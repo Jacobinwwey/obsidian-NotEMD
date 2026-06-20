@@ -3,6 +3,7 @@ import NotemdPlugin from '../main';
 import { ApiLivenessEvent, ApiLivenessPhase, NotemdSettings, ProgressReporter } from '../types';
 import { NOTEMD_SIDEBAR_ICON, NOTEMD_SIDEBAR_VIEW_TYPE } from '../constants';
 import { findDuplicates } from '../fileUtils';
+import { FFMPEG_INSTALL_HINTS, type EnvironmentReport, type ProbeResult } from '../slideExport/types';
 import {
     ActionCategory,
     CustomWorkflowButton,
@@ -112,6 +113,11 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
     private cancelButton: HTMLButtonElement | null = null;
     private languageSelector: HTMLSelectElement | null = null;
     private slideExportFormatSelector: HTMLSelectElement | null = null;
+    private slideExportOutlineToggleButton: HTMLButtonElement | null = null;
+    private slideExportDirectActionsEl: HTMLElement | null = null;
+    private slideExportOutlineActionsEl: HTMLElement | null = null;
+    private slideExportControlsSectionEl: (HTMLElement & { open?: boolean }) | null = null;
+    private slideExportEnvironmentPanelEl: HTMLElement | null = null;
     private apiLivenessPhase: ApiLivenessVisualPhase = 'idle';
     private apiLivenessTimer: ReturnType<typeof setTimeout> | null = null;
     private apiLivenessRequests = new Map<string, ApiActivityRequestRecord>();
@@ -123,6 +129,7 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
     private isProcessing = false;
     private isCancelled = false;
     private currentAbortController: AbortController | null = null;
+    private slideExportOutlineMode = false;
     activeTasks = 0;
 
     private actionButtons = new Map<string, HTMLButtonElement>();
@@ -758,6 +765,9 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
         if (this.slideExportFormatSelector) {
             this.slideExportFormatSelector.disabled = processing;
         }
+        if (this.slideExportOutlineToggleButton) {
+            this.slideExportOutlineToggleButton.disabled = processing;
+        }
 
         if (this.cancelButton) {
             this.cancelButton.disabled = !processing || this.isCancelled;
@@ -1137,7 +1147,7 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
                 break;
             }
             case 'probe-slide-export-env': {
-                await this.plugin.probeSlideExportEnvironmentCommand();
+                await this.runSlideExportEnvironmentProbe();
                 break;
             }
             case 'export-slides': {
@@ -1198,6 +1208,441 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
         };
 
         this.slideExportFormatSelector = selector;
+    }
+
+    private buildSlideExportControls(parent: HTMLElement) {
+        const i18n = this.getStrings();
+        this.slideExportControlsSectionEl = this.resolveContainingDetails(parent);
+
+        const probeButton = this.createSecondarySlideExportActionButton(
+            parent,
+            'notemd-slide-export-probe-button',
+            getSidebarActionLabel(i18n, 'probe-slide-export-env'),
+            getSidebarActionTooltip(i18n, 'probe-slide-export-env'),
+            () => this.runSlideExportEnvironmentProbe()
+        );
+        this.actionButtons.set('probe-slide-export-env', probeButton);
+
+        this.buildSlideExportFormatSelector(parent);
+
+        const toggleButton = parent.createEl('button', { cls: 'notemd-slide-export-outline-toggle' }) as HTMLButtonElement;
+        toggleButton.type = 'button';
+        toggleButton.title = i18n.slideExport.outlineBeforeExportTooltip;
+        toggleButton.setAttr('role', 'switch');
+        toggleButton.onclick = () => {
+            this.slideExportOutlineMode = !this.slideExportOutlineMode;
+            this.syncSlideExportOutlineControls();
+        };
+        toggleButton.createEl('span', { cls: 'notemd-slide-export-outline-toggle-track' });
+        toggleButton.createEl('span', { text: i18n.slideExport.outlineBeforeExportToggle, cls: 'notemd-slide-export-outline-toggle-label' });
+        this.slideExportOutlineToggleButton = toggleButton;
+
+        this.slideExportDirectActionsEl = parent.createDiv({ cls: 'notemd-slide-export-direct-actions' });
+        const directButton = this.createPrimarySlideExportActionButton(
+            this.slideExportDirectActionsEl,
+            'notemd-slide-export-direct-button',
+            i18n.slideExport.oneShotExportButton,
+            i18n.slideExport.oneShotExportTooltip,
+            () => this.runSlideExportFileAction(
+                i18n.slideExport.oneShotExportButton,
+                (file, reporter) => this.plugin.exportSlidesCommand(file, reporter)
+            )
+        );
+        this.actionButtons.set('slide-export-one-shot', directButton);
+
+        this.slideExportOutlineActionsEl = parent.createDiv({ cls: 'notemd-slide-export-outline-actions is-hidden' });
+        const outlineButton = this.createSlideExportStepButton(
+            this.slideExportOutlineActionsEl,
+            '1',
+            i18n.slideExport.generateOutlineButton,
+            i18n.slideExport.generateOutlineTooltip,
+            () => this.runSlideExportFileAction(
+                i18n.slideExport.generateOutlineButton,
+                (file, reporter) => this.plugin.generateSlidevExportOutlineCommand(file, reporter)
+            )
+        );
+        const continueButton = this.createSlideExportStepButton(
+            this.slideExportOutlineActionsEl,
+            '2',
+            i18n.slideExport.continueFromOutlineButton,
+            i18n.slideExport.continueFromOutlineTooltip,
+            () => this.runSlideExportFileAction(
+                i18n.slideExport.continueFromOutlineButton,
+                (file, reporter) => this.plugin.exportSlidesFromOutlineCommand(file, reporter)
+            )
+        );
+        this.actionButtons.set('slide-export-outline-generate', outlineButton);
+        this.actionButtons.set('slide-export-outline-continue', continueButton);
+
+        this.slideExportEnvironmentPanelEl = parent.createDiv({ cls: 'notemd-slide-export-env-panel is-hidden' });
+        this.syncSlideExportOutlineControls();
+    }
+
+    private createPrimarySlideExportActionButton(
+        parent: HTMLElement,
+        className: string,
+        label: string,
+        tooltip: string,
+        onClick: () => Promise<void>
+    ): HTMLButtonElement {
+        return this.appendSlideExportActionButton(parent, [className, 'mod-cta', 'is-primary'], label, tooltip, onClick);
+    }
+
+    private createSecondarySlideExportActionButton(
+        parent: HTMLElement,
+        className: string,
+        label: string,
+        tooltip: string,
+        onClick: () => Promise<void>
+    ): HTMLButtonElement {
+        return this.appendSlideExportActionButton(parent, [className, 'notemd-slide-export-secondary-button'], label, tooltip, onClick);
+    }
+
+    private appendSlideExportActionButton(
+        parent: HTMLElement,
+        classNames: string[],
+        label: string,
+        tooltip: string,
+        onClick: () => Promise<void>
+    ): HTMLButtonElement {
+        const classes = ['notemd-action-button', ...classNames];
+        const button = parent.createEl('button', {
+            text: label,
+            cls: classes.join(' ')
+        }) as HTMLButtonElement;
+        button.title = tooltip;
+        button.onclick = onClick;
+        return button;
+    }
+
+    private resolveContainingDetails(element: HTMLElement): (HTMLElement & { open?: boolean }) | null {
+        const parentElement = element.parentElement ?? (element as any).parent ?? null;
+        if (!parentElement || !('open' in parentElement)) {
+            return null;
+        }
+        return parentElement as HTMLElement & { open?: boolean };
+    }
+
+    private createSlideExportStepButton(
+        parent: HTMLElement,
+        stepNumber: string,
+        label: string,
+        tooltip: string,
+        onClick: () => Promise<void>
+    ): HTMLButtonElement {
+        const button = parent.createEl('button', {
+            cls: 'notemd-action-button notemd-slide-export-step-button'
+        }) as HTMLButtonElement;
+        button.title = tooltip;
+        button.onclick = onClick;
+        button.createEl('span', { text: stepNumber, cls: 'notemd-slide-export-step-index' });
+        button.createEl('span', { text: label, cls: 'notemd-slide-export-step-label' });
+        return button;
+    }
+
+    private syncSlideExportOutlineControls() {
+        this.slideExportOutlineToggleButton?.setAttr('aria-checked', this.slideExportOutlineMode ? 'true' : 'false');
+        if (this.slideExportOutlineMode) {
+            this.slideExportOutlineToggleButton?.addClass('is-enabled');
+            this.slideExportDirectActionsEl?.addClass('is-hidden');
+            this.slideExportDirectActionsEl?.setAttr('aria-hidden', 'true');
+            this.slideExportOutlineActionsEl?.removeClass('is-hidden');
+            this.slideExportOutlineActionsEl?.setAttr('aria-hidden', 'false');
+            return;
+        }
+        this.slideExportOutlineToggleButton?.removeClass('is-enabled');
+        this.slideExportDirectActionsEl?.removeClass('is-hidden');
+        this.slideExportDirectActionsEl?.setAttr('aria-hidden', 'false');
+        this.slideExportOutlineActionsEl?.addClass('is-hidden');
+        this.slideExportOutlineActionsEl?.setAttr('aria-hidden', 'true');
+    }
+
+    private getActiveMarkdownFileForSlideExport(): TFile {
+        const activeFile = this.app.workspace.getActiveFile();
+        if (!activeFile || !(activeFile instanceof TFile) || activeFile.extension !== 'md') {
+            throw new Error(this.getStrings().notices.noActiveMarkdownFileSelected);
+        }
+        return activeFile;
+    }
+
+    private async runSlideExportFileAction(
+        label: string,
+        operation: (file: TFile, reporter: ProgressReporter) => Promise<unknown>
+    ): Promise<void> {
+        const i18n = this.getStrings();
+        if (this.isProcessing || this.plugin.getIsBusy()) {
+            new Notice(i18n.notices.processingAlreadyRunning);
+            return;
+        }
+
+        this.openSlideExportControlsSection();
+        this.startProcessing(formatI18n(i18n.sidebar.status.runningAction, { label }));
+        const reporter = this.createReporterProxy();
+        try {
+            const file = this.getActiveMarkdownFileForSlideExport();
+            await operation(file, reporter);
+        } catch (error: unknown) {
+            const message = error instanceof Error ? error.message : String(error);
+            const failureMessage = formatI18n(i18n.sidebar.status.actionFailed, { message });
+            this.log(failureMessage);
+            this.updateStatus(failureMessage, -1);
+        } finally {
+            this.finishProcessing();
+        }
+    }
+
+    async runSlideExportEnvironmentProbe(): Promise<void> {
+        const i18n = this.getStrings();
+        if (this.isProcessing || this.plugin.getIsBusy()) {
+            new Notice(i18n.notices.processingAlreadyRunning);
+            return;
+        }
+
+        this.openSlideExportControlsSection();
+        this.startProcessing(i18n.slideExport.probingEnvironment);
+        this.renderSlideExportEnvironmentLoading();
+        const reporter = this.createReporterProxy();
+        try {
+            reporter.log(i18n.slideExport.probingEnvironment);
+            const { probeEnvironment } = await import('../slideExport');
+            const report = await probeEnvironment();
+            this.renderSlideExportEnvironmentReport(report);
+            this.logSlideExportEnvironmentSummary(report);
+            this.updateStatus(i18n.slideExport.environmentCheckComplete, 100);
+        } catch (error: unknown) {
+            const message = error instanceof Error ? error.message : String(error);
+            this.renderSlideExportEnvironmentFailure(message);
+            this.log(formatI18n(i18n.slideExport.environmentCheckFailed, { message }));
+            this.updateStatus(formatI18n(i18n.slideExport.environmentCheckFailed, { message }), -1);
+        } finally {
+            this.finishProcessing();
+        }
+    }
+
+    private openSlideExportControlsSection() {
+        if (this.slideExportControlsSectionEl) {
+            this.slideExportControlsSectionEl.open = true;
+        }
+    }
+
+    private renderSlideExportEnvironmentLoading() {
+        const i18n = this.getStrings();
+        const panel = this.ensureSlideExportEnvironmentPanel();
+        panel.empty();
+        panel.removeClass('is-hidden');
+        panel.createEl('div', { text: i18n.slideExport.environmentCheckingTitle, cls: 'notemd-slide-export-env-title' });
+        panel.createEl('p', { text: i18n.slideExport.environmentCheckingDesc, cls: 'notemd-slide-export-env-desc' });
+    }
+
+    private renderSlideExportEnvironmentFailure(message: string) {
+        const i18n = this.getStrings();
+        const panel = this.ensureSlideExportEnvironmentPanel();
+        panel.empty();
+        panel.removeClass('is-hidden');
+        panel.createEl('div', { text: i18n.slideExport.environmentCheckFailedTitle, cls: 'notemd-slide-export-env-title' });
+        panel.createEl('p', {
+            text: formatI18n(i18n.slideExport.environmentCheckFailed, { message }),
+            cls: 'notemd-slide-export-env-desc is-error'
+        });
+    }
+
+    private renderSlideExportEnvironmentReport(report: EnvironmentReport) {
+        const i18n = this.getStrings();
+        const panel = this.ensureSlideExportEnvironmentPanel();
+        panel.empty();
+        panel.removeClass('is-hidden');
+
+        const availableCount = SLIDE_EXPORT_FORMATS.filter(format => report.capabilities[format]).length;
+        const titleRow = panel.createDiv({ cls: 'notemd-slide-export-env-heading' });
+        titleRow.createEl('div', { text: i18n.slideExport.environmentReportTitle, cls: 'notemd-slide-export-env-title' });
+        titleRow.createEl('div', {
+            text: formatI18n(i18n.slideExport.environmentCapabilitySummary, { count: availableCount, total: SLIDE_EXPORT_FORMATS.length }),
+            cls: 'notemd-slide-export-env-badge'
+        });
+
+        if (!report.isDesktop) {
+            panel.createEl('p', {
+                text: i18n.slideExport.mobileUnsupportedError,
+                cls: 'notemd-slide-export-env-desc is-error'
+            });
+            return;
+        }
+
+        const toolGrid = panel.createDiv({ cls: 'notemd-slide-export-env-tool-grid' });
+        this.renderSlideExportToolRow(toolGrid, 'node', 'Node.js', report.node, report);
+        this.renderSlideExportToolRow(toolGrid, 'slidev', 'Slidev CLI', report.slidev, report);
+        this.renderSlideExportToolRow(toolGrid, 'playwright', 'Playwright Chromium', report.playwright, report);
+        this.renderSlideExportToolRow(toolGrid, 'ffmpeg', 'ffmpeg', report.ffmpeg, report);
+
+        const capabilityList = panel.createDiv({ cls: 'notemd-slide-export-env-capabilities' });
+        const capabilityLabels: Record<NotemdSettings['slideExportDefaultFormat'], string> = {
+            html: 'HTML',
+            pdf: 'PDF',
+            png: 'PNG',
+            mp4: 'MP4'
+        };
+        for (const format of SLIDE_EXPORT_FORMATS) {
+            const item = capabilityList.createDiv({
+                cls: report.capabilities[format]
+                    ? 'notemd-slide-export-env-capability is-available'
+                    : 'notemd-slide-export-env-capability is-unavailable'
+            });
+            item.createEl('span', {
+                text: report.capabilities[format] ? i18n.slideExport.availableShort : i18n.slideExport.unavailableShort,
+                cls: 'notemd-slide-export-env-capability-state'
+            });
+            item.createEl('span', { text: capabilityLabels[format] });
+        }
+    }
+
+    private renderSlideExportToolRow(
+        parent: HTMLElement,
+        tool: ProbeResult['tool'],
+        label: string,
+        result: ProbeResult,
+        report: EnvironmentReport
+    ) {
+        const i18n = this.getStrings();
+        const guidance = this.getSlideExportToolGuidance(tool, report);
+        const row = parent.createDiv({
+            cls: result.installed
+                ? 'notemd-slide-export-env-tool is-installed'
+                : 'notemd-slide-export-env-tool is-missing'
+        });
+        const header = row.createDiv({ cls: 'notemd-slide-export-env-tool-header' });
+        header.createEl('span', { text: label, cls: 'notemd-slide-export-env-tool-name' });
+        header.createEl('span', {
+            text: result.installed ? i18n.slideExport.installedStatus : i18n.slideExport.missingStatus,
+            cls: 'notemd-slide-export-env-tool-status'
+        });
+        row.createEl('div', {
+            text: result.installed
+                ? (result.version || i18n.slideExport.availableShort)
+                : (result.error || i18n.slideExport.missingStatus),
+            cls: 'notemd-slide-export-env-tool-detail'
+        });
+
+        if (!result.installed) {
+            const command = row.createEl('code', {
+                text: guidance.command,
+                cls: 'notemd-slide-export-env-command'
+            });
+            command.setAttr('data-command', guidance.command);
+            const footer = row.createDiv({ cls: 'notemd-slide-export-env-tool-footer' });
+            const copyButton = footer.createEl('button', {
+                text: i18n.slideExport.copyInstallCommand,
+                cls: 'notemd-slide-export-env-copy-button'
+            }) as HTMLButtonElement;
+            copyButton.onclick = () => this.copySlideExportInstallCommand(guidance.command);
+
+            const link = footer.createEl('a', {
+                text: guidance.websiteLabel,
+                cls: 'notemd-slide-export-env-link'
+            });
+            link.setAttr('href', guidance.websiteUrl);
+            link.setAttr('target', '_blank');
+            link.setAttr('rel', 'noopener noreferrer');
+
+            if (tool === 'slidev' || tool === 'playwright') {
+                const installButton = footer.createEl('button', {
+                    text: i18n.slideExport.probeInstallBtn,
+                    cls: 'notemd-slide-export-env-install-button'
+                }) as HTMLButtonElement;
+                installButton.onclick = () => this.installSlideExportTool(tool);
+            }
+        }
+    }
+
+    private getSlideExportToolGuidance(tool: ProbeResult['tool'], report: EnvironmentReport): { command: string; websiteUrl: string; websiteLabel: string } {
+        const i18n = this.getStrings();
+        switch (tool) {
+            case 'node':
+                return {
+                    command: 'node --version',
+                    websiteUrl: 'https://nodejs.org/en/download',
+                    websiteLabel: i18n.slideExport.nodeWebsiteLabel
+                };
+            case 'slidev':
+                return {
+                    command: 'corepack enable\npnpm add -D @slidev/cli',
+                    websiteUrl: 'https://sli.dev/builtin/cli',
+                    websiteLabel: i18n.slideExport.slidevWebsiteLabel
+                };
+            case 'playwright':
+                return {
+                    command: 'npx playwright install chromium',
+                    websiteUrl: 'https://playwright.dev/docs/intro',
+                    websiteLabel: i18n.slideExport.playwrightWebsiteLabel
+                };
+            case 'ffmpeg':
+                return {
+                    command: FFMPEG_INSTALL_HINTS[report.platform] || FFMPEG_INSTALL_HINTS.unknown,
+                    websiteUrl: 'https://ffmpeg.org/download.html',
+                    websiteLabel: i18n.slideExport.ffmpegWebsiteLabel
+                };
+        }
+    }
+
+    private copySlideExportInstallCommand(command: string): void {
+        const i18n = this.getStrings();
+        navigator.clipboard
+            .writeText(command)
+            .then(
+                () => new Notice(i18n.slideExport.copyInstallCommandSuccess),
+                () => new Notice(i18n.slideExport.copyInstallCommandFailed)
+            );
+    }
+
+    private async installSlideExportTool(tool: 'slidev' | 'playwright'): Promise<void> {
+        const i18n = this.getStrings();
+        if (this.isProcessing || this.plugin.getIsBusy()) {
+            new Notice(i18n.notices.processingAlreadyRunning);
+            return;
+        }
+
+        this.startProcessing(formatI18n(i18n.slideExport.installingTool, {
+            tool: tool === 'slidev' ? 'Slidev CLI' : 'Playwright Chromium'
+        }));
+        const reporter = this.createReporterProxy();
+        try {
+            const { autoInstallSlidev, autoInstallPlaywright, probeEnvironment } = await import('../slideExport');
+            const result = tool === 'slidev'
+                ? await autoInstallSlidev((phase, detail) => reporter.log(detail ? `${phase}: ${detail}` : phase))
+                : await autoInstallPlaywright((phase, detail) => reporter.log(detail ? `${phase}: ${detail}` : phase));
+            if (result.exitCode !== 0) {
+                throw new Error(result.stderr || result.error?.message || i18n.common.unknownError);
+            }
+            reporter.log(i18n.slideExport.installComplete);
+            const report = await probeEnvironment();
+            this.renderSlideExportEnvironmentReport(report);
+            this.logSlideExportEnvironmentSummary(report);
+            this.updateStatus(i18n.slideExport.environmentCheckComplete, 100);
+        } catch (error: unknown) {
+            const message = error instanceof Error ? error.message : String(error);
+            reporter.log(formatI18n(i18n.slideExport.installFailed, { message }));
+            this.updateStatus(formatI18n(i18n.slideExport.installFailed, { message }), -1);
+        } finally {
+            this.finishProcessing();
+        }
+    }
+
+    private ensureSlideExportEnvironmentPanel(): HTMLElement {
+        if (this.slideExportEnvironmentPanelEl) {
+            return this.slideExportEnvironmentPanelEl;
+        }
+        throw new Error('Slide export environment panel is not mounted.');
+    }
+
+    private logSlideExportEnvironmentSummary(report: EnvironmentReport) {
+        const i18n = this.getStrings();
+        const missingTools = [report.node, report.slidev, report.playwright, report.ffmpeg]
+            .filter(result => !result.installed)
+            .map(result => result.tool);
+        const availableFormats = SLIDE_EXPORT_FORMATS.filter(format => report.capabilities[format]).join(', ') || i18n.slideExport.noneShort;
+        this.log(formatI18n(i18n.slideExport.environmentAvailableFormats, { formats: availableFormats }));
+        if (missingTools.length > 0) {
+            this.log(formatI18n(i18n.slideExport.environmentMissingTools, { tools: missingTools.join(', ') }));
+        }
     }
 
     private buildDiagramIntentSelector(parent: HTMLElement) {
@@ -1295,12 +1740,12 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
                 ACTION_CATEGORY_CONFIG[category].openByDefault
             );
 
-            defs.forEach(def => {
-                this.createActionButton(body, def.id, def.category);
-            });
-
             if (category === 'export') {
-                this.buildSlideExportFormatSelector(body);
+                this.buildSlideExportControls(body);
+            } else {
+                defs.forEach(def => {
+                    this.createActionButton(body, def.id, def.category);
+                });
             }
 
             if (category === 'generation') {
@@ -1418,6 +1863,12 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
         this.cancelButton = null;
         this.languageSelector = null;
         this.clearApiLivenessTimer();
+        this.slideExportFormatSelector = null;
+        this.slideExportOutlineToggleButton = null;
+        this.slideExportDirectActionsEl = null;
+        this.slideExportOutlineActionsEl = null;
+        this.slideExportControlsSectionEl = null;
+        this.slideExportEnvironmentPanelEl = null;
         this.expandedApiActivityRequestIds.clear();
         this.actionButtons.clear();
         this.workflowButtons = [];

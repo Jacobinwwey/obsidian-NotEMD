@@ -87,6 +87,87 @@ export async function prepareSlidevExportSource(
 	};
 }
 
+export async function generateSlidevExportOutline(
+	app: App,
+	sourceFile: TFile,
+	config: SlideExportConfig,
+	options: SlidevSourcePreparationOptions = {},
+	onProgress?: ExportProgressCallback,
+): Promise<string> {
+	const sourceMarkdown = await app.vault.read(sourceFile);
+	onProgress?.('slidev-outline', 'Preparing Slidev export outline...');
+
+	const skillContext = loadSlidevSkillContext();
+	if (skillContext.rootPath) {
+		onProgress?.('slidev-outline', `Loaded Slidev skill from ${skillContext.rootPath} (${skillContext.referenceFiles.length} references).`);
+	} else {
+		onProgress?.('slidev-outline', 'Slidev skill directory not found; using deterministic outline.');
+	}
+
+	const outlineMarkdown = options.deckGeneration
+		? await tryGenerateOutlineWithLlm(sourceFile, sourceMarkdown, skillContext, options.deckGeneration, onProgress)
+		: null;
+	const outlinePath = await writeSlidevOutline(
+		app,
+		sourceFile,
+		config,
+		outlineMarkdown ?? buildDeterministicSlidevOutline(sourceMarkdown, sourceFile.basename)
+	);
+	onProgress?.('slidev-outline', `Prepared Slidev outline: ${outlinePath}`);
+	return outlinePath;
+}
+
+export async function prepareSlidevExportSourceFromOutline(
+	app: App,
+	sourceFile: TFile,
+	outlineMarkdown: string,
+	config: SlideExportConfig,
+	options: SlidevSourcePreparationOptions = {},
+	onProgress?: ExportProgressCallback,
+): Promise<SlidevExportSource> {
+	const sourceMarkdown = await app.vault.read(sourceFile);
+	if (isSlidevDeckMarkdown(sourceMarkdown)) {
+		onProgress?.('slidev-source', 'Current file is already a Slidev deck; outline is not needed for this export.');
+		const preparedDeckPath = await writePreparedDeckWorkspace(app, sourceFile, config, decorateComponentHeavySlotZones(sourceMarkdown), onProgress);
+		return {
+			inputFilePath: preparedDeckPath,
+			outputBasename: sourceFile.basename,
+			sourceLabel: preparedDeckPath,
+			preparedDeckPath,
+		};
+	}
+
+	onProgress?.('slidev-source', 'Preparing Slidev deck from saved outline...');
+	const skillContext = loadSlidevSkillContext();
+	if (skillContext.rootPath) {
+		onProgress?.('slidev-source', `Loaded Slidev skill from ${skillContext.rootPath} (${skillContext.referenceFiles.length} references).`);
+	} else {
+		onProgress?.('slidev-source', 'Slidev skill directory not found; using deterministic preparation.');
+	}
+	const generatedDeck = options.deckGeneration
+		? await tryGenerateDeckFromOutlineWithLlm(sourceFile, sourceMarkdown, outlineMarkdown, skillContext, options.deckGeneration, onProgress)
+		: null;
+	const deckMarkdown = applySlidevPresentationGuardrails(
+		generatedDeck ?? buildDeterministicSlidevDeck(sourceMarkdown, sourceFile.basename),
+		config.slidevTheme || 'default',
+	);
+	const preparedDeckPath = await writePreparedDeck(app, sourceFile, config, decorateComponentHeavySlotZones(deckMarkdown));
+
+	onProgress?.('slidev-source', `Prepared Slidev deck: ${preparedDeckPath}`);
+	return {
+		inputFilePath: preparedDeckPath,
+		outputBasename: sourceFile.basename,
+		sourceLabel: preparedDeckPath,
+		preparedDeckPath,
+		skillRootPath: skillContext.rootPath ?? undefined,
+		skillReferencePaths: skillContext.referenceFiles.map(reference => reference.relativePath),
+	};
+}
+
+export function getSlidevExportOutlinePath(sourceFile: TFile, config: SlideExportConfig): string {
+	return normalizeVaultPath(`${config.outputSubfolder}/_slidev-outlines/${sourceFile.basename}.outline.md`);
+}
+
 export function isSlidevDeckMarkdown(markdown: string): boolean {
 	const slideSeparators = findSlideSeparators(markdown);
 	if (slideSeparators.length > 0) {
@@ -147,6 +228,46 @@ export function buildDeterministicSlidevDeck(markdown: string, fallbackTitle: st
 		.filter(Boolean)
 		.join('\n\n---\n\n')
 		+ '\n';
+}
+
+export function buildDeterministicSlidevOutline(markdown: string, fallbackTitle: string): string {
+	const title = extractTitle(markdown) || fallbackTitle;
+	const segments = splitMarkdownIntoSegments(markdown).filter(segment => segment.headingLevel > 1);
+	const lines = [
+		`# Slidev Export Outline: ${title}`,
+		'',
+		'## Deck intent',
+		`- Title: ${title}`,
+		'- Output: polished Slidev deck generated from the source note',
+		'- Layout rule: split dense sections instead of compressing tables, diagrams, or code into one slide',
+		'- Safety rule: use per-slide zoom or structural splits when content risks clipping on a 16:9 canvas',
+		'',
+		'## Slide sequence',
+		'',
+		'1. Cover',
+		`   - Heading: ${title}`,
+		'   - Layout: cover or center',
+	];
+
+	let step = 2;
+	for (const segment of segments) {
+		lines.push(
+			`${step}. ${segment.headingText}`,
+			`   - Source heading: ${'#'.repeat(segment.headingLevel)} ${segment.headingText}`,
+			`   - Density: ${describeSegmentDensity(segment.body)}`,
+			`   - Handling: ${describeSegmentHandling(segment.body)}`,
+		);
+		step++;
+	}
+
+	lines.push(
+		`${step}. Closing`,
+		'   - Heading: End',
+		'   - Layout: center',
+		''
+	);
+
+	return lines.join('\n');
 }
 
 export function applySlidevPresentationGuardrails(deckMarkdown: string, deckTheme = 'default'): string {
@@ -647,6 +768,77 @@ async function tryGenerateDeckWithLlm(
 	}
 }
 
+async function tryGenerateDeckFromOutlineWithLlm(
+	sourceFile: TFile,
+	sourceMarkdown: string,
+	outlineMarkdown: string,
+	skillContext: SlidevSkillContext,
+	deckGeneration: SlidevDeckGenerationProfile,
+	onProgress?: ExportProgressCallback,
+): Promise<string | null> {
+	if (!skillContext.skillText && skillContext.referenceFiles.length === 0) {
+		onProgress?.('slidev-source', 'Slidev skill context unavailable; using deterministic deck preparation.');
+		return null;
+	}
+
+	onProgress?.('slidev-source', `Generating Slidev deck from saved outline with ${deckGeneration.provider.name}...`);
+	try {
+		const prompt = buildSlidevDeckFromOutlinePrompt(sourceFile, sourceMarkdown, outlineMarkdown, skillContext);
+		const response = await callLLM(
+			deckGeneration.provider,
+			prompt.system,
+			prompt.user,
+			deckGeneration.settings,
+			deckGeneration.reporter,
+			deckGeneration.modelName,
+			deckGeneration.reporter.abortController?.signal,
+		);
+		const deckMarkdown = extractMarkdownDeck(response);
+		if (!isSlidevDeckMarkdown(deckMarkdown)) {
+			onProgress?.('slidev-source', 'LLM response was not a valid Slidev deck; using deterministic deck preparation.');
+			return null;
+		}
+		return deckMarkdown.trim() + '\n';
+	} catch (error) {
+		const message = error instanceof Error ? error.message : String(error);
+		onProgress?.('slidev-source', `LLM deck preparation from outline failed: ${message}; using deterministic deck preparation.`);
+		return null;
+	}
+}
+
+async function tryGenerateOutlineWithLlm(
+	sourceFile: TFile,
+	sourceMarkdown: string,
+	skillContext: SlidevSkillContext,
+	deckGeneration: SlidevDeckGenerationProfile,
+	onProgress?: ExportProgressCallback,
+): Promise<string | null> {
+	if (!skillContext.skillText && skillContext.referenceFiles.length === 0) {
+		onProgress?.('slidev-outline', 'Slidev skill context unavailable; using deterministic outline.');
+		return null;
+	}
+
+	onProgress?.('slidev-outline', `Generating Slidev outline with ${deckGeneration.provider.name} and Slidev skill references...`);
+	try {
+		const prompt = buildSlidevOutlinePrompt(sourceFile, sourceMarkdown, skillContext);
+		const response = await callLLM(
+			deckGeneration.provider,
+			prompt.system,
+			prompt.user,
+			deckGeneration.settings,
+			deckGeneration.reporter,
+			deckGeneration.modelName,
+			deckGeneration.reporter.abortController?.signal,
+		);
+		const outlineMarkdown = extractMarkdownOutline(response);
+		return outlineMarkdown.trim().length > 0 ? `${outlineMarkdown.trim()}\n` : null;
+	} catch (error) {
+		const message = error instanceof Error ? error.message : String(error);
+		onProgress?.('slidev-outline', `LLM outline generation failed: ${message}; using deterministic outline.`);
+		return null;
+	}
+}
+
 function buildSlidevDeckPrompt(
 	sourceFile: TFile,
 	sourceMarkdown: string,
@@ -668,6 +860,96 @@ function buildSlidevDeckPrompt(
 		'Preserve fenced code blocks, Mermaid diagrams, tables, and important technical details.',
 		'Split dense source sections into multiple readable slides instead of making one overflowing slide.',
 		'For large diagrams, tables, or code blocks, use per-slide frontmatter such as zoom: 0.55-0.75 or Transform so nothing is clipped on a 16:9 canvas.',
+	].join('\n');
+
+	const user = [
+		'# Slidev Skill',
+		skillContext.skillText.trim(),
+		'',
+		'# Available Slidev Skill References',
+		referenceIndex,
+		'',
+		'# Slidev Skill Reference Contents',
+		truncateText(referenceText, MAX_LLM_REFERENCE_CHARS),
+		'',
+		'# Source Note',
+		`Path: ${sourceFile.path}`,
+		`Deck title: ${sourceTitle}`,
+		'',
+		sourceMarkdown,
+	].join('\n');
+
+	return { system, user };
+}
+
+function buildSlidevDeckFromOutlinePrompt(
+	sourceFile: TFile,
+	sourceMarkdown: string,
+	outlineMarkdown: string,
+	skillContext: SlidevSkillContext,
+): { system: string; user: string } {
+	const referenceIndex = skillContext.referenceFiles
+		.map(reference => `- ${reference.relativePath}`)
+		.join('\n');
+	const referenceText = skillContext.referenceFiles
+		.map(reference => `## ${reference.relativePath}\n\n${reference.content.trim()}`)
+		.join('\n\n');
+	const sourceTitle = extractTitle(sourceMarkdown) || sourceFile.basename;
+
+	const system = [
+		'You convert long-form Markdown notes into polished Slidev decks.',
+		'Use the saved Slidev export outline as the deck plan. Do not ignore it unless it conflicts with source facts.',
+		'Use the official Slidev skill instructions and references provided below.',
+		'Return only a complete Slidev Markdown deck. Do not wrap it in a code fence.',
+		'The deck must start with Slidev headmatter and use --- slide separators.',
+		'Preserve fenced code blocks, Mermaid diagrams, tables, and important technical details.',
+		'Split dense source sections into multiple readable slides instead of making one overflowing slide.',
+		'For large diagrams, tables, or code blocks, use per-slide frontmatter such as zoom: 0.55-0.75 or Transform so nothing is clipped on a 16:9 canvas.',
+	].join('\n');
+
+	const user = [
+		'# Slidev Skill',
+		skillContext.skillText.trim(),
+		'',
+		'# Available Slidev Skill References',
+		referenceIndex,
+		'',
+		'# Slidev Skill Reference Contents',
+		truncateText(referenceText, MAX_LLM_REFERENCE_CHARS),
+		'',
+		'# Saved Slidev Export Outline',
+		outlineMarkdown.trim(),
+		'',
+		'# Source Note',
+		`Path: ${sourceFile.path}`,
+		`Deck title: ${sourceTitle}`,
+		'',
+		sourceMarkdown,
+	].join('\n');
+
+	return { system, user };
+}
+
+function buildSlidevOutlinePrompt(
+	sourceFile: TFile,
+	sourceMarkdown: string,
+	skillContext: SlidevSkillContext,
+): { system: string; user: string } {
+	const referenceIndex = skillContext.referenceFiles
+		.map(reference => `- ${reference.relativePath}`)
+		.join('\n');
+	const referenceText = skillContext.referenceFiles
+		.map(reference => `## ${reference.relativePath}\n\n${reference.content.trim()}`)
+		.join('\n\n');
+	const sourceTitle = extractTitle(sourceMarkdown) || sourceFile.basename;
+
+	const system = [
+		'You create reviewable implementation outlines for Slidev decks.',
+		'Use the official Slidev skill instructions and references provided below.',
+		'Return only Markdown. Do not wrap the outline in a code fence.',
+		'Define the intended slide sequence, each slide purpose, likely layout, source sections, and risks.',
+		'Call out diagrams, tables, code blocks, and dense sections that require splitting, zoom, Transform, or alternate layouts.',
+		'The outline is a planning artifact for a later Slidev deck generation step, not the final deck.',
 	].join('\n');
 
 	const user = [
@@ -779,11 +1061,27 @@ function extractMarkdownDeck(response: string): string {
 	return trimmed;
 }
 
+function extractMarkdownOutline(response: string): string {
+	const fencedBlocks = [...response.matchAll(/```[^\n]*\n([\s\S]*?)\n```/gi)];
+	if (fencedBlocks.length > 0) {
+		return fencedBlocks[0][1].trim();
+	}
+	return response.trim();
+}
+
 function truncateText(text: string, maxChars: number): string {
 	if (text.length <= maxChars) {
 		return text;
 	}
 	return `${text.slice(0, maxChars)}\n\n[Truncated to fit the deck generation prompt budget.]`;
+}
+
+async function writeSlidevOutline(app: App, sourceFile: TFile, config: SlideExportConfig, outlineMarkdown: string): Promise<string> {
+	const directoryPath = normalizeVaultPath(`${config.outputSubfolder}/_slidev-outlines`);
+	const filePath = getSlidevExportOutlinePath(sourceFile, config);
+	await ensureVaultDirectory(app, directoryPath);
+	await app.vault.adapter.write(filePath, outlineMarkdown);
+	return filePath;
 }
 
 async function writePreparedDeck(app: App, sourceFile: TFile, config: SlideExportConfig, deckMarkdown: string): Promise<string> {
@@ -883,6 +1181,37 @@ function normalizeVaultPath(path: string): string {
 		.replace(/^\/+/, '')
 		.replace(/\/{2,}/g, '/')
 		.replace(/\/$/, '');
+}
+
+function describeSegmentDensity(body: string): string {
+	const lineCount = body.split(/\r?\n/).filter(line => line.trim().length > 0).length;
+	if (lineCount >= 36) {
+		return 'high';
+	}
+	if (lineCount >= 16) {
+		return 'medium';
+	}
+	return 'low';
+}
+
+function describeSegmentHandling(body: string): string {
+	const hasMermaid = /```+\s*mermaid/i.test(body);
+	const hasTable = /^\s*\|.+\|\s*$/m.test(body);
+	const hasCode = /```+/.test(body);
+	const handling: string[] = [];
+	if (hasMermaid) {
+		handling.push('audit Mermaid fit and apply zoom or split if needed');
+	}
+	if (hasTable) {
+		handling.push('split or transform wide tables');
+	}
+	if (hasCode) {
+		handling.push('keep code readable with small focused excerpts');
+	}
+	if (handling.length === 0) {
+		handling.push('summarize into concise slide body');
+	}
+	return handling.join('; ');
 }
 
 function quoteYamlString(value: string): string {

@@ -75,7 +75,8 @@ function createPluginMock() {
         fixFormulaFormatsCommand: jest.fn().mockResolvedValue(undefined),
         batchFixFormulaFormatsCommand: jest.fn().mockResolvedValue(undefined),
         checkAndRemoveDuplicateConceptNotesCommand: jest.fn().mockResolvedValue(undefined),
-        testLlmConnectionCommand: jest.fn().mockResolvedValue(undefined)
+        testLlmConnectionCommand: jest.fn().mockResolvedValue(undefined),
+        exportSlidesCommand: jest.fn().mockResolvedValue(undefined)
     };
 }
 
@@ -132,7 +133,9 @@ describe('NotemdSidebarView button trigger chains', () => {
             'batch-fix-formula',
             'check-duplicates-current',
             'check-remove-duplicate-concepts',
-            'test-llm-connection'
+            'test-llm-connection',
+            'probe-slide-export-env',
+            'export-slides'
         ];
         const definedActionIds = SIDEBAR_ACTION_DEFINITIONS.map(def => def.id);
         expect(new Set(testedActionIds)).toEqual(new Set(definedActionIds));
@@ -324,5 +327,19 @@ describe('NotemdSidebarView button trigger chains', () => {
     test('test-llm-connection triggers testLlmConnectionCommand', async () => {
         await executeAction('test-llm-connection', reporter);
         expect(plugin.testLlmConnectionCommand).toHaveBeenCalledWith(reporter);
+    });
+
+    test('probe-slide-export-env triggers inline sidebar environment probe', async () => {
+        const probeSpy = jest.spyOn(sidebar, 'runSlideExportEnvironmentProbe').mockResolvedValue(undefined);
+
+        await executeAction('probe-slide-export-env', reporter);
+
+        expect(probeSpy).toHaveBeenCalledTimes(1);
+    });
+
+    test('export-slides triggers exportSlidesCommand with active markdown file', async () => {
+        await executeAction('export-slides', reporter);
+
+        expect(plugin.exportSlidesCommand).toHaveBeenCalledWith(activeMdFile, reporter);
     });
 });

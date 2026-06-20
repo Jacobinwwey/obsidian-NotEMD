@@ -940,6 +940,308 @@
     font-size: 12px;
 }
 
+.notemd-slide-export-probe-button,
+.notemd-slide-export-direct-button {
+    min-height: 44px;
+}
+
+.notemd-slide-export-secondary-button {
+    border-color: color-mix(in srgb, var(--notemd-border) 82%, var(--interactive-accent) 18%);
+    background: color-mix(in srgb, var(--background-secondary) 86%, var(--background-primary) 14%);
+    color: var(--text-normal);
+    box-shadow: none;
+}
+
+.notemd-slide-export-secondary-button:hover {
+    border-color: color-mix(in srgb, var(--interactive-accent) 36%, var(--notemd-border) 64%);
+    background: color-mix(in srgb, var(--background-modifier-hover) 70%, var(--background-primary) 30%);
+}
+
+.notemd-slide-export-outline-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.68em;
+    width: 100%;
+    min-height: 44px;
+    padding: 0.52em 0.62em;
+    border: 1px solid color-mix(in srgb, var(--notemd-border) 78%, transparent);
+    border-radius: 8px;
+    background: color-mix(in srgb, var(--background-primary) 88%, var(--background-secondary) 12%);
+    color: var(--text-normal);
+    font-size: 12px;
+    font-weight: 650;
+    line-height: 1.35;
+    cursor: pointer;
+    transition: border-color 160ms ease, background-color 160ms ease, box-shadow 160ms ease;
+}
+
+.notemd-slide-export-outline-toggle:hover {
+    border-color: color-mix(in srgb, var(--notemd-accent) 62%, var(--notemd-border) 38%);
+    background: color-mix(in srgb, var(--background-modifier-hover) 64%, var(--background-primary) 36%);
+}
+
+.notemd-slide-export-outline-toggle.is-enabled {
+    border-color: color-mix(in srgb, var(--interactive-accent) 54%, var(--notemd-border) 46%);
+    background: color-mix(in srgb, var(--interactive-accent) 10%, var(--background-primary) 90%);
+}
+
+.notemd-slide-export-outline-toggle-track {
+    position: relative;
+    flex: 0 0 auto;
+    width: 36px;
+    height: 20px;
+    border-radius: 999px;
+    border: 1px solid color-mix(in srgb, var(--notemd-border) 86%, transparent);
+    background: color-mix(in srgb, var(--background-secondary) 86%, var(--text-muted) 14%);
+    transition: background-color 160ms ease, border-color 160ms ease;
+}
+
+.notemd-slide-export-outline-toggle-track::before {
+    content: '';
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 14px;
+    height: 14px;
+    border-radius: 999px;
+    background: var(--background-primary);
+    box-shadow: 0 1px 3px color-mix(in srgb, #0f172a 26%, transparent);
+    transition: transform 160ms ease;
+}
+
+.notemd-slide-export-outline-toggle.is-enabled .notemd-slide-export-outline-toggle-track {
+    border-color: color-mix(in srgb, var(--interactive-accent) 62%, var(--notemd-border) 38%);
+    background: color-mix(in srgb, var(--interactive-accent) 44%, var(--background-secondary) 56%);
+}
+
+.notemd-slide-export-outline-toggle.is-enabled .notemd-slide-export-outline-toggle-track::before {
+    transform: translateX(16px);
+}
+
+.notemd-slide-export-outline-toggle-label {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+.notemd-slide-export-outline-toggle:focus-visible,
+.notemd-slide-export-env-install-button:focus-visible,
+.notemd-slide-export-env-copy-button:focus-visible,
+.notemd-slide-export-env-link:focus-visible {
+    outline: 2px solid var(--notemd-focus);
+    outline-offset: 2px;
+}
+
+.notemd-slide-export-direct-actions,
+.notemd-slide-export-outline-actions {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0.52em;
+}
+
+.notemd-slide-export-step-button {
+    display: grid;
+    grid-template-columns: 24px minmax(0, 1fr);
+    align-items: center;
+    gap: 0.58em;
+    min-height: 44px;
+}
+
+.notemd-slide-export-step-index {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--interactive-accent) 14%, var(--background-secondary) 86%);
+    color: color-mix(in srgb, var(--text-normal) 86%, var(--interactive-accent) 14%);
+    font-size: 11px;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+}
+
+.notemd-slide-export-step-label {
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+.notemd-slide-export-env-panel {
+    border: 1px solid color-mix(in srgb, var(--notemd-border) 74%, var(--interactive-accent) 26%);
+    border-radius: 8px;
+    padding: 0.72em;
+    background: color-mix(in srgb, var(--background-primary) 88%, var(--background-secondary) 12%);
+    box-shadow: inset 0 1px 0 color-mix(in srgb, #ffffff 32%, transparent);
+}
+
+.notemd-slide-export-env-heading,
+.notemd-slide-export-env-tool-header,
+.notemd-slide-export-env-tool-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.55em;
+}
+
+.notemd-slide-export-env-title {
+    color: var(--text-normal);
+    font-size: 12px;
+    font-weight: 800;
+    line-height: 1.35;
+}
+
+.notemd-slide-export-env-desc {
+    margin: 0.35em 0 0;
+    color: var(--text-muted);
+    font-size: 11px;
+    line-height: 1.45;
+}
+
+.notemd-slide-export-env-desc.is-error {
+    color: var(--text-error);
+}
+
+.notemd-slide-export-env-badge {
+    flex: 0 0 auto;
+    border: 1px solid color-mix(in srgb, var(--notemd-border) 70%, var(--interactive-accent) 30%);
+    border-radius: 8px;
+    padding: 0.18em 0.5em;
+    background: color-mix(in srgb, var(--interactive-accent) 10%, var(--background-secondary) 90%);
+    color: var(--text-muted);
+    font-size: 10px;
+    font-weight: 750;
+    line-height: 1.35;
+}
+
+.notemd-slide-export-env-tool-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0.5em;
+    margin-top: 0.65em;
+}
+
+.notemd-slide-export-env-tool {
+    border: 1px solid var(--notemd-border);
+    border-radius: 8px;
+    padding: 0.56em;
+    background: color-mix(in srgb, var(--background-secondary) 90%, var(--background-primary) 10%);
+}
+
+.notemd-slide-export-env-tool.is-installed {
+    border-color: color-mix(in srgb, #10b981 28%, var(--notemd-border) 72%);
+}
+
+.notemd-slide-export-env-tool.is-missing {
+    border-color: color-mix(in srgb, #f59e0b 32%, var(--notemd-border) 68%);
+}
+
+.notemd-slide-export-env-tool-name {
+    color: var(--text-normal);
+    font-size: 11px;
+    font-weight: 800;
+    line-height: 1.35;
+}
+
+.notemd-slide-export-env-tool-status {
+    color: var(--text-muted);
+    font-size: 10px;
+    font-weight: 750;
+    line-height: 1.35;
+}
+
+.notemd-slide-export-env-tool-detail {
+    margin-top: 0.22em;
+    color: var(--text-muted);
+    font-size: 10px;
+    line-height: 1.45;
+    overflow-wrap: anywhere;
+}
+
+.notemd-slide-export-env-command {
+    display: block;
+    margin-top: 0.45em;
+    padding: 0.48em 0.54em;
+    border: 1px solid color-mix(in srgb, var(--notemd-border) 76%, transparent);
+    border-radius: 6px;
+    background: color-mix(in srgb, var(--background-primary) 88%, #0f172a 12%);
+    color: var(--text-normal);
+    font-family: var(--font-monospace);
+    font-size: 10px;
+    line-height: 1.45;
+    white-space: pre-wrap;
+    user-select: text;
+    -webkit-user-select: text;
+}
+
+.notemd-slide-export-env-tool-footer {
+    margin-top: 0.5em;
+    flex-wrap: wrap;
+}
+
+.notemd-slide-export-env-link {
+    color: var(--link-color);
+    font-size: 10px;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.notemd-slide-export-env-link:hover {
+    text-decoration: underline;
+}
+
+.notemd-slide-export-env-install-button,
+.notemd-slide-export-env-copy-button {
+    min-height: 32px;
+    border: 1px solid color-mix(in srgb, var(--interactive-accent) 44%, var(--notemd-border) 56%);
+    border-radius: 8px;
+    padding: 0.24em 0.62em;
+    background: color-mix(in srgb, var(--interactive-accent) 12%, var(--background-secondary) 88%);
+    color: var(--text-normal);
+    font-size: 10px;
+    font-weight: 750;
+    cursor: pointer;
+}
+
+.notemd-slide-export-env-copy-button {
+    background: var(--background-secondary);
+    border-color: color-mix(in srgb, var(--notemd-border) 82%, var(--interactive-accent) 18%);
+}
+
+.notemd-slide-export-env-capabilities {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.42em;
+    margin-top: 0.65em;
+}
+
+.notemd-slide-export-env-capability {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35em;
+    min-width: 0;
+    border-radius: 6px;
+    padding: 0.32em 0.44em;
+    background: var(--background-secondary);
+    color: var(--text-muted);
+    font-size: 10px;
+    font-weight: 700;
+    line-height: 1.35;
+}
+
+.notemd-slide-export-env-capability.is-available {
+    color: color-mix(in srgb, var(--text-normal) 78%, #10b981 22%);
+}
+
+.notemd-slide-export-env-capability.is-unavailable {
+    color: color-mix(in srgb, var(--text-muted) 78%, #f59e0b 22%);
+}
+
+.notemd-slide-export-env-capability-state {
+    font-size: 9px;
+    font-weight: 800;
+}
+
 .notemd-provider-callout {
     border: 1px solid var(--notemd-border);
     border-radius: 12px;
@@ -1460,17 +1762,15 @@
 }
 
 .notemd-progress-area .notemd-progress-bar-container.mod-sidebar.is-idle::after {
-    content: 'Standby';
+    content: '';
     position: absolute;
     inset: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 10px;
-    font-weight: 700;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: color-mix(in srgb, var(--text-normal) 68%, var(--interactive-accent) 32%);
+    background: linear-gradient(
+        90deg,
+        transparent 0%,
+        color-mix(in srgb, var(--interactive-accent) 10%, transparent) 50%,
+        transparent 100%
+    );
     pointer-events: none;
 }
 
@@ -1573,6 +1873,9 @@
 @media (prefers-reduced-motion: reduce) {
     .notemd-action-button,
     .notemd-cancel-button,
+    .notemd-slide-export-outline-toggle,
+    .notemd-slide-export-outline-toggle-track,
+    .notemd-slide-export-outline-toggle-track::before,
     .notemd-copy-log-button,
     .notemd-progress-bar-fill,
     .notemd-section-summary::before {

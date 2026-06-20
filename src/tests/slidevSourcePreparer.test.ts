@@ -3,8 +3,11 @@ import * as path from 'path';
 import {
     applySlidevPresentationGuardrails,
     buildDeterministicSlidevDeck,
+    buildDeterministicSlidevOutline,
+    generateSlidevExportOutline,
     isSlidevDeckMarkdown,
     prepareSlidevExportSource,
+    prepareSlidevExportSourceFromOutline,
 } from '../slideExport/slidevSourcePreparer';
 import type { SlideExportConfig } from '../slideExport/types';
 import type { TFile } from 'obsidian';
@@ -127,6 +130,30 @@ describe('slidevSourcePreparer', () => {
         expect(deck).toContain('```mermaid\nflowchart TB\n  A --> B\n```');
         expect(deck).toContain('| Layer | Role |');
         expect(deck).toContain('layout: section');
+    });
+
+    test('deterministic outline captures dense tables and diagrams before export', () => {
+        const outline = buildDeterministicSlidevOutline([
+            '# Architecture',
+            '',
+            '## Runtime',
+            '',
+            '```mermaid',
+            'flowchart TB',
+            '  A --> B',
+            '```',
+            '',
+            '## Metrics',
+            '',
+            '| Metric | Value |',
+            '|---|---|',
+            '| Latency | 120ms |',
+        ].join('\n'), 'architecture');
+
+        expect(outline).toContain('# Slidev Export Outline: Architecture');
+        expect(outline).toContain('Runtime');
+        expect(outline).toContain('audit Mermaid fit');
+        expect(outline).toContain('split or transform wide tables');
     });
 
     test('existing Slidev decks are copied into an isolated prepared export workspace instead of exporting the source file directly', async () => {
@@ -445,6 +472,21 @@ describe('slidevSourcePreparer', () => {
         );
     });
 
+    test('writes a reviewable outline artifact before outline-based export', async () => {
+        const app = createApp('# Architecture\n\n## Runtime\n\nContent');
+        const file = createFile('architecture.zh-CN.md');
+
+        const outlinePath = await generateSlidevExportOutline(app, file, config, {}, jest.fn());
+
+        expect(outlinePath).toBe('export/_slidev-outlines/architecture.zh-CN.outline.md');
+        expect(app.vault.adapter.mkdir).toHaveBeenCalledWith('export');
+        expect(app.vault.adapter.mkdir).toHaveBeenCalledWith('export/_slidev-outlines');
+        expect(app.vault.adapter.write).toHaveBeenCalledWith(
+            'export/_slidev-outlines/architecture.zh-CN.outline.md',
+            expect.stringContaining('# Slidev Export Outline: Architecture')
+        );
+    });
+
     test('loads all Slidev skill references for LLM deck preparation', async () => {
         const skillRoot = '/skills/slidev';
         process.env.NOTEMD_SLIDEV_SKILL_DIR = skillRoot;
@@ -594,6 +636,83 @@ describe('slidevSourcePreparer', () => {
             },
         });
 
+        expect(app.vault.adapter.write).toHaveBeenCalledWith(
+            'export/_slidev-sources/architecture.zh-CN.slidev.md',
+            expect.stringMatching(/^---\ntheme: default/)
+        );
+    });
+
+    test('uses a saved outline as deck-generation guidance during export continuation', async () => {
+        const skillRoot = '/skills/slidev';
+        process.env.NOTEMD_SLIDEV_SKILL_DIR = skillRoot;
+        const files = new Map([
+            [`${skillRoot}/SKILL.md`, 'Slidev skill instructions'],
+            [`${skillRoot}/references/core-syntax.md`, 'Use --- separators.'],
+            [`${skillRoot}/references/layout-fit.md`, 'Split dense slides and control zoom.'],
+        ]);
+        mockSafeRequire.mockImplementation((name: string) => {
+            if (name === 'path') {
+                return {
+                    join: (...parts: string[]) => parts.join('/').replace(/\/+/g, '/'),
+                };
+            }
+            if (name === 'fs') {
+                return {
+                    existsSync: (path: string) => files.has(path) || path === `${skillRoot}/references`,
+                    readFileSync: (path: string) => files.get(path) || '',
+                    readdirSync: (path: string) => path === `${skillRoot}/references`
+                        ? ['core-syntax.md', 'layout-fit.md']
+                        : [],
+                };
+            }
+            return null;
+        });
+        mockCallLLM.mockResolvedValue([
+            '---',
+            'theme: default',
+            'title: Architecture',
+            '---',
+            '',
+            '# Architecture',
+            '',
+            '---',
+            '',
+            '# Runtime',
+        ].join('\n'));
+        const app = createApp('# Architecture\n\n## Runtime\n\nContent');
+        const file = createFile('architecture.zh-CN.md');
+        const reporter = {
+            abortController: new AbortController(),
+            activeTasks: 0,
+            log: jest.fn(),
+            updateStatus: jest.fn(),
+            requestCancel: jest.fn(),
+            clearDisplay: jest.fn(),
+            updateActiveTasks: jest.fn(),
+            get cancelled() {
+                return false;
+            },
+        };
+
+        await prepareSlidevExportSourceFromOutline(
+            app,
+            file,
+            '# Saved Outline\n\n1. Cover\n2. Runtime with zoom safety',
+            config,
+            {
+                deckGeneration: {
+                    provider: { name: 'Mock', type: 'openai-compatible', apiKey: 'key', baseUrl: 'https://example.test', models: [] } as any,
+                    modelName: 'mock-model',
+                    settings: {} as any,
+                    reporter,
+                },
+            }
+        );
+
+        const userPrompt = mockCallLLM.mock.calls[0][2];
+        expect(userPrompt).toContain('# Saved Slidev Export Outline');
+        expect(userPrompt).toContain('Runtime with zoom safety');
+        expect(userPrompt).toContain('Split dense slides and control zoom.');
         expect(app.vault.adapter.write).toHaveBeenCalledWith(
             'export/_slidev-sources/architecture.zh-CN.slidev.md',
             expect.stringMatching(/^---\ntheme: default/)

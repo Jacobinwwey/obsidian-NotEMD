@@ -98,6 +98,7 @@ import {
     runPreviewDiagramCommandWithHost
 } from './operations/diagramCommandHostAdapter';
 import { stopAllServers } from './slideExport/localServer';
+import type { SlideExportConfig, SlidevExportSource } from './slideExport/types';
 import {
     DiagramCommandExecutionHost,
     runArtifactDiagramExecutionWithHost,
@@ -1364,6 +1365,17 @@ export default class NotemdPlugin extends Plugin {
             modal.open();
             return modal;
         }
+    }
+
+    async getSidebarReporter(): Promise<ProgressReporter> {
+        await this.activateView();
+        const view = this.app.workspace.getLeavesOfType(NOTEMD_SIDEBAR_VIEW_TYPE)[0]?.view;
+        if (view instanceof NotemdSidebarView) {
+            this.app.workspace.revealLeaf(view.leaf);
+            view.clearDisplay();
+            return view;
+        }
+        return this.getReporter();
     }
 
     /** Helper to show folder selection modal */
@@ -2793,15 +2805,17 @@ export default class NotemdPlugin extends Plugin {
 
     /** Command: Probe Slide Export Environment */
     async probeSlideExportEnvironmentCommand(): Promise<void> {
-        const { EnvironmentProbeModal } = await import('./slideExport');
-        new EnvironmentProbeModal(this.app).open();
+        await this.activateView();
+        const view = this.app.workspace.getLeavesOfType(NOTEMD_SIDEBAR_VIEW_TYPE)[0]?.view;
+        if (view instanceof NotemdSidebarView) {
+            await view.runSlideExportEnvironmentProbe();
+            return;
+        }
+        new Notice(this.getUiStrings().notices.couldNotOpenSidebar);
     }
 
-    /** Command: Export Slides */
-    async exportSlidesCommand(file: TFile, reporter?: ProgressReporter): Promise<void> {
-        const { probeEnvironment, prepareSlidevExportSource, convergeSlidevDeckLayout, exportSlidevPdf, exportSlidevPng, exportVideoMp4 } = await import('./slideExport');
-        const uiStrings = this.getUiStrings();
-        const config = {
+    private buildSlideExportConfig(): SlideExportConfig {
+        return {
             format: this.settings.slideExportDefaultFormat,
             withClicks: this.settings.slideExportWithClicks,
             outputSubfolder: this.settings.slideExportOutputSubfolder,
@@ -2811,61 +2825,166 @@ export default class NotemdPlugin extends Plugin {
             timeoutMs: this.settings.slideExportTimeoutMs,
             htmlMode: this.settings.slideExportHtmlMode,
         };
+    }
 
-        const modal = new ProgressModal(this.app, uiStrings.slideExport.exportingSlides);
-        const modalReporter = reporter || modal;
-        const logSlideExportProgress = (phase: string, detail?: string) => {
-            modalReporter.log(detail ? `${phase}: ${detail}` : phase);
-        };
-        modal.open();
+    private createSlidevDeckGenerationProfile(reporter: ProgressReporter) {
+        const uiStrings = this.getUiStrings();
+        try {
+            const { provider, modelName } = this.getProviderAndModelForTask('generateTitle');
+            return {
+                provider,
+                modelName,
+                settings: this.settings,
+                reporter,
+            };
+        } catch (providerError) {
+            const message = providerError instanceof Error ? providerError.message : String(providerError);
+            reporter.log(formatI18n(uiStrings.slideExport.outlineLlmUnavailable, { message }));
+            return undefined;
+        }
+    }
+
+    async generateSlidevExportOutlineCommand(file: TFile, reporter?: ProgressReporter): Promise<string> {
+        const { generateSlidevExportOutline } = await import('./slideExport');
+        const uiStrings = this.getUiStrings();
+        const activeReporter = reporter ?? await this.getSidebarReporter();
+        const ownsReporter = !reporter;
+        const label = uiStrings.slideExport.generateOutlineButton;
+        const config = this.buildSlideExportConfig();
+
+        if (ownsReporter) {
+            this.startReporterAction(activeReporter, label);
+        }
 
         try {
-            modalReporter.log(uiStrings.slideExport.probingEnvironment);
+            const deckGeneration = this.createSlidevDeckGenerationProfile(activeReporter);
+            const outlinePath = await generateSlidevExportOutline(
+                this.app,
+                file,
+                config,
+                { deckGeneration },
+                (phase, detail) => activeReporter.log(detail ? `${phase}: ${detail}` : phase)
+            );
+            activeReporter.log(formatI18n(uiStrings.slideExport.outlineOutputLog, { path: outlinePath }));
+            activeReporter.updateStatus(formatI18n(uiStrings.slideExport.outlineOutputSuccess, { path: outlinePath }), 100);
+            new Notice(formatI18n(uiStrings.slideExport.outlineOutputSuccess, { path: outlinePath }));
+            return outlinePath;
+        } catch (error: unknown) {
+            const message = error instanceof Error ? error.message : String(error);
+            const failureNotice = formatI18n(uiStrings.slideExport.exportFailedNotice, { message });
+            activeReporter.log(failureNotice);
+            activeReporter.updateStatus(failureNotice, -1);
+            new Notice(failureNotice);
+            console.error('Slide outline export error:', error);
+            return '';
+        } finally {
+            if (ownsReporter && activeReporter instanceof NotemdSidebarView) {
+                activeReporter.finishProcessing();
+            }
+        }
+    }
+
+    /** Command: Export Slides */
+    async exportSlidesCommand(file: TFile, reporter?: ProgressReporter): Promise<void> {
+        const { prepareSlidevExportSource } = await import('./slideExport');
+        await this.exportSlidesWithPreparedSource(
+            file,
+            this.getUiStrings().slideExport.oneShotExportButton,
+            reporter,
+            async (config, activeReporter, logSlideExportProgress) => prepareSlidevExportSource(
+                this.app,
+                file,
+                config,
+                { deckGeneration: this.createSlidevDeckGenerationProfile(activeReporter) },
+                logSlideExportProgress
+            )
+        );
+    }
+
+    async exportSlidesFromOutlineCommand(file: TFile, reporter?: ProgressReporter): Promise<void> {
+        const { getSlidevExportOutlinePath, prepareSlidevExportSourceFromOutline } = await import('./slideExport');
+        const uiStrings = this.getUiStrings();
+        await this.exportSlidesWithPreparedSource(
+            file,
+            uiStrings.slideExport.continueFromOutlineButton,
+            reporter,
+            async (config, activeReporter, logSlideExportProgress) => {
+                const outlinePath = getSlidevExportOutlinePath(file, config);
+                let outlineMarkdown = '';
+                try {
+                    outlineMarkdown = await this.app.vault.adapter.read(outlinePath);
+                } catch {
+                    throw new Error(formatI18n(uiStrings.slideExport.outlineMissingError, { path: outlinePath }));
+                }
+                activeReporter.log(formatI18n(uiStrings.slideExport.outlineLoadedLog, { path: outlinePath }));
+                activeReporter.log(uiStrings.slideExport.outlinePreparingDeck);
+                return prepareSlidevExportSourceFromOutline(
+                    this.app,
+                    file,
+                    outlineMarkdown,
+                    config,
+                    { deckGeneration: this.createSlidevDeckGenerationProfile(activeReporter) },
+                    logSlideExportProgress
+                );
+            }
+        );
+    }
+
+    private async exportSlidesWithPreparedSource(
+        file: TFile,
+        label: string,
+        reporter: ProgressReporter | undefined,
+        prepareSource: (
+            config: SlideExportConfig,
+            activeReporter: ProgressReporter,
+            logSlideExportProgress: (phase: string, detail?: string) => void
+        ) => Promise<SlidevExportSource>
+    ): Promise<void> {
+        const { probeEnvironment, convergeSlidevDeckLayout, exportSlidevPdf, exportSlidevPng, exportVideoMp4 } = await import('./slideExport');
+        const uiStrings = this.getUiStrings();
+        const config = this.buildSlideExportConfig();
+        const activeReporter = reporter ?? await this.getSidebarReporter();
+        const ownsReporter = !reporter;
+        const logSlideExportProgress = (phase: string, detail?: string) => {
+            activeReporter.log(detail ? `${phase}: ${detail}` : phase);
+        };
+
+        if (ownsReporter) {
+            this.startReporterAction(activeReporter, label);
+        }
+
+        try {
+            activeReporter.updateStatus(uiStrings.slideExport.probingEnvironment, 8);
+            activeReporter.log(uiStrings.slideExport.probingEnvironment);
             const envReport = await probeEnvironment();
 
             if (!envReport.capabilities[config.format]) {
                 throw new Error(uiStrings.slideExport.formatNotSupported.replace('{format}', config.format.toUpperCase()));
             }
 
-            let deckGeneration;
-            try {
-                const { provider, modelName } = this.getProviderAndModelForTask('generateTitle');
-                deckGeneration = {
-                    provider,
-                    modelName,
-                    settings: this.settings,
-                    reporter: modalReporter,
-                };
-            } catch (providerError) {
-                const message = providerError instanceof Error ? providerError.message : String(providerError);
-                modalReporter.log(`Slide deck LLM preparation unavailable: ${message}`);
-            }
-
-            const slideSource = await prepareSlidevExportSource(
-                this.app,
-                file,
-                config,
-                { deckGeneration },
-                logSlideExportProgress
-            );
+            activeReporter.updateStatus(uiStrings.slideExport.exportingSlides, 22);
+            const slideSource = await prepareSource(config, activeReporter, logSlideExportProgress);
+            activeReporter.updateStatus(uiStrings.slideExport.exportingSlides, 48);
             const layoutConvergence = await convergeSlidevDeckLayout(
                 this.app,
                 slideSource,
                 config,
                 logSlideExportProgress
             );
+            activeReporter.updateStatus(uiStrings.slideExport.exportingSlides, 74);
 
             if (config.format === 'html') {
                 const outputPath = layoutConvergence.exportPath;
-                modalReporter.log(uiStrings.slideExport.exportSuccess.replace('{path}', outputPath));
+                activeReporter.log(uiStrings.slideExport.exportSuccess.replace('{path}', outputPath));
+                activeReporter.updateStatus(uiStrings.slideExport.exportSuccess.replace('{path}', outputPath), 100);
                 new Notice(uiStrings.slideExport.exportComplete);
 
                 const requiresLocalServer = outputPath.endsWith('/index.html');
                 if (config.htmlMode === 'server-script' || requiresLocalServer) {
                     if (requiresLocalServer && config.htmlMode !== 'server-script') {
-                        modalReporter.log('Standalone HTML fallback requires a local server; opening compatible HTML export...');
+                        activeReporter.log('Standalone HTML fallback requires a local server; opening compatible HTML export...');
                     }
-                    modalReporter.log('Opening in browser...');
+                    activeReporter.log('Opening in browser...');
                     const { openHtmlInBrowser } = await import('./slideExport/localServer');
                     const vaultRoot = (this.app.vault.adapter as any).basePath;
                     await openHtmlInBrowser(outputPath, vaultRoot);
@@ -2877,7 +2996,8 @@ export default class NotemdPlugin extends Plugin {
                     config,
                     logSlideExportProgress
                 );
-                modalReporter.log(uiStrings.slideExport.exportSuccess.replace('{path}', outputPath));
+                activeReporter.log(uiStrings.slideExport.exportSuccess.replace('{path}', outputPath));
+                activeReporter.updateStatus(uiStrings.slideExport.exportSuccess.replace('{path}', outputPath), 100);
                 new Notice(uiStrings.slideExport.exportComplete);
             } else if (config.format === 'png') {
                 const outputPath = await exportSlidevPng(
@@ -2886,17 +3006,19 @@ export default class NotemdPlugin extends Plugin {
                     config,
                     logSlideExportProgress
                 );
-                modalReporter.log(uiStrings.slideExport.exportSuccess.replace('{path}', outputPath));
+                activeReporter.log(uiStrings.slideExport.exportSuccess.replace('{path}', outputPath));
+                activeReporter.updateStatus(uiStrings.slideExport.exportSuccess.replace('{path}', outputPath), 100);
                 new Notice(uiStrings.slideExport.exportComplete);
             } else if (config.format === 'mp4') {
-                modalReporter.log(uiStrings.slideExport.exportingPngSequence);
+                activeReporter.log(uiStrings.slideExport.exportingPngSequence);
                 const pngDir = await exportSlidevPng(
                     this.app,
                     slideSource,
                     config,
                     logSlideExportProgress
                 );
-                modalReporter.log(uiStrings.slideExport.convertingToVideo);
+                activeReporter.updateStatus(uiStrings.slideExport.convertingToVideo, 88);
+                activeReporter.log(uiStrings.slideExport.convertingToVideo);
                 const outputPath = await exportVideoMp4(
                     this.app,
                     pngDir,
@@ -2904,18 +3026,20 @@ export default class NotemdPlugin extends Plugin {
                     config,
                     logSlideExportProgress
                 );
-                modalReporter.log(uiStrings.slideExport.exportSuccess.replace('{path}', outputPath));
+                activeReporter.log(uiStrings.slideExport.exportSuccess.replace('{path}', outputPath));
+                activeReporter.updateStatus(uiStrings.slideExport.exportSuccess.replace('{path}', outputPath), 100);
                 new Notice(uiStrings.slideExport.exportComplete);
             }
         } catch (error) {
             const errorMessage = error instanceof Error ? error.message : String(error);
             const failureNotice = formatI18n(uiStrings.slideExport.exportFailedNotice, { message: errorMessage });
-            modalReporter.log(failureNotice);
+            activeReporter.log(failureNotice);
+            activeReporter.updateStatus(failureNotice, -1);
             new Notice(failureNotice);
             console.error('Slide export error:', error);
         } finally {
-            if (modal && !reporter) {
-                modal.close();
+            if (ownsReporter && activeReporter instanceof NotemdSidebarView) {
+                activeReporter.finishProcessing();
             }
         }
     }

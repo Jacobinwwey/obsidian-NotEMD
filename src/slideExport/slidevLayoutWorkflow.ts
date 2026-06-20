@@ -209,7 +209,7 @@ async function runPlaywrightLayoutChecks(
 			});
 
 			const targetUrl = baseUrl ? `${baseUrl}#/${slide}` : `file://${htmlPath}#/${slide}`;
-			await page.goto(targetUrl, { waitUntil: 'networkidle', timeout: 30_000 });
+			await openSlideForLayoutAudit(page, targetUrl);
 			await page.waitForTimeout(1_000);
 			const text = await page.locator('body').innerText({ timeout: 5_000 }).catch(() => '');
 			const measurement = await collectRenderedSlideMeasurement(page, slide);
@@ -237,6 +237,23 @@ async function runPlaywrightLayoutChecks(
 	}
 
 	return { checks, layoutAudits };
+}
+
+async function openSlideForLayoutAudit(page: any, targetUrl: string): Promise<void> {
+	await page.goto(targetUrl, { waitUntil: 'domcontentloaded', timeout: 30_000 });
+	if (typeof page.waitForLoadState === 'function') {
+		await page.waitForLoadState('networkidle', { timeout: 10_000 }).catch(() => undefined);
+	}
+	if (typeof page.waitForFunction === 'function') {
+		await page.waitForFunction(
+			() => {
+				const root = document.querySelector('.slidev-page, .slidev-layout, .slidev-slide-content, #app');
+				return Boolean(root && (root.textContent || '').trim().length > 0);
+			},
+			null,
+			{ timeout: 15_000 },
+		).catch(() => undefined);
+	}
 }
 
 function resolveSlidesToAudit(sampleSlides: number[] | null | undefined, deckMarkdown: string | null): number[] {

@@ -2,6 +2,11 @@ import { getLanguage, MarkdownView, TFile } from 'obsidian';
 import { NotemdSidebarView } from '../ui/NotemdSidebarView';
 import { mockApp } from './__mocks__/app';
 import { ApiLivenessEvent } from '../types';
+import { probeEnvironment } from '../slideExport';
+
+jest.mock('../slideExport', () => ({
+    probeEnvironment: jest.fn()
+}));
 
 type MockPlugin = {
     app: typeof mockApp;
@@ -40,6 +45,9 @@ type MockPlugin = {
     batchFixFormulaFormatsCommand: jest.Mock<Promise<void>, [any]>;
     checkAndRemoveDuplicateConceptNotesCommand: jest.Mock<Promise<void>, [any]>;
     testLlmConnectionCommand: jest.Mock<Promise<void>, [any]>;
+    generateSlidevExportOutlineCommand: jest.Mock<Promise<string>, [any, any]>;
+    exportSlidesCommand: jest.Mock<Promise<void>, [any, any]>;
+    exportSlidesFromOutlineCommand: jest.Mock<Promise<void>, [any, any]>;
 };
 
 class FakeElement {
@@ -53,6 +61,7 @@ class FakeElement {
     disabled = false;
     open = false;
     dataset: Record<string, string> = {};
+    attributes: Record<string, string> = {};
     style: Record<string, string> = {};
     value = '';
     type = '';
@@ -60,12 +69,16 @@ class FakeElement {
     scrollTop = 0;
     scrollHeight = 100;
     inputEl: any;
+    href = '';
+    title = '';
 
-    constructor(tag: string, options?: { text?: string; cls?: string; type?: string }) {
+    constructor(tag: string, options?: { text?: string; cls?: string; type?: string; href?: string; title?: string }) {
         this.tag = tag;
         if (options?.text) this.text = options.text;
         if (options?.cls) this.cls = options.cls.split(' ').filter(Boolean);
         if (options?.type) this.type = options.type;
+        if (options?.href) this.href = options.href;
+        if (options?.title) this.title = options.title;
         this.inputEl = {
             setAttrs: jest.fn(),
             value: ''
@@ -78,7 +91,7 @@ class FakeElement {
         return child;
     }
 
-    createEl(tag: string, options?: { text?: string; cls?: string; type?: string }): FakeElement {
+    createEl(tag: string, options?: { text?: string; cls?: string; type?: string; href?: string; title?: string }): FakeElement {
         return this.appendChild(new FakeElement(tag, options));
     }
 
@@ -103,10 +116,14 @@ class FakeElement {
     }
 
     setAttr(_name: string, _value: string) {
+        this.attributes[_name] = _value;
+        if (_name === 'href') this.href = _value;
+        if (_name === 'title') this.title = _value;
         return;
     }
 
     setAttrs(_attrs: Record<string, string>) {
+        Object.assign(this.attributes, _attrs);
         return;
     }
 
@@ -115,7 +132,8 @@ class FakeElement {
     }
 
     findButton(text: string): FakeElement | null {
-        if (this.tag === 'button' && this.text === text) {
+        const content = this.textContent();
+        if (this.tag === 'button' && (content === text || content.endsWith(` ${text}`))) {
             return this;
         }
         for (const child of this.children) {
@@ -134,6 +152,37 @@ class FakeElement {
             if (match) return match;
         }
         return null;
+    }
+
+    findVisibleButton(text: string): FakeElement | null {
+        const content = this.textContent();
+        if (
+            this.tag === 'button'
+            && !this.isHidden()
+            && (content === text || content.endsWith(` ${text}`))
+        ) {
+            return this;
+        }
+        for (const child of this.children) {
+            const match = child.findVisibleButton(text);
+            if (match) return match;
+        }
+        return null;
+    }
+
+    isHidden(): boolean {
+        let current: FakeElement | null = this;
+        while (current) {
+            if (current.cls.includes('is-hidden') || current.attributes['aria-hidden'] === 'true') {
+                return true;
+            }
+            current = current.parent;
+        }
+        return false;
+    }
+
+    textContent(): string {
+        return [this.text, ...this.children.map(child => child.textContent())].filter(Boolean).join(' ');
     }
 }
 
@@ -177,7 +226,10 @@ function createPluginMock(): MockPlugin {
         fixFormulaFormatsCommand: jest.fn().mockResolvedValue(undefined),
         batchFixFormulaFormatsCommand: jest.fn().mockResolvedValue(undefined),
         checkAndRemoveDuplicateConceptNotesCommand: jest.fn().mockResolvedValue(undefined),
-        testLlmConnectionCommand: jest.fn().mockResolvedValue(undefined)
+        testLlmConnectionCommand: jest.fn().mockResolvedValue(undefined),
+        generateSlidevExportOutlineCommand: jest.fn().mockResolvedValue('export/_slidev-outlines/Active.outline.md'),
+        exportSlidesCommand: jest.fn().mockResolvedValue(undefined),
+        exportSlidesFromOutlineCommand: jest.fn().mockResolvedValue(undefined)
     };
 }
 
@@ -198,6 +250,17 @@ function findAllByClass(root: FakeElement, cls: string): FakeElement[] {
     }
     for (const child of root.children) {
         matches.push(...findAllByClass(child, cls));
+    }
+    return matches;
+}
+
+function collectLinks(root: FakeElement): FakeElement[] {
+    const matches: FakeElement[] = [];
+    if (root.tag === 'a') {
+        matches.push(root);
+    }
+    for (const child of root.children) {
+        matches.push(...collectLinks(child));
     }
     return matches;
 }
@@ -252,6 +315,15 @@ describe('NotemdSidebarView DOM button wiring', () => {
         (mockApp.vault.read as jest.Mock).mockResolvedValue('duplicate duplicate words');
         (mockApp.vault.getAbstractFileByPath as jest.Mock).mockReturnValue(null);
         (mockApp.workspace.iterateAllLeaves as jest.Mock).mockImplementation(() => {});
+        (probeEnvironment as jest.Mock).mockResolvedValue({
+            isDesktop: true,
+            platform: 'linux',
+            node: { tool: 'node', installed: false, version: null, error: 'node not found in PATH' },
+            slidev: { tool: 'slidev', installed: false, version: null, error: 'Not available via npx slidev' },
+            playwright: { tool: 'playwright', installed: false, version: null, error: 'Playwright chromium not installed' },
+            ffmpeg: { tool: 'ffmpeg', installed: false, version: null, error: 'ffmpeg not found in PATH' },
+            capabilities: { html: false, pdf: false, png: false, mp4: false }
+        });
     });
 
     async function clickButton(label: string) {
@@ -439,6 +511,89 @@ describe('NotemdSidebarView DOM button wiring', () => {
 
         expect(plugin.settings.slideExportDefaultFormat).toBe('pdf');
         expect(plugin.saveSettings).toHaveBeenCalledTimes(1);
+    });
+
+    test('renders slide export controls as one-shot by default and reveals ordered outline steps on demand', async () => {
+        await sidebar.onOpen();
+
+        const outlineToggle = contentContainer.findByClass('notemd-slide-export-outline-toggle');
+        const directGroup = contentContainer.findByClass('notemd-slide-export-direct-actions');
+        const outlineGroup = contentContainer.findByClass('notemd-slide-export-outline-actions');
+
+        expect(outlineToggle).not.toBeNull();
+        expect(outlineToggle?.tag).toBe('button');
+        expect(outlineToggle?.attributes.role).toBe('switch');
+        expect(outlineToggle?.attributes['aria-checked']).toBe('false');
+        const probeButton = contentContainer.findVisibleButton('Probe slide export env');
+        const oneShotButton = contentContainer.findVisibleButton('One-shot export');
+        expect(probeButton).not.toBeNull();
+        expect(probeButton?.cls).toContain('notemd-slide-export-secondary-button');
+        expect(probeButton?.cls).not.toContain('mod-cta');
+        expect(oneShotButton).not.toBeNull();
+        expect(oneShotButton?.cls).toContain('mod-cta');
+        expect(oneShotButton?.cls).toContain('is-primary');
+        expect(contentContainer.findVisibleButton('Generate outline')).toBeNull();
+        expect(contentContainer.findVisibleButton('Continue from outline')).toBeNull();
+        expect(directGroup?.cls).not.toContain('is-hidden');
+        expect(outlineGroup?.cls).toContain('is-hidden');
+
+        await outlineToggle!.onclick?.();
+
+        expect(outlineToggle?.attributes['aria-checked']).toBe('true');
+        expect(outlineToggle?.cls).toContain('is-enabled');
+        expect(directGroup?.cls).toContain('is-hidden');
+        expect(outlineGroup?.cls).not.toContain('is-hidden');
+        expect(contentContainer.findVisibleButton('One-shot export')).toBeNull();
+        expect(contentContainer.findVisibleButton('Generate outline')).not.toBeNull();
+        expect(contentContainer.findVisibleButton('Continue from outline')).not.toBeNull();
+    });
+
+    test('slide export controls call the concrete one-shot and outline commands with the sidebar reporter', async () => {
+        await sidebar.onOpen();
+
+        await contentContainer.findButton('One-shot export')!.onclick?.();
+        expect(plugin.exportSlidesCommand).toHaveBeenCalledWith(mdFile, expect.objectContaining({
+            log: expect.any(Function),
+            updateStatus: expect.any(Function)
+        }));
+
+        const outlineToggle = contentContainer.findByClass('notemd-slide-export-outline-toggle');
+        await outlineToggle!.onclick?.();
+
+        await contentContainer.findButton('Generate outline')!.onclick?.();
+        expect(plugin.generateSlidevExportOutlineCommand).toHaveBeenCalledWith(mdFile, expect.objectContaining({
+            log: expect.any(Function),
+            updateStatus: expect.any(Function)
+        }));
+
+        await contentContainer.findButton('Continue from outline')!.onclick?.();
+        expect(plugin.exportSlidesFromOutlineCommand).toHaveBeenCalledWith(mdFile, expect.objectContaining({
+            log: expect.any(Function),
+            updateStatus: expect.any(Function)
+        }));
+    });
+
+    test('slide export environment check renders inline install guidance with commands and official links', async () => {
+        await sidebar.onOpen();
+
+        await contentContainer.findButton('Probe slide export env')!.onclick?.();
+
+        const panel = contentContainer.findByClass('notemd-slide-export-env-panel');
+        expect(panel).not.toBeNull();
+        expect(panel?.parent?.parent?.open).toBe(true);
+        expect(panel?.textContent()).toContain('node --version');
+        expect(panel?.textContent()).toContain('corepack enable');
+        expect(panel?.textContent()).toContain('npx playwright install chromium');
+        expect(panel?.textContent()).toContain('sudo apt install ffmpeg');
+        expect(panel?.textContent()).toContain('Copy command');
+
+        const links = collectLinks(panel!);
+        expect(links.map(link => link.href)).toEqual(expect.arrayContaining([
+            'https://nodejs.org/en/download',
+            'https://sli.dev/builtin/cli',
+            'https://playwright.dev/docs/intro',
+            'https://ffmpeg.org/download.html'
+        ]));
     });
 
     test('updateStatus swaps between active progress and idle standby states', async () => {

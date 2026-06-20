@@ -169,6 +169,8 @@ describe('slidevLayoutWorkflow', () => {
 			removeAllListeners: jest.fn(),
 			on: jest.fn(),
 			goto: jest.fn(),
+			waitForLoadState: jest.fn().mockRejectedValue(new Error('networkidle timeout')),
+			waitForFunction: jest.fn().mockResolvedValue(undefined),
 			waitForTimeout: jest.fn(),
 			locator: jest.fn(() => ({
 				innerText: jest.fn().mockResolvedValue('1 / 1'),
@@ -239,6 +241,9 @@ describe('slidevLayoutWorkflow', () => {
 		expect(result.htmlExport.actualMode).toBe('server-script-fallback');
 		expect(result.htmlExportHistory).toHaveLength(2);
 		expect(result.checks).toHaveLength(1);
+		expect(page.goto).toHaveBeenCalledWith(expect.any(String), { waitUntil: 'domcontentloaded', timeout: 30_000 });
+		expect(page.waitForLoadState).toHaveBeenCalledWith('networkidle', { timeout: 10_000 });
+		expect(page.waitForFunction).toHaveBeenCalled();
 		expect(mockStartLocalServer).toHaveBeenCalled();
 		expect(mockStopLocalServer).toHaveBeenCalled();
 		expect(process.env.PLAYWRIGHT_BROWSERS_PATH).toBe('/home/user/.cache/ms-playwright');
