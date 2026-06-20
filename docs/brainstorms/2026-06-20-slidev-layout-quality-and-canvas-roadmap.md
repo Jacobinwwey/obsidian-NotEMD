@@ -3,7 +3,7 @@ date: 2026-06-20
 last_updated: 2026-06-20
 topic: slidev-layout-quality-and-canvas-roadmap
 canonical: false
-status: stage12-mixed-component-prose-converged
+status: stage13-unsupported-component-boundary-fail-transparent
 ---
 
 # Slidev Layout Quality And Canvas Roadmap
@@ -26,7 +26,7 @@ Current landed facts:
 8. `SlideLayoutPlan` is injected into deterministic outline generation, one-shot deck generation, and outline-continuation generation.
 9. The real `docs/architecture.zh-CN.md` strict standalone run is the recurring acceptance source for actual export behavior.
 
-The current slice adds Stage 12 mixed component/prose convergence on top of Stage 11 Mermaid source-boundary hardening, the Stage 10 bounded Vue component tree convergence fixture, Mermaid measured-fit ownership, font-safe slot/code convergence, explicit CSS asset dependency graph copying, and Stage 9 custom single-surface convergence:
+The current slice adds Stage 13 fail-transparent unsupported component/table boundary coverage on top of Stage 12 mixed component/prose convergence, Stage 11 Mermaid source-boundary hardening, the Stage 10 bounded Vue component tree convergence fixture, Mermaid measured-fit ownership, font-safe slot/code convergence, explicit CSS asset dependency graph copying, and Stage 9 custom single-surface convergence:
 
 1. Markdown images, HTML media/link/srcset attributes, and Slidev frontmatter local file keys are copied into the prepared deck workspace.
 2. Local CSS files explicitly referenced by the deck are parsed for local `url(...)` dependencies and local `@import` stylesheet chains.
@@ -46,6 +46,7 @@ The current slice adds Stage 12 mixed component/prose convergence on top of Stag
 16. Bounded component-only Vue tree surfaces with multiline component openers, multiline props, nested components, and named template slots can now receive the same measured local `<Transform>` path. Mixed Markdown prose/table/fence/directive content is intentionally rejected from this path.
 17. Mermaid preservation tests now cover inline fence metadata: mixed Mermaid/prose repair may move only non-Mermaid content, and source preparation rejects LLM deck candidates that change only a Mermaid fence opener option.
 18. Clear-boundary mixed component/prose slides can now be separated into component and prose presentation surfaces before whole-slide zoom is considered. The component page can then receive a measured local `<Transform>` while the prose page stays readable. Mixed component surfaces with fences, tables, images, directives, existing Transform wrappers, or component/prose/component ordering fail transparent instead of silently shrinking prose.
+19. Unsupported component/table production fixtures can now be represented as expected failures. These fixtures pass only when the verifier fails for the intended layout reason while native standalone export, browser load, generated-artifact visibility, failure fingerprints, and Mermaid source preservation remain intact. They are excluded from the default success fixture suite unless explicitly selected or `--include-expected-failures` is passed.
 
 Closeout evidence:
 
@@ -65,6 +66,9 @@ Closeout evidence:
 14. Stage 11 Mermaid source-boundary evidence archive: `/home/jacob/slidev-export-review/2026-06-20-stage11-mermaid-source-boundary/`. The real `architecture.zh-CN.md` strict native standalone report is `ok = true`, uses Jacob's local Slidev fork and 52 skill references, outputs native standalone HTML, preserves 3/3 Mermaid fences with `changedFenceIndexes = []`, and closes with `hardOverflowCount = 0`, `lowEffectiveFontCount = 0`, `postPatchCount = 4`, `mermaidLowZoomCount = 2`, and `mermaidManualReviewCount = 1`. The reviewable deck is `architecture.zh-CN.stage11.slidev.md`.
 15. Stage 12 mixed component/prose fixture archive: `/home/jacob/slidev-export-review/2026-06-20-stage12-mixed-component-prose-fixtures/`. The production suite now contains 9 fixtures. `mixed-component-prose-stress` converges to 3 slides in 2 patch passes, keeps `layout: dashboard-shell`, preserves the prose fingerprint, avoids whole-slide zoom, and wraps the component page with measured local `<Transform>`.
 16. Real Stage 12 `architecture.zh-CN.md` strict native standalone archive: `/home/jacob/slidev-export-review/2026-06-20-stage12-mixed-component-prose-real/`. The report is `ok = true`, uses Jacob's local Slidev fork, loads `/home/jacob/slidev/skills/slidev` with 52 references, outputs native standalone HTML, preserves 3/3 Mermaid fences with `changedFenceIndexes = []`, and closes with `slideCount = 27`, `hardOverflowCount = 0`, `lowEffectiveFontCount = 0`, `postPatchCount = 4`, `mermaidLowZoomCount = 2`, and `mermaidManualReviewCount = 1`. The reviewable deck is `architecture.zh-CN.stage12.slidev.md`.
+17. Stage 13 expected-failure archive: `/home/jacob/slidev-export-review/2026-06-20-stage13-unsupported-component-boundary-fixture/`. `unsupported-component-table-boundary-stress` deliberately ends with verifier `ok = false`, `hardOverflowCount > 0`, and a blocked reason for mixed component plus primary Markdown content. That is the correct result: the workflow refuses whole-slide zoom for an unsafe component/table boundary while keeping the review fingerprint and a source Mermaid fence byte-stable.
+18. Stage 13 default success fixture archive: `/home/jacob/slidev-export-review/2026-06-20-stage13-success-fixtures/`. The default suite still includes only converging fixtures and all 9 pass; expected-failure fixtures are explicit opt-in coverage.
+19. Real Stage 13 `architecture.zh-CN.md` strict native standalone archive: `/home/jacob/slidev-export-review/2026-06-20-stage13-real/`. The report is `ok = true`, uses `/home/jacob/slidev/packages/slidev/bin/slidev.mjs`, loads `/home/jacob/slidev/skills/slidev` with 52 references, outputs native standalone HTML, preserves 3/3 Mermaid fences with `changedFenceIndexes = []`, and closes with `slideCount = 27`, `hardOverflowCount = 0`, `lowEffectiveFontCount = 0`, `mermaidFitReviewCount = 3`, `mermaidLowZoomCount = 2`, and `mermaidManualReviewCount = 1`. The reviewable deck is `architecture.zh-CN.stage13.slidev.md`.
 
 ## Mermaid Boundary
 
@@ -90,7 +94,7 @@ Mermaid-only slides may use measured low zoom to keep the full preserved diagram
 | Mixed Mermaid/prose must not use low whole-slide zoom | Only non-Mermaid content may move; Mermaid fence opener, metadata, body, and closer remain byte-stable | Improve outer layout and prose movement only |
 | Local assets must not disappear in standalone output | Markdown, HTML, frontmatter, CSS `url(...)`, CSS `@import`, and local media dependencies are copied explicitly; rejected local CSS references are sanitized in copied CSS | Extend only through explicit dependency parsing, not whole-directory copying |
 | Remote fonts must not be required for verification | Prepared decks default to `fonts.provider: none` | Use explicit local assets for branded fonts |
-| Custom component surfaces without stable slot owners need convergence evidence | Bounded raw HTML/component single-surface slides, bounded component-only Vue tree surfaces, and clear-boundary mixed component/prose slides can now converge without whole-slide zoom; existing Transform blocks whole-slide zoom compounding | Keep component surfaces with fences/tables/directives or ambiguous owner ordering conservative until a fixture proves a safe boundary |
+| Custom component surfaces without stable slot owners need convergence evidence | Bounded raw HTML/component single-surface slides, bounded component-only Vue tree surfaces, and clear-boundary mixed component/prose slides can now converge without whole-slide zoom; component/table now has an expected-failure production fixture, and component/directive blocking is covered by unit tests | Keep component surfaces with fences/images or ambiguous owner ordering conservative until a fixture proves a safe boundary |
 
 ## Architecture Direction
 
@@ -127,7 +131,7 @@ Required verification before closing a slice:
 
 The next useful slices are:
 
-1. Add more real failure fixtures for unsupported layouts without stable owners, component surfaces that contain table/fence/directive syntax, and custom layouts that need pagination without an explicit surface boundary; Stage 12 covers clear-boundary mixed component/prose, not arbitrary component trees.
+1. Add more real failure fixtures for unsupported layouts without stable owners, component surfaces that contain fence/image syntax, and custom layouts that need pagination without an explicit surface boundary; Stage 13 covers component/table fail-transparent behavior and unit-tests component/directive blocking, not arbitrary component trees.
 2. Keep Mermaid source-preserved fit review as a first-class report surface; automatic repair may move only non-Mermaid content and must not split the diagram, rewrite the body, alter opener metadata, or reorder fences.
 3. Extend parser-light code splitting only where it preserves semantic blocks better than line budgets.
 4. Consider an upstream Slidev skill PR only for general guardrails: complete references, source-preserved Mermaid fit review, browser-check expectations, standalone/fallback distinction, and no automatic user-diagram splitting.

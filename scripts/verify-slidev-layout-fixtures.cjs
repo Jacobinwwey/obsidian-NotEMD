@@ -22,6 +22,7 @@ function parseArgs(argv) {
     const args = {
         archive: null,
         fixture: null,
+        includeExpectedFailures: false,
         json: false,
         keep: false,
         timeoutMs: DEFAULT_TIMEOUT_MS,
@@ -34,6 +35,8 @@ function parseArgs(argv) {
             args.archive = argv[++index];
         } else if (arg === '--fixture' && argv[index + 1]) {
             args.fixture = argv[++index];
+        } else if (arg === '--include-expected-failures') {
+            args.includeExpectedFailures = true;
         } else if (arg === '--json') {
             args.json = true;
         } else if (arg === '--keep') {
@@ -64,6 +67,8 @@ function printHelp() {
         'Options:',
         '  --archive <path>      Preserve fixture reports/decks/exports under this directory',
         '  --fixture <id>        Run one fixture id instead of the full suite',
+        '  --include-expected-failures',
+        '                        Include fail-transparent boundary fixtures in the full suite',
         '  --keep                Keep the generated temporary vault',
         '  --json                Print machine-readable summary only',
         '  --timeout-ms <ms>     Per-fixture verifier timeout, default: 300000',
@@ -346,6 +351,41 @@ function createMixedComponentProseStressDeck() {
         '- The prose must not inherit whole-slide zoom from the overflowing component.',
         '- The component page may receive a measured local Transform after the next rendered audit pass.',
         '- The original component tree and prose text stay intact as separate presentation surfaces.',
+        '',
+    ].join('\n');
+}
+
+function createUnsupportedComponentTableBoundaryStressDeck() {
+    return [
+        '---',
+        'theme: default',
+        'mdc: true',
+        '---',
+        '',
+        '# Unsupported Component Table Boundary Stress',
+        '',
+        '```mermaid',
+        'flowchart LR',
+        '  Source[One source Mermaid fence] --> Deck[One exported Mermaid fence]',
+        '  Deck --> Review[Source-preserved review]',
+        '```',
+        '',
+        '---',
+        'layout: dashboard-shell',
+        '---',
+        '',
+        '## Unsupported Component Surface',
+        '',
+        '<DashboardGrid class="stage13-dashboard">',
+        '  <MetricPanel label="Queue A" value="128" tone="teal" />',
+        '  <MetricPanel label="Queue B" value="256" tone="blue" />',
+        '  <MetricPanel label="Queue C" value="512" tone="amber" />',
+        '  <MetricPanel label="Queue D" value="1024" tone="violet" />',
+        '</DashboardGrid>',
+        '',
+        '| Risk | Mitigation | Evidence |',
+        '| --- | --- | --- |',
+        '| Unsupported component table boundary regression fingerprint | Must fail transparent instead of shrinking component and table together. | The original component and table must stay visible in the prepared deck for manual review. |',
         '',
     ].join('\n');
 }
@@ -888,6 +928,106 @@ const FIXTURES = [
         expectedMermaidBlocks: 0,
     },
     {
+        id: 'unsupported-component-table-boundary-stress',
+        sourcePath: 'unsupported-component-table-boundary-stress.md',
+        sourceMarkdown: createUnsupportedComponentTableBoundaryStressDeck(),
+        files: [
+            {
+                path: 'layouts/dashboard-shell.vue',
+                content: [
+                    '<template>',
+                    '  <main class="notemd-dashboard-shell">',
+                    '    <slot />',
+                    '  </main>',
+                    '</template>',
+                    '',
+                    '<style>',
+                    '.notemd-dashboard-shell {',
+                    '  height: 100%;',
+                    '  padding: 54px 62px;',
+                    '  overflow: hidden;',
+                    '}',
+                    '</style>',
+                ].join('\n'),
+            },
+            {
+                path: 'components/DashboardGrid.vue',
+                content: [
+                    '<template>',
+                    '  <section class="stage13-grid">',
+                    '    <slot />',
+                    '  </section>',
+                    '</template>',
+                    '',
+                    '<style>',
+                    '.stage13-grid {',
+                    '  width: 1680px;',
+                    '  min-height: 510px;',
+                    '  display: grid;',
+                    '  grid-template-columns: repeat(4, 365px);',
+                    '  gap: 24px;',
+                    '  border: 1px solid #475569;',
+                    '  padding: 26px;',
+                    '  background: #f8fafc;',
+                    '  color: #0f172a;',
+                    '}',
+                    '</style>',
+                ].join('\n'),
+            },
+            {
+                path: 'components/MetricPanel.vue',
+                content: [
+                    '<template>',
+                    '  <article class="stage13-panel" :class="`stage13-panel--${tone}`">',
+                    '    <h2>{{ label }}</h2>',
+                    '    <strong>{{ value }}</strong>',
+                    '    <p>Unsupported component table boundary must not be repaired with whole-slide zoom.</p>',
+                    '  </article>',
+                    '</template>',
+                    '',
+                    '<script setup>',
+                    'defineProps({',
+                    '  label: { type: String, required: true },',
+                    '  value: { type: String, required: true },',
+                    '  tone: { type: String, required: true },',
+                    '});',
+                    '</script>',
+                    '',
+                    '<style>',
+                    '.stage13-panel {',
+                    '  border-left: 5px solid #0f766e;',
+                    '  padding-left: 16px;',
+                    '}',
+                    '.stage13-panel--blue { border-left-color: #2563eb; }',
+                    '.stage13-panel--amber { border-left-color: #b45309; }',
+                    '.stage13-panel--violet { border-left-color: #7c3aed; }',
+                    '.stage13-panel h2 {',
+                    '  font-size: 30px;',
+                    '  margin: 0 0 14px;',
+                    '}',
+                    '.stage13-panel strong {',
+                    '  display: block;',
+                    '  font-size: 38px;',
+                    '  margin-bottom: 12px;',
+                    '}',
+                    '.stage13-panel p {',
+                    '  font-size: 20px;',
+                    '  line-height: 1.35;',
+                    '  margin: 0;',
+                    '}',
+                    '</style>',
+                ].join('\n'),
+            },
+        ],
+        expectNoWholeSlideZoom: true,
+        expectedMermaidBlocks: 1,
+        expectedFailure: {
+            expectedHardOverflow: true,
+            expectedFingerprint: 'Unsupported component table boundary regression fingerprint',
+            reasonIncludes: 'mixed component and primary Markdown content',
+        },
+    },
+    {
         id: 'competing-slot-zones-stress',
         sourcePath: 'competing-slot-zones-stress.md',
         sourceMarkdown: createCompetingSlotZonesStressDeck(),
@@ -1029,15 +1169,21 @@ const FIXTURES = [
 
 const FIXTURE_IDS = FIXTURES.map(fixture => fixture.id);
 
-function resolveFixtures(filterId) {
-    if (!filterId) {
-        return FIXTURES;
+function selectFixtures(args) {
+    if (!args.fixture) {
+        return args.includeExpectedFailures
+            ? FIXTURES
+            : FIXTURES.filter(fixture => !isExpectedFailureFixture(fixture));
     }
-    const fixture = FIXTURES.find(candidate => candidate.id === filterId);
+    const fixture = FIXTURES.find(candidate => candidate.id === args.fixture);
     if (!fixture) {
-        throw new Error(`Unknown fixture ${filterId}`);
+        throw new Error(`Unknown fixture ${args.fixture}`);
     }
     return [fixture];
+}
+
+function isExpectedFailureFixture(fixture) {
+    return Boolean(fixture.expectedFailure);
 }
 
 function resolveWorkRoot(args) {
@@ -1227,6 +1373,64 @@ function assertFixtureReport(fixture, report, sourceMarkdown) {
         assert(!deckMarkdown.includes('| Capability | Trigger | Boundary | Evidence | Fallback | User surface | Owner | Replay command | Regression risk | Gate |'), `${fixture.id}: ultra-wide table survived unsplit`);
         assert((deckMarkdown.match(/Ultra Wide Contract Matrix/g) || []).length > 1, `${fixture.id}: ultra-wide table did not produce continuation slides`);
     }
+}
+
+function assertExpectedFailureFixtureReport(fixture, report, sourceMarkdown) {
+    const expectedFailure = fixture.expectedFailure;
+    assert(expectedFailure, `${fixture.id}: expected-failure assertion called for a normal fixture`);
+    assert(report.ok === false, `${fixture.id}: expected verifier to fail transparently, but it passed`);
+    assert(report.htmlExport?.actualMode === 'standalone', `${fixture.id}: expected native standalone mode before layout failure`);
+    assert(report.htmlExport?.requiresLocalServer === false, `${fixture.id}: standalone output should not require a local server`);
+    assert(report.standaloneGate?.passed === true, `${fixture.id}: standalone gate should pass before layout failure`);
+    assert(Array.isArray(report.ignoredOutputs) && report.ignoredOutputs.length === 0, `${fixture.id}: generated outputs must stay visible to Git`);
+    assert(Array.isArray(report.playwright) && report.playwright.every(check => !check.failed), `${fixture.id}: expected layout failure, not browser/render failure`);
+
+    const summary = report.layoutAuditSummary || {};
+    if (expectedFailure.expectedHardOverflow) {
+        assert(
+            summary.hardOverflowCount > 0 || hasLayoutFinding(report, 'overflow'),
+            `${fixture.id}: expected a hard overflow to remain as the transparent failure`
+        );
+    }
+
+    if (expectedFailure.reasonIncludes) {
+        const blockedReasons = collectBlockedReasons(report);
+        assert(
+            blockedReasons.some(reason => reason.includes(expectedFailure.reasonIncludes)),
+            `${fixture.id}: expected blocked patch reason containing "${expectedFailure.reasonIncludes}", got ${JSON.stringify(blockedReasons)}`
+        );
+    }
+
+    const sourceMermaidFences = extractMermaidFenceBlocks(sourceMarkdown);
+    const sourceMermaidBlocks = sourceMermaidFences.length;
+    assert(report.deck?.mermaidBlocks === sourceMermaidBlocks, `${fixture.id}: source/exported Mermaid fence count changed`);
+    if (typeof fixture.expectedMermaidBlocks === 'number') {
+        assert(sourceMermaidBlocks === fixture.expectedMermaidBlocks, `${fixture.id}: fixture source Mermaid count changed`);
+    }
+    assert(report.mermaidSourcePreservation?.passed === true, `${fixture.id}: verifier reported Mermaid source-preservation drift`);
+
+    assert(report.deck?.path && fs.existsSync(report.deck.path), `${fixture.id}: expected prepared deck artifact for failure review`);
+    const deckMarkdown = fs.readFileSync(report.deck.path, 'utf8');
+    assertMermaidFencesUnchanged(fixture.id, sourceMermaidFences, extractMermaidFenceBlocks(deckMarkdown));
+    assertLowZoomOnlyTargetsMermaid(fixture.id, deckMarkdown);
+
+    if (fixture.expectNoWholeSlideZoom || expectedFailure.expectNoWholeSlideZoom) {
+        assert(!/^zoom:\s*[0-9.]+$/im.test(deckMarkdown), `${fixture.id}: whole-slide zoom was introduced on an unsupported failure boundary`);
+    }
+    if (expectedFailure.expectedFingerprint) {
+        assert(deckMarkdown.includes(expectedFailure.expectedFingerprint), `${fixture.id}: failure-review fingerprint disappeared from prepared deck`);
+    }
+}
+
+function collectBlockedReasons(report) {
+    return (report.layoutPatchAttempts || [])
+        .flatMap(attempt => attempt.blockedSlides || [])
+        .map(blockedSlide => blockedSlide.reason)
+        .filter(reason => typeof reason === 'string');
+}
+
+function hasLayoutFinding(report, kind) {
+    return (report.layoutAudit || []).some(audit => (audit.findings || []).some(finding => finding.kind === kind));
 }
 
 function assertNoRejectedCssReferences(fixtureId, directoryPath, label) {
@@ -1563,7 +1767,7 @@ function assert(condition, message) {
 async function main() {
     const args = parseArgs(process.argv.slice(2));
     const repoRoot = path.resolve(__dirname, '..');
-    const fixtures = resolveFixtures(args.fixture);
+    const fixtures = selectFixtures(args);
     const workRoot = resolveWorkRoot(args);
     fs.mkdirSync(workRoot, { recursive: true });
     const runRoot = fs.mkdtempSync(path.join(workRoot, 'run-'));
@@ -1584,9 +1788,22 @@ async function main() {
 
             let report = null;
             try {
-                report = runVerifier(repoRoot, vaultRoot, fixture.sourcePath, args.timeoutMs);
-                writeFixtureReportArtifact(runRoot, fixture, report);
-                assertFixtureReport(fixture, report, fixture.sourceMarkdown);
+                if (isExpectedFailureFixture(fixture)) {
+                    try {
+                        report = runVerifier(repoRoot, vaultRoot, fixture.sourcePath, args.timeoutMs);
+                    } catch (error) {
+                        report = reportFromError(error);
+                        if (!report) {
+                            throw error;
+                        }
+                    }
+                    writeFixtureReportArtifact(runRoot, fixture, report);
+                    assertExpectedFailureFixtureReport(fixture, report, fixture.sourceMarkdown);
+                } else {
+                    report = runVerifier(repoRoot, vaultRoot, fixture.sourcePath, args.timeoutMs);
+                    writeFixtureReportArtifact(runRoot, fixture, report);
+                    assertFixtureReport(fixture, report, fixture.sourceMarkdown);
+                }
                 if (args.archive) {
                     copyFixtureEvidence(args.archive, fixture, report, sourcePath);
                 }
@@ -1603,6 +1820,8 @@ async function main() {
             results.push({
                 id: fixture.id,
                 ok: true,
+                expectedFailure: isExpectedFailureFixture(fixture),
+                verifierOk: report.ok,
                 sourcePath,
                 outputPath: report.output.path,
                 deckPath: report.deck.path,
@@ -1624,7 +1843,8 @@ async function main() {
         } else {
             console.log('Slidev layout fixture verification passed.');
             for (const result of results) {
-                console.log(`- ${result.id}: ${result.layoutAuditSummary.slideCount} slides, ${result.layoutAuditSummary.postPatchCount} patch passes, ${result.outputPath}`);
+                const label = result.expectedFailure ? 'expected failure' : 'converged';
+                console.log(`- ${result.id}: ${label}, ${result.layoutAuditSummary.slideCount} slides, ${result.layoutAuditSummary.postPatchCount} patch passes, ${result.outputPath}`);
             }
             if (args.archive) {
                 console.log(`Evidence archived at ${path.resolve(args.archive)}`);

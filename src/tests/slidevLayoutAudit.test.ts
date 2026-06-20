@@ -2585,6 +2585,74 @@ describe('slidevLayoutAudit', () => {
 		expect(patched.deckMarkdown).toContain('const unsafeBoundary');
 	});
 
+	test.each([
+		{
+			name: 'table',
+			lines: [
+				'| Risk | Mitigation |',
+				'| --- | --- |',
+				'| unsafe mixed table | do not shrink the component and table together |',
+			],
+			fingerprint: '| unsafe mixed table |',
+		},
+		{
+			name: 'directive',
+			lines: [
+				':::note',
+				'Directive content is an unsupported component/prose boundary.',
+				':::',
+			],
+			fingerprint: 'Directive content is an unsupported component/prose boundary.',
+		},
+	])('blocks whole-slide zoom for mixed component and $name content when separation is unsafe', ({ lines, fingerprint }) => {
+		const audit: SlidevLayoutAudit = {
+			slide: 2,
+			safeRect: { left: 51.2, top: 43.2, right: 1228.8, bottom: 676.8, width: 1177.6, height: 633.6 },
+			contentBounds: { left: 48, top: 52, right: 1248, bottom: 812, width: 1200, height: 760 },
+			pageScale: 1,
+			elementKinds: ['other', 'text'],
+			findings: [
+				{
+					kind: 'overflow',
+					target: 'content',
+					message: 'Slide content exceeds the safe visible rectangle',
+					recommendedPatch: 'reduce-zoom',
+					recommendedScale: 0.62,
+				},
+			],
+		};
+		const deck = [
+			'---',
+			'theme: default',
+			'---',
+			'',
+			'# Intro',
+			'',
+			'---',
+			'layout: dashboard-shell',
+			'---',
+			'',
+			'<DashboardGrid class="stage13-dashboard">',
+			'  <MetricPanel label="Queue A" value="128" />',
+			'</DashboardGrid>',
+			'',
+			...lines,
+		].join('\n');
+
+		const patched = patchDeckWithLayoutAudit(deck, [audit]);
+
+		expect(patched.changed).toBe(false);
+		expect(patched.blockedSlides).toEqual([
+			expect.objectContaining({
+				slide: 2,
+				reason: expect.stringContaining('mixed component and primary Markdown content'),
+			}),
+		]);
+		expect(countSlideDeckSlides(patched.deckMarkdown)).toBe(2);
+		expect(patched.deckMarkdown).not.toContain('zoom: 0.62');
+		expect(patched.deckMarkdown).toContain(fingerprint);
+	});
+
 	test('does not compound a single-surface Transform with whole-slide zoom', () => {
 		const audit: SlidevLayoutAudit = {
 			slide: 2,

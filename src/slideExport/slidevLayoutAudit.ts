@@ -1908,7 +1908,7 @@ function extractComponentPrimaryContentSurface(slideMarkdown: string): Patchable
 	const frontmatterEnd = findSlideFrontmatterEnd(lines);
 	const frontmatterLines = frontmatterEnd > 0 ? lines.slice(0, frontmatterEnd + 1) : [];
 	const bodyLines = frontmatterEnd > 0 ? lines.slice(frontmatterEnd + 1) : lines;
-	if (bodyLines.some(line => /^::[\w-]+::$/.test(line.trim()) || /^:::\s*/.test(line.trim()))) {
+	if (bodyLines.some(line => /^::[\w-]+::$/.test(line.trim()))) {
 		return null;
 	}
 
