@@ -223,6 +223,41 @@ function createSlotComponentStressDeck() {
     ].join('\n');
 }
 
+function createCustomSingleSurfaceComponentStressDeck() {
+    return [
+        '---',
+        'theme: default',
+        'mdc: true',
+        '---',
+        '',
+        '# Custom Single Surface Component Stress',
+        '',
+        '---',
+        'layout: surface-shell',
+        '---',
+        '',
+        '<div style="width: 1480px; height: 500px; border: 1px solid #475569; padding: 24px; display: grid; grid-template-columns: repeat(4, 330px); gap: 22px; background: #f8fafc; color: #0f172a;">',
+        '  <section style="border-left: 5px solid #0f766e; padding-left: 16px;">',
+        '    <h2 style="font-size: 30px; margin: 0 0 16px;">Surface</h2>',
+        '    <p style="font-size: 20px; line-height: 1.35;">Single surface regression fingerprint keeps a custom layout surface as one transformable component.</p>',
+        '  </section>',
+        '  <section style="border-left: 5px solid #2563eb; padding-left: 16px;">',
+        '    <h2 style="font-size: 30px; margin: 0 0 16px;">Owner</h2>',
+        '    <p style="font-size: 20px; line-height: 1.35;">There are no named slot markers here, so the workflow must not depend on slot owner attribution.</p>',
+        '  </section>',
+        '  <section style="border-left: 5px solid #b45309; padding-left: 16px;">',
+        '    <h2 style="font-size: 30px; margin: 0 0 16px;">Patch</h2>',
+        '    <p style="font-size: 20px; line-height: 1.35;">The acceptable repair is a measured local Transform around the raw component surface.</p>',
+        '  </section>',
+        '  <section style="border-left: 5px solid #7c3aed; padding-left: 16px;">',
+        '    <h2 style="font-size: 30px; margin: 0 0 16px;">Gate</h2>',
+        '    <p style="font-size: 20px; line-height: 1.35;">Whole-slide zoom remains a regression because it shrinks the custom shell together with the content.</p>',
+        '  </section>',
+        '</div>',
+        '',
+    ].join('\n');
+}
+
 function createCompetingSlotZonesStressDeck() {
     return [
         '---',
@@ -506,6 +541,36 @@ const FIXTURES = [
         expectedMermaidBlocks: 0,
     },
     {
+        id: 'custom-single-surface-component-stress',
+        sourcePath: 'custom-single-surface-component-stress.md',
+        sourceMarkdown: createCustomSingleSurfaceComponentStressDeck(),
+        files: [
+            {
+                path: 'layouts/surface-shell.vue',
+                content: [
+                    '<template>',
+                    '  <main class="notemd-surface-shell">',
+                    '    <slot />',
+                    '  </main>',
+                    '</template>',
+                    '',
+                    '<style>',
+                    '.notemd-surface-shell {',
+                    '  height: 100%;',
+                    '  padding: 56px 64px;',
+                    '  overflow: hidden;',
+                    '}',
+                    '</style>',
+                ].join('\n'),
+            },
+        ],
+        expectPatch: true,
+        expectSingleSurfaceTransform: true,
+        expectNoWholeSlideZoom: true,
+        expectedLayout: 'surface-shell',
+        expectedMermaidBlocks: 0,
+    },
+    {
         id: 'competing-slot-zones-stress',
         sourcePath: 'competing-slot-zones-stress.md',
         sourceMarkdown: createCompetingSlotZonesStressDeck(),
@@ -764,6 +829,14 @@ function assertFixtureReport(fixture, report, sourceMarkdown) {
             assert(deckMarkdown.includes('data-notemd-slot-zone="left"'), `${fixture.id}: slot owner wrapper was not preserved`);
         }
         assert(deckMarkdown.includes('<Transform :scale='), `${fixture.id}: component-heavy slot was not wrapped in a measured Transform`);
+    }
+    if (fixture.expectSingleSurfaceTransform) {
+        assert(deckMarkdown.includes('<Transform :scale='), `${fixture.id}: single component surface was not wrapped in a measured Transform`);
+        assert(!deckMarkdown.includes('data-notemd-slot-zone='), `${fixture.id}: single component surface should not require slot owner wrappers`);
+        assert(deckMarkdown.includes('Single surface regression fingerprint'), `${fixture.id}: single component surface content disappeared`);
+    }
+    if (fixture.expectedLayout) {
+        assert(deckMarkdown.includes(`layout: ${fixture.expectedLayout}`), `${fixture.id}: expected layout ${fixture.expectedLayout} did not survive convergence`);
     }
     if (fixture.expectedTransformZones) {
         for (const zoneName of fixture.expectedTransformZones) {

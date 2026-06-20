@@ -3,7 +3,7 @@ date: 2026-06-20
 last_updated: 2026-06-20
 topic: slidev-layout-quality-and-canvas-roadmap
 canonical: false
-status: stage7-font-safe-slot-and-code-convergence-implemented
+status: stage9-custom-single-surface-transform-fixture-implemented
 ---
 
 # Slidev Layout Quality And Canvas Roadmap
@@ -26,7 +26,7 @@ Current landed facts:
 8. `SlideLayoutPlan` is injected into deterministic outline generation, one-shot deck generation, and outline-continuation generation.
 9. The real `docs/architecture.zh-CN.md` strict standalone run is the recurring acceptance source for actual export behavior.
 
-The current slice adds font-safe slot and code convergence on top of the explicit CSS asset dependency graph copying:
+The current slice adds the Stage 9 custom single-surface convergence fixture on top of Mermaid measured-fit ownership, font-safe slot/code convergence, and explicit CSS asset dependency graph copying:
 
 1. Markdown images, HTML media/link/srcset attributes, and Slidev frontmatter local file keys are copied into the prepared deck workspace.
 2. Local CSS files explicitly referenced by the deck are parsed for local `url(...)` dependencies and local `@import` stylesheet chains.
@@ -42,6 +42,7 @@ The current slice adds font-safe slot and code convergence on top of the explici
 12. Multiple component-heavy named slots that cannot be locally transformed without unreadable text are split into independent default canvases while preserving `data-notemd-slot-zone` evidence.
 13. Table/code structural splitting now also triggers when the font floor rejects zoom, and chunk count uses the measured fit factor instead of only the coarse readable-scale floor.
 14. Generated Mermaid slides no longer receive line-count seed zoom and no longer keep LLM-chosen Mermaid zoom; rendered audit owns any measured Mermaid zoom or `mermaidFit` review state. Existing user-authored Slidev decks still keep their explicit source settings in isolated working copies.
+15. Bounded raw HTML/component single-surface custom layouts can now receive a measured local `<Transform>` without requiring slot-owner wrappers, while existing `<Transform>` wrappers on slot and non-slot surfaces block follow-up whole-slide zoom so scale does not compound.
 
 Closeout evidence:
 
@@ -54,12 +55,14 @@ Closeout evidence:
 7. The real Stage 7 report is `ok = true`, uses Jacob's local Slidev fork, loads `/home/jacob/slidev/skills/slidev` with 52 references, outputs native standalone HTML, preserves all 3 Mermaid fences, and keeps hard overflow and low effective font at zero. The exported deck is archived at `/home/jacob/slidev-export-review/2026-06-20-font-safe-real/architecture.zh-CN.slidev.md`.
 8. Historical generated `docs/export/test-slidev-*`, `docs/export/test-slidev.pdf`, `docs/export/test-slidev-video.mp4`, and old `docs/export/slides/` artifacts are removed from Git tracking; future generated outputs should stay as external evidence packages unless explicitly reviewed for commit.
 9. Real Stage 8 `architecture.zh-CN.md` strict native standalone archive: `/home/jacob/slidev-export-review/2026-06-20-mermaid-measured-fit-real/`. The report is `ok = true`, uses `/home/jacob/slidev/packages/slidev/bin/slidev.mjs`, loads `/home/jacob/slidev/skills/slidev` with 52 references, preserves 3/3 Mermaid fences, strips generated Mermaid zoom before rendered audit, and closes with `hardOverflowCount = 0`, `lowEffectiveFontCount = 0`, `postPatchCount = 4`, `mermaidFitReviewCount = 3`, `mermaidLowZoomCount = 2`, and `mermaidManualReviewCount = 1`.
+10. Stage 9 fixture archive: `/home/jacob/slidev-export-review/2026-06-20-stage9-custom-single-surface-fixtures/`. It includes `custom-single-surface-component-stress`: a custom `layout: surface-shell` deck with one oversized raw HTML/component surface and no slot owner markers. The production fixture converges with a measured local `<Transform>` only, keeps the custom layout frontmatter, does not introduce `data-notemd-slot-zone`, does not stack whole-slide `zoom`, and closes with `hardOverflowCount = 0`, `lowEffectiveFontCount = 0`, and `postPatchCount = 1`.
+11. Real Stage 9 `architecture.zh-CN.md` strict native standalone archive: `/home/jacob/slidev-export-review/2026-06-20-stage9-architecture-real/`. The report is `ok = true`, uses `/home/jacob/slidev/packages/slidev/bin/slidev.mjs`, loads `/home/jacob/slidev/skills/slidev` with 52 references, outputs native standalone HTML, preserves 3/3 Mermaid fences with `changedFenceIndexes = []`, and closes with `hardOverflowCount = 0`, `lowEffectiveFontCount = 0`, `postPatchCount = 4`, `mermaidLowZoomCount = 2`, and `mermaidManualReviewCount = 1`. The reviewable deck is `architecture.zh-CN.stage9.slidev.md`.
 
 ## Mermaid Boundary
 
 The Mermaid rule is stricter than the table/code/prose rule.
 
-One source Mermaid fence remains one source Mermaid fence. The workflow must not split one user-provided Mermaid diagram into several generated diagrams, must not rewrite the diagram body to force layout success, and must not treat a count-only match as enough. Source preparation rejects one-shot and outline-continuation LLM deck candidates that change Mermaid fence count, order, metadata, or body text before `_slidev-sources` is written. It also strips generated Mermaid slide `zoom`, so a fixed heuristic or LLM choice cannot pre-decide the fit. The verifier then compares each source Mermaid fence against the exported deck fence; changed content, order, fence metadata, or split diagrams must fail the report.
+One source Mermaid fence remains one source Mermaid fence. The workflow must not split one user-provided Mermaid diagram into several generated diagrams, must not rewrite the diagram body or fence metadata to force layout success, and must not treat a count-only match as enough. Source preparation rejects one-shot and outline-continuation LLM deck candidates that change Mermaid fence count, order, metadata, or body text before `_slidev-sources` is written. It also strips generated Mermaid slide `zoom`, so a fixed heuristic or LLM choice cannot pre-decide the fit. The verifier then compares each source Mermaid fence against the exported deck fence; changed content, order, fence metadata, or split diagrams must fail the report.
 
 Mixed Mermaid/prose slides are handled differently from Mermaid-only slides. Low whole-slide zoom is not acceptable for mixed content because prose becomes unreadable. The allowed repair is to move only non-Mermaid prose/list content to a readable slide while keeping the Mermaid fence byte-stable on a diagram-focused slide. If that move is not safe for the layout, the patcher should block low whole-slide zoom and surface review evidence instead of silently shrinking mixed content.
 
@@ -75,10 +78,11 @@ Mermaid-only slides may use measured low zoom to keep the full preserved diagram
 | Standalone must be real standalone | `actualMode`, `requiresLocalServer`, `loaderGaps`, and strict gate are reported | Keep server-script fallback explicit |
 | Test export files must not enter main | Generated exports are archived outside the repository and ignored under `docs/export` | Commit only reusable docs/tests/source changes |
 | Zoom must come from measurement | Generated Mermaid zoom is stripped before `_slidev-sources`; overflow patching derives scale from rendered geometry and is bounded by measured font floors | Continue treating low zoom as a risk signal, not a default solution |
-| Mermaid content must not be modified | Prompt, plan, patcher, tests, source-preparation LLM candidate rejection, and verifier are source-preserving | Keep exact fence comparison as a required gate |
+| Mermaid content must not be modified | Prompt, plan, patcher, tests, source-preparation LLM candidate rejection, and verifier are source-preserving | Keep exact fence comparison as a required gate; do not add Mermaid auto-splitting |
 | Mixed Mermaid/prose must not use low whole-slide zoom | Only non-Mermaid content may move; Mermaid fences remain byte-stable | Improve outer layout and prose movement only |
 | Local assets must not disappear in standalone output | Markdown, HTML, frontmatter, CSS `url(...)`, CSS `@import`, and local media dependencies are copied explicitly; rejected local CSS references are sanitized in copied CSS | Extend only through explicit dependency parsing, not whole-directory copying |
 | Remote fonts must not be required for verification | Prepared decks default to `fonts.provider: none` | Use explicit local assets for branded fonts |
+| Custom component surfaces without stable slot owners need convergence evidence | Bounded raw HTML/component single-surface slides can receive a measured local `<Transform>` without slot wrappers; existing Transform blocks whole-slide zoom compounding | Keep richer Vue/custom layouts conservative until a fixture proves a safe owner surface |
 
 ## Architecture Direction
 
@@ -95,7 +99,8 @@ Do not collapse this back into a prompt-only workflow. The better direction is t
 2. Continue using clean-room world-rect and viewport-fit ideas from `ref/infinite-canvas`, without copying AGPL-3.0 code or embedding an infinite-canvas UI into Slidev export.
 3. Model fixed slide safe rectangles, content bounds, local transform ownership, and readable scale thresholds explicitly.
 4. For table/code/prose, prefer structural splitting when quality gates say zoom would harm readability.
-5. For Mermaid, preserve the source fence and surface `manual-review` when complete visibility and projector readability cannot both be proven automatically.
+5. For Mermaid, preserve the source fence and surface `manual-review` when complete visibility and projector readability cannot both be proven automatically; do not solve that tension by decomposing the user's diagram.
+6. For custom component surfaces, prefer local measured transforms on a single bounded surface over shrinking the whole custom shell.
 
 ## Verification Baseline
 
@@ -114,7 +119,7 @@ Required verification before closing a slice:
 
 The next useful slices are:
 
-1. Add more real failure fixtures for custom Vue layouts, unsupported layouts without stable owners, and single component surfaces that cannot be safely paginated or transformed.
+1. Add more real failure fixtures for richer custom Vue layouts and unsupported layouts without stable owners; Stage 9 covers only bounded raw HTML/component single-surface slides, not arbitrary component trees.
 2. Keep Mermaid source-preserved fit review as a first-class report surface; do not introduce automatic Mermaid splitting.
 3. Extend parser-light code splitting only where it preserves semantic blocks better than line budgets.
 4. Consider an upstream Slidev skill PR only for general guardrails: complete references, source-preserved Mermaid fit review, browser-check expectations, standalone/fallback distinction, and no automatic user-diagram splitting.

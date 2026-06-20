@@ -576,10 +576,12 @@ export function patchDeckWithLayoutAudit(
 			continue;
 		}
 
-		if (hasSupportedSlotMarkers(currentSlide) && containsTransformWrapper(currentSlide.split(/\r?\n/))) {
+		if (containsTransformWrapper(currentSlide.split(/\r?\n/))) {
 			blockedSlides.push({
 				slide: audit.slide,
-				reason: 'existing slot Transform will not be compounded with whole-slide zoom',
+				reason: hasSupportedSlotMarkers(currentSlide)
+					? 'existing slot Transform will not be compounded with whole-slide zoom'
+					: 'existing Transform will not be compounded with whole-slide zoom',
 			});
 			continue;
 		}
@@ -1768,8 +1770,8 @@ function wrapOverflowingSlideSurfaceInTransform(
 		return null;
 	}
 
-	const surface = extractPatchableSlideSurface(slideMarkdown);
-	if (!surface || !containsTransformableComponentSyntax(surface.bodyLines)) {
+	const surface = extractTransformableComponentSurface(slideMarkdown);
+	if (!surface) {
 		return null;
 	}
 
@@ -1791,6 +1793,40 @@ function extractPatchableSlideSurface(slideMarkdown: string): PatchableSlideSurf
 		return null;
 	}
 	if (bodyLines.some(line => /^::[\w-]+::$/.test(line.trim()) || /^:::\s*/.test(line.trim()) || /<(Transform|v-click|v-switch)\b/i.test(line.trim()))) {
+		return null;
+	}
+
+	return {
+		frontmatterLines,
+		bodyLines,
+	};
+}
+
+function extractTransformableComponentSurface(slideMarkdown: string): PatchableSlideSurface | null {
+	const normalizedSlide = normalizeSlideFrontmatter(slideMarkdown);
+	if (normalizedSlide.trimStart().startsWith('---')) {
+		return null;
+	}
+
+	const lines = normalizedSlide.split(/\r?\n/);
+	const frontmatterEnd = findSlideFrontmatterEnd(lines);
+	const frontmatterLines = frontmatterEnd > 0 ? lines.slice(0, frontmatterEnd + 1) : [];
+	const bodyLines = frontmatterEnd > 0 ? lines.slice(frontmatterEnd + 1) : lines;
+	const trimmedBodyLines = trimOuterBlankLines(bodyLines);
+	if (!containsTransformableComponentSyntax(trimmedBodyLines)) {
+		return null;
+	}
+	if (trimmedBodyLines.some(line => !isRawHtmlSurfaceLine(line))) {
+		return null;
+	}
+	if (trimmedBodyLines.some(line =>
+		/^::[\w-]+::$/.test(line.trim())
+		|| /^:::\s*/.test(line.trim())
+		|| /<(Transform|v-click|v-switch)\b/i.test(line.trim())
+		|| /^(```+|~~~+)/.test(line.trim())
+		|| isMarkdownTableRow(line)
+		|| /^!\[.*\]\(.+\)/.test(line.trim())
+	)) {
 		return null;
 	}
 
@@ -3546,6 +3582,13 @@ function collectSimpleSlideBlocks(lines: string[]): string[][] {
 
 function containsTransformableComponentSyntax(lines: string[]): boolean {
 	return lines.some(line => /^\s*<[A-Za-z][\w-]*(?:\s|>|\/)/.test(line.trim()) || /^\s*<\/[A-Za-z][\w-]*\s*>/.test(line.trim()));
+}
+
+function isRawHtmlSurfaceLine(line: string): boolean {
+	const trimmed = line.trim();
+	return trimmed.length === 0
+		|| /^<!--.*-->$/.test(trimmed)
+		|| /^<\/?[A-Za-z][\w-]*(?:\s|>|\/)/.test(trimmed);
 }
 
 function containsTransformWrapper(lines: string[]): boolean {

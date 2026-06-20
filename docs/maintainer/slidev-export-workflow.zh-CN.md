@@ -77,6 +77,14 @@ npm run verify:slidev-layout-fixtures -- --archive /home/jacob/slidev-export-rev
 /home/jacob/slidev-export-review/2026-06-20-expanded-layout-fixtures/
 ```
 
+当前 Stage 9 fixture archive 为：
+
+```text
+/home/jacob/slidev-export-review/2026-06-20-stage9-custom-single-surface-fixtures/
+```
+
+其中包含 `custom-single-surface-component-stress`，用于证明自定义 layout 内一个有界 raw HTML/component surface 可以通过 measured local `<Transform>` 收敛，不需要 slot-owner wrapper，也不能再叠加整页 zoom。
+
 如果本机已有真实 Obsidian 桌面会话，也应补一层真实命令路径 smoke：
 
 ```bash
@@ -112,8 +120,9 @@ docs/maintainer/slidev-standalone-acceptance-2026-06-18.zh-CN.md
 14. 严格 native standalone 收口时，`htmlExport.requiresLocalServer: false`
 15. 严格 native standalone 收口时，`htmlExport.standaloneAttempt.loaderGaps: []`
 16. 严格 native standalone 收口时，`standaloneGate.passed: true`
-17. 源文件包含 Mermaid fence 时，除非人工显式改源文档，否则导出 deck 的 Mermaid fence 数量和逐 fence 内容必须与源文档一致。
+17. 源文件包含 Mermaid fence 时，除非人工显式改源文档，否则导出 deck 的 Mermaid fence 数量、顺序、fence metadata 与逐 fence 正文必须与源文档一致。
 18. Mermaid/prose 混排页不能保留低整页 zoom；如果可以分离，Mermaid fence 原样保留在 Mermaid 专属页，正文移动到可读页。
+19. 已有局部 `<Transform>` 的页面，包括非 slot 的 single-surface wrapper，不能在后续 retry 中再叠加整页 `zoom`。
 
 任一条件失败，都应先修 NoteMD 工作流，再相信导出文件。
 
@@ -177,7 +186,7 @@ mermaidSourcePreservation.deckFenceCount
 mermaidSourcePreservation.changedFenceIndexes
 ```
 
-对 Mermaid 来说，`mermaidFit.status` 是源图保持证据，不是允许自动改写用户图的指令。`fits` 表示保留源图后满足当前渲染阈值；`source-preserved-fit-review` 表示 deck 结构上成立，但由于低 zoom 或边距偏紧，需要人工看图确认演示质量；`manual-review` 表示保留源图与投影可读性存在冲突，流程必须暴露这个事实，而不是静默把一张图拆成多张图。
+对 Mermaid 来说，`mermaidFit.status` 是源图保持证据，不是允许自动改写或拆分用户图的指令。`fits` 表示保留源图后满足当前渲染阈值；`source-preserved-fit-review` 表示 deck 结构上成立，但由于低 zoom 或边距偏紧，需要人工看图确认演示质量；`manual-review` 表示保留源图与投影可读性存在冲突，流程必须暴露这个事实，而不是静默把一张图拆成多张图。
 
 `mermaidSourcePreservation` 是更严格的结构门禁：源笔记包含 Mermaid fences 时，verifier 会逐个比较导出 Mermaid fence 与源 fence。只做到数量一致不够；内容变化、顺序变化、fence metadata 变化，或把一个源图改写成多图，都必须让报告失败。
 
@@ -225,17 +234,19 @@ mermaidSourcePreservation.changedFenceIndexes
 36. 2026-06-20 font-safe slot/code convergence 验收包位于 `/home/jacob/slidev-export-review/2026-06-20-competing-slot-zones-final-fixtures-v2/`；slot zone audit 现在报告 zone 内最小 effective font 与最低可读 Transform scale，局部 `<Transform>` 和整页 `zoom` 都会拒绝跌破字体下限的 scale。多个 component-heavy named slot 若无法以可读 scale 局部缩放，会分页为独立默认画布并保留 `data-notemd-slot-zone` 证据。
 37. table/code 结构拆分现在会在字体下限禁止 `zoom` 时触发，chunk 数按实测 fit factor 估算；`source-layout-stress` 重新验证为 `ok: true`，使用 `/home/jacob/slidev/skills/slidev` 与 52 个 references，最终 `hardOverflowCount = 0`、`lowEffectiveFontCount = 0`。
 38. 同批真实 `architecture.zh-CN.md` strict standalone 验收包位于 `/home/jacob/slidev-export-review/2026-06-20-font-safe-real/`；报告为 `ok = true`，使用本地 Slidev fork，加载 52 个 skill references，`actualMode = "standalone"`，`requiresLocalServer = false`，`mermaidSourcePreservation.passed = true`，并归档了可审查的 `architecture.zh-CN.slidev.md`。
+39. bounded raw HTML/component single-surface custom layout 现在可以通过 measured local `<Transform>` 收敛，不需要 `data-notemd-slot-zone` wrapper。`custom-single-surface-component-stress` fixture 会检查最终 deck 保留 `layout: surface-shell`、保留 component surface 内容，并拒绝局部 Transform 后继续叠加整页 `zoom` 的回归。
+40. Stage 9 真实 `architecture.zh-CN.md` strict standalone 验收包位于 `/home/jacob/slidev-export-review/2026-06-20-stage9-architecture-real/`；报告为 `ok = true`，使用本地 Slidev fork，加载 52 个 skill references，输出 native standalone HTML，3 个 Mermaid fence 均保持 `changedFenceIndexes = []`，并归档了可审查的 `architecture.zh-CN.stage9.slidev.md`。
 
 当前限制：
 
 1. effective font measurement 现在已经覆盖常见局部 CSS transform / scale / zoom 链，但复杂 Vue layout 仍必须以浏览器 rendered audit 为准，不能退回静态 Markdown 估算；
-2. 超出当前支持集的 richer custom/component-heavy Slidev layout 仍保持保守/manual-review 路径，尤其是缺少稳定 owner surface、不能安全分页、或单个非 Mermaid component surface 既不能结构拆分又不能可读缩放的情况；多个 named slot 竞争且 unsafe 的路径已由 slot 分页 fixture 覆盖；
+2. 超出当前支持集的 richer custom/component-heavy Slidev layout 仍保持保守/manual-review 路径，尤其是缺少稳定 owner surface 或不能安全分页的情况；Stage 9 只覆盖有界 raw HTML/component single-surface，不证明任意 Vue component tree 都能安全 Transform；多个 named slot 竞争且 unsafe 的路径已由 slot 分页 fixture 覆盖；
 3. native standalone 现在已有严格 gate，且真实 architecture fixture 已通过；但正确性仍依赖 post-build sanity detection，server-script fallback 只是兼容通道，不能再被算作 native standalone 成功；
 4. full-deck Playwright 验证故意比代表性抽样更慢，后续优化方向应是提高 patch 收敛能力，而不是退回弱审计；
 5. `obsidian command id=notemd:export-slides` 目前仍只能算 dispatch-level smoke，因为 Obsidian CLI 没有暴露导出完成握手信号。
 6. Mermaid `manual-review` 证据不是 hard gate failure。它是在“不修改原 Mermaid 内容”和“自动保证投影级可读”不能同时被证明时，正确暴露给维护者的透明结果。
 7. code splitting 仍是 parser-light；TypeScript/JavaScript/Python/Rust 已有 top-level tokenizer，但完整 AST 拆分与更多语言专用 splitter 仍是后续工作。
-8. Mermaid 不拆图约束不等于 Mermaid 演示质量自动合格。超大源图如果只能靠低 zoom 保持完整，流程应暴露 `source-preserved-fit-review` 或 `manual-review`，而不是静默改图。
+8. Mermaid 不拆图约束不等于 Mermaid 演示质量自动合格。超大源图如果只能靠低 zoom 保持完整，流程应暴露 `source-preserved-fit-review` 或 `manual-review`，而不是静默改图或拆图。
 9. Stage 5/6 full-deck fixtures 已覆盖长表、宽表、混合代码、Mermaid 源图保持 fit、component-heavy slot Transform 边界、Mermaid/prose 非图内容移动、本地图片资产、嵌套 slot component、超宽表、frontmatter background/image/favicon、跨目录资产、CSS `url(...)` 图片/字体依赖、本地 CSS `@import` 链、本地 video/audio/track 资产与离线字体边界，但仍不是 exhaustive；后续真实文档若出现复杂 Vue component 或 unsupported layout 失败，应继续沉淀为 fixture。
 
 ## 输出策略

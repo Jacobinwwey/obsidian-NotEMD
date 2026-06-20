@@ -77,6 +77,14 @@ The current expanded fixture archive is:
 /home/jacob/slidev-export-review/2026-06-20-expanded-layout-fixtures/
 ```
 
+The current Stage 9 fixture archive is:
+
+```text
+/home/jacob/slidev-export-review/2026-06-20-stage9-custom-single-surface-fixtures/
+```
+
+It includes `custom-single-surface-component-stress`, which proves a bounded raw HTML/component surface inside a custom layout can converge through a measured local `<Transform>` without slot-owner wrappers or whole-slide zoom stacking.
+
 For a live desktop-session smoke against the real Obsidian command path:
 
 ```bash
@@ -112,8 +120,9 @@ Treat the command as passing only when the final JSON report has:
 14. for strict native standalone closure, `htmlExport.requiresLocalServer: false`
 15. for strict native standalone closure, `htmlExport.standaloneAttempt.loaderGaps: []`
 16. for strict native standalone closure, `standaloneGate.passed: true`
-17. when the source contains Mermaid fences, the exported deck preserves the same Mermaid fence count and exact fence content unless a human explicitly edits the source.
+17. when the source contains Mermaid fences, the exported deck preserves the same Mermaid fence count, order, fence metadata, and exact fence body unless a human explicitly edits the source.
 18. mixed Mermaid/prose slides must not retain low whole-slide zoom; if separation is possible, the Mermaid fence stays byte-stable on a Mermaid-focused slide and only non-Mermaid prose moves to a readable slide.
+19. existing local `<Transform>` wrappers, including non-slot single-surface wrappers, must not be compounded with later whole-slide `zoom`.
 
 If any check fails, fix the NoteMD workflow before relying on the exported files.
 
@@ -177,7 +186,7 @@ mermaidSourcePreservation.deckFenceCount
 mermaidSourcePreservation.changedFenceIndexes
 ```
 
-For Mermaid, `mermaidFit.status` is source-preserving evidence, not permission to rewrite a user diagram. `fits` means the preserved diagram satisfies the current rendered thresholds. `source-preserved-fit-review` means the deck remains structurally valid but should be visually reviewed, usually because zoom is low or margins are tight. `manual-review` means the preserved source diagram and presentation readability are in tension; the workflow must surface that fact instead of silently splitting the diagram.
+For Mermaid, `mermaidFit.status` is source-preserving evidence, not permission to rewrite or split a user diagram. `fits` means the preserved diagram satisfies the current rendered thresholds. `source-preserved-fit-review` means the deck remains structurally valid but should be visually reviewed, usually because zoom is low or margins are tight. `manual-review` means the preserved source diagram and presentation readability are in tension; the workflow must surface that fact instead of silently splitting the diagram.
 
 `mermaidSourcePreservation` is a stricter structural gate: when the source note has Mermaid fences, the verifier compares each exported Mermaid fence against the corresponding source fence. A count-only match is not enough; changed content, reordered fences, changed fence metadata, or one source diagram rewritten as several diagrams must fail the report.
 
@@ -225,17 +234,19 @@ Current landed truth as of 2026-06-20:
 36. the 2026-06-20 font-safe slot/code convergence archive is `/home/jacob/slidev-export-review/2026-06-20-competing-slot-zones-final-fixtures-v2/`; slot-zone audit now records each zone's minimum effective font and minimum readable local Transform scale, and both local `<Transform>` and whole-slide `zoom` reject scale values that would push non-Mermaid text below the font floor.
 37. multiple component-heavy named slots that cannot be locally transformed at a readable scale are split into independent default canvases while preserving `data-notemd-slot-zone` evidence; table/code structural splitting also triggers when the font floor rejects zoom, with chunk count derived from the measured fit factor.
 38. the matching real `architecture.zh-CN.md` strict standalone archive is `/home/jacob/slidev-export-review/2026-06-20-font-safe-real/`; the report is `ok = true`, uses Jacob's local Slidev fork, loads 52 skill references, outputs native standalone HTML, passes Mermaid source preservation, and archives the reviewable `architecture.zh-CN.slidev.md`.
+39. bounded raw HTML/component single-surface custom layouts can now use measured local `<Transform>` convergence without `data-notemd-slot-zone` wrappers. The `custom-single-surface-component-stress` fixture keeps `layout: surface-shell`, preserves the component surface content, and rejects the previous regression where a local Transform was compounded with whole-slide `zoom`.
+40. the Stage 9 real `architecture.zh-CN.md` strict standalone archive is `/home/jacob/slidev-export-review/2026-06-20-stage9-architecture-real/`; the report is `ok = true`, uses Jacob's local Slidev fork, loads 52 skill references, outputs native standalone HTML, preserves all 3 Mermaid fences with `changedFenceIndexes = []`, and archives the reviewable `architecture.zh-CN.stage9.slidev.md`.
 
 Current limitation:
 
 1. effective font measurement now accounts for common local CSS transform/scale/zoom chains, but the browser rendered audit remains the authority for complex Vue layouts; do not replace it with static Markdown estimates;
-2. richer custom/component-heavy Slidev layouts beyond the current supported structural set still remain conservative/manual-review paths, especially when no stable owner surface exists, content cannot be safely paginated, or a single non-Mermaid component surface cannot be structurally split or transformed within the font floor; multiple unsafe named slots are now covered by the slot pagination fixture;
+2. richer custom/component-heavy Slidev layouts beyond the current supported structural set still remain conservative/manual-review paths, especially when no stable owner surface exists or content cannot be safely paginated. Stage 9 covers only bounded raw HTML/component single-surface slides; it is not proof that arbitrary Vue component trees can be transformed safely;
 3. native standalone export now has a strict gate and the real architecture fixture passes it, but correctness still depends on post-build sanity detection; server-script fallback remains a compatibility lane and must not be counted as native standalone success;
 4. full-deck Playwright verification is deliberately slower than representative sampling, so future work should improve convergence rather than weaken the audit;
 5. `obsidian command id=notemd:export-slides` is still only a dispatch-level smoke because the Obsidian CLI does not expose an export-complete handshake.
 6. Mermaid `manual-review` evidence is not a hard gate failure. It is the correct fail-transparent outcome when preserving the original Mermaid source and guaranteeing projector-level readability cannot both be proven automatically.
 7. code splitting is still parser-light. TypeScript/JavaScript/Python/Rust now have top-level tokenizers, but full AST splitting and more language-specific splitters remain future work.
-8. The Mermaid no-split constraint does not mean Mermaid presentation quality automatically passes. If a very large source diagram can only remain complete at low zoom, the workflow should surface `source-preserved-fit-review` or `manual-review` instead of silently rewriting the diagram.
+8. The Mermaid no-split constraint does not mean Mermaid presentation quality automatically passes. If a very large source diagram can only remain complete at low zoom, the workflow should surface `source-preserved-fit-review` or `manual-review` instead of silently rewriting or splitting the diagram.
 9. Stage 5/6 full-deck fixtures now cover long-table, wide-table, mixed-code, Mermaid source-preserved fit, component-heavy slot Transform boundaries, mixed Mermaid/prose non-diagram content movement, local image assets, nested slot components, ultra-wide tables, frontmatter background/image/favicon assets, cross-directory assets, CSS `url(...)` image/font dependencies, local CSS `@import` chains, local video/audio/track assets, and offline font-provider boundaries, but they are not exhaustive; add more fixture sources for complex Vue components and unsupported layouts as they fail in real documents.
 
 ## Output Policy

@@ -2322,6 +2322,107 @@ describe('slidevLayoutAudit', () => {
 		expect(patched.deckMarkdown).not.toContain('zoom: 0.88');
 	});
 
+	test('wraps a component-heavy custom single-surface layout in Transform without widening structural split support', () => {
+		const audit: SlidevLayoutAudit = {
+			slide: 2,
+			safeRect: { left: 51.2, top: 43.2, right: 1228.8, bottom: 676.8, width: 1177.6, height: 633.6 },
+			contentBounds: { left: 48, top: 52, right: 1234, bottom: 820, width: 1186, height: 768 },
+			pageScale: 1,
+			elementKinds: ['other'],
+			findings: [
+				{
+					kind: 'overflow',
+					target: 'content',
+					message: 'Slide content exceeds the safe visible rectangle',
+					recommendedPatch: 'split-slide',
+					recommendedScale: 0.86,
+				},
+				{
+					kind: 'overflow',
+					target: 'other',
+					message: 'component surface exceeds the safe visible rectangle',
+					recommendedPatch: 'reduce-zoom',
+					recommendedScale: 0.86,
+				},
+			],
+		};
+		const deck = [
+			'---',
+			'theme: default',
+			'---',
+			'',
+			'# Intro',
+			'',
+			'---',
+			'layout: telemetry-shell',
+			'---',
+			'',
+			'<div class="surface-grid">',
+			'  <MetricCard title="Queue A" value="128" />',
+			'  <MetricCard title="Queue B" value="256" />',
+			'  <MetricCard title="Queue C" value="512" />',
+			'</div>',
+		].join('\n');
+
+		const patched = patchDeckWithLayoutAudit(deck, [audit]);
+
+		expect(patched.changed).toBe(true);
+		expect(patched.blockedSlides).toEqual([]);
+		expect(countSlideDeckSlides(patched.deckMarkdown)).toBe(2);
+		expect(patched.deckMarkdown).toContain('layout: telemetry-shell');
+		expect(patched.deckMarkdown).toContain('<Transform :scale="0.86" origin="top left">');
+		expect(patched.deckMarkdown).toContain('<MetricCard title="Queue C" value="512" />');
+		expect(patched.deckMarkdown).not.toContain('zoom: 0.86');
+	});
+
+	test('does not compound a single-surface Transform with whole-slide zoom', () => {
+		const audit: SlidevLayoutAudit = {
+			slide: 2,
+			safeRect: { left: 51.2, top: 43.2, right: 1228.8, bottom: 676.8, width: 1177.6, height: 633.6 },
+			contentBounds: { left: 48, top: 52, right: 1234, bottom: 820, width: 1186, height: 768 },
+			pageScale: 0.86,
+			elementKinds: ['other'],
+			findings: [
+				{
+					kind: 'overflow',
+					target: 'other',
+					message: 'component surface still exceeds the safe visible rectangle',
+					recommendedPatch: 'reduce-zoom',
+					recommendedScale: 0.9,
+				},
+			],
+		};
+		const deck = [
+			'---',
+			'theme: default',
+			'---',
+			'',
+			'# Intro',
+			'',
+			'---',
+			'layout: telemetry-shell',
+			'---',
+			'',
+			'<Transform :scale="0.86" origin="top left">',
+			'<div class="surface-grid">',
+			'  <MetricCard title="Queue A" value="128" />',
+			'</div>',
+			'</Transform>',
+		].join('\n');
+
+		const patched = patchDeckWithLayoutAudit(deck, [audit]);
+
+		expect(patched.changed).toBe(false);
+		expect(patched.blockedSlides).toEqual([
+			expect.objectContaining({
+				slide: 2,
+				reason: 'existing Transform will not be compounded with whole-slide zoom',
+			}),
+		]);
+		expect(patched.deckMarkdown).toContain('<Transform :scale="0.86" origin="top left">');
+		expect(patched.deckMarkdown).not.toContain('zoom: 0.774');
+	});
+
 	test('blocks component-heavy surface zoom when measured scaling would violate the font floor', () => {
 		const audit: SlidevLayoutAudit = {
 			slide: 2,
