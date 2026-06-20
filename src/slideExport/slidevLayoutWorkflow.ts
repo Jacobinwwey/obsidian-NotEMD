@@ -615,6 +615,10 @@ export async function collectRenderedSlideMeasurement(page: any, slide: number):
 				const zoneElementRects = measuredElements
 					.filter(entry => entry.ownerElement === ownerElement && !entry.measured.slotOwner)
 					.map(entry => entry.measured.rect);
+				const zoneEffectiveFontSamples = measuredElements
+					.filter(entry => entry.ownerElement === ownerElement && !entry.measured.slotOwner)
+					.map(entry => entry.measured.effectiveMinFontPx)
+					.filter((value): value is number => typeof value === 'number' && Number.isFinite(value) && value > 0);
 				const contentBounds = unionRects(zoneElementRects.length > 0 ? zoneElementRects : [ownerRect]);
 				if (contentBounds) {
 					contentBounds.width = contentBounds.right - contentBounds.left;
@@ -626,6 +630,7 @@ export async function collectRenderedSlideMeasurement(page: any, slide: number):
 					name: zoneName,
 					textLength: textValue.length,
 					textPreview: textValue.length > 0 ? toTextPreview(textValue) : undefined,
+					effectiveMinFontPx: minMetric(zoneEffectiveFontSamples),
 					ownerRect,
 					contentBounds,
 					scrollWidth: ownerElement.scrollWidth || ownerRect.width,

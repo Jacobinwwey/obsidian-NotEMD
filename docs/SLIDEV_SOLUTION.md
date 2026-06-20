@@ -156,7 +156,7 @@ The current render-feedback loop is now:
 2. `SlideLayoutPlan` estimates dense Markdown blocks before generation and feeds a deterministic layout budget into outlines and LLM prompts.
 3. `scripts/verify-slidev-export-workflow.cjs` and the product `exportSlidesCommand()` now share the same convergence workflow, which renders the built HTML in Playwright, waits for visible slide content, and measures the actual `slidev-page` root plus overflow-prone elements.
 4. `SlidevOverflowAudit` classifies `overflow`, `unreadable-scale`, `render-error`, `low-effective-font`, `tight-margin`, and `low-content-utilization` from rendered geometry, records source-preserved Mermaid fit status, and also records slot-zone owner rects, content bounds, scroll overflow, and recommended local transform scales instead of relying only on Markdown heuristics.
-5. `SlidevDeckPatch` now applies overflow-derived slide `zoom` values, zone-local `<Transform>` scales derived from detected out-of-bounds geometry, and escalates to structural patching for tables, code, or prose when shrinking further would make the slide unreadable or when rendered quality findings recommend splitting.
+5. `SlidevDeckPatch` now applies overflow-derived slide `zoom` values, zone-local `<Transform>` scales derived from detected out-of-bounds geometry, and escalates to structural patching for tables, code, prose, or competing component slots when shrinking further would make the slide unreadable or when rendered quality findings recommend splitting.
 6. The current structural patcher supports:
    - simple heading + paragraph/list slides
    - Markdown tables, including row-split and width-driven column decomposition
@@ -164,6 +164,7 @@ The current render-feedback loop is now:
    - non-Mermaid fenced code blocks, with TypeScript/JavaScript/Python/Rust top-level tokenizer chunking before generic semantic-block, blank-line, or line-budget fallback
    - generic slot-marked layouts, including explicit `::default::`, supported built-in slot layouts, and custom named slots when the slot content is structurally patchable
    - unique component-heavy slot zones through local `<Transform :scale="...">` wrapping when structural splitting is unavailable
+   - multiple unsafe component-heavy named slots through slot-level pagination when local Transform scale would violate the font floor
    - first-slide deck headmatter content when structural splitting is possible
    - mixed Mermaid/prose slides by moving prose/list content away from the diagram slide while preserving each Mermaid fence unchanged
 7. The HTML exporter now records structured HTML outcomes, rejects known-bad native standalone bundles, preserves rejected native attempts as `index-standalone.failed.html`, and falls back to server-script-compatible HTML only for the compatibility path.
@@ -212,10 +213,12 @@ Current landed state:
 20. the CSS import/media fixture archive is `/home/jacob/slidev-export-review/2026-06-20-css-import-media-fixtures/`: the production fixture suite now verifies local CSS `@import` recursion, imported CSS font/background dependencies, local video/audio/track/poster assets, CSS sanitizer behavior, and rejection of out-of-scope imported stylesheets in both prepared workspace and final standalone export.
 21. source preparation now rejects both one-shot and outline-continuation LLM deck candidates that split or rewrite source Mermaid fences, then falls back to deterministic source-preserving preparation instead of writing a mutated deck.
 22. historical generated `docs/export/test-slidev-*`, `docs/export/test-slidev.pdf`, `docs/export/test-slidev-video.mp4`, and old `docs/export/slides/` artifacts are no longer tracked in `main`; reusable export guidance remains in `docs/export/README.md` and `docs/export/README.zh-CN.md`.
+23. the font-safe slot/code convergence archive is `/home/jacob/slidev-export-review/2026-06-20-competing-slot-zones-final-fixtures-v2/`: production fixtures cover unsafe competing slot pagination, font-floor zoom blocking, and fit-factor code splitting while keeping hard overflow and low effective font at zero.
+24. the matching real `architecture.zh-CN.md` strict standalone output is archived at `/home/jacob/slidev-export-review/2026-06-20-font-safe-real/`; `architecture.zh-CN.slidev.md` is the reviewable exported deck and `index-standalone.html` is the native standalone output.
 
 Current gap:
 
-1. richer custom/component-heavy Slidev layouts beyond the current supported structural set still fall back to conservative zoom/manual-review behavior, especially when multiple competing component-heavy slot zones remain near-tied even after zone-level geometry scoring but not every overflowing zone is safely transformable, or when the owner surface does not expose a stable transform/split target;
+1. richer custom/component-heavy Slidev layouts beyond the current supported structural set still fall back to conservative/manual-review behavior, especially when there is no stable owner, the content cannot be safely paginated, or a single non-Mermaid component surface cannot be structurally split or transformed within the font floor;
 2. standalone export now has a strict native gate and the real architecture fixture passes it, but correctness still depends on post-build sanity detection; server-script fallback remains a compatibility lane for future bad bundles, not evidence that native standalone passed;
 3. full-deck Playwright verification is now more correct, but noticeably slower, so future work should improve patch convergence instead of weakening the audit back to representative sampling;
 4. the Obsidian CLI can dispatch `notemd:export-slides`, but it does not expose an export-complete handshake, so host-command smoke is still weaker than the maintainer verifier.

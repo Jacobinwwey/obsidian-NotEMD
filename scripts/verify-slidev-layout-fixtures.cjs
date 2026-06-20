@@ -223,6 +223,60 @@ function createSlotComponentStressDeck() {
     ].join('\n');
 }
 
+function createCompetingSlotZonesStressDeck() {
+    return [
+        '---',
+        'theme: default',
+        'mdc: true',
+        '---',
+        '',
+        '# Competing Slot Zones Stress',
+        '',
+        '---',
+        'layout: dual-rail',
+        '---',
+        '',
+        '::summary::',
+        '',
+        '<div style="width: 760px; height: 430px; border: 1px solid #0f766e; padding: 18px; display: grid; grid-template-columns: repeat(3, 220px); gap: 16px; background: #ecfdf5; color: #064e3b;">',
+        '  <section style="border-left: 4px solid #0f766e; padding-left: 12px;">',
+        '    <h3 style="font-size: 23px; margin: 0 0 10px;">Queue</h3>',
+        '    <p style="font-size: 17px; line-height: 1.35;">Summary rail card one intentionally exceeds the named slot owner width before convergence.</p>',
+        '  </section>',
+        '  <section style="border-left: 4px solid #2563eb; padding-left: 12px;">',
+        '    <h3 style="font-size: 23px; margin: 0 0 10px;">Budget</h3>',
+        '    <p style="font-size: 17px; line-height: 1.35;">Summary rail card two must be locally transformed without changing the peer slot.</p>',
+        '  </section>',
+        '  <section style="border-left: 4px solid #b45309; padding-left: 12px;">',
+        '    <h3 style="font-size: 23px; margin: 0 0 10px;">Signal</h3>',
+        '    <p style="font-size: 17px; line-height: 1.35;">The verifier should see this as one component surface, not prose to split.</p>',
+        '  </section>',
+        '</div>',
+        '',
+        '::details::',
+        '',
+        '<div style="width: 820px; height: 450px; border: 1px solid #4338ca; padding: 18px; display: grid; grid-template-columns: repeat(4, 185px); gap: 14px; background: #eef2ff; color: #312e81;">',
+        '  <section style="border-left: 4px solid #4338ca; padding-left: 12px;">',
+        '    <h3 style="font-size: 22px; margin: 0 0 10px;">Audit</h3>',
+        '    <p style="font-size: 16px; line-height: 1.35;">Details rail card one independently overflows its named slot owner.</p>',
+        '  </section>',
+        '  <section style="border-left: 4px solid #0f766e; padding-left: 12px;">',
+        '    <h3 style="font-size: 22px; margin: 0 0 10px;">Patch</h3>',
+        '    <p style="font-size: 16px; line-height: 1.35;">Details rail card two needs its own measured Transform.</p>',
+        '  </section>',
+        '  <section style="border-left: 4px solid #b45309; padding-left: 12px;">',
+        '    <h3 style="font-size: 22px; margin: 0 0 10px;">Replay</h3>',
+        '    <p style="font-size: 16px; line-height: 1.35;">The final deck must not pick only one winner from two valid zones.</p>',
+        '  </section>',
+        '  <section style="border-left: 4px solid #be123c; padding-left: 12px;">',
+        '    <h3 style="font-size: 22px; margin: 0 0 10px;">Gate</h3>',
+        '    <p style="font-size: 16px; line-height: 1.35;">Whole-slide zoom is a regression here because both slots expose local owners.</p>',
+        '  </section>',
+        '</div>',
+        '',
+    ].join('\n');
+}
+
 function createMixedMermaidProseStressDeck() {
     return [
         '---',
@@ -452,6 +506,51 @@ const FIXTURES = [
         expectedMermaidBlocks: 0,
     },
     {
+        id: 'competing-slot-zones-stress',
+        sourcePath: 'competing-slot-zones-stress.md',
+        sourceMarkdown: createCompetingSlotZonesStressDeck(),
+        files: [
+            {
+                path: 'layouts/dual-rail.vue',
+                content: [
+                    '<template>',
+                    '  <div class="notemd-dual-rail">',
+                    '    <section class="notemd-dual-rail__summary">',
+                    '      <slot name="summary" />',
+                    '    </section>',
+                    '    <section class="notemd-dual-rail__details">',
+                    '      <slot name="details" />',
+                    '    </section>',
+                    '  </div>',
+                    '</template>',
+                    '',
+                    '<style>',
+                    '.notemd-dual-rail {',
+                    '  display: grid;',
+                    '  grid-template-columns: minmax(0, 0.92fr) minmax(0, 1.08fr);',
+                    '  gap: 28px;',
+                    '  height: 100%;',
+                    '  padding: 58px 64px;',
+                    '}',
+                    '.notemd-dual-rail__summary,',
+                    '.notemd-dual-rail__details {',
+                    '  min-width: 0;',
+                    '  overflow: hidden;',
+                    '  border: 1px solid #cbd5e1;',
+                    '  border-radius: 8px;',
+                    '  padding: 18px;',
+                    '}',
+                    '</style>',
+                ].join('\n'),
+            },
+        ],
+        expectPatch: true,
+        expectedOwnerZones: ['summary', 'details'],
+        expectedMinSlideCount: 3,
+        expectNoWholeSlideZoom: true,
+        expectedMermaidBlocks: 0,
+    },
+    {
         id: 'mixed-mermaid-prose-stress',
         sourcePath: 'mixed-mermaid-prose-stress.md',
         sourceMarkdown: createMixedMermaidProseStressDeck(),
@@ -661,8 +760,37 @@ function assertFixtureReport(fixture, report, sourceMarkdown) {
         assert(countFenceOpeners(deckMarkdown, 'ts') > 1, `${fixture.id}: TypeScript code fixture did not split into multiple fences`);
     }
     if (fixture.expectTransform) {
-        assert(deckMarkdown.includes('data-notemd-slot-zone="left"'), `${fixture.id}: slot owner wrapper was not preserved`);
+        if (!fixture.expectedTransformZones) {
+            assert(deckMarkdown.includes('data-notemd-slot-zone="left"'), `${fixture.id}: slot owner wrapper was not preserved`);
+        }
         assert(deckMarkdown.includes('<Transform :scale='), `${fixture.id}: component-heavy slot was not wrapped in a measured Transform`);
+    }
+    if (fixture.expectedTransformZones) {
+        for (const zoneName of fixture.expectedTransformZones) {
+            assert(deckMarkdown.includes(`data-notemd-slot-zone="${zoneName}"`), `${fixture.id}: ${zoneName} slot owner wrapper was not preserved`);
+            assert(
+                new RegExp(`::${escapeRegExp(zoneName)}::\\s*\\n\\s*<Transform :scale=`, 'm').test(deckMarkdown),
+                `${fixture.id}: ${zoneName} slot was not wrapped in a measured Transform`
+            );
+        }
+        assert(
+            countTransformWrappers(deckMarkdown) >= fixture.expectedTransformZones.length,
+            `${fixture.id}: expected at least ${fixture.expectedTransformZones.length} local Transform wrappers`
+        );
+    }
+    if (fixture.expectedOwnerZones) {
+        for (const zoneName of fixture.expectedOwnerZones) {
+            assert(deckMarkdown.includes(`data-notemd-slot-zone="${zoneName}"`), `${fixture.id}: ${zoneName} slot owner wrapper was not preserved`);
+        }
+    }
+    if (fixture.expectedMinSlideCount) {
+        assert(
+            splitDeckSlides(deckMarkdown).length >= fixture.expectedMinSlideCount,
+            `${fixture.id}: expected at least ${fixture.expectedMinSlideCount} slides after convergence`
+        );
+    }
+    if (fixture.expectNoWholeSlideZoom) {
+        assert(!/^zoom:\s*[0-9.]+$/im.test(deckMarkdown), `${fixture.id}: whole-slide zoom was introduced instead of local slot transforms`);
     }
     if (fixture.expectMixedMermaidSeparation) {
         assert(splitDeckSlides(deckMarkdown).length > splitDeckSlides(sourceMarkdown).length, `${fixture.id}: mixed Mermaid/prose slide was not separated`);
@@ -711,6 +839,14 @@ function assertNoRejectedCssReferences(fixtureId, directoryPath, label) {
         assert(!cssText.includes('outside.css'), `${fixtureId}: ${label} CSS still references outside.css in ${path.relative(directoryPath, cssFilePath)}`);
         assert(!cssText.includes('outside.svg'), `${fixtureId}: ${label} CSS still references outside.svg in ${path.relative(directoryPath, cssFilePath)}`);
     }
+}
+
+function countTransformWrappers(deckMarkdown) {
+    return (deckMarkdown.match(/<Transform :scale=/g) || []).length;
+}
+
+function escapeRegExp(value) {
+    return String(value).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
 function listCssFiles(directoryPath) {

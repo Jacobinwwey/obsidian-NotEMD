@@ -3,7 +3,7 @@ date: 2026-06-20
 last_updated: 2026-06-20
 topic: slidev-layout-quality-and-canvas-roadmap
 canonical: true
-status: stage6-css-import-media-and-mermaid-preservation-gate-implemented
+status: stage7-font-safe-slot-and-code-convergence-implemented
 ---
 
 # Slidev 布局质量与画布规划路线
@@ -26,7 +26,7 @@ status: stage6-css-import-media-and-mermaid-preservation-gate-implemented
 
 1. 分支：`main`
 2. 远端：`origin/main`
-3. 本批次实现内容：rendered quality gate + clean-room `SlideLayoutPlan` 第一切片 + Mermaid 源图保持 fit 审计 + JS/TS/Python/Rust tokenizer + Mermaid 不拆图回归契约 + Stage 5 full-deck/export fixture、文本 glyph rect 测量、slot Transform 去整页 zoom 叠加、mixed Mermaid/prose 非图内容移动、相对图片资产镜像、local Slidev fork standalone loader 边界修复、Stage 6 frontmatter/cross-dir 资产镜像、CSS `url(...)` 与本地 `@import` 依赖图、HTML export 后资产同步、本地媒体 fixture 与离线字体 provider
+3. 本批次实现内容：rendered quality gate + clean-room `SlideLayoutPlan` 第一切片 + Mermaid 源图保持 fit 审计 + JS/TS/Python/Rust tokenizer + Mermaid 不拆图回归契约 + Stage 5 full-deck/export fixture、文本 glyph rect 测量、slot Transform 去整页 zoom 叠加、mixed Mermaid/prose 非图内容移动、相对图片资产镜像、local Slidev fork standalone loader 边界修复、Stage 6 frontmatter/cross-dir 资产镜像、CSS `url(...)` 与本地 `@import` 依赖图、HTML export 后资产同步、本地媒体 fixture 与离线字体 provider、Stage 7 font-safe slot/code convergence
 4. 真实源文件：`docs/architecture.zh-CN.md`
 5. 本批次真实导出证据包：`/home/jacob/slidev-export-review/2026-06-20-quality/`
 6. 本批次最终 source-preserved-fit 输出归档：`/home/jacob/slidev-export-review/2026-06-20-source-preserved-fit-final/`
@@ -37,6 +37,8 @@ status: stage6-css-import-media-and-mermaid-preservation-gate-implemented
 11. expanded layout fixture 验收包：`/home/jacob/slidev-export-review/2026-06-20-expanded-layout-fixtures/`
 12. Stage 6 真实 architecture strict standalone 验收包：`/home/jacob/slidev-export-review/2026-06-20-expanded-layout-final/`
 13. CSS import/media fixture 验收包：`/home/jacob/slidev-export-review/2026-06-20-css-import-media-fixtures/`
+14. Stage 7 font-safe slot/code convergence fixture 验收包：`/home/jacob/slidev-export-review/2026-06-20-competing-slot-zones-final-fixtures-v2/`
+15. Stage 7 真实 `architecture.zh-CN.md` strict standalone 验收包：`/home/jacob/slidev-export-review/2026-06-20-font-safe-real/`
 
 当前已落地事实：
 
@@ -66,11 +68,14 @@ status: stage6-css-import-media-and-mermaid-preservation-gate-implemented
 24. CSS asset dependency 最终验收包位于 `/home/jacob/slidev-export-review/2026-06-20-css-asset-dependencies-final/`；真实 `architecture.zh-CN.md` strict standalone report 为 `ok = true`，`actualMode = "standalone"`，`requiresLocalServer = false`，`standaloneGate.passed = true`，`skillReferenceCount = 52`，`mermaidSourcePreservation.passed = true`，`hardOverflowCount = 0`，`lowEffectiveFontCount = 0`；
 25. CSS import/media fixture 已覆盖本地 CSS `@import` 递归、imported CSS 内的字体/背景图依赖、本地 video/audio/track/poster 资产、CSS sanitizer 行为，以及越界 imported stylesheet 在 prepared workspace 与最终 standalone export 两层都不会被复制；
 26. 历史生成的 `docs/export/test-slidev-*`、`docs/export/test-slidev.pdf`、`docs/export/test-slidev-video.mp4` 与旧 `docs/export/slides/` 产物已从 Git 索引移除；后续真实输出默认归档到 `/home/jacob/slidev-export-review/...`，提交前清理 `docs/export/_slidev-sources` 与 `docs/export/*-slides`。
+27. slot zone 审计现在携带 `effectiveMinFontPx` 与 `minimumReadableTransformScale`；局部 `<Transform>` 和整页 `zoom` 都会先预测是否跌破字体下限。多个 component-heavy named slot 若几何 scale 会让字体不可读，patcher 会把 slot 内容分页到独立默认画布并保留 `data-notemd-slot-zone` 证据，而不是强行套低 scale。
+28. table/code 结构化拆分现在也会在字体下限阻止 `zoom` 时触发，chunk 数按 `currentZoom / nextZoom` 的实际 fit factor 估算，避免 dense code 在 retry 预算内只被拆两半后仍溢出。
+29. Stage 7 真实 `architecture.zh-CN.md` strict standalone rerun 为 `ok = true`，使用 `/home/jacob/slidev/packages/slidev/bin/slidev.mjs`，加载 `/home/jacob/slidev/skills/slidev` 与 52 个 references，`actualMode = "standalone"`，`requiresLocalServer = false`，`standaloneGate.passed = true`，`mermaidSourcePreservation.passed = true`，3 个源 Mermaid fence 与导出 deck 一一对应且内容未变，hard overflow / unreadable scale / low effective font / quality margin warning / low utilization 均为零；输出 deck 位于 `/home/jacob/slidev-export-review/2026-06-20-font-safe-real/architecture.zh-CN.slidev.md`。
 
 当前未完成事实：
 
 1. semantic split 仍只覆盖当前已有 table/code/text 支持集；Mermaid 源图保持后，过密原图只能通过布局/zoom/Transform 或人工复核处理，不能把一个源 Mermaid fence 自动拆成多个图；
-2. effective font 现在会把文本节点到 slide root 之间的局部 CSS `transform` / `scale` / `zoom` 乘入逐样本字号；full-deck slot fixture 已覆盖复杂 Vue/slot、嵌套 slot 与 component-heavy Transform 的真实收敛链路，但更多 custom layout 仍需继续加 fixture；
+2. effective font 现在会把文本节点到 slide root 之间的局部 CSS `transform` / `scale` / `zoom` 乘入逐样本字号；full-deck slot fixture 已覆盖复杂 Vue/slot、嵌套 slot、component-heavy Transform，以及 unsafe competing slot 自动分页的真实收敛链路，但不暴露稳定 owner 或不可安全分页的 custom layout 仍需继续加 fixture；
 3. `SlideLayoutPlan` 是生成前预算，不替代 Playwright rendered audit；
 4. 真实 `architecture.zh-CN.md` 仍需要每批次跑 strict standalone 验收，不能用单测替代；
 5. 当前真实 deck 仍可能出现 `zoom` 小于 `0.72` 的 Mermaid-only 页面；在“不改原 Mermaid 图内容”的约束下，低 zoom 有时是保留源图的代价，但不能扩散到 prose/table/code。混合 Mermaid/prose 页应先分离非图内容，不能把正文一起缩小。
@@ -84,7 +89,7 @@ status: stage6-css-import-media-and-mermaid-preservation-gate-implemented
 | 必须使用本地 Slidev fork | CLI 解析优先使用 `$HOME/slidev/packages/slidev/bin/slidev.mjs`；本批次还在 fork 中修复 standalone loader binding 被 preload helper 替换误删的问题 | 已落地 | verifier 中继续检查 fork 路径与 `loaderGaps = []` |
 | standalone 文件必须真实可打开 | strict native gate 检查 `actualMode = standalone`、`requiresLocalServer = false`、`loaderGaps = []` | 已落地 | 新 standalone 验收应继续走带日期 evidence package |
 | 不能提交测试生成文件 | `docs/export/` 产物可见但默认不提交，本批次真实输出已归档到仓库外 | 已收口 | 最终 commit 前继续检查 `git status --short docs/export` |
-| zoom 参数应由检测结果决定 | overflow patch 已用 measured fit scale；quality finding 现在会优先触发结构化拆分 | 已推进 | 继续避免把低 `zoom` 当最终修复手段 |
+| zoom 参数应由检测结果决定 | overflow patch 已用 measured fit scale；slot Transform 与整页 zoom 还会用实测字体下限做预测门禁；table/code 的拆分数量按 fit factor 推导 | 已推进 | 继续避免把低 `zoom` 当最终修复手段 |
 | 不修改 Mermaid 原图内容 | prompt、layout budget、patcher 与 audit 都按 source-preserved 模型推进；Mermaid fit 问题进入证据字段或人工复核，不进入自动拆图；单测已覆盖 Mermaid fence 不被误走 code split，verifier 已新增逐 fence exact compare；source preparation 会拒绝一次性或基于 outline 的 LLM 生成中改写、重排或拆分 Mermaid fence 的候选 deck | 已落地当前切片 | 真实导出继续检查 `mermaidSourcePreservation.passed = true` |
 | Mermaid 与正文混排不能靠低整页 zoom 解决 | `slidevLayoutAudit` 只允许把 mixed Mermaid/prose 页中的非 Mermaid 正文移到可读页；每个 Mermaid fence 原样保留、数量不变、逐 fence byte-stable；无法安全移动非图内容的 unsupported layout 会阻止低整页 zoom | 已落地 | 后续只允许增强外层布局或非图内容移动，不允许拆一个 Mermaid fence |
 | 相对图片与 frontmatter 资产不能在 prepared/export 中丢失 | source-preparer 会复制 Markdown image、HTML media/link/srcset 与 Slidev frontmatter 本地文件引用到 prepared deck 所在目录；HTML exporter 会再把未被 Vite 打包的相对本地文件同步到最终输出目录；忽略 URL、绝对路径和 `..` traversal | 已落地 | 后续扩展到更复杂 CSS/background URL 时仍必须只复制显式引用，不能粗暴复制整个源目录 |
@@ -535,13 +540,13 @@ interface SlideLayoutPlan {
 
 实现状态：已新增/扩展 unit fixtures 与 full-deck export fixtures：
 
-1. `src/tests/slidevLayoutAudit.test.ts` 覆盖 low effective font measurement、Mermaid 源图保持、Mermaid fit/manual-review 统计、`source-preserved-fit-review` 与 `manual-review` 分流、table/code 质量 finding 驱动结构拆分、长 cell record-list fallback、代码语义块拆分、TypeScript import 组和顶层声明 tokenizer、Python import/decorator/top-level block tokenizer、Rust use/attribute/top-level item tokenizer、summary 新字段；
+1. `src/tests/slidevLayoutAudit.test.ts` 覆盖 low effective font measurement、Mermaid 源图保持、Mermaid fit/manual-review 统计、`source-preserved-fit-review` 与 `manual-review` 分流、table/code 质量 finding 驱动结构拆分、长 cell record-list fallback、代码语义块拆分、TypeScript import 组和顶层声明 tokenizer、Python import/decorator/top-level block tokenizer、Rust use/attribute/top-level item tokenizer、unsafe competing slot font-safe pagination、component-heavy surface font-floor zoom blocking、summary 新字段；
 2. `src/tests/slidevLayoutPlan.test.ts` 覆盖 clean-room layout budget 对 Mermaid 的 `preserve-source-fit` 与 table/code 的 pre-split 判断；
 3. `src/tests/slidevSourcePreparer.test.ts` 覆盖 deterministic outline 与 LLM prompt 都带 layout budget；
 4. `src/tests/slidevLayoutWorkflow.test.ts` 更新 summary schema，避免 verifier mock 停留在旧字段；
 5. `src/tests/slidevRenderedMeasurement.test.ts` 用真实 Playwright 页面验证局部 `transform: scale(0.5)` 与整页 `--slidev-slide-zoom-scale: 0.8` 会把 20px code font 测为 8px effective font，并验证长表 record-list fallback 在浏览器里以可读文本呈现、不残留 table overflow；
-6. `scripts/verify-slidev-layout-fixtures.cjs` 运行完整生产 verifier，临时生成 fixture vault，不把 fixture Markdown 或导出产物写入仓库；`source-layout-stress` 覆盖完整 skill references、native standalone、Mermaid source fence count、record-list fallback、代码拆分和低 zoom 只允许出现在 Mermaid-only 页；`slot-component-stress` 覆盖 component-heavy slot 的局部 `<Transform>`，并防止整页 low zoom 混入；
-7. 2026-06-20 full-deck fixture 归档位于 `/home/jacob/slidev-export-review/2026-06-20-full-deck-layout-fixtures/`，两条 fixture 均为 `ok: true`，`hardOverflowCount = 0`，`lowEffectiveFontCount = 0`。
+6. `scripts/verify-slidev-layout-fixtures.cjs` 运行完整生产 verifier，临时生成 fixture vault，不把 fixture Markdown 或导出产物写入仓库；`source-layout-stress` 覆盖完整 skill references、native standalone、Mermaid source fence count、record-list fallback、font-safe code splitting 和低 zoom 只允许出现在 Mermaid-only 页；`slot-component-stress` 覆盖 component-heavy slot 的局部 `<Transform>`，并防止整页 low zoom 混入；`competing-slot-zones-stress` 覆盖多个 named slot 的几何 scale 会低于字体下限时，转为 slot 分页而不是低 scale Transform；
+7. 2026-06-20 Stage 7 full-deck fixture 归档位于 `/home/jacob/slidev-export-review/2026-06-20-competing-slot-zones-final-fixtures-v2/`，6 条 fixture 均为 `ok: true`，`hardOverflowCount = 0`，`lowEffectiveFontCount = 0`；其中 `source-layout-stress` 使用 `/home/jacob/slidev/skills/slidev` 与 52 个 references，`competing-slot-zones-stress` 最终 3 页收敛且没有整页 `zoom`。
 
 ## 8. 与上游 Slidev skill PR 的关系
 
@@ -584,10 +589,11 @@ interface SlideLayoutPlan {
 13. local Slidev fork 修复了 standalone bundler 用正则猜测 Vite preload helper 结束位置导致误删第一张 slide loader binding 的问题；fork focused bundler test 与 NoteMD full fixture suite 已验证 `loaderGaps = []`。
 14. Stage 6 CSS asset dependency 切片已收口：full fixture suite 归档到 `/home/jacob/slidev-export-review/2026-06-20-css-asset-dependencies-final-fixtures/`，真实 `architecture.zh-CN.md` strict standalone 归档到 `/home/jacob/slidev-export-review/2026-06-20-css-asset-dependencies-final/`，并已确认测试导出产物不再进入 `main` 跟踪集合。
 15. Stage 6 CSS import/media 切片已落地：full fixture suite 归档到 `/home/jacob/slidev-export-review/2026-06-20-css-import-media-fixtures/`，覆盖本地 CSS `@import` 递归、imported CSS 内的字体/背景图依赖、本地 video/audio/track/poster 资产、CSS sanitizer 行为，以及越界 imported stylesheet 在 prepared/export 两层都被拒绝。
+16. Stage 7 font-safe convergence 切片已落地：slot zone measurement 新增字体下限，局部 Transform 和整页 zoom 都会拒绝不可读 scale；多个 competing component-heavy slot 会在 unsafe 时拆成独立画布；table/code 在字体下限阻止 zoom 时也会结构化拆分，并用实际 fit factor 决定 chunk 数。完整 fixture suite 归档到 `/home/jacob/slidev-export-review/2026-06-20-competing-slot-zones-final-fixtures-v2/`，真实 `architecture.zh-CN.md` 输出归档到 `/home/jacob/slidev-export-review/2026-06-20-font-safe-real/`。
 
 建议下一批实现顺序：
 
-1. 继续把更多真实失败样本沉淀为 full-deck/export fixtures，尤其是复杂 Vue component、多 Mermaid 页面混排、竞争 transformable zones 和 unsupported layout；
+1. 继续把更多真实失败样本沉淀为 full-deck/export fixtures，尤其是复杂 Vue component、多 Mermaid 页面混排、缺少稳定 owner 的 unsupported layout，以及单个非 Mermaid component surface 无法安全分页的情况；
 2. 对 Mermaid 继续只做源图保持的 fit/zoom/Transform 与人工复核边界，不引入自动拆原图策略；
 3. 继续增强更多语言专用 splitter；Python/Rust 当前是 parser-light，不是完整 AST；
 4. 评估是否把 source-preserved Mermaid fit review、mixed Mermaid/prose 仅移动非图内容的 guardrail、browser-check 与“不要拆用户原图”抽成通用 Slidev skill PR 建议。

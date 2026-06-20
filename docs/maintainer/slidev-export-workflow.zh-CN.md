@@ -222,11 +222,14 @@ mermaidSourcePreservation.changedFenceIndexes
 33. 2026-06-20 CSS asset dependency 收口验收包位于 `/home/jacob/slidev-export-review/2026-06-20-css-asset-dependencies-final/`；真实 `architecture.zh-CN.md` strict standalone report 为 `ok = true`，`actualMode = "standalone"`，`requiresLocalServer = false`，`standaloneGate.passed = true`，`skillReferenceCount = 52`，且 `mermaidSourcePreservation.passed = true`。
 34. 2026-06-20 CSS import/media fixture 验收包位于 `/home/jacob/slidev-export-review/2026-06-20-css-import-media-fixtures/`；生产 fixture suite 现在覆盖本地 CSS `@import` 递归、imported CSS 内的字体/背景图依赖、本地 video/audio/track/poster 资产、CSS sanitizer 行为，以及越界 imported stylesheet 在 prepared workspace 和最终 standalone export 两层都不会被复制。
 35. 生成式测试导出产物已不再跟踪在 `docs/export/test-slidev-*`、`docs/export/test-slidev.pdf`、`docs/export/test-slidev-video.mp4` 或旧 `docs/export/slides/` 下；后续 Slidev 生成产物默认作为仓库外 evidence package 保存，除非任务明确要求提交经过审查的 artifact。
+36. 2026-06-20 font-safe slot/code convergence 验收包位于 `/home/jacob/slidev-export-review/2026-06-20-competing-slot-zones-final-fixtures-v2/`；slot zone audit 现在报告 zone 内最小 effective font 与最低可读 Transform scale，局部 `<Transform>` 和整页 `zoom` 都会拒绝跌破字体下限的 scale。多个 component-heavy named slot 若无法以可读 scale 局部缩放，会分页为独立默认画布并保留 `data-notemd-slot-zone` 证据。
+37. table/code 结构拆分现在会在字体下限禁止 `zoom` 时触发，chunk 数按实测 fit factor 估算；`source-layout-stress` 重新验证为 `ok: true`，使用 `/home/jacob/slidev/skills/slidev` 与 52 个 references，最终 `hardOverflowCount = 0`、`lowEffectiveFontCount = 0`。
+38. 同批真实 `architecture.zh-CN.md` strict standalone 验收包位于 `/home/jacob/slidev-export-review/2026-06-20-font-safe-real/`；报告为 `ok = true`，使用本地 Slidev fork，加载 52 个 skill references，`actualMode = "standalone"`，`requiresLocalServer = false`，`mermaidSourcePreservation.passed = true`，并归档了可审查的 `architecture.zh-CN.slidev.md`。
 
 当前限制：
 
 1. effective font measurement 现在已经覆盖常见局部 CSS transform / scale / zoom 链，但复杂 Vue layout 仍必须以浏览器 rendered audit 为准，不能退回静态 Markdown 估算；
-2. 超出当前支持集的 richer custom/component-heavy Slidev layout 仍保持保守/manual-review 路径，尤其是多个 component-heavy slot zone 的 zone 级几何仍然接近打平但并非每个溢出 zone 都可安全 transform、或 owner surface 本身不形成稳定 local transform / structural split target 的情况；
+2. 超出当前支持集的 richer custom/component-heavy Slidev layout 仍保持保守/manual-review 路径，尤其是缺少稳定 owner surface、不能安全分页、或单个非 Mermaid component surface 既不能结构拆分又不能可读缩放的情况；多个 named slot 竞争且 unsafe 的路径已由 slot 分页 fixture 覆盖；
 3. native standalone 现在已有严格 gate，且真实 architecture fixture 已通过；但正确性仍依赖 post-build sanity detection，server-script fallback 只是兼容通道，不能再被算作 native standalone 成功；
 4. full-deck Playwright 验证故意比代表性抽样更慢，后续优化方向应是提高 patch 收敛能力，而不是退回弱审计；
 5. `obsidian command id=notemd:export-slides` 目前仍只能算 dispatch-level smoke，因为 Obsidian CLI 没有暴露导出完成握手信号。

@@ -57,6 +57,7 @@ export interface SlidevMeasuredSlotZone {
 	name: string;
 	textLength: number;
 	textPreview?: string;
+	effectiveMinFontPx?: number | null;
 	ownerRect: SlidevRect;
 	contentBounds: SlidevRect | null;
 	scrollWidth: number;
@@ -136,6 +137,7 @@ export interface SlidevLayoutAudit {
 export interface SlidevSlotZoneAudit {
 	name: string;
 	textPreview?: string;
+	effectiveMinFontPx?: number | null;
 	ownerRect: SlidevRect;
 	contentBounds: SlidevRect | null;
 	scrollOverflow: boolean;
@@ -146,6 +148,7 @@ export interface SlidevSlotZoneAudit {
 		bottom: number;
 	};
 	recommendedTransformScale: number | null;
+	minimumReadableTransformScale?: number | null;
 }
 
 export interface SlidevLayoutAuditSummary {
@@ -261,7 +264,7 @@ export function analyzeRenderedSlideMeasurement(
 	const elementKinds = Array.from(new Set(measurement.elements.map(element => element.kind)));
 	const qualityMetrics = collectRenderedQualityMetrics(measurement);
 	const slotZones = measurement.safeRect
-		? analyzeRenderedSlotZones(measurement.slotZones ?? [], measurement.safeRect, resolvedConfig.overflowTolerancePx)
+		? analyzeRenderedSlotZones(measurement.slotZones ?? [], measurement.safeRect, resolvedConfig)
 		: [];
 
 	if (measurement.errors.length > 0 || !measurement.slideRoot || !measurement.safeRect) {
@@ -491,12 +494,21 @@ export function patchDeckWithLayoutAudit(
 			}
 		}
 
+		const splitCompetingSlotZones = splitCompetingSupportedSlotLayoutZones(currentSlide, audit, resolvedConfig);
+		if (splitCompetingSlotZones.slides) {
+			slides.splice(targetIndex, 1, ...splitCompetingSlotZones.slides);
+			changedSlides.push(audit.slide);
+			slideOffset += splitCompetingSlotZones.slides.length - 1;
+			continue;
+		}
+
 		const transformedSlotSlide = wrapOverflowingSupportedSlotLayoutZonesInTransform(
 			currentSlide,
 			audit,
 			bestScale,
 			currentZoom,
 			resolvedConfig.minReadableScale,
+			resolvedConfig.minEffectiveFontPx,
 		);
 		if (transformedSlotSlide) {
 			slides[targetIndex] = transformedSlotSlide;
@@ -525,7 +537,7 @@ export function patchDeckWithLayoutAudit(
 			}
 		}
 
-		if (shouldSplitTableBeforeZoom(audit.findings, nextZoom, resolvedConfig.minReadableScale)) {
+		if (shouldSplitTableBeforeZoom(audit, nextZoom, resolvedConfig)) {
 			const splitResult = splitOverflowingMarkdownTableSlide(currentSlide, audit, currentZoom, nextZoom, resolvedConfig);
 			if (splitResult.slides) {
 				slides.splice(targetIndex, 1, ...splitResult.slides);
@@ -535,7 +547,7 @@ export function patchDeckWithLayoutAudit(
 			}
 		}
 
-		if (shouldSplitCodeBeforeZoom(audit.findings, nextZoom, resolvedConfig.minReadableScale)) {
+		if (shouldSplitCodeBeforeZoom(audit, nextZoom, resolvedConfig)) {
 			const splitResult = splitOverflowingCodeSlide(currentSlide, audit, currentZoom, nextZoom, resolvedConfig);
 			if (splitResult.slides) {
 				slides.splice(targetIndex, 1, ...splitResult.slides);
@@ -545,7 +557,7 @@ export function patchDeckWithLayoutAudit(
 			}
 		}
 
-		const transformedSurfaceSlide = wrapOverflowingSlideSurfaceInTransform(currentSlide, bestScale, currentZoom, resolvedConfig.minReadableScale);
+		const transformedSurfaceSlide = wrapOverflowingSlideSurfaceInTransform(currentSlide, audit, bestScale, currentZoom, resolvedConfig);
 		if (transformedSurfaceSlide) {
 			slides[targetIndex] = transformedSurfaceSlide;
 			changedSlides.push(audit.slide);
@@ -587,6 +599,17 @@ export function patchDeckWithLayoutAudit(
 			blockedSlides.push({
 				slide: audit.slide,
 				reason: `required zoom ${nextZoom.toFixed(3)} is below readable floor ${resolvedConfig.minReadableScale.toFixed(2)}`,
+			});
+			continue;
+		}
+
+		if (
+			wouldPatchScaleLowerFontBelowFloor(audit.effectiveMinFontPx, bestScale, resolvedConfig.minEffectiveFontPx)
+			&& !isSourcePreservedMermaidFitSlide(currentSlide, audit)
+		) {
+			blockedSlides.push({
+				slide: audit.slide,
+				reason: `required zoom ${nextZoom.toFixed(3)} would lower text below ${resolvedConfig.minEffectiveFontPx}px`,
 			});
 			continue;
 		}
@@ -826,6 +849,31 @@ function normalizePositiveNumber(value: number | null | undefined): number | nul
 	return typeof value === 'number' && Number.isFinite(value) && value > 0 ? value : null;
 }
 
+function computeMinimumReadableScaleForFont(
+	effectiveFontPx: number | null | undefined,
+	fontThresholdPx: number,
+): number | null {
+	const normalizedFontPx = normalizePositiveNumber(effectiveFontPx);
+	if (normalizedFontPx === null || !Number.isFinite(fontThresholdPx) || fontThresholdPx <= 0) {
+		return null;
+	}
+
+	return fontThresholdPx / normalizedFontPx;
+}
+
+function wouldPatchScaleLowerFontBelowFloor(
+	effectiveFontPx: number | null | undefined,
+	patchScale: number | null,
+	fontThresholdPx: number,
+): boolean {
+	const normalizedFontPx = normalizePositiveNumber(effectiveFontPx);
+	if (normalizedFontPx === null || patchScale === null || !Number.isFinite(patchScale) || patchScale <= 0) {
+		return false;
+	}
+
+	return normalizedFontPx * patchScale < fontThresholdPx;
+}
+
 function minNumber(values: number[]): number | null {
 	return values.length > 0 ? Math.min(...values) : null;
 }
@@ -984,21 +1032,23 @@ function computeElementFitScale(
 function analyzeRenderedSlotZones(
 	zones: SlidevMeasuredSlotZone[],
 	safeRect: SlidevRect,
-	overflowTolerancePx: number,
+	config: SlidevLayoutAuditConfig,
 ): SlidevSlotZoneAudit[] {
 	return zones.map(zone => {
 		const contentRect = zone.contentBounds ?? zone.ownerRect;
-		const overflow = measureOverflow(contentRect, safeRect, overflowTolerancePx);
-		const scrollOverflow = zone.scrollWidth - zone.clientWidth > overflowTolerancePx
-			|| zone.scrollHeight - zone.clientHeight > overflowTolerancePx;
+		const overflow = measureOverflow(contentRect, safeRect, config.overflowTolerancePx);
+		const scrollOverflow = zone.scrollWidth - zone.clientWidth > config.overflowTolerancePx
+			|| zone.scrollHeight - zone.clientHeight > config.overflowTolerancePx;
 		return {
 			name: zone.name,
 			textPreview: zone.textPreview,
+			effectiveMinFontPx: normalizePositiveNumber(zone.effectiveMinFontPx),
 			ownerRect: zone.ownerRect,
 			contentBounds: zone.contentBounds,
 			scrollOverflow,
 			overflow: hasOverflow(overflow) ? overflow : undefined,
-			recommendedTransformScale: computeSlotZoneFitScale(zone, overflowTolerancePx),
+			recommendedTransformScale: computeSlotZoneFitScale(zone, config.overflowTolerancePx),
+			minimumReadableTransformScale: computeMinimumReadableScaleForFont(zone.effectiveMinFontPx, config.minEffectiveFontPx),
 		};
 	});
 }
@@ -1146,29 +1196,35 @@ function shouldSplitSimpleSlideBeforeZoom(findings: SlidevLayoutFinding[]): bool
 }
 
 function shouldSplitTableBeforeZoom(
-	findings: SlidevLayoutFinding[],
+	audit: SlidevLayoutAudit,
 	nextZoom: number | null,
-	minReadableScale: number,
+	config: SlidevLayoutAuditConfig,
 ): boolean {
+	const findings = audit.findings;
+	const bestScale = chooseBestRecommendedScale(findings);
 	return findings.some(finding => finding.recommendedPatch === 'split-table')
 		&& (
 			findings.some(finding => finding.kind === 'unreadable-scale')
 			|| hasQualityStructuralFinding(findings)
-			|| (nextZoom !== null && nextZoom < minReadableScale)
+			|| (nextZoom !== null && nextZoom < config.minReadableScale)
+			|| wouldPatchScaleLowerFontBelowFloor(audit.tableBodyMinFontPx ?? audit.effectiveMinFontPx, bestScale, config.minTableBodyFontPx)
 			|| hasTableStructuralOverflow(findings)
 		);
 }
 
 function shouldSplitCodeBeforeZoom(
-	findings: SlidevLayoutFinding[],
+	audit: SlidevLayoutAudit,
 	nextZoom: number | null,
-	minReadableScale: number,
+	config: SlidevLayoutAuditConfig,
 ): boolean {
+	const findings = audit.findings;
+	const bestScale = chooseBestRecommendedScale(findings);
 	return findings.some(finding => finding.recommendedPatch === 'reduce-code')
 		&& (
 			findings.some(finding => finding.kind === 'unreadable-scale')
 			|| hasQualityStructuralFinding(findings)
-			|| (nextZoom !== null && nextZoom < minReadableScale)
+			|| (nextZoom !== null && nextZoom < config.minReadableScale)
+			|| wouldPatchScaleLowerFontBelowFloor(audit.codeMinFontPx ?? audit.effectiveMinFontPx, bestScale, config.minCodeFontPx)
 			|| hasCodeStructuralOverflow(findings)
 		);
 }
@@ -1403,12 +1459,55 @@ function splitOverflowingSupportedSlotLayoutSlide(
 	return { slides: splitSlides };
 }
 
+function splitCompetingSupportedSlotLayoutZones(
+	slideMarkdown: string,
+	audit: SlidevLayoutAudit,
+	config: SlidevLayoutAuditConfig,
+): { slides: string[] | null; reason?: string } {
+	const surface = parseSupportedSlotLayoutSurface(slideMarkdown);
+	if (!surface) {
+		return { slides: null, reason: 'slot layout is not in the supported structural patch set' };
+	}
+
+	const transformableZones = collectSupportedSlotZones(surface).filter(zone =>
+		zone.contentLines.some(line => line.trim().length > 0)
+		&& containsTransformableComponentSyntax(zone.contentLines)
+	);
+	if (transformableZones.length < 2) {
+		return { slides: null, reason: 'slot layout does not expose multiple transformable zones' };
+	}
+
+	const unsafeZoneNames = new Set(collectUnreadableSlotTransformNames(audit, config));
+	if (unsafeZoneNames.size === 0) {
+		return { slides: null, reason: 'slot layout transforms are within readable font bounds' };
+	}
+
+	const candidateZoneNames = new Set(collectSlotLayoutTransformCandidateNames(slideMarkdown, audit));
+	const zonesToSplit = transformableZones.filter(zone =>
+		candidateZoneNames.has(zone.name) || unsafeZoneNames.has(zone.name)
+	);
+	if (zonesToSplit.length < 2 || !zonesToSplit.some(zone => unsafeZoneNames.has(zone.name))) {
+		return { slides: null, reason: 'slot layout does not have multiple unsafe competing zones' };
+	}
+
+	const cleanFrontmatter = stripFrontmatterKey(stripFrontmatterKey(surface.frontmatterLines, 'layout'), 'zoom');
+	const splitSlides = zonesToSplit.map(zone => {
+		const bodyLines = zone.ownershipWrapped
+			? zone.lines
+			: wrapLinesInSlotZoneOwner(zone.contentLines, zone.name);
+		return assemblePatchedSlide(cleanFrontmatter, trimOuterBlankLines(bodyLines));
+	});
+
+	return splitSlides.length > 1 ? { slides: splitSlides } : { slides: null, reason: 'slot layout did not produce multiple zone slides' };
+}
+
 function wrapOverflowingSupportedSlotLayoutZonesInTransform(
 	slideMarkdown: string,
 	audit: SlidevLayoutAudit,
 	fallbackScale: number | null,
 	currentZoom: number,
 	minReadableScale: number,
+	minEffectiveFontPx: number,
 ): string | null {
 	let nextSlideMarkdown = slideMarkdown;
 	let changed = false;
@@ -1432,6 +1531,7 @@ function wrapOverflowingSupportedSlotLayoutZonesInTransform(
 			fallbackScale,
 			currentZoom,
 			minReadableScale,
+			minEffectiveFontPx,
 		);
 		if (transformScale === null) {
 			continue;
@@ -1546,14 +1646,14 @@ function applyZoneStructuralSplit(
 		}
 	}
 
-	if (shouldSplitTableBeforeZoom(audit.findings, nextZoom, config.minReadableScale)) {
+	if (shouldSplitTableBeforeZoom(audit, nextZoom, config)) {
 		const result = splitOverflowingMarkdownTableSlide(zoneMarkdown, audit, currentZoom, nextZoom, config);
 		if (result.slides) {
 			return result;
 		}
 	}
 
-	if (shouldSplitCodeBeforeZoom(audit.findings, nextZoom, config.minReadableScale)) {
+	if (shouldSplitCodeBeforeZoom(audit, nextZoom, config)) {
 		const result = splitOverflowingCodeSlide(zoneMarkdown, audit, currentZoom, nextZoom, config);
 		if (result.slides) {
 			return result;
@@ -1652,11 +1752,18 @@ function separateMixedMermaidPrimaryContentSlide(
 
 function wrapOverflowingSlideSurfaceInTransform(
 	slideMarkdown: string,
+	audit: SlidevLayoutAudit,
 	recommendedScale: number | null,
 	currentZoom: number,
-	minReadableScale: number,
+	config: SlidevLayoutAuditConfig,
 ): string | null {
-	const transformScale = deriveMeasuredTransformScale(recommendedScale, currentZoom, minReadableScale);
+	const minimumReadableTransformScale = computeMinimumReadableScaleForFont(audit.effectiveMinFontPx, config.minEffectiveFontPx);
+	const transformScale = deriveMeasuredTransformScale(
+		recommendedScale,
+		currentZoom,
+		config.minReadableScale,
+		minimumReadableTransformScale,
+	);
 	if (transformScale === null) {
 		return null;
 	}
@@ -1895,6 +2002,22 @@ function collectSlotLayoutTransformCandidateNames(
 
 	const singleZone = pickSlotLayoutTransformZone(surface, audit);
 	return singleZone ? [singleZone.name] : [];
+}
+
+function collectUnreadableSlotTransformNames(
+	audit: SlidevLayoutAudit,
+	config: SlidevLayoutAuditConfig,
+): string[] {
+	return (audit.slotZones ?? [])
+		.filter(zone => {
+			const recommendedScale = zone.recommendedTransformScale;
+			const minimumReadableScale = zone.minimumReadableTransformScale
+				?? computeMinimumReadableScaleForFont(zone.effectiveMinFontPx, config.minEffectiveFontPx);
+			return recommendedScale !== null
+				&& minimumReadableScale !== null
+				&& recommendedScale < minimumReadableScale;
+		})
+		.map(zone => zone.name);
 }
 
 function collectRetunableSlotZoneNames(
@@ -2191,12 +2314,17 @@ function deriveMeasuredTransformScale(
 	recommendedScale: number | null,
 	currentZoom: number,
 	minReadableScale: number,
+	minimumReadableTransformScale: number | null,
 ): number | null {
 	if (recommendedScale === null || !Number.isFinite(recommendedScale) || recommendedScale <= 0 || recommendedScale >= 0.995) {
 		return null;
 	}
 
 	if (currentZoom * recommendedScale < minReadableScale) {
+		return null;
+	}
+
+	if (minimumReadableTransformScale !== null && recommendedScale < minimumReadableTransformScale) {
 		return null;
 	}
 
@@ -2209,10 +2337,14 @@ function resolveSupportedSlotZoneTransformScale(
 	fallbackScale: number | null,
 	currentZoom: number,
 	minReadableScale: number,
+	minEffectiveFontPx: number,
 ): number | null {
-	const zoneScale = audit.slotZones?.find(zone => zone.name === targetZone.name)?.recommendedTransformScale ?? null;
-	return deriveMeasuredTransformScale(zoneScale, currentZoom, minReadableScale)
-		?? deriveMeasuredTransformScale(fallbackScale, currentZoom, minReadableScale);
+	const zoneAudit = audit.slotZones?.find(zone => zone.name === targetZone.name) ?? null;
+	const zoneScale = zoneAudit?.recommendedTransformScale ?? null;
+	const minimumReadableTransformScale = zoneAudit?.minimumReadableTransformScale
+		?? computeMinimumReadableScaleForFont(audit.effectiveMinFontPx, minEffectiveFontPx);
+	return deriveMeasuredTransformScale(zoneScale, currentZoom, minReadableScale, minimumReadableTransformScale)
+		?? deriveMeasuredTransformScale(fallbackScale, currentZoom, minReadableScale, minimumReadableTransformScale);
 }
 
 function readFrontmatterScalar(frontmatterLines: string[], key: string): string | null {
@@ -2521,7 +2653,10 @@ function resolveStructuralChunkCount(
 ): number {
 	const effectiveZoom = nextZoom
 		?? (audit.pageScale !== null && audit.pageScale > 0 ? audit.pageScale : currentZoom);
-	const requiredFactor = minReadableScale / Math.max(effectiveZoom, 0.01);
+	const fitFactor = nextZoom !== null && currentZoom > 0
+		? currentZoom / Math.max(nextZoom, 0.01)
+		: 1;
+	const requiredFactor = Math.max(fitFactor, minReadableScale / Math.max(effectiveZoom, 0.01));
 	return Math.max(2, Math.min(4, Math.ceil(requiredFactor)));
 }
 

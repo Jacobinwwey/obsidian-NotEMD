@@ -2010,6 +2010,101 @@ describe('slidevLayoutAudit', () => {
 		expect(patched.deckMarkdown).toContain('::details::\n\n<Transform :scale="0.901" origin="top left">');
 	});
 
+	test('splits competing component-heavy slot zones when measured transforms would lower text below the font floor', () => {
+		const audit: SlidevLayoutAudit = {
+			slide: 2,
+			safeRect: { left: 51.2, top: 43.2, right: 1228.8, bottom: 676.8, width: 1177.6, height: 633.6 },
+			contentBounds: { left: 48, top: 52, right: 1234, bottom: 820, width: 1186, height: 768 },
+			pageScale: 1,
+			effectiveMinFontPx: 16,
+			elementKinds: ['other'],
+			findings: [
+				{
+					kind: 'overflow',
+					target: 'other',
+					message: 'summary zone overflows',
+					recommendedPatch: 'reduce-zoom',
+					recommendedScale: 0.44,
+					slotZone: 'summary',
+					textPreview: 'Summary cards',
+					overflow: { left: 0, top: 0, right: 140, bottom: 44 },
+				},
+				{
+					kind: 'overflow',
+					target: 'other',
+					message: 'details zone overflows',
+					recommendedPatch: 'reduce-zoom',
+					recommendedScale: 0.48,
+					slotZone: 'details',
+					textPreview: 'Detailed orchestration cards',
+					overflow: { left: 0, top: 0, right: 126, bottom: 62 },
+				},
+			],
+			slotZones: [
+				{
+					name: 'summary',
+					textPreview: 'Summary cards',
+					effectiveMinFontPx: 17,
+					ownerRect: { left: 110, top: 146, right: 520, bottom: 420, width: 410, height: 274 },
+					contentBounds: { left: 110, top: 146, right: 970, bottom: 454, width: 860, height: 308 },
+					scrollOverflow: true,
+					overflow: { left: 0, top: 0, right: 140, bottom: 44 },
+					recommendedTransformScale: 0.44,
+					minimumReadableTransformScale: 0.588,
+				},
+				{
+					name: 'details',
+					textPreview: 'Detailed orchestration cards',
+					effectiveMinFontPx: 16,
+					ownerRect: { left: 612, top: 146, right: 1112, bottom: 418, width: 500, height: 272 },
+					contentBounds: { left: 612, top: 146, right: 1218, bottom: 448, width: 606, height: 302 },
+					scrollOverflow: true,
+					overflow: { left: 0, top: 0, right: 126, bottom: 62 },
+					recommendedTransformScale: 0.48,
+					minimumReadableTransformScale: 0.625,
+				},
+			],
+		};
+		const deck = [
+			'---',
+			'theme: default',
+			'---',
+			'',
+			'# Intro',
+			'',
+			'---',
+			'layout: custom-grid',
+			'---',
+			'',
+			'::summary::',
+			'',
+			'<div data-notemd-slot-zone="summary">',
+			'<div class="summary-grid">',
+			'  <div class="border rounded px-3 py-2 text-sm">Summary cards</div>',
+			'</div>',
+			'</div>',
+			'',
+			'::details::',
+			'',
+			'<div data-notemd-slot-zone="details">',
+			'<div class="space-y-3">',
+			'  <div class="border rounded px-3 py-2 text-sm">Detailed orchestration cards</div>',
+			'</div>',
+			'</div>',
+		].join('\n');
+
+		const patched = patchDeckWithLayoutAudit(deck, [audit]);
+
+		expect(patched.changed).toBe(true);
+		expect(patched.blockedSlides).toEqual([]);
+		expect(countSlideDeckSlides(patched.deckMarkdown)).toBe(3);
+		expect(patched.deckMarkdown).toContain('data-notemd-slot-zone="summary"');
+		expect(patched.deckMarkdown).toContain('data-notemd-slot-zone="details"');
+		expect(patched.deckMarkdown).not.toContain('<Transform :scale=');
+		expect(patched.deckMarkdown).not.toContain('layout: custom-grid');
+		expect(patched.deckMarkdown).not.toContain('zoom: 0.44');
+	});
+
 	test('does not retarget a different component-heavy slot after another slot is already wrapped in Transform', () => {
 		const audit: SlidevLayoutAudit = {
 			slide: 2,
@@ -2225,6 +2320,54 @@ describe('slidevLayoutAudit', () => {
 		expect(patched.deckMarkdown).toContain('<Transform :scale="0.88" origin="top left">');
 		expect(patched.deckMarkdown).toContain('<StatBlock label="Queue C" value="512" />');
 		expect(patched.deckMarkdown).not.toContain('zoom: 0.88');
+	});
+
+	test('blocks component-heavy surface zoom when measured scaling would violate the font floor', () => {
+		const audit: SlidevLayoutAudit = {
+			slide: 2,
+			safeRect: { left: 51.2, top: 43.2, right: 1228.8, bottom: 676.8, width: 1177.6, height: 633.6 },
+			contentBounds: { left: 48, top: 52, right: 1500, bottom: 820, width: 1452, height: 768 },
+			pageScale: 1,
+			effectiveMinFontPx: 14,
+			elementKinds: ['text'],
+			findings: [
+				{
+					kind: 'overflow',
+					target: 'content',
+					message: 'Slide content exceeds the safe visible rectangle',
+					recommendedPatch: 'reduce-zoom',
+					recommendedScale: 0.5,
+				},
+			],
+		};
+		const deck = [
+			'---',
+			'theme: default',
+			'---',
+			'',
+			'# Intro',
+			'',
+			'---',
+			'layout: default',
+			'---',
+			'',
+			'<div class="space-y-2">',
+			'  <StatBlock label="Queue A" value="128" />',
+			'  <StatBlock label="Queue B" value="256" />',
+			'</div>',
+		].join('\n');
+
+		const patched = patchDeckWithLayoutAudit(deck, [audit]);
+
+		expect(patched.changed).toBe(false);
+		expect(patched.blockedSlides).toEqual([
+			expect.objectContaining({
+				slide: 2,
+				reason: expect.stringContaining('would lower text below 10px'),
+			}),
+		]);
+		expect(patched.deckMarkdown).not.toContain('<Transform :scale=');
+		expect(patched.deckMarkdown).not.toContain('zoom: 0.5');
 	});
 
 	test('allows supported single-slot built-in layouts to split content without slot markers', () => {
