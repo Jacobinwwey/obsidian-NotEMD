@@ -81,3 +81,22 @@ architecture.zh-CN-slides/
 本次验收证明直接 PPTX 导出已经接入生产等价的 NoteMD 工作流，并且会输出 PowerPoint 可编辑文本。它不声称每个 Slidev 对象都已经被重建为 Office 原生可编辑对象。Mermaid、SVG、canvas 和复杂 Vue/CSS surface 当前按设计保留为图片 fallback。
 
 后续更有价值的升级是表格重建、代码块以等宽 text runs 抽取、以及选择性 shape extraction。这些升级仍应由 sidecar report 量化，而不是把“可编辑”退化成无法验证的口号。
+
+## 视觉对比后续补充
+
+同日后续新增了更严格的 PPTX 回渲染视觉质量门：
+
+```bash
+npm run verify:slidev-export -- --vault docs --source architecture.zh-CN.md --format pptx --output-subfolder export/test-slidev-pptx-visual-diff --sample-slides all --timeout-ms 240000 --no-screenshots --pptx-visual-diff --json
+```
+
+该 run 完成了生产等价导出路径，并生成逐页对比产物，但视觉质量门没有通过：
+
+1. `pageCount = 27`
+2. `comparablePageCount = 27`
+3. `meanRmse = 0.15322961111111114`
+4. `maxRmse = 0.260447`
+5. 默认阈值：`meanRmse <= 0.08`，`maxRmse <= 0.12`
+6. 最差页：21、19、24、20、16、17、18、10、22、15、13、12
+
+因此这份验收记录应理解为结构/可编辑性验收，不是最终视觉保真验收。后续收口门槛是 `--pptx-visual-diff --require-pptx-visual-match`。

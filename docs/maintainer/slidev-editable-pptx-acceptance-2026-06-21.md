@@ -81,3 +81,22 @@ architecture.zh-CN-slides/
 This acceptance proves direct PPTX export is wired into the production-equivalent NoteMD workflow and produces editable PowerPoint text. It does not claim every Slidev object is Office-native editable. Mermaid, SVG, canvas, and complex Vue/CSS surfaces are preserved as image fallback by design.
 
 The next useful upgrades are table reconstruction, code-block text extraction with monospace runs, and selective shape extraction. Those should be gated by the same sidecar report instead of weakening the editable contract into an unmeasured claim.
+
+## Visual Diff Follow-up
+
+A later same-day PPTX render-back audit added a stricter visual-fidelity gate:
+
+```bash
+npm run verify:slidev-export -- --vault docs --source architecture.zh-CN.md --format pptx --output-subfolder export/test-slidev-pptx-visual-diff --sample-slides all --timeout-ms 240000 --no-screenshots --pptx-visual-diff --json
+```
+
+That run completed the production-equivalent export path and generated per-page comparison artifacts, but the visual gate did not pass:
+
+1. `pageCount = 27`
+2. `comparablePageCount = 27`
+3. `meanRmse = 0.15322961111111114`
+4. `maxRmse = 0.260447`
+5. default thresholds: `meanRmse <= 0.08`, `maxRmse <= 0.12`
+6. worst slides: 21, 19, 24, 20, 16, 17, 18, 10, 22, 15, 13, 12
+
+So this acceptance record should be read as structural/editability acceptance, not final visual-fidelity acceptance. The next closure gate is `--pptx-visual-diff --require-pptx-visual-match`.

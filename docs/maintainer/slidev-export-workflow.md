@@ -18,7 +18,7 @@ The NoteMD workflow must verify all of these steps together:
 6. Generated deck guardrails normalize theme and slide frontmatter, strip generated Mermaid slide `zoom` so rendered audit owns measured fit, and reject LLM-generated decks that change source Mermaid fences before the prepared deck is written.
 7. HTML export attempts native standalone first, records the actual HTML mode, and falls back to server-script-compatible HTML only when the generated standalone bundle really misses slide loader bindings.
 8. The final HTML output is opened by a real browser check, auditing the full deck by default.
-9. Generated inspection artifacts remain visible to Git and are not accidentally hidden by `.gitignore`.
+9. Generated inspection artifacts remain inspectable on disk but ignored by Git, so verifier runs do not accidentally stage one-off export files.
 
 ## Maintainer Command
 
@@ -57,6 +57,27 @@ docs/export/architecture.zh-CN.pptx.report.json
 ```
 
 The verifier also opens the `.pptx` as a zip and checks slide XML for editable `<a:t>` text nodes. Treat image-only PPTX output as a failure for this path.
+
+To compare every PPTX page against the Slidev PNG reference output:
+
+```bash
+npm run verify:slidev-export -- --format pptx --source architecture.zh-CN.md --sample-slides all --timeout-ms 240000 --no-screenshots --pptx-visual-diff --json
+```
+
+This run writes:
+
+```text
+docs/export/architecture.zh-CN-pptx-visual-diff/pptx-visual-diff.report.json
+docs/export/architecture.zh-CN-pptx-visual-diff/comparison-metrics.csv
+docs/export/architecture.zh-CN-pptx-visual-diff/all-side-by-side-sheet.png
+docs/export/architecture.zh-CN-pptx-visual-diff/all-diff-sheet.png
+```
+
+Report mode records `pptxVisualDiff.gate.passed` but does not fail the whole verifier when visual thresholds are exceeded. For strict closure, add:
+
+```bash
+npm run verify:slidev-export -- --format pptx --source architecture.zh-CN.md --sample-slides all --timeout-ms 240000 --no-screenshots --pptx-visual-diff --require-pptx-visual-match --json
+```
 
 For a quieter machine-readable run:
 
@@ -138,7 +159,7 @@ Treat the command as passing only when the final JSON report has:
 7. `deck.containsKnownStaleText: false`
 8. `deck.containsMissingTheme: false`
 9. every `playwright[].failed` value equal to `false`
-10. `ignoredOutputs: []`
+10. `unignoredOutputs: []`
 11. `layoutAuditSummary.overflowCount: 0`
 12. `layoutAuditSummary.unreadableCount: 0`
 13. for strict native standalone closure, `htmlExport.actualMode: "standalone"`
@@ -155,6 +176,11 @@ Treat the command as passing only when the final JSON report has:
 24. for PPTX closure, `pptxInspection.textRunCount > 0`
 25. for PPTX closure, `pptxInspection.slidesWithoutEditableText` is empty when every source slide contains text
 26. for PPTX closure, the sidecar report records `textBoxCount`, `editableTextSlideCount`, `imageFallbackCount`, and `pagesWithoutEditableText`
+27. for PPTX visual closure, run with `--pptx-visual-diff --require-pptx-visual-match`
+28. for PPTX visual closure, `pptxVisualDiff.comparison.summary.missingReferenceSlides: []`
+29. for PPTX visual closure, `pptxVisualDiff.comparison.summary.missingRenderedSlides: []`
+30. for PPTX visual closure, `pptxVisualDiff.comparison.summary.maxRmse <= 0.12`
+31. for PPTX visual closure, `pptxVisualDiff.comparison.summary.meanRmse <= 0.08`
 
 If any check fails, fix the NoteMD workflow before relying on the exported files.
 

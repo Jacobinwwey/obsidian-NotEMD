@@ -58,6 +58,9 @@ docs/*_diagram_preview.svg
 docs/*_diagram_preview.png
 
 # local Slidev test export artifacts
+docs/export/*
+!docs/export/README.md
+!docs/export/README.zh-CN.md
 docs/export/test-slidev-*/
 docs/export/test-slidev.pdf
 docs/export/test-slidev-video.mp4

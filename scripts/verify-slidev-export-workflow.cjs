@@ -12,6 +12,7 @@ const childProcess = require('child_process');
 const fs = require('fs');
 const path = require('path');
 const esbuild = require('esbuild');
+const { buildPptxVisualDiff } = require('./lib/pptx-visual-diff');
 
 const LAYOUT_AUDIT_CONFIG = {
 	overflowTolerancePx: 6,
@@ -40,6 +41,12 @@ function parseArgs(argv) {
 		playwright: true,
 		screenshots: true,
 		sampleSlides: null,
+		pptxVisualDiff: false,
+		requirePptxVisualMatch: false,
+		pptxVisualMaxRmse: 0.12,
+		pptxVisualMeanRmse: 0.08,
+		pptxVisualDpi: 150,
+		pptxVisualDiffDir: null,
 		json: false,
 	};
 
@@ -70,6 +77,19 @@ function parseArgs(argv) {
 			args.playwright = false;
 		} else if (arg === '--no-screenshots') {
 			args.screenshots = false;
+		} else if (arg === '--pptx-visual-diff') {
+			args.pptxVisualDiff = true;
+		} else if (arg === '--require-pptx-visual-match') {
+			args.requirePptxVisualMatch = true;
+			args.pptxVisualDiff = true;
+		} else if (arg === '--pptx-visual-max-rmse' && argv[index + 1]) {
+			args.pptxVisualMaxRmse = Number(argv[++index]);
+		} else if (arg === '--pptx-visual-mean-rmse' && argv[index + 1]) {
+			args.pptxVisualMeanRmse = Number(argv[++index]);
+		} else if (arg === '--pptx-visual-dpi' && argv[index + 1]) {
+			args.pptxVisualDpi = Number(argv[++index]);
+		} else if (arg === '--pptx-visual-diff-dir' && argv[index + 1]) {
+			args.pptxVisualDiffDir = argv[++index];
 		} else if (arg === '--json') {
 			args.json = true;
 		} else if (arg === '--help' || arg === '-h') {
@@ -92,6 +112,18 @@ function parseArgs(argv) {
 	if (args.requireNativeStandalone && (args.format !== 'html' || args.htmlMode !== 'standalone')) {
 		throw new Error('--require-native-standalone requires --format html --html-mode standalone');
 	}
+	if (args.pptxVisualDiff && args.format !== 'pptx') {
+		throw new Error('--pptx-visual-diff requires --format pptx');
+	}
+	if (!Number.isFinite(args.pptxVisualMaxRmse) || args.pptxVisualMaxRmse < 0) {
+		throw new Error('--pptx-visual-max-rmse must be a non-negative number');
+	}
+	if (!Number.isFinite(args.pptxVisualMeanRmse) || args.pptxVisualMeanRmse < 0) {
+		throw new Error('--pptx-visual-mean-rmse must be a non-negative number');
+	}
+	if (!Number.isFinite(args.pptxVisualDpi) || args.pptxVisualDpi <= 0) {
+		throw new Error('--pptx-visual-dpi must be a positive number');
+	}
 
 	return args;
 }
@@ -111,6 +143,12 @@ function printHelp() {
 		'  --sample-slides <list|all> Comma-separated slide numbers for Playwright, default: all slides',
 		'  --no-playwright            Skip browser rendering checks',
 		'  --no-screenshots           Do not write Playwright screenshots',
+		'  --pptx-visual-diff         Render PPTX back to PNG and compare each page with Slidev PNG export',
+		'  --require-pptx-visual-match Fail when PPTX/PNG visual diff exceeds thresholds',
+		'  --pptx-visual-max-rmse <n> Max per-slide normalized RMSE, default: 0.12',
+		'  --pptx-visual-mean-rmse <n> Mean normalized RMSE, default: 0.08',
+		'  --pptx-visual-dpi <n>      LibreOffice/PDF render DPI, default: 150',
+		'  --pptx-visual-diff-dir <path> Output directory for visual diff artifacts',
 		'  --json                     Print only the final JSON report',
 	].join('\n'));
 }
@@ -641,22 +679,37 @@ function resolveSlidesToAudit(sampleSlides, deckMarkdown, slideExport) {
 	return filteredSlides.length > 0 ? filteredSlides : allSlides;
 }
 
-function checkIgnored(pathsToCheck) {
+function checkGitIgnoreStatus(pathsToCheck) {
 	const existingPaths = pathsToCheck.filter(Boolean).filter(filePath => fs.existsSync(filePath));
 	if (existingPaths.length === 0) {
-		return [];
+		return {
+			ignoredOutputs: [],
+			unignoredOutputs: [],
+			error: null,
+		};
 	}
 
 	const relativePaths = existingPaths.map(filePath => path.relative(process.cwd(), filePath));
-	const result = childProcess.spawnSync('git', ['check-ignore', '-v', ...relativePaths], {
+	const result = childProcess.spawnSync('git', ['check-ignore', '-v', '--stdin'], {
 		cwd: process.cwd(),
 		encoding: 'utf8',
+		input: `${relativePaths.join('\n')}\n`,
 	});
 
-	return result.stdout
+	const ignoredOutputs = result.stdout
 		.split(/\r?\n/)
 		.map(line => line.trim())
 		.filter(Boolean);
+	const ignoredRelativePaths = new Set(ignoredOutputs.map(line => {
+		const parts = line.split('\t');
+		return (parts[parts.length - 1] || line).trim();
+	}));
+
+	return {
+		ignoredOutputs,
+		unignoredOutputs: relativePaths.filter(filePath => !ignoredRelativePaths.has(filePath)),
+		error: result.status && result.status > 1 ? (result.stderr || result.stdout || `git check-ignore exited ${result.status}`) : null,
+	};
 }
 
 function inspectPptx(pptxPath) {
@@ -774,11 +827,60 @@ async function main() {
 	let layoutPatchAttempts = layoutConvergence?.layoutPatchAttempts ?? [];
 	let auditedSlides = layoutConvergence?.auditedSlides ?? [];
 	const pptxInspection = args.format === 'pptx' ? inspectPptx(absoluteExportPath) : null;
+	let pptxReferencePngDirectory = null;
+	let pptxVisualDiff = null;
+	if (args.format === 'pptx' && args.pptxVisualDiff) {
+		onProgress('pptx-visual-diff', 'Exporting Slidev PNG reference sequence...');
+		const referencePath = await slideExport.exportSlidevPng(app, slideSource, config, onProgress);
+		pptxReferencePngDirectory = path.join(vaultRoot, referencePath);
+		const visualDiffDirectory = args.pptxVisualDiffDir
+			? (path.isAbsolute(args.pptxVisualDiffDir)
+				? args.pptxVisualDiffDir
+				: path.join(vaultRoot, args.pptxVisualDiffDir))
+			: path.join(path.dirname(absoluteExportPath), `${path.basename(absoluteExportPath, path.extname(absoluteExportPath))}-pptx-visual-diff`);
+		onProgress('pptx-visual-diff', 'Rendering PPTX back to PNG and comparing pages...');
+		try {
+			pptxVisualDiff = buildPptxVisualDiff({
+				pptxPath: absoluteExportPath,
+				referenceDirectory: pptxReferencePngDirectory,
+				outputDirectory: visualDiffDirectory,
+				dpi: args.pptxVisualDpi,
+				timeoutMs: args.timeoutMs,
+				thresholds: {
+					maxRmse: args.pptxVisualMaxRmse,
+					meanRmse: args.pptxVisualMeanRmse,
+				},
+			});
+			onProgress(
+				'pptx-visual-diff',
+				pptxVisualDiff.gate?.passed
+					? 'PPTX visual diff is within thresholds.'
+					: `PPTX visual diff exceeded thresholds: ${(pptxVisualDiff.gate?.failures || []).join('; ')}`,
+			);
+		} catch (error) {
+			pptxVisualDiff = {
+				available: false,
+				outputDirectory: visualDiffDirectory,
+				error: error instanceof Error ? error.message : String(error),
+				gate: {
+					passed: false,
+					failures: [error instanceof Error ? error.message : String(error)],
+					thresholds: {
+						maxRmse: args.pptxVisualMaxRmse,
+						meanRmse: args.pptxVisualMeanRmse,
+					},
+				},
+			};
+			onProgress('pptx-visual-diff', `PPTX visual diff failed: ${pptxVisualDiff.error}`);
+		}
+	}
 
-	const ignoredOutputs = checkIgnored([
+	const gitIgnoreStatus = checkGitIgnoreStatus([
 		absoluteDeckPath,
 		absoluteExportPath,
 		pptxReportPath,
+		pptxReferencePngDirectory,
+		pptxVisualDiff?.outputDirectory,
 		htmlExport?.standaloneAttempt?.preservedFailurePath
 			? path.join(vaultRoot, htmlExport.standaloneAttempt.preservedFailurePath)
 			: null,
@@ -790,6 +892,8 @@ async function main() {
 			: null,
 		...playwrightChecks.map(check => check.screenshotPath),
 	]);
+	const ignoredOutputs = gitIgnoreStatus.ignoredOutputs;
+	const unignoredOutputs = gitIgnoreStatus.unignoredOutputs;
 	const hasLayoutFailures = layoutAudits.some(audit => audit.findings.length > 0);
 	const nativeStandalonePassed = htmlExport?.actualMode === 'standalone'
 		&& htmlExport?.standaloneAttempt?.accepted === true
@@ -801,13 +905,26 @@ async function main() {
 			? `Expected native standalone HTML but actual mode was ${htmlExport?.actualMode || 'unavailable'}`
 			: null,
 	};
+	const pptxVisualDiffExecutionPassed = !args.pptxVisualDiff || Boolean(pptxVisualDiff?.available && !pptxVisualDiff?.error);
+	const pptxVisualGate = {
+		required: args.requirePptxVisualMatch,
+		passed: !args.requirePptxVisualMatch || Boolean(pptxVisualDiff?.gate?.passed),
+		failures: args.requirePptxVisualMatch ? (pptxVisualDiff?.gate?.failures || []) : [],
+		thresholds: {
+			maxRmse: args.pptxVisualMaxRmse,
+			meanRmse: args.pptxVisualMeanRmse,
+		},
+	};
 
 	const report = {
 		ok: playwrightChecks.every(check => !check.failed)
 			&& environment.capabilities[args.format] === true
 			&& fs.existsSync(absoluteExportPath)
-			&& ignoredOutputs.length === 0
+			&& !gitIgnoreStatus.error
+			&& unignoredOutputs.length === 0
 			&& (args.format !== 'pptx' || Boolean(pptxInspection?.isZip && pptxInspection.textRunCount > 0))
+			&& pptxVisualDiffExecutionPassed
+			&& pptxVisualGate.passed
 			&& !hasLayoutFailures
 			&& (!deckSummary || (!deckSummary.containsKnownStaleText && !deckSummary.containsMissingTheme))
 			&& (!mermaidSourcePreservation || mermaidSourcePreservation.passed)
@@ -839,6 +956,8 @@ async function main() {
 			pptxReportPath,
 		},
 		pptxInspection,
+		pptxVisualDiff,
+		pptxVisualGate,
 		htmlExport,
 		htmlExportHistory,
 		standaloneGate,
@@ -850,6 +969,8 @@ async function main() {
 		layoutAuditSummary,
 		layoutPatchAttempts,
 		ignoredOutputs,
+		unignoredOutputs,
+		gitIgnoreCheckError: gitIgnoreStatus.error,
 		progress,
 	};
 

@@ -18,7 +18,7 @@ NoteMD 的验证必须把以下步骤串起来看：
 6. 生成 deck 的 guardrails 会规范 theme 与逐页 frontmatter，并剥离生成页中的 Mermaid `zoom`，让 rendered audit 拥有实测 fit 决策权；LLM 生成的 deck 如果改变源 Mermaid fence，会在写入 prepared deck 前被拒绝。
 7. HTML 导出会先尝试 native standalone，记录实际 HTML mode；只有在生成的 standalone bundle 确实缺少 slide loader binding 时，才自动回退到 server-script 兼容 HTML。
 8. 最终 HTML 输出会经过真实浏览器打开，并默认审计整个 deck。
-9. 生成的检查产物对 Git 可见，不会被 `.gitignore` 意外隐藏。
+9. 生成的检查产物会保留在磁盘上供维护者直接打开检查，但默认被 Git 忽略，避免一次性导出文件误入提交。
 
 ## 维护者命令
 
@@ -57,6 +57,27 @@ docs/export/architecture.zh-CN.pptx.report.json
 ```
 
 verifier 会把 `.pptx` 当作 zip 打开，并检查 slide XML 中是否存在可编辑文本节点 `<a:t>`。如果只是图片式 PPTX，这条路径应视为失败。
+
+如果要逐页比较 PPTX 回放结果与 Slidev PNG reference：
+
+```bash
+npm run verify:slidev-export -- --format pptx --source architecture.zh-CN.md --sample-slides all --timeout-ms 240000 --no-screenshots --pptx-visual-diff --json
+```
+
+该路径会写出：
+
+```text
+docs/export/architecture.zh-CN-pptx-visual-diff/pptx-visual-diff.report.json
+docs/export/architecture.zh-CN-pptx-visual-diff/comparison-metrics.csv
+docs/export/architecture.zh-CN-pptx-visual-diff/all-side-by-side-sheet.png
+docs/export/architecture.zh-CN-pptx-visual-diff/all-diff-sheet.png
+```
+
+报告模式会记录 `pptxVisualDiff.gate.passed`，但视觉阈值超标时不会让整个 verifier 失败。严格收口时加：
+
+```bash
+npm run verify:slidev-export -- --format pptx --source architecture.zh-CN.md --sample-slides all --timeout-ms 240000 --no-screenshots --pptx-visual-diff --require-pptx-visual-match --json
+```
 
 如果只需要机器可读的轻量结果：
 
@@ -138,7 +159,7 @@ docs/maintainer/slidev-standalone-acceptance-2026-06-18.zh-CN.md
 7. `deck.containsKnownStaleText: false`
 8. `deck.containsMissingTheme: false`
 9. 所有 `playwright[].failed` 都是 `false`
-10. `ignoredOutputs: []`
+10. `unignoredOutputs: []`
 11. `layoutAuditSummary.overflowCount: 0`
 12. `layoutAuditSummary.unreadableCount: 0`
 13. 严格 native standalone 收口时，`htmlExport.actualMode: "standalone"`
@@ -155,6 +176,11 @@ docs/maintainer/slidev-standalone-acceptance-2026-06-18.zh-CN.md
 24. PPTX 收口时，`pptxInspection.textRunCount > 0`
 25. PPTX 收口时，若源 deck 每页都有文本，`pptxInspection.slidesWithoutEditableText` 必须为空
 26. PPTX 收口时，sidecar report 必须记录 `textBoxCount`、`editableTextSlideCount`、`imageFallbackCount` 与 `pagesWithoutEditableText`
+27. PPTX 视觉收口时，必须加 `--pptx-visual-diff --require-pptx-visual-match`
+28. PPTX 视觉收口时，`pptxVisualDiff.comparison.summary.missingReferenceSlides: []`
+29. PPTX 视觉收口时，`pptxVisualDiff.comparison.summary.missingRenderedSlides: []`
+30. PPTX 视觉收口时，`pptxVisualDiff.comparison.summary.maxRmse <= 0.12`
+31. PPTX 视觉收口时，`pptxVisualDiff.comparison.summary.meanRmse <= 0.08`
 
 任一条件失败，都应先修 NoteMD 工作流，再相信导出文件。
 
