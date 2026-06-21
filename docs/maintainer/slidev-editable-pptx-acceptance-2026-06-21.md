@@ -12,7 +12,8 @@ The accepted contract is not screenshot-only PPTX. It is:
 2. extract visible rendered text into editable PowerPoint text frames;
 3. preserve complex Slidev/Mermaid/CSS visuals through a slide-level image fallback layer;
 4. generate a real `.pptx` zip with PresentationML slide XML and `<a:t>` text nodes;
-5. write a sidecar JSON report so editability is measurable rather than implied.
+5. emit a native DrawingML structural layer for HTML `<table>` elements without making it the visible rendering source by default;
+6. write a sidecar JSON report so editability is measurable rather than implied.
 
 ## Command
 
@@ -100,3 +101,17 @@ That run completed the production-equivalent export path and generated per-page 
 6. worst slides: 21, 19, 24, 20, 16, 17, 18, 10, 22, 15, 13, 12
 
 So this acceptance record should be read as structural/editability acceptance, not final visual-fidelity acceptance. The next closure gate is `--pptx-visual-diff --require-pptx-visual-match`.
+
+## Structural Table Follow-up
+
+NoteMD later added a transparent native DrawingML table layer based on the table-first extraction direction in `oh-my-ppt`. The latest real `architecture.zh-CN.md` inspector run still returns `ok: true` and records:
+
+1. `pptxInspection.textRunCount = 331`
+2. `pptxInspection.tableCount = 4`
+3. sidecar `tableCount = 4`
+4. sidecar `editableTableCellCount = 95`
+5. `pptxInspection.slidesWithoutEditableText = []`
+
+The table layer is intentionally transparent. Two attempts to make native tables visible both regressed the real visual diff: visible native table reached `meanRmse = 0.15640467407407407`, and hybrid native-table text reached `meanRmse = 0.15657594444444442`, both worse than the baseline `0.15322961111111114`. The current transparent structural layer reports `meanRmse = 0.15259227777777779` and `maxRmse = 0.260447`, which is a small improvement but still fails the default visual gate.
+
+Conclusion: table-first extraction is the right architecture direction, but Office-native tables should not become the visible layer until padding, border collapse, line height, cell baseline, and font fallback are modeled well enough to pass visual diff.

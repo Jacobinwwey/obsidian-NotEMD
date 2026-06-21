@@ -12,7 +12,8 @@
 2. 把真实可见文本抽取为 PowerPoint 可编辑 text frame；
 3. 将复杂 Slidev/Mermaid/CSS 视觉保留为 slide-level image fallback；
 4. 生成真正的 `.pptx` zip，其中 slide XML 含 `<a:t>` 文本节点；
-5. 写出 sidecar JSON report，用数据说明可编辑覆盖率，而不是口头暗示。
+5. 对 HTML `<table>` 输出 native DrawingML 结构层，但默认不让它接管可见渲染；
+6. 写出 sidecar JSON report，用数据说明可编辑覆盖率，而不是口头暗示。
 
 ## 命令
 
@@ -100,3 +101,17 @@ npm run verify:slidev-export -- --vault docs --source architecture.zh-CN.md --fo
 6. 最差页：21、19、24、20、16、17、18、10、22、15、13、12
 
 因此这份验收记录应理解为结构/可编辑性验收，不是最终视觉保真验收。后续收口门槛是 `--pptx-visual-diff --require-pptx-visual-match`。
+
+## 结构化表格后续补充
+
+随后参考 `oh-my-ppt` 的 table-first extraction 路线，NoteMD 增加了透明 native DrawingML table 结构层。最新真实 `architecture.zh-CN.md` inspector run 仍返回 `ok: true`，并额外记录：
+
+1. `pptxInspection.textRunCount = 331`
+2. `pptxInspection.tableCount = 4`
+3. sidecar `tableCount = 4`
+4. sidecar `editableTableCellCount = 95`
+5. `pptxInspection.slidesWithoutEditableText = []`
+
+这里的表格结构层是有意透明的。两次让原生表格进入可见层的实测结果都变差：可见 native table 的 `meanRmse = 0.15640467407407407`，hybrid native table text 的 `meanRmse = 0.15657594444444442`，均差于基线 `0.15322961111111114`。当前透明结构层为 `meanRmse = 0.15259227777777779`、`maxRmse = 0.260447`，略优于基线但仍未通过默认视觉门槛。
+
+结论：表格先抽取是正确架构方向，但当前不应把 Office 原生表格作为可见层。下一步应先补齐 padding、border collapse、line-height、cell baseline 与字体 fallback 的 round-trip 模型，再用 visual diff 决定是否逐步放开可见表格层。

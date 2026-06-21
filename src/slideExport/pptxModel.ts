@@ -22,6 +22,36 @@ export interface SlidevPptxTextBox {
 	order: number;
 }
 
+export type SlidevPptxVerticalAlign = 'top' | 'middle' | 'bottom';
+
+export interface SlidevPptxTableCell {
+	text: string;
+	rowSpan: number;
+	colSpan: number;
+	fontSize: number;
+	fontFace: string;
+	color: string;
+	bold: boolean;
+	italic: boolean;
+	underline: boolean;
+	align: SlidevPptxTextAlign;
+	verticalAlign: SlidevPptxVerticalAlign;
+	fillColor: string | null;
+	borderColor: string | null;
+	borderWidthPt: number;
+}
+
+export interface SlidevPptxTable {
+	x: number;
+	y: number;
+	w: number;
+	h: number;
+	colWidths: number[];
+	rowHeights: number[];
+	rows: SlidevPptxTableCell[][];
+	order: number;
+}
+
 export interface SlidevPptxImage {
 	data: Uint8Array;
 	mimeType: 'image/png' | 'image/jpeg';
@@ -39,6 +69,7 @@ export interface SlidevPptxSlide {
 	backgroundColor: string;
 	backgroundImage?: SlidevPptxImage;
 	texts: SlidevPptxTextBox[];
+	tables: SlidevPptxTable[];
 	warnings: string[];
 }
 
@@ -60,6 +91,8 @@ export interface SlidevPptxExportReport {
 	};
 	slideCount: number;
 	textBoxCount: number;
+	tableCount: number;
+	editableTableCellCount: number;
 	editableTextSlideCount: number;
 	pagesWithoutEditableText: number[];
 	backgroundImageSlideCount: number;

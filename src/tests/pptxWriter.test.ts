@@ -47,6 +47,64 @@ describe('pptxWriter', () => {
 						bullet: false,
 						order: 10,
 					}],
+					tables: [{
+						x: 1,
+						y: 2.25,
+						w: 5,
+						h: 1,
+						colWidths: [2, 3],
+						rowHeights: [0.45, 0.55],
+						order: 20,
+						rows: [
+							[{
+								text: 'Header',
+								rowSpan: 1,
+								colSpan: 1,
+								fontSize: 12,
+								fontFace: 'Aptos',
+								color: '111827',
+								bold: true,
+								italic: false,
+								underline: false,
+								align: 'left',
+								verticalAlign: 'middle',
+								fillColor: 'F3F4F6',
+								borderColor: 'D1D5DB',
+								borderWidthPt: 0.75,
+							}, {
+								text: '值',
+								rowSpan: 1,
+								colSpan: 1,
+								fontSize: 12,
+								fontFace: 'Aptos',
+								color: '111827',
+								bold: true,
+								italic: false,
+								underline: false,
+								align: 'center',
+								verticalAlign: 'middle',
+								fillColor: 'F3F4F6',
+								borderColor: 'D1D5DB',
+								borderWidthPt: 0.75,
+							}],
+							[{
+								text: 'Editable table cell',
+								rowSpan: 1,
+								colSpan: 2,
+								fontSize: 11,
+								fontFace: 'Aptos',
+								color: '374151',
+								bold: false,
+								italic: false,
+								underline: false,
+								align: 'left',
+								verticalAlign: 'top',
+								fillColor: null,
+								borderColor: 'D1D5DB',
+								borderWidthPt: 0.75,
+							}],
+						],
+					}],
 					warnings: [],
 				}],
 			};
@@ -63,6 +121,15 @@ describe('pptxWriter', () => {
 			expect(slideXml).toContain('<a:bodyPr wrap="square" lIns="0" tIns="0" rIns="0" bIns="0" rtlCol="0" anchor="t">');
 			expect(slideXml).toContain('<a:normAutofit fontScale="100000"/>');
 			expect(slideXml).toContain('<p:pic>');
+			expect(slideXml).toContain('<p:graphicFrame>');
+			expect(slideXml).toContain('<a:tbl>');
+			expect(slideXml).toContain('<a:gridCol');
+			expect(slideXml).toContain('<a:t>Header</a:t>');
+			expect(slideXml).toContain('<a:t>值</a:t>');
+			expect(slideXml).toContain('<a:t>Editable table cell</a:t>');
+			expect(slideXml).toContain('gridSpan="2"');
+			expect(slideXml).toContain('<a:alpha val="0"/>');
+			expect(slideXml).toContain('<a:lnL><a:noFill/></a:lnL>');
 		} finally {
 			rmSync(directory, { recursive: true, force: true });
 		}

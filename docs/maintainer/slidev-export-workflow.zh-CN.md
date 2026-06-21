@@ -56,7 +56,7 @@ docs/export/architecture.zh-CN.pptx
 docs/export/architecture.zh-CN.pptx.report.json
 ```
 
-verifier 会把 `.pptx` 当作 zip 打开，并检查 slide XML 中是否存在可编辑文本节点 `<a:t>`。如果只是图片式 PPTX，这条路径应视为失败。
+verifier 会把 `.pptx` 当作 zip 打开，并检查 slide XML 中是否存在可编辑文本节点 `<a:t>`，同时通过 `pptxInspection.tableCount` 统计 native DrawingML table。如果只是图片式 PPTX，这条路径应视为失败。
 
 如果要逐页比较 PPTX 回放结果与 Slidev PNG reference：
 
@@ -175,12 +175,13 @@ docs/maintainer/slidev-standalone-acceptance-2026-06-18.zh-CN.md
 23. PPTX 收口时，`pptxInspection.isZip: true`
 24. PPTX 收口时，`pptxInspection.textRunCount > 0`
 25. PPTX 收口时，若源 deck 每页都有文本，`pptxInspection.slidesWithoutEditableText` 必须为空
-26. PPTX 收口时，sidecar report 必须记录 `textBoxCount`、`editableTextSlideCount`、`imageFallbackCount` 与 `pagesWithoutEditableText`
-27. PPTX 视觉收口时，必须加 `--pptx-visual-diff --require-pptx-visual-match`
-28. PPTX 视觉收口时，`pptxVisualDiff.comparison.summary.missingReferenceSlides: []`
-29. PPTX 视觉收口时，`pptxVisualDiff.comparison.summary.missingRenderedSlides: []`
-30. PPTX 视觉收口时，`pptxVisualDiff.comparison.summary.maxRmse <= 0.12`
-31. PPTX 视觉收口时，`pptxVisualDiff.comparison.summary.meanRmse <= 0.08`
+26. PPTX 收口时，含表格的 deck 应满足 `pptxInspection.tableCount > 0`
+27. PPTX 收口时，sidecar report 必须记录 `textBoxCount`、`tableCount`、`editableTableCellCount`、`editableTextSlideCount`、`imageFallbackCount` 与 `pagesWithoutEditableText`
+28. PPTX 视觉收口时，必须加 `--pptx-visual-diff --require-pptx-visual-match`
+29. PPTX 视觉收口时，`pptxVisualDiff.comparison.summary.missingReferenceSlides: []`
+30. PPTX 视觉收口时，`pptxVisualDiff.comparison.summary.missingRenderedSlides: []`
+31. PPTX 视觉收口时，`pptxVisualDiff.comparison.summary.maxRmse <= 0.12`
+32. PPTX 视觉收口时，`pptxVisualDiff.comparison.summary.meanRmse <= 0.08`
 
 任一条件失败，都应先修 NoteMD 工作流，再相信导出文件。
 

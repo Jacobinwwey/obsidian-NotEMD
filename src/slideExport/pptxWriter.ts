@@ -5,6 +5,8 @@ import {
 	type SlidevPptxDocument,
 	type SlidevPptxImage,
 	type SlidevPptxSlide,
+	type SlidevPptxTable,
+	type SlidevPptxTableCell,
 	type SlidevPptxTextAlign,
 	type SlidevPptxTextBox,
 } from './pptxModel';
@@ -126,6 +128,192 @@ function buildTextShape(textBox: SlidevPptxTextBox, shapeId: number): string {
 	].join('');
 }
 
+function buildTableCellRun(text: string, cell: SlidevPptxTableCell): string {
+	const color = clampHexColor(cell.color, '111827');
+	const size = Math.max(600, Math.min(14400, Math.round(cell.fontSize * 100)));
+	const bold = cell.bold ? ' b="1"' : '';
+	const italic = cell.italic ? ' i="1"' : '';
+	const underline = cell.underline ? ' u="sng"' : '';
+	const fontFace = escapeXmlAttribute(cell.fontFace || 'Aptos');
+	const eastAsiaFont = /[\u3400-\u9fff\uf900-\ufaff]/.test(text) ? 'Microsoft YaHei' : fontFace;
+
+	return [
+		'<a:r>',
+		`<a:rPr lang="en-US" sz="${size}"${bold}${italic}${underline}>`,
+		`<a:solidFill><a:srgbClr val="${color}"><a:alpha val="0"/></a:srgbClr></a:solidFill>`,
+		`<a:latin typeface="${fontFace}"/>`,
+		`<a:ea typeface="${escapeXmlAttribute(eastAsiaFont)}"/>`,
+		'<a:cs typeface="Aptos"/>',
+		'</a:rPr>',
+		`<a:t>${escapeXml(text)}</a:t>`,
+		'</a:r>',
+	].join('');
+}
+
+function buildTableCellParagraphs(cell: SlidevPptxTableCell): string {
+	const lines = cell.text
+		.replace(/\r\n?/g, '\n')
+		.split('\n')
+		.map(line => line.trimEnd())
+		.filter((line, index, allLines) => line.length > 0 || allLines.length === 1);
+	const align = alignToOoxml(cell.align);
+	const size = Math.max(600, Math.min(14400, Math.round(cell.fontSize * 100)));
+
+	return lines.map(line => [
+		'<a:p>',
+		`<a:pPr algn="${align}"/>`,
+		buildTableCellRun(line || ' ', cell),
+		`<a:endParaRPr lang="en-US" sz="${size}"/>`,
+		'</a:p>',
+	].join('')).join('');
+}
+
+function buildTableCellProperties(cell: SlidevPptxTableCell): string {
+	const attributes: string[] = [];
+	const invisibleBorders = [
+		'<a:lnL><a:noFill/></a:lnL>',
+		'<a:lnR><a:noFill/></a:lnR>',
+		'<a:lnT><a:noFill/></a:lnT>',
+		'<a:lnB><a:noFill/></a:lnB>',
+	].join('');
+	if (cell.verticalAlign === 'middle') {
+		attributes.push('anchor="ctr"');
+	} else if (cell.verticalAlign === 'bottom') {
+		attributes.push('anchor="b"');
+	}
+	// Visible table paint and text stay in the DOM-derived layers until native table layout can match Slidev.
+	return `<a:tcPr${attributes.length > 0 ? ` ${attributes.join(' ')}` : ''}><a:noFill/>${invisibleBorders}</a:tcPr>`;
+}
+
+function buildEmptyTableCell(attributes = ''): string {
+	return [
+		`<a:tc${attributes}>`,
+		'<a:txBody>',
+		'<a:bodyPr/>',
+		'<a:lstStyle/>',
+		'<a:p><a:endParaRPr lang="en-US"/></a:p>',
+		'</a:txBody>',
+		buildTableCellProperties({
+			text: '',
+			rowSpan: 1,
+			colSpan: 1,
+			fontSize: 12,
+			fontFace: 'Aptos',
+			color: '111827',
+			bold: false,
+			italic: false,
+			underline: false,
+			align: 'left',
+			verticalAlign: 'top',
+			fillColor: null,
+			borderColor: null,
+			borderWidthPt: 0,
+		}),
+		'</a:tc>',
+	].join('');
+}
+
+function buildTableXml(table: SlidevPptxTable, shapeId: number): string {
+	const maxCols = Math.max(
+		table.colWidths.length,
+		...table.rows.map(row => row.reduce((total, cell) => total + Math.max(1, cell.colSpan), 0)),
+		1,
+	);
+	const totalRows = Math.max(table.rows.length, 1);
+	type TableGridEntry = {
+		cell: SlidevPptxTableCell;
+		origin: boolean;
+		rowSpan: number;
+		colSpan: number;
+		hMerge: boolean;
+		vMerge: boolean;
+	};
+	const cellGrid: Array<Array<TableGridEntry | null>> = Array.from({ length: totalRows }, () => (
+		Array.from({ length: maxCols }, () => null)
+	));
+
+	for (let rowIndex = 0; rowIndex < table.rows.length; rowIndex += 1) {
+		let colIndex = 0;
+		for (const cell of table.rows[rowIndex]) {
+			while (colIndex < maxCols && cellGrid[rowIndex][colIndex]) {
+				colIndex += 1;
+			}
+			if (colIndex >= maxCols) break;
+			const rowSpan = Math.min(Math.max(1, cell.rowSpan), totalRows - rowIndex);
+			const colSpan = Math.min(Math.max(1, cell.colSpan), maxCols - colIndex);
+			for (let rowOffset = 0; rowOffset < rowSpan; rowOffset += 1) {
+				for (let colOffset = 0; colOffset < colSpan; colOffset += 1) {
+					cellGrid[rowIndex + rowOffset][colIndex + colOffset] = {
+						cell,
+						origin: rowOffset === 0 && colOffset === 0,
+						rowSpan,
+						colSpan,
+						hMerge: colOffset > 0,
+						vMerge: rowOffset > 0,
+					};
+				}
+			}
+			colIndex += colSpan;
+		}
+	}
+
+	const defaultColWidth = table.w / maxCols;
+	const gridColumns = Array.from({ length: maxCols }, (_unused, index) => table.colWidths[index] || defaultColWidth);
+	const gridColumnsXml = gridColumns.map(width => `<a:gridCol w="${inchesToEmu(width)}"/>`).join('');
+	const rowsXml = cellGrid.map((gridRow, rowIndex) => {
+		const rowHeight = table.rowHeights[rowIndex] || table.h / totalRows;
+		const cellsXml = gridRow.map(gridEntry => {
+			if (!gridEntry) {
+				return buildEmptyTableCell();
+			}
+			if (!gridEntry.origin) {
+				const mergeAttributes = [
+					gridEntry.hMerge ? 'hMerge="1"' : '',
+					gridEntry.vMerge ? 'vMerge="1"' : '',
+				].filter(Boolean).join(' ');
+				return buildEmptyTableCell(mergeAttributes ? ` ${mergeAttributes}` : '');
+			}
+			const gridSpan = gridEntry.colSpan > 1 ? ` gridSpan="${gridEntry.colSpan}"` : '';
+			const rowSpan = gridEntry.rowSpan > 1 ? ` rowSpan="${gridEntry.rowSpan}"` : '';
+			return [
+				`<a:tc${gridSpan}${rowSpan}>`,
+				'<a:txBody>',
+				'<a:bodyPr/>',
+				'<a:lstStyle/>',
+				buildTableCellParagraphs(gridEntry.cell),
+				'</a:txBody>',
+				buildTableCellProperties(gridEntry.cell),
+				'</a:tc>',
+			].join('');
+		}).join('');
+		return `<a:tr h="${inchesToEmu(rowHeight)}">${cellsXml}</a:tr>`;
+	}).join('');
+	const name = escapeXmlAttribute(`Editable Table ${shapeId}`);
+
+	return [
+		'<p:graphicFrame>',
+		'<p:nvGraphicFramePr>',
+		`<p:cNvPr id="${shapeId}" name="${name}"/>`,
+		'<p:cNvGraphicFramePr/>',
+		'<p:nvPr/>',
+		'</p:nvGraphicFramePr>',
+		'<p:xfrm>',
+		`<a:off x="${inchesToEmu(table.x)}" y="${inchesToEmu(table.y)}"/>`,
+		`<a:ext cx="${inchesToEmu(table.w)}" cy="${inchesToEmu(table.h)}"/>`,
+		'</p:xfrm>',
+		'<a:graphic>',
+		'<a:graphicData uri="http://schemas.openxmlformats.org/drawingml/2006/table">',
+		'<a:tbl>',
+		'<a:tblPr firstRow="0" lastRow="0" firstCol="0" lastCol="0" noBandRow="1" noBandCol="1"/>',
+		`<a:tblGrid>${gridColumnsXml}</a:tblGrid>`,
+		rowsXml,
+		'</a:tbl>',
+		'</a:graphicData>',
+		'</a:graphic>',
+		'</p:graphicFrame>',
+	].join('');
+}
+
 function buildPicture(image: SlidevPptxImage, shapeId: number, relationshipId: string): string {
 	const x = inchesToEmu(image.x);
 	const y = inchesToEmu(image.y);
@@ -169,6 +357,14 @@ function buildSlideXml(slide: SlidevPptxSlide, imageRelationships: SlideImageRel
 		items.push({
 			order: text.order,
 			xml: buildTextShape(text, shapeId),
+		});
+		shapeId += 1;
+	}
+
+	for (const table of slide.tables) {
+		items.push({
+			order: table.order,
+			xml: buildTableXml(table, shapeId),
 		});
 		shapeId += 1;
 	}

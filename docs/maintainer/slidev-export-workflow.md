@@ -56,7 +56,7 @@ docs/export/architecture.zh-CN.pptx
 docs/export/architecture.zh-CN.pptx.report.json
 ```
 
-The verifier also opens the `.pptx` as a zip and checks slide XML for editable `<a:t>` text nodes. Treat image-only PPTX output as a failure for this path.
+The verifier also opens the `.pptx` as a zip and checks slide XML for editable `<a:t>` text nodes. It counts native DrawingML tables through `pptxInspection.tableCount`. Treat image-only PPTX output as a failure for this path.
 
 To compare every PPTX page against the Slidev PNG reference output:
 
@@ -175,12 +175,13 @@ Treat the command as passing only when the final JSON report has:
 23. for PPTX closure, `pptxInspection.isZip: true`
 24. for PPTX closure, `pptxInspection.textRunCount > 0`
 25. for PPTX closure, `pptxInspection.slidesWithoutEditableText` is empty when every source slide contains text
-26. for PPTX closure, the sidecar report records `textBoxCount`, `editableTextSlideCount`, `imageFallbackCount`, and `pagesWithoutEditableText`
-27. for PPTX visual closure, run with `--pptx-visual-diff --require-pptx-visual-match`
-28. for PPTX visual closure, `pptxVisualDiff.comparison.summary.missingReferenceSlides: []`
-29. for PPTX visual closure, `pptxVisualDiff.comparison.summary.missingRenderedSlides: []`
-30. for PPTX visual closure, `pptxVisualDiff.comparison.summary.maxRmse <= 0.12`
-31. for PPTX visual closure, `pptxVisualDiff.comparison.summary.meanRmse <= 0.08`
+26. for PPTX closure on decks with tables, `pptxInspection.tableCount > 0`
+27. for PPTX closure, the sidecar report records `textBoxCount`, `tableCount`, `editableTableCellCount`, `editableTextSlideCount`, `imageFallbackCount`, and `pagesWithoutEditableText`
+28. for PPTX visual closure, run with `--pptx-visual-diff --require-pptx-visual-match`
+29. for PPTX visual closure, `pptxVisualDiff.comparison.summary.missingReferenceSlides: []`
+30. for PPTX visual closure, `pptxVisualDiff.comparison.summary.missingRenderedSlides: []`
+31. for PPTX visual closure, `pptxVisualDiff.comparison.summary.maxRmse <= 0.12`
+32. for PPTX visual closure, `pptxVisualDiff.comparison.summary.meanRmse <= 0.08`
 
 If any check fails, fix the NoteMD workflow before relying on the exported files.
 

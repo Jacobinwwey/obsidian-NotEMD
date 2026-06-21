@@ -170,6 +170,10 @@ function buildReport(
 		},
 		slideCount: slides.length,
 		textBoxCount: slides.reduce((total, slide) => total + slide.texts.length, 0),
+		tableCount: slides.reduce((total, slide) => total + slide.tables.length, 0),
+		editableTableCellCount: slides.reduce((total, slide) => (
+			total + slide.tables.reduce((tableTotal, table) => tableTotal + table.rows.reduce((rowTotal, row) => rowTotal + row.length, 0), 0)
+		), 0),
 		editableTextSlideCount: slides.length - pagesWithoutEditableText.length,
 		pagesWithoutEditableText,
 		backgroundImageSlideCount: slides.filter(slide => Boolean(slide.backgroundImage)).length,
@@ -203,7 +207,7 @@ export async function exportSlidevPptxFromHtml(
 	writePptxDocument(outputPath, document);
 	const report = buildReport(absoluteHtmlPath, deckPath, outputPath, reportPath, slides);
 	writeFileSync(reportPath, JSON.stringify(report, null, 2), 'utf8');
-	onProgress?.('pptx-export', `PPTX export complete with ${report.textBoxCount} editable text boxes.`);
+	onProgress?.('pptx-export', `PPTX export complete with ${report.textBoxCount} editable text boxes and ${report.tableCount} native tables.`);
 
 	return {
 		path: `${config.outputSubfolder}/${source.outputBasename}.pptx`,

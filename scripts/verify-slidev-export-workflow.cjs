@@ -731,10 +731,12 @@ function inspectPptx(pptxPath) {
 			const xml = strFromU8(entries[name]);
 			const textRunCount = (xml.match(/<a:t>/g) || []).length;
 			const pictureCount = (xml.match(/<p:pic>/g) || []).length;
+			const tableCount = (xml.match(/<a:tbl>/g) || []).length;
 			return {
 				path: name,
 				textRunCount,
 				pictureCount,
+				tableCount,
 				hasEditableText: textRunCount > 0,
 			};
 		});
@@ -745,6 +747,7 @@ function inspectPptx(pptxPath) {
 			mediaCount: names.filter(name => /^ppt\/media\/image\d+\.(png|jpg|jpeg)$/.test(name)).length,
 			textRunCount: slideTextRuns.reduce((total, slide) => total + slide.textRunCount, 0),
 			pictureCount: slideTextRuns.reduce((total, slide) => total + slide.pictureCount, 0),
+			tableCount: slideTextRuns.reduce((total, slide) => total + slide.tableCount, 0),
 			slidesWithoutEditableText: slideTextRuns.filter(slide => !slide.hasEditableText).map(slide => slide.path),
 			slideTextRuns,
 		};
