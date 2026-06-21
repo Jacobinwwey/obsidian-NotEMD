@@ -390,6 +390,168 @@ function createUnsupportedComponentTableBoundaryStressDeck() {
     ].join('\n');
 }
 
+function createUnsupportedComponentFenceBoundaryStressDeck() {
+    return [
+        '---',
+        'theme: default',
+        'mdc: true',
+        '---',
+        '',
+        '# Unsupported Component Fence Boundary Stress',
+        '',
+        '```mermaid',
+        'flowchart LR',
+        '  Source[One source Mermaid fence] --> Deck[One exported Mermaid fence]',
+        '  Deck --> Review[Source-preserved review]',
+        '```',
+        '',
+        '---',
+        'layout: dashboard-shell',
+        '---',
+        '',
+        '## Unsupported Component Fence Surface',
+        '',
+        '<DashboardGrid class="stage14-dashboard">',
+        '  <MetricPanel label="Queue A" value="128" tone="teal" />',
+        '  <MetricPanel label="Queue B" value="256" tone="blue" />',
+        '  <MetricPanel label="Queue C" value="512" tone="amber" />',
+        '  <MetricPanel label="Queue D" value="1024" tone="violet" />',
+        '</DashboardGrid>',
+        '',
+        '```ts',
+        'const unsupportedComponentFenceBoundary = "Unsupported component fence boundary regression fingerprint";',
+        'export function shouldFailTransparent() {',
+        '  return unsupportedComponentFenceBoundary;',
+        '}',
+        '```',
+        '',
+    ].join('\n');
+}
+
+function createUnsupportedComponentImageBoundaryStressDeck() {
+    return [
+        '---',
+        'theme: default',
+        'mdc: true',
+        '---',
+        '',
+        '# Unsupported Component Image Boundary Stress',
+        '',
+        '```mermaid',
+        'flowchart LR',
+        '  Source[One source Mermaid fence] --> Deck[One exported Mermaid fence]',
+        '  Deck --> Review[Source-preserved review]',
+        '```',
+        '',
+        '---',
+        'layout: dashboard-shell',
+        '---',
+        '',
+        '## Unsupported Component Image Surface',
+        '',
+        '<DashboardGrid class="stage14-dashboard">',
+        '  <MetricPanel label="Queue A" value="128" tone="teal" />',
+        '  <MetricPanel label="Queue B" value="256" tone="blue" />',
+        '  <MetricPanel label="Queue C" value="512" tone="amber" />',
+        '  <MetricPanel label="Queue D" value="1024" tone="violet" />',
+        '</DashboardGrid>',
+        '',
+        '![Unsupported component image boundary regression fingerprint](./assets/boundary-image.svg)',
+        '',
+    ].join('\n');
+}
+
+function createUnsupportedComponentBoundarySupportFiles(panelText) {
+    return [
+        {
+            path: 'layouts/dashboard-shell.vue',
+            content: [
+                '<template>',
+                '  <main class="notemd-dashboard-shell">',
+                '    <slot />',
+                '  </main>',
+                '</template>',
+                '',
+                '<style>',
+                '.notemd-dashboard-shell {',
+                '  height: 100%;',
+                '  padding: 54px 62px;',
+                '  overflow: hidden;',
+                '}',
+                '</style>',
+            ].join('\n'),
+        },
+        {
+            path: 'components/DashboardGrid.vue',
+            content: [
+                '<template>',
+                '  <section class="stage14-grid">',
+                '    <slot />',
+                '  </section>',
+                '</template>',
+                '',
+                '<style>',
+                '.stage14-grid {',
+                '  width: 1680px;',
+                '  min-height: 510px;',
+                '  display: grid;',
+                '  grid-template-columns: repeat(4, 365px);',
+                '  gap: 24px;',
+                '  border: 1px solid #475569;',
+                '  padding: 26px;',
+                '  background: #f8fafc;',
+                '  color: #0f172a;',
+                '}',
+                '</style>',
+            ].join('\n'),
+        },
+        {
+            path: 'components/MetricPanel.vue',
+            content: [
+                '<template>',
+                '  <article class="stage14-panel" :class="`stage14-panel--${tone}`">',
+                '    <h2>{{ label }}</h2>',
+                '    <strong>{{ value }}</strong>',
+                `    <p>${panelText}</p>`,
+                '  </article>',
+                '</template>',
+                '',
+                '<script setup>',
+                'defineProps({',
+                '  label: { type: String, required: true },',
+                '  value: { type: String, required: true },',
+                '  tone: { type: String, required: true },',
+                '});',
+                '</script>',
+                '',
+                '<style>',
+                '.stage14-panel {',
+                '  border-left: 5px solid #0f766e;',
+                '  padding-left: 16px;',
+                '}',
+                '.stage14-panel--blue { border-left-color: #2563eb; }',
+                '.stage14-panel--amber { border-left-color: #b45309; }',
+                '.stage14-panel--violet { border-left-color: #7c3aed; }',
+                '.stage14-panel h2 {',
+                '  font-size: 30px;',
+                '  margin: 0 0 14px;',
+                '}',
+                '.stage14-panel strong {',
+                '  display: block;',
+                '  font-size: 38px;',
+                '  margin-bottom: 12px;',
+                '}',
+                '.stage14-panel p {',
+                '  font-size: 20px;',
+                '  line-height: 1.35;',
+                '  margin: 0;',
+                '}',
+                '</style>',
+            ].join('\n'),
+        },
+    ];
+}
+
 function createCompetingSlotZonesStressDeck() {
     return [
         '---',
@@ -1028,6 +1190,37 @@ const FIXTURES = [
         },
     },
     {
+        id: 'unsupported-component-fence-boundary-stress',
+        sourcePath: 'unsupported-component-fence-boundary-stress.md',
+        sourceMarkdown: createUnsupportedComponentFenceBoundaryStressDeck(),
+        files: createUnsupportedComponentBoundarySupportFiles('Unsupported component fence boundary must not be repaired with whole-slide zoom.'),
+        expectNoWholeSlideZoom: true,
+        expectedMermaidBlocks: 1,
+        expectedFailure: {
+            expectedHardOverflow: true,
+            expectedFingerprint: 'Unsupported component fence boundary regression fingerprint',
+            reasonIncludes: 'mixed component and primary Markdown content',
+        },
+    },
+    {
+        id: 'unsupported-component-image-boundary-stress',
+        sourcePath: 'unsupported-component-image-boundary-stress.md',
+        sourceMarkdown: createUnsupportedComponentImageBoundaryStressDeck(),
+        files: [
+            ...createUnsupportedComponentBoundarySupportFiles('Unsupported component image boundary must not be repaired with whole-slide zoom.'),
+            { path: 'assets/boundary-image.svg', content: createFixtureSvg('Unsupported component image boundary', '#eff6ff', '#2563eb') },
+        ],
+        expectNoWholeSlideZoom: true,
+        expectedMermaidBlocks: 1,
+        expectedCopiedAssets: ['assets/boundary-image.svg'],
+        expectedExportAssets: ['assets/boundary-image.svg'],
+        expectedFailure: {
+            expectedHardOverflow: true,
+            expectedFingerprint: 'Unsupported component image boundary regression fingerprint',
+            reasonIncludes: 'mixed component and primary Markdown content',
+        },
+    },
+    {
         id: 'competing-slot-zones-stress',
         sourcePath: 'competing-slot-zones-stress.md',
         sourceMarkdown: createCompetingSlotZonesStressDeck(),
@@ -1419,6 +1612,26 @@ function assertExpectedFailureFixtureReport(fixture, report, sourceMarkdown) {
     }
     if (expectedFailure.expectedFingerprint) {
         assert(deckMarkdown.includes(expectedFailure.expectedFingerprint), `${fixture.id}: failure-review fingerprint disappeared from prepared deck`);
+    }
+    if (fixture.expectedCopiedAssets) {
+        const preparedDeckDirectory = path.dirname(report.deck.path);
+        for (const relativeAssetPath of fixture.expectedCopiedAssets) {
+            assert(fs.existsSync(path.join(preparedDeckDirectory, relativeAssetPath)), `${fixture.id}: prepared workspace is missing ${relativeAssetPath}`);
+        }
+        assert(!fs.existsSync(path.join(preparedDeckDirectory, 'outside.svg')), `${fixture.id}: prepared workspace copied an out-of-scope asset`);
+        assert(!fs.existsSync(path.join(preparedDeckDirectory, 'outside.css')), `${fixture.id}: prepared workspace copied an out-of-scope imported stylesheet`);
+        assertNoRejectedCssReferences(fixture.id, preparedDeckDirectory, 'prepared workspace');
+    }
+    if (fixture.expectedExportAssets) {
+        const outputDirectory = fs.statSync(report.output.path).isDirectory()
+            ? report.output.path
+            : path.dirname(report.output.path);
+        for (const relativeAssetPath of fixture.expectedExportAssets) {
+            assert(fs.existsSync(path.join(outputDirectory, relativeAssetPath)), `${fixture.id}: final export is missing ${relativeAssetPath}`);
+        }
+        assert(!fs.existsSync(path.join(outputDirectory, 'outside.svg')), `${fixture.id}: final export copied an out-of-scope asset`);
+        assert(!fs.existsSync(path.join(outputDirectory, 'outside.css')), `${fixture.id}: final export copied an out-of-scope imported stylesheet`);
+        assertNoRejectedCssReferences(fixture.id, outputDirectory, 'final export');
     }
 }
 

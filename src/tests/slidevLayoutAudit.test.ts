@@ -2604,6 +2604,13 @@ describe('slidevLayoutAudit', () => {
 			],
 			fingerprint: 'Directive content is an unsupported component/prose boundary.',
 		},
+		{
+			name: 'image',
+			lines: [
+				'![Unsupported component image boundary regression fingerprint](./assets/boundary-image.svg)',
+			],
+			fingerprint: 'Unsupported component image boundary regression fingerprint',
+		},
 	])('blocks whole-slide zoom for mixed component and $name content when separation is unsafe', ({ lines, fingerprint }) => {
 		const audit: SlidevLayoutAudit = {
 			slide: 2,

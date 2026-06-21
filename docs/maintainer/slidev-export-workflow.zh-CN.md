@@ -85,13 +85,15 @@ npm run verify:slidev-layout-fixtures -- --archive /home/jacob/slidev-export-rev
 
 其中新增 `mixed-component-prose-stress`，用于证明自定义 `dashboard-shell` 中一个完整 Vue component surface 与 Markdown prose/list 主内容块可以先被分离为独立 presentation surfaces，后续组件页通过 measured local `<Transform>` 收敛，正文页不继承整页 `zoom`。该套件仍要求 Mermaid fence byte-stable，不允许把一个源 Mermaid 图拆成多个图，也不允许改写 fence metadata 或图体内容。
 
-Stage 13 新增 expected-failure fixture，用于验证不安全 component/table 边界会显性失败而不是被整页 `zoom` 静默修掉：
+Stage 13/14 新增 expected-failure fixtures，用于验证不安全 component/table、component/fence 与 component/image 边界会显性失败而不是被整页 `zoom` 静默修掉：
 
 ```bash
 npm run verify:slidev-layout-fixtures -- --fixture unsupported-component-table-boundary-stress --archive /home/jacob/slidev-export-review/2026-06-20-stage13-unsupported-component-boundary-fixture --timeout-ms 300000
+npm run verify:slidev-layout-fixtures -- --fixture unsupported-component-fence-boundary-stress --archive /home/jacob/slidev-export-review/2026-06-20-stage14-unsupported-component-fence-boundary-fixture --timeout-ms 300000
+npm run verify:slidev-layout-fixtures -- --fixture unsupported-component-image-boundary-stress --archive /home/jacob/slidev-export-review/2026-06-20-stage14-unsupported-component-image-boundary-fixture --timeout-ms 300000
 ```
 
-这个 fixture 的成功含义是生产 verifier 报告 `ok = false`，blocked reason 指向 `mixed component and primary Markdown content cannot be fixed with whole-slide zoom`，同时 standalone gate、浏览器加载、Git 可见性、失败指纹和 Mermaid source-preservation 都通过。默认 fixture suite 不包含 expected-failure；若要一起审查，显式传 `--include-expected-failures`。
+这些 fixtures 的成功含义是生产 verifier 报告 `ok = false`，blocked reason 指向 `mixed component and primary Markdown content cannot be fixed with whole-slide zoom`，同时 standalone gate、浏览器加载、Git 可见性、失败指纹和 Mermaid source-preservation 都通过。image fixture 还要求本地 SVG 资产同时存在于 prepared deck 和最终 standalone export。默认 fixture suite 不包含 expected-failure；若要一起审查，显式传 `--include-expected-failures`。
 
 如果本机已有真实 Obsidian 桌面会话，也应补一层真实命令路径 smoke：
 
@@ -218,7 +220,7 @@ mermaidSourcePreservation.changedFenceIndexes
 10. pass/fail 的 hard overflow 仍以渲染后的 slide root 为边界，而 `safeRect` 继续只承担 measured scale 的保守拟合目标；这样既不会放过真正裁剪，也不会把合理的 edge-aligned layout 过度误杀；
 11. 共享的 `convergeSlidevDeckLayout()` 现在已经进入 `exportSlidesCommand()` 与维护者 verifier，因此 HTML/PDF/PNG/MP4 都会复用同一个收敛后的 prepared deck；
 12. HTML exporter 现在会返回结构化 outcome，包含 `requestedMode`、`actualMode`、fallback 状态与 standalone sanity 细节；已知坏掉的 native attempt 会先保留为 `index-standalone.failed.html`，再进入兼容 fallback；
-13. 真实 `docs/architecture.zh-CN.md` 严格 native standalone workflow 现在已经收敛到 `ok: true`、`actualMode: "standalone"`、`requiresLocalServer: false`、`standaloneGate.passed: true`、`27` 个审计页，hard overflow / unreadable scale / low effective font / quality margin warning / low utilization 均为零，`retryCount = 4`；preserve-Mermaid rerun 保持源文档与导出 deck 均为 `3` 个 Mermaid fence，且当前 verifier 必须报告 `mermaidSourcePreservation.passed = true`；当前 Stage 13 证据包位于 `/home/jacob/slidev-export-review/2026-06-20-stage13-real/`；
+13. 真实 `docs/architecture.zh-CN.md` 严格 native standalone workflow 现在已经收敛到 `ok: true`、`actualMode: "standalone"`、`requiresLocalServer: false`、`standaloneGate.passed: true`、`27` 个审计页，hard overflow / unreadable scale / low effective font / quality margin warning / low utilization 均为零，`retryCount = 4`；preserve-Mermaid rerun 保持源文档与导出 deck 均为 `3` 个 Mermaid fence，且当前 verifier 必须报告 `mermaidSourcePreservation.passed = true`；当前 Stage 14 证据包位于 `/home/jacob/slidev-export-review/2026-06-20-stage14-real/`；
 14. 同一真实源文件的 `PDF` 与 `PNG` 验证也返回 `ok: true`，而且现在导出自同一个收敛后的 deck，而不是 raw prepared source；
 15. rendered layout audit 现在会同时报告 effective minimum font、SVG text font、table/code minimum font、quality margins 与 content-area ratio；
 16. low effective font、tight margin 与 low content utilization finding 现在会对 table/code/prose 携带结构化 `recommendedPatch`；Mermaid 低字号指标会被记录，但默认保持源 fence，不把一张原图自动拆成多张图；
@@ -254,18 +256,22 @@ mermaidSourcePreservation.changedFenceIndexes
 46. Stage 13 expected-failure fixture 验收包位于 `/home/jacob/slidev-export-review/2026-06-20-stage13-unsupported-component-boundary-fixture/`；`unsupported-component-table-boundary-stress` 证明 unsupported component/table boundary 不会被整页 `zoom` 静默修掉，同时保留一个源 Mermaid fence 为一个导出 Mermaid fence。
 47. Stage 13 默认成功 fixture suite 归档到 `/home/jacob/slidev-export-review/2026-06-20-stage13-success-fixtures/`；9 个可收敛生产 fixtures 均通过，expected-failure fixture 默认排除。
 48. Stage 13 真实 `architecture.zh-CN.md` strict native standalone 验收包位于 `/home/jacob/slidev-export-review/2026-06-20-stage13-real/`；报告为 `ok = true`，使用本地 Slidev fork 与 52 个 skill references，`actualMode = "standalone"`，`requiresLocalServer = false`，`standaloneGate.passed = true`，3 个 Mermaid fence 均保持 `changedFenceIndexes = []`，`hardOverflowCount = 0`，`lowEffectiveFontCount = 0`，并归档了可审查的 `architecture.zh-CN.stage13.slidev.md` 与 `architecture.zh-CN-slides/index-standalone.html`。
+49. Stage 14 component/fence expected-failure fixture 验收包位于 `/home/jacob/slidev-export-review/2026-06-20-stage14-unsupported-component-fence-boundary-fixture/`；`unsupported-component-fence-boundary-stress` 证明 unsupported component/fence boundary 不会被整页 `zoom` 静默修掉，同时保留一个源 Mermaid fence 为一个导出 Mermaid fence。
+50. Stage 14 component/image expected-failure fixture 验收包位于 `/home/jacob/slidev-export-review/2026-06-20-stage14-unsupported-component-image-boundary-fixture/`；`unsupported-component-image-boundary-stress` 证明 image 混排边界同样 fail transparent，并验证 `assets/boundary-image.svg` 在 prepared deck 和最终 standalone export 两层都存在。
+51. Stage 14 默认成功 fixture suite 归档到 `/home/jacob/slidev-export-review/2026-06-20-stage14-success-fixtures/`；9 个可收敛生产 fixtures 均通过，三个 expected-failure fixtures 默认排除。
+52. Stage 14 真实 `architecture.zh-CN.md` strict native standalone 验收包位于 `/home/jacob/slidev-export-review/2026-06-20-stage14-real/`；报告为 `ok = true`，使用本地 Slidev fork 与 52 个 skill references，`actualMode = "standalone"`，`requiresLocalServer = false`，`standaloneGate.passed = true`，3 个 Mermaid fence 均保持 `changedFenceIndexes = []`，`hardOverflowCount = 0`，`lowEffectiveFontCount = 0`，并归档了可审查的 `architecture.zh-CN.stage14.slidev.md` 与 `architecture.zh-CN-slides/index-standalone.html`。
 
 当前限制：
 
 1. effective font measurement 现在已经覆盖常见局部 CSS transform / scale / zoom 链，但复杂 Vue layout 仍必须以浏览器 rendered audit 为准，不能退回静态 Markdown 估算；
-2. 超出当前支持集的 richer custom/component-heavy Slidev layout 仍保持保守/manual-review 路径，尤其是缺少稳定 owner surface、component surface 内混入 fence/image、component/prose/component 顺序不稳定或不能安全分页的情况；Stage 13 已覆盖 component/table fail-transparent 与 component/directive 阻断，不证明任意 Vue component tree 都能安全 Transform；多个 named slot 竞争且 unsafe 的路径已由 slot 分页 fixture 覆盖；
+2. 超出当前支持集的 richer custom/component-heavy Slidev layout 仍保持保守/manual-review 路径，尤其是缺少稳定 owner surface、component/prose/component 顺序不稳定或不能安全分页的情况；Stage 14 已覆盖 component/table/fence/image fail-transparent，component/directive 阻断由单测覆盖，不证明任意 Vue component tree 都能安全 Transform；多个 named slot 竞争且 unsafe 的路径已由 slot 分页 fixture 覆盖；
 3. native standalone 现在已有严格 gate，且真实 architecture fixture 已通过；但正确性仍依赖 post-build sanity detection，server-script fallback 只是兼容通道，不能再被算作 native standalone 成功；
 4. full-deck Playwright 验证故意比代表性抽样更慢，后续优化方向应是提高 patch 收敛能力，而不是退回弱审计；
 5. `obsidian command id=notemd:export-slides` 目前仍只能算 dispatch-level smoke，因为 Obsidian CLI 没有暴露导出完成握手信号。
 6. Mermaid `manual-review` 证据不是 hard gate failure。它是在“不修改原 Mermaid 内容”和“自动保证投影级可读”不能同时被证明时，正确暴露给维护者的透明结果。
 7. code splitting 仍是 parser-light；TypeScript/JavaScript/Python/Rust 已有 top-level tokenizer，但完整 AST 拆分与更多语言专用 splitter 仍是后续工作。
 8. Mermaid 不拆图约束不等于 Mermaid 演示质量自动合格。超大源图如果只能靠低 zoom 保持完整，流程应暴露 `source-preserved-fit-review` 或 `manual-review`，而不是静默改图或拆图。
-9. 当前 full-deck fixtures 已覆盖长表、宽表、混合代码、Mermaid 源图保持 fit、component-heavy slot Transform 边界、Mermaid/prose 非图内容移动、本地图片资产、嵌套 slot component、超宽表、frontmatter background/image/favicon、跨目录资产、CSS `url(...)` 图片/字体依赖、本地 CSS `@import` 链、本地 video/audio/track 资产、离线字体边界、bounded raw HTML/component single-surface、bounded component-only Vue tree surface、清晰边界 mixed component/prose 与 unsupported component/table expected-failure，但仍不是 exhaustive；后续真实文档若出现复杂 Vue component 或 unsupported layout 失败，应继续沉淀为 fixture。
+9. 当前 full-deck fixtures 已覆盖长表、宽表、混合代码、Mermaid 源图保持 fit、component-heavy slot Transform 边界、Mermaid/prose 非图内容移动、本地图片资产、嵌套 slot component、超宽表、frontmatter background/image/favicon、跨目录资产、CSS `url(...)` 图片/字体依赖、本地 CSS `@import` 链、本地 video/audio/track 资产、离线字体边界、bounded raw HTML/component single-surface、bounded component-only Vue tree surface、清晰边界 mixed component/prose 与 unsupported component/table/fence/image expected-failure，但仍不是 exhaustive；后续真实文档若出现复杂 Vue component 或 unsupported layout 失败，应继续沉淀为 fixture。
 
 ## 输出策略
 
