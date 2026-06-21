@@ -2940,7 +2940,7 @@ export default class NotemdPlugin extends Plugin {
             logSlideExportProgress: (phase: string, detail?: string) => void
         ) => Promise<SlidevExportSource>
     ): Promise<void> {
-        const { probeEnvironment, convergeSlidevDeckLayout, exportSlidevPdf, exportSlidevPng, exportVideoMp4 } = await import('./slideExport');
+        const { probeEnvironment, convergeSlidevDeckLayout, exportSlidevPdf, exportSlidevPng, exportVideoMp4, getVaultBasePath } = await import('./slideExport');
         const uiStrings = this.getUiStrings();
         const config = this.buildSlideExportConfig();
         const activeReporter = reporter ?? await this.getSidebarReporter();
@@ -2956,7 +2956,8 @@ export default class NotemdPlugin extends Plugin {
         try {
             activeReporter.updateStatus(uiStrings.slideExport.probingEnvironment, 8);
             activeReporter.log(uiStrings.slideExport.probingEnvironment);
-            const envReport = await probeEnvironment();
+            const vaultRoot = getVaultBasePath(this.app);
+            const envReport = await probeEnvironment(vaultRoot ? [vaultRoot] : []);
 
             if (!envReport.capabilities[config.format]) {
                 throw new Error(uiStrings.slideExport.formatNotSupported.replace('{format}', config.format.toUpperCase()));

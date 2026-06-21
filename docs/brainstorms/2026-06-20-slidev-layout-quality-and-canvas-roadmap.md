@@ -1,9 +1,9 @@
 ---
 date: 2026-06-20
-last_updated: 2026-06-20
+last_updated: 2026-06-21
 topic: slidev-layout-quality-and-canvas-roadmap
 canonical: false
-status: stage14-unsupported-component-fence-image-boundaries
+status: stage15-mermaid-no-split-hardening
 ---
 
 # Slidev Layout Quality And Canvas Roadmap
@@ -26,7 +26,7 @@ Current landed facts:
 8. `SlideLayoutPlan` is injected into deterministic outline generation, one-shot deck generation, and outline-continuation generation.
 9. The real `docs/architecture.zh-CN.md` strict standalone run is the recurring acceptance source for actual export behavior.
 
-The current slice adds Stage 14 fail-transparent unsupported component/fence and component/image boundary coverage on top of Stage 13 unsupported component/table expected-failure coverage, Stage 12 mixed component/prose convergence, Stage 11 Mermaid source-boundary hardening, the Stage 10 bounded Vue component tree convergence fixture, Mermaid measured-fit ownership, font-safe slot/code convergence, explicit CSS asset dependency graph copying, and Stage 9 custom single-surface convergence:
+The current slice adds Stage 15 Mermaid no-split hardening on top of Stage 14 fail-transparent unsupported component/fence and component/image boundary coverage, Stage 13 unsupported component/table expected-failure coverage, Stage 12 mixed component/prose convergence, Stage 11 Mermaid source-boundary hardening, the Stage 10 bounded Vue component tree convergence fixture, Mermaid measured-fit ownership, font-safe slot/code convergence, explicit CSS asset dependency graph copying, and Stage 9 custom single-surface convergence:
 
 1. Markdown images, HTML media/link/srcset attributes, and Slidev frontmatter local file keys are copied into the prepared deck workspace.
 2. Local CSS files explicitly referenced by the deck are parsed for local `url(...)` dependencies and local `@import` stylesheet chains.
@@ -48,6 +48,7 @@ The current slice adds Stage 14 fail-transparent unsupported component/fence and
 18. Clear-boundary mixed component/prose slides can now be separated into component and prose presentation surfaces before whole-slide zoom is considered. The component page can then receive a measured local `<Transform>` while the prose page stays readable. Mixed component surfaces with fences, tables, images, directives, existing Transform wrappers, or component/prose/component ordering fail transparent instead of silently shrinking prose.
 19. Unsupported component/table/fence/image production fixtures can now be represented as expected failures. These fixtures pass only when the verifier fails for the intended layout reason while native standalone export, browser load, generated-artifact visibility, failure fingerprints, and Mermaid source preservation remain intact. They are excluded from the default success fixture suite unless explicitly selected or `--include-expected-failures` is passed.
 20. The component/image expected-failure path also checks that explicit local image assets are still copied into both the prepared deck and final standalone output, so fail-transparent layout handling does not hide asset regressions.
+21. Mermaid no-split handling is now explicit in the layout plan and both LLM deck-generation prompts: the workflow may not split, rewrite, or derive one source Mermaid diagram into several generated diagrams. Large diagrams must be handled through outer layout, diagram-focused slides, Transform containers, speaker notes, adjacent explanation, rendered measured fit, or manual-review evidence.
 
 Closeout evidence:
 
@@ -74,12 +75,14 @@ Closeout evidence:
 21. Stage 14 component/image expected-failure archive: `/home/jacob/slidev-export-review/2026-06-20-stage14-unsupported-component-image-boundary-fixture/`. `unsupported-component-image-boundary-stress` has the same fail-transparent layout result and also proves `assets/boundary-image.svg` exists in both the prepared deck and final standalone export.
 22. Stage 14 default success fixture archive: `/home/jacob/slidev-export-review/2026-06-20-stage14-success-fixtures/`. The default suite still includes only the 9 converging production fixtures; all pass and the three expected-failure fixtures remain opt-in.
 23. Real Stage 14 `architecture.zh-CN.md` strict native standalone archive: `/home/jacob/slidev-export-review/2026-06-20-stage14-real/`. The report is `ok = true`, uses `/home/jacob/slidev/packages/slidev/bin/slidev.mjs`, loads `/home/jacob/slidev/skills/slidev` with 52 references, outputs native standalone HTML, preserves 3/3 Mermaid fences with `changedFenceIndexes = []`, and closes with `slideCount = 27`, `hardOverflowCount = 0`, `lowEffectiveFontCount = 0`, `mermaidFitReviewCount = 3`, `mermaidLowZoomCount = 2`, and `mermaidManualReviewCount = 1`. The reviewable deck is `architecture.zh-CN.stage14.slidev.md`.
+24. Stage 15 adds outline-continuation regression coverage: if an LLM turns one source Mermaid fence into two generated Mermaid diagrams while continuing from a saved outline, `prepareSlidevExportSourceFromOutline()` must reject the candidate and fall back to the deterministic source-preserving deck.
+25. Real Stage 15 `architecture.zh-CN.md` strict native standalone archive: `/home/jacob/slidev-export-review/2026-06-21-stage15-mermaid-no-split/`. The report is `ok = true`, uses `/home/jacob/slidev/packages/slidev/bin/slidev.mjs`, loads `/home/jacob/slidev/skills/slidev` with 52 references, outputs native standalone HTML, preserves 3/3 Mermaid fences with `changedFenceIndexes = []`, and closes with `slideCount = 27`, `hardOverflowCount = 0`, `lowEffectiveFontCount = 0`, `mermaidFitReviewCount = 3`, `mermaidLowZoomCount = 2`, and `mermaidManualReviewCount = 1`. The reviewable deck is archived as `architecture.zh-CN.stage15.slidev.md` and tracked in-repo at `docs/slidev/architecture.zh-CN.stage15.slidev.md`; runtime HTML/assets/screenshots are not committed.
 
 ## Mermaid Boundary
 
 The Mermaid rule is stricter than the table/code/prose rule.
 
-One source Mermaid fence remains one source Mermaid fence. The workflow must not split one user-provided Mermaid diagram into several generated diagrams, must not rewrite the diagram body or fence metadata to force layout success, and must not treat a count-only match as enough. Source preparation rejects one-shot and outline-continuation LLM deck candidates that change Mermaid fence count, order, metadata, or body text before `_slidev-sources` is written; changing only an opener option is still a source mutation. It also strips generated Mermaid slide `zoom`, so a fixed heuristic or LLM choice cannot pre-decide the fit. The verifier then compares each source Mermaid fence against the exported deck fence; changed content, order, fence metadata, or split diagrams must fail the report.
+One source Mermaid fence remains one source Mermaid fence. The workflow must not split one user-provided Mermaid diagram into several generated diagrams, must not derive alternative Mermaid diagrams from the original, must not rewrite the diagram body or fence metadata to force layout success, and must not treat a count-only match as enough. Source preparation rejects one-shot and outline-continuation LLM deck candidates that change Mermaid fence count, order, metadata, or body text before `_slidev-sources` is written; changing only an opener option is still a source mutation. It also strips generated Mermaid slide `zoom`, so a fixed heuristic or LLM choice cannot pre-decide the fit. The verifier then compares each source Mermaid fence against the exported deck fence; changed content, order, fence metadata, or split diagrams must fail the report.
 
 Mixed Mermaid/prose slides are handled differently from Mermaid-only slides. Low whole-slide zoom is not acceptable for mixed content because prose becomes unreadable. The allowed repair is to move only non-Mermaid prose/list content to a readable slide while keeping the Mermaid opener, metadata, body, and closer byte-stable on a diagram-focused slide. If that move is not safe for the layout, the patcher should block low whole-slide zoom and surface review evidence instead of silently shrinking mixed content.
 
@@ -137,7 +140,7 @@ Required verification before closing a slice:
 The next useful slices are:
 
 1. Add more real failure fixtures for unsupported layouts without stable owners, ambiguous component/prose/component ordering, and custom layouts that need pagination without an explicit surface boundary; Stage 14 covers component/table/fence/image fail-transparent behavior and unit-tests component/directive blocking, not arbitrary component trees.
-2. Keep Mermaid source-preserved fit review as a first-class report surface; automatic repair may move only non-Mermaid content and must not split the diagram, rewrite the body, alter opener metadata, or reorder fences.
+2. Keep Mermaid source-preserved fit review as a first-class report surface; automatic repair may move only non-Mermaid content and must not split the diagram, derive alternative diagrams, rewrite the body, alter opener metadata, or reorder fences.
 3. Extend parser-light code splitting only where it preserves semantic blocks better than line budgets.
 4. Consider an upstream Slidev skill PR only for general guardrails: complete references, source-preserved Mermaid fit review, browser-check expectations, standalone/fallback distinction, and no automatic user-diagram splitting.
 

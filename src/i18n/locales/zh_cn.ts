@@ -1015,7 +1015,7 @@ export const STRINGS_ZH_CN: DeepPartial<NotemdEnglishStrings> = {
         missingStatus: '缺失',
         noneShort: '无',
         nodeWebsiteLabel: 'Node.js 官网',
-        slidevWebsiteLabel: 'Slidev 安装指南',
+        slidevWebsiteLabel: 'NoteMD Slidev fork release',
         playwrightWebsiteLabel: 'Playwright 文档',
         ffmpegWebsiteLabel: 'ffmpeg 下载',
         installingTool: '正在安装 {tool}…',

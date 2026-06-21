@@ -679,7 +679,7 @@ async function main() {
 	printProgress(!args.json, 'slidev-workflow', `Vault: ${vaultRoot}`);
 	printProgress(!args.json, 'slidev-workflow', `Source: ${sourceFile.path}`);
 
-	const environment = await slideExport.probeEnvironment();
+	const environment = await slideExport.probeEnvironment([vaultRoot]);
 	const slideSource = await slideExport.prepareSlidevExportSource(app, sourceFile, config, {}, onProgress);
 	let layoutConvergence = null;
 	if (args.playwright) {

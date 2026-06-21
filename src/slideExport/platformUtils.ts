@@ -12,7 +12,11 @@ export interface ResolvedSlidevCommand {
 	command: string;
 	argsPrefix: string[];
 	description: string;
-	source: 'local-fork' | 'npx';
+	source: 'configured-path' | 'local-fork' | 'project-bin' | 'npx';
+}
+
+export interface SlidevCommandSearchOptions {
+	roots?: string[];
 }
 
 /**
@@ -128,6 +132,14 @@ export function resolveNpxCommand(): string {
 	return 'npx';
 }
 
+export function resolveNpmCommand(): string {
+	const os: any = safeRequire('os');
+	if (os && typeof os.platform === 'function') {
+		return os.platform() === 'win32' ? 'npm.cmd' : 'npm';
+	}
+	return 'npm';
+}
+
 export function resolveWorkspaceHomeCandidates(): string[] {
 	const path: any = safeRequire('path');
 	const candidates: string[] = [];
@@ -188,17 +200,35 @@ export function resolvePlaywrightBrowsersPath(): string | null {
 	return null;
 }
 
-export function resolveSlidevCommand(): ResolvedSlidevCommand {
+export function resolveSlidevCommand(options: SlidevCommandSearchOptions = {}): ResolvedSlidevCommand {
 	const fs: any = safeRequire('fs');
 	const path: any = safeRequire('path');
 	const workspaceHomes = resolveWorkspaceHomeCandidates();
-	const candidatePaths = [
+	const configuredPaths = [
 		process.env.NOTEMD_SLIDEV_BIN,
 		process.env.SLIDEV_CLI_PATH,
+	].filter((candidate): candidate is string => typeof candidate === 'string' && candidate.length > 0);
+	const localForkPaths = [
 		...workspaceHomes.map(home => path?.join?.(home, 'slidev', 'packages', 'slidev', 'bin', 'slidev.mjs')),
 	].filter((candidate): candidate is string => typeof candidate === 'string' && candidate.length > 0);
+	const projectBinPaths = resolveSlidevProjectBinCandidates(options.roots ?? [], path);
 
-	for (const candidate of candidatePaths) {
+	for (const candidate of configuredPaths) {
+		try {
+			if (fs?.existsSync?.(candidate)) {
+				return {
+					command: candidate,
+					argsPrefix: [],
+					description: candidate,
+					source: 'configured-path',
+				};
+			}
+		} catch {
+			// Try the next candidate.
+		}
+	}
+
+	for (const candidate of localForkPaths) {
 		try {
 			if (fs?.existsSync?.(candidate)) {
 				return {
@@ -213,12 +243,50 @@ export function resolveSlidevCommand(): ResolvedSlidevCommand {
 		}
 	}
 
+	for (const candidate of projectBinPaths) {
+		try {
+			if (fs?.existsSync?.(candidate)) {
+				return {
+					command: candidate,
+					argsPrefix: [],
+					description: candidate,
+					source: 'project-bin',
+				};
+			}
+		} catch {
+			// Try the next candidate.
+		}
+	}
+
 	return {
 		command: resolveNpxCommand(),
 		argsPrefix: ['-y', '@slidev/cli'],
 		description: 'npx -y @slidev/cli',
 		source: 'npx',
 	};
+}
+
+function resolveSlidevProjectBinCandidates(roots: string[], path: any): string[] {
+	const candidates: string[] = [];
+	const pushRoot = (root: string | undefined | null) => {
+		if (typeof root !== 'string' || root.trim().length === 0 || !path?.join) {
+			return;
+		}
+		const binName = getOsPlatform() === 'win32' ? 'slidev.cmd' : 'slidev';
+		const normalizedRoot = path.resolve ? path.resolve(root) : root;
+		const candidate = path.join(normalizedRoot, 'node_modules', '.bin', binName);
+		if (!candidates.includes(candidate)) {
+			candidates.push(candidate);
+		}
+	};
+
+	for (const root of roots) {
+		pushRoot(root);
+	}
+	if (typeof process !== 'undefined') {
+		pushRoot(process.cwd());
+	}
+	return candidates;
 }
 
 /**

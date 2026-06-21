@@ -1236,4 +1236,85 @@ describe('slidevSourcePreparer', () => {
             expect.stringContaining('LLM deck from outline changed source Mermaid fences')
         );
     });
+
+    test('rejects outline continuation decks that split one source Mermaid fence into multiple diagrams', async () => {
+        const skillRoot = '/skills/slidev';
+        process.env.NOTEMD_SLIDEV_SKILL_DIR = skillRoot;
+        const files = new Map([
+            [`${skillRoot}/SKILL.md`, 'Slidev skill instructions'],
+            [`${skillRoot}/references/core-syntax.md`, 'Use --- separators.'],
+        ]);
+        mockSafeRequire.mockImplementation((name: string) => {
+            if (name === 'path') {
+                return {
+                    join: (...parts: string[]) => parts.join('/').replace(/\/+/g, '/'),
+                };
+            }
+            if (name === 'fs') {
+                return {
+                    existsSync: (path: string) => files.has(path) || path === `${skillRoot}/references`,
+                    readFileSync: (path: string) => files.get(path) || '',
+                    readdirSync: (path: string) => path === `${skillRoot}/references`
+                        ? ['core-syntax.md']
+                        : [],
+                };
+            }
+            return null;
+        });
+        mockCallLLM.mockResolvedValue([
+            '---',
+            'theme: default',
+            'title: Architecture',
+            '---',
+            '',
+            '# First Derived Diagram',
+            '',
+            '```mermaid',
+            'flowchart TB',
+            '  A --> B',
+            '```',
+            '',
+            '---',
+            '',
+            '# Second Derived Diagram',
+            '',
+            '```mermaid',
+            'flowchart TB',
+            '  C --> D',
+            '```',
+        ].join('\n'));
+        const sourceMarkdown = [
+            '# Architecture',
+            '',
+            '## Diagram',
+            '',
+            '```mermaid',
+            'flowchart TB',
+            '  A --> B',
+            '  B --> C',
+            '  C --> D',
+            '```',
+        ].join('\n');
+        const app = createApp(sourceMarkdown);
+        const onProgress = jest.fn();
+
+        await prepareSlidevExportSourceFromOutline(
+            app,
+            createFile('architecture.zh-CN.md'),
+            '# Saved Outline\n\n1. Preserve the original Mermaid diagram as one fence',
+            config,
+            { deckGeneration: createDeckGenerationProfile() },
+            onProgress
+        );
+
+        const writtenDeck = (app.vault.adapter.write as jest.Mock).mock.calls[0][1] as string;
+        expect(writtenDeck).toContain('```mermaid\nflowchart TB\n  A --> B\n  B --> C\n  C --> D\n```');
+        expect(writtenDeck).not.toContain('# First Derived Diagram');
+        expect(writtenDeck).not.toContain('# Second Derived Diagram');
+        expect((writtenDeck.match(/```mermaid/g) || []).length).toBe(1);
+        expect(onProgress).toHaveBeenCalledWith(
+            'slidev-source',
+            expect.stringContaining('LLM deck from outline changed source Mermaid fences')
+        );
+    });
 });

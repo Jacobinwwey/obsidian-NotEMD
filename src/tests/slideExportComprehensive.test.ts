@@ -81,6 +81,34 @@ function fail(tool: string, version: string | null, error: string) {
     return { tool, installed: false, version, error };
 }
 
+function mockSlideExportExec(options: { playwrightAvailable?: boolean; ffmpegAvailable?: boolean } = {}): void {
+    mockExecFileAsync.mockImplementation(async (command: string, args: string[]) => {
+        if (command === 'node' && args.includes('--version')) {
+            return { exitCode: 0, stdout: 'v20.1.0', stderr: '' };
+        }
+        if (command === 'ffmpeg' && args.includes('-version')) {
+            return options.ffmpegAvailable
+                ? { exitCode: 0, stdout: 'ffmpeg version 6.1\nmore info', stderr: '' }
+                : { exitCode: 1, stdout: '', stderr: '' };
+        }
+        if (command === 'ffmpeg') {
+            return { exitCode: 0, stdout: '', stderr: '' };
+        }
+        if (args.includes('playwright') && args.includes('--version')) {
+            return options.playwrightAvailable
+                ? { exitCode: 0, stdout: 'Version 1.61.0', stderr: '' }
+                : { exitCode: 1, stdout: '', stderr: '' };
+        }
+        if (args.includes('--version')) {
+            return { exitCode: 0, stdout: '52.16.0', stderr: '' };
+        }
+        if (args.includes('build') && args.includes('--help')) {
+            return { exitCode: 0, stdout: '--standalone-bundle  generate standalone single-file HTML bundle', stderr: '' };
+        }
+        return { exitCode: 0, stdout: '', stderr: '' };
+    });
+}
+
 describe('platformUtils — Edge Cases', () => {
     beforeEach(() => {
         jest.clearAllMocks();
@@ -201,12 +229,6 @@ describe('environmentProber — Node Version Edge Cases', () => {
     });
 
     test('probeEnvironment executes all probes in parallel', async () => {
-        mockExecFileAsync
-            .mockResolvedValueOnce({ exitCode: 0, stdout: 'v20.1.0', stderr: '' })
-            .mockResolvedValueOnce({ exitCode: 0, stdout: '0.50.0', stderr: '' })
-            .mockResolvedValueOnce({ exitCode: 1, stdout: '', stderr: '' })
-            .mockResolvedValueOnce({ exitCode: 0, stdout: 'ffmpeg version 6.1\n', stderr: '' });
-
         const mockFs = { existsSync: jest.fn().mockReturnValue(true), readdirSync: jest.fn().mockReturnValue(['chromium']) };
         mockSafeRequire.mockImplementation((name: string) => {
             if (name === 'fs') return mockFs;
@@ -215,12 +237,14 @@ describe('environmentProber — Node Version Edge Cases', () => {
             return null;
         });
         mockGetOsPlatform.mockReturnValue('linux');
+        mockSlideExportExec({ ffmpegAvailable: true });
 
-        const report = await probeEnvironment();
+        const report = await probeEnvironment(['/vault']);
         expect(report.node.installed).toBe(true);
         expect(report.slidev.installed).toBe(true);
         expect(report.playwright.installed).toBe(true);
         expect(report.ffmpeg.installed).toBe(true);
+        expect(mockResolveSlidevCommand).toHaveBeenCalledWith({ roots: ['/vault'] });
     });
 });
 
@@ -723,12 +747,9 @@ describe('Integration — Probe to HTML Export', () => {
     });
 
     test('full probe to HTML export flow', async () => {
-        mockExecFileAsync
-            .mockResolvedValueOnce({ exitCode: 0, stdout: 'v20.1.0', stderr: '' })
-            .mockResolvedValueOnce({ exitCode: 0, stdout: '0.50.0', stderr: '' })
-            .mockResolvedValueOnce({ exitCode: 0, stdout: '', stderr: '' });
+        mockSlideExportExec();
 
-        const report = await probeEnvironment();
+        const report = await probeEnvironment(['/vault']);
         expect(report.node.installed).toBe(true);
         expect(report.slidev.installed).toBe(true);
         expect(report.capabilities.html).toBe(true);
@@ -771,13 +792,9 @@ describe('Integration — Probe to PDF Export', () => {
             return null;
         });
         mockGetOsPlatform.mockReturnValue('linux');
-        mockExecFileAsync
-            .mockResolvedValueOnce({ exitCode: 0, stdout: 'v20.1.0', stderr: '' })
-            .mockResolvedValueOnce({ exitCode: 0, stdout: '0.50.0', stderr: '' })
-            .mockResolvedValueOnce({ exitCode: 1, stdout: '', stderr: '' })
-            .mockResolvedValueOnce({ exitCode: 0, stdout: '', stderr: '' });
+        mockSlideExportExec();
 
-        const report = await probeEnvironment();
+        const report = await probeEnvironment(['/vault']);
         expect(report.playwright.installed).toBe(true);
         expect(report.capabilities.pdf).toBe(true);
 
@@ -822,15 +839,9 @@ describe('Integration — Probe to PNG to MP4 Chain', () => {
             return null;
         });
         mockGetOsPlatform.mockReturnValue('linux');
-        mockExecFileAsync
-            .mockResolvedValueOnce({ exitCode: 0, stdout: 'v20.1.0', stderr: '' })
-            .mockResolvedValueOnce({ exitCode: 0, stdout: '0.50.0', stderr: '' })
-            .mockResolvedValueOnce({ exitCode: 1, stdout: '', stderr: '' })
-            .mockResolvedValueOnce({ exitCode: 0, stdout: 'ffmpeg version 6.1\nmore info', stderr: '' })
-            .mockResolvedValueOnce({ exitCode: 0, stdout: '', stderr: '' })
-            .mockResolvedValueOnce({ exitCode: 0, stdout: '', stderr: '' });
+        mockSlideExportExec({ ffmpegAvailable: true });
 
-        const report = await probeEnvironment();
+        const report = await probeEnvironment(['/vault']);
         expect(report.capabilities.png).toBe(true);
         expect(report.capabilities.mp4).toBe(true);
 

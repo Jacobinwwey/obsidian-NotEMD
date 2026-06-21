@@ -2,11 +2,15 @@ import { getLanguage, MarkdownView, TFile } from 'obsidian';
 import { NotemdSidebarView } from '../ui/NotemdSidebarView';
 import { mockApp } from './__mocks__/app';
 import { ApiLivenessEvent } from '../types';
-import { probeEnvironment } from '../slideExport';
+import { getVaultBasePath, probeEnvironment } from '../slideExport';
+import { NOTEMD_SLIDEV_FORK_RELEASE_URL, NOTEMD_SLIDEV_INSTALL_COMMAND } from '../slideExport/slidevDistribution';
 
 jest.mock('../slideExport', () => ({
+    getVaultBasePath: jest.fn(() => '/vault'),
     probeEnvironment: jest.fn()
 }));
+
+const mockGetVaultBasePath = getVaultBasePath as jest.Mock;
 
 type MockPlugin = {
     app: typeof mockApp;
@@ -315,6 +319,7 @@ describe('NotemdSidebarView DOM button wiring', () => {
         (mockApp.vault.read as jest.Mock).mockResolvedValue('duplicate duplicate words');
         (mockApp.vault.getAbstractFileByPath as jest.Mock).mockReturnValue(null);
         (mockApp.workspace.iterateAllLeaves as jest.Mock).mockImplementation(() => {});
+        mockGetVaultBasePath.mockReturnValue('/vault');
         (probeEnvironment as jest.Mock).mockResolvedValue({
             isDesktop: true,
             platform: 'linux',
@@ -582,7 +587,7 @@ describe('NotemdSidebarView DOM button wiring', () => {
         expect(panel).not.toBeNull();
         expect(panel?.parent?.parent?.open).toBe(true);
         expect(panel?.textContent()).toContain('node --version');
-        expect(panel?.textContent()).toContain('corepack enable');
+        expect(panel?.textContent()).toContain(NOTEMD_SLIDEV_INSTALL_COMMAND);
         expect(panel?.textContent()).toContain('npx playwright install chromium');
         expect(panel?.textContent()).toContain('sudo apt install ffmpeg');
         expect(panel?.textContent()).toContain('Copy command');
@@ -590,7 +595,7 @@ describe('NotemdSidebarView DOM button wiring', () => {
         const links = collectLinks(panel!);
         expect(links.map(link => link.href)).toEqual(expect.arrayContaining([
             'https://nodejs.org/en/download',
-            'https://sli.dev/builtin/cli',
+            NOTEMD_SLIDEV_FORK_RELEASE_URL,
             'https://playwright.dev/docs/intro',
             'https://ffmpeg.org/download.html'
         ]));

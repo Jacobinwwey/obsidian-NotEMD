@@ -4,6 +4,7 @@ import { ApiLivenessEvent, ApiLivenessPhase, NotemdSettings, ProgressReporter } 
 import { NOTEMD_SIDEBAR_ICON, NOTEMD_SIDEBAR_VIEW_TYPE } from '../constants';
 import { findDuplicates } from '../fileUtils';
 import { FFMPEG_INSTALL_HINTS, type EnvironmentReport, type ProbeResult } from '../slideExport/types';
+import { NOTEMD_SLIDEV_FORK_RELEASE_URL, NOTEMD_SLIDEV_INSTALL_COMMAND } from '../slideExport/slidevDistribution';
 import {
     ActionCategory,
     CustomWorkflowButton,
@@ -67,6 +68,14 @@ const ACTION_CATEGORY_CONFIG: Record<ActionCategory, { openByDefault: boolean }>
     utilities: { openByDefault: false },
     export: { openByDefault: false }
 };
+
+function quotePosixShellPath(path: string): string {
+    return `'${path.replace(/'/g, `'\\''`)}'`;
+}
+
+function quoteWindowsCommandPath(path: string): string {
+    return `"${path.replace(/"/g, '""')}"`;
+}
 
 const SINGLE_FILE_ACTION_IDS = new Set<SidebarActionId>([
     'process-current-add-links',
@@ -1404,8 +1413,9 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
         const reporter = this.createReporterProxy();
         try {
             reporter.log(i18n.slideExport.probingEnvironment);
-            const { probeEnvironment } = await import('../slideExport');
-            const report = await probeEnvironment();
+            const { probeEnvironment, getVaultBasePath } = await import('../slideExport');
+            const vaultRoot = getVaultBasePath(this.app);
+            const report = await probeEnvironment(vaultRoot ? [vaultRoot] : []);
             this.renderSlideExportEnvironmentReport(report);
             this.logSlideExportEnvironmentSummary(report);
             this.updateStatus(i18n.slideExport.environmentCheckComplete, 100);
@@ -1564,8 +1574,8 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
                 };
             case 'slidev':
                 return {
-                    command: 'corepack enable\npnpm add -D @slidev/cli',
-                    websiteUrl: 'https://sli.dev/builtin/cli',
+                    command: this.getSlidevForkInstallCommand(report.platform),
+                    websiteUrl: NOTEMD_SLIDEV_FORK_RELEASE_URL,
                     websiteLabel: i18n.slideExport.slidevWebsiteLabel
                 };
             case 'playwright':
@@ -1605,15 +1615,22 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
         }));
         const reporter = this.createReporterProxy();
         try {
-            const { autoInstallSlidev, autoInstallPlaywright, probeEnvironment } = await import('../slideExport');
-            const result = tool === 'slidev'
-                ? await autoInstallSlidev((phase, detail) => reporter.log(detail ? `${phase}: ${detail}` : phase))
-                : await autoInstallPlaywright((phase, detail) => reporter.log(detail ? `${phase}: ${detail}` : phase));
+            const { installSlidevForVault, autoInstallPlaywright, probeEnvironment, getVaultBasePath } = await import('../slideExport');
+            const vaultRoot = getVaultBasePath(this.app);
+            let result;
+            if (tool === 'slidev') {
+                if (!vaultRoot) {
+                    throw new Error('Vault filesystem path is unavailable; open a local vault before installing the NoteMD Slidev fork.');
+                }
+                result = await installSlidevForVault(vaultRoot, (phase, detail) => reporter.log(detail ? `${phase}: ${detail}` : phase));
+            } else {
+                result = await autoInstallPlaywright((phase, detail) => reporter.log(detail ? `${phase}: ${detail}` : phase));
+            }
             if (result.exitCode !== 0) {
                 throw new Error(result.stderr || result.error?.message || i18n.common.unknownError);
             }
             reporter.log(i18n.slideExport.installComplete);
-            const report = await probeEnvironment();
+            const report = await probeEnvironment(vaultRoot ? [vaultRoot] : []);
             this.renderSlideExportEnvironmentReport(report);
             this.logSlideExportEnvironmentSummary(report);
             this.updateStatus(i18n.slideExport.environmentCheckComplete, 100);
@@ -1624,6 +1641,25 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
         } finally {
             this.finishProcessing();
         }
+    }
+
+    private getSlidevForkInstallCommand(platform: EnvironmentReport['platform']): string {
+        const vaultRoot = this.getVaultRootForInstallCommand();
+        if (!vaultRoot) {
+            return NOTEMD_SLIDEV_INSTALL_COMMAND;
+        }
+        const cdCommand = platform === 'win32'
+            ? `cd /d ${quoteWindowsCommandPath(vaultRoot)}`
+            : `cd ${quotePosixShellPath(vaultRoot)}`;
+        return `${cdCommand}\n${NOTEMD_SLIDEV_INSTALL_COMMAND}`;
+    }
+
+    private getVaultRootForInstallCommand(): string | null {
+        const adapter = this.app?.vault?.adapter as any;
+        if (typeof adapter?.getBasePath === 'function') {
+            return adapter.getBasePath();
+        }
+        return typeof adapter?.basePath === 'string' ? adapter.basePath : null;
     }
 
     private ensureSlideExportEnvironmentPanel(): HTMLElement {

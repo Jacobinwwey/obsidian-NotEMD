@@ -10,7 +10,8 @@ import { Modal, Notice } from 'obsidian';
 import type { EnvironmentReport } from './types';
 import { FFMPEG_INSTALL_HINTS } from './types';
 import { probeEnvironment } from './environmentProber';
-import { autoInstallSlidev, autoInstallPlaywright } from './slidevExporter';
+import { autoInstallPlaywright, installSlidevForVault } from './slidevExporter';
+import { getVaultBasePath } from './platformUtils';
 
 export class EnvironmentProbeModal extends Modal {
 	private report: EnvironmentReport | null = null;
@@ -137,7 +138,8 @@ export class EnvironmentProbeModal extends Modal {
 		this.report = null;
 		this.renderProbeUI();
 		try {
-			this.report = await probeEnvironment();
+			const vaultRoot = getVaultBasePath(this.app);
+			this.report = await probeEnvironment(vaultRoot ? [vaultRoot] : []);
 			this.onReportUpdated?.(this.report);
 		} catch (err) {
 			new Notice(`Environment probe failed: ${err instanceof Error ? err.message : String(err)}`);
@@ -150,7 +152,12 @@ export class EnvironmentProbeModal extends Modal {
 
 		let result;
 		if (tool === 'slidev') {
-			result = await autoInstallSlidev((phase) => new Notice(phase, 3000));
+			const vaultRoot = getVaultBasePath(this.app);
+			if (!vaultRoot) {
+				new Notice('Vault filesystem path is unavailable; open a local vault before installing the NoteMD Slidev fork.');
+				return;
+			}
+			result = await installSlidevForVault(vaultRoot, (phase) => new Notice(phase, 3000));
 		} else {
 			result = await autoInstallPlaywright((phase) => new Notice(phase, 3000));
 		}

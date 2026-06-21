@@ -1024,7 +1024,7 @@ export const STRINGS_EN = {
         missingStatus: 'Missing',
         noneShort: 'None',
         nodeWebsiteLabel: 'Node.js official site',
-        slidevWebsiteLabel: 'Slidev install guide',
+        slidevWebsiteLabel: 'NoteMD Slidev fork release',
         playwrightWebsiteLabel: 'Playwright docs',
         ffmpegWebsiteLabel: 'ffmpeg downloads',
         installingTool: 'Installing {tool}...',

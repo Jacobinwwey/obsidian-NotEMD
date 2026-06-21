@@ -29,13 +29,23 @@ export async function probeNode(): Promise<ProbeResult> {
 	return { tool: 'node', installed: false, version: null, error: 'node not found in PATH' };
 }
 
-export async function probeSlidev(): Promise<ProbeResult> {
+export async function probeSlidev(searchRoots: string[] = []): Promise<ProbeResult> {
 	if (!isDesktopApp()) return makeMissingProbe('slidev', 'Not a desktop app');
 
-	const slidev = resolveSlidevCommand();
+	const slidev = resolveSlidevCommand({ roots: searchRoots });
 	const result = await execFileAsync(slidev.command, [...slidev.argsPrefix, '--version'], { timeout: 45_000 });
 	if (result.exitCode === 0) {
 		const version = result.stdout.trim() || 'available';
+		const help = await execFileAsync(slidev.command, [...slidev.argsPrefix, 'build', '--help'], { timeout: 45_000 });
+		const helpText = `${help.stdout}\n${help.stderr}`;
+		if (help.exitCode !== 0 || !helpText.includes('--standalone-bundle')) {
+			return {
+				tool: 'slidev',
+				installed: false,
+				version: `${version} (${slidev.description})`,
+				error: `Slidev found via ${slidev.description}, but it does not expose --standalone-bundle`,
+			};
+		}
 		return { tool: 'slidev', installed: true, version: `${version} (${slidev.description})` };
 	}
 	return { tool: 'slidev', installed: false, version: null, error: `Not available via ${slidev.description}` };
@@ -99,7 +109,7 @@ function computeCapabilities(
 	};
 }
 
-export async function probeEnvironment(): Promise<EnvironmentReport> {
+export async function probeEnvironment(searchRoots: string[] = []): Promise<EnvironmentReport> {
 	const platform = getOsPlatform();
 
 	if (!isDesktopApp()) {
@@ -117,7 +127,7 @@ export async function probeEnvironment(): Promise<EnvironmentReport> {
 
 	const [node, slidev, playwright, ffmpeg] = await Promise.all([
 		probeNode(),
-		probeSlidev(),
+		probeSlidev(searchRoots),
 		probePlaywright(),
 		probeFfmpeg(),
 	]);

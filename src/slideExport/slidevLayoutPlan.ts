@@ -76,7 +76,7 @@ export function formatSlideLayoutPlanForPrompt(plan: SlideLayoutPlan): string {
 		`Source-preserving fit reviews: ${plan.fitReviewCount}`,
 		'Rules:',
 		'- Treat fit scale below 0.72 as a layout failure candidate; split table, code, and prose before shrinking text.',
-		'- Keep each source Mermaid fence intact; use fit, layout, or manual review instead of rewriting one diagram into several diagrams.',
+		'- Keep each source Mermaid fence intact; use fit, layout, or manual review instead of splitting, rewriting, or deriving one diagram into several diagrams.',
 		'- Wide tables split by columns; tall tables split by rows; pathological dense tables become record-list slides.',
 		'- Long code blocks split into focused excerpts; do not solve code readability by zooming below quality thresholds.',
 		'Slide budgets:',

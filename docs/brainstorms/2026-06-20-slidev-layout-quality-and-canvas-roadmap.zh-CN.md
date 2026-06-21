@@ -1,9 +1,9 @@
 ---
 date: 2026-06-20
-last_updated: 2026-06-20
+last_updated: 2026-06-21
 topic: slidev-layout-quality-and-canvas-roadmap
 canonical: true
-status: stage14-unsupported-component-fence-image-boundaries
+status: stage15-mermaid-no-split-hardening
 ---
 
 # Slidev 布局质量与画布规划路线
@@ -26,7 +26,7 @@ status: stage14-unsupported-component-fence-image-boundaries
 
 1. 分支：`main`
 2. 远端：`origin/main`
-3. 本批次实现内容：rendered quality gate + clean-room `SlideLayoutPlan` 第一切片 + Mermaid 源图保持 fit 审计 + JS/TS/Python/Rust tokenizer + Mermaid 不拆图回归契约 + Stage 5 full-deck/export fixture、文本 glyph rect 测量、slot Transform 去整页 zoom 叠加、mixed Mermaid/prose 非图内容移动、相对图片资产镜像、local Slidev fork standalone loader 边界修复、Stage 6 frontmatter/cross-dir 资产镜像、CSS `url(...)` 与本地 `@import` 依赖图、HTML export 后资产同步、本地媒体 fixture 与离线字体 provider、Stage 7 font-safe slot/code convergence、Stage 8 Mermaid measured-fit ownership、Stage 9 custom single-surface local Transform fixture、Stage 10 bounded Vue component tree surface fixture、Stage 11 Mermaid fence metadata 保持回归约束、Stage 12 mixed component/prose 清晰边界分离与标题+组件局部 Transform、Stage 13 unsupported component/table/directive boundary fail-transparent fixture、Stage 14 unsupported component/fence/image expected-failure fixtures
+3. 本批次实现内容：rendered quality gate + clean-room `SlideLayoutPlan` 第一切片 + Mermaid 源图保持 fit 审计 + JS/TS/Python/Rust tokenizer + Mermaid 不拆图回归契约 + Stage 5 full-deck/export fixture、文本 glyph rect 测量、slot Transform 去整页 zoom 叠加、mixed Mermaid/prose 非图内容移动、相对图片资产镜像、local Slidev fork standalone loader 边界修复、Stage 6 frontmatter/cross-dir 资产镜像、CSS `url(...)` 与本地 `@import` 依赖图、HTML export 后资产同步、本地媒体 fixture 与离线字体 provider、Stage 7 font-safe slot/code convergence、Stage 8 Mermaid measured-fit ownership、Stage 9 custom single-surface local Transform fixture、Stage 10 bounded Vue component tree surface fixture、Stage 11 Mermaid fence metadata 保持回归约束、Stage 12 mixed component/prose 清晰边界分离与标题+组件局部 Transform、Stage 13 unsupported component/table/directive boundary fail-transparent fixture、Stage 14 unsupported component/fence/image expected-failure fixtures、Stage 15 Mermaid no-split hardening
 4. 真实源文件：`docs/architecture.zh-CN.md`
 5. 本批次真实导出证据包：`/home/jacob/slidev-export-review/2026-06-20-quality/`
 6. 本批次最终 source-preserved-fit 输出归档：`/home/jacob/slidev-export-review/2026-06-20-source-preserved-fit-final/`
@@ -54,6 +54,7 @@ status: stage14-unsupported-component-fence-image-boundaries
 28. Stage 14 component/image expected-failure fixture 验收包：`/home/jacob/slidev-export-review/2026-06-20-stage14-unsupported-component-image-boundary-fixture/`
 29. Stage 14 默认成功 fixture suite 验收包：`/home/jacob/slidev-export-review/2026-06-20-stage14-success-fixtures/`
 30. Stage 14 真实 `architecture.zh-CN.md` strict native standalone 验收包：`/home/jacob/slidev-export-review/2026-06-20-stage14-real/`
+31. Stage 15 Mermaid no-split hardening 真实 `architecture.zh-CN.md` strict native standalone 验收包：`/home/jacob/slidev-export-review/2026-06-21-stage15-mermaid-no-split/`
 
 当前已落地事实：
 
@@ -105,10 +106,12 @@ status: stage14-unsupported-component-fence-image-boundaries
 46. Stage 14 image expected-failure 还额外验证失败路径里的本地图片资产不会丢失：`assets/boundary-image.svg` 同时存在于 prepared deck 与最终 standalone export。这个 slice 没有扩大自动修复范围，只把“component surface 混入 fence/image 必须 fail transparent”变成真实导出契约。
 47. Stage 14 默认成功 fixture suite 归档到 `/home/jacob/slidev-export-review/2026-06-20-stage14-success-fixtures/`：9 个可收敛生产 fixtures 继续全部通过，三个 expected-failure fixtures 均不进入默认成功路径。
 48. Stage 14 真实 `architecture.zh-CN.md` strict native standalone rerun 已通过并归档到 `/home/jacob/slidev-export-review/2026-06-20-stage14-real/`：`ok = true`，继续使用本地 Slidev fork 与 `/home/jacob/slidev/skills/slidev` 的 52 个 references，`actualMode = "standalone"`，`requiresLocalServer = false`，`standaloneGate.passed = true`，`slideCount = 27`，`hardOverflowCount = 0`，`lowEffectiveFontCount = 0`，`mermaidSourcePreservation.passed = true`，3 个 Mermaid fence 均保持 `changedFenceIndexes = []`；可审查 deck 为 `architecture.zh-CN.stage14.slidev.md`，native standalone 输出为 `architecture.zh-CN-slides/index-standalone.html`。
+49. Stage 15 收紧用户明确约束：自动导出不把“拆解 Mermaid 原图为多图”作为修复方案。`SlideLayoutPlan` 和两条 LLM deck 生成 prompt 都明确禁止 split、rewrite、derive 多个 Mermaid diagram；大图只能通过外层布局、diagram-focused slide、Transform、speaker notes、邻接说明、rendered audit measured fit 或人工复核证据处理。`prepareSlidevExportSourceFromOutline()` 现在也有回归测试覆盖：基于大纲继续导出时，LLM 若把一个源 Mermaid fence 拆成两个生成图，必须回退 deterministic source-preserving deck。
+50. Stage 15 真实 `architecture.zh-CN.md` strict native standalone rerun 已通过并归档到 `/home/jacob/slidev-export-review/2026-06-21-stage15-mermaid-no-split/`：`ok = true`，使用 `/home/jacob/slidev/packages/slidev/bin/slidev.mjs` 与 `/home/jacob/slidev/skills/slidev` 的 52 个 references，`actualMode = "standalone"`，`requiresLocalServer = false`，`standaloneGate.passed = true`，`slideCount = 27`，`hardOverflowCount = 0`，`lowEffectiveFontCount = 0`，`mermaidSourcePreservation.passed = true`，源文档与导出 deck 仍为 3 个 Mermaid fence 且 `changedFenceIndexes = []`；可审查 deck 已归档为 `architecture.zh-CN.stage15.slidev.md`，并在仓库内保留副本 `docs/slidev/architecture.zh-CN.stage15.slidev.md`，native standalone 输出为 `architecture.zh-CN-slides/index-standalone.html`，但 HTML/assets/screenshots 不进入提交。
 
 当前未完成事实：
 
-1. semantic split 仍只覆盖当前已有 table/code/text 支持集；Mermaid 源图保持后，过密原图只能通过布局/zoom/Transform 或人工复核处理，不能把一个源 Mermaid fence 自动拆成多个图，也不能把 fence metadata 当作可由 LLM 重写的格式化细节；
+1. semantic split 仍只覆盖当前已有 table/code/text 支持集；Mermaid 源图保持后，过密原图只能通过布局/zoom/Transform、旁路说明或人工复核处理，不能把一个源 Mermaid fence 自动拆成多个图，也不能把 fence metadata 当作可由 LLM 重写的格式化细节；
 2. effective font 现在会把文本节点到 slide root 之间的局部 CSS `transform` / `scale` / `zoom` 乘入逐样本字号；full-deck slot fixture 已覆盖复杂 Vue/slot、嵌套 slot、component-heavy Transform、unsafe competing slot 自动分页、bounded raw HTML/component single-surface local Transform、bounded component-only Vue tree surface，以及清晰边界 mixed component/prose 的真实收敛链路；混入 table/directive/fence/image 的 component surface 已有 fail-transparent fixture 或单元测试覆盖，多个不稳定 surface owner 或不可安全分页的 custom layout 仍需继续加 fixture；
 3. `SlideLayoutPlan` 是生成前预算，不替代 Playwright rendered audit；
 4. 真实 `architecture.zh-CN.md` 仍需要每批次跑 strict standalone 验收，不能用单测替代；
@@ -636,11 +639,13 @@ interface SlideLayoutPlan {
 25. Stage 13 真实 `architecture.zh-CN.md` strict native standalone 已重新验收并归档到 `/home/jacob/slidev-export-review/2026-06-20-stage13-real/`；报告继续证明本地 Slidev fork、52 个 skill references、native standalone、3 个 Mermaid fence byte-stable、`changedFenceIndexes = []`、0 hard overflow 与 0 low effective font。该切片没有引入任何 Mermaid 源图拆分或改写。
 26. Stage 14 unsupported component/fence 与 component/image fail-transparent fixtures 已落地：两个显式 fixture 都必须 verifier `ok = false` 且 blocked reason 指向 mixed component + primary Markdown 不能用整页 zoom 修，同时 standalone、浏览器加载、Mermaid source-preservation 与失败指纹通过；image fixture 额外验证 prepared/export 两层都保留本地 SVG 资产。
 27. Stage 14 真实 `architecture.zh-CN.md` strict native standalone 已重新验收并归档到 `/home/jacob/slidev-export-review/2026-06-20-stage14-real/`；报告继续证明本地 Slidev fork、52 个 skill references、native standalone、3 个 Mermaid fence byte-stable、`changedFenceIndexes = []`、0 hard overflow 与 0 low effective font。该切片没有引入任何 Mermaid 源图拆分或改写。
+28. Stage 15 Mermaid no-split hardening 已按用户反馈收口：方案层不再把“拆解原图为多图”列为 Mermaid 自动修复方向；prompt、layout budget 与 outline-continuation 回归测试均按“一个源 Mermaid fence 对应一个导出 Mermaid fence”加硬。后续只能增强外层画布/viewport/Transform/fit 证据，不能让 LLM 派生多个 Mermaid 图来规避可见范围问题。
+29. Stage 15 真实 `architecture.zh-CN.md` strict native standalone 已重新验收并归档到 `/home/jacob/slidev-export-review/2026-06-21-stage15-mermaid-no-split/`；报告继续证明本地 Slidev fork、52 个 skill references、native standalone、3 个 Mermaid fence byte-stable、`changedFenceIndexes = []`、0 hard overflow 与 0 low effective font。可审查输出为 `architecture.zh-CN.stage15.slidev.md` 和 `architecture.zh-CN-slides/index-standalone.html`；仓库内只保留 `docs/slidev/architecture.zh-CN.stage15.slidev.md` 这个 Markdown deck 副本，运行时生成目录已清理，避免测试产物进入提交。
 
 建议下一批实现顺序：
 
 1. 继续把更多真实失败样本沉淀为 full-deck/export fixtures，尤其是多个不稳定 owner、component/prose/component 顺序、custom layout 需要分页但没有明确 surface boundary 的 unsupported layout；Stage 14 已证明 component/table/fence/image 会 fail transparent、component/directive 会阻断整页 zoom，不代表任意 Vue component tree 都可安全 Transform；
-2. 对 Mermaid 继续只做源图保持的 fit/zoom/Transform 与人工复核边界；自动路径只允许移动非 Mermaid 内容，不允许拆原图、改 body、改 opener metadata 或重排 fence；
+2. 对 Mermaid 继续只做源图保持的 fit/zoom/Transform、旁路说明与人工复核边界；自动路径只允许移动非 Mermaid 内容，不允许拆原图、派生多图、改 body、改 opener metadata 或重排 fence；
 3. 继续增强更多语言专用 splitter；Python/Rust 当前是 parser-light，不是完整 AST；
 4. 评估是否把 source-preserved Mermaid fit review、mixed Mermaid/prose 仅移动非图内容的 guardrail、browser-check 与“不要拆用户原图”抽成通用 Slidev skill PR 建议。
 

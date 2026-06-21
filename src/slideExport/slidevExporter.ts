@@ -7,7 +7,8 @@
 
 import type { App } from 'obsidian';
 import type { SlideExportConfig, ExecResult, ExportProgressCallback, SlidevExportSource, SlidevHtmlActualMode, SlidevHtmlExportOutcome } from './types';
-import { execFileAsync, getVaultBasePath, resolveNpxCommand, resolvePlaywrightBrowsersPath, resolveSlidevCommand, safeRequire } from './platformUtils';
+import { NOTEMD_SLIDEV_INSTALL_PACKAGES } from './slidevDistribution';
+import { execFileAsync, getVaultBasePath, resolveNpmCommand, resolveNpxCommand, resolvePlaywrightBrowsersPath, resolveSlidevCommand, safeRequire } from './platformUtils';
 import { collectLocalAssetReferencesWithDependencies, copyLocalSlidevAssetReference } from './slidevSourcePreparer';
 
 function createBuildArgs(
@@ -147,7 +148,7 @@ async function exportSlidevStandaloneHtml(
 
 	const inputPath = `${vaultRoot}/${source.inputFilePath}`;
 	const outputDir = `${vaultRoot}/${config.outputSubfolder}/${source.outputBasename}-slides`;
-	const slidev = resolveSlidevCommand();
+	const slidev = resolveSlidevCommand({ roots: [vaultRoot] });
 	recreateDirectory(outputDir);
 	const args = [
 		...slidev.argsPrefix,
@@ -215,7 +216,7 @@ async function exportSlidevServerHtml(
 
 	const inputPath = `${vaultRoot}/${source.inputFilePath}`;
 	const outputDir = `${vaultRoot}/${config.outputSubfolder}/${source.outputBasename}-slides`;
-	const slidev = resolveSlidevCommand();
+	const slidev = resolveSlidevCommand({ roots: [vaultRoot] });
 	recreateDirectory(outputDir);
 	const args = [
 		...slidev.argsPrefix,
@@ -267,7 +268,7 @@ export async function exportSlidevPdf(
 
 	const inputPath = `${vaultRoot}/${source.inputFilePath}`;
 	const outputDir = `${vaultRoot}/${config.outputSubfolder}`;
-	const slidev = resolveSlidevCommand();
+	const slidev = resolveSlidevCommand({ roots: [vaultRoot] });
 	ensureDirectoryExists(outputDir);
 	const outputPath = `${outputDir}/${source.outputBasename}.pdf`;
 	const playwrightBrowsersPath = resolvePlaywrightBrowsersPath();
@@ -311,7 +312,7 @@ export async function exportSlidevPng(
 
 	const inputPath = `${vaultRoot}/${source.inputFilePath}`;
 	const outputDir = `${vaultRoot}/${config.outputSubfolder}/${source.outputBasename}-slides-png`;
-	const slidev = resolveSlidevCommand();
+	const slidev = resolveSlidevCommand({ roots: [vaultRoot] });
 	recreateDirectory(outputDir);
 	const playwrightBrowsersPath = resolvePlaywrightBrowsersPath();
 
@@ -349,15 +350,35 @@ export async function autoInstallSlidev(
 	onProgress?: ExportProgressCallback,
 ): Promise<ExecResult> {
 	const slidev = resolveSlidevCommand();
-	if (slidev.source === 'local-fork') {
-		onProgress?.('install-slidev', 'Using local Slidev fork...');
+	if (slidev.source !== 'npx') {
+		onProgress?.('install-slidev', `Using ${slidev.description}...`);
 		const result = await execFileAsync(slidev.command, ['--version'], { timeout: 120_000 });
-		onProgress?.('install-slidev', result.exitCode === 0 ? 'Local Slidev fork is available' : 'Local Slidev fork failed');
+		onProgress?.('install-slidev', result.exitCode === 0 ? 'Slidev CLI is available' : 'Slidev CLI failed');
 		return result;
 	}
 
 	onProgress?.('install-slidev', 'Installing Slidev CLI (may take a moment)...');
 	const result = await execFileAsync(slidev.command, [...slidev.argsPrefix, '--version'], { timeout: 120_000 });
+	onProgress?.('install-slidev', result.exitCode === 0 ? 'Slidev CLI installed' : 'Slidev CLI install failed');
+	return result;
+}
+
+export async function installSlidevForVault(
+	projectRoot: string,
+	onProgress?: ExportProgressCallback,
+): Promise<ExecResult> {
+	const slidev = resolveSlidevCommand({ roots: [projectRoot] });
+	if (slidev.source !== 'npx') {
+		onProgress?.('install-slidev', `Using ${slidev.description}...`);
+		const result = await execFileAsync(slidev.command, ['--version'], { timeout: 120_000 });
+		onProgress?.('install-slidev', result.exitCode === 0 ? 'Slidev CLI is available' : 'Slidev CLI failed');
+		return result;
+	}
+	onProgress?.('install-slidev', 'Installing NoteMD Slidev fork release into the vault...');
+	const result = await execFileAsync(resolveNpmCommand(), ['install', '-D', ...NOTEMD_SLIDEV_INSTALL_PACKAGES], {
+		cwd: projectRoot,
+		timeout: 300_000,
+	});
 	onProgress?.('install-slidev', result.exitCode === 0 ? 'Slidev CLI installed' : 'Slidev CLI install failed');
 	return result;
 }
