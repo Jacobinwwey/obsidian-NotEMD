@@ -4,7 +4,7 @@
  * Types for environment probing, export configuration, and command execution.
  */
 
-export type SlideExportFormat = 'html' | 'pdf' | 'png' | 'mp4';
+export type SlideExportFormat = 'html' | 'pdf' | 'png' | 'pptx' | 'mp4';
 
 export interface ProbeResult {
 	tool: 'node' | 'slidev' | 'playwright' | 'ffmpeg';
@@ -17,6 +17,7 @@ export interface ExportCapabilities {
 	html: boolean;
 	pdf: boolean;
 	png: boolean;
+	pptx: boolean;
 	mp4: boolean;
 }
 

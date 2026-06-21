@@ -80,7 +80,7 @@ function parseArgs(argv) {
 		}
 	}
 
-	if (!['html', 'pdf', 'png', 'mp4'].includes(args.format)) {
+	if (!['html', 'pdf', 'png', 'pptx', 'mp4'].includes(args.format)) {
 		throw new Error(`Unsupported --format ${args.format}`);
 	}
 	if (!['standalone', 'server-script'].includes(args.htmlMode)) {
@@ -103,7 +103,7 @@ function printHelp() {
 		'Options:',
 		'  --vault <path>             Vault root, default: docs',
 		'  --source <path>            Vault-relative source Markdown, default: architecture.zh-CN.md',
-		'  --format <html|pdf|png|mp4> Export format, default: html',
+		'  --format <html|pdf|png|pptx|mp4> Export format, default: html',
 		'  --html-mode <standalone|server-script> HTML mode, default: standalone',
 		'  --output-subfolder <path>  Vault-relative output folder, default: export',
 		'  --theme <name>             Slidev theme, default: default',
@@ -122,6 +122,7 @@ async function bundleSlideExportModules() {
 					"export { probeEnvironment } from './src/slideExport/environmentProber';",
 					"export { prepareSlidevExportSource } from './src/slideExport/slidevSourcePreparer';",
 					"export { exportSlidevHtml, exportSlidevHtmlWithOutcome, exportSlidevPdf, exportSlidevPng } from './src/slideExport/slidevExporter';",
+					"export { exportSlidevPptxFromHtml } from './src/slideExport/pptxExporter';",
 					"export { convergeSlidevDeckLayout } from './src/slideExport/slidevLayoutWorkflow';",
 					"export { exportVideoMp4 } from './src/slideExport/videoExporter';",
 					"export { analyzeRenderedSlideMeasurement, summarizeLayoutAudits, patchDeckWithLayoutAudit, countSlideDeckSlides } from './src/slideExport/slidevLayoutAudit';",
@@ -658,6 +659,50 @@ function checkIgnored(pathsToCheck) {
 		.filter(Boolean);
 }
 
+function inspectPptx(pptxPath) {
+	if (!pptxPath || !fs.existsSync(pptxPath)) {
+		return null;
+	}
+	try {
+		const { strFromU8, unzipSync } = require('fflate');
+		const entries = unzipSync(new Uint8Array(fs.readFileSync(pptxPath)));
+		const names = Object.keys(entries);
+		const slideXmlPaths = names
+			.filter(name => /^ppt\/slides\/slide\d+\.xml$/.test(name))
+			.sort((left, right) => {
+				const leftNumber = Number(left.match(/slide(\d+)\.xml$/)?.[1] || 0);
+				const rightNumber = Number(right.match(/slide(\d+)\.xml$/)?.[1] || 0);
+				return leftNumber - rightNumber;
+			});
+		const slideTextRuns = slideXmlPaths.map(name => {
+			const xml = strFromU8(entries[name]);
+			const textRunCount = (xml.match(/<a:t>/g) || []).length;
+			const pictureCount = (xml.match(/<p:pic>/g) || []).length;
+			return {
+				path: name,
+				textRunCount,
+				pictureCount,
+				hasEditableText: textRunCount > 0,
+			};
+		});
+		return {
+			isZip: true,
+			entryCount: names.length,
+			slideCount: slideXmlPaths.length,
+			mediaCount: names.filter(name => /^ppt\/media\/image\d+\.(png|jpg|jpeg)$/.test(name)).length,
+			textRunCount: slideTextRuns.reduce((total, slide) => total + slide.textRunCount, 0),
+			pictureCount: slideTextRuns.reduce((total, slide) => total + slide.pictureCount, 0),
+			slidesWithoutEditableText: slideTextRuns.filter(slide => !slide.hasEditableText).map(slide => slide.path),
+			slideTextRuns,
+		};
+	} catch (error) {
+		return {
+			isZip: false,
+			error: error instanceof Error ? error.message : String(error),
+		};
+	}
+}
+
 function printProgress(enabled, phase, detail) {
 	if (!enabled) return;
 	console.log(detail ? `${phase}: ${detail}` : phase);
@@ -694,10 +739,22 @@ async function main() {
 	let exportPath = layoutConvergence?.exportPath;
 	let htmlExport = layoutConvergence?.htmlExport ?? null;
 	let htmlExportHistory = layoutConvergence?.htmlExportHistory ?? [];
+	let pptxReportPath = null;
 	if (args.format === 'pdf') {
 		exportPath = await slideExport.exportSlidevPdf(app, slideSource, config, onProgress);
 	} else if (args.format === 'png') {
 		exportPath = await slideExport.exportSlidevPng(app, slideSource, config, onProgress);
+	} else if (args.format === 'pptx') {
+		if (!exportPath) {
+			htmlExport = await slideExport.exportSlidevHtmlWithOutcome(app, slideSource, config, onProgress);
+			htmlExportHistory = [htmlExport];
+			exportPath = htmlExport.path;
+		}
+		const pptxResult = await slideExport.exportSlidevPptxFromHtml(app, slideSource, config, exportPath, onProgress);
+		exportPath = pptxResult.path;
+		htmlExport = layoutConvergence?.htmlExport ?? htmlExport;
+		htmlExportHistory = layoutConvergence?.htmlExportHistory ?? htmlExportHistory;
+		pptxReportPath = path.join(vaultRoot, pptxResult.reportPath);
 	} else if (args.format === 'mp4') {
 		const pngDirectory = await slideExport.exportSlidevPng(app, slideSource, config, onProgress);
 		exportPath = await slideExport.exportVideoMp4(app, pngDirectory, slideSource.outputBasename, config, onProgress);
@@ -716,10 +773,12 @@ async function main() {
 	let layoutAuditSummary = layoutConvergence?.layoutAuditSummary ?? slideExport.summarizeLayoutAudits([], 0);
 	let layoutPatchAttempts = layoutConvergence?.layoutPatchAttempts ?? [];
 	let auditedSlides = layoutConvergence?.auditedSlides ?? [];
+	const pptxInspection = args.format === 'pptx' ? inspectPptx(absoluteExportPath) : null;
 
 	const ignoredOutputs = checkIgnored([
 		absoluteDeckPath,
 		absoluteExportPath,
+		pptxReportPath,
 		htmlExport?.standaloneAttempt?.preservedFailurePath
 			? path.join(vaultRoot, htmlExport.standaloneAttempt.preservedFailurePath)
 			: null,
@@ -748,6 +807,7 @@ async function main() {
 			&& environment.capabilities[args.format] === true
 			&& fs.existsSync(absoluteExportPath)
 			&& ignoredOutputs.length === 0
+			&& (args.format !== 'pptx' || Boolean(pptxInspection?.isZip && pptxInspection.textRunCount > 0))
 			&& !hasLayoutFailures
 			&& (!deckSummary || (!deckSummary.containsKnownStaleText && !deckSummary.containsMissingTheme))
 			&& (!mermaidSourcePreservation || mermaidSourcePreservation.passed)
@@ -776,7 +836,9 @@ async function main() {
 			bytes: fs.existsSync(absoluteExportPath) && fs.statSync(absoluteExportPath).isFile()
 				? fs.statSync(absoluteExportPath).size
 				: null,
+			pptxReportPath,
 		},
+		pptxInspection,
 		htmlExport,
 		htmlExportHistory,
 		standaloneGate,

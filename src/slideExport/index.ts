@@ -7,6 +7,7 @@
  */
 
 export { type SlideExportFormat, type SlideExportConfig, type SlidevExportSource, type EnvironmentReport, type ProbeResult, type ExportCapabilities, type ExecResult, type ExportProgressCallback, type SlidevHtmlActualMode, type SlidevHtmlExportOutcome, type SlidevHtmlMode, type SlidevStandaloneAttempt } from './types';
+export { type SlidevPptxExportReport, type SlidevPptxExportResult } from './pptxModel';
 export { isDesktopApp, getVaultBasePath, safeRequire, execFileAsync, resolveNpmCommand, resolveNpxCommand, getOsPlatform } from './platformUtils';
 export { probeEnvironment, probeNode, probeSlidev, probePlaywright, probeFfmpeg } from './environmentProber';
 export {
@@ -17,6 +18,7 @@ export {
 } from './slidevSourcePreparer';
 export { planSlidevMarkdownLayout, formatSlideLayoutPlanForPrompt } from './slidevLayoutPlan';
 export { exportSlidevHtml, exportSlidevHtmlWithOutcome, exportSlidevPdf, exportSlidevPng, autoInstallSlidev, installSlidevForVault, autoInstallPlaywright } from './slidevExporter';
+export { exportSlidevPptxFromHtml } from './pptxExporter';
 export { convergeSlidevDeckLayout } from './slidevLayoutWorkflow';
 export { exportVideoMp4, getFfmpegInstallInstructions } from './videoExporter';
 export { EnvironmentProbeModal } from './EnvironmentProbeModal';

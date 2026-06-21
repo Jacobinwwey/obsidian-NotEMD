@@ -3255,6 +3255,7 @@ export class NotemdSettingTab extends PluginSettingTab {
                     .addOption('html', 'HTML')
                     .addOption('pdf', 'PDF')
                     .addOption('png', 'PNG')
+                    .addOption('pptx', 'PPTX')
                     .addOption('mp4', 'MP4')
                     .setValue(this.plugin.settings.slideExportDefaultFormat)
                     .onChange(async (value) => {

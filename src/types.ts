@@ -217,7 +217,7 @@ export interface NotemdSettings {
 
     // Slide Export Settings
     enableSlideExport: boolean;
-    slideExportDefaultFormat: 'html' | 'pdf' | 'png' | 'mp4';
+    slideExportDefaultFormat: 'html' | 'pdf' | 'png' | 'pptx' | 'mp4';
     slideExportOutputSubfolder: string;
     slideExportWithClicks: boolean;
     slideExportFfmpegFps: number;

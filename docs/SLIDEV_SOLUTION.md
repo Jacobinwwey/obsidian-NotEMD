@@ -16,7 +16,7 @@ The maintained workflow is:
 6. HTML output directories are recreated before build to avoid stale assets.
 7. HTML export attempts native standalone first, records the actual HTML mode, and falls back to server-script-compatible HTML only when native standalone sanity checks find real missing slide loader bindings.
 8. Browser rendering is verified with Playwright across the full deck by default.
-9. When the Playwright runtime is available, `exportSlidesCommand()` and the maintainer verifier both run the same `convergeSlidevDeckLayout()` loop before final `HTML`/`PDF`/`PNG`/`MP4` export.
+9. When the Playwright runtime is available, `exportSlidesCommand()` and the maintainer verifier both run the same `convergeSlidevDeckLayout()` loop before final `HTML`/`PDF`/`PNG`/`PPTX`/`MP4` export.
 
 The canonical maintainer workflow is documented in:
 
@@ -115,6 +115,46 @@ npm install -D https://github.com/Jacobinwwey/slidev/releases/download/notemd-st
 
 Validation on 2026-06-21 proved that the release asset packs as `@slidev/cli@52.16.0`, installs into a clean npm project, exposes the `slidev` binary, and includes `build --help` support for `--standalone-bundle`.
 
+## Editable PPTX Export
+
+NoteMD now supports `pptx` as an export format in addition to HTML, PDF, PNG, and MP4.
+
+The PPTX path is intentionally not a screenshot-only export. It follows the stronger `oh-my-ppt` architecture shape instead of the `huashu-design` source-template-only shape:
+
+1. converge the Slidev deck through the same rendered HTML workflow used by normal export;
+2. open the final HTML in Playwright;
+3. navigate each Slidev route (`#/1`, `#/2`, ...);
+4. extract visible text boxes from the rendered DOM as editable PowerPoint text frames;
+5. capture each rendered slide as a visual fallback image layer for complex CSS, Mermaid, SVG, canvas, icons, and layout effects;
+6. write a clean-room PresentationML `.pptx` package with `fflate`;
+7. write a sidecar `.pptx.report.json` with editability metrics.
+
+This is not the same as running arbitrary visual HTML through a strict HTML-to-PPTX template converter. The `huashu-design` approach is valuable when the source HTML is authored under PPTX constraints from the start: text must live in paragraph/headline tags, backgrounds must be on container elements, gradients and `background-image` are constrained, and dimensions must match the PowerPoint layout. Slidev output is a SPA with Vue, transforms, Mermaid SVG, and complex CSS, so forcing that route onto generated Slidev HTML would be brittle. NoteMD therefore uses a browser-observed extraction path and reports the parts that remain image fallback.
+
+Expected PPTX outputs:
+
+```text
+docs/export/<source-basename>.pptx
+docs/export/<source-basename>.pptx.report.json
+```
+
+Maintainer command:
+
+```bash
+npm run verify:slidev-export -- --format pptx --source architecture.zh-CN.md --sample-slides all --timeout-ms 240000 --no-screenshots --json
+```
+
+PPTX pass conditions add:
+
+1. `environment.capabilities.pptx = true`
+2. `pptxInspection.isZip = true`
+3. `pptxInspection.slideCount` matches the rendered deck slide count
+4. `pptxInspection.textRunCount > 0`
+5. `pptxInspection.slidesWithoutEditableText = []` for decks that contain text on every slide
+6. the sidecar report has `editableTextSlideCount`, `textBoxCount`, `imageFallbackCount`, and `pagesWithoutEditableText`
+
+The current implementation deliberately treats Mermaid/SVG/canvas and complex decoration as image fallback. That preserves source Mermaid content and visual fidelity, but those graphic parts are not editable PowerPoint shapes. The user-facing contract is therefore "editable text over a visual fallback layer", not "perfectly editable reconstruction of every Slidev/Vue/CSS object".
+
 ## Real Verification Command
 
 Run:
@@ -162,8 +202,10 @@ Real maintained baseline as of 2026-06-21:
 15. the local Slidev fork's standalone bundler now preserves first-slide loader bindings when stubbing Vite preload helpers; NoteMD's strict standalone gate remains fail-closed and continues to report real `loaderGaps`
 16. HTML export syncs the prepared deck's explicit local file references into the final `<source>-slides/` output directory, and prepared decks default to `fonts.provider: none` unless the source already declares top-level `fonts:`
 17. the environment-check UI links to the fork release page and copies an `npm install -D <release .tgz> @slidev/theme-default` command; it must not suggest branch source links or generic official `@slidev/cli` installs for the standalone-required NoteMD path
+18. editable PPTX export runs after the same rendered convergence gate, writes a PresentationML package with real `<a:t>` text nodes, and emits a JSON report instead of pretending the whole deck is natively editable
+19. the real `architecture.zh-CN.md` PPTX run on 2026-06-21 returned `ok = true`, produced `27` slides, `236` slide XML text runs, `27` visual fallback images, and no slides without editable text
 
-Dedicated standalone acceptance evidence is tracked in `docs/maintainer/slidev-standalone-acceptance-2026-06-18.*`. The latest real Stage 15 acceptance archive is `/home/jacob/slidev-export-review/2026-06-21-stage15-final-rerun/`; generated HTML, screenshots, and install-smoke scratch files remain outside the repo so the main branch does not gain one-off export artifacts.
+Dedicated standalone acceptance evidence is tracked in `docs/maintainer/slidev-standalone-acceptance-2026-06-18.*`. Editable PPTX acceptance evidence is tracked in `docs/maintainer/slidev-editable-pptx-acceptance-2026-06-21.*`. The latest real Stage 15 acceptance archive is `/home/jacob/slidev-export-review/2026-06-21-stage15-final-rerun/`; the current real editable PPTX archive is `/home/jacob/slidev-export-review/2026-06-21-editable-pptx-real/`. Generated HTML, screenshots, PPTX files, and install-smoke scratch files remain outside the commit so the main branch does not gain one-off export artifacts.
 
 ## Current Rendered Layout Model
 
@@ -256,7 +298,8 @@ Current gap:
 1. richer custom/component-heavy Slidev layouts beyond the current supported structural set still fall back to conservative/manual-review behavior, especially when there is no stable owner, the component/prose order is ambiguous, or a single non-Mermaid component surface cannot be structurally split or transformed within the font floor; component/table/directive/fence/image boundaries now have explicit blocking coverage;
 2. standalone export now has a strict native gate and the real architecture fixture passes it, but correctness still depends on post-build sanity detection; server-script fallback remains a compatibility lane for future bad bundles, not evidence that native standalone passed;
 3. full-deck Playwright verification is now more correct, but noticeably slower, so future work should improve patch convergence instead of weakening the audit back to representative sampling;
-4. the Obsidian CLI can dispatch `notemd:export-slides`, but it does not expose an export-complete handshake, so host-command smoke is still weaker than the maintainer verifier.
+4. the Obsidian CLI can dispatch `notemd:export-slides`, but it does not expose an export-complete handshake, so host-command smoke is still weaker than the maintainer verifier;
+5. editable PPTX is currently a pragmatic extraction layer: text is editable, visual fidelity is preserved by slide-level image fallback, but tables, Mermaid, SVG, canvas, and Vue component internals are not yet reconstructed as editable Office-native objects.
 
 ## Next-Level Layout Quality Direction
 

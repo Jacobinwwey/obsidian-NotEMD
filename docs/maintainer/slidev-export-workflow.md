@@ -43,6 +43,21 @@ or docs/export/architecture.zh-CN-slides/index.html when standalone falls back
 docs/export/architecture.zh-CN-slides/slide-*-workflow.png
 ```
 
+For editable PPTX:
+
+```bash
+npm run verify:slidev-export -- --format pptx --source architecture.zh-CN.md --sample-slides all --timeout-ms 240000 --no-screenshots --json
+```
+
+The PPTX run writes:
+
+```text
+docs/export/architecture.zh-CN.pptx
+docs/export/architecture.zh-CN.pptx.report.json
+```
+
+The verifier also opens the `.pptx` as a zip and checks slide XML for editable `<a:t>` text nodes. Treat image-only PPTX output as a failure for this path.
+
 For a quieter machine-readable run:
 
 ```bash
@@ -135,6 +150,11 @@ Treat the command as passing only when the final JSON report has:
 19. existing local `<Transform>` wrappers, including non-slot single-surface wrappers, must not be compounded with later whole-slide `zoom`.
 20. mixed component/prose slides must not retain whole-slide zoom when a safe component/prose boundary exists; if the boundary is unsafe, the patcher should block whole-slide zoom and surface blocked/manual-review instead of shrinking prose.
 21. expected-failure fixtures should not be treated as normal regressions just because verifier `ok = false`; they must prove the intended failure reason, native standalone environment, artifact visibility, and source preservation. The default success suite must still contain only `ok = true` converging fixtures.
+22. for PPTX closure, `environment.capabilities.pptx: true`
+23. for PPTX closure, `pptxInspection.isZip: true`
+24. for PPTX closure, `pptxInspection.textRunCount > 0`
+25. for PPTX closure, `pptxInspection.slidesWithoutEditableText` is empty when every source slide contains text
+26. for PPTX closure, the sidecar report records `textBoxCount`, `editableTextSlideCount`, `imageFallbackCount`, and `pagesWithoutEditableText`
 
 If any check fails, fix the NoteMD workflow before relying on the exported files.
 

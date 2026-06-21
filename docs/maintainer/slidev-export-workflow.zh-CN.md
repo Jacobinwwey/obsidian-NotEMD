@@ -43,6 +43,21 @@ docs/export/architecture.zh-CN-slides/index-standalone.html
 docs/export/architecture.zh-CN-slides/slide-*-workflow.png
 ```
 
+验证可编辑 PPTX：
+
+```bash
+npm run verify:slidev-export -- --format pptx --source architecture.zh-CN.md --sample-slides all --timeout-ms 240000 --no-screenshots --json
+```
+
+PPTX 路径会写出：
+
+```text
+docs/export/architecture.zh-CN.pptx
+docs/export/architecture.zh-CN.pptx.report.json
+```
+
+verifier 会把 `.pptx` 当作 zip 打开，并检查 slide XML 中是否存在可编辑文本节点 `<a:t>`。如果只是图片式 PPTX，这条路径应视为失败。
+
 如果只需要机器可读的轻量结果：
 
 ```bash
@@ -135,6 +150,11 @@ docs/maintainer/slidev-standalone-acceptance-2026-06-18.zh-CN.md
 19. 已有局部 `<Transform>` 的页面，包括非 slot 的 single-surface wrapper，不能在后续 retry 中再叠加整页 `zoom`。
 20. mixed component/prose 页在存在安全 component/prose 边界时不能保留整页 `zoom`；如果边界不安全，patcher 应阻断整页 `zoom` 并暴露 blocked/manual-review，而不是缩小正文。
 21. expected-failure fixture 不能因为 verifier `ok = false` 就算失败；它必须证明失败原因、standalone 环境和源内容保持都符合预期。默认成功 suite 仍必须只包含 `ok = true` 的可收敛 fixtures。
+22. PPTX 收口时，`environment.capabilities.pptx: true`
+23. PPTX 收口时，`pptxInspection.isZip: true`
+24. PPTX 收口时，`pptxInspection.textRunCount > 0`
+25. PPTX 收口时，若源 deck 每页都有文本，`pptxInspection.slidesWithoutEditableText` 必须为空
+26. PPTX 收口时，sidecar report 必须记录 `textBoxCount`、`editableTextSlideCount`、`imageFallbackCount` 与 `pagesWithoutEditableText`
 
 任一条件失败，都应先修 NoteMD 工作流，再相信导出文件。
 

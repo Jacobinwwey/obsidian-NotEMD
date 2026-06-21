@@ -23,7 +23,7 @@ type MockPlugin = {
         customWorkflowButtonsDsl: string;
         customWorkflowErrorStrategy: 'stop_on_error' | 'continue_on_error';
         enableApiErrorDebugMode: boolean;
-        slideExportDefaultFormat: 'html' | 'pdf' | 'png' | 'mp4';
+        slideExportDefaultFormat: 'html' | 'pdf' | 'png' | 'pptx' | 'mp4';
     };
     saveSettings: jest.Mock<Promise<void>, []>;
     getIsBusy: jest.Mock<boolean, []>;
@@ -327,7 +327,7 @@ describe('NotemdSidebarView DOM button wiring', () => {
             slidev: { tool: 'slidev', installed: false, version: null, error: 'Not available via npx slidev' },
             playwright: { tool: 'playwright', installed: false, version: null, error: 'Playwright chromium not installed' },
             ffmpeg: { tool: 'ffmpeg', installed: false, version: null, error: 'ffmpeg not found in PATH' },
-            capabilities: { html: false, pdf: false, png: false, mp4: false }
+            capabilities: { html: false, pdf: false, png: false, pptx: false, mp4: false }
         });
     });
 
@@ -511,10 +511,10 @@ describe('NotemdSidebarView DOM button wiring', () => {
         expect(selector?.tag).toBe('select');
         expect(selector?.value).toBe('html');
 
-        selector!.value = 'pdf';
+        selector!.value = 'pptx';
         await selector!.onchange?.();
 
-        expect(plugin.settings.slideExportDefaultFormat).toBe('pdf');
+        expect(plugin.settings.slideExportDefaultFormat).toBe('pptx');
         expect(plugin.saveSettings).toHaveBeenCalledTimes(1);
     });
 

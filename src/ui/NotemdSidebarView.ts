@@ -58,7 +58,7 @@ interface ApiActivityRequestRecord {
 const API_ACTIVITY_RECENT_LIMIT = 6;
 const API_ACTIVITY_HISTORY_LIMIT = 20;
 const API_ACTIVITY_VISIBLE_HISTORY_LIMIT = 6;
-const SLIDE_EXPORT_FORMATS: Array<NotemdSettings['slideExportDefaultFormat']> = ['html', 'pdf', 'png', 'mp4'];
+const SLIDE_EXPORT_FORMATS: Array<NotemdSettings['slideExportDefaultFormat']> = ['html', 'pdf', 'png', 'pptx', 'mp4'];
 
 const ACTION_CATEGORY_CONFIG: Record<ActionCategory, { openByDefault: boolean }> = {
     core: { openByDefault: true },
@@ -1489,6 +1489,7 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
             html: 'HTML',
             pdf: 'PDF',
             png: 'PNG',
+            pptx: 'PPTX',
             mp4: 'MP4'
         };
         for (const format of SLIDE_EXPORT_FORMATS) {

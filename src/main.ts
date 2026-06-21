@@ -2940,7 +2940,7 @@ export default class NotemdPlugin extends Plugin {
             logSlideExportProgress: (phase: string, detail?: string) => void
         ) => Promise<SlidevExportSource>
     ): Promise<void> {
-        const { probeEnvironment, convergeSlidevDeckLayout, exportSlidevPdf, exportSlidevPng, exportVideoMp4, getVaultBasePath } = await import('./slideExport');
+        const { probeEnvironment, convergeSlidevDeckLayout, exportSlidevPdf, exportSlidevPng, exportSlidevPptxFromHtml, exportVideoMp4, getVaultBasePath } = await import('./slideExport');
         const uiStrings = this.getUiStrings();
         const config = this.buildSlideExportConfig();
         const activeReporter = reporter ?? await this.getSidebarReporter();
@@ -3009,6 +3009,18 @@ export default class NotemdPlugin extends Plugin {
                 );
                 activeReporter.log(uiStrings.slideExport.exportSuccess.replace('{path}', outputPath));
                 activeReporter.updateStatus(uiStrings.slideExport.exportSuccess.replace('{path}', outputPath), 100);
+                new Notice(uiStrings.slideExport.exportComplete);
+            } else if (config.format === 'pptx') {
+                const result = await exportSlidevPptxFromHtml(
+                    this.app,
+                    slideSource,
+                    config,
+                    layoutConvergence.exportPath,
+                    logSlideExportProgress
+                );
+                activeReporter.log(uiStrings.slideExport.exportSuccess.replace('{path}', result.path));
+                activeReporter.log(formatI18n(uiStrings.slideExport.pptxReportOutputLog, { path: result.reportPath }));
+                activeReporter.updateStatus(uiStrings.slideExport.exportSuccess.replace('{path}', result.path), 100);
                 new Notice(uiStrings.slideExport.exportComplete);
             } else if (config.format === 'mp4') {
                 activeReporter.log(uiStrings.slideExport.exportingPngSequence);

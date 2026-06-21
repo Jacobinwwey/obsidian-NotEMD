@@ -797,6 +797,7 @@ describe('Integration — Probe to PDF Export', () => {
         const report = await probeEnvironment(['/vault']);
         expect(report.playwright.installed).toBe(true);
         expect(report.capabilities.pdf).toBe(true);
+        expect(report.capabilities.pptx).toBe(true);
 
         const app = createMockApp();
         const source = createMockSlidevSource('slides', 'slides.md');
@@ -843,6 +844,7 @@ describe('Integration — Probe to PNG to MP4 Chain', () => {
 
         const report = await probeEnvironment(['/vault']);
         expect(report.capabilities.png).toBe(true);
+        expect(report.capabilities.pptx).toBe(true);
         expect(report.capabilities.mp4).toBe(true);
 
         const app = createMockApp();

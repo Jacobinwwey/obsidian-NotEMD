@@ -115,6 +115,7 @@ export class EnvironmentProbeModal extends Modal {
 			{ key: 'html', label: 'HTML (playable slides)', available: this.report.capabilities.html },
 			{ key: 'pdf', label: 'PDF', available: this.report.capabilities.pdf },
 			{ key: 'png', label: 'PNG (image sequence)', available: this.report.capabilities.png },
+			{ key: 'pptx', label: 'PPTX (editable text)', available: this.report.capabilities.pptx },
 			{ key: 'mp4', label: 'MP4 (video)', available: this.report.capabilities.mp4 },
 		];
 

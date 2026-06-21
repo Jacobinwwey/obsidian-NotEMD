@@ -105,6 +105,7 @@ function computeCapabilities(
 		html: hasBase,
 		pdf: hasBase && playwright.installed,
 		png: hasBase && playwright.installed,
+		pptx: hasBase && playwright.installed,
 		mp4: hasBase && playwright.installed && ffmpeg.installed,
 	};
 }
@@ -121,7 +122,7 @@ export async function probeEnvironment(searchRoots: string[] = []): Promise<Envi
 			slidev: missing('slidev'),
 			playwright: missing('playwright'),
 			ffmpeg: missing('ffmpeg'),
-			capabilities: { html: false, pdf: false, png: false, mp4: false },
+			capabilities: { html: false, pdf: false, png: false, pptx: false, mp4: false },
 		};
 	}
 
