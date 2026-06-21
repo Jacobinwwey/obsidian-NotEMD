@@ -35,6 +35,12 @@ npm install -D https://github.com/Jacobinwwey/slidev/releases/download/notemd-st
 
 This release asset was smoke-tested on 2026-06-21 with `npm pack --dry-run` and a clean-project `npm install`; the installed `slidev build --help` exposes `--standalone-bundle`.
 
+Distribution rule:
+
+1. Runtime CLI fixes, such as upstream PR `slidevjs/slidev#2633` for standalone bundle export, must be shipped through a release asset or an npm package before NoteMD links users to them.
+2. Skill/reference guidance, such as upstream PR `slidevjs/slidev#2638`, is not the same distribution surface as the CLI package. It can improve deck-generation prompts when the full skill directory is available, but it should not be represented as the environment-check install target.
+3. A branch, tree, blob, or raw file URL is acceptable for maintainer review only. It is not acceptable as the sidebar copyable install command because it can drift and may not pack as `@slidev/cli`.
+
 ## What The Verification Covers
 
 The maintainer command verifies more than a raw Slidev build:

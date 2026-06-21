@@ -35,6 +35,12 @@ npm install -D https://github.com/Jacobinwwey/slidev/releases/download/notemd-st
 
 2026-06-21 已用 `npm pack --dry-run` 和干净 npm 项目的 `npm install` 做过烟测；安装后的 `slidev build --help` 暴露 `--standalone-bundle`。
 
+分发规则：
+
+1. runtime CLI 修复，例如上游 PR `slidevjs/slidev#2633` 的 standalone bundle export，必须先通过 release asset 或 npm package 发布，NoteMD 才能把它作为用户安装入口。
+2. skill/reference 指导，例如上游 PR `slidevjs/slidev#2638`，不是 CLI package 的同一个分发面。它可以在完整 skill 目录可用时改善 deck generation prompt，但不应被包装成“检测演示导出环境”的安装目标。
+3. branch、tree、blob 或 raw file URL 只适合维护者审查，不适合作为侧边栏复制给用户的安装命令，因为它们会漂移，也不保证能被 npm 识别为 `@slidev/cli` package。
+
 ## 验证覆盖
 
 维护者命令覆盖以下内容：
