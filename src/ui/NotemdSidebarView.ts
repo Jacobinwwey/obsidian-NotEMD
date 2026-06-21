@@ -1556,7 +1556,7 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
 
             if (tool === 'slidev' || tool === 'playwright') {
                 const installButton = footer.createEl('button', {
-                    text: i18n.slideExport.probeInstallBtn,
+                    text: i18n.slideExport.installToolButton,
                     cls: 'notemd-slide-export-env-install-button'
                 }) as HTMLButtonElement;
                 installButton.onclick = () => this.installSlideExportTool(tool);

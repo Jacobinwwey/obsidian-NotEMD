@@ -16,13 +16,25 @@
 4. 写 OOXML package；
 5. 输出 warnings 与 editability coverage。
 
-2026-06-21 重新 fetch 后，`ref/oh-my-ppt-upstream-fresh-20260621` 的 `origin/main` 仍停在 `843ff74` / `v2.0.17`，但本地 fork 已同步 `upstream/feat/v2.0.18` 到 `5cf764b`。本次参考的是 `renderer.ts`、`browser-scripts.ts`、`index.ts`、`table-extract.ts` 与 `ooxml-writer.ts` 的 HTML->PPTX 路线。该项目对这类问题的关键处理不是“把截图转成 PPTX”，而是分层抽取：
+2026-06-21 重新 fetch 后，`ref/oh-my-ppt-upstream-latest` 的 `origin/main` 为 `843ff74` / `v2.0.17`。本地 fork `ref/oh-my-ppt-fork` 当前在 `pr/animation-export-contract` 的 `257c23b`，相对 `upstream/main` 的相关差异集中在 animation export contract；HTML->PPTX 主路线仍以 upstream 的 `renderer.ts`、`browser-scripts.ts`、`index.ts`、`table-extract.ts`、`font-collect.ts` 与 `ooxml-writer.ts` 为准。
+
+该项目对这类问题的关键处理不是“把截图转成 PPTX”，而是分层抽取：
 
 1. `table-extract.ts` 先抽取真实 `<table>`，计算 row/column geometry、rowspan/colspan、border、padding 与 vertical align，并把 consumed table 标记掉，避免后续文本抽取重复吃表格内容。
 2. `index.ts` 在浏览器中以 computed style 为事实源抽取 text run、shape、image、table，并使用 paint order 思路维持 z-order。
 3. `renderer.ts` 在捕获 background 前隐藏已抽取 primitive，并用像素采样检测 text residue，必要时 retry，避免“背景截图里残留一份文字 + PPTX 文本框再叠一份文字”。
 4. `ooxml-writer.ts` 支持 native DrawingML table、multi-run text、norm/no autofit、overlay image、font embedding 与 animation trace matching。
 5. `font-collect.ts` 把字体作为输出合同的一部分，而不是假设 Office 端字体和 Chromium 字体度量一致。
+
+这里有一个容易误判的点：`oh-my-ppt` 的背景 residue 检测服务于“原生 PPTX 文本可见”的策略；NotEMD 当前采用“冻结背景图可见 + 可编辑文本/表格透明结构层”的策略，所以不能直接把 `oh-my-ppt` 的 hide-before-background 逻辑搬进当前代码。当前 NotEMD 截图必须保留可见文字，否则 PPTX 会只剩透明可编辑层，视觉反而退化。residue 检测应作为未来打开 visible-native-text 或 visible-native-table 时的硬门槛，而不是当前透明结构层的前置条件。
+
+更准确的借鉴方式是：
+
+1. 继续保留 rendered convergence 作为 HTML/PPTX 的共同事实源；
+2. 对高置信 table/text 先抽结构，明确 consumed primitive，避免重复抽取；
+3. 让 sidecar report 记录每种对象的真实覆盖率，不把 fallback 伪装成可编辑；
+4. 当某类 native layer 要从透明变为可见时，先加同一冻结背景下的视觉 A/B gate；
+5. 只有 A/B 证明 visible-native layer 不让 RMSE、文本重叠、字体度量或表格边框退化，才逐页放开。
 
 NoteMD 当前已经从最小闭环推进到“文本框抽取 + table-first structural extraction + 整页视觉 fallback + PresentationML writer + 冻结背景视觉门槛”。它仍没有 rich text runs、完整 paint-order primitive graph、字体 embedding 和 background residue retry。因此它能证明“文本与表格结构可编辑/可选中”，也能证明“Office 回渲接近写入 PPTX 的冻结视觉层”；但还不能证明 Mermaid/SVG/canvas/Vue component 已被重建为 Office 原生可编辑对象。
 
@@ -162,7 +174,7 @@ GitHub branch、tree 或 blob URL 都不是正确安装面。它们不是稳定 
 1. 保持 visual diff gate 进入每次 PPTX 真实验收：报告模式用于开发，`--require-pptx-visual-match` 用于收口或 CI，并固定使用 `pptx-background-images` 作为 hard gate reference。
 2. table-first extraction 已经落地为透明结构层。下一步不要急着把表格设为可见层，而应先补齐 CSS padding、border collapse、line-height、cell text baseline、theme font fallback 与 Office round-trip 渲染模型；只有 visible-native-table 分支在 frozen reference gate 下不退化时，才允许逐页放开。
 3. 文本模型从“每个 DOM block 一个 text frame”升级为 rich run extraction。必须处理 CJK 字体、font fallback、line-height、paragraph spacing、list indent、code monospace 和 inline emphasis，否则长文本页会持续偏。
-4. 背景捕获增加 residue detection/retry。当前隐藏候选文本后直接截图，缺少像素级确认，容易叠出 ghost text 或漏隐藏的 inline text。
+4. 如果未来要让原生 text/table layer 从透明变为可见，必须先增加 background residue detection/retry。当前透明结构层不应隐藏背景文字；只有可见原生文本接管视觉时，才需要像 `oh-my-ppt` 那样隐藏已抽取文字并用像素采样确认背景不残留 ghost text。
 5. shape extraction 只从高置信纯色矩形/线条开始，按 DOM paint order 插入；不要先碰复杂 SVG/Mermaid/vector reconstruction。
 6. Mermaid 源内容继续不动，默认保持 image fallback；除非未来提供明确 experimental vector reconstruction 选项，并且不得自动拆分或改写源 Mermaid fence。
 7. 继续保留 rendered convergence 作为共同前置路径，不新增一条绕过 HTML/PNG 事实源的 HTML-to-PPTX 路线。

@@ -343,26 +343,6 @@ export async function exportSlidevPng(
 	return `${config.outputSubfolder}/${source.outputBasename}-slides-png`;
 }
 
-/**
- * Auto-install slidev CLI via npx -y (pre-warms the npx cache).
- */
-export async function autoInstallSlidev(
-	onProgress?: ExportProgressCallback,
-): Promise<ExecResult> {
-	const slidev = resolveSlidevCommand();
-	if (slidev.source !== 'npx') {
-		onProgress?.('install-slidev', `Using ${slidev.description}...`);
-		const result = await execFileAsync(slidev.command, ['--version'], { timeout: 120_000 });
-		onProgress?.('install-slidev', result.exitCode === 0 ? 'Slidev CLI is available' : 'Slidev CLI failed');
-		return result;
-	}
-
-	onProgress?.('install-slidev', 'Installing Slidev CLI (may take a moment)...');
-	const result = await execFileAsync(slidev.command, [...slidev.argsPrefix, '--version'], { timeout: 120_000 });
-	onProgress?.('install-slidev', result.exitCode === 0 ? 'Slidev CLI installed' : 'Slidev CLI install failed');
-	return result;
-}
-
 export async function installSlidevForVault(
 	projectRoot: string,
 	onProgress?: ExportProgressCallback,

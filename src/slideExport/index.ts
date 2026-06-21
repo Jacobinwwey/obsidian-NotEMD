@@ -17,8 +17,7 @@ export {
 	getSlidevExportOutlinePath
 } from './slidevSourcePreparer';
 export { planSlidevMarkdownLayout, formatSlideLayoutPlanForPrompt } from './slidevLayoutPlan';
-export { exportSlidevHtml, exportSlidevHtmlWithOutcome, exportSlidevPdf, exportSlidevPng, autoInstallSlidev, installSlidevForVault, autoInstallPlaywright } from './slidevExporter';
+export { exportSlidevHtml, exportSlidevHtmlWithOutcome, exportSlidevPdf, exportSlidevPng, installSlidevForVault, autoInstallPlaywright } from './slidevExporter';
 export { exportSlidevPptxFromHtml } from './pptxExporter';
 export { convergeSlidevDeckLayout } from './slidevLayoutWorkflow';
 export { exportVideoMp4, getFfmpegInstallInstructions } from './videoExporter';
-export { EnvironmentProbeModal } from './EnvironmentProbeModal';

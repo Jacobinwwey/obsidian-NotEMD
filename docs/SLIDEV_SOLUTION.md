@@ -95,7 +95,7 @@ Slidev command resolution prefers:
 3. `$HOME/slidev/packages/slidev/bin/slidev.mjs`
 4. `npx -y @slidev/cli`
 
-On Jacob's workstation, the maintained verification path should report the local fork path in `environment.slidev.version`.
+On Jacob's workstation, the maintained verification path should report the local fork path in `environment.slidev.version`. The `npx -y @slidev/cli` entry is only a last-resort probe fallback; it is not the NoteMD install recommendation. If that fallback does not expose `--standalone-bundle`, environment probing must mark Slidev unavailable for the standalone-required path.
 
 ## Fork Release Distribution
 
@@ -115,6 +115,8 @@ npm install -D https://github.com/Jacobinwwey/slidev/releases/download/notemd-st
 
 Validation on 2026-06-21 proved that the release asset packs as `@slidev/cli@52.16.0`, installs into a clean npm project, exposes the `slidev` binary, and includes `build --help` support for `--standalone-bundle`.
 
+The release is intentionally attached to the fork branch that carries the NoteMD standalone fix. Do not replace it with a `tree`, `blob`, raw file, or moving branch link in UI copy. Those links are useful for code review, but they are not package artifacts and do not give npm a stable executable package boundary.
+
 ## Editable PPTX Export
 
 NoteMD now supports `pptx` as an export format in addition to HTML, PDF, PNG, and MP4.
@@ -129,6 +131,8 @@ The PPTX path is intentionally not a screenshot-only export. It follows the stro
 6. capture each rendered slide as a visual fallback image layer for complex CSS, Mermaid, SVG, canvas, icons, and layout effects;
 7. write a clean-room PresentationML `.pptx` package with `fflate`;
 8. write a sidecar `.pptx.report.json` with editability metrics.
+
+The adopted part of `oh-my-ppt` is the pipeline and quality-gate shape, not a byte-for-byte output contract. `oh-my-ppt` hides extracted primitives before background capture and checks for residual text because its native text/table layers are visible. NoteMD currently keeps the frozen background image as the visible layer and writes editable text/table structures as transparent layers, so the background capture must retain visible text. Residue detection should become a hard gate only when a future slice makes native text or native tables visible.
 
 This is not the same as running arbitrary visual HTML through a strict HTML-to-PPTX template converter. The `huashu-design` approach is valuable when the source HTML is authored under PPTX constraints from the start: text must live in paragraph/headline tags, backgrounds must be on container elements, gradients and `background-image` are constrained, and dimensions must match the PowerPoint layout. Slidev output is a SPA with Vue, transforms, Mermaid SVG, and complex CSS, so forcing that route onto generated Slidev HTML would be brittle. NoteMD therefore uses a browser-observed extraction path and reports the parts that remain image fallback.
 
@@ -213,7 +217,7 @@ Real maintained baseline as of 2026-06-21:
 16. HTML export syncs the prepared deck's explicit local file references into the final `<source>-slides/` output directory, and prepared decks default to `fonts.provider: none` unless the source already declares top-level `fonts:`
 17. the environment-check UI links to the fork release page and copies an `npm install -D <release .tgz> @slidev/theme-default` command; it must not suggest branch source links or generic official `@slidev/cli` installs for the standalone-required NoteMD path
 18. editable PPTX export runs after the same rendered convergence gate, writes a PresentationML package with real `<a:t>` text nodes, and emits a JSON report instead of pretending the whole deck is natively editable
-19. the real `architecture.zh-CN.md` PPTX run on 2026-06-21 returned `ok = true`, produced `27` slides, `236` slide XML text runs, `27` visual fallback images, and no slides without editable text
+19. the real `architecture.zh-CN.md` PPTX run on 2026-06-21 returned `ok = true`, produced `27` slides, `331` slide XML text runs, `4` native table structures, `27` visual fallback images, and no slides without editable text
 
 Dedicated standalone acceptance evidence is tracked in `docs/maintainer/slidev-standalone-acceptance-2026-06-18.*`. Editable PPTX acceptance evidence is tracked in `docs/maintainer/slidev-editable-pptx-acceptance-2026-06-21.*`. The latest real Stage 15 acceptance archive is `/home/jacob/slidev-export-review/2026-06-21-stage15-final-rerun/`; the current real editable PPTX archive is `/home/jacob/slidev-export-review/2026-06-21-editable-pptx-real/`. Generated HTML, screenshots, PPTX files, and install-smoke scratch files remain outside the commit so the main branch does not gain one-off export artifacts.
 

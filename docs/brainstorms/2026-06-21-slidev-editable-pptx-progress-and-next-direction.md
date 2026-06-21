@@ -16,7 +16,27 @@ The requested feature is not "export a `.pptx` file". A PPTX containing one scre
 4. write an OOXML package;
 5. report warnings and editability coverage.
 
-After the 2026-06-21 refresh, `ref/oh-my-ppt-upstream-fresh-20260621` still points at `origin/main` commit `843ff74`, tagged `v2.0.17`, while the local fork has `upstream/feat/v2.0.18` at `5cf764b`. The useful lessons for this slice are table-first extraction, marking consumed primitives before background capture, freezing page state, native DrawingML table output, and residue-aware background capture. NoteMD ports that shape clean-room with Playwright and a small PresentationML writer instead of copying Apache-2.0 source or bringing Electron assumptions into an Obsidian plugin.
+After the 2026-06-21 refresh, `ref/oh-my-ppt-upstream-latest` points at `origin/main` commit `843ff74`, tagged `v2.0.17`. The local fork at `ref/oh-my-ppt-fork` is on `pr/animation-export-contract` commit `257c23b`; the relevant fork delta is concentrated in the animation export contract, so the HTML-to-PPTX route should be read from upstream `renderer.ts`, `browser-scripts.ts`, `index.ts`, `table-extract.ts`, `font-collect.ts`, and `ooxml-writer.ts`.
+
+The useful lessons are more specific than "convert screenshots to PPTX":
+
+1. `table-extract.ts` extracts real `<table>` geometry first, including row/column sizes, rowspan/colspan, borders, padding, and vertical alignment, then marks consumed table elements so later text extraction does not duplicate their contents.
+2. `index.ts` treats browser computed style as the source of truth for text runs, shapes, images, tables, and paint order.
+3. `renderer.ts` hides extracted primitives before background capture and uses pixel sampling to detect residual text, retrying when the screenshot still contains text that would double-render under visible native PPTX text.
+4. `ooxml-writer.ts` writes native DrawingML tables, multi-run text, autofit metadata, overlay images, embedded fonts, and animation trace targets.
+5. `font-collect.ts` treats fonts as part of the export contract instead of assuming Office will match Chromium font metrics.
+
+The critical boundary is that the `oh-my-ppt` residue check serves a visible-native-text strategy. NoteMD's current contract is different: the frozen background image is the visible layer, while editable text/table structures are transparent. Directly porting hide-before-background behavior would remove the visible text from the current PPTX and make the visual result worse. Residue detection becomes a hard gate only when NoteMD experiments with visible native text or visible native tables.
+
+The clean-room adoption path is therefore:
+
+1. keep rendered convergence as the shared HTML/PPTX source of truth;
+2. extract high-confidence table/text structures first and mark consumed primitives;
+3. report actual object coverage in the sidecar instead of presenting fallback imagery as editable;
+4. when a native layer moves from transparent to visible, add a same-frozen-background visual A/B gate first;
+5. only enable that visible native layer page by page if the A/B gate shows no regression in RMSE, text overlap, font metrics, or table borders.
+
+NoteMD ports that shape clean-room with Playwright and a small PresentationML writer instead of copying Apache-2.0 source or bringing Electron assumptions into an Obsidian plugin.
 
 ## Landed Implementation
 
@@ -137,7 +157,7 @@ The next level should be incremental and report-driven:
 1. keep visual diff in every real PPTX acceptance run, with `pptx-background-images` as the hard-gate reference source;
 2. keep the table structural layer, but do not make it visible until CSS padding, border collapse, line height, cell baseline, font fallback, and Office round-trip rendering are modeled tightly enough to avoid regressing the frozen visual layer;
 3. upgrade text extraction from block-level text frames to richer runs with CJK font fallback, paragraph spacing, list indentation, code monospace, and inline emphasis;
-4. add residue detection/retry before accepting background screenshots;
+4. if a future slice makes native text or table layers visible, add background residue detection/retry before accepting those screenshots. The current transparent-structure mode should not hide text from the frozen background; residue sampling only becomes mandatory when visible native text takes over the visual layer.
 5. add shape extraction for high-confidence solid-color rectangles/lines only;
 6. keep Mermaid source untouched and continue using image fallback unless a separate explicit user option requests experimental vector reconstruction.
 

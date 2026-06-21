@@ -3,7 +3,7 @@ import { NotemdSidebarView } from '../ui/NotemdSidebarView';
 import { mockApp } from './__mocks__/app';
 import { ApiLivenessEvent } from '../types';
 import { getVaultBasePath, probeEnvironment } from '../slideExport';
-import { NOTEMD_SLIDEV_FORK_RELEASE_URL, NOTEMD_SLIDEV_INSTALL_COMMAND } from '../slideExport/slidevDistribution';
+import { NOTEMD_SLIDEV_FORK_RELEASE_URL, NOTEMD_SLIDEV_FORK_TARBALL_URL, NOTEMD_SLIDEV_INSTALL_COMMAND } from '../slideExport/slidevDistribution';
 
 jest.mock('../slideExport', () => ({
     getVaultBasePath: jest.fn(() => '/vault'),
@@ -588,6 +588,11 @@ describe('NotemdSidebarView DOM button wiring', () => {
         expect(panel?.parent?.parent?.open).toBe(true);
         expect(panel?.textContent()).toContain('node --version');
         expect(panel?.textContent()).toContain(NOTEMD_SLIDEV_INSTALL_COMMAND);
+        expect(panel?.textContent()).toContain(NOTEMD_SLIDEV_FORK_TARBALL_URL);
+        expect(panel?.textContent()).not.toContain('npm install -D @slidev/cli');
+        expect(panel?.textContent()).not.toContain('pnpm add -D @slidev/cli');
+        expect(panel?.textContent()).not.toContain('/tree/');
+        expect(panel?.textContent()).not.toContain('/blob/');
         expect(panel?.textContent()).toContain('npx playwright install chromium');
         expect(panel?.textContent()).toContain('sudo apt install ffmpeg');
         expect(panel?.textContent()).toContain('Copy command');

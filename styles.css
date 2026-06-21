@@ -1068,7 +1068,7 @@
 }
 
 .notemd-slide-export-env-panel {
-    border: 1px solid color-mix(in srgb, var(--notemd-border) 74%, var(--interactive-accent) 26%);
+    border: 1px solid color-mix(in srgb, var(--notemd-border) 86%, transparent);
     border-radius: 8px;
     padding: 0.72em;
     background: color-mix(in srgb, var(--background-primary) 88%, var(--background-secondary) 12%);
@@ -1104,10 +1104,10 @@
 
 .notemd-slide-export-env-badge {
     flex: 0 0 auto;
-    border: 1px solid color-mix(in srgb, var(--notemd-border) 70%, var(--interactive-accent) 30%);
+    border: 1px solid color-mix(in srgb, var(--notemd-border) 86%, transparent);
     border-radius: 8px;
     padding: 0.18em 0.5em;
-    background: color-mix(in srgb, var(--interactive-accent) 10%, var(--background-secondary) 90%);
+    background: color-mix(in srgb, var(--background-secondary) 88%, var(--background-primary) 12%);
     color: var(--text-muted);
     font-size: 10px;
     font-weight: 750;

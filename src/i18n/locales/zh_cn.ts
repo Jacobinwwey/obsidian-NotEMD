@@ -1021,6 +1021,7 @@ export const STRINGS_ZH_CN: DeepPartial<NotemdEnglishStrings> = {
         installingTool: '正在安装 {tool}…',
         installComplete: '安装已完成，环境状态已刷新。',
         installFailed: '安装失败：{message}',
+        installToolButton: '安装',
         copyInstallCommand: '复制命令',
         copyInstallCommandSuccess: '安装命令已复制。',
         copyInstallCommandFailed: '复制安装命令失败。',
@@ -1033,25 +1034,6 @@ export const STRINGS_ZH_CN: DeepPartial<NotemdEnglishStrings> = {
         pptxReportOutputLog: 'PPTX 可编辑性报告：{path}',
         exportComplete: '演示导出完成',
         exportFailed: '导出失败',
-        formatNotSupported: '不支持 {format} 导出',
-        // 探测模态框字符串
-        probeModalTitle: '演示导出环境',
-        probeToolColumn: '工具',
-        probeStatusColumn: '状态',
-        probeVersionColumn: '版本',
-        probeActionColumn: '操作',
-        probeStatusPass: '已安装',
-        probeStatusFail: '未安装',
-        probeInstallBtn: '安装',
-        probeInstallingBtn: '正在安装…',
-        probeFfmpegInstructions: 'ffmpeg 需要手动安装：',
-        probeFfmpegMac: 'macOS：brew install ffmpeg',
-        probeFfmpegLinux: 'Linux：sudo apt install ffmpeg',
-        probeFfmpegWindows: 'Windows：从 ffmpeg.org 下载并添加到 PATH',
-        probeCapabilitiesHeading: '导出能力',
-        probeCapabilityAvailable: '✓ 可用',
-        probeCapabilityUnavailable: '✗ 不可用',
-        probeRecheckBtn: '重新检测环境',
-        probeCloseBtn: '关闭'
+        formatNotSupported: '不支持 {format} 导出'
     }
 };

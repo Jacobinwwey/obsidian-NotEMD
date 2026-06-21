@@ -1030,6 +1030,7 @@ export const STRINGS_EN = {
         installingTool: 'Installing {tool}...',
         installComplete: 'Installation finished. Environment refreshed.',
         installFailed: 'Installation failed: {message}',
+        installToolButton: 'Install',
         copyInstallCommand: 'Copy command',
         copyInstallCommandSuccess: 'Install command copied.',
         copyInstallCommandFailed: 'Failed to copy install command.',
@@ -1042,26 +1043,7 @@ export const STRINGS_EN = {
         pptxReportOutputLog: 'PPTX editability report: {path}',
         exportComplete: 'Slide export finished',
         exportFailed: 'Export failed',
-        formatNotSupported: '{format} export not available',
-        // Probe modal strings
-        probeModalTitle: 'Slide Export Environment',
-        probeToolColumn: 'Tool',
-        probeStatusColumn: 'Status',
-        probeVersionColumn: 'Version',
-        probeActionColumn: 'Action',
-        probeStatusPass: 'Installed',
-        probeStatusFail: 'Missing',
-        probeInstallBtn: 'Install',
-        probeInstallingBtn: 'Installing...',
-        probeFfmpegInstructions: 'ffmpeg must be installed manually:',
-        probeFfmpegMac: 'macOS: brew install ffmpeg',
-        probeFfmpegLinux: 'Linux: sudo apt install ffmpeg',
-        probeFfmpegWindows: 'Windows: Download from ffmpeg.org and add to PATH',
-        probeCapabilitiesHeading: 'Export Capabilities',
-        probeCapabilityAvailable: '✓ Available',
-        probeCapabilityUnavailable: '✗ Unavailable',
-        probeRecheckBtn: 'Re-check Environment',
-        probeCloseBtn: 'Close'
+        formatNotSupported: '{format} export not available'
     }
 };
 
