@@ -58,7 +58,7 @@ docs/export/architecture.zh-CN.pptx.report.json
 
 verifier 会把 `.pptx` 当作 zip 打开，并检查 slide XML 中是否存在可编辑文本节点 `<a:t>`，同时通过 `pptxInspection.tableCount` 统计 native DrawingML table。如果只是图片式 PPTX，这条路径应视为失败。
 
-如果要逐页比较 PPTX 回放结果与 Slidev PNG reference：
+如果要逐页比较 PPTX 回放结果与写入 PPTX 的冻结视觉 reference：
 
 ```bash
 npm run verify:slidev-export -- --format pptx --source architecture.zh-CN.md --sample-slides all --timeout-ms 240000 --no-screenshots --pptx-visual-diff --json
@@ -69,9 +69,12 @@ npm run verify:slidev-export -- --format pptx --source architecture.zh-CN.md --s
 ```text
 docs/export/architecture.zh-CN-pptx-visual-diff/pptx-visual-diff.report.json
 docs/export/architecture.zh-CN-pptx-visual-diff/comparison-metrics.csv
+docs/export/architecture.zh-CN-pptx-visual-diff/pptx-background-reference/slide-*.png
 docs/export/architecture.zh-CN-pptx-visual-diff/all-side-by-side-sheet.png
 docs/export/architecture.zh-CN-pptx-visual-diff/all-diff-sheet.png
 ```
+
+该门槛从 PPTX slide relationship 中抽取内嵌背景图作为 reference，不再另跑一次 Slidev PNG export。后者是另一个渲染实例，可能因为字体抗锯齿或页面状态漂移造成假失败。
 
 报告模式会记录 `pptxVisualDiff.gate.passed`，但视觉阈值超标时不会让整个 verifier 失败。严格收口时加：
 
@@ -178,10 +181,11 @@ docs/maintainer/slidev-standalone-acceptance-2026-06-18.zh-CN.md
 26. PPTX 收口时，含表格的 deck 应满足 `pptxInspection.tableCount > 0`
 27. PPTX 收口时，sidecar report 必须记录 `textBoxCount`、`tableCount`、`editableTableCellCount`、`editableTextSlideCount`、`imageFallbackCount` 与 `pagesWithoutEditableText`
 28. PPTX 视觉收口时，必须加 `--pptx-visual-diff --require-pptx-visual-match`
-29. PPTX 视觉收口时，`pptxVisualDiff.comparison.summary.missingReferenceSlides: []`
-30. PPTX 视觉收口时，`pptxVisualDiff.comparison.summary.missingRenderedSlides: []`
-31. PPTX 视觉收口时，`pptxVisualDiff.comparison.summary.maxRmse <= 0.12`
-32. PPTX 视觉收口时，`pptxVisualDiff.comparison.summary.meanRmse <= 0.08`
+29. PPTX 视觉收口时，`pptxVisualDiff.reference.source: "pptx-background-images"`
+30. PPTX 视觉收口时，`pptxVisualDiff.comparison.summary.missingReferenceSlides: []`
+31. PPTX 视觉收口时，`pptxVisualDiff.comparison.summary.missingRenderedSlides: []`
+32. PPTX 视觉收口时，`pptxVisualDiff.comparison.summary.maxRmse <= 0.12`
+33. PPTX 视觉收口时，`pptxVisualDiff.comparison.summary.meanRmse <= 0.08`
 
 任一条件失败，都应先修 NoteMD 工作流，再相信导出文件。
 

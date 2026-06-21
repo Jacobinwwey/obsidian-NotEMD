@@ -115,3 +115,35 @@ NoteMD later added a transparent native DrawingML table layer based on the table
 The table layer is intentionally transparent. Two attempts to make native tables visible both regressed the real visual diff: visible native table reached `meanRmse = 0.15640467407407407`, and hybrid native-table text reached `meanRmse = 0.15657594444444442`, both worse than the baseline `0.15322961111111114`. The current transparent structural layer reports `meanRmse = 0.15259227777777779` and `maxRmse = 0.260447`, which is a small improvement but still fails the default visual gate.
 
 Conclusion: table-first extraction is the right architecture direction, but Office-native tables should not become the visible layer until padding, border collapse, line height, cell baseline, and font fallback are modeled well enough to pass visual diff.
+
+## Frozen Background Visual Gate Follow-up
+
+Further debugging found that the earlier `--require-pptx-visual-match` failure was caused by the reference semantics, not by PPTX package drift or LibreOffice render-back drift. The passing report-mode run and failing strict run had identical PPTX embedded background images and identical PPTX render-back PNGs; only the separately generated Slidev PNG reference drifted. That second Slidev export is a different rendering instance, so it is not a reliable hard-gate reference for PPTX fidelity.
+
+The verifier now extracts each slide's embedded background image through the PPTX slide relationships and uses that frozen visual layer as the visual reference before comparing against LibreOffice render-back output. Real strict command:
+
+```bash
+runuser -u jacob -- env HOME=/home/jacob PLAYWRIGHT_BROWSERS_PATH=/home/jacob/.cache/ms-playwright bash -lc 'cd /home/jacob/obsidian-NotEMD && npm run verify:slidev-export -- --vault docs --source architecture.zh-CN.md --format pptx --output-subfolder export/test-slidev-pptx-frozen-reference-strict --sample-slides all --timeout-ms 240000 --no-screenshots --pptx-visual-diff --require-pptx-visual-match --json'
+```
+
+Result:
+
+1. `ok = true`
+2. `pptxVisualGate.required = true`
+3. `pptxVisualGate.passed = true`
+4. `pptxVisualDiff.reference.source = pptx-background-images`
+5. `pptxVisualDiff.comparison.summary.pageCount = 27`
+6. `pptxVisualDiff.comparison.summary.meanRmse = 0.049441916296296295`
+7. `pptxVisualDiff.comparison.summary.maxRmse = 0.0889364`
+8. `pptxInspection.textRunCount = 331`
+9. `pptxInspection.pictureCount = 27`
+10. `pptxInspection.tableCount = 4`
+11. `pptxInspection.slidesWithoutEditableText = []`
+
+Artifacts are under:
+
+```text
+docs/export/test-slidev-pptx-frozen-reference-strict/
+```
+
+This closes the PPTX acceptance from "structural editability passed, visual gate open" to "structural editability passed, Office render-back preserves the frozen visual layer." It still does not claim Mermaid, SVG, canvas, or Vue component internals are Office-native editable objects.

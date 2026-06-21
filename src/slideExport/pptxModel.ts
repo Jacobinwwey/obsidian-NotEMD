@@ -97,6 +97,8 @@ export interface SlidevPptxExportReport {
 	pagesWithoutEditableText: number[];
 	backgroundImageSlideCount: number;
 	imageFallbackCount: number;
+	visibleTextLayer: 'background-image';
+	editableLayerRenderMode: 'transparent-structure';
 	warnings: string[];
 }
 

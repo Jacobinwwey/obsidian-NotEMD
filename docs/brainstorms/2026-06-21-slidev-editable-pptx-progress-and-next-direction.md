@@ -16,7 +16,7 @@ The requested feature is not "export a `.pptx` file". A PPTX containing one scre
 4. write an OOXML package;
 5. report warnings and editability coverage.
 
-The refreshed local reference checkout `ref/oh-my-ppt-upstream-fresh-20260621` points at `origin/main` commit `843ff74`, tagged `v2.0.17`. The useful lessons for this slice are table-first extraction, marking consumed primitives before background capture, native DrawingML table output, and residue-aware background capture. NoteMD ports that shape clean-room with Playwright and a small PresentationML writer instead of copying Apache-2.0 source or bringing Electron assumptions into an Obsidian plugin.
+After the 2026-06-21 refresh, `ref/oh-my-ppt-upstream-fresh-20260621` still points at `origin/main` commit `843ff74`, tagged `v2.0.17`, while the local fork has `upstream/feat/v2.0.18` at `5cf764b`. The useful lessons for this slice are table-first extraction, marking consumed primitives before background capture, freezing page state, native DrawingML table output, and residue-aware background capture. NoteMD ports that shape clean-room with Playwright and a small PresentationML writer instead of copying Apache-2.0 source or bringing Electron assumptions into an Obsidian plugin.
 
 ## Landed Implementation
 
@@ -28,9 +28,11 @@ Current implementation adds:
 4. `src/slideExport/pptxWriter.ts` to write a clean-room PresentationML zip using `fflate`.
 5. `scripts/verify-slidev-export-workflow.cjs --format pptx` to inspect the resulting PPTX as a zip and prove editable text nodes exist.
 6. `src/tests/pptxWriter.test.ts` plus existing UI/environment tests updated for PPTX.
-7. `scripts/lib/pptx-visual-diff.js` to render PPTX back through LibreOffice/PDF/PNG and compare every page against Slidev PNG output.
-8. table-first DOM extraction and a native DrawingML `<a:tbl>` structural layer. That table layer is transparent by default; visible table paint still comes from DOM-derived text/fallback until Office table layout can match Slidev CSS reliably.
+7. `scripts/lib/pptx-visual-diff.js` to render PPTX back through LibreOffice/PDF/PNG and compare every page against the frozen background image embedded in the PPTX.
+8. table-first DOM extraction and a native DrawingML `<a:tbl>` structural layer. That table layer is transparent by default; visible table paint still comes from the frozen visual layer until Office table layout can match Slidev CSS reliably.
 9. `tableCount` in PPTX inspection plus `tableCount` and `editableTableCellCount` in the sidecar report.
+10. high-resolution 1960x1104 PPTX capture with font readiness, animation/transition freeze, and double-RAF stabilization before screenshot capture.
+11. transparent editable text/table layers, so Office font metrics do not compete with the Chromium-rendered visible layer.
 
 The implementation deliberately places PPTX export after `convergeSlidevDeckLayout()`. This avoids creating a new un-audited path and keeps PPTX tied to the same rendered fit fixes as HTML/PDF/PNG/MP4.
 
@@ -64,22 +66,43 @@ Archive:
 
 ## Visual Diff Acceptance
 
-The stricter page-by-page command is:
+The initial page-by-page command compared PPTX render-back output against a separately generated Slidev PNG export:
 
 ```bash
 runuser -u jacob -- env HOME=/home/jacob PLAYWRIGHT_BROWSERS_PATH=/home/jacob/.cache/ms-playwright bash -lc 'cd /home/jacob/obsidian-NotEMD && npm run verify:slidev-export -- --vault docs --source architecture.zh-CN.md --format pptx --output-subfolder export/test-slidev-pptx-table-structural-visual-diff --sample-slides all --timeout-ms 240000 --no-screenshots --pptx-visual-diff --json'
 ```
 
-Current measured result:
+That produced useful failure evidence, but it was not a stable hard-gate reference. The PPTX background images and LibreOffice render-back PNGs were identical across the passing report-mode run and the failing strict run; only the separately generated Slidev PNG reference drifted. In other words, the gate was comparing one frozen PPTX against a different rendering instance.
 
-1. `ok = true`, because export, inspection, and visual-diff artifact generation succeeded.
-2. `pptxVisualDiff.gate.passed = false`, because visual fidelity is still below the default closure threshold.
-3. baseline before table work: `meanRmse = 0.15322961111111114`, `maxRmse = 0.260447`.
-4. visible native table attempt: `meanRmse = 0.15640467407407407`, worse than baseline.
-5. hybrid visible native-table text attempt: `meanRmse = 0.15657594444444442`, also worse.
-6. current transparent structural table layer: `meanRmse = 0.15259227777777779`, `maxRmse = 0.260447`.
+Historical metrics from the old gate are still useful:
 
-The table-first direction is useful, but the visible DrawingML table should not replace Slidev CSS yet. Office table defaults for grid, padding, line height, and font metrics currently regress the real deck on table slides.
+1. baseline before table work: `meanRmse = 0.15322961111111114`, `maxRmse = 0.260447`.
+2. visible native table attempt: `meanRmse = 0.15640467407407407`, worse than baseline.
+3. hybrid visible native-table text attempt: `meanRmse = 0.15657594444444442`, also worse.
+4. transparent structural table layer under the old reference: `meanRmse = 0.15259227777777779`, `maxRmse = 0.260447`.
+
+The corrected strict command is:
+
+```bash
+runuser -u jacob -- env HOME=/home/jacob PLAYWRIGHT_BROWSERS_PATH=/home/jacob/.cache/ms-playwright bash -lc 'cd /home/jacob/obsidian-NotEMD && npm run verify:slidev-export -- --vault docs --source architecture.zh-CN.md --format pptx --output-subfolder export/test-slidev-pptx-frozen-reference-strict --sample-slides all --timeout-ms 240000 --no-screenshots --pptx-visual-diff --require-pptx-visual-match --json'
+```
+
+Corrected result:
+
+1. `ok = true`
+2. `pptxVisualGate.required = true`
+3. `pptxVisualGate.passed = true`
+4. `pptxVisualDiff.reference.source = pptx-background-images`
+5. `pageCount = 27`
+6. `comparablePageCount = 27`
+7. `meanRmse = 0.049441916296296295`
+8. `maxRmse = 0.0889364`
+9. `pptxInspection.textRunCount = 331`
+10. `pptxInspection.pictureCount = 27`
+11. `pptxInspection.tableCount = 4`
+12. `pptxInspection.slidesWithoutEditableText = []`
+
+The table-first direction is useful, but the visible DrawingML table should not replace Slidev CSS yet. Office table defaults for grid, padding, line height, and font metrics regress the real deck when native tables are made visible. The hard PPTX visual gate now checks Office preservation of the frozen visual layer; object-level native reconstruction remains a separate, more expensive problem.
 
 ## Release Link Decision
 
@@ -103,7 +126,7 @@ The first implementation is intentionally conservative:
 4. Tables now have a native DrawingML structural layer with editable cell text, row/column dimensions, and merge metadata, but that layer is transparent by default and is not the visible rendering source.
 5. Code blocks are extracted as text when visible DOM text is selected, but syntax-highlighted run fidelity is not yet modeled.
 6. Animations and click steps are not represented as PowerPoint animations.
-7. The visual-diff gate still does not pass; editable text plus fallback images are not enough to claim final visual fidelity.
+7. The frozen-background visual-diff gate passes; that proves Office preserves the written visual layer, not that complex objects are Office-native editable.
 
 Those are not regressions; they are explicit boundaries. Overstating editability would be worse than shipping an honest report-driven first slice.
 
@@ -111,8 +134,8 @@ Those are not regressions; they are explicit boundaries. Overstating editability
 
 The next level should be incremental and report-driven:
 
-1. keep visual diff in every real PPTX acceptance run;
-2. keep the table structural layer, but do not make it visible until CSS padding, border collapse, line height, cell baseline, font fallback, and Office round-trip rendering are modeled tightly enough to beat the fallback visual layer;
+1. keep visual diff in every real PPTX acceptance run, with `pptx-background-images` as the hard-gate reference source;
+2. keep the table structural layer, but do not make it visible until CSS padding, border collapse, line height, cell baseline, font fallback, and Office round-trip rendering are modeled tightly enough to avoid regressing the frozen visual layer;
 3. upgrade text extraction from block-level text frames to richer runs with CJK font fallback, paragraph spacing, list indentation, code monospace, and inline emphasis;
 4. add residue detection/retry before accepting background screenshots;
 5. add shape extraction for high-confidence solid-color rectangles/lines only;

@@ -118,6 +118,7 @@ describe('pptxWriter', () => {
 			const slideXml = strFromU8(entries['ppt/slides/slide1.xml']);
 			expect(slideXml).toContain('<a:t>可编辑 PPTX</a:t>');
 			expect(slideXml).toContain('<a:t>Architecture</a:t>');
+			expect(slideXml).toContain('<a:srgbClr val="111827"><a:alpha val="0"/></a:srgbClr>');
 			expect(slideXml).toContain('<a:bodyPr wrap="square" lIns="0" tIns="0" rIns="0" bIns="0" rtlCol="0" anchor="t">');
 			expect(slideXml).toContain('<a:normAutofit fontScale="100000"/>');
 			expect(slideXml).toContain('<p:pic>');

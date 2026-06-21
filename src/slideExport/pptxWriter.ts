@@ -58,6 +58,10 @@ function alignToOoxml(value: SlidevPptxTextAlign): string {
 	}
 }
 
+function buildTransparentTextFill(color: string): string {
+	return `<a:solidFill><a:srgbClr val="${color}"><a:alpha val="0"/></a:srgbClr></a:solidFill>`;
+}
+
 function buildTextRun(text: string, textBox: SlidevPptxTextBox): string {
 	const color = clampHexColor(textBox.color, '111827');
 	const size = Math.max(600, Math.min(14400, Math.round(textBox.fontSize * 100)));
@@ -70,7 +74,7 @@ function buildTextRun(text: string, textBox: SlidevPptxTextBox): string {
 	return [
 		'<a:r>',
 		`<a:rPr lang="en-US" sz="${size}"${bold}${italic}${underline}>`,
-		`<a:solidFill><a:srgbClr val="${color}"/></a:solidFill>`,
+		buildTransparentTextFill(color),
 		`<a:latin typeface="${fontFace}"/>`,
 		`<a:ea typeface="${escapeXmlAttribute(eastAsiaFont)}"/>`,
 		'<a:cs typeface="Aptos"/>',
@@ -140,7 +144,7 @@ function buildTableCellRun(text: string, cell: SlidevPptxTableCell): string {
 	return [
 		'<a:r>',
 		`<a:rPr lang="en-US" sz="${size}"${bold}${italic}${underline}>`,
-		`<a:solidFill><a:srgbClr val="${color}"><a:alpha val="0"/></a:srgbClr></a:solidFill>`,
+		buildTransparentTextFill(color),
 		`<a:latin typeface="${fontFace}"/>`,
 		`<a:ea typeface="${escapeXmlAttribute(eastAsiaFont)}"/>`,
 		'<a:cs typeface="Aptos"/>',

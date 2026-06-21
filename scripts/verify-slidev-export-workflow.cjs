@@ -143,7 +143,7 @@ function printHelp() {
 		'  --sample-slides <list|all> Comma-separated slide numbers for Playwright, default: all slides',
 		'  --no-playwright            Skip browser rendering checks',
 		'  --no-screenshots           Do not write Playwright screenshots',
-		'  --pptx-visual-diff         Render PPTX back to PNG and compare each page with Slidev PNG export',
+		'  --pptx-visual-diff         Render PPTX back to PNG and compare each page with the PPTX frozen background reference',
 		'  --require-pptx-visual-match Fail when PPTX/PNG visual diff exceeds thresholds',
 		'  --pptx-visual-max-rmse <n> Max per-slide normalized RMSE, default: 0.12',
 		'  --pptx-visual-mean-rmse <n> Mean normalized RMSE, default: 0.08',
@@ -833,19 +833,15 @@ async function main() {
 	let pptxReferencePngDirectory = null;
 	let pptxVisualDiff = null;
 	if (args.format === 'pptx' && args.pptxVisualDiff) {
-		onProgress('pptx-visual-diff', 'Exporting Slidev PNG reference sequence...');
-		const referencePath = await slideExport.exportSlidevPng(app, slideSource, config, onProgress);
-		pptxReferencePngDirectory = path.join(vaultRoot, referencePath);
 		const visualDiffDirectory = args.pptxVisualDiffDir
 			? (path.isAbsolute(args.pptxVisualDiffDir)
 				? args.pptxVisualDiffDir
 				: path.join(vaultRoot, args.pptxVisualDiffDir))
 			: path.join(path.dirname(absoluteExportPath), `${path.basename(absoluteExportPath, path.extname(absoluteExportPath))}-pptx-visual-diff`);
-		onProgress('pptx-visual-diff', 'Rendering PPTX back to PNG and comparing pages...');
+		onProgress('pptx-visual-diff', 'Rendering PPTX back to PNG and comparing pages with frozen background references...');
 		try {
 			pptxVisualDiff = buildPptxVisualDiff({
 				pptxPath: absoluteExportPath,
-				referenceDirectory: pptxReferencePngDirectory,
 				outputDirectory: visualDiffDirectory,
 				dpi: args.pptxVisualDpi,
 				timeoutMs: args.timeoutMs,
@@ -860,6 +856,7 @@ async function main() {
 					? 'PPTX visual diff is within thresholds.'
 					: `PPTX visual diff exceeded thresholds: ${(pptxVisualDiff.gate?.failures || []).join('; ')}`,
 			);
+			pptxReferencePngDirectory = pptxVisualDiff.reference?.referenceDirectory || null;
 		} catch (error) {
 			pptxVisualDiff = {
 				available: false,

@@ -205,7 +205,7 @@ export async function extractSlidevPptxSlideFromPage(page: any, slideNumber: num
 		const pxToInY = (value: number): number => (value - rootTop) / rootHeight * slideHeightIn;
 		const sizeToInX = (value: number): number => value / rootWidth * slideWidthIn;
 		const sizeToInY = (value: number): number => value / rootHeight * slideHeightIn;
-		const pxToPt = (value: number): number => value * 72 / 96;
+		const pxToPt = (value: number): number => value * Math.min(slideWidthIn / rootWidth, slideHeightIn / rootHeight) * 72;
 		const orderMap = new Map<Element, number>();
 		Array.from(root.querySelectorAll('*')).forEach((element, index) => {
 			orderMap.set(element, (index + 1) * 10);

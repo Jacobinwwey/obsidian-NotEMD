@@ -58,7 +58,7 @@ docs/export/architecture.zh-CN.pptx.report.json
 
 The verifier also opens the `.pptx` as a zip and checks slide XML for editable `<a:t>` text nodes. It counts native DrawingML tables through `pptxInspection.tableCount`. Treat image-only PPTX output as a failure for this path.
 
-To compare every PPTX page against the Slidev PNG reference output:
+To compare every PPTX page against the frozen visual reference written into the PPTX:
 
 ```bash
 npm run verify:slidev-export -- --format pptx --source architecture.zh-CN.md --sample-slides all --timeout-ms 240000 --no-screenshots --pptx-visual-diff --json
@@ -69,9 +69,12 @@ This run writes:
 ```text
 docs/export/architecture.zh-CN-pptx-visual-diff/pptx-visual-diff.report.json
 docs/export/architecture.zh-CN-pptx-visual-diff/comparison-metrics.csv
+docs/export/architecture.zh-CN-pptx-visual-diff/pptx-background-reference/slide-*.png
 docs/export/architecture.zh-CN-pptx-visual-diff/all-side-by-side-sheet.png
 docs/export/architecture.zh-CN-pptx-visual-diff/all-diff-sheet.png
 ```
+
+The hard gate extracts embedded background images from the PPTX slide relationships. It does not rerun Slidev PNG export as the strict reference, because that would be a second rendering instance and can drift in font antialiasing or page state.
 
 Report mode records `pptxVisualDiff.gate.passed` but does not fail the whole verifier when visual thresholds are exceeded. For strict closure, add:
 
@@ -178,10 +181,11 @@ Treat the command as passing only when the final JSON report has:
 26. for PPTX closure on decks with tables, `pptxInspection.tableCount > 0`
 27. for PPTX closure, the sidecar report records `textBoxCount`, `tableCount`, `editableTableCellCount`, `editableTextSlideCount`, `imageFallbackCount`, and `pagesWithoutEditableText`
 28. for PPTX visual closure, run with `--pptx-visual-diff --require-pptx-visual-match`
-29. for PPTX visual closure, `pptxVisualDiff.comparison.summary.missingReferenceSlides: []`
-30. for PPTX visual closure, `pptxVisualDiff.comparison.summary.missingRenderedSlides: []`
-31. for PPTX visual closure, `pptxVisualDiff.comparison.summary.maxRmse <= 0.12`
-32. for PPTX visual closure, `pptxVisualDiff.comparison.summary.meanRmse <= 0.08`
+29. for PPTX visual closure, `pptxVisualDiff.reference.source: "pptx-background-images"`
+30. for PPTX visual closure, `pptxVisualDiff.comparison.summary.missingReferenceSlides: []`
+31. for PPTX visual closure, `pptxVisualDiff.comparison.summary.missingRenderedSlides: []`
+32. for PPTX visual closure, `pptxVisualDiff.comparison.summary.maxRmse <= 0.12`
+33. for PPTX visual closure, `pptxVisualDiff.comparison.summary.meanRmse <= 0.08`
 
 If any check fails, fix the NoteMD workflow before relying on the exported files.
 

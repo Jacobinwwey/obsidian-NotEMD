@@ -24,6 +24,9 @@ type PlaywrightRuntime = {
 	};
 };
 
+const PPTX_CAPTURE_VIEWPORT_WIDTH = 1960;
+const PPTX_CAPTURE_VIEWPORT_HEIGHT = 1104;
+
 function resolvePlaywrightRuntime(): PlaywrightRuntime | null {
 	const playwrightBrowsersPath = resolvePlaywrightBrowsersPath();
 	if (playwrightBrowsersPath && !process.env.PLAYWRIGHT_BROWSERS_PATH) {
@@ -63,7 +66,64 @@ async function openSlideForPptxExport(page: any, targetUrl: string, timeoutMs: n
 			{ timeout: 20_000 },
 		).catch(() => undefined);
 	}
+	await stabilizeSlideForPptxExport(page);
 	await page.waitForTimeout(500);
+}
+
+async function stabilizeSlideForPptxExport(page: any): Promise<void> {
+	await page.evaluate(async () => {
+		document.getElementById('notemd-pptx-freeze-page')?.remove();
+		const style = document.createElement('style');
+		style.id = 'notemd-pptx-freeze-page';
+		style.textContent = [
+			'html { scroll-behavior: auto !important; }',
+			'*, *::before, *::after {',
+			'animation: none !important;',
+			'animation-delay: 0s !important;',
+			'animation-duration: 0s !important;',
+			'animation-play-state: paused !important;',
+			'transition: none !important;',
+			'transition-delay: 0s !important;',
+			'transition-duration: 0s !important;',
+			'}',
+		].join('\n');
+		document.head.appendChild(style);
+
+		try {
+			document.getAnimations?.().forEach(animation => {
+				try {
+					animation.finish();
+				} catch (_finishError) {
+					try {
+						animation.cancel();
+					} catch (_cancelError) {
+						// Some browser-managed animations cannot be controlled; the CSS freeze still applies.
+					}
+				}
+			});
+		} catch (_animationError) {
+			// Animation APIs are best-effort across Slidev/Vue runtime versions.
+		}
+
+		try {
+			await document.fonts?.ready;
+		} catch (_fontError) {
+			// Font readiness can reject for blocked external providers; continue with rendered fallback fonts.
+		}
+
+		await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+		void document.body.offsetHeight;
+	});
+}
+
+async function resetSlidePptxExtractionState(page: any): Promise<void> {
+	await page.evaluate(() => {
+		document.getElementById('notemd-pptx-hide-text')?.remove();
+		for (const element of Array.from(document.querySelectorAll('[data-notemd-pptx-hidden-text], [data-notemd-pptx-consumed-table]'))) {
+			element.removeAttribute('data-notemd-pptx-hidden-text');
+			element.removeAttribute('data-notemd-pptx-consumed-table');
+		}
+	});
 }
 
 async function captureSlideBackground(page: any, slideNumber: number): Promise<SlidevPptxImage> {
@@ -116,7 +176,7 @@ async function extractSlidesFromHtml(
 	}
 
 	const browser = await playwright.chromium.launch({ headless: true });
-	const page = await browser.newPage({ viewport: { width: 1280, height: 720 } });
+	const page = await browser.newPage({ viewport: { width: PPTX_CAPTURE_VIEWPORT_WIDTH, height: PPTX_CAPTURE_VIEWPORT_HEIGHT } });
 	let serverDirectory: string | null = null;
 	let baseUrl: string | null = null;
 
@@ -134,8 +194,10 @@ async function extractSlidesFromHtml(
 				? `${baseUrl}#/${slideNumber}`
 				: `${pathToFileURL(htmlPath).toString()}#/${slideNumber}`;
 			await openSlideForPptxExport(page, targetUrl, config.timeoutMs);
+			await resetSlidePptxExtractionState(page);
+			const visualBackground = await captureSlideBackground(page, slideNumber);
 			const slide = await extractSlidevPptxSlideFromPage(page, slideNumber);
-			slide.backgroundImage = await captureSlideBackground(page, slideNumber);
+			slide.backgroundImage = visualBackground;
 			slides.push(slide);
 		}
 		return slides;
@@ -178,6 +240,8 @@ function buildReport(
 		pagesWithoutEditableText,
 		backgroundImageSlideCount: slides.filter(slide => Boolean(slide.backgroundImage)).length,
 		imageFallbackCount: slides.filter(slide => Boolean(slide.backgroundImage)).length,
+		visibleTextLayer: 'background-image',
+		editableLayerRenderMode: 'transparent-structure',
 		warnings,
 	};
 }

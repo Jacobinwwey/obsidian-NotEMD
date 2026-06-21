@@ -125,9 +125,10 @@ The PPTX path is intentionally not a screenshot-only export. It follows the stro
 2. open the final HTML in Playwright;
 3. navigate each Slidev route (`#/1`, `#/2`, ...);
 4. extract visible text boxes from the rendered DOM as editable PowerPoint text frames;
-5. capture each rendered slide as a visual fallback image layer for complex CSS, Mermaid, SVG, canvas, icons, and layout effects;
-6. write a clean-room PresentationML `.pptx` package with `fflate`;
-7. write a sidecar `.pptx.report.json` with editability metrics.
+5. extract HTML `<table>` elements first into a transparent native DrawingML table structure layer with cell text, row/column geometry, and merge metadata;
+6. capture each rendered slide as a visual fallback image layer for complex CSS, Mermaid, SVG, canvas, icons, and layout effects;
+7. write a clean-room PresentationML `.pptx` package with `fflate`;
+8. write a sidecar `.pptx.report.json` with editability metrics.
 
 This is not the same as running arbitrary visual HTML through a strict HTML-to-PPTX template converter. The `huashu-design` approach is valuable when the source HTML is authored under PPTX constraints from the start: text must live in paragraph/headline tags, backgrounds must be on container elements, gradients and `background-image` are constrained, and dimensions must match the PowerPoint layout. Slidev output is a SPA with Vue, transforms, Mermaid SVG, and complex CSS, so forcing that route onto generated Slidev HTML would be brittle. NoteMD therefore uses a browser-observed extraction path and reports the parts that remain image fallback.
 
@@ -151,9 +152,18 @@ PPTX pass conditions add:
 3. `pptxInspection.slideCount` matches the rendered deck slide count
 4. `pptxInspection.textRunCount > 0`
 5. `pptxInspection.slidesWithoutEditableText = []` for decks that contain text on every slide
-6. the sidecar report has `editableTextSlideCount`, `textBoxCount`, `imageFallbackCount`, and `pagesWithoutEditableText`
+6. decks with HTML tables record `pptxInspection.tableCount`
+7. the sidecar report has `editableTextSlideCount`, `textBoxCount`, `tableCount`, `editableTableCellCount`, `imageFallbackCount`, and `pagesWithoutEditableText`
 
-The current implementation deliberately treats Mermaid/SVG/canvas and complex decoration as image fallback. That preserves source Mermaid content and visual fidelity, but those graphic parts are not editable PowerPoint shapes. The user-facing contract is therefore "editable text over a visual fallback layer", not "perfectly editable reconstruction of every Slidev/Vue/CSS object".
+For visual fidelity, run the PPTX render-back gate:
+
+```bash
+npm run verify:slidev-export -- --format pptx --source architecture.zh-CN.md --sample-slides all --timeout-ms 240000 --no-screenshots --pptx-visual-diff --require-pptx-visual-match --json
+```
+
+This gate extracts the frozen background image from each PPTX slide relationship, renders the PPTX back through LibreOffice -> PDF -> `pdftoppm`, then compares each page with ImageMagick RMSE/AE. It intentionally does not rerun Slidev PNG export as the strict reference, because a second Slidev export is a different rendering instance and can drift in font antialiasing or page state. The hard PPTX visual gate validates that Office preserves the visual layer actually written into the PPTX; HTML/layout correctness remains owned by rendered convergence and browser audit.
+
+The current implementation deliberately treats Mermaid/SVG/canvas and complex decoration as image fallback. That preserves source Mermaid content and visual fidelity, but those graphic parts are not editable PowerPoint shapes. Tables have a native DrawingML structure layer, but it is transparent by default because Office table layout does not yet reliably match Slidev CSS. The user-facing contract is therefore "editable text and transparent table structure over a visual fallback layer", not "perfectly editable reconstruction of every Slidev/Vue/CSS object".
 
 ## Real Verification Command
 
@@ -292,6 +302,7 @@ Current landed state:
 32. the Stage 14 default success fixture archive is `/home/jacob/slidev-export-review/2026-06-20-stage14-success-fixtures/`: all 9 converging production fixtures still pass, and the three expected-failure fixtures stay out of the default green path.
 33. the Stage 14 real `architecture.zh-CN.md` strict standalone output is archived at `/home/jacob/slidev-export-review/2026-06-20-stage14-real/`; `architecture.zh-CN.stage14.slidev.md` is the reviewable exported deck and `architecture.zh-CN-slides/index-standalone.html` is the native standalone output. The report is `ok = true`, uses the local Slidev fork and 52 skill references, preserves all 3 Mermaid fences with `changedFenceIndexes = []`, and closes with `hardOverflowCount = 0` and `lowEffectiveFontCount = 0`.
 34. the Stage 15 real `architecture.zh-CN.md` strict standalone output is archived at `/home/jacob/slidev-export-review/2026-06-21-stage15-final-rerun/`; `architecture.stage15.slidev.zh-CN.md` is the reviewable exported deck and `architecture.zh-CN-slides/index-standalone.html` is the native standalone output. The report is `ok = true`, uses the local Slidev fork and 52 skill references, preserves all 3 Mermaid fences with `changedFenceIndexes = []`, and closes with `hardOverflowCount = 0`, `lowEffectiveFontCount = 0`, and native standalone accepted. A repo-visible copy of the real exported Slidev Markdown is tracked at `docs/slidev/architecture.stage15.slidev.zh-CN.md`; the generated HTML/assets/screenshots remain outside the commit.
+35. on 2026-06-21 the editable PPTX path was closed against the real `architecture.zh-CN.md` fixture with a frozen-background visual reference. The strict run under `docs/export/test-slidev-pptx-frozen-reference-strict/` returned `ok = true`, `pptxVisualGate.passed = true`, `meanRmse = 0.049441916296296295`, `maxRmse = 0.0889364`, `reference.source = pptx-background-images`, 27 slides, 331 editable text runs, 27 picture fallback layers, and 4 native DrawingML table structures.
 
 Current gap:
 
@@ -299,7 +310,7 @@ Current gap:
 2. standalone export now has a strict native gate and the real architecture fixture passes it, but correctness still depends on post-build sanity detection; server-script fallback remains a compatibility lane for future bad bundles, not evidence that native standalone passed;
 3. full-deck Playwright verification is now more correct, but noticeably slower, so future work should improve patch convergence instead of weakening the audit back to representative sampling;
 4. the Obsidian CLI can dispatch `notemd:export-slides`, but it does not expose an export-complete handshake, so host-command smoke is still weaker than the maintainer verifier;
-5. editable PPTX is currently a pragmatic extraction layer: text is editable, visual fidelity is preserved by slide-level image fallback, but tables, Mermaid, SVG, canvas, and Vue component internals are not yet reconstructed as editable Office-native objects.
+5. editable PPTX is currently a pragmatic extraction layer: text is editable, tables have transparent native DrawingML structure, and strict visual fidelity passes against the frozen background layer, but Mermaid, SVG, canvas, and Vue component internals are not yet reconstructed as editable Office-native objects.
 
 ## Next-Level Layout Quality Direction
 

@@ -2,6 +2,7 @@ const childProcess = require('child_process');
 const fs = require('fs');
 const path = require('path');
 const { pathToFileURL } = require('url');
+const { unzipSync } = require('fflate');
 
 const REQUIRED_TOOLS = [
 	{ command: 'libreoffice', args: ['--version'] },
@@ -107,6 +108,89 @@ function pairPngSequences(referenceDirectory, renderedDirectory) {
 
 function formatSlideFileName(slide, suffix = '.png') {
 	return `slide-${String(slide).padStart(2, '0')}${suffix}`;
+}
+
+function slideNumberFromPptxPath(value) {
+	const match = String(value || '').match(/\/slide(\d+)\.xml$/);
+	return match ? Number(match[1]) : Number.POSITIVE_INFINITY;
+}
+
+function readZipText(entries, zipPath) {
+	const entry = entries[zipPath];
+	return entry ? Buffer.from(entry).toString('utf8') : '';
+}
+
+function collectSlideImageRelationships(entries, relsPath) {
+	const relsXml = readZipText(entries, relsPath);
+	const relationships = new Map();
+	const relationshipPattern = /<Relationship\b([^>]+)>?/g;
+	let match;
+	while ((match = relationshipPattern.exec(relsXml))) {
+		const attributes = match[1] || '';
+		const id = attributes.match(/\bId="([^"]+)"/)?.[1];
+		const target = attributes.match(/\bTarget="([^"]+)"/)?.[1];
+		const type = attributes.match(/\bType="([^"]+)"/)?.[1] || '';
+		if (id && target && /\/image$/i.test(type)) {
+			relationships.set(id, target);
+		}
+	}
+	return relationships;
+}
+
+function resolveSlideImageZipPath(slidePath, target) {
+	const slideDirectory = path.posix.dirname(slidePath);
+	return path.posix.normalize(path.posix.join(slideDirectory, target));
+}
+
+function extractPptxBackgroundImages(options) {
+	const pptxPath = path.resolve(options.pptxPath);
+	const outputDirectory = path.resolve(options.outputDirectory);
+	const referenceDirectory = path.resolve(options.referenceDirectory || path.join(outputDirectory, 'pptx-background-reference'));
+	if (!fs.existsSync(pptxPath)) {
+		throw new Error(`PPTX file does not exist: ${pptxPath}`);
+	}
+
+	resetDirectory(referenceDirectory);
+	const entries = unzipSync(new Uint8Array(fs.readFileSync(pptxPath)));
+	const slidePaths = Object.keys(entries)
+		.filter(file => /^ppt\/slides\/slide\d+\.xml$/i.test(file))
+		.sort((left, right) => slideNumberFromPptxPath(left) - slideNumberFromPptxPath(right));
+	const referenceImages = [];
+
+	for (const slidePath of slidePaths) {
+		const slideNumber = slideNumberFromPptxPath(slidePath);
+		const slideXml = readZipText(entries, slidePath);
+		const firstEmbedId = slideXml.match(/<a:blip\b[^>]*\br:embed="([^"]+)"/)?.[1];
+		if (!firstEmbedId) {
+			continue;
+		}
+		const relsPath = `ppt/slides/_rels/${path.posix.basename(slidePath)}.rels`;
+		const relationships = collectSlideImageRelationships(entries, relsPath);
+		const target = relationships.get(firstEmbedId);
+		if (!target) {
+			continue;
+		}
+		const imageZipPath = resolveSlideImageZipPath(slidePath, target);
+		const imageEntry = entries[imageZipPath];
+		if (!imageEntry) {
+			continue;
+		}
+		const extension = path.posix.extname(imageZipPath).toLowerCase() || '.png';
+		const imagePath = path.join(referenceDirectory, formatSlideFileName(slideNumber, extension));
+		fs.writeFileSync(imagePath, Buffer.from(imageEntry));
+		referenceImages.push({
+			slide: slideNumber,
+			imageZipPath,
+			imagePath,
+		});
+	}
+
+	return {
+		source: 'pptx-background-images',
+		pptxPath,
+		referenceDirectory,
+		referenceImages,
+	};
 }
 
 function resolvePdfPath(workDirectory, pptxPath) {
@@ -495,8 +579,21 @@ function buildPptxVisualDiff(options) {
 		dpi: options.dpi,
 		timeoutMs: options.timeoutMs,
 	});
+	const reference = options.referenceDirectory
+		? {
+			source: 'external-png-sequence',
+			referenceDirectory: path.resolve(options.referenceDirectory),
+			referenceImages: collectPngSequence(options.referenceDirectory).map((imagePath, index) => ({
+				slide: index + 1,
+				imagePath,
+			})),
+		}
+		: extractPptxBackgroundImages({
+			pptxPath: options.pptxPath,
+			outputDirectory,
+		});
 	const comparison = comparePngSequences({
-		referenceDirectory: options.referenceDirectory,
+		referenceDirectory: reference.referenceDirectory,
 		renderedDirectory: render.renderedDirectory,
 		outputDirectory,
 		thresholds: options.thresholds,
@@ -505,6 +602,7 @@ function buildPptxVisualDiff(options) {
 		available: true,
 		outputDirectory,
 		tools,
+		reference,
 		render,
 		comparison,
 		gate: comparison.gate,
@@ -520,6 +618,7 @@ module.exports = {
 	collectToolAvailability,
 	comparePngSequences,
 	evaluateVisualGate,
+	extractPptxBackgroundImages,
 	pairPngSequences,
 	parseCompareMetric,
 	renderPptxToPngSequence,

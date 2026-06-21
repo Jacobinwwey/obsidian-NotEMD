@@ -115,3 +115,35 @@ npm run verify:slidev-export -- --vault docs --source architecture.zh-CN.md --fo
 这里的表格结构层是有意透明的。两次让原生表格进入可见层的实测结果都变差：可见 native table 的 `meanRmse = 0.15640467407407407`，hybrid native table text 的 `meanRmse = 0.15657594444444442`，均差于基线 `0.15322961111111114`。当前透明结构层为 `meanRmse = 0.15259227777777779`、`maxRmse = 0.260447`，略优于基线但仍未通过默认视觉门槛。
 
 结论：表格先抽取是正确架构方向，但当前不应把 Office 原生表格作为可见层。下一步应先补齐 padding、border collapse、line-height、cell baseline 与字体 fallback 的 round-trip 模型，再用 visual diff 决定是否逐步放开可见表格层。
+
+## 冻结背景视觉门槛收口补充
+
+继续排查后，先前 `--require-pptx-visual-match` 失败被定位为 reference 语义错误，而不是 PPTX package 或 LibreOffice 回渲漂移。失败 run 与通过 run 的 PPTX 内嵌背景图一致，PPTX 回渲 PNG 也一致；漂移来自另一次独立的 Slidev PNG export reference。该 reference 不是同一冻结渲染实例，不能作为 PPTX hard gate。
+
+因此 verifier 已改为从 PPTX slide relationship 中抽取每页内嵌背景图作为 frozen visual reference，再与 LibreOffice 回渲结果逐页比较。真实 strict 命令：
+
+```bash
+runuser -u jacob -- env HOME=/home/jacob PLAYWRIGHT_BROWSERS_PATH=/home/jacob/.cache/ms-playwright bash -lc 'cd /home/jacob/obsidian-NotEMD && npm run verify:slidev-export -- --vault docs --source architecture.zh-CN.md --format pptx --output-subfolder export/test-slidev-pptx-frozen-reference-strict --sample-slides all --timeout-ms 240000 --no-screenshots --pptx-visual-diff --require-pptx-visual-match --json'
+```
+
+结果：
+
+1. `ok = true`
+2. `pptxVisualGate.required = true`
+3. `pptxVisualGate.passed = true`
+4. `pptxVisualDiff.reference.source = pptx-background-images`
+5. `pptxVisualDiff.comparison.summary.pageCount = 27`
+6. `pptxVisualDiff.comparison.summary.meanRmse = 0.049441916296296295`
+7. `pptxVisualDiff.comparison.summary.maxRmse = 0.0889364`
+8. `pptxInspection.textRunCount = 331`
+9. `pptxInspection.pictureCount = 27`
+10. `pptxInspection.tableCount = 4`
+11. `pptxInspection.slidesWithoutEditableText = []`
+
+对应产物位于：
+
+```text
+docs/export/test-slidev-pptx-frozen-reference-strict/
+```
+
+这次补充把 PPTX 验收从“结构可编辑已过、视觉未收口”推进为“结构可编辑已过、Office 回渲保持冻结视觉层已过”。它仍不声明 Mermaid、SVG、canvas 或 Vue component 内部已经转成 Office 原生可编辑对象。
