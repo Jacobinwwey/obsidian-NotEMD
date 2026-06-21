@@ -23,6 +23,18 @@ npm run verify:slidev-export -- --format html --html-mode standalone --require-n
 
 严格 standalone 门禁要求 `htmlExport.actualMode = "standalone"` 且 `standaloneGate.passed = true`。兼容 HTML 验证通过并不等于 standalone 一定通过，因为它可能走了 `server-script-fallback`。
 
+## Fork CLI 安装路径
+
+“检测演示导出环境”的 UI 必须使用真实可被 npm 安装的 NoteMD Slidev fork package URL。不要把 GitHub branch、source tree 或 raw file 当成安装目标给用户。
+
+当前安装命令：
+
+```bash
+npm install -D https://github.com/Jacobinwwey/slidev/releases/download/notemd-standalone-v52.16.0-1/slidev-cli-notemd-standalone-v52.16.0-1.tgz @slidev/theme-default
+```
+
+2026-06-21 已用 `npm pack --dry-run` 和干净 npm 项目的 `npm install` 做过烟测；安装后的 `slidev build --help` 暴露 `--standalone-bundle`。
+
 ## 验证覆盖
 
 维护者命令覆盖以下内容：

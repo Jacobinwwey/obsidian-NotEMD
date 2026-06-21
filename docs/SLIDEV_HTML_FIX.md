@@ -23,6 +23,18 @@ npm run verify:slidev-export -- --format html --html-mode standalone --require-n
 
 Compatibility HTML verification can still pass through server-script fallback. Strict native standalone requires `htmlExport.actualMode = "standalone"` and `standaloneGate.passed = true`.
 
+## Fork CLI Install Path
+
+The environment-check UI must use a real npm-installable package URL for the NoteMD Slidev fork. Do not point users at a GitHub branch, source tree, or raw file as the install target.
+
+Current install command:
+
+```bash
+npm install -D https://github.com/Jacobinwwey/slidev/releases/download/notemd-standalone-v52.16.0-1/slidev-cli-notemd-standalone-v52.16.0-1.tgz @slidev/theme-default
+```
+
+This release asset was smoke-tested on 2026-06-21 with `npm pack --dry-run` and a clean-project `npm install`; the installed `slidev build --help` exposes `--standalone-bundle`.
+
 ## What The Verification Covers
 
 The maintainer command verifies more than a raw Slidev build:

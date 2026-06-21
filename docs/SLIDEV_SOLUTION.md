@@ -97,6 +97,24 @@ Slidev command resolution prefers:
 
 On Jacob's workstation, the maintained verification path should report the local fork path in `environment.slidev.version`.
 
+## Fork Release Distribution
+
+The UI install path must point at an npm-installable release artifact, not at a GitHub source tree, blob, or branch URL. A branch URL can show the code but it is not a stable package boundary for `npm install`, and it can drift after the UI has shipped.
+
+Current NoteMD fork package:
+
+```text
+https://github.com/Jacobinwwey/slidev/releases/download/notemd-standalone-v52.16.0-1/slidev-cli-notemd-standalone-v52.16.0-1.tgz
+```
+
+The sidebar's copied install command is:
+
+```bash
+npm install -D https://github.com/Jacobinwwey/slidev/releases/download/notemd-standalone-v52.16.0-1/slidev-cli-notemd-standalone-v52.16.0-1.tgz @slidev/theme-default
+```
+
+Validation on 2026-06-21 proved that the release asset packs as `@slidev/cli@52.16.0`, installs into a clean npm project, exposes the `slidev` binary, and includes `build --help` support for `--standalone-bundle`.
+
 ## Real Verification Command
 
 Run:
@@ -125,13 +143,13 @@ Important pass conditions:
 10. quality-margin and content-area findings are either zero or explained by a structural patch attempt
 11. source Mermaid fences remain one-to-one with exact fence content in the exported deck unless a human explicitly edits the source
 
-Real maintained baseline as of 2026-06-20:
+Real maintained baseline as of 2026-06-21:
 
 1. `node scripts/verify-slidev-export-workflow.cjs --json` on `docs/architecture.zh-CN.md` returns `ok: true`
 2. the report confirms `/home/jacob/slidev/packages/slidev/bin/slidev.mjs`
 3. the report confirms `/home/jacob/slidev/skills/slidev`
 4. default HTML verification now audits the full prepared deck, not only representative slides
-5. the real `architecture.zh-CN` deck converges to `29` audited slides after bounded patching with `overflowCount = 0`, while preserving the source Mermaid fence count (`3` source fences, `3` exported fences); current reports must also show `mermaidSourcePreservation.passed = true`
+5. the real `architecture.zh-CN` deck converges to `27` audited slides after bounded patching with `overflowCount = 0`, while preserving the source Mermaid fence count (`3` source fences, `3` exported fences); current reports must also show `mermaidSourcePreservation.passed = true`
 6. `PDF` and `PNG` verification on the same real source also return `ok: true` after exporting from the same converged deck
 7. the current local Slidev `52.16.0` fork now passes the strict native standalone gate for the real `architecture.zh-CN` HTML export after fixing NoteMD's loader-binding detector to accept minified identifiers such as `$n`; the final real output is `index-standalone.html`, not a fallback-only `index.html`
 8. existing Slidev deck fixtures now go through isolated prepared working copies, so maintainer verification no longer under-audits them as single-slide files or loses sibling `layouts/*.vue`
@@ -143,8 +161,9 @@ Real maintained baseline as of 2026-06-20:
 14. explicit local relative assets referenced by Markdown images, HTML media/link/srcset attributes, and Slidev frontmatter keys are copied next to the prepared deck; local CSS files referenced by the deck are parsed as a local dependency graph, including `url(...)` image/font dependencies and local `@import` stylesheet chains relative to each CSS file location, so isolated `_slidev-sources` workspaces do not break source-relative SVG/PNG/JPEG/background/favicon/poster/font references
 15. the local Slidev fork's standalone bundler now preserves first-slide loader bindings when stubbing Vite preload helpers; NoteMD's strict standalone gate remains fail-closed and continues to report real `loaderGaps`
 16. HTML export syncs the prepared deck's explicit local file references into the final `<source>-slides/` output directory, and prepared decks default to `fonts.provider: none` unless the source already declares top-level `fonts:`
+17. the environment-check UI links to the fork release page and copies an `npm install -D <release .tgz> @slidev/theme-default` command; it must not suggest branch source links or generic official `@slidev/cli` installs for the standalone-required NoteMD path
 
-Dedicated standalone acceptance evidence is tracked in `docs/maintainer/slidev-standalone-acceptance-2026-06-18.*`. The large generated HTML and screenshot output remains archived outside the repo under `/home/jacob/slidev-export-review/2026-06-18/standalone-strict/` so the main branch does not gain new one-off export artifacts.
+Dedicated standalone acceptance evidence is tracked in `docs/maintainer/slidev-standalone-acceptance-2026-06-18.*`. The latest real Stage 15 acceptance archive is `/home/jacob/slidev-export-review/2026-06-21-stage15-final-rerun/`; generated HTML, screenshots, and install-smoke scratch files remain outside the repo so the main branch does not gain one-off export artifacts.
 
 ## Current Rendered Layout Model
 
@@ -230,7 +249,7 @@ Current landed state:
 31. the Stage 14 component/image expected-failure fixture archive is `/home/jacob/slidev-export-review/2026-06-20-stage14-unsupported-component-image-boundary-fixture/`: `unsupported-component-image-boundary-stress` proves the same fail-transparent behavior and also verifies `assets/boundary-image.svg` in the prepared deck and final standalone export.
 32. the Stage 14 default success fixture archive is `/home/jacob/slidev-export-review/2026-06-20-stage14-success-fixtures/`: all 9 converging production fixtures still pass, and the three expected-failure fixtures stay out of the default green path.
 33. the Stage 14 real `architecture.zh-CN.md` strict standalone output is archived at `/home/jacob/slidev-export-review/2026-06-20-stage14-real/`; `architecture.zh-CN.stage14.slidev.md` is the reviewable exported deck and `architecture.zh-CN-slides/index-standalone.html` is the native standalone output. The report is `ok = true`, uses the local Slidev fork and 52 skill references, preserves all 3 Mermaid fences with `changedFenceIndexes = []`, and closes with `hardOverflowCount = 0` and `lowEffectiveFontCount = 0`.
-34. the Stage 15 real `architecture.zh-CN.md` strict standalone output is archived at `/home/jacob/slidev-export-review/2026-06-21-stage15-mermaid-no-split/`; `architecture.zh-CN.stage15.slidev.md` is the reviewable exported deck and `architecture.zh-CN-slides/index-standalone.html` is the native standalone output. The report is `ok = true`, uses the local Slidev fork and 52 skill references, preserves all 3 Mermaid fences with `changedFenceIndexes = []`, and closes with `hardOverflowCount = 0`, `lowEffectiveFontCount = 0`, and native standalone accepted. A repo-visible copy of the real exported Slidev Markdown is tracked at `docs/slidev/architecture.zh-CN.stage15.slidev.md`; the generated HTML/assets/screenshots remain outside the commit.
+34. the Stage 15 real `architecture.zh-CN.md` strict standalone output is archived at `/home/jacob/slidev-export-review/2026-06-21-stage15-final-rerun/`; `architecture.stage15.slidev.zh-CN.md` is the reviewable exported deck and `architecture.zh-CN-slides/index-standalone.html` is the native standalone output. The report is `ok = true`, uses the local Slidev fork and 52 skill references, preserves all 3 Mermaid fences with `changedFenceIndexes = []`, and closes with `hardOverflowCount = 0`, `lowEffectiveFontCount = 0`, and native standalone accepted. A repo-visible copy of the real exported Slidev Markdown is tracked at `docs/slidev/architecture.stage15.slidev.zh-CN.md`; the generated HTML/assets/screenshots remain outside the commit.
 
 Current gap:
 
