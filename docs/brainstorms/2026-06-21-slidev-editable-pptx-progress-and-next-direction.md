@@ -1479,6 +1479,49 @@ Residual risk:
 
 This slice improves report precision, not layout geometry. The next high-value code path is still `unsupported-code-root`: decide whether the remaining code paint should become native rectangles/borders, or stay honestly background-owned. SVG and Mermaid should remain separate tracks. Mermaid source preservation is still more important than trying to reconstruct every diagram label as editable Office text.
 
+## M28 Current-Page Root Locking And Table-Owned Inline Code Fallback Cleanup
+
+This slice borrows the useful part of `oh-my-ppt`: lock the capture surface to one current page, then classify only primitives that are actually visible in that page and still owned by their root. After M27, the real report still had `unsupported-code-root = 115`, which matched `editableCodeBackgroundRectangleCount = 115` suspiciously closely. The follow-up investigation found two separate issues:
+
+1. During Slidev route transitions, an old `.slidev-page` can keep `slide-left-leave-*` classes. Its main body is offscreen, but its DOM rect can still be almost a full slide. The old root selection compared full rect area, so an outgoing page could win over the current page.
+2. Decorative diagnostics classified by code/table/svg root before checking visibility. Hidden pages, outgoing pages, and table-owned inline code could therefore be counted as `unsupported-code-root` or `code-highlight`.
+
+Implementation status:
+
+1. `visibleSlideRoot()` now ranks candidates by viewport-intersection area and uses semantic priority only when areas are comparable: `.slidev-page`, then `.slidev-layout`, then `.slidev-slide-content`, then `#app`.
+2. Decorative primitive diagnostics now check box visibility before protected-root classification. This uses `hasVisibleBox()` rather than the text extractor's `isVisible()`, because `isVisible()` intentionally excludes SVG content and would hide the `unsupported-svg-root` diagnostic.
+3. `codeHighlightPaintRequiresFallbackFor()` skips `table` and `[data-notemd-pptx-consumed-table="1"]` descendants. Inline code inside a consumed table is editable through native table text; any remaining chip-background/table-paint mismatch belongs to the table-root bucket, not to code-highlight fallback.
+4. Real Chromium tests cover both regressions: hidden/outgoing Slidev siblings cannot pollute the current page, and table-owned inline code no longer reports `code-highlight`.
+
+Comparison with the prior plan:
+
+1. M27 suggested widening `unsupported-code-root` extraction next. M28 shows that assumption was premature: part of the signal was page-root and ownership noise, not missing native code paint.
+2. This does not make table inline-code chip backgrounds fully Office-native. It tightens the report semantics: editable text is owned by the native table, and unmodeled table-internal decoration remains a table-root limitation.
+3. This keeps the earlier constraints intact: no Mermaid source rewrite, no diagram splitting, no second HTML-to-PPTX conversion route. PPTX still derives from the rendered convergence output.
+
+Validation:
+
+1. `npx tsc --noEmit --pretty false` passed.
+2. `git diff --check` passed.
+3. `npm run build` passed.
+4. `runuser -u jacob -- env HOME=/home/jacob PLAYWRIGHT_BROWSERS_PATH=/home/jacob/.cache/ms-playwright bash -lc 'cd /home/jacob/obsidian-NotEMD && npm test -- --runInBand src/tests/pptxDomExtractor.test.ts'` passed with real Chromium: `14` tests.
+5. Full Jest passed: `190` suites, `1551` tests. Root still logs the existing Playwright cache skip warning; item 4 is the real browser coverage for this DOM/PPTX extraction slice.
+6. Real `architecture.zh-CN.md` export passed: `npm run verify:slidev-export -- --vault docs --source architecture.zh-CN.md --format pptx --output-subfolder export/test-slidev-m28-visible-root-scope --sample-slides all --timeout-ms 240000 --no-screenshots --require-pptx-visual-match --json`.
+7. The local Slidev fork was still used: `52.16.0 (/home/jacob/slidev/packages/slidev/bin/slidev.mjs)`, `skillRootPath = /home/jacob/slidev/skills/slidev`, `skillReferenceCount = 52`.
+8. Visual/source gates passed: `ok = true`, `pptxVisualGate.passed = true`, `referenceSource = pptx-rendered-html-reference`, `thresholdProfile = visible-native-rendered-html`, `mermaidSourcePreservation.passed = true`, `sourceFenceCount = 3`, `deckFenceCount = 3`, `changedFenceIndexes = []`.
+9. Report semantics are tighter: `fallbackOnlyElementKinds = ["mermaid", "svg"]`; `code-highlight` is gone from the real deck's global fallback list. `decorativePrimitiveSkipReasonCounts = [{ not-visible: 68 }, { unsupported-table-root: 60 }]`.
+10. Editable output stayed stable: `slideCount = 30`, `textRunCount = 861`, `tableCount = 6`, `slidesWithoutEditableText = []`, `editableCodeTextBoxCount = 14`, `editableCodeBackgroundRectangleCount = 115`.
+11. Background residue sampling still passed: `checkedRegionCount = 437`, `suspiciousSlideCount = 0`, `suspiciousRegionCount = 0`, `maxTextLikePixelRatio = 0`, `warnings = []`.
+12. PPTX XML scan confirms there was no regression to transparent text: `alpha=0 = 0`, `alpha=8000 = 0`, `Visible Native Text = 324`, `Visible Native Code Text = 14`, `Visible Native Table = 6`, `Native Code Background Rectangle = 115`, `<a:t...>` tags = `861`.
+13. Output artifacts remain local and ignored under `docs/export/test-slidev-m28-visible-root-scope/`; `git status --ignored --short` reports the directory as `!!`, so it is not committed.
+
+Residual risk and next direction:
+
+1. The global fallback list is now only `mermaid` and `svg`, but this does not mean all vector/chart geometry is editable. The default path still does not claim Mermaid/SVG geometry as Office-native.
+2. `unsupported-table-root = 60` is now the most actionable bucket. It mainly covers table-internal inline-code chip backgrounds, cell decorations, and table paint differences. The next slice should improve native table writer support for inline runs and cell-internal decoration instead of routing those nodes back to code fallback.
+3. `not-visible = 68` should be split into true hidden residue versus Slidev transition/offscreen residue. It is not a functional failure, but it is still report noise.
+4. SVG should remain a separate track: consider SVG artifact/embedding or an explicit experimental mode before attempting default vector reconstruction.
+
 ## Current Limits
 
 The first implementation is intentionally conservative:

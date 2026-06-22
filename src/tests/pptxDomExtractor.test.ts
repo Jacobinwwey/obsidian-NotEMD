@@ -335,6 +335,41 @@ describe('pptxDomExtractor', () => {
 		}
 	});
 
+	test('does not report table-owned inline code as code-highlight fallback after table consumption', async () => {
+		if (!browser) {
+			console.warn('Skipping PPTX DOM extractor Playwright test:', launchError);
+			return;
+		}
+
+		const page = await browser.newPage({ viewport: { width: 1280, height: 720 } });
+		try {
+			await page.setContent(`
+				<body style="margin:0;background:#fff">
+					<div class="slidev-page" style="width:1280px;height:720px;background:#fff;padding:64px;box-sizing:border-box">
+						<table style="border-collapse:collapse;font-family:Arial;font-size:24px;color:#111827">
+							<tr>
+								<td style="padding:12px;border:1px solid #94a3b8">
+									<code style="background:#f5f5f5;border-radius:4px;padding:2px 6px">openai-compatible</code>
+								</td>
+							</tr>
+						</table>
+					</div>
+				</body>
+			`);
+
+			const slide = await extractSlidevPptxSlideFromPage(page, 1);
+			const skipCounts = new Map(
+				(slide.decorativePrimitiveDiagnostics?.skipReasonCounts || []).map((item) => [item.reason, item.count]),
+			);
+
+			expect(slide.tables[0]?.rows[0]?.[0]?.text).toBe('openai-compatible');
+			expect(slide.fallbackOnlyElementKinds).not.toContain('code-highlight');
+			expect(skipCounts.get('unsupported-table-root')).toBeGreaterThanOrEqual(1);
+		} finally {
+			await page.close();
+		}
+	});
+
 	test('extracts high-confidence decorative rectangles and border lines as native primitives', async () => {
 		if (!browser) {
 			console.warn('Skipping PPTX DOM extractor Playwright test:', launchError);
@@ -447,6 +482,53 @@ describe('pptxDomExtractor', () => {
 			expect(skipCounts.get('unsupported-mermaid-root')).toBeGreaterThanOrEqual(1);
 			expect(skipCounts.get('unsupported-svg-root')).toBeGreaterThanOrEqual(1);
 			expect(skipCounts.has('unsupported-root')).toBe(false);
+		} finally {
+			await page.close();
+		}
+	});
+
+	test('scopes extraction to the current visible Slidev page instead of hidden deck siblings', async () => {
+		if (!browser) {
+			console.warn('Skipping PPTX DOM extractor Playwright test:', launchError);
+			return;
+		}
+
+		const page = await browser.newPage({ viewport: { width: 1280, height: 720 } });
+		try {
+			await page.setContent(`
+				<body style="margin:0;background:#fff">
+					<div id="app" style="width:1280px;height:720px;background:#111827">
+						<div class="slidev-slide-content" style="width:1280px;height:720px;background:#111827">
+							<div class="slidev-page slidev-page-4" style="display:none">
+								<pre><code><span id="hidden-code" style="display:inline-block;width:120px;height:32px;background-image:linear-gradient(90deg,#111827,#334155)">hidden code</span></code></pre>
+								<table><tr><td id="hidden-table" style="width:120px;height:32px;background:#fde68a">hidden table</td></tr></table>
+								<svg width="120" height="40"><foreignObject width="120" height="40"><div xmlns="http://www.w3.org/1999/xhtml" id="hidden-svg" style="width:120px;height:32px;background:#dcfce7"></div></foreignObject></svg>
+							</div>
+							<div class="slidev-page slidev-page-4 slide-left-leave-active slide-left-leave-to" style="display:block;position:absolute;left:-1190px;top:0;width:1280px;height:720px;background:#fee2e2;padding:64px;box-sizing:border-box">
+								<pre><code><span id="leaving-code" style="display:inline-block;width:120px;height:32px;background-image:linear-gradient(90deg,#111827,#334155)">leaving code</span></code></pre>
+								<table><tr><td id="leaving-table" style="width:120px;height:32px;background:#fde68a">leaving table</td></tr></table>
+								<svg width="120" height="40"><foreignObject width="120" height="40"><div xmlns="http://www.w3.org/1999/xhtml" id="leaving-svg" style="width:120px;height:32px;background:#dcfce7"></div></foreignObject></svg>
+							</div>
+							<div class="slidev-page slidev-page-5" style="display:block;width:1279.5px;height:719.5px;background:#f8fafc;padding:64px;box-sizing:border-box">
+								<div class="slidev-layout default">
+									<h1 style="margin:0;font-family:Arial;font-size:40px;color:#0f172a">Active page only</h1>
+								</div>
+							</div>
+						</div>
+					</div>
+				</body>
+			`);
+
+			const slide = await extractSlidevPptxSlideFromPage(page, 5);
+			const skipCounts = new Map(
+				(slide.decorativePrimitiveDiagnostics?.skipReasonCounts || []).map((item) => [item.reason, item.count]),
+			);
+
+			expect(slide.backgroundColor).toBe('F8FAFC');
+			expect(slide.texts.map((textBox) => textBox.text)).toEqual(['Active page only']);
+			expect(skipCounts.has('unsupported-code-root')).toBe(false);
+			expect(skipCounts.has('unsupported-table-root')).toBe(false);
+			expect(skipCounts.has('unsupported-svg-root')).toBe(false);
 		} finally {
 			await page.close();
 		}

@@ -1500,6 +1500,49 @@ rendered-HTML visual hard gate 已通过，但 diff report 仍把若干页标为
 
 这一轮提升的是 report 精度，不是几何布局。下一步高价值目标仍是 `unsupported-code-root`：需要判断剩余 code paint 是否应该抽成 native rectangle/border，还是诚实地继续由背景拥有。SVG 和 Mermaid 应保持独立轨道。对 Mermaid 来说，源内容保留仍比把每个图内 label 都重建成 Office 可编辑文本更重要。
 
+## M28 当前页根锁定与表格内 inline code fallback 收口
+
+这一轮参考 `oh-my-ppt` 的不是代码，而是它的页面锁定和 ownership 顺序：先把当前 capture surface 收敛成唯一页面根，再只统计当前可见页面里的 primitive；被 table primitive 消费的子元素不再反向污染 code fallback。M27 后的真实报告里 `unsupported-code-root = 115` 和 `editableCodeBackgroundRectangleCount = 115` 高度重合，进一步排查发现其中一部分来自两个问题：
+
+1. Slidev 路由切页后旧 `.slidev-page` 带 `slide-left-leave-*` 类，主体已经在视口外，但完整 DOM rect 仍接近一整页。旧选择逻辑按完整 rect 面积比较，可能在当前页与旧页同为 `.slidev-page` 时选中旧页。
+2. decorative primitive 诊断先按 code/table/svg root 分类，再检查可见性。隐藏页、离场页或被 table 接管的 inline code 会被错误计入 `unsupported-code-root` 或 `code-highlight`。
+
+本轮落地内容：
+
+1. `visibleSlideRoot()` 改为按 viewport 交集面积选择候选根，并在面积可比较时优先 `.slidev-page`、`.slidev-layout`、`.slidev-slide-content`、`#app` 的语义优先级。
+2. decorative primitive 诊断先做 box 可见性过滤，再按 protected root 分类。这里不能复用文本抽取的 `isVisible()`，因为它会主动排除 SVG；本轮改为使用只判断 display/visibility/opacity/viewport intersection 的 `hasVisibleBox()`。
+3. `codeHighlightPaintRequiresFallbackFor()` 跳过 `table` 和 `[data-notemd-pptx-consumed-table="1"]` 内的 code。表格内 inline code 的文字已经由 native table text 承接；剩余 chip 背景保真问题应归入 table-root 限制，而不是继续报告成 code-highlight fallback。
+4. 新增真实 Chromium 单测覆盖两类回归：隐藏/离场 Slidev sibling 不能污染当前页诊断；被 table 消费的 inline code 不再触发 `code-highlight` fallback。
+
+与先前方案对比：
+
+1. M27 的下一步假设是继续扩大 `unsupported-code-root` 的 extraction。M28 证明这个假设过早：真实噪声里有一部分不是未建模 code paint，而是页面根选择和 ownership 归类错误。
+2. 这不是把表格 inline code 的 chip 背景“修成 Office 原生”。它只是把报告语义收准：文字可编辑归 native table，未建模 table 内部装饰归 table-root，不再伪装成独立 code fallback。
+3. 这符合当前“不修改 Mermaid、不拆图、不新增第二条 HTML-to-PPTX 路线”的约束。PPTX 仍从 rendered convergence 产物抽取，而不是引入独立转换器。
+
+验证：
+
+1. `npx tsc --noEmit --pretty false` 通过。
+2. `git diff --check` 通过。
+3. `npm run build` 通过。
+4. `runuser -u jacob -- env HOME=/home/jacob PLAYWRIGHT_BROWSERS_PATH=/home/jacob/.cache/ms-playwright bash -lc 'cd /home/jacob/obsidian-NotEMD && npm test -- --runInBand src/tests/pptxDomExtractor.test.ts'` 使用真实 Chromium 通过：`14` 个测试。
+5. 全量 Jest 通过：`190` suites，`1551` tests。root 环境仍会打印既有 Playwright cache skip warning；第 4 条才是本轮 DOM/PPTX 抽取的真实浏览器覆盖。
+6. 真实 `architecture.zh-CN.md` 导出通过：`npm run verify:slidev-export -- --vault docs --source architecture.zh-CN.md --format pptx --output-subfolder export/test-slidev-m28-visible-root-scope --sample-slides all --timeout-ms 240000 --no-screenshots --require-pptx-visual-match --json`。
+7. 本地 Slidev fork 仍被使用：`52.16.0 (/home/jacob/slidev/packages/slidev/bin/slidev.mjs)`，`skillRootPath = /home/jacob/slidev/skills/slidev`，`skillReferenceCount = 52`。
+8. visual/source gate 通过：`ok = true`，`pptxVisualGate.passed = true`，`referenceSource = pptx-rendered-html-reference`，`thresholdProfile = visible-native-rendered-html`，`mermaidSourcePreservation.passed = true`，`sourceFenceCount = 3`，`deckFenceCount = 3`，`changedFenceIndexes = []`。
+9. report 口径收紧：`fallbackOnlyElementKinds = ["mermaid", "svg"]`，`code-highlight` 已从真实 deck 的全局 fallback 中移除；`decorativePrimitiveSkipReasonCounts = [{ not-visible: 68 }, { unsupported-table-root: 60 }]`。
+10. 可编辑输出保持稳定：`slideCount = 30`，`textRunCount = 861`，`tableCount = 6`，`slidesWithoutEditableText = []`，`editableCodeTextBoxCount = 14`，`editableCodeBackgroundRectangleCount = 115`。
+11. 背景残留采样继续通过：`checkedRegionCount = 437`，`suspiciousSlideCount = 0`，`suspiciousRegionCount = 0`，`maxTextLikePixelRatio = 0`，`warnings = []`。
+12. PPTX XML 扫描确认没有回退到透明文字：`alpha=0 = 0`，`alpha=8000 = 0`，`Visible Native Text = 324`，`Visible Native Code Text = 14`，`Visible Native Table = 6`，`Native Code Background Rectangle = 115`，`<a:t...>` tags = `861`。
+13. 输出产物保留在 ignored 本地目录 `docs/export/test-slidev-m28-visible-root-scope/`，`git status --ignored --short` 显示为 `!!`，不提交。
+
+残余风险与后续方向：
+
+1. 全局 fallback 只剩 `mermaid` 和 `svg`，但这不等于所有矢量/图表几何已可编辑。默认路径仍然不宣称 Mermaid/SVG geometry 是 Office 原生对象。
+2. `unsupported-table-root = 60` 是当前最值得继续收敛的报告桶。它主要对应表格内部 inline code chip 背景、单元格内装饰和 table paint 差异。下一步应先增强 native table writer 对 inline run 样式和 cell 内装饰的表达，而不是把这些元素重新归到 code fallback。
+3. `not-visible = 68` 仍需要拆分为真正隐藏残留和 Slidev transition/offscreen residue 两类。它不应作为功能失败，但可以继续改善 report 噪声。
+4. SVG 轨道仍应单独推进：优先考虑 SVG artifact/embedding 或可选实验模式，而不是默认重建 SVG 内部 geometry。
+
 ## 当前边界
 
 第一版实现有意保守：

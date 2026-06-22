@@ -578,16 +578,19 @@ export async function extractSlidevPptxSlideFromPage(page: any, slideNumber: num
 				}
 				const rect = candidate.getBoundingClientRect();
 				if (rect.width < 2 || rect.height < 2) continue;
-				if (
-					rect.right <= 0 ||
-					rect.bottom <= 0 ||
-					rect.left >= window.innerWidth ||
-					rect.top >= window.innerHeight
-				)
-					continue;
-				const area = rect.width * rect.height;
+				const visibleLeft = Math.max(0, rect.left);
+				const visibleTop = Math.max(0, rect.top);
+				const visibleRight = Math.min(window.innerWidth, rect.right);
+				const visibleBottom = Math.min(window.innerHeight, rect.bottom);
+				if (visibleRight <= visibleLeft || visibleBottom <= visibleTop) continue;
+				const area = (visibleRight - visibleLeft) * (visibleBottom - visibleTop);
 				const priority = rootPriority(candidate);
-				if (!best || area > best.area + 1 || (Math.abs(area - best.area) <= 1 && priority > best.priority)) {
+				const comparableAreaDelta = best ? Math.max(16, best.area * 0.02) : 0;
+				if (
+					!best ||
+					area > best.area + comparableAreaDelta ||
+					(area >= best.area - comparableAreaDelta && priority > best.priority)
+				) {
 					best = { element: candidate, area, priority };
 				}
 			}
@@ -1513,6 +1516,7 @@ export async function extractSlidevPptxSlideFromPage(page: any, slideNumber: num
 			const candidates = [rootElement, ...Array.from(rootElement.querySelectorAll('*'))];
 			for (const element of candidates) {
 				if (!(element instanceof HTMLElement)) continue;
+				if (element.closest('table,[data-notemd-pptx-consumed-table="1"]')) continue;
 				if (!codeShapeOwnerFor(element)) continue;
 				const style = window.getComputedStyle(element);
 				const rect = element.getBoundingClientRect();
@@ -1658,6 +1662,11 @@ export async function extractSlidevPptxSlideFromPage(page: any, slideNumber: num
 				const style = window.getComputedStyle(element);
 				if (!hasDecorativePaintSignal(style)) continue;
 				candidateCount += 1;
+				const rect = element.getBoundingClientRect();
+				if (!hasVisibleBox(element)) {
+					recordSkip('not-visible');
+					continue;
+				}
 				const unsupportedRootReason = unsupportedRootReasonFor(element);
 				if (unsupportedRootReason) {
 					recordSkip(unsupportedRootReason);
@@ -1665,11 +1674,6 @@ export async function extractSlidevPptxSlideFromPage(page: any, slideNumber: num
 				}
 				if (element.matches('br,hr,img,picture,canvas,video,iframe,math,.katex,.MathJax')) {
 					recordSkip('unsupported-element');
-					continue;
-				}
-				const rect = element.getBoundingClientRect();
-				if (!isVisible(element, style, rect)) {
-					recordSkip('not-visible');
 					continue;
 				}
 				if (hasUnsupportedPrimitivePaint(style)) {
