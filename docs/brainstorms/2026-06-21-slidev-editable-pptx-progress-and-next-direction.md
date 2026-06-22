@@ -268,6 +268,20 @@ The current round treats `/home/jacob/ref/oh-my-ppt-upstream-latest` as the upst
 3. **Do not migrate as-is**: Electron `BrowserWindow`, `oh-my-ppt`'s default visible-native reconstruction bias, broad Tailwind utility reconstruction, and full shape/vector conversion. Those would make the current Slidev deck more fragile before the acceptance gate can prove parity.
 4. **Keep as future optional experiments only**: font embedding, native animation reconstruction, KaTeX/image overlay extraction, and visible-native shape rebuilding. They are valuable in `oh-my-ppt`, but they should not be mixed into the default NotEMD Slidev PPTX path until the current hybrid contract has stable visual and editability gates.
 
+The license boundary should stay explicit. `oh-my-ppt` is Apache-2.0 and NotEMD is MIT. Apache-2.0 code can be reused in an MIT project, but copied files bring Apache/NOTICE obligations into the repository. Even though Jacob is one of the `oh-my-ppt` developers, the upstream repository may still contain other contributions and third-party implementation details. The safer current policy is clean-room reuse: carry over behavior contracts, test oracles, failure classification, and data-model boundaries, not module source. If a module later deserves code-level reuse, do it as a small provenance-tracked import with license notes; do not copy the whole `html-pptx` tree into NotEMD.
+
+Module by module, the reuse scale should be:
+
+| `oh-my-ppt` module | NotEMD reuse scale | Reason |
+| --- | --- | --- |
+| `renderer.ts` / `browser-scripts.ts` | Reuse the render-convergence idea and residue/retry oracle, not the Electron implementation | NotEMD runs as Obsidian + Playwright + Slidev fork; importing `BrowserWindow` would add a second lifecycle and debugging surface |
+| `table-extract.ts` | Reuse table-first extraction, consumed markers, and row/column geometry contracts; keep the NotEMD DOM extractor | This already matches `data-notemd-pptx-consumed-table`, but Slidev page roots, scaling, and transparent-layer semantics differ |
+| `index.ts` text extraction | Reuse computed-style, rich-run, and utility-hint ideas without adopting the Tailwind/Pretext path wholesale | Slidev themes are not the same as a Tailwind-authored app; `@chenglou/pretext` is only worth adding if visible-native text needs pixel-level line boxes |
+| `ooxml-writer.ts` | Reuse PresentationML structure lessons and test-case ideas, not the writer | NotEMD already has a small writer; the next value is run-level fonts, hyperlink relationships, paragraph/list contracts, not a writer swap |
+| `font-collect.ts` | Reuse font contract/reporting first; keep font embedding as opt-in experimentation | Default system/remote-font embedding creates licensing, file-size, Office-compatibility, and privacy problems |
+
+In other words, being one of the `oh-my-ppt` developers lowers the cost of studying and adapting the design, but it should not lower the default product acceptance bar. Code can be reused; that does not mean it should be. NotEMD's constraint is not whether it can emit more complex OOXML, but whether arbitrary Slidev decks can export reliably from the Obsidian plugin and explain failures as environment, visual, font, or editability-coverage issues.
+
 The strongest reusable implementation pattern from `oh-my-ppt` is the contract, not the exact code shape:
 
 1. extract native structures before generic text/shape scanning;
@@ -288,6 +302,15 @@ The M7 implementation slice is:
 4. extract visible SVG/Mermaid text into transparent editable overlays without modifying Mermaid fences or Mermaid output structure;
 5. capture PPTX background/reference at device scale factor 2 to reduce low-quality Mermaid rasterization while keeping real PNG export on the existing Slidev export workflow;
 6. expose source-kind counts in the sidecar report and verifier JSON so acceptance can measure editability instead of guessing from the rendered PPTX.
+
+The practical plan should proceed in this order instead of chasing full native HTML-to-PPTX reconstruction at once:
+
+1. **Tighten the Office text contract first**: make the writer and report share the final emit view, split mixed CJK/Latin runs, record actual Office font faces, then add explicit hyperlink relationships, code monospace defaults, paragraph spacing, and list indentation. This improves the editable layer without changing the visible layer, so it is the lowest-risk path.
+2. **Improve selection ergonomics next**: keep the transparent structure layer, but add source-kind naming, PowerPoint Selection Pane-friendly names, and an optional debug overlay preview. The real user complaint is often not whether `<a:t>` exists, but whether the text can be found and edited in PowerPoint.
+3. **Keep tightening the PNG/PPTX reference contract**: preserve the three reference layers: `pptx-background-images` hard gate, `pptx-rendered-html-reference` same-source gate, and `external-png-sequence` advisory gate. Do not tune the writer just because external PNG RMSE fails; first decide whether the separate Slidev export invocation drifted.
+4. **Only embed allowlisted font assets**: future embedding can support explicitly licensed fonts stored in the vault/project and report embedded families, size, and fallback behavior. Do not scan and package user system fonts.
+5. **Admit visible-native page by page**: only make native text/table visible on a page that passes residue sampling, frozen-background A/B visual diff, fontContract risk checks, and paint-order checks. Default whole-deck visible-native mode remains the wrong direction.
+6. **Keep Mermaid/SVG as atomic visual fallback**: continue extracting SVG text overlays, but do not change Mermaid fences, split diagrams, or relayout nodes. Real Mermaid vector reconstruction belongs behind a separate experimental flag, not in the default PPTX export.
 
 Real `docs/architecture.zh-CN.md` M7 validation now passes:
 

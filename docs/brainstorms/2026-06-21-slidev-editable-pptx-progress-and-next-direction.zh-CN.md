@@ -287,6 +287,20 @@ runuser -u jacob -- env HOME=/home/jacob PLAYWRIGHT_BROWSERS_PATH=/home/jacob/.c
 3. **不应原样迁移的部分**：Electron `BrowserWindow`、`oh-my-ppt` 默认更偏 visible-native reconstruction 的策略、大范围 Tailwind utility reconstruction、完整 shape/vector conversion。这些会在验收门槛证明之前放大 Slidev deck 的脆弱面。
 4. **只适合作为后续可选实验的部分**：字体嵌入、原生动画重建、KaTeX/image overlay extraction、visible-native shape rebuilding。这些在 `oh-my-ppt` 中有价值，但不应该混进 NotEMD Slidev PPTX 默认路径，除非当前 hybrid contract 的视觉与可编辑门禁先稳定。
 
+许可证边界也要说清楚。`oh-my-ppt` 是 Apache-2.0，NotEMD 是 MIT；从许可证兼容性看，NotEMD 可以复用 Apache-2.0 代码，但那会把被复用文件的 NOTICE/Apache 条款带进仓库。即使 Jacob 是 `oh-my-ppt` 开发者之一，upstream 仓库仍可能包含其他贡献和第三方实现细节。当前更稳的策略是 clean-room 复用：复用行为合同、测试 oracle、失败分类和数据模型边界，不直接搬运模块源码。只有当某个模块确实值得代码级引入时，才单独做 provenance 记录、许可证声明和最小文件级引入；不要把整个 `html-pptx` 目录复制进 NotEMD。
+
+按模块看，实际复用尺度应分成五档：
+
+| `oh-my-ppt` 模块 | NotEMD 复用尺度 | 原因 |
+| --- | --- | --- |
+| `renderer.ts` / `browser-scripts.ts` | 复用渲染收敛思想与 residue/retry oracle，不复用 Electron 实现 | NotEMD 的运行边界是 Obsidian + Playwright + Slidev fork，直接引入 `BrowserWindow` 会制造第二套生命周期和调试面 |
+| `table-extract.ts` | 复用 table-first、consumed marker、row/col geometry 合同；实现继续保留 NotEMD DOM extractor | 这部分思想已经匹配当前 `data-notemd-pptx-consumed-table`，但 Slidev 页面根节点、缩放和透明层策略不同 |
+| `index.ts` 文本抽取 | 复用 computed-style + rich-run + utility hint 思想，避免直接引入 Tailwind/Pretext 路线 | Slidev theme 不等价于 Tailwind authoring app；`@chenglou/pretext` 只有在可见原生文本需要像素级 line box 时才值得引入 |
+| `ooxml-writer.ts` | 复用 PresentationML 结构经验和测试用例思路，不复用 writer | NotEMD 已有小型 writer，当前更需要补 run-level 字体、hyperlink relationship、paragraph/list contract，而不是换 writer |
+| `font-collect.ts` | 先复用 font contract/report；字体嵌入只做 opt-in 实验 | 默认嵌入系统/远程字体会引入授权、体积、Office 兼容和隐私问题，不能作为默认导出 |
+
+这意味着“我是开发者之一”可以降低研究和借鉴成本，但不应该降低默认产品路径的验收门槛。代码可拿，不等于应该拿。NotEMD 的核心约束不是能否写出更复杂 OOXML，而是任意 Slidev deck 在 Obsidian 插件里能否稳定导出，并且导出失败时用户能知道问题属于环境、视觉、字体、还是可编辑覆盖。
+
 `oh-my-ppt` 最值得复用的是合同，而不是代码形状：
 
 1. 先抽取 native structures，再做普通 text/shape scan；
@@ -307,6 +321,15 @@ M7 本轮落地切片是：
 4. 在不修改 Mermaid fence 或 Mermaid 输出结构的前提下，抽取可见 SVG/Mermaid 文本作为透明可编辑 overlay；
 5. PPTX 背景/reference 捕获使用 device scale factor 2，降低 Mermaid raster 低清晰度问题；真实 PNG 导出仍保持现有 Slidev export workflow；
 6. 在 sidecar report 和 verifier JSON 暴露 source-kind 计数，让验收用数据判断可编辑覆盖，而不是靠肉眼猜。
+
+后续实践方案应按以下顺序推进，而不是一次性追求“完整 HTML->PPTX 原生化”：
+
+1. **先补 Office 文本合同**：让 writer 和 report 共用最终 emit 视角，拆分 mixed CJK/Latin run，记录 Office 实际字体 face；再补显式 hyperlink relationship、code monospace 默认、paragraph spacing 与 list indentation。这个方向直接提升可编辑层质量，且不改变可见层，风险最低。
+2. **再补选择体验**：继续保留透明结构层，但增加 source-kind 命名、selection-pane 友好名称、可选的调试 overlay 预览。用户真正抱怨的往往不是“是否存在 `<a:t>`”，而是 PowerPoint 里能否找到并编辑那段文字。
+3. **把 PNG/PPTX reference contract 继续收紧**：保留 `pptx-background-images` hard gate、`pptx-rendered-html-reference` 同源 gate 和 `external-png-sequence` advisory gate 三层。不要因为 external PNG RMSE 偶发失败就改 writer；先判断是否是独立 Slidev export invocation 漂移。
+4. **字体嵌入只接受白名单资产**：后续可支持 vault/project 内明确授权的字体包，并在 report 中写明 embedded font family、体积和 fallback 结果；不要扫描并打包用户系统字体。
+5. **visible-native 逐页准入**：只有某页同时通过 residue sampling、frozen-background A/B visual diff、fontContract 风险检查和 paint-order 检查，才允许把 native text/table 从透明改为可见。默认全 deck 开启仍然是错误方向。
+6. **Mermaid/SVG 保持 atomic visual fallback**：继续抽取 SVG text overlay，不改 Mermaid fence，不拆图，不重排节点。真正的 Mermaid vector reconstruction 应该是单独实验开关，而不是默认 PPTX 导出目标。
 
 真实 `docs/architecture.zh-CN.md` M7 验证已通过：
 
