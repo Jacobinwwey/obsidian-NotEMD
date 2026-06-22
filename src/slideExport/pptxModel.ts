@@ -17,6 +17,8 @@ export type SlidevPptxFallbackOnlyElementKind =
 
 export type SlidevPptxUnmodeledTextRunReason = 'inline-code' | 'inline-formatting' | 'link' | 'syntax-highlight';
 
+export type SlidevPptxTextSourceKind = 'body' | 'code' | 'mermaid-text' | 'svg-text' | 'table-cell-overlay';
+
 export interface SlidevPptxInlineTextRun {
 	text: string;
 	fontSize: number;
@@ -35,6 +37,7 @@ export interface SlidevPptxRichTextParagraph {
 
 export interface SlidevPptxTextBox {
 	text: string;
+	sourceKind?: SlidevPptxTextSourceKind;
 	x: number;
 	y: number;
 	w: number;
@@ -148,6 +151,11 @@ export interface SlidevPptxDocument {
 export interface SlidevPptxSlideEditabilitySummary {
 	slideNumber: number;
 	editableTextBoxCount: number;
+	editableBodyTextBoxCount: number;
+	editableCodeTextBoxCount: number;
+	editableMermaidTextBoxCount: number;
+	editableSvgTextBoxCount: number;
+	editableTableCellOverlayTextBoxCount: number;
 	editableTableCount: number;
 	editableTableCellCount: number;
 	editableTextCharacterCount: number;
@@ -168,6 +176,11 @@ export interface SlidevPptxSlideEditabilitySummary {
 
 export interface SlidevPptxEditablePrimitiveCoverage {
 	editableTextBoxCount: number;
+	editableBodyTextBoxCount: number;
+	editableCodeTextBoxCount: number;
+	editableMermaidTextBoxCount: number;
+	editableSvgTextBoxCount: number;
+	editableTableCellOverlayTextBoxCount: number;
 	editableTextSlideCount: number;
 	editableTextSlideRatio: number;
 	editableTextCharacterCount: number;
@@ -239,6 +252,11 @@ export interface SlidevPptxExportReport {
 	richTextBoxCount: number;
 	richTextRunCount: number;
 	editableTableCellCount: number;
+	editableBodyTextBoxCount: number;
+	editableCodeTextBoxCount: number;
+	editableMermaidTextBoxCount: number;
+	editableSvgTextBoxCount: number;
+	editableTableCellOverlayTextBoxCount: number;
 	editableTextSlideCount: number;
 	pagesWithoutEditableText: number[];
 	backgroundImageSlideCount: number;

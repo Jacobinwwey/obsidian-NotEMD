@@ -761,7 +761,7 @@ function inspectPptx(pptxPath) {
 			});
 		const slideTextRuns = slideXmlPaths.map(name => {
 			const xml = strFromU8(entries[name]);
-			const textRunCount = (xml.match(/<a:t>/g) || []).length;
+			const textRunCount = (xml.match(/<a:t(?:\s[^>]*)?>/g) || []).length;
 			const pictureCount = (xml.match(/<p:pic>/g) || []).length;
 			const tableCount = (xml.match(/<a:tbl>/g) || []).length;
 			return {
@@ -901,6 +901,7 @@ async function main() {
 	let htmlExport = layoutConvergence?.htmlExport ?? null;
 	let htmlExportHistory = layoutConvergence?.htmlExportHistory ?? [];
 	let pptxReportPath = null;
+	let pptxReport = null;
 	let htmlExportPathForPptx = null;
 	let visibleNativeExperimentResult = null;
 	if (args.format === 'pdf') {
@@ -928,6 +929,7 @@ async function main() {
 		htmlExport = layoutConvergence?.htmlExport ?? htmlExport;
 		htmlExportHistory = layoutConvergence?.htmlExportHistory ?? htmlExportHistory;
 		pptxReportPath = path.join(vaultRoot, pptxResult.reportPath);
+		pptxReport = pptxResult.report;
 	} else if (args.format === 'mp4') {
 		const pngDirectory = await slideExport.exportSlidevPng(app, slideSource, config, onProgress);
 		exportPath = await slideExport.exportVideoMp4(app, pngDirectory, slideSource.outputBasename, config, onProgress);
@@ -1220,6 +1222,7 @@ async function main() {
 				? fs.statSync(absoluteExportPath).size
 				: null,
 			pptxReportPath,
+			pptxReport,
 		},
 		pptxInspection,
 		pptxVisualDiff,

@@ -278,6 +278,81 @@ runuser -u jacob -- env HOME=/home/jacob PLAYWRIGHT_BROWSERS_PATH=/home/jacob/.c
 
 这个结果不是“多一个 report 字段”这么简单，而是给 visible native text/table 设了硬约束。真实 deck 的可编辑层主要使用 `Avenir Next` 和 `Fira Code`，这两个字体都不能假设在所有 Office 环境中存在；同时两者都承载了 CJK 文本，而 writer 当前会把 CJK 写到 `Microsoft YaHei` 这个 East Asian typeface。也就是说，默认打开可见原生文本/表格仍然不安全：透明结构层避免了可见字体漂移，但未来 visible-native 分支必须证明字体替换不会造成视觉退化，或者先给出明确、授权可控的字体资产策略。
 
+## M7 `oh-my-ppt` 复用尺度与可编辑文本覆盖
+
+这一轮把 `/home/jacob/ref/oh-my-ppt-upstream-latest` 当作 upstream 架构参考，把 `/home/jacob/ref/oh-my-ppt-fork` 当作 Jacob 本地 fork 参考，而不是源码搬运对象。当前 upstream `main` 是 `843ff74`（`v2.0.17`）；本地 fork 参考点是 `pr/animation-export-contract` 上的 `257c23b`。合理的复用尺度如下：
+
+1. **可直接复用的思想与合同**：table-first extraction、consumed DOM marker、computed geometry、真实浏览器渲染事实源、背景/前景责任拆分、sidecar coverage report，以及 visible-native layer 前必须做 residue check。
+2. **需要在 NotEMD 中重写/适配的部分**：Slidev route 遍历、Playwright capture、透明可编辑 overlay、Mermaid/SVG 文本抽取、代码块段落保持，以及符合 NotEMD 默认 `background-image` 可见层的 report 字段。
+3. **不应原样迁移的部分**：Electron `BrowserWindow`、`oh-my-ppt` 默认更偏 visible-native reconstruction 的策略、大范围 Tailwind utility reconstruction、完整 shape/vector conversion。这些会在验收门槛证明之前放大 Slidev deck 的脆弱面。
+4. **只适合作为后续可选实验的部分**：字体嵌入、原生动画重建、KaTeX/image overlay extraction、visible-native shape rebuilding。这些在 `oh-my-ppt` 中有价值，但不应该混进 NotEMD Slidev PPTX 默认路径，除非当前 hybrid contract 的视觉与可编辑门禁先稳定。
+
+`oh-my-ppt` 最值得复用的是合同，而不是代码形状：
+
+1. 先抽取 native structures，再做普通 text/shape scan；
+2. 对已消费 DOM 打 marker，避免后续 pass 重复计数或重复隐藏；
+3. 用浏览器 computed rect/style 作为几何事实源；
+4. 隐藏已抽取可编辑 primitive 后再捕获背景；
+5. 输出 sidecar evidence，让测试可以阻止静默 coverage 回退。
+
+NotEMD 有两个必须主动偏离的点。第一，Slidev Mermaid 文本实际在 shadow root 里，普通 document-level CSS 和 `querySelectorAll('svg text')` 都不够。NotEMD 现在会遍历 composed root，并对 shadow-root SVG text 直接内联透明化。第二，NotEMD 的默认可见层仍然应该是 raster-first。`oh-my-ppt` 可以更偏 visible native reconstruction，是因为它的 authoring model 对 HTML shape vocabulary 控制更强；任意 Slidev deck 没有这个前提。
+
+这里最关键的修正是 Mermaid/SVG。`oh-my-ppt` 在背景捕获时隐藏 `svg text, svg tspan`，因为它的默认路径不抽取 SVG 文本。这个限制不能成为 NotEMD 的终点。NotEMD 应继续把 Mermaid/SVG 的可见图形留给高质量 raster background，同时把浏览器暴露的 `<text>/<tspan>` 映射成透明可编辑文本框。这样既不重写 Mermaid fence，也不拆图，还能让 diagram label 在 PPTX 中具备可编辑入口。
+
+M7 本轮落地切片是：
+
+1. 新增 `SlidevPptxTextSourceKind`，让 report 区分 `body`、`code`、`mermaid-text`、`svg-text` 和 `table-cell-overlay`；
+2. 将代码块作为 code-sourced editable text 保留，并把 rich run 中的换行拆成真正的 PPT 段落；
+3. 给表格单元格额外叠加透明可编辑文本框，因为透明 DrawingML table text 虽然技术上可编辑，但在真实 Office 交互中很难直接点选；
+4. 在不修改 Mermaid fence 或 Mermaid 输出结构的前提下，抽取可见 SVG/Mermaid 文本作为透明可编辑 overlay；
+5. PPTX 背景/reference 捕获使用 device scale factor 2，降低 Mermaid raster 低清晰度问题；真实 PNG 导出仍保持现有 Slidev export workflow；
+6. 在 sidecar report 和 verifier JSON 暴露 source-kind 计数，让验收用数据判断可编辑覆盖，而不是靠肉眼猜。
+
+真实 `docs/architecture.zh-CN.md` M7 验证已通过：
+
+1. PPTX 输出：`docs/export/test-slidev-m7-editable-text-quality/architecture.zh-CN.pptx`
+2. PPTX sidecar：`docs/export/test-slidev-m7-editable-text-quality/architecture.zh-CN.pptx.report.json`
+3. `slideCount = 30`
+4. `pptxInspection.textRunCount = 597`
+5. `pptxInspection.tableCount = 6`
+6. `pptxInspection.slidesWithoutEditableText = []`
+7. `editableTextBoxCount = 277`
+8. `editableBodyTextBoxCount = 138`
+9. `editableCodeTextBoxCount = 1`
+10. `editableMermaidTextBoxCount = 36`
+11. `editableSvgTextBoxCount = 0`
+12. `editableTableCellOverlayTextBoxCount = 102`
+13. `editableTableCellCount = 102`
+14. frozen-background PPTX visual gate 通过，阈值为 `maxRmse <= 0.12`、`meanRmse <= 0.08`
+15. same-rendered-HTML reference visual gate 通过，使用相同阈值
+16. `slidev.version = 52.16.0 (/home/jacob/slidev/packages/slidev/bin/slidev.mjs)`
+17. `skillRootPath = /home/jacob/slidev/skills/slidev`
+18. `skillReferenceCount = 52`
+19. `unignoredOutputs = []`
+
+同一源文件也跑了真实 PNG 验证：
+
+1. PNG 输出：`docs/export/test-slidev-m7-current-png-reference/architecture.zh-CN-slides-png`
+2. `pngCount = 30`
+3. `slidev.version = 52.16.0 (/home/jacob/slidev/packages/slidev/bin/slidev.mjs)`
+4. `skillRootPath = /home/jacob/slidev/skills/slidev`
+5. `skillReferenceCount = 52`
+6. `unignoredOutputs = []`
+
+verifier 在这台机器上仍会记录部分 ImageMagick 全量 contact-sheet montage 的 cache warning，但这些 warning 不再作为 hard failure。真正的验收合同仍然是逐页 visual metrics；contact sheet 只是审阅便利，不应该决定导出是否失败。
+
+这不是承诺每个 diagram 或 code token 都已经变成语义级可编辑对象。它是在当前架构下更稳的推进：视觉保真继续由冻结背景负责，DOM 中有稳定文本几何的区域则增加可编辑入口。完整 Mermaid 原生图形重建不适合作为默认方向，因为那等于重新实现 Mermaid 已完成的 layout、arrow/marker、字体与 label collision 逻辑。
+
+后续技术风险是：
+
+1. **SVG 坐标保真**：`getBoundingClientRect()` 对可编辑 overlay 足够实用，但旋转文本、transform group、text-on-path 不会完美映射到普通 PPT 文本框。
+2. **选中体验**：透明 overlay 可编辑，但密集图中用户可能仍需要 PowerPoint Selection Pane。未来可以提供可选的“可见编辑 overlay 预览”，但不应默认打开。
+3. **重复可编辑文本**：表格 cell overlay 会有意重复透明 DrawingML table text。它提升实际可编辑性，但自动 text-run 计数不再等价于视觉文本出现次数。
+4. **字体漂移**：这些 overlay 一旦变成可见层，就会重新触发 M5 的字体风险。除非 visible-native A/B gate 通过，否则必须保持透明。
+5. **reference 合同**：真实 PNG 导出仍走当前 Slidev 路径。PPTX 背景质量可以独立提升，但 external PNG vs PPTX hard comparison 在两者共享同一 rasterization contract 之前仍应保持 advisory。
+
+本切片验收必须使用 `docs/architecture.zh-CN.md`，要求 PPTX 与 frozen-background reference 的 visual match 通过，要求 same-rendered-HTML reference match 通过，并单独跑真实 PNG export，证明 PNG 路径没有被替换。
+
 ## M4 visible-native 实验收口
 
 visible-native 方向这次按显式实验收口，而不是默认行为变更。真实 verifier 命令：

@@ -659,6 +659,20 @@ function buildContactSheet(inputPaths, outputPath, tile = '3x') {
 	return outputPath;
 }
 
+function tryBuildContactSheet(inputPaths, outputPath, tile = '3x') {
+	try {
+		return {
+			path: buildContactSheet(inputPaths, outputPath, tile),
+			warning: null,
+		};
+	} catch (error) {
+		return {
+			path: null,
+			warning: error instanceof Error ? error.message : String(error),
+		};
+	}
+}
+
 function csvCell(value) {
 	if (value === null || value === undefined) {
 		return '';
@@ -1002,16 +1016,23 @@ function comparePngSequences(options) {
 
 	const summary = summarizePageMetrics(pages);
 	const metricsCsvPath = writeComparisonCsv(pages, path.join(outputDirectory, 'comparison-metrics.csv'));
-	const sideBySideSheetPath = buildContactSheet(
+	const contactSheetWarnings = [];
+	const sideBySideSheet = tryBuildContactSheet(
 		pages.filter((page) => page.sideBySidePath).map((page) => page.sideBySidePath),
 		path.join(outputDirectory, 'all-side-by-side-sheet.png'),
 		'3x',
 	);
-	const diffSheetPath = buildContactSheet(
+	if (sideBySideSheet.warning) {
+		contactSheetWarnings.push(sideBySideSheet.warning);
+	}
+	const diffSheet = tryBuildContactSheet(
 		pages.filter((page) => page.diffPath).map((page) => page.diffPath),
 		path.join(outputDirectory, 'all-diff-sheet.png'),
 		'3x',
 	);
+	if (diffSheet.warning) {
+		contactSheetWarnings.push(diffSheet.warning);
+	}
 
 	return {
 		referenceDirectory,
@@ -1020,8 +1041,9 @@ function comparePngSequences(options) {
 		resizedDirectory,
 		diffDirectory,
 		sideBySideDirectory,
-		sideBySideSheetPath,
-		diffSheetPath,
+		sideBySideSheetPath: sideBySideSheet.path,
+		diffSheetPath: diffSheet.path,
+		contactSheetWarnings,
 		metricsCsvPath,
 		optionalMetricSupport,
 		pages,

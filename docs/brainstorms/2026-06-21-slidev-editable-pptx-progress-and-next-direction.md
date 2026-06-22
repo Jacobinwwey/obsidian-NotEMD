@@ -259,6 +259,81 @@ Result:
 
 The result is a constraint, not just a report feature. The real deck's editable layer is dominated by `Avenir Next` and `Fira Code`, neither of which should be assumed to exist in Office across machines. It also contains CJK text under both source families, while the writer currently emits CJK text through `Microsoft YaHei` as the East Asian typeface. That means visible native text/table remains unsafe as a default: the transparent structure layer avoids visible font drift, but any future visible-native branch must either prove font substitution is visually neutral or ship an explicit, licensed font-asset policy.
 
+## M7 `oh-my-ppt` Reuse Scale And Editable Text Coverage
+
+The current round treats `/home/jacob/ref/oh-my-ppt-upstream-latest` as the upstream architectural reference and `/home/jacob/ref/oh-my-ppt-fork` as Jacob's local fork reference, not as source-dump inputs. Upstream `main` is currently `843ff74` (`v2.0.17`); the fork reference checked here is `257c23b` on `pr/animation-export-contract`. The reusable scale is:
+
+1. **Directly reusable ideas and contracts**: table-first extraction, consumed DOM markers, computed geometry, source-of-truth browser rendering, background/foreground responsibility split, sidecar coverage reporting, and residue checks before any visible-native layer is allowed.
+2. **Rewrite/adapt in NotEMD**: Slidev route traversal, Playwright capture, transparent editable overlays, Mermaid/SVG text extraction, code-block paragraph preservation, and report fields that match NotEMD's default `background-image` visible layer.
+3. **Do not migrate as-is**: Electron `BrowserWindow`, `oh-my-ppt`'s default visible-native reconstruction bias, broad Tailwind utility reconstruction, and full shape/vector conversion. Those would make the current Slidev deck more fragile before the acceptance gate can prove parity.
+4. **Keep as future optional experiments only**: font embedding, native animation reconstruction, KaTeX/image overlay extraction, and visible-native shape rebuilding. They are valuable in `oh-my-ppt`, but they should not be mixed into the default NotEMD Slidev PPTX path until the current hybrid contract has stable visual and editability gates.
+
+The strongest reusable implementation pattern from `oh-my-ppt` is the contract, not the exact code shape:
+
+1. extract native structures before generic text/shape scanning;
+2. mark consumed DOM so later passes do not double-count or double-hide;
+3. use browser-computed rectangles and styles as the geometry source of truth;
+4. capture a background after hiding extracted editable primitives;
+5. emit sidecar evidence that lets tests reject silent coverage regressions.
+
+NotEMD deliberately diverges in two places. First, Slidev Mermaid text lives inside shadow roots, so ordinary document-level CSS and `querySelectorAll('svg text')` are insufficient. The NotEMD extractor now walks composed roots and directly hides extracted shadow-root SVG text. Second, NotEMD's default visible layer stays raster-first. `oh-my-ppt` can bias toward visible native reconstruction because its authoring model controls more of the HTML shape vocabulary; arbitrary Slidev decks do not.
+
+The important correction is Mermaid/SVG handling. `oh-my-ppt` hides `svg text, svg tspan` during background capture because that project does not extract SVG text in its default path. That is not an acceptable final state for NotEMD. NotEMD should keep Mermaid/SVG visuals as high-quality raster background and add transparent editable text boxes over visible SVG text. This satisfies the user's constraint: do not rewrite or split Mermaid source, and still expose diagram labels as editable PPTX text where the browser exposes them as `<text>/<tspan>`.
+
+The M7 implementation slice is:
+
+1. add `SlidevPptxTextSourceKind` so the report can distinguish `body`, `code`, `mermaid-text`, `svg-text`, and `table-cell-overlay`;
+2. preserve code blocks as code-sourced editable text and split rich runs containing newlines into separate PPT paragraphs;
+3. add transparent editable text overlays for table cells, because native DrawingML table text is technically editable but hard to target in real Office interaction when it is invisible;
+4. extract visible SVG/Mermaid text into transparent editable overlays without modifying Mermaid fences or Mermaid output structure;
+5. capture PPTX background/reference at device scale factor 2 to reduce low-quality Mermaid rasterization while keeping real PNG export on the existing Slidev export workflow;
+6. expose source-kind counts in the sidecar report and verifier JSON so acceptance can measure editability instead of guessing from the rendered PPTX.
+
+Real `docs/architecture.zh-CN.md` M7 validation now passes:
+
+1. PPTX output: `docs/export/test-slidev-m7-editable-text-quality/architecture.zh-CN.pptx`
+2. PPTX sidecar: `docs/export/test-slidev-m7-editable-text-quality/architecture.zh-CN.pptx.report.json`
+3. `slideCount = 30`
+4. `pptxInspection.textRunCount = 597`
+5. `pptxInspection.tableCount = 6`
+6. `pptxInspection.slidesWithoutEditableText = []`
+7. `editableTextBoxCount = 277`
+8. `editableBodyTextBoxCount = 138`
+9. `editableCodeTextBoxCount = 1`
+10. `editableMermaidTextBoxCount = 36`
+11. `editableSvgTextBoxCount = 0`
+12. `editableTableCellOverlayTextBoxCount = 102`
+13. `editableTableCellCount = 102`
+14. frozen-background PPTX visual gate passed with `maxRmse <= 0.12` and `meanRmse <= 0.08`
+15. same-rendered-HTML reference visual gate passed with the same thresholds
+16. `slidev.version = 52.16.0 (/home/jacob/slidev/packages/slidev/bin/slidev.mjs)`
+17. `skillRootPath = /home/jacob/slidev/skills/slidev`
+18. `skillReferenceCount = 52`
+19. `unignoredOutputs = []`
+
+The real PNG validation was also run against the same source:
+
+1. PNG output: `docs/export/test-slidev-m7-current-png-reference/architecture.zh-CN-slides-png`
+2. `pngCount = 30`
+3. `slidev.version = 52.16.0 (/home/jacob/slidev/packages/slidev/bin/slidev.mjs)`
+4. `skillRootPath = /home/jacob/slidev/skills/slidev`
+5. `skillReferenceCount = 52`
+6. `unignoredOutputs = []`
+
+The verifier still records ImageMagick contact-sheet warnings on this host for some large all-slide montages, but those warnings are no longer a hard failure. Page-level visual metrics remain the gate. This is intentional: montage generation is review convenience, not the acceptance contract.
+
+This is still not a promise that every diagram or code token is semantically editable. It is a pragmatic improvement in the current architecture: visual fidelity remains owned by the frozen background, while user-editable text affordances are widened where the DOM exposes stable text geometry. Full native Mermaid graph reconstruction remains a bad default because it would require layout reimplementation, arrow/marker reconstruction, and font/label collision handling that Mermaid already solved in SVG.
+
+The next technical risks are:
+
+1. **SVG coordinate fidelity**: `getBoundingClientRect()` is good enough for editable overlay placement, but rotated text, transformed groups, and text-on-path will not map perfectly to simple PPT text boxes.
+2. **Selection ergonomics**: transparent overlays are editable, but users may still need to use PowerPoint's selection pane for dense diagrams. A future optional "visible editable overlay preview" mode could help, but should not become default.
+3. **Duplicate editable text**: table-cell overlays intentionally duplicate transparent DrawingML table text. This improves practical editability but means automated text-run counts are no longer one-to-one with visual text occurrences.
+4. **Font drift**: making these overlays visible would reintroduce the M5 font-risk problem. They must stay transparent unless a visible-native A/B gate passes.
+5. **Reference contract**: real PNG export stays on the current Slidev route. PPTX background quality can improve independently, but external PNG vs PPTX hard comparison should remain advisory until both share the same rasterization contract.
+
+The acceptance gate for this slice must use `docs/architecture.zh-CN.md`, require PPTX visual match against the frozen-background reference, require same-rendered-HTML reference match, and separately run real PNG export to prove the PNG path was not replaced.
+
 ## M4 Visible-Native Experiment Closure
 
 The visible-native direction has now been tested as an explicit experiment, not as a default behavior change. The verifier command was:

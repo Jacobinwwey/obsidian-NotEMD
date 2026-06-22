@@ -9,12 +9,14 @@ import {
 	type SlidevPptxTableCell,
 	type SlidevPptxTextAlign,
 	type SlidevPptxTextBox,
+	type SlidevPptxTextSourceKind,
 	type SlidevPptxUnmodeledTextRunReason,
 	type SlidevPptxVerticalAlign,
 } from './pptxModel';
 
 interface RawSlideTextBox {
 	text: string;
+	sourceKind?: SlidevPptxTextSourceKind;
 	x: number;
 	y: number;
 	w: number;
@@ -118,6 +120,32 @@ function normalizeInlineTextRun(raw: RawSlideInlineTextRun): SlidevPptxInlineTex
 	};
 }
 
+function normalizeTextSourceKind(value: unknown): SlidevPptxTextSourceKind {
+	return value === 'code' ||
+		value === 'mermaid-text' ||
+		value === 'svg-text' ||
+		value === 'table-cell-overlay'
+		? value
+		: 'body';
+}
+
+function normalizeTextValue(value: unknown, sourceKind: SlidevPptxTextSourceKind): string {
+	const source = String(value || '')
+		.replace(/\r\n?/g, '\n')
+		.replace(/[\u200b-\u200d\ufeff]/g, '');
+	if (sourceKind === 'code') {
+		const lines = source.split('\n');
+		while (lines.length > 0 && lines[0].trim().length === 0) {
+			lines.shift();
+		}
+		while (lines.length > 0 && lines[lines.length - 1].trim().length === 0) {
+			lines.pop();
+		}
+		return lines.map((line) => line.replace(/\s+$/g, '')).join('\n');
+	}
+	return source.replace(/[^\S\n]+/g, ' ').trim();
+}
+
 function buildFallbackRichTextParagraphs(
 	text: string,
 	textBox: Omit<SlidevPptxTextBox, 'richTextParagraphs'>,
@@ -164,16 +192,15 @@ function normalizeRichTextParagraphs(
 }
 
 function normalizeTextBox(raw: RawSlideTextBox): SlidevPptxTextBox | null {
-	const text = String(raw.text || '')
-		.replace(/\r\n?/g, '\n')
-		.replace(/[\u200b-\u200d\ufeff]/g, '')
-		.trim();
-	if (!text) {
+	const sourceKind = normalizeTextSourceKind(raw.sourceKind);
+	const text = normalizeTextValue(raw.text, sourceKind);
+	if (!text.trim()) {
 		return null;
 	}
 
 	const textBox: Omit<SlidevPptxTextBox, 'richTextParagraphs'> = {
 		text: text.slice(0, 4000),
+		sourceKind,
 		x: clamp(Number(raw.x) || 0, 0, PPTX_SLIDE_WIDTH_IN),
 		y: clamp(Number(raw.y) || 0, 0, PPTX_SLIDE_HEIGHT_IN),
 		w: clamp(Number(raw.w) || 0.1, 0.05, PPTX_SLIDE_WIDTH_IN),
@@ -327,8 +354,38 @@ export async function extractSlidevPptxSlideFromPage(page: any, slideNumber: num
 		const sizeToInY = (value: number): number => (value / rootHeight) * slideHeightIn;
 		const pxToPt = (value: number): number =>
 			value * Math.min(slideWidthIn / rootWidth, slideHeightIn / rootHeight) * 72;
+		const collectShadowRoots = (element: Element): ShadowRoot[] => {
+			const shadowRoots: ShadowRoot[] = [];
+			const visit = (current: Element): void => {
+				const shadowRoot = current.shadowRoot;
+				if (shadowRoot) {
+					shadowRoots.push(shadowRoot);
+					for (const shadowElement of Array.from(shadowRoot.querySelectorAll('*'))) {
+						visit(shadowElement);
+					}
+				}
+				for (const child of Array.from(current.children)) {
+					visit(child);
+				}
+			};
+			visit(element);
+			return shadowRoots;
+		};
+		const shadowRoots = collectShadowRoots(root);
+		const queryAllInComposedRoot = (selector: string): Element[] => [
+			...Array.from(root.querySelectorAll(selector)),
+			...shadowRoots.flatMap((shadowRoot) => Array.from(shadowRoot.querySelectorAll(selector))),
+		];
+		const allElementsInComposedRoot = (): Element[] => [
+			...Array.from(root.querySelectorAll('*')),
+			...shadowRoots.flatMap((shadowRoot) => Array.from(shadowRoot.querySelectorAll('*'))),
+		];
+		const shadowHostFor = (element: Element): Element | null => {
+			const rootNode = element.getRootNode();
+			return rootNode instanceof ShadowRoot ? rootNode.host : null;
+		};
 		const orderMap = new Map<Element, number>();
-		Array.from(root.querySelectorAll('*')).forEach((element, index) => {
+		allElementsInComposedRoot().forEach((element, index) => {
 			orderMap.set(element, (index + 1) * 10);
 		});
 		const orderFor = (element: Element, fallback: number): number => orderMap.get(element) || fallback;
@@ -338,6 +395,20 @@ export async function extractSlidevPptxSlideFromPage(page: any, slideNumber: num
 				.replace(/[\u200b-\u200d\ufeff]/g, '')
 				.replace(/[^\S\n]+/g, ' ')
 				.trim();
+		const normalizeCode = (value: string): string => {
+			const lines = String(value || '')
+				.replace(/\r\n?/g, '\n')
+				.replace(/[\u200b-\u200d\ufeff]/g, '')
+				.replace(/\t/g, '    ')
+				.split('\n');
+			while (lines.length > 0 && lines[0].trim().length === 0) {
+				lines.shift();
+			}
+			while (lines.length > 0 && lines[lines.length - 1].trim().length === 0) {
+				lines.pop();
+			}
+			return lines.map((line) => line.replace(/\s+$/g, '')).join('\n');
+		};
 		const rgbToHex = (value: string): string => {
 			const source = String(value || '').trim();
 			if (!source || source === 'transparent') return '';
@@ -481,6 +552,23 @@ export async function extractSlidevPptxSlideFromPage(page: any, slideNumber: num
 				}
 			}
 			return Array.from(reasons).sort();
+		};
+		const textSourceKindFor = (element: Element, tagName: string): SlidevPptxTextSourceKind => {
+			if (
+				tagName === 'PRE' ||
+				element.closest('pre,.shiki') ||
+				element.querySelector('.shiki, .token, code[class*="language-"]')
+			) {
+				return 'code';
+			}
+			return 'body';
+		};
+		const textForElement = (element: Element, tagName: string, sourceKind: SlidevPptxTextSourceKind): string => {
+			const rawText =
+				tagName === 'PRE' || sourceKind === 'code'
+					? element.textContent || ''
+					: (element instanceof HTMLElement ? element.innerText : element.textContent) || '';
+			return sourceKind === 'code' ? normalizeCode(rawText) : normalize(rawText);
 		};
 		const runStyleFor = (
 			style: CSSStyleDeclaration,
@@ -649,9 +737,10 @@ export async function extractSlidevPptxSlideFromPage(page: any, slideNumber: num
 			return best;
 		};
 		const tables: RawSlideTable[] = [];
+		const textBoxes: RawSlideTextBox[] = [];
 		let order = 10;
 
-		for (const tableElement of Array.from(root.querySelectorAll('table'))) {
+		for (const tableElement of queryAllInComposedRoot('table')) {
 			if (!(tableElement instanceof HTMLElement)) continue;
 			if (tableElement.parentElement?.closest('[data-notemd-pptx-consumed-table="1"]')) continue;
 			if (tableElement.closest('script,style,noscript,svg')) continue;
@@ -724,6 +813,12 @@ export async function extractSlidevPptxSlideFromPage(page: any, slideNumber: num
 			const rows: RawSlideTableCell[][] = Array.from({ length: rowElements.length }, () => []);
 			for (const placement of placements) {
 				const cellStyle = window.getComputedStyle(placement.element);
+				const cellTagName = placement.element.tagName.toUpperCase();
+				const cellText = normalize(
+					placement.element instanceof HTMLElement
+						? placement.element.innerText
+						: placement.element.textContent || '',
+				);
 				const perColumnWidth = placement.rect.width / Math.max(1, placement.colSpan);
 				for (
 					let colOffset = 0;
@@ -739,11 +834,7 @@ export async function extractSlidevPptxSlideFromPage(page: any, slideNumber: num
 				const fontWeight = Number.parseInt(cellStyle.fontWeight || '400', 10);
 				const border = strongestBorder(cellStyle);
 				rows[placement.rowIndex].push({
-					text: normalize(
-						placement.element instanceof HTMLElement
-							? placement.element.innerText
-							: placement.element.textContent || '',
-					),
+					text: cellText,
 					rowSpan: placement.rowSpan,
 					colSpan: placement.colSpan,
 					fontSize: pxToPt(fontSizePx),
@@ -758,6 +849,27 @@ export async function extractSlidevPptxSlideFromPage(page: any, slideNumber: num
 					borderColor: border.color,
 					borderWidthPt: border.widthPt,
 				});
+				if (cellText) {
+					textBoxes.push({
+						text: cellText,
+						sourceKind: 'table-cell-overlay',
+						x: pxToInX(placement.rect.left),
+						y: pxToInY(placement.rect.top),
+						w: sizeToInX(placement.rect.width),
+						h: sizeToInY(placement.rect.height),
+						fontSize: pxToPt(fontSizePx),
+						fontFace: sanitizeFontFace(cellStyle.fontFamily),
+						color: effectiveColor(cellStyle),
+						bold: Number.isFinite(fontWeight) ? fontWeight >= 600 : /bold/i.test(cellStyle.fontWeight),
+						italic: cellStyle.fontStyle === 'italic' || cellStyle.fontStyle === 'oblique',
+						underline: cellStyle.textDecorationLine.includes('underline'),
+						align: alignFor(cellStyle),
+						bullet: false,
+						order: orderFor(placement.element, order + 1),
+						richTextParagraphs: collectRichTextParagraphs(placement.element, cellTagName, cellStyle),
+						unmodeledRunReasons: textRunReasonsFor(placement.element, cellStyle, cellTagName),
+					});
+				}
 			}
 
 			tableElement.setAttribute('data-notemd-pptx-consumed-table', '1');
@@ -773,7 +885,6 @@ export async function extractSlidevPptxSlideFromPage(page: any, slideNumber: num
 			});
 			order += 10;
 		}
-		const textBoxes: RawSlideTextBox[] = [];
 		const fallbackOnlyElementKinds = collectFallbackOnlyElementKinds();
 		let consumedTableTextCandidateCount = 0;
 
@@ -787,18 +898,16 @@ export async function extractSlidevPptxSlideFromPage(page: any, slideNumber: num
 			const rect = element.getBoundingClientRect();
 			if (!isVisible(element, style, rect)) continue;
 			const tagName = element.tagName.toUpperCase();
-			const rawText =
-				tagName === 'PRE'
-					? element.textContent || ''
-					: (element instanceof HTMLElement ? element.innerText : element.textContent) || '';
-			const text = normalize(rawText);
-			if (!text) continue;
+			const sourceKind = textSourceKindFor(element, tagName);
+			const text = textForElement(element, tagName, sourceKind);
+			if (!text.trim()) continue;
 			selected.add(element);
 			const fontSizePx = Number.parseFloat(style.fontSize || '16') || 16;
 			const fontWeight = Number.parseInt(style.fontWeight || '400', 10);
 			const listStyle = style.listStyleType || '';
 			textBoxes.push({
 				text,
+				sourceKind,
 				x: pxToInX(rect.left),
 				y: pxToInY(rect.top),
 				w: sizeToInX(rect.width),
@@ -819,6 +928,86 @@ export async function extractSlidevPptxSlideFromPage(page: any, slideNumber: num
 			order += 10;
 		}
 
+		const svgTextSourceKindFor = (element: Element): SlidevPptxTextSourceKind => {
+			const ownerSvg = element instanceof SVGElement ? element.ownerSVGElement : null;
+			const shadowHost = shadowHostFor(element);
+			const inMermaid = Boolean(
+				element.closest('.mermaid,[id^="mermaid-"]') ||
+					(ownerSvg?.id && ownerSvg.id.startsWith('mermaid-')) ||
+					ownerSvg?.closest?.('.mermaid,[id^="mermaid-"]') ||
+					shadowHost?.matches?.('.mermaid,[id^="mermaid-"]') ||
+					shadowHost?.closest?.('.mermaid,[id^="mermaid-"]'),
+			);
+			return inMermaid ? 'mermaid-text' : 'svg-text';
+		};
+		const svgTextFillFor = (style: CSSStyleDeclaration): string =>
+			(style as any).fill || style.getPropertyValue('fill') || '';
+		const svgTextColorFor = (style: CSSStyleDeclaration): string =>
+			rgbToHex(svgTextFillFor(style)) || rgbToHex(style.color) || '111827';
+		const svgTextIsVisible = (element: Element, style: CSSStyleDeclaration, rect: DOMRect): boolean => {
+			if (style.display === 'none' || style.visibility === 'hidden') return false;
+			if (Number(style.opacity || '1') < 0.04) return false;
+			const fill = svgTextFillFor(style);
+			if (rgbToHex(fill) === '' && rgbToHex(style.color) === '' && String(fill || '') === 'none') {
+				return false;
+			}
+			if (rect.width < 1 || rect.height < 1) return false;
+			if (rect.right < rootLeft || rect.bottom < rootTop) return false;
+			if (rect.left > rootLeft + rootWidth || rect.top > rootTop + rootHeight) return false;
+			return true;
+		};
+		const hasVisibleTspanText = (element: Element): boolean =>
+			Array.from(element.querySelectorAll('tspan')).some((child) => normalize(child.textContent || '').length > 0);
+		for (const svgTextElement of queryAllInComposedRoot('svg text, svg tspan')) {
+			const tagName = svgTextElement.tagName.toUpperCase();
+			if (tagName === 'TEXT' && hasVisibleTspanText(svgTextElement)) {
+				continue;
+			}
+			const text = normalize(svgTextElement.textContent || '');
+			if (!text) continue;
+			const style = window.getComputedStyle(svgTextElement);
+			const rect = svgTextElement.getBoundingClientRect();
+			if (!svgTextIsVisible(svgTextElement, style, rect)) continue;
+			const fontSizePx = Number.parseFloat(style.fontSize || '16') || 16;
+			const fontWeight = Number.parseInt(style.fontWeight || '400', 10);
+			const sourceKind = svgTextSourceKindFor(svgTextElement);
+			textBoxes.push({
+				text,
+				sourceKind,
+				x: pxToInX(rect.left),
+				y: pxToInY(rect.top),
+				w: Math.max(sizeToInX(rect.width), sizeToInX(fontSizePx * 0.75)),
+				h: Math.max(sizeToInY(rect.height), sizeToInY(fontSizePx * 1.2)),
+				fontSize: pxToPt(fontSizePx),
+				fontFace: sanitizeFontFace(style.fontFamily),
+				color: svgTextColorFor(style),
+				bold: Number.isFinite(fontWeight) ? fontWeight >= 600 : /bold/i.test(style.fontWeight),
+				italic: style.fontStyle === 'italic' || style.fontStyle === 'oblique',
+				underline: style.textDecorationLine.includes('underline'),
+				align: 'left',
+				bullet: false,
+				order: orderFor(svgTextElement, order),
+				richTextParagraphs: [
+					{
+						runs: [
+							{
+								text,
+								...runStyleFor(style, svgTextElement),
+								color: svgTextColorFor(style),
+							},
+						],
+					},
+				],
+				unmodeledRunReasons: [],
+			});
+			svgTextElement.setAttribute('data-notemd-pptx-hidden-text', '1');
+			if (svgTextElement instanceof SVGElement) {
+				svgTextElement.style.setProperty('fill', 'transparent', 'important');
+				svgTextElement.style.setProperty('stroke', 'transparent', 'important');
+			}
+			order += 10;
+		}
+
 		const hideStyle = document.createElement('style');
 		hideStyle.id = 'notemd-pptx-hide-text';
 		hideStyle.textContent = [
@@ -828,6 +1017,11 @@ export async function extractSlidevPptxSlideFromPage(page: any, slideNumber: num
 			'-webkit-text-fill-color: transparent !important;',
 			'text-shadow: none !important;',
 			'text-decoration-color: transparent !important;',
+			'}',
+			'svg [data-notemd-pptx-hidden-text="1"],',
+			'svg [data-notemd-pptx-hidden-text="1"] * {',
+			'fill: transparent !important;',
+			'stroke: transparent !important;',
 			'}',
 			'[data-notemd-pptx-hidden-text="1"]::marker { color: transparent !important; }',
 			'[data-notemd-pptx-consumed-table="1"],',

@@ -146,6 +146,36 @@ function fallbackTextParagraphs(textBox: SlidevPptxTextBox): SlidevPptxRichTextP
 		}));
 }
 
+function splitParagraphRunsOnNewlines(paragraph: SlidevPptxRichTextParagraph): SlidevPptxRichTextParagraph[] {
+	const paragraphs: SlidevPptxRichTextParagraph[] = [];
+	let currentRuns: SlidevPptxRichTextParagraph['runs'] = [];
+	let lastRun = paragraph.runs[0];
+
+	const flush = (): void => {
+		if (currentRuns.length > 0) {
+			paragraphs.push({ runs: currentRuns });
+		} else if (lastRun) {
+			paragraphs.push({ runs: [{ ...lastRun, text: ' ' }] });
+		}
+		currentRuns = [];
+	};
+
+	for (const run of paragraph.runs) {
+		lastRun = run;
+		const parts = String(run.text || '').replace(/\r\n?/g, '\n').split('\n');
+		for (let index = 0; index < parts.length; index += 1) {
+			if (index > 0) {
+				flush();
+			}
+			if (parts[index].length > 0) {
+				currentRuns.push({ ...run, text: parts[index] });
+			}
+		}
+	}
+	flush();
+	return paragraphs.filter((item) => item.runs.some((run) => String(run.text || '').length > 0));
+}
+
 function chooseTextParagraphs(textBox: SlidevPptxTextBox): SlidevPptxRichTextParagraph[] {
 	const paragraphs = Array.isArray(textBox.richTextParagraphs)
 		? textBox.richTextParagraphs
@@ -156,7 +186,8 @@ function chooseTextParagraphs(textBox: SlidevPptxTextBox): SlidevPptxRichTextPar
 				}))
 				.filter((paragraph) => paragraph.runs.some((run) => String(run.text || '').trim().length > 0))
 		: [];
-	return paragraphs.length > 0 ? paragraphs : fallbackTextParagraphs(textBox);
+	const chosen = paragraphs.length > 0 ? paragraphs : fallbackTextParagraphs(textBox);
+	return chosen.flatMap(splitParagraphRunsOnNewlines);
 }
 
 function paragraphEndFontSize(paragraph: SlidevPptxRichTextParagraph, fallbackFontSize: number): number {

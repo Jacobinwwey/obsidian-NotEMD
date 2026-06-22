@@ -1,9 +1,37 @@
 import { buildSlidevPptxExportReport, buildSlidevVisibleNativePptxExperimentReport } from '../slideExport/pptxExporter';
-import { PPTX_SLIDE_HEIGHT_IN, PPTX_SLIDE_WIDTH_IN, type SlidevPptxSlide } from '../slideExport/pptxModel';
+import {
+	PPTX_SLIDE_HEIGHT_IN,
+	PPTX_SLIDE_WIDTH_IN,
+	type SlidevPptxSlide,
+	type SlidevPptxTextBox,
+	type SlidevPptxTextSourceKind,
+} from '../slideExport/pptxModel';
 
 jest.mock('obsidian', () => ({
 	Platform: { isDesktopApp: true },
 }));
+
+function editableTextBoxForReport(text: string, sourceKind?: SlidevPptxTextSourceKind): SlidevPptxTextBox {
+	return {
+		text,
+		sourceKind,
+		x: 1,
+		y: 1,
+		w: 4,
+		h: 0.5,
+		fontSize: 14,
+		fontFace: 'Aptos',
+		color: '111827',
+		bold: false,
+		italic: false,
+		underline: false,
+		align: 'left',
+		bullet: false,
+		order: 10,
+		richTextParagraphs: [],
+		unmodeledRunReasons: [],
+	};
+}
 
 describe('pptx export report', () => {
 	test('summarizes editable primitives, consumed table text, and fallback-only visual kinds', () => {
@@ -202,6 +230,78 @@ describe('pptx export report', () => {
 			}),
 		);
 		expect(report.slides[1].warnings).toEqual(['Slide 2 has no extracted editable text.']);
+	});
+
+	test('reports editable text boxes by source kind', () => {
+		const slides: SlidevPptxSlide[] = [
+			{
+				slideNumber: 1,
+				title: 'Source kinds',
+				backgroundColor: 'FFFFFF',
+				texts: [
+					editableTextBoxForReport('Body text'),
+					editableTextBoxForReport('const value = 1;', 'code'),
+					editableTextBoxForReport('Graph edge label', 'mermaid-text'),
+					editableTextBoxForReport('SVG legend', 'svg-text'),
+					editableTextBoxForReport('Table cell overlay', 'table-cell-overlay'),
+				],
+				tables: [],
+				fallbackOnlyElementKinds: [],
+				consumedTableTextCandidateCount: 0,
+				warnings: [],
+			},
+			{
+				slideNumber: 2,
+				title: 'More code',
+				backgroundColor: 'FFFFFF',
+				texts: [editableTextBoxForReport('pnpm build', 'code')],
+				tables: [],
+				fallbackOnlyElementKinds: [],
+				consumedTableTextCandidateCount: 0,
+				warnings: [],
+			},
+		];
+
+		const report = buildSlidevPptxExportReport(
+			'/vault/export/deck/index.html',
+			'/vault/deck.md',
+			'/vault/export/deck.pptx',
+			'/vault/export/deck.pptx.report.json',
+			slides,
+		);
+
+		expect(report.editableBodyTextBoxCount).toBe(1);
+		expect(report.editableCodeTextBoxCount).toBe(2);
+		expect(report.editableMermaidTextBoxCount).toBe(1);
+		expect(report.editableSvgTextBoxCount).toBe(1);
+		expect(report.editableTableCellOverlayTextBoxCount).toBe(1);
+		expect(report.editablePrimitiveCoverage).toEqual(
+			expect.objectContaining({
+				editableBodyTextBoxCount: 1,
+				editableCodeTextBoxCount: 2,
+				editableMermaidTextBoxCount: 1,
+				editableSvgTextBoxCount: 1,
+				editableTableCellOverlayTextBoxCount: 1,
+			}),
+		);
+		expect(report.slides[0]).toEqual(
+			expect.objectContaining({
+				editableBodyTextBoxCount: 1,
+				editableCodeTextBoxCount: 1,
+				editableMermaidTextBoxCount: 1,
+				editableSvgTextBoxCount: 1,
+				editableTableCellOverlayTextBoxCount: 1,
+			}),
+		);
+		expect(report.slides[1]).toEqual(
+			expect.objectContaining({
+				editableBodyTextBoxCount: 0,
+				editableCodeTextBoxCount: 1,
+				editableMermaidTextBoxCount: 0,
+				editableSvgTextBoxCount: 0,
+				editableTableCellOverlayTextBoxCount: 0,
+			}),
+		);
 	});
 
 	test('reports visible-native experiment contract and residue sampling separately from the default contract', () => {

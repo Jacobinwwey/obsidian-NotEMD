@@ -16,6 +16,8 @@ import {
 	type SlidevPptxSlide,
 	type SlidevPptxSlideEditabilitySummary,
 	type SlidevPptxTable,
+	type SlidevPptxTextBox,
+	type SlidevPptxTextSourceKind,
 	type SlidevPptxVisibleNativeResidueSamplingSummary,
 	type SlidevPptxVisibleNativeSlideResidueSampling,
 } from './pptxModel';
@@ -32,6 +34,7 @@ type PlaywrightRuntime = {
 
 const PPTX_CAPTURE_VIEWPORT_WIDTH = 1960;
 const PPTX_CAPTURE_VIEWPORT_HEIGHT = 1104;
+const PPTX_CAPTURE_DEVICE_SCALE_FACTOR = 2;
 const VISIBLE_NATIVE_RESIDUE_COLOR_DISTANCE = 62;
 const VISIBLE_NATIVE_RESIDUE_RATIO_THRESHOLD = 0.075;
 const VISIBLE_NATIVE_RESIDUE_MIN_TEXT_LIKE_PIXELS = 8;
@@ -46,6 +49,7 @@ export interface SlidevPptxRenderedHtmlReferencePngSequenceResult {
 	viewport: {
 		width: number;
 		height: number;
+		deviceScaleFactor: number;
 	};
 }
 
@@ -564,6 +568,7 @@ async function extractSlidesFromHtml(
 			width: PPTX_CAPTURE_VIEWPORT_WIDTH,
 			height: PPTX_CAPTURE_VIEWPORT_HEIGHT,
 		},
+		deviceScaleFactor: PPTX_CAPTURE_DEVICE_SCALE_FACTOR,
 	});
 	let serverDirectory: string | null = null;
 	let baseUrl: string | null = null;
@@ -614,6 +619,7 @@ async function capturePptxRenderedHtmlReferenceImages(
 			width: PPTX_CAPTURE_VIEWPORT_WIDTH,
 			height: PPTX_CAPTURE_VIEWPORT_HEIGHT,
 		},
+		deviceScaleFactor: PPTX_CAPTURE_DEVICE_SCALE_FACTOR,
 	});
 	let serverDirectory: string | null = null;
 	let baseUrl: string | null = null;
@@ -667,6 +673,7 @@ async function extractVisibleNativeExperimentSlidesFromHtml(
 			width: PPTX_CAPTURE_VIEWPORT_WIDTH,
 			height: PPTX_CAPTURE_VIEWPORT_HEIGHT,
 		},
+		deviceScaleFactor: PPTX_CAPTURE_DEVICE_SCALE_FACTOR,
 	});
 	let serverDirectory: string | null = null;
 	let baseUrl: string | null = null;
@@ -766,11 +773,29 @@ function collectUniqueSorted<T extends string>(values: T[]): T[] {
 	return Array.from(new Set(values)).sort();
 }
 
+function textSourceKindFor(textBox: SlidevPptxTextBox): SlidevPptxTextSourceKind {
+	return textBox.sourceKind === 'code' ||
+		textBox.sourceKind === 'mermaid-text' ||
+		textBox.sourceKind === 'svg-text' ||
+		textBox.sourceKind === 'table-cell-overlay'
+		? textBox.sourceKind
+		: 'body';
+}
+
+function countTextBoxesBySource(slide: SlidevPptxSlide, sourceKind: SlidevPptxTextSourceKind): number {
+	return slide.texts.filter((textBox) => textSourceKindFor(textBox) === sourceKind).length;
+}
+
 function buildSlideEditabilitySummary(slide: SlidevPptxSlide): SlidevPptxSlideEditabilitySummary {
 	const fontFamilies = fontFamiliesForSlideSummary(slide);
 	return {
 		slideNumber: slide.slideNumber,
 		editableTextBoxCount: slide.texts.length,
+		editableBodyTextBoxCount: countTextBoxesBySource(slide, 'body'),
+		editableCodeTextBoxCount: countTextBoxesBySource(slide, 'code'),
+		editableMermaidTextBoxCount: countTextBoxesBySource(slide, 'mermaid-text'),
+		editableSvgTextBoxCount: countTextBoxesBySource(slide, 'svg-text'),
+		editableTableCellOverlayTextBoxCount: countTextBoxesBySource(slide, 'table-cell-overlay'),
 		editableTableCount: slide.tables.length,
 		editableTableCellCount: countTableCells(slide),
 		editableTextCharacterCount: slide.texts.reduce((total, textBox) => total + textBox.text.length, 0),
@@ -796,6 +821,17 @@ function buildEditablePrimitiveCoverage(
 	const backgroundFallbackSlideCount = slideSummaries.filter((slide) => slide.backgroundFallbackPresent).length;
 	return {
 		editableTextBoxCount: slideSummaries.reduce((total, slide) => total + slide.editableTextBoxCount, 0),
+		editableBodyTextBoxCount: slideSummaries.reduce((total, slide) => total + slide.editableBodyTextBoxCount, 0),
+		editableCodeTextBoxCount: slideSummaries.reduce((total, slide) => total + slide.editableCodeTextBoxCount, 0),
+		editableMermaidTextBoxCount: slideSummaries.reduce(
+			(total, slide) => total + slide.editableMermaidTextBoxCount,
+			0,
+		),
+		editableSvgTextBoxCount: slideSummaries.reduce((total, slide) => total + slide.editableSvgTextBoxCount, 0),
+		editableTableCellOverlayTextBoxCount: slideSummaries.reduce(
+			(total, slide) => total + slide.editableTableCellOverlayTextBoxCount,
+			0,
+		),
 		editableTextSlideCount,
 		editableTextSlideRatio: ratio(editableTextSlideCount, slideCount),
 		editableTextCharacterCount: slideSummaries.reduce(
@@ -861,6 +897,11 @@ export function buildSlidevPptxExportReport(
 		richTextBoxCount: editablePrimitiveCoverage.richTextBoxCount,
 		richTextRunCount: editablePrimitiveCoverage.richTextRunCount,
 		editableTableCellCount: editablePrimitiveCoverage.editableTableCellCount,
+		editableBodyTextBoxCount: editablePrimitiveCoverage.editableBodyTextBoxCount,
+		editableCodeTextBoxCount: editablePrimitiveCoverage.editableCodeTextBoxCount,
+		editableMermaidTextBoxCount: editablePrimitiveCoverage.editableMermaidTextBoxCount,
+		editableSvgTextBoxCount: editablePrimitiveCoverage.editableSvgTextBoxCount,
+		editableTableCellOverlayTextBoxCount: editablePrimitiveCoverage.editableTableCellOverlayTextBoxCount,
 		editableTextSlideCount: slides.length - pagesWithoutEditableText.length,
 		pagesWithoutEditableText,
 		backgroundImageSlideCount: slides.filter((slide) => Boolean(slide.backgroundImage)).length,
@@ -947,6 +988,7 @@ export async function exportSlidevPptxRenderedHtmlReferencePngSequence(
 		viewport: {
 			width: PPTX_CAPTURE_VIEWPORT_WIDTH,
 			height: PPTX_CAPTURE_VIEWPORT_HEIGHT,
+			deviceScaleFactor: PPTX_CAPTURE_DEVICE_SCALE_FACTOR,
 		},
 	};
 }

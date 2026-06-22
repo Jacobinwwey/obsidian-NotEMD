@@ -322,4 +322,76 @@ describe('pptxWriter', () => {
 			rmSync(directory, { recursive: true, force: true });
 		}
 	});
+
+	test('splits rich text runs containing newlines into editable paragraphs', () => {
+		const directory = mkdtempSync(join(tmpdir(), 'notemd-pptx-code-lines-'));
+		try {
+			const outputPath = join(directory, 'deck.pptx');
+			const document: SlidevPptxDocument = {
+				title: 'Code lines',
+				author: 'NoteMD',
+				slides: [
+					{
+						slideNumber: 1,
+						title: 'Code',
+						backgroundColor: 'FFFFFF',
+						texts: [
+							{
+								text: 'const first = 1;\nconst second = 2;',
+								sourceKind: 'code',
+								x: 1,
+								y: 1,
+								w: 5,
+								h: 1,
+								fontSize: 14,
+								fontFace: 'Fira Code',
+								color: '111827',
+								bold: false,
+								italic: false,
+								underline: false,
+								align: 'left',
+								bullet: false,
+								order: 10,
+								richTextParagraphs: [
+									{
+										runs: [
+											{
+												text: 'const first = 1;\nconst second = 2;',
+												fontSize: 14,
+												fontFace: 'Fira Code',
+												color: '111827',
+												bold: false,
+												italic: false,
+												underline: false,
+												code: true,
+												link: false,
+											},
+										],
+									},
+								],
+								unmodeledRunReasons: ['syntax-highlight'],
+							},
+						],
+						tables: [],
+						fallbackOnlyElementKinds: [],
+						consumedTableTextCandidateCount: 0,
+						warnings: [],
+					},
+				],
+			};
+
+			writePptxDocument(outputPath, document);
+
+			const entries = unzipSync(new Uint8Array(readFileSync(outputPath)));
+			const slideXml = strFromU8(entries['ppt/slides/slide1.xml']);
+			const firstLineIndex = slideXml.indexOf('<a:t>const first = 1;</a:t>');
+			const secondLineIndex = slideXml.indexOf('<a:t>const second = 2;</a:t>');
+			expect(firstLineIndex).toBeGreaterThan(-1);
+			expect(secondLineIndex).toBeGreaterThan(firstLineIndex);
+			expect(slideXml.slice(firstLineIndex, secondLineIndex)).toContain('</a:p><a:p>');
+			expect(slideXml).not.toContain('const first = 1;\nconst second = 2;');
+		} finally {
+			rmSync(directory, { recursive: true, force: true });
+		}
+	});
 });
