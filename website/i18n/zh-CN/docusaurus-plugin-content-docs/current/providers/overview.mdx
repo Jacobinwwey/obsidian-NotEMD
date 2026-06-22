@@ -1,0 +1,183 @@
+---
+id: overview
+title: LLM Providers
+description: 配置 36 个 LLM providers：云端、网关、本地，并按任务选择模型
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [LLM providers, API, OpenAI, Anthropic, Google, DeepSeek, Qwen, Ollama, per-task model]
+concepts: [LLM Integration, API Providers, Per-Task Models, OpenAI Compatible, Ollama, China Providers]
+citations:
+  - title: OpenAI API
+    url: https://platform.openai.com
+  - title: Anthropic API
+    url: https://docs.anthropic.com
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# LLM Providers
+
+<TLDR>
+**Notemd 支持 36 个 LLM providers，覆盖 4 类 transport。** 所有 API 调用都使用原始 HTTP，不依赖 SDK；支持自动重试、transport fallback 和 5 分钟响应缓存。按任务选择模型可以让简单任务使用便宜模型，研究和图表等复杂任务使用更强模型。本地 providers（Ollama、LMStudio）不需要 API key。
+</TLDR>
+
+这是 [Obsidian AI 知识管理指南](../pillar-ai-knowledge) 的一部分。
+
+## Provider Categories
+
+### Cloud Providers
+
+| Provider | 默认 Base URL | 默认模型 | Temperature |
+|---|---|---|---|
+| **DeepSeek** | `api.deepseek.com` | `deepseek-v4-pro` | 0.5 |
+| **OpenAI** | `api.openai.com/v1` | `gpt-4o` | 0.5 |
+| **Anthropic** | `api.anthropic.com` | `claude-3-5-sonnet-20240620` | 0.5 |
+| **Google** | `generativelanguage.googleapis.com/v1` | `gemini-2.0-flash-exp` | 0.5 |
+| **Mistral** | `api.mistral.ai/v1` | `mistral-large-latest` | 0.5 |
+| **xAI** | `api.x.ai/v1` | `grok-4` | 0.7 |
+| **Cerebras** | `api.cerebras.ai/v1` | `gpt-oss-120b` | 0.5 |
+| **Fireworks** | `api.fireworks.ai/inference/v1` | `kimi-k2p5` | 0.5 |
+| **Nebius** | `api.studio.nebius.com/v1` | `openai/gpt-oss-120b` | 0.3 |
+
+### Gateway / Proxy Providers
+
+| Provider | 默认 Base URL | 默认模型 | 说明 |
+|---|---|---|---|
+| **OpenRouter** | `openrouter.ai/api/v1` | `anthropic/claude-3.7-sonnet` | 添加 `HTTP-Referer` + `X-Title` |
+| **GitHub Models** | `models.github.ai/inference` | `gpt-4o-mini` | 添加 `X-GitHub-Api-Version` |
+| **AIHubMix** | `aihubmix.com/v1` | `gpt-4o-mini` | 添加 `APP-Code` |
+| **PPIO** | `api.ppinfra.com/v3/openai` | `qwen/qwen3-32b` | OpenAI-compatible |
+| **Hugging Face** | `router.huggingface.co/v1` | `openai/gpt-oss-120b` | OpenAI-compatible |
+| **Vercel AI Gateway** | `ai-gateway.vercel.sh/v1` | `anthropic/claude-sonnet-4.5` | Gateway |
+| **Requesty** | `router.requesty.ai/v1` | `anthropic/claude-3-7-sonnet-latest` | Gateway |
+| **Together** | `api.together.xyz/v1` | `meta-llama/Meta-Llama-3.1-70B-Instruct-Turbo` | Gateway |
+| **LiteLLM** | `localhost:4000/v1` | `your-proxy-model` | API key 可选 |
+| **New API** | `localhost:3000/v1` | `gpt-4.1` | API key 可选 |
+| **OpenAI Compatible** | 用户配置 | `your-model-id` | 自定义 endpoint |
+
+### China Providers
+
+| Provider | 默认 Base URL | 默认模型 | 说明 |
+|---|---|---|---|
+| **Qwen** | `dashscope.aliyuncs.com/compatible-mode/v1` | `qwen3-235b-a22b` | Alibaba DashScope |
+| **Qwen Code** | `dashscope.aliyuncs.com/compatible-mode/v1` | `qwen3-coder-plus` | 代码模型 |
+| **Doubao** | `ark.cn-beijing.volces.com/api/v3` | 需要 endpoint ID | ByteDance Volcengine |
+| **Moonshot** | `api.moonshot.cn/v1` | `kimi-k2-0905-preview` | Kimi |
+| **Xiaomi MiMo** | `api.xiaomimimo.com/v1` | `mimo-v2.5-pro` | Xiaomi |
+| **GLM** | `open.bigmodel.cn/api/paas/v4` | `glm-5` | 智谱中国 endpoint |
+| **Z AI** | `api.z.ai/api/paas/v4` | `glm-5` | 智谱国际 endpoint |
+| **MiniMax** | `api.minimaxi.com/v1` | `MiniMax-M2.7` | MiniMax |
+| **Baidu Qianfan** | `qianfan.baidubce.com/v2` | `ernie-4.5-turbo-32k` | 百度千帆 |
+| **SiliconFlow** | `api.siliconflow.cn/v1` | `Qwen/QwQ-32B` | 模型托管平台 |
+| **Huawei Cloud MaaS** | `api.modelarts-maas.com/v1` | `DeepSeek-V3` | 华为云 |
+
+**Doubao 需要 Ark endpoint ID**，格式类似 `ep-xxxxxxxx-xxxx-xxxx`，不能直接使用普通模型族名。
+
+### Local Providers
+
+| Provider | 默认 Base URL | 默认模型 | 说明 |
+|---|---|---|---|
+| **Ollama** | `localhost:11434/api` | `llama3` | 无需 API key；NDJSON streaming；通过 `/api/tags` 发现模型 |
+| **LMStudio** | `localhost:1234/v1` | `local-model` | 发送 `"EMPTY"` bearer token；OpenAI-compatible discovery |
+| **OVMS** | `localhost:8000/v3` | `openvino-model` | OpenVINO Model Server |
+| **Azure OpenAI** | 用户配置 | `gpt-4o` | deployment name 在 URL 中，使用 `api-key` header |
+
+## Per-Task Model Selection
+
+Notemd 支持为每个任务独立选择 provider 和模型。开启方式：`useMultiModelSettings: true`。
+
+| 任务 | Settings key | 默认 Provider |
+|---|---|---|
+| Add Links | `addLinksProvider` / `addLinksModel` | DeepSeek |
+| Research | `researchProvider` / `researchModel` | DeepSeek |
+| Generate from Title | `generateTitleProvider` / `generateTitleModel` | DeepSeek |
+| Translation | `translateProvider` / `translateModel` | DeepSeek |
+| Diagram Generation | `summarizeToMermaidProvider` / `Model` | DeepSeek |
+| Concept Extraction | `extractConceptsProvider` / `Model` | DeepSeek |
+| Original Text Extraction | `extractOriginalTextProvider` / `Model` | DeepSeek |
+
+### 解析顺序
+
+1. 如果开启 `useMultiModelSettings`，使用任务级 provider + model
+2. 如果任务模型为空，回退到 provider 默认模型
+3. 如果任务 provider 无效，回退到全局 `activeProvider`
+4. 如果关闭 `useMultiModelSettings`，所有任务使用全局 `activeProvider`
+
+### 推荐组合
+
+```text
+# 研究者：研究任务用强模型，其余任务用低成本模型
+activeProvider: DeepSeek
+extractConceptsProvider: DeepSeek
+researchProvider: OpenAI
+summarizeToMermaidProvider: DeepSeek
+
+# 隐私优先：全本地
+activeProvider: Ollama
+addLinksProvider: Ollama
+extractConceptsProvider: Ollama
+
+# 双语预算方案
+activeProvider: DeepSeek
+translateProvider: Google
+researchProvider: SiliconFlow
+```
+
+## API Call Architecture
+
+### Transport Layers
+
+1. **Obsidian `requestUrl`**：主路径，所有平台可用
+2. **Desktop HTTP**：Node.js `http` / `https`，适合 streaming 和长请求
+3. **Web `fetch`**：Node 模块不可用时的 fallback
+
+插件会在临时网络错误时自动切换 transport。
+
+### Retry Logic
+
+- **Normal mode**：单次请求；临时失败时自动升级到 stable retry
+- **Stable retry mode**：最多 4 次尝试，间隔 5 秒
+- 会触发 retry 的临时错误：`err_connection_closed`、`err_connection_reset`、`err_timed_out`、`econnreset`、`socket hang up`、`network request failed`
+- 不重试：HTTP 400、401、403、404
+
+### Response Caching
+
+5 分钟内存 LRU 缓存，key 由 provider、model、temperature、prompt 和 content 组成。相同请求在 5 分钟内会直接返回缓存结果。
+
+### Reasoning Model Handling
+
+不支持 `system` role 的模型（DeepSeek R1、OpenAI o1/o3/o4/gpt-5）会把 system + user prompt 合并到一个 user message。DeepSeek thinking 开启时会加 `{ thinking: { type: 'enabled' } }`，并校验最大输出 token 不低于 8000。
+
+### Token Estimation
+
+`estimateTokens(text)` 使用 `Math.ceil(text.length / 4)`，按 4 字符约等于 1 token 估算。它用于在请求前控制 `maxResearchContentTokens`。
+
+当前未实现成本追踪。
+
+## Model Discovery
+
+| Mode | Providers | Endpoint |
+|---|---|---|
+| `ollama-tags` | Ollama | `/api/tags` |
+| `google-models` | Google | Models list API |
+| `anthropic-models` | Anthropic | Models list API |
+| `openai-compatible-models` | DeepSeek、Qwen、Mistral 等 | `/v1/models` |
+| `openrouter-models` | OpenRouter | Model list API |
+| `github-models` | GitHub Models | Inference API |
+| `none` | Azure OpenAI | 禁用，需要 deployment name |
+
+## Quick Start
+
+1. **选择 provider**：DeepSeek、OpenAI 或 Ollama
+2. **输入 API key**：Settings → Notemd → Provider → API Key
+3. **测试连接**：点击 test button
+4. **可选：按任务选择模型**：开启 `useMultiModelSettings`
+
+Ollama 不需要 API key，只要确认 `ollama serve` 正在运行。
+
+---
+
+## 下一步
+
+- [配置参考](../getting-started/configuration)
+- [FAQ](../faq)

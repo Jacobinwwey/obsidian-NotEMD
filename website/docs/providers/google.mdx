@@ -18,22 +18,46 @@ import TLDR from '@site/src/components/TLDR';
 # Google Provider
 
 <TLDR>
-**Google Gemini is configured as part of the [LLM Providers](/docs/providers/overview) overview.** Key details: default model `gemini-2.0-flash-exp`, Google transport (native Gemini API), base URL `generativelanguage.googleapis.com`, temperature `0.5`.
+**Google uses the native Gemini Generative Language API transport.** The current preset defaults to `gemini-2.0-flash-exp`, `https://generativelanguage.googleapis.com/v1`, and `temperature: 0.5`. It is not an OpenAI-compatible profile.
 
 This is part of the [Obsidian AI Knowledge Management Guide](/docs/pillar-ai-knowledge).
 </TLDR>
 
-Full setup instructions, per-task configuration, and troubleshooting are covered in [LLM Providers](/docs/providers/overview).
+## Setup
 
-**Quick reference:**
+Create a Google AI Studio or Google Cloud API key with Gemini access, add a `Google` provider profile, and keep the native Generative Language Base URL. Use the default Gemini Flash profile for fast translation and broad note workflows, then override per-task models when you need a larger or more capable Gemini model.
 
-| Field | Value |
-|-------|-------|
+Avoid placing Gemini model IDs in an OpenAI-compatible profile unless you are explicitly using a gateway that exposes Gemini through an OpenAI-compatible API.
+
+## Endpoint And Authentication
+
+| Field | Current preset |
+|-------|----------------|
+| Transport | `google` |
+| API key | Required |
+| Base URL | `https://generativelanguage.googleapis.com/v1` |
 | Default model | `gemini-2.0-flash-exp` |
-| Transport | Google (native) |
-| Base URL | `generativelanguage.googleapis.com` |
 | Temperature | `0.5` |
-| Model discovery | Google models list API |
+| Connection test | Chat-only |
+
+The runtime calls `/models/{model}:generateContent?key={apiKey}`. The key is passed as a query parameter because that is how the native Gemini endpoint is wired in the plugin.
+
+## Model Discovery
+
+Google uses the `google-models` discovery mode. Discovery should return Gemini models available to the API key; if the selector is empty, test the key against the same Base URL and confirm the model family is enabled for that account.
+
+Known output-token ceilings are model-aware in the provider registry. If a long translation or diagram explanation is truncated, select a Gemini model with a larger supported output cap or lower the requested output size.
+
+## Troubleshooting
+
+- `400`: the model ID usually does not match the native Gemini route or the request exceeds the model's supported shape.
+- `401` or `403`: verify key restrictions, project/API enablement, and whether the key can access Gemini.
+- `404`: the model ID is not available at the configured API version.
+- Gateway examples fail under this profile: use the gateway preset instead of the native Google provider.
+
+## When To Use
+
+Use Google for fast translation, large-volume note cleanup, and workflows where Gemini's cost/performance tradeoff is better than direct OpenAI or Anthropic. Prefer another provider for workflows that require OpenAI-compatible reasoning-model handling.
 
 ---
 

@@ -18,14 +18,18 @@ import TLDR from '@site/src/components/TLDR';
 # China Providers
 
 <TLDR>
-**Notemd supports 11 Chinese LLM providers: DeepSeek, Qwen, Doubao, Moonshot, MiMo, GLM, MiniMax, Baidu, SiliconFlow, Huawei, and Z AI.** Full configuration details are in [LLM Providers](/docs/providers/overview). These providers offer OpenAI-compatible endpoints accessible from within China. No separate VPN needed when using China-based base URLs.
+**Notemd supports China-region and China-origin providers through mostly OpenAI-compatible endpoints.** The current set includes DeepSeek, Qwen, Qwen Code, Doubao, Moonshot, Xiaomi MiMo, GLM, MiniMax, Baidu Qianfan, SiliconFlow, Huawei Cloud MaaS, and Z AI. The value is regional reach and cost control; the risk is provider-specific model naming and account gating.
 
 This is part of the [Obsidian AI Knowledge Management Guide](/docs/pillar-ai-knowledge).
 </TLDR>
 
-Full setup instructions, per-task configuration, and troubleshooting are covered in [LLM Providers](/docs/providers/overview).
+## Setup
 
-**Quick reference:**
+Create the provider account, generate an API key, then pick the matching Notemd provider preset instead of using a generic OpenAI profile. The preset owns the default Base URL, model, API test mode, model-discovery behavior, and any provider-specific UI fields.
+
+Use per-task model selection aggressively here. For example, keep DeepSeek or GLM on reasoning-heavy workflows, use Qwen or Moonshot for broad Chinese-language work, and route coding tasks to Qwen Code when that account exposes the coder models.
+
+## Endpoint And Authentication
 
 | Provider | Default Model | Base URL |
 |----------|---------------|----------|
@@ -40,8 +44,28 @@ Full setup instructions, per-task configuration, and troubleshooting are covered
 | Baidu Qianfan | `ernie-4.5-turbo-32k` | `qianfan.baidubce.com/v2` |
 | SiliconFlow | `Qwen/QwQ-32B` | `api.siliconflow.cn/v1` |
 | Huawei Cloud MaaS | `DeepSeek-V3` | `api.modelarts-maas.com/v1` |
+| Z AI | `glm-5` | `api.z.ai/api/paas/v4` |
 
 **Note:** Doubao requires an Ark endpoint ID (format: `ep-xxxxxxxx-xxxx-xxxx`) instead of a standard model name.
+
+Most of these providers use the shared OpenAI-compatible runtime, but their account and model semantics differ. Keep the preset-specific Base URL unless you have verified the account's alternate endpoint.
+
+## Model Discovery
+
+DeepSeek, Qwen, Qwen Code, Doubao, Moonshot, Xiaomi MiMo, GLM, Z AI, MiniMax, Baidu Qianfan, and SiliconFlow use OpenAI-compatible model discovery when the provider supports listing. Huawei Cloud MaaS uses the `huaweicloud-modelarts-models` mode because ModelArts deployment metadata is not identical to a generic `/v1/models` list.
+
+Do not treat discovery failure as proof that chat is impossible. Several providers allow chat while limiting model-list permissions. In that case, keep an explicit model ID in the profile and validate with the connection test.
+
+## Troubleshooting
+
+- Auth succeeds but chat fails: the model name may be outside the account's entitlement or region.
+- Doubao fails with a normal model name: use the Ark endpoint ID in the model field when your deployment requires it.
+- Reasoning responses are truncated: check provider-specific max output tokens and Notemd's model-aware max-token settings.
+- Regional networking varies: use the provider's China-region endpoint when the vault machine is inside China; use the international endpoint only when the account and network path are both valid.
+
+## When To Use
+
+Use China providers when regional latency, payment/account access, Chinese-language quality, or cost is the primary constraint. Prefer direct OpenAI, Anthropic, Google, or local providers when you need a simpler protocol boundary or stronger cross-provider debugging consistency.
 
 ---
 

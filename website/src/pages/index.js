@@ -41,8 +41,8 @@ const copyByLocale = {
     eyebrow: 'Obsidian 插件文档',
     heading: 'Notemd',
     lead: '把笔记处理成可积累的知识资产：wiki 链接、概念笔记、研究总结、翻译、图表，以及可复用的一键工作流。',
-    primary: '阅读英文文档',
-    secondary: '英文快速开始',
+    primary: '阅读文档',
+    secondary: '快速开始',
     faq: '常见问题',
     sections: [
       {

@@ -6,12 +6,12 @@
 
 ## 当前契约
 
-文档站当前只发布一个完整语言面和一个部分语言面：
+文档站发布一个完整语言面和一个部分语言面：
 
 1. 英文是完整 canonical 文档面，路径为 `https://jacobinwwey.github.io/obsidian-NotEMD/docs/...`。
-2. 简体中文当前只发布首页和 FAQ。
-3. Docusaurus 仍可能生成未翻译的 zh-CN fallback docs，但这些页面必须标记 `noindex,follow`，并从 zh-CN sitemap 排除。
-4. zh-CN 首页上指向未翻译文档的入口必须回到 canonical 英文 URL，不能进入 `/zh-CN/docs/...` fallback 页面。
+2. 简体中文发布首页和已 review 的 critical path：intro、installation、quick start、configuration、provider overview、AI knowledge pillar 与 FAQ。
+3. Docusaurus 仍可能生成未翻译 zh-CN fallback docs，但这些页面必须是 `noindex,follow`，必须从 zh-CN sitemap 排除，必须从 zh-CN sidebar/paginator 遍历中隐藏，也不能暴露 hreflang alternates。
+4. 从未发布 zh-CN fallback route 切换语言时，必须进入真实 route：中文去 zh-CN root，英文去 canonical English。
 5. `llms.txt` 必须声明同一语言边界，避免 answer engine 推断出不存在的完整多语言覆盖。
 
 ## 已落地门禁
@@ -24,18 +24,22 @@ npm run build
 npm run audit:build
 ```
 
-`npm run audit:build` 执行 `website/scripts/audit-build.cjs`。脚本审计的是 build 产物，而不只是源码：
+`npm run audit:build` 执行 `website/scripts/audit-build.cjs`。脚本同时检查 build 产物和源码契约点：
 
 1. root 页面存在：`build/index.html` 与 `build/zh-CN/index.html`；
 2. root 页面具有预期的 `lang`、canonical URL 与 WebPage JSON-LD URL；
-3. zh-CN 首页把未翻译 critical docs 链到 canonical 英文 URL；
-4. zh-CN 首页把 FAQ 保持在 `/zh-CN/docs/faq`；
-5. 未翻译 zh-CN docs 输出 `noindex,follow`；
-6. 已发布 zh-CN FAQ 不输出 `noindex,follow`；
-7. sitemap 包含 canonical 英文 docs，并排除未翻译 zh-CN docs；
-8. `llms.txt` 记录语言范围。
+3. 每个已发布 zh-CN source file 都存在，且每个 localized zh-CN doc file 都已声明在 `publishedLanguageScopeData.mjs`；
+4. critical zh-CN doc paths 都已发布；
+5. 已发布 zh-CN docs 不输出 `noindex,follow`；
+6. 未发布 zh-CN fallback docs 输出 `noindex,follow`，且不输出 alternates；
+7. 英文 docs 只有在 zh-CN translation 已发布时才暴露 zh-CN alternate；
+8. 已发布 zh-CN docs 不链接到未发布 zh-CN fallback docs；
+9. sitemap 包含 canonical 英文 docs，包含已发布 zh-CN docs，并排除未发布 zh-CN fallback docs；
+10. `llms.txt` 记录当前语言范围；
+11. provider docs 必须包含 setup、endpoint/auth、model discovery、troubleshooting 与 use-case sections；
+12. `GEO_ROADMAP.md` 与 measurement logs 必须提到 2026-06-22、Search Console、AI visibility 与 sitemap 证据。
 
-GitHub Pages workflow 现在会在上传 Pages artifact 前运行这个审计：
+GitHub Pages workflow 会在上传 Pages artifact 前运行这个审计：
 
 ```text
 .github/workflows/deploy-docs.yml
@@ -46,55 +50,64 @@ GitHub Pages workflow 现在会在上传 Pages artifact 前运行这个审计：
 
 ## Source Ownership
 
-语言发布范围由这一处共享：
+语言发布数据在：
+
+```text
+website/src/lib/publishedLanguageScopeData.mjs
+```
+
+运行时 helper 在：
 
 ```text
 website/src/lib/publishedLanguageScope.js
+website/src/lib/languageRoutePolicy.js
 ```
 
-当前值：
+当前已发布 zh-CN doc paths：
 
 ```text
-publishedZhCnDocIds = faq
-publishedZhCnDocPaths = /docs/faq
+/docs/intro
+/docs/getting-started/installation
+/docs/getting-started/quick-start
+/docs/getting-started/configuration
+/docs/providers/overview
+/docs/pillar-ai-knowledge
+/docs/faq
 ```
 
-这个模块被三处消费：
+这份 scope 被以下位置消费：
 
 1. `website/docusaurus.config.js` 用于 sitemap 过滤；
 2. `website/src/theme/DocItem/Layout/index.js` 用于 fallback doc 的 `noindex,follow`；
-3. `website/src/pages/index.js` 用于 zh-CN 首页路由。
+3. `website/src/theme/SiteMetadata/index.js` 用于 hreflang 与 Open Graph locale alternates；
+4. `website/src/theme/NavbarItem/LocaleDropdownNavbarItem/index.js` 用于 locale switch target；
+5. `website/src/theme/DocRoot/Layout/Sidebar/index.js` 用于 zh-CN sidebar 过滤；
+6. `website/src/theme/DocItem/Paginator/index.js` 用于 zh-CN previous/next 过滤；
+7. `website/src/pages/index.js` 与 `website/static/llms.txt` 用于公开入口。
 
-这样可以避免旧问题：sitemap、noindex 与首页链接各自维护一份 “FAQ 例外”，后续很容易漂移。
+关键规则不是“新增一个翻译文件”。关键规则是“翻译文件和 scope data 必须同批发布”。缺任一边，audit 都应该失败。
 
-从 zh-CN 页面渲染 canonical 英文链接时，应使用 canonical origin-relative path，并显式设置 `autoAddBaseUrl: false` 与 `data-noBrokenLinkCheck`。Docusaurus 的 broken-link 检查基于当前 locale route table，这类有意的跨 locale 链接不能被“修”回本地化 fallback 路由。最终路径是否正确由 `npm run audit:build` 负责验证。
+## Promotion Checklist
 
-## 之前错在哪里
+当一个 zh-CN doc 从 fallback 晋升为 published：
 
-此前 Pages 状态已经比旧 roadmap 好，但仍未闭环：
+1. 在 `website/i18n/zh-CN/docusaurus-plugin-content-docs/current/...` 下完成翻译。
+2. 把 doc id、route path、source path 加入 `publishedLanguageScopeData.mjs`。
+3. 确认该页面应该进入 zh-CN sidebar 和 paginator 遍历。
+4. 如果该页面属于公开 AI retrieval map，同步更新 `website/static/llms.txt`。
+5. 执行 `npm --prefix website run build && npm --prefix website run audit:build`。
+6. 部署后在 `docs/maintainer/github-pages-geo-measurement-log.zh-CN.md` 中记录 Search Console 与 AI visibility 观察。
 
-1. Docusaurus 会生成未翻译的 zh-CN fallback docs。
-2. 这些 fallback docs 已经 noindex 且从 sitemap 排除，这保护了 crawler。
-3. 但 zh-CN 首页、navbar 和 footer 仍会把用户送进 `/zh-CN/docs/intro` 这类 fallback 路由。
-4. 部署 workflow 只跑 `npm run build`，没有阻断语言路由契约漂移。
+## 为什么这样做
 
-所以 build 能通过，并不等于公开语言面可靠。`noindex` 不能替代 UI 入口的正确路由。
+最容易犯的错，是把 Docusaurus locale fallback 当成 GEO 面积。这是错误假设。它会制造看似中文、实际英文的 URL，削弱 hreflang 真值，并把用户带进没有经过本地化 review 的路线。
 
-## 更好的 GEO 方向
+更严格的 scope-data 模型有维护成本：每次晋升都要同时动翻译内容、数据、`llms.txt` 与 build proof。收益是 sitemap、robots、alternates、UI navigation 与 AI retrieval 会讲同一个事实。
 
-更好的 GEO 策略仍然是 truth-first：
+## 当前最佳方向
 
-1. 在具体 zh-CN 页面翻译并 review 前，英文继续作为 canonical；
-2. 只有在同批完成翻译时，才把对应 doc path 加入 `publishedLanguageScope.js`；
-3. Pages deploy 前必须跑 `npm run audit:build`；
-4. `llms.txt`、sitemap、首页链接与 noindex 行为必须保持一致；
-5. 增加更多 locale 之前，先扩写或合并 thin provider pages。
-
-不要把空 locale folder 或 fallback English 页面当成 GEO 面积。这会制造弱 hreflang 信号，也会损害用户信任。
-
-## 下一步
-
-1. 按顺序翻译并 review zh-CN critical path：intro、installation、quick-start、configuration、provider overview、AI knowledge pillar。
-2. 每个页面从 fallback 晋升为已发布页面时，都必须更新 `publishedLanguageScope.js`，并执行 `npm --prefix website run build && npm --prefix website run audit:build`。
-3. 语言路由门禁稳定后，再添加 provider-page quality audit；provider thinness 是内容质量问题，不是路由问题。
-4. `website/build` 继续作为生成产物忽略，不提交到 main。
+1. 英文继续保持 canonical 且完整。
+2. zh-CN 通过已 review 的 critical-path 页面增长，而不是通过 locale 数量增长。
+3. 先保证 provider pages 具备操作价值，再考虑增加更多 provider landing pages。
+4. Search Console 与 AI visibility 是部署后的 measurement，不是本地 build proof。
+5. 不要给 Docusaurus theme components 增加新的泛化 wrapper。本次 theme overrides 可以接受，是因为它们承接了具体 policy：alternates、locale switching、sidebar filtering 与 paginator filtering。
