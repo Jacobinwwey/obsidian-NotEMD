@@ -376,6 +376,78 @@ verifier 在这台机器上仍会记录部分 ImageMagick 全量 contact-sheet m
 
 本切片验收必须使用 `docs/architecture.zh-CN.md`，要求 PPTX 与 frozen-background reference 的 visual match 通过，要求 same-rendered-HTML reference match 通过，并单独跑真实 PNG export，证明 PNG 路径没有被替换。
 
+## M8 Office emit run 字体合同
+
+M8 先处理一个低风险但会直接影响编辑质量的问题：writer 之前在同一个 `<a:r>` 中给 mixed Latin/CJK 文本同时写源 Latin font 和 `Microsoft YaHei` East Asian font。PowerPoint 能做字体 fallback，但 report 并不知道最终 Office 侧实际写出了哪些字体 run；这会让后续 visible-native 字体判断和文本编辑质量评估都偏弱。
+
+本轮实现的合同是：
+
+1. `pptxFontContract.ts` 提供唯一的 `splitPptxTextIntoOfficeFontRuns()`，把同一 DOM rich run 按 CJK / non-CJK 段拆成 Office emit run。
+2. non-CJK 段保留源字体；CJK 段写成 `Microsoft YaHei`，并且 `<a:latin>` / `<a:ea>` 都使用同一个实际 emitted font face，避免 mixed run 内 Office 自行猜测。
+3. writer 的透明结构层和 visible-native 实验层共用这套拆分逻辑。
+4. `fontContract` 保留源字体视角的 `fontFamilies` / `cjkFontFamilies` / `writerEastAsiaFallbackFontFamilies`，同时新增 Office emit 视角：`officeFontFamilies`、`officeCjkFontFamilies`、`officeLatinFontFamilies`、`officeTextRunCount`、`officeEastAsiaFallbackRunCount` 和 `officeEastAsiaFallbackCharacterCount`。
+5. `richTextRunCount` 继续表示 DOM/rich-run 抽取层数量，不偷换为 Office emitted run 数；Office emitted run 数由新的 `officeTextRunCount` 承担。
+
+这里对 `oh-my-ppt` 的复用尺度是合同级复用，不是代码迁移。`oh-my-ppt` 的经验说明字体不能被当作 writer 的局部细节；抽取层、OOXML writer 和验收 report 必须共享同一个“最终写进 Office 的文本 run”视角。本轮按这个思想把 NotEMD 的 writer/report 接到同一 splitter 上，但没有引入 `oh-my-ppt` 的 `BrowserWindow`、字体嵌入、visible-native 默认策略或完整 `html-pptx` writer。实现还比 `oh-my-ppt` 当前简单汉字检测更保守一点：用于 Office 字体分段的判定覆盖 CJK 标点、假名、韩文和全角形式，避免 `API：架构` 这类文本把全角冒号错误留在 Latin font run。
+
+这不是字体嵌入，也不是 visible-native 准入。它只让“最终写进 PPTX 的文本 run 与字体 face”变成 writer/report 共享事实，给下一步 hyperlink、paragraph/list 和 visible-native 字体验收打基础。
+
+已补的单元验收：
+
+```bash
+npm test -- --runInBand src/tests/pptxWriter.test.ts src/tests/pptxExportReport.test.ts
+```
+
+当前通过点：
+
+1. 同一个 rich run `API 架构 v2` 会写成 `API `、`架构`、` v2` 三个 Office run；
+2. Latin 段保留 `Avenir Next`；
+3. CJK 段使用 `Microsoft YaHei`；
+4. report 中 `richTextRunCount` 仍是 `1`，而 `officeTextRunCount` 是 `3`；
+5. `API：架构 v2` 会把 `：架构` 保持在 East Asian Office font run；
+6. report 中 East Asian fallback 计数是 `1` 个 run / `2` 个 CJK 字符。
+
+真实 `docs/architecture.zh-CN.md` M8 验收已通过。PPTX 命令：
+
+```bash
+runuser -u jacob -- env HOME=/home/jacob PLAYWRIGHT_BROWSERS_PATH=/home/jacob/.cache/ms-playwright bash -lc 'cd /home/jacob/obsidian-NotEMD && npm run verify:slidev-export -- --vault docs --source architecture.zh-CN.md --format pptx --output-subfolder export/test-slidev-m8-office-run-contract --sample-slides all --timeout-ms 240000 --no-screenshots --pptx-visual-diff --require-pptx-visual-match --pptx-rendered-html-reference-diff --require-pptx-rendered-html-reference-match --json'
+```
+
+结果：
+
+1. `ok = true`；
+2. PPTX 输出：`docs/export/test-slidev-m8-office-run-contract/architecture.zh-CN.pptx`；
+3. sidecar：`docs/export/test-slidev-m8-office-run-contract/architecture.zh-CN.pptx.report.json`；
+4. `slidev.version = 52.16.0 (/home/jacob/slidev/packages/slidev/bin/slidev.mjs)`；
+5. `skillRootPath = /home/jacob/slidev/skills/slidev`，`skillReferenceCount = 52`；
+6. PPTX inspection：`slideCount = 30`，`mediaCount = 30`，`pictureCount = 30`，`tableCount = 6`，`textRunCount = 1092`，`slidesWithoutEditableText = []`；
+7. sidecar 默认层仍是 `visibleTextLayer = background-image`，`editableLayerRenderMode = transparent-structure`；
+8. sidecar：`textBoxCount = 277`，`richTextRunCount = 482`，`editableMermaidTextBoxCount = 36`，`editableTableCellOverlayTextBoxCount = 102`，`editableTableCellCount = 102`；
+9. Office emit 字体合同：`officeTextRunCount = 995`，`officeFontFamilies = ["Avenir Next", "Fira Code", "Microsoft YaHei", "trebuchet ms"]`，`officeCjkFontFamilies = ["Microsoft YaHei"]`，`officeLatinFontFamilies = ["Avenir Next", "Fira Code", "trebuchet ms"]`；
+10. East Asian fallback：`officeEastAsiaFallbackRunCount = 453`，`officeEastAsiaFallbackCharacterCount = 2007`；
+11. frozen-background hard gate 通过：`source = pptx-background-images`，`meanRmse = 0.04305776633333333`，`maxRmse = 0.0786701`；
+12. same-rendered-HTML hard gate 通过：`source = pptx-rendered-html-reference`，`slideCount = 30`，`meanRmse = 0.04305776633333333`，`maxRmse = 0.0786701`；
+13. `unignoredOutputs = []`，`gitIgnoreCheckError = null`。
+
+真实 PNG export 也已重新跑，证明 PNG 仍走当前 Slidev export workflow，而不是 PPTX capture 替代路径：
+
+```bash
+runuser -u jacob -- env HOME=/home/jacob PLAYWRIGHT_BROWSERS_PATH=/home/jacob/.cache/ms-playwright bash -lc 'cd /home/jacob/obsidian-NotEMD && npm run verify:slidev-export -- --vault docs --source architecture.zh-CN.md --format png --output-subfolder export/test-slidev-m8-current-png-reference --sample-slides all --timeout-ms 240000 --no-screenshots --json'
+```
+
+PNG 结果：
+
+1. `ok = true`；
+2. 输出目录：`docs/export/test-slidev-m8-current-png-reference/architecture.zh-CN-slides-png`；
+3. 实际 PNG 文件数：`30`；
+4. `layoutAuditSummary.slideCount = 30`，`overflowCount = 0`，`unreadableCount = 0`，`renderErrorCount = 0`；
+5. Mermaid 诊断仍保留为 review 信号：`mermaidSlideCount = 3`，`mermaidFitReviewCount = 3`，`mermaidLowZoomCount = 2`，`mermaidManualReviewCount = 1`，`retryCount = 4`；
+6. `slidev.version = 52.16.0 (/home/jacob/slidev/packages/slidev/bin/slidev.mjs)`；
+7. `skillRootPath = /home/jacob/slidev/skills/slidev`，`skillReferenceCount = 52`；
+8. `unignoredOutputs = []`，`gitIgnoreCheckError = null`。
+
+这个结果说明 M8 的字体 run 合同没有破坏视觉硬门，也没有替换真实 PNG 导出路径。它同时暴露了一个后续仍应处理的问题：PNG layout audit 中 Mermaid zoom 仍有 review 信号。当前它不是 hard failure，因为没有 overflow/unreadable/render error；但后续如果要继续提高 Mermaid 可读性，应优先改自动 zoom/fit 诊断和阈值解释，而不是修改 Mermaid 源内容或拆图。
+
 ## M4 visible-native 实验收口
 
 visible-native 方向这次按显式实验收口，而不是默认行为变更。真实 verifier 命令：

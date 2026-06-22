@@ -2,6 +2,7 @@ import { mkdtempSync, readFileSync, rmSync } from 'fs';
 import { tmpdir } from 'os';
 import { join } from 'path';
 import { strFromU8, unzipSync } from 'fflate';
+import { splitPptxTextIntoOfficeFontRuns } from '../slideExport/pptxFontContract';
 import { PPTX_SLIDE_HEIGHT_IN, PPTX_SLIDE_WIDTH_IN, type SlidevPptxDocument } from '../slideExport/pptxModel';
 import { writePptxDocument, writeVisibleNativeExperimentPptxDocument } from '../slideExport/pptxWriter';
 
@@ -10,6 +11,29 @@ jest.mock('obsidian', () => ({
 }));
 
 describe('pptxWriter', () => {
+	test('keeps East Asian punctuation with the East Asian Office font run', () => {
+		expect(splitPptxTextIntoOfficeFontRuns('API：架构 v2', 'Avenir Next')).toEqual([
+			{
+				text: 'API',
+				sourceFontFace: 'Avenir Next',
+				fontFace: 'Avenir Next',
+				usesEastAsiaFont: false,
+			},
+			{
+				text: '：架构',
+				sourceFontFace: 'Avenir Next',
+				fontFace: 'Microsoft YaHei',
+				usesEastAsiaFont: true,
+			},
+			{
+				text: ' v2',
+				sourceFontFace: 'Avenir Next',
+				fontFace: 'Avenir Next',
+				usesEastAsiaFont: false,
+			},
+		]);
+	});
+
 	test('writes a PPTX zip with editable text runs and a visual fallback image', () => {
 		const directory = mkdtempSync(join(tmpdir(), 'notemd-pptx-'));
 		try {
@@ -390,6 +414,78 @@ describe('pptxWriter', () => {
 			expect(secondLineIndex).toBeGreaterThan(firstLineIndex);
 			expect(slideXml.slice(firstLineIndex, secondLineIndex)).toContain('</a:p><a:p>');
 			expect(slideXml).not.toContain('const first = 1;\nconst second = 2;');
+		} finally {
+			rmSync(directory, { recursive: true, force: true });
+		}
+	});
+
+	test('splits mixed Latin and CJK text into Office font runs', () => {
+		const directory = mkdtempSync(join(tmpdir(), 'notemd-pptx-office-font-runs-'));
+		try {
+			const outputPath = join(directory, 'deck.pptx');
+			const document: SlidevPptxDocument = {
+				title: 'Office font runs',
+				author: 'NoteMD',
+				slides: [
+					{
+						slideNumber: 1,
+						title: 'Mixed script',
+						backgroundColor: 'FFFFFF',
+						texts: [
+							{
+								text: 'API 架构 v2',
+								x: 1,
+								y: 1,
+								w: 5,
+								h: 1,
+								fontSize: 18,
+								fontFace: 'Avenir Next',
+								color: '111827',
+								bold: false,
+								italic: false,
+								underline: false,
+								align: 'left',
+								bullet: false,
+								order: 10,
+								richTextParagraphs: [
+									{
+										runs: [
+											{
+												text: 'API 架构 v2',
+												fontSize: 18,
+												fontFace: 'Avenir Next',
+												color: '111827',
+												bold: false,
+												italic: false,
+												underline: false,
+												code: false,
+												link: false,
+											},
+										],
+									},
+								],
+								unmodeledRunReasons: [],
+							},
+						],
+						tables: [],
+						fallbackOnlyElementKinds: [],
+						consumedTableTextCandidateCount: 0,
+						warnings: [],
+					},
+				],
+			};
+
+			writePptxDocument(outputPath, document);
+
+			const entries = unzipSync(new Uint8Array(readFileSync(outputPath)));
+			const slideXml = strFromU8(entries['ppt/slides/slide1.xml']);
+			expect(slideXml).toContain('<a:t xml:space="preserve">API </a:t>');
+			expect(slideXml).toContain('<a:t>架构</a:t>');
+			expect(slideXml).toContain('<a:t xml:space="preserve"> v2</a:t>');
+			expect(slideXml).toContain('<a:latin typeface="Avenir Next"/>');
+			expect(slideXml).toContain('<a:latin typeface="Microsoft YaHei"/>');
+			expect(slideXml).toContain('<a:ea typeface="Microsoft YaHei"/>');
+			expect(slideXml).not.toContain('<a:t>API 架构 v2</a:t>');
 		} finally {
 			rmSync(directory, { recursive: true, force: true });
 		}

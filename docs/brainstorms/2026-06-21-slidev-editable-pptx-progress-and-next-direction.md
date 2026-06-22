@@ -357,6 +357,78 @@ The next technical risks are:
 
 The acceptance gate for this slice must use `docs/architecture.zh-CN.md`, require PPTX visual match against the frozen-background reference, require same-rendered-HTML reference match, and separately run real PNG export to prove the PNG path was not replaced.
 
+## M8 Office Emit Run Font Contract
+
+M8 handles a narrow but real editability-quality problem first. The writer previously emitted mixed Latin/CJK text inside one `<a:r>` with the source Latin font plus `Microsoft YaHei` as the East Asian font. PowerPoint can fallback from that, but the report did not know which font runs Office would actually receive. That weakens future visible-native font gating and editable-text quality analysis.
+
+The implemented contract is:
+
+1. `pptxFontContract.ts` owns the single `splitPptxTextIntoOfficeFontRuns()` function, splitting one DOM rich run into CJK and non-CJK Office emit runs.
+2. non-CJK segments keep the source font; CJK segments are emitted as `Microsoft YaHei`, with both `<a:latin>` and `<a:ea>` set to the same actual emitted face so Office does not need to infer mixed-run fallback.
+3. the transparent structure writer and visible-native experiment writer both use this same split logic.
+4. `fontContract` keeps the source-font view in `fontFamilies`, `cjkFontFamilies`, and `writerEastAsiaFallbackFontFamilies`, and adds an Office emit view: `officeFontFamilies`, `officeCjkFontFamilies`, `officeLatinFontFamilies`, `officeTextRunCount`, `officeEastAsiaFallbackRunCount`, and `officeEastAsiaFallbackCharacterCount`.
+5. `richTextRunCount` remains the DOM/rich-run extraction count; it is not redefined as Office emitted runs. The new `officeTextRunCount` carries the emitted-run count.
+
+The `oh-my-ppt` reuse scale here is contract-level reuse, not code migration. Its useful lesson is that fonts cannot stay a local writer detail; extraction, OOXML writing, and acceptance reporting need the same view of the final text runs emitted to Office. This slice applies that idea by wiring the NotEMD writer and report to one splitter, without importing `BrowserWindow`, font embedding, the default visible-native strategy, or the full `html-pptx` writer. The implementation is also a little stricter than the simple Han-character check in the current `oh-my-ppt` path: Office font segmentation covers CJK punctuation, kana, Hangul, and fullwidth forms so text such as `API：架构` keeps the fullwidth colon in the East Asian Office font run.
+
+This is not font embedding and not visible-native admission. It makes the final PPTX text runs and font faces a shared writer/report fact, which is the right foundation for hyperlink, paragraph/list, and visible-native font gates.
+
+Added unit acceptance:
+
+```bash
+npm test -- --runInBand src/tests/pptxWriter.test.ts src/tests/pptxExportReport.test.ts
+```
+
+Current passing assertions:
+
+1. one rich run `API 架构 v2` emits three Office runs: `API `, `架构`, and ` v2`;
+2. Latin segments keep `Avenir Next`;
+3. the CJK segment uses `Microsoft YaHei`;
+4. report `richTextRunCount` remains `1`, while `officeTextRunCount` is `3`;
+5. `API：架构 v2` keeps `：架构` in the East Asian Office font run;
+6. report East Asian fallback count is `1` run / `2` CJK characters.
+
+Real `docs/architecture.zh-CN.md` M8 acceptance now passes. PPTX command:
+
+```bash
+runuser -u jacob -- env HOME=/home/jacob PLAYWRIGHT_BROWSERS_PATH=/home/jacob/.cache/ms-playwright bash -lc 'cd /home/jacob/obsidian-NotEMD && npm run verify:slidev-export -- --vault docs --source architecture.zh-CN.md --format pptx --output-subfolder export/test-slidev-m8-office-run-contract --sample-slides all --timeout-ms 240000 --no-screenshots --pptx-visual-diff --require-pptx-visual-match --pptx-rendered-html-reference-diff --require-pptx-rendered-html-reference-match --json'
+```
+
+Result:
+
+1. `ok = true`;
+2. PPTX output: `docs/export/test-slidev-m8-office-run-contract/architecture.zh-CN.pptx`;
+3. sidecar: `docs/export/test-slidev-m8-office-run-contract/architecture.zh-CN.pptx.report.json`;
+4. `slidev.version = 52.16.0 (/home/jacob/slidev/packages/slidev/bin/slidev.mjs)`;
+5. `skillRootPath = /home/jacob/slidev/skills/slidev`, `skillReferenceCount = 52`;
+6. PPTX inspection: `slideCount = 30`, `mediaCount = 30`, `pictureCount = 30`, `tableCount = 6`, `textRunCount = 1092`, `slidesWithoutEditableText = []`;
+7. the default sidecar layers remain `visibleTextLayer = background-image` and `editableLayerRenderMode = transparent-structure`;
+8. sidecar counts: `textBoxCount = 277`, `richTextRunCount = 482`, `editableMermaidTextBoxCount = 36`, `editableTableCellOverlayTextBoxCount = 102`, `editableTableCellCount = 102`;
+9. Office emit font contract: `officeTextRunCount = 995`, `officeFontFamilies = ["Avenir Next", "Fira Code", "Microsoft YaHei", "trebuchet ms"]`, `officeCjkFontFamilies = ["Microsoft YaHei"]`, `officeLatinFontFamilies = ["Avenir Next", "Fira Code", "trebuchet ms"]`;
+10. East Asian fallback: `officeEastAsiaFallbackRunCount = 453`, `officeEastAsiaFallbackCharacterCount = 2007`;
+11. frozen-background hard gate passed: `source = pptx-background-images`, `meanRmse = 0.04305776633333333`, `maxRmse = 0.0786701`;
+12. same-rendered-HTML hard gate passed: `source = pptx-rendered-html-reference`, `slideCount = 30`, `meanRmse = 0.04305776633333333`, `maxRmse = 0.0786701`;
+13. `unignoredOutputs = []`, `gitIgnoreCheckError = null`.
+
+Real PNG export was also rerun to prove the PNG path still uses the current Slidev export workflow instead of the PPTX capture path:
+
+```bash
+runuser -u jacob -- env HOME=/home/jacob PLAYWRIGHT_BROWSERS_PATH=/home/jacob/.cache/ms-playwright bash -lc 'cd /home/jacob/obsidian-NotEMD && npm run verify:slidev-export -- --vault docs --source architecture.zh-CN.md --format png --output-subfolder export/test-slidev-m8-current-png-reference --sample-slides all --timeout-ms 240000 --no-screenshots --json'
+```
+
+PNG result:
+
+1. `ok = true`;
+2. output directory: `docs/export/test-slidev-m8-current-png-reference/architecture.zh-CN-slides-png`;
+3. actual PNG file count: `30`;
+4. `layoutAuditSummary.slideCount = 30`, `overflowCount = 0`, `unreadableCount = 0`, `renderErrorCount = 0`;
+5. Mermaid diagnostics remain a review signal: `mermaidSlideCount = 3`, `mermaidFitReviewCount = 3`, `mermaidLowZoomCount = 2`, `mermaidManualReviewCount = 1`, `retryCount = 4`;
+6. `slidev.version = 52.16.0 (/home/jacob/slidev/packages/slidev/bin/slidev.mjs)`;
+7. `skillRootPath = /home/jacob/slidev/skills/slidev`, `skillReferenceCount = 52`;
+8. `unignoredOutputs = []`, `gitIgnoreCheckError = null`.
+
+This means the M8 font-run contract did not regress the visual hard gates and did not replace real PNG export. It also preserves one next-step warning: the PNG layout audit still reports Mermaid zoom review signals. That is not a hard failure because there is no overflow, unreadable text, or render error, but later Mermaid quality work should target automatic zoom/fit diagnostics and threshold explanation instead of changing Mermaid source or splitting diagrams.
+
 ## M4 Visible-Native Experiment Closure
 
 The visible-native direction has now been tested as an explicit experiment, not as a default behavior change. The verifier command was:

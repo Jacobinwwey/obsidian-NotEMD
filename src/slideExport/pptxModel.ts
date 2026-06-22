@@ -226,6 +226,13 @@ export interface SlidevPptxFontContractSummary {
 	latinFontFamilies: string[];
 	writerEastAsiaFontFace: string;
 	writerEastAsiaFallbackFontFamilies: string[];
+	officeFontFamilyCount: number;
+	officeFontFamilies: string[];
+	officeCjkFontFamilies: string[];
+	officeLatinFontFamilies: string[];
+	officeTextRunCount: number;
+	officeEastAsiaFallbackRunCount: number;
+	officeEastAsiaFallbackCharacterCount: number;
 	officeMissingFontRiskCount: number;
 	officeMissingFontRiskFamilies: string[];
 	fontUsages: SlidevPptxFontUsage[];

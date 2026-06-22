@@ -11,7 +11,7 @@ import {
 	type SlidevPptxTextAlign,
 	type SlidevPptxTextBox,
 } from './pptxModel';
-import { PPTX_WRITER_EAST_ASIA_FONT_FACE, pptxTextContainsCjk } from './pptxFontContract';
+import { splitPptxTextIntoOfficeFontRuns } from './pptxFontContract';
 import { safeRequire } from './platformUtils';
 
 const EMU_PER_INCH = 914400;
@@ -79,21 +79,24 @@ type TextRunStyle = {
 	underline: boolean;
 };
 
-function buildTransparentRunXml(text: string, runStyle: TextRunStyle): string {
-	const color = clampHexColor(runStyle.color, '111827');
+function buildRunXmlWithTextFill(
+	text: string,
+	runStyle: TextRunStyle,
+	textFillXml: string,
+	language: 'en-US' | 'zh-CN',
+): string {
 	const size = Math.max(600, Math.min(14400, Math.round(runStyle.fontSize * 100)));
 	const bold = runStyle.bold ? ' b="1"' : '';
 	const italic = runStyle.italic ? ' i="1"' : '';
 	const underline = runStyle.underline ? ' u="sng"' : '';
 	const fontFace = escapeXmlAttribute(runStyle.fontFace || 'Aptos');
-	const eastAsiaFont = pptxTextContainsCjk(text) ? PPTX_WRITER_EAST_ASIA_FONT_FACE : fontFace;
 
 	return [
 		'<a:r>',
-		`<a:rPr lang="en-US" sz="${size}"${bold}${italic}${underline}>`,
-		buildTransparentTextFill(color),
+		`<a:rPr lang="${language}" sz="${size}"${bold}${italic}${underline}>`,
+		textFillXml,
 		`<a:latin typeface="${fontFace}"/>`,
-		`<a:ea typeface="${escapeXmlAttribute(eastAsiaFont)}"/>`,
+		`<a:ea typeface="${fontFace}"/>`,
 		'<a:cs typeface="Aptos"/>',
 		'</a:rPr>',
 		buildTextElement(text),
@@ -101,26 +104,34 @@ function buildTransparentRunXml(text: string, runStyle: TextRunStyle): string {
 	].join('');
 }
 
+function buildTransparentRunXml(text: string, runStyle: TextRunStyle): string {
+	const color = clampHexColor(runStyle.color, '111827');
+	const textFillXml = buildTransparentTextFill(color);
+	return splitPptxTextIntoOfficeFontRuns(text, runStyle.fontFace)
+		.map((officeRun) =>
+			buildRunXmlWithTextFill(
+				officeRun.text,
+				{ ...runStyle, fontFace: officeRun.fontFace },
+				textFillXml,
+				officeRun.usesEastAsiaFont ? 'zh-CN' : 'en-US',
+			),
+		)
+		.join('');
+}
+
 function buildVisibleRunXml(text: string, runStyle: TextRunStyle): string {
 	const color = clampHexColor(runStyle.color, '111827');
-	const size = Math.max(600, Math.min(14400, Math.round(runStyle.fontSize * 100)));
-	const bold = runStyle.bold ? ' b="1"' : '';
-	const italic = runStyle.italic ? ' i="1"' : '';
-	const underline = runStyle.underline ? ' u="sng"' : '';
-	const fontFace = escapeXmlAttribute(runStyle.fontFace || 'Aptos');
-	const eastAsiaFont = pptxTextContainsCjk(text) ? PPTX_WRITER_EAST_ASIA_FONT_FACE : fontFace;
-
-	return [
-		'<a:r>',
-		`<a:rPr lang="en-US" sz="${size}"${bold}${italic}${underline}>`,
-		buildVisibleTextFill(color),
-		`<a:latin typeface="${fontFace}"/>`,
-		`<a:ea typeface="${escapeXmlAttribute(eastAsiaFont)}"/>`,
-		'<a:cs typeface="Aptos"/>',
-		'</a:rPr>',
-		buildTextElement(text),
-		'</a:r>',
-	].join('');
+	const textFillXml = buildVisibleTextFill(color);
+	return splitPptxTextIntoOfficeFontRuns(text, runStyle.fontFace)
+		.map((officeRun) =>
+			buildRunXmlWithTextFill(
+				officeRun.text,
+				{ ...runStyle, fontFace: officeRun.fontFace },
+				textFillXml,
+				officeRun.usesEastAsiaFont ? 'zh-CN' : 'en-US',
+			),
+		)
+		.join('');
 }
 
 function fallbackTextParagraphs(textBox: SlidevPptxTextBox): SlidevPptxRichTextParagraph[] {

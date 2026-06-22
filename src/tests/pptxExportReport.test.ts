@@ -304,6 +304,88 @@ describe('pptx export report', () => {
 		);
 	});
 
+	test('reports Office emitted font runs for mixed Latin and CJK text', () => {
+		const slides: SlidevPptxSlide[] = [
+			{
+				slideNumber: 1,
+				title: 'Mixed script',
+				backgroundColor: 'FFFFFF',
+				texts: [
+					{
+						text: 'API 架构 v2',
+						x: 1,
+						y: 1,
+						w: 5,
+						h: 1,
+						fontSize: 18,
+						fontFace: 'Avenir Next',
+						color: '111827',
+						bold: false,
+						italic: false,
+						underline: false,
+						align: 'left',
+						bullet: false,
+						order: 10,
+						richTextParagraphs: [
+							{
+								runs: [
+									{
+										text: 'API 架构 v2',
+										fontSize: 18,
+										fontFace: 'Avenir Next',
+										color: '111827',
+										bold: false,
+										italic: false,
+										underline: false,
+										code: false,
+										link: false,
+									},
+								],
+							},
+						],
+						unmodeledRunReasons: [],
+					},
+				],
+				tables: [],
+				fallbackOnlyElementKinds: [],
+				consumedTableTextCandidateCount: 0,
+				warnings: [],
+			},
+		];
+
+		const report = buildSlidevPptxExportReport(
+			'/vault/export/deck/index.html',
+			'/vault/deck.md',
+			'/vault/export/deck.pptx',
+			'/vault/export/deck.pptx.report.json',
+			slides,
+		);
+
+		expect(report.richTextRunCount).toBe(1);
+		expect(report.fontContract).toEqual(
+			expect.objectContaining({
+				fontFamilies: ['Avenir Next'],
+				cjkFontFamilies: ['Avenir Next'],
+				writerEastAsiaFallbackFontFamilies: ['Avenir Next'],
+				officeFontFamilies: ['Avenir Next', 'Microsoft YaHei'],
+				officeCjkFontFamilies: ['Microsoft YaHei'],
+				officeLatinFontFamilies: ['Avenir Next'],
+				officeTextRunCount: 3,
+				officeEastAsiaFallbackRunCount: 1,
+				officeEastAsiaFallbackCharacterCount: 2,
+			}),
+		);
+		expect(report.fontContract.fontUsages).toEqual(
+			expect.arrayContaining([
+				expect.objectContaining({
+					fontFace: 'Avenir Next',
+					writerEastAsiaFallbackRunCount: 1,
+					writerEastAsiaFallbackCharacterCount: 2,
+				}),
+			]),
+		);
+	});
+
 	test('reports visible-native experiment contract and residue sampling separately from the default contract', () => {
 		const slides: SlidevPptxSlide[] = [
 			{

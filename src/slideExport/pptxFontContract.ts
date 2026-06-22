@@ -10,10 +10,17 @@ import type {
 
 export const PPTX_WRITER_EAST_ASIA_FONT_FACE = 'Microsoft YaHei';
 
-type EmittedTextRun = {
+type ExtractedTextRun = {
 	text: string;
 	fontFace: string;
 };
+
+export interface SlidevPptxOfficeTextRun {
+	text: string;
+	sourceFontFace: string;
+	fontFace: string;
+	usesEastAsiaFont: boolean;
+}
 
 type FontUsageAccumulator = {
 	fontFace: string;
@@ -28,6 +35,16 @@ type FontUsageAccumulator = {
 	officeMissingFontRiskReasons: Set<SlidevPptxOfficeFontRiskReason>;
 };
 
+type OfficeFontAccumulator = {
+	fontFace: string;
+	textRunCount: number;
+	characterCount: number;
+	cjkCharacterCount: number;
+	latinCharacterCount: number;
+	eastAsiaFallbackRunCount: number;
+	eastAsiaFallbackCharacterCount: number;
+};
+
 function normalizeFontFace(value: string): string {
 	const fontFace = String(value || '')
 		.split(',')
@@ -40,6 +57,46 @@ export function pptxTextContainsCjk(text: string): boolean {
 	return /[\u3400-\u9fff\uf900-\ufaff]/.test(text);
 }
 
+function pptxTextUsesEastAsiaFont(text: string): boolean {
+	return /[\u3000-\u30ff\u3400-\u9fff\uf900-\ufaff\uff00-\uffef\uac00-\ud7af]/.test(text);
+}
+
+export function splitPptxTextIntoOfficeFontRuns(text: string, fontFace: string): SlidevPptxOfficeTextRun[] {
+	const sourceFontFace = normalizeFontFace(fontFace);
+	const characters = Array.from(String(text || ''));
+	if (characters.length === 0) {
+		return [];
+	}
+
+	const runs: SlidevPptxOfficeTextRun[] = [];
+	let currentText = '';
+	let currentUsesEastAsiaFont = pptxTextUsesEastAsiaFont(characters[0]);
+
+	const flush = (): void => {
+		if (currentText.length === 0) {
+			return;
+		}
+		runs.push({
+			text: currentText,
+			sourceFontFace,
+			fontFace: currentUsesEastAsiaFont ? PPTX_WRITER_EAST_ASIA_FONT_FACE : sourceFontFace,
+			usesEastAsiaFont: currentUsesEastAsiaFont,
+		});
+		currentText = '';
+	};
+
+	for (const character of characters) {
+		const usesEastAsiaFont = pptxTextUsesEastAsiaFont(character);
+		if (usesEastAsiaFont !== currentUsesEastAsiaFont) {
+			flush();
+			currentUsesEastAsiaFont = usesEastAsiaFont;
+		}
+		currentText += character;
+	}
+	flush();
+	return runs;
+}
+
 function countCjkCharacters(text: string): number {
 	const matches = text.match(/[\u3400-\u9fff\uf900-\ufaff]/g);
 	return matches ? matches.length : 0;
@@ -50,7 +107,11 @@ function countLatinCharacters(text: string): number {
 	return matches ? matches.length : 0;
 }
 
-function hasText(run: EmittedTextRun): boolean {
+function hasText(run: ExtractedTextRun): boolean {
+	return run.text.length > 0 && run.text.trim().length > 0;
+}
+
+function hasOfficeText(run: SlidevPptxOfficeTextRun): boolean {
 	return run.text.length > 0 && run.text.trim().length > 0;
 }
 
@@ -58,7 +119,7 @@ function paragraphsContainRuns(paragraphs: SlidevPptxRichTextParagraph[]): boole
 	return paragraphs.some((paragraph) => paragraph.runs.some((run) => String(run.text || '').trim().length > 0));
 }
 
-function emittedTextRunsForTextBox(textBox: SlidevPptxTextBox): EmittedTextRun[] {
+function extractedTextRunsForTextBox(textBox: SlidevPptxTextBox): ExtractedTextRun[] {
 	const paragraphs = Array.isArray(textBox.richTextParagraphs) ? textBox.richTextParagraphs : [];
 	if (paragraphsContainRuns(paragraphs)) {
 		return paragraphs.flatMap((paragraph) =>
@@ -78,6 +139,10 @@ function emittedTextRunsForTextBox(textBox: SlidevPptxTextBox): EmittedTextRun[]
 			fontFace: normalizeFontFace(textBox.fontFace),
 		}))
 		.filter(hasText);
+}
+
+function officeTextRunsForExtractedRun(run: ExtractedTextRun): SlidevPptxOfficeTextRun[] {
+	return splitPptxTextIntoOfficeFontRuns(run.text, run.fontFace).filter(hasOfficeText);
 }
 
 function isCssGenericFontFace(fontFace: string): boolean {
@@ -141,7 +206,7 @@ function accumulatorFor(
 
 function recordText(
 	accumulators: Map<string, FontUsageAccumulator>,
-	run: EmittedTextRun,
+	run: ExtractedTextRun,
 	recordSource: (accumulator: FontUsageAccumulator) => void,
 ): void {
 	const text = run.text;
@@ -154,15 +219,24 @@ function recordText(
 	accumulator.characterCount += text.length;
 	accumulator.cjkCharacterCount += cjkCharacterCount;
 	accumulator.latinCharacterCount += countLatinCharacters(text);
-	if (cjkCharacterCount > 0 && accumulator.fontFace !== PPTX_WRITER_EAST_ASIA_FONT_FACE) {
-		accumulator.writerEastAsiaFallbackRunCount += 1;
-		accumulator.writerEastAsiaFallbackCharacterCount += cjkCharacterCount;
+	const fallbackRuns = officeTextRunsForExtractedRun(run).filter(
+		(officeRun) =>
+			officeRun.usesEastAsiaFont &&
+			officeRun.fontFace === PPTX_WRITER_EAST_ASIA_FONT_FACE &&
+			officeRun.sourceFontFace !== PPTX_WRITER_EAST_ASIA_FONT_FACE,
+	);
+	if (fallbackRuns.length > 0) {
+		accumulator.writerEastAsiaFallbackRunCount += fallbackRuns.length;
+		accumulator.writerEastAsiaFallbackCharacterCount += fallbackRuns.reduce(
+			(total, officeRun) => total + countCjkCharacters(officeRun.text),
+			0,
+		);
 	}
 }
 
 function recordTextBoxRun(
 	accumulators: Map<string, FontUsageAccumulator>,
-	run: EmittedTextRun,
+	run: ExtractedTextRun,
 	textBoxId: string,
 ): void {
 	recordText(accumulators, run, (accumulator) => {
@@ -171,7 +245,7 @@ function recordTextBoxRun(
 	});
 }
 
-function recordTableCellText(accumulators: Map<string, FontUsageAccumulator>, run: EmittedTextRun): void {
+function recordTableCellText(accumulators: Map<string, FontUsageAccumulator>, run: ExtractedTextRun): void {
 	recordText(accumulators, run, (accumulator) => {
 		accumulator.tableCellCount += 1;
 	});
@@ -204,7 +278,7 @@ function collectFontUsages(slides: SlidevPptxSlide[]): SlidevPptxFontUsage[] {
 		for (let textBoxIndex = 0; textBoxIndex < slide.texts.length; textBoxIndex += 1) {
 			const textBox = slide.texts[textBoxIndex];
 			const textBoxId = `${slide.slideNumber}:${textBoxIndex}`;
-			for (const run of emittedTextRunsForTextBox(textBox)) {
+			for (const run of extractedTextRunsForTextBox(textBox)) {
 				recordTextBoxRun(accumulators, run, textBoxId);
 			}
 		}
@@ -227,8 +301,78 @@ function collectFontUsages(slides: SlidevPptxSlide[]): SlidevPptxFontUsage[] {
 		.sort((left, right) => left.fontFace.localeCompare(right.fontFace));
 }
 
+function officeAccumulatorFor(
+	accumulators: Map<string, OfficeFontAccumulator>,
+	fontFace: string,
+): OfficeFontAccumulator {
+	const normalized = normalizeFontFace(fontFace);
+	const existing = accumulators.get(normalized);
+	if (existing) {
+		return existing;
+	}
+	const created: OfficeFontAccumulator = {
+		fontFace: normalized,
+		textRunCount: 0,
+		characterCount: 0,
+		cjkCharacterCount: 0,
+		latinCharacterCount: 0,
+		eastAsiaFallbackRunCount: 0,
+		eastAsiaFallbackCharacterCount: 0,
+	};
+	accumulators.set(normalized, created);
+	return created;
+}
+
+function recordOfficeTextRun(
+	accumulators: Map<string, OfficeFontAccumulator>,
+	run: SlidevPptxOfficeTextRun,
+): void {
+	if (!run.text.trim()) {
+		return;
+	}
+	const accumulator = officeAccumulatorFor(accumulators, run.fontFace);
+	const cjkCharacterCount = countCjkCharacters(run.text);
+	accumulator.textRunCount += 1;
+	accumulator.characterCount += run.text.length;
+	accumulator.cjkCharacterCount += cjkCharacterCount;
+	accumulator.latinCharacterCount += countLatinCharacters(run.text);
+	if (
+		run.usesEastAsiaFont &&
+		run.fontFace === PPTX_WRITER_EAST_ASIA_FONT_FACE &&
+		run.sourceFontFace !== PPTX_WRITER_EAST_ASIA_FONT_FACE
+	) {
+		accumulator.eastAsiaFallbackRunCount += 1;
+		accumulator.eastAsiaFallbackCharacterCount += cjkCharacterCount;
+	}
+}
+
+function collectOfficeFontUsages(slides: SlidevPptxSlide[]): OfficeFontAccumulator[] {
+	const accumulators = new Map<string, OfficeFontAccumulator>();
+	for (const slide of slides) {
+		for (const textBox of slide.texts) {
+			for (const run of extractedTextRunsForTextBox(textBox)) {
+				for (const officeRun of officeTextRunsForExtractedRun(run)) {
+					recordOfficeTextRun(accumulators, officeRun);
+				}
+			}
+		}
+		for (const table of slide.tables) {
+			for (const row of table.rows) {
+				for (const cell of row) {
+					const officeRuns = splitPptxTextIntoOfficeFontRuns(cell.text, cell.fontFace).filter(hasOfficeText);
+					for (const officeRun of officeRuns) {
+						recordOfficeTextRun(accumulators, officeRun);
+					}
+				}
+			}
+		}
+	}
+	return Array.from(accumulators.values()).sort((left, right) => left.fontFace.localeCompare(right.fontFace));
+}
+
 export function buildSlidevPptxFontContractSummary(slides: SlidevPptxSlide[]): SlidevPptxFontContractSummary {
 	const fontUsages = collectFontUsages(slides);
+	const officeFontUsages = collectOfficeFontUsages(slides);
 	const fontFamilies = fontUsages.map((usage) => usage.fontFace);
 	const cjkFontFamilies = fontUsages.filter((usage) => usage.cjkCharacterCount > 0).map((usage) => usage.fontFace);
 	const latinFontFamilies = fontUsages.filter((usage) => usage.latinCharacterCount > 0).map((usage) => usage.fontFace);
@@ -246,6 +390,23 @@ export function buildSlidevPptxFontContractSummary(slides: SlidevPptxSlide[]): S
 		latinFontFamilies,
 		writerEastAsiaFontFace: PPTX_WRITER_EAST_ASIA_FONT_FACE,
 		writerEastAsiaFallbackFontFamilies,
+		officeFontFamilyCount: officeFontUsages.length,
+		officeFontFamilies: officeFontUsages.map((usage) => usage.fontFace),
+		officeCjkFontFamilies: officeFontUsages
+			.filter((usage) => usage.cjkCharacterCount > 0)
+			.map((usage) => usage.fontFace),
+		officeLatinFontFamilies: officeFontUsages
+			.filter((usage) => usage.latinCharacterCount > 0)
+			.map((usage) => usage.fontFace),
+		officeTextRunCount: officeFontUsages.reduce((total, usage) => total + usage.textRunCount, 0),
+		officeEastAsiaFallbackRunCount: officeFontUsages.reduce(
+			(total, usage) => total + usage.eastAsiaFallbackRunCount,
+			0,
+		),
+		officeEastAsiaFallbackCharacterCount: officeFontUsages.reduce(
+			(total, usage) => total + usage.eastAsiaFallbackCharacterCount,
+			0,
+		),
 		officeMissingFontRiskCount: officeMissingFontRiskFamilies.length,
 		officeMissingFontRiskFamilies,
 		fontUsages,
