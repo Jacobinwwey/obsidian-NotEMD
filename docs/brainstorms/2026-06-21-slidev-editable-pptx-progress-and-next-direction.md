@@ -1219,8 +1219,8 @@ Real `architecture.zh-CN.md` acceptance:
 2. Slidev again came from the local fork: `52.16.0 (/home/jacob/slidev/packages/slidev/bin/slidev.mjs)`, with `skillRootPath = /home/jacob/slidev/skills/slidev` and `skillReferenceCount = 52`.
 3. Report highlights: `slideCount = 30`, `textBoxCount = 338`, `tableCount = 6`, `editableBodyTextBoxCount = 324`, `editableCodeTextBoxCount = 14`, `editableSolidRectangleCount = 115`, `editableCodeBackgroundRectangleCount = 115`, `editableTableCellCount = 102`, `editableTextSlideCount = 30`, `pagesWithoutEditableText = []`, `transparentOverlayTextSources = []`.
 4. Visual and source gates passed: `pptxVisualGate.passed = true`, `referenceSource = "pptx-rendered-html-reference"`, `thresholdProfile = "visible-native-rendered-html"`, `mermaidSourcePreservation.passed = true`, `sourceFenceCount = 3`, `deckFenceCount = 3`, `changedFenceIndexes = []`.
-5. Layout audit stayed clean: `overflowCount = 0`, `unreadableCount = 0`, `hardOverflowCount = 0`, with `retryCount = 4`, `mermaidSlideCount = 3`, `mermaidLowZoomCount = 2`, and `mermaidManualReviewCount = 1`.
-6. PPTX XML scan found `alpha=0 = 0`, `alpha=8000 = 0`, `Visible Native Text = 324`, `Visible Native Code Text = 14`, `Visible Native Table = 6`, `Native Code Background Rectangle = 115`, `roundRect = 115`, native object count `459`, transparent-only editable objects `0`, and `<a:t...>` tags `591`.
+5. Layout audit stayed clean: `overflowCount = 0`, `unreadableCount = 0`, `hardOverflowCount = 0`, with `retryCount = 4`, `mermaidSlideCount = 2`, `mermaidLowZoomCount = 1`, and `mermaidManualReviewCount = 0`.
+6. PPTX XML scan found `alpha=0 = 0`, `alpha=8000 = 0`, `Visible Native Text = 324`, `Visible Native Code Text = 14`, `Visible Native Table = 6`, `Native Code Background Rectangle = 115`, `roundRect = 115`, transparent-only editable objects `0`, and `<a:t...>` tags `861`.
 7. Generated outputs stayed ignored and untracked.
 
 Comparison against the previous plan:

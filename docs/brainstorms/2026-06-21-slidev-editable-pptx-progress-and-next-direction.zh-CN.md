@@ -1240,8 +1240,8 @@ fixture 验收：
 2. Slidev 仍来自本地 fork：`52.16.0 (/home/jacob/slidev/packages/slidev/bin/slidev.mjs)`，并使用 `skillRootPath = /home/jacob/slidev/skills/slidev`，`skillReferenceCount = 52`。
 3. report 关键数据：`slideCount = 30`，`textBoxCount = 338`，`tableCount = 6`，`editableBodyTextBoxCount = 324`，`editableCodeTextBoxCount = 14`，`editableSolidRectangleCount = 115`，`editableCodeBackgroundRectangleCount = 115`，`editableTableCellCount = 102`，`editableTextSlideCount = 30`，`pagesWithoutEditableText = []`，`transparentOverlayTextSources = []`。
 4. 视觉与源内容 gate 均通过：`pptxVisualGate.passed = true`，`referenceSource = "pptx-rendered-html-reference"`，`thresholdProfile = "visible-native-rendered-html"`，`mermaidSourcePreservation.passed = true`，`sourceFenceCount = 3`，`deckFenceCount = 3`，`changedFenceIndexes = []`。
-5. 布局审计保持干净：`overflowCount = 0`，`unreadableCount = 0`，`hardOverflowCount = 0`；同时记录 `retryCount = 4`，`mermaidSlideCount = 3`，`mermaidLowZoomCount = 2`，`mermaidManualReviewCount = 1`。
-6. PPTX XML 扫描显示 `alpha=0 = 0`，`alpha=8000 = 0`，`Visible Native Text = 324`，`Visible Native Code Text = 14`，`Visible Native Table = 6`，`Native Code Background Rectangle = 115`，`roundRect = 115`，native object count 为 `459`，transparent-only editable objects 为 `0`，`<a:t...>` tags 为 `591`。
+5. 布局审计保持干净：`overflowCount = 0`，`unreadableCount = 0`，`hardOverflowCount = 0`；同时记录 `retryCount = 4`，`mermaidSlideCount = 2`，`mermaidLowZoomCount = 1`，`mermaidManualReviewCount = 0`。
+6. PPTX XML 扫描显示 `alpha=0 = 0`，`alpha=8000 = 0`，`Visible Native Text = 324`，`Visible Native Code Text = 14`，`Visible Native Table = 6`，`Native Code Background Rectangle = 115`，`roundRect = 115`，transparent-only editable objects 为 `0`，`<a:t...>` tags 为 `861`。
 7. 生成物仍在 ignore 范围内，未进入 git 跟踪。
 
 与先前方案的对比：
