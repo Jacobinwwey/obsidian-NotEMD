@@ -1136,6 +1136,63 @@ Next direction after M20:
 4. keep default Mermaid background-owned and source-preserving;
 5. continue using `architecture.zh-CN.md` as the real acceptance deck, while adding a smaller fixture only when the real deck cannot exercise a primitive.
 
+## M21 `oh-my-ppt` Native Text Fidelity Slice
+
+This slice implements the part of the `ref/oh-my-ppt` approach that matches NotEMD's architecture: rendered browser DOM remains the source of truth, and the PPTX writer emits visible native DrawingML text from those measured facts. It deliberately does not add a second HTML-to-PPTX route, does not add a transparent text layer, and does not rewrite Mermaid.
+
+What landed:
+
+1. `SlidevPptxInlineTextRun`, `SlidevPptxTextBox`, and `SlidevPptxTableCell` now carry `strike` and `charSpacingPt` when Chromium exposes those CSS facts.
+2. `SlidevPptxTextBox` now carries `verticalAlign`, so centered flex/grid labels can be written with the correct Office `<a:bodyPr anchor="ctr">` instead of being forced to top anchoring.
+3. The DOM extractor records `line-through`, `letter-spacing`, flex/grid horizontal alignment, and flex/grid vertical alignment for visible body/code/chart/SVG text paths. Table cells receive the same run-level style facts.
+4. The writer emits `strike="sngStrike"` and DrawingML `spc` on native visible text runs and native table-cell runs.
+5. The writer now uses the measured table text inset for the alignment-owned edge: left-aligned cells can write `textLeftInsetIn` to `marL`, right-aligned cells can write `textRightInsetIn` to `marR`, top-aligned cells can write `textTopInsetIn` to `marT`, and bottom-aligned cells can write `textBottomInsetIn` to `marB`. Center/middle alignment remains intentionally unforced.
+6. The report's table inset drift metric now compares measured text insets against the same effective Office inset that the writer uses. The metric is therefore a remaining-drift signal, not a stale CSS-padding diagnostic.
+7. Unit coverage now locks the absence of transparent text in the default path while checking visible native `strike`, character spacing, vertical text anchoring, and table margin calibration.
+
+Verification:
+
+1. `npm test -- --runInBand src/tests/pptxWriter.test.ts` passed.
+2. `npm test -- --runInBand src/tests/pptxExportReport.test.ts` passed.
+3. `runuser -u jacob -- env HOME=/home/jacob PLAYWRIGHT_BROWSERS_PATH=/home/jacob/.cache/ms-playwright bash -lc 'cd /home/jacob/obsidian-NotEMD && npm test -- --runInBand src/tests/pptxDomExtractor.test.ts'` passed with real Chromium execution.
+4. `npx tsc --noEmit --pretty false` passed.
+5. Real acceptance command passed on `docs/architecture.zh-CN.md`: `runuser -u jacob -- env HOME=/home/jacob PLAYWRIGHT_BROWSERS_PATH=/home/jacob/.cache/ms-playwright bash -lc 'cd /home/jacob/obsidian-NotEMD && rm -rf docs/export/test-slidev-m21-native-text-fidelity /tmp/notemd-m21-native-text-fidelity.json && npm run verify:slidev-export -- --vault docs --source architecture.zh-CN.md --format pptx --output-subfolder export/test-slidev-m21-native-text-fidelity --sample-slides all --timeout-ms 240000 --no-screenshots --require-pptx-visual-match --json > /tmp/notemd-m21-native-text-fidelity.json'`.
+6. Output PPTX: `docs/export/test-slidev-m21-native-text-fidelity/architecture.zh-CN.pptx`.
+7. Output report: `docs/export/test-slidev-m21-native-text-fidelity/architecture.zh-CN.pptx.report.json`.
+
+Real `architecture.zh-CN.md` acceptance results:
+
+1. `ok = true`.
+2. Slidev CLI came from the local fork: `52.16.0 (/home/jacob/slidev/packages/slidev/bin/slidev.mjs)`, with `/home/jacob/slidev/skills/slidev` and `skillReferenceCount = 52`.
+3. `pptxInspection.slideCount = 30`, `textRunCount = 861`, `tableCount = 6`, `slidesWithoutEditableText = []`.
+4. `pptxVisualGate.required = true`, `passed = true`, `referenceSource = "pptx-rendered-html-reference"`, `thresholdProfile = "visible-native-rendered-html"`.
+5. `mermaidSourcePreservation.passed = true`, `sourceFenceCount = 3`, `deckFenceCount = 3`, `changedFenceIndexes = []`.
+6. `layoutAuditSummary.overflowCount = 0`, `unreadableCount = 0`, `hardOverflowCount = 0`, `retryCount = 4`, `mermaidSlideCount = 3`, `mermaidLowZoomCount = 2`, `mermaidManualReviewCount = 1`.
+7. sidecar `textBoxCount = 338`, `editableBodyTextBoxCount = 324`, `editableCodeTextBoxCount = 14`, `editableTextSlideCount = 30`, `editableTextSlideRatio = 1`.
+8. sidecar `tableCount = 6`, `editableTableCellCount = 102`, `editableTableCellCharacterCount = 1116`, `collapsedTableBorderModelCount = 6`, `separateTableBorderModelCount = 0`.
+9. sidecar `tableCellTextInsetCount = 102`, `tableCellTextInsetDeltaCount = 0`, `maxTableCellTextInsetDeltaIn = 0`; this closes the M20 table anchor drift rather than only documenting it.
+10. sidecar `visibleTextLayer = "native-text-and-background-image"`, `editableLayerRenderMode = "visible-native-text"`, `transparentOverlayTextSources = []`, `mermaidSvgTextPolicy = "background-image-only"`, `fallbackOnlyElementKinds = ["code-highlight", "mermaid", "svg"]`.
+11. PPTX XML scan found `alpha=0` count `0`, `alpha=8000` count `0`, visible native objects `344` (`324` body text boxes, `14` code text boxes, `6` native tables), transparent-only editable shapes `0`, Mermaid text shapes `0`, table cells with `mar*` attributes `102`, and `<a:t...>` text tags `861`.
+12. Generated outputs remain ignored: `ignoredOutputs = 6`, `unignoredOutputs = []`, and `git ls-files docs/export/test-slidev-m21-native-text-fidelity` is empty.
+
+Comparison against the previous plan:
+
+1. The M20 diagnostic requirement is now acted on: table anchor inset is no longer only reported; it is used by the writer on the edge that owns text placement.
+2. The user's main objection to fake editability is preserved as a hard invariant: visible text is native Office text, and default output still forbids `alpha=0` transparent text layers.
+3. The `oh-my-ppt` idea of native text boxes, body insets, vertical anchoring, strike, and character spacing was reused at the concept level. Its broader pretext fallback, standalone route, and generic shape extraction were not copied because they would bypass NotEMD's rendered convergence and current visual gate.
+4. Mermaid remains background-owned and source-preserving. This slice improves the surrounding slide text, code text, table text, and non-Mermaid SVG/chart labels; it does not claim Office-native Mermaid element editability.
+
+Known risks:
+
+1. Office text metrics and Chromium text metrics still differ. Character spacing improves semantic fidelity, but it can also expose renderer differences, so the rendered-HTML visual gate must remain mandatory.
+2. Table margin calibration is intentionally anchor-edge-only. Applying all measured insets would confuse real unused cell space with required Office margins.
+3. Code token background rectangles and chart geometry remain background-owned. Text is editable; all visual primitives are not yet native Office objects.
+4. The current report does not count `strike` or `charSpacingPt` coverage. That may be worth adding only if real decks show these styles are common enough to justify a gate.
+
+Next action:
+
+Do not add a hidden/pretext fallback to cover remaining fidelity gaps. The next slice should be high-confidence native primitive extraction for code token backgrounds and simple chart geometry, with the same rendered-HTML visual gate and report-level editability contract.
+
 ## Current Limits
 
 The first implementation is intentionally conservative:

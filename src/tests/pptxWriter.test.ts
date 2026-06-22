@@ -603,6 +603,86 @@ describe('pptxWriter', () => {
 		}
 	});
 
+	test('writes visible native text with browser-derived strike, character spacing, and vertical anchor', () => {
+		const directory = mkdtempSync(join(tmpdir(), 'notemd-pptx-native-text-style-'));
+		try {
+			const outputPath = join(directory, 'deck.pptx');
+			const document: SlidevPptxDocument = {
+				title: 'Native text style',
+				author: 'NoteMD',
+				slides: [
+					{
+						slideNumber: 1,
+						title: 'Native text style',
+						backgroundColor: 'FFFFFF',
+						texts: [
+							{
+								text: 'Display text is editable',
+								sourceKind: 'body',
+								x: 1,
+								y: 1,
+								w: 5,
+								h: 0.8,
+								fontSize: 18,
+								fontFace: 'Aptos',
+								color: '111827',
+								bold: false,
+								italic: false,
+								underline: false,
+								strike: true,
+								align: 'center',
+								verticalAlign: 'middle',
+								bullet: false,
+								charSpacingPt: 1.25,
+								order: 10,
+								richTextParagraphs: [
+									{
+										runs: [
+											{
+												text: 'Display text is editable',
+												fontSize: 18,
+												fontFace: 'Aptos',
+												color: '111827',
+												bold: false,
+												italic: false,
+												underline: false,
+												strike: true,
+												charSpacingPt: 1.25,
+												code: false,
+												link: false,
+											},
+										],
+									},
+								],
+								unmodeledRunReasons: [],
+							},
+						],
+						tables: [],
+						fallbackOnlyElementKinds: [],
+						consumedTableTextCandidateCount: 0,
+						warnings: [],
+					},
+				],
+			};
+
+			writePptxDocument(outputPath, document);
+
+			const entries = unzipSync(new Uint8Array(readFileSync(outputPath)));
+			const slideXml = strFromU8(entries['ppt/slides/slide1.xml']);
+			expect(slideXml).toContain('name="Visible Native Text');
+			expect(slideXml).toContain(
+				'<a:bodyPr wrap="square" lIns="0" tIns="0" rIns="0" bIns="0" rtlCol="0" anchor="ctr"><a:noAutofit/></a:bodyPr>',
+			);
+			expect(slideXml).toContain('<a:pPr algn="ctr"><a:buNone/></a:pPr>');
+			expect(slideXml).toContain('strike="sngStrike"');
+			expect(slideXml).toContain('spc="125"');
+			expect(slideXml).toContain('<a:t>Display text is editable</a:t>');
+			expect(slideXml).not.toContain('<a:alpha val="0"/>');
+		} finally {
+			rmSync(directory, { recursive: true, force: true });
+		}
+	});
+
 	test('writes experimental visible-native text and table fills without transparent alpha', () => {
 		const directory = mkdtempSync(join(tmpdir(), 'notemd-pptx-visible-native-'));
 		try {
@@ -943,16 +1023,19 @@ describe('pptxWriter', () => {
 											bold: false,
 											italic: false,
 											underline: false,
+											strike: true,
 											align: 'left',
 											verticalAlign: 'middle',
 											fillColor: 'F8FAFC',
 											borderColor: 'CBD5E1',
 											borderWidthPt: 1,
 											lineSpacingPt: 21,
+											charSpacingPt: 1.5,
 											paddingLeftIn: 0.1,
 											paddingRightIn: 0.2,
 											paddingTopIn: 0.05,
 											paddingBottomIn: 0.08,
+											textLeftInsetIn: 0.13,
 										},
 									],
 								],
@@ -971,11 +1054,13 @@ describe('pptxWriter', () => {
 			const slideXml = strFromU8(entries['ppt/slides/slide1.xml']);
 			expect(slideXml).toContain('name="Visible Native Table');
 			expect(slideXml).toContain('anchor="ctr"');
-			expect(slideXml).toContain('marL="91440"');
+			expect(slideXml).toContain('marL="118872"');
 			expect(slideXml).toContain('marR="182880"');
 			expect(slideXml).toContain('marT="45720"');
 			expect(slideXml).toContain('marB="73152"');
 			expect(slideXml).toContain('<a:lnSpc><a:spcPts val="2100"/></a:lnSpc>');
+			expect(slideXml).toContain('strike="sngStrike"');
+			expect(slideXml).toContain('spc="150"');
 			expect(slideXml).not.toContain('<a:alpha val="0"/>');
 		} finally {
 			rmSync(directory, { recursive: true, force: true });

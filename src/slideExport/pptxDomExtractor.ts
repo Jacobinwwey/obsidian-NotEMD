@@ -28,10 +28,13 @@ interface RawSlideTextBox {
 	bold: boolean;
 	italic: boolean;
 	underline: boolean;
+	strike?: boolean;
 	align: SlidevPptxTextAlign;
+	verticalAlign?: SlidevPptxVerticalAlign;
 	bullet: boolean;
 	bulletLevel?: number;
 	lineSpacingPt?: number;
+	charSpacingPt?: number;
 	paragraphSpacingBeforePt?: number;
 	paragraphSpacingAfterPt?: number;
 	paddingLeftIn?: number;
@@ -51,6 +54,8 @@ interface RawSlideInlineTextRun {
 	bold: boolean;
 	italic: boolean;
 	underline: boolean;
+	strike?: boolean;
+	charSpacingPt?: number;
 	code: boolean;
 	link: boolean;
 	hyperlinkTarget?: string;
@@ -70,12 +75,14 @@ interface RawSlideTableCell {
 	bold: boolean;
 	italic: boolean;
 	underline: boolean;
+	strike?: boolean;
 	align: SlidevPptxTextAlign;
 	verticalAlign: SlidevPptxVerticalAlign;
 	fillColor: string | null;
 	borderColor: string | null;
 	borderWidthPt: number;
 	lineSpacingPt?: number;
+	charSpacingPt?: number;
 	paddingLeftIn?: number;
 	paddingRightIn?: number;
 	paddingTopIn?: number;
@@ -141,6 +148,7 @@ function normalizeInlineTextRun(raw: RawSlideInlineTextRun): SlidevPptxInlineTex
 		return null;
 	}
 	const hyperlinkTarget = normalizeHyperlinkTarget(raw.hyperlinkTarget);
+	const charSpacingPt = normalizeOptionalCharSpacingPt(raw.charSpacingPt);
 	return {
 		text: text.slice(0, 4000),
 		fontSize: clamp(Number(raw.fontSize) || 12, 5, 144),
@@ -149,6 +157,8 @@ function normalizeInlineTextRun(raw: RawSlideInlineTextRun): SlidevPptxInlineTex
 		bold: Boolean(raw.bold),
 		italic: Boolean(raw.italic),
 		underline: Boolean(raw.underline),
+		strike: Boolean(raw.strike),
+		...(charSpacingPt !== undefined ? { charSpacingPt } : {}),
 		code: Boolean(raw.code),
 		link: Boolean(raw.link),
 		...(hyperlinkTarget ? { hyperlinkTarget } : {}),
@@ -216,6 +226,8 @@ function buildFallbackRichTextParagraphs(
 					bold: textBox.bold,
 					italic: textBox.italic,
 					underline: textBox.underline,
+					strike: textBox.strike,
+					charSpacingPt: textBox.charSpacingPt,
 					code: false,
 					link: false,
 				},
@@ -251,6 +263,7 @@ function normalizeTextBox(raw: RawSlideTextBox): SlidevPptxTextBox | null {
 	const bullet = Boolean(raw.bullet);
 	const bulletLevel = bullet ? normalizeOptionalBulletLevel(raw.bulletLevel) ?? 0 : undefined;
 	const lineSpacingPt = normalizeOptionalPositiveNumber(raw.lineSpacingPt, 1, 200);
+	const charSpacingPt = normalizeOptionalCharSpacingPt(raw.charSpacingPt);
 	const paragraphSpacingBeforePt = normalizeOptionalPositiveNumber(raw.paragraphSpacingBeforePt, 0.1, 72);
 	const paragraphSpacingAfterPt = normalizeOptionalPositiveNumber(raw.paragraphSpacingAfterPt, 0.1, 72);
 	const paddingLeftIn = normalizeOptionalPositiveNumber(raw.paddingLeftIn, 0.001, 2);
@@ -271,10 +284,13 @@ function normalizeTextBox(raw: RawSlideTextBox): SlidevPptxTextBox | null {
 		bold: Boolean(raw.bold),
 		italic: Boolean(raw.italic),
 		underline: Boolean(raw.underline),
+		strike: Boolean(raw.strike),
 		align: raw.align === 'center' || raw.align === 'right' || raw.align === 'justify' ? raw.align : 'left',
+		verticalAlign: normalizeVerticalAlign(raw.verticalAlign || 'top'),
 		bullet,
 		...(bulletLevel !== undefined ? { bulletLevel } : {}),
 		...(lineSpacingPt !== undefined ? { lineSpacingPt } : {}),
+		...(charSpacingPt !== undefined ? { charSpacingPt } : {}),
 		...(paragraphSpacingBeforePt !== undefined ? { paragraphSpacingBeforePt } : {}),
 		...(paragraphSpacingAfterPt !== undefined ? { paragraphSpacingAfterPt } : {}),
 		...(paddingLeftIn !== undefined ? { paddingLeftIn } : {}),
@@ -305,8 +321,17 @@ function normalizeVerticalAlign(value: string): SlidevPptxVerticalAlign {
 	return 'top';
 }
 
+function normalizeOptionalCharSpacingPt(value: unknown): number | undefined {
+	const numeric = Number(value);
+	if (!Number.isFinite(numeric) || Math.abs(numeric) < 0.01) {
+		return undefined;
+	}
+	return clamp(numeric, -20, 200);
+}
+
 function normalizeTableCell(raw: RawSlideTableCell): SlidevPptxTableCell {
 	const lineSpacingPt = normalizeOptionalPositiveNumber(raw.lineSpacingPt, 1, 200);
+	const charSpacingPt = normalizeOptionalCharSpacingPt(raw.charSpacingPt);
 	const paddingLeftIn = normalizeOptionalPositiveNumber(raw.paddingLeftIn, 0.001, 2);
 	const paddingRightIn = normalizeOptionalPositiveNumber(raw.paddingRightIn, 0.001, 2);
 	const paddingTopIn = normalizeOptionalPositiveNumber(raw.paddingTopIn, 0.001, 2);
@@ -330,12 +355,14 @@ function normalizeTableCell(raw: RawSlideTableCell): SlidevPptxTableCell {
 		bold: Boolean(raw.bold),
 		italic: Boolean(raw.italic),
 		underline: Boolean(raw.underline),
+		strike: Boolean(raw.strike),
 		align: raw.align === 'center' || raw.align === 'right' || raw.align === 'justify' ? raw.align : 'left',
 		verticalAlign: normalizeVerticalAlign(raw.verticalAlign),
 		fillColor: raw.fillColor ? normalizeHexColor(raw.fillColor, '') || null : null,
 		borderColor: raw.borderColor ? normalizeHexColor(raw.borderColor, '') || null : null,
 		borderWidthPt: clamp(Number(raw.borderWidthPt) || 0, 0, 12),
 		...(lineSpacingPt !== undefined ? { lineSpacingPt } : {}),
+		...(charSpacingPt !== undefined ? { charSpacingPt } : {}),
 		...(paddingLeftIn !== undefined ? { paddingLeftIn } : {}),
 		...(paddingRightIn !== undefined ? { paddingRightIn } : {}),
 		...(paddingTopIn !== undefined ? { paddingTopIn } : {}),
@@ -477,6 +504,12 @@ export async function extractSlidevPptxSlideFromPage(page: any, slideNumber: num
 			const lineHeight = pxToPt(cssPx(style.lineHeight));
 			return lineHeight > 0 ? Math.min(200, lineHeight) : undefined;
 		};
+		const charSpacingPtFor = (style: CSSStyleDeclaration): number | undefined => {
+			if (!style.letterSpacing || style.letterSpacing === 'normal') return undefined;
+			const letterSpacing = Number.parseFloat(style.letterSpacing);
+			if (!Number.isFinite(letterSpacing) || Math.abs(letterSpacing) < 0.01) return undefined;
+			return Math.max(-20, Math.min(200, pxToPt(letterSpacing)));
+		};
 		const bodyInsetsFor = (
 			style: CSSStyleDeclaration,
 		): Pick<
@@ -580,6 +613,7 @@ export async function extractSlidevPptxSlideFromPage(page: any, slideNumber: num
 		): Pick<
 			RawSlideTextBox,
 			| 'lineSpacingPt'
+			| 'charSpacingPt'
 			| 'paragraphSpacingBeforePt'
 			| 'paragraphSpacingAfterPt'
 			| 'paddingLeftIn'
@@ -588,6 +622,7 @@ export async function extractSlidevPptxSlideFromPage(page: any, slideNumber: num
 			| 'paddingBottomIn'
 		> => ({
 			...paragraphTextLayoutFor(style),
+			...(charSpacingPtFor(style) !== undefined ? { charSpacingPt: charSpacingPtFor(style) } : {}),
 			...bodyInsetsFor(style),
 		});
 		const listLevelFor = (element: Element): number => {
@@ -759,6 +794,25 @@ export async function extractSlidevPptxSlideFromPage(page: any, slideNumber: num
 			if (style.textAlign === 'center') return 'center';
 			if (style.textAlign === 'right' || style.textAlign === 'end') return 'right';
 			if (style.textAlign === 'justify') return 'justify';
+			if (style.display.includes('flex') || style.display.includes('grid')) {
+				const flexDirection = String(style.flexDirection || 'row');
+				const isColumn = /column/i.test(flexDirection);
+				const isRowReverse = /row-reverse/i.test(flexDirection);
+				const horizontalAxisValue = isColumn
+					? String(style.alignItems || '')
+					: String(style.justifyContent || '');
+				if (horizontalAxisValue === 'center') return 'center';
+				if (
+					horizontalAxisValue === 'end' ||
+					horizontalAxisValue === 'flex-end' ||
+					horizontalAxisValue === 'right'
+				) {
+					return isRowReverse ? 'left' : 'right';
+				}
+				if (!isColumn && (horizontalAxisValue === 'start' || horizontalAxisValue === 'flex-start')) {
+					return isRowReverse ? 'right' : 'left';
+				}
+			}
 			return 'left';
 		};
 		const effectiveColor = (style: CSSStyleDeclaration): string => {
@@ -782,7 +836,7 @@ export async function extractSlidevPptxSlideFromPage(page: any, slideNumber: num
 			if (element.closest('.shiki') || element.querySelector('.shiki, .token, code[class*="language-"]')) {
 				reasons.add('syntax-highlight');
 			}
-			for (const child of Array.from(element.querySelectorAll('b,strong,em,i,u,a,code,span,mark,sup,sub'))) {
+			for (const child of Array.from(element.querySelectorAll('b,strong,em,i,u,s,strike,del,a,code,span,mark,sup,sub'))) {
 				if (!hasText(child)) continue;
 				const childStyle = window.getComputedStyle(child);
 				if (
@@ -791,6 +845,7 @@ export async function extractSlidevPptxSlideFromPage(page: any, slideNumber: num
 					childStyle.textDecorationLine !== style.textDecorationLine ||
 					childStyle.fontFamily !== style.fontFamily ||
 					childStyle.fontSize !== style.fontSize ||
+					childStyle.letterSpacing !== style.letterSpacing ||
 					effectiveColor(childStyle) !== effectiveColor(style)
 				) {
 					reasons.add('inline-formatting');
@@ -823,6 +878,7 @@ export async function extractSlidevPptxSlideFromPage(page: any, slideNumber: num
 			const fontWeight = Number.parseInt(style.fontWeight || '400', 10);
 			const linkElement = sourceElement.closest('a[href]') as HTMLAnchorElement | null;
 			const hyperlinkTarget = linkElement?.href || linkElement?.getAttribute('href') || undefined;
+			const textDecoration = `${style.textDecorationLine || ''} ${style.textDecoration || ''}`;
 			return {
 				fontSize: pxToPt(fontSizePx),
 				fontFace: sanitizeFontFace(style.fontFamily),
@@ -830,7 +886,9 @@ export async function extractSlidevPptxSlideFromPage(page: any, slideNumber: num
 				bold: Number.isFinite(fontWeight) ? fontWeight >= 600 : /bold/i.test(style.fontWeight),
 				italic: style.fontStyle === 'italic' || style.fontStyle === 'oblique',
 				underline:
-					style.textDecorationLine.includes('underline') || Boolean(sourceElement.closest('u,ins,a[href]')),
+					textDecoration.includes('underline') || Boolean(sourceElement.closest('u,ins,a[href]')),
+				strike: textDecoration.includes('line-through') || Boolean(sourceElement.closest('s,strike,del')),
+				...(charSpacingPtFor(style) !== undefined ? { charSpacingPt: charSpacingPtFor(style) } : {}),
 				code: Boolean(sourceElement.closest('code,pre')),
 				link: Boolean(linkElement),
 				hyperlinkTarget,
@@ -848,6 +906,8 @@ export async function extractSlidevPptxSlideFromPage(page: any, slideNumber: num
 					previous.bold === run.bold &&
 					previous.italic === run.italic &&
 					previous.underline === run.underline &&
+					previous.strike === run.strike &&
+					previous.charSpacingPt === run.charSpacingPt &&
 					previous.code === run.code &&
 					previous.link === run.link &&
 					previous.hyperlinkTarget === run.hyperlinkTarget
@@ -942,6 +1002,8 @@ export async function extractSlidevPptxSlideFromPage(page: any, slideNumber: num
 			left.bold === right.bold &&
 			left.italic === right.italic &&
 			left.underline === right.underline &&
+			left.strike === right.strike &&
+			left.charSpacingPt === right.charSpacingPt &&
 			left.code === right.code &&
 			left.link === right.link &&
 			left.hyperlinkTarget === right.hyperlinkTarget;
@@ -1141,6 +1203,8 @@ export async function extractSlidevPptxSlideFromPage(page: any, slideNumber: num
 							bold: run.bold,
 							italic: run.italic,
 							underline: run.underline,
+							strike: run.strike,
+							...(run.charSpacingPt !== undefined ? { charSpacingPt: run.charSpacingPt } : {}),
 							align: alignFor(baseStyle),
 							bullet: false,
 							order: baseOrder + lineIndex * 0.01 + segmentIndex * 0.0001,
@@ -1156,6 +1220,21 @@ export async function extractSlidevPptxSlideFromPage(page: any, slideNumber: num
 			const verticalAlign = String(style.verticalAlign || '');
 			if (verticalAlign === 'middle') return 'middle';
 			if (verticalAlign === 'bottom' || verticalAlign === 'text-bottom') return 'bottom';
+			if (style.display.includes('flex') || style.display.includes('grid')) {
+				const flexDirection = String(style.flexDirection || 'row');
+				const isColumn = /column/i.test(flexDirection);
+				const isColumnReverse = /column-reverse/i.test(flexDirection);
+				const verticalAxisValue = isColumn
+					? String(style.justifyContent || '')
+					: String(style.alignItems || '');
+				if (verticalAxisValue === 'center') return 'middle';
+				if (isColumn && (verticalAxisValue === 'start' || verticalAxisValue === 'flex-start')) {
+					return isColumnReverse ? 'bottom' : 'top';
+				}
+				if (verticalAxisValue === 'end' || verticalAxisValue === 'flex-end') {
+					return isColumnReverse ? 'top' : 'bottom';
+				}
+			}
 			return 'top';
 		};
 		const parseSpan = (element: Element, attribute: 'rowspan' | 'colspan'): number => {
@@ -1300,6 +1379,8 @@ export async function extractSlidevPptxSlideFromPage(page: any, slideNumber: num
 				const fontWeight = Number.parseInt(cellStyle.fontWeight || '400', 10);
 				const border = strongestBorder(cellStyle);
 				const cellLineSpacingPt = lineSpacingPtFor(cellStyle);
+				const cellCharSpacingPt = charSpacingPtFor(cellStyle);
+				const cellTextDecoration = `${cellStyle.textDecorationLine || ''} ${cellStyle.textDecoration || ''}`;
 				rows[placement.rowIndex].push({
 					text: cellText,
 					rowSpan: placement.rowSpan,
@@ -1309,13 +1390,15 @@ export async function extractSlidevPptxSlideFromPage(page: any, slideNumber: num
 					color: effectiveColor(cellStyle),
 					bold: Number.isFinite(fontWeight) ? fontWeight >= 600 : /bold/i.test(cellStyle.fontWeight),
 					italic: cellStyle.fontStyle === 'italic' || cellStyle.fontStyle === 'oblique',
-					underline: cellStyle.textDecorationLine.includes('underline'),
+					underline: cellTextDecoration.includes('underline'),
+					strike: cellTextDecoration.includes('line-through'),
 					align: alignFor(cellStyle),
 					verticalAlign: verticalAlignFor(cellStyle),
 					fillColor: rgbToHex(cellStyle.backgroundColor) || null,
 					borderColor: border.color,
 					borderWidthPt: border.widthPt,
 					...(cellLineSpacingPt ? { lineSpacingPt: cellLineSpacingPt } : {}),
+					...(cellCharSpacingPt !== undefined ? { charSpacingPt: cellCharSpacingPt } : {}),
 					...bodyInsetsFor(cellStyle),
 					...tableCellTextInsetsFor(placement.element, placement.rect),
 				});
@@ -1333,8 +1416,10 @@ export async function extractSlidevPptxSlideFromPage(page: any, slideNumber: num
 						color: effectiveColor(cellStyle),
 						bold: Number.isFinite(fontWeight) ? fontWeight >= 600 : /bold/i.test(cellStyle.fontWeight),
 						italic: cellStyle.fontStyle === 'italic' || cellStyle.fontStyle === 'oblique',
-						underline: cellStyle.textDecorationLine.includes('underline'),
+						underline: cellTextDecoration.includes('underline'),
+						strike: cellTextDecoration.includes('line-through'),
 						align: alignFor(cellStyle),
+						verticalAlign: verticalAlignFor(cellStyle),
 						bullet: false,
 						...blockTextLayoutFor(cellStyle),
 						order: orderFor(placement.element, order + 1),
@@ -1380,6 +1465,7 @@ export async function extractSlidevPptxSlideFromPage(page: any, slideNumber: num
 			const fontSizePx = Number.parseFloat(style.fontSize || '16') || 16;
 			const fontWeight = Number.parseInt(style.fontWeight || '400', 10);
 			const listStyle = style.listStyleType || '';
+			const textDecoration = `${style.textDecorationLine || ''} ${style.textDecoration || ''}`;
 			const baseOrder = orderFor(element, order);
 			const bullet = tagName === 'LI' && listStyle !== 'none';
 			const unmodeledRunReasons = textRunReasonsFor(element, style, tagName);
@@ -1411,8 +1497,10 @@ export async function extractSlidevPptxSlideFromPage(page: any, slideNumber: num
 					color: effectiveColor(style),
 					bold: Number.isFinite(fontWeight) ? fontWeight >= 600 : /bold/i.test(style.fontWeight),
 					italic: style.fontStyle === 'italic' || style.fontStyle === 'oblique',
-					underline: style.textDecorationLine.includes('underline'),
+					underline: textDecoration.includes('underline'),
+					strike: textDecoration.includes('line-through'),
 					align: alignFor(style),
+					verticalAlign: verticalAlignFor(style),
 					bullet,
 					...(bullet ? { bulletLevel: listLevelFor(element) } : {}),
 					...blockTextLayoutFor(style),
@@ -1468,6 +1556,7 @@ export async function extractSlidevPptxSlideFromPage(page: any, slideNumber: num
 			const fontSizePx = Number.parseFloat(style.fontSize || '16') || 16;
 			const fontWeight = Number.parseInt(style.fontWeight || '400', 10);
 			const sourceKind = svgTextSourceKindFor(svgTextElement);
+			const textDecoration = `${style.textDecorationLine || ''} ${style.textDecoration || ''}`;
 			textBoxes.push({
 				text,
 				sourceKind,
@@ -1480,7 +1569,9 @@ export async function extractSlidevPptxSlideFromPage(page: any, slideNumber: num
 				color: svgTextColorFor(style),
 				bold: Number.isFinite(fontWeight) ? fontWeight >= 600 : /bold/i.test(style.fontWeight),
 				italic: style.fontStyle === 'italic' || style.fontStyle === 'oblique',
-				underline: style.textDecorationLine.includes('underline'),
+				underline: textDecoration.includes('underline'),
+				strike: textDecoration.includes('line-through'),
+				...(charSpacingPtFor(style) !== undefined ? { charSpacingPt: charSpacingPtFor(style) } : {}),
 				align: 'left',
 				bullet: false,
 				order: orderFor(svgTextElement, order),

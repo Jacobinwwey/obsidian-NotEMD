@@ -999,14 +999,14 @@ function tableCellHasTextInset(cell: SlidevPptxTableCell): boolean {
 function tableCellTextAnchorInsetDelta(cell: SlidevPptxTableCell): number {
 	const insetPairs: Array<[number | undefined, number | undefined]> = [];
 	if (cell.align === 'right') {
-		insetPairs.push([cell.textRightInsetIn, cell.paddingRightIn]);
+		insetPairs.push([cell.textRightInsetIn, tableCellOfficeRightInset(cell)]);
 	} else if (cell.align !== 'center') {
-		insetPairs.push([cell.textLeftInsetIn, cell.paddingLeftIn]);
+		insetPairs.push([cell.textLeftInsetIn, tableCellOfficeLeftInset(cell)]);
 	}
 	if (cell.verticalAlign === 'bottom') {
-		insetPairs.push([cell.textBottomInsetIn, cell.paddingBottomIn]);
+		insetPairs.push([cell.textBottomInsetIn, tableCellOfficeBottomInset(cell)]);
 	} else if (cell.verticalAlign !== 'middle') {
-		insetPairs.push([cell.textTopInsetIn, cell.paddingTopIn]);
+		insetPairs.push([cell.textTopInsetIn, tableCellOfficeTopInset(cell)]);
 	}
 	return Number(
 		Math.max(
@@ -1014,6 +1014,28 @@ function tableCellTextAnchorInsetDelta(cell: SlidevPptxTableCell): number {
 			...insetPairs.map(([textInset, cssInset]) => Math.abs((Number(textInset) || 0) - (Number(cssInset) || 0))),
 		).toFixed(6),
 	);
+}
+
+function measuredInsetOrPadding(measuredInset: number | undefined, paddingInset: number | undefined): number | undefined {
+	return Number.isFinite(Number(measuredInset)) && Number(measuredInset) > 0 ? measuredInset : paddingInset;
+}
+
+function tableCellOfficeLeftInset(cell: SlidevPptxTableCell): number | undefined {
+	return cell.align === 'left' ? measuredInsetOrPadding(cell.textLeftInsetIn, cell.paddingLeftIn) : cell.paddingLeftIn;
+}
+
+function tableCellOfficeRightInset(cell: SlidevPptxTableCell): number | undefined {
+	return cell.align === 'right' ? measuredInsetOrPadding(cell.textRightInsetIn, cell.paddingRightIn) : cell.paddingRightIn;
+}
+
+function tableCellOfficeTopInset(cell: SlidevPptxTableCell): number | undefined {
+	return cell.verticalAlign === 'top' ? measuredInsetOrPadding(cell.textTopInsetIn, cell.paddingTopIn) : cell.paddingTopIn;
+}
+
+function tableCellOfficeBottomInset(cell: SlidevPptxTableCell): number | undefined {
+	return cell.verticalAlign === 'bottom'
+		? measuredInsetOrPadding(cell.textBottomInsetIn, cell.paddingBottomIn)
+		: cell.paddingBottomIn;
 }
 
 function collectUniqueSorted<T extends string>(values: T[]): T[] {

@@ -83,6 +83,18 @@ function alignToOoxml(value: SlidevPptxTextAlign): string {
 	}
 }
 
+function verticalAlignToOoxml(value: SlidevPptxTextBox['verticalAlign']): string {
+	switch (value) {
+		case 'middle':
+			return 'ctr';
+		case 'bottom':
+			return 'b';
+		case 'top':
+		default:
+			return 't';
+	}
+}
+
 function buildTransparentTextFill(color: string): string {
 	return `<a:solidFill><a:srgbClr val="${color}"><a:alpha val="0"/></a:srgbClr></a:solidFill>`;
 }
@@ -103,6 +115,8 @@ type TextRunStyle = {
 	bold: boolean;
 	italic: boolean;
 	underline: boolean;
+	strike?: boolean;
+	charSpacingPt?: number;
 	hyperlinkTarget?: string;
 };
 
@@ -117,6 +131,11 @@ function buildRunXmlWithTextFill(
 	const bold = runStyle.bold ? ' b="1"' : '';
 	const italic = runStyle.italic ? ' i="1"' : '';
 	const underline = runStyle.underline ? ' u="sng"' : '';
+	const strike = runStyle.strike ? ' strike="sngStrike"' : '';
+	const charSpacing =
+		Number.isFinite(Number(runStyle.charSpacingPt)) && Math.abs(Number(runStyle.charSpacingPt)) >= 0.01
+			? ` spc="${Math.round(Math.max(-20, Math.min(200, Number(runStyle.charSpacingPt))) * 100)}"`
+			: '';
 	const fontFace = escapeXmlAttribute(runStyle.fontFace || 'Aptos');
 	const hyperlinkXml = hyperlinkRelationshipId
 		? `<a:hlinkClick r:id="${escapeXmlAttribute(hyperlinkRelationshipId)}"/>`
@@ -124,7 +143,7 @@ function buildRunXmlWithTextFill(
 
 	return [
 		'<a:r>',
-		`<a:rPr lang="${language}" sz="${size}"${bold}${italic}${underline}>`,
+		`<a:rPr lang="${language}" sz="${size}"${bold}${italic}${underline}${strike}${charSpacing}>`,
 		textFillXml,
 		`<a:latin typeface="${fontFace}"/>`,
 		`<a:ea typeface="${fontFace}"/>`,
@@ -186,6 +205,8 @@ function fallbackTextParagraphs(textBox: SlidevPptxTextBox): SlidevPptxRichTextP
 					bold: textBox.bold,
 					italic: textBox.italic,
 					underline: textBox.underline,
+					strike: textBox.strike,
+					charSpacingPt: textBox.charSpacingPt,
 					hyperlinkTarget: undefined,
 					code: false,
 					link: false,
@@ -335,7 +356,8 @@ function visibleNativeTextBodyProperties(textBox: SlidevPptxTextBox): string {
 	const rIns = inchesToEmu(textBox.paddingRightIn || 0);
 	const tIns = inchesToEmu(textBox.paddingTopIn || 0);
 	const bIns = inchesToEmu(textBox.paddingBottomIn || 0);
-	return `<a:bodyPr wrap="${wrap}" lIns="${lIns}" tIns="${tIns}" rIns="${rIns}" bIns="${bIns}" rtlCol="0" anchor="t"><a:noAutofit/></a:bodyPr>`;
+	const anchor = verticalAlignToOoxml(textBox.verticalAlign);
+	return `<a:bodyPr wrap="${wrap}" lIns="${lIns}" tIns="${tIns}" rIns="${rIns}" bIns="${bIns}" rtlCol="0" anchor="${anchor}"><a:noAutofit/></a:bodyPr>`;
 }
 
 function editableTextBodyProperties(textBox: SlidevPptxTextBox): string {
@@ -343,7 +365,8 @@ function editableTextBodyProperties(textBox: SlidevPptxTextBox): string {
 	const rIns = inchesToEmu(textBox.paddingRightIn || 0);
 	const tIns = inchesToEmu(textBox.paddingTopIn || 0);
 	const bIns = inchesToEmu(textBox.paddingBottomIn || 0);
-	return `<a:bodyPr wrap="square" lIns="${lIns}" tIns="${tIns}" rIns="${rIns}" bIns="${bIns}" rtlCol="0" anchor="t"><a:normAutofit fontScale="100000"/></a:bodyPr>`;
+	const anchor = verticalAlignToOoxml(textBox.verticalAlign);
+	return `<a:bodyPr wrap="square" lIns="${lIns}" tIns="${tIns}" rIns="${rIns}" bIns="${bIns}" rtlCol="0" anchor="${anchor}"><a:normAutofit fontScale="100000"/></a:bodyPr>`;
 }
 
 function textShapeLabel(textBox: SlidevPptxTextBox): string {
@@ -525,10 +548,10 @@ function pointsToEmu(value: number): number {
 function tableCellInsetAttributes(cell: SlidevPptxTableCell): string[] {
 	const attributes: string[] = [];
 	const insetPairs: Array<[string, number | undefined]> = [
-		['marL', cell.paddingLeftIn],
-		['marR', cell.paddingRightIn],
-		['marT', cell.paddingTopIn],
-		['marB', cell.paddingBottomIn],
+		['marL', tableCellOfficeLeftInset(cell)],
+		['marR', tableCellOfficeRightInset(cell)],
+		['marT', tableCellOfficeTopInset(cell)],
+		['marB', tableCellOfficeBottomInset(cell)],
 	];
 	for (const [attributeName, value] of insetPairs) {
 		const emuValue = inchesToEmu(value || 0);
@@ -537,6 +560,28 @@ function tableCellInsetAttributes(cell: SlidevPptxTableCell): string[] {
 		}
 	}
 	return attributes;
+}
+
+function measuredInsetOrPadding(measuredInset: number | undefined, paddingInset: number | undefined): number | undefined {
+	return Number.isFinite(Number(measuredInset)) && Number(measuredInset) > 0 ? measuredInset : paddingInset;
+}
+
+function tableCellOfficeLeftInset(cell: SlidevPptxTableCell): number | undefined {
+	return cell.align === 'left' ? measuredInsetOrPadding(cell.textLeftInsetIn, cell.paddingLeftIn) : cell.paddingLeftIn;
+}
+
+function tableCellOfficeRightInset(cell: SlidevPptxTableCell): number | undefined {
+	return cell.align === 'right' ? measuredInsetOrPadding(cell.textRightInsetIn, cell.paddingRightIn) : cell.paddingRightIn;
+}
+
+function tableCellOfficeTopInset(cell: SlidevPptxTableCell): number | undefined {
+	return cell.verticalAlign === 'top' ? measuredInsetOrPadding(cell.textTopInsetIn, cell.paddingTopIn) : cell.paddingTopIn;
+}
+
+function tableCellOfficeBottomInset(cell: SlidevPptxTableCell): number | undefined {
+	return cell.verticalAlign === 'bottom'
+		? measuredInsetOrPadding(cell.textBottomInsetIn, cell.paddingBottomIn)
+		: cell.paddingBottomIn;
 }
 
 function buildVisibleTableBorder(cell: SlidevPptxTableCell): string {

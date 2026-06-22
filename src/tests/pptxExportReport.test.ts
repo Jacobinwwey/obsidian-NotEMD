@@ -548,8 +548,8 @@ describe('pptx export report', () => {
 				collapsedTableBorderModelCount: 1,
 				separateTableBorderModelCount: 1,
 				tableCellTextInsetCount: 2,
-				tableCellTextInsetDeltaCount: 1,
-				maxTableCellTextInsetDeltaIn: 0.03,
+				tableCellTextInsetDeltaCount: 0,
+				maxTableCellTextInsetDeltaIn: 0,
 			}),
 		);
 		expect(report.editablePrimitiveCoverage).toEqual(
@@ -557,8 +557,8 @@ describe('pptx export report', () => {
 				collapsedTableBorderModelCount: 1,
 				separateTableBorderModelCount: 1,
 				tableCellTextInsetCount: 2,
-				tableCellTextInsetDeltaCount: 1,
-				maxTableCellTextInsetDeltaIn: 0.03,
+				tableCellTextInsetDeltaCount: 0,
+				maxTableCellTextInsetDeltaIn: 0,
 			}),
 		);
 		expect(report.slides[0]).toEqual(
@@ -566,8 +566,8 @@ describe('pptx export report', () => {
 				collapsedTableBorderModelCount: 1,
 				separateTableBorderModelCount: 0,
 				tableCellTextInsetCount: 1,
-				tableCellTextInsetDeltaCount: 1,
-				maxTableCellTextInsetDeltaIn: 0.03,
+				tableCellTextInsetDeltaCount: 0,
+				maxTableCellTextInsetDeltaIn: 0,
 			}),
 		);
 		expect(report.slides[1]).toEqual(

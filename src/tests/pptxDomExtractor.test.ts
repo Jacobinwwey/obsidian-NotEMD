@@ -179,6 +179,49 @@ describe('pptxDomExtractor', () => {
 		}
 	});
 
+	test('preserves browser text styling and flex alignment for visible native text', async () => {
+		if (!browser) {
+			console.warn('Skipping PPTX DOM extractor Playwright test:', launchError);
+			return;
+		}
+
+		const page = await browser.newPage({ viewport: { width: 1280, height: 720 } });
+		try {
+			await page.setContent(`
+				<body style="margin:0;background:#fff">
+					<div class="slidev-page" style="width:1280px;height:720px;background:#fff;padding:64px;box-sizing:border-box">
+						<div id="metric-label" style="width:520px;height:96px;display:flex;align-items:center;justify-content:center;font-family:Arial;font-size:30px;letter-spacing:2px;text-decoration:line-through;color:#111827">
+							Editable chart label
+						</div>
+					</div>
+				</body>
+			`);
+
+			const slide = await extractSlidevPptxSlideFromPage(page, 1);
+			const label = slide.texts.find((textBox) => textBox.text === 'Editable chart label');
+			const runs = label?.richTextParagraphs.flatMap((paragraph) => paragraph.runs) || [];
+
+			expect(label).toEqual(
+				expect.objectContaining({
+					strike: true,
+					align: 'center',
+					verticalAlign: 'middle',
+					charSpacingPt: expect.any(Number),
+				}),
+			);
+			expect(label?.charSpacingPt).toBeGreaterThan(0);
+			expect(runs).toEqual([
+				expect.objectContaining({
+					text: 'Editable chart label',
+					strike: true,
+					charSpacingPt: expect.any(Number),
+				}),
+			]);
+		} finally {
+			await page.close();
+		}
+	});
+
 	test('preserves table cell inset and line-height metadata for native Office tables', async () => {
 		if (!browser) {
 			console.warn('Skipping PPTX DOM extractor Playwright test:', launchError);
@@ -192,7 +235,7 @@ describe('pptxDomExtractor', () => {
 					<div class="slidev-page" style="width:1280px;height:720px;background:#fff;padding:64px;box-sizing:border-box">
 						<table style="border-collapse:collapse;font-family:Arial;font-size:24px;color:#111827">
 							<tr>
-								<td style="padding:10px 18px 12px 14px;border:2px solid #94a3b8;line-height:34px;background:#f8fafc">
+								<td style="padding:10px 18px 12px 14px;border:2px solid #94a3b8;line-height:34px;letter-spacing:2px;text-decoration:line-through;background:#f8fafc">
 									布局契约<br>Layout contract
 								</td>
 							</tr>
@@ -213,6 +256,8 @@ describe('pptxDomExtractor', () => {
 				expect.objectContaining({
 					text: '布局契约\nLayout contract',
 					lineSpacingPt: expect.any(Number),
+					charSpacingPt: expect.any(Number),
+					strike: true,
 					paddingLeftIn: expect.any(Number),
 					paddingRightIn: expect.any(Number),
 					paddingTopIn: expect.any(Number),
@@ -224,6 +269,7 @@ describe('pptxDomExtractor', () => {
 				}),
 			);
 			expect(cell?.lineSpacingPt).toBeGreaterThan(cell?.fontSize || 0);
+			expect(cell?.charSpacingPt).toBeGreaterThan(0);
 			expect(cell?.paddingLeftIn).toBeGreaterThan(0);
 			expect(cell?.paddingRightIn).toBeGreaterThan(0);
 			expect(cell?.paddingTopIn).toBeGreaterThan(0);

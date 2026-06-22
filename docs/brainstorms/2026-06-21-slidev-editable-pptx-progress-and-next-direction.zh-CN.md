@@ -1157,6 +1157,63 @@ M20 之后的推进方向：
 4. Mermaid 默认继续由背景拥有，并保持源内容不变；
 5. 继续用 `architecture.zh-CN.md` 做真实验收 deck；只有真实 deck 覆盖不到某个 primitive 时，才补小 fixture。
 
+## M21 `oh-my-ppt` 原生文字保真切片
+
+这一轮只落地 `ref/oh-my-ppt` 中与 NotEMD 架构匹配的部分：仍以真实 Chromium 渲染后的 DOM 为事实源，再由 PPTX writer 把这些事实写成可见原生 DrawingML 文字。没有新增第二条 HTML-to-PPTX 路线，没有新增透明文本层，也没有改写 Mermaid。
+
+本轮落地内容：
+
+1. `SlidevPptxInlineTextRun`、`SlidevPptxTextBox`、`SlidevPptxTableCell` 在 Chromium 能提供对应 CSS 事实时，会携带 `strike` 与 `charSpacingPt`。
+2. `SlidevPptxTextBox` 新增 `verticalAlign`，让 flex/grid 居中的 label 可以写成 Office `<a:bodyPr anchor="ctr">`，而不是全部顶端锚定。
+3. DOM extractor 记录 `line-through`、`letter-spacing`、flex/grid 水平对齐、flex/grid 垂直对齐，覆盖 body/code/chart/SVG 可见文本路径；table cell 也携带同一组 run-level 样式事实。
+4. writer 在可见原生文字 run 与原生 table-cell run 上写入 `strike="sngStrike"` 和 DrawingML `spc`。
+5. writer 现在会把浏览器实测 table text inset 用在对齐拥有的边缘：左对齐 cell 的 `textLeftInsetIn` 可写入 `marL`，右对齐写入 `marR`，顶端对齐写入 `marT`，底端对齐写入 `marB`。center/middle alignment 仍然不强行套用。
+6. report 的 table inset drift 指标改为比较“浏览器实测 inset”和“writer 实际写入 Office 的有效 inset”。因此它现在表示剩余漂移，而不是旧的 CSS padding 诊断残留。
+7. 单测继续锁定默认路径不得出现透明文本，同时新增可见原生 `strike`、字符间距、垂直锚点、table margin 校准的 XML 断言。
+
+验证：
+
+1. `npm test -- --runInBand src/tests/pptxWriter.test.ts` 通过。
+2. `npm test -- --runInBand src/tests/pptxExportReport.test.ts` 通过。
+3. `runuser -u jacob -- env HOME=/home/jacob PLAYWRIGHT_BROWSERS_PATH=/home/jacob/.cache/ms-playwright bash -lc 'cd /home/jacob/obsidian-NotEMD && npm test -- --runInBand src/tests/pptxDomExtractor.test.ts'` 通过，并且使用 jacob 的真实 Chromium 执行。
+4. `npx tsc --noEmit --pretty false` 通过。
+5. 基于 `docs/architecture.zh-CN.md` 的真实验收命令通过：`runuser -u jacob -- env HOME=/home/jacob PLAYWRIGHT_BROWSERS_PATH=/home/jacob/.cache/ms-playwright bash -lc 'cd /home/jacob/obsidian-NotEMD && rm -rf docs/export/test-slidev-m21-native-text-fidelity /tmp/notemd-m21-native-text-fidelity.json && npm run verify:slidev-export -- --vault docs --source architecture.zh-CN.md --format pptx --output-subfolder export/test-slidev-m21-native-text-fidelity --sample-slides all --timeout-ms 240000 --no-screenshots --require-pptx-visual-match --json > /tmp/notemd-m21-native-text-fidelity.json'`。
+6. 输出 PPTX：`docs/export/test-slidev-m21-native-text-fidelity/architecture.zh-CN.pptx`。
+7. 输出 report：`docs/export/test-slidev-m21-native-text-fidelity/architecture.zh-CN.pptx.report.json`。
+
+真实 `architecture.zh-CN.md` 验收结果：
+
+1. `ok = true`。
+2. Slidev CLI 来自本地 fork：`52.16.0 (/home/jacob/slidev/packages/slidev/bin/slidev.mjs)`，并使用 `/home/jacob/slidev/skills/slidev`，`skillReferenceCount = 52`。
+3. `pptxInspection.slideCount = 30`，`textRunCount = 861`，`tableCount = 6`，`slidesWithoutEditableText = []`。
+4. `pptxVisualGate.required = true`，`passed = true`，`referenceSource = "pptx-rendered-html-reference"`，`thresholdProfile = "visible-native-rendered-html"`。
+5. `mermaidSourcePreservation.passed = true`，`sourceFenceCount = 3`，`deckFenceCount = 3`，`changedFenceIndexes = []`。
+6. `layoutAuditSummary.overflowCount = 0`，`unreadableCount = 0`，`hardOverflowCount = 0`，`retryCount = 4`，`mermaidSlideCount = 3`，`mermaidLowZoomCount = 2`，`mermaidManualReviewCount = 1`。
+7. sidecar `textBoxCount = 338`，`editableBodyTextBoxCount = 324`，`editableCodeTextBoxCount = 14`，`editableTextSlideCount = 30`，`editableTextSlideRatio = 1`。
+8. sidecar `tableCount = 6`，`editableTableCellCount = 102`，`editableTableCellCharacterCount = 1116`，`collapsedTableBorderModelCount = 6`，`separateTableBorderModelCount = 0`。
+9. sidecar `tableCellTextInsetCount = 102`，`tableCellTextInsetDeltaCount = 0`，`maxTableCellTextInsetDeltaIn = 0`；这次不只是记录 M20 的表格锚点漂移，而是把漂移闭合到 writer/report 合同里。
+10. sidecar `visibleTextLayer = "native-text-and-background-image"`，`editableLayerRenderMode = "visible-native-text"`，`transparentOverlayTextSources = []`，`mermaidSvgTextPolicy = "background-image-only"`，`fallbackOnlyElementKinds = ["code-highlight", "mermaid", "svg"]`。
+11. PPTX XML 扫描显示 `alpha=0` 数量为 `0`，`alpha=8000` 数量为 `0`，可见原生对象为 `344`（`324` 个正文 text boxes、`14` 个 code text boxes、`6` 个 native tables），透明替身 editable shapes 为 `0`，Mermaid text shapes 为 `0`，带 `mar*` 属性的 table cells 为 `102`，`<a:t...>` 文字 tags 为 `861`。
+12. 生成物仍在 Git ignore 范围内：`ignoredOutputs = 6`，`unignoredOutputs = []`，`git ls-files docs/export/test-slidev-m21-native-text-fidelity` 为空。
+
+与先前方案的对比：
+
+1. M20 的诊断要求已经进入 writer：table anchor inset 不再只是报告字段，而是在拥有文本定位的边缘实际参与 `tcPr mar*` 写入。
+2. 用户指出的“虚假可编辑”问题继续作为硬约束：展示文字必须是原生 Office 文字，默认输出仍然禁止 `alpha=0` 透明文字层。
+3. 从 `oh-my-ppt` 复用的是方案思想：native text box、body inset、vertical anchor、strike、character spacing。没有照搬它更宽的 pretext fallback、standalone route 或 generic shape extraction，因为这些会绕过 NotEMD 目前的 rendered convergence 与 visual gate。
+4. Mermaid 仍保持背景拥有与源内容不变。本轮改进的是周边主页面文字、code 文字、table 文字，以及非 Mermaid SVG/chart label；不宣称 Mermaid 内部元素已经 Office-native 可编辑。
+
+已知风险：
+
+1. Office 文本度量和 Chromium 文本度量仍不完全一致。字符间距提高语义保真，但也可能暴露渲染器差异，所以 rendered-HTML visual gate 必须继续是硬门槛。
+2. Table margin 校准只作用于 anchor-owned edge。把所有实测 inset 都写进 Office，会把正常的单元格空白误当成 margin。
+3. Code token background rectangles 与 chart geometry 仍由背景拥有。文字可编辑，不代表所有视觉 primitive 都已经是 Office 原生对象。
+4. 目前 report 还没有统计 `strike` 或 `charSpacingPt` 覆盖率。只有当真实 deck 证明这些样式足够常见，才值得把它们升级为质量门槛。
+
+下一步：
+
+不要为了补剩余保真缺口再加 hidden/pretext fallback。下一轮应做高置信 Office 原生 primitive 抽取，先覆盖 code token background 与简单 chart geometry，并继续绑定 rendered-HTML visual gate 与 report 级 editability contract。
+
 ## 当前边界
 
 第一版实现有意保守：

@@ -38,6 +38,8 @@ export interface SlidevPptxInlineTextRun {
 	bold: boolean;
 	italic: boolean;
 	underline: boolean;
+	strike?: boolean;
+	charSpacingPt?: number;
 	code: boolean;
 	link: boolean;
 	hyperlinkTarget?: string;
@@ -60,10 +62,13 @@ export interface SlidevPptxTextBox {
 	bold: boolean;
 	italic: boolean;
 	underline: boolean;
+	strike?: boolean;
 	align: SlidevPptxTextAlign;
+	verticalAlign?: SlidevPptxVerticalAlign;
 	bullet: boolean;
 	bulletLevel?: number;
 	lineSpacingPt?: number;
+	charSpacingPt?: number;
 	paragraphSpacingBeforePt?: number;
 	paragraphSpacingAfterPt?: number;
 	paddingLeftIn?: number;
@@ -89,12 +94,14 @@ export interface SlidevPptxTableCell {
 	bold: boolean;
 	italic: boolean;
 	underline: boolean;
+	strike?: boolean;
 	align: SlidevPptxTextAlign;
 	verticalAlign: SlidevPptxVerticalAlign;
 	fillColor: string | null;
 	borderColor: string | null;
 	borderWidthPt: number;
 	lineSpacingPt?: number;
+	charSpacingPt?: number;
 	paddingLeftIn?: number;
 	paddingRightIn?: number;
 	paddingTopIn?: number;
