@@ -12,7 +12,7 @@ const childProcess = require('child_process');
 const fs = require('fs');
 const path = require('path');
 const esbuild = require('esbuild');
-const { buildPptxVisualDiff } = require('./lib/pptx-visual-diff');
+const { buildPptxVisualDiff, extractPptxBackgroundImages } = require('./lib/pptx-visual-diff');
 
 const LAYOUT_AUDIT_CONFIG = {
 	overflowTolerancePx: 6,
@@ -48,6 +48,8 @@ function parseArgs(argv) {
 		pptxVisualDpi: 150,
 		pptxVisualDiffDir: null,
 		pptxVisualReferenceDir: null,
+		pptxVisibleNativeExperiment: false,
+		requirePptxVisibleNativeMatch: false,
 		json: false,
 	};
 
@@ -94,6 +96,11 @@ function parseArgs(argv) {
 		} else if (arg === '--pptx-visual-reference-dir' && argv[index + 1]) {
 			args.pptxVisualReferenceDir = argv[++index];
 			args.pptxVisualDiff = true;
+		} else if (arg === '--pptx-visible-native-experiment') {
+			args.pptxVisibleNativeExperiment = true;
+		} else if (arg === '--require-pptx-visible-native-match') {
+			args.requirePptxVisibleNativeMatch = true;
+			args.pptxVisibleNativeExperiment = true;
 		} else if (arg === '--json') {
 			args.json = true;
 		} else if (arg === '--help' || arg === '-h') {
@@ -121,6 +128,9 @@ function parseArgs(argv) {
 	}
 	if (args.pptxVisualReferenceDir && args.format !== 'pptx') {
 		throw new Error('--pptx-visual-reference-dir requires --format pptx');
+	}
+	if (args.pptxVisibleNativeExperiment && args.format !== 'pptx') {
+		throw new Error('--pptx-visible-native-experiment requires --format pptx');
 	}
 	if (!Number.isFinite(args.pptxVisualMaxRmse) || args.pptxVisualMaxRmse < 0) {
 		throw new Error('--pptx-visual-max-rmse must be a non-negative number');
@@ -157,6 +167,8 @@ function printHelp() {
 		'  --pptx-visual-dpi <n>      LibreOffice/PDF render DPI, default: 150',
 		'  --pptx-visual-diff-dir <path> Output directory for visual diff artifacts',
 		'  --pptx-visual-reference-dir <path> External PNG sequence directory for advisory cross-export comparison',
+		'  --pptx-visible-native-experiment Also export experimental visible-native PPTX and compare it against the default frozen-background reference',
+		'  --require-pptx-visible-native-match Fail when the visible-native experiment exceeds PPTX visual thresholds',
 		'  --json                     Print only the final JSON report',
 	].join('\n'));
 }
@@ -168,7 +180,7 @@ async function bundleSlideExportModules() {
 					"export { probeEnvironment } from './src/slideExport/environmentProber';",
 					"export { prepareSlidevExportSource } from './src/slideExport/slidevSourcePreparer';",
 					"export { exportSlidevHtml, exportSlidevHtmlWithOutcome, exportSlidevPdf, exportSlidevPng } from './src/slideExport/slidevExporter';",
-					"export { exportSlidevPptxFromHtml } from './src/slideExport/pptxExporter';",
+					"export { exportSlidevPptxFromHtml, exportSlidevVisibleNativePptxExperimentFromHtml } from './src/slideExport/pptxExporter';",
 					"export { convergeSlidevDeckLayout } from './src/slideExport/slidevLayoutWorkflow';",
 					"export { exportVideoMp4 } from './src/slideExport/videoExporter';",
 					"export { analyzeRenderedSlideMeasurement, summarizeLayoutAudits, patchDeckWithLayoutAudit, countSlideDeckSlides } from './src/slideExport/slidevLayoutAudit';",
@@ -781,6 +793,64 @@ function resolvePptxVisualReferenceDirectory(vaultRoot, referenceDirectory) {
 	return path.join(vaultRoot, referenceDirectory);
 }
 
+function resolvePptxVisualDiffDirectory(vaultRoot, configuredDirectory, pptxPath) {
+	if (configuredDirectory) {
+		return path.isAbsolute(configuredDirectory)
+			? configuredDirectory
+			: path.join(vaultRoot, configuredDirectory);
+	}
+	return path.join(path.dirname(pptxPath), `${path.basename(pptxPath, path.extname(pptxPath))}-pptx-visual-diff`);
+}
+
+function buildUnavailablePptxVisualDiff(outputDirectory, error, thresholds) {
+	return {
+		available: false,
+		outputDirectory,
+		error,
+		gate: {
+			passed: false,
+			failures: [error],
+			thresholds,
+		},
+	};
+}
+
+function runPptxVisualDiff({ pptxPath, outputDirectory, referenceDirectory, dpi, timeoutMs, thresholds }) {
+	try {
+		return buildPptxVisualDiff({
+			pptxPath,
+			outputDirectory,
+			referenceDirectory,
+			dpi,
+			timeoutMs,
+			thresholds,
+		});
+	} catch (error) {
+		return buildUnavailablePptxVisualDiff(
+			outputDirectory,
+			error instanceof Error ? error.message : String(error),
+			thresholds,
+		);
+	}
+}
+
+function extractDefaultPptxBackgroundReference(pptxPath, outputDirectory) {
+	try {
+		return extractPptxBackgroundImages({
+			pptxPath,
+			outputDirectory,
+			referenceDirectory: path.join(outputDirectory, 'pptx-background-reference'),
+		});
+	} catch (error) {
+		return {
+			source: 'pptx-background-images',
+			referenceDirectory: path.join(outputDirectory, 'pptx-background-reference'),
+			referenceImages: [],
+			error: error instanceof Error ? error.message : String(error),
+		};
+	}
+}
+
 function printProgress(enabled, phase, detail) {
 	if (!enabled) return;
 	console.log(detail ? `${phase}: ${detail}` : phase);
@@ -818,6 +888,7 @@ async function main() {
 	let htmlExport = layoutConvergence?.htmlExport ?? null;
 	let htmlExportHistory = layoutConvergence?.htmlExportHistory ?? [];
 	let pptxReportPath = null;
+	let visibleNativeExperimentResult = null;
 	if (args.format === 'pdf') {
 		exportPath = await slideExport.exportSlidevPdf(app, slideSource, config, onProgress);
 	} else if (args.format === 'png') {
@@ -828,7 +899,17 @@ async function main() {
 			htmlExportHistory = [htmlExport];
 			exportPath = htmlExport.path;
 		}
-		const pptxResult = await slideExport.exportSlidevPptxFromHtml(app, slideSource, config, exportPath, onProgress);
+		const htmlExportPathForPptx = exportPath;
+		const pptxResult = await slideExport.exportSlidevPptxFromHtml(app, slideSource, config, htmlExportPathForPptx, onProgress);
+		if (args.pptxVisibleNativeExperiment) {
+			visibleNativeExperimentResult = await slideExport.exportSlidevVisibleNativePptxExperimentFromHtml(
+				app,
+				slideSource,
+				config,
+				htmlExportPathForPptx,
+				onProgress,
+			);
+		}
 		exportPath = pptxResult.path;
 		htmlExport = layoutConvergence?.htmlExport ?? htmlExport;
 		htmlExportHistory = layoutConvergence?.htmlExportHistory ?? htmlExportHistory;
@@ -852,14 +933,26 @@ async function main() {
 	let layoutPatchAttempts = layoutConvergence?.layoutPatchAttempts ?? [];
 	let auditedSlides = layoutConvergence?.auditedSlides ?? [];
 	const pptxInspection = args.format === 'pptx' ? inspectPptx(absoluteExportPath) : null;
+	const visibleNativeExperimentPptxPath = visibleNativeExperimentResult
+		? path.join(vaultRoot, visibleNativeExperimentResult.path)
+		: null;
+	const visibleNativeExperimentReportPath = visibleNativeExperimentResult
+		? path.join(vaultRoot, visibleNativeExperimentResult.reportPath)
+		: null;
+	const visibleNativeExperimentInspection = visibleNativeExperimentPptxPath
+		? inspectPptx(visibleNativeExperimentPptxPath)
+		: null;
+	const pptxVisualThresholds = {
+		maxRmse: args.pptxVisualMaxRmse,
+		meanRmse: args.pptxVisualMeanRmse,
+	};
 	let pptxReferencePngDirectory = null;
 	let pptxVisualDiff = null;
-	if (args.format === 'pptx' && args.pptxVisualDiff) {
-		const visualDiffDirectory = args.pptxVisualDiffDir
-			? (path.isAbsolute(args.pptxVisualDiffDir)
-				? args.pptxVisualDiffDir
-				: path.join(vaultRoot, args.pptxVisualDiffDir))
-			: path.join(path.dirname(absoluteExportPath), `${path.basename(absoluteExportPath, path.extname(absoluteExportPath))}-pptx-visual-diff`);
+	let visibleNativeExperimentVisualDiff = null;
+	let visibleNativeExperimentVisualReference = null;
+	const needsDefaultPptxVisualDiff = args.format === 'pptx' && (args.pptxVisualDiff || args.pptxVisibleNativeExperiment);
+	if (needsDefaultPptxVisualDiff) {
+		const visualDiffDirectory = resolvePptxVisualDiffDirectory(vaultRoot, args.pptxVisualDiffDir, absoluteExportPath);
 		const visualReferenceDirectory = resolvePptxVisualReferenceDirectory(vaultRoot, args.pptxVisualReferenceDir);
 		onProgress(
 			'pptx-visual-diff',
@@ -867,40 +960,74 @@ async function main() {
 				? `Rendering PPTX back to PNG and comparing pages with external PNG reference: ${visualReferenceDirectory}`
 				: 'Rendering PPTX back to PNG and comparing pages with frozen background references...',
 		);
-		try {
-			pptxVisualDiff = buildPptxVisualDiff({
-				pptxPath: absoluteExportPath,
-				outputDirectory: visualDiffDirectory,
-				referenceDirectory: visualReferenceDirectory,
-				dpi: args.pptxVisualDpi,
-				timeoutMs: args.timeoutMs,
-				thresholds: {
-					maxRmse: args.pptxVisualMaxRmse,
-					meanRmse: args.pptxVisualMeanRmse,
-				},
-			});
+		pptxVisualDiff = runPptxVisualDiff({
+			pptxPath: absoluteExportPath,
+			outputDirectory: visualDiffDirectory,
+			referenceDirectory: visualReferenceDirectory,
+			dpi: args.pptxVisualDpi,
+			timeoutMs: args.timeoutMs,
+			thresholds: pptxVisualThresholds,
+		});
+		if (pptxVisualDiff.error) {
+			onProgress('pptx-visual-diff', `PPTX visual diff failed: ${pptxVisualDiff.error}`);
+		} else {
 			onProgress(
 				'pptx-visual-diff',
 				pptxVisualDiff.gate?.passed
 					? 'PPTX visual diff is within thresholds.'
 					: `PPTX visual diff exceeded thresholds: ${(pptxVisualDiff.gate?.failures || []).join('; ')}`,
 			);
-			pptxReferencePngDirectory = pptxVisualDiff.reference?.referenceDirectory || null;
-		} catch (error) {
-			pptxVisualDiff = {
-				available: false,
+		}
+		pptxReferencePngDirectory = pptxVisualDiff.reference?.referenceDirectory || null;
+	}
+
+	if (visibleNativeExperimentPptxPath) {
+		const defaultReferenceSource = pptxVisualDiff?.reference?.source === 'pptx-background-images'
+			? pptxVisualDiff.reference
+			: extractDefaultPptxBackgroundReference(
+				absoluteExportPath,
+				path.join(path.dirname(absoluteExportPath), `${path.basename(absoluteExportPath, path.extname(absoluteExportPath))}-default-frozen-reference`),
+			);
+		visibleNativeExperimentVisualReference = {
+			source: 'default-frozen-background',
+			referenceDirectory: defaultReferenceSource.referenceDirectory,
+			referenceImageCount: defaultReferenceSource.referenceImages?.length || 0,
+			error: defaultReferenceSource.error || null,
+		};
+		const visualDiffDirectory = path.join(
+			path.dirname(visibleNativeExperimentPptxPath),
+			`${path.basename(visibleNativeExperimentPptxPath, path.extname(visibleNativeExperimentPptxPath))}-pptx-visual-diff`,
+		);
+		if (visibleNativeExperimentVisualReference.error || !visibleNativeExperimentVisualReference.referenceImageCount) {
+			visibleNativeExperimentVisualDiff = buildUnavailablePptxVisualDiff(
+				visualDiffDirectory,
+				visibleNativeExperimentVisualReference.error || 'Default PPTX frozen-background reference contains no images.',
+				pptxVisualThresholds,
+			);
+			onProgress('pptx-visible-native-experiment', `Visible-native visual diff failed: ${visibleNativeExperimentVisualDiff.error}`);
+		} else {
+			onProgress(
+				'pptx-visible-native-experiment',
+				`Rendering visible-native PPTX back to PNG and comparing against default frozen background: ${visibleNativeExperimentVisualReference.referenceDirectory}`,
+			);
+			visibleNativeExperimentVisualDiff = runPptxVisualDiff({
+				pptxPath: visibleNativeExperimentPptxPath,
 				outputDirectory: visualDiffDirectory,
-				error: error instanceof Error ? error.message : String(error),
-				gate: {
-					passed: false,
-					failures: [error instanceof Error ? error.message : String(error)],
-					thresholds: {
-						maxRmse: args.pptxVisualMaxRmse,
-						meanRmse: args.pptxVisualMeanRmse,
-					},
-				},
-			};
-			onProgress('pptx-visual-diff', `PPTX visual diff failed: ${pptxVisualDiff.error}`);
+				referenceDirectory: visibleNativeExperimentVisualReference.referenceDirectory,
+				dpi: args.pptxVisualDpi,
+				timeoutMs: args.timeoutMs,
+				thresholds: pptxVisualThresholds,
+			});
+			if (visibleNativeExperimentVisualDiff.error) {
+				onProgress('pptx-visible-native-experiment', `Visible-native visual diff failed: ${visibleNativeExperimentVisualDiff.error}`);
+			} else {
+				onProgress(
+					'pptx-visible-native-experiment',
+					visibleNativeExperimentVisualDiff.gate?.passed
+						? 'Visible-native visual diff is within thresholds.'
+						: `Visible-native visual diff exceeded thresholds: ${(visibleNativeExperimentVisualDiff.gate?.failures || []).join('; ')}`,
+				);
+			}
 		}
 	}
 
@@ -908,8 +1035,12 @@ async function main() {
 		absoluteDeckPath,
 		absoluteExportPath,
 		pptxReportPath,
+		visibleNativeExperimentPptxPath,
+		visibleNativeExperimentReportPath,
 		pptxReferencePngDirectory,
 		pptxVisualDiff?.outputDirectory,
+		visibleNativeExperimentVisualReference?.referenceDirectory,
+		visibleNativeExperimentVisualDiff?.outputDirectory,
 		htmlExport?.standaloneAttempt?.preservedFailurePath
 			? path.join(vaultRoot, htmlExport.standaloneAttempt.preservedFailurePath)
 			: null,
@@ -934,16 +1065,44 @@ async function main() {
 			? `Expected native standalone HTML but actual mode was ${htmlExport?.actualMode || 'unavailable'}`
 			: null,
 	};
-	const pptxVisualDiffExecutionPassed = !args.pptxVisualDiff || Boolean(pptxVisualDiff?.available && !pptxVisualDiff?.error);
+	const pptxVisualDiffExecutionPassed = !needsDefaultPptxVisualDiff || Boolean(pptxVisualDiff?.available && !pptxVisualDiff?.error);
 	const pptxVisualGate = {
 		required: args.requirePptxVisualMatch,
+		observedPassed: Boolean(pptxVisualDiff?.gate?.passed),
 		passed: !args.requirePptxVisualMatch || Boolean(pptxVisualDiff?.gate?.passed),
-		failures: args.requirePptxVisualMatch ? (pptxVisualDiff?.gate?.failures || []) : [],
-		thresholds: {
-			maxRmse: args.pptxVisualMaxRmse,
-			meanRmse: args.pptxVisualMeanRmse,
-		},
+		failures: pptxVisualDiff?.gate?.failures || [],
+		thresholds: pptxVisualThresholds,
 	};
+	const visibleNativeExperimentVisualDiffExecutionPassed = !args.pptxVisibleNativeExperiment
+		|| Boolean(visibleNativeExperimentVisualDiff?.available && !visibleNativeExperimentVisualDiff?.error);
+	const visibleNativeExperimentGate = {
+		required: args.requirePptxVisibleNativeMatch,
+		observedPassed: Boolean(visibleNativeExperimentVisualDiff?.gate?.passed),
+		passed: !args.requirePptxVisibleNativeMatch || Boolean(visibleNativeExperimentVisualDiff?.gate?.passed),
+		failures: visibleNativeExperimentVisualDiff?.gate?.failures || [],
+		thresholds: pptxVisualThresholds,
+	};
+	const pptxVisibleNativeExperiment = visibleNativeExperimentResult
+		? {
+				path: visibleNativeExperimentPptxPath,
+				reportPath: visibleNativeExperimentReportPath,
+				bytes: visibleNativeExperimentPptxPath && fs.existsSync(visibleNativeExperimentPptxPath) && fs.statSync(visibleNativeExperimentPptxPath).isFile()
+					? fs.statSync(visibleNativeExperimentPptxPath).size
+					: null,
+				inspection: visibleNativeExperimentInspection,
+				sidecarReport: visibleNativeExperimentResult.report,
+				visualReference: visibleNativeExperimentVisualReference,
+				visualDiff: visibleNativeExperimentVisualDiff,
+				gate: visibleNativeExperimentGate,
+			}
+		: null;
+	const visibleNativeExperimentPackagePassed = !args.pptxVisibleNativeExperiment
+		|| Boolean(visibleNativeExperimentInspection?.isZip && visibleNativeExperimentInspection.textRunCount > 0);
+	const visibleNativeExperimentOutputPassed = !args.pptxVisibleNativeExperiment
+		|| Boolean(visibleNativeExperimentPptxPath && fs.existsSync(visibleNativeExperimentPptxPath));
+
+	const pptxVisualDiffGatePassed = pptxVisualGate.passed;
+	const visibleNativeExperimentGatePassed = visibleNativeExperimentGate.passed;
 
 	const report = {
 		ok: playwrightChecks.every(check => !check.failed)
@@ -952,8 +1111,12 @@ async function main() {
 			&& !gitIgnoreStatus.error
 			&& unignoredOutputs.length === 0
 			&& (args.format !== 'pptx' || Boolean(pptxInspection?.isZip && pptxInspection.textRunCount > 0))
+			&& visibleNativeExperimentOutputPassed
+			&& visibleNativeExperimentPackagePassed
 			&& pptxVisualDiffExecutionPassed
-			&& pptxVisualGate.passed
+			&& visibleNativeExperimentVisualDiffExecutionPassed
+			&& pptxVisualDiffGatePassed
+			&& visibleNativeExperimentGatePassed
 			&& !hasLayoutFailures
 			&& (!deckSummary || (!deckSummary.containsKnownStaleText && !deckSummary.containsMissingTheme))
 			&& (!mermaidSourcePreservation || mermaidSourcePreservation.passed)
@@ -987,6 +1150,7 @@ async function main() {
 		pptxInspection,
 		pptxVisualDiff,
 		pptxVisualGate,
+		pptxVisibleNativeExperiment,
 		htmlExport,
 		htmlExportHistory,
 		standaloneGate,

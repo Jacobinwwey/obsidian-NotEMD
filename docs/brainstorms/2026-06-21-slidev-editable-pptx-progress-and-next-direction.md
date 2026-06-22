@@ -16,7 +16,7 @@ The requested feature is not "export a `.pptx` file". A PPTX containing one scre
 4. write an OOXML package;
 5. report warnings and editability coverage.
 
-After the 2026-06-21 refresh, `/home/jacob/ref/oh-my-ppt-upstream-fresh-20260621` points at `origin/main` commit `843ff74`, tagged `v2.0.17`. The local fork at `/home/jacob/ref/oh-my-ppt-fork` is on `pr/animation-export-contract` commit `257c23b`; the relevant fork delta is concentrated in the animation export contract, so the HTML-to-PPTX route should be read from upstream `renderer.ts`, `browser-scripts.ts`, `index.ts`, `table-extract.ts`, `font-collect.ts`, and `ooxml-writer.ts`.
+After the 2026-06-21 refresh, `/home/jacob/ref/oh-my-ppt-upstream-latest` points at `origin/main` commit `843ff74`, tagged `v2.0.17`. The local fork at `/home/jacob/ref/oh-my-ppt-fork` is on `pr/animation-export-contract` commit `257c23b`; the relevant fork delta is concentrated in the animation export contract, so the HTML-to-PPTX route should be read from upstream `renderer.ts`, `browser-scripts.ts`, `index.ts`, `table-extract.ts`, `font-collect.ts`, and `ooxml-writer.ts`.
 
 The useful lessons are more specific than "convert screenshots to PPTX":
 
@@ -58,6 +58,7 @@ Current implementation adds:
 14. M2 rich-run transparent text structures: DOM text boxes now preserve inline run boundaries, computed font size/family/color, bold/italic/underline, inline code/link markers, multi-paragraph text, and `xml:space="preserve"` for Office-safe leading/trailing spaces. The sidecar report now exposes `richTextBoxCount`, `richTextRunCount`, and rich-run character coverage.
 15. M3 external-reference advisory diagnostics: the verifier now accepts `--pptx-visual-reference-dir`, records optional ImageMagick `PHASH`/`NCC`/`SSIM` availability, adds per-page visual diagnostics, and summarizes likely renderer/subpixel noise separately from layout-review candidates.
 16. M5 font-contract reporting: the PPTX sidecar now records `fontContract`, including extracted font families, CJK-bearing families, Latin-bearing families, the writer's East Asian fallback face, source families that will be written through that fallback, Office missing-font risk, per-family usage counts, and the explicit current policy that fonts are not embedded by default.
+17. M4 visible-native experiment mode: `--pptx-visible-native-experiment` now writes a separate `.visible-native-experiment.pptx`, captures its background after extracted DOM text/table content is hidden, samples residual text/table regions, retries background capture up to three times when residue remains suspicious, and compares the experiment render-back against the default PPTX frozen-background reference. This is explicitly not the default export path.
 
 The implementation deliberately places PPTX export after `convergeSlidevDeckLayout()`. This avoids creating a new un-audited path and keeps PPTX tied to the same rendered fit fixes as HTML/PDF/PNG/MP4.
 
@@ -211,7 +212,7 @@ The useful reading of `oh-my-ppt` is narrower than "it supports HTML Slides -> P
 2. **Consumption contract**: `table-extract.ts` consumes `<table>` first and marks it with `data-pptx-consumed-table` so shape/text extraction does not duplicate table contents. NotEMD already has `data-notemd-pptx-consumed-table`; the next step is reporting consumed primitive counts, unconsumed text, and fallback-only coverage instead of only aggregate text/table counts.
 3. **Text contract**: `index.ts` goes beyond `innerText`: it models inline runs, per-character line grouping, CJK fallback, list/bullet semantics, paragraph spacing, Tailwind utility hints, and `@chenglou/pretext` layout. NotEMD is still block-level. Transparent structure mode keeps visuals safe, but editing quality will remain weak for inline emphasis, syntax highlighting, list indentation, and long mixed CJK/Latin text.
 4. **Paint-order contract**: `oh-my-ppt` estimates stacking order with stacking-context analysis plus `elementsFromPoint()` sampling, then `ooxml-writer.ts` writes shape/table/image/text in order. NotEMD's visible layer is currently the whole-slide background image, so paint order is not a visual hard blocker yet; it becomes mandatory only when visible native shape/image/text layers are introduced.
-5. **Visible-native-layer contract**: `renderer.ts` hides consumed primitives before background capture and uses pixel sampling to detect text residue and retry. This cannot be directly ported to the current NotEMD flow, because NotEMD's visible text/table paint comes from the frozen background. Hiding text now would make the PPTX visually worse. Residue detection should gate visible-native-text/table experiments, not transparent-structure export.
+5. **Visible-native-layer contract**: `renderer.ts` hides consumed primitives before background capture and uses pixel sampling to detect text residue and retry. This cannot be directly ported to the default NotEMD flow, because NotEMD's visible text/table paint comes from the frozen background. Hiding text now would make the PPTX visually worse. The current branch only imports the same residue sampling plus three-attempt background retry under `--pptx-visible-native-experiment`, where it gates visible-native-text/table experiments rather than transparent-structure export.
 
 The concrete next slices are:
 
@@ -257,6 +258,116 @@ Result:
 17. `unignoredOutputs = []`
 
 The result is a constraint, not just a report feature. The real deck's editable layer is dominated by `Avenir Next` and `Fira Code`, neither of which should be assumed to exist in Office across machines. It also contains CJK text under both source families, while the writer currently emits CJK text through `Microsoft YaHei` as the East Asian typeface. That means visible native text/table remains unsafe as a default: the transparent structure layer avoids visible font drift, but any future visible-native branch must either prove font substitution is visually neutral or ship an explicit, licensed font-asset policy.
+
+## M4 Visible-Native Experiment Closure
+
+The visible-native direction has now been tested as an explicit experiment, not as a default behavior change. The verifier command was:
+
+```bash
+runuser -u jacob -- env HOME=/home/jacob PLAYWRIGHT_BROWSERS_PATH=/home/jacob/.cache/ms-playwright bash -lc 'cd /home/jacob/obsidian-NotEMD && npm run verify:slidev-export -- --vault docs --source architecture.zh-CN.md --format pptx --output-subfolder export/test-slidev-m4-visible-native-experiment --sample-slides all --timeout-ms 240000 --no-screenshots --pptx-visual-diff --require-pptx-visual-match --pptx-visible-native-experiment --json'
+```
+
+Default PPTX result:
+
+1. `ok = true`
+2. `slidev.version = 52.16.0 (/home/jacob/slidev/packages/slidev/bin/slidev.mjs)`
+3. `skillRootPath = /home/jacob/slidev/skills/slidev`
+4. `skillReferenceCount = 52`
+5. `pptxInspection.slideCount = 30`
+6. `pptxInspection.textRunCount = 371`
+7. `pptxInspection.tableCount = 6`
+8. `pptxInspection.slidesWithoutEditableText = []`
+9. `pptxVisualGate.required = true`
+10. `pptxVisualGate.observedPassed = true`
+11. `pptxVisualGate.passed = true`
+12. `pptxVisualDiff.reference.source = pptx-background-images`
+13. `pptxVisualDiff.comparison.summary.meanRmse = 0.049330418`
+14. `pptxVisualDiff.comparison.summary.maxRmse = 0.0889364`
+15. `mermaidSourcePreservation.changedFenceIndexes = []`
+16. `unignoredOutputs = []`
+
+Visible-native experiment result:
+
+1. output PPTX: `docs/export/test-slidev-m4-visible-native-experiment/architecture.zh-CN.visible-native-experiment.pptx`
+2. sidecar: `docs/export/test-slidev-m4-visible-native-experiment/architecture.zh-CN.visible-native-experiment.pptx.report.json`
+3. `visibleTextLayer = native-text-experiment`
+4. `editableLayerRenderMode = visible-native-experiment`
+5. experiment package `slideCount = 30`
+6. experiment package `textRunCount = 371`
+7. experiment package `tableCount = 6`
+8. `residueSampling.sampledSlideCount = 30`
+9. `residueSampling.checkedRegionCount = 212`
+10. `residueSampling.suspiciousSlideCount = 0`
+11. `residueSampling.suspiciousRegionCount = 0`
+12. `residueSampling.maxTextLikePixelRatio = 0`
+13. experiment visual reference is the default frozen background: `referenceImageCount = 30`
+14. experiment render-back `meanRmse = 0.13384873333333333`
+15. experiment render-back `maxRmse = 0.233655`
+16. worst experiment pages are 24, 27, 19, 22, 23, 20, 21, and 17.
+
+This is the important engineering conclusion: the `oh-my-ppt`-style consumed-DOM hiding, residue sampling, and retry worked for avoiding double-rendered source text, but visible native text/table still regresses visual fidelity on the real deck. The likely causes are Office font substitution, line-height/baseline differences, text antialiasing, table cell padding/border model differences, and incomplete paint-order modeling. The correct state is therefore:
+
+1. keep the default PPTX export as frozen background plus transparent editable structure;
+2. keep visible-native output behind an explicit verifier flag;
+3. keep `--require-pptx-visible-native-match` available for future experiments, but do not enable it in the default UI path;
+4. use the experiment's side-by-side artifacts to identify which pages might be safe for selective visible-native enablement later;
+5. do not split or rewrite Mermaid diagrams to improve visible-native metrics.
+
+## oh-my-ppt Reference Refresh Acceptance
+
+After the latest `oh-my-ppt` read-through, the real `docs/architecture.zh-CN.md` deck was revalidated with the same architectural boundary: default PPTX remains frozen visible background plus transparent editable structures; visible native text/table remains an explicit experiment.
+
+PNG reference command:
+
+```bash
+runuser -u jacob -- env HOME=/home/jacob PLAYWRIGHT_BROWSERS_PATH=/home/jacob/.cache/ms-playwright bash -lc 'cd /home/jacob/obsidian-NotEMD && npm run verify:slidev-export -- --vault docs --source architecture.zh-CN.md --format png --output-subfolder export/test-slidev-ohmyppt-final-png-reference --sample-slides all --timeout-ms 240000 --no-screenshots --json'
+```
+
+Default PPTX plus visible-native experiment command:
+
+```bash
+runuser -u jacob -- env HOME=/home/jacob PLAYWRIGHT_BROWSERS_PATH=/home/jacob/.cache/ms-playwright bash -lc 'cd /home/jacob/obsidian-NotEMD && npm run verify:slidev-export -- --vault docs --source architecture.zh-CN.md --format pptx --output-subfolder export/test-slidev-ohmyppt-final-pptx-acceptance --sample-slides all --timeout-ms 240000 --no-screenshots --pptx-visual-diff --require-pptx-visual-match --pptx-visible-native-experiment --json'
+```
+
+External PNG advisory diff command:
+
+```bash
+node - <<'NODE'
+const { buildPptxVisualDiff } = require('./scripts/lib/pptx-visual-diff');
+const report = buildPptxVisualDiff({
+  pptxPath: 'docs/export/test-slidev-ohmyppt-final-pptx-acceptance/architecture.zh-CN.pptx',
+  referenceDirectory: 'docs/export/test-slidev-ohmyppt-final-png-reference/architecture.zh-CN-slides-png',
+  outputDirectory: 'docs/export/test-slidev-ohmyppt-final-external-png-diff',
+  dpi: 150,
+  timeoutMs: 240000,
+  thresholds: { maxRmse: 0.12, meanRmse: 0.08 },
+});
+console.log(JSON.stringify({ gate: report.gate, summary: report.comparison.summary }, null, 2));
+NODE
+```
+
+Current acceptance facts:
+
+1. the PNG reference run passed with `ok = true`, `layoutAuditSummary.overflowCount = 0`, native standalone HTML accepted, `unignoredOutputs = []`, `skillRootPath = /home/jacob/slidev/skills/slidev`, and `skillReferenceCount = 52`;
+2. the default PPTX file is `docs/export/test-slidev-ohmyppt-final-pptx-acceptance/architecture.zh-CN.pptx`, `2,804,976` bytes;
+3. PPTX inspection shows `slideCount = 30`, `mediaCount = 30`, `textRunCount = 371`, `pictureCount = 30`, `tableCount = 6`, and `slidesWithoutEditableText = []`;
+4. the default sidecar keeps `visibleTextLayer = background-image` and `editableLayerRenderMode = transparent-structure`;
+5. the default sidecar reports `textBoxCount = 139`, `richTextRunCount = 344`, `tableCount = 6`, and `editableTableCellCount = 102`;
+6. font contract still reports `fontFamilies = ["Avenir Next", "Fira Code"]`, `officeMissingFontRiskFamilies = ["Avenir Next", "Fira Code"]`, and `embeddedFontCount = 0`;
+7. fallback-only objects remain explicit: `fallbackOnlyElementKinds = ["code-highlight", "mermaid", "svg"]`;
+8. unmodeled text reasons remain explicit: `unmodeledTextRunReasons = ["inline-code", "inline-formatting", "syntax-highlight"]`;
+9. default frozen-reference visual diff passed with `reference.source = pptx-background-images`, `meanRmse = 0.049330418`, `maxRmse = 0.0889364`, `maxScaleRatioDelta = 0.02091836734693886`, and `maxDifferenceBoundingBoxAreaRatio = 0.6987466725820763`;
+10. external PNG advisory diff failed its advisory thresholds with `reference.source = external-png-sequence`, `meanRmse = 0.102229238`, `maxRmse = 0.241976`, and no likely layout-drift slides;
+11. the frozen-reference report classifies the remaining differences as text antialias / renderer noise: `textAntialiasDriftLikely = 20`, `rendererNoiseLikely = 20`, `referenceContractDriftLikely = 0`, `layoutDriftLikely = 0`;
+12. the external PNG report classifies the failure as reference-contract drift plus renderer noise, not layout drift: `textAntialiasDriftLikely = 7`, `rendererNoiseLikely = 7`, `referenceContractDriftLikely = 13`, `layoutDriftLikely = 0`;
+13. the visible-native experiment package has the same `slideCount = 30`, `textRunCount = 371`, and `tableCount = 6`;
+14. visible-native residue sampling succeeded: `sampledSlideCount = 30`, `checkedRegionCount = 212`, `suspiciousSlideCount = 0`, `suspiciousRegionCount = 0`, `maxTextLikePixelRatio = 0`;
+15. visible-native visual diff still failed: `meanRmse = 0.13384873333333333`, `maxRmse = 0.233655`, worst pages `24, 27, 19, 22, 23, 20, 21, 17, 25, 18`;
+16. all generated outputs are under `docs/export/test-slidev-*` and remain ignored local evidence, not commit material.
+
+This keeps the external PNG conclusion intentionally conservative: external PNG comparison is useful, but it is not stable enough to be a hard gate yet. A separate Slidev PNG invocation can still drift from the PPTX capture path even when both are derived from the same source deck. The advisory failure is still valuable because it identifies reference-contract drift without confusing it with layout drift. The hard gate remains the PPTX frozen background reference.
+
+The visible-native conclusion did not change. Residue detection and retry solve one specific failure class: ghost text left behind in the captured background. They do not solve Office font substitution, baseline/line-height mismatch, table padding/border differences, or incomplete paint order. That is why the experiment can have `suspiciousRegionCount = 0` and still fail the visual diff. Treating that as a success would be a category error.
 
 ## Release Link Decision
 

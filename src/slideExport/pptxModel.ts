@@ -105,6 +105,40 @@ export interface SlidevPptxSlide {
 	warnings: string[];
 }
 
+export interface SlidevPptxVisibleNativeSlideResidueSampling {
+	slideNumber: number;
+	sampledTextBoxCount: number;
+	sampledTableCellCount: number;
+	checkedRegionCount: number;
+	suspiciousRegionCount: number;
+	maxTextLikePixelRatio: number;
+	suspicious: boolean;
+}
+
+export interface SlidevPptxVisibleNativeResidueSamplingSummary {
+	slideCount: number;
+	sampledSlideCount: number;
+	suspiciousSlideCount: number;
+	checkedRegionCount: number;
+	suspiciousRegionCount: number;
+	maxTextLikePixelRatio: number;
+	threshold: {
+		colorDistance: number;
+		textLikePixelRatio: number;
+		minTextLikePixels: number;
+	};
+	slides: SlidevPptxVisibleNativeSlideResidueSampling[];
+}
+
+export interface SlidevPptxVisibleNativeExperimentReport {
+	status: 'experimental';
+	nativeLayer: 'visible-text-and-table';
+	backgroundCapture: 'after-extracted-dom-hidden';
+	visualReference: 'default-frozen-background-required';
+	residueSampling: SlidevPptxVisibleNativeResidueSamplingSummary;
+	warnings: string[];
+}
+
 export interface SlidevPptxDocument {
 	title: string;
 	author?: string;
@@ -214,8 +248,9 @@ export interface SlidevPptxExportReport {
 	fallbackOnlyElementKinds: SlidevPptxFallbackOnlyElementKind[];
 	unmodeledTextRunReasons: SlidevPptxUnmodeledTextRunReason[];
 	slides: SlidevPptxSlideEditabilitySummary[];
-	visibleTextLayer: 'background-image';
-	editableLayerRenderMode: 'transparent-structure';
+	visibleTextLayer: 'background-image' | 'native-text-experiment';
+	editableLayerRenderMode: 'transparent-structure' | 'visible-native-experiment';
+	visibleNativeExperiment?: SlidevPptxVisibleNativeExperimentReport;
 	warnings: string[];
 }
 

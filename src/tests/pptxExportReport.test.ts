@@ -1,4 +1,4 @@
-import { buildSlidevPptxExportReport } from '../slideExport/pptxExporter';
+import { buildSlidevPptxExportReport, buildSlidevVisibleNativePptxExperimentReport } from '../slideExport/pptxExporter';
 import { PPTX_SLIDE_HEIGHT_IN, PPTX_SLIDE_WIDTH_IN, type SlidevPptxSlide } from '../slideExport/pptxModel';
 
 jest.mock('obsidian', () => ({
@@ -202,5 +202,104 @@ describe('pptx export report', () => {
 			}),
 		);
 		expect(report.slides[1].warnings).toEqual(['Slide 2 has no extracted editable text.']);
+	});
+
+	test('reports visible-native experiment contract and residue sampling separately from the default contract', () => {
+		const slides: SlidevPptxSlide[] = [
+			{
+				slideNumber: 1,
+				title: 'Visible native',
+				backgroundColor: 'FFFFFF',
+				backgroundImage: {
+					data: new Uint8Array([137, 80, 78, 71, 13, 10, 26, 10]),
+					mimeType: 'image/png',
+					x: 0,
+					y: 0,
+					w: PPTX_SLIDE_WIDTH_IN,
+					h: PPTX_SLIDE_HEIGHT_IN,
+					name: 'Residual background',
+					order: 0,
+				},
+				texts: [
+					{
+						text: 'Native visible text',
+						x: 1,
+						y: 1,
+						w: 5,
+						h: 1,
+						fontSize: 24,
+						fontFace: 'Aptos',
+						color: '111827',
+						bold: true,
+						italic: false,
+						underline: false,
+						align: 'left',
+						bullet: false,
+						order: 10,
+						richTextParagraphs: [],
+						unmodeledRunReasons: [],
+					},
+				],
+				tables: [],
+				fallbackOnlyElementKinds: [],
+				consumedTableTextCandidateCount: 0,
+				warnings: ['Slide 1 visible-native background residue sampling is suspicious (1 region(s), max ratio 0.2).'],
+			},
+		];
+
+		const report = buildSlidevVisibleNativePptxExperimentReport(
+			'/vault/export/deck/index.html',
+			'/vault/deck.md',
+			'/vault/export/deck.visible-native-experiment.pptx',
+			'/vault/export/deck.visible-native-experiment.pptx.report.json',
+			slides,
+			{
+				slideCount: 1,
+				sampledSlideCount: 1,
+				suspiciousSlideCount: 1,
+				checkedRegionCount: 3,
+				suspiciousRegionCount: 1,
+				maxTextLikePixelRatio: 0.2,
+				threshold: {
+					colorDistance: 62,
+					textLikePixelRatio: 0.075,
+					minTextLikePixels: 8,
+				},
+				slides: [
+					{
+						slideNumber: 1,
+						sampledTextBoxCount: 3,
+						sampledTableCellCount: 0,
+						checkedRegionCount: 3,
+						suspiciousRegionCount: 1,
+						maxTextLikePixelRatio: 0.2,
+						suspicious: true,
+					},
+				],
+			},
+		);
+
+		expect(report.visibleTextLayer).toBe('native-text-experiment');
+		expect(report.editableLayerRenderMode).toBe('visible-native-experiment');
+		expect(report.visibleNativeExperiment).toEqual(
+			expect.objectContaining({
+				status: 'experimental',
+				nativeLayer: 'visible-text-and-table',
+				backgroundCapture: 'after-extracted-dom-hidden',
+				visualReference: 'default-frozen-background-required',
+			}),
+		);
+		expect(report.visibleNativeExperiment?.residueSampling).toEqual(
+			expect.objectContaining({
+				slideCount: 1,
+				sampledSlideCount: 1,
+				suspiciousSlideCount: 1,
+				checkedRegionCount: 3,
+				suspiciousRegionCount: 1,
+				maxTextLikePixelRatio: 0.2,
+			}),
+		);
+		expect(report.warnings[0]).toContain('Visible-native PPTX is experimental');
+		expect(report.warnings[1]).toContain('residue sampling is suspicious');
 	});
 });

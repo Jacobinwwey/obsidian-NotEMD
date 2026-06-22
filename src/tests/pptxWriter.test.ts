@@ -3,7 +3,7 @@ import { tmpdir } from 'os';
 import { join } from 'path';
 import { strFromU8, unzipSync } from 'fflate';
 import { PPTX_SLIDE_HEIGHT_IN, PPTX_SLIDE_WIDTH_IN, type SlidevPptxDocument } from '../slideExport/pptxModel';
-import { writePptxDocument } from '../slideExport/pptxWriter';
+import { writePptxDocument, writeVisibleNativeExperimentPptxDocument } from '../slideExport/pptxWriter';
 
 jest.mock('obsidian', () => ({
 	Platform: { isDesktopApp: true },
@@ -206,6 +206,118 @@ describe('pptxWriter', () => {
 			expect(slideXml).toContain('gridSpan="2"');
 			expect(slideXml).toContain('<a:alpha val="0"/>');
 			expect(slideXml).toContain('<a:lnL><a:noFill/></a:lnL>');
+		} finally {
+			rmSync(directory, { recursive: true, force: true });
+		}
+	});
+
+	test('writes experimental visible-native text and table fills without transparent alpha', () => {
+		const directory = mkdtempSync(join(tmpdir(), 'notemd-pptx-visible-native-'));
+		try {
+			const outputPath = join(directory, 'deck.visible-native-experiment.pptx');
+			const document: SlidevPptxDocument = {
+				title: 'Visible native deck',
+				author: 'NoteMD',
+				slides: [
+					{
+						slideNumber: 1,
+						title: 'Architecture',
+						backgroundColor: 'FFFFFF',
+						backgroundImage: {
+							data: new Uint8Array([137, 80, 78, 71, 13, 10, 26, 10]),
+							mimeType: 'image/png',
+							x: 0,
+							y: 0,
+							w: PPTX_SLIDE_WIDTH_IN,
+							h: PPTX_SLIDE_HEIGHT_IN,
+							name: 'Residual background',
+							order: 0,
+						},
+						texts: [
+							{
+								text: 'Visible native text',
+								x: 1,
+								y: 1,
+								w: 5,
+								h: 1,
+								fontSize: 24,
+								fontFace: 'Aptos',
+								color: '2563EB',
+								bold: true,
+								italic: false,
+								underline: false,
+								align: 'left',
+								bullet: false,
+								order: 10,
+								richTextParagraphs: [],
+								unmodeledRunReasons: [],
+							},
+						],
+						tables: [
+							{
+								x: 1,
+								y: 2.25,
+								w: 5,
+								h: 0.75,
+								colWidths: [2, 3],
+								rowHeights: [0.75],
+								order: 20,
+								rows: [
+									[
+										{
+											text: 'Visible cell',
+											rowSpan: 1,
+											colSpan: 1,
+											fontSize: 12,
+											fontFace: 'Aptos',
+											color: '111827',
+											bold: false,
+											italic: false,
+											underline: false,
+											align: 'left',
+											verticalAlign: 'middle',
+											fillColor: 'F3F4F6',
+											borderColor: 'D1D5DB',
+											borderWidthPt: 0.75,
+										},
+										{
+											text: '值',
+											rowSpan: 1,
+											colSpan: 1,
+											fontSize: 12,
+											fontFace: 'Aptos',
+											color: '047857',
+											bold: false,
+											italic: false,
+											underline: false,
+											align: 'center',
+											verticalAlign: 'middle',
+											fillColor: 'ECFDF5',
+											borderColor: 'D1D5DB',
+											borderWidthPt: 0.75,
+										},
+									],
+								],
+							},
+						],
+						fallbackOnlyElementKinds: [],
+						consumedTableTextCandidateCount: 0,
+						warnings: [],
+					},
+				],
+			};
+
+			writeVisibleNativeExperimentPptxDocument(outputPath, document);
+
+			const entries = unzipSync(new Uint8Array(readFileSync(outputPath)));
+			const slideXml = strFromU8(entries['ppt/slides/slide1.xml']);
+			expect(slideXml).toContain('<a:t>Visible native text</a:t>');
+			expect(slideXml).toContain('<a:srgbClr val="2563EB"/>');
+			expect(slideXml).toContain('<a:t>Visible cell</a:t>');
+			expect(slideXml).toContain('<a:t>值</a:t>');
+			expect(slideXml).toContain('<a:solidFill><a:srgbClr val="F3F4F6"/></a:solidFill>');
+			expect(slideXml).toContain('<a:lnL w="9525"><a:solidFill><a:srgbClr val="D1D5DB"/></a:solidFill></a:lnL>');
+			expect(slideXml).not.toContain('<a:alpha val="0"/>');
 		} finally {
 			rmSync(directory, { recursive: true, force: true });
 		}

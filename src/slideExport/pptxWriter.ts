@@ -61,6 +61,10 @@ function buildTransparentTextFill(color: string): string {
 	return `<a:solidFill><a:srgbClr val="${color}"><a:alpha val="0"/></a:srgbClr></a:solidFill>`;
 }
 
+function buildVisibleTextFill(color: string): string {
+	return `<a:solidFill><a:srgbClr val="${color}"/></a:solidFill>`;
+}
+
 function buildTextElement(text: string): string {
 	const xmlSpace = /^\s|\s$/.test(text) ? ' xml:space="preserve"' : '';
 	return `<a:t${xmlSpace}>${escapeXml(text)}</a:t>`;
@@ -88,6 +92,28 @@ function buildTransparentRunXml(text: string, runStyle: TextRunStyle): string {
 		'<a:r>',
 		`<a:rPr lang="en-US" sz="${size}"${bold}${italic}${underline}>`,
 		buildTransparentTextFill(color),
+		`<a:latin typeface="${fontFace}"/>`,
+		`<a:ea typeface="${escapeXmlAttribute(eastAsiaFont)}"/>`,
+		'<a:cs typeface="Aptos"/>',
+		'</a:rPr>',
+		buildTextElement(text),
+		'</a:r>',
+	].join('');
+}
+
+function buildVisibleRunXml(text: string, runStyle: TextRunStyle): string {
+	const color = clampHexColor(runStyle.color, '111827');
+	const size = Math.max(600, Math.min(14400, Math.round(runStyle.fontSize * 100)));
+	const bold = runStyle.bold ? ' b="1"' : '';
+	const italic = runStyle.italic ? ' i="1"' : '';
+	const underline = runStyle.underline ? ' u="sng"' : '';
+	const fontFace = escapeXmlAttribute(runStyle.fontFace || 'Aptos');
+	const eastAsiaFont = pptxTextContainsCjk(text) ? PPTX_WRITER_EAST_ASIA_FONT_FACE : fontFace;
+
+	return [
+		'<a:r>',
+		`<a:rPr lang="en-US" sz="${size}"${bold}${italic}${underline}>`,
+		buildVisibleTextFill(color),
 		`<a:latin typeface="${fontFace}"/>`,
 		`<a:ea typeface="${escapeXmlAttribute(eastAsiaFont)}"/>`,
 		'<a:cs typeface="Aptos"/>',
@@ -156,6 +182,24 @@ function buildTextParagraphs(textBox: SlidevPptxTextBox): string {
 		.join('');
 }
 
+function buildVisibleTextParagraphs(textBox: SlidevPptxTextBox): string {
+	const paragraphs = chooseTextParagraphs(textBox);
+	const align = alignToOoxml(textBox.align);
+	const bullet = textBox.bullet ? '<a:buChar char="&#8226;"/>' : '<a:buNone/>';
+
+	return paragraphs
+		.map((paragraph) =>
+			[
+				'<a:p>',
+				`<a:pPr algn="${align}">${bullet}</a:pPr>`,
+				paragraph.runs.map((run) => buildVisibleRunXml(run.text || ' ', run)).join(''),
+				`<a:endParaRPr lang="en-US" sz="${paragraphEndFontSize(paragraph, textBox.fontSize)}"/>`,
+				'</a:p>',
+			].join(''),
+		)
+		.join('');
+}
+
 function buildTextShape(textBox: SlidevPptxTextBox, shapeId: number): string {
 	const x = inchesToEmu(textBox.x);
 	const y = inchesToEmu(textBox.y);
@@ -185,8 +229,41 @@ function buildTextShape(textBox: SlidevPptxTextBox, shapeId: number): string {
 	].join('');
 }
 
+function buildVisibleTextShape(textBox: SlidevPptxTextBox, shapeId: number): string {
+	const x = inchesToEmu(textBox.x);
+	const y = inchesToEmu(textBox.y);
+	const w = inchesToEmu(textBox.w);
+	const h = inchesToEmu(textBox.h);
+	const name = escapeXmlAttribute(`Visible Native Text ${shapeId}`);
+
+	return [
+		'<p:sp>',
+		'<p:nvSpPr>',
+		`<p:cNvPr id="${shapeId}" name="${name}"/>`,
+		'<p:cNvSpPr txBox="1"/>',
+		'<p:nvPr/>',
+		'</p:nvSpPr>',
+		'<p:spPr>',
+		`<a:xfrm><a:off x="${x}" y="${y}"/><a:ext cx="${w}" cy="${h}"/></a:xfrm>`,
+		'<a:prstGeom prst="rect"><a:avLst/></a:prstGeom>',
+		'<a:noFill/>',
+		'<a:ln><a:noFill/></a:ln>',
+		'</p:spPr>',
+		'<p:txBody>',
+		'<a:bodyPr wrap="square" lIns="0" tIns="0" rIns="0" bIns="0" rtlCol="0" anchor="t"><a:normAutofit fontScale="100000"/></a:bodyPr>',
+		'<a:lstStyle/>',
+		buildVisibleTextParagraphs(textBox),
+		'</p:txBody>',
+		'</p:sp>',
+	].join('');
+}
+
 function buildTableCellRun(text: string, cell: SlidevPptxTableCell): string {
 	return buildTransparentRunXml(text, cell);
+}
+
+function buildVisibleTableCellRun(text: string, cell: SlidevPptxTableCell): string {
+	return buildVisibleRunXml(text, cell);
 }
 
 function buildTableCellParagraphs(cell: SlidevPptxTableCell): string {
@@ -211,6 +288,28 @@ function buildTableCellParagraphs(cell: SlidevPptxTableCell): string {
 		.join('');
 }
 
+function buildVisibleTableCellParagraphs(cell: SlidevPptxTableCell): string {
+	const lines = cell.text
+		.replace(/\r\n?/g, '\n')
+		.split('\n')
+		.map((line) => line.trimEnd())
+		.filter((line, index, allLines) => line.length > 0 || allLines.length === 1);
+	const align = alignToOoxml(cell.align);
+	const size = Math.max(600, Math.min(14400, Math.round(cell.fontSize * 100)));
+
+	return lines
+		.map((line) =>
+			[
+				'<a:p>',
+				`<a:pPr algn="${align}"/>`,
+				buildVisibleTableCellRun(line || ' ', cell),
+				`<a:endParaRPr lang="en-US" sz="${size}"/>`,
+				'</a:p>',
+			].join(''),
+		)
+		.join('');
+}
+
 function buildTableCellProperties(cell: SlidevPptxTableCell): string {
 	const attributes: string[] = [];
 	const invisibleBorders = [
@@ -228,6 +327,48 @@ function buildTableCellProperties(cell: SlidevPptxTableCell): string {
 	return `<a:tcPr${attributes.length > 0 ? ` ${attributes.join(' ')}` : ''}><a:noFill/>${invisibleBorders}</a:tcPr>`;
 }
 
+function pointsToEmu(value: number): number {
+	return Math.round(Math.max(0, value) * 12700);
+}
+
+function buildVisibleTableBorder(cell: SlidevPptxTableCell): string {
+	const borderColor = cell.borderColor ? clampHexColor(cell.borderColor, '') : '';
+	const borderWidth = pointsToEmu(cell.borderWidthPt);
+	if (!borderColor || borderWidth <= 0) {
+		return '<a:noFill/>';
+	}
+	return `<a:solidFill><a:srgbClr val="${borderColor}"/></a:solidFill>`;
+}
+
+function buildVisibleTableCellProperties(cell: SlidevPptxTableCell): string {
+	const attributes: string[] = [];
+	if (cell.verticalAlign === 'middle') {
+		attributes.push('anchor="ctr"');
+	} else if (cell.verticalAlign === 'bottom') {
+		attributes.push('anchor="b"');
+	}
+	const fill = cell.fillColor
+		? `<a:solidFill><a:srgbClr val="${clampHexColor(cell.fillColor, 'FFFFFF')}"/></a:solidFill>`
+		: '<a:noFill/>';
+	const borderWidth = pointsToEmu(cell.borderWidthPt);
+	const borderFill = buildVisibleTableBorder(cell);
+	const border =
+		borderWidth > 0
+			? [
+					`<a:lnL w="${borderWidth}">${borderFill}</a:lnL>`,
+					`<a:lnR w="${borderWidth}">${borderFill}</a:lnR>`,
+					`<a:lnT w="${borderWidth}">${borderFill}</a:lnT>`,
+					`<a:lnB w="${borderWidth}">${borderFill}</a:lnB>`,
+				].join('')
+			: [
+					'<a:lnL><a:noFill/></a:lnL>',
+					'<a:lnR><a:noFill/></a:lnR>',
+					'<a:lnT><a:noFill/></a:lnT>',
+					'<a:lnB><a:noFill/></a:lnB>',
+				].join('');
+	return `<a:tcPr${attributes.length > 0 ? ` ${attributes.join(' ')}` : ''}>${fill}${border}</a:tcPr>`;
+}
+
 function buildEmptyTableCell(attributes = ''): string {
 	return [
 		`<a:tc${attributes}>`,
@@ -237,6 +378,34 @@ function buildEmptyTableCell(attributes = ''): string {
 		'<a:p><a:endParaRPr lang="en-US"/></a:p>',
 		'</a:txBody>',
 		buildTableCellProperties({
+			text: '',
+			rowSpan: 1,
+			colSpan: 1,
+			fontSize: 12,
+			fontFace: 'Aptos',
+			color: '111827',
+			bold: false,
+			italic: false,
+			underline: false,
+			align: 'left',
+			verticalAlign: 'top',
+			fillColor: null,
+			borderColor: null,
+			borderWidthPt: 0,
+		}),
+		'</a:tc>',
+	].join('');
+}
+
+function buildVisibleEmptyTableCell(attributes = ''): string {
+	return [
+		`<a:tc${attributes}>`,
+		'<a:txBody>',
+		'<a:bodyPr/>',
+		'<a:lstStyle/>',
+		'<a:p><a:endParaRPr lang="en-US"/></a:p>',
+		'</a:txBody>',
+		buildVisibleTableCellProperties({
 			text: '',
 			rowSpan: 1,
 			colSpan: 1,
@@ -363,6 +532,113 @@ function buildTableXml(table: SlidevPptxTable, shapeId: number): string {
 	].join('');
 }
 
+function buildVisibleTableXml(table: SlidevPptxTable, shapeId: number): string {
+	const maxCols = Math.max(
+		table.colWidths.length,
+		...table.rows.map((row) => row.reduce((total, cell) => total + Math.max(1, cell.colSpan), 0)),
+		1,
+	);
+	const totalRows = Math.max(table.rows.length, 1);
+	type TableGridEntry = {
+		cell: SlidevPptxTableCell;
+		origin: boolean;
+		rowSpan: number;
+		colSpan: number;
+		hMerge: boolean;
+		vMerge: boolean;
+	};
+	const cellGrid: Array<Array<TableGridEntry | null>> = Array.from({ length: totalRows }, () =>
+		Array.from({ length: maxCols }, () => null),
+	);
+
+	for (let rowIndex = 0; rowIndex < table.rows.length; rowIndex += 1) {
+		let colIndex = 0;
+		for (const cell of table.rows[rowIndex]) {
+			while (colIndex < maxCols && cellGrid[rowIndex][colIndex]) {
+				colIndex += 1;
+			}
+			if (colIndex >= maxCols) break;
+			const rowSpan = Math.min(Math.max(1, cell.rowSpan), totalRows - rowIndex);
+			const colSpan = Math.min(Math.max(1, cell.colSpan), maxCols - colIndex);
+			for (let rowOffset = 0; rowOffset < rowSpan; rowOffset += 1) {
+				for (let colOffset = 0; colOffset < colSpan; colOffset += 1) {
+					cellGrid[rowIndex + rowOffset][colIndex + colOffset] = {
+						cell,
+						origin: rowOffset === 0 && colOffset === 0,
+						rowSpan,
+						colSpan,
+						hMerge: colOffset > 0,
+						vMerge: rowOffset > 0,
+					};
+				}
+			}
+			colIndex += colSpan;
+		}
+	}
+
+	const defaultColWidth = table.w / maxCols;
+	const gridColumns = Array.from({ length: maxCols }, (_unused, index) => table.colWidths[index] || defaultColWidth);
+	const gridColumnsXml = gridColumns.map((width) => `<a:gridCol w="${inchesToEmu(width)}"/>`).join('');
+	const rowsXml = cellGrid
+		.map((gridRow, rowIndex) => {
+			const rowHeight = table.rowHeights[rowIndex] || table.h / totalRows;
+			const cellsXml = gridRow
+				.map((gridEntry) => {
+					if (!gridEntry) {
+						return buildVisibleEmptyTableCell();
+					}
+					if (!gridEntry.origin) {
+						const mergeAttributes = [
+							gridEntry.hMerge ? 'hMerge="1"' : '',
+							gridEntry.vMerge ? 'vMerge="1"' : '',
+						]
+							.filter(Boolean)
+							.join(' ');
+						return buildVisibleEmptyTableCell(mergeAttributes ? ` ${mergeAttributes}` : '');
+					}
+					const gridSpan = gridEntry.colSpan > 1 ? ` gridSpan="${gridEntry.colSpan}"` : '';
+					const rowSpan = gridEntry.rowSpan > 1 ? ` rowSpan="${gridEntry.rowSpan}"` : '';
+					return [
+						`<a:tc${gridSpan}${rowSpan}>`,
+						'<a:txBody>',
+						'<a:bodyPr/>',
+						'<a:lstStyle/>',
+						buildVisibleTableCellParagraphs(gridEntry.cell),
+						'</a:txBody>',
+						buildVisibleTableCellProperties(gridEntry.cell),
+						'</a:tc>',
+					].join('');
+				})
+				.join('');
+			return `<a:tr h="${inchesToEmu(rowHeight)}">${cellsXml}</a:tr>`;
+		})
+		.join('');
+	const name = escapeXmlAttribute(`Visible Native Table ${shapeId}`);
+
+	return [
+		'<p:graphicFrame>',
+		'<p:nvGraphicFramePr>',
+		`<p:cNvPr id="${shapeId}" name="${name}"/>`,
+		'<p:cNvGraphicFramePr/>',
+		'<p:nvPr/>',
+		'</p:nvGraphicFramePr>',
+		'<p:xfrm>',
+		`<a:off x="${inchesToEmu(table.x)}" y="${inchesToEmu(table.y)}"/>`,
+		`<a:ext cx="${inchesToEmu(table.w)}" cy="${inchesToEmu(table.h)}"/>`,
+		'</p:xfrm>',
+		'<a:graphic>',
+		'<a:graphicData uri="http://schemas.openxmlformats.org/drawingml/2006/table">',
+		'<a:tbl>',
+		'<a:tblPr firstRow="0" lastRow="0" firstCol="0" lastCol="0" noBandRow="1" noBandCol="1"/>',
+		`<a:tblGrid>${gridColumnsXml}</a:tblGrid>`,
+		rowsXml,
+		'</a:tbl>',
+		'</a:graphicData>',
+		'</a:graphic>',
+		'</p:graphicFrame>',
+	].join('');
+}
+
 function buildPicture(image: SlidevPptxImage, shapeId: number, relationshipId: string): string {
 	const x = inchesToEmu(image.x);
 	const y = inchesToEmu(image.y);
@@ -386,6 +662,56 @@ function buildPicture(image: SlidevPptxImage, shapeId: number, relationshipId: s
 		'<a:prstGeom prst="rect"><a:avLst/></a:prstGeom>',
 		'</p:spPr>',
 		'</p:pic>',
+	].join('');
+}
+
+function buildVisibleNativeExperimentSlideXml(
+	slide: SlidevPptxSlide,
+	imageRelationships: SlideImageRelationship[],
+): string {
+	const backgroundColor = clampHexColor(slide.backgroundColor, 'FFFFFF');
+	const items: Array<{ order: number; xml: string }> = [];
+	let shapeId = 2;
+
+	for (const relationship of imageRelationships) {
+		items.push({
+			order: relationship.image.order,
+			xml: buildPicture(relationship.image, shapeId, relationship.relationshipId),
+		});
+		shapeId += 1;
+	}
+
+	for (const text of slide.texts) {
+		items.push({
+			order: text.order,
+			xml: buildVisibleTextShape(text, shapeId),
+		});
+		shapeId += 1;
+	}
+
+	for (const table of slide.tables) {
+		items.push({
+			order: table.order,
+			xml: buildVisibleTableXml(table, shapeId),
+		});
+		shapeId += 1;
+	}
+
+	items.sort((left, right) => left.order - right.order);
+
+	return [
+		'<?xml version="1.0" encoding="UTF-8" standalone="yes"?>',
+		'<p:sld xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns:p="http://schemas.openxmlformats.org/presentationml/2006/main">',
+		'<p:cSld>',
+		`<p:bg><p:bgPr><a:solidFill><a:srgbClr val="${backgroundColor}"/></a:solidFill><a:effectLst/></p:bgPr></p:bg>`,
+		'<p:spTree>',
+		'<p:nvGrpSpPr><p:cNvPr id="1" name=""/><p:cNvGrpSpPr/><p:nvPr/></p:nvGrpSpPr>',
+		'<p:grpSpPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="0" cy="0"/><a:chOff x="0" y="0"/><a:chExt cx="0" cy="0"/></a:xfrm></p:grpSpPr>',
+		items.map((item) => item.xml).join(''),
+		'</p:spTree>',
+		'</p:cSld>',
+		'<p:clrMapOvr><a:masterClrMapping/></p:clrMapOvr>',
+		'</p:sld>',
 	].join('');
 }
 
@@ -606,7 +932,11 @@ function buildTheme(): string {
 	].join('');
 }
 
-export function writePptxDocument(outputPath: string, document: SlidevPptxDocument): void {
+function writePptxPackage(
+	outputPath: string,
+	document: SlidevPptxDocument,
+	buildSlideContentXml: (slide: SlidevPptxSlide, imageRelationships: SlideImageRelationship[]) => string,
+): void {
 	const fs: any = safeRequire('fs');
 	const path: any = safeRequire('path');
 	if (!fs?.writeFileSync || !path?.dirname) {
@@ -635,11 +965,11 @@ export function writePptxDocument(outputPath: string, document: SlidevPptxDocume
 				relationshipId: `rId${imageIndex + 2}`,
 				mediaPath,
 			};
-		});
-		const slideNumber = slideIndex + 1;
-		addText(`ppt/slides/slide${slideNumber}.xml`, buildSlideXml(slide, imageRelationships));
-		addText(`ppt/slides/_rels/slide${slideNumber}.xml.rels`, buildSlideRelationships(imageRelationships));
-	}
+			});
+			const slideNumber = slideIndex + 1;
+			addText(`ppt/slides/slide${slideNumber}.xml`, buildSlideContentXml(slide, imageRelationships));
+			addText(`ppt/slides/_rels/slide${slideNumber}.xml.rels`, buildSlideRelationships(imageRelationships));
+		}
 
 	addText('[Content_Types].xml', buildContentTypes(document.slides.length, imageExtensions));
 	addText('_rels/.rels', buildRootRelationships());
@@ -656,4 +986,12 @@ export function writePptxDocument(outputPath: string, document: SlidevPptxDocume
 	fs.mkdirSync(path.dirname(outputPath), { recursive: true });
 	const zipped = zipSync(files, { level: 6 });
 	fs.writeFileSync(outputPath, Buffer.from(zipped));
+}
+
+export function writePptxDocument(outputPath: string, document: SlidevPptxDocument): void {
+	writePptxPackage(outputPath, document, buildSlideXml);
+}
+
+export function writeVisibleNativeExperimentPptxDocument(outputPath: string, document: SlidevPptxDocument): void {
+	writePptxPackage(outputPath, document, buildVisibleNativeExperimentSlideXml);
 }
