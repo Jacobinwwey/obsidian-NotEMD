@@ -236,7 +236,7 @@ NODE
 所以后续不是“全面换成 oh-my-ppt 路线”。更准确的推进切片是：
 
 1. **M1：增强 report，而不是先增强可见层**。这一项已在当前分支落地。report 继续保留 `visibleTextLayer = background-image` 和 `editableLayerRenderMode = transparent-structure`，并新增 `consumedTableCount`、`consumedTableTextCandidateCount`、`editablePrimitiveCoverage`、`fallbackOnlyElementKinds`、`unmodeledTextRunReasons` 与逐页 summary。这能防止“看似可编辑，实际大部分靠截图”的误报。
-2. **M2：rich run extraction**。第一片已经落到透明文本层：inline runs、computed font 元数据、link/code 标记、段落拆分、underline/color/bold/italic 保留，以及 Office-safe whitespace 都会写进 DrawingML。M2 剩余部分是同一 run 内的 CJK/Latin font-face 拆分、bullet levels、line-height、paragraph spacing 与显式 hyperlink relationships。
+2. **M2：rich run extraction**。第一片已经落到透明文本层：inline runs、computed font 元数据、link/code 标记、段落拆分、underline/color/bold/italic 保留，以及 Office-safe whitespace 都会写进 DrawingML。M17 已补上显式 hyperlink relationships。M2 剩余部分是同一 run 内的 CJK/Latin font-face 拆分、bullet levels、line-height 与 paragraph spacing。
 3. **M3：external PNG advisory gate 升级指标**。第一片已经落地。verifier 可通过 `--pptx-visual-reference-dir` 接收外部 PNG 序列，但除非显式传 `--require-pptx-visual-match`，不会让整个 run hard fail。报告现在包含 scale drift、差异几何、文本抗锯齿/renderer-noise 启发式分类、layout-review 候选页，以及可选 `PHASH`/`NCC`/`SSIM` 指标可用性，用来把不同 rasterization path 的亚像素差异和真实版面漂移分开。
 4. **M4：visible native table/text 分支**。只有同一 frozen HTML 下的 A/B gate 通过，才允许把透明结构层变成可见层。这个分支必须带 residue detection/retry，否则很容易出现背景文字 + PPTX 文字双影。
 5. **M5：字体合同**。第一片已经以 report 方式落地，而不是直接嵌入字体。`oh-my-ppt` 的 font embedding 很有价值，但 NotEMD 不能默认嵌入用户系统字体或远程字体；当前合同先报告字体族、CJK fallback、Office 端缺失风险，后续只应对 vault/local package 中有授权的 font asset 做 opt-in embedding。
@@ -296,7 +296,7 @@ runuser -u jacob -- env HOME=/home/jacob PLAYWRIGHT_BROWSERS_PATH=/home/jacob/.c
 | `renderer.ts` / `browser-scripts.ts` | 复用渲染收敛思想与 residue/retry oracle，不复用 Electron 实现 | NotEMD 的运行边界是 Obsidian + Playwright + Slidev fork，直接引入 `BrowserWindow` 会制造第二套生命周期和调试面 |
 | `table-extract.ts` | 复用 table-first、consumed marker、row/col geometry 合同；实现继续保留 NotEMD DOM extractor | 这部分思想已经匹配当前 `data-notemd-pptx-consumed-table`，但 Slidev 页面根节点、缩放和透明层策略不同 |
 | `index.ts` 文本抽取 | 复用 computed-style + rich-run + utility hint 思想，避免直接引入 Tailwind/Pretext 路线 | Slidev theme 不等价于 Tailwind authoring app；`@chenglou/pretext` 只有在可见原生文本需要像素级 line box 时才值得引入 |
-| `ooxml-writer.ts` | 复用 PresentationML 结构经验和测试用例思路，不复用 writer | NotEMD 已有小型 writer，当前更需要补 run-level 字体、hyperlink relationship、paragraph/list contract，而不是换 writer |
+| `ooxml-writer.ts` | 复用 PresentationML 结构经验和测试用例思路，不复用 writer | NotEMD 已有小型 writer，当前更需要补 run-level 字体、paragraph/list contract 与高置信 shape；hyperlink relationship 已在 M17 落地 |
 | `font-collect.ts` | 先复用 font contract/report；字体嵌入只做 opt-in 实验 | 默认嵌入系统/远程字体会引入授权、体积、Office 兼容和隐私问题，不能作为默认导出 |
 
 这意味着“我是开发者之一”可以降低研究和借鉴成本，但不应该降低默认产品路径的验收门槛。代码可拿，不等于应该拿。NotEMD 的核心约束不是能否写出更复杂 OOXML，而是任意 Slidev deck 在 Obsidian 插件里能否稳定导出，并且导出失败时用户能知道问题属于环境、视觉、字体、还是可编辑覆盖。
@@ -324,7 +324,7 @@ M7 本轮落地切片是：
 
 后续实践方案应按以下顺序推进，而不是一次性追求“完整 HTML->PPTX 原生化”：
 
-1. **先补 Office 文本合同**：让 writer 和 report 共用最终 emit 视角，拆分 mixed CJK/Latin run，记录 Office 实际字体 face；再补显式 hyperlink relationship、code monospace 默认、paragraph spacing 与 list indentation。这个方向直接提升可编辑层质量，且不改变可见层，风险最低。
+1. **先补 Office 文本合同**：让 writer 和 report 共用最终 emit 视角，拆分 mixed CJK/Latin run，记录 Office 实际字体 face；继续补 code monospace 默认、paragraph spacing 与 list indentation。这个方向直接提升可编辑层质量，且不改变可见层，风险最低。
 2. **再补选择体验**：继续保留透明结构层，但增加 source-kind 命名、selection-pane 友好名称、可选的调试 overlay 预览。用户真正抱怨的往往不是“是否存在 `<a:t>`”，而是 PowerPoint 里能否找到并编辑那段文字。
 3. **把 PNG/PPTX reference contract 继续收紧**：保留 `pptx-background-images` hard gate、`pptx-rendered-html-reference` 同源 gate 和 `external-png-sequence` advisory gate 三层。不要因为 external PNG RMSE 偶发失败就改 writer；先判断是否是独立 Slidev export invocation 漂移。
 4. **字体嵌入只接受白名单资产**：后续可支持 vault/project 内明确授权的字体包，并在 report 中写明 embedded font family、体积和 fallback 结果；不要扫描并打包用户系统字体。
@@ -966,7 +966,51 @@ runuser -u jacob -- env HOME=/home/jacob PLAYWRIGHT_BROWSERS_PATH=/home/jacob/.c
 12. sidecar `fontContract.officeOutputMissingFontRiskFamilies = ["DejaVu Sans Mono", "Noto Sans"]`，因为这些默认字体没有嵌入，不应声称 Office 跨机器可移植；
 13. 生成物仍在 Git ignore 范围内：`git status --ignored --short docs/export/test-slidev-m16-font-policy` 显示 `!!`，`git ls-files docs/export/test-slidev-m16-font-policy` 为空。
 
-这完成了当前针对 `oh-my-ppt` 的字体与真实可编辑文字对比切片。项目现在有了用户字体选择的稳定边界，同时没有退回透明文字的假可编辑路径。后续更高价值的 PPTX 工作仍是几何和对象建模：table baseline、paragraph spacing、code token background、hyperlink relationship、高置信 shape，以及可选的授权字体嵌入。Mermaid 默认仍应由背景拥有，直到单独 SVG/vector 策略能证明不会改写原 Mermaid 源，也不会扭曲图形。
+这完成了当前针对 `oh-my-ppt` 的字体与真实可编辑文字对比切片。项目现在有了用户字体选择的稳定边界，同时没有退回透明文字的假可编辑路径。后续更高价值的 PPTX 工作仍是几何和对象建模：table baseline、paragraph spacing、code token background、高置信 shape，以及可选的授权字体嵌入。Mermaid 默认仍应由背景拥有，直到单独 SVG/vector 策略能证明不会改写原 Mermaid 源，也不会扭曲图形。
+
+## M17 显式 PPTX 超链接关系
+
+本轮继续按 `ref/oh-my-ppt` 的架构原则推进：高置信文本语义应该写成 Office 原生对象，复杂视觉仍由背景兜底。`oh-my-ppt` 的当前 HTML-to-PPTX writer 只有主题中的 hyperlink 颜色槽，并没有把 DOM `<a href>` 写成 slide-level hyperlink relationship；但它的核心做法是把浏览器里能可靠抽取的 primitive 写成真实 OOXML。NoteMD 已经能抽取 rich text run，所以 link run 不应只停留在 `link: true`、蓝色或下划线样式上。
+
+本轮落地的合同更窄：
+
+1. DOM extractor 在 rich text run 上保留经过边界校验的 `hyperlinkTarget`；
+2. 相邻 rich runs 只有在 `hyperlinkTarget` 相同的情况下才会合并，避免把不同链接吞成一个 run；
+3. writer 对每张 slide 维护独立 hyperlink relationship 表，同一 slide 内相同 target 复用同一个 `rId`；
+4. run 的 `<a:rPr>` 写入 `<a:hlinkClick r:id="..."/>`，slide `.rels` 写入 `relationships/hyperlink` 且 `TargetMode="External"`；
+5. DOM 边界和 writer 边界都拒绝空 target、控制字符、超长 target，以及 `javascript:` / `data:` / `vbscript:`；
+6. sidecar report 新增 `hyperlinkRunCount` 与 `hyperlinkTargetCount`，逐页 summary 与 deck-level coverage 都能看出链接语义覆盖；
+7. 默认展示文字仍是可见 native text，没有重新引入透明文字层。
+
+这不是一个“大重构”，也不应该伪装成完整 Office 语义重建。它解决的是已经具备 DOM 事实源的文本链接：当源 HTML 有真实 `<a href>` 时，PPTX 里对应可见文字可编辑且可点击。Mermaid/SVG/canvas 内部链接、复杂组件级交互、锚点导航语义仍不在本轮声明范围内。
+
+真实 `docs/architecture.zh-CN.md` 验收命令：
+
+```bash
+runuser -u jacob -- env HOME=/home/jacob PLAYWRIGHT_BROWSERS_PATH=/home/jacob/.cache/ms-playwright bash -lc 'cd /home/jacob/obsidian-NotEMD && rm -rf docs/export/test-slidev-m17-hyperlink-contract /tmp/notemd-m17-hyperlink-contract.json && npm run verify:slidev-export -- --vault docs --source architecture.zh-CN.md --format pptx --output-subfolder export/test-slidev-m17-hyperlink-contract --sample-slides all --timeout-ms 240000 --no-screenshots --require-pptx-visual-match --json > /tmp/notemd-m17-hyperlink-contract.json'
+```
+
+结果：
+
+1. `ok = true`；
+2. 输出 PPTX：`docs/export/test-slidev-m17-hyperlink-contract/architecture.zh-CN.pptx`；
+3. 输出 report：`docs/export/test-slidev-m17-hyperlink-contract/architecture.zh-CN.pptx.report.json`；
+4. `slidev.version = 52.16.0 (/home/jacob/slidev/packages/slidev/bin/slidev.mjs)`；
+5. `skillRootPath = /home/jacob/slidev/skills/slidev`，`skillReferenceCount = 52`；
+6. `pptxInspection.slideCount = 30`，`textRunCount = 861`，`pictureCount = 30`，`tableCount = 6`，`slidesWithoutEditableText = []`；
+7. `pptxVisualGate.referenceSource = "pptx-rendered-html-reference"`，`thresholdProfile = "visible-native-rendered-html"`，`passed = true`；
+8. rendered-HTML reference diff：`meanRmse = 0.13862538666666666`，`maxRmse = 0.238758`；
+9. sidecar `textBoxCount = 338`，`richTextBoxCount = 134`，`richTextRunCount = 338`；
+10. sidecar `editableBodyTextBoxCount = 324`，`editableCodeTextBoxCount = 14`，`editableTableCellCount = 102`，`editableMermaidTextBoxCount = 0`；
+11. `visibleTextLayer = native-text-and-background-image`，`editableLayerRenderMode = visible-native-text`，`transparentOverlayTextSources = []`；
+12. `visibleNativeBackgroundCapture.status = verified`，`sampledSlideCount = 30`，`checkedRegionCount = 437`，`suspiciousRegionCount = 0`，`maxTextLikePixelRatio = 0`；
+13. PPTX XML 扫描显示 `alpha=0` 数量为 `0`，`alpha=8000` 数量为 `0`，`Visible Native Text = 324`，`Visible Native Code Text = 14`，`Visible Native Table = 6`，`Editable Mermaid Text = 0`；
+14. `mermaidSourcePreservation.passed = true`，`changedFenceIndexes = []`；
+15. `hyperlinkRunCount = 0`，`hyperlinkTargetCount = 0`，这是因为当前 `architecture.zh-CN.md` 真实 deck 本身没有可抽取的 `<a href>` 文本链接；
+16. targeted tests 覆盖了链接行为：DOM extractor 保留 `href`，writer 写出 `<a:hlinkClick>` 与 slide `.rels` hyperlink relationship，report 统计 run/target；
+17. 生成物仍在 Git ignore 范围内：`git status --ignored --short docs/export/test-slidev-m17-hyperlink-contract` 显示 `!!`，`git ls-files docs/export/test-slidev-m17-hyperlink-contract` 为空。
+
+这轮的工程判断是：链接关系属于“低漂移、高语义价值”的 native primitive，应该优先落地；而 Mermaid 文本、复杂 SVG 形状、图表数据和动画仍属于高漂移 primitive，必须继续通过单独 gate 推进。不要为了追求“更多可编辑”而把不稳定对象伪装成 Office 原生语义。
 
 ## 当前边界
 
@@ -976,7 +1020,7 @@ runuser -u jacob -- env HOME=/home/jacob PLAYWRIGHT_BROWSERS_PATH=/home/jacob/.c
 2. 整页视觉 fallback 保留复杂视觉。
 3. Mermaid/canvas 不会被转换成 Office 原生可编辑 vector object；非 Mermaid SVG/chart 文字会抽取为可见原生文本，剩余 chart/vector 几何仍保留在背景图里。
 4. 表格现在使用可见 native DrawingML table 层，包含可编辑单元格文本、rowspan/colspan 和行列尺寸。
-5. 代码块在 DOM 文本被建模时会以可见原生文本进入 PPTX。inline run 样式会保留，但完整 syntax-token 语义与显式 hyperlink relationship 仍未建模为 Office 原生对象。
+5. 代码块在 DOM 文本被建模时会以可见原生文本进入 PPTX。inline run 样式会保留；普通 DOM `<a href>` 已写成 Office 原生 hyperlink relationship，但完整 syntax-token 语义仍未建模为 Office 原生对象。
 6. 动画和 click steps 尚未转换为 PowerPoint animations。
 7. 旧 frozen-background visual gate 只证明 fallback image path 成立。当前 visible-native 默认路径需要更严格的逐页漂移分析，因为 Office 文本排版会偏离 Chromium。
 8. 默认非 Mermaid 文字现在是可见原生文字，不是低透明度 selectable overlay。默认 Mermaid label 不再写透明 overlay，仍由背景图拥有。
@@ -989,7 +1033,7 @@ runuser -u jacob -- env HOME=/home/jacob PLAYWRIGHT_BROWSERS_PATH=/home/jacob/.c
 
 1. 保持 visual diff gate 进入每次 PPTX 真实验收。对默认 visible-native PPTX 路径，应使用 rendered-HTML reference 作为 hard gate，因为 PPTX background 已经故意隐藏已建模文字；background-image diff 保留为 fallback-image packaging 与外部 reference 检查的诊断面。
 2. 保持可见 native table 层，但后续围绕 CSS padding、border collapse、line-height、cell text baseline、theme font fallback 与 Office round-trip 渲染模型继续收敛，不退回透明结构层。
-3. 把 `fontContract` 作为 visible native text/table 质量门槛。下一步 rich-text 切片只有在 writer/report 对最终 Office 字体一致时，才应拆分 mixed CJK/Latin runs；然后再补 paragraph spacing、list indentation、code monospace 默认、显式 hyperlink relationship，以及“文本样式保真”和“Office 原生语义保真”的报告区分。
+3. 把 `fontContract` 作为 visible native text/table 质量门槛。下一步 rich-text 切片只有在 writer/report 对最终 Office 字体一致时，才应继续补 paragraph spacing、list indentation、code monospace 默认、更多文本样式保真，以及“文本样式保真”和“Office 原生语义保真”的报告区分。
 4. 把默认 background residue detection/retry 作为必需 sidecar 合同保留，并只在证据显示有缺口时扩展；不要用静默退回透明 overlay 的方式绕过问题。
 5. shape extraction 只从高置信纯色矩形/线条开始，按 DOM paint order 插入；不要先碰复杂 SVG/Mermaid/vector reconstruction。
 6. 增加字体选择策略：少量内置 preset、用户选择系统已安装字体、明确 portability report；不要默认嵌入任意系统字体。

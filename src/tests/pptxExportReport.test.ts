@@ -106,6 +106,7 @@ describe('pptx export report', () => {
 										underline: true,
 										code: false,
 										link: true,
+										hyperlinkTarget: 'https://example.com/architecture',
 									},
 								],
 							},
@@ -190,6 +191,8 @@ describe('pptx export report', () => {
 		expect(report.consumedTableTextCandidateCount).toBe(2);
 		expect(report.richTextBoxCount).toBe(1);
 		expect(report.richTextRunCount).toBe(2);
+		expect(report.hyperlinkRunCount).toBe(1);
+		expect(report.hyperlinkTargetCount).toBe(1);
 		expect(report.editableTableCellCount).toBe(2);
 		expect(report.fallbackOnlyElementKinds).toEqual(['canvas', 'mermaid', 'svg']);
 		expect(report.unmodeledTextRunReasons).toEqual(['inline-formatting', 'link']);
@@ -198,6 +201,8 @@ describe('pptx export report', () => {
 		expect(report.editablePrimitiveCoverage.richTextBoxRatio).toBe(1);
 		expect(report.editablePrimitiveCoverage.richTextRunCount).toBe(2);
 		expect(report.editablePrimitiveCoverage.richTextRunCharacterCount).toBe('Architecture overview'.length);
+		expect(report.editablePrimitiveCoverage.hyperlinkRunCount).toBe(1);
+		expect(report.editablePrimitiveCoverage.hyperlinkTargetCount).toBe(1);
 		expect(report.editablePrimitiveCoverage.backgroundFallbackSlideRatio).toBe(0.5);
 		expect(report.editableLayerContract).toEqual({
 			visualFidelityStrategy: 'frozen-background-first',
@@ -258,6 +263,8 @@ describe('pptx export report', () => {
 				editableTableCellCount: 2,
 				richTextBoxCount: 1,
 				richTextRunCount: 2,
+				hyperlinkRunCount: 1,
+				hyperlinkTargetCount: 1,
 				fontFamilies: ['Aptos', 'Inter', 'Noto Sans CJK SC'],
 				cjkFontFamilies: ['Noto Sans CJK SC'],
 				writerEastAsiaFallbackFontFamilies: ['Noto Sans CJK SC'],

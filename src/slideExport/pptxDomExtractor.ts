@@ -44,6 +44,7 @@ interface RawSlideInlineTextRun {
 	underline: boolean;
 	code: boolean;
 	link: boolean;
+	hyperlinkTarget?: string;
 }
 
 interface RawSlideRichTextParagraph {
@@ -100,6 +101,17 @@ function normalizeHexColor(value: string, fallback: string): string {
 	return /^[0-9A-F]{6}$/.test(normalized) ? normalized : fallback;
 }
 
+function normalizeHyperlinkTarget(value: unknown): string | undefined {
+	const target = String(value || '').trim();
+	if (!target || target.length > 2048 || /[\u0000-\u001f\u007f]/.test(target)) {
+		return undefined;
+	}
+	if (/^(?:javascript|data|vbscript):/i.test(target)) {
+		return undefined;
+	}
+	return target;
+}
+
 function normalizeInlineTextRun(raw: RawSlideInlineTextRun): SlidevPptxInlineTextRun | null {
 	const text = String(raw.text || '')
 		.replace(/\r\n?/g, '\n')
@@ -107,6 +119,7 @@ function normalizeInlineTextRun(raw: RawSlideInlineTextRun): SlidevPptxInlineTex
 	if (text.length === 0) {
 		return null;
 	}
+	const hyperlinkTarget = normalizeHyperlinkTarget(raw.hyperlinkTarget);
 	return {
 		text: text.slice(0, 4000),
 		fontSize: clamp(Number(raw.fontSize) || 12, 5, 144),
@@ -117,6 +130,7 @@ function normalizeInlineTextRun(raw: RawSlideInlineTextRun): SlidevPptxInlineTex
 		underline: Boolean(raw.underline),
 		code: Boolean(raw.code),
 		link: Boolean(raw.link),
+		...(hyperlinkTarget ? { hyperlinkTarget } : {}),
 	};
 }
 
@@ -589,6 +603,8 @@ export async function extractSlidevPptxSlideFromPage(page: any, slideNumber: num
 		): Omit<RawSlideInlineTextRun, 'text'> => {
 			const fontSizePx = Number.parseFloat(style.fontSize || '16') || 16;
 			const fontWeight = Number.parseInt(style.fontWeight || '400', 10);
+			const linkElement = sourceElement.closest('a[href]') as HTMLAnchorElement | null;
+			const hyperlinkTarget = linkElement?.href || linkElement?.getAttribute('href') || undefined;
 			return {
 				fontSize: pxToPt(fontSizePx),
 				fontFace: sanitizeFontFace(style.fontFamily),
@@ -598,7 +614,8 @@ export async function extractSlidevPptxSlideFromPage(page: any, slideNumber: num
 				underline:
 					style.textDecorationLine.includes('underline') || Boolean(sourceElement.closest('u,ins,a[href]')),
 				code: Boolean(sourceElement.closest('code,pre')),
-				link: Boolean(sourceElement.closest('a[href]')),
+				link: Boolean(linkElement),
+				hyperlinkTarget,
 			};
 		};
 		const mergeAdjacentRuns = (runs: RawSlideInlineTextRun[]): RawSlideInlineTextRun[] => {
@@ -614,7 +631,8 @@ export async function extractSlidevPptxSlideFromPage(page: any, slideNumber: num
 					previous.italic === run.italic &&
 					previous.underline === run.underline &&
 					previous.code === run.code &&
-					previous.link === run.link
+					previous.link === run.link &&
+					previous.hyperlinkTarget === run.hyperlinkTarget
 				) {
 					previous.text += run.text;
 				} else {
@@ -707,7 +725,8 @@ export async function extractSlidevPptxSlideFromPage(page: any, slideNumber: num
 			left.italic === right.italic &&
 			left.underline === right.underline &&
 			left.code === right.code &&
-			left.link === right.link;
+			left.link === right.link &&
+			left.hyperlinkTarget === right.hyperlinkTarget;
 		type BrowserLineSegment = {
 			top: number;
 			left: number;

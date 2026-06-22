@@ -85,4 +85,40 @@ describe('pptxDomExtractor', () => {
 			await page.close();
 		}
 	});
+
+	test('preserves anchor href as a PPTX hyperlink target on extracted text runs', async () => {
+		if (!browser) {
+			console.warn('Skipping PPTX DOM extractor Playwright test:', launchError);
+			return;
+		}
+
+		const page = await browser.newPage({ viewport: { width: 1280, height: 720 } });
+		try {
+			await page.setContent(`
+				<body style="margin:0;background:#fff">
+					<div class="slidev-page" style="width:1280px;height:720px;background:#fff;padding:64px;box-sizing:border-box">
+						<p style="margin:0;font-family:Arial;font-size:32px;line-height:40px;color:#111827">
+							Read the <a href="https://example.com/docs?topic=pptx&amp;phase=hyperlinks" style="color:#2563eb;text-decoration:underline">export docs</a>.
+						</p>
+					</div>
+				</body>
+			`);
+
+			const slide = await extractSlidevPptxSlideFromPage(page, 1);
+			const linkRuns = slide.texts
+				.flatMap((textBox) => textBox.richTextParagraphs)
+				.flatMap((paragraph) => paragraph.runs)
+				.filter((run) => run.link);
+
+			expect(linkRuns).toEqual([
+				expect.objectContaining({
+					text: 'export docs',
+					hyperlinkTarget: 'https://example.com/docs?topic=pptx&phase=hyperlinks',
+				}),
+			]);
+			expect(slide.texts.some((textBox) => textBox.unmodeledRunReasons.includes('link'))).toBe(true);
+		} finally {
+			await page.close();
+		}
+	});
 });

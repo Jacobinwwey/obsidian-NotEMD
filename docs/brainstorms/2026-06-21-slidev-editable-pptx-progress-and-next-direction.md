@@ -217,7 +217,7 @@ The useful reading of `oh-my-ppt` is narrower than "it supports HTML Slides -> P
 The concrete next slices are:
 
 1. **M1: improve the report before the visible layer**. This is now landed in the current branch. The report keeps `visibleTextLayer = background-image` and `editableLayerRenderMode = transparent-structure`, and records `consumedTableCount`, `consumedTableTextCandidateCount`, `editablePrimitiveCoverage`, `fallbackOnlyElementKinds`, `unmodeledTextRunReasons`, and per-slide summaries.
-2. **M2: rich run extraction**. First slice is now landed for the transparent text layer: inline runs, computed font metadata, link/code markers, paragraph splitting, underline/color/bold/italic preservation, and Office-safe whitespace are written into DrawingML. Remaining M2 work is CJK/Latin font-face splitting inside one run, bullet levels, line-height, paragraph spacing, and explicit hyperlink relationships.
+2. **M2: rich run extraction**. First slice is now landed for the transparent text layer: inline runs, computed font metadata, link/code markers, paragraph splitting, underline/color/bold/italic preservation, and Office-safe whitespace are written into DrawingML. M17 added explicit hyperlink relationships. Remaining M2 work is CJK/Latin font-face splitting inside one run, bullet levels, line-height, and paragraph spacing.
 3. **M3: external PNG advisory metrics**. First slice is now landed. The verifier can take an external PNG sequence through `--pptx-visual-reference-dir`, but it does not hard-fail the whole run unless `--require-pptx-visual-match` is explicitly passed. The report now includes scale drift, difference geometry, text-antialias/renderer-noise heuristics, layout-review candidates, and optional `PHASH`/`NCC`/`SSIM` metric availability so subpixel renderer drift is separated from actual layout drift.
 4. **M4: visible native table/text branch**. Only make transparent structures visible after a same-frozen-HTML A/B gate passes. That branch must include residue detection/retry, or it will create background text plus PPTX text ghosting.
 5. **M5: font contract**. The first slice is now landed as reporting, not embedding. `oh-my-ppt` font embedding is valuable, but NotEMD should not silently embed arbitrary user system or remote fonts. The current contract reports font families, CJK fallback, and Office missing-font risk; later embedding should be opt-in and limited to licensed local/vault font assets.
@@ -277,7 +277,7 @@ Module by module, the reuse scale should be:
 | `renderer.ts` / `browser-scripts.ts` | Reuse the render-convergence idea and residue/retry oracle, not the Electron implementation | NotEMD runs as Obsidian + Playwright + Slidev fork; importing `BrowserWindow` would add a second lifecycle and debugging surface |
 | `table-extract.ts` | Reuse table-first extraction, consumed markers, and row/column geometry contracts; keep the NotEMD DOM extractor | This already matches `data-notemd-pptx-consumed-table`, but Slidev page roots, scaling, and transparent-layer semantics differ |
 | `index.ts` text extraction | Reuse computed-style, rich-run, and utility-hint ideas without adopting the Tailwind/Pretext path wholesale | Slidev themes are not the same as a Tailwind-authored app; `@chenglou/pretext` is only worth adding if visible-native text needs pixel-level line boxes |
-| `ooxml-writer.ts` | Reuse PresentationML structure lessons and test-case ideas, not the writer | NotEMD already has a small writer; the next value is run-level fonts, hyperlink relationships, paragraph/list contracts, not a writer swap |
+| `ooxml-writer.ts` | Reuse PresentationML structure lessons and test-case ideas, not the writer | NotEMD already has a small writer; the next value is run-level fonts, paragraph/list contracts, and high-confidence shapes; hyperlink relationships landed in M17 |
 | `font-collect.ts` | Reuse font contract/reporting first; keep font embedding as opt-in experimentation | Default system/remote-font embedding creates licensing, file-size, Office-compatibility, and privacy problems |
 
 In other words, being one of the `oh-my-ppt` developers lowers the cost of studying and adapting the design, but it should not lower the default product acceptance bar. Code can be reused; that does not mean it should be. NotEMD's constraint is not whether it can emit more complex OOXML, but whether arbitrary Slidev decks can export reliably from the Obsidian plugin and explain failures as environment, visual, font, or editability-coverage issues.
@@ -305,7 +305,7 @@ The M7 implementation slice is:
 
 The practical plan should proceed in this order instead of chasing full native HTML-to-PPTX reconstruction at once:
 
-1. **Tighten the Office text contract first**: make the writer and report share the final emit view, split mixed CJK/Latin runs, record actual Office font faces, then add explicit hyperlink relationships, code monospace defaults, paragraph spacing, and list indentation. This improves the editable layer without changing the visible layer, so it is the lowest-risk path.
+1. **Tighten the Office text contract first**: make the writer and report share the final emit view, split mixed CJK/Latin runs, record actual Office font faces, then add code monospace defaults, paragraph spacing, and list indentation. This improves the editable layer without changing the visible layer, so it is the lowest-risk path.
 2. **Improve selection ergonomics next**: keep the transparent structure layer, but add source-kind naming, PowerPoint Selection Pane-friendly names, and an optional debug overlay preview. The real user complaint is often not whether `<a:t>` exists, but whether the text can be found and edited in PowerPoint.
 3. **Keep tightening the PNG/PPTX reference contract**: preserve the three reference layers: `pptx-background-images` hard gate, `pptx-rendered-html-reference` same-source gate, and `external-png-sequence` advisory gate. Do not tune the writer just because external PNG RMSE fails; first decide whether the separate Slidev export invocation drifted.
 4. **Only embed allowlisted font assets**: future embedding can support explicitly licensed fonts stored in the vault/project and report embedded families, size, and fallback behavior. Do not scan and package user system fonts.
@@ -945,7 +945,51 @@ Result:
 12. sidecar `fontContract.officeOutputMissingFontRiskFamilies = ["DejaVu Sans Mono", "Noto Sans"]`, because those defaults are not embedded and should not be claimed as Office-portable;
 13. generated outputs remain ignored: `git status --ignored --short docs/export/test-slidev-m16-font-policy` reports `!!`, and `git ls-files docs/export/test-slidev-m16-font-policy` is empty.
 
-This completes the current `oh-my-ppt` comparison slice for fonts and editable text. The project now has a stable boundary for user-selected fonts without regressing to fake transparent text. The remaining higher-value PPTX work is still geometry and object modeling: table baselines, paragraph spacing, code token backgrounds, hyperlink relationships, high-confidence shapes, and optional licensed font embedding. Mermaid should remain background-owned in the default path until a separate SVG/vector strategy can prove that it does not alter the original Mermaid source or distort the diagram.
+This completes the current `oh-my-ppt` comparison slice for fonts and editable text. The project now has a stable boundary for user-selected fonts without regressing to fake transparent text. The remaining higher-value PPTX work is still geometry and object modeling: table baselines, paragraph spacing, code token backgrounds, high-confidence shapes, and optional licensed font embedding. Mermaid should remain background-owned in the default path until a separate SVG/vector strategy can prove that it does not alter the original Mermaid source or distort the diagram.
+
+## M17 Explicit PPTX Hyperlink Relationships
+
+This slice continues the `ref/oh-my-ppt` architectural principle: high-confidence text semantics should become native Office objects, while complex visuals remain background-owned. The current `oh-my-ppt` HTML-to-PPTX writer exposes hyperlink colors in the theme but does not write DOM `<a href>` values as slide-level hyperlink relationships. The useful lesson is still the same: when a browser-observed primitive is reliable enough, write the corresponding OOXML rather than leaving it as paint only. Since NoteMD already extracts rich text runs, link runs should not stop at `link: true`, blue color, or underline styling.
+
+The landed contract is deliberately narrow:
+
+1. the DOM extractor preserves a validated `hyperlinkTarget` on rich text runs;
+2. adjacent runs merge only when `hyperlinkTarget` matches, so different links are not collapsed into one run;
+3. the writer maintains a per-slide hyperlink relationship table and reuses one `rId` for repeated targets on the same slide;
+4. text run properties get `<a:hlinkClick r:id="..."/>`, while the slide `.rels` gets a `relationships/hyperlink` entry with `TargetMode="External"`;
+5. both the DOM boundary and writer boundary reject empty targets, control characters, oversized targets, and `javascript:` / `data:` / `vbscript:`;
+6. the sidecar report now includes `hyperlinkRunCount` and `hyperlinkTargetCount` in per-slide summaries and deck-level coverage;
+7. displayed text remains visible native text; no transparent text layer was reintroduced.
+
+This is not a broad semantic reconstruction claim. It solves the text-link case where the source HTML contains a real `<a href>`: the corresponding displayed PPTX text remains editable and becomes clickable. Mermaid/SVG/canvas internal links, component-level interactions, and slide anchor navigation are still outside this slice.
+
+Real acceptance against `docs/architecture.zh-CN.md`:
+
+```bash
+runuser -u jacob -- env HOME=/home/jacob PLAYWRIGHT_BROWSERS_PATH=/home/jacob/.cache/ms-playwright bash -lc 'cd /home/jacob/obsidian-NotEMD && rm -rf docs/export/test-slidev-m17-hyperlink-contract /tmp/notemd-m17-hyperlink-contract.json && npm run verify:slidev-export -- --vault docs --source architecture.zh-CN.md --format pptx --output-subfolder export/test-slidev-m17-hyperlink-contract --sample-slides all --timeout-ms 240000 --no-screenshots --require-pptx-visual-match --json > /tmp/notemd-m17-hyperlink-contract.json'
+```
+
+Result:
+
+1. `ok = true`;
+2. output PPTX: `docs/export/test-slidev-m17-hyperlink-contract/architecture.zh-CN.pptx`;
+3. output report: `docs/export/test-slidev-m17-hyperlink-contract/architecture.zh-CN.pptx.report.json`;
+4. `slidev.version = 52.16.0 (/home/jacob/slidev/packages/slidev/bin/slidev.mjs)`;
+5. `skillRootPath = /home/jacob/slidev/skills/slidev`, `skillReferenceCount = 52`;
+6. `pptxInspection.slideCount = 30`, `textRunCount = 861`, `pictureCount = 30`, `tableCount = 6`, `slidesWithoutEditableText = []`;
+7. `pptxVisualGate.referenceSource = "pptx-rendered-html-reference"`, `thresholdProfile = "visible-native-rendered-html"`, `passed = true`;
+8. rendered-HTML reference diff: `meanRmse = 0.13862538666666666`, `maxRmse = 0.238758`;
+9. sidecar `textBoxCount = 338`, `richTextBoxCount = 134`, `richTextRunCount = 338`;
+10. sidecar `editableBodyTextBoxCount = 324`, `editableCodeTextBoxCount = 14`, `editableTableCellCount = 102`, `editableMermaidTextBoxCount = 0`;
+11. `visibleTextLayer = native-text-and-background-image`, `editableLayerRenderMode = visible-native-text`, `transparentOverlayTextSources = []`;
+12. `visibleNativeBackgroundCapture.status = verified`, `sampledSlideCount = 30`, `checkedRegionCount = 437`, `suspiciousRegionCount = 0`, `maxTextLikePixelRatio = 0`;
+13. PPTX XML scan found `alpha=0` count `0`, `alpha=8000` count `0`, `Visible Native Text = 324`, `Visible Native Code Text = 14`, `Visible Native Table = 6`, and `Editable Mermaid Text = 0`;
+14. `mermaidSourcePreservation.passed = true`, `changedFenceIndexes = []`;
+15. `hyperlinkRunCount = 0` and `hyperlinkTargetCount = 0`, because the current real `architecture.zh-CN.md` deck does not contain an extractable `<a href>` text link;
+16. targeted tests cover the link behavior: the DOM extractor preserves `href`, the writer emits `<a:hlinkClick>` and slide `.rels` hyperlink relationships, and the report counts runs/targets;
+17. generated outputs remain ignored: `git status --ignored --short docs/export/test-slidev-m17-hyperlink-contract` reports `!!`, and `git ls-files docs/export/test-slidev-m17-hyperlink-contract` is empty.
+
+The engineering judgment here is that hyperlink relationships are low-drift, high-semantic-value native primitives and should be handled now. Mermaid text, complex SVG geometry, chart data, and animations remain high-drift primitives that still need separate gates. Do not inflate editability by pretending unstable objects are Office-native semantics.
 
 ## Current Limits
 
@@ -955,7 +999,7 @@ The first implementation is intentionally conservative:
 2. Whole-slide visual fallback preserves complex visuals.
 3. Mermaid/canvas are not converted into Office-native editable vector objects; non-Mermaid SVG/chart text is extracted as visible native text, while the remaining chart/vector geometry stays in the background image.
 4. Tables now use a visible native DrawingML table layer with editable cell text, row/column dimensions, and merge metadata.
-5. Code blocks are extracted as visible native text when the DOM text is modeled. Inline run styling is preserved, but full syntax-token semantics and explicit hyperlink relationships are still not modeled as Office-native objects.
+5. Code blocks are extracted as visible native text when the DOM text is modeled. Inline run styling is preserved; ordinary DOM `<a href>` links are now written as Office-native hyperlink relationships, but full syntax-token semantics are still not modeled as Office-native objects.
 6. Animations and click steps are not represented as PowerPoint animations.
 7. The old frozen-background visual-diff gate proved the fallback image path. The current visible-native default needs stricter per-slide drift analysis because Office text layout can diverge from Chromium.
 8. Default non-Mermaid text is now visible native text, not a low-opacity selectable overlay. Default Mermaid labels are not written as transparent overlays; they remain in the background image.
@@ -968,7 +1012,7 @@ The next level should be incremental and report-driven:
 
 1. keep visual diff in every real PPTX acceptance run. For the default visible-native PPTX path, use the rendered-HTML reference as the hard gate because the PPTX background intentionally hides modeled text; keep background-image diff as a diagnostic for fallback-image packaging and external reference checks;
 2. keep the visible native table layer, but gate improvements around CSS padding, border collapse, line height, cell baseline, font fallback, and Office round-trip rendering instead of reverting to transparent structures;
-3. use `fontContract` as the gate for visible native text/table quality. The next rich-text slices should split mixed CJK/Latin runs only when the writer/report agree on the final Office faces, then add paragraph spacing, list indentation, code monospace defaults, explicit hyperlink relationships, and a clearer distinction between text-style fidelity and true Office-native semantic fidelity;
+3. use `fontContract` as the gate for visible native text/table quality. The next rich-text slices should continue with paragraph spacing, list indentation, code monospace defaults, richer text-style fidelity, and a clearer distinction between text-style fidelity and true Office-native semantic fidelity;
 4. keep default background residue detection/retry as a required sidecar contract, and expand it only where evidence shows gaps; do not replace it with a silent fallback to transparent overlays;
 5. add shape extraction for high-confidence solid-color rectangles/lines only;
 6. add a font selection policy with a small preset list, user-selected installed family names, and a clear portability report; do not default to embedding arbitrary system fonts;

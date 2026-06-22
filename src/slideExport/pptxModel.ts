@@ -40,6 +40,7 @@ export interface SlidevPptxInlineTextRun {
 	underline: boolean;
 	code: boolean;
 	link: boolean;
+	hyperlinkTarget?: string;
 }
 
 export interface SlidevPptxRichTextParagraph {
@@ -182,6 +183,8 @@ export interface SlidevPptxSlideEditabilitySummary {
 	richTextBoxCount: number;
 	richTextRunCount: number;
 	richTextRunCharacterCount: number;
+	hyperlinkRunCount: number;
+	hyperlinkTargetCount: number;
 	backgroundFallbackPresent: boolean;
 	fallbackOnlyElementKinds: SlidevPptxFallbackOnlyElementKind[];
 	unmodeledTextRunReasons: SlidevPptxUnmodeledTextRunReason[];
@@ -223,6 +226,8 @@ export interface SlidevPptxEditablePrimitiveCoverage {
 	richTextBoxRatio: number;
 	richTextRunCount: number;
 	richTextRunCharacterCount: number;
+	hyperlinkRunCount: number;
+	hyperlinkTargetCount: number;
 	backgroundFallbackSlideCount: number;
 	backgroundFallbackSlideRatio: number;
 	textSourceCoverage: SlidevPptxTextSourceCoverage[];
@@ -331,6 +336,8 @@ export interface SlidevPptxExportReport {
 	consumedTableTextCandidateCount: number;
 	richTextBoxCount: number;
 	richTextRunCount: number;
+	hyperlinkRunCount: number;
+	hyperlinkTargetCount: number;
 	editableTableCellCount: number;
 	editableBodyTextBoxCount: number;
 	editableCodeTextBoxCount: number;

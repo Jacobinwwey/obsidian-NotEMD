@@ -25,9 +25,17 @@ interface SlideImageRelationship {
 	mediaPath: string;
 }
 
+interface SlideHyperlinkRelationship {
+	relationshipId: string;
+	target: string;
+}
+
 type PptxWriterContext = {
 	fontPolicy: SlidevPptxFontPolicy;
+	registerHyperlinkTarget: (target: string | undefined) => string;
 };
+
+type PptxPackageContext = Pick<PptxWriterContext, 'fontPolicy'>;
 
 function escapeXml(value: string): string {
 	return value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
@@ -35,6 +43,17 @@ function escapeXml(value: string): string {
 
 function escapeXmlAttribute(value: string): string {
 	return escapeXml(value).replace(/"/g, '&quot;').replace(/'/g, '&apos;');
+}
+
+function normalizeOfficeHyperlinkTarget(value: string | undefined): string {
+	const target = String(value || '').trim();
+	if (!target || target.length > 2048 || /[\u0000-\u001f\u007f]/.test(target)) {
+		return '';
+	}
+	if (/^(?:javascript|data|vbscript):/i.test(target)) {
+		return '';
+	}
+	return target;
 }
 
 function inchesToEmu(value: number): number {
@@ -84,6 +103,7 @@ type TextRunStyle = {
 	bold: boolean;
 	italic: boolean;
 	underline: boolean;
+	hyperlinkTarget?: string;
 };
 
 function buildRunXmlWithTextFill(
@@ -91,12 +111,16 @@ function buildRunXmlWithTextFill(
 	runStyle: TextRunStyle,
 	textFillXml: string,
 	language: 'en-US' | 'zh-CN',
+	hyperlinkRelationshipId?: string,
 ): string {
 	const size = Math.max(600, Math.min(14400, Math.round(runStyle.fontSize * 100)));
 	const bold = runStyle.bold ? ' b="1"' : '';
 	const italic = runStyle.italic ? ' i="1"' : '';
 	const underline = runStyle.underline ? ' u="sng"' : '';
 	const fontFace = escapeXmlAttribute(runStyle.fontFace || 'Aptos');
+	const hyperlinkXml = hyperlinkRelationshipId
+		? `<a:hlinkClick r:id="${escapeXmlAttribute(hyperlinkRelationshipId)}"/>`
+		: '';
 
 	return [
 		'<a:r>',
@@ -105,6 +129,7 @@ function buildRunXmlWithTextFill(
 		`<a:latin typeface="${fontFace}"/>`,
 		`<a:ea typeface="${fontFace}"/>`,
 		'<a:cs typeface="Aptos"/>',
+		hyperlinkXml,
 		'</a:rPr>',
 		buildTextElement(text),
 		'</a:r>',
@@ -114,6 +139,7 @@ function buildRunXmlWithTextFill(
 function buildTransparentRunXml(text: string, runStyle: TextRunStyle, context: PptxWriterContext): string {
 	const color = clampHexColor(runStyle.color, '111827');
 	const textFillXml = buildTransparentTextFill(color);
+	const hyperlinkRelationshipId = context.registerHyperlinkTarget(runStyle.hyperlinkTarget);
 	return splitPptxTextIntoOfficeFontRuns(text, runStyle.fontFace, context.fontPolicy)
 		.map((officeRun) =>
 			buildRunXmlWithTextFill(
@@ -121,6 +147,7 @@ function buildTransparentRunXml(text: string, runStyle: TextRunStyle, context: P
 				{ ...runStyle, fontFace: officeRun.fontFace },
 				textFillXml,
 				officeRun.usesEastAsiaFont ? 'zh-CN' : 'en-US',
+				hyperlinkRelationshipId,
 			),
 		)
 		.join('');
@@ -129,6 +156,7 @@ function buildTransparentRunXml(text: string, runStyle: TextRunStyle, context: P
 function buildVisibleRunXml(text: string, runStyle: TextRunStyle, context: PptxWriterContext): string {
 	const color = clampHexColor(runStyle.color, '111827');
 	const textFillXml = buildVisibleTextFill(color);
+	const hyperlinkRelationshipId = context.registerHyperlinkTarget(runStyle.hyperlinkTarget);
 	return splitPptxTextIntoOfficeFontRuns(text, runStyle.fontFace, context.fontPolicy)
 		.map((officeRun) =>
 			buildRunXmlWithTextFill(
@@ -136,6 +164,7 @@ function buildVisibleRunXml(text: string, runStyle: TextRunStyle, context: PptxW
 				{ ...runStyle, fontFace: officeRun.fontFace },
 				textFillXml,
 				officeRun.usesEastAsiaFont ? 'zh-CN' : 'en-US',
+				hyperlinkRelationshipId,
 			),
 		)
 		.join('');
@@ -157,6 +186,7 @@ function fallbackTextParagraphs(textBox: SlidevPptxTextBox): SlidevPptxRichTextP
 					bold: textBox.bold,
 					italic: textBox.italic,
 					underline: textBox.underline,
+					hyperlinkTarget: undefined,
 					code: false,
 					link: false,
 				},
@@ -872,16 +902,24 @@ function buildSlideXml(
 	].join('');
 }
 
-function buildSlideRelationships(imageRelationships: SlideImageRelationship[]): string {
+function buildSlideRelationships(
+	imageRelationships: SlideImageRelationship[],
+	hyperlinkRelationships: SlideHyperlinkRelationship[],
+): string {
 	const imageRels = imageRelationships.map(
 		(relationship) =>
 			`<Relationship Id="${relationship.relationshipId}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target="../${relationship.mediaPath}"/>`,
+	);
+	const hyperlinkRels = hyperlinkRelationships.map(
+		(relationship) =>
+			`<Relationship Id="${relationship.relationshipId}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/hyperlink" Target="${escapeXmlAttribute(relationship.target)}" TargetMode="External"/>`,
 	);
 	return [
 		'<?xml version="1.0" encoding="UTF-8" standalone="yes"?>',
 		'<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">',
 		'<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/slideLayout" Target="../slideLayouts/slideLayout1.xml"/>',
 		imageRels.join(''),
+		hyperlinkRels.join(''),
 		'</Relationships>',
 	].join('');
 }
@@ -1027,7 +1065,7 @@ function buildSlideLayoutRelationships(): string {
 	].join('');
 }
 
-function buildTheme(context: PptxWriterContext): string {
+function buildTheme(context: PptxPackageContext): string {
 	const latinFontFace = escapeXmlAttribute(context.fontPolicy.latinFontFace);
 	const eastAsiaFontFace = escapeXmlAttribute(context.fontPolicy.eastAsiaFontFace);
 	const monospaceFontFace = escapeXmlAttribute(context.fontPolicy.monospaceFontFace);
@@ -1053,7 +1091,7 @@ function writePptxPackage(
 		imageRelationships: SlideImageRelationship[],
 		context: PptxWriterContext,
 	) => string,
-	context: PptxWriterContext,
+	context: PptxPackageContext,
 ): void {
 	const fs: any = safeRequire('fs');
 	const path: any = safeRequire('path');
@@ -1084,9 +1122,33 @@ function writePptxPackage(
 				mediaPath,
 			};
 		});
+		const hyperlinkRelationships: SlideHyperlinkRelationship[] = [];
+		const hyperlinkRelationshipIdsByTarget = new Map<string, string>();
+		let nextRelationshipId = imageRelationships.length + 2;
+		const slideContext: PptxWriterContext = {
+			fontPolicy: context.fontPolicy,
+			registerHyperlinkTarget: (targetInput) => {
+				const target = normalizeOfficeHyperlinkTarget(targetInput);
+				if (!target) {
+					return '';
+				}
+				const existingRelationshipId = hyperlinkRelationshipIdsByTarget.get(target);
+				if (existingRelationshipId) {
+					return existingRelationshipId;
+				}
+				const relationshipId = `rId${nextRelationshipId}`;
+				nextRelationshipId += 1;
+				hyperlinkRelationshipIdsByTarget.set(target, relationshipId);
+				hyperlinkRelationships.push({ relationshipId, target });
+				return relationshipId;
+			},
+		};
 		const slideNumber = slideIndex + 1;
-		addText(`ppt/slides/slide${slideNumber}.xml`, buildSlideContentXml(slide, imageRelationships, context));
-		addText(`ppt/slides/_rels/slide${slideNumber}.xml.rels`, buildSlideRelationships(imageRelationships));
+		addText(`ppt/slides/slide${slideNumber}.xml`, buildSlideContentXml(slide, imageRelationships, slideContext));
+		addText(
+			`ppt/slides/_rels/slide${slideNumber}.xml.rels`,
+			buildSlideRelationships(imageRelationships, hyperlinkRelationships),
+		);
 	}
 
 	addText('[Content_Types].xml', buildContentTypes(document.slides.length, imageExtensions));

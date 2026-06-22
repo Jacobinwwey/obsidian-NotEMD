@@ -357,6 +357,104 @@ describe('pptxWriter', () => {
 		}
 	});
 
+	test('writes rich text hyperlinks as real slide relationships', () => {
+		const directory = mkdtempSync(join(tmpdir(), 'notemd-pptx-hyperlinks-'));
+		try {
+			const outputPath = join(directory, 'deck.pptx');
+			const document: SlidevPptxDocument = {
+				title: 'Hyperlink deck',
+				author: 'NoteMD',
+				slides: [
+					{
+						slideNumber: 1,
+						title: 'Links',
+						backgroundColor: 'FFFFFF',
+						texts: [
+							{
+								text: 'Open docs and docs again',
+								sourceKind: 'body',
+								x: 1,
+								y: 1,
+								w: 7,
+								h: 0.6,
+								fontSize: 18,
+								fontFace: 'Aptos',
+								color: '111827',
+								bold: false,
+								italic: false,
+								underline: false,
+								align: 'left',
+								bullet: false,
+								order: 10,
+								richTextParagraphs: [
+									{
+										runs: [
+											{
+												text: 'Open ',
+												fontSize: 18,
+												fontFace: 'Aptos',
+												color: '111827',
+												bold: false,
+												italic: false,
+												underline: false,
+												code: false,
+												link: false,
+											},
+											{
+												text: 'docs',
+												fontSize: 18,
+												fontFace: 'Aptos',
+												color: '2563EB',
+												bold: false,
+												italic: false,
+												underline: true,
+												code: false,
+												link: true,
+												hyperlinkTarget: 'https://example.com/docs?a=1&b=2',
+											},
+											{
+												text: ' and docs again',
+												fontSize: 18,
+												fontFace: 'Aptos',
+												color: '2563EB',
+												bold: false,
+												italic: false,
+												underline: true,
+												code: false,
+												link: true,
+												hyperlinkTarget: 'https://example.com/docs?a=1&b=2',
+											},
+										],
+									},
+								],
+								unmodeledRunReasons: ['link'],
+							},
+						],
+						tables: [],
+						fallbackOnlyElementKinds: [],
+						consumedTableTextCandidateCount: 0,
+						warnings: [],
+					},
+				],
+			};
+
+			writePptxDocument(outputPath, document);
+
+			const entries = unzipSync(new Uint8Array(readFileSync(outputPath)));
+			const slideXml = strFromU8(entries['ppt/slides/slide1.xml']);
+			const relationshipsXml = strFromU8(entries['ppt/slides/_rels/slide1.xml.rels']);
+			expect(slideXml.match(/<a:hlinkClick r:id="rId2"\/>/g)).toHaveLength(2);
+			expect(relationshipsXml).toContain(
+				'Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/hyperlink"',
+			);
+			expect(relationshipsXml).toContain('Target="https://example.com/docs?a=1&amp;b=2"');
+			expect(relationshipsXml).toContain('TargetMode="External"');
+			expect((relationshipsXml.match(/relationships\/hyperlink/g) || []).length).toBe(1);
+		} finally {
+			rmSync(directory, { recursive: true, force: true });
+		}
+	});
+
 	test('writes default text sources as visible native text and omits Mermaid transparent labels', () => {
 		const directory = mkdtempSync(join(tmpdir(), 'notemd-pptx-visible-native-default-'));
 		try {

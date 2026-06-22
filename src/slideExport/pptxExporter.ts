@@ -936,6 +936,24 @@ function countRichTextRunCharacters(slide: SlidevPptxSlide): number {
 	);
 }
 
+function hyperlinkTargetsForSlide(slide: SlidevPptxSlide): string[] {
+	return slide.texts.flatMap((textBox) =>
+		textBox.richTextParagraphs.flatMap((paragraph) =>
+			paragraph.runs
+				.map((run) => String(run.hyperlinkTarget || '').trim())
+				.filter((target) => target.length > 0),
+		),
+	);
+}
+
+function countHyperlinkRuns(slide: SlidevPptxSlide): number {
+	return hyperlinkTargetsForSlide(slide).length;
+}
+
+function countHyperlinkTargets(slide: SlidevPptxSlide): number {
+	return new Set(hyperlinkTargetsForSlide(slide)).size;
+}
+
 function collectUniqueSorted<T extends string>(values: T[]): T[] {
 	return Array.from(new Set(values)).sort();
 }
@@ -1052,6 +1070,8 @@ function buildSlideEditabilitySummary(
 		richTextBoxCount: countRichTextBoxes(slide),
 		richTextRunCount: countRichTextRuns(slide),
 		richTextRunCharacterCount: countRichTextRunCharacters(slide),
+		hyperlinkRunCount: countHyperlinkRuns(slide),
+		hyperlinkTargetCount: countHyperlinkTargets(slide),
 		backgroundFallbackPresent: Boolean(slide.backgroundImage),
 		fallbackOnlyElementKinds: collectUniqueSorted(slide.fallbackOnlyElementKinds),
 		unmodeledTextRunReasons: collectUniqueSorted(slide.texts.flatMap((textBox) => textBox.unmodeledRunReasons)),
@@ -1103,6 +1123,8 @@ function buildEditablePrimitiveCoverage(
 		),
 		richTextRunCount: slideSummaries.reduce((total, slide) => total + slide.richTextRunCount, 0),
 		richTextRunCharacterCount: slideSummaries.reduce((total, slide) => total + slide.richTextRunCharacterCount, 0),
+		hyperlinkRunCount: slideSummaries.reduce((total, slide) => total + slide.hyperlinkRunCount, 0),
+		hyperlinkTargetCount: slideSummaries.reduce((total, slide) => total + slide.hyperlinkTargetCount, 0),
 		backgroundFallbackSlideCount,
 		backgroundFallbackSlideRatio: ratio(backgroundFallbackSlideCount, slideCount),
 		textSourceCoverage: mergeTextSourceCoverage(slideSummaries.flatMap((slide) => slide.textSourceCoverage)),
@@ -1208,6 +1230,8 @@ export function buildSlidevPptxExportReport(
 		),
 		richTextBoxCount: editablePrimitiveCoverage.richTextBoxCount,
 		richTextRunCount: editablePrimitiveCoverage.richTextRunCount,
+		hyperlinkRunCount: editablePrimitiveCoverage.hyperlinkRunCount,
+		hyperlinkTargetCount: editablePrimitiveCoverage.hyperlinkTargetCount,
 		editableTableCellCount: editablePrimitiveCoverage.editableTableCellCount,
 		editableBodyTextBoxCount: editablePrimitiveCoverage.editableBodyTextBoxCount,
 		editableCodeTextBoxCount: editablePrimitiveCoverage.editableCodeTextBoxCount,
