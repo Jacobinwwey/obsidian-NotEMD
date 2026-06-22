@@ -1,0 +1,398 @@
+---
+id: configuration
+title: 配置
+description: 配置 Notemd 设置与偏好
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [configuration, settings, customization, preferences]
+concepts: [Configuration, Per-Task Models, Output Paths, Custom Workflows]
+citations:
+  - title: Obsidian
+    url: https://obsidian.md
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# 配置
+
+<TLDR>
+**Notemd 配置主要分 6 类：** LLM providers 与 API keys、按任务选择模型、输出路径与模板、UI/输出语言、搜索服务（Tavily/DuckDuckGo）、自定义工作流。所有设置都在 Obsidian Settings → Notemd 中，修改后立即生效。
+</TLDR>
+
+## 设置入口
+
+路径：**Obsidian Settings → Notemd**
+
+### 主要区域
+
+1. **Provider Configuration**：API keys、base URLs、models
+2. **Task Settings**：按任务选择 provider 与模型
+3. **Output Configuration**：生成文件保存位置
+4. **Language Settings**：UI 语言与输出语言
+5. **Search Integration**：Tavily / DuckDuckGo
+6. **Workflows**：自定义按钮链
+7. **Advanced**：诊断、批处理、chunking
+
+---
+
+## 1. Provider Configuration
+
+### 添加 Provider
+
+1. 从下拉框选择 provider（30+ 可用）
+2. 输入 API Key
+3. 可选：设置自定义 base URL（代理或网关）
+4. 点击 “Get Model List” 验证连接
+5. 选择默认模型
+
+### 常见 Provider
+
+#### OpenAI
+
+```text
+Provider: OpenAI
+API Key: sk-...
+Base URL: https://api.openai.com/v1 (default)
+Model: gpt-4o-mini
+```
+
+#### Anthropic
+
+```text
+Provider: Anthropic
+API Key: sk-ant-...
+Model: claude-sonnet-4-6
+```
+
+#### Ollama（本地）
+
+```text
+Provider: Ollama
+Base URL: http://localhost:11434 (default)
+Model: llama3.1
+API Key: (not required)
+```
+
+#### DeepSeek
+
+```text
+Provider: DeepSeek
+API Key: sk-...
+Model: deepseek-chat
+```
+
+### 多 Provider
+
+你可以配置多个 provider，并按任务切换：
+
+- **Main provider**：默认 fallback
+- **Task-specific providers**：对指定任务覆盖默认 provider
+
+---
+
+## 2. Task-Specific Models
+
+用不同模型处理不同任务，可以在成本和质量之间做更细的取舍。
+
+| 任务 | 默认模型 | 用途 |
+|---|---|---|
+| **Linking** | Main provider | 识别概念并插入 wiki-links |
+| **Concept Generation** | Main provider | 抽取并描述概念 |
+| **Research** | Main provider | 汇总 web search 结果 |
+| **Translation** | Main provider | 翻译文本 |
+| **Diagram Generation** | Main provider | 生成 Mermaid / Canvas 图表 |
+
+### 成本优化示例
+
+```text
+Linking: gpt-4o-mini (fast, many calls)
+Concept Generation: claude-sonnet-4-6 (quality extraction)
+Research: gpt-4o (web-grounded)
+Translation: gemini-flash (multilingual)
+Diagram: ollama/llama3.1 (free, local)
+```
+
+### 配置方式
+
+1. **Settings → Notemd → Task Settings**
+2. 对每个任务选择：
+   - **Use main provider**（默认）
+   - **Use custom provider** → 选择 provider + model
+
+---
+
+## 3. Output Configuration
+
+### 概念笔记输出
+
+新概念笔记保存位置：
+
+```text
+Settings → Output → Concept Folder
+Default: concepts/
+```
+
+模板：
+
+```markdown
+---
+tags: [concept]
+created: {{date}}
+---
+
+# {{concept}}
+
+{{description}}
+
+## Backlinks
+{{backlinks}}
+```
+
+### 文件夹结构
+
+**扁平结构：**
+
+```text
+vault/
+└── concepts/
+    ├── Machine Learning.md
+    ├── Neural Networks.md
+    └── Deep Learning.md
+```
+
+**按源文件夹分层：**
+
+```text
+vault/
+├── papers/
+│   └── concepts/
+│       └── Transformer.md
+└── notes/
+    └── concepts/
+        └── Attention Mechanism.md
+```
+
+配置入口：**Settings → Output → Use Hierarchical Folders**
+
+### 图表输出
+
+```text
+Settings → Output → Diagram Folder
+Default: diagrams/
+```
+
+支持格式：
+
+- `.mmd`：Mermaid source
+- `.canvas`：JSON Canvas
+- `.html`：Vega-Lite
+
+---
+
+## 4. Language Settings
+
+### UI Language
+
+界面语言控制按钮、菜单、对话框：
+
+```text
+Settings → Language → UI Language
+Options: 21+ languages
+Default: System language
+```
+
+支持 English、简体中文、繁體中文、日本語、한국어、Español、Français、Deutsch、Русский、العربية 等。
+
+### Output Language
+
+生成内容语言控制概念笔记、研究摘要等：
+
+```text
+Settings → Language → Output Language
+Options: Same as UI languages
+Default: Same as UI
+```
+
+典型场景：中文界面 + 英文输出，用于双语研究。
+
+### Translation Target
+
+翻译任务的默认目标语言：
+
+```text
+Settings → Translation → Target Language
+Default: English
+```
+
+---
+
+## 5. Search Integration
+
+### Tavily（推荐）
+
+面向 AI 场景优化的搜索服务：
+
+```text
+Settings → Search → Service: Tavily
+API Key: tvly-...
+```
+
+获取 key：[tavily.com](https://tavily.com/)
+
+特点：
+
+- 结果质量高
+- 更适合 AI 汇总
+- 支持来源引用
+
+### DuckDuckGo（实验）
+
+无需 API key：
+
+```text
+Settings → Search → Service: DuckDuckGo
+```
+
+注意：质量和可控性低于 Tavily。
+
+---
+
+## 6. Workflow Configuration
+
+工作流把多个任务串成一个按钮。
+
+1. **Settings → Workflows → Add Workflow**
+2. **Name**：`Paper Analysis Flow`
+3. **DSL**：`process-current-add-links>extract-concepts-current>research-and-summarize>summarize-as-mermaid`
+4. 保存
+
+新按钮会出现在左侧边栏。
+
+### DSL 语法
+
+格式：`action1>action2>action3`
+
+常用动作：
+
+- `process-current-add-links`：给当前笔记添加 wiki-links
+- `extract-concepts-current`：生成概念笔记
+- `research-and-summarize`：Web research + summary
+- `translate-current`：翻译当前笔记
+- `summarize-as-mermaid`：生成 Mermaid 图
+- `process-folder-add-links`：批量处理文件夹
+
+示例：
+
+```text
+process-current-add-links>extract-concepts-current
+process-current-add-links>research-and-summarize>extract-concepts-current
+translate-current>process-current-add-links>extract-concepts-current
+```
+
+---
+
+## 7. Advanced Settings
+
+### Batch Processing
+
+```text
+Settings → Advanced → Batch Processing
+Concurrency: 3 (default)
+```
+
+更高并发更快，但会产生更多 API 调用。
+
+### Smart Chunking
+
+```text
+Settings → Advanced → Smart Chunking
+Chunk Size: 2000 words (default)
+Overlap: 200 words (default)
+```
+
+用于长笔记，避免超过模型 token 限制。
+
+### Diagnostics Panel
+
+```text
+Settings → Advanced → Enable Diagnostics
+```
+
+可查看 API 请求/响应、token 使用量、处理耗时和错误。
+
+### Duplicate Concept Detection
+
+```text
+Settings → Advanced → Synonym Suppression
+Threshold: 0.8 (default, 0-1)
+```
+
+阈值越高，合并越激进。
+
+---
+
+## 推荐配置
+
+### 学生
+
+```text
+Provider: OpenAI (gpt-4o-mini)
+Concept Folder: concepts/
+UI Language: System
+Output Language: System
+Workflow: "Study Flow" (add-links>extract-concepts)
+```
+
+### 研究者
+
+```text
+Providers:
+  - Linking: DeepSeek (cheap, many calls)
+  - Concepts: Claude Sonnet (high quality)
+  - Research: GPT-4o (web-grounded)
+Concept Folder: notes/concepts/
+Hierarchical: Yes
+Workflow: "Paper Flow" (add-links>extract>research>diagram)
+```
+
+### 隐私优先
+
+```text
+Provider: Ollama (llama3.1)
+All tasks: Local model
+Search: DuckDuckGo (no API)
+Diagnostics: Off
+```
+
+### 双语工作
+
+```text
+UI Language: Chinese
+Output Language: English
+Translation Target: Chinese
+Provider: Gemini (multilingual)
+```
+
+## 配置排查
+
+### 设置没有保存
+
+- 检查 `.obsidian/plugins/notemd/` 文件权限
+- 尝试禁用插件后重新启用
+
+### API Key Invalid
+
+- 检查前后空格
+- 检查 key 是否过期
+- 确认 provider 账号有额度
+
+### Models Not Loading
+
+- 点击 “Get Model List” 刷新
+- 检查网络连接
+- 尝试切换 provider
+
+## 下一步
+
+- [Provider 设置](../providers/overview)
+- [FAQ](../faq)

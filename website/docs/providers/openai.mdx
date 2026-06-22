@@ -18,22 +18,46 @@ import TLDR from '@site/src/components/TLDR';
 # OpenAI Provider
 
 <TLDR>
-**OpenAI is configured as part of the [LLM Providers](/docs/providers/overview) overview.** Key details: default model `gpt-4o`, base URL `api.openai.com/v1`, temperature `0.5`. Supports model discovery via `/v1/models` endpoint. Requires an API key with sufficient credits.
+**OpenAI uses the shared OpenAI-compatible transport.** The current preset defaults to `gpt-4o`, `https://api.openai.com/v1`, `temperature: 0.5`, and the `models-then-chat` connection test. Use this page when you need exact field semantics; use the [LLM Providers](/docs/providers/overview) overview for category-level selection.
 
 This is part of the [Obsidian AI Knowledge Management Guide](/docs/pillar-ai-knowledge).
 </TLDR>
 
-Full setup instructions, per-task configuration, and troubleshooting are covered in [LLM Providers](/docs/providers/overview).
+## Setup
 
-**Quick reference:**
+Create an OpenAI API key, add an `OpenAI` provider profile in Notemd settings, and keep the default Base URL unless you are intentionally pointing at an OpenAI-compatible gateway. The model field can stay on `gpt-4o` for general work or be replaced by another OpenAI model ID that your account can call.
 
-| Field | Value |
-|-------|-------|
+Use task-specific models for cost control: keep stronger models for research, concept extraction, and long-form restructuring; use cheaper or faster models for translation, link suggestions, and short summaries.
+
+## Endpoint And Authentication
+
+| Field | Current preset |
+|-------|----------------|
+| Transport | `openai-compatible` |
+| API key | Required |
+| Base URL | `https://api.openai.com/v1` |
 | Default model | `gpt-4o` |
-| Base URL | `api.openai.com/v1` |
 | Temperature | `0.5` |
-| Model discovery | `/v1/models` |
-| API key | Required (pay-as-you-go) |
+| Connection test | `/models`, then `/chat/completions` |
+
+Notemd normalizes OpenAI-compatible base URLs before appending `chat/completions` or `models`. Do not include a trailing `/chat/completions` in the Base URL; that creates a duplicated path.
+
+## Model Discovery
+
+OpenAI uses the generic OpenAI-compatible model discovery path. The settings UI first asks `/v1/models`, then validates the selected model with a lightweight chat request. If discovery fails but chat still works, check whether your key has model-list permission or whether a gateway blocks model listing.
+
+Reasoning models are treated as a protocol edge case: Notemd merges system and user prompt content for OpenAI reasoning IDs that reject a separate `system` role, and it exposes `reasoningEffort` only where the provider definition supports it.
+
+## Troubleshooting
+
+- `401` or `403`: verify the key, project access, billing state, and whether the selected model is enabled for the key.
+- `404` on chat: the Base URL is usually wrong or already includes `/chat/completions`.
+- Model appears in docs but not in the selector: model-list access and chat access are separate failure points; test the exact model ID manually in the provider profile.
+- Reasoning model rejects messages: use a model ID covered by the OpenAI reasoning handling path or switch to a non-reasoning chat model.
+
+## When To Use
+
+Use OpenAI when you want the most predictable default hosted path, when `/v1/models` discovery is important, or when a workflow depends on OpenAI reasoning model semantics. Prefer a gateway or local provider when routing, privacy, or cost controls matter more than direct OpenAI API behavior.
 
 ---
 

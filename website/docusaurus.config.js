@@ -174,11 +174,9 @@ const config = {
         },
         items: [
           {
-            href: `${baseUrl}docs/intro`,
+            to: '/docs/intro',
             position: 'left',
             label: 'Docs',
-            autoAddBaseUrl: false,
-            'data-noBrokenLinkCheck': true,
           },
           {
             to: '/docs/faq',
@@ -204,9 +202,7 @@ const config = {
             items: [
               {
                 label: 'Getting Started',
-                href: `${baseUrl}docs/intro`,
-                autoAddBaseUrl: false,
-                'data-noBrokenLinkCheck': true,
+                to: '/docs/intro',
               },
               {
                 label: 'FAQ',

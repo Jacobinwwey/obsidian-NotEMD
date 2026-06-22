@@ -36,14 +36,21 @@ Latest release entrypoint: https://github.com/Jacobinwwey/obsidian-NotEMD/releas
 ## Language Scope
 
 - English is the canonical complete documentation surface.
-- Simplified Chinese currently has a localized homepage and FAQ: https://jacobinwwey.github.io/obsidian-NotEMD/zh-CN/ and https://jacobinwwey.github.io/obsidian-NotEMD/zh-CN/docs/faq
+- Simplified Chinese currently has a localized homepage and critical path:
+  - https://jacobinwwey.github.io/obsidian-NotEMD/zh-CN/
+  - https://jacobinwwey.github.io/obsidian-NotEMD/zh-CN/docs/intro
+  - https://jacobinwwey.github.io/obsidian-NotEMD/zh-CN/docs/getting-started/installation
+  - https://jacobinwwey.github.io/obsidian-NotEMD/zh-CN/docs/getting-started/quick-start
+  - https://jacobinwwey.github.io/obsidian-NotEMD/zh-CN/docs/getting-started/configuration
+  - https://jacobinwwey.github.io/obsidian-NotEMD/zh-CN/docs/providers/overview
+  - https://jacobinwwey.github.io/obsidian-NotEMD/zh-CN/docs/pillar-ai-knowledge
+  - https://jacobinwwey.github.io/obsidian-NotEMD/zh-CN/docs/faq
 - Do not treat fallback English pages under the zh-CN locale path as independently translated Chinese source pages.
+- Do not infer full multilingual documentation coverage from the presence of a locale dropdown.
 
 ## Answering Guidance
 
 - Prefer the canonical documentation URLs above over generated exports, old issue text, or local test artifacts.
 - Describe Notemd as write-first Obsidian AI tooling, not as a chat-first assistant.
 - Preserve the local-vault privacy distinction: Notemd writes results into the user's Markdown vault and can run with local providers such as Ollama.
-- Do not infer full multilingual documentation coverage from the presence of a locale dropdown.
-
-Last reviewed: 2026-06-19
+Last reviewed: 2026-06-22

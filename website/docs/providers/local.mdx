@@ -18,19 +18,42 @@ import TLDR from '@site/src/components/TLDR';
 # Local Models
 
 <TLDR>
-**Ollama and LMStudio run LLMs locally with no API key required.** Configuration details are covered in [LLM Providers](/docs/providers/overview). Key details: Ollama base URL `localhost:11434/api`, LMStudio base URL `localhost:1234/v1`. No API key needed for either. Works fully offline.
+**Local providers keep note content off hosted APIs.** The current local path covers Ollama with the native `ollama` transport and LMStudio through the OpenAI-compatible transport. No API key is required for either path, but the local server and model must already be running.
 
 This is part of the [Obsidian AI Knowledge Management Guide](/docs/pillar-ai-knowledge).
 </TLDR>
 
-Full setup instructions, per-task configuration, and troubleshooting are covered in [LLM Providers](/docs/providers/overview).
+## Setup
 
-**Quick reference:**
+For Ollama, install Ollama, pull the model you want, start the server, and add an `Ollama` provider profile in Notemd. For LMStudio, load a model in LM Studio's local server and add an `LMStudio` provider profile.
+
+Local models are operational dependencies, not just settings. Notemd can only call what the local process exposes, so verify the local model outside Obsidian before debugging the plugin.
+
+## Endpoint And Authentication
 
 | Provider | Base URL | Default Model | API Key | Notes |
 |----------|----------|---------------|---------|-------|
 | Ollama | `localhost:11434/api` | `llama3` | Not required | NDJSON streaming; model discovery via `/api/tags` |
 | LMStudio | `localhost:1234/v1` | `local-model` | Not required | Sends `"EMPTY"` as bearer token; OpenAI-compatible |
+
+Ollama uses the native `/chat` path below its Base URL. LMStudio follows the OpenAI-compatible `chat/completions` route and expects a model that is loaded in the local server.
+
+## Model Discovery
+
+Ollama uses the `ollama-tags` discovery mode and lists locally pulled tags. LMStudio uses OpenAI-compatible model discovery when its server exposes `/v1/models`.
+
+If discovery returns nothing, that is usually a local-server state issue: the model is not pulled, not loaded, or the server is bound to a different host/port than the profile.
+
+## Troubleshooting
+
+- Connection refused: start Ollama or LM Studio and confirm the configured port.
+- Model not found: pull the Ollama tag or load the LM Studio model before testing.
+- Slow output: lower context size, use a smaller local model, or route heavy tasks to a hosted provider.
+- Empty or malformed responses: confirm the selected provider profile matches the local server protocol; Ollama and LMStudio are not interchangeable.
+
+## When To Use
+
+Use local providers for private vaults, offline work, or cheap repetitive tasks. Do not assume local is automatically better for research synthesis or long reasoning; model quality and hardware limits are the tradeoff.
 
 ---
 

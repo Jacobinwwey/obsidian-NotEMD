@@ -24,6 +24,8 @@ describe('mainline progress audit contract', () => {
     const standaloneAcceptanceDocZh = readDoc('docs/maintainer/slidev-standalone-acceptance-2026-06-18.zh-CN.md');
     const pagesLanguageGeoWorkflowDoc = readDoc('docs/maintainer/github-pages-language-geo-workflow.md');
     const pagesLanguageGeoWorkflowDocZh = readDoc('docs/maintainer/github-pages-language-geo-workflow.zh-CN.md');
+    const pagesGeoMeasurementLog = readDoc('docs/maintainer/github-pages-geo-measurement-log.md');
+    const pagesGeoMeasurementLogZh = readDoc('docs/maintainer/github-pages-geo-measurement-log.zh-CN.md');
     const docsReadme = readDoc('docs/README.md');
     const docsReadmeZh = readDoc('docs/README.zh-CN.md');
     const websiteReadme = readDoc('website/README.md');
@@ -277,18 +279,39 @@ describe('mainline progress audit contract', () => {
     test('locks the GitHub Pages language and GEO build-output gate', () => {
         for (const content of [pagesLanguageGeoWorkflowDoc, pagesLanguageGeoWorkflowDocZh]) {
             expect(content).toContain('website/scripts/audit-build.cjs');
+            expect(content).toContain('website/src/lib/publishedLanguageScopeData.mjs');
             expect(content).toContain('website/src/lib/publishedLanguageScope.js');
+            expect(content).toContain('website/src/lib/languageRoutePolicy.js');
+            expect(content).toContain('website/src/theme/SiteMetadata/index.js');
+            expect(content).toContain('website/src/theme/NavbarItem/LocaleDropdownNavbarItem/index.js');
+            expect(content).toContain('website/src/theme/DocRoot/Layout/Sidebar/index.js');
+            expect(content).toContain('website/src/theme/DocItem/Paginator/index.js');
             expect(content).toContain('npm run audit:build');
             expect(content).toContain('noindex,follow');
             expect(content).toContain('llms.txt');
-            expect(content).toContain('/zh-CN/docs/faq');
+            expect(content).toContain('/docs/intro');
+            expect(content).toContain('/docs/getting-started/quick-start');
+            expect(content).toContain('/docs/providers/overview');
+            expect(content).toContain('/docs/faq');
             expect(content).toContain('canonical');
-            expect(content).toContain('autoAddBaseUrl: false');
-            expect(content).toContain('data-noBrokenLinkCheck');
+            expect(content).toContain('Search Console');
+            expect(content).toContain('AI visibility');
+            expect(content).toContain('sitemap');
         }
 
         expect(docsReadme).toContain('GitHub Pages Language And GEO Workflow');
+        expect(docsReadme).toContain('GitHub Pages GEO Measurement Log');
         expect(docsReadmeZh).toContain('GitHub Pages 语言与 GEO 工作流');
+        expect(docsReadmeZh).toContain('GitHub Pages GEO 测量记录');
+
+        for (const content of [pagesGeoMeasurementLog, pagesGeoMeasurementLogZh]) {
+            expect(content).toContain('2026-06-22');
+            expect(content).toContain('Search Console');
+            expect(content).toContain('AI visibility');
+            expect(content).toContain('sitemap');
+            expect(content).toContain('/zh-CN/docs/providers/openai');
+            expect(content).toContain('noindex,follow');
+        }
 
         for (const content of [progressDoc, progressDocZh, websiteReadme, geoRoadmap]) {
             expect(content).toContain('website/scripts/audit-build.cjs');
@@ -300,8 +323,13 @@ describe('mainline progress audit contract', () => {
 
         expect(progressDoc).toContain('build-output gate');
         expect(progressDocZh).toContain('build-output gate');
-        expect(websiteReadme).toContain('zh-CN homepage sends untranslated docs to canonical English URLs');
+        expect(websiteReadme).toContain('publishedLanguageScopeData.mjs');
+        expect(websiteReadme).toContain('partial Simplified Chinese (`zh-CN`) critical path and FAQ');
+        expect(websiteReadme).toContain('Provider docs contain setup, endpoint/auth, model discovery, troubleshooting, and use-case sections');
+        expect(geoRoadmap).toContain('2026-06-22 Phase 5 Completion Slice');
         expect(geoRoadmap).toContain('zh-CN homepage does not route users into fallback docs');
+        expect(geoRoadmap).toContain('Provider page quality');
+        expect(geoRoadmap).toContain('Search Console and AI visibility');
         expect(geoRoadmap).toContain('.github/workflows/deploy-docs.yml');
     });
 });
