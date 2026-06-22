@@ -200,13 +200,15 @@ async function resetSlidePptxExtractionState(page: any): Promise<void> {
 		document.getElementById('notemd-pptx-visible-native-background')?.remove();
 		for (const element of Array.from(
 			document.querySelectorAll(
-				'[data-notemd-pptx-hidden-text], [data-notemd-pptx-consumed-table], [data-notemd-pptx-text-source-kind], [data-notemd-pptx-marker-color]',
+				'[data-notemd-pptx-hidden-text], [data-notemd-pptx-consumed-table], [data-notemd-pptx-text-source-kind], [data-notemd-pptx-marker-color], [data-notemd-pptx-consumed-shape]',
 			),
 		)) {
 			element.removeAttribute('data-notemd-pptx-hidden-text');
 			element.removeAttribute('data-notemd-pptx-consumed-table');
 			element.removeAttribute('data-notemd-pptx-text-source-kind');
 			element.removeAttribute('data-notemd-pptx-marker-color');
+			element.removeAttribute('data-notemd-pptx-consumed-shape');
+			element.removeAttribute('data-notemd-pptx-consumed-shape-fill');
 			if (element instanceof HTMLElement) {
 				element.style.removeProperty('--notemd-pptx-marker-color');
 			}
@@ -258,6 +260,12 @@ async function prepareDefaultVisibleTextBackground(page: any): Promise<void> {
 			'-webkit-text-fill-color: transparent !important;',
 			'text-shadow: none !important;',
 			'text-decoration-color: transparent !important;',
+			'}',
+			'[data-notemd-pptx-consumed-shape="code-background"] {',
+			'background-color: transparent !important;',
+			'background-image: none !important;',
+			'border-color: transparent !important;',
+			'box-shadow: none !important;',
 			'}',
 		]
 			.filter(Boolean)
@@ -369,6 +377,12 @@ async function prepareVisibleNativeExperimentBackground(page: any): Promise<void
 			'-webkit-text-fill-color: transparent !important;',
 			'text-shadow: none !important;',
 			'text-decoration-color: transparent !important;',
+			'}',
+			'[data-notemd-pptx-consumed-shape="code-background"] {',
+			'background-color: transparent !important;',
+			'background-image: none !important;',
+			'border-color: transparent !important;',
+			'box-shadow: none !important;',
 			'}',
 		].join('\n');
 		document.head.appendChild(style);
@@ -913,6 +927,10 @@ function tableCellsForSlide(slide: SlidevPptxSlide): SlidevPptxTableCell[] {
 	return slide.tables.flatMap((table) => table.rows.flatMap((row) => row));
 }
 
+function solidRectanglesForSlide(slide: SlidevPptxSlide): NonNullable<SlidevPptxSlide['shapes']> {
+	return slide.shapes || [];
+}
+
 function countRichTextRuns(slide: SlidevPptxSlide): number {
 	return slide.texts.reduce(
 		(total, textBox) =>
@@ -1141,6 +1159,7 @@ function buildSlideEditabilitySummary(
 	const fontFamilies = fontFamiliesForSlideSummary(slide, fontPolicy);
 	const tableCells = tableCellsForSlide(slide);
 	const tableCellTextInsetDeltas = tableCells.map(tableCellTextAnchorInsetDelta);
+	const solidRectangles = solidRectanglesForSlide(slide);
 	return {
 		slideNumber: slide.slideNumber,
 		editableTextBoxCount: slide.texts.length,
@@ -1170,6 +1189,9 @@ function buildSlideEditabilitySummary(
 			(delta) => delta > TABLE_CELL_TEXT_INSET_DELTA_THRESHOLD_IN,
 		).length,
 		maxTableCellTextInsetDeltaIn: Number(Math.max(0, ...tableCellTextInsetDeltas).toFixed(6)),
+		editableSolidRectangleCount: solidRectangles.length,
+		editableCodeBackgroundRectangleCount: solidRectangles.filter((shape) => shape.sourceKind === 'code-background')
+			.length,
 		bulletedTextBoxCount: slide.texts.filter((textBox) => textBox.bullet).length,
 		backgroundFallbackPresent: Boolean(slide.backgroundImage),
 		fallbackOnlyElementKinds: collectUniqueSorted(slide.fallbackOnlyElementKinds),
@@ -1250,6 +1272,14 @@ function buildEditablePrimitiveCoverage(
 		),
 		maxTableCellTextInsetDeltaIn: Number(
 			Math.max(0, ...slideSummaries.map((slide) => slide.maxTableCellTextInsetDeltaIn)).toFixed(6),
+		),
+		editableSolidRectangleCount: slideSummaries.reduce(
+			(total, slide) => total + slide.editableSolidRectangleCount,
+			0,
+		),
+		editableCodeBackgroundRectangleCount: slideSummaries.reduce(
+			(total, slide) => total + slide.editableCodeBackgroundRectangleCount,
+			0,
 		),
 		bulletedTextBoxCount: slideSummaries.reduce((total, slide) => total + slide.bulletedTextBoxCount, 0),
 		backgroundFallbackSlideCount,
@@ -1369,6 +1399,8 @@ export function buildSlidevPptxExportReport(
 		tableCellTextInsetCount: editablePrimitiveCoverage.tableCellTextInsetCount,
 		tableCellTextInsetDeltaCount: editablePrimitiveCoverage.tableCellTextInsetDeltaCount,
 		maxTableCellTextInsetDeltaIn: editablePrimitiveCoverage.maxTableCellTextInsetDeltaIn,
+		editableSolidRectangleCount: editablePrimitiveCoverage.editableSolidRectangleCount,
+		editableCodeBackgroundRectangleCount: editablePrimitiveCoverage.editableCodeBackgroundRectangleCount,
 		bulletedTextBoxCount: editablePrimitiveCoverage.bulletedTextBoxCount,
 		editableTableCellCount: editablePrimitiveCoverage.editableTableCellCount,
 		editableBodyTextBoxCount: editablePrimitiveCoverage.editableBodyTextBoxCount,

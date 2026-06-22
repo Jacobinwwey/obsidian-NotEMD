@@ -8,6 +8,7 @@ import {
 	type SlidevPptxImage,
 	type SlidevPptxRichTextParagraph,
 	type SlidevPptxSlide,
+	type SlidevPptxSolidRectangle,
 	type SlidevPptxTable,
 	type SlidevPptxTableCell,
 	type SlidevPptxTextAlign,
@@ -919,6 +920,54 @@ function buildPicture(image: SlidevPptxImage, shapeId: number, relationshipId: s
 	].join('');
 }
 
+function shapeLabel(shape: SlidevPptxSolidRectangle): string {
+	switch (shape.sourceKind) {
+		case 'code-background':
+		default:
+			return 'Code Background Rectangle';
+	}
+}
+
+function solidRectangleGeometryXml(shape: SlidevPptxSolidRectangle): string {
+	const adjustment = Math.max(0, Math.min(50000, Math.round(shape.cornerRadiusAdjustment || 0)));
+	if (adjustment <= 0) {
+		return '<a:prstGeom prst="rect"><a:avLst/></a:prstGeom>';
+	}
+	return `<a:prstGeom prst="roundRect"><a:avLst><a:gd name="adj" fmla="val ${adjustment}"/></a:avLst></a:prstGeom>`;
+}
+
+function buildSolidRectangleShape(shape: SlidevPptxSolidRectangle, shapeId: number): string {
+	const x = inchesToEmu(shape.x);
+	const y = inchesToEmu(shape.y);
+	const w = inchesToEmu(shape.w);
+	const h = inchesToEmu(shape.h);
+	const name = escapeXmlAttribute(`Native ${shapeLabel(shape)} ${shapeId}`);
+	const fillColor = clampHexColor(shape.fillColor, 'FFFFFF');
+	const borderColor = shape.borderColor ? clampHexColor(shape.borderColor, '') : '';
+	const borderWidth = pointsToEmu(shape.borderWidthPt || 0);
+	const geometryXml = solidRectangleGeometryXml(shape);
+	const lineXml =
+		borderColor && borderWidth > 0
+			? `<a:ln w="${borderWidth}"><a:solidFill><a:srgbClr val="${borderColor}"/></a:solidFill></a:ln>`
+			: '<a:ln><a:noFill/></a:ln>';
+
+	return [
+		'<p:sp>',
+		'<p:nvSpPr>',
+		`<p:cNvPr id="${shapeId}" name="${name}"/>`,
+		'<p:cNvSpPr/>',
+		'<p:nvPr/>',
+		'</p:nvSpPr>',
+		'<p:spPr>',
+		`<a:xfrm><a:off x="${x}" y="${y}"/><a:ext cx="${w}" cy="${h}"/></a:xfrm>`,
+		geometryXml,
+		`<a:solidFill><a:srgbClr val="${fillColor}"/></a:solidFill>`,
+		lineXml,
+		'</p:spPr>',
+		'</p:sp>',
+	].join('');
+}
+
 function buildVisibleNativeExperimentSlideXml(
 	slide: SlidevPptxSlide,
 	imageRelationships: SlideImageRelationship[],
@@ -932,6 +981,14 @@ function buildVisibleNativeExperimentSlideXml(
 		items.push({
 			order: relationship.image.order,
 			xml: buildPicture(relationship.image, shapeId, relationship.relationshipId),
+		});
+		shapeId += 1;
+	}
+
+	for (const shape of slide.shapes || []) {
+		items.push({
+			order: shape.order,
+			xml: buildSolidRectangleShape(shape, shapeId),
 		});
 		shapeId += 1;
 	}
@@ -983,6 +1040,14 @@ function buildSlideXml(
 		items.push({
 			order: relationship.image.order,
 			xml: buildPicture(relationship.image, shapeId, relationship.relationshipId),
+		});
+		shapeId += 1;
+	}
+
+	for (const shape of slide.shapes || []) {
+		items.push({
+			order: shape.order,
+			xml: buildSolidRectangleShape(shape, shapeId),
 		});
 		shapeId += 1;
 	}

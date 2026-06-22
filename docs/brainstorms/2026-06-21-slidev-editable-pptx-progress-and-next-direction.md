@@ -1193,6 +1193,54 @@ Next action:
 
 Do not add a hidden/pretext fallback to cover remaining fidelity gaps. The next slice should be high-confidence native primitive extraction for code token backgrounds and simple chart geometry, with the same rendered-HTML visual gate and report-level editability contract.
 
+## M22 Native Code Background Primitive Slice
+
+This slice follows the `ref/oh-my-ppt` contract at the scale that fits NotEMD: Chromium-rendered computed style is the source of truth, high-confidence DOM primitives become native PPTX objects, consumed DOM paint is hidden from the fallback background, and the result is checked by visual and XML gates. It still does not copy the `oh-my-ppt` writer, does not add another HTML-to-PPTX route, and does not rewrite Mermaid.
+
+What landed:
+
+1. `SlidevPptxSolidRectangle` now models a solid native rectangle primitive with `sourceKind = "code-background"`, optional border metadata, paint order, and `cornerRadiusAdjustment` for DrawingML `roundRect`.
+2. The DOM extractor now collects only high-confidence code-context rectangles: elements inside `pre`, `.shiki`, or `code`, with visible geometry, a solid computed `background-color`, no `background-image`, and uniform border radius. Non-uniform radius, table/SVG/script/style nodes, and invisible nodes are ignored.
+3. Uniform CSS border radius is converted into DrawingML `roundRect` adjustment instead of flattening rounded code blocks into square rectangles. This came directly from testing real Slidev/Shiki output, where `pre.shiki.slidev-code` uses a small radius.
+4. Extracted code-background DOM nodes are marked with `data-notemd-pptx-consumed-shape="code-background"` and are hidden before the screenshot fallback. That prevents duplicate visible background paint while keeping the modeled primitive visible and editable as an Office shape.
+5. The writer emits visible native `Native Code Background Rectangle` shapes below native code text and native body/table text, with no transparent alpha. The report now counts `editableSolidRectangleCount` and `editableCodeBackgroundRectangleCount`.
+6. Tests cover DOM extraction, rounded rectangle OOXML, shape ordering below visible code text, report coverage fields, and the invariant that the default PPTX path does not reintroduce transparent overlay text.
+
+Fixture acceptance:
+
+1. `npm run verify:slidev-export -- --vault docs --source export/test-slidev-m22-code-background-fixture/code-background-fixture.md --format pptx --output-subfolder export/test-slidev-m22-code-background-fixture-output --sample-slides all --timeout-ms 240000 --no-screenshots --require-pptx-visual-match --json` passed under jacob's Playwright Chromium cache.
+2. The fixture used the local Slidev fork: `52.16.0 (/home/jacob/slidev/packages/slidev/bin/slidev.mjs)`.
+3. Report highlights: `slideCount = 1`, `textBoxCount = 12`, `editableCodeTextBoxCount = 10`, `editableSolidRectangleCount = 1`, `editableCodeBackgroundRectangleCount = 1`, `transparentOverlayTextSources = []`, `fallbackOnlyElementKinds = ["code-highlight", "svg"]`, `unignoredOutputs = []`.
+4. PPTX XML scan found `Native Code Background Rectangle = 1`, `roundRect = 1`, `alpha=0 = 0`, `alpha=8000 = 0`, visible code text objects `10`, and the expected radius adjustment.
+
+Real `architecture.zh-CN.md` acceptance:
+
+1. Real export command passed: `npm run verify:slidev-export -- --vault docs --source architecture.zh-CN.md --format pptx --output-subfolder export/test-slidev-m22-native-code-backgrounds --sample-slides all --timeout-ms 240000 --no-screenshots --require-pptx-visual-match --json`.
+2. Slidev again came from the local fork: `52.16.0 (/home/jacob/slidev/packages/slidev/bin/slidev.mjs)`, with `skillRootPath = /home/jacob/slidev/skills/slidev` and `skillReferenceCount = 52`.
+3. Report highlights: `slideCount = 30`, `textBoxCount = 338`, `tableCount = 6`, `editableBodyTextBoxCount = 324`, `editableCodeTextBoxCount = 14`, `editableSolidRectangleCount = 115`, `editableCodeBackgroundRectangleCount = 115`, `editableTableCellCount = 102`, `editableTextSlideCount = 30`, `pagesWithoutEditableText = []`, `transparentOverlayTextSources = []`.
+4. Visual and source gates passed: `pptxVisualGate.passed = true`, `referenceSource = "pptx-rendered-html-reference"`, `thresholdProfile = "visible-native-rendered-html"`, `mermaidSourcePreservation.passed = true`, `sourceFenceCount = 3`, `deckFenceCount = 3`, `changedFenceIndexes = []`.
+5. Layout audit stayed clean: `overflowCount = 0`, `unreadableCount = 0`, `hardOverflowCount = 0`, with `retryCount = 4`, `mermaidSlideCount = 3`, `mermaidLowZoomCount = 2`, and `mermaidManualReviewCount = 1`.
+6. PPTX XML scan found `alpha=0 = 0`, `alpha=8000 = 0`, `Visible Native Text = 324`, `Visible Native Code Text = 14`, `Visible Native Table = 6`, `Native Code Background Rectangle = 115`, `roundRect = 115`, native object count `459`, transparent-only editable objects `0`, and `<a:t...>` tags `591`.
+7. Generated outputs stayed ignored and untracked.
+
+Comparison against the previous plan:
+
+1. M21's "visible text must be native Office text" invariant remains intact. This slice adds native code background shapes; it does not fall back to a transparent selectable layer.
+2. M20's "add high-confidence shape extraction before complex geometry" direction is now partially implemented. The implementation intentionally starts with code/inline-code solid backgrounds because their DOM ownership and visual semantics are narrow enough to verify.
+3. The `oh-my-ppt` lesson applied here is consumed-primitive provenance plus background hiding, not wholesale DOM-to-PPTX reconstruction. This distinction matters: turning every DOM node into a PPTX shape would increase visual drift before the acceptance gate can classify failures.
+4. Mermaid remains background-owned and source-preserving. The 115 native rectangles in the real deck are code-context background primitives, mostly fenced-code and inline-code backgrounds, not a claim that Mermaid, SVG, or chart geometry is Office-native editable.
+
+Known risks:
+
+1. Inline code backgrounds can produce many native rectangles. That is acceptable for editability, but the writer/report must keep naming and counts explicit so users understand the object surface in PowerPoint.
+2. The extractor does not synthesize syntax-token line highlights without a real computed solid background. This is deliberate; synthetic highlights would become a second renderer.
+3. Rounded rectangle mapping is only for uniform radii. Non-uniform CSS radii remain fallback-owned until a separate shape contract proves parity.
+4. Generic chart geometry is still not modeled. The next useful work is a similarly narrow primitive set, not broad SVG reconstruction.
+
+Next action:
+
+Keep extending native primitives only where DOM ownership, computed style, paint order, and visual-diff acceptance can all be proven. The next candidate should be simple solid lines/rectangles outside Mermaid, with the same consumed-marker contract and XML/report gate. Mermaid should stay source-preserving and background-owned unless an explicit SVG/vector option proves that it can preserve source fences and avoid geometry distortion.
+
 ## Current Limits
 
 The first implementation is intentionally conservative:

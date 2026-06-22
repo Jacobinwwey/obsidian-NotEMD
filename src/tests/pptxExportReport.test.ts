@@ -170,6 +170,17 @@ describe('pptx export report', () => {
 						],
 					},
 				],
+				shapes: [
+					{
+						sourceKind: 'code-background',
+						x: 1,
+						y: 3.25,
+						w: 4,
+						h: 0.6,
+						fillColor: '0F172A',
+						order: 25,
+					},
+				],
 				fallbackOnlyElementKinds: ['mermaid', 'svg'],
 				consumedTableTextCandidateCount: 2,
 				warnings: [],
@@ -198,6 +209,8 @@ describe('pptx export report', () => {
 		expect(report.tableCount).toBe(1);
 		expect(report.consumedTableCount).toBe(1);
 		expect(report.consumedTableTextCandidateCount).toBe(2);
+		expect(report.editableSolidRectangleCount).toBe(1);
+		expect(report.editableCodeBackgroundRectangleCount).toBe(1);
 		expect(report.richTextBoxCount).toBe(1);
 		expect(report.richTextRunCount).toBe(2);
 		expect(report.hyperlinkRunCount).toBe(1);
@@ -212,6 +225,8 @@ describe('pptx export report', () => {
 		expect(report.fallbackOnlyElementKinds).toEqual(['canvas', 'mermaid', 'svg']);
 		expect(report.unmodeledTextRunReasons).toEqual(['inline-formatting', 'link']);
 		expect(report.editablePrimitiveCoverage.editableTextSlideRatio).toBe(0.5);
+		expect(report.editablePrimitiveCoverage.editableSolidRectangleCount).toBe(1);
+		expect(report.editablePrimitiveCoverage.editableCodeBackgroundRectangleCount).toBe(1);
 		expect(report.editablePrimitiveCoverage.richTextBoxCount).toBe(1);
 		expect(report.editablePrimitiveCoverage.richTextBoxRatio).toBe(1);
 		expect(report.editablePrimitiveCoverage.richTextRunCount).toBe(2);

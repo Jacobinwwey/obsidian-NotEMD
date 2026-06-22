@@ -222,6 +222,58 @@ describe('pptxDomExtractor', () => {
 		}
 	});
 
+	test('extracts high-confidence code backgrounds as native rectangle primitives', async () => {
+		if (!browser) {
+			console.warn('Skipping PPTX DOM extractor Playwright test:', launchError);
+			return;
+		}
+
+		const page = await browser.newPage({ viewport: { width: 1280, height: 720 } });
+		try {
+			await page.setContent(`
+				<body style="margin:0;background:#fff">
+					<div class="slidev-page" style="width:1280px;height:720px;background:#fff;padding:64px;box-sizing:border-box">
+						<pre id="code-block" style="margin:0;width:640px;background:#0f172a;border:2px solid #334155;border-radius:4px;font-family:Consolas;font-size:24px;line-height:32px;color:#e5e7eb;padding:16px"><code><span>const answer = </span><span id="highlight" style="background:#334155">42</span></code></pre>
+					</div>
+				</body>
+			`);
+
+			const slide = await extractSlidevPptxSlideFromPage(page, 1);
+			const codeBackgrounds = slide.shapes?.filter((shape) => shape.sourceKind === 'code-background') || [];
+			const codeText = slide.texts.find((textBox) => textBox.sourceKind === 'code');
+			const consumedState = await page.$eval('#code-block', (element: Element) => ({
+				shape: element.getAttribute('data-notemd-pptx-consumed-shape'),
+				fill: element.getAttribute('data-notemd-pptx-consumed-shape-fill'),
+			}));
+
+			expect(codeBackgrounds).toEqual(
+				expect.arrayContaining([
+					expect.objectContaining({
+						fillColor: '0F172A',
+						borderColor: '334155',
+						borderWidthPt: expect.any(Number),
+						cornerRadiusAdjustment: expect.any(Number),
+					}),
+					expect.objectContaining({
+						fillColor: '334155',
+					}),
+				]),
+			);
+			expect(codeBackgrounds.length).toBeGreaterThanOrEqual(2);
+			expect(codeBackgrounds.find((shape) => shape.fillColor === '0F172A')?.cornerRadiusAdjustment).toBeGreaterThan(0);
+			expect(codeText).toEqual(
+				expect.objectContaining({
+					text: 'const answer = 42',
+					sourceKind: 'code',
+				}),
+			);
+			expect(Math.max(...codeBackgrounds.map((shape) => shape.order))).toBeLessThan(codeText?.order || 0);
+			expect(consumedState).toEqual({ shape: 'code-background', fill: '0F172A' });
+		} finally {
+			await page.close();
+		}
+	});
+
 	test('preserves table cell inset and line-height metadata for native Office tables', async () => {
 		if (!browser) {
 			console.warn('Skipping PPTX DOM extractor Playwright test:', launchError);

@@ -137,6 +137,22 @@ export interface SlidevPptxImage {
 	order: number;
 }
 
+export type SlidevPptxSolidRectangleSourceKind = 'code-background';
+
+export interface SlidevPptxSolidRectangle {
+	sourceKind: SlidevPptxSolidRectangleSourceKind;
+	x: number;
+	y: number;
+	w: number;
+	h: number;
+	fillColor: string;
+	borderColor?: string;
+	borderWidthPt?: number;
+	/** DrawingML roundRect adjustment value, 0..50000. */
+	cornerRadiusAdjustment?: number;
+	order: number;
+}
+
 export interface SlidevPptxSlide {
 	slideNumber: number;
 	title: string;
@@ -144,6 +160,7 @@ export interface SlidevPptxSlide {
 	backgroundImage?: SlidevPptxImage;
 	texts: SlidevPptxTextBox[];
 	tables: SlidevPptxTable[];
+	shapes?: SlidevPptxSolidRectangle[];
 	fallbackOnlyElementKinds: SlidevPptxFallbackOnlyElementKind[];
 	consumedTableTextCandidateCount: number;
 	warnings: string[];
@@ -224,6 +241,8 @@ export interface SlidevPptxSlideEditabilitySummary {
 	tableCellTextInsetCount: number;
 	tableCellTextInsetDeltaCount: number;
 	maxTableCellTextInsetDeltaIn: number;
+	editableSolidRectangleCount: number;
+	editableCodeBackgroundRectangleCount: number;
 	bulletedTextBoxCount: number;
 	backgroundFallbackPresent: boolean;
 	fallbackOnlyElementKinds: SlidevPptxFallbackOnlyElementKind[];
@@ -278,6 +297,8 @@ export interface SlidevPptxEditablePrimitiveCoverage {
 	tableCellTextInsetCount: number;
 	tableCellTextInsetDeltaCount: number;
 	maxTableCellTextInsetDeltaIn: number;
+	editableSolidRectangleCount: number;
+	editableCodeBackgroundRectangleCount: number;
 	bulletedTextBoxCount: number;
 	backgroundFallbackSlideCount: number;
 	backgroundFallbackSlideRatio: number;
@@ -399,6 +420,8 @@ export interface SlidevPptxExportReport {
 	tableCellTextInsetCount: number;
 	tableCellTextInsetDeltaCount: number;
 	maxTableCellTextInsetDeltaIn: number;
+	editableSolidRectangleCount: number;
+	editableCodeBackgroundRectangleCount: number;
 	bulletedTextBoxCount: number;
 	editableTableCellCount: number;
 	editableBodyTextBoxCount: number;

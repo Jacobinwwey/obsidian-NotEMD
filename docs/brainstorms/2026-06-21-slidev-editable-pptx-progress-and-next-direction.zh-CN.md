@@ -1214,6 +1214,54 @@ M20 之后的推进方向：
 
 不要为了补剩余保真缺口再加 hidden/pretext fallback。下一轮应做高置信 Office 原生 primitive 抽取，先覆盖 code token background 与简单 chart geometry，并继续绑定 rendered-HTML visual gate 与 report 级 editability contract。
 
+## M22 原生代码背景 primitive 切片
+
+这一轮继续按 `ref/oh-my-ppt` 中适合 NotEMD 的合同推进：以 Chromium 渲染后的 computed style 为事实源，把高置信 DOM primitive 写成原生 PPTX 对象，对已消费的 DOM paint 在 fallback background 捕获前隐藏，再用 visual gate 和 XML gate 验证。这里没有复制 `oh-my-ppt` writer，没有新增第二条 HTML-to-PPTX 路线，也没有改写 Mermaid。
+
+本轮落地内容：
+
+1. 新增 `SlidevPptxSolidRectangle`，用于表达纯色原生矩形 primitive；当前 `sourceKind = "code-background"`，并携带可选 border、paint order，以及 DrawingML `roundRect` 所需的 `cornerRadiusAdjustment`。
+2. DOM extractor 只抽取高置信 code-context rectangle：节点必须位于 `pre`、`.shiki` 或 `code` 内，有可见几何、computed `background-color` 为纯色、没有 `background-image`，且 border radius 为 uniform。非 uniform radius、table/SVG/script/style 节点、不可见节点全部跳过。
+3. uniform CSS border radius 会映射为 DrawingML `roundRect` adjustment，而不是把圆角代码块压平成直角矩形。这个修正来自真实 Slidev/Shiki 输出：`pre.shiki.slidev-code` 默认就带小圆角。
+4. 已抽取的 code-background DOM 节点会标记 `data-notemd-pptx-consumed-shape="code-background"`，并在 screenshot fallback 捕获前隐藏。这样可以避免背景里保留一份重复的可见底色，同时由原生 Office shape 承担可见层。
+5. writer 会在原生 code text、body text、table text 之下写入可见的 `Native Code Background Rectangle`，不写透明 alpha。report 新增 `editableSolidRectangleCount` 与 `editableCodeBackgroundRectangleCount`。
+6. 单测覆盖 DOM 抽取、圆角矩形 OOXML、shape 位于可见 code text 之下、report 覆盖字段，以及默认 PPTX 路径不能重新出现透明 overlay text 的不变量。
+
+fixture 验收：
+
+1. 使用 jacob 的 Playwright Chromium cache 执行 `npm run verify:slidev-export -- --vault docs --source export/test-slidev-m22-code-background-fixture/code-background-fixture.md --format pptx --output-subfolder export/test-slidev-m22-code-background-fixture-output --sample-slides all --timeout-ms 240000 --no-screenshots --require-pptx-visual-match --json`，结果通过。
+2. fixture 使用本地 Slidev fork：`52.16.0 (/home/jacob/slidev/packages/slidev/bin/slidev.mjs)`。
+3. report 关键数据：`slideCount = 1`，`textBoxCount = 12`，`editableCodeTextBoxCount = 10`，`editableSolidRectangleCount = 1`，`editableCodeBackgroundRectangleCount = 1`，`transparentOverlayTextSources = []`，`fallbackOnlyElementKinds = ["code-highlight", "svg"]`，`unignoredOutputs = []`。
+4. PPTX XML 扫描显示 `Native Code Background Rectangle = 1`，`roundRect = 1`，`alpha=0 = 0`，`alpha=8000 = 0`，可见 code text objects 为 `10`，并包含预期 radius adjustment。
+
+真实 `architecture.zh-CN.md` 验收：
+
+1. 真实导出命令通过：`npm run verify:slidev-export -- --vault docs --source architecture.zh-CN.md --format pptx --output-subfolder export/test-slidev-m22-native-code-backgrounds --sample-slides all --timeout-ms 240000 --no-screenshots --require-pptx-visual-match --json`。
+2. Slidev 仍来自本地 fork：`52.16.0 (/home/jacob/slidev/packages/slidev/bin/slidev.mjs)`，并使用 `skillRootPath = /home/jacob/slidev/skills/slidev`，`skillReferenceCount = 52`。
+3. report 关键数据：`slideCount = 30`，`textBoxCount = 338`，`tableCount = 6`，`editableBodyTextBoxCount = 324`，`editableCodeTextBoxCount = 14`，`editableSolidRectangleCount = 115`，`editableCodeBackgroundRectangleCount = 115`，`editableTableCellCount = 102`，`editableTextSlideCount = 30`，`pagesWithoutEditableText = []`，`transparentOverlayTextSources = []`。
+4. 视觉与源内容 gate 均通过：`pptxVisualGate.passed = true`，`referenceSource = "pptx-rendered-html-reference"`，`thresholdProfile = "visible-native-rendered-html"`，`mermaidSourcePreservation.passed = true`，`sourceFenceCount = 3`，`deckFenceCount = 3`，`changedFenceIndexes = []`。
+5. 布局审计保持干净：`overflowCount = 0`，`unreadableCount = 0`，`hardOverflowCount = 0`；同时记录 `retryCount = 4`，`mermaidSlideCount = 3`，`mermaidLowZoomCount = 2`，`mermaidManualReviewCount = 1`。
+6. PPTX XML 扫描显示 `alpha=0 = 0`，`alpha=8000 = 0`，`Visible Native Text = 324`，`Visible Native Code Text = 14`，`Visible Native Table = 6`，`Native Code Background Rectangle = 115`，`roundRect = 115`，native object count 为 `459`，transparent-only editable objects 为 `0`，`<a:t...>` tags 为 `591`。
+7. 生成物仍在 ignore 范围内，未进入 git 跟踪。
+
+与先前方案的对比：
+
+1. M21 的“展示文字必须是原生 Office 文字”不变量没有被破坏。本轮新增的是原生 code 背景 shape，不是退回透明可选中文本层。
+2. M20 提到的“先做高置信 shape extraction，再碰复杂 geometry”已经部分落地。当前只从 code/inline-code 纯色背景开始，因为这类 primitive 的 DOM ownership 和视觉语义足够窄，能验收。
+3. 从 `oh-my-ppt` 复用的是 consumed-primitive provenance 与 background hiding 的合同，不是全量 DOM-to-PPTX reconstruction。这个边界很重要：把每个 DOM 节点都转成 PPTX shape，会在验收 gate 能分类失败前先放大视觉漂移。
+4. Mermaid 仍由背景拥有并保持源内容不变。真实 deck 中的 `115` 个原生矩形来自 code-context background，主要是 fenced-code 与 inline-code 背景，不代表 Mermaid、SVG 或 chart geometry 已经 Office-native 可编辑。
+
+已知风险：
+
+1. inline code background 会产生较多原生矩形。为了可编辑性这是可以接受的，但 writer/report 必须保持明确命名与计数，让用户知道 PowerPoint 里的对象面。
+2. extractor 不会在没有真实 computed solid background 时合成 syntax-token line highlight。这是有意约束；合成 highlight 等于引入第二套 renderer。
+3. 圆角映射只覆盖 uniform radius。非 uniform CSS radius 继续由 fallback 拥有，直到单独的 shape 合同能证明 parity。
+4. 通用 chart geometry 仍未建模。下一步应该继续做窄 primitive，而不是直接上宽泛 SVG reconstruction。
+
+下一步：
+
+只在 DOM ownership、computed style、paint order、visual-diff acceptance 都能证明的地方继续扩展原生 primitive。下一个候选应该是 Mermaid 之外的简单纯色线条/矩形，继续沿用 consumed-marker 合同和 XML/report gate。Mermaid 仍应保持源内容不动并由背景拥有，除非未来显式 SVG/vector 选项能证明既不改写源 fence，也不扭曲几何。
+
 ## 当前边界
 
 第一版实现有意保守：

@@ -683,6 +683,95 @@ describe('pptxWriter', () => {
 		}
 	});
 
+	test('writes editable native code background rectangles below visible code text', () => {
+		const directory = mkdtempSync(join(tmpdir(), 'notemd-pptx-code-background-'));
+		try {
+			const outputPath = join(directory, 'deck.pptx');
+			const document: SlidevPptxDocument = {
+				title: 'Code background',
+				author: 'NoteMD',
+				slides: [
+					{
+						slideNumber: 1,
+						title: 'Code background',
+						backgroundColor: 'FFFFFF',
+						texts: [
+							{
+								text: 'const answer = 42',
+								sourceKind: 'code',
+								x: 1.25,
+								y: 1.2,
+								w: 4,
+								h: 0.4,
+								fontSize: 16,
+								fontFace: 'Consolas',
+								color: 'E5E7EB',
+								bold: false,
+								italic: false,
+								underline: false,
+								align: 'left',
+								bullet: false,
+								order: 20,
+								richTextParagraphs: [
+									{
+										runs: [
+											{
+												text: 'const answer = 42',
+												fontSize: 16,
+												fontFace: 'Consolas',
+												color: 'E5E7EB',
+												bold: false,
+												italic: false,
+												underline: false,
+												code: true,
+												link: false,
+											},
+										],
+									},
+								],
+								unmodeledRunReasons: [],
+							},
+						],
+						tables: [],
+						shapes: [
+							{
+								sourceKind: 'code-background',
+								x: 1,
+								y: 1,
+								w: 5,
+								h: 0.8,
+								fillColor: '0F172A',
+								borderColor: '334155',
+								borderWidthPt: 1,
+								cornerRadiusAdjustment: 5900,
+								order: 10,
+							},
+						],
+						fallbackOnlyElementKinds: [],
+						consumedTableTextCandidateCount: 0,
+						warnings: [],
+					},
+				],
+			};
+
+			writePptxDocument(outputPath, document);
+
+			const entries = unzipSync(new Uint8Array(readFileSync(outputPath)));
+			const slideXml = strFromU8(entries['ppt/slides/slide1.xml']);
+			const rectangleIndex = slideXml.indexOf('name="Native Code Background Rectangle');
+			const codeTextIndex = slideXml.indexOf('name="Visible Native Code Text');
+			expect(rectangleIndex).toBeGreaterThan(-1);
+			expect(codeTextIndex).toBeGreaterThan(rectangleIndex);
+			expect(slideXml).toContain('<a:prstGeom prst="roundRect"><a:avLst><a:gd name="adj" fmla="val 5900"/></a:avLst></a:prstGeom>');
+			expect(slideXml).toContain('<a:solidFill><a:srgbClr val="0F172A"/></a:solidFill>');
+			expect(slideXml).toContain('<a:ln w="12700"><a:solidFill><a:srgbClr val="334155"/></a:solidFill></a:ln>');
+			expect(slideXml).toContain('<a:t>const answer = 42</a:t>');
+			expect(slideXml).not.toContain('<a:alpha val="0"/>');
+		} finally {
+			rmSync(directory, { recursive: true, force: true });
+		}
+	});
+
 	test('writes experimental visible-native text and table fills without transparent alpha', () => {
 		const directory = mkdtempSync(join(tmpdir(), 'notemd-pptx-visible-native-'));
 		try {

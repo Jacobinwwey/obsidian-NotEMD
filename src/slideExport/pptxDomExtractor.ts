@@ -5,6 +5,8 @@ import {
 	type SlidevPptxInlineTextRun,
 	type SlidevPptxRichTextParagraph,
 	type SlidevPptxSlide,
+	type SlidevPptxSolidRectangle,
+	type SlidevPptxSolidRectangleSourceKind,
 	type SlidevPptxTable,
 	type SlidevPptxTableBorderModel,
 	type SlidevPptxTableCell,
@@ -107,11 +109,25 @@ interface RawSlideTable {
 	order: number;
 }
 
+interface RawSlideSolidRectangle {
+	sourceKind: SlidevPptxSolidRectangleSourceKind;
+	x: number;
+	y: number;
+	w: number;
+	h: number;
+	fillColor: string;
+	borderColor?: string;
+	borderWidthPt?: number;
+	cornerRadiusAdjustment?: number;
+	order: number;
+}
+
 interface RawSlideExtraction {
 	title: string;
 	backgroundColor: string;
 	texts: RawSlideTextBox[];
 	tables: RawSlideTable[];
+	shapes: RawSlideSolidRectangle[];
 	fallbackOnlyElementKinds: SlidevPptxFallbackOnlyElementKind[];
 	consumedTableTextCandidateCount: number;
 	warnings: string[];
@@ -434,6 +450,35 @@ function normalizeTable(raw: RawSlideTable): SlidevPptxTable | null {
 	};
 }
 
+function normalizeSolidRectangle(raw: RawSlideSolidRectangle): SlidevPptxSolidRectangle | null {
+	const fillColor = normalizeHexColor(raw.fillColor, '');
+	if (!fillColor) {
+		return null;
+	}
+	const x = clamp(Number(raw.x) || 0, 0, PPTX_SLIDE_WIDTH_IN);
+	const y = clamp(Number(raw.y) || 0, 0, PPTX_SLIDE_HEIGHT_IN);
+	const w = clamp(Number(raw.w) || 0, 0, PPTX_SLIDE_WIDTH_IN);
+	const h = clamp(Number(raw.h) || 0, 0, PPTX_SLIDE_HEIGHT_IN);
+	if (w < 0.01 || h < 0.01) {
+		return null;
+	}
+	const borderColor = raw.borderColor ? normalizeHexColor(raw.borderColor, '') : '';
+	const borderWidthPt = normalizeOptionalPositiveNumber(raw.borderWidthPt, 0.1, 12);
+	const cornerRadiusAdjustment = clamp(Number(raw.cornerRadiusAdjustment) || 0, 0, 50000);
+	return {
+		sourceKind: raw.sourceKind === 'code-background' ? raw.sourceKind : 'code-background',
+		x,
+		y,
+		w,
+		h,
+		fillColor,
+		...(borderColor ? { borderColor } : {}),
+		...(borderColor && borderWidthPt !== undefined ? { borderWidthPt } : {}),
+		...(cornerRadiusAdjustment > 0 ? { cornerRadiusAdjustment } : {}),
+		order: Number.isFinite(Number(raw.order)) ? Number(raw.order) : 1000,
+	};
+}
+
 export async function extractSlidevPptxSlideFromPage(page: any, slideNumber: number): Promise<SlidevPptxSlide> {
 	const raw = (await page.evaluate((currentSlide: number): RawSlideExtraction => {
 		const slideWidthIn = 13.3333333333;
@@ -722,6 +767,10 @@ export async function extractSlidevPptxSlideFromPage(page: any, slideNumber: num
 				.join('')
 				.toUpperCase();
 		};
+		const visibleSolidFillFor = (style: CSSStyleDeclaration): string => {
+			if (style.backgroundImage && style.backgroundImage !== 'none') return '';
+			return rgbToHex(style.backgroundColor);
+		};
 		const sanitizeFontFace = (value: string): string => {
 			const font = String(value || '')
 				.split(',')
@@ -743,6 +792,7 @@ export async function extractSlidevPptxSlideFromPage(page: any, slideNumber: num
 			(element) => directText(element) && !hasCandidateDescendant(element),
 		);
 		const allCandidates = [...baseCandidates, ...fallbackCandidates];
+		const shapes: RawSlideSolidRectangle[] = [];
 		const hasSelectedAncestor = (element: Element): boolean => {
 			let parent = element.parentElement;
 			while (parent && parent !== root) {
@@ -1281,6 +1331,82 @@ export async function extractSlidevPptxSlideFromPage(page: any, slideNumber: num
 			}
 			return best;
 		};
+		const uniformBorderRadiusPxFor = (style: CSSStyleDeclaration): number | null => {
+			const radii = [
+				style.borderTopLeftRadius,
+				style.borderTopRightRadius,
+				style.borderBottomRightRadius,
+				style.borderBottomLeftRadius,
+			].map(cssPx);
+			const maxRadius = Math.max(...radii);
+			const minRadius = Math.min(...radii);
+			if (maxRadius <= 1) return 0;
+			return maxRadius - minRadius <= 1 ? maxRadius : null;
+		};
+		const cornerRadiusAdjustmentFor = (radiusPx: number, rect: DOMRect): number => {
+			const minSide = Math.min(rect.width, rect.height);
+			if (radiusPx <= 1 || minSide <= 0) return 0;
+			return Math.min(50000, Math.max(0, Math.round((radiusPx / minSide) * 100000)));
+		};
+		const sameRect = (left: DOMRect, right: DOMRect): boolean =>
+			Math.abs(left.left - right.left) <= 1 &&
+			Math.abs(left.top - right.top) <= 1 &&
+			Math.abs(left.width - right.width) <= 1 &&
+			Math.abs(left.height - right.height) <= 1;
+		const hasConsumedAncestorWithSameFill = (element: Element, fillColor: string, rect: DOMRect): boolean => {
+			let parent = element.parentElement;
+			while (parent && parent !== root) {
+				if (
+					parent.getAttribute('data-notemd-pptx-consumed-shape') === 'code-background' &&
+					parent.getAttribute('data-notemd-pptx-consumed-shape-fill') === fillColor
+				) {
+					const parentRect = parent.getBoundingClientRect();
+					if (sameRect(parentRect, rect) || parentRect.width * parentRect.height >= rect.width * rect.height) {
+						return true;
+					}
+				}
+				parent = parent.parentElement;
+			}
+			return false;
+		};
+		const codeShapeOwnerFor = (element: Element): Element | null =>
+			element.closest('pre,.shiki') || element.closest('code');
+		const collectCodeBackgroundRectangles = (): void => {
+			const codeBackgroundCandidates = allElementsInComposedRoot().filter((element) => {
+				if (!(element instanceof HTMLElement)) return false;
+				if (element.closest('table,[data-notemd-pptx-consumed-table="1"],svg,script,style,noscript')) return false;
+				return Boolean(codeShapeOwnerFor(element));
+			});
+			for (const element of codeBackgroundCandidates) {
+				const style = window.getComputedStyle(element);
+				const rect = element.getBoundingClientRect();
+				if (!isVisible(element, style, rect)) continue;
+				if (rect.width < 4 || rect.height < 4) continue;
+				const borderRadiusPx = uniformBorderRadiusPxFor(style);
+				if (borderRadiusPx === null) continue;
+				const fillColor = visibleSolidFillFor(style);
+				if (!fillColor) continue;
+				if (hasConsumedAncestorWithSameFill(element, fillColor, rect)) continue;
+				const border = strongestBorder(style);
+				const cornerRadiusAdjustment = cornerRadiusAdjustmentFor(borderRadiusPx, rect);
+				const owner = codeShapeOwnerFor(element) || element;
+				const domOrder = orderFor(element, order);
+				const ownerOrder = orderFor(owner, domOrder);
+				shapes.push({
+					sourceKind: 'code-background',
+					x: pxToInX(rect.left),
+					y: pxToInY(rect.top),
+					w: sizeToInX(rect.width),
+					h: sizeToInY(rect.height),
+					fillColor,
+					...(border.color && border.widthPt > 0 ? { borderColor: border.color, borderWidthPt: border.widthPt } : {}),
+					...(cornerRadiusAdjustment > 0 ? { cornerRadiusAdjustment } : {}),
+					order: ownerOrder - 0.3 + domOrder / 1_000_000,
+				});
+				element.setAttribute('data-notemd-pptx-consumed-shape', 'code-background');
+				element.setAttribute('data-notemd-pptx-consumed-shape-fill', fillColor);
+			}
+		};
 		const tables: RawSlideTable[] = [];
 		const textBoxes: RawSlideTextBox[] = [];
 		let order = 10;
@@ -1444,6 +1570,7 @@ export async function extractSlidevPptxSlideFromPage(page: any, slideNumber: num
 			});
 			order += 10;
 		}
+		collectCodeBackgroundRectangles();
 		const fallbackOnlyElementKinds = collectFallbackOnlyElementKinds();
 		let consumedTableTextCandidateCount = 0;
 
@@ -1606,6 +1733,7 @@ export async function extractSlidevPptxSlideFromPage(page: any, slideNumber: num
 			backgroundColor: rootBg || bodyBg || 'FFFFFF',
 			texts: textBoxes,
 			tables,
+			shapes,
 			fallbackOnlyElementKinds,
 			consumedTableTextCandidateCount,
 			warnings,
@@ -1616,12 +1744,16 @@ export async function extractSlidevPptxSlideFromPage(page: any, slideNumber: num
 	const tables = (Array.isArray(raw.tables) ? raw.tables : [])
 		.map(normalizeTable)
 		.filter((table): table is SlidevPptxTable => table !== null);
+	const shapes = (Array.isArray(raw.shapes) ? raw.shapes : [])
+		.map(normalizeSolidRectangle)
+		.filter((shape): shape is SlidevPptxSolidRectangle => shape !== null);
 	return {
 		slideNumber,
 		title: raw.title || `Slide ${slideNumber}`,
 		backgroundColor: normalizeHexColor(raw.backgroundColor, 'FFFFFF'),
 		texts,
 		tables,
+		shapes,
 		fallbackOnlyElementKinds: Array.from(
 			new Set(Array.isArray(raw.fallbackOnlyElementKinds) ? raw.fallbackOnlyElementKinds : []),
 		)
