@@ -153,6 +153,14 @@ export interface SlidevPptxVisibleNativeExperimentReport {
 	warnings: string[];
 }
 
+export interface SlidevPptxVisibleNativeBackgroundCaptureReport {
+	status: 'verified';
+	nativeLayer: 'visible-text-and-table';
+	backgroundCapture: 'after-modeled-dom-hidden';
+	residueSampling: SlidevPptxVisibleNativeResidueSamplingSummary;
+	warnings: string[];
+}
+
 export interface SlidevPptxDocument {
 	title: string;
 	author?: string;
@@ -333,6 +341,7 @@ export interface SlidevPptxExportReport {
 		| 'transparent-structure'
 		| 'visible-native-text'
 		| 'visible-native-experiment';
+	visibleNativeBackgroundCapture?: SlidevPptxVisibleNativeBackgroundCaptureReport;
 	visibleNativeExperiment?: SlidevPptxVisibleNativeExperimentReport;
 	warnings: string[];
 }

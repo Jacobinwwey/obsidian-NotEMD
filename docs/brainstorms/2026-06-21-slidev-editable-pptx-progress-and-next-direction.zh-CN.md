@@ -872,6 +872,50 @@ runuser -u jacob -- env HOME=/home/jacob PLAYWRIGHT_BROWSERS_PATH=/home/jacob/.c
 
 这里的边界必须说清楚：visible-native profile 不是宣称像素等同于浏览器。它承认“真实可编辑文字”与“浏览器 raster 逐像素一致”之间存在 Office renderer 差异。当前 hard gate 的作用是阻止结构性坏页、错误 reference、透明层回归和明显重排，而不是要求 LibreOffice 与 Chromium 字体抗锯齿完全一致。后续如果要继续降低 RMSE，优先级应是 table baseline、paragraph spacing、code token/background padding、系统字体选择 UI 和 per-page font portability gate；不应该退回透明文字或把 Mermaid 源拆成多图。
 
+## M15 默认背景残留门禁
+
+M14 已经让非 Mermaid 的展示文字真实变成 native editable text，但默认背景捕获仍缺少一条之前只存在于 visible-native 实验路径里的证明：隐藏已建模文本之后，背景里不能残留 ghost text。本轮补上这个缺口。
+
+默认导出现在把 hidden-modeled-text background capture 当成可验证合同：
+
+1. `extractSlidesFromHtml()` 不再只返回 slides，同时返回默认 visible-native background residue sampling。
+2. 默认背景捕获复用现有 residue sampler 和 retry 纪律：隐藏已建模可见源、截图、采样候选文本/表格区域；可疑时最多重试三次；最终状态写入 report。
+3. 默认采样刻意排除 `mermaid-text`，因为默认 Mermaid label 仍由背景图拥有；采样范围是 visible-native text sources 和 native table cell regions。
+4. 默认背景 CSS 现在同时隐藏已消费 DOM table 内的文字，而不只是隐藏 table background/border。这样 native DrawingML table text 不会叠在旧 DOM table text 背景上。
+5. sidecar 新增 `visibleNativeBackgroundCapture`，其中 `backgroundCapture = "after-modeled-dom-hidden"`，并包含 residue summary。
+6. 默认 report 现在只统计默认 PPTX writer 真实写出的 text box。默认路径不会写出的 Mermaid text candidate，以及被 visible native table 跳过的 table-cell overlay candidate，不再被误报为 editable text box。
+
+这轮采用的是 `ref/oh-my-ppt` HTML-to-PPTX 中更可靠的那部分设计：先 freeze/extract，把可见文字和表格写成 native OOXML；截图背景前移除已建模 DOM 层；最后用 residue check + retry 证明背景里没有旧文字残影。关键差异是 NoteMD 默认路径仍把 Mermaid label 交给背景图拥有，因为把 Mermaid/SVG 文字重建成 native editable object 会夸大语义可编辑性，也更容易扭曲图形。report 因此只声明默认 writer 真实写出的对象。
+
+真实验收命令：
+
+```bash
+runuser -u jacob -- env HOME=/home/jacob PLAYWRIGHT_BROWSERS_PATH=/home/jacob/.cache/ms-playwright bash -lc 'cd /home/jacob/obsidian-NotEMD && rm -rf docs/export/test-slidev-default-residue /tmp/notemd-default-residue.json && npm run verify:slidev-export -- --vault docs --source architecture.zh-CN.md --format pptx --output-subfolder export/test-slidev-default-residue --sample-slides all --timeout-ms 240000 --no-screenshots --require-pptx-visual-match --json > /tmp/notemd-default-residue.json'
+```
+
+结果：
+
+1. `ok = true`；
+2. `pptxVisualGate.referenceSource = "pptx-rendered-html-reference"`；
+3. `pptxVisualGate.thresholdProfile = "visible-native-rendered-html"`；
+4. `pptxVisualGate.passed = true`，`failures = []`；
+5. `pptxInspection.slideCount = 30`，`textRunCount = 861`，`pictureCount = 30`，`tableCount = 6`，`slidesWithoutEditableText = []`；
+6. sidecar `textBoxCount = 338`，`editableBodyTextBoxCount = 324`，`editableCodeTextBoxCount = 14`，`editableTableCellCount = 102`；
+7. sidecar `editableMermaidTextBoxCount = 0`，`editableTableCellOverlayTextBoxCount = 0`，与默认 writer 真实输出一致；
+8. `visibleNativeBackgroundCapture.status = "verified"`，`sampledSlideCount = 30`，`checkedRegionCount = 437`，`suspiciousSlideCount = 0`，`suspiciousRegionCount = 0`，`maxTextLikePixelRatio = 0`；
+9. PPTX XML 扫描显示 `alpha=0` 数量为 `0`，`alpha=8000` 数量为 `0`，`Visible Native Text = 324`，`Visible Native Code Text = 14`，`Visible Native Table = 6`，`Editable Mermaid Text = 0`，`Visible Native Table Cell Overlay Text = 0`；
+10. 生成物仍在 Git ignore 范围内：`git status --ignored --short docs/export/test-slidev-default-residue` 显示 `!!`。
+
+补充验证：
+
+1. `npx tsc --noEmit --pretty false` 通过；
+2. `npm run build` 通过；
+3. `npm test -- --runInBand` 通过，190 个 test suites、1531 个 tests；
+4. 针对 `src/slideExport/pptxExporter.ts`、`src/slideExport/pptxModel.ts`、`src/tests/pptxExportReport.test.ts` 的定向 ESLint 为 0 error；
+5. repo-wide `npm run lint` 目前还不能作为本切片门禁：恢复旧的 ignored export 目录属主后，它能扫完整仓库，但会命中本次改动之外的历史 lint errors。
+
+这改变了验收含义。默认 PPTX run 通过时，现在不只证明“存在 visible native text”和“回渲视觉在 rendered-HTML gate 内”，还证明“已建模 visible-native text/table 区域背后的背景被采样过，且没有 text-like residue”。它仍然是采样门禁，不是对每个 glyph 的全量像素证明。后续更稳的方向是继续扩展 report 覆盖真实漂移点：table baseline/padding、paragraph spacing、code token background，以及显式字体选择/可移植策略。
+
 ## Release 链接决策
 
 环境检测 UI 必须继续指向 npm 可安装的 GitHub release asset：
@@ -903,10 +947,10 @@ GitHub branch、tree 或 blob URL 都不是正确安装面。它们不是稳定 
 
 下一阶段应保持增量、报告驱动：
 
-1. 保持 visual diff gate 进入每次 PPTX 真实验收：报告模式用于开发，`--require-pptx-visual-match` 用于收口或 CI，并固定使用 `pptx-background-images` 作为 hard gate reference；同时保留 `--pptx-rendered-html-reference-diff` 作为 reference-contract 回归检查，避免后续改动重新制造 HTML capture 漂移。
+1. 保持 visual diff gate 进入每次 PPTX 真实验收。对默认 visible-native PPTX 路径，应使用 rendered-HTML reference 作为 hard gate，因为 PPTX background 已经故意隐藏已建模文字；background-image diff 保留为 fallback-image packaging 与外部 reference 检查的诊断面。
 2. 保持可见 native table 层，但后续围绕 CSS padding、border collapse、line-height、cell text baseline、theme font fallback 与 Office round-trip 渲染模型继续收敛，不退回透明结构层。
 3. 把 `fontContract` 作为 visible native text/table 质量门槛。下一步 rich-text 切片只有在 writer/report 对最终 Office 字体一致时，才应拆分 mixed CJK/Latin runs；然后再补 paragraph spacing、list indentation、code monospace 默认、显式 hyperlink relationship，以及“文本样式保真”和“Office 原生语义保真”的报告区分。
-4. 由于默认路径现在由 visible native text 接管展示层，需要给默认路径增加 background residue detection/retry。截图前隐藏已建模 DOM 文本必须可验证，避免 editable text 后面残留 ghost text。
+4. 把默认 background residue detection/retry 作为必需 sidecar 合同保留，并只在证据显示有缺口时扩展；不要用静默退回透明 overlay 的方式绕过问题。
 5. shape extraction 只从高置信纯色矩形/线条开始，按 DOM paint order 插入；不要先碰复杂 SVG/Mermaid/vector reconstruction。
 6. 增加字体选择策略：少量内置 preset、用户选择系统已安装字体、明确 portability report；不要默认嵌入任意系统字体。
 7. Mermaid 源内容继续不动；默认输出 rendered SVG sidecar，继续使用 image fallback；除非未来提供明确 experimental SVG embedding 或 vector reconstruction 选项，并且不得自动拆分或改写源 Mermaid fence。

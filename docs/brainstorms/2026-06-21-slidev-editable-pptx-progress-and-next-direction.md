@@ -851,6 +851,50 @@ Result:
 
 The boundary is important: the visible-native profile does not claim pixel identity with Chromium. It acknowledges the renderer gap between genuinely editable displayed text and browser-raster fidelity. The hard gate now prevents structurally bad pages, wrong references, transparent-layer regressions, and obvious reflow, not LibreOffice/Chromium antialias identity. The next RMSE reductions should target table baselines, paragraph spacing, code token/background padding, a system-font selection UI, and per-page font-portability gates. They should not revert to transparent text or split Mermaid source into multiple diagrams.
 
+## M15 Default Background Residue Gate
+
+M14 made displayed non-Mermaid text genuinely native and editable, but the default background capture still needed the same "no ghost text behind native text" proof that had previously existed only in the visible-native experiment. This slice closes that gap.
+
+The default export now treats hidden-modeled-text background capture as a verified contract:
+
+1. `extractSlidesFromHtml()` returns both extracted slides and default visible-native background residue sampling.
+2. The default background capture reuses the existing residue sampler and retry discipline: hide modeled visible sources, capture the slide background, sample candidate text/table regions, retry up to three times if suspicious, and report the final state.
+3. Default sampling intentionally excludes `mermaid-text`, because default Mermaid labels remain background-owned. It samples visible-native text sources and native table cell regions.
+4. The default background CSS now hides text inside consumed DOM tables as well as table backgrounds and borders. This prevents the native DrawingML table text from sitting on top of stale DOM table text in the background image.
+5. The sidecar now includes `visibleNativeBackgroundCapture`, with `backgroundCapture = "after-modeled-dom-hidden"` and a residue summary.
+6. The default report now counts only text boxes actually emitted by the default PPTX writer as editable text. Default Mermaid text candidates and table-cell overlay candidates skipped by visible native tables are no longer reported as editable text boxes.
+
+This follows the robust part of the `ref/oh-my-ppt` HTML-to-PPTX design: freeze/extract first, write visible text and tables as native OOXML, remove the modeled DOM layer before background capture, then run a residue check with retry. The important difference is that NoteMD's default path still keeps Mermaid labels background-owned, because rebuilding Mermaid/SVG text as native editable objects would overstate semantic editability and risk distorting diagrams. The report therefore only claims the objects the default writer really emits.
+
+Real acceptance command:
+
+```bash
+runuser -u jacob -- env HOME=/home/jacob PLAYWRIGHT_BROWSERS_PATH=/home/jacob/.cache/ms-playwright bash -lc 'cd /home/jacob/obsidian-NotEMD && rm -rf docs/export/test-slidev-default-residue /tmp/notemd-default-residue.json && npm run verify:slidev-export -- --vault docs --source architecture.zh-CN.md --format pptx --output-subfolder export/test-slidev-default-residue --sample-slides all --timeout-ms 240000 --no-screenshots --require-pptx-visual-match --json > /tmp/notemd-default-residue.json'
+```
+
+Result:
+
+1. `ok = true`;
+2. `pptxVisualGate.referenceSource = "pptx-rendered-html-reference"`;
+3. `pptxVisualGate.thresholdProfile = "visible-native-rendered-html"`;
+4. `pptxVisualGate.passed = true`, `failures = []`;
+5. `pptxInspection.slideCount = 30`, `textRunCount = 861`, `pictureCount = 30`, `tableCount = 6`, `slidesWithoutEditableText = []`;
+6. sidecar `textBoxCount = 338`, `editableBodyTextBoxCount = 324`, `editableCodeTextBoxCount = 14`, `editableTableCellCount = 102`;
+7. sidecar `editableMermaidTextBoxCount = 0`, `editableTableCellOverlayTextBoxCount = 0`, matching the actual default writer output;
+8. `visibleNativeBackgroundCapture.status = "verified"`, `sampledSlideCount = 30`, `checkedRegionCount = 437`, `suspiciousSlideCount = 0`, `suspiciousRegionCount = 0`, `maxTextLikePixelRatio = 0`;
+9. PPTX XML scan found `alpha=0` count `0`, `alpha=8000` count `0`, `Visible Native Text = 324`, `Visible Native Code Text = 14`, `Visible Native Table = 6`, `Editable Mermaid Text = 0`, and `Visible Native Table Cell Overlay Text = 0`;
+10. generated outputs remain ignored: `git status --ignored --short docs/export/test-slidev-default-residue` reports `!!`.
+
+Additional verification:
+
+1. `npx tsc --noEmit --pretty false` passed;
+2. `npm run build` passed;
+3. `npm test -- --runInBand` passed with 190 suites and 1531 tests;
+4. targeted ESLint on `src/slideExport/pptxExporter.ts`, `src/slideExport/pptxModel.ts`, and `src/tests/pptxExportReport.test.ts` had 0 errors;
+5. repo-wide `npm run lint` is not yet a usable gate for this slice: after restoring stale ignored export-directory ownership, it reaches the existing project baseline and reports historical errors outside this change set.
+
+This changes the acceptance meaning. A passing default PPTX run now proves not only "visible native text exists" and "visual round-trip stays within the rendered-HTML gate", but also "the background behind modeled visible-native text/table regions was sampled and did not retain text-like residue." It is still a sampling gate, not a full pixel proof for every glyph. The robust next step is to keep expanding the report around where renderer drift remains: table baseline/padding, paragraph spacing, code token backgrounds, and explicit font selection/portability policy.
+
 ## Release Link Decision
 
 The environment-check UI must continue pointing users at an npm-installable GitHub release asset:
@@ -882,10 +926,10 @@ Those are not regressions; they are explicit boundaries. Overstating editability
 
 The next level should be incremental and report-driven:
 
-1. keep visual diff in every real PPTX acceptance run, with `pptx-background-images` as the hard-gate reference source; also keep `--pptx-rendered-html-reference-diff` as a reference-contract regression check so future changes do not reintroduce HTML capture drift;
+1. keep visual diff in every real PPTX acceptance run. For the default visible-native PPTX path, use the rendered-HTML reference as the hard gate because the PPTX background intentionally hides modeled text; keep background-image diff as a diagnostic for fallback-image packaging and external reference checks;
 2. keep the visible native table layer, but gate improvements around CSS padding, border collapse, line height, cell baseline, font fallback, and Office round-trip rendering instead of reverting to transparent structures;
 3. use `fontContract` as the gate for visible native text/table quality. The next rich-text slices should split mixed CJK/Latin runs only when the writer/report agree on the final Office faces, then add paragraph spacing, list indentation, code monospace defaults, explicit hyperlink relationships, and a clearer distinction between text-style fidelity and true Office-native semantic fidelity;
-4. add background residue detection/retry for the default path now that visible native text owns the display layer. Hiding modeled DOM text before screenshot capture must be verified so ghost text does not remain behind editable text.
+4. keep default background residue detection/retry as a required sidecar contract, and expand it only where evidence shows gaps; do not replace it with a silent fallback to transparent overlays;
 5. add shape extraction for high-confidence solid-color rectangles/lines only;
 6. add a font selection policy with a small preset list, user-selected installed family names, and a clear portability report; do not default to embedding arbitrary system fonts;
 7. keep Mermaid source untouched, export rendered SVG sidecars when available, and continue using image fallback unless a separate explicit user option requests experimental SVG embedding or vector reconstruction.

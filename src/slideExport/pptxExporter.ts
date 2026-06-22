@@ -21,6 +21,7 @@ import {
 	type SlidevPptxTextBox,
 	type SlidevPptxTextSourceCoverage,
 	type SlidevPptxTextSourceKind,
+	type SlidevPptxVisibleNativeBackgroundCaptureReport,
 	type SlidevPptxVisibleNativeResidueSamplingSummary,
 	type SlidevPptxVisibleNativeSlideResidueSampling,
 } from './pptxModel';
@@ -74,11 +75,18 @@ type VisibleNativeResidueRegion = {
 	text: string;
 };
 
-type VisibleNativeExperimentBackgroundCapture = {
+type VisibleNativeResidueSamplingScope = {
+	textSourceKinds: readonly SlidevPptxTextSourceKind[];
+	includeTables: boolean;
+};
+
+type VisibleNativeBackgroundCapture = {
 	visualBackground: SlidevPptxImage;
 	residueSampling: SlidevPptxVisibleNativeSlideResidueSampling;
 	warnings: string[];
 };
+
+type PptxReportTextPolicy = 'default-emitted-text' | 'all-extracted-text';
 
 function resolvePlaywrightRuntime(): PlaywrightRuntime | null {
 	const playwrightBrowsersPath = resolvePlaywrightBrowsersPath();
@@ -236,6 +244,13 @@ async function prepareDefaultVisibleTextBackground(page: any): Promise<void> {
 			'border-color: transparent !important;',
 			'box-shadow: none !important;',
 			'}',
+			'[data-notemd-pptx-consumed-table="1"],',
+			'[data-notemd-pptx-consumed-table="1"] * {',
+			'color: transparent !important;',
+			'-webkit-text-fill-color: transparent !important;',
+			'text-shadow: none !important;',
+			'text-decoration-color: transparent !important;',
+			'}',
 		]
 			.filter(Boolean)
 			.join('\n');
@@ -362,8 +377,13 @@ function normalizeResidueColor(value: string): string {
 	return /^[0-9A-F]{6}$/.test(normalized) ? normalized : '';
 }
 
-function visibleNativeTextResidueRegions(slide: SlidevPptxSlide): VisibleNativeResidueRegion[] {
+function visibleNativeTextResidueRegions(
+	slide: SlidevPptxSlide,
+	sourceKinds: readonly SlidevPptxTextSourceKind[],
+): VisibleNativeResidueRegion[] {
+	const allowedSources = new Set(sourceKinds);
 	return slide.texts
+		.filter((textBox) => allowedSources.has(textSourceKindFor(textBox)))
 		.map((textBox) => ({
 			kind: 'text-box' as const,
 			x: textBox.x,
@@ -413,7 +433,11 @@ function visibleNativeTableResidueRegionsForTable(table: SlidevPptxTable): Visib
 	return regions;
 }
 
-function visibleNativeTableResidueRegions(slide: SlidevPptxSlide): VisibleNativeResidueRegion[] {
+function visibleNativeTableResidueRegions(
+	slide: SlidevPptxSlide,
+	includeTables: boolean,
+): VisibleNativeResidueRegion[] {
+	if (!includeTables) return [];
 	return slide.tables
 		.flatMap(visibleNativeTableResidueRegionsForTable)
 		.sort((left, right) => right.fontSize * right.w * right.h - left.fontSize * left.w * left.h)
@@ -424,9 +448,10 @@ async function sampleVisibleNativeResidueFromBackground(
 	page: any,
 	visualBackground: SlidevPptxImage,
 	slide: SlidevPptxSlide,
+	scope: VisibleNativeResidueSamplingScope,
 ): Promise<SlidevPptxVisibleNativeSlideResidueSampling> {
-	const textRegions = visibleNativeTextResidueRegions(slide);
-	const tableRegions = visibleNativeTableResidueRegions(slide);
+	const textRegions = visibleNativeTextResidueRegions(slide, scope.textSourceKinds);
+	const tableRegions = visibleNativeTableResidueRegions(slide, scope.includeTables);
 	const regions = [...textRegions, ...tableRegions];
 	if (regions.length === 0) {
 		return {
@@ -601,17 +626,59 @@ function summarizeVisibleNativeResidueSampling(
 	};
 }
 
+async function captureDefaultVisibleNativeBackground(
+	page: any,
+	slide: SlidevPptxSlide,
+): Promise<VisibleNativeBackgroundCapture> {
+	let finalBackground: SlidevPptxImage | null = null;
+	let finalResidueSampling: SlidevPptxVisibleNativeSlideResidueSampling | null = null;
+
+	for (let attempt = 1; attempt <= VISIBLE_NATIVE_BACKGROUND_CAPTURE_ATTEMPTS; attempt += 1) {
+		await prepareDefaultVisibleTextBackground(page);
+		const visualBackground = await captureSlideBackground(page, slide.slideNumber);
+		const residueSampling = await sampleVisibleNativeResidueFromBackground(page, visualBackground, slide, {
+			textSourceKinds: SLIDEV_PPTX_VISIBLE_TEXT_SOURCE_KINDS,
+			includeTables: true,
+		});
+		finalBackground = visualBackground;
+		finalResidueSampling = residueSampling;
+		if (!residueSampling.suspicious) {
+			const warnings =
+				attempt > 1
+					? [
+							`Slide ${slide.slideNumber} default visible-native background residue cleared after ${attempt} capture attempts.`,
+						]
+					: [];
+			return { visualBackground, residueSampling, warnings };
+		}
+	}
+
+	if (!finalBackground || !finalResidueSampling) {
+		throw new Error(`Unable to capture default visible-native background for slide ${slide.slideNumber}.`);
+	}
+	return {
+		visualBackground: finalBackground,
+		residueSampling: finalResidueSampling,
+		warnings: [
+			`Slide ${slide.slideNumber} default visible-native background residue sampling is suspicious after ${VISIBLE_NATIVE_BACKGROUND_CAPTURE_ATTEMPTS} attempts (${finalResidueSampling.suspiciousRegionCount} region(s), max ratio ${finalResidueSampling.maxTextLikePixelRatio}).`,
+		],
+	};
+}
+
 async function captureVisibleNativeExperimentBackground(
 	page: any,
 	slide: SlidevPptxSlide,
-): Promise<VisibleNativeExperimentBackgroundCapture> {
+): Promise<VisibleNativeBackgroundCapture> {
 	let finalBackground: SlidevPptxImage | null = null;
 	let finalResidueSampling: SlidevPptxVisibleNativeSlideResidueSampling | null = null;
 
 	for (let attempt = 1; attempt <= VISIBLE_NATIVE_BACKGROUND_CAPTURE_ATTEMPTS; attempt += 1) {
 		await prepareVisibleNativeExperimentBackground(page);
 		const visualBackground = await captureSlideBackground(page, slide.slideNumber);
-		const residueSampling = await sampleVisibleNativeResidueFromBackground(page, visualBackground, slide);
+		const residueSampling = await sampleVisibleNativeResidueFromBackground(page, visualBackground, slide, {
+			textSourceKinds: PPTX_TEXT_SOURCE_KIND_ORDER,
+			includeTables: true,
+		});
 		finalBackground = visualBackground;
 		finalResidueSampling = residueSampling;
 		if (!residueSampling.suspicious) {
@@ -642,7 +709,10 @@ async function extractSlidesFromHtml(
 	slideCount: number,
 	config: SlideExportConfig,
 	onProgress?: ExportProgressCallback,
-): Promise<SlidevPptxSlide[]> {
+): Promise<{
+	slides: SlidevPptxSlide[];
+	residueSampling: SlidevPptxVisibleNativeResidueSamplingSummary;
+}> {
 	const playwright = resolvePlaywrightRuntime();
 	if (!playwright?.chromium) {
 		throw new Error('Playwright runtime is unavailable; PPTX export requires Playwright Chromium.');
@@ -667,6 +737,7 @@ async function extractSlidesFromHtml(
 		}
 
 		const slides: SlidevPptxSlide[] = [];
+		const residueSlides: SlidevPptxVisibleNativeSlideResidueSampling[] = [];
 		for (let slideNumber = 1; slideNumber <= slideCount; slideNumber += 1) {
 			onProgress?.('pptx-export', `Extracting editable slide ${slideNumber}/${slideCount}...`);
 			const targetUrl = baseUrl
@@ -675,12 +746,16 @@ async function extractSlidesFromHtml(
 			await openSlideForPptxExport(page, targetUrl, config.timeoutMs);
 			await resetSlidePptxExtractionState(page);
 			const slide = await extractSlidevPptxSlideFromPage(page, slideNumber);
-			await prepareDefaultVisibleTextBackground(page);
-			const visualBackground = await captureSlideBackground(page, slideNumber);
-			slide.backgroundImage = visualBackground;
+			const backgroundCapture = await captureDefaultVisibleNativeBackground(page, slide);
+			slide.backgroundImage = backgroundCapture.visualBackground;
+			slide.warnings.push(...backgroundCapture.warnings);
 			slides.push(slide);
+			residueSlides.push(backgroundCapture.residueSampling);
 		}
-		return slides;
+		return {
+			slides,
+			residueSampling: summarizeVisibleNativeResidueSampling(residueSlides),
+		};
 	} finally {
 		await browser.close();
 		if (serverDirectory) {
@@ -865,8 +940,22 @@ function textSourceKindFor(textBox: SlidevPptxTextBox): SlidevPptxTextSourceKind
 		textBox.sourceKind === 'mermaid-text' ||
 		textBox.sourceKind === 'svg-text' ||
 		textBox.sourceKind === 'table-cell-overlay'
-		? textBox.sourceKind
-		: 'body';
+			? textBox.sourceKind
+			: 'body';
+}
+
+function isDefaultPptxEmittedTextBox(slide: SlidevPptxSlide, textBox: SlidevPptxTextBox): boolean {
+	const sourceKind = textSourceKindFor(textBox);
+	if (sourceKind === 'mermaid-text') return false;
+	if (sourceKind === 'table-cell-overlay' && slide.tables.length > 0) return false;
+	return SLIDEV_PPTX_VISIBLE_TEXT_SOURCE_KINDS.includes(sourceKind);
+}
+
+function defaultPptxReportSlides(slides: SlidevPptxSlide[]): SlidevPptxSlide[] {
+	return slides.map((slide) => ({
+		...slide,
+		texts: slide.texts.filter((textBox) => isDefaultPptxEmittedTextBox(slide, textBox)),
+	}));
 }
 
 function countTextBoxesBySource(slide: SlidevPptxSlide, sourceKind: SlidevPptxTextSourceKind): number {
@@ -1059,20 +1148,36 @@ function buildVisibleNativeEditableLayerContract(): SlidevPptxExportReport['edit
 	};
 }
 
+function buildDefaultVisibleNativeBackgroundCaptureReport(
+	residueSampling: SlidevPptxVisibleNativeResidueSamplingSummary,
+	warnings: string[],
+): SlidevPptxVisibleNativeBackgroundCaptureReport {
+	return {
+		status: 'verified',
+		nativeLayer: 'visible-text-and-table',
+		backgroundCapture: 'after-modeled-dom-hidden',
+		residueSampling,
+		warnings,
+	};
+}
+
 export function buildSlidevPptxExportReport(
 	htmlPath: string,
 	deckPath: string | null,
 	pptxPath: string,
 	reportPath: string,
 	slides: SlidevPptxSlide[],
+	visibleNativeBackgroundCapture?: SlidevPptxVisibleNativeBackgroundCaptureReport,
+	textPolicy: PptxReportTextPolicy = 'default-emitted-text',
 ): SlidevPptxExportReport {
-	const pagesWithoutEditableText = slides
+	const reportSlides = textPolicy === 'all-extracted-text' ? slides : defaultPptxReportSlides(slides);
+	const pagesWithoutEditableText = reportSlides
 		.filter((slide) => slide.texts.length === 0)
 		.map((slide) => slide.slideNumber);
 	const warnings = slides.flatMap((slide) => slide.warnings);
-	const slideSummaries = slides.map(buildSlideEditabilitySummary);
+	const slideSummaries = reportSlides.map(buildSlideEditabilitySummary);
 	const editablePrimitiveCoverage = buildEditablePrimitiveCoverage(slideSummaries);
-	const fontContract = buildSlidevPptxFontContractSummary(slides);
+	const fontContract = buildSlidevPptxFontContractSummary(reportSlides);
 	return {
 		formatVersion: 1,
 		source: {
@@ -1112,6 +1217,7 @@ export function buildSlidevPptxExportReport(
 		slides: slideSummaries,
 		visibleTextLayer: 'native-text-and-background-image',
 		editableLayerRenderMode: 'visible-native-text',
+		visibleNativeBackgroundCapture,
 		warnings,
 	};
 }
@@ -1124,7 +1230,15 @@ export function buildSlidevVisibleNativePptxExperimentReport(
 	slides: SlidevPptxSlide[],
 	residueSampling: SlidevPptxVisibleNativeResidueSamplingSummary,
 ): SlidevPptxExportReport {
-	const report = buildSlidevPptxExportReport(htmlPath, deckPath, pptxPath, reportPath, slides);
+	const report = buildSlidevPptxExportReport(
+		htmlPath,
+		deckPath,
+		pptxPath,
+		reportPath,
+		slides,
+		undefined,
+		'all-extracted-text',
+	);
 	const experimentWarnings = [
 		'Visible-native PPTX is experimental; it also converts background-owned text sources such as Mermaid labels, while default export keeps Mermaid labels in the background image.',
 		...slides.flatMap((slide) => slide.warnings),
@@ -1206,7 +1320,7 @@ export async function exportSlidevPptxFromHtml(
 
 	const absoluteHtmlPath = join(vaultRoot, htmlExportPath);
 	const { slideCount, deckPath } = resolveSlideCount(source, vaultRoot);
-	const slides = await extractSlidesFromHtml(absoluteHtmlPath, slideCount, config, onProgress);
+	const { slides, residueSampling } = await extractSlidesFromHtml(absoluteHtmlPath, slideCount, config, onProgress);
 	const outputPath = join(vaultRoot, config.outputSubfolder, `${source.outputBasename}.pptx`);
 	const reportPath = join(vaultRoot, config.outputSubfolder, `${source.outputBasename}.pptx.report.json`);
 	const document: SlidevPptxDocument = {
@@ -1216,7 +1330,17 @@ export async function exportSlidevPptxFromHtml(
 	};
 
 	writePptxDocument(outputPath, document);
-	const report = buildSlidevPptxExportReport(absoluteHtmlPath, deckPath, outputPath, reportPath, slides);
+	const residueWarnings = slides.flatMap((slide) =>
+		slide.warnings.filter((warning) => warning.includes('default visible-native background residue')),
+	);
+	const report = buildSlidevPptxExportReport(
+		absoluteHtmlPath,
+		deckPath,
+		outputPath,
+		reportPath,
+		slides,
+		buildDefaultVisibleNativeBackgroundCaptureReport(residueSampling, residueWarnings),
+	);
 	writeFileSync(reportPath, JSON.stringify(report, null, 2), 'utf8');
 	onProgress?.(
 		'pptx-export',

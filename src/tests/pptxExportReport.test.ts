@@ -308,14 +308,14 @@ describe('pptx export report', () => {
 
 		expect(report.editableBodyTextBoxCount).toBe(1);
 		expect(report.editableCodeTextBoxCount).toBe(2);
-		expect(report.editableMermaidTextBoxCount).toBe(1);
+		expect(report.editableMermaidTextBoxCount).toBe(0);
 		expect(report.editableSvgTextBoxCount).toBe(1);
 		expect(report.editableTableCellOverlayTextBoxCount).toBe(1);
 		expect(report.editablePrimitiveCoverage).toEqual(
 			expect.objectContaining({
 				editableBodyTextBoxCount: 1,
 				editableCodeTextBoxCount: 2,
-				editableMermaidTextBoxCount: 1,
+				editableMermaidTextBoxCount: 0,
 				editableSvgTextBoxCount: 1,
 				editableTableCellOverlayTextBoxCount: 1,
 			}),
@@ -338,15 +338,6 @@ describe('pptx export report', () => {
 				characterCount: 'const value = 1;'.length + 'pnpm build'.length,
 				richTextParagraphCount: 2,
 				richTextRunCount: 2,
-			},
-			{
-				sourceKind: 'mermaid-text',
-				slideCount: 1,
-				textBoxCount: 1,
-				textLineCount: 1,
-				characterCount: 'Graph edge label'.length,
-				richTextParagraphCount: 1,
-				richTextRunCount: 1,
 			},
 			{
 				sourceKind: 'svg-text',
@@ -372,7 +363,7 @@ describe('pptx export report', () => {
 			expect.objectContaining({
 				editableBodyTextBoxCount: 1,
 				editableCodeTextBoxCount: 1,
-				editableMermaidTextBoxCount: 1,
+				editableMermaidTextBoxCount: 0,
 				editableSvgTextBoxCount: 1,
 				editableTableCellOverlayTextBoxCount: 1,
 			}),
@@ -380,7 +371,6 @@ describe('pptx export report', () => {
 		expect(report.slides[0].textSourceCoverage).toEqual([
 			expect.objectContaining({ sourceKind: 'body', slideCount: 1, textBoxCount: 1, richTextRunCount: 1 }),
 			expect.objectContaining({ sourceKind: 'code', slideCount: 1, textBoxCount: 1, richTextRunCount: 1 }),
-			expect.objectContaining({ sourceKind: 'mermaid-text', slideCount: 1, textBoxCount: 1, richTextRunCount: 1 }),
 			expect.objectContaining({ sourceKind: 'svg-text', slideCount: 1, textBoxCount: 1, richTextRunCount: 1 }),
 			expect.objectContaining({
 				sourceKind: 'table-cell-overlay',
@@ -409,6 +399,152 @@ describe('pptx export report', () => {
 				richTextRunCount: 1,
 			}),
 		]);
+	});
+
+	test('reports only text boxes emitted by the default PPTX writer as editable', () => {
+		const slides: SlidevPptxSlide[] = [
+			{
+				slideNumber: 1,
+				title: 'Native table owns cell text',
+				backgroundColor: 'FFFFFF',
+				texts: [
+					editableTextBoxForReport('Table overlay candidate', 'table-cell-overlay'),
+					editableTextBoxForReport('Mermaid candidate', 'mermaid-text'),
+				],
+				tables: [
+					{
+						x: 1,
+						y: 1,
+						w: 3,
+						h: 0.6,
+						colWidths: [3],
+						rowHeights: [0.6],
+						order: 20,
+						rows: [
+							[
+								{
+									text: 'Visible native table cell',
+									rowSpan: 1,
+									colSpan: 1,
+									fontSize: 12,
+									fontFace: 'Aptos',
+									color: '111827',
+									bold: false,
+									italic: false,
+									underline: false,
+									align: 'left',
+									verticalAlign: 'top',
+									fillColor: null,
+									borderColor: null,
+									borderWidthPt: 0,
+								},
+							],
+						],
+					},
+				],
+				fallbackOnlyElementKinds: ['mermaid'],
+				consumedTableTextCandidateCount: 1,
+				warnings: [],
+			},
+		];
+
+		const report = buildSlidevPptxExportReport(
+			'/vault/export/deck/index.html',
+			'/vault/deck.md',
+			'/vault/export/deck.pptx',
+			'/vault/export/deck.pptx.report.json',
+			slides,
+		);
+
+		expect(report.textBoxCount).toBe(0);
+		expect(report.editableMermaidTextBoxCount).toBe(0);
+		expect(report.editableTableCellOverlayTextBoxCount).toBe(0);
+		expect(report.editableTableCellCount).toBe(1);
+		expect(report.textSourceCoverage).toEqual([]);
+		expect(report.slides[0]).toEqual(
+			expect.objectContaining({
+				editableTextBoxCount: 0,
+				editableMermaidTextBoxCount: 0,
+				editableTableCellOverlayTextBoxCount: 0,
+				editableTableCellCount: 1,
+			}),
+		);
+	});
+
+	test('reports default visible-native background residue sampling', () => {
+		const slides: SlidevPptxSlide[] = [
+			{
+				slideNumber: 1,
+				title: 'Residue check',
+				backgroundColor: 'FFFFFF',
+				texts: [editableTextBoxForReport('Visible native text', 'body')],
+				tables: [],
+				fallbackOnlyElementKinds: [],
+				consumedTableTextCandidateCount: 0,
+				warnings: [
+					'Slide 1 default visible-native background residue sampling is suspicious after 3 attempts (1 region(s), max ratio 0.2).',
+				],
+			},
+		];
+
+		const report = buildSlidevPptxExportReport(
+			'/vault/export/deck/index.html',
+			'/vault/deck.md',
+			'/vault/export/deck.pptx',
+			'/vault/export/deck.pptx.report.json',
+			slides,
+			{
+				status: 'verified',
+				nativeLayer: 'visible-text-and-table',
+				backgroundCapture: 'after-modeled-dom-hidden',
+				residueSampling: {
+					slideCount: 1,
+					sampledSlideCount: 1,
+					suspiciousSlideCount: 1,
+					checkedRegionCount: 1,
+					suspiciousRegionCount: 1,
+					maxTextLikePixelRatio: 0.2,
+					threshold: {
+						colorDistance: 62,
+						textLikePixelRatio: 0.075,
+						minTextLikePixels: 8,
+					},
+					slides: [
+						{
+							slideNumber: 1,
+							sampledTextBoxCount: 1,
+							sampledTableCellCount: 0,
+							checkedRegionCount: 1,
+							suspiciousRegionCount: 1,
+							maxTextLikePixelRatio: 0.2,
+							suspicious: true,
+						},
+					],
+				},
+				warnings: [
+					'Slide 1 default visible-native background residue sampling is suspicious after 3 attempts (1 region(s), max ratio 0.2).',
+				],
+			},
+		);
+
+		expect(report.visibleNativeBackgroundCapture).toEqual(
+			expect.objectContaining({
+				status: 'verified',
+				nativeLayer: 'visible-text-and-table',
+				backgroundCapture: 'after-modeled-dom-hidden',
+			}),
+		);
+		expect(report.visibleNativeBackgroundCapture?.residueSampling).toEqual(
+			expect.objectContaining({
+				slideCount: 1,
+				sampledSlideCount: 1,
+				suspiciousSlideCount: 1,
+				checkedRegionCount: 1,
+				suspiciousRegionCount: 1,
+				maxTextLikePixelRatio: 0.2,
+			}),
+		);
+		expect(report.warnings[0]).toContain('default visible-native background residue sampling is suspicious');
 	});
 
 	test('reports Office emitted font runs for mixed Latin and CJK text', () => {
