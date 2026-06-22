@@ -124,6 +124,95 @@ Corrected result:
 
 The table-first direction is useful, but the visible DrawingML table should not replace Slidev CSS yet. Office table defaults for grid, padding, line height, and font metrics regress the real deck when native tables are made visible. The hard PPTX visual gate now checks Office preservation of the frozen visual layer; object-level native reconstruction remains a separate, more expensive problem.
 
+The 2026-06-21 follow-up acceptance keeps that conclusion, but the reference semantics need to be more precise. The external Slidev PNG reference should not be removed; it should become a cross-export advisory gate that exposes whether the PNG export path and PPTX capture path share the same layout contract. It should not replace the frozen-reference hard gate.
+
+The current mainline PPTX hard gate was rerun with:
+
+```bash
+runuser -u jacob -- env HOME=/home/jacob PLAYWRIGHT_BROWSERS_PATH=/home/jacob/.cache/ms-playwright bash -lc 'cd /home/jacob/obsidian-NotEMD && npm run verify:slidev-export -- --vault docs --source architecture.zh-CN.md --format pptx --output-subfolder export/test-slidev-current-frozen --sample-slides all --timeout-ms 240000 --no-screenshots --pptx-visual-diff --require-pptx-visual-match --json'
+```
+
+Result:
+
+1. `ok = true`
+2. `slidev.version = 52.16.0 (/home/jacob/slidev/packages/slidev/bin/slidev.mjs)`
+3. `skillRootPath = /home/jacob/slidev/skills/slidev`
+4. `skillReferenceCount = 52`
+5. `pptxInspection.slideCount = 27`
+6. `pptxInspection.textRunCount = 331`
+7. `pptxInspection.tableCount = 4`
+8. `pptxInspection.slidesWithoutEditableText = []`
+9. `pptxVisualDiff.reference.source = pptx-background-images`
+10. `meanRmse = 0.049441916296296295`
+11. `maxRmse = 0.0889364`
+12. `pptxVisualGate.passed = true`
+13. `mermaidSourcePreservation.changedFenceIndexes = []`
+
+The same baseline was then compared against an external Slidev PNG sequence:
+
+```bash
+runuser -u jacob -- env HOME=/home/jacob PLAYWRIGHT_BROWSERS_PATH=/home/jacob/.cache/ms-playwright bash -lc 'cd /home/jacob/obsidian-NotEMD && npm run verify:slidev-export -- --vault docs --source architecture.zh-CN.md --format png --output-subfolder export/test-slidev-current-png-reference --sample-slides all --timeout-ms 240000 --no-screenshots --json'
+```
+
+```bash
+node - <<'NODE'
+const { buildPptxVisualDiff } = require('./scripts/lib/pptx-visual-diff');
+const report = buildPptxVisualDiff({
+  pptxPath: 'docs/export/test-slidev-current-frozen/architecture.zh-CN.pptx',
+  referenceDirectory: 'docs/export/test-slidev-current-png-reference/architecture.zh-CN-slides-png',
+  outputDirectory: 'docs/export/test-slidev-current-external-png-diff',
+  dpi: 150,
+  timeoutMs: 240000,
+  thresholds: { maxRmse: 0.12, meanRmse: 0.08 },
+});
+console.log(JSON.stringify({ gate: report.gate, summary: report.comparison.summary }, null, 2));
+NODE
+```
+
+Result:
+
+1. `reference.source = external-png-sequence`
+2. `gate.passed = false`
+3. `meanRmse = 0.10535973851851853`
+4. `maxRmse = 0.241976`
+5. worst pages remained concentrated around `21, 19, 16, 20, 24, 18, 17, 15, 10, 22, 13, 12`
+
+Manual inspection of `docs/export/test-slidev-current-external-png-diff/side-by-side/slide-21.png` and `slide-16.png` showed that the current differences are no longer the early obvious scale failures. The main layout is aligned; the residual diff is dominated by text antialiasing, LibreOffice PDF render-back, and subpixel differences between the PNG export path and the PPTX capture path. That means the external PNG gate failure should not be read as "PPTX visual output is broken", but it correctly exposes that PNG export and PPTX capture still use different rasterization paths.
+
+The next work should therefore focus on the reference-generation contract before tuning `pptxWriter.ts`:
+
+1. make PNG export and PPTX capture share the same converged standalone HTML, viewport, route, freeze script, font readiness, and double-RAF settle;
+2. or expose a configurable export viewport/deviceScaleFactor/fit-off contract in the Slidev fork so `slidev export --format png` and NotEMD PPTX capture align;
+3. keep external PNG comparison advisory by default until the reference contract is unified;
+4. add structured external-gate metrics: geometric shift, scale drift, text-antialias tolerance, SSIM, and perceptual hash.
+
+The key lesson from `oh-my-ppt` is not "turn every DOM node into native PPTX". It is the verifiable layering model: high-confidence primitives become editable, fragile visuals stay raster fallback, consumed primitives are marked, background capture hides only what native PPTX has actually taken over, and pixel checks prevent ghost text. NotEMD should import that discipline into acceptance and coverage reporting before enabling visible native text/table layers.
+
+## `oh-my-ppt` Mechanism-Level Conclusions
+
+The useful reading of `oh-my-ppt` is narrower than "it supports HTML Slides -> PPTX". It solves similar failures through five contracts:
+
+1. **Render contract**: `renderer.ts` uses an isolated browser surface, fixed 1600x900 capture dimensions, `fit=off`, `print=1`, `export=1`, a print-ready signal, animation freeze, font readiness, and chart/canvas stability waits to converge DOM state into a measurable fact. NotEMD already uses Playwright 1960x1104 plus `convergeSlidevDeckLayout()`, but PNG export and PPTX capture still do not fully share the same viewport/route/freeze contract.
+2. **Consumption contract**: `table-extract.ts` consumes `<table>` first and marks it with `data-pptx-consumed-table` so shape/text extraction does not duplicate table contents. NotEMD already has `data-notemd-pptx-consumed-table`; the next step is reporting consumed primitive counts, unconsumed text, and fallback-only coverage instead of only aggregate text/table counts.
+3. **Text contract**: `index.ts` goes beyond `innerText`: it models inline runs, per-character line grouping, CJK fallback, list/bullet semantics, paragraph spacing, Tailwind utility hints, and `@chenglou/pretext` layout. NotEMD is still block-level. Transparent structure mode keeps visuals safe, but editing quality will remain weak for inline emphasis, syntax highlighting, list indentation, and long mixed CJK/Latin text.
+4. **Paint-order contract**: `oh-my-ppt` estimates stacking order with stacking-context analysis plus `elementsFromPoint()` sampling, then `ooxml-writer.ts` writes shape/table/image/text in order. NotEMD's visible layer is currently the whole-slide background image, so paint order is not a visual hard blocker yet; it becomes mandatory only when visible native shape/image/text layers are introduced.
+5. **Visible-native-layer contract**: `renderer.ts` hides consumed primitives before background capture and uses pixel sampling to detect text residue and retry. This cannot be directly ported to the current NotEMD flow, because NotEMD's visible text/table paint comes from the frozen background. Hiding text now would make the PPTX visually worse. Residue detection should gate visible-native-text/table experiments, not transparent-structure export.
+
+The concrete next slices are:
+
+1. **M1: improve the report before the visible layer**. Keep `visibleTextLayer = background-image` and `editableLayerRenderMode = transparent-structure`, but add `consumedTableCount`, `editablePrimitiveCoverage`, `fallbackOnlyElementKinds`, and `unmodeledTextRunReasons`.
+2. **M2: rich run extraction**. Add inline runs, CJK/Latin font-face splitting, code monospace, bullet levels, line-height, and paragraph spacing to the transparent text layer. This improves editability without visual risk.
+3. **M3: external PNG advisory metrics**. Keep the external PNG gate, but do not hard-fail by default. Add geometry shift, scale drift, SSIM/pHash, and text-antialias tolerance so subpixel renderer drift is separated from actual layout drift.
+4. **M4: visible native table/text branch**. Only make transparent structures visible after a same-frozen-HTML A/B gate passes. That branch must include residue detection/retry, or it will create background text plus PPTX text ghosting.
+5. **M5: font contract**. `oh-my-ppt` font embedding is valuable, but NotEMD should not silently embed arbitrary user system or remote fonts. First report font families, CJK fallback, and Office missing-font risk; then support opt-in embedding only for licensed local/vault font assets.
+
+Do not migrate these parts now:
+
+1. Do not bring Electron `BrowserWindow` assumptions into the Obsidian plugin; Playwright plus a local server fits the current runtime boundary better.
+2. Do not rewrite or split Mermaid source to chase native vector editability; Mermaid/SVG/canvas should remain atomic visual fallback until the user explicitly opts into experimental vector reconstruction.
+3. Do not treat `oh-my-ppt`'s Tailwind-specific parser as a generic Slidev solution. The idea of utility hints supplementing computed style is portable; the failure surface is not.
+4. Do not interpret external PNG RMSE failure as a `pptxWriter.ts` failure. The frozen-reference hard gate already proves the writer preserves the embedded visual layer; external PNG failure mostly exposes an unshared reference contract.
+
 ## Release Link Decision
 
 The environment-check UI must continue pointing users at an npm-installable GitHub release asset:

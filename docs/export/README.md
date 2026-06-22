@@ -9,18 +9,21 @@ This directory contains exported Slidev presentations from the NotEMD plugin.
 **Output:** Single HTML file that works by double-clicking
 
 **Example:**
+
 ```
 export/presentation-slides/
 └── index-standalone.html    (~727KB, double-click to view)
 ```
 
 **Advantages:**
+
 - ✅ No setup required
 - ✅ Works offline forever
 - ✅ Share as single file
 - ✅ Opens in any browser via file:// protocol
 
 **Use When:**
+
 - Sharing presentations with non-technical users
 - Need offline access
 - Want maximum simplicity
@@ -30,6 +33,7 @@ export/presentation-slides/
 **Output:** Multi-file structure with server scripts
 
 **Example:**
+
 ```
 export/presentation-slides/
 ├── index.html               (~200KB)
@@ -40,16 +44,19 @@ export/presentation-slides/
 ```
 
 **Advantages:**
+
 - Smaller total file size
 - Better for development
 - Separate asset caching
 
 **Use When:**
+
 - Comfortable with command line
 - Need to modify assets
 - Hosting on web server
 
 **How to Use:**
+
 ```bash
 cd export/presentation-slides/
 ./start-server.sh          # macOS/Linux
@@ -79,6 +86,7 @@ docs/export/
 ## Technical Details
 
 ### Standalone Bundle
+
 - **Size:** 727KB typical (includes all JS/CSS)
 - **Modules:** 34 CommonJS modules inlined
 - **Loader:** Custom `__require()` system
@@ -86,6 +94,7 @@ docs/export/
 - **Dependencies:** None
 
 ### Server-Script Bundle
+
 - **Size:** ~900KB total across multiple files
 - **Modules:** ES modules with dynamic imports
 - **Server:** Python 3, Python 2, or Node.js
@@ -99,6 +108,7 @@ docs/export/
 **Problem:** Double-clicking HTML shows blank page
 
 **Solution:**
+
 1. Check file size (~727KB) - if much smaller, re-export
 2. Try different browser (Chrome, Firefox, Edge)
 3. Check browser console for errors (F12)
@@ -109,6 +119,7 @@ docs/export/
 **Problem:** Server script won't run
 
 **Solution:**
+
 1. Check Python/Node.js is installed: `python3 --version`
 2. Make script executable: `chmod +x start-server.sh`
 3. Try different port if 8765 is busy
@@ -117,33 +128,36 @@ docs/export/
 **Problem:** Presentation shows blank page on localhost
 
 **Solution:**
+
 1. Check server is running (should show "Serving HTTP on...")
-2. Verify URL is exactly http://localhost:8765
+2. Verify URL is exactly `http://localhost:8765`
 3. Check browser console (F12) for errors
 4. Try clearing browser cache
 
 ## Browser Compatibility
 
 | Browser | Standalone | Server-Script |
-|---------|-----------|---------------|
-| Chrome | ✅ | ✅ |
-| Firefox | ✅ | ✅ |
-| Edge | ✅ | ✅ |
-| Safari | ✅ | ✅ |
-| Mobile | ✅* | ✅** |
+| ------- | ---------- | ------------- |
+| Chrome  | ✅         | ✅            |
+| Firefox | ✅         | ✅            |
+| Edge    | ✅         | ✅            |
+| Safari  | ✅         | ✅            |
+| Mobile  | ✅\*       | ✅\*\*        |
 
 \* May need to upload to cloud/server first  
-\** Requires accessing http://[your-ip]:8765 from mobile
+\*\* Requires accessing `http://[your-ip]:8765` from mobile
 
 ## Security
 
 **Standalone Mode:**
+
 - Pure static HTML, no network access
 - Safe to share publicly
 - No external dependencies
 - No execution of remote code
 
 **Server-Script Mode:**
+
 - Localhost only (127.0.0.1)
 - No external network access
 - User must manually start/stop
@@ -159,6 +173,7 @@ docs/export/
 ## Support
 
 If you encounter issues:
+
 1. Check [Troubleshooting](#troubleshooting) section above
 2. Verify you're using latest plugin version
 3. Report issues at: https://github.com/Jacobinwwey/obsidian-NotEMD/issues

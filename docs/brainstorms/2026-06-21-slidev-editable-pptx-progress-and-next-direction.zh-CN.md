@@ -141,6 +141,97 @@ docs/export/test-slidev-pptx-frozen-reference-strict/architecture.zh-CN-pptx-vis
 
 该结果证明两件事：第一，`pptxInspection.textRunCount > 0` 仍然只能证明结构可编辑，不能单独证明视觉；第二，PPTX 视觉 hard gate 的 reference 必须来自同一冻结视觉层。把另一次 Slidev PNG export 当作 hard gate reference 会把独立渲染实例的漂移混入 PPTX 质量评估。
 
+2026-06-21 追加核验后，这个判断仍然成立，但需要说得更精确：外部 Slidev PNG reference 不能被丢掉，它应该作为 cross-export advisory gate，专门暴露“PNG 导出路径与 PPTX 捕获路径没有共享 layout contract”的问题；它不应该直接替代 frozen reference hard gate。
+
+当前 main 重新跑出的真实 PPTX hard gate：
+
+```bash
+runuser -u jacob -- env HOME=/home/jacob PLAYWRIGHT_BROWSERS_PATH=/home/jacob/.cache/ms-playwright bash -lc 'cd /home/jacob/obsidian-NotEMD && npm run verify:slidev-export -- --vault docs --source architecture.zh-CN.md --format pptx --output-subfolder export/test-slidev-current-frozen --sample-slides all --timeout-ms 240000 --no-screenshots --pptx-visual-diff --require-pptx-visual-match --json'
+```
+
+结果：
+
+1. `ok = true`
+2. `slidev.version = 52.16.0 (/home/jacob/slidev/packages/slidev/bin/slidev.mjs)`
+3. `skillRootPath = /home/jacob/slidev/skills/slidev`
+4. `skillReferenceCount = 52`
+5. `pptxInspection.slideCount = 27`
+6. `pptxInspection.textRunCount = 331`
+7. `pptxInspection.tableCount = 4`
+8. `pptxInspection.slidesWithoutEditableText = []`
+9. `pptxVisualDiff.reference.source = pptx-background-images`
+10. `meanRmse = 0.049441916296296295`
+11. `maxRmse = 0.0889364`
+12. `pptxVisualGate.passed = true`
+13. `mermaidSourcePreservation.changedFenceIndexes = []`
+
+同一次基线下再跑外部 Slidev PNG export：
+
+```bash
+runuser -u jacob -- env HOME=/home/jacob PLAYWRIGHT_BROWSERS_PATH=/home/jacob/.cache/ms-playwright bash -lc 'cd /home/jacob/obsidian-NotEMD && npm run verify:slidev-export -- --vault docs --source architecture.zh-CN.md --format png --output-subfolder export/test-slidev-current-png-reference --sample-slides all --timeout-ms 240000 --no-screenshots --json'
+```
+
+再用该 PNG 序列作为 external reference 比较刚才的 PPTX 回渲：
+
+```bash
+node - <<'NODE'
+const { buildPptxVisualDiff } = require('./scripts/lib/pptx-visual-diff');
+const report = buildPptxVisualDiff({
+  pptxPath: 'docs/export/test-slidev-current-frozen/architecture.zh-CN.pptx',
+  referenceDirectory: 'docs/export/test-slidev-current-png-reference/architecture.zh-CN-slides-png',
+  outputDirectory: 'docs/export/test-slidev-current-external-png-diff',
+  dpi: 150,
+  timeoutMs: 240000,
+  thresholds: { maxRmse: 0.12, meanRmse: 0.08 },
+});
+console.log(JSON.stringify({ gate: report.gate, summary: report.comparison.summary }, null, 2));
+NODE
+```
+
+结果：
+
+1. `reference.source = external-png-sequence`
+2. `gate.passed = false`
+3. `meanRmse = 0.10535973851851853`
+4. `maxRmse = 0.241976`
+5. 最差页仍集中在 `21, 19, 16, 20, 24, 18, 17, 15, 10, 22, 13, 12`
+
+肉眼检查 `docs/export/test-slidev-current-external-png-diff/side-by-side/slide-21.png` 与 `slide-16.png` 后，当前差异已经不是早期那种明显缩放错误；两侧主体版面基本一致，diff 主要来自文本抗锯齿、LibreOffice PDF 回渲、PNG/PPTX 不同截图链路造成的亚像素差异。也就是说，当前 external PNG gate 失败不能直接解释为 PPTX 视觉崩坏，但它准确暴露了一个尚未建模的事实：PNG export 与 PPTX capture 仍然是两条不同 rasterization path。
+
+这里最容易犯的错是继续调 `pptxWriter.ts`。对当前失败指标来说，writer 不是主要嫌疑；frozen reference 已证明 PPTX 内嵌背景和 Office 回渲基本一致。更应该收敛的是 reference 生成合同：
+
+1. 让 PNG export 与 PPTX capture 共用同一个 converged standalone HTML、viewport、route、freeze script、font readiness 和 double-RAF settle；
+2. 或在 Slidev fork 层暴露一个可配置的 export viewport/deviceScaleFactor/fit-off contract，让 `slidev export --format png` 与 NotEMD PPTX capture 对齐；
+3. external PNG gate 默认只作为 advisory，只有在 reference 生成合同统一后才升级为 hard gate；
+4. 对 external PNG gate 增加结构化指标：几何偏移、scale drift、text antialias tolerance、SSIM/perceptual hash，而不是只看 ImageMagick RMSE/AE。
+
+`oh-my-ppt` 对这里的启发不是“把所有 DOM 都转成原生 PPTX”。它真正做对的是把视觉责任拆成可验证的层：高置信 primitive 可编辑，复杂视觉走 raster fallback；每个 primitive 被消费后打标，background capture 只隐藏它已经接管的那部分；最后用像素检测确认没有 ghost text。这套方法应该被引入到 NotEMD 的验收层和可编辑覆盖率报告里，而不是直接把 visible native text/table 打开。
+
+## `oh-my-ppt` 机制级参考结论
+
+这次重新读 `oh-my-ppt` 的结论要比“它支持 HTML Slides -> PPTX”更窄，也更有用。它解决类似问题靠的是五个合同，而不是某个单点 API：
+
+1. **渲染合同**：`renderer.ts` 用独立浏览器窗口、固定 1600x900 capture surface、`fit=off`、`print=1`、`export=1`、print-ready signal、动画冻结、字体 ready、chart/canvas 稳定等待，把 DOM 状态收敛成可测量事实。NotEMD 目前用 Playwright 1960x1104 和 `convergeSlidevDeckLayout()` 达成类似目标，但 PNG export 与 PPTX capture 仍没有完全共享同一套 viewport/route/freeze contract。
+2. **消费合同**：`table-extract.ts` 先消费 `<table>`，并通过 `data-pptx-consumed-table` 阻止后续 shape/text 抽取重复吃表格内容。NotEMD 已经有 `data-notemd-pptx-consumed-table`，方向是对的；下一步应把 consumed primitive 数、未消费文本数、fallback 覆盖数写进 report，而不是只报总 text/table count。
+3. **文本合同**：`index.ts` 不只是取 `innerText`，还处理 inline text runs、逐字符 line grouping、CJK fallback、list/bullet、paragraph spacing、Tailwind utility hints 和 `@chenglou/pretext` layout。NotEMD 当前仍是 block-level text frame；透明结构层让它视觉上安全，但编辑体验会在行内加粗、代码高亮、列表缩进、长中英混排上失真。
+4. **绘制顺序合同**：`oh-my-ppt` 用 stacking context + `elementsFromPoint()` 采样估计 paint order，再在 `ooxml-writer.ts` 按 order/priority 写 shape/table/image/text。NotEMD 当前可见层是整页背景图，paint order 对视觉不是硬问题；只有引入 visible native shape/image/text 时，这个合同才从“可选优化”变成“必须先做”。
+5. **可见原生层合同**：`renderer.ts` 在隐藏已抽取 primitive 后捕获背景，并用像素采样检测文本残影、失败重试。这个机制不能直接搬进 NotEMD 当前流程，因为 NotEMD 的可见文字和可见表格来自整页冻结背景；现在隐藏文字会直接降低视觉质量。它应该作为 visible-native-text / visible-native-table 实验的准入门槛。
+
+所以后续不是“全面换成 oh-my-ppt 路线”。更准确的推进切片是：
+
+1. **M1：增强 report，而不是先增强可见层**。把 `visibleTextLayer = background-image` 和 `editableLayerRenderMode = transparent-structure` 继续保留，同时新增 `consumedTableCount`、`editablePrimitiveCoverage`、`fallbackOnlyElementKinds`、`unmodeledTextRunReasons`。这能防止“看似可编辑，实际大部分靠截图”的误报。
+2. **M2：rich run extraction**。在透明文本层里补 inline runs、CJK/Latin font face 拆分、code monospace、bullet level、line-height/paragraph spacing。透明模式下做这件事不会影响视觉，是性价比最高的下一步。
+3. **M3：external PNG advisory gate 升级指标**。继续保留 external PNG gate，但默认不要 hard fail；新增几何偏移、scale drift、SSIM/pHash、文本抗锯齿容忍，把“不同 rasterization path 的亚像素差异”和“真实版面漂移”分开。
+4. **M4：visible native table/text 分支**。只有同一 frozen HTML 下的 A/B gate 通过，才允许把透明结构层变成可见层。这个分支必须带 residue detection/retry，否则很容易出现背景文字 + PPTX 文字双影。
+5. **M5：字体合同**。`oh-my-ppt` 的 font embedding 很有价值，但 NotEMD 不能默认嵌入用户系统字体或远程字体；可行做法是先报告字体族、CJK fallback、Office 端缺失风险，再只对 vault/local package 中有授权的 font asset 做 opt-in embedding。
+
+不建议现在迁移的部分也要明确：
+
+1. 不要把 `oh-my-ppt` 的 Electron `BrowserWindow` 假设带进 Obsidian 插件；Playwright + local server 更适合当前运行边界。
+2. 不要为了 visible native layer 去重写 Mermaid 源码或拆 Mermaid 图；用户要求是保留原 Mermaid 内容，Mermaid/SVG/canvas 现阶段应作为 atomic visual fallback。
+3. 不要把 Tailwind 专用 utility parser 当成 Slidev 通用解。可以借鉴“utility hint 补充 computed style”的思想，但 Slidev theme / Vue component / Mermaid 的失败面不同。
+4. 不要把 external PNG RMSE 失败直接归因到 `pptxWriter.ts`。当前 frozen-reference hard gate 已证明 writer 保留了 PPTX 内嵌视觉层；external PNG 失败主要暴露 reference contract 不统一。
+
 ## Release 链接决策
 
 环境检测 UI 必须继续指向 npm 可安装的 GitHub release asset：
