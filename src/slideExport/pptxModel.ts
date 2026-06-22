@@ -5,6 +5,18 @@ export const PPTX_SLIDE_HEIGHT_EMU = 6858000;
 
 export type SlidevPptxTextAlign = 'left' | 'center' | 'right' | 'justify';
 
+export type SlidevPptxFallbackOnlyElementKind =
+	| 'canvas'
+	| 'code-highlight'
+	| 'iframe'
+	| 'image'
+	| 'math'
+	| 'mermaid'
+	| 'svg'
+	| 'video';
+
+export type SlidevPptxUnmodeledTextRunReason = 'inline-code' | 'inline-formatting' | 'link' | 'syntax-highlight';
+
 export interface SlidevPptxTextBox {
 	text: string;
 	x: number;
@@ -20,6 +32,7 @@ export interface SlidevPptxTextBox {
 	align: SlidevPptxTextAlign;
 	bullet: boolean;
 	order: number;
+	unmodeledRunReasons: SlidevPptxUnmodeledTextRunReason[];
 }
 
 export type SlidevPptxVerticalAlign = 'top' | 'middle' | 'bottom';
@@ -70,6 +83,8 @@ export interface SlidevPptxSlide {
 	backgroundImage?: SlidevPptxImage;
 	texts: SlidevPptxTextBox[];
 	tables: SlidevPptxTable[];
+	fallbackOnlyElementKinds: SlidevPptxFallbackOnlyElementKind[];
+	consumedTableTextCandidateCount: number;
 	warnings: string[];
 }
 
@@ -77,6 +92,36 @@ export interface SlidevPptxDocument {
 	title: string;
 	author?: string;
 	slides: SlidevPptxSlide[];
+}
+
+export interface SlidevPptxSlideEditabilitySummary {
+	slideNumber: number;
+	editableTextBoxCount: number;
+	editableTableCount: number;
+	editableTableCellCount: number;
+	editableTextCharacterCount: number;
+	editableTableCellCharacterCount: number;
+	backgroundFallbackPresent: boolean;
+	fallbackOnlyElementKinds: SlidevPptxFallbackOnlyElementKind[];
+	unmodeledTextRunReasons: SlidevPptxUnmodeledTextRunReason[];
+	consumedTableTextCandidateCount: number;
+	warnings: string[];
+}
+
+export interface SlidevPptxEditablePrimitiveCoverage {
+	editableTextBoxCount: number;
+	editableTextSlideCount: number;
+	editableTextSlideRatio: number;
+	editableTextCharacterCount: number;
+	editableTableCount: number;
+	editableTableSlideCount: number;
+	editableTableSlideRatio: number;
+	editableTableCellCount: number;
+	editableTableCellCharacterCount: number;
+	backgroundFallbackSlideCount: number;
+	backgroundFallbackSlideRatio: number;
+	fallbackOnlyElementKinds: SlidevPptxFallbackOnlyElementKind[];
+	unmodeledTextRunReasons: SlidevPptxUnmodeledTextRunReason[];
 }
 
 export interface SlidevPptxExportReport {
@@ -92,11 +137,17 @@ export interface SlidevPptxExportReport {
 	slideCount: number;
 	textBoxCount: number;
 	tableCount: number;
+	consumedTableCount: number;
+	consumedTableTextCandidateCount: number;
 	editableTableCellCount: number;
 	editableTextSlideCount: number;
 	pagesWithoutEditableText: number[];
 	backgroundImageSlideCount: number;
 	imageFallbackCount: number;
+	editablePrimitiveCoverage: SlidevPptxEditablePrimitiveCoverage;
+	fallbackOnlyElementKinds: SlidevPptxFallbackOnlyElementKind[];
+	unmodeledTextRunReasons: SlidevPptxUnmodeledTextRunReason[];
+	slides: SlidevPptxSlideEditabilitySummary[];
 	visibleTextLayer: 'background-image';
 	editableLayerRenderMode: 'transparent-structure';
 	warnings: string[];

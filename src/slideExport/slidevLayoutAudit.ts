@@ -273,7 +273,7 @@ export function analyzeRenderedSlideMeasurement(
 ): SlidevLayoutAudit {
 	const resolvedConfig = { ...DEFAULT_CONFIG, ...config };
 	const findings: SlidevLayoutFinding[] = [];
-	const elementKinds = Array.from(new Set(measurement.elements.map(element => element.kind)));
+	const elementKinds = Array.from(new Set(measurement.elements.map((element) => element.kind)));
 	const qualityMetrics = collectRenderedQualityMetrics(measurement);
 	const slotZones = measurement.safeRect
 		? analyzeRenderedSlotZones(measurement.slotZones ?? [], measurement.safeRect, resolvedConfig)
@@ -307,7 +307,11 @@ export function analyzeRenderedSlideMeasurement(
 	}
 
 	if (measurement.contentBounds) {
-		const contentOverflow = measureOverflow(measurement.contentBounds, measurement.slideRoot, resolvedConfig.overflowTolerancePx);
+		const contentOverflow = measureOverflow(
+			measurement.contentBounds,
+			measurement.slideRoot,
+			resolvedConfig.overflowTolerancePx,
+		);
 		if (hasOverflow(contentOverflow)) {
 			findings.push({
 				kind: 'overflow',
@@ -322,27 +326,32 @@ export function analyzeRenderedSlideMeasurement(
 	}
 
 	for (const element of measurement.elements) {
-		const elementOverflow = measureOverflow(element.rect, measurement.slideRoot, resolvedConfig.overflowTolerancePx);
-		const scrollOverflow = element.scrollWidth - element.clientWidth > resolvedConfig.overflowTolerancePx
-			|| element.scrollHeight - element.clientHeight > resolvedConfig.overflowTolerancePx;
+		const elementOverflow = measureOverflow(
+			element.rect,
+			measurement.slideRoot,
+			resolvedConfig.overflowTolerancePx,
+		);
+		const scrollOverflow =
+			element.scrollWidth - element.clientWidth > resolvedConfig.overflowTolerancePx ||
+			element.scrollHeight - element.clientHeight > resolvedConfig.overflowTolerancePx;
 
 		if (!hasOverflow(elementOverflow) && !scrollOverflow) {
 			continue;
 		}
 
-			findings.push({
-				kind: 'overflow',
-				target: element.kind,
-				message: describeElementOverflow(element.kind, scrollOverflow),
-				recommendedPatch: patchTargetForElement(element.kind),
-				recommendedScale: computeElementFitScale(element, measurement.safeRect, scrollOverflow),
-				slotZone: element.slotZone,
-				slotOwner: element.slotOwner,
-				scrollOverflow,
-				textPreview: element.textPreview,
-				overflowAxis: resolveOverflowAxis(
-					elementOverflow,
-					element.scrollWidth - element.clientWidth > resolvedConfig.overflowTolerancePx,
+		findings.push({
+			kind: 'overflow',
+			target: element.kind,
+			message: describeElementOverflow(element.kind, scrollOverflow),
+			recommendedPatch: patchTargetForElement(element.kind),
+			recommendedScale: computeElementFitScale(element, measurement.safeRect, scrollOverflow),
+			slotZone: element.slotZone,
+			slotOwner: element.slotOwner,
+			scrollOverflow,
+			textPreview: element.textPreview,
+			overflowAxis: resolveOverflowAxis(
+				elementOverflow,
+				element.scrollWidth - element.clientWidth > resolvedConfig.overflowTolerancePx,
 				element.scrollHeight - element.clientHeight > resolvedConfig.overflowTolerancePx,
 			),
 			overflow: elementOverflow,
@@ -354,11 +363,10 @@ export function analyzeRenderedSlideMeasurement(
 		? Math.min(qualityMetrics.qualityMargins.right, qualityMetrics.qualityMargins.bottom)
 		: null;
 	if (
-		trailingQualityMargin !== null
-		&& trailingQualityMargin >= 0
-		&& trailingQualityMargin < resolvedConfig.minQualityMarginPx
-		&& hasDenseLayoutContent(elementKinds)
-		&& hasAutoPatchableQualityContent(elementKinds)
+		trailingQualityMargin !== null &&
+		trailingQualityMargin < resolvedConfig.minQualityMarginPx &&
+		hasDenseLayoutContent(elementKinds) &&
+		hasAutoPatchableQualityContent(elementKinds)
 	) {
 		findings.push({
 			kind: 'tight-margin',
@@ -371,12 +379,12 @@ export function analyzeRenderedSlideMeasurement(
 	}
 
 	const lowContentUtilization = Boolean(
-		qualityMetrics.contentAreaRatio !== null
-		&& qualityMetrics.contentAreaRatio < resolvedConfig.minContentAreaRatio
-		&& measurement.pageScale !== null
-		&& measurement.pageScale < resolvedConfig.lowContentUtilizationScaleThreshold
-		&& hasDenseLayoutContent(elementKinds)
-		&& hasAutoPatchableQualityContent(elementKinds)
+		qualityMetrics.contentAreaRatio !== null &&
+			qualityMetrics.contentAreaRatio < resolvedConfig.minContentAreaRatio &&
+			measurement.pageScale !== null &&
+			measurement.pageScale < resolvedConfig.lowContentUtilizationScaleThreshold &&
+			hasDenseLayoutContent(elementKinds) &&
+			hasAutoPatchableQualityContent(elementKinds),
 	);
 	if (lowContentUtilization) {
 		findings.push({
@@ -390,9 +398,9 @@ export function analyzeRenderedSlideMeasurement(
 	}
 
 	if (
-		measurement.pageScale !== null
-		&& measurement.pageScale < resolvedConfig.minReadableScale
-		&& !isSourcePreservedMermaidRenderedSurface(elementKinds)
+		measurement.pageScale !== null &&
+		measurement.pageScale < resolvedConfig.minReadableScale &&
+		!isSourcePreservedMermaidRenderedSurface(elementKinds)
 	) {
 		findings.push({
 			kind: 'unreadable-scale',
@@ -424,28 +432,50 @@ export function analyzeRenderedSlideMeasurement(
 	};
 }
 
-export function summarizeLayoutAudits(
-	audits: SlidevLayoutAudit[],
-	retryCount = 0,
-): SlidevLayoutAuditSummary {
-	const hardOverflowCount = audits.reduce((total, audit) => total + audit.findings.filter(finding => finding.kind === 'overflow').length, 0);
-	const unreadableScaleCount = audits.reduce((total, audit) => total + audit.findings.filter(finding => finding.kind === 'unreadable-scale').length, 0);
+export function summarizeLayoutAudits(audits: SlidevLayoutAudit[], retryCount = 0): SlidevLayoutAuditSummary {
+	const hardOverflowCount = audits.reduce(
+		(total, audit) => total + audit.findings.filter((finding) => finding.kind === 'overflow').length,
+		0,
+	);
+	const unreadableScaleCount = audits.reduce(
+		(total, audit) => total + audit.findings.filter((finding) => finding.kind === 'unreadable-scale').length,
+		0,
+	);
 	return {
 		slideCount: audits.length,
 		overflowCount: hardOverflowCount,
 		unreadableCount: unreadableScaleCount,
-		renderErrorCount: audits.reduce((total, audit) => total + audit.findings.filter(finding => finding.kind === 'render-error').length, 0),
+		renderErrorCount: audits.reduce(
+			(total, audit) => total + audit.findings.filter((finding) => finding.kind === 'render-error').length,
+			0,
+		),
 		hardOverflowCount,
 		unreadableScaleCount,
-		lowEffectiveFontCount: audits.reduce((total, audit) => total + audit.findings.filter(finding => finding.kind === 'low-effective-font').length, 0),
-		qualityMarginWarningCount: audits.reduce((total, audit) => total + audit.findings.filter(finding => finding.kind === 'tight-margin').length, 0),
-		lowContentUtilizationCount: audits.reduce((total, audit) => total + audit.findings.filter(finding => finding.kind === 'low-content-utilization').length, 0),
+		lowEffectiveFontCount: audits.reduce(
+			(total, audit) => total + audit.findings.filter((finding) => finding.kind === 'low-effective-font').length,
+			0,
+		),
+		qualityMarginWarningCount: audits.reduce(
+			(total, audit) => total + audit.findings.filter((finding) => finding.kind === 'tight-margin').length,
+			0,
+		),
+		lowContentUtilizationCount: audits.reduce(
+			(total, audit) =>
+				total + audit.findings.filter((finding) => finding.kind === 'low-content-utilization').length,
+			0,
+		),
 		preSplitCount: audits.reduce((total, audit) => total + (audit.preSplitCount ?? 0), 0),
 		postPatchCount: retryCount,
 		mermaidSlideCount: audits.reduce((total, audit) => total + (audit.mermaidFit ? 1 : 0), 0),
-		mermaidFitReviewCount: audits.reduce((total, audit) => total + (audit.mermaidFit && audit.mermaidFit.status !== 'fits' ? 1 : 0), 0),
+		mermaidFitReviewCount: audits.reduce(
+			(total, audit) => total + (audit.mermaidFit && audit.mermaidFit.status !== 'fits' ? 1 : 0),
+			0,
+		),
 		mermaidLowZoomCount: audits.reduce((total, audit) => total + (audit.mermaidFit?.lowZoom ? 1 : 0), 0),
-		mermaidManualReviewCount: audits.reduce((total, audit) => total + (audit.mermaidFit?.status === 'manual-review' ? 1 : 0), 0),
+		mermaidManualReviewCount: audits.reduce(
+			(total, audit) => total + (audit.mermaidFit?.status === 'manual-review' ? 1 : 0),
+			0,
+		),
 		retryCount,
 	};
 }
@@ -487,7 +517,13 @@ export function patchDeckWithLayoutAudit(
 		}
 
 		if (isDeckHeadmatterSlide(currentSlide, targetIndex) && hasStructuralSplitCandidate(audit.findings)) {
-			const splitResult = splitOverflowingDeckHeadmatterSlide(currentSlide, audit, currentZoom, nextZoom, resolvedConfig);
+			const splitResult = splitOverflowingDeckHeadmatterSlide(
+				currentSlide,
+				audit,
+				currentZoom,
+				nextZoom,
+				resolvedConfig,
+			);
 			if (splitResult.slides) {
 				slides.splice(targetIndex, 1, ...splitResult.slides);
 				changedSlides.push(audit.slide);
@@ -538,11 +574,7 @@ export function patchDeckWithLayoutAudit(
 			continue;
 		}
 
-		const retunedSlotTransformSlide = retuneSupportedSlotLayoutTransformScale(
-			currentSlide,
-			audit,
-			currentZoom,
-		);
+		const retunedSlotTransformSlide = retuneSupportedSlotLayoutTransformScale(currentSlide, audit, currentZoom);
 		if (retunedSlotTransformSlide) {
 			slides[targetIndex] = retunedSlotTransformSlide;
 			changedSlides.push(audit.slide);
@@ -550,7 +582,13 @@ export function patchDeckWithLayoutAudit(
 		}
 
 		if (hasSupportedSlotMarkers(currentSlide)) {
-			const splitResult = splitOverflowingSupportedSlotLayoutSlide(currentSlide, audit, currentZoom, nextZoom, resolvedConfig);
+			const splitResult = splitOverflowingSupportedSlotLayoutSlide(
+				currentSlide,
+				audit,
+				currentZoom,
+				nextZoom,
+				resolvedConfig,
+			);
 			if (splitResult.slides) {
 				slides.splice(targetIndex, 1, ...splitResult.slides);
 				changedSlides.push(audit.slide);
@@ -560,7 +598,13 @@ export function patchDeckWithLayoutAudit(
 		}
 
 		if (shouldSplitTableBeforeZoom(audit, nextZoom, resolvedConfig)) {
-			const splitResult = splitOverflowingMarkdownTableSlide(currentSlide, audit, currentZoom, nextZoom, resolvedConfig);
+			const splitResult = splitOverflowingMarkdownTableSlide(
+				currentSlide,
+				audit,
+				currentZoom,
+				nextZoom,
+				resolvedConfig,
+			);
 			if (splitResult.slides) {
 				slides.splice(targetIndex, 1, ...splitResult.slides);
 				changedSlides.push(audit.slide);
@@ -579,7 +623,13 @@ export function patchDeckWithLayoutAudit(
 			}
 		}
 
-		const transformedSurfaceSlide = wrapOverflowingSlideSurfaceInTransform(currentSlide, audit, bestScale, currentZoom, resolvedConfig);
+		const transformedSurfaceSlide = wrapOverflowingSlideSurfaceInTransform(
+			currentSlide,
+			audit,
+			bestScale,
+			currentZoom,
+			resolvedConfig,
+		);
 		if (transformedSurfaceSlide) {
 			slides[targetIndex] = transformedSurfaceSlide;
 			changedSlides.push(audit.slide);
@@ -609,8 +659,8 @@ export function patchDeckWithLayoutAudit(
 		}
 
 		if (
-			nextZoom < resolvedConfig.mermaidLowZoomReviewScale
-			&& containsMermaidWithPrimaryNonMermaidContent(currentSlide)
+			nextZoom < resolvedConfig.mermaidLowZoomReviewScale &&
+			containsMermaidWithPrimaryNonMermaidContent(currentSlide)
 		) {
 			blockedSlides.push({
 				slide: audit.slide,
@@ -636,8 +686,12 @@ export function patchDeckWithLayoutAudit(
 		}
 
 		if (
-			wouldPatchScaleLowerFontBelowFloor(audit.effectiveMinFontPx, bestScale, resolvedConfig.minEffectiveFontPx)
-			&& !isSourcePreservedMermaidFitSlide(currentSlide, audit)
+			wouldPatchScaleLowerFontBelowFloor(
+				audit.effectiveMinFontPx,
+				bestScale,
+				resolvedConfig.minEffectiveFontPx,
+			) &&
+			!isSourcePreservedMermaidFitSlide(currentSlide, audit)
 		) {
 			blockedSlides.push({
 				slide: audit.slide,
@@ -667,18 +721,18 @@ function collectRenderedQualityMetrics(measurement: RenderedSlideMeasurement): {
 	contentAreaRatio: number | null;
 } {
 	const elementEffectiveFonts = measurement.elements
-		.map(element => normalizePositiveNumber(element.effectiveMinFontPx))
+		.map((element) => normalizePositiveNumber(element.effectiveMinFontPx))
 		.filter((value): value is number => value !== null);
 	const elementSvgFonts = measurement.elements
-		.map(element => normalizePositiveNumber(element.svgTextMinFontPx))
+		.map((element) => normalizePositiveNumber(element.svgTextMinFontPx))
 		.filter((value): value is number => value !== null);
 	const tableFonts = measurement.elements
-		.filter(element => element.kind === 'table')
-		.map(element => normalizePositiveNumber(element.effectiveMinFontPx))
+		.filter((element) => element.kind === 'table')
+		.map((element) => normalizePositiveNumber(element.effectiveMinFontPx))
 		.filter((value): value is number => value !== null);
 	const codeFonts = measurement.elements
-		.filter(element => element.kind === 'code')
-		.map(element => normalizePositiveNumber(element.effectiveMinFontPx))
+		.filter((element) => element.kind === 'code')
+		.map((element) => normalizePositiveNumber(element.effectiveMinFontPx))
 		.filter((value): value is number => value !== null);
 
 	return {
@@ -686,8 +740,11 @@ function collectRenderedQualityMetrics(measurement: RenderedSlideMeasurement): {
 		svgTextMinFontPx: normalizePositiveNumber(measurement.svgTextMinFontPx) ?? minNumber(elementSvgFonts),
 		tableBodyMinFontPx: normalizePositiveNumber(measurement.tableBodyMinFontPx) ?? minNumber(tableFonts),
 		codeMinFontPx: normalizePositiveNumber(measurement.codeMinFontPx) ?? minNumber(codeFonts),
-		qualityMargins: measurement.qualityMargins ?? computeQualityMargins(measurement.contentBounds, measurement.safeRect),
-		contentAreaRatio: normalizePositiveNumber(measurement.contentAreaRatio) ?? computeContentAreaRatio(measurement.contentBounds, measurement.safeRect),
+		qualityMargins:
+			measurement.qualityMargins ?? computeQualityMargins(measurement.contentBounds, measurement.safeRect),
+		contentAreaRatio:
+			normalizePositiveNumber(measurement.contentAreaRatio) ??
+			computeContentAreaRatio(measurement.contentBounds, measurement.safeRect),
 	};
 }
 
@@ -699,30 +756,31 @@ function analyzeSourcePreservedMermaidFit(
 	},
 	config: SlidevLayoutAuditConfig,
 ): SlidevMermaidFitAudit | null {
-	const mermaidElements = measurement.elements.filter(element => element.kind === 'mermaid');
+	const mermaidElements = measurement.elements.filter((element) => element.kind === 'mermaid');
 	if (mermaidElements.length === 0) {
 		return null;
 	}
 
-	const diagramBounds = unionSlideRects(mermaidElements.map(element => element.rect));
-	const fitScale = diagramBounds && measurement.safeRect
-		? computeFitScale(diagramBounds, measurement.safeRect)
-		: null;
-	const nextZoom = measurement.pageScale !== null && fitScale !== null
-		? measurement.pageScale * fitScale
-		: null;
-	const mermaidSvgTextMinFontPx = minNumber(mermaidElements
-		.map(element => normalizePositiveNumber(element.svgTextMinFontPx))
-		.filter((value): value is number => value !== null));
-	const mermaidEffectiveMinFontPx = minNumber(mermaidElements
-		.map(element => normalizePositiveNumber(element.effectiveMinFontPx))
-		.filter((value): value is number => value !== null));
+	const diagramBounds = unionSlideRects(mermaidElements.map((element) => element.rect));
+	const fitScale =
+		diagramBounds && measurement.safeRect ? computeFitScale(diagramBounds, measurement.safeRect) : null;
+	const nextZoom = measurement.pageScale !== null && fitScale !== null ? measurement.pageScale * fitScale : null;
+	const mermaidSvgTextMinFontPx = minNumber(
+		mermaidElements
+			.map((element) => normalizePositiveNumber(element.svgTextMinFontPx))
+			.filter((value): value is number => value !== null),
+	);
+	const mermaidEffectiveMinFontPx = minNumber(
+		mermaidElements
+			.map((element) => normalizePositiveNumber(element.effectiveMinFontPx))
+			.filter((value): value is number => value !== null),
+	);
 	const fontFloor = mermaidSvgTextMinFontPx !== null ? config.minSvgTextFontPx : config.minEffectiveFontPx;
 	const measuredFont = mermaidSvgTextMinFontPx ?? mermaidEffectiveMinFontPx;
 	const lowFont = measuredFont !== null && measuredFont < fontFloor;
 	const lowZoom = measurement.pageScale !== null && measurement.pageScale < config.mermaidLowZoomReviewScale;
-	const tightMargin = qualityMetrics.qualityMargins !== null
-		&& qualityMetrics.qualityMargins.min < config.minQualityMarginPx;
+	const tightMargin =
+		qualityMetrics.qualityMargins !== null && qualityMetrics.qualityMargins.min < config.minQualityMarginPx;
 	const cannotFitAboveReadableFloor = nextZoom !== null && nextZoom < config.minReadableScale;
 
 	const reasons: string[] = [];
@@ -730,20 +788,27 @@ function analyzeSourcePreservedMermaidFit(
 		reasons.push(`preserved Mermaid font ${measuredFont.toFixed(1)}px is below ${fontFloor}px`);
 	}
 	if (lowZoom && measurement.pageScale !== null) {
-		reasons.push(`preserved Mermaid zoom ${measurement.pageScale.toFixed(3)} is below review scale ${config.mermaidLowZoomReviewScale.toFixed(2)}`);
+		reasons.push(
+			`preserved Mermaid zoom ${measurement.pageScale.toFixed(3)} is below review scale ${config.mermaidLowZoomReviewScale.toFixed(2)}`,
+		);
 	}
 	if (tightMargin && qualityMetrics.qualityMargins) {
-		reasons.push(`preserved Mermaid margin ${qualityMetrics.qualityMargins.min.toFixed(1)}px is below ${config.minQualityMarginPx}px`);
+		reasons.push(
+			`preserved Mermaid margin ${qualityMetrics.qualityMargins.min.toFixed(1)}px is below ${config.minQualityMarginPx}px`,
+		);
 	}
 	if (cannotFitAboveReadableFloor && nextZoom !== null) {
-		reasons.push(`safe-rect fit would require zoom ${nextZoom.toFixed(3)}, below readable floor ${config.minReadableScale.toFixed(2)}`);
+		reasons.push(
+			`safe-rect fit would require zoom ${nextZoom.toFixed(3)}, below readable floor ${config.minReadableScale.toFixed(2)}`,
+		);
 	}
 
-	const status: SlidevMermaidFitStatus = lowFont || cannotFitAboveReadableFloor
-		? 'manual-review'
-		: lowZoom || tightMargin
-			? 'source-preserved-fit-review'
-			: 'fits';
+	const status: SlidevMermaidFitStatus =
+		lowFont || cannotFitAboveReadableFloor
+			? 'manual-review'
+			: lowZoom || tightMargin
+				? 'source-preserved-fit-review'
+				: 'fits';
 
 	return {
 		status,
@@ -767,13 +832,16 @@ function findLowEffectiveFontIssues(
 	elementKinds: SlidevMeasuredElementKind[],
 	config: SlidevLayoutAuditConfig,
 ): SlidevLayoutFinding[] {
-	const candidates = new Map<SlidevMeasuredElementKind, {
-		fontPx: number;
-		thresholdPx: number;
-		textPreview?: string;
-		slotZone?: string;
-		slotOwner?: boolean;
-	}>();
+	const candidates = new Map<
+		SlidevMeasuredElementKind,
+		{
+			fontPx: number;
+			thresholdPx: number;
+			textPreview?: string;
+			slotZone?: string;
+			slotOwner?: boolean;
+		}
+	>();
 
 	for (const element of measurement.elements) {
 		const fontPx = normalizePositiveNumber(element.effectiveMinFontPx);
@@ -815,10 +883,7 @@ function findLowEffectiveFontIssues(
 	}));
 }
 
-function fontThresholdForElement(
-	element: SlidevMeasuredElement,
-	config: SlidevLayoutAuditConfig,
-): number {
+function fontThresholdForElement(element: SlidevMeasuredElement, config: SlidevLayoutAuditConfig): number {
 	switch (element.kind) {
 		case 'mermaid':
 			return element.svgTextMinFontPx !== null && element.svgTextMinFontPx !== undefined
@@ -845,14 +910,21 @@ function qualityPatchTargetForElement(
 		case 'code':
 			return 'reduce-code';
 		default:
-			if (elementKinds.some(elementKind => elementKind === 'mermaid' || elementKind === 'table' || elementKind === 'code')) {
+			if (
+				elementKinds.some(
+					(elementKind) => elementKind === 'mermaid' || elementKind === 'table' || elementKind === 'code',
+				)
+			) {
 				return dominantPatchTarget(elementKinds);
 			}
 			return 'split-slide';
 	}
 }
 
-function computeQualityMargins(contentBounds: SlidevRect | null, safeRect: SlidevRect | null): SlidevQualityMargins | null {
+function computeQualityMargins(
+	contentBounds: SlidevRect | null,
+	safeRect: SlidevRect | null,
+): SlidevQualityMargins | null {
 	if (!contentBounds || !safeRect) {
 		return null;
 	}
@@ -870,7 +942,14 @@ function computeQualityMargins(contentBounds: SlidevRect | null, safeRect: Slide
 }
 
 function computeContentAreaRatio(contentBounds: SlidevRect | null, safeRect: SlidevRect | null): number | null {
-	if (!contentBounds || !safeRect || contentBounds.width <= 0 || contentBounds.height <= 0 || safeRect.width <= 0 || safeRect.height <= 0) {
+	if (
+		!contentBounds ||
+		!safeRect ||
+		contentBounds.width <= 0 ||
+		contentBounds.height <= 0 ||
+		safeRect.width <= 0 ||
+		safeRect.height <= 0
+	) {
 		return null;
 	}
 
@@ -915,10 +994,10 @@ function unionSlideRects(rects: SlidevRect[]): SlidevRect | null {
 		return null;
 	}
 
-	const left = Math.min(...rects.map(rect => rect.left));
-	const top = Math.min(...rects.map(rect => rect.top));
-	const right = Math.max(...rects.map(rect => rect.right));
-	const bottom = Math.max(...rects.map(rect => rect.bottom));
+	const left = Math.min(...rects.map((rect) => rect.left));
+	const top = Math.min(...rects.map((rect) => rect.top));
+	const right = Math.max(...rects.map((rect) => rect.right));
+	const bottom = Math.max(...rects.map((rect) => rect.bottom));
 	return {
 		left,
 		top,
@@ -930,17 +1009,19 @@ function unionSlideRects(rects: SlidevRect[]): SlidevRect | null {
 }
 
 function hasDenseLayoutContent(elementKinds: SlidevMeasuredElementKind[]): boolean {
-	return elementKinds.some(kind => kind === 'mermaid' || kind === 'table' || kind === 'code' || kind === 'text' || kind === 'other');
+	return elementKinds.some(
+		(kind) => kind === 'mermaid' || kind === 'table' || kind === 'code' || kind === 'text' || kind === 'other',
+	);
 }
 
 function hasAutoPatchableQualityContent(elementKinds: SlidevMeasuredElementKind[]): boolean {
-	if (elementKinds.some(kind => kind === 'table' || kind === 'code')) {
+	if (elementKinds.some((kind) => kind === 'table' || kind === 'code')) {
 		return true;
 	}
 	if (elementKinds.includes('mermaid')) {
 		return false;
 	}
-	return elementKinds.some(kind => kind === 'text' || kind === 'other');
+	return elementKinds.some((kind) => kind === 'text' || kind === 'other');
 }
 
 function shouldPreserveMermaidFontFinding(
@@ -950,15 +1031,17 @@ function shouldPreserveMermaidFontFinding(
 	if (!elementKinds.includes('mermaid')) {
 		return false;
 	}
-	if (elementKinds.some(elementKind => elementKind === 'table' || elementKind === 'code')) {
+	if (elementKinds.some((elementKind) => elementKind === 'table' || elementKind === 'code')) {
 		return kind === 'mermaid';
 	}
 	return kind === 'mermaid' || kind === 'text' || kind === 'other';
 }
 
 function isSourcePreservedMermaidRenderedSurface(elementKinds: SlidevMeasuredElementKind[]): boolean {
-	return elementKinds.includes('mermaid')
-		&& !elementKinds.some(kind => kind === 'table' || kind === 'code' || kind === 'image');
+	return (
+		elementKinds.includes('mermaid') &&
+		!elementKinds.some((kind) => kind === 'table' || kind === 'code' || kind === 'image')
+	);
 }
 
 function describeElementOverflow(kind: SlidevMeasuredElementKind, scrollOverflow: boolean): string {
@@ -1031,12 +1114,9 @@ function computeFitScale(rect: SlidevRect, safeRect: SlidevRect): number | null 
 
 	const relativeRight = rect.right - safeRect.left;
 	const relativeBottom = rect.bottom - safeRect.top;
-	const widthScale = relativeRight > safeRect.width
-		? safeRect.width / relativeRight
-		: safeRect.width / rect.width;
-	const heightScale = relativeBottom > safeRect.height
-		? safeRect.height / relativeBottom
-		: safeRect.height / rect.height;
+	const widthScale = relativeRight > safeRect.width ? safeRect.width / relativeRight : safeRect.width / rect.width;
+	const heightScale =
+		relativeBottom > safeRect.height ? safeRect.height / relativeBottom : safeRect.height / rect.height;
 
 	return Math.min(1, widthScale, heightScale);
 }
@@ -1066,11 +1146,12 @@ function analyzeRenderedSlotZones(
 	safeRect: SlidevRect,
 	config: SlidevLayoutAuditConfig,
 ): SlidevSlotZoneAudit[] {
-	return zones.map(zone => {
+	return zones.map((zone) => {
 		const contentRect = zone.contentBounds ?? zone.ownerRect;
 		const overflow = measureOverflow(contentRect, safeRect, config.overflowTolerancePx);
-		const scrollOverflow = zone.scrollWidth - zone.clientWidth > config.overflowTolerancePx
-			|| zone.scrollHeight - zone.clientHeight > config.overflowTolerancePx;
+		const scrollOverflow =
+			zone.scrollWidth - zone.clientWidth > config.overflowTolerancePx ||
+			zone.scrollHeight - zone.clientHeight > config.overflowTolerancePx;
 		return {
 			name: zone.name,
 			textPreview: zone.textPreview,
@@ -1080,25 +1161,24 @@ function analyzeRenderedSlotZones(
 			scrollOverflow,
 			overflow: hasOverflow(overflow) ? overflow : undefined,
 			recommendedTransformScale: computeSlotZoneFitScale(zone, config.overflowTolerancePx),
-			minimumReadableTransformScale: computeMinimumReadableScaleForFont(zone.effectiveMinFontPx, config.minEffectiveFontPx),
+			minimumReadableTransformScale: computeMinimumReadableScaleForFont(
+				zone.effectiveMinFontPx,
+				config.minEffectiveFontPx,
+			),
 		};
 	});
 }
 
-function computeSlotZoneFitScale(
-	zone: SlidevMeasuredSlotZone,
-	overflowTolerancePx: number,
-): number | null {
+function computeSlotZoneFitScale(zone: SlidevMeasuredSlotZone, overflowTolerancePx: number): number | null {
 	const contentRect = zone.contentBounds ?? zone.ownerRect;
 	const layoutScale = computeFitScale(contentRect, zone.ownerRect);
-	const widthScale = zone.scrollWidth - zone.clientWidth > overflowTolerancePx
-		? zone.clientWidth / zone.scrollWidth
-		: 1;
-	const heightScale = zone.scrollHeight - zone.clientHeight > overflowTolerancePx
-		? zone.clientHeight / zone.scrollHeight
-		: 1;
-	const scales = [layoutScale, widthScale, heightScale]
-		.filter((value): value is number => typeof value === 'number' && Number.isFinite(value) && value > 0 && value < 1);
+	const widthScale =
+		zone.scrollWidth - zone.clientWidth > overflowTolerancePx ? zone.clientWidth / zone.scrollWidth : 1;
+	const heightScale =
+		zone.scrollHeight - zone.clientHeight > overflowTolerancePx ? zone.clientHeight / zone.scrollHeight : 1;
+	const scales = [layoutScale, widthScale, heightScale].filter(
+		(value): value is number => typeof value === 'number' && Number.isFinite(value) && value > 0 && value < 1,
+	);
 	return scales.length > 0 ? Math.min(...scales) : null;
 }
 
@@ -1107,12 +1187,8 @@ function computeScrollableContentScale(element: SlidevMeasuredElement): number |
 		return null;
 	}
 
-	const widthScale = element.scrollWidth > element.clientWidth
-		? element.clientWidth / element.scrollWidth
-		: 1;
-	const heightScale = element.scrollHeight > element.clientHeight
-		? element.clientHeight / element.scrollHeight
-		: 1;
+	const widthScale = element.scrollWidth > element.clientWidth ? element.clientWidth / element.scrollWidth : 1;
+	const heightScale = element.scrollHeight > element.clientHeight ? element.clientHeight / element.scrollHeight : 1;
 	const scale = Math.min(widthScale, heightScale);
 	return scale > 0 && Number.isFinite(scale) ? Math.min(1, scale) : null;
 }
@@ -1138,8 +1214,10 @@ function resolveOverflowAxis(
 
 function chooseBestRecommendedScale(findings: SlidevLayoutFinding[]): number | null {
 	const scales = findings
-		.map(finding => finding.recommendedScale)
-		.filter((value): value is number => typeof value === 'number' && Number.isFinite(value) && value > 0 && value < 1);
+		.map((finding) => finding.recommendedScale)
+		.filter(
+			(value): value is number => typeof value === 'number' && Number.isFinite(value) && value > 0 && value < 1,
+		);
 
 	if (scales.length === 0) {
 		return null;
@@ -1149,7 +1227,12 @@ function chooseBestRecommendedScale(findings: SlidevLayoutFinding[]): number | n
 }
 
 function deriveMeasuredPatchZoom(currentZoom: number, recommendedScale: number | null): number | null {
-	if (recommendedScale === null || !Number.isFinite(recommendedScale) || recommendedScale <= 0 || recommendedScale >= 1) {
+	if (
+		recommendedScale === null ||
+		!Number.isFinite(recommendedScale) ||
+		recommendedScale <= 0 ||
+		recommendedScale >= 1
+	) {
 		return null;
 	}
 
@@ -1224,7 +1307,7 @@ function splitSlideDeck(deckMarkdown: string): string[] {
 }
 
 function shouldSplitSimpleSlideBeforeZoom(findings: SlidevLayoutFinding[]): boolean {
-	return findings.some(finding => finding.recommendedPatch === 'split-slide');
+	return findings.some((finding) => finding.recommendedPatch === 'split-slide');
 }
 
 function shouldSplitTableBeforeZoom(
@@ -1234,14 +1317,18 @@ function shouldSplitTableBeforeZoom(
 ): boolean {
 	const findings = audit.findings;
 	const bestScale = chooseBestRecommendedScale(findings);
-	return findings.some(finding => finding.recommendedPatch === 'split-table')
-		&& (
-			findings.some(finding => finding.kind === 'unreadable-scale')
-			|| hasQualityStructuralFinding(findings)
-			|| (nextZoom !== null && nextZoom < config.minReadableScale)
-			|| wouldPatchScaleLowerFontBelowFloor(audit.tableBodyMinFontPx ?? audit.effectiveMinFontPx, bestScale, config.minTableBodyFontPx)
-			|| hasTableStructuralOverflow(findings)
-		);
+	return (
+		findings.some((finding) => finding.recommendedPatch === 'split-table') &&
+		(findings.some((finding) => finding.kind === 'unreadable-scale') ||
+			hasQualityStructuralFinding(findings) ||
+			(nextZoom !== null && nextZoom < config.minReadableScale) ||
+			wouldPatchScaleLowerFontBelowFloor(
+				audit.tableBodyMinFontPx ?? audit.effectiveMinFontPx,
+				bestScale,
+				config.minTableBodyFontPx,
+			) ||
+			hasTableStructuralOverflow(findings))
+	);
 }
 
 function shouldSplitCodeBeforeZoom(
@@ -1251,20 +1338,27 @@ function shouldSplitCodeBeforeZoom(
 ): boolean {
 	const findings = audit.findings;
 	const bestScale = chooseBestRecommendedScale(findings);
-	return findings.some(finding => finding.recommendedPatch === 'reduce-code')
-		&& (
-			findings.some(finding => finding.kind === 'unreadable-scale')
-			|| hasQualityStructuralFinding(findings)
-			|| (nextZoom !== null && nextZoom < config.minReadableScale)
-			|| wouldPatchScaleLowerFontBelowFloor(audit.codeMinFontPx ?? audit.effectiveMinFontPx, bestScale, config.minCodeFontPx)
-			|| hasCodeStructuralOverflow(findings)
-		);
+	return (
+		findings.some((finding) => finding.recommendedPatch === 'reduce-code') &&
+		(findings.some((finding) => finding.kind === 'unreadable-scale') ||
+			hasQualityStructuralFinding(findings) ||
+			(nextZoom !== null && nextZoom < config.minReadableScale) ||
+			wouldPatchScaleLowerFontBelowFloor(
+				audit.codeMinFontPx ?? audit.effectiveMinFontPx,
+				bestScale,
+				config.minCodeFontPx,
+			) ||
+			hasCodeStructuralOverflow(findings))
+	);
 }
 
 function hasQualityStructuralFinding(findings: SlidevLayoutFinding[]): boolean {
-	return findings.some(finding => finding.kind === 'low-effective-font'
-		|| finding.kind === 'tight-margin'
-		|| finding.kind === 'low-content-utilization');
+	return findings.some(
+		(finding) =>
+			finding.kind === 'low-effective-font' ||
+			finding.kind === 'tight-margin' ||
+			finding.kind === 'low-content-utilization',
+	);
 }
 
 function hasSupportedSlotMarkers(slideMarkdown: string): boolean {
@@ -1272,21 +1366,22 @@ function hasSupportedSlotMarkers(slideMarkdown: string): boolean {
 }
 
 function hasStructuralSplitCandidate(findings: SlidevLayoutFinding[]): boolean {
-	return findings.some(finding => [
-		'split-table',
-		'reduce-code',
-		'split-slide',
-	].includes(finding.recommendedPatch));
+	return findings.some((finding) => ['split-table', 'reduce-code', 'split-slide'].includes(finding.recommendedPatch));
 }
 
 function hasTableStructuralOverflow(findings: SlidevLayoutFinding[]): boolean {
-	return findings.some(finding => finding.recommendedPatch === 'split-table' && typeof finding.overflowAxis === 'string');
+	return findings.some(
+		(finding) => finding.recommendedPatch === 'split-table' && typeof finding.overflowAxis === 'string',
+	);
 }
 
 function hasCodeStructuralOverflow(findings: SlidevLayoutFinding[]): boolean {
-	return findings.some(finding => finding.target === 'code'
-		&& finding.scrollOverflow === true
-		&& (finding.overflowAxis === 'height' || finding.overflowAxis === 'both'));
+	return findings.some(
+		(finding) =>
+			finding.target === 'code' &&
+			finding.scrollOverflow === true &&
+			(finding.overflowAxis === 'height' || finding.overflowAxis === 'both'),
+	);
 }
 
 function shouldSeparateMixedMermaidPrimaryContent(audit: SlidevLayoutAudit): boolean {
@@ -1296,13 +1391,14 @@ function shouldSeparateMixedMermaidPrimaryContent(audit: SlidevLayoutAudit): boo
 	if (audit.mermaidFit?.lowZoom || audit.mermaidFit?.status === 'manual-review') {
 		return true;
 	}
-	return audit.findings.some(finding =>
-		finding.kind === 'overflow'
-		|| finding.kind === 'unreadable-scale'
-		|| finding.kind === 'low-effective-font'
-		|| finding.kind === 'tight-margin'
-		|| finding.kind === 'low-content-utilization'
-		|| finding.recommendedPatch === 'reduce-zoom'
+	return audit.findings.some(
+		(finding) =>
+			finding.kind === 'overflow' ||
+			finding.kind === 'unreadable-scale' ||
+			finding.kind === 'low-effective-font' ||
+			finding.kind === 'tight-margin' ||
+			finding.kind === 'low-content-utilization' ||
+			finding.recommendedPatch === 'reduce-zoom',
 	);
 }
 
@@ -1311,14 +1407,15 @@ function shouldSeparateMixedComponentPrimaryContent(audit: SlidevLayoutAudit): b
 		return false;
 	}
 
-	return audit.findings.some(finding =>
-		finding.kind === 'overflow'
-		|| finding.kind === 'unreadable-scale'
-		|| finding.kind === 'low-effective-font'
-		|| finding.kind === 'tight-margin'
-		|| finding.kind === 'low-content-utilization'
-		|| finding.recommendedPatch === 'reduce-zoom'
-		|| finding.recommendedPatch === 'split-slide'
+	return audit.findings.some(
+		(finding) =>
+			finding.kind === 'overflow' ||
+			finding.kind === 'unreadable-scale' ||
+			finding.kind === 'low-effective-font' ||
+			finding.kind === 'tight-margin' ||
+			finding.kind === 'low-content-utilization' ||
+			finding.recommendedPatch === 'reduce-zoom' ||
+			finding.recommendedPatch === 'split-slide',
 	);
 }
 
@@ -1326,7 +1423,7 @@ function isSourcePreservedMermaidFitSlide(slideMarkdown: string, audit: SlidevLa
 	if (!isSourcePreservedMermaidRenderedSurface(audit.elementKinds)) {
 		return false;
 	}
-	if (audit.findings.some(finding => finding.target !== 'content' && finding.target !== 'mermaid')) {
+	if (audit.findings.some((finding) => finding.target !== 'content' && finding.target !== 'mermaid')) {
 		return false;
 	}
 
@@ -1335,11 +1432,13 @@ function isSourcePreservedMermaidFitSlide(slideMarkdown: string, audit: SlidevLa
 		return false;
 	}
 
-	return containsMermaidFence(surface.bodyLines)
-		&& !containsNonMermaidFence(surface.bodyLines)
-		&& !containsMarkdownTableOutsideFence(surface.bodyLines)
-		&& !containsMarkdownImageOutsideFence(surface.bodyLines)
-		&& !containsPrimaryNonMermaidContentOutsideFence(surface.bodyLines);
+	return (
+		containsMermaidFence(surface.bodyLines) &&
+		!containsNonMermaidFence(surface.bodyLines) &&
+		!containsMarkdownTableOutsideFence(surface.bodyLines) &&
+		!containsMarkdownImageOutsideFence(surface.bodyLines) &&
+		!containsPrimaryNonMermaidContentOutsideFence(surface.bodyLines)
+	);
 }
 
 function splitOverflowingMarkdownTableSlide(
@@ -1351,18 +1450,30 @@ function splitOverflowingMarkdownTableSlide(
 ): { slides: string[] | null; reason?: string } {
 	const surface = extractPatchableSlideSurface(slideMarkdown);
 	if (!surface) {
-		return { slides: null, reason: 'table slide uses deck headmatter or unsupported layout syntax' };
+		return {
+			slides: null,
+			reason: 'table slide uses deck headmatter or unsupported layout syntax',
+		};
 	}
-	if (surface.bodyLines.some(line => /^(```+|~~~+)/.test(line.trim()) || /^!\[.*\]\(.+\)/.test(line.trim()))) {
-		return { slides: null, reason: 'table split does not support mixed code or image slides' };
+	if (surface.bodyLines.some((line) => /^(```+|~~~+)/.test(line.trim()) || /^!\[.*\]\(.+\)/.test(line.trim()))) {
+		return {
+			slides: null,
+			reason: 'table split does not support mixed code or image slides',
+		};
 	}
 
 	const tableBlock = findSingleMarkdownTableBlock(surface.bodyLines);
 	if (!tableBlock) {
-		return { slides: null, reason: 'table split requires exactly one Markdown table block' };
+		return {
+			slides: null,
+			reason: 'table split requires exactly one Markdown table block',
+		};
 	}
 	if (tableBlock.dataLines.length < 2) {
-		return { slides: null, reason: 'table does not have enough data rows to split safely' };
+		return {
+			slides: null,
+			reason: 'table does not have enough data rows to split safely',
+		};
 	}
 
 	const targetChunkCount = resolveStructuralChunkCount(audit, currentZoom, nextZoom, config.minReadableScale);
@@ -1377,17 +1488,25 @@ function splitOverflowingMarkdownTableSlide(
 	const cleanFrontmatter = stripFrontmatterKey(surface.frontmatterLines, 'zoom');
 	const splitSlides: string[] = [];
 
-	const chunkedTableBodies = recordSlideBodies
-		?? (splitOrientation === 'columns'
+	const chunkedTableBodies =
+		recordSlideBodies ??
+		(splitOrientation === 'columns'
 			? splitMarkdownTableByColumns(tableBlock, targetChunkCount)
 			: splitMarkdownTableByRows(tableBlock, targetChunkCount));
 	if (!chunkedTableBodies || chunkedTableBodies.length < 2) {
 		if (recordSlideBodies) {
-			return { slides: null, reason: 'table record fallback could not be distributed into multiple slides' };
+			return {
+				slides: null,
+				reason: 'table record fallback could not be distributed into multiple slides',
+			};
 		}
-		return { slides: null, reason: splitOrientation === 'columns'
-			? 'table columns could not be distributed into multiple slides'
-			: 'table rows could not be distributed into multiple slides' };
+		return {
+			slides: null,
+			reason:
+				splitOrientation === 'columns'
+					? 'table columns could not be distributed into multiple slides'
+					: 'table rows could not be distributed into multiple slides',
+		};
 	}
 
 	for (let index = 0; index < chunkedTableBodies.length; index++) {
@@ -1422,24 +1541,39 @@ function splitOverflowingCodeSlide(
 ): { slides: string[] | null; reason?: string } {
 	const surface = extractPatchableSlideSurface(slideMarkdown);
 	if (!surface) {
-		return { slides: null, reason: 'code slide uses deck headmatter or unsupported layout syntax' };
+		return {
+			slides: null,
+			reason: 'code slide uses deck headmatter or unsupported layout syntax',
+		};
 	}
-	if (surface.bodyLines.some(line => /^\|.*\|$/.test(line.trim()) || /^!\[.*\]\(.+\)/.test(line.trim()))) {
-		return { slides: null, reason: 'code split does not support mixed table or image slides' };
+	if (surface.bodyLines.some((line) => /^\|.*\|$/.test(line.trim()) || /^!\[.*\]\(.+\)/.test(line.trim()))) {
+		return {
+			slides: null,
+			reason: 'code split does not support mixed table or image slides',
+		};
 	}
 
 	const codeBlock = findSingleCodeFenceBlock(surface.bodyLines);
 	if (!codeBlock) {
-		return { slides: null, reason: 'code split requires exactly one non-Mermaid code fence' };
+		return {
+			slides: null,
+			reason: 'code split requires exactly one non-Mermaid code fence',
+		};
 	}
 	if (codeBlock.bodyLines.length < 2) {
-		return { slides: null, reason: 'code block does not have enough lines to split safely' };
+		return {
+			slides: null,
+			reason: 'code block does not have enough lines to split safely',
+		};
 	}
 
 	const targetChunkCount = resolveStructuralChunkCount(audit, currentZoom, nextZoom, config.minReadableScale);
 	const codeChunks = splitCodeFenceIntoChunks(codeBlock, targetChunkCount);
 	if (!codeChunks || codeChunks.length < 2) {
-		return { slides: null, reason: 'code block could not be distributed into multiple slides' };
+		return {
+			slides: null,
+			reason: 'code block could not be distributed into multiple slides',
+		};
 	}
 
 	const prefixLines = trimOuterBlankLines(surface.bodyLines.slice(0, codeBlock.startLine));
@@ -1480,25 +1614,37 @@ function splitOverflowingSupportedSlotLayoutSlide(
 ): { slides: string[] | null; reason?: string } {
 	const surface = parseSupportedSlotLayoutSurface(slideMarkdown);
 	if (!surface) {
-		return { slides: null, reason: 'slot layout is not in the supported structural patch set' };
+		return {
+			slides: null,
+			reason: 'slot layout is not in the supported structural patch set',
+		};
 	}
 
 	const targetZone = pickSlotLayoutTargetZone(surface, audit);
 	if (!targetZone) {
-		return { slides: null, reason: 'no supported slot zone matches the current structural patch target' };
+		return {
+			slides: null,
+			reason: 'no supported slot zone matches the current structural patch target',
+		};
 	}
 
 	const zoneMarkdown = targetZone.contentLines.join('\n').trim();
 	if (!zoneMarkdown) {
-		return { slides: null, reason: 'target slot does not contain patchable content' };
+		return {
+			slides: null,
+			reason: 'target slot does not contain patchable content',
+		};
 	}
 
 	const splitResult = applyZoneStructuralSplit(zoneMarkdown, audit, currentZoom, nextZoom, config);
 	if (!splitResult.slides || splitResult.slides.length < 2) {
-		return { slides: null, reason: splitResult.reason ?? 'slot zone did not yield multiple structural chunks' };
+		return {
+			slides: null,
+			reason: splitResult.reason ?? 'slot zone did not yield multiple structural chunks',
+		};
 	}
 
-	const splitSlides = splitResult.slides.map(splitSlide => {
+	const splitSlides = splitResult.slides.map((splitSlide) => {
 		const chunkSurface = extractPatchableSlideSurface(splitSlide);
 		const chunkLines = chunkSurface ? chunkSurface.bodyLines : splitSlide.split(/\r?\n/);
 		return assembleSupportedSlotLayoutSlide(surface, targetZone, trimOuterBlankLines(chunkLines));
@@ -1514,39 +1660,55 @@ function splitCompetingSupportedSlotLayoutZones(
 ): { slides: string[] | null; reason?: string } {
 	const surface = parseSupportedSlotLayoutSurface(slideMarkdown);
 	if (!surface) {
-		return { slides: null, reason: 'slot layout is not in the supported structural patch set' };
+		return {
+			slides: null,
+			reason: 'slot layout is not in the supported structural patch set',
+		};
 	}
 
-	const transformableZones = collectSupportedSlotZones(surface).filter(zone =>
-		zone.contentLines.some(line => line.trim().length > 0)
-		&& containsTransformableComponentSyntax(zone.contentLines)
+	const transformableZones = collectSupportedSlotZones(surface).filter(
+		(zone) =>
+			zone.contentLines.some((line) => line.trim().length > 0) &&
+			containsTransformableComponentSyntax(zone.contentLines),
 	);
 	if (transformableZones.length < 2) {
-		return { slides: null, reason: 'slot layout does not expose multiple transformable zones' };
+		return {
+			slides: null,
+			reason: 'slot layout does not expose multiple transformable zones',
+		};
 	}
 
 	const unsafeZoneNames = new Set(collectUnreadableSlotTransformNames(audit, config));
 	if (unsafeZoneNames.size === 0) {
-		return { slides: null, reason: 'slot layout transforms are within readable font bounds' };
+		return {
+			slides: null,
+			reason: 'slot layout transforms are within readable font bounds',
+		};
 	}
 
 	const candidateZoneNames = new Set(collectSlotLayoutTransformCandidateNames(slideMarkdown, audit));
-	const zonesToSplit = transformableZones.filter(zone =>
-		candidateZoneNames.has(zone.name) || unsafeZoneNames.has(zone.name)
+	const zonesToSplit = transformableZones.filter(
+		(zone) => candidateZoneNames.has(zone.name) || unsafeZoneNames.has(zone.name),
 	);
-	if (zonesToSplit.length < 2 || !zonesToSplit.some(zone => unsafeZoneNames.has(zone.name))) {
-		return { slides: null, reason: 'slot layout does not have multiple unsafe competing zones' };
+	if (zonesToSplit.length < 2 || !zonesToSplit.some((zone) => unsafeZoneNames.has(zone.name))) {
+		return {
+			slides: null,
+			reason: 'slot layout does not have multiple unsafe competing zones',
+		};
 	}
 
 	const cleanFrontmatter = stripFrontmatterKey(stripFrontmatterKey(surface.frontmatterLines, 'layout'), 'zoom');
-	const splitSlides = zonesToSplit.map(zone => {
-		const bodyLines = zone.ownershipWrapped
-			? zone.lines
-			: wrapLinesInSlotZoneOwner(zone.contentLines, zone.name);
+	const splitSlides = zonesToSplit.map((zone) => {
+		const bodyLines = zone.ownershipWrapped ? zone.lines : wrapLinesInSlotZoneOwner(zone.contentLines, zone.name);
 		return assemblePatchedSlide(cleanFrontmatter, trimOuterBlankLines(bodyLines));
 	});
 
-	return splitSlides.length > 1 ? { slides: splitSlides } : { slides: null, reason: 'slot layout did not produce multiple zone slides' };
+	return splitSlides.length > 1
+		? { slides: splitSlides }
+		: {
+				slides: null,
+				reason: 'slot layout did not produce multiple zone slides',
+			};
 }
 
 function wrapOverflowingSupportedSlotLayoutZonesInTransform(
@@ -1567,9 +1729,14 @@ function wrapOverflowingSupportedSlotLayoutZonesInTransform(
 			break;
 		}
 
-		const targetZone = collectSupportedSlotZones(surface).find(zone => zone.name === zoneName)
-			?? pickSlotLayoutTransformZone(surface, audit);
-		if (!targetZone || containsTransformWrapper(targetZone.contentLines) || !containsTransformableComponentSyntax(targetZone.contentLines)) {
+		const targetZone =
+			collectSupportedSlotZones(surface).find((zone) => zone.name === zoneName) ??
+			pickSlotLayoutTransformZone(surface, audit);
+		if (
+			!targetZone ||
+			containsTransformWrapper(targetZone.contentLines) ||
+			!containsTransformableComponentSyntax(targetZone.contentLines)
+		) {
 			continue;
 		}
 
@@ -1599,13 +1766,15 @@ function retuneSupportedSlotLayoutTransformScale(
 	currentZoom: number,
 ): string | null {
 	const surface = parseSupportedSlotLayoutSurface(slideMarkdown);
-	const hasSlotFontFailure = audit.findings.some(finding => finding.kind === 'low-effective-font' && finding.slotZone);
+	const hasSlotFontFailure = audit.findings.some(
+		(finding) => finding.kind === 'low-effective-font' && finding.slotZone,
+	);
 	if (!surface || currentZoom >= 0.995 || !hasSlotFontFailure) {
 		return null;
 	}
 
 	const zones = collectSupportedSlotZones(surface);
-	const transformedZones = zones.filter(zone => containsTransformWrapper(zone.contentLines));
+	const transformedZones = zones.filter((zone) => containsTransformWrapper(zone.contentLines));
 	if (transformedZones.length === 0) {
 		return null;
 	}
@@ -1618,7 +1787,7 @@ function retuneSupportedSlotLayoutTransformScale(
 			break;
 		}
 
-		const targetZone = collectSupportedSlotZones(currentSurface).find(zone => zone.name === zoneName);
+		const targetZone = collectSupportedSlotZones(currentSurface).find((zone) => zone.name === zoneName);
 		if (!targetZone || !containsTransformWrapper(targetZone.contentLines)) {
 			continue;
 		}
@@ -1651,28 +1820,33 @@ function splitOverflowingDeckHeadmatterSlide(
 ): { slides: string[] | null; reason?: string } {
 	const surface = parseDeckHeadmatterSlideSurface(slideMarkdown);
 	if (!surface) {
-		return { slides: null, reason: 'deck headmatter slide surface unavailable' };
+		return {
+			slides: null,
+			reason: 'deck headmatter slide surface unavailable',
+		};
 	}
 
 	const zoneMarkdown = surface.bodyLines.join('\n').trim();
 	if (!zoneMarkdown) {
-		return { slides: null, reason: 'deck headmatter slide does not contain patchable body content' };
+		return {
+			slides: null,
+			reason: 'deck headmatter slide does not contain patchable body content',
+		};
 	}
 
 	const splitResult = applyZoneStructuralSplit(zoneMarkdown, audit, currentZoom, nextZoom, config);
 	if (!splitResult.slides || splitResult.slides.length < 2) {
-		return { slides: null, reason: splitResult.reason ?? 'deck headmatter slide did not yield multiple structural chunks' };
+		return {
+			slides: null,
+			reason: splitResult.reason ?? 'deck headmatter slide did not yield multiple structural chunks',
+		};
 	}
 
 	const reconstructedSlides = splitResult.slides.map((splitSlide, index) => {
 		const chunkSurface = extractPatchableSlideSurface(splitSlide);
 		const chunkLines = chunkSurface ? chunkSurface.bodyLines : splitSlide.split(/\r?\n/);
 		if (index === 0) {
-			return [
-				...surface.headmatterLines,
-				'',
-				...trimOuterBlankLines(chunkLines),
-			].join('\n').trim();
+			return [...surface.headmatterLines, '', ...trimOuterBlankLines(chunkLines)].join('\n').trim();
 		}
 		return trimOuterBlankLines(chunkLines).join('\n').trim();
 	});
@@ -1708,7 +1882,10 @@ function applyZoneStructuralSplit(
 		}
 	}
 
-	return { slides: null, reason: 'slot zone does not match a supported structural splitter' };
+	return {
+		slides: null,
+		reason: 'slot zone does not match a supported structural splitter',
+	};
 }
 
 function splitOverflowingSimpleSlide(
@@ -1720,39 +1897,49 @@ function splitOverflowingSimpleSlide(
 ): { slides: string[] | null; reason?: string } {
 	const surface = extractPatchableSlideSurface(slideMarkdown);
 	if (!surface) {
-		return { slides: null, reason: 'content slide uses deck headmatter or unsupported layout syntax' };
+		return {
+			slides: null,
+			reason: 'content slide uses deck headmatter or unsupported layout syntax',
+		};
 	}
-	if (surface.bodyLines.some(line => /^(```+|~~~+)/.test(line.trim()) || /^\|.*\|$/.test(line.trim()) || /^!\[.*\]\(.+\)/.test(line.trim()))) {
-		return { slides: null, reason: 'content split only supports paragraph and list slides' };
+	if (
+		surface.bodyLines.some(
+			(line) =>
+				/^(```+|~~~+)/.test(line.trim()) || /^\|.*\|$/.test(line.trim()) || /^!\[.*\]\(.+\)/.test(line.trim()),
+		)
+	) {
+		return {
+			slides: null,
+			reason: 'content split only supports paragraph and list slides',
+		};
 	}
 
 	const normalizedBody = trimOuterBlankLines(surface.bodyLines);
-	const headingIndex = normalizedBody.findIndex(line => /^#{1,6}\s+\S/.test(line.trim()));
+	const headingIndex = normalizedBody.findIndex((line) => /^#{1,6}\s+\S/.test(line.trim()));
 	const headingLine = headingIndex >= 0 ? normalizedBody[headingIndex].trim() : null;
-	const leadLines = headingIndex >= 0
-		? trimOuterBlankLines(normalizedBody.slice(0, headingIndex + 1))
-		: [];
-	const contentLines = headingIndex >= 0
-		? trimOuterBlankLines(normalizedBody.slice(headingIndex + 1))
-		: normalizedBody;
+	const leadLines = headingIndex >= 0 ? trimOuterBlankLines(normalizedBody.slice(0, headingIndex + 1)) : [];
+	const contentLines =
+		headingIndex >= 0 ? trimOuterBlankLines(normalizedBody.slice(headingIndex + 1)) : normalizedBody;
 	const blocks = collectSimpleSlideBlocks(contentLines);
 	if (blocks.length < 2) {
-		return { slides: null, reason: 'content slide does not expose enough paragraph or list blocks to split safely' };
+		return {
+			slides: null,
+			reason: 'content slide does not expose enough paragraph or list blocks to split safely',
+		};
 	}
 
 	const targetChunkCount = resolveStructuralChunkCount(audit, currentZoom, nextZoom, config.minReadableScale);
 	const chunkedBlocks = chunkLineBlocks(blocks, Math.max(2, Math.min(targetChunkCount, blocks.length)));
 	if (chunkedBlocks.length < 2) {
-		return { slides: null, reason: 'content blocks could not be distributed into multiple slides' };
+		return {
+			slides: null,
+			reason: 'content blocks could not be distributed into multiple slides',
+		};
 	}
 
 	const cleanFrontmatter = stripFrontmatterKey(surface.frontmatterLines, 'zoom');
 	const splitSlides = chunkedBlocks.map((chunk, index) => {
-		const bodyLines = index === 0
-			? [...leadLines]
-			: headingLine
-				? [headingLine, '']
-				: [];
+		const bodyLines = index === 0 ? [...leadLines] : headingLine ? [headingLine, ''] : [];
 		appendSlideBlock(bodyLines, chunk);
 		return assemblePatchedSlide(cleanFrontmatter, bodyLines);
 	});
@@ -1760,34 +1947,41 @@ function splitOverflowingSimpleSlide(
 	return { slides: splitSlides };
 }
 
-function separateMixedMermaidPrimaryContentSlide(
-	slideMarkdown: string,
-): { slides: string[] | null; reason?: string } {
+function separateMixedMermaidPrimaryContentSlide(slideMarkdown: string): {
+	slides: string[] | null;
+	reason?: string;
+} {
 	const surface = extractPatchableSlideSurface(slideMarkdown);
 	if (!surface) {
-		return { slides: null, reason: 'mixed Mermaid slide uses deck headmatter or unsupported layout syntax' };
+		return {
+			slides: null,
+			reason: 'mixed Mermaid slide uses deck headmatter or unsupported layout syntax',
+		};
 	}
 
 	const partition = partitionMermaidAndPrimaryContent(surface.bodyLines);
 	if (partition.mermaidLines.length === 0) {
-		return { slides: null, reason: 'mixed Mermaid separation requires at least one Mermaid fence' };
+		return {
+			slides: null,
+			reason: 'mixed Mermaid separation requires at least one Mermaid fence',
+		};
 	}
 	if (partition.primaryContentLines.length === 0) {
-		return { slides: null, reason: 'mixed Mermaid slide has no primary non-Mermaid content' };
+		return {
+			slides: null,
+			reason: 'mixed Mermaid slide has no primary non-Mermaid content',
+		};
 	}
 
 	const cleanFrontmatter = stripFrontmatterKey(surface.frontmatterLines, 'zoom');
 	const headingLines = partition.headingLine ? [partition.headingLine, ''] : [];
-	const mermaidSlideLines = trimOuterBlankLines([
-		...headingLines,
-		...partition.mermaidLines,
-	]);
-	const primarySlideLines = trimOuterBlankLines([
-		...headingLines,
-		...partition.primaryContentLines,
-	]);
+	const mermaidSlideLines = trimOuterBlankLines([...headingLines, ...partition.mermaidLines]);
+	const primarySlideLines = trimOuterBlankLines([...headingLines, ...partition.primaryContentLines]);
 	if (countMeaningfulLines(mermaidSlideLines) === 0 || countMeaningfulLines(primarySlideLines) === 0) {
-		return { slides: null, reason: 'mixed Mermaid separation produced an empty slide' };
+		return {
+			slides: null,
+			reason: 'mixed Mermaid separation produced an empty slide',
+		};
 	}
 
 	return {
@@ -1798,29 +1992,38 @@ function separateMixedMermaidPrimaryContentSlide(
 	};
 }
 
-function separateMixedComponentPrimaryContentSlide(
-	slideMarkdown: string,
-): { slides: string[] | null; reason?: string } {
+function separateMixedComponentPrimaryContentSlide(slideMarkdown: string): {
+	slides: string[] | null;
+	reason?: string;
+} {
 	const surface = extractComponentPrimaryContentSurface(slideMarkdown);
 	if (!surface) {
-		return { slides: null, reason: 'mixed component slide uses deck headmatter or unsupported layout syntax' };
+		return {
+			slides: null,
+			reason: 'mixed component slide uses deck headmatter or unsupported layout syntax',
+		};
 	}
 
 	const partition = partitionComponentAndPrimaryContent(surface.bodyLines);
 	if (!canSeparateComponentPrimaryContent(partition)) {
-		return { slides: null, reason: 'mixed component slide does not expose one safe component/prose boundary' };
+		return {
+			slides: null,
+			reason: 'mixed component slide does not expose one safe component/prose boundary',
+		};
 	}
 
 	const cleanFrontmatter = stripFrontmatterKey(surface.frontmatterLines, 'zoom');
 	const headingLines = partition.headingLine ? [partition.headingLine, ''] : [];
-	const separatedSlides = partition.groups.map(group => assemblePatchedSlide(cleanFrontmatter, trimOuterBlankLines([
-		...headingLines,
-		...group.lines,
-	])));
+	const separatedSlides = partition.groups.map((group) =>
+		assemblePatchedSlide(cleanFrontmatter, trimOuterBlankLines([...headingLines, ...group.lines])),
+	);
 
 	return separatedSlides.length > 1
 		? { slides: separatedSlides }
-		: { slides: null, reason: 'mixed component separation produced fewer than two slides' };
+		: {
+				slides: null,
+				reason: 'mixed component separation produced fewer than two slides',
+			};
 }
 
 function wrapOverflowingSlideSurfaceInTransform(
@@ -1830,7 +2033,10 @@ function wrapOverflowingSlideSurfaceInTransform(
 	currentZoom: number,
 	config: SlidevLayoutAuditConfig,
 ): string | null {
-	const minimumReadableTransformScale = computeMinimumReadableScaleForFont(audit.effectiveMinFontPx, config.minEffectiveFontPx);
+	const minimumReadableTransformScale = computeMinimumReadableScaleForFont(
+		audit.effectiveMinFontPx,
+		config.minEffectiveFontPx,
+	);
 	const transformScale = deriveMeasuredTransformScale(
 		recommendedScale,
 		currentZoom,
@@ -1860,10 +2066,10 @@ function wrapComponentSurfaceWithOptionalHeadingInTransform(
 
 	const partition = partitionComponentAndPrimaryContent(surface.bodyLines);
 	if (
-		partition.unsupportedPrimarySyntax
-		|| partition.ambiguousOrder
-		|| partition.groups.length !== 1
-		|| partition.groups[0].kind !== 'component'
+		partition.unsupportedPrimarySyntax ||
+		partition.ambiguousOrder ||
+		partition.groups.length !== 1 ||
+		partition.groups[0].kind !== 'component'
 	) {
 		return null;
 	}
@@ -1888,7 +2094,14 @@ function extractPatchableSlideSurface(slideMarkdown: string): PatchableSlideSurf
 	if (!isSupportedSingleSlotLayout(layout)) {
 		return null;
 	}
-	if (bodyLines.some(line => /^::[\w-]+::$/.test(line.trim()) || /^:::\s*/.test(line.trim()) || /<(Transform|v-click|v-switch)\b/i.test(line.trim()))) {
+	if (
+		bodyLines.some(
+			(line) =>
+				/^::[\w-]+::$/.test(line.trim()) ||
+				/^:::\s*/.test(line.trim()) ||
+				/<(Transform|v-click|v-switch)\b/i.test(line.trim()),
+		)
+	) {
 		return null;
 	}
 
@@ -1908,7 +2121,7 @@ function extractComponentPrimaryContentSurface(slideMarkdown: string): Patchable
 	const frontmatterEnd = findSlideFrontmatterEnd(lines);
 	const frontmatterLines = frontmatterEnd > 0 ? lines.slice(0, frontmatterEnd + 1) : [];
 	const bodyLines = frontmatterEnd > 0 ? lines.slice(frontmatterEnd + 1) : lines;
-	if (bodyLines.some(line => /^::[\w-]+::$/.test(line.trim()))) {
+	if (bodyLines.some((line) => /^::[\w-]+::$/.test(line.trim()))) {
 		return null;
 	}
 
@@ -1953,7 +2166,7 @@ function parseSupportedSlotLayoutSurface(slideMarkdown: string): SupportedSlotLa
 	const frontmatterLines = frontmatterEnd > 0 ? lines.slice(0, frontmatterEnd + 1) : [];
 	const bodyLines = frontmatterEnd > 0 ? lines.slice(frontmatterEnd + 1) : lines;
 	const layout = readFrontmatterScalar(frontmatterLines, 'layout');
-	if (!bodyLines.some(line => /^::[\w-]+::$/.test(line.trim()))) {
+	if (!bodyLines.some((line) => /^::[\w-]+::$/.test(line.trim()))) {
 		return null;
 	}
 
@@ -1962,14 +2175,12 @@ function parseSupportedSlotLayoutSurface(slideMarkdown: string): SupportedSlotLa
 		return null;
 	}
 
-	const hasExplicitDefaultSection = slotLines.sections.some(section => section.name === 'default');
+	const hasExplicitDefaultSection = slotLines.sections.some((section) => section.name === 'default');
 	if (slotLines.leadLines.length > 0 && hasExplicitDefaultSection) {
 		return null;
 	}
 
-	const leadRole = layout === 'two-cols-header' && slotLines.leadLines.length > 0
-		? 'header'
-		: 'default';
+	const leadRole = layout === 'two-cols-header' && slotLines.leadLines.length > 0 ? 'header' : 'default';
 
 	return {
 		frontmatterLines,
@@ -2053,19 +2264,21 @@ function pickSlotLayoutTargetZone(
 	}
 
 	const matchers: Array<(lines: string[]) => boolean> = [];
-	if (audit.findings.some(finding => finding.recommendedPatch === 'split-table')) {
-		matchers.push(lines => findSingleMarkdownTableBlock(lines) !== null);
+	if (audit.findings.some((finding) => finding.recommendedPatch === 'split-table')) {
+		matchers.push((lines) => findSingleMarkdownTableBlock(lines) !== null);
 	}
-	if (audit.findings.some(finding => finding.recommendedPatch === 'reduce-code')) {
-		matchers.push(lines => findSingleCodeFenceBlock(lines) !== null);
+	if (audit.findings.some((finding) => finding.recommendedPatch === 'reduce-code')) {
+		matchers.push((lines) => findSingleCodeFenceBlock(lines) !== null);
 	}
-	const hasComponentZone = zones.some(zone => containsTransformableComponentSyntax(zone.lines) || containsTransformWrapper(zone.lines));
-	if (!hasComponentZone && audit.findings.some(finding => finding.recommendedPatch === 'split-slide')) {
-		matchers.push(lines => collectSimpleSlideBlocks(trimOuterBlankLines(lines)).length >= 2);
+	const hasComponentZone = zones.some(
+		(zone) => containsTransformableComponentSyntax(zone.lines) || containsTransformWrapper(zone.lines),
+	);
+	if (!hasComponentZone && audit.findings.some((finding) => finding.recommendedPatch === 'split-slide')) {
+		matchers.push((lines) => collectSimpleSlideBlocks(trimOuterBlankLines(lines)).length >= 2);
 	}
 
 	for (const matcher of matchers) {
-		const matchedZones = zones.filter(zone => matcher(zone.contentLines));
+		const matchedZones = zones.filter((zone) => matcher(zone.contentLines));
 		if (matchedZones.length === 1) {
 			return matchedZones[0];
 		}
@@ -2087,21 +2300,30 @@ function pickSlotLayoutTransformZone(
 ): SupportedSlotZone | null {
 	const zones = collectSupportedSlotZones(surface);
 	const zoneByGeometry = pickZoneBySlotZoneGeometry(zones, audit.slotZones ?? []);
-	if (zoneByGeometry && containsTransformableComponentSyntax(zoneByGeometry.contentLines) && !containsTransformWrapper(zoneByGeometry.contentLines)) {
+	if (
+		zoneByGeometry &&
+		containsTransformableComponentSyntax(zoneByGeometry.contentLines) &&
+		!containsTransformWrapper(zoneByGeometry.contentLines)
+	) {
 		return zoneByGeometry;
 	}
 
 	const zoneBySlotName = pickZoneByFindingSlotSignals(zones, audit.findings);
-	if (zoneBySlotName && containsTransformableComponentSyntax(zoneBySlotName.contentLines) && !zoneBySlotName.ownershipWrapped) {
+	if (
+		zoneBySlotName &&
+		containsTransformableComponentSyntax(zoneBySlotName.contentLines) &&
+		!zoneBySlotName.ownershipWrapped
+	) {
 		return zoneBySlotName;
 	}
-	const componentZones = zones.filter(zone =>
-		containsTransformableComponentSyntax(zone.contentLines) || containsTransformWrapper(zone.contentLines)
+	const componentZones = zones.filter(
+		(zone) =>
+			containsTransformableComponentSyntax(zone.contentLines) || containsTransformWrapper(zone.contentLines),
 	);
 
-	const transformableZones = zones.filter(zone =>
-		containsTransformableComponentSyntax(zone.contentLines)
-		&& !containsTransformWrapper(zone.contentLines)
+	const transformableZones = zones.filter(
+		(zone) =>
+			containsTransformableComponentSyntax(zone.contentLines) && !containsTransformWrapper(zone.contentLines),
 	);
 	if (componentZones.length > 1) {
 		return transformableZones.length > 0 ? pickZoneByFindingTextHints(transformableZones, audit.findings) : null;
@@ -2113,10 +2335,7 @@ function pickSlotLayoutTransformZone(
 	return transformableZones[0];
 }
 
-function collectSlotLayoutTransformCandidateNames(
-	slideMarkdown: string,
-	audit: SlidevLayoutAudit,
-): string[] {
+function collectSlotLayoutTransformCandidateNames(slideMarkdown: string, audit: SlidevLayoutAudit): string[] {
 	const surface = parseSupportedSlotLayoutSurface(slideMarkdown);
 	if (!surface) {
 		return [];
@@ -2125,18 +2344,19 @@ function collectSlotLayoutTransformCandidateNames(
 	const zones = collectSupportedSlotZones(surface);
 	const zoneOrder = new Map(zones.map((zone, index) => [zone.name, index]));
 	const measuredCandidates = (audit.slotZones ?? [])
-		.filter(zone =>
-			zoneOrder.has(zone.name)
-			&& (zone.scrollOverflow
-				|| (zone.overflow ? hasOverflow(zone.overflow) : false)
-				|| (typeof zone.recommendedTransformScale === 'number' && zone.recommendedTransformScale < 0.995))
+		.filter(
+			(zone) =>
+				zoneOrder.has(zone.name) &&
+				(zone.scrollOverflow ||
+					(zone.overflow ? hasOverflow(zone.overflow) : false) ||
+					(typeof zone.recommendedTransformScale === 'number' && zone.recommendedTransformScale < 0.995)),
 		)
 		.sort((left, right) => {
 			const leftOrder = zoneOrder.get(left.name) ?? Number.MAX_SAFE_INTEGER;
 			const rightOrder = zoneOrder.get(right.name) ?? Number.MAX_SAFE_INTEGER;
 			return leftOrder - rightOrder;
 		})
-		.map(zone => zone.name);
+		.map((zone) => zone.name);
 
 	if (measuredCandidates.length > 0) {
 		return Array.from(new Set(measuredCandidates));
@@ -2146,20 +2366,18 @@ function collectSlotLayoutTransformCandidateNames(
 	return singleZone ? [singleZone.name] : [];
 }
 
-function collectUnreadableSlotTransformNames(
-	audit: SlidevLayoutAudit,
-	config: SlidevLayoutAuditConfig,
-): string[] {
+function collectUnreadableSlotTransformNames(audit: SlidevLayoutAudit, config: SlidevLayoutAuditConfig): string[] {
 	return (audit.slotZones ?? [])
-		.filter(zone => {
+		.filter((zone) => {
 			const recommendedScale = zone.recommendedTransformScale;
-			const minimumReadableScale = zone.minimumReadableTransformScale
-				?? computeMinimumReadableScaleForFont(zone.effectiveMinFontPx, config.minEffectiveFontPx);
-			return recommendedScale !== null
-				&& minimumReadableScale !== null
-				&& recommendedScale < minimumReadableScale;
+			const minimumReadableScale =
+				zone.minimumReadableTransformScale ??
+				computeMinimumReadableScaleForFont(zone.effectiveMinFontPx, config.minEffectiveFontPx);
+			return (
+				recommendedScale !== null && minimumReadableScale !== null && recommendedScale < minimumReadableScale
+			);
 		})
-		.map(zone => zone.name);
+		.map((zone) => zone.name);
 }
 
 function collectRetunableSlotZoneNames(
@@ -2167,15 +2385,16 @@ function collectRetunableSlotZoneNames(
 	audit: SlidevLayoutAudit,
 	transformedZones: SupportedSlotZone[],
 ): string[] {
-	const transformedNames = new Set(transformedZones.map(zone => zone.name));
-	const measuredNames = collectSlotLayoutTransformCandidateNames(slideMarkdown, audit)
-		.filter(name => transformedNames.has(name));
+	const transformedNames = new Set(transformedZones.map((zone) => zone.name));
+	const measuredNames = collectSlotLayoutTransformCandidateNames(slideMarkdown, audit).filter((name) =>
+		transformedNames.has(name),
+	);
 	if (measuredNames.length > 0) {
 		return measuredNames;
 	}
 
 	const findingNames = audit.findings
-		.map(finding => finding.slotZone)
+		.map((finding) => finding.slotZone)
 		.filter((name): name is string => typeof name === 'string' && transformedNames.has(name));
 	if (findingNames.length > 0) {
 		return Array.from(new Set(findingNames));
@@ -2184,9 +2403,7 @@ function collectRetunableSlotZoneNames(
 	return transformedZones.length === 1 ? [transformedZones[0].name] : [];
 }
 
-function collectSupportedSlotZones(
-	surface: SupportedSlotLayoutSurface,
-): SupportedSlotZone[] {
+function collectSupportedSlotZones(surface: SupportedSlotLayoutSurface): SupportedSlotZone[] {
 	return [
 		{
 			kind: 'lead' as const,
@@ -2195,26 +2412,29 @@ function collectSupportedSlotZones(
 			contentLines: unwrapSlotZoneOwnerWrapper(surface.leadLines)?.contentLines ?? surface.leadLines,
 			ownershipWrapped: unwrapSlotZoneOwnerWrapper(surface.leadLines) !== null,
 		},
-		...surface.sections.map(section => ({
+		...surface.sections.map((section) => ({
 			kind: 'section' as const,
 			name: section.name,
 			lines: section.lines,
 			contentLines: unwrapSlotZoneOwnerWrapper(section.lines)?.contentLines ?? section.lines,
 			ownershipWrapped: unwrapSlotZoneOwnerWrapper(section.lines) !== null,
 		})),
-	].filter(zone => zone.lines.some(line => line.trim().length > 0));
+	].filter((zone) => zone.lines.some((line) => line.trim().length > 0));
 }
 
 function pickZoneByFindingSlotSignals(
 	zones: SupportedSlotZone[],
 	findings: SlidevLayoutFinding[],
 ): SupportedSlotZone | null {
-	const slotScores = new Map<string, {
-		findingCount: number;
-		totalScore: number;
-		slotOwnerCount: number;
-		slotOwnerScore: number;
-	}>();
+	const slotScores = new Map<
+		string,
+		{
+			findingCount: number;
+			totalScore: number;
+			slotOwnerCount: number;
+			slotOwnerScore: number;
+		}
+	>();
 	for (const finding of findings) {
 		if (!finding.slotZone) {
 			continue;
@@ -2242,25 +2462,26 @@ function pickZoneByFindingSlotSignals(
 		const [, leftScore] = left;
 		const [, rightScore] = right;
 		return (
-			rightScore.slotOwnerScore - leftScore.slotOwnerScore
-			|| rightScore.slotOwnerCount - leftScore.slotOwnerCount
-			|| rightScore.totalScore - leftScore.totalScore
-			|| rightScore.findingCount - leftScore.findingCount
+			rightScore.slotOwnerScore - leftScore.slotOwnerScore ||
+			rightScore.slotOwnerCount - leftScore.slotOwnerCount ||
+			rightScore.totalScore - leftScore.totalScore ||
+			rightScore.findingCount - leftScore.findingCount
 		);
 	});
 	if (rankedSlots.length > 1) {
 		const [, first] = rankedSlots[0];
 		const [, second] = rankedSlots[1];
-		const sameRank = first.slotOwnerScore === second.slotOwnerScore
-			&& first.slotOwnerCount === second.slotOwnerCount
-			&& first.totalScore === second.totalScore
-			&& first.findingCount === second.findingCount;
+		const sameRank =
+			first.slotOwnerScore === second.slotOwnerScore &&
+			first.slotOwnerCount === second.slotOwnerCount &&
+			first.totalScore === second.totalScore &&
+			first.findingCount === second.findingCount;
 		if (sameRank) {
 			return null;
 		}
 	}
 
-	return zones.find(zone => zone.name === rankedSlots[0][0]) ?? null;
+	return zones.find((zone) => zone.name === rankedSlots[0][0]) ?? null;
 }
 
 function pickZoneBySlotZoneGeometry(
@@ -2268,37 +2489,45 @@ function pickZoneBySlotZoneGeometry(
 	slotZones: SlidevSlotZoneAudit[],
 ): SupportedSlotZone | null {
 	const candidates = slotZones
-		.filter(slotZone => zones.some(zone => zone.name === slotZone.name))
-		.map(slotZone => ({
+		.filter((slotZone) => zones.some((zone) => zone.name === slotZone.name))
+		.map((slotZone) => ({
 			slotZone,
 			severityScore: computeSlotZoneSeverityScore(slotZone),
 		}))
-		.filter(candidate =>
-			candidate.slotZone.scrollOverflow
-			|| (candidate.slotZone.overflow ? hasOverflow(candidate.slotZone.overflow) : false)
-			|| (typeof candidate.slotZone.recommendedTransformScale === 'number' && candidate.slotZone.recommendedTransformScale < 0.995)
+		.filter(
+			(candidate) =>
+				candidate.slotZone.scrollOverflow ||
+				(candidate.slotZone.overflow ? hasOverflow(candidate.slotZone.overflow) : false) ||
+				(typeof candidate.slotZone.recommendedTransformScale === 'number' &&
+					candidate.slotZone.recommendedTransformScale < 0.995),
 		);
 	if (candidates.length === 0) {
 		return null;
 	}
 
-	const rankedZones = candidates.sort((left, right) => (
-		right.severityScore - left.severityScore
-		|| Number(left.slotZone.recommendedTransformScale ?? 1) - Number(right.slotZone.recommendedTransformScale ?? 1)
-		|| Number(right.slotZone.scrollOverflow) - Number(left.slotZone.scrollOverflow)
-	));
+	const rankedZones = candidates.sort(
+		(left, right) =>
+			right.severityScore - left.severityScore ||
+			Number(left.slotZone.recommendedTransformScale ?? 1) -
+				Number(right.slotZone.recommendedTransformScale ?? 1) ||
+			Number(right.slotZone.scrollOverflow) - Number(left.slotZone.scrollOverflow),
+	);
 	if (rankedZones.length > 1) {
 		const first = rankedZones[0];
 		const second = rankedZones[1];
-		const sameRank = Math.abs(first.severityScore - second.severityScore) < 0.001
-			&& Math.abs(Number(first.slotZone.recommendedTransformScale ?? 1) - Number(second.slotZone.recommendedTransformScale ?? 1)) < 0.001
-			&& first.slotZone.scrollOverflow === second.slotZone.scrollOverflow;
+		const sameRank =
+			Math.abs(first.severityScore - second.severityScore) < 0.001 &&
+			Math.abs(
+				Number(first.slotZone.recommendedTransformScale ?? 1) -
+					Number(second.slotZone.recommendedTransformScale ?? 1),
+			) < 0.001 &&
+			first.slotZone.scrollOverflow === second.slotZone.scrollOverflow;
 		if (sameRank) {
 			return null;
 		}
 	}
 
-	return zones.find(zone => zone.name === rankedZones[0].slotZone.name) ?? null;
+	return zones.find((zone) => zone.name === rankedZones[0].slotZone.name) ?? null;
 }
 
 function computeSlotFindingSeverityScore(finding: SlidevLayoutFinding): number {
@@ -2350,19 +2579,23 @@ function pickZoneByFindingTextHints<T extends { contentLines: string[] }>(
 	zones: T[],
 	findings: SlidevLayoutFinding[],
 ): T | null {
-	const hints = Array.from(new Set(findings
-		.map(finding => normalizeTextForMatching(finding.textPreview ?? ''))
-		.filter(hint => hint.length >= 12)));
+	const hints = Array.from(
+		new Set(
+			findings
+				.map((finding) => normalizeTextForMatching(finding.textPreview ?? ''))
+				.filter((hint) => hint.length >= 12),
+		),
+	);
 	if (hints.length === 0) {
 		return null;
 	}
 
 	const scoredZones = zones
-		.map(zone => ({
+		.map((zone) => ({
 			zone,
 			score: scoreZoneTextHints(zone.contentLines, hints),
 		}))
-		.filter(candidate => candidate.score > 0)
+		.filter((candidate) => candidate.score > 0)
 		.sort((left, right) => right.score - left.score);
 	if (scoredZones.length === 0) {
 		return null;
@@ -2375,12 +2608,13 @@ function pickZoneByFindingTextHints<T extends { contentLines: string[] }>(
 }
 
 function scoreZoneTextHints(lines: string[], hints: string[]): number {
-	const zoneText = normalizeTextForMatching(lines
-		.join('\n')
-		.replace(/<[^>]+>/g, ' ')
-		.replace(/^\s{0,3}(?:[-*+]|\d+\.)\s+/gm, ' ')
-		.replace(/^#{1,6}\s+/gm, ' ')
-		.replace(/^::[\w-]+::$/gm, ' ')
+	const zoneText = normalizeTextForMatching(
+		lines
+			.join('\n')
+			.replace(/<[^>]+>/g, ' ')
+			.replace(/^\s{0,3}(?:[-*+]|\d+\.)\s+/gm, ' ')
+			.replace(/^#{1,6}\s+/gm, ' ')
+			.replace(/^::[\w-]+::$/gm, ' '),
 	);
 	if (!zoneText) {
 		return 0;
@@ -2404,13 +2638,12 @@ function assembleSupportedSlotLayoutSlide(
 ): string {
 	const bodyLines: string[] = [];
 	const zones = collectSupportedSlotZones(surface);
-	const matchedTargetZone = zones.find(zone => zone.kind === targetZone.kind && zone.name === targetZone.name) ?? null;
+	const matchedTargetZone =
+		zones.find((zone) => zone.kind === targetZone.kind && zone.name === targetZone.name) ?? null;
 	const nextReplacementLines = matchedTargetZone?.ownershipWrapped
 		? wrapLinesInSlotZoneOwner(replacementLines, targetZone.name)
 		: replacementLines;
-	const nextLeadLines = targetZone.kind === 'lead'
-		? nextReplacementLines
-		: surface.leadLines;
+	const nextLeadLines = targetZone.kind === 'lead' ? nextReplacementLines : surface.leadLines;
 
 	if (nextLeadLines.length > 0) {
 		bodyLines.push(...trimOuterBlankLines(nextLeadLines));
@@ -2420,13 +2653,12 @@ function assembleSupportedSlotLayoutSlide(
 		if (bodyLines.length > 0) {
 			bodyLines.push('');
 		}
-			bodyLines.push(section.marker);
-			bodyLines.push('');
-			const sectionLines = targetZone.kind === 'section' && targetZone.name === section.name
-				? nextReplacementLines
-				: section.lines;
-			bodyLines.push(...trimOuterBlankLines(sectionLines));
-		}
+		bodyLines.push(section.marker);
+		bodyLines.push('');
+		const sectionLines =
+			targetZone.kind === 'section' && targetZone.name === section.name ? nextReplacementLines : section.lines;
+		bodyLines.push(...trimOuterBlankLines(sectionLines));
+	}
 
 	return assemblePatchedSlide(surface.frontmatterLines, bodyLines);
 }
@@ -2436,20 +2668,23 @@ function isDeckHeadmatterSlide(slideMarkdown: string, slideIndex: number): boole
 }
 
 function isSupportedSingleSlotLayout(layout: string | null): boolean {
-	return layout === null || [
-		'default',
-		'center',
-		'full',
-		'none',
-		'intro',
-		'quote',
-		'statement',
-		'fact',
-		'image-left',
-		'image-right',
-		'iframe-left',
-		'iframe-right',
-	].includes(layout);
+	return (
+		layout === null ||
+		[
+			'default',
+			'center',
+			'full',
+			'none',
+			'intro',
+			'quote',
+			'statement',
+			'fact',
+			'image-left',
+			'image-right',
+			'iframe-left',
+			'iframe-right',
+		].includes(layout)
+	);
 }
 
 function deriveMeasuredTransformScale(
@@ -2458,7 +2693,12 @@ function deriveMeasuredTransformScale(
 	minReadableScale: number,
 	minimumReadableTransformScale: number | null,
 ): number | null {
-	if (recommendedScale === null || !Number.isFinite(recommendedScale) || recommendedScale <= 0 || recommendedScale >= 0.995) {
+	if (
+		recommendedScale === null ||
+		!Number.isFinite(recommendedScale) ||
+		recommendedScale <= 0 ||
+		recommendedScale >= 0.995
+	) {
 		return null;
 	}
 
@@ -2481,12 +2721,15 @@ function resolveSupportedSlotZoneTransformScale(
 	minReadableScale: number,
 	minEffectiveFontPx: number,
 ): number | null {
-	const zoneAudit = audit.slotZones?.find(zone => zone.name === targetZone.name) ?? null;
+	const zoneAudit = audit.slotZones?.find((zone) => zone.name === targetZone.name) ?? null;
 	const zoneScale = zoneAudit?.recommendedTransformScale ?? null;
-	const minimumReadableTransformScale = zoneAudit?.minimumReadableTransformScale
-		?? computeMinimumReadableScaleForFont(audit.effectiveMinFontPx, minEffectiveFontPx);
-	return deriveMeasuredTransformScale(zoneScale, currentZoom, minReadableScale, minimumReadableTransformScale)
-		?? deriveMeasuredTransformScale(fallbackScale, currentZoom, minReadableScale, minimumReadableTransformScale);
+	const minimumReadableTransformScale =
+		zoneAudit?.minimumReadableTransformScale ??
+		computeMinimumReadableScaleForFont(audit.effectiveMinFontPx, minEffectiveFontPx);
+	return (
+		deriveMeasuredTransformScale(zoneScale, currentZoom, minReadableScale, minimumReadableTransformScale) ??
+		deriveMeasuredTransformScale(fallbackScale, currentZoom, minReadableScale, minimumReadableTransformScale)
+	);
 }
 
 function readFrontmatterScalar(frontmatterLines: string[], key: string): string | null {
@@ -2506,7 +2749,7 @@ function stripFrontmatterKey(frontmatterLines: string[], key: string): string[] 
 	}
 
 	const keyPattern = new RegExp(`^${key}\\s*:`, 'i');
-	const contentLines = frontmatterLines.slice(0, -1).filter(line => !keyPattern.test(line.trim()));
+	const contentLines = frontmatterLines.slice(0, -1).filter((line) => !keyPattern.test(line.trim()));
 	if (contentLines.length === 0) {
 		return [];
 	}
@@ -2560,11 +2803,11 @@ function findSingleCodeFenceBlock(lines: string[]): FencedBlock | null {
 }
 
 function containsMermaidFence(lines: string[]): boolean {
-	return containsFenceMatching(lines, info => /^mermaid(?:\s+\{[^}]+\})?\s*$/i.test(info));
+	return containsFenceMatching(lines, (info) => /^mermaid(?:\s+\{[^}]+\})?\s*$/i.test(info));
 }
 
 function containsNonMermaidFence(lines: string[]): boolean {
-	return containsFenceMatching(lines, info => !/^mermaid(?:\s+\{[^}]+\})?\s*$/i.test(info));
+	return containsFenceMatching(lines, (info) => !/^mermaid(?:\s+\{[^}]+\})?\s*$/i.test(info));
 }
 
 function containsFenceMatching(lines: string[], predicate: (info: string) => boolean): boolean {
@@ -2593,7 +2836,7 @@ function containsMarkdownTableOutsideFence(lines: string[]): boolean {
 }
 
 function containsMarkdownImageOutsideFence(lines: string[]): boolean {
-	return hasOutsideFenceLine(lines, line => /^!\[.*\]\(.+\)/.test(line.trim()));
+	return hasOutsideFenceLine(lines, (line) => /^!\[.*\]\(.+\)/.test(line.trim()));
 }
 
 function containsPrimaryNonMermaidContentOutsideFence(lines: string[]): boolean {
@@ -2616,8 +2859,10 @@ function containsComponentSurfaceWithPrimaryMarkdownContent(slideMarkdown: strin
 	}
 
 	const partition = partitionComponentAndPrimaryContent(surface.bodyLines);
-	return partition.groups.some(group => group.kind === 'component')
-		&& partition.groups.some(group => group.kind === 'primary');
+	return (
+		partition.groups.some((group) => group.kind === 'component') &&
+		partition.groups.some((group) => group.kind === 'primary')
+	);
 }
 
 function extractSlideBodyLinesWithoutLayoutCheck(slideMarkdown: string): string[] | null {
@@ -2636,7 +2881,7 @@ function partitionMermaidAndPrimaryContent(lines: string[]): {
 	primaryContentLines: string[];
 } {
 	const trimmedLines = trimOuterBlankLines(lines);
-	const headingIndex = trimmedLines.findIndex(line => /^#{1,6}\s+\S/.test(line.trim()));
+	const headingIndex = trimmedLines.findIndex((line) => /^#{1,6}\s+\S/.test(line.trim()));
 	const headingLine = headingIndex >= 0 ? trimmedLines[headingIndex].trim() : null;
 	const mermaidLines: string[] = [];
 	const primaryContentLines: string[] = [];
@@ -2692,7 +2937,7 @@ function partitionMermaidAndPrimaryContent(lines: string[]): {
 
 function partitionComponentAndPrimaryContent(lines: string[]): ComponentPrimaryContentPartition {
 	const trimmedLines = trimOuterBlankLines(lines);
-	const headingIndex = trimmedLines.findIndex(line => /^#{1,6}\s+\S/.test(line.trim()));
+	const headingIndex = trimmedLines.findIndex((line) => /^#{1,6}\s+\S/.test(line.trim()));
 	const headingLine = headingIndex >= 0 ? trimmedLines[headingIndex].trim() : null;
 	const groups: ComponentPrimaryContentGroup[] = [];
 	let unsupportedPrimarySyntax = false;
@@ -2747,9 +2992,11 @@ function canSeparateComponentPrimaryContent(partition: ComponentPrimaryContentPa
 	if (partition.groups.length !== 2) {
 		return false;
 	}
-	return partition.groups.some(group => group.kind === 'component')
-		&& partition.groups.some(group => group.kind === 'primary')
-		&& partition.groups.every(group => countMeaningfulLines(group.lines) > 0);
+	return (
+		partition.groups.some((group) => group.kind === 'component') &&
+		partition.groups.some((group) => group.kind === 'primary') &&
+		partition.groups.every((group) => countMeaningfulLines(group.lines) > 0)
+	);
 }
 
 function isIgnorableMermaidCompanionLine(line: string): boolean {
@@ -2826,31 +3073,33 @@ function chooseTableSplitOrientation(
 	tableBlock: MarkdownTableBlock,
 ): 'rows' | 'columns' {
 	const columnCount = parseMarkdownTableCells(tableBlock.headerLine).length;
-	const tableFinding = findings.find(finding => finding.target === 'table')
-		?? findings.find(finding => finding.recommendedPatch === 'split-table' && typeof finding.overflowAxis === 'string');
+	const tableFinding =
+		findings.find((finding) => finding.target === 'table') ??
+		findings.find(
+			(finding) => finding.recommendedPatch === 'split-table' && typeof finding.overflowAxis === 'string',
+		);
 	if (tableFinding?.overflowAxis === 'width' || tableFinding?.overflowAxis === 'both') {
 		return columnCount > 2 ? 'columns' : 'rows';
 	}
 	return 'rows';
 }
 
-function shouldConvertTableToRecordSlides(
-	findings: SlidevLayoutFinding[],
-	tableBlock: MarkdownTableBlock,
-): boolean {
-	const tableFinding = findings.find(finding => finding.target === 'table')
-		?? findings.find(finding => finding.recommendedPatch === 'split-table' && typeof finding.overflowAxis === 'string');
-	const hasTableQualityFinding = findings.some(finding => finding.recommendedPatch === 'split-table'
-		&& (finding.kind === 'low-effective-font'
-			|| finding.kind === 'tight-margin'
-			|| finding.kind === 'low-content-utilization'));
+function shouldConvertTableToRecordSlides(findings: SlidevLayoutFinding[], tableBlock: MarkdownTableBlock): boolean {
+	const tableFinding =
+		findings.find((finding) => finding.target === 'table') ??
+		findings.find(
+			(finding) => finding.recommendedPatch === 'split-table' && typeof finding.overflowAxis === 'string',
+		);
+	const hasTableQualityFinding = findings.some(
+		(finding) =>
+			finding.recommendedPatch === 'split-table' &&
+			(finding.kind === 'low-effective-font' ||
+				finding.kind === 'tight-margin' ||
+				finding.kind === 'low-content-utilization'),
+	);
 	if (
-		!tableFinding
-		|| (
-			tableFinding.overflowAxis !== 'width'
-			&& tableFinding.overflowAxis !== 'both'
-			&& !hasTableQualityFinding
-		)
+		!tableFinding ||
+		(tableFinding.overflowAxis !== 'width' && tableFinding.overflowAxis !== 'both' && !hasTableQualityFinding)
 	) {
 		return false;
 	}
@@ -2859,10 +3108,9 @@ function shouldConvertTableToRecordSlides(
 	const rowCells = tableBlock.dataLines.map(parseMarkdownTableCells);
 	const longestTokenLength = Math.max(
 		0,
-		...rowCells.flatMap(cells => cells.map(cell => longestUnbrokenTokenLength(cell))),
+		...rowCells.flatMap((cells) => cells.map((cell) => longestUnbrokenTokenLength(cell))),
 	);
-	return (headerCells.length >= 5 && longestTokenLength >= 28)
-		|| hasLongMarkdownTableCell(rowCells);
+	return (headerCells.length >= 5 && longestTokenLength >= 28) || hasLongMarkdownTableCell(rowCells);
 }
 
 function resolveStructuralChunkCount(
@@ -2871,11 +3119,8 @@ function resolveStructuralChunkCount(
 	nextZoom: number | null,
 	minReadableScale: number,
 ): number {
-	const effectiveZoom = nextZoom
-		?? (audit.pageScale !== null && audit.pageScale > 0 ? audit.pageScale : currentZoom);
-	const fitFactor = nextZoom !== null && currentZoom > 0
-		? currentZoom / Math.max(nextZoom, 0.01)
-		: 1;
+	const effectiveZoom = nextZoom ?? (audit.pageScale !== null && audit.pageScale > 0 ? audit.pageScale : currentZoom);
+	const fitFactor = nextZoom !== null && currentZoom > 0 ? currentZoom / Math.max(nextZoom, 0.01) : 1;
 	const requiredFactor = Math.max(fitFactor, minReadableScale / Math.max(effectiveZoom, 0.01));
 	return Math.max(2, Math.min(4, Math.ceil(requiredFactor)));
 }
@@ -2909,7 +3154,10 @@ function splitJavaScriptLikeCodeFenceIntoChunks(codeBlock: FencedBlock, targetCh
 		return null;
 	}
 
-	const chunkedTopLevelBlocks = chunkLineBlocks(topLevelBlocks, Math.max(2, Math.min(targetChunkCount, topLevelBlocks.length)));
+	const chunkedTopLevelBlocks = chunkLineBlocks(
+		topLevelBlocks,
+		Math.max(2, Math.min(targetChunkCount, topLevelBlocks.length)),
+	);
 	return chunkedTopLevelBlocks.length >= 2 ? chunkedTopLevelBlocks : null;
 }
 
@@ -2923,7 +3171,10 @@ function splitPythonCodeFenceIntoChunks(codeBlock: FencedBlock, targetChunkCount
 		return null;
 	}
 
-	const chunkedTopLevelBlocks = chunkLineBlocks(topLevelBlocks, Math.max(2, Math.min(targetChunkCount, topLevelBlocks.length)));
+	const chunkedTopLevelBlocks = chunkLineBlocks(
+		topLevelBlocks,
+		Math.max(2, Math.min(targetChunkCount, topLevelBlocks.length)),
+	);
 	return chunkedTopLevelBlocks.length >= 2 ? chunkedTopLevelBlocks : null;
 }
 
@@ -2937,14 +3188,20 @@ function splitRustCodeFenceIntoChunks(codeBlock: FencedBlock, targetChunkCount: 
 		return null;
 	}
 
-	const chunkedTopLevelBlocks = chunkLineBlocks(topLevelBlocks, Math.max(2, Math.min(targetChunkCount, topLevelBlocks.length)));
+	const chunkedTopLevelBlocks = chunkLineBlocks(
+		topLevelBlocks,
+		Math.max(2, Math.min(targetChunkCount, topLevelBlocks.length)),
+	);
 	return chunkedTopLevelBlocks.length >= 2 ? chunkedTopLevelBlocks : null;
 }
 
 function splitGenericCodeFenceIntoChunks(bodyLines: string[], targetChunkCount: number): string[][] | null {
 	const semanticBlocks = collectCodeSemanticBlocks(bodyLines);
 	if (semanticBlocks.length >= 2) {
-		const chunkedSemanticBlocks = chunkLineBlocks(semanticBlocks, Math.max(2, Math.min(targetChunkCount, semanticBlocks.length)));
+		const chunkedSemanticBlocks = chunkLineBlocks(
+			semanticBlocks,
+			Math.max(2, Math.min(targetChunkCount, semanticBlocks.length)),
+		);
 		if (chunkedSemanticBlocks.length >= 2) {
 			return chunkedSemanticBlocks;
 		}
@@ -2952,7 +3209,10 @@ function splitGenericCodeFenceIntoChunks(bodyLines: string[], targetChunkCount: 
 
 	const codeSegments = collectCodeFenceSegments(bodyLines);
 	if (codeSegments.length >= 2) {
-		const chunkedSegments = chunkLineBlocks(codeSegments, Math.max(2, Math.min(targetChunkCount, codeSegments.length)));
+		const chunkedSegments = chunkLineBlocks(
+			codeSegments,
+			Math.max(2, Math.min(targetChunkCount, codeSegments.length)),
+		);
 		if (chunkedSegments.length >= 2) {
 			return chunkedSegments;
 		}
@@ -2983,38 +3243,41 @@ function readCodeFenceLanguage(opener: string): string {
 }
 
 function splitMarkdownTableByRows(tableBlock: MarkdownTableBlock, targetChunkCount: number): string[][] | null {
-	const rowBlocks = tableBlock.dataLines.map(line => [line]);
+	const rowBlocks = tableBlock.dataLines.map((line) => [line]);
 	const chunkedRowBlocks = chunkLineBlocks(rowBlocks, Math.max(2, Math.min(targetChunkCount, rowBlocks.length)));
 	if (chunkedRowBlocks.length < 2) {
 		return null;
 	}
 
-	return chunkedRowBlocks.map(rows => [
+	return chunkedRowBlocks.map((rows) => [
 		tableBlock.headerLine,
 		tableBlock.separatorLine,
-		...rows.map(line => line.trimEnd()),
+		...rows.map((line) => line.trimEnd()),
 	]);
 }
 
 function splitMarkdownTableByColumns(tableBlock: MarkdownTableBlock, targetChunkCount: number): string[][] | null {
 	const headerCells = parseMarkdownTableCells(tableBlock.headerLine);
 	const rowCells = tableBlock.dataLines.map(parseMarkdownTableCells);
-	if (headerCells.length < 3 || rowCells.some(cells => cells.length !== headerCells.length)) {
+	if (headerCells.length < 3 || rowCells.some((cells) => cells.length !== headerCells.length)) {
 		return null;
 	}
 
 	const trailingColumnIndexes = Array.from({ length: headerCells.length - 1 }, (_, index) => index + 1);
-	const columnGroups = chunkIndexList(trailingColumnIndexes, Math.max(2, Math.min(targetChunkCount, trailingColumnIndexes.length)));
+	const columnGroups = chunkIndexList(
+		trailingColumnIndexes,
+		Math.max(2, Math.min(targetChunkCount, trailingColumnIndexes.length)),
+	);
 	if (columnGroups.length < 2) {
 		return null;
 	}
 
-	return columnGroups.map(group => {
+	return columnGroups.map((group) => {
 		const selectedIndexes = [0, ...group];
 		return [
 			formatMarkdownTableLine(selectTableCells(headerCells, selectedIndexes)),
 			formatMarkdownTableSeparator(selectedIndexes.length),
-			...rowCells.map(cells => formatMarkdownTableLine(selectTableCells(cells, selectedIndexes))),
+			...rowCells.map((cells) => formatMarkdownTableLine(selectTableCells(cells, selectedIndexes))),
 		];
 	});
 }
@@ -3022,23 +3285,28 @@ function splitMarkdownTableByColumns(tableBlock: MarkdownTableBlock, targetChunk
 function splitMarkdownTableToRecordSlides(tableBlock: MarkdownTableBlock, targetChunkCount: number): string[][] | null {
 	const headerCells = parseMarkdownTableCells(tableBlock.headerLine);
 	const rowCells = tableBlock.dataLines.map(parseMarkdownTableCells);
-	if (headerCells.length < 2 || rowCells.some(cells => cells.length !== headerCells.length)) {
+	if (headerCells.length < 2 || rowCells.some((cells) => cells.length !== headerCells.length)) {
 		return null;
 	}
 
-	const recordBlocks = rowCells.map(cells => formatMarkdownTableRecordBlock(headerCells, cells));
-	const chunkedRecordBlocks = chunkLineBlocks(recordBlocks, Math.max(2, Math.min(targetChunkCount, recordBlocks.length)));
+	const recordBlocks = rowCells.map((cells) => formatMarkdownTableRecordBlock(headerCells, cells));
+	const chunkedRecordBlocks = chunkLineBlocks(
+		recordBlocks,
+		Math.max(2, Math.min(targetChunkCount, recordBlocks.length)),
+	);
 	if (chunkedRecordBlocks.length < 2) {
 		return null;
 	}
 
-	return chunkedRecordBlocks.map(blocks => blocks.flatMap((line, index, lines) => {
-		const emitted = [line];
-		if (index < lines.length - 1 && line.trim().length > 0 && lines[index + 1]?.trim().startsWith('- ')) {
-			emitted.push('');
-		}
-		return emitted;
-	}));
+	return chunkedRecordBlocks.map((blocks) =>
+		blocks.flatMap((line, index, lines) => {
+			const emitted = [line];
+			if (index < lines.length - 1 && line.trim().length > 0 && lines[index + 1]?.trim().startsWith('- ')) {
+				emitted.push('');
+			}
+			return emitted;
+		}),
+	);
 }
 
 function hasSubstantiveLine(line: string): boolean {
@@ -3047,7 +3315,10 @@ function hasSubstantiveLine(line: string): boolean {
 }
 
 function chunkLineBlocks(blocks: string[][], chunkCount: number): string[][] {
-	const targetLineBudget = Math.max(1, Math.ceil(blocks.reduce((total, block) => total + countMeaningfulLines(block), 0) / chunkCount));
+	const targetLineBudget = Math.max(
+		1,
+		Math.ceil(blocks.reduce((total, block) => total + countMeaningfulLines(block), 0) / chunkCount),
+	);
 	const chunks: string[][] = [];
 	let currentChunk: string[] = [];
 	let currentLineCount = 0;
@@ -3057,12 +3328,10 @@ function chunkLineBlocks(blocks: string[][], chunkCount: number): string[][] {
 		const blockLineCount = countMeaningfulLines(block);
 		const remainingSegments = blocks.length - index;
 		const remainingChunkSlots = chunkCount - chunks.length;
-		const shouldSealChunk = currentLineCount > 0
-			&& chunks.length < chunkCount - 1
-			&& (
-				currentLineCount + blockLineCount > targetLineBudget
-				|| remainingSegments === remainingChunkSlots
-			);
+		const shouldSealChunk =
+			currentLineCount > 0 &&
+			chunks.length < chunkCount - 1 &&
+			(currentLineCount + blockLineCount > targetLineBudget || remainingSegments === remainingChunkSlots);
 
 		if (shouldSealChunk) {
 			chunks.push(trimOuterBlankLines(currentChunk));
@@ -3078,7 +3347,7 @@ function chunkLineBlocks(blocks: string[][], chunkCount: number): string[][] {
 		chunks.push(trimOuterBlankLines(currentChunk));
 	}
 
-	return chunks.filter(chunk => chunk.some(hasSubstantiveLine));
+	return chunks.filter((chunk) => chunk.some(hasSubstantiveLine));
 }
 
 function collectCodeSemanticBlocks(lines: string[]): string[][] {
@@ -3127,7 +3396,7 @@ function collectCodeSemanticBlocks(lines: string[]): string[][] {
 		blocks.push(trimOuterBlankLines(pendingLeadLines));
 	}
 
-	return blocks.filter(block => block.some(hasSubstantiveLine));
+	return blocks.filter((block) => block.some(hasSubstantiveLine));
 }
 
 function collectJavaScriptLikeTopLevelBlocks(lines: string[]): string[][] {
@@ -3193,7 +3462,7 @@ function collectJavaScriptLikeTopLevelBlocks(lines: string[]): string[][] {
 		blocks.push(trimOuterBlankLines(pendingLeadLines));
 	}
 
-	return blocks.filter(block => block.some(hasSubstantiveLine));
+	return blocks.filter((block) => block.some(hasSubstantiveLine));
 }
 
 function collectPythonTopLevelBlocks(lines: string[]): string[][] {
@@ -3259,7 +3528,7 @@ function collectPythonTopLevelBlocks(lines: string[]): string[][] {
 		blocks.push(trimOuterBlankLines(pendingLeadLines));
 	}
 
-	return blocks.filter(block => block.some(hasSubstantiveLine));
+	return blocks.filter((block) => block.some(hasSubstantiveLine));
 }
 
 function collectRustTopLevelBlocks(lines: string[]): string[][] {
@@ -3325,7 +3594,7 @@ function collectRustTopLevelBlocks(lines: string[]): string[][] {
 		blocks.push(trimOuterBlankLines(pendingLeadLines));
 	}
 
-	return blocks.filter(block => block.some(hasSubstantiveLine));
+	return blocks.filter((block) => block.some(hasSubstantiveLine));
 }
 
 function collectCodeFenceSegments(lines: string[]): string[][] {
@@ -3346,7 +3615,7 @@ function collectCodeFenceSegments(lines: string[]): string[][] {
 		segments.push(trimOuterBlankLines(current));
 	}
 
-	return segments.filter(segment => segment.some(hasSubstantiveLine));
+	return segments.filter((segment) => segment.some(hasSubstantiveLine));
 }
 
 function chunkIndexList(indexes: number[], chunkCount: number): number[][] {
@@ -3359,7 +3628,7 @@ function chunkIndexList(indexes: number[], chunkCount: number): number[][] {
 	for (let index = 0; index < indexes.length; index += chunkSize) {
 		groups.push(indexes.slice(index, index + chunkSize));
 	}
-	return groups.filter(group => group.length > 0);
+	return groups.filter((group) => group.length > 0);
 }
 
 function splitCodeLinesByBudget(lines: string[], chunkCount: number): string[][] | null {
@@ -3387,7 +3656,10 @@ function splitCodeLinesByBudget(lines: string[], chunkCount: number): string[][]
 	return chunks.length >= 2 ? chunks : null;
 }
 
-function consumeJavaScriptLikeTopLevelStatement(lines: string[], startIndex: number): { lines: string[]; nextIndex: number } {
+function consumeJavaScriptLikeTopLevelStatement(
+	lines: string[],
+	startIndex: number,
+): { lines: string[]; nextIndex: number } {
 	const block: string[] = [];
 	let delimiterDepth = 0;
 	let inBlockComment = false;
@@ -3471,7 +3743,10 @@ function consumeRustTopLevelBlock(lines: string[], startIndex: number): { lines:
 	return { lines: trimOuterBlankLines(block), nextIndex: index };
 }
 
-function updateJavaScriptBlockCommentState(line: string, inBlockComment: boolean): { inBlockComment: boolean; onlyComment: boolean } {
+function updateJavaScriptBlockCommentState(
+	line: string,
+	inBlockComment: boolean,
+): { inBlockComment: boolean; onlyComment: boolean } {
 	const commentVisibleLine = stripJavaScriptQuotedSegments(line);
 	let cursor = 0;
 	let activeComment = inBlockComment;
@@ -3556,9 +3831,13 @@ function startsJavaScriptLikeImport(trimmedLine: string): boolean {
 }
 
 function startsJavaScriptLikeTopLevel(trimmedLine: string): boolean {
-	return /^(?:export\s+)?(?:(?:declare|abstract|async|default)\s+)*(?:class|function|interface|type|enum|namespace|module|const|let|var)\b/.test(trimmedLine)
-		|| /^export\s+(?:type\s+)?\{/.test(trimmedLine)
-		|| startsJavaScriptLikeImport(trimmedLine);
+	return (
+		/^(?:export\s+)?(?:(?:declare|abstract|async|default)\s+)*(?:class|function|interface|type|enum|namespace|module|const|let|var)\b/.test(
+			trimmedLine,
+		) ||
+		/^export\s+(?:type\s+)?\{/.test(trimmedLine) ||
+		startsJavaScriptLikeImport(trimmedLine)
+	);
 }
 
 function isPythonLeadLine(trimmedLine: string): boolean {
@@ -3598,9 +3877,13 @@ function startsRustImport(trimmedLine: string): boolean {
 }
 
 function startsRustTopLevel(trimmedLine: string): boolean {
-	return startsRustImport(trimmedLine)
-		|| /^(?:pub(?:\([^)]*\))?\s+)?(?:async\s+)?(?:unsafe\s+)?(?:extern\s+"[^"]+"\s+)?(?:fn|struct|enum|trait|impl|mod|const|static|type|union)\b/.test(trimmedLine)
-		|| /^macro_rules!/.test(trimmedLine);
+	return (
+		startsRustImport(trimmedLine) ||
+		/^(?:pub(?:\([^)]*\))?\s+)?(?:async\s+)?(?:unsafe\s+)?(?:extern\s+"[^"]+"\s+)?(?:fn|struct|enum|trait|impl|mod|const|static|type|union)\b/.test(
+			trimmedLine,
+		) ||
+		/^macro_rules!/.test(trimmedLine)
+	);
 }
 
 function shouldStartNextCodeSemanticBlock(
@@ -3624,8 +3907,10 @@ function shouldStartNextCodeSemanticBlock(
 }
 
 function startsIndentScopedCodeBlock(trimmedLine: string): boolean {
-	return /:\s*(?:#.*)?$/.test(trimmedLine)
-		&& /^(?:async\s+def|def|class|if|elif|else|for|while|try|except|finally|with|match|case)\b/.test(trimmedLine);
+	return (
+		/:\s*(?:#.*)?$/.test(trimmedLine) &&
+		/^(?:async\s+def|def|class|if|elif|else|for|while|try|except|finally|with|match|case)\b/.test(trimmedLine)
+	);
 }
 
 function isCodeLeadComment(trimmedLine: string): boolean {
@@ -3634,8 +3919,7 @@ function isCodeLeadComment(trimmedLine: string): boolean {
 
 function codeLineContinues(line: string): boolean {
 	const trimmed = line.trim();
-	return trimmed.length > 0
-		&& /(?:[({[\\,]|=>|\?|\|\||&&|[+\-*/%=<>])$/.test(trimmed);
+	return trimmed.length > 0 && /(?:[({[\\,]|=>|\?|\|\||&&|[+\-*/%=<>])$/.test(trimmed);
 }
 
 function measureCodeDelimiterDelta(line: string): number {
@@ -3664,11 +3948,11 @@ function countLeadingWhitespace(line: string): number {
 
 function parseMarkdownTableCells(line: string): string[] {
 	const trimmed = line.trim().replace(/^\|/, '').replace(/\|$/, '');
-	return trimmed.split('|').map(cell => cell.trim());
+	return trimmed.split('|').map((cell) => cell.trim());
 }
 
 function selectTableCells(cells: string[], indexes: number[]): string[] {
-	return indexes.map(index => cells[index] ?? '');
+	return indexes.map((index) => cells[index] ?? '');
 }
 
 function formatMarkdownTableLine(cells: string[]): string {
@@ -3690,25 +3974,27 @@ function formatMarkdownTableRecordBlock(headers: string[], cells: string[]): str
 }
 
 function longestUnbrokenTokenLength(value: string): number {
-	return value
-		.split(/\s+/)
-		.reduce((longest, token) => Math.max(longest, token.length), 0);
+	return value.split(/\s+/).reduce((longest, token) => Math.max(longest, token.length), 0);
 }
 
 function hasLongMarkdownTableCell(rows: string[][]): boolean {
-	return rows.some(cells => cells.some(cell => {
-		const trimmed = cell.trim();
-		return trimmed.length >= 80 || trimmed.split(/\s+/).filter(Boolean).length >= 12;
-	}));
+	return rows.some((cells) =>
+		cells.some((cell) => {
+			const trimmed = cell.trim();
+			return trimmed.length >= 80 || trimmed.split(/\s+/).filter(Boolean).length >= 12;
+		}),
+	);
 }
 
 function isMarkdownTableRow(line: string): boolean {
 	const trimmed = line.trim();
-	return trimmed.length > 0
-		&& trimmed.includes('|')
-		&& !trimmed.startsWith('```')
-		&& !trimmed.startsWith('~~~')
-		&& !trimmed.startsWith('#');
+	return (
+		trimmed.length > 0 &&
+		trimmed.includes('|') &&
+		!trimmed.startsWith('```') &&
+		!trimmed.startsWith('~~~') &&
+		!trimmed.startsWith('#')
+	);
 }
 
 function isMarkdownTableSeparator(line: string): boolean {
@@ -3761,11 +4047,13 @@ function collectSimpleSlideBlocks(lines: string[]): string[][] {
 		blocks.push(trimOuterBlankLines(block));
 	}
 
-	return blocks.filter(block => block.some(line => line.trim().length > 0));
+	return blocks.filter((block) => block.some((line) => line.trim().length > 0));
 }
 
 function containsTransformableComponentSyntax(lines: string[]): boolean {
-	return lines.some(line => /^\s*<[A-Za-z][\w-]*(?:\s|>|\/|$)/.test(line.trim()) || /^\s*<\/[A-Za-z][\w-]*\s*>/.test(line.trim()));
+	return lines.some(
+		(line) => /^\s*<[A-Za-z][\w-]*(?:\s|>|\/|$)/.test(line.trim()) || /^\s*<\/[A-Za-z][\w-]*\s*>/.test(line.trim()),
+	);
 }
 
 function consumeComponentSurfaceBlock(
@@ -3861,7 +4149,10 @@ function consumePrimaryMarkdownBlock(
 			if (nextMeaningfulIndex < 0 || nextMeaningfulIndex === headingIndex) {
 				break;
 			}
-			if (isComponentSurfaceStartLine(lines[nextMeaningfulIndex]) || consumeUnsupportedPrimaryMarkdownBlock(lines, nextMeaningfulIndex)) {
+			if (
+				isComponentSurfaceStartLine(lines[nextMeaningfulIndex]) ||
+				consumeUnsupportedPrimaryMarkdownBlock(lines, nextMeaningfulIndex)
+			) {
 				break;
 			}
 			block.push(line);
@@ -3877,9 +4168,7 @@ function consumePrimaryMarkdownBlock(
 	}
 
 	const primaryLines = trimOuterBlankLines(block);
-	return primaryLines.length > 0
-		? { lines: primaryLines, nextIndex: index }
-		: null;
+	return primaryLines.length > 0 ? { lines: primaryLines, nextIndex: index } : null;
 }
 
 function containsOnlyTransformableComponentSurfaceSyntax(lines: string[]): boolean {
@@ -3914,12 +4203,14 @@ function isTransformableComponentSurfaceLine(line: string, state: ComponentSurfa
 }
 
 function isForbiddenComponentSurfaceLine(trimmedLine: string): boolean {
-	return /^::[\w-]+::$/.test(trimmedLine)
-		|| /^:::\s*/.test(trimmedLine)
-		|| /<(Transform|v-click|v-switch)\b/i.test(trimmedLine)
-		|| /^(```+|~~~+)/.test(trimmedLine)
-		|| isMarkdownTableRow(trimmedLine)
-		|| /^!\[.*\]\(.+\)/.test(trimmedLine);
+	return (
+		/^::[\w-]+::$/.test(trimmedLine) ||
+		/^:::\s*/.test(trimmedLine) ||
+		/<(Transform|v-click|v-switch)\b/i.test(trimmedLine) ||
+		/^(```+|~~~+)/.test(trimmedLine) ||
+		isMarkdownTableRow(trimmedLine) ||
+		/^!\[.*\]\(.+\)/.test(trimmedLine)
+	);
 }
 
 function isUnsupportedComponentPrimaryLine(trimmedLine: string): boolean {
@@ -3928,8 +4219,7 @@ function isUnsupportedComponentPrimaryLine(trimmedLine: string): boolean {
 
 function isComponentSurfaceStartLine(line: string): boolean {
 	const trimmed = line.trim();
-	return /^<[A-Za-z][\w-]*(?:\s|>|\/|$)/.test(trimmed)
-		|| /^<\/[A-Za-z][\w-]*\s*>/.test(trimmed);
+	return /^<[A-Za-z][\w-]*(?:\s|>|\/|$)/.test(trimmed) || /^<\/[A-Za-z][\w-]*\s*>/.test(trimmed);
 }
 
 function nextMeaningfulLineStartsComponentSurface(lines: string[], startIndex: number): boolean {
@@ -3952,9 +4242,11 @@ function componentSurfaceEndsAtBoundary(lines: string[]): boolean {
 		return false;
 	}
 
-	return /^<\/[A-Za-z][\w-]*\s*>$/.test(lastLine)
-		|| /\/>\s*$/.test(lastLine)
-		|| /^<([A-Za-z][\w-]*)\b[^>]*>.*<\/\1>\s*$/.test(lastLine);
+	return (
+		/^<\/[A-Za-z][\w-]*\s*>$/.test(lastLine) ||
+		/\/>\s*$/.test(lastLine) ||
+		/^<([A-Za-z][\w-]*)\b[^>]*>.*<\/\1>\s*$/.test(lastLine)
+	);
 }
 
 function appendComponentPrimaryGroup(
@@ -4017,7 +4309,7 @@ function updateComponentSurfaceScanState(line: string, state: ComponentSurfaceSc
 }
 
 function containsTransformWrapper(lines: string[]): boolean {
-	return lines.some(line => /<(Transform)\b/i.test(line.trim()));
+	return lines.some((line) => /<(Transform)\b/i.test(line.trim()));
 }
 
 function readFirstTransformScale(lines: string[]): number | null {
@@ -4034,7 +4326,7 @@ function readFirstTransformScale(lines: string[]): number | null {
 
 function replaceFirstTransformScale(lines: string[], scale: number): string[] {
 	let replaced = false;
-	return lines.map(line => {
+	return lines.map((line) => {
 		if (replaced || !/<Transform\b/i.test(line)) {
 			return line;
 		}
@@ -4045,20 +4337,12 @@ function replaceFirstTransformScale(lines: string[], scale: number): string[] {
 
 function wrapLinesInTransform(lines: string[], scale: number): string[] {
 	const trimmedLines = trimOuterBlankLines(lines);
-	return [
-		`<Transform :scale="${formatZoom(scale)}" origin="top left">`,
-		...trimmedLines,
-		'</Transform>',
-	];
+	return [`<Transform :scale="${formatZoom(scale)}" origin="top left">`, ...trimmedLines, '</Transform>'];
 }
 
 function wrapLinesInSlotZoneOwner(lines: string[], zoneName: string): string[] {
 	const trimmedLines = trimOuterBlankLines(lines);
-	return [
-		`<div ${NOTEMD_SLOT_ZONE_ATTR}="${zoneName}">`,
-		...trimmedLines,
-		'</div>',
-	];
+	return [`<div ${NOTEMD_SLOT_ZONE_ATTR}="${zoneName}">`, ...trimmedLines, '</div>'];
 }
 
 function unwrapSlotZoneOwnerWrapper(lines: string[]): { zoneName: string; contentLines: string[] } | null {
@@ -4067,7 +4351,9 @@ function unwrapSlotZoneOwnerWrapper(lines: string[]): { zoneName: string; conten
 		return null;
 	}
 
-	const openingMatch = trimmedLines[0].trim().match(new RegExp(`^<div\\s+${NOTEMD_SLOT_ZONE_ATTR}="([^"]+)"\\s*>$`, 'i'));
+	const openingMatch = trimmedLines[0]
+		.trim()
+		.match(new RegExp(`^<div\\s+${NOTEMD_SLOT_ZONE_ATTR}="([^"]+)"\\s*>$`, 'i'));
 	if (!openingMatch || trimmedLines[trimmedLines.length - 1].trim() !== '</div>') {
 		return null;
 	}
@@ -4081,7 +4367,7 @@ function unwrapSlotZoneOwnerWrapper(lines: string[]): { zoneName: string; conten
 export function decorateComponentHeavySlotZones(deckMarkdown: string): string {
 	const slides = splitSlideDeck(deckMarkdown);
 	let changed = false;
-	const decoratedSlides = slides.map(slideMarkdown => {
+	const decoratedSlides = slides.map((slideMarkdown) => {
 		const decoratedSlide = decorateComponentHeavySlotZonesInSlide(slideMarkdown);
 		if (decoratedSlide !== slideMarkdown) {
 			changed = true;
@@ -4098,15 +4384,18 @@ function decorateComponentHeavySlotZonesInSlide(slideMarkdown: string): string {
 	}
 
 	const nextLeadLines = decorateSlotZoneOwnershipLines(surface.leadLines, surface.leadRole);
-	const nextSections = surface.sections.map(section => ({
+	const nextSections = surface.sections.map((section) => ({
 		...section,
 		lines: decorateSlotZoneOwnershipLines(section.lines, section.name),
 	}));
-	return assemblePatchedSlide(surface.frontmatterLines, buildSupportedSlotLayoutBodyLines({
-		...surface,
-		leadLines: nextLeadLines,
-		sections: nextSections,
-	}));
+	return assemblePatchedSlide(
+		surface.frontmatterLines,
+		buildSupportedSlotLayoutBodyLines({
+			...surface,
+			leadLines: nextLeadLines,
+			sections: nextSections,
+		}),
+	);
 }
 
 function decorateSlotZoneOwnershipLines(lines: string[], zoneName: string): string[] {
@@ -4196,11 +4485,7 @@ function assemblePatchedSlide(frontmatterLines: string[], bodyLines: string[]): 
 		return normalizedBody.join('\n').trim();
 	}
 
-	return [
-		...frontmatterLines,
-		'',
-		...normalizedBody,
-	].join('\n').trim();
+	return [...frontmatterLines, '', ...normalizedBody].join('\n').trim();
 }
 
 function escapeRegExp(value: string): string {
@@ -4214,9 +4499,7 @@ function joinSlideDeck(slides: string[]): string {
 
 	let deckMarkdown = slides[0].trim();
 	for (const slide of slides.slice(1)) {
-		deckMarkdown += slideStartsWithFrontmatter(slide)
-			? `\n\n---\n${slide.trim()}`
-			: `\n\n---\n\n${slide.trim()}`;
+		deckMarkdown += slideStartsWithFrontmatter(slide) ? `\n\n---\n${slide.trim()}` : `\n\n---\n\n${slide.trim()}`;
 	}
 
 	return `${deckMarkdown}\n`;
@@ -4246,11 +4529,7 @@ function ensureSlideFrontmatterValue(slideMarkdown: string, key: string, value: 
 		return nextLines.join('\n');
 	}
 
-	return [
-		`${key}: ${value}`,
-		'---',
-		normalizedSlide.replace(/^\s+/, ''),
-	].join('\n');
+	return [`${key}: ${value}`, '---', normalizedSlide.replace(/^\s+/, '')].join('\n');
 }
 
 function normalizeSlideFrontmatter(slideMarkdown: string): string {
@@ -4265,15 +4544,11 @@ function normalizeSlideFrontmatter(slideMarkdown: string): string {
 		return lines.join('\n');
 	}
 
-	return [
-		...lines.slice(0, bodyStart),
-		'---',
-		...lines.slice(bodyStart),
-	].join('\n');
+	return [...lines.slice(0, bodyStart), '---', ...lines.slice(bodyStart)].join('\n');
 }
 
 function findSlideFrontmatterEnd(lines: string[]): number {
-	const firstContentLine = lines.findIndex(line => line.trim().length > 0);
+	const firstContentLine = lines.findIndex((line) => line.trim().length > 0);
 	if (firstContentLine < 0 || !/^[A-Za-z][\w-]*\s*:/.test(lines[firstContentLine].trim())) {
 		return -1;
 	}
@@ -4292,7 +4567,7 @@ function findSlideFrontmatterEnd(lines: string[]): number {
 }
 
 function startsWithFrontmatterValue(lines: string[]): boolean {
-	const firstContentLine = lines.findIndex(line => line.trim().length > 0);
+	const firstContentLine = lines.findIndex((line) => line.trim().length > 0);
 	return firstContentLine >= 0 && /^[A-Za-z][\w-]*\s*:/.test(lines[firstContentLine].trim());
 }
 
@@ -4316,7 +4591,7 @@ function slideStartsWithFrontmatter(slideMarkdown: string): boolean {
 }
 
 function isFrontmatterClosingBoundary(lines: string[]): boolean {
-	const firstContentLine = lines.findIndex(line => line.trim().length > 0);
+	const firstContentLine = lines.findIndex((line) => line.trim().length > 0);
 	if (firstContentLine < 0 || !/^[A-Za-z][\w-]*\s*:/.test(lines[firstContentLine].trim())) {
 		return false;
 	}
@@ -4335,12 +4610,14 @@ function isFrontmatterClosingBoundary(lines: string[]): boolean {
 }
 
 function isSlideBodyBoundaryLine(line: string): boolean {
-	return line.startsWith('#')
-		|| line.startsWith('```')
-		|| line.startsWith('~~~')
-		|| line.startsWith(':::')
-		|| line.startsWith('<')
-		|| isSlotMarkerLine(line);
+	return (
+		line.startsWith('#') ||
+		line.startsWith('```') ||
+		line.startsWith('~~~') ||
+		line.startsWith(':::') ||
+		line.startsWith('<') ||
+		isSlotMarkerLine(line)
+	);
 }
 
 function isSlotMarkerLine(line: string): boolean {

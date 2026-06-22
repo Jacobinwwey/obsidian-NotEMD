@@ -24,14 +24,11 @@ function resetDirectory(directory) {
 
 function prepareVisualDiffOutputDirectory(directory) {
 	ensureDirectory(directory);
-	for (const child of [
-		'work',
-		'pptx-rendered',
-		'pptx-resized',
-		'diff',
-		'side-by-side',
-	]) {
-		fs.rmSync(path.join(directory, child), { recursive: true, force: true });
+	for (const child of ['work', 'pptx-rendered', 'pptx-resized', 'diff', 'side-by-side']) {
+		fs.rmSync(path.join(directory, child), {
+			recursive: true,
+			force: true,
+		});
 	}
 	for (const file of [
 		'all-side-by-side-sheet.png',
@@ -60,7 +57,7 @@ function runCommand(command, args, options = {}) {
 }
 
 function collectToolAvailability(tools = REQUIRED_TOOLS) {
-	const checked = tools.map(tool => {
+	const checked = tools.map((tool) => {
 		const result = runCommand(tool.command, tool.args);
 		return {
 			command: tool.command,
@@ -72,7 +69,7 @@ function collectToolAvailability(tools = REQUIRED_TOOLS) {
 	});
 	return {
 		checked,
-		missing: checked.filter(tool => !tool.available).map(tool => tool.command),
+		missing: checked.filter((tool) => !tool.available).map((tool) => tool.command),
 	};
 }
 
@@ -85,9 +82,10 @@ function collectPngSequence(directory) {
 	if (!directory || !fs.existsSync(directory)) {
 		return [];
 	}
-	return fs.readdirSync(directory)
-		.filter(file => /\.png$/i.test(file))
-		.map(file => path.join(directory, file))
+	return fs
+		.readdirSync(directory)
+		.filter((file) => /\.png$/i.test(file))
+		.map((file) => path.join(directory, file))
 		.sort((left, right) => firstNumber(left) - firstNumber(right) || left.localeCompare(right));
 }
 
@@ -145,7 +143,9 @@ function resolveSlideImageZipPath(slidePath, target) {
 function extractPptxBackgroundImages(options) {
 	const pptxPath = path.resolve(options.pptxPath);
 	const outputDirectory = path.resolve(options.outputDirectory);
-	const referenceDirectory = path.resolve(options.referenceDirectory || path.join(outputDirectory, 'pptx-background-reference'));
+	const referenceDirectory = path.resolve(
+		options.referenceDirectory || path.join(outputDirectory, 'pptx-background-reference'),
+	);
 	if (!fs.existsSync(pptxPath)) {
 		throw new Error(`PPTX file does not exist: ${pptxPath}`);
 	}
@@ -153,7 +153,7 @@ function extractPptxBackgroundImages(options) {
 	resetDirectory(referenceDirectory);
 	const entries = unzipSync(new Uint8Array(fs.readFileSync(pptxPath)));
 	const slidePaths = Object.keys(entries)
-		.filter(file => /^ppt\/slides\/slide\d+\.xml$/i.test(file))
+		.filter((file) => /^ppt\/slides\/slide\d+\.xml$/i.test(file))
 		.sort((left, right) => slideNumberFromPptxPath(left) - slideNumberFromPptxPath(right));
 	const referenceImages = [];
 
@@ -199,9 +199,10 @@ function resolvePdfPath(workDirectory, pptxPath) {
 	if (fs.existsSync(candidate)) {
 		return candidate;
 	}
-	const pdfs = fs.readdirSync(workDirectory)
-		.filter(file => /\.pdf$/i.test(file))
-		.map(file => path.join(workDirectory, file));
+	const pdfs = fs
+		.readdirSync(workDirectory)
+		.filter((file) => /\.pdf$/i.test(file))
+		.map((file) => path.join(workDirectory, file));
 	return pdfs[0] || candidate;
 }
 
@@ -223,21 +224,27 @@ function renderPptxToPngSequence(options) {
 	const profileDirectory = path.join(workDirectory, 'libreoffice-profile');
 	ensureDirectory(profileDirectory);
 
-	const convertResult = runCommand('libreoffice', [
-		'--headless',
-		'--invisible',
-		'--nodefault',
-		'--nofirststartwizard',
-		'--norestore',
-		`-env:UserInstallation=${pathToFileURL(profileDirectory).toString()}`,
-		'--convert-to',
-		'pdf',
-		'--outdir',
-		workDirectory,
-		pptxPath,
-	], { timeout: Number(options.timeoutMs) || 120000 });
+	const convertResult = runCommand(
+		'libreoffice',
+		[
+			'--headless',
+			'--invisible',
+			'--nodefault',
+			'--nofirststartwizard',
+			'--norestore',
+			`-env:UserInstallation=${pathToFileURL(profileDirectory).toString()}`,
+			'--convert-to',
+			'pdf',
+			'--outdir',
+			workDirectory,
+			pptxPath,
+		],
+		{ timeout: Number(options.timeoutMs) || 120000 },
+	);
 	if (convertResult.status !== 0) {
-		throw new Error(`LibreOffice PPTX to PDF conversion failed: ${convertResult.stderr || convertResult.stdout || convertResult.error || 'unknown error'}`);
+		throw new Error(
+			`LibreOffice PPTX to PDF conversion failed: ${convertResult.stderr || convertResult.stdout || convertResult.error || 'unknown error'}`,
+		);
 	}
 
 	const pdfPath = resolvePdfPath(workDirectory, pptxPath);
@@ -246,15 +253,13 @@ function renderPptxToPngSequence(options) {
 	}
 
 	const ppmPrefix = path.join(rawDirectory, 'slide');
-	const ppmResult = runCommand('pdftoppm', [
-		'-png',
-		'-r',
-		String(dpi),
-		pdfPath,
-		ppmPrefix,
-	], { timeout: Number(options.timeoutMs) || 120000 });
+	const ppmResult = runCommand('pdftoppm', ['-png', '-r', String(dpi), pdfPath, ppmPrefix], {
+		timeout: Number(options.timeoutMs) || 120000,
+	});
 	if (ppmResult.status !== 0) {
-		throw new Error(`pdftoppm render failed: ${ppmResult.stderr || ppmResult.stdout || ppmResult.error || 'unknown error'}`);
+		throw new Error(
+			`pdftoppm render failed: ${ppmResult.stderr || ppmResult.stdout || ppmResult.error || 'unknown error'}`,
+		);
 	}
 
 	const rawImages = collectPngSequence(rawDirectory);
@@ -284,9 +289,13 @@ function renderPptxToPngSequence(options) {
 }
 
 function identifyDimensions(imagePath) {
-	const result = runCommand('identify', ['-format', '%w %h', imagePath], { timeout: 30000 });
+	const result = runCommand('identify', ['-format', '%w %h', imagePath], {
+		timeout: 30000,
+	});
 	if (result.status !== 0) {
-		throw new Error(`identify failed for ${imagePath}: ${result.stderr || result.stdout || result.error || 'unknown error'}`);
+		throw new Error(
+			`identify failed for ${imagePath}: ${result.stderr || result.stdout || result.error || 'unknown error'}`,
+		);
 	}
 	const [width, height] = result.stdout.trim().split(/\s+/).map(Number);
 	if (!Number.isFinite(width) || !Number.isFinite(height)) {
@@ -313,38 +322,99 @@ function parseCompareMetric(output) {
 	};
 }
 
+function parseGeometryBox(output) {
+	const text = String(output || '').trim();
+	const match = text.match(/^(\d+)x(\d+)([+-]\d+)([+-]\d+)$/);
+	if (!match) {
+		return null;
+	}
+	return {
+		width: Number(match[1]),
+		height: Number(match[2]),
+		x: Number(match[3]),
+		y: Number(match[4]),
+	};
+}
+
 function runCompareMetric(metric, referencePath, renderedPath, outputPath) {
 	const args = ['-metric', metric, referencePath, renderedPath, outputPath || 'null:'];
 	const result = runCommand('compare', args, { timeout: 60000 });
 	if (![0, 1].includes(result.status)) {
-		throw new Error(`ImageMagick compare ${metric} failed: ${result.stderr || result.stdout || result.error || 'unknown error'}`);
+		throw new Error(
+			`ImageMagick compare ${metric} failed: ${result.stderr || result.stdout || result.error || 'unknown error'}`,
+		);
 	}
 	return parseCompareMetric(result.stderr || result.stdout);
+}
+
+function measureDifferenceBoundingBox(referencePath, renderedPath, referenceDimensions, thresholdPercent = 8) {
+	const result = runCommand(
+		'convert',
+		[
+			referencePath,
+			renderedPath,
+			'-compose',
+			'difference',
+			'-composite',
+			'-colorspace',
+			'Gray',
+			'-threshold',
+			`${thresholdPercent}%`,
+			'-format',
+			'%@',
+			'info:',
+		],
+		{ timeout: 60000 },
+	);
+	if (result.status !== 0) {
+		return {
+			available: false,
+			thresholdPercent,
+			error: result.stderr || result.stdout || result.error || 'unknown error',
+		};
+	}
+	const box = parseGeometryBox(result.stdout || result.stderr);
+	if (!box || box.width <= 0 || box.height <= 0) {
+		return {
+			available: true,
+			thresholdPercent,
+			x: 0,
+			y: 0,
+			width: 0,
+			height: 0,
+			areaRatio: 0,
+		};
+	}
+	const pixelCount = referenceDimensions.width * referenceDimensions.height;
+	return {
+		available: true,
+		thresholdPercent,
+		...box,
+		areaRatio: pixelCount > 0 ? (box.width * box.height) / pixelCount : null,
+	};
 }
 
 function resizeRenderedImage(renderedPath, referenceDimensions, outputPath) {
 	const geometry = `${referenceDimensions.width}x${referenceDimensions.height}!`;
 	const result = runCommand('convert', [renderedPath, '-resize', geometry, outputPath], { timeout: 60000 });
 	if (result.status !== 0) {
-		throw new Error(`ImageMagick resize failed: ${result.stderr || result.stdout || result.error || 'unknown error'}`);
+		throw new Error(
+			`ImageMagick resize failed: ${result.stderr || result.stdout || result.error || 'unknown error'}`,
+		);
 	}
 	return outputPath;
 }
 
 function buildSideBySide(referencePath, renderedPath, outputPath) {
-	const result = runCommand('montage', [
-		referencePath,
-		renderedPath,
-		'-tile',
-		'2x1',
-		'-geometry',
-		'+12+12',
-		'-background',
-		'white',
-		outputPath,
-	], { timeout: 60000 });
+	const result = runCommand(
+		'montage',
+		[referencePath, renderedPath, '-tile', '2x1', '-geometry', '+12+12', '-background', 'white', outputPath],
+		{ timeout: 60000 },
+	);
 	if (result.status !== 0) {
-		throw new Error(`ImageMagick side-by-side montage failed: ${result.stderr || result.stdout || result.error || 'unknown error'}`);
+		throw new Error(
+			`ImageMagick side-by-side montage failed: ${result.stderr || result.stdout || result.error || 'unknown error'}`,
+		);
 	}
 	return outputPath;
 }
@@ -353,18 +423,15 @@ function buildContactSheet(inputPaths, outputPath, tile = '3x') {
 	if (inputPaths.length === 0) {
 		return null;
 	}
-	const result = runCommand('montage', [
-		...inputPaths,
-		'-tile',
-		tile,
-		'-geometry',
-		'+8+8',
-		'-background',
-		'white',
-		outputPath,
-	], { timeout: 120000 });
+	const result = runCommand(
+		'montage',
+		[...inputPaths, '-tile', tile, '-geometry', '+8+8', '-background', 'white', outputPath],
+		{ timeout: 120000 },
+	);
 	if (result.status !== 0) {
-		throw new Error(`ImageMagick contact sheet montage failed: ${result.stderr || result.stdout || result.error || 'unknown error'}`);
+		throw new Error(
+			`ImageMagick contact sheet montage failed: ${result.stderr || result.stdout || result.error || 'unknown error'}`,
+		);
 	}
 	return outputPath;
 }
@@ -388,48 +455,92 @@ function writeComparisonCsv(pages, outputPath) {
 		'absolute_error_ratio',
 		'reference_width',
 		'reference_height',
+		'rendered_original_width',
+		'rendered_original_height',
+		'width_scale_ratio',
+		'height_scale_ratio',
+		'max_scale_ratio_delta',
+		'difference_bbox_x',
+		'difference_bbox_y',
+		'difference_bbox_width',
+		'difference_bbox_height',
+		'difference_bbox_area_ratio',
 		'reference_path',
 		'rendered_path',
 		'resized_path',
 		'diff_path',
 		'side_by_side_path',
 	];
-	const rows = pages.map(page => [
+	const rows = pages.map((page) => [
 		page.slide,
 		page.rmseNormalized,
 		page.absoluteErrorPixels,
 		page.absoluteErrorRatio,
 		page.referenceDimensions?.width,
 		page.referenceDimensions?.height,
+		page.renderedOriginalDimensions?.width,
+		page.renderedOriginalDimensions?.height,
+		page.widthScaleRatio,
+		page.heightScaleRatio,
+		page.maxScaleRatioDelta,
+		page.differenceBoundingBox?.x,
+		page.differenceBoundingBox?.y,
+		page.differenceBoundingBox?.width,
+		page.differenceBoundingBox?.height,
+		page.differenceBoundingBox?.areaRatio,
 		page.referencePath,
 		page.renderedPath,
 		page.resizedPath,
 		page.diffPath,
 		page.sideBySidePath,
 	]);
-	fs.writeFileSync(
-		outputPath,
-		[headers, ...rows].map(row => row.map(csvCell).join(',')).join('\n'),
-		'utf8',
-	);
+	fs.writeFileSync(outputPath, [headers, ...rows].map((row) => row.map(csvCell).join(',')).join('\n'), 'utf8');
 	return outputPath;
 }
 
 function summarizePageMetrics(pages) {
-	const comparablePages = pages.filter(page => Number.isFinite(page.rmseNormalized));
-	const meanRmse = comparablePages.length > 0
-		? comparablePages.reduce((sum, page) => sum + page.rmseNormalized, 0) / comparablePages.length
-		: null;
-	const maxRmse = comparablePages.length > 0
-		? Math.max(...comparablePages.map(page => page.rmseNormalized))
-		: null;
+	const comparablePages = pages.filter((page) => Number.isFinite(page.rmseNormalized));
+	const meanRmse =
+		comparablePages.length > 0
+			? comparablePages.reduce((sum, page) => sum + page.rmseNormalized, 0) / comparablePages.length
+			: null;
+	const maxRmse = comparablePages.length > 0 ? Math.max(...comparablePages.map((page) => page.rmseNormalized)) : null;
+	const pagesWithScale = comparablePages.filter((page) => Number.isFinite(page.maxScaleRatioDelta));
+	const maxScaleRatioDelta =
+		pagesWithScale.length > 0 ? Math.max(...pagesWithScale.map((page) => page.maxScaleRatioDelta)) : null;
+	const pagesWithDifferenceBox = comparablePages.filter((page) =>
+		Number.isFinite(page.differenceBoundingBox?.areaRatio),
+	);
+	const maxDifferenceBoundingBoxAreaRatio =
+		pagesWithDifferenceBox.length > 0
+			? Math.max(...pagesWithDifferenceBox.map((page) => page.differenceBoundingBox.areaRatio))
+			: null;
 	const worstSlides = [...comparablePages]
 		.sort((left, right) => right.rmseNormalized - left.rmseNormalized)
 		.slice(0, 12)
-		.map(page => ({
+		.map((page) => ({
 			slide: page.slide,
 			rmseNormalized: page.rmseNormalized,
 			absoluteErrorRatio: page.absoluteErrorRatio,
+			maxScaleRatioDelta: page.maxScaleRatioDelta,
+			differenceBoundingBox: page.differenceBoundingBox,
+			sideBySidePath: page.sideBySidePath,
+			diffPath: page.diffPath,
+		}));
+	const worstDifferenceBoundingBoxSlides = [...comparablePages]
+		.sort((left, right) => {
+			const rightBox = right.differenceBoundingBox?.areaRatio ?? -1;
+			const leftBox = left.differenceBoundingBox?.areaRatio ?? -1;
+			if (rightBox !== leftBox) return rightBox - leftBox;
+			return (right.maxScaleRatioDelta ?? -1) - (left.maxScaleRatioDelta ?? -1);
+		})
+		.slice(0, 12)
+		.map((page) => ({
+			slide: page.slide,
+			rmseNormalized: page.rmseNormalized,
+			absoluteErrorRatio: page.absoluteErrorRatio,
+			maxScaleRatioDelta: page.maxScaleRatioDelta,
+			differenceBoundingBox: page.differenceBoundingBox,
 			sideBySidePath: page.sideBySidePath,
 			diffPath: page.diffPath,
 		}));
@@ -437,17 +548,22 @@ function summarizePageMetrics(pages) {
 	return {
 		pageCount: pages.length,
 		comparablePageCount: comparablePages.length,
-		missingReferenceSlides: pages.filter(page => !page.referencePath).map(page => page.slide),
-		missingRenderedSlides: pages.filter(page => !page.renderedPath).map(page => page.slide),
+		missingReferenceSlides: pages.filter((page) => !page.referencePath).map((page) => page.slide),
+		missingRenderedSlides: pages.filter((page) => !page.renderedPath).map((page) => page.slide),
 		meanRmse,
 		maxRmse,
+		maxScaleRatioDelta,
+		maxDifferenceBoundingBoxAreaRatio,
 		worstSlides,
+		worstDifferenceBoundingBoxSlides,
 	};
 }
 
 function evaluateVisualGate(summary, thresholds) {
 	const maxRmse = Number(thresholds?.maxRmse);
 	const meanRmse = Number(thresholds?.meanRmse);
+	const maxScaleRatioDelta = Number(thresholds?.maxScaleRatioDelta);
+	const maxDifferenceBoundingBoxAreaRatio = Number(thresholds?.maxDifferenceBoundingBoxAreaRatio);
 	const failures = [];
 	if (summary.missingReferenceSlides.length > 0) {
 		failures.push(`Missing reference PNG for slides: ${summary.missingReferenceSlides.join(', ')}`);
@@ -461,6 +577,22 @@ function evaluateVisualGate(summary, thresholds) {
 	if (Number.isFinite(meanRmse) && Number.isFinite(summary.meanRmse) && summary.meanRmse > meanRmse) {
 		failures.push(`Mean RMSE ${summary.meanRmse.toFixed(6)} exceeds ${meanRmse}`);
 	}
+	if (
+		Number.isFinite(maxScaleRatioDelta) &&
+		Number.isFinite(summary.maxScaleRatioDelta) &&
+		summary.maxScaleRatioDelta > maxScaleRatioDelta
+	) {
+		failures.push(`Max scale ratio delta ${summary.maxScaleRatioDelta.toFixed(6)} exceeds ${maxScaleRatioDelta}`);
+	}
+	if (
+		Number.isFinite(maxDifferenceBoundingBoxAreaRatio) &&
+		Number.isFinite(summary.maxDifferenceBoundingBoxAreaRatio) &&
+		summary.maxDifferenceBoundingBoxAreaRatio > maxDifferenceBoundingBoxAreaRatio
+	) {
+		failures.push(
+			`Max difference bounding-box area ratio ${summary.maxDifferenceBoundingBoxAreaRatio.toFixed(6)} exceeds ${maxDifferenceBoundingBoxAreaRatio}`,
+		);
+	}
 	if (summary.comparablePageCount === 0) {
 		failures.push('No comparable PPTX/PNG pages were found');
 	}
@@ -470,6 +602,10 @@ function evaluateVisualGate(summary, thresholds) {
 		thresholds: {
 			maxRmse: Number.isFinite(maxRmse) ? maxRmse : null,
 			meanRmse: Number.isFinite(meanRmse) ? meanRmse : null,
+			maxScaleRatioDelta: Number.isFinite(maxScaleRatioDelta) ? maxScaleRatioDelta : null,
+			maxDifferenceBoundingBoxAreaRatio: Number.isFinite(maxDifferenceBoundingBoxAreaRatio)
+				? maxDifferenceBoundingBoxAreaRatio
+				: null,
 		},
 	};
 }
@@ -487,7 +623,7 @@ function comparePngSequences(options) {
 	resetDirectory(sideBySideDirectory);
 
 	const pairs = pairPngSequences(referenceDirectory, renderedDirectory);
-	const pages = pairs.map(pair => {
+	const pages = pairs.map((pair) => {
 		if (!pair.referencePath || !pair.renderedPath) {
 			return {
 				slide: pair.slide,
@@ -500,12 +636,26 @@ function comparePngSequences(options) {
 		}
 
 		const referenceDimensions = identifyDimensions(pair.referencePath);
+		const renderedOriginalDimensions = identifyDimensions(pair.renderedPath);
+		const widthScaleRatio =
+			referenceDimensions.width > 0 ? renderedOriginalDimensions.width / referenceDimensions.width : null;
+		const heightScaleRatio =
+			referenceDimensions.height > 0 ? renderedOriginalDimensions.height / referenceDimensions.height : null;
+		const maxScaleRatioDelta =
+			Number.isFinite(widthScaleRatio) && Number.isFinite(heightScaleRatio)
+				? Math.max(Math.abs(widthScaleRatio - 1), Math.abs(heightScaleRatio - 1))
+				: null;
 		const resizedPath = path.join(resizedDirectory, formatSlideFileName(pair.slide));
 		resizeRenderedImage(pair.renderedPath, referenceDimensions, resizedPath);
 		const diffPath = path.join(diffDirectory, formatSlideFileName(pair.slide));
 		const sideBySidePath = path.join(sideBySideDirectory, formatSlideFileName(pair.slide));
 		const rmse = runCompareMetric('RMSE', pair.referencePath, resizedPath, diffPath);
 		const ae = runCompareMetric('AE', pair.referencePath, resizedPath, null);
+		const differenceBoundingBox = measureDifferenceBoundingBox(
+			pair.referencePath,
+			resizedPath,
+			referenceDimensions,
+		);
 		const absoluteErrorPixels = Number.isFinite(ae.value) ? ae.value : null;
 		const pixelCount = referenceDimensions.width * referenceDimensions.height;
 
@@ -519,6 +669,11 @@ function comparePngSequences(options) {
 			diffPath,
 			sideBySidePath,
 			referenceDimensions,
+			renderedOriginalDimensions,
+			widthScaleRatio,
+			heightScaleRatio,
+			maxScaleRatioDelta,
+			differenceBoundingBox,
 			rmseRaw: rmse.raw,
 			rmseNormalized: Number.isFinite(rmse.value) ? rmse.value : null,
 			absoluteErrorPixels,
@@ -529,12 +684,12 @@ function comparePngSequences(options) {
 	const summary = summarizePageMetrics(pages);
 	const metricsCsvPath = writeComparisonCsv(pages, path.join(outputDirectory, 'comparison-metrics.csv'));
 	const sideBySideSheetPath = buildContactSheet(
-		pages.filter(page => page.sideBySidePath).map(page => page.sideBySidePath),
+		pages.filter((page) => page.sideBySidePath).map((page) => page.sideBySidePath),
 		path.join(outputDirectory, 'all-side-by-side-sheet.png'),
 		'3x',
 	);
 	const diffSheetPath = buildContactSheet(
-		pages.filter(page => page.diffPath).map(page => page.diffPath),
+		pages.filter((page) => page.diffPath).map((page) => page.diffPath),
 		path.join(outputDirectory, 'all-diff-sheet.png'),
 		'3x',
 	);
@@ -581,17 +736,17 @@ function buildPptxVisualDiff(options) {
 	});
 	const reference = options.referenceDirectory
 		? {
-			source: 'external-png-sequence',
-			referenceDirectory: path.resolve(options.referenceDirectory),
-			referenceImages: collectPngSequence(options.referenceDirectory).map((imagePath, index) => ({
-				slide: index + 1,
-				imagePath,
-			})),
-		}
+				source: 'external-png-sequence',
+				referenceDirectory: path.resolve(options.referenceDirectory),
+				referenceImages: collectPngSequence(options.referenceDirectory).map((imagePath, index) => ({
+					slide: index + 1,
+					imagePath,
+				})),
+			}
 		: extractPptxBackgroundImages({
-			pptxPath: options.pptxPath,
-			outputDirectory,
-		});
+				pptxPath: options.pptxPath,
+				outputDirectory,
+			});
 	const comparison = comparePngSequences({
 		referenceDirectory: reference.referenceDirectory,
 		renderedDirectory: render.renderedDirectory,
@@ -607,7 +762,11 @@ function buildPptxVisualDiff(options) {
 		comparison,
 		gate: comparison.gate,
 	};
-	fs.writeFileSync(path.join(outputDirectory, 'pptx-visual-diff.report.json'), JSON.stringify(report, null, 2), 'utf8');
+	fs.writeFileSync(
+		path.join(outputDirectory, 'pptx-visual-diff.report.json'),
+		JSON.stringify(report, null, 2),
+		'utf8',
+	);
 	return report;
 }
 
@@ -621,6 +780,7 @@ module.exports = {
 	extractPptxBackgroundImages,
 	pairPngSequences,
 	parseCompareMetric,
+	parseGeometryBox,
 	renderPptxToPngSequence,
 	summarizePageMetrics,
 	writeComparisonCsv,

@@ -16,7 +16,7 @@ The requested feature is not "export a `.pptx` file". A PPTX containing one scre
 4. write an OOXML package;
 5. report warnings and editability coverage.
 
-After the 2026-06-21 refresh, `ref/oh-my-ppt-upstream-latest` points at `origin/main` commit `843ff74`, tagged `v2.0.17`. The local fork at `ref/oh-my-ppt-fork` is on `pr/animation-export-contract` commit `257c23b`; the relevant fork delta is concentrated in the animation export contract, so the HTML-to-PPTX route should be read from upstream `renderer.ts`, `browser-scripts.ts`, `index.ts`, `table-extract.ts`, `font-collect.ts`, and `ooxml-writer.ts`.
+After the 2026-06-21 refresh, `/home/jacob/ref/oh-my-ppt-upstream-fresh-20260621` points at `origin/main` commit `843ff74`, tagged `v2.0.17`. The local fork at `/home/jacob/ref/oh-my-ppt-fork` is on `pr/animation-export-contract` commit `257c23b`; the relevant fork delta is concentrated in the animation export contract, so the HTML-to-PPTX route should be read from upstream `renderer.ts`, `browser-scripts.ts`, `index.ts`, `table-extract.ts`, `font-collect.ts`, and `ooxml-writer.ts`.
 
 The useful lessons are more specific than "convert screenshots to PPTX":
 
@@ -53,6 +53,8 @@ Current implementation adds:
 9. `tableCount` in PPTX inspection plus `tableCount` and `editableTableCellCount` in the sidecar report.
 10. high-resolution 1960x1104 PPTX capture with font readiness, animation/transition freeze, and double-RAF stabilization before screenshot capture.
 11. transparent editable text/table layers, so Office font metrics do not compete with the Chromium-rendered visible layer.
+12. M1 editability reporting: `consumedTableCount`, `consumedTableTextCandidateCount`, `editablePrimitiveCoverage`, `fallbackOnlyElementKinds`, `unmodeledTextRunReasons`, and per-slide editability summaries.
+13. visual-diff diagnostics for original rendered dimensions, width/height scale ratio drift, difference bounding-box geometry, and worst bounding-box slides. These are currently diagnostic unless explicit thresholds are supplied.
 
 The implementation deliberately places PPTX export after `convergeSlidevDeckLayout()`. This avoids creating a new un-audited path and keeps PPTX tied to the same rendered fit fixes as HTML/PDF/PNG/MP4.
 
@@ -67,16 +69,22 @@ runuser -u jacob -- env HOME=/home/jacob PLAYWRIGHT_BROWSERS_PATH=/home/jacob/.c
 Result:
 
 1. `ok = true`
-2. `slideCount = 27`
-3. `pptxInspection.textRunCount = 331`
-4. `pptxInspection.pictureCount = 27`
-5. `pptxInspection.tableCount = 4`
+2. `slideCount = 30`
+3. `pptxInspection.textRunCount = 254`
+4. `pptxInspection.pictureCount = 30`
+5. `pptxInspection.tableCount = 6`
 6. `pptxInspection.slidesWithoutEditableText = []`
-7. sidecar `textBoxCount = 223`
-8. sidecar `tableCount = 4`
-9. sidecar `editableTableCellCount = 95`
-10. sidecar `editableTextSlideCount = 27`
-11. sidecar `imageFallbackCount = 27`
+7. sidecar `textBoxCount = 139`
+8. sidecar `tableCount = 6`
+9. sidecar `editableTableCellCount = 102`
+10. sidecar `editableTextSlideCount = 30`
+11. sidecar `imageFallbackCount = 30`
+12. sidecar `consumedTableCount = 6`
+13. sidecar `consumedTableTextCandidateCount = 129`
+14. sidecar `editablePrimitiveCoverage.editableTextSlideRatio = 1`
+15. sidecar `editablePrimitiveCoverage.editableTableSlideRatio = 0.2`
+16. sidecar `fallbackOnlyElementKinds = ["code-highlight", "mermaid", "svg"]`
+17. sidecar `unmodeledTextRunReasons = ["inline-code", "inline-formatting", "syntax-highlight"]`
 
 Archive:
 
@@ -129,7 +137,7 @@ The 2026-06-21 follow-up acceptance keeps that conclusion, but the reference sem
 The current mainline PPTX hard gate was rerun with:
 
 ```bash
-runuser -u jacob -- env HOME=/home/jacob PLAYWRIGHT_BROWSERS_PATH=/home/jacob/.cache/ms-playwright bash -lc 'cd /home/jacob/obsidian-NotEMD && npm run verify:slidev-export -- --vault docs --source architecture.zh-CN.md --format pptx --output-subfolder export/test-slidev-current-frozen --sample-slides all --timeout-ms 240000 --no-screenshots --pptx-visual-diff --require-pptx-visual-match --json'
+runuser -u jacob -- env HOME=/home/jacob PLAYWRIGHT_BROWSERS_PATH=/home/jacob/.cache/ms-playwright bash -lc 'cd /home/jacob/obsidian-NotEMD && npm run verify:slidev-export -- --vault docs --source architecture.zh-CN.md --format pptx --output-subfolder export/test-slidev-final-pptx-strict --sample-slides all --timeout-ms 240000 --no-screenshots --pptx-visual-diff --require-pptx-visual-match --json'
 ```
 
 Result:
@@ -138,15 +146,19 @@ Result:
 2. `slidev.version = 52.16.0 (/home/jacob/slidev/packages/slidev/bin/slidev.mjs)`
 3. `skillRootPath = /home/jacob/slidev/skills/slidev`
 4. `skillReferenceCount = 52`
-5. `pptxInspection.slideCount = 27`
-6. `pptxInspection.textRunCount = 331`
-7. `pptxInspection.tableCount = 4`
+5. `pptxInspection.slideCount = 30`
+6. `pptxInspection.textRunCount = 254`
+7. `pptxInspection.tableCount = 6`
 8. `pptxInspection.slidesWithoutEditableText = []`
 9. `pptxVisualDiff.reference.source = pptx-background-images`
-10. `meanRmse = 0.049441916296296295`
+10. `meanRmse = 0.049339111333333345`
 11. `maxRmse = 0.0889364`
 12. `pptxVisualGate.passed = true`
 13. `mermaidSourcePreservation.changedFenceIndexes = []`
+14. `maxScaleRatioDelta = 0.02091836734693886`
+15. `maxDifferenceBoundingBoxAreaRatio = 0.6987466725820763`
+
+The high bounding-box area ratio is not a standalone overflow failure. In the current run it mostly captures text antialiasing and LibreOffice render-back differences distributed across dense text regions. It should stay advisory until the gate can distinguish geometric displacement from renderer noise.
 
 The same baseline was then compared against an external Slidev PNG sequence:
 
@@ -158,7 +170,7 @@ runuser -u jacob -- env HOME=/home/jacob PLAYWRIGHT_BROWSERS_PATH=/home/jacob/.c
 node - <<'NODE'
 const { buildPptxVisualDiff } = require('./scripts/lib/pptx-visual-diff');
 const report = buildPptxVisualDiff({
-  pptxPath: 'docs/export/test-slidev-current-frozen/architecture.zh-CN.pptx',
+  pptxPath: 'docs/export/test-slidev-final-pptx-strict/architecture.zh-CN.pptx',
   referenceDirectory: 'docs/export/test-slidev-current-png-reference/architecture.zh-CN-slides-png',
   outputDirectory: 'docs/export/test-slidev-current-external-png-diff',
   dpi: 150,
@@ -200,7 +212,7 @@ The useful reading of `oh-my-ppt` is narrower than "it supports HTML Slides -> P
 
 The concrete next slices are:
 
-1. **M1: improve the report before the visible layer**. Keep `visibleTextLayer = background-image` and `editableLayerRenderMode = transparent-structure`, but add `consumedTableCount`, `editablePrimitiveCoverage`, `fallbackOnlyElementKinds`, and `unmodeledTextRunReasons`.
+1. **M1: improve the report before the visible layer**. This is now landed in the current branch. The report keeps `visibleTextLayer = background-image` and `editableLayerRenderMode = transparent-structure`, and records `consumedTableCount`, `consumedTableTextCandidateCount`, `editablePrimitiveCoverage`, `fallbackOnlyElementKinds`, `unmodeledTextRunReasons`, and per-slide summaries.
 2. **M2: rich run extraction**. Add inline runs, CJK/Latin font-face splitting, code monospace, bullet levels, line-height, and paragraph spacing to the transparent text layer. This improves editability without visual risk.
 3. **M3: external PNG advisory metrics**. Keep the external PNG gate, but do not hard-fail by default. Add geometry shift, scale drift, SSIM/pHash, and text-antialias tolerance so subpixel renderer drift is separated from actual layout drift.
 4. **M4: visible native table/text branch**. Only make transparent structures visible after a same-frozen-HTML A/B gate passes. That branch must include residue detection/retry, or it will create background text plus PPTX text ghosting.

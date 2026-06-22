@@ -39,22 +39,28 @@ Key evidence:
 8. `layoutAuditSummary.overflowCount = 0`
 9. `layoutAuditSummary.lowEffectiveFontCount = 0`
 10. `pptxInspection.isZip = true`
-11. `pptxInspection.slideCount = 27`
-12. `pptxInspection.mediaCount = 27`
-13. `pptxInspection.textRunCount = 236`
-14. `pptxInspection.pictureCount = 27`
+11. `pptxInspection.slideCount = 30`
+12. `pptxInspection.mediaCount = 30`
+13. `pptxInspection.textRunCount = 254`
+14. `pptxInspection.pictureCount = 30`
 15. `pptxInspection.slidesWithoutEditableText = []`
 
-The sidecar report at the time of acceptance recorded:
+The current sidecar report records:
 
 ```json
 {
-  "slideCount": 27,
-  "textBoxCount": 223,
-  "editableTextSlideCount": 27,
+  "slideCount": 30,
+  "textBoxCount": 139,
+  "tableCount": 6,
+  "consumedTableCount": 6,
+  "consumedTableTextCandidateCount": 129,
+  "editableTableCellCount": 102,
+  "editableTextSlideCount": 30,
   "pagesWithoutEditableText": [],
-  "backgroundImageSlideCount": 27,
-  "imageFallbackCount": 27,
+  "backgroundImageSlideCount": 30,
+  "imageFallbackCount": 30,
+  "fallbackOnlyElementKinds": ["code-highlight", "mermaid", "svg"],
+  "unmodeledTextRunReasons": ["inline-code", "inline-formatting", "syntax-highlight"],
   "warnings": []
 }
 ```
@@ -147,3 +153,40 @@ docs/export/test-slidev-pptx-frozen-reference-strict/
 ```
 
 This closes the PPTX acceptance from "structural editability passed, visual gate open" to "structural editability passed, Office render-back preserves the frozen visual layer." It still does not claim Mermaid, SVG, canvas, or Vue component internals are Office-native editable objects.
+
+## Current Strict Closure
+
+The current real closure run uses:
+
+```bash
+runuser -u jacob -- env HOME=/home/jacob PLAYWRIGHT_BROWSERS_PATH=/home/jacob/.cache/ms-playwright bash -lc 'cd /home/jacob/obsidian-NotEMD && npm run verify:slidev-export -- --vault docs --source architecture.zh-CN.md --format pptx --output-subfolder export/test-slidev-final-pptx-strict --sample-slides all --timeout-ms 240000 --no-screenshots --pptx-visual-diff --require-pptx-visual-match --json'
+```
+
+Current evidence:
+
+1. `ok = true`
+2. `pptxInspection.slideCount = 30`
+3. `pptxInspection.mediaCount = 30`
+4. `pptxInspection.textRunCount = 254`
+5. `pptxInspection.pictureCount = 30`
+6. `pptxInspection.tableCount = 6`
+7. `pptxInspection.slidesWithoutEditableText = []`
+8. `pptxVisualGate.passed = true`
+9. `pptxVisualDiff.reference.source = pptx-background-images`
+10. `pptxVisualDiff.comparison.summary.pageCount = 30`
+11. `pptxVisualDiff.comparison.summary.meanRmse = 0.049339111333333345`
+12. `pptxVisualDiff.comparison.summary.maxRmse = 0.0889364`
+13. `pptxVisualDiff.comparison.summary.maxScaleRatioDelta = 0.02091836734693886`
+14. `pptxVisualDiff.comparison.summary.maxDifferenceBoundingBoxAreaRatio = 0.6987466725820763`
+
+Artifacts are under:
+
+```text
+docs/export/test-slidev-final-pptx-strict/
+docs/export/test-slidev-final-pptx-strict/architecture.zh-CN.pptx
+docs/export/test-slidev-final-pptx-strict/architecture.zh-CN.pptx.report.json
+docs/export/test-slidev-final-pptx-strict/architecture.zh-CN-pptx-visual-diff/pptx-visual-diff.report.json
+docs/export/test-slidev-final-pptx-strict/architecture.zh-CN-pptx-visual-diff/all-side-by-side-sheet.png
+```
+
+The high difference bounding-box area is diagnostic, not a current hard failure. It is caused by dense antialiasing/render-back differences spreading over text regions; RMSE and visual inspection show the frozen visual layer is preserved. A future geometry gate should compare detected object displacement or scale drift, not raw diff area alone.

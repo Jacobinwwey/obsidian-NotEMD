@@ -8,11 +8,13 @@ import { extractSlidevPptxSlideFromPage } from './pptxDomExtractor';
 import {
 	PPTX_SLIDE_HEIGHT_IN,
 	PPTX_SLIDE_WIDTH_IN,
+	type SlidevPptxEditablePrimitiveCoverage,
 	type SlidevPptxDocument,
 	type SlidevPptxExportReport,
 	type SlidevPptxExportResult,
 	type SlidevPptxImage,
 	type SlidevPptxSlide,
+	type SlidevPptxSlideEditabilitySummary,
 } from './pptxModel';
 import { writePptxDocument } from './pptxWriter';
 import { getVaultBasePath, resolvePlaywrightBrowsersPath, safeRequire } from './platformUtils';
@@ -37,7 +39,10 @@ function resolvePlaywrightRuntime(): PlaywrightRuntime | null {
 	return playwright?.chromium ? playwright : null;
 }
 
-function resolveSlideCount(source: SlidevExportSource, vaultRoot: string): { slideCount: number; deckPath: string | null } {
+function resolveSlideCount(
+	source: SlidevExportSource,
+	vaultRoot: string,
+): { slideCount: number; deckPath: string | null } {
 	const deckPath = source.preparedDeckPath
 		? join(vaultRoot, source.preparedDeckPath)
 		: join(vaultRoot, source.inputFilePath);
@@ -52,19 +57,24 @@ function resolveSlideCount(source: SlidevExportSource, vaultRoot: string): { sli
 }
 
 async function openSlideForPptxExport(page: any, targetUrl: string, timeoutMs: number): Promise<void> {
-	await page.goto(targetUrl, { waitUntil: 'domcontentloaded', timeout: Math.min(timeoutMs, 60_000) });
+	await page.goto(targetUrl, {
+		waitUntil: 'domcontentloaded',
+		timeout: Math.min(timeoutMs, 60_000),
+	});
 	if (typeof page.waitForLoadState === 'function') {
 		await page.waitForLoadState('networkidle', { timeout: 10_000 }).catch(() => undefined);
 	}
 	if (typeof page.waitForFunction === 'function') {
-		await page.waitForFunction(
-			() => {
-				const root = document.querySelector('.slidev-page, .slidev-layout, .slidev-slide-content, #app');
-				return Boolean(root && (root.textContent || '').trim().length > 0);
-			},
-			null,
-			{ timeout: 20_000 },
-		).catch(() => undefined);
+		await page
+			.waitForFunction(
+				() => {
+					const root = document.querySelector('.slidev-page, .slidev-layout, .slidev-slide-content, #app');
+					return Boolean(root && (root.textContent || '').trim().length > 0);
+				},
+				null,
+				{ timeout: 20_000 },
+			)
+			.catch(() => undefined);
 	}
 	await stabilizeSlideForPptxExport(page);
 	await page.waitForTimeout(500);
@@ -90,7 +100,7 @@ async function stabilizeSlideForPptxExport(page: any): Promise<void> {
 		document.head.appendChild(style);
 
 		try {
-			document.getAnimations?.().forEach(animation => {
+			document.getAnimations?.().forEach((animation) => {
 				try {
 					animation.finish();
 				} catch (_finishError) {
@@ -111,7 +121,7 @@ async function stabilizeSlideForPptxExport(page: any): Promise<void> {
 			// Font readiness can reject for blocked external providers; continue with rendered fallback fonts.
 		}
 
-		await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+		await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
 		void document.body.offsetHeight;
 	});
 }
@@ -119,7 +129,9 @@ async function stabilizeSlideForPptxExport(page: any): Promise<void> {
 async function resetSlidePptxExtractionState(page: any): Promise<void> {
 	await page.evaluate(() => {
 		document.getElementById('notemd-pptx-hide-text')?.remove();
-		for (const element of Array.from(document.querySelectorAll('[data-notemd-pptx-hidden-text], [data-notemd-pptx-consumed-table]'))) {
+		for (const element of Array.from(
+			document.querySelectorAll('[data-notemd-pptx-hidden-text], [data-notemd-pptx-consumed-table]'),
+		)) {
 			element.removeAttribute('data-notemd-pptx-hidden-text');
 			element.removeAttribute('data-notemd-pptx-consumed-table');
 		}
@@ -127,9 +139,17 @@ async function resetSlidePptxExtractionState(page: any): Promise<void> {
 }
 
 async function captureSlideBackground(page: any, slideNumber: number): Promise<SlidevPptxImage> {
-	const clip = await page.evaluate(() => {
-		const candidates = Array.from(document.querySelectorAll('.slidev-page, .slidev-layout, .slidev-slide-content, #app'));
-		let best: { x: number; y: number; width: number; height: number; area: number } | null = null;
+	const clip = (await page.evaluate(() => {
+		const candidates = Array.from(
+			document.querySelectorAll('.slidev-page, .slidev-layout, .slidev-slide-content, #app'),
+		);
+		let best: {
+			x: number;
+			y: number;
+			width: number;
+			height: number;
+			area: number;
+		} | null = null;
 		for (const candidate of candidates) {
 			const style = window.getComputedStyle(candidate);
 			if (style.display === 'none' || style.visibility === 'hidden' || Number(style.opacity || '1') < 0.04) {
@@ -144,13 +164,33 @@ async function captureSlideBackground(page: any, slideNumber: number): Promise<S
 			if (right <= left || bottom <= top) continue;
 			const area = (right - left) * (bottom - top);
 			if (!best || area > best.area) {
-				best = { x: left, y: top, width: right - left, height: bottom - top, area };
+				best = {
+					x: left,
+					y: top,
+					width: right - left,
+					height: bottom - top,
+					area,
+				};
 			}
 		}
 		return best;
-	}) as { x: number; y: number; width: number; height: number; area: number } | null;
+	})) as {
+		x: number;
+		y: number;
+		width: number;
+		height: number;
+		area: number;
+	} | null;
 	const screenshot = clip
-		? await page.screenshot({ type: 'png', clip: { x: clip.x, y: clip.y, width: clip.width, height: clip.height } })
+		? await page.screenshot({
+				type: 'png',
+				clip: {
+					x: clip.x,
+					y: clip.y,
+					width: clip.width,
+					height: clip.height,
+				},
+			})
 		: await page.screenshot({ type: 'png', fullPage: false });
 	return {
 		data: new Uint8Array(screenshot),
@@ -176,7 +216,12 @@ async function extractSlidesFromHtml(
 	}
 
 	const browser = await playwright.chromium.launch({ headless: true });
-	const page = await browser.newPage({ viewport: { width: PPTX_CAPTURE_VIEWPORT_WIDTH, height: PPTX_CAPTURE_VIEWPORT_HEIGHT } });
+	const page = await browser.newPage({
+		viewport: {
+			width: PPTX_CAPTURE_VIEWPORT_WIDTH,
+			height: PPTX_CAPTURE_VIEWPORT_HEIGHT,
+		},
+	});
 	let serverDirectory: string | null = null;
 	let baseUrl: string | null = null;
 
@@ -209,7 +254,82 @@ async function extractSlidesFromHtml(
 	}
 }
 
-function buildReport(
+function ratio(count: number, total: number): number {
+	return total > 0 ? Number((count / total).toFixed(6)) : 0;
+}
+
+function countTableCells(slide: SlidevPptxSlide): number {
+	return slide.tables.reduce(
+		(tableTotal, table) => tableTotal + table.rows.reduce((rowTotal, row) => rowTotal + row.length, 0),
+		0,
+	);
+}
+
+function countTableCellCharacters(slide: SlidevPptxSlide): number {
+	return slide.tables.reduce(
+		(tableTotal, table) =>
+			tableTotal +
+			table.rows.reduce(
+				(rowTotal, row) => rowTotal + row.reduce((cellTotal, cell) => cellTotal + cell.text.length, 0),
+				0,
+			),
+		0,
+	);
+}
+
+function collectUniqueSorted<T extends string>(values: T[]): T[] {
+	return Array.from(new Set(values)).sort();
+}
+
+function buildSlideEditabilitySummary(slide: SlidevPptxSlide): SlidevPptxSlideEditabilitySummary {
+	return {
+		slideNumber: slide.slideNumber,
+		editableTextBoxCount: slide.texts.length,
+		editableTableCount: slide.tables.length,
+		editableTableCellCount: countTableCells(slide),
+		editableTextCharacterCount: slide.texts.reduce((total, textBox) => total + textBox.text.length, 0),
+		editableTableCellCharacterCount: countTableCellCharacters(slide),
+		backgroundFallbackPresent: Boolean(slide.backgroundImage),
+		fallbackOnlyElementKinds: collectUniqueSorted(slide.fallbackOnlyElementKinds),
+		unmodeledTextRunReasons: collectUniqueSorted(slide.texts.flatMap((textBox) => textBox.unmodeledRunReasons)),
+		consumedTableTextCandidateCount: slide.consumedTableTextCandidateCount,
+		warnings: slide.warnings,
+	};
+}
+
+function buildEditablePrimitiveCoverage(
+	slideSummaries: SlidevPptxSlideEditabilitySummary[],
+): SlidevPptxEditablePrimitiveCoverage {
+	const slideCount = slideSummaries.length;
+	const editableTextSlideCount = slideSummaries.filter((slide) => slide.editableTextBoxCount > 0).length;
+	const editableTableSlideCount = slideSummaries.filter((slide) => slide.editableTableCount > 0).length;
+	const backgroundFallbackSlideCount = slideSummaries.filter((slide) => slide.backgroundFallbackPresent).length;
+	return {
+		editableTextBoxCount: slideSummaries.reduce((total, slide) => total + slide.editableTextBoxCount, 0),
+		editableTextSlideCount,
+		editableTextSlideRatio: ratio(editableTextSlideCount, slideCount),
+		editableTextCharacterCount: slideSummaries.reduce(
+			(total, slide) => total + slide.editableTextCharacterCount,
+			0,
+		),
+		editableTableCount: slideSummaries.reduce((total, slide) => total + slide.editableTableCount, 0),
+		editableTableSlideCount,
+		editableTableSlideRatio: ratio(editableTableSlideCount, slideCount),
+		editableTableCellCount: slideSummaries.reduce((total, slide) => total + slide.editableTableCellCount, 0),
+		editableTableCellCharacterCount: slideSummaries.reduce(
+			(total, slide) => total + slide.editableTableCellCharacterCount,
+			0,
+		),
+		backgroundFallbackSlideCount,
+		backgroundFallbackSlideRatio: ratio(backgroundFallbackSlideCount, slideCount),
+		fallbackOnlyElementKinds: collectUniqueSorted(
+			slideSummaries.flatMap((slide) => slide.fallbackOnlyElementKinds),
+		),
+		unmodeledTextRunReasons: collectUniqueSorted(slideSummaries.flatMap((slide) => slide.unmodeledTextRunReasons)),
+	};
+}
+
+export function buildSlidevPptxExportReport(
 	htmlPath: string,
 	deckPath: string | null,
 	pptxPath: string,
@@ -217,9 +337,11 @@ function buildReport(
 	slides: SlidevPptxSlide[],
 ): SlidevPptxExportReport {
 	const pagesWithoutEditableText = slides
-		.filter(slide => slide.texts.length === 0)
-		.map(slide => slide.slideNumber);
-	const warnings = slides.flatMap(slide => slide.warnings);
+		.filter((slide) => slide.texts.length === 0)
+		.map((slide) => slide.slideNumber);
+	const warnings = slides.flatMap((slide) => slide.warnings);
+	const slideSummaries = slides.map(buildSlideEditabilitySummary);
+	const editablePrimitiveCoverage = buildEditablePrimitiveCoverage(slideSummaries);
 	return {
 		formatVersion: 1,
 		source: {
@@ -231,15 +353,22 @@ function buildReport(
 			reportPath,
 		},
 		slideCount: slides.length,
-		textBoxCount: slides.reduce((total, slide) => total + slide.texts.length, 0),
-		tableCount: slides.reduce((total, slide) => total + slide.tables.length, 0),
-		editableTableCellCount: slides.reduce((total, slide) => (
-			total + slide.tables.reduce((tableTotal, table) => tableTotal + table.rows.reduce((rowTotal, row) => rowTotal + row.length, 0), 0)
-		), 0),
+		textBoxCount: editablePrimitiveCoverage.editableTextBoxCount,
+		tableCount: editablePrimitiveCoverage.editableTableCount,
+		consumedTableCount: editablePrimitiveCoverage.editableTableCount,
+		consumedTableTextCandidateCount: slideSummaries.reduce(
+			(total, slide) => total + slide.consumedTableTextCandidateCount,
+			0,
+		),
+		editableTableCellCount: editablePrimitiveCoverage.editableTableCellCount,
 		editableTextSlideCount: slides.length - pagesWithoutEditableText.length,
 		pagesWithoutEditableText,
-		backgroundImageSlideCount: slides.filter(slide => Boolean(slide.backgroundImage)).length,
-		imageFallbackCount: slides.filter(slide => Boolean(slide.backgroundImage)).length,
+		backgroundImageSlideCount: slides.filter((slide) => Boolean(slide.backgroundImage)).length,
+		imageFallbackCount: slides.filter((slide) => Boolean(slide.backgroundImage)).length,
+		editablePrimitiveCoverage,
+		fallbackOnlyElementKinds: editablePrimitiveCoverage.fallbackOnlyElementKinds,
+		unmodeledTextRunReasons: editablePrimitiveCoverage.unmodeledTextRunReasons,
+		slides: slideSummaries,
 		visibleTextLayer: 'background-image',
 		editableLayerRenderMode: 'transparent-structure',
 		warnings,
@@ -269,9 +398,12 @@ export async function exportSlidevPptxFromHtml(
 	};
 
 	writePptxDocument(outputPath, document);
-	const report = buildReport(absoluteHtmlPath, deckPath, outputPath, reportPath, slides);
+	const report = buildSlidevPptxExportReport(absoluteHtmlPath, deckPath, outputPath, reportPath, slides);
 	writeFileSync(reportPath, JSON.stringify(report, null, 2), 'utf8');
-	onProgress?.('pptx-export', `PPTX export complete with ${report.textBoxCount} editable text boxes and ${report.tableCount} native tables.`);
+	onProgress?.(
+		'pptx-export',
+		`PPTX export complete with ${report.textBoxCount} editable text boxes and ${report.tableCount} native tables.`,
+	);
 
 	return {
 		path: `${config.outputSubfolder}/${source.outputBasename}.pptx`,

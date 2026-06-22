@@ -58,6 +58,8 @@ docs/export/architecture.zh-CN.pptx.report.json
 
 The verifier also opens the `.pptx` as a zip and checks slide XML for editable `<a:t>` text nodes. It counts native DrawingML tables through `pptxInspection.tableCount`. Treat image-only PPTX output as a failure for this path.
 
+The PPTX sidecar report must be read as part of the export contract. It reports the visible layer strategy (`visibleTextLayer = "background-image"`), transparent editable-layer strategy, table consumption counts, editability coverage, fallback-only visual kinds, unmodeled text-run reasons, and per-slide summaries. This is deliberate: complex Slidev/Mermaid/SVG/canvas content is still allowed to be raster fallback, but the report must not imply it is Office-native editable.
+
 To compare every PPTX page against the frozen visual reference written into the PPTX:
 
 ```bash
@@ -75,6 +77,8 @@ docs/export/architecture.zh-CN-pptx-visual-diff/all-diff-sheet.png
 ```
 
 The hard gate extracts embedded background images from the PPTX slide relationships. It does not rerun Slidev PNG export as the strict reference, because that would be a second rendering instance and can drift in font antialiasing or page state.
+
+The report also includes diagnostic geometry metrics such as `maxScaleRatioDelta`, `maxDifferenceBoundingBoxAreaRatio`, and `worstDifferenceBoundingBoxSlides`. Keep those advisory unless explicit thresholds are passed. Dense text antialiasing can produce large diff bounding boxes without actual slide overflow.
 
 Report mode records `pptxVisualDiff.gate.passed` but does not fail the whole verifier when visual thresholds are exceeded. For strict closure, add:
 
@@ -179,13 +183,14 @@ Treat the command as passing only when the final JSON report has:
 24. for PPTX closure, `pptxInspection.textRunCount > 0`
 25. for PPTX closure, `pptxInspection.slidesWithoutEditableText` is empty when every source slide contains text
 26. for PPTX closure on decks with tables, `pptxInspection.tableCount > 0`
-27. for PPTX closure, the sidecar report records `textBoxCount`, `tableCount`, `editableTableCellCount`, `editableTextSlideCount`, `imageFallbackCount`, and `pagesWithoutEditableText`
+27. for PPTX closure, the sidecar report records `textBoxCount`, `tableCount`, `consumedTableCount`, `consumedTableTextCandidateCount`, `editableTableCellCount`, `editableTextSlideCount`, `imageFallbackCount`, `pagesWithoutEditableText`, `editablePrimitiveCoverage`, `fallbackOnlyElementKinds`, `unmodeledTextRunReasons`, and per-slide summaries
 28. for PPTX visual closure, run with `--pptx-visual-diff --require-pptx-visual-match`
 29. for PPTX visual closure, `pptxVisualDiff.reference.source: "pptx-background-images"`
 30. for PPTX visual closure, `pptxVisualDiff.comparison.summary.missingReferenceSlides: []`
 31. for PPTX visual closure, `pptxVisualDiff.comparison.summary.missingRenderedSlides: []`
 32. for PPTX visual closure, `pptxVisualDiff.comparison.summary.maxRmse <= 0.12`
 33. for PPTX visual closure, `pptxVisualDiff.comparison.summary.meanRmse <= 0.08`
+34. for PPTX visual diagnostics, review `pptxVisualDiff.comparison.summary.maxScaleRatioDelta` and `maxDifferenceBoundingBoxAreaRatio`, but do not promote them to hard failures until the thresholds distinguish layout displacement from renderer noise
 
 If any check fails, fix the NoteMD workflow before relying on the exported files.
 

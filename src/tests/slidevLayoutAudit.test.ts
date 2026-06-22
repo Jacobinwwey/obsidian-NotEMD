@@ -36,155 +36,212 @@ describe('slidevLayoutAudit', () => {
 	test('reports overflow and recommends a smaller scale for oversized Mermaid slides', () => {
 		const audit = analyzeRenderedSlideMeasurement(createMeasurement());
 
-		expect(audit.findings.some(finding => finding.kind === 'overflow' && finding.target === 'content')).toBe(true);
-		expect(audit.findings.some(finding => finding.kind === 'overflow' && finding.target === 'mermaid')).toBe(true);
-		expect(audit.findings.some(finding => finding.recommendedScale !== null && finding.recommendedScale < 1)).toBe(true);
+		expect(audit.findings.some((finding) => finding.kind === 'overflow' && finding.target === 'content')).toBe(
+			true,
+		);
+		expect(audit.findings.some((finding) => finding.kind === 'overflow' && finding.target === 'mermaid')).toBe(
+			true,
+		);
+		expect(
+			audit.findings.some((finding) => finding.recommendedScale !== null && finding.recommendedScale < 1),
+		).toBe(true);
 	});
 
 	test('derives fit scale from the verifier safe rectangle instead of the raw slide root', () => {
 		const audit = analyzeRenderedSlideMeasurement(createMeasurement());
-		const contentFinding = audit.findings.find(finding => finding.target === 'content');
+		const contentFinding = audit.findings.find((finding) => finding.target === 'content');
 
 		expect(contentFinding?.recommendedScale).toBeCloseTo(0.816, 2);
 	});
 
-	test('reports unreadable scale for non-Mermaid primary content below the readable floor', () => {
-		const audit = analyzeRenderedSlideMeasurement(createMeasurement({
-			pageScale: 0.22,
-			contentBounds: { left: 70, top: 60, right: 1160, bottom: 620, width: 1090, height: 560 },
-			elements: [
-				{
-					kind: 'text',
-					selector: 'p',
-					textLength: 120,
-					scrollWidth: 1090,
-					scrollHeight: 560,
-					clientWidth: 1090,
-					clientHeight: 560,
-					rect: { left: 70, top: 60, right: 1160, bottom: 620, width: 1090, height: 560 },
-				},
-			],
-		}));
+	test('treats safe-rect boundary crossings as quality findings when content remains inside the viewport', () => {
+		const audit = analyzeRenderedSlideMeasurement(
+			createMeasurement({
+				pageScale: 0.82,
+				contentBounds: { left: 90, top: 80, right: 1180, bottom: 704, width: 1090, height: 624 },
+				elements: [
+					{
+						kind: 'text',
+						selector: '.slidev-layout',
+						textLength: 320,
+						scrollWidth: 1090,
+						scrollHeight: 624,
+						clientWidth: 1090,
+						clientHeight: 624,
+						rect: { left: 90, top: 80, right: 1180, bottom: 704, width: 1090, height: 624 },
+					},
+				],
+			}),
+		);
 
-		expect(audit.findings.some(finding => finding.kind === 'unreadable-scale')).toBe(true);
+		expect(audit.findings.some((finding) => finding.kind === 'overflow')).toBe(false);
+		expect(audit.findings).toEqual(
+			expect.arrayContaining([
+				expect.objectContaining({
+					kind: 'tight-margin',
+					target: 'content',
+					recommendedPatch: 'split-slide',
+					qualityMarginPx: expect.closeTo(-27.2, 1),
+				}),
+			]),
+		);
+	});
+
+	test('reports unreadable scale for non-Mermaid primary content below the readable floor', () => {
+		const audit = analyzeRenderedSlideMeasurement(
+			createMeasurement({
+				pageScale: 0.22,
+				contentBounds: { left: 70, top: 60, right: 1160, bottom: 620, width: 1090, height: 560 },
+				elements: [
+					{
+						kind: 'text',
+						selector: 'p',
+						textLength: 120,
+						scrollWidth: 1090,
+						scrollHeight: 560,
+						clientWidth: 1090,
+						clientHeight: 560,
+						rect: { left: 70, top: 60, right: 1160, bottom: 620, width: 1090, height: 560 },
+					},
+				],
+			}),
+		);
+
+		expect(audit.findings.some((finding) => finding.kind === 'unreadable-scale')).toBe(true);
 	});
 
 	test('keeps low source-preserved Mermaid zoom as review evidence instead of a hard unreadable finding', () => {
-		const audit = analyzeRenderedSlideMeasurement(createMeasurement({
-			pageScale: 0.22,
-			contentBounds: { left: 70, top: 60, right: 1160, bottom: 620, width: 1090, height: 560 },
-			elements: [
-				{
-					kind: 'mermaid',
-					selector: 'svg[id^="mermaid-"]',
-					textLength: 0,
-					scrollWidth: 1090,
-					scrollHeight: 560,
-					clientWidth: 1090,
-					clientHeight: 560,
-					rect: { left: 70, top: 60, right: 1160, bottom: 620, width: 1090, height: 560 },
-				},
-			],
-		}));
+		const audit = analyzeRenderedSlideMeasurement(
+			createMeasurement({
+				pageScale: 0.22,
+				contentBounds: { left: 70, top: 60, right: 1160, bottom: 620, width: 1090, height: 560 },
+				elements: [
+					{
+						kind: 'mermaid',
+						selector: 'svg[id^="mermaid-"]',
+						textLength: 0,
+						scrollWidth: 1090,
+						scrollHeight: 560,
+						clientWidth: 1090,
+						clientHeight: 560,
+						rect: { left: 70, top: 60, right: 1160, bottom: 620, width: 1090, height: 560 },
+					},
+				],
+			}),
+		);
 
-		expect(audit.findings.some(finding => finding.kind === 'unreadable-scale')).toBe(false);
-		expect(audit.mermaidFit).toEqual(expect.objectContaining({
-			status: 'manual-review',
-			lowZoom: true,
-		}));
+		expect(audit.findings.some((finding) => finding.kind === 'unreadable-scale')).toBe(false);
+		expect(audit.mermaidFit).toEqual(
+			expect.objectContaining({
+				status: 'manual-review',
+				lowZoom: true,
+			}),
+		);
 	});
 
 	test('records Mermaid quality metrics without auto-splitting preserved source diagrams', () => {
-		const audit = analyzeRenderedSlideMeasurement(createMeasurement({
-			pageScale: 0.42,
-			contentBounds: { left: 100, top: 90, right: 980, bottom: 610, width: 880, height: 520 },
-			elements: [
-				{
-					kind: 'mermaid',
-					selector: '.mermaid',
-					textLength: 120,
-					textPreview: 'Runtime graph',
-					minFontPx: 16,
-					effectiveMinFontPx: 6.72,
-					svgTextMinFontPx: 6.72,
-					textSampleCount: 8,
-					scrollWidth: 880,
-					scrollHeight: 520,
-					clientWidth: 880,
-					clientHeight: 520,
-					rect: { left: 100, top: 90, right: 980, bottom: 610, width: 880, height: 520 },
-				},
-			],
-		}));
+		const audit = analyzeRenderedSlideMeasurement(
+			createMeasurement({
+				pageScale: 0.42,
+				contentBounds: { left: 100, top: 90, right: 980, bottom: 610, width: 880, height: 520 },
+				elements: [
+					{
+						kind: 'mermaid',
+						selector: '.mermaid',
+						textLength: 120,
+						textPreview: 'Runtime graph',
+						minFontPx: 16,
+						effectiveMinFontPx: 6.72,
+						svgTextMinFontPx: 6.72,
+						textSampleCount: 8,
+						scrollWidth: 880,
+						scrollHeight: 520,
+						clientWidth: 880,
+						clientHeight: 520,
+						rect: { left: 100, top: 90, right: 980, bottom: 610, width: 880, height: 520 },
+					},
+				],
+			}),
+		);
 
 		expect(audit.effectiveMinFontPx).toBeCloseTo(6.72, 2);
 		expect(audit.svgTextMinFontPx).toBeCloseTo(6.72, 2);
 		expect(audit.qualityMargins?.bottom).toBeCloseTo(66.8, 1);
 		expect(audit.contentAreaRatio).toBeGreaterThan(0);
-		expect(audit.mermaidFit).toEqual(expect.objectContaining({
-			status: 'manual-review',
-			lowZoom: true,
-			lowFont: true,
-		}));
+		expect(audit.mermaidFit).toEqual(
+			expect.objectContaining({
+				status: 'manual-review',
+				lowZoom: true,
+				lowFont: true,
+			}),
+		);
 		expect(audit.mermaidFit?.reason).toContain('preserved Mermaid font');
 		expect(audit.findings).toEqual([]);
 	});
 
 	test('separates source-preserved Mermaid fit review from manual-review conflicts', () => {
-		const fitReviewAudit = analyzeRenderedSlideMeasurement(createMeasurement({
-			pageScale: 0.62,
-			contentBounds: { left: 110, top: 96, right: 980, bottom: 600, width: 870, height: 504 },
-			elements: [
-				{
-					kind: 'mermaid',
-					selector: '.mermaid',
-					textLength: 160,
-					textPreview: 'Dense but readable Mermaid graph',
-					minFontPx: 16,
-					effectiveMinFontPx: 10.4,
-					svgTextMinFontPx: 10.4,
-					textSampleCount: 12,
-					scrollWidth: 870,
-					scrollHeight: 504,
-					clientWidth: 870,
-					clientHeight: 504,
-					rect: { left: 110, top: 96, right: 980, bottom: 600, width: 870, height: 504 },
-				},
-			],
-		}));
-		const manualReviewAudit = analyzeRenderedSlideMeasurement(createMeasurement({
-			pageScale: 0.3,
-			contentBounds: { left: -180, top: 50, right: 1800, bottom: 650, width: 1980, height: 600 },
-			elements: [
-				{
-					kind: 'mermaid',
-					selector: '.mermaid',
-					textLength: 220,
-					textPreview: 'Oversized preserved Mermaid graph',
-					minFontPx: 36,
-					effectiveMinFontPx: 10.8,
-					svgTextMinFontPx: 10.8,
-					textSampleCount: 16,
-					scrollWidth: 1980,
-					scrollHeight: 600,
-					clientWidth: 1980,
-					clientHeight: 600,
-					rect: { left: -180, top: 50, right: 1800, bottom: 650, width: 1980, height: 600 },
-				},
-			],
-		}));
+		const fitReviewAudit = analyzeRenderedSlideMeasurement(
+			createMeasurement({
+				pageScale: 0.62,
+				contentBounds: { left: 110, top: 96, right: 980, bottom: 600, width: 870, height: 504 },
+				elements: [
+					{
+						kind: 'mermaid',
+						selector: '.mermaid',
+						textLength: 160,
+						textPreview: 'Dense but readable Mermaid graph',
+						minFontPx: 16,
+						effectiveMinFontPx: 10.4,
+						svgTextMinFontPx: 10.4,
+						textSampleCount: 12,
+						scrollWidth: 870,
+						scrollHeight: 504,
+						clientWidth: 870,
+						clientHeight: 504,
+						rect: { left: 110, top: 96, right: 980, bottom: 600, width: 870, height: 504 },
+					},
+				],
+			}),
+		);
+		const manualReviewAudit = analyzeRenderedSlideMeasurement(
+			createMeasurement({
+				pageScale: 0.3,
+				contentBounds: { left: -180, top: 50, right: 1800, bottom: 650, width: 1980, height: 600 },
+				elements: [
+					{
+						kind: 'mermaid',
+						selector: '.mermaid',
+						textLength: 220,
+						textPreview: 'Oversized preserved Mermaid graph',
+						minFontPx: 36,
+						effectiveMinFontPx: 10.8,
+						svgTextMinFontPx: 10.8,
+						textSampleCount: 16,
+						scrollWidth: 1980,
+						scrollHeight: 600,
+						clientWidth: 1980,
+						clientHeight: 600,
+						rect: { left: -180, top: 50, right: 1800, bottom: 650, width: 1980, height: 600 },
+					},
+				],
+			}),
+		);
 
-		expect(fitReviewAudit.mermaidFit).toEqual(expect.objectContaining({
-			status: 'source-preserved-fit-review',
-			lowZoom: true,
-			lowFont: false,
-			tightMargin: false,
-		}));
+		expect(fitReviewAudit.mermaidFit).toEqual(
+			expect.objectContaining({
+				status: 'source-preserved-fit-review',
+				lowZoom: true,
+				lowFont: false,
+				tightMargin: false,
+			}),
+		);
 		expect(fitReviewAudit.mermaidFit?.reason).toContain('preserved Mermaid zoom');
-		expect(manualReviewAudit.mermaidFit).toEqual(expect.objectContaining({
-			status: 'manual-review',
-			lowFont: false,
-		}));
+		expect(manualReviewAudit.mermaidFit).toEqual(
+			expect.objectContaining({
+				status: 'manual-review',
+				lowFont: false,
+			}),
+		);
 		expect(manualReviewAudit.mermaidFit?.reason).toContain('safe-rect fit would require zoom');
 	});
 
@@ -243,59 +300,63 @@ describe('slidevLayoutAudit', () => {
 	});
 
 	test('derives a smaller recommended scale from table scroll overflow even when the outer rect fits', () => {
-		const audit = analyzeRenderedSlideMeasurement(createMeasurement({
-			contentBounds: { left: 70, top: 60, right: 1160, bottom: 620, width: 1090, height: 560 },
-			elements: [
-				{
-					kind: 'table',
-					selector: 'table',
-					textLength: 400,
-					scrollWidth: 2200,
-					scrollHeight: 560,
-					clientWidth: 1100,
-					clientHeight: 560,
-					rect: { left: 70, top: 60, right: 1160, bottom: 620, width: 1090, height: 560 },
-				},
-			],
-		}));
+		const audit = analyzeRenderedSlideMeasurement(
+			createMeasurement({
+				contentBounds: { left: 70, top: 60, right: 1160, bottom: 620, width: 1090, height: 560 },
+				elements: [
+					{
+						kind: 'table',
+						selector: 'table',
+						textLength: 400,
+						scrollWidth: 2200,
+						scrollHeight: 560,
+						clientWidth: 1100,
+						clientHeight: 560,
+						rect: { left: 70, top: 60, right: 1160, bottom: 620, width: 1090, height: 560 },
+					},
+				],
+			}),
+		);
 
-		const tableFinding = audit.findings.find(finding => finding.target === 'table');
+		const tableFinding = audit.findings.find((finding) => finding.target === 'table');
 		expect(tableFinding?.recommendedPatch).toBe('split-table');
 		expect(tableFinding?.recommendedScale).toBeCloseTo(0.5, 2);
 	});
 
 	test('derives slot-zone transform scale from measured zone geometry instead of slide-wide overflow only', () => {
-		const audit = analyzeRenderedSlideMeasurement(createMeasurement({
-			pageScale: 1,
-			contentBounds: { left: 80, top: 72, right: 1180, bottom: 620, width: 1100, height: 548 },
-			elements: [
-				{
-					kind: 'other',
-					selector: 'div',
-					slotZone: 'details',
-					textLength: 160,
-					textPreview: 'Runtime orchestration detail block',
-					scrollWidth: 450,
-					scrollHeight: 300,
-					clientWidth: 400,
-					clientHeight: 260,
-					rect: { left: 680, top: 120, right: 1130, bottom: 420, width: 450, height: 300 },
-				},
-			],
-			slotZones: [
-				{
-					name: 'details',
-					textLength: 160,
-					textPreview: 'Runtime orchestration detail block',
-					ownerRect: { left: 680, top: 120, right: 1080, bottom: 380, width: 400, height: 260 },
-					contentBounds: { left: 680, top: 120, right: 1130, bottom: 420, width: 450, height: 300 },
-					scrollWidth: 450,
-					scrollHeight: 300,
-					clientWidth: 400,
-					clientHeight: 260,
-				},
-			],
-		}));
+		const audit = analyzeRenderedSlideMeasurement(
+			createMeasurement({
+				pageScale: 1,
+				contentBounds: { left: 80, top: 72, right: 1180, bottom: 620, width: 1100, height: 548 },
+				elements: [
+					{
+						kind: 'other',
+						selector: 'div',
+						slotZone: 'details',
+						textLength: 160,
+						textPreview: 'Runtime orchestration detail block',
+						scrollWidth: 450,
+						scrollHeight: 300,
+						clientWidth: 400,
+						clientHeight: 260,
+						rect: { left: 680, top: 120, right: 1130, bottom: 420, width: 450, height: 300 },
+					},
+				],
+				slotZones: [
+					{
+						name: 'details',
+						textLength: 160,
+						textPreview: 'Runtime orchestration detail block',
+						ownerRect: { left: 680, top: 120, right: 1080, bottom: 380, width: 400, height: 260 },
+						contentBounds: { left: 680, top: 120, right: 1130, bottom: 420, width: 450, height: 300 },
+						scrollWidth: 450,
+						scrollHeight: 300,
+						clientWidth: 400,
+						clientHeight: 260,
+					},
+				],
+			}),
+		);
 
 		expect(audit.slotZones?.[0]?.recommendedTransformScale).toBeCloseTo(0.866, 2);
 	});
@@ -348,7 +409,7 @@ describe('slidevLayoutAudit', () => {
 			slide: 2,
 			safeRect: { left: 51.2, top: 43.2, right: 1228.8, bottom: 676.8, width: 1177.6, height: 633.6 },
 			contentBounds: { left: 48, top: 52, right: 1234, bottom: 920, width: 1186, height: 868 },
-			pageScale: 0.30,
+			pageScale: 0.3,
 			elementKinds: ['mermaid'],
 			findings: [
 				{
@@ -377,9 +438,7 @@ describe('slidevLayoutAudit', () => {
 		const patched = patchDeckWithLayoutAudit(deck, [audit]);
 
 		expect(patched.changed).toBe(false);
-		expect(patched.blockedSlides).toEqual([
-			expect.objectContaining({ slide: 2 }),
-		]);
+		expect(patched.blockedSlides).toEqual([expect.objectContaining({ slide: 2 })]);
 	});
 
 	test('fits oversized Mermaid flowcharts below the readable floor without rewriting source diagrams', () => {
@@ -387,7 +446,7 @@ describe('slidevLayoutAudit', () => {
 			slide: 2,
 			safeRect: { left: 51.2, top: 43.2, right: 1228.8, bottom: 676.8, width: 1177.6, height: 633.6 },
 			contentBounds: { left: 48, top: 52, right: 1234, bottom: 920, width: 1186, height: 868 },
-			pageScale: 0.30,
+			pageScale: 0.3,
 			elementKinds: ['mermaid'],
 			findings: [
 				{
@@ -629,7 +688,7 @@ describe('slidevLayoutAudit', () => {
 			slide: 2,
 			safeRect: { left: 51.2, top: 43.2, right: 1228.8, bottom: 676.8, width: 1177.6, height: 633.6 },
 			contentBounds: { left: 48, top: 52, right: 1234, bottom: 920, width: 1186, height: 868 },
-			pageScale: 0.30,
+			pageScale: 0.3,
 			elementKinds: ['mermaid'],
 			findings: [
 				{
@@ -941,7 +1000,9 @@ describe('slidevLayoutAudit', () => {
 		expect(patched.deckMarkdown).toContain('- Provider: OpenAI');
 		expect(patched.deckMarkdown).toContain('  - Fallback Route: primary::north-america::zero-downtime');
 		expect(patched.deckMarkdown).toContain('- Provider: Anthropic');
-		expect(patched.deckMarkdown).not.toContain('| Provider | Model | Runtime | Token Ceiling | Fallback Route | Deployment Notes | Verification Marker |');
+		expect(patched.deckMarkdown).not.toContain(
+			'| Provider | Model | Runtime | Token Ceiling | Fallback Route | Deployment Notes | Verification Marker |',
+		);
 	});
 
 	test('converts long table cells into record slides instead of preserving cramped rows', () => {
@@ -1165,7 +1226,9 @@ describe('slidevLayoutAudit', () => {
 		expect(patched.blockedSlides).toEqual([]);
 		expect(countSlideDeckSlides(patched.deckMarkdown)).toBe(3);
 		expect((patched.deckMarkdown.match(/```ts/g) || []).length).toBe(2);
-		expect(patched.deckMarkdown).toMatch(/\/\/ Prepare the source once\.\nasync function prepareDeck\(\) \{[\s\S]*?return slideSource;\n\}/);
+		expect(patched.deckMarkdown).toMatch(
+			/\/\/ Prepare the source once\.\nasync function prepareDeck\(\) \{[\s\S]*?return slideSource;\n\}/,
+		);
 		expect(patched.deckMarkdown).toMatch(/async function buildDeck\(slideSource\) \{[\s\S]*?return htmlPath;\n\}/);
 		expect(patched.deckMarkdown).not.toContain('zoom: 0.26');
 	});
@@ -1245,8 +1308,12 @@ describe('slidevLayoutAudit', () => {
 		expect((patched.deckMarkdown.match(/```ts/g) || []).length).toBe(4);
 		expect(patched.deckMarkdown).toContain(importLines.join('\n'));
 		expect(patched.deckMarkdown).toMatch(/type ExportMode = \{[\s\S]*?config: SlideExportConfig;\n\};/);
-		expect(patched.deckMarkdown).toMatch(/export async function runExport\(mode: ExportMode\) \{[\s\S]*?return gamma\.render\(environment, slideSource\);\n\}/);
-		expect(patched.deckMarkdown).toMatch(/export class SlideExportRunner \{[\s\S]*?return runExport\(this\.mode\);\n  \}\n\}/);
+		expect(patched.deckMarkdown).toMatch(
+			/export async function runExport\(mode: ExportMode\) \{[\s\S]*?return gamma\.render\(environment, slideSource\);\n\}/,
+		);
+		expect(patched.deckMarkdown).toMatch(
+			/export class SlideExportRunner \{[\s\S]*?return runExport\(this\.mode\);\n  \}\n\}/,
+		);
 		expect(patched.deckMarkdown).not.toContain('zoom: 0.08');
 	});
 
@@ -1321,8 +1388,12 @@ describe('slidevLayoutAudit', () => {
 		expect((patched.deckMarkdown.match(/```python/g) || []).length).toBe(4);
 		expect(patched.deckMarkdown).toContain(importLines.join('\n'));
 		expect(patched.deckMarkdown).toMatch(/@dataclass\nclass ExportJob:[\s\S]*?return self\.source\.stem/);
-		expect(patched.deckMarkdown).toMatch(/async def load_export_job\(path: Path\) -> ExportJob:[\s\S]*?output=Path\(payload\["output"\]\),\n    \)/);
-		expect(patched.deckMarkdown).toMatch(/def render_export\(job: ExportJob\) -> dict\[str, str\]:[\s\S]*?return \{"label": job\.label\(\), "output": str\(job\.output\)\}/);
+		expect(patched.deckMarkdown).toMatch(
+			/async def load_export_job\(path: Path\) -> ExportJob:[\s\S]*?output=Path\(payload\["output"\]\),\n    \)/,
+		);
+		expect(patched.deckMarkdown).toMatch(
+			/def render_export\(job: ExportJob\) -> dict\[str, str\]:[\s\S]*?return \{"label": job\.label\(\), "output": str\(job\.output\)\}/,
+		);
 		expect(patched.deckMarkdown).toMatch(/if __name__ == "__main__":[\s\S]*?print\(render_export/);
 		expect(patched.deckMarkdown).not.toContain('zoom: 0.08');
 	});
@@ -1403,9 +1474,15 @@ describe('slidevLayoutAudit', () => {
 		expect(countSlideDeckSlides(patched.deckMarkdown)).toBe(5);
 		expect((patched.deckMarkdown.match(/```rust/g) || []).length).toBe(4);
 		expect(patched.deckMarkdown).toContain(useLines.join('\n'));
-		expect(patched.deckMarkdown).toMatch(/#\[derive\(Debug, Clone\)\]\npub struct ExportJob \{[\s\S]*?metadata: BTreeMap<String, String>,\n\}/);
-		expect(patched.deckMarkdown).toMatch(/impl ExportJob \{[\s\S]*?self\.source\.display\(\)\.to_string\(\)\n    \}\n\}/);
-		expect(patched.deckMarkdown).toMatch(/pub fn render_export\(plan: &SlideLayoutPlan, job: &ExportJob\) -> RenderReport \{[\s\S]*?RenderReport::new\(plan\.source_title\.clone\(\), label\)\n\}/);
+		expect(patched.deckMarkdown).toMatch(
+			/#\[derive\(Debug, Clone\)\]\npub struct ExportJob \{[\s\S]*?metadata: BTreeMap<String, String>,\n\}/,
+		);
+		expect(patched.deckMarkdown).toMatch(
+			/impl ExportJob \{[\s\S]*?self\.source\.display\(\)\.to_string\(\)\n    \}\n\}/,
+		);
+		expect(patched.deckMarkdown).toMatch(
+			/pub fn render_export\(plan: &SlideLayoutPlan, job: &ExportJob\) -> RenderReport \{[\s\S]*?RenderReport::new\(plan\.source_title\.clone\(\), label\)\n\}/,
+		);
 		expect(patched.deckMarkdown).toMatch(/#\[cfg\(test\)\]\nmod tests \{[\s\S]*?labels_export_jobs/);
 		expect(patched.deckMarkdown).not.toContain('zoom: 0.08');
 	});
@@ -1802,7 +1879,8 @@ describe('slidevLayoutAudit', () => {
 					message: 'other element exceeds the safe visible rectangle',
 					recommendedPatch: 'reduce-zoom',
 					recommendedScale: 0.86,
-					textPreview: 'Runtime orchestration detail block 12 with explicit structured text that stays inside a single custom component tree.',
+					textPreview:
+						'Runtime orchestration detail block 12 with explicit structured text that stays inside a single custom component tree.',
 				},
 			],
 		};
@@ -2127,7 +2205,8 @@ describe('slidevLayoutAudit', () => {
 					message: 'other element exceeds the safe visible rectangle',
 					recommendedPatch: 'reduce-zoom',
 					recommendedScale: 0.9,
-					textPreview: 'Runtime orchestration detail block 12 with explicit structured text that stays inside a single custom component tree.',
+					textPreview:
+						'Runtime orchestration detail block 12 with explicit structured text that stays inside a single custom component tree.',
 				},
 			],
 		};
@@ -2597,68 +2676,65 @@ describe('slidevLayoutAudit', () => {
 		},
 		{
 			name: 'directive',
-			lines: [
-				':::note',
-				'Directive content is an unsupported component/prose boundary.',
-				':::',
-			],
+			lines: [':::note', 'Directive content is an unsupported component/prose boundary.', ':::'],
 			fingerprint: 'Directive content is an unsupported component/prose boundary.',
 		},
 		{
 			name: 'image',
-			lines: [
-				'![Unsupported component image boundary regression fingerprint](./assets/boundary-image.svg)',
-			],
+			lines: ['![Unsupported component image boundary regression fingerprint](./assets/boundary-image.svg)'],
 			fingerprint: 'Unsupported component image boundary regression fingerprint',
 		},
-	])('blocks whole-slide zoom for mixed component and $name content when separation is unsafe', ({ lines, fingerprint }) => {
-		const audit: SlidevLayoutAudit = {
-			slide: 2,
-			safeRect: { left: 51.2, top: 43.2, right: 1228.8, bottom: 676.8, width: 1177.6, height: 633.6 },
-			contentBounds: { left: 48, top: 52, right: 1248, bottom: 812, width: 1200, height: 760 },
-			pageScale: 1,
-			elementKinds: ['other', 'text'],
-			findings: [
-				{
-					kind: 'overflow',
-					target: 'content',
-					message: 'Slide content exceeds the safe visible rectangle',
-					recommendedPatch: 'reduce-zoom',
-					recommendedScale: 0.62,
-				},
-			],
-		};
-		const deck = [
-			'---',
-			'theme: default',
-			'---',
-			'',
-			'# Intro',
-			'',
-			'---',
-			'layout: dashboard-shell',
-			'---',
-			'',
-			'<DashboardGrid class="stage13-dashboard">',
-			'  <MetricPanel label="Queue A" value="128" />',
-			'</DashboardGrid>',
-			'',
-			...lines,
-		].join('\n');
-
-		const patched = patchDeckWithLayoutAudit(deck, [audit]);
-
-		expect(patched.changed).toBe(false);
-		expect(patched.blockedSlides).toEqual([
-			expect.objectContaining({
+	])(
+		'blocks whole-slide zoom for mixed component and $name content when separation is unsafe',
+		({ lines, fingerprint }) => {
+			const audit: SlidevLayoutAudit = {
 				slide: 2,
-				reason: expect.stringContaining('mixed component and primary Markdown content'),
-			}),
-		]);
-		expect(countSlideDeckSlides(patched.deckMarkdown)).toBe(2);
-		expect(patched.deckMarkdown).not.toContain('zoom: 0.62');
-		expect(patched.deckMarkdown).toContain(fingerprint);
-	});
+				safeRect: { left: 51.2, top: 43.2, right: 1228.8, bottom: 676.8, width: 1177.6, height: 633.6 },
+				contentBounds: { left: 48, top: 52, right: 1248, bottom: 812, width: 1200, height: 760 },
+				pageScale: 1,
+				elementKinds: ['other', 'text'],
+				findings: [
+					{
+						kind: 'overflow',
+						target: 'content',
+						message: 'Slide content exceeds the safe visible rectangle',
+						recommendedPatch: 'reduce-zoom',
+						recommendedScale: 0.62,
+					},
+				],
+			};
+			const deck = [
+				'---',
+				'theme: default',
+				'---',
+				'',
+				'# Intro',
+				'',
+				'---',
+				'layout: dashboard-shell',
+				'---',
+				'',
+				'<DashboardGrid class="stage13-dashboard">',
+				'  <MetricPanel label="Queue A" value="128" />',
+				'</DashboardGrid>',
+				'',
+				...lines,
+			].join('\n');
+
+			const patched = patchDeckWithLayoutAudit(deck, [audit]);
+
+			expect(patched.changed).toBe(false);
+			expect(patched.blockedSlides).toEqual([
+				expect.objectContaining({
+					slide: 2,
+					reason: expect.stringContaining('mixed component and primary Markdown content'),
+				}),
+			]);
+			expect(countSlideDeckSlides(patched.deckMarkdown)).toBe(2);
+			expect(patched.deckMarkdown).not.toContain('zoom: 0.62');
+			expect(patched.deckMarkdown).toContain(fingerprint);
+		},
+	);
 
 	test('does not compound a single-surface Transform with whole-slide zoom', () => {
 		const audit: SlidevLayoutAudit = {
@@ -2812,13 +2888,15 @@ describe('slidevLayoutAudit', () => {
 
 	test('summarizes audit counts across slides', () => {
 		const auditWithOverflow = analyzeRenderedSlideMeasurement(createMeasurement());
-		const auditWithRenderError = analyzeRenderedSlideMeasurement(createMeasurement({
-			slideRoot: null,
-			safeRect: null,
-			contentBounds: null,
-			elements: [],
-			errors: ['Slide root not found'],
-		}));
+		const auditWithRenderError = analyzeRenderedSlideMeasurement(
+			createMeasurement({
+				slideRoot: null,
+				safeRect: null,
+				contentBounds: null,
+				elements: [],
+				errors: ['Slide root not found'],
+			}),
+		);
 
 		const summary = summarizeLayoutAudits([auditWithOverflow, auditWithRenderError], 1);
 

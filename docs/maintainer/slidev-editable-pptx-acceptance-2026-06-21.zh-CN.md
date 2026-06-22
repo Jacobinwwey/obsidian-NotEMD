@@ -39,22 +39,28 @@ runuser -u jacob -- env HOME=/home/jacob PLAYWRIGHT_BROWSERS_PATH=/home/jacob/.c
 8. `layoutAuditSummary.overflowCount = 0`
 9. `layoutAuditSummary.lowEffectiveFontCount = 0`
 10. `pptxInspection.isZip = true`
-11. `pptxInspection.slideCount = 27`
-12. `pptxInspection.mediaCount = 27`
-13. `pptxInspection.textRunCount = 236`
-14. `pptxInspection.pictureCount = 27`
+11. `pptxInspection.slideCount = 30`
+12. `pptxInspection.mediaCount = 30`
+13. `pptxInspection.textRunCount = 254`
+14. `pptxInspection.pictureCount = 30`
 15. `pptxInspection.slidesWithoutEditableText = []`
 
-验收时 sidecar report 记录：
+当前 sidecar report 记录：
 
 ```json
 {
-  "slideCount": 27,
-  "textBoxCount": 223,
-  "editableTextSlideCount": 27,
+  "slideCount": 30,
+  "textBoxCount": 139,
+  "tableCount": 6,
+  "consumedTableCount": 6,
+  "consumedTableTextCandidateCount": 129,
+  "editableTableCellCount": 102,
+  "editableTextSlideCount": 30,
   "pagesWithoutEditableText": [],
-  "backgroundImageSlideCount": 27,
-  "imageFallbackCount": 27,
+  "backgroundImageSlideCount": 30,
+  "imageFallbackCount": 30,
+  "fallbackOnlyElementKinds": ["code-highlight", "mermaid", "svg"],
+  "unmodeledTextRunReasons": ["inline-code", "inline-formatting", "syntax-highlight"],
   "warnings": []
 }
 ```
@@ -147,3 +153,40 @@ docs/export/test-slidev-pptx-frozen-reference-strict/
 ```
 
 这次补充把 PPTX 验收从“结构可编辑已过、视觉未收口”推进为“结构可编辑已过、Office 回渲保持冻结视觉层已过”。它仍不声明 Mermaid、SVG、canvas 或 Vue component 内部已经转成 Office 原生可编辑对象。
+
+## 当前 strict 收口
+
+当前真实收口命令：
+
+```bash
+runuser -u jacob -- env HOME=/home/jacob PLAYWRIGHT_BROWSERS_PATH=/home/jacob/.cache/ms-playwright bash -lc 'cd /home/jacob/obsidian-NotEMD && npm run verify:slidev-export -- --vault docs --source architecture.zh-CN.md --format pptx --output-subfolder export/test-slidev-final-pptx-strict --sample-slides all --timeout-ms 240000 --no-screenshots --pptx-visual-diff --require-pptx-visual-match --json'
+```
+
+当前证据：
+
+1. `ok = true`
+2. `pptxInspection.slideCount = 30`
+3. `pptxInspection.mediaCount = 30`
+4. `pptxInspection.textRunCount = 254`
+5. `pptxInspection.pictureCount = 30`
+6. `pptxInspection.tableCount = 6`
+7. `pptxInspection.slidesWithoutEditableText = []`
+8. `pptxVisualGate.passed = true`
+9. `pptxVisualDiff.reference.source = pptx-background-images`
+10. `pptxVisualDiff.comparison.summary.pageCount = 30`
+11. `pptxVisualDiff.comparison.summary.meanRmse = 0.049339111333333345`
+12. `pptxVisualDiff.comparison.summary.maxRmse = 0.0889364`
+13. `pptxVisualDiff.comparison.summary.maxScaleRatioDelta = 0.02091836734693886`
+14. `pptxVisualDiff.comparison.summary.maxDifferenceBoundingBoxAreaRatio = 0.6987466725820763`
+
+产物在：
+
+```text
+docs/export/test-slidev-final-pptx-strict/
+docs/export/test-slidev-final-pptx-strict/architecture.zh-CN.pptx
+docs/export/test-slidev-final-pptx-strict/architecture.zh-CN.pptx.report.json
+docs/export/test-slidev-final-pptx-strict/architecture.zh-CN-pptx-visual-diff/pptx-visual-diff.report.json
+docs/export/test-slidev-final-pptx-strict/architecture.zh-CN-pptx-visual-diff/all-side-by-side-sheet.png
+```
+
+高 difference bounding-box area 当前是诊断信息，不是 hard failure。它主要来自密集文本区的抗锯齿与 LibreOffice 回渲差异；RMSE 与 side-by-side 视觉检查显示冻结视觉层保持成立。后续如果要把几何指标升级为 hard gate，应检测对象位移或缩放漂移，而不是直接用原始 diff 面积。
