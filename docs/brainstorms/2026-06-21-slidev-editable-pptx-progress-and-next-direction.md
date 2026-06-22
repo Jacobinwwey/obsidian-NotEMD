@@ -991,6 +991,58 @@ Result:
 
 The engineering judgment here is that hyperlink relationships are low-drift, high-semantic-value native primitives and should be handled now. Mermaid text, complex SVG geometry, chart data, and animations remain high-drift primitives that still need separate gates. Do not inflate editability by pretending unstable objects are Office-native semantics.
 
+## M18 Paragraph/List/Code Office Text Contract
+
+This slice fixes the regression behind the user's latest PPTX finding: visible text must be the editable Office text itself, and the export must not pass by keeping a readable screenshot plus a hidden transparent text layer. The direct reference from `ref/oh-my-ppt` is the text-box contract shape: paragraph spacing, line spacing, body inset, and bullet metadata belong in the extracted model and OOXML writer, but only where Office should actually perform paragraph layout.
+
+The important correction is that browser-measured line boxes are already laid out. Applying CSS `line-height` again to those one-line Office shapes lets PowerPoint/LibreOffice re-layout text that was supposed to be position-locked, and it was enough to fail the real rendered-HTML visual gate. M18 therefore keeps paragraph and inset metadata for block/fallback text boxes and table overlays, but does not attach `lineSpacingPt` to character-rect measured line boxes.
+
+What landed:
+
+1. `SlidevPptxTextBox` now carries optional `bulletLevel`, `lineSpacingPt`, paragraph spacing, and body inset fields.
+2. The DOM extractor validates those fields at the browser extraction boundary and records them only for the right owner: block/table text layout, not already-positioned line fragments.
+3. The writer emits `<a:spcBef>`, `<a:spcAft>`, `<a:lnSpc>`, body insets, and bullet indentation when the model provides them.
+4. The report exposes `lineSpacingTextBoxCount`, `paragraphSpacingTextBoxCount`, `bodyInsetTextBoxCount`, and `bulletedTextBoxCount`.
+5. Tests now cover the DOM extraction boundary, writer XML, and report coverage fields.
+
+The failing pre-fix real run against `docs/architecture.zh-CN.md` had `lineSpacingTextBoxCount = 338`, `meanRmse = 0.15714042333333336`, `maxRmse = 0.294646`, and failed `--require-pptx-visual-match`. That was not a reason to relax thresholds. It was a sign that the model was letting Office re-layout every measured line.
+
+The corrected real acceptance command was:
+
+```bash
+runuser -u jacob -- env HOME=/home/jacob PLAYWRIGHT_BROWSERS_PATH=/home/jacob/.cache/ms-playwright bash -lc 'cd /home/jacob/obsidian-NotEMD && rm -rf docs/export/test-slidev-m18-visible-native-text-contract /tmp/notemd-m18-visible-native-text-contract.json && npm run verify:slidev-export -- --vault docs --source architecture.zh-CN.md --format pptx --output-subfolder export/test-slidev-m18-visible-native-text-contract --sample-slides all --timeout-ms 240000 --no-screenshots --require-pptx-visual-match --json > /tmp/notemd-m18-visible-native-text-contract.json'
+```
+
+Result:
+
+1. `ok = true`;
+2. output PPTX: `docs/export/test-slidev-m18-visible-native-text-contract/architecture.zh-CN.pptx`;
+3. output report: `docs/export/test-slidev-m18-visible-native-text-contract/architecture.zh-CN.pptx.report.json`;
+4. `slidev.version = 52.16.0 (/home/jacob/slidev/packages/slidev/bin/slidev.mjs)`;
+5. `skillRootPath = /home/jacob/slidev/skills/slidev`, `skillReferenceCount = 52`;
+6. `pptxInspection.slideCount = 30`, `textRunCount = 861`, `pictureCount = 30`, `tableCount = 6`, `slidesWithoutEditableText = []`;
+7. `pptxVisualGate.referenceSource = "pptx-rendered-html-reference"`, `thresholdProfile = "visible-native-rendered-html"`, `passed = true`;
+8. rendered-HTML reference diff: `meanRmse = 0.14035412333333333`, `maxRmse = 0.238758`;
+9. sidecar `textBoxCount = 338`, `richTextBoxCount = 134`, `richTextRunCount = 338`;
+10. sidecar `lineSpacingTextBoxCount = 33`, `paragraphSpacingTextBoxCount = 11`, `bodyInsetTextBoxCount = 1`, `bulletedTextBoxCount = 0`;
+11. sidecar `editableBodyTextBoxCount = 324`, `editableCodeTextBoxCount = 14`, `editableTableCellCount = 102`, `editableMermaidTextBoxCount = 0`;
+12. `visibleTextLayer = native-text-and-background-image`, `editableLayerRenderMode = visible-native-text`, `transparentOverlayTextSources = []`;
+13. `mermaidSourcePreservation.passed = true`, `changedFenceIndexes = []`;
+14. PPTX XML scan found `totalTextTags = 861`, `Visible Native` shapes `344`, `Editable` transparent-only shapes `0`, `Mermaid Text` shapes `0`, `alpha=0` count `0`, and `alpha=8000` count `0`;
+15. generated outputs remain ignored: `git status --ignored --short docs/export/test-slidev-m18-visible-native-text-contract` reports `!!`, and these files must stay out of commits.
+
+Additional verification:
+
+1. targeted M18 tests passed: `pptxDomExtractor.test.ts`, `pptxWriter.test.ts`, and `pptxExportReport.test.ts`;
+2. `npx tsc --noEmit --pretty false` passed;
+3. `git diff --check` passed;
+4. `npm run build` passed;
+5. full `npm test -- --runInBand` passed with 190 suites and 1537 tests.
+
+The lesson from `oh-my-ppt` is not "always preserve CSS text metrics verbatim." The better rule is: extract CSS layout facts at the browser edge, then decide whether Office or the browser-owned coordinate model is responsible for layout. Paragraph-level Office text should receive paragraph properties. Single-line measured fragments should not.
+
+The next PPTX quality slice should focus on geometry and object modeling that still affects visible-native drift: table baseline/padding, code token background rectangles, high-confidence non-SVG shapes, and a stronger distinction between real layout drift and renderer noise in the visual report. Mermaid should remain background-owned by default; do not split or rewrite Mermaid source to improve this metric.
+
 ## Current Limits
 
 The first implementation is intentionally conservative:

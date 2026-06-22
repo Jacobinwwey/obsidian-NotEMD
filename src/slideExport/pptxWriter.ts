@@ -243,16 +243,60 @@ function paragraphEndFontSize(paragraph: SlidevPptxRichTextParagraph, fallbackFo
 	return Math.max(600, Math.min(14400, Math.round((lastRun?.fontSize || fallbackFontSize) * 100)));
 }
 
+function pointsToSpacingValue(value: number | undefined): number {
+	const numeric = Number(value);
+	return Number.isFinite(numeric) && numeric > 0 ? Math.round(Math.max(0, Math.min(200, numeric)) * 100) : 0;
+}
+
+function buildParagraphSpacingXml(textBox: SlidevPptxTextBox): string {
+	const spacing: string[] = [];
+	const spacingBefore = pointsToSpacingValue(textBox.paragraphSpacingBeforePt);
+	const spacingAfter = pointsToSpacingValue(textBox.paragraphSpacingAfterPt);
+	const lineSpacing = pointsToSpacingValue(textBox.lineSpacingPt);
+	if (spacingBefore > 0) {
+		spacing.push(`<a:spcBef><a:spcPts val="${spacingBefore}"/></a:spcBef>`);
+	}
+	if (spacingAfter > 0) {
+		spacing.push(`<a:spcAft><a:spcPts val="${spacingAfter}"/></a:spcAft>`);
+	}
+	if (lineSpacing > 0) {
+		spacing.push(`<a:lnSpc><a:spcPts val="${lineSpacing}"/></a:lnSpc>`);
+	}
+	return spacing.join('');
+}
+
+function buildTextBoxBulletXml(textBox: SlidevPptxTextBox): { attributes: string[]; children: string } {
+	if (!textBox.bullet) {
+		return { attributes: [], children: '<a:buNone/>' };
+	}
+	const level = Math.max(0, Math.min(8, Math.floor(Number(textBox.bulletLevel) || 0)));
+	const marginLeft = 342900 + level * 228600;
+	return {
+		attributes: [`marL="${marginLeft}"`, 'indent="-171450"'],
+		children: '<a:buChar char="&#8226;"/>',
+	};
+}
+
+function buildTextBoxParagraphProperties(textBox: SlidevPptxTextBox): string {
+	const align = alignToOoxml(textBox.align);
+	const bullet = buildTextBoxBulletXml(textBox);
+	const attributes = [`algn="${align}"`, ...bullet.attributes].join(' ');
+	return `<a:pPr ${attributes}>${buildParagraphSpacingXml(textBox)}${bullet.children}</a:pPr>`;
+}
+
+function buildTableCellParagraphProperties(cell: SlidevPptxTableCell): string {
+	return `<a:pPr algn="${alignToOoxml(cell.align)}"/>`;
+}
+
 function buildTextParagraphs(textBox: SlidevPptxTextBox, context: PptxWriterContext): string {
 	const paragraphs = chooseTextParagraphs(textBox);
-	const align = alignToOoxml(textBox.align);
-	const bullet = textBox.bullet ? '<a:buChar char="&#8226;"/>' : '<a:buNone/>';
+	const paragraphProperties = buildTextBoxParagraphProperties(textBox);
 
 	return paragraphs
 		.map((paragraph) =>
 				[
 					'<a:p>',
-					`<a:pPr algn="${align}">${bullet}</a:pPr>`,
+					paragraphProperties,
 					paragraph.runs.map((run) => buildTransparentRunXml(run.text || ' ', run, context)).join(''),
 					`<a:endParaRPr lang="en-US" sz="${paragraphEndFontSize(paragraph, textBox.fontSize)}"/>`,
 					'</a:p>',
@@ -263,14 +307,13 @@ function buildTextParagraphs(textBox: SlidevPptxTextBox, context: PptxWriterCont
 
 function buildVisibleTextParagraphs(textBox: SlidevPptxTextBox, context: PptxWriterContext): string {
 	const paragraphs = chooseTextParagraphs(textBox);
-	const align = alignToOoxml(textBox.align);
-	const bullet = textBox.bullet ? '<a:buChar char="&#8226;"/>' : '<a:buNone/>';
+	const paragraphProperties = buildTextBoxParagraphProperties(textBox);
 
 	return paragraphs
 		.map((paragraph) =>
 				[
 					'<a:p>',
-					`<a:pPr algn="${align}">${bullet}</a:pPr>`,
+					paragraphProperties,
 					paragraph.runs.map((run) => buildVisibleRunXml(run.text || ' ', run, context)).join(''),
 					`<a:endParaRPr lang="en-US" sz="${paragraphEndFontSize(paragraph, textBox.fontSize)}"/>`,
 					'</a:p>',
@@ -284,7 +327,19 @@ function visibleNativeTextBodyProperties(textBox: SlidevPptxTextBox): string {
 	const maxSingleLineHeight = Math.max(0.18, (textBox.fontSize / 72) * 1.8);
 	const browserLineBox = paragraphCount === 1 && !textBox.text.includes('\n') && textBox.h <= maxSingleLineHeight;
 	const wrap = browserLineBox ? 'none' : 'square';
-	return `<a:bodyPr wrap="${wrap}" lIns="0" tIns="0" rIns="0" bIns="0" rtlCol="0" anchor="t"><a:noAutofit/></a:bodyPr>`;
+	const lIns = inchesToEmu(textBox.paddingLeftIn || 0);
+	const rIns = inchesToEmu(textBox.paddingRightIn || 0);
+	const tIns = inchesToEmu(textBox.paddingTopIn || 0);
+	const bIns = inchesToEmu(textBox.paddingBottomIn || 0);
+	return `<a:bodyPr wrap="${wrap}" lIns="${lIns}" tIns="${tIns}" rIns="${rIns}" bIns="${bIns}" rtlCol="0" anchor="t"><a:noAutofit/></a:bodyPr>`;
+}
+
+function editableTextBodyProperties(textBox: SlidevPptxTextBox): string {
+	const lIns = inchesToEmu(textBox.paddingLeftIn || 0);
+	const rIns = inchesToEmu(textBox.paddingRightIn || 0);
+	const tIns = inchesToEmu(textBox.paddingTopIn || 0);
+	const bIns = inchesToEmu(textBox.paddingBottomIn || 0);
+	return `<a:bodyPr wrap="square" lIns="${lIns}" tIns="${tIns}" rIns="${rIns}" bIns="${bIns}" rtlCol="0" anchor="t"><a:normAutofit fontScale="100000"/></a:bodyPr>`;
 }
 
 function textShapeLabel(textBox: SlidevPptxTextBox): string {
@@ -337,7 +392,7 @@ function buildTextShape(textBox: SlidevPptxTextBox, shapeId: number, context: Pp
 		'<a:ln><a:noFill/></a:ln>',
 		'</p:spPr>',
 		'<p:txBody>',
-		'<a:bodyPr wrap="square" lIns="0" tIns="0" rIns="0" bIns="0" rtlCol="0" anchor="t"><a:normAutofit fontScale="100000"/></a:bodyPr>',
+		editableTextBodyProperties(textBox),
 		'<a:lstStyle/>',
 		buildTextParagraphs(textBox, context),
 		'</p:txBody>',
@@ -405,14 +460,13 @@ function buildTableCellParagraphs(cell: SlidevPptxTableCell, context: PptxWriter
 		.split('\n')
 		.map((line) => line.trimEnd())
 		.filter((line, index, allLines) => line.length > 0 || allLines.length === 1);
-	const align = alignToOoxml(cell.align);
 	const size = Math.max(600, Math.min(14400, Math.round(cell.fontSize * 100)));
 
 	return lines
 		.map((line) =>
 				[
 					'<a:p>',
-					`<a:pPr algn="${align}"/>`,
+					buildTableCellParagraphProperties(cell),
 					buildTableCellRun(line || ' ', cell, context),
 					`<a:endParaRPr lang="en-US" sz="${size}"/>`,
 					'</a:p>',
@@ -427,14 +481,13 @@ function buildVisibleTableCellParagraphs(cell: SlidevPptxTableCell, context: Ppt
 		.split('\n')
 		.map((line) => line.trimEnd())
 		.filter((line, index, allLines) => line.length > 0 || allLines.length === 1);
-	const align = alignToOoxml(cell.align);
 	const size = Math.max(600, Math.min(14400, Math.round(cell.fontSize * 100)));
 
 	return lines
 		.map((line) =>
 				[
 					'<a:p>',
-					`<a:pPr algn="${align}"/>`,
+					buildTableCellParagraphProperties(cell),
 					buildVisibleTableCellRun(line || ' ', cell, context),
 					`<a:endParaRPr lang="en-US" sz="${size}"/>`,
 					'</a:p>',

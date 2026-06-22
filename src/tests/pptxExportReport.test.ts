@@ -81,6 +81,10 @@ describe('pptx export report', () => {
 						underline: false,
 						align: 'left',
 						bullet: false,
+						lineSpacingPt: 28,
+						paragraphSpacingBeforePt: 6,
+						paragraphSpacingAfterPt: 10,
+						paddingLeftIn: 0.1,
 						order: 10,
 						richTextParagraphs: [
 							{
@@ -193,6 +197,10 @@ describe('pptx export report', () => {
 		expect(report.richTextRunCount).toBe(2);
 		expect(report.hyperlinkRunCount).toBe(1);
 		expect(report.hyperlinkTargetCount).toBe(1);
+		expect(report.lineSpacingTextBoxCount).toBe(1);
+		expect(report.paragraphSpacingTextBoxCount).toBe(1);
+		expect(report.bodyInsetTextBoxCount).toBe(1);
+		expect(report.bulletedTextBoxCount).toBe(0);
 		expect(report.editableTableCellCount).toBe(2);
 		expect(report.fallbackOnlyElementKinds).toEqual(['canvas', 'mermaid', 'svg']);
 		expect(report.unmodeledTextRunReasons).toEqual(['inline-formatting', 'link']);
@@ -203,6 +211,10 @@ describe('pptx export report', () => {
 		expect(report.editablePrimitiveCoverage.richTextRunCharacterCount).toBe('Architecture overview'.length);
 		expect(report.editablePrimitiveCoverage.hyperlinkRunCount).toBe(1);
 		expect(report.editablePrimitiveCoverage.hyperlinkTargetCount).toBe(1);
+		expect(report.editablePrimitiveCoverage.lineSpacingTextBoxCount).toBe(1);
+		expect(report.editablePrimitiveCoverage.paragraphSpacingTextBoxCount).toBe(1);
+		expect(report.editablePrimitiveCoverage.bodyInsetTextBoxCount).toBe(1);
+		expect(report.editablePrimitiveCoverage.bulletedTextBoxCount).toBe(0);
 		expect(report.editablePrimitiveCoverage.backgroundFallbackSlideRatio).toBe(0.5);
 		expect(report.editableLayerContract).toEqual({
 			visualFidelityStrategy: 'frozen-background-first',

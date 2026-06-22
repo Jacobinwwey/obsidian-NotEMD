@@ -788,6 +788,127 @@ describe('pptxWriter', () => {
 		}
 	});
 
+	test('writes paragraph spacing, body insets, and bullet indentation as Office text properties', () => {
+		const directory = mkdtempSync(join(tmpdir(), 'notemd-pptx-paragraph-contract-'));
+		try {
+			const outputPath = join(directory, 'deck.pptx');
+			const document: SlidevPptxDocument = {
+				title: 'Paragraph contract',
+				author: 'NoteMD',
+				slides: [
+					{
+						slideNumber: 1,
+						title: 'Paragraph contract',
+						backgroundColor: 'FFFFFF',
+						texts: [
+							{
+								text: 'Indented paragraph',
+								sourceKind: 'body',
+								x: 1,
+								y: 1,
+								w: 5,
+								h: 0.8,
+								fontSize: 18,
+								fontFace: 'Aptos',
+								color: '111827',
+								bold: false,
+								italic: false,
+								underline: false,
+								align: 'left',
+								bullet: false,
+								lineSpacingPt: 24,
+								paragraphSpacingBeforePt: 6,
+								paragraphSpacingAfterPt: 9,
+								paddingLeftIn: 0.15,
+								paddingRightIn: 0.2,
+								paddingTopIn: 0.05,
+								paddingBottomIn: 0.08,
+								order: 10,
+								richTextParagraphs: [
+									{
+										runs: [
+											{
+												text: 'Indented paragraph',
+												fontSize: 18,
+												fontFace: 'Aptos',
+												color: '111827',
+												bold: false,
+												italic: false,
+												underline: false,
+												code: false,
+												link: false,
+											},
+										],
+									},
+								],
+								unmodeledRunReasons: [],
+							},
+							{
+								text: 'Nested bullet',
+								sourceKind: 'body',
+								x: 1,
+								y: 2,
+								w: 5,
+								h: 0.5,
+								fontSize: 16,
+								fontFace: 'Aptos',
+								color: '111827',
+								bold: false,
+								italic: false,
+								underline: false,
+								align: 'left',
+								bullet: true,
+								bulletLevel: 2,
+								lineSpacingPt: 20,
+								order: 20,
+								richTextParagraphs: [
+									{
+										runs: [
+											{
+												text: 'Nested bullet',
+												fontSize: 16,
+												fontFace: 'Aptos',
+												color: '111827',
+												bold: false,
+												italic: false,
+												underline: false,
+												code: false,
+												link: false,
+											},
+										],
+									},
+								],
+								unmodeledRunReasons: [],
+							},
+						],
+						tables: [],
+						fallbackOnlyElementKinds: [],
+						consumedTableTextCandidateCount: 0,
+						warnings: [],
+					},
+				],
+			};
+
+			writePptxDocument(outputPath, document);
+
+			const entries = unzipSync(new Uint8Array(readFileSync(outputPath)));
+			const slideXml = strFromU8(entries['ppt/slides/slide1.xml']);
+			expect(slideXml).toContain('lIns="137160"');
+			expect(slideXml).toContain('rIns="182880"');
+			expect(slideXml).toContain('tIns="45720"');
+			expect(slideXml).toContain('bIns="73152"');
+			expect(slideXml).toContain('<a:spcBef><a:spcPts val="600"/></a:spcBef>');
+			expect(slideXml).toContain('<a:spcAft><a:spcPts val="900"/></a:spcAft>');
+			expect(slideXml).toContain('<a:lnSpc><a:spcPts val="2400"/></a:lnSpc>');
+			expect(slideXml).toContain('<a:lnSpc><a:spcPts val="2000"/></a:lnSpc>');
+			expect(slideXml).toContain('<a:pPr algn="l" marL="800100" indent="-171450">');
+			expect(slideXml).toContain('<a:buChar char="&#8226;"/>');
+			expect(slideXml).not.toContain('<a:alpha val="0"/>');
+		} finally {
+			rmSync(directory, { recursive: true, force: true });
+		}
+	});
+
 	test('splits mixed Latin and CJK text into Office font runs', () => {
 		const directory = mkdtempSync(join(tmpdir(), 'notemd-pptx-office-font-runs-'));
 		try {

@@ -954,6 +954,23 @@ function countHyperlinkTargets(slide: SlidevPptxSlide): number {
 	return new Set(hyperlinkTargetsForSlide(slide)).size;
 }
 
+function hasPositiveNumber(value: number | undefined): boolean {
+	return Number.isFinite(Number(value)) && Number(value) > 0;
+}
+
+function textBoxHasParagraphSpacing(textBox: SlidevPptxTextBox): boolean {
+	return hasPositiveNumber(textBox.paragraphSpacingBeforePt) || hasPositiveNumber(textBox.paragraphSpacingAfterPt);
+}
+
+function textBoxHasBodyInset(textBox: SlidevPptxTextBox): boolean {
+	return (
+		hasPositiveNumber(textBox.paddingLeftIn) ||
+		hasPositiveNumber(textBox.paddingRightIn) ||
+		hasPositiveNumber(textBox.paddingTopIn) ||
+		hasPositiveNumber(textBox.paddingBottomIn)
+	);
+}
+
 function collectUniqueSorted<T extends string>(values: T[]): T[] {
 	return Array.from(new Set(values)).sort();
 }
@@ -1072,6 +1089,10 @@ function buildSlideEditabilitySummary(
 		richTextRunCharacterCount: countRichTextRunCharacters(slide),
 		hyperlinkRunCount: countHyperlinkRuns(slide),
 		hyperlinkTargetCount: countHyperlinkTargets(slide),
+		lineSpacingTextBoxCount: slide.texts.filter((textBox) => hasPositiveNumber(textBox.lineSpacingPt)).length,
+		paragraphSpacingTextBoxCount: slide.texts.filter(textBoxHasParagraphSpacing).length,
+		bodyInsetTextBoxCount: slide.texts.filter(textBoxHasBodyInset).length,
+		bulletedTextBoxCount: slide.texts.filter((textBox) => textBox.bullet).length,
 		backgroundFallbackPresent: Boolean(slide.backgroundImage),
 		fallbackOnlyElementKinds: collectUniqueSorted(slide.fallbackOnlyElementKinds),
 		unmodeledTextRunReasons: collectUniqueSorted(slide.texts.flatMap((textBox) => textBox.unmodeledRunReasons)),
@@ -1125,6 +1146,13 @@ function buildEditablePrimitiveCoverage(
 		richTextRunCharacterCount: slideSummaries.reduce((total, slide) => total + slide.richTextRunCharacterCount, 0),
 		hyperlinkRunCount: slideSummaries.reduce((total, slide) => total + slide.hyperlinkRunCount, 0),
 		hyperlinkTargetCount: slideSummaries.reduce((total, slide) => total + slide.hyperlinkTargetCount, 0),
+		lineSpacingTextBoxCount: slideSummaries.reduce((total, slide) => total + slide.lineSpacingTextBoxCount, 0),
+		paragraphSpacingTextBoxCount: slideSummaries.reduce(
+			(total, slide) => total + slide.paragraphSpacingTextBoxCount,
+			0,
+		),
+		bodyInsetTextBoxCount: slideSummaries.reduce((total, slide) => total + slide.bodyInsetTextBoxCount, 0),
+		bulletedTextBoxCount: slideSummaries.reduce((total, slide) => total + slide.bulletedTextBoxCount, 0),
 		backgroundFallbackSlideCount,
 		backgroundFallbackSlideRatio: ratio(backgroundFallbackSlideCount, slideCount),
 		textSourceCoverage: mergeTextSourceCoverage(slideSummaries.flatMap((slide) => slide.textSourceCoverage)),
@@ -1232,6 +1260,10 @@ export function buildSlidevPptxExportReport(
 		richTextRunCount: editablePrimitiveCoverage.richTextRunCount,
 		hyperlinkRunCount: editablePrimitiveCoverage.hyperlinkRunCount,
 		hyperlinkTargetCount: editablePrimitiveCoverage.hyperlinkTargetCount,
+		lineSpacingTextBoxCount: editablePrimitiveCoverage.lineSpacingTextBoxCount,
+		paragraphSpacingTextBoxCount: editablePrimitiveCoverage.paragraphSpacingTextBoxCount,
+		bodyInsetTextBoxCount: editablePrimitiveCoverage.bodyInsetTextBoxCount,
+		bulletedTextBoxCount: editablePrimitiveCoverage.bulletedTextBoxCount,
 		editableTableCellCount: editablePrimitiveCoverage.editableTableCellCount,
 		editableBodyTextBoxCount: editablePrimitiveCoverage.editableBodyTextBoxCount,
 		editableCodeTextBoxCount: editablePrimitiveCoverage.editableCodeTextBoxCount,

@@ -1012,6 +1012,58 @@ runuser -u jacob -- env HOME=/home/jacob PLAYWRIGHT_BROWSERS_PATH=/home/jacob/.c
 
 这轮的工程判断是：链接关系属于“低漂移、高语义价值”的 native primitive，应该优先落地；而 Mermaid 文本、复杂 SVG 形状、图表数据和动画仍属于高漂移 primitive，必须继续通过单独 gate 推进。不要为了追求“更多可编辑”而把不稳定对象伪装成 Office 原生语义。
 
+## M18 段落/列表/代码 Office 文本合同
+
+本轮修的是用户最新指出的 PPTX 本质问题：展示文字必须就是可编辑的 Office 原生文字，不能靠“可读截图 + 透明文本层”冒充可编辑。这里参考 `ref/oh-my-ppt` 的不是源码，而是文本框合同：段落间距、行距、正文 inset、bullet 层级应该进入抽取模型和 OOXML writer，但只能放在确实需要 Office 执行段落排版的位置。
+
+关键修正是：浏览器逐字符 rect 测出来的 line box 已经完成排版。再把 CSS `line-height` 写进这些单行 Office shape，会让 PowerPoint/LibreOffice 对本来应当锁定坐标的文本再排版一次，这正是实机 visual gate 失败的主要原因。M18 因此保留 block/fallback text box 与 table overlay 上的 paragraph/inset 元数据，但不给逐行测量出的文本片段附加 `lineSpacingPt`。
+
+本轮落地内容：
+
+1. `SlidevPptxTextBox` 新增可选的 `bulletLevel`、`lineSpacingPt`、段前/段后 spacing 和 body inset 字段。
+2. DOM extractor 在浏览器抽取边界统一校验这些字段，只把布局责任交给正确 owner：block/table 文本布局，而不是已经定位好的 line fragment。
+3. writer 在模型提供字段时写出 `<a:spcBef>`、`<a:spcAft>`、`<a:lnSpc>`、body inset 和 bullet indentation。
+4. report 新增 `lineSpacingTextBoxCount`、`paragraphSpacingTextBoxCount`、`bodyInsetTextBoxCount`、`bulletedTextBoxCount`。
+5. 测试覆盖 DOM extraction 边界、writer XML 和 report 覆盖统计。
+
+修复前的真实 `docs/architecture.zh-CN.md` run 中，`lineSpacingTextBoxCount = 338`，`meanRmse = 0.15714042333333336`，`maxRmse = 0.294646`，并且 `--require-pptx-visual-match` 失败。这个结果不应该通过放宽阈值解决；它说明模型把每个已测量 line 都交给 Office 二次布局了。
+
+修复后的真实验收命令：
+
+```bash
+runuser -u jacob -- env HOME=/home/jacob PLAYWRIGHT_BROWSERS_PATH=/home/jacob/.cache/ms-playwright bash -lc 'cd /home/jacob/obsidian-NotEMD && rm -rf docs/export/test-slidev-m18-visible-native-text-contract /tmp/notemd-m18-visible-native-text-contract.json && npm run verify:slidev-export -- --vault docs --source architecture.zh-CN.md --format pptx --output-subfolder export/test-slidev-m18-visible-native-text-contract --sample-slides all --timeout-ms 240000 --no-screenshots --require-pptx-visual-match --json > /tmp/notemd-m18-visible-native-text-contract.json'
+```
+
+结果：
+
+1. `ok = true`；
+2. 输出 PPTX：`docs/export/test-slidev-m18-visible-native-text-contract/architecture.zh-CN.pptx`；
+3. 输出 report：`docs/export/test-slidev-m18-visible-native-text-contract/architecture.zh-CN.pptx.report.json`；
+4. `slidev.version = 52.16.0 (/home/jacob/slidev/packages/slidev/bin/slidev.mjs)`；
+5. `skillRootPath = /home/jacob/slidev/skills/slidev`，`skillReferenceCount = 52`；
+6. `pptxInspection.slideCount = 30`，`textRunCount = 861`，`pictureCount = 30`，`tableCount = 6`，`slidesWithoutEditableText = []`；
+7. `pptxVisualGate.referenceSource = "pptx-rendered-html-reference"`，`thresholdProfile = "visible-native-rendered-html"`，`passed = true`；
+8. rendered-HTML reference diff：`meanRmse = 0.14035412333333333`，`maxRmse = 0.238758`；
+9. sidecar `textBoxCount = 338`，`richTextBoxCount = 134`，`richTextRunCount = 338`；
+10. sidecar `lineSpacingTextBoxCount = 33`，`paragraphSpacingTextBoxCount = 11`，`bodyInsetTextBoxCount = 1`，`bulletedTextBoxCount = 0`；
+11. sidecar `editableBodyTextBoxCount = 324`，`editableCodeTextBoxCount = 14`，`editableTableCellCount = 102`，`editableMermaidTextBoxCount = 0`；
+12. `visibleTextLayer = native-text-and-background-image`，`editableLayerRenderMode = visible-native-text`，`transparentOverlayTextSources = []`；
+13. `mermaidSourcePreservation.passed = true`，`changedFenceIndexes = []`；
+14. PPTX XML 扫描显示 `totalTextTags = 861`，`Visible Native` shapes 为 `344`，透明替身 `Editable` shapes 为 `0`，`Mermaid Text` shapes 为 `0`，`alpha=0` 数量为 `0`，`alpha=8000` 数量为 `0`；
+15. 生成物仍在 Git ignore 范围内：`git status --ignored --short docs/export/test-slidev-m18-visible-native-text-contract` 显示 `!!`，这些文件不得进入 commit。
+
+补充验证：
+
+1. M18 定向测试通过：`pptxDomExtractor.test.ts`、`pptxWriter.test.ts`、`pptxExportReport.test.ts`；
+2. `npx tsc --noEmit --pretty false` 通过；
+3. `git diff --check` 通过；
+4. `npm run build` 通过；
+5. 完整 `npm test -- --runInBand` 通过，190 个 suites、1537 个 tests。
+
+从 `oh-my-ppt` 得到的经验不是“无条件保留 CSS 文本度量”。更准确的规则是：在浏览器边界抽取 CSS layout facts，然后判断排版责任属于 Office 还是属于浏览器坐标模型。段落级 Office 文本应写 paragraph properties；单行测量片段不应该写。
+
+下一轮 PPTX 质量切片应继续处理影响 visible-native drift 的几何和对象建模：table baseline/padding、code token background rectangles、高置信非 SVG shape，以及在 visual report 中更明确地区分真实 layout drift 和 renderer noise。Mermaid 默认仍应由背景拥有；不要为了改善指标而拆分或改写 Mermaid 源。
+
 ## 当前边界
 
 第一版实现有意保守：

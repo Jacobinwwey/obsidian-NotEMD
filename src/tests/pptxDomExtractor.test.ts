@@ -121,4 +121,61 @@ describe('pptxDomExtractor', () => {
 			await page.close();
 		}
 	});
+
+	test('preserves paragraph, inset, and list layout metadata for native Office text', async () => {
+		if (!browser) {
+			console.warn('Skipping PPTX DOM extractor Playwright test:', launchError);
+			return;
+		}
+
+		const page = await browser.newPage({ viewport: { width: 1280, height: 720 } });
+		try {
+			await page.setContent(`
+				<body style="margin:0;background:#fff">
+					<div class="slidev-page" style="width:1280px;height:720px;background:#fff;padding:64px;box-sizing:border-box">
+						<p id="body-copy" style="margin:12px 0 18px;padding:8px 16px 4px 12px;font-family:Arial;font-size:32px;line-height:40px;color:#111827">
+							Paragraph contract.
+						</p>
+						<ul style="margin:0;padding-left:40px;list-style-type:disc">
+							<li id="nested-list" style="width:720px;margin:0 0 10px;font-family:Arial;font-size:28px;line-height:36px;color:#111827">
+								Native bullet contract.
+							</li>
+						</ul>
+					</div>
+				</body>
+			`);
+
+			const slide = await extractSlidevPptxSlideFromPage(page, 1);
+			const paragraph = slide.texts.find((textBox) => textBox.text === 'Paragraph contract.');
+			const bullet = slide.texts.find((textBox) => textBox.text === 'Native bullet contract.');
+
+			expect(paragraph).toEqual(
+				expect.objectContaining({
+					lineSpacingPt: expect.any(Number),
+					paragraphSpacingBeforePt: expect.any(Number),
+					paragraphSpacingAfterPt: expect.any(Number),
+					paddingLeftIn: expect.any(Number),
+					paddingRightIn: expect.any(Number),
+					paddingTopIn: expect.any(Number),
+					paddingBottomIn: expect.any(Number),
+				}),
+			);
+			expect(paragraph?.lineSpacingPt).toBeGreaterThan(paragraph?.fontSize || 0);
+			expect(paragraph?.paragraphSpacingBeforePt).toBeGreaterThan(0);
+			expect(paragraph?.paragraphSpacingAfterPt).toBeGreaterThan(0);
+			expect(paragraph?.paddingLeftIn).toBeGreaterThan(0);
+			expect(paragraph?.paddingRightIn).toBeGreaterThan(0);
+			expect(paragraph?.paddingTopIn).toBeGreaterThan(0);
+			expect(paragraph?.paddingBottomIn).toBeGreaterThan(0);
+			expect(bullet).toEqual(
+				expect.objectContaining({
+					bullet: false,
+				}),
+			);
+			expect(bullet).not.toHaveProperty('lineSpacingPt');
+			expect(bullet).not.toHaveProperty('paragraphSpacingAfterPt');
+		} finally {
+			await page.close();
+		}
+	});
 });

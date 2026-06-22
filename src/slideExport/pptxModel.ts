@@ -62,6 +62,14 @@ export interface SlidevPptxTextBox {
 	underline: boolean;
 	align: SlidevPptxTextAlign;
 	bullet: boolean;
+	bulletLevel?: number;
+	lineSpacingPt?: number;
+	paragraphSpacingBeforePt?: number;
+	paragraphSpacingAfterPt?: number;
+	paddingLeftIn?: number;
+	paddingRightIn?: number;
+	paddingTopIn?: number;
+	paddingBottomIn?: number;
 	order: number;
 	richTextParagraphs: SlidevPptxRichTextParagraph[];
 	unmodeledRunReasons: SlidevPptxUnmodeledTextRunReason[];
@@ -185,6 +193,10 @@ export interface SlidevPptxSlideEditabilitySummary {
 	richTextRunCharacterCount: number;
 	hyperlinkRunCount: number;
 	hyperlinkTargetCount: number;
+	lineSpacingTextBoxCount: number;
+	paragraphSpacingTextBoxCount: number;
+	bodyInsetTextBoxCount: number;
+	bulletedTextBoxCount: number;
 	backgroundFallbackPresent: boolean;
 	fallbackOnlyElementKinds: SlidevPptxFallbackOnlyElementKind[];
 	unmodeledTextRunReasons: SlidevPptxUnmodeledTextRunReason[];
@@ -228,6 +240,10 @@ export interface SlidevPptxEditablePrimitiveCoverage {
 	richTextRunCharacterCount: number;
 	hyperlinkRunCount: number;
 	hyperlinkTargetCount: number;
+	lineSpacingTextBoxCount: number;
+	paragraphSpacingTextBoxCount: number;
+	bodyInsetTextBoxCount: number;
+	bulletedTextBoxCount: number;
 	backgroundFallbackSlideCount: number;
 	backgroundFallbackSlideRatio: number;
 	textSourceCoverage: SlidevPptxTextSourceCoverage[];
@@ -338,6 +354,10 @@ export interface SlidevPptxExportReport {
 	richTextRunCount: number;
 	hyperlinkRunCount: number;
 	hyperlinkTargetCount: number;
+	lineSpacingTextBoxCount: number;
+	paragraphSpacingTextBoxCount: number;
+	bodyInsetTextBoxCount: number;
+	bulletedTextBoxCount: number;
 	editableTableCellCount: number;
 	editableBodyTextBoxCount: number;
 	editableCodeTextBoxCount: number;

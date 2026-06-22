@@ -29,6 +29,14 @@ interface RawSlideTextBox {
 	underline: boolean;
 	align: SlidevPptxTextAlign;
 	bullet: boolean;
+	bulletLevel?: number;
+	lineSpacingPt?: number;
+	paragraphSpacingBeforePt?: number;
+	paragraphSpacingAfterPt?: number;
+	paddingLeftIn?: number;
+	paddingRightIn?: number;
+	paddingTopIn?: number;
+	paddingBottomIn?: number;
 	order: number;
 	richTextParagraphs: RawSlideRichTextParagraph[];
 	unmodeledRunReasons: SlidevPptxUnmodeledTextRunReason[];
@@ -160,6 +168,22 @@ function normalizeTextValue(value: unknown, sourceKind: SlidevPptxTextSourceKind
 	return source.replace(/[^\S\n]+/g, ' ').trim();
 }
 
+function normalizeOptionalPositiveNumber(value: unknown, min: number, max: number): number | undefined {
+	const numeric = Number(value);
+	if (!Number.isFinite(numeric) || numeric <= 0) {
+		return undefined;
+	}
+	return clamp(numeric, min, max);
+}
+
+function normalizeOptionalBulletLevel(value: unknown): number | undefined {
+	const numeric = Number(value);
+	if (!Number.isFinite(numeric) || numeric < 0) {
+		return undefined;
+	}
+	return Math.floor(clamp(numeric, 0, 8));
+}
+
 function buildFallbackRichTextParagraphs(
 	text: string,
 	textBox: Omit<SlidevPptxTextBox, 'richTextParagraphs'>,
@@ -211,6 +235,15 @@ function normalizeTextBox(raw: RawSlideTextBox): SlidevPptxTextBox | null {
 	if (!text.trim()) {
 		return null;
 	}
+	const bullet = Boolean(raw.bullet);
+	const bulletLevel = bullet ? normalizeOptionalBulletLevel(raw.bulletLevel) ?? 0 : undefined;
+	const lineSpacingPt = normalizeOptionalPositiveNumber(raw.lineSpacingPt, 1, 200);
+	const paragraphSpacingBeforePt = normalizeOptionalPositiveNumber(raw.paragraphSpacingBeforePt, 0.1, 72);
+	const paragraphSpacingAfterPt = normalizeOptionalPositiveNumber(raw.paragraphSpacingAfterPt, 0.1, 72);
+	const paddingLeftIn = normalizeOptionalPositiveNumber(raw.paddingLeftIn, 0.001, 2);
+	const paddingRightIn = normalizeOptionalPositiveNumber(raw.paddingRightIn, 0.001, 2);
+	const paddingTopIn = normalizeOptionalPositiveNumber(raw.paddingTopIn, 0.001, 2);
+	const paddingBottomIn = normalizeOptionalPositiveNumber(raw.paddingBottomIn, 0.001, 2);
 
 	const textBox: Omit<SlidevPptxTextBox, 'richTextParagraphs'> = {
 		text: text.slice(0, 4000),
@@ -226,7 +259,15 @@ function normalizeTextBox(raw: RawSlideTextBox): SlidevPptxTextBox | null {
 		italic: Boolean(raw.italic),
 		underline: Boolean(raw.underline),
 		align: raw.align === 'center' || raw.align === 'right' || raw.align === 'justify' ? raw.align : 'left',
-		bullet: Boolean(raw.bullet),
+		bullet,
+		...(bulletLevel !== undefined ? { bulletLevel } : {}),
+		...(lineSpacingPt !== undefined ? { lineSpacingPt } : {}),
+		...(paragraphSpacingBeforePt !== undefined ? { paragraphSpacingBeforePt } : {}),
+		...(paragraphSpacingAfterPt !== undefined ? { paragraphSpacingAfterPt } : {}),
+		...(paddingLeftIn !== undefined ? { paddingLeftIn } : {}),
+		...(paddingRightIn !== undefined ? { paddingRightIn } : {}),
+		...(paddingTopIn !== undefined ? { paddingTopIn } : {}),
+		...(paddingBottomIn !== undefined ? { paddingBottomIn } : {}),
 		order: Number.isFinite(Number(raw.order)) ? Number(raw.order) : 1000,
 		unmodeledRunReasons: Array.from(new Set(Array.isArray(raw.unmodeledRunReasons) ? raw.unmodeledRunReasons : []))
 			.filter(
@@ -381,6 +422,73 @@ export async function extractSlidevPptxSlideFromPage(page: any, slideNumber: num
 		const sizeToInY = (value: number): number => (value / rootHeight) * slideHeightIn;
 		const pxToPt = (value: number): number =>
 			value * rootVisualScale * Math.min(slideWidthIn / rootWidth, slideHeightIn / rootHeight) * 72;
+		const cssPx = (value: string): number => {
+			const parsed = Number.parseFloat(value || '0');
+			return Number.isFinite(parsed) ? Math.max(0, parsed) : 0;
+		};
+		const spacingPtFor = (style: CSSStyleDeclaration, property: 'marginTop' | 'marginBottom'): number | undefined => {
+			const spacing = pxToPt(cssPx(style[property]));
+			return spacing > 0 ? Math.min(72, spacing) : undefined;
+		};
+		const lineSpacingPtFor = (style: CSSStyleDeclaration): number | undefined => {
+			if (!style.lineHeight || style.lineHeight === 'normal') return undefined;
+			const lineHeight = pxToPt(cssPx(style.lineHeight));
+			return lineHeight > 0 ? Math.min(200, lineHeight) : undefined;
+		};
+		const bodyInsetsFor = (
+			style: CSSStyleDeclaration,
+		): Pick<
+			RawSlideTextBox,
+			'paddingLeftIn' | 'paddingRightIn' | 'paddingTopIn' | 'paddingBottomIn'
+		> => {
+			const maxInsetIn = 2;
+			const paddingLeftIn = Math.min(maxInsetIn, sizeToInX(cssPx(style.paddingLeft) + cssPx(style.borderLeftWidth)));
+			const paddingRightIn = Math.min(maxInsetIn, sizeToInX(cssPx(style.paddingRight) + cssPx(style.borderRightWidth)));
+			const paddingTopIn = Math.min(maxInsetIn, sizeToInY(cssPx(style.paddingTop) + cssPx(style.borderTopWidth)));
+			const paddingBottomIn = Math.min(maxInsetIn, sizeToInY(cssPx(style.paddingBottom) + cssPx(style.borderBottomWidth)));
+			return {
+				...(paddingLeftIn > 0 ? { paddingLeftIn } : {}),
+				...(paddingRightIn > 0 ? { paddingRightIn } : {}),
+				...(paddingTopIn > 0 ? { paddingTopIn } : {}),
+				...(paddingBottomIn > 0 ? { paddingBottomIn } : {}),
+			};
+		};
+		const paragraphTextLayoutFor = (
+			style: CSSStyleDeclaration,
+		): Pick<RawSlideTextBox, 'lineSpacingPt' | 'paragraphSpacingBeforePt' | 'paragraphSpacingAfterPt'> => {
+			const lineSpacingPt = lineSpacingPtFor(style);
+			const paragraphSpacingBeforePt = spacingPtFor(style, 'marginTop');
+			const paragraphSpacingAfterPt = spacingPtFor(style, 'marginBottom');
+			return {
+				...(lineSpacingPt ? { lineSpacingPt } : {}),
+				...(paragraphSpacingBeforePt ? { paragraphSpacingBeforePt } : {}),
+				...(paragraphSpacingAfterPt ? { paragraphSpacingAfterPt } : {}),
+			};
+		};
+		const blockTextLayoutFor = (
+			style: CSSStyleDeclaration,
+		): Pick<
+			RawSlideTextBox,
+			| 'lineSpacingPt'
+			| 'paragraphSpacingBeforePt'
+			| 'paragraphSpacingAfterPt'
+			| 'paddingLeftIn'
+			| 'paddingRightIn'
+			| 'paddingTopIn'
+			| 'paddingBottomIn'
+		> => ({
+			...paragraphTextLayoutFor(style),
+			...bodyInsetsFor(style),
+		});
+		const listLevelFor = (element: Element): number => {
+			let level = 0;
+			let parentListItem = element.parentElement?.closest('li');
+			while (parentListItem) {
+				level += 1;
+				parentListItem = parentListItem.parentElement?.closest('li') || null;
+			}
+			return Math.min(8, level);
+		};
 		const collectShadowRoots = (element: Element): ShadowRoot[] => {
 			const shadowRoots: ShadowRoot[] = [];
 			const visit = (current: Element): void => {
@@ -1114,6 +1222,7 @@ export async function extractSlidevPptxSlideFromPage(page: any, slideNumber: num
 						underline: cellStyle.textDecorationLine.includes('underline'),
 						align: alignFor(cellStyle),
 						bullet: false,
+						...blockTextLayoutFor(cellStyle),
 						order: orderFor(placement.element, order + 1),
 						richTextParagraphs: collectRichTextParagraphs(placement.element, cellTagName, cellStyle),
 						unmodeledRunReasons: textRunReasonsFor(placement.element, cellStyle, cellTagName),
@@ -1189,6 +1298,8 @@ export async function extractSlidevPptxSlideFromPage(page: any, slideNumber: num
 					underline: style.textDecorationLine.includes('underline'),
 					align: alignFor(style),
 					bullet,
+					...(bullet ? { bulletLevel: listLevelFor(element) } : {}),
+					...blockTextLayoutFor(style),
 					order: baseOrder,
 					richTextParagraphs: collectRichTextParagraphs(element, tagName, style),
 					unmodeledRunReasons,
