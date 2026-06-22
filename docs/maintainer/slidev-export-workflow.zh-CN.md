@@ -58,7 +58,9 @@ docs/export/architecture.zh-CN.pptx.report.json
 
 verifier 会把 `.pptx` 当作 zip 打开，并检查 slide XML 中是否存在可编辑文本节点 `<a:t>`，同时通过 `pptxInspection.tableCount` 统计 native DrawingML table。如果只是图片式 PPTX，这条路径应视为失败。
 
-PPTX sidecar report 是导出合同的一部分，不能忽略。它会记录可见层策略（`visibleTextLayer = "background-image"`）、透明可编辑层策略、table consumption 数量、editability coverage、rich-run coverage、fallback-only 视觉对象类型、未建模 text-run 原因与逐页 summary。这样做是刻意的：复杂 Slidev/Mermaid/SVG/canvas 内容当前仍可作为 raster fallback，但 report 不能暗示它们已经是 Office 原生可编辑对象。
+PPTX sidecar report 是导出合同的一部分，不能忽略。它会记录可见层策略（`visibleTextLayer = "background-image"`）、透明可编辑层策略、table consumption 数量、editability coverage、rich-run coverage、fallback-only 视觉对象类型、未建模 text-run 原因、`fontContract` 与逐页 summary。这样做是刻意的：复杂 Slidev/Mermaid/SVG/canvas 内容当前仍可作为 raster fallback，但 report 不能暗示它们已经是 Office 原生可编辑对象。
+
+当前 `fontContract` 是诊断合同，不是默认打开可见原生文本的许可。它记录抽取到的字体族、承载 CJK 的字体族、承载 Latin 的字体族、writer 的 East Asian fallback 字体、Office 缺字风险，以及显式的 `fontEmbeddingPolicy = "not-embedded"` 状态。visible native text/table 后续必须先证明最终 Office 字体稳定，或先提供明确、授权可控的 local/vault 字体嵌入路径。
 
 如果要逐页比较 PPTX 回放结果与写入 PPTX 的冻结视觉 reference：
 
@@ -191,7 +193,7 @@ docs/maintainer/slidev-standalone-acceptance-2026-06-18.zh-CN.md
 24. PPTX 收口时，`pptxInspection.textRunCount > 0`
 25. PPTX 收口时，若源 deck 每页都有文本，`pptxInspection.slidesWithoutEditableText` 必须为空
 26. PPTX 收口时，含表格的 deck 应满足 `pptxInspection.tableCount > 0`
-27. PPTX 收口时，sidecar report 必须记录 `textBoxCount`、`tableCount`、`consumedTableCount`、`consumedTableTextCandidateCount`、`richTextBoxCount`、`richTextRunCount`、`editableTableCellCount`、`editableTextSlideCount`、`imageFallbackCount`、`pagesWithoutEditableText`、`editablePrimitiveCoverage`、`fallbackOnlyElementKinds`、`unmodeledTextRunReasons` 与逐页 summary
+27. PPTX 收口时，sidecar report 必须记录 `textBoxCount`、`tableCount`、`consumedTableCount`、`consumedTableTextCandidateCount`、`richTextBoxCount`、`richTextRunCount`、`editableTableCellCount`、`editableTextSlideCount`、`imageFallbackCount`、`pagesWithoutEditableText`、`editablePrimitiveCoverage`、`fontContract`、`fallbackOnlyElementKinds`、`unmodeledTextRunReasons` 与逐页 summary
 28. PPTX 视觉收口时，必须加 `--pptx-visual-diff --require-pptx-visual-match`
 29. PPTX 视觉收口时，`pptxVisualDiff.reference.source: "pptx-background-images"`
 30. PPTX 视觉收口时，`pptxVisualDiff.comparison.summary.missingReferenceSlides: []`

@@ -185,6 +185,7 @@ describe('pptxWriter', () => {
 			expect(entries['ppt/media/image1.png']).toBeDefined();
 			const slideXml = strFromU8(entries['ppt/slides/slide1.xml']);
 			expect(slideXml).toContain('<a:t>可编辑</a:t>');
+			expect(slideXml).toContain('<a:ea typeface="Microsoft YaHei"/>');
 			expect(slideXml).toContain('<a:t xml:space="preserve"> </a:t>');
 			expect(slideXml).toContain('<a:t>PPTX</a:t>');
 			expect(slideXml).toContain('<a:t>Architecture</a:t>');

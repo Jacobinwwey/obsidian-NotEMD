@@ -55,7 +55,7 @@ describe('pptx export report', () => {
 									{
 										text: 'overview',
 										fontSize: 24,
-										fontFace: 'Aptos',
+										fontFace: 'Inter',
 										color: '2563EB',
 										bold: true,
 										italic: false,
@@ -81,11 +81,11 @@ describe('pptx export report', () => {
 						rows: [
 							[
 								{
-									text: 'Decision',
+									text: '决策',
 									rowSpan: 1,
 									colSpan: 1,
 									fontSize: 12,
-									fontFace: 'Aptos',
+									fontFace: 'Noto Sans CJK SC',
 									color: '111827',
 									bold: false,
 									italic: false,
@@ -155,6 +155,37 @@ describe('pptx export report', () => {
 		expect(report.editablePrimitiveCoverage.richTextRunCount).toBe(2);
 		expect(report.editablePrimitiveCoverage.richTextRunCharacterCount).toBe('Architecture overview'.length);
 		expect(report.editablePrimitiveCoverage.backgroundFallbackSlideRatio).toBe(0.5);
+		expect(report.fontContract).toEqual(
+			expect.objectContaining({
+				fontFamilyCount: 3,
+				fontFamilies: ['Aptos', 'Inter', 'Noto Sans CJK SC'],
+				cjkFontFamilies: ['Noto Sans CJK SC'],
+				latinFontFamilies: ['Aptos', 'Inter'],
+				writerEastAsiaFontFace: 'Microsoft YaHei',
+				writerEastAsiaFallbackFontFamilies: ['Noto Sans CJK SC'],
+				officeMissingFontRiskCount: 2,
+				officeMissingFontRiskFamilies: ['Inter', 'Noto Sans CJK SC'],
+				fontEmbeddingPolicy: 'not-embedded',
+				embeddedFontCount: 0,
+				embeddedFontFamilies: [],
+			}),
+		);
+		expect(report.fontContract.fontUsages).toEqual(
+			expect.arrayContaining([
+				expect.objectContaining({
+					fontFace: 'Inter',
+					officeMissingFontRisk: true,
+					officeMissingFontRiskReasons: ['non-office-family'],
+				}),
+				expect.objectContaining({
+					fontFace: 'Noto Sans CJK SC',
+					cjkCharacterCount: 2,
+					writerEastAsiaFallbackRunCount: 1,
+					writerEastAsiaFallbackCharacterCount: 2,
+					officeMissingFontRiskReasons: ['non-office-family'],
+				}),
+			]),
+		);
 		expect(report.slides[0]).toEqual(
 			expect.objectContaining({
 				slideNumber: 1,
@@ -163,6 +194,10 @@ describe('pptx export report', () => {
 				editableTableCellCount: 2,
 				richTextBoxCount: 1,
 				richTextRunCount: 2,
+				fontFamilies: ['Aptos', 'Inter', 'Noto Sans CJK SC'],
+				cjkFontFamilies: ['Noto Sans CJK SC'],
+				writerEastAsiaFallbackFontFamilies: ['Noto Sans CJK SC'],
+				officeMissingFontRiskFamilies: ['Inter', 'Noto Sans CJK SC'],
 				consumedTableTextCandidateCount: 2,
 			}),
 		);

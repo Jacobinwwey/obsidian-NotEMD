@@ -58,7 +58,9 @@ docs/export/architecture.zh-CN.pptx.report.json
 
 The verifier also opens the `.pptx` as a zip and checks slide XML for editable `<a:t>` text nodes. It counts native DrawingML tables through `pptxInspection.tableCount`. Treat image-only PPTX output as a failure for this path.
 
-The PPTX sidecar report must be read as part of the export contract. It reports the visible layer strategy (`visibleTextLayer = "background-image"`), transparent editable-layer strategy, table consumption counts, editability coverage, rich-run coverage, fallback-only visual kinds, unmodeled text-run reasons, and per-slide summaries. This is deliberate: complex Slidev/Mermaid/SVG/canvas content is still allowed to be raster fallback, but the report must not imply it is Office-native editable.
+The PPTX sidecar report must be read as part of the export contract. It reports the visible layer strategy (`visibleTextLayer = "background-image"`), transparent editable-layer strategy, table consumption counts, editability coverage, rich-run coverage, fallback-only visual kinds, unmodeled text-run reasons, `fontContract`, and per-slide summaries. This is deliberate: complex Slidev/Mermaid/SVG/canvas content is still allowed to be raster fallback, but the report must not imply it is Office-native editable.
+
+`fontContract` is intentionally diagnostic today. It records extracted font families, CJK-bearing families, Latin-bearing families, the writer's East Asian fallback font, Office missing-font risk, and the explicit `fontEmbeddingPolicy = "not-embedded"` state. Do not use it as permission to make native text visible. Use it as the opposite: visible native text/table work must prove the final Office fonts are stable, or provide an explicit licensed local/vault font embedding path first.
 
 To compare every PPTX page against the frozen visual reference written into the PPTX:
 
@@ -191,7 +193,7 @@ Treat the command as passing only when the final JSON report has:
 24. for PPTX closure, `pptxInspection.textRunCount > 0`
 25. for PPTX closure, `pptxInspection.slidesWithoutEditableText` is empty when every source slide contains text
 26. for PPTX closure on decks with tables, `pptxInspection.tableCount > 0`
-27. for PPTX closure, the sidecar report records `textBoxCount`, `tableCount`, `consumedTableCount`, `consumedTableTextCandidateCount`, `richTextBoxCount`, `richTextRunCount`, `editableTableCellCount`, `editableTextSlideCount`, `imageFallbackCount`, `pagesWithoutEditableText`, `editablePrimitiveCoverage`, `fallbackOnlyElementKinds`, `unmodeledTextRunReasons`, and per-slide summaries
+27. for PPTX closure, the sidecar report records `textBoxCount`, `tableCount`, `consumedTableCount`, `consumedTableTextCandidateCount`, `richTextBoxCount`, `richTextRunCount`, `editableTableCellCount`, `editableTextSlideCount`, `imageFallbackCount`, `pagesWithoutEditableText`, `editablePrimitiveCoverage`, `fontContract`, `fallbackOnlyElementKinds`, `unmodeledTextRunReasons`, and per-slide summaries
 28. for PPTX visual closure, run with `--pptx-visual-diff --require-pptx-visual-match`
 29. for PPTX visual closure, `pptxVisualDiff.reference.source: "pptx-background-images"`
 30. for PPTX visual closure, `pptxVisualDiff.comparison.summary.missingReferenceSlides: []`

@@ -16,6 +16,7 @@ import {
 	type SlidevPptxSlide,
 	type SlidevPptxSlideEditabilitySummary,
 } from './pptxModel';
+import { buildSlidevPptxFontContractSummary, fontFamiliesForSlideSummary } from './pptxFontContract';
 import { writePptxDocument } from './pptxWriter';
 import { getVaultBasePath, resolvePlaywrightBrowsersPath, safeRequire } from './platformUtils';
 import type { ExportProgressCallback, SlideExportConfig, SlidevExportSource } from './types';
@@ -312,6 +313,7 @@ function collectUniqueSorted<T extends string>(values: T[]): T[] {
 }
 
 function buildSlideEditabilitySummary(slide: SlidevPptxSlide): SlidevPptxSlideEditabilitySummary {
+	const fontFamilies = fontFamiliesForSlideSummary(slide);
 	return {
 		slideNumber: slide.slideNumber,
 		editableTextBoxCount: slide.texts.length,
@@ -325,6 +327,7 @@ function buildSlideEditabilitySummary(slide: SlidevPptxSlide): SlidevPptxSlideEd
 		backgroundFallbackPresent: Boolean(slide.backgroundImage),
 		fallbackOnlyElementKinds: collectUniqueSorted(slide.fallbackOnlyElementKinds),
 		unmodeledTextRunReasons: collectUniqueSorted(slide.texts.flatMap((textBox) => textBox.unmodeledRunReasons)),
+		...fontFamilies,
 		consumedTableTextCandidateCount: slide.consumedTableTextCandidateCount,
 		warnings: slide.warnings,
 	};
@@ -382,6 +385,7 @@ export function buildSlidevPptxExportReport(
 	const warnings = slides.flatMap((slide) => slide.warnings);
 	const slideSummaries = slides.map(buildSlideEditabilitySummary);
 	const editablePrimitiveCoverage = buildEditablePrimitiveCoverage(slideSummaries);
+	const fontContract = buildSlidevPptxFontContractSummary(slides);
 	return {
 		formatVersion: 1,
 		source: {
@@ -408,6 +412,7 @@ export function buildSlidevPptxExportReport(
 		backgroundImageSlideCount: slides.filter((slide) => Boolean(slide.backgroundImage)).length,
 		imageFallbackCount: slides.filter((slide) => Boolean(slide.backgroundImage)).length,
 		editablePrimitiveCoverage,
+		fontContract,
 		fallbackOnlyElementKinds: editablePrimitiveCoverage.fallbackOnlyElementKinds,
 		unmodeledTextRunReasons: editablePrimitiveCoverage.unmodeledTextRunReasons,
 		slides: slideSummaries,

@@ -258,3 +258,46 @@ runuser -u jacob -- env HOME=/home/jacob PLAYWRIGHT_BROWSERS_PATH=/home/jacob/.c
 12. `unignoredOutputs = []`。
 
 这是预期结果。external PNG 对比的价值是暴露 Slidev PNG export 与 NotEMD PPTX capture 之间仍未统一的 cross-export contract drift；它不是 PPTX writer hard failure。在 PNG export 与 PPTX capture 共用同一套 frozen HTML/capture contract 前，PPTX 视觉 hard gate 仍应以 frozen-background strict gate 为准。
+
+## M5 字体合同收口
+
+当前字体合同收口仍使用同一个真实源文件和 strict visual gate：
+
+```bash
+runuser -u jacob -- env HOME=/home/jacob PLAYWRIGHT_BROWSERS_PATH=/home/jacob/.cache/ms-playwright bash -lc 'cd /home/jacob/obsidian-NotEMD && npm run verify:slidev-export -- --vault docs --source architecture.zh-CN.md --format pptx --output-subfolder export/test-slidev-m5-font-contract-pptx-strict --sample-slides all --timeout-ms 240000 --no-screenshots --pptx-visual-diff --require-pptx-visual-match --json'
+```
+
+当前证据：
+
+1. `ok = true`
+2. `pptxInspection.slideCount = 30`
+3. `pptxInspection.mediaCount = 30`
+4. `pptxInspection.textRunCount = 371`
+5. `pptxInspection.tableCount = 6`
+6. `pptxInspection.slidesWithoutEditableText = []`
+7. `pptxVisualGate.passed = true`
+8. `pptxVisualDiff.reference.source = pptx-background-images`
+9. `pptxVisualDiff.comparison.summary.meanRmse = 0.049330418`
+10. `pptxVisualDiff.comparison.summary.maxRmse = 0.0889364`
+11. sidecar `fontContract.fontFamilyCount = 2`
+12. sidecar `fontContract.fontFamilies = ["Avenir Next", "Fira Code"]`
+13. sidecar `fontContract.cjkFontFamilies = ["Avenir Next", "Fira Code"]`
+14. sidecar `fontContract.writerEastAsiaFontFace = "Microsoft YaHei"`
+15. sidecar `fontContract.writerEastAsiaFallbackFontFamilies = ["Avenir Next", "Fira Code"]`
+16. sidecar `fontContract.officeMissingFontRiskCount = 2`
+17. sidecar `fontContract.officeMissingFontRiskFamilies = ["Avenir Next", "Fira Code"]`
+18. sidecar `fontContract.fontEmbeddingPolicy = "not-embedded"`
+19. sidecar `fontContract.embeddedFontCount = 0`
+20. `unignoredOutputs = []`
+
+产物在：
+
+```text
+docs/export/test-slidev-m5-font-contract-pptx-strict/
+docs/export/test-slidev-m5-font-contract-pptx-strict/architecture.zh-CN.pptx
+docs/export/test-slidev-m5-font-contract-pptx-strict/architecture.zh-CN.pptx.report.json
+docs/export/test-slidev-m5-font-contract-pptx-strict/architecture.zh-CN-pptx-visual-diff/pptx-visual-diff.report.json
+docs/export/test-slidev-m5-font-contract-pptx-strict/architecture.zh-CN-pptx-visual-diff/all-side-by-side-sheet.png
+```
+
+这只收口了字体合同的第一片。它不嵌入字体、不拉取远程字体，也不声称可见 native text 会匹配 Chromium。真实 report 显示可编辑层依赖 `Avenir Next` 和 `Fira Code`，两者都被标为 Office 缺字风险；CJK 文本会通过 writer 的 East Asian fallback `Microsoft YaHei` 写出。这正是继续保持透明结构层的理由，除非后续 visible-native 分支先通过更严格的字体合同和视觉 A/B gate。

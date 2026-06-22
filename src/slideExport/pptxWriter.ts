@@ -11,6 +11,7 @@ import {
 	type SlidevPptxTextAlign,
 	type SlidevPptxTextBox,
 } from './pptxModel';
+import { PPTX_WRITER_EAST_ASIA_FONT_FACE, pptxTextContainsCjk } from './pptxFontContract';
 import { safeRequire } from './platformUtils';
 
 const EMU_PER_INCH = 914400;
@@ -81,7 +82,7 @@ function buildTransparentRunXml(text: string, runStyle: TextRunStyle): string {
 	const italic = runStyle.italic ? ' i="1"' : '';
 	const underline = runStyle.underline ? ' u="sng"' : '';
 	const fontFace = escapeXmlAttribute(runStyle.fontFace || 'Aptos');
-	const eastAsiaFont = /[\u3400-\u9fff\uf900-\ufaff]/.test(text) ? 'Microsoft YaHei' : fontFace;
+	const eastAsiaFont = pptxTextContainsCjk(text) ? PPTX_WRITER_EAST_ASIA_FONT_FACE : fontFace;
 
 	return [
 		'<a:r>',

@@ -258,3 +258,46 @@ Current evidence:
 12. `unignoredOutputs = []`.
 
 This is the expected outcome. External PNG comparison is useful because it exposes the remaining cross-export contract drift between Slidev PNG export and NotEMD PPTX capture, but it is not a PPTX writer hard failure. The frozen-background strict gate remains the authoritative PPTX visual gate until PNG export and PPTX capture share one frozen HTML/capture contract.
+
+## M5 Font Contract Closure
+
+The current font-contract closure uses the same real source file and strict visual gate:
+
+```bash
+runuser -u jacob -- env HOME=/home/jacob PLAYWRIGHT_BROWSERS_PATH=/home/jacob/.cache/ms-playwright bash -lc 'cd /home/jacob/obsidian-NotEMD && npm run verify:slidev-export -- --vault docs --source architecture.zh-CN.md --format pptx --output-subfolder export/test-slidev-m5-font-contract-pptx-strict --sample-slides all --timeout-ms 240000 --no-screenshots --pptx-visual-diff --require-pptx-visual-match --json'
+```
+
+Current evidence:
+
+1. `ok = true`
+2. `pptxInspection.slideCount = 30`
+3. `pptxInspection.mediaCount = 30`
+4. `pptxInspection.textRunCount = 371`
+5. `pptxInspection.tableCount = 6`
+6. `pptxInspection.slidesWithoutEditableText = []`
+7. `pptxVisualGate.passed = true`
+8. `pptxVisualDiff.reference.source = pptx-background-images`
+9. `pptxVisualDiff.comparison.summary.meanRmse = 0.049330418`
+10. `pptxVisualDiff.comparison.summary.maxRmse = 0.0889364`
+11. sidecar `fontContract.fontFamilyCount = 2`
+12. sidecar `fontContract.fontFamilies = ["Avenir Next", "Fira Code"]`
+13. sidecar `fontContract.cjkFontFamilies = ["Avenir Next", "Fira Code"]`
+14. sidecar `fontContract.writerEastAsiaFontFace = "Microsoft YaHei"`
+15. sidecar `fontContract.writerEastAsiaFallbackFontFamilies = ["Avenir Next", "Fira Code"]`
+16. sidecar `fontContract.officeMissingFontRiskCount = 2`
+17. sidecar `fontContract.officeMissingFontRiskFamilies = ["Avenir Next", "Fira Code"]`
+18. sidecar `fontContract.fontEmbeddingPolicy = "not-embedded"`
+19. sidecar `fontContract.embeddedFontCount = 0`
+20. `unignoredOutputs = []`
+
+Artifacts are under:
+
+```text
+docs/export/test-slidev-m5-font-contract-pptx-strict/
+docs/export/test-slidev-m5-font-contract-pptx-strict/architecture.zh-CN.pptx
+docs/export/test-slidev-m5-font-contract-pptx-strict/architecture.zh-CN.pptx.report.json
+docs/export/test-slidev-m5-font-contract-pptx-strict/architecture.zh-CN-pptx-visual-diff/pptx-visual-diff.report.json
+docs/export/test-slidev-m5-font-contract-pptx-strict/architecture.zh-CN-pptx-visual-diff/all-side-by-side-sheet.png
+```
+
+This closes the first font-contract slice only. It does not embed fonts, fetch remote fonts, or assert that native visible text would match Chromium. The real report shows that the editable layer depends on `Avenir Next` and `Fira Code`, both flagged as Office missing-font risks, and that CJK text is written through `Microsoft YaHei` as the writer's East Asian fallback. That is a reason to keep the editable layer transparent until a visible-native branch has a stricter font and visual A/B gate.

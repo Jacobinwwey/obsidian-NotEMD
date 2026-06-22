@@ -124,6 +124,10 @@ export interface SlidevPptxSlideEditabilitySummary {
 	backgroundFallbackPresent: boolean;
 	fallbackOnlyElementKinds: SlidevPptxFallbackOnlyElementKind[];
 	unmodeledTextRunReasons: SlidevPptxUnmodeledTextRunReason[];
+	fontFamilies: string[];
+	cjkFontFamilies: string[];
+	writerEastAsiaFallbackFontFamilies: string[];
+	officeMissingFontRiskFamilies: string[];
 	consumedTableTextCandidateCount: number;
 	warnings: string[];
 }
@@ -146,6 +150,41 @@ export interface SlidevPptxEditablePrimitiveCoverage {
 	backgroundFallbackSlideRatio: number;
 	fallbackOnlyElementKinds: SlidevPptxFallbackOnlyElementKind[];
 	unmodeledTextRunReasons: SlidevPptxUnmodeledTextRunReason[];
+}
+
+export type SlidevPptxOfficeFontRiskReason =
+	| 'css-generic-family'
+	| 'local-platform-family'
+	| 'non-office-family'
+	| 'unresolved-css-family';
+
+export interface SlidevPptxFontUsage {
+	fontFace: string;
+	textBoxCount: number;
+	richTextRunCount: number;
+	tableCellCount: number;
+	characterCount: number;
+	cjkCharacterCount: number;
+	latinCharacterCount: number;
+	writerEastAsiaFallbackRunCount: number;
+	writerEastAsiaFallbackCharacterCount: number;
+	officeMissingFontRisk: boolean;
+	officeMissingFontRiskReasons: SlidevPptxOfficeFontRiskReason[];
+}
+
+export interface SlidevPptxFontContractSummary {
+	fontFamilyCount: number;
+	fontFamilies: string[];
+	cjkFontFamilies: string[];
+	latinFontFamilies: string[];
+	writerEastAsiaFontFace: string;
+	writerEastAsiaFallbackFontFamilies: string[];
+	officeMissingFontRiskCount: number;
+	officeMissingFontRiskFamilies: string[];
+	fontUsages: SlidevPptxFontUsage[];
+	fontEmbeddingPolicy: 'not-embedded';
+	embeddedFontCount: 0;
+	embeddedFontFamilies: [];
 }
 
 export interface SlidevPptxExportReport {
@@ -171,6 +210,7 @@ export interface SlidevPptxExportReport {
 	backgroundImageSlideCount: number;
 	imageFallbackCount: number;
 	editablePrimitiveCoverage: SlidevPptxEditablePrimitiveCoverage;
+	fontContract: SlidevPptxFontContractSummary;
 	fallbackOnlyElementKinds: SlidevPptxFallbackOnlyElementKind[];
 	unmodeledTextRunReasons: SlidevPptxUnmodeledTextRunReason[];
 	slides: SlidevPptxSlideEditabilitySummary[];
