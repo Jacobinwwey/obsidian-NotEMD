@@ -38,6 +38,34 @@ describe('pptx export report', () => {
 						align: 'left',
 						bullet: false,
 						order: 10,
+						richTextParagraphs: [
+							{
+								runs: [
+									{
+										text: 'Architecture ',
+										fontSize: 24,
+										fontFace: 'Aptos',
+										color: '111827',
+										bold: true,
+										italic: false,
+										underline: false,
+										code: false,
+										link: false,
+									},
+									{
+										text: 'overview',
+										fontSize: 24,
+										fontFace: 'Aptos',
+										color: '2563EB',
+										bold: true,
+										italic: false,
+										underline: true,
+										code: false,
+										link: true,
+									},
+								],
+							},
+						],
 						unmodeledRunReasons: ['inline-formatting', 'link'],
 					},
 				],
@@ -116,10 +144,16 @@ describe('pptx export report', () => {
 		expect(report.tableCount).toBe(1);
 		expect(report.consumedTableCount).toBe(1);
 		expect(report.consumedTableTextCandidateCount).toBe(2);
+		expect(report.richTextBoxCount).toBe(1);
+		expect(report.richTextRunCount).toBe(2);
 		expect(report.editableTableCellCount).toBe(2);
 		expect(report.fallbackOnlyElementKinds).toEqual(['canvas', 'mermaid', 'svg']);
 		expect(report.unmodeledTextRunReasons).toEqual(['inline-formatting', 'link']);
 		expect(report.editablePrimitiveCoverage.editableTextSlideRatio).toBe(0.5);
+		expect(report.editablePrimitiveCoverage.richTextBoxCount).toBe(1);
+		expect(report.editablePrimitiveCoverage.richTextBoxRatio).toBe(1);
+		expect(report.editablePrimitiveCoverage.richTextRunCount).toBe(2);
+		expect(report.editablePrimitiveCoverage.richTextRunCharacterCount).toBe('Architecture overview'.length);
 		expect(report.editablePrimitiveCoverage.backgroundFallbackSlideRatio).toBe(0.5);
 		expect(report.slides[0]).toEqual(
 			expect.objectContaining({
@@ -127,6 +161,8 @@ describe('pptx export report', () => {
 				editableTextBoxCount: 1,
 				editableTableCount: 1,
 				editableTableCellCount: 2,
+				richTextBoxCount: 1,
+				richTextRunCount: 2,
 				consumedTableTextCandidateCount: 2,
 			}),
 		);

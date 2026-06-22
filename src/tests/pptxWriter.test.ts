@@ -48,6 +48,60 @@ describe('pptxWriter', () => {
 								align: 'left',
 								bullet: false,
 								order: 10,
+								richTextParagraphs: [
+									{
+										runs: [
+											{
+												text: '可编辑',
+												fontSize: 24,
+												fontFace: 'Aptos',
+												color: '111827',
+												bold: true,
+												italic: false,
+												underline: false,
+												code: false,
+												link: false,
+											},
+											{
+												text: ' ',
+												fontSize: 24,
+												fontFace: 'Aptos',
+												color: '111827',
+												bold: true,
+												italic: false,
+												underline: false,
+												code: false,
+												link: false,
+											},
+											{
+												text: 'PPTX',
+												fontSize: 24,
+												fontFace: 'Aptos',
+												color: '2563EB',
+												bold: true,
+												italic: false,
+												underline: true,
+												code: false,
+												link: true,
+											},
+										],
+									},
+									{
+										runs: [
+											{
+												text: 'Architecture',
+												fontSize: 24,
+												fontFace: 'Aptos',
+												color: '111827',
+												bold: true,
+												italic: false,
+												underline: false,
+												code: false,
+												link: false,
+											},
+										],
+									},
+								],
 								unmodeledRunReasons: [],
 							},
 						],
@@ -130,9 +184,13 @@ describe('pptxWriter', () => {
 			expect(entries['ppt/slides/slide1.xml']).toBeDefined();
 			expect(entries['ppt/media/image1.png']).toBeDefined();
 			const slideXml = strFromU8(entries['ppt/slides/slide1.xml']);
-			expect(slideXml).toContain('<a:t>可编辑 PPTX</a:t>');
+			expect(slideXml).toContain('<a:t>可编辑</a:t>');
+			expect(slideXml).toContain('<a:t xml:space="preserve"> </a:t>');
+			expect(slideXml).toContain('<a:t>PPTX</a:t>');
 			expect(slideXml).toContain('<a:t>Architecture</a:t>');
 			expect(slideXml).toContain('<a:srgbClr val="111827"><a:alpha val="0"/></a:srgbClr>');
+			expect(slideXml).toContain('<a:srgbClr val="2563EB"><a:alpha val="0"/></a:srgbClr>');
+			expect(slideXml).toContain('u="sng"');
 			expect(slideXml).toContain(
 				'<a:bodyPr wrap="square" lIns="0" tIns="0" rIns="0" bIns="0" rtlCol="0" anchor="t">',
 			);

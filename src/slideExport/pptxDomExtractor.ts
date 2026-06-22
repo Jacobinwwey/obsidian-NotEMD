@@ -2,6 +2,8 @@ import {
 	PPTX_SLIDE_HEIGHT_IN,
 	PPTX_SLIDE_WIDTH_IN,
 	type SlidevPptxFallbackOnlyElementKind,
+	type SlidevPptxInlineTextRun,
+	type SlidevPptxRichTextParagraph,
 	type SlidevPptxSlide,
 	type SlidevPptxTable,
 	type SlidevPptxTableCell,
@@ -26,7 +28,24 @@ interface RawSlideTextBox {
 	align: SlidevPptxTextAlign;
 	bullet: boolean;
 	order: number;
+	richTextParagraphs: RawSlideRichTextParagraph[];
 	unmodeledRunReasons: SlidevPptxUnmodeledTextRunReason[];
+}
+
+interface RawSlideInlineTextRun {
+	text: string;
+	fontSize: number;
+	fontFace: string;
+	color: string;
+	bold: boolean;
+	italic: boolean;
+	underline: boolean;
+	code: boolean;
+	link: boolean;
+}
+
+interface RawSlideRichTextParagraph {
+	runs: RawSlideInlineTextRun[];
 }
 
 interface RawSlideTableCell {
@@ -79,6 +98,71 @@ function normalizeHexColor(value: string, fallback: string): string {
 	return /^[0-9A-F]{6}$/.test(normalized) ? normalized : fallback;
 }
 
+function normalizeInlineTextRun(raw: RawSlideInlineTextRun): SlidevPptxInlineTextRun | null {
+	const text = String(raw.text || '')
+		.replace(/\r\n?/g, '\n')
+		.replace(/[\u200b-\u200d\ufeff]/g, '');
+	if (text.length === 0) {
+		return null;
+	}
+	return {
+		text: text.slice(0, 4000),
+		fontSize: clamp(Number(raw.fontSize) || 12, 5, 144),
+		fontFace: String(raw.fontFace || 'Aptos').slice(0, 120),
+		color: normalizeHexColor(raw.color, '111827'),
+		bold: Boolean(raw.bold),
+		italic: Boolean(raw.italic),
+		underline: Boolean(raw.underline),
+		code: Boolean(raw.code),
+		link: Boolean(raw.link),
+	};
+}
+
+function buildFallbackRichTextParagraphs(
+	text: string,
+	textBox: Omit<SlidevPptxTextBox, 'richTextParagraphs'>,
+): SlidevPptxRichTextParagraph[] {
+	return text
+		.replace(/\r\n?/g, '\n')
+		.split('\n')
+		.map((line) => line.trimEnd())
+		.filter((line, index, lines) => line.length > 0 || lines.length === 1)
+		.map((line) => ({
+			runs: [
+				{
+					text: line || ' ',
+					fontSize: textBox.fontSize,
+					fontFace: textBox.fontFace,
+					color: textBox.color,
+					bold: textBox.bold,
+					italic: textBox.italic,
+					underline: textBox.underline,
+					code: false,
+					link: false,
+				},
+			],
+		}));
+}
+
+function normalizeRichTextParagraphs(
+	rawParagraphs: RawSlideRichTextParagraph[] | undefined,
+	text: string,
+	textBox: Omit<SlidevPptxTextBox, 'richTextParagraphs'>,
+): SlidevPptxRichTextParagraph[] {
+	const paragraphs = Array.isArray(rawParagraphs)
+		? rawParagraphs
+				.map((paragraph) => ({
+					runs: Array.isArray(paragraph.runs)
+						? paragraph.runs
+								.map(normalizeInlineTextRun)
+								.filter((run): run is SlidevPptxInlineTextRun => run !== null)
+						: [],
+				}))
+				.filter((paragraph) => paragraph.runs.some((run) => run.text.trim().length > 0))
+		: [];
+	return paragraphs.length > 0 ? paragraphs : buildFallbackRichTextParagraphs(text, textBox);
+}
+
 function normalizeTextBox(raw: RawSlideTextBox): SlidevPptxTextBox | null {
 	const text = String(raw.text || '')
 		.replace(/\r\n?/g, '\n')
@@ -88,7 +172,7 @@ function normalizeTextBox(raw: RawSlideTextBox): SlidevPptxTextBox | null {
 		return null;
 	}
 
-	return {
+	const textBox: Omit<SlidevPptxTextBox, 'richTextParagraphs'> = {
 		text: text.slice(0, 4000),
 		x: clamp(Number(raw.x) || 0, 0, PPTX_SLIDE_WIDTH_IN),
 		y: clamp(Number(raw.y) || 0, 0, PPTX_SLIDE_HEIGHT_IN),
@@ -112,6 +196,10 @@ function normalizeTextBox(raw: RawSlideTextBox): SlidevPptxTextBox | null {
 					reason === 'syntax-highlight',
 			)
 			.sort(),
+	};
+	return {
+		...textBox,
+		richTextParagraphs: normalizeRichTextParagraphs(raw.richTextParagraphs, text, textBox),
 	};
 }
 
@@ -394,6 +482,122 @@ export async function extractSlidevPptxSlideFromPage(page: any, slideNumber: num
 			}
 			return Array.from(reasons).sort();
 		};
+		const runStyleFor = (
+			style: CSSStyleDeclaration,
+			sourceElement: Element,
+		): Omit<RawSlideInlineTextRun, 'text'> => {
+			const fontSizePx = Number.parseFloat(style.fontSize || '16') || 16;
+			const fontWeight = Number.parseInt(style.fontWeight || '400', 10);
+			return {
+				fontSize: pxToPt(fontSizePx),
+				fontFace: sanitizeFontFace(style.fontFamily),
+				color: effectiveColor(style),
+				bold: Number.isFinite(fontWeight) ? fontWeight >= 600 : /bold/i.test(style.fontWeight),
+				italic: style.fontStyle === 'italic' || style.fontStyle === 'oblique',
+				underline:
+					style.textDecorationLine.includes('underline') || Boolean(sourceElement.closest('u,ins,a[href]')),
+				code: Boolean(sourceElement.closest('code,pre')),
+				link: Boolean(sourceElement.closest('a[href]')),
+			};
+		};
+		const mergeAdjacentRuns = (runs: RawSlideInlineTextRun[]): RawSlideInlineTextRun[] => {
+			const merged: RawSlideInlineTextRun[] = [];
+			for (const run of runs) {
+				const previous = merged[merged.length - 1];
+				if (
+					previous &&
+					previous.fontSize === run.fontSize &&
+					previous.fontFace === run.fontFace &&
+					previous.color === run.color &&
+					previous.bold === run.bold &&
+					previous.italic === run.italic &&
+					previous.underline === run.underline &&
+					previous.code === run.code &&
+					previous.link === run.link
+				) {
+					previous.text += run.text;
+				} else {
+					merged.push({ ...run });
+				}
+			}
+			return merged;
+		};
+		const collectRichTextParagraphs = (
+			element: Element,
+			tagName: string,
+			baseStyle: CSSStyleDeclaration,
+		): RawSlideRichTextParagraph[] => {
+			const paragraphs: RawSlideRichTextParagraph[] = [];
+			let currentRuns: RawSlideInlineTextRun[] = [];
+			const preserveWhitespace = tagName === 'PRE';
+			const flushParagraph = (): void => {
+				const normalizedRuns = mergeAdjacentRuns(currentRuns).map((run) => ({
+					...run,
+					text: preserveWhitespace ? run.text.replace(/\r\n?/g, '\n') : run.text.replace(/[^\S\n]+/g, ' '),
+				}));
+				if (!preserveWhitespace && normalizedRuns.length > 0) {
+					normalizedRuns[0].text = normalizedRuns[0].text.replace(/^\s+/, '');
+					normalizedRuns[normalizedRuns.length - 1].text = normalizedRuns[
+						normalizedRuns.length - 1
+					].text.replace(/\s+$/, '');
+				}
+				const runs = normalizedRuns.filter((run) => run.text.length > 0);
+				if (runs.some((run) => run.text.trim().length > 0)) {
+					paragraphs.push({ runs });
+				}
+				currentRuns = [];
+			};
+			const appendText = (text: string, sourceElement: Element): void => {
+				const normalizedText = preserveWhitespace ? text.replace(/\r\n?/g, '\n') : text.replace(/\s+/g, ' ');
+				if (normalizedText.length === 0) return;
+				const style = window.getComputedStyle(sourceElement);
+				currentRuns.push({
+					text: normalizedText,
+					...runStyleFor(style, sourceElement),
+				});
+			};
+			const visit = (node: Node): void => {
+				if (node.nodeType === Node.TEXT_NODE) {
+					const parent = node.parentElement || element;
+					const parentStyle = window.getComputedStyle(parent);
+					if (parentStyle.display === 'none' || parentStyle.visibility === 'hidden') return;
+					if (Number(parentStyle.opacity || '1') < 0.04) return;
+					appendText(node.textContent || '', parent);
+					return;
+				}
+				if (!(node instanceof Element)) return;
+				if (node.closest('script,style,noscript,svg')) return;
+				if (node.tagName.toUpperCase() === 'BR') {
+					flushParagraph();
+					return;
+				}
+				for (const child of Array.from(node.childNodes)) {
+					visit(child);
+				}
+			};
+			visit(element);
+			flushParagraph();
+			if (paragraphs.length === 0) {
+				const text =
+					tagName === 'PRE'
+						? element.textContent || ''
+						: (element instanceof HTMLElement ? element.innerText : element.textContent) || '';
+				const normalizedText = preserveWhitespace ? text.replace(/\r\n?/g, '\n') : normalize(text);
+				if (normalizedText.trim()) {
+					return [
+						{
+							runs: [
+								{
+									text: normalizedText,
+									...runStyleFor(baseStyle, element),
+								},
+							],
+						},
+					];
+				}
+			}
+			return paragraphs;
+		};
 		const verticalAlignFor = (style: CSSStyleDeclaration): SlidevPptxVerticalAlign => {
 			const verticalAlign = String(style.verticalAlign || '');
 			if (verticalAlign === 'middle') return 'middle';
@@ -608,6 +812,7 @@ export async function extractSlidevPptxSlideFromPage(page: any, slideNumber: num
 				align: alignFor(style),
 				bullet: tagName === 'LI' && listStyle !== 'none',
 				order: orderFor(element, order),
+				richTextParagraphs: collectRichTextParagraphs(element, tagName, style),
 				unmodeledRunReasons: textRunReasonsFor(element, style, tagName),
 			});
 			element.setAttribute('data-notemd-pptx-hidden-text', '1');

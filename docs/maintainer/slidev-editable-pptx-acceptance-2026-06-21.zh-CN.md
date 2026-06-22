@@ -190,3 +190,40 @@ docs/export/test-slidev-final-pptx-strict/architecture.zh-CN-pptx-visual-diff/al
 ```
 
 高 difference bounding-box area 当前是诊断信息，不是 hard failure。它主要来自密集文本区的抗锯齿与 LibreOffice 回渲差异；RMSE 与 side-by-side 视觉检查显示冻结视觉层保持成立。后续如果要把几何指标升级为 hard gate，应检测对象位移或缩放漂移，而不是直接用原始 diff 面积。
+
+## M2 rich-run 收口
+
+2026-06-21 的 M2 后续仍使用同形 strict 命令，产物位于：
+
+```text
+docs/export/test-slidev-m2-pptx-strict/
+```
+
+当前证据：
+
+1. `ok = true`
+2. `environment.slidev.version = 52.16.0 (/home/jacob/slidev/packages/slidev/bin/slidev.mjs)`
+3. `slideSource.skillRootPath = /home/jacob/slidev/skills/slidev`
+4. `slideSource.skillReferenceCount = 52`
+5. `htmlExport.actualMode = standalone`
+6. `mermaidSourcePreservation.changedFenceIndexes = []`
+7. `layoutAuditSummary.overflowCount = 0`
+8. `layoutAuditSummary.unreadableCount = 0`
+9. `pptxInspection.slideCount = 30`
+10. `pptxInspection.mediaCount = 30`
+11. `pptxInspection.textRunCount = 371`
+12. `pptxInspection.pictureCount = 30`
+13. `pptxInspection.tableCount = 6`
+14. `pptxInspection.slidesWithoutEditableText = []`
+15. sidecar `textBoxCount = 139`
+16. sidecar `richTextBoxCount = 45`
+17. sidecar `richTextRunCount = 344`
+18. sidecar `editablePrimitiveCoverage.richTextBoxRatio = 0.323741`
+19. sidecar `editablePrimitiveCoverage.richTextRunCharacterCount = 6502`
+20. sidecar `editableTableCellCount = 102`
+21. `pptxVisualGate.passed = true`
+22. `pptxVisualDiff.reference.source = pptx-background-images`
+23. `pptxVisualDiff.comparison.summary.meanRmse = 0.049330418`
+24. `pptxVisualDiff.comparison.summary.maxRmse = 0.0889364`
+
+这收口的是 rich-run 第一片：可编辑文本框现在会保留多 run DrawingML 结构，用于 inline emphasis、computed text style、code/link 标记和 Office-safe whitespace。它仍是透明结构层；不声称已经支持可见原生文本、真实 hyperlink relationship 或完整 syntax-token 语义。

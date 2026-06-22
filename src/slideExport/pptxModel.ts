@@ -17,6 +17,22 @@ export type SlidevPptxFallbackOnlyElementKind =
 
 export type SlidevPptxUnmodeledTextRunReason = 'inline-code' | 'inline-formatting' | 'link' | 'syntax-highlight';
 
+export interface SlidevPptxInlineTextRun {
+	text: string;
+	fontSize: number;
+	fontFace: string;
+	color: string;
+	bold: boolean;
+	italic: boolean;
+	underline: boolean;
+	code: boolean;
+	link: boolean;
+}
+
+export interface SlidevPptxRichTextParagraph {
+	runs: SlidevPptxInlineTextRun[];
+}
+
 export interface SlidevPptxTextBox {
 	text: string;
 	x: number;
@@ -32,6 +48,7 @@ export interface SlidevPptxTextBox {
 	align: SlidevPptxTextAlign;
 	bullet: boolean;
 	order: number;
+	richTextParagraphs: SlidevPptxRichTextParagraph[];
 	unmodeledRunReasons: SlidevPptxUnmodeledTextRunReason[];
 }
 
@@ -101,6 +118,9 @@ export interface SlidevPptxSlideEditabilitySummary {
 	editableTableCellCount: number;
 	editableTextCharacterCount: number;
 	editableTableCellCharacterCount: number;
+	richTextBoxCount: number;
+	richTextRunCount: number;
+	richTextRunCharacterCount: number;
 	backgroundFallbackPresent: boolean;
 	fallbackOnlyElementKinds: SlidevPptxFallbackOnlyElementKind[];
 	unmodeledTextRunReasons: SlidevPptxUnmodeledTextRunReason[];
@@ -118,6 +138,10 @@ export interface SlidevPptxEditablePrimitiveCoverage {
 	editableTableSlideRatio: number;
 	editableTableCellCount: number;
 	editableTableCellCharacterCount: number;
+	richTextBoxCount: number;
+	richTextBoxRatio: number;
+	richTextRunCount: number;
+	richTextRunCharacterCount: number;
 	backgroundFallbackSlideCount: number;
 	backgroundFallbackSlideRatio: number;
 	fallbackOnlyElementKinds: SlidevPptxFallbackOnlyElementKind[];
@@ -139,6 +163,8 @@ export interface SlidevPptxExportReport {
 	tableCount: number;
 	consumedTableCount: number;
 	consumedTableTextCandidateCount: number;
+	richTextBoxCount: number;
+	richTextRunCount: number;
 	editableTableCellCount: number;
 	editableTextSlideCount: number;
 	pagesWithoutEditableText: number[];

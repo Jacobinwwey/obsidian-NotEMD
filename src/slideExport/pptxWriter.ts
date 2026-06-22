@@ -4,6 +4,7 @@ import {
 	PPTX_SLIDE_WIDTH_EMU,
 	type SlidevPptxDocument,
 	type SlidevPptxImage,
+	type SlidevPptxRichTextParagraph,
 	type SlidevPptxSlide,
 	type SlidevPptxTable,
 	type SlidevPptxTableCell,
@@ -21,10 +22,7 @@ interface SlideImageRelationship {
 }
 
 function escapeXml(value: string): string {
-	return value
-		.replace(/&/g, '&amp;')
-		.replace(/</g, '&lt;')
-		.replace(/>/g, '&gt;');
+	return value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
 
 function escapeXmlAttribute(value: string): string {
@@ -62,13 +60,27 @@ function buildTransparentTextFill(color: string): string {
 	return `<a:solidFill><a:srgbClr val="${color}"><a:alpha val="0"/></a:srgbClr></a:solidFill>`;
 }
 
-function buildTextRun(text: string, textBox: SlidevPptxTextBox): string {
-	const color = clampHexColor(textBox.color, '111827');
-	const size = Math.max(600, Math.min(14400, Math.round(textBox.fontSize * 100)));
-	const bold = textBox.bold ? ' b="1"' : '';
-	const italic = textBox.italic ? ' i="1"' : '';
-	const underline = textBox.underline ? ' u="sng"' : '';
-	const fontFace = escapeXmlAttribute(textBox.fontFace || 'Aptos');
+function buildTextElement(text: string): string {
+	const xmlSpace = /^\s|\s$/.test(text) ? ' xml:space="preserve"' : '';
+	return `<a:t${xmlSpace}>${escapeXml(text)}</a:t>`;
+}
+
+type TextRunStyle = {
+	fontSize: number;
+	fontFace: string;
+	color: string;
+	bold: boolean;
+	italic: boolean;
+	underline: boolean;
+};
+
+function buildTransparentRunXml(text: string, runStyle: TextRunStyle): string {
+	const color = clampHexColor(runStyle.color, '111827');
+	const size = Math.max(600, Math.min(14400, Math.round(runStyle.fontSize * 100)));
+	const bold = runStyle.bold ? ' b="1"' : '';
+	const italic = runStyle.italic ? ' i="1"' : '';
+	const underline = runStyle.underline ? ' u="sng"' : '';
+	const fontFace = escapeXmlAttribute(runStyle.fontFace || 'Aptos');
 	const eastAsiaFont = /[\u3400-\u9fff\uf900-\ufaff]/.test(text) ? 'Microsoft YaHei' : fontFace;
 
 	return [
@@ -79,28 +91,68 @@ function buildTextRun(text: string, textBox: SlidevPptxTextBox): string {
 		`<a:ea typeface="${escapeXmlAttribute(eastAsiaFont)}"/>`,
 		'<a:cs typeface="Aptos"/>',
 		'</a:rPr>',
-		`<a:t>${escapeXml(text)}</a:t>`,
+		buildTextElement(text),
 		'</a:r>',
 	].join('');
 }
 
-function buildTextParagraphs(textBox: SlidevPptxTextBox): string {
-	const paragraphs = textBox.text
+function fallbackTextParagraphs(textBox: SlidevPptxTextBox): SlidevPptxRichTextParagraph[] {
+	return textBox.text
 		.replace(/\r\n?/g, '\n')
 		.split('\n')
-		.map(line => line.trimEnd())
-		.filter((line, index, lines) => line.length > 0 || lines.length === 1);
+		.map((line) => line.trimEnd())
+		.filter((line, index, lines) => line.length > 0 || lines.length === 1)
+		.map((line) => ({
+			runs: [
+				{
+					text: line || ' ',
+					fontSize: textBox.fontSize,
+					fontFace: textBox.fontFace,
+					color: textBox.color,
+					bold: textBox.bold,
+					italic: textBox.italic,
+					underline: textBox.underline,
+					code: false,
+					link: false,
+				},
+			],
+		}));
+}
+
+function chooseTextParagraphs(textBox: SlidevPptxTextBox): SlidevPptxRichTextParagraph[] {
+	const paragraphs = Array.isArray(textBox.richTextParagraphs)
+		? textBox.richTextParagraphs
+				.map((paragraph) => ({
+					runs: Array.isArray(paragraph.runs)
+						? paragraph.runs.filter((run) => String(run.text || '').length > 0)
+						: [],
+				}))
+				.filter((paragraph) => paragraph.runs.some((run) => String(run.text || '').trim().length > 0))
+		: [];
+	return paragraphs.length > 0 ? paragraphs : fallbackTextParagraphs(textBox);
+}
+
+function paragraphEndFontSize(paragraph: SlidevPptxRichTextParagraph, fallbackFontSize: number): number {
+	const lastRun = paragraph.runs[paragraph.runs.length - 1];
+	return Math.max(600, Math.min(14400, Math.round((lastRun?.fontSize || fallbackFontSize) * 100)));
+}
+
+function buildTextParagraphs(textBox: SlidevPptxTextBox): string {
+	const paragraphs = chooseTextParagraphs(textBox);
 	const align = alignToOoxml(textBox.align);
 	const bullet = textBox.bullet ? '<a:buChar char="&#8226;"/>' : '<a:buNone/>';
-	const size = Math.max(600, Math.min(14400, Math.round(textBox.fontSize * 100)));
 
-	return paragraphs.map(line => [
-		'<a:p>',
-		`<a:pPr algn="${align}">${bullet}</a:pPr>`,
-		buildTextRun(line || ' ', textBox),
-		`<a:endParaRPr lang="en-US" sz="${size}"/>`,
-		'</a:p>',
-	].join('')).join('');
+	return paragraphs
+		.map((paragraph) =>
+			[
+				'<a:p>',
+				`<a:pPr algn="${align}">${bullet}</a:pPr>`,
+				paragraph.runs.map((run) => buildTransparentRunXml(run.text || ' ', run)).join(''),
+				`<a:endParaRPr lang="en-US" sz="${paragraphEndFontSize(paragraph, textBox.fontSize)}"/>`,
+				'</a:p>',
+			].join(''),
+		)
+		.join('');
 }
 
 function buildTextShape(textBox: SlidevPptxTextBox, shapeId: number): string {
@@ -133,43 +185,29 @@ function buildTextShape(textBox: SlidevPptxTextBox, shapeId: number): string {
 }
 
 function buildTableCellRun(text: string, cell: SlidevPptxTableCell): string {
-	const color = clampHexColor(cell.color, '111827');
-	const size = Math.max(600, Math.min(14400, Math.round(cell.fontSize * 100)));
-	const bold = cell.bold ? ' b="1"' : '';
-	const italic = cell.italic ? ' i="1"' : '';
-	const underline = cell.underline ? ' u="sng"' : '';
-	const fontFace = escapeXmlAttribute(cell.fontFace || 'Aptos');
-	const eastAsiaFont = /[\u3400-\u9fff\uf900-\ufaff]/.test(text) ? 'Microsoft YaHei' : fontFace;
-
-	return [
-		'<a:r>',
-		`<a:rPr lang="en-US" sz="${size}"${bold}${italic}${underline}>`,
-		buildTransparentTextFill(color),
-		`<a:latin typeface="${fontFace}"/>`,
-		`<a:ea typeface="${escapeXmlAttribute(eastAsiaFont)}"/>`,
-		'<a:cs typeface="Aptos"/>',
-		'</a:rPr>',
-		`<a:t>${escapeXml(text)}</a:t>`,
-		'</a:r>',
-	].join('');
+	return buildTransparentRunXml(text, cell);
 }
 
 function buildTableCellParagraphs(cell: SlidevPptxTableCell): string {
 	const lines = cell.text
 		.replace(/\r\n?/g, '\n')
 		.split('\n')
-		.map(line => line.trimEnd())
+		.map((line) => line.trimEnd())
 		.filter((line, index, allLines) => line.length > 0 || allLines.length === 1);
 	const align = alignToOoxml(cell.align);
 	const size = Math.max(600, Math.min(14400, Math.round(cell.fontSize * 100)));
 
-	return lines.map(line => [
-		'<a:p>',
-		`<a:pPr algn="${align}"/>`,
-		buildTableCellRun(line || ' ', cell),
-		`<a:endParaRPr lang="en-US" sz="${size}"/>`,
-		'</a:p>',
-	].join('')).join('');
+	return lines
+		.map((line) =>
+			[
+				'<a:p>',
+				`<a:pPr algn="${align}"/>`,
+				buildTableCellRun(line || ' ', cell),
+				`<a:endParaRPr lang="en-US" sz="${size}"/>`,
+				'</a:p>',
+			].join(''),
+		)
+		.join('');
 }
 
 function buildTableCellProperties(cell: SlidevPptxTableCell): string {
@@ -220,7 +258,7 @@ function buildEmptyTableCell(attributes = ''): string {
 function buildTableXml(table: SlidevPptxTable, shapeId: number): string {
 	const maxCols = Math.max(
 		table.colWidths.length,
-		...table.rows.map(row => row.reduce((total, cell) => total + Math.max(1, cell.colSpan), 0)),
+		...table.rows.map((row) => row.reduce((total, cell) => total + Math.max(1, cell.colSpan), 0)),
 		1,
 	);
 	const totalRows = Math.max(table.rows.length, 1);
@@ -232,9 +270,9 @@ function buildTableXml(table: SlidevPptxTable, shapeId: number): string {
 		hMerge: boolean;
 		vMerge: boolean;
 	};
-	const cellGrid: Array<Array<TableGridEntry | null>> = Array.from({ length: totalRows }, () => (
-		Array.from({ length: maxCols }, () => null)
-	));
+	const cellGrid: Array<Array<TableGridEntry | null>> = Array.from({ length: totalRows }, () =>
+		Array.from({ length: maxCols }, () => null),
+	);
 
 	for (let rowIndex = 0; rowIndex < table.rows.length; rowIndex += 1) {
 		let colIndex = 0;
@@ -263,35 +301,41 @@ function buildTableXml(table: SlidevPptxTable, shapeId: number): string {
 
 	const defaultColWidth = table.w / maxCols;
 	const gridColumns = Array.from({ length: maxCols }, (_unused, index) => table.colWidths[index] || defaultColWidth);
-	const gridColumnsXml = gridColumns.map(width => `<a:gridCol w="${inchesToEmu(width)}"/>`).join('');
-	const rowsXml = cellGrid.map((gridRow, rowIndex) => {
-		const rowHeight = table.rowHeights[rowIndex] || table.h / totalRows;
-		const cellsXml = gridRow.map(gridEntry => {
-			if (!gridEntry) {
-				return buildEmptyTableCell();
-			}
-			if (!gridEntry.origin) {
-				const mergeAttributes = [
-					gridEntry.hMerge ? 'hMerge="1"' : '',
-					gridEntry.vMerge ? 'vMerge="1"' : '',
-				].filter(Boolean).join(' ');
-				return buildEmptyTableCell(mergeAttributes ? ` ${mergeAttributes}` : '');
-			}
-			const gridSpan = gridEntry.colSpan > 1 ? ` gridSpan="${gridEntry.colSpan}"` : '';
-			const rowSpan = gridEntry.rowSpan > 1 ? ` rowSpan="${gridEntry.rowSpan}"` : '';
-			return [
-				`<a:tc${gridSpan}${rowSpan}>`,
-				'<a:txBody>',
-				'<a:bodyPr/>',
-				'<a:lstStyle/>',
-				buildTableCellParagraphs(gridEntry.cell),
-				'</a:txBody>',
-				buildTableCellProperties(gridEntry.cell),
-				'</a:tc>',
-			].join('');
-		}).join('');
-		return `<a:tr h="${inchesToEmu(rowHeight)}">${cellsXml}</a:tr>`;
-	}).join('');
+	const gridColumnsXml = gridColumns.map((width) => `<a:gridCol w="${inchesToEmu(width)}"/>`).join('');
+	const rowsXml = cellGrid
+		.map((gridRow, rowIndex) => {
+			const rowHeight = table.rowHeights[rowIndex] || table.h / totalRows;
+			const cellsXml = gridRow
+				.map((gridEntry) => {
+					if (!gridEntry) {
+						return buildEmptyTableCell();
+					}
+					if (!gridEntry.origin) {
+						const mergeAttributes = [
+							gridEntry.hMerge ? 'hMerge="1"' : '',
+							gridEntry.vMerge ? 'vMerge="1"' : '',
+						]
+							.filter(Boolean)
+							.join(' ');
+						return buildEmptyTableCell(mergeAttributes ? ` ${mergeAttributes}` : '');
+					}
+					const gridSpan = gridEntry.colSpan > 1 ? ` gridSpan="${gridEntry.colSpan}"` : '';
+					const rowSpan = gridEntry.rowSpan > 1 ? ` rowSpan="${gridEntry.rowSpan}"` : '';
+					return [
+						`<a:tc${gridSpan}${rowSpan}>`,
+						'<a:txBody>',
+						'<a:bodyPr/>',
+						'<a:lstStyle/>',
+						buildTableCellParagraphs(gridEntry.cell),
+						'</a:txBody>',
+						buildTableCellProperties(gridEntry.cell),
+						'</a:tc>',
+					].join('');
+				})
+				.join('');
+			return `<a:tr h="${inchesToEmu(rowHeight)}">${cellsXml}</a:tr>`;
+		})
+		.join('');
 	const name = escapeXmlAttribute(`Editable Table ${shapeId}`);
 
 	return [
@@ -383,7 +427,7 @@ function buildSlideXml(slide: SlidevPptxSlide, imageRelationships: SlideImageRel
 		'<p:spTree>',
 		'<p:nvGrpSpPr><p:cNvPr id="1" name=""/><p:cNvGrpSpPr/><p:nvPr/></p:nvGrpSpPr>',
 		'<p:grpSpPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="0" cy="0"/><a:chOff x="0" y="0"/><a:chExt cx="0" cy="0"/></a:xfrm></p:grpSpPr>',
-		items.map(item => item.xml).join(''),
+		items.map((item) => item.xml).join(''),
 		'</p:spTree>',
 		'</p:cSld>',
 		'<p:clrMapOvr><a:masterClrMapping/></p:clrMapOvr>',
@@ -392,9 +436,10 @@ function buildSlideXml(slide: SlidevPptxSlide, imageRelationships: SlideImageRel
 }
 
 function buildSlideRelationships(imageRelationships: SlideImageRelationship[]): string {
-	const imageRels = imageRelationships.map(relationship => (
-		`<Relationship Id="${relationship.relationshipId}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target="../${relationship.mediaPath}"/>`
-	));
+	const imageRels = imageRelationships.map(
+		(relationship) =>
+			`<Relationship Id="${relationship.relationshipId}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target="../${relationship.mediaPath}"/>`,
+	);
 	return [
 		'<?xml version="1.0" encoding="UTF-8" standalone="yes"?>',
 		'<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">',
@@ -405,9 +450,10 @@ function buildSlideRelationships(imageRelationships: SlideImageRelationship[]): 
 }
 
 function buildPresentationXml(slideCount: number): string {
-	const slideIds = Array.from({ length: slideCount }, (_unused, index) => (
-		`<p:sldId id="${256 + index}" r:id="rId${index + 2}"/>`
-	)).join('');
+	const slideIds = Array.from(
+		{ length: slideCount },
+		(_unused, index) => `<p:sldId id="${256 + index}" r:id="rId${index + 2}"/>`,
+	).join('');
 
 	return [
 		'<?xml version="1.0" encoding="UTF-8" standalone="yes"?>',
@@ -422,9 +468,11 @@ function buildPresentationXml(slideCount: number): string {
 }
 
 function buildPresentationRelationships(slideCount: number): string {
-	const slideRels = Array.from({ length: slideCount }, (_unused, index) => (
-		`<Relationship Id="rId${index + 2}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/slide" Target="slides/slide${index + 1}.xml"/>`
-	)).join('');
+	const slideRels = Array.from(
+		{ length: slideCount },
+		(_unused, index) =>
+			`<Relationship Id="rId${index + 2}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/slide" Target="slides/slide${index + 1}.xml"/>`,
+	).join('');
 	return [
 		'<?xml version="1.0" encoding="UTF-8" standalone="yes"?>',
 		'<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">',
@@ -435,13 +483,18 @@ function buildPresentationRelationships(slideCount: number): string {
 }
 
 function buildContentTypes(slideCount: number, imageExtensions: Set<string>): string {
-	const imageDefaults = Array.from(imageExtensions).sort().map(extension => {
-		const contentType = extension === 'jpg' ? 'image/jpeg' : `image/${extension}`;
-		return `<Default Extension="${extension}" ContentType="${contentType}"/>`;
-	}).join('');
-	const slideOverrides = Array.from({ length: slideCount }, (_unused, index) => (
-		`<Override PartName="/ppt/slides/slide${index + 1}.xml" ContentType="application/vnd.openxmlformats-officedocument.presentationml.slide+xml"/>`
-	)).join('');
+	const imageDefaults = Array.from(imageExtensions)
+		.sort()
+		.map((extension) => {
+			const contentType = extension === 'jpg' ? 'image/jpeg' : `image/${extension}`;
+			return `<Default Extension="${extension}" ContentType="${contentType}"/>`;
+		})
+		.join('');
+	const slideOverrides = Array.from(
+		{ length: slideCount },
+		(_unused, index) =>
+			`<Override PartName="/ppt/slides/slide${index + 1}.xml" ContentType="application/vnd.openxmlformats-officedocument.presentationml.slide+xml"/>`,
+	).join('');
 
 	return [
 		'<?xml version="1.0" encoding="UTF-8" standalone="yes"?>',

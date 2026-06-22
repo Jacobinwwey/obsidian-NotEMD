@@ -277,6 +277,36 @@ function countTableCellCharacters(slide: SlidevPptxSlide): number {
 	);
 }
 
+function countRichTextRuns(slide: SlidevPptxSlide): number {
+	return slide.texts.reduce(
+		(total, textBox) =>
+			total +
+			textBox.richTextParagraphs.reduce((paragraphTotal, paragraph) => paragraphTotal + paragraph.runs.length, 0),
+		0,
+	);
+}
+
+function countRichTextBoxes(slide: SlidevPptxSlide): number {
+	return slide.texts.filter((textBox) =>
+		textBox.richTextParagraphs.some(
+			(paragraph) => paragraph.runs.length > 1 || paragraph.runs.some((run) => run.code || run.link),
+		),
+	).length;
+}
+
+function countRichTextRunCharacters(slide: SlidevPptxSlide): number {
+	return slide.texts.reduce(
+		(total, textBox) =>
+			total +
+			textBox.richTextParagraphs.reduce(
+				(paragraphTotal, paragraph) =>
+					paragraphTotal + paragraph.runs.reduce((runTotal, run) => runTotal + run.text.length, 0),
+				0,
+			),
+		0,
+	);
+}
+
 function collectUniqueSorted<T extends string>(values: T[]): T[] {
 	return Array.from(new Set(values)).sort();
 }
@@ -289,6 +319,9 @@ function buildSlideEditabilitySummary(slide: SlidevPptxSlide): SlidevPptxSlideEd
 		editableTableCellCount: countTableCells(slide),
 		editableTextCharacterCount: slide.texts.reduce((total, textBox) => total + textBox.text.length, 0),
 		editableTableCellCharacterCount: countTableCellCharacters(slide),
+		richTextBoxCount: countRichTextBoxes(slide),
+		richTextRunCount: countRichTextRuns(slide),
+		richTextRunCharacterCount: countRichTextRunCharacters(slide),
 		backgroundFallbackPresent: Boolean(slide.backgroundImage),
 		fallbackOnlyElementKinds: collectUniqueSorted(slide.fallbackOnlyElementKinds),
 		unmodeledTextRunReasons: collectUniqueSorted(slide.texts.flatMap((textBox) => textBox.unmodeledRunReasons)),
@@ -320,6 +353,13 @@ function buildEditablePrimitiveCoverage(
 			(total, slide) => total + slide.editableTableCellCharacterCount,
 			0,
 		),
+		richTextBoxCount: slideSummaries.reduce((total, slide) => total + slide.richTextBoxCount, 0),
+		richTextBoxRatio: ratio(
+			slideSummaries.reduce((total, slide) => total + slide.richTextBoxCount, 0),
+			slideSummaries.reduce((total, slide) => total + slide.editableTextBoxCount, 0),
+		),
+		richTextRunCount: slideSummaries.reduce((total, slide) => total + slide.richTextRunCount, 0),
+		richTextRunCharacterCount: slideSummaries.reduce((total, slide) => total + slide.richTextRunCharacterCount, 0),
 		backgroundFallbackSlideCount,
 		backgroundFallbackSlideRatio: ratio(backgroundFallbackSlideCount, slideCount),
 		fallbackOnlyElementKinds: collectUniqueSorted(
@@ -360,6 +400,8 @@ export function buildSlidevPptxExportReport(
 			(total, slide) => total + slide.consumedTableTextCandidateCount,
 			0,
 		),
+		richTextBoxCount: editablePrimitiveCoverage.richTextBoxCount,
+		richTextRunCount: editablePrimitiveCoverage.richTextRunCount,
 		editableTableCellCount: editablePrimitiveCoverage.editableTableCellCount,
 		editableTextSlideCount: slides.length - pagesWithoutEditableText.length,
 		pagesWithoutEditableText,

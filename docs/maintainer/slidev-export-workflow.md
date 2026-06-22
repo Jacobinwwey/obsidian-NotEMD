@@ -58,7 +58,7 @@ docs/export/architecture.zh-CN.pptx.report.json
 
 The verifier also opens the `.pptx` as a zip and checks slide XML for editable `<a:t>` text nodes. It counts native DrawingML tables through `pptxInspection.tableCount`. Treat image-only PPTX output as a failure for this path.
 
-The PPTX sidecar report must be read as part of the export contract. It reports the visible layer strategy (`visibleTextLayer = "background-image"`), transparent editable-layer strategy, table consumption counts, editability coverage, fallback-only visual kinds, unmodeled text-run reasons, and per-slide summaries. This is deliberate: complex Slidev/Mermaid/SVG/canvas content is still allowed to be raster fallback, but the report must not imply it is Office-native editable.
+The PPTX sidecar report must be read as part of the export contract. It reports the visible layer strategy (`visibleTextLayer = "background-image"`), transparent editable-layer strategy, table consumption counts, editability coverage, rich-run coverage, fallback-only visual kinds, unmodeled text-run reasons, and per-slide summaries. This is deliberate: complex Slidev/Mermaid/SVG/canvas content is still allowed to be raster fallback, but the report must not imply it is Office-native editable.
 
 To compare every PPTX page against the frozen visual reference written into the PPTX:
 
@@ -183,7 +183,7 @@ Treat the command as passing only when the final JSON report has:
 24. for PPTX closure, `pptxInspection.textRunCount > 0`
 25. for PPTX closure, `pptxInspection.slidesWithoutEditableText` is empty when every source slide contains text
 26. for PPTX closure on decks with tables, `pptxInspection.tableCount > 0`
-27. for PPTX closure, the sidecar report records `textBoxCount`, `tableCount`, `consumedTableCount`, `consumedTableTextCandidateCount`, `editableTableCellCount`, `editableTextSlideCount`, `imageFallbackCount`, `pagesWithoutEditableText`, `editablePrimitiveCoverage`, `fallbackOnlyElementKinds`, `unmodeledTextRunReasons`, and per-slide summaries
+27. for PPTX closure, the sidecar report records `textBoxCount`, `tableCount`, `consumedTableCount`, `consumedTableTextCandidateCount`, `richTextBoxCount`, `richTextRunCount`, `editableTableCellCount`, `editableTextSlideCount`, `imageFallbackCount`, `pagesWithoutEditableText`, `editablePrimitiveCoverage`, `fallbackOnlyElementKinds`, `unmodeledTextRunReasons`, and per-slide summaries
 28. for PPTX visual closure, run with `--pptx-visual-diff --require-pptx-visual-match`
 29. for PPTX visual closure, `pptxVisualDiff.reference.source: "pptx-background-images"`
 30. for PPTX visual closure, `pptxVisualDiff.comparison.summary.missingReferenceSlides: []`
@@ -357,7 +357,7 @@ That method must keep the order:
 3. export the prepared source in the selected format;
 4. report the concrete output path.
 
-Settings must expose the default export format (`HTML`, `PDF`, `PNG`, `MP4`) and the HTML mode when HTML is selected. A UI change that hides format selection regresses the export workflow.
+Settings must expose the default export format (`HTML`, `PDF`, `PNG`, `PPTX`, `MP4`) and the HTML mode when HTML is selected. A UI change that hides format selection regresses the export workflow.
 
 ## When To Run
 
@@ -383,6 +383,7 @@ For code changes, also run:
 
 ```bash
 npm test -- --runInBand src/tests/slidevLayoutAudit.test.ts src/tests/slidevSourcePreparer.test.ts src/tests/slideExportComprehensive.test.ts src/tests/sidebarDomButtonClicks.test.ts
+npm test -- --runInBand src/tests/pptxWriter.test.ts src/tests/pptxVisualDiff.test.ts src/tests/pptxExportReport.test.ts
 PLAYWRIGHT_BROWSERS_PATH=/home/jacob/.cache/ms-playwright npm test -- --runInBand src/tests/slidevRenderedMeasurement.test.ts
 PLAYWRIGHT_BROWSERS_PATH=/home/jacob/.cache/ms-playwright npm run verify:slidev-layout-fixtures -- --timeout-ms 300000
 npm run build

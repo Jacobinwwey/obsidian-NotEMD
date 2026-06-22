@@ -190,3 +190,40 @@ docs/export/test-slidev-final-pptx-strict/architecture.zh-CN-pptx-visual-diff/al
 ```
 
 The high difference bounding-box area is diagnostic, not a current hard failure. It is caused by dense antialiasing/render-back differences spreading over text regions; RMSE and visual inspection show the frozen visual layer is preserved. A future geometry gate should compare detected object displacement or scale drift, not raw diff area alone.
+
+## M2 Rich-Run Closure
+
+The 2026-06-21 M2 follow-up kept the same strict command shape and output under:
+
+```text
+docs/export/test-slidev-m2-pptx-strict/
+```
+
+Current evidence:
+
+1. `ok = true`
+2. `environment.slidev.version = 52.16.0 (/home/jacob/slidev/packages/slidev/bin/slidev.mjs)`
+3. `slideSource.skillRootPath = /home/jacob/slidev/skills/slidev`
+4. `slideSource.skillReferenceCount = 52`
+5. `htmlExport.actualMode = standalone`
+6. `mermaidSourcePreservation.changedFenceIndexes = []`
+7. `layoutAuditSummary.overflowCount = 0`
+8. `layoutAuditSummary.unreadableCount = 0`
+9. `pptxInspection.slideCount = 30`
+10. `pptxInspection.mediaCount = 30`
+11. `pptxInspection.textRunCount = 371`
+12. `pptxInspection.pictureCount = 30`
+13. `pptxInspection.tableCount = 6`
+14. `pptxInspection.slidesWithoutEditableText = []`
+15. sidecar `textBoxCount = 139`
+16. sidecar `richTextBoxCount = 45`
+17. sidecar `richTextRunCount = 344`
+18. sidecar `editablePrimitiveCoverage.richTextBoxRatio = 0.323741`
+19. sidecar `editablePrimitiveCoverage.richTextRunCharacterCount = 6502`
+20. sidecar `editableTableCellCount = 102`
+21. `pptxVisualGate.passed = true`
+22. `pptxVisualDiff.reference.source = pptx-background-images`
+23. `pptxVisualDiff.comparison.summary.meanRmse = 0.049330418`
+24. `pptxVisualDiff.comparison.summary.maxRmse = 0.0889364`
+
+This closes the first rich-run slice: editable text boxes now preserve multi-run DrawingML structure for inline emphasis, computed text style, code/link markers, and Office-safe whitespace. It is still a transparent structure layer; it does not claim visible native text, true hyperlink relationships, or full syntax-token semantics.

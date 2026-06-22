@@ -55,6 +55,7 @@ Current implementation adds:
 11. transparent editable text/table layers, so Office font metrics do not compete with the Chromium-rendered visible layer.
 12. M1 editability reporting: `consumedTableCount`, `consumedTableTextCandidateCount`, `editablePrimitiveCoverage`, `fallbackOnlyElementKinds`, `unmodeledTextRunReasons`, and per-slide editability summaries.
 13. visual-diff diagnostics for original rendered dimensions, width/height scale ratio drift, difference bounding-box geometry, and worst bounding-box slides. These are currently diagnostic unless explicit thresholds are supplied.
+14. M2 rich-run transparent text structures: DOM text boxes now preserve inline run boundaries, computed font size/family/color, bold/italic/underline, inline code/link markers, multi-paragraph text, and `xml:space="preserve"` for Office-safe leading/trailing spaces. The sidecar report now exposes `richTextBoxCount`, `richTextRunCount`, and rich-run character coverage.
 
 The implementation deliberately places PPTX export after `convergeSlidevDeckLayout()`. This avoids creating a new un-audited path and keeps PPTX tied to the same rendered fit fixes as HTML/PDF/PNG/MP4.
 
@@ -213,7 +214,7 @@ The useful reading of `oh-my-ppt` is narrower than "it supports HTML Slides -> P
 The concrete next slices are:
 
 1. **M1: improve the report before the visible layer**. This is now landed in the current branch. The report keeps `visibleTextLayer = background-image` and `editableLayerRenderMode = transparent-structure`, and records `consumedTableCount`, `consumedTableTextCandidateCount`, `editablePrimitiveCoverage`, `fallbackOnlyElementKinds`, `unmodeledTextRunReasons`, and per-slide summaries.
-2. **M2: rich run extraction**. Add inline runs, CJK/Latin font-face splitting, code monospace, bullet levels, line-height, and paragraph spacing to the transparent text layer. This improves editability without visual risk.
+2. **M2: rich run extraction**. First slice is now landed for the transparent text layer: inline runs, computed font metadata, link/code markers, paragraph splitting, underline/color/bold/italic preservation, and Office-safe whitespace are written into DrawingML. Remaining M2 work is CJK/Latin font-face splitting inside one run, bullet levels, line-height, paragraph spacing, and explicit hyperlink relationships.
 3. **M3: external PNG advisory metrics**. Keep the external PNG gate, but do not hard-fail by default. Add geometry shift, scale drift, SSIM/pHash, and text-antialias tolerance so subpixel renderer drift is separated from actual layout drift.
 4. **M4: visible native table/text branch**. Only make transparent structures visible after a same-frozen-HTML A/B gate passes. That branch must include residue detection/retry, or it will create background text plus PPTX text ghosting.
 5. **M5: font contract**. `oh-my-ppt` font embedding is valuable, but NotEMD should not silently embed arbitrary user system or remote fonts. First report font families, CJK fallback, and Office missing-font risk; then support opt-in embedding only for licensed local/vault font assets.
@@ -245,7 +246,7 @@ The first implementation is intentionally conservative:
 2. Whole-slide visual fallback preserves complex visuals.
 3. Mermaid/SVG/canvas are not converted into Office-native editable vector objects.
 4. Tables now have a native DrawingML structural layer with editable cell text, row/column dimensions, and merge metadata, but that layer is transparent by default and is not the visible rendering source.
-5. Code blocks are extracted as text when visible DOM text is selected, but syntax-highlighted run fidelity is not yet modeled.
+5. Code blocks are extracted as text when visible DOM text is selected. Inline run styling is now preserved in the transparent structure layer, but full syntax-token semantics and explicit hyperlink relationships are still not modeled as Office-native objects.
 6. Animations and click steps are not represented as PowerPoint animations.
 7. The frozen-background visual-diff gate passes; that proves Office preserves the written visual layer, not that complex objects are Office-native editable.
 
@@ -257,7 +258,7 @@ The next level should be incremental and report-driven:
 
 1. keep visual diff in every real PPTX acceptance run, with `pptx-background-images` as the hard-gate reference source;
 2. keep the table structural layer, but do not make it visible until CSS padding, border collapse, line height, cell baseline, font fallback, and Office round-trip rendering are modeled tightly enough to avoid regressing the frozen visual layer;
-3. upgrade text extraction from block-level text frames to richer runs with CJK font fallback, paragraph spacing, list indentation, code monospace, and inline emphasis;
+3. continue upgrading the rich text model beyond the first M2 slice: CJK font fallback inside mixed runs, paragraph spacing, list indentation, code monospace defaults, explicit hyperlink relationships, and a clearer distinction between text-style fidelity and true Office-native semantic fidelity;
 4. if a future slice makes native text or table layers visible, add background residue detection/retry before accepting those screenshots. The current transparent-structure mode should not hide text from the frozen background; residue sampling only becomes mandatory when visible native text takes over the visual layer.
 5. add shape extraction for high-confidence solid-color rectangles/lines only;
 6. keep Mermaid source untouched and continue using image fallback unless a separate explicit user option requests experimental vector reconstruction.
