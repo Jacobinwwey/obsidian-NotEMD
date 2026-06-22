@@ -600,6 +600,92 @@ runuser -u jacob -- env HOME=/home/jacob PLAYWRIGHT_BROWSERS_PATH=/home/jacob/.c
 
 这不是把 PNG hard gate 偷换成 PPTX 内嵌图。它是一个中间层：同源 HTML reference 能证明当前 PPTX capture 合同稳定；独立 Slidev PNG export 失败时，就能更明确地把问题归到 PNG export route/viewport/freeze/font readiness 合同未统一，而不是误判为 PPTX writer 失败。
 
+## M9 source-kind 可编辑覆盖合同
+
+这次从 `oh-my-ppt` 继续借鉴的重点是“覆盖来源可证明”。`oh-my-ppt` 不只是写 native object，它会跟踪哪些 DOM primitive 被消费、哪些内容仍是视觉 fallback、每个可编辑 primitive 来自哪条抽取路径。这个尺度适合 NoteMD：学习合同和验收方法，而不是把 Electron renderer、字体嵌入管线或整套 OOXML writer 搬进 Obsidian 插件。
+
+本切片把这个思想落到 PPTX sidecar 和 OOXML shape name：
+
+1. 新增 `SlidevPptxTextSourceCoverage`，按 `body`、`code`、`mermaid-text`、`svg-text`、`table-cell-overlay` 记录文本来源覆盖。
+2. sidecar 在三个层级记录这组覆盖：顶层 `textSourceCoverage`、`editablePrimitiveCoverage.textSourceCoverage`、逐页 `textSourceCoverage`。
+3. 每个来源条目记录 `slideCount`、`textBoxCount`、`textLineCount`、`characterCount`、`richTextParagraphCount` 和 `richTextRunCount`。
+4. PPTX 文本 shape name 现在包含来源角色，例如 `Editable Code Text`、`Editable Mermaid Text`、`Editable SVG Text`、`Editable Table Cell Overlay Text`。
+5. 单元测试已经对 source-kind coverage 和代码文本框的 slide XML shape name 做硬断言。
+
+这不是一个展示字段，而是补上之前 report 的证据缺口。过去的 text-box count 只能证明“有一些文本框”，但不能证明 code fence、Mermaid/SVG label、table-cell overlay 是否分别进入了可编辑结构层。M9 之后，真实 deck 可以按来源检查可编辑覆盖，而不是把 fallback 视觉误读为可编辑能力。
+
+这里仍然明确不同于 visible-native reconstruction：
+
+1. Mermaid 源内容继续保留，不改写、不拆分。
+2. Mermaid/SVG/canvas 的可见视觉仍来自冻结背景。
+3. Mermaid/SVG 中可安全抽取的文字 label 会成为透明可编辑 overlay，但这不等价于“整张图是 Office 原生可编辑图”。
+4. `table-cell-overlay` 与 DrawingML table 结构分开报告，后续 visible-native-table 实验能区分表格几何、表格文本和 overlay 文本。
+5. 默认导出仍是 `visibleTextLayer = background-image` 和 `editableLayerRenderMode = transparent-structure`。
+
+重新读 `/home/jacob/ref/oh-my-ppt-upstream-latest` 与 `/home/jacob/ref/oh-my-ppt-fork` 后，复用边界应这样定：
+
+1. 复用 **消费纪律**：先抽高置信结构，标记 consumed DOM，避免重复文本。
+2. 复用 **报告纪律**：按 provenance 区分可编辑对象，而不是只报总数。
+3. 复用 **门禁纪律**：visible-native 层只有在 residue sampling 和 same-rendered-reference gate 都通过后，才有资格进入默认路径。
+4. 不复用 **运行容器**：Electron `BrowserWindow` 和 app-local asset 假设不应该进入 Obsidian 插件导出路径。
+5. 不默认复用 **字体嵌入管线**：NotEMD 不能静默嵌入用户系统字体或远程字体；字体嵌入需要明确的、授权可控的 vault/local asset 策略。
+6. 不整体复用 **DOM 全量原生化目标**：对 Slidev deck 来说，冻结视觉层 + 透明可编辑 overlay 目前比把 Mermaid/SVG/code/table 全部重建为 Office 原生对象更稳。
+
+M9 之后的实际推进方向不应是大范围重写 writer，而是定向提高抽取质量：
+
+1. 对已知真实 deck 在 verifier 中增加 source-kind coverage 阈值；
+2. 继续提升 code text extraction，记录 syntax-token provenance，但默认不让 token 原生层可见；
+3. Mermaid label 能安全抽取就让它可编辑，但不修改 Mermaid fence；
+4. 表格单元格文本样式/run 覆盖应独立于表格几何报告；
+5. 只有这些报告稳定后，再考虑按页 opt-in visible-native，并强制 residue 与 visual-diff gate。
+
+真实 `docs/architecture.zh-CN.md` 的 M9 PPTX 验收：
+
+```bash
+runuser -u jacob -- env HOME=/home/jacob PLAYWRIGHT_BROWSERS_PATH=/home/jacob/.cache/ms-playwright bash -lc 'cd /home/jacob/obsidian-NotEMD && npm run verify:slidev-export -- --vault docs --source architecture.zh-CN.md --format pptx --output-subfolder export/test-slidev-m9-source-coverage-contract --sample-slides all --timeout-ms 240000 --no-screenshots --pptx-visual-diff --require-pptx-visual-match --pptx-rendered-html-reference-diff --require-pptx-rendered-html-reference-match --json'
+```
+
+结果：
+
+1. `ok = true`；
+2. PPTX 输出：`docs/export/test-slidev-m9-source-coverage-contract/architecture.zh-CN.pptx`，大小 `5,296,432` bytes；
+3. sidecar：`docs/export/test-slidev-m9-source-coverage-contract/architecture.zh-CN.pptx.report.json`；
+4. `slidev.version = 52.16.0 (/home/jacob/slidev/packages/slidev/bin/slidev.mjs)`；
+5. `skillRootPath = /home/jacob/slidev/skills/slidev`，`skillReferenceCount = 52`；
+6. `pptxInspection.slideCount = 30`，`mediaCount = 30`，`pictureCount = 30`，`tableCount = 6`，`textRunCount = 1092`，`slidesWithoutEditableText = []`；
+7. sidecar 继续保持 `visibleTextLayer = background-image` 与 `editableLayerRenderMode = transparent-structure`；
+8. sidecar 对象计数：`textBoxCount = 277`，`richTextRunCount = 482`，`tableCount = 6`，`editableTableCellCount = 102`；
+9. source-kind 覆盖：`body = 30 slides / 138 boxes / 6062 chars / 343 rich runs`；
+10. source-kind 覆盖：`code = 1 slide / 1 box / 14 lines / 440 chars / 1 rich run`；
+11. source-kind 覆盖：`mermaid-text = 1 slide / 36 boxes / 531 chars / 36 rich runs`；
+12. source-kind 覆盖：`svg-text = 0`，这是当前真实 deck 的抽取事实，不是 schema 回退；
+13. source-kind 覆盖：`table-cell-overlay = 6 slides / 102 boxes / 1116 chars / 102 rich runs`；
+14. 字体合同仍显示 `fontFamilies = ["Avenir Next", "Fira Code", "trebuchet ms"]`，`officeFontFamilies = ["Avenir Next", "Fira Code", "Microsoft YaHei", "trebuchet ms"]`，`officeTextRunCount = 995`，`officeEastAsiaFallbackRunCount = 453`，`officeEastAsiaFallbackCharacterCount = 2007`；
+15. frozen-background hard gate 通过：`reference.source = pptx-background-images`，`meanRmse = 0.04305776633333333`，`maxRmse = 0.0786701`；
+16. same-rendered-HTML hard gate 通过：`reference.source = pptx-rendered-html-reference`，`meanRmse = 0.04305776633333333`，`maxRmse = 0.0786701`；
+17. Mermaid source preservation 通过：`sourceFenceCount = 3`，`deckFenceCount = 3`，`changedFenceIndexes = []`；
+18. `unignoredOutputs = []`，`gitIgnoreCheckError = null`。
+
+真实 PNG export 也已重跑，用来证明本切片没有把当前 Slidev PNG workflow 替换成 PPTX capture：
+
+```bash
+runuser -u jacob -- env HOME=/home/jacob PLAYWRIGHT_BROWSERS_PATH=/home/jacob/.cache/ms-playwright bash -lc 'cd /home/jacob/obsidian-NotEMD && npm run verify:slidev-export -- --vault docs --source architecture.zh-CN.md --format png --output-subfolder export/test-slidev-m9-current-png-reference --sample-slides all --timeout-ms 240000 --no-screenshots --json'
+```
+
+PNG 结果：
+
+1. `ok = true`；
+2. 输出目录：`docs/export/test-slidev-m9-current-png-reference/architecture.zh-CN-slides-png`；
+3. 真实 slide PNG 数为 `30`；输出树里的额外 PNG 是 Slidev logo asset，不是渲染页；
+4. `slidev.version = 52.16.0 (/home/jacob/slidev/packages/slidev/bin/slidev.mjs)`；
+5. `skillRootPath = /home/jacob/slidev/skills/slidev`，`skillReferenceCount = 52`；
+6. `layoutAuditSummary.slideCount = 30`，`overflowCount = 0`，`unreadableCount = 0`，`renderErrorCount = 0`；
+7. Mermaid 仍是 review signal，不是 hard failure：`mermaidSlideCount = 3`，`mermaidFitReviewCount = 3`，`mermaidLowZoomCount = 2`，`mermaidManualReviewCount = 1`，`retryCount = 4`；
+8. `unignoredOutputs = []`，`gitIgnoreCheckError = null`；
+9. `git status --ignored` 显示两个 M9 输出目录都是 `!!`，`git ls-files` 在这些目录下没有跟踪文件。
+
+本次验收还暴露了一个 workflow 风险：可选 ImageMagick `NCC` 诊断在 3920x2208 的密集对比页上会显著拉长运行时间。它本次最终完成，所以不是正确性失败；但后续 workflow hardening 应给每个可选 metric 加 timeout/degrade，避免可选诊断把已经通过的 visual gate 表现得像卡死。
+
 ## Release 链接决策
 
 环境检测 UI 必须继续指向 npm 可安装的 GitHub release asset：

@@ -17,6 +17,7 @@ import {
 	type SlidevPptxSlideEditabilitySummary,
 	type SlidevPptxTable,
 	type SlidevPptxTextBox,
+	type SlidevPptxTextSourceCoverage,
 	type SlidevPptxTextSourceKind,
 	type SlidevPptxVisibleNativeResidueSamplingSummary,
 	type SlidevPptxVisibleNativeSlideResidueSampling,
@@ -41,6 +42,13 @@ const VISIBLE_NATIVE_RESIDUE_MIN_TEXT_LIKE_PIXELS = 8;
 const VISIBLE_NATIVE_RESIDUE_TEXT_BOX_LIMIT = 24;
 const VISIBLE_NATIVE_RESIDUE_TABLE_CELL_LIMIT = 16;
 const VISIBLE_NATIVE_BACKGROUND_CAPTURE_ATTEMPTS = 3;
+const PPTX_TEXT_SOURCE_KIND_ORDER: SlidevPptxTextSourceKind[] = [
+	'body',
+	'code',
+	'mermaid-text',
+	'svg-text',
+	'table-cell-overlay',
+];
 
 export interface SlidevPptxRenderedHtmlReferencePngSequenceResult {
 	path: string;
@@ -786,6 +794,71 @@ function countTextBoxesBySource(slide: SlidevPptxSlide, sourceKind: SlidevPptxTe
 	return slide.texts.filter((textBox) => textSourceKindFor(textBox) === sourceKind).length;
 }
 
+function countTextLines(text: string): number {
+	const normalized = String(text || '').replace(/\r\n?/g, '\n');
+	return normalized.trim().length > 0 ? normalized.split('\n').length : 0;
+}
+
+function emptyTextSourceCoverage(sourceKind: SlidevPptxTextSourceKind): SlidevPptxTextSourceCoverage {
+	return {
+		sourceKind,
+		slideCount: 0,
+		textBoxCount: 0,
+		textLineCount: 0,
+		characterCount: 0,
+		richTextParagraphCount: 0,
+		richTextRunCount: 0,
+	};
+}
+
+function buildSlideTextSourceCoverage(slide: SlidevPptxSlide): SlidevPptxTextSourceCoverage[] {
+	return PPTX_TEXT_SOURCE_KIND_ORDER.map((sourceKind) => {
+		const textBoxes = slide.texts.filter((textBox) => textSourceKindFor(textBox) === sourceKind);
+		const richTextParagraphCount = textBoxes.reduce(
+			(total, textBox) =>
+				total + textBox.richTextParagraphs.filter((paragraph) => paragraph.runs.length > 0).length,
+			0,
+		);
+		const richTextRunCount = textBoxes.reduce(
+			(total, textBox) =>
+				total +
+				textBox.richTextParagraphs.reduce((paragraphTotal, paragraph) => paragraphTotal + paragraph.runs.length, 0),
+			0,
+		);
+		return {
+			sourceKind,
+			slideCount: textBoxes.length > 0 ? 1 : 0,
+			textBoxCount: textBoxes.length,
+			textLineCount: textBoxes.reduce((total, textBox) => total + countTextLines(textBox.text), 0),
+			characterCount: textBoxes.reduce((total, textBox) => total + textBox.text.length, 0),
+			richTextParagraphCount,
+			richTextRunCount,
+		};
+	}).filter((coverage) => coverage.textBoxCount > 0);
+}
+
+function mergeTextSourceCoverage(
+	coverages: SlidevPptxTextSourceCoverage[],
+): SlidevPptxTextSourceCoverage[] {
+	const totals = new Map<SlidevPptxTextSourceKind, SlidevPptxTextSourceCoverage>();
+	for (const sourceKind of PPTX_TEXT_SOURCE_KIND_ORDER) {
+		totals.set(sourceKind, emptyTextSourceCoverage(sourceKind));
+	}
+	for (const coverage of coverages) {
+		const total = totals.get(coverage.sourceKind) || emptyTextSourceCoverage(coverage.sourceKind);
+		total.slideCount += coverage.slideCount;
+		total.textBoxCount += coverage.textBoxCount;
+		total.textLineCount += coverage.textLineCount;
+		total.characterCount += coverage.characterCount;
+		total.richTextParagraphCount += coverage.richTextParagraphCount;
+		total.richTextRunCount += coverage.richTextRunCount;
+		totals.set(coverage.sourceKind, total);
+	}
+	return PPTX_TEXT_SOURCE_KIND_ORDER.map((sourceKind) => totals.get(sourceKind)!).filter(
+		(coverage) => coverage.textBoxCount > 0,
+	);
+}
+
 function buildSlideEditabilitySummary(slide: SlidevPptxSlide): SlidevPptxSlideEditabilitySummary {
 	const fontFamilies = fontFamiliesForSlideSummary(slide);
 	return {
@@ -807,6 +880,7 @@ function buildSlideEditabilitySummary(slide: SlidevPptxSlide): SlidevPptxSlideEd
 		fallbackOnlyElementKinds: collectUniqueSorted(slide.fallbackOnlyElementKinds),
 		unmodeledTextRunReasons: collectUniqueSorted(slide.texts.flatMap((textBox) => textBox.unmodeledRunReasons)),
 		...fontFamilies,
+		textSourceCoverage: buildSlideTextSourceCoverage(slide),
 		consumedTableTextCandidateCount: slide.consumedTableTextCandidateCount,
 		warnings: slide.warnings,
 	};
@@ -855,6 +929,7 @@ function buildEditablePrimitiveCoverage(
 		richTextRunCharacterCount: slideSummaries.reduce((total, slide) => total + slide.richTextRunCharacterCount, 0),
 		backgroundFallbackSlideCount,
 		backgroundFallbackSlideRatio: ratio(backgroundFallbackSlideCount, slideCount),
+		textSourceCoverage: mergeTextSourceCoverage(slideSummaries.flatMap((slide) => slide.textSourceCoverage)),
 		fallbackOnlyElementKinds: collectUniqueSorted(
 			slideSummaries.flatMap((slide) => slide.fallbackOnlyElementKinds),
 		),
@@ -907,6 +982,7 @@ export function buildSlidevPptxExportReport(
 		backgroundImageSlideCount: slides.filter((slide) => Boolean(slide.backgroundImage)).length,
 		imageFallbackCount: slides.filter((slide) => Boolean(slide.backgroundImage)).length,
 		editablePrimitiveCoverage,
+		textSourceCoverage: editablePrimitiveCoverage.textSourceCoverage,
 		fontContract,
 		fallbackOnlyElementKinds: editablePrimitiveCoverage.fallbackOnlyElementKinds,
 		unmodeledTextRunReasons: editablePrimitiveCoverage.unmodeledTextRunReasons,

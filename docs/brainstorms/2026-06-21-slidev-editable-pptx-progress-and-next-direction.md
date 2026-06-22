@@ -579,6 +579,92 @@ This separates three reference meanings:
 
 This is not replacing the PNG hard gate with images extracted from the PPTX. It is an intermediate layer: the same-rendered-HTML reference proves the PPTX capture contract is stable; when a separate Slidev PNG export fails, the failure can now be attributed more clearly to PNG export route/viewport/freeze/font-readiness contract drift instead of being misread as a PPTX writer failure.
 
+## M9 Source-Kind Editable Coverage Contract
+
+The next `oh-my-ppt` lesson worth carrying forward is coverage provenance. `oh-my-ppt` does not only write native objects; it tracks which DOM primitives were consumed, which content stayed visual fallback, and which extraction path produced each editable primitive. That is the right reuse scale for NoteMD. The current plugin should learn the contract and evidence model, not copy the upstream Electron renderer or font embedding pipeline.
+
+This slice lands that idea in the PPTX sidecar and OOXML shape names:
+
+1. `SlidevPptxTextSourceCoverage` now records per-source coverage for `body`, `code`, `mermaid-text`, `svg-text`, and `table-cell-overlay`.
+2. The sidecar records that coverage at three levels: top-level `textSourceCoverage`, `editablePrimitiveCoverage.textSourceCoverage`, and each slide's `textSourceCoverage`.
+3. Each source entry records `slideCount`, `textBoxCount`, `textLineCount`, `characterCount`, `richTextParagraphCount`, and `richTextRunCount`.
+4. PPTX text shape names now include their source role, for example `Editable Code Text`, `Editable Mermaid Text`, `Editable SVG Text`, and `Editable Table Cell Overlay Text`.
+5. Unit tests now assert source-kind coverage and the code shape name in generated slide XML.
+
+The point is not cosmetic. It closes an evidence gap from the previous reports: raw text-box count could prove that some text existed, but it could not prove that code fences, Mermaid/SVG labels, or table-cell overlays were separately represented as editable structures. With this slice, a real deck can be inspected for source-specific editability without overstating visual-native support.
+
+This remains deliberately different from a visible-native reconstruction strategy:
+
+1. Mermaid source is still preserved and not rewritten or split.
+2. Mermaid/SVG/canvas visuals still use the frozen background as the visible layer.
+3. Extracted Mermaid/SVG text labels are transparent editable overlays, not a claim that the diagram is Office-native editable.
+4. Table-cell overlay text is reported separately from the DrawingML table structure, so a future visible-native-table experiment can tell table geometry, table text, and overlay text apart.
+5. The default export continues to be `visibleTextLayer = background-image` and `editableLayerRenderMode = transparent-structure`.
+
+Reuse boundary after rereading `/home/jacob/ref/oh-my-ppt-upstream-latest` and `/home/jacob/ref/oh-my-ppt-fork`:
+
+1. Reuse the **consumption discipline**: extract high-confidence structures first, mark consumed DOM, and avoid duplicate text.
+2. Reuse the **reporting discipline**: distinguish editable objects by provenance instead of reporting only aggregate counts.
+3. Reuse the **gating discipline**: visual-native layers need residue sampling and same-rendered-reference gates before they can become default.
+4. Do not reuse the **runtime container**: Electron `BrowserWindow` and app-local asset assumptions do not belong in the Obsidian plugin path.
+5. Do not reuse the **font embedding pipeline** by default: NotEMD must not silently embed arbitrary system or remote fonts; embedding needs an explicit licensed vault/local asset policy.
+6. Do not reuse the **DOM-to-native ambition** wholesale: for Slidev decks, preserving the frozen visual layer plus transparent editable overlays is currently more robust than trying to reconstruct every Mermaid/SVG/code/table visual as native Office shapes.
+
+The practical next step after M9 is not another broad writer rewrite. It is targeted extraction quality:
+
+1. add source-kind coverage thresholds to the verifier for real decks where the expected categories are known;
+2. extend code text extraction toward syntax-token provenance without making tokens visible by default;
+3. keep Mermaid labels editable where DOM/SVG text can be safely extracted, but do not mutate the Mermaid fence;
+4. add table-cell text style/run coverage separately from table geometry;
+5. only after those reports are stable, consider a visible-native page-by-page opt-in path guarded by residue and visual-diff gates.
+
+Real `docs/architecture.zh-CN.md` PPTX acceptance for M9:
+
+```bash
+runuser -u jacob -- env HOME=/home/jacob PLAYWRIGHT_BROWSERS_PATH=/home/jacob/.cache/ms-playwright bash -lc 'cd /home/jacob/obsidian-NotEMD && npm run verify:slidev-export -- --vault docs --source architecture.zh-CN.md --format pptx --output-subfolder export/test-slidev-m9-source-coverage-contract --sample-slides all --timeout-ms 240000 --no-screenshots --pptx-visual-diff --require-pptx-visual-match --pptx-rendered-html-reference-diff --require-pptx-rendered-html-reference-match --json'
+```
+
+Result:
+
+1. `ok = true`;
+2. output PPTX: `docs/export/test-slidev-m9-source-coverage-contract/architecture.zh-CN.pptx`, `5,296,432` bytes;
+3. sidecar: `docs/export/test-slidev-m9-source-coverage-contract/architecture.zh-CN.pptx.report.json`;
+4. `slidev.version = 52.16.0 (/home/jacob/slidev/packages/slidev/bin/slidev.mjs)`;
+5. `skillRootPath = /home/jacob/slidev/skills/slidev`, `skillReferenceCount = 52`;
+6. `pptxInspection.slideCount = 30`, `mediaCount = 30`, `pictureCount = 30`, `tableCount = 6`, `textRunCount = 1092`, `slidesWithoutEditableText = []`;
+7. sidecar keeps `visibleTextLayer = background-image` and `editableLayerRenderMode = transparent-structure`;
+8. sidecar object counts: `textBoxCount = 277`, `richTextRunCount = 482`, `tableCount = 6`, `editableTableCellCount = 102`;
+9. source-kind coverage: `body = 30 slides / 138 boxes / 6062 chars / 343 rich runs`;
+10. source-kind coverage: `code = 1 slide / 1 box / 14 lines / 440 chars / 1 rich run`;
+11. source-kind coverage: `mermaid-text = 1 slide / 36 boxes / 531 chars / 36 rich runs`;
+12. source-kind coverage: `svg-text = 0`, which is the current real deck's extracted-source fact, not a regression in the schema;
+13. source-kind coverage: `table-cell-overlay = 6 slides / 102 boxes / 1116 chars / 102 rich runs`;
+14. font contract still reports `fontFamilies = ["Avenir Next", "Fira Code", "trebuchet ms"]`, `officeFontFamilies = ["Avenir Next", "Fira Code", "Microsoft YaHei", "trebuchet ms"]`, `officeTextRunCount = 995`, `officeEastAsiaFallbackRunCount = 453`, `officeEastAsiaFallbackCharacterCount = 2007`;
+15. frozen-background hard gate passed: `reference.source = pptx-background-images`, `meanRmse = 0.04305776633333333`, `maxRmse = 0.0786701`;
+16. same-rendered-HTML hard gate passed: `reference.source = pptx-rendered-html-reference`, `meanRmse = 0.04305776633333333`, `maxRmse = 0.0786701`;
+17. Mermaid source preservation passed: `sourceFenceCount = 3`, `deckFenceCount = 3`, `changedFenceIndexes = []`;
+18. `unignoredOutputs = []`, `gitIgnoreCheckError = null`.
+
+Real PNG export was rerun to prove this slice did not replace the current Slidev PNG workflow with a PPTX capture substitute:
+
+```bash
+runuser -u jacob -- env HOME=/home/jacob PLAYWRIGHT_BROWSERS_PATH=/home/jacob/.cache/ms-playwright bash -lc 'cd /home/jacob/obsidian-NotEMD && npm run verify:slidev-export -- --vault docs --source architecture.zh-CN.md --format png --output-subfolder export/test-slidev-m9-current-png-reference --sample-slides all --timeout-ms 240000 --no-screenshots --json'
+```
+
+PNG result:
+
+1. `ok = true`;
+2. output directory: `docs/export/test-slidev-m9-current-png-reference/architecture.zh-CN-slides-png`;
+3. real slide PNG count is `30`; the extra PNG under the output tree is the Slidev logo asset, not a rendered slide;
+4. `slidev.version = 52.16.0 (/home/jacob/slidev/packages/slidev/bin/slidev.mjs)`;
+5. `skillRootPath = /home/jacob/slidev/skills/slidev`, `skillReferenceCount = 52`;
+6. `layoutAuditSummary.slideCount = 30`, `overflowCount = 0`, `unreadableCount = 0`, `renderErrorCount = 0`;
+7. Mermaid remains a review signal, not a hard failure: `mermaidSlideCount = 3`, `mermaidFitReviewCount = 3`, `mermaidLowZoomCount = 2`, `mermaidManualReviewCount = 1`, `retryCount = 4`;
+8. `unignoredOutputs = []`, `gitIgnoreCheckError = null`;
+9. `git status --ignored` shows both M9 output directories as `!!`, and `git ls-files` returns no tracked files under them.
+
+One workflow risk was observed during this acceptance: optional ImageMagick `NCC` diagnostics can dominate runtime on dense 3920x2208 comparison pages. It completed in this run, so it is not a correctness failure, but future workflow hardening should add per-metric timeout/degrade behavior so optional diagnostics cannot make a passing visual gate look hung.
+
 ## Release Link Decision
 
 The environment-check UI must continue pointing users at an npm-installable GitHub release asset:

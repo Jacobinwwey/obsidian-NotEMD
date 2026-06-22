@@ -242,12 +242,28 @@ function buildVisibleTextParagraphs(textBox: SlidevPptxTextBox): string {
 		.join('');
 }
 
+function textShapeLabel(textBox: SlidevPptxTextBox): string {
+	switch (textBox.sourceKind) {
+		case 'code':
+			return 'Code Text';
+		case 'mermaid-text':
+			return 'Mermaid Text';
+		case 'svg-text':
+			return 'SVG Text';
+		case 'table-cell-overlay':
+			return 'Table Cell Overlay Text';
+		case 'body':
+		default:
+			return 'Text';
+	}
+}
+
 function buildTextShape(textBox: SlidevPptxTextBox, shapeId: number): string {
 	const x = inchesToEmu(textBox.x);
 	const y = inchesToEmu(textBox.y);
 	const w = inchesToEmu(textBox.w);
 	const h = inchesToEmu(textBox.h);
-	const name = escapeXmlAttribute(`Editable Text ${shapeId}`);
+	const name = escapeXmlAttribute(`Editable ${textShapeLabel(textBox)} ${shapeId}`);
 
 	return [
 		'<p:sp>',
@@ -276,7 +292,7 @@ function buildVisibleTextShape(textBox: SlidevPptxTextBox, shapeId: number): str
 	const y = inchesToEmu(textBox.y);
 	const w = inchesToEmu(textBox.w);
 	const h = inchesToEmu(textBox.h);
-	const name = escapeXmlAttribute(`Visible Native Text ${shapeId}`);
+	const name = escapeXmlAttribute(`Visible Native ${textShapeLabel(textBox)} ${shapeId}`);
 
 	return [
 		'<p:sp>',

@@ -170,8 +170,19 @@ export interface SlidevPptxSlideEditabilitySummary {
 	cjkFontFamilies: string[];
 	writerEastAsiaFallbackFontFamilies: string[];
 	officeMissingFontRiskFamilies: string[];
+	textSourceCoverage: SlidevPptxTextSourceCoverage[];
 	consumedTableTextCandidateCount: number;
 	warnings: string[];
+}
+
+export interface SlidevPptxTextSourceCoverage {
+	sourceKind: SlidevPptxTextSourceKind;
+	slideCount: number;
+	textBoxCount: number;
+	textLineCount: number;
+	characterCount: number;
+	richTextParagraphCount: number;
+	richTextRunCount: number;
 }
 
 export interface SlidevPptxEditablePrimitiveCoverage {
@@ -195,6 +206,7 @@ export interface SlidevPptxEditablePrimitiveCoverage {
 	richTextRunCharacterCount: number;
 	backgroundFallbackSlideCount: number;
 	backgroundFallbackSlideRatio: number;
+	textSourceCoverage: SlidevPptxTextSourceCoverage[];
 	fallbackOnlyElementKinds: SlidevPptxFallbackOnlyElementKind[];
 	unmodeledTextRunReasons: SlidevPptxUnmodeledTextRunReason[];
 }
@@ -269,6 +281,7 @@ export interface SlidevPptxExportReport {
 	backgroundImageSlideCount: number;
 	imageFallbackCount: number;
 	editablePrimitiveCoverage: SlidevPptxEditablePrimitiveCoverage;
+	textSourceCoverage: SlidevPptxTextSourceCoverage[];
 	fontContract: SlidevPptxFontContractSummary;
 	fallbackOnlyElementKinds: SlidevPptxFallbackOnlyElementKind[];
 	unmodeledTextRunReasons: SlidevPptxUnmodeledTextRunReason[];

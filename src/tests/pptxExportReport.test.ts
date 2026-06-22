@@ -28,7 +28,23 @@ function editableTextBoxForReport(text: string, sourceKind?: SlidevPptxTextSourc
 		align: 'left',
 		bullet: false,
 		order: 10,
-		richTextParagraphs: [],
+		richTextParagraphs: [
+			{
+				runs: [
+					{
+						text,
+						fontSize: 14,
+						fontFace: 'Aptos',
+						color: '111827',
+						bold: false,
+						italic: false,
+						underline: false,
+						code: sourceKind === 'code',
+						link: false,
+					},
+				],
+			},
+		],
 		unmodeledRunReasons: [],
 	};
 }
@@ -284,6 +300,54 @@ describe('pptx export report', () => {
 				editableTableCellOverlayTextBoxCount: 1,
 			}),
 		);
+		expect(report.textSourceCoverage).toEqual([
+			{
+				sourceKind: 'body',
+				slideCount: 1,
+				textBoxCount: 1,
+				textLineCount: 1,
+				characterCount: 'Body text'.length,
+				richTextParagraphCount: 1,
+				richTextRunCount: 1,
+			},
+			{
+				sourceKind: 'code',
+				slideCount: 2,
+				textBoxCount: 2,
+				textLineCount: 2,
+				characterCount: 'const value = 1;'.length + 'pnpm build'.length,
+				richTextParagraphCount: 2,
+				richTextRunCount: 2,
+			},
+			{
+				sourceKind: 'mermaid-text',
+				slideCount: 1,
+				textBoxCount: 1,
+				textLineCount: 1,
+				characterCount: 'Graph edge label'.length,
+				richTextParagraphCount: 1,
+				richTextRunCount: 1,
+			},
+			{
+				sourceKind: 'svg-text',
+				slideCount: 1,
+				textBoxCount: 1,
+				textLineCount: 1,
+				characterCount: 'SVG legend'.length,
+				richTextParagraphCount: 1,
+				richTextRunCount: 1,
+			},
+			{
+				sourceKind: 'table-cell-overlay',
+				slideCount: 1,
+				textBoxCount: 1,
+				textLineCount: 1,
+				characterCount: 'Table cell overlay'.length,
+				richTextParagraphCount: 1,
+				richTextRunCount: 1,
+			},
+		]);
+		expect(report.editablePrimitiveCoverage.textSourceCoverage).toEqual(report.textSourceCoverage);
 		expect(report.slides[0]).toEqual(
 			expect.objectContaining({
 				editableBodyTextBoxCount: 1,
@@ -293,6 +357,18 @@ describe('pptx export report', () => {
 				editableTableCellOverlayTextBoxCount: 1,
 			}),
 		);
+		expect(report.slides[0].textSourceCoverage).toEqual([
+			expect.objectContaining({ sourceKind: 'body', slideCount: 1, textBoxCount: 1, richTextRunCount: 1 }),
+			expect.objectContaining({ sourceKind: 'code', slideCount: 1, textBoxCount: 1, richTextRunCount: 1 }),
+			expect.objectContaining({ sourceKind: 'mermaid-text', slideCount: 1, textBoxCount: 1, richTextRunCount: 1 }),
+			expect.objectContaining({ sourceKind: 'svg-text', slideCount: 1, textBoxCount: 1, richTextRunCount: 1 }),
+			expect.objectContaining({
+				sourceKind: 'table-cell-overlay',
+				slideCount: 1,
+				textBoxCount: 1,
+				richTextRunCount: 1,
+			}),
+		]);
 		expect(report.slides[1]).toEqual(
 			expect.objectContaining({
 				editableBodyTextBoxCount: 0,
@@ -302,6 +378,17 @@ describe('pptx export report', () => {
 				editableTableCellOverlayTextBoxCount: 0,
 			}),
 		);
+		expect(report.slides[1].textSourceCoverage).toEqual([
+			expect.objectContaining({
+				sourceKind: 'code',
+				slideCount: 1,
+				textBoxCount: 1,
+				textLineCount: 1,
+				characterCount: 'pnpm build'.length,
+				richTextParagraphCount: 1,
+				richTextRunCount: 1,
+			}),
+		]);
 	});
 
 	test('reports Office emitted font runs for mixed Latin and CJK text', () => {

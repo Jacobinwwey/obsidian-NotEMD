@@ -412,6 +412,7 @@ describe('pptxWriter', () => {
 			const secondLineIndex = slideXml.indexOf('<a:t>const second = 2;</a:t>');
 			expect(firstLineIndex).toBeGreaterThan(-1);
 			expect(secondLineIndex).toBeGreaterThan(firstLineIndex);
+			expect(slideXml).toContain('name="Editable Code Text');
 			expect(slideXml.slice(firstLineIndex, secondLineIndex)).toContain('</a:p><a:p>');
 			expect(slideXml).not.toContain('const first = 1;\nconst second = 2;');
 		} finally {
