@@ -47,6 +47,7 @@ function parseArgs(argv) {
 		pptxVisualMeanRmse: 0.08,
 		pptxVisualDpi: 150,
 		pptxVisualDiffDir: null,
+		pptxVisualReferenceDir: null,
 		json: false,
 	};
 
@@ -90,6 +91,9 @@ function parseArgs(argv) {
 			args.pptxVisualDpi = Number(argv[++index]);
 		} else if (arg === '--pptx-visual-diff-dir' && argv[index + 1]) {
 			args.pptxVisualDiffDir = argv[++index];
+		} else if (arg === '--pptx-visual-reference-dir' && argv[index + 1]) {
+			args.pptxVisualReferenceDir = argv[++index];
+			args.pptxVisualDiff = true;
 		} else if (arg === '--json') {
 			args.json = true;
 		} else if (arg === '--help' || arg === '-h') {
@@ -114,6 +118,9 @@ function parseArgs(argv) {
 	}
 	if (args.pptxVisualDiff && args.format !== 'pptx') {
 		throw new Error('--pptx-visual-diff requires --format pptx');
+	}
+	if (args.pptxVisualReferenceDir && args.format !== 'pptx') {
+		throw new Error('--pptx-visual-reference-dir requires --format pptx');
 	}
 	if (!Number.isFinite(args.pptxVisualMaxRmse) || args.pptxVisualMaxRmse < 0) {
 		throw new Error('--pptx-visual-max-rmse must be a non-negative number');
@@ -149,6 +156,7 @@ function printHelp() {
 		'  --pptx-visual-mean-rmse <n> Mean normalized RMSE, default: 0.08',
 		'  --pptx-visual-dpi <n>      LibreOffice/PDF render DPI, default: 150',
 		'  --pptx-visual-diff-dir <path> Output directory for visual diff artifacts',
+		'  --pptx-visual-reference-dir <path> External PNG sequence directory for advisory cross-export comparison',
 		'  --json                     Print only the final JSON report',
 	].join('\n'));
 }
@@ -759,6 +767,20 @@ function inspectPptx(pptxPath) {
 	}
 }
 
+function resolvePptxVisualReferenceDirectory(vaultRoot, referenceDirectory) {
+	if (!referenceDirectory) {
+		return null;
+	}
+	if (path.isAbsolute(referenceDirectory)) {
+		return referenceDirectory;
+	}
+	const workspaceRelative = path.resolve(process.cwd(), referenceDirectory);
+	if (fs.existsSync(workspaceRelative)) {
+		return workspaceRelative;
+	}
+	return path.join(vaultRoot, referenceDirectory);
+}
+
 function printProgress(enabled, phase, detail) {
 	if (!enabled) return;
 	console.log(detail ? `${phase}: ${detail}` : phase);
@@ -838,11 +860,18 @@ async function main() {
 				? args.pptxVisualDiffDir
 				: path.join(vaultRoot, args.pptxVisualDiffDir))
 			: path.join(path.dirname(absoluteExportPath), `${path.basename(absoluteExportPath, path.extname(absoluteExportPath))}-pptx-visual-diff`);
-		onProgress('pptx-visual-diff', 'Rendering PPTX back to PNG and comparing pages with frozen background references...');
+		const visualReferenceDirectory = resolvePptxVisualReferenceDirectory(vaultRoot, args.pptxVisualReferenceDir);
+		onProgress(
+			'pptx-visual-diff',
+			visualReferenceDirectory
+				? `Rendering PPTX back to PNG and comparing pages with external PNG reference: ${visualReferenceDirectory}`
+				: 'Rendering PPTX back to PNG and comparing pages with frozen background references...',
+		);
 		try {
 			pptxVisualDiff = buildPptxVisualDiff({
 				pptxPath: absoluteExportPath,
 				outputDirectory: visualDiffDirectory,
+				referenceDirectory: visualReferenceDirectory,
 				dpi: args.pptxVisualDpi,
 				timeoutMs: args.timeoutMs,
 				thresholds: {

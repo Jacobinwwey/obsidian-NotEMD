@@ -4,6 +4,7 @@ import { tmpdir } from 'os';
 import { strToU8, zipSync } from 'fflate';
 
 const {
+	diagnoseVisualPage,
 	evaluateVisualGate,
 	extractPptxBackgroundImages,
 	pairPngSequences,
@@ -18,6 +19,7 @@ describe('pptx visual diff helper', () => {
 		expect(parseCompareMetric('17068.7 (0.260447)').normalized).toBe(true);
 		expect(parseCompareMetric('42').value).toBe(42);
 		expect(parseCompareMetric('42').normalized).toBe(false);
+		expect(parseCompareMetric('inf').value).toBe(Number.POSITIVE_INFINITY);
 	});
 
 	test('parses ImageMagick bounding-box geometry output', () => {
@@ -105,6 +107,9 @@ describe('pptx visual diff helper', () => {
 		expect(summary.maxDifferenceBoundingBoxAreaRatio).toBeCloseTo(0.24, 6);
 		expect(summary.worstSlides[0].slide).toBe(2);
 		expect(summary.worstDifferenceBoundingBoxSlides[0].slide).toBe(2);
+		expect(summary.advisoryMetrics.diagnosticCounts.layoutDriftLikely).toBe(1);
+		expect(summary.advisoryMetrics.likelyRendererNoiseSlides).toEqual([1]);
+		expect(summary.advisoryMetrics.worstLikelyLayoutDriftSlides[0].slide).toBe(2);
 		expect(evaluateVisualGate(summary, { maxRmse: 0.12, meanRmse: 0.08 }).passed).toBe(false);
 		expect(evaluateVisualGate(summary, { maxRmse: 0.2, meanRmse: 0.1 }).passed).toBe(true);
 		expect(
@@ -121,6 +126,64 @@ describe('pptx visual diff helper', () => {
 				maxDifferenceBoundingBoxAreaRatio: 0.1,
 			}).passed,
 		).toBe(false);
+	});
+
+	test('classifies wide low-rmse diffs as likely renderer noise', () => {
+		const diagnostics = diagnoseVisualPage({
+			slide: 7,
+			referencePath: 'reference.png',
+			renderedPath: 'rendered.png',
+			rmseNormalized: 0.05,
+			maxScaleRatioDelta: 0.01,
+			differenceBoundingBox: {
+				available: true,
+				areaRatio: 0.64,
+			},
+		});
+
+		expect(diagnostics.textAntialiasDriftLikely).toBe(true);
+		expect(diagnostics.rendererNoiseLikely).toBe(true);
+		expect(diagnostics.layoutDriftLikely).toBe(false);
+		expect(diagnostics.status).toBe('renderer-noise-review');
+	});
+
+	test('classifies scale drift as layout review', () => {
+		const diagnostics = diagnoseVisualPage({
+			slide: 8,
+			referencePath: 'reference.png',
+			renderedPath: 'rendered.png',
+			rmseNormalized: 0.13,
+			maxScaleRatioDelta: 0.05,
+			differenceBoundingBox: {
+				available: true,
+				areaRatio: 0.2,
+			},
+		});
+
+		expect(diagnostics.layoutDriftLikely).toBe(true);
+		expect(diagnostics.reviewPriority).toBe('high');
+		expect(diagnostics.status).toBe('layout-review');
+	});
+
+	test('keeps high-rmse external references separate from layout drift when scale is stable', () => {
+		const diagnostics = diagnoseVisualPage(
+			{
+				slide: 9,
+				referencePath: 'reference.png',
+				renderedPath: 'rendered.png',
+				rmseNormalized: 0.19,
+				maxScaleRatioDelta: 0.02,
+				differenceBoundingBox: {
+					available: true,
+					areaRatio: 0.6,
+				},
+			},
+			{ referenceSource: 'external-png-sequence' },
+		);
+
+		expect(diagnostics.referenceContractDriftLikely).toBe(true);
+		expect(diagnostics.layoutDriftLikely).toBe(false);
+		expect(diagnostics.status).toBe('reference-contract-review');
 	});
 
 	test('extracts PPTX frozen background images as visual references', () => {

@@ -78,7 +78,15 @@ docs/export/architecture.zh-CN-pptx-visual-diff/all-diff-sheet.png
 
 The hard gate extracts embedded background images from the PPTX slide relationships. It does not rerun Slidev PNG export as the strict reference, because that would be a second rendering instance and can drift in font antialiasing or page state.
 
-The report also includes diagnostic geometry metrics such as `maxScaleRatioDelta`, `maxDifferenceBoundingBoxAreaRatio`, and `worstDifferenceBoundingBoxSlides`. Keep those advisory unless explicit thresholds are passed. Dense text antialiasing can produce large diff bounding boxes without actual slide overflow.
+The report also includes diagnostic geometry and perception metrics such as `maxScaleRatioDelta`, `maxDifferenceBoundingBoxAreaRatio`, `advisoryMetrics`, per-page `diagnostics`, optional `PHASH`/`NCC` values, and `worstDifferenceBoundingBoxSlides`. Keep those advisory unless explicit thresholds are passed. Dense text antialiasing can produce large diff bounding boxes without actual slide overflow.
+
+To compare PPTX render-back output against a separately generated Slidev PNG sequence, pass the external reference directory:
+
+```bash
+npm run verify:slidev-export -- --format pptx --source architecture.zh-CN.md --sample-slides all --timeout-ms 240000 --no-screenshots --pptx-visual-diff --pptx-visual-reference-dir docs/export/test-slidev-current-png-reference/architecture.zh-CN-slides-png --json
+```
+
+This is a cross-export advisory check. It is useful for detecting whether the PNG export path and PPTX capture path share the same viewport, route, freeze, font-readiness, and stabilization contract. It must not replace the frozen-background hard gate unless the external reference is generated from the same frozen HTML/capture contract. ImageMagick on this host supports `PHASH` and `NCC`; `SSIM` is reported as unavailable when the local ImageMagick build does not expose it.
 
 Report mode records `pptxVisualDiff.gate.passed` but does not fail the whole verifier when visual thresholds are exceeded. For strict closure, add:
 
@@ -191,6 +199,7 @@ Treat the command as passing only when the final JSON report has:
 32. for PPTX visual closure, `pptxVisualDiff.comparison.summary.maxRmse <= 0.12`
 33. for PPTX visual closure, `pptxVisualDiff.comparison.summary.meanRmse <= 0.08`
 34. for PPTX visual diagnostics, review `pptxVisualDiff.comparison.summary.maxScaleRatioDelta` and `maxDifferenceBoundingBoxAreaRatio`, but do not promote them to hard failures until the thresholds distinguish layout displacement from renderer noise
+35. for external PNG advisory comparison, `pptxVisualDiff.reference.source: "external-png-sequence"` may report `pptxVisualDiff.gate.passed: false` while the verifier remains `ok: true`; read `advisoryMetrics.diagnosticCounts.referenceContractDriftLikely` separately from `layoutDriftLikely`
 
 If any check fails, fix the NoteMD workflow before relying on the exported files.
 

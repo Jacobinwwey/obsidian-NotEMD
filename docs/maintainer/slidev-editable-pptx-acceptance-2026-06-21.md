@@ -227,3 +227,34 @@ Current evidence:
 24. `pptxVisualDiff.comparison.summary.maxRmse = 0.0889364`
 
 This closes the first rich-run slice: editable text boxes now preserve multi-run DrawingML structure for inline emphasis, computed text style, code/link markers, and Office-safe whitespace. It is still a transparent structure layer; it does not claim visible native text, true hyperlink relationships, or full syntax-token semantics.
+
+## M3 External PNG Advisory Diagnostics
+
+The external PNG comparison is now a first-class verifier input instead of a one-off Node script:
+
+```bash
+runuser -u jacob -- env HOME=/home/jacob PLAYWRIGHT_BROWSERS_PATH=/home/jacob/.cache/ms-playwright bash -lc 'cd /home/jacob/obsidian-NotEMD && npm run verify:slidev-export -- --vault docs --source architecture.zh-CN.md --format pptx --output-subfolder export/test-slidev-m3-pptx-external-advisory --sample-slides all --timeout-ms 240000 --no-screenshots --pptx-visual-diff --pptx-visual-reference-dir docs/export/test-slidev-m3-png-reference/architecture.zh-CN-slides-png --json'
+```
+
+The external reference was generated from the same real source file with:
+
+```bash
+runuser -u jacob -- env HOME=/home/jacob PLAYWRIGHT_BROWSERS_PATH=/home/jacob/.cache/ms-playwright bash -lc 'cd /home/jacob/obsidian-NotEMD && npm run verify:slidev-export -- --vault docs --source architecture.zh-CN.md --format png --output-subfolder export/test-slidev-m3-png-reference --sample-slides all --timeout-ms 240000 --no-screenshots --json'
+```
+
+Current evidence:
+
+1. PNG reference run returned `ok = true`.
+2. PPTX external advisory run returned `ok = true`.
+3. `pptxVisualDiff.reference.source = external-png-sequence`.
+4. `pptxVisualGate.required = false`.
+5. `pptxVisualGate.passed = true`.
+6. internal `pptxVisualDiff.gate.passed = false`, with `meanRmse = 0.102229238` and `maxRmse = 0.241976`.
+7. `pptxVisualDiff.comparison.summary.maxScaleRatioDelta = 0.02091836734693886`.
+8. `advisoryMetrics.diagnosticCounts.rendererNoiseLikely = 7`.
+9. `advisoryMetrics.diagnosticCounts.referenceContractDriftLikely = 13`.
+10. `advisoryMetrics.diagnosticCounts.layoutDriftLikely = 0`.
+11. optional ImageMagick metrics include `PHASH` and `NCC`; `SSIM` is recorded as unavailable on this host.
+12. `unignoredOutputs = []`.
+
+This is the expected outcome. External PNG comparison is useful because it exposes the remaining cross-export contract drift between Slidev PNG export and NotEMD PPTX capture, but it is not a PPTX writer hard failure. The frozen-background strict gate remains the authoritative PPTX visual gate until PNG export and PPTX capture share one frozen HTML/capture contract.

@@ -78,7 +78,15 @@ docs/export/architecture.zh-CN-pptx-visual-diff/all-diff-sheet.png
 
 该门槛从 PPTX slide relationship 中抽取内嵌背景图作为 reference，不再另跑一次 Slidev PNG export。后者是另一个渲染实例，可能因为字体抗锯齿或页面状态漂移造成假失败。
 
-报告还会输出诊断性几何指标，例如 `maxScaleRatioDelta`、`maxDifferenceBoundingBoxAreaRatio` 与 `worstDifferenceBoundingBoxSlides`。除非显式传入阈值，这些指标应保持 advisory。密集文本抗锯齿可能造成大面积 diff bounding box，但不代表真实 slide overflow。
+报告还会输出诊断性几何与感知指标，例如 `maxScaleRatioDelta`、`maxDifferenceBoundingBoxAreaRatio`、`advisoryMetrics`、逐页 `diagnostics`、可选 `PHASH`/`NCC` 值与 `worstDifferenceBoundingBoxSlides`。除非显式传入阈值，这些指标应保持 advisory。密集文本抗锯齿可能造成大面积 diff bounding box，但不代表真实 slide overflow。
+
+如果要把 PPTX 回渲结果与另一次 Slidev PNG 序列做 cross-export 对比，传入外部 reference 目录：
+
+```bash
+npm run verify:slidev-export -- --format pptx --source architecture.zh-CN.md --sample-slides all --timeout-ms 240000 --no-screenshots --pptx-visual-diff --pptx-visual-reference-dir docs/export/test-slidev-current-png-reference/architecture.zh-CN-slides-png --json
+```
+
+这条路径是 advisory，不是 strict hard gate。它适合检查 PNG export 与 PPTX capture 是否共享同一套 viewport、route、freeze、font-readiness 与稳定等待合同；除非外部 reference 来自同一个冻结 HTML/capture 合同，否则不能替代 frozen-background hard gate。本机 ImageMagick 支持 `PHASH` 与 `NCC`；如果当前构建没有暴露 `SSIM`，报告会把 `SSIM` 标成 unavailable，而不是让验证失败。
 
 报告模式会记录 `pptxVisualDiff.gate.passed`，但视觉阈值超标时不会让整个 verifier 失败。严格收口时加：
 
@@ -191,6 +199,7 @@ docs/maintainer/slidev-standalone-acceptance-2026-06-18.zh-CN.md
 32. PPTX 视觉收口时，`pptxVisualDiff.comparison.summary.maxRmse <= 0.12`
 33. PPTX 视觉收口时，`pptxVisualDiff.comparison.summary.meanRmse <= 0.08`
 34. PPTX 视觉诊断时，应查看 `pptxVisualDiff.comparison.summary.maxScaleRatioDelta` 与 `maxDifferenceBoundingBoxAreaRatio`，但在阈值能区分 layout 位移和渲染噪声前，不应把它们默认升级为 hard failure
+35. external PNG advisory 对比时，`pptxVisualDiff.reference.source: "external-png-sequence"` 可以出现 `pptxVisualDiff.gate.passed: false` 且 verifier 仍为 `ok: true`；应把 `advisoryMetrics.diagnosticCounts.referenceContractDriftLikely` 和 `layoutDriftLikely` 分开读
 
 任一条件失败，都应先修 NoteMD 工作流，再相信导出文件。
 

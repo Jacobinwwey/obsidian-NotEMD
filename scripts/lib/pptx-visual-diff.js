@@ -13,6 +13,26 @@ const REQUIRED_TOOLS = [
 	{ command: 'montage', args: ['-version'] },
 ];
 
+const OPTIONAL_COMPARE_METRICS = ['PHASH', 'NCC', 'SSIM'];
+
+const VISUAL_DIAGNOSTIC_LIMITS = {
+	rmse: {
+		low: 0.08,
+		medium: 0.12,
+		high: 0.2,
+	},
+	scaleDrift: {
+		low: 0.015,
+		medium: 0.035,
+		high: 0.06,
+	},
+	diffArea: {
+		low: 0.08,
+		medium: 0.28,
+		high: 0.55,
+	},
+};
+
 function ensureDirectory(directory) {
 	fs.mkdirSync(directory, { recursive: true });
 }
@@ -306,6 +326,13 @@ function identifyDimensions(imagePath) {
 
 function parseCompareMetric(output) {
 	const text = String(output || '').trim();
+	if (/^inf(?:inity)?$/i.test(text)) {
+		return {
+			raw: text,
+			value: Number.POSITIVE_INFINITY,
+			normalized: false,
+		};
+	}
 	const normalizedMatch = text.match(/\(([-+]?\d*\.?\d+(?:e[-+]?\d+)?)\)/i);
 	if (normalizedMatch) {
 		return {
@@ -319,6 +346,26 @@ function parseCompareMetric(output) {
 		raw: text,
 		value: valueMatch ? Number(valueMatch[0]) : null,
 		normalized: false,
+	};
+}
+
+function collectCompareMetricSupport() {
+	const result = runCommand('compare', ['-list', 'metric'], { timeout: 30000 });
+	if (result.status !== 0) {
+		return {
+			available: false,
+			metrics: [],
+			error: result.stderr || result.stdout || result.error || 'compare -list metric failed',
+		};
+	}
+	const metrics = (result.stdout || result.stderr)
+		.split(/\r?\n/)
+		.map((line) => line.trim().toUpperCase())
+		.filter(Boolean);
+	return {
+		available: true,
+		metrics,
+		error: null,
 	};
 }
 
@@ -345,6 +392,178 @@ function runCompareMetric(metric, referencePath, renderedPath, outputPath) {
 		);
 	}
 	return parseCompareMetric(result.stderr || result.stdout);
+}
+
+function runOptionalCompareMetric(metric, referencePath, renderedPath, metricSupport) {
+	const normalizedMetric = String(metric || '').trim().toUpperCase();
+	if (!metricSupport?.available) {
+		return {
+			metric: normalizedMetric,
+			available: false,
+			value: null,
+			normalized: false,
+			reason: metricSupport?.error || 'metric support unavailable',
+		};
+	}
+	if (!metricSupport.metrics.includes(normalizedMetric)) {
+		return {
+			metric: normalizedMetric,
+			available: false,
+			value: null,
+			normalized: false,
+			reason: 'unsupported-by-imagemagick',
+		};
+	}
+	try {
+		const parsed = runCompareMetric(normalizedMetric, referencePath, renderedPath, null);
+		return {
+			metric: normalizedMetric,
+			available: Number.isFinite(parsed.value) || parsed.value === Number.POSITIVE_INFINITY,
+			raw: parsed.raw,
+			value: Number.isFinite(parsed.value) || parsed.value === Number.POSITIVE_INFINITY ? parsed.value : null,
+			normalized: parsed.normalized,
+			reason: Number.isFinite(parsed.value) || parsed.value === Number.POSITIVE_INFINITY ? null : 'metric-output-unparsed',
+		};
+	} catch (error) {
+		return {
+			metric: normalizedMetric,
+			available: false,
+			value: null,
+			normalized: false,
+			reason: error instanceof Error ? error.message : String(error),
+		};
+	}
+}
+
+function levelFor(value, limits) {
+	if (!Number.isFinite(value)) {
+		return 'unavailable';
+	}
+	if (value <= limits.low) {
+		return 'low';
+	}
+	if (value <= limits.medium) {
+		return 'medium';
+	}
+	if (value <= limits.high) {
+		return 'high';
+	}
+	return 'critical';
+}
+
+function buildDifferenceGeometry(differenceBoundingBox) {
+	if (!differenceBoundingBox?.available || !Number.isFinite(differenceBoundingBox.areaRatio)) {
+		return {
+			available: false,
+			centerOffsetXRatio: null,
+			centerOffsetYRatio: null,
+			maxCenterOffsetRatio: null,
+		};
+	}
+	const referenceWidth = Number(differenceBoundingBox.referenceWidth);
+	const referenceHeight = Number(differenceBoundingBox.referenceHeight);
+	if (!Number.isFinite(referenceWidth) || !Number.isFinite(referenceHeight) || referenceWidth <= 0 || referenceHeight <= 0) {
+		return {
+			available: false,
+			centerOffsetXRatio: null,
+			centerOffsetYRatio: null,
+			maxCenterOffsetRatio: null,
+		};
+	}
+	const boxCenterX = differenceBoundingBox.x + differenceBoundingBox.width / 2;
+	const boxCenterY = differenceBoundingBox.y + differenceBoundingBox.height / 2;
+	const centerOffsetXRatio = Math.abs(boxCenterX - referenceWidth / 2) / referenceWidth;
+	const centerOffsetYRatio = Math.abs(boxCenterY - referenceHeight / 2) / referenceHeight;
+	return {
+		available: true,
+		centerOffsetXRatio,
+		centerOffsetYRatio,
+		maxCenterOffsetRatio: Math.max(centerOffsetXRatio, centerOffsetYRatio),
+	};
+}
+
+function diagnoseVisualPage(page, context = {}) {
+	if (!page.referencePath || !page.renderedPath) {
+		return {
+			status: !page.referencePath ? 'missing-reference' : 'missing-rendered',
+			rmseLevel: 'unavailable',
+			scaleDriftLevel: 'unavailable',
+			diffAreaLevel: 'unavailable',
+			textAntialiasDriftLikely: false,
+			rendererNoiseLikely: false,
+			referenceContractDriftLikely: false,
+			layoutDriftLikely: true,
+			reviewPriority: 'high',
+			rationale: [!page.referencePath ? 'missing reference image' : 'missing rendered image'],
+		};
+	}
+
+	const rmse = Number(page.rmseNormalized);
+	const scaleDrift = Number(page.maxScaleRatioDelta);
+	const diffAreaRatio = Number(page.differenceBoundingBox?.areaRatio);
+	const rmseLevel = levelFor(rmse, VISUAL_DIAGNOSTIC_LIMITS.rmse);
+	const scaleDriftLevel = levelFor(scaleDrift, VISUAL_DIAGNOSTIC_LIMITS.scaleDrift);
+	const diffAreaLevel = levelFor(diffAreaRatio, VISUAL_DIAGNOSTIC_LIMITS.diffArea);
+	const lowScaleDrift = !Number.isFinite(scaleDrift) || scaleDrift <= VISUAL_DIAGNOSTIC_LIMITS.scaleDrift.low;
+	const acceptableScaleDrift = !Number.isFinite(scaleDrift) || scaleDrift <= 0.025;
+	const lowOrMediumRmse = Number.isFinite(rmse) && rmse <= VISUAL_DIAGNOSTIC_LIMITS.rmse.medium;
+	const highDiffSpread = Number.isFinite(diffAreaRatio) && diffAreaRatio >= VISUAL_DIAGNOSTIC_LIMITS.diffArea.medium;
+	const textAntialiasDriftLikely = lowOrMediumRmse && acceptableScaleDrift && highDiffSpread;
+	const rendererNoiseLikely =
+		(Number.isFinite(rmse) && rmse <= VISUAL_DIAGNOSTIC_LIMITS.rmse.medium && lowScaleDrift) ||
+		textAntialiasDriftLikely;
+	const referenceSource = context.referenceSource || page.referenceSource || null;
+	const usesExternalReference = referenceSource === 'external-png-sequence';
+	const scaleDriftExceedsLayoutLimit =
+		Number.isFinite(scaleDrift) && scaleDrift > VISUAL_DIAGNOSTIC_LIMITS.scaleDrift.medium;
+	const referenceContractDriftLikely =
+		usesExternalReference &&
+		!scaleDriftExceedsLayoutLimit &&
+		Number.isFinite(rmse) &&
+		rmse > VISUAL_DIAGNOSTIC_LIMITS.rmse.medium;
+	const layoutDriftLikely =
+		scaleDriftExceedsLayoutLimit ||
+		(!referenceContractDriftLikely &&
+			((Number.isFinite(rmse) && rmse > VISUAL_DIAGNOSTIC_LIMITS.rmse.high) ||
+				(Number.isFinite(rmse) &&
+					rmse > VISUAL_DIAGNOSTIC_LIMITS.rmse.medium &&
+					Number.isFinite(scaleDrift) &&
+					scaleDrift > VISUAL_DIAGNOSTIC_LIMITS.scaleDrift.low)));
+	const rationale = [];
+	if (textAntialiasDriftLikely) {
+		rationale.push('wide diff region with low RMSE and low scale drift');
+	}
+	if (referenceContractDriftLikely) {
+		rationale.push('external reference has high RMSE without layout-scale drift');
+	}
+	if (layoutDriftLikely) {
+		rationale.push('RMSE or scale drift exceeds layout-review limits');
+	}
+	if (rendererNoiseLikely && !layoutDriftLikely) {
+		rationale.push('metrics fit renderer/subpixel noise profile');
+	}
+	if (rationale.length === 0) {
+		rationale.push('no dominant visual drift signal');
+	}
+
+	return {
+		status: layoutDriftLikely
+			? 'layout-review'
+			: referenceContractDriftLikely
+				? 'reference-contract-review'
+				: rendererNoiseLikely
+					? 'renderer-noise-review'
+					: 'within-advisory-range',
+		rmseLevel,
+		scaleDriftLevel,
+		diffAreaLevel,
+		textAntialiasDriftLikely,
+		rendererNoiseLikely,
+		referenceContractDriftLikely,
+		layoutDriftLikely,
+		reviewPriority: layoutDriftLikely ? 'high' : rendererNoiseLikely ? 'low' : 'medium',
+		rationale,
+	};
 }
 
 function measureDifferenceBoundingBox(referencePath, renderedPath, referenceDimensions, thresholdPercent = 8) {
@@ -378,6 +597,8 @@ function measureDifferenceBoundingBox(referencePath, renderedPath, referenceDime
 		return {
 			available: true,
 			thresholdPercent,
+			referenceWidth: referenceDimensions.width,
+			referenceHeight: referenceDimensions.height,
 			x: 0,
 			y: 0,
 			width: 0,
@@ -389,6 +610,8 @@ function measureDifferenceBoundingBox(referencePath, renderedPath, referenceDime
 	return {
 		available: true,
 		thresholdPercent,
+		referenceWidth: referenceDimensions.width,
+		referenceHeight: referenceDimensions.height,
 		...box,
 		areaRatio: pixelCount > 0 ? (box.width * box.height) / pixelCount : null,
 	};
@@ -465,6 +688,20 @@ function writeComparisonCsv(pages, outputPath) {
 		'difference_bbox_width',
 		'difference_bbox_height',
 		'difference_bbox_area_ratio',
+		'difference_bbox_center_offset_x_ratio',
+		'difference_bbox_center_offset_y_ratio',
+		'difference_bbox_max_center_offset_ratio',
+		'phash',
+		'ncc',
+		'ssim',
+		'rmse_level',
+		'scale_drift_level',
+		'diff_area_level',
+		'text_antialias_drift_likely',
+		'renderer_noise_likely',
+		'reference_contract_drift_likely',
+		'layout_drift_likely',
+		'review_priority',
 		'reference_path',
 		'rendered_path',
 		'resized_path',
@@ -488,6 +725,20 @@ function writeComparisonCsv(pages, outputPath) {
 		page.differenceBoundingBox?.width,
 		page.differenceBoundingBox?.height,
 		page.differenceBoundingBox?.areaRatio,
+		page.differenceGeometry?.centerOffsetXRatio,
+		page.differenceGeometry?.centerOffsetYRatio,
+		page.differenceGeometry?.maxCenterOffsetRatio,
+		page.optionalCompareMetrics?.PHASH?.value,
+		page.optionalCompareMetrics?.NCC?.value,
+		page.optionalCompareMetrics?.SSIM?.value,
+		page.diagnostics?.rmseLevel,
+		page.diagnostics?.scaleDriftLevel,
+		page.diagnostics?.diffAreaLevel,
+		page.diagnostics?.textAntialiasDriftLikely,
+		page.diagnostics?.rendererNoiseLikely,
+		page.diagnostics?.referenceContractDriftLikely,
+		page.diagnostics?.layoutDriftLikely,
+		page.diagnostics?.reviewPriority,
 		page.referencePath,
 		page.renderedPath,
 		page.resizedPath,
@@ -500,6 +751,11 @@ function writeComparisonCsv(pages, outputPath) {
 
 function summarizePageMetrics(pages) {
 	const comparablePages = pages.filter((page) => Number.isFinite(page.rmseNormalized));
+	const pagesWithDiagnostics = pages.map((page) => ({
+		...page,
+		diagnostics: page.diagnostics || diagnoseVisualPage(page),
+	}));
+	const comparablePagesWithDiagnostics = pagesWithDiagnostics.filter((page) => Number.isFinite(page.rmseNormalized));
 	const meanRmse =
 		comparablePages.length > 0
 			? comparablePages.reduce((sum, page) => sum + page.rmseNormalized, 0) / comparablePages.length
@@ -544,6 +800,47 @@ function summarizePageMetrics(pages) {
 			sideBySidePath: page.sideBySidePath,
 			diffPath: page.diffPath,
 		}));
+	const diagnosticCounts = comparablePagesWithDiagnostics.reduce(
+		(counts, page) => {
+			if (page.diagnostics.textAntialiasDriftLikely) counts.textAntialiasDriftLikely += 1;
+			if (page.diagnostics.rendererNoiseLikely) counts.rendererNoiseLikely += 1;
+			if (page.diagnostics.referenceContractDriftLikely) counts.referenceContractDriftLikely += 1;
+			if (page.diagnostics.layoutDriftLikely) counts.layoutDriftLikely += 1;
+			return counts;
+		},
+		{
+			textAntialiasDriftLikely: 0,
+			rendererNoiseLikely: 0,
+			referenceContractDriftLikely: 0,
+			layoutDriftLikely: 0,
+		},
+	);
+	const worstLikelyLayoutDriftSlides = comparablePagesWithDiagnostics
+		.filter((page) => page.diagnostics.layoutDriftLikely)
+		.sort((left, right) => {
+			const rmseDelta = (right.rmseNormalized ?? -1) - (left.rmseNormalized ?? -1);
+			if (rmseDelta !== 0) return rmseDelta;
+			return (right.maxScaleRatioDelta ?? -1) - (left.maxScaleRatioDelta ?? -1);
+		})
+		.slice(0, 12)
+		.map((page) => ({
+			slide: page.slide,
+			rmseNormalized: page.rmseNormalized,
+			maxScaleRatioDelta: page.maxScaleRatioDelta,
+			differenceBoundingBox: page.differenceBoundingBox,
+			diagnostics: page.diagnostics,
+			sideBySidePath: page.sideBySidePath,
+			diffPath: page.diffPath,
+		}));
+	const likelyRendererNoiseSlides = comparablePagesWithDiagnostics
+		.filter((page) => page.diagnostics.rendererNoiseLikely && !page.diagnostics.layoutDriftLikely)
+		.map((page) => page.slide);
+	const textAntialiasDriftSlides = comparablePagesWithDiagnostics
+		.filter((page) => page.diagnostics.textAntialiasDriftLikely)
+		.map((page) => page.slide);
+	const referenceContractDriftSlides = comparablePagesWithDiagnostics
+		.filter((page) => page.diagnostics.referenceContractDriftLikely)
+		.map((page) => page.slide);
 
 	return {
 		pageCount: pages.length,
@@ -556,6 +853,14 @@ function summarizePageMetrics(pages) {
 		maxDifferenceBoundingBoxAreaRatio,
 		worstSlides,
 		worstDifferenceBoundingBoxSlides,
+		advisoryMetrics: {
+			limits: VISUAL_DIAGNOSTIC_LIMITS,
+			diagnosticCounts,
+			likelyRendererNoiseSlides,
+			textAntialiasDriftSlides,
+			referenceContractDriftSlides,
+			worstLikelyLayoutDriftSlides,
+		},
 	};
 }
 
@@ -617,6 +922,7 @@ function comparePngSequences(options) {
 	const resizedDirectory = path.join(outputDirectory, 'pptx-resized');
 	const diffDirectory = path.join(outputDirectory, 'diff');
 	const sideBySideDirectory = path.join(outputDirectory, 'side-by-side');
+	const optionalMetricSupport = collectCompareMetricSupport();
 
 	resetDirectory(resizedDirectory);
 	resetDirectory(diffDirectory);
@@ -625,7 +931,7 @@ function comparePngSequences(options) {
 	const pairs = pairPngSequences(referenceDirectory, renderedDirectory);
 	const pages = pairs.map((pair) => {
 		if (!pair.referencePath || !pair.renderedPath) {
-			return {
+			const page = {
 				slide: pair.slide,
 				referencePath: pair.referencePath,
 				renderedPath: pair.renderedPath,
@@ -633,6 +939,8 @@ function comparePngSequences(options) {
 				absoluteErrorPixels: null,
 				absoluteErrorRatio: null,
 			};
+			page.diagnostics = diagnoseVisualPage(page, { referenceSource: options.referenceSource });
+			return page;
 		}
 
 		const referenceDimensions = identifyDimensions(pair.referencePath);
@@ -656,12 +964,19 @@ function comparePngSequences(options) {
 			resizedPath,
 			referenceDimensions,
 		);
+		const differenceGeometry = buildDifferenceGeometry(differenceBoundingBox);
+		const optionalCompareMetrics = Object.fromEntries(
+			OPTIONAL_COMPARE_METRICS.map((metric) => [
+				metric,
+				runOptionalCompareMetric(metric, pair.referencePath, resizedPath, optionalMetricSupport),
+			]),
+		);
 		const absoluteErrorPixels = Number.isFinite(ae.value) ? ae.value : null;
 		const pixelCount = referenceDimensions.width * referenceDimensions.height;
 
 		buildSideBySide(pair.referencePath, resizedPath, sideBySidePath);
 
-		return {
+		const page = {
 			slide: pair.slide,
 			referencePath: pair.referencePath,
 			renderedPath: pair.renderedPath,
@@ -674,11 +989,15 @@ function comparePngSequences(options) {
 			heightScaleRatio,
 			maxScaleRatioDelta,
 			differenceBoundingBox,
+			differenceGeometry,
+			optionalCompareMetrics,
 			rmseRaw: rmse.raw,
 			rmseNormalized: Number.isFinite(rmse.value) ? rmse.value : null,
 			absoluteErrorPixels,
 			absoluteErrorRatio: absoluteErrorPixels === null ? null : absoluteErrorPixels / pixelCount,
 		};
+		page.diagnostics = diagnoseVisualPage(page, { referenceSource: options.referenceSource });
+		return page;
 	});
 
 	const summary = summarizePageMetrics(pages);
@@ -704,6 +1023,7 @@ function comparePngSequences(options) {
 		sideBySideSheetPath,
 		diffSheetPath,
 		metricsCsvPath,
+		optionalMetricSupport,
 		pages,
 		summary,
 		gate: evaluateVisualGate(summary, options.thresholds || {}),
@@ -751,6 +1071,7 @@ function buildPptxVisualDiff(options) {
 		referenceDirectory: reference.referenceDirectory,
 		renderedDirectory: render.renderedDirectory,
 		outputDirectory,
+		referenceSource: reference.source,
 		thresholds: options.thresholds,
 	});
 	const report = {
@@ -772,10 +1093,14 @@ function buildPptxVisualDiff(options) {
 
 module.exports = {
 	REQUIRED_TOOLS,
+	OPTIONAL_COMPARE_METRICS,
+	VISUAL_DIAGNOSTIC_LIMITS,
 	buildPptxVisualDiff,
+	collectCompareMetricSupport,
 	collectPngSequence,
 	collectToolAvailability,
 	comparePngSequences,
+	diagnoseVisualPage,
 	evaluateVisualGate,
 	extractPptxBackgroundImages,
 	pairPngSequences,

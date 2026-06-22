@@ -227,3 +227,34 @@ docs/export/test-slidev-m2-pptx-strict/
 24. `pptxVisualDiff.comparison.summary.maxRmse = 0.0889364`
 
 这收口的是 rich-run 第一片：可编辑文本框现在会保留多 run DrawingML 结构，用于 inline emphasis、computed text style、code/link 标记和 Office-safe whitespace。它仍是透明结构层；不声称已经支持可见原生文本、真实 hyperlink relationship 或完整 syntax-token 语义。
+
+## M3 external PNG advisory diagnostics
+
+external PNG 对比现在是一等 verifier 输入，不再需要单独写 Node 脚本调用库函数：
+
+```bash
+runuser -u jacob -- env HOME=/home/jacob PLAYWRIGHT_BROWSERS_PATH=/home/jacob/.cache/ms-playwright bash -lc 'cd /home/jacob/obsidian-NotEMD && npm run verify:slidev-export -- --vault docs --source architecture.zh-CN.md --format pptx --output-subfolder export/test-slidev-m3-pptx-external-advisory --sample-slides all --timeout-ms 240000 --no-screenshots --pptx-visual-diff --pptx-visual-reference-dir docs/export/test-slidev-m3-png-reference/architecture.zh-CN-slides-png --json'
+```
+
+external reference 由同一个真实源文件生成：
+
+```bash
+runuser -u jacob -- env HOME=/home/jacob PLAYWRIGHT_BROWSERS_PATH=/home/jacob/.cache/ms-playwright bash -lc 'cd /home/jacob/obsidian-NotEMD && npm run verify:slidev-export -- --vault docs --source architecture.zh-CN.md --format png --output-subfolder export/test-slidev-m3-png-reference --sample-slides all --timeout-ms 240000 --no-screenshots --json'
+```
+
+当前证据：
+
+1. PNG reference run 返回 `ok = true`。
+2. PPTX external advisory run 返回 `ok = true`。
+3. `pptxVisualDiff.reference.source = external-png-sequence`。
+4. `pptxVisualGate.required = false`。
+5. `pptxVisualGate.passed = true`。
+6. 内部 `pptxVisualDiff.gate.passed = false`，`meanRmse = 0.102229238`，`maxRmse = 0.241976`。
+7. `pptxVisualDiff.comparison.summary.maxScaleRatioDelta = 0.02091836734693886`。
+8. `advisoryMetrics.diagnosticCounts.rendererNoiseLikely = 7`。
+9. `advisoryMetrics.diagnosticCounts.referenceContractDriftLikely = 13`。
+10. `advisoryMetrics.diagnosticCounts.layoutDriftLikely = 0`。
+11. 当前 ImageMagick 可选指标包含 `PHASH` 与 `NCC`；本机不支持 `SSIM`，报告会标为 unavailable。
+12. `unignoredOutputs = []`。
+
+这是预期结果。external PNG 对比的价值是暴露 Slidev PNG export 与 NotEMD PPTX capture 之间仍未统一的 cross-export contract drift；它不是 PPTX writer hard failure。在 PNG export 与 PPTX capture 共用同一套 frozen HTML/capture contract 前，PPTX 视觉 hard gate 仍应以 frozen-background strict gate 为准。
