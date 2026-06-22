@@ -431,6 +431,156 @@ describe('pptx export report', () => {
 		]);
 	});
 
+	test('reports table border models and measured cell text inset drift', () => {
+		const slides: SlidevPptxSlide[] = [
+			{
+				slideNumber: 1,
+				title: 'Collapsed table',
+				backgroundColor: 'FFFFFF',
+				texts: [],
+				tables: [
+					{
+						x: 1,
+						y: 1,
+						w: 4,
+						h: 0.8,
+						colWidths: [4],
+						rowHeights: [0.8],
+						borderModel: 'collapsed',
+						order: 10,
+						rows: [
+							[
+								{
+									text: 'Measured drift',
+									rowSpan: 1,
+									colSpan: 1,
+									fontSize: 12,
+									fontFace: 'Aptos',
+									color: '111827',
+									bold: false,
+									italic: false,
+									underline: false,
+									align: 'left',
+									verticalAlign: 'top',
+									fillColor: null,
+									borderColor: null,
+									borderWidthPt: 0,
+									paddingLeftIn: 0.1,
+									paddingRightIn: 0.1,
+									paddingTopIn: 0.05,
+									paddingBottomIn: 0.05,
+									textLeftInsetIn: 0.13,
+									textRightInsetIn: 0.16,
+									textTopInsetIn: 0.08,
+									textBottomInsetIn: 0.08,
+								},
+							],
+						],
+					},
+				],
+				fallbackOnlyElementKinds: [],
+				consumedTableTextCandidateCount: 0,
+				warnings: [],
+			},
+			{
+				slideNumber: 2,
+				title: 'Separate table',
+				backgroundColor: 'FFFFFF',
+				texts: [],
+				tables: [
+					{
+						x: 1,
+						y: 1,
+						w: 4,
+						h: 0.8,
+						colWidths: [4],
+						rowHeights: [0.8],
+						borderModel: 'separate',
+						borderSpacingXIn: 0.12,
+						borderSpacingYIn: 0.14,
+						order: 10,
+						rows: [
+							[
+								{
+									text: 'Matched inset',
+									rowSpan: 1,
+									colSpan: 1,
+									fontSize: 12,
+									fontFace: 'Aptos',
+									color: '111827',
+									bold: false,
+									italic: false,
+									underline: false,
+									align: 'left',
+									verticalAlign: 'top',
+									fillColor: null,
+									borderColor: null,
+									borderWidthPt: 0,
+									paddingLeftIn: 0.08,
+									paddingRightIn: 0.08,
+									paddingTopIn: 0.04,
+									paddingBottomIn: 0.04,
+									textLeftInsetIn: 0.08,
+									textRightInsetIn: 0.08,
+									textTopInsetIn: 0.04,
+									textBottomInsetIn: 0.04,
+								},
+							],
+						],
+					},
+				],
+				fallbackOnlyElementKinds: [],
+				consumedTableTextCandidateCount: 0,
+				warnings: [],
+			},
+		];
+
+		const report = buildSlidevPptxExportReport(
+			'/vault/export/deck/index.html',
+			'/vault/deck.md',
+			'/vault/export/deck.pptx',
+			'/vault/export/deck.pptx.report.json',
+			slides,
+		);
+
+		expect(report).toEqual(
+			expect.objectContaining({
+				collapsedTableBorderModelCount: 1,
+				separateTableBorderModelCount: 1,
+				tableCellTextInsetCount: 2,
+				tableCellTextInsetDeltaCount: 1,
+				maxTableCellTextInsetDeltaIn: 0.03,
+			}),
+		);
+		expect(report.editablePrimitiveCoverage).toEqual(
+			expect.objectContaining({
+				collapsedTableBorderModelCount: 1,
+				separateTableBorderModelCount: 1,
+				tableCellTextInsetCount: 2,
+				tableCellTextInsetDeltaCount: 1,
+				maxTableCellTextInsetDeltaIn: 0.03,
+			}),
+		);
+		expect(report.slides[0]).toEqual(
+			expect.objectContaining({
+				collapsedTableBorderModelCount: 1,
+				separateTableBorderModelCount: 0,
+				tableCellTextInsetCount: 1,
+				tableCellTextInsetDeltaCount: 1,
+				maxTableCellTextInsetDeltaIn: 0.03,
+			}),
+		);
+		expect(report.slides[1]).toEqual(
+			expect.objectContaining({
+				collapsedTableBorderModelCount: 0,
+				separateTableBorderModelCount: 1,
+				tableCellTextInsetCount: 1,
+				tableCellTextInsetDeltaCount: 0,
+				maxTableCellTextInsetDeltaIn: 0,
+			}),
+		);
+	});
+
 	test('reports only text boxes emitted by the default PPTX writer as editable', () => {
 		const slides: SlidevPptxSlide[] = [
 			{

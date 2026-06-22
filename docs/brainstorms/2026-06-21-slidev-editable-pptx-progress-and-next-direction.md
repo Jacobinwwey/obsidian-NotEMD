@@ -1090,6 +1090,52 @@ Next direction after M19:
 4. keep Mermaid source unchanged and background-owned by default;
 5. keep visual gate strict. Do not relax thresholds to hide Office layout drift.
 
+## M20 Table Diagnostics Contract
+
+This slice is intentionally diagnostic-only. The `ref/oh-my-ppt` implementation is useful because it separates DOM measurement from OOXML writing: table extraction happens before generic text/shape extraction, consumed table text is not duplicated, and the writer emits native DrawingML tables from measured browser facts. The part that should not be copied blindly is a direct writer change without a stable NotEMD-specific metric. NotEMD's default path already hides modeled text before background capture and relies on visible native Office text/table primitives, so the next improvement needs a precise drift signal before changing table geometry again.
+
+What landed:
+
+1. `SlidevPptxTable` now records `borderModel`, `borderSpacingXIn`, and `borderSpacingYIn`.
+2. `SlidevPptxTableCell` now records the browser-measured text rectangle insets: `textLeftInsetIn`, `textRightInsetIn`, `textTopInsetIn`, and `textBottomInsetIn`.
+3. The DOM extractor measures cell text with `Range.getClientRects()` and captures `border-collapse` / `border-spacing` at the table edge.
+4. The report exposes `collapsedTableBorderModelCount`, `separateTableBorderModelCount`, `tableCellTextInsetCount`, `tableCellTextInsetDeltaCount`, and `maxTableCellTextInsetDeltaIn` at deck, coverage, and per-slide levels.
+5. The drift metric is anchor-aware: left aligned cells compare left inset, right aligned cells compare right inset, top aligned cells compare top inset, and bottom aligned cells compare bottom inset. Center/middle alignment is not forced into a fake padding comparison.
+
+The anchor-aware rule matters. A naive comparison of `textRightInsetIn` or `textBottomInsetIn` against CSS padding treats ordinary unused cell space as layout drift. The first real run exposed that flaw immediately: all 102 cells were over threshold and the max delta was about `1.95in`, mostly from right/bottom whitespace. That is not an actionable writer signal. The landed version keeps the raw measured insets but uses only the alignment-owned edge for the delta count, reducing the real max delta to `0.136054in`.
+
+Real acceptance command:
+
+```bash
+runuser -u jacob -- env HOME=/home/jacob PLAYWRIGHT_BROWSERS_PATH=/home/jacob/.cache/ms-playwright bash -lc 'cd /home/jacob/obsidian-NotEMD && rm -rf docs/export/test-slidev-m20-table-diagnostics-contract /tmp/notemd-m20-table-diagnostics-contract.json && npm run verify:slidev-export -- --vault docs --source architecture.zh-CN.md --format pptx --output-subfolder export/test-slidev-m20-table-diagnostics-contract --sample-slides all --timeout-ms 240000 --no-screenshots --require-pptx-visual-match --json > /tmp/notemd-m20-table-diagnostics-contract.json'
+```
+
+Result:
+
+1. `ok = true`;
+2. output PPTX: `docs/export/test-slidev-m20-table-diagnostics-contract/architecture.zh-CN.pptx`;
+3. output report: `docs/export/test-slidev-m20-table-diagnostics-contract/architecture.zh-CN.pptx.report.json`;
+4. `slidev.version = 52.16.0 (/home/jacob/slidev/packages/slidev/bin/slidev.mjs)`;
+5. `skillRootPath = /home/jacob/slidev/skills/slidev`, `skillReferenceCount = 52`;
+6. `pptxInspection.slideCount = 30`, `textRunCount = 861`, `tableCount = 6`, `slidesWithoutEditableText = []`;
+7. `pptxVisualGate.referenceSource = "pptx-rendered-html-reference"`, `thresholdProfile = "visible-native-rendered-html"`, `passed = true`;
+8. `mermaidSourcePreservation.passed = true`, `sourceFenceCount = 3`, `deckFenceCount = 3`, `changedFenceIndexes = []`;
+9. sidecar `tableCount = 6`, `editableTableCellCount = 102`, `collapsedTableBorderModelCount = 6`, `separateTableBorderModelCount = 0`;
+10. sidecar `tableCellTextInsetCount = 102`, `tableCellTextInsetDeltaCount = 102`, `maxTableCellTextInsetDeltaIn = 0.136054`;
+11. sidecar `lineSpacingTableCellCount = 102`, `bodyInsetTableCellCount = 102`;
+12. PPTX XML scan found `Visible Native` shapes `344`, transparent-only `Editable` shapes `0`, `Mermaid Text` shapes `0`, `alpha=0` count `0`, `alpha=8000` count `0`, table cells with `mar*` attributes `102`, and paragraph `<a:lnSpc>` entries `135`;
+13. generated outputs remain ignored: `ignoredOutputs = 6`, `unignoredOutputs = []`, and `git ls-files docs/export/test-slidev-m20-table-diagnostics-contract` is empty.
+
+The current interpretation is not "all tables are broken." It is narrower: every real table cell has a measurable text-anchor offset beyond the current `0.02in` diagnostic threshold, with a bounded max of `0.136054in`. That points to a future writer slice around table text anchor calibration, border-collapse compensation, and possibly cell margin adjustment. It does not justify changing Mermaid, splitting diagrams, or adding transparent table overlays.
+
+Next direction after M20:
+
+1. use the new diagnostics to decide whether `tcPr mar*` should consume CSS padding, measured anchor inset, or a border-collapse-adjusted value;
+2. add a writer experiment only behind a real visual/report gate, not as a silent heuristic;
+3. introduce a generic high-confidence shape primitive before code token background rectangles, because code backgrounds need real rectangles rather than text-only extraction;
+4. keep default Mermaid background-owned and source-preserving;
+5. continue using `architecture.zh-CN.md` as the real acceptance deck, while adding a smaller fixture only when the real deck cannot exercise a primitive.
+
 ## Current Limits
 
 The first implementation is intentionally conservative:

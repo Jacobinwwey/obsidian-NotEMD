@@ -204,6 +204,11 @@ describe('pptxDomExtractor', () => {
 			const slide = await extractSlidevPptxSlideFromPage(page, 1);
 			const cell = slide.tables[0]?.rows[0]?.[0];
 
+			expect(slide.tables[0]).toEqual(
+				expect.objectContaining({
+					borderModel: 'collapsed',
+				}),
+			);
 			expect(cell).toEqual(
 				expect.objectContaining({
 					text: '布局契约\nLayout contract',
@@ -212,6 +217,10 @@ describe('pptxDomExtractor', () => {
 					paddingRightIn: expect.any(Number),
 					paddingTopIn: expect.any(Number),
 					paddingBottomIn: expect.any(Number),
+					textLeftInsetIn: expect.any(Number),
+					textRightInsetIn: expect.any(Number),
+					textTopInsetIn: expect.any(Number),
+					textBottomInsetIn: expect.any(Number),
 				}),
 			);
 			expect(cell?.lineSpacingPt).toBeGreaterThan(cell?.fontSize || 0);
@@ -219,6 +228,49 @@ describe('pptxDomExtractor', () => {
 			expect(cell?.paddingRightIn).toBeGreaterThan(0);
 			expect(cell?.paddingTopIn).toBeGreaterThan(0);
 			expect(cell?.paddingBottomIn).toBeGreaterThan(0);
+			expect(cell?.textLeftInsetIn).toBeGreaterThan(0);
+			expect(cell?.textRightInsetIn).toBeGreaterThan(0);
+			expect(cell?.textTopInsetIn).toBeGreaterThan(0);
+			expect(cell?.textBottomInsetIn).toBeGreaterThan(0);
+		} finally {
+			await page.close();
+		}
+	});
+
+	test('captures separate table border spacing for table layout diagnostics', async () => {
+		if (!browser) {
+			console.warn('Skipping PPTX DOM extractor Playwright test:', launchError);
+			return;
+		}
+
+		const page = await browser.newPage({ viewport: { width: 1280, height: 720 } });
+		try {
+			await page.setContent(`
+				<body style="margin:0;background:#fff">
+					<div class="slidev-page" style="width:1280px;height:720px;background:#fff;padding:64px;box-sizing:border-box">
+						<table style="border-collapse:separate;border-spacing:16px 20px;font-family:Arial;font-size:22px;color:#111827">
+							<tr>
+								<td style="padding:8px 12px;border:1px solid #94a3b8;background:#fff">
+									Separate spacing
+								</td>
+							</tr>
+						</table>
+					</div>
+				</body>
+			`);
+
+			const slide = await extractSlidevPptxSlideFromPage(page, 1);
+			const table = slide.tables[0];
+
+			expect(table).toEqual(
+				expect.objectContaining({
+					borderModel: 'separate',
+					borderSpacingXIn: expect.any(Number),
+					borderSpacingYIn: expect.any(Number),
+				}),
+			);
+			expect(table?.borderSpacingXIn).toBeGreaterThan(0);
+			expect(table?.borderSpacingYIn).toBeGreaterThan(0);
 		} finally {
 			await page.close();
 		}

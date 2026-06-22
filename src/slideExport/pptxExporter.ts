@@ -36,6 +36,8 @@ import { writePptxDocument, writeVisibleNativeExperimentPptxDocument } from './p
 import { getVaultBasePath, resolvePlaywrightBrowsersPath, safeRequire } from './platformUtils';
 import type { ExportProgressCallback, SlideExportConfig, SlidevExportSource } from './types';
 
+const TABLE_CELL_TEXT_INSET_DELTA_THRESHOLD_IN = 0.02;
+
 type PlaywrightRuntime = {
 	chromium?: {
 		launch(options: { headless: boolean }): Promise<any>;
@@ -985,6 +987,35 @@ function tableCellHasBodyInset(cell: SlidevPptxTableCell): boolean {
 	);
 }
 
+function tableCellHasTextInset(cell: SlidevPptxTableCell): boolean {
+	return (
+		hasPositiveNumber(cell.textLeftInsetIn) ||
+		hasPositiveNumber(cell.textRightInsetIn) ||
+		hasPositiveNumber(cell.textTopInsetIn) ||
+		hasPositiveNumber(cell.textBottomInsetIn)
+	);
+}
+
+function tableCellTextAnchorInsetDelta(cell: SlidevPptxTableCell): number {
+	const insetPairs: Array<[number | undefined, number | undefined]> = [];
+	if (cell.align === 'right') {
+		insetPairs.push([cell.textRightInsetIn, cell.paddingRightIn]);
+	} else if (cell.align !== 'center') {
+		insetPairs.push([cell.textLeftInsetIn, cell.paddingLeftIn]);
+	}
+	if (cell.verticalAlign === 'bottom') {
+		insetPairs.push([cell.textBottomInsetIn, cell.paddingBottomIn]);
+	} else if (cell.verticalAlign !== 'middle') {
+		insetPairs.push([cell.textTopInsetIn, cell.paddingTopIn]);
+	}
+	return Number(
+		Math.max(
+			0,
+			...insetPairs.map(([textInset, cssInset]) => Math.abs((Number(textInset) || 0) - (Number(cssInset) || 0))),
+		).toFixed(6),
+	);
+}
+
 function collectUniqueSorted<T extends string>(values: T[]): T[] {
 	return Array.from(new Set(values)).sort();
 }
@@ -1087,6 +1118,7 @@ function buildSlideEditabilitySummary(
 ): SlidevPptxSlideEditabilitySummary {
 	const fontFamilies = fontFamiliesForSlideSummary(slide, fontPolicy);
 	const tableCells = tableCellsForSlide(slide);
+	const tableCellTextInsetDeltas = tableCells.map(tableCellTextAnchorInsetDelta);
 	return {
 		slideNumber: slide.slideNumber,
 		editableTextBoxCount: slide.texts.length,
@@ -1109,6 +1141,13 @@ function buildSlideEditabilitySummary(
 		bodyInsetTextBoxCount: slide.texts.filter(textBoxHasBodyInset).length,
 		lineSpacingTableCellCount: tableCells.filter((cell) => hasPositiveNumber(cell.lineSpacingPt)).length,
 		bodyInsetTableCellCount: tableCells.filter(tableCellHasBodyInset).length,
+		collapsedTableBorderModelCount: slide.tables.filter((table) => table.borderModel === 'collapsed').length,
+		separateTableBorderModelCount: slide.tables.filter((table) => table.borderModel === 'separate').length,
+		tableCellTextInsetCount: tableCells.filter(tableCellHasTextInset).length,
+		tableCellTextInsetDeltaCount: tableCellTextInsetDeltas.filter(
+			(delta) => delta > TABLE_CELL_TEXT_INSET_DELTA_THRESHOLD_IN,
+		).length,
+		maxTableCellTextInsetDeltaIn: Number(Math.max(0, ...tableCellTextInsetDeltas).toFixed(6)),
 		bulletedTextBoxCount: slide.texts.filter((textBox) => textBox.bullet).length,
 		backgroundFallbackPresent: Boolean(slide.backgroundImage),
 		fallbackOnlyElementKinds: collectUniqueSorted(slide.fallbackOnlyElementKinds),
@@ -1174,6 +1213,22 @@ function buildEditablePrimitiveCoverage(
 			0,
 		),
 		bodyInsetTableCellCount: slideSummaries.reduce((total, slide) => total + slide.bodyInsetTableCellCount, 0),
+		collapsedTableBorderModelCount: slideSummaries.reduce(
+			(total, slide) => total + slide.collapsedTableBorderModelCount,
+			0,
+		),
+		separateTableBorderModelCount: slideSummaries.reduce(
+			(total, slide) => total + slide.separateTableBorderModelCount,
+			0,
+		),
+		tableCellTextInsetCount: slideSummaries.reduce((total, slide) => total + slide.tableCellTextInsetCount, 0),
+		tableCellTextInsetDeltaCount: slideSummaries.reduce(
+			(total, slide) => total + slide.tableCellTextInsetDeltaCount,
+			0,
+		),
+		maxTableCellTextInsetDeltaIn: Number(
+			Math.max(0, ...slideSummaries.map((slide) => slide.maxTableCellTextInsetDeltaIn)).toFixed(6),
+		),
 		bulletedTextBoxCount: slideSummaries.reduce((total, slide) => total + slide.bulletedTextBoxCount, 0),
 		backgroundFallbackSlideCount,
 		backgroundFallbackSlideRatio: ratio(backgroundFallbackSlideCount, slideCount),
@@ -1287,6 +1342,11 @@ export function buildSlidevPptxExportReport(
 		bodyInsetTextBoxCount: editablePrimitiveCoverage.bodyInsetTextBoxCount,
 		lineSpacingTableCellCount: editablePrimitiveCoverage.lineSpacingTableCellCount,
 		bodyInsetTableCellCount: editablePrimitiveCoverage.bodyInsetTableCellCount,
+		collapsedTableBorderModelCount: editablePrimitiveCoverage.collapsedTableBorderModelCount,
+		separateTableBorderModelCount: editablePrimitiveCoverage.separateTableBorderModelCount,
+		tableCellTextInsetCount: editablePrimitiveCoverage.tableCellTextInsetCount,
+		tableCellTextInsetDeltaCount: editablePrimitiveCoverage.tableCellTextInsetDeltaCount,
+		maxTableCellTextInsetDeltaIn: editablePrimitiveCoverage.maxTableCellTextInsetDeltaIn,
 		bulletedTextBoxCount: editablePrimitiveCoverage.bulletedTextBoxCount,
 		editableTableCellCount: editablePrimitiveCoverage.editableTableCellCount,
 		editableBodyTextBoxCount: editablePrimitiveCoverage.editableBodyTextBoxCount,

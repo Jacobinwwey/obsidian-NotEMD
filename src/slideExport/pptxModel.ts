@@ -77,6 +77,8 @@ export interface SlidevPptxTextBox {
 
 export type SlidevPptxVerticalAlign = 'top' | 'middle' | 'bottom';
 
+export type SlidevPptxTableBorderModel = 'collapsed' | 'separate';
+
 export interface SlidevPptxTableCell {
 	text: string;
 	rowSpan: number;
@@ -97,6 +99,10 @@ export interface SlidevPptxTableCell {
 	paddingRightIn?: number;
 	paddingTopIn?: number;
 	paddingBottomIn?: number;
+	textLeftInsetIn?: number;
+	textRightInsetIn?: number;
+	textTopInsetIn?: number;
+	textBottomInsetIn?: number;
 }
 
 export interface SlidevPptxTable {
@@ -107,6 +113,9 @@ export interface SlidevPptxTable {
 	colWidths: number[];
 	rowHeights: number[];
 	rows: SlidevPptxTableCell[][];
+	borderModel?: SlidevPptxTableBorderModel;
+	borderSpacingXIn?: number;
+	borderSpacingYIn?: number;
 	order: number;
 }
 
@@ -203,6 +212,11 @@ export interface SlidevPptxSlideEditabilitySummary {
 	bodyInsetTextBoxCount: number;
 	lineSpacingTableCellCount: number;
 	bodyInsetTableCellCount: number;
+	collapsedTableBorderModelCount: number;
+	separateTableBorderModelCount: number;
+	tableCellTextInsetCount: number;
+	tableCellTextInsetDeltaCount: number;
+	maxTableCellTextInsetDeltaIn: number;
 	bulletedTextBoxCount: number;
 	backgroundFallbackPresent: boolean;
 	fallbackOnlyElementKinds: SlidevPptxFallbackOnlyElementKind[];
@@ -252,6 +266,11 @@ export interface SlidevPptxEditablePrimitiveCoverage {
 	bodyInsetTextBoxCount: number;
 	lineSpacingTableCellCount: number;
 	bodyInsetTableCellCount: number;
+	collapsedTableBorderModelCount: number;
+	separateTableBorderModelCount: number;
+	tableCellTextInsetCount: number;
+	tableCellTextInsetDeltaCount: number;
+	maxTableCellTextInsetDeltaIn: number;
 	bulletedTextBoxCount: number;
 	backgroundFallbackSlideCount: number;
 	backgroundFallbackSlideRatio: number;
@@ -368,6 +387,11 @@ export interface SlidevPptxExportReport {
 	bodyInsetTextBoxCount: number;
 	lineSpacingTableCellCount: number;
 	bodyInsetTableCellCount: number;
+	collapsedTableBorderModelCount: number;
+	separateTableBorderModelCount: number;
+	tableCellTextInsetCount: number;
+	tableCellTextInsetDeltaCount: number;
+	maxTableCellTextInsetDeltaIn: number;
 	bulletedTextBoxCount: number;
 	editableTableCellCount: number;
 	editableBodyTextBoxCount: number;

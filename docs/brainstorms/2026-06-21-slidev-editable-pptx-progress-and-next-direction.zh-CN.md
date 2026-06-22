@@ -1111,6 +1111,52 @@ M19 之后的推进方向：
 4. Mermaid 源内容继续不动，默认仍由背景拥有；
 5. 继续保持 visual gate 严格，不通过放宽阈值掩盖 Office layout drift。
 
+## M20 表格诊断合同
+
+这一轮有意只做诊断合同，不改 writer 行为。`ref/oh-my-ppt` 的有价值之处是把 DOM 测量和 OOXML 写入分开：表格先于通用文本/shape 抽取，已消费的 table text 不重复写，writer 再从浏览器事实生成 DrawingML table。不应该照搬的是“没有 NotEMD 专属稳定指标就直接改 writer”。NotEMD 默认路径已经会在背景捕获前隐藏已建模文字，并依赖可见 Office 原生文本/表格 primitive，所以下一步必须先得到精确 drift 信号，再继续改表格几何。
+
+本轮落地内容：
+
+1. `SlidevPptxTable` 新增 `borderModel`、`borderSpacingXIn`、`borderSpacingYIn`。
+2. `SlidevPptxTableCell` 新增浏览器实测文字矩形 inset：`textLeftInsetIn`、`textRightInsetIn`、`textTopInsetIn`、`textBottomInsetIn`。
+3. DOM extractor 用 `Range.getClientRects()` 测量 cell 内文字矩形，并在 table 边界记录 `border-collapse` / `border-spacing`。
+4. report 在 deck、coverage、逐页 summary 三层新增 `collapsedTableBorderModelCount`、`separateTableBorderModelCount`、`tableCellTextInsetCount`、`tableCellTextInsetDeltaCount`、`maxTableCellTextInsetDeltaIn`。
+5. drift 指标按锚点边缘计算：left aligned cell 比较 left inset，right aligned cell 比较 right inset，top aligned cell 比较 top inset，bottom aligned cell 比较 bottom inset。center/middle alignment 不强行塞进 padding 比较。
+
+这个锚点规则很关键。直接拿 `textRightInsetIn` 或 `textBottomInsetIn` 和 CSS padding 比，会把普通单元格剩余空白误报成布局漂移。第一次真实 run 立刻暴露了这个问题：102 个 cell 全部超阈值，max delta 接近 `1.95in`，主要来自 right/bottom 空白。这不是可执行的 writer 信号。最终落地版本保留 raw measured insets，但 delta count 只使用 alignment 拥有的边缘，真实 max delta 降到 `0.136054in`。
+
+真实验收命令：
+
+```bash
+runuser -u jacob -- env HOME=/home/jacob PLAYWRIGHT_BROWSERS_PATH=/home/jacob/.cache/ms-playwright bash -lc 'cd /home/jacob/obsidian-NotEMD && rm -rf docs/export/test-slidev-m20-table-diagnostics-contract /tmp/notemd-m20-table-diagnostics-contract.json && npm run verify:slidev-export -- --vault docs --source architecture.zh-CN.md --format pptx --output-subfolder export/test-slidev-m20-table-diagnostics-contract --sample-slides all --timeout-ms 240000 --no-screenshots --require-pptx-visual-match --json > /tmp/notemd-m20-table-diagnostics-contract.json'
+```
+
+结果：
+
+1. `ok = true`；
+2. 输出 PPTX：`docs/export/test-slidev-m20-table-diagnostics-contract/architecture.zh-CN.pptx`；
+3. 输出 report：`docs/export/test-slidev-m20-table-diagnostics-contract/architecture.zh-CN.pptx.report.json`；
+4. `slidev.version = 52.16.0 (/home/jacob/slidev/packages/slidev/bin/slidev.mjs)`；
+5. `skillRootPath = /home/jacob/slidev/skills/slidev`，`skillReferenceCount = 52`；
+6. `pptxInspection.slideCount = 30`，`textRunCount = 861`，`tableCount = 6`，`slidesWithoutEditableText = []`；
+7. `pptxVisualGate.referenceSource = "pptx-rendered-html-reference"`，`thresholdProfile = "visible-native-rendered-html"`，`passed = true`；
+8. `mermaidSourcePreservation.passed = true`，`sourceFenceCount = 3`，`deckFenceCount = 3`，`changedFenceIndexes = []`；
+9. sidecar `tableCount = 6`，`editableTableCellCount = 102`，`collapsedTableBorderModelCount = 6`，`separateTableBorderModelCount = 0`；
+10. sidecar `tableCellTextInsetCount = 102`，`tableCellTextInsetDeltaCount = 102`，`maxTableCellTextInsetDeltaIn = 0.136054`；
+11. sidecar `lineSpacingTableCellCount = 102`，`bodyInsetTableCellCount = 102`；
+12. PPTX XML 扫描显示 `Visible Native` shapes 为 `344`，透明替身 `Editable` shapes 为 `0`，`Mermaid Text` shapes 为 `0`，`alpha=0` 数量为 `0`，`alpha=8000` 数量为 `0`，带 `mar*` 属性的 table cells 为 `102`，paragraph `<a:lnSpc>` 条目为 `135`；
+13. 生成物仍在 Git ignore 范围内：`ignoredOutputs = 6`，`unignoredOutputs = []`，`git ls-files docs/export/test-slidev-m20-table-diagnostics-contract` 为空。
+
+当前解释不是“全部表格都坏了”。更准确地说：真实 deck 的每个 table cell 都存在高于 `0.02in` 诊断阈值的文字锚点偏移，最大值受控在 `0.136054in`。这指向下一轮 writer 需要处理 table text anchor calibration、border-collapse compensation，以及可能的 cell margin 调整；它不构成修改 Mermaid、拆图，或添加透明 table overlay 的理由。
+
+M20 之后的推进方向：
+
+1. 用新增诊断决定 `tcPr mar*` 应该消费 CSS padding、实测 anchor inset，还是 border-collapse-adjusted value；
+2. writer experiment 必须挂在真实 visual/report gate 后面，不做静默 heuristic；
+3. 在 code token background rectangles 之前先引入通用高置信 shape primitive，因为代码背景需要真实矩形，而不是只抽文字；
+4. Mermaid 默认继续由背景拥有，并保持源内容不变；
+5. 继续用 `architecture.zh-CN.md` 做真实验收 deck；只有真实 deck 覆盖不到某个 primitive 时，才补小 fixture。
+
 ## 当前边界
 
 第一版实现有意保守：

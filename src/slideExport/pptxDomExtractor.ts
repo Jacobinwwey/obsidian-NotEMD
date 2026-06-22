@@ -6,6 +6,7 @@ import {
 	type SlidevPptxRichTextParagraph,
 	type SlidevPptxSlide,
 	type SlidevPptxTable,
+	type SlidevPptxTableBorderModel,
 	type SlidevPptxTableCell,
 	type SlidevPptxTextAlign,
 	type SlidevPptxTextBox,
@@ -79,6 +80,10 @@ interface RawSlideTableCell {
 	paddingRightIn?: number;
 	paddingTopIn?: number;
 	paddingBottomIn?: number;
+	textLeftInsetIn?: number;
+	textRightInsetIn?: number;
+	textTopInsetIn?: number;
+	textBottomInsetIn?: number;
 }
 
 interface RawSlideTable {
@@ -89,6 +94,9 @@ interface RawSlideTable {
 	colWidths: number[];
 	rowHeights: number[];
 	rows: RawSlideTableCell[][];
+	borderModel?: SlidevPptxTableBorderModel;
+	borderSpacingXIn?: number;
+	borderSpacingYIn?: number;
 	order: number;
 }
 
@@ -303,6 +311,10 @@ function normalizeTableCell(raw: RawSlideTableCell): SlidevPptxTableCell {
 	const paddingRightIn = normalizeOptionalPositiveNumber(raw.paddingRightIn, 0.001, 2);
 	const paddingTopIn = normalizeOptionalPositiveNumber(raw.paddingTopIn, 0.001, 2);
 	const paddingBottomIn = normalizeOptionalPositiveNumber(raw.paddingBottomIn, 0.001, 2);
+	const textLeftInsetIn = normalizeOptionalPositiveNumber(raw.textLeftInsetIn, 0.001, 2);
+	const textRightInsetIn = normalizeOptionalPositiveNumber(raw.textRightInsetIn, 0.001, 2);
+	const textTopInsetIn = normalizeOptionalPositiveNumber(raw.textTopInsetIn, 0.001, 2);
+	const textBottomInsetIn = normalizeOptionalPositiveNumber(raw.textBottomInsetIn, 0.001, 2);
 
 	return {
 		text: String(raw.text || '')
@@ -328,7 +340,15 @@ function normalizeTableCell(raw: RawSlideTableCell): SlidevPptxTableCell {
 		...(paddingRightIn !== undefined ? { paddingRightIn } : {}),
 		...(paddingTopIn !== undefined ? { paddingTopIn } : {}),
 		...(paddingBottomIn !== undefined ? { paddingBottomIn } : {}),
+		...(textLeftInsetIn !== undefined ? { textLeftInsetIn } : {}),
+		...(textRightInsetIn !== undefined ? { textRightInsetIn } : {}),
+		...(textTopInsetIn !== undefined ? { textTopInsetIn } : {}),
+		...(textBottomInsetIn !== undefined ? { textBottomInsetIn } : {}),
 	};
+}
+
+function normalizeTableBorderModel(value: unknown): SlidevPptxTableBorderModel | undefined {
+	return value === 'collapsed' || value === 'separate' ? value : undefined;
 }
 
 function normalizeSizeSeries(values: number[], expectedLength: number, totalSize: number): number[] {
@@ -368,6 +388,9 @@ function normalizeTable(raw: RawSlideTable): SlidevPptxTable | null {
 		1,
 	);
 	const colCount = Math.max(widestRow, Array.isArray(raw.colWidths) ? raw.colWidths.length : 0, 1);
+	const borderModel = normalizeTableBorderModel(raw.borderModel);
+	const borderSpacingXIn = normalizeOptionalPositiveNumber(raw.borderSpacingXIn, 0.001, 2);
+	const borderSpacingYIn = normalizeOptionalPositiveNumber(raw.borderSpacingYIn, 0.001, 2);
 
 	return {
 		x,
@@ -377,6 +400,9 @@ function normalizeTable(raw: RawSlideTable): SlidevPptxTable | null {
 		colWidths: normalizeSizeSeries(Array.isArray(raw.colWidths) ? raw.colWidths : [], colCount, w),
 		rowHeights: normalizeSizeSeries(Array.isArray(raw.rowHeights) ? raw.rowHeights : [], rows.length, h),
 		rows,
+		...(borderModel !== undefined ? { borderModel } : {}),
+		...(borderSpacingXIn !== undefined ? { borderSpacingXIn } : {}),
+		...(borderSpacingYIn !== undefined ? { borderSpacingYIn } : {}),
 		order: Number.isFinite(Number(raw.order)) ? Number(raw.order) : 1000,
 	};
 }
@@ -467,6 +493,74 @@ export async function extractSlidevPptxSlideFromPage(page: any, slideNumber: num
 				...(paddingRightIn > 0 ? { paddingRightIn } : {}),
 				...(paddingTopIn > 0 ? { paddingTopIn } : {}),
 				...(paddingBottomIn > 0 ? { paddingBottomIn } : {}),
+			};
+		};
+		const borderSpacingFor = (
+			style: CSSStyleDeclaration,
+		): Pick<RawSlideTable, 'borderSpacingXIn' | 'borderSpacingYIn'> => {
+			const parts = String(style.borderSpacing || '')
+				.trim()
+				.split(/\s+/)
+				.filter(Boolean);
+			const spacingXPx = cssPx(parts[0] || '0');
+			const spacingYPx = cssPx(parts[1] || parts[0] || '0');
+			const borderSpacingXIn = Math.min(2, sizeToInX(spacingXPx));
+			const borderSpacingYIn = Math.min(2, sizeToInY(spacingYPx));
+			return {
+				...(borderSpacingXIn > 0 ? { borderSpacingXIn } : {}),
+				...(borderSpacingYIn > 0 ? { borderSpacingYIn } : {}),
+			};
+		};
+		const textContentRectFor = (element: Element): DOMRect | null => {
+			let left = Number.POSITIVE_INFINITY;
+			let top = Number.POSITIVE_INFINITY;
+			let right = Number.NEGATIVE_INFINITY;
+			let bottom = Number.NEGATIVE_INFINITY;
+			const walker = document.createTreeWalker(element, NodeFilter.SHOW_TEXT);
+			let current = walker.nextNode();
+			while (current) {
+				if (normalize(current.textContent || '').length > 0) {
+					const range = document.createRange();
+					range.selectNodeContents(current);
+					for (const rect of Array.from(range.getClientRects())) {
+						if (rect.width < 0.5 || rect.height < 0.5) continue;
+						left = Math.min(left, rect.left);
+						top = Math.min(top, rect.top);
+						right = Math.max(right, rect.right);
+						bottom = Math.max(bottom, rect.bottom);
+					}
+					range.detach();
+				}
+				current = walker.nextNode();
+			}
+			if (!Number.isFinite(left) || !Number.isFinite(top) || !Number.isFinite(right) || !Number.isFinite(bottom)) {
+				return null;
+			}
+			return DOMRect.fromRect({
+				x: left,
+				y: top,
+				width: Math.max(0, right - left),
+				height: Math.max(0, bottom - top),
+			});
+		};
+		const tableCellTextInsetsFor = (
+			element: Element,
+			cellRect: DOMRect,
+		): Pick<
+			RawSlideTableCell,
+			'textLeftInsetIn' | 'textRightInsetIn' | 'textTopInsetIn' | 'textBottomInsetIn'
+		> => {
+			const textRect = textContentRectFor(element);
+			if (!textRect) return {};
+			const textLeftInsetIn = Math.min(2, sizeToInX(Math.max(0, textRect.left - cellRect.left)));
+			const textRightInsetIn = Math.min(2, sizeToInX(Math.max(0, cellRect.right - textRect.right)));
+			const textTopInsetIn = Math.min(2, sizeToInY(Math.max(0, textRect.top - cellRect.top)));
+			const textBottomInsetIn = Math.min(2, sizeToInY(Math.max(0, cellRect.bottom - textRect.bottom)));
+			return {
+				...(textLeftInsetIn > 0 ? { textLeftInsetIn } : {}),
+				...(textRightInsetIn > 0 ? { textRightInsetIn } : {}),
+				...(textTopInsetIn > 0 ? { textTopInsetIn } : {}),
+				...(textBottomInsetIn > 0 ? { textBottomInsetIn } : {}),
 			};
 		};
 		const paragraphTextLayoutFor = (
@@ -1223,6 +1317,7 @@ export async function extractSlidevPptxSlideFromPage(page: any, slideNumber: num
 					borderWidthPt: border.widthPt,
 					...(cellLineSpacingPt ? { lineSpacingPt: cellLineSpacingPt } : {}),
 					...bodyInsetsFor(cellStyle),
+					...tableCellTextInsetsFor(placement.element, placement.rect),
 				});
 				if (cellText) {
 					placement.element.setAttribute('data-notemd-pptx-text-source-kind', 'table-cell-overlay');
@@ -1258,6 +1353,8 @@ export async function extractSlidevPptxSlideFromPage(page: any, slideNumber: num
 				colWidths: colWidthsPx.map(sizeToInX),
 				rowHeights: rowHeightsPx.map(sizeToInY),
 				rows,
+				borderModel: tableStyle.borderCollapse === 'collapse' ? 'collapsed' : 'separate',
+				...borderSpacingFor(tableStyle),
 				order: orderFor(tableElement, order),
 			});
 			order += 10;
