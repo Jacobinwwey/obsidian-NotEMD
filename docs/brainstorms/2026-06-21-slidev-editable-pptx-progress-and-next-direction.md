@@ -1043,6 +1043,53 @@ The lesson from `oh-my-ppt` is not "always preserve CSS text metrics verbatim." 
 
 The next PPTX quality slice should focus on geometry and object modeling that still affects visible-native drift: table baseline/padding, code token background rectangles, high-confidence non-SVG shapes, and a stronger distinction between real layout drift and renderer noise in the visual report. Mermaid should remain background-owned by default; do not split or rewrite Mermaid source to improve this metric.
 
+## M19 Native Table Cell Layout Contract
+
+This slice applies the same `oh-my-ppt` lesson to native DrawingML tables: collect browser CSS layout facts at the DOM edge, then write them to the Office owner that actually controls the primitive. Text boxes use `<a:bodyPr>` insets. Table cells use `<a:tcPr marL/marR/marT/marB>`. Paragraph line height belongs in `<a:pPr><a:lnSpc>`.
+
+What landed:
+
+1. `SlidevPptxTableCell` now carries optional `lineSpacingPt` and four cell inset fields.
+2. The DOM extractor records table cell `line-height` plus CSS padding and border widths, using the same browser-to-PPTX unit conversion already used for text boxes.
+3. The writer emits table cell margins on `<a:tcPr>` and line spacing on each cell paragraph.
+4. The report now exposes `lineSpacingTableCellCount` and `bodyInsetTableCellCount` at the deck, coverage, and per-slide summary levels.
+5. Tests cover the extraction boundary, default writer XML, and report counters.
+
+The important design boundary is that this is not a return to table-cell overlay text. The default table path remains visible native DrawingML table text. `table-cell-overlay` remains suppressed when the native table owns the visible cell text. The new fields improve native table fidelity instead of adding another hidden or transparent edit surface.
+
+Real acceptance command:
+
+```bash
+runuser -u jacob -- env HOME=/home/jacob PLAYWRIGHT_BROWSERS_PATH=/home/jacob/.cache/ms-playwright bash -lc 'cd /home/jacob/obsidian-NotEMD && rm -rf docs/export/test-slidev-m19-table-cell-layout-contract /tmp/notemd-m19-table-cell-layout-contract.json && npm run verify:slidev-export -- --vault docs --source architecture.zh-CN.md --format pptx --output-subfolder export/test-slidev-m19-table-cell-layout-contract --sample-slides all --timeout-ms 240000 --no-screenshots --require-pptx-visual-match --json > /tmp/notemd-m19-table-cell-layout-contract.json'
+```
+
+Result:
+
+1. `ok = true`;
+2. output PPTX: `docs/export/test-slidev-m19-table-cell-layout-contract/architecture.zh-CN.pptx`;
+3. output report: `docs/export/test-slidev-m19-table-cell-layout-contract/architecture.zh-CN.pptx.report.json`;
+4. `slidev.version = 52.16.0 (/home/jacob/slidev/packages/slidev/bin/slidev.mjs)`;
+5. `skillRootPath = /home/jacob/slidev/skills/slidev`, `skillReferenceCount = 52`;
+6. `pptxInspection.slideCount = 30`, `textRunCount = 861`, `tableCount = 6`, `slidesWithoutEditableText = []`;
+7. `pptxVisualGate.referenceSource = "pptx-rendered-html-reference"`, `thresholdProfile = "visible-native-rendered-html"`, `passed = true`;
+8. `layoutAuditSummary.overflowCount = 0`, `unreadableCount = 0`, `hardOverflowCount = 0`, `retryCount = 4`;
+9. sidecar `textBoxCount = 338`, `tableCount = 6`, `editableTableCellCount = 102`;
+10. sidecar `lineSpacingTextBoxCount = 33`, `bodyInsetTextBoxCount = 1`, `lineSpacingTableCellCount = 102`, `bodyInsetTableCellCount = 102`;
+11. `visibleTextLayer = native-text-and-background-image`, `editableLayerRenderMode = visible-native-text`, `transparentOverlayTextSources = []`;
+12. `mermaidSourcePreservation.passed = true`, `sourceFenceCount = 3`, `deckFenceCount = 3`, `changedFenceIndexes = []`;
+13. PPTX XML scan found `Visible Native` shapes `344`, transparent-only `Editable` shapes `0`, `Mermaid Text` shapes `0`, `alpha=0` count `0`, `alpha=8000` count `0`, table cells with `mar*` attributes `102`, and paragraph `<a:lnSpc>` entries `135`;
+14. generated outputs remain ignored: `ignoredOutputs = 6`, `unignoredOutputs = []`, and `git status --ignored --short docs/export/test-slidev-m19-table-cell-layout-contract` reports `!!`.
+
+The `oh-my-ppt` comparison is useful but limited. It validates the idea of carrying CSS padding and line spacing into the Office model, but its table writer does not solve this exact NotEMD problem because our default path now hides modeled DOM text before background capture and relies on visible native tables. For this repo, putting margins directly on `tcPr` is the cleaner contract than keeping a separate visible screenshot plus selectable table text.
+
+Next direction after M19:
+
+1. measure table baseline drift specifically instead of only counting padding/line-height presence;
+2. add table border-collapse diagnostics because CSS collapsed borders and DrawingML per-cell borders are not equivalent;
+3. model high-confidence code token background rectangles before attempting broader SVG or chart geometry;
+4. keep Mermaid source unchanged and background-owned by default;
+5. keep visual gate strict. Do not relax thresholds to hide Office layout drift.
+
 ## Current Limits
 
 The first implementation is intentionally conservative:

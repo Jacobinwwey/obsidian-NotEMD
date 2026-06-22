@@ -74,6 +74,11 @@ interface RawSlideTableCell {
 	fillColor: string | null;
 	borderColor: string | null;
 	borderWidthPt: number;
+	lineSpacingPt?: number;
+	paddingLeftIn?: number;
+	paddingRightIn?: number;
+	paddingTopIn?: number;
+	paddingBottomIn?: number;
 }
 
 interface RawSlideTable {
@@ -293,6 +298,12 @@ function normalizeVerticalAlign(value: string): SlidevPptxVerticalAlign {
 }
 
 function normalizeTableCell(raw: RawSlideTableCell): SlidevPptxTableCell {
+	const lineSpacingPt = normalizeOptionalPositiveNumber(raw.lineSpacingPt, 1, 200);
+	const paddingLeftIn = normalizeOptionalPositiveNumber(raw.paddingLeftIn, 0.001, 2);
+	const paddingRightIn = normalizeOptionalPositiveNumber(raw.paddingRightIn, 0.001, 2);
+	const paddingTopIn = normalizeOptionalPositiveNumber(raw.paddingTopIn, 0.001, 2);
+	const paddingBottomIn = normalizeOptionalPositiveNumber(raw.paddingBottomIn, 0.001, 2);
+
 	return {
 		text: String(raw.text || '')
 			.replace(/\r\n?/g, '\n')
@@ -312,6 +323,11 @@ function normalizeTableCell(raw: RawSlideTableCell): SlidevPptxTableCell {
 		fillColor: raw.fillColor ? normalizeHexColor(raw.fillColor, '') || null : null,
 		borderColor: raw.borderColor ? normalizeHexColor(raw.borderColor, '') || null : null,
 		borderWidthPt: clamp(Number(raw.borderWidthPt) || 0, 0, 12),
+		...(lineSpacingPt !== undefined ? { lineSpacingPt } : {}),
+		...(paddingLeftIn !== undefined ? { paddingLeftIn } : {}),
+		...(paddingRightIn !== undefined ? { paddingRightIn } : {}),
+		...(paddingTopIn !== undefined ? { paddingTopIn } : {}),
+		...(paddingBottomIn !== undefined ? { paddingBottomIn } : {}),
 	};
 }
 
@@ -1189,6 +1205,7 @@ export async function extractSlidevPptxSlideFromPage(page: any, slideNumber: num
 				const fontSizePx = Number.parseFloat(cellStyle.fontSize || '16') || 16;
 				const fontWeight = Number.parseInt(cellStyle.fontWeight || '400', 10);
 				const border = strongestBorder(cellStyle);
+				const cellLineSpacingPt = lineSpacingPtFor(cellStyle);
 				rows[placement.rowIndex].push({
 					text: cellText,
 					rowSpan: placement.rowSpan,
@@ -1204,6 +1221,8 @@ export async function extractSlidevPptxSlideFromPage(page: any, slideNumber: num
 					fillColor: rgbToHex(cellStyle.backgroundColor) || null,
 					borderColor: border.color,
 					borderWidthPt: border.widthPt,
+					...(cellLineSpacingPt ? { lineSpacingPt: cellLineSpacingPt } : {}),
+					...bodyInsetsFor(cellStyle),
 				});
 				if (cellText) {
 					placement.element.setAttribute('data-notemd-pptx-text-source-kind', 'table-cell-overlay');

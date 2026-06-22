@@ -19,6 +19,7 @@ import {
 	type SlidevPptxSlide,
 	type SlidevPptxSlideEditabilitySummary,
 	type SlidevPptxTable,
+	type SlidevPptxTableCell,
 	type SlidevPptxTextBox,
 	type SlidevPptxTextSourceCoverage,
 	type SlidevPptxTextSourceKind,
@@ -906,6 +907,10 @@ function countTableCellCharacters(slide: SlidevPptxSlide): number {
 	);
 }
 
+function tableCellsForSlide(slide: SlidevPptxSlide): SlidevPptxTableCell[] {
+	return slide.tables.flatMap((table) => table.rows.flatMap((row) => row));
+}
+
 function countRichTextRuns(slide: SlidevPptxSlide): number {
 	return slide.texts.reduce(
 		(total, textBox) =>
@@ -968,6 +973,15 @@ function textBoxHasBodyInset(textBox: SlidevPptxTextBox): boolean {
 		hasPositiveNumber(textBox.paddingRightIn) ||
 		hasPositiveNumber(textBox.paddingTopIn) ||
 		hasPositiveNumber(textBox.paddingBottomIn)
+	);
+}
+
+function tableCellHasBodyInset(cell: SlidevPptxTableCell): boolean {
+	return (
+		hasPositiveNumber(cell.paddingLeftIn) ||
+		hasPositiveNumber(cell.paddingRightIn) ||
+		hasPositiveNumber(cell.paddingTopIn) ||
+		hasPositiveNumber(cell.paddingBottomIn)
 	);
 }
 
@@ -1072,6 +1086,7 @@ function buildSlideEditabilitySummary(
 	fontPolicy: SlidevPptxFontPolicy,
 ): SlidevPptxSlideEditabilitySummary {
 	const fontFamilies = fontFamiliesForSlideSummary(slide, fontPolicy);
+	const tableCells = tableCellsForSlide(slide);
 	return {
 		slideNumber: slide.slideNumber,
 		editableTextBoxCount: slide.texts.length,
@@ -1092,6 +1107,8 @@ function buildSlideEditabilitySummary(
 		lineSpacingTextBoxCount: slide.texts.filter((textBox) => hasPositiveNumber(textBox.lineSpacingPt)).length,
 		paragraphSpacingTextBoxCount: slide.texts.filter(textBoxHasParagraphSpacing).length,
 		bodyInsetTextBoxCount: slide.texts.filter(textBoxHasBodyInset).length,
+		lineSpacingTableCellCount: tableCells.filter((cell) => hasPositiveNumber(cell.lineSpacingPt)).length,
+		bodyInsetTableCellCount: tableCells.filter(tableCellHasBodyInset).length,
 		bulletedTextBoxCount: slide.texts.filter((textBox) => textBox.bullet).length,
 		backgroundFallbackPresent: Boolean(slide.backgroundImage),
 		fallbackOnlyElementKinds: collectUniqueSorted(slide.fallbackOnlyElementKinds),
@@ -1152,6 +1169,11 @@ function buildEditablePrimitiveCoverage(
 			0,
 		),
 		bodyInsetTextBoxCount: slideSummaries.reduce((total, slide) => total + slide.bodyInsetTextBoxCount, 0),
+		lineSpacingTableCellCount: slideSummaries.reduce(
+			(total, slide) => total + slide.lineSpacingTableCellCount,
+			0,
+		),
+		bodyInsetTableCellCount: slideSummaries.reduce((total, slide) => total + slide.bodyInsetTableCellCount, 0),
 		bulletedTextBoxCount: slideSummaries.reduce((total, slide) => total + slide.bulletedTextBoxCount, 0),
 		backgroundFallbackSlideCount,
 		backgroundFallbackSlideRatio: ratio(backgroundFallbackSlideCount, slideCount),
@@ -1263,6 +1285,8 @@ export function buildSlidevPptxExportReport(
 		lineSpacingTextBoxCount: editablePrimitiveCoverage.lineSpacingTextBoxCount,
 		paragraphSpacingTextBoxCount: editablePrimitiveCoverage.paragraphSpacingTextBoxCount,
 		bodyInsetTextBoxCount: editablePrimitiveCoverage.bodyInsetTextBoxCount,
+		lineSpacingTableCellCount: editablePrimitiveCoverage.lineSpacingTableCellCount,
+		bodyInsetTableCellCount: editablePrimitiveCoverage.bodyInsetTableCellCount,
 		bulletedTextBoxCount: editablePrimitiveCoverage.bulletedTextBoxCount,
 		editableTableCellCount: editablePrimitiveCoverage.editableTableCellCount,
 		editableBodyTextBoxCount: editablePrimitiveCoverage.editableBodyTextBoxCount,

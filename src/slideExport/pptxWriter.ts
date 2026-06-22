@@ -285,7 +285,11 @@ function buildTextBoxParagraphProperties(textBox: SlidevPptxTextBox): string {
 }
 
 function buildTableCellParagraphProperties(cell: SlidevPptxTableCell): string {
-	return `<a:pPr algn="${alignToOoxml(cell.align)}"/>`;
+	const lineSpacing = pointsToSpacingValue(cell.lineSpacingPt);
+	if (lineSpacing <= 0) {
+		return `<a:pPr algn="${alignToOoxml(cell.align)}"/>`;
+	}
+	return `<a:pPr algn="${alignToOoxml(cell.align)}"><a:lnSpc><a:spcPts val="${lineSpacing}"/></a:lnSpc></a:pPr>`;
 }
 
 function buildTextParagraphs(textBox: SlidevPptxTextBox, context: PptxWriterContext): string {
@@ -509,12 +513,30 @@ function buildTableCellProperties(cell: SlidevPptxTableCell): string {
 	} else if (cell.verticalAlign === 'bottom') {
 		attributes.push('anchor="b"');
 	}
+	attributes.push(...tableCellInsetAttributes(cell));
 	// Visible table paint and text stay in the DOM-derived layers until native table layout can match Slidev.
 	return `<a:tcPr${attributes.length > 0 ? ` ${attributes.join(' ')}` : ''}><a:noFill/>${invisibleBorders}</a:tcPr>`;
 }
 
 function pointsToEmu(value: number): number {
 	return Math.round(Math.max(0, value) * 12700);
+}
+
+function tableCellInsetAttributes(cell: SlidevPptxTableCell): string[] {
+	const attributes: string[] = [];
+	const insetPairs: Array<[string, number | undefined]> = [
+		['marL', cell.paddingLeftIn],
+		['marR', cell.paddingRightIn],
+		['marT', cell.paddingTopIn],
+		['marB', cell.paddingBottomIn],
+	];
+	for (const [attributeName, value] of insetPairs) {
+		const emuValue = inchesToEmu(value || 0);
+		if (emuValue > 0) {
+			attributes.push(`${attributeName}="${emuValue}"`);
+		}
+	}
+	return attributes;
 }
 
 function buildVisibleTableBorder(cell: SlidevPptxTableCell): string {
@@ -533,6 +555,7 @@ function buildVisibleTableCellProperties(cell: SlidevPptxTableCell): string {
 	} else if (cell.verticalAlign === 'bottom') {
 		attributes.push('anchor="b"');
 	}
+	attributes.push(...tableCellInsetAttributes(cell));
 	const fill = cell.fillColor
 		? `<a:solidFill><a:srgbClr val="${clampHexColor(cell.fillColor, 'FFFFFF')}"/></a:solidFill>`
 		: '<a:noFill/>';

@@ -144,6 +144,11 @@ describe('pptx export report', () => {
 									fillColor: null,
 									borderColor: null,
 									borderWidthPt: 0,
+									lineSpacingPt: 18,
+									paddingLeftIn: 0.1,
+									paddingRightIn: 0.1,
+									paddingTopIn: 0.05,
+									paddingBottomIn: 0.05,
 								},
 								{
 									text: 'Risk',
@@ -202,6 +207,8 @@ describe('pptx export report', () => {
 		expect(report.bodyInsetTextBoxCount).toBe(1);
 		expect(report.bulletedTextBoxCount).toBe(0);
 		expect(report.editableTableCellCount).toBe(2);
+		expect(report.lineSpacingTableCellCount).toBe(1);
+		expect(report.bodyInsetTableCellCount).toBe(1);
 		expect(report.fallbackOnlyElementKinds).toEqual(['canvas', 'mermaid', 'svg']);
 		expect(report.unmodeledTextRunReasons).toEqual(['inline-formatting', 'link']);
 		expect(report.editablePrimitiveCoverage.editableTextSlideRatio).toBe(0.5);
@@ -215,6 +222,8 @@ describe('pptx export report', () => {
 		expect(report.editablePrimitiveCoverage.paragraphSpacingTextBoxCount).toBe(1);
 		expect(report.editablePrimitiveCoverage.bodyInsetTextBoxCount).toBe(1);
 		expect(report.editablePrimitiveCoverage.bulletedTextBoxCount).toBe(0);
+		expect(report.editablePrimitiveCoverage.lineSpacingTableCellCount).toBe(1);
+		expect(report.editablePrimitiveCoverage.bodyInsetTableCellCount).toBe(1);
 		expect(report.editablePrimitiveCoverage.backgroundFallbackSlideRatio).toBe(0.5);
 		expect(report.editableLayerContract).toEqual({
 			visualFidelityStrategy: 'frozen-background-first',
@@ -277,6 +286,8 @@ describe('pptx export report', () => {
 				richTextRunCount: 2,
 				hyperlinkRunCount: 1,
 				hyperlinkTargetCount: 1,
+				lineSpacingTableCellCount: 1,
+				bodyInsetTableCellCount: 1,
 				fontFamilies: ['Aptos', 'Inter', 'Noto Sans CJK SC'],
 				cjkFontFamilies: ['Noto Sans CJK SC'],
 				writerEastAsiaFallbackFontFamilies: ['Noto Sans CJK SC'],

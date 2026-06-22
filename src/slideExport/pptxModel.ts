@@ -92,6 +92,11 @@ export interface SlidevPptxTableCell {
 	fillColor: string | null;
 	borderColor: string | null;
 	borderWidthPt: number;
+	lineSpacingPt?: number;
+	paddingLeftIn?: number;
+	paddingRightIn?: number;
+	paddingTopIn?: number;
+	paddingBottomIn?: number;
 }
 
 export interface SlidevPptxTable {
@@ -196,6 +201,8 @@ export interface SlidevPptxSlideEditabilitySummary {
 	lineSpacingTextBoxCount: number;
 	paragraphSpacingTextBoxCount: number;
 	bodyInsetTextBoxCount: number;
+	lineSpacingTableCellCount: number;
+	bodyInsetTableCellCount: number;
 	bulletedTextBoxCount: number;
 	backgroundFallbackPresent: boolean;
 	fallbackOnlyElementKinds: SlidevPptxFallbackOnlyElementKind[];
@@ -243,6 +250,8 @@ export interface SlidevPptxEditablePrimitiveCoverage {
 	lineSpacingTextBoxCount: number;
 	paragraphSpacingTextBoxCount: number;
 	bodyInsetTextBoxCount: number;
+	lineSpacingTableCellCount: number;
+	bodyInsetTableCellCount: number;
 	bulletedTextBoxCount: number;
 	backgroundFallbackSlideCount: number;
 	backgroundFallbackSlideRatio: number;
@@ -357,6 +366,8 @@ export interface SlidevPptxExportReport {
 	lineSpacingTextBoxCount: number;
 	paragraphSpacingTextBoxCount: number;
 	bodyInsetTextBoxCount: number;
+	lineSpacingTableCellCount: number;
+	bodyInsetTableCellCount: number;
 	bulletedTextBoxCount: number;
 	editableTableCellCount: number;
 	editableBodyTextBoxCount: number;

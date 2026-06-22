@@ -178,4 +178,49 @@ describe('pptxDomExtractor', () => {
 			await page.close();
 		}
 	});
+
+	test('preserves table cell inset and line-height metadata for native Office tables', async () => {
+		if (!browser) {
+			console.warn('Skipping PPTX DOM extractor Playwright test:', launchError);
+			return;
+		}
+
+		const page = await browser.newPage({ viewport: { width: 1280, height: 720 } });
+		try {
+			await page.setContent(`
+				<body style="margin:0;background:#fff">
+					<div class="slidev-page" style="width:1280px;height:720px;background:#fff;padding:64px;box-sizing:border-box">
+						<table style="border-collapse:collapse;font-family:Arial;font-size:24px;color:#111827">
+							<tr>
+								<td style="padding:10px 18px 12px 14px;border:2px solid #94a3b8;line-height:34px;background:#f8fafc">
+									布局契约<br>Layout contract
+								</td>
+							</tr>
+						</table>
+					</div>
+				</body>
+			`);
+
+			const slide = await extractSlidevPptxSlideFromPage(page, 1);
+			const cell = slide.tables[0]?.rows[0]?.[0];
+
+			expect(cell).toEqual(
+				expect.objectContaining({
+					text: '布局契约\nLayout contract',
+					lineSpacingPt: expect.any(Number),
+					paddingLeftIn: expect.any(Number),
+					paddingRightIn: expect.any(Number),
+					paddingTopIn: expect.any(Number),
+					paddingBottomIn: expect.any(Number),
+				}),
+			);
+			expect(cell?.lineSpacingPt).toBeGreaterThan(cell?.fontSize || 0);
+			expect(cell?.paddingLeftIn).toBeGreaterThan(0);
+			expect(cell?.paddingRightIn).toBeGreaterThan(0);
+			expect(cell?.paddingTopIn).toBeGreaterThan(0);
+			expect(cell?.paddingBottomIn).toBeGreaterThan(0);
+		} finally {
+			await page.close();
+		}
+	});
 });

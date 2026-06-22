@@ -1064,6 +1064,53 @@ runuser -u jacob -- env HOME=/home/jacob PLAYWRIGHT_BROWSERS_PATH=/home/jacob/.c
 
 下一轮 PPTX 质量切片应继续处理影响 visible-native drift 的几何和对象建模：table baseline/padding、code token background rectangles、高置信非 SVG shape，以及在 visual report 中更明确地区分真实 layout drift 和 renderer noise。Mermaid 默认仍应由背景拥有；不要为了改善指标而拆分或改写 Mermaid 源。
 
+## M19 原生表格单元格布局合同
+
+这一轮把 `oh-my-ppt` 的同一类经验用到 DrawingML 原生表格上：在 DOM 边界抽取浏览器已经确定的 CSS layout facts，再写入真正拥有该 primitive 的 Office 位置。文本框 inset 属于 `<a:bodyPr>`；表格单元格 inset 属于 `<a:tcPr marL/marR/marT/marB>`；段落行高属于 `<a:pPr><a:lnSpc>`。
+
+本轮落地内容：
+
+1. `SlidevPptxTableCell` 新增可选 `lineSpacingPt` 与四向 cell inset 字段。
+2. DOM extractor 记录 table cell 的 `line-height`、CSS padding 与 border width，并复用现有 text box 的 browser-to-PPTX 单位换算逻辑。
+3. writer 把单元格 margin 写到 `<a:tcPr>`，把行距写到每个 cell paragraph。
+4. report 在 deck、coverage 与逐页 summary 三层新增 `lineSpacingTableCellCount` 与 `bodyInsetTableCellCount`。
+5. 测试覆盖 DOM extraction 边界、默认 writer XML 和 report 统计字段。
+
+这里的关键边界是：这不是回到 table-cell overlay text。默认表格路径仍是可见 native DrawingML table text。只要 native table 拥有可见 cell text，`table-cell-overlay` 仍会被抑制。新增字段是在提高原生表格保真，而不是额外增加隐藏或透明编辑层。
+
+真实验收命令：
+
+```bash
+runuser -u jacob -- env HOME=/home/jacob PLAYWRIGHT_BROWSERS_PATH=/home/jacob/.cache/ms-playwright bash -lc 'cd /home/jacob/obsidian-NotEMD && rm -rf docs/export/test-slidev-m19-table-cell-layout-contract /tmp/notemd-m19-table-cell-layout-contract.json && npm run verify:slidev-export -- --vault docs --source architecture.zh-CN.md --format pptx --output-subfolder export/test-slidev-m19-table-cell-layout-contract --sample-slides all --timeout-ms 240000 --no-screenshots --require-pptx-visual-match --json > /tmp/notemd-m19-table-cell-layout-contract.json'
+```
+
+结果：
+
+1. `ok = true`；
+2. 输出 PPTX：`docs/export/test-slidev-m19-table-cell-layout-contract/architecture.zh-CN.pptx`；
+3. 输出 report：`docs/export/test-slidev-m19-table-cell-layout-contract/architecture.zh-CN.pptx.report.json`；
+4. `slidev.version = 52.16.0 (/home/jacob/slidev/packages/slidev/bin/slidev.mjs)`；
+5. `skillRootPath = /home/jacob/slidev/skills/slidev`，`skillReferenceCount = 52`；
+6. `pptxInspection.slideCount = 30`，`textRunCount = 861`，`tableCount = 6`，`slidesWithoutEditableText = []`；
+7. `pptxVisualGate.referenceSource = "pptx-rendered-html-reference"`，`thresholdProfile = "visible-native-rendered-html"`，`passed = true`；
+8. `layoutAuditSummary.overflowCount = 0`，`unreadableCount = 0`，`hardOverflowCount = 0`，`retryCount = 4`；
+9. sidecar `textBoxCount = 338`，`tableCount = 6`，`editableTableCellCount = 102`；
+10. sidecar `lineSpacingTextBoxCount = 33`，`bodyInsetTextBoxCount = 1`，`lineSpacingTableCellCount = 102`，`bodyInsetTableCellCount = 102`；
+11. `visibleTextLayer = native-text-and-background-image`，`editableLayerRenderMode = visible-native-text`，`transparentOverlayTextSources = []`；
+12. `mermaidSourcePreservation.passed = true`，`sourceFenceCount = 3`，`deckFenceCount = 3`，`changedFenceIndexes = []`；
+13. PPTX XML 扫描显示 `Visible Native` shapes 为 `344`，透明替身 `Editable` shapes 为 `0`，`Mermaid Text` shapes 为 `0`，`alpha=0` 数量为 `0`，`alpha=8000` 数量为 `0`，带 `mar*` 属性的 table cells 为 `102`，paragraph `<a:lnSpc>` 条目为 `135`；
+14. 生成物仍在 Git ignore 范围内：`ignoredOutputs = 6`，`unignoredOutputs = []`，`git status --ignored --short docs/export/test-slidev-m19-table-cell-layout-contract` 显示 `!!`。
+
+`oh-my-ppt` 的对照价值明确但有限。它证明 CSS padding 与 line spacing 应进入 Office 模型，但它的 table writer 并不直接解决 NotEMD 当前问题，因为本项目默认路径已经会在背景捕获前隐藏已建模 DOM 文本，并依赖可见原生表格。对本项目而言，把 margin 直接落到 `tcPr`，比保留“可见截图 + 可选中文本”的双层方案更干净。
+
+M19 之后的推进方向：
+
+1. 专门测量 table baseline drift，而不是只统计 padding/line-height 是否存在；
+2. 增加 table border-collapse 诊断，因为 CSS collapsed border 与 DrawingML per-cell border 并不等价；
+3. 先建模高置信 code token background rectangles，再考虑更宽的 SVG 或 chart geometry；
+4. Mermaid 源内容继续不动，默认仍由背景拥有；
+5. 继续保持 visual gate 严格，不通过放宽阈值掩盖 Office layout drift。
+
 ## 当前边界
 
 第一版实现有意保守：

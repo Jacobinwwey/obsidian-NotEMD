@@ -909,6 +909,79 @@ describe('pptxWriter', () => {
 		}
 	});
 
+	test('writes native table cell insets and line spacing as Office table properties', () => {
+		const directory = mkdtempSync(join(tmpdir(), 'notemd-pptx-table-cell-layout-contract-'));
+		try {
+			const outputPath = join(directory, 'deck.pptx');
+			const document: SlidevPptxDocument = {
+				title: 'Table layout contract',
+				author: 'NoteMD',
+				slides: [
+					{
+						slideNumber: 1,
+						title: 'Table layout contract',
+						backgroundColor: 'FFFFFF',
+						texts: [],
+						tables: [
+							{
+								x: 1,
+								y: 1,
+								w: 5,
+								h: 1,
+								colWidths: [5],
+								rowHeights: [1],
+								order: 10,
+								rows: [
+									[
+										{
+											text: 'Cell layout',
+											rowSpan: 1,
+											colSpan: 1,
+											fontSize: 16,
+											fontFace: 'Aptos',
+											color: '111827',
+											bold: false,
+											italic: false,
+											underline: false,
+											align: 'left',
+											verticalAlign: 'middle',
+											fillColor: 'F8FAFC',
+											borderColor: 'CBD5E1',
+											borderWidthPt: 1,
+											lineSpacingPt: 21,
+											paddingLeftIn: 0.1,
+											paddingRightIn: 0.2,
+											paddingTopIn: 0.05,
+											paddingBottomIn: 0.08,
+										},
+									],
+								],
+							},
+						],
+						fallbackOnlyElementKinds: [],
+						consumedTableTextCandidateCount: 0,
+						warnings: [],
+					},
+				],
+			};
+
+			writePptxDocument(outputPath, document);
+
+			const entries = unzipSync(new Uint8Array(readFileSync(outputPath)));
+			const slideXml = strFromU8(entries['ppt/slides/slide1.xml']);
+			expect(slideXml).toContain('name="Visible Native Table');
+			expect(slideXml).toContain('anchor="ctr"');
+			expect(slideXml).toContain('marL="91440"');
+			expect(slideXml).toContain('marR="182880"');
+			expect(slideXml).toContain('marT="45720"');
+			expect(slideXml).toContain('marB="73152"');
+			expect(slideXml).toContain('<a:lnSpc><a:spcPts val="2100"/></a:lnSpc>');
+			expect(slideXml).not.toContain('<a:alpha val="0"/>');
+		} finally {
+			rmSync(directory, { recursive: true, force: true });
+		}
+	});
+
 	test('splits mixed Latin and CJK text into Office font runs', () => {
 		const directory = mkdtempSync(join(tmpdir(), 'notemd-pptx-office-font-runs-'));
 		try {
