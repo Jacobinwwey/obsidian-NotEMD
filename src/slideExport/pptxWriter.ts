@@ -923,6 +923,11 @@ function buildPicture(image: SlidevPptxImage, shapeId: number, relationshipId: s
 function shapeLabel(shape: SlidevPptxSolidRectangle): string {
 	switch (shape.sourceKind) {
 		case 'code-background':
+			return 'Code Background Rectangle';
+		case 'decorative-rectangle':
+			return 'Decorative Rectangle';
+		case 'decorative-line':
+			return 'Decorative Line';
 		default:
 			return 'Code Background Rectangle';
 	}

@@ -1262,6 +1262,63 @@ fixture 验收：
 
 只在 DOM ownership、computed style、paint order、visual-diff acceptance 都能证明的地方继续扩展原生 primitive。下一个候选应该是 Mermaid 之外的简单纯色线条/矩形，继续沿用 consumed-marker 合同和 XML/report gate。Mermaid 仍应保持源内容不动并由背景拥有，除非未来显式 SVG/vector 选项能证明既不改写源 fence，也不扭曲几何。
 
+## M23 装饰矩形与线条 primitive 切片
+
+这一轮把 M22 的窄 primitive 路径从 code-only background 扩展到非代码 DOM 装饰元素。实现仍复用 `SlidevPptxSolidRectangle` writer 路径，并把 CSS divider line 表示为很薄的填充矩形。这比直接引入 DrawingML line reconstruction 更保守，但更贴近浏览器盒模型中的真实视觉来源，也避免在没有证据前增加第二套几何路径。
+
+本轮落地内容：
+
+1. `SlidevPptxSolidRectangleSourceKind` 现在区分 `code-background`、`decorative-rectangle` 和 `decorative-line`。
+2. extractor 在 table 和 code-background 抽取之后新增保守的 `collectDecorativeSolidRectangles()`。候选必须是普通 HTML 元素，且不在 table/code/SVG/Mermaid/media/script/style 根内。
+3. decorative rectangle 必须是 opaque solid computed background，没有 `background-image`、`box-shadow`、CSS `filter`、transform，border radius 必须 uniform；如果与父背景同色且没有可见 border 则跳过；面积不得超过 slide 的 45%。这会有意跳过 layout root、blur blob、gradient card、transform object 和 shadowed card。
+4. decorative line 来自很薄的 opaque filled box，或单边可见 border。它们写成很薄的 native filled rectangle，而不是 DrawingML line preset。
+5. 背景捕获前现在用通用 `[data-notemd-pptx-consumed-shape]` selector 隐藏已消费 shape，因此所有已建模 native primitive 都不会在 screenshot fallback 中重复出现。
+6. report 新增 `editableDecorativeRectangleCount` 和 `editableDecorativeLineCount`，并保留总数与 code-background 计数。writer XML 名称为 `Native Decorative Rectangle` 与 `Native Decorative Line`。
+
+验证：
+
+1. `npx tsc --noEmit --pretty false` 通过。
+2. `npm run build` 通过。
+3. `npm test -- --runInBand src/tests/pptxWriter.test.ts src/tests/pptxExportReport.test.ts` 通过。
+4. `runuser -u jacob -- env HOME=/home/jacob PLAYWRIGHT_BROWSERS_PATH=/home/jacob/.cache/ms-playwright bash -lc 'cd /home/jacob/obsidian-NotEMD && npm test -- --runInBand src/tests/pptxDomExtractor.test.ts'` 使用真实 Chromium 通过。
+5. 全量 Jest 通过：`190` suites，`1546` tests。
+
+fixture 验收：
+
+1. 生成的 ignored fixture `docs/export/test-slidev-m23-decorative-fixture/decorative-primitives.md` 用于验证完整 Slidev-to-PPTX 路径中的一个 decorative rectangle 和一个 decorative line。
+2. 第一次 fixture 带可见文本与 code，hard visual gate 失败：`Mean RMSE 0.148172 exceeds 0.145`。primitive 抽取本身正确，但这个 fixture 实际测到的是 Office 文字度量漂移，不是 shape 切片。因此后续把 fixture 缩成 primitive-only 内容，再用同一 gate 验收通过。
+3. 通过的 fixture 命令：`npm run verify:slidev-export -- --vault docs --source export/test-slidev-m23-decorative-fixture/decorative-primitives.md --format pptx --output-subfolder export/test-slidev-m23-decorative-fixture-output --sample-slides all --timeout-ms 240000 --no-screenshots --require-pptx-visual-match --json`。
+4. fixture report：`ok = true`，`slideCount = 1`，`editableSolidRectangleCount = 2`，`editableCodeBackgroundRectangleCount = 0`，`editableDecorativeRectangleCount = 1`，`editableDecorativeLineCount = 1`，`transparentOverlayTextSources = []`，`fallbackOnlyElementKinds = []`，`pptxVisualGate.passed = true`，`unignoredOutputs = []`。
+5. fixture XML 扫描：`Native Decorative Rectangle = 1`，`Native Decorative Line = 1`，`roundRect = 1`，`alpha=0 = 0`，`alpha=8000 = 0`。
+
+真实 `architecture.zh-CN.md` 验收：
+
+1. 真实导出命令通过：`npm run verify:slidev-export -- --vault docs --source architecture.zh-CN.md --format pptx --output-subfolder export/test-slidev-m23-decorative-primitives --sample-slides all --timeout-ms 240000 --no-screenshots --require-pptx-visual-match --json`。
+2. Slidev 来自本地 fork：`52.16.0 (/home/jacob/slidev/packages/slidev/bin/slidev.mjs)`，并使用 `skillRootPath = /home/jacob/slidev/skills/slidev`，`skillReferenceCount = 52`。
+3. report 关键数据：`slideCount = 30`，`textBoxCount = 338`，`tableCount = 6`，`editableBodyTextBoxCount = 324`，`editableCodeTextBoxCount = 14`，`editableTableCellCount = 102`，`editableSolidRectangleCount = 116`，`editableCodeBackgroundRectangleCount = 115`，`editableDecorativeRectangleCount = 1`，`editableDecorativeLineCount = 0`，`transparentOverlayTextSources = []`。
+4. 视觉与源内容 gate 均通过：`pptxVisualGate.passed = true`，`referenceSource = "pptx-rendered-html-reference"`，`thresholdProfile = "visible-native-rendered-html"`，`mermaidSourcePreservation.passed = true`，`sourceFenceCount = 3`，`deckFenceCount = 3`，`changedFenceIndexes = []`。
+5. 布局审计保持干净：`overflowCount = 0`，`unreadableCount = 0`，`hardOverflowCount = 0`；同时记录 `retryCount = 4`，`mermaidSlideCount = 3`，`mermaidLowZoomCount = 2`，`mermaidManualReviewCount = 1`。
+6. PPTX XML 扫描显示 `alpha=0 = 0`，`alpha=8000 = 0`，`Visible Native Text = 324`，`Visible Native Code Text = 14`，`Visible Native Table = 6`，`Native Code Background Rectangle = 115`，`Native Decorative Rectangle = 1`，`Native Decorative Line = 0`，`roundRect = 116`，transparent-only editable objects 为 `0`，`<a:t...>` tags 为 `861`。
+7. 生成物仍在 ignore 范围内，未进入 git 跟踪。
+
+与先前方案的对比：
+
+1. M22 的 source-kind provenance 现在不只服务于 code background。report 可以解释哪些 native shape 是 code 背景，哪些是普通装饰元素。
+2. 这轮复用了 `oh-my-ppt` 的 consumed native primitive 与 paint-order 插入思想，但没有采用它较宽的 `section, div, span, table, td, th` shape sweep。NotEMD 的 extractor 增加了 opacity、paint feature、size、ancestry 和 source-root gate，因为任意 Slidev deck 不具备 `oh-my-ppt` authoring surface 的控制度。
+3. 第一次 fixture 失败是有效警告：把新 shape 工作和 visible native text 混在同一个 fixture 里，会因为字体度量失败而发出错误信号。primitive fixture 应该隔离 primitive paint，除非测试目标本来就是 text/shape interaction。
+4. Mermaid 继续不动。本轮不抽取 SVG 或 Mermaid 内部，也不宣称 chart geometry 已经 Office-native 可编辑。
+
+已知风险：
+
+1. 薄矩形是务实的线条表示，不是语义化 Office connector。它可编辑且视觉稳定，但不携带 connector endpoint 或 arrow 语义。
+2. 45% slide-area cap 是刻意保守。它可能跳过一些可安全建模的大面板，但能避免把 page background 和 layout wrapper 变成嘈杂的 native object。
+3. shadow、filter、transform、gradient、半透明 shape 继续由 fallback 拥有。把这些建模成纯色 shape 会制造可见漂移。
+4. 真实 `architecture.zh-CN.md` 只覆盖到一个 decorative rectangle；decorative line 的全流程覆盖来自专用 ignored fixture 以及 DOM/writer 单测。
+
+下一步：
+
+不要把这轮扩展成 SVG/Mermaid reconstruction。下一个安全推进点要么是满足同一 opacity 和 paint-feature 合同的目标化 chart/container primitive，要么先做 skipped-candidate diagnostics，在扩大抽取前报告被跳过的原因。对用户可见质量而言，更高价值的并行方向仍是 Office 文字度量收敛与字体可移植性，因为 visible-native text 仍比简单 shape geometry 更容易主导视觉漂移。
+
 ## 当前边界
 
 第一版实现有意保守：
@@ -1271,9 +1328,10 @@ fixture 验收：
 3. Mermaid/canvas 不会被转换成 Office 原生可编辑 vector object；非 Mermaid SVG/chart 文字会抽取为可见原生文本，剩余 chart/vector 几何仍保留在背景图里。
 4. 表格现在使用可见 native DrawingML table 层，包含可编辑单元格文本、rowspan/colspan 和行列尺寸。
 5. 代码块在 DOM 文本被建模时会以可见原生文本进入 PPTX。inline run 样式会保留；普通 DOM `<a href>` 已写成 Office 原生 hyperlink relationship，但完整 syntax-token 语义仍未建模为 Office 原生对象。
-6. 动画和 click steps 尚未转换为 PowerPoint animations。
-7. 旧 frozen-background visual gate 只证明 fallback image path 成立。当前 visible-native 默认路径需要更严格的逐页漂移分析，因为 Office 文本排版会偏离 Chromium。
-8. 默认非 Mermaid 文字现在是可见原生文字，不是低透明度 selectable overlay。默认 Mermaid label 不再写透明 overlay，仍由背景图拥有。
+6. 简单 opaque code background、decorative rectangle 和 decorative divider line 现在可以抽成可见 Office 原生 shape。复杂 SVG/Mermaid/chart geometry 仍由 fallback 拥有。
+7. 动画和 click steps 尚未转换为 PowerPoint animations。
+8. 旧 frozen-background visual gate 只证明 fallback image path 成立。当前 visible-native 默认路径需要更严格的逐页漂移分析，因为 Office 文本排版会偏离 Chromium。
+9. 默认非 Mermaid 文字现在是可见原生文字，不是低透明度 selectable overlay。默认 Mermaid label 不再写透明 overlay，仍由背景图拥有。
 
 这些不是回归，而是明确边界。把可编辑性夸大成无法验证的承诺，比交付一个诚实的 report-driven 第一版更糟。
 

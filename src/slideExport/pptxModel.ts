@@ -137,7 +137,7 @@ export interface SlidevPptxImage {
 	order: number;
 }
 
-export type SlidevPptxSolidRectangleSourceKind = 'code-background';
+export type SlidevPptxSolidRectangleSourceKind = 'code-background' | 'decorative-rectangle' | 'decorative-line';
 
 export interface SlidevPptxSolidRectangle {
 	sourceKind: SlidevPptxSolidRectangleSourceKind;
@@ -243,6 +243,8 @@ export interface SlidevPptxSlideEditabilitySummary {
 	maxTableCellTextInsetDeltaIn: number;
 	editableSolidRectangleCount: number;
 	editableCodeBackgroundRectangleCount: number;
+	editableDecorativeRectangleCount: number;
+	editableDecorativeLineCount: number;
 	bulletedTextBoxCount: number;
 	backgroundFallbackPresent: boolean;
 	fallbackOnlyElementKinds: SlidevPptxFallbackOnlyElementKind[];
@@ -299,6 +301,8 @@ export interface SlidevPptxEditablePrimitiveCoverage {
 	maxTableCellTextInsetDeltaIn: number;
 	editableSolidRectangleCount: number;
 	editableCodeBackgroundRectangleCount: number;
+	editableDecorativeRectangleCount: number;
+	editableDecorativeLineCount: number;
 	bulletedTextBoxCount: number;
 	backgroundFallbackSlideCount: number;
 	backgroundFallbackSlideRatio: number;
@@ -422,6 +426,8 @@ export interface SlidevPptxExportReport {
 	maxTableCellTextInsetDeltaIn: number;
 	editableSolidRectangleCount: number;
 	editableCodeBackgroundRectangleCount: number;
+	editableDecorativeRectangleCount: number;
+	editableDecorativeLineCount: number;
 	bulletedTextBoxCount: number;
 	editableTableCellCount: number;
 	editableBodyTextBoxCount: number;

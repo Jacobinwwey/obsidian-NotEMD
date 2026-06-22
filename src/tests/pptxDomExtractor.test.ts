@@ -274,6 +274,63 @@ describe('pptxDomExtractor', () => {
 		}
 	});
 
+	test('extracts high-confidence decorative rectangles and border lines as native primitives', async () => {
+		if (!browser) {
+			console.warn('Skipping PPTX DOM extractor Playwright test:', launchError);
+			return;
+		}
+
+		const page = await browser.newPage({ viewport: { width: 1280, height: 720 } });
+		try {
+			await page.setContent(`
+				<body style="margin:0;background:#fff">
+					<div class="slidev-page" style="width:1280px;height:720px;background:#fff;padding:64px;box-sizing:border-box">
+						<div id="metric-card" style="width:360px;height:120px;background:#e0f2fe;border:2px solid #0284c7;border-radius:6px;display:flex;align-items:center;justify-content:center">
+							<span style="font-family:Arial;font-size:28px;color:#0f172a">Native metric card</span>
+						</div>
+						<div id="divider" style="width:480px;height:32px;margin-top:24px;border-top:4px solid #64748b"></div>
+						<div id="shadow-card" style="width:200px;height:80px;background:#fee2e2;box-shadow:0 8px 16px rgba(0,0,0,.2)"></div>
+					</div>
+				</body>
+			`);
+
+			const slide = await extractSlidevPptxSlideFromPage(page, 1);
+			const decorativeRectangle = slide.shapes?.find((shape) => shape.sourceKind === 'decorative-rectangle');
+			const decorativeLine = slide.shapes?.find((shape) => shape.sourceKind === 'decorative-line');
+			const shadowShape = slide.shapes?.find((shape) => shape.fillColor === 'FEE2E2');
+			const cardText = slide.texts.find((textBox) => textBox.text === 'Native metric card');
+			const consumedState = await page.$eval('#metric-card', (element: Element) => ({
+				shape: element.getAttribute('data-notemd-pptx-consumed-shape'),
+				fill: element.getAttribute('data-notemd-pptx-consumed-shape-fill'),
+			}));
+
+			expect(decorativeRectangle).toEqual(
+				expect.objectContaining({
+					fillColor: 'E0F2FE',
+					borderColor: '0284C7',
+					borderWidthPt: expect.any(Number),
+					cornerRadiusAdjustment: expect.any(Number),
+				}),
+			);
+			expect(decorativeLine).toEqual(
+				expect.objectContaining({
+					fillColor: '64748B',
+				}),
+			);
+			expect(decorativeLine?.h).toBeLessThan(0.06);
+			expect(shadowShape).toBeUndefined();
+			expect(cardText).toEqual(
+				expect.objectContaining({
+					sourceKind: 'body',
+				}),
+			);
+			expect(decorativeRectangle?.order).toBeLessThan(cardText?.order || 0);
+			expect(consumedState).toEqual({ shape: 'decorative-rectangle', fill: 'E0F2FE' });
+		} finally {
+			await page.close();
+		}
+	});
+
 	test('preserves table cell inset and line-height metadata for native Office tables', async () => {
 		if (!browser) {
 			console.warn('Skipping PPTX DOM extractor Playwright test:', launchError);

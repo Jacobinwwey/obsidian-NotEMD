@@ -180,6 +180,24 @@ describe('pptx export report', () => {
 						fillColor: '0F172A',
 						order: 25,
 					},
+					{
+						sourceKind: 'decorative-rectangle',
+						x: 5.25,
+						y: 3.25,
+						w: 2,
+						h: 0.6,
+						fillColor: 'E0F2FE',
+						order: 26,
+					},
+					{
+						sourceKind: 'decorative-line',
+						x: 1,
+						y: 4,
+						w: 6,
+						h: 0.04,
+						fillColor: '64748B',
+						order: 27,
+					},
 				],
 				fallbackOnlyElementKinds: ['mermaid', 'svg'],
 				consumedTableTextCandidateCount: 2,
@@ -209,8 +227,10 @@ describe('pptx export report', () => {
 		expect(report.tableCount).toBe(1);
 		expect(report.consumedTableCount).toBe(1);
 		expect(report.consumedTableTextCandidateCount).toBe(2);
-		expect(report.editableSolidRectangleCount).toBe(1);
+		expect(report.editableSolidRectangleCount).toBe(3);
 		expect(report.editableCodeBackgroundRectangleCount).toBe(1);
+		expect(report.editableDecorativeRectangleCount).toBe(1);
+		expect(report.editableDecorativeLineCount).toBe(1);
 		expect(report.richTextBoxCount).toBe(1);
 		expect(report.richTextRunCount).toBe(2);
 		expect(report.hyperlinkRunCount).toBe(1);
@@ -225,8 +245,10 @@ describe('pptx export report', () => {
 		expect(report.fallbackOnlyElementKinds).toEqual(['canvas', 'mermaid', 'svg']);
 		expect(report.unmodeledTextRunReasons).toEqual(['inline-formatting', 'link']);
 		expect(report.editablePrimitiveCoverage.editableTextSlideRatio).toBe(0.5);
-		expect(report.editablePrimitiveCoverage.editableSolidRectangleCount).toBe(1);
+		expect(report.editablePrimitiveCoverage.editableSolidRectangleCount).toBe(3);
 		expect(report.editablePrimitiveCoverage.editableCodeBackgroundRectangleCount).toBe(1);
+		expect(report.editablePrimitiveCoverage.editableDecorativeRectangleCount).toBe(1);
+		expect(report.editablePrimitiveCoverage.editableDecorativeLineCount).toBe(1);
 		expect(report.editablePrimitiveCoverage.richTextBoxCount).toBe(1);
 		expect(report.editablePrimitiveCoverage.richTextBoxRatio).toBe(1);
 		expect(report.editablePrimitiveCoverage.richTextRunCount).toBe(2);

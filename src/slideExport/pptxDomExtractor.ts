@@ -451,6 +451,10 @@ function normalizeTable(raw: RawSlideTable): SlidevPptxTable | null {
 }
 
 function normalizeSolidRectangle(raw: RawSlideSolidRectangle): SlidevPptxSolidRectangle | null {
+	const sourceKind: SlidevPptxSolidRectangleSourceKind =
+		raw.sourceKind === 'decorative-rectangle' || raw.sourceKind === 'decorative-line'
+			? raw.sourceKind
+			: 'code-background';
 	const fillColor = normalizeHexColor(raw.fillColor, '');
 	if (!fillColor) {
 		return null;
@@ -466,7 +470,7 @@ function normalizeSolidRectangle(raw: RawSlideSolidRectangle): SlidevPptxSolidRe
 	const borderWidthPt = normalizeOptionalPositiveNumber(raw.borderWidthPt, 0.1, 12);
 	const cornerRadiusAdjustment = clamp(Number(raw.cornerRadiusAdjustment) || 0, 0, 50000);
 	return {
-		sourceKind: raw.sourceKind === 'code-background' ? raw.sourceKind : 'code-background',
+		sourceKind,
 		x,
 		y,
 		w,
@@ -767,8 +771,25 @@ export async function extractSlidevPptxSlideFromPage(page: any, slideNumber: num
 				.join('')
 				.toUpperCase();
 		};
+		const colorAlpha = (value: string): number => {
+			const source = String(value || '').trim();
+			if (!source || source === 'transparent') return 0;
+			if (source.startsWith('#')) return 1;
+			const match = source.match(
+				/rgba?\(\s*(\d+(?:\.\d+)?)(?:\s*,\s*|\s+)(\d+(?:\.\d+)?)(?:\s*,\s*|\s+)(\d+(?:\.\d+)?)(?:\s*(?:,|\/)\s*(\d+(?:\.\d+)?%?))?/i,
+			);
+			if (!match) return 0;
+			const alphaRaw = match[4];
+			if (alphaRaw === undefined) return 1;
+			return alphaRaw.endsWith('%') ? Number.parseFloat(alphaRaw) / 100 : Number(alphaRaw);
+		};
 		const visibleSolidFillFor = (style: CSSStyleDeclaration): string => {
 			if (style.backgroundImage && style.backgroundImage !== 'none') return '';
+			return rgbToHex(style.backgroundColor);
+		};
+		const opaqueSolidFillFor = (style: CSSStyleDeclaration): string => {
+			if (style.backgroundImage && style.backgroundImage !== 'none') return '';
+			if (colorAlpha(style.backgroundColor) < 0.98) return '';
 			return rgbToHex(style.backgroundColor);
 		};
 		const sanitizeFontFace = (value: string): string => {
@@ -1357,7 +1378,7 @@ export async function extractSlidevPptxSlideFromPage(page: any, slideNumber: num
 			let parent = element.parentElement;
 			while (parent && parent !== root) {
 				if (
-					parent.getAttribute('data-notemd-pptx-consumed-shape') === 'code-background' &&
+					parent.hasAttribute('data-notemd-pptx-consumed-shape') &&
 					parent.getAttribute('data-notemd-pptx-consumed-shape-fill') === fillColor
 				) {
 					const parentRect = parent.getBoundingClientRect();
@@ -1371,6 +1392,52 @@ export async function extractSlidevPptxSlideFromPage(page: any, slideNumber: num
 		};
 		const codeShapeOwnerFor = (element: Element): Element | null =>
 			element.closest('pre,.shiki') || element.closest('code');
+		type VisibleBorderSide = {
+			side: 'top' | 'right' | 'bottom' | 'left';
+			color: string;
+			widthPx: number;
+			widthPt: number;
+		};
+		const visibleBorderSidesFor = (style: CSSStyleDeclaration): VisibleBorderSide[] => {
+			const sides: Array<{ side: VisibleBorderSide['side']; width: string; color: string; borderStyle: string }> = [
+				{ side: 'top', width: style.borderTopWidth, color: style.borderTopColor, borderStyle: style.borderTopStyle },
+				{ side: 'right', width: style.borderRightWidth, color: style.borderRightColor, borderStyle: style.borderRightStyle },
+				{ side: 'bottom', width: style.borderBottomWidth, color: style.borderBottomColor, borderStyle: style.borderBottomStyle },
+				{ side: 'left', width: style.borderLeftWidth, color: style.borderLeftColor, borderStyle: style.borderLeftStyle },
+			];
+			return sides
+				.map((side) => {
+					const widthPx = Number.parseFloat(side.width || '0') || 0;
+					const color = colorAlpha(side.color) >= 0.98 ? rgbToHex(side.color) : '';
+					if (widthPx <= 0 || !color || side.borderStyle === 'none' || side.borderStyle === 'hidden') return null;
+					return { side: side.side, color, widthPx, widthPt: pxToPt(widthPx) };
+				})
+				.filter((side): side is VisibleBorderSide => side !== null);
+		};
+		const hasUnsupportedPrimitivePaint = (style: CSSStyleDeclaration): boolean => {
+			const backgroundImage = String(style.backgroundImage || '').trim();
+			const boxShadow = String(style.boxShadow || '').trim();
+			const filter = String(style.filter || '').trim();
+			const transform = String(style.transform || '').trim();
+			return (
+				(Boolean(backgroundImage) && backgroundImage !== 'none') ||
+				(Boolean(boxShadow) && boxShadow !== 'none') ||
+				(Boolean(filter) && filter !== 'none') ||
+				(Boolean(transform) && transform !== 'none')
+			);
+		};
+		const parentBackgroundFillFor = (element: Element): string => {
+			const parent = element.parentElement;
+			return parent ? rgbToHex(window.getComputedStyle(parent).backgroundColor) : '';
+		};
+		const markConsumedShape = (
+			element: Element,
+			sourceKind: SlidevPptxSolidRectangleSourceKind,
+			fillColor: string,
+		): void => {
+			element.setAttribute('data-notemd-pptx-consumed-shape', sourceKind);
+			element.setAttribute('data-notemd-pptx-consumed-shape-fill', fillColor);
+		};
 		const collectCodeBackgroundRectangles = (): void => {
 			const codeBackgroundCandidates = allElementsInComposedRoot().filter((element) => {
 				if (!(element instanceof HTMLElement)) return false;
@@ -1403,8 +1470,101 @@ export async function extractSlidevPptxSlideFromPage(page: any, slideNumber: num
 					...(cornerRadiusAdjustment > 0 ? { cornerRadiusAdjustment } : {}),
 					order: ownerOrder - 0.3 + domOrder / 1_000_000,
 				});
-				element.setAttribute('data-notemd-pptx-consumed-shape', 'code-background');
-				element.setAttribute('data-notemd-pptx-consumed-shape-fill', fillColor);
+				markConsumedShape(element, 'code-background', fillColor);
+			}
+		};
+		const lineBoxForBorderSide = (side: VisibleBorderSide, rect: DOMRect): DOMRect => {
+			const width = side.side === 'left' || side.side === 'right' ? side.widthPx : rect.width;
+			const height = side.side === 'top' || side.side === 'bottom' ? side.widthPx : rect.height;
+			const left = side.side === 'right' ? rect.right - side.widthPx : rect.left;
+			const top = side.side === 'bottom' ? rect.bottom - side.widthPx : rect.top;
+			return new DOMRect(left, top, width, height);
+		};
+		const collectDecorativeSolidRectangles = (): void => {
+			const slideArea = Math.max(1, rootWidth * rootHeight);
+			const candidates = allElementsInComposedRoot().filter((element) => {
+				if (!(element instanceof HTMLElement)) return false;
+				if (element.hasAttribute('data-notemd-pptx-consumed-shape')) return false;
+				if (
+					element.closest(
+						'table,[data-notemd-pptx-consumed-table="1"],pre,.shiki,code,.mermaid,[id^="mermaid-"],svg,script,style,noscript',
+					)
+				) {
+					return false;
+				}
+				if (element.matches('br,hr,img,picture,canvas,video,iframe,math,.katex,.MathJax')) return false;
+				return true;
+			});
+			for (const element of candidates) {
+				const style = window.getComputedStyle(element);
+				const rect = element.getBoundingClientRect();
+				if (!isVisible(element, style, rect)) continue;
+				if (hasUnsupportedPrimitivePaint(style)) continue;
+				const opacity = Number(style.opacity || '1');
+				if (!Number.isFinite(opacity) || opacity < 0.98) continue;
+				const borderRadiusPx = uniformBorderRadiusPxFor(style);
+				if (borderRadiusPx === null) continue;
+				const fillColor = opaqueSolidFillFor(style);
+				const borderSides = visibleBorderSidesFor(style);
+				const isThinFill =
+					fillColor &&
+					((rect.width <= 8 && rect.height >= 24) || (rect.height <= 8 && rect.width >= 24));
+
+				if (isThinFill) {
+					const lineRect = rect;
+					if (hasConsumedAncestorWithSameFill(element, fillColor, lineRect)) continue;
+					shapes.push({
+						sourceKind: 'decorative-line',
+						x: pxToInX(lineRect.left),
+						y: pxToInY(lineRect.top),
+						w: sizeToInX(lineRect.width),
+						h: sizeToInY(lineRect.height),
+						fillColor,
+						order: orderFor(element, order) - 0.25,
+					});
+					markConsumedShape(element, 'decorative-line', fillColor);
+					continue;
+				}
+
+				if (fillColor && rect.width >= 8 && rect.height >= 8) {
+					const area = rect.width * rect.height;
+					if (area > slideArea * 0.45) continue;
+					if (fillColor === parentBackgroundFillFor(element) && borderSides.length === 0) continue;
+					if (hasConsumedAncestorWithSameFill(element, fillColor, rect)) continue;
+					const border = strongestBorder(style);
+					const cornerRadiusAdjustment = cornerRadiusAdjustmentFor(borderRadiusPx, rect);
+					shapes.push({
+						sourceKind: 'decorative-rectangle',
+						x: pxToInX(rect.left),
+						y: pxToInY(rect.top),
+						w: sizeToInX(rect.width),
+						h: sizeToInY(rect.height),
+						fillColor,
+						...(border.color && border.widthPt > 0 ? { borderColor: border.color, borderWidthPt: border.widthPt } : {}),
+						...(cornerRadiusAdjustment > 0 ? { cornerRadiusAdjustment } : {}),
+						order: orderFor(element, order) - 0.25,
+					});
+					markConsumedShape(element, 'decorative-rectangle', fillColor);
+					continue;
+				}
+
+				if (borderSides.length !== 1) continue;
+				const lineSide = borderSides[0];
+				if (lineSide.widthPx > 8) continue;
+				if (rect.width < 24 && rect.height < 24) continue;
+				const lineRect = lineBoxForBorderSide(lineSide, rect);
+				if (lineRect.width < 2 || lineRect.height < 2) continue;
+				if (hasConsumedAncestorWithSameFill(element, lineSide.color, lineRect)) continue;
+				shapes.push({
+					sourceKind: 'decorative-line',
+					x: pxToInX(lineRect.left),
+					y: pxToInY(lineRect.top),
+					w: sizeToInX(lineRect.width),
+					h: sizeToInY(lineRect.height),
+					fillColor: lineSide.color,
+					order: orderFor(element, order) - 0.25,
+				});
+				markConsumedShape(element, 'decorative-line', lineSide.color);
 			}
 		};
 		const tables: RawSlideTable[] = [];
@@ -1571,6 +1731,7 @@ export async function extractSlidevPptxSlideFromPage(page: any, slideNumber: num
 			order += 10;
 		}
 		collectCodeBackgroundRectangles();
+		collectDecorativeSolidRectangles();
 		const fallbackOnlyElementKinds = collectFallbackOnlyElementKinds();
 		let consumedTableTextCandidateCount = 0;
 

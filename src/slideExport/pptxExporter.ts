@@ -261,7 +261,7 @@ async function prepareDefaultVisibleTextBackground(page: any): Promise<void> {
 			'text-shadow: none !important;',
 			'text-decoration-color: transparent !important;',
 			'}',
-			'[data-notemd-pptx-consumed-shape="code-background"] {',
+			'[data-notemd-pptx-consumed-shape] {',
 			'background-color: transparent !important;',
 			'background-image: none !important;',
 			'border-color: transparent !important;',
@@ -378,7 +378,7 @@ async function prepareVisibleNativeExperimentBackground(page: any): Promise<void
 			'text-shadow: none !important;',
 			'text-decoration-color: transparent !important;',
 			'}',
-			'[data-notemd-pptx-consumed-shape="code-background"] {',
+			'[data-notemd-pptx-consumed-shape] {',
 			'background-color: transparent !important;',
 			'background-image: none !important;',
 			'border-color: transparent !important;',
@@ -1192,6 +1192,9 @@ function buildSlideEditabilitySummary(
 		editableSolidRectangleCount: solidRectangles.length,
 		editableCodeBackgroundRectangleCount: solidRectangles.filter((shape) => shape.sourceKind === 'code-background')
 			.length,
+		editableDecorativeRectangleCount: solidRectangles.filter((shape) => shape.sourceKind === 'decorative-rectangle')
+			.length,
+		editableDecorativeLineCount: solidRectangles.filter((shape) => shape.sourceKind === 'decorative-line').length,
 		bulletedTextBoxCount: slide.texts.filter((textBox) => textBox.bullet).length,
 		backgroundFallbackPresent: Boolean(slide.backgroundImage),
 		fallbackOnlyElementKinds: collectUniqueSorted(slide.fallbackOnlyElementKinds),
@@ -1279,6 +1282,14 @@ function buildEditablePrimitiveCoverage(
 		),
 		editableCodeBackgroundRectangleCount: slideSummaries.reduce(
 			(total, slide) => total + slide.editableCodeBackgroundRectangleCount,
+			0,
+		),
+		editableDecorativeRectangleCount: slideSummaries.reduce(
+			(total, slide) => total + slide.editableDecorativeRectangleCount,
+			0,
+		),
+		editableDecorativeLineCount: slideSummaries.reduce(
+			(total, slide) => total + slide.editableDecorativeLineCount,
 			0,
 		),
 		bulletedTextBoxCount: slideSummaries.reduce((total, slide) => total + slide.bulletedTextBoxCount, 0),
@@ -1401,6 +1412,8 @@ export function buildSlidevPptxExportReport(
 		maxTableCellTextInsetDeltaIn: editablePrimitiveCoverage.maxTableCellTextInsetDeltaIn,
 		editableSolidRectangleCount: editablePrimitiveCoverage.editableSolidRectangleCount,
 		editableCodeBackgroundRectangleCount: editablePrimitiveCoverage.editableCodeBackgroundRectangleCount,
+		editableDecorativeRectangleCount: editablePrimitiveCoverage.editableDecorativeRectangleCount,
+		editableDecorativeLineCount: editablePrimitiveCoverage.editableDecorativeLineCount,
 		bulletedTextBoxCount: editablePrimitiveCoverage.bulletedTextBoxCount,
 		editableTableCellCount: editablePrimitiveCoverage.editableTableCellCount,
 		editableBodyTextBoxCount: editablePrimitiveCoverage.editableBodyTextBoxCount,

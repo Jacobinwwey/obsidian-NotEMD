@@ -1241,6 +1241,63 @@ Next action:
 
 Keep extending native primitives only where DOM ownership, computed style, paint order, and visual-diff acceptance can all be proven. The next candidate should be simple solid lines/rectangles outside Mermaid, with the same consumed-marker contract and XML/report gate. Mermaid should stay source-preserving and background-owned unless an explicit SVG/vector option proves that it can preserve source fences and avoid geometry distortion.
 
+## M23 Decorative Rectangle And Line Primitive Slice
+
+This slice extends M22's narrow primitive path from code-only backgrounds to simple non-code DOM decoration. It deliberately keeps the same `SlidevPptxSolidRectangle` writer path and represents CSS divider lines as thin filled rectangles. That is less ambitious than DrawingML line reconstruction, but it matches how these visuals exist in the browser box model and avoids a second geometry path before there is evidence that one is needed.
+
+What landed:
+
+1. `SlidevPptxSolidRectangleSourceKind` now distinguishes `code-background`, `decorative-rectangle`, and `decorative-line`.
+2. The extractor adds a conservative `collectDecorativeSolidRectangles()` pass after table and code-background extraction. Candidates must be ordinary HTML elements outside table/code/SVG/Mermaid/media/script/style roots.
+3. Decorative rectangles require an opaque solid computed background, no `background-image`, no `box-shadow`, no CSS `filter`, no transform, uniform border radius, no same-fill parent background unless a visible border exists, and area below 45% of the slide. This intentionally avoids layout roots, blur blobs, gradient cards, transformed objects, and shadowed cards.
+4. Decorative lines are extracted from either a thin opaque filled box or a single visible border side. They are written as thin native filled rectangles, not DrawingML line presets.
+5. Consumed shapes now hide via the generic `[data-notemd-pptx-consumed-shape]` selector before background capture, so all modeled native primitives avoid duplicate paint in the screenshot fallback.
+6. Report fields now distinguish `editableDecorativeRectangleCount` and `editableDecorativeLineCount` alongside the existing total and code-background counts. Writer XML names are `Native Decorative Rectangle` and `Native Decorative Line`.
+
+Verification:
+
+1. `npx tsc --noEmit --pretty false` passed.
+2. `npm run build` passed.
+3. `npm test -- --runInBand src/tests/pptxWriter.test.ts src/tests/pptxExportReport.test.ts` passed.
+4. `runuser -u jacob -- env HOME=/home/jacob PLAYWRIGHT_BROWSERS_PATH=/home/jacob/.cache/ms-playwright bash -lc 'cd /home/jacob/obsidian-NotEMD && npm test -- --runInBand src/tests/pptxDomExtractor.test.ts'` passed with real Chromium.
+5. Full Jest passed: `190` suites, `1546` tests.
+
+Fixture acceptance:
+
+1. A generated ignored fixture at `docs/export/test-slidev-m23-decorative-fixture/decorative-primitives.md` validates the full Slidev-to-PPTX path for one decorative rectangle and one decorative line.
+2. The first fixture attempt included visible text and code and failed the hard visual gate with `Mean RMSE 0.148172 exceeds 0.145`. The primitive extraction itself was correct, but the fixture was measuring Office text metric drift instead of the shape slice. The fixture was reduced to primitive-only content and then passed the same gate.
+3. Passing fixture command: `npm run verify:slidev-export -- --vault docs --source export/test-slidev-m23-decorative-fixture/decorative-primitives.md --format pptx --output-subfolder export/test-slidev-m23-decorative-fixture-output --sample-slides all --timeout-ms 240000 --no-screenshots --require-pptx-visual-match --json`.
+4. Fixture report: `ok = true`, `slideCount = 1`, `editableSolidRectangleCount = 2`, `editableCodeBackgroundRectangleCount = 0`, `editableDecorativeRectangleCount = 1`, `editableDecorativeLineCount = 1`, `transparentOverlayTextSources = []`, `fallbackOnlyElementKinds = []`, `pptxVisualGate.passed = true`, `unignoredOutputs = []`.
+5. Fixture XML scan: `Native Decorative Rectangle = 1`, `Native Decorative Line = 1`, `roundRect = 1`, `alpha=0 = 0`, `alpha=8000 = 0`.
+
+Real `architecture.zh-CN.md` acceptance:
+
+1. Real export command passed: `npm run verify:slidev-export -- --vault docs --source architecture.zh-CN.md --format pptx --output-subfolder export/test-slidev-m23-decorative-primitives --sample-slides all --timeout-ms 240000 --no-screenshots --require-pptx-visual-match --json`.
+2. Slidev came from the local fork: `52.16.0 (/home/jacob/slidev/packages/slidev/bin/slidev.mjs)`, with `skillRootPath = /home/jacob/slidev/skills/slidev` and `skillReferenceCount = 52`.
+3. Report highlights: `slideCount = 30`, `textBoxCount = 338`, `tableCount = 6`, `editableBodyTextBoxCount = 324`, `editableCodeTextBoxCount = 14`, `editableTableCellCount = 102`, `editableSolidRectangleCount = 116`, `editableCodeBackgroundRectangleCount = 115`, `editableDecorativeRectangleCount = 1`, `editableDecorativeLineCount = 0`, `transparentOverlayTextSources = []`.
+4. Visual and source gates passed: `pptxVisualGate.passed = true`, `referenceSource = "pptx-rendered-html-reference"`, `thresholdProfile = "visible-native-rendered-html"`, `mermaidSourcePreservation.passed = true`, `sourceFenceCount = 3`, `deckFenceCount = 3`, `changedFenceIndexes = []`.
+5. Layout audit stayed clean: `overflowCount = 0`, `unreadableCount = 0`, `hardOverflowCount = 0`, with `retryCount = 4`, `mermaidSlideCount = 3`, `mermaidLowZoomCount = 2`, and `mermaidManualReviewCount = 1`.
+6. PPTX XML scan found `alpha=0 = 0`, `alpha=8000 = 0`, `Visible Native Text = 324`, `Visible Native Code Text = 14`, `Visible Native Table = 6`, `Native Code Background Rectangle = 115`, `Native Decorative Rectangle = 1`, `Native Decorative Line = 0`, `roundRect = 116`, transparent-only editable objects `0`, and `<a:t...>` tags `861`.
+7. Generated outputs stayed ignored and untracked.
+
+Comparison against the previous plan:
+
+1. M22's source-kind provenance is now useful beyond code backgrounds. The report can explain exactly which native shapes are code backgrounds and which are generic decoration.
+2. The implementation takes the `oh-my-ppt` idea of consumed native primitives and paint-order insertion, but rejects its broad `section, div, span, table, td, th` shape sweep. NotEMD's extractor adds stricter opacity, paint-feature, size, ancestry, and source-root gates because arbitrary Slidev decks are less controlled than `oh-my-ppt`'s authoring surface.
+3. The first fixture failure is a real warning: a fixture that mixes new shape work with visible native text can fail for font metrics and send the wrong signal. Primitive fixtures should isolate primitive paint unless the test intentionally covers text/shape interaction.
+4. Mermaid remains untouched. This slice does not extract inside SVG or Mermaid and does not imply chart geometry is now Office-native editable.
+
+Known risks:
+
+1. Thin rectangles are a pragmatic line representation, not a semantic Office connector. They are editable and visually stable, but they do not carry connector endpoints or arrow semantics.
+2. The 45% slide-area cap is intentionally conservative. It may skip large panels that could be modeled safely, but it avoids turning page backgrounds and layout wrappers into noisy native objects.
+3. Shadowed, filtered, transformed, gradient, and semi-transparent shapes remain fallback-owned. Modeling them as solid shapes would create visible drift.
+4. Real `architecture.zh-CN.md` only exercises one decorative rectangle; decorative line coverage comes from the dedicated ignored fixture plus DOM/writer unit tests.
+
+Next action:
+
+Do not broaden this into SVG/Mermaid reconstruction. The next safe step is either targeted high-confidence chart/container primitives that satisfy the same opacity and paint-feature contract, or diagnostics that report skipped candidate reasons before expanding extraction. For user-facing quality, the more valuable parallel track remains Office text metric convergence and font portability, because visual-native text still dominates drift risk more than simple shape geometry.
+
 ## Current Limits
 
 The first implementation is intentionally conservative:
@@ -1250,9 +1307,10 @@ The first implementation is intentionally conservative:
 3. Mermaid/canvas are not converted into Office-native editable vector objects; non-Mermaid SVG/chart text is extracted as visible native text, while the remaining chart/vector geometry stays in the background image.
 4. Tables now use a visible native DrawingML table layer with editable cell text, row/column dimensions, and merge metadata.
 5. Code blocks are extracted as visible native text when the DOM text is modeled. Inline run styling is preserved; ordinary DOM `<a href>` links are now written as Office-native hyperlink relationships, but full syntax-token semantics are still not modeled as Office-native objects.
-6. Animations and click steps are not represented as PowerPoint animations.
-7. The old frozen-background visual-diff gate proved the fallback image path. The current visible-native default needs stricter per-slide drift analysis because Office text layout can diverge from Chromium.
-8. Default non-Mermaid text is now visible native text, not a low-opacity selectable overlay. Default Mermaid labels are not written as transparent overlays; they remain in the background image.
+6. Simple opaque code backgrounds, decorative rectangles, and decorative divider lines can now be extracted as visible native Office shapes. Complex SVG/Mermaid/chart geometry remains fallback-owned.
+7. Animations and click steps are not represented as PowerPoint animations.
+8. The old frozen-background visual-diff gate proved the fallback image path. The current visible-native default needs stricter per-slide drift analysis because Office text layout can diverge from Chromium.
+9. Default non-Mermaid text is now visible native text, not a low-opacity selectable overlay. Default Mermaid labels are not written as transparent overlays; they remain in the background image.
 
 Those are not regressions; they are explicit boundaries. Overstating editability would be worse than shipping an honest report-driven first slice.
 

@@ -746,6 +746,27 @@ describe('pptxWriter', () => {
 								cornerRadiusAdjustment: 5900,
 								order: 10,
 							},
+							{
+								sourceKind: 'decorative-rectangle',
+								x: 6.25,
+								y: 1,
+								w: 2,
+								h: 0.8,
+								fillColor: 'E0F2FE',
+								borderColor: '0284C7',
+								borderWidthPt: 1,
+								cornerRadiusAdjustment: 7500,
+								order: 11,
+							},
+							{
+								sourceKind: 'decorative-line',
+								x: 1,
+								y: 2,
+								w: 6,
+								h: 0.04,
+								fillColor: '64748B',
+								order: 12,
+							},
 						],
 						fallbackOnlyElementKinds: [],
 						consumedTableTextCandidateCount: 0,
@@ -759,12 +780,20 @@ describe('pptxWriter', () => {
 			const entries = unzipSync(new Uint8Array(readFileSync(outputPath)));
 			const slideXml = strFromU8(entries['ppt/slides/slide1.xml']);
 			const rectangleIndex = slideXml.indexOf('name="Native Code Background Rectangle');
+			const decorativeRectangleIndex = slideXml.indexOf('name="Native Decorative Rectangle');
+			const decorativeLineIndex = slideXml.indexOf('name="Native Decorative Line');
 			const codeTextIndex = slideXml.indexOf('name="Visible Native Code Text');
 			expect(rectangleIndex).toBeGreaterThan(-1);
-			expect(codeTextIndex).toBeGreaterThan(rectangleIndex);
+			expect(decorativeRectangleIndex).toBeGreaterThan(rectangleIndex);
+			expect(decorativeLineIndex).toBeGreaterThan(decorativeRectangleIndex);
+			expect(codeTextIndex).toBeGreaterThan(decorativeLineIndex);
 			expect(slideXml).toContain('<a:prstGeom prst="roundRect"><a:avLst><a:gd name="adj" fmla="val 5900"/></a:avLst></a:prstGeom>');
+			expect(slideXml).toContain('<a:prstGeom prst="roundRect"><a:avLst><a:gd name="adj" fmla="val 7500"/></a:avLst></a:prstGeom>');
 			expect(slideXml).toContain('<a:solidFill><a:srgbClr val="0F172A"/></a:solidFill>');
+			expect(slideXml).toContain('<a:solidFill><a:srgbClr val="E0F2FE"/></a:solidFill>');
+			expect(slideXml).toContain('<a:solidFill><a:srgbClr val="64748B"/></a:solidFill>');
 			expect(slideXml).toContain('<a:ln w="12700"><a:solidFill><a:srgbClr val="334155"/></a:solidFill></a:ln>');
+			expect(slideXml).toContain('<a:ln w="12700"><a:solidFill><a:srgbClr val="0284C7"/></a:solidFill></a:ln>');
 			expect(slideXml).toContain('<a:t>const answer = 42</a:t>');
 			expect(slideXml).not.toContain('<a:alpha val="0"/>');
 		} finally {
