@@ -139,6 +139,32 @@ export interface SlidevPptxImage {
 
 export type SlidevPptxSolidRectangleSourceKind = 'code-background' | 'decorative-rectangle' | 'decorative-line';
 
+export type SlidevPptxDecorativePrimitiveSkipReason =
+	| 'unsupported-root'
+	| 'unsupported-element'
+	| 'not-visible'
+	| 'unsupported-paint'
+	| 'low-opacity'
+	| 'non-uniform-radius'
+	| 'no-opaque-fill-or-single-border'
+	| 'oversized'
+	| 'same-parent-fill'
+	| 'consumed-ancestor'
+	| 'line-too-wide'
+	| 'line-too-small';
+
+export interface SlidevPptxDecorativePrimitiveSkipReasonCount {
+	reason: SlidevPptxDecorativePrimitiveSkipReason;
+	count: number;
+}
+
+export interface SlidevPptxDecorativePrimitiveDiagnostics {
+	candidateCount: number;
+	acceptedCount: number;
+	skippedCount: number;
+	skipReasonCounts: SlidevPptxDecorativePrimitiveSkipReasonCount[];
+}
+
 export interface SlidevPptxSolidRectangle {
 	sourceKind: SlidevPptxSolidRectangleSourceKind;
 	x: number;
@@ -161,6 +187,7 @@ export interface SlidevPptxSlide {
 	texts: SlidevPptxTextBox[];
 	tables: SlidevPptxTable[];
 	shapes?: SlidevPptxSolidRectangle[];
+	decorativePrimitiveDiagnostics?: SlidevPptxDecorativePrimitiveDiagnostics;
 	fallbackOnlyElementKinds: SlidevPptxFallbackOnlyElementKind[];
 	consumedTableTextCandidateCount: number;
 	warnings: string[];
@@ -245,6 +272,10 @@ export interface SlidevPptxSlideEditabilitySummary {
 	editableCodeBackgroundRectangleCount: number;
 	editableDecorativeRectangleCount: number;
 	editableDecorativeLineCount: number;
+	decorativePrimitiveCandidateCount: number;
+	decorativePrimitiveAcceptedCount: number;
+	decorativePrimitiveSkippedCount: number;
+	decorativePrimitiveSkipReasonCounts: SlidevPptxDecorativePrimitiveSkipReasonCount[];
 	bulletedTextBoxCount: number;
 	backgroundFallbackPresent: boolean;
 	fallbackOnlyElementKinds: SlidevPptxFallbackOnlyElementKind[];
@@ -303,6 +334,10 @@ export interface SlidevPptxEditablePrimitiveCoverage {
 	editableCodeBackgroundRectangleCount: number;
 	editableDecorativeRectangleCount: number;
 	editableDecorativeLineCount: number;
+	decorativePrimitiveCandidateCount: number;
+	decorativePrimitiveAcceptedCount: number;
+	decorativePrimitiveSkippedCount: number;
+	decorativePrimitiveSkipReasonCounts: SlidevPptxDecorativePrimitiveSkipReasonCount[];
 	bulletedTextBoxCount: number;
 	backgroundFallbackSlideCount: number;
 	backgroundFallbackSlideRatio: number;
@@ -428,6 +463,10 @@ export interface SlidevPptxExportReport {
 	editableCodeBackgroundRectangleCount: number;
 	editableDecorativeRectangleCount: number;
 	editableDecorativeLineCount: number;
+	decorativePrimitiveCandidateCount: number;
+	decorativePrimitiveAcceptedCount: number;
+	decorativePrimitiveSkippedCount: number;
+	decorativePrimitiveSkipReasonCounts: SlidevPptxDecorativePrimitiveSkipReasonCount[];
 	bulletedTextBoxCount: number;
 	editableTableCellCount: number;
 	editableBodyTextBoxCount: number;

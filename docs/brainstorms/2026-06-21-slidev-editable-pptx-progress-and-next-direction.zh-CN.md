@@ -1319,6 +1319,55 @@ fixture 验收：
 
 不要把这轮扩展成 SVG/Mermaid reconstruction。下一个安全推进点要么是满足同一 opacity 和 paint-feature 合同的目标化 chart/container primitive，要么先做 skipped-candidate diagnostics，在扩大抽取前报告被跳过的原因。对用户可见质量而言，更高价值的并行方向仍是 Office 文字度量收敛与字体可移植性，因为 visible-native text 仍比简单 shape geometry 更容易主导视觉漂移。
 
+## M24 装饰 primitive 跳过候选诊断
+
+这一轮只取 `oh-my-ppt` 中当前适合 NotEMD 的部分：原生 primitive 必须有 provenance，背景隐藏必须可观测。没有复制 `oh-my-ppt` 更宽的 HTML-to-PPTX sweep，也没有改变 Mermaid/SVG reconstruction 策略。目标是在扩大抽取规则前，先知道装饰元素为什么仍由 fallback background 拥有。
+
+本轮落地内容：
+
+1. 新增 `SlidevPptxDecorativePrimitiveDiagnostics`，每页记录 `candidateCount`、`acceptedCount`、`skippedCount` 和 `skipReasonCounts`。
+2. decorative primitive 跳过原因被规范成 report 合同：`unsupported-root`、`unsupported-element`、`not-visible`、`unsupported-paint`、`low-opacity`、`non-uniform-radius`、`no-opaque-fill-or-single-border`、`oversized`、`same-parent-fill`、`consumed-ancestor`、`line-too-wide`、`line-too-small`。
+3. extractor 只统计存在真实 paint signal 的元素：background color、background image、visible border、box shadow、filter 或 transform。接受条件仍保持 M23 的保守 gate。
+4. report 现在在每页和全局层面汇总同一组诊断，并与已有 editable primitive 计数并列。后续可以据此判断是新增 primitive path，还是明确让某类内容继续保留在 rendered background 中。
+5. 本轮没有扩大抽取面。Mermaid、SVG、table、code、media、script、style root 仍会阻止 generic decorative extraction。
+
+验证：
+
+1. `npx tsc --noEmit --pretty false` 通过。
+2. `npm run build` 通过。
+3. `npm test -- --runInBand src/tests/pptxExportReport.test.ts` 通过。
+4. `runuser -u jacob -- env HOME=/home/jacob PLAYWRIGHT_BROWSERS_PATH=/home/jacob/.cache/ms-playwright bash -lc 'cd /home/jacob/obsidian-NotEMD && npm test -- --runInBand src/tests/pptxDomExtractor.test.ts'` 使用真实 Chromium 通过。
+5. 全量 Jest 通过：`190` suites，`1546` tests。root 的 Playwright cache 仍缺 Chromium，因此全量测试会打印既有 browser-backed DOM extractor 跳过警告；上面的 jacob-run 命令才是真实浏览器覆盖。
+
+真实 `architecture.zh-CN.md` 验收：
+
+1. 真实导出命令通过：`npm run verify:slidev-export -- --vault docs --source architecture.zh-CN.md --format pptx --output-subfolder export/test-slidev-m24-decorative-diagnostics --sample-slides all --timeout-ms 240000 --no-screenshots --require-pptx-visual-match --json`。
+2. Slidev 来自本地 fork：`52.16.0 (/home/jacob/slidev/packages/slidev/bin/slidev.mjs)`，并使用 `skillRootPath = /home/jacob/slidev/skills/slidev`，`skillReferenceCount = 52`。
+3. 视觉与源内容 gate 均通过：`ok = true`，`pptxVisualGate.passed = true`，`referenceSource = "pptx-rendered-html-reference"`，`thresholdProfile = "visible-native-rendered-html"`，`mermaidSourcePreservation.passed = true`，`sourceFenceCount = 3`，`deckFenceCount = 3`，`changedFenceIndexes = []`。
+4. 布局审计保持干净：`slideCount = 30`，`overflowCount = 0`，`unreadableCount = 0`，`hardOverflowCount = 0`，`retryCount = 4`，`mermaidSlideCount = 3`，`mermaidLowZoomCount = 2`，`mermaidManualReviewCount = 1`。
+5. report 关键数据：`textBoxCount = 338`，`tableCount = 6`，`editableSolidRectangleCount = 116`，`editableCodeBackgroundRectangleCount = 115`，`editableDecorativeRectangleCount = 1`，`editableDecorativeLineCount = 0`，`decorativePrimitiveCandidateCount = 374`，`decorativePrimitiveAcceptedCount = 1`，`decorativePrimitiveSkippedCount = 373`。
+6. 真实 deck 的跳过原因：`unsupported-root = 371`，`not-visible = 2`。这个大数基本符合预期：包含 code、Mermaid、SVG、table 内部的 slide 会产生很多带 paint 的子节点，但这些 root 现在必须受保护，不能被 generic decoration extraction 直接消费。
+7. PPTX XML 扫描显示 `alpha=0 = 0`，`alpha=8000 = 0`，`Visible Native Text = 324`，`Visible Native Code Text = 14`，`Visible Native Table = 6`，`Native Code Background Rectangle = 115`，`Native Decorative Rectangle = 1`，`Native Decorative Line = 0`，transparent-only editable objects 为 `0`，`<a:t...>` tags 为 `861`。
+8. 生成物仍 ignored 且未被 git 跟踪：`docs/export/test-slidev-m24-decorative-diagnostics/` 显示为 ignored，`git ls-files` 在该输出目录下没有 tracked 文件。
+
+与先前方案的对比：
+
+1. M23 的下一步要求是在扩大抽取前先做 skipped-candidate diagnostics；这一点已落地。
+2. 当前结果反而不支持盲目放宽 generic decorative pass。真实跳过数量主要来自 protected roots，不是来自可安全放宽阈值的顶层卡片。
+3. `oh-my-ppt` 的对照仍然有价值，但可复用的是 observability 与 consumed primitive ownership。它更宽的 DOM sweep 不适合作为任意 Slidev deck 的默认策略，因为会撞上 code、Mermaid、SVG、table 的 ownership。
+4. 主要用户承诺保持不变：展示出来的 body/code/table 文字是可见 Office 原生文字，不是透明可选中文本。Mermaid label 继续由背景拥有，不再用透明 overlay 冒充。
+
+已知风险：
+
+1. `unsupported-root` 仍然偏粗。它保护正确性，但尚未区分 code token paint、Mermaid SVG paint、table internals 和普通 inline SVG。后续在扩大抽取前，report 可能需要 root-specific subreason。
+2. 诊断统计的是候选，不等于缺失的用户价值。很多候选只是 syntax-highlight span 或 SVG internal implementation detail。
+3. 真实 deck 仍有 `fallbackOnlyElementKinds = ["code-highlight", "mermaid", "svg"]`。这是一种诚实边界，不是失败；只要 report 不宣称这些几何已经 Office-native 可编辑即可。
+4. Visual matching 可以通过，同时部分 fallback-owned geometry 仍不可编辑。这是当前策略的取舍：先保真，再在能证明 parity 的地方窄幅扩大可编辑性。
+
+下一步：
+
+不要从放宽所有 protected root 开始。更强的一步应该先把 `unsupported-root` 拆成 root-specific diagnostics，再选择一个高价值目标。优先候选是能复用现有 code-background object model 的 code-highlight paint，或者把 standalone SVG export/embedding 作为显式 artifact path。Mermaid 源内容继续不动，除非未来单独的 experimental vector option 能同时证明 source preservation、geometry fit、Office editability，并且不引入透明文字。
+
 ## 当前边界
 
 第一版实现有意保守：

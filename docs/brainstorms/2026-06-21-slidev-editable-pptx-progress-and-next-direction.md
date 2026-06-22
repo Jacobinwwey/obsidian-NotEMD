@@ -1298,6 +1298,55 @@ Next action:
 
 Do not broaden this into SVG/Mermaid reconstruction. The next safe step is either targeted high-confidence chart/container primitives that satisfy the same opacity and paint-feature contract, or diagnostics that report skipped candidate reasons before expanding extraction. For user-facing quality, the more valuable parallel track remains Office text metric convergence and font portability, because visual-native text still dominates drift risk more than simple shape geometry.
 
+## M24 Decorative Primitive Skipped-Candidate Diagnostics
+
+This slice takes the `oh-my-ppt` lesson that matters for NotEMD now: every native primitive must have provenance, and every hidden-background decision must be observable. It does not copy `oh-my-ppt`'s wider HTML-to-PPTX sweep and does not change Mermaid/SVG reconstruction policy. The goal is to know why decoration stays fallback-owned before expanding extraction rules.
+
+What landed:
+
+1. `SlidevPptxDecorativePrimitiveDiagnostics` now records `candidateCount`, `acceptedCount`, `skippedCount`, and `skipReasonCounts` per slide.
+2. Decorative primitive skip reasons are normalized into a closed report contract: `unsupported-root`, `unsupported-element`, `not-visible`, `unsupported-paint`, `low-opacity`, `non-uniform-radius`, `no-opaque-fill-or-single-border`, `oversized`, `same-parent-fill`, `consumed-ancestor`, `line-too-wide`, and `line-too-small`.
+3. The extractor now counts only elements with a real paint signal: background color, background image, visible border, box shadow, filter, or transform. The acceptance gates remain M23's conservative gates.
+4. The report aggregates the same diagnostics at slide and deck level, next to the existing editable primitive counts. This makes the PPTX report actionable for deciding whether to add a new primitive path or intentionally leave content in the rendered background.
+5. No extraction surface was broadened. Mermaid, SVG, table, code, media, script, and style roots still block generic decorative extraction.
+
+Verification:
+
+1. `npx tsc --noEmit --pretty false` passed.
+2. `npm run build` passed.
+3. `npm test -- --runInBand src/tests/pptxExportReport.test.ts` passed.
+4. `runuser -u jacob -- env HOME=/home/jacob PLAYWRIGHT_BROWSERS_PATH=/home/jacob/.cache/ms-playwright bash -lc 'cd /home/jacob/obsidian-NotEMD && npm test -- --runInBand src/tests/pptxDomExtractor.test.ts'` passed with real Chromium.
+5. Full Jest passed: `190` suites, `1546` tests. Root's Playwright cache still lacks Chromium, so the full run logs the existing skip warnings for browser-backed DOM extractor tests; the jacob-run command above is the real browser coverage.
+
+Real `architecture.zh-CN.md` acceptance:
+
+1. Real export command passed: `npm run verify:slidev-export -- --vault docs --source architecture.zh-CN.md --format pptx --output-subfolder export/test-slidev-m24-decorative-diagnostics --sample-slides all --timeout-ms 240000 --no-screenshots --require-pptx-visual-match --json`.
+2. Slidev came from the local fork: `52.16.0 (/home/jacob/slidev/packages/slidev/bin/slidev.mjs)`, with `skillRootPath = /home/jacob/slidev/skills/slidev` and `skillReferenceCount = 52`.
+3. Visual and source gates passed: `ok = true`, `pptxVisualGate.passed = true`, `referenceSource = "pptx-rendered-html-reference"`, `thresholdProfile = "visible-native-rendered-html"`, `mermaidSourcePreservation.passed = true`, `sourceFenceCount = 3`, `deckFenceCount = 3`, `changedFenceIndexes = []`.
+4. Layout audit stayed clean: `slideCount = 30`, `overflowCount = 0`, `unreadableCount = 0`, `hardOverflowCount = 0`, `retryCount = 4`, `mermaidSlideCount = 3`, `mermaidLowZoomCount = 2`, `mermaidManualReviewCount = 1`.
+5. Report highlights: `textBoxCount = 338`, `tableCount = 6`, `editableSolidRectangleCount = 116`, `editableCodeBackgroundRectangleCount = 115`, `editableDecorativeRectangleCount = 1`, `editableDecorativeLineCount = 0`, `decorativePrimitiveCandidateCount = 374`, `decorativePrimitiveAcceptedCount = 1`, `decorativePrimitiveSkippedCount = 373`.
+6. Skip reasons from the real deck: `unsupported-root = 371`, `not-visible = 2`. The large count is mostly expected: slides with code, Mermaid, SVG, and table internals have paint-bearing descendants, but those roots are intentionally protected from generic decoration extraction.
+7. PPTX XML scan found `alpha=0 = 0`, `alpha=8000 = 0`, `Visible Native Text = 324`, `Visible Native Code Text = 14`, `Visible Native Table = 6`, `Native Code Background Rectangle = 115`, `Native Decorative Rectangle = 1`, `Native Decorative Line = 0`, transparent-only editable objects `0`, and `<a:t...>` tags `861`.
+8. Generated outputs stayed ignored and untracked: `docs/export/test-slidev-m24-decorative-diagnostics/` shows as ignored, and `git ls-files` returns no tracked files under that output directory.
+
+Comparison against the previous plan:
+
+1. M23's next direction said to add skipped-candidate diagnostics before widening extraction. That is now done.
+2. This result argues against a blind broadening of the generic decorative pass. The real skipped count is dominated by protected roots, not by safe top-level cards that merely need a relaxed threshold.
+3. The `oh-my-ppt` comparison remains useful, but the transferable pattern is observability plus consumed primitive ownership. Its broader DOM sweep is not a good default for arbitrary Slidev decks because it would collide with code, Mermaid, SVG, and table ownership.
+4. The main user-facing promise is preserved: displayed body/code/table text is native visible Office text, not transparent selectable text. Mermaid labels remain background-owned instead of fake transparent overlays.
+
+Known risks:
+
+1. `unsupported-root` is intentionally coarse. It protects correctness, but it does not yet distinguish code token paint, Mermaid SVG paint, table internals, and arbitrary inline SVG. A future report may need root-specific subreasons before extraction expands.
+2. The diagnostics count candidates, not missing user value. Many candidates are implementation details such as syntax-highlight spans and SVG internals.
+3. The real deck still has `fallbackOnlyElementKinds = ["code-highlight", "mermaid", "svg"]`. That is honest; it is not a failure as long as the report does not claim those geometries are Office-native editable.
+4. Visual matching can pass while some fallback-owned geometry remains non-editable. This is the intended tradeoff: fidelity first, then narrowly expand editability where a native primitive can prove parity.
+
+Next action:
+
+Do not start by relaxing every protected root. The next stronger slice should split `unsupported-root` into root-specific diagnostics and then pick one high-value target. The best candidates are either code-highlight paint that can reuse the existing code-background object model, or standalone SVG export/embedding as an explicit artifact path. Mermaid source should remain untouched unless a separate experimental vector option proves source preservation, geometry fit, and Office editability without transparent text.
+
 ## Current Limits
 
 The first implementation is intentionally conservative:

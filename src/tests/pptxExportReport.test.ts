@@ -199,6 +199,15 @@ describe('pptx export report', () => {
 						order: 27,
 					},
 				],
+				decorativePrimitiveDiagnostics: {
+					candidateCount: 5,
+					acceptedCount: 2,
+					skippedCount: 3,
+					skipReasonCounts: [
+						{ reason: 'oversized', count: 1 },
+						{ reason: 'unsupported-paint', count: 2 },
+					],
+				},
 				fallbackOnlyElementKinds: ['mermaid', 'svg'],
 				consumedTableTextCandidateCount: 2,
 				warnings: [],
@@ -231,6 +240,13 @@ describe('pptx export report', () => {
 		expect(report.editableCodeBackgroundRectangleCount).toBe(1);
 		expect(report.editableDecorativeRectangleCount).toBe(1);
 		expect(report.editableDecorativeLineCount).toBe(1);
+		expect(report.decorativePrimitiveCandidateCount).toBe(5);
+		expect(report.decorativePrimitiveAcceptedCount).toBe(2);
+		expect(report.decorativePrimitiveSkippedCount).toBe(3);
+		expect(report.decorativePrimitiveSkipReasonCounts).toEqual([
+			{ reason: 'oversized', count: 1 },
+			{ reason: 'unsupported-paint', count: 2 },
+		]);
 		expect(report.richTextBoxCount).toBe(1);
 		expect(report.richTextRunCount).toBe(2);
 		expect(report.hyperlinkRunCount).toBe(1);
@@ -249,6 +265,13 @@ describe('pptx export report', () => {
 		expect(report.editablePrimitiveCoverage.editableCodeBackgroundRectangleCount).toBe(1);
 		expect(report.editablePrimitiveCoverage.editableDecorativeRectangleCount).toBe(1);
 		expect(report.editablePrimitiveCoverage.editableDecorativeLineCount).toBe(1);
+		expect(report.editablePrimitiveCoverage.decorativePrimitiveCandidateCount).toBe(5);
+		expect(report.editablePrimitiveCoverage.decorativePrimitiveAcceptedCount).toBe(2);
+		expect(report.editablePrimitiveCoverage.decorativePrimitiveSkippedCount).toBe(3);
+		expect(report.editablePrimitiveCoverage.decorativePrimitiveSkipReasonCounts).toEqual([
+			{ reason: 'oversized', count: 1 },
+			{ reason: 'unsupported-paint', count: 2 },
+		]);
 		expect(report.editablePrimitiveCoverage.richTextBoxCount).toBe(1);
 		expect(report.editablePrimitiveCoverage.richTextBoxRatio).toBe(1);
 		expect(report.editablePrimitiveCoverage.richTextRunCount).toBe(2);
@@ -329,6 +352,13 @@ describe('pptx export report', () => {
 				cjkFontFamilies: ['Noto Sans CJK SC'],
 				writerEastAsiaFallbackFontFamilies: ['Noto Sans CJK SC'],
 				officeMissingFontRiskFamilies: ['Inter', 'Noto Sans CJK SC'],
+				decorativePrimitiveCandidateCount: 5,
+				decorativePrimitiveAcceptedCount: 2,
+				decorativePrimitiveSkippedCount: 3,
+				decorativePrimitiveSkipReasonCounts: [
+					{ reason: 'oversized', count: 1 },
+					{ reason: 'unsupported-paint', count: 2 },
+				],
 				consumedTableTextCandidateCount: 2,
 			}),
 		);

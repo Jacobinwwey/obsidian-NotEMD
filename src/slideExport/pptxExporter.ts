@@ -10,6 +10,8 @@ import {
 	PPTX_SLIDE_WIDTH_IN,
 	SLIDEV_PPTX_BACKGROUND_OWNED_TEXT_SOURCE_KINDS,
 	SLIDEV_PPTX_VISIBLE_TEXT_SOURCE_KINDS,
+	type SlidevPptxDecorativePrimitiveDiagnostics,
+	type SlidevPptxDecorativePrimitiveSkipReasonCount,
 	type SlidevPptxEditablePrimitiveCoverage,
 	type SlidevPptxDocument,
 	type SlidevPptxExportReport,
@@ -1060,6 +1062,37 @@ function collectUniqueSorted<T extends string>(values: T[]): T[] {
 	return Array.from(new Set(values)).sort();
 }
 
+function emptyDecorativePrimitiveDiagnostics(): SlidevPptxDecorativePrimitiveDiagnostics {
+	return {
+		candidateCount: 0,
+		acceptedCount: 0,
+		skippedCount: 0,
+		skipReasonCounts: [],
+	};
+}
+
+function decorativePrimitiveDiagnosticsForSlide(slide: SlidevPptxSlide): SlidevPptxDecorativePrimitiveDiagnostics {
+	return slide.decorativePrimitiveDiagnostics || emptyDecorativePrimitiveDiagnostics();
+}
+
+function mergeDecorativePrimitiveSkipReasonCounts(
+	reasonCounts: SlidevPptxDecorativePrimitiveSkipReasonCount[][],
+): SlidevPptxDecorativePrimitiveSkipReasonCount[] {
+	const totals = new Map<string, number>();
+	for (const slideReasonCounts of reasonCounts) {
+		for (const item of slideReasonCounts) {
+			totals.set(item.reason, (totals.get(item.reason) || 0) + item.count);
+		}
+	}
+	return Array.from(totals.entries())
+		.map(([reason, count]) => ({
+			reason: reason as SlidevPptxDecorativePrimitiveSkipReasonCount['reason'],
+			count,
+		}))
+		.filter((item) => item.count > 0)
+		.sort((left, right) => left.reason.localeCompare(right.reason));
+}
+
 function textSourceKindFor(textBox: SlidevPptxTextBox): SlidevPptxTextSourceKind {
 	return textBox.sourceKind === 'code' ||
 		textBox.sourceKind === 'mermaid-text' ||
@@ -1160,6 +1193,7 @@ function buildSlideEditabilitySummary(
 	const tableCells = tableCellsForSlide(slide);
 	const tableCellTextInsetDeltas = tableCells.map(tableCellTextAnchorInsetDelta);
 	const solidRectangles = solidRectanglesForSlide(slide);
+	const decorativePrimitiveDiagnostics = decorativePrimitiveDiagnosticsForSlide(slide);
 	return {
 		slideNumber: slide.slideNumber,
 		editableTextBoxCount: slide.texts.length,
@@ -1195,6 +1229,10 @@ function buildSlideEditabilitySummary(
 		editableDecorativeRectangleCount: solidRectangles.filter((shape) => shape.sourceKind === 'decorative-rectangle')
 			.length,
 		editableDecorativeLineCount: solidRectangles.filter((shape) => shape.sourceKind === 'decorative-line').length,
+		decorativePrimitiveCandidateCount: decorativePrimitiveDiagnostics.candidateCount,
+		decorativePrimitiveAcceptedCount: decorativePrimitiveDiagnostics.acceptedCount,
+		decorativePrimitiveSkippedCount: decorativePrimitiveDiagnostics.skippedCount,
+		decorativePrimitiveSkipReasonCounts: decorativePrimitiveDiagnostics.skipReasonCounts,
 		bulletedTextBoxCount: slide.texts.filter((textBox) => textBox.bullet).length,
 		backgroundFallbackPresent: Boolean(slide.backgroundImage),
 		fallbackOnlyElementKinds: collectUniqueSorted(slide.fallbackOnlyElementKinds),
@@ -1291,6 +1329,21 @@ function buildEditablePrimitiveCoverage(
 		editableDecorativeLineCount: slideSummaries.reduce(
 			(total, slide) => total + slide.editableDecorativeLineCount,
 			0,
+		),
+		decorativePrimitiveCandidateCount: slideSummaries.reduce(
+			(total, slide) => total + slide.decorativePrimitiveCandidateCount,
+			0,
+		),
+		decorativePrimitiveAcceptedCount: slideSummaries.reduce(
+			(total, slide) => total + slide.decorativePrimitiveAcceptedCount,
+			0,
+		),
+		decorativePrimitiveSkippedCount: slideSummaries.reduce(
+			(total, slide) => total + slide.decorativePrimitiveSkippedCount,
+			0,
+		),
+		decorativePrimitiveSkipReasonCounts: mergeDecorativePrimitiveSkipReasonCounts(
+			slideSummaries.map((slide) => slide.decorativePrimitiveSkipReasonCounts),
 		),
 		bulletedTextBoxCount: slideSummaries.reduce((total, slide) => total + slide.bulletedTextBoxCount, 0),
 		backgroundFallbackSlideCount,
@@ -1414,6 +1467,10 @@ export function buildSlidevPptxExportReport(
 		editableCodeBackgroundRectangleCount: editablePrimitiveCoverage.editableCodeBackgroundRectangleCount,
 		editableDecorativeRectangleCount: editablePrimitiveCoverage.editableDecorativeRectangleCount,
 		editableDecorativeLineCount: editablePrimitiveCoverage.editableDecorativeLineCount,
+		decorativePrimitiveCandidateCount: editablePrimitiveCoverage.decorativePrimitiveCandidateCount,
+		decorativePrimitiveAcceptedCount: editablePrimitiveCoverage.decorativePrimitiveAcceptedCount,
+		decorativePrimitiveSkippedCount: editablePrimitiveCoverage.decorativePrimitiveSkippedCount,
+		decorativePrimitiveSkipReasonCounts: editablePrimitiveCoverage.decorativePrimitiveSkipReasonCounts,
 		bulletedTextBoxCount: editablePrimitiveCoverage.bulletedTextBoxCount,
 		editableTableCellCount: editablePrimitiveCoverage.editableTableCellCount,
 		editableBodyTextBoxCount: editablePrimitiveCoverage.editableBodyTextBoxCount,

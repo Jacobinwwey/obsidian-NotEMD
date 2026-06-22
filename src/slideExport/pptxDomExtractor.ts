@@ -1,6 +1,8 @@
 import {
 	PPTX_SLIDE_HEIGHT_IN,
 	PPTX_SLIDE_WIDTH_IN,
+	type SlidevPptxDecorativePrimitiveDiagnostics,
+	type SlidevPptxDecorativePrimitiveSkipReason,
 	type SlidevPptxFallbackOnlyElementKind,
 	type SlidevPptxInlineTextRun,
 	type SlidevPptxRichTextParagraph,
@@ -122,12 +124,25 @@ interface RawSlideSolidRectangle {
 	order: number;
 }
 
+interface RawDecorativePrimitiveSkipReasonCount {
+	reason: SlidevPptxDecorativePrimitiveSkipReason;
+	count: number;
+}
+
+interface RawDecorativePrimitiveDiagnostics {
+	candidateCount: number;
+	acceptedCount: number;
+	skippedCount: number;
+	skipReasonCounts: RawDecorativePrimitiveSkipReasonCount[];
+}
+
 interface RawSlideExtraction {
 	title: string;
 	backgroundColor: string;
 	texts: RawSlideTextBox[];
 	tables: RawSlideTable[];
 	shapes: RawSlideSolidRectangle[];
+	decorativePrimitiveDiagnostics?: RawDecorativePrimitiveDiagnostics;
 	fallbackOnlyElementKinds: SlidevPptxFallbackOnlyElementKind[];
 	consumedTableTextCandidateCount: number;
 	warnings: string[];
@@ -480,6 +495,57 @@ function normalizeSolidRectangle(raw: RawSlideSolidRectangle): SlidevPptxSolidRe
 		...(borderColor && borderWidthPt !== undefined ? { borderWidthPt } : {}),
 		...(cornerRadiusAdjustment > 0 ? { cornerRadiusAdjustment } : {}),
 		order: Number.isFinite(Number(raw.order)) ? Number(raw.order) : 1000,
+	};
+}
+
+const DECORATIVE_PRIMITIVE_SKIP_REASONS: readonly SlidevPptxDecorativePrimitiveSkipReason[] = [
+	'unsupported-root',
+	'unsupported-element',
+	'not-visible',
+	'unsupported-paint',
+	'low-opacity',
+	'non-uniform-radius',
+	'no-opaque-fill-or-single-border',
+	'oversized',
+	'same-parent-fill',
+	'consumed-ancestor',
+	'line-too-wide',
+	'line-too-small',
+];
+
+function isDecorativePrimitiveSkipReason(value: unknown): value is SlidevPptxDecorativePrimitiveSkipReason {
+	return DECORATIVE_PRIMITIVE_SKIP_REASONS.includes(value as SlidevPptxDecorativePrimitiveSkipReason);
+}
+
+function normalizeDecorativePrimitiveDiagnostics(
+	raw: RawDecorativePrimitiveDiagnostics | undefined,
+): SlidevPptxDecorativePrimitiveDiagnostics {
+	const reasonCounts = new Map<SlidevPptxDecorativePrimitiveSkipReason, number>();
+	for (const item of Array.isArray(raw?.skipReasonCounts) ? raw!.skipReasonCounts : []) {
+		if (!isDecorativePrimitiveSkipReason(item.reason)) continue;
+		const count = Math.max(0, Math.round(Number(item.count) || 0));
+		if (count > 0) {
+			reasonCounts.set(item.reason, (reasonCounts.get(item.reason) || 0) + count);
+		}
+	}
+	const skipReasonCounts = DECORATIVE_PRIMITIVE_SKIP_REASONS.map((reason) => ({
+		reason,
+		count: reasonCounts.get(reason) || 0,
+	})).filter((item) => item.count > 0);
+	const skippedCount = Math.max(
+		0,
+		Math.round(Number(raw?.skippedCount) || skipReasonCounts.reduce((total, item) => total + item.count, 0)),
+	);
+	const acceptedCount = Math.max(0, Math.round(Number(raw?.acceptedCount) || 0));
+	const candidateCount = Math.max(
+		acceptedCount + skippedCount,
+		Math.round(Number(raw?.candidateCount) || 0),
+	);
+	return {
+		candidateCount,
+		acceptedCount,
+		skippedCount,
+		skipReasonCounts,
 	};
 }
 
@@ -1480,30 +1546,91 @@ export async function extractSlidevPptxSlideFromPage(page: any, slideNumber: num
 			const top = side.side === 'bottom' ? rect.bottom - side.widthPx : rect.top;
 			return new DOMRect(left, top, width, height);
 		};
+		let decorativePrimitiveDiagnostics: RawDecorativePrimitiveDiagnostics = {
+			candidateCount: 0,
+			acceptedCount: 0,
+			skippedCount: 0,
+			skipReasonCounts: [],
+		};
 		const collectDecorativeSolidRectangles = (): void => {
 			const slideArea = Math.max(1, rootWidth * rootHeight);
-			const candidates = allElementsInComposedRoot().filter((element) => {
-				if (!(element instanceof HTMLElement)) return false;
-				if (element.hasAttribute('data-notemd-pptx-consumed-shape')) return false;
+			let candidateCount = 0;
+			let acceptedCount = 0;
+			const skipCounts = new Map<SlidevPptxDecorativePrimitiveSkipReason, number>();
+			const recordSkip = (reason: SlidevPptxDecorativePrimitiveSkipReason): void => {
+				skipCounts.set(reason, (skipCounts.get(reason) || 0) + 1);
+			};
+			const hasBorderPaintSignal = (style: CSSStyleDeclaration): boolean =>
+				[
+					{ width: style.borderTopWidth, color: style.borderTopColor, borderStyle: style.borderTopStyle },
+					{ width: style.borderRightWidth, color: style.borderRightColor, borderStyle: style.borderRightStyle },
+					{ width: style.borderBottomWidth, color: style.borderBottomColor, borderStyle: style.borderBottomStyle },
+					{ width: style.borderLeftWidth, color: style.borderLeftColor, borderStyle: style.borderLeftStyle },
+				].some((side) => {
+					const widthPx = Number.parseFloat(side.width || '0') || 0;
+					return widthPx > 0 && side.borderStyle !== 'none' && side.borderStyle !== 'hidden' && colorAlpha(side.color) > 0.02;
+				});
+			const hasDecorativePaintSignal = (style: CSSStyleDeclaration): boolean => {
+				const backgroundImage = String(style.backgroundImage || '').trim();
+				const boxShadow = String(style.boxShadow || '').trim();
+				const filter = String(style.filter || '').trim();
+				const transform = String(style.transform || '').trim();
+				return (
+					colorAlpha(style.backgroundColor) > 0.02 ||
+					(Boolean(backgroundImage) && backgroundImage !== 'none') ||
+					hasBorderPaintSignal(style) ||
+					(Boolean(boxShadow) && boxShadow !== 'none') ||
+					(Boolean(filter) && filter !== 'none') ||
+					(Boolean(transform) && transform !== 'none')
+				);
+			};
+			const acceptShape = (
+				element: Element,
+				shape: RawSlideSolidRectangle,
+				sourceKind: SlidevPptxSolidRectangleSourceKind,
+				fillColor: string,
+			): void => {
+				shapes.push(shape);
+				markConsumedShape(element, sourceKind, fillColor);
+				acceptedCount += 1;
+			};
+			for (const element of allElementsInComposedRoot()) {
+				if (!(element instanceof HTMLElement)) continue;
+				if (element.hasAttribute('data-notemd-pptx-consumed-shape')) continue;
+				const style = window.getComputedStyle(element);
+				if (!hasDecorativePaintSignal(style)) continue;
+				candidateCount += 1;
 				if (
 					element.closest(
 						'table,[data-notemd-pptx-consumed-table="1"],pre,.shiki,code,.mermaid,[id^="mermaid-"],svg,script,style,noscript',
 					)
 				) {
-					return false;
+					recordSkip('unsupported-root');
+					continue;
 				}
-				if (element.matches('br,hr,img,picture,canvas,video,iframe,math,.katex,.MathJax')) return false;
-				return true;
-			});
-			for (const element of candidates) {
-				const style = window.getComputedStyle(element);
+				if (element.matches('br,hr,img,picture,canvas,video,iframe,math,.katex,.MathJax')) {
+					recordSkip('unsupported-element');
+					continue;
+				}
 				const rect = element.getBoundingClientRect();
-				if (!isVisible(element, style, rect)) continue;
-				if (hasUnsupportedPrimitivePaint(style)) continue;
+				if (!isVisible(element, style, rect)) {
+					recordSkip('not-visible');
+					continue;
+				}
+				if (hasUnsupportedPrimitivePaint(style)) {
+					recordSkip('unsupported-paint');
+					continue;
+				}
 				const opacity = Number(style.opacity || '1');
-				if (!Number.isFinite(opacity) || opacity < 0.98) continue;
+				if (!Number.isFinite(opacity) || opacity < 0.98) {
+					recordSkip('low-opacity');
+					continue;
+				}
 				const borderRadiusPx = uniformBorderRadiusPxFor(style);
-				if (borderRadiusPx === null) continue;
+				if (borderRadiusPx === null) {
+					recordSkip('non-uniform-radius');
+					continue;
+				}
 				const fillColor = opaqueSolidFillFor(style);
 				const borderSides = visibleBorderSidesFor(style);
 				const isThinFill =
@@ -1512,60 +1639,108 @@ export async function extractSlidevPptxSlideFromPage(page: any, slideNumber: num
 
 				if (isThinFill) {
 					const lineRect = rect;
-					if (hasConsumedAncestorWithSameFill(element, fillColor, lineRect)) continue;
-					shapes.push({
-						sourceKind: 'decorative-line',
-						x: pxToInX(lineRect.left),
-						y: pxToInY(lineRect.top),
-						w: sizeToInX(lineRect.width),
-						h: sizeToInY(lineRect.height),
+					if (hasConsumedAncestorWithSameFill(element, fillColor, lineRect)) {
+						recordSkip('consumed-ancestor');
+						continue;
+					}
+					acceptShape(
+						element,
+						{
+							sourceKind: 'decorative-line',
+							x: pxToInX(lineRect.left),
+							y: pxToInY(lineRect.top),
+							w: sizeToInX(lineRect.width),
+							h: sizeToInY(lineRect.height),
+							fillColor,
+							order: orderFor(element, order) - 0.25,
+						},
+						'decorative-line',
 						fillColor,
-						order: orderFor(element, order) - 0.25,
-					});
-					markConsumedShape(element, 'decorative-line', fillColor);
+					);
 					continue;
 				}
 
 				if (fillColor && rect.width >= 8 && rect.height >= 8) {
 					const area = rect.width * rect.height;
-					if (area > slideArea * 0.45) continue;
-					if (fillColor === parentBackgroundFillFor(element) && borderSides.length === 0) continue;
-					if (hasConsumedAncestorWithSameFill(element, fillColor, rect)) continue;
+					if (area > slideArea * 0.45) {
+						recordSkip('oversized');
+						continue;
+					}
+					if (fillColor === parentBackgroundFillFor(element) && borderSides.length === 0) {
+						recordSkip('same-parent-fill');
+						continue;
+					}
+					if (hasConsumedAncestorWithSameFill(element, fillColor, rect)) {
+						recordSkip('consumed-ancestor');
+						continue;
+					}
 					const border = strongestBorder(style);
 					const cornerRadiusAdjustment = cornerRadiusAdjustmentFor(borderRadiusPx, rect);
-					shapes.push({
-						sourceKind: 'decorative-rectangle',
-						x: pxToInX(rect.left),
-						y: pxToInY(rect.top),
-						w: sizeToInX(rect.width),
-						h: sizeToInY(rect.height),
+					acceptShape(
+						element,
+						{
+							sourceKind: 'decorative-rectangle',
+							x: pxToInX(rect.left),
+							y: pxToInY(rect.top),
+							w: sizeToInX(rect.width),
+							h: sizeToInY(rect.height),
+							fillColor,
+							...(border.color && border.widthPt > 0 ? { borderColor: border.color, borderWidthPt: border.widthPt } : {}),
+							...(cornerRadiusAdjustment > 0 ? { cornerRadiusAdjustment } : {}),
+							order: orderFor(element, order) - 0.25,
+						},
+						'decorative-rectangle',
 						fillColor,
-						...(border.color && border.widthPt > 0 ? { borderColor: border.color, borderWidthPt: border.widthPt } : {}),
-						...(cornerRadiusAdjustment > 0 ? { cornerRadiusAdjustment } : {}),
-						order: orderFor(element, order) - 0.25,
-					});
-					markConsumedShape(element, 'decorative-rectangle', fillColor);
+					);
 					continue;
 				}
 
-				if (borderSides.length !== 1) continue;
+				if (borderSides.length !== 1) {
+					recordSkip('no-opaque-fill-or-single-border');
+					continue;
+				}
 				const lineSide = borderSides[0];
-				if (lineSide.widthPx > 8) continue;
-				if (rect.width < 24 && rect.height < 24) continue;
+				if (lineSide.widthPx > 8) {
+					recordSkip('line-too-wide');
+					continue;
+				}
+				if (rect.width < 24 && rect.height < 24) {
+					recordSkip('line-too-small');
+					continue;
+				}
 				const lineRect = lineBoxForBorderSide(lineSide, rect);
-				if (lineRect.width < 2 || lineRect.height < 2) continue;
-				if (hasConsumedAncestorWithSameFill(element, lineSide.color, lineRect)) continue;
-				shapes.push({
-					sourceKind: 'decorative-line',
-					x: pxToInX(lineRect.left),
-					y: pxToInY(lineRect.top),
-					w: sizeToInX(lineRect.width),
-					h: sizeToInY(lineRect.height),
-					fillColor: lineSide.color,
-					order: orderFor(element, order) - 0.25,
-				});
-				markConsumedShape(element, 'decorative-line', lineSide.color);
+				if (lineRect.width < 2 || lineRect.height < 2) {
+					recordSkip('line-too-small');
+					continue;
+				}
+				if (hasConsumedAncestorWithSameFill(element, lineSide.color, lineRect)) {
+					recordSkip('consumed-ancestor');
+					continue;
+				}
+				acceptShape(
+					element,
+					{
+						sourceKind: 'decorative-line',
+						x: pxToInX(lineRect.left),
+						y: pxToInY(lineRect.top),
+						w: sizeToInX(lineRect.width),
+						h: sizeToInY(lineRect.height),
+						fillColor: lineSide.color,
+						order: orderFor(element, order) - 0.25,
+					},
+					'decorative-line',
+					lineSide.color,
+				);
 			}
+			const skipReasonCounts = Array.from(skipCounts.entries())
+				.map(([reason, count]) => ({ reason, count }))
+				.sort((left, right) => left.reason.localeCompare(right.reason));
+			decorativePrimitiveDiagnostics = {
+				candidateCount,
+				acceptedCount,
+				skippedCount: skipReasonCounts.reduce((total, item) => total + item.count, 0),
+				skipReasonCounts,
+			};
 		};
 		const tables: RawSlideTable[] = [];
 		const textBoxes: RawSlideTextBox[] = [];
@@ -1895,6 +2070,7 @@ export async function extractSlidevPptxSlideFromPage(page: any, slideNumber: num
 			texts: textBoxes,
 			tables,
 			shapes,
+			decorativePrimitiveDiagnostics,
 			fallbackOnlyElementKinds,
 			consumedTableTextCandidateCount,
 			warnings,
@@ -1915,6 +2091,7 @@ export async function extractSlidevPptxSlideFromPage(page: any, slideNumber: num
 		texts,
 		tables,
 		shapes,
+		decorativePrimitiveDiagnostics: normalizeDecorativePrimitiveDiagnostics(raw.decorativePrimitiveDiagnostics),
 		fallbackOnlyElementKinds: Array.from(
 			new Set(Array.isArray(raw.fallbackOnlyElementKinds) ? raw.fallbackOnlyElementKinds : []),
 		)

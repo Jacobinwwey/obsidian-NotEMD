@@ -299,6 +299,9 @@ describe('pptxDomExtractor', () => {
 			const decorativeLine = slide.shapes?.find((shape) => shape.sourceKind === 'decorative-line');
 			const shadowShape = slide.shapes?.find((shape) => shape.fillColor === 'FEE2E2');
 			const cardText = slide.texts.find((textBox) => textBox.text === 'Native metric card');
+			const unsupportedPaintSkip = slide.decorativePrimitiveDiagnostics?.skipReasonCounts.find(
+				(item) => item.reason === 'unsupported-paint',
+			);
 			const consumedState = await page.$eval('#metric-card', (element: Element) => ({
 				shape: element.getAttribute('data-notemd-pptx-consumed-shape'),
 				fill: element.getAttribute('data-notemd-pptx-consumed-shape-fill'),
@@ -319,6 +322,16 @@ describe('pptxDomExtractor', () => {
 			);
 			expect(decorativeLine?.h).toBeLessThan(0.06);
 			expect(shadowShape).toBeUndefined();
+			expect(slide.decorativePrimitiveDiagnostics).toEqual(
+				expect.objectContaining({
+					acceptedCount: 2,
+				}),
+			);
+			expect(slide.decorativePrimitiveDiagnostics?.candidateCount).toBe(
+				(slide.decorativePrimitiveDiagnostics?.acceptedCount || 0) +
+					(slide.decorativePrimitiveDiagnostics?.skippedCount || 0),
+			);
+			expect(unsupportedPaintSkip?.count).toBeGreaterThanOrEqual(1);
 			expect(cardText).toEqual(
 				expect.objectContaining({
 					sourceKind: 'body',
