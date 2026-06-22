@@ -382,7 +382,8 @@ describe('pptxDomExtractor', () => {
 			);
 			expect(cell?.unmodeledRunReasons).toEqual(expect.arrayContaining(['inline-code', 'inline-formatting']));
 			expect(slide.fallbackOnlyElementKinds).not.toContain('code-highlight');
-			expect(skipCounts.get('unsupported-table-root')).toBeGreaterThanOrEqual(1);
+			expect(skipCounts.get('table-owned-decoration')).toBeGreaterThanOrEqual(1);
+			expect(skipCounts.has('unsupported-table-root')).toBe(false);
 		} finally {
 			await page.close();
 		}
@@ -495,10 +496,11 @@ describe('pptxDomExtractor', () => {
 				(slide.decorativePrimitiveDiagnostics?.skippedCount || 0) +
 					(slide.decorativePrimitiveDiagnostics?.acceptedCount || 0),
 			);
-			expect(skipCounts.get('unsupported-table-root')).toBeGreaterThanOrEqual(1);
+			expect(skipCounts.get('table-owned-decoration')).toBeGreaterThanOrEqual(1);
 			expect(skipCounts.get('unsupported-code-root')).toBeGreaterThanOrEqual(1);
 			expect(skipCounts.get('unsupported-mermaid-root')).toBeGreaterThanOrEqual(1);
 			expect(skipCounts.get('unsupported-svg-root')).toBeGreaterThanOrEqual(1);
+			expect(skipCounts.has('unsupported-table-root')).toBe(false);
 			expect(skipCounts.has('unsupported-root')).toBe(false);
 		} finally {
 			await page.close();

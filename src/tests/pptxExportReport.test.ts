@@ -205,10 +205,10 @@ describe('pptx export report', () => {
 					skippedCount: 6,
 					skipReasonCounts: [
 						{ reason: 'oversized', count: 1 },
+						{ reason: 'table-owned-decoration', count: 1 },
 						{ reason: 'unsupported-code-root', count: 1 },
 						{ reason: 'unsupported-mermaid-root', count: 1 },
 						{ reason: 'unsupported-paint', count: 2 },
-						{ reason: 'unsupported-table-root', count: 1 },
 					],
 				},
 				fallbackOnlyElementKinds: ['mermaid', 'svg'],
@@ -248,10 +248,10 @@ describe('pptx export report', () => {
 		expect(report.decorativePrimitiveSkippedCount).toBe(6);
 		expect(report.decorativePrimitiveSkipReasonCounts).toEqual([
 			{ reason: 'oversized', count: 1 },
+			{ reason: 'table-owned-decoration', count: 1 },
 			{ reason: 'unsupported-code-root', count: 1 },
 			{ reason: 'unsupported-mermaid-root', count: 1 },
 			{ reason: 'unsupported-paint', count: 2 },
-			{ reason: 'unsupported-table-root', count: 1 },
 		]);
 		expect(report.richTextBoxCount).toBe(1);
 		expect(report.richTextRunCount).toBe(2);
@@ -276,10 +276,10 @@ describe('pptx export report', () => {
 		expect(report.editablePrimitiveCoverage.decorativePrimitiveSkippedCount).toBe(6);
 		expect(report.editablePrimitiveCoverage.decorativePrimitiveSkipReasonCounts).toEqual([
 			{ reason: 'oversized', count: 1 },
+			{ reason: 'table-owned-decoration', count: 1 },
 			{ reason: 'unsupported-code-root', count: 1 },
 			{ reason: 'unsupported-mermaid-root', count: 1 },
 			{ reason: 'unsupported-paint', count: 2 },
-			{ reason: 'unsupported-table-root', count: 1 },
 		]);
 		expect(report.editablePrimitiveCoverage.richTextBoxCount).toBe(1);
 		expect(report.editablePrimitiveCoverage.richTextBoxRatio).toBe(1);
@@ -366,10 +366,10 @@ describe('pptx export report', () => {
 				decorativePrimitiveSkippedCount: 6,
 				decorativePrimitiveSkipReasonCounts: [
 					{ reason: 'oversized', count: 1 },
+					{ reason: 'table-owned-decoration', count: 1 },
 					{ reason: 'unsupported-code-root', count: 1 },
 					{ reason: 'unsupported-mermaid-root', count: 1 },
 					{ reason: 'unsupported-paint', count: 2 },
-					{ reason: 'unsupported-table-root', count: 1 },
 				],
 				consumedTableTextCandidateCount: 2,
 			}),

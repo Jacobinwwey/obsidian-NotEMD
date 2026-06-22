@@ -524,6 +524,7 @@ const DECORATIVE_PRIMITIVE_SKIP_REASONS: readonly SlidevPptxDecorativePrimitiveS
 	'unsupported-svg-root',
 	'unsupported-table-root',
 	'unsupported-element',
+	'table-owned-decoration',
 	'not-visible',
 	'unsupported-paint',
 	'low-opacity',
@@ -1685,10 +1686,11 @@ export async function extractSlidevPptxSlideFromPage(page: any, slideNumber: num
 				markConsumedShape(element, sourceKind, fillColor);
 				acceptedCount += 1;
 			};
-			const unsupportedRootReasonFor = (
+			const protectedRootSkipReasonFor = (
 				element: HTMLElement,
 			): SlidevPptxDecorativePrimitiveSkipReason | null => {
-				if (element.closest('table,[data-notemd-pptx-consumed-table="1"]')) return 'unsupported-table-root';
+				if (element.closest('[data-notemd-pptx-consumed-table="1"]')) return 'table-owned-decoration';
+				if (element.closest('table')) return 'unsupported-table-root';
 				if (element.closest('pre,.shiki,code')) return 'unsupported-code-root';
 				if (element.closest('.mermaid,[id^="mermaid-"]')) return 'unsupported-mermaid-root';
 				if (element.closest('svg')) return 'unsupported-svg-root';
@@ -1706,9 +1708,9 @@ export async function extractSlidevPptxSlideFromPage(page: any, slideNumber: num
 					recordSkip('not-visible');
 					continue;
 				}
-				const unsupportedRootReason = unsupportedRootReasonFor(element);
-				if (unsupportedRootReason) {
-					recordSkip(unsupportedRootReason);
+				const protectedRootSkipReason = protectedRootSkipReasonFor(element);
+				if (protectedRootSkipReason) {
+					recordSkip(protectedRootSkipReason);
 					continue;
 				}
 				if (element.matches('br,hr,img,picture,canvas,video,iframe,math,.katex,.MathJax')) {

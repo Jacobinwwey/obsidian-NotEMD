@@ -150,6 +150,7 @@ export type SlidevPptxDecorativePrimitiveSkipReason =
 	| 'unsupported-svg-root'
 	| 'unsupported-table-root'
 	| 'unsupported-element'
+	| 'table-owned-decoration'
 	| 'not-visible'
 	| 'unsupported-paint'
 	| 'low-opacity'

@@ -1609,6 +1609,50 @@ Residual risk and next direction:
 3. The real deck still has no table hyperlinks, so `hyperlinkRunCount = 0` is a source-content fact rather than missing code coverage. The code path remains covered by writer/report tests.
 4. Mermaid/SVG should not be mixed into table coverage. Keep Mermaid fences untouched and unsplit; SVG/Mermaid editability should remain an explicit experiment or artifact/embedding path.
 
+## M31 Consumed Table Decoration Ownership Closure
+
+This slice continues to reference `ref/oh-my-ppt`, but the applied lesson is narrower: ownership, not writer reuse. The valuable part of `oh-my-ppt` is that DOM nodes are first assigned to typed primitives, and table/text/shape nodes already consumed by one pass are not reprocessed by later background or shape passes. NotEMD already has a Slidev-specific extractor, visible-native background hiding, a native table writer, and rendered-HTML visual gates. The current problem was therefore not a missing second export pipeline; it was that consumed table-internal decoration was still reported as `unsupported-table-root`, which made acceptance look as if the table path had not taken ownership.
+
+Implementation status:
+
+1. Added a decorative primitive skip reason: `table-owned-decoration`.
+2. The DOM extractor now records `table-owned-decoration` when an element is inside `data-notemd-pptx-consumed-table="1"`. Only an ordinary unconsumed `table` root remains `unsupported-table-root`.
+3. Report aggregation keeps the new reason. PPTX writer output was not changed, transparent overlays were not restored, and table-internal inline-code chips are not rerouted into global `code-highlight` fallback.
+4. DOM extractor tests now cover inline-code decoration after table consumption: `table-owned-decoration` must be present, and `unsupported-table-root` must be absent.
+5. Report tests were updated so top-level report, `editablePrimitiveCoverage`, and per-slide summary keep consistent ordering and counts.
+
+Comparison with the prior plan and current code:
+
+1. M29/M30 already moved table text and cell rich runs into native DrawingML tables and proved `102/102` table cells through `tableCellRichTextCoverage`. M31 stops describing table-internal decoration residue as an unsupported table root. It now describes it as table-owned decoration that is currently approximated through Office-native run highlight and table styling.
+2. This is not a visual-fidelity fix. PowerPoint table-cell rich text has no equivalent primitive for arbitrary rounded CSS chips. Modeling chips as slide-level shapes has z-order risk: above the table can cover editable text; below the table can disappear under cell fill or borders. The safer contract is to keep editable text semantics through `<a:highlight>` and expose the remaining cell-owned decoration honestly.
+3. Mermaid/SVG policy is unchanged. `fallbackOnlyElementKinds = ["mermaid", "svg"]` still means diagram/vector geometry is owned by the background or a separate artifact track, not by fake transparent editable labels.
+4. Font and chart editability boundaries are also unchanged. This slice only fixes table-owned decoration ownership diagnostics so future engineering decisions are not misled by `unsupported-table-root`.
+
+Validation:
+
+1. `npm test -- --runInBand src/tests/pptxExportReport.test.ts` passed: `9` tests.
+2. `runuser -u jacob -- env HOME=/home/jacob PLAYWRIGHT_BROWSERS_PATH=/home/jacob/.cache/ms-playwright bash -lc 'cd /home/jacob/obsidian-NotEMD && npm test -- --runInBand src/tests/pptxDomExtractor.test.ts'` passed: `14` real Chromium DOM extractor tests.
+3. `npm test -- --runInBand src/tests/pptxWriter.test.ts src/tests/pptxExportReport.test.ts` passed: `23` tests.
+4. `npx tsc --noEmit --pretty false` passed.
+5. `npm run build` passed.
+6. `git diff --check` passed.
+7. Full Jest passed: `190` suites, `1553` tests. The root environment still prints the existing Playwright cache warning; browser-specific coverage was handled by the jacob-user test run above.
+8. Real `architecture.zh-CN.md` export passed: `runuser -u jacob -- env HOME=/home/jacob PLAYWRIGHT_BROWSERS_PATH=/home/jacob/.cache/ms-playwright bash -lc 'cd /home/jacob/obsidian-NotEMD && npm run verify:slidev-export -- --vault docs --source architecture.zh-CN.md --format pptx --output-subfolder export/test-slidev-m31-table-owned-decoration --sample-slides all --timeout-ms 600000 --no-screenshots --require-pptx-visual-match --json'`.
+9. The local Slidev fork was still used: `52.16.0 (/home/jacob/slidev/packages/slidev/bin/slidev.mjs)`, `skillRootPath = /home/jacob/slidev/skills/slidev`, `skillReferenceCount = 52`.
+10. Real report metrics: `slideCount = 30`, `textBoxCount = 338`, `tableCount = 6`, `consumedTableCount = 6`, `editableTableCellCount = 102`, `editableTableCellOverlayTextBoxCount = 0`.
+11. Skip reasons are closed down: `decorativePrimitiveSkipReasonCounts = [{ not-visible: 68 }, { table-owned-decoration: 60 }]`; the real report no longer contains `unsupported-table-root`.
+12. Table rich-text coverage stayed stable: `richTextTableSlideCount = 6`, `richTextTableCellCount = 102`, `richTextRunCount = 102`, `styledRunCount = 27`, `codeRunCount = 27`, `highlightedRunCount = 27`.
+13. Fallback boundaries remain honest: `fallbackOnlyElementKinds = ["mermaid", "svg"]`, `transparentOverlayTextSources = []`.
+14. PPTX XML scanning found no transparent-text regression: no matches for `<a:alpha val="0"/>`, `<a:alpha val="8000"/>`, `table-cell-overlay`, or `notemd-table-cell-overlay`.
+15. Output artifacts remain local and ignored under `docs/export/test-slidev-m31-table-owned-decoration/`; `git ls-files docs/export/test-slidev-m31-table-owned-decoration` returns no tracked files, and `git status --ignored --short docs/export/test-slidev-m31-table-owned-decoration` shows only the ignored directory.
+
+Next direction:
+
+1. If table-chip visual fidelity remains a target, define an Office-native cell-internal decoration contract and z-order gate first. Without that contract, do not model chips as ordinary slide shapes, and do not reintroduce transparent text.
+2. `table-owned-decoration` does not mean "perfectly rendered"; it means ownership is clear. A later report can split it into highlight-owned, border-owned, cell-fill-owned, and unmodeled-cell-decoration buckets only after the writer has verifiable outputs for those cases.
+3. Mermaid/SVG should stay on an independent track. Keep Mermaid fences untouched and unsplit; default to background or SVG sidecar ownership unless an explicit experimental option requests SVG embedding or vector reconstruction.
+4. The better next investment is a real Office round-trip quality gate: editable-text scanning, font replacement risk, table z-order/residue sampling, and explainable per-slide PNG/PPTX diff diagnostics. Avoid adding a second conversion path that bypasses rendered convergence.
+
 ## Current Limits
 
 The first implementation is intentionally conservative:

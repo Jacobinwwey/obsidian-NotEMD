@@ -1630,6 +1630,50 @@ rendered-HTML visual hard gate 已通过，但 diff report 仍把若干页标为
 3. 真实 deck 仍没有 table hyperlink，`hyperlinkRunCount = 0` 是内容事实，不代表代码路径不存在；该路径由 writer/report 单测覆盖。
 4. Mermaid/SVG 仍不要混入 table coverage。继续保持源 Mermaid fence 不改、不拆图；SVG/Mermaid editability 应走独立实验或 artifact/embedding 方案。
 
+## M31 consumed table 内部装饰归属收口
+
+本轮继续参考 `ref/oh-my-ppt`，但落点更窄：吸收它的 ownership 思想，而不是把它的 HTML-to-PPTX writer 搬进来。`oh-my-ppt` 的强点是先把 DOM 节点归到 typed primitives，再让已消费的 table/text/shape 不被后续背景或 shape pass 重复处理。NotEMD 现有架构已经有 Slidev 专用 extraction、visible-native 背景隐藏、native table writer 和 rendered-HTML visual gate，所以当前问题不是“缺一条新导出管线”，而是 consumed table 内部的装饰元素仍被报告为 `unsupported-table-root`，让验收误以为表格主路径没有接管这些元素。
+
+本轮落地内容：
+
+1. decorative primitive skip reason 新增 `table-owned-decoration`。
+2. DOM extractor 在元素位于 `data-notemd-pptx-consumed-table="1"` 内时记录 `table-owned-decoration`，只有未被 consumed table 接管的普通 `table` root 才继续记为 `unsupported-table-root`。
+3. 报告层继续聚合 skip reason，不修改 PPTX writer 输出，不恢复透明 overlay，不把表格内 inline code chip 重路由为全局 `code-highlight` fallback。
+4. DOM extractor 单测覆盖 table consumption 后的 inline code 装饰归属：应出现 `table-owned-decoration`，不应出现 `unsupported-table-root`。
+5. report 单测 fixture 同步新 reason，保证顶层 report、`editablePrimitiveCoverage` 和逐页 summary 的排序与计数保持一致。
+
+与先前方案和现有代码对比：
+
+1. M29/M30 已经让表格文字和 cell rich runs 进入 native DrawingML table，并通过 `tableCellRichTextCoverage` 证明 `102/102` 个单元格有 rich text。M31 不再把表格内部装饰残差描述成“未支持表格 root”，而是描述成“已由 table ownership 接管，但当前 Office native table 只能以 run highlight 等近似方式表达的装饰”。
+2. 这不是视觉保真修复。PowerPoint table cell rich text 没有等价的任意 CSS rounded chip primitive；如果把 chip 做成 slide-level shape，放在 table 上方可能遮挡可编辑文字，放在下方又可能被 cell fill/border 盖住。当前更稳的合同是 `<a:highlight>` 保留可编辑文本语义，report 诚实暴露 cell-owned decoration。
+3. 这次没有修改 Mermaid/SVG 策略。`fallbackOnlyElementKinds = ["mermaid", "svg"]` 仍表示图形几何由背景或独立 artifact 轨道拥有，不把 diagram label 伪装成可编辑透明文字。
+4. 这也没有改变字体或 chart 的 editability 边界。当前 slice 只修正 table-owned decoration 的 ownership 诊断，避免后续工程判断被 `unsupported-table-root` 误导。
+
+验证：
+
+1. `npm test -- --runInBand src/tests/pptxExportReport.test.ts` 通过：`9` 个测试。
+2. `runuser -u jacob -- env HOME=/home/jacob PLAYWRIGHT_BROWSERS_PATH=/home/jacob/.cache/ms-playwright bash -lc 'cd /home/jacob/obsidian-NotEMD && npm test -- --runInBand src/tests/pptxDomExtractor.test.ts'` 通过：`14` 个真实 Chromium DOM 抽取测试。
+3. `npm test -- --runInBand src/tests/pptxWriter.test.ts src/tests/pptxExportReport.test.ts` 通过：`23` 个测试。
+4. `npx tsc --noEmit --pretty false` 通过。
+5. `npm run build` 通过。
+6. `git diff --check` 通过。
+7. 全量 Jest 通过：`190` suites，`1553` tests。root 环境仍会打印既有 Playwright cache warning；浏览器相关路径已由 jacob 用户单测覆盖。
+8. 真实 `architecture.zh-CN.md` 导出通过：`runuser -u jacob -- env HOME=/home/jacob PLAYWRIGHT_BROWSERS_PATH=/home/jacob/.cache/ms-playwright bash -lc 'cd /home/jacob/obsidian-NotEMD && npm run verify:slidev-export -- --vault docs --source architecture.zh-CN.md --format pptx --output-subfolder export/test-slidev-m31-table-owned-decoration --sample-slides all --timeout-ms 600000 --no-screenshots --require-pptx-visual-match --json'`。
+9. 本地 Slidev fork 仍被使用：`52.16.0 (/home/jacob/slidev/packages/slidev/bin/slidev.mjs)`，`skillRootPath = /home/jacob/slidev/skills/slidev`，`skillReferenceCount = 52`。
+10. 真实 report 口径：`slideCount = 30`，`textBoxCount = 338`，`tableCount = 6`，`consumedTableCount = 6`，`editableTableCellCount = 102`，`editableTableCellOverlayTextBoxCount = 0`。
+11. skip reason 已收口：`decorativePrimitiveSkipReasonCounts = [{ not-visible: 68 }, { table-owned-decoration: 60 }]`，真实 report 中不再出现 `unsupported-table-root`。
+12. table rich text 覆盖保持稳定：`richTextTableSlideCount = 6`，`richTextTableCellCount = 102`，`richTextRunCount = 102`，`styledRunCount = 27`，`codeRunCount = 27`，`highlightedRunCount = 27`。
+13. fallback 边界保持诚实：`fallbackOnlyElementKinds = ["mermaid", "svg"]`，`transparentOverlayTextSources = []`。
+14. PPTX XML 扫描未发现透明文字回归：未匹配到 `<a:alpha val="0"/>`、`<a:alpha val="8000"/>`、`table-cell-overlay` 或 `notemd-table-cell-overlay`。
+15. 输出产物保留在 ignored 本地目录 `docs/export/test-slidev-m31-table-owned-decoration/`；`git ls-files docs/export/test-slidev-m31-table-owned-decoration` 没有 tracked 文件，`git status --ignored --short docs/export/test-slidev-m31-table-owned-decoration` 仅显示 ignored 目录。
+
+后续方向：
+
+1. 若继续追表格 chip 视觉保真，必须先定义 Office-native cell-internal decoration 合同和 z-order gate。没有这个合同前，不应把 chip 做成普通 slide shape，也不应重新引入透明文字。
+2. `table-owned-decoration` 不是“已完美渲染”，而是 ownership 已明确。后续 report 可以继续细分为 highlight-owned、border-owned、cell-fill-owned、unmodeled-cell-decoration，但前提是 writer 有对应可验证输出。
+3. Mermaid/SVG 继续走独立轨道。源 Mermaid fence 不改、不拆；默认仍以背景或 SVG sidecar 表达，只有显式实验开关才应尝试 SVG embedding 或 vector reconstruction。
+4. 下一步更值得投入的是真实 Office round-trip 质量门：文字可编辑性扫描、字体替换风险、表格 z-order/residue sampling、PNG/PPTX 逐页 diff 的可解释诊断，而不是新增一条绕过 rendered convergence 的转换管线。
+
 ## 当前边界
 
 第一版实现有意保守：
