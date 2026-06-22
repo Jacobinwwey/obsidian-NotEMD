@@ -1,4 +1,4 @@
-import { existsSync, readFileSync, writeFileSync } from 'fs';
+import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'fs';
 import { dirname, join } from 'path';
 import { pathToFileURL } from 'url';
 import type { App } from 'obsidian';
@@ -38,6 +38,16 @@ const VISIBLE_NATIVE_RESIDUE_MIN_TEXT_LIKE_PIXELS = 8;
 const VISIBLE_NATIVE_RESIDUE_TEXT_BOX_LIMIT = 24;
 const VISIBLE_NATIVE_RESIDUE_TABLE_CELL_LIMIT = 16;
 const VISIBLE_NATIVE_BACKGROUND_CAPTURE_ATTEMPTS = 3;
+
+export interface SlidevPptxRenderedHtmlReferencePngSequenceResult {
+	path: string;
+	absolutePath: string;
+	slideCount: number;
+	viewport: {
+		width: number;
+		height: number;
+	};
+}
 
 type VisibleNativeResidueRegion = {
 	kind: 'text-box' | 'table-cell';
@@ -587,6 +597,56 @@ async function extractSlidesFromHtml(
 	}
 }
 
+async function capturePptxRenderedHtmlReferenceImages(
+	htmlPath: string,
+	slideCount: number,
+	config: SlideExportConfig,
+	onProgress?: ExportProgressCallback,
+): Promise<SlidevPptxImage[]> {
+	const playwright = resolvePlaywrightRuntime();
+	if (!playwright?.chromium) {
+		throw new Error('Playwright runtime is unavailable; PPTX rendered-HTML PNG reference requires Playwright Chromium.');
+	}
+
+	const browser = await playwright.chromium.launch({ headless: true });
+	const page = await browser.newPage({
+		viewport: {
+			width: PPTX_CAPTURE_VIEWPORT_WIDTH,
+			height: PPTX_CAPTURE_VIEWPORT_HEIGHT,
+		},
+	});
+	let serverDirectory: string | null = null;
+	let baseUrl: string | null = null;
+
+	try {
+		if (htmlPath.endsWith('/index.html')) {
+			serverDirectory = dirname(htmlPath);
+			const port = await startLocalServer(serverDirectory);
+			baseUrl = `http://localhost:${port}/index.html`;
+		}
+
+		const images: SlidevPptxImage[] = [];
+		for (let slideNumber = 1; slideNumber <= slideCount; slideNumber += 1) {
+			onProgress?.(
+				'pptx-rendered-html-reference',
+				`Capturing rendered-HTML PNG reference slide ${slideNumber}/${slideCount}...`,
+			);
+			const targetUrl = baseUrl
+				? `${baseUrl}#/${slideNumber}`
+				: `${pathToFileURL(htmlPath).toString()}#/${slideNumber}`;
+			await openSlideForPptxExport(page, targetUrl, config.timeoutMs);
+			await resetSlidePptxExtractionState(page);
+			images.push(await captureSlideBackground(page, slideNumber));
+		}
+		return images;
+	} finally {
+		await browser.close();
+		if (serverDirectory) {
+			stopLocalServer(serverDirectory);
+		}
+	}
+}
+
 async function extractVisibleNativeExperimentSlidesFromHtml(
 	htmlPath: string,
 	slideCount: number,
@@ -842,6 +902,52 @@ export function buildSlidevVisibleNativePptxExperimentReport(
 			warnings: experimentWarnings,
 		},
 		warnings: experimentWarnings,
+	};
+}
+
+export async function exportSlidevPptxRenderedHtmlReferencePngSequence(
+	app: App,
+	source: SlidevExportSource,
+	config: SlideExportConfig,
+	htmlExportPath: string,
+	onProgress?: ExportProgressCallback,
+): Promise<SlidevPptxRenderedHtmlReferencePngSequenceResult> {
+	const vaultRoot = getVaultBasePath(app);
+	if (!vaultRoot) throw new Error('Vault root path unavailable');
+
+	const absoluteHtmlPath = join(vaultRoot, htmlExportPath);
+	const { slideCount } = resolveSlideCount(source, vaultRoot);
+	const images = await capturePptxRenderedHtmlReferenceImages(
+		absoluteHtmlPath,
+		slideCount,
+		config,
+		onProgress,
+	);
+	const outputDirectory = join(
+		vaultRoot,
+		config.outputSubfolder,
+		`${source.outputBasename}-pptx-rendered-html-reference`,
+	);
+	rmSync(outputDirectory, { recursive: true, force: true });
+	mkdirSync(outputDirectory, { recursive: true });
+
+	for (let index = 0; index < images.length; index += 1) {
+		const imagePath = join(outputDirectory, `slide-${String(index + 1).padStart(2, '0')}.png`);
+		writeFileSync(imagePath, Buffer.from(images[index].data));
+	}
+	onProgress?.(
+		'pptx-rendered-html-reference',
+		`Rendered-HTML PNG reference complete with ${images.length} slide image(s).`,
+	);
+
+	return {
+		path: `${config.outputSubfolder}/${source.outputBasename}-pptx-rendered-html-reference`,
+		absolutePath: outputDirectory,
+		slideCount: images.length,
+		viewport: {
+			width: PPTX_CAPTURE_VIEWPORT_WIDTH,
+			height: PPTX_CAPTURE_VIEWPORT_HEIGHT,
+		},
 	};
 }
 

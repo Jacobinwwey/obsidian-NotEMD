@@ -1054,9 +1054,10 @@ function buildPptxVisualDiff(options) {
 		dpi: options.dpi,
 		timeoutMs: options.timeoutMs,
 	});
+	const explicitReferenceSource = options.referenceSource || 'external-png-sequence';
 	const reference = options.referenceDirectory
 		? {
-				source: 'external-png-sequence',
+				source: explicitReferenceSource,
 				referenceDirectory: path.resolve(options.referenceDirectory),
 				referenceImages: collectPngSequence(options.referenceDirectory).map((imagePath, index) => ({
 					slide: index + 1,

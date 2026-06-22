@@ -186,6 +186,27 @@ describe('pptx visual diff helper', () => {
 		expect(diagnostics.status).toBe('reference-contract-review');
 	});
 
+	test('does not classify same-rendered-html references as external contract drift', () => {
+		const diagnostics = diagnoseVisualPage(
+			{
+				slide: 10,
+				referencePath: 'reference.png',
+				renderedPath: 'rendered.png',
+				rmseNormalized: 0.19,
+				maxScaleRatioDelta: 0.02,
+				differenceBoundingBox: {
+					available: true,
+					areaRatio: 0.6,
+				},
+			},
+			{ referenceSource: 'pptx-rendered-html-reference' },
+		);
+
+		expect(diagnostics.referenceContractDriftLikely).toBe(false);
+		expect(diagnostics.layoutDriftLikely).toBe(true);
+		expect(diagnostics.status).toBe('layout-review');
+	});
+
 	test('extracts PPTX frozen background images as visual references', () => {
 		const directory = mkdtempSync(join(tmpdir(), 'notemd-pptx-visual-reference-'));
 		try {

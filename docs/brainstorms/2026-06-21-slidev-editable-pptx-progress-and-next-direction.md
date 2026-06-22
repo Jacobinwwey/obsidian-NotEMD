@@ -369,6 +369,46 @@ This keeps the external PNG conclusion intentionally conservative: external PNG 
 
 The visible-native conclusion did not change. Residue detection and retry solve one specific failure class: ghost text left behind in the captured background. They do not solve Office font substitution, baseline/line-height mismatch, table padding/border differences, or incomplete paint order. That is why the experiment can have `suspiciousRegionCount = 0` and still fail the visual diff. Treating that as a success would be a category error.
 
+## M6 Same-Rendered-HTML Reference Gate
+
+The next useful `oh-my-ppt` lesson is not another `pptxWriter.ts` tuning pass. It is tightening the reference contract first. `oh-my-ppt` treats one browser-rendered state as the export fact. NoteMD already has a PPTX embedded frozen-background hard gate, but the external PNG advisory still comes from a separate Slidev PNG invocation, so it naturally includes drift from a second rendering instance.
+
+This slice adds a maintainer verifier path:
+
+1. `exportSlidevPptxRenderedHtmlReferencePngSequence()` captures PNG references from the same converged HTML, 1960x1104 viewport, route, freeze script, font readiness, and double-RAF settle used by the PPTX export.
+2. `scripts/verify-slidev-export-workflow.cjs --pptx-rendered-html-reference-diff` compares PPTX render-back output page by page against that same-rendered-HTML PNG sequence.
+3. `scripts/lib/pptx-visual-diff.js` now accepts an explicit `referenceSource`, so this path is reported as `pptx-rendered-html-reference` instead of being misclassified as a generic `external-png-sequence`.
+4. `--require-pptx-rendered-html-reference-match` can promote this same-source reference diff to a hard gate, but it remains an additional acceptance surface by default.
+
+Real command:
+
+```bash
+runuser -u jacob -- env HOME=/home/jacob PLAYWRIGHT_BROWSERS_PATH=/home/jacob/.cache/ms-playwright bash -lc 'cd /home/jacob/obsidian-NotEMD && npm run verify:slidev-export -- --vault docs --source architecture.zh-CN.md --format pptx --output-subfolder export/test-slidev-ohmyppt-same-html-reference-pptx --sample-slides all --timeout-ms 240000 --no-screenshots --pptx-visual-diff --require-pptx-visual-match --pptx-rendered-html-reference-diff --json'
+```
+
+Current real result:
+
+1. `ok = true`;
+2. `slidev.version = 52.16.0 (/home/jacob/slidev/packages/slidev/bin/slidev.mjs)`;
+3. `skillRootPath = /home/jacob/slidev/skills/slidev`, `skillReferenceCount = 52`;
+4. PPTX output: `docs/export/test-slidev-ohmyppt-same-html-reference-pptx/architecture.zh-CN.pptx`, `2,804,979` bytes;
+5. sidecar: `slideCount = 30`, `textBoxCount = 139`, `richTextRunCount = 344`, `tableCount = 6`, `editableTableCellCount = 102`;
+6. sidecar still keeps `visibleTextLayer = background-image` and `editableLayerRenderMode = transparent-structure`;
+7. font contract still reports `fontFamilies = ["Avenir Next", "Fira Code"]`, `officeMissingFontRiskFamilies = ["Avenir Next", "Fira Code"]`, and `embeddedFontCount = 0`;
+8. fallback-only objects remain `["code-highlight", "mermaid", "svg"]`;
+9. unmodeled text reasons remain `["inline-code", "inline-formatting", "syntax-highlight"]`;
+10. frozen-reference hard gate: `source = pptx-background-images`, `gatePassed = true`, `meanRmse = 0.049330418`, `maxRmse = 0.0889364`, `layoutDriftLikely = 0`;
+11. same-rendered-HTML reference diff: `source = pptx-rendered-html-reference`, `gatePassed = true`, `meanRmse = 0.049330418`, `maxRmse = 0.0889364`, `referenceContractDriftLikely = 0`, `layoutDriftLikely = 0`;
+12. all outputs from this run live under `docs/export/test-slidev-ohmyppt-same-html-reference-pptx/`; `git status --ignored` reports them as `!!`, so they are local evidence and not commit material.
+
+This separates three reference meanings:
+
+1. `pptx-background-images` is the current hard gate. It proves the frozen visual layer written into the PPTX survives Office/LibreOffice render-back within accepted limits.
+2. `pptx-rendered-html-reference` is the same-source HTML reference. It proves a PNG capture from the exact HTML capture path used by PPTX does not introduce the reference-contract drift seen in separate Slidev PNG invocations.
+3. `external-png-sequence` remains the cross-export advisory surface for checking whether the real PNG export and PPTX capture path share a strong enough layout/render contract.
+
+This is not replacing the PNG hard gate with images extracted from the PPTX. It is an intermediate layer: the same-rendered-HTML reference proves the PPTX capture contract is stable; when a separate Slidev PNG export fails, the failure can now be attributed more clearly to PNG export route/viewport/freeze/font-readiness contract drift instead of being misread as a PPTX writer failure.
+
 ## Release Link Decision
 
 The environment-check UI must continue pointing users at an npm-installable GitHub release asset:
@@ -399,7 +439,7 @@ Those are not regressions; they are explicit boundaries. Overstating editability
 
 The next level should be incremental and report-driven:
 
-1. keep visual diff in every real PPTX acceptance run, with `pptx-background-images` as the hard-gate reference source;
+1. keep visual diff in every real PPTX acceptance run, with `pptx-background-images` as the hard-gate reference source; also keep `--pptx-rendered-html-reference-diff` as a reference-contract regression check so future changes do not reintroduce HTML capture drift;
 2. keep the table structural layer, but do not make it visible until CSS padding, border collapse, line height, cell baseline, font fallback, and Office round-trip rendering are modeled tightly enough to avoid regressing the frozen visual layer;
 3. use `fontContract` as the gate before visible native text/table work. The next rich-text slices should split mixed CJK/Latin runs only when the writer/report agree on the final Office faces, then add paragraph spacing, list indentation, code monospace defaults, explicit hyperlink relationships, and a clearer distinction between text-style fidelity and true Office-native semantic fidelity;
 4. if a future slice makes native text or table layers visible, add background residue detection/retry before accepting those screenshots. The current transparent-structure mode should not hide text from the frozen background; residue sampling only becomes mandatory when visible native text takes over the visual layer.

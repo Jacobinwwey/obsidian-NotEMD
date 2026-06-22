@@ -390,6 +390,46 @@ NODE
 
 visible-native 的结论没有变。residue detection/retry 只解决一类问题：背景截图里不应残留已抽取文本造成 ghost text。它不解决 Office 字体替换、baseline/line-height 偏差、表格 padding/border 差异，也不解决 paint order 建模不完整。因此实验结果可以同时满足 `suspiciousRegionCount = 0` 并且 visual diff 失败；把前者当成整体成功是错误归因。
 
+## M6 same-rendered-HTML reference gate
+
+这次基于 `oh-my-ppt` 的后续结论不是继续调 `pptxWriter.ts`，而是先收紧 reference contract。`oh-my-ppt` 的关键做法是让导出以同一个浏览器渲染事实为准；NotEMD 之前已经有 PPTX 内嵌 frozen background hard gate，但 external PNG advisory 仍来自另一条 Slidev PNG invocation，因此天然会混入第二次渲染实例的漂移。
+
+本轮新增维护者 verifier 路径：
+
+1. `exportSlidevPptxRenderedHtmlReferencePngSequence()` 从 PPTX 使用的同一个 converged HTML、同一个 1960x1104 viewport、同一个 route、同一个 freeze/font-ready/double-RAF 逻辑捕获 PNG reference；
+2. `scripts/verify-slidev-export-workflow.cjs --pptx-rendered-html-reference-diff` 会把 PPTX 回渲结果与这组 same-rendered-HTML PNG 序列逐页比较；
+3. `scripts/lib/pptx-visual-diff.js` 现在支持显式 `referenceSource`，因此这条路径在 report 中标为 `pptx-rendered-html-reference`，不会被误归类成普通 `external-png-sequence`；
+4. `--require-pptx-rendered-html-reference-match` 可以把这条同源 reference diff 提升为 hard gate，但默认仍保持为额外验收面。
+
+真实命令：
+
+```bash
+runuser -u jacob -- env HOME=/home/jacob PLAYWRIGHT_BROWSERS_PATH=/home/jacob/.cache/ms-playwright bash -lc 'cd /home/jacob/obsidian-NotEMD && npm run verify:slidev-export -- --vault docs --source architecture.zh-CN.md --format pptx --output-subfolder export/test-slidev-ohmyppt-same-html-reference-pptx --sample-slides all --timeout-ms 240000 --no-screenshots --pptx-visual-diff --require-pptx-visual-match --pptx-rendered-html-reference-diff --json'
+```
+
+当前真实结果：
+
+1. `ok = true`；
+2. `slidev.version = 52.16.0 (/home/jacob/slidev/packages/slidev/bin/slidev.mjs)`；
+3. `skillRootPath = /home/jacob/slidev/skills/slidev`，`skillReferenceCount = 52`；
+4. PPTX 输出：`docs/export/test-slidev-ohmyppt-same-html-reference-pptx/architecture.zh-CN.pptx`，大小 `2,804,979` bytes；
+5. sidecar：`slideCount = 30`，`textBoxCount = 139`，`richTextRunCount = 344`，`tableCount = 6`，`editableTableCellCount = 102`；
+6. sidecar 继续保持 `visibleTextLayer = background-image` 与 `editableLayerRenderMode = transparent-structure`；
+7. 字体合同仍然显示 `fontFamilies = ["Avenir Next", "Fira Code"]`，`officeMissingFontRiskFamilies = ["Avenir Next", "Fira Code"]`，`embeddedFontCount = 0`；
+8. fallback-only 对象仍然是 `["code-highlight", "mermaid", "svg"]`；
+9. 未建模文本原因仍然是 `["inline-code", "inline-formatting", "syntax-highlight"]`；
+10. frozen-reference hard gate：`source = pptx-background-images`，`gatePassed = true`，`meanRmse = 0.049330418`，`maxRmse = 0.0889364`，`layoutDriftLikely = 0`；
+11. same-rendered-HTML reference diff：`source = pptx-rendered-html-reference`，`gatePassed = true`，`meanRmse = 0.049330418`，`maxRmse = 0.0889364`，`referenceContractDriftLikely = 0`，`layoutDriftLikely = 0`；
+12. 所有本轮产物都在 `docs/export/test-slidev-ohmyppt-same-html-reference-pptx/` 下，`git status --ignored` 显示为 `!!`，不会进入提交。
+
+这个结果把三类 reference 语义分开了：
+
+1. `pptx-background-images` 是当前 hard gate，证明 PPTX 包内写入的冻结视觉层经过 Office/LibreOffice 回渲后仍保持可接受视觉；
+2. `pptx-rendered-html-reference` 是同源 HTML reference，证明从 PPTX 使用的同一 HTML capture path 再捕获 PNG，不会引入独立 Slidev PNG invocation 那种 reference-contract drift；
+3. `external-png-sequence` 仍然保留为 cross-export advisory，用来暴露“真正的 PNG 导出”和“PPTX capture”两条路径是否共享足够强的 layout/render contract。
+
+这不是把 PNG hard gate 偷换成 PPTX 内嵌图。它是一个中间层：同源 HTML reference 能证明当前 PPTX capture 合同稳定；独立 Slidev PNG export 失败时，就能更明确地把问题归到 PNG export route/viewport/freeze/font readiness 合同未统一，而不是误判为 PPTX writer 失败。
+
 ## Release 链接决策
 
 环境检测 UI 必须继续指向 npm 可安装的 GitHub release asset：
@@ -420,7 +460,7 @@ GitHub branch、tree 或 blob URL 都不是正确安装面。它们不是稳定 
 
 下一阶段应保持增量、报告驱动：
 
-1. 保持 visual diff gate 进入每次 PPTX 真实验收：报告模式用于开发，`--require-pptx-visual-match` 用于收口或 CI，并固定使用 `pptx-background-images` 作为 hard gate reference。
+1. 保持 visual diff gate 进入每次 PPTX 真实验收：报告模式用于开发，`--require-pptx-visual-match` 用于收口或 CI，并固定使用 `pptx-background-images` 作为 hard gate reference；同时保留 `--pptx-rendered-html-reference-diff` 作为 reference-contract 回归检查，避免后续改动重新制造 HTML capture 漂移。
 2. table-first extraction 已经落地为透明结构层。下一步不要急着把表格设为可见层，而应先补齐 CSS padding、border collapse、line-height、cell text baseline、theme font fallback 与 Office round-trip 渲染模型；只有 visible-native-table 分支在 frozen reference gate 下不退化时，才允许逐页放开。
 3. 把 `fontContract` 作为 visible native text/table 的前置门槛。下一步 rich-text 切片只有在 writer/report 对最终 Office 字体一致时，才应拆分 mixed CJK/Latin runs；然后再补 paragraph spacing、list indentation、code monospace 默认、显式 hyperlink relationship，以及“文本样式保真”和“Office 原生语义保真”的报告区分。
 4. 如果未来要让原生 text/table layer 从透明变为可见，必须先增加 background residue detection/retry。当前透明结构层不应隐藏背景文字；只有可见原生文本接管视觉时，才需要像 `oh-my-ppt` 那样隐藏已抽取文字并用像素采样确认背景不残留 ghost text。
