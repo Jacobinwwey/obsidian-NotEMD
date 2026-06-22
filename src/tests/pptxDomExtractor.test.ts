@@ -222,6 +222,67 @@ describe('pptxDomExtractor', () => {
 		}
 	});
 
+	test('treats syntax token foreground colors as native rich text instead of code-highlight fallback', async () => {
+		if (!browser) {
+			console.warn('Skipping PPTX DOM extractor Playwright test:', launchError);
+			return;
+		}
+
+		const page = await browser.newPage({ viewport: { width: 1280, height: 720 } });
+		try {
+			await page.setContent(`
+				<body style="margin:0;background:#fff">
+					<div class="slidev-page" style="width:1280px;height:720px;background:#fff;padding:64px;box-sizing:border-box">
+						<pre class="shiki" style="margin:0;width:640px;background:#0f172a;font-family:Consolas;font-size:24px;line-height:32px;color:#e5e7eb;padding:16px"><code><span class="token keyword" style="color:#93c5fd">const</span><span> answer = </span><span class="token number" style="color:#fde68a">42</span></code></pre>
+					</div>
+				</body>
+			`);
+
+			const slide = await extractSlidevPptxSlideFromPage(page, 1);
+			const codeText = slide.texts.find((textBox) => textBox.sourceKind === 'code');
+			const runColors = new Set(
+				(codeText?.richTextParagraphs || []).flatMap((paragraph) => paragraph.runs.map((run) => run.color)),
+			);
+
+			expect(codeText?.text).toBe('const answer = 42');
+			expect(runColors).toEqual(new Set(['93C5FD', 'E5E7EB', 'FDE68A']));
+			expect(codeText?.unmodeledRunReasons).not.toContain('syntax-highlight');
+			expect(slide.fallbackOnlyElementKinds).not.toContain('code-highlight');
+		} finally {
+			await page.close();
+		}
+	});
+
+	test('keeps code-highlight fallback when token paint cannot be represented as native text or solid rectangles', async () => {
+		if (!browser) {
+			console.warn('Skipping PPTX DOM extractor Playwright test:', launchError);
+			return;
+		}
+
+		const page = await browser.newPage({ viewport: { width: 1280, height: 720 } });
+		try {
+			await page.setContent(`
+				<body style="margin:0;background:#fff">
+					<div class="slidev-page" style="width:1280px;height:720px;background:#fff;padding:64px;box-sizing:border-box">
+						<pre class="shiki" style="margin:0;width:640px;background:#0f172a;font-family:Consolas;font-size:24px;line-height:32px;color:#e5e7eb;padding:16px"><code><span class="token keyword" style="color:#93c5fd">const</span><span> answer = </span><span class="token number" style="color:#fde68a;background-image:linear-gradient(90deg,#7f1d1d,#1e3a8a)">42</span></code></pre>
+					</div>
+				</body>
+			`);
+
+			const slide = await extractSlidevPptxSlideFromPage(page, 1);
+			const codeText = slide.texts.find((textBox) => textBox.sourceKind === 'code');
+			const skipCounts = new Map(
+				(slide.decorativePrimitiveDiagnostics?.skipReasonCounts || []).map((item) => [item.reason, item.count]),
+			);
+
+			expect(codeText?.unmodeledRunReasons).toContain('syntax-highlight');
+			expect(slide.fallbackOnlyElementKinds).toContain('code-highlight');
+			expect(skipCounts.get('unsupported-code-root')).toBeGreaterThanOrEqual(1);
+		} finally {
+			await page.close();
+		}
+	});
+
 	test('extracts high-confidence code backgrounds as native rectangle primitives', async () => {
 		if (!browser) {
 			console.warn('Skipping PPTX DOM extractor Playwright test:', launchError);

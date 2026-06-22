@@ -929,7 +929,6 @@ export async function extractSlidevPptxSlideFromPage(page: any, slideNumber: num
 			addIfVisible('video', 'video');
 			addIfVisible('iframe', 'iframe');
 			addIfVisible('math', 'math, .katex, .MathJax');
-			addIfVisible('code-highlight', 'pre code, .shiki, .token, code[class*="language-"]');
 			return Array.from(kinds).sort();
 		};
 		const alignFor = (style: CSSStyleDeclaration): SlidevPptxTextAlign => {
@@ -975,7 +974,10 @@ export async function extractSlidevPptxSlideFromPage(page: any, slideNumber: num
 			if (element.querySelector('a[href]')) {
 				reasons.add('link');
 			}
-			if (element.closest('.shiki') || element.querySelector('.shiki, .token, code[class*="language-"]')) {
+			if (
+				(element.closest('.shiki') || element.querySelector('.shiki, .token, code[class*="language-"]')) &&
+				codeHighlightPaintRequiresFallbackFor(element)
+			) {
 				reasons.add('syntax-highlight');
 			}
 			for (const child of Array.from(element.querySelectorAll('b,strong,em,i,u,s,strike,del,a,code,span,mark,sup,sub'))) {
@@ -1497,6 +1499,47 @@ export async function extractSlidevPptxSlideFromPage(page: any, slideNumber: num
 				(Boolean(transform) && transform !== 'none')
 			);
 		};
+		const hasVisibleBorderPaint = (style: CSSStyleDeclaration): boolean =>
+			[
+				{ width: style.borderTopWidth, color: style.borderTopColor, borderStyle: style.borderTopStyle },
+				{ width: style.borderRightWidth, color: style.borderRightColor, borderStyle: style.borderRightStyle },
+				{ width: style.borderBottomWidth, color: style.borderBottomColor, borderStyle: style.borderBottomStyle },
+				{ width: style.borderLeftWidth, color: style.borderLeftColor, borderStyle: style.borderLeftStyle },
+			].some((side) => {
+				const widthPx = Number.parseFloat(side.width || '0') || 0;
+				return widthPx > 0 && side.borderStyle !== 'none' && side.borderStyle !== 'hidden' && colorAlpha(side.color) > 0.02;
+			});
+		const codeHighlightPaintRequiresFallbackFor = (rootElement: Element): boolean => {
+			const candidates = [rootElement, ...Array.from(rootElement.querySelectorAll('*'))];
+			for (const element of candidates) {
+				if (!(element instanceof HTMLElement)) continue;
+				if (!codeShapeOwnerFor(element)) continue;
+				const style = window.getComputedStyle(element);
+				const rect = element.getBoundingClientRect();
+				if (!isVisible(element, style, rect)) continue;
+				if (hasUnsupportedPrimitivePaint(style)) return true;
+				const fillColor = visibleSolidFillFor(style);
+				if (
+					fillColor &&
+					!element.hasAttribute('data-notemd-pptx-consumed-shape') &&
+					!hasConsumedAncestorWithSameFill(element, fillColor, rect)
+				) {
+					return true;
+				}
+				if (hasVisibleBorderPaint(style) && !element.hasAttribute('data-notemd-pptx-consumed-shape')) {
+					return true;
+				}
+			}
+			return false;
+		};
+		const codeHighlightPaintRequiresFallback = (): boolean => {
+			for (const element of allElementsInComposedRoot()) {
+				if (!(element instanceof HTMLElement)) continue;
+				if (!codeShapeOwnerFor(element)) continue;
+				if (codeHighlightPaintRequiresFallbackFor(element)) return true;
+			}
+			return false;
+		};
 		const parentBackgroundFillFor = (element: Element): string => {
 			const parent = element.parentElement;
 			return parent ? rgbToHex(window.getComputedStyle(parent).backgroundColor) : '';
@@ -1919,7 +1962,12 @@ export async function extractSlidevPptxSlideFromPage(page: any, slideNumber: num
 		}
 		collectCodeBackgroundRectangles();
 		collectDecorativeSolidRectangles();
-		const fallbackOnlyElementKinds = collectFallbackOnlyElementKinds();
+		const fallbackOnlyElementKinds = Array.from(
+			new Set<SlidevPptxFallbackOnlyElementKind>([
+				...collectFallbackOnlyElementKinds(),
+				...(codeHighlightPaintRequiresFallback() ? ['code-highlight' as const] : []),
+			]),
+		).sort();
 		let consumedTableTextCandidateCount = 0;
 
 		for (const element of allCandidates) {

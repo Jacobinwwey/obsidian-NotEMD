@@ -1456,6 +1456,50 @@ fixture 验收：
 
 rendered-HTML visual hard gate 已通过，但 diff report 仍把若干页标为 high-priority layout-review candidate，原因是 Office 文本/排版和 Chromium 存在漂移。这不是恢复透明 overlay 的理由。下一步质量切片应该在 visible-native 合同下处理 code-highlight paint extraction，以及表格/文字 layout parity。
 
+## M27 code-highlight 原生覆盖语义收紧
+
+这一轮收紧 PPTX report 中 `code-highlight` 和 `syntax-highlight` 的含义。旧 report 只要看到 Shiki/token DOM，就把它当作 fallback-owned，即使导出的 PPTX 已经把 token 前景色写成了可见 native rich-text run。这会让报告比真实可编辑输出更悲观，也会污染下一步工程优先级。
+
+本轮落地内容：
+
+1. `pre code`、`.shiki`、`.token` 或 `code[class*="language-"]` 可见时，不再自动加入 `code-highlight`。
+2. extractor 现在只检查当前 native 层无法表达的 code-owned paint：unsupported primitive paint、未被消费的纯色 fill、未被消费的可见 border。
+3. 只有这些 unsupported code paint 存在时，text run diagnostics 才加入 `syntax-highlight`。普通 token 前景色已经由 native rich text 覆盖。
+4. 代码路径继续沿用从 `oh-my-ppt` 学到的 ownership 模型：能表达的 DOM 样式抽成 native object，已消费 shape 做标记，捕获背景前隐藏已建模文字，不可表达 paint 继续留给背景 fallback。没有引入第二条独立 HTML-to-PPTX 管线。
+5. 实现上移除了 `collectFallbackOnlyElementKinds` 的模式布尔参数：先收集基础 fallback kinds，再在有 code paint 证据时合并 `code-highlight`。
+
+与先前方案对比：
+
+1. M25 已经把 protected-root diagnostics 拆开，让 code、SVG、Mermaid、table 不再共用一个 `unsupported-root` 大桶。
+2. M26 移除了 fake-editable 透明文字路径，把可见 native text/table 固化成默认合同。
+3. M27 不宣称所有代码视觉都已经 Office-native。它只修正一件事：已经由 native rich text 承接的 token 前景色，不应继续被报告成 unmodeled fallback。
+4. 这是扩大抽取前必须做的一步：report 现在能区分“文本样式已覆盖”和“code-root paint 仍未建模”。没有这层区分，下一步目标会被噪声带偏。
+
+验证：
+
+1. `npx tsc --noEmit --pretty false` 通过。
+2. `git diff --check` 通过。
+3. `runuser -u jacob -- env HOME=/home/jacob PLAYWRIGHT_BROWSERS_PATH=/home/jacob/.cache/ms-playwright bash -lc 'cd /home/jacob/obsidian-NotEMD && npm test -- --runInBand src/tests/pptxDomExtractor.test.ts'` 使用真实 Chromium 通过：`12` 个测试。
+4. `npm test -- --runInBand src/tests/pptxWriter.test.ts src/tests/pptxExportReport.test.ts` 通过：`21` 个测试。
+5. `npm run build` 通过。
+6. 全量 Jest 通过：`190` suites，`1549` tests。root 的 Playwright cache 仍会打印既有 browser skip warning；上面的 jacob-run DOM extractor 命令才是真实浏览器验证。
+
+真实 `architecture.zh-CN.md` 验收：
+
+1. 真实导出命令通过：`npm run verify:slidev-export -- --vault docs --source architecture.zh-CN.md --format pptx --output-subfolder export/test-slidev-m27-code-highlight-native-coverage --sample-slides all --timeout-ms 240000 --no-screenshots --require-pptx-visual-match --json`。
+2. Slidev 来自本地 fork：`52.16.0 (/home/jacob/slidev/packages/slidev/bin/slidev.mjs)`，并使用 `skillRootPath = /home/jacob/slidev/skills/slidev`，`skillReferenceCount = 52`。
+3. 视觉与源内容 gate 均通过：`ok = true`，`pptxVisualGate.passed = true`，`referenceSource = "pptx-rendered-html-reference"`，`thresholdProfile = "visible-native-rendered-html"`，`mermaidSourcePreservation.passed = true`，`sourceFenceCount = 3`，`deckFenceCount = 3`，`changedFenceIndexes = []`。
+4. editable 输出保持稳定：`slideCount = 30`，`textRunCount = 861`，`tableCount = 6`，`slidesWithoutEditableText = []`，`editableCodeTextBoxCount = 14`，`editableCodeBackgroundRectangleCount = 115`。
+5. report 语义已经改善：`unmodeledTextRunReasons = ["inline-code", "inline-formatting"]`；真实 deck 中不再出现 `syntax-highlight`。
+6. `fallbackOnlyElementKinds` 仍包含 `["code-highlight", "mermaid", "svg"]`。这是预期结果：真实代码区域仍有 `unsupported-code-root = 115`，Mermaid/SVG 几何仍由背景拥有。
+7. decorative skip 分布仍可行动：`unsupported-code-root = 115`，`unsupported-svg-root = 136`，`unsupported-table-root = 120`，`not-visible = 2`。
+8. PPTX XML 扫描确认透明路径仍然不存在：`alpha=0 = 0`，`alpha=8000 = 0`，具名 `Editable ... Text = 0`，具名 `Editable Table = 0`，`Visible Native Text = 324`，`Visible Native Code Text = 14`，`Visible Native Table = 6`，`Native Code Background Rectangle = 115`，`<a:t...>` tags = `861`。
+9. 生成物仍 ignored 且未被 git 跟踪：`docs/export/test-slidev-m27-code-highlight-native-coverage/` 显示为 ignored，`git ls-files docs/export/test-slidev-m27-code-highlight-native-coverage` 没有 tracked 文件。
+
+残余风险：
+
+这一轮提升的是 report 精度，不是几何布局。下一步高价值目标仍是 `unsupported-code-root`：需要判断剩余 code paint 是否应该抽成 native rectangle/border，还是诚实地继续由背景拥有。SVG 和 Mermaid 应保持独立轨道。对 Mermaid 来说，源内容保留仍比把每个图内 label 都重建成 Office 可编辑文本更重要。
+
 ## 当前边界
 
 第一版实现有意保守：

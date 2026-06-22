@@ -1435,6 +1435,50 @@ Residual risk:
 
 The rendered-HTML visual hard gate passes, but the diff report still marks several pages as high-priority layout-review candidates because Office text/layout differs from Chromium. That is not a reason to restore transparent overlays. It means the next quality slice should target code-highlight paint extraction and table/text layout parity under the visible-native contract.
 
+## M27 Code-Highlight Native Coverage Semantics
+
+This slice narrows what `code-highlight` and `syntax-highlight` mean in the PPTX report. The previous report treated the presence of Shiki/token DOM as fallback-owned even when the exported PPTX already carried the token foreground colors as visible native rich-text runs. That made the report look worse than the actual editable output and blurred the next engineering target.
+
+Implementation status:
+
+1. `code-highlight` is no longer added just because `pre code`, `.shiki`, `.token`, or `code[class*="language-"]` is visible.
+2. The extractor now checks code-owned paint that cannot be represented by the current native layer: unsupported primitive paint, unconsumed solid fills, and unconsumed visible borders.
+3. Text run diagnostics add `syntax-highlight` only when that unsupported code paint is present. Plain token foreground colors remain covered by native rich text.
+4. The code path keeps the same ownership model adopted from `oh-my-ppt`: extract native objects where the DOM style can be represented, mark consumed shapes, hide modeled text before background capture, and leave unsupported paint in the background fallback. It does not import a parallel HTML-to-PPTX route.
+5. The implementation avoids a mode flag in `collectFallbackOnlyElementKinds`; the base fallback kinds are collected first, then `code-highlight` is merged only when code paint evidence requires it.
+
+Comparison with the prior plan:
+
+1. M25 split protected-root diagnostics so code, SVG, Mermaid, and table candidates stopped sharing one `unsupported-root` bucket.
+2. M26 removed the fake-editable transparent text path and made visible native text/table the default contract.
+3. M27 does not claim all code visuals are Office-native. It only prevents native-rich token foreground colors from being reported as unmodeled fallback.
+4. This is the correct next step before widening extraction: the report now distinguishes text-style coverage from unmodeled code-root paint. Without that distinction, the next target would be selected from noisy diagnostics.
+
+Validation:
+
+1. `npx tsc --noEmit --pretty false` passed.
+2. `git diff --check` passed.
+3. `runuser -u jacob -- env HOME=/home/jacob PLAYWRIGHT_BROWSERS_PATH=/home/jacob/.cache/ms-playwright bash -lc 'cd /home/jacob/obsidian-NotEMD && npm test -- --runInBand src/tests/pptxDomExtractor.test.ts'` passed with real Chromium: `12` tests.
+4. `npm test -- --runInBand src/tests/pptxWriter.test.ts src/tests/pptxExportReport.test.ts` passed: `21` tests.
+5. `npm run build` passed.
+6. Full Jest passed: `190` suites, `1549` tests. Root's Playwright cache still logs the existing browser skip warnings; the jacob-run DOM extractor command above is the real browser validation.
+
+Real `architecture.zh-CN.md` acceptance:
+
+1. Real export command passed: `npm run verify:slidev-export -- --vault docs --source architecture.zh-CN.md --format pptx --output-subfolder export/test-slidev-m27-code-highlight-native-coverage --sample-slides all --timeout-ms 240000 --no-screenshots --require-pptx-visual-match --json`.
+2. Slidev came from the local fork: `52.16.0 (/home/jacob/slidev/packages/slidev/bin/slidev.mjs)`, with `skillRootPath = /home/jacob/slidev/skills/slidev` and `skillReferenceCount = 52`.
+3. Visual and source gates passed: `ok = true`, `pptxVisualGate.passed = true`, `referenceSource = "pptx-rendered-html-reference"`, `thresholdProfile = "visible-native-rendered-html"`, `mermaidSourcePreservation.passed = true`, `sourceFenceCount = 3`, `deckFenceCount = 3`, `changedFenceIndexes = []`.
+4. Editable output stayed stable: `slideCount = 30`, `textRunCount = 861`, `tableCount = 6`, `slidesWithoutEditableText = []`, `editableCodeTextBoxCount = 14`, `editableCodeBackgroundRectangleCount = 115`.
+5. Report semantics improved: `unmodeledTextRunReasons = ["inline-code", "inline-formatting"]`; `syntax-highlight` is no longer present for the real deck.
+6. `fallbackOnlyElementKinds` still includes `["code-highlight", "mermaid", "svg"]`. That is expected: real code-root paint still has `unsupported-code-root = 115`, while Mermaid/SVG geometry remains background-owned.
+7. The decorative skip distribution remains actionable: `unsupported-code-root = 115`, `unsupported-svg-root = 136`, `unsupported-table-root = 120`, `not-visible = 2`.
+8. PPTX XML scan confirms the transparent path remains gone: `alpha=0 = 0`, `alpha=8000 = 0`, named `Editable ... Text = 0`, named `Editable Table = 0`, `Visible Native Text = 324`, `Visible Native Code Text = 14`, `Visible Native Table = 6`, `Native Code Background Rectangle = 115`, and `<a:t...>` tags = `861`.
+9. Generated outputs stayed ignored and untracked: `docs/export/test-slidev-m27-code-highlight-native-coverage/` shows as ignored, and `git ls-files docs/export/test-slidev-m27-code-highlight-native-coverage` returns no tracked files.
+
+Residual risk:
+
+This slice improves report precision, not layout geometry. The next high-value code path is still `unsupported-code-root`: decide whether the remaining code paint should become native rectangles/borders, or stay honestly background-owned. SVG and Mermaid should remain separate tracks. Mermaid source preservation is still more important than trying to reconstruct every diagram label as editable Office text.
+
 ## Current Limits
 
 The first implementation is intentionally conservative:
