@@ -319,7 +319,14 @@ export async function extractSlidevPptxSlideFromPage(page: any, slideNumber: num
 			const candidates = Array.from(
 				document.querySelectorAll('.slidev-page, .slidev-layout, .slidev-slide-content, #app'),
 			);
-			let best: { element: Element; area: number } | null = null;
+			const rootPriority = (element: Element): number => {
+				if (element.matches('.slidev-page')) return 4;
+				if (element.matches('.slidev-layout')) return 3;
+				if (element.matches('.slidev-slide-content')) return 2;
+				if (element.matches('#app')) return 1;
+				return 0;
+			};
+			let best: { element: Element; area: number; priority: number } | null = null;
 			for (const candidate of candidates) {
 				const style = window.getComputedStyle(candidate);
 				if (style.display === 'none' || style.visibility === 'hidden' || Number(style.opacity || '1') < 0.04) {
@@ -335,8 +342,9 @@ export async function extractSlidevPptxSlideFromPage(page: any, slideNumber: num
 				)
 					continue;
 				const area = rect.width * rect.height;
-				if (!best || area > best.area) {
-					best = { element: candidate, area };
+				const priority = rootPriority(candidate);
+				if (!best || area > best.area + 1 || (Math.abs(area - best.area) <= 1 && priority > best.priority)) {
+					best = { element: candidate, area, priority };
 				}
 			}
 			return best?.element || document.body;
@@ -348,12 +356,17 @@ export async function extractSlidevPptxSlideFromPage(page: any, slideNumber: num
 		const rootTop = rootRect.top || 0;
 		const rootWidth = rootRect.width || window.innerWidth || 1280;
 		const rootHeight = rootRect.height || window.innerHeight || 720;
+		const rootOffsetWidth = root instanceof HTMLElement ? root.offsetWidth || rootWidth : rootWidth;
+		const rootOffsetHeight = root instanceof HTMLElement ? root.offsetHeight || rootHeight : rootHeight;
+		const rootScaleX = rootOffsetWidth > 0 ? rootWidth / rootOffsetWidth : 1;
+		const rootScaleY = rootOffsetHeight > 0 ? rootHeight / rootOffsetHeight : rootScaleX;
+		const rootVisualScale = Math.max(0.05, Math.min(rootScaleX || 1, rootScaleY || rootScaleX || 1));
 		const pxToInX = (value: number): number => ((value - rootLeft) / rootWidth) * slideWidthIn;
 		const pxToInY = (value: number): number => ((value - rootTop) / rootHeight) * slideHeightIn;
 		const sizeToInX = (value: number): number => (value / rootWidth) * slideWidthIn;
 		const sizeToInY = (value: number): number => (value / rootHeight) * slideHeightIn;
 		const pxToPt = (value: number): number =>
-			value * Math.min(slideWidthIn / rootWidth, slideHeightIn / rootHeight) * 72;
+			value * rootVisualScale * Math.min(slideWidthIn / rootWidth, slideHeightIn / rootHeight) * 72;
 		const collectShadowRoots = (element: Element): ShadowRoot[] => {
 			const shadowRoots: ShadowRoot[] = [];
 			const visit = (current: Element): void => {
@@ -850,6 +863,7 @@ export async function extractSlidevPptxSlideFromPage(page: any, slideNumber: num
 					borderWidthPt: border.widthPt,
 				});
 				if (cellText) {
+					placement.element.setAttribute('data-notemd-pptx-text-source-kind', 'table-cell-overlay');
 					textBoxes.push({
 						text: cellText,
 						sourceKind: 'table-cell-overlay',
@@ -902,6 +916,7 @@ export async function extractSlidevPptxSlideFromPage(page: any, slideNumber: num
 			const text = textForElement(element, tagName, sourceKind);
 			if (!text.trim()) continue;
 			selected.add(element);
+			element.setAttribute('data-notemd-pptx-text-source-kind', sourceKind);
 			const fontSizePx = Number.parseFloat(style.fontSize || '16') || 16;
 			const fontWeight = Number.parseInt(style.fontWeight || '400', 10);
 			const listStyle = style.listStyleType || '';
@@ -1001,38 +1016,9 @@ export async function extractSlidevPptxSlideFromPage(page: any, slideNumber: num
 				unmodeledRunReasons: [],
 			});
 			svgTextElement.setAttribute('data-notemd-pptx-hidden-text', '1');
-			if (svgTextElement instanceof SVGElement) {
-				svgTextElement.style.setProperty('fill', 'transparent', 'important');
-				svgTextElement.style.setProperty('stroke', 'transparent', 'important');
-			}
+			svgTextElement.setAttribute('data-notemd-pptx-text-source-kind', sourceKind);
 			order += 10;
 		}
-
-		const hideStyle = document.createElement('style');
-		hideStyle.id = 'notemd-pptx-hide-text';
-		hideStyle.textContent = [
-			'[data-notemd-pptx-hidden-text="1"],',
-			'[data-notemd-pptx-hidden-text="1"] * {',
-			'color: transparent !important;',
-			'-webkit-text-fill-color: transparent !important;',
-			'text-shadow: none !important;',
-			'text-decoration-color: transparent !important;',
-			'}',
-			'svg [data-notemd-pptx-hidden-text="1"],',
-			'svg [data-notemd-pptx-hidden-text="1"] * {',
-			'fill: transparent !important;',
-			'stroke: transparent !important;',
-			'}',
-			'[data-notemd-pptx-hidden-text="1"]::marker { color: transparent !important; }',
-			'[data-notemd-pptx-consumed-table="1"],',
-			'[data-notemd-pptx-consumed-table="1"] * {',
-			'color: transparent !important;',
-			'-webkit-text-fill-color: transparent !important;',
-			'text-shadow: none !important;',
-			'text-decoration-color: transparent !important;',
-			'}',
-		].join('\n');
-		document.head.appendChild(hideStyle);
 
 		if (textBoxes.length === 0) {
 			warnings.push(`Slide ${currentSlide} has no extracted editable text.`);

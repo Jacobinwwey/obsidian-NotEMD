@@ -201,16 +201,24 @@ describe('pptx export report', () => {
 		expect(report.editablePrimitiveCoverage.backgroundFallbackSlideRatio).toBe(0.5);
 		expect(report.editableLayerContract).toEqual({
 			visualFidelityStrategy: 'frozen-background-first',
-			visibleTextSource: 'background-image',
-			editableTextShapeFill: 'transparent',
-			editableTableTextFill: 'transparent',
-			backgroundTextPolicy: 'preserve-rendered-text',
-			textSelectionSurface: 'named-transparent-shapes',
+			visibleTextSource: 'native-text-and-background-image',
+			editableTextShapeFill: 'visible',
+			editableTableTextFill: 'visible',
+			editableTableCellOverlayTextFill: 'visible',
+			backgroundTextPolicy: 'hide-modeled-text-before-capture',
+			textSelectionSurface: 'visible-native-text',
+			selectableNativeTextSources: ['body', 'code', 'svg-text', 'table-cell-overlay'],
+			visibleNativeTextSources: ['body', 'code', 'svg-text', 'table-cell-overlay'],
+			transparentOverlayTextSources: [],
+			backgroundHiddenTextSources: ['body', 'code', 'svg-text', 'table-cell-overlay'],
+			backgroundPreservedTextSources: ['mermaid-text'],
 			mermaidSvgVisualPolicy: 'background-image',
-			mermaidSvgTextPolicy: 'transparent-editable-label-overlays',
+			mermaidSvgTextPolicy: 'background-image-only',
 			officeNativeMermaidSvgElementEditability: 'not-claimed',
 			fontPortabilityPolicy: 'report-only-no-default-font-embedding',
 		});
+		expect(report.visibleTextLayer).toBe('native-text-and-background-image');
+		expect(report.editableLayerRenderMode).toBe('visible-native-text');
 		expect(report.fontContract).toEqual(
 			expect.objectContaining({
 				fontFamilyCount: 3,
@@ -568,10 +576,16 @@ describe('pptx export report', () => {
 				visibleTextSource: 'native-text',
 				editableTextShapeFill: 'visible',
 				editableTableTextFill: 'visible',
+				editableTableCellOverlayTextFill: 'visible',
 				backgroundTextPolicy: 'hide-extracted-text-before-capture',
 				textSelectionSurface: 'visible-native-text',
+				selectableNativeTextSources: ['body', 'code', 'mermaid-text', 'svg-text', 'table-cell-overlay'],
+				visibleNativeTextSources: ['body', 'code', 'mermaid-text', 'svg-text', 'table-cell-overlay'],
+				transparentOverlayTextSources: [],
+				backgroundHiddenTextSources: ['body', 'code', 'mermaid-text', 'svg-text', 'table-cell-overlay'],
+				backgroundPreservedTextSources: [],
 				mermaidSvgVisualPolicy: 'background-image',
-				mermaidSvgTextPolicy: 'transparent-editable-label-overlays',
+				mermaidSvgTextPolicy: 'visible-native-text',
 				officeNativeMermaidSvgElementEditability: 'not-claimed',
 			}),
 		);

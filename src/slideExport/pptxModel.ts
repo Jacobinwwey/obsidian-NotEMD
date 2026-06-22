@@ -19,6 +19,17 @@ export type SlidevPptxUnmodeledTextRunReason = 'inline-code' | 'inline-formattin
 
 export type SlidevPptxTextSourceKind = 'body' | 'code' | 'mermaid-text' | 'svg-text' | 'table-cell-overlay';
 
+export const SLIDEV_PPTX_VISIBLE_TEXT_SOURCE_KINDS: readonly SlidevPptxTextSourceKind[] = [
+	'body',
+	'code',
+	'svg-text',
+	'table-cell-overlay',
+];
+
+export const SLIDEV_PPTX_BACKGROUND_OWNED_TEXT_SOURCE_KINDS: readonly SlidevPptxTextSourceKind[] = [
+	'mermaid-text',
+];
+
 export interface SlidevPptxInlineTextRun {
 	text: string;
 	fontSize: number;
@@ -255,13 +266,27 @@ export interface SlidevPptxFontContractSummary {
 
 export interface SlidevPptxEditableLayerContract {
 	visualFidelityStrategy: 'frozen-background-first' | 'visible-native-experiment';
-	visibleTextSource: 'background-image' | 'native-text';
+	visibleTextSource:
+		| 'background-image'
+		| 'native-text'
+		| 'native-text-and-background-image';
 	editableTextShapeFill: 'transparent' | 'visible';
 	editableTableTextFill: 'transparent' | 'visible';
-	backgroundTextPolicy: 'preserve-rendered-text' | 'hide-extracted-text-before-capture';
-	textSelectionSurface: 'named-transparent-shapes' | 'visible-native-text';
+	editableTableCellOverlayTextFill: 'transparent' | 'visible';
+	backgroundTextPolicy:
+		| 'preserve-rendered-text'
+		| 'hide-extracted-text-before-capture'
+		| 'hide-modeled-text-before-capture';
+	textSelectionSurface:
+		| 'named-transparent-shapes'
+		| 'visible-native-text';
+	selectableNativeTextSources: SlidevPptxTextSourceKind[];
+	visibleNativeTextSources: SlidevPptxTextSourceKind[];
+	transparentOverlayTextSources: SlidevPptxTextSourceKind[];
+	backgroundHiddenTextSources: SlidevPptxTextSourceKind[];
+	backgroundPreservedTextSources: SlidevPptxTextSourceKind[];
 	mermaidSvgVisualPolicy: 'background-image';
-	mermaidSvgTextPolicy: 'transparent-editable-label-overlays';
+	mermaidSvgTextPolicy: 'background-image-only' | 'transparent-editable-label-overlays' | 'visible-native-text';
 	officeNativeMermaidSvgElementEditability: 'not-claimed';
 	fontPortabilityPolicy: 'report-only-no-default-font-embedding';
 }
@@ -300,8 +325,14 @@ export interface SlidevPptxExportReport {
 	fallbackOnlyElementKinds: SlidevPptxFallbackOnlyElementKind[];
 	unmodeledTextRunReasons: SlidevPptxUnmodeledTextRunReason[];
 	slides: SlidevPptxSlideEditabilitySummary[];
-	visibleTextLayer: 'background-image' | 'native-text-experiment';
-	editableLayerRenderMode: 'transparent-structure' | 'visible-native-experiment';
+	visibleTextLayer:
+		| 'background-image'
+		| 'native-text-and-background-image'
+		| 'native-text-experiment';
+	editableLayerRenderMode:
+		| 'transparent-structure'
+		| 'visible-native-text'
+		| 'visible-native-experiment';
 	visibleNativeExperiment?: SlidevPptxVisibleNativeExperimentReport;
 	warnings: string[];
 }

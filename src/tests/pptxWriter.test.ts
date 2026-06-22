@@ -213,13 +213,12 @@ describe('pptxWriter', () => {
 			expect(slideXml).toContain('<a:t xml:space="preserve"> </a:t>');
 			expect(slideXml).toContain('<a:t>PPTX</a:t>');
 			expect(slideXml).toContain('<a:t>Architecture</a:t>');
-			expect(slideXml).toContain('<a:srgbClr val="111827"><a:alpha val="0"/></a:srgbClr>');
-			expect(slideXml).toContain('<a:srgbClr val="2563EB"><a:alpha val="0"/></a:srgbClr>');
+			expect(slideXml).toContain('<a:solidFill><a:srgbClr val="2563EB"/></a:solidFill>');
 			expect(slideXml).toContain('u="sng"');
 			expect(slideXml).toContain(
 				'<a:bodyPr wrap="square" lIns="0" tIns="0" rIns="0" bIns="0" rtlCol="0" anchor="t">',
 			);
-			expect(slideXml).toContain('<a:normAutofit fontScale="100000"/>');
+			expect(slideXml).toContain('<a:noAutofit/>');
 			expect(slideXml).toContain('<p:pic>');
 			expect(slideXml).toContain('<p:graphicFrame>');
 			expect(slideXml).toContain('<a:tbl>');
@@ -228,8 +227,85 @@ describe('pptxWriter', () => {
 			expect(slideXml).toContain('<a:t>值</a:t>');
 			expect(slideXml).toContain('<a:t>Editable table cell</a:t>');
 			expect(slideXml).toContain('gridSpan="2"');
-			expect(slideXml).toContain('<a:alpha val="0"/>');
-			expect(slideXml).toContain('<a:lnL><a:noFill/></a:lnL>');
+			expect(slideXml).toContain('<a:lnL w="9525"><a:solidFill><a:srgbClr val="D1D5DB"/></a:solidFill></a:lnL>');
+			expect(slideXml).not.toContain('<a:alpha val="0"/>');
+			expect(slideXml).not.toContain('<a:alpha val="8000"/>');
+		} finally {
+			rmSync(directory, { recursive: true, force: true });
+		}
+	});
+
+	test('writes default text sources as visible native text and omits Mermaid transparent labels', () => {
+		const directory = mkdtempSync(join(tmpdir(), 'notemd-pptx-visible-native-default-'));
+		try {
+			const outputPath = join(directory, 'deck.pptx');
+			const textBox = (
+				text: string,
+				sourceKind: 'body' | 'code' | 'svg-text' | 'table-cell-overlay' | 'mermaid-text',
+				color: string,
+				order: number,
+			) => ({
+				text,
+				sourceKind,
+				x: 1,
+				y: order / 100,
+				w: 5,
+				h: 0.5,
+				fontSize: 16,
+				fontFace: sourceKind === 'code' ? 'Fira Code' : 'Aptos',
+				color,
+				bold: false,
+				italic: false,
+				underline: false,
+				align: 'left' as const,
+				bullet: false,
+				order,
+				richTextParagraphs: [],
+				unmodeledRunReasons: [],
+			});
+			const document: SlidevPptxDocument = {
+				title: 'Selective native text',
+				author: 'NoteMD',
+				slides: [
+					{
+						slideNumber: 1,
+						title: 'Selective native text',
+						backgroundColor: 'FFFFFF',
+						texts: [
+							textBox('Body title', 'body', '111111', 10),
+							textBox('const chart = true;', 'code', '222222', 20),
+							textBox('Chart axis label', 'svg-text', '333333', 30),
+							textBox('Table overlay value', 'table-cell-overlay', '444444', 40),
+							textBox('Mermaid edge label', 'mermaid-text', '555555', 50),
+						],
+						tables: [],
+						fallbackOnlyElementKinds: [],
+						consumedTableTextCandidateCount: 0,
+						warnings: [],
+					},
+				],
+			};
+
+			writePptxDocument(outputPath, document);
+
+			const entries = unzipSync(new Uint8Array(readFileSync(outputPath)));
+			const slideXml = strFromU8(entries['ppt/slides/slide1.xml']);
+			expect(slideXml).toContain('name="Visible Native Text');
+			expect(slideXml).toContain('name="Visible Native Code Text');
+			expect(slideXml).toContain('name="Visible Native SVG Text');
+			expect(slideXml).toContain('name="Visible Native Table Cell Overlay Text');
+			expect(slideXml).not.toContain('name="Editable Mermaid Text');
+			expect(slideXml).not.toContain('Mermaid edge label');
+			expect(slideXml).toContain('<a:solidFill><a:srgbClr val="111111"/></a:solidFill>');
+			expect(slideXml).toContain('<a:solidFill><a:srgbClr val="222222"/></a:solidFill>');
+			expect(slideXml).toContain('<a:solidFill><a:srgbClr val="333333"/></a:solidFill>');
+			expect(slideXml).toContain('<a:solidFill><a:srgbClr val="444444"/></a:solidFill>');
+			expect(slideXml).not.toContain('<a:alpha val="8000"/>');
+			expect(slideXml).not.toContain('<a:alpha val="0"/>');
+			expect(slideXml).not.toContain('<a:srgbClr val="111111"><a:alpha val="0"/></a:srgbClr>');
+			expect(slideXml).not.toContain('<a:srgbClr val="222222"><a:alpha val="0"/></a:srgbClr>');
+			expect(slideXml).not.toContain('<a:srgbClr val="333333"><a:alpha val="0"/></a:srgbClr>');
+			expect(slideXml).not.toContain('<a:srgbClr val="444444"><a:alpha val="0"/></a:srgbClr>');
 		} finally {
 			rmSync(directory, { recursive: true, force: true });
 		}
@@ -412,7 +488,7 @@ describe('pptxWriter', () => {
 			const secondLineIndex = slideXml.indexOf('<a:t>const second = 2;</a:t>');
 			expect(firstLineIndex).toBeGreaterThan(-1);
 			expect(secondLineIndex).toBeGreaterThan(firstLineIndex);
-			expect(slideXml).toContain('name="Editable Code Text');
+			expect(slideXml).toContain('name="Visible Native Code Text');
 			expect(slideXml.slice(firstLineIndex, secondLineIndex)).toContain('</a:p><a:p>');
 			expect(slideXml).not.toContain('const first = 1;\nconst second = 2;');
 		} finally {

@@ -2,6 +2,7 @@ import { strToU8, zipSync } from 'fflate';
 import {
 	PPTX_SLIDE_HEIGHT_EMU,
 	PPTX_SLIDE_WIDTH_EMU,
+	SLIDEV_PPTX_VISIBLE_TEXT_SOURCE_KINDS,
 	type SlidevPptxDocument,
 	type SlidevPptxImage,
 	type SlidevPptxRichTextParagraph,
@@ -10,6 +11,7 @@ import {
 	type SlidevPptxTableCell,
 	type SlidevPptxTextAlign,
 	type SlidevPptxTextBox,
+	type SlidevPptxTextSourceKind,
 } from './pptxModel';
 import { splitPptxTextIntoOfficeFontRuns } from './pptxFontContract';
 import { safeRequire } from './platformUtils';
@@ -258,6 +260,19 @@ function textShapeLabel(textBox: SlidevPptxTextBox): string {
 	}
 }
 
+function textSourceKindForDefaultLayer(textBox: SlidevPptxTextBox): SlidevPptxTextSourceKind {
+	return textBox.sourceKind === 'code' ||
+		textBox.sourceKind === 'mermaid-text' ||
+		textBox.sourceKind === 'svg-text' ||
+		textBox.sourceKind === 'table-cell-overlay'
+		? textBox.sourceKind
+		: 'body';
+}
+
+function isVisibleDefaultTextSource(textBox: SlidevPptxTextBox): boolean {
+	return SLIDEV_PPTX_VISIBLE_TEXT_SOURCE_KINDS.includes(textSourceKindForDefaultLayer(textBox));
+}
+
 function buildTextShape(textBox: SlidevPptxTextBox, shapeId: number): string {
 	const x = inchesToEmu(textBox.x);
 	const y = inchesToEmu(textBox.y);
@@ -308,12 +323,22 @@ function buildVisibleTextShape(textBox: SlidevPptxTextBox, shapeId: number): str
 		'<a:ln><a:noFill/></a:ln>',
 		'</p:spPr>',
 		'<p:txBody>',
-		'<a:bodyPr wrap="square" lIns="0" tIns="0" rIns="0" bIns="0" rtlCol="0" anchor="t"><a:normAutofit fontScale="100000"/></a:bodyPr>',
+		'<a:bodyPr wrap="square" lIns="0" tIns="0" rIns="0" bIns="0" rtlCol="0" anchor="t"><a:noAutofit/></a:bodyPr>',
 		'<a:lstStyle/>',
 		buildVisibleTextParagraphs(textBox),
 		'</p:txBody>',
 		'</p:sp>',
 	].join('');
+}
+
+function buildDefaultTextShape(textBox: SlidevPptxTextBox, shapeId: number, hasVisibleNativeTables: boolean): string | null {
+	if (textBox.sourceKind === 'mermaid-text') {
+		return null;
+	}
+	if (textBox.sourceKind === 'table-cell-overlay' && hasVisibleNativeTables) {
+		return null;
+	}
+	return isVisibleDefaultTextSource(textBox) ? buildVisibleTextShape(textBox, shapeId) : buildTextShape(textBox, shapeId);
 }
 
 function buildTableCellRun(text: string, cell: SlidevPptxTableCell): string {
@@ -787,9 +812,11 @@ function buildSlideXml(slide: SlidevPptxSlide, imageRelationships: SlideImageRel
 	}
 
 	for (const text of slide.texts) {
+		const textXml = buildDefaultTextShape(text, shapeId, slide.tables.length > 0);
+		if (!textXml) continue;
 		items.push({
 			order: text.order,
-			xml: buildTextShape(text, shapeId),
+			xml: textXml,
 		});
 		shapeId += 1;
 	}
@@ -797,7 +824,7 @@ function buildSlideXml(slide: SlidevPptxSlide, imageRelationships: SlideImageRel
 	for (const table of slide.tables) {
 		items.push({
 			order: table.order,
-			xml: buildTableXml(table, shapeId),
+			xml: buildVisibleTableXml(table, shapeId),
 		});
 		shapeId += 1;
 	}

@@ -8,6 +8,8 @@ import { extractSlidevPptxSlideFromPage } from './pptxDomExtractor';
 import {
 	PPTX_SLIDE_HEIGHT_IN,
 	PPTX_SLIDE_WIDTH_IN,
+	SLIDEV_PPTX_BACKGROUND_OWNED_TEXT_SOURCE_KINDS,
+	SLIDEV_PPTX_VISIBLE_TEXT_SOURCE_KINDS,
 	type SlidevPptxEditablePrimitiveCoverage,
 	type SlidevPptxDocument,
 	type SlidevPptxExportReport,
@@ -178,13 +180,65 @@ async function stabilizeSlideForPptxExport(page: any): Promise<void> {
 async function resetSlidePptxExtractionState(page: any): Promise<void> {
 	await page.evaluate(() => {
 		document.getElementById('notemd-pptx-hide-text')?.remove();
+		document.getElementById('notemd-pptx-visible-default-background')?.remove();
+		document.getElementById('notemd-pptx-visible-native-background')?.remove();
 		for (const element of Array.from(
-			document.querySelectorAll('[data-notemd-pptx-hidden-text], [data-notemd-pptx-consumed-table]'),
+			document.querySelectorAll(
+				'[data-notemd-pptx-hidden-text], [data-notemd-pptx-consumed-table], [data-notemd-pptx-text-source-kind]',
+			),
 		)) {
 			element.removeAttribute('data-notemd-pptx-hidden-text');
 			element.removeAttribute('data-notemd-pptx-consumed-table');
+			element.removeAttribute('data-notemd-pptx-text-source-kind');
 		}
 	});
+}
+
+async function prepareDefaultVisibleTextBackground(page: any): Promise<void> {
+	await page.evaluate(async (visibleTextSourceKinds: string[]) => {
+		document.getElementById('notemd-pptx-visible-default-background')?.remove();
+		const selectors = visibleTextSourceKinds.map(
+			(sourceKind) => `[data-notemd-pptx-text-source-kind="${sourceKind}"]`,
+		);
+		const style = document.createElement('style');
+		style.id = 'notemd-pptx-visible-default-background';
+		style.textContent = [
+			selectors.length > 0
+				? [
+						`${selectors.join(',\n')},`,
+						`${selectors.map((selector) => `${selector} *`).join(',\n')} {`,
+						'color: transparent !important;',
+						'-webkit-text-fill-color: transparent !important;',
+						'text-shadow: none !important;',
+						'text-decoration-color: transparent !important;',
+						'}',
+						`${selectors.map((selector) => `svg ${selector}`).join(',\n')},`,
+						`${selectors.map((selector) => `svg ${selector} *`).join(',\n')} {`,
+						'fill: transparent !important;',
+						'stroke: transparent !important;',
+						'}',
+						`${selectors.map((selector) => `${selector}::marker`).join(',\n')} {`,
+						'color: transparent !important;',
+						'}',
+					].join('\n')
+				: '',
+			'[data-notemd-pptx-consumed-table="1"],',
+			'[data-notemd-pptx-consumed-table="1"] table,',
+			'[data-notemd-pptx-consumed-table="1"] tr,',
+			'[data-notemd-pptx-consumed-table="1"] td,',
+			'[data-notemd-pptx-consumed-table="1"] th {',
+			'background-color: transparent !important;',
+			'background-image: none !important;',
+			'border-color: transparent !important;',
+			'box-shadow: none !important;',
+			'}',
+		]
+			.filter(Boolean)
+			.join('\n');
+		document.head.appendChild(style);
+		void document.body.offsetHeight;
+		await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+	}, Array.from(SLIDEV_PPTX_VISIBLE_TEXT_SOURCE_KINDS));
 }
 
 async function captureSlideBackground(page: any, slideNumber: number): Promise<SlidevPptxImage> {
@@ -259,6 +313,19 @@ async function prepareVisibleNativeExperimentBackground(page: any): Promise<void
 		const style = document.createElement('style');
 		style.id = 'notemd-pptx-visible-native-background';
 		style.textContent = [
+			'[data-notemd-pptx-hidden-text="1"],',
+			'[data-notemd-pptx-hidden-text="1"] * {',
+			'color: transparent !important;',
+			'-webkit-text-fill-color: transparent !important;',
+			'text-shadow: none !important;',
+			'text-decoration-color: transparent !important;',
+			'}',
+			'svg [data-notemd-pptx-hidden-text="1"],',
+			'svg [data-notemd-pptx-hidden-text="1"] * {',
+			'fill: transparent !important;',
+			'stroke: transparent !important;',
+			'}',
+			'[data-notemd-pptx-hidden-text="1"]::marker { color: transparent !important; }',
 			'[data-notemd-pptx-consumed-table="1"],',
 			'[data-notemd-pptx-consumed-table="1"] table,',
 			'[data-notemd-pptx-consumed-table="1"] tr,',
@@ -268,6 +335,13 @@ async function prepareVisibleNativeExperimentBackground(page: any): Promise<void
 			'background-image: none !important;',
 			'border-color: transparent !important;',
 			'box-shadow: none !important;',
+			'}',
+			'[data-notemd-pptx-consumed-table="1"],',
+			'[data-notemd-pptx-consumed-table="1"] * {',
+			'color: transparent !important;',
+			'-webkit-text-fill-color: transparent !important;',
+			'text-shadow: none !important;',
+			'text-decoration-color: transparent !important;',
 			'}',
 		].join('\n');
 		document.head.appendChild(style);
@@ -596,8 +670,9 @@ async function extractSlidesFromHtml(
 				: `${pathToFileURL(htmlPath).toString()}#/${slideNumber}`;
 			await openSlideForPptxExport(page, targetUrl, config.timeoutMs);
 			await resetSlidePptxExtractionState(page);
-			const visualBackground = await captureSlideBackground(page, slideNumber);
 			const slide = await extractSlidevPptxSlideFromPage(page, slideNumber);
+			await prepareDefaultVisibleTextBackground(page);
+			const visualBackground = await captureSlideBackground(page, slideNumber);
 			slide.backgroundImage = visualBackground;
 			slides.push(slide);
 		}
@@ -938,29 +1013,45 @@ function buildEditablePrimitiveCoverage(
 }
 
 function buildDefaultEditableLayerContract(): SlidevPptxExportReport['editableLayerContract'] {
+	const visibleNativeTextSources = Array.from(SLIDEV_PPTX_VISIBLE_TEXT_SOURCE_KINDS);
+	const backgroundOwnedTextSources = Array.from(SLIDEV_PPTX_BACKGROUND_OWNED_TEXT_SOURCE_KINDS);
 	return {
 		visualFidelityStrategy: 'frozen-background-first',
-		visibleTextSource: 'background-image',
-		editableTextShapeFill: 'transparent',
-		editableTableTextFill: 'transparent',
-		backgroundTextPolicy: 'preserve-rendered-text',
-		textSelectionSurface: 'named-transparent-shapes',
+		visibleTextSource: 'native-text-and-background-image',
+		editableTextShapeFill: 'visible',
+		editableTableTextFill: 'visible',
+		editableTableCellOverlayTextFill: 'visible',
+		backgroundTextPolicy: 'hide-modeled-text-before-capture',
+		textSelectionSurface: 'visible-native-text',
+		selectableNativeTextSources: visibleNativeTextSources,
+		visibleNativeTextSources,
+		transparentOverlayTextSources: [],
+		backgroundHiddenTextSources: visibleNativeTextSources,
+		backgroundPreservedTextSources: backgroundOwnedTextSources,
 		mermaidSvgVisualPolicy: 'background-image',
-		mermaidSvgTextPolicy: 'transparent-editable-label-overlays',
+		mermaidSvgTextPolicy: 'background-image-only',
 		officeNativeMermaidSvgElementEditability: 'not-claimed',
 		fontPortabilityPolicy: 'report-only-no-default-font-embedding',
 	};
 }
 
 function buildVisibleNativeEditableLayerContract(): SlidevPptxExportReport['editableLayerContract'] {
+	const visibleNativeTextSources = Array.from(PPTX_TEXT_SOURCE_KIND_ORDER);
 	return {
 		...buildDefaultEditableLayerContract(),
 		visualFidelityStrategy: 'visible-native-experiment',
 		visibleTextSource: 'native-text',
 		editableTextShapeFill: 'visible',
 		editableTableTextFill: 'visible',
+		editableTableCellOverlayTextFill: 'visible',
 		backgroundTextPolicy: 'hide-extracted-text-before-capture',
 		textSelectionSurface: 'visible-native-text',
+		selectableNativeTextSources: visibleNativeTextSources,
+		visibleNativeTextSources,
+		transparentOverlayTextSources: [],
+		backgroundHiddenTextSources: visibleNativeTextSources,
+		backgroundPreservedTextSources: [],
+		mermaidSvgTextPolicy: 'visible-native-text',
 	};
 }
 
@@ -1015,8 +1106,8 @@ export function buildSlidevPptxExportReport(
 		fallbackOnlyElementKinds: editablePrimitiveCoverage.fallbackOnlyElementKinds,
 		unmodeledTextRunReasons: editablePrimitiveCoverage.unmodeledTextRunReasons,
 		slides: slideSummaries,
-		visibleTextLayer: 'background-image',
-		editableLayerRenderMode: 'transparent-structure',
+		visibleTextLayer: 'native-text-and-background-image',
+		editableLayerRenderMode: 'visible-native-text',
 		warnings,
 	};
 }
@@ -1031,7 +1122,7 @@ export function buildSlidevVisibleNativePptxExperimentReport(
 ): SlidevPptxExportReport {
 	const report = buildSlidevPptxExportReport(htmlPath, deckPath, pptxPath, reportPath, slides);
 	const experimentWarnings = [
-		'Visible-native PPTX is experimental; default export keeps frozen background as the visible layer.',
+		'Visible-native PPTX is experimental; it also converts background-owned text sources such as Mermaid labels, while default export keeps Mermaid labels in the background image.',
 		...slides.flatMap((slide) => slide.warnings),
 	];
 	return {

@@ -733,6 +733,77 @@ Mermaid/SVG needs a similar split. The default should preserve Mermaid source fe
 4. add an experimental PPTX SVG embedding path only after the frozen visual gate and Office compatibility tests prove it is stable;
 5. do not claim Mermaid diagram shapes are natively editable until the report can distinguish SVG image editability from Office DrawingML shape editability.
 
+## M12 Selectable Native Overlay Default
+
+The user's latest correction changes the priority: Mermaid label text is not the first problem. The immediate user-facing gap is that ordinary slide text, code text, SVG/chart text when present, and table-cell text need to be selectable and editable in the PPTX without sacrificing the real Slidev visual result.
+
+The attempted default of hiding selected DOM text before background capture and making `body`, `code`, `svg-text`, and `table-cell-overlay` fully visible native text was rejected by real acceptance. It made the PPTX structurally editable, but ordinary content pages drifted badly because Office/LibreOffice text layout is not browser layout. The failed real run had `slideCount = 30`, `textRunCount = 1092`, `pictureCount = 30`, `tableCount = 6`, and `slidesWithoutEditableText = []`, but the rendered-HTML reference gate failed with `maxRmse = 0.282811` and `meanRmse = 0.15579297`. The worst pages were normal text pages such as 24, 22, 27, 23, 19, 20, and 21. The side-by-side evidence showed different list bullets, indentation, line wrapping, inline-code baselines, and font substitution. That is not a Mermaid problem and not a global zoom problem.
+
+One useful bug fix from that failed attempt remains: the extractor now prefers `.slidev-page` over `#app` when equal-area roots are visible. Slidev's active page can be visually scaled while `#app` has the same viewport area, so choosing `#app` under-counted the root visual scale and produced wrong native font sizes. The tie-break now follows `.slidev-page > .slidev-layout > .slidev-slide-content > #app`.
+
+The default PPTX path now uses a hybrid that matches the product contract better:
+
+1. the visible layer is still the frozen rendered Slidev background;
+2. default capture no longer hides extracted DOM text;
+3. `body`, `code`, `svg-text`, and `table-cell-overlay` are written as named native text boxes with an 8% alpha selection-affordance fill;
+4. Mermaid text remains a transparent named overlay and is not the priority of this slice;
+5. native table structures remain transparent, while table-cell overlay text is selectable through the same selection-affordance layer;
+6. the sidecar reports `visibleTextLayer = background-image-with-selectable-native-text-overlay`;
+7. the sidecar reports `editableLayerRenderMode = selectable-native-text-overlay`;
+8. the sidecar contract says `backgroundTextPolicy = preserve-rendered-text`, `selectableNativeTextSources = ["body", "code", "svg-text", "table-cell-overlay"]`, `visibleNativeTextSources = []`, and `backgroundHiddenTextSources = []`.
+
+This is intentionally not the same as full visible-native reconstruction. It optimizes for direct selection/editability of ordinary text while keeping the browser-rendered background as the visual authority. The tradeoff is that the native text layer is a low-opacity editing affordance, not the primary visible rendering. Fully visible native text remains an experiment until it can pass real visual gates page by page.
+
+The implementation also fixed a workflow bug in the extractor boundary. `pptxDomExtractor` used to inject the text-hiding CSS unconditionally after setting `data-notemd-pptx-hidden-text`. That meant even the default background could be captured with faded or hidden text. The extractor now only extracts and marks elements; the hide CSS is applied only by the visible-native experiment's background-preparation step. This keeps the default capture honest and keeps the experiment path intact.
+
+Real M12 acceptance was run against `docs/architecture.zh-CN.md`:
+
+```bash
+runuser -u jacob -- env HOME=/home/jacob PLAYWRIGHT_BROWSERS_PATH=/home/jacob/.cache/ms-playwright bash -lc 'cd /home/jacob/obsidian-NotEMD && rm -rf docs/export/test-slidev-selectable-native-text /tmp/notemd-selectable-native-text.json && npm run verify:slidev-export -- --vault docs --source architecture.zh-CN.md --format pptx --output-subfolder export/test-slidev-selectable-native-text --sample-slides all --timeout-ms 240000 --no-screenshots --pptx-visual-diff --require-pptx-visual-match --pptx-rendered-html-reference-diff --require-pptx-rendered-html-reference-match --json > /tmp/notemd-selectable-native-text.json'
+```
+
+Result:
+
+1. `ok = true`;
+2. `slidev.version = 52.16.0 (/home/jacob/slidev/packages/slidev/bin/slidev.mjs)`;
+3. `skillRootPath = /home/jacob/slidev/skills/slidev`, `skillReferenceCount = 52`;
+4. output PPTX: `docs/export/test-slidev-selectable-native-text/architecture.zh-CN.pptx`;
+5. output report: `docs/export/test-slidev-selectable-native-text/architecture.zh-CN.pptx.report.json`;
+6. `pptxInspection.slideCount = 30`, `textRunCount = 1032`, `pictureCount = 30`, `tableCount = 6`, `slidesWithoutEditableText = []`;
+7. sidecar editable coverage: `editableTextBoxCount = 217`, `editableBodyTextBoxCount = 78`, `editableCodeTextBoxCount = 1`, `editableTableCellOverlayTextBoxCount = 102`, `editableMermaidTextBoxCount = 36`, `pagesWithoutEditableText = []`;
+8. `pptxVisualGate.passed = true`, `failures = []`;
+9. `pptxRenderedHtmlReferenceGate.passed = true`, `failures = []`;
+10. both visual reports show `meanRmse = 0.044284142`, `maxRmse = 0.0806512`;
+11. generated outputs remain ignored: `git status --ignored --short docs/export/test-slidev-selectable-native-text` reports `!!`, and the verifier reports `unignoredOutputs = []`.
+
+The current best direction is not to chase a larger global alpha or a global zoom knob. If users need fully visible editable text, the implementation should graduate it page-by-page using measured visual gates, font portability gates, and list/code/table-specific layout modeling. For the default export, the stable architecture is frozen visual background plus selectable native editing overlays.
+
+## M13 Visible Editable Text Default
+
+User acceptance rejected the M12 default: low-alpha native overlays are still fake editability when the readable text remains in the background image. The default PPTX export must make the displayed text itself editable and should not keep transparent text shapes as the primary edit surface.
+
+The default PPTX contract now changes again:
+
+1. before capturing the background, modeled non-Mermaid text sources are hidden in the DOM;
+2. ordinary body text, code text, and non-Mermaid SVG/chart text are written as visible native PowerPoint text boxes;
+3. modeled tables are written as visible native PowerPoint tables, so displayed cell text is editable table text instead of transparent table text;
+4. table-cell overlay text boxes are skipped when a visible native table exists, avoiding duplicate cell text;
+5. Mermaid label overlays are not written as transparent default text shapes; Mermaid remains background-owned until a separate Mermaid-specific pass can make its labels visible-native without degrading diagrams;
+6. the default sidecar reports `visibleTextLayer = native-text-and-background-image`, `editableLayerRenderMode = visible-native-text`, `backgroundTextPolicy = hide-modeled-text-before-capture`, and `transparentOverlayTextSources = []`.
+
+This is the correct product behavior for editable PPTX, but it is not a free win. Office text layout is still not Chromium layout. Bullets, inline code baselines, CJK fallback, and wrapping can drift. The next engineering direction should not reintroduce transparent overlays; it should reduce drift by extracting browser line boxes and writing shorter positioned native runs, especially for list items, code fences, and dense body paragraphs. That is the robust path if visual matching must improve while keeping displayed text genuinely editable.
+
+Real M13 smoke acceptance against `docs/architecture.zh-CN.md` passed for the export flow and editability contract:
+
+1. output PPTX: `docs/export/test-slidev-visible-native-text-smoke/architecture.zh-CN.pptx`;
+2. output report: `docs/export/test-slidev-visible-native-text-smoke/architecture.zh-CN.pptx.report.json`;
+3. `ok = true`, `slideCount = 30`, `textRunCount = 838`, `pictureCount = 30`, `tableCount = 6`, `slidesWithoutEditableText = []`;
+4. sidecar reports `visibleTextLayer = native-text-and-background-image`, `editableLayerRenderMode = visible-native-text`, and `transparentOverlayTextSources = []`;
+5. PPTX XML scan found `alpha=0` count `0`, `alpha=8000` count `0`, `Visible Native Text` count `78`, `Visible Native Code Text` count `1`, `Visible Native Table` count `6`, and `Editable Mermaid Text` count `0`;
+6. generated outputs remain ignored by Git.
+
+The visual-diff run generated the expected advisory failure for the new visible-native default: `meanRmse = 0.12245296333333332`, `maxRmse = 0.206806`, with worst slides 24, 27, 22, 19, 23, 20, 21, and 17. This is accepted as current risk because the user explicitly rejected fake transparent editability. The next quality slice must attack line wrapping, bullet indentation, inline-code baseline, and font fallback directly rather than reintroducing hidden/transparent text layers.
+
 ## Release Link Decision
 
 The environment-check UI must continue pointing users at an npm-installable GitHub release asset:
@@ -751,12 +822,12 @@ The first implementation is intentionally conservative:
 
 1. Text is editable.
 2. Whole-slide visual fallback preserves complex visuals.
-3. Mermaid/SVG/canvas are not converted into Office-native editable vector objects.
-4. Tables now have a native DrawingML structural layer with editable cell text, row/column dimensions, and merge metadata, but that layer is transparent by default and is not the visible rendering source.
-5. Code blocks are extracted as text when visible DOM text is selected. Inline run styling is now preserved in the transparent structure layer, but full syntax-token semantics and explicit hyperlink relationships are still not modeled as Office-native objects.
+3. Mermaid/canvas are not converted into Office-native editable vector objects; non-Mermaid SVG/chart text is extracted as visible native text, while the remaining chart/vector geometry stays in the background image.
+4. Tables now use a visible native DrawingML table layer with editable cell text, row/column dimensions, and merge metadata.
+5. Code blocks are extracted as visible native text when the DOM text is modeled. Inline run styling is preserved, but full syntax-token semantics and explicit hyperlink relationships are still not modeled as Office-native objects.
 6. Animations and click steps are not represented as PowerPoint animations.
-7. The frozen-background visual-diff gate passes; that proves Office preserves the written visual layer, not that complex objects are Office-native editable.
-8. Default editable text/table structures are transparent by design. This is a visual-fidelity contract, not a debug leftover, but it does make user editing less natural than a visible-native reconstruction.
+7. The old frozen-background visual-diff gate proved the fallback image path. The current visible-native default needs stricter per-slide drift analysis because Office text layout can diverge from Chromium.
+8. Default non-Mermaid text is now visible native text, not a low-opacity selectable overlay. Default Mermaid labels are not written as transparent overlays; they remain in the background image.
 
 Those are not regressions; they are explicit boundaries. Overstating editability would be worse than shipping an honest report-driven first slice.
 
@@ -765,9 +836,9 @@ Those are not regressions; they are explicit boundaries. Overstating editability
 The next level should be incremental and report-driven:
 
 1. keep visual diff in every real PPTX acceptance run, with `pptx-background-images` as the hard-gate reference source; also keep `--pptx-rendered-html-reference-diff` as a reference-contract regression check so future changes do not reintroduce HTML capture drift;
-2. keep the table structural layer, but do not make it visible until CSS padding, border collapse, line height, cell baseline, font fallback, and Office round-trip rendering are modeled tightly enough to avoid regressing the frozen visual layer;
-3. use `fontContract` as the gate before visible native text/table work. The next rich-text slices should split mixed CJK/Latin runs only when the writer/report agree on the final Office faces, then add paragraph spacing, list indentation, code monospace defaults, explicit hyperlink relationships, and a clearer distinction between text-style fidelity and true Office-native semantic fidelity;
-4. if a future slice makes native text or table layers visible, add background residue detection/retry before accepting those screenshots. The current transparent-structure mode should not hide text from the frozen background; residue sampling only becomes mandatory when visible native text takes over the visual layer.
+2. keep the visible native table layer, but gate improvements around CSS padding, border collapse, line height, cell baseline, font fallback, and Office round-trip rendering instead of reverting to transparent structures;
+3. use `fontContract` as the gate for visible native text/table quality. The next rich-text slices should split mixed CJK/Latin runs only when the writer/report agree on the final Office faces, then add paragraph spacing, list indentation, code monospace defaults, explicit hyperlink relationships, and a clearer distinction between text-style fidelity and true Office-native semantic fidelity;
+4. add background residue detection/retry for the default path now that visible native text owns the display layer. Hiding modeled DOM text before screenshot capture must be verified so ghost text does not remain behind editable text.
 5. add shape extraction for high-confidence solid-color rectangles/lines only;
 6. add a font selection policy with a small preset list, user-selected installed family names, and a clear portability report; do not default to embedding arbitrary system fonts;
 7. keep Mermaid source untouched, export rendered SVG sidecars when available, and continue using image fallback unless a separate explicit user option requests experimental SVG embedding or vector reconstruction.
