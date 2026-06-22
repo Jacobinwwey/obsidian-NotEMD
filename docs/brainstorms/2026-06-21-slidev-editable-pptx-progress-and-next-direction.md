@@ -1567,6 +1567,48 @@ Residual risk and next direction:
 4. `textSourceCoverage` still describes text-box sources only, not table-cell rich-run sources. A future `tableCellRichTextCoverage` field would be cleaner than stuffing table cells back into `table-cell-overlay`.
 5. Mermaid/SVG remain separate tracks. Keep source fences untouched and avoid splitting Mermaid diagrams; if editability improves there, use explicit SVG artifact/embedding or experimental vector reconstruction rather than transparent editable labels.
 
+## M30 Table-Cell Native Rich-Run Coverage Contract
+
+This slice continues to reference `ref/oh-my-ppt`, but the reused idea is the architecture boundary, not its writer implementation. `oh-my-ppt` classifies HTML nodes into typed text, shape, image, and table objects before the writer emits Office-native objects; only unmodeled content remains image-owned. NotEMD already has a Slidev-specific extractor, visible-native background hiding, a PPTX writer, and rendered-HTML visual gates. The remaining gap was the report contract: it could not independently prove native table-cell rich-text coverage.
+
+Implementation status:
+
+1. Added `SlidevPptxTableCellRichTextCoverage` and attached it to per-slide summaries, `editablePrimitiveCoverage`, and the top-level report.
+2. The coverage fields are `tableSlideCount`, `richTextTableSlideCount`, `tableCount`, `tableCellCount`, `richTextTableCellCount`, `richTextParagraphCount`, `richTextRunCount`, `richTextRunCharacterCount`, `styledRunCount`, `codeRunCount`, `highlightedRunCount`, `hyperlinkRunCount`, and `hyperlinkTargetCount`.
+3. `styledRunCount` is based on whether a run actually differs from the table-cell base style. It does not count every run merely because the normalized model has `fontFace` or `color` fields.
+4. `textSourceCoverage` remains text-box-only. Table cells are not folded back into `table-cell-overlay`; the new table-cell coverage proves native table text separately.
+5. The report test now covers the suppressed-overlay path: when a native table exists and `table-cell-overlay` is suppressed, the report still counts rich runs, inline-code highlight, hyperlink, and characters from the table cell itself.
+
+Comparison with the prior plan:
+
+1. M29 made the native table writer emit cell rich runs. M30 does not change the PPTX visual output; it adds the acceptance evidence so future work cannot use global `richTextRunCount` or a suppressed overlay as a proxy for table editability.
+2. The useful lesson from `oh-my-ppt` is the typed object boundary. NotEMD now applies that boundary in reporting: text-box sources and table-cell rich-text sources are separate contracts, and native table output does not have to be inferred from overlay counts.
+3. This is not a Mermaid/SVG geometry slice and not a CSS chip box-model slice. `highlightedRunCount = 27` proves Office-native highlight runs exist; it does not claim browser-identical rounded chip geometry or padding.
+
+Validation:
+
+1. `npx tsc --noEmit --pretty false` passed.
+2. `git diff --check` passed.
+3. `npm run build` passed.
+4. `npm test -- --runInBand src/tests/pptxExportReport.test.ts` passed: `9` tests.
+5. Full Jest passed: `190` suites, `1553` tests. The root environment still prints the existing Playwright cache warning.
+6. `runuser -u jacob -- env HOME=/home/jacob PLAYWRIGHT_BROWSERS_PATH=/home/jacob/.cache/ms-playwright bash -lc 'cd /home/jacob/obsidian-NotEMD && npm test -- --runInBand src/tests/pptxDomExtractor.test.ts'` passed with real Chromium: `14` tests.
+7. Real `architecture.zh-CN.md` export passed: `npm run verify:slidev-export -- --vault docs --source architecture.zh-CN.md --format pptx --output-subfolder export/test-slidev-m30-table-rich-coverage --sample-slides all --timeout-ms 240000 --no-screenshots --require-pptx-visual-match --json`.
+8. The local Slidev fork was still used: `52.16.0 (/home/jacob/slidev/packages/slidev/bin/slidev.mjs)`, `skillRootPath = /home/jacob/slidev/skills/slidev`, `skillReferenceCount = 52`.
+9. Visual/source gates passed: `ok = true`, `pptxVisualGate.passed = true`, `referenceSource = pptx-rendered-html-reference`, `thresholdProfile = visible-native-rendered-html`, `mermaidSourcePreservation.passed = true`, `sourceFenceCount = 3`, `deckFenceCount = 3`, `changedFenceIndexes = []`.
+10. Real report metrics: `slideCount = 30`, `textBoxCount = 338`, `tableCount = 6`, `editableTableCellCount = 102`, `editableTableCellOverlayTextBoxCount = 0`, `richTextRunCount = 440`, `editablePrimitiveCoverage.richTextRunCharacterCount = 7409`.
+11. New table coverage: `tableSlideCount = 6`, `richTextTableSlideCount = 6`, `tableCellCount = 102`, `richTextTableCellCount = 102`, `richTextParagraphCount = 102`, `richTextRunCount = 102`, `richTextRunCharacterCount = 1116`, `styledRunCount = 27`, `codeRunCount = 27`, `highlightedRunCount = 27`, `hyperlinkRunCount = 0`.
+12. Fallback reporting remains honest: `fallbackOnlyElementKinds = ["mermaid", "svg"]`; `decorativePrimitiveSkipReasonCounts = [{ not-visible: 68 }, { unsupported-table-root: 60 }]`.
+13. PPTX XML scan confirms there was no regression to transparent text: `alpha=0 = 0`, `alpha=8000 = 0`, `Table Cell Overlay Text = 0`, `Visible Native Text = 324`, `Visible Native Code Text = 14`, `Visible Native Table = 6`, `Native Code Background Rectangle = 115`, `highlightTags = 27`, `<a:t...>` tags = `1218`.
+14. Output artifacts remain local and ignored under `docs/export/test-slidev-m30-table-rich-coverage/`, including `_slidev-sources/architecture.zh-CN.slidev.md`, HTML/standalone HTML, PPTX, report, rendered-HTML reference PNGs, and diff sheets. `git ls-files docs/export/test-slidev-m30-table-rich-coverage` returns no tracked files.
+
+Residual risk and next direction:
+
+1. M30 is a report-contract improvement, not a visual fix. It makes native table rich-text coverage independently auditable, but it does not reduce `unsupported-table-root = 60`.
+2. Table-internal chips still use `<a:highlight>` for editable text highlight, not CSS radius/padding. The next improvement should add a cell-internal decoration typed model and writer gate rather than restoring transparent overlays.
+3. The real deck still has no table hyperlinks, so `hyperlinkRunCount = 0` is a source-content fact rather than missing code coverage. The code path remains covered by writer/report tests.
+4. Mermaid/SVG should not be mixed into table coverage. Keep Mermaid fences untouched and unsplit; SVG/Mermaid editability should remain an explicit experiment or artifact/embedding path.
+
 ## Current Limits
 
 The first implementation is intentionally conservative:

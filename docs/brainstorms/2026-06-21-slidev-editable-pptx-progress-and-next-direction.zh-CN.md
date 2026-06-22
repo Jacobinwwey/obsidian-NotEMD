@@ -1588,6 +1588,48 @@ rendered-HTML visual hard gate 已通过，但 diff report 仍把若干页标为
 4. `textSourceCoverage` 仍只描述 text box 来源，不描述 table cell rich run 来源；这是历史 report 结构限制。后续可以加独立 `tableCellRichTextCoverage`，不要把 table cell 偷塞回 `table-cell-overlay`。
 5. Mermaid/SVG 仍是独立轨道。继续保持源 fence 不改、不拆 Mermaid 图；如要提升可编辑性，应走显式 SVG artifact/embedding 或实验 vector reconstruction，而不是把 diagram label 伪装成透明 editable text。
 
+## M30 表格原生 rich-run 覆盖报告契约
+
+这一轮参考 `ref/oh-my-ppt` 的方案继续推进，但参考点仍然是架构边界，而不是复制它的 writer。`oh-my-ppt` 的可编辑 PPTX 路线把 HTML 节点先归类为文本、shape、image、table 等 typed object，再由 writer 输出对应 Office 原生对象；无法建模的内容才进入图片层。NotEMD 现在已经有 Slidev 专用 extractor、visible-native 背景隐藏、PPTX writer 和 rendered-HTML visual gate。缺口不是再引入第二条 HTML-to-PPTX 管线，而是报告层还不能独立证明 native table cell rich text 的真实覆盖。
+
+本轮落地内容：
+
+1. 新增 `SlidevPptxTableCellRichTextCoverage`，并挂到逐页 summary、`editablePrimitiveCoverage` 和顶层 report。
+2. 覆盖字段包括 `tableSlideCount`、`richTextTableSlideCount`、`tableCount`、`tableCellCount`、`richTextTableCellCount`、`richTextParagraphCount`、`richTextRunCount`、`richTextRunCharacterCount`、`styledRunCount`、`codeRunCount`、`highlightedRunCount`、`hyperlinkRunCount` 和 `hyperlinkTargetCount`。
+3. `styledRunCount` 按 run 相对 cell 基础样式是否有真实差异计算，而不是看到 `fontFace` 或 `color` 字段就计数。这样能减少“所有 run 都是 styled”的噪声。
+4. `textSourceCoverage` 保持只描述 text box 来源，不把 table cell 偷塞回 `table-cell-overlay`。表格可编辑文本由新的 table-cell coverage 单独证明。
+5. 新增 report 单测：当 native table 存在并 suppress `table-cell-overlay` 时，report 仍能从 table cell 本体统计 rich runs、inline code highlight、hyperlink 和字符数。
+
+与先前方案对比：
+
+1. M29 已经让 native table writer 写出 cell rich runs。M30 不改变 PPTX 视觉输出，而是补上验收证据，防止后续又用全局 `richTextRunCount` 或 suppressed overlay 当作表格可编辑性的代理指标。
+2. `oh-my-ppt` 的实践说明 typed object boundary 必须清楚。NotEMD 这里采用同一思想：text box 来源与 table cell 来源分开报告，writer 是否输出 native table 不能靠 overlay count 间接推断。
+3. 这不是解决 Mermaid/SVG geometry 的切片，也不是 CSS chip box model 的切片。`highlightedRunCount = 27` 只能证明 Office native highlight run 存在，不证明 rounded chip/padding 与浏览器完全一致。
+
+验证：
+
+1. `npx tsc --noEmit --pretty false` 通过。
+2. `git diff --check` 通过。
+3. `npm run build` 通过。
+4. `npm test -- --runInBand src/tests/pptxExportReport.test.ts` 通过：`9` 个测试。
+5. 全量 Jest 通过：`190` suites，`1553` tests。root 环境仍会打印既有 Playwright cache warning。
+6. `runuser -u jacob -- env HOME=/home/jacob PLAYWRIGHT_BROWSERS_PATH=/home/jacob/.cache/ms-playwright bash -lc 'cd /home/jacob/obsidian-NotEMD && npm test -- --runInBand src/tests/pptxDomExtractor.test.ts'` 使用真实 Chromium 通过：`14` 个测试。
+7. 真实 `architecture.zh-CN.md` 导出通过：`npm run verify:slidev-export -- --vault docs --source architecture.zh-CN.md --format pptx --output-subfolder export/test-slidev-m30-table-rich-coverage --sample-slides all --timeout-ms 240000 --no-screenshots --require-pptx-visual-match --json`。
+8. 本地 Slidev fork 仍被使用：`52.16.0 (/home/jacob/slidev/packages/slidev/bin/slidev.mjs)`，`skillRootPath = /home/jacob/slidev/skills/slidev`，`skillReferenceCount = 52`。
+9. visual/source gate 通过：`ok = true`，`pptxVisualGate.passed = true`，`referenceSource = pptx-rendered-html-reference`，`thresholdProfile = visible-native-rendered-html`，`mermaidSourcePreservation.passed = true`，`sourceFenceCount = 3`，`deckFenceCount = 3`，`changedFenceIndexes = []`。
+10. 真实 report 口径：`slideCount = 30`，`textBoxCount = 338`，`tableCount = 6`，`editableTableCellCount = 102`，`editableTableCellOverlayTextBoxCount = 0`，`richTextRunCount = 440`，`editablePrimitiveCoverage.richTextRunCharacterCount = 7409`。
+11. 新 table coverage：`tableSlideCount = 6`，`richTextTableSlideCount = 6`，`tableCellCount = 102`，`richTextTableCellCount = 102`，`richTextParagraphCount = 102`，`richTextRunCount = 102`，`richTextRunCharacterCount = 1116`，`styledRunCount = 27`，`codeRunCount = 27`，`highlightedRunCount = 27`，`hyperlinkRunCount = 0`。
+12. fallback 仍诚实：`fallbackOnlyElementKinds = ["mermaid", "svg"]`；`decorativePrimitiveSkipReasonCounts = [{ not-visible: 68 }, { unsupported-table-root: 60 }]`。
+13. PPTX XML 扫描确认没有回退到透明文字：`alpha=0 = 0`，`alpha=8000 = 0`，`Table Cell Overlay Text = 0`，`Visible Native Text = 324`，`Visible Native Code Text = 14`，`Visible Native Table = 6`，`Native Code Background Rectangle = 115`，`highlightTags = 27`，`<a:t...>` tags = `1218`。
+14. 输出产物保留在 ignored 本地目录 `docs/export/test-slidev-m30-table-rich-coverage/`，包含 `_slidev-sources/architecture.zh-CN.slidev.md`、HTML/standalone HTML、PPTX、report、rendered-HTML reference PNG 和 diff sheets；`git ls-files docs/export/test-slidev-m30-table-rich-coverage` 没有 tracked 文件。
+
+残余风险与后续方向：
+
+1. M30 是报告契约补强，不是视觉修复。它让 native table rich text 的覆盖可独立验收，但不会降低 `unsupported-table-root = 60`。
+2. 表格内部 chip 仍只用 `<a:highlight>` 表达文本 highlight，不表达 CSS radius/padding。下一步若要继续优化，应增加 cell-internal decoration 的 typed model 和 writer gate，而不是恢复透明 overlay。
+3. 真实 deck 仍没有 table hyperlink，`hyperlinkRunCount = 0` 是内容事实，不代表代码路径不存在；该路径由 writer/report 单测覆盖。
+4. Mermaid/SVG 仍不要混入 table coverage。继续保持源 Mermaid fence 不改、不拆图；SVG/Mermaid editability 应走独立实验或 artifact/embedding 方案。
+
 ## 当前边界
 
 第一版实现有意保守：

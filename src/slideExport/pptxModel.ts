@@ -293,6 +293,7 @@ export interface SlidevPptxSlideEditabilitySummary {
 	writerEastAsiaFallbackFontFamilies: string[];
 	officeMissingFontRiskFamilies: string[];
 	textSourceCoverage: SlidevPptxTextSourceCoverage[];
+	tableCellRichTextCoverage: SlidevPptxTableCellRichTextCoverage;
 	consumedTableTextCandidateCount: number;
 	warnings: string[];
 }
@@ -305,6 +306,22 @@ export interface SlidevPptxTextSourceCoverage {
 	characterCount: number;
 	richTextParagraphCount: number;
 	richTextRunCount: number;
+}
+
+export interface SlidevPptxTableCellRichTextCoverage {
+	tableSlideCount: number;
+	richTextTableSlideCount: number;
+	tableCount: number;
+	tableCellCount: number;
+	richTextTableCellCount: number;
+	richTextParagraphCount: number;
+	richTextRunCount: number;
+	richTextRunCharacterCount: number;
+	styledRunCount: number;
+	codeRunCount: number;
+	highlightedRunCount: number;
+	hyperlinkRunCount: number;
+	hyperlinkTargetCount: number;
 }
 
 export interface SlidevPptxEditablePrimitiveCoverage {
@@ -350,6 +367,7 @@ export interface SlidevPptxEditablePrimitiveCoverage {
 	backgroundFallbackSlideCount: number;
 	backgroundFallbackSlideRatio: number;
 	textSourceCoverage: SlidevPptxTextSourceCoverage[];
+	tableCellRichTextCoverage: SlidevPptxTableCellRichTextCoverage;
 	fallbackOnlyElementKinds: SlidevPptxFallbackOnlyElementKind[];
 	unmodeledTextRunReasons: SlidevPptxUnmodeledTextRunReason[];
 }
@@ -484,6 +502,7 @@ export interface SlidevPptxExportReport {
 	imageFallbackCount: number;
 	editablePrimitiveCoverage: SlidevPptxEditablePrimitiveCoverage;
 	textSourceCoverage: SlidevPptxTextSourceCoverage[];
+	tableCellRichTextCoverage: SlidevPptxTableCellRichTextCoverage;
 	fontContract: SlidevPptxFontContractSummary;
 	editableLayerContract: SlidevPptxEditableLayerContract;
 	fallbackOnlyElementKinds: SlidevPptxFallbackOnlyElementKind[];

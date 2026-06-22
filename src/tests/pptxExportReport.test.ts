@@ -480,6 +480,23 @@ describe('pptx export report', () => {
 		expect(report.editableTableCellOverlayTextBoxCount).toBe(0);
 		expect(report.editableTableCellCount).toBe(1);
 		expect(report.richTextRunCount).toBe(3);
+		expect(report.tableCellRichTextCoverage).toEqual({
+			tableSlideCount: 1,
+			richTextTableSlideCount: 1,
+			tableCount: 1,
+			tableCellCount: 1,
+			richTextTableCellCount: 1,
+			richTextParagraphCount: 1,
+			richTextRunCount: 3,
+			richTextRunCharacterCount: 'Use apiKey docs'.length,
+			styledRunCount: 2,
+			codeRunCount: 1,
+			highlightedRunCount: 1,
+			hyperlinkRunCount: 1,
+			hyperlinkTargetCount: 1,
+		});
+		expect(report.editablePrimitiveCoverage.tableCellRichTextCoverage).toEqual(report.tableCellRichTextCoverage);
+		expect(report.slides[0].tableCellRichTextCoverage).toEqual(report.tableCellRichTextCoverage);
 		expect(report.editablePrimitiveCoverage.richTextRunCharacterCount).toBe('Use apiKey docs'.length);
 		expect(report.hyperlinkRunCount).toBe(1);
 		expect(report.hyperlinkTargetCount).toBe(1);

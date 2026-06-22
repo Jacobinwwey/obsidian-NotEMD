@@ -23,6 +23,7 @@ import {
 	type SlidevPptxSlideEditabilitySummary,
 	type SlidevPptxTable,
 	type SlidevPptxTableCell,
+	type SlidevPptxTableCellRichTextCoverage,
 	type SlidevPptxTextBox,
 	type SlidevPptxTextSourceCoverage,
 	type SlidevPptxTextSourceKind,
@@ -948,6 +949,99 @@ function tableCellRichTextRuns(slide: SlidevPptxSlide): SlidevPptxRichTextParagr
 	);
 }
 
+function normalizeTextStyleToken(value: string | undefined): string {
+	return String(value || '').trim().replace(/^#/, '').toUpperCase();
+}
+
+function textRunStyleDiffersFromTableCell(
+	cell: SlidevPptxTableCell,
+	run: SlidevPptxRichTextParagraph['runs'][number],
+): boolean {
+	const runSpacing = Number(run.charSpacingPt) || 0;
+	const cellSpacing = Number(cell.charSpacingPt) || 0;
+	return (
+		run.code ||
+		run.link ||
+		Boolean(String(run.backgroundColor || '').trim()) ||
+		run.bold !== cell.bold ||
+		run.italic !== cell.italic ||
+		run.underline !== cell.underline ||
+		Boolean(run.strike) !== Boolean(cell.strike) ||
+		Math.abs(run.fontSize - cell.fontSize) > 0.1 ||
+		normalizeTextStyleToken(run.fontFace) !== normalizeTextStyleToken(cell.fontFace) ||
+		normalizeTextStyleToken(run.color) !== normalizeTextStyleToken(cell.color) ||
+		Math.abs(runSpacing - cellSpacing) > 0.01
+	);
+}
+
+function emptyTableCellRichTextCoverage(): SlidevPptxTableCellRichTextCoverage {
+	return {
+		tableSlideCount: 0,
+		richTextTableSlideCount: 0,
+		tableCount: 0,
+		tableCellCount: 0,
+		richTextTableCellCount: 0,
+		richTextParagraphCount: 0,
+		richTextRunCount: 0,
+		richTextRunCharacterCount: 0,
+		styledRunCount: 0,
+		codeRunCount: 0,
+		highlightedRunCount: 0,
+		hyperlinkRunCount: 0,
+		hyperlinkTargetCount: 0,
+	};
+}
+
+function buildSlideTableCellRichTextCoverage(slide: SlidevPptxSlide): SlidevPptxTableCellRichTextCoverage {
+	const coverage = emptyTableCellRichTextCoverage();
+	const tableCells = tableCellsForSlide(slide);
+	const hyperlinkTargets = new Set<string>();
+	coverage.tableSlideCount = slide.tables.length > 0 ? 1 : 0;
+	coverage.tableCount = slide.tables.length;
+	coverage.tableCellCount = tableCells.length;
+	for (const cell of tableCells) {
+		const paragraphs = tableCellRichTextParagraphs(cell);
+		if (paragraphs.length === 0) continue;
+		coverage.richTextTableCellCount += 1;
+		coverage.richTextParagraphCount += paragraphs.length;
+		for (const run of paragraphs.flatMap((paragraph) => paragraph.runs)) {
+			coverage.richTextRunCount += 1;
+			coverage.richTextRunCharacterCount += run.text.length;
+			if (textRunStyleDiffersFromTableCell(cell, run)) coverage.styledRunCount += 1;
+			if (run.code) coverage.codeRunCount += 1;
+			if (String(run.backgroundColor || '').trim().length > 0) coverage.highlightedRunCount += 1;
+			const hyperlinkTarget = String(run.hyperlinkTarget || '').trim();
+			if (hyperlinkTarget) {
+				coverage.hyperlinkRunCount += 1;
+				hyperlinkTargets.add(hyperlinkTarget);
+			}
+		}
+	}
+	coverage.richTextTableSlideCount = coverage.richTextRunCount > 0 ? 1 : 0;
+	coverage.hyperlinkTargetCount = hyperlinkTargets.size;
+	return coverage;
+}
+
+function mergeTableCellRichTextCoverage(
+	coverages: SlidevPptxTableCellRichTextCoverage[],
+): SlidevPptxTableCellRichTextCoverage {
+	return coverages.reduce((total, coverage) => ({
+		tableSlideCount: total.tableSlideCount + coverage.tableSlideCount,
+		richTextTableSlideCount: total.richTextTableSlideCount + coverage.richTextTableSlideCount,
+		tableCount: total.tableCount + coverage.tableCount,
+		tableCellCount: total.tableCellCount + coverage.tableCellCount,
+		richTextTableCellCount: total.richTextTableCellCount + coverage.richTextTableCellCount,
+		richTextParagraphCount: total.richTextParagraphCount + coverage.richTextParagraphCount,
+		richTextRunCount: total.richTextRunCount + coverage.richTextRunCount,
+		richTextRunCharacterCount: total.richTextRunCharacterCount + coverage.richTextRunCharacterCount,
+		styledRunCount: total.styledRunCount + coverage.styledRunCount,
+		codeRunCount: total.codeRunCount + coverage.codeRunCount,
+		highlightedRunCount: total.highlightedRunCount + coverage.highlightedRunCount,
+		hyperlinkRunCount: total.hyperlinkRunCount + coverage.hyperlinkRunCount,
+		hyperlinkTargetCount: total.hyperlinkTargetCount + coverage.hyperlinkTargetCount,
+	}), emptyTableCellRichTextCoverage());
+}
+
 function solidRectanglesForSlide(slide: SlidevPptxSlide): NonNullable<SlidevPptxSlide['shapes']> {
 	return slide.shapes || [];
 }
@@ -1221,6 +1315,7 @@ function buildSlideEditabilitySummary(
 	const tableCellTextInsetDeltas = tableCells.map(tableCellTextAnchorInsetDelta);
 	const solidRectangles = solidRectanglesForSlide(slide);
 	const decorativePrimitiveDiagnostics = decorativePrimitiveDiagnosticsForSlide(slide);
+	const tableCellRichTextCoverage = buildSlideTableCellRichTextCoverage(slide);
 	return {
 		slideNumber: slide.slideNumber,
 		editableTextBoxCount: slide.texts.length,
@@ -1269,6 +1364,7 @@ function buildSlideEditabilitySummary(
 		]),
 		...fontFamilies,
 		textSourceCoverage: buildSlideTextSourceCoverage(slide),
+		tableCellRichTextCoverage,
 		consumedTableTextCandidateCount: slide.consumedTableTextCandidateCount,
 		warnings: slide.warnings,
 	};
@@ -1379,6 +1475,9 @@ function buildEditablePrimitiveCoverage(
 		backgroundFallbackSlideCount,
 		backgroundFallbackSlideRatio: ratio(backgroundFallbackSlideCount, slideCount),
 		textSourceCoverage: mergeTextSourceCoverage(slideSummaries.flatMap((slide) => slide.textSourceCoverage)),
+		tableCellRichTextCoverage: mergeTableCellRichTextCoverage(
+			slideSummaries.map((slide) => slide.tableCellRichTextCoverage),
+		),
 		fallbackOnlyElementKinds: collectUniqueSorted(
 			slideSummaries.flatMap((slide) => slide.fallbackOnlyElementKinds),
 		),
@@ -1514,6 +1613,7 @@ export function buildSlidevPptxExportReport(
 		imageFallbackCount: slides.filter((slide) => Boolean(slide.backgroundImage)).length,
 		editablePrimitiveCoverage,
 		textSourceCoverage: editablePrimitiveCoverage.textSourceCoverage,
+		tableCellRichTextCoverage: editablePrimitiveCoverage.tableCellRichTextCoverage,
 		fontContract,
 		editableLayerContract: buildDefaultEditableLayerContract(),
 		fallbackOnlyElementKinds: editablePrimitiveCoverage.fallbackOnlyElementKinds,
