@@ -684,7 +684,75 @@ PNG 结果：
 8. `unignoredOutputs = []`，`gitIgnoreCheckError = null`；
 9. `git status --ignored` 显示两个 M9 输出目录都是 `!!`，`git ls-files` 在这些目录下没有跟踪文件。
 
-本次验收还暴露了一个 workflow 风险：可选 ImageMagick `NCC` 诊断在 3920x2208 的密集对比页上会显著拉长运行时间。它本次最终完成，所以不是正确性失败；但后续 workflow hardening 应给每个可选 metric 加 timeout/degrade，避免可选诊断把已经通过的 visual gate 表现得像卡死。
+本次验收还暴露了一个 workflow 风险：可选 ImageMagick `NCC` 诊断在 3920x2208 的密集对比页上会显著拉长运行时间。它本次最终完成，所以不是正确性失败。后续 hardening 的方向应是稳定优先：默认保留原先每个 metric `60000ms` 的预算，但把可选指标失败写进 report，而不是让 advisory 诊断中断已经通过 hard visual gate 的验收。
+
+## M10 可选视觉指标稳定性合同
+
+M10 的修正不是短 timeout 加速策略。`PHASH`、`NCC`、`SSIM` 是 ImageMagick 诊断指标，能提供额外证据，但不能成为导出正确性的权威。真正的 hard visual gate 仍然是针对选定 reference source 的 RMSE/AE/difference geometry。
+
+本轮实现把可选指标 timeout 保持为 `60000ms`，与之前稳定的 `compare` 预算一致。这样优先保证真实密集 deck 的诊断完整性，避免用很短 timeout 换来“快但证据不完整”的报告。如果某个可选指标不被当前 ImageMagick 支持、在稳定预算内真实超时、输出不可解析，或命令失败，workflow 会记录结构化原因，而不是把整个 verifier 打断。
+
+新增的 report 合同如下：
+
+1. `comparison.optionalMetricPolicy = { metrics: ["PHASH", "NCC", "SSIM"], timeoutMs: 60000, hardGate: false }`；
+2. `comparison.summary.advisoryMetrics.optionalCompareMetrics` 记录 requested、available、unavailable、timed-out、unsupported、unparsed 与 command-failed 计数；
+3. `comparison-metrics.csv` 增加 `phash_reason`、`ncc_reason`、`ssim_reason`，维护者可以逐页看到 advisory metric 的降级原因；
+4. 可选指标降级不会改变 `pptxVisualGate.passed` 或 `pptxRenderedHtmlReferenceGate.passed`；
+5. 真实验收应使用稳定默认预算，不能用人为极短 timeout 制造降级路径。
+
+这与 `oh-my-ppt` 的经验保持在正确复用尺度上。`oh-my-ppt` 不会把每个辅助信号都变成阻塞产品门禁；它会记录 warning，在视觉合同需要时 retry，并保持导出阶段语义清晰。NotEMD 也应这样做：hard gate 证明视觉保真与可编辑覆盖，advisory metric 用来解释风险与漂移，不应该成为隐藏的 flaky 来源。
+
+本轮仍然不复制 `oh-my-ppt` 源码。复用的是 workflow 合同：区分必要视觉不变量与诊断信号，显式报告诊断降级，并继续确保生成证据留在 git ignore 范围内。
+
+本轮合同变更后，已再次用真实 `docs/architecture.zh-CN.md` deck 做 M10 验收：
+
+```bash
+runuser -u jacob -- env HOME=/home/jacob PLAYWRIGHT_BROWSERS_PATH=/home/jacob/.cache/ms-playwright bash -lc 'cd /home/jacob/obsidian-NotEMD && rm -rf docs/export/test-slidev-m10-optional-metric-stability /tmp/notemd-m10-pptx-verify.json && npm run verify:slidev-export -- --vault docs --source architecture.zh-CN.md --format pptx --output-subfolder export/test-slidev-m10-optional-metric-stability --sample-slides all --timeout-ms 240000 --no-screenshots --pptx-visual-diff --require-pptx-visual-match --pptx-rendered-html-reference-diff --require-pptx-rendered-html-reference-match --json > /tmp/notemd-m10-pptx-verify.json'
+```
+
+结果：
+
+1. `ok = true`；
+2. `environment.slidev.version = 52.16.0 (/home/jacob/slidev/packages/slidev/bin/slidev.mjs)`；
+3. `pptxInspection.slideCount = 30`，`textRunCount = 1092`，`pictureCount = 30`，`tableCount = 6`，`slidesWithoutEditableText = []`；
+4. `pptxVisualGate.required = true`，`pptxVisualGate.passed = true`，`failures = []`；
+5. `pptxRenderedHtmlReferenceGate.required = true`，`pptxRenderedHtmlReferenceGate.passed = true`，`failures = []`；
+6. 两套 visual report 都保持 `optionalMetricPolicy.timeoutMs = 60000`，`hardGate = false`；
+7. 两套 visual report 都显示 `requestedMetricCount = 90`，`availableMetricCount = 60`，`unavailableMetricCount = 30`，`timedOutMetricCount = 0`，`unsupportedMetricCount = 30`，`unavailableReasons = { "unsupported-by-imagemagick": 30 }`；
+8. 两套 visual report 都显示 `meanRmse = 0.04305776633333333`，`maxRmse = 0.0786701`；
+9. sidecar 显示 `textBoxCount = 277`，`editableMermaidTextBoxCount = 36`，`editableTableCellOverlayTextBoxCount = 102`；
+10. sidecar 继续保持 `visibleTextLayer = background-image` 与 `editableLayerRenderMode = transparent-structure`；
+11. 生成物仍在 ignore 范围内：`git status --ignored --short docs/export/test-slidev-m10-optional-metric-stability` 显示 `!!`，`git ls-files docs/export/test-slidev-m10-optional-metric-stability` 没有返回 tracked 文件。
+
+这次 run 使用的是稳定的 optional metric 预算，不是用短 timeout 制造诊断降级路径。
+
+## M11 可编辑层合同、字体与 Mermaid/SVG 后续方向
+
+当前“文字不便于编辑”的问题成立，但根因大概率不是 debug 残留。默认 writer 有意输出透明 DrawingML 文本（`<a:alpha val="0"/>`），因为可见层来自冻结后的浏览器渲染背景图。这个策略让视觉 gate 稳定，但降低了直接编辑的可发现性：用户往往需要在 PowerPoint 里通过选择窗格或 shape selection 选中透明文本框。
+
+这个事实现在通过 sidecar 的 `editableLayerContract` 显式记录：
+
+1. 默认导出：`visualFidelityStrategy = frozen-background-first`，`visibleTextSource = background-image`，`editableTextShapeFill = transparent`，`editableTableTextFill = transparent`，`backgroundTextPolicy = preserve-rendered-text`，`textSelectionSurface = named-transparent-shapes`；
+2. visible-native 实验：`visibleTextSource = native-text`，`editableTextShapeFill = visible`，`editableTableTextFill = visible`，`backgroundTextPolicy = hide-extracted-text-before-capture`；
+3. Mermaid/SVG 默认策略：`mermaidSvgVisualPolicy = background-image`，`mermaidSvgTextPolicy = transparent-editable-label-overlays`，`officeNativeMermaidSvgElementEditability = not-claimed`；
+4. 字体可移植性策略：`fontPortabilityPolicy = report-only-no-default-font-embedding`。
+
+这也是和 `oh-my-ppt` 对比时应该坚持的边界。`oh-my-ppt` 在捕获背景前隐藏已抽取 primitive，是因为它的目标路径更接近 visible native reconstruction。NotEMD 默认路径不能隐藏这些 primitive，因为冻结背景仍然是视觉事实源。真正值得复用的不是“现在就把所有文字设成可见”，而是把 native 可见层放在 residue/visual-diff gate 后面，并把透明结构层的代价显式报告出来。
+
+字体选择应该作为导出策略进入产品，而不是隐式嵌入系统字体：
+
+1. UI 内置少量可移植 preset，优先考虑 Office/跨平台常见字体，例如 `Aptos`、`Arial`、`Calibri`、`Consolas`、`Microsoft YaHei`，以及本机可用时的 `Noto Sans CJK` 系列；
+2. 允许用户输入或选择系统已支持的 font family，用于 Slidev 渲染和 PPTX 抽取，但除非目标 Office 机器也确定存在该字体，否则 report 必须标记可移植风险；
+3. 后续可以支持 vault-local licensed font asset 的 opt-in embedding；不要默认扫描并打包任意系统字体；
+4. 继续把 `fontContract` 作为验收面：源 CSS 字体、Office 实际写出的字体、CJK fallback、缺字风险与 embedding 策略必须一致，才能考虑改变 visible-native text/table 的默认策略。
+
+Mermaid/SVG 也需要分层处理。默认应继续保留 Mermaid source fence，稳定视觉 fallback；同时在能拿到 rendered SVG 时输出 sidecar，方便用户单独检查或手工编辑 SVG 元素。把 SVG 直接嵌入 PPTX 值得做实验，但这不等于 Office-native 可编辑图语义：PowerPoint/LibreOffice 兼容、ungroup 行为、SVG 内字体替换、fallback 渲染都要先测。近期最合理的路径是：
+
+1. Mermaid 源内容不变，不拆分大图；
+2. 默认复制 rendered Mermaid/SVG asset sidecar；
+3. 继续把 Mermaid/SVG 文本 label 抽成透明、具名的可编辑 overlay；
+4. 只有 frozen visual gate 和 Office 兼容测试通过后，才增加实验性的 PPTX SVG embedding；
+5. 在 report 能区分“SVG 图片可编辑性”和“Office DrawingML shape 可编辑性”前，不宣称 Mermaid diagram shape 已经原生可编辑。
 
 ## Release 链接决策
 
@@ -709,6 +777,7 @@ GitHub branch、tree 或 blob URL 都不是正确安装面。它们不是稳定 
 5. 代码块在 DOM 文本被选中时会以文本方式进入 PPTX。inline run 样式现在会进入透明结构层，但完整 syntax-token 语义与显式 hyperlink relationship 仍未建模为 Office 原生对象。
 6. 动画和 click steps 尚未转换为 PowerPoint animations。
 7. 冻结背景 reference 下的视觉质量门已经通过；但这只证明 Office 回渲保留视觉层，不证明复杂对象已经 Office 原生可编辑。
+8. 默认可编辑 text/table 结构层是透明的，这是视觉保真合同，不是 debug 残留；但它确实让用户编辑体验不如 visible-native reconstruction 自然。
 
 这些不是回归，而是明确边界。把可编辑性夸大成无法验证的承诺，比交付一个诚实的 report-driven 第一版更糟。
 
@@ -721,7 +790,8 @@ GitHub branch、tree 或 blob URL 都不是正确安装面。它们不是稳定 
 3. 把 `fontContract` 作为 visible native text/table 的前置门槛。下一步 rich-text 切片只有在 writer/report 对最终 Office 字体一致时，才应拆分 mixed CJK/Latin runs；然后再补 paragraph spacing、list indentation、code monospace 默认、显式 hyperlink relationship，以及“文本样式保真”和“Office 原生语义保真”的报告区分。
 4. 如果未来要让原生 text/table layer 从透明变为可见，必须先增加 background residue detection/retry。当前透明结构层不应隐藏背景文字；只有可见原生文本接管视觉时，才需要像 `oh-my-ppt` 那样隐藏已抽取文字并用像素采样确认背景不残留 ghost text。
 5. shape extraction 只从高置信纯色矩形/线条开始，按 DOM paint order 插入；不要先碰复杂 SVG/Mermaid/vector reconstruction。
-6. Mermaid 源内容继续不动，默认保持 image fallback；除非未来提供明确 experimental vector reconstruction 选项，并且不得自动拆分或改写源 Mermaid fence。
-7. 继续保留 rendered convergence 作为共同前置路径，不新增一条绕过 HTML/PNG 事实源的 HTML-to-PPTX 路线。
+6. 增加字体选择策略：少量内置 preset、用户选择系统已安装字体、明确 portability report；不要默认嵌入任意系统字体。
+7. Mermaid 源内容继续不动；默认输出 rendered SVG sidecar，继续使用 image fallback；除非未来提供明确 experimental SVG embedding 或 vector reconstruction 选项，并且不得自动拆分或改写源 Mermaid fence。
+8. 继续保留 rendered convergence 作为共同前置路径，不新增一条绕过 HTML/PNG 事实源的 HTML-to-PPTX 路线。
 
 不要新增一条绕过 rendered convergence 的 HTML-to-PPTX 路线。那会制造第二套质量门，并让 PPTX 结果偏离用户已经依赖的 HTML 导出路径。

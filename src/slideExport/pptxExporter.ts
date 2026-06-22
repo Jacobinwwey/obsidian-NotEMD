@@ -937,6 +937,33 @@ function buildEditablePrimitiveCoverage(
 	};
 }
 
+function buildDefaultEditableLayerContract(): SlidevPptxExportReport['editableLayerContract'] {
+	return {
+		visualFidelityStrategy: 'frozen-background-first',
+		visibleTextSource: 'background-image',
+		editableTextShapeFill: 'transparent',
+		editableTableTextFill: 'transparent',
+		backgroundTextPolicy: 'preserve-rendered-text',
+		textSelectionSurface: 'named-transparent-shapes',
+		mermaidSvgVisualPolicy: 'background-image',
+		mermaidSvgTextPolicy: 'transparent-editable-label-overlays',
+		officeNativeMermaidSvgElementEditability: 'not-claimed',
+		fontPortabilityPolicy: 'report-only-no-default-font-embedding',
+	};
+}
+
+function buildVisibleNativeEditableLayerContract(): SlidevPptxExportReport['editableLayerContract'] {
+	return {
+		...buildDefaultEditableLayerContract(),
+		visualFidelityStrategy: 'visible-native-experiment',
+		visibleTextSource: 'native-text',
+		editableTextShapeFill: 'visible',
+		editableTableTextFill: 'visible',
+		backgroundTextPolicy: 'hide-extracted-text-before-capture',
+		textSelectionSurface: 'visible-native-text',
+	};
+}
+
 export function buildSlidevPptxExportReport(
 	htmlPath: string,
 	deckPath: string | null,
@@ -984,6 +1011,7 @@ export function buildSlidevPptxExportReport(
 		editablePrimitiveCoverage,
 		textSourceCoverage: editablePrimitiveCoverage.textSourceCoverage,
 		fontContract,
+		editableLayerContract: buildDefaultEditableLayerContract(),
 		fallbackOnlyElementKinds: editablePrimitiveCoverage.fallbackOnlyElementKinds,
 		unmodeledTextRunReasons: editablePrimitiveCoverage.unmodeledTextRunReasons,
 		slides: slideSummaries,
@@ -1010,6 +1038,7 @@ export function buildSlidevVisibleNativePptxExperimentReport(
 		...report,
 		visibleTextLayer: 'native-text-experiment',
 		editableLayerRenderMode: 'visible-native-experiment',
+		editableLayerContract: buildVisibleNativeEditableLayerContract(),
 		visibleNativeExperiment: {
 			status: 'experimental',
 			nativeLayer: 'visible-text-and-table',

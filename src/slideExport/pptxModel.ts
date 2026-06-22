@@ -253,6 +253,19 @@ export interface SlidevPptxFontContractSummary {
 	embeddedFontFamilies: [];
 }
 
+export interface SlidevPptxEditableLayerContract {
+	visualFidelityStrategy: 'frozen-background-first' | 'visible-native-experiment';
+	visibleTextSource: 'background-image' | 'native-text';
+	editableTextShapeFill: 'transparent' | 'visible';
+	editableTableTextFill: 'transparent' | 'visible';
+	backgroundTextPolicy: 'preserve-rendered-text' | 'hide-extracted-text-before-capture';
+	textSelectionSurface: 'named-transparent-shapes' | 'visible-native-text';
+	mermaidSvgVisualPolicy: 'background-image';
+	mermaidSvgTextPolicy: 'transparent-editable-label-overlays';
+	officeNativeMermaidSvgElementEditability: 'not-claimed';
+	fontPortabilityPolicy: 'report-only-no-default-font-embedding';
+}
+
 export interface SlidevPptxExportReport {
 	formatVersion: 1;
 	source: {
@@ -283,6 +296,7 @@ export interface SlidevPptxExportReport {
 	editablePrimitiveCoverage: SlidevPptxEditablePrimitiveCoverage;
 	textSourceCoverage: SlidevPptxTextSourceCoverage[];
 	fontContract: SlidevPptxFontContractSummary;
+	editableLayerContract: SlidevPptxEditableLayerContract;
 	fallbackOnlyElementKinds: SlidevPptxFallbackOnlyElementKind[];
 	unmodeledTextRunReasons: SlidevPptxUnmodeledTextRunReason[];
 	slides: SlidevPptxSlideEditabilitySummary[];

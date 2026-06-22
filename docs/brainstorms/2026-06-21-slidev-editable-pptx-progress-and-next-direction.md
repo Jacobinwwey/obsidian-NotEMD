@@ -663,7 +663,75 @@ PNG result:
 8. `unignoredOutputs = []`, `gitIgnoreCheckError = null`;
 9. `git status --ignored` shows both M9 output directories as `!!`, and `git ls-files` returns no tracked files under them.
 
-One workflow risk was observed during this acceptance: optional ImageMagick `NCC` diagnostics can dominate runtime on dense 3920x2208 comparison pages. It completed in this run, so it is not a correctness failure, but future workflow hardening should add per-metric timeout/degrade behavior so optional diagnostics cannot make a passing visual gate look hung.
+One workflow risk was observed during this acceptance: optional ImageMagick `NCC` diagnostics can dominate runtime on dense 3920x2208 comparison pages. It completed in this run, so it is not a correctness failure. The hardening direction is stability-first: keep the previous 60000ms per-metric budget by default, but make optional metric failures observable as report data instead of allowing advisory diagnostics to abort an otherwise valid hard visual gate.
+
+## M10 Optional Visual Metric Stability Contract
+
+The correction for M10 is intentionally not a short-timeout acceleration policy. `PHASH`, `NCC`, and `SSIM` are diagnostic ImageMagick metrics. They are useful when available, but they are not the authority for export correctness. The hard visual gate remains RMSE/AE/difference geometry against the selected reference source.
+
+The implementation now keeps the optional metric timeout at `60000ms`, matching the previous stable `compare` budget. That preserves diagnostic completeness for dense real decks and avoids the false confidence of a fast but incomplete metric report. If an optional metric is unsupported, times out under that stable budget, returns unparsable output, or fails as a command, the run records a structured reason instead of throwing through the whole verifier.
+
+The report contract added in this slice is:
+
+1. `comparison.optionalMetricPolicy = { metrics: ["PHASH", "NCC", "SSIM"], timeoutMs: 60000, hardGate: false }`;
+2. `comparison.summary.advisoryMetrics.optionalCompareMetrics` records requested, available, unavailable, timed-out, unsupported, unparsable, and command-failed counts;
+3. `comparison-metrics.csv` includes `phash_reason`, `ncc_reason`, and `ssim_reason` so a maintainer can see which advisory metrics degraded on which page;
+4. optional metric degradation does not change `pptxVisualGate.passed` or `pptxRenderedHtmlReferenceGate.passed`;
+5. real acceptance should use the stable default budget, not an artificially tiny timeout to manufacture the degrade path.
+
+This aligns with the `oh-my-ppt` lesson at the right reuse scale. `oh-my-ppt` does not treat every helper signal as a blocking product gate; it records warnings, retries where the visual contract needs retries, and keeps export stages explicit. NotEMD should do the same: hard gates prove visual preservation and editability coverage, while advisory metrics explain risk and drift without becoming a hidden source of flakiness.
+
+The implementation still does not copy `oh-my-ppt` source. The reused idea is the workflow contract: separate required visual invariants from diagnostic signals, report degraded diagnostics explicitly, and keep generated evidence outside git-tracked artifacts.
+
+Real M10 acceptance was rerun against the real `docs/architecture.zh-CN.md` deck after this contract change:
+
+```bash
+runuser -u jacob -- env HOME=/home/jacob PLAYWRIGHT_BROWSERS_PATH=/home/jacob/.cache/ms-playwright bash -lc 'cd /home/jacob/obsidian-NotEMD && rm -rf docs/export/test-slidev-m10-optional-metric-stability /tmp/notemd-m10-pptx-verify.json && npm run verify:slidev-export -- --vault docs --source architecture.zh-CN.md --format pptx --output-subfolder export/test-slidev-m10-optional-metric-stability --sample-slides all --timeout-ms 240000 --no-screenshots --pptx-visual-diff --require-pptx-visual-match --pptx-rendered-html-reference-diff --require-pptx-rendered-html-reference-match --json > /tmp/notemd-m10-pptx-verify.json'
+```
+
+Result:
+
+1. `ok = true`;
+2. `environment.slidev.version = 52.16.0 (/home/jacob/slidev/packages/slidev/bin/slidev.mjs)`;
+3. `pptxInspection.slideCount = 30`, `textRunCount = 1092`, `pictureCount = 30`, `tableCount = 6`, `slidesWithoutEditableText = []`;
+4. `pptxVisualGate.required = true`, `pptxVisualGate.passed = true`, `failures = []`;
+5. `pptxRenderedHtmlReferenceGate.required = true`, `pptxRenderedHtmlReferenceGate.passed = true`, `failures = []`;
+6. both visual reports keep `optionalMetricPolicy.timeoutMs = 60000`, `hardGate = false`;
+7. both visual reports show `requestedMetricCount = 90`, `availableMetricCount = 60`, `unavailableMetricCount = 30`, `timedOutMetricCount = 0`, `unsupportedMetricCount = 30`, `unavailableReasons = { "unsupported-by-imagemagick": 30 }`;
+8. both visual reports show `meanRmse = 0.04305776633333333`, `maxRmse = 0.0786701`;
+9. sidecar shows `textBoxCount = 277`, `editableMermaidTextBoxCount = 36`, `editableTableCellOverlayTextBoxCount = 102`;
+10. sidecar keeps `visibleTextLayer = background-image` and `editableLayerRenderMode = transparent-structure`;
+11. generated output remains ignored: `git status --ignored --short docs/export/test-slidev-m10-optional-metric-stability` reports `!!`, and `git ls-files docs/export/test-slidev-m10-optional-metric-stability` returns no tracked files.
+
+This run used the stable optional metric budget. It did not use a short timeout to force a degraded metric path.
+
+## M11 Editable Layer Contract, Fonts, and Mermaid/SVG Direction
+
+The current editability problem is real, but the likely root cause is not a leftover debug artifact. The default writer intentionally emits transparent DrawingML text (`<a:alpha val="0"/>`) because the visible layer is the frozen rendered background. That strategy keeps the visual gate stable, but it makes direct text editing less discoverable: users often need PowerPoint's selection pane or shape selection to pick the transparent text boxes.
+
+This is now explicit in the sidecar report through `editableLayerContract`:
+
+1. default export: `visualFidelityStrategy = frozen-background-first`, `visibleTextSource = background-image`, `editableTextShapeFill = transparent`, `editableTableTextFill = transparent`, `backgroundTextPolicy = preserve-rendered-text`, `textSelectionSurface = named-transparent-shapes`;
+2. visible-native experiment: `visibleTextSource = native-text`, `editableTextShapeFill = visible`, `editableTableTextFill = visible`, `backgroundTextPolicy = hide-extracted-text-before-capture`;
+3. Mermaid/SVG default policy: `mermaidSvgVisualPolicy = background-image`, `mermaidSvgTextPolicy = transparent-editable-label-overlays`, `officeNativeMermaidSvgElementEditability = not-claimed`;
+4. font portability policy: `fontPortabilityPolicy = report-only-no-default-font-embedding`.
+
+This is the right comparison boundary with `oh-my-ppt`. `oh-my-ppt` hides already extracted primitives before background capture because its target path is visible native reconstruction. NotEMD's default path must not hide those primitives, because the frozen background is still the visual source of truth. The useful lesson is not "make all text visible now"; it is to keep native visibility behind a residue/visual-diff gate and make the transparent-layer tradeoff observable.
+
+Font selection should be added as an export policy, not as implicit system-font embedding:
+
+1. ship a small portable preset list for UI selection, biased toward Office/common cross-platform faces such as `Aptos`, `Arial`, `Calibri`, `Consolas`, `Microsoft YaHei`, and optionally locally available `Noto Sans CJK` families;
+2. allow users to type or select a system-supported font family for rendered Slidev/PPTX extraction, but mark it as a portability risk unless it is known to exist on the target Office machine;
+3. support vault-local licensed font assets as an opt-in embedding source later; do not scan and package arbitrary system fonts by default;
+4. keep `fontContract` as the acceptance surface: source CSS fonts, Office-emitted fonts, CJK fallback, missing-font risk, and embedding policy must all agree before any visible-native text/table default changes.
+
+Mermaid/SVG needs a similar split. The default should preserve Mermaid source fences and keep the visual fallback stable, while exporting rendered Mermaid SVG sidecars for users who want to inspect or manually edit vector elements. Embedding SVG directly into PPTX is worth an experiment, but it is not the same as Office-native editable diagram semantics: PowerPoint/LibreOffice compatibility, ungroup behavior, font substitution inside SVG, and fallback rendering must be tested before it becomes default. The near-term best path is:
+
+1. keep Mermaid source unchanged and do not split large Mermaid diagrams;
+2. copy rendered Mermaid/SVG assets as sidecars by default when available;
+3. continue extracting Mermaid/SVG text labels into transparent named overlays;
+4. add an experimental PPTX SVG embedding path only after the frozen visual gate and Office compatibility tests prove it is stable;
+5. do not claim Mermaid diagram shapes are natively editable until the report can distinguish SVG image editability from Office DrawingML shape editability.
 
 ## Release Link Decision
 
@@ -688,6 +756,7 @@ The first implementation is intentionally conservative:
 5. Code blocks are extracted as text when visible DOM text is selected. Inline run styling is now preserved in the transparent structure layer, but full syntax-token semantics and explicit hyperlink relationships are still not modeled as Office-native objects.
 6. Animations and click steps are not represented as PowerPoint animations.
 7. The frozen-background visual-diff gate passes; that proves Office preserves the written visual layer, not that complex objects are Office-native editable.
+8. Default editable text/table structures are transparent by design. This is a visual-fidelity contract, not a debug leftover, but it does make user editing less natural than a visible-native reconstruction.
 
 Those are not regressions; they are explicit boundaries. Overstating editability would be worse than shipping an honest report-driven first slice.
 
@@ -700,6 +769,7 @@ The next level should be incremental and report-driven:
 3. use `fontContract` as the gate before visible native text/table work. The next rich-text slices should split mixed CJK/Latin runs only when the writer/report agree on the final Office faces, then add paragraph spacing, list indentation, code monospace defaults, explicit hyperlink relationships, and a clearer distinction between text-style fidelity and true Office-native semantic fidelity;
 4. if a future slice makes native text or table layers visible, add background residue detection/retry before accepting those screenshots. The current transparent-structure mode should not hide text from the frozen background; residue sampling only becomes mandatory when visible native text takes over the visual layer.
 5. add shape extraction for high-confidence solid-color rectangles/lines only;
-6. keep Mermaid source untouched and continue using image fallback unless a separate explicit user option requests experimental vector reconstruction.
+6. add a font selection policy with a small preset list, user-selected installed family names, and a clear portability report; do not default to embedding arbitrary system fonts;
+7. keep Mermaid source untouched, export rendered SVG sidecars when available, and continue using image fallback unless a separate explicit user option requests experimental SVG embedding or vector reconstruction.
 
 Avoid adding a second HTML-to-PPTX route that bypasses rendered convergence. That would create a separate quality gate and make PPTX results drift from the HTML export path that users already rely on.

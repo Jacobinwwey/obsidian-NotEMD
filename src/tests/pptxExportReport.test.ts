@@ -199,6 +199,18 @@ describe('pptx export report', () => {
 		expect(report.editablePrimitiveCoverage.richTextRunCount).toBe(2);
 		expect(report.editablePrimitiveCoverage.richTextRunCharacterCount).toBe('Architecture overview'.length);
 		expect(report.editablePrimitiveCoverage.backgroundFallbackSlideRatio).toBe(0.5);
+		expect(report.editableLayerContract).toEqual({
+			visualFidelityStrategy: 'frozen-background-first',
+			visibleTextSource: 'background-image',
+			editableTextShapeFill: 'transparent',
+			editableTableTextFill: 'transparent',
+			backgroundTextPolicy: 'preserve-rendered-text',
+			textSelectionSurface: 'named-transparent-shapes',
+			mermaidSvgVisualPolicy: 'background-image',
+			mermaidSvgTextPolicy: 'transparent-editable-label-overlays',
+			officeNativeMermaidSvgElementEditability: 'not-claimed',
+			fontPortabilityPolicy: 'report-only-no-default-font-embedding',
+		});
 		expect(report.fontContract).toEqual(
 			expect.objectContaining({
 				fontFamilyCount: 3,
@@ -550,6 +562,19 @@ describe('pptx export report', () => {
 
 		expect(report.visibleTextLayer).toBe('native-text-experiment');
 		expect(report.editableLayerRenderMode).toBe('visible-native-experiment');
+		expect(report.editableLayerContract).toEqual(
+			expect.objectContaining({
+				visualFidelityStrategy: 'visible-native-experiment',
+				visibleTextSource: 'native-text',
+				editableTextShapeFill: 'visible',
+				editableTableTextFill: 'visible',
+				backgroundTextPolicy: 'hide-extracted-text-before-capture',
+				textSelectionSurface: 'visible-native-text',
+				mermaidSvgVisualPolicy: 'background-image',
+				mermaidSvgTextPolicy: 'transparent-editable-label-overlays',
+				officeNativeMermaidSvgElementEditability: 'not-claimed',
+			}),
+		);
 		expect(report.visibleNativeExperiment).toEqual(
 			expect.objectContaining({
 				status: 'experimental',

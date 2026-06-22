@@ -14,6 +14,7 @@ const REQUIRED_TOOLS = [
 ];
 
 const OPTIONAL_COMPARE_METRICS = ['PHASH', 'NCC', 'SSIM'];
+const DEFAULT_OPTIONAL_COMPARE_METRIC_TIMEOUT_MS = 60000;
 
 const VISUAL_DIAGNOSTIC_LIMITS = {
 	rmse: {
@@ -66,13 +67,17 @@ function runCommand(command, args, options = {}) {
 		maxBuffer: 16 * 1024 * 1024,
 		...options,
 	});
+	const errorCode = result.error?.code || null;
 	return {
 		command,
 		args,
 		status: result.status,
+		signal: result.signal || null,
 		stdout: result.stdout || '',
 		stderr: result.stderr || '',
 		error: result.error ? result.error.message : null,
+		errorCode,
+		timedOut: errorCode === 'ETIMEDOUT',
 	};
 }
 
@@ -383,9 +388,18 @@ function parseGeometryBox(output) {
 	};
 }
 
-function runCompareMetric(metric, referencePath, renderedPath, outputPath) {
+function resolvePositiveInteger(value, fallback) {
+	const parsed = Number(value);
+	return Number.isFinite(parsed) && parsed > 0 ? Math.floor(parsed) : fallback;
+}
+
+function runCompareMetric(metric, referencePath, renderedPath, outputPath, options = {}) {
 	const args = ['-metric', metric, referencePath, renderedPath, outputPath || 'null:'];
-	const result = runCommand('compare', args, { timeout: 60000 });
+	const timeoutMs = resolvePositiveInteger(options.timeoutMs, DEFAULT_OPTIONAL_COMPARE_METRIC_TIMEOUT_MS);
+	const result = runCommand('compare', args, { timeout: timeoutMs });
+	if (result.timedOut) {
+		throw new Error(`ImageMagick compare ${metric} timed out after ${timeoutMs}ms`);
+	}
 	if (![0, 1].includes(result.status)) {
 		throw new Error(
 			`ImageMagick compare ${metric} failed: ${result.stderr || result.stdout || result.error || 'unknown error'}`,
@@ -394,28 +408,46 @@ function runCompareMetric(metric, referencePath, renderedPath, outputPath) {
 	return parseCompareMetric(result.stderr || result.stdout);
 }
 
-function runOptionalCompareMetric(metric, referencePath, renderedPath, metricSupport) {
-	const normalizedMetric = String(metric || '').trim().toUpperCase();
-	if (!metricSupport?.available) {
+function unavailableOptionalCompareMetric(metric, reason, error = null) {
+	return {
+		metric,
+		available: false,
+		value: null,
+		normalized: false,
+		reason,
+		error,
+	};
+}
+
+function optionalCompareMetricReason(error) {
+	const message = error instanceof Error ? error.message : String(error);
+	if (/timed out/i.test(message)) {
 		return {
-			metric: normalizedMetric,
-			available: false,
-			value: null,
-			normalized: false,
-			reason: metricSupport?.error || 'metric support unavailable',
+			reason: 'metric-timeout',
+			error: message,
 		};
+	}
+	return {
+		reason: 'metric-command-failed',
+		error: message,
+	};
+}
+
+function runOptionalCompareMetric(metric, referencePath, renderedPath, metricSupport, options = {}) {
+	const normalizedMetric = String(metric || '').trim().toUpperCase();
+	const timeoutMs = resolvePositiveInteger(options.timeoutMs, DEFAULT_OPTIONAL_COMPARE_METRIC_TIMEOUT_MS);
+	if (!metricSupport?.available) {
+		return unavailableOptionalCompareMetric(
+			normalizedMetric,
+			'metric-support-unavailable',
+			metricSupport?.error || 'metric support unavailable',
+		);
 	}
 	if (!metricSupport.metrics.includes(normalizedMetric)) {
-		return {
-			metric: normalizedMetric,
-			available: false,
-			value: null,
-			normalized: false,
-			reason: 'unsupported-by-imagemagick',
-		};
+		return unavailableOptionalCompareMetric(normalizedMetric, 'unsupported-by-imagemagick');
 	}
 	try {
-		const parsed = runCompareMetric(normalizedMetric, referencePath, renderedPath, null);
+		const parsed = runCompareMetric(normalizedMetric, referencePath, renderedPath, null, { timeoutMs });
 		return {
 			metric: normalizedMetric,
 			available: Number.isFinite(parsed.value) || parsed.value === Number.POSITIVE_INFINITY,
@@ -423,14 +455,14 @@ function runOptionalCompareMetric(metric, referencePath, renderedPath, metricSup
 			value: Number.isFinite(parsed.value) || parsed.value === Number.POSITIVE_INFINITY ? parsed.value : null,
 			normalized: parsed.normalized,
 			reason: Number.isFinite(parsed.value) || parsed.value === Number.POSITIVE_INFINITY ? null : 'metric-output-unparsed',
+			error: null,
+			timeoutMs,
 		};
 	} catch (error) {
+		const reason = optionalCompareMetricReason(error);
 		return {
-			metric: normalizedMetric,
-			available: false,
-			value: null,
-			normalized: false,
-			reason: error instanceof Error ? error.message : String(error),
+			...unavailableOptionalCompareMetric(normalizedMetric, reason.reason, reason.error),
+			timeoutMs,
 		};
 	}
 }
@@ -708,6 +740,9 @@ function writeComparisonCsv(pages, outputPath) {
 		'phash',
 		'ncc',
 		'ssim',
+		'phash_reason',
+		'ncc_reason',
+		'ssim_reason',
 		'rmse_level',
 		'scale_drift_level',
 		'diff_area_level',
@@ -745,6 +780,9 @@ function writeComparisonCsv(pages, outputPath) {
 		page.optionalCompareMetrics?.PHASH?.value,
 		page.optionalCompareMetrics?.NCC?.value,
 		page.optionalCompareMetrics?.SSIM?.value,
+		page.optionalCompareMetrics?.PHASH?.reason,
+		page.optionalCompareMetrics?.NCC?.reason,
+		page.optionalCompareMetrics?.SSIM?.reason,
 		page.diagnostics?.rmseLevel,
 		page.diagnostics?.scaleDriftLevel,
 		page.diagnostics?.diffAreaLevel,
@@ -761,6 +799,41 @@ function writeComparisonCsv(pages, outputPath) {
 	]);
 	fs.writeFileSync(outputPath, [headers, ...rows].map((row) => row.map(csvCell).join(',')).join('\n'), 'utf8');
 	return outputPath;
+}
+
+function summarizeOptionalCompareMetrics(pages) {
+	const summary = {
+		requestedMetricCount: 0,
+		availableMetricCount: 0,
+		unavailableMetricCount: 0,
+		timedOutMetricCount: 0,
+		unsupportedMetricCount: 0,
+		unparsedMetricCount: 0,
+		commandFailedMetricCount: 0,
+		unavailableReasons: {},
+	};
+	for (const page of pages) {
+		for (const metricResult of Object.values(page.optionalCompareMetrics || {})) {
+			summary.requestedMetricCount += 1;
+			if (metricResult?.available) {
+				summary.availableMetricCount += 1;
+				continue;
+			}
+			summary.unavailableMetricCount += 1;
+			const reason = metricResult?.reason || 'unknown';
+			summary.unavailableReasons[reason] = (summary.unavailableReasons[reason] || 0) + 1;
+			if (reason === 'metric-timeout') {
+				summary.timedOutMetricCount += 1;
+			} else if (reason === 'unsupported-by-imagemagick') {
+				summary.unsupportedMetricCount += 1;
+			} else if (reason === 'metric-output-unparsed') {
+				summary.unparsedMetricCount += 1;
+			} else if (reason === 'metric-command-failed') {
+				summary.commandFailedMetricCount += 1;
+			}
+		}
+	}
+	return summary;
 }
 
 function summarizePageMetrics(pages) {
@@ -869,6 +942,7 @@ function summarizePageMetrics(pages) {
 		worstDifferenceBoundingBoxSlides,
 		advisoryMetrics: {
 			limits: VISUAL_DIAGNOSTIC_LIMITS,
+			optionalCompareMetrics: summarizeOptionalCompareMetrics(pages),
 			diagnosticCounts,
 			likelyRendererNoiseSlides,
 			textAntialiasDriftSlides,
@@ -937,6 +1011,10 @@ function comparePngSequences(options) {
 	const diffDirectory = path.join(outputDirectory, 'diff');
 	const sideBySideDirectory = path.join(outputDirectory, 'side-by-side');
 	const optionalMetricSupport = collectCompareMetricSupport();
+	const optionalMetricTimeoutMs = resolvePositiveInteger(
+		options.optionalMetricTimeoutMs,
+		DEFAULT_OPTIONAL_COMPARE_METRIC_TIMEOUT_MS,
+	);
 
 	resetDirectory(resizedDirectory);
 	resetDirectory(diffDirectory);
@@ -982,7 +1060,9 @@ function comparePngSequences(options) {
 		const optionalCompareMetrics = Object.fromEntries(
 			OPTIONAL_COMPARE_METRICS.map((metric) => [
 				metric,
-				runOptionalCompareMetric(metric, pair.referencePath, resizedPath, optionalMetricSupport),
+				runOptionalCompareMetric(metric, pair.referencePath, resizedPath, optionalMetricSupport, {
+					timeoutMs: optionalMetricTimeoutMs,
+				}),
 			]),
 		);
 		const absoluteErrorPixels = Number.isFinite(ae.value) ? ae.value : null;
@@ -1046,6 +1126,11 @@ function comparePngSequences(options) {
 		contactSheetWarnings,
 		metricsCsvPath,
 		optionalMetricSupport,
+		optionalMetricPolicy: {
+			metrics: OPTIONAL_COMPARE_METRICS,
+			timeoutMs: optionalMetricTimeoutMs,
+			hardGate: false,
+		},
 		pages,
 		summary,
 		gate: evaluateVisualGate(summary, options.thresholds || {}),
@@ -1096,6 +1181,7 @@ function buildPptxVisualDiff(options) {
 		outputDirectory,
 		referenceSource: reference.source,
 		thresholds: options.thresholds,
+		optionalMetricTimeoutMs: options.optionalMetricTimeoutMs,
 	});
 	const report = {
 		available: true,
@@ -1117,6 +1203,7 @@ function buildPptxVisualDiff(options) {
 module.exports = {
 	REQUIRED_TOOLS,
 	OPTIONAL_COMPARE_METRICS,
+	DEFAULT_OPTIONAL_COMPARE_METRIC_TIMEOUT_MS,
 	VISUAL_DIAGNOSTIC_LIMITS,
 	buildPptxVisualDiff,
 	collectCompareMetricSupport,
@@ -1130,6 +1217,7 @@ module.exports = {
 	parseCompareMetric,
 	parseGeometryBox,
 	renderPptxToPngSequence,
+	runOptionalCompareMetric,
 	summarizePageMetrics,
 	writeComparisonCsv,
 };

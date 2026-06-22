@@ -4,13 +4,16 @@ import { tmpdir } from 'os';
 import { strToU8, zipSync } from 'fflate';
 
 const {
+	DEFAULT_OPTIONAL_COMPARE_METRIC_TIMEOUT_MS,
 	diagnoseVisualPage,
 	evaluateVisualGate,
 	extractPptxBackgroundImages,
 	pairPngSequences,
 	parseCompareMetric,
 	parseGeometryBox,
+	runOptionalCompareMetric,
 	summarizePageMetrics,
+	writeComparisonCsv,
 } = require('../../scripts/lib/pptx-visual-diff');
 
 describe('pptx visual diff helper', () => {
@@ -126,6 +129,89 @@ describe('pptx visual diff helper', () => {
 				maxDifferenceBoundingBoxAreaRatio: 0.1,
 			}).passed,
 		).toBe(false);
+	});
+
+	test('keeps optional ImageMagick metric timeout stable by default', () => {
+		expect(DEFAULT_OPTIONAL_COMPARE_METRIC_TIMEOUT_MS).toBe(60000);
+	});
+
+	test('reports unsupported optional ImageMagick metrics without throwing', () => {
+		const result = runOptionalCompareMetric(
+			'NCC',
+			'reference.png',
+			'rendered.png',
+			{ available: true, metrics: ['RMSE', 'AE'] },
+		);
+
+		expect(result).toEqual(expect.objectContaining({
+			metric: 'NCC',
+			available: false,
+			value: null,
+			normalized: false,
+			reason: 'unsupported-by-imagemagick',
+		}));
+	});
+
+	test('summarizes optional metric availability as advisory diagnostics', () => {
+		const summary = summarizePageMetrics([
+			{
+				slide: 1,
+				referencePath: '1.png',
+				renderedPath: 'slide-01.png',
+				rmseNormalized: 0.03,
+				absoluteErrorRatio: 0.01,
+				maxScaleRatioDelta: 0.01,
+				optionalCompareMetrics: {
+					PHASH: { metric: 'PHASH', available: true, value: 0.02, normalized: true, reason: null },
+					NCC: { metric: 'NCC', available: false, value: null, normalized: false, reason: 'metric-timeout' },
+					SSIM: {
+						metric: 'SSIM',
+						available: false,
+						value: null,
+						normalized: false,
+						reason: 'unsupported-by-imagemagick',
+					},
+				},
+			},
+		]);
+
+		expect(summary.advisoryMetrics.optionalCompareMetrics).toEqual(expect.objectContaining({
+			requestedMetricCount: 3,
+			availableMetricCount: 1,
+			unavailableMetricCount: 2,
+			timedOutMetricCount: 1,
+			unsupportedMetricCount: 1,
+			unavailableReasons: {
+				'metric-timeout': 1,
+				'unsupported-by-imagemagick': 1,
+			},
+		}));
+	});
+
+	test('writes optional metric unavailable reasons into the comparison CSV', () => {
+		const directory = mkdtempSync(join(tmpdir(), 'notemd-pptx-visual-csv-'));
+		try {
+			const outputPath = join(directory, 'comparison-metrics.csv');
+			writeComparisonCsv([
+				{
+					slide: 1,
+					referencePath: '1.png',
+					renderedPath: 'slide-01.png',
+					optionalCompareMetrics: {
+						PHASH: { value: 0.02, reason: null },
+						NCC: { value: null, reason: 'metric-timeout' },
+						SSIM: { value: null, reason: 'unsupported-by-imagemagick' },
+					},
+				},
+			], outputPath);
+
+			const csv = readFileSync(outputPath, 'utf8');
+			expect(csv.split('\n')[0]).toContain('phash_reason,ncc_reason,ssim_reason');
+			expect(csv).toContain('metric-timeout');
+			expect(csv).toContain('unsupported-by-imagemagick');
+		} finally {
+			rmSync(directory, { recursive: true, force: true });
+		}
 	});
 
 	test('classifies wide low-rmse diffs as likely renderer noise', () => {
