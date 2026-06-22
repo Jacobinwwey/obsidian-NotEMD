@@ -377,6 +377,126 @@ describe('pptx export report', () => {
 		expect(report.slides[1].warnings).toEqual(['Slide 2 has no extracted editable text.']);
 	});
 
+	test('counts native table rich text runs without relying on table-cell overlay text boxes', () => {
+		const slides: SlidevPptxSlide[] = [
+			{
+				slideNumber: 1,
+				title: 'Table rich runs',
+				backgroundColor: 'FFFFFF',
+				texts: [
+					{
+						...editableTextBoxForReport('Overlay should be suppressed', 'table-cell-overlay'),
+						unmodeledRunReasons: ['inline-code'],
+					},
+				],
+				tables: [
+					{
+						x: 1,
+						y: 1,
+						w: 6,
+						h: 1,
+						colWidths: [6],
+						rowHeights: [1],
+						order: 20,
+						rows: [
+							[
+								{
+									text: 'Use apiKey docs',
+									rowSpan: 1,
+									colSpan: 1,
+									fontSize: 14,
+									fontFace: 'Aptos',
+									color: '111827',
+									bold: false,
+									italic: false,
+									underline: false,
+									align: 'left',
+									verticalAlign: 'top',
+									fillColor: null,
+									borderColor: null,
+									borderWidthPt: 0,
+									richTextParagraphs: [
+										{
+											runs: [
+												{
+													text: 'Use ',
+													fontSize: 14,
+													fontFace: 'Aptos',
+													color: '111827',
+													bold: false,
+													italic: false,
+													underline: false,
+													code: false,
+													link: false,
+												},
+												{
+													text: 'apiKey',
+													fontSize: 14,
+													fontFace: 'Fira Code',
+													color: '0F172A',
+													backgroundColor: 'F5F5F5',
+													bold: false,
+													italic: false,
+													underline: false,
+													code: true,
+													link: false,
+												},
+												{
+													text: ' docs',
+													fontSize: 14,
+													fontFace: 'Aptos',
+													color: '2563EB',
+													bold: true,
+													italic: false,
+													underline: true,
+													code: false,
+													link: true,
+													hyperlinkTarget: 'https://example.com/docs',
+												},
+											],
+										},
+									],
+									unmodeledRunReasons: ['inline-code', 'inline-formatting', 'link'],
+								},
+							],
+						],
+					},
+				],
+				fallbackOnlyElementKinds: [],
+				consumedTableTextCandidateCount: 1,
+				warnings: [],
+			},
+		];
+
+		const report = buildSlidevPptxExportReport(
+			'/vault/export/deck/index.html',
+			'/vault/deck.md',
+			'/vault/export/deck.pptx',
+			'/vault/export/deck.pptx.report.json',
+			slides,
+		);
+
+		expect(report.textBoxCount).toBe(0);
+		expect(report.editableTableCellOverlayTextBoxCount).toBe(0);
+		expect(report.editableTableCellCount).toBe(1);
+		expect(report.richTextRunCount).toBe(3);
+		expect(report.editablePrimitiveCoverage.richTextRunCharacterCount).toBe('Use apiKey docs'.length);
+		expect(report.hyperlinkRunCount).toBe(1);
+		expect(report.hyperlinkTargetCount).toBe(1);
+		expect(report.unmodeledTextRunReasons).toEqual(['inline-code', 'inline-formatting', 'link']);
+		expect(report.fontContract.fontFamilies).toEqual(['Aptos', 'Fira Code']);
+		expect(report.fontContract.officeFontFamilies).toEqual(['Aptos', 'DejaVu Sans Mono']);
+		expect(report.fontContract.fontUsages).toEqual(
+			expect.arrayContaining([
+				expect.objectContaining({
+					fontFace: 'Fira Code',
+					tableCellCount: 1,
+					richTextRunCount: 1,
+				}),
+			]),
+		);
+	});
+
 	test('reports editable text boxes by source kind', () => {
 		const slides: SlidevPptxSlide[] = [
 			{

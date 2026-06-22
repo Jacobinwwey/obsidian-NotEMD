@@ -357,6 +357,133 @@ describe('pptxWriter', () => {
 		}
 	});
 
+	test('writes native table rich text runs instead of transparent overlay text', () => {
+		const directory = mkdtempSync(join(tmpdir(), 'notemd-pptx-table-rich-runs-'));
+		try {
+			const outputPath = join(directory, 'deck.pptx');
+			const document: SlidevPptxDocument = {
+				title: 'Table rich runs',
+				author: 'NoteMD',
+				slides: [
+					{
+						slideNumber: 1,
+						title: 'Table rich runs',
+						backgroundColor: 'FFFFFF',
+						texts: [],
+						tables: [
+							{
+								x: 1,
+								y: 1,
+								w: 6,
+								h: 0.8,
+								colWidths: [6],
+								rowHeights: [0.8],
+								order: 10,
+								rows: [
+									[
+										{
+											text: 'Use apiKey and docs',
+											rowSpan: 1,
+											colSpan: 1,
+											fontSize: 14,
+											fontFace: 'Aptos',
+											color: '111827',
+											bold: false,
+											italic: false,
+											underline: false,
+											align: 'left',
+											verticalAlign: 'top',
+											fillColor: null,
+											borderColor: 'CBD5E1',
+											borderWidthPt: 0.75,
+											richTextParagraphs: [
+												{
+													runs: [
+														{
+															text: 'Use ',
+															fontSize: 14,
+															fontFace: 'Aptos',
+															color: '111827',
+															bold: false,
+															italic: false,
+															underline: false,
+															code: false,
+															link: false,
+														},
+														{
+															text: 'apiKey',
+															fontSize: 14,
+															fontFace: 'Fira Code',
+															color: '0F172A',
+															backgroundColor: 'F5F5F5',
+															bold: false,
+															italic: false,
+															underline: false,
+															code: true,
+															link: false,
+														},
+														{
+															text: ' and ',
+															fontSize: 14,
+															fontFace: 'Aptos',
+															color: '111827',
+															bold: false,
+															italic: false,
+															underline: false,
+															code: false,
+															link: false,
+														},
+														{
+															text: 'docs',
+															fontSize: 14,
+															fontFace: 'Aptos',
+															color: '2563EB',
+															bold: true,
+															italic: false,
+															underline: true,
+															code: false,
+															link: true,
+															hyperlinkTarget: 'https://example.com/docs',
+														},
+													],
+												},
+											],
+											unmodeledRunReasons: ['inline-code', 'inline-formatting', 'link'],
+										},
+									],
+								],
+							},
+						],
+						fallbackOnlyElementKinds: [],
+						consumedTableTextCandidateCount: 1,
+						warnings: [],
+					},
+				],
+			};
+
+			writePptxDocument(outputPath, document);
+
+			const entries = unzipSync(new Uint8Array(readFileSync(outputPath)));
+			const slideXml = strFromU8(entries['ppt/slides/slide1.xml']);
+			const relsXml = strFromU8(entries['ppt/slides/_rels/slide1.xml.rels']);
+			expect(slideXml).toContain('<a:t xml:space="preserve">Use </a:t>');
+			expect(slideXml).toContain('<a:t>apiKey</a:t>');
+			expect(slideXml).toContain('<a:highlight><a:srgbClr val="F5F5F5"/></a:highlight>');
+			expect(slideXml).toContain('<a:latin typeface="DejaVu Sans Mono"/>');
+			expect(slideXml).toContain('<a:t xml:space="preserve"> and </a:t>');
+			expect(slideXml).toContain('<a:t>docs</a:t>');
+			expect(slideXml).toContain('<a:solidFill><a:srgbClr val="2563EB"/></a:solidFill>');
+			expect(slideXml).toContain('u="sng"');
+			expect(slideXml).toContain('<a:hlinkClick r:id="rId');
+			expect(relsXml).toContain('Target="https://example.com/docs"');
+			expect(slideXml).not.toContain('Table Cell Overlay Text');
+			expect(slideXml).not.toContain('<a:alpha val="0"/>');
+			expect(slideXml).not.toContain('<a:alpha val="8000"/>');
+		} finally {
+			rmSync(directory, { recursive: true, force: true });
+		}
+	});
+
 	test('writes rich text hyperlinks as real slide relationships', () => {
 		const directory = mkdtempSync(join(tmpdir(), 'notemd-pptx-hyperlinks-'));
 		try {

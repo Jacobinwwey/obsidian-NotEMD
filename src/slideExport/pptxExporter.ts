@@ -18,6 +18,7 @@ import {
 	type SlidevPptxExportResult,
 	type SlidevPptxFontPolicy,
 	type SlidevPptxImage,
+	type SlidevPptxRichTextParagraph,
 	type SlidevPptxSlide,
 	type SlidevPptxSlideEditabilitySummary,
 	type SlidevPptxTable,
@@ -929,16 +930,36 @@ function tableCellsForSlide(slide: SlidevPptxSlide): SlidevPptxTableCell[] {
 	return slide.tables.flatMap((table) => table.rows.flatMap((row) => row));
 }
 
+function tableCellRichTextParagraphs(cell: SlidevPptxTableCell): SlidevPptxRichTextParagraph[] {
+	return Array.isArray(cell.richTextParagraphs)
+		? cell.richTextParagraphs
+				.map((paragraph) => ({
+					runs: Array.isArray(paragraph.runs)
+						? paragraph.runs.filter((run) => String(run.text || '').length > 0)
+						: [],
+				}))
+				.filter((paragraph) => paragraph.runs.some((run) => String(run.text || '').trim().length > 0))
+		: [];
+}
+
+function tableCellRichTextRuns(slide: SlidevPptxSlide): SlidevPptxRichTextParagraph['runs'] {
+	return tableCellsForSlide(slide).flatMap((cell) =>
+		tableCellRichTextParagraphs(cell).flatMap((paragraph) => paragraph.runs),
+	);
+}
+
 function solidRectanglesForSlide(slide: SlidevPptxSlide): NonNullable<SlidevPptxSlide['shapes']> {
 	return slide.shapes || [];
 }
 
 function countRichTextRuns(slide: SlidevPptxSlide): number {
-	return slide.texts.reduce(
-		(total, textBox) =>
-			total +
-			textBox.richTextParagraphs.reduce((paragraphTotal, paragraph) => paragraphTotal + paragraph.runs.length, 0),
-		0,
+	return (
+		slide.texts.reduce(
+			(total, textBox) =>
+				total +
+				textBox.richTextParagraphs.reduce((paragraphTotal, paragraph) => paragraphTotal + paragraph.runs.length, 0),
+			0,
+		) + tableCellRichTextRuns(slide).length
 	);
 }
 
@@ -951,26 +972,32 @@ function countRichTextBoxes(slide: SlidevPptxSlide): number {
 }
 
 function countRichTextRunCharacters(slide: SlidevPptxSlide): number {
-	return slide.texts.reduce(
-		(total, textBox) =>
-			total +
-			textBox.richTextParagraphs.reduce(
-				(paragraphTotal, paragraph) =>
-					paragraphTotal + paragraph.runs.reduce((runTotal, run) => runTotal + run.text.length, 0),
-				0,
-			),
-		0,
+	return (
+		slide.texts.reduce(
+			(total, textBox) =>
+				total +
+				textBox.richTextParagraphs.reduce(
+					(paragraphTotal, paragraph) =>
+						paragraphTotal + paragraph.runs.reduce((runTotal, run) => runTotal + run.text.length, 0),
+					0,
+				),
+			0,
+		) + tableCellRichTextRuns(slide).reduce((total, run) => total + run.text.length, 0)
 	);
 }
 
 function hyperlinkTargetsForSlide(slide: SlidevPptxSlide): string[] {
-	return slide.texts.flatMap((textBox) =>
+	const textBoxTargets = slide.texts.flatMap((textBox) =>
 		textBox.richTextParagraphs.flatMap((paragraph) =>
 			paragraph.runs
 				.map((run) => String(run.hyperlinkTarget || '').trim())
 				.filter((target) => target.length > 0),
 		),
 	);
+	const tableCellTargets = tableCellRichTextRuns(slide)
+		.map((run) => String(run.hyperlinkTarget || '').trim())
+		.filter((target) => target.length > 0);
+	return [...textBoxTargets, ...tableCellTargets];
 }
 
 function countHyperlinkRuns(slide: SlidevPptxSlide): number {
@@ -1236,7 +1263,10 @@ function buildSlideEditabilitySummary(
 		bulletedTextBoxCount: slide.texts.filter((textBox) => textBox.bullet).length,
 		backgroundFallbackPresent: Boolean(slide.backgroundImage),
 		fallbackOnlyElementKinds: collectUniqueSorted(slide.fallbackOnlyElementKinds),
-		unmodeledTextRunReasons: collectUniqueSorted(slide.texts.flatMap((textBox) => textBox.unmodeledRunReasons)),
+		unmodeledTextRunReasons: collectUniqueSorted([
+			...slide.texts.flatMap((textBox) => textBox.unmodeledRunReasons),
+			...tableCells.flatMap((cell) => cell.unmodeledRunReasons || []),
+		]),
 		...fontFamilies,
 		textSourceCoverage: buildSlideTextSourceCoverage(slide),
 		consumedTableTextCandidateCount: slide.consumedTableTextCandidateCount,

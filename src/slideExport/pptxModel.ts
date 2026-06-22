@@ -35,6 +35,7 @@ export interface SlidevPptxInlineTextRun {
 	fontSize: number;
 	fontFace: string;
 	color: string;
+	backgroundColor?: string;
 	bold: boolean;
 	italic: boolean;
 	underline: boolean;
@@ -110,6 +111,8 @@ export interface SlidevPptxTableCell {
 	textRightInsetIn?: number;
 	textTopInsetIn?: number;
 	textBottomInsetIn?: number;
+	richTextParagraphs?: SlidevPptxRichTextParagraph[];
+	unmodeledRunReasons?: SlidevPptxUnmodeledTextRunReason[];
 }
 
 export interface SlidevPptxTable {

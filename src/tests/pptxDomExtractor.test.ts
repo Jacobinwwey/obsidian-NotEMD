@@ -349,7 +349,8 @@ describe('pptxDomExtractor', () => {
 						<table style="border-collapse:collapse;font-family:Arial;font-size:24px;color:#111827">
 							<tr>
 								<td style="padding:12px;border:1px solid #94a3b8">
-									<code style="background:#f5f5f5;border-radius:4px;padding:2px 6px">openai-compatible</code>
+									Use <code style="background:#f5f5f5;color:#0f172a;border-radius:4px;padding:2px 6px">openai-compatible</code>
+									and <strong style="color:#2563eb">token</strong>
 								</td>
 							</tr>
 						</table>
@@ -361,8 +362,25 @@ describe('pptxDomExtractor', () => {
 			const skipCounts = new Map(
 				(slide.decorativePrimitiveDiagnostics?.skipReasonCounts || []).map((item) => [item.reason, item.count]),
 			);
+			const cell = slide.tables[0]?.rows[0]?.[0];
+			const runs = cell?.richTextParagraphs?.flatMap((paragraph) => paragraph.runs) || [];
 
-			expect(slide.tables[0]?.rows[0]?.[0]?.text).toBe('openai-compatible');
+			expect(cell?.text).toBe('Use openai-compatible and token');
+			expect(runs.map((run) => run.text).join('')).toContain('openai-compatible');
+			expect(runs.find((run) => run.text.includes('openai-compatible'))).toEqual(
+				expect.objectContaining({
+					code: true,
+					backgroundColor: 'F5F5F5',
+					color: '0F172A',
+				}),
+			);
+			expect(runs.find((run) => run.text.includes('token'))).toEqual(
+				expect.objectContaining({
+					bold: true,
+					color: '2563EB',
+				}),
+			);
+			expect(cell?.unmodeledRunReasons).toEqual(expect.arrayContaining(['inline-code', 'inline-formatting']));
 			expect(slide.fallbackOnlyElementKinds).not.toContain('code-highlight');
 			expect(skipCounts.get('unsupported-table-root')).toBeGreaterThanOrEqual(1);
 		} finally {

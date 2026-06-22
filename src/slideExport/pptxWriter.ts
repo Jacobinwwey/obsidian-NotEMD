@@ -109,6 +109,7 @@ type TextRunStyle = {
 	fontSize: number;
 	fontFace: string;
 	color: string;
+	backgroundColor?: string;
 	bold: boolean;
 	italic: boolean;
 	underline: boolean;
@@ -134,6 +135,8 @@ function buildRunXmlWithTextFill(
 			? ` spc="${Math.round(Math.max(-20, Math.min(200, Number(runStyle.charSpacingPt))) * 100)}"`
 			: '';
 	const fontFace = escapeXmlAttribute(runStyle.fontFace || 'Aptos');
+	const highlightColor = runStyle.backgroundColor ? clampHexColor(runStyle.backgroundColor, '') : '';
+	const highlightXml = highlightColor ? `<a:highlight><a:srgbClr val="${highlightColor}"/></a:highlight>` : '';
 	const hyperlinkXml = hyperlinkRelationshipId
 		? `<a:hlinkClick r:id="${escapeXmlAttribute(hyperlinkRelationshipId)}"/>`
 		: '';
@@ -142,6 +145,7 @@ function buildRunXmlWithTextFill(
 		'<a:r>',
 		`<a:rPr lang="${language}" sz="${size}"${bold}${italic}${underline}${strike}${charSpacing}>`,
 		textFillXml,
+		highlightXml,
 		`<a:latin typeface="${fontFace}"/>`,
 		`<a:ea typeface="${fontFace}"/>`,
 		'<a:cs typeface="Aptos"/>',
@@ -398,26 +402,60 @@ function buildDefaultTextShape(
 		: null;
 }
 
-function buildVisibleTableCellRun(text: string, cell: SlidevPptxTableCell, context: PptxWriterContext): string {
-	return buildVisibleRunXml(text, cell, context);
+function buildVisibleTableCellRun(text: string, runStyle: TextRunStyle, context: PptxWriterContext): string {
+	return buildVisibleRunXml(text, runStyle, context);
 }
 
-function buildVisibleTableCellParagraphs(cell: SlidevPptxTableCell, context: PptxWriterContext): string {
-	const lines = cell.text
+function fallbackTableCellParagraphs(cell: SlidevPptxTableCell): SlidevPptxRichTextParagraph[] {
+	return cell.text
 		.replace(/\r\n?/g, '\n')
 		.split('\n')
 		.map((line) => line.trimEnd())
-		.filter((line, index, allLines) => line.length > 0 || allLines.length === 1);
-	const size = Math.max(600, Math.min(14400, Math.round(cell.fontSize * 100)));
+		.filter((line, index, lines) => line.length > 0 || lines.length === 1)
+		.map((line) => ({
+			runs: [
+				{
+					text: line || ' ',
+					fontSize: cell.fontSize,
+					fontFace: cell.fontFace,
+					color: cell.color,
+					bold: cell.bold,
+					italic: cell.italic,
+					underline: cell.underline,
+					strike: cell.strike,
+					charSpacingPt: cell.charSpacingPt,
+					code: false,
+					link: false,
+				},
+			],
+		}));
+}
 
-	return lines
-		.map((line) =>
-				[
-					'<a:p>',
-					buildTableCellParagraphProperties(cell),
-					buildVisibleTableCellRun(line || ' ', cell, context),
-					`<a:endParaRPr lang="en-US" sz="${size}"/>`,
-					'</a:p>',
+function chooseTableCellParagraphs(cell: SlidevPptxTableCell): SlidevPptxRichTextParagraph[] {
+	const paragraphs = Array.isArray(cell.richTextParagraphs)
+		? cell.richTextParagraphs
+				.map((paragraph) => ({
+					runs: Array.isArray(paragraph.runs)
+						? paragraph.runs.filter((run) => String(run.text || '').length > 0)
+						: [],
+				}))
+				.filter((paragraph) => paragraph.runs.some((run) => String(run.text || '').trim().length > 0))
+		: [];
+	const chosen = paragraphs.length > 0 ? paragraphs : fallbackTableCellParagraphs(cell);
+	return chosen.flatMap(splitParagraphRunsOnNewlines);
+}
+
+function buildVisibleTableCellParagraphs(cell: SlidevPptxTableCell, context: PptxWriterContext): string {
+	const paragraphs = chooseTableCellParagraphs(cell);
+
+	return paragraphs
+		.map((paragraph) =>
+			[
+				'<a:p>',
+				buildTableCellParagraphProperties(cell),
+				paragraph.runs.map((run) => buildVisibleTableCellRun(run.text || ' ', run, context)).join(''),
+				`<a:endParaRPr lang="en-US" sz="${paragraphEndFontSize(paragraph, cell.fontSize)}"/>`,
+				'</a:p>',
 			].join(''),
 		)
 		.join('');

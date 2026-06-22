@@ -55,6 +55,7 @@ interface RawSlideInlineTextRun {
 	fontSize: number;
 	fontFace: string;
 	color: string;
+	backgroundColor?: string;
 	bold: boolean;
 	italic: boolean;
 	underline: boolean;
@@ -95,6 +96,8 @@ interface RawSlideTableCell {
 	textRightInsetIn?: number;
 	textTopInsetIn?: number;
 	textBottomInsetIn?: number;
+	richTextParagraphs?: RawSlideRichTextParagraph[];
+	unmodeledRunReasons?: SlidevPptxUnmodeledTextRunReason[];
 }
 
 interface RawSlideTable {
@@ -171,6 +174,18 @@ function normalizeHyperlinkTarget(value: unknown): string | undefined {
 	return target;
 }
 
+function normalizeUnmodeledTextRunReasons(value: unknown): SlidevPptxUnmodeledTextRunReason[] {
+	return Array.from(new Set(Array.isArray(value) ? value : []))
+		.filter(
+			(reason): reason is SlidevPptxUnmodeledTextRunReason =>
+				reason === 'inline-code' ||
+				reason === 'inline-formatting' ||
+				reason === 'link' ||
+				reason === 'syntax-highlight',
+		)
+		.sort();
+}
+
 function normalizeInlineTextRun(raw: RawSlideInlineTextRun): SlidevPptxInlineTextRun | null {
 	const text = String(raw.text || '')
 		.replace(/\r\n?/g, '\n')
@@ -180,11 +195,13 @@ function normalizeInlineTextRun(raw: RawSlideInlineTextRun): SlidevPptxInlineTex
 	}
 	const hyperlinkTarget = normalizeHyperlinkTarget(raw.hyperlinkTarget);
 	const charSpacingPt = normalizeOptionalCharSpacingPt(raw.charSpacingPt);
+	const backgroundColor = raw.backgroundColor ? normalizeHexColor(raw.backgroundColor, '') : '';
 	return {
 		text: text.slice(0, 4000),
 		fontSize: clamp(Number(raw.fontSize) || 12, 5, 144),
 		fontFace: String(raw.fontFace || 'Aptos').slice(0, 120),
 		color: normalizeHexColor(raw.color, '111827'),
+		...(backgroundColor ? { backgroundColor } : {}),
 		bold: Boolean(raw.bold),
 		italic: Boolean(raw.italic),
 		underline: Boolean(raw.underline),
@@ -238,10 +255,12 @@ function normalizeOptionalBulletLevel(value: unknown): number | undefined {
 	return Math.floor(clamp(numeric, 0, 8));
 }
 
-function buildFallbackRichTextParagraphs(
-	text: string,
-	textBox: Omit<SlidevPptxTextBox, 'richTextParagraphs'>,
-): SlidevPptxRichTextParagraph[] {
+type FallbackRichTextStyle = Pick<
+	SlidevPptxInlineTextRun,
+	'fontSize' | 'fontFace' | 'color' | 'bold' | 'italic' | 'underline' | 'strike' | 'charSpacingPt'
+>;
+
+function buildFallbackRichTextParagraphs(text: string, style: FallbackRichTextStyle): SlidevPptxRichTextParagraph[] {
 	return text
 		.replace(/\r\n?/g, '\n')
 		.split('\n')
@@ -251,14 +270,14 @@ function buildFallbackRichTextParagraphs(
 			runs: [
 				{
 					text: line || ' ',
-					fontSize: textBox.fontSize,
-					fontFace: textBox.fontFace,
-					color: textBox.color,
-					bold: textBox.bold,
-					italic: textBox.italic,
-					underline: textBox.underline,
-					strike: textBox.strike,
-					charSpacingPt: textBox.charSpacingPt,
+					fontSize: style.fontSize,
+					fontFace: style.fontFace,
+					color: style.color,
+					bold: style.bold,
+					italic: style.italic,
+					underline: style.underline,
+					strike: style.strike,
+					charSpacingPt: style.charSpacingPt,
 					code: false,
 					link: false,
 				},
@@ -269,7 +288,7 @@ function buildFallbackRichTextParagraphs(
 function normalizeRichTextParagraphs(
 	rawParagraphs: RawSlideRichTextParagraph[] | undefined,
 	text: string,
-	textBox: Omit<SlidevPptxTextBox, 'richTextParagraphs'>,
+	style: FallbackRichTextStyle,
 ): SlidevPptxRichTextParagraph[] {
 	const paragraphs = Array.isArray(rawParagraphs)
 		? rawParagraphs
@@ -282,7 +301,7 @@ function normalizeRichTextParagraphs(
 				}))
 				.filter((paragraph) => paragraph.runs.some((run) => run.text.trim().length > 0))
 		: [];
-	return paragraphs.length > 0 ? paragraphs : buildFallbackRichTextParagraphs(text, textBox);
+	return paragraphs.length > 0 ? paragraphs : buildFallbackRichTextParagraphs(text, style);
 }
 
 function normalizeTextBox(raw: RawSlideTextBox): SlidevPptxTextBox | null {
@@ -329,15 +348,7 @@ function normalizeTextBox(raw: RawSlideTextBox): SlidevPptxTextBox | null {
 		...(paddingTopIn !== undefined ? { paddingTopIn } : {}),
 		...(paddingBottomIn !== undefined ? { paddingBottomIn } : {}),
 		order: Number.isFinite(Number(raw.order)) ? Number(raw.order) : 1000,
-		unmodeledRunReasons: Array.from(new Set(Array.isArray(raw.unmodeledRunReasons) ? raw.unmodeledRunReasons : []))
-			.filter(
-				(reason): reason is SlidevPptxUnmodeledTextRunReason =>
-					reason === 'inline-code' ||
-					reason === 'inline-formatting' ||
-					reason === 'link' ||
-					reason === 'syntax-highlight',
-			)
-			.sort(),
+		unmodeledRunReasons: normalizeUnmodeledTextRunReasons(raw.unmodeledRunReasons),
 	};
 	return {
 		...textBox,
@@ -361,6 +372,11 @@ function normalizeOptionalCharSpacingPt(value: unknown): number | undefined {
 }
 
 function normalizeTableCell(raw: RawSlideTableCell): SlidevPptxTableCell {
+	const text = String(raw.text || '')
+		.replace(/\r\n?/g, '\n')
+		.replace(/[\u200b-\u200d\ufeff]/g, '')
+		.trim()
+		.slice(0, 4000);
 	const lineSpacingPt = normalizeOptionalPositiveNumber(raw.lineSpacingPt, 1, 200);
 	const charSpacingPt = normalizeOptionalCharSpacingPt(raw.charSpacingPt);
 	const paddingLeftIn = normalizeOptionalPositiveNumber(raw.paddingLeftIn, 0.001, 2);
@@ -372,12 +388,8 @@ function normalizeTableCell(raw: RawSlideTableCell): SlidevPptxTableCell {
 	const textTopInsetIn = normalizeOptionalPositiveNumber(raw.textTopInsetIn, 0.001, 2);
 	const textBottomInsetIn = normalizeOptionalPositiveNumber(raw.textBottomInsetIn, 0.001, 2);
 
-	return {
-		text: String(raw.text || '')
-			.replace(/\r\n?/g, '\n')
-			.replace(/[\u200b-\u200d\ufeff]/g, '')
-			.trim()
-			.slice(0, 4000),
+	const tableCell: SlidevPptxTableCell = {
+		text,
 		rowSpan: clamp(Math.round(Number(raw.rowSpan) || 1), 1, 50),
 		colSpan: clamp(Math.round(Number(raw.colSpan) || 1), 1, 50),
 		fontSize: clamp(Number(raw.fontSize) || 12, 5, 144),
@@ -402,6 +414,12 @@ function normalizeTableCell(raw: RawSlideTableCell): SlidevPptxTableCell {
 		...(textRightInsetIn !== undefined ? { textRightInsetIn } : {}),
 		...(textTopInsetIn !== undefined ? { textTopInsetIn } : {}),
 		...(textBottomInsetIn !== undefined ? { textBottomInsetIn } : {}),
+	};
+	const richTextParagraphs = normalizeRichTextParagraphs(raw.richTextParagraphs, text, tableCell);
+	return {
+		...tableCell,
+		richTextParagraphs,
+		unmodeledRunReasons: normalizeUnmodeledTextRunReasons(raw.unmodeledRunReasons),
 	};
 }
 
@@ -964,6 +982,23 @@ export async function extractSlidevPptxSlideFromPage(page: any, slideNumber: num
 				(style as any).webkitTextFillColor || style.getPropertyValue('-webkit-text-fill-color') || '';
 			return rgbToHex(webkitFill) || rgbToHex(style.color) || '111827';
 		};
+		const inlineRunBackgroundColor = (style: CSSStyleDeclaration, sourceElement: Element): string | undefined => {
+			if (!sourceElement.closest('td,th')) return undefined;
+			if (style.backgroundImage && style.backgroundImage !== 'none') return undefined;
+			if (colorAlpha(style.backgroundColor) < 0.3) return undefined;
+			const color = rgbToHex(style.backgroundColor);
+			if (!color) return undefined;
+			const inlineCode = Boolean(sourceElement.closest('code') && !sourceElement.closest('pre'));
+			const semanticHighlight = Boolean(sourceElement.closest('mark'));
+			const tagName = sourceElement.tagName.toUpperCase();
+			const inlineStyledElement = /^(SPAN|A|B|STRONG|EM|I|U|S|DEL|INS)$/.test(tagName);
+			if (!inlineCode && !semanticHighlight && !inlineStyledElement) return undefined;
+			const parentColor = sourceElement.parentElement
+				? rgbToHex(window.getComputedStyle(sourceElement.parentElement).backgroundColor)
+				: '';
+			if (!inlineCode && !semanticHighlight && parentColor === color) return undefined;
+			return color;
+		};
 		const textRunReasonsFor = (
 			element: Element,
 			style: CSSStyleDeclaration,
@@ -1026,10 +1061,12 @@ export async function extractSlidevPptxSlideFromPage(page: any, slideNumber: num
 			const linkElement = sourceElement.closest('a[href]') as HTMLAnchorElement | null;
 			const hyperlinkTarget = linkElement?.href || linkElement?.getAttribute('href') || undefined;
 			const textDecoration = `${style.textDecorationLine || ''} ${style.textDecoration || ''}`;
+			const backgroundColor = inlineRunBackgroundColor(style, sourceElement);
 			return {
 				fontSize: pxToPt(fontSizePx),
 				fontFace: sanitizeFontFace(style.fontFamily),
 				color: effectiveColor(style),
+				...(backgroundColor ? { backgroundColor } : {}),
 				bold: Number.isFinite(fontWeight) ? fontWeight >= 600 : /bold/i.test(style.fontWeight),
 				italic: style.fontStyle === 'italic' || style.fontStyle === 'oblique',
 				underline:
@@ -1050,6 +1087,7 @@ export async function extractSlidevPptxSlideFromPage(page: any, slideNumber: num
 					previous.fontSize === run.fontSize &&
 					previous.fontFace === run.fontFace &&
 					previous.color === run.color &&
+					previous.backgroundColor === run.backgroundColor &&
 					previous.bold === run.bold &&
 					previous.italic === run.italic &&
 					previous.underline === run.underline &&
@@ -1146,6 +1184,7 @@ export async function extractSlidevPptxSlideFromPage(page: any, slideNumber: num
 			left.fontSize === right.fontSize &&
 			left.fontFace === right.fontFace &&
 			left.color === right.color &&
+			left.backgroundColor === right.backgroundColor &&
 			left.bold === right.bold &&
 			left.italic === right.italic &&
 			left.underline === right.underline &&
@@ -1901,6 +1940,8 @@ export async function extractSlidevPptxSlideFromPage(page: any, slideNumber: num
 				const cellLineSpacingPt = lineSpacingPtFor(cellStyle);
 				const cellCharSpacingPt = charSpacingPtFor(cellStyle);
 				const cellTextDecoration = `${cellStyle.textDecorationLine || ''} ${cellStyle.textDecoration || ''}`;
+				const richTextParagraphs = collectRichTextParagraphs(placement.element, cellTagName, cellStyle);
+				const unmodeledRunReasons = textRunReasonsFor(placement.element, cellStyle, cellTagName);
 				rows[placement.rowIndex].push({
 					text: cellText,
 					rowSpan: placement.rowSpan,
@@ -1921,6 +1962,8 @@ export async function extractSlidevPptxSlideFromPage(page: any, slideNumber: num
 					...(cellCharSpacingPt !== undefined ? { charSpacingPt: cellCharSpacingPt } : {}),
 					...bodyInsetsFor(cellStyle),
 					...tableCellTextInsetsFor(placement.element, placement.rect),
+					richTextParagraphs,
+					unmodeledRunReasons,
 				});
 				if (cellText) {
 					placement.element.setAttribute('data-notemd-pptx-text-source-kind', 'table-cell-overlay');
@@ -1943,8 +1986,8 @@ export async function extractSlidevPptxSlideFromPage(page: any, slideNumber: num
 						bullet: false,
 						...blockTextLayoutFor(cellStyle),
 						order: orderFor(placement.element, order + 1),
-						richTextParagraphs: collectRichTextParagraphs(placement.element, cellTagName, cellStyle),
-						unmodeledRunReasons: textRunReasonsFor(placement.element, cellStyle, cellTagName),
+						richTextParagraphs,
+						unmodeledRunReasons,
 					});
 				}
 			}

@@ -1543,6 +1543,51 @@ rendered-HTML visual hard gate 已通过，但 diff report 仍把若干页标为
 3. `not-visible = 68` 仍需要拆分为真正隐藏残留和 Slidev transition/offscreen residue 两类。它不应作为功能失败，但可以继续改善 report 噪声。
 4. SVG 轨道仍应单独推进：优先考虑 SVG artifact/embedding 或可选实验模式，而不是默认重建 SVG 内部 geometry。
 
+## M29 表格原生 rich runs 与 inline code 归属收口
+
+这一轮继续参考 `oh-my-ppt` 的 ownership contract，而不是照搬实现。`oh-my-ppt` 的 table extractor 当前仍以 cell-level plain text/style 为主；真正值得借鉴的是 table-first consumption、writer 直接输出 Office native table、background capture 隐藏已消费 primitive、再用报告/像素 gate 防止 ghost text。NotEMD 的缺口更具体：M28 之前已经能从 `<td>/<th>` 里抽出 rich runs，但默认 writer 会在存在 native table 时 suppress `table-cell-overlay` text box，导致表格内的 inline code、strong/link 等样式只存在于被抑制的 overlay 里，最终 table cell 仍退化为 plain `cell.text`。
+
+本轮落地内容：
+
+1. `SlidevPptxTableCell` 增加 table-owned `richTextParagraphs` 和 `unmodeledRunReasons`；`SlidevPptxInlineTextRun` 增加可选 `backgroundColor`。
+2. DOM extractor 在 table cell 归一化边界把 `collectRichTextParagraphs()` 和 `textRunReasonsFor()` 的结果挂到 cell 本体，同时保留 `table-cell-overlay` 只作为兼容/诊断候选。
+3. inline 背景只在 table-owned inline code/mark/有独立背景的 inline 元素上转成 run-level `backgroundColor`。这里没有把所有普通正文背景都转为 highlight，避免 frozen background、native rectangle 与 Office highlight 三者重复绘制。
+4. PPTX writer 的 native table path 改为优先写 `cell.richTextParagraphs`，按 run 输出 `<a:r>`，保留不同字体、颜色、粗斜体、下划线、字符间距、CJK/Latin font split 和 hyperlink relationship；inline code 背景使用 Office 原生 `<a:highlight>` 表达。没有 rich runs 的手写/旧模型 cell 仍使用 plain text fallback。
+5. report 与 `fontContract` 改为统计 table cell 本体的 rich runs、hyperlink target、unmodeled reasons 和字体使用；`tableCellCount` 按 cell id 去重，避免一个单元格多个 run 时把“单元格数”膨胀成“run 数”。
+6. 新增单测覆盖三条合同：真实 Chromium extractor 中 table-owned inline code/strong 进入 cell rich runs；writer 输出 native table rich runs、highlight 和 hyperlink relationship 且没有透明文字；report 在 suppress `table-cell-overlay` 后仍能从 native table cell 统计 rich runs/font usage。
+
+与先前方案对比：
+
+1. M28 的结论是表格内 inline code 不应再污染 `code-highlight` fallback。M29 补上了缺失的后一半：既然归属给 native table，native table writer 就必须直接消费 rich runs，而不是依赖会被 suppress 的 overlay。
+2. 这不是“拆表格内容”或“重写 Mermaid/图表”。表格仍是一个 Office native table；Mermaid/SVG 仍按背景拥有，源 Mermaid fence 保持不变。
+3. 这也不是完整 CSS chip 复刻。`<a:highlight>` 是可编辑文本层的保守近似，不能表达 CSS border-radius/padding/box model。它优先解决真实可选中、可编辑、可重排的文本，而不是追求所有 inline chip 几何 1:1。
+
+验证：
+
+1. `npx tsc --noEmit --pretty false` 通过。
+2. `git diff --check` 通过。
+3. `npm run build` 通过。
+4. `runuser -u jacob -- env HOME=/home/jacob PLAYWRIGHT_BROWSERS_PATH=/home/jacob/.cache/ms-playwright bash -lc 'cd /home/jacob/obsidian-NotEMD && npm test -- --runInBand src/tests/pptxDomExtractor.test.ts'` 使用真实 Chromium 通过：`14` 个测试。
+5. focused Jest 通过：`src/tests/pptxWriter.test.ts` 与 `src/tests/pptxExportReport.test.ts` 共 `23` 个测试。
+6. 全量 Jest 通过：`190` suites，`1553` tests。root 环境仍会打印既有 Playwright cache skip warning；第 4 条才是本轮 DOM/PPTX 抽取的真实浏览器覆盖。
+7. 真实 `architecture.zh-CN.md` 导出通过：`npm run verify:slidev-export -- --vault docs --source architecture.zh-CN.md --format pptx --output-subfolder export/test-slidev-m29-table-rich-runs --sample-slides all --timeout-ms 240000 --no-screenshots --require-pptx-visual-match --json`。
+8. 本地 Slidev fork 仍被使用：`52.16.0 (/home/jacob/slidev/packages/slidev/bin/slidev.mjs)`，`skillRootPath = /home/jacob/slidev/skills/slidev`，`skillReferenceCount = 52`。
+9. visual/source gate 通过：`ok = true`，`pptxVisualGate.passed = true`，`referenceSource = pptx-rendered-html-reference`，`thresholdProfile = visible-native-rendered-html`，`mermaidSourcePreservation.passed = true`，`sourceFenceCount = 3`，`deckFenceCount = 3`，`changedFenceIndexes = []`。
+10. 真实 report 口径：`slideCount = 30`，`textBoxCount = 338`，`tableCount = 6`，`editableTableCellCount = 102`，`editableTableCellOverlayTextBoxCount = 0`，`richTextRunCount = 440`，`richTextRunCharacterCount = 7409`。
+11. fallback 仍诚实：`fallbackOnlyElementKinds = ["mermaid", "svg"]`；`decorativePrimitiveSkipReasonCounts = [{ not-visible: 68 }, { unsupported-table-root: 60 }]`。
+12. 字体合同与 table runs 对齐：`fontFamilies = ["Avenir Next", "Fira Code"]`，`officeFontFamilies = ["DejaVu Sans Mono", "Microsoft YaHei", "Noto Sans"]`，`officeTextRunCount = 780`，其中 table cell 字体用量为 `Avenir Next.tableCellCount = 75`、`Fira Code.tableCellCount = 27`。
+13. 背景残留采样继续通过：`checkedRegionCount = 437`，`suspiciousSlideCount = 0`，`suspiciousRegionCount = 0`，`maxTextLikePixelRatio = 0`，`warnings = []`。
+14. PPTX XML 扫描确认没有回退到透明文字：`alpha=0 = 0`，`alpha=8000 = 0`，`Table Cell Overlay Text = 0`，`Visible Native Text = 324`，`Visible Native Code Text = 14`，`Visible Native Table = 6`，`Native Code Background Rectangle = 115`，`highlightTags = 27`，`<a:t...>` tags = `1218`。
+15. 输出产物保留在 ignored 本地目录 `docs/export/test-slidev-m29-table-rich-runs/`，`git status --ignored --short` 显示为 `!!`，`unignoredOutputs = []`，不提交。
+
+残余风险与后续方向：
+
+1. `unsupported-table-root = 60` 没有下降，这是预期边界。M29 解决的是 table-owned text/runs；剩余桶主要是单元格内部装饰、CSS chip box model、border/collapse paint 与 Office table renderer 差异。
+2. `<a:highlight>` 不是 CSS rounded chip。若后续要更接近浏览器视觉，应优先做 cell 内 decoration 的 Office shape/geometry 合同，并以 paint order 和 residue sampling gate 约束；不建议回到透明 overlay。
+3. 真实 deck 没有 hyperlink run，因此 hyperlink 的 table path 由 writer/report 单测覆盖。后续如果源 deck 出现表格链接，应把真实验收指标纳入 acceptance。
+4. `textSourceCoverage` 仍只描述 text box 来源，不描述 table cell rich run 来源；这是历史 report 结构限制。后续可以加独立 `tableCellRichTextCoverage`，不要把 table cell 偷塞回 `table-cell-overlay`。
+5. Mermaid/SVG 仍是独立轨道。继续保持源 fence 不改、不拆 Mermaid 图；如要提升可编辑性，应走显式 SVG artifact/embedding 或实验 vector reconstruction，而不是把 diagram label 伪装成透明 editable text。
+
 ## 当前边界
 
 第一版实现有意保守：

@@ -1522,6 +1522,51 @@ Residual risk and next direction:
 3. `not-visible = 68` should be split into true hidden residue versus Slidev transition/offscreen residue. It is not a functional failure, but it is still report noise.
 4. SVG should remain a separate track: consider SVG artifact/embedding or an explicit experimental mode before attempting default vector reconstruction.
 
+## M29 Native Table Rich Runs And Inline-Code Ownership Closure
+
+This slice continues to use the `oh-my-ppt` ownership contract rather than copying its implementation. The current `oh-my-ppt` table extractor is still mostly cell-level plain text/style; the reusable idea is table-first consumption, native Office table writing, hiding consumed primitives from the background capture, and then proving the result with report/pixel gates. NotEMD's gap was narrower: M28 already extracted rich runs from `<td>/<th>`, but the default writer suppresses `table-cell-overlay` text boxes when a native table exists. That meant inline code, strong/link styling, and similar table-internal runs were present only in the suppressed overlay, while the actual native table cell still fell back to plain `cell.text`.
+
+Implementation status:
+
+1. `SlidevPptxTableCell` now carries table-owned `richTextParagraphs` and `unmodeledRunReasons`; `SlidevPptxInlineTextRun` has optional `backgroundColor`.
+2. The DOM extractor attaches `collectRichTextParagraphs()` and `textRunReasonsFor()` output to the table cell at the normalization boundary. `table-cell-overlay` remains only as a compatibility/diagnostic candidate.
+3. Inline backgrounds are converted to run-level `backgroundColor` only for table-owned inline code, `mark`, or inline elements with an independent visible background. This deliberately avoids converting ordinary body backgrounds into Office highlights, which would risk double painting with the frozen background or native rectangles.
+4. The PPTX writer's native table path now prefers `cell.richTextParagraphs`, emits each run as `<a:r>`, and preserves font, color, bold/italic, underline, character spacing, CJK/Latin font splitting, and hyperlink relationships. Inline-code backgrounds use native Office `<a:highlight>`. Hand-written or old-model cells without rich runs still use the plain text fallback.
+5. Report generation and `fontContract` now count rich runs, hyperlink targets, unmodeled reasons, and font usage from the table cell itself. `tableCellCount` is keyed by cell id so one multi-run cell does not inflate the cell count into a run count.
+6. Tests cover the three contracts: real Chromium extraction puts table-owned inline code/strong text into cell rich runs; the writer emits native table rich runs/highlight/hyperlink relationships with no transparent text; the report still counts rich runs/font usage after `table-cell-overlay` is suppressed.
+
+Comparison with the prior plan:
+
+1. M28 established that inline code inside tables should not pollute `code-highlight` fallback. M29 closes the other half: once ownership belongs to the native table, the table writer must consume the rich runs directly rather than depending on an overlay that is intentionally suppressed.
+2. This does not split table content or rewrite Mermaid/chart content. Tables remain Office-native tables; Mermaid/SVG remain background-owned, and Mermaid fences are preserved.
+3. This is not full CSS chip reconstruction. `<a:highlight>` is a conservative editable-text approximation; it cannot express border radius, padding, or CSS box model. The priority is real selectable/editable/reflowable text, not 1:1 reconstruction of every inline chip geometry.
+
+Validation:
+
+1. `npx tsc --noEmit --pretty false` passed.
+2. `git diff --check` passed.
+3. `npm run build` passed.
+4. `runuser -u jacob -- env HOME=/home/jacob PLAYWRIGHT_BROWSERS_PATH=/home/jacob/.cache/ms-playwright bash -lc 'cd /home/jacob/obsidian-NotEMD && npm test -- --runInBand src/tests/pptxDomExtractor.test.ts'` passed with real Chromium: `14` tests.
+5. Focused Jest passed for `src/tests/pptxWriter.test.ts` and `src/tests/pptxExportReport.test.ts`: `23` tests.
+6. Full Jest passed: `190` suites, `1553` tests. Root still logs the existing Playwright cache skip warning; item 4 is the real browser coverage for this DOM/PPTX extraction slice.
+7. Real `architecture.zh-CN.md` export passed: `npm run verify:slidev-export -- --vault docs --source architecture.zh-CN.md --format pptx --output-subfolder export/test-slidev-m29-table-rich-runs --sample-slides all --timeout-ms 240000 --no-screenshots --require-pptx-visual-match --json`.
+8. The local Slidev fork was still used: `52.16.0 (/home/jacob/slidev/packages/slidev/bin/slidev.mjs)`, `skillRootPath = /home/jacob/slidev/skills/slidev`, `skillReferenceCount = 52`.
+9. Visual/source gates passed: `ok = true`, `pptxVisualGate.passed = true`, `referenceSource = pptx-rendered-html-reference`, `thresholdProfile = visible-native-rendered-html`, `mermaidSourcePreservation.passed = true`, `sourceFenceCount = 3`, `deckFenceCount = 3`, `changedFenceIndexes = []`.
+10. Real report metrics: `slideCount = 30`, `textBoxCount = 338`, `tableCount = 6`, `editableTableCellCount = 102`, `editableTableCellOverlayTextBoxCount = 0`, `richTextRunCount = 440`, `richTextRunCharacterCount = 7409`.
+11. Fallback reporting remains honest: `fallbackOnlyElementKinds = ["mermaid", "svg"]`; `decorativePrimitiveSkipReasonCounts = [{ not-visible: 68 }, { unsupported-table-root: 60 }]`.
+12. The font contract now reflects table runs: `fontFamilies = ["Avenir Next", "Fira Code"]`, `officeFontFamilies = ["DejaVu Sans Mono", "Microsoft YaHei", "Noto Sans"]`, `officeTextRunCount = 780`, with table usage `Avenir Next.tableCellCount = 75` and `Fira Code.tableCellCount = 27`.
+13. Background residue sampling still passed: `checkedRegionCount = 437`, `suspiciousSlideCount = 0`, `suspiciousRegionCount = 0`, `maxTextLikePixelRatio = 0`, `warnings = []`.
+14. PPTX XML scan confirms there was no regression to transparent text: `alpha=0 = 0`, `alpha=8000 = 0`, `Table Cell Overlay Text = 0`, `Visible Native Text = 324`, `Visible Native Code Text = 14`, `Visible Native Table = 6`, `Native Code Background Rectangle = 115`, `highlightTags = 27`, `<a:t...>` tags = `1218`.
+15. Output artifacts remain local and ignored under `docs/export/test-slidev-m29-table-rich-runs/`; `git status --ignored --short` reports `!!`, `unignoredOutputs = []`, so artifacts are not committed.
+
+Residual risk and next direction:
+
+1. `unsupported-table-root = 60` did not decrease, and that is the expected boundary. M29 fixes table-owned text/runs; the remaining bucket mostly covers cell-internal decoration, CSS chip box model, border/collapse paint, and Office table-renderer differences.
+2. `<a:highlight>` is not a CSS rounded chip. If visual fidelity needs to move closer to Chromium, the next step should be a cell-internal decoration shape/geometry contract gated by paint order and residue sampling. Do not revert to transparent overlays.
+3. The real deck has no hyperlink runs, so the table hyperlink path is covered by writer/report tests. If a future source deck contains table links, add that to real acceptance metrics.
+4. `textSourceCoverage` still describes text-box sources only, not table-cell rich-run sources. A future `tableCellRichTextCoverage` field would be cleaner than stuffing table cells back into `table-cell-overlay`.
+5. Mermaid/SVG remain separate tracks. Keep source fences untouched and avoid splitting Mermaid diagrams; if editability improves there, use explicit SVG artifact/embedding or experimental vector reconstruction rather than transparent editable labels.
+
 ## Current Limits
 
 The first implementation is intentionally conservative:

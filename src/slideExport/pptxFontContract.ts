@@ -6,6 +6,7 @@ import type {
 	SlidevPptxRichTextParagraph,
 	SlidevPptxSlide,
 	SlidevPptxSlideEditabilitySummary,
+	SlidevPptxTableCell,
 	SlidevPptxTextBox,
 } from './pptxModel';
 
@@ -58,7 +59,7 @@ type FontUsageAccumulator = {
 	fontFace: string;
 	textBoxIds: Set<string>;
 	richTextRunCount: number;
-	tableCellCount: number;
+	tableCellIds: Set<string>;
 	characterCount: number;
 	cjkCharacterCount: number;
 	latinCharacterCount: number;
@@ -259,6 +260,28 @@ function extractedTextRunsForTextBox(textBox: SlidevPptxTextBox): ExtractedTextR
 		.filter(hasText);
 }
 
+function extractedTextRunsForTableCell(cell: SlidevPptxTableCell): ExtractedTextRun[] {
+	const paragraphs = Array.isArray(cell.richTextParagraphs) ? cell.richTextParagraphs : [];
+	if (paragraphsContainRuns(paragraphs)) {
+		return paragraphs.flatMap((paragraph) =>
+			paragraph.runs
+				.map((run) => ({
+					text: String(run.text || ''),
+					fontFace: normalizeFontFace(run.fontFace),
+				}))
+				.filter(hasText),
+		);
+	}
+	return cell.text
+		.replace(/\r\n?/g, '\n')
+		.split('\n')
+		.map((line) => ({
+			text: line.trimEnd() || ' ',
+			fontFace: normalizeFontFace(cell.fontFace),
+		}))
+		.filter(hasText);
+}
+
 function officeTextRunsForExtractedRun(
 	run: ExtractedTextRun,
 	policy?: Partial<SlidevPptxFontPolicy>,
@@ -320,7 +343,7 @@ function accumulatorFor(
 		fontFace: normalized,
 		textBoxIds: new Set(),
 		richTextRunCount: 0,
-		tableCellCount: 0,
+		tableCellIds: new Set(),
 		characterCount: 0,
 		cjkCharacterCount: 0,
 		latinCharacterCount: 0,
@@ -378,10 +401,12 @@ function recordTextBoxRun(
 function recordTableCellText(
 	accumulators: Map<string, FontUsageAccumulator>,
 	run: ExtractedTextRun,
+	tableCellId: string,
 	policy: SlidevPptxFontPolicy,
 ): void {
 	recordText(accumulators, run, policy, (accumulator) => {
-		accumulator.tableCellCount += 1;
+		accumulator.tableCellIds.add(tableCellId);
+		accumulator.richTextRunCount += 1;
 	});
 }
 
@@ -391,7 +416,7 @@ function usageFromAccumulator(accumulator: FontUsageAccumulator): SlidevPptxFont
 		fontFace: accumulator.fontFace,
 		textBoxCount: accumulator.textBoxIds.size,
 		richTextRunCount: accumulator.richTextRunCount,
-		tableCellCount: accumulator.tableCellCount,
+		tableCellCount: accumulator.tableCellIds.size,
 		characterCount: accumulator.characterCount,
 		cjkCharacterCount: accumulator.cjkCharacterCount,
 		latinCharacterCount: accumulator.latinCharacterCount,
@@ -412,17 +437,15 @@ function collectFontUsages(slides: SlidevPptxSlide[], policy: SlidevPptxFontPoli
 				recordTextBoxRun(accumulators, run, textBoxId, policy);
 			}
 		}
-		for (const table of slide.tables) {
-			for (const row of table.rows) {
-				for (const cell of row) {
-					recordTableCellText(
-						accumulators,
-						{
-							text: cell.text,
-							fontFace: normalizeFontFace(cell.fontFace),
-						},
-						policy,
-					);
+		for (let tableIndex = 0; tableIndex < slide.tables.length; tableIndex += 1) {
+			const table = slide.tables[tableIndex];
+			for (let rowIndex = 0; rowIndex < table.rows.length; rowIndex += 1) {
+				const row = table.rows[rowIndex];
+				for (let cellIndex = 0; cellIndex < row.length; cellIndex += 1) {
+					const tableCellId = `${slide.slideNumber}:${tableIndex}:${rowIndex}:${cellIndex}`;
+					for (const run of extractedTextRunsForTableCell(row[cellIndex])) {
+						recordTableCellText(accumulators, run, tableCellId, policy);
+					}
 				}
 			}
 		}
@@ -491,9 +514,11 @@ function collectOfficeFontUsages(slides: SlidevPptxSlide[], policy: SlidevPptxFo
 		for (const table of slide.tables) {
 			for (const row of table.rows) {
 				for (const cell of row) {
-					const officeRuns = splitPptxTextIntoOfficeFontRuns(cell.text, cell.fontFace, policy).filter(hasOfficeText);
-					for (const officeRun of officeRuns) {
-						recordOfficeTextRun(accumulators, officeRun, policy);
+					for (const run of extractedTextRunsForTableCell(cell)) {
+						const officeRuns = officeTextRunsForExtractedRun(run, policy);
+						for (const officeRun of officeRuns) {
+							recordOfficeTextRun(accumulators, officeRun, policy);
+						}
 					}
 				}
 			}
