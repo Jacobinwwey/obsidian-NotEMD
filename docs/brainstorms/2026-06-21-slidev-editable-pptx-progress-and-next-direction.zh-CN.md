@@ -928,6 +928,46 @@ GitHub branch、tree 或 blob URL 都不是正确安装面。它们不是稳定 
 
 后续 Slidev fork 有新改动时，只有在 fork 仓库真正切出新 release 并完成 npm package 烟测后，NoteMD 才应该更新 UI 安装 URL。包含 PR 工作的分支只是 staging surface，不是用户安装 surface。
 
+## M16 PPTX 字体选择合同
+
+本轮继续参考 `/home/jacob/ref/oh-my-ppt-upstream-latest`，但参考的是架构合同，不是复制它的导出引擎。`oh-my-ppt` 的有效经验是：字体不能只是 writer 内部细节，而应该成为导出合同的一部分。它能做字体嵌入，是因为项目内有字体资产注册与 project-local font files 的收集流程。NoteMD 目前还没有带授权来源的 vault font asset 边界，所以默认扫描并嵌入系统字体不是正确方向：这会给出无法证明的跨机器还原承诺，也可能打包用户无权再分发的字体。
+
+本轮落地的是更窄但可验证的合同：
+
+1. 当默认导出格式为 `pptx` 时，设置页提供三个 PPTX 字体选择：拉丁文、东亚文字、等宽字体；
+2. 默认值保持当前 writer 输出：`Noto Sans`、`Microsoft YaHei`、`DejaVu Sans Mono`；
+3. 每个选择器都有少量 preset，并支持输入自定义/系统字体名；
+4. source font override 集中在同一个策略里：`Avenir Next` 映射到已选择的拉丁文字体，`Fira Code` 映射到已选择的等宽字体；
+5. PPTX writer、theme、slide summary 和 sidecar `fontContract` 共用同一个 resolved policy；
+6. report 明确写出 `fontEmbeddingPolicy = not-embedded`、`embeddedFontCount = 0`；
+7. 用户自定义字体可以使用，但会作为 local platform risk 报告，不会被误报成可移植字体。
+
+这比 `oh-my-ppt` 的默认可编辑导出更保守，但边界更适合当前 NoteMD。下一步不应该扫描 `/usr/share/fonts` 或用户系统字体目录。更稳的方向是新增 opt-in vault/project font asset 目录，要求授权来源明确、逐字体显式启用、生成 subset，并设置严格 payload 上限。只有这个边界具备后，未来才应该把策略升级为 `embedded`，否则就是过度承诺。
+
+真实验收使用用户指定的 `docs/architecture.zh-CN.md`：
+
+```bash
+runuser -u jacob -- env HOME=/home/jacob PLAYWRIGHT_BROWSERS_PATH=/home/jacob/.cache/ms-playwright bash -lc 'cd /home/jacob/obsidian-NotEMD && rm -rf docs/export/test-slidev-m16-font-policy /tmp/notemd-m16-font-policy.json && npm run verify:slidev-export -- --vault docs --source architecture.zh-CN.md --format pptx --output-subfolder export/test-slidev-m16-font-policy --sample-slides all --timeout-ms 240000 --no-screenshots --require-pptx-visual-match --json > /tmp/notemd-m16-font-policy.json'
+```
+
+结果：
+
+1. `ok = true`；
+2. 输出 PPTX：`docs/export/test-slidev-m16-font-policy/architecture.zh-CN.pptx`；
+3. 输出 report：`docs/export/test-slidev-m16-font-policy/architecture.zh-CN.pptx.report.json`；
+4. rendered-HTML reference diff 在 visible-native profile 内通过；
+5. `slideCount = 30`，`textRunCount = 861`，`textBoxCount = 338`；
+6. `editableBodyTextBoxCount = 324`，`editableCodeTextBoxCount = 14`，`editableTableCellCount = 102`，`editableMermaidTextBoxCount = 0`；
+7. `visibleTextLayer = native-text-and-background-image`，`editableLayerRenderMode = visible-native-text`，`transparentOverlayTextSources = []`；
+8. `visibleNativeBackgroundCapture.status = verified`，`sampledSlideCount = 30`，`checkedRegionCount = 437`，`suspiciousRegionCount = 0`，`maxTextLikePixelRatio = 0`；
+9. PPTX XML 扫描显示 `alpha=0` 数量为 `0`，`alpha=8000` 数量为 `0`，`Visible Native Text = 324`，`Visible Native Code Text = 14`，`Visible Native Table = 6`，`Editable Mermaid Text = 0`；
+10. PPTX theme 包含 `Noto Sans`、`Microsoft YaHei`、`DejaVu Sans Mono`；
+11. sidecar `fontContract.officeFontFamilies = ["DejaVu Sans Mono", "Microsoft YaHei", "Noto Sans"]`；
+12. sidecar `fontContract.officeOutputMissingFontRiskFamilies = ["DejaVu Sans Mono", "Noto Sans"]`，因为这些默认字体没有嵌入，不应声称 Office 跨机器可移植；
+13. 生成物仍在 Git ignore 范围内：`git status --ignored --short docs/export/test-slidev-m16-font-policy` 显示 `!!`，`git ls-files docs/export/test-slidev-m16-font-policy` 为空。
+
+这完成了当前针对 `oh-my-ppt` 的字体与真实可编辑文字对比切片。项目现在有了用户字体选择的稳定边界，同时没有退回透明文字的假可编辑路径。后续更高价值的 PPTX 工作仍是几何和对象建模：table baseline、paragraph spacing、code token background、hyperlink relationship、高置信 shape，以及可选的授权字体嵌入。Mermaid 默认仍应由背景拥有，直到单独 SVG/vector 策略能证明不会改写原 Mermaid 源，也不会扭曲图形。
+
 ## 当前边界
 
 第一版实现有意保守：

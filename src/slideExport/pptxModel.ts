@@ -236,6 +236,15 @@ export type SlidevPptxOfficeFontRiskReason =
 	| 'non-office-family'
 	| 'unresolved-css-family';
 
+export interface SlidevPptxFontPolicy {
+	latinFontFace: string;
+	eastAsiaFontFace: string;
+	monospaceFontFace: string;
+	sourceFontFaceOverrides: Record<string, string>;
+	userSystemFontFaces: string[];
+	embeddingPolicy: 'not-embedded';
+}
+
 export interface SlidevPptxFontUsage {
 	fontFace: string;
 	textBoxCount: number;
@@ -257,6 +266,11 @@ export interface SlidevPptxFontContractSummary {
 	latinFontFamilies: string[];
 	writerEastAsiaFontFace: string;
 	writerEastAsiaFallbackFontFamilies: string[];
+	fontSelectionPolicy: SlidevPptxFontPolicy;
+	selectedLatinFontFace: string;
+	selectedEastAsiaFontFace: string;
+	selectedMonospaceFontFace: string;
+	userSystemFontFamilies: string[];
 	officeFontFamilyCount: number;
 	officeFontFamilies: string[];
 	officeCjkFontFamilies: string[];
@@ -266,6 +280,7 @@ export interface SlidevPptxFontContractSummary {
 	officeEastAsiaFallbackCharacterCount: number;
 	officeMissingFontRiskCount: number;
 	officeMissingFontRiskFamilies: string[];
+	officeOutputMissingFontRiskFamilies: string[];
 	fontUsages: SlidevPptxFontUsage[];
 	fontEmbeddingPolicy: 'not-embedded';
 	embeddedFontCount: 0;

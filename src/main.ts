@@ -2824,6 +2824,11 @@ export default class NotemdPlugin extends Plugin {
             slidevTheme: this.settings.slideExportTheme,
             timeoutMs: this.settings.slideExportTimeoutMs,
             htmlMode: this.settings.slideExportHtmlMode,
+            pptxFontPolicy: {
+                latinFontFace: this.settings.slideExportPptxLatinFontFace,
+                eastAsiaFontFace: this.settings.slideExportPptxEastAsiaFontFace,
+                monospaceFontFace: this.settings.slideExportPptxMonospaceFontFace,
+            },
         };
     }
 

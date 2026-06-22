@@ -225,6 +225,9 @@ export interface NotemdSettings {
     slideExportTimeoutMs: number;
     slideExportTheme: string;
     slideExportHtmlMode: 'standalone' | 'server-script';
+    slideExportPptxLatinFontFace: string;
+    slideExportPptxEastAsiaFontFace: string;
+    slideExportPptxMonospaceFontFace: string;
 }
 
 // Defines the keys for tasks that can have custom prompts

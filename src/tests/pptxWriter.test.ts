@@ -34,6 +34,128 @@ describe('pptxWriter', () => {
 		]);
 	});
 
+	test('applies the selected PPTX font policy to Office text runs and theme fonts', () => {
+		const fontPolicy = {
+			latinFontFace: 'Aptos',
+			eastAsiaFontFace: 'Noto Sans CJK SC',
+			monospaceFontFace: 'Consolas',
+		};
+		expect(splitPptxTextIntoOfficeFontRuns('API：架构 v2', 'Avenir Next', fontPolicy)).toEqual([
+			{
+				text: 'API',
+				sourceFontFace: 'Avenir Next',
+				fontFace: 'Aptos',
+				usesEastAsiaFont: false,
+			},
+			{
+				text: '：架构',
+				sourceFontFace: 'Avenir Next',
+				fontFace: 'Noto Sans CJK SC',
+				usesEastAsiaFont: true,
+			},
+			{
+				text: ' v2',
+				sourceFontFace: 'Avenir Next',
+				fontFace: 'Aptos',
+				usesEastAsiaFont: false,
+			},
+		]);
+		expect(splitPptxTextIntoOfficeFontRuns('const ok = true;', 'Fira Code', fontPolicy)).toEqual([
+			{
+				text: 'const ok = true;',
+				sourceFontFace: 'Fira Code',
+				fontFace: 'Consolas',
+				usesEastAsiaFont: false,
+			},
+		]);
+
+		const directory = mkdtempSync(join(tmpdir(), 'notemd-pptx-font-policy-'));
+		try {
+			const outputPath = join(directory, 'deck.pptx');
+			const document: SlidevPptxDocument = {
+				title: 'Font policy',
+				author: 'NoteMD',
+				slides: [
+					{
+						slideNumber: 1,
+						title: 'Font policy',
+						backgroundColor: 'FFFFFF',
+						texts: [
+							{
+								text: 'API 架构 v2\nconst ok = true;',
+								sourceKind: 'body',
+								x: 1,
+								y: 1,
+								w: 6,
+								h: 1,
+								fontSize: 18,
+								fontFace: 'Avenir Next',
+								color: '111827',
+								bold: false,
+								italic: false,
+								underline: false,
+								align: 'left',
+								bullet: false,
+								order: 10,
+								richTextParagraphs: [
+									{
+										runs: [
+											{
+												text: 'API 架构 v2',
+												fontSize: 18,
+												fontFace: 'Avenir Next',
+												color: '111827',
+												bold: false,
+												italic: false,
+												underline: false,
+												code: false,
+												link: false,
+											},
+										],
+									},
+									{
+										runs: [
+											{
+												text: 'const ok = true;',
+												fontSize: 14,
+												fontFace: 'Fira Code',
+												color: '111827',
+												bold: false,
+												italic: false,
+												underline: false,
+												code: true,
+												link: false,
+											},
+										],
+									},
+								],
+								unmodeledRunReasons: [],
+							},
+						],
+						tables: [],
+						fallbackOnlyElementKinds: [],
+						consumedTableTextCandidateCount: 0,
+						warnings: [],
+					},
+				],
+			};
+
+			writePptxDocument(outputPath, document, fontPolicy);
+
+			const entries = unzipSync(new Uint8Array(readFileSync(outputPath)));
+			const slideXml = strFromU8(entries['ppt/slides/slide1.xml']);
+			const themeXml = strFromU8(entries['ppt/theme/theme1.xml']);
+			expect(slideXml).toContain('<a:latin typeface="Aptos"/>');
+			expect(slideXml).toContain('<a:ea typeface="Noto Sans CJK SC"/>');
+			expect(slideXml).toContain('<a:latin typeface="Consolas"/>');
+			expect(themeXml).toContain('<a:latin typeface="Aptos"/>');
+			expect(themeXml).toContain('<a:ea typeface="Noto Sans CJK SC"/>');
+			expect(themeXml).toContain('<a:cs typeface="Consolas"/>');
+		} finally {
+			rmSync(directory, { recursive: true, force: true });
+		}
+	});
+
 	test('writes a PPTX zip with editable text runs and a visual fallback image', () => {
 		const directory = mkdtempSync(join(tmpdir(), 'notemd-pptx-'));
 		try {

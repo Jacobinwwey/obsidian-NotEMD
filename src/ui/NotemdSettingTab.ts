@@ -43,10 +43,19 @@ import { formatI18n, getI18nStrings } from '../i18n';
 import { runProviderConnectionTestWithHost } from '../operations/providerConnectionTestCommandHostAdapter';
 import { getFolderTaskFileSelectionProfiles, getFolderTaskRegexValidationError } from '../folderTaskFileSelector';
 import { DiscoveredProviderModel, discoverProviderModelsDetailed } from '../providerModelDiscovery';
+import {
+    SLIDEV_PPTX_EAST_ASIA_FONT_FACE_PRESETS,
+    SLIDEV_PPTX_LATIN_FONT_FACE_PRESETS,
+    SLIDEV_PPTX_MONOSPACE_FONT_FACE_PRESETS
+} from '../slideExport/pptxFontContract';
 
 // Define specific key types for settings accessed dynamically
 type ProviderSettingKey = 'addLinksProvider' | 'researchProvider' | 'generateTitleProvider' | 'translateProvider';
 type ModelSettingKey = 'addLinksModel' | 'researchModel' | 'generateTitleModel' | 'translateModel';
+type SlideExportPptxFontSettingKey =
+    | 'slideExportPptxLatinFontFace'
+    | 'slideExportPptxEastAsiaFontFace'
+    | 'slideExportPptxMonospaceFontFace';
 
 type ProviderPanelState = {
     advancedSettingsExpanded?: boolean;
@@ -107,6 +116,44 @@ export class NotemdSettingTab extends PluginSettingTab {
             return fallback;
         }
         return normalized;
+    }
+
+    private addPptxFontFaceSetting(
+        containerEl: HTMLElement,
+        settingKey: SlideExportPptxFontSettingKey,
+        presets: readonly string[],
+        name: string,
+        desc: string,
+        placeholder: string,
+        customLabel: string
+    ): void {
+        const customValue = '__custom__';
+        const currentValue = this.plugin.settings[settingKey] || placeholder;
+        const presetSet = new Set(presets);
+        const setting = new Setting(containerEl).setName(name).setDesc(desc);
+        setting.addDropdown(dropdown => {
+            for (const preset of presets) {
+                dropdown.addOption(preset, preset);
+            }
+            dropdown.addOption(customValue, customLabel);
+            dropdown
+                .setValue(presetSet.has(currentValue) ? currentValue : customValue)
+                .onChange(async (value) => {
+                    if (value === customValue) {
+                        return;
+                    }
+                    this.plugin.settings[settingKey] = value;
+                    await this.plugin.saveSettings();
+                    this.display();
+                });
+        });
+        setting.addText(text => text
+            .setPlaceholder(placeholder)
+            .setValue(currentValue)
+            .onChange(async (value) => {
+                this.plugin.settings[settingKey] = value.trim();
+                await this.plugin.saveSettings();
+            }));
     }
 
     private normalizeMultilinePathSetting(value: string): string {
@@ -3276,6 +3323,36 @@ export class NotemdSettingTab extends PluginSettingTab {
                             this.plugin.settings.slideExportHtmlMode = value as 'standalone' | 'server-script';
                             await this.plugin.saveSettings();
                         }));
+            }
+
+            if (this.plugin.settings.slideExportDefaultFormat === 'pptx') {
+                this.addPptxFontFaceSetting(
+                    containerEl,
+                    'slideExportPptxLatinFontFace',
+                    SLIDEV_PPTX_LATIN_FONT_FACE_PRESETS,
+                    i18n.slideExport.pptxLatinFontName,
+                    i18n.slideExport.pptxLatinFontDesc,
+                    'Noto Sans',
+                    i18n.slideExport.pptxCustomSystemFontOption
+                );
+                this.addPptxFontFaceSetting(
+                    containerEl,
+                    'slideExportPptxEastAsiaFontFace',
+                    SLIDEV_PPTX_EAST_ASIA_FONT_FACE_PRESETS,
+                    i18n.slideExport.pptxEastAsiaFontName,
+                    i18n.slideExport.pptxEastAsiaFontDesc,
+                    'Microsoft YaHei',
+                    i18n.slideExport.pptxCustomSystemFontOption
+                );
+                this.addPptxFontFaceSetting(
+                    containerEl,
+                    'slideExportPptxMonospaceFontFace',
+                    SLIDEV_PPTX_MONOSPACE_FONT_FACE_PRESETS,
+                    i18n.slideExport.pptxMonospaceFontName,
+                    i18n.slideExport.pptxMonospaceFontDesc,
+                    'DejaVu Sans Mono',
+                    i18n.slideExport.pptxCustomSystemFontOption
+                );
             }
 
             this.addDeferredTextSetting(

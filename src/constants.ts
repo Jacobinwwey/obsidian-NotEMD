@@ -209,6 +209,9 @@ export const DEFAULT_SETTINGS: NotemdSettings = {
     slideExportTimeoutMs: 120_000,
     slideExportTheme: '',
     slideExportHtmlMode: 'standalone',
+    slideExportPptxLatinFontFace: 'Noto Sans',
+    slideExportPptxEastAsiaFontFace: 'Microsoft YaHei',
+    slideExportPptxMonospaceFontFace: 'DejaVu Sans Mono',
 };
 
 // Constants for the Sidebar View

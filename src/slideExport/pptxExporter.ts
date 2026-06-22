@@ -14,6 +14,7 @@ import {
 	type SlidevPptxDocument,
 	type SlidevPptxExportReport,
 	type SlidevPptxExportResult,
+	type SlidevPptxFontPolicy,
 	type SlidevPptxImage,
 	type SlidevPptxSlide,
 	type SlidevPptxSlideEditabilitySummary,
@@ -25,7 +26,11 @@ import {
 	type SlidevPptxVisibleNativeResidueSamplingSummary,
 	type SlidevPptxVisibleNativeSlideResidueSampling,
 } from './pptxModel';
-import { buildSlidevPptxFontContractSummary, fontFamiliesForSlideSummary } from './pptxFontContract';
+import {
+	buildSlidevPptxFontContractSummary,
+	fontFamiliesForSlideSummary,
+	resolveSlidevPptxFontPolicy,
+} from './pptxFontContract';
 import { writePptxDocument, writeVisibleNativeExperimentPptxDocument } from './pptxWriter';
 import { getVaultBasePath, resolvePlaywrightBrowsersPath, safeRequire } from './platformUtils';
 import type { ExportProgressCallback, SlideExportConfig, SlidevExportSource } from './types';
@@ -1027,8 +1032,11 @@ function mergeTextSourceCoverage(
 	);
 }
 
-function buildSlideEditabilitySummary(slide: SlidevPptxSlide): SlidevPptxSlideEditabilitySummary {
-	const fontFamilies = fontFamiliesForSlideSummary(slide);
+function buildSlideEditabilitySummary(
+	slide: SlidevPptxSlide,
+	fontPolicy: SlidevPptxFontPolicy,
+): SlidevPptxSlideEditabilitySummary {
+	const fontFamilies = fontFamiliesForSlideSummary(slide, fontPolicy);
 	return {
 		slideNumber: slide.slideNumber,
 		editableTextBoxCount: slide.texts.length,
@@ -1169,15 +1177,17 @@ export function buildSlidevPptxExportReport(
 	slides: SlidevPptxSlide[],
 	visibleNativeBackgroundCapture?: SlidevPptxVisibleNativeBackgroundCaptureReport,
 	textPolicy: PptxReportTextPolicy = 'default-emitted-text',
+	fontPolicyInput?: Partial<SlidevPptxFontPolicy>,
 ): SlidevPptxExportReport {
+	const fontPolicy = resolveSlidevPptxFontPolicy(fontPolicyInput);
 	const reportSlides = textPolicy === 'all-extracted-text' ? slides : defaultPptxReportSlides(slides);
 	const pagesWithoutEditableText = reportSlides
 		.filter((slide) => slide.texts.length === 0)
 		.map((slide) => slide.slideNumber);
 	const warnings = slides.flatMap((slide) => slide.warnings);
-	const slideSummaries = reportSlides.map(buildSlideEditabilitySummary);
+	const slideSummaries = reportSlides.map((slide) => buildSlideEditabilitySummary(slide, fontPolicy));
 	const editablePrimitiveCoverage = buildEditablePrimitiveCoverage(slideSummaries);
-	const fontContract = buildSlidevPptxFontContractSummary(reportSlides);
+	const fontContract = buildSlidevPptxFontContractSummary(reportSlides, fontPolicy);
 	return {
 		formatVersion: 1,
 		source: {
@@ -1229,6 +1239,7 @@ export function buildSlidevVisibleNativePptxExperimentReport(
 	reportPath: string,
 	slides: SlidevPptxSlide[],
 	residueSampling: SlidevPptxVisibleNativeResidueSamplingSummary,
+	fontPolicyInput?: Partial<SlidevPptxFontPolicy>,
 ): SlidevPptxExportReport {
 	const report = buildSlidevPptxExportReport(
 		htmlPath,
@@ -1238,6 +1249,7 @@ export function buildSlidevVisibleNativePptxExperimentReport(
 		slides,
 		undefined,
 		'all-extracted-text',
+		fontPolicyInput,
 	);
 	const experimentWarnings = [
 		'Visible-native PPTX is experimental; it also converts background-owned text sources such as Mermaid labels, while default export keeps Mermaid labels in the background image.',
@@ -1329,7 +1341,8 @@ export async function exportSlidevPptxFromHtml(
 		slides,
 	};
 
-	writePptxDocument(outputPath, document);
+	const fontPolicy = resolveSlidevPptxFontPolicy(config.pptxFontPolicy);
+	writePptxDocument(outputPath, document, fontPolicy);
 	const residueWarnings = slides.flatMap((slide) =>
 		slide.warnings.filter((warning) => warning.includes('default visible-native background residue')),
 	);
@@ -1340,6 +1353,8 @@ export async function exportSlidevPptxFromHtml(
 		reportPath,
 		slides,
 		buildDefaultVisibleNativeBackgroundCaptureReport(residueSampling, residueWarnings),
+		'default-emitted-text',
+		fontPolicy,
 	);
 	writeFileSync(reportPath, JSON.stringify(report, null, 2), 'utf8');
 	onProgress?.(
@@ -1392,7 +1407,8 @@ export async function exportSlidevVisibleNativePptxExperimentFromHtml(
 		slides,
 	};
 
-	writeVisibleNativeExperimentPptxDocument(outputPath, document);
+	const fontPolicy = resolveSlidevPptxFontPolicy(config.pptxFontPolicy);
+	writeVisibleNativeExperimentPptxDocument(outputPath, document, fontPolicy);
 	const report = buildSlidevVisibleNativePptxExperimentReport(
 		absoluteHtmlPath,
 		deckPath,
@@ -1400,6 +1416,7 @@ export async function exportSlidevVisibleNativePptxExperimentFromHtml(
 		reportPath,
 		slides,
 		residueSampling,
+		fontPolicy,
 	);
 	writeFileSync(reportPath, JSON.stringify(report, null, 2), 'utf8');
 	onProgress?.(

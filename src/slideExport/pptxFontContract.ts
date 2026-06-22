@@ -1,5 +1,6 @@
 import type {
 	SlidevPptxFontContractSummary,
+	SlidevPptxFontPolicy,
 	SlidevPptxFontUsage,
 	SlidevPptxOfficeFontRiskReason,
 	SlidevPptxRichTextParagraph,
@@ -9,11 +10,37 @@ import type {
 } from './pptxModel';
 
 export const PPTX_WRITER_EAST_ASIA_FONT_FACE = 'Microsoft YaHei';
+export const PPTX_WRITER_LATIN_FONT_FACE = 'Noto Sans';
+export const PPTX_WRITER_MONOSPACE_FONT_FACE = 'DejaVu Sans Mono';
 
-const PPTX_WRITER_LATIN_FONT_FACE_OVERRIDES = new Map<string, string>([
-	['avenir next', 'Noto Sans'],
-	['fira code', 'DejaVu Sans Mono'],
-]);
+export const SLIDEV_PPTX_LATIN_FONT_FACE_PRESETS = [
+	PPTX_WRITER_LATIN_FONT_FACE,
+	'Aptos',
+	'Arial',
+	'Calibri',
+	'Inter',
+] as const;
+
+export const SLIDEV_PPTX_EAST_ASIA_FONT_FACE_PRESETS = [
+	PPTX_WRITER_EAST_ASIA_FONT_FACE,
+	'Noto Sans CJK SC',
+	'Microsoft JhengHei',
+	'DengXian',
+	'SimSun',
+] as const;
+
+export const SLIDEV_PPTX_MONOSPACE_FONT_FACE_PRESETS = [
+	PPTX_WRITER_MONOSPACE_FONT_FACE,
+	'Aptos Mono',
+	'Consolas',
+	'Courier New',
+	'Fira Code',
+] as const;
+
+const DEFAULT_SOURCE_FONT_FACE_OVERRIDES: Record<string, 'latin' | 'monospace'> = {
+	'Avenir Next': 'latin',
+	'Fira Code': 'monospace',
+};
 
 type ExtractedTextRun = {
 	text: string;
@@ -50,17 +77,93 @@ type OfficeFontAccumulator = {
 	eastAsiaFallbackCharacterCount: number;
 };
 
-function normalizeFontFace(value: string): string {
+export function normalizePptxFontFace(value: string, fallback = 'Aptos'): string {
 	const fontFace = String(value || '')
 		.split(',')
 		.map((part) => part.trim().replace(/^["']|["']$/g, ''))
 		.find(Boolean);
-	return fontFace || 'Aptos';
+	return fontFace || fallback;
 }
 
-function resolvePptxOfficeLatinFontFace(fontFace: string): string {
+function normalizeFontFace(value: string): string {
+	return normalizePptxFontFace(value);
+}
+
+function sortedUnique(values: string[]): string[] {
+	return Array.from(new Set(values.filter(Boolean))).sort((left, right) => left.localeCompare(right));
+}
+
+function builtInFontPresetFaces(): Set<string> {
+	return new Set(
+		[
+			...SLIDEV_PPTX_LATIN_FONT_FACE_PRESETS,
+			...SLIDEV_PPTX_EAST_ASIA_FONT_FACE_PRESETS,
+			...SLIDEV_PPTX_MONOSPACE_FONT_FACE_PRESETS,
+		].map((fontFace) => fontFace.toLowerCase()),
+	);
+}
+
+export function resolveSlidevPptxFontPolicy(policy?: Partial<SlidevPptxFontPolicy>): SlidevPptxFontPolicy {
+	const latinFontFace = normalizePptxFontFace(policy?.latinFontFace || PPTX_WRITER_LATIN_FONT_FACE);
+	const eastAsiaFontFace = normalizePptxFontFace(policy?.eastAsiaFontFace || PPTX_WRITER_EAST_ASIA_FONT_FACE);
+	const monospaceFontFace = normalizePptxFontFace(policy?.monospaceFontFace || PPTX_WRITER_MONOSPACE_FONT_FACE);
+	const sourceFontFaceOverrides: Record<string, string> = {};
+
+	for (const [sourceFontFace, targetRole] of Object.entries(DEFAULT_SOURCE_FONT_FACE_OVERRIDES)) {
+		sourceFontFaceOverrides[sourceFontFace] = targetRole === 'monospace' ? monospaceFontFace : latinFontFace;
+	}
+	for (const [sourceFontFace, targetFontFace] of Object.entries(policy?.sourceFontFaceOverrides || {})) {
+		const normalizedSourceFontFace = normalizePptxFontFace(sourceFontFace, '');
+		const normalizedTargetFontFace = normalizePptxFontFace(targetFontFace, '');
+		if (normalizedSourceFontFace && normalizedTargetFontFace) {
+			sourceFontFaceOverrides[normalizedSourceFontFace] = normalizedTargetFontFace;
+		}
+	}
+
+	const presetFaces = builtInFontPresetFaces();
+	const selectedFontFaces = [latinFontFace, eastAsiaFontFace, monospaceFontFace];
+	const userSystemFontFaces = sortedUnique([
+		...(policy?.userSystemFontFaces || []).map((fontFace) => normalizePptxFontFace(fontFace, '')).filter(Boolean),
+		...selectedFontFaces.filter((fontFace) => !presetFaces.has(fontFace.toLowerCase())),
+	]);
+
+	return {
+		latinFontFace,
+		eastAsiaFontFace,
+		monospaceFontFace,
+		sourceFontFaceOverrides,
+		userSystemFontFaces,
+		embeddingPolicy: 'not-embedded',
+	};
+}
+
+function overrideTargetFontFace(sourceFontFace: string, policy: SlidevPptxFontPolicy): string | null {
+	const normalizedSourceFontFace = sourceFontFace.toLowerCase();
+	for (const [candidateSourceFontFace, targetFontFace] of Object.entries(policy.sourceFontFaceOverrides)) {
+		if (normalizePptxFontFace(candidateSourceFontFace).toLowerCase() === normalizedSourceFontFace) {
+			return normalizePptxFontFace(targetFontFace);
+		}
+	}
+	return null;
+}
+
+function sourceFontFaceLooksMonospace(fontFace: string): boolean {
+	return /(?:mono|monospace|code|consolas|courier)/i.test(fontFace);
+}
+
+function resolvePptxOfficeLatinFontFace(fontFace: string, policy: SlidevPptxFontPolicy): string {
 	const normalized = normalizeFontFace(fontFace);
-	return PPTX_WRITER_LATIN_FONT_FACE_OVERRIDES.get(normalized.toLowerCase()) || normalized;
+	const override = overrideTargetFontFace(normalized, policy);
+	if (override) {
+		return override;
+	}
+	if (sourceFontFaceLooksMonospace(normalized)) {
+		return policy.monospaceFontFace;
+	}
+	if (isCssGenericFontFace(normalized)) {
+		return policy.latinFontFace;
+	}
+	return normalized;
 }
 
 export function pptxTextContainsCjk(text: string): boolean {
@@ -71,7 +174,12 @@ function pptxTextUsesEastAsiaFont(text: string): boolean {
 	return /[\u3000-\u30ff\u3400-\u9fff\uf900-\ufaff\uff00-\uffef\uac00-\ud7af]/.test(text);
 }
 
-export function splitPptxTextIntoOfficeFontRuns(text: string, fontFace: string): SlidevPptxOfficeTextRun[] {
+export function splitPptxTextIntoOfficeFontRuns(
+	text: string,
+	fontFace: string,
+	policy?: Partial<SlidevPptxFontPolicy>,
+): SlidevPptxOfficeTextRun[] {
+	const fontPolicy = resolveSlidevPptxFontPolicy(policy);
 	const sourceFontFace = normalizeFontFace(fontFace);
 	const characters = Array.from(String(text || ''));
 	if (characters.length === 0) {
@@ -89,9 +197,7 @@ export function splitPptxTextIntoOfficeFontRuns(text: string, fontFace: string):
 		runs.push({
 			text: currentText,
 			sourceFontFace,
-			fontFace: currentUsesEastAsiaFont
-				? PPTX_WRITER_EAST_ASIA_FONT_FACE
-				: resolvePptxOfficeLatinFontFace(sourceFontFace),
+			fontFace: currentUsesEastAsiaFont ? fontPolicy.eastAsiaFontFace : resolvePptxOfficeLatinFontFace(sourceFontFace, fontPolicy),
 			usesEastAsiaFont: currentUsesEastAsiaFont,
 		});
 		currentText = '';
@@ -153,8 +259,11 @@ function extractedTextRunsForTextBox(textBox: SlidevPptxTextBox): ExtractedTextR
 		.filter(hasText);
 }
 
-function officeTextRunsForExtractedRun(run: ExtractedTextRun): SlidevPptxOfficeTextRun[] {
-	return splitPptxTextIntoOfficeFontRuns(run.text, run.fontFace).filter(hasOfficeText);
+function officeTextRunsForExtractedRun(
+	run: ExtractedTextRun,
+	policy?: Partial<SlidevPptxFontPolicy>,
+): SlidevPptxOfficeTextRun[] {
+	return splitPptxTextIntoOfficeFontRuns(run.text, run.fontFace, policy).filter(hasOfficeText);
 }
 
 function isCssGenericFontFace(fontFace: string): boolean {
@@ -191,6 +300,13 @@ function officeFontRiskReasons(fontFace: string): SlidevPptxOfficeFontRiskReason
 	return ['non-office-family'];
 }
 
+function officeFontRiskReasonsForPolicy(fontFace: string, policy: SlidevPptxFontPolicy): SlidevPptxOfficeFontRiskReason[] {
+	if (policy.userSystemFontFaces.some((systemFontFace) => systemFontFace.toLowerCase() === fontFace.toLowerCase())) {
+		return ['local-platform-family'];
+	}
+	return officeFontRiskReasons(fontFace);
+}
+
 function accumulatorFor(
 	accumulators: Map<string, FontUsageAccumulator>,
 	fontFace: string,
@@ -219,6 +335,7 @@ function accumulatorFor(
 function recordText(
 	accumulators: Map<string, FontUsageAccumulator>,
 	run: ExtractedTextRun,
+	policy: SlidevPptxFontPolicy,
 	recordSource: (accumulator: FontUsageAccumulator) => void,
 ): void {
 	const text = run.text;
@@ -231,11 +348,11 @@ function recordText(
 	accumulator.characterCount += text.length;
 	accumulator.cjkCharacterCount += cjkCharacterCount;
 	accumulator.latinCharacterCount += countLatinCharacters(text);
-	const fallbackRuns = officeTextRunsForExtractedRun(run).filter(
+	const fallbackRuns = officeTextRunsForExtractedRun(run, policy).filter(
 		(officeRun) =>
 			officeRun.usesEastAsiaFont &&
-			officeRun.fontFace === PPTX_WRITER_EAST_ASIA_FONT_FACE &&
-			officeRun.sourceFontFace !== PPTX_WRITER_EAST_ASIA_FONT_FACE,
+			officeRun.fontFace === policy.eastAsiaFontFace &&
+			officeRun.sourceFontFace !== policy.eastAsiaFontFace,
 	);
 	if (fallbackRuns.length > 0) {
 		accumulator.writerEastAsiaFallbackRunCount += fallbackRuns.length;
@@ -250,21 +367,22 @@ function recordTextBoxRun(
 	accumulators: Map<string, FontUsageAccumulator>,
 	run: ExtractedTextRun,
 	textBoxId: string,
+	policy: SlidevPptxFontPolicy,
 ): void {
-	recordText(accumulators, run, (accumulator) => {
+	recordText(accumulators, run, policy, (accumulator) => {
 		accumulator.textBoxIds.add(textBoxId);
 		accumulator.richTextRunCount += 1;
 	});
 }
 
-function recordTableCellText(accumulators: Map<string, FontUsageAccumulator>, run: ExtractedTextRun): void {
-	recordText(accumulators, run, (accumulator) => {
+function recordTableCellText(
+	accumulators: Map<string, FontUsageAccumulator>,
+	run: ExtractedTextRun,
+	policy: SlidevPptxFontPolicy,
+): void {
+	recordText(accumulators, run, policy, (accumulator) => {
 		accumulator.tableCellCount += 1;
 	});
-}
-
-function sortedUnique(values: string[]): string[] {
-	return Array.from(new Set(values)).sort((left, right) => left.localeCompare(right));
 }
 
 function usageFromAccumulator(accumulator: FontUsageAccumulator): SlidevPptxFontUsage {
@@ -284,14 +402,14 @@ function usageFromAccumulator(accumulator: FontUsageAccumulator): SlidevPptxFont
 	};
 }
 
-function collectFontUsages(slides: SlidevPptxSlide[]): SlidevPptxFontUsage[] {
+function collectFontUsages(slides: SlidevPptxSlide[], policy: SlidevPptxFontPolicy): SlidevPptxFontUsage[] {
 	const accumulators = new Map<string, FontUsageAccumulator>();
 	for (const slide of slides) {
 		for (let textBoxIndex = 0; textBoxIndex < slide.texts.length; textBoxIndex += 1) {
 			const textBox = slide.texts[textBoxIndex];
 			const textBoxId = `${slide.slideNumber}:${textBoxIndex}`;
 			for (const run of extractedTextRunsForTextBox(textBox)) {
-				recordTextBoxRun(accumulators, run, textBoxId);
+				recordTextBoxRun(accumulators, run, textBoxId, policy);
 			}
 		}
 		for (const table of slide.tables) {
@@ -303,6 +421,7 @@ function collectFontUsages(slides: SlidevPptxSlide[]): SlidevPptxFontUsage[] {
 							text: cell.text,
 							fontFace: normalizeFontFace(cell.fontFace),
 						},
+						policy,
 					);
 				}
 			}
@@ -338,6 +457,7 @@ function officeAccumulatorFor(
 function recordOfficeTextRun(
 	accumulators: Map<string, OfficeFontAccumulator>,
 	run: SlidevPptxOfficeTextRun,
+	policy: SlidevPptxFontPolicy,
 ): void {
 	if (!run.text.trim()) {
 		return;
@@ -350,30 +470,30 @@ function recordOfficeTextRun(
 	accumulator.latinCharacterCount += countLatinCharacters(run.text);
 	if (
 		run.usesEastAsiaFont &&
-		run.fontFace === PPTX_WRITER_EAST_ASIA_FONT_FACE &&
-		run.sourceFontFace !== PPTX_WRITER_EAST_ASIA_FONT_FACE
+		run.fontFace === policy.eastAsiaFontFace &&
+		run.sourceFontFace !== policy.eastAsiaFontFace
 	) {
 		accumulator.eastAsiaFallbackRunCount += 1;
 		accumulator.eastAsiaFallbackCharacterCount += cjkCharacterCount;
 	}
 }
 
-function collectOfficeFontUsages(slides: SlidevPptxSlide[]): OfficeFontAccumulator[] {
+function collectOfficeFontUsages(slides: SlidevPptxSlide[], policy: SlidevPptxFontPolicy): OfficeFontAccumulator[] {
 	const accumulators = new Map<string, OfficeFontAccumulator>();
 	for (const slide of slides) {
 		for (const textBox of slide.texts) {
 			for (const run of extractedTextRunsForTextBox(textBox)) {
-				for (const officeRun of officeTextRunsForExtractedRun(run)) {
-					recordOfficeTextRun(accumulators, officeRun);
+				for (const officeRun of officeTextRunsForExtractedRun(run, policy)) {
+					recordOfficeTextRun(accumulators, officeRun, policy);
 				}
 			}
 		}
 		for (const table of slide.tables) {
 			for (const row of table.rows) {
 				for (const cell of row) {
-					const officeRuns = splitPptxTextIntoOfficeFontRuns(cell.text, cell.fontFace).filter(hasOfficeText);
+					const officeRuns = splitPptxTextIntoOfficeFontRuns(cell.text, cell.fontFace, policy).filter(hasOfficeText);
 					for (const officeRun of officeRuns) {
-						recordOfficeTextRun(accumulators, officeRun);
+						recordOfficeTextRun(accumulators, officeRun, policy);
 					}
 				}
 			}
@@ -382,9 +502,13 @@ function collectOfficeFontUsages(slides: SlidevPptxSlide[]): OfficeFontAccumulat
 	return Array.from(accumulators.values()).sort((left, right) => left.fontFace.localeCompare(right.fontFace));
 }
 
-export function buildSlidevPptxFontContractSummary(slides: SlidevPptxSlide[]): SlidevPptxFontContractSummary {
-	const fontUsages = collectFontUsages(slides);
-	const officeFontUsages = collectOfficeFontUsages(slides);
+export function buildSlidevPptxFontContractSummary(
+	slides: SlidevPptxSlide[],
+	policy?: Partial<SlidevPptxFontPolicy>,
+): SlidevPptxFontContractSummary {
+	const fontPolicy = resolveSlidevPptxFontPolicy(policy);
+	const fontUsages = collectFontUsages(slides, fontPolicy);
+	const officeFontUsages = collectOfficeFontUsages(slides, fontPolicy);
 	const fontFamilies = fontUsages.map((usage) => usage.fontFace);
 	const cjkFontFamilies = fontUsages.filter((usage) => usage.cjkCharacterCount > 0).map((usage) => usage.fontFace);
 	const latinFontFamilies = fontUsages.filter((usage) => usage.latinCharacterCount > 0).map((usage) => usage.fontFace);
@@ -394,14 +518,22 @@ export function buildSlidevPptxFontContractSummary(slides: SlidevPptxSlide[]): S
 	const officeMissingFontRiskFamilies = fontUsages
 		.filter((usage) => usage.officeMissingFontRisk)
 		.map((usage) => usage.fontFace);
+	const officeOutputMissingFontRiskFamilies = officeFontUsages
+		.filter((usage) => officeFontRiskReasonsForPolicy(usage.fontFace, fontPolicy).length > 0)
+		.map((usage) => usage.fontFace);
 
 	return {
 		fontFamilyCount: fontFamilies.length,
 		fontFamilies,
 		cjkFontFamilies,
 		latinFontFamilies,
-		writerEastAsiaFontFace: PPTX_WRITER_EAST_ASIA_FONT_FACE,
+		writerEastAsiaFontFace: fontPolicy.eastAsiaFontFace,
 		writerEastAsiaFallbackFontFamilies,
+		fontSelectionPolicy: fontPolicy,
+		selectedLatinFontFace: fontPolicy.latinFontFace,
+		selectedEastAsiaFontFace: fontPolicy.eastAsiaFontFace,
+		selectedMonospaceFontFace: fontPolicy.monospaceFontFace,
+		userSystemFontFamilies: fontPolicy.userSystemFontFaces,
 		officeFontFamilyCount: officeFontUsages.length,
 		officeFontFamilies: officeFontUsages.map((usage) => usage.fontFace),
 		officeCjkFontFamilies: officeFontUsages
@@ -421,18 +553,22 @@ export function buildSlidevPptxFontContractSummary(slides: SlidevPptxSlide[]): S
 		),
 		officeMissingFontRiskCount: officeMissingFontRiskFamilies.length,
 		officeMissingFontRiskFamilies,
+		officeOutputMissingFontRiskFamilies,
 		fontUsages,
-		fontEmbeddingPolicy: 'not-embedded',
+		fontEmbeddingPolicy: fontPolicy.embeddingPolicy,
 		embeddedFontCount: 0,
 		embeddedFontFamilies: [],
 	};
 }
 
-export function fontFamiliesForSlideSummary(slide: SlidevPptxSlide): Pick<
+export function fontFamiliesForSlideSummary(
+	slide: SlidevPptxSlide,
+	policy?: Partial<SlidevPptxFontPolicy>,
+): Pick<
 	SlidevPptxSlideEditabilitySummary,
 	'fontFamilies' | 'cjkFontFamilies' | 'writerEastAsiaFallbackFontFamilies' | 'officeMissingFontRiskFamilies'
 > {
-	const summary = buildSlidevPptxFontContractSummary([slide]);
+	const summary = buildSlidevPptxFontContractSummary([slide], policy);
 	return {
 		fontFamilies: sortedUnique(summary.fontFamilies),
 		cjkFontFamilies: sortedUnique(summary.cjkFontFamilies),

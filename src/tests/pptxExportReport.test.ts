@@ -629,6 +629,118 @@ describe('pptx export report', () => {
 		);
 	});
 
+	test('reports selected PPTX font policy without claiming default font embedding', () => {
+		const slides: SlidevPptxSlide[] = [
+			{
+				slideNumber: 1,
+				title: 'Custom fonts',
+				backgroundColor: 'FFFFFF',
+				texts: [
+					{
+						text: 'API 架构 v2',
+						x: 1,
+						y: 1,
+						w: 5,
+						h: 1,
+						fontSize: 18,
+						fontFace: 'Avenir Next',
+						color: '111827',
+						bold: false,
+						italic: false,
+						underline: false,
+						align: 'left',
+						bullet: false,
+						order: 10,
+						richTextParagraphs: [
+							{
+								runs: [
+									{
+										text: 'API 架构 v2',
+										fontSize: 18,
+										fontFace: 'Avenir Next',
+										color: '111827',
+										bold: false,
+										italic: false,
+										underline: false,
+										code: false,
+										link: false,
+									},
+								],
+							},
+						],
+						unmodeledRunReasons: [],
+					},
+					{
+						text: 'const ok = true;',
+						sourceKind: 'code',
+						x: 1,
+						y: 2,
+						w: 5,
+						h: 0.5,
+						fontSize: 14,
+						fontFace: 'Fira Code',
+						color: '111827',
+						bold: false,
+						italic: false,
+						underline: false,
+						align: 'left',
+						bullet: false,
+						order: 20,
+						richTextParagraphs: [],
+						unmodeledRunReasons: [],
+					},
+				],
+				tables: [],
+				fallbackOnlyElementKinds: [],
+				consumedTableTextCandidateCount: 0,
+				warnings: [],
+			},
+		];
+
+		const report = buildSlidevPptxExportReport(
+			'/vault/export/deck/index.html',
+			'/vault/deck.md',
+			'/vault/export/deck.pptx',
+			'/vault/export/deck.pptx.report.json',
+			slides,
+			undefined,
+			'default-emitted-text',
+			{
+				latinFontFace: 'Aptos',
+				eastAsiaFontFace: 'Noto Sans CJK SC',
+				monospaceFontFace: 'JetBrains Mono',
+			},
+		);
+
+		expect(report.fontContract).toEqual(
+			expect.objectContaining({
+				selectedLatinFontFace: 'Aptos',
+				selectedEastAsiaFontFace: 'Noto Sans CJK SC',
+				selectedMonospaceFontFace: 'JetBrains Mono',
+				writerEastAsiaFontFace: 'Noto Sans CJK SC',
+				officeFontFamilies: ['Aptos', 'JetBrains Mono', 'Noto Sans CJK SC'],
+				officeCjkFontFamilies: ['Noto Sans CJK SC'],
+				officeLatinFontFamilies: ['Aptos', 'JetBrains Mono'],
+				userSystemFontFamilies: ['JetBrains Mono'],
+				officeOutputMissingFontRiskFamilies: ['JetBrains Mono', 'Noto Sans CJK SC'],
+				fontEmbeddingPolicy: 'not-embedded',
+				embeddedFontCount: 0,
+			}),
+		);
+		expect(report.fontContract.fontSelectionPolicy).toEqual(
+			expect.objectContaining({
+				latinFontFace: 'Aptos',
+				eastAsiaFontFace: 'Noto Sans CJK SC',
+				monospaceFontFace: 'JetBrains Mono',
+				embeddingPolicy: 'not-embedded',
+				sourceFontFaceOverrides: {
+					'Avenir Next': 'Aptos',
+					'Fira Code': 'JetBrains Mono',
+				},
+			}),
+		);
+	});
+
 	test('reports visible-native experiment contract and residue sampling separately from the default contract', () => {
 		const slides: SlidevPptxSlide[] = [
 			{

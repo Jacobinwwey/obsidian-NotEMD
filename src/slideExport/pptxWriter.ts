@@ -4,6 +4,7 @@ import {
 	PPTX_SLIDE_WIDTH_EMU,
 	SLIDEV_PPTX_VISIBLE_TEXT_SOURCE_KINDS,
 	type SlidevPptxDocument,
+	type SlidevPptxFontPolicy,
 	type SlidevPptxImage,
 	type SlidevPptxRichTextParagraph,
 	type SlidevPptxSlide,
@@ -13,7 +14,7 @@ import {
 	type SlidevPptxTextBox,
 	type SlidevPptxTextSourceKind,
 } from './pptxModel';
-import { splitPptxTextIntoOfficeFontRuns } from './pptxFontContract';
+import { resolveSlidevPptxFontPolicy, splitPptxTextIntoOfficeFontRuns } from './pptxFontContract';
 import { safeRequire } from './platformUtils';
 
 const EMU_PER_INCH = 914400;
@@ -23,6 +24,10 @@ interface SlideImageRelationship {
 	relationshipId: string;
 	mediaPath: string;
 }
+
+type PptxWriterContext = {
+	fontPolicy: SlidevPptxFontPolicy;
+};
 
 function escapeXml(value: string): string {
 	return value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
@@ -106,10 +111,10 @@ function buildRunXmlWithTextFill(
 	].join('');
 }
 
-function buildTransparentRunXml(text: string, runStyle: TextRunStyle): string {
+function buildTransparentRunXml(text: string, runStyle: TextRunStyle, context: PptxWriterContext): string {
 	const color = clampHexColor(runStyle.color, '111827');
 	const textFillXml = buildTransparentTextFill(color);
-	return splitPptxTextIntoOfficeFontRuns(text, runStyle.fontFace)
+	return splitPptxTextIntoOfficeFontRuns(text, runStyle.fontFace, context.fontPolicy)
 		.map((officeRun) =>
 			buildRunXmlWithTextFill(
 				officeRun.text,
@@ -121,10 +126,10 @@ function buildTransparentRunXml(text: string, runStyle: TextRunStyle): string {
 		.join('');
 }
 
-function buildVisibleRunXml(text: string, runStyle: TextRunStyle): string {
+function buildVisibleRunXml(text: string, runStyle: TextRunStyle, context: PptxWriterContext): string {
 	const color = clampHexColor(runStyle.color, '111827');
 	const textFillXml = buildVisibleTextFill(color);
-	return splitPptxTextIntoOfficeFontRuns(text, runStyle.fontFace)
+	return splitPptxTextIntoOfficeFontRuns(text, runStyle.fontFace, context.fontPolicy)
 		.map((officeRun) =>
 			buildRunXmlWithTextFill(
 				officeRun.text,
@@ -208,37 +213,37 @@ function paragraphEndFontSize(paragraph: SlidevPptxRichTextParagraph, fallbackFo
 	return Math.max(600, Math.min(14400, Math.round((lastRun?.fontSize || fallbackFontSize) * 100)));
 }
 
-function buildTextParagraphs(textBox: SlidevPptxTextBox): string {
+function buildTextParagraphs(textBox: SlidevPptxTextBox, context: PptxWriterContext): string {
 	const paragraphs = chooseTextParagraphs(textBox);
 	const align = alignToOoxml(textBox.align);
 	const bullet = textBox.bullet ? '<a:buChar char="&#8226;"/>' : '<a:buNone/>';
 
 	return paragraphs
 		.map((paragraph) =>
-			[
-				'<a:p>',
-				`<a:pPr algn="${align}">${bullet}</a:pPr>`,
-				paragraph.runs.map((run) => buildTransparentRunXml(run.text || ' ', run)).join(''),
-				`<a:endParaRPr lang="en-US" sz="${paragraphEndFontSize(paragraph, textBox.fontSize)}"/>`,
-				'</a:p>',
+				[
+					'<a:p>',
+					`<a:pPr algn="${align}">${bullet}</a:pPr>`,
+					paragraph.runs.map((run) => buildTransparentRunXml(run.text || ' ', run, context)).join(''),
+					`<a:endParaRPr lang="en-US" sz="${paragraphEndFontSize(paragraph, textBox.fontSize)}"/>`,
+					'</a:p>',
 			].join(''),
 		)
 		.join('');
 }
 
-function buildVisibleTextParagraphs(textBox: SlidevPptxTextBox): string {
+function buildVisibleTextParagraphs(textBox: SlidevPptxTextBox, context: PptxWriterContext): string {
 	const paragraphs = chooseTextParagraphs(textBox);
 	const align = alignToOoxml(textBox.align);
 	const bullet = textBox.bullet ? '<a:buChar char="&#8226;"/>' : '<a:buNone/>';
 
 	return paragraphs
 		.map((paragraph) =>
-			[
-				'<a:p>',
-				`<a:pPr algn="${align}">${bullet}</a:pPr>`,
-				paragraph.runs.map((run) => buildVisibleRunXml(run.text || ' ', run)).join(''),
-				`<a:endParaRPr lang="en-US" sz="${paragraphEndFontSize(paragraph, textBox.fontSize)}"/>`,
-				'</a:p>',
+				[
+					'<a:p>',
+					`<a:pPr algn="${align}">${bullet}</a:pPr>`,
+					paragraph.runs.map((run) => buildVisibleRunXml(run.text || ' ', run, context)).join(''),
+					`<a:endParaRPr lang="en-US" sz="${paragraphEndFontSize(paragraph, textBox.fontSize)}"/>`,
+					'</a:p>',
 			].join(''),
 		)
 		.join('');
@@ -281,7 +286,7 @@ function isVisibleDefaultTextSource(textBox: SlidevPptxTextBox): boolean {
 	return SLIDEV_PPTX_VISIBLE_TEXT_SOURCE_KINDS.includes(textSourceKindForDefaultLayer(textBox));
 }
 
-function buildTextShape(textBox: SlidevPptxTextBox, shapeId: number): string {
+function buildTextShape(textBox: SlidevPptxTextBox, shapeId: number, context: PptxWriterContext): string {
 	const x = inchesToEmu(textBox.x);
 	const y = inchesToEmu(textBox.y);
 	const w = inchesToEmu(textBox.w);
@@ -304,13 +309,13 @@ function buildTextShape(textBox: SlidevPptxTextBox, shapeId: number): string {
 		'<p:txBody>',
 		'<a:bodyPr wrap="square" lIns="0" tIns="0" rIns="0" bIns="0" rtlCol="0" anchor="t"><a:normAutofit fontScale="100000"/></a:bodyPr>',
 		'<a:lstStyle/>',
-		buildTextParagraphs(textBox),
+		buildTextParagraphs(textBox, context),
 		'</p:txBody>',
 		'</p:sp>',
 	].join('');
 }
 
-function buildVisibleTextShape(textBox: SlidevPptxTextBox, shapeId: number): string {
+function buildVisibleTextShape(textBox: SlidevPptxTextBox, shapeId: number, context: PptxWriterContext): string {
 	const x = inchesToEmu(textBox.x);
 	const y = inchesToEmu(textBox.y);
 	const w = inchesToEmu(textBox.w);
@@ -333,31 +338,38 @@ function buildVisibleTextShape(textBox: SlidevPptxTextBox, shapeId: number): str
 		'<p:txBody>',
 		visibleNativeTextBodyProperties(textBox),
 		'<a:lstStyle/>',
-		buildVisibleTextParagraphs(textBox),
+		buildVisibleTextParagraphs(textBox, context),
 		'</p:txBody>',
 		'</p:sp>',
 	].join('');
 }
 
-function buildDefaultTextShape(textBox: SlidevPptxTextBox, shapeId: number, hasVisibleNativeTables: boolean): string | null {
+function buildDefaultTextShape(
+	textBox: SlidevPptxTextBox,
+	shapeId: number,
+	hasVisibleNativeTables: boolean,
+	context: PptxWriterContext,
+): string | null {
 	if (textBox.sourceKind === 'mermaid-text') {
 		return null;
 	}
 	if (textBox.sourceKind === 'table-cell-overlay' && hasVisibleNativeTables) {
 		return null;
 	}
-	return isVisibleDefaultTextSource(textBox) ? buildVisibleTextShape(textBox, shapeId) : buildTextShape(textBox, shapeId);
+	return isVisibleDefaultTextSource(textBox)
+		? buildVisibleTextShape(textBox, shapeId, context)
+		: buildTextShape(textBox, shapeId, context);
 }
 
-function buildTableCellRun(text: string, cell: SlidevPptxTableCell): string {
-	return buildTransparentRunXml(text, cell);
+function buildTableCellRun(text: string, cell: SlidevPptxTableCell, context: PptxWriterContext): string {
+	return buildTransparentRunXml(text, cell, context);
 }
 
-function buildVisibleTableCellRun(text: string, cell: SlidevPptxTableCell): string {
-	return buildVisibleRunXml(text, cell);
+function buildVisibleTableCellRun(text: string, cell: SlidevPptxTableCell, context: PptxWriterContext): string {
+	return buildVisibleRunXml(text, cell, context);
 }
 
-function buildTableCellParagraphs(cell: SlidevPptxTableCell): string {
+function buildTableCellParagraphs(cell: SlidevPptxTableCell, context: PptxWriterContext): string {
 	const lines = cell.text
 		.replace(/\r\n?/g, '\n')
 		.split('\n')
@@ -368,18 +380,18 @@ function buildTableCellParagraphs(cell: SlidevPptxTableCell): string {
 
 	return lines
 		.map((line) =>
-			[
-				'<a:p>',
-				`<a:pPr algn="${align}"/>`,
-				buildTableCellRun(line || ' ', cell),
-				`<a:endParaRPr lang="en-US" sz="${size}"/>`,
-				'</a:p>',
+				[
+					'<a:p>',
+					`<a:pPr algn="${align}"/>`,
+					buildTableCellRun(line || ' ', cell, context),
+					`<a:endParaRPr lang="en-US" sz="${size}"/>`,
+					'</a:p>',
 			].join(''),
 		)
 		.join('');
 }
 
-function buildVisibleTableCellParagraphs(cell: SlidevPptxTableCell): string {
+function buildVisibleTableCellParagraphs(cell: SlidevPptxTableCell, context: PptxWriterContext): string {
 	const lines = cell.text
 		.replace(/\r\n?/g, '\n')
 		.split('\n')
@@ -390,12 +402,12 @@ function buildVisibleTableCellParagraphs(cell: SlidevPptxTableCell): string {
 
 	return lines
 		.map((line) =>
-			[
-				'<a:p>',
-				`<a:pPr algn="${align}"/>`,
-				buildVisibleTableCellRun(line || ' ', cell),
-				`<a:endParaRPr lang="en-US" sz="${size}"/>`,
-				'</a:p>',
+				[
+					'<a:p>',
+					`<a:pPr algn="${align}"/>`,
+					buildVisibleTableCellRun(line || ' ', cell, context),
+					`<a:endParaRPr lang="en-US" sz="${size}"/>`,
+					'</a:p>',
 			].join(''),
 		)
 		.join('');
@@ -516,7 +528,7 @@ function buildVisibleEmptyTableCell(attributes = ''): string {
 	].join('');
 }
 
-function buildTableXml(table: SlidevPptxTable, shapeId: number): string {
+function buildTableXml(table: SlidevPptxTable, shapeId: number, context: PptxWriterContext): string {
 	const maxCols = Math.max(
 		table.colWidths.length,
 		...table.rows.map((row) => row.reduce((total, cell) => total + Math.max(1, cell.colSpan), 0)),
@@ -587,7 +599,7 @@ function buildTableXml(table: SlidevPptxTable, shapeId: number): string {
 						'<a:txBody>',
 						'<a:bodyPr/>',
 						'<a:lstStyle/>',
-						buildTableCellParagraphs(gridEntry.cell),
+						buildTableCellParagraphs(gridEntry.cell, context),
 						'</a:txBody>',
 						buildTableCellProperties(gridEntry.cell),
 						'</a:tc>',
@@ -623,7 +635,7 @@ function buildTableXml(table: SlidevPptxTable, shapeId: number): string {
 	].join('');
 }
 
-function buildVisibleTableXml(table: SlidevPptxTable, shapeId: number): string {
+function buildVisibleTableXml(table: SlidevPptxTable, shapeId: number, context: PptxWriterContext): string {
 	const maxCols = Math.max(
 		table.colWidths.length,
 		...table.rows.map((row) => row.reduce((total, cell) => total + Math.max(1, cell.colSpan), 0)),
@@ -694,7 +706,7 @@ function buildVisibleTableXml(table: SlidevPptxTable, shapeId: number): string {
 						'<a:txBody>',
 						'<a:bodyPr/>',
 						'<a:lstStyle/>',
-						buildVisibleTableCellParagraphs(gridEntry.cell),
+						buildVisibleTableCellParagraphs(gridEntry.cell, context),
 						'</a:txBody>',
 						buildVisibleTableCellProperties(gridEntry.cell),
 						'</a:tc>',
@@ -759,6 +771,7 @@ function buildPicture(image: SlidevPptxImage, shapeId: number, relationshipId: s
 function buildVisibleNativeExperimentSlideXml(
 	slide: SlidevPptxSlide,
 	imageRelationships: SlideImageRelationship[],
+	context: PptxWriterContext,
 ): string {
 	const backgroundColor = clampHexColor(slide.backgroundColor, 'FFFFFF');
 	const items: Array<{ order: number; xml: string }> = [];
@@ -775,7 +788,7 @@ function buildVisibleNativeExperimentSlideXml(
 	for (const text of slide.texts) {
 		items.push({
 			order: text.order,
-			xml: buildVisibleTextShape(text, shapeId),
+			xml: buildVisibleTextShape(text, shapeId, context),
 		});
 		shapeId += 1;
 	}
@@ -783,7 +796,7 @@ function buildVisibleNativeExperimentSlideXml(
 	for (const table of slide.tables) {
 		items.push({
 			order: table.order,
-			xml: buildVisibleTableXml(table, shapeId),
+			xml: buildVisibleTableXml(table, shapeId, context),
 		});
 		shapeId += 1;
 	}
@@ -806,7 +819,11 @@ function buildVisibleNativeExperimentSlideXml(
 	].join('');
 }
 
-function buildSlideXml(slide: SlidevPptxSlide, imageRelationships: SlideImageRelationship[]): string {
+function buildSlideXml(
+	slide: SlidevPptxSlide,
+	imageRelationships: SlideImageRelationship[],
+	context: PptxWriterContext,
+): string {
 	const backgroundColor = clampHexColor(slide.backgroundColor, 'FFFFFF');
 	const items: Array<{ order: number; xml: string }> = [];
 	let shapeId = 2;
@@ -820,7 +837,7 @@ function buildSlideXml(slide: SlidevPptxSlide, imageRelationships: SlideImageRel
 	}
 
 	for (const text of slide.texts) {
-		const textXml = buildDefaultTextShape(text, shapeId, slide.tables.length > 0);
+		const textXml = buildDefaultTextShape(text, shapeId, slide.tables.length > 0, context);
 		if (!textXml) continue;
 		items.push({
 			order: text.order,
@@ -832,7 +849,7 @@ function buildSlideXml(slide: SlidevPptxSlide, imageRelationships: SlideImageRel
 	for (const table of slide.tables) {
 		items.push({
 			order: table.order,
-			xml: buildVisibleTableXml(table, shapeId),
+			xml: buildVisibleTableXml(table, shapeId, context),
 		});
 		shapeId += 1;
 	}
@@ -1010,13 +1027,16 @@ function buildSlideLayoutRelationships(): string {
 	].join('');
 }
 
-function buildTheme(): string {
+function buildTheme(context: PptxWriterContext): string {
+	const latinFontFace = escapeXmlAttribute(context.fontPolicy.latinFontFace);
+	const eastAsiaFontFace = escapeXmlAttribute(context.fontPolicy.eastAsiaFontFace);
+	const monospaceFontFace = escapeXmlAttribute(context.fontPolicy.monospaceFontFace);
 	return [
 		'<?xml version="1.0" encoding="UTF-8" standalone="yes"?>',
 		'<a:theme xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" name="NoteMD">',
 		'<a:themeElements>',
 		'<a:clrScheme name="NoteMD"><a:dk1><a:srgbClr val="111827"/></a:dk1><a:lt1><a:srgbClr val="FFFFFF"/></a:lt1><a:dk2><a:srgbClr val="1F2937"/></a:dk2><a:lt2><a:srgbClr val="F9FAFB"/></a:lt2><a:accent1><a:srgbClr val="2563EB"/></a:accent1><a:accent2><a:srgbClr val="059669"/></a:accent2><a:accent3><a:srgbClr val="D97706"/></a:accent3><a:accent4><a:srgbClr val="DC2626"/></a:accent4><a:accent5><a:srgbClr val="7C3AED"/></a:accent5><a:accent6><a:srgbClr val="0891B2"/></a:accent6><a:hlink><a:srgbClr val="2563EB"/></a:hlink><a:folHlink><a:srgbClr val="7C3AED"/></a:folHlink></a:clrScheme>',
-		'<a:fontScheme name="NoteMD"><a:majorFont><a:latin typeface="Aptos Display"/><a:ea typeface="Microsoft YaHei"/><a:cs typeface="Aptos"/></a:majorFont><a:minorFont><a:latin typeface="Aptos"/><a:ea typeface="Microsoft YaHei"/><a:cs typeface="Aptos"/></a:minorFont></a:fontScheme>',
+		`<a:fontScheme name="NoteMD"><a:majorFont><a:latin typeface="${latinFontFace}"/><a:ea typeface="${eastAsiaFontFace}"/><a:cs typeface="${latinFontFace}"/></a:majorFont><a:minorFont><a:latin typeface="${latinFontFace}"/><a:ea typeface="${eastAsiaFontFace}"/><a:cs typeface="${monospaceFontFace}"/></a:minorFont></a:fontScheme>`,
 		'<a:fmtScheme name="NoteMD"><a:fillStyleLst><a:solidFill><a:schemeClr val="phClr"/></a:solidFill></a:fillStyleLst><a:lnStyleLst><a:ln w="6350" cap="flat" cmpd="sng" algn="ctr"><a:solidFill><a:schemeClr val="phClr"/></a:solidFill><a:prstDash val="solid"/></a:ln></a:lnStyleLst><a:effectStyleLst><a:effectStyle><a:effectLst/></a:effectStyle></a:effectStyleLst><a:bgFillStyleLst><a:solidFill><a:schemeClr val="phClr"/></a:solidFill></a:bgFillStyleLst></a:fmtScheme>',
 		'</a:themeElements>',
 		'<a:objectDefaults/>',
@@ -1028,7 +1048,12 @@ function buildTheme(): string {
 function writePptxPackage(
 	outputPath: string,
 	document: SlidevPptxDocument,
-	buildSlideContentXml: (slide: SlidevPptxSlide, imageRelationships: SlideImageRelationship[]) => string,
+	buildSlideContentXml: (
+		slide: SlidevPptxSlide,
+		imageRelationships: SlideImageRelationship[],
+		context: PptxWriterContext,
+	) => string,
+	context: PptxWriterContext,
 ): void {
 	const fs: any = safeRequire('fs');
 	const path: any = safeRequire('path');
@@ -1058,11 +1083,11 @@ function writePptxPackage(
 				relationshipId: `rId${imageIndex + 2}`,
 				mediaPath,
 			};
-			});
-			const slideNumber = slideIndex + 1;
-			addText(`ppt/slides/slide${slideNumber}.xml`, buildSlideContentXml(slide, imageRelationships));
-			addText(`ppt/slides/_rels/slide${slideNumber}.xml.rels`, buildSlideRelationships(imageRelationships));
-		}
+		});
+		const slideNumber = slideIndex + 1;
+		addText(`ppt/slides/slide${slideNumber}.xml`, buildSlideContentXml(slide, imageRelationships, context));
+		addText(`ppt/slides/_rels/slide${slideNumber}.xml.rels`, buildSlideRelationships(imageRelationships));
+	}
 
 	addText('[Content_Types].xml', buildContentTypes(document.slides.length, imageExtensions));
 	addText('_rels/.rels', buildRootRelationships());
@@ -1074,17 +1099,29 @@ function writePptxPackage(
 	addText('ppt/slideMasters/_rels/slideMaster1.xml.rels', buildSlideMasterRelationships());
 	addText('ppt/slideLayouts/slideLayout1.xml', buildSlideLayout());
 	addText('ppt/slideLayouts/_rels/slideLayout1.xml.rels', buildSlideLayoutRelationships());
-	addText('ppt/theme/theme1.xml', buildTheme());
+	addText('ppt/theme/theme1.xml', buildTheme(context));
 
 	fs.mkdirSync(path.dirname(outputPath), { recursive: true });
 	const zipped = zipSync(files, { level: 6 });
 	fs.writeFileSync(outputPath, Buffer.from(zipped));
 }
 
-export function writePptxDocument(outputPath: string, document: SlidevPptxDocument): void {
-	writePptxPackage(outputPath, document, buildSlideXml);
+export function writePptxDocument(
+	outputPath: string,
+	document: SlidevPptxDocument,
+	fontPolicy?: Partial<SlidevPptxFontPolicy>,
+): void {
+	writePptxPackage(outputPath, document, buildSlideXml, {
+		fontPolicy: resolveSlidevPptxFontPolicy(fontPolicy),
+	});
 }
 
-export function writeVisibleNativeExperimentPptxDocument(outputPath: string, document: SlidevPptxDocument): void {
-	writePptxPackage(outputPath, document, buildVisibleNativeExperimentSlideXml);
+export function writeVisibleNativeExperimentPptxDocument(
+	outputPath: string,
+	document: SlidevPptxDocument,
+	fontPolicy?: Partial<SlidevPptxFontPolicy>,
+): void {
+	writePptxPackage(outputPath, document, buildVisibleNativeExperimentSlideXml, {
+		fontPolicy: resolveSlidevPptxFontPolicy(fontPolicy),
+	});
 }

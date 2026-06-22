@@ -4,6 +4,8 @@
  * Types for environment probing, export configuration, and command execution.
  */
 
+import type { SlidevPptxFontPolicy } from './pptxModel';
+
 export type SlideExportFormat = 'html' | 'pdf' | 'png' | 'pptx' | 'mp4';
 
 export interface ProbeResult {
@@ -62,6 +64,7 @@ export interface SlideExportConfig {
 	slidevTheme: string;
 	timeoutMs: number;
 	htmlMode?: SlidevHtmlMode;
+	pptxFontPolicy?: Partial<SlidevPptxFontPolicy>;
 }
 
 export interface SlidevExportSource {

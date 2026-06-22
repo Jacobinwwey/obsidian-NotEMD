@@ -907,6 +907,46 @@ A GitHub branch, tree, or blob URL is the wrong install surface. It is not a sta
 
 New Slidev fork work should only update NoteMD's install URL after a new fork release is actually cut and smoke-tested as an npm package. A branch containing PR work is a staging surface, not a user installation surface.
 
+## M16 PPTX Font Selection Contract
+
+This slice references `/home/jacob/ref/oh-my-ppt-upstream-latest` at the architecture-contract level, not by copying its export engine. The useful lesson is that font handling has to be part of the export contract, not a writer-local afterthought. `oh-my-ppt` can embed fonts because its project owns a font asset registry and collects project-local font files before writing OOXML. NoteMD does not yet have that licensed vault-font asset boundary, so default system-font embedding would be the wrong move: it would create portability promises we cannot prove and may package fonts the user has no right to redistribute.
+
+The landed contract is therefore narrower and explicit:
+
+1. settings expose three PPTX font selections when the default export format is `pptx`: Latin, East Asian, and monospace;
+2. defaults preserve the current writer output: `Noto Sans`, `Microsoft YaHei`, and `DejaVu Sans Mono`;
+3. each selector has a small preset list plus a custom/system-font text value;
+4. source font overrides are centralized: `Avenir Next` maps to the selected Latin face, and `Fira Code` maps to the selected monospace face;
+5. the PPTX writer, theme, slide summaries, and sidecar `fontContract` now share the same resolved policy;
+6. the report states `fontEmbeddingPolicy = not-embedded` and `embeddedFontCount = 0`;
+7. user/custom font faces are allowed but reported as local platform risk rather than treated as portable.
+
+This is intentionally less ambitious than `oh-my-ppt`'s default editable export. The correct next step is not scanning `/usr/share/fonts` or the user's system font folders. The next robust step is an opt-in vault/project font asset directory with license-aware provenance, explicit per-font inclusion, subset generation, and a hard payload cap. Only that can support a future `embedded` policy without overclaiming.
+
+Real acceptance used the required `docs/architecture.zh-CN.md` deck:
+
+```bash
+runuser -u jacob -- env HOME=/home/jacob PLAYWRIGHT_BROWSERS_PATH=/home/jacob/.cache/ms-playwright bash -lc 'cd /home/jacob/obsidian-NotEMD && rm -rf docs/export/test-slidev-m16-font-policy /tmp/notemd-m16-font-policy.json && npm run verify:slidev-export -- --vault docs --source architecture.zh-CN.md --format pptx --output-subfolder export/test-slidev-m16-font-policy --sample-slides all --timeout-ms 240000 --no-screenshots --require-pptx-visual-match --json > /tmp/notemd-m16-font-policy.json'
+```
+
+Result:
+
+1. `ok = true`;
+2. output PPTX: `docs/export/test-slidev-m16-font-policy/architecture.zh-CN.pptx`;
+3. output report: `docs/export/test-slidev-m16-font-policy/architecture.zh-CN.pptx.report.json`;
+4. rendered-HTML reference diff passed within the visible-native profile;
+5. `slideCount = 30`, `textRunCount = 861`, `textBoxCount = 338`;
+6. `editableBodyTextBoxCount = 324`, `editableCodeTextBoxCount = 14`, `editableTableCellCount = 102`, `editableMermaidTextBoxCount = 0`;
+7. `visibleTextLayer = native-text-and-background-image`, `editableLayerRenderMode = visible-native-text`, `transparentOverlayTextSources = []`;
+8. `visibleNativeBackgroundCapture.status = verified`, `sampledSlideCount = 30`, `checkedRegionCount = 437`, `suspiciousRegionCount = 0`, `maxTextLikePixelRatio = 0`;
+9. XML scan found `alpha=0` count `0`, `alpha=8000` count `0`, `Visible Native Text = 324`, `Visible Native Code Text = 14`, `Visible Native Table = 6`, and `Editable Mermaid Text = 0`;
+10. the PPTX theme contains `Noto Sans`, `Microsoft YaHei`, and `DejaVu Sans Mono`;
+11. sidecar `fontContract.officeFontFamilies = ["DejaVu Sans Mono", "Microsoft YaHei", "Noto Sans"]`;
+12. sidecar `fontContract.officeOutputMissingFontRiskFamilies = ["DejaVu Sans Mono", "Noto Sans"]`, because those defaults are not embedded and should not be claimed as Office-portable;
+13. generated outputs remain ignored: `git status --ignored --short docs/export/test-slidev-m16-font-policy` reports `!!`, and `git ls-files docs/export/test-slidev-m16-font-policy` is empty.
+
+This completes the current `oh-my-ppt` comparison slice for fonts and editable text. The project now has a stable boundary for user-selected fonts without regressing to fake transparent text. The remaining higher-value PPTX work is still geometry and object modeling: table baselines, paragraph spacing, code token backgrounds, hyperlink relationships, high-confidence shapes, and optional licensed font embedding. Mermaid should remain background-owned in the default path until a separate SVG/vector strategy can prove that it does not alter the original Mermaid source or distort the diagram.
+
 ## Current Limits
 
 The first implementation is intentionally conservative:
