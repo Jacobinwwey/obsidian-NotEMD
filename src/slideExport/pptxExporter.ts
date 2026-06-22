@@ -184,12 +184,16 @@ async function resetSlidePptxExtractionState(page: any): Promise<void> {
 		document.getElementById('notemd-pptx-visible-native-background')?.remove();
 		for (const element of Array.from(
 			document.querySelectorAll(
-				'[data-notemd-pptx-hidden-text], [data-notemd-pptx-consumed-table], [data-notemd-pptx-text-source-kind]',
+				'[data-notemd-pptx-hidden-text], [data-notemd-pptx-consumed-table], [data-notemd-pptx-text-source-kind], [data-notemd-pptx-marker-color]',
 			),
 		)) {
 			element.removeAttribute('data-notemd-pptx-hidden-text');
 			element.removeAttribute('data-notemd-pptx-consumed-table');
 			element.removeAttribute('data-notemd-pptx-text-source-kind');
+			element.removeAttribute('data-notemd-pptx-marker-color');
+			if (element instanceof HTMLElement) {
+				element.style.removeProperty('--notemd-pptx-marker-color');
+			}
 		}
 	});
 }
@@ -217,8 +221,8 @@ async function prepareDefaultVisibleTextBackground(page: any): Promise<void> {
 						'fill: transparent !important;',
 						'stroke: transparent !important;',
 						'}',
-						`${selectors.map((selector) => `${selector}::marker`).join(',\n')} {`,
-						'color: transparent !important;',
+						`${selectors.map((selector) => `${selector}[data-notemd-pptx-marker-color="1"]::marker`).join(',\n')} {`,
+						'color: var(--notemd-pptx-marker-color, #111827) !important;',
 						'}',
 					].join('\n')
 				: '',

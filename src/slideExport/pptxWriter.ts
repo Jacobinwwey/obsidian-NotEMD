@@ -244,6 +244,14 @@ function buildVisibleTextParagraphs(textBox: SlidevPptxTextBox): string {
 		.join('');
 }
 
+function visibleNativeTextBodyProperties(textBox: SlidevPptxTextBox): string {
+	const paragraphCount = chooseTextParagraphs(textBox).length;
+	const maxSingleLineHeight = Math.max(0.18, (textBox.fontSize / 72) * 1.8);
+	const browserLineBox = paragraphCount === 1 && !textBox.text.includes('\n') && textBox.h <= maxSingleLineHeight;
+	const wrap = browserLineBox ? 'none' : 'square';
+	return `<a:bodyPr wrap="${wrap}" lIns="0" tIns="0" rIns="0" bIns="0" rtlCol="0" anchor="t"><a:noAutofit/></a:bodyPr>`;
+}
+
 function textShapeLabel(textBox: SlidevPptxTextBox): string {
 	switch (textBox.sourceKind) {
 		case 'code':
@@ -323,7 +331,7 @@ function buildVisibleTextShape(textBox: SlidevPptxTextBox, shapeId: number): str
 		'<a:ln><a:noFill/></a:ln>',
 		'</p:spPr>',
 		'<p:txBody>',
-		'<a:bodyPr wrap="square" lIns="0" tIns="0" rIns="0" bIns="0" rtlCol="0" anchor="t"><a:noAutofit/></a:bodyPr>',
+		visibleNativeTextBodyProperties(textBox),
 		'<a:lstStyle/>',
 		buildVisibleTextParagraphs(textBox),
 		'</p:txBody>',

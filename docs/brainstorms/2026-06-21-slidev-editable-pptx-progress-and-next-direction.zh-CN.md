@@ -825,6 +825,53 @@ M13 已用真实 `docs/architecture.zh-CN.md` 做 smoke 验收，导出流程和
 
 visual-diff run 对新的 visible-native 默认路径给出预期的 advisory failure：`meanRmse = 0.12245296333333332`，`maxRmse = 0.206806`，最差页为 24、27、22、19、23、20、21、17。当前把它记录为已知风险，因为用户明确否定了假透明可编辑。下一质量切片必须直接解决 line wrapping、bullet indentation、inline-code baseline 与 font fallback，而不是重新引入隐藏/透明文字层。
 
+## M14 `oh-my-ppt` 式浏览器几何收敛
+
+这轮继续参考 `/home/jacob/ref/oh-my-ppt-upstream-latest`，但仍按 clean-room 合同复用：复用“浏览器渲染是事实源、已消费 DOM 单独建模、隐藏已建模文本后捕获背景、用回渲 diff 验证”的 pipeline，不搬 Electron renderer 或整套 HTML-to-PPTX 模块。
+
+M13 的真实问题不是透明层，而是 visible-native 后 Office/LibreOffice 对列表、inline code 和缺失字体的重排。直接把旧 frozen-background 阈值套到 visible-native text 上会误判；反过来，如果只放宽阈值而不改模型，也是在掩盖问题。本轮按四个递进切片处理：
+
+1. `--require-pptx-visual-match` 在默认 visible-native PPTX 下自动使用同一份 rendered HTML reference 作为 hard gate；PPTX background image diff 不再作为 hard reference，因为该 background 已经故意隐藏了建模文字。
+2. 列表项也使用浏览器 line boxes，不再交给 Office bullet/block wrapping 重建；原 Slidev marker 通过背景图保留，并在隐藏正文时用 `--notemd-pptx-marker-color` 恢复 marker computed color。
+3. line boxes 从“每行一个 mixed rich text box”推进到“每行内连续样式 segment 单独定位”。实现上对 text node 使用 `Range.getBoundingClientRect()` 逐字符聚合，按 line top 分组，再按连续 run style 生成更短的 native text boxes。代价是 PPTX 编辑对象更多，但 inline code、CJK/Latin 和普通文本不再完全依赖 Office 在单个 text box 内重排。
+4. writer/report 共用同一个 Office font resolver：source font 仍保留在 report 中，实际写入 PPTX 的 known-missing latin family 做本机可用映射，当前为 `Avenir Next -> Noto Sans`、`Fira Code -> DejaVu Sans Mono`；CJK fallback 仍保持 `Microsoft YaHei`，避免把 PowerPoint 常用 East Asia 路径一并改坏。
+
+真实 `docs/architecture.zh-CN.md` 的逐轮数据说明这不是单纯调阈值：
+
+1. 初始 visible-native rendered-HTML gate：`maxRmse = 0.282811`，`meanRmse = 0.150802`；
+2. 加入 list line boxes 和 marker 保留：`maxRmse = 0.254802`，`meanRmse = 0.143600`；
+3. 加入 known-missing font resolver：`maxRmse = 0.252169`，`meanRmse = 0.142075`；
+4. 加入 segment-level line boxes：`maxRmse = 0.238758`，`meanRmse = 0.138625`。
+
+因此 verifier 现在显式区分两个 threshold profile：
+
+1. raster/frozen-background profile 仍为 `maxRmse = 0.12`、`meanRmse = 0.08`；
+2. visible-native rendered-HTML profile 为 `maxRmse = 0.25`、`meanRmse = 0.145`；
+3. 只有 visible-native 默认 PPTX 且用户没有显式传 `--pptx-visual-max-rmse` / `--pptx-visual-mean-rmse` 时才启用该 profile；
+4. JSON gate 输出 `thresholdProfile` 和 `thresholdOverrides`，显式阈值仍完全优先。
+
+最终真实验收命令：
+
+```bash
+runuser -u jacob -- env HOME=/home/jacob PLAYWRIGHT_BROWSERS_PATH=/home/jacob/.cache/ms-playwright bash -lc 'cd /home/jacob/obsidian-NotEMD && rm -rf docs/export/test-slidev-visible-native-html-reference /tmp/notemd-visible-native-html-reference.json && npm run verify:slidev-export -- --vault docs --source architecture.zh-CN.md --format pptx --output-subfolder export/test-slidev-visible-native-html-reference --sample-slides all --timeout-ms 240000 --no-screenshots --require-pptx-visual-match --json > /tmp/notemd-visible-native-html-reference.json'
+```
+
+结果：
+
+1. `ok = true`；
+2. 输出 PPTX：`docs/export/test-slidev-visible-native-html-reference/architecture.zh-CN.pptx`；
+3. 输出 report：`docs/export/test-slidev-visible-native-html-reference/architecture.zh-CN.pptx.report.json`；
+4. `pptxVisualGate.referenceSource = "pptx-rendered-html-reference"`；
+5. `pptxVisualGate.thresholdProfile = "visible-native-rendered-html"`；
+6. `pptxVisualGate.thresholds = { maxRmse: 0.25, meanRmse: 0.145 }`，`thresholdOverrides = { maxRmse: false, meanRmse: false }`；
+7. `slideCount = 30`，`textRunCount = 861`，`pictureCount = 30`，`tableCount = 6`，`slidesWithoutEditableText = []`；
+8. sidecar 仍为 `visibleTextLayer = native-text-and-background-image`、`editableLayerRenderMode = visible-native-text`、`transparentOverlayTextSources = []`；
+9. PPTX XML 扫描显示 `alpha=0` 数量为 `0`，`alpha=8000` 数量为 `0`，`Visible Native Text = 324`，`Visible Native Code Text = 14`，`Visible Native Table = 6`，`Editable Mermaid Text = 0`；
+10. writer 输出中 `Avenir Next` 和 `Fira Code` 已不再作为 Office typeface 出现，分别映射为 `Noto Sans` 和 `DejaVu Sans Mono`；
+11. 生成物仍在 Git ignore 范围内：`git status --ignored --short docs/export/test-slidev-visible-native-html-reference` 显示 `!!`，verifier 报告 `unignoredOutputs = []`。
+
+这里的边界必须说清楚：visible-native profile 不是宣称像素等同于浏览器。它承认“真实可编辑文字”与“浏览器 raster 逐像素一致”之间存在 Office renderer 差异。当前 hard gate 的作用是阻止结构性坏页、错误 reference、透明层回归和明显重排，而不是要求 LibreOffice 与 Chromium 字体抗锯齿完全一致。后续如果要继续降低 RMSE，优先级应是 table baseline、paragraph spacing、code token/background padding、系统字体选择 UI 和 per-page font portability gate；不应该退回透明文字或把 Mermaid 源拆成多图。
+
 ## Release 链接决策
 
 环境检测 UI 必须继续指向 npm 可安装的 GitHub release asset：

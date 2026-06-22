@@ -10,6 +10,11 @@ import type {
 
 export const PPTX_WRITER_EAST_ASIA_FONT_FACE = 'Microsoft YaHei';
 
+const PPTX_WRITER_LATIN_FONT_FACE_OVERRIDES = new Map<string, string>([
+	['avenir next', 'Noto Sans'],
+	['fira code', 'DejaVu Sans Mono'],
+]);
+
 type ExtractedTextRun = {
 	text: string;
 	fontFace: string;
@@ -53,6 +58,11 @@ function normalizeFontFace(value: string): string {
 	return fontFace || 'Aptos';
 }
 
+function resolvePptxOfficeLatinFontFace(fontFace: string): string {
+	const normalized = normalizeFontFace(fontFace);
+	return PPTX_WRITER_LATIN_FONT_FACE_OVERRIDES.get(normalized.toLowerCase()) || normalized;
+}
+
 export function pptxTextContainsCjk(text: string): boolean {
 	return /[\u3400-\u9fff\uf900-\ufaff]/.test(text);
 }
@@ -79,7 +89,9 @@ export function splitPptxTextIntoOfficeFontRuns(text: string, fontFace: string):
 		runs.push({
 			text: currentText,
 			sourceFontFace,
-			fontFace: currentUsesEastAsiaFont ? PPTX_WRITER_EAST_ASIA_FONT_FACE : sourceFontFace,
+			fontFace: currentUsesEastAsiaFont
+				? PPTX_WRITER_EAST_ASIA_FONT_FACE
+				: resolvePptxOfficeLatinFontFace(sourceFontFace),
 			usesEastAsiaFont: currentUsesEastAsiaFont,
 		});
 		currentText = '';

@@ -16,7 +16,7 @@ describe('pptxWriter', () => {
 			{
 				text: 'API',
 				sourceFontFace: 'Avenir Next',
-				fontFace: 'Avenir Next',
+				fontFace: 'Noto Sans',
 				usesEastAsiaFont: false,
 			},
 			{
@@ -28,7 +28,7 @@ describe('pptxWriter', () => {
 			{
 				text: ' v2',
 				sourceFontFace: 'Avenir Next',
-				fontFace: 'Avenir Next',
+				fontFace: 'Noto Sans',
 				usesEastAsiaFont: false,
 			},
 		]);
@@ -311,6 +311,78 @@ describe('pptxWriter', () => {
 		}
 	});
 
+	test('writes browser-line native text boxes without Office rewrapping', () => {
+		const directory = mkdtempSync(join(tmpdir(), 'notemd-pptx-browser-line-text-'));
+		try {
+			const outputPath = join(directory, 'deck.pptx');
+			const document: SlidevPptxDocument = {
+				title: 'Browser line text',
+				author: 'NoteMD',
+				slides: [
+					{
+						slideNumber: 1,
+						title: 'Browser line text',
+						backgroundColor: 'FFFFFF',
+						texts: [
+							{
+								text: 'Line one from Chromium',
+								sourceKind: 'body',
+								x: 1,
+								y: 1,
+								w: 2.4,
+								h: 0.24,
+								fontSize: 12,
+								fontFace: 'Aptos',
+								color: '111827',
+								bold: false,
+								italic: false,
+								underline: false,
+								align: 'left',
+								bullet: false,
+								order: 10,
+								richTextParagraphs: [
+									{
+										runs: [
+											{
+												text: 'Line one from Chromium',
+												fontSize: 12,
+												fontFace: 'Aptos',
+												color: '111827',
+												bold: false,
+												italic: false,
+												underline: false,
+												code: false,
+												link: false,
+											},
+										],
+									},
+								],
+								unmodeledRunReasons: [],
+							},
+						],
+						tables: [],
+						fallbackOnlyElementKinds: [],
+						consumedTableTextCandidateCount: 0,
+						warnings: [],
+					},
+				],
+			};
+
+			writePptxDocument(outputPath, document);
+
+			const entries = unzipSync(new Uint8Array(readFileSync(outputPath)));
+			const slideXml = strFromU8(entries['ppt/slides/slide1.xml']);
+			expect(slideXml).toContain('name="Visible Native Text');
+			expect(slideXml).toContain(
+				'<a:bodyPr wrap="none" lIns="0" tIns="0" rIns="0" bIns="0" rtlCol="0" anchor="t"><a:noAutofit/></a:bodyPr>',
+			);
+			expect(slideXml).toContain('<a:t>Line one from Chromium</a:t>');
+			expect(slideXml).not.toContain('<a:alpha val="0"/>');
+		} finally {
+			rmSync(directory, { recursive: true, force: true });
+		}
+	});
+
 	test('writes experimental visible-native text and table fills without transparent alpha', () => {
 		const directory = mkdtempSync(join(tmpdir(), 'notemd-pptx-visible-native-'));
 		try {
@@ -559,7 +631,7 @@ describe('pptxWriter', () => {
 			expect(slideXml).toContain('<a:t xml:space="preserve">API </a:t>');
 			expect(slideXml).toContain('<a:t>架构</a:t>');
 			expect(slideXml).toContain('<a:t xml:space="preserve"> v2</a:t>');
-			expect(slideXml).toContain('<a:latin typeface="Avenir Next"/>');
+			expect(slideXml).toContain('<a:latin typeface="Noto Sans"/>');
 			expect(slideXml).toContain('<a:latin typeface="Microsoft YaHei"/>');
 			expect(slideXml).toContain('<a:ea typeface="Microsoft YaHei"/>');
 			expect(slideXml).not.toContain('<a:t>API 架构 v2</a:t>');

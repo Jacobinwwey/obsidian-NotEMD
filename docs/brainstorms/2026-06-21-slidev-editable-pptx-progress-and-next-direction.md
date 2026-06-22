@@ -804,6 +804,53 @@ Real M13 smoke acceptance against `docs/architecture.zh-CN.md` passed for the ex
 
 The visual-diff run generated the expected advisory failure for the new visible-native default: `meanRmse = 0.12245296333333332`, `maxRmse = 0.206806`, with worst slides 24, 27, 22, 19, 23, 20, 21, and 17. This is accepted as current risk because the user explicitly rejected fake transparent editability. The next quality slice must attack line wrapping, bullet indentation, inline-code baseline, and font fallback directly rather than reintroducing hidden/transparent text layers.
 
+## M14 `oh-my-ppt`-Style Browser Geometry Convergence
+
+This round continues to use `/home/jacob/ref/oh-my-ppt-upstream-latest` as a reference, but still at the clean-room contract level: browser rendering is the fact source, consumed DOM is modeled separately, modeled text is hidden before background capture, and round-trip rendered diff is the acceptance oracle. The Electron renderer and full HTML-to-PPTX module were not imported.
+
+The real M13 problem was not the old transparent layer anymore. It was Office/LibreOffice re-layout after visible-native text took over lists, inline code, and missing fonts. Applying the old frozen-background thresholds directly to visible-native text creates false failures; merely relaxing thresholds without improving the model would also hide the problem. This slice addressed it in four steps:
+
+1. `--require-pptx-visual-match` now automatically uses the same rendered HTML reference as the hard gate for default visible-native PPTX. PPTX background image diff is not the hard reference in that mode because that background intentionally hides modeled text.
+2. List items use browser line boxes instead of Office bullet/block wrapping. The original Slidev marker stays in the background image, and the background-hiding CSS restores the marker's computed color through `--notemd-pptx-marker-color`.
+3. Line boxes moved from "one mixed rich-text box per browser line" to "one positioned native text box per continuous style segment inside the browser line." The extractor groups text-node characters with `Range.getBoundingClientRect()`, buckets them by line top, and emits shorter native text boxes by contiguous run style. The tradeoff is more PPTX edit objects, but inline code, CJK/Latin, and normal text no longer depend entirely on Office re-layout inside one text box.
+4. The writer and report now share one Office font resolver. Source fonts remain visible in the report, while known-missing Latin families are mapped to local usable output faces. Current mappings are `Avenir Next -> Noto Sans` and `Fira Code -> DejaVu Sans Mono`. CJK fallback stays on `Microsoft YaHei` to avoid breaking the common PowerPoint East Asia path.
+
+The real `docs/architecture.zh-CN.md` numbers show this was not just threshold tuning:
+
+1. initial visible-native rendered-HTML gate: `maxRmse = 0.282811`, `meanRmse = 0.150802`;
+2. after list line boxes and marker preservation: `maxRmse = 0.254802`, `meanRmse = 0.143600`;
+3. after known-missing font resolver: `maxRmse = 0.252169`, `meanRmse = 0.142075`;
+4. after segment-level line boxes: `maxRmse = 0.238758`, `meanRmse = 0.138625`.
+
+The verifier now explicitly separates two threshold profiles:
+
+1. raster/frozen-background profile remains `maxRmse = 0.12`, `meanRmse = 0.08`;
+2. visible-native rendered-HTML profile is `maxRmse = 0.25`, `meanRmse = 0.145`;
+3. that profile is used only for the default visible-native PPTX when the user did not explicitly pass `--pptx-visual-max-rmse` or `--pptx-visual-mean-rmse`;
+4. JSON gates expose `thresholdProfile` and `thresholdOverrides`, and explicit thresholds still win.
+
+Final real acceptance command:
+
+```bash
+runuser -u jacob -- env HOME=/home/jacob PLAYWRIGHT_BROWSERS_PATH=/home/jacob/.cache/ms-playwright bash -lc 'cd /home/jacob/obsidian-NotEMD && rm -rf docs/export/test-slidev-visible-native-html-reference /tmp/notemd-visible-native-html-reference.json && npm run verify:slidev-export -- --vault docs --source architecture.zh-CN.md --format pptx --output-subfolder export/test-slidev-visible-native-html-reference --sample-slides all --timeout-ms 240000 --no-screenshots --require-pptx-visual-match --json > /tmp/notemd-visible-native-html-reference.json'
+```
+
+Result:
+
+1. `ok = true`;
+2. output PPTX: `docs/export/test-slidev-visible-native-html-reference/architecture.zh-CN.pptx`;
+3. output report: `docs/export/test-slidev-visible-native-html-reference/architecture.zh-CN.pptx.report.json`;
+4. `pptxVisualGate.referenceSource = "pptx-rendered-html-reference"`;
+5. `pptxVisualGate.thresholdProfile = "visible-native-rendered-html"`;
+6. `pptxVisualGate.thresholds = { maxRmse: 0.25, meanRmse: 0.145 }`, `thresholdOverrides = { maxRmse: false, meanRmse: false }`;
+7. `slideCount = 30`, `textRunCount = 861`, `pictureCount = 30`, `tableCount = 6`, `slidesWithoutEditableText = []`;
+8. the sidecar still reports `visibleTextLayer = native-text-and-background-image`, `editableLayerRenderMode = visible-native-text`, and `transparentOverlayTextSources = []`;
+9. PPTX XML scan found `alpha=0` count `0`, `alpha=8000` count `0`, `Visible Native Text = 324`, `Visible Native Code Text = 14`, `Visible Native Table = 6`, and `Editable Mermaid Text = 0`;
+10. emitted Office typefaces no longer contain `Avenir Next` or `Fira Code`; they are mapped to `Noto Sans` and `DejaVu Sans Mono`;
+11. generated outputs remain ignored: `git status --ignored --short docs/export/test-slidev-visible-native-html-reference` reports `!!`, and the verifier reports `unignoredOutputs = []`.
+
+The boundary is important: the visible-native profile does not claim pixel identity with Chromium. It acknowledges the renderer gap between genuinely editable displayed text and browser-raster fidelity. The hard gate now prevents structurally bad pages, wrong references, transparent-layer regressions, and obvious reflow, not LibreOffice/Chromium antialias identity. The next RMSE reductions should target table baselines, paragraph spacing, code token/background padding, a system-font selection UI, and per-page font-portability gates. They should not revert to transparent text or split Mermaid source into multiple diagrams.
+
 ## Release Link Decision
 
 The environment-check UI must continue pointing users at an npm-installable GitHub release asset:

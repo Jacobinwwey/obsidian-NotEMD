@@ -699,6 +699,222 @@ export async function extractSlidevPptxSlideFromPage(page: any, slideNumber: num
 			}
 			return paragraphs;
 		};
+		const sameRunStyle = (left: RawSlideInlineTextRun, right: RawSlideInlineTextRun): boolean =>
+			left.fontSize === right.fontSize &&
+			left.fontFace === right.fontFace &&
+			left.color === right.color &&
+			left.bold === right.bold &&
+			left.italic === right.italic &&
+			left.underline === right.underline &&
+			left.code === right.code &&
+			left.link === right.link;
+		type BrowserLineSegment = {
+			top: number;
+			left: number;
+			right: number;
+			bottom: number;
+			run: RawSlideInlineTextRun;
+		};
+		const mergeAdjacentLineSegments = (segments: BrowserLineSegment[]): BrowserLineSegment[] => {
+			const merged: BrowserLineSegment[] = [];
+			for (const segment of segments) {
+				const previous = merged[merged.length - 1];
+				if (previous && sameRunStyle(previous.run, segment.run)) {
+					previous.run.text += segment.run.text;
+					previous.top = Math.min(previous.top, segment.top);
+					previous.left = Math.min(previous.left, segment.left);
+					previous.right = Math.max(previous.right, segment.right);
+					previous.bottom = Math.max(previous.bottom, segment.bottom);
+				} else {
+					merged.push({
+						...segment,
+						run: { ...segment.run },
+					});
+				}
+			}
+			return merged;
+		};
+		const normalizeBrowserLineSegments = (
+			segments: BrowserLineSegment[],
+			preserveWhitespace: boolean,
+		): BrowserLineSegment[] => {
+			const normalized = mergeAdjacentLineSegments(
+				segments.map((segment) => ({
+					...segment,
+					run: {
+						...segment.run,
+						text: preserveWhitespace
+							? segment.run.text.replace(/\r\n?/g, '\n')
+							: segment.run.text.replace(/[^\S\n]+/g, ' '),
+					},
+				})),
+			);
+			if (normalized.length === 0) return [];
+			if (preserveWhitespace) {
+				normalized[normalized.length - 1].run.text = normalized[normalized.length - 1].run.text.replace(/\s+$/g, '');
+			} else {
+				while (normalized.length > 0) {
+					normalized[0].run.text = normalized[0].run.text.replace(/^\s+/, '');
+					if (normalized[0].run.text.length > 0) break;
+					normalized.shift();
+				}
+				while (normalized.length > 0) {
+					normalized[normalized.length - 1].run.text = normalized[normalized.length - 1].run.text.replace(/\s+$/g, '');
+					if (normalized[normalized.length - 1].run.text.length > 0) break;
+					normalized.pop();
+				}
+			}
+			return normalized.filter((segment) => segment.run.text.length > 0);
+		};
+		const collectBrowserLineTextBoxes = (
+			element: Element,
+			tagName: string,
+			baseStyle: CSSStyleDeclaration,
+			sourceKind: SlidevPptxTextSourceKind,
+			bullet: boolean,
+			baseOrder: number,
+			unmodeledRunReasons: SlidevPptxUnmodeledTextRunReason[],
+		): RawSlideTextBox[] => {
+			const preserveWhitespace = sourceKind === 'code' || tagName === 'PRE';
+			const sourceText =
+				tagName === 'PRE' || sourceKind === 'code'
+					? element.textContent || ''
+					: (element instanceof HTMLElement ? element.innerText : element.textContent) || '';
+			const maxPreciseLineCharacters = sourceKind === 'code' ? 2400 : 1400;
+			if (sourceText.length > maxPreciseLineCharacters) return [];
+			type LineGroup = {
+				top: number;
+				left: number;
+				right: number;
+				bottom: number;
+				segments: BrowserLineSegment[];
+			};
+			const groups: LineGroup[] = [];
+			let activeSegment: BrowserLineSegment | null = null;
+			const appendRun = (
+				group: LineGroup,
+				text: string,
+				style: CSSStyleDeclaration,
+				sourceElement: Element,
+				rect: DOMRect,
+			): void => {
+				if (!text) return;
+				const run = {
+					text,
+					...runStyleFor(style, sourceElement),
+				};
+				const previous = group.segments[group.segments.length - 1];
+				if (previous && sameRunStyle(previous.run, run)) {
+					previous.run.text += text;
+					previous.top = Math.min(previous.top, rect.top);
+					previous.left = Math.min(previous.left, rect.left);
+					previous.right = Math.max(previous.right, rect.right);
+					previous.bottom = Math.max(previous.bottom, rect.bottom);
+					activeSegment = previous;
+				} else {
+					activeSegment = {
+						top: rect.top,
+						left: rect.left,
+						right: rect.right,
+						bottom: rect.bottom,
+						run,
+					};
+					group.segments.push(activeSegment);
+				}
+			};
+			const groupForRect = (rect: DOMRect): LineGroup => {
+				let group = groups.find(
+					(candidate) => Math.abs(candidate.top - rect.top) < Math.max(3, rect.height * 0.35),
+				);
+				if (!group) {
+					group = {
+						top: rect.top,
+						left: rect.left,
+						right: rect.right,
+						bottom: rect.bottom,
+						segments: [],
+					};
+					groups.push(group);
+				} else {
+					group.left = Math.min(group.left, rect.left);
+					group.right = Math.max(group.right, rect.right);
+					group.bottom = Math.max(group.bottom, rect.bottom);
+				}
+				return group;
+			};
+			const visit = (node: Node): void => {
+				if (node.nodeType === Node.TEXT_NODE) {
+					const parent = node.parentElement || element;
+					const parentStyle = window.getComputedStyle(parent);
+					if (parentStyle.display === 'none' || parentStyle.visibility === 'hidden') return;
+					if (Number(parentStyle.opacity || '1') < 0.04) return;
+					const text = node.textContent || '';
+					for (let offset = 0; offset < text.length; offset += 1) {
+						const char = text[offset];
+						const range = document.createRange();
+						range.setStart(node, offset);
+						range.setEnd(node, offset + 1);
+						const rect = range.getBoundingClientRect();
+						range.detach();
+						if (rect.width < 0.5 || rect.height < 0.5) {
+							if (activeSegment && /\s/.test(char)) {
+								activeSegment.run.text += char;
+							}
+							continue;
+						}
+						if (rect.right < rootLeft || rect.bottom < rootTop) continue;
+						if (rect.left > rootLeft + rootWidth || rect.top > rootTop + rootHeight) continue;
+						appendRun(groupForRect(rect), char, parentStyle, parent, rect);
+					}
+					return;
+				}
+				if (!(node instanceof Element)) return;
+				if (node.closest('script,style,noscript,svg')) return;
+				if (node.tagName.toUpperCase() === 'BR') {
+					activeSegment = null;
+					return;
+				}
+				for (const child of Array.from(node.childNodes)) {
+					visit(child);
+				}
+			};
+			visit(element);
+			const lineTextBoxes = groups
+				.sort((left, right) => left.top - right.top || left.left - right.left)
+				.map((group, lineIndex): RawSlideTextBox[] => {
+					const segments = normalizeBrowserLineSegments(group.segments, preserveWhitespace);
+					const lineText = segments.map((segment) => segment.run.text).join('');
+					const text = preserveWhitespace ? lineText.replace(/\s+$/g, '') : normalize(lineText);
+					if (!text) return [];
+					return segments.map((segment, segmentIndex): RawSlideTextBox => {
+						const run = segment.run;
+						const fontSizePx = Math.max(1, (run.fontSize * 96) / 72);
+						const rectWidth = Math.max(1, segment.right - segment.left);
+						const rectHeight = Math.max(1, segment.bottom - segment.top);
+						return {
+							text: run.text,
+							sourceKind,
+							x: pxToInX(segment.left),
+							y: pxToInY(segment.top),
+							w: Math.max(sizeToInX(rectWidth), sizeToInX(fontSizePx * 0.65)),
+							h: Math.max(sizeToInY(rectHeight), sizeToInY(fontSizePx * 1.1)),
+							fontSize: run.fontSize,
+							fontFace: run.fontFace,
+							color: run.color,
+							bold: run.bold,
+							italic: run.italic,
+							underline: run.underline,
+							align: alignFor(baseStyle),
+							bullet: false,
+							order: baseOrder + lineIndex * 0.01 + segmentIndex * 0.0001,
+							richTextParagraphs: [{ runs: [run] }],
+							unmodeledRunReasons,
+						};
+					});
+				})
+				.flat();
+			return bullet || groups.length > 1 ? lineTextBoxes : [];
+		};
 		const verticalAlignFor = (style: CSSStyleDeclaration): SlidevPptxVerticalAlign => {
 			const verticalAlign = String(style.verticalAlign || '');
 			if (verticalAlign === 'middle') return 'middle';
@@ -920,25 +1136,45 @@ export async function extractSlidevPptxSlideFromPage(page: any, slideNumber: num
 			const fontSizePx = Number.parseFloat(style.fontSize || '16') || 16;
 			const fontWeight = Number.parseInt(style.fontWeight || '400', 10);
 			const listStyle = style.listStyleType || '';
-			textBoxes.push({
-				text,
+			const baseOrder = orderFor(element, order);
+			const bullet = tagName === 'LI' && listStyle !== 'none';
+			const unmodeledRunReasons = textRunReasonsFor(element, style, tagName);
+			const browserLineTextBoxes = collectBrowserLineTextBoxes(
+				element,
+				tagName,
+				style,
 				sourceKind,
-				x: pxToInX(rect.left),
-				y: pxToInY(rect.top),
-				w: sizeToInX(rect.width),
-				h: sizeToInY(rect.height),
-				fontSize: pxToPt(fontSizePx),
-				fontFace: sanitizeFontFace(style.fontFamily),
-				color: effectiveColor(style),
-				bold: Number.isFinite(fontWeight) ? fontWeight >= 600 : /bold/i.test(style.fontWeight),
-				italic: style.fontStyle === 'italic' || style.fontStyle === 'oblique',
-				underline: style.textDecorationLine.includes('underline'),
-				align: alignFor(style),
-				bullet: tagName === 'LI' && listStyle !== 'none',
-				order: orderFor(element, order),
-				richTextParagraphs: collectRichTextParagraphs(element, tagName, style),
-				unmodeledRunReasons: textRunReasonsFor(element, style, tagName),
-			});
+				bullet,
+				baseOrder,
+				unmodeledRunReasons,
+			);
+			if (browserLineTextBoxes.length > 0) {
+				if (bullet && element instanceof HTMLElement) {
+					element.setAttribute('data-notemd-pptx-marker-color', '1');
+					element.style.setProperty('--notemd-pptx-marker-color', `#${effectiveColor(style)}`);
+				}
+				textBoxes.push(...browserLineTextBoxes);
+			} else {
+				textBoxes.push({
+					text,
+					sourceKind,
+					x: pxToInX(rect.left),
+					y: pxToInY(rect.top),
+					w: sizeToInX(rect.width),
+					h: sizeToInY(rect.height),
+					fontSize: pxToPt(fontSizePx),
+					fontFace: sanitizeFontFace(style.fontFamily),
+					color: effectiveColor(style),
+					bold: Number.isFinite(fontWeight) ? fontWeight >= 600 : /bold/i.test(style.fontWeight),
+					italic: style.fontStyle === 'italic' || style.fontStyle === 'oblique',
+					underline: style.textDecorationLine.includes('underline'),
+					align: alignFor(style),
+					bullet,
+					order: baseOrder,
+					richTextParagraphs: collectRichTextParagraphs(element, tagName, style),
+					unmodeledRunReasons,
+				});
+			}
 			element.setAttribute('data-notemd-pptx-hidden-text', '1');
 			order += 10;
 		}

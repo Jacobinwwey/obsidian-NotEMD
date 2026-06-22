@@ -15,6 +15,12 @@ const {
 	summarizePageMetrics,
 	writeComparisonCsv,
 } = require('../../scripts/lib/pptx-visual-diff');
+const {
+	selectPptxHardGateReferenceSource,
+	selectPptxVisualThresholdProfile,
+	shouldRunBackgroundPptxVisualDiff,
+	shouldRunRenderedHtmlPptxReferenceDiff,
+} = require('../../scripts/verify-slidev-export-workflow.cjs');
 
 describe('pptx visual diff helper', () => {
 	test('parses ImageMagick normalized RMSE output', () => {
@@ -133,6 +139,72 @@ describe('pptx visual diff helper', () => {
 
 	test('keeps optional ImageMagick metric timeout stable by default', () => {
 		expect(DEFAULT_OPTIONAL_COMPARE_METRIC_TIMEOUT_MS).toBe(60000);
+	});
+
+	test('uses rendered HTML as the hard visual gate for visible-native PPTX defaults', () => {
+		const args = {
+			requirePptxVisualMatch: true,
+			pptxVisualDiff: true,
+			pptxVisualReferenceDir: null,
+			pptxRenderedHtmlReferenceDiff: false,
+			pptxVisibleNativeExperiment: false,
+			pptxVisualMaxRmse: 0.12,
+			pptxVisualMeanRmse: 0.08,
+			pptxVisualMaxRmseExplicit: false,
+			pptxVisualMeanRmseExplicit: false,
+		};
+		const report = {
+			visibleTextLayer: 'native-text-and-background-image',
+			editableLayerRenderMode: 'visible-native-text',
+		};
+
+		expect(selectPptxHardGateReferenceSource(args, report)).toBe('pptx-rendered-html-reference');
+		expect(shouldRunRenderedHtmlPptxReferenceDiff(args, report)).toBe(true);
+		expect(shouldRunBackgroundPptxVisualDiff(args, report)).toBe(false);
+		expect(selectPptxVisualThresholdProfile(args, report, 'pptx-rendered-html-reference')).toEqual({
+			name: 'visible-native-rendered-html',
+			explicit: {
+				maxRmse: false,
+				meanRmse: false,
+			},
+			thresholds: {
+				maxRmse: 0.25,
+				meanRmse: 0.145,
+			},
+		});
+	});
+
+	test('keeps configured PPTX visual reference directories explicit', () => {
+		const args = {
+			requirePptxVisualMatch: true,
+			pptxVisualDiff: true,
+			pptxVisualReferenceDir: 'export/reference-png',
+			pptxRenderedHtmlReferenceDiff: false,
+			pptxVisibleNativeExperiment: false,
+			pptxVisualMaxRmse: 0.11,
+			pptxVisualMeanRmse: 0.07,
+			pptxVisualMaxRmseExplicit: true,
+			pptxVisualMeanRmseExplicit: true,
+		};
+		const report = {
+			visibleTextLayer: 'native-text-and-background-image',
+			editableLayerRenderMode: 'visible-native-text',
+		};
+
+		expect(selectPptxHardGateReferenceSource(args, report)).toBe('configured-png-sequence');
+		expect(shouldRunRenderedHtmlPptxReferenceDiff(args, report)).toBe(false);
+		expect(shouldRunBackgroundPptxVisualDiff(args, report)).toBe(true);
+		expect(selectPptxVisualThresholdProfile(args, report, 'configured-png-sequence')).toEqual({
+			name: 'default-raster',
+			explicit: {
+				maxRmse: true,
+				meanRmse: true,
+			},
+			thresholds: {
+				maxRmse: 0.11,
+				meanRmse: 0.07,
+			},
+		});
 	});
 
 	test('reports unsupported optional ImageMagick metrics without throwing', () => {
