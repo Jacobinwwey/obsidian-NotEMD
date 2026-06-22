@@ -707,16 +707,16 @@ This run used the stable optional metric budget. It did not use a short timeout 
 
 ## M11 Editable Layer Contract, Fonts, and Mermaid/SVG Direction
 
-The current editability problem is real, but the likely root cause is not a leftover debug artifact. The default writer intentionally emits transparent DrawingML text (`<a:alpha val="0"/>`) because the visible layer is the frozen rendered background. That strategy keeps the visual gate stable, but it makes direct text editing less discoverable: users often need PowerPoint's selection pane or shape selection to pick the transparent text boxes.
+Historical note: this M11 section described the pre-visible-native default. It is superseded by M26. The diagnosis was correct for the old writer, but it is no longer an acceptable default contract because it made editable text discoverable only through transparent DrawingML text under the rendered image.
 
 This is now explicit in the sidecar report through `editableLayerContract`:
 
-1. default export: `visualFidelityStrategy = frozen-background-first`, `visibleTextSource = background-image`, `editableTextShapeFill = transparent`, `editableTableTextFill = transparent`, `backgroundTextPolicy = preserve-rendered-text`, `textSelectionSurface = named-transparent-shapes`;
+1. pre-M26 default export: `visualFidelityStrategy = frozen-background-first`, `visibleTextSource = background-image`, `editableTextShapeFill = transparent`, `editableTableTextFill = transparent`, `backgroundTextPolicy = preserve-rendered-text`, `textSelectionSurface = named-transparent-shapes`;
 2. visible-native experiment: `visibleTextSource = native-text`, `editableTextShapeFill = visible`, `editableTableTextFill = visible`, `backgroundTextPolicy = hide-extracted-text-before-capture`;
-3. Mermaid/SVG default policy: `mermaidSvgVisualPolicy = background-image`, `mermaidSvgTextPolicy = transparent-editable-label-overlays`, `officeNativeMermaidSvgElementEditability = not-claimed`;
+3. current Mermaid/SVG default policy after M26: `mermaidSvgVisualPolicy = background-image`, `mermaidSvgTextPolicy = background-image-only`, `officeNativeMermaidSvgElementEditability = not-claimed`;
 4. font portability policy: `fontPortabilityPolicy = report-only-no-default-font-embedding`.
 
-This is the right comparison boundary with `oh-my-ppt`. `oh-my-ppt` hides already extracted primitives before background capture because its target path is visible native reconstruction. NotEMD's default path must not hide those primitives, because the frozen background is still the visual source of truth. The useful lesson is not "make all text visible now"; it is to keep native visibility behind a residue/visual-diff gate and make the transparent-layer tradeoff observable.
+The comparison boundary changed after visible-native became the default. The useful `oh-my-ppt` lesson is not a second screenshot route; it is native object extraction, marking consumed DOM, hiding modeled DOM before fallback capture, and using residue/visual-diff gates to detect leaked rendered text. That does not justify reconstructing Mermaid/SVG geometry by default.
 
 Font selection should be added as an export policy, not as implicit system-font embedding:
 
@@ -729,7 +729,7 @@ Mermaid/SVG needs a similar split. The default should preserve Mermaid source fe
 
 1. keep Mermaid source unchanged and do not split large Mermaid diagrams;
 2. copy rendered Mermaid/SVG assets as sidecars by default when available;
-3. continue extracting Mermaid/SVG text labels into transparent named overlays;
+3. do not emit transparent Mermaid/SVG label overlays in the default path; keep labels background-owned unless an explicit visible-native experiment proves parity;
 4. add an experimental PPTX SVG embedding path only after the frozen visual gate and Office compatibility tests prove it is stable;
 5. do not claim Mermaid diagram shapes are natively editable until the report can distinguish SVG image editability from Office DrawingML shape editability.
 
@@ -1346,6 +1346,94 @@ Known risks:
 Next action:
 
 Do not start by relaxing every protected root. The next stronger slice should split `unsupported-root` into root-specific diagnostics and then pick one high-value target. The best candidates are either code-highlight paint that can reuse the existing code-background object model, or standalone SVG export/embedding as an explicit artifact path. Mermaid source should remain untouched unless a separate experimental vector option proves source preservation, geometry fit, and Office editability without transparent text.
+
+## M25 Root-Specific Decorative Diagnostics
+
+This slice completes the first half of M24's next action: `unsupported-root` is now split into root-specific reasons. It still does not widen extraction and does not change PPTX rendering. The purpose is to make the next extraction decision data-driven instead of treating code, SVG, Mermaid, and table internals as one undifferentiated bucket.
+
+What landed:
+
+1. The decorative primitive skip contract now includes `unsupported-code-root`, `unsupported-document-root`, `unsupported-mermaid-root`, `unsupported-svg-root`, and `unsupported-table-root`, while keeping the legacy `unsupported-root` value for compatibility and future unknown root buckets.
+2. The extractor classifies protected roots before the generic unsupported-element and visibility checks. This preserves the ownership boundary and makes report counts explain why a paint-bearing candidate was not considered for generic decorative extraction.
+3. The actual extraction surface is unchanged. The same candidates accepted in M24 are accepted in M25; this slice only improves reporting.
+4. Tests now cover table/code/Mermaid/SVG protected root diagnostics using real Chromium, and report aggregation covers root-specific reasons.
+
+Verification:
+
+1. `npx tsc --noEmit --pretty false` passed.
+2. `npm run build` passed.
+3. `npm test -- --runInBand src/tests/pptxExportReport.test.ts` passed.
+4. `runuser -u jacob -- env HOME=/home/jacob PLAYWRIGHT_BROWSERS_PATH=/home/jacob/.cache/ms-playwright bash -lc 'cd /home/jacob/obsidian-NotEMD && npm test -- --runInBand src/tests/pptxDomExtractor.test.ts'` passed with real Chromium.
+5. Full Jest passed: `190` suites, `1547` tests. Root's Playwright cache still logs the existing browser skip warnings; the jacob-run DOM extractor command is the real browser validation.
+6. `git diff --check` passed.
+
+Real `architecture.zh-CN.md` acceptance:
+
+1. Real export command passed: `npm run verify:slidev-export -- --vault docs --source architecture.zh-CN.md --format pptx --output-subfolder export/test-slidev-m25-root-diagnostics --sample-slides all --timeout-ms 240000 --no-screenshots --require-pptx-visual-match --json`.
+2. Slidev came from the local fork: `52.16.0 (/home/jacob/slidev/packages/slidev/bin/slidev.mjs)`, with `skillRootPath = /home/jacob/slidev/skills/slidev` and `skillReferenceCount = 52`.
+3. Visual and source gates passed: `ok = true`, `pptxVisualGate.passed = true`, `referenceSource = "pptx-rendered-html-reference"`, `thresholdProfile = "visible-native-rendered-html"`, `mermaidSourcePreservation.passed = true`, `sourceFenceCount = 3`, `deckFenceCount = 3`, `changedFenceIndexes = []`.
+4. Layout audit stayed clean: `slideCount = 30`, `overflowCount = 0`, `unreadableCount = 0`, `hardOverflowCount = 0`, `retryCount = 4`, `mermaidSlideCount = 3`, `mermaidLowZoomCount = 2`, `mermaidManualReviewCount = 1`.
+5. Report highlights stayed stable on editable output: `textBoxCount = 338`, `tableCount = 6`, `editableSolidRectangleCount = 116`, `editableCodeBackgroundRectangleCount = 115`, `editableDecorativeRectangleCount = 1`, `editableDecorativeLineCount = 0`, `decorativePrimitiveCandidateCount = 374`, `decorativePrimitiveAcceptedCount = 1`, `decorativePrimitiveSkippedCount = 373`.
+6. The M24 `unsupported-root = 371` bucket is now actionable: `unsupported-code-root = 115`, `unsupported-svg-root = 136`, `unsupported-table-root = 120`, `not-visible = 2`. No real-deck candidates landed in `unsupported-mermaid-root` for this source; Mermaid still appears in `fallbackOnlyElementKinds` because the SVG geometry remains background-owned.
+7. PPTX XML scan found `alpha=0 = 0`, `alpha=8000 = 0`, `Visible Native Text = 324`, `Visible Native Code Text = 14`, `Visible Native Table = 6`, `Native Code Background Rectangle = 115`, `Native Decorative Rectangle = 1`, `Native Decorative Line = 0`, transparent-only editable objects `0`, and `<a:t...>` tags `861`.
+8. Generated outputs stayed ignored and untracked: `docs/export/test-slidev-m25-root-diagnostics/` shows as ignored, and `git ls-files` returns no tracked files under that output directory.
+
+Comparison against the prior plan:
+
+1. M24 said the next stronger slice should split `unsupported-root` first. That is complete.
+2. The real data changes the next priority. The biggest bucket is SVG-root paint, not Mermaid-root paint. Code-root and table-root are also significant, but table internals are already represented by native tables, so table-root paint needs a separate border/fill fidelity review rather than generic decorative extraction.
+3. `unsupported-code-root = 115` is probably the best next extraction candidate because it can reuse the existing code-background object model and has a narrow source domain. But it must be scoped to code-highlight paint, not arbitrary children under `pre`.
+4. `unsupported-svg-root = 136` should not be treated as an invitation to reconstruct SVG geometry. The better next move is an explicit SVG sidecar or SVG embedding artifact path, with report language that distinguishes embedded SVG editability from Office-native vector editability.
+
+Known risks:
+
+1. A root-specific skip reason is still a count, not an impact score. SVG-root candidates can be many implementation details inside one visual.
+2. The diagnostics classify by nearest protected root ownership, not by semantic user intent. For example, a table cell fill and a table text overlay both fall under table ownership but have different remediation paths.
+3. Keeping legacy `unsupported-root` avoids schema churn, but future code should not add new known protected roots to that bucket without a specific reason.
+4. No new geometry became editable in this slice. It is an observability slice, and judging it by editable shape count would be the wrong metric.
+
+Next action:
+
+Pick one target from the now-separated root buckets. The most robust next implementation is code-highlight paint extraction under `unsupported-code-root`, because it can extend the existing code-background primitive without touching Mermaid source or SVG geometry. SVG should proceed as a separate artifact/embedding track, and table-root paint should be audited against the native table writer before any generic extraction is added.
+
+## M26 Transparent Text Path Removal
+
+This slice addresses the concrete PPTX usability failure: a file can pass visual diff while the visible text is still image-only and the editable text is hidden underneath. That behavior is not acceptable for the default export. The contract now follows the `oh-my-ppt` pattern at the level that matters for NotEMD: model native text/table objects, hide the modeled DOM before background capture, and use the background only for unmodeled visual residue.
+
+Implementation status:
+
+1. the default PPTX writer no longer has a transparent text-shape generation path;
+2. non-visible default text sources are skipped instead of being emitted as named transparent editable shapes;
+3. native table text is emitted only through the visible native table writer, not through a transparent table writer;
+4. Mermaid/SVG labels remain background-owned in the default path unless an explicit visible-native experiment owns them;
+5. the report type contract no longer allows the old `background-image`/`transparent`/`named-transparent-shapes` default values;
+6. M25 root-specific decorative diagnostics remain in place so the next expansion target can be selected from real code/table/SVG buckets.
+
+Comparison with prior plan:
+
+1. M24/M25 improved observability but did not harden the writer contract. M26 changes the contract so the old fake-editable fallback cannot be silently used by the default writer.
+2. The `oh-my-ppt` lesson adopted here is DOM ownership and hide-before-capture. The part intentionally not adopted is broad SVG/Mermaid reconstruction.
+3. This does not solve every non-editable visual. It prevents the misleading case where visible text is image-only while a hidden text object claims editability.
+
+Validation:
+
+1. `npx tsc --noEmit --pretty false` passed.
+2. `git diff --check` passed.
+3. `npm test -- --runInBand src/tests/pptxWriter.test.ts src/tests/pptxExportReport.test.ts` passed: `21` tests.
+4. `runuser -u jacob -- env HOME=/home/jacob PLAYWRIGHT_BROWSERS_PATH=/home/jacob/.cache/ms-playwright bash -lc 'cd /home/jacob/obsidian-NotEMD && npm test -- --runInBand src/tests/pptxDomExtractor.test.ts'` passed with real Chromium: `10` tests.
+5. `npm run build` passed.
+6. Full Jest passed: `190` suites, `1547` tests. The root run still prints the known Playwright cache skip warning; the jacob-run DOM extractor command above is the real browser coverage.
+7. Real `architecture.zh-CN.md` export passed with local Slidev fork `52.16.0 (/home/jacob/slidev/packages/slidev/bin/slidev.mjs)`, `skillRootPath = /home/jacob/slidev/skills/slidev`, and `skillReferenceCount = 52`.
+8. Real PPTX gate passed: `ok = true`, `pptxVisualGate.passed = true`, `referenceSource = pptx-rendered-html-reference`, `thresholdProfile = visible-native-rendered-html`, `mermaidSourcePreservation.passed = true`, `sourceFenceCount = 3`, `deckFenceCount = 3`, `changedFenceIndexes = []`.
+9. Real report confirms visible-native output: `visibleTextLayer = native-text-and-background-image`, `editableLayerRenderMode = visible-native-text`, `editableTextShapeFill = visible`, `editableTableTextFill = visible`, `transparentOverlayTextSources = []`, `backgroundTextPolicy = hide-modeled-text-before-capture`, `mermaidSvgTextPolicy = background-image-only`.
+10. Native object counts are stable: `slideCount = 30`, `textBoxCount = 338`, `tableCount = 6`, `visible native text = 324`, `visible native code text = 14`, `visible native table = 6`, `editableCodeBackgroundRectangleCount = 115`.
+11. PPTX XML scan confirms the transparent path is gone: `alpha=0 = 0`, `alpha=8000 = 0`, named `Editable ... Text = 0`, named `Editable Table = 0`, `<a:t...>` tags = `861`.
+12. Background residue sampling passed: `sampledSlideCount = 30`, `checkedRegionCount = 437`, `suspiciousSlideCount = 0`, `suspiciousRegionCount = 0`, `maxTextLikePixelRatio = 0`.
+13. Output artifacts are available locally at `docs/export/test-slidev-m26-visible-native-no-transparent/`: prepared Slidev markdown, `index.html`, `index-standalone.html`, PPTX, report, rendered-HTML reference PNGs, and diff sheets. The directory remains ignored and `git ls-files` reports no tracked file under it.
+
+Residual risk:
+
+The rendered-HTML visual hard gate passes, but the diff report still marks several pages as high-priority layout-review candidates because Office text/layout differs from Chromium. That is not a reason to restore transparent overlays. It means the next quality slice should target code-highlight paint extraction and table/text layout parity under the visible-native contract.
 
 ## Current Limits
 

@@ -141,6 +141,11 @@ export type SlidevPptxSolidRectangleSourceKind = 'code-background' | 'decorative
 
 export type SlidevPptxDecorativePrimitiveSkipReason =
 	| 'unsupported-root'
+	| 'unsupported-code-root'
+	| 'unsupported-document-root'
+	| 'unsupported-mermaid-root'
+	| 'unsupported-svg-root'
+	| 'unsupported-table-root'
 	| 'unsupported-element'
 	| 'not-visible'
 	| 'unsupported-paint'
@@ -406,26 +411,22 @@ export interface SlidevPptxFontContractSummary {
 export interface SlidevPptxEditableLayerContract {
 	visualFidelityStrategy: 'frozen-background-first' | 'visible-native-experiment';
 	visibleTextSource:
-		| 'background-image'
 		| 'native-text'
 		| 'native-text-and-background-image';
-	editableTextShapeFill: 'transparent' | 'visible';
-	editableTableTextFill: 'transparent' | 'visible';
-	editableTableCellOverlayTextFill: 'transparent' | 'visible';
+	editableTextShapeFill: 'visible';
+	editableTableTextFill: 'visible';
+	editableTableCellOverlayTextFill: 'visible';
 	backgroundTextPolicy:
-		| 'preserve-rendered-text'
 		| 'hide-extracted-text-before-capture'
 		| 'hide-modeled-text-before-capture';
-	textSelectionSurface:
-		| 'named-transparent-shapes'
-		| 'visible-native-text';
+	textSelectionSurface: 'visible-native-text';
 	selectableNativeTextSources: SlidevPptxTextSourceKind[];
 	visibleNativeTextSources: SlidevPptxTextSourceKind[];
-	transparentOverlayTextSources: SlidevPptxTextSourceKind[];
+	transparentOverlayTextSources: [];
 	backgroundHiddenTextSources: SlidevPptxTextSourceKind[];
 	backgroundPreservedTextSources: SlidevPptxTextSourceKind[];
 	mermaidSvgVisualPolicy: 'background-image';
-	mermaidSvgTextPolicy: 'background-image-only' | 'transparent-editable-label-overlays' | 'visible-native-text';
+	mermaidSvgTextPolicy: 'background-image-only' | 'visible-native-text';
 	officeNativeMermaidSvgElementEditability: 'not-claimed';
 	fontPortabilityPolicy: 'report-only-no-default-font-embedding';
 }

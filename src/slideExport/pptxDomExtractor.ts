@@ -500,6 +500,11 @@ function normalizeSolidRectangle(raw: RawSlideSolidRectangle): SlidevPptxSolidRe
 
 const DECORATIVE_PRIMITIVE_SKIP_REASONS: readonly SlidevPptxDecorativePrimitiveSkipReason[] = [
 	'unsupported-root',
+	'unsupported-code-root',
+	'unsupported-document-root',
+	'unsupported-mermaid-root',
+	'unsupported-svg-root',
+	'unsupported-table-root',
 	'unsupported-element',
 	'not-visible',
 	'unsupported-paint',
@@ -1594,18 +1599,25 @@ export async function extractSlidevPptxSlideFromPage(page: any, slideNumber: num
 				markConsumedShape(element, sourceKind, fillColor);
 				acceptedCount += 1;
 			};
+			const unsupportedRootReasonFor = (
+				element: HTMLElement,
+			): SlidevPptxDecorativePrimitiveSkipReason | null => {
+				if (element.closest('table,[data-notemd-pptx-consumed-table="1"]')) return 'unsupported-table-root';
+				if (element.closest('pre,.shiki,code')) return 'unsupported-code-root';
+				if (element.closest('.mermaid,[id^="mermaid-"]')) return 'unsupported-mermaid-root';
+				if (element.closest('svg')) return 'unsupported-svg-root';
+				if (element.closest('script,style,noscript')) return 'unsupported-document-root';
+				return null;
+			};
 			for (const element of allElementsInComposedRoot()) {
 				if (!(element instanceof HTMLElement)) continue;
 				if (element.hasAttribute('data-notemd-pptx-consumed-shape')) continue;
 				const style = window.getComputedStyle(element);
 				if (!hasDecorativePaintSignal(style)) continue;
 				candidateCount += 1;
-				if (
-					element.closest(
-						'table,[data-notemd-pptx-consumed-table="1"],pre,.shiki,code,.mermaid,[id^="mermaid-"],svg,script,style,noscript',
-					)
-				) {
-					recordSkip('unsupported-root');
+				const unsupportedRootReason = unsupportedRootReasonFor(element);
+				if (unsupportedRootReason) {
+					recordSkip(unsupportedRootReason);
 					continue;
 				}
 				if (element.matches('br,hr,img,picture,canvas,video,iframe,math,.katex,.MathJax')) {

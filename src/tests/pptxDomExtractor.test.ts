@@ -344,6 +344,53 @@ describe('pptxDomExtractor', () => {
 		}
 	});
 
+	test('reports root-specific decorative primitive skip reasons before widening extraction', async () => {
+		if (!browser) {
+			console.warn('Skipping PPTX DOM extractor Playwright test:', launchError);
+			return;
+		}
+
+		const page = await browser.newPage({ viewport: { width: 1280, height: 720 } });
+		try {
+			await page.setContent(`
+				<body style="margin:0">
+					<div class="slidev-page" style="width:1280px;height:720px;padding:64px;box-sizing:border-box">
+						<table>
+							<tr>
+								<td id="diagnostic-table" style="width:100px;height:32px;background:#fde68a">Cell</td>
+							</tr>
+						</table>
+						<pre><code><span id="diagnostic-code" style="display:inline-block;width:100px;height:24px;background-image:linear-gradient(90deg,#111827,#334155)"></span></code></pre>
+						<div class="mermaid"><span id="diagnostic-mermaid" style="display:inline-block;width:100px;height:24px;background:#dbeafe"></span></div>
+						<svg width="120" height="40">
+							<foreignObject width="120" height="40">
+								<div xmlns="http://www.w3.org/1999/xhtml" id="diagnostic-svg" style="width:100px;height:24px;background:#dcfce7"></div>
+							</foreignObject>
+						</svg>
+					</div>
+				</body>
+			`);
+
+			const slide = await extractSlidevPptxSlideFromPage(page, 1);
+			const skipCounts = new Map(
+				(slide.decorativePrimitiveDiagnostics?.skipReasonCounts || []).map((item) => [item.reason, item.count]),
+			);
+
+			expect(slide.decorativePrimitiveDiagnostics?.acceptedCount).toBe(0);
+			expect(slide.decorativePrimitiveDiagnostics?.candidateCount).toBe(
+				(slide.decorativePrimitiveDiagnostics?.skippedCount || 0) +
+					(slide.decorativePrimitiveDiagnostics?.acceptedCount || 0),
+			);
+			expect(skipCounts.get('unsupported-table-root')).toBeGreaterThanOrEqual(1);
+			expect(skipCounts.get('unsupported-code-root')).toBeGreaterThanOrEqual(1);
+			expect(skipCounts.get('unsupported-mermaid-root')).toBeGreaterThanOrEqual(1);
+			expect(skipCounts.get('unsupported-svg-root')).toBeGreaterThanOrEqual(1);
+			expect(skipCounts.has('unsupported-root')).toBe(false);
+		} finally {
+			await page.close();
+		}
+	});
+
 	test('preserves table cell inset and line-height metadata for native Office tables', async () => {
 		if (!browser) {
 			console.warn('Skipping PPTX DOM extractor Playwright test:', launchError);
