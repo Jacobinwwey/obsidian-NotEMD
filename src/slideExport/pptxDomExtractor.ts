@@ -1615,8 +1615,7 @@ export async function extractSlidevPptxSlideFromPage(page: any, slideNumber: num
 				const border = strongestBorder(style);
 				const cornerRadiusAdjustment = cornerRadiusAdjustmentFor(borderRadiusPx, rect);
 				const owner = codeShapeOwnerFor(element) || element;
-				const domOrder = orderFor(element, order);
-				const ownerOrder = orderFor(owner, domOrder);
+				const ownerOrder = orderFor(owner, orderFor(element, order));
 				shapes.push({
 					sourceKind: 'code-background',
 					x: pxToInX(rect.left),
@@ -1626,7 +1625,7 @@ export async function extractSlidevPptxSlideFromPage(page: any, slideNumber: num
 					fillColor,
 					...(border.color && border.widthPt > 0 ? { borderColor: border.color, borderWidthPt: border.widthPt } : {}),
 					...(cornerRadiusAdjustment > 0 ? { cornerRadiusAdjustment } : {}),
-					order: ownerOrder - 0.3 + domOrder / 1_000_000,
+					order: ownerOrder - 0.3,
 				});
 				markConsumedShape(element, 'code-background', fillColor);
 			}

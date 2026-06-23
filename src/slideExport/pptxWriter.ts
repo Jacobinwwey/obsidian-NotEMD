@@ -38,6 +38,17 @@ type PptxWriterContext = {
 
 type PptxPackageContext = Pick<PptxWriterContext, 'fontPolicy'>;
 
+type SlideTreeItem = {
+	layer: number;
+	order: number;
+	xml: string;
+};
+
+const SLIDE_TREE_LAYER_BACKGROUND_IMAGE = 0;
+const SLIDE_TREE_LAYER_NATIVE_SHAPE = 1;
+const SLIDE_TREE_LAYER_NATIVE_TABLE = 2;
+const SLIDE_TREE_LAYER_NATIVE_TEXT = 3;
+
 function escapeXml(value: string): string {
 	return value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
@@ -763,11 +774,12 @@ function buildVisibleNativeExperimentSlideXml(
 	context: PptxWriterContext,
 ): string {
 	const backgroundColor = clampHexColor(slide.backgroundColor, 'FFFFFF');
-	const items: Array<{ order: number; xml: string }> = [];
+	const items: SlideTreeItem[] = [];
 	let shapeId = 2;
 
 	for (const relationship of imageRelationships) {
 		items.push({
+			layer: SLIDE_TREE_LAYER_BACKGROUND_IMAGE,
 			order: relationship.image.order,
 			xml: buildPicture(relationship.image, shapeId, relationship.relationshipId),
 		});
@@ -776,6 +788,7 @@ function buildVisibleNativeExperimentSlideXml(
 
 	for (const shape of slide.shapes || []) {
 		items.push({
+			layer: SLIDE_TREE_LAYER_NATIVE_SHAPE,
 			order: shape.order,
 			xml: buildSolidRectangleShape(shape, shapeId),
 		});
@@ -784,6 +797,7 @@ function buildVisibleNativeExperimentSlideXml(
 
 	for (const text of slide.texts) {
 		items.push({
+			layer: SLIDE_TREE_LAYER_NATIVE_TEXT,
 			order: text.order,
 			xml: buildVisibleTextShape(text, shapeId, context),
 		});
@@ -792,13 +806,14 @@ function buildVisibleNativeExperimentSlideXml(
 
 	for (const table of slide.tables) {
 		items.push({
+			layer: SLIDE_TREE_LAYER_NATIVE_TABLE,
 			order: table.order,
 			xml: buildVisibleTableXml(table, shapeId, context),
 		});
 		shapeId += 1;
 	}
 
-	items.sort((left, right) => left.order - right.order);
+	items.sort((left, right) => left.layer - right.layer || left.order - right.order);
 
 	return [
 		'<?xml version="1.0" encoding="UTF-8" standalone="yes"?>',
@@ -822,11 +837,12 @@ function buildSlideXml(
 	context: PptxWriterContext,
 ): string {
 	const backgroundColor = clampHexColor(slide.backgroundColor, 'FFFFFF');
-	const items: Array<{ order: number; xml: string }> = [];
+	const items: SlideTreeItem[] = [];
 	let shapeId = 2;
 
 	for (const relationship of imageRelationships) {
 		items.push({
+			layer: SLIDE_TREE_LAYER_BACKGROUND_IMAGE,
 			order: relationship.image.order,
 			xml: buildPicture(relationship.image, shapeId, relationship.relationshipId),
 		});
@@ -835,6 +851,7 @@ function buildSlideXml(
 
 	for (const shape of slide.shapes || []) {
 		items.push({
+			layer: SLIDE_TREE_LAYER_NATIVE_SHAPE,
 			order: shape.order,
 			xml: buildSolidRectangleShape(shape, shapeId),
 		});
@@ -845,6 +862,7 @@ function buildSlideXml(
 		const textXml = buildDefaultTextShape(text, shapeId, slide.tables.length > 0, context);
 		if (!textXml) continue;
 		items.push({
+			layer: SLIDE_TREE_LAYER_NATIVE_TEXT,
 			order: text.order,
 			xml: textXml,
 		});
@@ -853,13 +871,14 @@ function buildSlideXml(
 
 	for (const table of slide.tables) {
 		items.push({
+			layer: SLIDE_TREE_LAYER_NATIVE_TABLE,
 			order: table.order,
 			xml: buildVisibleTableXml(table, shapeId, context),
 		});
 		shapeId += 1;
 	}
 
-	items.sort((left, right) => left.order - right.order);
+	items.sort((left, right) => left.layer - right.layer || left.order - right.order);
 
 	return [
 		'<?xml version="1.0" encoding="UTF-8" standalone="yes"?>',

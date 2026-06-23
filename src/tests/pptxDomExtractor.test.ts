@@ -294,14 +294,16 @@ describe('pptxDomExtractor', () => {
 			await page.setContent(`
 				<body style="margin:0;background:#fff">
 					<div class="slidev-page" style="width:1280px;height:720px;background:#fff;padding:64px;box-sizing:border-box">
-						<pre id="code-block" style="margin:0;width:640px;background:#0f172a;border:2px solid #334155;border-radius:4px;font-family:Consolas;font-size:24px;line-height:32px;color:#e5e7eb;padding:16px"><code><span>const answer = </span><span id="highlight" style="background:#334155">42</span></code></pre>
+							<pre id="code-block" style="margin:0;width:640px;background:#0f172a;border:2px solid #334155;border-radius:4px;font-family:Consolas;font-size:24px;line-height:32px;color:#e5e7eb;padding:16px"><code><span>const answer = </span><span id="highlight" style="background:#334155">42</span>
+<span>console.log(answer)</span></code></pre>
 					</div>
 				</body>
 			`);
 
 			const slide = await extractSlidevPptxSlideFromPage(page, 1);
 			const codeBackgrounds = slide.shapes?.filter((shape) => shape.sourceKind === 'code-background') || [];
-			const codeText = slide.texts.find((textBox) => textBox.sourceKind === 'code');
+			const codeTexts = slide.texts.filter((textBox) => textBox.sourceKind === 'code');
+			const firstCodeText = codeTexts.find((textBox) => textBox.text.includes('const answer'));
 			const consumedState = await page.$eval('#code-block', (element: Element) => ({
 				shape: element.getAttribute('data-notemd-pptx-consumed-shape'),
 				fill: element.getAttribute('data-notemd-pptx-consumed-shape-fill'),
@@ -322,13 +324,16 @@ describe('pptxDomExtractor', () => {
 			);
 			expect(codeBackgrounds.length).toBeGreaterThanOrEqual(2);
 			expect(codeBackgrounds.find((shape) => shape.fillColor === '0F172A')?.cornerRadiusAdjustment).toBeGreaterThan(0);
-			expect(codeText).toEqual(
+			expect(firstCodeText).toEqual(
 				expect.objectContaining({
-					text: 'const answer = 42',
+					text: expect.stringContaining('const answer = 42'),
 					sourceKind: 'code',
 				}),
 			);
-			expect(Math.max(...codeBackgrounds.map((shape) => shape.order))).toBeLessThan(codeText?.order || 0);
+			expect(codeTexts.length).toBeGreaterThanOrEqual(2);
+			expect(Math.max(...codeBackgrounds.map((shape) => shape.order))).toBeLessThan(
+				Math.min(...codeTexts.map((textBox) => textBox.order)),
+			);
 			expect(consumedState).toEqual({ shape: 'code-background', fill: '0F172A' });
 		} finally {
 			await page.close();

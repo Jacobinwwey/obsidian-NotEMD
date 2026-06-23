@@ -871,7 +871,7 @@ describe('pptxWriter', () => {
 								borderColor: '334155',
 								borderWidthPt: 1,
 								cornerRadiusAdjustment: 5900,
-								order: 10,
+								order: 30,
 							},
 							{
 								sourceKind: 'decorative-rectangle',
@@ -911,8 +911,10 @@ describe('pptxWriter', () => {
 			const decorativeLineIndex = slideXml.indexOf('name="Native Decorative Line');
 			const codeTextIndex = slideXml.indexOf('name="Visible Native Code Text');
 			expect(rectangleIndex).toBeGreaterThan(-1);
-			expect(decorativeRectangleIndex).toBeGreaterThan(rectangleIndex);
-			expect(decorativeLineIndex).toBeGreaterThan(decorativeRectangleIndex);
+			expect(decorativeRectangleIndex).toBeGreaterThan(-1);
+			expect(decorativeLineIndex).toBeGreaterThan(-1);
+			expect(codeTextIndex).toBeGreaterThan(rectangleIndex);
+			expect(codeTextIndex).toBeGreaterThan(decorativeRectangleIndex);
 			expect(codeTextIndex).toBeGreaterThan(decorativeLineIndex);
 			expect(slideXml).toContain('<a:prstGeom prst="roundRect"><a:avLst><a:gd name="adj" fmla="val 5900"/></a:avLst></a:prstGeom>');
 			expect(slideXml).toContain('<a:prstGeom prst="roundRect"><a:avLst><a:gd name="adj" fmla="val 7500"/></a:avLst></a:prstGeom>');

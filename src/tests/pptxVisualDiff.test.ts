@@ -16,6 +16,7 @@ const {
 	writeComparisonCsv,
 } = require('../../scripts/lib/pptx-visual-diff');
 const {
+	inspectPptx,
 	selectPptxHardGateReferenceSource,
 	selectPptxVisualThresholdProfile,
 	shouldRunBackgroundPptxVisualDiff,

@@ -767,40 +767,136 @@ function inspectPptx(pptxPath) {
 		const { strFromU8, unzipSync } = require('fflate');
 		const entries = unzipSync(new Uint8Array(fs.readFileSync(pptxPath)));
 		const names = Object.keys(entries);
-		const slideXmlPaths = names
-			.filter(name => /^ppt\/slides\/slide\d+\.xml$/.test(name))
-			.sort((left, right) => {
-				const leftNumber = Number(left.match(/slide(\d+)\.xml$/)?.[1] || 0);
-				const rightNumber = Number(right.match(/slide(\d+)\.xml$/)?.[1] || 0);
-				return leftNumber - rightNumber;
+			const slideXmlPaths = names
+				.filter(name => /^ppt\/slides\/slide\d+\.xml$/.test(name))
+				.sort((left, right) => {
+					const leftNumber = Number(left.match(/slide(\d+)\.xml$/)?.[1] || 0);
+					const rightNumber = Number(right.match(/slide(\d+)\.xml$/)?.[1] || 0);
+					return leftNumber - rightNumber;
+				});
+			const slideTextRuns = slideXmlPaths.map(name => {
+				const xml = strFromU8(entries[name]);
+				const textRunXmlBlocks = xml.match(/<a:r\b[\s\S]*?<\/a:r>/g) || [];
+				const textRunAlphaValues = textRunXmlBlocks
+					.filter(runXml => /<a:t(?:\s[^>]*)?>/.test(runXml))
+					.flatMap(runXml => Array.from(runXml.matchAll(/<a:alpha\s+val="(\d+)"\s*\/>/g), match => Number(match[1])))
+					.filter(value => Number.isFinite(value));
+				const nonOpaqueTextRunCount = textRunXmlBlocks.filter(runXml =>
+					/<a:t(?:\s[^>]*)?>/.test(runXml)
+						&& Array.from(runXml.matchAll(/<a:alpha\s+val="(\d+)"\s*\/>/g), match => Number(match[1]))
+							.some(value => Number.isFinite(value) && value < 100000),
+				).length;
+				const transparentTextRunCount = textRunXmlBlocks.filter(runXml =>
+					/<a:t(?:\s[^>]*)?>/.test(runXml)
+						&& Array.from(runXml.matchAll(/<a:alpha\s+val="(\d+)"\s*\/>/g), match => Number(match[1]))
+							.some(value => Number.isFinite(value) && value <= 10000),
+				).length;
+				const textRunCount = (xml.match(/<a:t(?:\s[^>]*)?>/g) || []).length;
+				const pictureCount = (xml.match(/<p:pic>/g) || []).length;
+				const tableCount = (xml.match(/<a:tbl>/g) || []).length;
+				const shapeNames = Array.from(
+					xml.matchAll(/<p:cNvPr\b[^>]*\bname="([^"]*)"/g),
+					match => match[1],
+				);
+				const visibleNativeTextShapeCounts = shapeNames.reduce((counts, shapeName) => {
+					if (/^Visible Native Table Cell Overlay Text\b/.test(shapeName)) {
+						counts.tableCellOverlay += 1;
+					} else if (/^Visible Native Code Text\b/.test(shapeName)) {
+						counts.code += 1;
+					} else if (/^Visible Native SVG Text\b/.test(shapeName)) {
+						counts.svg += 1;
+					} else if (/^Visible Native Mermaid Text\b/.test(shapeName)) {
+						counts.mermaid += 1;
+					} else if (/^Visible Native Text\b/.test(shapeName)) {
+						counts.body += 1;
+					} else if (/^Visible Native Table\b/.test(shapeName)) {
+						counts.table += 1;
+					}
+					return counts;
+				}, {
+					body: 0,
+					code: 0,
+					svg: 0,
+					mermaid: 0,
+					tableCellOverlay: 0,
+					table: 0,
+				});
+				const nativeTableOverlayLeakCount = tableCount > 0 ? visibleNativeTextShapeCounts.tableCellOverlay : 0;
+				return {
+					path: name,
+					textRunCount,
+					pictureCount,
+					tableCount,
+					visibleNativeTextShapeCounts,
+					visibleNativeTextShapeCount:
+						visibleNativeTextShapeCounts.body +
+						visibleNativeTextShapeCounts.code +
+						visibleNativeTextShapeCounts.svg +
+						visibleNativeTextShapeCounts.mermaid +
+						visibleNativeTextShapeCounts.tableCellOverlay,
+					visibleNativeTableShapeCount: visibleNativeTextShapeCounts.table,
+					tableCellOverlayTextShapeCount: visibleNativeTextShapeCounts.tableCellOverlay,
+					nativeTableOverlayLeakCount,
+					nonOpaqueTextRunCount,
+					transparentTextRunCount,
+					lowOpacityTextRunCount: Math.max(0, nonOpaqueTextRunCount - transparentTextRunCount),
+					minimumTextRunAlpha: textRunAlphaValues.length > 0 ? Math.min(...textRunAlphaValues) : 100000,
+					hasEditableText: textRunCount > 0,
+				};
 			});
-		const slideTextRuns = slideXmlPaths.map(name => {
-			const xml = strFromU8(entries[name]);
-			const textRunCount = (xml.match(/<a:t(?:\s[^>]*)?>/g) || []).length;
-			const pictureCount = (xml.match(/<p:pic>/g) || []).length;
-			const tableCount = (xml.match(/<a:tbl>/g) || []).length;
+			const textRunCount = slideTextRuns.reduce((total, slide) => total + slide.textRunCount, 0);
+			const nonOpaqueTextRunCount = slideTextRuns.reduce((total, slide) => total + slide.nonOpaqueTextRunCount, 0);
+			const transparentTextRunCount = slideTextRuns.reduce((total, slide) => total + slide.transparentTextRunCount, 0);
+			const nativeTableOverlayLeakCount = slideTextRuns.reduce((total, slide) => total + slide.nativeTableOverlayLeakCount, 0);
+			const slidesWithoutEditableText = slideTextRuns.filter(slide => !slide.hasEditableText).map(slide => slide.path);
+			const slidesWithNonOpaqueText = slideTextRuns.filter(slide => slide.nonOpaqueTextRunCount > 0).map(slide => slide.path);
+			const slidesWithNativeTableOverlayLeak = slideTextRuns
+				.filter(slide => slide.nativeTableOverlayLeakCount > 0)
+				.map(slide => slide.path);
 			return {
-				path: name,
+				isZip: true,
+				entryCount: names.length,
+				slideCount: slideXmlPaths.length,
+				mediaCount: names.filter(name => /^ppt\/media\/image\d+\.(png|jpg|jpeg)$/.test(name)).length,
 				textRunCount,
-				pictureCount,
-				tableCount,
-				hasEditableText: textRunCount > 0,
+				pictureCount: slideTextRuns.reduce((total, slide) => total + slide.pictureCount, 0),
+				tableCount: slideTextRuns.reduce((total, slide) => total + slide.tableCount, 0),
+				visibleNativeTextShapeCount: slideTextRuns.reduce((total, slide) => total + slide.visibleNativeTextShapeCount, 0),
+				visibleNativeTableShapeCount: slideTextRuns.reduce((total, slide) => total + slide.visibleNativeTableShapeCount, 0),
+				tableCellOverlayTextShapeCount: slideTextRuns.reduce((total, slide) => total + slide.tableCellOverlayTextShapeCount, 0),
+				nonOpaqueTextRunCount,
+				transparentTextRunCount,
+				lowOpacityTextRunCount: slideTextRuns.reduce((total, slide) => total + slide.lowOpacityTextRunCount, 0),
+				nativeTableOverlayLeakCount,
+				minimumTextRunAlpha: slideTextRuns.length > 0
+					? Math.min(...slideTextRuns.map(slide => slide.minimumTextRunAlpha))
+					: 100000,
+				slidesWithoutEditableText,
+				slidesWithNonOpaqueText,
+				slidesWithNativeTableOverlayLeak,
+				editableTextAudit: {
+					passed: textRunCount > 0
+						&& slidesWithoutEditableText.length === 0
+						&& nonOpaqueTextRunCount === 0
+						&& nativeTableOverlayLeakCount === 0,
+					failures: [
+						...(textRunCount > 0 ? [] : ['pptx contains no editable text runs']),
+						...(slidesWithoutEditableText.length === 0
+							? []
+							: [`slides without editable text: ${slidesWithoutEditableText.join(', ')}`]),
+						...(nonOpaqueTextRunCount === 0
+							? []
+							: [`non-opaque text runs: ${nonOpaqueTextRunCount}`]),
+						...(nativeTableOverlayLeakCount === 0
+							? []
+							: [`native table overlay text leaks: ${nativeTableOverlayLeakCount}`]),
+					],
+				},
+				slideTextRuns,
 			};
-		});
-		return {
-			isZip: true,
-			entryCount: names.length,
-			slideCount: slideXmlPaths.length,
-			mediaCount: names.filter(name => /^ppt\/media\/image\d+\.(png|jpg|jpeg)$/.test(name)).length,
-			textRunCount: slideTextRuns.reduce((total, slide) => total + slide.textRunCount, 0),
-			pictureCount: slideTextRuns.reduce((total, slide) => total + slide.pictureCount, 0),
-			tableCount: slideTextRuns.reduce((total, slide) => total + slide.tableCount, 0),
-			slidesWithoutEditableText: slideTextRuns.filter(slide => !slide.hasEditableText).map(slide => slide.path),
-			slideTextRuns,
-		};
-	} catch (error) {
-		return {
-			isZip: false,
+		} catch (error) {
+			return {
+				isZip: false,
 			error: error instanceof Error ? error.message : String(error),
 		};
 	}
@@ -1274,15 +1370,15 @@ async function main() {
 	const visibleNativeExperimentGatePassed = visibleNativeExperimentGate.passed;
 
 	const report = {
-		ok: playwrightChecks.every(check => !check.failed)
-			&& environment.capabilities[args.format] === true
-			&& fs.existsSync(absoluteExportPath)
-			&& !gitIgnoreStatus.error
-			&& unignoredOutputs.length === 0
-			&& (args.format !== 'pptx' || Boolean(pptxInspection?.isZip && pptxInspection.textRunCount > 0))
-			&& visibleNativeExperimentOutputPassed
-			&& visibleNativeExperimentPackagePassed
-			&& pptxVisualDiffExecutionPassed
+			ok: playwrightChecks.every(check => !check.failed)
+				&& environment.capabilities[args.format] === true
+				&& fs.existsSync(absoluteExportPath)
+				&& !gitIgnoreStatus.error
+				&& unignoredOutputs.length === 0
+				&& (args.format !== 'pptx' || Boolean(pptxInspection?.isZip && pptxInspection.editableTextAudit?.passed))
+				&& visibleNativeExperimentOutputPassed
+				&& visibleNativeExperimentPackagePassed
+				&& pptxVisualDiffExecutionPassed
 			&& pptxRenderedHtmlReferenceDiffExecutionPassed
 			&& visibleNativeExperimentVisualDiffExecutionPassed
 			&& pptxVisualDiffGatePassed
@@ -1367,6 +1463,7 @@ if (require.main === module) {
 	});
 } else {
 	module.exports = {
+		inspectPptx,
 		selectPptxVisualThresholdProfile,
 		selectPptxHardGateReferenceSource,
 		shouldRunBackgroundPptxVisualDiff,
