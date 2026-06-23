@@ -821,7 +821,7 @@ function inspectPptx(pptxPath) {
 					tableCellOverlay: 0,
 					table: 0,
 				});
-				const nativeTableOverlayLeakCount = tableCount > 0 ? visibleNativeTextShapeCounts.tableCellOverlay : 0;
+				const nativeTableOverlayLeakCount = tableCount === 0 ? visibleNativeTextShapeCounts.tableCellOverlay : 0;
 				return {
 					path: name,
 					textRunCount,
