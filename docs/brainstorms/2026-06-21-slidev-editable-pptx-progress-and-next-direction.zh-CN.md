@@ -1717,9 +1717,10 @@ release note 范围：
 
 1. GitHub Release `1.9.3` 已发布为 `Notemd 1.9.3`，包含 `main.js`、`manifest.json`、`README.md` 和 `styles.css`。
 2. tag `1.9.3` 指向 `9efe104`（`release: prepare notemd 1.9.3`）。
-3. `main` 与 `origin/main` 在发布后的 chronicle refresh 后指向 `8a94b35`。
-4. release workflow 的 `publish` 与 `refresh_chronicle` jobs 已成功完成。
-5. 工作区保持 clean，真实导出产物 `docs/export/test-slidev-1.9.3-layer-release/` 仍处于 ignored 且 untracked 状态。
+3. 发布后的 chronicle refresh 产生了 `8a94b35`。
+4. `main` 与 `origin/main` 已在本次 release-closure 文档更新后同步。
+5. release workflow 的 `publish` 与 `refresh_chronicle` jobs 已成功完成。
+6. 工作区保持 clean，真实导出产物 `docs/export/test-slidev-1.9.3-layer-release/` 仍处于 ignored 且 untracked 状态。
 
 ## 当前边界
 

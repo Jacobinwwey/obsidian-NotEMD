@@ -8,7 +8,8 @@
 **Remote Before Release Prep:** `origin/main` at 5798162
 **Release Status:** 1.9.3 published and verified
 **Release Tag:** `1.9.3` at 9efe104
-**Current Remote Closure:** `origin/main` at 8a94b35 after the post-release chronicle refresh
+**Post-Release Chronicle Refresh:** 8a94b35
+**Current Remote Closure:** `origin/main` updated after the release-closure documentation pass
 
 ---
 
