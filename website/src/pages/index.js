@@ -17,6 +17,35 @@ const copyByLocale = {
     primary: 'Read the docs',
     secondary: 'Quick start',
     faq: 'FAQ',
+    factHeading: 'Source-backed product facts',
+    facts: [
+      {label: 'Workflow model', value: 'Write-first Obsidian automation, not a chat transcript'},
+      {label: 'Provider surface', value: '36 cloud, gateway, China, and local LLM providers'},
+      {label: 'Vault boundary', value: 'Outputs are written back into local Markdown files'},
+      {label: 'Current release', value: 'Version 1.9.3 public docs and release assets'},
+    ],
+    retrievalHeading: 'Answer-engine source map',
+    retrievalLead:
+      'The public site now exposes the same canonical routes that llms.txt, sitemap, hreflang metadata, and JSON-LD describe. Use these pages as the source of truth for AI search and citation workflows.',
+    languageBoundary: 'Language boundary: English is complete; Simplified Chinese is partial and scoped to reviewed critical paths.',
+    retrievalLinks: [
+      {
+        title: 'llms.txt retrieval map',
+        body: 'Compact route map for answer engines, canonical docs, provider topics, and the current language boundary.',
+        href: '/llms.txt',
+        kind: 'static',
+      },
+      {
+        title: 'Provider configuration',
+        body: 'Operational setup, endpoint/auth behavior, model discovery, troubleshooting, and use-case boundaries.',
+        href: '/docs/providers/overview',
+      },
+      {
+        title: 'AI knowledge workflow',
+        body: 'The canonical pillar page for wiki-links, concept notes, research, translation, diagrams, and workflows.',
+        href: '/docs/pillar-ai-knowledge',
+      },
+    ],
     sections: [
       {
         title: 'Start safely',
@@ -44,6 +73,35 @@ const copyByLocale = {
     primary: '阅读文档',
     secondary: '快速开始',
     faq: '常见问题',
+    factHeading: '可索引的产品事实',
+    facts: [
+      {label: '工作流模型', value: '写入优先的 Obsidian 自动化，不是聊天记录'},
+      {label: '模型提供商', value: '36 个云端、网关、中国与本地 LLM 提供商'},
+      {label: 'Vault 边界', value: '结果写回本地 Markdown 文件'},
+      {label: '当前版本', value: '1.9.3 公开文档与 release assets'},
+    ],
+    retrievalHeading: 'Answer engine 来源地图',
+    retrievalLead:
+      '项目网页现在公开展示与 llms.txt、sitemap、hreflang metadata 和 JSON-LD 一致的 canonical routes。AI search 与引用场景应以这些页面为真值来源。',
+    languageBoundary: '语言边界：英文文档完整；简体中文是 partial，只覆盖已 review 的 critical path。',
+    retrievalLinks: [
+      {
+        title: 'llms.txt 检索地图',
+        body: '面向 answer engine 的紧凑 route map，包含 canonical docs、provider topics 与当前语言边界。',
+        href: '/llms.txt',
+        kind: 'static',
+      },
+      {
+        title: 'Provider 配置',
+        body: '覆盖 setup、endpoint/auth、model discovery、troubleshooting 与 use-case boundaries。',
+        href: '/docs/providers/overview',
+      },
+      {
+        title: 'AI 知识工作流',
+        body: 'wiki 链接、概念笔记、研究、翻译、图表与 workflow 的 canonical pillar page。',
+        href: '/docs/pillar-ai-knowledge',
+      },
+    ],
     sections: [
       {
         title: '先跑通基础配置',
@@ -70,6 +128,8 @@ export default function Home() {
   const copy = copyByLocale[i18n.currentLocale] || copyByLocale.en;
   const pageUrl = new URL(siteConfig.baseUrl, siteConfig.url).toString();
   const canonicalBasePath = siteConfig.customFields?.canonicalBasePath || siteConfig.baseUrl;
+  const llmsHref = `${canonicalBasePath}llms.txt`;
+  const softwareVersion = siteConfig.customFields?.softwareVersion || '1.9.3';
   const englishDocHref = (docPath) => `${canonicalBasePath}${docPath.replace(/^\//, '')}`;
   const docLinkProps = (docPath) => {
     if (i18n.currentLocale === 'zh-CN' && !isPublishedZhCnDocPath(docPath)) {
@@ -81,6 +141,17 @@ export default function Home() {
     }
 
     return {to: docPath};
+  };
+  const sourceLinkProps = (source) => {
+    if (source.kind === 'static') {
+      return {
+        href: llmsHref,
+        autoAddBaseUrl: false,
+        'data-noBrokenLinkCheck': true,
+      };
+    }
+
+    return docLinkProps(source.href);
   };
 
   return (
@@ -94,6 +165,26 @@ export default function Home() {
             description: copy.description,
             url: pageUrl,
             inLanguage: i18n.currentLocale,
+            isPartOf: {
+              '@type': 'WebSite',
+              name: 'Notemd Documentation',
+              url: pageUrl,
+            },
+            about: [
+              'Obsidian AI plugin',
+              'persistent knowledge workflows',
+              'wiki-links',
+              'concept notes',
+              'LLM provider configuration',
+              'local Markdown vault output',
+            ],
+            mainEntity: {
+              '@type': 'SoftwareApplication',
+              name: 'Notemd',
+              softwareVersion,
+              applicationCategory: 'ProductivityApplication',
+              operatingSystem: ['Windows', 'macOS', 'Linux', 'iOS', 'Android'],
+            },
           })}
         </script>
       </Head>
@@ -120,6 +211,19 @@ export default function Home() {
           </div>
           <img className={styles.logo} src={logoSrc} alt="" />
         </section>
+        <section className={styles.factBand} aria-labelledby="notemd-facts-heading">
+          <div className={styles.factBandInner}>
+            <h2 id="notemd-facts-heading">{copy.factHeading}</h2>
+            <dl className={styles.factGrid}>
+              {copy.facts.map((fact) => (
+                <div className={styles.factItem} key={fact.label}>
+                  <dt>{fact.label}</dt>
+                  <dd>{fact.value}</dd>
+                </div>
+              ))}
+            </dl>
+          </div>
+        </section>
         <section className={styles.sectionGrid} aria-label={copy.primary}>
           {copy.sections.map((section) => (
             <Link className={styles.sectionCard} key={section.href} {...docLinkProps(section.href)}>
@@ -127,6 +231,21 @@ export default function Home() {
               <p>{section.body}</p>
             </Link>
           ))}
+        </section>
+        <section className={styles.retrievalSection} aria-labelledby="answer-engine-source-map-heading">
+          <div className={styles.retrievalCopy}>
+            <h2 id="answer-engine-source-map-heading">{copy.retrievalHeading}</h2>
+            <p>{copy.retrievalLead}</p>
+            <p className={styles.languageBoundary}>{copy.languageBoundary}</p>
+          </div>
+          <div className={styles.retrievalLinks}>
+            {copy.retrievalLinks.map((source) => (
+              <Link className={styles.retrievalLink} key={source.href} {...sourceLinkProps(source)}>
+                <span>{source.title}</span>
+                <small>{source.body}</small>
+              </Link>
+            ))}
+          </div>
         </section>
       </main>
     </Layout>

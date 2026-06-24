@@ -11,6 +11,7 @@ const siteRoot = 'https://jacobinwwey.github.io/obsidian-NotEMD/';
 const basePath = '/obsidian-NotEMD/';
 const zhRoot = `${siteRoot}zh-CN/`;
 const zhBasePath = `${basePath}zh-CN/`;
+const expectedSoftwareVersion = '1.9.3';
 const providerSourceRoot = path.join(websiteRoot, 'docs', 'providers');
 const providerDetailHeadings = [
   '## Setup',
@@ -189,10 +190,24 @@ function auditHomepageRoutes(languageScope) {
   assertContains(englishHome, '<html lang="en-US"', 'English homepage');
   assertContains(englishHome, `rel="canonical" href="${siteRoot}"`, 'English homepage');
   assertContains(englishHome, `"url":"${siteRoot}"`, 'English homepage JSON-LD');
+  assertContains(englishHome, `"softwareVersion":"${expectedSoftwareVersion}"`, 'English homepage SoftwareApplication JSON-LD');
+  assertContains(englishHome, 'Source-backed product facts', 'English homepage GEO surface');
+  assertContains(englishHome, 'Answer-engine source map', 'English homepage GEO surface');
+  assertContains(englishHome, `${basePath}llms.txt`, 'English homepage GEO source map link');
+  assertContains(
+    englishHome,
+    'English is complete; Simplified Chinese is partial and scoped to reviewed critical paths.',
+    'English homepage language boundary',
+  );
 
   assertContains(zhHome, '<html lang="zh-CN"', 'zh-CN homepage');
   assertContains(zhHome, `rel="canonical" href="${zhRoot}"`, 'zh-CN homepage');
   assertContains(zhHome, `"url":"${zhRoot}"`, 'zh-CN homepage JSON-LD');
+  assertContains(zhHome, `"softwareVersion":"${expectedSoftwareVersion}"`, 'zh-CN homepage SoftwareApplication JSON-LD');
+  assertContains(zhHome, '可索引的产品事实', 'zh-CN homepage GEO surface');
+  assertContains(zhHome, 'Answer engine 来源地图', 'zh-CN homepage GEO surface');
+  assertContains(zhHome, `${basePath}llms.txt`, 'zh-CN homepage GEO source map link');
+  assertContains(zhHome, '简体中文是 partial，只覆盖已 review 的 critical path。', 'zh-CN homepage language boundary');
   assertContains(zhHome, `href="${zhBasePath}docs/faq"`, 'zh-CN homepage');
 
   for (const docPath of languageScope.zhCnHomepageDocPaths) {
@@ -298,6 +313,9 @@ function auditAiRetrievalMap(languageScope) {
   const llmsText = readBuildFile('llms.txt');
 
   assertContains(llmsText, '## Language Scope', 'llms.txt');
+  assertContains(llmsText, `Current documented release: ${expectedSoftwareVersion}`, 'llms.txt');
+  assertContains(llmsText, `${siteRoot}llms.txt`, 'llms.txt');
+  assertContains(llmsText, '## Homepage GEO Contract', 'llms.txt');
   assertContains(llmsText, 'English is the canonical complete documentation surface.', 'llms.txt');
   assertContains(llmsText, `${siteRoot}zh-CN/`, 'llms.txt');
 
@@ -330,8 +348,10 @@ function auditMeasurementEvidence() {
 
   for (const content of [geoRoadmap, measurementLog, measurementLogZh]) {
     assertContains(content, '2026-06-22', 'GEO measurement evidence');
+    assertContains(content, '2026-06-24', 'GEO measurement evidence');
     assertContains(content, 'Search Console', 'GEO measurement evidence');
     assertContains(content, 'AI visibility', 'GEO measurement evidence');
+    assertContains(content, 'homepage', 'GEO measurement evidence');
     assertContains(content, 'sitemap', 'GEO measurement evidence');
   }
 }

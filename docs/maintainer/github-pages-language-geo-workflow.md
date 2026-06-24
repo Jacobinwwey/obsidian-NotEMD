@@ -13,6 +13,7 @@ The website publishes one complete language surface and one partial language sur
 3. Docusaurus may still generate untranslated zh-CN fallback docs, but those pages must be `noindex,follow`, excluded from the zh-CN sitemap, hidden from zh-CN sidebar/paginator traversal, and excluded from hreflang alternates.
 4. Locale switching from an unpublished zh-CN fallback route must go to a real route: zh-CN root for Chinese, canonical English for English.
 5. `llms.txt` must describe the same language boundary so answer engines do not infer full multilingual coverage.
+6. Public GEO/product-positioning changes must update the visible GitHub Pages homepage, homepage JSON-LD, `llms.txt`, and build-audit expectations in the same change. Updating only maintainer notes is not enough.
 
 ## Implemented Gate
 
@@ -37,7 +38,8 @@ npm run audit:build
 9. sitemap output includes canonical English docs, includes published zh-CN docs, and excludes unpublished zh-CN fallback docs;
 10. `llms.txt` records the current language scope;
 11. provider docs contain setup, endpoint/auth, model discovery, troubleshooting, and use-case sections;
-12. `GEO_ROADMAP.md` and the measurement logs mention 2026-06-22, Search Console, AI visibility, and sitemap evidence.
+12. `GEO_ROADMAP.md` and the measurement logs mention 2026-06-22 baseline evidence plus 2026-06-24 homepage sync evidence, Search Console, AI visibility, and sitemap evidence.
+13. the homepage exposes source-backed product facts, an answer-engine source map, the `llms.txt` link, the current release version, and the partial zh-CN language boundary.
 
 The GitHub Pages workflow runs this audit before uploading the Pages artifact:
 
@@ -83,9 +85,11 @@ This scope is consumed by:
 4. `website/src/theme/NavbarItem/LocaleDropdownNavbarItem/index.js` for locale-switch targets;
 5. `website/src/theme/DocRoot/Layout/Sidebar/index.js` for zh-CN sidebar filtering;
 6. `website/src/theme/DocItem/Paginator/index.js` for zh-CN previous/next filtering;
-7. `website/src/pages/index.js` and `website/static/llms.txt` for public entry points.
+7. `website/src/pages/index.js`, `website/docusaurus.config.js`, and `website/static/llms.txt` for public entry points, homepage JSON-LD, release version, and the answer-engine source map.
 
 The important rule is not "add a translation file." The rule is "add the translation file and publish it through the scope data in the same change." If either side is missing, the audit should fail.
+
+The parallel homepage rule is similar: do not change public GEO facts in only one place. If the answer-engine framing, provider count, language scope, release version, or canonical source routes change, update the homepage copy, JSON-LD, `llms.txt`, and `audit-build.cjs` together.
 
 ## Promotion Checklist
 
@@ -95,8 +99,9 @@ When promoting a zh-CN doc from fallback to published:
 2. Add the doc id, route path, and source path to `publishedLanguageScopeData.mjs`.
 3. Confirm the page should appear in zh-CN sidebar and paginator traversal.
 4. Update `website/static/llms.txt` if the doc becomes part of the public AI retrieval map.
-5. Run `npm --prefix website run build && npm --prefix website run audit:build`.
-6. After deploy, update `docs/maintainer/github-pages-geo-measurement-log.md` with Search Console and AI visibility observations.
+5. Update `website/src/pages/index.js` if the promoted page changes the homepage source map or the visible language boundary.
+6. Run `npm --prefix website run build && npm --prefix website run audit:build`.
+7. After deploy, update `docs/maintainer/github-pages-geo-measurement-log.md` with Search Console and AI visibility observations.
 
 ## Why This Shape
 

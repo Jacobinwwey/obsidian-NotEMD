@@ -30,6 +30,7 @@ The build generates static content into `build`. The audit checks the public con
 
 - root and zh-CN root pages exist;
 - canonical and JSON-LD URLs match GitHub Pages routes;
+- homepage GEO text, `llms.txt` link, release version, and partial-language boundary are present on both root homepages;
 - every localized zh-CN doc file is declared in `publishedLanguageScopeData.mjs`;
 - published zh-CN docs are indexable and expose correct alternates;
 - unpublished zh-CN fallback docs are `noindex,follow`, have no alternates, are excluded from zh-CN sitemap output, and are not linked from published zh-CN docs;
@@ -78,6 +79,7 @@ These overrides are intentionally policy-bearing. Do not replace them with a gen
 - `src/pages/index.js`: real root route for `/obsidian-NotEMD/` and `/obsidian-NotEMD/zh-CN/`
 - Prevents navbar/logo/footer root links from pointing to a missing page
 - Routes readers and crawlers to Intro, Quick Start, FAQ, provider docs, and the AI knowledge pillar
+- Owns visible GEO facts that answer engines and humans should see first: write-first workflow model, provider surface, local-vault boundary, current release, answer-engine source map, and partial zh-CN language boundary
 
 ### 6. AI Retrieval Entry Point
 
@@ -88,7 +90,7 @@ These overrides are intentionally policy-bearing. Do not replace them with a gen
 ### 7. Build Output Language Gate
 
 - `website/scripts/audit-build.cjs`: blocks Pages deployment when build output violates the language/GEO contract
-- Checks real generated HTML, sitemaps, `llms.txt`, provider docs, source scope, and measurement evidence
+- Checks real generated HTML, homepage GEO copy, current release version, sitemaps, `llms.txt`, provider docs, source scope, and measurement evidence
 
 ### 8. FAQ with FAQPage Schema
 
@@ -175,6 +177,18 @@ npm run audit:build
 ```
 
 After deployment, record Search Console and AI visibility observations in `docs/maintainer/github-pages-geo-measurement-log.md`.
+
+## Homepage GEO Sync Constraint
+
+Public GEO or product-positioning changes are not complete unless they are visible on the project website. In the same change, update:
+
+1. `website/src/pages/index.js` for visible homepage facts, source-map links, and language-boundary wording.
+2. `website/docusaurus.config.js` for global JSON-LD and current release metadata.
+3. `website/static/llms.txt` for answer-engine route mapping and the same language boundary.
+4. `website/scripts/audit-build.cjs` so future builds fail when those surfaces drift.
+5. `GEO_ROADMAP.md` and `docs/maintainer/github-pages-geo-measurement-log*.md` for dated source-side evidence and post-deploy measurement scope.
+
+Do not ship a GEO update that only changes maintainer documentation. The homepage, `llms.txt`, sitemap/hreflang behavior, and JSON-LD must describe the same product and language truth before Pages deployment.
 
 ## License
 

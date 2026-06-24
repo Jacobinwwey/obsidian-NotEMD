@@ -17,6 +17,18 @@
 | Search Console | 本地无法证明；部署后提交并检查 | 外部手工检查 |
 | AI visibility | 本地无法证明；部署和索引窗口后再重测 | 外部手工或 API 检查 |
 
+## 2026-06-24 Homepage GEO 同步
+
+| 证据 | 当前状态 | 负责人 |
+|---|---|---|
+| Homepage source-backed facts | 必须展示 write-first workflow model、provider surface、local-vault boundary 与当前 release | `website/src/pages/index.js` |
+| Homepage answer-engine source map | 必须在英文和中文 root homepage 链接 `llms.txt`、provider overview 与 AI knowledge pillar | `website/src/pages/index.js` |
+| Homepage JSON-LD | 必须暴露当前 `SoftwareApplication` version 与 WebPage main entity | `website/docusaurus.config.js`, `website/src/pages/index.js` |
+| `llms.txt` homepage contract | 必须说明 homepage GEO contract、release `1.9.3` 与 answer-engine source map | `website/static/llms.txt` |
+| Build audit | 必须拒绝缺失 homepage GEO text、stale version、缺失 `llms.txt` link 或缺失 2026-06-24 homepage evidence 的构建 | `website/scripts/audit-build.cjs` |
+| Search Console | 本地无法证明；等这次 homepage update 经 Pages workflow 部署后检查 | 外部手工检查 |
+| AI visibility | 本地无法证明；部署和索引窗口后再重测 | 外部手工或 API 检查 |
+
 ## Route 样本
 
 Search Console 检查和 AI visibility prompt 使用这一组：
@@ -24,6 +36,7 @@ Search Console 检查和 AI visibility prompt 使用这一组：
 | Route | 预期源码真值 |
 |---|---|
 | `https://jacobinwwey.github.io/obsidian-NotEMD/` | Canonical 英文 root |
+| `https://jacobinwwey.github.io/obsidian-NotEMD/llms.txt` | 首页链接的 answer-engine source map |
 | `https://jacobinwwey.github.io/obsidian-NotEMD/docs/intro` | 英文 canonical doc，带 zh-CN alternate |
 | `https://jacobinwwey.github.io/obsidian-NotEMD/docs/getting-started/quick-start` | 英文 canonical doc，带 zh-CN alternate |
 | `https://jacobinwwey.github.io/obsidian-NotEMD/docs/providers/overview` | 英文 canonical doc，带 zh-CN alternate |

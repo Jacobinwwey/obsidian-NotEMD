@@ -13,6 +13,7 @@
 3. Docusaurus 仍可能生成未翻译 zh-CN fallback docs，但这些页面必须是 `noindex,follow`，必须从 zh-CN sitemap 排除，必须从 zh-CN sidebar/paginator 遍历中隐藏，也不能暴露 hreflang alternates。
 4. 从未发布 zh-CN fallback route 切换语言时，必须进入真实 route：中文去 zh-CN root，英文去 canonical English。
 5. `llms.txt` 必须声明同一语言边界，避免 answer engine 推断出不存在的完整多语言覆盖。
+6. 任何公开 GEO / product-positioning 变更，都必须在同一次变更中同步 GitHub Pages 首页可见内容、首页 JSON-LD、`llms.txt` 与 build-audit 预期。只更新 maintainer notes 不算完成。
 
 ## 已落地门禁
 
@@ -37,7 +38,8 @@ npm run audit:build
 9. sitemap 包含 canonical 英文 docs，包含已发布 zh-CN docs，并排除未发布 zh-CN fallback docs；
 10. `llms.txt` 记录当前语言范围；
 11. provider docs 必须包含 setup、endpoint/auth、model discovery、troubleshooting 与 use-case sections；
-12. `GEO_ROADMAP.md` 与 measurement logs 必须提到 2026-06-22、Search Console、AI visibility 与 sitemap 证据。
+12. `GEO_ROADMAP.md` 与 measurement logs 必须提到 2026-06-22 baseline evidence、2026-06-24 homepage sync evidence、Search Console、AI visibility 与 sitemap 证据。
+13. 首页必须暴露 source-backed product facts、answer-engine source map、`llms.txt` link、当前 release version 与 partial zh-CN language boundary。
 
 GitHub Pages workflow 会在上传 Pages artifact 前运行这个审计：
 
@@ -83,9 +85,11 @@ website/src/lib/languageRoutePolicy.js
 4. `website/src/theme/NavbarItem/LocaleDropdownNavbarItem/index.js` 用于 locale switch target；
 5. `website/src/theme/DocRoot/Layout/Sidebar/index.js` 用于 zh-CN sidebar 过滤；
 6. `website/src/theme/DocItem/Paginator/index.js` 用于 zh-CN previous/next 过滤；
-7. `website/src/pages/index.js` 与 `website/static/llms.txt` 用于公开入口。
+7. `website/src/pages/index.js`、`website/docusaurus.config.js` 与 `website/static/llms.txt` 用于公开入口、首页 JSON-LD、release version 与 answer-engine source map。
 
 关键规则不是“新增一个翻译文件”。关键规则是“翻译文件和 scope data 必须同批发布”。缺任一边，audit 都应该失败。
+
+同样还有一条 homepage 规则：不要只在一个位置修改公开 GEO 事实。如果 answer-engine framing、provider count、language scope、release version 或 canonical source routes 发生变化，首页文案、JSON-LD、`llms.txt` 与 `audit-build.cjs` 必须一起更新。
 
 ## Promotion Checklist
 
@@ -95,8 +99,9 @@ website/src/lib/languageRoutePolicy.js
 2. 把 doc id、route path、source path 加入 `publishedLanguageScopeData.mjs`。
 3. 确认该页面应该进入 zh-CN sidebar 和 paginator 遍历。
 4. 如果该页面属于公开 AI retrieval map，同步更新 `website/static/llms.txt`。
-5. 执行 `npm --prefix website run build && npm --prefix website run audit:build`。
-6. 部署后在 `docs/maintainer/github-pages-geo-measurement-log.zh-CN.md` 中记录 Search Console 与 AI visibility 观察。
+5. 如果晋升页面改变首页 source map 或可见语言边界，同步更新 `website/src/pages/index.js`。
+6. 执行 `npm --prefix website run build && npm --prefix website run audit:build`。
+7. 部署后在 `docs/maintainer/github-pages-geo-measurement-log.zh-CN.md` 中记录 Search Console 与 AI visibility 观察。
 
 ## 为什么这样做
 

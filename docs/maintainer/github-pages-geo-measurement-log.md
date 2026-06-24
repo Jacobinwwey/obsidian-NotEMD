@@ -17,6 +17,18 @@ This log separates source-side GEO proof from live indexing proof. `npm run audi
 | Search Console | Not locally verifiable; submit and inspect after deploy | External manual check |
 | AI visibility | Not locally verifiable; retest after deploy and indexing window | External/manual or API-backed check |
 
+## 2026-06-24 Homepage GEO Sync
+
+| Evidence | Current state | Owner |
+|---|---|---|
+| Homepage source-backed facts | Must show write-first workflow model, provider surface, local-vault boundary, and current release | `website/src/pages/index.js` |
+| Homepage answer-engine source map | Must link `llms.txt`, provider overview, and AI knowledge pillar from both root homepages | `website/src/pages/index.js` |
+| Homepage JSON-LD | Must expose current `SoftwareApplication` version and WebPage main entity | `website/docusaurus.config.js`, `website/src/pages/index.js` |
+| `llms.txt` homepage contract | Must mention the homepage GEO contract, release `1.9.3`, and the answer-engine source map | `website/static/llms.txt` |
+| Build audit | Must reject missing homepage GEO text, stale version, missing `llms.txt` link, or missing 2026-06-24 homepage evidence | `website/scripts/audit-build.cjs` |
+| Search Console | Not locally verifiable; inspect after the Pages workflow deploys this homepage update | External manual check |
+| AI visibility | Not locally verifiable; retest after deploy and indexing window | External/manual or API-backed check |
+
 ## Route Sample
 
 Use this set for Search Console inspection and manual AI visibility prompts:
@@ -24,6 +36,7 @@ Use this set for Search Console inspection and manual AI visibility prompts:
 | Route | Expected source truth |
 |---|---|
 | `https://jacobinwwey.github.io/obsidian-NotEMD/` | Canonical English root |
+| `https://jacobinwwey.github.io/obsidian-NotEMD/llms.txt` | Answer-engine source map linked from the homepage |
 | `https://jacobinwwey.github.io/obsidian-NotEMD/docs/intro` | English canonical doc with zh-CN alternate |
 | `https://jacobinwwey.github.io/obsidian-NotEMD/docs/getting-started/quick-start` | English canonical doc with zh-CN alternate |
 | `https://jacobinwwey.github.io/obsidian-NotEMD/docs/providers/overview` | English canonical doc with zh-CN alternate |

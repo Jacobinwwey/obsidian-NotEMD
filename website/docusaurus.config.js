@@ -10,6 +10,7 @@ import {publishedZhCnDocPaths} from './src/lib/publishedLanguageScope.js';
 const siteUrl = 'https://jacobinwwey.github.io';
 const baseUrl = '/obsidian-NotEMD/';
 const siteBaseUrl = `${siteUrl}${baseUrl}`;
+const currentSoftwareVersion = '1.9.3';
 const personId = `${siteBaseUrl}#person-jacobinwwey`;
 const logoUrl = `${siteBaseUrl}img/logo.svg`;
 const publishedZhCnDocUrls = new Set(
@@ -39,6 +40,7 @@ const config = {
   projectName: 'obsidian-NotEMD',
   customFields: {
     canonicalBasePath: baseUrl,
+    softwareVersion: currentSoftwareVersion,
   },
 
   onBrokenLinks: 'warn',
@@ -90,7 +92,7 @@ const config = {
         "applicationCategory": "Productivity",
         "operatingSystem": ["Windows", "macOS", "Linux", "iOS", "Android"],
         "description": "AI-powered Obsidian plugin that enhances notes with wiki-links, concept notes, web research, translation, and diagram generation. Supports 30+ LLM providers.",
-        "softwareVersion": "1.9.2",
+        "softwareVersion": currentSoftwareVersion,
         "offers": {
           "@type": "Offer",
           "price": "0",
