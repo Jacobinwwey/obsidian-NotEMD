@@ -6,7 +6,9 @@
 **Commits Since Release Before Release Prep:** 163
 **Current Branch:** main
 **Remote Before Release Prep:** `origin/main` at 5798162
-**Release Prep:** 1.9.3 in progress
+**Release Status:** 1.9.3 published and verified
+**Release Tag:** `1.9.3` at 9efe104
+**Current Remote Closure:** `origin/main` at 8a94b35 after the post-release chronicle refresh
 
 ---
 
@@ -333,11 +335,11 @@ Keep new acceptance/progress updates bilingual when the English and Chinese file
 
 ## Next Development Directions
 
-### Immediate (Before 1.9.3 Release)
-1. **Preserve the real PPTX gate** - keep `architecture.zh-CN.md` export with rendered-HTML reference diff in the release checklist.
-2. **Promote the layer XML gate** - keep slide XML checks for transparent text, table overlay leaks, and background-after-text regressions.
-3. **Document known boundaries in release notes** - visible native text/table are editable; Mermaid/SVG geometry remains fallback-owned unless an experiment says otherwise.
-4. **Audit Obsidian UI wording** - make sure UI labels do not imply Mermaid/SVG geometry is fully Office-native editable.
+### Locked Into The 1.9.3 Release Gate
+1. **Preserve the real PPTX gate** - `architecture.zh-CN.md` export with rendered-HTML reference diff is part of the verified release evidence.
+2. **Keep the layer XML gate** - slide XML checks for transparent text, table overlay leaks, and background-after-text regressions are required for future PPTX work.
+3. **Keep release-note boundaries explicit** - visible native text/table are editable; Mermaid/SVG geometry remains fallback-owned unless a future experiment proves otherwise.
+4. **Keep UI wording honest** - UI labels must not imply Mermaid/SVG geometry is fully Office-native editable.
 
 ### Short-term (1.9.3 → 1.10.0)
 1. **Font policy enforcement audit** - Ensure consistent fallback chain
@@ -410,16 +412,18 @@ Remaining known issues documented in PROGRESS_SINCE_1.9.2.md
 - [x] Transparency metrics show zero transparent/low-opacity text in the inspected layer-ordering acceptance
 - [x] Table overlay leak detection logic is corrected
 - [x] Generated export artifacts remain ignored and untracked
-- [ ] Release prep commit pushed to `origin/main`
-- [ ] Git working tree is clean after 1.9.3 release publish
+- [x] Release prep commit pushed to `origin/main`
+- [x] GitHub Release `1.9.3` published with `main.js`, `manifest.json`, `README.md`, and `styles.css`
+- [x] Release workflow `publish` and `refresh_chronicle` jobs completed successfully
+- [x] Git working tree is clean after 1.9.3 release publish
 
 ---
 
 ## Summary
 
-**Current State:** PPTX visual layer ordering, transparency inspection, table overlay leak detection, and progress documentation are committed on `main`; 1.9.3 release prep is now being assembled on top of that code closure.
+**Current State:** PPTX visual layer ordering, transparency inspection, table overlay leak detection, and progress documentation are committed on `main`; 1.9.3 has been published, the release assets were verified, and `main` now includes the post-release chronicle refresh.
 
-**Readiness:** Ready for release-gate execution, with known boundaries documented rather than hidden behind transparent overlays or unsupported editability claims.
+**Readiness:** Released and verified. Known boundaries remain documented rather than hidden behind transparent overlays or unsupported editability claims.
 
 **Recommendation:** Keep the current visible-native PPTX route, keep the layer/opacity XML checks in the release gate, and continue with Office round-trip diagnostics before widening Mermaid/SVG/vector reconstruction.
 

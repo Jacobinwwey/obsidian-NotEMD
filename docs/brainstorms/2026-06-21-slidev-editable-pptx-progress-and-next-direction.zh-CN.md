@@ -1713,6 +1713,14 @@ release note 范围：
 2. GEO/GitHub Pages 工作不写入 1.9.3 release notes。它存在于 commit range 中，但不是这次发布的用户叙事重点。
 3. 已知边界保持不变：普通页面文字与表格单元格文字是可见且可编辑的；Mermaid/SVG geometry 由 fallback 拥有；Office round-trip layout drift 仍需要后续更强门禁。
 
+最终发布收口：
+
+1. GitHub Release `1.9.3` 已发布为 `Notemd 1.9.3`，包含 `main.js`、`manifest.json`、`README.md` 和 `styles.css`。
+2. tag `1.9.3` 指向 `9efe104`（`release: prepare notemd 1.9.3`）。
+3. `main` 与 `origin/main` 在发布后的 chronicle refresh 后指向 `8a94b35`。
+4. release workflow 的 `publish` 与 `refresh_chronicle` jobs 已成功完成。
+5. 工作区保持 clean，真实导出产物 `docs/export/test-slidev-1.9.3-layer-release/` 仍处于 ignored 且 untracked 状态。
+
 ## 当前边界
 
 第一版实现有意保守：

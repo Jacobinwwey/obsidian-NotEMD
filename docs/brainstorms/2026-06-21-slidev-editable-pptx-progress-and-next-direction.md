@@ -1692,6 +1692,14 @@ Release-note scope:
 2. GEO/GitHub Pages work should not be described in the 1.9.3 release notes. It exists in the commit range, but it is not part of this release's user-facing story.
 3. The known boundary remains: ordinary slide text and table-cell text are visible and editable; Mermaid/SVG geometry is fallback-owned; Office round-trip layout drift still deserves a stronger future gate.
 
+Final release closure:
+
+1. GitHub Release `1.9.3` is published as `Notemd 1.9.3` with `main.js`, `manifest.json`, `README.md`, and `styles.css`.
+2. Tag `1.9.3` points at `9efe104` (`release: prepare notemd 1.9.3`).
+3. `main` and `origin/main` point at `8a94b35` after the post-release chronicle refresh.
+4. The release workflow `publish` and `refresh_chronicle` jobs completed successfully.
+5. The worktree is clean, and the real export artifacts under `docs/export/test-slidev-1.9.3-layer-release/` remain ignored and untracked.
+
 ## Current Limits
 
 The first implementation is intentionally conservative:
