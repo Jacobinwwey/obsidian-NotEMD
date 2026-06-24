@@ -1674,6 +1674,45 @@ rendered-HTML visual hard gate 已通过，但 diff report 仍把若干页标为
 3. Mermaid/SVG 继续走独立轨道。源 Mermaid fence 不改、不拆；默认仍以背景或 SVG sidecar 表达，只有显式实验开关才应尝试 SVG embedding 或 vector reconstruction。
 4. 下一步更值得投入的是真实 Office round-trip 质量门：文字可编辑性扫描、字体替换风险、表格 z-order/residue sampling、PNG/PPTX 逐页 diff 的可解释诊断，而不是新增一条绕过 rendered convergence 的转换管线。
 
+## M32-M34 可见文字层级排序与 1.9.3 发布门禁
+
+最新的 PPTX 用户可见缺陷不是另一个文本抽取缺口，而是 paint order 问题：代码背景矩形已经作为原生可编辑 shape 存在，但第 17-29 页可能把这些矩形写在可见文字之后。在 PowerPoint 中，后出现的 sibling 会显示在更上层，所以背景矩形变成了遮挡层。
+
+本轮落地内容：
+
+1. `pptxWriter.ts` 现在给每个 slide-tree item 分配显式 layer：background image、native shape、native table、native text。
+2. 默认 writer 与 visible-native experiment writer 都先按 `layer` 排序，再按 DOM/source order 排序。这样背景图、代码背景和装饰 shape 会稳定在文字下方，同时保留同层内部顺序。
+3. `pptxDomExtractor.ts` 将代码背景顺序简化为 `ownerOrder - 0.3`，先保证 code background 的归属清晰，再由 writer 应用最终层级模型。
+4. verifier 现在会分别报告透明文字、可见原生来源桶、native table overlay leak 与 table-cell rich-text coverage。
+5. `nativeTableOverlayLeakCount` 已修正：存在 native table 时，预期被 suppress 的 table-cell overlay 不再被误报为 leak。
+
+与先前方案和当前代码对比：
+
+1. 画布/几何方案降低了 layout overflow 风险，但不能保证 Office z-order。PPTX shape-tree 排序必须有自己的模型，因为 PowerPoint paint order 是 XML sibling order，而不是浏览器 CSS stacking order。
+2. 更优修复不是移除代码背景。代码背景是有价值的可编辑 primitive；bug 在 ownership 与 layer placement。把它们放在文字下方，可以保留视觉保真而不牺牲可编辑性。
+3. 这次没有修改 Mermaid 源、拆分图，也没有声称 Mermaid/SVG geometry 已经 Office 原生可编辑。Mermaid/SVG 仍由 fallback 拥有，除非未来显式实验增加 SVG embedding 或 vector reconstruction。
+4. 这也没有退回透明文字。实际显示文字仍然就是可编辑文字，`transparentOverlayTextSources` 仍为空。
+
+1.9.3 新验收：
+
+1. 真实源文件：`docs/architecture.zh-CN.md`。
+2. 真实输出：`docs/export/test-slidev-1.9.3-layer-release/architecture.zh-CN.pptx`。
+3. 真实命令：`runuser -u jacob -- env HOME=/home/jacob PLAYWRIGHT_BROWSERS_PATH=/home/jacob/.cache/ms-playwright bash -lc 'cd /home/jacob/obsidian-NotEMD && npm run verify:slidev-export -- --vault docs --source architecture.zh-CN.md --format pptx --output-subfolder export/test-slidev-1.9.3-layer-release --sample-slides all --timeout-ms 600000 --no-screenshots --require-pptx-visual-match --json'`。
+4. 本地 Slidev fork 已确认：`52.16.0 (/home/jacob/slidev/packages/slidev/bin/slidev.mjs)`。
+5. 完整 Slidev skill 路径已确认：`/home/jacob/slidev/skills/slidev`；`skillReferenceCount = 52`。
+6. 报告门禁通过：`ok = true`，`slideCount = 30`，`editableTextSlideCount = 30`，`pagesWithoutEditableText = []`。
+7. 可编辑覆盖：`textBoxCount = 338`，`editableBodyTextBoxCount = 324`，`editableCodeTextBoxCount = 14`，`tableCount = 6`，`editableTableCellCount = 102`。
+8. 表格 rich-text 覆盖保持稳定：`richTextTableCellCount = 102`，`richTextRunCount = 102`，`highlightedRunCount = 27`。
+9. fallback 边界保持诚实：`fallbackOnlyElementKinds = ["mermaid", "svg"]`，`transparentOverlayTextSources = []`。
+10. 第 17-29 页直接 XML 扫描通过：`totalCodeBackgroundAfterText = 0`，`totalNativeShapeAfterText = 0`，`totalTransparentishAlpha = 0`，`totalTableOverlayText = 0`。
+11. 生成产物继续位于 ignored 且未 tracked 的 `docs/export/test-slidev-1.9.3-layer-release/` 下。
+
+release note 范围：
+
+1. 1.9.3 应描述 Slidev export、standalone HTML、visible-native PPTX、层级排序、表格 rich text 与 release workflow gates。
+2. GEO/GitHub Pages 工作不写入 1.9.3 release notes。它存在于 commit range 中，但不是这次发布的用户叙事重点。
+3. 已知边界保持不变：普通页面文字与表格单元格文字是可见且可编辑的；Mermaid/SVG geometry 由 fallback 拥有；Office round-trip layout drift 仍需要后续更强门禁。
+
 ## 当前边界
 
 第一版实现有意保守：

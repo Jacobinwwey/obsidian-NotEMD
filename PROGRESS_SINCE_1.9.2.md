@@ -1,16 +1,18 @@
 # Progress Report: Development Since v1.9.2
 
-**Report Date:** 2026-06-23  
-**Base Version:** 1.9.2 (2026-06-06)  
-**Current HEAD:** fa8e8c1  
-**Commits Since Release:** 50  
-**Current Branch:** main  
+**Report Date:** 2026-06-24
+**Base Version:** 1.9.2 (2026-06-06)
+**Code Closure HEAD Before Release Prep:** 5798162
+**Commits Since Release Before Release Prep:** 163
+**Current Branch:** main
+**Remote Before Release Prep:** `origin/main` at 5798162
+**Release Prep:** 1.9.3 in progress
 
 ---
 
 ## Executive Summary
 
-Since the 1.9.2 release on June 6, 2026, development has focused entirely on **Slidev PPTX export quality improvements**, specifically advancing the **editable native PPTX export** feature to production-ready state. All 50 commits target precise rendering fidelity, visual layer ordering, rich text preservation, and table cell text coverage.
+Since the 1.9.2 release on June 6, 2026, development has included release workflow hardening, GEO documentation work, contributor metadata hygiene, and a large Slidev export track. The most important product track is still **Slidev PPTX export quality**, where the current branch now has visible native PPTX text, native tables, rich text runs, table-cell coverage reporting, residue checks, and deterministic layer ordering.
 
 ### Key Achievement Areas
 
@@ -22,7 +24,7 @@ Since the 1.9.2 release on June 6, 2026, development has focused entirely on **S
 
 ---
 
-## Detailed Commit Analysis (1.9.2 → HEAD)
+## Detailed Slidev PPTX Commit Analysis
 
 ### Phase 1: Foundation & Core Infrastructure (Jun 20)
 **Commits 50-41** - Initial Slidev export transformation and environment setup
@@ -62,8 +64,8 @@ Since the 1.9.2 release on June 6, 2026, development has focused entirely on **S
 - `d26ec3d` - Report PPTX editable source coverage (feat)
 - `4ecb244` - Report PPTX advisory metric and layer contracts (test)
 
-### Phase 3: Quality Hardening & Documentation (Jun 22)
-**Commits 20-1** - Production readiness refinement
+### Phase 3: Quality Hardening & Documentation (Jun 22-23)
+**Commits 20-1 plus follow-up commits** - Production readiness refinement
 
 - `81a9bc8` - Harden pages GEO language scope (docs)
 - `842a3c4` - Make Slidev PPTX text visibly editable
@@ -85,15 +87,57 @@ Since the 1.9.2 release on June 6, 2026, development has focused entirely on **S
 - `ed4b515` - Scope PPTX extraction to visible slide root
 - `cfdbef0` - Preserve native table rich text in PPTX
 - `224f22f` - Report PPTX table cell rich text coverage (chore)
-- `fa8e8c1` - **[CURRENT HEAD]** Reclassify consumed table PPTX decorations
+- `fa8e8c1` - Reclassify consumed table PPTX decorations
+- `8b6d0c6` - **[MAJOR]** Enforce proper visual layer ordering in slide composition
+- `d7d05c8` - Correct table overlay leak detection logic
+- `5798162` - **[CODE CLOSURE HEAD BEFORE RELEASE PREP]** Complete development phase implementation report
 
 ---
 
-## Current Working Tree Changes (Unstaged)
+## 1.9.3 Release Closure Status
 
-### Modified Files Analysis
+### Scope Included In Release Notes
 
-#### 1. `src/slideExport/pptxWriter.ts` (+23, -4)
+1. Slidev export workflow: environment probing, local Slidev fork use, full Slidev skill reference loading, source preparation, standalone HTML, and multi-format routing.
+2. PPTX export: visible native editable text, native table cells, rich text runs, font policy reporting, code backgrounds, rendered-HTML reference gate, and layer ordering.
+3. Verification workflow: real `architecture.zh-CN.md` export, PPTX report metrics, slides 17-29 XML ordering scan, generated artifact ignore proof, and release asset gates.
+4. Release workflow hardening: numeric tag validation, required GitHub Release assets, bilingual release notes, and reusable helper scripts.
+
+### Scope Deliberately Excluded From Release Notes
+
+1. GEO / GitHub Pages work is intentionally not described in `docs/releases/1.9.3*.md`, per release-scope correction.
+2. Mermaid/SVG Office-native geometry editability is not claimed. Mermaid/SVG remain explicitly fallback-owned unless a future experimental vector/SVG path is enabled.
+3. Table CSS chip visual parity is not overstated. Table text is native and editable; table-owned decoration residue is reported honestly.
+
+### Fresh Real-Deck Acceptance
+
+- Real output: `docs/export/test-slidev-1.9.3-layer-release/architecture.zh-CN.pptx`
+- Real source: `docs/architecture.zh-CN.md`
+- Slidev fork: `52.16.0 (/home/jacob/slidev/packages/slidev/bin/slidev.mjs)`
+- Skill path: `/home/jacob/slidev/skills/slidev`
+- Skill references: `52`
+- Report gate: `ok = true`, `slideCount = 30`, `editableTextSlideCount = 30`, `pagesWithoutEditableText = []`
+- Editable coverage: `textBoxCount = 338`, `editableBodyTextBoxCount = 324`, `editableCodeTextBoxCount = 14`, `tableCount = 6`, `editableTableCellCount = 102`
+- Table rich text coverage: `richTextTableCellCount = 102`, `richTextRunCount = 102`, `highlightedRunCount = 27`
+- Fallback boundary: `fallbackOnlyElementKinds = ["mermaid", "svg"]`, `transparentOverlayTextSources = []`
+- Generated output status: ignored under `docs/export/test-slidev-1.9.3-layer-release/`, not tracked
+
+### Slides 17-29 XML Gate
+
+Direct PPTX XML inspection over `ppt/slides/slide17.xml` through `slide29.xml` produced:
+
+- `totalCodeBackgroundAfterText = 0`
+- `totalNativeShapeAfterText = 0`
+- `totalTransparentishAlpha = 0`
+- `totalTableOverlayText = 0`
+
+This directly validates the user-reported issue: the background/code rectangle layer is now below visible native text, and no transparent fallback text or table-cell overlay layer is reintroduced.
+
+## M32/M33 Layer Ordering Closure
+
+### Changed Files
+
+#### 1. `src/slideExport/pptxWriter.ts`
 **Purpose:** Fix visual layer ordering in PPTX slide composition
 
 **Changes:**
@@ -108,7 +152,7 @@ Since the 1.9.2 release on June 6, 2026, development has focused entirely on **S
 
 **Impact:** Ensures proper visual stacking order in PowerPoint - text always renders on top, backgrounds stay below, preventing text occlusion by decorative shapes.
 
-#### 2. `src/slideExport/pptxDomExtractor.ts` (+2, -3)
+#### 2. `src/slideExport/pptxDomExtractor.ts`
 **Purpose:** Simplify code background shape ordering logic
 
 **Changes:**
@@ -118,7 +162,7 @@ Since the 1.9.2 release on June 6, 2026, development has focused entirely on **S
 
 **Impact:** Cleaner code, more predictable shape ordering for code block backgrounds.
 
-#### 3. `scripts/verify-slidev-export-workflow.cjs` (+136, -39)
+#### 3. `scripts/verify-slidev-export-workflow.cjs`
 **Purpose:** Enhance PPTX inspection diagnostics for quality assurance
 
 **New Metrics Added:**
@@ -140,12 +184,24 @@ Since the 1.9.2 release on June 6, 2026, development has focused entirely on **S
 
 **Impact:** Production-grade verification that catches visual regressions, transparency bugs, and incomplete text coverage.
 
-#### 4. Test Files Modified
+#### 4. Test Files
 - `src/tests/pptxDomExtractor.test.ts` (+15, -1)
 - `src/tests/pptxVisualDiff.test.ts` (+1)
 - `src/tests/pptxWriter.test.ts` (+8, -1)
 
-**Purpose:** Align test assertions with new layer-based ordering and enhanced diagnostics.
+**Purpose:** Align test assertions with layer-based ordering, code-background ordering, and enhanced diagnostics.
+
+### Real Acceptance
+
+- Prior real output: `docs/export/test-slidev-m33-layered-text-over-background/architecture.zh-CN.pptx`
+- Release real output: `docs/export/test-slidev-1.9.3-layer-release/architecture.zh-CN.pptx`
+- Real source: `docs/architecture.zh-CN.md`
+- Slidev fork: `52.16.0 (/home/jacob/slidev/packages/slidev/bin/slidev.mjs)`
+- Skill path: `/home/jacob/slidev/skills/slidev`
+- Skill references: `52`
+- XML gate over slides 17-29: `totalCodeBackgroundAfterText = 0`
+- Transparency gate over slides 17-29: `transparentishAlpha = 0`
+- Generated output status: ignored under `docs/export/test-slidev-*`, not tracked
 
 ---
 
@@ -177,44 +233,38 @@ Since the 1.9.2 release on June 6, 2026, development has focused entirely on **S
 
 #### High Priority
 
-1. **Table Cell Overlay Leak** (Partially addressed)
-   - Issue: `nativeTableOverlayLeakCount` metric exists but leaks may still occur
-   - Root cause: Table cell rich text shapes might render outside table bounds
-   - Current commit (`fa8e8c1`) reclassifies decorations but leak prevention incomplete
-   - **Action Required:** Add boundary validation in `pptxDomExtractor.ts`
+1. **Office Round-Trip Visual Drift**
+   - Issue: visible native PPTX text is editable, but Office/LibreOffice layout can still diverge from Chromium
+   - Current mitigation: rendered-HTML visual reference gate, residue checks, per-slide reports
+   - **Action Required:** keep improving explainable per-slide diagnostics before widening object reconstruction
 
-2. **Transparency Fallback Removal Incomplete** (`c636f4a`)
-   - Commit removed transparent text fallbacks
-   - Verification script now detects `nonOpaqueTextRunCount` and `transparentTextRunCount`
-   - **Action Required:** Verify no visual regressions in slides with complex backgrounds
+2. **Table-Owned Decoration Fidelity**
+   - Issue: table-owned inline decorations are correctly classified, but CSS rounded chips/padding do not have a direct native table equivalent
+   - Current mitigation: native table rich runs plus Office highlight
+   - **Action Required:** define a cell-internal decoration contract before adding slide-level shapes
 
-3. **Code Background Z-Index Edge Cases**
-   - Simplified ordering in current changes may interact poorly with nested structures
-   - **Action Required:** Add integration test for nested code blocks in tables
+3. **Mermaid/SVG Editability Boundary**
+   - Issue: default export preserves Mermaid/SVG visual fidelity through background ownership, not Office-native editable geometry
+   - Current mitigation: Mermaid source preservation and honest fallback reporting
+   - **Action Required:** keep SVG embedding/vector reconstruction behind an explicit experiment
 
 #### Medium Priority
 
-4. **Font Policy Contract Not Fully Enforced** (`02411f3`)
-   - Font policy added but enforcement across all text types unclear
-   - **Action Required:** Audit font fallback chain consistency
+4. **Font Portability**
+   - Font policy exists, but exported PPTX can still depend on viewer-side font availability
+   - **Action Required:** continue with preset/system-font selection and portability reporting
 
-5. **Hyperlink Relationship Coverage** (`974e2c0`)
-   - Relationships written but click-through behavior untested
-   - **Action Required:** Add E2E test for hyperlink preservation in PPTX
+5. **Hyperlink Round-Trip Coverage**
+   - Relationships are written and covered by writer/report tests
+   - **Action Required:** add real-deck acceptance once source decks contain table/body links
 
-6. **Mermaid SVG Text Preservation**
-   - `visibleNativeTextShapeCounts.svg` and `.mermaid` tracked separately
-   - Text extraction from rendered SVG may miss dynamic labels
-   - **Action Required:** Compare Mermaid diagram text coverage against Slidev preview
+6. **Large Deck Performance**
+   - Multiple DOM and XML passes are acceptable for `architecture.zh-CN.md`, but large decks need profiling
+   - **Action Required:** profile 50+ slide decks before widening primitive extraction
 
 #### Low Priority
 
-7. **Performance Optimization Opportunities**
-   - Multiple DOM traversals in extractor
-   - Regex-heavy XML parsing in verification script
-   - **Action Required:** Profile large deck exports (50+ slides)
-
-8. **Diagnostic Output Verbosity**
+7. **Diagnostic Output Verbosity**
    - Verification script generates extensive metrics
    - Console output may overwhelm in CI environments
    - **Action Required:** Add `--quiet` mode with summary-only output
@@ -224,7 +274,7 @@ Since the 1.9.2 release on June 6, 2026, development has focused entirely on **S
 ## Documentation Gap Analysis
 
 ### English Documentation Complete
-- ✅ Main README comprehensive and up-to-date (v1.9.2 referenced)
+- ✅ Main README comprehensive and up-to-date for the 1.9.3 release prep
 - ✅ Maintainer docs cover release workflow, CLI capability matrix
 - ✅ Slide export documentation well-structured:
   - Slidev standalone acceptance
@@ -235,23 +285,23 @@ Since the 1.9.2 release on June 6, 2026, development has focused entirely on **S
 ### Chinese Documentation Gaps
 
 #### Critical (User-Facing)
-1. **README_zh.md is fully aligned** - No gaps detected in feature parity
-2. **Slide export docs missing Chinese versions:**
-   - `docs/maintainer/slidev-standalone-acceptance-2026-06-18.md` (no `.zh-CN.md`)
-   - `docs/maintainer/slidev-editable-pptx-acceptance-2026-06-21.md` (no `.zh-CN.md`)
-   - `docs/maintainer/slidev-export-workflow.md` (no `.zh-CN.md`)
+1. **README_zh.md is aligned** - No feature-parity gap detected in the current audit.
+2. **Critical Slidev maintainer docs have Chinese versions:**
+   - `docs/maintainer/slidev-standalone-acceptance-2026-06-18.zh-CN.md`
+   - `docs/maintainer/slidev-editable-pptx-acceptance-2026-06-21.zh-CN.md`
+   - `docs/maintainer/slidev-export-workflow.zh-CN.md`
 
 #### Medium Priority (Maintainer-Facing)
-3. **Brainstorm and planning docs missing Chinese versions:**
-   - `docs/brainstorms/2026-06-21-slidev-editable-pptx-progress-and-next-direction.md`
-   - Most files under `docs/brainstorms/` and `docs/superpowers/plans/`
+3. **The active Slidev PPTX progress doc has a Chinese version:**
+   - `docs/brainstorms/2026-06-21-slidev-editable-pptx-progress-and-next-direction.zh-CN.md`
+   - Older brainstorm and superpowers planning docs are not all bilingual; treat that as archive debt, not a blocker for this slice.
 
 #### Low Priority
 4. **Test documentation** - Test files not typically translated
-5. **Release notes** - 1.9.2 has both English and Chinese versions ✅
+5. **Release notes** - 1.9.3 has both English and Chinese versions ✅
 
 ### Recommendation
-**Prioritize translating the three maintainer acceptance/workflow docs** to enable Chinese-speaking contributors to verify PPTX export quality gates.
+Keep new acceptance/progress updates bilingual when the English and Chinese files already exist. Do not block this PPTX slice on translating unrelated archived brainstorms.
 
 ---
 
@@ -264,13 +314,13 @@ Since the 1.9.2 release on June 6, 2026, development has focused entirely on **S
 | Editable native text in PPTX | ✅ Complete | `1061857`, `842a3c4`, `b92cbf4` |
 | Structural native tables | ✅ Complete | `ab31736`, `d7fa183`, `6ee2fac` |
 | Rich text run preservation | ✅ Complete | `fd85c6f`, `cfdbef0`, `224f22f` |
-| Font policy enforcement | ⚠️ Partial | `02411f3` - policy added, enforcement unclear |
-| Hyperlink relationships | ✅ Complete | `974e2c0` - written but untested |
+| Font policy enforcement | ✅ Complete for current contract | `02411f3` plus report/font-contract evidence; portability remains next work |
+| Hyperlink relationships | ✅ Complete for writer/report path | `974e2c0`; real-deck acceptance waits for source content with links |
 | Code block background rendering | ✅ Complete | `3584828`, `04d19c5` |
 | Decorative primitive handling | ✅ Complete | `358a083`, `07f4f71` |
-| Visual layer ordering | 🔄 In Progress | Current working tree changes |
-| Transparency elimination | ⚠️ Partial | `c636f4a` - removed but verification needed |
-| Table cell text coverage | ⚠️ Partial | `224f22f`, `fa8e8c1` - leaks still possible |
+| Visual layer ordering | ✅ Complete | `8b6d0c6`; slides 17-29 XML gate shows zero backgrounds after text |
+| Transparency elimination | ✅ Complete for current writer path | `c636f4a`, `8b6d0c6`; alpha gates show zero transparent text |
+| Table cell text coverage | ✅ Complete for current contract | `224f22f`, `fa8e8c1`, `d7d05c8`; overlay leak metric fixed |
 | Visual diff gate | ✅ Complete | `8260f18`, `0ecafc1` |
 | Acceptance evidence | ✅ Complete | `3b38aa0`, `3aa7277` |
 
@@ -284,10 +334,10 @@ Since the 1.9.2 release on June 6, 2026, development has focused entirely on **S
 ## Next Development Directions
 
 ### Immediate (Before 1.9.3 Release)
-1. **Complete working tree changes** - Commit layer ordering fixes
-2. **Fix table overlay leaks** - Add boundary validation
-3. **Verify transparency elimination** - Run full visual regression suite
-4. **Translate critical maintainer docs** - Three Slidev acceptance/workflow docs to Chinese
+1. **Preserve the real PPTX gate** - keep `architecture.zh-CN.md` export with rendered-HTML reference diff in the release checklist.
+2. **Promote the layer XML gate** - keep slide XML checks for transparent text, table overlay leaks, and background-after-text regressions.
+3. **Document known boundaries in release notes** - visible native text/table are editable; Mermaid/SVG geometry remains fallback-owned unless an experiment says otherwise.
+4. **Audit Obsidian UI wording** - make sure UI labels do not imply Mermaid/SVG geometry is fully Office-native editable.
 
 ### Short-term (1.9.3 → 1.10.0)
 1. **Font policy enforcement audit** - Ensure consistent fallback chain
@@ -303,7 +353,7 @@ Since the 1.9.2 release on June 6, 2026, development has focused entirely on **S
 
 ---
 
-## Proposed Commit Strategy
+## Commit Strategy Used
 
 ### Commit 1: Fix Visual Layer Ordering
 ```
@@ -335,7 +385,7 @@ Document all 50 commits focusing on Slidev PPTX export quality:
 Identifies remaining defects and documentation gaps for 1.9.3 planning.
 ```
 
-### Commit 3: Create Release 1.9.3 Branch (Future)
+### Future Release Commit: Prepare 1.9.3
 ```
 release: prepare v1.9.3 - Slidev PPTX Export Hardening
 
@@ -350,26 +400,27 @@ Remaining known issues documented in PROGRESS_SINCE_1.9.2.md
 
 ---
 
-## Verification Checklist (Before Push)
+## Verification Checklist
 
-- [ ] All working tree changes committed and pushed
-- [ ] `npm run build` succeeds
-- [ ] `npm test -- --runInBand` passes
-- [ ] `npm run audit:i18n-ui` passes
-- [ ] Visual diff gate passes for reference deck
-- [ ] Transparency metrics show zero `transparentTextRunCount`
-- [ ] Table overlay leak count is zero for test decks
-- [ ] Git working tree is clean (`git status`)
-- [ ] No unintended files staged (`git diff --cached`)
+- [x] All layer-ordering changes committed and pushed
+- [x] `npm run build` succeeds
+- [x] Targeted PPTX tests pass
+- [x] Full Jest was run during this PPTX hardening series
+- [x] Real `architecture.zh-CN.md` PPTX export passed for the layer-ordering slice
+- [x] Transparency metrics show zero transparent/low-opacity text in the inspected layer-ordering acceptance
+- [x] Table overlay leak detection logic is corrected
+- [x] Generated export artifacts remain ignored and untracked
+- [ ] Release prep commit pushed to `origin/main`
+- [ ] Git working tree is clean after 1.9.3 release publish
 
 ---
 
 ## Summary
 
-**Current State:** Unstaged improvements to PPTX visual layer ordering and diagnostic infrastructure represent the final hardening phase of the Slidev editable PPTX export feature.
+**Current State:** PPTX visual layer ordering, transparency inspection, table overlay leak detection, and progress documentation are committed on `main`; 1.9.3 release prep is now being assembled on top of that code closure.
 
-**Readiness:** Ready to commit and push. Changes are well-scoped, tested via enhanced verification script, and documented in this progress report.
+**Readiness:** Ready for release-gate execution, with known boundaries documented rather than hidden behind transparent overlays or unsupported editability claims.
 
-**Recommendation:** Commit working tree changes → Update test expectations → Run full verification suite → Push to main → Begin 1.9.3 release planning.
+**Recommendation:** Keep the current visible-native PPTX route, keep the layer/opacity XML checks in the release gate, and continue with Office round-trip diagnostics before widening Mermaid/SVG/vector reconstruction.
 
 **Estimated Impact:** These changes complete the production-ready foundation for Slidev → PPTX export. Users will be able to generate fully editable PowerPoint presentations from Slidev markdown with proper text hierarchy, rich formatting, and table support.

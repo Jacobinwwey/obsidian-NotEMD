@@ -11,6 +11,14 @@ const WELCOME_RELEASE_NOTE_LIMIT = 2;
 
 const ENTRIES_EN: WelcomeReleaseNoteEntry[] = [
     {
+        version: '1.9.3',
+        highlights: [
+            'Slidev export now ships a report-gated HTML/PDF/PNG/PPTX path with the local Slidev fork and full Slidev skill reference set wired into the real export workflow.',
+            'PPTX export now uses visible native editable text and native tables instead of transparent selectable overlays, with richer font, paragraph, table-cell, and code-background contracts.',
+            'The PPTX writer now enforces background, shape, table, and text layer ordering so code-background rectangles stay below visible text in the exported deck.'
+        ]
+    },
+    {
         version: '1.9.2',
         highlights: [
             'Sidebar footer scrolling and API observability styling are restored, so API activity no longer squeezes the log output area out of view.',
@@ -54,6 +62,14 @@ const ENTRIES_EN: WelcomeReleaseNoteEntry[] = [
 
 const ENTRIES_ZH_CN: WelcomeReleaseNoteEntry[] = [
     {
+        version: '1.9.3',
+        highlights: [
+            'Slidev 导出现在具备经过报告门禁验证的 HTML/PDF/PNG/PPTX 路径，并在真实导出工作流中接入本地 Slidev fork 与完整 Slidev skill reference 集合。',
+            'PPTX 导出现在使用可见的 Office 原生可编辑文字与原生表格，不再依赖透明可选中文字层，并补齐字体、段落、表格单元格与代码背景契约。',
+            'PPTX writer 现在强制 background、shape、table、text 的层级顺序，导出 deck 中的代码背景矩形会稳定位于可见文字下方。'
+        ]
+    },
+    {
         version: '1.9.2',
         highlights: [
             'Sidebar 底部滚动区与 API 可观测性样式已恢复，API activity 不会再把 Log output 区域挤出可视范围。',
@@ -96,6 +112,14 @@ const ENTRIES_ZH_CN: WelcomeReleaseNoteEntry[] = [
 ];
 
 const ENTRIES_ZH_TW: WelcomeReleaseNoteEntry[] = [
+    {
+        version: '1.9.3',
+        highlights: [
+            'Slidev 匯出現在具備經過報告門檻驗證的 HTML/PDF/PNG/PPTX 路徑，並在真實匯出流程中接入本機 Slidev fork 與完整 Slidev skill reference 集合。',
+            'PPTX 匯出現在使用可見的 Office 原生可編輯文字與原生表格，不再依賴透明可選中文字層，並補齊字型、段落、表格儲存格與程式碼背景契約。',
+            'PPTX writer 現在強制 background、shape、table、text 的層級順序，匯出 deck 中的程式碼背景矩形會穩定位於可見文字下方。'
+        ]
+    },
     {
         version: '1.9.2',
         highlights: [

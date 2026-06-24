@@ -40,7 +40,7 @@ Notemd 是一个**开源 Obsidian 插件**，集成 30+ 种大型语言模型 (L
 
 如果您喜欢使用 Notemd，请考虑 [⭐ 给 GitHub 加星](https://github.com/Jacobinwwey/obsidian-NotEMD) 或 [☕️ 请喝杯咖啡](https://ko-fi.com/jacobinwwey)。
 
-**版本:** 1.9.2
+**版本:** 1.9.3
 
 ![GitHub Release](https://img.shields.io/github/v/release/Jacobinwwey/obsidian-NotEMD?label=Version&link=https%3A%2F%2Fgithub.com%2Jacobinwwey%2Fobsidian-NotEMD%2Freleases%2Flatest) ![GitHub Downloads](https://img.shields.io/github/downloads/Jacobinwwey/obsidian-NotEMD/total?logo=Obsidian&label=Downloads&labelColor=%237C3AED&color=%235b5b5b&link=https%3A%2F%2Fgithub.com%2Jacobinwwey%2Fobsidian-NotEMD%2Freleases%2Flatest)
 
@@ -827,7 +827,7 @@ MIT许可证 - 详情请见[LICENSE](LICENSE)。
 
 ---
 
-*Notemd v1.9.2 - 用AI提升你的Obsidian知识图谱。*
+*Notemd v1.9.3 - 用AI提升你的Obsidian知识图谱。*
 
 <!-- repo-chronicle:start -->
 ## 发展编年史
@@ -836,7 +836,7 @@ MIT许可证 - 详情请见[LICENSE](LICENSE)。
 
 ![Notemd Development Chronicle](./docs/repo-saga/notemd-development-history.zh.svg)
 
-_最近一次已针对发布 tag `1.9.2` 于 2026-06-06 刷新。 最新提交日期：2026-06-06。_
+_最近一次已针对发布 tag `1.9.3` 于 2026-06-24 刷新。 最新提交日期：2026-06-23。_
 <!-- repo-chronicle:end -->
 
 

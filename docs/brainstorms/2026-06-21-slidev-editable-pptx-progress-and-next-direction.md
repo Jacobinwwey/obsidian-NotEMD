@@ -1653,6 +1653,45 @@ Next direction:
 3. Mermaid/SVG should stay on an independent track. Keep Mermaid fences untouched and unsplit; default to background or SVG sidecar ownership unless an explicit experimental option requests SVG embedding or vector reconstruction.
 4. The better next investment is a real Office round-trip quality gate: editable-text scanning, font replacement risk, table z-order/residue sampling, and explainable per-slide PNG/PPTX diff diagnostics. Avoid adding a second conversion path that bypasses rendered convergence.
 
+## M32-M34 Visible Text Layer Ordering And 1.9.3 Release Gate
+
+The latest user-visible PPTX defect was not another text-extraction gap. The failure mode was paint order: code-background rectangles existed as native editable shapes, but pages 17-29 could place those rectangles after visible text in the PPTX shape tree. In PowerPoint, later siblings are visually above earlier siblings, so the background became an occluder.
+
+Implementation status:
+
+1. `pptxWriter.ts` now assigns each slide-tree item an explicit layer: background image, native shape, native table, native text.
+2. Both the default writer and the visible-native experiment writer sort by `layer` first, then DOM/source order. This keeps background images and code/decorative shapes below text while preserving stable intra-layer order.
+3. `pptxDomExtractor.ts` simplified code-background ordering to `ownerOrder - 0.3`, so code background ownership is clear before the writer applies the final layer model.
+4. The verifier now reports transparent text, visible native source buckets, native table overlay leaks, and table-cell rich-text coverage separately.
+5. `nativeTableOverlayLeakCount` was corrected so the presence of native tables suppresses expected table-cell overlay counts instead of flagging a false leak.
+
+Comparison with the prior plan and current code:
+
+1. The canvas/geometry work reduced layout overflow risk, but it did not guarantee Office z-order. PPTX shape-tree ordering needed its own model because PowerPoint paint order is XML sibling order, not browser CSS stacking order.
+2. The better fix was not to remove code backgrounds. Code backgrounds are useful editable primitives; the bug was ownership and layer placement. Keeping them below text preserves fidelity without sacrificing editability.
+3. The change does not modify Mermaid source, split diagrams, or claim Mermaid/SVG Office-native geometry. Mermaid/SVG remain fallback-owned unless a future explicit experiment adds SVG embedding or vector reconstruction.
+4. This also avoids reverting to transparent text. The displayed text remains the editable text, and transparent overlay sources remain empty.
+
+Fresh 1.9.3 validation:
+
+1. Real source: `docs/architecture.zh-CN.md`.
+2. Real output: `docs/export/test-slidev-1.9.3-layer-release/architecture.zh-CN.pptx`.
+3. Real command: `runuser -u jacob -- env HOME=/home/jacob PLAYWRIGHT_BROWSERS_PATH=/home/jacob/.cache/ms-playwright bash -lc 'cd /home/jacob/obsidian-NotEMD && npm run verify:slidev-export -- --vault docs --source architecture.zh-CN.md --format pptx --output-subfolder export/test-slidev-1.9.3-layer-release --sample-slides all --timeout-ms 600000 --no-screenshots --require-pptx-visual-match --json'`.
+4. Local Slidev fork confirmed: `52.16.0 (/home/jacob/slidev/packages/slidev/bin/slidev.mjs)`.
+5. Full Slidev skill path confirmed: `/home/jacob/slidev/skills/slidev`; `skillReferenceCount = 52`.
+6. Report gate passed: `ok = true`, `slideCount = 30`, `editableTextSlideCount = 30`, `pagesWithoutEditableText = []`.
+7. Editable coverage: `textBoxCount = 338`, `editableBodyTextBoxCount = 324`, `editableCodeTextBoxCount = 14`, `tableCount = 6`, `editableTableCellCount = 102`.
+8. Table rich-text coverage stayed intact: `richTextTableCellCount = 102`, `richTextRunCount = 102`, `highlightedRunCount = 27`.
+9. Fallback boundary stayed honest: `fallbackOnlyElementKinds = ["mermaid", "svg"]`, `transparentOverlayTextSources = []`.
+10. Direct XML scan over slides 17-29 passed: `totalCodeBackgroundAfterText = 0`, `totalNativeShapeAfterText = 0`, `totalTransparentishAlpha = 0`, `totalTableOverlayText = 0`.
+11. Generated artifacts remain ignored and untracked under `docs/export/test-slidev-1.9.3-layer-release/`.
+
+Release-note scope:
+
+1. 1.9.3 should describe Slidev export, standalone HTML, visible-native PPTX, layer ordering, table rich text, and release workflow gates.
+2. GEO/GitHub Pages work should not be described in the 1.9.3 release notes. It exists in the commit range, but it is not part of this release's user-facing story.
+3. The known boundary remains: ordinary slide text and table-cell text are visible and editable; Mermaid/SVG geometry is fallback-owned; Office round-trip layout drift still deserves a stronger future gate.
+
 ## Current Limits
 
 The first implementation is intentionally conservative:

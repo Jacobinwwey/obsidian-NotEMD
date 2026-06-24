@@ -4,6 +4,33 @@ This document summarizes the major functional and architectural changes implemen
 
 ---
 
+## 1.9.3
+
+### Highlights
+
+- Slidev export is now a report-gated multi-format workflow covering HTML, standalone HTML, PDF, PNG, and PPTX from the same prepared deck source.
+- PPTX export now emits visible native editable text and native table-cell text instead of transparent selectable overlays.
+- The reported PPTX page 17-29 occlusion issue is fixed by deterministic background, shape, table, and text layer ordering.
+
+### New Features
+
+- Added environment and output reporting for the real Slidev export workflow, including local Slidev fork detection, full Slidev skill root loading, and per-format capability checks.
+- Added standalone HTML bundle support with offline `file://` behavior, relative asset handling, and Vue component transformation fixes.
+- Added editable PPTX export contracts for visible native text, rich text runs, font policy, paragraph spacing, native tables, table-cell rich text, code backgrounds, and rendered-HTML visual reference comparison.
+- Added verifier metrics for fallback-only element kinds, transparent overlay removal, table-owned decoration ownership, and PPTX XML layer-order regressions.
+
+### Fixes
+
+- Fixed PPTX code-background rectangles and decorative native shapes so they render below visible text instead of covering editable text.
+- Removed transparent text from the default PPTX editability path; the displayed text is now the editable text.
+- Fixed table rich-text preservation and coverage reporting so native table output is independently auditable.
+- Fixed table overlay leak reporting so suppressed table-cell overlays do not produce false-positive leak counts.
+
+### Verification
+
+- Revalidated with real `docs/architecture.zh-CN.md` Slidev PPTX export through the local jacob-user Playwright/Slidev environment, followed by a direct PPTX XML scan proving zero code-background-after-text, native-shape-after-text, transparent-alpha, or table-overlay-text matches on slides 17-29.
+- Release gates: `npm run chronicle:sync-repo-saga`, `npm run chronicle:update -- --tag 1.9.3`, `npm run build`, `npm test -- --runInBand`, `npm run audit:i18n-ui`, `npm run audit:render-host`, `obsidian help`, `obsidian-cli help`, and `git diff --check`.
+
 ## 1.9.2
 
 ### Highlights

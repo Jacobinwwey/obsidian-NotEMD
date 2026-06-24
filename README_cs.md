@@ -690,7 +690,7 @@ Licence MIT. Podrobnosti naleznete v souboru [LICENSE](LICENSE).
 ---
 
 
-*Notemd v1.9.2 - Vylepšete svůj graf znalostí v Obsidianu pomocí AI.*
+*Notemd v1.9.3 - Vylepšete svůj graf znalostí v Obsidianu pomocí AI.*
 
 
 
@@ -701,7 +701,7 @@ Tato čtvrtletní kronika zachovává původní vizuální styl [repo-saga](http
 
 ![Notemd Development Chronicle](./docs/repo-saga/notemd-development-history.cs.svg)
 
-_Naposledy obnoveno pro tag vydání `1.9.2` dne 2026-06-06. Datum posledního commitu: 2026-06-06._
+_Naposledy obnoveno pro tag vydání `1.9.3` dne 2026-06-24. Datum posledního commitu: 2026-06-23._
 <!-- repo-chronicle:end -->
 
 
