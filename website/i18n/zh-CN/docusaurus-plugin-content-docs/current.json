@@ -1,0 +1,22 @@
+{
+  "version.label": {
+    "message": "Next",
+    "description": "The label for version current"
+  },
+  "sidebar.tutorialSidebar.category.Getting Started": {
+    "message": "快速开始",
+    "description": "The label for category 'Getting Started' in sidebar 'tutorialSidebar'"
+  },
+  "sidebar.tutorialSidebar.category.Core Features": {
+    "message": "核心功能",
+    "description": "The label for category 'Core Features' in sidebar 'tutorialSidebar'"
+  },
+  "sidebar.tutorialSidebar.category.LLM Providers": {
+    "message": "LLM 提供商",
+    "description": "The label for category 'LLM Providers' in sidebar 'tutorialSidebar'"
+  },
+  "sidebar.tutorialSidebar.category.Advanced": {
+    "message": "高级",
+    "description": "The label for category 'Advanced' in sidebar 'tutorialSidebar'"
+  }
+}

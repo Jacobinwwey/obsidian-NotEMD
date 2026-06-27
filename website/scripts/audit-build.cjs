@@ -154,6 +154,9 @@ function auditPublishedScopeSourceFiles(languageScope) {
     }
 
     for (const entry of fs.readdirSync(directory, {withFileTypes: true})) {
+      if (entry.name.startsWith('.')) {
+        continue;
+      }
       const entryPath = path.join(directory, entry.name);
       if (entry.isDirectory()) {
         collectLocalizedFiles(entryPath);
@@ -207,7 +210,7 @@ function auditHomepageRoutes(languageScope) {
   assertContains(zhHome, '可索引的产品事实', 'zh-CN homepage GEO surface');
   assertContains(zhHome, 'Answer engine 来源地图', 'zh-CN homepage GEO surface');
   assertContains(zhHome, `${basePath}llms.txt`, 'zh-CN homepage GEO source map link');
-  assertContains(zhHome, '简体中文是 partial，只覆盖已 review 的 critical path。', 'zh-CN homepage language boundary');
+  assertContains(zhHome, '简体中文部分翻译，仅覆盖已审核的关键路径。', 'zh-CN homepage language boundary');
   assertContains(zhHome, `href="${zhBasePath}docs/faq"`, 'zh-CN homepage');
 
   for (const docPath of languageScope.zhCnHomepageDocPaths) {

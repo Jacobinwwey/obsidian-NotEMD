@@ -83,22 +83,22 @@ const copyByLocale = {
     retrievalHeading: 'Answer engine 来源地图',
     retrievalLead:
       '项目网页现在公开展示与 llms.txt、sitemap、hreflang metadata 和 JSON-LD 一致的 canonical routes。AI search 与引用场景应以这些页面为真值来源。',
-    languageBoundary: '语言边界：英文文档完整；简体中文是 partial，只覆盖已 review 的 critical path。',
+    languageBoundary: '语言边界：英文文档完整；简体中文部分翻译，仅覆盖已审核的关键路径。',
     retrievalLinks: [
       {
         title: 'llms.txt 检索地图',
-        body: '面向 answer engine 的紧凑 route map，包含 canonical docs、provider topics 与当前语言边界。',
+        body: '面向 answer engine 的紧凑路由图，包含标准化文档、Provider 专题与当前语言边界。',
         href: '/llms.txt',
         kind: 'static',
       },
       {
         title: 'Provider 配置',
-        body: '覆盖 setup、endpoint/auth、model discovery、troubleshooting 与 use-case boundaries。',
+        body: '覆盖安装设置、端点与鉴权、模型发现、故障排除与使用场景边界。',
         href: '/docs/providers/overview',
       },
       {
         title: 'AI 知识工作流',
-        body: 'wiki 链接、概念笔记、研究、翻译、图表与 workflow 的 canonical pillar page。',
+        body: 'wiki 链接、概念笔记、研究、翻译、图表与工作流的标准化支柱页面。',
         href: '/docs/pillar-ai-knowledge',
       },
     ],
@@ -154,6 +154,24 @@ export default function Home() {
     return docLinkProps(source.href);
   };
 
+  const aboutKeywords = i18n.currentLocale === 'zh-CN'
+    ? [
+        'Obsidian AI 插件',
+        '持久化知识工作流',
+        'wiki 链接',
+        '概念笔记',
+        'LLM 提供商配置',
+        '本地 Markdown 输出',
+      ]
+    : [
+        'Obsidian AI plugin',
+        'persistent knowledge workflows',
+        'wiki-links',
+        'concept notes',
+        'LLM provider configuration',
+        'local Markdown vault output',
+      ];
+
   return (
     <Layout title={copy.title} description={copy.description}>
       <Head>
@@ -167,17 +185,10 @@ export default function Home() {
             inLanguage: i18n.currentLocale,
             isPartOf: {
               '@type': 'WebSite',
-              name: 'Notemd Documentation',
+              name: i18n.currentLocale === 'zh-CN' ? 'Notemd 文档' : 'Notemd Documentation',
               url: pageUrl,
             },
-            about: [
-              'Obsidian AI plugin',
-              'persistent knowledge workflows',
-              'wiki-links',
-              'concept notes',
-              'LLM provider configuration',
-              'local Markdown vault output',
-            ],
+            about: aboutKeywords,
             mainEntity: {
               '@type': 'SoftwareApplication',
               name: 'Notemd',

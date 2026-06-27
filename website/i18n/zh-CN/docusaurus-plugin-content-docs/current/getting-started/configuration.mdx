@@ -42,7 +42,7 @@ import TLDR from '@site/src/components/TLDR';
 1. 从下拉框选择 provider（30+ 可用）
 2. 输入 API Key
 3. 可选：设置自定义 base URL（代理或网关）
-4. 点击 “Get Model List” 验证连接
+4. 点击 "Get Model List" 验证连接
 5. 选择默认模型
 
 ### 常见 Provider
@@ -331,6 +331,24 @@ Threshold: 0.8 (default, 0-1)
 
 ---
 
+## 配置档案
+
+### 导出/导入设置
+
+**跨设备共享配置：**
+
+1. **Settings → Advanced → Export Configuration**
+2. 保存为 `notemd-config.json`
+3. 在新设备上：**Import Configuration**
+
+**包含内容：**
+- Provider API keys（可选）
+- 模型选择
+- 输出路径
+- 自定义工作流
+
+---
+
 ## 推荐配置
 
 ### 学生
@@ -388,7 +406,7 @@ Provider: Gemini (multilingual)
 
 ### Models Not Loading
 
-- 点击 “Get Model List” 刷新
+- 点击 "Get Model List" 刷新
 - 检查网络连接
 - 尝试切换 provider
 

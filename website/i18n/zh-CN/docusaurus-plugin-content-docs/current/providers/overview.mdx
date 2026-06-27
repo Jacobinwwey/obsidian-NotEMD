@@ -29,7 +29,7 @@ import TLDR from '@site/src/components/TLDR';
 
 | Provider | 默认 Base URL | 默认模型 | Temperature |
 |---|---|---|---|
-| **DeepSeek** | `api.deepseek.com` | `deepseek-v4-pro` | 0.5 |
+| **DeepSEEK** | `api.deepseek.com` | `deepseek-v4-pro` | 0.5 |
 | **OpenAI** | `api.openai.com/v1` | `gpt-4o` | 0.5 |
 | **Anthropic** | `api.anthropic.com` | `claude-3-5-sonnet-20240620` | 0.5 |
 | **Google** | `generativelanguage.googleapis.com/v1` | `gemini-2.0-flash-exp` | 0.5 |
@@ -86,6 +86,8 @@ import TLDR from '@site/src/components/TLDR';
 
 Notemd 支持为每个任务独立选择 provider 和模型。开启方式：`useMultiModelSettings: true`。
 
+### 可用任务
+
 | 任务 | Settings key | 默认 Provider |
 |---|---|---|
 | Add Links | `addLinksProvider` / `addLinksModel` | DeepSeek |
@@ -137,7 +139,7 @@ researchProvider: SiliconFlow
 
 - **Normal mode**：单次请求；临时失败时自动升级到 stable retry
 - **Stable retry mode**：最多 4 次尝试，间隔 5 秒
-- 会触发 retry 的临时错误：`err_connection_closed`、`err_connection_reset`、`err_timed_out`、`econnreset`、`socket hang up`、`network request failed`
+- 会触发 retry 的临时错误：`err_connection_closed`、`err_connection_reset`、`err_timed_out`、`econnreset`、`econnaborted`、`etimedout`、`socket hang up`、`network request failed`
 - 不重试：HTTP 400、401、403、404
 
 ### Response Caching
@@ -146,7 +148,7 @@ researchProvider: SiliconFlow
 
 ### Reasoning Model Handling
 
-不支持 `system` role 的模型（DeepSeek R1、OpenAI o1/o3/o4/gpt-5）会把 system + user prompt 合并到一个 user message。DeepSeek thinking 开启时会加 `{ thinking: { type: 'enabled' } }`，并校验最大输出 token 不低于 8000。
+不支持 `system` role 的模型（DeepSeek R1、OpenAI o1/o3/o4/gpt-5）会把 system + user prompt 合并到一个 user message。DeepSeek thinking 开启时会加 `{ thinking: { type: 'enabled' } }`。`reasoningEffort`（low/medium/high）会作为 `reasoning_effort` 传入。thinking 开启时校验最大输出 token 不低于 8000。
 
 ### Token Estimation
 
@@ -179,5 +181,7 @@ Ollama 不需要 API key，只要确认 `ollama serve` 正在运行。
 
 ## 下一步
 
-- [配置参考](../getting-started/configuration)
-- [FAQ](../faq)
+- [概念笔记（英文）](https://jacobinwwey.github.io/obsidian-NotEMD/docs/features/concept-notes) — 使用按任务提取模型
+- [图表（英文）](https://jacobinwwey.github.io/obsidian-NotEMD/docs/features/diagrams) — 使用按任务图表模型
+- [研究（英文）](https://jacobinwwey.github.io/obsidian-NotEMD/docs/features/research) — 使用研究专用模型
+- [配置参考](../getting-started/configuration) — 完整设置参考

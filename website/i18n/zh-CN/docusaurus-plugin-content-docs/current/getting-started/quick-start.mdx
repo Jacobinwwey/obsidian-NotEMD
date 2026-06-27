@@ -16,7 +16,7 @@ import TLDR from '@site/src/components/TLDR';
 # 快速开始
 
 <TLDR>
-**5 分钟开始使用 Notemd。** 三步：配置 LLM API key（或本地 Ollama），打开笔记运行 “Process file (add links)”，再试用侧边栏一键工作流。支持 30+ providers，无需写代码；配合 Ollama 可离线运行。
+**5 分钟开始使用 Notemd。** 三步：配置 LLM API key（或本地 Ollama），打开笔记运行 "Process file (add links)"，再试用侧边栏一键工作流。支持 30+ providers，无需写代码；配合 Ollama 可离线运行。
 </TLDR>
 
 ## 第 1 步：配置第一个 LLM Provider（2 分钟）
@@ -26,7 +26,7 @@ import TLDR from '@site/src/components/TLDR';
 1. 打开 **Settings** → **Notemd**
 2. 在 **LLM Provider Configuration** 中选择 provider
 3. 输入 **API Key**
-4. 可选：点击 **“Get Model List”** 查看可用模型
+4. 可选：点击 **"Get Model List"** 查看可用模型
 5. 为不同任务选择模型
 
 常见选择：
@@ -48,7 +48,7 @@ import TLDR from '@site/src/components/TLDR';
 
 1. 打开一篇有实际内容的笔记
 2. 在编辑器中右键
-3. 选择 **“Process file (add links)”**
+3. 选择 **"Process file (add links)"**
 4. 等待几秒
 5. 关键概念会变成 `[[wiki-links]]`
 
@@ -70,7 +70,7 @@ Machine learning models use neural networks to process data.
 
 ### 抽取概念笔记
 
-1. 右键 → **“Extract concepts from current file”**
+1. 右键 → **"Extract concepts from current file"**
 2. Notemd 为每个概念创建独立文件
 3. 查看配置的概念目录，默认是 `concepts/`
 4. 每个概念笔记都会回链到原始笔记
@@ -78,14 +78,14 @@ Machine learning models use neural networks to process data.
 ### Research & Summarize
 
 1. 在笔记中选中一个主题
-2. 右键 → **“Research and summarize”**
+2. 右键 → **"Research and summarize"**
 3. Notemd 调用 Tavily 或 DuckDuckGo
 4. 摘要会带来源追加到当前笔记
 
 ### 一键工作流
 
 1. 查看 **左侧边栏** 的工作流按钮
-2. 在任意笔记上点击 **“One-Click Extract”**
+2. 在任意笔记上点击 **"One-Click Extract"**
 3. 它会依次运行：add links → extract concepts → research → generate diagram
 4. 一个按钮完成整条流程
 
@@ -139,22 +139,22 @@ Machine learning models use neural networks to process data.
 创建自己的按钮：
 
 1. Settings → Notemd → Workflows
-2. 点击 “Add Workflow”
+2. 点击 "Add Workflow"
 3. 输入 DSL：`process-current-add-links>extract-concepts-current>research-and-summarize`
-4. 命名为 “My Research Flow”
+4. 命名为 "My Research Flow"
 5. 侧边栏会出现新的按钮
 
 ## Troubleshooting
 
-### “API Key Invalid”
+### "API Key Invalid"
 
 - 检查 key 是否正确，尤其是前后空格
 - 确认账号有额度
-- 在设置里使用 “Connection Test”
+- 在设置里使用 "Connection Test"
 
-### “Model Not Found”
+### "Model Not Found"
 
-- 点击 “Get Model List” 查看可用模型
+- 点击 "Get Model List" 查看可用模型
 - 部分 provider 要求精确模型名，例如 `gpt-4o` 不是 `gpt-4`
 
 ### 没有出现链接
@@ -171,6 +171,7 @@ Machine learning models use neural networks to process data.
 
 ## 下一步
 
+- [探索全部功能（英文）](https://jacobinwwey.github.io/obsidian-NotEMD/docs/features/wiki-links)
 - [高级配置](./configuration)
 - [LLM Provider 设置](../providers/overview)
 - [FAQ](../faq)
