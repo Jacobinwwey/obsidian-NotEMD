@@ -329,6 +329,7 @@ function createConfig(args) {
 		slidevTheme: args.theme,
 		timeoutMs: args.timeoutMs,
 		htmlMode: args.htmlMode,
+		imageScale: 3,
 	};
 }
 
@@ -759,6 +760,17 @@ function checkGitIgnoreStatus(pathsToCheck) {
 	};
 }
 
+function injectMermaidPostFit(htmlPath, onProgress) {
+	const html = fs.readFileSync(htmlPath, 'utf8');
+	const POST_FIT_SCRIPT = '<script>' + fs.readFileSync(path.join(__dirname, '..', 'src', 'slideExport', 'mermaidPostFitScript.txt'), 'utf8').trim() + '</script>';
+	const lastBodyIdx = html.lastIndexOf("</body>");
+	const patched = lastBodyIdx >= 0
+		? html.slice(0, lastBodyIdx) + POST_FIT_SCRIPT + "\n" + html.slice(lastBodyIdx)
+		: html.replace("</body>", POST_FIT_SCRIPT + "\n</body>");
+	fs.writeFileSync(htmlPath, patched, 'utf8');
+	onProgress?.('mermaid-fit', 'Injected post-fit script into standalone HTML');
+}
+
 function inspectPptx(pptxPath) {
 	if (!pptxPath || !fs.existsSync(pptxPath)) {
 		return null;
@@ -1106,6 +1118,13 @@ async function main() {
 		htmlExportHistory = [htmlExport];
 		exportPath = htmlExport.path;
 	}
+
+		// Inject mermaid post-fit script into standalone HTML after full layout settle.
+		if (args.format === 'html' && args.htmlMode === 'standalone') {
+			const htmlPath = path.join(vaultRoot, exportPath);
+			injectMermaidPostFit(htmlPath, onProgress);
+		}
+
 
 	let absoluteExportPath = path.join(vaultRoot, exportPath);
 	const absoluteDeckPath = slideSource.preparedDeckPath ? path.join(vaultRoot, slideSource.preparedDeckPath) : null;

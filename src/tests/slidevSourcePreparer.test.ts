@@ -87,6 +87,7 @@ const config: SlideExportConfig = {
     ffmpegCrf: 23,
     slidevTheme: '',
     timeoutMs: 120000,
+    imageScale: 3,
     htmlMode: 'standalone',
 };
 

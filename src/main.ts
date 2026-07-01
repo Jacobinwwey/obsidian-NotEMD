@@ -2814,6 +2814,12 @@ export default class NotemdPlugin extends Plugin {
         new Notice(this.getUiStrings().notices.couldNotOpenSidebar);
     }
 
+private static readonly slideExportImageClarityScale: Record<'standard' | 'high' | 'ultra', number> = {
+        standard: 1,
+        high: 2,
+        ultra: 3,
+    };
+
     private buildSlideExportConfig(): SlideExportConfig {
         return {
             format: this.settings.slideExportDefaultFormat,
@@ -2824,6 +2830,7 @@ export default class NotemdPlugin extends Plugin {
             slidevTheme: this.settings.slideExportTheme,
             timeoutMs: this.settings.slideExportTimeoutMs,
             htmlMode: this.settings.slideExportHtmlMode,
+            imageScale: NotemdPlugin.slideExportImageClarityScale[this.settings.slideExportImageClarity] ?? 3,
             pptxFontPolicy: {
                 latinFontFace: this.settings.slideExportPptxLatinFontFace,
                 eastAsiaFontFace: this.settings.slideExportPptxEastAsiaFontFace,
@@ -2981,6 +2988,16 @@ export default class NotemdPlugin extends Plugin {
 
             if (config.format === 'html') {
                 const outputPath = layoutConvergence.exportPath;
+                if (config.htmlMode === 'standalone') {
+                    const { injectMermaidPostFitIntoHtml } = await import('./slideExport/mermaidFitScript');
+                    try {
+                        const html = await this.app.vault.adapter.read(outputPath);
+                        await this.app.vault.adapter.write(outputPath, injectMermaidPostFitIntoHtml(html));
+                        logSlideExportProgress('mermaid-fit', 'Injected post-fit script into standalone HTML');
+                    } catch (fitError) {
+                        console.error('Mermaid post-fit injection failed:', fitError);
+                    }
+                }
                 activeReporter.log(uiStrings.slideExport.exportSuccess.replace('{path}', outputPath));
                 activeReporter.updateStatus(uiStrings.slideExport.exportSuccess.replace('{path}', outputPath), 100);
                 new Notice(uiStrings.slideExport.exportComplete);

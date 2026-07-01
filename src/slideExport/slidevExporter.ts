@@ -11,6 +11,21 @@ import { NOTEMD_SLIDEV_INSTALL_PACKAGES } from './slidevDistribution';
 import { execFileAsync, getVaultBasePath, resolveNpmCommand, resolveNpxCommand, resolvePlaywrightBrowsersPath, resolveSlidevCommand, safeRequire } from './platformUtils';
 import { collectLocalAssetReferencesWithDependencies, copyLocalSlidevAssetReference } from './slidevSourcePreparer';
 
+// In Slidev's one-piece export mode the CLI renders all slides on a single tall
+// page and only waits for one shared `#mermaid-rendering-container`, so later
+// Mermaid diagrams whose async render has not finished by print time are blank
+// in the captured PDF/PNG. `--per-slide` forces Slidev to navigate and print
+// each slide individually, giving each slide its own Mermaid container-wait
+// cycle. The extra networkidle + settle wait is a belt-and-suspenders guard
+// that also covers any other async-rendered content.
+const EXPORT_CAPTURE_READY_WAIT_MS = 3000;
+
+// Append capture-readiness flags to a Slidev export args array so each slide is
+// printed individually and Mermaid / async content settle before capture.
+function appendAsyncRenderWaitFlags(args: string[]): void {
+	args.push('--per-slide', '--wait-until', 'networkidle', '--wait', String(EXPORT_CAPTURE_READY_WAIT_MS));
+}
+
 function createBuildArgs(
 	inputPath: string,
 	outputDir: string,
@@ -283,6 +298,7 @@ export async function exportSlidevPdf(
 	if (config.slidevTheme) {
 		args.push('--theme', config.slidevTheme);
 	}
+	appendAsyncRenderWaitFlags(args);
 
 	const result = await execFileAsync(slidev.command, args, {
 		cwd: vaultRoot,
@@ -329,6 +345,10 @@ export async function exportSlidevPng(
 	if (config.slidevTheme) {
 		args.push('--theme', config.slidevTheme);
 	}
+	if (config.imageScale && config.imageScale > 1) {
+		args.push('--scale', String(config.imageScale));
+	}
+	appendAsyncRenderWaitFlags(args);
 
 	const result = await execFileAsync(slidev.command, args, {
 		cwd: vaultRoot,

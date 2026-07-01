@@ -1,0 +1,41 @@
+(function () {
+  var fitted = new WeakSet();
+  function fitOne(host) {
+    var svg = host.shadowRoot && host.shadowRoot.querySelector("svg");
+    if (!svg || !svg.hasAttribute("viewBox") || fitted.has(host)) return;
+    if (svg.getBoundingClientRect().width < 2) return;
+    var vb = svg.getAttribute("viewBox").split(/\s+/);
+    var w = parseFloat(vb[2]), H = parseFloat(vb[3]);
+    if (!isFinite(w) || !isFinite(H) || w <= 0 || H <= 0) return;
+    var box = null, node = host;
+    while (node) {
+      if (node.matches && node.matches(".slidev-page,.slidev-layout,.slidev-slide-content,.slidev-slide-container,#app")) {
+        if (node.clientWidth > 2 && node.clientHeight > 2) { box = node; break; }
+      }
+      node = node.parentElement;
+    }
+    if (!box) return;
+    var cw = box.clientWidth, ch = box.clientHeight;
+    var hr = host.getBoundingClientRect(), br = box.getBoundingClientRect();
+    var remainingBottom = br.bottom - hr.top - 2;
+    if (remainingBottom <= 0 || br.height <= 0) return;
+    var availH = ch * (remainingBottom / br.height);
+    var availW = cw * 0.92;
+    var scale = Math.min(availW / w, availH / H);
+    if (scale < 1) {
+      svg.setAttribute("height", String(H * scale));
+      svg.removeAttribute("width");
+      svg.removeAttribute("style");
+      fitted.add(host);
+    }
+  }
+  function fitAll() {
+    var hosts = document.querySelectorAll(".mermaid");
+    for (var i = 0; i < hosts.length; i++) {
+      if (!fitted.has(hosts[i])) fitOne(hosts[i]);
+    }
+  }
+  fitAll();
+  setTimeout(fitAll, 2500);
+  setInterval(fitAll, 800);
+})();

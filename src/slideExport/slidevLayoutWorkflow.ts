@@ -15,6 +15,7 @@ import {
 	type SlidevLayoutAuditSummary,
 } from './slidevLayoutAudit';
 import { getVaultBasePath, resolvePlaywrightBrowsersPath, safeRequire } from './platformUtils';
+import { MERMAID_POST_FIT_SCRIPT_SOURCE } from './mermaidFitScript';
 import type { ExportProgressCallback, SlideExportConfig, SlidevExportSource, SlidevHtmlExportOutcome } from './types';
 
 export interface SlidevLayoutCheck {
@@ -224,6 +225,7 @@ async function runPlaywrightLayoutChecks(
 			const targetUrl = baseUrl ? `${baseUrl}#/${slide}` : `file://${htmlPath}#/${slide}`;
 			await openSlideForLayoutAudit(page, targetUrl, navigationTimeoutMs);
 			await page.waitForTimeout(1_000);
+			await fitMermaidDiagramsBeforeMeasure(page);
 			const text = await page.locator('body').innerText({ timeout: 5_000 }).catch(() => '');
 			const measurement = await collectRenderedSlideMeasurement(page, slide);
 			const layoutAudit = analyzeRenderedSlideMeasurement(measurement, auditConfig);
@@ -250,6 +252,15 @@ async function runPlaywrightLayoutChecks(
 	}
 
 	return { checks, layoutAudits };
+}
+
+
+// Pre-fit mermaid SVG heights before the rendered audit measures geometry, so
+// overflow caused by a tall diagram is attributed to the table/text/zone that
+// the existing splitters already handle. Mirrors the standalone post-fit logic
+// (mermaidPostFitScript.txt) but runs once per slide in the headless browser.
+async function fitMermaidDiagramsBeforeMeasure(page: any): Promise<void> {
+	await page.evaluate(MERMAID_POST_FIT_SCRIPT_SOURCE);
 }
 
 function resolveLayoutNavigationTimeout(timeoutMs: number | null | undefined): number {

@@ -3244,7 +3244,7 @@ function readCodeFenceLanguage(opener: string): string {
 
 function splitMarkdownTableByRows(tableBlock: MarkdownTableBlock, targetChunkCount: number): string[][] | null {
 	const rowBlocks = tableBlock.dataLines.map((line) => [line]);
-	const chunkedRowBlocks = chunkLineBlocks(rowBlocks, Math.max(2, Math.min(targetChunkCount, rowBlocks.length)));
+	const chunkedRowBlocks = chunkBlocksByVisualWeight(rowBlocks, Math.max(2, Math.min(targetChunkCount, rowBlocks.length)));
 	if (chunkedRowBlocks.length < 2) {
 		return null;
 	}
@@ -3290,7 +3290,7 @@ function splitMarkdownTableToRecordSlides(tableBlock: MarkdownTableBlock, target
 	}
 
 	const recordBlocks = rowCells.map((cells) => formatMarkdownTableRecordBlock(headerCells, cells));
-	const chunkedRecordBlocks = chunkLineBlocks(
+	const chunkedRecordBlocks = chunkBlocksByVisualWeight(
 		recordBlocks,
 		Math.max(2, Math.min(targetChunkCount, recordBlocks.length)),
 	);
@@ -3312,6 +3312,57 @@ function splitMarkdownTableToRecordSlides(tableBlock: MarkdownTableBlock, target
 function hasSubstantiveLine(line: string): boolean {
 	const trimmed = line.trim();
 	return trimmed.length > 0 && !trimmed.startsWith('%%');
+}
+
+// Heuristic wrapped-line count for a block of wrapping prose (table row content or a
+// record entry). The default Slidev body width (~1176px at 15px glyphs) holds
+// roughly APPROX_CHARS_PER_RENDERED_LINE Latin glyphs, fewer for wide CJK glyphs,
+// so this is deliberately conservative (underestimate -> balance slightly toward
+// more chunks), never zero. Used only by table-row and record-list splitters,
+// where source-line count (chunkLineBlocks) underestimates tall wrapped rows and
+// dumps them all on one page. Code fences keep chunkLineBlocks because code does
+// not wrap.
+const APPROX_CHARS_PER_RENDERED_LINE = 80;
+
+function estimateBlockVisualWeight(block: string[]): number {
+	const visibleChars = block.join('\n').replace(/\s+/g, '').length;
+	return Math.max(1, Math.ceil(visibleChars / APPROX_CHARS_PER_RENDERED_LINE));
+}
+
+function chunkBlocksByVisualWeight(blocks: string[][], chunkCount: number): string[][] {
+	const totalWeight = blocks.reduce((total, block) => total + estimateBlockVisualWeight(block), 0);
+	const targetWeightBudget = Math.max(1, Math.ceil(totalWeight / chunkCount));
+	const chunks: string[][] = [];
+	let currentChunk: string[] = [];
+
+	for (let index = 0; index < blocks.length; index++) {
+		const block = blocks[index];
+		const remainingBlocks = blocks.length - index;
+		const remainingChunkSlots = chunkCount - chunks.length;
+		// Seal the current chunk once it has crossed the weight budget and at least
+		// one block remains for every still-open slot, so a final oversized page is
+		// not produced by an uneven trailing accumulation.
+		const currentWeight = estimateBlockVisualWeight(currentChunk);
+		const hasContent = currentChunk.some(hasSubstantiveLine);
+		const shouldSealChunk =
+			hasContent &&
+			chunks.length < chunkCount - 1 &&
+			(currentWeight + estimateBlockVisualWeight(block) > targetWeightBudget ||
+				remainingBlocks === remainingChunkSlots);
+
+		if (shouldSealChunk) {
+			chunks.push(trimOuterBlankLines(currentChunk));
+			currentChunk = [];
+		}
+
+		currentChunk.push(...block);
+	}
+
+	if (currentChunk.some(hasSubstantiveLine)) {
+		chunks.push(trimOuterBlankLines(currentChunk));
+	}
+
+	return chunks.filter((chunk) => chunk.some(hasSubstantiveLine));
 }
 
 function chunkLineBlocks(blocks: string[][], chunkCount: number): string[][] {
@@ -4425,7 +4476,11 @@ function buildSupportedSlotLayoutBodyLines(surface: SupportedSlotLayoutSurface):
 }
 
 function isTopLevelListItem(line: string): boolean {
-	return /^\s{0,3}(?:[-*+]|\d+\.)\s+\S/.test(line);
+	// A top-level list item starts at column 0. Allowing leading whitespace
+	// treated nested indented children (e.g. `  - Responsibility:` under a
+	// record bullet) as new top-level blocks, which let the cross-page splitter
+	// carve a parent from its child and orphan the child on the next slide.
+	return /^(?:[-*+]|\d+\.)\s+\S/.test(line);
 }
 
 function appendSlideBlock(lines: string[], block: string[]): void {

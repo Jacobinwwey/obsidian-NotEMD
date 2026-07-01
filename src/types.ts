@@ -225,6 +225,7 @@ export interface NotemdSettings {
     slideExportTimeoutMs: number;
     slideExportTheme: string;
     slideExportHtmlMode: 'standalone' | 'server-script';
+    slideExportImageClarity: 'standard' | 'high' | 'ultra';
     slideExportPptxLatinFontFace: string;
     slideExportPptxEastAsiaFontFace: string;
     slideExportPptxMonospaceFontFace: string;

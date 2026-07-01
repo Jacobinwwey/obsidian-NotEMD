@@ -90,6 +90,16 @@ export async function execFileAsync(
 		};
 	}
 
+	// On Windows, child_process.execFile cannot spawn a bare name like "node" or
+	// a batch shim ("npx.cmd", "npm.cmd", "slidev.cmd") without shell resolution —
+	// it throws EINVAL synchronously. We need shell:true so Node resolves the PATHEXT
+	// and runs .cmd/.bat/.exe shims the same way `child_process.exec` would, while
+	// still passing our args as an array (no shell interpolation risk because execFile
+	// with shell:true still substitutes via cmd.exe only when command itself is a batch).
+	// On macOS/Linux, shell stays false — direct exec, no shell overhead.
+	const os: any = safeRequire('os');
+	const isWindows = os?.platform?.() === 'win32';
+
 	return new Promise<ExecResult>((resolve) => {
 		const proc = childProcess.execFile(
 			command,
@@ -99,6 +109,8 @@ export async function execFileAsync(
 				timeout: options?.timeout ?? 120_000,
 				env: { ...process.env, ...options?.env },
 				maxBuffer: 10 * 1024 * 1024,
+				shell: isWindows,
+				windowsHide: true,
 			},
 			(error: Error | null, stdout: string | Buffer, stderr: string | Buffer) => {
 				const stdoutStr = typeof stdout === 'string' ? stdout : stdout?.toString?.('utf8') ?? '';
@@ -186,6 +198,7 @@ export function resolvePlaywrightBrowsersPath(): string | null {
 			path.join(home, '.cache', 'ms-playwright'),
 			path.join(home, 'Library', 'Caches', 'ms-playwright'),
 			path.join(home, 'AppData', 'Local', 'ms-playwright'),
+			path.join(home, 'AppData', 'Roaming', 'ms-playwright'),
 		]) {
 			try {
 				if (fs.existsSync(candidate)) {
@@ -194,6 +207,17 @@ export function resolvePlaywrightBrowsersPath(): string | null {
 			} catch {
 				// Try the next candidate.
 			}
+		}
+	}
+
+	// Windows falls back to the PLAYWRIGHT_BROWSERS_PATH env var if set.
+	if (process.env.PLAYWRIGHT_BROWSERS_PATH) {
+		try {
+			if (fs.existsSync(process.env.PLAYWRIGHT_BROWSERS_PATH)) {
+				return process.env.PLAYWRIGHT_BROWSERS_PATH;
+			}
+		} catch {
+			// Fall through to null.
 		}
 	}
 

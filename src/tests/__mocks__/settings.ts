@@ -148,6 +148,7 @@ export const mockSettings: NotemdSettings = {
     slideExportTimeoutMs: 120000,
     slideExportTheme: '',
     slideExportHtmlMode: 'standalone',
+    slideExportImageClarity: 'ultra',
     slideExportPptxLatinFontFace: 'Noto Sans',
     slideExportPptxEastAsiaFontFace: 'Microsoft YaHei',
     slideExportPptxMonospaceFontFace: 'DejaVu Sans Mono',

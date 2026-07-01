@@ -3384,6 +3384,19 @@ export class NotemdSettingTab extends PluginSettingTab {
             );
 
             new Setting(containerEl)
+                .setName(i18n.slideExport.imageClarityName)
+                .setDesc(i18n.slideExport.imageClarityDesc)
+                .addDropdown(dropdown => dropdown
+                    .addOption('standard', i18n.slideExport.imageClarityStandard)
+                    .addOption('high', i18n.slideExport.imageClarityHigh)
+                    .addOption('ultra', i18n.slideExport.imageClarityUltra)
+                    .setValue(this.plugin.settings.slideExportImageClarity)
+                    .onChange(async (value) => {
+                        this.plugin.settings.slideExportImageClarity = value as 'standard' | 'high' | 'ultra';
+                        await this.plugin.saveSettings();
+                    }));
+
+            new Setting(containerEl)
                 .setName(i18n.slideExport.withClicksName)
                 .setDesc(i18n.slideExport.withClicksDesc)
                 .addToggle(toggle => toggle

@@ -789,8 +789,87 @@ describe('slidevLayoutAudit', () => {
 		expect(countSlideDeckSlides(patched.deckMarkdown)).toBe(3);
 		expect((patched.deckMarkdown.match(/## CLI 边界现实/g) || []).length).toBe(2);
 		expect(patched.deckMarkdown).toContain('providerDiagnosticReportPersistence');
-		expect(patched.deckMarkdown).toContain('providerDiagnosticCommandHostAdapter');
+			expect(patched.deckMarkdown).toContain('providerDiagnosticCommandHostAdapter');
 	});
+
+	test('keeps nested record-list children attached to their parent across cross-page splits', () => {
+		const audit: SlidevLayoutAudit = {
+			slide: 2,
+			safeRect: { left: 51.2, top: 43.2, right: 1228.8, bottom: 676.8, width: 1177.6, height: 633.6 },
+			contentBounds: { left: 48, top: 52, right: 1234, bottom: 900, width: 1186, height: 848 },
+			pageScale: 1,
+			elementKinds: ['text'],
+			findings: [
+				{
+					kind: 'overflow',
+					target: 'content',
+					message: 'Slide content exceeds the safe visible rectangle',
+					recommendedPatch: 'split-slide',
+					recommendedScale: 0.9,
+				},
+			],
+		};
+		// Record-style list: each top-level bullet owns an indented child. A
+		// cross-page split must keep parent and child on the same slide.
+		const deck = [
+			'---',
+			'theme: default',
+			'---',
+			'',
+			'# Intro',
+			'',
+			'---',
+			'## Module Map',
+			'',
+			'- Module: `src/translate.ts`',
+			'  - Responsibility: Translation pipeline with chunking',
+			'- Module: `src/promptUtils.ts`',
+			'  - Responsibility: Task-specific prompts',
+			'- Module: `src/diagram/`',
+			'  - Responsibility: Diagram domain model',
+			'- Module: `src/rendering/`',
+			'  - Responsibility: Render host, preview, export, theme',
+			'- Module: `src/ui/`',
+			'  - Responsibility: Settings tab, sidebar, modals',
+		].join('\n');
+
+		const patched = patchDeckWithLayoutAudit(deck, [audit]);
+
+		expect(patched.changed).toBe(true);
+		expect(patched.blockedSlides).toEqual([]);
+		// Every "Responsibility" sub-item must remain on the same slide as its
+		// parent "- Module" bullet (never the first line of a continuation).
+		const slideBodies: string[][] = [];
+		let current: string[] = [];
+		let sawFrontmatterClose = false;
+		for (const line of patched.deckMarkdown.split('\n')) {
+			if (line.trim() === '---') {
+				if (!sawFrontmatterClose) {
+					sawFrontmatterClose = true;
+					current = [];
+				} else {
+					slideBodies.push(current);
+					current = [];
+				}
+				continue;
+			}
+			current.push(line);
+		}
+		if (current.some((line) => line.trim().length > 0)) {
+			slideBodies.push(current);
+		}
+		for (const body of slideBodies) {
+			const firstSubstantive = body.find(
+				(line) => line.trim().length > 0 && !line.startsWith('##') && !line.startsWith('#'),
+			);
+			if (firstSubstantive !== undefined) {
+				expect(firstSubstantive).not.toMatch(/^\s+- Responsibility/);
+			}
+		}
+		expect(patched.deckMarkdown).toContain('  - Responsibility: Translation pipeline with chunking');
+		expect(patched.deckMarkdown).toContain('- Module: `src/translate.ts`');
+	});
+
 
 	test('splits oversized Markdown tables when further zoom would become unreadable', () => {
 		const audit: SlidevLayoutAudit = {

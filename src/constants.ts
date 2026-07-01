@@ -209,6 +209,7 @@ export const DEFAULT_SETTINGS: NotemdSettings = {
     slideExportTimeoutMs: 120_000,
     slideExportTheme: '',
     slideExportHtmlMode: 'standalone',
+    slideExportImageClarity: 'ultra',
     slideExportPptxLatinFontFace: 'Noto Sans',
     slideExportPptxEastAsiaFontFace: 'Microsoft YaHei',
     slideExportPptxMonospaceFontFace: 'DejaVu Sans Mono',

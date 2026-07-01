@@ -1,7 +1,7 @@
 module.exports = {
   preset: 'ts-jest',
   testEnvironment: 'node',
-  moduleFileExtensions: ['ts', 'js', 'json'],
+  moduleFileExtensions: ['ts', 'js', 'json', 'txt'],
   testMatch: ['**/tests/**/*.test.ts'],
   testPathIgnorePatterns: ['/node_modules/', '/ref/', '/.worktrees/', '/.cache/', '/.tmp_repo_saga_tool/'],
   modulePathIgnorePatterns: ['<rootDir>/.worktrees/', '<rootDir>/.cache/', '<rootDir>/.tmp_repo_saga_tool/', '<rootDir>/ref/'],
@@ -10,6 +10,7 @@ module.exports = {
     '^mermaid$': '<rootDir>/src/__mocks__/mermaid.ts'
   },
   transform: {
+    '^.+\\.txt$': '<rootDir>/jest-txt-transform.js',
     '^.+\\.ts$': [
       'ts-jest',
       {

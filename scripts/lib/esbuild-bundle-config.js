@@ -45,6 +45,7 @@ function createMainBundleBuildOptions({
         entryPoints: ['src/main.ts'],
         bundle: true,
         external: SHARED_EXTERNAL,
+        loader: { '.txt': 'text' },
         format: 'cjs',
         target: 'es2018',
         logLevel,

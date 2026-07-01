@@ -274,6 +274,7 @@ describe('slidevExporter — All Format Combinations', () => {
             ffmpegCrf: 23,
             slidevTheme: 'seriph',
             timeoutMs: 120000,
+            imageScale: 3,
         };
         const callback = jest.fn();
         await exportSlidevHtml(app, source, config, callback);
@@ -301,6 +302,7 @@ describe('slidevExporter — All Format Combinations', () => {
             ffmpegCrf: 23,
             slidevTheme: 'seriph',
             timeoutMs: 120000,
+            imageScale: 3,
         };
 
         const outcome = await exportSlidevHtmlWithOutcome(app, source, config, jest.fn());
@@ -401,6 +403,7 @@ describe('slidevExporter — All Format Combinations', () => {
             ffmpegCrf: 23,
             slidevTheme: 'default',
             timeoutMs: 120000,
+            imageScale: 3,
         };
 
         try {
@@ -447,6 +450,7 @@ describe('slidevExporter — All Format Combinations', () => {
             ffmpegCrf: 23,
             slidevTheme: 'default',
             timeoutMs: 120000,
+            imageScale: 3,
             htmlMode: 'server-script',
         };
 
@@ -485,6 +489,7 @@ describe('slidevExporter — All Format Combinations', () => {
             ffmpegCrf: 23,
             slidevTheme: '',
             timeoutMs: 60000,
+            imageScale: 3,
         };
         const callback = jest.fn();
         await exportSlidevPdf(app, source, config, callback);
@@ -515,6 +520,7 @@ describe('slidevExporter — All Format Combinations', () => {
             ffmpegCrf: 23,
             slidevTheme: 'default',
             timeoutMs: 90000,
+            imageScale: 3,
         };
         const callback = jest.fn();
         await exportSlidevPng(app, source, config, callback);
@@ -543,6 +549,7 @@ describe('slidevExporter — All Format Combinations', () => {
             ffmpegCrf: 23,
             slidevTheme: '',
             timeoutMs: 180000,
+            imageScale: 3,
         };
         await exportSlidevHtml(app, source, config, jest.fn());
         expect(mockExecFileAsync).toHaveBeenCalledWith(
@@ -573,6 +580,7 @@ window.__require("./index-abc.js");
             ffmpegCrf: 23,
             slidevTheme: 'default',
             timeoutMs: 120000,
+            imageScale: 3,
         };
 
         const output = await exportSlidevHtml(app, source, config, jest.fn());
@@ -612,6 +620,7 @@ window.__require("./index-abc.js");
             ffmpegCrf: 23,
             slidevTheme: 'default',
             timeoutMs: 120000,
+            imageScale: 3,
         };
 
         const outcome = await exportSlidevHtmlWithOutcome(app, source, config, jest.fn());
@@ -674,6 +683,15 @@ describe('videoExporter — Timeout and Pattern Construction', () => {
         mockGetVaultBasePath.mockReturnValue('/vault');
         mockResolveNpxCommand.mockReturnValue('npx');
         mockNpxSlidevCommand();
+        mockSafeRequire.mockImplementation((name: string) => {
+            if (name === 'fs') return {
+                existsSync: jest.fn().mockReturnValue(true),
+                readdirSync: jest.fn().mockReturnValue(['01.png', '02.png', '03.png']),
+                writeFileSync: jest.fn(),
+            };
+            if (name === 'path') return { join: (...args: string[]) => args.join('/') };
+            return null;
+        });
     });
 
     test('clamps timeout to minimum 300s', async () => {
@@ -687,6 +705,7 @@ describe('videoExporter — Timeout and Pattern Construction', () => {
             ffmpegCrf: 23,
             slidevTheme: '',
             timeoutMs: 100,
+            imageScale: 3,
         };
         await exportVideoMp4(app, 'export/test-export', 'test', config, jest.fn());
         expect(mockExecFileAsync).toHaveBeenCalledWith(
@@ -694,6 +713,11 @@ describe('videoExporter — Timeout and Pattern Construction', () => {
             expect.any(Array),
             expect.objectContaining({ timeout: 300000 })
         );
+        const callArgs = (mockExecFileAsync as jest.Mock).mock.calls[0][1] as string[];
+        expect(callArgs).toContain('-f');
+        expect(callArgs).toContain('concat');
+        expect(callArgs).toContain('-safe');
+        expect(callArgs).toContain('0');
     });
 
     test('constructs correct PNG pattern and output path', async () => {
@@ -708,15 +732,15 @@ describe('videoExporter — Timeout and Pattern Construction', () => {
             ffmpegCrf: 18,
             slidevTheme: '',
             timeoutMs: 180000,
+            imageScale: 3,
         };
         await exportVideoMp4(app, 'export/slides-export', 'slides', config, callback);
         expect(callback).toHaveBeenCalledWith('ffmpeg-encode', expect.any(String));
         expect(mockExecFileAsync).toHaveBeenCalledWith(
             'ffmpeg',
             expect.arrayContaining([
-                '-framerate', '2',
-                '-pattern_type', 'glob',
-                '-i', '/vault/export/slides-export/*.png',
+                '-f', 'concat',
+                '-safe', '0',
                 '-crf', '18',
                 '/vault/export/slides.mp4'
             ]),
@@ -764,6 +788,7 @@ describe('Integration — Probe to HTML Export', () => {
             ffmpegCrf: 23,
             slidevTheme: '',
             timeoutMs: 120000,
+            imageScale: 3,
         };
         await exportSlidevHtml(app, source, config, jest.fn());
         expect(mockExecFileAsync).toHaveBeenLastCalledWith(
@@ -809,6 +834,7 @@ describe('Integration — Probe to PDF Export', () => {
             ffmpegCrf: 23,
             slidevTheme: 'default',
             timeoutMs: 180000,
+            imageScale: 3,
         };
         await exportSlidevPdf(app, source, config, jest.fn());
         expect(mockExecFileAsync).toHaveBeenLastCalledWith(
@@ -832,7 +858,12 @@ describe('Integration — Probe to PNG to MP4 Chain', () => {
     });
 
     test('full PNG export to MP4 conversion chain', async () => {
-        const mockFs = { existsSync: jest.fn().mockReturnValue(true), readdirSync: jest.fn().mockReturnValue(['chromium']) };
+        mockExecFileAsync.mockResolvedValue({ exitCode: 0, stdout: '', stderr: '' });
+        const mockFs = {
+            existsSync: jest.fn().mockReturnValue(true),
+            readdirSync: jest.fn().mockReturnValue(['01.png', '02.png', '03.png']),
+            writeFileSync: jest.fn(),
+        };
         mockSafeRequire.mockImplementation((name: string) => {
             if (name === 'fs') return mockFs;
             if (name === 'path') return { join: (...args: string[]) => args.join('/') };
@@ -857,13 +888,14 @@ describe('Integration — Probe to PNG to MP4 Chain', () => {
             ffmpegCrf: 20,
             slidevTheme: '',
             timeoutMs: 120000,
+            imageScale: 3,
         };
         await exportSlidevPng(app, source, config, jest.fn());
 
         await exportVideoMp4(app, 'export/deck-slides-png', 'deck', config, jest.fn());
         expect(mockExecFileAsync).toHaveBeenLastCalledWith(
             'ffmpeg',
-            expect.arrayContaining(['-framerate', '2', '-crf', '20']),
+            expect.arrayContaining(['-f', 'concat', '-safe', '0', '-crf', '20']),
             expect.objectContaining({ timeout: 300000 })
         );
     });

@@ -64,6 +64,7 @@ export interface SlideExportConfig {
 	slidevTheme: string;
 	timeoutMs: number;
 	htmlMode?: SlidevHtmlMode;
+	imageScale: number;
 	pptxFontPolicy?: Partial<SlidevPptxFontPolicy>;
 }
 
