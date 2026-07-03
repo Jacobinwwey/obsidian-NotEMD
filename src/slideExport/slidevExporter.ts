@@ -10,6 +10,7 @@ import type { SlideExportConfig, ExecResult, ExportProgressCallback, SlidevExpor
 import { NOTEMD_SLIDEV_INSTALL_PACKAGES } from './slidevDistribution';
 import { execFileAsync, getVaultBasePath, resolveNpmCommand, resolveNpxCommand, resolvePlaywrightBrowsersPath, resolveSlidevCommand, safeRequire } from './platformUtils';
 import { collectLocalAssetReferencesWithDependencies, copyLocalSlidevAssetReference } from './slidevSourcePreparer';
+import { injectMermaidPostFitIntoHtml } from './mermaidFitScript';
 
 // In Slidev's one-piece export mode the CLI renders all slides on a single tall
 // page and only waits for one shared `#mermaid-rendering-container`, so later
@@ -98,6 +99,21 @@ function hasStandaloneLoaderBinding(entryModuleCode: string, loaderRef: string):
 	return new RegExp(`(^|[^A-Za-z0-9_$])${escapedLoaderRef}\\s*=`).test(entryModuleCode);
 }
 
+async function injectMermaidPostFitIntoExportHtml(
+	app: App,
+	exportPath: string,
+	onProgress?: ExportProgressCallback,
+): Promise<void> {
+	const html = await app.vault.adapter.read(exportPath);
+	const injectedHtml = injectMermaidPostFitIntoHtml(html);
+	if (injectedHtml === html) {
+		return;
+	}
+
+	await app.vault.adapter.write(exportPath, injectedHtml);
+	onProgress?.('mermaid-fit', `Injected post-fit script into ${exportPath}`);
+}
+
 export function detectStandaloneBundleLoaderGaps(html: string): string[] {
 	const entryRefMatch = html.match(/window\.__require\(['"](\.\/index-[^'"]+\.js)['"]\)/);
 	if (!entryRefMatch) {
@@ -180,6 +196,7 @@ async function exportSlidevStandaloneHtml(
 	const standaloneHtml = await app.vault.adapter.read(standaloneHtmlPath);
 	const loaderGaps = detectStandaloneBundleLoaderGaps(standaloneHtml);
 	if (loaderGaps.length === 0) {
+		await injectMermaidPostFitIntoExportHtml(app, standaloneHtmlPath, onProgress);
 		onProgress?.('slidev-build', `Standalone HTML created via ${slidev.description}`);
 		return {
 			path: standaloneHtmlPath,
@@ -245,6 +262,7 @@ async function exportSlidevServerHtml(
 	copyPreparedLocalFileReferencesToExport(source, vaultRoot, outputDir, onProgress);
 
 	const exportPath = `${config.outputSubfolder}/${source.outputBasename}-slides/index.html`;
+	await injectMermaidPostFitIntoExportHtml(app, exportPath, onProgress);
 
 	onProgress?.('slidev-build', 'Creating server scripts...');
 	const { createServerScripts } = await import('./serverScripts');

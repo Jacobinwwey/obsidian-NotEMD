@@ -245,6 +245,47 @@ describe('slidevLayoutAudit', () => {
 		expect(manualReviewAudit.mermaidFit?.reason).toContain('safe-rect fit would require zoom');
 	});
 
+	test('keeps Mermaid scroll-box-only overflow as fit review evidence when geometry is visible', () => {
+		const audit = analyzeRenderedSlideMeasurement(
+			createMeasurement({
+				pageScale: 0.844,
+				contentBounds: { left: 62.5, top: 42.93, right: 1217.47, bottom: 310.53, width: 1154.97, height: 267.6 },
+				elements: [
+					{
+						kind: 'mermaid',
+						selector: '.mermaid',
+						textLength: 260,
+						textPreview: 'Renderer platform graph',
+						scrollWidth: 1176,
+						scrollHeight: 270,
+						clientWidth: 1155,
+						clientHeight: 270,
+						rect: { left: 62.5, top: 83.66, right: 1217.47, bottom: 310.53, width: 1154.97, height: 226.87 },
+					},
+					{
+						kind: 'text',
+						selector: 'h2',
+						textLength: 6,
+						scrollWidth: 240,
+						scrollHeight: 40,
+						clientWidth: 240,
+						clientHeight: 40,
+						rect: { left: 62.5, top: 42.93, right: 302.5, bottom: 78, width: 240, height: 35.07 },
+					},
+				],
+			}),
+		);
+
+		expect(audit.findings.some((finding) => finding.kind === 'overflow')).toBe(false);
+		expect(audit.mermaidFit).toEqual(
+			expect.objectContaining({
+				status: 'source-preserved-fit-review',
+				tightMargin: true,
+			}),
+		);
+		expect(audit.mermaidFit?.reason).toContain('preserved Mermaid margin');
+	});
+
 	test('refuses to split Mermaid fences even if a structural code patch is requested', () => {
 		const audit: SlidevLayoutAudit = {
 			slide: 2,

@@ -15,11 +15,15 @@ import postFitSource from './mermaidPostFitScript.txt';
 export const MERMAID_POST_FIT_SCRIPT_SOURCE = postFitSource.trim();
 
 export function injectMermaidPostFitIntoHtml(html: string): string {
-	const scriptTag = `<script>${MERMAID_POST_FIT_SCRIPT_SOURCE}\n</script>`;
+	if (html.includes('data-notemd-mermaid-post-fit')) {
+		return html;
+	}
+
+	const scriptTag = `<script data-notemd-mermaid-post-fit="1">${MERMAID_POST_FIT_SCRIPT_SOURCE}\n</script>`;
 	// Replace the LAST (real) </body> tag, not earlier occurrences in JS strings.
 	const lastBodyIdx = html.lastIndexOf('</body>');
 	if (lastBodyIdx >= 0) {
 		return html.slice(0, lastBodyIdx) + scriptTag + '\n' + html.slice(lastBodyIdx);
 	}
-	return html.replace('</body>', `${scriptTag}\n</body>`);
+	return `${html}\n${scriptTag}\n`;
 }

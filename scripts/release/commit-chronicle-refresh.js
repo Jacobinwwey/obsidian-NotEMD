@@ -1,5 +1,5 @@
 const path = require('path');
-const { spawnSync } = require('child_process');
+const { spawnSyncWithCommandResolution } = require('../lib/cross-platform-command.js');
 const {
     RELEASE_CHRONICLE_REFRESH_TARGET_BRANCH
 } = require('../lib/packaging-contract.js');
@@ -25,7 +25,7 @@ function createGitCommandError(args, result = {}) {
 }
 
 function runGit(repoRoot, args, { allowFailure = false } = {}) {
-    const result = spawnSync('git', args, {
+    const result = spawnSyncWithCommandResolution('git', args, {
         cwd: repoRoot,
         encoding: 'utf8'
     });

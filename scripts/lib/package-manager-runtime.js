@@ -18,7 +18,7 @@ function buildPackageManagerRuntime(candidate, cwd) {
         return {
             command: candidate.command,
             prefix: candidate.prefix,
-            env: { ...process.env },
+            env: normalizePathEnv(process.env),
             shimDir: null
         };
     }
@@ -35,12 +35,17 @@ function buildPackageManagerRuntime(candidate, cwd) {
 function ensurePnpmShimDir(candidate, cwd) {
     const shimDir = path.join(cwd, PACKAGE_MANAGER_SHIM_DIR_NAME);
     const shimPath = path.join(shimDir, 'pnpm');
+    const cmdShimPath = path.join(shimDir, 'pnpm.cmd');
     const shimBody = buildPnpmShimBody(candidate);
+    const cmdShimBody = buildPnpmCmdShimBody(candidate);
 
     fs.mkdirSync(shimDir, { recursive: true });
     if (!fs.existsSync(shimPath) || fs.readFileSync(shimPath, 'utf8') !== shimBody) {
         fs.writeFileSync(shimPath, shimBody, 'utf8');
         fs.chmodSync(shimPath, 0o755);
+    }
+    if (!fs.existsSync(cmdShimPath) || fs.readFileSync(cmdShimPath, 'utf8') !== cmdShimBody) {
+        fs.writeFileSync(cmdShimPath, cmdShimBody, 'utf8');
     }
 
     return shimDir;
@@ -57,9 +62,36 @@ function buildPnpmShimBody(candidate) {
     }
 }
 
+function buildPnpmCmdShimBody(candidate) {
+    switch (candidate.command) {
+        case 'corepack':
+            return '@echo off\r\ncorepack pnpm %*\r\n';
+        case 'bun':
+            return '@echo off\r\nbun x pnpm %*\r\n';
+        default:
+            throw new Error(`Unsupported pnpm shim candidate: ${candidate.command}`);
+    }
+}
+
 function prependToPath(env, entry) {
-    const nextEnv = { ...env };
+    const nextEnv = normalizePathEnv(env);
     nextEnv.PATH = nextEnv.PATH ? `${entry}${path.delimiter}${nextEnv.PATH}` : entry;
+    const pathKey = Object.keys(nextEnv).find((key) => key.toLowerCase() === 'path' && key !== 'PATH');
+    if (pathKey) {
+        nextEnv[pathKey] = nextEnv.PATH;
+    }
+    return nextEnv;
+}
+
+function normalizePathEnv(env) {
+    const nextEnv = { ...env };
+    const pathKey = Object.keys(nextEnv).find((key) => key.toLowerCase() === 'path');
+    if (pathKey && pathKey !== 'PATH' && nextEnv.PATH === undefined) {
+        nextEnv.PATH = nextEnv[pathKey];
+    }
+    if (pathKey && pathKey !== 'PATH' && nextEnv.PATH !== undefined) {
+        nextEnv[pathKey] = nextEnv.PATH;
+    }
     return nextEnv;
 }
 

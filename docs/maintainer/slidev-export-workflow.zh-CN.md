@@ -327,6 +327,7 @@ mermaidSourcePreservation.changedFenceIndexes
 50. Stage 14 component/image expected-failure fixture 验收包位于 `/home/jacob/slidev-export-review/2026-06-20-stage14-unsupported-component-image-boundary-fixture/`；`unsupported-component-image-boundary-stress` 证明 image 混排边界同样 fail transparent，并验证 `assets/boundary-image.svg` 在 prepared deck 和最终 standalone export 两层都存在。
 51. Stage 14 默认成功 fixture suite 归档到 `/home/jacob/slidev-export-review/2026-06-20-stage14-success-fixtures/`；9 个可收敛生产 fixtures 均通过，三个 expected-failure fixtures 默认排除。
 52. Stage 14 真实 `architecture.zh-CN.md` strict native standalone 验收包位于 `/home/jacob/slidev-export-review/2026-06-20-stage14-real/`；报告为 `ok = true`，使用本地 Slidev fork 与 52 个 skill references，`actualMode = "standalone"`，`requiresLocalServer = false`，`standaloneGate.passed = true`，3 个 Mermaid fence 均保持 `changedFenceIndexes = []`，`hardOverflowCount = 0`，`lowEffectiveFontCount = 0`，并归档了可审查的 `architecture.zh-CN.stage14.slidev.md` 与 `architecture.zh-CN-slides/index-standalone.html`。
+53. 2026-07-02 process-resolution 收口修复了 Windows 上表现为 `spawn EINVAL` 的底层环境探测失败。exporter 现在会先尝试 direct execution；Windows bare command name 通过 `PATH` + `PATHEXT` 解析；`.exe` / `.com` 直接执行；`.js` / `.mjs` / `.cjs` 通过 `process.execPath` 运行；只有解析结果是 `.cmd` / `.bat` shim 时，才进入带安全 quoting 的 `cmd.exe /d /s /c call` 隔离路径。Linux 与 macOS 继续 direct exec，不因为 Windows 需要 batch-shim adapter 就额外加 shell 层。
 
 当前限制：
 
@@ -339,6 +340,7 @@ mermaidSourcePreservation.changedFenceIndexes
 7. code splitting 仍是 parser-light；TypeScript/JavaScript/Python/Rust 已有 top-level tokenizer，但完整 AST 拆分与更多语言专用 splitter 仍是后续工作。
 8. Mermaid 不拆图约束不等于 Mermaid 演示质量自动合格。超大源图如果只能靠低 zoom 保持完整，流程应暴露 `source-preserved-fit-review` 或 `manual-review`，而不是静默改图或拆图。
 9. 当前 full-deck fixtures 已覆盖长表、宽表、混合代码、Mermaid 源图保持 fit、component-heavy slot Transform 边界、Mermaid/prose 非图内容移动、本地图片资产、嵌套 slot component、超宽表、frontmatter background/image/favicon、跨目录资产、CSS `url(...)` 图片/字体依赖、本地 CSS `@import` 链、本地 video/audio/track 资产、离线字体边界、bounded raw HTML/component single-surface、bounded component-only Vue tree surface、清晰边界 mixed component/prose 与 unsupported component/table/fence/image expected-failure，但仍不是 exhaustive；后续真实文档若出现复杂 Vue component 或 unsupported layout 失败，应继续沉淀为 fixture。
+10. 进程启动可移植性现在属于导出契约的一部分。不要把平台适配器退回到全局 `shell: true`；它虽然可能掩盖 `.cmd` 解析失败，但会破坏 JSON 与代码式参数的参数保真。
 
 ## 输出策略
 

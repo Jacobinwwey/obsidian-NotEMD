@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 
 const fs = require('fs');
-const { spawnSync } = require('child_process');
 const { OPERATION_HELP } = require('./lib/maintainer-cli-operation-help.js');
+const { spawnSyncWithCommandResolution } = require('./lib/cross-platform-command.js');
 
 function printUsage() {
   const operationDetails = Object.entries(OPERATION_HELP)
@@ -164,7 +164,7 @@ function main() {
       input
     };
     const code = buildEvalCode(args.pluginId, request);
-    const child = spawnSync(
+    const child = spawnSyncWithCommandResolution(
       'obsidian-cli',
       ['native', `vault=${args.vault}`, 'eval', `code=${code}`],
       {

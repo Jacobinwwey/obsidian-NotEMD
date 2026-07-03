@@ -55,6 +55,7 @@ describe('package manager runtime helper', () => {
             const runtime = buildPackageManagerRuntime(candidate, tempRoot);
             const shimDir = path.join(tempRoot, '.notemd-package-manager-bin');
             const shimPath = path.join(shimDir, 'pnpm');
+            const cmdShimPath = path.join(shimDir, 'pnpm.cmd');
 
             expect(runtime.command).toBe(candidate.command);
             expect(runtime.prefix).toEqual(candidate.prefix);
@@ -62,7 +63,11 @@ describe('package manager runtime helper', () => {
             expect(runtime.env.PATH?.split(path.delimiter)[0]).toBe(shimDir);
             expect(fs.existsSync(shimPath)).toBe(true);
             expect(fs.readFileSync(shimPath, 'utf8')).toContain(expectedSnippet);
-            expect(fs.statSync(shimPath).mode & 0o111).not.toBe(0);
+            expect(fs.existsSync(cmdShimPath)).toBe(true);
+            expect(fs.readFileSync(cmdShimPath, 'utf8')).toContain(expectedSnippet.replace('exec ', '').replace(' "$@"', ' %*'));
+            if (process.platform !== 'win32') {
+                expect(fs.statSync(shimPath).mode & 0o111).not.toBe(0);
+            }
         } finally {
             fs.rmSync(tempRoot, { recursive: true, force: true });
         }

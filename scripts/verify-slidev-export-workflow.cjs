@@ -649,7 +649,7 @@ async function runPlaywrightChecks(htmlPath, sampleSlides, writeScreenshots, sli
 	let baseUrl = null;
 
 	try {
-		if (htmlPath.endsWith('/index.html')) {
+		if (isSlidevServerHtmlEntryPath(htmlPath)) {
 			serverDirectory = path.dirname(htmlPath);
 			const port = await slideExport.startLocalServer(serverDirectory);
 			baseUrl = `http://localhost:${port}/index.html`;
@@ -737,7 +737,7 @@ function checkGitIgnoreStatus(pathsToCheck) {
 		};
 	}
 
-	const relativePaths = existingPaths.map(filePath => path.relative(process.cwd(), filePath));
+	const relativePaths = existingPaths.map(filePath => normalizeGitRelativePath(path.relative(process.cwd(), filePath)));
 	const result = childProcess.spawnSync('git', ['check-ignore', '-v', '--stdin'], {
 		cwd: process.cwd(),
 		encoding: 'utf8',
@@ -750,7 +750,7 @@ function checkGitIgnoreStatus(pathsToCheck) {
 		.filter(Boolean);
 	const ignoredRelativePaths = new Set(ignoredOutputs.map(line => {
 		const parts = line.split('\t');
-		return (parts[parts.length - 1] || line).trim();
+		return normalizeGitCheckIgnoreOutputPath((parts[parts.length - 1] || line).trim());
 	}));
 
 	return {
@@ -760,15 +760,38 @@ function checkGitIgnoreStatus(pathsToCheck) {
 	};
 }
 
+function normalizeGitRelativePath(relativePath) {
+	return String(relativePath || '').replace(/\\/g, '/').replace(/\r$/, '');
+}
+
+function normalizeGitCheckIgnoreOutputPath(rawPath) {
+	const trimmed = String(rawPath || '').trim();
+	if (trimmed.startsWith('"') && trimmed.endsWith('"')) {
+		try {
+			return normalizeGitRelativePath(JSON.parse(trimmed));
+		} catch (_error) {
+			return normalizeGitRelativePath(trimmed.slice(1, -1));
+		}
+	}
+	return normalizeGitRelativePath(trimmed);
+}
+
 function injectMermaidPostFit(htmlPath, onProgress) {
 	const html = fs.readFileSync(htmlPath, 'utf8');
-	const POST_FIT_SCRIPT = '<script>' + fs.readFileSync(path.join(__dirname, '..', 'src', 'slideExport', 'mermaidPostFitScript.txt'), 'utf8').trim() + '</script>';
+	if (html.includes('data-notemd-mermaid-post-fit')) {
+		return;
+	}
+	const POST_FIT_SCRIPT = '<script data-notemd-mermaid-post-fit="1">' + fs.readFileSync(path.join(__dirname, '..', 'src', 'slideExport', 'mermaidPostFitScript.txt'), 'utf8').trim() + '</script>';
 	const lastBodyIdx = html.lastIndexOf("</body>");
 	const patched = lastBodyIdx >= 0
 		? html.slice(0, lastBodyIdx) + POST_FIT_SCRIPT + "\n" + html.slice(lastBodyIdx)
-		: html.replace("</body>", POST_FIT_SCRIPT + "\n</body>");
+		: html + "\n" + POST_FIT_SCRIPT + "\n";
 	fs.writeFileSync(htmlPath, patched, 'utf8');
 	onProgress?.('mermaid-fit', 'Injected post-fit script into standalone HTML');
+}
+
+function isSlidevServerHtmlEntryPath(htmlPath) {
+	return String(htmlPath || '').replace(/\\/g, '/').endsWith('/index.html');
 }
 
 function inspectPptx(pptxPath) {
@@ -1488,5 +1511,7 @@ if (require.main === module) {
 		shouldRunBackgroundPptxVisualDiff,
 		shouldRunRenderedHtmlPptxReferenceDiff,
 		usesVisibleNativeDefaultPptxTextLayer,
+		normalizeGitCheckIgnoreOutputPath,
+		normalizeGitRelativePath,
 	};
 }

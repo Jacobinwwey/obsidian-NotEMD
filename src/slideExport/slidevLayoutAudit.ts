@@ -325,6 +325,8 @@ export function analyzeRenderedSlideMeasurement(
 		}
 	}
 
+	const mermaidFit = analyzeSourcePreservedMermaidFit(measurement, qualityMetrics, resolvedConfig);
+
 	for (const element of measurement.elements) {
 		const elementOverflow = measureOverflow(
 			element.rect,
@@ -336,6 +338,9 @@ export function analyzeRenderedSlideMeasurement(
 			element.scrollHeight - element.clientHeight > resolvedConfig.overflowTolerancePx;
 
 		if (!hasOverflow(elementOverflow) && !scrollOverflow) {
+			continue;
+		}
+		if (isReviewOnlyMermaidScrollOverflow(element, elementOverflow, scrollOverflow, mermaidFit)) {
 			continue;
 		}
 
@@ -410,8 +415,6 @@ export function analyzeRenderedSlideMeasurement(
 			recommendedScale: null,
 		});
 	}
-
-	const mermaidFit = analyzeSourcePreservedMermaidFit(measurement, qualityMetrics, resolvedConfig);
 
 	return {
 		slide: measurement.slide,
@@ -825,6 +828,20 @@ function analyzeSourcePreservedMermaidFit(
 		lowFont,
 		tightMargin,
 	};
+}
+
+function isReviewOnlyMermaidScrollOverflow(
+	element: SlidevMeasuredElement,
+	elementOverflow: { left: number; top: number; right: number; bottom: number },
+	scrollOverflow: boolean,
+	mermaidFit: SlidevMermaidFitAudit | null,
+): boolean {
+	return (
+		element.kind === 'mermaid' &&
+		scrollOverflow &&
+		!hasOverflow(elementOverflow) &&
+		Boolean(mermaidFit && mermaidFit.status !== 'fits')
+	);
 }
 
 function findLowEffectiveFontIssues(

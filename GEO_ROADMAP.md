@@ -1,8 +1,8 @@
 # NotEMD GEO Roadmap
 
 **Created:** 2026-06-12
-**Updated:** 2026-06-26
-**Status:** Phase 1-6 shipped. Phase 7 aligns zh-CN documentation content parity with English, adds `code.json` theme translations, and fixes homepage JSON-LD locale conditioning. Live Search Console and AI visibility checks remain external post-deploy work.
+**Updated:** 2026-07-02
+**Status:** Phase 1-7 shipped. The 2026-07-02 closeout confirms the remote Pages failure was a historical deployment-settings 404, not a current source/build failure, and keeps Search Console plus AI visibility as external post-deploy work.
 **Scope:** Documentation-site GEO for AI search visibility, language truth, GitHub Pages reliability, and answer-engine retrieval quality. This does not cover plugin runtime i18n.
 
 ---
@@ -23,6 +23,33 @@ The current public language surface is intentionally partial:
 | Other locales | Not published | Do not add empty locale folders to `i18n.locales` |
 | Plugin UI i18n | Separate runtime feature | Do not treat runtime language support as website documentation coverage |
 | zh-CN UI chrome (navbar, footer, sidebar labels, pagination) | Translated via `code.json` + `docusaurus.config.json` as of Phase 7 | Previously all English-only on zh-CN pages |
+
+## 2026-07-02 CI, Pages, CLI, And Slidev Closeout
+
+### Finding
+
+The remote `main` CI failure that needed investigation was historical, not a current failing source gate. The failed Pages run `27451762938` failed inside `actions/deploy-pages@v4` with `HttpError: Not Found` and the explicit instruction to enable GitHub Pages. Later `main` runs, including `28281641014`, completed successfully. Current `eb777ef` has no check-runs attached, and the legacy commit status API reports no statuses; that "pending" API state is therefore absence of legacy statuses, not a failed CI result.
+
+This batch still treats Pages as a release gate. Touching `website/**` or `.github/workflows/deploy-docs.yml` must rerun `.github/workflows/deploy-docs.yml`, which performs `npm ci`, `npm run build`, and `npm run audit:build` from `website/` before deployment.
+
+### Source-Side Closeout
+
+| Area | Current truth | Status |
+|---|---|---|
+| Remote Pages CI | Historical failure was a Pages-enabled/settings 404; recent Pages deploys are green | Closed as source/build failure |
+| GitHub Pages gate | Workflow still builds and audits generated output before upload | Active gate |
+| GEO public site | Homepage, `llms.txt`, sitemap, hreflang, fallback noindex, provider-doc headings, and measurement evidence remain audit-backed | Active gate |
+| CLI / maintainer automation | Cross-platform command resolution is now explicit and test-backed for maintainer helpers and release/repo-saga scripts | Closed for process-resolution bug class |
+| Slidev environment probe | The Obsidian runtime command `notemd:probe-slide-export-environment` no longer relies on global Windows `shell: true`; Windows batch shims are resolved through an isolated quoted `cmd.exe /d /s /c call` path only when the resolved command is `.cmd` or `.bat` | Closed for Windows `spawn EINVAL` class |
+
+### Remaining GEO Work
+
+The remaining GEO work is external measurement, not another source-only route rewrite:
+
+1. submit or refresh `sitemap.xml` and `zh-CN/sitemap.xml` in Search Console;
+2. inspect root, zh-CN root, FAQ, provider overview, representative provider detail, and one unpublished zh-CN fallback route;
+3. rerun English and Chinese AI visibility prompts after the deployed Pages artifact is crawled;
+4. keep future zh-CN expansion scoped to translated, reviewed pages declared in `publishedLanguageScopeData.mjs`.
 
 ## 2026-06-26 Phase 7 zh-CN Content Parity & UI Alignment
 
@@ -212,7 +239,7 @@ The effective strategy is truth-first and route-first, not locale-volume-first.
 | Empty or fallback i18n pages emit weak hreflang signals | Controlled | No alternates for unpublished zh-CN fallback docs; noindex and sitemap exclusion remain mandatory |
 | Docusaurus theme override drift | Controlled, but real | Keep overrides small and policy-bearing; re-check after Docusaurus upgrades |
 | zh-CN UI links users into fallback docs | Controlled | Homepage, locale dropdown, sidebar, and paginator now follow published scope |
-| Thin provider pages dilute crawl budget | Controlled in source | Provider detail pages now carry required operational sections |
+| Provider page quality: thin provider pages dilute crawl budget | Controlled in source | Provider detail pages now carry required operational sections |
 | Hand-maintained `llms.txt` can drift | Controlled | `npm run audit:build` checks published zh-CN routes and language-scope warnings |
 | Search Console or AI visibility claims become stale | Open | Keep dated measurement logs; do not convert external checks into source-only assertions |
 | Test/generated output entering main | Controlled | Keep `website/build`, `.docusaurus`, and generated exports ignored/uncommitted |

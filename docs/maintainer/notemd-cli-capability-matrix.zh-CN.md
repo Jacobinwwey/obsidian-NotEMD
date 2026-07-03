@@ -1,6 +1,6 @@
 # Notemd CLI 能力矩阵
 
-> 更新：2026-05-28
+> 更新：2026-07-02
 
 ## 当前状态说明（2026-05-25）
 
@@ -24,6 +24,38 @@
 - 今天已经可以被官方 `obsidian` CLI 触发的命令
 - 哪些命令适合自动化，哪些只适合人工触发
 - 哪些更低层的 Notemd 能力应先抽成 first-class operations，再谈更广泛 CLI 暴露
+
+## 2026-07-02 跨平台进程启动收口
+
+本次收口不扩大 public CLI surface。它修复的是 maintainer helper、release helper、repo-saga helper、package-manager 调用与 Slidev 导出环境探测共用的进程启动层。
+
+根因：
+
+- POSIX 直接执行之所以一直可用，是因为可执行脚本与 shebang 会沿正常 `execve` 路径解析；
+- Windows 在直接用 `execFile` 风格启动 bare command 或 `.cmd` / `.bat` shim 时会失败，这在 Obsidian 内表现为“检测演示导出环境”阶段的 `spawn EINVAL`；
+- 不能把 Windows 全部改成 `shell: true`，因为 shell 会改变参数解析，容易破坏包含 JSON、引号或 `code=...=>...` 这类代码片段的参数。
+
+当前解析模型：
+
+| 平台 / 命令类型 | 执行策略 |
+|---|---|
+| Linux / macOS | 优先直接 exec；普通命令不额外加 shell 层 |
+| Windows `.exe` / `.com` | 直接 exec |
+| Windows `.cmd` / `.bat` | 显式解析 batch shim，再用带 Windows argv quoting 的 `cmd.exe /d /s /c call "<shim>" ...` |
+| Windows `.js` / `.mjs` / `.cjs` | 通过 `process.execPath` 运行 |
+| Windows bare command name | 通过 `PATH` + `PATHEXT` 解析，再按解析出的扩展名分发 |
+
+本批次证据：
+
+- process-level 测试覆盖 fake `git.cmd`、`gh.cmd`、`obsidian-cli.cmd`、`pnpm.cmd`、Node script execution、stderr 透传、JSON 输入与无法解析的 native-eval 失败路径，且不依赖真实桌面会话；
+- Obsidian runtime 路径已通过 `obsidian command id=notemd:probe-slide-export-environment` 检查；
+- 本地 Windows 环境没有安装独立的 `obsidian-cli`，但官方 `obsidian` CLI trigger surface 可用。
+
+边界：
+
+- `obsidian command id=<command-id>` 仍只是触发表面，不是类型化 public API；
+- path-based maintainer operations 在副作用、输出 schema、失败模式与用户文档同批提升前，仍保持 maintainer-only；
+- 本次修复只让现有 maintainer 与导出检查在 Windows、Linux、macOS 上具备一致的进程启动可靠性。
 
 ## Automation Levels
 

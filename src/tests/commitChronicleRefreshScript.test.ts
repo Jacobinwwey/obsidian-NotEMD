@@ -7,6 +7,11 @@ const packagingContract = require('../../scripts/lib/packaging-contract.js');
 const repoRoot = path.join(__dirname, '..', '..');
 const scriptPath = path.join(repoRoot, 'scripts', 'release', 'commit-chronicle-refresh.js');
 
+function prependPathEnv(tempRoot: string): NodeJS.ProcessEnv {
+    const nextPath = `${tempRoot}${path.delimiter}${process.env.Path || process.env.PATH || ''}`;
+    return { ...process.env, PATH: nextPath, Path: nextPath };
+}
+
 type GitResult = {
     status: number;
     stdout?: string;
@@ -28,6 +33,7 @@ function writeFakeGit(
     body: string
 ): { scriptPath: string; argsPath: string } {
     const scriptPath = path.join(tempRoot, 'git');
+    const cmdScriptPath = path.join(tempRoot, 'git.cmd');
     const argsPath = path.join(tempRoot, 'git-args.jsonl');
     const scriptSource = `#!/usr/bin/env node
 const fs = require('fs');
@@ -37,6 +43,7 @@ fs.appendFileSync(argsPath, JSON.stringify(args) + '\\n');
 ${body}
 `;
     fs.writeFileSync(scriptPath, scriptSource, { encoding: 'utf8', mode: 0o755 });
+    fs.writeFileSync(cmdScriptPath, `@echo off\r\n"${process.execPath}" "${scriptPath}" %*\r\n`, 'utf8');
     return { scriptPath, argsPath };
 }
 
@@ -121,10 +128,7 @@ process.exit(9);
             const output = execFileSync(process.execPath, [scriptPath, '1.8.7'], {
                 cwd: repoRoot,
                 encoding: 'utf8',
-                env: {
-                    ...process.env,
-                    PATH: `${tempRoot}:${process.env.PATH || ''}`
-                }
+                env: prependPathEnv(tempRoot)
             });
 
             expect(output).toContain('Chronicle already up to date.');
@@ -172,10 +176,7 @@ default:
             const result = spawnSync(process.execPath, [scriptPath, '1.8.7', '--target-branch', 'release-maint'], {
                 cwd: repoRoot,
                 encoding: 'utf8',
-                env: {
-                    ...process.env,
-                    PATH: `${tempRoot}:${process.env.PATH || ''}`
-                }
+                env: prependPathEnv(tempRoot)
             });
 
             expect(result.status).toBe(0);
@@ -203,10 +204,7 @@ default:
             const result = spawnSync(process.execPath, [scriptPath, '1.8.7', '--target-branch'], {
                 cwd: repoRoot,
                 encoding: 'utf8',
-                env: {
-                    ...process.env,
-                    PATH: `${tempRoot}:${process.env.PATH || ''}`
-                }
+                env: prependPathEnv(tempRoot)
             });
 
             expect(result.status).toBe(1);
@@ -235,10 +233,7 @@ process.exit(9);
             const result = spawnSync(process.execPath, [scriptPath, '1.8.7'], {
                 cwd: repoRoot,
                 encoding: 'utf8',
-                env: {
-                    ...process.env,
-                    PATH: `${tempRoot}:${process.env.PATH || ''}`
-                }
+                env: prependPathEnv(tempRoot)
             });
 
             expect(result.status).toBe(1);

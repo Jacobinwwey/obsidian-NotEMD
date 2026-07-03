@@ -3,6 +3,7 @@ import { dirname, join } from 'path';
 import { pathToFileURL } from 'url';
 import type { App } from 'obsidian';
 import { startLocalServer, stopLocalServer } from './localServer';
+import { isSlidevServerHtmlEntryPath } from './htmlExportPaths';
 import { countSlideDeckSlides } from './slidevLayoutAudit';
 import { extractSlidevPptxSlideFromPage } from './pptxDomExtractor';
 import {
@@ -756,7 +757,7 @@ async function extractSlidesFromHtml(
 	let baseUrl: string | null = null;
 
 	try {
-		if (htmlPath.endsWith('/index.html')) {
+		if (isSlidevServerHtmlEntryPath(htmlPath)) {
 			serverDirectory = dirname(htmlPath);
 			const port = await startLocalServer(serverDirectory);
 			baseUrl = `http://localhost:${port}/index.html`;
@@ -813,7 +814,7 @@ async function capturePptxRenderedHtmlReferenceImages(
 	let baseUrl: string | null = null;
 
 	try {
-		if (htmlPath.endsWith('/index.html')) {
+		if (isSlidevServerHtmlEntryPath(htmlPath)) {
 			serverDirectory = dirname(htmlPath);
 			const port = await startLocalServer(serverDirectory);
 			baseUrl = `http://localhost:${port}/index.html`;
@@ -867,7 +868,7 @@ async function extractVisibleNativeExperimentSlidesFromHtml(
 	let baseUrl: string | null = null;
 
 	try {
-		if (htmlPath.endsWith('/index.html')) {
+		if (isSlidevServerHtmlEntryPath(htmlPath)) {
 			serverDirectory = dirname(htmlPath);
 			const port = await startLocalServer(serverDirectory);
 			baseUrl = `http://localhost:${port}/index.html`;

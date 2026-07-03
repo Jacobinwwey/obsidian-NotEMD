@@ -1,7 +1,7 @@
 const fs = require('fs');
 const os = require('os');
 const path = require('path');
-const { spawnSync } = require('child_process');
+const { spawnSyncWithCommandResolution } = require('../lib/cross-platform-command.js');
 const {
     RELEASE_TAG_PATTERN_SOURCE,
     REQUIRED_RELEASE_ASSET_FILES
@@ -96,7 +96,7 @@ function buildGhReleaseCommands({ tag, title, notesFile, assets, releaseExists }
 }
 
 function hasExistingRelease(repoRoot, tag) {
-    const result = spawnSync('gh', ['release', 'view', tag], {
+    const result = spawnSyncWithCommandResolution('gh', ['release', 'view', tag], {
         cwd: repoRoot,
         stdio: 'ignore'
     });
@@ -109,7 +109,7 @@ function hasExistingRelease(repoRoot, tag) {
 }
 
 function runGhCommand(repoRoot, commandArgs) {
-    const result = spawnSync('gh', commandArgs, {
+    const result = spawnSyncWithCommandResolution('gh', commandArgs, {
         cwd: repoRoot,
         stdio: 'inherit'
     });

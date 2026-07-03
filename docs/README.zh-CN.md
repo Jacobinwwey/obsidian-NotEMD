@@ -4,6 +4,13 @@
 
 此目录保存仓库级文档，面向维护者与贡献者。
 
+## 当前真值与布局入口
+
+- [Mainline Progress Audit And Next-Level Direction](./brainstorms/2026-05-28-mainline-progress-audit-and-next-level-direction.zh-CN.md)
+- [Mainline CI, GEO, CLI, And Slidev Closeout Plan](./brainstorms/2026-07-02-mainline-ci-geo-cli-slidev-closeout-plan.zh-CN.md)
+- [仓库文档布局规则](./maintainer/repository-document-layout.zh-CN.md)
+- [文档归档区](./archive/README.zh-CN.md)
+
 ## 用户与维护者入口
 
 - [语言中心](./i18n/README_zh.md)
@@ -39,3 +46,4 @@
 - 计划目录之外的旧文档，在迁移完成前仍可能保留 `name.md` 加配对语种文件的形式。
 - 发布说明必须拆分为英文与简体中文两个完整文件；发布 GitHub Release 时再由辅助脚本组合成一个双语 release body。
 - 不要再向活跃文档里追加行内双语摘要块。每种语言都应维护独立完整文件。
+- 根目录下的一次性报告应进入 `docs/archive/root-history/`，不要再直接堆回仓库根目录。

@@ -1,6 +1,5 @@
 #!/usr/bin/env node
 
-import { execFileSync } from "node:child_process";
 import fs from "node:fs";
 import { createRequire } from "node:module";
 import path from "node:path";
@@ -18,6 +17,9 @@ const {
   countCanonicalHumanContributorsFromIdentityLines,
   rewriteRepoSagaContributorCountsInSvg,
 } = require("../lib/repo-saga-contributor-normalization.js");
+const {
+  execFileSyncWithCommandResolution,
+} = require("../lib/cross-platform-command.js");
 const repoRoot = path.resolve(__dirname, "..", "..");
 const outputDir = path.join(repoRoot, "docs", "repo-saga");
 const buildRoot = path.join(repoRoot, ".cache", "repo-saga-build");
@@ -637,7 +639,7 @@ function countAllTags() {
 }
 
 function runCommand(command, args, cwd, options = {}) {
-  execFileSync(command, args, {
+  execFileSyncWithCommandResolution(command, args, {
     cwd,
     stdio: "inherit",
     env: options.env ?? process.env,
@@ -645,7 +647,7 @@ function runCommand(command, args, cwd, options = {}) {
 }
 
 function captureCommand(command, args, cwd) {
-  return execFileSync(command, args, {
+  return execFileSyncWithCommandResolution(command, args, {
     cwd,
     encoding: "utf8",
   }).trim();
@@ -680,7 +682,7 @@ function runPnpmCommand(args, cwd) {
 
 function commandExists(command, args) {
   try {
-    execFileSync(command, args, {
+    execFileSyncWithCommandResolution(command, args, {
       stdio: "ignore",
     });
     return true;

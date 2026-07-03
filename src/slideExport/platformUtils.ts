@@ -90,46 +90,207 @@ export async function execFileAsync(
 		};
 	}
 
-	// On Windows, child_process.execFile cannot spawn a bare name like "node" or
-	// a batch shim ("npx.cmd", "npm.cmd", "slidev.cmd") without shell resolution —
-	// it throws EINVAL synchronously. We need shell:true so Node resolves the PATHEXT
-	// and runs .cmd/.bat/.exe shims the same way `child_process.exec` would, while
-	// still passing our args as an array (no shell interpolation risk because execFile
-	// with shell:true still substitutes via cmd.exe only when command itself is a batch).
-	// On macOS/Linux, shell stays false — direct exec, no shell overhead.
 	const os: any = safeRequire('os');
 	const isWindows = os?.platform?.() === 'win32';
+	if (isWindows && isWindowsNodeScript(command)) {
+		return execFileOnce(childProcess, process.execPath, [command, ...args], options, {
+			windowsVerbatimArguments: false,
+		});
+	}
 
+	const directResult = await execFileOnce(childProcess, command, args, options, {
+		windowsVerbatimArguments: false,
+	});
+	if (!isWindows || !shouldRetryWithWindowsCommandResolution(directResult.error)) {
+		return directResult;
+	}
+
+	const resolvedCommand = resolveWindowsCommand(command, options);
+	const commandForBatch = resolvedCommand ?? command;
+	if (isWindowsBatchFile(commandForBatch)) {
+		return execWindowsBatchFile(childProcess, commandForBatch, args, options);
+	}
+
+	if (isWindowsNodeScript(commandForBatch)) {
+		return execFileOnce(childProcess, process.execPath, [commandForBatch, ...args], options, {
+			windowsVerbatimArguments: false,
+		});
+	}
+
+	return directResult;
+}
+
+function execFileOnce(
+	childProcess: any,
+	command: string,
+	args: string[],
+	options: { cwd?: string; timeout?: number; env?: Record<string, string> } | undefined,
+	executionOptions: { windowsVerbatimArguments: boolean },
+): Promise<ExecResult> {
 	return new Promise<ExecResult>((resolve) => {
-		const proc = childProcess.execFile(
-			command,
-			args,
-			{
-				cwd: options?.cwd,
-				timeout: options?.timeout ?? 120_000,
-				env: { ...process.env, ...options?.env },
-				maxBuffer: 10 * 1024 * 1024,
-				shell: isWindows,
-				windowsHide: true,
-			},
-			(error: Error | null, stdout: string | Buffer, stderr: string | Buffer) => {
-				const stdoutStr = typeof stdout === 'string' ? stdout : stdout?.toString?.('utf8') ?? '';
-				const stderrStr = typeof stderr === 'string' ? stderr : stderr?.toString?.('utf8') ?? '';
-				resolve({
-					exitCode: error ? (error as any).code ?? 1 : 0,
-					stdout: stdoutStr,
-					stderr: stderrStr,
-					error: error ?? undefined,
-				});
-			},
-		);
+		let settled = false;
+		let killTimer: ReturnType<typeof setTimeout> | null = null;
+		const settle = (result: ExecResult) => {
+			if (settled) {
+				return;
+			}
+			settled = true;
+			if (killTimer) {
+				clearTimeout(killTimer);
+			}
+			resolve(result);
+		};
 
-		if (options?.timeout) {
-			setTimeout(() => {
-				try { proc.kill(); } catch { /* already exited */ }
-			}, options.timeout + 2_000);
+		try {
+			const proc = childProcess.execFile(
+				command,
+				args,
+				{
+					cwd: options?.cwd,
+					timeout: options?.timeout ?? 120_000,
+					env: { ...process.env, ...options?.env },
+					maxBuffer: 10 * 1024 * 1024,
+					shell: false,
+					windowsVerbatimArguments: executionOptions.windowsVerbatimArguments,
+					windowsHide: true,
+				},
+				(error: Error | null, stdout: string | Buffer, stderr: string | Buffer) => {
+					settle(createExecResult(error, stdout, stderr));
+				},
+			);
+
+			if (options?.timeout && !settled) {
+				killTimer = setTimeout(() => {
+					try { proc.kill(); } catch { /* already exited */ }
+				}, options.timeout + 2_000);
+			}
+		} catch (error) {
+			settle(createExecResult(error instanceof Error ? error : new Error(String(error)), '', ''));
 		}
 	});
+}
+
+function execWindowsBatchFile(
+	childProcess: any,
+	command: string,
+	args: string[],
+	options: { cwd?: string; timeout?: number; env?: Record<string, string> } | undefined,
+): Promise<ExecResult> {
+	const cmdExe = process.env.ComSpec || 'cmd.exe';
+	const commandLine = [
+		'call',
+		quoteCmdArgument(command),
+		...args.map(quoteCmdArgument),
+	].join(' ');
+	return execFileOnce(childProcess, cmdExe, ['/d', '/s', '/c', commandLine], options, {
+		windowsVerbatimArguments: true,
+	});
+}
+
+function createExecResult(error: Error | null, stdout: string | Buffer, stderr: string | Buffer): ExecResult {
+	const stdoutStr = typeof stdout === 'string' ? stdout : stdout?.toString?.('utf8') ?? '';
+	const stderrStr = typeof stderr === 'string' ? stderr : stderr?.toString?.('utf8') ?? '';
+	return {
+		exitCode: error ? normalizeExecErrorCode(error) : 0,
+		stdout: stdoutStr,
+		stderr: stderrStr,
+		error: error ?? undefined,
+	};
+}
+
+function normalizeExecErrorCode(error: Error): number {
+	const code = (error as any).code;
+	return typeof code === 'number' ? code : 1;
+}
+
+function shouldRetryWithWindowsCommandResolution(error: Error | undefined): boolean {
+	if (!error) {
+		return false;
+	}
+
+	const code = String((error as any).code ?? '').toUpperCase();
+	const message = String(error.message ?? '').toUpperCase();
+	return code === 'EINVAL'
+		|| code === 'ENOENT'
+		|| message.includes('SPAWN EINVAL')
+		|| message.includes('SPAWN ENOENT');
+}
+
+function resolveWindowsCommand(
+	command: string,
+	options: { cwd?: string; env?: Record<string, string> } | undefined,
+): string | null {
+	const fs: any = safeRequire('fs');
+	const path: any = safeRequire('path');
+	if (!fs || !path || typeof command !== 'string' || command.trim().length === 0) {
+		return null;
+	}
+
+	const env = { ...process.env, ...options?.env };
+	const cwd = options?.cwd ?? process.cwd();
+	const pathValue = env.Path ?? env.PATH ?? '';
+	const pathEntries = String(pathValue).split(path.delimiter).filter(Boolean);
+	const pathExts = String(env.PATHEXT ?? '.COM;.EXE;.BAT;.CMD').split(';').filter(Boolean);
+	const candidates = path.extname(command)
+		? [command]
+		: pathExts.map((extension: string) => `${command}${extension}`);
+
+	if (/[\\/]/.test(command)) {
+		for (const candidate of candidates) {
+			const absoluteCandidate = path.resolve(cwd, candidate);
+			if (fs.existsSync(absoluteCandidate)) {
+				return absoluteCandidate;
+			}
+		}
+		return null;
+	}
+
+	for (const entry of [cwd, ...pathEntries]) {
+		for (const candidate of candidates) {
+			const absoluteCandidate = path.join(entry, candidate);
+			if (fs.existsSync(absoluteCandidate)) {
+				return absoluteCandidate;
+			}
+		}
+	}
+
+	return null;
+}
+
+function isWindowsBatchFile(command: string): boolean {
+	return /\.(cmd|bat)$/i.test(command);
+}
+
+function isWindowsNodeScript(command: string): boolean {
+	return /\.(mjs|cjs|js)$/i.test(command);
+}
+
+function quoteCmdArgument(value: string): string {
+	const source = String(value);
+	let quoted = '"';
+	let backslashCount = 0;
+
+	for (const char of source) {
+		if (char === '\\') {
+			backslashCount += 1;
+			continue;
+		}
+
+		if (char === '"') {
+			quoted += '\\'.repeat(backslashCount * 2 + 1);
+			quoted += '"';
+			backslashCount = 0;
+			continue;
+		}
+
+		quoted += '\\'.repeat(backslashCount);
+		quoted += char;
+		backslashCount = 0;
+	}
+
+	quoted += '\\'.repeat(backslashCount * 2);
+	quoted += '"';
+	return quoted;
 }
 
 /**

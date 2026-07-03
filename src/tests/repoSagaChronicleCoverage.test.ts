@@ -23,9 +23,15 @@ function copyFileIntoTempRepo(repoRoot: string, tempRoot: string, relativePath: 
     fs.copyFileSync(sourcePath, targetPath);
 }
 
+function prependPathEnv(tempRoot: string): NodeJS.ProcessEnv {
+    const nextPath = `${tempRoot}${path.delimiter}${process.env.Path || process.env.PATH || ''}`;
+    return { ...process.env, PATH: nextPath, Path: nextPath };
+}
+
 function writeFakeGit(tempRoot: string, body: string): { argsPath: string } {
     const argsPath = path.join(tempRoot, 'git-args.jsonl');
     const scriptPath = path.join(tempRoot, 'git');
+    const cmdScriptPath = path.join(tempRoot, 'git.cmd');
     const runnerPath = path.join(tempRoot, 'git-runner.js');
     fs.writeFileSync(
         runnerPath,
@@ -45,12 +51,14 @@ exec ${JSON.stringify(process.execPath)} ${JSON.stringify(runnerPath)} "$@"
 `,
         { encoding: 'utf8', mode: 0o755 }
     );
+    fs.writeFileSync(cmdScriptPath, `@echo off\r\n"${process.execPath}" "${runnerPath}" %*\r\n`, 'utf8');
     return { argsPath };
 }
 
 function writeFakeNode(tempRoot: string, body: string): { argsPath: string } {
     const argsPath = path.join(tempRoot, 'node-args.jsonl');
     const scriptPath = path.join(tempRoot, 'node');
+    const cmdScriptPath = path.join(tempRoot, 'node.cmd');
     const runnerPath = path.join(tempRoot, 'node-runner.js');
     fs.writeFileSync(
         runnerPath,
@@ -69,6 +77,7 @@ exec ${JSON.stringify(process.execPath)} ${JSON.stringify(runnerPath)} "$@"
 `,
         { encoding: 'utf8', mode: 0o755 }
     );
+    fs.writeFileSync(cmdScriptPath, `@echo off\r\n"${process.execPath}" "${runnerPath}" %*\r\n`, 'utf8');
     return { argsPath };
 }
 
@@ -144,6 +153,7 @@ default:
         try {
             for (const relativePath of [
                 'scripts/repo-saga/update-quarterly-saga.mjs',
+                'scripts/lib/cross-platform-command.js',
                 'scripts/lib/package-manager-runtime.js',
                 'scripts/lib/repo-saga-execution-lock.js',
                 'scripts/lib/repo-saga-contributor-normalization.js'
@@ -194,10 +204,7 @@ default:
                 {
                     cwd: tempRoot,
                     encoding: 'utf8',
-                    env: {
-                        ...process.env,
-                        PATH: `${tempRoot}:${process.env.PATH || ''}`
-                    }
+                    env: prependPathEnv(tempRoot)
                 }
             );
 
@@ -224,6 +231,7 @@ default:
 
         try {
             copyFileIntoTempRepo(repoRoot, tempRoot, 'scripts/repo-saga/update-quarterly-saga.mjs');
+            copyFileIntoTempRepo(repoRoot, tempRoot, 'scripts/lib/cross-platform-command.js');
             copyFileIntoTempRepo(repoRoot, tempRoot, 'scripts/lib/repo-saga-execution-lock.js');
             copyFileIntoTempRepo(repoRoot, tempRoot, 'scripts/lib/package-manager-runtime.js');
             copyFileIntoTempRepo(repoRoot, tempRoot, 'scripts/lib/repo-saga-contributor-normalization.js');
@@ -260,6 +268,7 @@ default:
         try {
             for (const relativePath of [
                 'scripts/repo-saga/update-quarterly-saga.mjs',
+                'scripts/lib/cross-platform-command.js',
                 'scripts/lib/package-manager-runtime.js',
                 'scripts/lib/repo-saga-execution-lock.js',
                 'scripts/lib/repo-saga-contributor-normalization.js'
@@ -291,6 +300,7 @@ default:
         try {
             for (const relativePath of [
                 'scripts/repo-saga/update-quarterly-saga.mjs',
+                'scripts/lib/cross-platform-command.js',
                 'scripts/lib/package-manager-runtime.js',
                 'scripts/lib/repo-saga-execution-lock.js',
                 'scripts/lib/repo-saga-contributor-normalization.js'
@@ -378,6 +388,7 @@ process.exit(0);
         try {
             for (const relativePath of [
                 'scripts/repo-saga/update-quarterly-saga.mjs',
+                'scripts/lib/cross-platform-command.js',
                 'scripts/lib/package-manager-runtime.js',
                 'scripts/lib/repo-saga-execution-lock.js',
                 'scripts/lib/repo-saga-contributor-normalization.js'
@@ -439,14 +450,11 @@ process.exit(0);
                 {
                     cwd: tempRoot,
                     encoding: 'utf8',
-                    env: {
-                        ...process.env,
-                        PATH: `${tempRoot}:${process.env.PATH || ''}`
-                    }
+                    env: prependPathEnv(tempRoot)
                 }
             );
 
-            expect(output).toContain('Updated repo-saga chronicle SVGs in docs/repo-saga');
+            expect(output.replace(/\\/g, '/')).toContain('Updated repo-saga chronicle SVGs in docs/repo-saga');
             expect(output).not.toContain('Updated README chronicle sections above Star History.');
 
             const localizedSvgPath = path.join(tempRoot, 'docs', 'repo-saga', 'notemd-development-history.en.svg');

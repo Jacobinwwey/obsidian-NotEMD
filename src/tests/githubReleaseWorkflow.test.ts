@@ -14,6 +14,11 @@ describe('GitHub release workflow', () => {
     const validateTagScriptPath = path.join(repoRoot, validateTagScriptRelativePath);
     const releaseWorkflowPath = path.join(repoRoot, '.github', 'workflows', 'release.yml');
 
+    function prependPathEnv(tempRoot: string): NodeJS.ProcessEnv {
+        const nextPath = `${tempRoot}${path.delimiter}${process.env.Path || process.env.PATH || ''}`;
+        return { ...process.env, PATH: nextPath, Path: nextPath };
+    }
+
     test('exposes a checked-in GitHub release helper and notes for the current version', () => {
         expect(packageJson.scripts['release:github']).toBe(`node ${releaseScriptRelativePath}`);
         expect(packageJson.scripts['chronicle:sync-repo-saga']).toBe('node scripts/repo-saga/update-quarterly-saga.mjs --sync-only');
@@ -70,6 +75,7 @@ describe('GitHub release workflow', () => {
 
     function writeFakeGh(tempRoot: string, releaseViewExitCode: number) {
         const scriptPath = path.join(tempRoot, 'gh');
+        const cmdScriptPath = path.join(tempRoot, 'gh.cmd');
         const argsPath = path.join(tempRoot, 'gh-args.jsonl');
         const scriptSource = `#!/usr/bin/env node
 const fs = require('fs');
@@ -82,6 +88,7 @@ if (args[0] === 'release' && args[1] === 'view') {
 process.exit(0);
 `;
         fs.writeFileSync(scriptPath, scriptSource, { encoding: 'utf8', mode: 0o755 });
+        fs.writeFileSync(cmdScriptPath, `@echo off\r\n"${process.execPath}" "${scriptPath}" %*\r\n`, 'utf8');
         return { scriptPath, argsPath };
     }
 
@@ -169,10 +176,7 @@ process.exit(0);
                     {
                         cwd: repoRoot,
                         encoding: 'utf8',
-                        env: {
-                            ...process.env,
-                            PATH: `${tempRoot}:${process.env.PATH || ''}`
-                        }
+                        env: prependPathEnv(tempRoot)
                     }
                 );
 
@@ -205,10 +209,7 @@ process.exit(0);
                     {
                         cwd: repoRoot,
                         encoding: 'utf8',
-                        env: {
-                            ...process.env,
-                            PATH: `${tempRoot}:${process.env.PATH || ''}`
-                        }
+                        env: prependPathEnv(tempRoot)
                     }
                 );
 

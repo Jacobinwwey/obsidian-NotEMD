@@ -1,6 +1,6 @@
 # Notemd CLI Capability Matrix
 
-> Updated: 2026-05-28
+> Updated: 2026-07-02
 
 ## Status Call (2026-05-25)
 
@@ -24,6 +24,38 @@ This matrix is a maintainer control document. It distinguishes:
 - commands that the official `obsidian` CLI can already trigger today
 - commands that are safe for automation versus only safe for manual invocation
 - lower-level Notemd capabilities that should become first-class operations before wider CLI exposure
+
+## 2026-07-02 Cross-Platform Process Closeout
+
+This closeout does not widen the public CLI surface. It fixes the process-launch layer used by the maintainer helper, release helpers, repo-saga helpers, package-manager calls, and Slidev export environment probing.
+
+Root cause:
+
+- POSIX direct execution worked because executable scripts and shebangs resolve through the normal `execve` path.
+- Windows failed on bare commands and `.cmd` / `.bat` shims when the code tried to use direct `execFile`-style spawning. That failure surfaced in Obsidian as `spawn EINVAL` during "检测演示导出环境".
+- A blanket Windows `shell: true` fallback is not acceptable because it changes argument parsing and can corrupt arguments that contain JSON, quotes, or code fragments such as `code=...=>...`.
+
+Current resolution model:
+
+| Platform / command kind | Execution strategy |
+|---|---|
+| Linux / macOS | Direct exec first; no shell layer added for normal commands |
+| Windows `.exe` / `.com` | Direct exec |
+| Windows `.cmd` / `.bat` | Explicitly resolved batch shim, then `cmd.exe /d /s /c call "<shim>" ...` with Windows argv quoting |
+| Windows `.js` / `.mjs` / `.cjs` | Run through `process.execPath` |
+| Bare Windows command names | Resolve through `PATH` + `PATHEXT`, then dispatch by resolved extension |
+
+Evidence captured in this batch:
+
+- process-level tests cover fake `git.cmd`, `gh.cmd`, `obsidian-cli.cmd`, `pnpm.cmd`, Node script execution, stderr passthrough, JSON input, and unparseable native-eval failures without depending on a live desktop session;
+- the Obsidian runtime path was checked with `obsidian command id=notemd:probe-slide-export-environment`;
+- standalone `obsidian-cli` is not installed in the local Windows environment, while the official `obsidian` CLI trigger surface is available.
+
+Boundary:
+
+- `obsidian command id=<command-id>` remains a trigger surface, not a typed public API;
+- maintainer path-based operations remain maintainer-only until side effects, output schemas, failure modes, and user-facing docs are promoted together;
+- this fix only makes existing maintainer and export checks portable across Windows, Linux, and macOS.
 
 ## Automation Levels
 

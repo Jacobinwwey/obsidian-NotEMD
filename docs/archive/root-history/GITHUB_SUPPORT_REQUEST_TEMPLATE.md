@@ -122,7 +122,7 @@ The following should be removed:
 ## Supporting Documentation
 
 Full analysis available in repository:
-https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/ROOT_CAUSE_CLAUDE_CONTRIBUTOR.md
+https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/docs/archive/root-history/ROOT_CAUSE_CLAUDE_CONTRIBUTOR.md
 
 ---
 

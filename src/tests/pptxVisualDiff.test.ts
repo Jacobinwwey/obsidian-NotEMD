@@ -1,5 +1,5 @@
 import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'fs';
-import { join } from 'path';
+import { basename, join } from 'path';
 import { tmpdir } from 'os';
 import { strToU8, zipSync } from 'fflate';
 
@@ -17,6 +17,8 @@ const {
 } = require('../../scripts/lib/pptx-visual-diff');
 const {
 	inspectPptx,
+	normalizeGitCheckIgnoreOutputPath,
+	normalizeGitRelativePath,
 	selectPptxHardGateReferenceSource,
 	selectPptxVisualThresholdProfile,
 	shouldRunBackgroundPptxVisualDiff,
@@ -24,6 +26,19 @@ const {
 } = require('../../scripts/verify-slidev-export-workflow.cjs');
 
 describe('pptx visual diff helper', () => {
+	test('normalizes git check-ignore paths across Windows and POSIX output', () => {
+		expect(normalizeGitRelativePath('docs\\export\\deck\\index.html')).toBe('docs/export/deck/index.html');
+		expect(normalizeGitCheckIgnoreOutputPath('"docs\\\\export\\\\deck\\\\index.html"')).toBe(
+			'docs/export/deck/index.html',
+		);
+		expect(normalizeGitCheckIgnoreOutputPath('"docs/export/deck/index.html\\r"')).toBe(
+			'docs/export/deck/index.html',
+		);
+		expect(normalizeGitCheckIgnoreOutputPath('docs/export/deck/index.html')).toBe(
+			'docs/export/deck/index.html',
+		);
+	});
+
 	test('parses ImageMagick normalized RMSE output', () => {
 		expect(parseCompareMetric('17068.7 (0.260447)').value).toBeCloseTo(0.260447, 6);
 		expect(parseCompareMetric('17068.7 (0.260447)').normalized).toBe(true);
@@ -58,12 +73,12 @@ describe('pptx visual diff helper', () => {
 
 			const pairs = pairPngSequences(reference, rendered);
 
-			expect(pairs.map((pair: { referencePath: string }) => pair.referencePath.split('/').pop())).toEqual([
+			expect(pairs.map((pair: { referencePath: string }) => basename(pair.referencePath))).toEqual([
 				'1.png',
 				'2.png',
 				'10.png',
 			]);
-			expect(pairs.map((pair: { renderedPath: string }) => pair.renderedPath.split('/').pop())).toEqual([
+			expect(pairs.map((pair: { renderedPath: string }) => basename(pair.renderedPath))).toEqual([
 				'slide-01.png',
 				'slide-02.png',
 				'slide-10.png',

@@ -45,6 +45,17 @@ The site auto-deploys to GitHub Pages on push to `main` via `.github/workflows/d
 
 **Live URL**: https://jacobinwwey.github.io/obsidian-NotEMD/
 
+### 2026-07-02 Pages CI Triage
+
+The historical remote failure investigated on 2026-07-02 was not a Docusaurus source failure. Run `27451762938` failed during `actions/deploy-pages@v4` with `HttpError: Not Found` and GitHub's instruction to enable Pages. Later `main` Pages deploys succeeded, so the active repository gate remains the build plus audit pair in this workflow.
+
+When `website/**` or `.github/workflows/deploy-docs.yml` changes, treat the next Pages run as the source of truth and verify both jobs:
+
+```bash
+npm run build
+npm run audit:build
+```
+
 ## GEO Features
 
 ### 1. Global JSON-LD Schema

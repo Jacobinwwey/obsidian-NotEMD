@@ -29,6 +29,16 @@
 | Search Console | 本地无法证明；等这次 homepage update 经 Pages workflow 部署后检查 | 外部手工检查 |
 | AI visibility | 本地无法证明；部署和索引窗口后再重测 | 外部手工或 API 检查 |
 
+## 2026-07-02 远端 Pages CI 排查
+
+| 证据 | 当前状态 | 负责人 |
+|---|---|---|
+| 历史失败 run | `27451762938` 失败在 `actions/deploy-pages@v4`，报错为 `HttpError: Not Found`，并提示需要启用 GitHub Pages | GitHub repository settings / Pages availability |
+| 近期 main 部署 | 最近的 `main` 上 `Deploy Docusaurus to GitHub Pages` runs 已成功，包括 `28281641014` | GitHub Actions |
+| 当前基线 commit | 排查时 `eb777ef` 没有关联 check-runs，也没有 legacy statuses | 本地操作者 |
+| 源码侧解释 | 没发现当前远端 `main` 存在 Docusaurus build 或 `audit:build` 失败；只要改动 `website/**` 或 workflow 文件，Pages 仍由 workflow 门禁 | 本地操作者 |
+| 下一步测量 | 本次收口部署后，在 Search Console 检查 root、zh-CN root、FAQ、provider overview、一个 provider detail 与一个未发布 zh-CN fallback | 外部手工检查 |
+
 ## Route 样本
 
 Search Console 检查和 AI visibility prompt 使用这一组：

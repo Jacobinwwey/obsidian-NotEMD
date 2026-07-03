@@ -29,6 +29,16 @@ This log separates source-side GEO proof from live indexing proof. `npm run audi
 | Search Console | Not locally verifiable; inspect after the Pages workflow deploys this homepage update | External manual check |
 | AI visibility | Not locally verifiable; retest after deploy and indexing window | External/manual or API-backed check |
 
+## 2026-07-02 Remote Pages CI Triage
+
+| Evidence | Current state | Owner |
+|---|---|---|
+| Historical failed run | Run `27451762938` failed in `actions/deploy-pages@v4` with `HttpError: Not Found` and the instruction to enable GitHub Pages | GitHub repository settings / Pages availability |
+| Recent main deploys | Recent `Deploy Docusaurus to GitHub Pages` runs on `main`, including `28281641014`, completed successfully | GitHub Actions |
+| Current baseline commit | `eb777ef` had no check-runs and no legacy statuses attached during triage | Local operator |
+| Source-side interpretation | No current Docusaurus build or `audit:build` failure was found on remote `main`; Pages remains gated by the workflow when `website/**` or the workflow file changes | Local operator |
+| Next measurement | After this closeout deploy, inspect root, zh-CN root, FAQ, provider overview, one provider detail, and one unpublished zh-CN fallback in Search Console | External manual check |
+
 ## Route Sample
 
 Use this set for Search Console inspection and manual AI visibility prompts:

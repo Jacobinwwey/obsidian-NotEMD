@@ -4,6 +4,13 @@ Language: **English** | [简体中文](./README.zh-CN.md)
 
 This directory contains repository-level documentation for maintainers and contributors.
 
+## Current Truth And Layout
+
+- [Mainline Progress Audit And Next-Level Direction](./brainstorms/2026-05-28-mainline-progress-audit-and-next-level-direction.md)
+- [Mainline CI, GEO, CLI, And Slidev Closeout Plan](./brainstorms/2026-07-02-mainline-ci-geo-cli-slidev-closeout-plan.md)
+- [Repository Documentation Layout](./maintainer/repository-document-layout.md)
+- [Documentation Archive](./archive/README.md)
+
 ## User And Maintainer Entry Points
 
 - [Language Hub](./i18n/README.md)
@@ -41,3 +48,4 @@ This directory contains repository-level documentation for maintainers and contr
 - Outside the plan directory, older source docs may still use `name.md` plus a companion language file until they are migrated.
 - Release notes are stored as two complete files, one English and one Simplified Chinese. GitHub release publishing composes those two files into one bilingual release body at publish time.
 - Do not add inline bilingual summary blocks to active docs. Keep each language in its own complete file.
+- Root-level one-off reports belong in `docs/archive/root-history/`, not in the repository root.

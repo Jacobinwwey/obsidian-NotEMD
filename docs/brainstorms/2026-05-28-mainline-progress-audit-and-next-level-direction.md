@@ -1,6 +1,6 @@
 ---
 date: 2026-05-28
-last_updated: 2026-06-20
+last_updated: 2026-07-02
 topic: mainline-progress-audit-and-next-level-direction
 canonical: true
 ---
@@ -679,6 +679,80 @@ Next direction:
 2. Stage 3/4 should deepen source-preserving Mermaid fit/manual-review evidence, cell-level table rewrite, and code semantic excerpts instead of falling back to fixed zoom values;
 3. Stage 5 should keep expanding fixtures to cover large flowcharts, long sequence diagrams, wide/tall tables, mixed code/table slides, component-heavy slot layouts, and the real `architecture.zh-CN.md`;
 4. every implementation slice must retain strict standalone and full-deck browser audit instead of regressing to CLI-only or representative sampling.
+
+## 5.1 2026-07-02 Mainline CI / GEO / CLI / Slidev Closeout
+
+This batch closes a different class of risk than the earlier layout-quality and provider-control-plane batches. The new root problem was not that Slidev layout convergence regressed. It was that the environment probe and adjacent maintainer/release helpers still had platform-specific command-resolution assumptions.
+
+### Remote Main CI Finding
+
+Remote `main` did not have a current source/build failure at the investigation baseline:
+
+1. the latest listed `Deploy Docusaurus to GitHub Pages` runs on `main` were successful;
+2. the recent failure run investigated in detail, `27451762938`, failed in `actions/deploy-pages@v4` with `HttpError: Not Found` and the explicit instruction to enable GitHub Pages;
+3. current `eb777ef` had no check-runs attached, and the legacy status endpoint had no statuses, so the apparent pending legacy status was not a failing CI context.
+
+Interpretation:
+
+1. the historical remote failure was a Pages settings/deployment availability problem, not a Docusaurus build or `audit:build` source failure;
+2. Pages deployment remains a hard gate whenever `website/**` or `.github/workflows/deploy-docs.yml` changes;
+3. this batch should still push a new `main` change and watch the Pages workflow if website files are touched.
+
+### Cross-Platform Command Architecture
+
+The current implementation now uses one command-resolution model for plugin Slidev probing and Node maintainer scripts:
+
+| Requirement | Current implementation | Status |
+|---|---|---|
+| POSIX shell behavior must not regress | Linux/macOS keep direct exec first and do not get a shell wrapper for normal commands | Closed |
+| Windows `.cmd` / `.bat` shims must work | Windows resolves command names through `PATH` + `PATHEXT` and uses an isolated quoted `cmd.exe /d /s /c call` path only for resolved batch files | Closed |
+| Windows argument fidelity must survive JSON/code payloads | No blanket `shell: true`; `.exe` / `.com` run directly and Node scripts run through `process.execPath` | Closed |
+| Release/repo-saga/maintainer helper scripts must share the same rules | `scripts/lib/cross-platform-command.js` centralizes the Node-side process contract | Closed |
+| Slidev HTML output path detection must handle OS separators and modern Slidev output shapes | `src/slideExport/htmlExportPaths.ts` centralizes `index.html` discovery and path normalization | Closed |
+
+The design choice is deliberate: Windows needs a batch-shim adapter, but Linux and macOS already work through direct exec. Using shell on Windows globally would make the original `spawn EINVAL` disappear while introducing a harder-to-debug argument-corruption class.
+
+### GEO And GitHub Pages Progress
+
+The website architecture is already stronger than the original GEO roadmap required:
+
+1. root and zh-CN root pages exist;
+2. `llms.txt`, sitemap filtering, homepage JSON-LD, partial-language copy, provider-doc heading gates, and measurement logs are all covered by `website/scripts/audit-build.cjs`;
+3. zh-CN critical-path pages and UI chrome are translated, while fallback pages remain `noindex,follow` and out of the zh-CN sitemap.
+
+The remaining work is not another source-only route rewrite. It is live measurement:
+
+1. submit or refresh root and zh-CN sitemaps in Search Console;
+2. inspect root, zh-CN root, FAQ, provider overview, one provider detail, and one unpublished zh-CN fallback;
+3. rerun English and Chinese answer-engine prompts after crawl;
+4. update the measurement log with exact dates, engines, prompts, citations, and route results.
+
+### Updated Next Direction
+
+The next engineering direction is narrower than "finish GEO and CLI" as a broad slogan:
+
+1. keep public CLI promotion blocked until path-based write operations have explicit public schemas, side-effect docs, deterministic failure modes, and user-facing docs;
+2. keep Slidev export verification UI-equivalent and browser-rendered; do not regress to `slidev build` alone;
+3. keep Pages truth gated on built output, not source review alone;
+4. treat any future semantic/vector local-KB expansion as a new architecture decision, not an implication of current MiniSearch lexical retrieval;
+5. keep release/repo-saga/maintainer scripts on the shared cross-platform process adapter instead of reintroducing ad hoc `spawn`, `execFile`, or shell-only calls.
+
+## 5.2 2026-07-03 Repository doc truth/layout alignment
+
+The repository root had accumulated too many one-off status, migration, and investigation notes that were no longer the best entrypoint for current-main truth.
+
+Current closure direction is now explicit:
+
+1. `docs/README.md` is the canonical documentation hub.
+2. `DOCUMENTATION_INDEX.md` at the root is now only a thin entrypoint instead of a duplicate long-form catalog.
+3. historical root reports move to `docs/archive/root-history/` rather than continuing to live beside `README.md`.
+4. `GEO_ROADMAP.md` intentionally stays at the root for now because current website audit/test flows still read that path.
+5. active truth for this lane belongs in canonical progress docs, maintainer docs, and bounded roadmap/closeout docs under `docs/`.
+
+This is not cosmetic cleanup. It changes the operational rule for future batches:
+
+1. update the canonical progress docs under `docs/` instead of dropping new root summaries;
+2. treat root-doc sprawl as a regression in repository truth maintenance, not as harmless note-taking.
 
 ## 6. Documentation Sync Rule
 

@@ -3,6 +3,7 @@ import { dirname, join } from 'path';
 import type { App } from 'obsidian';
 import { exportSlidevHtmlWithOutcome } from './slidevExporter';
 import { startLocalServer, stopLocalServer } from './localServer';
+import { isSlidevServerHtmlEntryPath } from './htmlExportPaths';
 import {
 	analyzeRenderedSlideMeasurement,
 	countSlideDeckSlides,
@@ -200,7 +201,7 @@ async function runPlaywrightLayoutChecks(
 	let baseUrl: string | null = null;
 
 	try {
-		if (htmlPath.endsWith('/index.html')) {
+		if (isSlidevServerHtmlEntryPath(htmlPath)) {
 			serverDirectory = dirname(htmlPath);
 			const port = await startLocalServer(serverDirectory);
 			baseUrl = `http://localhost:${port}/index.html`;

@@ -13,6 +13,11 @@ type MaintainerOperationHelp = Record<string, {
 }>;
 
 describe('invoke maintainer CLI operation script', () => {
+    function prependPathEnv(tempRoot: string): NodeJS.ProcessEnv {
+        const nextPath = `${tempRoot}${path.delimiter}${process.env.Path || process.env.PATH || ''}`;
+        return { ...process.env, PATH: nextPath, Path: nextPath };
+    }
+
     function writeFakeObsidianCli(
         tempRoot: string,
         options: {
@@ -22,6 +27,7 @@ describe('invoke maintainer CLI operation script', () => {
         } = {}
     ) {
         const scriptPath = path.join(tempRoot, 'obsidian-cli');
+        const cmdScriptPath = path.join(tempRoot, 'obsidian-cli.cmd');
         const argsPath = path.join(tempRoot, 'obsidian-cli-args.json');
         const scriptSource = `#!/usr/bin/env node
 const fs = require('fs');
@@ -29,6 +35,7 @@ fs.writeFileSync(${JSON.stringify(argsPath)}, JSON.stringify(process.argv.slice(
 ${options.stderr ? `process.stderr.write(${JSON.stringify(options.stderr)});\n` : ''}${options.stdout ? `process.stdout.write(${JSON.stringify(options.stdout)});\n` : ''}process.exit(${options.exitCode ?? 0});
 `;
         fs.writeFileSync(scriptPath, scriptSource, { encoding: 'utf8', mode: 0o755 });
+        fs.writeFileSync(cmdScriptPath, `@echo off\r\n"${process.execPath}" "${scriptPath}" %*\r\n`, 'utf8');
         return { scriptPath, argsPath };
     }
 
@@ -108,10 +115,7 @@ ${options.stderr ? `process.stderr.write(${JSON.stringify(options.stderr)});\n` 
                 ],
                 {
                     encoding: 'utf8',
-                    env: {
-                        ...process.env,
-                        PATH: `${tempRoot}:${process.env.PATH || ''}`
-                    }
+                    env: prependPathEnv(tempRoot)
                 }
             );
 
@@ -157,10 +161,7 @@ ${options.stderr ? `process.stderr.write(${JSON.stringify(options.stderr)});\n` 
                 ],
                 {
                     encoding: 'utf8',
-                    env: {
-                        ...process.env,
-                        PATH: `${tempRoot}:${process.env.PATH || ''}`
-                    }
+                    env: prependPathEnv(tempRoot)
                 }
             );
 
@@ -194,10 +195,7 @@ ${options.stderr ? `process.stderr.write(${JSON.stringify(options.stderr)});\n` 
                 ],
                 {
                     encoding: 'utf8',
-                    env: {
-                        ...process.env,
-                        PATH: `${tempRoot}:${process.env.PATH || ''}`
-                    }
+                    env: prependPathEnv(tempRoot)
                 }
             );
 
@@ -227,10 +225,7 @@ ${options.stderr ? `process.stderr.write(${JSON.stringify(options.stderr)});\n` 
                 ],
                 {
                     encoding: 'utf8',
-                    env: {
-                        ...process.env,
-                        PATH: `${tempRoot}:${process.env.PATH || ''}`
-                    }
+                    env: prependPathEnv(tempRoot)
                 }
             );
 
@@ -264,10 +259,7 @@ ${options.stderr ? `process.stderr.write(${JSON.stringify(options.stderr)});\n` 
                 ],
                 {
                     encoding: 'utf8',
-                    env: {
-                        ...process.env,
-                        PATH: `${tempRoot}:${process.env.PATH || ''}`
-                    }
+                    env: prependPathEnv(tempRoot)
                 }
             );
 

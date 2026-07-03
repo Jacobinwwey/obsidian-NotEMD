@@ -2988,16 +2988,6 @@ private static readonly slideExportImageClarityScale: Record<'standard' | 'high'
 
             if (config.format === 'html') {
                 const outputPath = layoutConvergence.exportPath;
-                if (config.htmlMode === 'standalone') {
-                    const { injectMermaidPostFitIntoHtml } = await import('./slideExport/mermaidFitScript');
-                    try {
-                        const html = await this.app.vault.adapter.read(outputPath);
-                        await this.app.vault.adapter.write(outputPath, injectMermaidPostFitIntoHtml(html));
-                        logSlideExportProgress('mermaid-fit', 'Injected post-fit script into standalone HTML');
-                    } catch (fitError) {
-                        console.error('Mermaid post-fit injection failed:', fitError);
-                    }
-                }
                 activeReporter.log(uiStrings.slideExport.exportSuccess.replace('{path}', outputPath));
                 activeReporter.updateStatus(uiStrings.slideExport.exportSuccess.replace('{path}', outputPath), 100);
                 new Notice(uiStrings.slideExport.exportComplete);

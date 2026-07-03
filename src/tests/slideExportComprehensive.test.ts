@@ -324,6 +324,38 @@ describe('slidevExporter — All Format Combinations', () => {
         });
         expect(mockExecFileAsync).toHaveBeenCalledTimes(1);
         expect(mockExecFileAsync.mock.calls[0][1]).toEqual(expect.arrayContaining(['--standalone-bundle']));
+        expect(app.vault.adapter.write).toHaveBeenCalledWith(
+            'export/test-slides/index-standalone.html',
+            expect.stringContaining('data-notemd-mermaid-post-fit')
+        );
+    });
+
+    test('injects mermaid post-fit script into server-script html outcome', async () => {
+        mockExecFileAsync.mockResolvedValue({ exitCode: 0, stdout: '', stderr: '' });
+        const rmSync = jest.fn();
+        const mkdirSync = jest.fn();
+        mockSafeRequire.mockImplementation((name: string) => name === 'fs' ? { rmSync, mkdirSync } : null);
+        const app = createMockApp();
+        const source = createMockSlidevSource('test', 'test.md');
+        const config: SlideExportConfig = {
+            format: 'html',
+            withClicks: false,
+            outputSubfolder: 'export',
+            ffmpegFps: 1,
+            ffmpegCrf: 23,
+            slidevTheme: 'seriph',
+            timeoutMs: 120000,
+            imageScale: 3,
+            htmlMode: 'server-script',
+        };
+
+        const outcome = await exportSlidevHtmlWithOutcome(app, source, config, jest.fn());
+
+        expect(outcome.path).toBe('export/test-slides/index.html');
+        expect(app.vault.adapter.write).toHaveBeenCalledWith(
+            'export/test-slides/index.html',
+            expect.stringContaining('data-notemd-mermaid-post-fit')
+        );
     });
 
     test('copies prepared local file references into the HTML export directory', async () => {
