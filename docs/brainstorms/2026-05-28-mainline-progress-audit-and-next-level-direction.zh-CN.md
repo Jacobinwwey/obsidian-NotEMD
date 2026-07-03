@@ -1,6 +1,6 @@
 ---
 date: 2026-05-28
-last_updated: 2026-07-02
+last_updated: 2026-07-03
 topic: mainline-progress-audit-and-next-level-direction
 canonical: true
 ---

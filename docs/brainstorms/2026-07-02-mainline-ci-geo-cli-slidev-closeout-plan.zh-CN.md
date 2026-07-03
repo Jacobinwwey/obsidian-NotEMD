@@ -2,7 +2,7 @@
 date: 2026-07-02
 topic: mainline-ci-geo-cli-slidev-closeout-plan
 canonical: true
-status: local-verification-complete
+status: completed
 ---
 
 # 主线 CI、GEO、CLI 与 Slidev 收口方案
@@ -42,8 +42,8 @@ status: local-verification-complete
 | 5 | 让 Mermaid post-fit injection 由 exporter 路径统一负责，不再在 `src/main.ts` 里重复修改 standalone HTML | 已实现 |
 | 6 | 更新 CLI、Slidev workflow、GEO roadmap、Pages measurement log、website README 与 `llms.txt`，同步新的源码真值 | 已在本文档批次实现 |
 | 7 | 执行源码验证：Jest、插件构建、Pages build/audit、diff whitespace check，以及 Obsidian CLI/runtime smoke checks | 已于 2026-07-03 在本地验证 |
-| 8 | 提交并推送到 `main`；因为已改动 `website/**`，推送后观察 Pages workflow | 待提交/推送 |
-| 9 | 确认最终本地工作区 clean 且与 `origin/main` 对齐 | 待推送 |
+| 8 | 提交并推送到 `main`；因为已改动 `website/**`，推送后观察 Pages workflow | 已于 2026-07-03 完成（`b09d286`，workflow run `28641376675`） |
+| 9 | 确认最终本地工作区 clean 且与 `origin/main` 对齐 | 已于 2026-07-03 完成 |
 
 ## 架构方向
 
@@ -87,6 +87,17 @@ status: local-verification-complete
 6. `obsidian help`、`obsidian commands filter=notemd` 与 `obsidian dev:errors` 都成功返回，但宿主会提示当前安装器较旧、CLI 能力有限；
 7. 当前 Windows 环境里独立 `obsidian-cli` 未安装，因此它的缺失已经被明确记录为收口证据，而不是悬而未决的歧义；
 8. `obsidian command id=notemd:probe-slide-export-environment` 已经通过官方 `obsidian` trigger surface 返回同样的安装器版本提示，这足以证明 trigger surface 存在，只是当前宿主无法给出更丰富的命令输出。
+
+## 2026-07-03 远端收口结果
+
+push 之后的跟进现在也已经收口：
+
+1. commit `b09d286`（`chore(mainline): close out process alignment and archive root docs`）已经落到 `main`；
+2. 本次 push 触发的 `Deploy Docusaurus to GitHub Pages` run `28641376675` 已成功完成；
+3. 两个 workflow job 都通过：
+   - `build` job `84938128239`
+   - `deploy` job `84938347473`
+4. 当前剩余的 GitHub 侧提示并不是源码失败，而是 Actions 的 Node 20 deprecation 注记：`actions/checkout@v4`、`actions/setup-node@v4`、`actions/upload-artifact@v4` 与 `actions/deploy-pages@v4` 都被 GitHub runner 策略强制跑在 Node 24 上。
 
 ## 本批之后的剩余工作
 

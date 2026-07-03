@@ -2,7 +2,7 @@
 date: 2026-07-02
 topic: mainline-ci-geo-cli-slidev-closeout-plan
 canonical: false
-status: local-verification-complete
+status: completed
 ---
 
 # Mainline CI, GEO, CLI, And Slidev Closeout Plan
@@ -42,8 +42,8 @@ It does not promote maintainer-only CLI operations into a public user API, and i
 | 5 | Keep Mermaid post-fit injection owned by the exporter path instead of duplicating standalone HTML mutation in `src/main.ts` | Implemented |
 | 6 | Update CLI, Slidev workflow, GEO roadmap, Pages measurement log, website README, and `llms.txt` to reflect the new source truth | Implemented in this documentation batch |
 | 7 | Run source verification: Jest, plugin build, Pages build/audit, diff whitespace check, and Obsidian CLI/runtime smoke checks | Verified locally on 2026-07-03 |
-| 8 | Commit and push to `main`, then watch the Pages workflow because `website/**` changed | Pending commit/push |
-| 9 | Confirm final local worktree is clean and aligned with `origin/main` | Pending push |
+| 8 | Commit and push to `main`, then watch the Pages workflow because `website/**` changed | Completed on 2026-07-03 (`b09d286`, workflow run `28641376675`) |
+| 9 | Confirm final local worktree is clean and aligned with `origin/main` | Completed on 2026-07-03 |
 
 ## Architecture Direction
 
@@ -87,6 +87,17 @@ Local verification is now complete for the source-side closeout:
 6. `obsidian help`, `obsidian commands filter=notemd`, and `obsidian dev:errors` all returned successfully, while the host warned that the installed Obsidian CLI package is old and exposes limited CLI support;
 7. standalone `obsidian-cli` is not installed in this Windows environment, so its absence is now explicitly part of the closeout evidence instead of an unresolved ambiguity;
 8. `obsidian command id=notemd:probe-slide-export-environment` returned through the official `obsidian` trigger surface with the same installer-age warning, which is enough to show the trigger surface exists even though this host does not expose richer command output.
+
+## 2026-07-03 Remote Closeout Result
+
+The follow-through after push is now also closed:
+
+1. commit `b09d286` (`chore(mainline): close out process alignment and archive root docs`) landed on `main`;
+2. `Deploy Docusaurus to GitHub Pages` run `28641376675` completed successfully after this push;
+3. both workflow jobs passed:
+   - `build` job `84938128239`
+   - `deploy` job `84938347473`
+4. the remaining GitHub-side warning is not a source failure: Actions reported Node 20 deprecation notices for `actions/checkout@v4`, `actions/setup-node@v4`, `actions/upload-artifact@v4`, and `actions/deploy-pages@v4`, all forced onto Node 24 by GitHub's runner policy.
 
 ## Remaining Work After This Batch
 
