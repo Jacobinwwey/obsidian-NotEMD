@@ -51,8 +51,19 @@
 |---|---|
 | `npm --prefix website run build` | 2026-07-04 通过 |
 | `npm --prefix website run audit:build` | 2026-07-04 通过，输出 `website build audit passed` |
-| 近期远端 Pages runs | 当前可见的最新 `main` Pages workflow 仍为绿色，最近记录到 run `28641376675`；后续 docs-only commits，包括 `9efff59` 与 `40543eb`，没有触发新的 website workflow，因为它们没有改动 `website/**` |
+| 近期远端 Pages runs | 当前可见的最新 `main` Pages workflow 已绿色推进到 commit `2b2e1cd` 对应的 run `28701182146`；此前 docs-only commits，包括 `9efff59` 与 `40543eb`，没有触发新的 website workflow，因为它们没有改动 `website/**` |
 | 外部测量 | 本地仍不能证明；Search Console 与 AI visibility 仍属于手工/部署后证据 |
+
+## 2026-07-04 远端 Pages 收口
+
+commit `2b2e1cd`（`docs(geo): align bilingual closure evidence`）触发的后续 Pages workflow 已成功完成，对应 run 为 `28701182146`，并延续了上一轮绿色 Pages 基线 run `28641376675`。
+
+| Job | 结果 |
+|---|---|
+| `build`（`85119355773`） | 已通过，覆盖 checkout、Node setup、依赖安装、Docusaurus build、`npm run audit:build` 与 artifact upload |
+| `deploy`（`85119467658`） | 已通过，并完成 Pages artifact 部署 |
+
+当前剩余的 GitHub 侧 annotation 仍是既有 Node 20 deprecation notice：上游 actions 被 GitHub runner 策略强制跑在 Node 24 上。这不是 Docusaurus build、audit、artifact upload 或 deploy 失败。
 
 ## Route 样本
 

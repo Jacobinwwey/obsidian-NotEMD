@@ -308,6 +308,8 @@ describe('mainline progress audit contract', () => {
             expect(content).toContain('2026-06-22');
             expect(content).toContain('2026-07-04');
             expect(content).toContain('28641376675');
+            expect(content).toContain('28701182146');
+            expect(content).toContain('2b2e1cd');
             expect(content).toContain('40543eb');
             expect(content).toContain('Search Console');
             expect(content).toContain('AI visibility');

@@ -51,8 +51,19 @@ Current source-side result:
 |---|---|
 | `npm --prefix website run build` | Passed on 2026-07-04 |
 | `npm --prefix website run audit:build` | Passed on 2026-07-04 with `website build audit passed` |
-| Recent remote Pages runs | Latest visible `main` Pages workflow runs remain green through run `28641376675`; subsequent docs-only commits including `9efff59` and `40543eb` did not trigger a new website workflow because they did not change `website/**` |
+| Recent remote Pages runs | Latest visible `main` Pages workflow runs are green through run `28701182146` for commit `2b2e1cd`; earlier docs-only commits including `9efff59` and `40543eb` did not trigger a new website workflow because they did not change `website/**` |
 | External measurement | Still not locally provable; Search Console and AI visibility checks remain manual/post-deploy evidence |
+
+## 2026-07-04 Remote Pages Closure
+
+The follow-up Pages workflow for commit `2b2e1cd` (`docs(geo): align bilingual closure evidence`) completed successfully as run `28701182146`, extending the previous green Pages baseline from run `28641376675`.
+
+| Job | Result |
+|---|---|
+| `build` (`85119355773`) | Passed after checkout, Node setup, dependency install, Docusaurus build, `npm run audit:build`, and artifact upload |
+| `deploy` (`85119467658`) | Passed and deployed the Pages artifact |
+
+The only remaining GitHub-side annotation is the existing Node 20 deprecation notice for upstream actions being forced onto Node 24 by GitHub's runner policy. That annotation is not a Docusaurus build, audit, artifact upload, or deploy failure.
 
 ## Route Sample
 
