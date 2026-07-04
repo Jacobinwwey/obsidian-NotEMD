@@ -24,6 +24,8 @@
 
 ## 支撑文档
 
+- [图形参考项目集成与 Figure 生成扩展方案（英文）](./brainstorms/2026-07-04-diagram-reference-integration-and-figure-generation-plan.md)
+- [图形参考项目集成与 Figure 生成扩展方案（中文）](./brainstorms/2026-07-04-diagram-reference-integration-and-figure-generation-plan.zh-CN.md)
 - [图表平台 Phase 2 需求（英文）](./brainstorms/2026-04-14-diagram-platform-phase-2-requirements.md)
 - [图表平台 Phase 2 需求（中文）](./brainstorms/2026-04-14-diagram-platform-phase-2-requirements.zh-CN.md)
 - [Local KB Retrieval 方案决策与质量真值（英文）](./brainstorms/2026-06-09-local-kb-retrieval-decision-and-quality-truth.md)

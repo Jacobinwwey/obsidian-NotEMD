@@ -49,4 +49,25 @@ describe('docs hub contract', () => {
             '[Chapter Split 的知识管理与 TOC 对比真值（中文）](./brainstorms/2026-06-09-chapter-split-knowledge-management-and-toc-comparison-truth.zh-CN.md)'
         );
     });
+
+    test('docs hub and preview index keep the diagram reference integration plan discoverable in both languages', () => {
+        expect(docsHub).toContain(
+            '[Diagram Reference Integration And Figure Generation Plan](./brainstorms/2026-07-04-diagram-reference-integration-and-figure-generation-plan.md)'
+        );
+        expect(docsHubZh).toContain(
+            '[图形参考项目集成与 Figure 生成扩展方案](./brainstorms/2026-07-04-diagram-reference-integration-and-figure-generation-plan.zh-CN.md)'
+        );
+        expect(docsIndex).toContain(
+            '[Diagram Reference Integration And Figure Generation Plan (EN)](./brainstorms/2026-07-04-diagram-reference-integration-and-figure-generation-plan.md)'
+        );
+        expect(docsIndex).toContain(
+            '[Diagram Reference Integration And Figure Generation Plan (zh-CN)](./brainstorms/2026-07-04-diagram-reference-integration-and-figure-generation-plan.zh-CN.md)'
+        );
+        expect(docsIndexZh).toContain(
+            '[图形参考项目集成与 Figure 生成扩展方案（英文）](./brainstorms/2026-07-04-diagram-reference-integration-and-figure-generation-plan.md)'
+        );
+        expect(docsIndexZh).toContain(
+            '[图形参考项目集成与 Figure 生成扩展方案（中文）](./brainstorms/2026-07-04-diagram-reference-integration-and-figure-generation-plan.zh-CN.md)'
+        );
+    });
 });

@@ -1,0 +1,218 @@
+---
+date: 2026-07-04
+topic: diagram-reference-integration-and-figure-generation-plan
+---
+
+# 图形参考项目集成与 Figure 生成扩展方案
+
+## 范围与证据
+
+本文只回答一个窄问题：Notemd 是否可以参考 `cloudy-liu/cloudy-tech-diagrams-skill` 与 `plait-board/drawnix` 扩展 figure / diagram 生成能力；如果可以，这项工作应该进入现有架构的哪个边界。
+
+本地已检查的参考基线：
+
+| 参考项目 | 本地路径 | 基线 | 已读证据 |
+|---|---|---|---|
+| `cloudy-liu/cloudy-tech-diagrams-skill` | `ref/cloudy-tech-diagrams-skill` | `main@719a5be` | `SKILL.md`, `README*.md`, `assets/template.html`, `references/runtime-mechanism-mode.md`, Draw.io 导出测试 |
+| `plait-board/drawnix` | `ref/drawnix` | `develop@9939f45` | `README_en.md`, `package.json`, `packages/drawnix/src/data/types.ts`, `packages/drawnix/src/data/json.ts`, `components/ttd-dialog/*-to-drawnix.tsx` |
+| Notemd 当前 main | 仓库根目录 | `main@562074f` | `src/diagram/types.ts`, `src/rendering/rendererRegistry.ts`, `src/rendering/rendererService.ts`, roadmap 与 Drawnix 审计文档 |
+
+结论是有条件的：扩展 figure 生成在技术上可行，但正确扩展不是“嵌入一个白板”，也不是“再加一个 Mermaid 转换器”。可持续路径是继续把 `DiagramSpec` 作为语义边界，然后为可编辑 HTML/SVG 以及后续 board export 增加明确的 target adapter。
+
+## 当前 Notemd 架构位置
+
+Notemd 已经拥有多数图形生成器缺少的关键部分：spec-first 语义层。`DiagramSpec` 捕获意图、标题、节点、边、分区、callout、数据序列、布局提示、语言与 evidence references。`RendererRegistry` 按 `RenderTarget` 解析 renderer，`RendererService` 负责 cache、in-flight dedupe、render-host delegation 与 preview session preparation。
+
+当前 `RenderTarget` 取值为：
+
+```ts
+'mermaid' | 'json-canvas' | 'vega-lite' | 'html'
+```
+
+这点很关键。Cloudy 与 Drawnix 不应该被当成新的 prompt 风格。它们意味着新的 artifact target：
+
+| 候选 target | 最佳解释 | 原因 |
+|---|---|---|
+| Cloudy 风格输出 | 可编辑技术 HTML/SVG 报告 target | 它是 browser-first SVG sheet，并带有语义化 Draw.io 导出元数据。 |
+| Drawnix 输出 | 可选 `.drawnix` board export target | Drawnix 最干净的可复用边界是 `DrawnixExportedData`，不是它的 React host。 |
+| Mermaid-to-Drawnix converter | 仅适合作为实验性桥接 | 它会把 `DiagramSpec` 降级回字符串语法，和 Notemd 当前方向冲突。 |
+
+## 参考项目发现
+
+### Cloudy Tech Diagrams
+
+Cloudy 是一个 instruction-and-template system，用于生成自包含技术图：
+
+- 浏览器产物：standalone HTML，内联 SVG 与 CSS。
+- 视觉系统：暖色 editorial paper canvas、flat fills、semantic color roles、open chevron arrows、严格 spacing。
+- 导出模型：Draw.io 导出是产品关键路径，基于语义 SVG 注解，例如 `data-drawio-type`、`data-drawio-role`、`data-drawio-id`、`data-drawio-source`、`data-drawio-target`。
+- Runtime mechanism mode：要求抽取 trigger、participants、boundaries、carriers、transformations、state/stores、observable outputs 与 causal flow。
+- 验证模型：结构化 Draw.io coverage、visible-label mismatch 检查、edge/style mapping 抽样、exporter versioning，以及可选 diagrams.net Desktop 视觉回归。
+
+真正有价值的不是暖色配色本身，而是这条分层：
+
+```text
+semantic diagram intent -> annotated SVG sheet -> editable Draw.io-native export
+```
+
+这比把所有 explanatory diagram 都压进 Mermaid 更适合 Notemd。尤其是 architecture、runtime mechanism、security boundary、deployment、process views 这类图，SVG 布局与可编辑性通常比 Mermaid 语法兼容更重要。
+
+### Drawnix
+
+Drawnix 不是 renderer library。它是完整 React/Nx/Plait 白板产品：
+
+- React 19 + Vite + Nx monorepo。
+- Plait 栈：`@plait/core`、`@plait/draw`、`@plait/layouts`、`@plait/mind`、`@plait/text-plugins`。
+- 浏览器产品假设：DOM、browser file APIs、local browser storage、toolbar/popover/dialog UI、mobile detection。
+- 导出边界：`DrawnixExportedData` 是清晰 JSON：`type`、`version`、`source`、`elements`、`viewport`、`theme`。
+- 转换 dialogs lazy-load `@plait-board/mermaid-to-drawnix` 与 `@plait-board/markdown-to-drawnix`，再把 `PlaitElement[]` 插入 live board。
+
+可复用边界是数据形状与 layering pattern。完整 host 不适合进入 Obsidian plugin 主 bundle。转换器值得观察，但它们是 string-to-board bridge；不应成为 Notemd 主路径，因为它们会抹掉 `DiagramSpec` 的语义优势。
+
+## 关键方向
+
+最佳方向是两阶段扩展：
+
+1. 先增加可编辑 HTML/SVG figure target。
+2. 将 Drawnix 视为后续 board-export adapter，而不是 host embed。
+
+这是有意保守的。figure generation 的难点不是生成更多语法字符串，而是在不让 plugin bundle 爆炸的前提下，拥有 layout、editability、validation 与 export fidelity。
+
+## 建议架构
+
+### 阶段 1：可编辑 HTML/SVG Figure Target
+
+新增一个 target，输出带 annotated SVG sheet 的自包含 HTML artifact：
+
+```text
+DiagramSpec
+  -> SemanticFigureModel
+  -> AnnotatedSvgSheet
+  -> EditableHtmlSvgArtifact
+```
+
+候选代码归属：
+
+| 区域 | 建议 owner |
+|---|---|
+| 从 `DiagramSpec` 做语义投影 | `src/diagram/adapters/editableSvg/` |
+| Template assembly 与 export UI | `src/rendering/renderers/editableHtmlSvgRenderer.ts` |
+| Draw.io 注解校验 | `src/rendering/drawio/` 或 renderer-local validator |
+| Artifact save / preview integration | 复用现有 diagram command execution 与 renderer service 路径 |
+
+不要盲目复制 Cloudy 的整套 template。如果复制代码，必须保留 MIT attribution，并把 exporter block 隔离出来，让 version drift 可测试。更推荐抽取 contract，写 Notemd 自己拥有的 renderer，并沿用同类语义。
+
+最小可交付产物：
+
+- `.html` source artifact 保存到配置的 diagram output folder。
+- 通过现有 HTML/iframe preview path 进行浏览器预览。
+- 只有在 semantic export audit 通过后，才提供页内 PNG 与 Draw.io export actions。
+- 在 export fidelity 证明之前，不默认生成 `.drawio` 文件。
+
+### 阶段 2：Draw.io Export Contract
+
+在承诺 Draw.io 是支持输出前，必须锁定这些检查：
+
+- 每个有意义的可见 SVG 元素都有注解，或带原因显式 ignored。
+- 可见 SVG text 不能被 `data-drawio-label` 静默覆盖。
+- Open arrowheads、dashed strokes、fill/stroke、rounded corners、font size、font weight 能映射到可编辑 Draw.io cells。
+- Exporter version 嵌入并被测试覆盖。
+- 可选视觉回归应为 manual/release-gated，不应进入常规 CI，因为 diagrams.net / font rendering 受环境影响明显。
+
+这里应比普通 HTML preview tests 更严格。否则功能会退化为“HTML 看起来不错，但可编辑导出不可靠”，这正是 Cloudy 在解决的问题。
+
+### 阶段 3：Drawnix Export Target
+
+只有阶段 1 稳定后，才增加实验性 `.drawnix` export target：
+
+```text
+DiagramSpec
+  -> PlaitElementProjection
+  -> DrawnixExportedData
+  -> .drawnix JSON artifact
+```
+
+规则：
+
+- 不在 Notemd 中嵌入 Drawnix React host。
+- 不把 `DiagramSpec -> Mermaid -> mermaid-to-drawnix` 做成 mainline path。
+- 先做小子集：mindmap、flowchart、simple architecture node/edge diagrams。
+- 显式拥有 geometry generation：points、bounding boxes、viewport defaults、text wrapping、theme mapping。
+- 在 heavy-runtime packaging boundary 真正成立前，不把依赖带进 `main.js`。普通 JSON writer 优先于引入 Plait runtime。
+
+## 实施计划
+
+### Phase A：Contract-Only Planning
+
+- [x] 将 `cloudy-tech-diagrams-skill` clone / update 到 `ref/cloudy-tech-diagrams-skill`。
+- [x] 将 `drawnix` clone / update 到 `ref/drawnix`。
+- [x] 记录参考项目基线与当前 Notemd 架构适配关系。
+- [x] 增加 tracked renderer contract test，保证这份方案可以从 docs hub 找到。
+
+### Phase B：Editable HTML/SVG Prototype
+
+- [ ] 将 `SemanticFigureModel` 定义为内部 renderer model，而不是 public prompt contract。
+- [ ] 命名评审后新增 `editable-html-svg` 或等价 target，避免与现有 `html` 含义冲突。
+- [ ] 基于现有 `DiagramSpec` 字段，实现 architecture / process / runtime-mechanism views 的第一版 renderer。
+- [ ] 增加参考 Cloudy `data-drawio-type` contract 的 annotation coverage tests。
+- [ ] 增加 Playwright preview checks，覆盖 nonblank render、text bounds、mobile/desktop framing。
+- [ ] 在 preview/export 质量被证明前，把能力放在现有 experimental diagram pipeline 后面。
+
+### Phase C：Draw.io Export Hardening
+
+- [ ] 增加 deterministic exporter block 或 library boundary。
+- [ ] 增加 visible-label mismatch tests。
+- [ ] 增加 edge/style mapping 抽样测试。
+- [ ] 增加 local-only visual regression runbook；不要让 diagrams.net Desktop 成为普通 CI 依赖。
+- [ ] 文档化 exporter limitations 与 supported primitives。
+
+### Phase D：Drawnix Board Export Spike
+
+- [ ] 定义支持的 `DrawnixExportedData` 子集。
+- [ ] 在不导入完整 Drawnix host 的前提下实现 `DiagramSpec -> DrawnixExportedData`。
+- [ ] 手工在 Drawnix 中验证 `.drawnix` JSON validity 与简单 open/import 行为。
+- [ ] 只有当 Task 0 packaging isolation 不再是 candidate-only 后，才判断 Plait dependency 是否值得承担 bundle 成本。
+
+## 权衡
+
+| 决策 | 收益 | 成本 |
+|---|---|---|
+| HTML/SVG target 先于 Drawnix | 最快获得更丰富 figure 与可编辑导出路径 | 必须自己拥有 SVG layout 与 text fitting |
+| Drawnix 仅作为 export target | 避免完整白板 host 复杂度 | 不提供插件内 board editing |
+| 保持 `DiagramSpec` 为主边界 | 保留语义质量与可测试性 | 需要编写 target adapters，不能盲目复用 converters |
+| manual/release visual gate | 避免 diagrams.net/font 差异导致 flaky CI | release 前维护者需要跑更重的检查 |
+
+## 需要避免的坑
+
+- 不要让 “supports Drawnix” 变成 “bundles Drawnix”。那是 host 归属错误，不是 renderer 改进。
+- 不要为了复用 converter，把生产 `DiagramSpec` 绕回 Mermaid text。那会重新引入旧的 string-surgery failure mode。
+- 不要在没有 structural coverage tests 的情况下承诺 Draw.io editability。漂亮的 SVG 下载不是可编辑 Draw.io continuation path。
+- 不要在 Obsidian preview 里把 Google Fonts 做成硬运行时依赖。使用 system fallback，外部 font loading 保持可选。
+- 不要在 packaging isolation 成立前，把重型导出代码放进 `main.js`。
+- 不要过早扩宽 `DiagramSpec`。先使用内部 `SemanticFigureModel`；只有两个以上 target 都需要同一字段时，再提升为公共字段。
+
+## 最佳实践边界
+
+正确心智模型是：
+
+```text
+LLM output remains semantic.
+Adapters own target-specific geometry.
+Renderers own host/export behavior.
+Operations own artifact save and user workflow.
+Verification owns claims.
+```
+
+Cloudy 的价值在于证明严格的 HTML/SVG + Draw.io export contract 可以成立。Drawnix 的价值在于证明 board data boundary 足够清晰，未来可以作为 target。二者都不应覆盖 Notemd 当前架构方向。
+
+## 建议的下一步
+
+不要从增加依赖开始。先在 experimental diagram path 后面增加最小可编辑 HTML/SVG renderer，并证明：
+
+1. 当前 `DiagramSpec` 能表达有用的 architecture / runtime mechanism figure；
+2. renderer 能生成自包含、非空 HTML artifact；
+3. 可见文本能正确 fit，并保持 searchable / editable；
+4. Draw.io export coverage 可结构化审计；
+5. 现有 Mermaid、JSON Canvas、Vega-Lite 与 HTML renderer 不受影响。
+
+只有这些 claim 被验证后，Notemd 才应该考虑 `.drawnix` target。Drawnix 是好的未来导出格式，不是把白板产品嵌入插件的理由。

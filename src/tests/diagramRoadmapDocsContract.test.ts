@@ -40,4 +40,25 @@ describe('diagram roadmap docs contract', () => {
         expect(roadmapZh).toContain('2. 完成任务 2 剩余部分：diagram command architecture 收口');
         expect(roadmapZh).toContain('3. 完成任务 3 剩余部分：`mermaidProcessor.ts` 降责与 legacy fixer sunset boundary');
     });
+
+    test('roadmap records the 2026-07-04 Cloudy and Drawnix reference alignment in both languages', () => {
+        expect(roadmapEn).toContain('## 2026-07-04 Reference Integration Reality Correction');
+        expect(roadmapZh).toContain('## 2026-07-04 参考项目集成现实校正');
+        expect(roadmapEn).toContain('`cloudy-liu/cloudy-tech-diagrams-skill` at `main@719a5be`');
+        expect(roadmapZh).toContain('`cloudy-liu/cloudy-tech-diagrams-skill`：`main@719a5be`');
+        expect(roadmapEn).toContain('`plait-board/drawnix` at `develop@9939f45`');
+        expect(roadmapZh).toContain('`plait-board/drawnix`：`develop@9939f45`');
+        expect(roadmapEn).toContain(
+            'editable HTML/SVG figure target with semantic Draw.io export annotations'
+        );
+        expect(roadmapZh).toContain('带语义 Draw.io export annotations 的可编辑 HTML/SVG figure target');
+        expect(roadmapEn).toContain('It does not justify embedding the full React/Plait whiteboard host');
+        expect(roadmapZh).toContain('不应被解读为需要把完整 React/Plait 白板宿主嵌入 Obsidian 插件');
+        expect(roadmapEn).toContain(
+            '`DiagramSpec -> target-specific adapter -> renderer/export artifact`'
+        );
+        expect(roadmapZh).toContain(
+            '`DiagramSpec -> target-specific adapter -> renderer/export artifact`'
+        );
+    });
 });

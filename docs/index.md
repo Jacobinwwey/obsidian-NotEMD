@@ -24,6 +24,8 @@ Repository docs preview for `obsidian-NotEMD`.
 
 ## Supporting Docs
 
+- [Diagram Reference Integration And Figure Generation Plan (EN)](./brainstorms/2026-07-04-diagram-reference-integration-and-figure-generation-plan.md)
+- [Diagram Reference Integration And Figure Generation Plan (zh-CN)](./brainstorms/2026-07-04-diagram-reference-integration-and-figure-generation-plan.zh-CN.md)
 - [Diagram Platform Phase 2 Requirements (EN)](./brainstorms/2026-04-14-diagram-platform-phase-2-requirements.md)
 - [Diagram Platform Phase 2 Requirements (zh-CN)](./brainstorms/2026-04-14-diagram-platform-phase-2-requirements.zh-CN.md)
 - [Local KB Retrieval Decision And Quality Truth (EN)](./brainstorms/2026-06-09-local-kb-retrieval-decision-and-quality-truth.md)

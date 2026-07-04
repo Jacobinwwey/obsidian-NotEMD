@@ -47,6 +47,23 @@ What that correction means:
 - Task 3 is no longer about proving Mermaid subtype support. It is now about reducing `src/mermaidProcessor.ts` responsibility under the already-declared rule that every sub-slice must be verified in a real Obsidian session with saved-artifact inspection.
 - The checked-in release / chronicle / repo-saga helper entrypoints now have process-level regression proof, so Task 0 packaging evidence is repo-owned truth rather than maintainer memory.
 
+## 2026-07-04 Reference Integration Reality Correction
+
+The Cloudy and Drawnix reference pass is now recorded in `docs/brainstorms/2026-07-04-diagram-reference-integration-and-figure-generation-plan.md`.
+
+Baselines inspected locally:
+
+- `cloudy-liu/cloudy-tech-diagrams-skill` at `main@719a5be`.
+- `plait-board/drawnix` at `develop@9939f45`.
+- Notemd architecture baseline at `main@562074f`.
+
+What this changes:
+
+- Cloudy strengthens the case for an editable HTML/SVG figure target with semantic Draw.io export annotations. It does not justify adding another Mermaid-only prompt style.
+- Drawnix remains a future `.drawnix` data/export target candidate. It does not justify embedding the full React/Plait whiteboard host in the Obsidian plugin.
+- The correct future target boundary is still `DiagramSpec -> target-specific adapter -> renderer/export artifact`; production code should not route `DiagramSpec` back through Mermaid text just to reuse string-to-board converters.
+- The next implementation priority remains boundary hardening before expansion. When new target work resumes, editable HTML/SVG should precede `.drawnix` because it proves layout, text fitting, and Draw.io export claims without importing a heavy whiteboard runtime.
+
 ---
 
 **Goal:** Evolve Notemd from a single Mermaid-text generation path into an extensible diagram platform built around intent detection, structured specs, specialized renderers, and multi-format output inside Obsidian.
