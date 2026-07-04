@@ -8,8 +8,8 @@ This log separates source-side GEO proof from live indexing proof. `npm run audi
 
 | Evidence | Current state | Owner |
 |---|---|---|
-| Build output | Pending this slice's verification with `npm --prefix website run build` | Local operator |
-| Build audit | Pending this slice's verification with `npm --prefix website run audit:build` | Local operator |
+| Build output | Verified locally again on 2026-07-04 with `npm --prefix website run build` | Local operator |
+| Build audit | Verified locally again on 2026-07-04 with `npm --prefix website run audit:build` | Local operator |
 | Root sitemap | Must include canonical English docs and published zh-CN alternates only | `website/scripts/audit-build.cjs` |
 | zh-CN sitemap | Must include zh-CN root plus published zh-CN docs; must exclude untranslated fallback docs | `website/scripts/audit-build.cjs` |
 | `llms.txt` | Must list English canonical docs, published zh-CN docs, and the partial-language warning | `website/static/llms.txt` |
@@ -38,6 +38,21 @@ This log separates source-side GEO proof from live indexing proof. `npm run audi
 | Current baseline commit | `eb777ef` had no check-runs and no legacy statuses attached during triage | Local operator |
 | Source-side interpretation | No current Docusaurus build or `audit:build` failure was found on remote `main`; Pages remains gated by the workflow when `website/**` or the workflow file changes | Local operator |
 | Next measurement | After this closeout deploy, inspect root, zh-CN root, FAQ, provider overview, one provider detail, and one unpublished zh-CN fallback in Search Console | External manual check |
+
+## 2026-07-04 Source-Side GEO Closure
+
+This closure confirms the source-side GEO work is complete under the current repository-accessible evidence. The local build produced both English and zh-CN static output, and `website/scripts/audit-build.cjs` passed against the generated artifact. The gate covered root pages, canonical URLs, homepage JSON-LD, release metadata, `llms.txt`, sitemap language scope, published zh-CN translations, unpublished zh-CN fallback `noindex,follow`, hreflang alternates, provider-doc heading quality, and the measurement evidence references.
+
+No new public GEO surface was added in this closure. That is intentional: the current risk is not lack of more pages, but route/schema/map drift. The correct closure action was to re-run and record the existing build-output gate, keep `llms.txt`, sitemap, homepage copy, JSON-LD, and language policy aligned, and leave Search Console / AI visibility as post-deploy measurement.
+
+Current source-side result:
+
+| Evidence | Result |
+|---|---|
+| `npm --prefix website run build` | Passed on 2026-07-04 |
+| `npm --prefix website run audit:build` | Passed on 2026-07-04 with `website build audit passed` |
+| Recent remote Pages runs | Latest visible `main` Pages workflow runs remain green through run `28641376675`; commit `9efff59` did not trigger a new website workflow because it did not change `website/**` |
+| External measurement | Still not locally provable; Search Console and AI visibility checks remain manual/post-deploy evidence |
 
 ## Route Sample
 

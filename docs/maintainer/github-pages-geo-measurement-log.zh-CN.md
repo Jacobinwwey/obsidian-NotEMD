@@ -8,8 +8,8 @@
 
 | 证据 | 当前状态 | 负责人 |
 |---|---|---|
-| Build output | 等待本切片执行 `npm --prefix website run build` 验证 | 本地操作者 |
-| Build audit | 等待本切片执行 `npm --prefix website run audit:build` 验证 | 本地操作者 |
+| Build output | 已于 2026-07-04 重新通过 `npm --prefix website run build` 本地验证 | 本地操作者 |
+| Build audit | 已于 2026-07-04 重新通过 `npm --prefix website run audit:build` 本地验证 | 本地操作者 |
 | Root sitemap | 必须只包含 canonical 英文 docs 与已发布 zh-CN alternate | `website/scripts/audit-build.cjs` |
 | zh-CN sitemap | 必须包含 zh-CN root 与已发布 zh-CN docs；必须排除未翻译 fallback docs | `website/scripts/audit-build.cjs` |
 | `llms.txt` | 必须列出英文 canonical docs、已发布 zh-CN docs 与 partial-language 警告 | `website/static/llms.txt` |
@@ -38,6 +38,21 @@
 | 当前基线 commit | 排查时 `eb777ef` 没有关联 check-runs，也没有 legacy statuses | 本地操作者 |
 | 源码侧解释 | 没发现当前远端 `main` 存在 Docusaurus build 或 `audit:build` 失败；只要改动 `website/**` 或 workflow 文件，Pages 仍由 workflow 门禁 | 本地操作者 |
 | 下一步测量 | 本次收口部署后，在 Search Console 检查 root、zh-CN root、FAQ、provider overview、一个 provider detail 与一个未发布 zh-CN fallback | 外部手工检查 |
+
+## 2026-07-04 源码侧 GEO 收口
+
+本次收口确认：在当前仓库可证明的证据范围内，GEO 源码侧工作已经完成。本地构建产出了英文与 zh-CN 两套静态页面，`website/scripts/audit-build.cjs` 已对生成产物通过审计。该门禁覆盖 root pages、canonical URLs、homepage JSON-LD、release metadata、`llms.txt`、sitemap 语言范围、已发布 zh-CN 翻译、未发布 zh-CN fallback 的 `noindex,follow`、hreflang alternates、provider docs heading quality，以及 measurement evidence references。
+
+本次没有新增公开 GEO surface，这是刻意选择。当前主要风险不是页面数量不足，而是 route、schema、retrieval map 与语言策略漂移。正确的收口动作是重新运行并记录现有 build-output gate，保持 `llms.txt`、sitemap、homepage copy、JSON-LD 与 language policy 对齐，并继续把 Search Console / AI visibility 留作部署后的外部测量。
+
+当前源码侧结果：
+
+| 证据 | 结果 |
+|---|---|
+| `npm --prefix website run build` | 2026-07-04 通过 |
+| `npm --prefix website run audit:build` | 2026-07-04 通过，输出 `website build audit passed` |
+| 近期远端 Pages runs | 当前可见的最新 `main` Pages workflow 仍为绿色，最近记录到 run `28641376675`；commit `9efff59` 未触发新的 website workflow，因为它没有改动 `website/**` |
+| 外部测量 | 本地仍不能证明；Search Console 与 AI visibility 仍属于手工/部署后证据 |
 
 ## Route 样本
 
