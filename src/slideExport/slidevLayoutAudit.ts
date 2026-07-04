@@ -89,7 +89,8 @@ export type SlidevLayoutFindingKind =
 	| 'render-error'
 	| 'low-effective-font'
 	| 'tight-margin'
-	| 'low-content-utilization';
+	| 'low-content-utilization'
+	| 'dense-body';
 export type SlidevLayoutPatchKind = 'reduce-zoom' | 'split-table' | 'reduce-code' | 'split-slide' | 'manual-review';
 
 export interface SlidevLayoutFinding {
@@ -401,6 +402,8 @@ export function analyzeRenderedSlideMeasurement(
 			contentAreaRatio: qualityMetrics.contentAreaRatio ?? undefined,
 		});
 	}
+
+	findings.push(...findDenseBodyIssues(measurement, elementKinds, qualityMetrics, resolvedConfig));
 
 	if (
 		measurement.pageScale !== null &&
@@ -897,7 +900,60 @@ function findLowEffectiveFontIssues(
 		textPreview: candidate.textPreview,
 		effectiveFontPx: candidate.fontPx,
 		fontThresholdPx: candidate.thresholdPx,
-	}));
+		}));
+}
+
+function findDenseBodyIssues(
+	measurement: RenderedSlideMeasurement,
+	elementKinds: SlidevMeasuredElementKind[],
+	qualityMetrics: {
+		effectiveMinFontPx: number | null;
+		contentAreaRatio: number | null;
+	},
+	config: SlidevLayoutAuditConfig,
+): SlidevLayoutFinding[] {
+	if (!isPlainBodySurface(elementKinds)) {
+		return [];
+	}
+	if (measurement.pageScale !== null && measurement.pageScale < config.minReadableScale) {
+		return [];
+	}
+	if (qualityMetrics.effectiveMinFontPx !== null && qualityMetrics.effectiveMinFontPx < config.minEffectiveFontPx) {
+		return [];
+	}
+	if (qualityMetrics.contentAreaRatio !== null && qualityMetrics.contentAreaRatio < 0.42) {
+		return [];
+	}
+
+	const bodyTextElements = measurement.elements.filter(
+		(element) => (element.kind === 'text' || element.kind === 'other') && element.textLength >= 80,
+	);
+	const totalBodyTextLength = bodyTextElements.reduce((total, element) => total + element.textLength, 0);
+	if (bodyTextElements.length < 3 || totalBodyTextLength < 1000) {
+		return [];
+	}
+
+	const longestElement = bodyTextElements.reduce((selected, element) =>
+		element.textLength > selected.textLength ? element : selected,
+	);
+	return [
+		{
+			kind: 'dense-body',
+			target: 'text',
+			message: `Body slide contains ${totalBodyTextLength} visible text characters across ${bodyTextElements.length} blocks; split it instead of accepting a dense non-overflowing page.`,
+			recommendedPatch: 'split-slide',
+			recommendedScale: null,
+			textPreview: longestElement.textPreview,
+			contentAreaRatio: qualityMetrics.contentAreaRatio ?? undefined,
+		},
+	];
+}
+
+function isPlainBodySurface(elementKinds: SlidevMeasuredElementKind[]): boolean {
+	return (
+		elementKinds.some((kind) => kind === 'text' || kind === 'other') &&
+		!elementKinds.some((kind) => kind === 'mermaid' || kind === 'table' || kind === 'code' || kind === 'image')
+	);
 }
 
 function fontThresholdForElement(element: SlidevMeasuredElement, config: SlidevLayoutAuditConfig): number {

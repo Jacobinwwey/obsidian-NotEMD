@@ -87,6 +87,63 @@ describe('slidevLayoutAudit', () => {
 		);
 	});
 
+	test('flags dense body-only slides for structural splitting even without hard overflow', () => {
+		const audit = analyzeRenderedSlideMeasurement(
+			createMeasurement({
+				pageScale: 1,
+				contentBounds: { left: 74, top: 56, right: 1204, bottom: 602, width: 1130, height: 546 },
+				elements: [
+					{
+						kind: 'text',
+						selector: 'li',
+						textLength: 420,
+						textPreview: 'first dense body bullet with multiple implementation clauses',
+						effectiveMinFontPx: 17.6,
+						scrollWidth: 1130,
+						scrollHeight: 160,
+						clientWidth: 1130,
+						clientHeight: 160,
+						rect: { left: 74, top: 110, right: 1204, bottom: 270, width: 1130, height: 160 },
+					},
+					{
+						kind: 'text',
+						selector: 'li',
+						textLength: 390,
+						textPreview: 'second dense body bullet with more operational detail',
+						effectiveMinFontPx: 17.6,
+						scrollWidth: 1130,
+						scrollHeight: 150,
+						clientWidth: 1130,
+						clientHeight: 150,
+						rect: { left: 74, top: 286, right: 1204, bottom: 436, width: 1130, height: 150 },
+					},
+					{
+						kind: 'text',
+						selector: 'li',
+						textLength: 360,
+						textPreview: 'third dense body bullet with verification and ownership detail',
+						effectiveMinFontPx: 17.6,
+						scrollWidth: 1130,
+						scrollHeight: 142,
+						clientWidth: 1130,
+						clientHeight: 142,
+						rect: { left: 74, top: 452, right: 1204, bottom: 594, width: 1130, height: 142 },
+					},
+				],
+			}),
+		);
+
+		expect(audit.findings).toEqual(
+			expect.arrayContaining([
+				expect.objectContaining({
+					kind: 'dense-body',
+					target: 'text',
+					recommendedPatch: 'split-slide',
+				}),
+			]),
+		);
+	});
+
 	test('reports unreadable scale for non-Mermaid primary content below the readable floor', () => {
 		const audit = analyzeRenderedSlideMeasurement(
 			createMeasurement({

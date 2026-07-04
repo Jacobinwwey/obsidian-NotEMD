@@ -15,6 +15,7 @@ import postFitSource from './mermaidPostFitScript.txt';
 export const MERMAID_POST_FIT_SCRIPT_SOURCE = postFitSource.trim();
 
 const MERMAID_POST_FIT_VUE_MARKER = 'notemd-mermaid-post-fit';
+const MERMAID_POST_FIT_HTML_SCRIPT_PATTERN = /<script\b(?=[^>]*\bdata-notemd-mermaid-post-fit\s*=)[^>]*>[\s\S]*?<\/script>/i;
 
 function createMermaidPostFitVueRuntimeScript(): string {
 	return [
@@ -24,6 +25,20 @@ function createMermaidPostFitVueRuntimeScript(): string {
 		'}',
 		`// ${MERMAID_POST_FIT_VUE_MARKER}:end`,
 	].join('\n');
+}
+
+function replaceExistingMermaidPostFitVueRuntime(source: string, runtimeScript: string): string | null {
+	const existingRuntimePattern = new RegExp(
+		`[\\t ]*// ${MERMAID_POST_FIT_VUE_MARKER}:start[\\s\\S]*?// ${MERMAID_POST_FIT_VUE_MARKER}:end\\n?`,
+		'm',
+	);
+	return existingRuntimePattern.test(source)
+		? source.replace(existingRuntimePattern, `${runtimeScript}\n`)
+		: null;
+}
+
+function createMermaidPostFitHtmlScriptTag(): string {
+	return `<script data-notemd-mermaid-post-fit="1">${MERMAID_POST_FIT_SCRIPT_SOURCE}\n</script>`;
 }
 
 export function createMermaidPostFitGlobalBottomVue(): string {
@@ -38,11 +53,12 @@ export function createMermaidPostFitGlobalBottomVue(): string {
 }
 
 export function injectMermaidPostFitIntoVueSfc(source: string): string {
-	if (source.includes(MERMAID_POST_FIT_VUE_MARKER)) {
-		return source;
+	const runtimeScript = createMermaidPostFitVueRuntimeScript();
+	const upgradedSource = replaceExistingMermaidPostFitVueRuntime(source, runtimeScript);
+	if (upgradedSource !== null) {
+		return upgradedSource;
 	}
 
-	const runtimeScript = createMermaidPostFitVueRuntimeScript();
 	const setupScriptMatch = source.match(/<script\s+setup(?:\s[^>]*)?>/i);
 	if (setupScriptMatch?.index !== undefined) {
 		const insertAt = setupScriptMatch.index + setupScriptMatch[0].length;
@@ -59,11 +75,11 @@ export function injectMermaidPostFitIntoVueSfc(source: string): string {
 }
 
 export function injectMermaidPostFitIntoHtml(html: string): string {
-	if (html.includes('data-notemd-mermaid-post-fit')) {
-		return html;
+	const scriptTag = createMermaidPostFitHtmlScriptTag();
+	if (MERMAID_POST_FIT_HTML_SCRIPT_PATTERN.test(html)) {
+		return html.replace(MERMAID_POST_FIT_HTML_SCRIPT_PATTERN, scriptTag);
 	}
 
-	const scriptTag = `<script data-notemd-mermaid-post-fit="1">${MERMAID_POST_FIT_SCRIPT_SOURCE}\n</script>`;
 	// Replace the LAST (real) </body> tag, not earlier occurrences in JS strings.
 	const lastBodyIdx = html.lastIndexOf('</body>');
 	if (lastBodyIdx >= 0) {

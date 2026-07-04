@@ -30,13 +30,21 @@
     if (remainingBottom <= 0 || br.height <= 0) return;
     var availH = ch * (remainingBottom / br.height);
     var availW = cw * 0.92;
-    var scale = Math.min(availW / w, availH / H);
-    if (scale < 1) {
-      svg.setAttribute("height", String(H * scale));
-      svg.removeAttribute("width");
-      svg.removeAttribute("style");
-      fitted.add(host);
+    var maxScale = 3;
+    var scale = Math.min(maxScale, availW / w, availH / H);
+    if (!(scale > 0)) return;
+    if (host.style) {
+      host.style.display = "flex";
+      host.style.justifyContent = "center";
+      host.style.alignItems = "flex-start";
+      host.style.width = "100%";
     }
+    if (Math.abs(scale - 1) > 0.03) {
+      svg.removeAttribute("style");
+      svg.setAttribute("width", String(w * scale));
+      svg.setAttribute("height", String(H * scale));
+    }
+    fitted.add(host);
   }
   function fitAll() {
     var hosts = document.querySelectorAll(".mermaid");
