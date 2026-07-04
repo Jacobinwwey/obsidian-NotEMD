@@ -54,6 +54,13 @@ node scripts/verify-slidev-export-workflow.cjs --json --format html --html-mode 
 4. `htmlExport.standaloneAttempt.loaderGaps = []`
 5. `standaloneGate.required = true`
 6. `standaloneGate.passed = true`
+7. `renderedLayoutGate.required = true`
+8. `renderedLayoutGate.passed = true`
+9. `tableBodyLayoutGate.passed = true`
+
+这个门禁不是只证明 `--standalone-bundle` 写出了文件。带 `--no-playwright` 的快速命令只能证明原生 standalone bundle 生成成功，不能证明最终 standalone 产物已经经过渲染布局收敛；因此维护者不能用 `--no-playwright --require-native-standalone` 作为交付验收。
+
+Mermaid fence 不由这个门禁拆分。`renderedLayoutGate` 负责确认浏览器实测产物正确，`tableBodyLayoutGate` 专门覆盖表格页与正文页。后续 `PDF`、`PNG`、`PPTX`、`MP4` 导出也必须使用同一份已经收敛的 prepared deck。
 
 ### Server-Script HTML
 
@@ -116,9 +123,10 @@ Slidev 命令解析优先级：
 1. `NOTEMD_SLIDEV_BIN`
 2. `SLIDEV_CLI_PATH`
 3. `$HOME/slidev/packages/slidev/bin/slidev.mjs`
-4. `npx -y @slidev/cli`
+4. `<vault-or-project>/node_modules/.bin/slidev`
+5. `npx -y @slidev/cli`
 
-在 Jacob 的工作站上，维护者验证报告应显示本地 fork 路径。`npx -y @slidev/cli` 只是最后兜底探测路径，不是 NoteMD 推荐安装路径。如果该 fallback 没有暴露 `--standalone-bundle`，环境检测必须把 Slidev 判为不可用于 standalone 所需路径。
+在 Jacob 的工作站上，维护者验证报告应在 `environment.slidev.version` 中显示本地 fork 路径，或显示由 NoteMD fork release 安装出的项目级 binary。`npx -y @slidev/cli` 只是最后兜底探测路径，不是 NoteMD 推荐安装路径。registry 包和 fork 包都会报告 `@slidev/cli@52.16.0`，所以 semver 本身不是有效兼容性信号。环境检测必须运行 `slidev build --help`，并要求同时存在 `--out`、`--format` 和 `--standalone-bundle`；否则 Slidev 对 standalone-required 路径不可用。
 
 ## Fork release 分发边界
 
@@ -136,7 +144,7 @@ https://github.com/Jacobinwwey/slidev/releases/download/notemd-standalone-v52.16
 npm install -D https://github.com/Jacobinwwey/slidev/releases/download/notemd-standalone-v52.16.0-1/slidev-cli-notemd-standalone-v52.16.0-1.tgz @slidev/theme-default
 ```
 
-2026-06-21 的实机烟测已经证明该 release asset 会被 npm 识别为 `@slidev/cli@52.16.0`，能安装到干净 npm 项目，暴露 `slidev` binary，且 `slidev build --help` 包含 `--standalone-bundle`。
+2026-06-21 的实机烟测已经证明该 release asset 会被 npm 识别为 `@slidev/cli@52.16.0`，能安装到干净 npm 项目，暴露 `slidev` binary，且 `slidev build --help` 包含 `--standalone-bundle`。NoteMD 自身的 `package.json` 必须使用这个 release tarball，而不能使用 npm registry 上的 `^52.16.0`，因为同 semver 的 registry build 不提供 native standalone bundle 选项。
 
 这个 release 有意挂在包含 NoteMD standalone fix 的 fork 分支上。不要在 UI 文案里把它替换成 `tree`、`blob`、raw file 或移动分支链接。这些链接适合维护者审代码，但不是 package artifact，也不能给 npm 一个稳定的可执行包边界。
 

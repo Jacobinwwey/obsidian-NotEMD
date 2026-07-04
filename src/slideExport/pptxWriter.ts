@@ -16,6 +16,7 @@ import {
 	type SlidevPptxTextSourceKind,
 } from './pptxModel';
 import { resolveSlidevPptxFontPolicy, splitPptxTextIntoOfficeFontRuns } from './pptxFontContract';
+import { loadPptxOfficeTemplateEntries, readPptxOfficeTemplateXml } from './pptxOfficeTemplate';
 import { safeRequire } from './platformUtils';
 
 const EMU_PER_INCH = 914400;
@@ -923,17 +924,10 @@ function buildPresentationXml(slideCount: number): string {
 		{ length: slideCount },
 		(_unused, index) => `<p:sldId id="${256 + index}" r:id="rId${index + 2}"/>`,
 	).join('');
-
-	return [
-		'<?xml version="1.0" encoding="UTF-8" standalone="yes"?>',
-		'<p:presentation xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns:p="http://schemas.openxmlformats.org/presentationml/2006/main">',
-		'<p:sldMasterIdLst><p:sldMasterId id="2147483648" r:id="rId1"/></p:sldMasterIdLst>',
-		`<p:sldIdLst>${slideIds}</p:sldIdLst>`,
-		`<p:sldSz cx="${PPTX_SLIDE_WIDTH_EMU}" cy="${PPTX_SLIDE_HEIGHT_EMU}" type="wide"/>`,
-		'<p:notesSz cx="6858000" cy="9144000"/>',
-		'<p:defaultTextStyle><a:defPPr><a:defRPr lang="en-US"/></a:defPPr></p:defaultTextStyle>',
-		'</p:presentation>',
-	].join('');
+	const templateXml = readPptxOfficeTemplateXml('ppt/presentation.xml');
+	return templateXml
+		.replace(/<p:sldIdLst>[\s\S]*?<\/p:sldIdLst>/, `<p:sldIdLst>${slideIds}</p:sldIdLst>`)
+		.replace(/<p:sldSz cx="[^"]+" cy="[^"]+"\/>/, `<p:sldSz cx="${PPTX_SLIDE_WIDTH_EMU}" cy="${PPTX_SLIDE_HEIGHT_EMU}"/>`);
 }
 
 function buildPresentationRelationships(slideCount: number): string {
@@ -947,12 +941,16 @@ function buildPresentationRelationships(slideCount: number): string {
 		'<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">',
 		'<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/slideMaster" Target="slideMasters/slideMaster1.xml"/>',
 		slideRels,
+		`<Relationship Id="rId${slideCount + 2}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/presProps" Target="presProps.xml"/>`,
+		`<Relationship Id="rId${slideCount + 3}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/viewProps" Target="viewProps.xml"/>`,
+		`<Relationship Id="rId${slideCount + 4}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/theme" Target="theme/theme1.xml"/>`,
+		`<Relationship Id="rId${slideCount + 5}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/tableStyles" Target="tableStyles.xml"/>`,
 		'</Relationships>',
 	].join('');
 }
 
 function buildContentTypes(slideCount: number, imageExtensions: Set<string>): string {
-	const imageDefaults = Array.from(imageExtensions)
+	const imageDefaults = Array.from(new Set(['jpeg', ...Array.from(imageExtensions)]))
 		.sort()
 		.map((extension) => {
 			const contentType = extension === 'jpg' ? 'image/jpeg' : `image/${extension}`;
@@ -976,6 +974,9 @@ function buildContentTypes(slideCount: number, imageExtensions: Set<string>): st
 		'<Override PartName="/ppt/presentation.xml" ContentType="application/vnd.openxmlformats-officedocument.presentationml.presentation.main+xml"/>',
 		'<Override PartName="/ppt/slideMasters/slideMaster1.xml" ContentType="application/vnd.openxmlformats-officedocument.presentationml.slideMaster+xml"/>',
 		'<Override PartName="/ppt/slideLayouts/slideLayout1.xml" ContentType="application/vnd.openxmlformats-officedocument.presentationml.slideLayout+xml"/>',
+		'<Override PartName="/ppt/presProps.xml" ContentType="application/vnd.openxmlformats-officedocument.presentationml.presProps+xml"/>',
+		'<Override PartName="/ppt/viewProps.xml" ContentType="application/vnd.openxmlformats-officedocument.presentationml.viewProps+xml"/>',
+		'<Override PartName="/ppt/tableStyles.xml" ContentType="application/vnd.openxmlformats-officedocument.presentationml.tableStyles+xml"/>',
 		'<Override PartName="/ppt/theme/theme1.xml" ContentType="application/vnd.openxmlformats-officedocument.theme+xml"/>',
 		slideOverrides,
 		'</Types>',
@@ -1018,63 +1019,37 @@ function buildAppProperties(document: SlidevPptxDocument): string {
 	].join('');
 }
 
-function buildSlideMaster(): string {
-	return [
-		'<?xml version="1.0" encoding="UTF-8" standalone="yes"?>',
-		'<p:sldMaster xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns:p="http://schemas.openxmlformats.org/presentationml/2006/main">',
-		'<p:cSld><p:spTree><p:nvGrpSpPr><p:cNvPr id="1" name=""/><p:cNvGrpSpPr/><p:nvPr/></p:nvGrpSpPr><p:grpSpPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="0" cy="0"/><a:chOff x="0" y="0"/><a:chExt cx="0" cy="0"/></a:xfrm></p:grpSpPr></p:spTree></p:cSld>',
-		'<p:clrMap bg1="lt1" tx1="dk1" bg2="lt2" tx2="dk2" accent1="accent1" accent2="accent2" accent3="accent3" accent4="accent4" accent5="accent5" accent6="accent6" hlink="hlink" folHlink="folHlink"/>',
-		'<p:sldLayoutIdLst><p:sldLayoutId id="2147483649" r:id="rId1"/></p:sldLayoutIdLst>',
-		'<p:txStyles><p:titleStyle/><p:bodyStyle/><p:otherStyle/></p:txStyles>',
-		'</p:sldMaster>',
-	].join('');
-}
-
-function buildSlideMasterRelationships(): string {
-	return [
-		'<?xml version="1.0" encoding="UTF-8" standalone="yes"?>',
-		'<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">',
-		'<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/slideLayout" Target="../slideLayouts/slideLayout1.xml"/>',
-		'<Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/theme" Target="../theme/theme1.xml"/>',
-		'</Relationships>',
-	].join('');
-}
-
-function buildSlideLayout(): string {
-	return [
-		'<?xml version="1.0" encoding="UTF-8" standalone="yes"?>',
-		'<p:sldLayout xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns:p="http://schemas.openxmlformats.org/presentationml/2006/main" type="blank" preserve="1">',
-		'<p:cSld name="Blank"><p:spTree><p:nvGrpSpPr><p:cNvPr id="1" name=""/><p:cNvGrpSpPr/><p:nvPr/></p:nvGrpSpPr><p:grpSpPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="0" cy="0"/><a:chOff x="0" y="0"/><a:chExt cx="0" cy="0"/></a:xfrm></p:grpSpPr></p:spTree></p:cSld>',
-		'<p:clrMapOvr><a:masterClrMapping/></p:clrMapOvr>',
-		'</p:sldLayout>',
-	].join('');
-}
-
-function buildSlideLayoutRelationships(): string {
-	return [
-		'<?xml version="1.0" encoding="UTF-8" standalone="yes"?>',
-		'<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">',
-		'<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/slideMaster" Target="../slideMasters/slideMaster1.xml"/>',
-		'</Relationships>',
-	].join('');
-}
-
 function buildTheme(context: PptxPackageContext): string {
 	const latinFontFace = escapeXmlAttribute(context.fontPolicy.latinFontFace);
 	const eastAsiaFontFace = escapeXmlAttribute(context.fontPolicy.eastAsiaFontFace);
 	const monospaceFontFace = escapeXmlAttribute(context.fontPolicy.monospaceFontFace);
-	return [
-		'<?xml version="1.0" encoding="UTF-8" standalone="yes"?>',
-		'<a:theme xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" name="NoteMD">',
-		'<a:themeElements>',
-		'<a:clrScheme name="NoteMD"><a:dk1><a:srgbClr val="111827"/></a:dk1><a:lt1><a:srgbClr val="FFFFFF"/></a:lt1><a:dk2><a:srgbClr val="1F2937"/></a:dk2><a:lt2><a:srgbClr val="F9FAFB"/></a:lt2><a:accent1><a:srgbClr val="2563EB"/></a:accent1><a:accent2><a:srgbClr val="059669"/></a:accent2><a:accent3><a:srgbClr val="D97706"/></a:accent3><a:accent4><a:srgbClr val="DC2626"/></a:accent4><a:accent5><a:srgbClr val="7C3AED"/></a:accent5><a:accent6><a:srgbClr val="0891B2"/></a:accent6><a:hlink><a:srgbClr val="2563EB"/></a:hlink><a:folHlink><a:srgbClr val="7C3AED"/></a:folHlink></a:clrScheme>',
-		`<a:fontScheme name="NoteMD"><a:majorFont><a:latin typeface="${latinFontFace}"/><a:ea typeface="${eastAsiaFontFace}"/><a:cs typeface="${latinFontFace}"/></a:majorFont><a:minorFont><a:latin typeface="${latinFontFace}"/><a:ea typeface="${eastAsiaFontFace}"/><a:cs typeface="${monospaceFontFace}"/></a:minorFont></a:fontScheme>`,
-		'<a:fmtScheme name="NoteMD"><a:fillStyleLst><a:solidFill><a:schemeClr val="phClr"/></a:solidFill></a:fillStyleLst><a:lnStyleLst><a:ln w="6350" cap="flat" cmpd="sng" algn="ctr"><a:solidFill><a:schemeClr val="phClr"/></a:solidFill><a:prstDash val="solid"/></a:ln></a:lnStyleLst><a:effectStyleLst><a:effectStyle><a:effectLst/></a:effectStyle></a:effectStyleLst><a:bgFillStyleLst><a:solidFill><a:schemeClr val="phClr"/></a:solidFill></a:bgFillStyleLst></a:fmtScheme>',
-		'</a:themeElements>',
-		'<a:objectDefaults/>',
-		'<a:extraClrSchemeLst/>',
-		'</a:theme>',
-	].join('');
+	const themeTemplate = readPptxOfficeTemplateXml('ppt/theme/theme1.xml');
+	const replaceFontBlock = (
+		xml: string,
+		blockName: 'majorFont' | 'minorFont',
+		fonts: { latin: string; eastAsia: string; cs: string },
+	): string => xml.replace(
+		new RegExp(`<a:${blockName}>[\\s\\S]*?<\\/a:${blockName}>`),
+		(match) =>
+			match
+				.replace(/<a:latin typeface="[^"]*"[^>]*\/>/, `<a:latin typeface="${fonts.latin}" panose="020F0502020204030204"/>`)
+				.replace(/<a:ea typeface="[^"]*"\/>/, `<a:ea typeface="${fonts.eastAsia}"/>`)
+				.replace(/<a:cs typeface="[^"]*"\/>/, `<a:cs typeface="${fonts.cs}"/>`),
+	);
+
+	return replaceFontBlock(
+		replaceFontBlock(themeTemplate, 'majorFont', {
+			latin: latinFontFace,
+			eastAsia: eastAsiaFontFace,
+			cs: latinFontFace,
+		}),
+		'minorFont',
+		{
+			latin: latinFontFace,
+			eastAsia: eastAsiaFontFace,
+			cs: monospaceFontFace,
+		},
+	);
 }
 
 function writePptxPackage(
@@ -1093,7 +1068,7 @@ function writePptxPackage(
 		throw new Error('Filesystem APIs are unavailable; PPTX export requires desktop Obsidian.');
 	}
 
-	const files: Record<string, Uint8Array> = {};
+	const files: Record<string, Uint8Array> = loadPptxOfficeTemplateEntries();
 	const imageExtensions = new Set<string>();
 	let mediaIndex = 1;
 
@@ -1151,10 +1126,6 @@ function writePptxPackage(
 	addText('docProps/app.xml', buildAppProperties(document));
 	addText('ppt/presentation.xml', buildPresentationXml(document.slides.length));
 	addText('ppt/_rels/presentation.xml.rels', buildPresentationRelationships(document.slides.length));
-	addText('ppt/slideMasters/slideMaster1.xml', buildSlideMaster());
-	addText('ppt/slideMasters/_rels/slideMaster1.xml.rels', buildSlideMasterRelationships());
-	addText('ppt/slideLayouts/slideLayout1.xml', buildSlideLayout());
-	addText('ppt/slideLayouts/_rels/slideLayout1.xml.rels', buildSlideLayoutRelationships());
 	addText('ppt/theme/theme1.xml', buildTheme(context));
 
 	fs.mkdirSync(path.dirname(outputPath), { recursive: true });

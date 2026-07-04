@@ -39,6 +39,8 @@
 	"author": "jacob",
 	"license": "MIT",
 	"devDependencies": {
+		"@slidev/cli": "https://github.com/Jacobinwwey/slidev/releases/download/notemd-standalone-v52.16.0-1/slidev-cli-notemd-standalone-v52.16.0-1.tgz",
+		"@slidev/theme-default": "^0.25.0",
 		"@types/jest": "^29.5.14",
 		"@types/lodash": "^4.17.16",
 		"@types/node": "^16.11.6",
@@ -50,6 +52,7 @@
 		"lodash": "^4.17.21",
 		"obsidian": "latest",
 		"playwright": "^1.61.0",
+		"playwright-chromium": "^1.61.1",
 		"ts-jest": "^29.3.2",
 		"tslib": "2.4.0",
 		"typescript": "^5.9.3"

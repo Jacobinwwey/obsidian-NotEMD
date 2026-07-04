@@ -6,7 +6,7 @@ This directory keeps historical or one-off documentation that is still worth pre
 
 ## Archive Areas
 
-- [`root-history/`](./root-history/) - historical Markdown files that previously lived in the repository root and made the root path noisy
+- `root-history/` - historical Markdown files that previously lived in the repository root and made the root path noisy
 
 ## How To Use The Archive
 

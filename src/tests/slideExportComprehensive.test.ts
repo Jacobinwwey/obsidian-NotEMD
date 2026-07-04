@@ -1,5 +1,6 @@
-import { probeNode, probePlaywright, probeFfmpeg, probeEnvironment } from '../slideExport/environmentProber';
-import { detectStandaloneBundleLoaderGaps, exportSlidevHtml, exportSlidevHtmlWithOutcome, exportSlidevPdf, exportSlidevPng } from '../slideExport/slidevExporter';
+import { probeNode, probePlaywright, probeFfmpeg, probeEnvironment, probeSlidev } from '../slideExport/environmentProber';
+import { detectStandaloneBundleLoaderGaps, exportSlidevHtml, exportSlidevHtmlWithOutcome, exportSlidevPdf, exportSlidevPng, installSlidevForVault } from '../slideExport/slidevExporter';
+import { NOTEMD_SLIDEV_INSTALL_PACKAGES } from '../slideExport/slidevDistribution';
 import { exportVideoMp4 } from '../slideExport/videoExporter';
 import type { SlideExportConfig, SlidevExportSource } from '../slideExport/types';
 import type { TFile, App } from 'obsidian';
@@ -16,6 +17,7 @@ const mockGetVaultBasePath = platformUtils.getVaultBasePath as jest.MockedFuncti
 const mockSafeRequire = platformUtils.safeRequire as jest.MockedFunction<typeof platformUtils.safeRequire>;
 const mockExecFileAsync = platformUtils.execFileAsync as jest.MockedFunction<typeof platformUtils.execFileAsync>;
 const mockResolveNpxCommand = platformUtils.resolveNpxCommand as jest.MockedFunction<typeof platformUtils.resolveNpxCommand>;
+const mockResolveNpmCommand = platformUtils.resolveNpmCommand as jest.MockedFunction<typeof platformUtils.resolveNpmCommand>;
 const mockResolvePlaywrightBrowsersPath = platformUtils.resolvePlaywrightBrowsersPath as jest.MockedFunction<typeof platformUtils.resolvePlaywrightBrowsersPath>;
 const mockResolveSlidevCommand = platformUtils.resolveSlidevCommand as jest.MockedFunction<typeof platformUtils.resolveSlidevCommand>;
 const mockResolveWorkspaceHomeCandidates = platformUtils.resolveWorkspaceHomeCandidates as jest.MockedFunction<typeof platformUtils.resolveWorkspaceHomeCandidates>;
@@ -103,7 +105,7 @@ function mockSlideExportExec(options: { playwrightAvailable?: boolean; ffmpegAva
             return { exitCode: 0, stdout: '52.16.0', stderr: '' };
         }
         if (args.includes('build') && args.includes('--help')) {
-            return { exitCode: 0, stdout: '--standalone-bundle  generate standalone single-file HTML bundle', stderr: '' };
+            return { exitCode: 0, stdout: '--out  output dir\n--format  output format\n--standalone-bundle  generate standalone single-file HTML bundle', stderr: '' };
         }
         return { exitCode: 0, stdout: '', stderr: '' };
     });
@@ -211,7 +213,28 @@ describe('environmentProber — Node Version Edge Cases', () => {
         expect(result.error).toContain('ffmpeg not found');
     });
 
-    test('probePlaywright detects cache with entries', async () => {
+    test('probePlaywright detects playwright-chromium package with executable', async () => {
+        mockResolvePlaywrightBrowsersPath.mockReturnValue('/home/user/.cache/ms-playwright');
+        mockExecFileAsync.mockResolvedValue({
+            exitCode: 0,
+            stdout: '1.61.1 (/home/user/.cache/ms-playwright/chromium/chrome)',
+            stderr: '',
+        });
+
+        const result = await probePlaywright(['/vault']);
+
+        expect(result).toEqual(ok('playwright', 'playwright-chromium 1.61.1 (/home/user/.cache/ms-playwright/chromium/chrome)'));
+        expect(mockExecFileAsync).toHaveBeenCalledWith(
+            'node',
+            expect.arrayContaining(['-e', expect.stringContaining('playwright-chromium'), process.cwd(), '/vault']),
+            expect.objectContaining({
+                timeout: 15000,
+                env: { PLAYWRIGHT_BROWSERS_PATH: '/home/user/.cache/ms-playwright' },
+            })
+        );
+    });
+
+    test('probePlaywright rejects browser cache without playwright-chromium package', async () => {
         const mockFs = {
             existsSync: jest.fn().mockReturnValue(true),
             readdirSync: jest.fn().mockReturnValue(['chromium-1234', 'firefox-5678']),
@@ -223,9 +246,43 @@ describe('environmentProber — Node Version Edge Cases', () => {
             return null;
         });
         mockGetOsPlatform.mockReturnValue('linux');
-        mockExecFileAsync.mockResolvedValue({ exitCode: 1, stdout: '', stderr: '' });
+        mockExecFileAsync.mockImplementation(async (command: string, args: string[]) => {
+            if (command === 'node' && args[0] === '-e') {
+                return { exitCode: 1, stdout: '', stderr: 'Cannot find module playwright-chromium' };
+            }
+            if (args.includes('playwright') && args.includes('--version')) {
+                return { exitCode: 0, stdout: 'Version 1.61.0', stderr: '' };
+            }
+            return { exitCode: 0, stdout: '', stderr: '' };
+        });
         const result = await probePlaywright();
-        expect(result).toEqual(ok('playwright', 'chromium (cached)'));
+        expect(result.installed).toBe(false);
+        expect(result.error).toContain('playwright-chromium unavailable for Slidev export');
+    });
+
+    test('probeSlidev rejects registry builds without standalone bundle support', async () => {
+        mockResolveSlidevCommand.mockReturnValue({
+            command: 'slidev',
+            argsPrefix: [],
+            description: 'node_modules/.bin/slidev',
+            source: 'project-bin',
+        });
+        mockExecFileAsync.mockImplementation(async (_command: string, args: string[]) => {
+            if (args.includes('--version')) {
+                return { exitCode: 0, stdout: '52.16.0', stderr: '' };
+            }
+            if (args.includes('build') && args.includes('--help')) {
+                return { exitCode: 0, stdout: '--out  output dir\n--format  output format', stderr: '' };
+            }
+            return { exitCode: 0, stdout: '', stderr: '' };
+        });
+
+        const result = await probeSlidev(['/vault']);
+
+        expect(result.installed).toBe(false);
+        expect(result.version).toBe('52.16.0 (node_modules/.bin/slidev)');
+        expect(result.error).toContain('NoteMD Slidev fork');
+        expect(result.error).toContain('--standalone-bundle');
     });
 
     test('probeEnvironment executes all probes in parallel', async () => {
@@ -254,6 +311,7 @@ describe('slidevExporter — All Format Combinations', () => {
         mockIsDesktopApp.mockReturnValue(true);
         mockGetVaultBasePath.mockReturnValue('/vault');
         mockResolveNpxCommand.mockReturnValue('npx');
+        mockResolveNpmCommand.mockReturnValue('npm.cmd');
         mockNpxSlidevCommand();
         mockResolvePlaywrightBrowsersPath.mockReturnValue('/home/user/.cache/ms-playwright');
         mockResolveWorkspaceHomeCandidates.mockReturnValue(['/home/user']);
@@ -591,6 +649,38 @@ describe('slidevExporter — All Format Combinations', () => {
         );
     });
 
+    test('installSlidevForVault replaces project-bin Slidev builds without standalone bundle support', async () => {
+        mockResolveSlidevCommand.mockReturnValue({
+            command: 'slidev',
+            argsPrefix: [],
+            description: 'node_modules/.bin/slidev',
+            source: 'project-bin',
+        });
+        mockExecFileAsync.mockImplementation(async (command: string, args: string[]) => {
+            if (command === 'slidev' && args.includes('--version')) {
+                return { exitCode: 0, stdout: '52.16.0', stderr: '' };
+            }
+            if (command === 'slidev' && args.includes('build') && args.includes('--help')) {
+                return { exitCode: 0, stdout: '--out  output dir\n--format  output format', stderr: '' };
+            }
+            if (command === 'npm.cmd' && args.includes('install')) {
+                return { exitCode: 0, stdout: 'installed fork', stderr: '' };
+            }
+            return { exitCode: 0, stdout: '', stderr: '' };
+        });
+
+        const progress = jest.fn();
+        const result = await installSlidevForVault('/vault', progress);
+
+        expect(result).toEqual({ exitCode: 0, stdout: 'installed fork', stderr: '' });
+        expect(mockExecFileAsync).toHaveBeenLastCalledWith(
+            'npm.cmd',
+            ['install', '-D', ...NOTEMD_SLIDEV_INSTALL_PACKAGES],
+            expect.objectContaining({ cwd: '/vault', timeout: 300000 })
+        );
+        expect(progress).toHaveBeenCalledWith('install-slidev', expect.stringContaining('Installing NoteMD Slidev fork release'));
+    });
+
     test('falls back to server-script html when native standalone bundle misses slide loader bindings', async () => {
         mockExecFileAsync
             .mockResolvedValueOnce({ exitCode: 0, stdout: '', stderr: '' })
@@ -628,6 +718,48 @@ window.__require("./index-abc.js");
             'export/test-slides/README.md',
             expect.stringContaining('Quick Start')
         );
+    });
+
+    test('falls back to server-script html when Slidev CLI lacks standalone bundle support', async () => {
+        mockExecFileAsync
+            .mockResolvedValueOnce({ exitCode: 1, stdout: '', stderr: 'Unknown arguments: standalone-bundle, standaloneBundle' })
+            .mockResolvedValueOnce({ exitCode: 0, stdout: '', stderr: '' });
+        const rmSync = jest.fn();
+        const mkdirSync = jest.fn();
+        mockSafeRequire.mockImplementation((name: string) => name === 'fs' ? { rmSync, mkdirSync } : null);
+        const app = createMockApp();
+        const source = createMockSlidevSource('test', 'test.md');
+        const config: SlideExportConfig = {
+            format: 'html',
+            withClicks: false,
+            outputSubfolder: 'export',
+            ffmpegFps: 1,
+            ffmpegCrf: 23,
+            slidevTheme: 'default',
+            timeoutMs: 120000,
+            imageScale: 3,
+        };
+
+        const outcome = await exportSlidevHtmlWithOutcome(app, source, config, jest.fn());
+
+        expect(outcome).toEqual({
+            path: 'export/test-slides/index.html',
+            requestedMode: 'standalone',
+            actualMode: 'server-script-fallback',
+            requiresLocalServer: true,
+            fallbackPath: 'export/test-slides/index.html',
+            standaloneAttempt: {
+                attempted: true,
+                accepted: false,
+                outputPath: null,
+                preservedFailurePath: null,
+                loaderGaps: [],
+                failureReason: 'unsupported-standalone-bundle',
+            },
+        });
+        expect(mockExecFileAsync).toHaveBeenCalledTimes(2);
+        expect(mockExecFileAsync.mock.calls[0][1]).toEqual(expect.arrayContaining(['--standalone-bundle']));
+        expect(mockExecFileAsync.mock.calls[1][1]).not.toEqual(expect.arrayContaining(['--standalone-bundle']));
     });
 
     test('reports fallback html outcome and preserves rejected standalone bundle', async () => {

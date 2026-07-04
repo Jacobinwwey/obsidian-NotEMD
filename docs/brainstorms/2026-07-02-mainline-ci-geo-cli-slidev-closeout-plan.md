@@ -99,6 +99,25 @@ The follow-through after push is now also closed:
    - `deploy` job `84938347473`
 4. the remaining GitHub-side warning is not a source failure: Actions reported Node 20 deprecation notices for `actions/checkout@v4`, `actions/setup-node@v4`, `actions/upload-artifact@v4`, and `actions/deploy-pages@v4`, all forced onto Node 24 by GitHub's runner policy.
 
+## 2026-07-04 Reopened Slidev Export Verification
+
+The later standalone-bundle review found a real process gap rather than a Mermaid-layout gap: the fast native-standalone command could return `ok: true` with `--no-playwright --require-native-standalone`, even though that mode had not rendered the final `index-standalone.html` and therefore had not proven table/body overflow convergence. The fix is now fail-closed: strict native standalone requires both `standaloneGate.passed = true` and `renderedLayoutGate.passed = true`; a fast no-Playwright run can prove bundle creation only, and must not be used as maintainer closure for standalone delivery.
+
+The table/body gate is now explicit and separate from Mermaid source preservation. `tableBodyLayoutGate` records audited slides, table slides, body-text slides, failed slides, and the concrete failures. It fails on rendered table/body content findings, while Mermaid-only fit review remains governed by `mermaidSourcePreservation` and `mermaidFit`; this keeps the user's Mermaid no-split invariant intact and focuses automatic pagination/repair on tables, prose, and non-Mermaid dense content.
+
+The current architecture direction is therefore narrower than "make everything fit by rewriting slides." The owner remains the shared convergence path: `convergeSlidevDeckLayout()` prepares and patches the deck once, `exportSlidesCommand()` and the maintainer verifier consume that converged deck, and HTML/PDF/PNG/PPTX/MP4 are checked against the same rendered fact source. The exporter must not introduce a separate fast path that bypasses rendered layout audit when the output claim is strict standalone or final delivery quality.
+
+Local evidence from this reopen:
+
+1. `--format html --html-mode standalone --require-native-standalone --no-playwright` now returns `ok: false`, with `renderedLayoutGate.passed = false` and the reason `Playwright disabled by --no-playwright`;
+2. full standalone HTML over `docs/architecture.zh-CN.md` returns `ok: true`, audits all 32 slides, reports 8 table slides and 32 body-text slides, and has `tableBodyLayoutGate.failureCount = 0`;
+3. the user-reported local artifact path `docs/export/verify-html-fork-fast/architecture.zh-CN-slides/index-standalone.html` has been regenerated with strict rendered audit, not the previous fast no-Playwright shortcut;
+4. PDF, PNG, PPTX, and MP4 all pass through the same convergence sequence before their final export;
+5. PPTX reports 339 editable text boxes, 8 native tables, 106 editable table cells, and rich table-cell coverage for all 8 table slides;
+6. Mermaid preservation remains structural: source fences `3`, exported deck fences `3`, and `changedFenceIndexes = []`.
+
+The documentation-site CI failure mode was also tightened during this reopen. VitePress now excludes generated/export/archive-output trees (`archive/root-history/**`, `export/**`, and `dist/**`) from source scanning, and the archive index no longer publishes dead links into the excluded root-history area. This preserves the repo rule that generated Slidev export artifacts are local evidence, not GitHub Pages source content.
+
 ## Remaining Work After This Batch
 
 The remaining work is external measurement and future product scope, not the current source fix:

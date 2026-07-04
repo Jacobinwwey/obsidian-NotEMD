@@ -58,6 +58,7 @@ function parseArgs(argv) {
 		pptxVisualMaxRmseExplicit: false,
 		pptxVisualMeanRmseExplicit: false,
 		pptxVisualDpi: 150,
+		pptxVisualRenderer: 'auto',
 		pptxVisualDiffDir: null,
 		pptxVisualReferenceDir: null,
 		pptxRenderedHtmlReferenceDiff: false,
@@ -107,6 +108,8 @@ function parseArgs(argv) {
 			args.pptxVisualMeanRmseExplicit = true;
 		} else if (arg === '--pptx-visual-dpi' && argv[index + 1]) {
 			args.pptxVisualDpi = Number(argv[++index]);
+		} else if (arg === '--pptx-visual-renderer' && argv[index + 1]) {
+			args.pptxVisualRenderer = String(argv[++index]).toLowerCase();
 		} else if (arg === '--pptx-visual-diff-dir' && argv[index + 1]) {
 			args.pptxVisualDiffDir = argv[++index];
 		} else if (arg === '--pptx-visual-reference-dir' && argv[index + 1]) {
@@ -165,6 +168,9 @@ function parseArgs(argv) {
 	if (!Number.isFinite(args.pptxVisualDpi) || args.pptxVisualDpi <= 0) {
 		throw new Error('--pptx-visual-dpi must be a positive number');
 	}
+	if (!['auto', 'libreoffice', 'powerpoint'].includes(args.pptxVisualRenderer)) {
+		throw new Error('--pptx-visual-renderer must be one of: auto, libreoffice, powerpoint');
+	}
 
 	return args;
 }
@@ -189,7 +195,8 @@ function printHelp() {
 		'  --require-pptx-visual-match Fail when PPTX/PNG visual diff exceeds thresholds; visible-native defaults auto-gate against rendered HTML',
 		'  --pptx-visual-max-rmse <n> Max per-slide normalized RMSE, default: 0.12 raster / 0.25 visible-native rendered HTML',
 		'  --pptx-visual-mean-rmse <n> Mean normalized RMSE, default: 0.08 raster / 0.145 visible-native rendered HTML',
-		'  --pptx-visual-dpi <n>      LibreOffice/PDF render DPI, default: 150',
+		'  --pptx-visual-dpi <n>      PPTX render-back DPI for the LibreOffice/PDF path, default: 150',
+		'  --pptx-visual-renderer <auto|libreoffice|powerpoint> Render-back engine, default: auto',
 		'  --pptx-visual-diff-dir <path> Output directory for visual diff artifacts',
 		'  --pptx-visual-reference-dir <path> External PNG sequence directory for advisory cross-export comparison',
 		'  --pptx-rendered-html-reference-diff Capture PNG references from the same rendered HTML used by PPTX and compare against PPTX render-back',
@@ -372,6 +379,111 @@ function collectMermaidSourcePreservation(sourcePath, deckPath) {
 		deckFenceCount: deckFences.length,
 		changedFenceIndexes,
 	};
+}
+
+function buildTableBodyLayoutGate(layoutAudits) {
+	const tableBodyAudits = layoutAudits.filter(audit => hasTableOrBodyTextSurface(audit));
+	const failures = [];
+
+	for (const audit of tableBodyAudits) {
+		for (const finding of audit.findings || []) {
+			if (!isTableBodyLayoutFinding(audit, finding)) {
+				continue;
+			}
+			failures.push({
+				slide: audit.slide,
+				kind: finding.kind,
+				target: finding.target,
+				message: finding.message,
+				recommendedPatch: finding.recommendedPatch || null,
+				overflowAxis: finding.overflowAxis || null,
+				effectiveFontPx: typeof finding.effectiveFontPx === 'number' ? finding.effectiveFontPx : null,
+				fontThresholdPx: typeof finding.fontThresholdPx === 'number' ? finding.fontThresholdPx : null,
+			});
+		}
+	}
+
+	return {
+		passed: failures.length === 0,
+		auditedSlideCount: tableBodyAudits.length,
+		tableSlideCount: tableBodyAudits.filter(audit => (audit.elementKinds || []).includes('table')).length,
+		bodyTextSlideCount: tableBodyAudits.filter(audit => (audit.elementKinds || []).includes('text')).length,
+		failureCount: failures.length,
+		failureSlides: Array.from(new Set(failures.map(failure => failure.slide))).sort((left, right) => left - right),
+		failures,
+	};
+}
+
+function buildRenderedLayoutGate(options) {
+	const required = options?.required === true;
+	const auditedSlides = Array.isArray(options?.auditedSlides) ? options.auditedSlides : [];
+	const layoutAudits = Array.isArray(options?.layoutAudits) ? options.layoutAudits : [];
+	const playwrightChecks = Array.isArray(options?.playwrightChecks) ? options.playwrightChecks : [];
+	const auditSkippedReason = options?.auditSkippedReason || null;
+	const failures = [];
+
+	if (required && auditSkippedReason) {
+		failures.push({
+			kind: 'audit-skipped',
+			message: auditSkippedReason,
+		});
+	}
+
+	if (required && !auditSkippedReason && (auditedSlides.length === 0 || layoutAudits.length === 0)) {
+		failures.push({
+			kind: 'audit-empty',
+			message: 'Strict standalone verification requires rendered Playwright layout audits.',
+		});
+	}
+
+	for (const check of playwrightChecks) {
+		if (!check?.failed) {
+			continue;
+		}
+		failures.push({
+			kind: 'playwright-check-failed',
+			slide: check.slide,
+			message: (check.errors || []).join('; ') || 'Rendered slide check failed.',
+		});
+	}
+
+	for (const audit of layoutAudits) {
+		for (const finding of audit.findings || []) {
+			failures.push({
+				kind: finding.kind || 'layout-finding',
+				slide: audit.slide,
+				target: finding.target || null,
+				message: finding.message || 'Rendered layout audit reported a finding.',
+				recommendedPatch: finding.recommendedPatch || null,
+			});
+		}
+	}
+
+	return {
+		required,
+		passed: failures.length === 0,
+		auditedSlideCount: layoutAudits.length,
+		failureCount: failures.length,
+		failures,
+	};
+}
+
+function hasTableOrBodyTextSurface(audit) {
+	const elementKinds = audit?.elementKinds || [];
+	return elementKinds.includes('table') || elementKinds.includes('text');
+}
+
+function isTableBodyLayoutFinding(audit, finding) {
+	if (!finding) {
+		return false;
+	}
+	if (finding.target === 'table' || finding.target === 'text') {
+		return true;
+	}
+	if (finding.target === 'content' || finding.target === 'slide-root') {
+		return hasTableOrBodyTextSurface(audit);
+	}
+	return false;
 }
 
 function extractMermaidFenceBlocks(markdown) {
@@ -1030,13 +1142,14 @@ function selectPptxVisualThresholdProfile(args, pptxReport, hardGateReferenceSou
 	};
 }
 
-function runPptxVisualDiff({ pptxPath, outputDirectory, referenceDirectory, referenceSource, dpi, timeoutMs, thresholds }) {
+function runPptxVisualDiff({ pptxPath, outputDirectory, referenceDirectory, referenceSource, renderer, dpi, timeoutMs, thresholds }) {
 	try {
 		return buildPptxVisualDiff({
 			pptxPath,
 			outputDirectory,
 			referenceDirectory,
 			referenceSource,
+			renderer,
 			dpi,
 			timeoutMs,
 			thresholds,
@@ -1158,6 +1271,15 @@ async function main() {
 	let layoutAuditSummary = layoutConvergence?.layoutAuditSummary ?? slideExport.summarizeLayoutAudits([], 0);
 	let layoutPatchAttempts = layoutConvergence?.layoutPatchAttempts ?? [];
 	let auditedSlides = layoutConvergence?.auditedSlides ?? [];
+	const renderedLayoutGate = buildRenderedLayoutGate({
+		required: args.requireNativeStandalone,
+		auditedSlides,
+		layoutAudits,
+		playwrightChecks,
+		auditSkippedReason: args.playwright
+			? (layoutConvergence?.auditSkippedReason || null)
+			: 'Playwright disabled by --no-playwright.',
+	});
 	const pptxInspection = args.format === 'pptx' ? inspectPptx(absoluteExportPath) : null;
 	const visibleNativeExperimentPptxPath = visibleNativeExperimentResult
 		? path.join(vaultRoot, visibleNativeExperimentResult.path)
@@ -1201,6 +1323,7 @@ async function main() {
 			pptxPath: absoluteExportPath,
 			outputDirectory: visualDiffDirectory,
 			referenceDirectory: visualReferenceDirectory,
+			renderer: args.pptxVisualRenderer,
 			dpi: args.pptxVisualDpi,
 			timeoutMs: args.timeoutMs,
 			thresholds: pptxVisualThresholds,
@@ -1246,6 +1369,7 @@ async function main() {
 			outputDirectory: renderedHtmlReferenceDiffDirectory,
 			referenceDirectory: pptxRenderedHtmlReference.absolutePath,
 			referenceSource: 'pptx-rendered-html-reference',
+			renderer: args.pptxVisualRenderer,
 			dpi: args.pptxVisualDpi,
 			timeoutMs: args.timeoutMs,
 			thresholds: pptxVisualThresholds,
@@ -1295,6 +1419,7 @@ async function main() {
 				pptxPath: visibleNativeExperimentPptxPath,
 				outputDirectory: visualDiffDirectory,
 				referenceDirectory: visibleNativeExperimentVisualReference.referenceDirectory,
+				renderer: args.pptxVisualRenderer,
 				dpi: args.pptxVisualDpi,
 				timeoutMs: args.timeoutMs,
 				thresholds: pptxVisualThresholds,
@@ -1338,6 +1463,7 @@ async function main() {
 	const ignoredOutputs = gitIgnoreStatus.ignoredOutputs;
 	const unignoredOutputs = gitIgnoreStatus.unignoredOutputs;
 	const hasLayoutFailures = layoutAudits.some(audit => audit.findings.length > 0);
+	const tableBodyLayoutGate = buildTableBodyLayoutGate(layoutAudits);
 	const nativeStandalonePassed = htmlExport?.actualMode === 'standalone'
 		&& htmlExport?.standaloneAttempt?.accepted === true
 		&& fs.existsSync(path.join(vaultRoot, htmlExport.path));
@@ -1426,6 +1552,8 @@ async function main() {
 			&& pptxVisualDiffGatePassed
 			&& pptxRenderedHtmlReferenceGatePassed
 			&& visibleNativeExperimentGatePassed
+			&& renderedLayoutGate.passed
+			&& tableBodyLayoutGate.passed
 			&& !hasLayoutFailures
 			&& (!deckSummary || (!deckSummary.containsKnownStaleText && !deckSummary.containsMissingTheme))
 			&& (!mermaidSourcePreservation || mermaidSourcePreservation.passed)
@@ -1467,8 +1595,10 @@ async function main() {
 		htmlExport,
 		htmlExportHistory,
 		standaloneGate,
+		renderedLayoutGate,
 		deck: deckSummary,
 		mermaidSourcePreservation,
+		tableBodyLayoutGate,
 		playwright: playwrightChecks,
 		playwrightSlides: auditedSlides,
 		layoutAudit: layoutAudits,
@@ -1505,6 +1635,8 @@ if (require.main === module) {
 	});
 } else {
 	module.exports = {
+		buildRenderedLayoutGate,
+		buildTableBodyLayoutGate,
 		inspectPptx,
 		selectPptxVisualThresholdProfile,
 		selectPptxHardGateReferenceSource,

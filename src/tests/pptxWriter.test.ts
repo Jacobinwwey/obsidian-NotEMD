@@ -148,7 +148,7 @@ describe('pptxWriter', () => {
 			expect(slideXml).toContain('<a:latin typeface="Aptos"/>');
 			expect(slideXml).toContain('<a:ea typeface="Noto Sans CJK SC"/>');
 			expect(slideXml).toContain('<a:latin typeface="Consolas"/>');
-			expect(themeXml).toContain('<a:latin typeface="Aptos"/>');
+			expect(themeXml).toContain('<a:latin typeface="Aptos"');
 			expect(themeXml).toContain('<a:ea typeface="Noto Sans CJK SC"/>');
 			expect(themeXml).toContain('<a:cs typeface="Consolas"/>');
 		} finally {
@@ -327,8 +327,21 @@ describe('pptxWriter', () => {
 
 			const entries = unzipSync(new Uint8Array(readFileSync(outputPath)));
 			expect(entries['ppt/presentation.xml']).toBeDefined();
+			expect(entries['ppt/presProps.xml']).toBeDefined();
+			expect(entries['ppt/viewProps.xml']).toBeDefined();
+			expect(entries['ppt/tableStyles.xml']).toBeDefined();
 			expect(entries['ppt/slides/slide1.xml']).toBeDefined();
 			expect(entries['ppt/media/image1.png']).toBeDefined();
+			const contentTypesXml = strFromU8(entries['[Content_Types].xml']);
+			expect(contentTypesXml).toContain('/ppt/presProps.xml');
+			expect(contentTypesXml).toContain('/ppt/viewProps.xml');
+			expect(contentTypesXml).toContain('/ppt/tableStyles.xml');
+			const presentationXml = strFromU8(entries['ppt/presentation.xml']);
+			expect(presentationXml).toContain('saveSubsetFonts="1"');
+			const presentationRelsXml = strFromU8(entries['ppt/_rels/presentation.xml.rels']);
+			expect(presentationRelsXml).toContain('relationships/presProps');
+			expect(presentationRelsXml).toContain('relationships/viewProps');
+			expect(presentationRelsXml).toContain('relationships/tableStyles');
 			const slideXml = strFromU8(entries['ppt/slides/slide1.xml']);
 			expect(slideXml).toContain('<a:t>可编辑</a:t>');
 			expect(slideXml).toContain('<a:ea typeface="Microsoft YaHei"/>');
@@ -352,6 +365,67 @@ describe('pptxWriter', () => {
 			expect(slideXml).toContain('<a:lnL w="9525"><a:solidFill><a:srgbClr val="D1D5DB"/></a:solidFill></a:lnL>');
 			expect(slideXml).not.toContain('<a:alpha val="0"/>');
 			expect(slideXml).not.toContain('<a:alpha val="8000"/>');
+		} finally {
+			rmSync(directory, { recursive: true, force: true });
+		}
+	});
+
+	test('keeps the PowerPoint-compatible office skeleton and theme contract', () => {
+		const directory = mkdtempSync(join(tmpdir(), 'notemd-pptx-office-skeleton-'));
+		try {
+			const outputPath = join(directory, 'deck.pptx');
+			const document: SlidevPptxDocument = {
+				title: 'Office skeleton',
+				author: 'NoteMD',
+				slides: [
+					{
+						slideNumber: 1,
+						title: 'Skeleton',
+						backgroundColor: 'FFFFFF',
+						texts: [
+							{
+								text: 'Office-compatible deck',
+								sourceKind: 'body',
+								x: 1,
+								y: 1,
+								w: 5,
+								h: 0.5,
+								fontSize: 18,
+								fontFace: 'Aptos',
+								color: '111827',
+								bold: false,
+								italic: false,
+								underline: false,
+								align: 'left',
+								bullet: false,
+								order: 10,
+								richTextParagraphs: [],
+								unmodeledRunReasons: [],
+							},
+						],
+						tables: [],
+						fallbackOnlyElementKinds: [],
+						consumedTableTextCandidateCount: 0,
+						warnings: [],
+					},
+				],
+			};
+
+			writePptxDocument(outputPath, document);
+
+			const entries = unzipSync(new Uint8Array(readFileSync(outputPath)));
+			expect(entries['ppt/slideLayouts/slideLayout1.xml']).toBeDefined();
+			expect(entries['ppt/slideLayouts/_rels/slideLayout1.xml.rels']).toBeDefined();
+			expect(entries['ppt/slideMasters/slideMaster1.xml']).toBeDefined();
+			expect(entries['ppt/slideMasters/_rels/slideMaster1.xml.rels']).toBeDefined();
+			expect(entries['ppt/slides/_rels/slide1.xml.rels']).toBeDefined();
+			expect(strFromU8(entries['ppt/slides/_rels/slide1.xml.rels'])).toContain('slideLayout1.xml');
+
+			const themeXml = strFromU8(entries['ppt/theme/theme1.xml']);
+			expect(themeXml).toContain('<a:font script="Hans"');
+			expect(themeXml).toContain('<a:extLst>');
+			expect(themeXml).toContain('themeFamily');
+			expect(themeXml).not.toContain('<a:fontScheme name="NoteMD">');
 		} finally {
 			rmSync(directory, { recursive: true, force: true });
 		}

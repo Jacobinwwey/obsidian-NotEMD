@@ -99,6 +99,25 @@ push 之后的跟进现在也已经收口：
    - `deploy` job `84938347473`
 4. 当前剩余的 GitHub 侧提示并不是源码失败，而是 Actions 的 Node 20 deprecation 注记：`actions/checkout@v4`、`actions/setup-node@v4`、`actions/upload-artifact@v4` 与 `actions/deploy-pages@v4` 都被 GitHub runner 策略强制跑在 Node 24 上。
 
+## 2026-07-04 Slidev 导出复核
+
+后续 standalone-bundle 复核发现的问题不是 Mermaid 布局问题，而是流程门禁问题：带 `--no-playwright --require-native-standalone` 的快速 native-standalone 命令可能返回 `ok: true`，但该模式没有渲染最终 `index-standalone.html`，因此不能证明表格与正文已经完成跨页/溢出收敛。当前修复改为 fail-closed：严格 native standalone 必须同时满足 `standaloneGate.passed = true` 与 `renderedLayoutGate.passed = true`；无 Playwright 的快速运行只能证明 bundle 写出成功，不能作为 standalone 交付验收。
+
+表格/正文门禁现在与 Mermaid 源图保持门禁显式分离。`tableBodyLayoutGate` 会记录已审计页数、表格页数、正文页数、失败页与具体失败项；它只针对渲染后的表格/正文内容 finding 失败。Mermaid-only fit review 仍由 `mermaidSourcePreservation` 与 `mermaidFit` 管理；这保留了“Mermaid 不拆分”的约束，并把自动分页/修复范围聚焦在表格、正文和非 Mermaid 的密集内容上。
+
+因此当前架构方向不是“通过重写所有 slide 来让所有东西看起来能放下”。正确 owner 仍是共享收敛路径：`convergeSlidevDeckLayout()` 只准备并修补一次 deck，`exportSlidesCommand()` 与维护者 verifier 都消费这份已收敛 deck，HTML/PDF/PNG/PPTX/MP4 都以同一个渲染事实源为准。导出器不应再引入绕过 rendered layout audit 的快速路径，却同时声称 strict standalone 或最终交付质量已经通过。
+
+本次复核的本地证据：
+
+1. `--format html --html-mode standalone --require-native-standalone --no-playwright` 现在返回 `ok: false`，其中 `renderedLayoutGate.passed = false`，原因为 `Playwright disabled by --no-playwright`；
+2. 对 `docs/architecture.zh-CN.md` 的完整 standalone HTML 验证返回 `ok: true`，审计 32 页，包含 8 个表格页与 32 个正文页，且 `tableBodyLayoutGate.failureCount = 0`；
+3. 用户指出的本地产物路径 `docs/export/verify-html-fork-fast/architecture.zh-CN-slides/index-standalone.html` 已用严格渲染审计重新生成，而不是继续沿用先前无 Playwright 的快速路径；
+4. PDF、PNG、PPTX 与 MP4 都在最终导出前经过同一套 convergence sequence；
+5. PPTX 报告 339 个可编辑文本框、8 个原生表格、106 个可编辑表格单元格，并覆盖全部 8 个表格页的 rich table-cell；
+6. Mermaid 保持结构性不变：源 fence 为 `3`，导出 deck fence 为 `3`，`changedFenceIndexes = []`。
+
+本次复核也收紧了文档站 CI 失败模式。VitePress 现在会从源码扫描中排除生成/导出/归档产物树（`archive/root-history/**`、`export/**` 与 `dist/**`），归档首页也不再发布指向被排除 root-history 区域的死链接。这保留了仓库规则：生成的 Slidev 导出产物是本地证据，不是 GitHub Pages 源码内容。
+
 ## 本批之后的剩余工作
 
 剩余工作属于外部测量和后续产品范围，不是当前源码修复：

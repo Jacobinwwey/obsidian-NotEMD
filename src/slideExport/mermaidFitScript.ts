@@ -14,6 +14,50 @@ import postFitSource from './mermaidPostFitScript.txt';
  */
 export const MERMAID_POST_FIT_SCRIPT_SOURCE = postFitSource.trim();
 
+const MERMAID_POST_FIT_VUE_MARKER = 'notemd-mermaid-post-fit';
+
+function createMermaidPostFitVueRuntimeScript(): string {
+	return [
+		`// ${MERMAID_POST_FIT_VUE_MARKER}:start`,
+		'if (typeof window !== "undefined" && typeof document !== "undefined") {',
+		...MERMAID_POST_FIT_SCRIPT_SOURCE.split('\n').map(line => `\t${line}`),
+		'}',
+		`// ${MERMAID_POST_FIT_VUE_MARKER}:end`,
+	].join('\n');
+}
+
+export function createMermaidPostFitGlobalBottomVue(): string {
+	return [
+		'<script setup>',
+		createMermaidPostFitVueRuntimeScript(),
+		'</script>',
+		'',
+		'<template></template>',
+		'',
+	].join('\n');
+}
+
+export function injectMermaidPostFitIntoVueSfc(source: string): string {
+	if (source.includes(MERMAID_POST_FIT_VUE_MARKER)) {
+		return source;
+	}
+
+	const runtimeScript = createMermaidPostFitVueRuntimeScript();
+	const setupScriptMatch = source.match(/<script\s+setup(?:\s[^>]*)?>/i);
+	if (setupScriptMatch?.index !== undefined) {
+		const insertAt = setupScriptMatch.index + setupScriptMatch[0].length;
+		return `${source.slice(0, insertAt)}\n${runtimeScript}\n${source.slice(insertAt)}`;
+	}
+
+	const scriptMatch = source.match(/<script(?:\s[^>]*)?>/i);
+	if (scriptMatch?.index !== undefined) {
+		const insertAt = scriptMatch.index + scriptMatch[0].length;
+		return `${source.slice(0, insertAt)}\n${runtimeScript}\n${source.slice(insertAt)}`;
+	}
+
+	return `${createMermaidPostFitGlobalBottomVue()}\n${source}`;
+}
+
 export function injectMermaidPostFitIntoHtml(html: string): string {
 	if (html.includes('data-notemd-mermaid-post-fit')) {
 		return html;

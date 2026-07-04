@@ -6,7 +6,8 @@
  */
 
 import type { EnvironmentReport, ExportCapabilities, ProbeResult } from './types';
-import { execFileAsync, getOsPlatform, isDesktopApp, resolveNpxCommand, resolvePlaywrightBrowsersPath, resolveSlidevCommand, safeRequire } from './platformUtils';
+import { execFileAsync, getOsPlatform, isDesktopApp, resolvePlaywrightBrowsersPath, resolveSlidevCommand } from './platformUtils';
+import { findMissingSlidevBuildOptions, formatSlidevBuildRequirementError } from './slidevCompatibility';
 
 const MIN_NODE_MAJOR = 20;
 
@@ -38,12 +39,15 @@ export async function probeSlidev(searchRoots: string[] = []): Promise<ProbeResu
 		const version = result.stdout.trim() || 'available';
 		const help = await execFileAsync(slidev.command, [...slidev.argsPrefix, 'build', '--help'], { timeout: 45_000 });
 		const helpText = `${help.stdout}\n${help.stderr}`;
-		if (help.exitCode !== 0 || !helpText.includes('--standalone-bundle')) {
+		const missingBuildOptions = help.exitCode === 0
+			? findMissingSlidevBuildOptions(helpText)
+			: findMissingSlidevBuildOptions('');
+		if (help.exitCode !== 0 || missingBuildOptions.length > 0) {
 			return {
 				tool: 'slidev',
 				installed: false,
 				version: `${version} (${slidev.description})`,
-				error: `Slidev found via ${slidev.description}, but it does not expose --standalone-bundle`,
+				error: formatSlidevBuildRequirementError(slidev.description, missingBuildOptions),
 			};
 		}
 		return { tool: 'slidev', installed: true, version: `${version} (${slidev.description})` };
@@ -51,35 +55,41 @@ export async function probeSlidev(searchRoots: string[] = []): Promise<ProbeResu
 	return { tool: 'slidev', installed: false, version: null, error: `Not available via ${slidev.description}` };
 }
 
-export async function probePlaywright(): Promise<ProbeResult> {
+export async function probePlaywright(searchRoots: string[] = []): Promise<ProbeResult> {
 	if (!isDesktopApp()) return makeMissingProbe('playwright', 'Not a desktop app');
 
-	const npx = resolveNpxCommand();
-
-	// Try a lightweight probe: ask playwright to list browsers
-	const result = await execFileAsync(npx, ['playwright', '--version'], { timeout: 15_000 });
-	if (result.exitCode === 0) {
-		return { tool: 'playwright', installed: true, version: result.stdout.trim() || 'available' };
-	}
-
-	const fs: any = safeRequire('fs');
-	if (!fs) {
-		return { tool: 'playwright', installed: false, version: null, error: 'Playwright chromium not installed (auto-install available)' };
-	}
-
+	const roots = Array.from(new Set([typeof process !== 'undefined' ? process.cwd() : '', ...searchRoots].filter(Boolean)));
+	const script = [
+		'const fs = require("fs");',
+		'const roots = process.argv.slice(1);',
+		'const resolveOptions = roots.length > 0 ? { paths: roots } : undefined;',
+		'const entry = require.resolve("playwright-chromium", resolveOptions);',
+		'const packageJson = require(require.resolve("playwright-chromium/package.json", resolveOptions));',
+		'const runtime = require(entry);',
+		'const executablePath = runtime.chromium?.executablePath?.();',
+		'if (!executablePath || !fs.existsSync(executablePath)) {',
+		'  throw new Error(`playwright-chromium found, but Chromium executable is unavailable: ${executablePath || "unknown"}`);',
+		'}',
+		'console.log(`${packageJson.version} (${executablePath})`);',
+	].join('\n');
 	const browserPath = resolvePlaywrightBrowsersPath();
-	if (browserPath) {
-		try {
-			const entries = fs.readdirSync(browserPath);
-			if (entries.length > 0) {
-				return { tool: 'playwright', installed: true, version: 'chromium (cached)' };
-			}
-		} catch {
-			// Fall through to the missing-tool result below.
-		}
+	const result = await execFileAsync('node', ['-e', script, ...roots], {
+		timeout: 15_000,
+		env: browserPath ? { PLAYWRIGHT_BROWSERS_PATH: browserPath } : undefined,
+	});
+	if (result.exitCode === 0) {
+		return { tool: 'playwright', installed: true, version: `playwright-chromium ${result.stdout.trim() || 'available'}` };
 	}
 
-	return { tool: 'playwright', installed: false, version: null, error: 'Playwright chromium not installed (auto-install available)' };
+	const stderr = `${result.stderr || ''}\n${result.stdout || ''}`.trim();
+	return {
+		tool: 'playwright',
+		installed: false,
+		version: null,
+		error: stderr
+			? `playwright-chromium unavailable for Slidev export: ${stderr}`
+			: 'playwright-chromium unavailable for Slidev export',
+	};
 }
 
 export async function probeFfmpeg(): Promise<ProbeResult> {
@@ -129,7 +139,7 @@ export async function probeEnvironment(searchRoots: string[] = []): Promise<Envi
 	const [node, slidev, playwright, ffmpeg] = await Promise.all([
 		probeNode(),
 		probeSlidev(searchRoots),
-		probePlaywright(),
+		probePlaywright(searchRoots),
 		probeFfmpeg(),
 	]);
 

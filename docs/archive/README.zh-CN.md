@@ -6,7 +6,7 @@
 
 ## 归档区域
 
-- [`root-history/`](./root-history/) - 先前堆积在仓库根目录、导致主路径噪音过高的历史 Markdown 文档
+- `root-history/` - 先前堆积在仓库根目录、导致主路径噪音过高的历史 Markdown 文档
 
 ## 如何使用归档区
 

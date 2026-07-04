@@ -273,7 +273,7 @@ mermaidSourcePreservation.changedFenceIndexes
 
 具体推进路线见 `docs/brainstorms/2026-06-20-slidev-layout-quality-and-canvas-roadmap.zh-CN.md`。该路线保留当前 render-feedback loop 作为最终事实门，但在生成前增加 clean-room layout planning IR，并把 `ref/infinite-canvas` 的 world rect / viewport fit 思想转译为 NoteMD 自有几何算法，而不是复制 AGPL-3.0 实现或把无限画布 UI 嵌入 Slidev export。
 
-截至 2026-06-20 的当前真值：
+当前真值：
 
 1. 默认 HTML 验证在未传 `--sample-slides` 时会审计整个准备后的 deck；
 2. patcher 的 `zoom` 来自真实 overflow 测量，而不是固定导出常数；
@@ -328,6 +328,11 @@ mermaidSourcePreservation.changedFenceIndexes
 51. Stage 14 默认成功 fixture suite 归档到 `/home/jacob/slidev-export-review/2026-06-20-stage14-success-fixtures/`；9 个可收敛生产 fixtures 均通过，三个 expected-failure fixtures 默认排除。
 52. Stage 14 真实 `architecture.zh-CN.md` strict native standalone 验收包位于 `/home/jacob/slidev-export-review/2026-06-20-stage14-real/`；报告为 `ok = true`，使用本地 Slidev fork 与 52 个 skill references，`actualMode = "standalone"`，`requiresLocalServer = false`，`standaloneGate.passed = true`，3 个 Mermaid fence 均保持 `changedFenceIndexes = []`，`hardOverflowCount = 0`，`lowEffectiveFontCount = 0`，并归档了可审查的 `architecture.zh-CN.stage14.slidev.md` 与 `architecture.zh-CN-slides/index-standalone.html`。
 53. 2026-07-02 process-resolution 收口修复了 Windows 上表现为 `spawn EINVAL` 的底层环境探测失败。exporter 现在会先尝试 direct execution；Windows bare command name 通过 `PATH` + `PATHEXT` 解析；`.exe` / `.com` 直接执行；`.js` / `.mjs` / `.cjs` 通过 `process.execPath` 运行；只有解析结果是 `.cmd` / `.bat` shim 时，才进入带安全 quoting 的 `cmd.exe /d /s /c call` 隔离路径。Linux 与 macOS 继续 direct exec，不因为 Windows 需要 batch-shim adapter 就额外加 shell 层。
+54. 2026-07-04 standalone-bundle 复核新增显式 rendered-layout gate。严格 native standalone 声明现在必须同时通过 native bundle sanity gate 与 Playwright rendered layout audit；`--no-playwright --require-native-standalone` 必须失败，因为它不能证明最终 `index-standalone.html` 渲染后没有表格/正文溢出。
+55. `tableBodyLayoutGate` 现在是表格与正文/主体内容的交付门禁。它会报告已审计页数、表格页数、正文页数、失败数量、失败页与具体失败项。Mermaid-only finding 不会让这个门禁失败；Mermaid 仍由 `mermaidSourcePreservation` 与 `mermaidFit` 管理，因为保持一个源 Mermaid fence 对应一个导出 fence，比自动拆图是更强的结构不变量。
+56. 2026-07-04 对真实 `architecture.zh-CN.md` 的 Windows 验证证明了所有支持格式都走同一条已收敛 deck 路径：standalone HTML、PDF、PNG、PPTX 与 MP4 都在全量 deck audit 后返回 `ok = true`，报告 32 个审计页、8 个表格页、32 个正文页、零表格/正文失败、零 hard overflow、零 unreadable/low-effective-font finding，并保持全部 3 个 Mermaid fence 的 `changedFenceIndexes = []`。
+57. 同一 PPTX 验证报告 339 个可编辑文本框、8 个原生表格、106 个可编辑表格单元格，并覆盖全部 8 个表格页的 rich table-cell。这不声明 Mermaid/SVG 内部具备 Office 原生可编辑性；它们仍是背景图视觉层，而正文文本、代码文本与表格单元格会建模为可编辑 PowerPoint primitive。
+58. VitePress 文档构建隔离现在会排除生成或历史输出树：`archive/root-history/**`、`export/**` 与 `dist/**`。生成的 Slidev 导出结果继续作为 `docs/export/` 下的本地证据，而不是 Pages 源码文件。
 
 当前限制：
 
@@ -341,6 +346,7 @@ mermaidSourcePreservation.changedFenceIndexes
 8. Mermaid 不拆图约束不等于 Mermaid 演示质量自动合格。超大源图如果只能靠低 zoom 保持完整，流程应暴露 `source-preserved-fit-review` 或 `manual-review`，而不是静默改图或拆图。
 9. 当前 full-deck fixtures 已覆盖长表、宽表、混合代码、Mermaid 源图保持 fit、component-heavy slot Transform 边界、Mermaid/prose 非图内容移动、本地图片资产、嵌套 slot component、超宽表、frontmatter background/image/favicon、跨目录资产、CSS `url(...)` 图片/字体依赖、本地 CSS `@import` 链、本地 video/audio/track 资产、离线字体边界、bounded raw HTML/component single-surface、bounded component-only Vue tree surface、清晰边界 mixed component/prose 与 unsupported component/table/fence/image expected-failure，但仍不是 exhaustive；后续真实文档若出现复杂 Vue component 或 unsupported layout 失败，应继续沉淀为 fixture。
 10. 进程启动可移植性现在属于导出契约的一部分。不要把平台适配器退回到全局 `shell: true`；它虽然可能掩盖 `.cmd` 解析失败，但会破坏 JSON 与代码式参数的参数保真。
+11. strict standalone 验证有意比 bundle-generation smoke test 更慢。快速路径适合本地迭代，但任何关于 standalone 交付、表格/正文分页或跨格式导出质量的最终声明，都必须包含 rendered layout 证据。
 
 ## 输出策略
 
@@ -356,7 +362,7 @@ git check-ignore -v docs/export/_slidev-sources/architecture.zh-CN.slidev.md doc
 维护者本地期望状态：
 
 1. 生成文件可以显示为 untracked；
-2. `git check-ignore` 对当前验证产物不应输出任何内容；
+2. 生成的 `docs/export/<run>/...` 验证产物应被 `docs/export/*` ignore 规则覆盖；
 3. 最终 commit 应包含源码、工作流或文档改动，不应夹带临时生成测试输出。
 
 ## UI 契约

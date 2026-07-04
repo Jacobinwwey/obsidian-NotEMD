@@ -5,12 +5,15 @@ import { strToU8, zipSync } from 'fflate';
 
 const {
 	DEFAULT_OPTIONAL_COMPARE_METRIC_TIMEOUT_MS,
+	collectCoreImageDiffTools,
 	diagnoseVisualPage,
 	evaluateVisualGate,
 	extractPptxBackgroundImages,
 	pairPngSequences,
 	parseCompareMetric,
 	parseGeometryBox,
+	resolveImageMagickResizeCommand,
+	resolvePptxVisualRenderer,
 	runOptionalCompareMetric,
 	summarizePageMetrics,
 	writeComparisonCsv,
@@ -151,6 +154,64 @@ describe('pptx visual diff helper', () => {
 				maxDifferenceBoundingBoxAreaRatio: 0.1,
 			}).passed,
 		).toBe(false);
+	});
+
+	test('prefers PowerPoint render-back on Windows when LibreOffice is unavailable but PowerPoint is available', () => {
+		expect(
+			resolvePptxVisualRenderer({
+				requestedRenderer: 'auto',
+				platform: 'win32',
+				availability: {
+					libreoffice: false,
+					powerpoint: true,
+				},
+			}),
+		).toEqual({
+			renderer: 'powerpoint',
+			reason: 'windows-powerpoint-available',
+		});
+	});
+
+	test('keeps LibreOffice render-back on non-Windows hosts when available', () => {
+		expect(
+			resolvePptxVisualRenderer({
+				requestedRenderer: 'auto',
+				platform: 'linux',
+				availability: {
+					libreoffice: true,
+					powerpoint: false,
+				},
+			}),
+		).toEqual({
+			renderer: 'libreoffice',
+			reason: 'libreoffice-available',
+		});
+	});
+
+	test('uses magick instead of Windows convert.exe for resize operations', () => {
+		expect(resolveImageMagickResizeCommand('win32')).toEqual({
+			command: 'magick',
+			argsPrefix: [],
+		});
+		expect(resolveImageMagickResizeCommand('linux')).toEqual({
+			command: 'convert',
+			argsPrefix: [],
+		});
+	});
+
+	test('requires magick in the core image diff tool set on Windows', () => {
+		expect(collectCoreImageDiffTools('win32')).toEqual([
+			{ command: 'identify', args: ['-version'] },
+			{ command: 'compare', args: ['-version'] },
+			{ command: 'montage', args: ['-version'] },
+			{ command: 'magick', args: ['-version'] },
+		]);
+		expect(collectCoreImageDiffTools('linux')).toEqual([
+			{ command: 'identify', args: ['-version'] },
+			{ command: 'convert', args: ['-version'] },
+			{ command: 'compare', args: ['-version'] },
+			{ command: 'montage', args: ['-version'] },
+		]);
 	});
 
 	test('keeps optional ImageMagick metric timeout stable by default', () => {

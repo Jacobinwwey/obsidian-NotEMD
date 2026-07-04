@@ -4,14 +4,27 @@ const path = require('path');
 const { pathToFileURL } = require('url');
 const { unzipSync } = require('fflate');
 
-const REQUIRED_TOOLS = [
+function collectCoreImageDiffTools(platform = process.platform) {
+	const tools = [
+		{ command: 'identify', args: ['-version'] },
+		{ command: 'compare', args: ['-version'] },
+		{ command: 'montage', args: ['-version'] },
+	];
+	if (platform === 'win32') {
+		return [...tools, { command: 'magick', args: ['-version'] }];
+	}
+	return [tools[0], { command: 'convert', args: ['-version'] }, tools[1], tools[2]];
+}
+
+const CORE_IMAGE_DIFF_TOOLS = collectCoreImageDiffTools();
+
+const LIBREOFFICE_RENDER_TOOLS = [
 	{ command: 'libreoffice', args: ['--version'] },
 	{ command: 'pdftoppm', args: ['-v'] },
-	{ command: 'identify', args: ['-version'] },
-	{ command: 'convert', args: ['-version'] },
-	{ command: 'compare', args: ['-version'] },
-	{ command: 'montage', args: ['-version'] },
 ];
+
+const POWERPOINT_RENDER_SCRIPT = path.join(__dirname, 'powerpoint-render-pptx.ps1');
+const POWERPOINT_RENDERER_TIMEOUT_MS = 240000;
 
 const OPTIONAL_COMPARE_METRICS = ['PHASH', 'NCC', 'SSIM'];
 const DEFAULT_OPTIONAL_COMPARE_METRIC_TIMEOUT_MS = 60000;
@@ -81,7 +94,7 @@ function runCommand(command, args, options = {}) {
 	};
 }
 
-function collectToolAvailability(tools = REQUIRED_TOOLS) {
+function collectToolAvailability(tools = CORE_IMAGE_DIFF_TOOLS) {
 	const checked = tools.map((tool) => {
 		const result = runCommand(tool.command, tool.args);
 		return {
@@ -96,6 +109,73 @@ function collectToolAvailability(tools = REQUIRED_TOOLS) {
 		checked,
 		missing: checked.filter((tool) => !tool.available).map((tool) => tool.command),
 	};
+}
+
+function resolveImageMagickResizeCommand(platform = process.platform) {
+	if (platform === 'win32') {
+		return {
+			command: 'magick',
+			argsPrefix: [],
+		};
+	}
+	return {
+		command: 'convert',
+		argsPrefix: [],
+	};
+}
+
+function isToolAvailable(tool) {
+	const availability = collectToolAvailability([tool]);
+	return availability.checked[0]?.available === true;
+}
+
+function collectRendererAvailability() {
+	const libreoffice = LIBREOFFICE_RENDER_TOOLS.every((tool) => isToolAvailable(tool));
+	const powershell = process.platform === 'win32' && isToolAvailable({ command: 'powershell', args: ['-NoProfile', '-Command', '$PSVersionTable.PSVersion.ToString()'] });
+	let powerpoint = false;
+	let powerpointError = null;
+	if (powershell) {
+		const result = runCommand(
+			'powershell',
+			[
+				'-NoProfile',
+				'-NonInteractive',
+				'-ExecutionPolicy',
+				'Bypass',
+				'-Command',
+				'$ErrorActionPreference = "Stop"; $pp = New-Object -ComObject PowerPoint.Application; $pp.Quit(); Write-Output "PowerPoint COM available"',
+			],
+			{ timeout: 60000 },
+		);
+		powerpoint = result.status === 0 && !result.error;
+		powerpointError = powerpoint ? null : result.stderr || result.stdout || result.error || 'PowerPoint COM unavailable';
+	}
+
+	return {
+		libreoffice,
+		powerpoint,
+		powershell,
+		powerpointError,
+	};
+}
+
+function resolvePptxVisualRenderer({ requestedRenderer = 'auto', platform = process.platform, availability }) {
+	if (requestedRenderer === 'libreoffice') {
+		return { renderer: 'libreoffice', reason: 'requested-libreoffice' };
+	}
+	if (requestedRenderer === 'powerpoint') {
+		return { renderer: 'powerpoint', reason: 'requested-powerpoint' };
+	}
+	if (platform === 'win32' && availability.powerpoint) {
+		return { renderer: 'powerpoint', reason: 'windows-powerpoint-available' };
+	}
+	if (availability.libreoffice) {
+		return { renderer: 'libreoffice', reason: 'libreoffice-available' };
+	}
+	if (availability.powerpoint) {
+		return { renderer: 'powerpoint', reason: 'powerpoint-available' };
+	}
+	return { renderer: 'libreoffice', reason: 'fallback-libreoffice-missing' };
 }
 
 function firstNumber(value) {
@@ -232,6 +312,15 @@ function resolvePdfPath(workDirectory, pptxPath) {
 }
 
 function renderPptxToPngSequence(options) {
+	const renderer = options.renderer || 'libreoffice';
+	if (renderer === 'powerpoint') {
+		return renderPptxToPngSequenceWithPowerPoint(options);
+	}
+
+	return renderPptxToPngSequenceWithLibreOffice(options);
+}
+
+function renderPptxToPngSequenceWithLibreOffice(options) {
 	const pptxPath = path.resolve(options.pptxPath);
 	const outputDirectory = path.resolve(options.outputDirectory);
 	const workDirectory = path.resolve(options.workDirectory || path.join(outputDirectory, 'work'));
@@ -296,6 +385,7 @@ function renderPptxToPngSequence(options) {
 
 	return {
 		pptxPath,
+		renderer: 'libreoffice',
 		pdfPath,
 		renderedDirectory,
 		renderedImages,
@@ -308,6 +398,82 @@ function renderPptxToPngSequence(options) {
 			pdftoppm: {
 				status: ppmResult.status,
 				stderr: ppmResult.stderr.trim(),
+			},
+		},
+	};
+}
+
+function renderPptxToPngSequenceWithPowerPoint(options) {
+	const pptxPath = path.resolve(options.pptxPath);
+	const outputDirectory = path.resolve(options.outputDirectory);
+	const workDirectory = path.resolve(options.workDirectory || path.join(outputDirectory, 'work'));
+	const rawDirectory = path.resolve(options.rawDirectory || path.join(workDirectory, 'powerpoint-raw'));
+	const renderedDirectory = path.resolve(options.renderedDirectory || path.join(outputDirectory, 'pptx-rendered'));
+	const width = Number.isFinite(Number(options.width)) ? Number(options.width) : 1960;
+	const height = Number.isFinite(Number(options.height)) ? Number(options.height) : 1104;
+	const timeoutMs = Number(options.timeoutMs) || POWERPOINT_RENDERER_TIMEOUT_MS;
+
+	if (!fs.existsSync(pptxPath)) {
+		throw new Error(`PPTX file does not exist: ${pptxPath}`);
+	}
+
+	resetDirectory(workDirectory);
+	resetDirectory(rawDirectory);
+	resetDirectory(renderedDirectory);
+
+	const result = runCommand(
+		'powershell',
+		[
+			'-NoProfile',
+			'-NonInteractive',
+			'-ExecutionPolicy',
+			'Bypass',
+			'-File',
+			POWERPOINT_RENDER_SCRIPT,
+			'-PptxPath',
+			pptxPath,
+			'-OutputDirectory',
+			rawDirectory,
+			'-Width',
+			String(width),
+			'-Height',
+			String(height),
+		],
+		{ timeout: timeoutMs },
+	);
+	if (result.status !== 0) {
+		throw new Error(
+			`PowerPoint PPTX export failed: ${result.stderr || result.stdout || result.error || 'unknown error'}`,
+		);
+	}
+
+	let metadata = {};
+	try {
+		metadata = JSON.parse(result.stdout.trim());
+	} catch (_error) {
+		metadata = {};
+	}
+
+	const rawImages = collectPngSequence(rawDirectory);
+	const renderedImages = rawImages.map((imagePath, index) => {
+		const target = path.join(renderedDirectory, formatSlideFileName(index + 1));
+		fs.copyFileSync(imagePath, target);
+		return target;
+	});
+
+	return {
+		pptxPath,
+		renderer: 'powerpoint',
+		renderedDirectory,
+		renderedImages,
+		width,
+		height,
+		metadata,
+		commands: {
+			powerpoint: {
+				status: result.status,
+				stdout: result.stdout.trim(),
+				stderr: result.stderr.trim(),
 			},
 		},
 	};
@@ -599,9 +765,11 @@ function diagnoseVisualPage(page, context = {}) {
 }
 
 function measureDifferenceBoundingBox(referencePath, renderedPath, referenceDimensions, thresholdPercent = 8) {
+	const differenceCommand = resolveImageMagickResizeCommand();
 	const result = runCommand(
-		'convert',
+		differenceCommand.command,
 		[
+			...differenceCommand.argsPrefix,
 			referencePath,
 			renderedPath,
 			'-compose',
@@ -651,7 +819,12 @@ function measureDifferenceBoundingBox(referencePath, renderedPath, referenceDime
 
 function resizeRenderedImage(renderedPath, referenceDimensions, outputPath) {
 	const geometry = `${referenceDimensions.width}x${referenceDimensions.height}!`;
-	const result = runCommand('convert', [renderedPath, '-resize', geometry, outputPath], { timeout: 60000 });
+	const resizeCommand = resolveImageMagickResizeCommand();
+	const result = runCommand(
+		resizeCommand.command,
+		[...resizeCommand.argsPrefix, renderedPath, '-resize', geometry, outputPath],
+		{ timeout: 60000 },
+	);
 	if (result.status !== 0) {
 		throw new Error(
 			`ImageMagick resize failed: ${result.stderr || result.stdout || result.error || 'unknown error'}`,
@@ -1140,27 +1313,35 @@ function comparePngSequences(options) {
 function buildPptxVisualDiff(options) {
 	const outputDirectory = path.resolve(options.outputDirectory);
 	prepareVisualDiffOutputDirectory(outputDirectory);
-	const tools = collectToolAvailability();
-	if (tools.missing.length > 0) {
+	const availability = collectRendererAvailability();
+	const rendererSelection = resolvePptxVisualRenderer({
+		requestedRenderer: options.renderer || 'auto',
+		platform: process.platform,
+		availability,
+	});
+	const requiredTools = rendererSelection.renderer === 'powerpoint'
+		? CORE_IMAGE_DIFF_TOOLS
+		: [...LIBREOFFICE_RENDER_TOOLS, ...CORE_IMAGE_DIFF_TOOLS];
+	const tools = collectToolAvailability(requiredTools);
+	const missingReasons = [...tools.missing];
+	if (rendererSelection.renderer === 'powerpoint' && !availability.powerpoint) {
+		missingReasons.push(`powerpoint-com${availability.powershell ? '' : ' (powershell unavailable)'}`);
+	}
+	if (missingReasons.length > 0) {
 		return {
 			available: false,
 			outputDirectory,
 			tools,
-			error: `Missing required tools: ${tools.missing.join(', ')}`,
+			rendererSelection,
+			error: `Missing required tools: ${missingReasons.join(', ')}`,
 			gate: {
 				passed: false,
-				failures: [`Missing required tools: ${tools.missing.join(', ')}`],
-				thresholds: options.thresholds || {},
-			},
-		};
-	}
+			failures: [`Missing required tools: ${missingReasons.join(', ')}`],
+			thresholds: options.thresholds || {},
+		},
+	};
+}
 
-	const render = renderPptxToPngSequence({
-		pptxPath: options.pptxPath,
-		outputDirectory,
-		dpi: options.dpi,
-		timeoutMs: options.timeoutMs,
-	});
 	const explicitReferenceSource = options.referenceSource || 'external-png-sequence';
 	const reference = options.referenceDirectory
 		? {
@@ -1175,6 +1356,33 @@ function buildPptxVisualDiff(options) {
 				pptxPath: options.pptxPath,
 				outputDirectory,
 			});
+	const derivedPowerPointRenderSize =
+		rendererSelection.renderer === 'powerpoint' && !Number.isFinite(Number(options.width)) && !Number.isFinite(Number(options.height))
+			? (() => {
+					const firstReferenceImage = reference.referenceImages?.[0]?.imagePath;
+					if (!firstReferenceImage || !fs.existsSync(firstReferenceImage)) {
+						return null;
+					}
+					try {
+						const dimensions = identifyDimensions(firstReferenceImage);
+						return {
+							width: dimensions.width,
+							height: dimensions.height,
+						};
+					} catch (_error) {
+						return null;
+					}
+				})()
+			: null;
+	const render = renderPptxToPngSequence({
+		pptxPath: options.pptxPath,
+		outputDirectory,
+		dpi: options.dpi,
+		renderer: rendererSelection.renderer,
+		timeoutMs: options.timeoutMs,
+		width: derivedPowerPointRenderSize?.width,
+		height: derivedPowerPointRenderSize?.height,
+	});
 	const comparison = comparePngSequences({
 		referenceDirectory: reference.referenceDirectory,
 		renderedDirectory: render.renderedDirectory,
@@ -1187,6 +1395,7 @@ function buildPptxVisualDiff(options) {
 		available: true,
 		outputDirectory,
 		tools,
+		rendererSelection,
 		reference,
 		render,
 		comparison,
@@ -1201,11 +1410,14 @@ function buildPptxVisualDiff(options) {
 }
 
 module.exports = {
-	REQUIRED_TOOLS,
+	CORE_IMAGE_DIFF_TOOLS,
+	LIBREOFFICE_RENDER_TOOLS,
 	OPTIONAL_COMPARE_METRICS,
 	DEFAULT_OPTIONAL_COMPARE_METRIC_TIMEOUT_MS,
 	VISUAL_DIAGNOSTIC_LIMITS,
 	buildPptxVisualDiff,
+	collectCoreImageDiffTools,
+	collectRendererAvailability,
 	collectCompareMetricSupport,
 	collectPngSequence,
 	collectToolAvailability,
@@ -1216,6 +1428,8 @@ module.exports = {
 	pairPngSequences,
 	parseCompareMetric,
 	parseGeometryBox,
+	resolveImageMagickResizeCommand,
+	resolvePptxVisualRenderer,
 	renderPptxToPngSequence,
 	runOptionalCompareMetric,
 	summarizePageMetrics,

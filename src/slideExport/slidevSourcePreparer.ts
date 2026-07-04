@@ -8,6 +8,7 @@
 import type { App, TFile } from 'obsidian';
 import type { LLMProviderConfig, NotemdSettings, ProgressReporter } from '../types';
 import { callLLM } from '../llmUtils';
+import { createMermaidPostFitGlobalBottomVue, injectMermaidPostFitIntoVueSfc } from './mermaidFitScript';
 import { decorateComponentHeavySlotZones } from './slidevLayoutAudit';
 import { formatSlideLayoutPlanForPrompt, planSlidevMarkdownLayout } from './slidevLayoutPlan';
 import type { ExportProgressCallback, SlideExportConfig, SlidevExportSource } from './types';
@@ -1197,6 +1198,7 @@ async function writePreparedDeck(app: App, sourceFile: TFile, config: SlideExpor
 	await ensureVaultDirectory(app, directoryPath);
 	await app.vault.adapter.write(filePath, deckMarkdown);
 	await copyReferencedLocalAssetFiles(app, sourceFile, deckMarkdown, directoryPath);
+	await ensurePreparedDeckRuntimeSupport(app, filePath);
 	return filePath;
 }
 
@@ -1212,9 +1214,57 @@ async function writePreparedDeckWorkspace(
 	await recreatePreparedWorkspace(app, workspacePath);
 	await app.vault.adapter.write(filePath, deckMarkdown);
 	await copyExistingSlidevSupportWorkspace(app, sourceFile, deckMarkdown, workspacePath, onProgress);
+	await ensurePreparedDeckRuntimeSupport(app, filePath, onProgress);
 	return filePath;
 }
 
+async function ensurePreparedDeckRuntimeSupport(
+	app: App,
+	preparedDeckPath: string,
+	onProgress?: ExportProgressCallback,
+): Promise<void> {
+	const supportPath = normalizeVaultPath(`${dirnameVaultPath(preparedDeckPath)}/global-bottom.vue`);
+	const vaultRoot = getVaultBasePath(app);
+	const fs: any = safeRequire('fs');
+	const path: any = safeRequire('path');
+
+	if (vaultRoot && fs?.existsSync && fs?.readFileSync && fs?.writeFileSync && fs?.mkdirSync && path?.join && path?.dirname) {
+		const absoluteSupportPath = path.join(vaultRoot, supportPath);
+		const current = fs.existsSync(absoluteSupportPath)
+			? fs.readFileSync(absoluteSupportPath, 'utf8')
+			: null;
+		const next = current === null
+			? createMermaidPostFitGlobalBottomVue()
+			: injectMermaidPostFitIntoVueSfc(current);
+		if (next === current) {
+			return;
+		}
+		fs.mkdirSync(path.dirname(absoluteSupportPath), { recursive: true });
+		fs.writeFileSync(absoluteSupportPath, next, 'utf8');
+		onProgress?.('slidev-source', `Prepared Mermaid runtime fit support: ${supportPath}`);
+		return;
+	}
+
+	const adapter = app.vault.adapter as any;
+	let current: string | null = null;
+	if (typeof adapter.exists === 'function' && typeof adapter.read === 'function' && await adapter.exists(supportPath)) {
+		current = await adapter.read(supportPath);
+	}
+	const next = current === null
+		? createMermaidPostFitGlobalBottomVue()
+		: injectMermaidPostFitIntoVueSfc(current);
+	if (next === current) {
+		return;
+	}
+	await app.vault.adapter.write(supportPath, next);
+	onProgress?.('slidev-source', `Prepared Mermaid runtime fit support: ${supportPath}`);
+}
+
+function dirnameVaultPath(vaultPath: string): string {
+	const normalized = normalizeVaultPath(vaultPath);
+	const separatorIndex = normalized.lastIndexOf('/');
+	return separatorIndex >= 0 ? normalized.slice(0, separatorIndex) : '.';
+}
 async function recreatePreparedWorkspace(app: App, workspacePath: string): Promise<void> {
 	const vaultRoot = getVaultBasePath(app);
 	const fs: any = safeRequire('fs');

@@ -273,7 +273,7 @@ The same invariant is enforced earlier in source preparation: one-shot LLM gener
 
 The detailed implementation direction is tracked in `docs/brainstorms/2026-06-20-slidev-layout-quality-and-canvas-roadmap.zh-CN.md`. That route keeps the current render-feedback loop as the final fact gate, adds a clean-room layout planning IR before generation, and translates the world-rect / viewport-fit ideas from `ref/infinite-canvas` into NoteMD-owned geometry logic instead of copying AGPL-3.0 implementation code or embedding an infinite-canvas UI in Slidev export.
 
-Current landed truth as of 2026-06-20:
+Current landed truth:
 
 1. default HTML verification audits the full prepared deck when `--sample-slides` is not provided;
 2. the patcher derives `zoom` from measured overflow instead of fixed export constants;
@@ -328,6 +328,11 @@ Current landed truth as of 2026-06-20:
 51. the Stage 14 default success fixture suite is archived at `/home/jacob/slidev-export-review/2026-06-20-stage14-success-fixtures/`; all 9 converging production fixtures pass, and the three expected-failure fixtures are excluded by default.
 52. the Stage 14 real `architecture.zh-CN.md` strict native standalone archive is `/home/jacob/slidev-export-review/2026-06-20-stage14-real/`; the report is `ok = true`, uses the local Slidev fork and 52 skill references, reports `actualMode = "standalone"`, `requiresLocalServer = false`, `standaloneGate.passed = true`, preserves all 3 Mermaid fences with `changedFenceIndexes = []`, closes with `hardOverflowCount = 0` and `lowEffectiveFontCount = 0`, and archives the reviewable `architecture.zh-CN.stage14.slidev.md` plus `architecture.zh-CN-slides/index-standalone.html`.
 53. the 2026-07-02 process-resolution closeout fixes the lower-level environment probe failure that surfaced on Windows as `spawn EINVAL`. The exporter now tries direct execution first, resolves Windows bare command names through `PATH` + `PATHEXT`, runs `.exe` / `.com` directly, runs `.js` / `.mjs` / `.cjs` through `process.execPath`, and uses an isolated quoted `cmd.exe /d /s /c call` path only for resolved `.cmd` / `.bat` shims. Linux and macOS continue to use direct exec; they do not get a shell layer merely because Windows needs a batch-shim adapter.
+54. the 2026-07-04 standalone-bundle reopen adds an explicit rendered-layout gate. A strict native standalone claim now requires the native bundle sanity gate and a Playwright-rendered layout audit; `--no-playwright --require-native-standalone` must fail because it cannot prove the final `index-standalone.html` renders without table/body overflow.
+55. `tableBodyLayoutGate` is now the delivery gate for table and prose/body overflow. It reports audited slide count, table slide count, body-text slide count, failure count, failure slides, and concrete failures. Mermaid-only findings do not fail this gate; Mermaid remains governed by `mermaidSourcePreservation` and `mermaidFit` because preserving one source Mermaid fence as one exported fence is a stronger invariant than automatic diagram splitting.
+56. the 2026-07-04 real `architecture.zh-CN.md` Windows verification proves the converged-deck path across all supported export formats: standalone HTML, PDF, PNG, PPTX, and MP4 all return `ok = true` after full-deck audit, report 32 audited slides, 8 table slides, 32 body-text slides, zero table/body failures, zero hard overflow, zero unreadable/low-effective-font findings, and preserve all 3 Mermaid fences with `changedFenceIndexes = []`.
+57. the same PPTX verification reports 339 editable text boxes, 8 native tables, 106 editable table cells, and rich table-cell coverage on all 8 table slides. This does not claim native Office editability for Mermaid/SVG internals; those remain background-image visual surfaces while body text, code text, and table cells are modeled as editable PowerPoint primitives.
+58. VitePress documentation build isolation now excludes generated or historical-output trees with `archive/root-history/**`, `export/**`, and `dist/**`. Generated Slidev exports stay local evidence under `docs/export/`, not Pages source files.
 
 Current limitation:
 
@@ -341,6 +346,7 @@ Current limitation:
 8. The Mermaid no-split constraint does not mean Mermaid presentation quality automatically passes. If a very large source diagram can only remain complete at low zoom, the workflow should surface `source-preserved-fit-review` or `manual-review` instead of silently rewriting or splitting the diagram.
 9. the current full-deck fixtures cover long-table, wide-table, mixed-code, Mermaid source-preserved fit, component-heavy slot Transform boundaries, mixed Mermaid/prose non-diagram content movement, local image assets, nested slot components, ultra-wide tables, frontmatter background/image/favicon assets, cross-directory assets, CSS `url(...)` image/font dependencies, local CSS `@import` chains, local video/audio/track assets, offline font-provider boundaries, bounded raw HTML/component single-surface slides, bounded component-only Vue tree surfaces, clear-boundary mixed component/prose, and unsupported component/table/fence/image expected failures, but they are not exhaustive; add more fixture sources for complex Vue components and unsupported layouts as they fail in real documents.
 10. process-launch portability is now part of the export contract. Do not replace the platform adapter with blanket `shell: true`; it breaks argument fidelity for JSON and code-like arguments even though it may hide `.cmd` resolution failures.
+11. strict standalone verification is intentionally slower than bundle-generation smoke testing. The fast path is useful for local iteration, but any final statement about standalone delivery, table/body pagination, or cross-format export quality must include rendered layout evidence.
 
 ## Output Policy
 
@@ -356,7 +362,7 @@ git check-ignore -v docs/export/_slidev-sources/architecture.zh-CN.slidev.md doc
 Expected maintainer-local state:
 
 1. generated files may appear as untracked;
-2. `git check-ignore` should print nothing for the current verification artifacts;
+2. generated `docs/export/<run>/...` verification artifacts should be covered by the `docs/export/*` ignore rule;
 3. the final commit should include source/workflow/docs changes, not ad hoc generated test output.
 
 ## UI Contract

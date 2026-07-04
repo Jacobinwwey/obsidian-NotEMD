@@ -17,6 +17,7 @@ function readTrackedMarkdownDocs(repoRoot: string): string[] {
             relativePath === 'README_zh.md' ||
             relativePath.startsWith('docs/')
         )
+        .filter((relativePath) => !relativePath.startsWith('docs/archive/root-history/'))
         .filter((relativePath) => relativePath.endsWith('.md'))
         .map((relativePath) => path.join(repoRoot, relativePath));
 }

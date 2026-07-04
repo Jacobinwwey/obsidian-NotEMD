@@ -1,4 +1,13 @@
 (function () {
+  if (typeof window === "undefined" || typeof document === "undefined") return;
+  if (window.__notemdMermaidPostFitInstalled) {
+    if (typeof window.__notemdMermaidPostFitFitAll === "function") {
+      window.__notemdMermaidPostFitFitAll();
+    }
+    return;
+  }
+  window.__notemdMermaidPostFitInstalled = true;
+
   var fitted = new WeakSet();
   function fitOne(host) {
     var svg = host.shadowRoot && host.shadowRoot.querySelector("svg");
@@ -35,6 +44,7 @@
       if (!fitted.has(hosts[i])) fitOne(hosts[i]);
     }
   }
+  window.__notemdMermaidPostFitFitAll = fitAll;
   fitAll();
   setTimeout(fitAll, 2500);
   setInterval(fitAll, 800);

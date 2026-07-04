@@ -43,7 +43,7 @@ export interface SlidevStandaloneAttempt {
 	outputPath: string | null;
 	preservedFailurePath: string | null;
 	loaderGaps: string[];
-	failureReason: 'loader-gaps' | null;
+	failureReason: 'loader-gaps' | 'unsupported-standalone-bundle' | null;
 }
 
 export interface SlidevHtmlExportOutcome {

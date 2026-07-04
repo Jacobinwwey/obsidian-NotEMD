@@ -83,8 +83,13 @@ Strict pass conditions add:
 4. `htmlExport.standaloneAttempt.loaderGaps = []`
 5. `standaloneGate.required = true`
 6. `standaloneGate.passed = true`
+7. `renderedLayoutGate.required = true`
+8. `renderedLayoutGate.passed = true`
+9. `tableBodyLayoutGate.passed = true`
 
-The gate exists because a compatibility run with `ok: true` can still mean `actualMode = "server-script-fallback"`.
+The gate exists because a compatibility run with `ok: true` can still mean `actualMode = "server-script-fallback"`. A fast run with `--no-playwright` can also prove only that the native `--standalone-bundle` file was produced; it does not prove that the final standalone artifact has gone through rendered layout convergence. Maintainer closure for standalone HTML must not use `--no-playwright` with `--require-native-standalone`.
+
+Mermaid fences are not split by this gate. The rendered layout gate is about browser-observed artifact correctness, and the table/body gate specifically covers table and primary body-text pages. The same converged prepared deck is then used for the downstream `PDF`, `PNG`, `PPTX`, and `MP4` export paths.
 
 ## Local Fork Resolution
 
@@ -93,9 +98,10 @@ Slidev command resolution prefers:
 1. `NOTEMD_SLIDEV_BIN`
 2. `SLIDEV_CLI_PATH`
 3. `$HOME/slidev/packages/slidev/bin/slidev.mjs`
-4. `npx -y @slidev/cli`
+4. `<vault-or-project>/node_modules/.bin/slidev`
+5. `npx -y @slidev/cli`
 
-On Jacob's workstation, the maintained verification path should report the local fork path in `environment.slidev.version`. The `npx -y @slidev/cli` entry is only a last-resort probe fallback; it is not the NoteMD install recommendation. If that fallback does not expose `--standalone-bundle`, environment probing must mark Slidev unavailable for the standalone-required path.
+On Jacob's workstation, the maintained verification path should report either the local fork path or a project binary installed from the NoteMD fork release in `environment.slidev.version`. The `npx -y @slidev/cli` entry is only a last-resort probe fallback; it is not the NoteMD install recommendation. The registry package and the fork package both report `@slidev/cli@52.16.0`, so semver alone is not a valid compatibility signal. Environment probing must run `slidev build --help` and require `--out`, `--format`, and `--standalone-bundle`; otherwise Slidev is unavailable for the standalone-required path.
 
 ## Fork Release Distribution
 
@@ -113,7 +119,7 @@ The sidebar's copied install command is:
 npm install -D https://github.com/Jacobinwwey/slidev/releases/download/notemd-standalone-v52.16.0-1/slidev-cli-notemd-standalone-v52.16.0-1.tgz @slidev/theme-default
 ```
 
-Validation on 2026-06-21 proved that the release asset packs as `@slidev/cli@52.16.0`, installs into a clean npm project, exposes the `slidev` binary, and includes `build --help` support for `--standalone-bundle`.
+Validation on 2026-06-21 proved that the release asset packs as `@slidev/cli@52.16.0`, installs into a clean npm project, exposes the `slidev` binary, and includes `build --help` support for `--standalone-bundle`. NoteMD's own `package.json` must use this release tarball instead of `^52.16.0` from the npm registry, because the registry build with the same semver does not provide the native standalone bundle option.
 
 The release is intentionally attached to the fork branch that carries the NoteMD standalone fix. Do not replace it with a `tree`, `blob`, raw file, or moving branch link in UI copy. Those links are useful for code review, but they are not package artifacts and do not give npm a stable executable package boundary.
 

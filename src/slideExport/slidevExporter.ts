@@ -8,6 +8,7 @@
 import type { App } from 'obsidian';
 import type { SlideExportConfig, ExecResult, ExportProgressCallback, SlidevExportSource, SlidevHtmlActualMode, SlidevHtmlExportOutcome } from './types';
 import { NOTEMD_SLIDEV_INSTALL_PACKAGES } from './slidevDistribution';
+import { findMissingSlidevBuildOptions, formatSlidevBuildRequirementError } from './slidevCompatibility';
 import { execFileAsync, getVaultBasePath, resolveNpmCommand, resolveNpxCommand, resolvePlaywrightBrowsersPath, resolveSlidevCommand, safeRequire } from './platformUtils';
 import { collectLocalAssetReferencesWithDependencies, copyLocalSlidevAssetReference } from './slidevSourcePreparer';
 import { injectMermaidPostFitIntoHtml } from './mermaidFitScript';
@@ -143,6 +144,12 @@ export function detectStandaloneBundleLoaderGaps(html: string): string[] {
 	return uniqueRefs.filter(ref => !hasStandaloneLoaderBinding(entryModuleCode, ref));
 }
 
+function isUnsupportedStandaloneBundleError(result: ExecResult): boolean {
+	const detail = `${result.stderr || ''}\n${result.stdout || ''}\n${result.error?.message || ''}`.toLowerCase();
+	return detail.includes('standalone-bundle')
+		&& (detail.includes('unknown argument') || detail.includes('unknown option') || detail.includes('unknown arguments'));
+}
+
 /**
  * Export Markdown as a Slidev SPA (HTML build).
  */
@@ -188,6 +195,23 @@ async function exportSlidevStandaloneHtml(
 
 	const result = await execFileAsync(slidev.command, args, { cwd: vaultRoot, timeout: config.timeoutMs });
 	if (result.exitCode !== 0) {
+		if (isUnsupportedStandaloneBundleError(result)) {
+			onProgress?.('slidev-build', 'Slidev CLI does not support standalone bundle builds; falling back to server-script HTML...');
+			const fallbackOutcome = await exportSlidevServerHtml(app, source, config, 'server-script-fallback', onProgress);
+			return {
+				...fallbackOutcome,
+				requestedMode: 'standalone',
+				fallbackPath: fallbackOutcome.path,
+				standaloneAttempt: {
+					attempted: true,
+					accepted: false,
+					outputPath: null,
+					preservedFailurePath: null,
+					loaderGaps: [],
+					failureReason: 'unsupported-standalone-bundle',
+				},
+			};
+		}
 		throw new Error(`Slidev standalone build failed via ${slidev.description} (exit ${result.exitCode}): ${result.stderr || result.error?.message || 'unknown error'}`);
 	}
 	copyPreparedLocalFileReferencesToExport(source, vaultRoot, outputDir, onProgress);
@@ -388,9 +412,32 @@ export async function installSlidevForVault(
 	const slidev = resolveSlidevCommand({ roots: [projectRoot] });
 	if (slidev.source !== 'npx') {
 		onProgress?.('install-slidev', `Using ${slidev.description}...`);
-		const result = await execFileAsync(slidev.command, ['--version'], { timeout: 120_000 });
-		onProgress?.('install-slidev', result.exitCode === 0 ? 'Slidev CLI is available' : 'Slidev CLI failed');
-		return result;
+		const versionResult = await execFileAsync(slidev.command, [...slidev.argsPrefix, '--version'], { timeout: 120_000 });
+		if (versionResult.exitCode !== 0) {
+			onProgress?.('install-slidev', 'Slidev CLI failed');
+			return versionResult;
+		}
+
+		const helpResult = await execFileAsync(slidev.command, [...slidev.argsPrefix, 'build', '--help'], { timeout: 120_000 });
+		const missingBuildOptions = helpResult.exitCode === 0
+			? findMissingSlidevBuildOptions(`${helpResult.stdout}\n${helpResult.stderr}`)
+			: findMissingSlidevBuildOptions('');
+		if (helpResult.exitCode === 0 && missingBuildOptions.length === 0) {
+			onProgress?.('install-slidev', 'Slidev CLI is available');
+			return versionResult;
+		}
+
+		const requirementError = formatSlidevBuildRequirementError(slidev.description, missingBuildOptions);
+		if (slidev.source === 'configured-path' || slidev.source === 'local-fork') {
+			onProgress?.('install-slidev', requirementError);
+			return {
+				exitCode: helpResult.exitCode === 0 ? 1 : helpResult.exitCode,
+				stdout: versionResult.stdout,
+				stderr: requirementError,
+				error: new Error(requirementError),
+			};
+		}
+		onProgress?.('install-slidev', `${requirementError} Installing NoteMD Slidev fork release into the vault...`);
 	}
 	onProgress?.('install-slidev', 'Installing NoteMD Slidev fork release into the vault...');
 	const result = await execFileAsync(resolveNpmCommand(), ['install', '-D', ...NOTEMD_SLIDEV_INSTALL_PACKAGES], {

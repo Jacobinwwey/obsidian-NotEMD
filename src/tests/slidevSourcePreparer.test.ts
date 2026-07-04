@@ -216,6 +216,87 @@ describe('slidevSourcePreparer', () => {
         );
     });
 
+    test('prepared deterministic decks include Mermaid runtime fit support for non-HTML exports', async () => {
+        const app = createApp([
+            '# Architecture',
+            '',
+            '## Runtime Graph',
+            '',
+            '```mermaid',
+            'flowchart TB',
+            '  A --> B',
+            '```',
+        ].join('\n'));
+
+        await prepareSlidevExportSource(
+            app,
+            createFile('docs/architecture.md'),
+            config,
+            {},
+            jest.fn()
+        );
+
+        expect(app.vault.adapter.write).toHaveBeenCalledWith(
+            'export/_slidev-sources/global-bottom.vue',
+            expect.stringContaining('notemd-mermaid-post-fit')
+        );
+        expect(app.vault.adapter.write).toHaveBeenCalledWith(
+            'export/_slidev-sources/global-bottom.vue',
+            expect.stringContaining('querySelectorAll(".mermaid")')
+        );
+    });
+
+    test('existing Slidev deck workspaces preserve global-bottom.vue while injecting Mermaid runtime fit support', async () => {
+        const markdown = [
+            '---',
+            'theme: default',
+            'title: Existing Deck',
+            '---',
+            '',
+            '# First',
+            '',
+            '```mermaid',
+            'flowchart TB',
+            '  A --> B',
+            '```',
+        ].join('\n');
+        const app = createApp(markdown);
+        const tempVaultRoot = fs.mkdtempSync(path.join(require('os').tmpdir(), 'notemd-slidev-runtime-support-'));
+        const sourceDirectory = path.join(tempVaultRoot, 'docs');
+        fs.mkdirSync(sourceDirectory, { recursive: true });
+        fs.writeFileSync(
+            path.join(sourceDirectory, 'global-bottom.vue'),
+            [
+                '<template>',
+                '  <footer class="deck-footer">Existing footer</footer>',
+                '</template>',
+                '',
+            ].join('\n'),
+            'utf8'
+        );
+
+        app.vault.adapter.write = jest.fn(async (vaultPath: string, content: string) => {
+            const absolutePath = path.join(tempVaultRoot, vaultPath);
+            fs.mkdirSync(path.dirname(absolutePath), { recursive: true });
+            fs.writeFileSync(absolutePath, content, 'utf8');
+        });
+        mockGetVaultBasePath.mockReturnValue(tempVaultRoot);
+        mockSafeRequire.mockImplementation((moduleName: string) => require(moduleName));
+
+        await prepareSlidevExportSource(
+            app,
+            createFile('docs/existing-slidev.md'),
+            config,
+            {},
+            jest.fn()
+        );
+
+        const globalBottomPath = path.join(tempVaultRoot, 'export/_slidev-sources/existing-slidev/global-bottom.vue');
+        const globalBottom = fs.readFileSync(globalBottomPath, 'utf8');
+        expect(globalBottom).toContain('Existing footer');
+        expect(globalBottom).toContain('notemd-mermaid-post-fit');
+        expect(globalBottom).toContain('querySelectorAll(".mermaid")');
+    });
     test('existing Slidev decks preserve explicit font provider configuration', async () => {
         const markdown = [
             '---',
