@@ -51,7 +51,7 @@ Current source-side result:
 |---|---|
 | `npm --prefix website run build` | Passed on 2026-07-04 |
 | `npm --prefix website run audit:build` | Passed on 2026-07-04 with `website build audit passed` |
-| Recent remote Pages runs | Latest visible `main` Pages workflow runs remain green through run `28641376675`; commit `9efff59` did not trigger a new website workflow because it did not change `website/**` |
+| Recent remote Pages runs | Latest visible `main` Pages workflow runs remain green through run `28641376675`; subsequent docs-only commits including `9efff59` and `40543eb` did not trigger a new website workflow because they did not change `website/**` |
 | External measurement | Still not locally provable; Search Console and AI visibility checks remain manual/post-deploy evidence |
 
 ## Route Sample

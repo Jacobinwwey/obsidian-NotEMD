@@ -306,12 +306,22 @@ describe('mainline progress audit contract', () => {
 
         for (const content of [pagesGeoMeasurementLog, pagesGeoMeasurementLogZh]) {
             expect(content).toContain('2026-06-22');
+            expect(content).toContain('2026-07-04');
+            expect(content).toContain('28641376675');
+            expect(content).toContain('40543eb');
             expect(content).toContain('Search Console');
             expect(content).toContain('AI visibility');
             expect(content).toContain('sitemap');
             expect(content).toContain('/zh-CN/docs/providers/openai');
             expect(content).toContain('noindex,follow');
         }
+
+        expect(readDoc('docs/brainstorms/2026-07-02-mainline-ci-geo-cli-slidev-closeout-plan.md')).toContain(
+            'canonical: true'
+        );
+        expect(readDoc('docs/brainstorms/2026-07-02-mainline-ci-geo-cli-slidev-closeout-plan.zh-CN.md')).toContain(
+            'canonical: true'
+        );
 
         for (const content of [progressDoc, progressDocZh, websiteReadme, geoRoadmap]) {
             expect(content).toContain('website/scripts/audit-build.cjs');

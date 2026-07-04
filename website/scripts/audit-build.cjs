@@ -357,6 +357,12 @@ function auditMeasurementEvidence() {
     assertContains(content, 'homepage', 'GEO measurement evidence');
     assertContains(content, 'sitemap', 'GEO measurement evidence');
   }
+
+  for (const content of [measurementLog, measurementLogZh]) {
+    assertContains(content, '2026-07-04', 'GEO source-side closure evidence');
+    assertContains(content, '28641376675', 'GEO source-side closure evidence');
+    assertContains(content, '40543eb', 'GEO source-side closure evidence');
+  }
 }
 
 function auditRequiredFiles() {

@@ -51,7 +51,7 @@
 |---|---|
 | `npm --prefix website run build` | 2026-07-04 通过 |
 | `npm --prefix website run audit:build` | 2026-07-04 通过，输出 `website build audit passed` |
-| 近期远端 Pages runs | 当前可见的最新 `main` Pages workflow 仍为绿色，最近记录到 run `28641376675`；commit `9efff59` 未触发新的 website workflow，因为它没有改动 `website/**` |
+| 近期远端 Pages runs | 当前可见的最新 `main` Pages workflow 仍为绿色，最近记录到 run `28641376675`；后续 docs-only commits，包括 `9efff59` 与 `40543eb`，没有触发新的 website workflow，因为它们没有改动 `website/**` |
 | 外部测量 | 本地仍不能证明；Search Console 与 AI visibility 仍属于手工/部署后证据 |
 
 ## Route 样本

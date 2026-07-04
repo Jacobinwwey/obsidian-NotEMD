@@ -1,7 +1,7 @@
 ---
 date: 2026-07-02
 topic: mainline-ci-geo-cli-slidev-closeout-plan
-canonical: false
+canonical: true
 status: completed
 ---
 
