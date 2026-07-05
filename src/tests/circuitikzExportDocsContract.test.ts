@@ -58,6 +58,7 @@ describe('circuitikz export docs contract', () => {
             expect(doc).toContain('<use href="#...">');
             expect(doc).toContain('polyline');
             expect(doc).toContain('polygon');
+            expect(doc).toContain('tspan');
             expect(doc).toContain('render-png-blank');
             expect(doc).toContain('render-png-foreground-dense');
             expect(doc).toContain('render-png-content-clipped');
@@ -113,6 +114,7 @@ describe('circuitikz export docs contract', () => {
             expect(doc).toContain('path-only glyph placement');
             expect(doc).toContain('polyline');
             expect(doc).toContain('polygon');
+            expect(doc).toContain('tspan');
             expect(doc).toContain('RenderArtifact.diagnostics');
             expect(doc).toContain('diagnostic summary');
             expect(doc).toContain('src/rendering/diagnostics.ts');

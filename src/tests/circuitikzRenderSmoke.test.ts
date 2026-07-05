@@ -452,6 +452,32 @@ describe('circuitikz render smoke inspection', () => {
         }
     });
 
+    test('reports overlapping SVG labels when separate labels are emitted as tspans', () => {
+        const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'notemd-circuitikz-svg-tspan-text-overlap-'));
+        const svgPath = path.join(tempRoot, 'tspan-text-overlap.svg');
+        fs.writeFileSync(
+            svgPath,
+            '<svg viewBox="0 0 160 100"><text><tspan x="40" y="40" font-size="12">VDD</tspan><tspan x="42" y="41" font-size="12">VIN</tspan></text><path d="M0 0H12"/></svg>',
+            'utf8'
+        );
+
+        try {
+            const report = inspectCircuitikzRenderArtifact({
+                expectedArtifactPath: svgPath
+            });
+
+            expect(report.artifactKind).toBe('svg');
+            expect(report.diagnostics).toEqual([
+                expect.objectContaining({
+                    kind: 'render-svg-text-overlap',
+                    message: expect.stringContaining('VDD / VIN')
+                })
+            ]);
+        } finally {
+            fs.rmSync(tempRoot, { recursive: true, force: true });
+        }
+    });
+
     test('reports SVG drawing elements moved into label overlap by transforms', () => {
         const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'notemd-circuitikz-svg-transform-label-drawing-overlap-'));
         const svgPath = path.join(tempRoot, 'transformed-label-drawing-overlap.svg');

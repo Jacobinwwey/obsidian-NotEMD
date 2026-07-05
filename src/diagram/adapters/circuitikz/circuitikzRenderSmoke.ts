@@ -523,25 +523,22 @@ function elementBox(tagName: string, tag: string): SvgBox | undefined {
     return undefined;
 }
 
-function textBox(tag: string): SvgTextBox | undefined {
-    if (tagIsHidden(tag)) {
-        return undefined;
-    }
-
-    const x = parseNumericAttribute(tag, 'x');
-    const y = parseNumericAttribute(tag, 'y');
-    if (x === undefined || y === undefined) {
-        return undefined;
-    }
-
-    const fontSize = parseNumericAttribute(tag, 'font-size') ?? 12;
-    const text = decodeXmlEntities((tag.match(/<text\b[^>]*>([\s\S]*?)<\/text>/i)?.[1] ?? '')
+function tagTextContent(tag: string): string {
+    return decodeXmlEntities(tag
+        .replace(/^<[^>]+>/, '')
+        .replace(/<\/[^>]+>$/, '')
         .replace(/<[^>]+>/g, '')
         .trim());
-    if (!text) {
+}
+
+function positionedTextBox(tag: string, text: string, inheritedFontSize?: number): SvgTextBox | undefined {
+    const x = parseNumericAttribute(tag, 'x');
+    const y = parseNumericAttribute(tag, 'y');
+    if (x === undefined || y === undefined || !text) {
         return undefined;
     }
 
+    const fontSize = parseNumericAttribute(tag, 'font-size') ?? inheritedFontSize ?? 12;
     const width = Math.max(fontSize * 0.65, text.length * fontSize * 0.55);
     return {
         label: `text:${text}`,
@@ -551,6 +548,36 @@ function textBox(tag: string): SvgTextBox | undefined {
         maxX: x + width,
         maxY: y + fontSize * 0.25
     };
+}
+
+function svgTextBoxes(tag: string): SvgTextBox[] {
+    if (tagIsHidden(tag)) {
+        return [];
+    }
+
+    const parentFontSize = parseNumericAttribute(tag, 'font-size');
+    const tspanBoxes = Array.from(tag.matchAll(/<tspan\b[^>]*>[\s\S]*?<\/tspan>/gi))
+        .map(match => {
+            const tspan = match[0];
+            if (tagIsHidden(tspan)) {
+                return undefined;
+            }
+            return positionedTextBox(tspan, tagTextContent(tspan), parentFontSize);
+        })
+        .filter((box): box is SvgTextBox => Boolean(box));
+    if (tspanBoxes.length > 0) {
+        return tspanBoxes;
+    }
+
+    const x = parseNumericAttribute(tag, 'x');
+    const y = parseNumericAttribute(tag, 'y');
+    if (x === undefined || y === undefined) {
+        return [];
+    }
+
+    const text = tagTextContent(tag);
+    const box = positionedTextBox(tag, text);
+    return box ? [box] : [];
 }
 
 function collectSvgBoxes(svgText: string): { boxes: SvgBox[]; drawingBoxes: SvgBox[]; textBoxes: SvgTextBox[] } {
@@ -602,8 +629,7 @@ function collectSvgBoxes(svgText: string): { boxes: SvgBox[]; drawingBoxes: SvgB
 
         const localTransform = multiplyTransforms(parent.transform, parseSvgTransform(readAttribute(tag, 'transform')));
         if (/^<text\b/i.test(tag)) {
-            const box = textBox(tag);
-            if (box) {
+            for (const box of svgTextBoxes(tag)) {
                 const transformedBox = transformBox(box, localTransform);
                 textBoxes.push(transformedBox);
                 boxes.push(transformedBox);
