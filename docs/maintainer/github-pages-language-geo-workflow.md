@@ -52,6 +52,8 @@ The GitHub Pages workflow runs this audit before uploading the Pages artifact:
 
 As of 2026-07-05, the workflow is pinned to Node 24 compatible action major versions: `actions/checkout@v7`, `actions/setup-node@v6` with `node-version: 24`, `actions/upload-pages-artifact@v5`, and `actions/deploy-pages@v5`. This keeps the Pages gate away from the older Node 20 deprecation path that previously surfaced during deploy retries.
 
+The deploy job retries the official `actions/deploy-pages@v5` step up to three times with short waits between attempts. This retry only covers GitHub Pages service-side deployment failures such as `Deployment failed, try again later.` It does not mask checkout, install, build, audit, or artifact upload failures, because the deploy job still depends on the completed `build` job and the retry steps run only after the Pages deploy action itself fails.
+
 ## Source Ownership
 
 The published language data lives in:

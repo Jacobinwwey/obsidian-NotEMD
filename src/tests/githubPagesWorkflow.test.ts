@@ -17,4 +17,15 @@ describe('GitHub Pages workflow', () => {
         expect(workflow).not.toContain('actions/upload-pages-artifact@v3');
         expect(workflow).not.toContain('actions/deploy-pages@v4');
     });
+
+    test('retries transient GitHub Pages deploy service failures without masking build failures', () => {
+        expect(workflow).toContain('id: deployment_first');
+        expect(workflow).toContain('id: deployment_second');
+        expect(workflow).toContain('id: deployment');
+        expect(workflow).toContain("if: steps.deployment_first.outcome == 'failure'");
+        expect(workflow).toContain("if: steps.deployment_first.outcome == 'failure' && steps.deployment_second.outcome == 'failure'");
+        expect(workflow).toContain('Wait before Pages deploy retry');
+        expect(workflow).toContain('Final deploy to GitHub Pages');
+        expect(workflow).toContain('needs: build');
+    });
 });

@@ -44,6 +44,8 @@
 | 失败 deploy run | `28738168439` 已完成 website build、通过 `npm run audit:build`、上传 Pages artifact，然后在 `actions/deploy-pages@v4` 内部以 `Deployment failed, try again later.` 失败 | GitHub Pages deploy service / workflow action boundary |
 | 失败重跑 | 对 `28738168439` 重跑 failed jobs 后，artifact 已被接受，但 deploy-only failure 复现 | GitHub Pages deploy service / workflow action boundary |
 | Workflow 加固 | `.github/workflows/deploy-docs.yml` 现在使用 `actions/checkout@v7`、`actions/setup-node@v6` 且 `node-version: 24`、`actions/upload-pages-artifact@v5` 与 `actions/deploy-pages@v5` | Repository workflow |
+| 2026-07-05 重复失败 | `28739659512` 与 `28739750578` 均通过 website build、`audit:build` 和 artifact upload，只在 Pages deploy service 中以 `Deployment failed, try again later.` 失败 | GitHub Pages deploy service / workflow action boundary |
+| Deploy retry 加固 | `.github/workflows/deploy-docs.yml` 现在会对官方 `actions/deploy-pages@v5` 步骤最多重试三次，并在尝试之间等待；这不会掩盖 build 或 audit 失败 | Repository workflow |
 | Contract test | `src/tests/githubPagesWorkflow.test.ts` 锁定 Pages workflow，避免回退到旧的 `checkout@v4`、`setup-node@v4`、`upload-pages-artifact@v3` 与 `deploy-pages@v4` 组合 | Jest |
 | 源码侧解释 | 没发现当前远端 `main` 存在 Docusaurus build 或 `audit:build` 失败；只要改动 `website/**` 或 workflow 文件，Pages 仍由 workflow 门禁 | 本地操作者 |
 | 下一步测量 | 本次收口部署后，在 Search Console 检查 root、zh-CN root、FAQ、provider overview、一个 provider detail 与一个未发布 zh-CN fallback | 外部手工检查 |
