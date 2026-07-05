@@ -4,6 +4,7 @@ import { ApiLivenessEvent, ApiLivenessPhase, NotemdSettings, ProgressReporter } 
 import { NOTEMD_SIDEBAR_ICON, NOTEMD_SIDEBAR_VIEW_TYPE } from '../constants';
 import { findDuplicates } from '../fileUtils';
 import { FFMPEG_INSTALL_HINTS, type EnvironmentReport, type ProbeResult } from '../slideExport/types';
+import type { RenderTarget } from '../diagram/types';
 import { NOTEMD_SLIDEV_FORK_RELEASE_URL, NOTEMD_SLIDEV_INSTALL_COMMAND } from '../slideExport/slidevDistribution';
 import {
     ActionCategory,
@@ -1707,7 +1708,34 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
             const newValue = selector.value === 'auto' ? undefined : selector.value;
             this.plugin.settings.preferredDiagramIntent = newValue;
             await this.plugin.saveSettings();
-            const displayName = intents.find(i => i.value === selector.value)?.label || selector.value;
+        };
+
+        const targetRow = parent.createDiv({ cls: 'notemd-inline-control' });
+        targetRow.createEl('label', {
+            text: i18n.settings.developer.experimentalDiagramPipeline.renderTargetName,
+            cls: 'notemd-inline-label'
+        });
+        const targetSelector = targetRow.createEl('select', { cls: 'notemd-language-select' });
+
+        const renderTargets = [
+            { value: 'auto', label: i18n.settings.developer.experimentalDiagramPipeline.renderTargetAuto },
+            { value: 'mermaid', label: i18n.settings.developer.experimentalDiagramPipeline.renderTargetMermaid },
+            { value: 'json-canvas', label: i18n.settings.developer.experimentalDiagramPipeline.renderTargetJsonCanvas },
+            { value: 'vega-lite', label: i18n.settings.developer.experimentalDiagramPipeline.renderTargetVegaLite },
+            { value: 'html', label: i18n.settings.developer.experimentalDiagramPipeline.renderTargetHtml },
+            { value: 'editable-html-svg', label: i18n.settings.developer.experimentalDiagramPipeline.renderTargetEditableHtmlSvg },
+        ];
+
+        renderTargets.forEach(item => {
+            targetSelector.add(new Option(item.label, item.value));
+        });
+
+        targetSelector.value = this.plugin.settings.preferredDiagramRenderTarget || 'auto';
+        targetSelector.onchange = async () => {
+            this.plugin.settings.preferredDiagramRenderTarget = targetSelector.value === 'auto'
+                ? undefined
+                : targetSelector.value as RenderTarget;
+            await this.plugin.saveSettings();
         };
     }
 

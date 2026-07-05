@@ -69,7 +69,20 @@ Notemd infers the best diagram type from your note's content using keyword scori
 | `canvasMap` | Concept map, knowledge graph, spatial, cluster | 0.72 |
 | `mindmap` | Default fallback | 0.55 |
 
-Override with `preferredDiagramIntent` setting or the explicit command palette option.
+Override with the **Preferred diagram type** setting, the sidebar selector, or an explicit command palette option.
+
+## Render Target Selection
+
+The experimental spec-first pipeline now has two independent controls:
+
+| Control | Setting | Effect |
+|---------|---------|--------|
+| Preferred diagram type | `preferredDiagramIntent` | Guides the semantic shape of the generated `DiagramSpec` |
+| Preferred render target | `preferredDiagramRenderTarget` | Chooses the artifact renderer for **Generate diagram** and **Preview diagram** |
+
+Set **Preferred render target** to **Auto** for the planner default, or choose Mermaid, JSON Canvas, Vega-Lite, HTML, or Editable HTML/SVG explicitly. The override applies only to artifact and preview commands. The standard **Summarise as Mermaid diagram** command remains pinned to Mermaid-compatible output so existing Markdown workflows do not silently switch formats.
+
+This separation matters because a `flowchart` intent can now be rendered as Mermaid for Markdown notes, HTML for robust fallback, or Editable HTML/SVG for downstream editing. Draw.io and Drawnix remain CLI artifact exporters rather than in-plugin render targets.
 
 ## Usage
 

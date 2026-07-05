@@ -9,6 +9,7 @@ import {
     TaskKey
 } from '../types';
 import { DEFAULT_SETTINGS } from '../constants';
+import type { RenderTarget } from '../diagram/types';
 import {
     getLLMProviderDefinition,
     getKnownModelMaxOutputTokens,
@@ -2466,6 +2467,13 @@ export class NotemdSettingTab extends PluginSettingTab {
                 .addDropdown(dropdown => {
                     dropdown.addOption('legacy-mermaid', experimentalDiagramI18n.compatibilityLegacy);
                     dropdown.addOption('best-fit', experimentalDiagramI18n.compatibilityBestFit);
+                    dropdown
+                        .setValue(this.plugin.settings.experimentalDiagramCompatibilityMode)
+                        .onChange(async (value: 'legacy-mermaid' | 'best-fit') => {
+                            this.plugin.settings.experimentalDiagramCompatibilityMode = value;
+                            await this.plugin.saveSettings();
+                        });
+                });
 
             new Setting(containerEl)
                 .setName(experimentalDiagramI18n.intentName)
@@ -2485,10 +2493,23 @@ export class NotemdSettingTab extends PluginSettingTab {
                             await this.plugin.saveSettings();
                         });
                 });
+
+            new Setting(containerEl)
+                .setName(experimentalDiagramI18n.renderTargetName)
+                .setDesc(experimentalDiagramI18n.renderTargetDesc)
+                .addDropdown(dropdown => {
+                    dropdown.addOption('auto', experimentalDiagramI18n.renderTargetAuto);
+                    dropdown.addOption('mermaid', experimentalDiagramI18n.renderTargetMermaid);
+                    dropdown.addOption('json-canvas', experimentalDiagramI18n.renderTargetJsonCanvas);
+                    dropdown.addOption('vega-lite', experimentalDiagramI18n.renderTargetVegaLite);
+                    dropdown.addOption('html', experimentalDiagramI18n.renderTargetHtml);
+                    dropdown.addOption('editable-html-svg', experimentalDiagramI18n.renderTargetEditableHtmlSvg);
                     dropdown
-                        .setValue(this.plugin.settings.experimentalDiagramCompatibilityMode)
-                        .onChange(async (value: 'legacy-mermaid' | 'best-fit') => {
-                            this.plugin.settings.experimentalDiagramCompatibilityMode = value;
+                        .setValue(this.plugin.settings.preferredDiagramRenderTarget || 'auto')
+                        .onChange(async (value: string) => {
+                            this.plugin.settings.preferredDiagramRenderTarget = value === 'auto'
+                                ? undefined
+                                : value as RenderTarget;
                             await this.plugin.saveSettings();
                         });
                 });

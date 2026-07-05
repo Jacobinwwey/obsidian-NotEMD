@@ -1,3 +1,5 @@
+import type { RenderTarget } from './diagram/types';
+
 // Configuration for a single LLM Provider
 export interface LLMProviderConfig {
     name: string;
@@ -211,6 +213,7 @@ export interface NotemdSettings {
     enableExperimentalDiagramPipeline: boolean;
     experimentalDiagramCompatibilityMode: 'legacy-mermaid' | 'best-fit';
     preferredDiagramIntent?: string;
+    preferredDiagramRenderTarget?: RenderTarget;
     globalModelAwareMaxTokensTracking?: GlobalModelAwareMaxTokensTracking;
     discoveredModelMaxOutputTokensTracking?: ProviderDiscoveredModelMaxOutputTokensTracking;
     _firstLaunch?: boolean;

@@ -353,6 +353,8 @@ function auditDiagramDocs() {
   assertContains(englishDiagrams, 'Drawnix', 'English diagrams doc');
   assertContains(englishDiagrams, 'circuitikz', 'English diagrams doc');
   assertContains(englishDiagrams, 'TikZJax', 'English diagrams doc');
+  assertContains(englishDiagrams, 'preferredDiagramRenderTarget', 'English diagrams doc');
+  assertContains(englishDiagrams, 'Render Target Selection', 'English diagrams doc');
   assertContains(englishDiagrams, 'Golden Reference Prompt Shape', 'English diagrams doc');
   assertContains(englishDiagrams, 'scripts/diagram-semantic-verification.js', 'English diagrams doc');
 
@@ -362,6 +364,8 @@ function auditDiagramDocs() {
   assertContains(zhCnDiagrams, 'Drawnix', 'zh-CN diagrams doc');
   assertContains(zhCnDiagrams, 'circuitikz', 'zh-CN diagrams doc');
   assertContains(zhCnDiagrams, 'TikZJax', 'zh-CN diagrams doc');
+  assertContains(zhCnDiagrams, 'preferredDiagramRenderTarget', 'zh-CN diagrams doc');
+  assertContains(zhCnDiagrams, '渲染目标选择', 'zh-CN diagrams doc');
   assertContains(zhCnDiagrams, 'Golden Reference Prompt Shape', 'zh-CN diagrams doc');
   assertContains(zhCnDiagrams, 'SemanticFigureModel', 'zh-CN diagrams doc');
   assertNotContains(zhCnDiagrams, 'content="noindex,follow"', 'zh-CN diagrams doc');
@@ -376,6 +380,8 @@ function auditIntroDocs() {
   assertContains(englishIntro, 'TikZJax', 'English intro doc');
   assertContains(englishIntro, 'Draw.io', 'English intro doc');
   assertContains(englishIntro, 'Drawnix', 'English intro doc');
+  assertContains(englishIntro, 'Advanced', 'English intro sidebar');
+  assertContains(englishIntro, `${basePath}docs/advanced/custom-prompts`, 'English intro sidebar');
 
   assertContains(zhCnIntro, '<html lang="zh-CN"', 'zh-CN intro doc');
   assertContains(zhCnIntro, '图表能力方向', 'zh-CN intro doc');
@@ -383,7 +389,23 @@ function auditIntroDocs() {
   assertContains(zhCnIntro, 'TikZJax', 'zh-CN intro doc');
   assertContains(zhCnIntro, 'Draw.io', 'zh-CN intro doc');
   assertContains(zhCnIntro, 'Drawnix', 'zh-CN intro doc');
+  assertContains(zhCnIntro, '高级', 'zh-CN intro sidebar');
+  assertContains(zhCnIntro, `${zhBasePath}docs/advanced/custom-prompts`, 'zh-CN intro sidebar');
   assertNotContains(zhCnIntro, 'content="noindex,follow"', 'zh-CN intro doc');
+}
+
+function auditAdvancedDocs() {
+  for (const [relativePath, requiredText] of [
+    [path.join('zh-CN', 'docs', 'advanced', 'custom-prompts', 'index.html'), '自定义 Prompts'],
+    [path.join('zh-CN', 'docs', 'advanced', 'batch-processing', 'index.html'), '批处理'],
+    [path.join('zh-CN', 'docs', 'advanced', 'troubleshooting', 'index.html'), '故障排查'],
+  ]) {
+    const html = readBuildFile(relativePath);
+    assertContains(html, '<html lang="zh-CN"', `zh-CN advanced doc ${relativePath}`);
+    assertContains(html, requiredText, `zh-CN advanced doc ${relativePath}`);
+    assertContains(html, '高级', `zh-CN advanced doc ${relativePath}`);
+    assertNotContains(html, 'content="noindex,follow"', `zh-CN advanced doc ${relativePath}`);
+  }
 }
 
 function auditMeasurementEvidence() {
@@ -449,6 +471,7 @@ async function main() {
   auditProviderDocs();
   auditIntroDocs();
   auditDiagramDocs();
+  auditAdvancedDocs();
   auditMeasurementEvidence();
 
   console.log('website build audit passed');

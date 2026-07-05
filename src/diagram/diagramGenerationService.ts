@@ -10,13 +10,15 @@ import { NotemdSettings } from '../types';
 import { buildDiagramPlan } from './planner';
 import { buildDiagramSpecPrompt } from './prompts/diagramSpecPrompt';
 import { assertValidDiagramSpec } from './spec';
-import { DiagramIntent, DiagramPlan, DiagramSpec } from './types';
+import { isSupportedRenderTarget } from './types';
+import type { DiagramIntent, DiagramPlan, DiagramSpec, RenderTarget } from './types';
 import { parseDiagramSpecResponse } from './diagramSpecResponseParser';
 
 export interface DiagramGenerationOptions {
     compatibilityMode: 'best-fit' | 'legacy-mermaid';
     targetLanguage?: string;
     requestedIntent?: DiagramIntent;
+    requestedRenderTarget?: RenderTarget;
     llmInvoker: (systemPrompt: string, sourceMarkdown: string) => Promise<string>;
     rendererService?: RendererService;
 }
@@ -29,6 +31,7 @@ export interface DiagramOperationInput {
     sourceMarkdown: string;
     localKnowledgeContext?: string;
     requestedIntent?: DiagramIntent;
+    requestedRenderTarget?: RenderTarget;
     compatibilityMode: 'best-fit' | 'legacy-mermaid';
     outputMode: DiagramOperationOutputMode;
     targetLanguage?: string;
@@ -38,9 +41,10 @@ export interface BuildDiagramOperationInputParams {
     sourcePath?: string;
     sourceMarkdown: string;
     executionMode: DiagramOperationExecutionMode;
-    settings: Pick<NotemdSettings, 'preferredDiagramIntent' | 'experimentalDiagramCompatibilityMode' | 'summarizeToMermaidLanguage'>;
+    settings: Pick<NotemdSettings, 'preferredDiagramIntent' | 'preferredDiagramRenderTarget' | 'experimentalDiagramCompatibilityMode' | 'summarizeToMermaidLanguage'>;
     targetLanguage?: string;
     requestedIntentOverride?: DiagramIntent;
+    requestedRenderTargetOverride?: RenderTarget;
     compatibilityModeOverride?: 'best-fit' | 'legacy-mermaid';
     targetLanguageOverride?: string;
 }
@@ -57,11 +61,17 @@ export function resolveDiagramOperationCompatibilityMode(
 }
 
 export function buildDiagramOperationInput(params: BuildDiagramOperationInputParams): DiagramOperationInput {
+    const requestedRenderTarget = params.requestedRenderTargetOverride
+        ?? params.settings.preferredDiagramRenderTarget;
+
     return {
         sourcePath: params.sourcePath,
         sourceMarkdown: params.sourceMarkdown,
         requestedIntent: params.requestedIntentOverride
             ?? params.settings.preferredDiagramIntent as DiagramIntent | undefined,
+        requestedRenderTarget: params.executionMode === 'save-mermaid' || !isSupportedRenderTarget(requestedRenderTarget)
+            ? undefined
+            : requestedRenderTarget,
         compatibilityMode: resolveDiagramOperationCompatibilityMode(
             params.executionMode,
             params.compatibilityModeOverride ?? params.settings.experimentalDiagramCompatibilityMode
@@ -179,7 +189,7 @@ function mergeSpecDefaults(spec: DiagramSpec, plan: DiagramPlan): DiagramSpec {
 function assertPlanCompatibility(
     spec: DiagramSpec,
     plan: DiagramPlan,
-    options: Pick<DiagramGenerationOptions, 'compatibilityMode' | 'requestedIntent'>
+    options: Pick<DiagramGenerationOptions, 'compatibilityMode' | 'requestedIntent' | 'requestedRenderTarget'>
 ): void {
     if (options.requestedIntent && spec.intent !== options.requestedIntent) {
         throw new Error(
@@ -187,8 +197,9 @@ function assertPlanCompatibility(
         );
     }
 
+    const explicitRenderTarget = Boolean(options.requestedRenderTarget && options.compatibilityMode !== 'legacy-mermaid');
     const specTarget = resolveRenderTargetForIntent(spec.intent);
-    if (specTarget !== plan.renderTarget) {
+    if (!explicitRenderTarget && specTarget !== plan.renderTarget) {
         throw new Error(
             `Diagram spec intent "${spec.intent}" does not match planner route `
             + `"${plan.intent}" targeting "${plan.renderTarget}".`
@@ -202,7 +213,8 @@ export async function generateDiagramArtifact(
 ): Promise<DiagramGenerationResult> {
     const plan = buildDiagramPlan(markdown, {
         compatibilityMode: options.compatibilityMode,
-        requestedIntent: options.requestedIntent
+        requestedIntent: options.requestedIntent,
+        requestedRenderTarget: options.requestedRenderTarget
     });
 
     const prompt = buildDiagramSpecPrompt({

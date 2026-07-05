@@ -197,6 +197,7 @@ export const DEFAULT_SETTINGS: NotemdSettings = {
     mermaidErrorFolderPath: 'MermaidErrors',
     enableExperimentalDiagramPipeline: false,
     experimentalDiagramCompatibilityMode: 'legacy-mermaid',
+    preferredDiagramRenderTarget: undefined,
     discoveredModelMaxOutputTokensTracking: undefined,
 
     // Slide Export Defaults

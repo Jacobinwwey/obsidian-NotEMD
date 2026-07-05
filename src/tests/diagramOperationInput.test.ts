@@ -13,6 +13,7 @@ describe('diagram operation input helpers', () => {
             settings: {
                 ...mockSettings,
                 preferredDiagramIntent: 'flowchart',
+                preferredDiagramRenderTarget: 'editable-html-svg',
                 experimentalDiagramCompatibilityMode: 'best-fit'
             }
         });
@@ -20,6 +21,7 @@ describe('diagram operation input helpers', () => {
         expect(input.sourcePath).toBe('Notes/Topic.md');
         expect(input.sourceMarkdown).toBe('# Topic');
         expect(input.requestedIntent).toBe('flowchart');
+        expect(input.requestedRenderTarget).toBe('editable-html-svg');
         expect(input.compatibilityMode).toBe('best-fit');
         expect(input.outputMode).toBe('artifact');
     });
@@ -48,5 +50,23 @@ describe('diagram operation input helpers', () => {
         expect(input.requestedIntent).toBe('erDiagram');
         expect(input.compatibilityMode).toBe('best-fit');
         expect(input.targetLanguage).toBe('zh-CN');
+    });
+
+    test('ignores render target preferences for mermaid output mode', () => {
+        const input = buildDiagramOperationInput({
+            sourcePath: 'Notes/Topic.md',
+            sourceMarkdown: '# Topic',
+            executionMode: 'save-mermaid',
+            settings: {
+                ...mockSettings,
+                preferredDiagramIntent: 'flowchart',
+                preferredDiagramRenderTarget: 'editable-html-svg',
+                experimentalDiagramCompatibilityMode: 'best-fit'
+            }
+        });
+
+        expect(input.outputMode).toBe('mermaid');
+        expect(input.compatibilityMode).toBe('legacy-mermaid');
+        expect(input.requestedRenderTarget).toBeUndefined();
     });
 });

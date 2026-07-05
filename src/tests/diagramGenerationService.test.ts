@@ -152,6 +152,61 @@ describe('diagram generation service', () => {
         expect(result.artifact.content).toContain('Release Flow');
     });
 
+    test('honors an editable HTML/SVG render target override in best-fit artifact mode', async () => {
+        const result = await generateDiagramArtifact(`# Release Checklist
+
+1. Validate version
+2. If checks pass, publish release
+`, {
+            compatibilityMode: 'best-fit',
+            requestedRenderTarget: 'editable-html-svg',
+            targetLanguage: 'en',
+            llmInvoker: async () => JSON.stringify({
+                intent: 'flowchart',
+                title: 'Release Flow',
+                nodes: [
+                    { id: 'validate', label: 'Validate version' },
+                    { id: 'publish', label: 'Publish release' }
+                ],
+                edges: [
+                    { from: 'validate', to: 'publish', label: 'pass' }
+                ]
+            })
+        });
+
+        expect(result.plan.renderTarget).toBe('editable-html-svg');
+        expect(result.plan.fallbackTargets).toContain('mermaid');
+        expect(result.artifact.target).toBe('editable-html-svg');
+        expect(result.artifact.content).toContain('data-notemd-renderer="notemd-editable-html-svg@0.1.0"');
+    });
+
+    test('keeps legacy-mermaid output pinned even when a render target override is provided', async () => {
+        const result = await generateDiagramArtifact(`# Release Checklist
+
+1. Validate version
+2. If checks pass, publish release
+`, {
+            compatibilityMode: 'legacy-mermaid',
+            requestedRenderTarget: 'editable-html-svg',
+            targetLanguage: 'en',
+            llmInvoker: async () => JSON.stringify({
+                intent: 'flowchart',
+                title: 'Release Flow',
+                nodes: [
+                    { id: 'validate', label: 'Validate version' },
+                    { id: 'publish', label: 'Publish release' }
+                ],
+                edges: [
+                    { from: 'validate', to: 'publish', label: 'pass' }
+                ]
+            })
+        });
+
+        expect(result.plan.legacyCompatibilityMode).toBe(true);
+        expect(result.plan.renderTarget).toBe('mermaid');
+        expect(result.artifact.target).toBe('mermaid');
+    });
+
     test('rejects unsupported data chart layout hints before renderer fallback', async () => {
         await expect(generateDiagramArtifact(`# Weekly Signups
 

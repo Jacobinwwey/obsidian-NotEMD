@@ -96,6 +96,7 @@ export async function runDiagramGenerateOperation(
 
         return await runStructuredGeneration(sourceMarkdownForGeneration, {
             requestedIntent: input.requestedIntent,
+            requestedRenderTarget: input.requestedRenderTarget,
             compatibilityMode: input.compatibilityMode,
             targetLanguage: input.targetLanguage,
             llmInvoker: (systemPrompt, sourceMarkdown) =>

@@ -21,6 +21,10 @@ describe('website documentation contract', () => {
         path.join(websiteRoot, 'i18n', 'zh-CN', 'docusaurus-plugin-content-docs', 'current', 'features', 'diagrams.mdx'),
         'utf8'
     );
+    const publishedLanguageScope = fs.readFileSync(
+        path.join(websiteRoot, 'src', 'lib', 'publishedLanguageScopeData.mjs'),
+        'utf8'
+    );
 
     test('intro pages keep English and zh-CN content surfaces one-to-one', () => {
         expect(markdownHeadings(chineseIntro)).toHaveLength(markdownHeadings(englishIntro).length);
@@ -52,6 +56,20 @@ describe('website documentation contract', () => {
             expect(content).toContain('pmos');
             expect(content).toContain('nmos');
             expect(content).toContain('npm run diagram:export-artifact');
+        }
+    });
+
+    test('zh-CN scope publishes the Advanced sidebar pages used by intro', () => {
+        for (const [sourcePath, routePath] of [
+            ['advanced/custom-prompts.mdx', '/docs/advanced/custom-prompts'],
+            ['advanced/batch-processing.mdx', '/docs/advanced/batch-processing'],
+            ['advanced/troubleshooting.mdx', '/docs/advanced/troubleshooting']
+        ]) {
+            expect(fs.existsSync(
+                path.join(websiteRoot, 'i18n', 'zh-CN', 'docusaurus-plugin-content-docs', 'current', sourcePath)
+            )).toBe(true);
+            expect(publishedLanguageScope).toContain(`path: '${routePath}'`);
+            expect(publishedLanguageScope).toContain(`sourcePath: '${sourcePath}'`);
         }
     });
 });

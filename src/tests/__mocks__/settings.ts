@@ -139,6 +139,7 @@ export const mockSettings: NotemdSettings = {
     mermaidErrorFolderPath: '',
     enableExperimentalDiagramPipeline: false,
     experimentalDiagramCompatibilityMode: 'legacy-mermaid',
+    preferredDiagramRenderTarget: undefined,
     enableSlideExport: false,
     slideExportDefaultFormat: 'html',
     slideExportOutputSubfolder: 'slidev-export',

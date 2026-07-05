@@ -19,10 +19,13 @@ topic: circuitikz-figure-generation-roadmap
 |---|---|
 | Semantic input | 通用图表仍以 `DiagramSpec` 作为 model-facing boundary。 |
 | Internal figure model | `SemanticFigureModel` 支撑 editable HTML/SVG、Draw.io XML 和 Drawnix JSON artifact export。 |
+| Obsidian UI control | Developer settings 与侧边栏暴露 `preferredDiagramIntent` 和 `preferredDiagramRenderTarget`；artifact/preview 命令可以显式选择 Mermaid、JSON Canvas、Vega-Lite、HTML 或 editable HTML/SVG。 |
 | CLI artifact export | `npm run diagram:export-artifact` 可在无 Obsidian runtime 的情况下导出 `editable-html-svg`、`drawio` 和 `drawnix`。 |
 | Verification | 测试覆盖 semantic annotations、visible-label parity、stable IDs、Drawnix subset validity 和 CLI file output。 |
 
-这套架构是电路图的正确先例：模型应该生成结构化意图，而不是直接生成最终语法。
+render-target override 有意只作用于 artifact 与 preview 命令。legacy Mermaid 命令继续固定为 Mermaid-compatible 输出；Draw.io 与 Drawnix 在插件 runtime 渲染和编辑契约被证明之前，仍保持为 CLI/export-boundary targets。
+
+这套架构是电路图的正确先例：模型应该生成结构化意图，而不是直接生成最终语法；UI 应该在语义 spec 稳定之后再选择 renderer。
 
 ## circuitikz 为什么不同
 

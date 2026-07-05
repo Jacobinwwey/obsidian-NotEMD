@@ -1,4 +1,4 @@
-import {
+import type {
     DiagramIntent,
     DiagramIntentResult,
     DiagramPlan,
@@ -6,7 +6,7 @@ import {
     MermaidDiagramType,
     RenderTarget
 } from './types';
-import { SupportedVegaLiteChartType } from './adapters/vega/schema';
+import type { SupportedVegaLiteChartType } from './adapters/vega/schema';
 import { inferDiagramIntent } from './intent';
 
 function resolvePreferredRenderTarget(intent: DiagramIntent): RenderTarget {
@@ -41,7 +41,8 @@ function resolveMermaidDiagramType(intent: DiagramIntent): MermaidDiagramType | 
 
 function resolveFallbackTargets(
     compatibilityMode: 'best-fit' | 'legacy-mermaid',
-    preferredTarget: RenderTarget,
+    primaryTarget: RenderTarget,
+    defaultTarget: RenderTarget,
     preferredMermaidType: MermaidDiagramType | null
 ): RenderTarget[] {
     if (compatibilityMode === 'legacy-mermaid') {
@@ -50,15 +51,21 @@ function resolveFallbackTargets(
 
     const fallbackTargets: RenderTarget[] = [];
 
-    if (preferredTarget !== 'mermaid' && preferredMermaidType) {
+    if (primaryTarget !== defaultTarget) {
+        fallbackTargets.push(defaultTarget);
+    }
+
+    if (primaryTarget !== 'mermaid' && defaultTarget !== 'mermaid' && preferredMermaidType) {
         fallbackTargets.push('mermaid');
     }
 
-    if (preferredTarget !== 'html') {
+    if (primaryTarget !== 'html') {
         fallbackTargets.push('html');
     }
 
-    return fallbackTargets;
+    return fallbackTargets.filter((target, index, allTargets) =>
+        target !== primaryTarget && allTargets.indexOf(target) === index
+    );
 }
 
 function inferPreferredChartType(markdown: string, intent: DiagramIntent): SupportedVegaLiteChartType | undefined {
@@ -102,10 +109,18 @@ function buildIntentResult(markdown: string, requestedIntent?: DiagramIntent): D
 export function buildDiagramPlan(markdown: string, options: DiagramPlanOptions = {}): DiagramPlan {
     const compatibilityMode = options.compatibilityMode ?? 'best-fit';
     const inferred = buildIntentResult(markdown, options.requestedIntent);
-    const preferredTarget = resolvePreferredRenderTarget(inferred.intent);
+    const defaultTarget = resolvePreferredRenderTarget(inferred.intent);
     const preferredMermaidType = resolveMermaidDiagramType(inferred.intent);
     const preferredChartType = inferPreferredChartType(markdown, inferred.intent);
-    const fallbackTargets = resolveFallbackTargets(compatibilityMode, preferredTarget, preferredMermaidType);
+    const preferredTarget = compatibilityMode === 'legacy-mermaid'
+        ? 'mermaid'
+        : options.requestedRenderTarget ?? defaultTarget;
+    const fallbackTargets = resolveFallbackTargets(
+        compatibilityMode,
+        preferredTarget,
+        defaultTarget,
+        preferredMermaidType
+    );
 
     if (compatibilityMode === 'legacy-mermaid') {
         return {

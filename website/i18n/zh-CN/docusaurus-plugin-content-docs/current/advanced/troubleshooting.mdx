@@ -1,0 +1,161 @@
+---
+id: troubleshooting
+title: 故障排查
+description: 常见问题与解决方案
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [troubleshooting, errors, diagnostics, connection test]
+concepts: [Troubleshooting, Error Handling, Diagnostics]
+citations:
+  - title: Obsidian
+    url: https://obsidian.md
+  - title: Obsidian API
+    url: https://docs.obsidian.md
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# 故障排查
+
+<TLDR>
+**大多数 Notemd 问题可以归为四类：API key 问题、网络连通性、认证错误（401/403）和 rate limit（429）。** 内置 connection test 和 diagnostics panel 能快速定位根因。本页覆盖常见错误信息、原因和修复方式。未列出的问题，请带上 diagnostics output 到 GitHub Issues 反馈。
+
+这是 [Obsidian AI Knowledge Management Guide](/docs/pillar-ai-knowledge) 的一部分。
+</TLDR>
+
+## Overview
+
+Notemd 依赖外部服务，包括 LLM providers 和 search APIs，所以很多问题来源于插件之外。settings 中的 diagnostics panel 会结构化显示最近一次 API 调用，包括 request URL、response status 和 error body。排查前应先查看这里。
+
+## How It Works: Diagnostics
+
+### Connection Test
+
+每个 provider 配置区域都有 **"Test Connection"** 按钮。点击后会发送最小 API 请求，通常是 model list 或短 completion，并报告成功或具体 HTTP 错误。这是验证 API key 与 base URL 是否正确的最快方式。
+
+### Diagnostics Panel
+
+**Settings -> Notemd -> Diagnostics** 显示：
+
+| Field | Content |
+|-------|---------|
+| Last provider | 最近调用的 provider |
+| Last model | 最近调用的 model |
+| Last status | HTTP status code 或 transport error |
+| Last error | API 返回的原始错误信息 |
+| Last request URL | 最近请求 URL（API key 已脱敏） |
+| Last response body | 截断后的响应 body（前 500 字符） |
+
+在 GitHub 报告问题时，请复制完整 diagnostics output。
+
+## Common Errors
+
+### API Key Invalid or Missing
+
+**Symptom:** HTTP 401 或 "Incorrect API key provided"
+
+**Cause:** API key 缺失、包含空白，或属于另一个 provider。
+
+**Fix:**
+1. 确认 key 没有前后空格
+2. 确认 key 与所选 provider 匹配，OpenAI key 不能用于 Anthropic
+3. 检查账号是否有余额或有效订阅
+4. 点击 **"Test Connection"** 验证
+
+### Network / Connection Errors
+
+**Symptom:** `ERR_CONNECTION_REFUSED`、`ERR_TIMED_OUT`、`Socket hang up`、`Network request failed`
+
+**Cause:** 当前机器无法访问 API endpoint。
+
+**Fix:**
+1. 检查网络连接
+2. 如果在代理或防火墙后，确认 API domain 没有被阻断
+3. Ollama：确认 `ollama serve` 正在运行，`ollama list` 能返回 models
+4. LMStudio：确认 server 在 `localhost:1234` 运行
+5. 尝试不同 transport；移动端用户应确认 `requestUrl` transport 可用
+6. 启用 `enableStableApiCall`，对临时错误自动 retry
+
+### 403 Forbidden
+
+**Symptom:** HTTP 403
+
+**Cause:** API key 有效，但没有访问目标资源的权限。
+
+**Fix:**
+1. 部分模型需要特殊权限，例如 Azure GPT-4 需要 deployment name
+2. 某些 provider 按套餐限制模型，检查账号权限
+3. 可能存在地区限制
+4. 确认 model name 拼写正确，例如你的套餐可能只允许 `gpt-4o-mini`
+
+### Rate Limit (429)
+
+**Symptom:** HTTP 429 或 "Rate limit exceeded"
+
+**Cause:** 短时间内请求过多。
+
+**Fix:**
+1. 将 `batchConcurrency` 降到 `1` 或 `2`
+2. 等几分钟再重试
+3. 查看 provider 当前套餐的 rate limit 文档
+4. 启用 `enableStableApiCall`，使用 backoff retry
+5. 考虑切换到限制更宽的 provider，例如 DeepSeek 或 Ollama
+
+### Model Not Found
+
+**Symptom:** "Model not found" 或 HTTP 404
+
+**Cause:** 当前 provider 上不存在该 model name。
+
+**Fix:**
+1. 点击 **"Get Model List"** 查看 provider 可访问模型
+2. 模型名可能随时间变化，检查 provider 官方文档
+3. Ollama：运行 `ollama list` 查看已拉取模型；只有本地已下载模型可用
+
+### No Links / No Concepts Generated
+
+**Symptom:** 命令运行完成但没有输出
+
+**Cause:** LLM 返回空内容或无法解析的响应。
+
+**Fix:**
+1. 查看 diagnostics panel 中真实 LLM 响应
+2. 换用更强模型，小模型可能不擅长结构化输出
+3. 确认笔记内容足够长（>50 words）
+4. 检查自定义 prompt 是否有冲突指令
+5. 临时关闭 synonym suppression，确认是否过滤过度
+
+### Doubao Endpoint ID Missing
+
+**Symptom:** 使用 ByteDance Doubao provider 时报错
+
+**Cause:** Doubao 需要 Ark endpoint ID，格式通常为 `ep-xxxxxxxx-xxxx-xxxx`，而不是普通 model name。
+
+**Fix:** 将默认 placeholder model 替换为 Volcengine console 中真实 endpoint ID。
+
+## Configuration
+
+| Diagnostic Setting | Location | Purpose |
+|--------------------|----------|---------|
+| **Test Connection** | Settings -> Provider section | 验证 API key 和连通性 |
+| **Get Model List** | Settings -> Provider section | 确认哪些模型可访问 |
+| `enableStableApiCall` | Settings -> Advanced | 启用 backoff retry |
+| `batchConcurrency` | Settings -> Batch | 控制并行度以避免 rate limit |
+
+## How to Report Issues
+
+如果你的问题没有被覆盖：
+
+1. 打开 **Settings -> Notemd -> Diagnostics**
+2. 复制完整 diagnostics output
+3. 到 [github.com/Jacobinwwey/obsidian-NotEMD/issues](https://github.com/Jacobinwwey/obsidian-NotEMD/issues) 创建 GitHub Issue
+4. 附上 Obsidian version、Notemd version、provider、model、diagnostics output 和复现步骤
+5. 分享日志前删除 API key
+
+---
+
+## Next Steps
+
+- [LLM Providers](/docs/providers/overview) -- 完整 provider 配置参考
+- [Batch Processing](/docs/advanced/batch-processing) -- 大批量操作的 concurrency 与 retry 设置
+- [Custom Prompts](/docs/advanced/custom-prompts) -- 通过调整 prompt 修复意外 LLM 行为

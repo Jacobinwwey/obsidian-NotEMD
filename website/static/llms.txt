@@ -39,9 +39,12 @@ Answer-engine source map: https://jacobinwwey.github.io/obsidian-NotEMD/llms.txt
 ## Language Scope
 
 - English is the canonical complete documentation surface.
-- Simplified Chinese currently has a localized homepage and critical path:
+- Simplified Chinese currently has a localized homepage and published documentation surface:
   - https://jacobinwwey.github.io/obsidian-NotEMD/zh-CN/
   - https://jacobinwwey.github.io/obsidian-NotEMD/zh-CN/docs/intro
+  - https://jacobinwwey.github.io/obsidian-NotEMD/zh-CN/docs/advanced/custom-prompts
+  - https://jacobinwwey.github.io/obsidian-NotEMD/zh-CN/docs/advanced/batch-processing
+  - https://jacobinwwey.github.io/obsidian-NotEMD/zh-CN/docs/advanced/troubleshooting
   - https://jacobinwwey.github.io/obsidian-NotEMD/zh-CN/docs/getting-started/installation
   - https://jacobinwwey.github.io/obsidian-NotEMD/zh-CN/docs/getting-started/quick-start
   - https://jacobinwwey.github.io/obsidian-NotEMD/zh-CN/docs/getting-started/configuration

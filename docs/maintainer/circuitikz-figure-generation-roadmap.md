@@ -19,10 +19,13 @@ The current diagram work has already moved Notemd away from renderer-specific pr
 |---|---|
 | Semantic input | `DiagramSpec` remains the model-facing boundary for general diagrams. |
 | Internal figure model | `SemanticFigureModel` powers editable HTML/SVG, Draw.io XML, and Drawnix JSON artifact export. |
+| Obsidian UI control | Developer settings and the sidebar expose `preferredDiagramIntent` and `preferredDiagramRenderTarget`; artifact/preview commands can explicitly select Mermaid, JSON Canvas, Vega-Lite, HTML, or editable HTML/SVG. |
 | CLI artifact export | `npm run diagram:export-artifact` exports `editable-html-svg`, `drawio`, and `drawnix` without Obsidian runtime. |
 | Verification | Tests check semantic annotations, visible-label parity, stable IDs, Drawnix subset validity, and CLI file output. |
 
-This architecture is the right precedent for circuit diagrams: the model should produce structured intent, not raw final syntax.
+The render-target override is intentionally scoped to artifact and preview commands. The legacy Mermaid command stays pinned to Mermaid-compatible output, while Draw.io and Drawnix stay CLI/export-boundary targets until plugin-runtime rendering and editing contracts are proven.
+
+This architecture is the right precedent for circuit diagrams: the model should produce structured intent, not raw final syntax, and the UI should select a renderer only after the semantic spec is stable.
 
 ## Why circuitikz Is Different
 

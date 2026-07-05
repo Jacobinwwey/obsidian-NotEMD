@@ -1,4 +1,4 @@
-import { SupportedVegaLiteChartType } from './adapters/vega/schema';
+import type { SupportedVegaLiteChartType } from './adapters/vega/schema';
 
 export const SUPPORTED_DIAGRAM_INTENTS = [
     'mindmap',
@@ -18,7 +18,20 @@ export function isSupportedDiagramIntent(value: unknown): value is DiagramIntent
         && (SUPPORTED_DIAGRAM_INTENTS as readonly string[]).includes(value);
 }
 
-export type RenderTarget = 'mermaid' | 'json-canvas' | 'vega-lite' | 'html' | 'editable-html-svg';
+export const SUPPORTED_RENDER_TARGETS = [
+    'mermaid',
+    'json-canvas',
+    'vega-lite',
+    'html',
+    'editable-html-svg'
+] as const;
+
+export type RenderTarget = typeof SUPPORTED_RENDER_TARGETS[number];
+
+export function isSupportedRenderTarget(value: unknown): value is RenderTarget {
+    return typeof value === 'string'
+        && (SUPPORTED_RENDER_TARGETS as readonly string[]).includes(value);
+}
 
 export type MermaidDiagramType =
     | 'mindmap'
@@ -89,6 +102,7 @@ export interface DiagramIntentResult {
 export interface DiagramPlanOptions {
     compatibilityMode?: 'best-fit' | 'legacy-mermaid';
     requestedIntent?: DiagramIntent;
+    requestedRenderTarget?: RenderTarget;
 }
 
 export interface DiagramPlan {

@@ -5,6 +5,9 @@ export const publishedZhCnDocs = [
   {id: 'getting-started/configuration', path: '/docs/getting-started/configuration', sourcePath: 'getting-started/configuration.mdx'},
   {id: 'features/diagrams', path: '/docs/features/diagrams', sourcePath: 'features/diagrams.mdx'},
   {id: 'providers/overview', path: '/docs/providers/overview', sourcePath: 'providers/overview.mdx'},
+  {id: 'advanced/custom-prompts', path: '/docs/advanced/custom-prompts', sourcePath: 'advanced/custom-prompts.mdx'},
+  {id: 'advanced/batch-processing', path: '/docs/advanced/batch-processing', sourcePath: 'advanced/batch-processing.mdx'},
+  {id: 'advanced/troubleshooting', path: '/docs/advanced/troubleshooting', sourcePath: 'advanced/troubleshooting.mdx'},
   {id: 'pillar-ai-knowledge', path: '/docs/pillar-ai-knowledge', sourcePath: 'pillar-ai-knowledge.mdx'},
   {id: 'faq', path: '/docs/faq', sourcePath: 'faq.mdx'},
 ];
@@ -16,6 +19,9 @@ export const zhCnCriticalDocPaths = [
   '/docs/getting-started/configuration',
   '/docs/features/diagrams',
   '/docs/providers/overview',
+  '/docs/advanced/custom-prompts',
+  '/docs/advanced/batch-processing',
+  '/docs/advanced/troubleshooting',
   '/docs/pillar-ai-knowledge',
   '/docs/faq',
 ];

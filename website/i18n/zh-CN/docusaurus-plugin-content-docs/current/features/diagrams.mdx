@@ -69,7 +69,20 @@ Notemd 会根据笔记内容用关键词评分推断最合适的图表类型：
 | `canvasMap` | concept map、knowledge graph、spatial、cluster | 0.72 |
 | `mindmap` | 默认 fallback | 0.55 |
 
-可以通过 `preferredDiagramIntent` 设置或 command palette 的显式选项覆盖自动检测。
+可以通过 **首选图表类型** 设置、侧边栏选择器或 command palette 的显式选项覆盖自动检测。
+
+## 渲染目标选择
+
+实验性 spec-first 管线现在有两个彼此独立的控制项：
+
+| Control | Setting | Effect |
+|---------|---------|--------|
+| 首选图表类型 | `preferredDiagramIntent` | 指导生成出来的 `DiagramSpec` 采用哪种语义形状 |
+| 首选渲染目标 | `preferredDiagramRenderTarget` | 为 **Generate diagram** 和 **Preview diagram** 选择 artifact renderer |
+
+将 **首选渲染目标** 设为 **自动** 时使用 planner 默认值；也可以显式选择 Mermaid、JSON Canvas、Vega-Lite、HTML 或可编辑 HTML/SVG。这个 override 只作用于 artifact 与 preview 命令。标准 **Summarise as Mermaid diagram** 命令仍固定为 Mermaid-compatible 输出，避免既有 Markdown 工作流静默切换格式。
+
+这种分离很关键：同一个 `flowchart` intent 现在可以渲染为适合 Markdown 笔记的 Mermaid、用于鲁棒 fallback 的 HTML，或用于后续编辑的可编辑 HTML/SVG。Draw.io 和 Drawnix 仍然是 CLI artifact exporter，而不是插件内 render target。
 
 ## Usage
 
