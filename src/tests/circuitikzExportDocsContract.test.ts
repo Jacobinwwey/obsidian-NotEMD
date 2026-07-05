@@ -31,7 +31,11 @@ describe('circuitikz export docs contract', () => {
             expect(doc).toContain('cmos-inverter-v1');
             expect(doc).toContain('UTF-8');
             expect(doc).toContain('BOM');
+            expect(doc).toContain('--compile-log');
+            expect(doc).toContain('--diagnostics-output');
+            expect(doc).toContain('circuitikzDiagnostics.ts');
             expect(doc).toContain('src/tests/circuitikzExporter.test.ts');
+            expect(doc).toContain('src/tests/circuitikzCompileDiagnostics.test.ts');
             expect(doc).toContain('src/tests/circuitikzExportCli.test.ts');
         }
 
@@ -46,7 +50,9 @@ describe('circuitikz export docs contract', () => {
             expect(doc).toContain('scripts/export-circuitikz.js');
             expect(doc).toContain('npm run diagram:export-circuitikz');
             expect(doc).toContain('src/tests/circuitikzExporter.test.ts');
+            expect(doc).toContain('src/tests/circuitikzCompileDiagnostics.test.ts');
             expect(doc).toContain('src/tests/circuitikzExportCli.test.ts');
+            expect(doc).toContain('compile-log diagnostics');
             expect(doc).toContain('TikZJax/LaTeX');
             expect(doc).toContain('screenshot');
         }

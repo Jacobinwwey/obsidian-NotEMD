@@ -220,6 +220,14 @@ The prototype adds a separate `CircuitSpec` boundary and deterministic exporter 
 
 This is not a general TikZ generator yet. It does not compile LaTeX, call TikZJax, inspect screenshots, or run image-feedback repair. Those remain later gates.
 
+The CLI can now parse an existing LaTeX/TikZJax compile log without executing a compiler:
+
+```bash
+npm run diagram:export-circuitikz -- --input cmos-inverter.json --output cmos-inverter.tex --compile-log cmos-inverter.log --diagnostics-output cmos-inverter.diagnostics.json
+```
+
+This diagnostic path reports missing packages such as `circuitikz.sty`, unknown TikZ/circuitikz keys, undefined control sequences, generic LaTeX errors, emergency stops, and advisory overfull `\hbox` warnings. It remains log-driven: local LaTeX/TikZJax execution and screenshot-quality gates are still separate future work.
+
 ### Golden Reference Prompt Shape
 
 For near-term usage, provide a renderable golden reference before asking for a circuit variant. A constrained prompt should preserve the preamble, coordinate scale, anchor style, and routing conventions:
@@ -259,7 +267,7 @@ For a CMOS inverter, the prompt should request an explicit topology plus layout 
 | General diagrams | Spec-first pipeline implemented for Mermaid, JSON Canvas, Vega-Lite, HTML | Keep expanding semantic verification coverage |
 | Editable figures | `editable-html-svg`, Draw.io XML, and Drawnix JSON artifact boundaries implemented | Add richer primitives only after tests prove editability |
 | CLI support | `npm run diagram:export-artifact` exports editable HTML/SVG, Draw.io, and Drawnix from one `DiagramSpec` | Add target-specific smoke fixtures when new targets ship |
-| circuitikz | `CircuitSpec -> circuitikz` prototype exports common-source and CMOS inverter golden templates through `npm run diagram:export-circuitikz` | Add compile/screenshot feedback and topology-preserving repair |
+| circuitikz | `CircuitSpec -> circuitikz` prototype exports common-source and CMOS inverter golden templates, and parses existing compile logs into diagnostics through `npm run diagram:export-circuitikz` | Add optional renderer execution, screenshot feedback, and topology-preserving repair |
 | TikZJax integration | Candidate render host for Obsidian-side display | Keep it optional; do not make TikZJax a hard plugin runtime dependency |
 
 ## Configuration

@@ -142,9 +142,10 @@ Phase A 已经文档化。Phase B/C 现在有了受约束的仓库内原型：
 - `src/diagram/adapters/circuitikz/circuitSpec.ts` 定义独立的 circuit-only spec 边界。
 - `src/diagram/adapters/circuitikz/circuitikzExporter.ts` 会验证拓扑，并为 `common-source-amplifier` 与 `cmos-inverter` 输出确定性的 `circuitikz` LaTeX。
 - `scripts/export-circuitikz.js` 与 `npm run diagram:export-circuitikz` 提供离线导出命令。
-- `src/tests/circuitikzExporter.test.ts` 与 `src/tests/circuitikzExportCli.test.ts` 验证确定性输出、拓扑拒绝、package-script 暴露和 UTF-8 BOM 处理。
+- `src/diagram/adapters/circuitikz/circuitikzDiagnostics.ts` 会把已有 LaTeX/TikZJax compile logs 解析为 actionable diagnostics，不 spawn 编译器，也不依赖 shell command resolution。
+- `src/tests/circuitikzExporter.test.ts`、`src/tests/circuitikzCompileDiagnostics.test.ts` 与 `src/tests/circuitikzExportCli.test.ts` 验证确定性输出、拓扑拒绝、package-script 暴露、UTF-8 BOM 处理、diagnostic parsing、diagnostics JSON 输出，以及 compile log 含错误时 CLI 非零退出。
 
-实现仍有意停在 Phase D/E 之前。它不会编译 LaTeX、调用 TikZJax、检查截图或运行视觉修复闭环。
+Phase D 已经具备第一段 log-parsing slice，但实现仍有意停在本地 renderer 执行与 Phase E 之前。它不会运行 LaTeX、调用 TikZJax、检查截图或运行视觉修复闭环。
 
 ## Best Current Practice
 

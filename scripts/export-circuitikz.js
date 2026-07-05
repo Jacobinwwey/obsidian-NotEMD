@@ -10,9 +10,11 @@ function printUsage() {
 
 Usage:
   node scripts/export-circuitikz.js --input <circuit-spec.json> --output <circuit.tex>
+  node scripts/export-circuitikz.js --input <circuit-spec.json> --output <circuit.tex> --compile-log <latex.log> --diagnostics-output <diagnostics.json>
 
 Example:
   node scripts/export-circuitikz.js --input cmos-inverter.json --output cmos-inverter.tex
+  node scripts/export-circuitikz.js --input cmos-inverter.json --output cmos-inverter.tex --compile-log cmos-inverter.log --diagnostics-output cmos-inverter.diagnostics.json
 `);
 }
 
@@ -27,6 +29,12 @@ function parseArgs(argv) {
         break;
       case '--output':
         args.output = argv[++index];
+        break;
+      case '--compile-log':
+        args.compileLog = argv[++index];
+        break;
+      case '--diagnostics-output':
+        args.diagnosticsOutput = argv[++index];
         break;
       case '--help':
       case '-h':
@@ -46,6 +54,9 @@ function assertRequiredArgs(args) {
   }
   if (!args.output) {
     throw new Error('Missing required --output.');
+  }
+  if (args.diagnosticsOutput && !args.compileLog) {
+    throw new Error('--diagnostics-output requires --compile-log.');
   }
 }
 
@@ -67,9 +78,14 @@ function buildExporterBundle(repoRoot) {
   const outfile = path.join(tempRoot, 'circuitikz-exporter.cjs');
   const entrySource = `
     import { exportCircuitSpecToCircuitikz } from './src/diagram/adapters/circuitikz/circuitikzExporter';
+    import { diagnoseCircuitikzCompileLog } from './src/diagram/adapters/circuitikz/circuitikzDiagnostics';
 
     export function exportCircuitikz(spec) {
       return exportCircuitSpecToCircuitikz(spec);
+    }
+
+    export function diagnoseCompileLog(logText) {
+      return diagnoseCircuitikzCompileLog(logText);
     }
   `;
 
@@ -99,16 +115,18 @@ async function run(args, repoRoot = path.resolve(__dirname, '..')) {
   assertRequiredArgs(args);
   const inputPath = path.resolve(args.input);
   const outputPath = path.resolve(args.output);
+  const compileLogPath = args.compileLog ? path.resolve(args.compileLog) : undefined;
+  const diagnosticsOutputPath = args.diagnosticsOutput ? path.resolve(args.diagnosticsOutput) : undefined;
   const spec = loadCircuitSpec(inputPath);
   const bundle = buildExporterBundle(repoRoot);
 
   try {
-    const { exportCircuitikz } = require(bundle.outfile);
+    const { diagnoseCompileLog, exportCircuitikz } = require(bundle.outfile);
     const content = exportCircuitikz(spec);
     ensureOutputDirectory(outputPath);
     fs.writeFileSync(outputPath, content, 'utf8');
 
-    return {
+    const result = {
       circuitKind: spec.circuitKind,
       goldenReferenceId: spec.goldenReferenceId,
       inputPath,
@@ -116,6 +134,20 @@ async function run(args, repoRoot = path.resolve(__dirname, '..')) {
       componentCount: Array.isArray(spec.components) ? spec.components.length : 0,
       connectionCount: Array.isArray(spec.connections) ? spec.connections.length : 0
     };
+
+    if (compileLogPath) {
+      const compileLog = fs.readFileSync(compileLogPath, 'utf8').replace(/^\uFEFF/, '');
+      result.compileLogPath = compileLogPath;
+      result.compileDiagnostics = diagnoseCompileLog(compileLog);
+
+      if (diagnosticsOutputPath) {
+        ensureOutputDirectory(diagnosticsOutputPath);
+        fs.writeFileSync(diagnosticsOutputPath, `${JSON.stringify(result.compileDiagnostics, null, 2)}\n`, 'utf8');
+        result.diagnosticsOutputPath = diagnosticsOutputPath;
+      }
+    }
+
+    return result;
   } finally {
     bundle.cleanup();
   }
@@ -131,6 +163,10 @@ async function main() {
 
     const result = await run(args);
     process.stdout.write(`${JSON.stringify(result)}\n`);
+    if (result.compileDiagnostics && !result.compileDiagnostics.ok) {
+      process.stderr.write(`${result.compileDiagnostics.summary}\n`);
+      process.exitCode = 1;
+    }
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     process.stderr.write(`${message}\n`);

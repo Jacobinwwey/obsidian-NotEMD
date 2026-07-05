@@ -142,9 +142,10 @@ Phase A is documented. Phase B/C now have a constrained repository prototype:
 - `src/diagram/adapters/circuitikz/circuitSpec.ts` defines the separate circuit-only spec boundary.
 - `src/diagram/adapters/circuitikz/circuitikzExporter.ts` validates topology and emits deterministic `circuitikz` LaTeX for `common-source-amplifier` and `cmos-inverter`.
 - `scripts/export-circuitikz.js` and `npm run diagram:export-circuitikz` provide the offline export command.
-- `src/tests/circuitikzExporter.test.ts` and `src/tests/circuitikzExportCli.test.ts` verify deterministic output, topology rejection, package-script exposure, and UTF-8 BOM handling.
+- `src/diagram/adapters/circuitikz/circuitikzDiagnostics.ts` parses existing LaTeX/TikZJax compile logs into actionable diagnostics without spawning a compiler or depending on shell command resolution.
+- `src/tests/circuitikzExporter.test.ts`, `src/tests/circuitikzCompileDiagnostics.test.ts`, and `src/tests/circuitikzExportCli.test.ts` verify deterministic output, topology rejection, package-script exposure, UTF-8 BOM handling, diagnostic parsing, diagnostics JSON output, and nonzero CLI exit for logs with compile errors.
 
-The implementation still deliberately stops before Phase D/E. It does not compile LaTeX, call TikZJax, inspect screenshots, or run a visual repair loop.
+Phase D has its first log-parsing slice, but the implementation still deliberately stops before local renderer execution and Phase E. It does not run LaTeX, call TikZJax, inspect screenshots, or run a visual repair loop.
 
 ## Best Current Practice
 

@@ -220,6 +220,14 @@ npm run diagram:export-circuitikz -- --input cmos-inverter.json --output cmos-in
 
 这还不是通用 TikZ 生成器。它不会编译 LaTeX、调用 TikZJax、检查截图或运行图像反馈修复；这些仍是后续 gate。
 
+CLI 现在可以在不执行编译器的情况下解析已有 LaTeX/TikZJax compile log：
+
+```bash
+npm run diagram:export-circuitikz -- --input cmos-inverter.json --output cmos-inverter.tex --compile-log cmos-inverter.log --diagnostics-output cmos-inverter.diagnostics.json
+```
+
+这条 diagnostic path 会报告 `circuitikz.sty` 这类 missing package、unknown TikZ/circuitikz keys、undefined control sequences、generic LaTeX errors、emergency stops，以及 advisory overfull `\hbox` warnings。它仍然是 log-driven：本地 LaTeX/TikZJax execution 和 screenshot-quality gates 仍是独立的后续工作。
+
 ### Golden Reference Prompt Shape
 
 近期使用时，应该在要求生成电路变体前给出一个可渲染 golden reference。强约束 prompt 应保留 preamble、coordinate scale、anchor style 和 routing conventions：
@@ -259,7 +267,7 @@ npm run diagram:export-circuitikz -- --input cmos-inverter.json --output cmos-in
 | General diagrams | Mermaid、JSON Canvas、Vega-Lite、HTML 的 spec-first pipeline 已实现 | 继续扩展 semantic verification coverage |
 | Editable figures | `editable-html-svg`、Draw.io XML、Drawnix JSON artifact boundaries 已实现 | 只有在测试证明 editability 后再加入更丰富 primitives |
 | CLI support | `npm run diagram:export-artifact` 可从同一个 `DiagramSpec` 导出 editable HTML/SVG、Draw.io、Drawnix | 新 target 发布时增加 target-specific smoke fixtures |
-| circuitikz | `CircuitSpec -> circuitikz` 原型已经可通过 `npm run diagram:export-circuitikz` 导出 common-source 与 CMOS inverter golden templates | 增加 compile/screenshot feedback 与 topology-preserving repair |
+| circuitikz | `CircuitSpec -> circuitikz` 原型已经可通过 `npm run diagram:export-circuitikz` 导出 common-source 与 CMOS inverter golden templates，并把已有 compile logs 解析为 diagnostics | 增加可选 renderer execution、screenshot feedback 与 topology-preserving repair |
 | TikZJax integration | Obsidian-side display 的候选 render host | 保持可选，不把 TikZJax 变成硬 runtime 依赖 |
 
 ## Configuration

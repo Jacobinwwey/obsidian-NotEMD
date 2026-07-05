@@ -143,4 +143,60 @@ describe('circuitikz export CLI', () => {
             fs.rmSync(tempRoot, { recursive: true, force: true });
         }
     });
+
+    test('writes compile-log diagnostics and exits nonzero when the log contains LaTeX errors', () => {
+        const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'notemd-circuitikz-cli-diagnostics-'));
+        const specPath = path.join(tempRoot, 'circuit.json');
+        const outputPath = path.join(tempRoot, 'circuit.tex');
+        const compileLogPath = path.join(tempRoot, 'circuit.log');
+        const diagnosticsPath = path.join(tempRoot, 'diagnostics.json');
+        fs.writeFileSync(specPath, JSON.stringify(createSpec(), null, 2), 'utf8');
+        fs.writeFileSync(
+            compileLogPath,
+            "! LaTeX Error: File `circuitikz.sty' not found.\n! Undefined control sequence.\nl.12 \\badwire\n",
+            'utf8'
+        );
+
+        try {
+            const result = spawnSync(
+                process.execPath,
+                [
+                    scriptPath,
+                    '--input', specPath,
+                    '--output', outputPath,
+                    '--compile-log', compileLogPath,
+                    '--diagnostics-output', diagnosticsPath
+                ],
+                {
+                    cwd: repoRoot,
+                    encoding: 'utf8'
+                }
+            );
+
+            expect(result.status).toBe(1);
+            expect(fs.existsSync(outputPath)).toBe(true);
+            expect(fs.existsSync(diagnosticsPath)).toBe(true);
+            expect(result.stderr).toContain('2 error(s), 0 warning(s)');
+
+            const stdout = JSON.parse(result.stdout);
+            expect(stdout.compileDiagnostics).toEqual(expect.objectContaining({
+                ok: false,
+                summary: '2 error(s), 0 warning(s)'
+            }));
+
+            const diagnostics = JSON.parse(fs.readFileSync(diagnosticsPath, 'utf8'));
+            expect(diagnostics.diagnostics).toEqual([
+                expect.objectContaining({
+                    kind: 'missing-package',
+                    message: 'Missing LaTeX package: circuitikz.sty'
+                }),
+                expect.objectContaining({
+                    kind: 'undefined-control-sequence',
+                    advice: expect.stringContaining('unsupported macro')
+                })
+            ]);
+        } finally {
+            fs.rmSync(tempRoot, { recursive: true, force: true });
+        }
+    }, 30000);
 });

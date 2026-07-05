@@ -25,6 +25,30 @@ node scripts/export-circuitikz.js --input common-source.json --output common-sou
 
 Input may be UTF-8 with or without a BOM, so JSON written from Windows PowerShell remains usable.
 
+## Compile-Log Diagnostics
+
+The exporter can also parse an existing LaTeX/TikZJax compile log and return machine-readable diagnostics without executing a local compiler:
+
+```bash
+node scripts/export-circuitikz.js \
+  --input cmos-inverter.json \
+  --output cmos-inverter.tex \
+  --compile-log cmos-inverter.log \
+  --diagnostics-output cmos-inverter.diagnostics.json
+```
+
+This path is intentionally log-driven. It does not resolve shell commands, spawn `pdflatex`, or require TikZJax in the plugin runtime. If the log contains compile errors, the CLI still writes the deterministic `.tex` artifact, writes diagnostics when requested, prints the diagnostic summary to stderr, and exits nonzero so automation can stop before screenshot or visual repair gates.
+
+Current diagnostics include:
+
+- missing LaTeX packages such as `circuitikz.sty`;
+- unknown TikZ/circuitikz keys such as misspelled component names;
+- undefined control sequences;
+- generic LaTeX errors and emergency stops;
+- advisory overfull `\hbox` warnings for later visual review.
+
+The parser lives in `src/diagram/adapters/circuitikz/circuitikzDiagnostics.ts` so the diagnostic rules remain testable outside the CLI wrapper.
+
 ## Supported Circuit Families
 
 This is not a generic TikZ generator. The current prototype supports only golden-reference families whose topology and layout can be validated before export:
@@ -63,7 +87,7 @@ This keeps the model-facing contract narrow and makes topology drift testable. T
 Canonical regression commands:
 
 ```bash
-npm test -- --runInBand src/tests/circuitikzExporter.test.ts src/tests/circuitikzExportCli.test.ts --runTestsByPath
+npm test -- --runInBand src/tests/circuitikzExporter.test.ts src/tests/circuitikzCompileDiagnostics.test.ts src/tests/circuitikzExportCli.test.ts --runTestsByPath
 ```
 
 The tests verify:
@@ -73,8 +97,10 @@ The tests verify:
 - topology rejection before export;
 - CLI exposure through `package.json`;
 - UTF-8 BOM input handling;
+- compile-log diagnostics for missing packages, unknown keys, undefined control sequences, and overfull layout warnings;
+- diagnostics JSON output and nonzero CLI exit when a compile log contains errors;
 - no output file is written for invalid topology.
 
 ## Non-Goals
 
-This prototype does not compile LaTeX, call TikZJax, run screenshot inspection, or use rendered-image feedback. Those are later gates. It also does not accept arbitrary natural-language circuit requests. The important current claim is narrower: validated `CircuitSpec` input can produce stable, readable circuitikz for two high-value golden families.
+This prototype does not execute LaTeX, call TikZJax, run screenshot inspection, or use rendered-image feedback. Those are later gates. It also does not accept arbitrary natural-language circuit requests. The important current claim is narrower: validated `CircuitSpec` input can produce stable, readable circuitikz for two high-value golden families, and existing compile logs can now be converted into actionable diagnostics.

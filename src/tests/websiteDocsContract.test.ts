@@ -54,6 +54,9 @@ describe('website documentation contract', () => {
             expect(content).toContain('CircuitSpec');
             expect(content).toContain('common-source-amplifier');
             expect(content).toContain('cmos-inverter-v1');
+            expect(content).toContain('--compile-log');
+            expect(content).toContain('--diagnostics-output');
+            expect(content).toContain('circuitikz.sty');
             expect(content).toContain('Golden Reference Template');
             expect(content).toContain('TikZJax Render');
             expect(content).toContain('\\usepackage{circuitikz}');
