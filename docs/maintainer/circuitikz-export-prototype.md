@@ -93,6 +93,44 @@ The result is recorded as `compileExecution.renderSmoke`. Missing or empty artif
 
 The runner lives in `src/diagram/adapters/circuitikz/circuitikzCompileRunner.ts`. It reads the generated `{jobName}.log` from `{outputDir}`, reuses the same diagnostics parser, and returns `compileExecution` plus `compileDiagnostics` in the CLI JSON result. Artifact checks live in `src/diagram/adapters/circuitikz/circuitikzRenderSmoke.ts` so SVG structure rules remain testable without spawning a renderer. A non-ok diagnostic report still makes the CLI exit nonzero.
 
+## Maintainer Smoke Fixtures
+
+The repository now includes maintainer fixtures for every supported golden family:
+
+| Fixture | Circuit family |
+|---|---|
+| `docs/maintainer/fixtures/circuitikz/common-source-nmos-v1.json` | `common-source-amplifier` |
+| `docs/maintainer/fixtures/circuitikz/cmos-inverter-v1.json` | `cmos-inverter` |
+
+Run both fixtures through the same explicit renderer configuration with:
+
+```bash
+npm run diagram:smoke-circuitikz -- \
+  --output-dir docs/export/circuitikz-smoke \
+  --compile-executable pdflatex \
+  --compile-arg -interaction=nonstopmode \
+  --compile-arg -halt-on-error \
+  --compile-arg -output-directory={outputDir} \
+  --compile-arg {tex} \
+  --expected-artifact {outputDir}/{jobName}.pdf
+```
+
+The runner is `scripts/run-circuitikz-smoke-fixtures.js`. It discovers the fixture JSON files, writes one `.tex` artifact per fixture, invokes `scripts/export-circuitikz.js` for each fixture, and returns an aggregate JSON report with `fixtureCount`, per-fixture `compileExecution`, and per-fixture `compileDiagnostics`.
+
+For SVG-producing renderers or wrapper executables, use the same expected-artifact and text-token gates:
+
+```bash
+npm run diagram:smoke-circuitikz -- \
+  --output-dir docs/export/circuitikz-smoke \
+  --compile-executable <explicit-renderer-or-wrapper> \
+  --compile-arg ... \
+  --expected-artifact {outputDir}/{jobName}.svg \
+  --expected-svg-text v_{in} \
+  --expected-svg-text v_{out}
+```
+
+This is the first real-environment smoke boundary. It still does not make LaTeX or TikZJax mandatory for normal CI or plugin startup; it gives maintainers a repeatable command for local release evidence when a renderer is installed. The command stays cross-platform because the fixture runner delegates to the existing shell-free compile runner instead of resolving a platform shell.
+
 ## Supported Circuit Families
 
 This is not a generic TikZ generator. The current prototype supports only golden-reference families whose topology and layout can be validated before export:
@@ -147,6 +185,7 @@ The tests verify:
 - render-smoke artifact existence and non-empty checks through `--expected-artifact`;
 - SVG artifact structure checks and optional text-token checks through repeated `--expected-svg-text`;
 - PNG screenshot smoke checks for positive dimensions and non-background pixels;
+- maintainer fixture discovery and aggregate smoke execution through `src/tests/circuitikzSmokeFixturesCli.test.ts`;
 - no output file is written for invalid topology.
 
 ## Non-Goals

@@ -77,6 +77,9 @@ describe('website documentation contract', () => {
             expect(content).toContain('nmos');
             expect(content).toContain('npm run diagram:export-artifact');
             expect(content).toContain('npm run diagram:export-circuitikz');
+            expect(content).toContain('npm run diagram:smoke-circuitikz');
+            expect(content).toContain('docs/maintainer/fixtures/circuitikz/common-source-nmos-v1.json');
+            expect(content).toContain('docs/maintainer/fixtures/circuitikz/cmos-inverter-v1.json');
         }
     });
 

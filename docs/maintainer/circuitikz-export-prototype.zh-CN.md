@@ -93,6 +93,44 @@ node scripts/export-circuitikz.js \
 
 runner 位于 `src/diagram/adapters/circuitikz/circuitikzCompileRunner.ts`。它会从 `{outputDir}` 读取生成的 `{jobName}.log`，复用同一个 diagnostics parser，并在 CLI JSON result 中返回 `compileExecution` 与 `compileDiagnostics`。artifact 检查位于 `src/diagram/adapters/circuitikz/circuitikzRenderSmoke.ts`，这样 SVG 结构规则可以在不 spawn renderer 的情况下单独测试。diagnostic report 非 ok 时，CLI 仍会以非零状态退出。
 
+## Maintainer Smoke Fixtures
+
+仓库现在为每个已支持的 golden family 都提供 maintainer fixture：
+
+| Fixture | Circuit family |
+|---|---|
+| `docs/maintainer/fixtures/circuitikz/common-source-nmos-v1.json` | `common-source-amplifier` |
+| `docs/maintainer/fixtures/circuitikz/cmos-inverter-v1.json` | `cmos-inverter` |
+
+使用同一套显式 renderer 配置跑完两个 fixture：
+
+```bash
+npm run diagram:smoke-circuitikz -- \
+  --output-dir docs/export/circuitikz-smoke \
+  --compile-executable pdflatex \
+  --compile-arg -interaction=nonstopmode \
+  --compile-arg -halt-on-error \
+  --compile-arg -output-directory={outputDir} \
+  --compile-arg {tex} \
+  --expected-artifact {outputDir}/{jobName}.pdf
+```
+
+runner 是 `scripts/run-circuitikz-smoke-fixtures.js`。它会发现 fixture JSON 文件，为每个 fixture 写出一个 `.tex` artifact，逐个调用 `scripts/export-circuitikz.js`，并返回包含 `fixtureCount`、每个 fixture 的 `compileExecution` 和 `compileDiagnostics` 的聚合 JSON report。
+
+对于输出 SVG 的 renderer 或 wrapper executable，可以继续使用同样的 expected-artifact 与 text-token gates：
+
+```bash
+npm run diagram:smoke-circuitikz -- \
+  --output-dir docs/export/circuitikz-smoke \
+  --compile-executable <explicit-renderer-or-wrapper> \
+  --compile-arg ... \
+  --expected-artifact {outputDir}/{jobName}.svg \
+  --expected-svg-text v_{in} \
+  --expected-svg-text v_{out}
+```
+
+这是第一条真实环境 smoke 边界。它仍然不会让 LaTeX 或 TikZJax 成为普通 CI 或插件启动的硬依赖；它给维护者提供一个在本地安装 renderer 后可重复执行的 release evidence 命令。命令保持跨平台，因为 fixture runner 继续委托给现有 shell-free compile runner，而不是解析平台 shell。
+
 ## 已支持的电路族
 
 这不是通用 TikZ 生成器。当前原型只支持能够在导出前验证拓扑与布局约束的 golden-reference families：
@@ -147,6 +185,7 @@ npm test -- --runInBand src/tests/circuitikzExporter.test.ts src/tests/circuitik
 - 通过 `--expected-artifact` 执行 render-smoke artifact 存在与非空检查；
 - 对 SVG artifact 执行结构检查，并通过重复的 `--expected-svg-text` 执行可选文本 token 检查；
 - 对 PNG screenshot 执行正尺寸与非背景像素 smoke 检查；
+- 通过 `src/tests/circuitikzSmokeFixturesCli.test.ts` 验证 maintainer fixture discovery 与聚合 smoke execution；
 - 无效拓扑不会写出 output file。
 
 ## 非目标

@@ -248,6 +248,14 @@ SVG smoke verifies the `<svg>` root, positive dimensions or `viewBox`, at least 
 
 If the renderer emits `.png`, the same expected-artifact path becomes a first screenshot smoke: Notemd decodes non-interlaced 8-bit grayscale/RGB/RGBA PNG files, checks positive dimensions, and fails with `render-png-blank` when every visible pixel matches the top-left background color. This catches blank screenshots without adding a platform-specific shell dependency. It is not yet overlap detection or topology-preserving image repair.
 
+For release or maintainer evidence, run both supported golden families through the aggregate fixture runner:
+
+```bash
+npm run diagram:smoke-circuitikz -- --output-dir docs/export/circuitikz-smoke --compile-executable pdflatex --compile-arg -interaction=nonstopmode --compile-arg -halt-on-error --compile-arg -output-directory={outputDir} --compile-arg {tex} --expected-artifact {outputDir}/{jobName}.pdf
+```
+
+The runner uses `docs/maintainer/fixtures/circuitikz/common-source-nmos-v1.json` and `docs/maintainer/fixtures/circuitikz/cmos-inverter-v1.json`, calls the same shell-free exporter path for each fixture, and returns an aggregate JSON report with per-fixture `compileExecution` and `compileDiagnostics`. It is still a maintainer command, not a plugin runtime dependency.
+
 ### Golden Reference Prompt Shape
 
 For near-term usage, provide a renderable golden reference before asking for a circuit variant. A constrained prompt should preserve the preamble, coordinate scale, anchor style, and routing conventions:
@@ -287,7 +295,7 @@ For a CMOS inverter, the prompt should request an explicit topology plus layout 
 | General diagrams | Spec-first pipeline implemented for Mermaid, JSON Canvas, Vega-Lite, HTML | Keep expanding semantic verification coverage |
 | Editable figures | `editable-html-svg`, Draw.io XML, and Drawnix JSON artifact boundaries implemented | Add richer primitives only after tests prove editability |
 | CLI support | `npm run diagram:export-artifact` exports editable HTML/SVG, Draw.io, and Drawnix from one `DiagramSpec` | Add target-specific smoke fixtures when new targets ship |
-| circuitikz | `CircuitSpec -> circuitikz` prototype exports common-source and CMOS inverter golden templates, parses compile logs, can run explicit local renderers plus `--expected-artifact`, SVG `--expected-svg-text`, and PNG nonblank screenshot smoke checks without shell parsing, and now has generic preview diagnostics plus source-only fallback through `RenderArtifact.diagnostics` and the preview modal | Add real-environment smoke fixtures, overlap checks, and topology-preserving repair |
+| circuitikz | `CircuitSpec -> circuitikz` prototype exports common-source and CMOS inverter golden templates, parses compile logs, can run explicit local renderers plus `--expected-artifact`, SVG `--expected-svg-text`, and PNG nonblank screenshot smoke checks without shell parsing, includes aggregate maintainer smoke fixtures through `npm run diagram:smoke-circuitikz`, and has generic preview diagnostics plus source-only fallback through `RenderArtifact.diagnostics` and the preview modal | Add bounded-canvas checks, overlap checks, and topology-preserving repair |
 | TikZJax integration | Candidate render host for Obsidian-side display | Keep it optional; do not make TikZJax a hard plugin runtime dependency |
 
 ## Configuration
