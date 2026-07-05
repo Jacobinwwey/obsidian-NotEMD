@@ -477,8 +477,9 @@ function textBox(tag: string): SvgTextBox | undefined {
     };
 }
 
-function collectSvgBoxes(svgText: string): { boxes: SvgBox[]; textBoxes: SvgTextBox[] } {
+function collectSvgBoxes(svgText: string): { boxes: SvgBox[]; drawingBoxes: SvgBox[]; textBoxes: SvgTextBox[] } {
     const boxes: SvgBox[] = [];
+    const drawingBoxes: SvgBox[] = [];
     const textBoxes: SvgTextBox[] = [];
     const groupStack: Array<{ transform: SvgTransform; hidden: boolean }> = [{
         transform: identityTransform(),
@@ -528,11 +529,13 @@ function collectSvgBoxes(svgText: string): { boxes: SvgBox[]; textBoxes: SvgText
         }
         const box = elementBox(tagName, tag);
         if (box) {
-            boxes.push(transformBox(box, localTransform));
+            const transformedBox = transformBox(box, localTransform);
+            boxes.push(transformedBox);
+            drawingBoxes.push(transformedBox);
         }
     }
 
-    return { boxes, textBoxes };
+    return { boxes, drawingBoxes, textBoxes };
 }
 
 function extractTextBoxes(svgText: string): SvgTextBox[] {
@@ -541,6 +544,10 @@ function extractTextBoxes(svgText: string): SvgTextBox[] {
 
 function extractElementBoxes(svgText: string): SvgBox[] {
     return collectSvgBoxes(svgText).boxes;
+}
+
+function extractDrawingBoxes(svgText: string): SvgBox[] {
+    return collectSvgBoxes(svgText).drawingBoxes;
 }
 
 function boxIsOutsideViewBox(box: SvgBox, viewBox: [number, number, number, number]): boolean {
@@ -559,6 +566,16 @@ function boxesOverlap(left: SvgBox, right: SvgBox): boolean {
     const overlapWidth = Math.min(left.maxX, right.maxX) - Math.max(left.minX, right.minX);
     const overlapHeight = Math.min(left.maxY, right.maxY) - Math.max(left.minY, right.minY);
     return overlapWidth > 1 && overlapHeight > 1;
+}
+
+function expandBox(box: SvgBox, padding: number): SvgBox {
+    return {
+        ...box,
+        minX: box.minX - padding,
+        minY: box.minY - padding,
+        maxX: box.maxX + padding,
+        maxY: box.maxY + padding
+    };
 }
 
 function extractSvgSmoke(svgText: string, expectedSvgText: string[]): CircuitikzSvgSmokeReport {
@@ -681,6 +698,7 @@ function svgDiagnostic(
     }
 
     const textBoxes = extractTextBoxes(svgText);
+    const drawingBoxes = extractDrawingBoxes(svgText);
     for (let leftIndex = 0; leftIndex < textBoxes.length; leftIndex += 1) {
         for (let rightIndex = leftIndex + 1; rightIndex < textBoxes.length; rightIndex += 1) {
             const left = textBoxes[leftIndex];
@@ -699,6 +717,22 @@ function svgDiagnostic(
             leftIndex = textBoxes.length;
             break;
         }
+    }
+
+    for (const textBox of textBoxes) {
+        const overlappingDrawing = drawingBoxes.find(drawingBox => boxesOverlap(textBox, expandBox(drawingBox, 2)));
+        if (!overlappingDrawing) {
+            continue;
+        }
+
+        diagnostics.push({
+            severity: 'error',
+            kind: 'render-svg-label-overlap',
+            message: `Expected SVG render artifact text label overlaps a drawing element: ${textBox.text} / ${overlappingDrawing.label}`,
+            excerpt: expectedArtifactPath,
+            advice: 'Treat this as a label-legibility failure. Keep topology fixed and move labels away from wires or components before accepting the artifact.'
+        });
+        break;
     }
 
     return diagnostics;

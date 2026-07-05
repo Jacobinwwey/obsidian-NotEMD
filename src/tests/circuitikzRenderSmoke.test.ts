@@ -312,6 +312,58 @@ describe('circuitikz render smoke inspection', () => {
         }
     });
 
+    test('reports SVG text labels that overlap drawing elements', () => {
+        const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'notemd-circuitikz-svg-label-drawing-overlap-'));
+        const svgPath = path.join(tempRoot, 'label-drawing-overlap.svg');
+        fs.writeFileSync(
+            svgPath,
+            '<svg viewBox="0 0 160 100"><rect x="40" y="30" width="40" height="20"/><text x="45" y="45" font-size="12">v_{out}</text></svg>',
+            'utf8'
+        );
+
+        try {
+            const report = inspectCircuitikzRenderArtifact({
+                expectedArtifactPath: svgPath
+            });
+
+            expect(report.artifactKind).toBe('svg');
+            expect(report.diagnostics).toEqual([
+                expect.objectContaining({
+                    kind: 'render-svg-label-overlap',
+                    message: expect.stringContaining('text label overlaps a drawing element')
+                })
+            ]);
+        } finally {
+            fs.rmSync(tempRoot, { recursive: true, force: true });
+        }
+    });
+
+    test('reports SVG drawing elements moved into label overlap by transforms', () => {
+        const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'notemd-circuitikz-svg-transform-label-drawing-overlap-'));
+        const svgPath = path.join(tempRoot, 'transformed-label-drawing-overlap.svg');
+        fs.writeFileSync(
+            svgPath,
+            '<svg viewBox="0 0 160 100"><rect x="0" y="0" width="30" height="16" transform="translate(42 31)"/><text x="45" y="45" font-size="12">v_{out}</text></svg>',
+            'utf8'
+        );
+
+        try {
+            const report = inspectCircuitikzRenderArtifact({
+                expectedArtifactPath: svgPath
+            });
+
+            expect(report.artifactKind).toBe('svg');
+            expect(report.diagnostics).toEqual([
+                expect.objectContaining({
+                    kind: 'render-svg-label-overlap',
+                    message: expect.stringContaining('text label overlaps a drawing element')
+                })
+            ]);
+        } finally {
+            fs.rmSync(tempRoot, { recursive: true, force: true });
+        }
+    });
+
     test('accepts a nonblank PNG screenshot artifact', () => {
         const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'notemd-circuitikz-png-smoke-'));
         const pngPath = path.join(tempRoot, 'render.png');

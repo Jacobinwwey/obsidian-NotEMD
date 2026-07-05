@@ -50,6 +50,8 @@ describe('circuitikz export docs contract', () => {
             expect(doc).toContain('render-svg-text-path-only');
             expect(doc).toContain('render-svg-out-of-bounds');
             expect(doc).toContain('render-svg-text-overlap');
+            expect(doc).toContain('render-svg-label-overlap');
+            expect(doc).toContain('label-vs-drawing');
             expect(doc).toContain('transform-aware geometry');
             expect(doc).toContain('pathOnlyGlyphUseCount');
             expect(doc).toContain('render-png-blank');
@@ -101,6 +103,8 @@ describe('circuitikz export docs contract', () => {
             expect(doc).toContain('foregroundDensity');
             expect(doc).toContain('bounded');
             expect(doc).toContain('text-overlap');
+            expect(doc).toContain('render-svg-label-overlap');
+            expect(doc).toContain('label-vs-drawing');
             expect(doc).toContain('transform-aware geometry');
             expect(doc).toContain('RenderArtifact.diagnostics');
             expect(doc).toContain('diagnostic summary');

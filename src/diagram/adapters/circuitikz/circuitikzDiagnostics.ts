@@ -17,6 +17,7 @@ export type CircuitikzCompileDiagnosticKind =
     | 'render-svg-text-path-only'
     | 'render-svg-out-of-bounds'
     | 'render-svg-text-overlap'
+    | 'render-svg-label-overlap'
     | 'render-png-invalid'
     | 'render-png-unsupported'
     | 'render-png-blank'

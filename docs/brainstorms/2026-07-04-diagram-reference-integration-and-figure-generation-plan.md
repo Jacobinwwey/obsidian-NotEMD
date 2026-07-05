@@ -205,6 +205,7 @@ Phase E implementation status on 2026-07-05: `scripts/export-diagram-artifact.js
 - [x] Add first pixel-level PNG crowding smoke through `foregroundDensity` and `render-png-foreground-dense`.
 - [x] Add conservative SVG bounded-canvas and obvious text-overlap diagnostics.
 - [x] Add transform-aware geometry for common SVG group and element transforms before bounded-canvas/text-overlap checks.
+- [x] Add conservative SVG label-vs-drawing overlap diagnostics through `render-svg-label-overlap`.
 - [x] Add path-only SVG label classification through `pathOnlyGlyphUseCount` and `render-svg-text-path-only`.
 - [x] Add a front-end artifact diagnostics surface in the diagram preview modal.
 - [x] Add source-only preview fallback for non-inline artifacts so future circuitikz, Draw.io, and Drawnix sources can expose content and diagnostics without pretending to be visually rendered.
@@ -253,7 +254,7 @@ Cloudy is valuable because it proves a disciplined HTML/SVG + Draw.io export con
 The HTML/SVG, Draw.io, Drawnix, and first circuitikz export boundaries now exist. The next move should still avoid adding runtime dependencies by default:
 
 1. expand compile-log diagnostics as real renderer logs expose more failure shapes;
-2. add screenshot/OCR-level checks beyond structural SVG coordinates, including OCR recognition for path-only glyph text and more precise pixel-level overlap than the current foreground-density heuristic;
+2. add screenshot/OCR-level checks beyond structural SVG coordinates, including OCR recognition for path-only glyph text and more precise pixel-level overlap than the current foreground-density and label-vs-drawing box heuristics;
 3. keep topology locked during any repair prompt so visual repair cannot change the circuit;
 4. connect source-only preview sessions to external artifact outputs only after the renderer evidence is available, keeping raw source and real visual render states distinct;
 5. only then consider more circuit families or a plugin-side circuit preview target.
