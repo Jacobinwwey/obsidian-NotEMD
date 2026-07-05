@@ -62,6 +62,7 @@ node scripts/export-circuitikz.js \
   --compile-arg -halt-on-error \
   --compile-arg -output-directory={outputDir} \
   --compile-arg {tex} \
+  --expected-artifact {outputDir}/{jobName}.pdf \
   --diagnostics-output cmos-inverter.diagnostics.json
 ```
 
@@ -72,6 +73,8 @@ node scripts/export-circuitikz.js \
 | `{tex}` | 生成的 `.tex` 文件绝对路径 |
 | `{outputDir}` | 生成 artifact 的绝对输出目录 |
 | `{jobName}` | 生成 `.tex` 文件去掉扩展名后的 basename |
+
+提供 `--expected-artifact` 时，runner 还会执行第一层 render-smoke artifact 检查。它会确认预期文件存在且非空，把结果记录为 `compileExecution.renderSmoke`，并在 renderer 退出但没有产出可用 artifact 时追加 `render-artifact-missing` 或 `render-artifact-empty` diagnostic。
 
 runner 位于 `src/diagram/adapters/circuitikz/circuitikzCompileRunner.ts`。它会从 `{outputDir}` 读取生成的 `{jobName}.log`，复用同一个 diagnostics parser，并在 CLI JSON result 中返回 `compileExecution` 与 `compileDiagnostics`。diagnostic report 非 ok 时，CLI 仍会以非零状态退出。
 
@@ -126,8 +129,9 @@ npm test -- --runInBand src/tests/circuitikzExporter.test.ts src/tests/circuitik
 - 针对 missing packages、unknown keys、undefined control sequences 和 overfull layout warnings 的 compile-log diagnostics；
 - compile log 包含 errors 时写出 diagnostics JSON，并让 CLI 以非零状态退出；
 - 使用 placeholder-expanded argument arrays 的 shell-free compile execution；
+- 通过 `--expected-artifact` 执行 render-smoke artifact 存在与非空检查；
 - 无效拓扑不会写出 output file。
 
 ## 非目标
 
-这个原型不捆绑 LaTeX、不把 TikZJax 作为 Obsidian runtime 依赖调用、不做截图检查，也不使用渲染图像反馈。这些是后续 gate。它也不接受任意自然语言电路请求。当前重要声明更窄：经过验证的 `CircuitSpec` 输入可以为两个高价值 golden families 生成稳定、可读的 circuitikz，已有 compile logs 可以转换为 actionable diagnostics，并且显式配置的本地 renderer 可以在不走 shell-specific command parsing 的情况下执行。
+这个原型不捆绑 LaTeX、不把 TikZJax 作为 Obsidian runtime 依赖调用、不做截图检查，也不使用渲染图像反馈。这些是后续 gate。它也不接受任意自然语言电路请求。当前重要声明更窄：经过验证的 `CircuitSpec` 输入可以为两个高价值 golden families 生成稳定、可读的 circuitikz，已有 compile logs 可以转换为 actionable diagnostics，并且显式配置的本地 renderer 可以在不走 shell-specific command parsing 的情况下执行，同时可选证明具体输出 artifact 已经创建。

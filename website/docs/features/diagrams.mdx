@@ -231,10 +231,10 @@ This diagnostic path reports missing packages such as `circuitikz.sty`, unknown 
 For maintainer smoke checks, the same CLI can optionally run an explicitly configured renderer without shell command parsing:
 
 ```bash
-npm run diagram:export-circuitikz -- --input cmos-inverter.json --output cmos-inverter.tex --compile-executable pdflatex --compile-arg -interaction=nonstopmode --compile-arg -halt-on-error --compile-arg -output-directory={outputDir} --compile-arg {tex}
+npm run diagram:export-circuitikz -- --input cmos-inverter.json --output cmos-inverter.tex --compile-executable pdflatex --compile-arg -interaction=nonstopmode --compile-arg -halt-on-error --compile-arg -output-directory={outputDir} --compile-arg {tex} --expected-artifact {outputDir}/{jobName}.pdf
 ```
 
-The compile runner uses `shell: false`, expands `{tex}`, `{outputDir}`, and `{jobName}` placeholders into argument-array values, reads the generated `{jobName}.log`, and returns `compileExecution` plus `compileDiagnostics` in the CLI JSON output. It still does not bundle LaTeX or make TikZJax a plugin runtime dependency.
+The compile runner uses `shell: false`, expands `{tex}`, `{outputDir}`, and `{jobName}` placeholders into argument-array values, reads the generated `{jobName}.log`, and returns `compileExecution` plus `compileDiagnostics` in the CLI JSON output. With `--expected-artifact`, it also reports `compileExecution.renderSmoke` and fails the CLI if the renderer does not create a non-empty artifact. It still does not bundle LaTeX, make TikZJax a plugin runtime dependency, or perform screenshot-level visual repair.
 
 ### Golden Reference Prompt Shape
 
@@ -275,7 +275,7 @@ For a CMOS inverter, the prompt should request an explicit topology plus layout 
 | General diagrams | Spec-first pipeline implemented for Mermaid, JSON Canvas, Vega-Lite, HTML | Keep expanding semantic verification coverage |
 | Editable figures | `editable-html-svg`, Draw.io XML, and Drawnix JSON artifact boundaries implemented | Add richer primitives only after tests prove editability |
 | CLI support | `npm run diagram:export-artifact` exports editable HTML/SVG, Draw.io, and Drawnix from one `DiagramSpec` | Add target-specific smoke fixtures when new targets ship |
-| circuitikz | `CircuitSpec -> circuitikz` prototype exports common-source and CMOS inverter golden templates, parses compile logs, and can run explicit local renderers without shell parsing through `npm run diagram:export-circuitikz` | Add real-environment smoke fixtures, screenshot feedback, and topology-preserving repair |
+| circuitikz | `CircuitSpec -> circuitikz` prototype exports common-source and CMOS inverter golden templates, parses compile logs, and can run explicit local renderers plus `--expected-artifact` smoke checks without shell parsing through `npm run diagram:export-circuitikz` | Add real-environment smoke fixtures, screenshot feedback, and topology-preserving repair |
 | TikZJax integration | Candidate render host for Obsidian-side display | Keep it optional; do not make TikZJax a hard plugin runtime dependency |
 
 ## Configuration

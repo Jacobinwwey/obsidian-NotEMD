@@ -7,7 +7,9 @@ export type CircuitikzCompileDiagnosticKind =
     | 'latex-error'
     | 'emergency-stop'
     | 'overfull-hbox'
-    | 'compile-process-error';
+    | 'compile-process-error'
+    | 'render-artifact-missing'
+    | 'render-artifact-empty';
 
 export interface CircuitikzCompileDiagnostic {
     severity: CircuitikzCompileDiagnosticSeverity;

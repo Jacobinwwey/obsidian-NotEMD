@@ -267,6 +267,7 @@ describe('circuitikz export CLI', () => {
         const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'notemd-circuitikz-cli-compile-'));
         const specPath = path.join(tempRoot, 'circuit.json');
         const outputPath = path.join(tempRoot, 'circuit.tex');
+        const pdfPath = path.join(tempRoot, 'circuit.pdf');
         const compilerPath = path.join(tempRoot, 'fake-compiler.js');
         const argsPath = path.join(tempRoot, 'compile-args.json');
         fs.writeFileSync(specPath, JSON.stringify(createSpec(), null, 2), 'utf8');
@@ -281,6 +282,7 @@ const texPath = args[args.indexOf('--tex') + 1];
 const outputDirectory = args[args.indexOf('--out') + 1];
 const jobName = path.basename(texPath, path.extname(texPath));
 fs.writeFileSync(path.join(outputDirectory, jobName + '.log'), 'Overfull \\\\hbox (12.0pt too wide) in paragraph at lines 10--12\\n', 'utf8');
+fs.writeFileSync(path.join(outputDirectory, jobName + '.pdf'), 'pdf bytes', 'utf8');
 `,
             'utf8'
         );
@@ -297,7 +299,8 @@ fs.writeFileSync(path.join(outputDirectory, jobName + '.log'), 'Overfull \\\\hbo
                     '--compile-arg', '--tex',
                     '--compile-arg', '{tex}',
                     '--compile-arg', '--out',
-                    '--compile-arg', '{outputDir}'
+                    '--compile-arg', '{outputDir}',
+                    '--expected-artifact', '{outputDir}/{jobName}.pdf'
                 ],
                 {
                     cwd: repoRoot,
@@ -313,6 +316,12 @@ fs.writeFileSync(path.join(outputDirectory, jobName + '.log'), 'Overfull \\\\hbo
                 timedOut: false,
                 logPath: path.join(tempRoot, 'circuit.log')
             }));
+            expect(result.compileExecution.renderSmoke).toEqual({
+                expectedArtifactPath: pdfPath,
+                artifactExists: true,
+                artifactSizeBytes: 9,
+                nonEmptyArtifact: true
+            });
             expect(result.compileDiagnostics).toEqual(expect.objectContaining({
                 ok: true,
                 summary: '0 error(s), 1 warning(s)'
@@ -323,6 +332,76 @@ fs.writeFileSync(path.join(outputDirectory, jobName + '.log'), 'Overfull \\\\hbo
                 outputPath,
                 '--out',
                 tempRoot
+            ]);
+        } finally {
+            fs.rmSync(tempRoot, { recursive: true, force: true });
+        }
+    }, 30000);
+
+    test('fails active compile smoke when the expected render artifact is missing', () => {
+        const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'notemd-circuitikz-cli-missing-artifact-'));
+        const specPath = path.join(tempRoot, 'circuit.json');
+        const outputPath = path.join(tempRoot, 'circuit.tex');
+        const diagnosticsPath = path.join(tempRoot, 'diagnostics.json');
+        const compilerPath = path.join(tempRoot, 'fake-compiler.js');
+        fs.writeFileSync(specPath, JSON.stringify(createSpec(), null, 2), 'utf8');
+        fs.writeFileSync(
+            compilerPath,
+            `
+const fs = require('fs');
+const path = require('path');
+const args = process.argv.slice(2);
+const texPath = args[args.indexOf('--tex') + 1];
+const outputDirectory = args[args.indexOf('--out') + 1];
+const jobName = path.basename(texPath, path.extname(texPath));
+fs.writeFileSync(path.join(outputDirectory, jobName + '.log'), 'Output written on circuit.pdf (1 page).\\n', 'utf8');
+`,
+            'utf8'
+        );
+
+        try {
+            const result = spawnSync(
+                process.execPath,
+                [
+                    scriptPath,
+                    '--input', specPath,
+                    '--output', outputPath,
+                    '--compile-executable', process.execPath,
+                    '--compile-arg', compilerPath,
+                    '--compile-arg', '--tex',
+                    '--compile-arg', '{tex}',
+                    '--compile-arg', '--out',
+                    '--compile-arg', '{outputDir}',
+                    '--expected-artifact', '{outputDir}/{jobName}.pdf',
+                    '--diagnostics-output', diagnosticsPath
+                ],
+                {
+                    cwd: repoRoot,
+                    encoding: 'utf8'
+                }
+            );
+
+            expect(result.status).toBe(1);
+            expect(result.stderr).toContain('1 error(s), 0 warning(s)');
+
+            const stdout = JSON.parse(result.stdout);
+            expect(stdout.compileExecution.renderSmoke).toEqual({
+                expectedArtifactPath: path.join(tempRoot, 'circuit.pdf'),
+                artifactExists: false,
+                artifactSizeBytes: 0,
+                nonEmptyArtifact: false
+            });
+            expect(stdout.compileDiagnostics.diagnostics).toEqual([
+                expect.objectContaining({
+                    kind: 'render-artifact-missing'
+                })
+            ]);
+
+            const diagnostics = JSON.parse(fs.readFileSync(diagnosticsPath, 'utf8'));
+            expect(diagnostics.diagnostics).toEqual([
+                expect.objectContaining({
+                    kind: 'render-artifact-missing'
+                })
             ]);
         } finally {
             fs.rmSync(tempRoot, { recursive: true, force: true });

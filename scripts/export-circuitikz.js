@@ -11,12 +11,12 @@ function printUsage() {
 Usage:
   node scripts/export-circuitikz.js --input <circuit-spec.json> --output <circuit.tex>
   node scripts/export-circuitikz.js --input <circuit-spec.json> --output <circuit.tex> --compile-log <latex.log> --diagnostics-output <diagnostics.json>
-  node scripts/export-circuitikz.js --input <circuit-spec.json> --output <circuit.tex> --compile-executable <renderer> --compile-arg <arg>...
+  node scripts/export-circuitikz.js --input <circuit-spec.json> --output <circuit.tex> --compile-executable <renderer> --compile-arg <arg>... --expected-artifact <artifact>
 
 Example:
   node scripts/export-circuitikz.js --input cmos-inverter.json --output cmos-inverter.tex
   node scripts/export-circuitikz.js --input cmos-inverter.json --output cmos-inverter.tex --compile-log cmos-inverter.log --diagnostics-output cmos-inverter.diagnostics.json
-  node scripts/export-circuitikz.js --input cmos-inverter.json --output cmos-inverter.tex --compile-executable pdflatex --compile-arg -interaction=nonstopmode --compile-arg -halt-on-error --compile-arg -output-directory={outputDir} --compile-arg {tex}
+  node scripts/export-circuitikz.js --input cmos-inverter.json --output cmos-inverter.tex --compile-executable pdflatex --compile-arg -interaction=nonstopmode --compile-arg -halt-on-error --compile-arg -output-directory={outputDir} --compile-arg {tex} --expected-artifact {outputDir}/{jobName}.pdf
 `);
 }
 
@@ -44,6 +44,9 @@ function parseArgs(argv) {
       case '--compile-arg':
         args.compileArgs.push(argv[++index]);
         break;
+      case '--expected-artifact':
+        args.expectedArtifact = argv[++index];
+        break;
       case '--help':
       case '-h':
         args.help = true;
@@ -68,6 +71,9 @@ function assertRequiredArgs(args) {
   }
   if (args.compileArgs.length > 0 && !args.compileExecutable) {
     throw new Error('--compile-arg requires --compile-executable.');
+  }
+  if (args.expectedArtifact && !args.compileExecutable) {
+    throw new Error('--expected-artifact requires --compile-executable.');
   }
   if (args.diagnosticsOutput && !args.compileLog && !args.compileExecutable) {
     throw new Error('--diagnostics-output requires --compile-log or --compile-executable.');
@@ -172,7 +178,8 @@ async function run(args, repoRoot = path.resolve(__dirname, '..')) {
         executable: compileExecutable,
         args: args.compileArgs,
         texPath: outputPath,
-        outputDirectory: path.dirname(outputPath)
+        outputDirectory: path.dirname(outputPath),
+        expectedArtifactPath: args.expectedArtifact
       });
       result.compileDiagnostics = result.compileExecution.diagnostics;
 

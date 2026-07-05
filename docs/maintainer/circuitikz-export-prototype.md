@@ -62,6 +62,7 @@ node scripts/export-circuitikz.js \
   --compile-arg -halt-on-error \
   --compile-arg -output-directory={outputDir} \
   --compile-arg {tex} \
+  --expected-artifact {outputDir}/{jobName}.pdf \
   --diagnostics-output cmos-inverter.diagnostics.json
 ```
 
@@ -72,6 +73,8 @@ This path uses direct process execution with an argument array (`shell: false`).
 | `{tex}` | absolute path to the generated `.tex` file |
 | `{outputDir}` | absolute output directory for the generated artifact |
 | `{jobName}` | generated `.tex` basename without extension |
+
+When `--expected-artifact` is provided, the runner also performs the first render-smoke artifact check. It verifies that the expected file exists and is non-empty, records the result as `compileExecution.renderSmoke`, and adds a `render-artifact-missing` or `render-artifact-empty` diagnostic when the renderer exits without producing a usable artifact.
 
 The runner lives in `src/diagram/adapters/circuitikz/circuitikzCompileRunner.ts`. It reads the generated `{jobName}.log` from `{outputDir}`, reuses the same diagnostics parser, and returns `compileExecution` plus `compileDiagnostics` in the CLI JSON result. A non-ok diagnostic report still makes the CLI exit nonzero.
 
@@ -126,8 +129,9 @@ The tests verify:
 - compile-log diagnostics for missing packages, unknown keys, undefined control sequences, and overfull layout warnings;
 - diagnostics JSON output and nonzero CLI exit when a compile log contains errors;
 - shell-free compile execution with placeholder-expanded argument arrays;
+- render-smoke artifact existence and non-empty checks through `--expected-artifact`;
 - no output file is written for invalid topology.
 
 ## Non-Goals
 
-This prototype does not bundle LaTeX, call TikZJax as an Obsidian runtime dependency, run screenshot inspection, or use rendered-image feedback. Those are later gates. It also does not accept arbitrary natural-language circuit requests. The important current claim is narrower: validated `CircuitSpec` input can produce stable, readable circuitikz for two high-value golden families, existing compile logs can be converted into actionable diagnostics, and an explicitly configured local renderer can be executed without shell-specific command parsing.
+This prototype does not bundle LaTeX, call TikZJax as an Obsidian runtime dependency, run screenshot inspection, or use rendered-image feedback. Those are later gates. It also does not accept arbitrary natural-language circuit requests. The important current claim is narrower: validated `CircuitSpec` input can produce stable, readable circuitikz for two high-value golden families, existing compile logs can be converted into actionable diagnostics, and an explicitly configured local renderer can be executed without shell-specific command parsing while optionally proving that a concrete output artifact was created.

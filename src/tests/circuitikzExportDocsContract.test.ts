@@ -35,6 +35,9 @@ describe('circuitikz export docs contract', () => {
             expect(doc).toContain('--diagnostics-output');
             expect(doc).toContain('--compile-executable');
             expect(doc).toContain('--compile-arg');
+            expect(doc).toContain('--expected-artifact');
+            expect(doc).toContain('compileExecution.renderSmoke');
+            expect(doc).toContain('render-artifact-missing');
             expect(doc).toContain('circuitikzDiagnostics.ts');
             expect(doc).toContain('circuitikzCompileRunner.ts');
             expect(doc).toContain('src/tests/circuitikzExporter.test.ts');
@@ -59,6 +62,7 @@ describe('circuitikz export docs contract', () => {
             expect(doc).toContain('src/tests/circuitikzExportCli.test.ts');
             expect(doc).toContain('compile-log diagnostics');
             expect(doc).toContain('shell-free compile execution');
+            expect(doc).toContain('render-smoke artifact');
             expect(doc).toContain('TikZJax/LaTeX');
             expect(doc).toContain('screenshot');
         }

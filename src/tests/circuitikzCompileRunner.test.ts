@@ -8,6 +8,7 @@ describe('circuitikz compile runner', () => {
         const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'notemd circuitikz runner '));
         const compilerPath = path.join(tempRoot, 'fake-compiler.js');
         const texPath = path.join(tempRoot, 'cmos inverter.tex');
+        const pdfPath = path.join(tempRoot, 'cmos inverter.pdf');
         const argsPath = path.join(tempRoot, 'compiler-args.json');
         fs.writeFileSync(texPath, '\\begin{document}\\end{document}\n', 'utf8');
         fs.writeFileSync(
@@ -23,6 +24,7 @@ const texPath = args[texIndex + 1];
 const outputDirectory = args[outIndex + 1];
 const jobName = path.basename(texPath, path.extname(texPath));
 fs.writeFileSync(path.join(outputDirectory, jobName + '.log'), 'Output written on circuit.pdf (1 page).\\n', 'utf8');
+fs.writeFileSync(path.join(outputDirectory, jobName + '.pdf'), 'pdf bytes', 'utf8');
 process.stdout.write('fake compiler complete\\n');
 `,
             'utf8'
@@ -33,7 +35,8 @@ process.stdout.write('fake compiler complete\\n');
                 executable: process.execPath,
                 args: [compilerPath, '--tex', '{tex}', '--out', '{outputDir}'],
                 texPath,
-                outputDirectory: tempRoot
+                outputDirectory: tempRoot,
+                expectedArtifactPath: '{outputDir}/{jobName}.pdf'
             });
 
             expect(result).toEqual(expect.objectContaining({
@@ -46,10 +49,63 @@ process.stdout.write('fake compiler complete\\n');
                     ok: true,
                     summary: '0 error(s), 0 warning(s)',
                     diagnostics: []
+                },
+                renderSmoke: {
+                    expectedArtifactPath: pdfPath,
+                    artifactExists: true,
+                    artifactSizeBytes: 9,
+                    nonEmptyArtifact: true
                 }
             }));
             expect(result.args).toEqual([compilerPath, '--tex', texPath, '--out', tempRoot]);
             expect(JSON.parse(fs.readFileSync(argsPath, 'utf8'))).toEqual(result.args);
+        } finally {
+            fs.rmSync(tempRoot, { recursive: true, force: true });
+        }
+    });
+
+    test('returns non-ok diagnostics when the expected render artifact is missing', () => {
+        const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'notemd-circuitikz-runner-missing-artifact-'));
+        const compilerPath = path.join(tempRoot, 'fake-compiler.js');
+        const texPath = path.join(tempRoot, 'missing-output.tex');
+        fs.writeFileSync(texPath, '\\begin{document}\\end{document}\n', 'utf8');
+        fs.writeFileSync(
+            compilerPath,
+            `
+const fs = require('fs');
+const path = require('path');
+const args = process.argv.slice(2);
+const texPath = args[args.indexOf('--tex') + 1];
+const outputDirectory = args[args.indexOf('--out') + 1];
+const jobName = path.basename(texPath, path.extname(texPath));
+fs.writeFileSync(path.join(outputDirectory, jobName + '.log'), 'Output written on circuit.pdf (1 page).\\n', 'utf8');
+`,
+            'utf8'
+        );
+
+        try {
+            const result = runCircuitikzCompile({
+                executable: process.execPath,
+                args: [compilerPath, '--tex', '{tex}', '--out', '{outputDir}'],
+                texPath,
+                outputDirectory: tempRoot,
+                expectedArtifactPath: '{outputDir}/{jobName}.pdf'
+            });
+
+            expect(result.renderSmoke).toEqual({
+                expectedArtifactPath: path.join(tempRoot, 'missing-output.pdf'),
+                artifactExists: false,
+                artifactSizeBytes: 0,
+                nonEmptyArtifact: false
+            });
+            expect(result.diagnostics.ok).toBe(false);
+            expect(result.diagnostics.summary).toBe('1 error(s), 0 warning(s)');
+            expect(result.diagnostics.diagnostics).toEqual([
+                expect.objectContaining({
+                    kind: 'render-artifact-missing',
+                    message: 'Expected circuitikz render artifact was not created.'
+                })
+            ]);
         } finally {
             fs.rmSync(tempRoot, { recursive: true, force: true });
         }
