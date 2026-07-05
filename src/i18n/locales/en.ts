@@ -969,7 +969,9 @@ export const STRINGS_EN = {
         exportPngSuccessNotice: 'Diagram PNG exported to {path}',
         exportPngFailedNotice: 'Failed to export diagram PNG: {message}',
         sourceFile: 'Saved file: {path}',
-        historyTitle: 'History'
+        historyTitle: 'History',
+        diagnosticsTitle: 'Artifact diagnostics',
+        diagnosticAdvice: 'Advice: {advice}'
     },
     slideExport: {
         settingsHeading: 'Slide Export',

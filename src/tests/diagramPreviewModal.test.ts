@@ -142,6 +142,14 @@ function findByTag(root: MockElement, tag: string): MockElement | null {
     return null;
 }
 
+function collectText(root: MockElement): string[] {
+    const textValues = root.text ? [root.text] : [];
+    for (const child of root.children) {
+        textValues.push(...collectText(child));
+    }
+    return textValues;
+}
+
 function createSession(artifactOverrides: Partial<any> = {}, sourcePath = 'Notes/Topic.md', theme = 'system') {
     const artifact = {
         target: 'mermaid',
@@ -369,6 +377,51 @@ describe('diagram preview modal', () => {
         expect(modal.contentEl.children.some((child: MockElement) => child.tag === 'h3' && child.text === 'Mermaid 预览')).toBe(true);
     });
 
+    test('renders artifact diagnostics in the preview stage', async () => {
+        const modal = mountModal(new DiagramPreviewModal(mockApp, createSession({
+            diagnostics: [{
+                severity: 'error',
+                kind: 'render-png-blank',
+                message: 'Expected PNG render artifact appears visually blank.',
+                advice: 'Inspect the renderer before repair.'
+            }]
+        }), 'en') as any);
+
+        modal.onOpen();
+        await flushPromises();
+
+        const diagnosticsPanel = findByClass(modal.contentEl, 'notemd-diagram-preview-diagnostics');
+        expect(diagnosticsPanel).not.toBeNull();
+
+        const text = collectText(diagnosticsPanel as MockElement);
+        expect(text).toContain('Artifact diagnostics');
+        expect(text).toContain('ERROR · render-png-blank');
+        expect(text).toContain('Expected PNG render artifact appears visually blank.');
+        expect(text).toContain('Advice: Inspect the renderer before repair.');
+    });
+
+    test('renders localized artifact diagnostics copy in chinese preview modal', async () => {
+        const modal = mountModal(new DiagramPreviewModal(mockApp, createSession({
+            diagnostics: [{
+                severity: 'warning',
+                kind: 'render-svg-text-missing',
+                message: 'SVG text token is missing.',
+                advice: 'Check renderer text preservation.'
+            }]
+        }), 'zh-CN') as any);
+
+        modal.onOpen();
+        await flushPromises();
+
+        const diagnosticsPanel = findByClass(modal.contentEl, 'notemd-diagram-preview-diagnostics');
+        expect(diagnosticsPanel).not.toBeNull();
+
+        const text = collectText(diagnosticsPanel as MockElement);
+        expect(text).toContain('Artifact 诊断');
+        expect(text).toContain('WARNING · render-svg-text-missing');
+        expect(text).toContain('建议：Check renderer text preservation.');
+    });
+
     test('shows preview history entries and disables the active one', async () => {
         const firstModal = mountModal(new DiagramPreviewModal(mockApp, createSession({}, 'Notes/Topic.md', 'dark'), 'en') as any);
         firstModal.onOpen();
@@ -389,5 +442,33 @@ describe('diagram preview modal', () => {
         const historyButtons = collectButtons(historyPanel as MockElement);
         expect(historyButtons.some(button => button.text === 'Topic.md')).toBe(true);
         expect(historyButtons.some(button => button.text === 'Chart.md' && button.disabled)).toBe(true);
+    });
+
+    test('keeps history entries distinct when artifact diagnostics differ', async () => {
+        const firstModal = mountModal(new DiagramPreviewModal(mockApp, createSession({
+            diagnostics: [{
+                severity: 'warning',
+                kind: 'render-svg-text-missing',
+                message: 'Missing expected SVG text.'
+            }]
+        }, 'Notes/Topic.md', 'dark'), 'en') as any);
+        firstModal.onOpen();
+        await flushPromises();
+
+        const secondModal = mountModal(new DiagramPreviewModal(mockApp, createSession({
+            diagnostics: [{
+                severity: 'error',
+                kind: 'render-png-blank',
+                message: 'Blank PNG.'
+            }]
+        }, 'Notes/Topic.md', 'dark'), 'en') as any);
+        secondModal.onOpen();
+        await flushPromises();
+
+        const historyPanel = findByClass(secondModal.contentEl, 'notemd-diagram-preview-history');
+        expect(historyPanel).not.toBeNull();
+
+        const historyButtons = collectButtons(historyPanel as MockElement);
+        expect(historyButtons.filter(button => button.text === 'Topic.md')).toHaveLength(2);
     });
 });

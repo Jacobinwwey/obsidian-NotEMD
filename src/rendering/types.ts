@@ -6,6 +6,14 @@ export interface RenderArtifact {
     content: string;
     mimeType: string;
     sourceIntent: DiagramIntent;
+    diagnostics?: RenderArtifactDiagnostic[];
+}
+
+export interface RenderArtifactDiagnostic {
+    severity: 'info' | 'warning' | 'error';
+    kind: string;
+    message: string;
+    advice?: string;
 }
 
 export interface RenderOptions {

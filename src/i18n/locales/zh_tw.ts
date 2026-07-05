@@ -951,6 +951,8 @@ export const STRINGS_ZH_TW: DeepPartial<NotemdEnglishStrings> = {
         copySuccessNotice: '圖形原始碼已複製到剪貼簿！',
         copyFailedNotice: '複製圖形原始碼失敗，請查看主控台。',
         sourceFile: '已儲存檔案：{path}',
-        historyTitle: '歷史'
+        historyTitle: '歷史',
+        diagnosticsTitle: 'Artifact 診斷',
+        diagnosticAdvice: '建議：{advice}'
     }
 };

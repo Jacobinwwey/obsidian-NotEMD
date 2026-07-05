@@ -960,7 +960,9 @@ export const STRINGS_ZH_CN: DeepPartial<NotemdEnglishStrings> = {
         copySuccessNotice: '图形源码已复制到剪贴板！',
         copyFailedNotice: '复制图形源码失败，请查看控制台。',
         sourceFile: '已保存文件：{path}',
-        historyTitle: '历史'
+        historyTitle: '历史',
+        diagnosticsTitle: 'Artifact 诊断',
+        diagnosticAdvice: '建议：{advice}'
     },
     slideExport: {
         settingsHeading: '演示导出',

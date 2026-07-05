@@ -167,9 +167,44 @@ export class DiagramPreviewModal extends Modal {
                 cls: 'notemd-diagram-preview-source-path'
             });
         }
+        this.renderDiagnosticsPanel(stage, i18n);
 
         const previewContainer = stage.createDiv({ cls: 'notemd-diagram-preview-body' });
         void this.renderPreview(previewContainer);
+    }
+
+    private renderDiagnosticsPanel(container: HTMLElement, i18n: ReturnType<typeof getI18nStrings>): void {
+        const diagnostics = this.session.payload.artifact.diagnostics ?? [];
+        if (diagnostics.length === 0) {
+            return;
+        }
+
+        const panel = container.createDiv({ cls: 'notemd-diagram-preview-diagnostics' });
+        panel.createEl('h4', {
+            text: i18n.previewModal.diagnosticsTitle,
+            cls: 'notemd-diagram-preview-diagnostics-title'
+        });
+
+        const list = panel.createDiv({ cls: 'notemd-diagram-preview-diagnostics-list' });
+        for (const diagnostic of diagnostics) {
+            const item = list.createDiv({
+                cls: `notemd-diagram-preview-diagnostic is-${diagnostic.severity}`
+            });
+            item.createDiv({
+                text: `${diagnostic.severity.toUpperCase()} · ${diagnostic.kind}`,
+                cls: 'notemd-diagram-preview-diagnostic-meta'
+            });
+            item.createDiv({
+                text: diagnostic.message,
+                cls: 'notemd-diagram-preview-diagnostic-message'
+            });
+            if (diagnostic.advice?.trim()) {
+                item.createDiv({
+                    text: formatI18n(i18n.previewModal.diagnosticAdvice, { advice: diagnostic.advice }),
+                    cls: 'notemd-diagram-preview-diagnostic-advice'
+                });
+            }
+        }
     }
 
     private renderHistoryPanel(container: HTMLElement, i18n: ReturnType<typeof getI18nStrings>): void {

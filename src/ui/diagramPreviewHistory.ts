@@ -29,6 +29,7 @@ function buildHistoryKey(session: RenderPreviewSession): string {
         payload.theme,
         payload.resolvedTheme,
         payload.artifactSaved ? 'saved' : 'source',
+        JSON.stringify(payload.artifact.diagnostics ?? []),
         payload.artifact.content
     ].join('::');
 }

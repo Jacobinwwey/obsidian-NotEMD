@@ -102,6 +102,8 @@ describe('runtime i18n coverage', () => {
         expect(en.previewModal.saveSourceSuccessNotice).toBeDefined();
         expect(en.previewModal.exportPng).toBeDefined();
         expect(en.previewModal.exportPngSuccessNotice).toBeDefined();
+        expect(en.previewModal.diagnosticsTitle).toBeDefined();
+        expect(en.previewModal.diagnosticAdvice).toBeDefined();
 
         expect(zhCn.notices.processingComplete).not.toBe(en.notices.processingComplete);
         expect(zhCn.notices.updatingLinksForRenamedFile).not.toBe(en.notices.updatingLinksForRenamedFile);
@@ -123,6 +125,8 @@ describe('runtime i18n coverage', () => {
         expect(zhCn.previewModal.saveSourceSuccessNotice).not.toBe(en.previewModal.saveSourceSuccessNotice);
         expect(zhCn.previewModal.exportPng).not.toBe(en.previewModal.exportPng);
         expect(zhCn.previewModal.exportPngSuccessNotice).not.toBe(en.previewModal.exportPngSuccessNotice);
+        expect(zhCn.previewModal.diagnosticsTitle).not.toBe(en.previewModal.diagnosticsTitle);
+        expect(zhCn.previewModal.diagnosticAdvice).not.toBe(en.previewModal.diagnosticAdvice);
 
         expect(zhTw.notices.researchSummaryAppended).not.toBe(en.notices.researchSummaryAppended);
         expect(zhTw.notices.batchMermaidFixSuccess).not.toBe(en.notices.batchMermaidFixSuccess);
@@ -144,5 +148,7 @@ describe('runtime i18n coverage', () => {
         expect(zhTw.previewModal.saveSourceSuccessNotice).not.toBe(en.previewModal.saveSourceSuccessNotice);
         expect(zhTw.previewModal.exportPng).not.toBe(en.previewModal.exportPng);
         expect(zhTw.previewModal.exportPngSuccessNotice).not.toBe(en.previewModal.exportPngSuccessNotice);
+        expect(zhTw.previewModal.diagnosticsTitle).not.toBe(en.previewModal.diagnosticsTitle);
+        expect(zhTw.previewModal.diagnosticAdvice).not.toBe(en.previewModal.diagnosticAdvice);
     });
 });

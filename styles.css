@@ -505,6 +505,70 @@
     overflow-wrap: anywhere;
 }
 
+.notemd-diagram-preview-diagnostics {
+    margin: 0 0 0.8em;
+    border: 1px solid var(--notemd-border);
+    border-radius: 10px;
+    padding: 0.75em;
+    background: color-mix(in srgb, var(--background-secondary) 82%, #f8fafc 18%);
+}
+
+.notemd-diagram-preview-diagnostics-title {
+    margin: 0 0 0.55em;
+    font-size: 12px;
+    line-height: 1.4;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+}
+
+.notemd-diagram-preview-diagnostics-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5em;
+}
+
+.notemd-diagram-preview-diagnostic {
+    border-left: 3px solid var(--text-muted);
+    padding: 0.45em 0.55em;
+    background: var(--background-primary);
+    border-radius: 6px;
+}
+
+.notemd-diagram-preview-diagnostic.is-error {
+    border-left-color: #dc2626;
+}
+
+.notemd-diagram-preview-diagnostic.is-warning {
+    border-left-color: #d97706;
+}
+
+.notemd-diagram-preview-diagnostic.is-info {
+    border-left-color: var(--interactive-accent);
+}
+
+.notemd-diagram-preview-diagnostic-meta {
+    color: var(--text-muted);
+    font-size: 11px;
+    line-height: 1.35;
+    word-break: break-word;
+    overflow-wrap: anywhere;
+}
+
+.notemd-diagram-preview-diagnostic-message,
+.notemd-diagram-preview-diagnostic-advice {
+    margin-top: 0.25em;
+    color: var(--text-normal);
+    font-size: 12px;
+    line-height: 1.45;
+    word-break: break-word;
+    overflow-wrap: anywhere;
+}
+
+.notemd-diagram-preview-diagnostic-advice {
+    color: var(--text-muted);
+}
+
 .notemd-diagram-preview-body {
     min-height: 360px;
     max-height: 72vh;

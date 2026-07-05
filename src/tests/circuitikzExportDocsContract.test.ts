@@ -71,6 +71,8 @@ describe('circuitikz export docs contract', () => {
             expect(doc).toContain('render-smoke artifact');
             expect(doc).toContain('--expected-svg-text');
             expect(doc).toContain('PNG');
+            expect(doc).toContain('RenderArtifact.diagnostics');
+            expect(doc).toContain('DiagramPreviewModal.ts');
             expect(doc).toContain('TikZJax/LaTeX');
             expect(doc).toContain('screenshot');
         }
