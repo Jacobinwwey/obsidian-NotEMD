@@ -260,6 +260,68 @@ describe('circuitikz render smoke inspection', () => {
         }
     });
 
+    test('reports path-only SVG glyph uses that extend outside the viewBox', () => {
+        const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'notemd-circuitikz-svg-use-bounds-'));
+        const svgPath = path.join(tempRoot, 'path-only-use-out-of-bounds.svg');
+        fs.writeFileSync(
+            svgPath,
+            '<svg viewBox="0 0 100 80"><defs><path id="glyph-v" d="M0 0 L12 0 L12 8 L0 8"/></defs><path d="M10 10H20"/><use href="#glyph-v" x="94" y="20"/></svg>',
+            'utf8'
+        );
+
+        try {
+            const report = inspectCircuitikzRenderArtifact({
+                expectedArtifactPath: svgPath,
+                expectedSvgText: ['v_{out}']
+            });
+
+            expect(report.artifactKind).toBe('svg');
+            expect(report.svg).toEqual(expect.objectContaining({
+                pathOnlyGlyphUseCount: 1
+            }));
+            expect(report.diagnostics).toEqual([
+                expect.objectContaining({
+                    kind: 'render-svg-text-path-only'
+                }),
+                expect.objectContaining({
+                    kind: 'render-svg-out-of-bounds',
+                    message: expect.stringContaining('use:#glyph-v')
+                })
+            ]);
+        } finally {
+            fs.rmSync(tempRoot, { recursive: true, force: true });
+        }
+    });
+
+    test('does not count definitions-only SVG glyph paths as visible drawing elements', () => {
+        const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'notemd-circuitikz-svg-defs-only-'));
+        const svgPath = path.join(tempRoot, 'defs-only.svg');
+        fs.writeFileSync(
+            svgPath,
+            '<svg viewBox="0 0 100 80"><defs><path id="glyph-v" d="M0 0 L12 0 L12 8 L0 8"/></defs></svg>',
+            'utf8'
+        );
+
+        try {
+            const report = inspectCircuitikzRenderArtifact({
+                expectedArtifactPath: svgPath
+            });
+
+            expect(report.artifactKind).toBe('svg');
+            expect(report.svg).toEqual(expect.objectContaining({
+                visibleElementCount: 0,
+                pathOnlyGlyphUseCount: 0
+            }));
+            expect(report.diagnostics).toEqual([
+                expect.objectContaining({
+                    kind: 'render-svg-no-visible-elements'
+                })
+            ]);
+        } finally {
+            fs.rmSync(tempRoot, { recursive: true, force: true });
+        }
+    });
+
     test('reports obvious overlapping SVG text labels', () => {
         const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'notemd-circuitikz-svg-overlap-'));
         const svgPath = path.join(tempRoot, 'overlap.svg');

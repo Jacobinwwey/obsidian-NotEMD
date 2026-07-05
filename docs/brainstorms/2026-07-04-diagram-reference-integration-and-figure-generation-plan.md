@@ -207,6 +207,7 @@ Phase E implementation status on 2026-07-05: `scripts/export-diagram-artifact.js
 - [x] Add transform-aware geometry for common SVG group and element transforms before bounded-canvas/text-overlap checks.
 - [x] Add conservative SVG label-vs-drawing overlap diagnostics through `render-svg-label-overlap`.
 - [x] Add path-only SVG label classification through `pathOnlyGlyphUseCount` and `render-svg-text-path-only`.
+- [x] Add path-only glyph placement checks by resolving `<use href="#...">` boxes for bounded-canvas diagnostics.
 - [x] Add a front-end artifact diagnostics surface in the diagram preview modal.
 - [x] Add source-only preview fallback for non-inline artifacts so future circuitikz, Draw.io, and Drawnix sources can expose content and diagnostics without pretending to be visually rendered.
 - [x] Add maintainer smoke fixtures and an aggregate runner for the two supported circuitikz golden families.

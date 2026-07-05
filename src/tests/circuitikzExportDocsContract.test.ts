@@ -54,6 +54,8 @@ describe('circuitikz export docs contract', () => {
             expect(doc).toContain('label-vs-drawing');
             expect(doc).toContain('transform-aware geometry');
             expect(doc).toContain('pathOnlyGlyphUseCount');
+            expect(doc).toContain('path-only glyph placement');
+            expect(doc).toContain('<use href="#...">');
             expect(doc).toContain('render-png-blank');
             expect(doc).toContain('render-png-foreground-dense');
             expect(doc).toContain('render-png-content-clipped');
@@ -106,6 +108,7 @@ describe('circuitikz export docs contract', () => {
             expect(doc).toContain('render-svg-label-overlap');
             expect(doc).toContain('label-vs-drawing');
             expect(doc).toContain('transform-aware geometry');
+            expect(doc).toContain('path-only glyph placement');
             expect(doc).toContain('RenderArtifact.diagnostics');
             expect(doc).toContain('diagnostic summary');
             expect(doc).toContain('src/rendering/diagnostics.ts');

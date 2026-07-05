@@ -161,6 +161,19 @@ function countPathOnlyGlyphUses(svgText: string): number {
         .length;
 }
 
+function removeSvgDefinitions(svgText: string): string {
+    return svgText
+        .replace(/<defs\b[\s\S]*?<\/defs>/gi, ' ')
+        .replace(/<defs\b[^>]*\/\s*>/gi, ' ');
+}
+
+function countVisibleSvgElements(svgText: string): number {
+    return countMatches(
+        removeSvgDefinitions(svgText),
+        /<(?:path|line|polyline|polygon|rect|circle|ellipse|text|use)\b(?![^>]*\bdisplay\s*=\s*["']none["'])/gi
+    );
+}
+
 function parseNumericAttribute(tag: string, attributeName: string): number | undefined {
     const value = readAttribute(tag, attributeName);
     if (!value) {
@@ -378,6 +391,48 @@ function pathBox(tag: string): SvgBox | undefined {
     return boxFromPoints('path', points);
 }
 
+function collectPathDefinitionBoxes(svgText: string): Map<string, SvgBox> {
+    const definitions = new Map<string, SvgBox>();
+    for (const defsMatch of svgText.matchAll(/<defs\b[\s\S]*?<\/defs>/gi)) {
+        const defsText = defsMatch[0];
+        for (const pathMatch of defsText.matchAll(/<path\b[^>]*>/gi)) {
+            const tag = pathMatch[0];
+            const id = readAttribute(tag, 'id');
+            if (!id) {
+                continue;
+            }
+            const box = pathBox(tag);
+            if (box) {
+                definitions.set(id, box);
+            }
+        }
+    }
+
+    return definitions;
+}
+
+function useBox(tag: string, pathDefinitions: Map<string, SvgBox>): SvgBox | undefined {
+    const reference = readAttribute(tag, 'href') ?? readAttribute(tag, 'xlink:href');
+    if (!reference?.startsWith('#')) {
+        return undefined;
+    }
+
+    const definition = pathDefinitions.get(reference.slice(1));
+    if (!definition) {
+        return undefined;
+    }
+
+    const x = parseNumericAttribute(tag, 'x') ?? 0;
+    const y = parseNumericAttribute(tag, 'y') ?? 0;
+    return {
+        label: `use:${reference}`,
+        minX: definition.minX + x,
+        minY: definition.minY + y,
+        maxX: definition.maxX + x,
+        maxY: definition.maxY + y
+    };
+}
+
 function elementBox(tagName: string, tag: string): SvgBox | undefined {
     if (tagName === 'path') {
         return pathBox(tag);
@@ -481,15 +536,16 @@ function collectSvgBoxes(svgText: string): { boxes: SvgBox[]; drawingBoxes: SvgB
     const boxes: SvgBox[] = [];
     const drawingBoxes: SvgBox[] = [];
     const textBoxes: SvgTextBox[] = [];
+    const pathDefinitions = collectPathDefinitionBoxes(svgText);
     const groupStack: Array<{ transform: SvgTransform; hidden: boolean }> = [{
         transform: identityTransform(),
         hidden: false
     }];
-    const tokenPattern = /<\/g\s*>|<g\b[^>]*\/?>|<(path|line|rect|circle|ellipse)\b[^>]*\/?>|<text\b[^>]*>[\s\S]*?<\/text>/gi;
+    const tokenPattern = /<\/(?:g|defs)\s*>|<defs\b[^>]*\/?>|<g\b[^>]*\/?>|<(path|line|rect|circle|ellipse|use)\b[^>]*\/?>|<text\b[^>]*>[\s\S]*?<\/text>/gi;
 
     for (const match of svgText.matchAll(tokenPattern)) {
         const tag = match[0];
-        if (/^<\/g/i.test(tag)) {
+        if (/^<\/(?:g|defs)/i.test(tag)) {
             if (groupStack.length > 1) {
                 groupStack.pop();
             }
@@ -497,6 +553,17 @@ function collectSvgBoxes(svgText: string): { boxes: SvgBox[]; drawingBoxes: SvgB
         }
 
         const parent = groupStack[groupStack.length - 1];
+        if (/^<defs\b/i.test(tag)) {
+            if (/\/\s*>$/.test(tag)) {
+                continue;
+            }
+            groupStack.push({
+                transform: parent.transform,
+                hidden: true
+            });
+            continue;
+        }
+
         if (/^<g\b/i.test(tag)) {
             if (/\/\s*>$/.test(tag)) {
                 continue;
@@ -527,11 +594,15 @@ function collectSvgBoxes(svgText: string): { boxes: SvgBox[]; drawingBoxes: SvgB
         if (!tagName) {
             continue;
         }
-        const box = elementBox(tagName, tag);
+        const box = tagName === 'use'
+            ? useBox(tag, pathDefinitions)
+            : elementBox(tagName, tag);
         if (box) {
             const transformedBox = transformBox(box, localTransform);
             boxes.push(transformedBox);
-            drawingBoxes.push(transformedBox);
+            if (tagName !== 'use') {
+                drawingBoxes.push(transformedBox);
+            }
         }
     }
 
@@ -590,10 +661,7 @@ function extractSvgSmoke(svgText: string, expectedSvgText: string[]): Circuitikz
         width,
         height,
         viewBox,
-        visibleElementCount: countMatches(
-            svgText,
-            /<(?:path|line|polyline|polygon|rect|circle|ellipse|text|use)\b(?![^>]*\bdisplay\s*=\s*["']none["'])/gi
-        ),
+        visibleElementCount: countVisibleSvgElements(svgText),
         textElementCount: countMatches(svgText, /<text\b/gi),
         pathOnlyGlyphUseCount: countPathOnlyGlyphUses(svgText),
         expectedText: expectedSvgText.map(text => ({

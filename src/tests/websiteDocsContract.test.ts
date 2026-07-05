@@ -83,6 +83,8 @@ describe('website documentation contract', () => {
             expect(content).toContain('label-vs-drawing');
             expect(content).toContain('transform-aware geometry');
             expect(content).toContain('pathOnlyGlyphUseCount');
+            expect(content).toContain('path-only glyph placement');
+            expect(content).toContain('<use href="#...">');
             expect(content).toContain('render-png-blank');
             expect(content).toContain('render-png-foreground-dense');
             expect(content).toContain('render-png-content-clipped');
