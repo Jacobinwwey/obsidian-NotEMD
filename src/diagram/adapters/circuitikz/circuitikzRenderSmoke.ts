@@ -59,6 +59,18 @@ interface PngHeader {
     interlaceMethod: number;
 }
 
+interface SvgBox {
+    label: string;
+    minX: number;
+    minY: number;
+    maxX: number;
+    maxY: number;
+}
+
+interface SvgTextBox extends SvgBox {
+    text: string;
+}
+
 function decodeXmlEntities(text: string): string {
     return text
         .replace(/&lt;/g, '<')
@@ -111,6 +123,248 @@ function countMatches(text: string, pattern: RegExp): number {
     return Array.from(text.matchAll(pattern)).length;
 }
 
+function parseNumericAttribute(tag: string, attributeName: string): number | undefined {
+    const value = readAttribute(tag, attributeName);
+    if (!value) {
+        return undefined;
+    }
+
+    const match = value.trim().match(/^-?[0-9]+(?:\.[0-9]+)?/);
+    if (!match) {
+        return undefined;
+    }
+
+    const numericValue = Number(match[0]);
+    return Number.isFinite(numericValue) ? numericValue : undefined;
+}
+
+function boxFromPoints(label: string, points: Array<[number, number]>): SvgBox | undefined {
+    if (points.length === 0) {
+        return undefined;
+    }
+
+    const xs = points.map(point => point[0]);
+    const ys = points.map(point => point[1]);
+    return {
+        label,
+        minX: Math.min(...xs),
+        minY: Math.min(...ys),
+        maxX: Math.max(...xs),
+        maxY: Math.max(...ys)
+    };
+}
+
+function pathBox(tag: string): SvgBox | undefined {
+    const d = readAttribute(tag, 'd');
+    if (!d) {
+        return undefined;
+    }
+
+    const tokens = Array.from(d.matchAll(/[MLHVZmlhvz]|-?[0-9]+(?:\.[0-9]+)?(?:e[-+]?[0-9]+)?/g))
+        .map(match => match[0]);
+    const points: Array<[number, number]> = [];
+    let command = '';
+    let index = 0;
+    let x = 0;
+    let y = 0;
+
+    const readNumber = (): number | undefined => {
+        const token = tokens[index];
+        if (token === undefined || /^[MLHVZmlhvz]$/.test(token)) {
+            return undefined;
+        }
+        index += 1;
+        const value = Number(token);
+        return Number.isFinite(value) ? value : undefined;
+    };
+
+    while (index < tokens.length) {
+        const token = tokens[index];
+        if (/^[MLHVZmlhvz]$/.test(token)) {
+            command = token;
+            index += 1;
+            if (command.toLowerCase() === 'z') {
+                continue;
+            }
+        }
+
+        if (command === 'M' || command === 'L' || command === 'm' || command === 'l') {
+            const nextX = readNumber();
+            const nextY = readNumber();
+            if (nextX === undefined || nextY === undefined) {
+                break;
+            }
+            x = command === 'm' || command === 'l' ? x + nextX : nextX;
+            y = command === 'm' || command === 'l' ? y + nextY : nextY;
+            points.push([x, y]);
+            continue;
+        }
+
+        if (command === 'H' || command === 'h') {
+            const nextX = readNumber();
+            if (nextX === undefined) {
+                break;
+            }
+            x = command === 'h' ? x + nextX : nextX;
+            points.push([x, y]);
+            continue;
+        }
+
+        if (command === 'V' || command === 'v') {
+            const nextY = readNumber();
+            if (nextY === undefined) {
+                break;
+            }
+            y = command === 'v' ? y + nextY : nextY;
+            points.push([x, y]);
+            continue;
+        }
+
+        index += 1;
+    }
+
+    return boxFromPoints('path', points);
+}
+
+function elementBox(tagName: string, tag: string): SvgBox | undefined {
+    if (tagName === 'path') {
+        return pathBox(tag);
+    }
+
+    if (tagName === 'line') {
+        const x1 = parseNumericAttribute(tag, 'x1');
+        const y1 = parseNumericAttribute(tag, 'y1');
+        const x2 = parseNumericAttribute(tag, 'x2');
+        const y2 = parseNumericAttribute(tag, 'y2');
+        if (x1 === undefined || y1 === undefined || x2 === undefined || y2 === undefined) {
+            return undefined;
+        }
+        return boxFromPoints('line', [[x1, y1], [x2, y2]]);
+    }
+
+    if (tagName === 'rect') {
+        const x = parseNumericAttribute(tag, 'x') ?? 0;
+        const y = parseNumericAttribute(tag, 'y') ?? 0;
+        const width = parseNumericAttribute(tag, 'width');
+        const height = parseNumericAttribute(tag, 'height');
+        if (width === undefined || height === undefined) {
+            return undefined;
+        }
+        return {
+            label: 'rect',
+            minX: x,
+            minY: y,
+            maxX: x + width,
+            maxY: y + height
+        };
+    }
+
+    if (tagName === 'circle') {
+        const cx = parseNumericAttribute(tag, 'cx');
+        const cy = parseNumericAttribute(tag, 'cy');
+        const r = parseNumericAttribute(tag, 'r');
+        if (cx === undefined || cy === undefined || r === undefined) {
+            return undefined;
+        }
+        return {
+            label: 'circle',
+            minX: cx - r,
+            minY: cy - r,
+            maxX: cx + r,
+            maxY: cy + r
+        };
+    }
+
+    if (tagName === 'ellipse') {
+        const cx = parseNumericAttribute(tag, 'cx');
+        const cy = parseNumericAttribute(tag, 'cy');
+        const rx = parseNumericAttribute(tag, 'rx');
+        const ry = parseNumericAttribute(tag, 'ry');
+        if (cx === undefined || cy === undefined || rx === undefined || ry === undefined) {
+            return undefined;
+        }
+        return {
+            label: 'ellipse',
+            minX: cx - rx,
+            minY: cy - ry,
+            maxX: cx + rx,
+            maxY: cy + ry
+        };
+    }
+
+    return undefined;
+}
+
+function extractTextBoxes(svgText: string): SvgTextBox[] {
+    const boxes: SvgTextBox[] = [];
+    for (const match of svgText.matchAll(/<text\b([^>]*)>([\s\S]*?)<\/text>/gi)) {
+        const tag = match[0];
+        if (/\bdisplay\s*=\s*["']none["']/i.test(tag)) {
+            continue;
+        }
+
+        const x = parseNumericAttribute(tag, 'x');
+        const y = parseNumericAttribute(tag, 'y');
+        if (x === undefined || y === undefined) {
+            continue;
+        }
+
+        const fontSize = parseNumericAttribute(tag, 'font-size') ?? 12;
+        const text = decodeXmlEntities(match[2].replace(/<[^>]+>/g, '').trim());
+        if (!text) {
+            continue;
+        }
+
+        const width = Math.max(fontSize * 0.65, text.length * fontSize * 0.55);
+        boxes.push({
+            label: `text:${text}`,
+            text,
+            minX: x,
+            minY: y - fontSize,
+            maxX: x + width,
+            maxY: y + fontSize * 0.25
+        });
+    }
+
+    return boxes;
+}
+
+function extractElementBoxes(svgText: string): SvgBox[] {
+    const boxes: SvgBox[] = [];
+    for (const match of svgText.matchAll(/<(path|line|rect|circle|ellipse)\b[^>]*>/gi)) {
+        const tag = match[0];
+        if (/\bdisplay\s*=\s*["']none["']/i.test(tag)) {
+            continue;
+        }
+
+        const box = elementBox(match[1].toLowerCase(), tag);
+        if (box) {
+            boxes.push(box);
+        }
+    }
+
+    boxes.push(...extractTextBoxes(svgText));
+    return boxes;
+}
+
+function boxIsOutsideViewBox(box: SvgBox, viewBox: [number, number, number, number]): boolean {
+    const tolerance = 1;
+    const [minX, minY, width, height] = viewBox;
+    const maxX = minX + width;
+    const maxY = minY + height;
+
+    return box.minX < minX - tolerance
+        || box.minY < minY - tolerance
+        || box.maxX > maxX + tolerance
+        || box.maxY > maxY + tolerance;
+}
+
+function boxesOverlap(left: SvgBox, right: SvgBox): boolean {
+    const overlapWidth = Math.min(left.maxX, right.maxX) - Math.max(left.minX, right.minX);
+    const overlapHeight = Math.min(left.maxY, right.maxY) - Math.max(left.minY, right.minY);
+    return overlapWidth > 1 && overlapHeight > 1;
+}
+
 function extractSvgSmoke(svgText: string, expectedSvgText: string[]): CircuitikzSvgSmokeReport {
     const svgTag = svgText.match(/<svg\b[^>]*>/i)?.[0];
     const width = parsePositiveLength(svgTag ? readAttribute(svgTag, 'width') : undefined);
@@ -155,7 +409,11 @@ function artifactEmptyDiagnostic(expectedArtifactPath: string): CircuitikzCompil
     };
 }
 
-function svgDiagnostic(report: CircuitikzSvgSmokeReport, expectedArtifactPath: string): CircuitikzCompileDiagnostic[] {
+function svgDiagnostic(
+    report: CircuitikzSvgSmokeReport,
+    svgText: string,
+    expectedArtifactPath: string
+): CircuitikzCompileDiagnostic[] {
     const diagnostics: CircuitikzCompileDiagnostic[] = [];
 
     if (!report.rootElementPresent) {
@@ -197,6 +455,41 @@ function svgDiagnostic(report: CircuitikzSvgSmokeReport, expectedArtifactPath: s
                 excerpt: expectedArtifactPath,
                 advice: 'Only require SVG text tokens for renderers that preserve text nodes or searchable labels; otherwise validate labels through a later OCR/screenshot pass.'
             });
+        }
+    }
+
+    if (report.viewBox) {
+        const outOfBoundsBox = extractElementBoxes(svgText)
+            .find(box => boxIsOutsideViewBox(box, report.viewBox as [number, number, number, number]));
+        if (outOfBoundsBox) {
+            diagnostics.push({
+                severity: 'error',
+                kind: 'render-svg-out-of-bounds',
+                message: `Expected SVG render artifact contains an element that extends outside the SVG viewBox: ${outOfBoundsBox.label}`,
+                excerpt: expectedArtifactPath,
+                advice: 'Treat this as a bounded-canvas failure. Inspect layout coordinates before accepting or repairing the circuit visually.'
+            });
+        }
+    }
+
+    const textBoxes = extractTextBoxes(svgText);
+    for (let leftIndex = 0; leftIndex < textBoxes.length; leftIndex += 1) {
+        for (let rightIndex = leftIndex + 1; rightIndex < textBoxes.length; rightIndex += 1) {
+            const left = textBoxes[leftIndex];
+            const right = textBoxes[rightIndex];
+            if (!boxesOverlap(left, right)) {
+                continue;
+            }
+
+            diagnostics.push({
+                severity: 'error',
+                kind: 'render-svg-text-overlap',
+                message: `Expected SVG render artifact contains overlapping text labels: ${left.text} / ${right.text}`,
+                excerpt: expectedArtifactPath,
+                advice: 'Treat this as a label-legibility failure. Keep circuit topology fixed and adjust layout/routing before accepting the artifact.'
+            });
+            leftIndex = textBoxes.length;
+            break;
         }
     }
 
@@ -489,6 +782,6 @@ export function inspectCircuitikzRenderArtifact(request: CircuitikzRenderSmokeRe
         nonEmptyArtifact: true,
         artifactKind: 'svg',
         svg,
-        diagnostics: svgDiagnostic(svg, expectedArtifactPath)
+        diagnostics: svgDiagnostic(svg, svgText, expectedArtifactPath)
     };
 }

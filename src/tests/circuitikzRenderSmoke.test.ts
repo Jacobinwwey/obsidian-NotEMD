@@ -147,6 +147,58 @@ describe('circuitikz render smoke inspection', () => {
         }
     });
 
+    test('reports SVG drawing elements that extend outside the viewBox', () => {
+        const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'notemd-circuitikz-svg-bounds-'));
+        const svgPath = path.join(tempRoot, 'out-of-bounds.svg');
+        fs.writeFileSync(
+            svgPath,
+            '<svg viewBox="0 0 100 80"><path d="M10 10 L140 10"/></svg>',
+            'utf8'
+        );
+
+        try {
+            const report = inspectCircuitikzRenderArtifact({
+                expectedArtifactPath: svgPath
+            });
+
+            expect(report.artifactKind).toBe('svg');
+            expect(report.diagnostics).toEqual([
+                expect.objectContaining({
+                    kind: 'render-svg-out-of-bounds',
+                    message: expect.stringContaining('extends outside the SVG viewBox')
+                })
+            ]);
+        } finally {
+            fs.rmSync(tempRoot, { recursive: true, force: true });
+        }
+    });
+
+    test('reports obvious overlapping SVG text labels', () => {
+        const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'notemd-circuitikz-svg-overlap-'));
+        const svgPath = path.join(tempRoot, 'overlap.svg');
+        fs.writeFileSync(
+            svgPath,
+            '<svg viewBox="0 0 160 100"><text x="40" y="40" font-size="12">v_{in}</text><text x="42" y="41" font-size="12">v_{out}</text><path d="M0 0H12"/></svg>',
+            'utf8'
+        );
+
+        try {
+            const report = inspectCircuitikzRenderArtifact({
+                expectedArtifactPath: svgPath
+            });
+
+            expect(report.artifactKind).toBe('svg');
+            expect(report.diagnostics).toEqual([
+                expect.objectContaining({
+                    kind: 'render-svg-text-overlap',
+                    message: expect.stringContaining('overlap')
+                })
+            ]);
+        } finally {
+            fs.rmSync(tempRoot, { recursive: true, force: true });
+        }
+    });
+
     test('accepts a nonblank PNG screenshot artifact', () => {
         const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'notemd-circuitikz-png-smoke-'));
         const pngPath = path.join(tempRoot, 'render.png');

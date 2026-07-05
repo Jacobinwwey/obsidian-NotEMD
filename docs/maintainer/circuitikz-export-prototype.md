@@ -74,7 +74,7 @@ This path uses direct process execution with an argument array (`shell: false`).
 | `{outputDir}` | absolute output directory for the generated artifact |
 | `{jobName}` | generated `.tex` basename without extension |
 
-When `--expected-artifact` is provided, the runner also performs render-smoke artifact checks. For opaque artifacts such as PDF, it verifies that the expected file exists and is non-empty. For `.svg` artifacts, it additionally checks for an `<svg>` root, positive dimensions or `viewBox`, at least one visible drawing element, and any repeated `--expected-svg-text` tokens:
+When `--expected-artifact` is provided, the runner also performs render-smoke artifact checks. For opaque artifacts such as PDF, it verifies that the expected file exists and is non-empty. For `.svg` artifacts, it additionally checks for an `<svg>` root, positive dimensions or `viewBox`, at least one visible drawing element, any repeated `--expected-svg-text` tokens, obvious elements outside the `viewBox`, and obvious overlapping `<text>` labels:
 
 ```bash
 node scripts/export-circuitikz.js \
@@ -89,7 +89,9 @@ node scripts/export-circuitikz.js \
 
 For `.png` screenshot artifacts, the smoke check decodes non-interlaced 8-bit grayscale, RGB, grayscale-alpha, or RGBA PNG output and verifies positive dimensions plus at least one pixel that differs from the top-left background color. Blank screenshots fail with `render-png-blank`; malformed or unsupported PNGs fail with `render-png-invalid` or `render-png-unsupported`.
 
-The result is recorded as `compileExecution.renderSmoke`. Missing or empty artifacts add `render-artifact-missing` or `render-artifact-empty`; SVG structure failures add diagnostics such as `render-svg-invalid`, `render-svg-dimension-missing`, `render-svg-no-visible-elements`, or `render-svg-text-missing`.
+The result is recorded as `compileExecution.renderSmoke`. Missing or empty artifacts add `render-artifact-missing` or `render-artifact-empty`; SVG structure failures add diagnostics such as `render-svg-invalid`, `render-svg-dimension-missing`, `render-svg-no-visible-elements`, `render-svg-text-missing`, `render-svg-out-of-bounds`, or `render-svg-text-overlap`.
+
+The SVG bounded-canvas and text-overlap checks are intentionally conservative. They parse common direct SVG coordinates in `path`, `line`, `rect`, `circle`, `ellipse`, and positioned `text` elements. They catch obvious fixture failures before screenshot review, but they do not replace OCR, transform-aware geometry, or final image-based visual inspection.
 
 The runner lives in `src/diagram/adapters/circuitikz/circuitikzCompileRunner.ts`. It reads the generated `{jobName}.log` from `{outputDir}`, reuses the same diagnostics parser, and returns `compileExecution` plus `compileDiagnostics` in the CLI JSON result. Artifact checks live in `src/diagram/adapters/circuitikz/circuitikzRenderSmoke.ts` so SVG structure rules remain testable without spawning a renderer. A non-ok diagnostic report still makes the CLI exit nonzero.
 
@@ -184,6 +186,7 @@ The tests verify:
 - shell-free compile execution with placeholder-expanded argument arrays;
 - render-smoke artifact existence and non-empty checks through `--expected-artifact`;
 - SVG artifact structure checks and optional text-token checks through repeated `--expected-svg-text`;
+- bounded SVG viewBox and obvious text-overlap checks;
 - PNG screenshot smoke checks for positive dimensions and non-background pixels;
 - maintainer fixture discovery and aggregate smoke execution through `src/tests/circuitikzSmokeFixturesCli.test.ts`;
 - no output file is written for invalid topology.

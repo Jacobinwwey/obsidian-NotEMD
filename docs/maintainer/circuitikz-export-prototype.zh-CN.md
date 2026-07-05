@@ -74,7 +74,7 @@ node scripts/export-circuitikz.js \
 | `{outputDir}` | 生成 artifact 的绝对输出目录 |
 | `{jobName}` | 生成 `.tex` 文件去掉扩展名后的 basename |
 
-提供 `--expected-artifact` 时，runner 还会执行 render-smoke artifact 检查。对于 PDF 这类 opaque artifact，它会确认预期文件存在且非空。对于 `.svg` artifact，它还会检查 `<svg>` root、正的尺寸或 `viewBox`、至少一个可见绘图元素，以及重复传入的 `--expected-svg-text` tokens：
+提供 `--expected-artifact` 时，runner 还会执行 render-smoke artifact 检查。对于 PDF 这类 opaque artifact，它会确认预期文件存在且非空。对于 `.svg` artifact，它还会检查 `<svg>` root、正的尺寸或 `viewBox`、至少一个可见绘图元素、重复传入的 `--expected-svg-text` tokens、明显跑出 `viewBox` 的元素，以及明显重叠的 `<text>` labels：
 
 ```bash
 node scripts/export-circuitikz.js \
@@ -89,7 +89,9 @@ node scripts/export-circuitikz.js \
 
 对于 `.png` screenshot artifact，smoke check 会解码非交错的 8-bit grayscale、RGB、grayscale-alpha 或 RGBA PNG 输出，并检查正的尺寸以及至少一个不同于左上角背景色的像素。空白截图会以 `render-png-blank` 失败；格式损坏或不支持的 PNG 会以 `render-png-invalid` 或 `render-png-unsupported` 失败。
 
-检查结果会记录为 `compileExecution.renderSmoke`。缺失或空 artifact 会追加 `render-artifact-missing` 或 `render-artifact-empty`；SVG 结构失败会追加 `render-svg-invalid`、`render-svg-dimension-missing`、`render-svg-no-visible-elements` 或 `render-svg-text-missing` 等 diagnostic。
+检查结果会记录为 `compileExecution.renderSmoke`。缺失或空 artifact 会追加 `render-artifact-missing` 或 `render-artifact-empty`；SVG 结构失败会追加 `render-svg-invalid`、`render-svg-dimension-missing`、`render-svg-no-visible-elements`、`render-svg-text-missing`、`render-svg-out-of-bounds` 或 `render-svg-text-overlap` 等 diagnostic。
+
+SVG bounded-canvas 与 text-overlap 检查有意保持保守。它们只解析 `path`、`line`、`rect`、`circle`、`ellipse` 和带位置的 `text` 元素中常见的直接 SVG 坐标。它们用于在 screenshot review 之前捕获明显 fixture failure，但不能替代 OCR、transform-aware geometry 或最终 image-based visual inspection。
 
 runner 位于 `src/diagram/adapters/circuitikz/circuitikzCompileRunner.ts`。它会从 `{outputDir}` 读取生成的 `{jobName}.log`，复用同一个 diagnostics parser，并在 CLI JSON result 中返回 `compileExecution` 与 `compileDiagnostics`。artifact 检查位于 `src/diagram/adapters/circuitikz/circuitikzRenderSmoke.ts`，这样 SVG 结构规则可以在不 spawn renderer 的情况下单独测试。diagnostic report 非 ok 时，CLI 仍会以非零状态退出。
 
@@ -184,6 +186,7 @@ npm test -- --runInBand src/tests/circuitikzExporter.test.ts src/tests/circuitik
 - 使用 placeholder-expanded argument arrays 的 shell-free compile execution；
 - 通过 `--expected-artifact` 执行 render-smoke artifact 存在与非空检查；
 - 对 SVG artifact 执行结构检查，并通过重复的 `--expected-svg-text` 执行可选文本 token 检查；
+- 检查 bounded SVG viewBox 和明显 text-overlap；
 - 对 PNG screenshot 执行正尺寸与非背景像素 smoke 检查；
 - 通过 `src/tests/circuitikzSmokeFixturesCli.test.ts` 验证 maintainer fixture discovery 与聚合 smoke execution；
 - 无效拓扑不会写出 output file。
