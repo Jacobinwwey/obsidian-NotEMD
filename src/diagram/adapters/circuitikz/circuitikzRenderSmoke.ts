@@ -325,7 +325,7 @@ function pathBox(tag: string): SvgBox | undefined {
         return undefined;
     }
 
-    const tokens = Array.from(d.matchAll(/[MLHVZmlhvz]|-?[0-9]+(?:\.[0-9]+)?(?:e[-+]?[0-9]+)?/g))
+    const tokens = Array.from(d.matchAll(/[MLHVZAmlhvza]|-?[0-9]+(?:\.[0-9]+)?(?:e[-+]?[0-9]+)?/g))
         .map(match => match[0]);
     const points: Array<[number, number]> = [];
     let command = '';
@@ -335,7 +335,7 @@ function pathBox(tag: string): SvgBox | undefined {
 
     const readNumber = (): number | undefined => {
         const token = tokens[index];
-        if (token === undefined || /^[MLHVZmlhvz]$/.test(token)) {
+        if (token === undefined || /^[MLHVZAmlhvza]$/.test(token)) {
             return undefined;
         }
         index += 1;
@@ -345,7 +345,7 @@ function pathBox(tag: string): SvgBox | undefined {
 
     while (index < tokens.length) {
         const token = tokens[index];
-        if (/^[MLHVZmlhvz]$/.test(token)) {
+        if (/^[MLHVZAmlhvza]$/.test(token)) {
             command = token;
             index += 1;
             if (command.toLowerCase() === 'z') {
@@ -381,6 +381,31 @@ function pathBox(tag: string): SvgBox | undefined {
                 break;
             }
             y = command === 'v' ? y + nextY : nextY;
+            points.push([x, y]);
+            continue;
+        }
+
+        if (command === 'A' || command === 'a') {
+            const radiusX = readNumber();
+            const radiusY = readNumber();
+            const rotation = readNumber();
+            const largeArcFlag = readNumber();
+            const sweepFlag = readNumber();
+            const nextX = readNumber();
+            const nextY = readNumber();
+            if (
+                radiusX === undefined
+                || radiusY === undefined
+                || rotation === undefined
+                || largeArcFlag === undefined
+                || sweepFlag === undefined
+                || nextX === undefined
+                || nextY === undefined
+            ) {
+                break;
+            }
+            x = command === 'a' ? x + nextX : nextX;
+            y = command === 'a' ? y + nextY : nextY;
             points.push([x, y]);
             continue;
         }

@@ -19,6 +19,14 @@ describe('circuitikz export docs contract', () => {
         path.join(repoRoot, 'docs', 'brainstorms', '2026-07-04-diagram-reference-integration-and-figure-generation-plan.zh-CN.md'),
         'utf8'
     );
+    const roadmapDoc = fs.readFileSync(
+        path.join(repoRoot, 'docs', 'maintainer', 'circuitikz-figure-generation-roadmap.md'),
+        'utf8'
+    );
+    const roadmapDocZh = fs.readFileSync(
+        path.join(repoRoot, 'docs', 'maintainer', 'circuitikz-figure-generation-roadmap.zh-CN.md'),
+        'utf8'
+    );
 
     test('documents the CLI contract, supported families, and explicit non-goals in both languages', () => {
         for (const doc of [englishDoc, chineseDoc]) {
@@ -57,6 +65,8 @@ describe('circuitikz export docs contract', () => {
             expect(doc).toContain('pathOnlyGlyphUseCount');
             expect(doc).toContain('path-only glyph placement');
             expect(doc).toContain('path-only glyph overlap');
+            expect(doc).toContain('arc path endpoint geometry');
+            expect(doc).toContain('A/a arc endpoints');
             expect(doc).toContain('<use href="#...">');
             expect(doc).toContain('polyline');
             expect(doc).toContain('polygon');
@@ -116,6 +126,8 @@ describe('circuitikz export docs contract', () => {
             expect(doc).toContain('transform-aware geometry');
             expect(doc).toContain('path-only glyph placement');
             expect(doc).toContain('path-only glyph overlap');
+            expect(doc).toContain('arc path endpoint geometry');
+            expect(doc).toContain('A/a arc endpoints');
             expect(doc).toContain('polyline');
             expect(doc).toContain('polygon');
             expect(doc).toContain('tspan');
@@ -127,6 +139,18 @@ describe('circuitikz export docs contract', () => {
             expect(doc).toContain('src/tests/renderArtifactDiagnostics.test.ts');
             expect(doc).toContain('TikZJax/LaTeX');
             expect(doc).toContain('screenshot');
+        }
+    });
+
+    test('records SVG arc endpoint smoke coverage in the bilingual roadmap', () => {
+        for (const doc of [roadmapDoc, roadmapDocZh]) {
+            expect(doc).toContain('circuitikzRenderSmoke.ts');
+            expect(doc).toContain('arc path endpoint geometry');
+            expect(doc).toContain('A/a arc endpoints');
+            expect(doc).toContain('path-only glyph overlap diagnostics');
+            expect(doc).toContain('polyline');
+            expect(doc).toContain('polygon');
+            expect(doc).toContain('positioned `tspan` label geometry');
         }
     });
 });

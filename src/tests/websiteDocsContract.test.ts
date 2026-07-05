@@ -86,6 +86,8 @@ describe('website documentation contract', () => {
             expect(content).toContain('pathOnlyGlyphUseCount');
             expect(content).toContain('path-only glyph placement');
             expect(content).toContain('path-only glyph overlap');
+            expect(content).toContain('arc path endpoint geometry');
+            expect(content).toContain('A/a arc endpoints');
             expect(content).toContain('<use href="#...">');
             expect(content).toContain('polyline');
             expect(content).toContain('polygon');
