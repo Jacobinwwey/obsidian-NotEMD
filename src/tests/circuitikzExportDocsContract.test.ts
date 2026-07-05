@@ -51,10 +51,12 @@ describe('circuitikz export docs contract', () => {
             expect(doc).toContain('render-svg-out-of-bounds');
             expect(doc).toContain('render-svg-text-overlap');
             expect(doc).toContain('render-svg-label-overlap');
+            expect(doc).toContain('render-svg-path-glyph-overlap');
             expect(doc).toContain('label-vs-drawing');
             expect(doc).toContain('transform-aware geometry');
             expect(doc).toContain('pathOnlyGlyphUseCount');
             expect(doc).toContain('path-only glyph placement');
+            expect(doc).toContain('path-only glyph overlap');
             expect(doc).toContain('<use href="#...">');
             expect(doc).toContain('polyline');
             expect(doc).toContain('polygon');
@@ -109,9 +111,11 @@ describe('circuitikz export docs contract', () => {
             expect(doc).toContain('bounded');
             expect(doc).toContain('text-overlap');
             expect(doc).toContain('render-svg-label-overlap');
+            expect(doc).toContain('render-svg-path-glyph-overlap');
             expect(doc).toContain('label-vs-drawing');
             expect(doc).toContain('transform-aware geometry');
             expect(doc).toContain('path-only glyph placement');
+            expect(doc).toContain('path-only glyph overlap');
             expect(doc).toContain('polyline');
             expect(doc).toContain('polygon');
             expect(doc).toContain('tspan');

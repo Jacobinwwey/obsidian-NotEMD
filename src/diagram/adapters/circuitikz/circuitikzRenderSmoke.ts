@@ -580,9 +580,10 @@ function svgTextBoxes(tag: string): SvgTextBox[] {
     return box ? [box] : [];
 }
 
-function collectSvgBoxes(svgText: string): { boxes: SvgBox[]; drawingBoxes: SvgBox[]; textBoxes: SvgTextBox[] } {
+function collectSvgBoxes(svgText: string): { boxes: SvgBox[]; drawingBoxes: SvgBox[]; glyphUseBoxes: SvgBox[]; textBoxes: SvgTextBox[] } {
     const boxes: SvgBox[] = [];
     const drawingBoxes: SvgBox[] = [];
+    const glyphUseBoxes: SvgBox[] = [];
     const textBoxes: SvgTextBox[] = [];
     const pathDefinitions = collectPathDefinitionBoxes(svgText);
     const groupStack: Array<{ transform: SvgTransform; hidden: boolean }> = [{
@@ -647,13 +648,15 @@ function collectSvgBoxes(svgText: string): { boxes: SvgBox[]; drawingBoxes: SvgB
         if (box) {
             const transformedBox = transformBox(box, localTransform);
             boxes.push(transformedBox);
-            if (tagName !== 'use') {
+            if (tagName === 'use') {
+                glyphUseBoxes.push(transformedBox);
+            } else {
                 drawingBoxes.push(transformedBox);
             }
         }
     }
 
-    return { boxes, drawingBoxes, textBoxes };
+    return { boxes, drawingBoxes, glyphUseBoxes, textBoxes };
 }
 
 function extractTextBoxes(svgText: string): SvgTextBox[] {
@@ -666,6 +669,10 @@ function extractElementBoxes(svgText: string): SvgBox[] {
 
 function extractDrawingBoxes(svgText: string): SvgBox[] {
     return collectSvgBoxes(svgText).drawingBoxes;
+}
+
+function extractGlyphUseBoxes(svgText: string): SvgBox[] {
+    return collectSvgBoxes(svgText).glyphUseBoxes;
 }
 
 function boxIsOutsideViewBox(box: SvgBox, viewBox: [number, number, number, number]): boolean {
@@ -846,6 +853,22 @@ function svgDiagnostic(
             message: `Expected SVG render artifact text label overlaps a drawing element: ${textBox.text} / ${overlappingDrawing.label}`,
             excerpt: expectedArtifactPath,
             advice: 'Treat this as a label-legibility failure. Keep topology fixed and move labels away from wires or components before accepting the artifact.'
+        });
+        break;
+    }
+
+    for (const glyphBox of extractGlyphUseBoxes(svgText)) {
+        const overlappingDrawing = drawingBoxes.find(drawingBox => boxesOverlap(glyphBox, expandBox(drawingBox, 2)));
+        if (!overlappingDrawing) {
+            continue;
+        }
+
+        diagnostics.push({
+            severity: 'error',
+            kind: 'render-svg-path-glyph-overlap',
+            message: `Expected SVG render artifact path-only glyph label overlaps a drawing element: ${glyphBox.label} / ${overlappingDrawing.label}`,
+            excerpt: expectedArtifactPath,
+            advice: 'Treat this as an unverified path-only label-legibility failure. Move the label geometry away from wires or components, then confirm label identity through a later OCR/screenshot gate.'
         });
         break;
     }

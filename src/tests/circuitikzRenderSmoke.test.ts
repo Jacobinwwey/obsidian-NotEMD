@@ -374,6 +374,35 @@ describe('circuitikz render smoke inspection', () => {
         }
     });
 
+    test('reports path-only SVG glyph labels that overlap drawing elements', () => {
+        const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'notemd-circuitikz-svg-use-label-overlap-'));
+        const svgPath = path.join(tempRoot, 'path-only-use-label-overlap.svg');
+        fs.writeFileSync(
+            svgPath,
+            '<svg viewBox="0 0 120 80"><defs><path id="glyph-v" d="M0 0 L12 0 L12 8 L0 8"/></defs><rect x="38" y="36" width="20" height="16"/><use href="#glyph-v" x="40" y="40"/></svg>',
+            'utf8'
+        );
+
+        try {
+            const report = inspectCircuitikzRenderArtifact({
+                expectedArtifactPath: svgPath
+            });
+
+            expect(report.artifactKind).toBe('svg');
+            expect(report.svg).toEqual(expect.objectContaining({
+                pathOnlyGlyphUseCount: 1
+            }));
+            expect(report.diagnostics).toEqual([
+                expect.objectContaining({
+                    kind: 'render-svg-path-glyph-overlap',
+                    message: expect.stringContaining('use:#glyph-v / rect')
+                })
+            ]);
+        } finally {
+            fs.rmSync(tempRoot, { recursive: true, force: true });
+        }
+    });
+
     test('reports obvious overlapping SVG text labels', () => {
         const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'notemd-circuitikz-svg-overlap-'));
         const svgPath = path.join(tempRoot, 'overlap.svg');

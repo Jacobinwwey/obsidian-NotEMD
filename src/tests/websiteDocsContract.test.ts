@@ -80,10 +80,12 @@ describe('website documentation contract', () => {
             expect(content).toContain('render-svg-out-of-bounds');
             expect(content).toContain('render-svg-text-overlap');
             expect(content).toContain('render-svg-label-overlap');
+            expect(content).toContain('render-svg-path-glyph-overlap');
             expect(content).toContain('label-vs-drawing');
             expect(content).toContain('transform-aware geometry');
             expect(content).toContain('pathOnlyGlyphUseCount');
             expect(content).toContain('path-only glyph placement');
+            expect(content).toContain('path-only glyph overlap');
             expect(content).toContain('<use href="#...">');
             expect(content).toContain('polyline');
             expect(content).toContain('polygon');
