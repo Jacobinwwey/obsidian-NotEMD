@@ -115,4 +115,25 @@ describe('docs hub contract', () => {
             '[Drawnix 导出 Spike（中文）](./maintainer/drawnix-export-spike.zh-CN.md)'
         );
     });
+
+    test('docs hub and preview index keep the circuitikz figure roadmap discoverable in both languages', () => {
+        expect(docsHub).toContain(
+            '[circuitikz Figure Generation Roadmap](./maintainer/circuitikz-figure-generation-roadmap.md)'
+        );
+        expect(docsHubZh).toContain(
+            '[circuitikz Figure Generation Roadmap](./maintainer/circuitikz-figure-generation-roadmap.zh-CN.md)'
+        );
+        expect(docsIndex).toContain(
+            '[circuitikz Figure Generation Roadmap (EN)](./maintainer/circuitikz-figure-generation-roadmap.md)'
+        );
+        expect(docsIndex).toContain(
+            '[circuitikz Figure Generation Roadmap (zh-CN)](./maintainer/circuitikz-figure-generation-roadmap.zh-CN.md)'
+        );
+        expect(docsIndexZh).toContain(
+            '[circuitikz Figure Generation Roadmap（英文）](./maintainer/circuitikz-figure-generation-roadmap.md)'
+        );
+        expect(docsIndexZh).toContain(
+            '[circuitikz Figure Generation Roadmap（中文）](./maintainer/circuitikz-figure-generation-roadmap.zh-CN.md)'
+        );
+    });
 });

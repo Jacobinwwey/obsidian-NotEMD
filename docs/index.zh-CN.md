@@ -36,6 +36,8 @@
 - [Chapter Split 的知识管理与 TOC 对比真值（中文）](./brainstorms/2026-06-09-chapter-split-knowledge-management-and-toc-comparison-truth.zh-CN.md)
 - [Diagram Artifact Export CLI（英文）](./maintainer/diagram-artifact-export-cli.md)
 - [Diagram Artifact Export CLI（中文）](./maintainer/diagram-artifact-export-cli.zh-CN.md)
+- [circuitikz Figure Generation Roadmap（英文）](./maintainer/circuitikz-figure-generation-roadmap.md)
+- [circuitikz Figure Generation Roadmap（中文）](./maintainer/circuitikz-figure-generation-roadmap.zh-CN.md)
 - [draw.io 导出视觉回归 Runbook（英文）](./maintainer/drawio-export-visual-regression.md)
 - [draw.io 导出视觉回归 Runbook（中文）](./maintainer/drawio-export-visual-regression.zh-CN.md)
 - [Drawnix 导出 Spike（英文）](./maintainer/drawnix-export-spike.md)

@@ -36,6 +36,8 @@ Repository docs preview for `obsidian-NotEMD`.
 - [Chapter Split Knowledge Management And TOC Comparison Truth (zh-CN)](./brainstorms/2026-06-09-chapter-split-knowledge-management-and-toc-comparison-truth.zh-CN.md)
 - [Diagram Artifact Export CLI (EN)](./maintainer/diagram-artifact-export-cli.md)
 - [Diagram Artifact Export CLI (zh-CN)](./maintainer/diagram-artifact-export-cli.zh-CN.md)
+- [circuitikz Figure Generation Roadmap (EN)](./maintainer/circuitikz-figure-generation-roadmap.md)
+- [circuitikz Figure Generation Roadmap (zh-CN)](./maintainer/circuitikz-figure-generation-roadmap.zh-CN.md)
 - [Draw.io Export Visual Regression (EN)](./maintainer/drawio-export-visual-regression.md)
 - [Draw.io Export Visual Regression (zh-CN)](./maintainer/drawio-export-visual-regression.zh-CN.md)
 - [Drawnix Export Spike (EN)](./maintainer/drawnix-export-spike.md)

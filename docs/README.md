@@ -19,6 +19,7 @@ This directory contains repository-level documentation for maintainers and contr
 - [Diagram Artifact Export CLI](./maintainer/diagram-artifact-export-cli.md)
 - [Draw.io Export Visual Regression](./maintainer/drawio-export-visual-regression.md)
 - [Drawnix Export Spike](./maintainer/drawnix-export-spike.md)
+- [circuitikz Figure Generation Roadmap](./maintainer/circuitikz-figure-generation-roadmap.md)
 - [Chapter Split + TOC Extraction](./chapter-split-toc.md)
 - [Release Workflow](./maintainer/release-workflow.md)
 - [Release Notes 1.8.2](./releases/1.8.2.md)
@@ -37,6 +38,7 @@ This directory contains repository-level documentation for maintainers and contr
 ## Engineering Planning Docs
 
 - [Diagram Reference Integration And Figure Generation Plan](./brainstorms/2026-07-04-diagram-reference-integration-and-figure-generation-plan.md)
+- [circuitikz Figure Generation Roadmap](./maintainer/circuitikz-figure-generation-roadmap.md)
 - [Diagram Platform Phase 2 Requirements](./brainstorms/2026-04-14-diagram-platform-phase-2-requirements.md)
 - [Local KB Retrieval Decision And Quality Truth](./brainstorms/2026-06-09-local-kb-retrieval-decision-and-quality-truth.md)
 - [Local KB RAG Quality And Execution Truth](./brainstorms/2026-06-09-local-kb-rag-quality-and-execution-truth.md)

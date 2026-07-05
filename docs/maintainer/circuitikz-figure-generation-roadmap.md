@@ -1,0 +1,152 @@
+---
+date: 2026-07-05
+topic: circuitikz-figure-generation-roadmap
+---
+
+# circuitikz Figure Generation Roadmap
+
+Language: **English** | [简体中文](./circuitikz-figure-generation-roadmap.zh-CN.md)
+
+This document records the circuit-diagram extension direction after the Cloudy-style editable figure work and the Drawnix export spike.
+
+The short version: circuit diagrams should not enter Notemd as "LLM writes arbitrary TikZ." The useful target is a constrained `CircuitSpec -> circuitikz` adapter with golden-reference templates, compile feedback, and screenshot review. That is the only path likely to produce readable CMOS, analog, and digital-circuit figures reliably.
+
+## Current Figure Stack
+
+The current diagram work has already moved Notemd away from renderer-specific prompt strings:
+
+| Area | Current state |
+|---|---|
+| Semantic input | `DiagramSpec` remains the model-facing boundary for general diagrams. |
+| Internal figure model | `SemanticFigureModel` powers editable HTML/SVG, Draw.io XML, and Drawnix JSON artifact export. |
+| CLI artifact export | `npm run diagram:export-artifact` exports `editable-html-svg`, `drawio`, and `drawnix` without Obsidian runtime. |
+| Verification | Tests check semantic annotations, visible-label parity, stable IDs, Drawnix subset validity, and CLI file output. |
+
+This architecture is the right precedent for circuit diagrams: the model should produce structured intent, not raw final syntax.
+
+## Why circuitikz Is Different
+
+`circuitikz` is the right syntax family for electrical circuits in Obsidian TikZJax, especially when notes need MOSFETs, resistors, supplies, grounds, voltage probes, or analog/digital teaching diagrams.
+
+The hard problem is not syntax availability. The hard problem is layout quality under constraints:
+
+- LLMs can produce a topologically correct circuit that is visually unreadable.
+- Anchors such as `M1.G`, `M1.D`, and `M1.S` are easy to misuse if the model invents geometry late.
+- Complex circuits need routing lanes, not ad hoc wire segments.
+- TikZJax/LaTeX failures are often compile-log failures, while readability failures require rendered-image inspection.
+- A working small example does not generalize to larger CMOS blocks unless the generator owns placement and routing rules.
+
+## Recommended Architecture
+
+```text
+source note / prompt
+  -> CircuitSpec
+  -> topology validation
+  -> layout projection
+  -> circuitikz template adapter
+  -> TikZJax or LaTeX render
+  -> compile-log + screenshot feedback
+  -> constrained repair pass
+```
+
+### `CircuitSpec`
+
+`CircuitSpec` should be separate from `DiagramSpec` at first. Do not widen `DiagramSpec` until two or more non-circuit targets need the same fields.
+
+Minimum useful shape:
+
+| Field | Purpose |
+|---|---|
+| `circuitKind` | `cmos-inverter`, `common-source`, `logic-gate`, `rc-network`, etc. |
+| `nodes` | named electrical nets such as `VDD`, `GND`, `vin`, `vout`, `drain`, `source` |
+| `components` | typed parts with ids, terminals, labels, and optional model metadata |
+| `connections` | topology edges between terminals/nets |
+| `layoutHints` | grid positions, orientation, input/output side, routing lanes |
+| `style` | `american voltages`, label policy, voltage/current marker convention |
+| `goldenReferenceId` | template family used as the visual and syntax baseline |
+
+### Golden Reference First
+
+A golden reference is mandatory for reliable circuit generation. It should define:
+
+- the package preamble;
+- coordinate scale;
+- anchor style;
+- component orientation;
+- input/output side conventions;
+- wire routing pattern;
+- label placement rules.
+
+For example, the common-source amplifier reference should keep the working pattern:
+
+```latex
+\usepackage{circuitikz}
+\begin{document}
+\begin{circuitikz}[american voltages]
+\draw
+  (3,5) node[vcc]{$V_{DD}$}
+  to [R, l=$R_D$] (3,3)
+  to [short, *-o] (5,3) node[right]{$v_{out}$}
+  (3,3) to [short] (3,2.2)
+  node[nmos, anchor=D] (M1) {$M_1$}
+  (M1.S) to [short] (3,0.5)
+  node[ground]{}
+  (M1.G) to [short, -o] (0.8,2.2)
+  node[left]{$v_{in}$};
+\draw
+  (3,0.5) node[below right]{$S$};
+\end{circuitikz}
+\end{document}
+```
+
+A CMOS inverter template should then constrain the model explicitly:
+
+- `pmos` above `nmos`;
+- `VDD` above, `GND` below;
+- common input gate routed from the left;
+- common drain output routed to the right;
+- no diagonal wires;
+- named anchors for each transistor terminal.
+
+## Validation Strategy
+
+Do not accept "it compiled" as enough.
+
+| Gate | What it catches |
+|---|---|
+| Spec validation | missing nets, disconnected terminals, impossible terminal references |
+| Template validation | missing package preamble, invalid circuit kind, unsupported component |
+| Compile-log parsing | LaTeX/TikZJax syntax and package failures |
+| Screenshot inspection | overlaps, unreadable labels, bad routing, excessive whitespace |
+| Golden-reference diff | drift from known-good orientation and routing conventions |
+
+Screenshot feedback can be manual first. Automated screenshot checks should start with simple rules: nonblank render, bounded canvas, expected labels visible, and no obvious label overlap boxes.
+
+## Implementation Phases
+
+| Phase | Scope | Exit criteria |
+|---|---|---|
+| A. Prompt/runbook | Document constrained circuit prompts and golden references | website and maintainer docs explain circuitikz limits and usage |
+| B. `CircuitSpec` prototype | Add parser/types/tests for simple MOS circuits | common-source and CMOS inverter specs validate without rendering |
+| C. circuitikz adapter | Emit deterministic LaTeX for golden templates | generated LaTeX matches stable snapshots and contains required anchors |
+| D. render feedback | Add optional local TikZJax/LaTeX smoke path | compile failures return actionable diagnostics |
+| E. visual repair loop | Feed rendered image or overlap report back into repair prompt | repeated layout errors are corrected without changing topology |
+
+## Best Current Practice
+
+Until `CircuitSpec` exists, use constrained prompts:
+
+1. Provide a renderable golden reference.
+2. Ask for a named circuit family, not a vague "draw circuit."
+3. Lock orientation, anchors, and input/output sides.
+4. Require a topology checklist before LaTeX.
+5. Render once, then use the screenshot or compile log for a repair pass.
+
+This will outperform unconstrained ChatGPT/Gemini TikZ generation because it limits the model's freedom to the parts that matter: choosing components and topology, not inventing every coordinate and route from scratch.
+
+## Risks
+
+- Pulling TikZJax into the plugin runtime would create a hard dependency on another Obsidian plugin. Keep integration optional.
+- A generic "TikZ renderer" would be too broad. Start with circuitikz and only a small set of circuit families.
+- Visual feedback without topology locking can repair layout by accidentally changing the circuit. The repair prompt must treat topology as invariant.
+- circuitikz package versions can vary. Golden references must record the expected package behavior and renderer environment.

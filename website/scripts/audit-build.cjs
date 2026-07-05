@@ -351,14 +351,39 @@ function auditDiagramDocs() {
   assertContains(englishDiagrams, 'Editable HTML/SVG', 'English diagrams doc');
   assertContains(englishDiagrams, 'Draw.io', 'English diagrams doc');
   assertContains(englishDiagrams, 'Drawnix', 'English diagrams doc');
+  assertContains(englishDiagrams, 'circuitikz', 'English diagrams doc');
+  assertContains(englishDiagrams, 'TikZJax', 'English diagrams doc');
+  assertContains(englishDiagrams, 'Golden Reference Prompt Shape', 'English diagrams doc');
   assertContains(englishDiagrams, 'scripts/diagram-semantic-verification.js', 'English diagrams doc');
 
   assertContains(zhCnDiagrams, '<html lang="zh-CN"', 'zh-CN diagrams doc');
   assertContains(zhCnDiagrams, 'Editable HTML/SVG', 'zh-CN diagrams doc');
   assertContains(zhCnDiagrams, 'Draw.io', 'zh-CN diagrams doc');
   assertContains(zhCnDiagrams, 'Drawnix', 'zh-CN diagrams doc');
+  assertContains(zhCnDiagrams, 'circuitikz', 'zh-CN diagrams doc');
+  assertContains(zhCnDiagrams, 'TikZJax', 'zh-CN diagrams doc');
+  assertContains(zhCnDiagrams, 'Golden Reference Prompt Shape', 'zh-CN diagrams doc');
   assertContains(zhCnDiagrams, 'SemanticFigureModel', 'zh-CN diagrams doc');
   assertNotContains(zhCnDiagrams, 'content="noindex,follow"', 'zh-CN diagrams doc');
+}
+
+function auditIntroDocs() {
+  const englishIntro = readBuildFile(path.join('docs', 'intro', 'index.html'));
+  const zhCnIntro = readBuildFile(path.join('zh-CN', 'docs', 'intro', 'index.html'));
+
+  assertContains(englishIntro, 'Diagram Capability Direction', 'English intro doc');
+  assertContains(englishIntro, 'circuitikz', 'English intro doc');
+  assertContains(englishIntro, 'TikZJax', 'English intro doc');
+  assertContains(englishIntro, 'Draw.io', 'English intro doc');
+  assertContains(englishIntro, 'Drawnix', 'English intro doc');
+
+  assertContains(zhCnIntro, '<html lang="zh-CN"', 'zh-CN intro doc');
+  assertContains(zhCnIntro, '图表能力方向', 'zh-CN intro doc');
+  assertContains(zhCnIntro, 'circuitikz', 'zh-CN intro doc');
+  assertContains(zhCnIntro, 'TikZJax', 'zh-CN intro doc');
+  assertContains(zhCnIntro, 'Draw.io', 'zh-CN intro doc');
+  assertContains(zhCnIntro, 'Drawnix', 'zh-CN intro doc');
+  assertNotContains(zhCnIntro, 'content="noindex,follow"', 'zh-CN intro doc');
 }
 
 function auditMeasurementEvidence() {
@@ -422,6 +447,7 @@ async function main() {
   auditSitemaps(languageScope);
   auditAiRetrievalMap(languageScope);
   auditProviderDocs();
+  auditIntroDocs();
   auditDiagramDocs();
   auditMeasurementEvidence();
 

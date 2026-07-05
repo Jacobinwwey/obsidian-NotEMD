@@ -1,11 +1,11 @@
 ---
 id: diagrams
 title: 图表与可编辑 Figure
-description: 使用 spec-first 架构从 Obsidian 笔记生成 Mermaid、JSON Canvas、Vega-Lite、HTML 与可编辑 HTML/SVG 图形产物
+description: 使用 spec-first 架构从笔记生成 Mermaid、JSON Canvas、Vega-Lite、HTML、可编辑 figure artifact，以及未来的强约束 circuitikz 电路图
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
-keywords: [图表, Mermaid, Vega-Lite, JSON Canvas, 可编辑 SVG, Draw.io, Drawnix, Obsidian]
-concepts: [DiagramSpec, Mermaid, Vega-Lite, JSON Canvas, Editable HTML SVG, Draw.io, Drawnix, Spec-First Architecture]
+keywords: [图表, Mermaid, Vega-Lite, JSON Canvas, 可编辑 SVG, Draw.io, Drawnix, Obsidian, circuitikz, TikZJax]
+concepts: [DiagramSpec, Mermaid, Vega-Lite, JSON Canvas, Editable HTML SVG, Draw.io, Drawnix, circuitikz, TikZJax, Intent Detection, Spec-First Architecture]
 citations:
   - title: Mermaid
     url: https://mermaid.js.org
@@ -18,76 +18,266 @@ import TLDR from '@site/src/components/TLDR';
 # 图表与可编辑 Figure
 
 <TLDR>
-**Notemd 的图表生成走 spec-first 管线。** LLM 先生成 renderer-agnostic 的 `DiagramSpec`，再由适配器渲染为 Mermaid、JSON Canvas、Vega-Lite、HTML 或显式的 editable HTML/SVG 产物。这样可以在渲染前验证结构，并让同一份语义 spec 支持多种导出链路。
+**Notemd 通过 spec-first 管线从笔记生成图表。** LLM 先生成 renderer-agnostic 的 `DiagramSpec` JSON，再由专用 adapter 转换为 Mermaid、JSON Canvas、Vega-Lite、HTML 或 editable HTML/SVG 输出。当前支持 8 类 intent、自动 fallback chain、带 SVG/PNG 导出的实时预览、语义验证，以及 local-knowledge-augmented generation。
 </TLDR>
 
-## 架构边界
+这是 [Obsidian AI Knowledge Management Guide](/docs/pillar-ai-knowledge) 的一部分。
 
-Notemd 不要求 LLM 直接写 Mermaid、Vega 或 Canvas 语法。核心路径是：
+## 架构：Spec-First Pipeline
+
+Notemd 不要求 LLM 直接生成 Mermaid、Vega 或 Canvas 语法。核心路径是：
 
 ```mermaid
 graph LR
     A[Source Note] --> B[Intent Detection]
-    B --> C[DiagramSpec]
-    C --> D[Validate]
-    D --> E{Target Renderer}
-    E --> F[Mermaid]
-    E --> G[JSON Canvas]
-    E --> H[Vega-Lite]
-    E --> I[HTML]
-    E --> J[Editable HTML/SVG]
+    B --> C[Plan + Target]
+    C --> D[LLM: Generate DiagramSpec]
+    D --> E[Parse + Validate]
+    E --> F{Primary Target}
+    F -->|Success| G[Render Artifact]
+    F -->|Failure| H[Fallback Target]
+    H -->|Success| G
+    H -->|Failure| I[HTML Fallback]
 ```
 
-这个边界的价值不是“多一个格式”，而是把语义、渲染和导出拆开：LLM 承担结构意图，renderer 承担格式约束，verification 脚本检查产物是否保留核心语义。
+**为什么使用 spec-first？** LLM 经常生成无效的 renderer 语法，Mermaid 尤其明显。结构化 `DiagramSpec` 可以在渲染前校验，同一份 spec 也可以作为多个 renderer 的 fallback 输入。
 
-## 支持的输出
+## 支持的图表类型
 
-| Target | 文件类型 | 适用场景 |
-|--------|----------|----------|
-| Mermaid | `.md` / `.mmd` | 流程图、时序图、类图、状态图、ER 图 |
-| JSON Canvas | `.canvas` | Obsidian 原生 canvas / 知识图谱 |
-| Vega-Lite | `.json` | 数据图、时间序列、柱状图、散点图、表格 |
-| HTML | `.html` | 通用 fallback，自包含预览 |
-| Editable HTML/SVG | `.html` | 显式 figure target，面向后续编辑器导入链路 |
-| Draw.io XML | `.drawio` / XML | `SemanticFigureModel` 到 diagrams.net 的 deterministic artifact boundary |
-| Drawnix JSON | `.drawnix` | 最小 `geometry` / `arrow-line` subset spike |
+| Intent | Primary Renderer | Fallbacks | Use Case |
+|--------|------------------|-----------|----------|
+| `mindmap` | Mermaid | HTML | 层级主题拆解 |
+| `flowchart` | Mermaid | HTML | 流程、决策树 |
+| `sequence` | Mermaid | HTML | 客户端-服务端交互、协议 |
+| `classDiagram` | Mermaid | HTML | OOP 类关系 |
+| `erDiagram` | Mermaid | HTML | 数据库 schema、实体关系 |
+| `stateDiagram` | Mermaid | HTML | 状态机、生命周期模型 |
+| `canvasMap` | JSON Canvas | Mermaid → HTML | 概念图、知识图谱 |
+| `dataChart` | Vega-Lite | Mermaid → HTML | 柱状图、折线图、面积图、散点图、饼图、表格 |
 
-## Editable HTML/SVG
+## Intent Detection
 
-`editable-html-svg` 是显式 render target，不是默认 planner route。它把 `DiagramSpec` 投影为 deterministic 的 `SemanticFigureModel`，再生成自包含 HTML 与 inline SVG：
+Notemd 会根据笔记内容用关键词评分推断最合适的图表类型：
 
-- 节点 `<g>` 标注 `data-drawio-type`、`data-drawio-id`、`data-drawio-role`
-- 边 `<g>` 标注 `data-drawio-source`、`data-drawio-target`
-- 节点 id 归一化后会做碰撞处理，避免 `client app` 与 `client-app` 导出为同一个 id
+| Intent | Triggers | Confidence |
+|--------|----------|------------|
+| `dataChart` | 表格、数值单元格、指标/趋势关键词、百分比 | 0.88 |
+| `sequence` | request/response 词汇（4+ 命中）或 `->` / `=>` 标记 | 0.82 |
+| `erDiagram` | primary key、foreign key、entity、schema（2+ 命中） | 0.80 |
+| `stateDiagram` | state、transition、pending、running、failed（3+ 命中） | 0.76 |
+| `flowchart` | 编号步骤（2+）或 if/then/else/workflow 词汇 | 0.74 |
+| `canvasMap` | concept map、knowledge graph、spatial、cluster | 0.72 |
+| `mindmap` | 默认 fallback | 0.55 |
+
+可以通过 `preferredDiagramIntent` 设置或 command palette 的显式选项覆盖自动检测。
+
+## Usage
+
+### Generate a Diagram
+
+1. 打开一篇笔记
+2. 从 command palette 运行 **"Notemd: Generate diagram"**
+3. Notemd 检测 intent、生成 spec、渲染并保存 artifact
+
+**各 target 的输出文件：**
+
+| Target | Extension | Filename Pattern |
+|--------|-----------|------------------|
+| Mermaid | `.md` | `{note}_summ.md` |
+| JSON Canvas | `.canvas` | `{note}_diagram.canvas` |
+| Vega-Lite | `.json` | `{note}_diagram.json` |
+| HTML | `.html` | `{note}_diagram.html` |
+| Editable HTML/SVG | `.html` | `{note}_diagram.html` |
+
+### Preview a Diagram
+
+1. 运行 **"Notemd: Preview diagram"**
+2. modal 会打开渲染后的图表
+3. 使用 toolbar 按钮导出 SVG 或 PNG
+
+设置中可以启用 **Auto-open preview**，生成后自动打开 preview modal。
+
+### Legacy Mermaid Mode
+
+当 `enableExperimentalDiagramPipeline` 关闭时，Notemd 会把直接 Mermaid prompt 发送给 LLM。这会完全绕过 spec pipeline。如果 experimental pipeline 失败，也会 fallback 到这个模式。
+
+## Rendering Backends
+
+### Mermaid
+
+6 个 adapter（mindmap、flowchart、sequence、ER、class、state）会把 `DiagramSpec` 转换为 Mermaid 语法。生成后，`mermaid.parse()` 会校验输出。如果校验失败：
+
+1. **LLM retry**：把 Mermaid 错误信息作为上下文重试一次
+2. **Minimal fallback**：从 spec node id 生成最小 Mermaid 图
+
+**Legacy Mermaid Fixer** 会自动修复常见 LLM 语法错误：note directive 归一化、pipe-label escaping、semicolon repositioning、smart quotes、double-dash arrows、shape mismatches 等。
+
+### JSON Canvas
+
+生成 Obsidian JSON Canvas 格式并带空间布局：
+- 节点按深度定位（x = depth × 420），按索引定位（y = index × 170）
+- 宽度根据 label 长度估算
+- 边使用 `fromSide: 'right'`、`toSide: 'left'`、`toEnd: 'arrow'`
+
+### Vega-Lite
+
+构建完整的 Vega-Lite v5 JSON spec，并自动编码：
+- **Cartesian charts**（bar/line/area/point/scatter）：x + y channels，多系列使用 color
+- **Pie**：theta = y（quantitative），color = x（nominal）
+- **Table**：row = x，text = y + column = series
+
+dark / light theme patch 会在 compilation 前 deep-merge。
+
+### HTML
+
+通用 fallback。自包含 HTML 文档包含：
+- CSP meta headers
+- 通过 `prefers-color-scheme` 支持 light/dark mode
+- 20 个 locale 的本地化 UI labels
+- Sections：hero、structure（node tree）、relationships、callouts、data series tables
+
+### Editable HTML/SVG
+
+面向 editable export workflow 的显式 figure target。它把 `DiagramSpec` 投影为 deterministic `SemanticFigureModel`，再渲染为自包含 HTML 文档，inline SVG group 带 Draw.io-style annotations：
+
+- semantic nodes 上的 `data-drawio-type`、`data-drawio-id`、`data-drawio-role`
+- semantic edges 上的 `data-drawio-source`、`data-drawio-target`
+- 空白归一化和碰撞处理后的稳定 node/edge id
 - 不包含脚本、外部字体或远程资源
 
-当前选择是保守的：先保证 artifact contract 可验证，再决定是否进入默认生成路线。过早把它设为默认 target，会把真实编辑器兼容性风险推给用户。
+这个 target 目前有意不作为默认 planner route。它作为显式 render target 可用，同时产品路径继续验证真实工具中的编辑行为。
 
-## Draw.io 与 Drawnix
+### Draw.io and Drawnix Export Boundaries
 
-第三方编辑器集成目前停在 artifact boundary：
+当前实现把第三方编辑器支持保持在 artifact boundary：
 
-| 目标 | 当前 contract | 不做什么 |
-|------|---------------|----------|
-| Draw.io | 从 `SemanticFigureModel` 导出未压缩 `mxfile` XML，并检查可见 label 保真 | 不把 diagrams.net Desktop 放进插件 runtime 或 CI |
-| Drawnix | 导出最小 `.drawnix` JSON subset：`geometry` rectangle 与 `arrow-line` | 不引入 Drawnix / Plait runtime 依赖 |
+| Target | Contract | Runtime Dependency |
+|--------|----------|--------------------|
+| Draw.io | 从 `SemanticFigureModel` 生成 deterministic uncompressed `mxfile` XML | 插件 runtime 和 CI 中都没有依赖 |
+| Drawnix | 使用 `geometry` 与 `arrow-line` elements 的最小 `.drawnix` JSON subset | 插件 runtime 和 CI 中都没有依赖 |
 
-这是工程权衡：稳定、可测试、可维护优先于“看起来集成很多”。完整 UI import/open 行为应当作为本地 runbook 证据或后续端到端测试推进。
+这个权衡是有意的：Notemd 可以验证 visible labels、stable IDs 和 supported primitive coverage，而不把 diagrams.net Desktop、Drawnix、Plait 或 browser-only editor state 嵌入插件。
 
-## 语义验证
+### circuitikz / TikZJax Direction
 
-`scripts/diagram-semantic-verification.js` 覆盖以下 surface：
+电路图不是普通流程图问题。电学电路通常正确的语法 target 是 **circuitikz**，在 Obsidian 中可以通过 TikZJax 等插件渲染。TikZJax 可以加载 `circuitikz`、`pgfplots`、`tikz-cd`、`chemfig` 等包，因此对物理、电路、化学和数学笔记很有吸引力。
 
-- Mermaid
-- JSON Canvas
-- Vega-Lite
-- Editable HTML/SVG
+风险在于：未经约束的 LLM TikZ 输出非常脆弱：
 
-验证重点是语义保真，而不是截图相似：节点、边、标签、数据系列和 editable SVG 注解必须能被程序化读取。对导出链路来说，这比单纯“能打开”更可靠。
+- 复杂电路拓扑可能电气上正确，但视觉上不可读；
+- wire 和 label 重叠会让正确 netlist 也无法用于学习笔记；
+- 缺少 package preamble、anchor 错误或 component name 无效会导致无法渲染；
+- renderer 的反馈通常是图像级，而 LLM 生成的是文本级 geometry。
 
-## 使用建议
+更好的架构是把 circuitikz 当作强约束 diagram target，而不是自由 prompt：
 
-- 日常笔记优先用 Mermaid / JSON Canvas / Vega-Lite 的既有链路。
-- 需要后续编辑器导入时，再显式选择 editable HTML/SVG 或 Draw.io/Drawnix artifact。
-- 不要把 Drawnix JSON subset 误认为完整 Drawnix UI 兼容承诺；它是可验证的最小导出 spike。
-- 对跨工具导出，优先检查 visible label、stable id、edge endpoint 和 unsupported primitive，而不是只看截图。
+```mermaid
+graph LR
+    A[Circuit Intent] --> B[CircuitSpec]
+    B --> C[Golden Reference Template]
+    C --> D[circuitikz Adapter]
+    D --> E[TikZJax Render]
+    E --> F[Image + Log Feedback]
+    F --> G[Repair Pass]
+```
+
+一等模型应当把电路拓扑与布局分开描述：
+
+| Layer | Responsibility | Example |
+|-------|----------------|---------|
+| Topology | 电气节点和元件连接 | `VDD -> RD -> drain(M1)`, `source(M1) -> GND` |
+| Layout | 网格位置、方向、routing lanes | `M1 at (3,2.2)`, input left, output right |
+| Style | package、电压约定、labels、anchors | `\begin{circuitikz}[american voltages]` |
+| Validation | compile log、missing anchors、overlap/screenshot checks | TikZJax/LaTeX diagnostics plus visual review |
+
+### Golden Reference Prompt Shape
+
+近期使用时，应该在要求生成电路变体前给出一个可渲染 golden reference。强约束 prompt 应保留 preamble、coordinate scale、anchor style 和 routing conventions：
+
+```latex
+\usepackage{circuitikz}
+\begin{document}
+\begin{circuitikz}[american voltages]
+\draw
+  (3,5) node[vcc]{$V_{DD}$}
+  to [R, l=$R_D$] (3,3)
+  to [short, *-o] (5,3) node[right]{$v_{out}$}
+  (3,3) to [short] (3,2.2)
+  node[nmos, anchor=D] (M1) {$M_1$}
+  (M1.S) to [short] (3,0.5)
+  node[ground]{}
+  (M1.G) to [short, -o] (0.8,2.2)
+  node[left]{$v_{in}$};
+\draw
+  (3,0.5) node[below right]{$S$};
+\end{circuitikz}
+\end{document}
+```
+
+对于 CMOS 反相器，prompt 应要求显式拓扑和布局约束，而不是只说“draw a CMOS inverter”：
+
+- 保持 `VDD` 在上、`GND` 在下、input 在左、output 在右；
+- 使用上方 `pmos`、下方 `nmos`，共享 gate 和 shared drains；
+- output node 放在 drain junction，并用 `*-o` 标记；
+- 使用 named anchors（`PM1.G`、`NM1.G`、`PM1.D`、`NM1.D`），不要依赖视觉推断坐标；
+- 除非电气上必要，避免 diagonal 或 crossing wires。
+
+这还不是已发布的 renderer target。它是下一阶段实现的推荐约束系统。
+
+### Current Progress And Next Phases
+
+| Area | Current status | Next move |
+|------|----------------|-----------|
+| General diagrams | Mermaid、JSON Canvas、Vega-Lite、HTML 的 spec-first pipeline 已实现 | 继续扩展 semantic verification coverage |
+| Editable figures | `editable-html-svg`、Draw.io XML、Drawnix JSON artifact boundaries 已实现 | 只有在测试证明 editability 后再加入更丰富 primitives |
+| CLI support | `npm run diagram:export-artifact` 可从同一个 `DiagramSpec` 导出 editable HTML/SVG、Draw.io、Drawnix | 新 target 发布时增加 target-specific smoke fixtures |
+| circuitikz | 已作为强约束 future target 研究，不作为自由生成路径 | 定义 `CircuitSpec`、golden templates、compile-log parsing 与 screenshot feedback loop |
+| TikZJax integration | Obsidian-side display 的候选 render host | 保持可选，不把 TikZJax 变成硬 runtime 依赖 |
+
+## Configuration
+
+| Setting | Default | Effect |
+|---------|---------|--------|
+| `enableExperimentalDiagramPipeline` | `false` | 在 spec-first 和 legacy Mermaid 之间切换 |
+| `experimentalDiagramCompatibilityMode` | `'legacy-mermaid'` | `'legacy-mermaid'` = 只走 Mermaid；`'best-fit'` = native targets + fallbacks |
+| `preferredDiagramIntent` | `undefined`（auto） | 覆盖自动 intent detection |
+| `summarizeToMermaidLanguage` | `'en'` | 图表 labels 的目标语言 |
+| `summarizeToMermaidProvider` / `Model` | DeepSeek | 图表生成任务使用的 LLM |
+| `autoMermaidFixAfterGenerate` | 来自 constants | 对 Mermaid 输出自动运行 legacy fixer |
+| `enableLocalKnowledgeForDiagramGeneration` | `false` | 用本地 vault knowledge 增强 source |
+
+### Local Knowledge Augmentation
+
+启用后，Notemd 会从 vault 的 local knowledge base（基于 MiniSearch）检索相关 context snippet，并把它们加到 source markdown 前。增强 prompt 会说明：“supporting reference only; keep the primary structure faithful to the source note.”
+
+### Compatibility Modes
+
+- **`legacy-mermaid`**：所有 intent 都路由到 Mermaid。非 Mermaid intent（canvasMap、dataChart）会被强制转成 `flowchart` 或 `mindmap`。没有 fallback chain。
+- **`best-fit`**：每类 intent 路由到 native target。如果 primary 失败，就遍历 fallback chain（例如 Vega-Lite → Mermaid → HTML）。
+
+## Preview & Export
+
+| Action | Method |
+|--------|--------|
+| SVG export | `mermaid.render()` / `vega.View.toSVG()` / Canvas 的 SVG builder |
+| PNG export | SVG → Image → Canvas（device pixel ratio 1x-3x）→ PNG ArrayBuffer |
+| Source save | raw artifact content 按 target-specific extension 保存 |
+| Semantic audit | Mermaid、JSON Canvas、Vega-Lite 和 editable HTML/SVG 由 `scripts/diagram-semantic-verification.js` 检查 |
+
+**Caching**：RenderCache 使用 `{spec, target, theme}` 的 deterministic JSON key。In-flight deduplication 会避免重复渲染。
+
+## Tips
+
+- **从 `best-fit` mode 开始**：它会为每类 intent 选择更合适的视觉输出。
+- **复杂图表使用更强模型**：flowchart 和 ER diagram 通常更受益于 GPT-4o 或 Claude。
+- **为领域图表启用 local knowledge**：相关 vault context 能提升准确性。
+- **启用 `autoMermaidFixAfterGenerate`**：没有自动修复时，Mermaid 语法错误很常见。
+- **legacy fixer 覆盖很广**：如果 Mermaid preview 失败，手动运行 fixer command 通常能修复。
+
+---
+
+## Next Steps
+
+- 🔗 [Wiki-Links](https://jacobinwwey.github.io/obsidian-NotEMD/docs/features/wiki-links) — 概念如何被内联链接（英文）
+- 📝 [Concept Notes](https://jacobinwwey.github.io/obsidian-NotEMD/docs/features/concept-notes) — 为 diagram source material 抽取概念（英文）
+- 🔍 [Research](https://jacobinwwey.github.io/obsidian-NotEMD/docs/features/research) — 用 web-sourced data 增强图表（英文）

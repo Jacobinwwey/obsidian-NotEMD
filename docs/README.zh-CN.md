@@ -19,6 +19,7 @@
 - [Diagram Artifact Export CLI](./maintainer/diagram-artifact-export-cli.zh-CN.md)
 - [draw.io 导出视觉回归 Runbook](./maintainer/drawio-export-visual-regression.zh-CN.md)
 - [Drawnix 导出 Spike](./maintainer/drawnix-export-spike.zh-CN.md)
+- [circuitikz Figure Generation Roadmap](./maintainer/circuitikz-figure-generation-roadmap.zh-CN.md)
 - [章节拆分 + TOC 提取](./chapter-split-toc.zh-CN.md)
 - [发布流程](./maintainer/release-workflow.zh-CN.md)
 - [1.8.2 发布说明](./releases/1.8.2.zh-CN.md)
@@ -35,6 +36,7 @@
 ## 工程规划文档
 
 - [图形参考项目集成与 Figure 生成扩展方案](./brainstorms/2026-07-04-diagram-reference-integration-and-figure-generation-plan.zh-CN.md)
+- [circuitikz Figure Generation Roadmap](./maintainer/circuitikz-figure-generation-roadmap.zh-CN.md)
 - [Diagram Platform Phase 2 Requirements](./brainstorms/2026-04-14-diagram-platform-phase-2-requirements.zh-CN.md)
 - [Local KB Retrieval 方案决策与质量真值](./brainstorms/2026-06-09-local-kb-retrieval-decision-and-quality-truth.zh-CN.md)
 - [Local KB RAG 质量与执行链路真值](./brainstorms/2026-06-09-local-kb-rag-quality-and-execution-truth.zh-CN.md)

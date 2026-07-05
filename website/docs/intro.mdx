@@ -1,7 +1,7 @@
 ---
 id: intro
 title: Introduction to Notemd
-description: AI-powered knowledge base builder for Obsidian
+description: AI-powered knowledge base builder for Obsidian with persistent note transformations, workflows, and spec-first diagrams
 keywords: [notemd, obsidian, AI, LLM, knowledge base, wiki-links, Copilot alternative, Smart Connections alternative, obsidian AI plugin, auto wiki-link, concept notes]
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
@@ -16,12 +16,12 @@ import TLDR from '@site/src/components/TLDR';
 # Introduction to Notemd
 
 <TLDR>
-**Notemd** (Note + EMD — Enhanced Markdown Documents) is an open-source Obsidian plugin that transforms LLM-powered reading into persistent knowledge. Unlike chat-based AI where insights vanish after the session, Notemd writes results **directly into your vault** as wiki-links, concept notes, research summaries, translations, and diagrams. Built for researchers, students, and knowledge workers who want their reading to accumulate into a structured, evolving knowledge graph.
+**Notemd** (Note + EMD — Enhanced Markdown Documents) is an open-source Obsidian plugin that transforms LLM-powered reading into persistent knowledge. Unlike chat-based AI where insights vanish after the session, Notemd writes results **directly into your vault** as wiki-links, concept notes, research summaries, translations, workflows, and diagrams. It is built for researchers, students, and knowledge workers who want reading, research, and visual explanations to accumulate into a structured, evolving knowledge graph.
 </TLDR>
 
 ## What is Notemd?
 
-Notemd integrates **30+ Large Language Models** (OpenAI, Anthropic, Google, DeepSeek, Qwen, Ollama, and more) into your Obsidian workflow to automate knowledge extraction and organization.
+Notemd integrates **30+ Large Language Models** (OpenAI, Anthropic, Google, DeepSeek, Qwen, Ollama, and more) into your Obsidian workflow to automate knowledge extraction, organization, translation, research, and diagram generation.
 
 ### Key Difference: Ephemeral vs. Persistent Knowledge
 
@@ -60,6 +60,9 @@ Notemd integrates **30+ Large Language Models** (OpenAI, Anthropic, Google, Deep
 - **Mermaid**: Flowcharts, sequence, class, state, ER, Gantt
 - **JSON Canvas**: Obsidian native layouts
 - **Vega-Lite**: Data charts, time series, scatter plots
+- **HTML / Editable HTML/SVG**: Self-contained figure artifacts with semantic annotations
+- **Draw.io / Drawnix artifact boundaries**: Maintainer-facing export paths from the same semantic figure model
+- **Circuit diagrams roadmap**: circuitikz/TikZJax support is being designed around golden references, constrained prompts, render feedback, and topology/layout validation rather than raw unconstrained LLM TikZ
 - Syntax auto-fix for Mermaid errors
 
 ### 6. **One-Click Workflows**
@@ -94,6 +97,23 @@ Notemd integrates **30+ Large Language Models** (OpenAI, Anthropic, Google, Deep
 
 👉 [Installation Guide](./getting-started/installation) | [Quick Start Tutorial](./getting-started/quick-start)
 
+## Diagram Capability Direction
+
+Notemd's diagram work is moving away from "ask the model to write one syntax string" and toward a layered pipeline:
+
+```mermaid
+graph LR
+    A[Source Note] --> B[DiagramSpec]
+    B --> C[Target Adapter]
+    C --> D[Rendered Artifact]
+    D --> E[Semantic Verification]
+    E --> F[Preview or Export]
+```
+
+The current implementation already supports Mermaid, JSON Canvas, Vega-Lite, HTML fallback, editable HTML/SVG, Draw.io XML artifacts, and a minimal Drawnix JSON subset. Circuit diagrams are a harder class: circuitikz can express accurate electrical topology, but unconstrained LLM output often produces unreadable routing or non-rendering LaTeX. The planned direction is to treat circuitikz as a constrained target with golden-reference templates, node-grid layout rules, render diagnostics, and screenshot feedback loops.
+
+Read the details in [Diagrams](./features/diagrams).
+
 ## Architecture
 
 ```mermaid
@@ -121,7 +141,7 @@ Most Obsidian AI plugins are conversation-first (you ask, AI answers, insights s
 |-----------|--------|---------|-------------------|-----------------|
 | Auto wiki-link insertion | Yes | No | No | No |
 | Concept note generation | Yes (with backlinks + dedup) | No | No | No |
-| Diagram generation | Yes (Mermaid, Canvas, Vega-Lite, HTML) | No | No | No |
+| Diagram generation | Yes (Mermaid, Canvas, Vega-Lite, HTML, editable artifacts) | No | No | No |
 | Web research integration | Yes (Tavily + DuckDuckGo) | No | No | No |
 | Batch folder processing | Yes | Limited | No | Limited |
 | Per-task model routing | Yes (7 tasks, independent models) | No | No | No |
