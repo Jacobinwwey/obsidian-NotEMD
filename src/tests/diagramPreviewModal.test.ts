@@ -423,6 +423,7 @@ describe('diagram preview modal', () => {
 
         const text = collectText(diagnosticsPanel as MockElement);
         expect(text).toContain('Artifact diagnostics');
+        expect(text).toContain('1 error(s) · 0 warning(s) · 0 info');
         expect(text).toContain('ERROR · render-png-blank');
         expect(text).toContain('Expected PNG render artifact appears visually blank.');
         expect(text).toContain('Advice: Inspect the renderer before repair.');
@@ -495,6 +496,9 @@ describe('diagram preview modal', () => {
 
         const historyPanel = findByClass(secondModal.contentEl, 'notemd-diagram-preview-history');
         expect(historyPanel).not.toBeNull();
+
+        const historyText = collectText(historyPanel as MockElement);
+        expect(historyText.some(text => text.includes('1 error(s) · 0 warning(s) · 0 info'))).toBe(true);
 
         const historyButtons = collectButtons(historyPanel as MockElement);
         expect(historyButtons.filter(button => button.text === 'Topic.md')).toHaveLength(2);

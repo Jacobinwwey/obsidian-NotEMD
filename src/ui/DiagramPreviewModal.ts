@@ -21,6 +21,10 @@ import {
     listDiagramPreviewHistory,
     rememberDiagramPreviewSession
 } from './diagramPreviewHistory';
+import {
+    formatRenderArtifactDiagnosticSummary,
+    summarizeRenderArtifactDiagnostics
+} from '../rendering/diagnostics';
 
 export class DiagramPreviewModal extends Modal {
     private session: RenderPreviewSession;
@@ -187,6 +191,14 @@ export class DiagramPreviewModal extends Modal {
             cls: 'notemd-diagram-preview-diagnostics-title'
         });
 
+        const summary = formatRenderArtifactDiagnosticSummary(summarizeRenderArtifactDiagnostics(diagnostics));
+        if (summary) {
+            panel.createDiv({
+                text: summary,
+                cls: 'notemd-diagram-preview-diagnostics-summary'
+            });
+        }
+
         const list = panel.createDiv({ cls: 'notemd-diagram-preview-diagnostics-list' });
         for (const diagnostic of diagnostics) {
             const item = list.createDiv({
@@ -241,6 +253,12 @@ export class DiagramPreviewModal extends Modal {
             const metaParts = [getRenderTargetDisplayName(entry.target)];
             if (entry.sourcePath) {
                 metaParts.push(entry.sourcePath);
+            }
+            const diagnosticSummary = formatRenderArtifactDiagnosticSummary(
+                summarizeRenderArtifactDiagnostics(entry.session.payload.artifact.diagnostics ?? [])
+            );
+            if (diagnosticSummary) {
+                metaParts.push(diagnosticSummary);
             }
             item.createDiv({
                 text: metaParts.join(' · '),

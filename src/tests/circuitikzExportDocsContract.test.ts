@@ -103,8 +103,11 @@ describe('circuitikz export docs contract', () => {
             expect(doc).toContain('text-overlap');
             expect(doc).toContain('transform-aware geometry');
             expect(doc).toContain('RenderArtifact.diagnostics');
+            expect(doc).toContain('diagnostic summary');
+            expect(doc).toContain('src/rendering/diagnostics.ts');
             expect(doc).toContain('source-only preview fallback');
             expect(doc).toContain('DiagramPreviewModal.ts');
+            expect(doc).toContain('src/tests/renderArtifactDiagnostics.test.ts');
             expect(doc).toContain('TikZJax/LaTeX');
             expect(doc).toContain('screenshot');
         }

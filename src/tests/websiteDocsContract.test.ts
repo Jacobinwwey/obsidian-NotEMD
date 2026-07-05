@@ -64,6 +64,9 @@ describe('website documentation contract', () => {
             expect(content).toContain('--topology-reference');
             expect(content).toContain('shell: false');
             expect(content).toContain('RenderArtifact.diagnostics');
+            expect(content).toContain('diagnostic summary');
+            expect(content).toContain('error/warning/info');
+            expect(content).toContain('diagnostics-aware history entries');
             expect(content).toContain('source-only');
             expect(content).toContain('artifact diagnostics');
             expect(content).toContain('compileExecution');
