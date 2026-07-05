@@ -144,12 +144,12 @@ Phase A 已经文档化。Phase B/C 现在有了受约束的仓库内原型：
 - `scripts/export-circuitikz.js` 与 `npm run diagram:export-circuitikz` 提供离线导出命令。
 - `src/diagram/adapters/circuitikz/circuitikzDiagnostics.ts` 会把已有 LaTeX/TikZJax compile logs 解析为 actionable diagnostics，不 spawn 编译器，也不依赖 shell command resolution。
 - `src/diagram/adapters/circuitikz/circuitikzCompileRunner.ts` 可以用 `shell: false`、placeholder-expanded arguments、生成 log diagnostics 和可选 `--expected-artifact` render-smoke checks 运行显式配置的本地 renderer。
-- `src/diagram/adapters/circuitikz/circuitikzRenderSmoke.ts` 会检查预期 render artifact。PDF 和其他 opaque artifacts 检查存在与非空；SVG artifacts 还会检查 `<svg>` root、正的尺寸或 `viewBox`、可见绘图元素，以及可选重复传入的 `--expected-svg-text` tokens；PNG screenshot artifacts 会被解码并检查正尺寸与非背景像素。
+- `src/diagram/adapters/circuitikz/circuitikzRenderSmoke.ts` 会检查预期 render artifact。PDF 和其他 opaque artifacts 检查存在与非空；SVG artifacts 还会检查 `<svg>` root、正的尺寸或 `viewBox`、可见绘图元素，以及可选重复传入的 `--expected-svg-text` tokens；PNG screenshot artifacts 会被解码并检查正尺寸、非背景像素、前景包围盒，以及通过 `render-png-content-clipped` 报告的贴边裁剪内容。
 - `src/ui/DiagramPreviewModal.ts` 现在提供通用 artifact diagnostics surface。任意 render target 都可以把 diagnostics 挂到 `RenderArtifact.diagnostics`；preview UI 会显示 severity、kind、message 和 advice，而不要求插件 runtime 内置 TikZJax 或 LaTeX。
-- `src/tests/circuitikzExporter.test.ts`、`src/tests/circuitikzCompileDiagnostics.test.ts`、`src/tests/circuitikzRenderSmoke.test.ts`、`src/tests/circuitikzCompileRunner.test.ts` 与 `src/tests/circuitikzExportCli.test.ts` 验证确定性输出、拓扑拒绝、package-script 暴露、UTF-8 BOM 处理、diagnostic parsing、shell-free compile execution、diagnostics JSON 输出、render artifact 存在/非空 smoke checks、SVG 结构检查、PNG 空白截图检查，以及 compile log 或 smoke report 含错误时 CLI 非零退出。
+- `src/tests/circuitikzExporter.test.ts`、`src/tests/circuitikzCompileDiagnostics.test.ts`、`src/tests/circuitikzRenderSmoke.test.ts`、`src/tests/circuitikzCompileRunner.test.ts` 与 `src/tests/circuitikzExportCli.test.ts` 验证确定性输出、拓扑拒绝、package-script 暴露、UTF-8 BOM 处理、diagnostic parsing、shell-free compile execution、diagnostics JSON 输出、render artifact 存在/非空 smoke checks、SVG 结构检查、PNG 空白截图检查、PNG 前景包围盒报告、PNG 裁剪内容诊断，以及 compile log 或 smoke report 含错误时 CLI 非零退出。
 - `src/tests/diagramPreviewModal.test.ts` 验证 artifact diagnostics 会显示在 diagram preview modal 中，并且 preview history 不会把 diagnostics 不同的条目错误去重。
 
-Phase D 现在已经具备 log parsing、opt-in local renderer execution、artifact-level smoke checks、SVG structure smoke checks、第一层 PNG screenshot nonblank checks 与前端 diagnostics surface，但实现仍有意停在 required renderer availability、overlap detection 和 Phase E 之前。它不会捆绑 LaTeX、不会把 TikZJax 变成插件 runtime 依赖，也不会运行视觉修复闭环。
+Phase D 现在已经具备 log parsing、opt-in local renderer execution、artifact-level smoke checks、SVG structure smoke checks、第一层 PNG screenshot nonblank 与 edge-clipping checks，以及前端 diagnostics surface，但实现仍有意停在 required renderer availability、OCR 级 overlap detection 和 Phase E 之前。它不会捆绑 LaTeX、不会把 TikZJax 变成插件 runtime 依赖，也不会运行视觉修复闭环。
 
 ## Best Current Practice
 

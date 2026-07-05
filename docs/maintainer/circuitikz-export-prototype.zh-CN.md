@@ -87,9 +87,9 @@ node scripts/export-circuitikz.js \
   --expected-svg-text v_{out}
 ```
 
-对于 `.png` screenshot artifact，smoke check 会解码非交错的 8-bit grayscale、RGB、grayscale-alpha 或 RGBA PNG 输出，并检查正的尺寸以及至少一个不同于左上角背景色的像素。空白截图会以 `render-png-blank` 失败；格式损坏或不支持的 PNG 会以 `render-png-invalid` 或 `render-png-unsupported` 失败。
+对于 `.png` screenshot artifact，smoke check 会解码非交错的 8-bit grayscale、RGB、grayscale-alpha 或 RGBA PNG 输出，检查正的尺寸，把前景像素包围盒记录为 `foregroundBounds`，并要求至少一个不同于左上角背景色的像素。空白截图会以 `render-png-blank` 失败；前景内容贴到图像边界会以 `render-png-content-clipped` 失败；格式损坏或不支持的 PNG 会以 `render-png-invalid` 或 `render-png-unsupported` 失败。
 
-检查结果会记录为 `compileExecution.renderSmoke`。缺失或空 artifact 会追加 `render-artifact-missing` 或 `render-artifact-empty`；SVG 结构失败会追加 `render-svg-invalid`、`render-svg-dimension-missing`、`render-svg-no-visible-elements`、`render-svg-text-missing`、`render-svg-out-of-bounds` 或 `render-svg-text-overlap` 等 diagnostic。
+检查结果会记录为 `compileExecution.renderSmoke`。缺失或空 artifact 会追加 `render-artifact-missing` 或 `render-artifact-empty`；SVG 结构失败会追加 `render-svg-invalid`、`render-svg-dimension-missing`、`render-svg-no-visible-elements`、`render-svg-text-missing`、`render-svg-out-of-bounds` 或 `render-svg-text-overlap` 等 diagnostic；PNG screenshot 失败会追加 `render-png-blank` 或 `render-png-content-clipped` 等 diagnostic。
 
 SVG bounded-canvas 与 text-overlap 检查有意保持保守。它们只解析 `path`、`line`、`rect`、`circle`、`ellipse` 和带位置的 `text` 元素中常见的直接 SVG 坐标。它们用于在 screenshot review 之前捕获明显 fixture failure，但不能替代 OCR、transform-aware geometry 或最终 image-based visual inspection。
 
@@ -187,10 +187,10 @@ npm test -- --runInBand src/tests/circuitikzExporter.test.ts src/tests/circuitik
 - 通过 `--expected-artifact` 执行 render-smoke artifact 存在与非空检查；
 - 对 SVG artifact 执行结构检查，并通过重复的 `--expected-svg-text` 执行可选文本 token 检查；
 - 检查 bounded SVG viewBox 和明显 text-overlap；
-- 对 PNG screenshot 执行正尺寸与非背景像素 smoke 检查；
+- 对 PNG screenshot 执行正尺寸、非背景像素、前景包围盒与贴边裁剪 smoke 检查；
 - 通过 `src/tests/circuitikzSmokeFixturesCli.test.ts` 验证 maintainer fixture discovery 与聚合 smoke execution；
 - 无效拓扑不会写出 output file。
 
 ## 非目标
 
-这个原型不捆绑 LaTeX、不把 TikZJax 作为 Obsidian runtime 依赖调用、不做 overlap detection，也不使用渲染图像反馈进行自动修复。这些是后续 gate。它也不接受任意自然语言电路请求。当前重要声明更窄：经过验证的 `CircuitSpec` 输入可以为两个高价值 golden families 生成稳定、可读的 circuitikz，已有 compile logs 可以转换为 actionable diagnostics，并且显式配置的本地 renderer 可以在不走 shell-specific command parsing 的情况下执行，同时可选证明具体输出 artifact 已经创建；如果输出是 SVG 或 PNG，还能证明它具备进入后续视觉检查的基本结构。
+这个原型不捆绑 LaTeX、不把 TikZJax 作为 Obsidian runtime 依赖调用、不做 OCR 级 overlap detection，也不使用渲染图像反馈进行自动修复。这些是后续 gate。它也不接受任意自然语言电路请求。当前重要声明更窄：经过验证的 `CircuitSpec` 输入可以为两个高价值 golden families 生成稳定、可读的 circuitikz，已有 compile logs 可以转换为 actionable diagnostics，并且显式配置的本地 renderer 可以在不走 shell-specific command parsing 的情况下执行，同时可选证明具体输出 artifact 已经创建；如果输出是 SVG 或 PNG，还能证明它具备进入后续视觉检查的基本结构。PNG 输出现在还会暴露前景包围盒，用于在 topology-preserving repair loop 之前拒绝明显画布裁剪。

@@ -87,9 +87,9 @@ node scripts/export-circuitikz.js \
   --expected-svg-text v_{out}
 ```
 
-For `.png` screenshot artifacts, the smoke check decodes non-interlaced 8-bit grayscale, RGB, grayscale-alpha, or RGBA PNG output and verifies positive dimensions plus at least one pixel that differs from the top-left background color. Blank screenshots fail with `render-png-blank`; malformed or unsupported PNGs fail with `render-png-invalid` or `render-png-unsupported`.
+For `.png` screenshot artifacts, the smoke check decodes non-interlaced 8-bit grayscale, RGB, grayscale-alpha, or RGBA PNG output, verifies positive dimensions, records the foreground pixel bounding box as `foregroundBounds`, and requires at least one pixel that differs from the top-left background color. Blank screenshots fail with `render-png-blank`; foreground content that touches the image boundary fails with `render-png-content-clipped`; malformed or unsupported PNGs fail with `render-png-invalid` or `render-png-unsupported`.
 
-The result is recorded as `compileExecution.renderSmoke`. Missing or empty artifacts add `render-artifact-missing` or `render-artifact-empty`; SVG structure failures add diagnostics such as `render-svg-invalid`, `render-svg-dimension-missing`, `render-svg-no-visible-elements`, `render-svg-text-missing`, `render-svg-out-of-bounds`, or `render-svg-text-overlap`.
+The result is recorded as `compileExecution.renderSmoke`. Missing or empty artifacts add `render-artifact-missing` or `render-artifact-empty`; SVG structure failures add diagnostics such as `render-svg-invalid`, `render-svg-dimension-missing`, `render-svg-no-visible-elements`, `render-svg-text-missing`, `render-svg-out-of-bounds`, or `render-svg-text-overlap`; PNG screenshot failures add diagnostics such as `render-png-blank` or `render-png-content-clipped`.
 
 The SVG bounded-canvas and text-overlap checks are intentionally conservative. They parse common direct SVG coordinates in `path`, `line`, `rect`, `circle`, `ellipse`, and positioned `text` elements. They catch obvious fixture failures before screenshot review, but they do not replace OCR, transform-aware geometry, or final image-based visual inspection.
 
@@ -187,10 +187,10 @@ The tests verify:
 - render-smoke artifact existence and non-empty checks through `--expected-artifact`;
 - SVG artifact structure checks and optional text-token checks through repeated `--expected-svg-text`;
 - bounded SVG viewBox and obvious text-overlap checks;
-- PNG screenshot smoke checks for positive dimensions and non-background pixels;
+- PNG screenshot smoke checks for positive dimensions, non-background pixels, foreground bounds, and edge-touching clipped content;
 - maintainer fixture discovery and aggregate smoke execution through `src/tests/circuitikzSmokeFixturesCli.test.ts`;
 - no output file is written for invalid topology.
 
 ## Non-Goals
 
-This prototype does not bundle LaTeX, call TikZJax as an Obsidian runtime dependency, run overlap detection, or use rendered-image feedback for automatic repair. Those are later gates. It also does not accept arbitrary natural-language circuit requests. The important current claim is narrower: validated `CircuitSpec` input can produce stable, readable circuitikz for two high-value golden families, existing compile logs can be converted into actionable diagnostics, and an explicitly configured local renderer can be executed without shell-specific command parsing while optionally proving that a concrete output artifact was created and, for SVG or PNG output, structurally renderable enough for later visual inspection.
+This prototype does not bundle LaTeX, call TikZJax as an Obsidian runtime dependency, run OCR-level overlap detection, or use rendered-image feedback for automatic repair. Those are later gates. It also does not accept arbitrary natural-language circuit requests. The important current claim is narrower: validated `CircuitSpec` input can produce stable, readable circuitikz for two high-value golden families, existing compile logs can be converted into actionable diagnostics, and an explicitly configured local renderer can be executed without shell-specific command parsing while optionally proving that a concrete output artifact was created and, for SVG or PNG output, structurally renderable enough for later visual inspection. PNG output now also exposes the foreground bounds needed to reject obvious canvas clipping before a topology-preserving repair loop.

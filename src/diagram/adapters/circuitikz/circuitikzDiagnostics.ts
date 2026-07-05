@@ -18,7 +18,8 @@ export type CircuitikzCompileDiagnosticKind =
     | 'render-svg-text-overlap'
     | 'render-png-invalid'
     | 'render-png-unsupported'
-    | 'render-png-blank';
+    | 'render-png-blank'
+    | 'render-png-content-clipped';
 
 export interface CircuitikzCompileDiagnostic {
     severity: CircuitikzCompileDiagnosticSeverity;

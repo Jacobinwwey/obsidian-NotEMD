@@ -204,11 +204,16 @@ describe('circuitikz render smoke inspection', () => {
         const pngPath = path.join(tempRoot, 'render.png');
         fs.writeFileSync(
             pngPath,
-            createRgbaPng(2, 2, [
+            createRgbaPng(3, 3, [
                 [255, 255, 255, 255],
                 [255, 255, 255, 255],
                 [255, 255, 255, 255],
-                [0, 0, 0, 255]
+                [255, 255, 255, 255],
+                [0, 0, 0, 255],
+                [255, 255, 255, 255],
+                [255, 255, 255, 255],
+                [255, 255, 255, 255],
+                [255, 255, 255, 255]
             ])
         );
 
@@ -220,14 +225,63 @@ describe('circuitikz render smoke inspection', () => {
             expect(report.artifactKind).toBe('png');
             expect(report.diagnostics).toEqual([]);
             expect(report.png).toEqual({
-                width: 2,
-                height: 2,
+                width: 3,
+                height: 3,
                 bitDepth: 8,
                 colorType: 6,
                 interlaceMethod: 0,
-                decodedPixelCount: 4,
-                nonBackgroundPixelCount: 1
+                decodedPixelCount: 9,
+                nonBackgroundPixelCount: 1,
+                foregroundBounds: {
+                    minX: 1,
+                    minY: 1,
+                    maxX: 1,
+                    maxY: 1
+                }
             });
+        } finally {
+            fs.rmSync(tempRoot, { recursive: true, force: true });
+        }
+    });
+
+    test('reports PNG screenshot artifacts with foreground content clipped by the canvas edge', () => {
+        const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'notemd-circuitikz-png-clipped-'));
+        const pngPath = path.join(tempRoot, 'clipped.png');
+        fs.writeFileSync(
+            pngPath,
+            createRgbaPng(3, 3, [
+                [255, 255, 255, 255],
+                [255, 255, 255, 255],
+                [0, 0, 0, 255],
+                [255, 255, 255, 255],
+                [255, 255, 255, 255],
+                [255, 255, 255, 255],
+                [255, 255, 255, 255],
+                [255, 255, 255, 255],
+                [255, 255, 255, 255]
+            ])
+        );
+
+        try {
+            const report = inspectCircuitikzRenderArtifact({
+                expectedArtifactPath: pngPath
+            });
+
+            expect(report.artifactKind).toBe('png');
+            expect(report.png).toEqual(expect.objectContaining({
+                foregroundBounds: {
+                    minX: 2,
+                    minY: 0,
+                    maxX: 2,
+                    maxY: 0
+                }
+            }));
+            expect(report.diagnostics).toEqual([
+                expect.objectContaining({
+                    kind: 'render-png-content-clipped',
+                    message: expect.stringContaining('touches the image boundary')
+                })
+            ]);
         } finally {
             fs.rmSync(tempRoot, { recursive: true, force: true });
         }

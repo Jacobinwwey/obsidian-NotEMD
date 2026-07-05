@@ -31,6 +31,12 @@ export interface CircuitikzPngSmokeReport {
     interlaceMethod: number;
     decodedPixelCount: number;
     nonBackgroundPixelCount: number;
+    foregroundBounds?: {
+        minX: number;
+        minY: number;
+        maxX: number;
+        maxY: number;
+    };
 }
 
 export interface CircuitikzRenderSmokeReport {
@@ -669,11 +675,21 @@ function extractPngSmoke(pngBytes: Buffer): CircuitikzPngSmokeReport {
     const decodedPixelCount = header.width * header.height;
     const background = readPixel(decoded, 0, header.colorType, channels);
     let nonBackgroundPixelCount = 0;
+    let minX = header.width;
+    let minY = header.height;
+    let maxX = -1;
+    let maxY = -1;
 
     for (let pixelIndex = 0; pixelIndex < decodedPixelCount; pixelIndex += 1) {
         const pixel = readPixel(decoded, pixelIndex, header.colorType, channels);
         if (pixel[3] > 0 && colorDistance(pixel, background) > 8) {
             nonBackgroundPixelCount += 1;
+            const x = pixelIndex % header.width;
+            const y = Math.floor(pixelIndex / header.width);
+            minX = Math.min(minX, x);
+            minY = Math.min(minY, y);
+            maxX = Math.max(maxX, x);
+            maxY = Math.max(maxY, y);
         }
     }
 
@@ -684,22 +700,42 @@ function extractPngSmoke(pngBytes: Buffer): CircuitikzPngSmokeReport {
         colorType: header.colorType,
         interlaceMethod: header.interlaceMethod,
         decodedPixelCount,
-        nonBackgroundPixelCount
+        nonBackgroundPixelCount,
+        foregroundBounds: nonBackgroundPixelCount > 0
+            ? { minX, minY, maxX, maxY }
+            : undefined
     };
 }
 
 function pngDiagnostics(report: CircuitikzPngSmokeReport, expectedArtifactPath: string): CircuitikzCompileDiagnostic[] {
-    if (report.nonBackgroundPixelCount > 0) {
-        return [];
+    const diagnostics: CircuitikzCompileDiagnostic[] = [];
+
+    if (report.nonBackgroundPixelCount === 0) {
+        diagnostics.push({
+            severity: 'error',
+            kind: 'render-png-blank',
+            message: 'Expected PNG render artifact appears visually blank.',
+            excerpt: expectedArtifactPath,
+            advice: 'Treat this as a failed screenshot smoke and inspect the renderer before attempting topology-preserving visual repair.'
+        });
+        return diagnostics;
     }
 
-    return [{
-        severity: 'error',
-        kind: 'render-png-blank',
-        message: 'Expected PNG render artifact appears visually blank.',
-        excerpt: expectedArtifactPath,
-        advice: 'Treat this as a failed screenshot smoke and inspect the renderer before attempting topology-preserving visual repair.'
-    }];
+    const bounds = report.foregroundBounds;
+    if (
+        bounds
+        && (bounds.minX <= 0 || bounds.minY <= 0 || bounds.maxX >= report.width - 1 || bounds.maxY >= report.height - 1)
+    ) {
+        diagnostics.push({
+            severity: 'error',
+            kind: 'render-png-content-clipped',
+            message: 'Expected PNG render artifact foreground content touches the image boundary.',
+            excerpt: expectedArtifactPath,
+            advice: 'Increase renderer padding/viewBox or inspect layout before topology-preserving visual repair.'
+        });
+    }
+
+    return diagnostics;
 }
 
 export function inspectCircuitikzRenderArtifact(request: CircuitikzRenderSmokeRequest): CircuitikzRenderSmokeReport {

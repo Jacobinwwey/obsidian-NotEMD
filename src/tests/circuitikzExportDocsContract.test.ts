@@ -47,6 +47,8 @@ describe('circuitikz export docs contract', () => {
             expect(doc).toContain('render-svg-out-of-bounds');
             expect(doc).toContain('render-svg-text-overlap');
             expect(doc).toContain('render-png-blank');
+            expect(doc).toContain('render-png-content-clipped');
+            expect(doc).toContain('foregroundBounds');
             expect(doc).toContain('circuitikzDiagnostics.ts');
             expect(doc).toContain('circuitikzCompileRunner.ts');
             expect(doc).toContain('circuitikzRenderSmoke.ts');
@@ -83,6 +85,8 @@ describe('circuitikz export docs contract', () => {
             expect(doc).toContain('maintainer fixture');
             expect(doc).toContain('--expected-svg-text');
             expect(doc).toContain('PNG');
+            expect(doc).toContain('render-png-content-clipped');
+            expect(doc).toContain('foregroundBounds');
             expect(doc).toContain('bounded');
             expect(doc).toContain('text-overlap');
             expect(doc).toContain('RenderArtifact.diagnostics');
