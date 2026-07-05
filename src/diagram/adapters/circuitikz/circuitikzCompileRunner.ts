@@ -6,6 +6,10 @@ import {
     CircuitikzCompileDiagnosticReport,
     diagnoseCircuitikzCompileLog
 } from './circuitikzDiagnostics';
+import {
+    CircuitikzRenderSmokeReport,
+    inspectCircuitikzRenderArtifact
+} from './circuitikzRenderSmoke';
 
 export interface CircuitikzCompileRequest {
     executable: string;
@@ -13,14 +17,8 @@ export interface CircuitikzCompileRequest {
     texPath: string;
     outputDirectory: string;
     expectedArtifactPath?: string;
+    expectedSvgText?: string[];
     timeoutMs?: number;
-}
-
-export interface CircuitikzRenderSmokeReport {
-    expectedArtifactPath: string;
-    artifactExists: boolean;
-    artifactSizeBytes: number;
-    nonEmptyArtifact: boolean;
 }
 
 export interface CircuitikzCompileExecution {
@@ -75,49 +73,6 @@ function summarizeDiagnostics(diagnostics: CircuitikzCompileDiagnostic[]): strin
     return `${errors} error(s), ${warnings} warning(s)`;
 }
 
-function buildRenderSmokeReport(expectedArtifactPath: string): CircuitikzRenderSmokeReport {
-    if (!fs.existsSync(expectedArtifactPath)) {
-        return {
-            expectedArtifactPath,
-            artifactExists: false,
-            artifactSizeBytes: 0,
-            nonEmptyArtifact: false
-        };
-    }
-
-    const artifactSizeBytes = fs.statSync(expectedArtifactPath).size;
-    return {
-        expectedArtifactPath,
-        artifactExists: true,
-        artifactSizeBytes,
-        nonEmptyArtifact: artifactSizeBytes > 0
-    };
-}
-
-function renderSmokeDiagnostic(report: CircuitikzRenderSmokeReport): CircuitikzCompileDiagnostic | undefined {
-    if (!report.artifactExists) {
-        return {
-            severity: 'error',
-            kind: 'render-artifact-missing',
-            message: 'Expected circuitikz render artifact was not created.',
-            excerpt: report.expectedArtifactPath,
-            advice: 'Check the renderer output path, job name, and arguments before treating the compile run as a valid render smoke.'
-        };
-    }
-
-    if (!report.nonEmptyArtifact) {
-        return {
-            severity: 'error',
-            kind: 'render-artifact-empty',
-            message: 'Expected circuitikz render artifact is empty.',
-            excerpt: report.expectedArtifactPath,
-            advice: 'Inspect the renderer log and rerun with a known-good golden reference before attempting visual repair.'
-        };
-    }
-
-    return undefined;
-}
-
 function mergeRenderSmokeDiagnostic(
     diagnostics: CircuitikzCompileDiagnosticReport,
     smokeReport: CircuitikzRenderSmokeReport | undefined
@@ -126,12 +81,11 @@ function mergeRenderSmokeDiagnostic(
         return diagnostics;
     }
 
-    const smokeDiagnostic = renderSmokeDiagnostic(smokeReport);
-    if (!smokeDiagnostic) {
+    if (smokeReport.diagnostics.length === 0) {
         return diagnostics;
     }
 
-    const mergedDiagnostics = [...diagnostics.diagnostics, smokeDiagnostic];
+    const mergedDiagnostics = [...diagnostics.diagnostics, ...smokeReport.diagnostics];
     return {
         ok: false,
         summary: summarizeDiagnostics(mergedDiagnostics),
@@ -161,7 +115,12 @@ export function runCircuitikzCompile(request: CircuitikzCompileRequest): Circuit
     const parsedDiagnostics = execution.error
         ? buildProcessFailureReport(execution.error.message)
         : diagnoseCircuitikzCompileLog(diagnosticSource);
-    const renderSmoke = expectedArtifactPath ? buildRenderSmokeReport(expectedArtifactPath) : undefined;
+    const renderSmoke = expectedArtifactPath
+        ? inspectCircuitikzRenderArtifact({
+            expectedArtifactPath,
+            expectedSvgText: request.expectedSvgText
+        })
+        : undefined;
     const diagnostics = mergeRenderSmokeDiagnostic(parsedDiagnostics, renderSmoke);
 
     return {

@@ -9,7 +9,11 @@ export type CircuitikzCompileDiagnosticKind =
     | 'overfull-hbox'
     | 'compile-process-error'
     | 'render-artifact-missing'
-    | 'render-artifact-empty';
+    | 'render-artifact-empty'
+    | 'render-svg-invalid'
+    | 'render-svg-dimension-missing'
+    | 'render-svg-no-visible-elements'
+    | 'render-svg-text-missing';
 
 export interface CircuitikzCompileDiagnostic {
     severity: CircuitikzCompileDiagnosticSeverity;

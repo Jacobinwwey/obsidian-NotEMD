@@ -74,9 +74,22 @@ This path uses direct process execution with an argument array (`shell: false`).
 | `{outputDir}` | absolute output directory for the generated artifact |
 | `{jobName}` | generated `.tex` basename without extension |
 
-When `--expected-artifact` is provided, the runner also performs the first render-smoke artifact check. It verifies that the expected file exists and is non-empty, records the result as `compileExecution.renderSmoke`, and adds a `render-artifact-missing` or `render-artifact-empty` diagnostic when the renderer exits without producing a usable artifact.
+When `--expected-artifact` is provided, the runner also performs render-smoke artifact checks. For opaque artifacts such as PDF, it verifies that the expected file exists and is non-empty. For `.svg` artifacts, it additionally checks for an `<svg>` root, positive dimensions or `viewBox`, at least one visible drawing element, and any repeated `--expected-svg-text` tokens:
 
-The runner lives in `src/diagram/adapters/circuitikz/circuitikzCompileRunner.ts`. It reads the generated `{jobName}.log` from `{outputDir}`, reuses the same diagnostics parser, and returns `compileExecution` plus `compileDiagnostics` in the CLI JSON result. A non-ok diagnostic report still makes the CLI exit nonzero.
+```bash
+node scripts/export-circuitikz.js \
+  --input cmos-inverter.json \
+  --output cmos-inverter.tex \
+  --compile-executable dvisvgm \
+  --compile-arg ... \
+  --expected-artifact {outputDir}/{jobName}.svg \
+  --expected-svg-text v_{in} \
+  --expected-svg-text v_{out}
+```
+
+The result is recorded as `compileExecution.renderSmoke`. Missing or empty artifacts add `render-artifact-missing` or `render-artifact-empty`; SVG structure failures add diagnostics such as `render-svg-invalid`, `render-svg-dimension-missing`, `render-svg-no-visible-elements`, or `render-svg-text-missing`.
+
+The runner lives in `src/diagram/adapters/circuitikz/circuitikzCompileRunner.ts`. It reads the generated `{jobName}.log` from `{outputDir}`, reuses the same diagnostics parser, and returns `compileExecution` plus `compileDiagnostics` in the CLI JSON result. Artifact checks live in `src/diagram/adapters/circuitikz/circuitikzRenderSmoke.ts` so SVG structure rules remain testable without spawning a renderer. A non-ok diagnostic report still makes the CLI exit nonzero.
 
 ## Supported Circuit Families
 
@@ -116,7 +129,7 @@ This keeps the model-facing contract narrow and makes topology drift testable. T
 Canonical regression commands:
 
 ```bash
-npm test -- --runInBand src/tests/circuitikzExporter.test.ts src/tests/circuitikzCompileDiagnostics.test.ts src/tests/circuitikzCompileRunner.test.ts src/tests/circuitikzExportCli.test.ts --runTestsByPath
+npm test -- --runInBand src/tests/circuitikzExporter.test.ts src/tests/circuitikzCompileDiagnostics.test.ts src/tests/circuitikzRenderSmoke.test.ts src/tests/circuitikzCompileRunner.test.ts src/tests/circuitikzExportCli.test.ts --runTestsByPath
 ```
 
 The tests verify:
@@ -130,8 +143,9 @@ The tests verify:
 - diagnostics JSON output and nonzero CLI exit when a compile log contains errors;
 - shell-free compile execution with placeholder-expanded argument arrays;
 - render-smoke artifact existence and non-empty checks through `--expected-artifact`;
+- SVG artifact structure checks and optional text-token checks through repeated `--expected-svg-text`;
 - no output file is written for invalid topology.
 
 ## Non-Goals
 
-This prototype does not bundle LaTeX, call TikZJax as an Obsidian runtime dependency, run screenshot inspection, or use rendered-image feedback. Those are later gates. It also does not accept arbitrary natural-language circuit requests. The important current claim is narrower: validated `CircuitSpec` input can produce stable, readable circuitikz for two high-value golden families, existing compile logs can be converted into actionable diagnostics, and an explicitly configured local renderer can be executed without shell-specific command parsing while optionally proving that a concrete output artifact was created.
+This prototype does not bundle LaTeX, call TikZJax as an Obsidian runtime dependency, run screenshot inspection, or use rendered-image feedback. Those are later gates. It also does not accept arbitrary natural-language circuit requests. The important current claim is narrower: validated `CircuitSpec` input can produce stable, readable circuitikz for two high-value golden families, existing compile logs can be converted into actionable diagnostics, and an explicitly configured local renderer can be executed without shell-specific command parsing while optionally proving that a concrete output artifact was created and, for SVG output, structurally renderable enough for later screenshot inspection.

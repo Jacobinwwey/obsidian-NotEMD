@@ -236,6 +236,14 @@ npm run diagram:export-circuitikz -- --input cmos-inverter.json --output cmos-in
 
 compile runner 使用 `shell: false`，把 `{tex}`、`{outputDir}` 和 `{jobName}` placeholders 展开为参数数组值，读取生成的 `{jobName}.log`，并在 CLI JSON output 中返回 `compileExecution` 与 `compileDiagnostics`。配合 `--expected-artifact` 时，它还会报告 `compileExecution.renderSmoke`，并在 renderer 没有创建非空 artifact 时让 CLI 失败。它仍然不捆绑 LaTeX、不把 TikZJax 变成插件 runtime 依赖，也不执行 screenshot-level visual repair。
 
+如果预期 artifact 是 `.svg`，smoke check 会再深入一层：
+
+```bash
+npm run diagram:export-circuitikz -- --input cmos-inverter.json --output cmos-inverter.tex --compile-executable dvisvgm --compile-arg ... --expected-artifact {outputDir}/{jobName}.svg --expected-svg-text v_{in} --expected-svg-text v_{out}
+```
+
+SVG smoke 会检查 `<svg>` root、正的尺寸或 `viewBox`、至少一个可见绘图元素，以及显式要求的文本 tokens。失败会通过 `render-svg-invalid`、`render-svg-dimension-missing`、`render-svg-no-visible-elements` 或 `render-svg-text-missing` 报告。文本 token 检查只适合保留 searchable SVG text 的 renderer；如果 renderer 输出 path-only SVG，仍然需要后续 screenshot/OCR gate。
+
 ### Golden Reference Prompt Shape
 
 近期使用时，应该在要求生成电路变体前给出一个可渲染 golden reference。强约束 prompt 应保留 preamble、coordinate scale、anchor style 和 routing conventions：
@@ -275,7 +283,7 @@ compile runner 使用 `shell: false`，把 `{tex}`、`{outputDir}` 和 `{jobName
 | General diagrams | Mermaid、JSON Canvas、Vega-Lite、HTML 的 spec-first pipeline 已实现 | 继续扩展 semantic verification coverage |
 | Editable figures | `editable-html-svg`、Draw.io XML、Drawnix JSON artifact boundaries 已实现 | 只有在测试证明 editability 后再加入更丰富 primitives |
 | CLI support | `npm run diagram:export-artifact` 可从同一个 `DiagramSpec` 导出 editable HTML/SVG、Draw.io、Drawnix | 新 target 发布时增加 target-specific smoke fixtures |
-| circuitikz | `CircuitSpec -> circuitikz` 原型已经可通过 `npm run diagram:export-circuitikz` 导出 common-source 与 CMOS inverter golden templates、解析 compile logs，并在不经过 shell parsing 的情况下运行显式本地 renderer 与 `--expected-artifact` smoke checks | 增加真实环境 smoke fixtures、screenshot feedback 与 topology-preserving repair |
+| circuitikz | `CircuitSpec -> circuitikz` 原型已经可通过 `npm run diagram:export-circuitikz` 导出 common-source 与 CMOS inverter golden templates、解析 compile logs，并在不经过 shell parsing 的情况下运行显式本地 renderer、`--expected-artifact` 与 SVG `--expected-svg-text` smoke checks | 增加真实环境 smoke fixtures、screenshot feedback 与 topology-preserving repair |
 | TikZJax integration | Obsidian-side display 的候选 render host | 保持可选，不把 TikZJax 变成硬 runtime 依赖 |
 
 ## Configuration

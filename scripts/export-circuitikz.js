@@ -11,17 +11,18 @@ function printUsage() {
 Usage:
   node scripts/export-circuitikz.js --input <circuit-spec.json> --output <circuit.tex>
   node scripts/export-circuitikz.js --input <circuit-spec.json> --output <circuit.tex> --compile-log <latex.log> --diagnostics-output <diagnostics.json>
-  node scripts/export-circuitikz.js --input <circuit-spec.json> --output <circuit.tex> --compile-executable <renderer> --compile-arg <arg>... --expected-artifact <artifact>
+  node scripts/export-circuitikz.js --input <circuit-spec.json> --output <circuit.tex> --compile-executable <renderer> --compile-arg <arg>... --expected-artifact <artifact> [--expected-svg-text <text>...]
 
 Example:
   node scripts/export-circuitikz.js --input cmos-inverter.json --output cmos-inverter.tex
   node scripts/export-circuitikz.js --input cmos-inverter.json --output cmos-inverter.tex --compile-log cmos-inverter.log --diagnostics-output cmos-inverter.diagnostics.json
   node scripts/export-circuitikz.js --input cmos-inverter.json --output cmos-inverter.tex --compile-executable pdflatex --compile-arg -interaction=nonstopmode --compile-arg -halt-on-error --compile-arg -output-directory={outputDir} --compile-arg {tex} --expected-artifact {outputDir}/{jobName}.pdf
+  node scripts/export-circuitikz.js --input cmos-inverter.json --output cmos-inverter.tex --compile-executable dvisvgm --compile-arg ... --expected-artifact {outputDir}/{jobName}.svg --expected-svg-text v_{in} --expected-svg-text v_{out}
 `);
 }
 
 function parseArgs(argv) {
-  const args = { compileArgs: [] };
+  const args = { compileArgs: [], expectedSvgText: [] };
 
   for (let index = 0; index < argv.length; index += 1) {
     const token = argv[index];
@@ -46,6 +47,9 @@ function parseArgs(argv) {
         break;
       case '--expected-artifact':
         args.expectedArtifact = argv[++index];
+        break;
+      case '--expected-svg-text':
+        args.expectedSvgText.push(argv[++index]);
         break;
       case '--help':
       case '-h':
@@ -74,6 +78,9 @@ function assertRequiredArgs(args) {
   }
   if (args.expectedArtifact && !args.compileExecutable) {
     throw new Error('--expected-artifact requires --compile-executable.');
+  }
+  if (args.expectedSvgText.length > 0 && !args.expectedArtifact) {
+    throw new Error('--expected-svg-text requires --expected-artifact.');
   }
   if (args.diagnosticsOutput && !args.compileLog && !args.compileExecutable) {
     throw new Error('--diagnostics-output requires --compile-log or --compile-executable.');
@@ -179,7 +186,8 @@ async function run(args, repoRoot = path.resolve(__dirname, '..')) {
         args: args.compileArgs,
         texPath: outputPath,
         outputDirectory: path.dirname(outputPath),
-        expectedArtifactPath: args.expectedArtifact
+        expectedArtifactPath: args.expectedArtifact,
+        expectedSvgText: args.expectedSvgText
       });
       result.compileDiagnostics = result.compileExecution.diagnostics;
 

@@ -59,9 +59,11 @@ describe('website documentation contract', () => {
             expect(content).toContain('--compile-executable');
             expect(content).toContain('--compile-arg');
             expect(content).toContain('--expected-artifact');
+            expect(content).toContain('--expected-svg-text');
             expect(content).toContain('shell: false');
             expect(content).toContain('compileExecution');
             expect(content).toContain('compileExecution.renderSmoke');
+            expect(content).toContain('render-svg-text-missing');
             expect(content).toContain('circuitikz.sty');
             expect(content).toContain('Golden Reference Template');
             expect(content).toContain('TikZJax Render');

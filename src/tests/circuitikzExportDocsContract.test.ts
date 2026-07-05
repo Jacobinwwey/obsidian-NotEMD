@@ -36,12 +36,16 @@ describe('circuitikz export docs contract', () => {
             expect(doc).toContain('--compile-executable');
             expect(doc).toContain('--compile-arg');
             expect(doc).toContain('--expected-artifact');
+            expect(doc).toContain('--expected-svg-text');
             expect(doc).toContain('compileExecution.renderSmoke');
             expect(doc).toContain('render-artifact-missing');
+            expect(doc).toContain('render-svg-text-missing');
             expect(doc).toContain('circuitikzDiagnostics.ts');
             expect(doc).toContain('circuitikzCompileRunner.ts');
+            expect(doc).toContain('circuitikzRenderSmoke.ts');
             expect(doc).toContain('src/tests/circuitikzExporter.test.ts');
             expect(doc).toContain('src/tests/circuitikzCompileDiagnostics.test.ts');
+            expect(doc).toContain('src/tests/circuitikzRenderSmoke.test.ts');
             expect(doc).toContain('src/tests/circuitikzCompileRunner.test.ts');
             expect(doc).toContain('src/tests/circuitikzExportCli.test.ts');
         }
@@ -58,11 +62,13 @@ describe('circuitikz export docs contract', () => {
             expect(doc).toContain('npm run diagram:export-circuitikz');
             expect(doc).toContain('src/tests/circuitikzExporter.test.ts');
             expect(doc).toContain('src/tests/circuitikzCompileDiagnostics.test.ts');
+            expect(doc).toContain('src/tests/circuitikzRenderSmoke.test.ts');
             expect(doc).toContain('src/tests/circuitikzCompileRunner.test.ts');
             expect(doc).toContain('src/tests/circuitikzExportCli.test.ts');
             expect(doc).toContain('compile-log diagnostics');
             expect(doc).toContain('shell-free compile execution');
             expect(doc).toContain('render-smoke artifact');
+            expect(doc).toContain('--expected-svg-text');
             expect(doc).toContain('TikZJax/LaTeX');
             expect(doc).toContain('screenshot');
         }

@@ -74,9 +74,22 @@ node scripts/export-circuitikz.js \
 | `{outputDir}` | 生成 artifact 的绝对输出目录 |
 | `{jobName}` | 生成 `.tex` 文件去掉扩展名后的 basename |
 
-提供 `--expected-artifact` 时，runner 还会执行第一层 render-smoke artifact 检查。它会确认预期文件存在且非空，把结果记录为 `compileExecution.renderSmoke`，并在 renderer 退出但没有产出可用 artifact 时追加 `render-artifact-missing` 或 `render-artifact-empty` diagnostic。
+提供 `--expected-artifact` 时，runner 还会执行 render-smoke artifact 检查。对于 PDF 这类 opaque artifact，它会确认预期文件存在且非空。对于 `.svg` artifact，它还会检查 `<svg>` root、正的尺寸或 `viewBox`、至少一个可见绘图元素，以及重复传入的 `--expected-svg-text` tokens：
 
-runner 位于 `src/diagram/adapters/circuitikz/circuitikzCompileRunner.ts`。它会从 `{outputDir}` 读取生成的 `{jobName}.log`，复用同一个 diagnostics parser，并在 CLI JSON result 中返回 `compileExecution` 与 `compileDiagnostics`。diagnostic report 非 ok 时，CLI 仍会以非零状态退出。
+```bash
+node scripts/export-circuitikz.js \
+  --input cmos-inverter.json \
+  --output cmos-inverter.tex \
+  --compile-executable dvisvgm \
+  --compile-arg ... \
+  --expected-artifact {outputDir}/{jobName}.svg \
+  --expected-svg-text v_{in} \
+  --expected-svg-text v_{out}
+```
+
+检查结果会记录为 `compileExecution.renderSmoke`。缺失或空 artifact 会追加 `render-artifact-missing` 或 `render-artifact-empty`；SVG 结构失败会追加 `render-svg-invalid`、`render-svg-dimension-missing`、`render-svg-no-visible-elements` 或 `render-svg-text-missing` 等 diagnostic。
+
+runner 位于 `src/diagram/adapters/circuitikz/circuitikzCompileRunner.ts`。它会从 `{outputDir}` 读取生成的 `{jobName}.log`，复用同一个 diagnostics parser，并在 CLI JSON result 中返回 `compileExecution` 与 `compileDiagnostics`。artifact 检查位于 `src/diagram/adapters/circuitikz/circuitikzRenderSmoke.ts`，这样 SVG 结构规则可以在不 spawn renderer 的情况下单独测试。diagnostic report 非 ok 时，CLI 仍会以非零状态退出。
 
 ## 已支持的电路族
 
@@ -116,7 +129,7 @@ CircuitSpec
 标准回归命令：
 
 ```bash
-npm test -- --runInBand src/tests/circuitikzExporter.test.ts src/tests/circuitikzCompileDiagnostics.test.ts src/tests/circuitikzCompileRunner.test.ts src/tests/circuitikzExportCli.test.ts --runTestsByPath
+npm test -- --runInBand src/tests/circuitikzExporter.test.ts src/tests/circuitikzCompileDiagnostics.test.ts src/tests/circuitikzRenderSmoke.test.ts src/tests/circuitikzCompileRunner.test.ts src/tests/circuitikzExportCli.test.ts --runTestsByPath
 ```
 
 测试覆盖：
@@ -130,8 +143,9 @@ npm test -- --runInBand src/tests/circuitikzExporter.test.ts src/tests/circuitik
 - compile log 包含 errors 时写出 diagnostics JSON，并让 CLI 以非零状态退出；
 - 使用 placeholder-expanded argument arrays 的 shell-free compile execution；
 - 通过 `--expected-artifact` 执行 render-smoke artifact 存在与非空检查；
+- 对 SVG artifact 执行结构检查，并通过重复的 `--expected-svg-text` 执行可选文本 token 检查；
 - 无效拓扑不会写出 output file。
 
 ## 非目标
 
-这个原型不捆绑 LaTeX、不把 TikZJax 作为 Obsidian runtime 依赖调用、不做截图检查，也不使用渲染图像反馈。这些是后续 gate。它也不接受任意自然语言电路请求。当前重要声明更窄：经过验证的 `CircuitSpec` 输入可以为两个高价值 golden families 生成稳定、可读的 circuitikz，已有 compile logs 可以转换为 actionable diagnostics，并且显式配置的本地 renderer 可以在不走 shell-specific command parsing 的情况下执行，同时可选证明具体输出 artifact 已经创建。
+这个原型不捆绑 LaTeX、不把 TikZJax 作为 Obsidian runtime 依赖调用、不做截图检查，也不使用渲染图像反馈。这些是后续 gate。它也不接受任意自然语言电路请求。当前重要声明更窄：经过验证的 `CircuitSpec` 输入可以为两个高价值 golden families 生成稳定、可读的 circuitikz，已有 compile logs 可以转换为 actionable diagnostics，并且显式配置的本地 renderer 可以在不走 shell-specific command parsing 的情况下执行，同时可选证明具体输出 artifact 已经创建；如果输出是 SVG，还能证明它具备进入后续截图检查的基本结构。

@@ -320,7 +320,9 @@ fs.writeFileSync(path.join(outputDirectory, jobName + '.pdf'), 'pdf bytes', 'utf
                 expectedArtifactPath: pdfPath,
                 artifactExists: true,
                 artifactSizeBytes: 9,
-                nonEmptyArtifact: true
+                nonEmptyArtifact: true,
+                artifactKind: 'opaque',
+                diagnostics: []
             });
             expect(result.compileDiagnostics).toEqual(expect.objectContaining({
                 ok: true,
@@ -389,7 +391,13 @@ fs.writeFileSync(path.join(outputDirectory, jobName + '.log'), 'Output written o
                 expectedArtifactPath: path.join(tempRoot, 'circuit.pdf'),
                 artifactExists: false,
                 artifactSizeBytes: 0,
-                nonEmptyArtifact: false
+                nonEmptyArtifact: false,
+                artifactKind: 'opaque',
+                diagnostics: [
+                    expect.objectContaining({
+                        kind: 'render-artifact-missing'
+                    })
+                ]
             });
             expect(stdout.compileDiagnostics.diagnostics).toEqual([
                 expect.objectContaining({
@@ -401,6 +409,84 @@ fs.writeFileSync(path.join(outputDirectory, jobName + '.log'), 'Output written o
             expect(diagnostics.diagnostics).toEqual([
                 expect.objectContaining({
                     kind: 'render-artifact-missing'
+                })
+            ]);
+        } finally {
+            fs.rmSync(tempRoot, { recursive: true, force: true });
+        }
+    }, 30000);
+
+    test('fails active compile smoke when an SVG artifact is missing required text', () => {
+        const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'notemd-circuitikz-cli-svg-smoke-'));
+        const specPath = path.join(tempRoot, 'circuit.json');
+        const outputPath = path.join(tempRoot, 'circuit.tex');
+        const diagnosticsPath = path.join(tempRoot, 'diagnostics.json');
+        const compilerPath = path.join(tempRoot, 'fake-compiler.js');
+        fs.writeFileSync(specPath, JSON.stringify(createSpec(), null, 2), 'utf8');
+        fs.writeFileSync(
+            compilerPath,
+            `
+const fs = require('fs');
+const path = require('path');
+const args = process.argv.slice(2);
+const texPath = args[args.indexOf('--tex') + 1];
+const outputDirectory = args[args.indexOf('--out') + 1];
+const jobName = path.basename(texPath, path.extname(texPath));
+fs.writeFileSync(path.join(outputDirectory, jobName + '.log'), 'Output written on circuit.svg (1 page).\\n', 'utf8');
+fs.writeFileSync(path.join(outputDirectory, jobName + '.svg'), '<svg viewBox="0 0 100 80"><path d="M0 0H10"/></svg>', 'utf8');
+`,
+            'utf8'
+        );
+
+        try {
+            const result = spawnSync(
+                process.execPath,
+                [
+                    scriptPath,
+                    '--input', specPath,
+                    '--output', outputPath,
+                    '--compile-executable', process.execPath,
+                    '--compile-arg', compilerPath,
+                    '--compile-arg', '--tex',
+                    '--compile-arg', '{tex}',
+                    '--compile-arg', '--out',
+                    '--compile-arg', '{outputDir}',
+                    '--expected-artifact', '{outputDir}/{jobName}.svg',
+                    '--expected-svg-text', 'v_{out}',
+                    '--diagnostics-output', diagnosticsPath
+                ],
+                {
+                    cwd: repoRoot,
+                    encoding: 'utf8'
+                }
+            );
+
+            expect(result.status).toBe(1);
+            expect(result.stderr).toContain('1 error(s), 0 warning(s)');
+
+            const stdout = JSON.parse(result.stdout);
+            expect(stdout.compileExecution.renderSmoke).toEqual(expect.objectContaining({
+                expectedArtifactPath: path.join(tempRoot, 'circuit.svg'),
+                artifactKind: 'svg',
+                svg: expect.objectContaining({
+                    viewBox: [0, 0, 100, 80],
+                    visibleElementCount: 1,
+                    expectedText: [{
+                        text: 'v_{out}',
+                        present: false
+                    }]
+                })
+            }));
+            expect(stdout.compileDiagnostics.diagnostics).toEqual([
+                expect.objectContaining({
+                    kind: 'render-svg-text-missing'
+                })
+            ]);
+
+            const diagnostics = JSON.parse(fs.readFileSync(diagnosticsPath, 'utf8'));
+            expect(diagnostics.diagnostics).toEqual([
+                expect.objectContaining({
+                    kind: 'render-svg-text-missing'
                 })
             ]);
         } finally {

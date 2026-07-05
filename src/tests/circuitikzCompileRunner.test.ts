@@ -50,12 +50,14 @@ process.stdout.write('fake compiler complete\\n');
                     summary: '0 error(s), 0 warning(s)',
                     diagnostics: []
                 },
-                renderSmoke: {
+                renderSmoke: expect.objectContaining({
                     expectedArtifactPath: pdfPath,
                     artifactExists: true,
                     artifactSizeBytes: 9,
-                    nonEmptyArtifact: true
-                }
+                    nonEmptyArtifact: true,
+                    artifactKind: 'opaque',
+                    diagnostics: []
+                })
             }));
             expect(result.args).toEqual([compilerPath, '--tex', texPath, '--out', tempRoot]);
             expect(JSON.parse(fs.readFileSync(argsPath, 'utf8'))).toEqual(result.args);
@@ -96,7 +98,13 @@ fs.writeFileSync(path.join(outputDirectory, jobName + '.log'), 'Output written o
                 expectedArtifactPath: path.join(tempRoot, 'missing-output.pdf'),
                 artifactExists: false,
                 artifactSizeBytes: 0,
-                nonEmptyArtifact: false
+                nonEmptyArtifact: false,
+                artifactKind: 'opaque',
+                diagnostics: [
+                    expect.objectContaining({
+                        kind: 'render-artifact-missing'
+                    })
+                ]
             });
             expect(result.diagnostics.ok).toBe(false);
             expect(result.diagnostics.summary).toBe('1 error(s), 0 warning(s)');
@@ -104,6 +112,62 @@ fs.writeFileSync(path.join(outputDirectory, jobName + '.log'), 'Output written o
                 expect.objectContaining({
                     kind: 'render-artifact-missing',
                     message: 'Expected circuitikz render artifact was not created.'
+                })
+            ]);
+        } finally {
+            fs.rmSync(tempRoot, { recursive: true, force: true });
+        }
+    });
+
+    test('adds SVG render smoke diagnostics to compile diagnostics', () => {
+        const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'notemd-circuitikz-runner-svg-smoke-'));
+        const compilerPath = path.join(tempRoot, 'fake-compiler.js');
+        const texPath = path.join(tempRoot, 'svg-output.tex');
+        const svgPath = path.join(tempRoot, 'svg-output.svg');
+        fs.writeFileSync(texPath, '\\begin{document}\\end{document}\n', 'utf8');
+        fs.writeFileSync(
+            compilerPath,
+            `
+const fs = require('fs');
+const path = require('path');
+const args = process.argv.slice(2);
+const texPath = args[args.indexOf('--tex') + 1];
+const outputDirectory = args[args.indexOf('--out') + 1];
+const jobName = path.basename(texPath, path.extname(texPath));
+fs.writeFileSync(path.join(outputDirectory, jobName + '.log'), 'Output written on circuit.svg (1 page).\\n', 'utf8');
+fs.writeFileSync(path.join(outputDirectory, jobName + '.svg'), '<svg viewBox="0 0 100 60"><path d="M0 0H10"/></svg>', 'utf8');
+`,
+            'utf8'
+        );
+
+        try {
+            const result = runCircuitikzCompile({
+                executable: process.execPath,
+                args: [compilerPath, '--tex', '{tex}', '--out', '{outputDir}'],
+                texPath,
+                outputDirectory: tempRoot,
+                expectedArtifactPath: '{outputDir}/{jobName}.svg',
+                expectedSvgText: ['v_{out}']
+            });
+
+            expect(result.renderSmoke).toEqual(expect.objectContaining({
+                expectedArtifactPath: svgPath,
+                artifactKind: 'svg',
+                svg: expect.objectContaining({
+                    rootElementPresent: true,
+                    viewBox: [0, 0, 100, 60],
+                    visibleElementCount: 1,
+                    expectedText: [{
+                        text: 'v_{out}',
+                        present: false
+                    }]
+                })
+            }));
+            expect(result.diagnostics.ok).toBe(false);
+            expect(result.diagnostics.summary).toBe('1 error(s), 0 warning(s)');
+            expect(result.diagnostics.diagnostics).toEqual([
+                expect.objectContaining({
+                    kind: 'render-svg-text-missing'
                 })
             ]);
         } finally {
