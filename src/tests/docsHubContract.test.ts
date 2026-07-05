@@ -70,4 +70,31 @@ describe('docs hub contract', () => {
             '[图形参考项目集成与 Figure 生成扩展方案（中文）](./brainstorms/2026-07-04-diagram-reference-integration-and-figure-generation-plan.zh-CN.md)'
         );
     });
+
+    test('docs hub and preview index keep diagram export runbooks discoverable in both languages', () => {
+        expect(docsHub).toContain(
+            '[Draw.io Export Visual Regression](./maintainer/drawio-export-visual-regression.md)'
+        );
+        expect(docsHub).toContain(
+            '[Drawnix Export Spike](./maintainer/drawnix-export-spike.md)'
+        );
+        expect(docsHubZh).toContain(
+            '[draw.io 导出视觉回归 Runbook](./maintainer/drawio-export-visual-regression.zh-CN.md)'
+        );
+        expect(docsHubZh).toContain(
+            '[Drawnix 导出 Spike](./maintainer/drawnix-export-spike.zh-CN.md)'
+        );
+        expect(docsIndex).toContain(
+            '[Draw.io Export Visual Regression (EN)](./maintainer/drawio-export-visual-regression.md)'
+        );
+        expect(docsIndex).toContain(
+            '[Drawnix Export Spike (EN)](./maintainer/drawnix-export-spike.md)'
+        );
+        expect(docsIndexZh).toContain(
+            '[draw.io 导出视觉回归 Runbook（中文）](./maintainer/drawio-export-visual-regression.zh-CN.md)'
+        );
+        expect(docsIndexZh).toContain(
+            '[Drawnix 导出 Spike（中文）](./maintainer/drawnix-export-spike.zh-CN.md)'
+        );
+    });
 });

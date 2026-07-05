@@ -18,7 +18,7 @@ export function isSupportedDiagramIntent(value: unknown): value is DiagramIntent
         && (SUPPORTED_DIAGRAM_INTENTS as readonly string[]).includes(value);
 }
 
-export type RenderTarget = 'mermaid' | 'json-canvas' | 'vega-lite' | 'html';
+export type RenderTarget = 'mermaid' | 'json-canvas' | 'vega-lite' | 'html' | 'editable-html-svg';
 
 export type MermaidDiagramType =
     | 'mindmap'

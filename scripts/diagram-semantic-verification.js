@@ -47,6 +47,17 @@ const SURFACE_DEFINITIONS = [
             'preview opens through the plugin preview path',
             'chart renders rather than showing blank or broken host output'
         ]
+    },
+    {
+        id: 'editable-html-svg',
+        label: 'Editable HTML/SVG',
+        aliases: ['editable-html-svg', 'editable-svg', 'html-svg', 'editable_html_svg'],
+        checks: [
+            'saved artifact is a self-contained `.html` document',
+            'inline SVG contains `data-drawio-type` annotations for editable nodes and edges',
+            'preview opens through the iframe HTML preview path',
+            'desktop and mobile preview checks show nonblank rendering with contained text bounds'
+        ]
     }
 ];
 
@@ -81,7 +92,7 @@ const USAGE_TEXT = [
     '  --surfaces <list>    Add comma-separated semantic surfaces',
     '  --help               Print this usage text',
     '',
-    'Supported surfaces: mermaid, json-canvas, vega-lite'
+    'Supported surfaces: mermaid, json-canvas, vega-lite, editable-html-svg'
 ].join('\n');
 
 function parseQuotedArrayLiteralValue(source, key) {

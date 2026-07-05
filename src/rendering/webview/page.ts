@@ -85,7 +85,10 @@ ${themedHtml}
 }
 
 export function buildRenderWebviewHtml(payload: RenderWebviewPayload): string {
-    if (payload.artifact.target === 'html' && payload.artifact.mimeType === 'text/html') {
+    if (
+        (payload.artifact.target === 'html' || payload.artifact.target === 'editable-html-svg')
+        && payload.artifact.mimeType === 'text/html'
+    ) {
         const trimmed = payload.artifact.content.trim();
         if (/^<!DOCTYPE html>/i.test(trimmed)) {
             return injectHtmlPreviewThemeShim(trimmed, payload);

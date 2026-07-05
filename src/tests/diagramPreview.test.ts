@@ -1,5 +1,6 @@
 import {
     supportsDiagramPreviewModal,
+    supportsIframeHtmlPreview,
     supportsInlineCanvasPreview,
     supportsInlineMermaidPreview,
     supportsInlineVegaLitePreview,
@@ -84,5 +85,17 @@ describe('diagram preview helpers', () => {
             mimeType: 'text/html',
             sourceIntent: 'flowchart'
         })).toBe(true);
+    });
+
+    test('uses iframe html preview for editable html/svg artifacts', () => {
+        const artifact = {
+            target: 'editable-html-svg' as const,
+            content: '<!DOCTYPE html><html><body><svg /></body></html>',
+            mimeType: 'text/html',
+            sourceIntent: 'flowchart' as const
+        };
+
+        expect(supportsIframeHtmlPreview(artifact)).toBe(true);
+        expect(supportsDiagramPreviewModal(artifact)).toBe(true);
     });
 });

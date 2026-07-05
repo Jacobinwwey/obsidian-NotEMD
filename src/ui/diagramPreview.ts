@@ -19,7 +19,8 @@ export function supportsInlineVegaLitePreview(artifact: RenderArtifact): boolean
 }
 
 export function supportsIframeHtmlPreview(artifact: RenderArtifact): boolean {
-    return artifact.target === 'html' && artifact.mimeType === 'text/html';
+    return (artifact.target === 'html' || artifact.target === 'editable-html-svg')
+        && artifact.mimeType === 'text/html';
 }
 
 export function supportsDiagramPreviewModal(artifact: RenderArtifact): boolean {

@@ -137,6 +137,21 @@ describe('diagram preview export helpers', () => {
         expect(mockApp.vault.create).toHaveBeenCalledWith('Notes/Topic_diagram.json', '{"mark":"bar"}');
     });
 
+    test('saves editable html/svg source artifacts as html documents', async () => {
+        const outputPath = await saveDiagramSourceArtifact(mockApp, 'Notes/Runtime.md', {
+            target: 'editable-html-svg',
+            content: '<!DOCTYPE html><html><body><svg /></body></html>',
+            mimeType: 'text/html',
+            sourceIntent: 'flowchart'
+        });
+
+        expect(outputPath).toBe('Notes/Runtime_diagram.html');
+        expect(mockApp.vault.create).toHaveBeenCalledWith(
+            'Notes/Runtime_diagram.html',
+            expect.stringContaining('<svg')
+        );
+    });
+
     test('saves a png preview artifact beside the source file', async () => {
         const outputPath = await saveDiagramPreviewPng(mockApp, 'Notes/Topic.md', {
             target: 'mermaid',

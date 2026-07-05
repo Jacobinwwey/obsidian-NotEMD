@@ -30,6 +30,7 @@ function getArtifactPathSpec(artifact: RenderArtifact): ArtifactPathSpec {
         case 'vega-lite':
             return { suffix: '_diagram', extension: '.json' };
         case 'html':
+        case 'editable-html-svg':
             return { suffix: '_diagram', extension: '.html' };
         default:
             return { suffix: '_diagram', extension: '.txt' };

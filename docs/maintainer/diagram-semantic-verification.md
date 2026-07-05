@@ -49,7 +49,7 @@ npm run audit:render-host
 git diff --check
 ```
 
-These checks do **not** prove that a generated Mermaid artifact is visually valid in a real Obsidian session, or that JSON Canvas / Vega-Lite output still behaves correctly end-to-end in the desktop host.
+These checks do **not** prove that a generated Mermaid artifact is visually valid in a real Obsidian session, or that JSON Canvas / Vega-Lite / Editable HTML/SVG output still behaves correctly end-to-end in the desktop host.
 
 They also do **not** prove that heavy runtimes are already isolated into a separate packaged asset. `npm run audit:render-host` currently proves only the enforced shipping truth: the inline `srcdoc` host remains self-contained inside `main.js`, and stray `render-host.mjs` assets or references are rejected on current `main` through the shared packaging contract. The helper's packaging-boundary section adds one more explicit anti-drift check on top of that: latent runtime helpers must not silently reintroduce a default standalone runtime-module path on the current single-entry lane.
 It now adds a second anti-drift check for the source/build split: the render-host bundle build helper is allowed to remain in source as a future candidate, but current production build and release contracts must continue treating its output as non-shipped.
@@ -135,6 +135,22 @@ Recommended evidence:
 - saved file path
 - screenshot of the preview modal or rendered chart
 
+### Editable HTML/SVG
+
+Validate at least one note that produces `editable-html-svg` output.
+
+Check:
+
+- saved artifact is a self-contained `.html` document
+- inline SVG contains `data-drawio-type` annotations for editable nodes and edges
+- preview opens through the iframe HTML preview path
+- desktop and mobile preview checks show nonblank rendering with contained text bounds
+
+Recommended evidence:
+
+- saved `.html` file path
+- screenshot of the preview modal and annotation check output
+
 ## 5. Minimum Verification Flow
 
 Use this sequence unless the change is more narrowly scoped:
@@ -158,7 +174,7 @@ At minimum, record:
 
 - vault name used
 - plugin version / branch / commit
-- affected surface: Mermaid, JSON Canvas, Vega-Lite
+- affected surface: Mermaid, JSON Canvas, Vega-Lite, Editable HTML/SVG
 - command used
 - artifact path produced
 - result: pass/fail

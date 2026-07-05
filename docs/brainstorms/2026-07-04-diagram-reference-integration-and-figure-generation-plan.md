@@ -151,27 +151,33 @@ Rules:
 
 ### Phase B: Editable HTML/SVG Prototype
 
-- [ ] Define `SemanticFigureModel` as an internal renderer model, not a public prompt contract.
-- [ ] Add an `editable-html-svg` or equivalent target after naming is reviewed against existing `html`.
-- [ ] Implement a first renderer for architecture/process/runtime-mechanism views from existing `DiagramSpec` fields.
-- [ ] Add annotation coverage tests modeled after Cloudy's `data-drawio-type` contract.
-- [ ] Add Playwright preview checks for nonblank render, text bounds, and mobile/desktop framing.
-- [ ] Keep the feature behind the existing experimental diagram pipeline until preview/export quality is proven.
+- [x] Define `SemanticFigureModel` as an internal renderer model, not a public prompt contract.
+- [x] Add an `editable-html-svg` target after naming was reviewed against existing `html`.
+- [x] Implement a first renderer for architecture/process/runtime-mechanism views from existing `DiagramSpec` fields.
+- [x] Add annotation coverage tests modeled after Cloudy's `data-drawio-type` contract.
+- [x] Add Playwright preview checks for nonblank render, text bounds, and mobile/desktop framing.
+- [x] Keep the feature behind the existing experimental diagram pipeline until preview/export quality is proven.
+
+Phase B implementation status on 2026-07-05: `editable-html-svg` is now an explicit render target, not a default planner route. The prototype uses `src/diagram/adapters/editableSvg/semanticFigureModel.ts` as the internal renderer model and `src/rendering/renderers/editableHtmlSvgRenderer.ts` as the self-contained HTML/SVG renderer. Annotation coverage, iframe preview pass-through, source artifact `.html` export, and desktop/mobile Playwright preview checks are covered by `src/tests/editableHtmlSvgRenderer.test.ts`, `src/tests/editableHtmlSvgPreview.playwright.test.ts`, `src/tests/diagramPreview.test.ts`, `src/tests/previewExport.test.ts`, and the semantic-verification helper tests.
 
 ### Phase C: Draw.io Export Hardening
 
-- [ ] Add a deterministic exporter block or library boundary.
-- [ ] Add visible-label mismatch tests.
-- [ ] Add sampled edge/style mapping tests.
-- [ ] Add a local-only visual regression runbook; do not make diagrams.net Desktop a required normal CI dependency.
-- [ ] Document exporter limitations and supported primitives.
+- [x] Add a deterministic exporter block or library boundary.
+- [x] Add visible-label mismatch tests.
+- [x] Add sampled edge/style mapping tests.
+- [x] Add a local-only visual regression runbook; do not make diagrams.net Desktop a required normal CI dependency.
+- [x] Document exporter limitations and supported primitives.
+
+Phase C implementation status on 2026-07-05: draw.io export hardening is implemented as `src/diagram/adapters/drawio/drawioExporter.ts`, consuming the internal `SemanticFigureModel` and producing deterministic uncompressed draw.io XML. `src/tests/drawioExporter.test.ts` covers XML structure, visible-label mismatch detection, and sampled node/edge style mapping. `docs/maintainer/drawio-export-visual-regression.md` and `docs/maintainer/drawio-export-visual-regression.zh-CN.md` define the local-only diagrams.net Desktop visual check, supported primitives, and unsupported scope; `src/tests/drawioExportDocsContract.test.ts` keeps the bilingual runbook boundary from drifting.
 
 ### Phase D: Drawnix Board Export Spike
 
-- [ ] Define the supported `DrawnixExportedData` subset.
-- [ ] Build `DiagramSpec -> DrawnixExportedData` without importing the full Drawnix host.
-- [ ] Test `.drawnix` JSON validity and simple open/import behavior manually in Drawnix.
-- [ ] Decide whether a Plait dependency is worth the bundle cost only after Task 0 packaging isolation is no longer candidate-only.
+- [x] Define the supported `DrawnixExportedData` subset.
+- [x] Build `DiagramSpec -> DrawnixExportedData` without importing the full Drawnix host.
+- [x] Test `.drawnix` JSON validity; record the simple open/import behavior as a local Drawnix manual-evidence boundary.
+- [x] Decide whether a Plait dependency is worth the bundle cost only after Task 0 packaging isolation is no longer candidate-only.
+
+Phase D implementation status on 2026-07-05: the Drawnix spike is implemented as `src/diagram/adapters/drawnix/drawnixExporter.ts`. It exports a minimal `DrawnixExportedData` subset using top-level `type/version/source/elements/viewport/theme`, `geometry` rectangle nodes, and `arrow-line` edges without importing Drawnix, Plait, or Plait Board packages. `src/tests/drawnixExporter.test.ts` covers JSON validity, stable `.drawnix` serialization, unsupported subset rejection, and the no-runtime-dependency source contract. `docs/maintainer/drawnix-export-spike.md` and `docs/maintainer/drawnix-export-spike.zh-CN.md` record the manual open/import evidence boundary through Drawnix and the current decision to avoid a Plait runtime dependency until bundle isolation and release packaging are proven beyond candidate-only status.
 
 ## Tradeoffs
 

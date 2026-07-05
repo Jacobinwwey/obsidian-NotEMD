@@ -167,7 +167,7 @@ describe('diagram semantic verification helper', () => {
         expect(result.status).toBe(1);
         expect(result.stdout).toBe('');
         expect(result.stderr).toContain('Unsupported diagram semantic surface "bad-surface"');
-        expect(result.stderr).toContain('Supported values: mermaid, json-canvas, vega-lite');
+        expect(result.stderr).toContain('Supported values: mermaid, json-canvas, vega-lite, editable-html-svg');
     });
 
     const maybeDescribeHelper = fs.existsSync(scriptPath) ? describe : describe.skip;
@@ -381,13 +381,15 @@ describe('diagram semantic verification helper', () => {
             expect(resolveRequestedSurfaces([])).toEqual([
                 { id: 'mermaid', label: 'Mermaid' },
                 { id: 'json-canvas', label: 'JSON Canvas' },
-                { id: 'vega-lite', label: 'Vega-Lite' }
+                { id: 'vega-lite', label: 'Vega-Lite' },
+                { id: 'editable-html-svg', label: 'Editable HTML/SVG' }
             ]);
         });
 
         test('normalizes surface aliases and de-duplicates repeats', () => {
-            expect(resolveRequestedSurfaces(['VegaLite', 'mermaid', 'vega-lite', 'jsoncanvas'])).toEqual([
+            expect(resolveRequestedSurfaces(['VegaLite', 'editable-svg', 'mermaid', 'vega-lite', 'jsoncanvas', 'editable-html-svg'])).toEqual([
                 { id: 'vega-lite', label: 'Vega-Lite' },
+                { id: 'editable-html-svg', label: 'Editable HTML/SVG' },
                 { id: 'mermaid', label: 'Mermaid' },
                 { id: 'json-canvas', label: 'JSON Canvas' }
             ]);

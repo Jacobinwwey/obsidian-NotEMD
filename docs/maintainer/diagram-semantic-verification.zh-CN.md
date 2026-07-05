@@ -49,7 +49,7 @@ npm run audit:render-host
 git diff --check
 ```
 
-这些检查**不能**证明 Mermaid 产物在真实 Obsidian 会话中视觉上仍然正确，也不能证明 JSON Canvas / Vega-Lite 在桌面宿主中的端到端行为没有退化。
+这些检查**不能**证明 Mermaid 产物在真实 Obsidian 会话中视觉上仍然正确，也不能证明 JSON Canvas / Vega-Lite / Editable HTML/SVG 在桌面宿主中的端到端行为没有退化。
 
 它们也**不等于**重型运行时已经被真正隔离为独立打包资产。`npm run audit:render-host` 当前只能证明一条已强制的发布事实：内联 `srcdoc` host 仍然自包含地随 `main.js` 一起发布，同时当前主线会通过共享 packaging contract 拒绝残留的 `render-host.mjs` 资产或引用。helper 的 packaging-boundary 区块会在此基础上再补一层显式 anti-drift 检查：当前单入口主线上的 latent runtime helper 不能悄悄重新引入默认 standalone runtime-module 路径。
 它现在还会为 source/build split 增加第二层 anti-drift 检查：render-host bundle build helper 可以继续作为未来候选代码留在源码里，但当前 production build 与 release contract 必须继续把它的输出视为 non-shipped。
@@ -135,6 +135,22 @@ obsidian commands vault=<vault-name> filter=notemd
 - 保存文件路径
 - 预览模态框或图表渲染截图
 
+### Editable HTML/SVG
+
+至少验证一个会产出 `editable-html-svg` 的笔记。
+
+检查项：
+
+- 保存产物是自包含的 `.html` 文档
+- inline SVG 为可编辑节点与边保留 `data-drawio-type` 注解
+- 预览可通过 iframe HTML preview 路径正常打开
+- desktop 与 mobile preview checks 显示非空渲染，且文本边界未溢出
+
+建议证据：
+
+- 保存后的 `.html` 文件路径
+- 预览模态框截图与 annotation check 输出
+
 ## 5. 最小核验流程
 
 除非改动范围更窄，否则按以下顺序执行：
@@ -158,7 +174,7 @@ helper 现在还会额外生成 packaging-boundary、render-host audit、render-
 
 - 使用的 vault 名称
 - 插件版本 / 分支 / commit
-- 受影响表面：Mermaid、JSON Canvas、Vega-Lite
+- 受影响表面：Mermaid、JSON Canvas、Vega-Lite、Editable HTML/SVG
 - 使用的命令
 - 产物文件路径
 - 结果：pass/fail

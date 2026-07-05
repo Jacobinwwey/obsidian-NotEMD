@@ -151,27 +151,33 @@ DiagramSpec
 
 ### Phase B：Editable HTML/SVG Prototype
 
-- [ ] 将 `SemanticFigureModel` 定义为内部 renderer model，而不是 public prompt contract。
-- [ ] 命名评审后新增 `editable-html-svg` 或等价 target，避免与现有 `html` 含义冲突。
-- [ ] 基于现有 `DiagramSpec` 字段，实现 architecture / process / runtime-mechanism views 的第一版 renderer。
-- [ ] 增加参考 Cloudy `data-drawio-type` contract 的 annotation coverage tests。
-- [ ] 增加 Playwright preview checks，覆盖 nonblank render、text bounds、mobile/desktop framing。
-- [ ] 在 preview/export 质量被证明前，把能力放在现有 experimental diagram pipeline 后面。
+- [x] 将 `SemanticFigureModel` 定义为内部 renderer model，而不是 public prompt contract。
+- [x] 命名评审后新增 `editable-html-svg` target，避免与现有 `html` 含义冲突。
+- [x] 基于现有 `DiagramSpec` 字段，实现 architecture / process / runtime-mechanism views 的第一版 renderer。
+- [x] 增加参考 Cloudy `data-drawio-type` contract 的 annotation coverage tests。
+- [x] 增加 Playwright preview checks，覆盖 nonblank render、text bounds、mobile/desktop framing。
+- [x] 在 preview/export 质量被证明前，把能力放在现有 experimental diagram pipeline 后面。
+
+Phase B 于 2026-07-05 的实现状态：`editable-html-svg` 现在是显式 render target，不是默认 planner route。原型使用 `src/diagram/adapters/editableSvg/semanticFigureModel.ts` 作为内部 renderer model，使用 `src/rendering/renderers/editableHtmlSvgRenderer.ts` 输出自包含 HTML/SVG。annotation coverage、iframe preview pass-through、源产物 `.html` 导出、desktop/mobile Playwright preview checks 已由 `src/tests/editableHtmlSvgRenderer.test.ts`、`src/tests/editableHtmlSvgPreview.playwright.test.ts`、`src/tests/diagramPreview.test.ts`、`src/tests/previewExport.test.ts` 与 semantic-verification helper tests 覆盖。
 
 ### Phase C：Draw.io Export Hardening
 
-- [ ] 增加 deterministic exporter block 或 library boundary。
-- [ ] 增加 visible-label mismatch tests。
-- [ ] 增加 edge/style mapping 抽样测试。
-- [ ] 增加 local-only visual regression runbook；不要让 diagrams.net Desktop 成为普通 CI 依赖。
-- [ ] 文档化 exporter limitations 与 supported primitives。
+- [x] 增加 deterministic exporter block 或 library boundary。
+- [x] 增加 visible-label mismatch tests。
+- [x] 增加 edge/style mapping 抽样测试。
+- [x] 增加 local-only visual regression runbook；不要让 diagrams.net Desktop 成为普通 CI 依赖。
+- [x] 文档化 exporter limitations 与 supported primitives。
+
+Phase C 于 2026-07-05 的实现状态：draw.io export hardening 以 `src/diagram/adapters/drawio/drawioExporter.ts` 落地，消费内部 `SemanticFigureModel` 并生成 deterministic uncompressed draw.io XML。`src/tests/drawioExporter.test.ts` 覆盖 XML structure、visible-label mismatch detection 与节点/边 style mapping 抽样。`docs/maintainer/drawio-export-visual-regression.md` 与 `docs/maintainer/drawio-export-visual-regression.zh-CN.md` 定义 local-only diagrams.net Desktop visual check、supported primitives 与 unsupported scope；`src/tests/drawioExportDocsContract.test.ts` 用来防止双语 runbook 边界漂移。
 
 ### Phase D：Drawnix Board Export Spike
 
-- [ ] 定义支持的 `DrawnixExportedData` 子集。
-- [ ] 在不导入完整 Drawnix host 的前提下实现 `DiagramSpec -> DrawnixExportedData`。
-- [ ] 手工在 Drawnix 中验证 `.drawnix` JSON validity 与简单 open/import 行为。
-- [ ] 只有当 Task 0 packaging isolation 不再是 candidate-only 后，才判断 Plait dependency 是否值得承担 bundle 成本。
+- [x] 定义支持的 `DrawnixExportedData` 子集。
+- [x] 在不导入完整 Drawnix host 的前提下实现 `DiagramSpec -> DrawnixExportedData`。
+- [x] 验证 `.drawnix` JSON validity；将简单 open/import 行为记录为本地 Drawnix manual-evidence boundary。
+- [x] 只有当 Task 0 packaging isolation 不再是 candidate-only 后，才判断 Plait dependency 是否值得承担 bundle 成本。
+
+Phase D 于 2026-07-05 的实现状态：Drawnix spike 以 `src/diagram/adapters/drawnix/drawnixExporter.ts` 落地。它导出最小 `DrawnixExportedData` subset，使用顶层 `type/version/source/elements/viewport/theme`、`geometry` rectangle nodes 与 `arrow-line` edges，不导入 Drawnix、Plait 或 Plait Board packages。`src/tests/drawnixExporter.test.ts` 覆盖 JSON validity、稳定 `.drawnix` serialization、unsupported subset rejection，以及无运行时依赖的源码契约。`docs/maintainer/drawnix-export-spike.md` 与 `docs/maintainer/drawnix-export-spike.zh-CN.md` 记录通过 Drawnix 进行 manual open/import 的证据边界，以及在 bundle isolation 与 release packaging 未被证明超过 candidate-only 前不引入 Plait runtime dependency 的当前决策。
 
 ## 权衡
 
