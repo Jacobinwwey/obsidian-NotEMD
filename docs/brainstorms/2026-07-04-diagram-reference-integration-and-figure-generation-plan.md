@@ -179,6 +179,16 @@ Phase C implementation status on 2026-07-05: draw.io export hardening is impleme
 
 Phase D implementation status on 2026-07-05: the Drawnix spike is implemented as `src/diagram/adapters/drawnix/drawnixExporter.ts`. It exports a minimal `DrawnixExportedData` subset using top-level `type/version/source/elements/viewport/theme`, `geometry` rectangle nodes, and `arrow-line` edges without importing Drawnix, Plait, or Plait Board packages. `src/tests/drawnixExporter.test.ts` covers JSON validity, stable `.drawnix` serialization, unsupported subset rejection, and the no-runtime-dependency source contract. `docs/maintainer/drawnix-export-spike.md` and `docs/maintainer/drawnix-export-spike.zh-CN.md` record the manual open/import evidence boundary through Drawnix and the current decision to avoid a Plait runtime dependency until bundle isolation and release packaging are proven beyond candidate-only status.
 
+### Phase E: Offline Artifact Export CLI
+
+- [x] Add a repo-local CLI that exports Cloudy-style editable HTML/SVG, Draw.io XML, and Drawnix JSON from one `DiagramSpec`.
+- [x] Keep the CLI independent of Obsidian runtime and `obsidian-cli` so CI and local automation can exercise the exporters directly.
+- [x] Reuse the existing TypeScript `SemanticFigureModel`, `EditableHtmlSvgRenderer`, Draw.io exporter, and Drawnix exporter rather than duplicating a second JavaScript implementation.
+- [x] Add CLI contract tests that verify real files are written and unsupported targets fail before output creation.
+- [x] Add bilingual maintainer runbooks and docs hub discoverability.
+
+Phase E implementation status on 2026-07-05: `scripts/export-diagram-artifact.js` and `npm run diagram:export-artifact` now provide an offline artifact exporter. The CLI reads a `DiagramSpec` JSON file, validates the requested target, builds a temporary internal `esbuild` bundle from the existing TypeScript exporters, and writes `editable-html-svg`, `drawio`, or `drawnix` output. `src/tests/diagramArtifactExportCli.test.ts` verifies real HTML/XML/JSON output, normalized-id collision handling, Draw.io visible-label preservation, Drawnix `geometry`/`arrow-line` output, and unsupported-target failure semantics. `docs/maintainer/diagram-artifact-export-cli.md` and `docs/maintainer/diagram-artifact-export-cli.zh-CN.md` document the command contract and explicitly state that no Obsidian runtime is required.
+
 ## Tradeoffs
 
 | Decision | Benefit | Cost |

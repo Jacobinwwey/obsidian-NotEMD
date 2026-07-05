@@ -179,6 +179,16 @@ Phase C 于 2026-07-05 的实现状态：draw.io export hardening 以 `src/diagr
 
 Phase D 于 2026-07-05 的实现状态：Drawnix spike 以 `src/diagram/adapters/drawnix/drawnixExporter.ts` 落地。它导出最小 `DrawnixExportedData` subset，使用顶层 `type/version/source/elements/viewport/theme`、`geometry` rectangle nodes 与 `arrow-line` edges，不导入 Drawnix、Plait 或 Plait Board packages。`src/tests/drawnixExporter.test.ts` 覆盖 JSON validity、稳定 `.drawnix` serialization、unsupported subset rejection，以及无运行时依赖的源码契约。`docs/maintainer/drawnix-export-spike.md` 与 `docs/maintainer/drawnix-export-spike.zh-CN.md` 记录通过 Drawnix 进行 manual open/import 的证据边界，以及在 bundle isolation 与 release packaging 未被证明超过 candidate-only 前不引入 Plait runtime dependency 的当前决策。
 
+### Phase E：Offline Artifact Export CLI
+
+- [x] 增加 repo-local CLI，从同一份 `DiagramSpec` 导出 Cloudy 风格 editable HTML/SVG、Draw.io XML 与 Drawnix JSON。
+- [x] CLI 不依赖 Obsidian runtime 或 `obsidian-cli`，让 CI 与本地自动化可以直接验证 exporters。
+- [x] 复用现有 TypeScript `SemanticFigureModel`、`EditableHtmlSvgRenderer`、Draw.io exporter 与 Drawnix exporter，不维护第二份 JavaScript 逻辑。
+- [x] 增加 CLI contract tests，验证真实文件落盘，并确保 unsupported target 在创建输出前失败。
+- [x] 增加双语 maintainer runbook 与 docs hub 入口。
+
+Phase E 于 2026-07-05 的实现状态：`scripts/export-diagram-artifact.js` 与 `npm run diagram:export-artifact` 已提供离线 artifact exporter。CLI 读取 `DiagramSpec` JSON 文件，先验证 target，再用临时内部 `esbuild` bundle 复用现有 TypeScript exporters，写出 `editable-html-svg`、`drawio` 或 `drawnix` 输出。`src/tests/diagramArtifactExportCli.test.ts` 验证真实 HTML/XML/JSON 输出、normalized id collision handling、Draw.io visible-label preservation、Drawnix `geometry`/`arrow-line` 输出，以及 unsupported-target failure semantics。`docs/maintainer/diagram-artifact-export-cli.md` 与 `docs/maintainer/diagram-artifact-export-cli.zh-CN.md` 记录命令契约，并明确 no Obsidian runtime is required。
+
 ## 权衡
 
 | 决策 | 收益 | 成本 |

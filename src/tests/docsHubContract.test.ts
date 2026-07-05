@@ -73,10 +73,16 @@ describe('docs hub contract', () => {
 
     test('docs hub and preview index keep diagram export runbooks discoverable in both languages', () => {
         expect(docsHub).toContain(
+            '[Diagram Artifact Export CLI](./maintainer/diagram-artifact-export-cli.md)'
+        );
+        expect(docsHub).toContain(
             '[Draw.io Export Visual Regression](./maintainer/drawio-export-visual-regression.md)'
         );
         expect(docsHub).toContain(
             '[Drawnix Export Spike](./maintainer/drawnix-export-spike.md)'
+        );
+        expect(docsHubZh).toContain(
+            '[Diagram Artifact Export CLI](./maintainer/diagram-artifact-export-cli.zh-CN.md)'
         );
         expect(docsHubZh).toContain(
             '[draw.io 导出视觉回归 Runbook](./maintainer/drawio-export-visual-regression.zh-CN.md)'
@@ -85,10 +91,22 @@ describe('docs hub contract', () => {
             '[Drawnix 导出 Spike](./maintainer/drawnix-export-spike.zh-CN.md)'
         );
         expect(docsIndex).toContain(
+            '[Diagram Artifact Export CLI (EN)](./maintainer/diagram-artifact-export-cli.md)'
+        );
+        expect(docsIndex).toContain(
+            '[Diagram Artifact Export CLI (zh-CN)](./maintainer/diagram-artifact-export-cli.zh-CN.md)'
+        );
+        expect(docsIndex).toContain(
             '[Draw.io Export Visual Regression (EN)](./maintainer/drawio-export-visual-regression.md)'
         );
         expect(docsIndex).toContain(
             '[Drawnix Export Spike (EN)](./maintainer/drawnix-export-spike.md)'
+        );
+        expect(docsIndexZh).toContain(
+            '[Diagram Artifact Export CLI（英文）](./maintainer/diagram-artifact-export-cli.md)'
+        );
+        expect(docsIndexZh).toContain(
+            '[Diagram Artifact Export CLI（中文）](./maintainer/diagram-artifact-export-cli.zh-CN.md)'
         );
         expect(docsIndexZh).toContain(
             '[draw.io 导出视觉回归 Runbook（中文）](./maintainer/drawio-export-visual-regression.zh-CN.md)'

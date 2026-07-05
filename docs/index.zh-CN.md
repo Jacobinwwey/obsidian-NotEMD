@@ -34,6 +34,8 @@
 - [Local KB RAG 质量与执行链路真值（中文）](./brainstorms/2026-06-09-local-kb-rag-quality-and-execution-truth.zh-CN.md)
 - [Chapter Split 的知识管理与 TOC 对比真值（英文）](./brainstorms/2026-06-09-chapter-split-knowledge-management-and-toc-comparison-truth.md)
 - [Chapter Split 的知识管理与 TOC 对比真值（中文）](./brainstorms/2026-06-09-chapter-split-knowledge-management-and-toc-comparison-truth.zh-CN.md)
+- [Diagram Artifact Export CLI（英文）](./maintainer/diagram-artifact-export-cli.md)
+- [Diagram Artifact Export CLI（中文）](./maintainer/diagram-artifact-export-cli.zh-CN.md)
 - [draw.io 导出视觉回归 Runbook（英文）](./maintainer/drawio-export-visual-regression.md)
 - [draw.io 导出视觉回归 Runbook（中文）](./maintainer/drawio-export-visual-regression.zh-CN.md)
 - [Drawnix 导出 Spike（英文）](./maintainer/drawnix-export-spike.md)

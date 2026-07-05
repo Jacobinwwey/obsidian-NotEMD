@@ -16,6 +16,7 @@ This directory contains repository-level documentation for maintainers and contr
 - [Language Hub](./i18n/README.md)
 - [GitHub Pages Language And GEO Workflow](./maintainer/github-pages-language-geo-workflow.md)
 - [GitHub Pages GEO Measurement Log](./maintainer/github-pages-geo-measurement-log.md)
+- [Diagram Artifact Export CLI](./maintainer/diagram-artifact-export-cli.md)
 - [Draw.io Export Visual Regression](./maintainer/drawio-export-visual-regression.md)
 - [Drawnix Export Spike](./maintainer/drawnix-export-spike.md)
 - [Chapter Split + TOC Extraction](./chapter-split-toc.md)

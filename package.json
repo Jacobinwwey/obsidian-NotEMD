@@ -15,6 +15,7 @@
 		"diagnose:llm": "node scripts/diagnose-llm-provider.js",
 		"cli:help": "node scripts/invoke-maintainer-cli-operation.js --help",
 		"cli:invoke": "node scripts/invoke-maintainer-cli-operation.js",
+		"diagram:export-artifact": "node scripts/export-diagram-artifact.js",
 		"chronicle:sync-repo-saga": "node scripts/repo-saga/update-quarterly-saga.mjs --sync-only",
 		"chronicle:update": "node scripts/repo-saga/update-quarterly-saga.mjs",
 		"audit:i18n-ui": "node scripts/audit-hardcoded-ui-strings.js",

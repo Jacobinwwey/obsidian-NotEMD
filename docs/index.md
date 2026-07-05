@@ -34,6 +34,8 @@ Repository docs preview for `obsidian-NotEMD`.
 - [Local KB RAG Quality And Execution Truth (zh-CN)](./brainstorms/2026-06-09-local-kb-rag-quality-and-execution-truth.zh-CN.md)
 - [Chapter Split Knowledge Management And TOC Comparison Truth (EN)](./brainstorms/2026-06-09-chapter-split-knowledge-management-and-toc-comparison-truth.md)
 - [Chapter Split Knowledge Management And TOC Comparison Truth (zh-CN)](./brainstorms/2026-06-09-chapter-split-knowledge-management-and-toc-comparison-truth.zh-CN.md)
+- [Diagram Artifact Export CLI (EN)](./maintainer/diagram-artifact-export-cli.md)
+- [Diagram Artifact Export CLI (zh-CN)](./maintainer/diagram-artifact-export-cli.zh-CN.md)
 - [Draw.io Export Visual Regression (EN)](./maintainer/drawio-export-visual-regression.md)
 - [Draw.io Export Visual Regression (zh-CN)](./maintainer/drawio-export-visual-regression.zh-CN.md)
 - [Drawnix Export Spike (EN)](./maintainer/drawnix-export-spike.md)
