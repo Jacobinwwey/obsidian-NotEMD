@@ -433,9 +433,30 @@ function useBox(tag: string, pathDefinitions: Map<string, SvgBox>): SvgBox | und
     };
 }
 
+function pointListBox(label: string, tag: string): SvgBox | undefined {
+    const pointsAttribute = readAttribute(tag, 'points');
+    if (!pointsAttribute) {
+        return undefined;
+    }
+
+    const coordinates = Array.from(pointsAttribute.matchAll(/-?[0-9]+(?:\.[0-9]+)?(?:e[-+]?[0-9]+)?/gi))
+        .map(match => Number(match[0]))
+        .filter(Number.isFinite);
+    const points: Array<[number, number]> = [];
+    for (let index = 0; index + 1 < coordinates.length; index += 2) {
+        points.push([coordinates[index], coordinates[index + 1]]);
+    }
+
+    return boxFromPoints(label, points);
+}
+
 function elementBox(tagName: string, tag: string): SvgBox | undefined {
     if (tagName === 'path') {
         return pathBox(tag);
+    }
+
+    if (tagName === 'polyline' || tagName === 'polygon') {
+        return pointListBox(tagName, tag);
     }
 
     if (tagName === 'line') {
@@ -541,7 +562,7 @@ function collectSvgBoxes(svgText: string): { boxes: SvgBox[]; drawingBoxes: SvgB
         transform: identityTransform(),
         hidden: false
     }];
-    const tokenPattern = /<\/(?:g|defs)\s*>|<defs\b[^>]*\/?>|<g\b[^>]*\/?>|<(path|line|rect|circle|ellipse|use)\b[^>]*\/?>|<text\b[^>]*>[\s\S]*?<\/text>/gi;
+    const tokenPattern = /<\/(?:g|defs)\s*>|<defs\b[^>]*\/?>|<g\b[^>]*\/?>|<(path|line|polyline|polygon|rect|circle|ellipse|use)\b[^>]*\/?>|<text\b[^>]*>[\s\S]*?<\/text>/gi;
 
     for (const match of svgText.matchAll(tokenPattern)) {
         const tag = match[0];

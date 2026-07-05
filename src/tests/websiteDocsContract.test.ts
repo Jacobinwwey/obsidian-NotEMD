@@ -85,6 +85,8 @@ describe('website documentation contract', () => {
             expect(content).toContain('pathOnlyGlyphUseCount');
             expect(content).toContain('path-only glyph placement');
             expect(content).toContain('<use href="#...">');
+            expect(content).toContain('polyline');
+            expect(content).toContain('polygon');
             expect(content).toContain('render-png-blank');
             expect(content).toContain('render-png-foreground-dense');
             expect(content).toContain('render-png-content-clipped');

@@ -260,6 +260,58 @@ describe('circuitikz render smoke inspection', () => {
         }
     });
 
+    test('reports SVG polyline drawing elements that extend outside the viewBox', () => {
+        const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'notemd-circuitikz-svg-polyline-bounds-'));
+        const svgPath = path.join(tempRoot, 'polyline-out-of-bounds.svg');
+        fs.writeFileSync(
+            svgPath,
+            '<svg viewBox="0 0 100 80"><polyline points="10,10 40,10 112,20"/></svg>',
+            'utf8'
+        );
+
+        try {
+            const report = inspectCircuitikzRenderArtifact({
+                expectedArtifactPath: svgPath
+            });
+
+            expect(report.artifactKind).toBe('svg');
+            expect(report.diagnostics).toEqual([
+                expect.objectContaining({
+                    kind: 'render-svg-out-of-bounds',
+                    message: expect.stringContaining('polyline')
+                })
+            ]);
+        } finally {
+            fs.rmSync(tempRoot, { recursive: true, force: true });
+        }
+    });
+
+    test('reports SVG polygon drawing elements moved into label overlap by transforms', () => {
+        const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'notemd-circuitikz-svg-polygon-label-overlap-'));
+        const svgPath = path.join(tempRoot, 'polygon-label-overlap.svg');
+        fs.writeFileSync(
+            svgPath,
+            '<svg viewBox="0 0 160 100"><polygon points="0,0 24,0 24,16 0,16" transform="translate(42 31)"/><text x="45" y="45" font-size="12">M1</text></svg>',
+            'utf8'
+        );
+
+        try {
+            const report = inspectCircuitikzRenderArtifact({
+                expectedArtifactPath: svgPath
+            });
+
+            expect(report.artifactKind).toBe('svg');
+            expect(report.diagnostics).toEqual([
+                expect.objectContaining({
+                    kind: 'render-svg-label-overlap',
+                    message: expect.stringContaining('polygon')
+                })
+            ]);
+        } finally {
+            fs.rmSync(tempRoot, { recursive: true, force: true });
+        }
+    });
+
     test('reports path-only SVG glyph uses that extend outside the viewBox', () => {
         const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'notemd-circuitikz-svg-use-bounds-'));
         const svgPath = path.join(tempRoot, 'path-only-use-out-of-bounds.svg');
