@@ -594,6 +594,31 @@
     background: var(--notemd-surface-alt);
 }
 
+.notemd-diagram-preview-body.is-source-only {
+    background: var(--background-primary);
+    overflow: auto;
+}
+
+.notemd-diagram-preview-source-only {
+    margin: 0;
+    min-width: 0;
+    white-space: pre-wrap;
+    word-break: break-word;
+    overflow-wrap: anywhere;
+    font-family: var(--font-monospace);
+    font-size: 12px;
+    line-height: 1.55;
+    color: var(--text-normal);
+}
+
+.notemd-diagram-preview-source-only-code {
+    display: block;
+    white-space: inherit;
+    word-break: inherit;
+    overflow-wrap: inherit;
+    font-family: inherit;
+}
+
 .notemd-diagram-preview-body svg {
     display: block;
     max-width: 100%;

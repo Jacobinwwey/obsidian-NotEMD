@@ -4,6 +4,7 @@ import {
     supportsInlineCanvasPreview,
     supportsInlineMermaidPreview,
     supportsInlineVegaLitePreview,
+    supportsSourceOnlyDiagramPreview,
     unwrapMermaidFence
 } from '../ui/diagramPreview';
 
@@ -97,5 +98,27 @@ describe('diagram preview helpers', () => {
 
         expect(supportsIframeHtmlPreview(artifact)).toBe(true);
         expect(supportsDiagramPreviewModal(artifact)).toBe(true);
+    });
+
+    test('uses source-only modal fallback for non-inline artifacts with source content', () => {
+        const artifact = {
+            target: 'html' as const,
+            content: '\\usepackage{circuitikz}\n\\begin{document}\n\\end{document}',
+            mimeType: 'text/x-tex',
+            sourceIntent: 'flowchart' as const
+        };
+
+        expect(supportsIframeHtmlPreview(artifact)).toBe(false);
+        expect(supportsSourceOnlyDiagramPreview(artifact)).toBe(true);
+        expect(supportsDiagramPreviewModal(artifact)).toBe(true);
+    });
+
+    test('does not open source-only modal for blank artifact content', () => {
+        expect(supportsSourceOnlyDiagramPreview({
+            target: 'html',
+            content: '   ',
+            mimeType: 'text/x-tex',
+            sourceIntent: 'flowchart'
+        })).toBe(false);
     });
 });

@@ -9,9 +9,11 @@ import {
 } from '../rendering/preview/previewExport';
 import { RenderPreviewSession } from '../rendering/host/renderHost';
 import {
+    supportsIframeHtmlPreview,
     supportsInlineCanvasPreview,
     supportsInlineMermaidPreview,
     supportsInlineVegaLitePreview,
+    supportsSourceOnlyDiagramPreview,
 } from './diagramPreview';
 import { getRenderTargetDisplayName } from '../rendering/targetLabel';
 import {
@@ -260,6 +262,16 @@ export class DiagramPreviewModal extends Modal {
             }
         }
 
+        if (supportsIframeHtmlPreview(this.session.payload.artifact)) {
+            this.renderIframePreview(container);
+            return;
+        }
+
+        if (supportsSourceOnlyDiagramPreview(this.session.payload.artifact)) {
+            this.renderSourceOnlyPreview(container);
+            return;
+        }
+
         this.renderIframePreview(container);
     }
 
@@ -284,6 +296,16 @@ export class DiagramPreviewModal extends Modal {
         iframe.setAttribute('sandbox', this.getIframeSandboxPolicy());
         iframe.setAttribute('referrerpolicy', 'no-referrer');
         iframe.srcdoc = this.session.htmlSrcdoc;
+    }
+
+    private renderSourceOnlyPreview(container: HTMLElement): void {
+        container.empty();
+        container.addClass('is-source-only');
+        const sourceBlock = container.createEl('pre', { cls: 'notemd-diagram-preview-source-only' });
+        sourceBlock.createEl('code', {
+            text: this.session.payload.artifact.content,
+            cls: 'notemd-diagram-preview-source-only-code'
+        });
     }
 
     private getIframeSandboxPolicy(): string {

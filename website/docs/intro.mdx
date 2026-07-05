@@ -63,6 +63,7 @@ Notemd integrates **30+ Large Language Models** (OpenAI, Anthropic, Google, Deep
 - **HTML / Editable HTML/SVG**: Self-contained figure artifacts with semantic annotations
 - **Draw.io / Drawnix artifact boundaries**: Maintainer-facing export paths from the same semantic figure model
 - **Circuit diagrams roadmap**: circuitikz/TikZJax support is being designed around golden references, constrained prompts, render feedback, and topology/layout validation rather than raw unconstrained LLM TikZ
+- **Preview diagnostics**: Render artifacts can surface compile/render smoke diagnostics, and non-inline sources can be inspected without requiring a plugin-side LaTeX runtime
 - Syntax auto-fix for Mermaid errors
 
 ### 6. **One-Click Workflows**
@@ -110,7 +111,7 @@ graph LR
     E --> F[Preview or Export]
 ```
 
-The current implementation already supports Mermaid, JSON Canvas, Vega-Lite, HTML fallback, editable HTML/SVG, Draw.io XML artifacts, a minimal Drawnix JSON subset, and an offline `CircuitSpec -> circuitikz` prototype for common-source and CMOS inverter golden templates. Circuit diagrams are a harder class: circuitikz can express accurate electrical topology, but unconstrained LLM output often produces unreadable routing or non-rendering LaTeX. The next direction is to keep circuitikz constrained with golden-reference templates, node-grid layout rules, render diagnostics, and screenshot feedback loops.
+The current implementation already supports Mermaid, JSON Canvas, Vega-Lite, HTML fallback, editable HTML/SVG, Draw.io XML artifacts, a minimal Drawnix JSON subset, preview diagnostics/source-only fallback, and an offline `CircuitSpec -> circuitikz` prototype for common-source and CMOS inverter golden templates. Circuit diagrams are a harder class: circuitikz can express accurate electrical topology, but unconstrained LLM output often produces unreadable routing or non-rendering LaTeX. The next direction is to keep circuitikz constrained with golden-reference templates, node-grid layout rules, render diagnostics, and screenshot feedback loops.
 
 Read the details in [Diagrams](./features/diagrams).
 

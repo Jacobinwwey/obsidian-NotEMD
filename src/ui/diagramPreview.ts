@@ -23,9 +23,18 @@ export function supportsIframeHtmlPreview(artifact: RenderArtifact): boolean {
         && artifact.mimeType === 'text/html';
 }
 
+export function supportsSourceOnlyDiagramPreview(artifact: RenderArtifact): boolean {
+    return artifact.content.trim().length > 0
+        && !supportsInlineMermaidPreview(artifact)
+        && !supportsInlineCanvasPreview(artifact)
+        && !supportsInlineVegaLitePreview(artifact)
+        && !supportsIframeHtmlPreview(artifact);
+}
+
 export function supportsDiagramPreviewModal(artifact: RenderArtifact): boolean {
     return supportsInlineMermaidPreview(artifact)
         || supportsInlineCanvasPreview(artifact)
         || supportsInlineVegaLitePreview(artifact)
-        || supportsIframeHtmlPreview(artifact);
+        || supportsIframeHtmlPreview(artifact)
+        || supportsSourceOnlyDiagramPreview(artifact);
 }

@@ -38,6 +38,7 @@ describe('website documentation contract', () => {
             expect(content).toContain('TikZJax');
             expect(content).toContain('Draw.io');
             expect(content).toContain('Drawnix');
+            expect(content).toContain('source-only');
             expect(content).toContain('Notemd vs Other Obsidian AI Plugins');
         }
     });
@@ -62,6 +63,7 @@ describe('website documentation contract', () => {
             expect(content).toContain('--expected-svg-text');
             expect(content).toContain('shell: false');
             expect(content).toContain('RenderArtifact.diagnostics');
+            expect(content).toContain('source-only');
             expect(content).toContain('artifact diagnostics');
             expect(content).toContain('compileExecution');
             expect(content).toContain('compileExecution.renderSmoke');

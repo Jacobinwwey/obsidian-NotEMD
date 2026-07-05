@@ -66,12 +66,14 @@ describe('circuitikz export docs contract', () => {
             expect(doc).toContain('src/tests/circuitikzRenderSmoke.test.ts');
             expect(doc).toContain('src/tests/circuitikzCompileRunner.test.ts');
             expect(doc).toContain('src/tests/circuitikzExportCli.test.ts');
+            expect(doc).toContain('src/tests/diagramPreview.test.ts');
             expect(doc).toContain('compile-log diagnostics');
             expect(doc).toContain('shell-free compile execution');
             expect(doc).toContain('render-smoke artifact');
             expect(doc).toContain('--expected-svg-text');
             expect(doc).toContain('PNG');
             expect(doc).toContain('RenderArtifact.diagnostics');
+            expect(doc).toContain('source-only preview fallback');
             expect(doc).toContain('DiagramPreviewModal.ts');
             expect(doc).toContain('TikZJax/LaTeX');
             expect(doc).toContain('screenshot');

@@ -63,6 +63,7 @@ Notemd 将 **30+ 大语言模型**（OpenAI、Anthropic、Google、DeepSeek、Qw
 - **HTML / Editable HTML/SVG**：带语义注解的自包含 figure artifact
 - **Draw.io / Drawnix artifact 边界**：从同一个语义 figure model 导出的维护者级产物路径
 - **电路图路线图**：circuitikz/TikZJax 支持会围绕 golden reference、强约束 prompt、渲染反馈和拓扑/布局校验设计，而不是依赖不受约束的 LLM TikZ 输出
+- **预览诊断**：render artifact 可以展示 compile/render smoke diagnostics，非 inline source 也可以在不要求插件侧 LaTeX runtime 的情况下检查
 - Mermaid 语法错误自动修复
 
 ### 6. **一键工作流**
@@ -110,7 +111,7 @@ graph LR
     E --> F[Preview or Export]
 ```
 
-当前实现已经支持 Mermaid、JSON Canvas、Vega-Lite、HTML fallback、editable HTML/SVG、Draw.io XML artifact、最小 Drawnix JSON subset，以及面向 common-source 和 CMOS inverter golden templates 的离线 `CircuitSpec -> circuitikz` 原型。电路图是更难的一类：circuitikz 可以准确表达电路拓扑，但不受约束的 LLM 输出经常产生不可读的布线或无法渲染的 LaTeX。下一步方向是继续把 circuitikz 作为强约束 target：使用 golden-reference 模板、节点网格布局规则、渲染诊断和截图反馈闭环。
+当前实现已经支持 Mermaid、JSON Canvas、Vega-Lite、HTML fallback、editable HTML/SVG、Draw.io XML artifact、最小 Drawnix JSON subset、preview diagnostics / source-only fallback，以及面向 common-source 和 CMOS inverter golden templates 的离线 `CircuitSpec -> circuitikz` 原型。电路图是更难的一类：circuitikz 可以准确表达电路拓扑，但不受约束的 LLM 输出经常产生不可读的布线或无法渲染的 LaTeX。下一步方向是继续把 circuitikz 作为强约束 target：使用 golden-reference 模板、节点网格布局规则、渲染诊断和截图反馈闭环。
 
 详细内容见 [图表与可编辑 Figure](./features/diagrams)。
 

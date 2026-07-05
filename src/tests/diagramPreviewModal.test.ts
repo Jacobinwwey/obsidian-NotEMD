@@ -334,6 +334,34 @@ describe('diagram preview modal', () => {
         expect(iframe?.sandbox).toBe('allow-same-origin');
     });
 
+    test('renders source-only artifacts without iframe or svg export actions', async () => {
+        const source = '\\usepackage{circuitikz}\n\\begin{document}\n\\end{document}';
+        const modal = mountModal(new DiagramPreviewModal(mockApp, createSession({
+            target: 'html',
+            content: source,
+            mimeType: 'text/x-tex',
+            diagnostics: [{
+                severity: 'warning',
+                kind: 'render-svg-text-missing',
+                message: 'SVG text token is missing.'
+            }]
+        }), 'en') as any);
+
+        modal.onOpen();
+        await flushPromises();
+
+        const iframe = findByTag(modal.contentEl, 'iframe');
+        const sourcePreview = findByClass(modal.contentEl, 'notemd-diagram-preview-source-only-code');
+        const buttons = collectButtons(modal.contentEl);
+
+        expect(iframe).toBeNull();
+        expect(sourcePreview?.text).toBe(source);
+        expect(buttons.some(button => button.text === 'Save source file')).toBe(true);
+        expect(buttons.some(button => button.text === 'Export SVG')).toBe(false);
+        expect(buttons.some(button => button.text === 'Export PNG')).toBe(false);
+        expect(findByClass(modal.contentEl, 'notemd-diagram-preview-diagnostics')).not.toBeNull();
+    });
+
     test('hides save-source button when preview already points at saved artifact', async () => {
         const modal = mountModal(new DiagramPreviewModal(mockApp, {
             ...createSession(),
