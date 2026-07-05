@@ -9,7 +9,7 @@ topic: diagram-artifact-export-cli
 
 `scripts/export-diagram-artifact.js` is the offline CLI boundary for the diagram figure work that came from the Cloudy-style technical-diagram reference and the Drawnix reference spike.
 
-It accepts a checked `DiagramSpec` JSON file and writes one artifact without requiring Obsidian, `obsidian-cli`, diagrams.net Desktop, Drawnix, Plait, or a browser runtime.
+It accepts a checked `DiagramSpec` JSON file and writes one artifact without requiring Obsidian, `obsidian-cli`, diagrams.net Desktop, Drawnix, Plait, or a browser runtime. The input may be UTF-8 with or without a BOM, which keeps files produced by Windows PowerShell usable without a separate normalization step.
 
 ```bash
 npm run diagram:export-artifact -- --input spec.json --target editable-html-svg --output figure.html

@@ -79,7 +79,8 @@ function assertSupportedTarget(target) {
 }
 
 function loadDiagramSpec(inputPath) {
-  return JSON.parse(fs.readFileSync(inputPath, 'utf8'));
+  const source = fs.readFileSync(inputPath, 'utf8').replace(/^\uFEFF/, '');
+  return JSON.parse(source);
 }
 
 function ensureOutputDirectory(outputPath) {

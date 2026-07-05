@@ -9,7 +9,7 @@ topic: diagram-artifact-export-cli
 
 `scripts/export-diagram-artifact.js` 是图形扩展工作的离线 CLI 边界，覆盖 Cloudy 风格技术图参考与 Drawnix 参考 spike 产生的 artifact 导出需求。
 
-它读取已验证结构的 `DiagramSpec` JSON 文件，并写出一个 artifact；不需要 Obsidian、`obsidian-cli`、diagrams.net Desktop、Drawnix、Plait 或浏览器运行时。
+它读取已验证结构的 `DiagramSpec` JSON 文件，并写出一个 artifact；不需要 Obsidian、`obsidian-cli`、diagrams.net Desktop、Drawnix、Plait 或浏览器运行时。输入文件可以是带 BOM 或不带 BOM 的 UTF-8，这样 Windows PowerShell 生成的 JSON 不需要额外归一化也能直接使用。
 
 ```bash
 npm run diagram:export-artifact -- --input spec.json --target editable-html-svg --output figure.html

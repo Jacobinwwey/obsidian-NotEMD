@@ -50,6 +50,8 @@ describe('diagram artifact export CLI', () => {
             expect(runbook).toContain('DiagramSpec');
             expect(runbook).toContain('SemanticFigureModel');
             expect(runbook).toContain('no Obsidian runtime');
+            expect(runbook).toContain('UTF-8');
+            expect(runbook).toContain('BOM');
         }
     });
 
@@ -120,6 +122,40 @@ describe('diagram artifact export CLI', () => {
                     style: expect.objectContaining({ dashed: true })
                 })
             ]));
+        } finally {
+            fs.rmSync(tempRoot, { recursive: true, force: true });
+        }
+    }, 30000);
+
+    test('accepts UTF-8 BOM DiagramSpec files produced by Windows PowerShell', () => {
+        const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'notemd-diagram-artifact-cli-bom-'));
+        const specPath = path.join(tempRoot, 'spec.json');
+        const outputPath = path.join(tempRoot, 'figure.drawio');
+        fs.writeFileSync(specPath, `\uFEFF${JSON.stringify(createSpec(), null, 2)}`, 'utf8');
+
+        try {
+            const stdout = execFileSync(
+                process.execPath,
+                [
+                    scriptPath,
+                    '--input', specPath,
+                    '--target', 'drawio',
+                    '--output', outputPath
+                ],
+                {
+                    cwd: repoRoot,
+                    encoding: 'utf8'
+                }
+            );
+
+            const result = JSON.parse(stdout);
+            expect(result).toEqual(expect.objectContaining({
+                target: 'drawio',
+                outputPath,
+                nodeCount: 3,
+                edgeCount: 2
+            }));
+            expect(fs.readFileSync(outputPath, 'utf8')).toContain('<mxfile');
         } finally {
             fs.rmSync(tempRoot, { recursive: true, force: true });
         }
