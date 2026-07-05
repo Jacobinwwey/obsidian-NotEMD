@@ -199,4 +199,133 @@ describe('circuitikz export CLI', () => {
             fs.rmSync(tempRoot, { recursive: true, force: true });
         }
     }, 30000);
+
+    test('rejects compile args without an explicit compile executable', () => {
+        const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'notemd-circuitikz-cli-compile-args-'));
+        const specPath = path.join(tempRoot, 'circuit.json');
+        const outputPath = path.join(tempRoot, 'circuit.tex');
+        fs.writeFileSync(specPath, JSON.stringify(createSpec(), null, 2), 'utf8');
+
+        try {
+            const result = spawnSync(
+                process.execPath,
+                [
+                    scriptPath,
+                    '--input', specPath,
+                    '--output', outputPath,
+                    '--compile-arg', '{tex}'
+                ],
+                {
+                    cwd: repoRoot,
+                    encoding: 'utf8'
+                }
+            );
+
+            expect(result.status).toBe(1);
+            expect(result.stdout).toBe('');
+            expect(result.stderr).toContain('--compile-arg requires --compile-executable.');
+            expect(fs.existsSync(outputPath)).toBe(false);
+        } finally {
+            fs.rmSync(tempRoot, { recursive: true, force: true });
+        }
+    });
+
+    test('rejects compile-log and compile-executable in the same invocation', () => {
+        const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'notemd-circuitikz-cli-compile-mode-'));
+        const specPath = path.join(tempRoot, 'circuit.json');
+        const outputPath = path.join(tempRoot, 'circuit.tex');
+        const compileLogPath = path.join(tempRoot, 'circuit.log');
+        fs.writeFileSync(specPath, JSON.stringify(createSpec(), null, 2), 'utf8');
+        fs.writeFileSync(compileLogPath, 'Output written on circuit.pdf (1 page).\n', 'utf8');
+
+        try {
+            const result = spawnSync(
+                process.execPath,
+                [
+                    scriptPath,
+                    '--input', specPath,
+                    '--output', outputPath,
+                    '--compile-log', compileLogPath,
+                    '--compile-executable', process.execPath
+                ],
+                {
+                    cwd: repoRoot,
+                    encoding: 'utf8'
+                }
+            );
+
+            expect(result.status).toBe(1);
+            expect(result.stdout).toBe('');
+            expect(result.stderr).toContain('--compile-log and --compile-executable cannot be used together.');
+            expect(fs.existsSync(outputPath)).toBe(false);
+        } finally {
+            fs.rmSync(tempRoot, { recursive: true, force: true });
+        }
+    });
+
+    test('runs an explicit compile executable without shell resolution and reports generated log diagnostics', () => {
+        const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'notemd-circuitikz-cli-compile-'));
+        const specPath = path.join(tempRoot, 'circuit.json');
+        const outputPath = path.join(tempRoot, 'circuit.tex');
+        const compilerPath = path.join(tempRoot, 'fake-compiler.js');
+        const argsPath = path.join(tempRoot, 'compile-args.json');
+        fs.writeFileSync(specPath, JSON.stringify(createSpec(), null, 2), 'utf8');
+        fs.writeFileSync(
+            compilerPath,
+            `
+const fs = require('fs');
+const path = require('path');
+const args = process.argv.slice(2);
+fs.writeFileSync(${JSON.stringify(argsPath)}, JSON.stringify([process.argv[1], ...args]), 'utf8');
+const texPath = args[args.indexOf('--tex') + 1];
+const outputDirectory = args[args.indexOf('--out') + 1];
+const jobName = path.basename(texPath, path.extname(texPath));
+fs.writeFileSync(path.join(outputDirectory, jobName + '.log'), 'Overfull \\\\hbox (12.0pt too wide) in paragraph at lines 10--12\\n', 'utf8');
+`,
+            'utf8'
+        );
+
+        try {
+            const stdout = execFileSync(
+                process.execPath,
+                [
+                    scriptPath,
+                    '--input', specPath,
+                    '--output', outputPath,
+                    '--compile-executable', process.execPath,
+                    '--compile-arg', compilerPath,
+                    '--compile-arg', '--tex',
+                    '--compile-arg', '{tex}',
+                    '--compile-arg', '--out',
+                    '--compile-arg', '{outputDir}'
+                ],
+                {
+                    cwd: repoRoot,
+                    encoding: 'utf8'
+                }
+            );
+
+            const result = JSON.parse(stdout);
+            expect(result.compileExecution).toEqual(expect.objectContaining({
+                executable: process.execPath,
+                exitCode: 0,
+                signal: null,
+                timedOut: false,
+                logPath: path.join(tempRoot, 'circuit.log')
+            }));
+            expect(result.compileDiagnostics).toEqual(expect.objectContaining({
+                ok: true,
+                summary: '0 error(s), 1 warning(s)'
+            }));
+            expect(JSON.parse(fs.readFileSync(argsPath, 'utf8'))).toEqual([
+                compilerPath,
+                '--tex',
+                outputPath,
+                '--out',
+                tempRoot
+            ]);
+        } finally {
+            fs.rmSync(tempRoot, { recursive: true, force: true });
+        }
+    }, 30000);
 });

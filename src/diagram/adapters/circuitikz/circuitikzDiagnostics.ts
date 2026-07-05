@@ -6,7 +6,8 @@ export type CircuitikzCompileDiagnosticKind =
     | 'undefined-control-sequence'
     | 'latex-error'
     | 'emergency-stop'
-    | 'overfull-hbox';
+    | 'overfull-hbox'
+    | 'compile-process-error';
 
 export interface CircuitikzCompileDiagnostic {
     severity: CircuitikzCompileDiagnosticSeverity;

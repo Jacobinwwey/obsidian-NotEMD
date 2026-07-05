@@ -143,9 +143,10 @@ Phase A is documented. Phase B/C now have a constrained repository prototype:
 - `src/diagram/adapters/circuitikz/circuitikzExporter.ts` validates topology and emits deterministic `circuitikz` LaTeX for `common-source-amplifier` and `cmos-inverter`.
 - `scripts/export-circuitikz.js` and `npm run diagram:export-circuitikz` provide the offline export command.
 - `src/diagram/adapters/circuitikz/circuitikzDiagnostics.ts` parses existing LaTeX/TikZJax compile logs into actionable diagnostics without spawning a compiler or depending on shell command resolution.
-- `src/tests/circuitikzExporter.test.ts`, `src/tests/circuitikzCompileDiagnostics.test.ts`, and `src/tests/circuitikzExportCli.test.ts` verify deterministic output, topology rejection, package-script exposure, UTF-8 BOM handling, diagnostic parsing, diagnostics JSON output, and nonzero CLI exit for logs with compile errors.
+- `src/diagram/adapters/circuitikz/circuitikzCompileRunner.ts` can run an explicitly configured local renderer with `shell: false`, placeholder-expanded arguments, and generated-log diagnostics.
+- `src/tests/circuitikzExporter.test.ts`, `src/tests/circuitikzCompileDiagnostics.test.ts`, `src/tests/circuitikzCompileRunner.test.ts`, and `src/tests/circuitikzExportCli.test.ts` verify deterministic output, topology rejection, package-script exposure, UTF-8 BOM handling, diagnostic parsing, shell-free compile execution, diagnostics JSON output, and nonzero CLI exit for logs with compile errors.
 
-Phase D has its first log-parsing slice, but the implementation still deliberately stops before local renderer execution and Phase E. It does not run LaTeX, call TikZJax, inspect screenshots, or run a visual repair loop.
+Phase D now has log parsing and opt-in local renderer execution slices, but the implementation still deliberately stops before required renderer availability, screenshot inspection, and Phase E. It does not bundle LaTeX, make TikZJax a plugin runtime dependency, inspect screenshots, or run a visual repair loop.
 
 ## Best Current Practice
 

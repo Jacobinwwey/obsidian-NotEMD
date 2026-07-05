@@ -143,9 +143,10 @@ Phase A 已经文档化。Phase B/C 现在有了受约束的仓库内原型：
 - `src/diagram/adapters/circuitikz/circuitikzExporter.ts` 会验证拓扑，并为 `common-source-amplifier` 与 `cmos-inverter` 输出确定性的 `circuitikz` LaTeX。
 - `scripts/export-circuitikz.js` 与 `npm run diagram:export-circuitikz` 提供离线导出命令。
 - `src/diagram/adapters/circuitikz/circuitikzDiagnostics.ts` 会把已有 LaTeX/TikZJax compile logs 解析为 actionable diagnostics，不 spawn 编译器，也不依赖 shell command resolution。
-- `src/tests/circuitikzExporter.test.ts`、`src/tests/circuitikzCompileDiagnostics.test.ts` 与 `src/tests/circuitikzExportCli.test.ts` 验证确定性输出、拓扑拒绝、package-script 暴露、UTF-8 BOM 处理、diagnostic parsing、diagnostics JSON 输出，以及 compile log 含错误时 CLI 非零退出。
+- `src/diagram/adapters/circuitikz/circuitikzCompileRunner.ts` 可以用 `shell: false`、placeholder-expanded arguments 和生成 log diagnostics 运行显式配置的本地 renderer。
+- `src/tests/circuitikzExporter.test.ts`、`src/tests/circuitikzCompileDiagnostics.test.ts`、`src/tests/circuitikzCompileRunner.test.ts` 与 `src/tests/circuitikzExportCli.test.ts` 验证确定性输出、拓扑拒绝、package-script 暴露、UTF-8 BOM 处理、diagnostic parsing、shell-free compile execution、diagnostics JSON 输出，以及 compile log 含错误时 CLI 非零退出。
 
-Phase D 已经具备第一段 log-parsing slice，但实现仍有意停在本地 renderer 执行与 Phase E 之前。它不会运行 LaTeX、调用 TikZJax、检查截图或运行视觉修复闭环。
+Phase D 现在已经具备 log parsing 与 opt-in local renderer execution 两段切片，但实现仍有意停在 required renderer availability、screenshot inspection 和 Phase E 之前。它不会捆绑 LaTeX、不会把 TikZJax 变成插件 runtime 依赖、不会检查截图，也不会运行视觉修复闭环。
 
 ## Best Current Practice
 

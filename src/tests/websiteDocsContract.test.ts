@@ -56,6 +56,10 @@ describe('website documentation contract', () => {
             expect(content).toContain('cmos-inverter-v1');
             expect(content).toContain('--compile-log');
             expect(content).toContain('--diagnostics-output');
+            expect(content).toContain('--compile-executable');
+            expect(content).toContain('--compile-arg');
+            expect(content).toContain('shell: false');
+            expect(content).toContain('compileExecution');
             expect(content).toContain('circuitikz.sty');
             expect(content).toContain('Golden Reference Template');
             expect(content).toContain('TikZJax Render');

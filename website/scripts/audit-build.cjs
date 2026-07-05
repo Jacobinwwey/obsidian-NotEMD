@@ -360,6 +360,9 @@ function auditDiagramDocs() {
   assertContains(englishDiagrams, 'cmos-inverter-v1', 'English diagrams doc');
   assertContains(englishDiagrams, '--compile-log', 'English diagrams doc');
   assertContains(englishDiagrams, '--diagnostics-output', 'English diagrams doc');
+  assertContains(englishDiagrams, '--compile-executable', 'English diagrams doc');
+  assertContains(englishDiagrams, '--compile-arg', 'English diagrams doc');
+  assertContains(englishDiagrams, 'compileExecution', 'English diagrams doc');
   assertContains(englishDiagrams, 'circuitikz.sty', 'English diagrams doc');
   assertContains(englishDiagrams, 'Golden Reference Prompt Shape', 'English diagrams doc');
   assertContains(englishDiagrams, 'scripts/diagram-semantic-verification.js', 'English diagrams doc');
@@ -377,6 +380,9 @@ function auditDiagramDocs() {
   assertContains(zhCnDiagrams, 'cmos-inverter-v1', 'zh-CN diagrams doc');
   assertContains(zhCnDiagrams, '--compile-log', 'zh-CN diagrams doc');
   assertContains(zhCnDiagrams, '--diagnostics-output', 'zh-CN diagrams doc');
+  assertContains(zhCnDiagrams, '--compile-executable', 'zh-CN diagrams doc');
+  assertContains(zhCnDiagrams, '--compile-arg', 'zh-CN diagrams doc');
+  assertContains(zhCnDiagrams, 'compileExecution', 'zh-CN diagrams doc');
   assertContains(zhCnDiagrams, 'circuitikz.sty', 'zh-CN diagrams doc');
   assertContains(zhCnDiagrams, 'Golden Reference Prompt Shape', 'zh-CN diagrams doc');
   assertContains(zhCnDiagrams, 'SemanticFigureModel', 'zh-CN diagrams doc');

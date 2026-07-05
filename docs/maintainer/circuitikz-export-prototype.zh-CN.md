@@ -49,6 +49,32 @@ node scripts/export-circuitikz.js \
 
 parser 位于 `src/diagram/adapters/circuitikz/circuitikzDiagnostics.ts`，这样 diagnostic rules 可以脱离 CLI wrapper 进行测试。
 
+## 可选本地 Compile Execution
+
+CLI 可以在写出 `.tex` 后可选运行一个本地 renderer command：
+
+```bash
+node scripts/export-circuitikz.js \
+  --input cmos-inverter.json \
+  --output cmos-inverter.tex \
+  --compile-executable pdflatex \
+  --compile-arg -interaction=nonstopmode \
+  --compile-arg -halt-on-error \
+  --compile-arg -output-directory={outputDir} \
+  --compile-arg {tex} \
+  --diagnostics-output cmos-inverter.diagnostics.json
+```
+
+这条路径使用直接进程执行和参数数组（`shell: false`），不会拼接 shell command，因此 Windows、Linux 与 macOS 都能避开 shell-specific quoting 和 resolution 差异。支持的 placeholder 是：
+
+| Placeholder | Value |
+|---|---|
+| `{tex}` | 生成的 `.tex` 文件绝对路径 |
+| `{outputDir}` | 生成 artifact 的绝对输出目录 |
+| `{jobName}` | 生成 `.tex` 文件去掉扩展名后的 basename |
+
+runner 位于 `src/diagram/adapters/circuitikz/circuitikzCompileRunner.ts`。它会从 `{outputDir}` 读取生成的 `{jobName}.log`，复用同一个 diagnostics parser，并在 CLI JSON result 中返回 `compileExecution` 与 `compileDiagnostics`。diagnostic report 非 ok 时，CLI 仍会以非零状态退出。
+
 ## 已支持的电路族
 
 这不是通用 TikZ 生成器。当前原型只支持能够在导出前验证拓扑与布局约束的 golden-reference families：
@@ -87,7 +113,7 @@ CircuitSpec
 标准回归命令：
 
 ```bash
-npm test -- --runInBand src/tests/circuitikzExporter.test.ts src/tests/circuitikzCompileDiagnostics.test.ts src/tests/circuitikzExportCli.test.ts --runTestsByPath
+npm test -- --runInBand src/tests/circuitikzExporter.test.ts src/tests/circuitikzCompileDiagnostics.test.ts src/tests/circuitikzCompileRunner.test.ts src/tests/circuitikzExportCli.test.ts --runTestsByPath
 ```
 
 测试覆盖：
@@ -99,8 +125,9 @@ npm test -- --runInBand src/tests/circuitikzExporter.test.ts src/tests/circuitik
 - UTF-8 BOM 输入处理；
 - 针对 missing packages、unknown keys、undefined control sequences 和 overfull layout warnings 的 compile-log diagnostics；
 - compile log 包含 errors 时写出 diagnostics JSON，并让 CLI 以非零状态退出；
+- 使用 placeholder-expanded argument arrays 的 shell-free compile execution；
 - 无效拓扑不会写出 output file。
 
 ## 非目标
 
-这个原型不执行 LaTeX、不调用 TikZJax、不做截图检查，也不使用渲染图像反馈。这些是后续 gate。它也不接受任意自然语言电路请求。当前重要声明更窄：经过验证的 `CircuitSpec` 输入可以为两个高价值 golden families 生成稳定、可读的 circuitikz，并且已有 compile logs 现在可以转换为 actionable diagnostics。
+这个原型不捆绑 LaTeX、不把 TikZJax 作为 Obsidian runtime 依赖调用、不做截图检查，也不使用渲染图像反馈。这些是后续 gate。它也不接受任意自然语言电路请求。当前重要声明更窄：经过验证的 `CircuitSpec` 输入可以为两个高价值 golden families 生成稳定、可读的 circuitikz，已有 compile logs 可以转换为 actionable diagnostics，并且显式配置的本地 renderer 可以在不走 shell-specific command parsing 的情况下执行。

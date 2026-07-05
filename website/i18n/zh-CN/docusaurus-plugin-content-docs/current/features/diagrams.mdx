@@ -228,6 +228,14 @@ npm run diagram:export-circuitikz -- --input cmos-inverter.json --output cmos-in
 
 这条 diagnostic path 会报告 `circuitikz.sty` 这类 missing package、unknown TikZ/circuitikz keys、undefined control sequences、generic LaTeX errors、emergency stops，以及 advisory overfull `\hbox` warnings。它仍然是 log-driven：本地 LaTeX/TikZJax execution 和 screenshot-quality gates 仍是独立的后续工作。
 
+对于 maintainer smoke checks，同一个 CLI 也可以可选运行显式配置的 renderer，且不走 shell command parsing：
+
+```bash
+npm run diagram:export-circuitikz -- --input cmos-inverter.json --output cmos-inverter.tex --compile-executable pdflatex --compile-arg -interaction=nonstopmode --compile-arg -halt-on-error --compile-arg -output-directory={outputDir} --compile-arg {tex}
+```
+
+compile runner 使用 `shell: false`，把 `{tex}`、`{outputDir}` 和 `{jobName}` placeholders 展开为参数数组值，读取生成的 `{jobName}.log`，并在 CLI JSON output 中返回 `compileExecution` 与 `compileDiagnostics`。它仍然不捆绑 LaTeX，也不把 TikZJax 变成插件 runtime 依赖。
+
 ### Golden Reference Prompt Shape
 
 近期使用时，应该在要求生成电路变体前给出一个可渲染 golden reference。强约束 prompt 应保留 preamble、coordinate scale、anchor style 和 routing conventions：
@@ -267,7 +275,7 @@ npm run diagram:export-circuitikz -- --input cmos-inverter.json --output cmos-in
 | General diagrams | Mermaid、JSON Canvas、Vega-Lite、HTML 的 spec-first pipeline 已实现 | 继续扩展 semantic verification coverage |
 | Editable figures | `editable-html-svg`、Draw.io XML、Drawnix JSON artifact boundaries 已实现 | 只有在测试证明 editability 后再加入更丰富 primitives |
 | CLI support | `npm run diagram:export-artifact` 可从同一个 `DiagramSpec` 导出 editable HTML/SVG、Draw.io、Drawnix | 新 target 发布时增加 target-specific smoke fixtures |
-| circuitikz | `CircuitSpec -> circuitikz` 原型已经可通过 `npm run diagram:export-circuitikz` 导出 common-source 与 CMOS inverter golden templates，并把已有 compile logs 解析为 diagnostics | 增加可选 renderer execution、screenshot feedback 与 topology-preserving repair |
+| circuitikz | `CircuitSpec -> circuitikz` 原型已经可通过 `npm run diagram:export-circuitikz` 导出 common-source 与 CMOS inverter golden templates、解析 compile logs，并在不经过 shell parsing 的情况下运行显式本地 renderer | 增加真实环境 smoke fixtures、screenshot feedback 与 topology-preserving repair |
 | TikZJax integration | Obsidian-side display 的候选 render host | 保持可选，不把 TikZJax 变成硬 runtime 依赖 |
 
 ## Configuration

@@ -49,6 +49,32 @@ Current diagnostics include:
 
 The parser lives in `src/diagram/adapters/circuitikz/circuitikzDiagnostics.ts` so the diagnostic rules remain testable outside the CLI wrapper.
 
+## Optional Local Compile Execution
+
+The CLI can optionally run a local renderer command after writing the `.tex` file:
+
+```bash
+node scripts/export-circuitikz.js \
+  --input cmos-inverter.json \
+  --output cmos-inverter.tex \
+  --compile-executable pdflatex \
+  --compile-arg -interaction=nonstopmode \
+  --compile-arg -halt-on-error \
+  --compile-arg -output-directory={outputDir} \
+  --compile-arg {tex} \
+  --diagnostics-output cmos-inverter.diagnostics.json
+```
+
+This path uses direct process execution with an argument array (`shell: false`). It does not concatenate a shell command, so Windows, Linux, and macOS avoid shell-specific quoting and resolution differences. Supported placeholders are:
+
+| Placeholder | Value |
+|---|---|
+| `{tex}` | absolute path to the generated `.tex` file |
+| `{outputDir}` | absolute output directory for the generated artifact |
+| `{jobName}` | generated `.tex` basename without extension |
+
+The runner lives in `src/diagram/adapters/circuitikz/circuitikzCompileRunner.ts`. It reads the generated `{jobName}.log` from `{outputDir}`, reuses the same diagnostics parser, and returns `compileExecution` plus `compileDiagnostics` in the CLI JSON result. A non-ok diagnostic report still makes the CLI exit nonzero.
+
 ## Supported Circuit Families
 
 This is not a generic TikZ generator. The current prototype supports only golden-reference families whose topology and layout can be validated before export:
@@ -87,7 +113,7 @@ This keeps the model-facing contract narrow and makes topology drift testable. T
 Canonical regression commands:
 
 ```bash
-npm test -- --runInBand src/tests/circuitikzExporter.test.ts src/tests/circuitikzCompileDiagnostics.test.ts src/tests/circuitikzExportCli.test.ts --runTestsByPath
+npm test -- --runInBand src/tests/circuitikzExporter.test.ts src/tests/circuitikzCompileDiagnostics.test.ts src/tests/circuitikzCompileRunner.test.ts src/tests/circuitikzExportCli.test.ts --runTestsByPath
 ```
 
 The tests verify:
@@ -99,8 +125,9 @@ The tests verify:
 - UTF-8 BOM input handling;
 - compile-log diagnostics for missing packages, unknown keys, undefined control sequences, and overfull layout warnings;
 - diagnostics JSON output and nonzero CLI exit when a compile log contains errors;
+- shell-free compile execution with placeholder-expanded argument arrays;
 - no output file is written for invalid topology.
 
 ## Non-Goals
 
-This prototype does not execute LaTeX, call TikZJax, run screenshot inspection, or use rendered-image feedback. Those are later gates. It also does not accept arbitrary natural-language circuit requests. The important current claim is narrower: validated `CircuitSpec` input can produce stable, readable circuitikz for two high-value golden families, and existing compile logs can now be converted into actionable diagnostics.
+This prototype does not bundle LaTeX, call TikZJax as an Obsidian runtime dependency, run screenshot inspection, or use rendered-image feedback. Those are later gates. It also does not accept arbitrary natural-language circuit requests. The important current claim is narrower: validated `CircuitSpec` input can produce stable, readable circuitikz for two high-value golden families, existing compile logs can be converted into actionable diagnostics, and an explicitly configured local renderer can be executed without shell-specific command parsing.

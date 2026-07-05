@@ -11,15 +11,17 @@ function printUsage() {
 Usage:
   node scripts/export-circuitikz.js --input <circuit-spec.json> --output <circuit.tex>
   node scripts/export-circuitikz.js --input <circuit-spec.json> --output <circuit.tex> --compile-log <latex.log> --diagnostics-output <diagnostics.json>
+  node scripts/export-circuitikz.js --input <circuit-spec.json> --output <circuit.tex> --compile-executable <renderer> --compile-arg <arg>...
 
 Example:
   node scripts/export-circuitikz.js --input cmos-inverter.json --output cmos-inverter.tex
   node scripts/export-circuitikz.js --input cmos-inverter.json --output cmos-inverter.tex --compile-log cmos-inverter.log --diagnostics-output cmos-inverter.diagnostics.json
+  node scripts/export-circuitikz.js --input cmos-inverter.json --output cmos-inverter.tex --compile-executable pdflatex --compile-arg -interaction=nonstopmode --compile-arg -halt-on-error --compile-arg -output-directory={outputDir} --compile-arg {tex}
 `);
 }
 
 function parseArgs(argv) {
-  const args = {};
+  const args = { compileArgs: [] };
 
   for (let index = 0; index < argv.length; index += 1) {
     const token = argv[index];
@@ -35,6 +37,12 @@ function parseArgs(argv) {
         break;
       case '--diagnostics-output':
         args.diagnosticsOutput = argv[++index];
+        break;
+      case '--compile-executable':
+        args.compileExecutable = argv[++index];
+        break;
+      case '--compile-arg':
+        args.compileArgs.push(argv[++index]);
         break;
       case '--help':
       case '-h':
@@ -55,8 +63,14 @@ function assertRequiredArgs(args) {
   if (!args.output) {
     throw new Error('Missing required --output.');
   }
-  if (args.diagnosticsOutput && !args.compileLog) {
-    throw new Error('--diagnostics-output requires --compile-log.');
+  if (args.compileLog && args.compileExecutable) {
+    throw new Error('--compile-log and --compile-executable cannot be used together.');
+  }
+  if (args.compileArgs.length > 0 && !args.compileExecutable) {
+    throw new Error('--compile-arg requires --compile-executable.');
+  }
+  if (args.diagnosticsOutput && !args.compileLog && !args.compileExecutable) {
+    throw new Error('--diagnostics-output requires --compile-log or --compile-executable.');
   }
 }
 
@@ -79,6 +93,7 @@ function buildExporterBundle(repoRoot) {
   const entrySource = `
     import { exportCircuitSpecToCircuitikz } from './src/diagram/adapters/circuitikz/circuitikzExporter';
     import { diagnoseCircuitikzCompileLog } from './src/diagram/adapters/circuitikz/circuitikzDiagnostics';
+    import { runCircuitikzCompile } from './src/diagram/adapters/circuitikz/circuitikzCompileRunner';
 
     export function exportCircuitikz(spec) {
       return exportCircuitSpecToCircuitikz(spec);
@@ -86,6 +101,10 @@ function buildExporterBundle(repoRoot) {
 
     export function diagnoseCompileLog(logText) {
       return diagnoseCircuitikzCompileLog(logText);
+    }
+
+    export function runCompile(request) {
+      return runCircuitikzCompile(request);
     }
   `;
 
@@ -117,11 +136,12 @@ async function run(args, repoRoot = path.resolve(__dirname, '..')) {
   const outputPath = path.resolve(args.output);
   const compileLogPath = args.compileLog ? path.resolve(args.compileLog) : undefined;
   const diagnosticsOutputPath = args.diagnosticsOutput ? path.resolve(args.diagnosticsOutput) : undefined;
+  const compileExecutable = args.compileExecutable;
   const spec = loadCircuitSpec(inputPath);
   const bundle = buildExporterBundle(repoRoot);
 
   try {
-    const { diagnoseCompileLog, exportCircuitikz } = require(bundle.outfile);
+    const { diagnoseCompileLog, exportCircuitikz, runCompile } = require(bundle.outfile);
     const content = exportCircuitikz(spec);
     ensureOutputDirectory(outputPath);
     fs.writeFileSync(outputPath, content, 'utf8');
@@ -139,6 +159,22 @@ async function run(args, repoRoot = path.resolve(__dirname, '..')) {
       const compileLog = fs.readFileSync(compileLogPath, 'utf8').replace(/^\uFEFF/, '');
       result.compileLogPath = compileLogPath;
       result.compileDiagnostics = diagnoseCompileLog(compileLog);
+
+      if (diagnosticsOutputPath) {
+        ensureOutputDirectory(diagnosticsOutputPath);
+        fs.writeFileSync(diagnosticsOutputPath, `${JSON.stringify(result.compileDiagnostics, null, 2)}\n`, 'utf8');
+        result.diagnosticsOutputPath = diagnosticsOutputPath;
+      }
+    }
+
+    if (compileExecutable) {
+      result.compileExecution = runCompile({
+        executable: compileExecutable,
+        args: args.compileArgs,
+        texPath: outputPath,
+        outputDirectory: path.dirname(outputPath)
+      });
+      result.compileDiagnostics = result.compileExecution.diagnostics;
 
       if (diagnosticsOutputPath) {
         ensureOutputDirectory(diagnosticsOutputPath);

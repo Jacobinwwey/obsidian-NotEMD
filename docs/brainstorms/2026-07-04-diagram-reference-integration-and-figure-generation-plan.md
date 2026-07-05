@@ -198,8 +198,9 @@ Phase E implementation status on 2026-07-05: `scripts/export-diagram-artifact.js
 - [x] Add topology-rejection tests so invalid circuits fail before output creation.
 - [x] Add bilingual maintainer docs and website progress notes.
 - [x] Add compile-log diagnostics that parse existing LaTeX/TikZJax logs without shelling out to a compiler.
+- [x] Add optional shell-free local renderer execution with placeholder-expanded argument arrays.
 
-Phase F implementation status on 2026-07-05: `src/diagram/adapters/circuitikz/circuitSpec.ts` and `src/diagram/adapters/circuitikz/circuitikzExporter.ts` now implement a constrained `CircuitSpec -> circuitikz` prototype. `scripts/export-circuitikz.js` and `npm run diagram:export-circuitikz` export deterministic LaTeX for `common-source-nmos-v1` and `cmos-inverter-v1`. `src/diagram/adapters/circuitikz/circuitikzDiagnostics.ts` parses existing compile logs into actionable diagnostics for missing packages, unknown TikZ keys, undefined control sequences, generic LaTeX errors, emergency stops, and overfull layout warnings. `src/tests/circuitikzExporter.test.ts`, `src/tests/circuitikzCompileDiagnostics.test.ts`, and `src/tests/circuitikzExportCli.test.ts` verify deterministic output, topology rejection, package-script exposure, UTF-8 BOM input handling, diagnostics JSON output, and nonzero CLI exit for logs with compile errors. The implementation deliberately stops before running TikZJax/LaTeX, screenshot inspection, and visual repair loops.
+Phase F implementation status on 2026-07-05: `src/diagram/adapters/circuitikz/circuitSpec.ts` and `src/diagram/adapters/circuitikz/circuitikzExporter.ts` now implement a constrained `CircuitSpec -> circuitikz` prototype. `scripts/export-circuitikz.js` and `npm run diagram:export-circuitikz` export deterministic LaTeX for `common-source-nmos-v1` and `cmos-inverter-v1`. `src/diagram/adapters/circuitikz/circuitikzDiagnostics.ts` parses existing compile logs into actionable diagnostics for missing packages, unknown TikZ keys, undefined control sequences, generic LaTeX errors, emergency stops, and overfull layout warnings. `src/diagram/adapters/circuitikz/circuitikzCompileRunner.ts` can run an explicitly configured local renderer without shell parsing and feed the generated `{jobName}.log` back into diagnostics. `src/tests/circuitikzExporter.test.ts`, `src/tests/circuitikzCompileDiagnostics.test.ts`, `src/tests/circuitikzCompileRunner.test.ts`, and `src/tests/circuitikzExportCli.test.ts` verify deterministic output, topology rejection, package-script exposure, UTF-8 BOM input handling, shell-free compile execution, diagnostics JSON output, and nonzero CLI exit for logs with compile errors. The implementation deliberately stops before screenshot inspection and visual repair loops.
 
 ## Tradeoffs
 
@@ -239,7 +240,7 @@ Cloudy is valuable because it proves a disciplined HTML/SVG + Draw.io export con
 
 The HTML/SVG, Draw.io, Drawnix, and first circuitikz export boundaries now exist. The next move should still avoid adding runtime dependencies by default:
 
-1. add optional local TikZJax/LaTeX smoke execution for the two circuitikz golden families without using shell-specific command resolution;
+1. add maintainer smoke fixtures that exercise real local TikZJax/LaTeX installs for the two circuitikz golden families;
 2. expand compile-log diagnostics as real renderer logs expose more failure shapes;
 3. add screenshot-level checks for nonblank render, expected labels, bounded canvas, and obvious overlap;
 4. keep topology locked during any repair prompt so visual repair cannot change the circuit;
