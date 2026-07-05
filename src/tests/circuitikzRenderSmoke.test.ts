@@ -345,6 +345,7 @@ describe('circuitikz render smoke inspection', () => {
                 interlaceMethod: 0,
                 decodedPixelCount: 9,
                 nonBackgroundPixelCount: 1,
+                foregroundDensity: 1,
                 foregroundBounds: {
                     minX: 1,
                     minY: 1,
@@ -395,6 +396,117 @@ describe('circuitikz render smoke inspection', () => {
                     message: expect.stringContaining('touches the image boundary')
                 })
             ]);
+        } finally {
+            fs.rmSync(tempRoot, { recursive: true, force: true });
+        }
+    });
+
+    test('reports PNG screenshot artifacts with overly dense foreground pixels', () => {
+        const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'notemd-circuitikz-png-dense-'));
+        const pngPath = path.join(tempRoot, 'dense.png');
+        fs.writeFileSync(
+            pngPath,
+            createRgbaPng(5, 5, [
+                [255, 255, 255, 255],
+                [255, 255, 255, 255],
+                [255, 255, 255, 255],
+                [255, 255, 255, 255],
+                [255, 255, 255, 255],
+                [255, 255, 255, 255],
+                [0, 0, 0, 255],
+                [0, 0, 0, 255],
+                [0, 0, 0, 255],
+                [255, 255, 255, 255],
+                [255, 255, 255, 255],
+                [0, 0, 0, 255],
+                [0, 0, 0, 255],
+                [0, 0, 0, 255],
+                [255, 255, 255, 255],
+                [255, 255, 255, 255],
+                [0, 0, 0, 255],
+                [0, 0, 0, 255],
+                [0, 0, 0, 255],
+                [255, 255, 255, 255],
+                [255, 255, 255, 255],
+                [255, 255, 255, 255],
+                [255, 255, 255, 255],
+                [255, 255, 255, 255],
+                [255, 255, 255, 255]
+            ])
+        );
+
+        try {
+            const report = inspectCircuitikzRenderArtifact({
+                expectedArtifactPath: pngPath
+            });
+
+            expect(report.artifactKind).toBe('png');
+            expect(report.png).toEqual(expect.objectContaining({
+                nonBackgroundPixelCount: 9,
+                foregroundDensity: 1
+            }));
+            expect(report.diagnostics).toEqual([
+                expect.objectContaining({
+                    kind: 'render-png-foreground-dense',
+                    message: expect.stringContaining('foreground pixels are unusually dense')
+                })
+            ]);
+        } finally {
+            fs.rmSync(tempRoot, { recursive: true, force: true });
+        }
+    });
+
+    test('does not report dense PNG foreground for a thin stroke', () => {
+        const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'notemd-circuitikz-png-thin-stroke-'));
+        const pngPath = path.join(tempRoot, 'thin-stroke.png');
+        fs.writeFileSync(
+            pngPath,
+            createRgbaPng(5, 5, [
+                [255, 255, 255, 255],
+                [255, 255, 255, 255],
+                [255, 255, 255, 255],
+                [255, 255, 255, 255],
+                [255, 255, 255, 255],
+                [255, 255, 255, 255],
+                [255, 255, 255, 255],
+                [255, 255, 255, 255],
+                [255, 255, 255, 255],
+                [255, 255, 255, 255],
+                [255, 255, 255, 255],
+                [0, 0, 0, 255],
+                [0, 0, 0, 255],
+                [0, 0, 0, 255],
+                [255, 255, 255, 255],
+                [255, 255, 255, 255],
+                [255, 255, 255, 255],
+                [255, 255, 255, 255],
+                [255, 255, 255, 255],
+                [255, 255, 255, 255],
+                [255, 255, 255, 255],
+                [255, 255, 255, 255],
+                [255, 255, 255, 255],
+                [255, 255, 255, 255],
+                [255, 255, 255, 255]
+            ])
+        );
+
+        try {
+            const report = inspectCircuitikzRenderArtifact({
+                expectedArtifactPath: pngPath
+            });
+
+            expect(report.artifactKind).toBe('png');
+            expect(report.png).toEqual(expect.objectContaining({
+                nonBackgroundPixelCount: 3,
+                foregroundDensity: 1,
+                foregroundBounds: {
+                    minX: 1,
+                    minY: 2,
+                    maxX: 3,
+                    maxY: 2
+                }
+            }));
+            expect(report.diagnostics).toEqual([]);
         } finally {
             fs.rmSync(tempRoot, { recursive: true, force: true });
         }

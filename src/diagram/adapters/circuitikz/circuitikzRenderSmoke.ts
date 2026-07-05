@@ -32,6 +32,7 @@ export interface CircuitikzPngSmokeReport {
     interlaceMethod: number;
     decodedPixelCount: number;
     nonBackgroundPixelCount: number;
+    foregroundDensity?: number;
     foregroundBounds?: {
         minX: number;
         minY: number;
@@ -894,6 +895,13 @@ function extractPngSmoke(pngBytes: Buffer): CircuitikzPngSmokeReport {
         }
     }
 
+    const foregroundBounds = nonBackgroundPixelCount > 0
+        ? { minX, minY, maxX, maxY }
+        : undefined;
+    const foregroundArea = foregroundBounds
+        ? (foregroundBounds.maxX - foregroundBounds.minX + 1) * (foregroundBounds.maxY - foregroundBounds.minY + 1)
+        : undefined;
+
     return {
         width: header.width,
         height: header.height,
@@ -902,9 +910,8 @@ function extractPngSmoke(pngBytes: Buffer): CircuitikzPngSmokeReport {
         interlaceMethod: header.interlaceMethod,
         decodedPixelCount,
         nonBackgroundPixelCount,
-        foregroundBounds: nonBackgroundPixelCount > 0
-            ? { minX, minY, maxX, maxY }
-            : undefined
+        foregroundDensity: foregroundArea ? nonBackgroundPixelCount / foregroundArea : undefined,
+        foregroundBounds
     };
 }
 
@@ -934,6 +941,21 @@ function pngDiagnostics(report: CircuitikzPngSmokeReport, expectedArtifactPath: 
             excerpt: expectedArtifactPath,
             advice: 'Increase renderer padding/viewBox or inspect layout before topology-preserving visual repair.'
         });
+    }
+
+    if (bounds && report.foregroundDensity !== undefined) {
+        const foregroundWidth = bounds.maxX - bounds.minX + 1;
+        const foregroundHeight = bounds.maxY - bounds.minY + 1;
+        const foregroundArea = foregroundWidth * foregroundHeight;
+        if (foregroundWidth >= 3 && foregroundHeight >= 3 && foregroundArea >= 9 && report.foregroundDensity >= 0.85) {
+            diagnostics.push({
+                severity: 'error',
+                kind: 'render-png-foreground-dense',
+                message: `Expected PNG render artifact foreground pixels are unusually dense inside the foreground bounds: ${report.foregroundDensity.toFixed(2)}`,
+                excerpt: expectedArtifactPath,
+                advice: 'Treat this as a pixel-level crowding failure. Inspect labels and routing for merged strokes before topology-preserving visual repair.'
+            });
+        }
     }
 
     return diagnostics;

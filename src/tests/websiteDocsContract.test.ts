@@ -75,8 +75,10 @@ describe('website documentation contract', () => {
             expect(content).toContain('transform-aware geometry');
             expect(content).toContain('pathOnlyGlyphUseCount');
             expect(content).toContain('render-png-blank');
+            expect(content).toContain('render-png-foreground-dense');
             expect(content).toContain('render-png-content-clipped');
             expect(content).toContain('foregroundBounds');
+            expect(content).toContain('foregroundDensity');
             expect(content).toContain('circuitikz.sty');
             expect(content).toContain('Golden Reference Template');
             expect(content).toContain('TikZJax Render');
