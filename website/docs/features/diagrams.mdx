@@ -1,11 +1,11 @@
 ---
 id: diagrams
 title: Diagrams
-description: Generate Mermaid, JSON Canvas, Vega-Lite, and HTML diagrams from your notes using a spec-first architecture
+description: Generate Mermaid, JSON Canvas, Vega-Lite, HTML, and editable figure artifacts from your notes using a spec-first architecture
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
-keywords: [diagrams, mermaid, vega-lite, canvas, visualization, spec-first]
-concepts: [DiagramSpec, Mermaid, Vega-Lite, JSON Canvas, Intent Detection, Spec-First Architecture]
+keywords: [diagrams, mermaid, vega-lite, canvas, visualization, spec-first, drawio, drawnix, editable svg]
+concepts: [DiagramSpec, Mermaid, Vega-Lite, JSON Canvas, Editable HTML SVG, Draw.io, Drawnix, Intent Detection, Spec-First Architecture]
 citations:
   - title: Mermaid
     url: https://mermaid.js.org
@@ -18,7 +18,7 @@ import TLDR from '@site/src/components/TLDR';
 # Diagrams
 
 <TLDR>
-**Notemd generates diagrams from your notes through a spec-first pipeline.** The LLM produces a renderer-agnostic `DiagramSpec` JSON, then dedicated adapters translate it into Mermaid, JSON Canvas, Vega-Lite, or HTML output. Supports 8 intent types, automatic fallback chains, live preview with SVG/PNG export, and local-knowledge-augmented generation.
+**Notemd generates diagrams from your notes through a spec-first pipeline.** The LLM produces a renderer-agnostic `DiagramSpec` JSON, then dedicated adapters translate it into Mermaid, JSON Canvas, Vega-Lite, HTML, or editable HTML/SVG output. Supports 8 intent types, automatic fallback chains, live preview with SVG/PNG export, semantic verification, and local-knowledge-augmented generation.
 </TLDR>
 
 This is part of the [Obsidian AI Knowledge Management Guide](/docs/pillar-ai-knowledge).
@@ -87,6 +87,7 @@ Override with `preferredDiagramIntent` setting or the explicit command palette o
 | JSON Canvas | `.canvas` | `{note}_diagram.canvas` |
 | Vega-Lite | `.json` | `{note}_diagram.json` |
 | HTML | `.html` | `{note}_diagram.html` |
+| Editable HTML/SVG | `.html` | `{note}_diagram.html` |
 
 ### Preview a Diagram
 
@@ -135,6 +136,28 @@ Universal fallback. Self-contained HTML document with:
 - Localized UI labels for 20 locales
 - Sections: hero, structure (node tree), relationships, callouts, data series tables
 
+### Editable HTML/SVG
+
+Explicit figure target for editable export workflows. It projects `DiagramSpec` into a deterministic `SemanticFigureModel`, then renders a self-contained HTML document with inline SVG groups that carry Draw.io-style annotations:
+
+- `data-drawio-type`, `data-drawio-id`, and `data-drawio-role` on semantic nodes
+- `data-drawio-source` and `data-drawio-target` on semantic edges
+- stable node/edge identifiers after whitespace normalization and collision handling
+- no scripts, no external fonts, and no remote assets
+
+This target is intentionally not the default planner route yet. It is available as an explicit render target while the product path proves editing behavior across real tools.
+
+### Draw.io and Drawnix Export Boundaries
+
+The current implementation keeps third-party editor support at the artifact boundary:
+
+| Target | Contract | Runtime Dependency |
+|--------|----------|--------------------|
+| Draw.io | deterministic uncompressed `mxfile` XML from `SemanticFigureModel` | none in plugin runtime or CI |
+| Drawnix | minimal `.drawnix` JSON subset using `geometry` and `arrow-line` elements | none in plugin runtime or CI |
+
+The tradeoff is deliberate: Notemd can verify visible labels, stable IDs, and supported primitive coverage without embedding diagrams.net Desktop, Drawnix, Plait, or browser-only editor state into the plugin.
+
 ## Configuration
 
 | Setting | Default | Effect |
@@ -163,6 +186,7 @@ When enabled, Notemd retrieves relevant context snippets from your vault's local
 | SVG export | `mermaid.render()` / `vega.View.toSVG()` / SVG builder for Canvas |
 | PNG export | SVG → Image → Canvas (device pixel ratio 1x-3x) → PNG ArrayBuffer |
 | Source save | Raw artifact content saved with target-specific extension |
+| Semantic audit | Mermaid, JSON Canvas, Vega-Lite, and editable HTML/SVG checked by `scripts/diagram-semantic-verification.js` |
 
 **Caching**: RenderCache uses deterministic JSON key of `{spec, target, theme}`. In-flight deduplication prevents duplicate renders.
 

@@ -45,6 +45,7 @@ Answer-engine source map: https://jacobinwwey.github.io/obsidian-NotEMD/llms.txt
   - https://jacobinwwey.github.io/obsidian-NotEMD/zh-CN/docs/getting-started/installation
   - https://jacobinwwey.github.io/obsidian-NotEMD/zh-CN/docs/getting-started/quick-start
   - https://jacobinwwey.github.io/obsidian-NotEMD/zh-CN/docs/getting-started/configuration
+  - https://jacobinwwey.github.io/obsidian-NotEMD/zh-CN/docs/features/diagrams
   - https://jacobinwwey.github.io/obsidian-NotEMD/zh-CN/docs/providers/overview
   - https://jacobinwwey.github.io/obsidian-NotEMD/zh-CN/docs/pillar-ai-knowledge
   - https://jacobinwwey.github.io/obsidian-NotEMD/zh-CN/docs/faq

@@ -29,7 +29,7 @@ faqItems:
   - question: Can I use Notemd for paper or PDF reading?
     answer: Yes. Convert PDF to Markdown using MinerU, open in Obsidian, then run Notemd tasks to add wiki-links, generate concept notes, extract text, research background, translate sections, and create Mermaid diagrams.
   - question: What diagram types can Notemd generate?
-    answer: Mermaid (flowchart, sequence, class, state, ER, Gantt with syntax auto-fix), JSON Canvas (Obsidian native), Vega-Lite (data charts), and HTML fallback. Supports preview, SVG/PNG export, and .mmd file saving.
+    answer: Mermaid (flowchart, sequence, class, state, ER, Gantt with syntax auto-fix), JSON Canvas (Obsidian native), Vega-Lite (data charts), HTML fallback, and explicit editable HTML/SVG figure artifacts. Draw.io XML and Drawnix JSON exporter boundaries are available for deterministic artifact testing.
   - question: Is Notemd free and open source?
     answer: Yes. MIT licensed, no paid tiers, no cloud lock-in, no telemetry. Source code on GitHub with 234+ stars. Pull requests welcome.
   - question: Can Notemd work 100% offline?
@@ -254,6 +254,8 @@ All three can be used together — they complement rather than compete.
 | **JSON Canvas** | Full | Obsidian native canvas layouts |
 | **Vega-Lite** | Full | Data charts, time series, bar, scatter, customizable |
 | **HTML** | Fallback | For unsupported diagram types |
+| **Editable HTML/SVG** | Explicit target | Self-contained inline SVG with semantic Draw.io-style annotations |
+| **Draw.io / Drawnix artifacts** | Export boundary | Deterministic XML/JSON from `SemanticFigureModel`; no editor runtime dependency |
 
 **Mermaid auto-fix:** Deep debug mode repairs:
 - Broken arrows (`-->`, `-.->`, `==>`)

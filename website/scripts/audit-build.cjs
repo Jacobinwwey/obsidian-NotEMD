@@ -344,6 +344,23 @@ function auditProviderDocs() {
   }
 }
 
+function auditDiagramDocs() {
+  const englishDiagrams = readBuildFile(path.join('docs', 'features', 'diagrams', 'index.html'));
+  const zhCnDiagrams = readBuildFile(path.join('zh-CN', 'docs', 'features', 'diagrams', 'index.html'));
+
+  assertContains(englishDiagrams, 'Editable HTML/SVG', 'English diagrams doc');
+  assertContains(englishDiagrams, 'Draw.io', 'English diagrams doc');
+  assertContains(englishDiagrams, 'Drawnix', 'English diagrams doc');
+  assertContains(englishDiagrams, 'scripts/diagram-semantic-verification.js', 'English diagrams doc');
+
+  assertContains(zhCnDiagrams, '<html lang="zh-CN"', 'zh-CN diagrams doc');
+  assertContains(zhCnDiagrams, 'Editable HTML/SVG', 'zh-CN diagrams doc');
+  assertContains(zhCnDiagrams, 'Draw.io', 'zh-CN diagrams doc');
+  assertContains(zhCnDiagrams, 'Drawnix', 'zh-CN diagrams doc');
+  assertContains(zhCnDiagrams, 'SemanticFigureModel', 'zh-CN diagrams doc');
+  assertNotContains(zhCnDiagrams, 'content="noindex,follow"', 'zh-CN diagrams doc');
+}
+
 function auditMeasurementEvidence() {
   const geoRoadmap = readSourceFile(path.join(websiteRoot, '..', 'GEO_ROADMAP.md'));
   const measurementLog = readSourceFile(path.join(websiteRoot, '..', 'docs', 'maintainer', 'github-pages-geo-measurement-log.md'));
@@ -388,6 +405,7 @@ async function main() {
   auditSitemaps(languageScope);
   auditAiRetrievalMap(languageScope);
   auditProviderDocs();
+  auditDiagramDocs();
   auditMeasurementEvidence();
 
   console.log('website build audit passed');
