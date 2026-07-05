@@ -50,6 +50,8 @@ The GitHub Pages workflow runs this audit before uploading the Pages artifact:
   -> upload-pages-artifact
 ```
 
+As of 2026-07-05, the workflow is pinned to Node 24 compatible action major versions: `actions/checkout@v7`, `actions/setup-node@v6` with `node-version: 24`, `actions/upload-pages-artifact@v5`, and `actions/deploy-pages@v5`. This keeps the Pages gate away from the older Node 20 deprecation path that previously surfaced during deploy retries.
+
 ## Source Ownership
 
 The published language data lives in:

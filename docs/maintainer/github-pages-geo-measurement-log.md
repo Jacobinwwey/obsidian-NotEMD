@@ -36,6 +36,15 @@ This log separates source-side GEO proof from live indexing proof. `npm run audi
 | Historical failed run | Run `27451762938` failed in `actions/deploy-pages@v4` with `HttpError: Not Found` and the instruction to enable GitHub Pages | GitHub repository settings / Pages availability |
 | Recent main deploys | Recent `Deploy Docusaurus to GitHub Pages` runs on `main`, including `28281641014`, completed successfully | GitHub Actions |
 | Current baseline commit | `eb777ef` had no check-runs and no legacy statuses attached during triage | Local operator |
+
+## 2026-07-05 Pages Action Hardening
+
+| Evidence | Current state | Owner |
+|---|---|---|
+| Failed deploy run | Run `28738168439` built the website, passed `npm run audit:build`, uploaded the Pages artifact, then failed inside `actions/deploy-pages@v4` with `Deployment failed, try again later.` | GitHub Pages deploy service / workflow action boundary |
+| Failed rerun | Re-running failed jobs for `28738168439` reproduced the same deploy-only failure after the artifact was accepted | GitHub Pages deploy service / workflow action boundary |
+| Workflow hardening | `.github/workflows/deploy-docs.yml` now uses `actions/checkout@v7`, `actions/setup-node@v6` with `node-version: 24`, `actions/upload-pages-artifact@v5`, and `actions/deploy-pages@v5` | Repository workflow |
+| Contract test | `src/tests/githubPagesWorkflow.test.ts` locks the Pages workflow away from the old `checkout@v4`, `setup-node@v4`, `upload-pages-artifact@v3`, and `deploy-pages@v4` combination | Jest |
 | Source-side interpretation | No current Docusaurus build or `audit:build` failure was found on remote `main`; Pages remains gated by the workflow when `website/**` or the workflow file changes | Local operator |
 | Next measurement | After this closeout deploy, inspect root, zh-CN root, FAQ, provider overview, one provider detail, and one unpublished zh-CN fallback in Search Console | External manual check |
 

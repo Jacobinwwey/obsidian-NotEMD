@@ -36,6 +36,15 @@
 | 历史失败 run | `27451762938` 失败在 `actions/deploy-pages@v4`，报错为 `HttpError: Not Found`，并提示需要启用 GitHub Pages | GitHub repository settings / Pages availability |
 | 近期 main 部署 | 最近的 `main` 上 `Deploy Docusaurus to GitHub Pages` runs 已成功，包括 `28281641014` | GitHub Actions |
 | 当前基线 commit | 排查时 `eb777ef` 没有关联 check-runs，也没有 legacy statuses | 本地操作者 |
+
+## 2026-07-05 Pages Action 加固
+
+| 证据 | 当前状态 | 负责人 |
+|---|---|---|
+| 失败 deploy run | `28738168439` 已完成 website build、通过 `npm run audit:build`、上传 Pages artifact，然后在 `actions/deploy-pages@v4` 内部以 `Deployment failed, try again later.` 失败 | GitHub Pages deploy service / workflow action boundary |
+| 失败重跑 | 对 `28738168439` 重跑 failed jobs 后，artifact 已被接受，但 deploy-only failure 复现 | GitHub Pages deploy service / workflow action boundary |
+| Workflow 加固 | `.github/workflows/deploy-docs.yml` 现在使用 `actions/checkout@v7`、`actions/setup-node@v6` 且 `node-version: 24`、`actions/upload-pages-artifact@v5` 与 `actions/deploy-pages@v5` | Repository workflow |
+| Contract test | `src/tests/githubPagesWorkflow.test.ts` 锁定 Pages workflow，避免回退到旧的 `checkout@v4`、`setup-node@v4`、`upload-pages-artifact@v3` 与 `deploy-pages@v4` 组合 | Jest |
 | 源码侧解释 | 没发现当前远端 `main` 存在 Docusaurus build 或 `audit:build` 失败；只要改动 `website/**` 或 workflow 文件，Pages 仍由 workflow 门禁 | 本地操作者 |
 | 下一步测量 | 本次收口部署后，在 Search Console 检查 root、zh-CN root、FAQ、provider overview、一个 provider detail 与一个未发布 zh-CN fallback | 外部手工检查 |
 

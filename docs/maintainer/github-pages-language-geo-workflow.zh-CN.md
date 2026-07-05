@@ -50,6 +50,8 @@ GitHub Pages workflow 会在上传 Pages artifact 前运行这个审计：
   -> upload-pages-artifact
 ```
 
+截至 2026-07-05，workflow 已固定到 Node 24 兼容的 action 主版本：`actions/checkout@v7`、`actions/setup-node@v6` 且 `node-version: 24`、`actions/upload-pages-artifact@v5` 与 `actions/deploy-pages@v5`。这能让 Pages gate 避开此前 deploy 重试时暴露的旧 Node 20 deprecation 路径。
+
 ## Source Ownership
 
 语言发布数据在：
