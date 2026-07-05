@@ -81,6 +81,7 @@ describe('circuitikz render smoke inspection', () => {
                     viewBox: [0, 0, 120, 80],
                     visibleElementCount: 2,
                     textElementCount: 1,
+                    pathOnlyGlyphUseCount: 0,
                     expectedText: [{
                         text: 'v_{out}',
                         present: true
@@ -140,6 +141,40 @@ describe('circuitikz render smoke inspection', () => {
                 expect.objectContaining({
                     kind: 'render-svg-text-missing',
                     message: 'Expected SVG render artifact is missing text: v_{in}'
+                })
+            ]);
+        } finally {
+            fs.rmSync(tempRoot, { recursive: true, force: true });
+        }
+    });
+
+    test('reports path-only SVG labels when expected text cannot be searched', () => {
+        const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'notemd-circuitikz-svg-path-only-label-'));
+        const svgPath = path.join(tempRoot, 'path-only-label.svg');
+        fs.writeFileSync(
+            svgPath,
+            '<svg viewBox="0 0 120 80"><defs><path id="glyph-v" d="M0 0 L3 8 L6 0"/></defs><path d="M0 0H10"/><use href="#glyph-v" x="40" y="40"/></svg>',
+            'utf8'
+        );
+
+        try {
+            const report = inspectCircuitikzRenderArtifact({
+                expectedArtifactPath: svgPath,
+                expectedSvgText: ['v_{in}']
+            });
+
+            expect(report.svg).toEqual(expect.objectContaining({
+                textElementCount: 0,
+                pathOnlyGlyphUseCount: 1,
+                expectedText: [{
+                    text: 'v_{in}',
+                    present: false
+                }]
+            }));
+            expect(report.diagnostics).toEqual([
+                expect.objectContaining({
+                    kind: 'render-svg-text-path-only',
+                    message: expect.stringContaining('path-only glyph geometry')
                 })
             ]);
         } finally {

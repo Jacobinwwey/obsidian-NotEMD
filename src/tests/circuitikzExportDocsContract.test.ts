@@ -47,9 +47,11 @@ describe('circuitikz export docs contract', () => {
             expect(doc).toContain('assertCircuitTopologyUnchanged');
             expect(doc).toContain('render-artifact-missing');
             expect(doc).toContain('render-svg-text-missing');
+            expect(doc).toContain('render-svg-text-path-only');
             expect(doc).toContain('render-svg-out-of-bounds');
             expect(doc).toContain('render-svg-text-overlap');
             expect(doc).toContain('transform-aware geometry');
+            expect(doc).toContain('pathOnlyGlyphUseCount');
             expect(doc).toContain('render-png-blank');
             expect(doc).toContain('render-png-content-clipped');
             expect(doc).toContain('foregroundBounds');

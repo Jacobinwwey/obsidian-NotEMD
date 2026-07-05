@@ -20,6 +20,7 @@ export interface CircuitikzSvgSmokeReport {
     viewBox?: [number, number, number, number];
     visibleElementCount: number;
     textElementCount: number;
+    pathOnlyGlyphUseCount: number;
     expectedText: CircuitikzSvgExpectedTextReport[];
 }
 
@@ -136,6 +137,27 @@ function parseViewBox(value: string | undefined): [number, number, number, numbe
 
 function countMatches(text: string, pattern: RegExp): number {
     return Array.from(text.matchAll(pattern)).length;
+}
+
+function countPathOnlyGlyphUses(svgText: string): number {
+    const pathIds = new Set(
+        Array.from(svgText.matchAll(/<path\b[^>]*\sid\s*=\s*["']([^"']+)["'][^>]*>/gi))
+            .map(match => match[1])
+    );
+    if (pathIds.size === 0) {
+        return 0;
+    }
+
+    return Array.from(svgText.matchAll(/<use\b[^>]*>/gi))
+        .filter(match => {
+            const tag = match[0];
+            if (tagIsHidden(tag)) {
+                return false;
+            }
+            const reference = readAttribute(tag, 'href') ?? readAttribute(tag, 'xlink:href');
+            return Boolean(reference?.startsWith('#') && pathIds.has(reference.slice(1)));
+        })
+        .length;
 }
 
 function parseNumericAttribute(tag: string, attributeName: string): number | undefined {
@@ -555,6 +577,7 @@ function extractSvgSmoke(svgText: string, expectedSvgText: string[]): Circuitikz
             /<(?:path|line|polyline|polygon|rect|circle|ellipse|text|use)\b(?![^>]*\bdisplay\s*=\s*["']none["'])/gi
         ),
         textElementCount: countMatches(svgText, /<text\b/gi),
+        pathOnlyGlyphUseCount: countPathOnlyGlyphUses(svgText),
         expectedText: expectedSvgText.map(text => ({
             text,
             present: svgText.includes(text) || searchableText.includes(text)
@@ -621,6 +644,17 @@ function svgDiagnostic(
 
     for (const expectedText of report.expectedText) {
         if (!expectedText.present) {
+            if (report.textElementCount === 0 && report.pathOnlyGlyphUseCount > 0) {
+                diagnostics.push({
+                    severity: 'error',
+                    kind: 'render-svg-text-path-only',
+                    message: `Expected SVG text cannot be searched because the renderer converted labels to path-only glyph geometry: ${expectedText.text}`,
+                    excerpt: expectedArtifactPath,
+                    advice: 'Treat this as an unverified label render. Use the PNG/OCR or screenshot gate before accepting or repairing the circuit visually.'
+                });
+                continue;
+            }
+
             diagnostics.push({
                 severity: 'error',
                 kind: 'render-svg-text-missing',

@@ -69,9 +69,11 @@ describe('website documentation contract', () => {
             expect(content).toContain('compileExecution');
             expect(content).toContain('compileExecution.renderSmoke');
             expect(content).toContain('render-svg-text-missing');
+            expect(content).toContain('render-svg-text-path-only');
             expect(content).toContain('render-svg-out-of-bounds');
             expect(content).toContain('render-svg-text-overlap');
             expect(content).toContain('transform-aware geometry');
+            expect(content).toContain('pathOnlyGlyphUseCount');
             expect(content).toContain('render-png-blank');
             expect(content).toContain('render-png-content-clipped');
             expect(content).toContain('foregroundBounds');
