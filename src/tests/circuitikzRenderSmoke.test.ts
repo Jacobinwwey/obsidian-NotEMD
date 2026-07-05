@@ -1,7 +1,55 @@
 import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
+import * as zlib from 'zlib';
 import { inspectCircuitikzRenderArtifact } from '../diagram/adapters/circuitikz/circuitikzRenderSmoke';
+
+function crc32(bytes: Buffer): number {
+    let crc = 0xffffffff;
+    for (const byte of bytes) {
+        crc ^= byte;
+        for (let bit = 0; bit < 8; bit += 1) {
+            crc = (crc >>> 1) ^ (0xedb88320 & -(crc & 1));
+        }
+    }
+    return (crc ^ 0xffffffff) >>> 0;
+}
+
+function pngChunk(type: string, data: Buffer): Buffer {
+    const typeBytes = Buffer.from(type, 'ascii');
+    const length = Buffer.alloc(4);
+    length.writeUInt32BE(data.length, 0);
+    const crc = Buffer.alloc(4);
+    crc.writeUInt32BE(crc32(Buffer.concat([typeBytes, data])), 0);
+    return Buffer.concat([length, typeBytes, data, crc]);
+}
+
+function createRgbaPng(width: number, height: number, pixels: Array<[number, number, number, number]>): Buffer {
+    const signature = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
+    const ihdr = Buffer.alloc(13);
+    ihdr.writeUInt32BE(width, 0);
+    ihdr.writeUInt32BE(height, 4);
+    ihdr[8] = 8;
+    ihdr[9] = 6;
+    ihdr[10] = 0;
+    ihdr[11] = 0;
+    ihdr[12] = 0;
+
+    const scanlines: number[] = [];
+    for (let row = 0; row < height; row += 1) {
+        scanlines.push(0);
+        for (let column = 0; column < width; column += 1) {
+            scanlines.push(...pixels[row * width + column]);
+        }
+    }
+
+    return Buffer.concat([
+        signature,
+        pngChunk('IHDR', ihdr),
+        pngChunk('IDAT', zlib.deflateSync(Buffer.from(scanlines))),
+        pngChunk('IEND', Buffer.alloc(0))
+    ]);
+}
 
 describe('circuitikz render smoke inspection', () => {
     test('accepts a bounded non-empty SVG artifact with expected text', () => {
@@ -92,6 +140,74 @@ describe('circuitikz render smoke inspection', () => {
                 expect.objectContaining({
                     kind: 'render-svg-text-missing',
                     message: 'Expected SVG render artifact is missing text: v_{in}'
+                })
+            ]);
+        } finally {
+            fs.rmSync(tempRoot, { recursive: true, force: true });
+        }
+    });
+
+    test('accepts a nonblank PNG screenshot artifact', () => {
+        const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'notemd-circuitikz-png-smoke-'));
+        const pngPath = path.join(tempRoot, 'render.png');
+        fs.writeFileSync(
+            pngPath,
+            createRgbaPng(2, 2, [
+                [255, 255, 255, 255],
+                [255, 255, 255, 255],
+                [255, 255, 255, 255],
+                [0, 0, 0, 255]
+            ])
+        );
+
+        try {
+            const report = inspectCircuitikzRenderArtifact({
+                expectedArtifactPath: pngPath
+            });
+
+            expect(report.artifactKind).toBe('png');
+            expect(report.diagnostics).toEqual([]);
+            expect(report.png).toEqual({
+                width: 2,
+                height: 2,
+                bitDepth: 8,
+                colorType: 6,
+                interlaceMethod: 0,
+                decodedPixelCount: 4,
+                nonBackgroundPixelCount: 1
+            });
+        } finally {
+            fs.rmSync(tempRoot, { recursive: true, force: true });
+        }
+    });
+
+    test('reports PNG screenshot artifacts that match only the background color', () => {
+        const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'notemd-circuitikz-png-blank-'));
+        const pngPath = path.join(tempRoot, 'blank.png');
+        fs.writeFileSync(
+            pngPath,
+            createRgbaPng(2, 2, [
+                [255, 255, 255, 255],
+                [255, 255, 255, 255],
+                [255, 255, 255, 255],
+                [255, 255, 255, 255]
+            ])
+        );
+
+        try {
+            const report = inspectCircuitikzRenderArtifact({
+                expectedArtifactPath: pngPath
+            });
+
+            expect(report.artifactKind).toBe('png');
+            expect(report.png).toEqual(expect.objectContaining({
+                width: 2,
+                height: 2,
+                nonBackgroundPixelCount: 0
+            }));
+            expect(report.diagnostics).toEqual([
+                expect.objectContaining({
+                    kind: 'render-png-blank'
                 })
             ]);
         } finally {

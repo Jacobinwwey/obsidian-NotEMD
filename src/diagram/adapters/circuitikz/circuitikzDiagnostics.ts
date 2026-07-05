@@ -13,7 +13,10 @@ export type CircuitikzCompileDiagnosticKind =
     | 'render-svg-invalid'
     | 'render-svg-dimension-missing'
     | 'render-svg-no-visible-elements'
-    | 'render-svg-text-missing';
+    | 'render-svg-text-missing'
+    | 'render-png-invalid'
+    | 'render-png-unsupported'
+    | 'render-png-blank';
 
 export interface CircuitikzCompileDiagnostic {
     severity: CircuitikzCompileDiagnosticSeverity;

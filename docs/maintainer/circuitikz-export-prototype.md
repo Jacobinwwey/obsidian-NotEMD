@@ -87,6 +87,8 @@ node scripts/export-circuitikz.js \
   --expected-svg-text v_{out}
 ```
 
+For `.png` screenshot artifacts, the smoke check decodes non-interlaced 8-bit grayscale, RGB, grayscale-alpha, or RGBA PNG output and verifies positive dimensions plus at least one pixel that differs from the top-left background color. Blank screenshots fail with `render-png-blank`; malformed or unsupported PNGs fail with `render-png-invalid` or `render-png-unsupported`.
+
 The result is recorded as `compileExecution.renderSmoke`. Missing or empty artifacts add `render-artifact-missing` or `render-artifact-empty`; SVG structure failures add diagnostics such as `render-svg-invalid`, `render-svg-dimension-missing`, `render-svg-no-visible-elements`, or `render-svg-text-missing`.
 
 The runner lives in `src/diagram/adapters/circuitikz/circuitikzCompileRunner.ts`. It reads the generated `{jobName}.log` from `{outputDir}`, reuses the same diagnostics parser, and returns `compileExecution` plus `compileDiagnostics` in the CLI JSON result. Artifact checks live in `src/diagram/adapters/circuitikz/circuitikzRenderSmoke.ts` so SVG structure rules remain testable without spawning a renderer. A non-ok diagnostic report still makes the CLI exit nonzero.
@@ -144,8 +146,9 @@ The tests verify:
 - shell-free compile execution with placeholder-expanded argument arrays;
 - render-smoke artifact existence and non-empty checks through `--expected-artifact`;
 - SVG artifact structure checks and optional text-token checks through repeated `--expected-svg-text`;
+- PNG screenshot smoke checks for positive dimensions and non-background pixels;
 - no output file is written for invalid topology.
 
 ## Non-Goals
 
-This prototype does not bundle LaTeX, call TikZJax as an Obsidian runtime dependency, run screenshot inspection, or use rendered-image feedback. Those are later gates. It also does not accept arbitrary natural-language circuit requests. The important current claim is narrower: validated `CircuitSpec` input can produce stable, readable circuitikz for two high-value golden families, existing compile logs can be converted into actionable diagnostics, and an explicitly configured local renderer can be executed without shell-specific command parsing while optionally proving that a concrete output artifact was created and, for SVG output, structurally renderable enough for later screenshot inspection.
+This prototype does not bundle LaTeX, call TikZJax as an Obsidian runtime dependency, run overlap detection, or use rendered-image feedback for automatic repair. Those are later gates. It also does not accept arbitrary natural-language circuit requests. The important current claim is narrower: validated `CircuitSpec` input can produce stable, readable circuitikz for two high-value golden families, existing compile logs can be converted into actionable diagnostics, and an explicitly configured local renderer can be executed without shell-specific command parsing while optionally proving that a concrete output artifact was created and, for SVG or PNG output, structurally renderable enough for later visual inspection.

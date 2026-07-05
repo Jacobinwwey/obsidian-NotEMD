@@ -40,6 +40,7 @@ describe('circuitikz export docs contract', () => {
             expect(doc).toContain('compileExecution.renderSmoke');
             expect(doc).toContain('render-artifact-missing');
             expect(doc).toContain('render-svg-text-missing');
+            expect(doc).toContain('render-png-blank');
             expect(doc).toContain('circuitikzDiagnostics.ts');
             expect(doc).toContain('circuitikzCompileRunner.ts');
             expect(doc).toContain('circuitikzRenderSmoke.ts');
@@ -69,6 +70,7 @@ describe('circuitikz export docs contract', () => {
             expect(doc).toContain('shell-free compile execution');
             expect(doc).toContain('render-smoke artifact');
             expect(doc).toContain('--expected-svg-text');
+            expect(doc).toContain('PNG');
             expect(doc).toContain('TikZJax/LaTeX');
             expect(doc).toContain('screenshot');
         }

@@ -87,6 +87,8 @@ node scripts/export-circuitikz.js \
   --expected-svg-text v_{out}
 ```
 
+对于 `.png` screenshot artifact，smoke check 会解码非交错的 8-bit grayscale、RGB、grayscale-alpha 或 RGBA PNG 输出，并检查正的尺寸以及至少一个不同于左上角背景色的像素。空白截图会以 `render-png-blank` 失败；格式损坏或不支持的 PNG 会以 `render-png-invalid` 或 `render-png-unsupported` 失败。
+
 检查结果会记录为 `compileExecution.renderSmoke`。缺失或空 artifact 会追加 `render-artifact-missing` 或 `render-artifact-empty`；SVG 结构失败会追加 `render-svg-invalid`、`render-svg-dimension-missing`、`render-svg-no-visible-elements` 或 `render-svg-text-missing` 等 diagnostic。
 
 runner 位于 `src/diagram/adapters/circuitikz/circuitikzCompileRunner.ts`。它会从 `{outputDir}` 读取生成的 `{jobName}.log`，复用同一个 diagnostics parser，并在 CLI JSON result 中返回 `compileExecution` 与 `compileDiagnostics`。artifact 检查位于 `src/diagram/adapters/circuitikz/circuitikzRenderSmoke.ts`，这样 SVG 结构规则可以在不 spawn renderer 的情况下单独测试。diagnostic report 非 ok 时，CLI 仍会以非零状态退出。
@@ -144,8 +146,9 @@ npm test -- --runInBand src/tests/circuitikzExporter.test.ts src/tests/circuitik
 - 使用 placeholder-expanded argument arrays 的 shell-free compile execution；
 - 通过 `--expected-artifact` 执行 render-smoke artifact 存在与非空检查；
 - 对 SVG artifact 执行结构检查，并通过重复的 `--expected-svg-text` 执行可选文本 token 检查；
+- 对 PNG screenshot 执行正尺寸与非背景像素 smoke 检查；
 - 无效拓扑不会写出 output file。
 
 ## 非目标
 
-这个原型不捆绑 LaTeX、不把 TikZJax 作为 Obsidian runtime 依赖调用、不做截图检查，也不使用渲染图像反馈。这些是后续 gate。它也不接受任意自然语言电路请求。当前重要声明更窄：经过验证的 `CircuitSpec` 输入可以为两个高价值 golden families 生成稳定、可读的 circuitikz，已有 compile logs 可以转换为 actionable diagnostics，并且显式配置的本地 renderer 可以在不走 shell-specific command parsing 的情况下执行，同时可选证明具体输出 artifact 已经创建；如果输出是 SVG，还能证明它具备进入后续截图检查的基本结构。
+这个原型不捆绑 LaTeX、不把 TikZJax 作为 Obsidian runtime 依赖调用、不做 overlap detection，也不使用渲染图像反馈进行自动修复。这些是后续 gate。它也不接受任意自然语言电路请求。当前重要声明更窄：经过验证的 `CircuitSpec` 输入可以为两个高价值 golden families 生成稳定、可读的 circuitikz，已有 compile logs 可以转换为 actionable diagnostics，并且显式配置的本地 renderer 可以在不走 shell-specific command parsing 的情况下执行，同时可选证明具体输出 artifact 已经创建；如果输出是 SVG 或 PNG，还能证明它具备进入后续视觉检查的基本结构。

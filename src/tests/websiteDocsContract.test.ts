@@ -64,6 +64,7 @@ describe('website documentation contract', () => {
             expect(content).toContain('compileExecution');
             expect(content).toContain('compileExecution.renderSmoke');
             expect(content).toContain('render-svg-text-missing');
+            expect(content).toContain('render-png-blank');
             expect(content).toContain('circuitikz.sty');
             expect(content).toContain('Golden Reference Template');
             expect(content).toContain('TikZJax Render');
