@@ -25,6 +25,10 @@ describe('website documentation contract', () => {
         path.join(websiteRoot, 'src', 'lib', 'publishedLanguageScopeData.mjs'),
         'utf8'
     );
+    const chineseDocsPluginMessages = JSON.parse(fs.readFileSync(
+        path.join(websiteRoot, 'i18n', 'zh-CN', 'docusaurus-plugin-content-docs', 'current.json'),
+        'utf8'
+    ));
 
     test('intro pages keep English and zh-CN content surfaces one-to-one', () => {
         expect(markdownHeadings(chineseIntro)).toHaveLength(markdownHeadings(englishIntro).length);
@@ -100,6 +104,9 @@ describe('website documentation contract', () => {
     });
 
     test('zh-CN scope publishes the Advanced sidebar pages used by intro', () => {
+        expect(chineseDocsPluginMessages['sidebar.tutorialSidebar.category.Advanced'].message)
+            .toContain('Advanced');
+
         for (const [sourcePath, routePath] of [
             ['advanced/custom-prompts.mdx', '/docs/advanced/custom-prompts'],
             ['advanced/batch-processing.mdx', '/docs/advanced/batch-processing'],

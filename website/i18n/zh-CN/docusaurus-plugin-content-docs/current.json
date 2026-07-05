@@ -16,7 +16,7 @@
     "description": "The label for category 'LLM Providers' in sidebar 'tutorialSidebar'"
   },
   "sidebar.tutorialSidebar.category.Advanced": {
-    "message": "高级",
+    "message": "高级 / Advanced",
     "description": "The label for category 'Advanced' in sidebar 'tutorialSidebar'"
   }
 }
