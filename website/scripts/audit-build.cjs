@@ -395,9 +395,26 @@ function auditRequiredFiles() {
   }
 }
 
+function auditGeneratedTextIntegrity() {
+  const htmlFiles = [
+    ...listHtmlFiles(englishDocsRoot),
+    ...listHtmlFiles(zhDocsRoot),
+    path.join(buildRoot, 'index.html'),
+    path.join(buildRoot, 'zh-CN', 'index.html'),
+  ];
+
+  for (const filePath of htmlFiles) {
+    const content = fs.readFileSync(filePath, 'utf8');
+    if (content.includes('\u0000')) {
+      fail(`Generated HTML contains a NUL character: ${path.relative(buildRoot, filePath)}`);
+    }
+  }
+}
+
 async function main() {
   const languageScope = await loadPublishedLanguageScope();
   auditRequiredFiles();
+  auditGeneratedTextIntegrity();
   auditPublishedScopeSourceFiles(languageScope);
   auditHomepageRoutes(languageScope);
   auditZhCnDocFallbacks(languageScope);
