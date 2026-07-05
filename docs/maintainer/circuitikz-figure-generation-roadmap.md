@@ -135,6 +135,17 @@ Screenshot feedback can be manual first. Automated screenshot checks should star
 | D. render feedback | Add optional local TikZJax/LaTeX smoke path | compile failures return actionable diagnostics |
 | E. visual repair loop | Feed rendered image or overlap report back into repair prompt | repeated layout errors are corrected without changing topology |
 
+## Implementation Status
+
+Phase A is documented. Phase B/C now have a constrained repository prototype:
+
+- `src/diagram/adapters/circuitikz/circuitSpec.ts` defines the separate circuit-only spec boundary.
+- `src/diagram/adapters/circuitikz/circuitikzExporter.ts` validates topology and emits deterministic `circuitikz` LaTeX for `common-source-amplifier` and `cmos-inverter`.
+- `scripts/export-circuitikz.js` and `npm run diagram:export-circuitikz` provide the offline export command.
+- `src/tests/circuitikzExporter.test.ts` and `src/tests/circuitikzExportCli.test.ts` verify deterministic output, topology rejection, package-script exposure, and UTF-8 BOM handling.
+
+The implementation still deliberately stops before Phase D/E. It does not compile LaTeX, call TikZJax, inspect screenshots, or run a visual repair loop.
+
 ## Best Current Practice
 
 Until `CircuitSpec` exists, use constrained prompts:

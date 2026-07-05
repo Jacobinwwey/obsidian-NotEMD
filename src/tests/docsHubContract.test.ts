@@ -120,8 +120,14 @@ describe('docs hub contract', () => {
         expect(docsHub).toContain(
             '[circuitikz Figure Generation Roadmap](./maintainer/circuitikz-figure-generation-roadmap.md)'
         );
+        expect(docsHub).toContain(
+            '[circuitikz Export Prototype](./maintainer/circuitikz-export-prototype.md)'
+        );
         expect(docsHubZh).toContain(
             '[circuitikz Figure Generation Roadmap](./maintainer/circuitikz-figure-generation-roadmap.zh-CN.md)'
+        );
+        expect(docsHubZh).toContain(
+            '[circuitikz 导出原型](./maintainer/circuitikz-export-prototype.zh-CN.md)'
         );
         expect(docsIndex).toContain(
             '[circuitikz Figure Generation Roadmap (EN)](./maintainer/circuitikz-figure-generation-roadmap.md)'
@@ -129,11 +135,23 @@ describe('docs hub contract', () => {
         expect(docsIndex).toContain(
             '[circuitikz Figure Generation Roadmap (zh-CN)](./maintainer/circuitikz-figure-generation-roadmap.zh-CN.md)'
         );
+        expect(docsIndex).toContain(
+            '[circuitikz Export Prototype (EN)](./maintainer/circuitikz-export-prototype.md)'
+        );
+        expect(docsIndex).toContain(
+            '[circuitikz Export Prototype (zh-CN)](./maintainer/circuitikz-export-prototype.zh-CN.md)'
+        );
         expect(docsIndexZh).toContain(
             '[circuitikz Figure Generation Roadmap（英文）](./maintainer/circuitikz-figure-generation-roadmap.md)'
         );
         expect(docsIndexZh).toContain(
             '[circuitikz Figure Generation Roadmap（中文）](./maintainer/circuitikz-figure-generation-roadmap.zh-CN.md)'
+        );
+        expect(docsIndexZh).toContain(
+            '[circuitikz 导出原型（英文）](./maintainer/circuitikz-export-prototype.md)'
+        );
+        expect(docsIndexZh).toContain(
+            '[circuitikz 导出原型（中文）](./maintainer/circuitikz-export-prototype.zh-CN.md)'
         );
     });
 });

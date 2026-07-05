@@ -355,6 +355,9 @@ function auditDiagramDocs() {
   assertContains(englishDiagrams, 'TikZJax', 'English diagrams doc');
   assertContains(englishDiagrams, 'preferredDiagramRenderTarget', 'English diagrams doc');
   assertContains(englishDiagrams, 'Render Target Selection', 'English diagrams doc');
+  assertContains(englishDiagrams, 'diagram:export-circuitikz', 'English diagrams doc');
+  assertContains(englishDiagrams, 'CircuitSpec', 'English diagrams doc');
+  assertContains(englishDiagrams, 'cmos-inverter-v1', 'English diagrams doc');
   assertContains(englishDiagrams, 'Golden Reference Prompt Shape', 'English diagrams doc');
   assertContains(englishDiagrams, 'scripts/diagram-semantic-verification.js', 'English diagrams doc');
 
@@ -366,6 +369,9 @@ function auditDiagramDocs() {
   assertContains(zhCnDiagrams, 'TikZJax', 'zh-CN diagrams doc');
   assertContains(zhCnDiagrams, 'preferredDiagramRenderTarget', 'zh-CN diagrams doc');
   assertContains(zhCnDiagrams, '渲染目标选择', 'zh-CN diagrams doc');
+  assertContains(zhCnDiagrams, 'diagram:export-circuitikz', 'zh-CN diagrams doc');
+  assertContains(zhCnDiagrams, 'CircuitSpec', 'zh-CN diagrams doc');
+  assertContains(zhCnDiagrams, 'cmos-inverter-v1', 'zh-CN diagrams doc');
   assertContains(zhCnDiagrams, 'Golden Reference Prompt Shape', 'zh-CN diagrams doc');
   assertContains(zhCnDiagrams, 'SemanticFigureModel', 'zh-CN diagrams doc');
   assertNotContains(zhCnDiagrams, 'content="noindex,follow"', 'zh-CN diagrams doc');

@@ -110,7 +110,7 @@ graph LR
     E --> F[Preview or Export]
 ```
 
-The current implementation already supports Mermaid, JSON Canvas, Vega-Lite, HTML fallback, editable HTML/SVG, Draw.io XML artifacts, and a minimal Drawnix JSON subset. Circuit diagrams are a harder class: circuitikz can express accurate electrical topology, but unconstrained LLM output often produces unreadable routing or non-rendering LaTeX. The planned direction is to treat circuitikz as a constrained target with golden-reference templates, node-grid layout rules, render diagnostics, and screenshot feedback loops.
+The current implementation already supports Mermaid, JSON Canvas, Vega-Lite, HTML fallback, editable HTML/SVG, Draw.io XML artifacts, a minimal Drawnix JSON subset, and an offline `CircuitSpec -> circuitikz` prototype for common-source and CMOS inverter golden templates. Circuit diagrams are a harder class: circuitikz can express accurate electrical topology, but unconstrained LLM output often produces unreadable routing or non-rendering LaTeX. The next direction is to keep circuitikz constrained with golden-reference templates, node-grid layout rules, render diagnostics, and screenshot feedback loops.
 
 Read the details in [Diagrams](./features/diagrams).
 

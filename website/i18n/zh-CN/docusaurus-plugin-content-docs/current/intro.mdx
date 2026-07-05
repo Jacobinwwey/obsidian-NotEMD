@@ -110,7 +110,7 @@ graph LR
     E --> F[Preview or Export]
 ```
 
-当前实现已经支持 Mermaid、JSON Canvas、Vega-Lite、HTML fallback、editable HTML/SVG、Draw.io XML artifact，以及最小 Drawnix JSON subset。电路图是更难的一类：circuitikz 可以准确表达电路拓扑，但不受约束的 LLM 输出经常产生不可读的布线或无法渲染的 LaTeX。后续方向是把 circuitikz 作为强约束 target：使用 golden-reference 模板、节点网格布局规则、渲染诊断和截图反馈闭环。
+当前实现已经支持 Mermaid、JSON Canvas、Vega-Lite、HTML fallback、editable HTML/SVG、Draw.io XML artifact、最小 Drawnix JSON subset，以及面向 common-source 和 CMOS inverter golden templates 的离线 `CircuitSpec -> circuitikz` 原型。电路图是更难的一类：circuitikz 可以准确表达电路拓扑，但不受约束的 LLM 输出经常产生不可读的布线或无法渲染的 LaTeX。下一步方向是继续把 circuitikz 作为强约束 target：使用 golden-reference 模板、节点网格布局规则、渲染诊断和截图反馈闭环。
 
 详细内容见 [图表与可编辑 Figure](./features/diagrams)。
 

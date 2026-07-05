@@ -189,6 +189,17 @@ Phase D implementation status on 2026-07-05: the Drawnix spike is implemented as
 
 Phase E implementation status on 2026-07-05: `scripts/export-diagram-artifact.js` and `npm run diagram:export-artifact` now provide an offline artifact exporter. The CLI reads a `DiagramSpec` JSON file, validates the requested target, builds a temporary internal `esbuild` bundle from the existing TypeScript exporters, and writes `editable-html-svg`, `drawio`, or `drawnix` output. `src/tests/diagramArtifactExportCli.test.ts` verifies real HTML/XML/JSON output, normalized-id collision handling, Draw.io visible-label preservation, Drawnix `geometry`/`arrow-line` output, and unsupported-target failure semantics. `docs/maintainer/diagram-artifact-export-cli.md` and `docs/maintainer/diagram-artifact-export-cli.zh-CN.md` document the command contract and explicitly state that no Obsidian runtime is required.
 
+### Phase F: Constrained circuitikz Prototype
+
+- [x] Keep circuit diagrams outside `DiagramSpec` until the circuit-specific topology/layout fields prove reusable.
+- [x] Define a minimal `CircuitSpec` with `circuitKind`, named nets, typed components, terminal references, layout hints, style, and `goldenReferenceId`.
+- [x] Add deterministic golden-template export for `common-source-amplifier` and `cmos-inverter`.
+- [x] Add an offline CLI that writes `.tex` without Obsidian, TikZJax, LaTeX, or browser runtime dependencies.
+- [x] Add topology-rejection tests so invalid circuits fail before output creation.
+- [x] Add bilingual maintainer docs and website progress notes.
+
+Phase F implementation status on 2026-07-05: `src/diagram/adapters/circuitikz/circuitSpec.ts` and `src/diagram/adapters/circuitikz/circuitikzExporter.ts` now implement a constrained `CircuitSpec -> circuitikz` prototype. `scripts/export-circuitikz.js` and `npm run diagram:export-circuitikz` export deterministic LaTeX for `common-source-nmos-v1` and `cmos-inverter-v1`. `src/tests/circuitikzExporter.test.ts` and `src/tests/circuitikzExportCli.test.ts` verify deterministic output, topology rejection, package-script exposure, UTF-8 BOM input handling, and no output write for invalid topology. The implementation deliberately stops before TikZJax/LaTeX compilation, screenshot inspection, and visual repair loops.
+
 ## Tradeoffs
 
 | Decision | Benefit | Cost |
@@ -196,6 +207,7 @@ Phase E implementation status on 2026-07-05: `scripts/export-diagram-artifact.js
 | HTML/SVG target before Drawnix | Fastest path to richer figures and editable export | Requires owning SVG layout and text fitting |
 | Drawnix as export target only | Avoids full whiteboard host complexity | No in-plugin board editing |
 | Keep `DiagramSpec` primary | Preserves semantic quality and testability | Requires writing target adapters instead of reusing converters blindly |
+| Separate `CircuitSpec` for circuitikz | Keeps terminal/topology rules explicit and testable | Requires a second spec boundary until common fields prove reusable |
 | Manual/release visual gate | Avoids flaky CI from diagrams.net/font differences | Maintainer must run richer checks before release claims |
 
 ## Pitfalls To Avoid
@@ -206,6 +218,7 @@ Phase E implementation status on 2026-07-05: `scripts/export-diagram-artifact.js
 - Do not add Google Fonts as a hard runtime dependency inside Obsidian preview. Use system fallbacks and keep external font loading optional.
 - Do not put heavy export code in `main.js` until packaging isolation is real.
 - Do not widen `DiagramSpec` prematurely. Use an internal `SemanticFigureModel` first; only promote fields after two or more targets need them.
+- Do not treat `diagram:export-circuitikz` as proof of visual rendering. It proves topology-constrained LaTeX export, not TikZJax compilation or screenshot quality.
 
 ## Best-Practice Boundary
 
@@ -223,12 +236,12 @@ Cloudy is valuable because it proves a disciplined HTML/SVG + Draw.io export con
 
 ## Recommended Next Move
 
-Do not start by adding dependencies. Start by adding a minimal editable HTML/SVG renderer behind the experimental diagram path and prove:
+The HTML/SVG, Draw.io, Drawnix, and first circuitikz export boundaries now exist. The next move should still avoid adding runtime dependencies by default:
 
-1. current `DiagramSpec` can express a useful architecture/runtime mechanism figure;
-2. the renderer can generate a self-contained nonblank HTML artifact;
-3. visible text fits and remains searchable/editable;
-4. Draw.io export coverage can be audited structurally;
-5. the existing Mermaid, JSON Canvas, Vega-Lite, and HTML renderers are unaffected.
+1. add optional local TikZJax/LaTeX smoke verification for the two circuitikz golden families;
+2. parse compile logs into actionable diagnostics without requiring TikZJax as a plugin runtime dependency;
+3. add screenshot-level checks for nonblank render, expected labels, bounded canvas, and obvious overlap;
+4. keep topology locked during any repair prompt so visual repair cannot change the circuit;
+5. only then consider more circuit families or a plugin-side circuit preview target.
 
-Only after those claims are verified should Notemd consider a `.drawnix` target. Drawnix is a good future export format, not a reason to embed a whiteboard product in the plugin.
+Drawnix remains a good export format, not a reason to embed a whiteboard product in the plugin. circuitikz remains a constrained circuit target, not a reason to accept arbitrary TikZ from the LLM.

@@ -37,6 +37,7 @@
 
 - [图形参考项目集成与 Figure 生成扩展方案](./brainstorms/2026-07-04-diagram-reference-integration-and-figure-generation-plan.zh-CN.md)
 - [circuitikz Figure Generation Roadmap](./maintainer/circuitikz-figure-generation-roadmap.zh-CN.md)
+- [circuitikz 导出原型](./maintainer/circuitikz-export-prototype.zh-CN.md)
 - [Diagram Platform Phase 2 Requirements](./brainstorms/2026-04-14-diagram-platform-phase-2-requirements.zh-CN.md)
 - [Local KB Retrieval 方案决策与质量真值](./brainstorms/2026-06-09-local-kb-retrieval-decision-and-quality-truth.zh-CN.md)
 - [Local KB RAG 质量与执行链路真值](./brainstorms/2026-06-09-local-kb-rag-quality-and-execution-truth.zh-CN.md)

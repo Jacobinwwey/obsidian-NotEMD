@@ -203,6 +203,23 @@ graph LR
 | Style | package、电压约定、labels、anchors | `\begin{circuitikz}[american voltages]` |
 | Validation | compile log、missing anchors、overlap/screenshot checks | TikZJax/LaTeX diagnostics plus visual review |
 
+### 当前 circuitikz 原型
+
+Notemd 现在已经包含这个方向的第一个受约束仓库内原型。它有意保持为离线、template-bound 的导出能力：
+
+```bash
+npm run diagram:export-circuitikz -- --input cmos-inverter.json --output cmos-inverter.tex
+```
+
+这个原型新增了独立的 `CircuitSpec` 边界，并为两个 golden-reference families 提供确定性 exporter：
+
+| Circuit kind | Golden reference | Current guarantee |
+|--------------|------------------|-------------------|
+| `common-source-amplifier` | `common-source-nmos-v1` | 写出 LaTeX 前验证 `VDD -> R_D -> M1.D`、`vin -> M1.G`、`M1.S -> GND` 和 `M1.D -> vout` |
+| `cmos-inverter` | `cmos-inverter-v1` | 写出 LaTeX 前验证 PMOS-over-NMOS 拓扑、shared gate input、shared drain output、`VDD -> MP.S` 和 `MN.S -> GND` |
+
+这还不是通用 TikZ 生成器。它不会编译 LaTeX、调用 TikZJax、检查截图或运行图像反馈修复；这些仍是后续 gate。
+
 ### Golden Reference Prompt Shape
 
 近期使用时，应该在要求生成电路变体前给出一个可渲染 golden reference。强约束 prompt 应保留 preamble、coordinate scale、anchor style 和 routing conventions：
@@ -235,8 +252,6 @@ graph LR
 - 使用 named anchors（`PM1.G`、`NM1.G`、`PM1.D`、`NM1.D`），不要依赖视觉推断坐标；
 - 除非电气上必要，避免 diagonal 或 crossing wires。
 
-这还不是已发布的 renderer target。它是下一阶段实现的推荐约束系统。
-
 ### Current Progress And Next Phases
 
 | Area | Current status | Next move |
@@ -244,7 +259,7 @@ graph LR
 | General diagrams | Mermaid、JSON Canvas、Vega-Lite、HTML 的 spec-first pipeline 已实现 | 继续扩展 semantic verification coverage |
 | Editable figures | `editable-html-svg`、Draw.io XML、Drawnix JSON artifact boundaries 已实现 | 只有在测试证明 editability 后再加入更丰富 primitives |
 | CLI support | `npm run diagram:export-artifact` 可从同一个 `DiagramSpec` 导出 editable HTML/SVG、Draw.io、Drawnix | 新 target 发布时增加 target-specific smoke fixtures |
-| circuitikz | 已作为强约束 future target 研究，不作为自由生成路径 | 定义 `CircuitSpec`、golden templates、compile-log parsing 与 screenshot feedback loop |
+| circuitikz | `CircuitSpec -> circuitikz` 原型已经可通过 `npm run diagram:export-circuitikz` 导出 common-source 与 CMOS inverter golden templates | 增加 compile/screenshot feedback 与 topology-preserving repair |
 | TikZJax integration | Obsidian-side display 的候选 render host | 保持可选，不把 TikZJax 变成硬 runtime 依赖 |
 
 ## Configuration

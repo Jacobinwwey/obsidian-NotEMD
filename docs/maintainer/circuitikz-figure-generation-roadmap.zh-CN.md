@@ -135,6 +135,17 @@ screenshot feedback 可以先保持人工执行。自动 screenshot 检查应从
 | D. render feedback | 增加可选的本地 TikZJax/LaTeX smoke path | compile failures 返回 actionable diagnostics |
 | E. visual repair loop | 将 rendered image 或 overlap report 反馈给 repair prompt | 不改变拓扑的前提下修正重复 layout errors |
 
+## 实现状态
+
+Phase A 已经文档化。Phase B/C 现在有了受约束的仓库内原型：
+
+- `src/diagram/adapters/circuitikz/circuitSpec.ts` 定义独立的 circuit-only spec 边界。
+- `src/diagram/adapters/circuitikz/circuitikzExporter.ts` 会验证拓扑，并为 `common-source-amplifier` 与 `cmos-inverter` 输出确定性的 `circuitikz` LaTeX。
+- `scripts/export-circuitikz.js` 与 `npm run diagram:export-circuitikz` 提供离线导出命令。
+- `src/tests/circuitikzExporter.test.ts` 与 `src/tests/circuitikzExportCli.test.ts` 验证确定性输出、拓扑拒绝、package-script 暴露和 UTF-8 BOM 处理。
+
+实现仍有意停在 Phase D/E 之前。它不会编译 LaTeX、调用 TikZJax、检查截图或运行视觉修复闭环。
+
 ## Best Current Practice
 
 在 `CircuitSpec` 尚未存在前，使用强约束 prompt：

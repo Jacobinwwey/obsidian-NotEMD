@@ -203,6 +203,23 @@ The first-class model should describe circuit topology and layout separately:
 | Style | package, voltage convention, labels, anchors | `\begin{circuitikz}[american voltages]` |
 | Validation | compile log, missing anchors, overlap/screenshot checks | TikZJax/LaTeX diagnostics plus visual review |
 
+### Current circuitikz Prototype
+
+Notemd now includes the first constrained repository prototype for this direction. It is intentionally offline and template-bound:
+
+```bash
+npm run diagram:export-circuitikz -- --input cmos-inverter.json --output cmos-inverter.tex
+```
+
+The prototype adds a separate `CircuitSpec` boundary and deterministic exporter for two golden-reference families:
+
+| Circuit kind | Golden reference | Current guarantee |
+|--------------|------------------|-------------------|
+| `common-source-amplifier` | `common-source-nmos-v1` | validates `VDD -> R_D -> M1.D`, `vin -> M1.G`, `M1.S -> GND`, and `M1.D -> vout` before writing LaTeX |
+| `cmos-inverter` | `cmos-inverter-v1` | validates PMOS-over-NMOS topology, shared gate input, shared drain output, `VDD -> MP.S`, and `MN.S -> GND` before writing LaTeX |
+
+This is not a general TikZ generator yet. It does not compile LaTeX, call TikZJax, inspect screenshots, or run image-feedback repair. Those remain later gates.
+
 ### Golden Reference Prompt Shape
 
 For near-term usage, provide a renderable golden reference before asking for a circuit variant. A constrained prompt should preserve the preamble, coordinate scale, anchor style, and routing conventions:
@@ -235,8 +252,6 @@ For a CMOS inverter, the prompt should request an explicit topology plus layout 
 - use named anchors (`PM1.G`, `NM1.G`, `PM1.D`, `NM1.D`) instead of visually inferred coordinates;
 - avoid diagonal or crossing wires unless electrically required.
 
-This is not yet a shipped renderer target. It is the recommended constraint system for the next implementation phase.
-
 ### Current Progress And Next Phases
 
 | Area | Current status | Next move |
@@ -244,7 +259,7 @@ This is not yet a shipped renderer target. It is the recommended constraint syst
 | General diagrams | Spec-first pipeline implemented for Mermaid, JSON Canvas, Vega-Lite, HTML | Keep expanding semantic verification coverage |
 | Editable figures | `editable-html-svg`, Draw.io XML, and Drawnix JSON artifact boundaries implemented | Add richer primitives only after tests prove editability |
 | CLI support | `npm run diagram:export-artifact` exports editable HTML/SVG, Draw.io, and Drawnix from one `DiagramSpec` | Add target-specific smoke fixtures when new targets ship |
-| circuitikz | Researched as a constrained future target, not a free-form generation path | Define `CircuitSpec`, golden templates, compile-log parsing, and screenshot feedback loop |
+| circuitikz | `CircuitSpec -> circuitikz` prototype exports common-source and CMOS inverter golden templates through `npm run diagram:export-circuitikz` | Add compile/screenshot feedback and topology-preserving repair |
 | TikZJax integration | Candidate render host for Obsidian-side display | Keep it optional; do not make TikZJax a hard plugin runtime dependency |
 
 ## Configuration

@@ -42,20 +42,25 @@ describe('website documentation contract', () => {
         }
     });
 
-    test('diagram pages document circuitikz as a constrained future target in both languages', () => {
+    test('diagram pages document circuitikz as a constrained prototype in both languages', () => {
         expect(markdownHeadings(chineseDiagrams)).toHaveLength(markdownHeadings(englishDiagrams).length);
+        expect(englishDiagrams).toContain('Current circuitikz Prototype');
+        expect(chineseDiagrams).toContain('当前 circuitikz 原型');
 
         for (const content of [englishDiagrams, chineseDiagrams]) {
             expect(content).toContain('circuitikz / TikZJax Direction');
             expect(content).toContain('Golden Reference Prompt Shape');
             expect(content).toContain('Current Progress And Next Phases');
             expect(content).toContain('CircuitSpec');
+            expect(content).toContain('common-source-amplifier');
+            expect(content).toContain('cmos-inverter-v1');
             expect(content).toContain('Golden Reference Template');
             expect(content).toContain('TikZJax Render');
             expect(content).toContain('\\usepackage{circuitikz}');
             expect(content).toContain('pmos');
             expect(content).toContain('nmos');
             expect(content).toContain('npm run diagram:export-artifact');
+            expect(content).toContain('npm run diagram:export-circuitikz');
         }
     });
 

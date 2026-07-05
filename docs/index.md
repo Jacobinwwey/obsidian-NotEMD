@@ -38,6 +38,8 @@ Repository docs preview for `obsidian-NotEMD`.
 - [Diagram Artifact Export CLI (zh-CN)](./maintainer/diagram-artifact-export-cli.zh-CN.md)
 - [circuitikz Figure Generation Roadmap (EN)](./maintainer/circuitikz-figure-generation-roadmap.md)
 - [circuitikz Figure Generation Roadmap (zh-CN)](./maintainer/circuitikz-figure-generation-roadmap.zh-CN.md)
+- [circuitikz Export Prototype (EN)](./maintainer/circuitikz-export-prototype.md)
+- [circuitikz Export Prototype (zh-CN)](./maintainer/circuitikz-export-prototype.zh-CN.md)
 - [Draw.io Export Visual Regression (EN)](./maintainer/drawio-export-visual-regression.md)
 - [Draw.io Export Visual Regression (zh-CN)](./maintainer/drawio-export-visual-regression.zh-CN.md)
 - [Drawnix Export Spike (EN)](./maintainer/drawnix-export-spike.md)
