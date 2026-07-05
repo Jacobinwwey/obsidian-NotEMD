@@ -77,6 +77,15 @@ interface SvgTextBox extends SvgBox {
     text: string;
 }
 
+interface SvgTransform {
+    a: number;
+    b: number;
+    c: number;
+    d: number;
+    e: number;
+    f: number;
+}
+
 function decodeXmlEntities(text: string): string {
     return text
         .replace(/&lt;/g, '<')
@@ -158,6 +167,120 @@ function boxFromPoints(label: string, points: Array<[number, number]>): SvgBox |
         maxX: Math.max(...xs),
         maxY: Math.max(...ys)
     };
+}
+
+function identityTransform(): SvgTransform {
+    return { a: 1, b: 0, c: 0, d: 1, e: 0, f: 0 };
+}
+
+function multiplyTransforms(left: SvgTransform, right: SvgTransform): SvgTransform {
+    return {
+        a: left.a * right.a + left.c * right.b,
+        b: left.b * right.a + left.d * right.b,
+        c: left.a * right.c + left.c * right.d,
+        d: left.b * right.c + left.d * right.d,
+        e: left.a * right.e + left.c * right.f + left.e,
+        f: left.b * right.e + left.d * right.f + left.f
+    };
+}
+
+function parseTransformNumbers(value: string): number[] {
+    return Array.from(value.matchAll(/-?[0-9]+(?:\.[0-9]+)?(?:e[-+]?[0-9]+)?/gi))
+        .map(match => Number(match[0]))
+        .filter(Number.isFinite);
+}
+
+function translateTransform(x: number, y: number): SvgTransform {
+    return { a: 1, b: 0, c: 0, d: 1, e: x, f: y };
+}
+
+function scaleTransform(x: number, y: number): SvgTransform {
+    return { a: x, b: 0, c: 0, d: y, e: 0, f: 0 };
+}
+
+function rotateTransform(degrees: number, centerX?: number, centerY?: number): SvgTransform {
+    const radians = degrees * Math.PI / 180;
+    const rotation = {
+        a: Math.cos(radians),
+        b: Math.sin(radians),
+        c: -Math.sin(radians),
+        d: Math.cos(radians),
+        e: 0,
+        f: 0
+    };
+    if (centerX === undefined || centerY === undefined) {
+        return rotation;
+    }
+    return multiplyTransforms(
+        multiplyTransforms(translateTransform(centerX, centerY), rotation),
+        translateTransform(-centerX, -centerY)
+    );
+}
+
+function parseSvgTransform(value: string | undefined): SvgTransform {
+    if (!value) {
+        return identityTransform();
+    }
+
+    let transform = identityTransform();
+    for (const match of value.matchAll(/([a-z]+)\s*\(([^)]*)\)/gi)) {
+        const name = match[1].toLowerCase();
+        const numbers = parseTransformNumbers(match[2]);
+        let next = identityTransform();
+
+        if (name === 'matrix' && numbers.length >= 6) {
+            next = {
+                a: numbers[0],
+                b: numbers[1],
+                c: numbers[2],
+                d: numbers[3],
+                e: numbers[4],
+                f: numbers[5]
+            };
+        } else if (name === 'translate' && numbers.length >= 1) {
+            next = translateTransform(numbers[0], numbers[1] ?? 0);
+        } else if (name === 'scale' && numbers.length >= 1) {
+            next = scaleTransform(numbers[0], numbers[1] ?? numbers[0]);
+        } else if (name === 'rotate' && numbers.length >= 1) {
+            next = rotateTransform(numbers[0], numbers[1], numbers[2]);
+        } else if (name === 'skewx' && numbers.length >= 1) {
+            next = { a: 1, b: 0, c: Math.tan(numbers[0] * Math.PI / 180), d: 1, e: 0, f: 0 };
+        } else if (name === 'skewy' && numbers.length >= 1) {
+            next = { a: 1, b: Math.tan(numbers[0] * Math.PI / 180), c: 0, d: 1, e: 0, f: 0 };
+        }
+
+        transform = multiplyTransforms(transform, next);
+    }
+
+    return transform;
+}
+
+function transformPoint(transform: SvgTransform, point: [number, number]): [number, number] {
+    return [
+        transform.a * point[0] + transform.c * point[1] + transform.e,
+        transform.b * point[0] + transform.d * point[1] + transform.f
+    ];
+}
+
+function transformBox<T extends SvgBox>(box: T, transform: SvgTransform): T {
+    const transformed = boxFromPoints(box.label, [
+        transformPoint(transform, [box.minX, box.minY]),
+        transformPoint(transform, [box.maxX, box.minY]),
+        transformPoint(transform, [box.maxX, box.maxY]),
+        transformPoint(transform, [box.minX, box.maxY])
+    ]);
+
+    return {
+        ...box,
+        minX: transformed?.minX ?? box.minX,
+        minY: transformed?.minY ?? box.minY,
+        maxX: transformed?.maxX ?? box.maxX,
+        maxY: transformed?.maxY ?? box.maxY
+    };
+}
+
+function tagIsHidden(tag: string): boolean {
+    return /\bdisplay\s*=\s*["']none["']/i.test(tag);
 }
 
 function pathBox(tag: string): SvgBox | undefined {
@@ -301,56 +424,100 @@ function elementBox(tagName: string, tag: string): SvgBox | undefined {
     return undefined;
 }
 
-function extractTextBoxes(svgText: string): SvgTextBox[] {
-    const boxes: SvgTextBox[] = [];
-    for (const match of svgText.matchAll(/<text\b([^>]*)>([\s\S]*?)<\/text>/gi)) {
-        const tag = match[0];
-        if (/\bdisplay\s*=\s*["']none["']/i.test(tag)) {
-            continue;
-        }
-
-        const x = parseNumericAttribute(tag, 'x');
-        const y = parseNumericAttribute(tag, 'y');
-        if (x === undefined || y === undefined) {
-            continue;
-        }
-
-        const fontSize = parseNumericAttribute(tag, 'font-size') ?? 12;
-        const text = decodeXmlEntities(match[2].replace(/<[^>]+>/g, '').trim());
-        if (!text) {
-            continue;
-        }
-
-        const width = Math.max(fontSize * 0.65, text.length * fontSize * 0.55);
-        boxes.push({
-            label: `text:${text}`,
-            text,
-            minX: x,
-            minY: y - fontSize,
-            maxX: x + width,
-            maxY: y + fontSize * 0.25
-        });
+function textBox(tag: string): SvgTextBox | undefined {
+    if (tagIsHidden(tag)) {
+        return undefined;
     }
 
-    return boxes;
+    const x = parseNumericAttribute(tag, 'x');
+    const y = parseNumericAttribute(tag, 'y');
+    if (x === undefined || y === undefined) {
+        return undefined;
+    }
+
+    const fontSize = parseNumericAttribute(tag, 'font-size') ?? 12;
+    const text = decodeXmlEntities((tag.match(/<text\b[^>]*>([\s\S]*?)<\/text>/i)?.[1] ?? '')
+        .replace(/<[^>]+>/g, '')
+        .trim());
+    if (!text) {
+        return undefined;
+    }
+
+    const width = Math.max(fontSize * 0.65, text.length * fontSize * 0.55);
+    return {
+        label: `text:${text}`,
+        text,
+        minX: x,
+        minY: y - fontSize,
+        maxX: x + width,
+        maxY: y + fontSize * 0.25
+    };
+}
+
+function collectSvgBoxes(svgText: string): { boxes: SvgBox[]; textBoxes: SvgTextBox[] } {
+    const boxes: SvgBox[] = [];
+    const textBoxes: SvgTextBox[] = [];
+    const groupStack: Array<{ transform: SvgTransform; hidden: boolean }> = [{
+        transform: identityTransform(),
+        hidden: false
+    }];
+    const tokenPattern = /<\/g\s*>|<g\b[^>]*\/?>|<(path|line|rect|circle|ellipse)\b[^>]*\/?>|<text\b[^>]*>[\s\S]*?<\/text>/gi;
+
+    for (const match of svgText.matchAll(tokenPattern)) {
+        const tag = match[0];
+        if (/^<\/g/i.test(tag)) {
+            if (groupStack.length > 1) {
+                groupStack.pop();
+            }
+            continue;
+        }
+
+        const parent = groupStack[groupStack.length - 1];
+        if (/^<g\b/i.test(tag)) {
+            if (/\/\s*>$/.test(tag)) {
+                continue;
+            }
+            groupStack.push({
+                transform: multiplyTransforms(parent.transform, parseSvgTransform(readAttribute(tag, 'transform'))),
+                hidden: parent.hidden || tagIsHidden(tag)
+            });
+            continue;
+        }
+
+        if (parent.hidden || tagIsHidden(tag)) {
+            continue;
+        }
+
+        const localTransform = multiplyTransforms(parent.transform, parseSvgTransform(readAttribute(tag, 'transform')));
+        if (/^<text\b/i.test(tag)) {
+            const box = textBox(tag);
+            if (box) {
+                const transformedBox = transformBox(box, localTransform);
+                textBoxes.push(transformedBox);
+                boxes.push(transformedBox);
+            }
+            continue;
+        }
+
+        const tagName = match[1]?.toLowerCase();
+        if (!tagName) {
+            continue;
+        }
+        const box = elementBox(tagName, tag);
+        if (box) {
+            boxes.push(transformBox(box, localTransform));
+        }
+    }
+
+    return { boxes, textBoxes };
+}
+
+function extractTextBoxes(svgText: string): SvgTextBox[] {
+    return collectSvgBoxes(svgText).textBoxes;
 }
 
 function extractElementBoxes(svgText: string): SvgBox[] {
-    const boxes: SvgBox[] = [];
-    for (const match of svgText.matchAll(/<(path|line|rect|circle|ellipse)\b[^>]*>/gi)) {
-        const tag = match[0];
-        if (/\bdisplay\s*=\s*["']none["']/i.test(tag)) {
-            continue;
-        }
-
-        const box = elementBox(match[1].toLowerCase(), tag);
-        if (box) {
-            boxes.push(box);
-        }
-    }
-
-    boxes.push(...extractTextBoxes(svgText));
-    return boxes;
+    return collectSvgBoxes(svgText).boxes;
 }
 
 function boxIsOutsideViewBox(box: SvgBox, viewBox: [number, number, number, number]): boolean {

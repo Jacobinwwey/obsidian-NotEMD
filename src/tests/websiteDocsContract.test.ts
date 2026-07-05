@@ -71,6 +71,7 @@ describe('website documentation contract', () => {
             expect(content).toContain('render-svg-text-missing');
             expect(content).toContain('render-svg-out-of-bounds');
             expect(content).toContain('render-svg-text-overlap');
+            expect(content).toContain('transform-aware geometry');
             expect(content).toContain('render-png-blank');
             expect(content).toContain('render-png-content-clipped');
             expect(content).toContain('foregroundBounds');

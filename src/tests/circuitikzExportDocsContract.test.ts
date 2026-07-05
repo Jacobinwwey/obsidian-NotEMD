@@ -49,6 +49,7 @@ describe('circuitikz export docs contract', () => {
             expect(doc).toContain('render-svg-text-missing');
             expect(doc).toContain('render-svg-out-of-bounds');
             expect(doc).toContain('render-svg-text-overlap');
+            expect(doc).toContain('transform-aware geometry');
             expect(doc).toContain('render-png-blank');
             expect(doc).toContain('render-png-content-clipped');
             expect(doc).toContain('foregroundBounds');
@@ -94,6 +95,7 @@ describe('circuitikz export docs contract', () => {
             expect(doc).toContain('foregroundBounds');
             expect(doc).toContain('bounded');
             expect(doc).toContain('text-overlap');
+            expect(doc).toContain('transform-aware geometry');
             expect(doc).toContain('RenderArtifact.diagnostics');
             expect(doc).toContain('source-only preview fallback');
             expect(doc).toContain('DiagramPreviewModal.ts');
