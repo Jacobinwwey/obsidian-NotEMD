@@ -220,7 +220,15 @@ The prototype adds a separate `CircuitSpec` boundary and deterministic exporter 
 | `common-source-amplifier` | `common-source-nmos-v1` | validates `VDD -> R_D -> M1.D`, `vin -> M1.G`, `M1.S -> GND`, and `M1.D -> vout` before writing LaTeX |
 | `cmos-inverter` | `cmos-inverter-v1` | validates PMOS-over-NMOS topology, shared gate input, shared drain output, `VDD -> MP.S`, and `MN.S -> GND` before writing LaTeX |
 
-This is not a general TikZ generator yet. It does not compile LaTeX, call TikZJax, inspect screenshots, or run image-feedback repair. Those remain later gates.
+This is not a general TikZ generator yet. It does not compile LaTeX, call TikZJax, inspect screenshots, or run automated image-feedback repair. Those remain later gates.
+
+For topology-preserving repair, pass the pre-repair spec as a reference before accepting a repaired candidate:
+
+```bash
+npm run diagram:export-circuitikz -- --input repaired-cmos-inverter.json --topology-reference cmos-inverter.json --output cmos-inverter.tex
+```
+
+The repair guard uses `createCircuitTopologySignature` and `assertCircuitTopologyUnchanged` to compare `circuitKind`, `goldenReferenceId`, nets, component ids/types/terminals, and undirected connection endpoints before output. Labels, title text, layout hints, connection order, and connection labels are intentionally ignored. A candidate that adds a short or rewires a terminal fails with `Circuit topology drift detected` before the `.tex` file is written.
 
 The CLI can now parse an existing LaTeX/TikZJax compile log without executing a compiler:
 
@@ -295,7 +303,7 @@ For a CMOS inverter, the prompt should request an explicit topology plus layout 
 | General diagrams | Spec-first pipeline implemented for Mermaid, JSON Canvas, Vega-Lite, HTML | Keep expanding semantic verification coverage |
 | Editable figures | `editable-html-svg`, Draw.io XML, and Drawnix JSON artifact boundaries implemented | Add richer primitives only after tests prove editability |
 | CLI support | `npm run diagram:export-artifact` exports editable HTML/SVG, Draw.io, and Drawnix from one `DiagramSpec` | Add target-specific smoke fixtures when new targets ship |
-| circuitikz | `CircuitSpec -> circuitikz` prototype exports common-source and CMOS inverter golden templates, parses compile logs, can run explicit local renderers plus `--expected-artifact`, SVG `--expected-svg-text`, SVG bounded-canvas/text-overlap smoke, and PNG nonblank / `render-png-content-clipped` screenshot smoke checks without shell parsing, includes aggregate maintainer smoke fixtures through `npm run diagram:smoke-circuitikz`, and has generic preview diagnostics plus source-only fallback through `RenderArtifact.diagnostics` and the preview modal | Add screenshot/OCR-level overlap checks and topology-preserving repair |
+| circuitikz | `CircuitSpec -> circuitikz` prototype exports common-source and CMOS inverter golden templates, rejects repair topology drift through `--topology-reference`, parses compile logs, can run explicit local renderers plus `--expected-artifact`, SVG `--expected-svg-text`, SVG bounded-canvas/text-overlap smoke, and PNG nonblank / `render-png-content-clipped` screenshot smoke checks without shell parsing, includes aggregate maintainer smoke fixtures through `npm run diagram:smoke-circuitikz`, and has generic preview diagnostics plus source-only fallback through `RenderArtifact.diagnostics` and the preview modal | Add screenshot/OCR-level overlap checks and automated topology-preserving repair |
 | TikZJax integration | Candidate render host for Obsidian-side display | Keep it optional; do not make TikZJax a hard plugin runtime dependency |
 
 ## Configuration

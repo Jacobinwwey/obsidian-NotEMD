@@ -25,6 +25,21 @@ node scripts/export-circuitikz.js --input common-source.json --output common-sou
 
 输入可以是带 BOM 或不带 BOM 的 UTF-8，因此 Windows PowerShell 写出的 JSON 不需要额外归一化。
 
+## Topology-Preserving Repair Guard
+
+视觉修复可以改 label、title text、layout hints 和 routing coordinates，但不能改变电气拓扑。exporter 现在通过 `--topology-reference` 暴露 repair guard：
+
+```bash
+node scripts/export-circuitikz.js \
+  --input repaired-cmos-inverter.json \
+  --topology-reference cmos-inverter.json \
+  --output cmos-inverter.tex
+```
+
+guard 会在写出任何 `.tex` output 前比较 canonical topology signatures。signature 由 `createCircuitTopologySignature` 生成，包含 `circuitKind`、`goldenReferenceId`、规范化 nets、component ids/types/terminals，以及无向 connection endpoints。它有意忽略 labels、title text、layout hints、connection ordering 和 connection labels，这样 repair pass 可以改善可读性，而不会被非电气改动阻塞。
+
+`assertCircuitTopologyUnchanged` 会拒绝 topology signature 与 reference 不同的 candidate spec。这能捕获新增短路、删除端子连接、改变晶体管类型、把 component terminal 移到不同 net 等 repair drift，即使 template 的最小 family validation 仍然通过。CLI 会报告 `Circuit topology drift detected`，并且不会写出 output file。
+
 ## Compile-Log 诊断
 
 exporter 也可以解析已有的 LaTeX/TikZJax compile log，并在不执行本地编译器的情况下返回 machine-readable diagnostics：
@@ -181,6 +196,7 @@ npm test -- --runInBand src/tests/circuitikzExporter.test.ts src/tests/circuitik
 - 导出前拒绝拓扑错误；
 - `package.json` 中的 CLI 暴露；
 - UTF-8 BOM 输入处理；
+- 通过 `--topology-reference`、`createCircuitTopologySignature` 和 `assertCircuitTopologyUnchanged` 执行 topology-preserving repair 检查；
 - 针对 missing packages、unknown keys、undefined control sequences 和 overfull layout warnings 的 compile-log diagnostics；
 - compile log 包含 errors 时写出 diagnostics JSON，并让 CLI 以非零状态退出；
 - 使用 placeholder-expanded argument arrays 的 shell-free compile execution；

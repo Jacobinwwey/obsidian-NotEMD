@@ -13,9 +13,72 @@ export interface CircuitSpecValidationResult {
     errors: string[];
 }
 
+interface CanonicalCircuitTopology {
+    circuitKind: string;
+    goldenReferenceId: string;
+    nets: string[];
+    components: Array<{
+        id: string;
+        type: string;
+        terminals: Array<[string, string]>;
+    }>;
+    connections: Array<[string, string]>;
+}
+
 function normalizeLabel(value: string | undefined, fallback: string): string {
     const trimmed = value?.trim();
     return trimmed || fallback;
+}
+
+function normalizeIdentifier(value: string): string {
+    return value.trim();
+}
+
+function canonicalConnection(connection: CircuitConnection): [string, string] {
+    const endpoints = [
+        normalizeIdentifier(connection.from),
+        normalizeIdentifier(connection.to)
+    ].sort();
+    return [endpoints[0], endpoints[1]];
+}
+
+function canonicalCircuitTopology(spec: CircuitSpec): CanonicalCircuitTopology {
+    return {
+        circuitKind: spec.circuitKind,
+        goldenReferenceId: spec.goldenReferenceId,
+        nets: [...new Set((spec.nets ?? []).map(normalizeIdentifier).filter(Boolean))].sort(),
+        components: (spec.components ?? [])
+            .map(component => ({
+                id: normalizeIdentifier(component.id),
+                type: component.type,
+                terminals: Object.entries(component.terminals ?? {})
+                    .map(([terminal, net]) => [normalizeIdentifier(terminal), normalizeIdentifier(net)] as [string, string])
+                    .sort(([leftTerminal], [rightTerminal]) => leftTerminal.localeCompare(rightTerminal))
+            }))
+            .sort((left, right) => left.id.localeCompare(right.id)),
+        connections: (spec.connections ?? [])
+            .map(canonicalConnection)
+            .sort(([leftFrom, leftTo], [rightFrom, rightTo]) =>
+                `${leftFrom}\u0000${leftTo}`.localeCompare(`${rightFrom}\u0000${rightTo}`)
+            )
+    };
+}
+
+export function createCircuitTopologySignature(spec: CircuitSpec): string {
+    assertValidCircuitSpec(spec);
+    return JSON.stringify(canonicalCircuitTopology(spec));
+}
+
+export function assertCircuitTopologyUnchanged(reference: CircuitSpec, candidate: CircuitSpec): CircuitSpec {
+    const referenceSignature = createCircuitTopologySignature(reference);
+    const candidateSignature = createCircuitTopologySignature(candidate);
+    if (referenceSignature !== candidateSignature) {
+        throw new ValidationError(
+            'Circuit topology drift detected. Repair candidates may change labels or layout hints, but not circuit kind, golden reference, nets, components, terminals, or connections.',
+            'INVALID_INPUT'
+        );
+    }
+    return candidate;
 }
 
 function collectComponentIds(components: CircuitComponent[], errors: string[]): Map<string, CircuitComponent> {

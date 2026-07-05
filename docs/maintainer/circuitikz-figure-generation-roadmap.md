@@ -141,7 +141,8 @@ Phase A is documented. Phase B/C now have a constrained repository prototype:
 
 - `src/diagram/adapters/circuitikz/circuitSpec.ts` defines the separate circuit-only spec boundary.
 - `src/diagram/adapters/circuitikz/circuitikzExporter.ts` validates topology and emits deterministic `circuitikz` LaTeX for `common-source-amplifier` and `cmos-inverter`.
-- `scripts/export-circuitikz.js` and `npm run diagram:export-circuitikz` provide the offline export command.
+- `src/diagram/adapters/circuitikz/circuitikzExporter.ts` now also exposes `createCircuitTopologySignature` and `assertCircuitTopologyUnchanged` so topology-preserving repair can reject electrical drift while allowing label and layout changes.
+- `scripts/export-circuitikz.js` and `npm run diagram:export-circuitikz` provide the offline export command, including `--topology-reference` for repair candidates.
 - `src/diagram/adapters/circuitikz/circuitikzDiagnostics.ts` parses existing LaTeX/TikZJax compile logs into actionable diagnostics without spawning a compiler or depending on shell command resolution.
 - `src/diagram/adapters/circuitikz/circuitikzCompileRunner.ts` can run an explicitly configured local renderer with `shell: false`, placeholder-expanded arguments, generated-log diagnostics, and optional `--expected-artifact` render-smoke checks.
 - `src/diagram/adapters/circuitikz/circuitikzRenderSmoke.ts` inspects expected render artifacts. PDF and other opaque artifacts are checked for existence/non-empty output; SVG artifacts are additionally checked for an `<svg>` root, positive dimensions or `viewBox`, visible drawing elements, and optional repeated `--expected-svg-text` tokens; PNG screenshot artifacts are decoded for positive dimensions, non-background pixels, foreground bounds, and edge-touching clipped content through `render-png-content-clipped`.
@@ -149,7 +150,7 @@ Phase A is documented. Phase B/C now have a constrained repository prototype:
 - `src/tests/circuitikzExporter.test.ts`, `src/tests/circuitikzCompileDiagnostics.test.ts`, `src/tests/circuitikzRenderSmoke.test.ts`, `src/tests/circuitikzCompileRunner.test.ts`, and `src/tests/circuitikzExportCli.test.ts` verify deterministic output, topology rejection, package-script exposure, UTF-8 BOM handling, diagnostic parsing, shell-free compile execution, diagnostics JSON output, render artifact existence/non-empty smoke checks, SVG structure checks, PNG blank screenshot checks, PNG foreground-bound reporting, PNG clipped-content diagnostics, and nonzero CLI exit for logs or smoke reports with errors.
 - `src/tests/diagramPreviewModal.test.ts` verifies that artifact diagnostics are visible in the diagram preview modal and that preview history does not collapse entries with different diagnostics.
 
-Phase D now has log parsing, opt-in local renderer execution, artifact-level smoke checks, SVG structure smoke checks, first PNG screenshot nonblank and edge-clipping checks, and a front-end diagnostics surface, but the implementation still deliberately stops before required renderer availability, OCR-level overlap detection, and Phase E. It does not bundle LaTeX, make TikZJax a plugin runtime dependency, or run a visual repair loop.
+Phase D now has log parsing, opt-in local renderer execution, artifact-level smoke checks, SVG structure smoke checks, first PNG screenshot nonblank and edge-clipping checks, a topology-preserving repair guard, and a front-end diagnostics surface, but the implementation still deliberately stops before required renderer availability, OCR-level overlap detection, and automated Phase E repair. It does not bundle LaTeX, make TikZJax a plugin runtime dependency, or run a visual repair loop.
 
 ## Best Current Practice
 

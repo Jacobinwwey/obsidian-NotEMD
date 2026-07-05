@@ -144,6 +144,43 @@ describe('circuitikz export CLI', () => {
         }
     });
 
+    test('uses topology reference to reject repair candidates that add electrical connections', () => {
+        const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'notemd-circuitikz-cli-topology-ref-'));
+        const referencePath = path.join(tempRoot, 'reference.json');
+        const candidatePath = path.join(tempRoot, 'candidate.json');
+        const outputPath = path.join(tempRoot, 'candidate.tex');
+        const candidate = createSpec();
+        candidate.connections = [
+            ...candidate.connections,
+            { from: 'VDD', to: 'MN.D', label: 'invalid repair short' }
+        ];
+        fs.writeFileSync(referencePath, JSON.stringify(createSpec(), null, 2), 'utf8');
+        fs.writeFileSync(candidatePath, JSON.stringify(candidate, null, 2), 'utf8');
+
+        try {
+            const result = spawnSync(
+                process.execPath,
+                [
+                    scriptPath,
+                    '--input', candidatePath,
+                    '--output', outputPath,
+                    '--topology-reference', referencePath
+                ],
+                {
+                    cwd: repoRoot,
+                    encoding: 'utf8'
+                }
+            );
+
+            expect(result.status).toBe(1);
+            expect(result.stdout).toBe('');
+            expect(result.stderr).toContain('Circuit topology drift detected');
+            expect(fs.existsSync(outputPath)).toBe(false);
+        } finally {
+            fs.rmSync(tempRoot, { recursive: true, force: true });
+        }
+    }, 30000);
+
     test('writes compile-log diagnostics and exits nonzero when the log contains LaTeX errors', () => {
         const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'notemd-circuitikz-cli-diagnostics-'));
         const specPath = path.join(tempRoot, 'circuit.json');

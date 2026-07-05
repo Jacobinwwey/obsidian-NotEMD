@@ -10,11 +10,13 @@ function printUsage() {
 
 Usage:
   node scripts/export-circuitikz.js --input <circuit-spec.json> --output <circuit.tex>
+  node scripts/export-circuitikz.js --input <repair-candidate.json> --topology-reference <reference.json> --output <circuit.tex>
   node scripts/export-circuitikz.js --input <circuit-spec.json> --output <circuit.tex> --compile-log <latex.log> --diagnostics-output <diagnostics.json>
   node scripts/export-circuitikz.js --input <circuit-spec.json> --output <circuit.tex> --compile-executable <renderer> --compile-arg <arg>... --expected-artifact <artifact> [--expected-svg-text <text>...]
 
 Example:
   node scripts/export-circuitikz.js --input cmos-inverter.json --output cmos-inverter.tex
+  node scripts/export-circuitikz.js --input repaired-cmos-inverter.json --topology-reference cmos-inverter.json --output cmos-inverter.tex
   node scripts/export-circuitikz.js --input cmos-inverter.json --output cmos-inverter.tex --compile-log cmos-inverter.log --diagnostics-output cmos-inverter.diagnostics.json
   node scripts/export-circuitikz.js --input cmos-inverter.json --output cmos-inverter.tex --compile-executable pdflatex --compile-arg -interaction=nonstopmode --compile-arg -halt-on-error --compile-arg -output-directory={outputDir} --compile-arg {tex} --expected-artifact {outputDir}/{jobName}.pdf
   node scripts/export-circuitikz.js --input cmos-inverter.json --output cmos-inverter.tex --compile-executable dvisvgm --compile-arg ... --expected-artifact {outputDir}/{jobName}.svg --expected-svg-text v_{in} --expected-svg-text v_{out}
@@ -32,6 +34,9 @@ function parseArgs(argv) {
         break;
       case '--output':
         args.output = argv[++index];
+        break;
+      case '--topology-reference':
+        args.topologyReference = argv[++index];
         break;
       case '--compile-log':
         args.compileLog = argv[++index];
@@ -105,11 +110,20 @@ function buildExporterBundle(repoRoot) {
   const outfile = path.join(tempRoot, 'circuitikz-exporter.cjs');
   const entrySource = `
     import { exportCircuitSpecToCircuitikz } from './src/diagram/adapters/circuitikz/circuitikzExporter';
+    import { assertCircuitTopologyUnchanged, createCircuitTopologySignature } from './src/diagram/adapters/circuitikz/circuitikzExporter';
     import { diagnoseCircuitikzCompileLog } from './src/diagram/adapters/circuitikz/circuitikzDiagnostics';
     import { runCircuitikzCompile } from './src/diagram/adapters/circuitikz/circuitikzCompileRunner';
 
     export function exportCircuitikz(spec) {
       return exportCircuitSpecToCircuitikz(spec);
+    }
+
+    export function assertTopologyUnchanged(reference, candidate) {
+      return assertCircuitTopologyUnchanged(reference, candidate);
+    }
+
+    export function topologySignature(spec) {
+      return createCircuitTopologySignature(spec);
     }
 
     export function diagnoseCompileLog(logText) {
@@ -151,10 +165,22 @@ async function run(args, repoRoot = path.resolve(__dirname, '..')) {
   const diagnosticsOutputPath = args.diagnosticsOutput ? path.resolve(args.diagnosticsOutput) : undefined;
   const compileExecutable = args.compileExecutable;
   const spec = loadCircuitSpec(inputPath);
+  const topologyReferencePath = args.topologyReference ? path.resolve(args.topologyReference) : undefined;
+  const topologyReferenceSpec = topologyReferencePath ? loadCircuitSpec(topologyReferencePath) : undefined;
   const bundle = buildExporterBundle(repoRoot);
 
   try {
-    const { diagnoseCompileLog, exportCircuitikz, runCompile } = require(bundle.outfile);
+    const { assertTopologyUnchanged, diagnoseCompileLog, exportCircuitikz, runCompile, topologySignature } = require(bundle.outfile);
+    const topologyCheck = topologyReferenceSpec
+      ? {
+          ok: true,
+          referenceSignature: topologySignature(topologyReferenceSpec),
+          candidateSignature: topologySignature(spec)
+        }
+      : undefined;
+    if (topologyReferenceSpec) {
+      assertTopologyUnchanged(topologyReferenceSpec, spec);
+    }
     const content = exportCircuitikz(spec);
     ensureOutputDirectory(outputPath);
     fs.writeFileSync(outputPath, content, 'utf8');
@@ -167,6 +193,10 @@ async function run(args, repoRoot = path.resolve(__dirname, '..')) {
       componentCount: Array.isArray(spec.components) ? spec.components.length : 0,
       connectionCount: Array.isArray(spec.connections) ? spec.connections.length : 0
     };
+    if (topologyReferencePath && topologyCheck) {
+      result.topologyReferencePath = topologyReferencePath;
+      result.topologyCheck = topologyCheck;
+    }
 
     if (compileLogPath) {
       const compileLog = fs.readFileSync(compileLogPath, 'utf8').replace(/^\uFEFF/, '');

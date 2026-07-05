@@ -25,6 +25,21 @@ node scripts/export-circuitikz.js --input common-source.json --output common-sou
 
 Input may be UTF-8 with or without a BOM, so JSON written from Windows PowerShell remains usable.
 
+## Topology-Preserving Repair Guard
+
+Visual repair is allowed to change labels, title text, layout hints, and routing coordinates, but it must not change electrical topology. The exporter now exposes a repair guard through `--topology-reference`:
+
+```bash
+node scripts/export-circuitikz.js \
+  --input repaired-cmos-inverter.json \
+  --topology-reference cmos-inverter.json \
+  --output cmos-inverter.tex
+```
+
+The guard compares canonical topology signatures before any `.tex` output is written. The signature is produced by `createCircuitTopologySignature` and includes `circuitKind`, `goldenReferenceId`, normalized nets, component ids/types/terminals, and undirected connection endpoints. It intentionally ignores labels, title text, layout hints, connection ordering, and connection labels so a repair pass can improve readability without being blocked by non-electrical edits.
+
+`assertCircuitTopologyUnchanged` rejects candidate specs whose topology signature differs from the reference. This catches repair drift such as adding a short, removing a terminal connection, changing a transistor type, or moving a component terminal to a different net even if the template's minimal family validation still passes. The CLI reports `Circuit topology drift detected` and does not write the output file.
+
 ## Compile-Log Diagnostics
 
 The exporter can also parse an existing LaTeX/TikZJax compile log and return machine-readable diagnostics without executing a local compiler:
@@ -181,6 +196,7 @@ The tests verify:
 - topology rejection before export;
 - CLI exposure through `package.json`;
 - UTF-8 BOM input handling;
+- topology-preserving repair checks through `--topology-reference`, `createCircuitTopologySignature`, and `assertCircuitTopologyUnchanged`;
 - compile-log diagnostics for missing packages, unknown keys, undefined control sequences, and overfull layout warnings;
 - diagnostics JSON output and nonzero CLI exit when a compile log contains errors;
 - shell-free compile execution with placeholder-expanded argument arrays;

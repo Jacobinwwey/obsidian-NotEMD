@@ -1,5 +1,7 @@
 import {
+    assertCircuitTopologyUnchanged,
     assertValidCircuitSpec,
+    createCircuitTopologySignature,
     exportCircuitSpecToCircuitikz,
     validateCircuitSpec
 } from '../diagram/adapters/circuitikz/circuitikzExporter';
@@ -122,6 +124,39 @@ describe('circuitikz exporter', () => {
 
         expect(validateCircuitSpec(spec).errors).toContain(
             'Common-source amplifier requires vin to connect to M1.G.'
+        );
+    });
+
+    test('keeps topology signatures stable across layout-only repair changes', () => {
+        const reference = createCmosInverterSpec();
+        const candidate = createCmosInverterSpec();
+        candidate.title = 'CMOS inverter after visual repair';
+        candidate.components = candidate.components.map(component => ({
+            ...component,
+            label: component.id === 'MP' ? '$P_1$' : '$N_1$'
+        }));
+        candidate.connections = [...candidate.connections].reverse();
+        candidate.layoutHints = {
+            inputSide: 'right',
+            outputSide: 'left',
+            routingStyle: 'orthogonal'
+        };
+
+        expect(createCircuitTopologySignature(candidate)).toBe(createCircuitTopologySignature(reference));
+        expect(assertCircuitTopologyUnchanged(reference, candidate)).toBe(candidate);
+    });
+
+    test('rejects repair candidates that add electrical topology even when the template still validates', () => {
+        const reference = createCmosInverterSpec();
+        const candidate = createCmosInverterSpec();
+        candidate.connections = [
+            ...candidate.connections,
+            { from: 'VDD', to: 'MN.D', label: 'invalid repair short' }
+        ];
+
+        expect(validateCircuitSpec(candidate)).toEqual({ valid: true, errors: [] });
+        expect(() => assertCircuitTopologyUnchanged(reference, candidate)).toThrow(
+            /Circuit topology drift detected/
         );
     });
 });

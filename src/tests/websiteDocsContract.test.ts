@@ -61,6 +61,7 @@ describe('website documentation contract', () => {
             expect(content).toContain('--compile-arg');
             expect(content).toContain('--expected-artifact');
             expect(content).toContain('--expected-svg-text');
+            expect(content).toContain('--topology-reference');
             expect(content).toContain('shell: false');
             expect(content).toContain('RenderArtifact.diagnostics');
             expect(content).toContain('source-only');
@@ -82,6 +83,7 @@ describe('website documentation contract', () => {
             expect(content).toContain('npm run diagram:export-artifact');
             expect(content).toContain('npm run diagram:export-circuitikz');
             expect(content).toContain('npm run diagram:smoke-circuitikz');
+            expect(content).toContain('topology-preserving repair');
             expect(content).toContain('docs/maintainer/fixtures/circuitikz/common-source-nmos-v1.json');
             expect(content).toContain('docs/maintainer/fixtures/circuitikz/cmos-inverter-v1.json');
         }
