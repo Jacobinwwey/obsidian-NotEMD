@@ -287,6 +287,24 @@ describe('circuitikz export CLI', () => {
                 diagnostics: expect.objectContaining({
                     ok: false,
                     summary: '1 error(s), 0 warning(s)'
+                }),
+                repairPrompt: expect.objectContaining({
+                    role: 'topology-preserving-circuitikz-repair',
+                    instructions: expect.arrayContaining([
+                        expect.stringContaining('revised CircuitSpec JSON object'),
+                        expect.stringContaining('Preserve topologySignature exactly')
+                    ]),
+                    diagnosticFocus: [
+                        expect.objectContaining({
+                            severity: 'error',
+                            kind: 'missing-package',
+                            message: 'Missing LaTeX package: circuitikz.sty'
+                        })
+                    ],
+                    acceptanceCriteria: expect.arrayContaining([
+                        expect.stringContaining('assertCircuitikzRepairCandidateMatchesBrief'),
+                        expect.stringContaining('Render-smoke diagnostics')
+                    ])
                 })
             }));
             expect(repairBrief.topologyInvariant.prohibitedChanges).toContain('connections');

@@ -1,12 +1,19 @@
 import { CircuitSpec } from './circuitSpec';
 import { assertCircuitTopologyUnchanged, createCircuitTopologySignature } from './circuitikzExporter';
-import { CircuitikzCompileDiagnosticReport } from './circuitikzDiagnostics';
+import { CircuitikzCompileDiagnostic, CircuitikzCompileDiagnosticReport } from './circuitikzDiagnostics';
 import { ValidationError } from '../../../types';
 
 export interface CircuitikzRepairBriefRequest {
     referenceSpec: CircuitSpec;
     sourceSpec: CircuitSpec;
     diagnostics: CircuitikzCompileDiagnosticReport;
+}
+
+export interface CircuitikzRepairPrompt {
+    role: 'topology-preserving-circuitikz-repair';
+    instructions: string[];
+    diagnosticFocus: Array<Pick<CircuitikzCompileDiagnostic, 'severity' | 'kind' | 'message' | 'advice'>>;
+    acceptanceCriteria: string[];
 }
 
 export interface CircuitikzRepairBrief {
@@ -21,7 +28,32 @@ export interface CircuitikzRepairBrief {
     };
     sourceSpec: CircuitSpec;
     diagnostics: CircuitikzCompileDiagnosticReport;
+    repairPrompt: CircuitikzRepairPrompt;
     nextSteps: string[];
+}
+
+function createCircuitikzRepairPrompt(diagnostics: CircuitikzCompileDiagnosticReport): CircuitikzRepairPrompt {
+    return {
+        role: 'topology-preserving-circuitikz-repair',
+        instructions: [
+            'Produce a revised CircuitSpec JSON object, not free-form TikZ or prose.',
+            'Preserve topologySignature exactly; do not change circuitKind, goldenReferenceId, nets, components, terminals, or connections.',
+            'Only change title, labels, layout hints, or routing coordinates that remain inside the same golden template.',
+            'Address each diagnosticFocus item with the smallest local edit before changing any other presentation detail.'
+        ],
+        diagnosticFocus: diagnostics.diagnostics.map(diagnostic => ({
+            severity: diagnostic.severity,
+            kind: diagnostic.kind,
+            message: diagnostic.message,
+            advice: diagnostic.advice
+        })),
+        acceptanceCriteria: [
+            'assertCircuitikzRepairCandidateMatchesBrief accepts the revised CircuitSpec.',
+            'Re-export using either --repair-brief or --topology-reference as the topology guard for the run.',
+            'Compile diagnostics report no errors.',
+            'Render-smoke diagnostics report no blocking SVG or PNG artifact failures.'
+        ]
+    };
 }
 
 export function createCircuitikzRepairBrief(request: CircuitikzRepairBriefRequest): CircuitikzRepairBrief {
@@ -53,6 +85,7 @@ export function createCircuitikzRepairBrief(request: CircuitikzRepairBriefReques
         },
         sourceSpec: request.sourceSpec,
         diagnostics: request.diagnostics,
+        repairPrompt: createCircuitikzRepairPrompt(request.diagnostics),
         nextSteps: [
             'Apply the smallest layout or label change that resolves the listed diagnostics.',
             'Re-export with --topology-reference pointing at the original reference spec.',

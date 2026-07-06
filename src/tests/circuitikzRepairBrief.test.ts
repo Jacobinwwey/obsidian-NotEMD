@@ -91,10 +91,107 @@ describe('circuitikz repair brief', () => {
             },
             sourceSpec,
             diagnostics,
+            repairPrompt: {
+                role: 'topology-preserving-circuitikz-repair',
+                instructions: [
+                    'Produce a revised CircuitSpec JSON object, not free-form TikZ or prose.',
+                    'Preserve topologySignature exactly; do not change circuitKind, goldenReferenceId, nets, components, terminals, or connections.',
+                    'Only change title, labels, layout hints, or routing coordinates that remain inside the same golden template.',
+                    'Address each diagnosticFocus item with the smallest local edit before changing any other presentation detail.'
+                ],
+                diagnosticFocus: [
+                    {
+                        severity: 'error',
+                        kind: 'render-svg-label-overlap',
+                        message: 'Expected SVG render artifact text label overlaps a drawing element: VIN / line',
+                        advice: 'Keep topology fixed and move labels away from wires or components before accepting the artifact.'
+                    }
+                ],
+                acceptanceCriteria: [
+                    'assertCircuitikzRepairCandidateMatchesBrief accepts the revised CircuitSpec.',
+                    'Re-export using either --repair-brief or --topology-reference as the topology guard for the run.',
+                    'Compile diagnostics report no errors.',
+                    'Render-smoke diagnostics report no blocking SVG or PNG artifact failures.'
+                ]
+            },
             nextSteps: [
                 'Apply the smallest layout or label change that resolves the listed diagnostics.',
                 'Re-export with --topology-reference pointing at the original reference spec.',
                 'Re-run compile diagnostics and render-smoke checks before accepting the repair.'
+            ]
+        });
+    });
+
+    test('creates a constrained repair prompt handoff from diagnostic focus', () => {
+        const referenceSpec = createCmosInverterSpec();
+        const sourceSpec = createCmosInverterSpec();
+        const diagnostics: CircuitikzCompileDiagnosticReport = {
+            ok: false,
+            summary: '2 error(s), 0 warning(s)',
+            diagnostics: [
+                {
+                    severity: 'error',
+                    kind: 'render-svg-label-overlap',
+                    message: 'Expected SVG render artifact text label overlaps a drawing element: VIN / line',
+                    excerpt: 'cmos.svg',
+                    advice: 'Keep topology fixed and move labels away from wires or components before accepting the artifact.'
+                },
+                {
+                    severity: 'error',
+                    kind: 'render-png-content-clipped',
+                    message: 'PNG foreground content touches the artifact boundary.',
+                    excerpt: 'cmos.png',
+                    advice: 'Move the circuit body inward or increase the render viewport before accepting the artifact.'
+                }
+            ]
+        };
+
+        const brief = createCircuitikzRepairBrief({
+            referenceSpec,
+            sourceSpec,
+            diagnostics
+        });
+        const repairPrompt = (brief as {
+            repairPrompt?: {
+                role: string;
+                instructions: string[];
+                diagnosticFocus: Array<{
+                    severity: string;
+                    kind: string;
+                    message: string;
+                    advice: string;
+                }>;
+                acceptanceCriteria: string[];
+            };
+        }).repairPrompt;
+
+        expect(repairPrompt).toEqual({
+            role: 'topology-preserving-circuitikz-repair',
+            instructions: [
+                'Produce a revised CircuitSpec JSON object, not free-form TikZ or prose.',
+                'Preserve topologySignature exactly; do not change circuitKind, goldenReferenceId, nets, components, terminals, or connections.',
+                'Only change title, labels, layout hints, or routing coordinates that remain inside the same golden template.',
+                'Address each diagnosticFocus item with the smallest local edit before changing any other presentation detail.'
+            ],
+            diagnosticFocus: [
+                {
+                    severity: 'error',
+                    kind: 'render-svg-label-overlap',
+                    message: 'Expected SVG render artifact text label overlaps a drawing element: VIN / line',
+                    advice: 'Keep topology fixed and move labels away from wires or components before accepting the artifact.'
+                },
+                {
+                    severity: 'error',
+                    kind: 'render-png-content-clipped',
+                    message: 'PNG foreground content touches the artifact boundary.',
+                    advice: 'Move the circuit body inward or increase the render viewport before accepting the artifact.'
+                }
+            ],
+            acceptanceCriteria: [
+                'assertCircuitikzRepairCandidateMatchesBrief accepts the revised CircuitSpec.',
+                'Re-export using either --repair-brief or --topology-reference as the topology guard for the run.',
+                'Compile diagnostics report no errors.',
+                'Render-smoke diagnostics report no blocking SVG or PNG artifact failures.'
             ]
         });
     });

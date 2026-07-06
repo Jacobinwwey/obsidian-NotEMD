@@ -69,6 +69,10 @@ describe('website documentation contract', () => {
             expect(content).toContain('--repair-brief-output');
             expect(content).toContain('--repair-brief');
             expect(content).toContain('notemd.circuitikz.repair-brief.v1');
+            expect(content).toContain('repairPrompt');
+            expect(content).toContain('diagnosticFocus');
+            expect(content).toContain('acceptanceCriteria');
+            expect(content).toContain('topology-preserving-circuitikz-repair');
             expect(content).toContain('shell: false');
             expect(content).toContain('RenderArtifact.diagnostics');
             expect(content).toContain('diagnostic summary');
