@@ -60,6 +60,10 @@ describe('circuitikz export docs contract', () => {
             expect(doc).toContain('diagnosticFocus');
             expect(doc).toContain('acceptanceCriteria');
             expect(doc).toContain('topology-preserving-circuitikz-repair');
+            expect(doc).toContain('repairAcceptance');
+            expect(doc).toContain('notemd.circuitikz.repair-acceptance.v1');
+            expect(doc).toContain('readyForVisualAcceptance');
+            expect(doc).toContain('remainingChecks');
             expect(doc).toContain('compileExecution.renderSmoke');
             expect(doc).toContain('createCircuitTopologySignature');
             expect(doc).toContain('assertCircuitTopologyUnchanged');
@@ -137,6 +141,10 @@ describe('circuitikz export docs contract', () => {
             expect(doc).toContain('diagnosticFocus');
             expect(doc).toContain('acceptanceCriteria');
             expect(doc).toContain('topology-preserving-circuitikz-repair');
+            expect(doc).toContain('repairAcceptance');
+            expect(doc).toContain('notemd.circuitikz.repair-acceptance.v1');
+            expect(doc).toContain('readyForVisualAcceptance');
+            expect(doc).toContain('remainingChecks');
             expect(doc).toContain('render-smoke artifact');
             expect(doc).toContain('maintainer fixture');
             expect(doc).toContain('--expected-svg-text');
@@ -200,6 +208,10 @@ describe('circuitikz export docs contract', () => {
             expect(doc).toContain('diagnosticFocus');
             expect(doc).toContain('acceptanceCriteria');
             expect(doc).toContain('topology-preserving-circuitikz-repair');
+            expect(doc).toContain('repairAcceptance');
+            expect(doc).toContain('notemd.circuitikz.repair-acceptance.v1');
+            expect(doc).toContain('readyForVisualAcceptance');
+            expect(doc).toContain('remainingChecks');
             expect(doc).toContain('SVG number grammar');
             expect(doc).toContain('leading-dot decimals');
             expect(doc).toContain('explicit plus signs');

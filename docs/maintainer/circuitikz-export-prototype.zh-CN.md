@@ -64,6 +64,8 @@ node scripts/export-circuitikz.js \
 
 `--repair-brief` 会在写出 output 前，把 candidate 的 canonical topology signature 与 brief 中的 signature 比较。它与 `--topology-reference` 互斥，避免一次运行中出现两个 topology truth source。通过这个 gate 只能证明拓扑未变；candidate 仍必须重新渲染，并通过 compile diagnostics 与 render-smoke gates 后才能被视觉接受。
 
+使用 `--repair-brief` 时，CLI result 现在还会包含 schema 为 `notemd.circuitikz.repair-acceptance.v1` 的 `repairAcceptance`。这个 report 会把 `topology-signature`、`compile-diagnostics` 和 `render-smoke` gates 标记为 `passed`、`failed` 或 `missing`，暴露 `blockingDiagnostics`，并列出 `remainingChecks`。只有当同一次 candidate run 中 topology、compile diagnostics 与 render-smoke 全部通过时，`readyForVisualAcceptance` 才会是 `true`；只通过拓扑校验的 candidate 会被明确标记为尚未达到视觉验收条件。
+
 ## Compile-Log 诊断
 
 exporter 也可以解析已有的 LaTeX/TikZJax compile log，并在不执行本地编译器的情况下返回 machine-readable diagnostics：
@@ -238,6 +240,7 @@ npm test -- --runInBand src/tests/circuitikzExporter.test.ts src/tests/circuitik
 - 通过 `--expected-artifact` 执行 render-smoke artifact 存在与非空检查；
 - 通过 `--repair-brief-output` 与 schema `notemd.circuitikz.repair-brief.v1` 写出 topology-preserving repair brief；
 - repair brief 内的 `repairPrompt`、`diagnosticFocus`、`acceptanceCriteria` 与 `topology-preserving-circuitikz-repair` handoff 内容；
+- 通过 `--repair-brief` 校验 repair candidates 时输出的 `repairAcceptance`、`notemd.circuitikz.repair-acceptance.v1`、`readyForVisualAcceptance` 与 `remainingChecks` 证据；
 - 通过 `--repair-brief` 校验 repair candidate 是否匹配已有 brief；
 - 对 SVG artifact 执行结构检查，并通过重复的 `--expected-svg-text` 执行可选文本 token 检查；
 - 对 visible-output smoke 排除 hidden 与 transparent SVG elements；

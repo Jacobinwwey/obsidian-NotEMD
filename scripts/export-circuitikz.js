@@ -141,7 +141,7 @@ function buildExporterBundle(repoRoot) {
     import { assertCircuitTopologyUnchanged, createCircuitTopologySignature } from './src/diagram/adapters/circuitikz/circuitikzExporter';
     import { diagnoseCircuitikzCompileLog } from './src/diagram/adapters/circuitikz/circuitikzDiagnostics';
     import { runCircuitikzCompile } from './src/diagram/adapters/circuitikz/circuitikzCompileRunner';
-    import { assertCircuitikzRepairCandidateMatchesBrief, createCircuitikzRepairBrief } from './src/diagram/adapters/circuitikz/circuitikzRepairBrief';
+    import { assertCircuitikzRepairCandidateMatchesBrief, createCircuitikzRepairAcceptanceReport, createCircuitikzRepairBrief } from './src/diagram/adapters/circuitikz/circuitikzRepairBrief';
 
     export function exportCircuitikz(spec) {
       return exportCircuitSpecToCircuitikz(spec);
@@ -165,6 +165,10 @@ function buildExporterBundle(repoRoot) {
 
     export function createRepairBrief(request) {
       return createCircuitikzRepairBrief(request);
+    }
+
+    export function createRepairAcceptanceReport(brief, candidate, evidence) {
+      return createCircuitikzRepairAcceptanceReport(brief, candidate, evidence);
     }
 
     export function assertRepairCandidateMatchesBrief(brief, candidate) {
@@ -213,6 +217,7 @@ async function run(args, repoRoot = path.resolve(__dirname, '..')) {
     const {
       assertRepairCandidateMatchesBrief,
       assertTopologyUnchanged,
+      createRepairAcceptanceReport,
       createRepairBrief,
       diagnoseCompileLog,
       exportCircuitikz,
@@ -297,6 +302,13 @@ async function run(args, repoRoot = path.resolve(__dirname, '..')) {
       });
       fs.writeFileSync(repairBriefOutputPath, `${JSON.stringify(repairBrief, null, 2)}\n`, 'utf8');
       result.repairBriefOutputPath = repairBriefOutputPath;
+    }
+
+    if (repairBrief) {
+      result.repairAcceptance = createRepairAcceptanceReport(repairBrief, spec, {
+        diagnostics: result.compileDiagnostics,
+        renderSmoke: result.compileExecution ? result.compileExecution.renderSmoke : undefined
+      });
     }
 
     return result;

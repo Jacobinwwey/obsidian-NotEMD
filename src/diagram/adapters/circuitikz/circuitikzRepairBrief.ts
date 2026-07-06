@@ -9,6 +9,32 @@ export interface CircuitikzRepairBriefRequest {
     diagnostics: CircuitikzCompileDiagnosticReport;
 }
 
+export type CircuitikzRepairAcceptanceCheckName =
+    | 'topology-signature'
+    | 'compile-diagnostics'
+    | 'render-smoke';
+
+export interface CircuitikzRepairAcceptanceCheck {
+    name: CircuitikzRepairAcceptanceCheckName;
+    status: 'passed' | 'failed' | 'missing';
+    summary: string;
+}
+
+export interface CircuitikzRepairAcceptanceEvidence {
+    diagnostics?: CircuitikzCompileDiagnosticReport;
+    renderSmoke?: {
+        diagnostics: CircuitikzCompileDiagnostic[];
+    };
+}
+
+export interface CircuitikzRepairAcceptanceReport {
+    schemaVersion: 'notemd.circuitikz.repair-acceptance.v1';
+    readyForVisualAcceptance: boolean;
+    checks: CircuitikzRepairAcceptanceCheck[];
+    blockingDiagnostics: Array<Pick<CircuitikzCompileDiagnostic, 'severity' | 'kind' | 'message' | 'advice'>>;
+    remainingChecks: CircuitikzRepairAcceptanceCheckName[];
+}
+
 export interface CircuitikzRepairPrompt {
     role: 'topology-preserving-circuitikz-repair';
     instructions: string[];
@@ -53,6 +79,63 @@ function createCircuitikzRepairPrompt(diagnostics: CircuitikzCompileDiagnosticRe
             'Compile diagnostics report no errors.',
             'Render-smoke diagnostics report no blocking SVG or PNG artifact failures.'
         ]
+    };
+}
+
+function summarizeBlockingDiagnostics(
+    diagnostics: CircuitikzCompileDiagnosticReport | undefined
+): Array<Pick<CircuitikzCompileDiagnostic, 'severity' | 'kind' | 'message' | 'advice'>> {
+    return (diagnostics?.diagnostics ?? [])
+        .filter(diagnostic => diagnostic.severity === 'error')
+        .map(diagnostic => ({
+            severity: diagnostic.severity,
+            kind: diagnostic.kind,
+            message: diagnostic.message,
+            advice: diagnostic.advice
+        }));
+}
+
+function createCompileDiagnosticsCheck(
+    diagnostics: CircuitikzCompileDiagnosticReport | undefined
+): CircuitikzRepairAcceptanceCheck {
+    if (!diagnostics) {
+        return {
+            name: 'compile-diagnostics',
+            status: 'missing',
+            summary: 'Compile diagnostics were not provided for this candidate run.'
+        };
+    }
+
+    return {
+        name: 'compile-diagnostics',
+        status: diagnostics.ok ? 'passed' : 'failed',
+        summary: diagnostics.summary
+    };
+}
+
+function createRenderSmokeCheck(
+    evidence: CircuitikzRepairAcceptanceEvidence
+): CircuitikzRepairAcceptanceCheck {
+    if (!evidence.renderSmoke) {
+        return {
+            name: 'render-smoke',
+            status: 'missing',
+            summary: 'Render-smoke diagnostics were not provided for this candidate run.'
+        };
+    }
+
+    if (evidence.renderSmoke.diagnostics.length === 0) {
+        return {
+            name: 'render-smoke',
+            status: 'passed',
+            summary: 'Render-smoke diagnostics report no blocking artifact failures.'
+        };
+    }
+
+    return {
+        name: 'render-smoke',
+        status: 'failed',
+        summary: `${evidence.renderSmoke.diagnostics.length} render-smoke diagnostic(s)`
     };
 }
 
@@ -114,4 +197,33 @@ export function assertCircuitikzRepairCandidateMatchesBrief(
     }
 
     return candidate;
+}
+
+export function createCircuitikzRepairAcceptanceReport(
+    brief: Pick<CircuitikzRepairBrief, 'schemaVersion' | 'topologySignature'>,
+    candidate: CircuitSpec,
+    evidence: CircuitikzRepairAcceptanceEvidence = {}
+): CircuitikzRepairAcceptanceReport {
+    assertCircuitikzRepairCandidateMatchesBrief(brief, candidate);
+
+    const checks: CircuitikzRepairAcceptanceCheck[] = [
+        {
+            name: 'topology-signature',
+            status: 'passed',
+            summary: 'Candidate topology matches the repair brief signature.'
+        },
+        createCompileDiagnosticsCheck(evidence.diagnostics),
+        createRenderSmokeCheck(evidence)
+    ];
+    const remainingChecks = checks
+        .filter(check => check.status !== 'passed')
+        .map(check => check.name);
+
+    return {
+        schemaVersion: 'notemd.circuitikz.repair-acceptance.v1',
+        readyForVisualAcceptance: remainingChecks.length === 0,
+        checks,
+        blockingDiagnostics: summarizeBlockingDiagnostics(evidence.diagnostics),
+        remainingChecks
+    };
 }

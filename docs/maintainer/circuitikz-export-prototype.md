@@ -64,6 +64,8 @@ node scripts/export-circuitikz.js \
 
 `--repair-brief` validates the candidate's canonical topology signature against the brief before writing output. It is mutually exclusive with `--topology-reference` so automation has a single source of topology truth for each run. Passing this gate only proves topology preservation; the candidate must still be re-rendered and checked with compile diagnostics and render-smoke gates before it is accepted visually.
 
+When `--repair-brief` is used, the CLI result now also includes `repairAcceptance` with schema `notemd.circuitikz.repair-acceptance.v1`. This report records the `topology-signature`, `compile-diagnostics`, and `render-smoke` gates as `passed`, `failed`, or `missing`, exposes `blockingDiagnostics`, and lists `remainingChecks`. `readyForVisualAcceptance` is `true` only when topology, compile diagnostics, and render-smoke have all passed in the same candidate run; a topology-only candidate remains explicitly not ready for visual acceptance.
+
 ## Compile-Log Diagnostics
 
 The exporter can also parse an existing LaTeX/TikZJax compile log and return machine-readable diagnostics without executing a local compiler:
@@ -238,6 +240,7 @@ The tests verify:
 - render-smoke artifact existence and non-empty checks through `--expected-artifact`;
 - topology-preserving repair brief output through `--repair-brief-output` and schema `notemd.circuitikz.repair-brief.v1`;
 - `repairPrompt`, `diagnosticFocus`, `acceptanceCriteria`, and `topology-preserving-circuitikz-repair` handoff content inside repair briefs;
+- `repairAcceptance`, `notemd.circuitikz.repair-acceptance.v1`, `readyForVisualAcceptance`, and `remainingChecks` evidence when validating repair candidates through `--repair-brief`;
 - repair candidate validation against an existing brief through `--repair-brief`;
 - SVG artifact structure checks and optional text-token checks through repeated `--expected-svg-text`;
 - hidden and transparent SVG element exclusion for visible-output smoke;
