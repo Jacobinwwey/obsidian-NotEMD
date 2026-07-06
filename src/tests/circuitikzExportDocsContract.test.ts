@@ -81,6 +81,8 @@ describe('circuitikz export docs contract', () => {
             expect(doc).toContain('circuitikz source-only');
             expect(doc).toContain('.tex');
             expect(doc).toContain('.tikz');
+            expect(doc).toContain('TikZ path syntax');
+            expect(doc).toContain('runaway arguments');
             expect(doc).toContain('createCircuitTopologySignature');
             expect(doc).toContain('assertCircuitTopologyUnchanged');
             expect(doc).toContain('render-artifact-missing');
@@ -164,6 +166,9 @@ describe('circuitikz export docs contract', () => {
             expect(doc).toContain('src/tests/diagramPreview.test.ts');
             expect(doc).toContain('src/tests/circuitikzSmokeFixturesCli.test.ts');
             expect(doc).toContain('compile-log diagnostics');
+            expect(doc).toContain('tikz-path-syntax');
+            expect(doc).toContain('runaway-argument');
+            expect(doc).toContain('Runaway argument?');
             expect(doc).toContain('shell-free compile execution');
             expect(doc).toContain('topology-preserving repair');
             expect(doc).toContain('--topology-reference');

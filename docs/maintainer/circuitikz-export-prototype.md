@@ -96,6 +96,8 @@ Current diagnostics include:
 
 - missing LaTeX packages such as `circuitikz.sty`;
 - unknown TikZ/circuitikz keys such as misspelled component names;
+- TikZ path syntax failures such as missing semicolons;
+- runaway arguments from unbalanced braces, unterminated labels, or unterminated paths;
 - undefined control sequences;
 - generic LaTeX errors and emergency stops;
 - advisory overfull `\hbox` warnings for later visual review.
@@ -275,6 +277,7 @@ The tests verify:
 - UTF-8 BOM input handling;
 - topology-preserving repair checks through `--topology-reference`, `createCircuitTopologySignature`, and `assertCircuitTopologyUnchanged`;
 - compile-log diagnostics for missing packages, unknown keys, undefined control sequences, and overfull layout warnings;
+- compile-log diagnostics for TikZ path syntax failures and runaway arguments before visual repair;
 - diagnostics JSON output and nonzero CLI exit when a compile log contains errors;
 - shell-free compile execution with placeholder-expanded argument arrays;
 - render-smoke artifact existence and non-empty checks through `--expected-artifact`;

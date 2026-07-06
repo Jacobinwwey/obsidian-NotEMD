@@ -96,6 +96,8 @@ node scripts/export-circuitikz.js \
 
 - `circuitikz.sty` 这类缺失 LaTeX package；
 - 拼错 component name 等 unknown TikZ/circuitikz keys；
+- 缺少分号等 TikZ path syntax failures；
+- 由 braces 不平衡、label 未闭合或 path 未终止造成的 runaway arguments；
 - undefined control sequences；
 - generic LaTeX errors 与 emergency stops；
 - 留给后续视觉审查的 advisory overfull `\hbox` warnings。
@@ -275,6 +277,7 @@ npm test -- --runInBand src/tests/circuitikzExporter.test.ts src/tests/circuitik
 - UTF-8 BOM 输入处理；
 - 通过 `--topology-reference`、`createCircuitTopologySignature` 和 `assertCircuitTopologyUnchanged` 执行 topology-preserving repair 检查；
 - 针对 missing packages、unknown keys、undefined control sequences 和 overfull layout warnings 的 compile-log diagnostics；
+- 针对 TikZ path syntax failures 与 runaway arguments 的 compile-log diagnostics，先于 visual repair 给出定位；
 - compile log 包含 errors 时写出 diagnostics JSON，并让 CLI 以非零状态退出；
 - 使用 placeholder-expanded argument arrays 的 shell-free compile execution；
 - 通过 `--expected-artifact` 执行 render-smoke artifact 存在与非空检查；

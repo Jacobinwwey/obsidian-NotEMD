@@ -244,7 +244,7 @@ The CLI can now parse an existing LaTeX/TikZJax compile log without executing a 
 npm run diagram:export-circuitikz -- --input cmos-inverter.json --output cmos-inverter.tex --compile-log cmos-inverter.log --diagnostics-output cmos-inverter.diagnostics.json
 ```
 
-This diagnostic path reports missing packages such as `circuitikz.sty`, unknown TikZ/circuitikz keys, undefined control sequences, generic LaTeX errors, emergency stops, and advisory overfull `\hbox` warnings. It remains log-driven: local LaTeX/TikZJax execution and screenshot-quality gates are still separate future work.
+This diagnostic path reports missing packages such as `circuitikz.sty`, unknown TikZ/circuitikz keys, TikZ path syntax failures such as missing semicolons, runaway arguments from unbalanced braces or unterminated labels, undefined control sequences, generic LaTeX errors, emergency stops, and advisory overfull `\hbox` warnings. It remains log-driven: local LaTeX/TikZJax execution and screenshot-quality gates are still separate future work.
 
 For maintainer smoke checks, the same CLI can optionally run an explicitly configured renderer without shell command parsing:
 

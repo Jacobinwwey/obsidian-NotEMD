@@ -72,6 +72,8 @@ describe('website documentation contract', () => {
             expect(content).toContain('port placement');
             expect(content).toContain('--compile-log');
             expect(content).toContain('--diagnostics-output');
+            expect(content).toContain('TikZ path syntax');
+            expect(content).toContain('runaway arguments');
             expect(content).toContain('--compile-executable');
             expect(content).toContain('--compile-arg');
             expect(content).toContain('--expected-artifact');

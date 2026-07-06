@@ -244,7 +244,7 @@ CLI 现在可以在不执行编译器的情况下解析已有 LaTeX/TikZJax comp
 npm run diagram:export-circuitikz -- --input cmos-inverter.json --output cmos-inverter.tex --compile-log cmos-inverter.log --diagnostics-output cmos-inverter.diagnostics.json
 ```
 
-这条 diagnostic path 会报告 `circuitikz.sty` 这类 missing package、unknown TikZ/circuitikz keys、undefined control sequences、generic LaTeX errors、emergency stops，以及 advisory overfull `\hbox` warnings。它仍然是 log-driven：本地 LaTeX/TikZJax execution 和 screenshot-quality gates 仍是独立的后续工作。
+这条 diagnostic path 会报告 `circuitikz.sty` 这类 missing package、unknown TikZ/circuitikz keys、缺少分号等 TikZ path syntax failures、由 braces 不平衡或 label 未闭合造成的 runaway arguments、undefined control sequences、generic LaTeX errors、emergency stops，以及 advisory overfull `\hbox` warnings。它仍然是 log-driven：本地 LaTeX/TikZJax execution 和 screenshot-quality gates 仍是独立的后续工作。
 
 对于 maintainer smoke checks，同一个 CLI 也可以可选运行显式配置的 renderer，且不走 shell command parsing：
 

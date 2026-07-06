@@ -3,7 +3,9 @@ export type CircuitikzCompileDiagnosticSeverity = 'error' | 'warning';
 export type CircuitikzCompileDiagnosticKind =
     | 'missing-package'
     | 'unknown-tikz-key'
+    | 'tikz-path-syntax'
     | 'undefined-control-sequence'
+    | 'runaway-argument'
     | 'latex-error'
     | 'emergency-stop'
     | 'overfull-hbox'
@@ -106,6 +108,31 @@ export function diagnoseCircuitikzCompileLog(logText: string): CircuitikzCompile
                 message: `Unknown TikZ/circuitikz key: ${unknownTikzKey[1]}`,
                 excerpt: lineContext(lines, index),
                 advice: 'Check the component name, circuitikz library support, and template spelling before changing topology.'
+            });
+            continue;
+        }
+
+        if (/Package tikz Error: Giving up on this path\. Did you forget a semicolon\??\.?/i.test(line)) {
+            pushUnique(diagnostics, seen, {
+                severity: 'error',
+                kind: 'tikz-path-syntax',
+                message: 'TikZ path syntax failed, likely because a path was not terminated.',
+                excerpt: lineContext(lines, index),
+                advice: 'Check for a missing semicolon at the end of a \\draw path before changing circuit topology.'
+            });
+            continue;
+        }
+
+        if (line === 'Runaway argument?' || /Paragraph ended before .* was complete\./.test(line)) {
+            if (diagnostics.some(diagnostic => diagnostic.kind === 'runaway-argument')) {
+                continue;
+            }
+            pushUnique(diagnostics, seen, {
+                severity: 'error',
+                kind: 'runaway-argument',
+                message: 'LaTeX reported a runaway argument while parsing circuit source.',
+                excerpt: lineContext(lines, index),
+                advice: 'Check for unbalanced braces, unterminated labels, or a missing semicolon in the preceding circuitikz path.'
             });
             continue;
         }
