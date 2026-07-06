@@ -39,6 +39,9 @@ describe('circuitikz export docs contract', () => {
             expect(doc).toContain('common-source-nmos-v1');
             expect(doc).toContain('cmos-inverter');
             expect(doc).toContain('cmos-inverter-v1');
+            expect(doc).toContain('layoutHints.inputSide');
+            expect(doc).toContain('layoutHints.outputSide');
+            expect(doc).toContain('port placement');
             expect(doc).toContain('docs/maintainer/fixtures/circuitikz/common-source-nmos-v1.json');
             expect(doc).toContain('docs/maintainer/fixtures/circuitikz/cmos-inverter-v1.json');
             expect(doc).toContain('UTF-8');
@@ -109,6 +112,9 @@ describe('circuitikz export docs contract', () => {
         for (const doc of [progressDoc, progressDocZh]) {
             expect(doc).toContain('Phase F');
             expect(doc).toContain('CircuitSpec -> circuitikz');
+            expect(doc).toContain('layoutHints.inputSide');
+            expect(doc).toContain('layoutHints.outputSide');
+            expect(doc).toContain('port placement');
             expect(doc).toContain('scripts/export-circuitikz.js');
             expect(doc).toContain('scripts/run-circuitikz-smoke-fixtures.js');
             expect(doc).toContain('npm run diagram:export-circuitikz');
@@ -184,6 +190,9 @@ describe('circuitikz export docs contract', () => {
         for (const doc of [roadmapDoc, roadmapDocZh]) {
             expect(doc).toContain('circuitikzRenderSmoke.ts');
             expect(doc).toContain('circuitikzRepairBrief.ts');
+            expect(doc).toContain('layoutHints.inputSide');
+            expect(doc).toContain('layoutHints.outputSide');
+            expect(doc).toContain('port placement');
             expect(doc).toContain('--repair-brief-output');
             expect(doc).toContain('--repair-brief');
             expect(doc).toContain('notemd.circuitikz.repair-brief.v1');

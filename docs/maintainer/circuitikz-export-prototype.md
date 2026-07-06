@@ -213,6 +213,8 @@ CircuitSpec
 
 This keeps the model-facing contract narrow and makes topology drift testable. The exporter rejects invalid topology before writing an output file.
 
+For the current golden templates, `layoutHints.inputSide` and `layoutHints.outputSide` are projected into deterministic input/output port placement. A topology-preserving repair can move `v_{in}` or `v_{out}` to the other side through layout hints while keeping the same `topologySignature`; the exporter rewrites only the presentation route and node anchor. This is not a general autorouter. It is a constrained layout projection for the supported `common-source-amplifier` and `cmos-inverter` families.
+
 ## Verification
 
 Canonical regression commands:
@@ -225,6 +227,7 @@ The tests verify:
 
 - deterministic common-source LaTeX;
 - constrained CMOS inverter output;
+- deterministic `layoutHints.inputSide` and `layoutHints.outputSide` projection for supported templates;
 - topology rejection before export;
 - CLI exposure through `package.json`;
 - UTF-8 BOM input handling;

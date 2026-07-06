@@ -108,6 +108,42 @@ describe('circuitikz exporter', () => {
         expect(output).toContain('node[ground]{};');
     });
 
+    test('projects CMOS inverter layout hints into deterministic input and output ports', () => {
+        const reference = createCmosInverterSpec();
+        const spec = createCmosInverterSpec();
+        spec.layoutHints = {
+            inputSide: 'right',
+            outputSide: 'left',
+            routingStyle: 'orthogonal'
+        };
+
+        const output = exportCircuitSpecToCircuitikz(spec);
+
+        expect(createCircuitTopologySignature(spec)).toBe(createCircuitTopologySignature(reference));
+        expect(output).toContain('(3,2.75) to [short, *-o] (0.8,2.75) node[left]{$v_{out}$};');
+        expect(output).toContain('(1.5,2.75) to [short] (1.5,1.2)');
+        expect(output).toContain('to [short, -o] (5.2,1.2)');
+        expect(output).toContain('node[right]{$v_{in}$};');
+    });
+
+    test('projects common-source layout hints into deterministic input and output ports', () => {
+        const reference = createCommonSourceSpec();
+        const spec = createCommonSourceSpec();
+        spec.layoutHints = {
+            inputSide: 'right',
+            outputSide: 'left',
+            routingStyle: 'orthogonal'
+        };
+
+        const output = exportCircuitSpecToCircuitikz(spec);
+
+        expect(createCircuitTopologySignature(spec)).toBe(createCircuitTopologySignature(reference));
+        expect(output).toContain('to [short, *-o] (0.8,3) node[left]{$v_{out}$}');
+        expect(output).toContain('(M1.G) to [short] (1.5,2.2)');
+        expect(output).toContain('to [short, -o] (5.2,1.4)');
+        expect(output).toContain('node[right]{$v_{in}$};');
+    });
+
     test('rejects CMOS inverter specs that do not lock shared drain topology', () => {
         const spec = createCmosInverterSpec();
         spec.connections = spec.connections.filter(connection => connection.from !== 'MP.D' || connection.to !== 'MN.D');

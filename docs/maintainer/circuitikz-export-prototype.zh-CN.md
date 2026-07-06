@@ -213,6 +213,8 @@ CircuitSpec
 
 这能让 model-facing contract 保持窄边界，并让拓扑漂移可测试。exporter 会在写出文件前拒绝无效拓扑。
 
+对于当前 golden templates，`layoutHints.inputSide` 与 `layoutHints.outputSide` 现在会被投影为确定性的 input/output port placement。topology-preserving repair 可以通过 layout hints 把 `v_{in}` 或 `v_{out}` 移到另一侧，同时保持同一个 `topologySignature`；exporter 只会改 presentation route 和 node anchor。这不是通用 autorouter，而是面向已支持 `common-source-amplifier` 与 `cmos-inverter` families 的受约束 layout projection。
+
 ## 验证
 
 标准回归命令：
@@ -225,6 +227,7 @@ npm test -- --runInBand src/tests/circuitikzExporter.test.ts src/tests/circuitik
 
 - 确定性的 common-source LaTeX；
 - 强约束 CMOS inverter 输出；
+- 针对已支持 templates 的确定性 `layoutHints.inputSide` 与 `layoutHints.outputSide` projection；
 - 导出前拒绝拓扑错误；
 - `package.json` 中的 CLI 暴露；
 - UTF-8 BOM 输入处理；

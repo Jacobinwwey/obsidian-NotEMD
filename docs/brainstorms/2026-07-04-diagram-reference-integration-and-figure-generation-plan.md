@@ -223,6 +223,7 @@ Phase E implementation status on 2026-07-05: `scripts/export-diagram-artifact.js
 - [x] Add stroke-width-aware SVG bounds and label-vs-drawing overlap checks so thick wires or component outlines can fail smoke when their visible stroke is clipped or covers a label.
 - [x] Add a front-end artifact diagnostics surface in the diagram preview modal.
 - [x] Add source-only preview fallback for non-inline artifacts so future circuitikz, Draw.io, and Drawnix sources can expose content and diagnostics without pretending to be visually rendered.
+- [x] Project `layoutHints.inputSide` and `layoutHints.outputSide` into deterministic circuitikz input/output port placement for supported golden templates.
 - [x] Add maintainer smoke fixtures and an aggregate runner for the two supported circuitikz golden families.
 - [x] Add a topology-preserving repair guard through `--topology-reference`, `createCircuitTopologySignature`, and `assertCircuitTopologyUnchanged`.
 - [x] Add a topology-preserving repair brief handoff through `--repair-brief-output` and schema `notemd.circuitikz.repair-brief.v1`.
@@ -244,6 +245,8 @@ Phase F implementation status on 2026-07-05: `src/diagram/adapters/circuitikz/ci
 
 2026-07-06 repair prompt handoff increment: `src/diagram/adapters/circuitikz/circuitikzRepairBrief.ts` now embeds a structured `repairPrompt` in schema `notemd.circuitikz.repair-brief.v1`. The role is `topology-preserving-circuitikz-repair`; `diagnosticFocus` is derived from compile/render diagnostics; `acceptanceCriteria` requires `assertCircuitikzRepairCandidateMatchesBrief`, re-export through one topology guard for the run (`--repair-brief` or `--topology-reference`), fresh compile diagnostics, and render-smoke diagnostics. This advances Phase E handoff quality without claiming automated visual repair execution.
 
+2026-07-06 layout projection increment: `src/diagram/adapters/circuitikz/circuitikzExporter.ts` now makes `layoutHints.inputSide` and `layoutHints.outputSide` executable for `common-source-amplifier` and `cmos-inverter`. The projection moves `v_{in}` and `v_{out}` ports and rewrites only presentation routing; `createCircuitTopologySignature` remains unchanged for layout-only repair candidates. This closes the gap where repair briefs allowed layout-hint edits but the exporter previously ignored them.
+
 ## Current Architecture Progress Audit
 
 | Prior requirement | Current code evidence | Status | Next direction |
@@ -251,7 +254,7 @@ Phase F implementation status on 2026-07-05: `src/diagram/adapters/circuitikz/ci
 | Keep model output semantic instead of free-form renderer text | `DiagramSpec`, `SemanticFigureModel`, and the separate `CircuitSpec` boundary keep renderer syntax behind adapters | Implemented for current targets | Do not widen `DiagramSpec` for circuit-only terminal/layout fields until another target needs them |
 | Keep editor integrations at artifact boundaries | Draw.io XML, Drawnix JSON, editable HTML/SVG, and circuitikz all export through CLI or render artifacts without embedding third-party editors | Implemented | Add richer primitives only when structural editability tests exist |
 | Make renderer execution cross-platform | `circuitikzCompileRunner.ts` uses `shell: false` with placeholder-expanded argument arrays and structured executable diagnostics | Implemented | Keep Windows/POSIX behavior in argument arrays, not shell command strings |
-| Verify circuit output before visual repair | Compile-log diagnostics, topology-preserving repair guard, structured repair prompt handoff, SVG structural smoke, 1/2/4/8-bit indexed-color, grayscale/RGB `tRNS` transparent samples, format-specific Adam7/interlaced and indexed bit-depth rejection guidance, 1/2/4/8/16-bit grayscale, and 8/16-bit grayscale-alpha/RGB/RGBA PNG foreground smoke are in place | Partially implemented | Add OCR-level label recognition, precise pixel overlap gates, and automated topology-preserving repair execution |
+| Verify circuit output before visual repair | Compile-log diagnostics, topology-preserving repair guard, structured repair prompt handoff, deterministic layout-hint projection, SVG structural smoke, 1/2/4/8-bit indexed-color, grayscale/RGB `tRNS` transparent samples, format-specific Adam7/interlaced and indexed bit-depth rejection guidance, 1/2/4/8/16-bit grayscale, and 8/16-bit grayscale-alpha/RGB/RGBA PNG foreground smoke are in place | Partially implemented | Add OCR-level label recognition, precise pixel overlap gates, and automated topology-preserving repair execution |
 | Expose diagnostics to users without pretending source is rendered | `RenderArtifact.diagnostics`, diagnostic summary counts, preview history entries, and source-only fallback are implemented | Implemented | Connect external renderer artifacts only when evidence distinguishes raw source from rendered output |
 
 ## Tradeoffs

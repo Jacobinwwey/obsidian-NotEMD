@@ -34,6 +34,18 @@ function normalizeIdentifier(value: string): string {
     return value.trim();
 }
 
+function layoutSide(value: 'left' | 'right' | undefined, fallback: 'left' | 'right'): 'left' | 'right' {
+    return value ?? fallback;
+}
+
+function commonPortX(side: 'left' | 'right'): string {
+    return side === 'left' ? '0.8' : '5';
+}
+
+function extendedPortX(side: 'left' | 'right'): string {
+    return side === 'left' ? '0.8' : '5.2';
+}
+
 function canonicalConnection(connection: CircuitConnection): [string, string] {
     const endpoints = [
         normalizeIdentifier(connection.from),
@@ -286,6 +298,15 @@ function renderCommonSourceTemplate(spec: CircuitSpec): string {
     const rd = spec.components.find(component => component.id === 'RD');
     const m1Label = normalizeLabel(m1?.label, '$M_1$');
     const rdLabel = normalizeLabel(rd?.label, '$R_D$');
+    const inputSide = layoutSide(spec.layoutHints?.inputSide, 'left');
+    const outputSide = layoutSide(spec.layoutHints?.outputSide, 'right');
+    const inputRoute = inputSide === 'left'
+        ? `  (M1.G) to [short, -o] (0.8,2.2)
+  node[left]{$v_{in}$};`
+        : `  (M1.G) to [short] (1.5,2.2)
+  to [short] (1.5,1.4)
+  to [short, -o] (${extendedPortX(inputSide)},1.4)
+  node[${inputSide}]{$v_{in}$};`;
 
     return `\\usepackage{circuitikz}
 \\begin{document}
@@ -293,13 +314,12 @@ function renderCommonSourceTemplate(spec: CircuitSpec): string {
 \\draw
   (3,5) node[vcc]{$V_{DD}$}
   to [R, l=${rdLabel}] (3,3)
-  to [short, *-o] (5,3) node[right]{$v_{out}$}
+  to [short, *-o] (${commonPortX(outputSide)},3) node[${outputSide}]{$v_{out}$}
   (3,3) to [short] (3,2.2)
   node[nmos, anchor=D] (M1) {${m1Label}}
   (M1.S) to [short] (3,0.5)
   node[ground]{}
-  (M1.G) to [short, -o] (0.8,2.2)
-  node[left]{$v_{in}$};
+${inputRoute}
 \\draw
   (3,0.5) node[below right]{$S$};
 \\end{circuitikz}
@@ -312,6 +332,20 @@ function renderCmosInverterTemplate(spec: CircuitSpec): string {
     const mn = spec.components.find(component => component.id === 'MN');
     const mpLabel = normalizeLabel(mp?.label, '$M_P$');
     const mnLabel = normalizeLabel(mn?.label, '$M_N$');
+    const inputSide = layoutSide(spec.layoutHints?.inputSide, 'left');
+    const outputSide = layoutSide(spec.layoutHints?.outputSide, 'right');
+    const inputRoute = inputSide === 'left'
+        ? `  (MP.G) to [short] (1.5,3.5)
+  (MN.G) to [short] (1.5,2.0)
+  (1.5,3.5) to [short] (1.5,2.0)
+  to [short, -o] (0.8,2.75)
+  node[left]{$v_{in}$};`
+        : `  (MP.G) to [short] (1.5,3.5)
+  (MN.G) to [short] (1.5,2.0)
+  (1.5,3.5) to [short] (1.5,2.0)
+  (1.5,2.75) to [short] (1.5,1.2)
+  to [short, -o] (${extendedPortX(inputSide)},1.2)
+  node[${inputSide}]{$v_{in}$};`;
 
     return `\\usepackage{circuitikz}
 \\begin{document}
@@ -326,13 +360,9 @@ function renderCmosInverterTemplate(spec: CircuitSpec): string {
   (MN.S) to [short] (3,0.8)
   node[ground]{};
 \\draw
-  (MP.G) to [short] (1.5,3.5)
-  (MN.G) to [short] (1.5,2.0)
-  (1.5,3.5) to [short] (1.5,2.0)
-  to [short, -o] (0.8,2.75)
-  node[left]{$v_{in}$};
+${inputRoute}
 \\draw
-  (3,2.75) to [short, *-o] (5,2.75) node[right]{$v_{out}$};
+  (3,2.75) to [short, *-o] (${commonPortX(outputSide)},2.75) node[${outputSide}]{$v_{out}$};
 \\end{circuitikz}
 \\end{document}
 `;
