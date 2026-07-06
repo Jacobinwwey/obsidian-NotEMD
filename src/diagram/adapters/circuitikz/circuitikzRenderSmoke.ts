@@ -72,6 +72,11 @@ interface PngPalette {
     alpha: number[];
 }
 
+interface PngTransparency {
+    grayscale?: number;
+    rgb?: [number, number, number];
+}
+
 type PngPixelLayout = {
     kind: 'direct';
     colorType: number;
@@ -1491,6 +1496,37 @@ function parsePngPalette(chunks: PngChunk[], colorType: number): PngPalette | un
     };
 }
 
+function parsePngTransparency(chunks: PngChunk[], colorType: number): PngTransparency | undefined {
+    const transparency = chunks.find(chunk => chunk.type === 'tRNS');
+    if (!transparency || colorType === 3) {
+        return undefined;
+    }
+
+    if (colorType === 0) {
+        if (transparency.data.length !== 2) {
+            throw new Error('PNG grayscale transparency chunk is malformed.');
+        }
+        return {
+            grayscale: transparency.data.readUInt16BE(0)
+        };
+    }
+
+    if (colorType === 2) {
+        if (transparency.data.length !== 6) {
+            throw new Error('PNG RGB transparency chunk is malformed.');
+        }
+        return {
+            rgb: [
+                transparency.data.readUInt16BE(0),
+                transparency.data.readUInt16BE(2),
+                transparency.data.readUInt16BE(4)
+            ]
+        };
+    }
+
+    return undefined;
+}
+
 function readPackedSample(decoded: Buffer, pixelIndex: number, width: number, bitDepth: number, scanlineByteLength: number): number {
     if (bitDepth === 8) {
         return decoded[pixelIndex];
@@ -1515,11 +1551,15 @@ function normalizePngSample(sample: number, bitDepth: number): number {
     return Math.round(sample * 255 / ((1 << bitDepth) - 1));
 }
 
-function readDirectSample(decoded: Buffer, offset: number, bitDepth: number): number {
+function readRawDirectSample(decoded: Buffer, offset: number, bitDepth: number): number {
     if (bitDepth === 16) {
-        return normalizePngSample(decoded.readUInt16BE(offset), bitDepth);
+        return decoded.readUInt16BE(offset);
     }
     return decoded[offset];
+}
+
+function readDirectSample(decoded: Buffer, offset: number, bitDepth: number): number {
+    return normalizePngSample(readRawDirectSample(decoded, offset, bitDepth), bitDepth);
 }
 
 function readPixel(
@@ -1527,12 +1567,13 @@ function readPixel(
     pixelIndex: number,
     width: number,
     layout: PngPixelLayout,
-    palette?: PngPalette
+    palette?: PngPalette,
+    transparency?: PngTransparency
 ): [number, number, number, number] {
     if (layout.kind === 'grayscale') {
         const sample = readPackedSample(decoded, pixelIndex, width, layout.bitDepth, layout.scanlineByteLength);
         const gray = normalizePngSample(sample, layout.bitDepth);
-        return [gray, gray, gray, 255];
+        return [gray, gray, gray, transparency?.grayscale === sample ? 0 : 255];
     }
 
     if (layout.kind === 'indexed') {
@@ -1547,16 +1588,25 @@ function readPixel(
     const offset = pixelIndex * layout.bytesPerPixel;
     switch (layout.colorType) {
         case 0: {
-            const gray = readDirectSample(decoded, offset, layout.bitDepth);
-            return [gray, gray, gray, 255];
+            const sample = readRawDirectSample(decoded, offset, layout.bitDepth);
+            const gray = normalizePngSample(sample, layout.bitDepth);
+            return [gray, gray, gray, transparency?.grayscale === sample ? 0 : 255];
         }
-        case 2:
+        case 2: {
+            const red = readRawDirectSample(decoded, offset, layout.bitDepth);
+            const green = readRawDirectSample(decoded, offset + layout.bytesPerSample, layout.bitDepth);
+            const blue = readRawDirectSample(decoded, offset + layout.bytesPerSample * 2, layout.bitDepth);
+            const transparent = transparency?.rgb
+                && transparency.rgb[0] === red
+                && transparency.rgb[1] === green
+                && transparency.rgb[2] === blue;
             return [
-                readDirectSample(decoded, offset, layout.bitDepth),
-                readDirectSample(decoded, offset + layout.bytesPerSample, layout.bitDepth),
-                readDirectSample(decoded, offset + layout.bytesPerSample * 2, layout.bitDepth),
-                255
+                normalizePngSample(red, layout.bitDepth),
+                normalizePngSample(green, layout.bitDepth),
+                normalizePngSample(blue, layout.bitDepth),
+                transparent ? 0 : 255
             ];
+        }
         case 4: {
             const gray = readDirectSample(decoded, offset, layout.bitDepth);
             return [gray, gray, gray, readDirectSample(decoded, offset + layout.bytesPerSample, layout.bitDepth)];
@@ -1591,6 +1641,7 @@ function extractPngSmoke(pngBytes: Buffer): CircuitikzPngSmokeReport {
         throw new Error('PNG dimensions must be positive.');
     }
     const palette = parsePngPalette(chunks, header.colorType);
+    const transparency = parsePngTransparency(chunks, header.colorType);
 
     const idatChunks = chunks.filter(chunk => chunk.type === 'IDAT');
     if (idatChunks.length === 0) {
@@ -1600,7 +1651,7 @@ function extractPngSmoke(pngBytes: Buffer): CircuitikzPngSmokeReport {
     const inflated = zlib.inflateSync(Buffer.concat(idatChunks.map(chunk => chunk.data)));
     const decoded = unfilterPngScanlines(inflated, header.height, pixelLayout.scanlineByteLength, pixelLayout.filterByteStride);
     const decodedPixelCount = header.width * header.height;
-    const background = readPixel(decoded, 0, header.width, pixelLayout, palette);
+    const background = readPixel(decoded, 0, header.width, pixelLayout, palette, transparency);
     let nonBackgroundPixelCount = 0;
     let minX = header.width;
     let minY = header.height;
@@ -1608,7 +1659,7 @@ function extractPngSmoke(pngBytes: Buffer): CircuitikzPngSmokeReport {
     let maxY = -1;
 
     for (let pixelIndex = 0; pixelIndex < decodedPixelCount; pixelIndex += 1) {
-        const pixel = readPixel(decoded, pixelIndex, header.width, pixelLayout, palette);
+        const pixel = readPixel(decoded, pixelIndex, header.width, pixelLayout, palette, transparency);
         if (pixel[3] > 0 && colorDistance(pixel, background) > 8) {
             nonBackgroundPixelCount += 1;
             const x = pixelIndex % header.width;

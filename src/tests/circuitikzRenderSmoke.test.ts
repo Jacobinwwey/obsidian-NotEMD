@@ -116,7 +116,8 @@ function createGrayscalePng(
     width: number,
     height: number,
     bitDepth: number,
-    samples: number[]
+    samples: number[],
+    transparentSample?: number
 ): Buffer {
     const signature = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
     const ihdr = Buffer.alloc(13);
@@ -134,12 +135,62 @@ function createGrayscalePng(
         scanlines.push(...packPngSamples(samples.slice(row * width, row * width + width), bitDepth));
     }
 
-    return Buffer.concat([
+    const chunks = [
         signature,
-        pngChunk('IHDR', ihdr),
+        pngChunk('IHDR', ihdr)
+    ];
+    if (transparentSample !== undefined) {
+        const transparency = Buffer.alloc(2);
+        transparency.writeUInt16BE(transparentSample, 0);
+        chunks.push(pngChunk('tRNS', transparency));
+    }
+    chunks.push(
         pngChunk('IDAT', zlib.deflateSync(Buffer.from(scanlines))),
         pngChunk('IEND', Buffer.alloc(0))
-    ]);
+    );
+
+    return Buffer.concat(chunks);
+}
+
+function createRgbPng(
+    width: number,
+    height: number,
+    pixels: Array<[number, number, number]>,
+    transparentColor?: [number, number, number]
+): Buffer {
+    const signature = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
+    const ihdr = Buffer.alloc(13);
+    ihdr.writeUInt32BE(width, 0);
+    ihdr.writeUInt32BE(height, 4);
+    ihdr[8] = 8;
+    ihdr[9] = 2;
+    ihdr[10] = 0;
+    ihdr[11] = 0;
+    ihdr[12] = 0;
+
+    const scanlines: number[] = [];
+    for (let row = 0; row < height; row += 1) {
+        scanlines.push(0);
+        for (let column = 0; column < width; column += 1) {
+            scanlines.push(...pixels[row * width + column]);
+        }
+    }
+
+    const chunks = [
+        signature,
+        pngChunk('IHDR', ihdr)
+    ];
+    if (transparentColor) {
+        const transparency = Buffer.alloc(6);
+        transparentColor.forEach((sample, index) => transparency.writeUInt16BE(sample, index * 2));
+        chunks.push(pngChunk('tRNS', transparency));
+    }
+    chunks.push(
+        pngChunk('IDAT', zlib.deflateSync(Buffer.from(scanlines))),
+        pngChunk('IEND', Buffer.alloc(0))
+    );
+
+    return Buffer.concat(chunks);
 }
 
 function createIndexedPng(
@@ -1260,6 +1311,95 @@ describe('circuitikz render smoke inspection', () => {
                     maxY: 1
                 }
             }));
+        } finally {
+            fs.rmSync(tempRoot, { recursive: true, force: true });
+        }
+    });
+
+    test('ignores grayscale PNG tRNS transparent samples when checking foreground', () => {
+        const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'notemd-circuitikz-png-gray-trns-smoke-'));
+        const pngPath = path.join(tempRoot, 'gray-trns-render.png');
+        fs.writeFileSync(
+            pngPath,
+            createGrayscalePng(
+                3,
+                3,
+                8,
+                [
+                    255, 255, 255,
+                    255, 0, 255,
+                    255, 255, 255
+                ],
+                0
+            )
+        );
+
+        try {
+            const report = inspectCircuitikzRenderArtifact({
+                expectedArtifactPath: pngPath
+            });
+
+            expect(report.artifactKind).toBe('png');
+            expect(report.png).toEqual(expect.objectContaining({
+                bitDepth: 8,
+                colorType: 0,
+                decodedPixelCount: 9,
+                nonBackgroundPixelCount: 0,
+                foregroundBounds: undefined
+            }));
+            expect(report.diagnostics).toEqual([
+                expect.objectContaining({
+                    kind: 'render-png-blank',
+                    message: expect.stringContaining('visually blank')
+                })
+            ]);
+        } finally {
+            fs.rmSync(tempRoot, { recursive: true, force: true });
+        }
+    });
+
+    test('ignores RGB PNG tRNS transparent colors when checking foreground', () => {
+        const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'notemd-circuitikz-png-rgb-trns-smoke-'));
+        const pngPath = path.join(tempRoot, 'rgb-trns-render.png');
+        fs.writeFileSync(
+            pngPath,
+            createRgbPng(
+                3,
+                3,
+                [
+                    [255, 255, 255],
+                    [255, 255, 255],
+                    [255, 255, 255],
+                    [255, 255, 255],
+                    [255, 0, 0],
+                    [255, 255, 255],
+                    [255, 255, 255],
+                    [255, 255, 255],
+                    [255, 255, 255]
+                ],
+                [255, 0, 0]
+            )
+        );
+
+        try {
+            const report = inspectCircuitikzRenderArtifact({
+                expectedArtifactPath: pngPath
+            });
+
+            expect(report.artifactKind).toBe('png');
+            expect(report.png).toEqual(expect.objectContaining({
+                bitDepth: 8,
+                colorType: 2,
+                decodedPixelCount: 9,
+                nonBackgroundPixelCount: 0,
+                foregroundBounds: undefined
+            }));
+            expect(report.diagnostics).toEqual([
+                expect.objectContaining({
+                    kind: 'render-png-blank',
+                    message: expect.stringContaining('visually blank')
+                })
+            ]);
         } finally {
             fs.rmSync(tempRoot, { recursive: true, force: true });
         }
