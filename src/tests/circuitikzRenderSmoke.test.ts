@@ -286,6 +286,58 @@ describe('circuitikz render smoke inspection', () => {
         }
     });
 
+    test('reports SVG arc bounds that extend outside the viewBox between endpoints', () => {
+        const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'notemd-circuitikz-svg-arc-curve-bounds-'));
+        const svgPath = path.join(tempRoot, 'arc-curve-out-of-bounds.svg');
+        fs.writeFileSync(
+            svgPath,
+            '<svg viewBox="0 20 100 40"><path d="M10 50 A40 40 0 0 0 90 50"/></svg>',
+            'utf8'
+        );
+
+        try {
+            const report = inspectCircuitikzRenderArtifact({
+                expectedArtifactPath: svgPath
+            });
+
+            expect(report.artifactKind).toBe('svg');
+            expect(report.diagnostics).toEqual([
+                expect.objectContaining({
+                    kind: 'render-svg-out-of-bounds',
+                    message: expect.stringContaining('path')
+                })
+            ]);
+        } finally {
+            fs.rmSync(tempRoot, { recursive: true, force: true });
+        }
+    });
+
+    test('reports relative SVG arc bounds that extend outside the viewBox between endpoints', () => {
+        const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'notemd-circuitikz-svg-relative-arc-curve-bounds-'));
+        const svgPath = path.join(tempRoot, 'relative-arc-curve-out-of-bounds.svg');
+        fs.writeFileSync(
+            svgPath,
+            '<svg viewBox="0 20 100 40"><path d="M10 50 a40 40 0 0 0 80 0"/></svg>',
+            'utf8'
+        );
+
+        try {
+            const report = inspectCircuitikzRenderArtifact({
+                expectedArtifactPath: svgPath
+            });
+
+            expect(report.artifactKind).toBe('svg');
+            expect(report.diagnostics).toEqual([
+                expect.objectContaining({
+                    kind: 'render-svg-out-of-bounds',
+                    message: expect.stringContaining('path')
+                })
+            ]);
+        } finally {
+            fs.rmSync(tempRoot, { recursive: true, force: true });
+        }
+    });
+
     test('reports relative SVG cubic curve endpoints that extend outside the viewBox', () => {
         const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'notemd-circuitikz-svg-cubic-bounds-'));
         const svgPath = path.join(tempRoot, 'cubic-out-of-bounds.svg');

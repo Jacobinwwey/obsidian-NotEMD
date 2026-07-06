@@ -65,8 +65,8 @@ describe('circuitikz export docs contract', () => {
             expect(doc).toContain('pathOnlyGlyphUseCount');
             expect(doc).toContain('path-only glyph placement');
             expect(doc).toContain('path-only glyph overlap');
-            expect(doc).toContain('arc path endpoint geometry');
-            expect(doc).toContain('A/a arc endpoints');
+            expect(doc).toContain('exact arc bounds');
+            expect(doc).toContain('A/a arc extrema');
             expect(doc).toContain('exact Bezier curve bounds');
             expect(doc).toContain('C/S/Q/T curve extrema');
             expect(doc).toContain('<use href="#...">');
@@ -128,8 +128,8 @@ describe('circuitikz export docs contract', () => {
             expect(doc).toContain('transform-aware geometry');
             expect(doc).toContain('path-only glyph placement');
             expect(doc).toContain('path-only glyph overlap');
-            expect(doc).toContain('arc path endpoint geometry');
-            expect(doc).toContain('A/a arc endpoints');
+            expect(doc).toContain('exact arc bounds');
+            expect(doc).toContain('A/a arc extrema');
             expect(doc).toContain('exact Bezier curve bounds');
             expect(doc).toContain('C/S/Q/T curve extrema');
             expect(doc).toContain('polyline');
@@ -156,11 +156,11 @@ describe('circuitikz export docs contract', () => {
         expect(progressDocZh).toContain('视觉修复前必须先验证电路输出');
     });
 
-    test('records SVG arc endpoint smoke coverage in the bilingual roadmap', () => {
+    test('records SVG exact arc smoke coverage in the bilingual roadmap', () => {
         for (const doc of [roadmapDoc, roadmapDocZh]) {
             expect(doc).toContain('circuitikzRenderSmoke.ts');
-            expect(doc).toContain('arc path endpoint geometry');
-            expect(doc).toContain('A/a arc endpoints');
+            expect(doc).toContain('exact arc bounds');
+            expect(doc).toContain('A/a arc extrema');
             expect(doc).toContain('exact Bezier curve bounds');
             expect(doc).toContain('C/S/Q/T curve extrema');
             expect(doc).toContain('path-only glyph overlap diagnostics');

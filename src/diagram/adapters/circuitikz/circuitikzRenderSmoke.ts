@@ -410,6 +410,128 @@ function addCubicBezierBoundsPoints(
     }
 }
 
+function normalizeRadians(angle: number): number {
+    const fullTurn = Math.PI * 2;
+    return ((angle % fullTurn) + fullTurn) % fullTurn;
+}
+
+function arcAngleIsWithinSweep(angle: number, startAngle: number, sweepAngle: number): boolean {
+    const epsilon = 1e-9;
+    if (sweepAngle >= 0) {
+        return normalizeRadians(angle - startAngle) <= sweepAngle + epsilon;
+    }
+
+    return normalizeRadians(startAngle - angle) <= -sweepAngle + epsilon;
+}
+
+function svgArcPoint(
+    center: [number, number],
+    radiusX: number,
+    radiusY: number,
+    rotation: number,
+    angle: number
+): [number, number] {
+    const cosRotation = Math.cos(rotation);
+    const sinRotation = Math.sin(rotation);
+    return [
+        center[0] + radiusX * Math.cos(angle) * cosRotation - radiusY * Math.sin(angle) * sinRotation,
+        center[1] + radiusX * Math.cos(angle) * sinRotation + radiusY * Math.sin(angle) * cosRotation
+    ];
+}
+
+function vectorAngle(left: [number, number], right: [number, number]): number {
+    const leftLength = Math.hypot(left[0], left[1]);
+    const rightLength = Math.hypot(right[0], right[1]);
+    if (leftLength < Number.EPSILON || rightLength < Number.EPSILON) {
+        return 0;
+    }
+
+    const dot = left[0] * right[0] + left[1] * right[1];
+    const cross = left[0] * right[1] - left[1] * right[0];
+    const cosine = Math.max(-1, Math.min(1, dot / (leftLength * rightLength)));
+    return (cross < 0 ? -1 : 1) * Math.acos(cosine);
+}
+
+function addSvgArcBoundsPoints(
+    points: Array<[number, number]>,
+    start: [number, number],
+    radiusX: number,
+    radiusY: number,
+    rotationDegrees: number,
+    largeArcFlag: number,
+    sweepFlag: number,
+    end: [number, number]
+): void {
+    points.push(start, end);
+
+    let scaledRadiusX = Math.abs(radiusX);
+    let scaledRadiusY = Math.abs(radiusY);
+    if (scaledRadiusX < Number.EPSILON || scaledRadiusY < Number.EPSILON || (start[0] === end[0] && start[1] === end[1])) {
+        return;
+    }
+
+    const rotation = rotationDegrees * Math.PI / 180;
+    const cosRotation = Math.cos(rotation);
+    const sinRotation = Math.sin(rotation);
+    const halfDeltaX = (start[0] - end[0]) / 2;
+    const halfDeltaY = (start[1] - end[1]) / 2;
+    const startPrimeX = cosRotation * halfDeltaX + sinRotation * halfDeltaY;
+    const startPrimeY = -sinRotation * halfDeltaX + cosRotation * halfDeltaY;
+
+    const radiusScale = (startPrimeX * startPrimeX) / (scaledRadiusX * scaledRadiusX)
+        + (startPrimeY * startPrimeY) / (scaledRadiusY * scaledRadiusY);
+    if (radiusScale > 1) {
+        const scale = Math.sqrt(radiusScale);
+        scaledRadiusX *= scale;
+        scaledRadiusY *= scale;
+    }
+
+    const radiusXSquared = scaledRadiusX * scaledRadiusX;
+    const radiusYSquared = scaledRadiusY * scaledRadiusY;
+    const startPrimeXSquared = startPrimeX * startPrimeX;
+    const startPrimeYSquared = startPrimeY * startPrimeY;
+    const denominator = radiusXSquared * startPrimeYSquared + radiusYSquared * startPrimeXSquared;
+    if (denominator < Number.EPSILON) {
+        return;
+    }
+
+    const numerator = radiusXSquared * radiusYSquared
+        - radiusXSquared * startPrimeYSquared
+        - radiusYSquared * startPrimeXSquared;
+    const direction = Boolean(largeArcFlag) === Boolean(sweepFlag) ? -1 : 1;
+    const centerScale = direction * Math.sqrt(Math.max(0, numerator / denominator));
+    const centerPrimeX = centerScale * scaledRadiusX * startPrimeY / scaledRadiusY;
+    const centerPrimeY = -centerScale * scaledRadiusY * startPrimeX / scaledRadiusX;
+    const center: [number, number] = [
+        cosRotation * centerPrimeX - sinRotation * centerPrimeY + (start[0] + end[0]) / 2,
+        sinRotation * centerPrimeX + cosRotation * centerPrimeY + (start[1] + end[1]) / 2
+    ];
+
+    const startVector: [number, number] = [
+        (startPrimeX - centerPrimeX) / scaledRadiusX,
+        (startPrimeY - centerPrimeY) / scaledRadiusY
+    ];
+    const endVector: [number, number] = [
+        (-startPrimeX - centerPrimeX) / scaledRadiusX,
+        (-startPrimeY - centerPrimeY) / scaledRadiusY
+    ];
+    const startAngle = vectorAngle([1, 0], startVector);
+    let sweepAngle = vectorAngle(startVector, endVector);
+    if (!sweepFlag && sweepAngle > 0) {
+        sweepAngle -= Math.PI * 2;
+    } else if (sweepFlag && sweepAngle < 0) {
+        sweepAngle += Math.PI * 2;
+    }
+
+    const xExtremaAngle = Math.atan2(-scaledRadiusY * sinRotation, scaledRadiusX * cosRotation);
+    const yExtremaAngle = Math.atan2(scaledRadiusY * cosRotation, scaledRadiusX * sinRotation);
+    for (const angle of [xExtremaAngle, xExtremaAngle + Math.PI, yExtremaAngle, yExtremaAngle + Math.PI]) {
+        if (arcAngleIsWithinSweep(angle, startAngle, sweepAngle)) {
+            points.push(svgArcPoint(center, scaledRadiusX, scaledRadiusY, rotation, angle));
+        }
+    }
+}
+
 function pathBox(tag: string): SvgBox | undefined {
     const d = readAttribute(tag, 'd');
     if (!d) {
@@ -513,9 +635,10 @@ function pathBox(tag: string): SvgBox | undefined {
             ) {
                 break;
             }
-            x = command === 'a' ? x + nextX : nextX;
-            y = command === 'a' ? y + nextY : nextY;
-            points.push([x, y]);
+            const start: [number, number] = [x, y];
+            const end = resolveCoordinate(nextX, nextY);
+            addSvgArcBoundsPoints(points, start, radiusX, radiusY, rotation, largeArcFlag, sweepFlag, end);
+            [x, y] = end;
             resetCurveControls();
             continue;
         }

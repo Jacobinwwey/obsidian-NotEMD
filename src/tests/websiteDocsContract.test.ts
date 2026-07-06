@@ -86,8 +86,8 @@ describe('website documentation contract', () => {
             expect(content).toContain('pathOnlyGlyphUseCount');
             expect(content).toContain('path-only glyph placement');
             expect(content).toContain('path-only glyph overlap');
-            expect(content).toContain('arc path endpoint geometry');
-            expect(content).toContain('A/a arc endpoints');
+            expect(content).toContain('exact arc bounds');
+            expect(content).toContain('A/a arc extrema');
             expect(content).toContain('exact Bezier curve bounds');
             expect(content).toContain('C/S/Q/T curve extrema');
             expect(content).toContain('<use href="#...">');
