@@ -663,6 +663,7 @@ function pathBox(tag: string): SvgBox | undefined {
     let index = 0;
     let x = 0;
     let y = 0;
+    let subpathStart: [number, number] | undefined;
     let lastCubicControl: [number, number] | undefined;
     let lastQuadraticControl: [number, number] | undefined;
 
@@ -693,6 +694,9 @@ function pathBox(tag: string): SvgBox | undefined {
             command = token;
             index += 1;
             if (command.toLowerCase() === 'z') {
+                if (subpathStart) {
+                    [x, y] = subpathStart;
+                }
                 resetCurveControls();
                 continue;
             }
@@ -707,6 +711,10 @@ function pathBox(tag: string): SvgBox | undefined {
             x = command === 'm' || command === 'l' ? x + nextX : nextX;
             y = command === 'm' || command === 'l' ? y + nextY : nextY;
             points.push([x, y]);
+            if (command === 'M' || command === 'm') {
+                subpathStart = [x, y];
+                command = command === 'M' ? 'L' : 'l';
+            }
             resetCurveControls();
             continue;
         }

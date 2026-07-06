@@ -559,6 +559,27 @@ describe('circuitikz render smoke inspection', () => {
         }
     });
 
+    test('keeps relative SVG path commands bounded after close-path resets current point', () => {
+        const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'notemd-circuitikz-svg-close-path-current-point-'));
+        const svgPath = path.join(tempRoot, 'close-path-relative-command.svg');
+        fs.writeFileSync(
+            svgPath,
+            '<svg viewBox="0 0 100 80"><path d="M10 10 L90 10 z h20"/></svg>',
+            'utf8'
+        );
+
+        try {
+            const report = inspectCircuitikzRenderArtifact({
+                expectedArtifactPath: svgPath
+            });
+
+            expect(report.artifactKind).toBe('svg');
+            expect(report.diagnostics).toEqual([]);
+        } finally {
+            fs.rmSync(tempRoot, { recursive: true, force: true });
+        }
+    });
+
     test('accepts bounded SVG path coordinates written as leading-dot decimals', () => {
         const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'notemd-circuitikz-svg-leading-dot-path-'));
         const svgPath = path.join(tempRoot, 'leading-dot-path.svg');
