@@ -92,6 +92,10 @@ describe('website documentation contract', () => {
             expect(content).toContain('compileExecution.renderSmoke');
             expect(content).toContain('render-svg-text-missing');
             expect(content).toContain('render-svg-text-path-only');
+            expect(content).toContain('accessibility metadata');
+            expect(content).toContain('aria-label');
+            expect(content).toContain('<title>');
+            expect(content).toContain('<desc>');
             expect(content).toContain('render-svg-out-of-bounds');
             expect(content).toContain('render-svg-text-overlap');
             expect(content).toContain('render-svg-label-overlap');

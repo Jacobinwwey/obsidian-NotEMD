@@ -71,6 +71,10 @@ describe('circuitikz export docs contract', () => {
             expect(doc).toContain('render-artifact-missing');
             expect(doc).toContain('render-svg-text-missing');
             expect(doc).toContain('render-svg-text-path-only');
+            expect(doc).toContain('accessibility metadata');
+            expect(doc).toContain('aria-label');
+            expect(doc).toContain('<title>');
+            expect(doc).toContain('<desc>');
             expect(doc).toContain('render-svg-out-of-bounds');
             expect(doc).toContain('render-svg-text-overlap');
             expect(doc).toContain('render-svg-label-overlap');
@@ -79,6 +83,10 @@ describe('circuitikz export docs contract', () => {
             expect(doc).toContain('transform-aware geometry');
             expect(doc).toContain('pathOnlyGlyphUseCount');
             expect(doc).toContain('path-only glyph placement');
+            expect(doc).toContain('accessibility metadata');
+            expect(doc).toContain('aria-label');
+            expect(doc).toContain('<title>');
+            expect(doc).toContain('<desc>');
             expect(doc).toContain('path-only glyph overlap');
             expect(doc).toContain('SVG number grammar');
             expect(doc).toContain('leading-dot decimals');
@@ -225,6 +233,10 @@ describe('circuitikz export docs contract', () => {
             expect(doc).toContain('stroke-width-aware SVG bounds');
             expect(doc).toContain('label overlap checks');
             expect(doc).toContain('path-only glyph overlap diagnostics');
+            expect(doc).toContain('accessibility metadata');
+            expect(doc).toContain('aria-label');
+            expect(doc).toContain('<title>');
+            expect(doc).toContain('<desc>');
             expect(doc).toContain('polyline');
             expect(doc).toContain('polygon');
             expect(doc).toContain('positioned `tspan` label geometry');

@@ -182,6 +182,23 @@ function countMatches(text: string, pattern: RegExp): number {
     return Array.from(text.matchAll(pattern)).length;
 }
 
+function extractSvgAccessibilityText(svgText: string): string {
+    const parts: string[] = [];
+
+    for (const tagMatch of svgText.matchAll(/<[^!?][^>]*>/g)) {
+        const ariaLabel = readAttribute(tagMatch[0], 'aria-label');
+        if (ariaLabel) {
+            parts.push(decodeXmlEntities(ariaLabel));
+        }
+    }
+
+    for (const metadataMatch of svgText.matchAll(/<(title|desc)\b[^>]*>[\s\S]*?<\/\1>/gi)) {
+        parts.push(tagTextContent(metadataMatch[0]));
+    }
+
+    return parts.join(' ');
+}
+
 function countPathOnlyGlyphUses(svgText: string): number {
     const pathIds = new Set(
         Array.from(svgText.matchAll(/<path\b[^>]*\sid\s*=\s*["']([^"']+)["'][^>]*>/gi))
@@ -1238,7 +1255,10 @@ function extractSvgSmoke(svgText: string, expectedSvgText: string[]): Circuitikz
     const width = parsePositiveLength(svgTag ? readAttribute(svgTag, 'width') : undefined);
     const height = parsePositiveLength(svgTag ? readAttribute(svgTag, 'height') : undefined);
     const viewBox = parseViewBox(svgTag ? readAttribute(svgTag, 'viewBox') : undefined);
-    const searchableText = decodeXmlEntities(svgText.replace(/<[^>]+>/g, ' '));
+    const searchableText = [
+        decodeXmlEntities(svgText.replace(/<[^>]+>/g, ' ')),
+        extractSvgAccessibilityText(svgText)
+    ].join(' ');
 
     return {
         rootElementPresent: Boolean(svgTag),

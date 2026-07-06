@@ -409,6 +409,35 @@ describe('circuitikz render smoke inspection', () => {
         }
     });
 
+    test('accepts expected SVG text preserved only in accessibility metadata', () => {
+        const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'notemd-circuitikz-svg-accessible-label-'));
+        const svgPath = path.join(tempRoot, 'accessible-path-label.svg');
+        fs.writeFileSync(
+            svgPath,
+            '<svg viewBox="0 0 120 80"><path d="M0 0H10"/><path aria-label="v_{in} &amp; v_{out}" d="M40 40 L43 48 L46 40"/></svg>',
+            'utf8'
+        );
+
+        try {
+            const report = inspectCircuitikzRenderArtifact({
+                expectedArtifactPath: svgPath,
+                expectedSvgText: ['v_{in} & v_{out}']
+            });
+
+            expect(report.svg).toEqual(expect.objectContaining({
+                textElementCount: 0,
+                pathOnlyGlyphUseCount: 0,
+                expectedText: [{
+                    text: 'v_{in} & v_{out}',
+                    present: true
+                }]
+            }));
+            expect(report.diagnostics).toEqual([]);
+        } finally {
+            fs.rmSync(tempRoot, { recursive: true, force: true });
+        }
+    });
+
     test('reports SVG drawing elements that extend outside the viewBox', () => {
         const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'notemd-circuitikz-svg-bounds-'));
         const svgPath = path.join(tempRoot, 'out-of-bounds.svg');
