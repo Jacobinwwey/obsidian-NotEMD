@@ -167,6 +167,7 @@ The repository now includes maintainer fixtures for every supported golden famil
 | `docs/maintainer/fixtures/circuitikz/common-source-nmos-v1.json` | `common-source-amplifier` |
 | `docs/maintainer/fixtures/circuitikz/cmos-inverter-v1.json` | `cmos-inverter` |
 | `docs/maintainer/fixtures/circuitikz/cmos-buffer-v1.json` | `cmos-buffer` |
+| `docs/maintainer/fixtures/circuitikz/cmos-transmission-gate-v1.json` | `cmos-transmission-gate` |
 | `docs/maintainer/fixtures/circuitikz/cmos-nand2-v1.json` | `cmos-nand2` |
 | `docs/maintainer/fixtures/circuitikz/cmos-nor2-v1.json` | `cmos-nor2` |
 
@@ -218,6 +219,7 @@ This is not a generic TikZ generator. The current prototype supports only golden
 | `common-source-amplifier` | `common-source-nmos-v1` | NMOS common-source amplifier with `R_D`, `VDD`, `vin`, `vout`, and grounded source |
 | `cmos-inverter` | `cmos-inverter-v1` | PMOS-over-NMOS CMOS inverter with shared gate input and shared drain output |
 | `cmos-buffer` | `cmos-buffer-v1` | Two-stage CMOS buffer with first-stage inverted node `vmid`, second-stage restored output, `vin`, and `vout` |
+| `cmos-transmission-gate` | `cmos-transmission-gate-v1` | CMOS transmission gate with parallel PMOS/NMOS pass devices, bidirectional `vin` / `vout`, and complementary `phib` / `phi` gate controls |
 | `cmos-nand2` | `cmos-nand2-v1` | Two-input CMOS NAND with parallel PMOS pull-up devices, series NMOS pull-down devices, `va`, `vb`, and `vout` |
 | `cmos-nor2` | `cmos-nor2-v1` | Two-input CMOS NOR with series PMOS pull-up devices, parallel NMOS pull-down devices, `va`, `vb`, and `vout` |
 

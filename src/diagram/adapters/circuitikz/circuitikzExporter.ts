@@ -55,6 +55,10 @@ function requiredNetsForCircuitKind(circuitKind: string): string[] {
         return ['VDD', 'GND', 'vin', 'vmid', 'vout'];
     }
 
+    if (circuitKind === 'cmos-transmission-gate') {
+        return ['vin', 'vout', 'phi', 'phib'];
+    }
+
     if (circuitKind === 'cmos-nand2' || circuitKind === 'cmos-nor2') {
         return ['VDD', 'GND', 'va', 'vb', 'vout'];
     }
@@ -336,6 +340,35 @@ function validateCmosBufferTemplate(
     }
 }
 
+function validateCmosTransmissionGateTemplate(
+    spec: CircuitSpec,
+    componentById: Map<string, CircuitComponent>,
+    errors: string[]
+): void {
+    if (spec.goldenReferenceId !== 'cmos-transmission-gate-v1') {
+        errors.push('CMOS transmission gate requires goldenReferenceId "cmos-transmission-gate-v1".');
+    }
+
+    requireComponent(componentById, 'MP', 'pmos', errors);
+    requireComponent(componentById, 'MN', 'nmos', errors);
+
+    if (!hasConnection(spec.connections, 'vin', 'MP.S') || !hasConnection(spec.connections, 'vin', 'MN.D')) {
+        errors.push('CMOS transmission gate requires vin to connect to MP.S and MN.D.');
+    }
+    if (!hasConnection(spec.connections, 'MP.S', 'MN.D')) {
+        errors.push('CMOS transmission gate requires MP.S and MN.D to share the input pass node.');
+    }
+    if (!hasConnection(spec.connections, 'MP.D', 'vout') || !hasConnection(spec.connections, 'MN.S', 'vout')) {
+        errors.push('CMOS transmission gate requires MP.D and MN.S to connect to vout.');
+    }
+    if (!hasConnection(spec.connections, 'MP.D', 'MN.S')) {
+        errors.push('CMOS transmission gate requires MP.D and MN.S to share the output pass node.');
+    }
+    if (!hasConnection(spec.connections, 'phib', 'MP.G') || !hasConnection(spec.connections, 'phi', 'MN.G')) {
+        errors.push('CMOS transmission gate requires phib to drive MP.G and phi to drive MN.G.');
+    }
+}
+
 function validateCmosNor2Template(
     spec: CircuitSpec,
     componentById: Map<string, CircuitComponent>,
@@ -415,6 +448,8 @@ export function validateCircuitSpec(spec: CircuitSpec): CircuitSpecValidationRes
         validateCmosInverterTemplate(spec, componentById, errors);
     } else if (spec.circuitKind === 'cmos-buffer') {
         validateCmosBufferTemplate(spec, componentById, errors);
+    } else if (spec.circuitKind === 'cmos-transmission-gate') {
+        validateCmosTransmissionGateTemplate(spec, componentById, errors);
     } else if (spec.circuitKind === 'cmos-nand2') {
         validateCmosNand2Template(spec, componentById, errors);
     } else if (spec.circuitKind === 'cmos-nor2') {
@@ -572,6 +607,44 @@ ${inputRoute}
 `;
 }
 
+function renderCmosTransmissionGateTemplate(spec: CircuitSpec): string {
+    const mp = spec.components.find(component => component.id === 'MP');
+    const mn = spec.components.find(component => component.id === 'MN');
+    const mpLabel = normalizeLabel(mp?.label, '$M_P$');
+    const mnLabel = normalizeLabel(mn?.label, '$M_N$');
+    const inputSide = layoutSide(spec.layoutHints?.inputSide, 'left');
+    const outputSide = layoutSide(spec.layoutHints?.outputSide, 'right');
+    const inputPortX = inputSide === 'left' ? '0.8' : '5.2';
+    const outputPortX = outputSide === 'right' ? '5.2' : '0.8';
+
+    return `\\usepackage{circuitikz}
+\\begin{document}
+\\begin{circuitikz}[${spec.style.voltageConvention}]
+\\draw
+  (${inputPortX},3.1) to [short, o-] (2.2,3.1)
+  node[${inputSide}]{$v_{in}$}
+  (2.2,3.1) to [short] (2.2,3.8)
+  node[pmos, anchor=S] (MP) {${mpLabel}}
+  (MP.D) to [short] (3.8,3.8)
+  (3.8,3.8) to [short] (3.8,3.1)
+  (2.2,3.1) to [short] (2.2,2.4)
+  node[nmos, anchor=D] (MN) {${mnLabel}}
+  (MN.S) to [short] (3.8,2.4)
+  (3.8,2.4) to [short] (3.8,3.1)
+  (3.8,3.1) to [short, -o] (${outputPortX},3.1) node[${outputSide}]{$v_{out}$};
+\\draw
+  (MP.G) to [short] (3.0,4.6)
+  to [short, -o] (3.0,5.1)
+  node[above]{$\\bar{\\phi}$};
+\\draw
+  (MN.G) to [short] (3.0,1.6)
+  to [short, -o] (3.0,1.1)
+  node[below]{$\\phi$};
+\\end{circuitikz}
+\\end{document}
+`;
+}
+
 function renderCmosNand2Template(spec: CircuitSpec): string {
     const mpa = spec.components.find(component => component.id === 'MPA');
     const mpb = spec.components.find(component => component.id === 'MPB');
@@ -707,6 +780,8 @@ export function exportCircuitSpecToCircuitikz(spec: CircuitSpec): string {
             return renderCmosInverterTemplate(spec);
         case 'cmos-buffer':
             return renderCmosBufferTemplate(spec);
+        case 'cmos-transmission-gate':
+            return renderCmosTransmissionGateTemplate(spec);
         case 'cmos-nand2':
             return renderCmosNand2Template(spec);
         case 'cmos-nor2':

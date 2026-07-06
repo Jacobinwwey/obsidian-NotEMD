@@ -167,6 +167,7 @@ runner 位于 `src/diagram/adapters/circuitikz/circuitikzCompileRunner.ts`。它
 | `docs/maintainer/fixtures/circuitikz/common-source-nmos-v1.json` | `common-source-amplifier` |
 | `docs/maintainer/fixtures/circuitikz/cmos-inverter-v1.json` | `cmos-inverter` |
 | `docs/maintainer/fixtures/circuitikz/cmos-buffer-v1.json` | `cmos-buffer` |
+| `docs/maintainer/fixtures/circuitikz/cmos-transmission-gate-v1.json` | `cmos-transmission-gate` |
 | `docs/maintainer/fixtures/circuitikz/cmos-nand2-v1.json` | `cmos-nand2` |
 | `docs/maintainer/fixtures/circuitikz/cmos-nor2-v1.json` | `cmos-nor2` |
 
@@ -218,6 +219,7 @@ npm run diagram:smoke-circuitikz -- \
 | `common-source-amplifier` | `common-source-nmos-v1` | 带 `R_D`、`VDD`、`vin`、`vout` 和源极接地的 NMOS 共源放大器 |
 | `cmos-inverter` | `cmos-inverter-v1` | PMOS 在上、NMOS 在下，共用 gate 输入、共用 drain 输出的 CMOS 反相器 |
 | `cmos-buffer` | `cmos-buffer-v1` | 两级 CMOS buffer，包含第一级反相中间节点 `vmid`、第二级恢复输出、`vin` 与 `vout` |
+| `cmos-transmission-gate` | `cmos-transmission-gate-v1` | CMOS transmission gate，包含并联 PMOS/NMOS pass devices、双向 `vin` / `vout` 与互补 `phib` / `phi` gate controls |
 | `cmos-nand2` | `cmos-nand2-v1` | 两输入 CMOS NAND，包含并联 PMOS 上拉、串联 NMOS 下拉、`va`、`vb` 与 `vout` |
 | `cmos-nor2` | `cmos-nor2-v1` | 两输入 CMOS NOR，包含串联 PMOS 上拉、并联 NMOS 下拉、`va`、`vb` 与 `vout` |
 

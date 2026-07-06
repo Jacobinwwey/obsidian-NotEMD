@@ -41,6 +41,8 @@ describe('circuitikz export docs contract', () => {
             expect(doc).toContain('cmos-inverter-v1');
             expect(doc).toContain('cmos-buffer');
             expect(doc).toContain('cmos-buffer-v1');
+            expect(doc).toContain('cmos-transmission-gate');
+            expect(doc).toContain('cmos-transmission-gate-v1');
             expect(doc).toContain('cmos-nand2');
             expect(doc).toContain('cmos-nand2-v1');
             expect(doc).toContain('cmos-nor2');
@@ -51,6 +53,7 @@ describe('circuitikz export docs contract', () => {
             expect(doc).toContain('docs/maintainer/fixtures/circuitikz/common-source-nmos-v1.json');
             expect(doc).toContain('docs/maintainer/fixtures/circuitikz/cmos-inverter-v1.json');
             expect(doc).toContain('docs/maintainer/fixtures/circuitikz/cmos-buffer-v1.json');
+            expect(doc).toContain('docs/maintainer/fixtures/circuitikz/cmos-transmission-gate-v1.json');
             expect(doc).toContain('docs/maintainer/fixtures/circuitikz/cmos-nand2-v1.json');
             expect(doc).toContain('docs/maintainer/fixtures/circuitikz/cmos-nor2-v1.json');
             expect(doc).toContain('UTF-8');
@@ -137,6 +140,8 @@ describe('circuitikz export docs contract', () => {
             expect(doc).toContain('CircuitSpec -> circuitikz');
             expect(doc).toContain('cmos-buffer');
             expect(doc).toContain('cmos-buffer-v1');
+            expect(doc).toContain('cmos-transmission-gate');
+            expect(doc).toContain('cmos-transmission-gate-v1');
             expect(doc).toContain('cmos-nand2');
             expect(doc).toContain('cmos-nand2-v1');
             expect(doc).toContain('cmos-nor2');
@@ -227,6 +232,8 @@ describe('circuitikz export docs contract', () => {
             expect(doc).toContain('circuitikzRepairBrief.ts');
             expect(doc).toContain('cmos-buffer');
             expect(doc).toContain('cmos-buffer-v1');
+            expect(doc).toContain('cmos-transmission-gate');
+            expect(doc).toContain('cmos-transmission-gate-v1');
             expect(doc).toContain('cmos-nand2');
             expect(doc).toContain('cmos-nand2-v1');
             expect(doc).toContain('cmos-nor2');

@@ -2,6 +2,7 @@ export const SUPPORTED_CIRCUIT_KINDS = [
     'common-source-amplifier',
     'cmos-inverter',
     'cmos-buffer',
+    'cmos-transmission-gate',
     'cmos-nand2',
     'cmos-nor2'
 ] as const;

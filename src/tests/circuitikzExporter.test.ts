@@ -107,6 +107,38 @@ function createCmosBufferSpec(): CircuitSpec {
     };
 }
 
+function createCmosTransmissionGateSpec(): CircuitSpec {
+    return {
+        circuitKind: 'cmos-transmission-gate' as CircuitSpec['circuitKind'],
+        title: 'CMOS Transmission Gate',
+        goldenReferenceId: 'cmos-transmission-gate-v1',
+        style: {
+            package: 'circuitikz',
+            voltageConvention: 'american voltages'
+        },
+        nets: ['vin', 'vout', 'phi', 'phib'],
+        components: [
+            { id: 'MP', type: 'pmos', label: '$M_P$', terminals: { S: 'vin', G: 'phib', D: 'vout' } },
+            { id: 'MN', type: 'nmos', label: '$M_N$', terminals: { D: 'vin', G: 'phi', S: 'vout' } }
+        ],
+        connections: [
+            { from: 'vin', to: 'MP.S' },
+            { from: 'MP.D', to: 'vout' },
+            { from: 'vin', to: 'MN.D' },
+            { from: 'MN.S', to: 'vout' },
+            { from: 'phib', to: 'MP.G' },
+            { from: 'phi', to: 'MN.G' },
+            { from: 'MP.S', to: 'MN.D' },
+            { from: 'MP.D', to: 'MN.S' }
+        ],
+        layoutHints: {
+            inputSide: 'left',
+            outputSide: 'right',
+            routingStyle: 'orthogonal'
+        }
+    };
+}
+
 function createCmosNand2Spec(): CircuitSpec {
     return {
         circuitKind: 'cmos-nand2',
@@ -283,6 +315,48 @@ describe('circuitikz exporter', () => {
             'CMOS buffer requires vmid to drive both MP2.G and MN2.G.'
         );
         expect(() => exportCircuitSpecToCircuitikz(spec)).toThrow(/vmid to drive both MP2\.G and MN2\.G/);
+    });
+
+    test('validates and exports a constrained CMOS transmission gate template deterministically', () => {
+        const spec = createCmosTransmissionGateSpec();
+        const output = exportCircuitSpecToCircuitikz(spec);
+
+        expect(assertValidCircuitSpec(spec)).toBe(spec);
+        expect(output).toContain('\\begin{circuitikz}[american voltages]');
+        expect(output).toContain('node[pmos, anchor=S] (MP) {$M_P$}');
+        expect(output).toContain('node[nmos, anchor=D] (MN) {$M_N$}');
+        expect(output).toContain('(0.8,3.1) to [short, o-] (2.2,3.1)');
+        expect(output).toContain('(3.8,3.1) to [short, -o] (5.2,3.1) node[right]{$v_{out}$};');
+        expect(output).toContain('node[left]{$v_{in}$}');
+        expect(output).toContain('node[above]{$\\bar{\\phi}$}');
+        expect(output).toContain('node[below]{$\\phi$}');
+    });
+
+    test('projects CMOS transmission gate layout hints into deterministic bidirectional ports', () => {
+        const reference = createCmosTransmissionGateSpec();
+        const spec = createCmosTransmissionGateSpec();
+        spec.layoutHints = {
+            inputSide: 'right',
+            outputSide: 'left',
+            routingStyle: 'orthogonal'
+        };
+
+        const output = exportCircuitSpecToCircuitikz(spec);
+
+        expect(createCircuitTopologySignature(spec)).toBe(createCircuitTopologySignature(reference));
+        expect(output).toContain('(5.2,3.1) to [short, o-] (2.2,3.1)');
+        expect(output).toContain('(3.8,3.1) to [short, -o] (0.8,3.1) node[left]{$v_{out}$};');
+        expect(output).toContain('node[right]{$v_{in}$}');
+    });
+
+    test('rejects CMOS transmission gate specs without complementary gate control', () => {
+        const spec = createCmosTransmissionGateSpec();
+        spec.connections = spec.connections.filter(connection => connection.from !== 'phib' || connection.to !== 'MP.G');
+
+        expect(validateCircuitSpec(spec).errors).toContain(
+            'CMOS transmission gate requires phib to drive MP.G and phi to drive MN.G.'
+        );
+        expect(() => exportCircuitSpecToCircuitikz(spec)).toThrow(/phib to drive MP\.G and phi to drive MN\.G/);
     });
 
     test('validates and exports a constrained two-input CMOS NAND template deterministically', () => {
