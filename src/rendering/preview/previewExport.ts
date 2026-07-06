@@ -34,6 +34,10 @@ function getArtifactPathSpec(artifact: RenderArtifact): ArtifactPathSpec {
             return { suffix: '_diagram', extension: '.html' };
         case 'circuitikz':
             return { suffix: '_diagram', extension: '.tex' };
+        case 'drawio':
+            return { suffix: '_diagram', extension: '.drawio' };
+        case 'drawnix':
+            return { suffix: '_diagram', extension: '.drawnix' };
         default:
             return { suffix: '_diagram', extension: '.txt' };
     }

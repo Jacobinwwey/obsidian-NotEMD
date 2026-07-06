@@ -98,6 +98,17 @@ describe('website documentation contract', () => {
             expect(content).toContain('.tex');
             expect(content).toContain('.tikz');
             expect(content).toContain('circuitikz source-only');
+            expect(content).toContain('.drawio');
+            expect(content).toContain('.drawnix');
+            expect(content).toContain('Draw.io');
+            expect(content).toContain('Drawnix');
+            expect(content).toContain('source-only preview boundary');
+            expect(content).toContain('mxfile');
+            expect(content).toContain('mxGraphModel');
+            expect(content).toContain('type: "drawnix"');
+            expect(content).toContain('elements');
+            expect(content).toContain('diagrams.net');
+            expect(content).toContain('whiteboard host');
             expect(content).toContain('artifact diagnostics');
             expect(content).toContain('compileExecution');
             expect(content).toContain('compileExecution.renderSmoke');

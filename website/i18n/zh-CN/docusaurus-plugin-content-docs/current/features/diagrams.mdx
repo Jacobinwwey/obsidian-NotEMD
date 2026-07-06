@@ -228,6 +228,8 @@ npm run diagram:export-circuitikz -- --input cmos-inverter.json --output cmos-in
 
 Preview diagram 命令可以直接重新打开已保存的 circuitikz source artifacts：文件扩展名必须是 `.tex` 或 `.tikz`，且源码包含 `\usepackage{circuitikz}` 或 `\begin{circuitikz}`。这条路径是 circuitikz source-only preview：modal 会显示源码、diagnostics、复制/保存 controls 与 history metadata，但不会在插件 runtime 内编译 LaTeX 或调用 TikZJax。
 
+同一个 source-only preview boundary 现在也覆盖已保存的 Draw.io 与 Drawnix artifacts。`.drawio` 文件需要看起来像 Draw.io XML（`mxfile` 或 `mxGraphModel`），`.drawnix` 文件需要是包含 `type: "drawnix"` 与 `elements` array 的 Drawnix JSON。插件仍然不嵌入 diagrams.net 或 Drawnix whiteboard host；这些 preview 只暴露 source、diagnostics 与 artifact history，不声称提供插件内视觉编辑器。
+
 对于 topology-preserving repair，在接受修复后的 candidate 前，把修复前 spec 作为 reference 传入：
 
 ```bash

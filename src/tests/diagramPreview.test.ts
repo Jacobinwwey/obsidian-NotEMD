@@ -126,6 +126,28 @@ describe('diagram preview helpers', () => {
         expect(supportsDiagramPreviewModal(artifact)).toBe(true);
     });
 
+    test('uses source-only modal fallback for drawio and drawnix artifacts', () => {
+        const drawioArtifact = {
+            target: 'drawio' as any,
+            content: '<mxfile><diagram /></mxfile>',
+            mimeType: 'application/vnd.jgraph.mxfile',
+            sourceIntent: 'flowchart' as const
+        };
+        const drawnixArtifact = {
+            target: 'drawnix' as any,
+            content: '{"type":"drawnix","elements":[]}',
+            mimeType: 'application/vnd.drawnix+json',
+            sourceIntent: 'flowchart' as const
+        };
+
+        expect(supportsIframeHtmlPreview(drawioArtifact)).toBe(false);
+        expect(supportsSourceOnlyDiagramPreview(drawioArtifact)).toBe(true);
+        expect(supportsDiagramPreviewModal(drawioArtifact)).toBe(true);
+        expect(supportsIframeHtmlPreview(drawnixArtifact)).toBe(false);
+        expect(supportsSourceOnlyDiagramPreview(drawnixArtifact)).toBe(true);
+        expect(supportsDiagramPreviewModal(drawnixArtifact)).toBe(true);
+    });
+
     test('does not open source-only modal for blank artifact content', () => {
         expect(supportsSourceOnlyDiagramPreview({
             target: 'html',

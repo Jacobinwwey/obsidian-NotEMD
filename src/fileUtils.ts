@@ -1699,6 +1699,12 @@ export async function saveDiagramArtifactFile(
         case 'circuitikz':
             extension = '.tex';
             break;
+        case 'drawio':
+            extension = '.drawio';
+            break;
+        case 'drawnix':
+            extension = '.drawnix';
+            break;
     }
 
     const outputFileName = `${originalFile.basename}${suffix}${extension}`;

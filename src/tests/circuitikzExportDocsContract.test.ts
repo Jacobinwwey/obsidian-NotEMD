@@ -215,6 +215,13 @@ describe('circuitikz export docs contract', () => {
             expect(doc).toContain('circuitikz source-only');
             expect(doc).toContain('.tex');
             expect(doc).toContain('.tikz');
+            expect(doc).toContain('Draw.io/Drawnix source-only');
+            expect(doc).toContain('.drawio');
+            expect(doc).toContain('.drawnix');
+            expect(doc).toContain('RenderArtifactTarget');
+            expect(doc).toContain('SUPPORTED_RENDER_TARGETS');
+            expect(doc).toContain('diagrams.net');
+            expect(doc).toContain('Drawnix host');
             expect(doc).toContain('DiagramPreviewModal.ts');
             expect(doc).toContain('src/tests/renderArtifactDiagnostics.test.ts');
             expect(doc).toContain('TikZJax/LaTeX');

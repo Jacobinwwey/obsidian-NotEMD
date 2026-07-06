@@ -624,6 +624,36 @@ describe('diagram command architecture', () => {
         expect(previewSpy).toHaveBeenCalledWith(circuitFile, expect.anything());
     });
 
+    test.each([
+        ['Draw.io', 'Architecture_diagram.drawio', 'drawio'],
+        ['Drawnix', 'Architecture_diagram.drawnix', 'drawnix']
+    ])('canonical preview command stays available for saved %s artifacts', async (_label, name, extension) => {
+        const commandCalls: any[] = [];
+        plugin.addCommand = jest.fn((command: any) => {
+            commandCalls.push(command);
+        }) as any;
+        const previewSpy = jest.spyOn(plugin as any, 'previewDiagramCommand').mockResolvedValue(undefined);
+        const artifactFile = {
+            name,
+            basename: name.replace(/\.[^.]+$/, ''),
+            path: `Notes/${name}`,
+            extension,
+            parent: { path: 'Notes' }
+        };
+        (mockApp.workspace.getActiveFile as jest.Mock).mockReturnValue(artifactFile);
+
+        await plugin.onload();
+
+        const previewCommand = commandCalls.find(command => command.id === 'notemd-preview-diagram');
+        expect(previewCommand).toBeDefined();
+        expect(previewCommand.checkCallback(true)).toBe(true);
+
+        previewCommand.checkCallback(false);
+        await Promise.resolve();
+
+        expect(previewSpy).toHaveBeenCalledWith(artifactFile, expect.anything());
+    });
+
     test('canonical generate command delegates to the canonical save flow', async () => {
         const canonicalCall = jest
             .spyOn(plugin as any, 'generateDiagramCommand')

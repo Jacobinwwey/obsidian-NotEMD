@@ -116,4 +116,31 @@ describe('saveDiagramArtifactFile', () => {
             expect.stringContaining('\\begin{circuitikz}')
         );
     });
+
+    test('saves drawio and drawnix artifacts with native source-only extensions', async () => {
+        const reporter = createReporter();
+        const drawioPath = await saveDiagramArtifactFile(mockApp, mockSettings, originalFile, {
+            target: 'drawio' as any,
+            content: '<mxfile><diagram /></mxfile>',
+            mimeType: 'application/vnd.jgraph.mxfile',
+            sourceIntent: 'flowchart'
+        }, reporter);
+        const drawnixPath = await saveDiagramArtifactFile(mockApp, mockSettings, originalFile, {
+            target: 'drawnix' as any,
+            content: '{"type":"drawnix","elements":[]}',
+            mimeType: 'application/vnd.drawnix+json',
+            sourceIntent: 'flowchart'
+        }, reporter);
+
+        expect(drawioPath).toBe('Notes/Source_diagram.drawio');
+        expect(drawnixPath).toBe('Notes/Source_diagram.drawnix');
+        expect(mockApp.vault.create).toHaveBeenCalledWith(
+            'Notes/Source_diagram.drawio',
+            expect.stringContaining('<mxfile')
+        );
+        expect(mockApp.vault.create).toHaveBeenCalledWith(
+            'Notes/Source_diagram.drawnix',
+            expect.stringContaining('"type":"drawnix"')
+        );
+    });
 });

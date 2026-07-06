@@ -167,6 +167,32 @@ describe('diagram preview export helpers', () => {
         );
     });
 
+    test('saves drawio and drawnix source-only artifacts with native extensions', async () => {
+        const drawioPath = await saveDiagramSourceArtifact(mockApp, 'Notes/Architecture.md', {
+            target: 'drawio' as any,
+            content: '<mxfile><diagram /></mxfile>',
+            mimeType: 'application/vnd.jgraph.mxfile',
+            sourceIntent: 'flowchart'
+        });
+        const drawnixPath = await saveDiagramSourceArtifact(mockApp, 'Notes/Architecture.md', {
+            target: 'drawnix' as any,
+            content: '{"type":"drawnix","elements":[]}',
+            mimeType: 'application/vnd.drawnix+json',
+            sourceIntent: 'flowchart'
+        });
+
+        expect(drawioPath).toBe('Notes/Architecture_diagram.drawio');
+        expect(drawnixPath).toBe('Notes/Architecture_diagram.drawnix');
+        expect(mockApp.vault.create).toHaveBeenCalledWith(
+            'Notes/Architecture_diagram.drawio',
+            expect.stringContaining('<mxfile')
+        );
+        expect(mockApp.vault.create).toHaveBeenCalledWith(
+            'Notes/Architecture_diagram.drawnix',
+            expect.stringContaining('"type":"drawnix"')
+        );
+    });
+
     test('saves a png preview artifact beside the source file', async () => {
         const outputPath = await saveDiagramPreviewPng(mockApp, 'Notes/Topic.md', {
             target: 'mermaid',

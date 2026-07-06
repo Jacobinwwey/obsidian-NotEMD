@@ -263,4 +263,58 @@ describe('diagram command host adapter', () => {
             true
         );
     });
+
+    test('preview wrapper supports saved drawio artifacts as source-only previews', async () => {
+        const { host, reporter } = createDiagramHost();
+        const file = { name: 'Architecture_diagram.drawio', path: 'Notes/Architecture_diagram.drawio' };
+        host.readFile.mockResolvedValue('<mxfile><diagram name="Page-1"><mxGraphModel /></diagram></mxfile>');
+
+        const result = await runPreviewDiagramCommandWithHost(host as any, file as any, reporter as any);
+
+        expect(result).toMatchObject({
+            kind: 'success',
+            sourcePath: 'Notes/Architecture_diagram.drawio',
+            previewOpened: true,
+            artifact: expect.objectContaining({
+                target: 'drawio',
+                mimeType: 'application/vnd.jgraph.mxfile',
+                sourceIntent: 'flowchart'
+            })
+        });
+        expect(host.createDiagramHostAdapter().openPreview).toHaveBeenCalledWith(
+            expect.objectContaining({
+                target: 'drawio',
+                content: expect.stringContaining('<mxfile')
+            }),
+            'Notes/Architecture_diagram.drawio',
+            true
+        );
+    });
+
+    test('preview wrapper supports saved drawnix artifacts as source-only previews', async () => {
+        const { host, reporter } = createDiagramHost();
+        const file = { name: 'Architecture_diagram.drawnix', path: 'Notes/Architecture_diagram.drawnix' };
+        host.readFile.mockResolvedValue('{"type":"drawnix","version":"1","source":"notemd","elements":[]}');
+
+        const result = await runPreviewDiagramCommandWithHost(host as any, file as any, reporter as any);
+
+        expect(result).toMatchObject({
+            kind: 'success',
+            sourcePath: 'Notes/Architecture_diagram.drawnix',
+            previewOpened: true,
+            artifact: expect.objectContaining({
+                target: 'drawnix',
+                mimeType: 'application/vnd.drawnix+json',
+                sourceIntent: 'flowchart'
+            })
+        });
+        expect(host.createDiagramHostAdapter().openPreview).toHaveBeenCalledWith(
+            expect.objectContaining({
+                target: 'drawnix',
+                content: expect.stringContaining('"type":"drawnix"')
+            }),
+            'Notes/Architecture_diagram.drawnix',
+            true
+        );
+    });
 });

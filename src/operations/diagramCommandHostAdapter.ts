@@ -187,12 +187,12 @@ export class MissingVegaLiteFenceError extends Error {
 
 export class MissingPreviewableDiagramArtifactError extends Error {
     constructor() {
-        super('No previewable diagram artifact found in this file. Supported direct preview sources are Mermaid or Vega-Lite markdown fences, raw Mermaid markdown artifacts, Vega-Lite JSON (.json), JSON Canvas (.canvas), HTML (.html), and circuitikz TeX (.tex/.tikz) files.');
+        super('No previewable diagram artifact found in this file. Supported direct preview sources are Mermaid or Vega-Lite markdown fences, raw Mermaid markdown artifacts, Vega-Lite JSON (.json), JSON Canvas (.canvas), HTML (.html), circuitikz TeX (.tex/.tikz), Draw.io (.drawio), and Drawnix (.drawnix) files.');
         this.name = 'MissingPreviewableDiagramArtifactError';
     }
 }
 
-const DIRECT_PREVIEWABLE_DIAGRAM_EXTENSIONS = new Set(['md', 'json', 'canvas', 'html', 'htm', 'tex', 'tikz']);
+const DIRECT_PREVIEWABLE_DIAGRAM_EXTENSIONS = new Set(['md', 'json', 'canvas', 'html', 'htm', 'tex', 'tikz', 'drawio', 'drawnix']);
 
 export function isDirectPreviewableDiagramExtension(extension: string): boolean {
     return typeof extension === 'string'
@@ -410,6 +410,43 @@ function buildCircuitikzPreviewArtifact(circuitikzContent: string): RenderArtifa
     };
 }
 
+function looksLikeDrawioSource(sourceContent: string): boolean {
+    return /<mxfile\b/i.test(sourceContent) || /<mxGraphModel\b/i.test(sourceContent);
+}
+
+function buildDrawioPreviewArtifact(drawioContent: string): RenderArtifact {
+    return {
+        target: 'drawio',
+        content: drawioContent.trim(),
+        mimeType: 'application/vnd.jgraph.mxfile',
+        sourceIntent: 'flowchart'
+    };
+}
+
+function looksLikeDrawnixSource(sourceContent: string): boolean {
+    try {
+        const parsed = JSON.parse(sourceContent);
+        return Boolean(
+            parsed
+            && typeof parsed === 'object'
+            && !Array.isArray(parsed)
+            && (parsed as Record<string, unknown>).type === 'drawnix'
+            && Array.isArray((parsed as Record<string, unknown>).elements)
+        );
+    } catch {
+        return false;
+    }
+}
+
+function buildDrawnixPreviewArtifact(drawnixContent: string): RenderArtifact {
+    return {
+        target: 'drawnix',
+        content: drawnixContent.trim(),
+        mimeType: 'application/vnd.drawnix+json',
+        sourceIntent: 'flowchart'
+    };
+}
+
 type SupportedMarkdownFence = 'mermaid' | 'vega-lite';
 
 interface MarkdownFenceMatch {
@@ -511,6 +548,22 @@ function resolveDirectPreviewArtifact(sourceContent: string, sourcePath: string)
             artifact: buildCircuitikzPreviewArtifact(sourceContent),
             artifactSaved: true,
             detectionLabel: 'circuitikz TeX artifact'
+        };
+    }
+
+    if (normalizedPath.endsWith('.drawio') && looksLikeDrawioSource(sourceContent)) {
+        return {
+            artifact: buildDrawioPreviewArtifact(sourceContent),
+            artifactSaved: true,
+            detectionLabel: 'Draw.io artifact'
+        };
+    }
+
+    if (normalizedPath.endsWith('.drawnix') && looksLikeDrawnixSource(sourceContent)) {
+        return {
+            artifact: buildDrawnixPreviewArtifact(sourceContent),
+            artifactSaved: true,
+            detectionLabel: 'Drawnix artifact'
         };
     }
 
