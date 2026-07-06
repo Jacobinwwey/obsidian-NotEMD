@@ -166,8 +166,9 @@ The repository now includes maintainer fixtures for every supported golden famil
 |---|---|
 | `docs/maintainer/fixtures/circuitikz/common-source-nmos-v1.json` | `common-source-amplifier` |
 | `docs/maintainer/fixtures/circuitikz/cmos-inverter-v1.json` | `cmos-inverter` |
+| `docs/maintainer/fixtures/circuitikz/cmos-nand2-v1.json` | `cmos-nand2` |
 
-Run both fixtures through the same explicit renderer configuration with:
+Run every fixture through the same explicit renderer configuration with:
 
 ```bash
 npm run diagram:smoke-circuitikz -- \
@@ -214,6 +215,7 @@ This is not a generic TikZ generator. The current prototype supports only golden
 |---|---|---|
 | `common-source-amplifier` | `common-source-nmos-v1` | NMOS common-source amplifier with `R_D`, `VDD`, `vin`, `vout`, and grounded source |
 | `cmos-inverter` | `cmos-inverter-v1` | PMOS-over-NMOS CMOS inverter with shared gate input and shared drain output |
+| `cmos-nand2` | `cmos-nand2-v1` | Two-input CMOS NAND with parallel PMOS pull-up devices, series NMOS pull-down devices, `va`, `vb`, and `vout` |
 
 The adapter validates the structural invariant first, then emits a fixed layout. For example, the CMOS inverter requires:
 
@@ -223,6 +225,8 @@ The adapter validates the structural invariant first, then emits a fixed layout.
 - `vin -> MP.G` and `vin -> MN.G`;
 - `MP.D` and `MN.D` on the shared output drain path;
 - both transistor drains connected to `vout`.
+
+The CMOS NAND template adds a stronger digital-logic invariant: `MPA` and `MPB` must be PMOS devices in the parallel pull-up network from `VDD` to `vout`; `MNA` and `MNB` must be NMOS devices in a series pull-down stack from `vout` to `GND`; `va` must drive `MPA.G` and `MNA.G`; and `vb` must drive `MPB.G` and `MNB.G`. `layoutHints.inputSide` and `layoutHints.outputSide` only move the input/output ports and presentation routing; they do not change the topology signature.
 
 ## Why `CircuitSpec` Is Separate
 

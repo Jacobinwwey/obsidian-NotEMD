@@ -14,13 +14,14 @@ describe('circuitikz smoke fixtures CLI', () => {
         expect(packageJson.scripts['diagram:smoke-circuitikz']).toBe('node scripts/run-circuitikz-smoke-fixtures.js');
     });
 
-    test('keeps maintainer fixtures for both supported golden circuit families', () => {
+    test('keeps maintainer fixtures for every supported golden circuit family', () => {
         const fixtureNames = fs.readdirSync(fixtureDirectory)
             .filter(fileName => fileName.endsWith('.json'))
             .sort();
 
         expect(fixtureNames).toEqual([
             'cmos-inverter-v1.json',
+            'cmos-nand2-v1.json',
             'common-source-nmos-v1.json'
         ]);
 
@@ -57,7 +58,7 @@ describe('circuitikz smoke fixtures CLI', () => {
             const report = JSON.parse(result.stdout);
             expect(report).toEqual(expect.objectContaining({
                 ok: false,
-                fixtureCount: 2,
+                fixtureCount: 3,
                 reportOutputPath: reportPath,
                 rendererAvailability: expect.objectContaining({
                     ok: false,
@@ -136,11 +137,12 @@ fs.writeFileSync(
             const report = JSON.parse(stdout);
             expect(report).toEqual(expect.objectContaining({
                 ok: true,
-                fixtureCount: 2,
+                fixtureCount: 3,
                 outputDirectory
             }));
             expect(report.fixtures.map((fixture: any) => fixture.name).sort()).toEqual([
                 'cmos-inverter-v1',
+                'cmos-nand2-v1',
                 'common-source-nmos-v1'
             ]);
 
@@ -160,7 +162,7 @@ fs.writeFileSync(
                 .trim()
                 .split(/\r?\n/)
                 .map(line => JSON.parse(line));
-            expect(invocations).toHaveLength(2);
+            expect(invocations).toHaveLength(3);
             for (const invocation of invocations) {
                 expect(invocation[0]).toBe(compilerPath);
                 expect(invocation).toContain('--tex');

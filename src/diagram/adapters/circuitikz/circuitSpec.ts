@@ -1,6 +1,7 @@
 export const SUPPORTED_CIRCUIT_KINDS = [
     'common-source-amplifier',
-    'cmos-inverter'
+    'cmos-inverter',
+    'cmos-nand2'
 ] as const;
 
 export type CircuitKind = typeof SUPPORTED_CIRCUIT_KINDS[number];

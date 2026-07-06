@@ -46,6 +46,18 @@ function extendedPortX(side: 'left' | 'right'): string {
     return side === 'left' ? '0.8' : '5.2';
 }
 
+function nandInputPortX(side: 'left' | 'right'): string {
+    return side === 'left' ? '0.8' : '5.2';
+}
+
+function requiredNetsForCircuitKind(circuitKind: string): string[] {
+    if (circuitKind === 'cmos-nand2') {
+        return ['VDD', 'GND', 'va', 'vb', 'vout'];
+    }
+
+    return ['VDD', 'GND', 'vin', 'vout'];
+}
+
 function canonicalConnection(connection: CircuitConnection): [string, string] {
     const endpoints = [
         normalizeIdentifier(connection.from),
@@ -237,6 +249,43 @@ function validateCmosInverterTemplate(
     }
 }
 
+function validateCmosNand2Template(
+    spec: CircuitSpec,
+    componentById: Map<string, CircuitComponent>,
+    errors: string[]
+): void {
+    if (spec.goldenReferenceId !== 'cmos-nand2-v1') {
+        errors.push('CMOS NAND requires goldenReferenceId "cmos-nand2-v1".');
+    }
+
+    requireComponent(componentById, 'MPA', 'pmos', errors);
+    requireComponent(componentById, 'MPB', 'pmos', errors);
+    requireComponent(componentById, 'MNA', 'nmos', errors);
+    requireComponent(componentById, 'MNB', 'nmos', errors);
+
+    if (!hasConnection(spec.connections, 'VDD', 'MPA.S') || !hasConnection(spec.connections, 'VDD', 'MPB.S')) {
+        errors.push('CMOS NAND requires both PMOS sources to connect to VDD for the parallel pull-up network.');
+    }
+    if (!hasConnection(spec.connections, 'MPA.D', 'vout') || !hasConnection(spec.connections, 'MPB.D', 'vout')) {
+        errors.push('CMOS NAND requires both PMOS drains to connect to vout for the parallel pull-up network.');
+    }
+    if (!hasConnection(spec.connections, 'MNA.D', 'vout')) {
+        errors.push('CMOS NAND requires MNA.D to connect to vout at the top of the pull-down stack.');
+    }
+    if (!hasConnection(spec.connections, 'MNA.S', 'MNB.D')) {
+        errors.push('CMOS NAND requires MNA.S to connect to MNB.D for the series pull-down stack.');
+    }
+    if (!hasConnection(spec.connections, 'MNB.S', 'GND')) {
+        errors.push('CMOS NAND requires MNB.S to connect to GND at the bottom of the pull-down stack.');
+    }
+    if (!hasConnection(spec.connections, 'va', 'MPA.G') || !hasConnection(spec.connections, 'va', 'MNA.G')) {
+        errors.push('CMOS NAND requires va to drive both MPA.G and MNA.G.');
+    }
+    if (!hasConnection(spec.connections, 'vb', 'MPB.G') || !hasConnection(spec.connections, 'vb', 'MNB.G')) {
+        errors.push('CMOS NAND requires vb to drive both MPB.G and MNB.G.');
+    }
+}
+
 export function validateCircuitSpec(spec: CircuitSpec): CircuitSpecValidationResult {
     const errors: string[] = [];
 
@@ -261,7 +310,7 @@ export function validateCircuitSpec(spec: CircuitSpec): CircuitSpecValidationRes
     }
 
     const nets = new Set((spec.nets ?? []).map(net => net.trim()).filter(Boolean));
-    for (const requiredNet of ['VDD', 'GND', 'vin', 'vout']) {
+    for (const requiredNet of requiredNetsForCircuitKind(spec.circuitKind)) {
         if (!nets.has(requiredNet)) {
             errors.push(`Circuit spec requires net "${requiredNet}".`);
         }
@@ -277,6 +326,8 @@ export function validateCircuitSpec(spec: CircuitSpec): CircuitSpecValidationRes
         validateCommonSourceTemplate(spec, componentById, errors);
     } else if (spec.circuitKind === 'cmos-inverter') {
         validateCmosInverterTemplate(spec, componentById, errors);
+    } else if (spec.circuitKind === 'cmos-nand2') {
+        validateCmosNand2Template(spec, componentById, errors);
     }
 
     return {
@@ -368,6 +419,69 @@ ${inputRoute}
 `;
 }
 
+function renderCmosNand2Template(spec: CircuitSpec): string {
+    const mpa = spec.components.find(component => component.id === 'MPA');
+    const mpb = spec.components.find(component => component.id === 'MPB');
+    const mna = spec.components.find(component => component.id === 'MNA');
+    const mnb = spec.components.find(component => component.id === 'MNB');
+    const mpaLabel = normalizeLabel(mpa?.label, '$M_{PA}$');
+    const mpbLabel = normalizeLabel(mpb?.label, '$M_{PB}$');
+    const mnaLabel = normalizeLabel(mna?.label, '$M_{NA}$');
+    const mnbLabel = normalizeLabel(mnb?.label, '$M_{NB}$');
+    const inputSide = layoutSide(spec.layoutHints?.inputSide, 'left');
+    const outputSide = layoutSide(spec.layoutHints?.outputSide, 'right');
+    const inputRoute = inputSide === 'left'
+        ? `  (MPA.G) to [short] (1.7,4.2)
+  (MNA.G) to [short] (1.7,2.7)
+  (1.7,4.2) to [short] (1.7,2.7)
+  to [short, -o] (${nandInputPortX(inputSide)},3.45)
+  node[left]{$v_A$}
+  (MPB.G) to [short] (1.3,4.2)
+  (MNB.G) to [short] (1.3,1.8)
+  (1.3,4.2) to [short] (1.3,1.8)
+  to [short, -o] (${nandInputPortX(inputSide)},2.7)
+  node[left]{$v_B$};`
+        : `  (MPA.G) to [short] (4.1,4.2)
+  (MNA.G) to [short] (4.1,2.7)
+  (4.1,4.2) to [short] (4.1,2.7)
+  to [short] (4.5,2.7)
+  to [short, -o] (${nandInputPortX(inputSide)},4.15)
+  node[right]{$v_A$}
+  (MPB.G) to [short] (4.5,4.2)
+  (MNB.G) to [short] (4.5,1.8)
+  (4.5,4.2) to [short] (4.5,1.8)
+  to [short, -o] (${nandInputPortX(inputSide)},1.85)
+  node[right]{$v_B$};`;
+
+    return `\\usepackage{circuitikz}
+\\begin{document}
+\\begin{circuitikz}[${spec.style.voltageConvention}]
+\\draw
+  (3,5) node[vcc]{$V_{DD}$}
+  to [short] (3,4.8)
+  (2.5,4.2) node[pmos, anchor=S] (MPA) {${mpaLabel}}
+  (3.5,4.2) node[pmos, anchor=S] (MPB) {${mpbLabel}}
+  (MPA.S) to [short] (2.5,4.8)
+  (MPB.S) to [short] (3.5,4.8)
+  (2.5,4.8) to [short] (3.5,4.8)
+  (MPA.D) to [short] (2.5,3.2)
+  (MPB.D) to [short] (3.5,3.2)
+  (2.5,3.2) to [short] (3.5,3.2)
+  (3,3.2) to [short, *-o] (${commonPortX(outputSide)},3.2) node[${outputSide}]{$v_{out}$};
+\\draw
+  (3,3.2) to [short] (3,2.7)
+  node[nmos, anchor=D] (MNA) {${mnaLabel}}
+  (MNA.S) to [short] (3,1.8)
+  node[nmos, anchor=D] (MNB) {${mnbLabel}}
+  (MNB.S) to [short] (3,0.7)
+  node[ground]{};
+\\draw
+${inputRoute}
+\\end{circuitikz}
+\\end{document}
+`;
+}
+
 export function exportCircuitSpecToCircuitikz(spec: CircuitSpec): string {
     assertValidCircuitSpec(spec);
 
@@ -376,6 +490,8 @@ export function exportCircuitSpecToCircuitikz(spec: CircuitSpec): string {
             return renderCommonSourceTemplate(spec);
         case 'cmos-inverter':
             return renderCmosInverterTemplate(spec);
+        case 'cmos-nand2':
+            return renderCmosNand2Template(spec);
         default:
             throw new ValidationError('Unsupported circuitKind.', 'INVALID_INPUT');
     }
