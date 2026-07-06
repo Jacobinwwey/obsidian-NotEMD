@@ -187,6 +187,14 @@ function countPathOnlyGlyphUses(svgText: string): number {
         Array.from(svgText.matchAll(/<path\b[^>]*\sid\s*=\s*["']([^"']+)["'][^>]*>/gi))
             .map(match => match[1])
     );
+    for (const defsMatch of svgText.matchAll(/<defs\b[\s\S]*?<\/defs>/gi)) {
+        const defsText = defsMatch[0];
+        for (const containerMatch of defsText.matchAll(/<(g|symbol)\b[^>]*\sid\s*=\s*["']([^"']+)["'][^>]*>[\s\S]*?<\/\1>/gi)) {
+            if (/<path\b/i.test(containerMatch[0])) {
+                pathIds.add(containerMatch[2]);
+            }
+        }
+    }
     if (pathIds.size === 0) {
         return 0;
     }
@@ -407,6 +415,20 @@ function transformBox<T extends SvgBox>(box: T, transform: SvgTransform): T {
         minY: transformed?.minY ?? box.minY,
         maxX: transformed?.maxX ?? box.maxX,
         maxY: transformed?.maxY ?? box.maxY
+    };
+}
+
+function unionBoxes(label: string, boxes: SvgBox[]): SvgBox | undefined {
+    if (boxes.length === 0) {
+        return undefined;
+    }
+
+    return {
+        label,
+        minX: Math.min(...boxes.map(box => box.minX)),
+        minY: Math.min(...boxes.map(box => box.minY)),
+        maxX: Math.max(...boxes.map(box => box.maxX)),
+        maxY: Math.max(...boxes.map(box => box.maxY))
     };
 }
 
@@ -842,6 +864,29 @@ function collectPathDefinitionBoxes(svgText: string): Map<string, SvgBox> {
             const box = pathBox(tag);
             if (box) {
                 definitions.set(id, transformBox(box, parseSvgTransform(readAttribute(tag, 'transform'))));
+            }
+        }
+        for (const containerMatch of defsText.matchAll(/<(g|symbol)\b[^>]*\sid\s*=\s*["']([^"']+)["'][^>]*>([\s\S]*?)<\/\1>/gi)) {
+            const tag = containerMatch[0].match(/^<[^>]+>/)?.[0];
+            if (!tag) {
+                continue;
+            }
+            const id = containerMatch[2];
+            const containerTransform = parseSvgTransform(readAttribute(tag, 'transform'));
+            const boxes = Array.from(containerMatch[3].matchAll(/<path\b[^>]*>/gi))
+                .map(pathMatch => {
+                    const pathTag = pathMatch[0];
+                    const box = pathBox(pathTag);
+                    if (!box) {
+                        return undefined;
+                    }
+                    const pathTransform = parseSvgTransform(readAttribute(pathTag, 'transform'));
+                    return transformBox(box, multiplyTransforms(containerTransform, pathTransform));
+                })
+                .filter((box): box is SvgBox => Boolean(box));
+            const box = unionBoxes(id, boxes);
+            if (box) {
+                definitions.set(id, box);
             }
         }
     }
