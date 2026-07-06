@@ -80,6 +80,7 @@ describe('website documentation contract', () => {
             expect(content).toContain('notemd.circuitikz.repair-acceptance.v1');
             expect(content).toContain('readyForVisualAcceptance');
             expect(content).toContain('remainingChecks');
+            expect(content).toContain('--repair-acceptance-output');
             expect(content).toContain('shell: false');
             expect(content).toContain('RenderArtifact.diagnostics');
             expect(content).toContain('diagnostic summary');

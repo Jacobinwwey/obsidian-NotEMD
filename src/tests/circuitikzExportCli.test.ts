@@ -495,6 +495,87 @@ describe('circuitikz export CLI', () => {
         }
     }, 30000);
 
+    test('writes repair acceptance evidence to an explicit output file', () => {
+        const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'notemd-circuitikz-cli-repair-acceptance-output-'));
+        const referenceSpec = createSpec();
+        const candidateSpec = createSpec();
+        candidateSpec.title = 'CMOS inverter repaired layout';
+        const candidatePath = path.join(tempRoot, 'candidate.json');
+        const repairBriefPath = path.join(tempRoot, 'repair-brief.json');
+        const outputPath = path.join(tempRoot, 'candidate.tex');
+        const acceptancePath = path.join(tempRoot, 'repair-acceptance.json');
+        fs.writeFileSync(candidatePath, JSON.stringify(candidateSpec, null, 2), 'utf8');
+        fs.writeFileSync(repairBriefPath, JSON.stringify({
+            schemaVersion: 'notemd.circuitikz.repair-brief.v1',
+            topologySignature: createCircuitTopologySignature(referenceSpec)
+        }, null, 2), 'utf8');
+
+        try {
+            const stdout = execFileSync(
+                process.execPath,
+                [
+                    scriptPath,
+                    '--input', candidatePath,
+                    '--repair-brief', repairBriefPath,
+                    '--output', outputPath,
+                    '--repair-acceptance-output', acceptancePath
+                ],
+                {
+                    cwd: repoRoot,
+                    encoding: 'utf8'
+                }
+            );
+
+            const result = JSON.parse(stdout);
+            const acceptance = JSON.parse(fs.readFileSync(acceptancePath, 'utf8'));
+
+            expect(result.repairAcceptanceOutputPath).toBe(acceptancePath);
+            expect(acceptance).toEqual(result.repairAcceptance);
+            expect(acceptance).toEqual(expect.objectContaining({
+                schemaVersion: 'notemd.circuitikz.repair-acceptance.v1',
+                readyForVisualAcceptance: false,
+                remainingChecks: [
+                    'compile-diagnostics',
+                    'render-smoke'
+                ]
+            }));
+        } finally {
+            fs.rmSync(tempRoot, { recursive: true, force: true });
+        }
+    }, 30000);
+
+    test('rejects repair acceptance output without a repair brief', () => {
+        const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'notemd-circuitikz-cli-repair-acceptance-missing-brief-'));
+        const specPath = path.join(tempRoot, 'candidate.json');
+        const outputPath = path.join(tempRoot, 'candidate.tex');
+        const acceptancePath = path.join(tempRoot, 'repair-acceptance.json');
+        fs.writeFileSync(specPath, JSON.stringify(createSpec(), null, 2), 'utf8');
+
+        try {
+            const result = spawnSync(
+                process.execPath,
+                [
+                    scriptPath,
+                    '--input', specPath,
+                    '--output', outputPath,
+                    '--repair-acceptance-output', acceptancePath
+                ],
+                {
+                    cwd: repoRoot,
+                    encoding: 'utf8'
+                }
+            );
+
+            expect(result.status).toBe(1);
+            expect(result.stdout).toBe('');
+            expect(result.stderr).toContain('--repair-acceptance-output requires --repair-brief.');
+            expect(fs.existsSync(outputPath)).toBe(false);
+            expect(fs.existsSync(acceptancePath)).toBe(false);
+        } finally {
+            fs.rmSync(tempRoot, { recursive: true, force: true });
+        }
+    });
+
     test('rejects repair candidates that drift from an existing repair brief topology signature', () => {
         const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'notemd-circuitikz-cli-repair-brief-candidate-drift-'));
         const referenceSpec = createSpec();

@@ -230,6 +230,7 @@ Phase E implementation status on 2026-07-05: `scripts/export-diagram-artifact.js
 - [x] Add structured `repairPrompt` handoff content with `diagnosticFocus`, `acceptanceCriteria`, and role `topology-preserving-circuitikz-repair`.
 - [x] Add repair candidate validation against an existing brief through `--repair-brief`.
 - [x] Add `repairAcceptance` gate evidence for `--repair-brief` candidate runs through schema `notemd.circuitikz.repair-acceptance.v1`.
+- [x] Add `--repair-acceptance-output` so CI and release workflows can persist repair acceptance evidence as JSON.
 - [x] Add reusable `RenderArtifact.diagnostics` summary counts and show them in the preview diagnostics panel and preview history entries.
 - [x] Add definition-local `transform` handling for reusable path-only SVG glyphs so dvisvgm-style scaled or mirrored label geometry is checked before `<use>` placement.
 - [x] Add grouped and `symbol` path-only SVG glyph definition resolution so `<use href="#...">` labels keep bounded-canvas and overlap coverage when renderers wrap glyph paths.
@@ -249,6 +250,8 @@ Phase F implementation status on 2026-07-05: `src/diagram/adapters/circuitikz/ci
 2026-07-06 layout projection increment: `src/diagram/adapters/circuitikz/circuitikzExporter.ts` now makes `layoutHints.inputSide` and `layoutHints.outputSide` executable for `common-source-amplifier` and `cmos-inverter`. The projection moves `v_{in}` and `v_{out}` ports and rewrites only presentation routing; `createCircuitTopologySignature` remains unchanged for layout-only repair candidates. This closes the gap where repair briefs allowed layout-hint edits but the exporter previously ignored them.
 
 2026-07-06 repair acceptance evidence increment: `scripts/export-circuitikz.js` now returns `repairAcceptance` when `--repair-brief` validates a candidate. The schema `notemd.circuitikz.repair-acceptance.v1` records `topology-signature`, `compile-diagnostics`, and `render-smoke` gates as `passed`, `failed`, or `missing`, includes `blockingDiagnostics`, and reports `remainingChecks`. `readyForVisualAcceptance` stays false until all three gates pass in the same candidate run.
+
+2026-07-06 repair acceptance output increment: `scripts/export-circuitikz.js` now accepts `--repair-acceptance-output` with `--repair-brief`, writing the same `repairAcceptance` JSON to disk for CI or release records. This persists evidence without changing repair behavior or relaxing compile/render-smoke requirements.
 
 ## Current Architecture Progress Audit
 
