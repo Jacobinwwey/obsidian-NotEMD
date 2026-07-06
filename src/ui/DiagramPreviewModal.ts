@@ -191,7 +191,10 @@ export class DiagramPreviewModal extends Modal {
             cls: 'notemd-diagram-preview-diagnostics-title'
         });
 
-        const summary = formatRenderArtifactDiagnosticSummary(summarizeRenderArtifactDiagnostics(diagnostics));
+        const summary = formatRenderArtifactDiagnosticSummary(
+            summarizeRenderArtifactDiagnostics(diagnostics),
+            i18n.previewModal.diagnosticSummary
+        );
         if (summary) {
             panel.createDiv({
                 text: summary,
@@ -255,7 +258,8 @@ export class DiagramPreviewModal extends Modal {
                 metaParts.push(entry.sourcePath);
             }
             const diagnosticSummary = formatRenderArtifactDiagnosticSummary(
-                summarizeRenderArtifactDiagnostics(entry.session.payload.artifact.diagnostics ?? [])
+                summarizeRenderArtifactDiagnostics(entry.session.payload.artifact.diagnostics ?? []),
+                i18n.previewModal.diagnosticSummary
             );
             if (diagnosticSummary) {
                 metaParts.push(diagnosticSummary);

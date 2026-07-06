@@ -21,7 +21,12 @@ export const PREVIEW_MODAL_LOCALE_EXTENSIONS: Record<string, DeepPartial<NotemdE
             exportFailedNotice: 'فشل تصدير معاينة المخطط: {message}',
             exportPngSuccessNotice: 'تم تصدير PNG للمخطط إلى {path}',
             exportPngFailedNotice: 'فشل تصدير PNG للمخطط: {message}',
-            sourceFile: 'الملف المحفوظ: {path}'
+            sourceFile: 'الملف المحفوظ: {path}',
+            diagnosticSummary: {
+                errors: 'أخطاء',
+                warnings: 'تحذيرات',
+                info: 'معلومات'
+            }
         }
     },
     de: {
@@ -42,7 +47,12 @@ export const PREVIEW_MODAL_LOCALE_EXTENSIONS: Record<string, DeepPartial<NotemdE
             exportFailedNotice: 'Diagrammvorschau konnte nicht exportiert werden: {message}',
             exportPngSuccessNotice: 'Diagramm-PNG nach {path} exportiert',
             exportPngFailedNotice: 'Diagramm-PNG konnte nicht exportiert werden: {message}',
-            sourceFile: 'Gespeicherte Datei: {path}'
+            sourceFile: 'Gespeicherte Datei: {path}',
+            diagnosticSummary: {
+                errors: 'Fehler',
+                warnings: 'Warnungen',
+                info: 'Info'
+            }
         }
     },
     es: {
@@ -63,7 +73,12 @@ export const PREVIEW_MODAL_LOCALE_EXTENSIONS: Record<string, DeepPartial<NotemdE
             exportFailedNotice: 'No se pudo exportar la vista previa del diagrama: {message}',
             exportPngSuccessNotice: 'PNG del diagrama exportado a {path}',
             exportPngFailedNotice: 'No se pudo exportar el PNG del diagrama: {message}',
-            sourceFile: 'Archivo guardado: {path}'
+            sourceFile: 'Archivo guardado: {path}',
+            diagnosticSummary: {
+                errors: 'errores',
+                warnings: 'advertencias',
+                info: 'info'
+            }
         }
     },
     fa: {
@@ -84,7 +99,12 @@ export const PREVIEW_MODAL_LOCALE_EXTENSIONS: Record<string, DeepPartial<NotemdE
             exportFailedNotice: 'صدور پیش‌نمایش نمودار ناموفق بود: {message}',
             exportPngSuccessNotice: 'PNG نمودار به {path} صادر شد',
             exportPngFailedNotice: 'صدور PNG نمودار ناموفق بود: {message}',
-            sourceFile: 'فایل ذخیره‌شده: {path}'
+            sourceFile: 'فایل ذخیره‌شده: {path}',
+            diagnosticSummary: {
+                errors: 'خطا',
+                warnings: 'هشدار',
+                info: 'اطلاعات'
+            }
         }
     },
     fr: {
@@ -105,7 +125,12 @@ export const PREVIEW_MODAL_LOCALE_EXTENSIONS: Record<string, DeepPartial<NotemdE
             exportFailedNotice: 'Impossible d’exporter l’aperçu du diagramme : {message}',
             exportPngSuccessNotice: 'PNG du diagramme exporté vers {path}',
             exportPngFailedNotice: 'Impossible d’exporter le PNG du diagramme : {message}',
-            sourceFile: 'Fichier enregistré : {path}'
+            sourceFile: 'Fichier enregistré : {path}',
+            diagnosticSummary: {
+                errors: 'erreurs',
+                warnings: 'avertissements',
+                info: 'infos'
+            }
         }
     },
     id: {
@@ -126,7 +151,12 @@ export const PREVIEW_MODAL_LOCALE_EXTENSIONS: Record<string, DeepPartial<NotemdE
             exportFailedNotice: 'Gagal mengekspor pratinjau diagram: {message}',
             exportPngSuccessNotice: 'PNG diagram diekspor ke {path}',
             exportPngFailedNotice: 'Gagal mengekspor PNG diagram: {message}',
-            sourceFile: 'File tersimpan: {path}'
+            sourceFile: 'File tersimpan: {path}',
+            diagnosticSummary: {
+                errors: 'error',
+                warnings: 'peringatan',
+                info: 'info'
+            }
         }
     },
     it: {
@@ -147,7 +177,12 @@ export const PREVIEW_MODAL_LOCALE_EXTENSIONS: Record<string, DeepPartial<NotemdE
             exportFailedNotice: 'Impossibile esportare l’anteprima del diagramma: {message}',
             exportPngSuccessNotice: 'PNG del diagramma esportato in {path}',
             exportPngFailedNotice: 'Impossibile esportare il PNG del diagramma: {message}',
-            sourceFile: 'File salvato: {path}'
+            sourceFile: 'File salvato: {path}',
+            diagnosticSummary: {
+                errors: 'errori',
+                warnings: 'avvisi',
+                info: 'info'
+            }
         }
     },
     ja: {
@@ -168,7 +203,12 @@ export const PREVIEW_MODAL_LOCALE_EXTENSIONS: Record<string, DeepPartial<NotemdE
             exportFailedNotice: '図のプレビューを書き出せませんでした: {message}',
             exportPngSuccessNotice: '図の PNG を {path} に書き出しました',
             exportPngFailedNotice: '図の PNG を書き出せませんでした: {message}',
-            sourceFile: '保存先ファイル: {path}'
+            sourceFile: '保存先ファイル: {path}',
+            diagnosticSummary: {
+                errors: 'エラー',
+                warnings: '警告',
+                info: '情報'
+            }
         }
     },
     ko: {
@@ -189,7 +229,12 @@ export const PREVIEW_MODAL_LOCALE_EXTENSIONS: Record<string, DeepPartial<NotemdE
             exportFailedNotice: '다이어그램 미리보기를 내보내지 못했습니다: {message}',
             exportPngSuccessNotice: '다이어그램 PNG를 {path}로 내보냈습니다',
             exportPngFailedNotice: '다이어그램 PNG를 내보내지 못했습니다: {message}',
-            sourceFile: '저장된 파일: {path}'
+            sourceFile: '저장된 파일: {path}',
+            diagnosticSummary: {
+                errors: '오류',
+                warnings: '경고',
+                info: '정보'
+            }
         }
     },
     nl: {
@@ -210,7 +255,12 @@ export const PREVIEW_MODAL_LOCALE_EXTENSIONS: Record<string, DeepPartial<NotemdE
             exportFailedNotice: 'Diagramvoorbeeld kon niet worden geëxporteerd: {message}',
             exportPngSuccessNotice: 'Diagram-PNG geëxporteerd naar {path}',
             exportPngFailedNotice: 'Diagram-PNG kon niet worden geëxporteerd: {message}',
-            sourceFile: 'Opgeslagen bestand: {path}'
+            sourceFile: 'Opgeslagen bestand: {path}',
+            diagnosticSummary: {
+                errors: 'fouten',
+                warnings: 'waarschuwingen',
+                info: 'info'
+            }
         }
     },
     pl: {
@@ -231,7 +281,12 @@ export const PREVIEW_MODAL_LOCALE_EXTENSIONS: Record<string, DeepPartial<NotemdE
             exportFailedNotice: 'Nie udało się wyeksportować podglądu diagramu: {message}',
             exportPngSuccessNotice: 'PNG diagramu wyeksportowano do {path}',
             exportPngFailedNotice: 'Nie udało się wyeksportować PNG diagramu: {message}',
-            sourceFile: 'Zapisany plik: {path}'
+            sourceFile: 'Zapisany plik: {path}',
+            diagnosticSummary: {
+                errors: 'błędy',
+                warnings: 'ostrzeżenia',
+                info: 'info'
+            }
         }
     },
     pt: {
@@ -252,7 +307,12 @@ export const PREVIEW_MODAL_LOCALE_EXTENSIONS: Record<string, DeepPartial<NotemdE
             exportFailedNotice: 'Falha ao exportar a pré-visualização do diagrama: {message}',
             exportPngSuccessNotice: 'PNG do diagrama exportado para {path}',
             exportPngFailedNotice: 'Falha ao exportar o PNG do diagrama: {message}',
-            sourceFile: 'Ficheiro guardado: {path}'
+            sourceFile: 'Ficheiro guardado: {path}',
+            diagnosticSummary: {
+                errors: 'erros',
+                warnings: 'avisos',
+                info: 'info'
+            }
         }
     },
     'pt-BR': {
@@ -273,7 +333,12 @@ export const PREVIEW_MODAL_LOCALE_EXTENSIONS: Record<string, DeepPartial<NotemdE
             exportFailedNotice: 'Falha ao exportar a pré-visualização do diagrama: {message}',
             exportPngSuccessNotice: 'PNG do diagrama exportado para {path}',
             exportPngFailedNotice: 'Falha ao exportar o PNG do diagrama: {message}',
-            sourceFile: 'Arquivo salvo: {path}'
+            sourceFile: 'Arquivo salvo: {path}',
+            diagnosticSummary: {
+                errors: 'erros',
+                warnings: 'avisos',
+                info: 'info'
+            }
         }
     },
     ru: {
@@ -294,7 +359,12 @@ export const PREVIEW_MODAL_LOCALE_EXTENSIONS: Record<string, DeepPartial<NotemdE
             exportFailedNotice: 'Не удалось экспортировать предпросмотр диаграммы: {message}',
             exportPngSuccessNotice: 'PNG диаграммы экспортирован в {path}',
             exportPngFailedNotice: 'Не удалось экспортировать PNG диаграммы: {message}',
-            sourceFile: 'Сохранённый файл: {path}'
+            sourceFile: 'Сохранённый файл: {path}',
+            diagnosticSummary: {
+                errors: 'ошибки',
+                warnings: 'предупреждения',
+                info: 'инфо'
+            }
         }
     },
     th: {
@@ -315,7 +385,12 @@ export const PREVIEW_MODAL_LOCALE_EXTENSIONS: Record<string, DeepPartial<NotemdE
             exportFailedNotice: 'ส่งออกตัวอย่างไดอะแกรมไม่สำเร็จ: {message}',
             exportPngSuccessNotice: 'ส่งออก PNG ของไดอะแกรมไปยัง {path} แล้ว',
             exportPngFailedNotice: 'ส่งออก PNG ของไดอะแกรมไม่สำเร็จ: {message}',
-            sourceFile: 'ไฟล์ที่บันทึก: {path}'
+            sourceFile: 'ไฟล์ที่บันทึก: {path}',
+            diagnosticSummary: {
+                errors: 'ข้อผิดพลาด',
+                warnings: 'คำเตือน',
+                info: 'ข้อมูล'
+            }
         }
     },
     tr: {
@@ -336,7 +411,12 @@ export const PREVIEW_MODAL_LOCALE_EXTENSIONS: Record<string, DeepPartial<NotemdE
             exportFailedNotice: 'Diyagram önizlemesi dışa aktarılamadı: {message}',
             exportPngSuccessNotice: 'Diyagram PNG’si {path} konumuna aktarıldı',
             exportPngFailedNotice: 'Diyagram PNG’si dışa aktarılamadı: {message}',
-            sourceFile: 'Kaydedilen dosya: {path}'
+            sourceFile: 'Kaydedilen dosya: {path}',
+            diagnosticSummary: {
+                errors: 'hata',
+                warnings: 'uyarı',
+                info: 'bilgi'
+            }
         }
     },
     uk: {
@@ -357,7 +437,12 @@ export const PREVIEW_MODAL_LOCALE_EXTENSIONS: Record<string, DeepPartial<NotemdE
             exportFailedNotice: 'Не вдалося експортувати попередній перегляд діаграми: {message}',
             exportPngSuccessNotice: 'PNG діаграми експортовано до {path}',
             exportPngFailedNotice: 'Не вдалося експортувати PNG діаграми: {message}',
-            sourceFile: 'Збережений файл: {path}'
+            sourceFile: 'Збережений файл: {path}',
+            diagnosticSummary: {
+                errors: 'помилки',
+                warnings: 'попередження',
+                info: 'інфо'
+            }
         }
     },
     vi: {
@@ -378,7 +463,12 @@ export const PREVIEW_MODAL_LOCALE_EXTENSIONS: Record<string, DeepPartial<NotemdE
             exportFailedNotice: 'Không thể xuất bản xem trước sơ đồ: {message}',
             exportPngSuccessNotice: 'Đã xuất PNG sơ đồ tới {path}',
             exportPngFailedNotice: 'Không thể xuất PNG sơ đồ: {message}',
-            sourceFile: 'Tệp đã lưu: {path}'
+            sourceFile: 'Tệp đã lưu: {path}',
+            diagnosticSummary: {
+                errors: 'lỗi',
+                warnings: 'cảnh báo',
+                info: 'thông tin'
+            }
         }
     },
     zh: {
@@ -399,7 +489,12 @@ export const PREVIEW_MODAL_LOCALE_EXTENSIONS: Record<string, DeepPartial<NotemdE
             exportFailedNotice: '导出图形预览失败：{message}',
             exportPngSuccessNotice: '图形 PNG 已导出到 {path}',
             exportPngFailedNotice: '导出图形 PNG 失败：{message}',
-            sourceFile: '已保存文件：{path}'
+            sourceFile: '已保存文件：{path}',
+            diagnosticSummary: {
+                errors: '错误',
+                warnings: '警告',
+                info: '信息'
+            }
         }
     },
     'zh-CN': {
@@ -420,7 +515,12 @@ export const PREVIEW_MODAL_LOCALE_EXTENSIONS: Record<string, DeepPartial<NotemdE
             exportFailedNotice: '导出图形预览失败：{message}',
             exportPngSuccessNotice: '图形 PNG 已导出到 {path}',
             exportPngFailedNotice: '导出图形 PNG 失败：{message}',
-            sourceFile: '已保存文件：{path}'
+            sourceFile: '已保存文件：{path}',
+            diagnosticSummary: {
+                errors: '错误',
+                warnings: '警告',
+                info: '信息'
+            }
         }
     },
     'zh-TW': {
@@ -441,7 +541,12 @@ export const PREVIEW_MODAL_LOCALE_EXTENSIONS: Record<string, DeepPartial<NotemdE
             exportFailedNotice: '匯出圖形預覽失敗：{message}',
             exportPngSuccessNotice: '圖形 PNG 已匯出到 {path}',
             exportPngFailedNotice: '匯出圖形 PNG 失敗：{message}',
-            sourceFile: '已儲存檔案：{path}'
+            sourceFile: '已儲存檔案：{path}',
+            diagnosticSummary: {
+                errors: '錯誤',
+                warnings: '警告',
+                info: '資訊'
+            }
         }
     }
 };

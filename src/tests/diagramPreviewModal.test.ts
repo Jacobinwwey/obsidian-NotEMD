@@ -447,6 +447,7 @@ describe('diagram preview modal', () => {
 
         const text = collectText(diagnosticsPanel as MockElement);
         expect(text).toContain('Artifact 诊断');
+        expect(text).toContain('0 错误 · 1 警告 · 0 信息');
         expect(text).toContain('WARNING · render-svg-text-missing');
         expect(text).toContain('建议：Check renderer text preservation.');
     });
@@ -502,5 +503,34 @@ describe('diagram preview modal', () => {
 
         const historyButtons = collectButtons(historyPanel as MockElement);
         expect(historyButtons.filter(button => button.text === 'Topic.md')).toHaveLength(2);
+    });
+
+    test('uses localized diagnostic summary in chinese preview history', async () => {
+        const firstModal = mountModal(new DiagramPreviewModal(mockApp, createSession({
+            diagnostics: [{
+                severity: 'error',
+                kind: 'render-png-blank',
+                message: 'Blank PNG.'
+            }]
+        }, 'Notes/Topic.md', 'dark'), 'zh-CN') as any);
+        firstModal.onOpen();
+        await flushPromises();
+
+        const secondModal = mountModal(new DiagramPreviewModal(mockApp, createSession({
+            diagnostics: [{
+                severity: 'warning',
+                kind: 'render-svg-text-missing',
+                message: 'Missing expected SVG text.'
+            }]
+        }, 'Notes/Chart.md', 'dark'), 'zh-CN') as any);
+        secondModal.onOpen();
+        await flushPromises();
+
+        const historyPanel = findByClass(secondModal.contentEl, 'notemd-diagram-preview-history');
+        expect(historyPanel).not.toBeNull();
+
+        const historyText = collectText(historyPanel as MockElement);
+        expect(historyText.some(text => text.includes('1 错误 · 0 警告 · 0 信息'))).toBe(true);
+        expect(historyText.some(text => text.includes('0 错误 · 1 警告 · 0 信息'))).toBe(true);
     });
 });

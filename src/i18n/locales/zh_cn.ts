@@ -962,6 +962,11 @@ export const STRINGS_ZH_CN: DeepPartial<NotemdEnglishStrings> = {
         sourceFile: '已保存文件：{path}',
         historyTitle: '历史',
         diagnosticsTitle: 'Artifact 诊断',
+        diagnosticSummary: {
+            errors: '错误',
+            warnings: '警告',
+            info: '信息'
+        },
         diagnosticAdvice: '建议：{advice}'
     },
     slideExport: {

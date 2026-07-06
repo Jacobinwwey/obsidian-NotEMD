@@ -971,6 +971,11 @@ export const STRINGS_EN = {
         sourceFile: 'Saved file: {path}',
         historyTitle: 'History',
         diagnosticsTitle: 'Artifact diagnostics',
+        diagnosticSummary: {
+            errors: 'error(s)',
+            warnings: 'warning(s)',
+            info: 'info'
+        },
         diagnosticAdvice: 'Advice: {advice}'
     },
     slideExport: {

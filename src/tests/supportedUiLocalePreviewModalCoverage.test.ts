@@ -22,7 +22,8 @@ describe('supported UI locale preview modal coverage', () => {
             { label: 'previewModal.exportFailedNotice', get: (strings: typeof en) => strings.previewModal.exportFailedNotice },
             { label: 'previewModal.exportPngSuccessNotice', get: (strings: typeof en) => strings.previewModal.exportPngSuccessNotice },
             { label: 'previewModal.exportPngFailedNotice', get: (strings: typeof en) => strings.previewModal.exportPngFailedNotice },
-            { label: 'previewModal.sourceFile', get: (strings: typeof en) => strings.previewModal.sourceFile }
+            { label: 'previewModal.sourceFile', get: (strings: typeof en) => strings.previewModal.sourceFile },
+            { label: 'previewModal.diagnosticSummary', get: (strings: typeof en) => strings.previewModal.diagnosticSummary }
         ];
 
         for (const locale of SUPPORTED_UI_LOCALE_CODES) {

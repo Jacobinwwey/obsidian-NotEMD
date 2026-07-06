@@ -953,6 +953,11 @@ export const STRINGS_ZH_TW: DeepPartial<NotemdEnglishStrings> = {
         sourceFile: '已儲存檔案：{path}',
         historyTitle: '歷史',
         diagnosticsTitle: 'Artifact 診斷',
+        diagnosticSummary: {
+            errors: '錯誤',
+            warnings: '警告',
+            info: '資訊'
+        },
         diagnosticAdvice: '建議：{advice}'
     }
 };

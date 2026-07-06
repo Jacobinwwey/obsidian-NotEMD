@@ -31,6 +31,11 @@ describe('render artifact diagnostics', () => {
             hasErrors: true
         });
         expect(formatRenderArtifactDiagnosticSummary(summary)).toBe('1 error(s) · 1 warning(s) · 1 info');
+        expect(formatRenderArtifactDiagnosticSummary(summary, {
+            errors: '错误',
+            warnings: '警告',
+            info: '信息'
+        })).toBe('1 错误 · 1 警告 · 1 信息');
     });
 
     test('omits a formatted summary when no diagnostics exist', () => {

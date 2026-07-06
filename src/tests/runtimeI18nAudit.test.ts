@@ -104,6 +104,7 @@ describe('runtime i18n coverage', () => {
         expect(en.previewModal.exportPngSuccessNotice).toBeDefined();
         expect(en.previewModal.diagnosticsTitle).toBeDefined();
         expect(en.previewModal.diagnosticAdvice).toBeDefined();
+        expect(en.previewModal.diagnosticSummary).toBeDefined();
 
         expect(zhCn.notices.processingComplete).not.toBe(en.notices.processingComplete);
         expect(zhCn.notices.updatingLinksForRenamedFile).not.toBe(en.notices.updatingLinksForRenamedFile);
@@ -127,6 +128,7 @@ describe('runtime i18n coverage', () => {
         expect(zhCn.previewModal.exportPngSuccessNotice).not.toBe(en.previewModal.exportPngSuccessNotice);
         expect(zhCn.previewModal.diagnosticsTitle).not.toBe(en.previewModal.diagnosticsTitle);
         expect(zhCn.previewModal.diagnosticAdvice).not.toBe(en.previewModal.diagnosticAdvice);
+        expect(zhCn.previewModal.diagnosticSummary).not.toBe(en.previewModal.diagnosticSummary);
 
         expect(zhTw.notices.researchSummaryAppended).not.toBe(en.notices.researchSummaryAppended);
         expect(zhTw.notices.batchMermaidFixSuccess).not.toBe(en.notices.batchMermaidFixSuccess);
@@ -150,5 +152,6 @@ describe('runtime i18n coverage', () => {
         expect(zhTw.previewModal.exportPngSuccessNotice).not.toBe(en.previewModal.exportPngSuccessNotice);
         expect(zhTw.previewModal.diagnosticsTitle).not.toBe(en.previewModal.diagnosticsTitle);
         expect(zhTw.previewModal.diagnosticAdvice).not.toBe(en.previewModal.diagnosticAdvice);
+        expect(zhTw.previewModal.diagnosticSummary).not.toBe(en.previewModal.diagnosticSummary);
     });
 });

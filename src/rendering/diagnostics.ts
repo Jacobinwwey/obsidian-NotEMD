@@ -8,6 +8,18 @@ export interface RenderArtifactDiagnosticSummary {
     hasErrors: boolean;
 }
 
+export interface RenderArtifactDiagnosticSummaryLabels {
+    errors: string;
+    warnings: string;
+    info: string;
+}
+
+const DEFAULT_RENDER_ARTIFACT_DIAGNOSTIC_SUMMARY_LABELS: RenderArtifactDiagnosticSummaryLabels = {
+    errors: 'error(s)',
+    warnings: 'warning(s)',
+    info: 'info'
+};
+
 export function summarizeRenderArtifactDiagnostics(
     diagnostics: readonly RenderArtifactDiagnostic[]
 ): RenderArtifactDiagnosticSummary {
@@ -35,11 +47,12 @@ export function summarizeRenderArtifactDiagnostics(
 }
 
 export function formatRenderArtifactDiagnosticSummary(
-    summary: RenderArtifactDiagnosticSummary
+    summary: RenderArtifactDiagnosticSummary,
+    labels: RenderArtifactDiagnosticSummaryLabels = DEFAULT_RENDER_ARTIFACT_DIAGNOSTIC_SUMMARY_LABELS
 ): string {
     if (summary.total === 0) {
         return '';
     }
 
-    return `${summary.errors} error(s) · ${summary.warnings} warning(s) · ${summary.info} info`;
+    return `${summary.errors} ${labels.errors} · ${summary.warnings} ${labels.warnings} · ${summary.info} ${labels.info}`;
 }
