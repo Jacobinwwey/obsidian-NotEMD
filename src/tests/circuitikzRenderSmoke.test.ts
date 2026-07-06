@@ -318,6 +318,33 @@ describe('circuitikz render smoke inspection', () => {
         }
     });
 
+    test('reports SVG artifacts with only invisible drawing elements', () => {
+        const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'notemd-circuitikz-svg-invisible-elements-'));
+        const svgPath = path.join(tempRoot, 'invisible-elements.svg');
+        fs.writeFileSync(
+            svgPath,
+            '<svg viewBox="0 0 120 80"><path d="M0 0H10" visibility="hidden"/><line x1="0" y1="10" x2="10" y2="10" opacity="0"/><g style="display: none"><rect x="0" y="20" width="10" height="10"/></g></svg>',
+            'utf8'
+        );
+
+        try {
+            const report = inspectCircuitikzRenderArtifact({
+                expectedArtifactPath: svgPath
+            });
+
+            expect(report.artifactKind).toBe('svg');
+            expect(report.svg).toEqual(expect.objectContaining({
+                rootElementPresent: true,
+                visibleElementCount: 0
+            }));
+            expect(report.diagnostics).toEqual([
+                expect.objectContaining({ kind: 'render-svg-no-visible-elements' })
+            ]);
+        } finally {
+            fs.rmSync(tempRoot, { recursive: true, force: true });
+        }
+    });
+
     test('reports missing expected SVG text tokens as render smoke failures', () => {
         const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'notemd-circuitikz-svg-label-'));
         const svgPath = path.join(tempRoot, 'missing-label.svg');

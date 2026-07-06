@@ -211,17 +211,41 @@ function countPathOnlyGlyphUses(svgText: string): number {
         .length;
 }
 
-function removeSvgDefinitions(svgText: string): string {
-    return svgText
-        .replace(/<defs\b[\s\S]*?<\/defs>/gi, ' ')
-        .replace(/<defs\b[^>]*\/\s*>/gi, ' ');
-}
-
 function countVisibleSvgElements(svgText: string): number {
-    return countMatches(
-        removeSvgDefinitions(svgText),
-        /<(?:path|line|polyline|polygon|rect|circle|ellipse|text|use)\b(?![^>]*\bdisplay\s*=\s*["']none["'])/gi
-    );
+    let visibleElementCount = 0;
+    const groupStack: boolean[] = [false];
+    const tokenPattern = /<\/(?:g|defs)\s*>|<defs\b[^>]*\/?>|<g\b[^>]*\/?>|<text\b[^>]*>[\s\S]*?<\/text>|<(?:path|line|polyline|polygon|rect|circle|ellipse|use)\b[^>]*\/?>/gi;
+
+    for (const match of svgText.matchAll(tokenPattern)) {
+        const tag = match[0];
+        if (/^<\/(?:g|defs)/i.test(tag)) {
+            if (groupStack.length > 1) {
+                groupStack.pop();
+            }
+            continue;
+        }
+
+        const parentHidden = groupStack[groupStack.length - 1];
+        if (/^<defs\b/i.test(tag)) {
+            if (!/\/\s*>$/.test(tag)) {
+                groupStack.push(true);
+            }
+            continue;
+        }
+
+        if (/^<g\b/i.test(tag)) {
+            if (!/\/\s*>$/.test(tag)) {
+                groupStack.push(parentHidden || tagIsHidden(tag));
+            }
+            continue;
+        }
+
+        if (!parentHidden && !tagIsHidden(tag)) {
+            visibleElementCount += 1;
+        }
+    }
+
+    return visibleElementCount;
 }
 
 function parseNumericAttribute(tag: string, attributeName: string): number | undefined {
@@ -433,7 +457,19 @@ function unionBoxes(label: string, boxes: SvgBox[]): SvgBox | undefined {
 }
 
 function tagIsHidden(tag: string): boolean {
-    return /\bdisplay\s*=\s*["']none["']/i.test(tag);
+    const display = readStyleProperty(tag, 'display') ?? readAttribute(tag, 'display');
+    if (display?.trim().toLowerCase() === 'none') {
+        return true;
+    }
+
+    const visibility = readStyleProperty(tag, 'visibility') ?? readAttribute(tag, 'visibility');
+    const normalizedVisibility = visibility?.trim().toLowerCase();
+    if (normalizedVisibility === 'hidden' || normalizedVisibility === 'collapse') {
+        return true;
+    }
+
+    const opacity = parseSvgNumberPrefix(readStyleProperty(tag, 'opacity') ?? readAttribute(tag, 'opacity'));
+    return opacity === 0;
 }
 
 function isInteriorUnitInterval(value: number): boolean {
