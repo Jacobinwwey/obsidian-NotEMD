@@ -67,6 +67,8 @@ describe('circuitikz export docs contract', () => {
             expect(doc).toContain('path-only glyph overlap');
             expect(doc).toContain('arc path endpoint geometry');
             expect(doc).toContain('A/a arc endpoints');
+            expect(doc).toContain('Bezier path endpoint geometry');
+            expect(doc).toContain('C/S/Q/T curve endpoints');
             expect(doc).toContain('<use href="#...">');
             expect(doc).toContain('polyline');
             expect(doc).toContain('polygon');
@@ -128,6 +130,8 @@ describe('circuitikz export docs contract', () => {
             expect(doc).toContain('path-only glyph overlap');
             expect(doc).toContain('arc path endpoint geometry');
             expect(doc).toContain('A/a arc endpoints');
+            expect(doc).toContain('Bezier path endpoint geometry');
+            expect(doc).toContain('C/S/Q/T curve endpoints');
             expect(doc).toContain('polyline');
             expect(doc).toContain('polygon');
             expect(doc).toContain('tspan');
@@ -140,6 +144,16 @@ describe('circuitikz export docs contract', () => {
             expect(doc).toContain('TikZJax/LaTeX');
             expect(doc).toContain('screenshot');
         }
+
+        expect(progressDoc).toContain('Current Architecture Progress Audit');
+        expect(progressDoc).toContain('Keep model output semantic instead of free-form renderer text');
+        expect(progressDoc).toContain('Make renderer execution cross-platform');
+        expect(progressDoc).toContain('Verify circuit output before visual repair');
+
+        expect(progressDocZh).toContain('当前架构推进审计');
+        expect(progressDocZh).toContain('保持模型输出为语义层');
+        expect(progressDocZh).toContain('renderer 执行必须跨平台');
+        expect(progressDocZh).toContain('视觉修复前必须先验证电路输出');
     });
 
     test('records SVG arc endpoint smoke coverage in the bilingual roadmap', () => {
@@ -147,6 +161,8 @@ describe('circuitikz export docs contract', () => {
             expect(doc).toContain('circuitikzRenderSmoke.ts');
             expect(doc).toContain('arc path endpoint geometry');
             expect(doc).toContain('A/a arc endpoints');
+            expect(doc).toContain('Bezier path endpoint geometry');
+            expect(doc).toContain('C/S/Q/T curve endpoints');
             expect(doc).toContain('path-only glyph overlap diagnostics');
             expect(doc).toContain('polyline');
             expect(doc).toContain('polygon');

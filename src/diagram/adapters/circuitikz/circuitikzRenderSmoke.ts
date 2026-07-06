@@ -325,8 +325,9 @@ function pathBox(tag: string): SvgBox | undefined {
         return undefined;
     }
 
-    const tokens = Array.from(d.matchAll(/[MLHVZAmlhvza]|-?[0-9]+(?:\.[0-9]+)?(?:e[-+]?[0-9]+)?/g))
+    const tokens = Array.from(d.matchAll(/[MLHVZACSQTAmlhvzacsqt]|-?[0-9]+(?:\.[0-9]+)?(?:e[-+]?[0-9]+)?/g))
         .map(match => match[0]);
+    const commandPattern = /^[MLHVZACSQTAmlhvzacsqt]$/;
     const points: Array<[number, number]> = [];
     let command = '';
     let index = 0;
@@ -335,7 +336,7 @@ function pathBox(tag: string): SvgBox | undefined {
 
     const readNumber = (): number | undefined => {
         const token = tokens[index];
-        if (token === undefined || /^[MLHVZAmlhvza]$/.test(token)) {
+        if (token === undefined || commandPattern.test(token)) {
             return undefined;
         }
         index += 1;
@@ -345,7 +346,7 @@ function pathBox(tag: string): SvgBox | undefined {
 
     while (index < tokens.length) {
         const token = tokens[index];
-        if (/^[MLHVZAmlhvza]$/.test(token)) {
+        if (commandPattern.test(token)) {
             command = token;
             index += 1;
             if (command.toLowerCase() === 'z') {
@@ -406,6 +407,31 @@ function pathBox(tag: string): SvgBox | undefined {
             }
             x = command === 'a' ? x + nextX : nextX;
             y = command === 'a' ? y + nextY : nextY;
+            points.push([x, y]);
+            continue;
+        }
+
+        if (command === 'C' || command === 'c' || command === 'S' || command === 's' || command === 'Q' || command === 'q' || command === 'T' || command === 't') {
+            const coordinateCount = command === 'C' || command === 'c'
+                ? 6
+                : command === 'T' || command === 't'
+                    ? 2
+                    : 4;
+            const coordinates: number[] = [];
+            for (let coordinateIndex = 0; coordinateIndex < coordinateCount; coordinateIndex += 1) {
+                const value = readNumber();
+                if (value === undefined) {
+                    break;
+                }
+                coordinates.push(value);
+            }
+            if (coordinates.length !== coordinateCount) {
+                break;
+            }
+            const nextX = coordinates[coordinateCount - 2];
+            const nextY = coordinates[coordinateCount - 1];
+            x = command === command.toLowerCase() ? x + nextX : nextX;
+            y = command === command.toLowerCase() ? y + nextY : nextY;
             points.push([x, y]);
             continue;
         }
