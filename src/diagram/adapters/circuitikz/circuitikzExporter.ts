@@ -51,6 +51,10 @@ function dualInputPortX(side: 'left' | 'right'): string {
 }
 
 function requiredNetsForCircuitKind(circuitKind: string): string[] {
+    if (circuitKind === 'cmos-buffer') {
+        return ['VDD', 'GND', 'vin', 'vmid', 'vout'];
+    }
+
     if (circuitKind === 'cmos-nand2' || circuitKind === 'cmos-nor2') {
         return ['VDD', 'GND', 'va', 'vb', 'vout'];
     }
@@ -286,6 +290,52 @@ function validateCmosNand2Template(
     }
 }
 
+function validateCmosBufferTemplate(
+    spec: CircuitSpec,
+    componentById: Map<string, CircuitComponent>,
+    errors: string[]
+): void {
+    if (spec.goldenReferenceId !== 'cmos-buffer-v1') {
+        errors.push('CMOS buffer requires goldenReferenceId "cmos-buffer-v1".');
+    }
+
+    requireComponent(componentById, 'MP1', 'pmos', errors);
+    requireComponent(componentById, 'MN1', 'nmos', errors);
+    requireComponent(componentById, 'MP2', 'pmos', errors);
+    requireComponent(componentById, 'MN2', 'nmos', errors);
+
+    if (!hasConnection(spec.connections, 'MP1.D', 'MN1.D')) {
+        errors.push('CMOS buffer requires MP1.D and MN1.D to share the first-stage drain path.');
+    }
+    if (!hasConnection(spec.connections, 'vin', 'MP1.G') || !hasConnection(spec.connections, 'vin', 'MN1.G')) {
+        errors.push('CMOS buffer requires vin to drive both MP1.G and MN1.G.');
+    }
+    if (!hasConnection(spec.connections, 'VDD', 'MP1.S')) {
+        errors.push('CMOS buffer requires VDD to connect to MP1.S.');
+    }
+    if (!hasConnection(spec.connections, 'MN1.S', 'GND')) {
+        errors.push('CMOS buffer requires MN1.S to connect to GND.');
+    }
+    if (!hasConnection(spec.connections, 'MP1.D', 'vmid') || !hasConnection(spec.connections, 'MN1.D', 'vmid')) {
+        errors.push('CMOS buffer requires both first-stage drains to connect to vmid.');
+    }
+    if (!hasConnection(spec.connections, 'MP2.D', 'MN2.D')) {
+        errors.push('CMOS buffer requires MP2.D and MN2.D to share the second-stage drain path.');
+    }
+    if (!hasConnection(spec.connections, 'vmid', 'MP2.G') || !hasConnection(spec.connections, 'vmid', 'MN2.G')) {
+        errors.push('CMOS buffer requires vmid to drive both MP2.G and MN2.G.');
+    }
+    if (!hasConnection(spec.connections, 'VDD', 'MP2.S')) {
+        errors.push('CMOS buffer requires VDD to connect to MP2.S.');
+    }
+    if (!hasConnection(spec.connections, 'MN2.S', 'GND')) {
+        errors.push('CMOS buffer requires MN2.S to connect to GND.');
+    }
+    if (!hasConnection(spec.connections, 'MP2.D', 'vout') || !hasConnection(spec.connections, 'MN2.D', 'vout')) {
+        errors.push('CMOS buffer requires both second-stage drains to connect to vout.');
+    }
+}
+
 function validateCmosNor2Template(
     spec: CircuitSpec,
     componentById: Map<string, CircuitComponent>,
@@ -363,6 +413,8 @@ export function validateCircuitSpec(spec: CircuitSpec): CircuitSpecValidationRes
         validateCommonSourceTemplate(spec, componentById, errors);
     } else if (spec.circuitKind === 'cmos-inverter') {
         validateCmosInverterTemplate(spec, componentById, errors);
+    } else if (spec.circuitKind === 'cmos-buffer') {
+        validateCmosBufferTemplate(spec, componentById, errors);
     } else if (spec.circuitKind === 'cmos-nand2') {
         validateCmosNand2Template(spec, componentById, errors);
     } else if (spec.circuitKind === 'cmos-nor2') {
@@ -453,6 +505,68 @@ function renderCmosInverterTemplate(spec: CircuitSpec): string {
 ${inputRoute}
 \\draw
   (3,2.75) to [short, *-o] (${commonPortX(outputSide)},2.75) node[${outputSide}]{$v_{out}$};
+\\end{circuitikz}
+\\end{document}
+`;
+}
+
+function renderCmosBufferTemplate(spec: CircuitSpec): string {
+    const mp1 = spec.components.find(component => component.id === 'MP1');
+    const mn1 = spec.components.find(component => component.id === 'MN1');
+    const mp2 = spec.components.find(component => component.id === 'MP2');
+    const mn2 = spec.components.find(component => component.id === 'MN2');
+    const mp1Label = normalizeLabel(mp1?.label, '$M_{P1}$');
+    const mn1Label = normalizeLabel(mn1?.label, '$M_{N1}$');
+    const mp2Label = normalizeLabel(mp2?.label, '$M_{P2}$');
+    const mn2Label = normalizeLabel(mn2?.label, '$M_{N2}$');
+    const inputSide = layoutSide(spec.layoutHints?.inputSide, 'left');
+    const outputSide = layoutSide(spec.layoutHints?.outputSide, 'right');
+    const outputPortX = outputSide === 'right' ? '7.2' : commonPortX(outputSide);
+    const inputRoute = inputSide === 'left'
+        ? `  (MP1.G) to [short] (1.5,3.5)
+  (MN1.G) to [short] (1.5,2.0)
+  (1.5,3.5) to [short] (1.5,2.0)
+  to [short, -o] (0.8,2.75)
+  node[left]{$v_{in}$};`
+        : `  (MP1.G) to [short] (1.5,3.5)
+  (MN1.G) to [short] (1.5,2.0)
+  (1.5,3.5) to [short] (1.5,2.0)
+  (1.5,2.75) to [short] (1.5,1.2)
+  to [short, -o] (7.2,1.2)
+  node[right]{$v_{in}$};`;
+
+    return `\\usepackage{circuitikz}
+\\begin{document}
+\\begin{circuitikz}[${spec.style.voltageConvention}]
+\\draw
+  (3,5) node[vcc]{$V_{DD}$}
+  to [short] (3,4.4)
+  node[pmos, anchor=S] (MP1) {${mp1Label}}
+  (MP1.D) to [short] (3,2.75)
+  to [short] (3,2.6)
+  node[nmos, anchor=D] (MN1) {${mn1Label}}
+  (MN1.S) to [short] (3,0.8)
+  node[ground]{};
+\\draw
+  (5.4,5) node[vcc]{$V_{DD}$}
+  to [short] (5.4,4.4)
+  node[pmos, anchor=S] (MP2) {${mp2Label}}
+  (MP2.D) to [short] (5.4,2.75)
+  to [short] (5.4,2.6)
+  node[nmos, anchor=D] (MN2) {${mn2Label}}
+  (MN2.S) to [short] (5.4,0.8)
+  node[ground]{};
+\\draw
+  (3,2.75) to [short, *-] (4.2,2.75)
+  node[above]{$v_{mid}$}
+  (4.2,2.75) to [short] (4.2,3.5)
+  (MP2.G) to [short] (4.2,3.5)
+  (MN2.G) to [short] (4.2,2.0)
+  (4.2,3.5) to [short] (4.2,2.0);
+\\draw
+${inputRoute}
+\\draw
+  (5.4,2.75) to [short, *-o] (${outputPortX},2.75) node[${outputSide}]{$v_{out}$};
 \\end{circuitikz}
 \\end{document}
 `;
@@ -591,6 +705,8 @@ export function exportCircuitSpecToCircuitikz(spec: CircuitSpec): string {
             return renderCommonSourceTemplate(spec);
         case 'cmos-inverter':
             return renderCmosInverterTemplate(spec);
+        case 'cmos-buffer':
+            return renderCmosBufferTemplate(spec);
         case 'cmos-nand2':
             return renderCmosNand2Template(spec);
         case 'cmos-nor2':

@@ -67,6 +67,46 @@ function createCmosInverterSpec(): CircuitSpec {
     };
 }
 
+function createCmosBufferSpec(): CircuitSpec {
+    return {
+        circuitKind: 'cmos-buffer' as CircuitSpec['circuitKind'],
+        title: 'CMOS Buffer',
+        goldenReferenceId: 'cmos-buffer-v1',
+        style: {
+            package: 'circuitikz',
+            voltageConvention: 'american voltages'
+        },
+        nets: ['VDD', 'GND', 'vin', 'vmid', 'vout'],
+        components: [
+            { id: 'MP1', type: 'pmos', label: '$M_{P1}$', terminals: { S: 'VDD', G: 'vin', D: 'vmid' } },
+            { id: 'MN1', type: 'nmos', label: '$M_{N1}$', terminals: { D: 'vmid', G: 'vin', S: 'GND' } },
+            { id: 'MP2', type: 'pmos', label: '$M_{P2}$', terminals: { S: 'VDD', G: 'vmid', D: 'vout' } },
+            { id: 'MN2', type: 'nmos', label: '$M_{N2}$', terminals: { D: 'vout', G: 'vmid', S: 'GND' } }
+        ],
+        connections: [
+            { from: 'VDD', to: 'MP1.S' },
+            { from: 'MP1.D', to: 'MN1.D' },
+            { from: 'MN1.S', to: 'GND' },
+            { from: 'vin', to: 'MP1.G' },
+            { from: 'vin', to: 'MN1.G' },
+            { from: 'MP1.D', to: 'vmid' },
+            { from: 'MN1.D', to: 'vmid' },
+            { from: 'VDD', to: 'MP2.S' },
+            { from: 'MP2.D', to: 'MN2.D' },
+            { from: 'MN2.S', to: 'GND' },
+            { from: 'vmid', to: 'MP2.G' },
+            { from: 'vmid', to: 'MN2.G' },
+            { from: 'MP2.D', to: 'vout' },
+            { from: 'MN2.D', to: 'vout' }
+        ],
+        layoutHints: {
+            inputSide: 'left',
+            outputSide: 'right',
+            routingStyle: 'orthogonal'
+        }
+    };
+}
+
 function createCmosNand2Spec(): CircuitSpec {
     return {
         circuitKind: 'cmos-nand2',
@@ -198,6 +238,51 @@ describe('circuitikz exporter', () => {
         expect(output).toContain('(1.5,2.75) to [short] (1.5,1.2)');
         expect(output).toContain('to [short, -o] (5.2,1.2)');
         expect(output).toContain('node[right]{$v_{in}$};');
+    });
+
+    test('validates and exports a constrained two-stage CMOS buffer template deterministically', () => {
+        const spec = createCmosBufferSpec();
+        const output = exportCircuitSpecToCircuitikz(spec);
+
+        expect(assertValidCircuitSpec(spec)).toBe(spec);
+        expect(output).toContain('\\begin{circuitikz}[american voltages]');
+        expect(output).toContain('node[pmos, anchor=S] (MP1) {$M_{P1}$}');
+        expect(output).toContain('node[nmos, anchor=D] (MN1) {$M_{N1}$}');
+        expect(output).toContain('node[pmos, anchor=S] (MP2) {$M_{P2}$}');
+        expect(output).toContain('node[nmos, anchor=D] (MN2) {$M_{N2}$}');
+        expect(output).toContain('(3,2.75) to [short, *-] (4.2,2.75)');
+        expect(output).toContain('(4.2,2.75) to [short] (4.2,3.5)');
+        expect(output).toContain('(5.4,2.75) to [short, *-o] (7.2,2.75) node[right]{$v_{out}$};');
+        expect(output).toContain('node[left]{$v_{in}$};');
+        expect(output).toContain('node[above]{$v_{mid}$}');
+    });
+
+    test('projects CMOS buffer layout hints into deterministic input and output ports', () => {
+        const reference = createCmosBufferSpec();
+        const spec = createCmosBufferSpec();
+        spec.layoutHints = {
+            inputSide: 'right',
+            outputSide: 'left',
+            routingStyle: 'orthogonal'
+        };
+
+        const output = exportCircuitSpecToCircuitikz(spec);
+
+        expect(createCircuitTopologySignature(spec)).toBe(createCircuitTopologySignature(reference));
+        expect(output).toContain('(5.4,2.75) to [short, *-o] (0.8,2.75) node[left]{$v_{out}$};');
+        expect(output).toContain('to [short, -o] (7.2,1.2)');
+        expect(output).toContain('node[right]{$v_{in}$};');
+        expect(output).toContain('(3,2.75) to [short, *-] (4.2,2.75)');
+    });
+
+    test('rejects CMOS buffer specs that do not drive the second inverter from vmid', () => {
+        const spec = createCmosBufferSpec();
+        spec.connections = spec.connections.filter(connection => connection.from !== 'vmid' || connection.to !== 'MP2.G');
+
+        expect(validateCircuitSpec(spec).errors).toContain(
+            'CMOS buffer requires vmid to drive both MP2.G and MN2.G.'
+        );
+        expect(() => exportCircuitSpecToCircuitikz(spec)).toThrow(/vmid to drive both MP2\.G and MN2\.G/);
     });
 
     test('validates and exports a constrained two-input CMOS NAND template deterministically', () => {

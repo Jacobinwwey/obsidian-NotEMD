@@ -166,6 +166,7 @@ The repository now includes maintainer fixtures for every supported golden famil
 |---|---|
 | `docs/maintainer/fixtures/circuitikz/common-source-nmos-v1.json` | `common-source-amplifier` |
 | `docs/maintainer/fixtures/circuitikz/cmos-inverter-v1.json` | `cmos-inverter` |
+| `docs/maintainer/fixtures/circuitikz/cmos-buffer-v1.json` | `cmos-buffer` |
 | `docs/maintainer/fixtures/circuitikz/cmos-nand2-v1.json` | `cmos-nand2` |
 | `docs/maintainer/fixtures/circuitikz/cmos-nor2-v1.json` | `cmos-nor2` |
 
@@ -216,6 +217,7 @@ This is not a generic TikZ generator. The current prototype supports only golden
 |---|---|---|
 | `common-source-amplifier` | `common-source-nmos-v1` | NMOS common-source amplifier with `R_D`, `VDD`, `vin`, `vout`, and grounded source |
 | `cmos-inverter` | `cmos-inverter-v1` | PMOS-over-NMOS CMOS inverter with shared gate input and shared drain output |
+| `cmos-buffer` | `cmos-buffer-v1` | Two-stage CMOS buffer with first-stage inverted node `vmid`, second-stage restored output, `vin`, and `vout` |
 | `cmos-nand2` | `cmos-nand2-v1` | Two-input CMOS NAND with parallel PMOS pull-up devices, series NMOS pull-down devices, `va`, `vb`, and `vout` |
 | `cmos-nor2` | `cmos-nor2-v1` | Two-input CMOS NOR with series PMOS pull-up devices, parallel NMOS pull-down devices, `va`, `vb`, and `vout` |
 
@@ -227,6 +229,8 @@ The adapter validates the structural invariant first, then emits a fixed layout.
 - `vin -> MP.G` and `vin -> MN.G`;
 - `MP.D` and `MN.D` on the shared output drain path;
 - both transistor drains connected to `vout`.
+
+The CMOS buffer template composes two locked inverter stages. The first stage requires `MP1` / `MN1` to share the `vmid` drain path and `vin` to drive both first-stage gates. The second stage requires `vmid` to drive both `MP2.G` and `MN2.G`, `MP2` / `MN2` to share the output drain path, and both second-stage drains to connect to `vout`. `layoutHints.inputSide` and `layoutHints.outputSide` remain presentation-only and do not change the topology signature.
 
 The CMOS NAND template adds a stronger digital-logic invariant: `MPA` and `MPB` must be PMOS devices in the parallel pull-up network from `VDD` to `vout`; `MNA` and `MNB` must be NMOS devices in a series pull-down stack from `vout` to `GND`; `va` must drive `MPA.G` and `MNA.G`; and `vb` must drive `MPB.G` and `MNB.G`. `layoutHints.inputSide` and `layoutHints.outputSide` only move the input/output ports and presentation routing; they do not change the topology signature.
 
@@ -247,7 +251,7 @@ CircuitSpec
 
 This keeps the model-facing contract narrow and makes topology drift testable. The exporter rejects invalid topology before writing an output file.
 
-For the current golden templates, `layoutHints.inputSide` and `layoutHints.outputSide` are projected into deterministic input/output port placement. A topology-preserving repair can move `v_{in}` or `v_{out}` to the other side through layout hints while keeping the same `topologySignature`; the exporter rewrites only the presentation route and node anchor. This is not a general autorouter. It is a constrained layout projection for the supported `common-source-amplifier` and `cmos-inverter` families.
+For the current golden templates, `layoutHints.inputSide` and `layoutHints.outputSide` are projected into deterministic input/output port placement. A topology-preserving repair can move input or output ports to the other side through layout hints while keeping the same `topologySignature`; the exporter rewrites only the presentation route and node anchor. This is not a general autorouter. It is a constrained layout projection for the supported golden families.
 
 ## Verification
 
@@ -260,7 +264,7 @@ npm test -- --runInBand src/tests/circuitikzExporter.test.ts src/tests/circuitik
 The tests verify:
 
 - deterministic common-source LaTeX;
-- constrained CMOS inverter output;
+- constrained CMOS inverter, buffer, NAND, and NOR output;
 - deterministic `layoutHints.inputSide` and `layoutHints.outputSide` projection for supported templates;
 - topology rejection before export;
 - CLI exposure through `package.json`;
@@ -288,4 +292,4 @@ The tests verify:
 
 ## Non-Goals
 
-This prototype does not bundle LaTeX, call TikZJax as an Obsidian runtime dependency, OCR path-only glyph text, run precise pixel-level overlap detection, cover unsupported SVG path geometry, or use rendered-image feedback for automatic repair. Those are later gates. It also does not accept arbitrary natural-language circuit requests. The important current claim is narrower: validated `CircuitSpec` input can produce stable, readable circuitikz for four golden families, existing compile logs can be converted into actionable diagnostics, and an explicitly configured local renderer can be executed without shell-specific command parsing while optionally proving that a concrete output artifact was created and, for SVG or PNG output, structurally renderable enough for later visual inspection. SVG output now includes transform-aware geometry for common SVG transforms, exact arc bounds for A/a arc extrema, exact Bezier curve bounds for C/S/Q/T curve extrema, positioned `tspan` label geometry, path-only label classification, path-only glyph overlap detection, and conservative label-vs-drawing overlap detection; PNG output exposes foreground bounds, foreground density, and format-specific unsupported-export guidance needed to reject obvious canvas clipping, first-pass pixel crowding, Adam7 interlaced PNGs, and unsupported indexed-color bit depths before a topology-preserving repair loop.
+This prototype does not bundle LaTeX, call TikZJax as an Obsidian runtime dependency, OCR path-only glyph text, run precise pixel-level overlap detection, cover unsupported SVG path geometry, or use rendered-image feedback for automatic repair. Those are later gates. It also does not accept arbitrary natural-language circuit requests. The important current claim is narrower: validated `CircuitSpec` input can produce stable, readable circuitikz for five golden families, existing compile logs can be converted into actionable diagnostics, and an explicitly configured local renderer can be executed without shell-specific command parsing while optionally proving that a concrete output artifact was created and, for SVG or PNG output, structurally renderable enough for later visual inspection. SVG output now includes transform-aware geometry for common SVG transforms, exact arc bounds for A/a arc extrema, exact Bezier curve bounds for C/S/Q/T curve extrema, positioned `tspan` label geometry, path-only label classification, path-only glyph overlap detection, and conservative label-vs-drawing overlap detection; PNG output exposes foreground bounds, foreground density, and format-specific unsupported-export guidance needed to reject obvious canvas clipping, first-pass pixel crowding, Adam7 interlaced PNGs, and unsupported indexed-color bit depths before a topology-preserving repair loop.
