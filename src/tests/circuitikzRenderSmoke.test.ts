@@ -54,6 +54,7 @@ function createRgbaPng(width: number, height: number, pixels: Array<[number, num
 function createIndexedPng(
     width: number,
     height: number,
+    bitDepth: number,
     palette: Array<[number, number, number]>,
     indexes: number[],
     alpha?: number[]
@@ -62,18 +63,33 @@ function createIndexedPng(
     const ihdr = Buffer.alloc(13);
     ihdr.writeUInt32BE(width, 0);
     ihdr.writeUInt32BE(height, 4);
-    ihdr[8] = 8;
+    ihdr[8] = bitDepth;
     ihdr[9] = 3;
     ihdr[10] = 0;
     ihdr[11] = 0;
     ihdr[12] = 0;
 
+    const packedRowSamples = (rowIndexes: number[]): number[] => {
+        if (bitDepth === 8) {
+            return rowIndexes;
+        }
+        const samplesPerByte = 8 / bitDepth;
+        const rowBytes: number[] = [];
+        for (let offset = 0; offset < rowIndexes.length; offset += samplesPerByte) {
+            let packed = 0;
+            for (let sampleOffset = 0; sampleOffset < samplesPerByte; sampleOffset += 1) {
+                const sample = rowIndexes[offset + sampleOffset] ?? 0;
+                packed |= sample << (8 - bitDepth * (sampleOffset + 1));
+            }
+            rowBytes.push(packed);
+        }
+        return rowBytes;
+    };
+
     const scanlines: number[] = [];
     for (let row = 0; row < height; row += 1) {
         scanlines.push(0);
-        for (let column = 0; column < width; column += 1) {
-            scanlines.push(indexes[row * width + column]);
-        }
+        scanlines.push(...packedRowSamples(indexes.slice(row * width, row * width + width)));
     }
 
     const chunks = [
@@ -1137,6 +1153,7 @@ describe('circuitikz render smoke inspection', () => {
             createIndexedPng(
                 3,
                 3,
+                8,
                 [
                     [255, 255, 255],
                     [0, 0, 0]
@@ -1185,6 +1202,7 @@ describe('circuitikz render smoke inspection', () => {
             createIndexedPng(
                 3,
                 3,
+                8,
                 [
                     [255, 255, 255],
                     [0, 0, 0]
@@ -1207,6 +1225,147 @@ describe('circuitikz render smoke inspection', () => {
             expect(report.diagnostics).toEqual([]);
             expect(report.png).toEqual(expect.objectContaining({
                 colorType: 3,
+                nonBackgroundPixelCount: 1,
+                foregroundDensity: 1,
+                foregroundBounds: {
+                    minX: 1,
+                    minY: 1,
+                    maxX: 1,
+                    maxY: 1
+                }
+            }));
+        } finally {
+            fs.rmSync(tempRoot, { recursive: true, force: true });
+        }
+    });
+
+    test('accepts a packed one-bit indexed-color PNG screenshot artifact', () => {
+        const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'notemd-circuitikz-png-indexed-1bit-smoke-'));
+        const pngPath = path.join(tempRoot, 'indexed-1bit-render.png');
+        fs.writeFileSync(
+            pngPath,
+            createIndexedPng(
+                3,
+                3,
+                1,
+                [
+                    [255, 255, 255],
+                    [0, 0, 0]
+                ],
+                [
+                    0, 0, 0,
+                    0, 1, 0,
+                    0, 0, 0
+                ]
+            )
+        );
+
+        try {
+            const report = inspectCircuitikzRenderArtifact({
+                expectedArtifactPath: pngPath
+            });
+
+            expect(report.artifactKind).toBe('png');
+            expect(report.diagnostics).toEqual([]);
+            expect(report.png).toEqual(expect.objectContaining({
+                bitDepth: 1,
+                colorType: 3,
+                decodedPixelCount: 9,
+                nonBackgroundPixelCount: 1,
+                foregroundDensity: 1,
+                foregroundBounds: {
+                    minX: 1,
+                    minY: 1,
+                    maxX: 1,
+                    maxY: 1
+                }
+            }));
+        } finally {
+            fs.rmSync(tempRoot, { recursive: true, force: true });
+        }
+    });
+
+    test('accepts a packed two-bit indexed-color PNG screenshot artifact', () => {
+        const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'notemd-circuitikz-png-indexed-2bit-smoke-'));
+        const pngPath = path.join(tempRoot, 'indexed-2bit-render.png');
+        fs.writeFileSync(
+            pngPath,
+            createIndexedPng(
+                3,
+                3,
+                2,
+                [
+                    [255, 255, 255],
+                    [192, 192, 192],
+                    [96, 96, 96],
+                    [0, 0, 0]
+                ],
+                [
+                    0, 0, 0,
+                    0, 3, 0,
+                    0, 0, 0
+                ]
+            )
+        );
+
+        try {
+            const report = inspectCircuitikzRenderArtifact({
+                expectedArtifactPath: pngPath
+            });
+
+            expect(report.artifactKind).toBe('png');
+            expect(report.diagnostics).toEqual([]);
+            expect(report.png).toEqual(expect.objectContaining({
+                bitDepth: 2,
+                colorType: 3,
+                decodedPixelCount: 9,
+                nonBackgroundPixelCount: 1,
+                foregroundDensity: 1,
+                foregroundBounds: {
+                    minX: 1,
+                    minY: 1,
+                    maxX: 1,
+                    maxY: 1
+                }
+            }));
+        } finally {
+            fs.rmSync(tempRoot, { recursive: true, force: true });
+        }
+    });
+
+    test('accepts a packed four-bit indexed-color PNG screenshot artifact', () => {
+        const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'notemd-circuitikz-png-indexed-4bit-smoke-'));
+        const pngPath = path.join(tempRoot, 'indexed-4bit-render.png');
+        fs.writeFileSync(
+            pngPath,
+            createIndexedPng(
+                3,
+                3,
+                4,
+                [
+                    [255, 255, 255],
+                    [192, 192, 192],
+                    [0, 0, 0]
+                ],
+                [
+                    0, 0, 0,
+                    0, 2, 0,
+                    0, 0, 0
+                ]
+            )
+        );
+
+        try {
+            const report = inspectCircuitikzRenderArtifact({
+                expectedArtifactPath: pngPath
+            });
+
+            expect(report.artifactKind).toBe('png');
+            expect(report.diagnostics).toEqual([]);
+            expect(report.png).toEqual(expect.objectContaining({
+                bitDepth: 4,
+                colorType: 3,
+                decodedPixelCount: 9,
                 nonBackgroundPixelCount: 1,
                 foregroundDensity: 1,
                 foregroundBounds: {

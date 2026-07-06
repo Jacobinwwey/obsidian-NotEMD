@@ -126,7 +126,7 @@ node scripts/export-circuitikz.js \
   --expected-svg-text v_{out}
 ```
 
-对于 `.png` screenshot artifact，smoke check 会解码非交错的 8-bit indexed-color、grayscale、RGB、grayscale-alpha 或 RGBA PNG 输出，包括 indexed-color 图像的 PLTE palette entries 与可选 tRNS alpha。它会检查正的尺寸，把前景像素包围盒记录为 `foregroundBounds`，把包围盒内前景密度记录为 `foregroundDensity`，并要求至少一个不同于左上角背景色的像素。空白截图会以 `render-png-blank` 失败；前景内容贴到图像边界会以 `render-png-content-clipped` 失败；非平凡包围盒内前景像素异常密集会以 `render-png-foreground-dense` 失败；格式损坏或不支持的 PNG 会以 `render-png-invalid` 或 `render-png-unsupported` 失败。
+对于 `.png` screenshot artifact，smoke check 会解码非交错的 1/2/4/8-bit indexed-color、8-bit grayscale、RGB、grayscale-alpha 或 RGBA PNG 输出，包括 packed indexed samples、indexed-color 图像的 PLTE palette entries 与可选 tRNS alpha。它会检查正的尺寸，把前景像素包围盒记录为 `foregroundBounds`，把包围盒内前景密度记录为 `foregroundDensity`，并要求至少一个不同于左上角背景色的像素。空白截图会以 `render-png-blank` 失败；前景内容贴到图像边界会以 `render-png-content-clipped` 失败；非平凡包围盒内前景像素异常密集会以 `render-png-foreground-dense` 失败；格式损坏或不支持的 PNG 会以 `render-png-invalid` 或 `render-png-unsupported` 失败。
 
 检查结果会记录为 `compileExecution.renderSmoke`。缺失或空 artifact 会追加 `render-artifact-missing` 或 `render-artifact-empty`；SVG 结构失败会追加 `render-svg-invalid`、`render-svg-dimension-missing`、`render-svg-no-visible-elements`、`render-svg-text-missing`、`render-svg-text-path-only`、`render-svg-out-of-bounds`、`render-svg-text-overlap`、`render-svg-label-overlap` 或 `render-svg-path-glyph-overlap` 等 diagnostic；PNG screenshot 失败会追加 `render-png-blank`、`render-png-content-clipped` 或 `render-png-foreground-dense` 等 diagnostic。
 

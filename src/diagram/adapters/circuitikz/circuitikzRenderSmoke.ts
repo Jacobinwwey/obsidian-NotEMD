@@ -72,6 +72,19 @@ interface PngPalette {
     alpha: number[];
 }
 
+type PngPixelLayout = {
+    kind: 'direct';
+    colorType: number;
+    bytesPerPixel: number;
+    scanlineByteLength: number;
+    filterByteStride: number;
+} | {
+    kind: 'indexed';
+    bitDepth: number;
+    scanlineByteLength: number;
+    filterByteStride: 1;
+};
+
 interface SvgBox {
     label: string;
     minX: number;
@@ -1338,8 +1351,6 @@ function channelsForColorType(colorType: number): number | undefined {
     switch (colorType) {
         case 0:
             return 1;
-        case 3:
-            return 1;
         case 2:
             return 3;
         case 4:
@@ -1349,6 +1360,32 @@ function channelsForColorType(colorType: number): number | undefined {
         default:
             return undefined;
     }
+}
+
+function createPngPixelLayout(header: PngHeader): PngPixelLayout | undefined {
+    if (header.colorType === 3) {
+        if (![1, 2, 4, 8].includes(header.bitDepth)) {
+            return undefined;
+        }
+        return {
+            kind: 'indexed',
+            bitDepth: header.bitDepth,
+            scanlineByteLength: Math.ceil(header.width * header.bitDepth / 8),
+            filterByteStride: 1
+        };
+    }
+
+    const channels = channelsForColorType(header.colorType);
+    if (!channels || header.bitDepth !== 8) {
+        return undefined;
+    }
+    return {
+        kind: 'direct',
+        colorType: header.colorType,
+        bytesPerPixel: channels,
+        scanlineByteLength: header.width * channels,
+        filterByteStride: channels
+    };
 }
 
 function paethPredictor(left: number, up: number, upLeft: number): number {
@@ -1366,26 +1403,25 @@ function paethPredictor(left: number, up: number, upLeft: number): number {
     return upLeft;
 }
 
-function unfilterPngScanlines(inflated: Buffer, width: number, height: number, bytesPerPixel: number): Buffer {
-    const rowLength = width * bytesPerPixel;
-    const expectedLength = (rowLength + 1) * height;
+function unfilterPngScanlines(inflated: Buffer, height: number, scanlineByteLength: number, filterByteStride: number): Buffer {
+    const expectedLength = (scanlineByteLength + 1) * height;
     if (inflated.length < expectedLength) {
         throw new Error('PNG image data is shorter than the decoded scanline length.');
     }
 
-    const decoded = Buffer.alloc(rowLength * height);
+    const decoded = Buffer.alloc(scanlineByteLength * height);
     for (let row = 0; row < height; row += 1) {
-        const sourceOffset = row * (rowLength + 1);
+        const sourceOffset = row * (scanlineByteLength + 1);
         const filter = inflated[sourceOffset];
-        const targetOffset = row * rowLength;
-        const previousOffset = row > 0 ? targetOffset - rowLength : undefined;
+        const targetOffset = row * scanlineByteLength;
+        const previousOffset = row > 0 ? targetOffset - scanlineByteLength : undefined;
 
-        for (let column = 0; column < rowLength; column += 1) {
+        for (let column = 0; column < scanlineByteLength; column += 1) {
             const raw = inflated[sourceOffset + 1 + column];
-            const left = column >= bytesPerPixel ? decoded[targetOffset + column - bytesPerPixel] : 0;
+            const left = column >= filterByteStride ? decoded[targetOffset + column - filterByteStride] : 0;
             const up = previousOffset === undefined ? 0 : decoded[previousOffset + column];
-            const upLeft = previousOffset !== undefined && column >= bytesPerPixel
-                ? decoded[previousOffset + column - bytesPerPixel]
+            const upLeft = previousOffset !== undefined && column >= filterByteStride
+                ? decoded[previousOffset + column - filterByteStride]
                 : 0;
 
             switch (filter) {
@@ -1438,23 +1474,29 @@ function parsePngPalette(chunks: PngChunk[], colorType: number): PngPalette | un
 function readPixel(
     decoded: Buffer,
     pixelIndex: number,
-    colorType: number,
-    channels: number,
+    width: number,
+    layout: PngPixelLayout,
     palette?: PngPalette
 ): [number, number, number, number] {
-    const offset = pixelIndex * channels;
-    switch (colorType) {
+    if (layout.kind === 'indexed') {
+        const row = Math.floor(pixelIndex / width);
+        const column = pixelIndex % width;
+        const bitOffset = column * layout.bitDepth;
+        const packed = decoded[row * layout.scanlineByteLength + Math.floor(bitOffset / 8)];
+        const shift = 8 - layout.bitDepth - (bitOffset % 8);
+        const paletteIndex = (packed >> shift) & ((1 << layout.bitDepth) - 1);
+        const color = palette?.colors[paletteIndex];
+        if (!color) {
+            throw new Error(`PNG indexed-color pixel references missing palette entry: ${paletteIndex}.`);
+        }
+        return [color[0], color[1], color[2], palette.alpha[paletteIndex] ?? 255];
+    }
+
+    const offset = pixelIndex * layout.bytesPerPixel;
+    switch (layout.colorType) {
         case 0: {
             const gray = decoded[offset];
             return [gray, gray, gray, 255];
-        }
-        case 3: {
-            const paletteIndex = decoded[offset];
-            const color = palette?.colors[paletteIndex];
-            if (!color) {
-                throw new Error(`PNG indexed-color pixel references missing palette entry: ${paletteIndex}.`);
-            }
-            return [color[0], color[1], color[2], palette.alpha[paletteIndex] ?? 255];
         }
         case 2:
             return [decoded[offset], decoded[offset + 1], decoded[offset + 2], 255];
@@ -1465,7 +1507,7 @@ function readPixel(
         case 6:
             return [decoded[offset], decoded[offset + 1], decoded[offset + 2], decoded[offset + 3]];
         default:
-            throw new Error(`Unsupported PNG color type: ${colorType}.`);
+            throw new Error(`Unsupported PNG color type: ${layout.colorType}.`);
     }
 }
 
@@ -1479,8 +1521,8 @@ function colorDistance(left: [number, number, number, number], right: [number, n
 function extractPngSmoke(pngBytes: Buffer): CircuitikzPngSmokeReport {
     const chunks = parsePngChunks(pngBytes);
     const header = parsePngHeader(chunks);
-    const channels = channelsForColorType(header.colorType);
-    if (!channels || header.bitDepth !== 8 || header.compressionMethod !== 0 || header.filterMethod !== 0 || header.interlaceMethod !== 0) {
+    const pixelLayout = createPngPixelLayout(header);
+    if (!pixelLayout || header.compressionMethod !== 0 || header.filterMethod !== 0 || header.interlaceMethod !== 0) {
         throw new Error(`Unsupported PNG format: bitDepth=${header.bitDepth}, colorType=${header.colorType}, interlace=${header.interlaceMethod}.`);
     }
     if (header.width <= 0 || header.height <= 0) {
@@ -1494,9 +1536,9 @@ function extractPngSmoke(pngBytes: Buffer): CircuitikzPngSmokeReport {
     }
 
     const inflated = zlib.inflateSync(Buffer.concat(idatChunks.map(chunk => chunk.data)));
-    const decoded = unfilterPngScanlines(inflated, header.width, header.height, channels);
+    const decoded = unfilterPngScanlines(inflated, header.height, pixelLayout.scanlineByteLength, pixelLayout.filterByteStride);
     const decodedPixelCount = header.width * header.height;
-    const background = readPixel(decoded, 0, header.colorType, channels, palette);
+    const background = readPixel(decoded, 0, header.width, pixelLayout, palette);
     let nonBackgroundPixelCount = 0;
     let minX = header.width;
     let minY = header.height;
@@ -1504,7 +1546,7 @@ function extractPngSmoke(pngBytes: Buffer): CircuitikzPngSmokeReport {
     let maxY = -1;
 
     for (let pixelIndex = 0; pixelIndex < decodedPixelCount; pixelIndex += 1) {
-        const pixel = readPixel(decoded, pixelIndex, header.colorType, channels, palette);
+        const pixel = readPixel(decoded, pixelIndex, header.width, pixelLayout, palette);
         if (pixel[3] > 0 && colorDistance(pixel, background) > 8) {
             nonBackgroundPixelCount += 1;
             const x = pixelIndex % header.width;
@@ -1635,7 +1677,7 @@ export function inspectCircuitikzRenderArtifact(request: CircuitikzRenderSmokeRe
                     kind: message.startsWith('Unsupported PNG format') ? 'render-png-unsupported' : 'render-png-invalid',
                     message: `Expected PNG render artifact could not be inspected: ${message}`,
                     excerpt: expectedArtifactPath,
-                    advice: 'Use a non-interlaced 8-bit indexed-color, grayscale, RGB, or RGBA PNG for screenshot-level smoke checks.'
+                    advice: 'Use a non-interlaced 1/2/4/8-bit indexed-color PNG, or an 8-bit grayscale, RGB, or RGBA PNG for screenshot-level smoke checks.'
                 }]
             };
         }
