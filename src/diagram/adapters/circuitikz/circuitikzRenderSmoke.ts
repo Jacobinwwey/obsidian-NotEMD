@@ -72,6 +72,9 @@ interface PngPalette {
     alpha: number[];
 }
 
+const PNG_FOREGROUND_FOOTPRINT_MIN_SCREENSHOT_PIXELS = 256;
+const PNG_FOREGROUND_FOOTPRINT_MIN_VISIBLE_PIXELS = 4;
+
 interface PngTransparency {
     grayscale?: number;
     rgb?: [number, number, number];
@@ -1916,6 +1919,20 @@ function pngDiagnostics(report: CircuitikzPngSmokeReport, expectedArtifactPath: 
             message: 'Expected PNG render artifact foreground content touches the image boundary.',
             excerpt: expectedArtifactPath,
             advice: 'Increase renderer padding/viewBox or inspect layout before topology-preserving visual repair.'
+        });
+    }
+
+    if (
+        bounds
+        && report.decodedPixelCount >= PNG_FOREGROUND_FOOTPRINT_MIN_SCREENSHOT_PIXELS
+        && report.nonBackgroundPixelCount < PNG_FOREGROUND_FOOTPRINT_MIN_VISIBLE_PIXELS
+    ) {
+        diagnostics.push({
+            severity: 'error',
+            kind: 'render-png-foreground-too-small',
+            message: `Expected PNG render artifact foreground footprint is too small to review: ${report.nonBackgroundPixelCount} foreground pixel(s).`,
+            excerpt: expectedArtifactPath,
+            advice: 'Treat this as an under-rendered screenshot. Check renderer scale, crop, and foreground contrast before topology-preserving visual repair.'
         });
     }
 

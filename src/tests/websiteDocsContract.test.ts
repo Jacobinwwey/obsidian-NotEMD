@@ -145,6 +145,7 @@ describe('website documentation contract', () => {
             expect(content).toContain('text-anchor');
             expect(content).toContain('render-png-blank');
             expect(content).toContain('render-png-foreground-dense');
+            expect(content).toContain('render-png-foreground-too-small');
             expect(content).toContain('render-png-content-clipped');
             expect(content).toContain('foregroundBounds');
             expect(content).toContain('foregroundDensity');

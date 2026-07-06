@@ -121,6 +121,7 @@ describe('circuitikz export docs contract', () => {
             expect(doc).toContain('text-anchor');
             expect(doc).toContain('render-png-blank');
             expect(doc).toContain('render-png-foreground-dense');
+            expect(doc).toContain('render-png-foreground-too-small');
             expect(doc).toContain('render-png-content-clipped');
             expect(doc).toContain('foregroundBounds');
             expect(doc).toContain('foregroundDensity');
@@ -189,9 +190,11 @@ describe('circuitikz export docs contract', () => {
             expect(doc).toContain('--expected-svg-text');
             expect(doc).toContain('PNG');
             expect(doc).toContain('render-png-foreground-dense');
+            expect(doc).toContain('render-png-foreground-too-small');
             expect(doc).toContain('render-png-content-clipped');
             expect(doc).toContain('foregroundBounds');
             expect(doc).toContain('foregroundDensity');
+            expect(doc).toContain('footprint');
             expect(doc).toContain('bounded');
             expect(doc).toContain('text-overlap');
             expect(doc).toContain('render-svg-label-overlap');

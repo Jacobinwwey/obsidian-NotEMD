@@ -26,6 +26,7 @@ export type CircuitikzCompileDiagnosticKind =
     | 'render-png-invalid'
     | 'render-png-unsupported'
     | 'render-png-blank'
+    | 'render-png-foreground-too-small'
     | 'render-png-foreground-dense'
     | 'render-png-content-clipped';
 

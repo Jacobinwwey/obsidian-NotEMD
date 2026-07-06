@@ -2040,6 +2040,47 @@ describe('circuitikz render smoke inspection', () => {
         }
     });
 
+    test('reports large PNG screenshot artifacts whose foreground is too small to review', () => {
+        const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'notemd-circuitikz-png-tiny-foreground-'));
+        const pngPath = path.join(tempRoot, 'tiny-foreground.png');
+        fs.writeFileSync(
+            pngPath,
+            createRgbaPng(
+                20,
+                20,
+                Array.from({ length: 400 }, (_value, index) => index === 210
+                    ? [0, 0, 0, 255]
+                    : [255, 255, 255, 255])
+            )
+        );
+
+        try {
+            const report = inspectCircuitikzRenderArtifact({
+                expectedArtifactPath: pngPath
+            });
+
+            expect(report.artifactKind).toBe('png');
+            expect(report.png).toEqual(expect.objectContaining({
+                decodedPixelCount: 400,
+                nonBackgroundPixelCount: 1,
+                foregroundBounds: {
+                    minX: 10,
+                    minY: 10,
+                    maxX: 10,
+                    maxY: 10
+                }
+            }));
+            expect(report.diagnostics).toEqual([
+                expect.objectContaining({
+                    kind: 'render-png-foreground-too-small',
+                    message: expect.stringContaining('foreground footprint is too small')
+                })
+            ]);
+        } finally {
+            fs.rmSync(tempRoot, { recursive: true, force: true });
+        }
+    });
+
     test('does not report dense PNG foreground for a thin stroke', () => {
         const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'notemd-circuitikz-png-thin-stroke-'));
         const pngPath = path.join(tempRoot, 'thin-stroke.png');
