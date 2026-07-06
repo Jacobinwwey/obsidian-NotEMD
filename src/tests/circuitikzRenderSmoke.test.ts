@@ -24,6 +24,24 @@ function pngChunk(type: string, data: Buffer): Buffer {
     return Buffer.concat([length, typeBytes, data, crc]);
 }
 
+function createPngHeaderOnly(bitDepth: number, colorType: number, interlaceMethod: number): Buffer {
+    const signature = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
+    const ihdr = Buffer.alloc(13);
+    ihdr.writeUInt32BE(1, 0);
+    ihdr.writeUInt32BE(1, 4);
+    ihdr[8] = bitDepth;
+    ihdr[9] = colorType;
+    ihdr[10] = 0;
+    ihdr[11] = 0;
+    ihdr[12] = interlaceMethod;
+
+    return Buffer.concat([
+        signature,
+        pngChunk('IHDR', ihdr),
+        pngChunk('IEND', Buffer.alloc(0))
+    ]);
+}
+
 function packPngSamples(samples: number[], bitDepth: number): number[] {
     if (bitDepth === 8) {
         return samples;
@@ -1856,6 +1874,54 @@ describe('circuitikz render smoke inspection', () => {
                 }
             }));
             expect(report.diagnostics).toEqual([]);
+        } finally {
+            fs.rmSync(tempRoot, { recursive: true, force: true });
+        }
+    });
+
+    test('reports interlaced PNG screenshot artifacts with format-specific guidance', () => {
+        const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'notemd-circuitikz-png-interlaced-'));
+        const pngPath = path.join(tempRoot, 'interlaced.png');
+        fs.writeFileSync(pngPath, createPngHeaderOnly(8, 6, 1));
+
+        try {
+            const report = inspectCircuitikzRenderArtifact({
+                expectedArtifactPath: pngPath
+            });
+
+            expect(report.artifactKind).toBe('png');
+            expect(report.png).toBeUndefined();
+            expect(report.diagnostics).toEqual([
+                expect.objectContaining({
+                    kind: 'render-png-unsupported',
+                    message: expect.stringContaining('Adam7 interlaced PNG output is not supported'),
+                    advice: expect.stringContaining('Export the renderer screenshot as a non-interlaced PNG')
+                })
+            ]);
+        } finally {
+            fs.rmSync(tempRoot, { recursive: true, force: true });
+        }
+    });
+
+    test('reports 16-bit indexed-color PNG screenshot artifacts with indexed bit-depth guidance', () => {
+        const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'notemd-circuitikz-png-indexed-16bit-'));
+        const pngPath = path.join(tempRoot, 'indexed-16bit.png');
+        fs.writeFileSync(pngPath, createPngHeaderOnly(16, 3, 0));
+
+        try {
+            const report = inspectCircuitikzRenderArtifact({
+                expectedArtifactPath: pngPath
+            });
+
+            expect(report.artifactKind).toBe('png');
+            expect(report.png).toBeUndefined();
+            expect(report.diagnostics).toEqual([
+                expect.objectContaining({
+                    kind: 'render-png-unsupported',
+                    message: expect.stringContaining('Indexed-color PNG bit depth 16 is not supported'),
+                    advice: expect.stringContaining('Export indexed-color screenshots as 1/2/4/8-bit PNG')
+                })
+            ]);
         } finally {
             fs.rmSync(tempRoot, { recursive: true, force: true });
         }

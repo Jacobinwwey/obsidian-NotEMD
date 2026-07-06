@@ -77,6 +77,12 @@ interface PngTransparency {
     rgb?: [number, number, number];
 }
 
+class PngUnsupportedFormatError extends Error {
+    constructor(message: string, readonly advice: string) {
+        super(message);
+    }
+}
+
 type PngPixelLayout = {
     kind: 'direct';
     colorType: number;
@@ -1372,6 +1378,61 @@ function channelsForColorType(colorType: number): number | undefined {
     }
 }
 
+const supportedPngAdvice = 'Use a non-interlaced 1/2/4/8-bit indexed-color PNG, 1/2/4/8/16-bit grayscale PNG, or 8/16-bit grayscale-alpha/RGB/RGBA PNG for screenshot-level smoke checks.';
+
+function createPngUnsupportedFormatError(header: PngHeader, pixelLayout?: PngPixelLayout): PngUnsupportedFormatError | undefined {
+    if (header.compressionMethod !== 0) {
+        return new PngUnsupportedFormatError(
+            `PNG compression method ${header.compressionMethod} is not supported.`,
+            supportedPngAdvice
+        );
+    }
+
+    if (header.filterMethod !== 0) {
+        return new PngUnsupportedFormatError(
+            `PNG filter method ${header.filterMethod} is not supported.`,
+            supportedPngAdvice
+        );
+    }
+
+    if (header.interlaceMethod !== 0) {
+        return new PngUnsupportedFormatError(
+            `Adam7 interlaced PNG output is not supported for render smoke checks (interlaceMethod=${header.interlaceMethod}).`,
+            'Export the renderer screenshot as a non-interlaced PNG before running screenshot-level smoke checks.'
+        );
+    }
+
+    if (pixelLayout) {
+        return undefined;
+    }
+
+    if (header.colorType === 3) {
+        return new PngUnsupportedFormatError(
+            `Indexed-color PNG bit depth ${header.bitDepth} is not supported.`,
+            'Export indexed-color screenshots as 1/2/4/8-bit PNG, or use 8/16-bit RGB/RGBA output for screenshot-level smoke checks.'
+        );
+    }
+
+    if (header.colorType === 0) {
+        return new PngUnsupportedFormatError(
+            `Grayscale PNG bit depth ${header.bitDepth} is not supported.`,
+            'Export grayscale screenshots as 1/2/4/8/16-bit PNG, or use 8/16-bit grayscale-alpha/RGBA output for screenshot-level smoke checks.'
+        );
+    }
+
+    if (channelsForColorType(header.colorType)) {
+        return new PngUnsupportedFormatError(
+            `PNG color type ${header.colorType} with bit depth ${header.bitDepth} is not supported.`,
+            'Export direct-color screenshots as 8/16-bit grayscale-alpha, RGB, or RGBA PNG for screenshot-level smoke checks.'
+        );
+    }
+
+    return new PngUnsupportedFormatError(
+        `PNG color type ${header.colorType} is not supported.`,
+        supportedPngAdvice
+    );
+}
+
 function createPngPixelLayout(header: PngHeader): PngPixelLayout | undefined {
     if (header.colorType === 0) {
         if (![1, 2, 4, 8, 16].includes(header.bitDepth)) {
@@ -1634,8 +1695,12 @@ function extractPngSmoke(pngBytes: Buffer): CircuitikzPngSmokeReport {
     const chunks = parsePngChunks(pngBytes);
     const header = parsePngHeader(chunks);
     const pixelLayout = createPngPixelLayout(header);
-    if (!pixelLayout || header.compressionMethod !== 0 || header.filterMethod !== 0 || header.interlaceMethod !== 0) {
-        throw new Error(`Unsupported PNG format: bitDepth=${header.bitDepth}, colorType=${header.colorType}, interlace=${header.interlaceMethod}.`);
+    const unsupportedFormatError = createPngUnsupportedFormatError(header, pixelLayout);
+    if (unsupportedFormatError) {
+        throw unsupportedFormatError;
+    }
+    if (!pixelLayout) {
+        throw new Error('PNG format support classification failed.');
     }
     if (header.width <= 0 || header.height <= 0) {
         throw new Error('PNG dimensions must be positive.');
@@ -1779,6 +1844,7 @@ export function inspectCircuitikzRenderArtifact(request: CircuitikzRenderSmokeRe
             };
         } catch (error) {
             const message = error instanceof Error ? error.message : String(error);
+            const unsupported = error instanceof PngUnsupportedFormatError;
             return {
                 expectedArtifactPath,
                 artifactExists: true,
@@ -1787,10 +1853,10 @@ export function inspectCircuitikzRenderArtifact(request: CircuitikzRenderSmokeRe
                 artifactKind: 'png',
                 diagnostics: [{
                     severity: 'error',
-                    kind: message.startsWith('Unsupported PNG format') ? 'render-png-unsupported' : 'render-png-invalid',
+                    kind: unsupported ? 'render-png-unsupported' : 'render-png-invalid',
                     message: `Expected PNG render artifact could not be inspected: ${message}`,
                     excerpt: expectedArtifactPath,
-                    advice: 'Use a non-interlaced 1/2/4/8-bit indexed-color PNG, 1/2/4/8/16-bit grayscale PNG, or 8/16-bit grayscale-alpha/RGB/RGBA PNG for screenshot-level smoke checks.'
+                    advice: unsupported ? error.advice : supportedPngAdvice
                 }]
             };
         }
