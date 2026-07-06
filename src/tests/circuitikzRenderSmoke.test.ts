@@ -24,6 +24,23 @@ function pngChunk(type: string, data: Buffer): Buffer {
     return Buffer.concat([length, typeBytes, data, crc]);
 }
 
+function packPngSamples(samples: number[], bitDepth: number): number[] {
+    if (bitDepth === 8) {
+        return samples;
+    }
+    const samplesPerByte = 8 / bitDepth;
+    const rowBytes: number[] = [];
+    for (let offset = 0; offset < samples.length; offset += samplesPerByte) {
+        let packed = 0;
+        for (let sampleOffset = 0; sampleOffset < samplesPerByte; sampleOffset += 1) {
+            const sample = samples[offset + sampleOffset] ?? 0;
+            packed |= sample << (8 - bitDepth * (sampleOffset + 1));
+        }
+        rowBytes.push(packed);
+    }
+    return rowBytes;
+}
+
 function createRgbaPng(width: number, height: number, pixels: Array<[number, number, number, number]>): Buffer {
     const signature = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
     const ihdr = Buffer.alloc(13);
@@ -41,6 +58,36 @@ function createRgbaPng(width: number, height: number, pixels: Array<[number, num
         for (let column = 0; column < width; column += 1) {
             scanlines.push(...pixels[row * width + column]);
         }
+    }
+
+    return Buffer.concat([
+        signature,
+        pngChunk('IHDR', ihdr),
+        pngChunk('IDAT', zlib.deflateSync(Buffer.from(scanlines))),
+        pngChunk('IEND', Buffer.alloc(0))
+    ]);
+}
+
+function createGrayscalePng(
+    width: number,
+    height: number,
+    bitDepth: number,
+    samples: number[]
+): Buffer {
+    const signature = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
+    const ihdr = Buffer.alloc(13);
+    ihdr.writeUInt32BE(width, 0);
+    ihdr.writeUInt32BE(height, 4);
+    ihdr[8] = bitDepth;
+    ihdr[9] = 0;
+    ihdr[10] = 0;
+    ihdr[11] = 0;
+    ihdr[12] = 0;
+
+    const scanlines: number[] = [];
+    for (let row = 0; row < height; row += 1) {
+        scanlines.push(0);
+        scanlines.push(...packPngSamples(samples.slice(row * width, row * width + width), bitDepth));
     }
 
     return Buffer.concat([
@@ -69,27 +116,10 @@ function createIndexedPng(
     ihdr[11] = 0;
     ihdr[12] = 0;
 
-    const packedRowSamples = (rowIndexes: number[]): number[] => {
-        if (bitDepth === 8) {
-            return rowIndexes;
-        }
-        const samplesPerByte = 8 / bitDepth;
-        const rowBytes: number[] = [];
-        for (let offset = 0; offset < rowIndexes.length; offset += samplesPerByte) {
-            let packed = 0;
-            for (let sampleOffset = 0; sampleOffset < samplesPerByte; sampleOffset += 1) {
-                const sample = rowIndexes[offset + sampleOffset] ?? 0;
-                packed |= sample << (8 - bitDepth * (sampleOffset + 1));
-            }
-            rowBytes.push(packed);
-        }
-        return rowBytes;
-    };
-
     const scanlines: number[] = [];
     for (let row = 0; row < height; row += 1) {
         scanlines.push(0);
-        scanlines.push(...packedRowSamples(indexes.slice(row * width, row * width + width)));
+        scanlines.push(...packPngSamples(indexes.slice(row * width, row * width + width), bitDepth));
     }
 
     const chunks = [
@@ -1140,6 +1170,52 @@ describe('circuitikz render smoke inspection', () => {
                     maxY: 1
                 }
             });
+        } finally {
+            fs.rmSync(tempRoot, { recursive: true, force: true });
+        }
+    });
+
+    test.each([
+        [1, 1],
+        [2, 3],
+        [4, 15]
+    ])('accepts a packed %i-bit grayscale PNG screenshot artifact', (bitDepth, foregroundSample) => {
+        const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), `notemd-circuitikz-png-gray-${bitDepth}bit-smoke-`));
+        const pngPath = path.join(tempRoot, `gray-${bitDepth}bit-render.png`);
+        fs.writeFileSync(
+            pngPath,
+            createGrayscalePng(
+                3,
+                3,
+                bitDepth,
+                [
+                    0, 0, 0,
+                    0, foregroundSample, 0,
+                    0, 0, 0
+                ]
+            )
+        );
+
+        try {
+            const report = inspectCircuitikzRenderArtifact({
+                expectedArtifactPath: pngPath
+            });
+
+            expect(report.artifactKind).toBe('png');
+            expect(report.diagnostics).toEqual([]);
+            expect(report.png).toEqual(expect.objectContaining({
+                bitDepth,
+                colorType: 0,
+                decodedPixelCount: 9,
+                nonBackgroundPixelCount: 1,
+                foregroundDensity: 1,
+                foregroundBounds: {
+                    minX: 1,
+                    minY: 1,
+                    maxX: 1,
+                    maxY: 1
+                }
+            }));
         } finally {
             fs.rmSync(tempRoot, { recursive: true, force: true });
         }
