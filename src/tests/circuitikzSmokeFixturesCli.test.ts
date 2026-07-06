@@ -22,6 +22,7 @@ describe('circuitikz smoke fixtures CLI', () => {
         expect(fixtureNames).toEqual([
             'cmos-inverter-v1.json',
             'cmos-nand2-v1.json',
+            'cmos-nor2-v1.json',
             'common-source-nmos-v1.json'
         ]);
 
@@ -58,7 +59,7 @@ describe('circuitikz smoke fixtures CLI', () => {
             const report = JSON.parse(result.stdout);
             expect(report).toEqual(expect.objectContaining({
                 ok: false,
-                fixtureCount: 3,
+                fixtureCount: 4,
                 reportOutputPath: reportPath,
                 rendererAvailability: expect.objectContaining({
                     ok: false,
@@ -137,12 +138,13 @@ fs.writeFileSync(
             const report = JSON.parse(stdout);
             expect(report).toEqual(expect.objectContaining({
                 ok: true,
-                fixtureCount: 3,
+                fixtureCount: 4,
                 outputDirectory
             }));
             expect(report.fixtures.map((fixture: any) => fixture.name).sort()).toEqual([
                 'cmos-inverter-v1',
                 'cmos-nand2-v1',
+                'cmos-nor2-v1',
                 'common-source-nmos-v1'
             ]);
 
@@ -162,7 +164,7 @@ fs.writeFileSync(
                 .trim()
                 .split(/\r?\n/)
                 .map(line => JSON.parse(line));
-            expect(invocations).toHaveLength(3);
+            expect(invocations).toHaveLength(4);
             for (const invocation of invocations) {
                 expect(invocation[0]).toBe(compilerPath);
                 expect(invocation).toContain('--tex');

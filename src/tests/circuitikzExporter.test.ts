@@ -104,6 +104,43 @@ function createCmosNand2Spec(): CircuitSpec {
     };
 }
 
+function createCmosNor2Spec(): CircuitSpec {
+    return {
+        circuitKind: 'cmos-nor2' as CircuitSpec['circuitKind'],
+        title: 'Two Input CMOS NOR Gate',
+        goldenReferenceId: 'cmos-nor2-v1',
+        style: {
+            package: 'circuitikz',
+            voltageConvention: 'american voltages'
+        },
+        nets: ['VDD', 'GND', 'va', 'vb', 'vout', 'pull_up_mid'],
+        components: [
+            { id: 'MPA', type: 'pmos', label: '$M_{PA}$', terminals: { S: 'VDD', G: 'va', D: 'pull_up_mid' } },
+            { id: 'MPB', type: 'pmos', label: '$M_{PB}$', terminals: { S: 'pull_up_mid', G: 'vb', D: 'vout' } },
+            { id: 'MNA', type: 'nmos', label: '$M_{NA}$', terminals: { D: 'vout', G: 'va', S: 'GND' } },
+            { id: 'MNB', type: 'nmos', label: '$M_{NB}$', terminals: { D: 'vout', G: 'vb', S: 'GND' } }
+        ],
+        connections: [
+            { from: 'VDD', to: 'MPA.S' },
+            { from: 'MPA.D', to: 'MPB.S' },
+            { from: 'MPB.D', to: 'vout' },
+            { from: 'MNA.D', to: 'vout' },
+            { from: 'MNB.D', to: 'vout' },
+            { from: 'MNA.S', to: 'GND' },
+            { from: 'MNB.S', to: 'GND' },
+            { from: 'va', to: 'MPA.G' },
+            { from: 'va', to: 'MNA.G' },
+            { from: 'vb', to: 'MPB.G' },
+            { from: 'vb', to: 'MNB.G' }
+        ],
+        layoutHints: {
+            inputSide: 'left',
+            outputSide: 'right',
+            routingStyle: 'orthogonal'
+        }
+    };
+}
+
 describe('circuitikz exporter', () => {
     test('validates and exports the common-source golden reference template deterministically', () => {
         const spec = createCommonSourceSpec();
@@ -207,6 +244,52 @@ describe('circuitikz exporter', () => {
             'CMOS NAND requires MNA.S to connect to MNB.D for the series pull-down stack.'
         );
         expect(() => exportCircuitSpecToCircuitikz(spec)).toThrow(/series pull-down stack/);
+    });
+
+    test('validates and exports a constrained two-input CMOS NOR template deterministically', () => {
+        const spec = createCmosNor2Spec();
+        const output = exportCircuitSpecToCircuitikz(spec);
+
+        expect(assertValidCircuitSpec(spec)).toBe(spec);
+        expect(output).toContain('\\begin{circuitikz}[american voltages]');
+        expect(output).toContain('node[pmos, anchor=S] (MPA) {$M_{PA}$}');
+        expect(output).toContain('node[pmos, anchor=S] (MPB) {$M_{PB}$}');
+        expect(output).toContain('node[nmos, anchor=D] (MNA) {$M_{NA}$}');
+        expect(output).toContain('node[nmos, anchor=D] (MNB) {$M_{NB}$}');
+        expect(output).toContain('(MPA.D) to [short] (3,3.75)');
+        expect(output).toContain('(MPB.D) to [short] (3,2.75)');
+        expect(output).toContain('(3,2.75) to [short, *-o] (5,2.75) node[right]{$v_{out}$};');
+        expect(output).toContain('node[left]{$v_A$}');
+        expect(output).toContain('node[left]{$v_B$};');
+    });
+
+    test('projects CMOS NOR layout hints into deterministic input and output ports', () => {
+        const reference = createCmosNor2Spec();
+        const spec = createCmosNor2Spec();
+        spec.layoutHints = {
+            inputSide: 'right',
+            outputSide: 'left',
+            routingStyle: 'orthogonal'
+        };
+
+        const output = exportCircuitSpecToCircuitikz(spec);
+
+        expect(createCircuitTopologySignature(spec)).toBe(createCircuitTopologySignature(reference));
+        expect(output).toContain('(3,2.75) to [short, *-o] (0.8,2.75) node[left]{$v_{out}$};');
+        expect(output).toContain('to [short, -o] (5.2,4.35)');
+        expect(output).toContain('node[right]{$v_A$}');
+        expect(output).toContain('to [short, -o] (5.2,1.95)');
+        expect(output).toContain('node[right]{$v_B$};');
+    });
+
+    test('rejects CMOS NOR specs that do not keep the PMOS pull-up stack in series', () => {
+        const spec = createCmosNor2Spec();
+        spec.connections = spec.connections.filter(connection => connection.from !== 'MPA.D' || connection.to !== 'MPB.S');
+
+        expect(validateCircuitSpec(spec).errors).toContain(
+            'CMOS NOR requires MPA.D to connect to MPB.S for the series pull-up stack.'
+        );
+        expect(() => exportCircuitSpecToCircuitikz(spec)).toThrow(/series pull-up stack/);
     });
 
     test('projects common-source layout hints into deterministic input and output ports', () => {

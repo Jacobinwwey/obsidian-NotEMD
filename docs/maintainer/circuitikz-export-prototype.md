@@ -167,6 +167,7 @@ The repository now includes maintainer fixtures for every supported golden famil
 | `docs/maintainer/fixtures/circuitikz/common-source-nmos-v1.json` | `common-source-amplifier` |
 | `docs/maintainer/fixtures/circuitikz/cmos-inverter-v1.json` | `cmos-inverter` |
 | `docs/maintainer/fixtures/circuitikz/cmos-nand2-v1.json` | `cmos-nand2` |
+| `docs/maintainer/fixtures/circuitikz/cmos-nor2-v1.json` | `cmos-nor2` |
 
 Run every fixture through the same explicit renderer configuration with:
 
@@ -216,6 +217,7 @@ This is not a generic TikZ generator. The current prototype supports only golden
 | `common-source-amplifier` | `common-source-nmos-v1` | NMOS common-source amplifier with `R_D`, `VDD`, `vin`, `vout`, and grounded source |
 | `cmos-inverter` | `cmos-inverter-v1` | PMOS-over-NMOS CMOS inverter with shared gate input and shared drain output |
 | `cmos-nand2` | `cmos-nand2-v1` | Two-input CMOS NAND with parallel PMOS pull-up devices, series NMOS pull-down devices, `va`, `vb`, and `vout` |
+| `cmos-nor2` | `cmos-nor2-v1` | Two-input CMOS NOR with series PMOS pull-up devices, parallel NMOS pull-down devices, `va`, `vb`, and `vout` |
 
 The adapter validates the structural invariant first, then emits a fixed layout. For example, the CMOS inverter requires:
 
@@ -227,6 +229,8 @@ The adapter validates the structural invariant first, then emits a fixed layout.
 - both transistor drains connected to `vout`.
 
 The CMOS NAND template adds a stronger digital-logic invariant: `MPA` and `MPB` must be PMOS devices in the parallel pull-up network from `VDD` to `vout`; `MNA` and `MNB` must be NMOS devices in a series pull-down stack from `vout` to `GND`; `va` must drive `MPA.G` and `MNA.G`; and `vb` must drive `MPB.G` and `MNB.G`. `layoutHints.inputSide` and `layoutHints.outputSide` only move the input/output ports and presentation routing; they do not change the topology signature.
+
+The CMOS NOR template mirrors the digital-logic constraint in the opposite networks: `MPA` and `MPB` must be PMOS devices in a series pull-up stack from `VDD` to `vout`; `MNA` and `MNB` must be NMOS devices in the parallel pull-down network from `vout` to `GND`; `va` must drive `MPA.G` and `MNA.G`; and `vb` must drive `MPB.G` and `MNB.G`. The same layout-hint projection rule applies: port placement can move, but the topology signature cannot.
 
 ## Why `CircuitSpec` Is Separate
 
@@ -284,4 +288,4 @@ The tests verify:
 
 ## Non-Goals
 
-This prototype does not bundle LaTeX, call TikZJax as an Obsidian runtime dependency, OCR path-only glyph text, run precise pixel-level overlap detection, cover unsupported SVG path geometry, or use rendered-image feedback for automatic repair. Those are later gates. It also does not accept arbitrary natural-language circuit requests. The important current claim is narrower: validated `CircuitSpec` input can produce stable, readable circuitikz for two high-value golden families, existing compile logs can be converted into actionable diagnostics, and an explicitly configured local renderer can be executed without shell-specific command parsing while optionally proving that a concrete output artifact was created and, for SVG or PNG output, structurally renderable enough for later visual inspection. SVG output now includes transform-aware geometry for common SVG transforms, exact arc bounds for A/a arc extrema, exact Bezier curve bounds for C/S/Q/T curve extrema, positioned `tspan` label geometry, path-only label classification, path-only glyph overlap detection, and conservative label-vs-drawing overlap detection; PNG output exposes foreground bounds, foreground density, and format-specific unsupported-export guidance needed to reject obvious canvas clipping, first-pass pixel crowding, Adam7 interlaced PNGs, and unsupported indexed-color bit depths before a topology-preserving repair loop.
+This prototype does not bundle LaTeX, call TikZJax as an Obsidian runtime dependency, OCR path-only glyph text, run precise pixel-level overlap detection, cover unsupported SVG path geometry, or use rendered-image feedback for automatic repair. Those are later gates. It also does not accept arbitrary natural-language circuit requests. The important current claim is narrower: validated `CircuitSpec` input can produce stable, readable circuitikz for four golden families, existing compile logs can be converted into actionable diagnostics, and an explicitly configured local renderer can be executed without shell-specific command parsing while optionally proving that a concrete output artifact was created and, for SVG or PNG output, structurally renderable enough for later visual inspection. SVG output now includes transform-aware geometry for common SVG transforms, exact arc bounds for A/a arc extrema, exact Bezier curve bounds for C/S/Q/T curve extrema, positioned `tspan` label geometry, path-only label classification, path-only glyph overlap detection, and conservative label-vs-drawing overlap detection; PNG output exposes foreground bounds, foreground density, and format-specific unsupported-export guidance needed to reject obvious canvas clipping, first-pass pixel crowding, Adam7 interlaced PNGs, and unsupported indexed-color bit depths before a topology-preserving repair loop.

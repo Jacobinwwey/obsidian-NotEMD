@@ -61,6 +61,8 @@ describe('website documentation contract', () => {
             expect(content).toContain('cmos-inverter-v1');
             expect(content).toContain('cmos-nand2');
             expect(content).toContain('cmos-nand2-v1');
+            expect(content).toContain('cmos-nor2');
+            expect(content).toContain('cmos-nor2-v1');
             expect(content).toContain('layoutHints.inputSide');
             expect(content).toContain('layoutHints.outputSide');
             expect(content).toContain('port placement');
@@ -139,6 +141,7 @@ describe('website documentation contract', () => {
             expect(content).toContain('docs/maintainer/fixtures/circuitikz/common-source-nmos-v1.json');
             expect(content).toContain('docs/maintainer/fixtures/circuitikz/cmos-inverter-v1.json');
             expect(content).toContain('docs/maintainer/fixtures/circuitikz/cmos-nand2-v1.json');
+            expect(content).toContain('docs/maintainer/fixtures/circuitikz/cmos-nor2-v1.json');
         }
     });
 
