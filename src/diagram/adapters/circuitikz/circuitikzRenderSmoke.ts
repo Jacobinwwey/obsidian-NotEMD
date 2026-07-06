@@ -319,6 +319,97 @@ function tagIsHidden(tag: string): boolean {
     return /\bdisplay\s*=\s*["']none["']/i.test(tag);
 }
 
+function isInteriorUnitInterval(value: number): boolean {
+    return Number.isFinite(value) && value > 0 && value < 1;
+}
+
+function evaluateQuadraticBezier(p0: number, p1: number, p2: number, t: number): number {
+    const inverseT = 1 - t;
+    return inverseT * inverseT * p0 + 2 * inverseT * t * p1 + t * t * p2;
+}
+
+function evaluateCubicBezier(p0: number, p1: number, p2: number, p3: number, t: number): number {
+    const inverseT = 1 - t;
+    return inverseT * inverseT * inverseT * p0
+        + 3 * inverseT * inverseT * t * p1
+        + 3 * inverseT * t * t * p2
+        + t * t * t * p3;
+}
+
+function quadraticExtremaParameters(p0: number, p1: number, p2: number): number[] {
+    const denominator = p0 - 2 * p1 + p2;
+    if (Math.abs(denominator) < Number.EPSILON) {
+        return [];
+    }
+
+    const t = (p0 - p1) / denominator;
+    return isInteriorUnitInterval(t) ? [t] : [];
+}
+
+function cubicExtremaParameters(p0: number, p1: number, p2: number, p3: number): number[] {
+    const a = -p0 + 3 * p1 - 3 * p2 + p3;
+    const b = 2 * (p0 - 2 * p1 + p2);
+    const c = -p0 + p1;
+
+    if (Math.abs(a) < Number.EPSILON) {
+        if (Math.abs(b) < Number.EPSILON) {
+            return [];
+        }
+        const linearT = -c / b;
+        return isInteriorUnitInterval(linearT) ? [linearT] : [];
+    }
+
+    const discriminant = b * b - 4 * a * c;
+    if (discriminant < 0) {
+        return [];
+    }
+
+    const sqrtDiscriminant = Math.sqrt(discriminant);
+    return [
+        (-b + sqrtDiscriminant) / (2 * a),
+        (-b - sqrtDiscriminant) / (2 * a)
+    ].filter(isInteriorUnitInterval);
+}
+
+function addQuadraticBezierBoundsPoints(
+    points: Array<[number, number]>,
+    start: [number, number],
+    control: [number, number],
+    end: [number, number]
+): void {
+    points.push(start, end);
+    const extrema = new Set([
+        ...quadraticExtremaParameters(start[0], control[0], end[0]),
+        ...quadraticExtremaParameters(start[1], control[1], end[1])
+    ]);
+    for (const t of extrema) {
+        points.push([
+            evaluateQuadraticBezier(start[0], control[0], end[0], t),
+            evaluateQuadraticBezier(start[1], control[1], end[1], t)
+        ]);
+    }
+}
+
+function addCubicBezierBoundsPoints(
+    points: Array<[number, number]>,
+    start: [number, number],
+    control1: [number, number],
+    control2: [number, number],
+    end: [number, number]
+): void {
+    points.push(start, end);
+    const extrema = new Set([
+        ...cubicExtremaParameters(start[0], control1[0], control2[0], end[0]),
+        ...cubicExtremaParameters(start[1], control1[1], control2[1], end[1])
+    ]);
+    for (const t of extrema) {
+        points.push([
+            evaluateCubicBezier(start[0], control1[0], control2[0], end[0], t),
+            evaluateCubicBezier(start[1], control1[1], control2[1], end[1], t)
+        ]);
+    }
+}
+
 function pathBox(tag: string): SvgBox | undefined {
     const d = readAttribute(tag, 'd');
     if (!d) {
@@ -333,6 +424,8 @@ function pathBox(tag: string): SvgBox | undefined {
     let index = 0;
     let x = 0;
     let y = 0;
+    let lastCubicControl: [number, number] | undefined;
+    let lastQuadraticControl: [number, number] | undefined;
 
     const readNumber = (): number | undefined => {
         const token = tokens[index];
@@ -344,12 +437,24 @@ function pathBox(tag: string): SvgBox | undefined {
         return Number.isFinite(value) ? value : undefined;
     };
 
+    const resetCurveControls = (): void => {
+        lastCubicControl = undefined;
+        lastQuadraticControl = undefined;
+    };
+
+    const resolveCoordinate = (offsetX: number, offsetY: number): [number, number] => {
+        return command === command.toLowerCase()
+            ? [x + offsetX, y + offsetY]
+            : [offsetX, offsetY];
+    };
+
     while (index < tokens.length) {
         const token = tokens[index];
         if (commandPattern.test(token)) {
             command = token;
             index += 1;
             if (command.toLowerCase() === 'z') {
+                resetCurveControls();
                 continue;
             }
         }
@@ -363,6 +468,7 @@ function pathBox(tag: string): SvgBox | undefined {
             x = command === 'm' || command === 'l' ? x + nextX : nextX;
             y = command === 'm' || command === 'l' ? y + nextY : nextY;
             points.push([x, y]);
+            resetCurveControls();
             continue;
         }
 
@@ -373,6 +479,7 @@ function pathBox(tag: string): SvgBox | undefined {
             }
             x = command === 'h' ? x + nextX : nextX;
             points.push([x, y]);
+            resetCurveControls();
             continue;
         }
 
@@ -383,6 +490,7 @@ function pathBox(tag: string): SvgBox | undefined {
             }
             y = command === 'v' ? y + nextY : nextY;
             points.push([x, y]);
+            resetCurveControls();
             continue;
         }
 
@@ -408,31 +516,92 @@ function pathBox(tag: string): SvgBox | undefined {
             x = command === 'a' ? x + nextX : nextX;
             y = command === 'a' ? y + nextY : nextY;
             points.push([x, y]);
+            resetCurveControls();
             continue;
         }
 
-        if (command === 'C' || command === 'c' || command === 'S' || command === 's' || command === 'Q' || command === 'q' || command === 'T' || command === 't') {
-            const coordinateCount = command === 'C' || command === 'c'
-                ? 6
-                : command === 'T' || command === 't'
-                    ? 2
-                    : 4;
-            const coordinates: number[] = [];
-            for (let coordinateIndex = 0; coordinateIndex < coordinateCount; coordinateIndex += 1) {
-                const value = readNumber();
-                if (value === undefined) {
-                    break;
-                }
-                coordinates.push(value);
-            }
-            if (coordinates.length !== coordinateCount) {
+        if (command === 'C' || command === 'c') {
+            const control1X = readNumber();
+            const control1Y = readNumber();
+            const control2X = readNumber();
+            const control2Y = readNumber();
+            const nextX = readNumber();
+            const nextY = readNumber();
+            if (
+                control1X === undefined
+                || control1Y === undefined
+                || control2X === undefined
+                || control2Y === undefined
+                || nextX === undefined
+                || nextY === undefined
+            ) {
                 break;
             }
-            const nextX = coordinates[coordinateCount - 2];
-            const nextY = coordinates[coordinateCount - 1];
-            x = command === command.toLowerCase() ? x + nextX : nextX;
-            y = command === command.toLowerCase() ? y + nextY : nextY;
-            points.push([x, y]);
+            const start: [number, number] = [x, y];
+            const control1 = resolveCoordinate(control1X, control1Y);
+            const control2 = resolveCoordinate(control2X, control2Y);
+            const end = resolveCoordinate(nextX, nextY);
+            addCubicBezierBoundsPoints(points, start, control1, control2, end);
+            [x, y] = end;
+            lastCubicControl = control2;
+            lastQuadraticControl = undefined;
+            continue;
+        }
+
+        if (command === 'S' || command === 's') {
+            const control2X = readNumber();
+            const control2Y = readNumber();
+            const nextX = readNumber();
+            const nextY = readNumber();
+            if (control2X === undefined || control2Y === undefined || nextX === undefined || nextY === undefined) {
+                break;
+            }
+            const start: [number, number] = [x, y];
+            const control1: [number, number] = lastCubicControl
+                ? [2 * x - lastCubicControl[0], 2 * y - lastCubicControl[1]]
+                : start;
+            const control2 = resolveCoordinate(control2X, control2Y);
+            const end = resolveCoordinate(nextX, nextY);
+            addCubicBezierBoundsPoints(points, start, control1, control2, end);
+            [x, y] = end;
+            lastCubicControl = control2;
+            lastQuadraticControl = undefined;
+            continue;
+        }
+
+        if (command === 'Q' || command === 'q') {
+            const controlX = readNumber();
+            const controlY = readNumber();
+            const nextX = readNumber();
+            const nextY = readNumber();
+            if (controlX === undefined || controlY === undefined || nextX === undefined || nextY === undefined) {
+                break;
+            }
+            const start: [number, number] = [x, y];
+            const control = resolveCoordinate(controlX, controlY);
+            const end = resolveCoordinate(nextX, nextY);
+            addQuadraticBezierBoundsPoints(points, start, control, end);
+            [x, y] = end;
+            lastQuadraticControl = control;
+            lastCubicControl = undefined;
+            continue;
+        }
+
+        if (command === 'T' || command === 't') {
+            const nextX = readNumber();
+            const nextY = readNumber();
+            if (nextX === undefined || nextY === undefined) {
+                break;
+            }
+            const start: [number, number] = [x, y];
+            const control: [number, number] = lastQuadraticControl
+                ? [2 * x - lastQuadraticControl[0], 2 * y - lastQuadraticControl[1]]
+                : start;
+            const end = resolveCoordinate(nextX, nextY);
+            addQuadraticBezierBoundsPoints(points, start, control, end);
+            [x, y] = end;
+            lastQuadraticControl = control;
+            lastCubicControl = undefined;
             continue;
         }
 

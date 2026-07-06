@@ -67,8 +67,8 @@ describe('circuitikz export docs contract', () => {
             expect(doc).toContain('path-only glyph overlap');
             expect(doc).toContain('arc path endpoint geometry');
             expect(doc).toContain('A/a arc endpoints');
-            expect(doc).toContain('Bezier path endpoint geometry');
-            expect(doc).toContain('C/S/Q/T curve endpoints');
+            expect(doc).toContain('exact Bezier curve bounds');
+            expect(doc).toContain('C/S/Q/T curve extrema');
             expect(doc).toContain('<use href="#...">');
             expect(doc).toContain('polyline');
             expect(doc).toContain('polygon');
@@ -130,8 +130,8 @@ describe('circuitikz export docs contract', () => {
             expect(doc).toContain('path-only glyph overlap');
             expect(doc).toContain('arc path endpoint geometry');
             expect(doc).toContain('A/a arc endpoints');
-            expect(doc).toContain('Bezier path endpoint geometry');
-            expect(doc).toContain('C/S/Q/T curve endpoints');
+            expect(doc).toContain('exact Bezier curve bounds');
+            expect(doc).toContain('C/S/Q/T curve extrema');
             expect(doc).toContain('polyline');
             expect(doc).toContain('polygon');
             expect(doc).toContain('tspan');
@@ -161,8 +161,8 @@ describe('circuitikz export docs contract', () => {
             expect(doc).toContain('circuitikzRenderSmoke.ts');
             expect(doc).toContain('arc path endpoint geometry');
             expect(doc).toContain('A/a arc endpoints');
-            expect(doc).toContain('Bezier path endpoint geometry');
-            expect(doc).toContain('C/S/Q/T curve endpoints');
+            expect(doc).toContain('exact Bezier curve bounds');
+            expect(doc).toContain('C/S/Q/T curve extrema');
             expect(doc).toContain('path-only glyph overlap diagnostics');
             expect(doc).toContain('polyline');
             expect(doc).toContain('polygon');
