@@ -237,6 +237,104 @@ describe('circuitikz export CLI', () => {
         }
     }, 30000);
 
+    test('writes a topology-preserving repair brief from compile diagnostics', () => {
+        const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'notemd-circuitikz-cli-repair-brief-'));
+        const specPath = path.join(tempRoot, 'circuit.json');
+        const outputPath = path.join(tempRoot, 'circuit.tex');
+        const compileLogPath = path.join(tempRoot, 'circuit.log');
+        const repairBriefPath = path.join(tempRoot, 'repair-brief.json');
+        fs.writeFileSync(specPath, JSON.stringify(createSpec(), null, 2), 'utf8');
+        fs.writeFileSync(
+            compileLogPath,
+            "! LaTeX Error: File `circuitikz.sty' not found.\n",
+            'utf8'
+        );
+
+        try {
+            const result = spawnSync(
+                process.execPath,
+                [
+                    scriptPath,
+                    '--input', specPath,
+                    '--topology-reference', specPath,
+                    '--output', outputPath,
+                    '--compile-log', compileLogPath,
+                    '--repair-brief-output', repairBriefPath
+                ],
+                {
+                    cwd: repoRoot,
+                    encoding: 'utf8'
+                }
+            );
+
+            expect(result.status).toBe(1);
+            expect(fs.existsSync(outputPath)).toBe(true);
+            expect(fs.existsSync(repairBriefPath)).toBe(true);
+
+            const stdout = JSON.parse(result.stdout);
+            expect(stdout.repairBriefOutputPath).toBe(repairBriefPath);
+
+            const repairBrief = JSON.parse(fs.readFileSync(repairBriefPath, 'utf8'));
+            expect(repairBrief).toEqual(expect.objectContaining({
+                schemaVersion: 'notemd.circuitikz.repair-brief.v1',
+                repairObjective: expect.stringContaining('preserving the electrical topology exactly'),
+                circuitKind: 'cmos-inverter',
+                goldenReferenceId: 'cmos-inverter-v1',
+                sourceSpec: expect.objectContaining({
+                    circuitKind: 'cmos-inverter'
+                }),
+                diagnostics: expect.objectContaining({
+                    ok: false,
+                    summary: '1 error(s), 0 warning(s)'
+                })
+            }));
+            expect(repairBrief.topologyInvariant.prohibitedChanges).toContain('connections');
+            expect(repairBrief.diagnostics.diagnostics).toEqual([
+                expect.objectContaining({
+                    kind: 'missing-package',
+                    message: 'Missing LaTeX package: circuitikz.sty'
+                })
+            ]);
+        } finally {
+            fs.rmSync(tempRoot, { recursive: true, force: true });
+        }
+    }, 30000);
+
+    test('rejects repair brief output without a topology reference', () => {
+        const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'notemd-circuitikz-cli-repair-brief-missing-reference-'));
+        const specPath = path.join(tempRoot, 'circuit.json');
+        const outputPath = path.join(tempRoot, 'circuit.tex');
+        const compileLogPath = path.join(tempRoot, 'circuit.log');
+        const repairBriefPath = path.join(tempRoot, 'repair-brief.json');
+        fs.writeFileSync(specPath, JSON.stringify(createSpec(), null, 2), 'utf8');
+        fs.writeFileSync(compileLogPath, 'Output written on circuit.pdf (1 page).\n', 'utf8');
+
+        try {
+            const result = spawnSync(
+                process.execPath,
+                [
+                    scriptPath,
+                    '--input', specPath,
+                    '--output', outputPath,
+                    '--compile-log', compileLogPath,
+                    '--repair-brief-output', repairBriefPath
+                ],
+                {
+                    cwd: repoRoot,
+                    encoding: 'utf8'
+                }
+            );
+
+            expect(result.status).toBe(1);
+            expect(result.stdout).toBe('');
+            expect(result.stderr).toContain('--repair-brief-output requires --topology-reference.');
+            expect(fs.existsSync(outputPath)).toBe(false);
+            expect(fs.existsSync(repairBriefPath)).toBe(false);
+        } finally {
+            fs.rmSync(tempRoot, { recursive: true, force: true });
+        }
+    });
+
     test('rejects compile args without an explicit compile executable', () => {
         const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'notemd-circuitikz-cli-compile-args-'));
         const specPath = path.join(tempRoot, 'circuit.json');

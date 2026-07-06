@@ -50,6 +50,8 @@ describe('circuitikz export docs contract', () => {
             expect(doc).toContain('--expected-artifact');
             expect(doc).toContain('--expected-svg-text');
             expect(doc).toContain('--topology-reference');
+            expect(doc).toContain('--repair-brief-output');
+            expect(doc).toContain('notemd.circuitikz.repair-brief.v1');
             expect(doc).toContain('compileExecution.renderSmoke');
             expect(doc).toContain('createCircuitTopologySignature');
             expect(doc).toContain('assertCircuitTopologyUnchanged');
@@ -117,6 +119,8 @@ describe('circuitikz export docs contract', () => {
             expect(doc).toContain('shell-free compile execution');
             expect(doc).toContain('topology-preserving repair');
             expect(doc).toContain('--topology-reference');
+            expect(doc).toContain('--repair-brief-output');
+            expect(doc).toContain('notemd.circuitikz.repair-brief.v1');
             expect(doc).toContain('render-smoke artifact');
             expect(doc).toContain('maintainer fixture');
             expect(doc).toContain('--expected-svg-text');
@@ -169,6 +173,9 @@ describe('circuitikz export docs contract', () => {
     test('records SVG exact arc smoke coverage in the bilingual roadmap', () => {
         for (const doc of [roadmapDoc, roadmapDocZh]) {
             expect(doc).toContain('circuitikzRenderSmoke.ts');
+            expect(doc).toContain('circuitikzRepairBrief.ts');
+            expect(doc).toContain('--repair-brief-output');
+            expect(doc).toContain('notemd.circuitikz.repair-brief.v1');
             expect(doc).toContain('SVG number grammar');
             expect(doc).toContain('leading-dot decimals');
             expect(doc).toContain('explicit plus signs');
