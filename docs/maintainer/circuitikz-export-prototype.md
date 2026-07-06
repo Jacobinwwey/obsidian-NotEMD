@@ -148,6 +148,8 @@ The SVG bounded-canvas, path-only label classification, path-only glyph placemen
 
 Path-only glyph definitions can now be direct paths or grouped/symbol containers inside `<defs>`. The smoke pass resolves child path geometry from `<g id="...">` and `<symbol id="...">` before `<use>` placement, so renderers that wrap reusable glyph paths still feed `pathOnlyGlyphUseCount`, bounded-canvas diagnostics, and `render-svg-path-glyph-overlap`.
 
+Positioned SVG `text` and `tspan` boxes now respect `text-anchor` values `start`, `middle`, and `end` from attributes or inline style. This keeps centered and right-aligned LaTeX/dvisvgm labels in text/text and label-vs-drawing overlap checks. It is still a structural smoke approximation, not browser-grade text layout or pixel-perfect typography.
+
 The runner lives in `src/diagram/adapters/circuitikz/circuitikzCompileRunner.ts`. It reads the generated `{jobName}.log` from `{outputDir}`, reuses the same diagnostics parser, and returns `compileExecution` plus `compileDiagnostics` in the CLI JSON result. Artifact checks live in `src/diagram/adapters/circuitikz/circuitikzRenderSmoke.ts` so SVG structure rules remain testable without spawning a renderer. A non-ok diagnostic report still makes the CLI exit nonzero.
 
 If `--repair-brief-output` is provided, it must be paired with `--topology-reference` and either `--compile-log` or `--compile-executable`. The brief is written after diagnostics are available, and it reuses the same topology signature check before writing any repair handoff. If `--repair-brief` is provided, the candidate spec is compared with the topology signature embedded in the brief before any output is written.

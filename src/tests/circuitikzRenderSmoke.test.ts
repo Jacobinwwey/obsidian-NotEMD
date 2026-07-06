@@ -1329,6 +1329,84 @@ describe('circuitikz render smoke inspection', () => {
         }
     });
 
+    test('reports SVG centered text labels overlapped by drawing elements', () => {
+        const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'notemd-circuitikz-svg-anchor-middle-label-overlap-'));
+        const svgPath = path.join(tempRoot, 'anchor-middle-label-overlap.svg');
+        fs.writeFileSync(
+            svgPath,
+            '<svg viewBox="0 0 160 100"><line x1="58" y1="45" x2="62" y2="45" stroke="black" stroke-width="2"/><text x="80" y="48" font-size="12" text-anchor="middle">v_{out}</text></svg>',
+            'utf8'
+        );
+
+        try {
+            const report = inspectCircuitikzRenderArtifact({
+                expectedArtifactPath: svgPath
+            });
+
+            expect(report.artifactKind).toBe('svg');
+            expect(report.diagnostics).toEqual([
+                expect.objectContaining({
+                    kind: 'render-svg-label-overlap',
+                    message: expect.stringContaining('v_{out} / line')
+                })
+            ]);
+        } finally {
+            fs.rmSync(tempRoot, { recursive: true, force: true });
+        }
+    });
+
+    test('reports SVG end-anchored text labels that overlap preceding labels', () => {
+        const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'notemd-circuitikz-svg-anchor-end-text-overlap-'));
+        const svgPath = path.join(tempRoot, 'anchor-end-text-overlap.svg');
+        fs.writeFileSync(
+            svgPath,
+            '<svg viewBox="0 0 180 100"><text x="30" y="50" font-size="12">left</text><text x="80" y="50" font-size="12" style="text-anchor: end">right</text><path d="M0 0H12"/></svg>',
+            'utf8'
+        );
+
+        try {
+            const report = inspectCircuitikzRenderArtifact({
+                expectedArtifactPath: svgPath
+            });
+
+            expect(report.artifactKind).toBe('svg');
+            expect(report.diagnostics).toEqual([
+                expect.objectContaining({
+                    kind: 'render-svg-text-overlap',
+                    message: expect.stringContaining('left / right')
+                })
+            ]);
+        } finally {
+            fs.rmSync(tempRoot, { recursive: true, force: true });
+        }
+    });
+
+    test('inherits SVG text-anchor from parent text into positioned tspan labels', () => {
+        const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'notemd-circuitikz-svg-tspan-anchor-inherit-'));
+        const svgPath = path.join(tempRoot, 'tspan-anchor-inherit.svg');
+        fs.writeFileSync(
+            svgPath,
+            '<svg viewBox="0 0 180 100"><text x="30" y="50" font-size="12">left</text><text style="text-anchor: end"><tspan x="80" y="50" font-size="12">right</tspan></text><path d="M0 0H12"/></svg>',
+            'utf8'
+        );
+
+        try {
+            const report = inspectCircuitikzRenderArtifact({
+                expectedArtifactPath: svgPath
+            });
+
+            expect(report.artifactKind).toBe('svg');
+            expect(report.diagnostics).toEqual([
+                expect.objectContaining({
+                    kind: 'render-svg-text-overlap',
+                    message: expect.stringContaining('left / right')
+                })
+            ]);
+        } finally {
+            fs.rmSync(tempRoot, { recursive: true, force: true });
+        }
+    });
+
     test('reports overlapping SVG labels when separate labels are emitted as tspans', () => {
         const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'notemd-circuitikz-svg-tspan-text-overlap-'));
         const svgPath = path.join(tempRoot, 'tspan-text-overlap.svg');

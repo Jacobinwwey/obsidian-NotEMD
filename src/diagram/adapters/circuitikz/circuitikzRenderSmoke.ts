@@ -1078,7 +1078,26 @@ function tagTextContent(tag: string): string {
         .trim());
 }
 
-function positionedTextBox(tag: string, text: string, inheritedFontSize?: number): SvgTextBox | undefined {
+type SvgTextAnchor = 'start' | 'middle' | 'end';
+
+function normalizeTextAnchor(textAnchor: string | undefined): SvgTextAnchor | undefined {
+    const normalizedTextAnchor = textAnchor?.trim().toLowerCase();
+    return normalizedTextAnchor === 'start' || normalizedTextAnchor === 'middle' || normalizedTextAnchor === 'end'
+        ? normalizedTextAnchor
+        : undefined;
+}
+
+function readTextAnchor(tag: string, inheritedTextAnchor?: string): SvgTextAnchor {
+    const textAnchor = readStyleProperty(tag, 'text-anchor') ?? readAttribute(tag, 'text-anchor') ?? inheritedTextAnchor;
+    return normalizeTextAnchor(textAnchor) ?? normalizeTextAnchor(inheritedTextAnchor) ?? 'start';
+}
+
+function positionedTextBox(
+    tag: string,
+    text: string,
+    inheritedFontSize?: number,
+    inheritedTextAnchor?: string
+): SvgTextBox | undefined {
     const x = parseNumericAttribute(tag, 'x');
     const y = parseNumericAttribute(tag, 'y');
     if (x === undefined || y === undefined || !text) {
@@ -1087,12 +1106,18 @@ function positionedTextBox(tag: string, text: string, inheritedFontSize?: number
 
     const fontSize = parseNumericAttribute(tag, 'font-size') ?? inheritedFontSize ?? 12;
     const width = Math.max(fontSize * 0.65, text.length * fontSize * 0.55);
+    const textAnchor = readTextAnchor(tag, inheritedTextAnchor);
+    const minX = textAnchor === 'end'
+        ? x - width
+        : textAnchor === 'middle'
+            ? x - width / 2
+            : x;
     return {
         label: `text:${text}`,
         text,
-        minX: x,
+        minX,
         minY: y - fontSize,
-        maxX: x + width,
+        maxX: minX + width,
         maxY: y + fontSize * 0.25
     };
 }
@@ -1103,13 +1128,14 @@ function svgTextBoxes(tag: string): SvgTextBox[] {
     }
 
     const parentFontSize = parseNumericAttribute(tag, 'font-size');
+    const parentTextAnchor = readTextAnchor(tag);
     const tspanBoxes = Array.from(tag.matchAll(/<tspan\b[^>]*>[\s\S]*?<\/tspan>/gi))
         .map(match => {
             const tspan = match[0];
             if (tagIsHidden(tspan)) {
                 return undefined;
             }
-            return positionedTextBox(tspan, tagTextContent(tspan), parentFontSize);
+            return positionedTextBox(tspan, tagTextContent(tspan), parentFontSize, parentTextAnchor);
         })
         .filter((box): box is SvgTextBox => Boolean(box));
     if (tspanBoxes.length > 0) {

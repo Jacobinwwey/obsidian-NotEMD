@@ -217,6 +217,7 @@ Phase E implementation status on 2026-07-05: `scripts/export-diagram-artifact.js
 - [x] Add path-only glyph placement checks by resolving `<use href="#...">` boxes for bounded-canvas diagnostics.
 - [x] Add `polyline` / `polygon` SVG drawing geometry checks for bounded-canvas and label-vs-drawing diagnostics.
 - [x] Add positioned `tspan` label geometry so LaTeX-style SVG output with multiple labels under one `<text>` parent can trigger text-overlap diagnostics.
+- [x] Add `text-anchor`-aware positioned text geometry for `start`, `middle`, and `end` labels so centered and right-aligned SVG text can participate in text/text and label-vs-drawing overlap diagnostics.
 - [x] Add path-only glyph label-vs-drawing overlap diagnostics through `render-svg-path-glyph-overlap`.
 - [x] Add exact arc bounds for A/a arc extrema so curved circuit-symbol arc interiors participate in bounded-canvas diagnostics.
 - [x] Add exact Bezier curve bounds for C/S/Q/T curve extrema so dvisvgm curve interiors participate in bounded-canvas diagnostics.
@@ -258,6 +259,8 @@ Phase F implementation status on 2026-07-05: `src/diagram/adapters/circuitikz/ci
 2026-07-06 renderer availability evidence increment: `scripts/run-circuitikz-smoke-fixtures.js` now accepts `--output-dir` plus optional `--report-output` without `--compile-executable`. The runner exports each fixture `.tex`, returns `ok: false`, and records `rendererAvailability.status: "missing-configuration"` with a `compile-executable-invalid` diagnostic. This makes missing local renderer setup auditable without shell probing, silent skips, or claiming compile/render-smoke success.
 
 2026-07-06 accessibility metadata label increment: `src/diagram/adapters/circuitikz/circuitikzRenderSmoke.ts` now includes decoded SVG accessibility metadata from `aria-label`, `<title>`, and `<desc>` in `--expected-svg-text` checks. This lets metadata-preserving SVG renderers prove semantic label identity even when visible text is converted to paths, while still routing path-only visual text without metadata to the later OCR/screenshot gate. `src/tests/circuitikzRenderSmoke.test.ts` covers XML entity decoding in `aria-label`.
+
+2026-07-06 SVG text-anchor geometry increment: positioned SVG `text` and `tspan` boxes now honor `text-anchor` values `start`, `middle`, and `end` from attributes or inline style. This makes centered and right-aligned labels participate in the same bounded-canvas, text-overlap, and `render-svg-label-overlap` checks as start-anchored labels, while still avoiding a browser-grade text-layout claim.
 
 ## Current Architecture Progress Audit
 

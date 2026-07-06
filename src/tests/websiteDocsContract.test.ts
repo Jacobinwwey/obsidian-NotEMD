@@ -118,6 +118,7 @@ describe('website documentation contract', () => {
             expect(content).toContain('polyline');
             expect(content).toContain('polygon');
             expect(content).toContain('tspan');
+            expect(content).toContain('text-anchor');
             expect(content).toContain('render-png-blank');
             expect(content).toContain('render-png-foreground-dense');
             expect(content).toContain('render-png-content-clipped');
