@@ -805,7 +805,7 @@ function collectPathDefinitionBoxes(svgText: string): Map<string, SvgBox> {
             }
             const box = pathBox(tag);
             if (box) {
-                definitions.set(id, box);
+                definitions.set(id, transformBox(box, parseSvgTransform(readAttribute(tag, 'transform'))));
             }
         }
     }

@@ -795,6 +795,39 @@ describe('circuitikz render smoke inspection', () => {
         }
     });
 
+    test('reports path-only SVG glyph uses with transformed definitions that extend outside the viewBox', () => {
+        const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'notemd-circuitikz-svg-use-definition-transform-bounds-'));
+        const svgPath = path.join(tempRoot, 'path-only-use-definition-transform-out-of-bounds.svg');
+        fs.writeFileSync(
+            svgPath,
+            '<svg viewBox="0 0 100 80"><defs><path id="glyph-v" transform="scale(10)" d="M0 0 L12 0 L12 1 L0 1"/></defs><path d="M20 70H30"/><use href="#glyph-v" x="0" y="0"/></svg>',
+            'utf8'
+        );
+
+        try {
+            const report = inspectCircuitikzRenderArtifact({
+                expectedArtifactPath: svgPath,
+                expectedSvgText: ['v_{out}']
+            });
+
+            expect(report.artifactKind).toBe('svg');
+            expect(report.svg).toEqual(expect.objectContaining({
+                pathOnlyGlyphUseCount: 1
+            }));
+            expect(report.diagnostics).toEqual([
+                expect.objectContaining({
+                    kind: 'render-svg-text-path-only'
+                }),
+                expect.objectContaining({
+                    kind: 'render-svg-out-of-bounds',
+                    message: expect.stringContaining('use:#glyph-v')
+                })
+            ]);
+        } finally {
+            fs.rmSync(tempRoot, { recursive: true, force: true });
+        }
+    });
+
     test('does not count definitions-only SVG glyph paths as visible drawing elements', () => {
         const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'notemd-circuitikz-svg-defs-only-'));
         const svgPath = path.join(tempRoot, 'defs-only.svg');
