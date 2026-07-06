@@ -180,6 +180,16 @@ npm run diagram:smoke-circuitikz -- \
 
 runner 是 `scripts/run-circuitikz-smoke-fixtures.js`。它会发现 fixture JSON 文件，为每个 fixture 写出一个 `.tex` artifact，逐个调用 `scripts/export-circuitikz.js`，并返回包含 `fixtureCount`、每个 fixture 的 `compileExecution` 和 `compileDiagnostics` 的聚合 JSON report。
 
+如果维护者机器尚未配置 renderer，同一个 runner 仍可以生成 release-audit evidence，而不是猜测平台 shell 或静默跳过 fixtures：
+
+```bash
+npm run diagram:smoke-circuitikz -- \
+  --output-dir docs/export/circuitikz-smoke \
+  --report-output docs/export/circuitikz-smoke/renderer-availability.json
+```
+
+在这个模式下，runner 会为每个 fixture 写出确定性的 `.tex` artifact，返回 `ok: false`，并把 `rendererAvailability.status` 记录为 `missing-configuration`，同时带有 `compile-executable-invalid` diagnostic。这只能证明 fixture specs 仍能导出，并把缺失 renderer 变成显式环境 gate；它不是 compile、render-smoke 或 visual-acceptance 通过。
+
 对于输出 SVG 的 renderer 或 wrapper executable，可以继续使用同样的 expected-artifact 与 text-token gates：
 
 ```bash
@@ -262,7 +272,7 @@ npm test -- --runInBand src/tests/circuitikzExporter.test.ts src/tests/circuitik
 - 为 `Z/z` 后的 bounded relative commands 增加 SVG close-path current-point handling；
 - 检查 bounded SVG viewBox、针对 A/a arc extrema 的 exact arc bounds、针对 C/S/Q/T curve extrema 的 exact Bezier curve bounds、stroke-width-aware SVG bounds 与 label overlap checks、明显 text-overlap、positioned `tspan` label overlap、path-only glyph label overlap 和 label-vs-drawing overlap，包括常见 SVG transforms 的 transform-aware geometry；
 - 对 PNG screenshot 执行正尺寸、非背景像素、前景包围盒、前景密度、贴边裁剪与异常密集前景块 smoke 检查；
-- 通过 `src/tests/circuitikzSmokeFixturesCli.test.ts` 验证 maintainer fixture discovery 与聚合 smoke execution；
+- 通过 `src/tests/circuitikzSmokeFixturesCli.test.ts` 验证 maintainer fixture discovery、聚合 smoke execution 与显式 missing-renderer availability reports；
 - 无效拓扑不会写出 output file。
 
 ## 非目标

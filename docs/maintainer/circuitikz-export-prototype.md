@@ -180,6 +180,16 @@ npm run diagram:smoke-circuitikz -- \
 
 The runner is `scripts/run-circuitikz-smoke-fixtures.js`. It discovers the fixture JSON files, writes one `.tex` artifact per fixture, invokes `scripts/export-circuitikz.js` for each fixture, and returns an aggregate JSON report with `fixtureCount`, per-fixture `compileExecution`, and per-fixture `compileDiagnostics`.
 
+If the maintainer machine does not have a renderer configured yet, the same runner can still produce release-audit evidence without guessing a platform shell or silently skipping the fixtures:
+
+```bash
+npm run diagram:smoke-circuitikz -- \
+  --output-dir docs/export/circuitikz-smoke \
+  --report-output docs/export/circuitikz-smoke/renderer-availability.json
+```
+
+In that mode the runner writes the deterministic `.tex` artifacts for every fixture, returns `ok: false`, and records `rendererAvailability.status` as `missing-configuration` with a `compile-executable-invalid` diagnostic. This proves the fixture specs still export and makes the missing renderer an explicit environment gate; it is not a compile, render-smoke, or visual-acceptance pass.
+
 For SVG-producing renderers or wrapper executables, use the same expected-artifact and text-token gates:
 
 ```bash
@@ -262,7 +272,7 @@ The tests verify:
 - SVG close-path current-point handling for bounded relative commands after `Z/z`;
 - bounded SVG viewBox, exact arc bounds for A/a arc extrema, exact Bezier curve bounds for C/S/Q/T curve extrema, stroke-width-aware SVG bounds and label overlap checks, obvious text-overlap, positioned `tspan` label overlap, path-only glyph label overlap, and label-vs-drawing overlap checks, including transform-aware geometry for common SVG transforms;
 - PNG screenshot smoke checks for positive dimensions, non-background pixels, foreground bounds, foreground density, edge-touching clipped content, and unusually dense foreground blocks;
-- maintainer fixture discovery and aggregate smoke execution through `src/tests/circuitikzSmokeFixturesCli.test.ts`;
+- maintainer fixture discovery, aggregate smoke execution, and explicit missing-renderer availability reports through `src/tests/circuitikzSmokeFixturesCli.test.ts`;
 - no output file is written for invalid topology.
 
 ## Non-Goals

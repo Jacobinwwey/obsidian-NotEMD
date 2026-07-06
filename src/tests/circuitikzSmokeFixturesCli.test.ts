@@ -1,4 +1,4 @@
-import { execFileSync } from 'child_process';
+import { execFileSync, spawnSync } from 'child_process';
 import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
@@ -30,6 +30,60 @@ describe('circuitikz smoke fixtures CLI', () => {
             expect(fixture.style.voltageConvention).toBe('american voltages');
         }
     });
+
+    test('writes a renderer availability report when no renderer is configured', () => {
+        const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'notemd-circuitikz-smoke-fixtures-missing-renderer-'));
+        const outputDirectory = path.join(tempRoot, 'out');
+        const reportPath = path.join(tempRoot, 'renderer-availability.json');
+
+        try {
+            const result = spawnSync(
+                process.execPath,
+                [
+                    scriptPath,
+                    '--fixture-dir', fixtureDirectory,
+                    '--output-dir', outputDirectory,
+                    '--report-output', reportPath
+                ],
+                {
+                    cwd: repoRoot,
+                    encoding: 'utf8'
+                }
+            );
+
+            expect(result.status).toBe(1);
+            expect(result.stderr).toContain('One or more circuitikz smoke fixtures failed.');
+
+            const report = JSON.parse(result.stdout);
+            expect(report).toEqual(expect.objectContaining({
+                ok: false,
+                fixtureCount: 2,
+                reportOutputPath: reportPath,
+                rendererAvailability: expect.objectContaining({
+                    ok: false,
+                    status: 'missing-configuration'
+                })
+            }));
+            expect(report.rendererAvailability.diagnostics).toEqual([
+                expect.objectContaining({
+                    kind: 'compile-executable-invalid',
+                    message: expect.stringContaining('renderer is not configured')
+                })
+            ]);
+
+            const persistedReport = JSON.parse(fs.readFileSync(reportPath, 'utf8'));
+            expect(persistedReport.reportOutputPath).toBe(reportPath);
+            expect(persistedReport.rendererAvailability).toEqual(report.rendererAvailability);
+            for (const fixture of report.fixtures) {
+                expect(fs.existsSync(path.join(outputDirectory, `${fixture.name}.tex`))).toBe(true);
+                expect(fixture.rendererAvailability.status).toBe('missing-configuration');
+                expect(fixture.compileDiagnostics).toEqual(report.rendererAvailability);
+                expect(fixture.compileExecution).toBeUndefined();
+            }
+        } finally {
+            fs.rmSync(tempRoot, { recursive: true, force: true });
+        }
+    }, 30000);
 
     test('runs every golden fixture through explicit shell-free renderer arguments', () => {
         const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'notemd-circuitikz-smoke-fixtures-'));

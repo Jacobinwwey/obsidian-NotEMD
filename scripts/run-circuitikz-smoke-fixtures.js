@@ -9,6 +9,7 @@ function printUsage() {
 
 Usage:
   node scripts/run-circuitikz-smoke-fixtures.js --output-dir <dir> --compile-executable <renderer> --compile-arg <arg>... --expected-artifact <artifact>
+  node scripts/run-circuitikz-smoke-fixtures.js --output-dir <dir> --report-output renderer-availability.json
 
 Example:
   node scripts/run-circuitikz-smoke-fixtures.js \\
@@ -69,11 +70,17 @@ function assertRequiredArgs(args) {
   if (!args.outputDir) {
     throw new Error('Missing required --output-dir.');
   }
-  if (!args.compileExecutable) {
-    throw new Error('Missing required --compile-executable.');
+  if (args.compileExecutable && !args.expectedArtifact) {
+    throw new Error('--compile-executable requires --expected-artifact.');
   }
-  if (!args.expectedArtifact) {
-    throw new Error('Missing required --expected-artifact.');
+  if (args.expectedArtifact && !args.compileExecutable) {
+    throw new Error('--expected-artifact requires --compile-executable.');
+  }
+  if (args.compileArgs.length > 0 && !args.compileExecutable) {
+    throw new Error('--compile-arg requires --compile-executable.');
+  }
+  if (args.expectedSvgText.length > 0 && !args.expectedArtifact) {
+    throw new Error('--expected-svg-text requires --expected-artifact.');
   }
 }
 
@@ -103,24 +110,54 @@ function fixtureNameFromPath(fixturePath) {
   return path.basename(fixturePath, path.extname(fixturePath));
 }
 
+function createRendererAvailabilityReport(args) {
+  if (args.compileExecutable) {
+    return {
+      ok: true,
+      status: 'configured',
+      diagnostics: []
+    };
+  }
+
+  return {
+    ok: false,
+    status: 'missing-configuration',
+    summary: '1 error(s), 0 warning(s)',
+    diagnostics: [{
+      severity: 'error',
+      kind: 'compile-executable-invalid',
+      message: 'Circuitikz smoke fixture renderer is not configured.',
+      excerpt: '--compile-executable',
+      advice: 'Pass --compile-executable, repeated --compile-arg values, and --expected-artifact to run local renderer smoke checks. This runner does not resolve a platform shell or infer a renderer automatically.'
+    }]
+  };
+}
+
 async function run(args, repoRoot = path.resolve(__dirname, '..')) {
   assertRequiredArgs(args);
   const fixturePaths = listFixturePaths(args.fixtureDir);
   const outputDirectory = path.resolve(args.outputDir);
+  const rendererAvailability = createRendererAvailabilityReport(args);
   ensureDirectory(outputDirectory);
 
   const fixtures = [];
   for (const fixturePath of fixturePaths) {
     const name = fixtureNameFromPath(fixturePath);
     const outputPath = path.join(outputDirectory, `${name}.tex`);
-    const result = await runCircuitikzExport({
+    const exportArgs = {
       input: fixturePath,
       output: outputPath,
-      compileExecutable: args.compileExecutable,
-      compileArgs: args.compileArgs,
-      expectedArtifact: args.expectedArtifact,
-      expectedSvgText: args.expectedSvgText
-    }, repoRoot);
+      compileArgs: [],
+      expectedSvgText: []
+    };
+    if (rendererAvailability.ok) {
+      exportArgs.compileExecutable = args.compileExecutable;
+      exportArgs.compileArgs = args.compileArgs;
+      exportArgs.expectedArtifact = args.expectedArtifact;
+      exportArgs.expectedSvgText = args.expectedSvgText;
+    }
+
+    const result = await runCircuitikzExport(exportArgs, repoRoot);
     fixtures.push({
       name,
       inputPath: result.inputPath,
@@ -128,24 +165,26 @@ async function run(args, repoRoot = path.resolve(__dirname, '..')) {
       circuitKind: result.circuitKind,
       goldenReferenceId: result.goldenReferenceId,
       compileExecution: result.compileExecution,
-      compileDiagnostics: result.compileDiagnostics
+      compileDiagnostics: rendererAvailability.ok ? result.compileDiagnostics : rendererAvailability,
+      rendererAvailability
     });
   }
 
-  const ok = fixtures.every(fixture => fixture.compileDiagnostics?.ok === true);
+  const ok = rendererAvailability.ok && fixtures.every(fixture => fixture.compileDiagnostics?.ok === true);
   const report = {
     ok,
     fixtureDirectory: path.resolve(args.fixtureDir),
     outputDirectory,
+    rendererAvailability,
     fixtureCount: fixtures.length,
     fixtures
   };
 
   if (args.reportOutput) {
     const reportOutputPath = path.resolve(args.reportOutput);
+    report.reportOutputPath = reportOutputPath;
     ensureDirectory(path.dirname(reportOutputPath));
     fs.writeFileSync(reportOutputPath, `${JSON.stringify(report, null, 2)}\n`, 'utf8');
-    report.reportOutputPath = reportOutputPath;
   }
 
   return report;
