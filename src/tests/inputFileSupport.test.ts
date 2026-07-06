@@ -81,6 +81,29 @@ describe('input file support', () => {
         expect(mockApp.vault.read).toHaveBeenCalledWith(file);
     });
 
+    test.each([
+        ['drawio', 'diagram.drawio'],
+        ['drawnix', 'diagram.drawnix'],
+        ['tex', 'circuit.tex'],
+        ['tikz', 'circuit.tikz']
+    ])('reads source-only diagram artifact files as text for preview: .%s', async (extension, name) => {
+        const file = {
+            name,
+            path: `Docs/${name}`,
+            extension
+        } as any;
+        const settings = {
+            ...mockSettings,
+            enableDeveloperMode: false,
+            enableRelaxedInputFileTypes: false
+        };
+
+        (mockApp.vault.read as jest.Mock).mockResolvedValue('source artifact');
+
+        await expect(readSupportedInputFile(mockApp, file, settings)).resolves.toBe('source artifact');
+        expect(mockApp.vault.read).toHaveBeenCalledWith(file);
+    });
+
     test('extracts pdf text through Obsidian PDF.js when relaxed input mode is on', async () => {
         const file = {
             name: 'Topic.pdf',

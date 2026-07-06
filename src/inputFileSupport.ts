@@ -65,9 +65,13 @@ const TEXT_INPUT_EXTENSIONS = new Set([
     'html',
     'htm',
     'canvas',
+    'drawio',
+    'drawnix',
     'mermaid',
     'mmd',
     'svg',
+    'tex',
+    'tikz',
     'log'
 ]);
 
