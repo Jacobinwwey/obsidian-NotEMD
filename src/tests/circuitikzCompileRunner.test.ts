@@ -4,6 +4,66 @@ import * as path from 'path';
 import { runCircuitikzCompile } from '../diagram/adapters/circuitikz/circuitikzCompileRunner';
 
 describe('circuitikz compile runner', () => {
+    test('returns structured diagnostics for an empty renderer executable', () => {
+        const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'notemd-circuitikz-runner-empty-executable-'));
+        const texPath = path.join(tempRoot, 'circuit.tex');
+        fs.writeFileSync(texPath, '\\begin{document}\\end{document}\n', 'utf8');
+
+        try {
+            const result = runCircuitikzCompile({
+                executable: '   ',
+                args: [],
+                texPath,
+                outputDirectory: tempRoot
+            });
+
+            expect(result.exitCode).toBeNull();
+            expect(result.signal).toBeNull();
+            expect(result.timedOut).toBe(false);
+            expect(result.diagnostics).toEqual({
+                ok: false,
+                summary: '1 error(s), 0 warning(s)',
+                diagnostics: [
+                    expect.objectContaining({
+                        severity: 'error',
+                        kind: 'compile-executable-invalid',
+                        message: 'Renderer executable must be a non-empty command or executable path.',
+                        advice: expect.stringContaining('direct process execution')
+                    })
+                ]
+            });
+        } finally {
+            fs.rmSync(tempRoot, { recursive: true, force: true });
+        }
+    });
+
+    test('returns actionable diagnostics when shell arguments are embedded in the renderer executable', () => {
+        const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'notemd-circuitikz-runner-shell-command-executable-'));
+        const texPath = path.join(tempRoot, 'circuit.tex');
+        fs.writeFileSync(texPath, '\\begin{document}\\end{document}\n', 'utf8');
+
+        try {
+            const result = runCircuitikzCompile({
+                executable: 'pdflatex -halt-on-error',
+                args: ['{tex}'],
+                texPath,
+                outputDirectory: tempRoot
+            });
+
+            expect(result.exitCode).toBeNull();
+            expect(result.diagnostics.ok).toBe(false);
+            expect(result.diagnostics.diagnostics).toEqual([
+                expect.objectContaining({
+                    kind: 'compile-executable-not-found',
+                    message: expect.stringContaining('pdflatex -halt-on-error'),
+                    advice: expect.stringContaining('Pass executable arguments through --compile-arg')
+                })
+            ]);
+        } finally {
+            fs.rmSync(tempRoot, { recursive: true, force: true });
+        }
+    });
+
     test('runs a renderer command without a shell and parses the generated log', () => {
         const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'notemd circuitikz runner '));
         const compilerPath = path.join(tempRoot, 'fake-compiler.js');

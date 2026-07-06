@@ -244,7 +244,7 @@ npm run diagram:export-circuitikz -- --input cmos-inverter.json --output cmos-in
 npm run diagram:export-circuitikz -- --input cmos-inverter.json --output cmos-inverter.tex --compile-executable pdflatex --compile-arg -interaction=nonstopmode --compile-arg -halt-on-error --compile-arg -output-directory={outputDir} --compile-arg {tex} --expected-artifact {outputDir}/{jobName}.pdf
 ```
 
-compile runner 使用 `shell: false`，把 `{tex}`、`{outputDir}` 和 `{jobName}` placeholders 展开为参数数组值，读取生成的 `{jobName}.log`，并在 CLI JSON output 中返回 `compileExecution` 与 `compileDiagnostics`。配合 `--expected-artifact` 时，它还会报告 `compileExecution.renderSmoke`，并在 renderer 没有创建非空 artifact 时让 CLI 失败。它仍然不捆绑 LaTeX、不把 TikZJax 变成插件 runtime 依赖，也不执行 screenshot-level visual repair。
+compile runner 使用 `shell: false`，把 `{tex}`、`{outputDir}` 和 `{jobName}` placeholders 展开为参数数组值，读取生成的 `{jobName}.log`，并在 CLI JSON output 中返回 `compileExecution` 与 `compileDiagnostics`。`--compile-executable` 只表示 renderer binary 或 wrapper 路径；renderer flags 应通过重复的 `--compile-arg` 传入。空 executable 会以 `compile-executable-invalid` 失败，缺失 binary 会以 `compile-executable-not-found` 失败，shell-command-shaped executable string 会得到拆分参数的建议，让 Windows、Linux 与 macOS 走同一套 direct-exec contract。配合 `--expected-artifact` 时，它还会报告 `compileExecution.renderSmoke`，并在 renderer 没有创建非空 artifact 时让 CLI 失败。它仍然不捆绑 LaTeX、不把 TikZJax 变成插件 runtime 依赖，也不执行 screenshot-level visual repair。
 
 如果预期 artifact 是 `.svg`，smoke check 会再深入一层：
 

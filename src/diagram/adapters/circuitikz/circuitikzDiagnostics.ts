@@ -7,6 +7,8 @@ export type CircuitikzCompileDiagnosticKind =
     | 'latex-error'
     | 'emergency-stop'
     | 'overfull-hbox'
+    | 'compile-executable-invalid'
+    | 'compile-executable-not-found'
     | 'compile-process-error'
     | 'render-artifact-missing'
     | 'render-artifact-empty'

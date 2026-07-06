@@ -3,6 +3,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import {
     CircuitikzCompileDiagnostic,
+    CircuitikzCompileDiagnosticKind,
     CircuitikzCompileDiagnosticReport,
     diagnoseCircuitikzCompileLog
 } from './circuitikzDiagnostics';
@@ -49,18 +50,58 @@ function resolveLogPath(texPath: string, outputDirectory: string): string | unde
     return fs.existsSync(candidate) ? candidate : undefined;
 }
 
-function buildProcessFailureReport(message: string): CircuitikzCompileDiagnosticReport {
+function buildProcessFailureReport(
+    kind: CircuitikzCompileDiagnosticKind,
+    message: string,
+    advice: string
+): CircuitikzCompileDiagnosticReport {
     return {
         ok: false,
         summary: '1 error(s), 0 warning(s)',
         diagnostics: [{
             severity: 'error',
-            kind: 'compile-process-error',
+            kind,
             message,
             excerpt: message,
-            advice: 'Check the renderer executable path and arguments. The circuitikz runner uses direct process execution without a shell.'
+            advice
         }]
     };
+}
+
+function buildInvalidExecutableReport(): CircuitikzCompileDiagnosticReport {
+    return buildProcessFailureReport(
+        'compile-executable-invalid',
+        'Renderer executable must be a non-empty command or executable path.',
+        'Provide the renderer binary as the executable and pass every argument separately. The circuitikz runner uses direct process execution without a shell.'
+    );
+}
+
+function buildSpawnFailureReport(error: Error, executable: string): CircuitikzCompileDiagnosticReport {
+    const code = (error as NodeJS.ErrnoException).code;
+    if (code === 'ENOENT') {
+        const advice = /\s/.test(executable)
+            ? 'Renderer executable was not found. Pass executable arguments through --compile-arg instead of embedding a shell command string in --compile-executable.'
+            : 'Renderer executable was not found. Check the executable name, absolute path, PATH visibility, and platform-specific file extension.';
+        return buildProcessFailureReport(
+            'compile-executable-not-found',
+            `Renderer executable was not found: ${executable}`,
+            advice
+        );
+    }
+
+    if (code === 'EINVAL') {
+        return buildProcessFailureReport(
+            'compile-executable-invalid',
+            `Renderer executable could not be started: ${error.message}`,
+            'Check the renderer executable path and argument array. The circuitikz runner uses direct process execution without shell parsing on every platform.'
+        );
+    }
+
+    return buildProcessFailureReport(
+        'compile-process-error',
+        error.message,
+        'Check the renderer executable path and arguments. The circuitikz runner uses direct process execution without a shell.'
+    );
 }
 
 function isProcessTimeout(error: Error | undefined): boolean {
@@ -102,7 +143,23 @@ export function runCircuitikzCompile(request: CircuitikzCompileRequest): Circuit
     const expectedArtifactPath = request.expectedArtifactPath
         ? path.resolve(outputDirectory, expandCompileArg(request.expectedArtifactPath, texPath, outputDirectory))
         : undefined;
-    const execution = spawnSync(request.executable, args, {
+    const executable = request.executable.trim();
+
+    if (!executable) {
+        return {
+            executable: request.executable,
+            args,
+            cwd: outputDirectory,
+            exitCode: null,
+            signal: null,
+            timedOut: false,
+            stdout: '',
+            stderr: '',
+            diagnostics: buildInvalidExecutableReport()
+        };
+    }
+
+    const execution = spawnSync(executable, args, {
         cwd: outputDirectory,
         encoding: 'utf8',
         shell: false,
@@ -113,7 +170,7 @@ export function runCircuitikzCompile(request: CircuitikzCompileRequest): Circuit
     const logPath = resolveLogPath(texPath, outputDirectory);
     const diagnosticSource = logPath ? fs.readFileSync(logPath, 'utf8').replace(/^\uFEFF/, '') : `${stdout}\n${stderr}`;
     const parsedDiagnostics = execution.error
-        ? buildProcessFailureReport(execution.error.message)
+        ? buildSpawnFailureReport(execution.error, executable)
         : diagnoseCircuitikzCompileLog(diagnosticSource);
     const renderSmoke = expectedArtifactPath
         ? inspectCircuitikzRenderArtifact({
@@ -124,7 +181,7 @@ export function runCircuitikzCompile(request: CircuitikzCompileRequest): Circuit
     const diagnostics = mergeRenderSmokeDiagnostic(parsedDiagnostics, renderSmoke);
 
     return {
-        executable: request.executable,
+        executable,
         args,
         cwd: outputDirectory,
         exitCode: execution.status,

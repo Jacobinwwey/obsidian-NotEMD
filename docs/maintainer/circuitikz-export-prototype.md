@@ -105,7 +105,7 @@ node scripts/export-circuitikz.js \
   --diagnostics-output cmos-inverter.diagnostics.json
 ```
 
-This path uses direct process execution with an argument array (`shell: false`). It does not concatenate a shell command, so Windows, Linux, and macOS avoid shell-specific quoting and resolution differences. Supported placeholders are:
+This path uses direct process execution with an argument array (`shell: false`). It does not concatenate a shell command, so Windows, Linux, and macOS avoid shell-specific quoting and resolution differences. `--compile-executable` must be the renderer binary or wrapper path only; pass every flag through repeated `--compile-arg` values. Empty executables fail with `compile-executable-invalid`, missing binaries fail with `compile-executable-not-found`, and shell-command-shaped executables such as `pdflatex -halt-on-error` receive advice to split arguments instead of relying on platform-specific shell parsing. Supported placeholders are:
 
 | Placeholder | Value |
 |---|---|

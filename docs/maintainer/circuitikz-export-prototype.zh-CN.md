@@ -105,7 +105,7 @@ node scripts/export-circuitikz.js \
   --diagnostics-output cmos-inverter.diagnostics.json
 ```
 
-这条路径使用直接进程执行和参数数组（`shell: false`），不会拼接 shell command，因此 Windows、Linux 与 macOS 都能避开 shell-specific quoting 和 resolution 差异。支持的 placeholder 是：
+这条路径使用直接进程执行和参数数组（`shell: false`），不会拼接 shell command，因此 Windows、Linux 与 macOS 都能避开 shell-specific quoting 和 resolution 差异。`--compile-executable` 必须只传 renderer binary 或 wrapper 路径；每个 flag 都应通过重复的 `--compile-arg` 传入。空 executable 会以 `compile-executable-invalid` 失败，找不到 binary 会以 `compile-executable-not-found` 失败，像 `pdflatex -halt-on-error` 这种 shell-command-shaped executable 会得到拆分参数而不是依赖平台 shell parsing 的建议。支持的 placeholder 是：
 
 | Placeholder | Value |
 |---|---|

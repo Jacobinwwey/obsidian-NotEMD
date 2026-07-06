@@ -199,6 +199,7 @@ Phase E implementation status on 2026-07-05: `scripts/export-diagram-artifact.js
 - [x] Add bilingual maintainer docs and website progress notes.
 - [x] Add compile-log diagnostics that parse existing LaTeX/TikZJax logs without shelling out to a compiler.
 - [x] Add optional shell-free local renderer execution with placeholder-expanded argument arrays.
+- [x] Add structured renderer executable diagnostics for empty executables, missing binaries, and shell-command-shaped `--compile-executable` values.
 - [x] Add optional render-smoke artifact existence and non-empty checks through `--expected-artifact`.
 - [x] Add SVG render-smoke structure checks and optional repeated `--expected-svg-text` label-token checks.
 - [x] Add PNG screenshot smoke checks for positive dimensions, non-background pixels, foreground bounds, and edge-touching clipped content.
@@ -232,7 +233,7 @@ Phase F implementation status on 2026-07-05: `src/diagram/adapters/circuitikz/ci
 |---|---|---|---|
 | Keep model output semantic instead of free-form renderer text | `DiagramSpec`, `SemanticFigureModel`, and the separate `CircuitSpec` boundary keep renderer syntax behind adapters | Implemented for current targets | Do not widen `DiagramSpec` for circuit-only terminal/layout fields until another target needs them |
 | Keep editor integrations at artifact boundaries | Draw.io XML, Drawnix JSON, editable HTML/SVG, and circuitikz all export through CLI or render artifacts without embedding third-party editors | Implemented | Add richer primitives only when structural editability tests exist |
-| Make renderer execution cross-platform | `circuitikzCompileRunner.ts` uses `shell: false` with placeholder-expanded argument arrays | Implemented | Keep Windows/POSIX behavior in argument arrays, not shell command strings |
+| Make renderer execution cross-platform | `circuitikzCompileRunner.ts` uses `shell: false` with placeholder-expanded argument arrays and structured executable diagnostics | Implemented | Keep Windows/POSIX behavior in argument arrays, not shell command strings |
 | Verify circuit output before visual repair | Compile-log diagnostics, topology-preserving repair guard, SVG structural smoke, PNG foreground smoke, and preview diagnostics are in place | Partially implemented | Add OCR-level label recognition, exact arc bounds, precise pixel overlap gates, and topology-preserving repair prompts |
 | Expose diagnostics to users without pretending source is rendered | `RenderArtifact.diagnostics`, diagnostic summary counts, preview history entries, and source-only fallback are implemented | Implemented | Connect external renderer artifacts only when evidence distinguishes raw source from rendered output |
 
