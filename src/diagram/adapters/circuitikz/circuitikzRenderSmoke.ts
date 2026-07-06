@@ -67,6 +67,11 @@ interface PngHeader {
     interlaceMethod: number;
 }
 
+interface PngPalette {
+    colors: Array<[number, number, number]>;
+    alpha: number[];
+}
+
 interface SvgBox {
     label: string;
     minX: number;
@@ -1333,6 +1338,8 @@ function channelsForColorType(colorType: number): number | undefined {
     switch (colorType) {
         case 0:
             return 1;
+        case 3:
+            return 1;
         case 2:
             return 3;
         case 4:
@@ -1406,12 +1413,48 @@ function unfilterPngScanlines(inflated: Buffer, width: number, height: number, b
     return decoded;
 }
 
-function readPixel(decoded: Buffer, pixelIndex: number, colorType: number, channels: number): [number, number, number, number] {
+function parsePngPalette(chunks: PngChunk[], colorType: number): PngPalette | undefined {
+    if (colorType !== 3) {
+        return undefined;
+    }
+
+    const plte = chunks.find(chunk => chunk.type === 'PLTE');
+    if (!plte || plte.data.length === 0 || plte.data.length % 3 !== 0) {
+        throw new Error('PNG indexed-color palette is missing or malformed.');
+    }
+
+    const colors: Array<[number, number, number]> = [];
+    for (let offset = 0; offset < plte.data.length; offset += 3) {
+        colors.push([plte.data[offset], plte.data[offset + 1], plte.data[offset + 2]]);
+    }
+
+    const transparency = chunks.find(chunk => chunk.type === 'tRNS');
+    return {
+        colors,
+        alpha: transparency ? Array.from(transparency.data) : []
+    };
+}
+
+function readPixel(
+    decoded: Buffer,
+    pixelIndex: number,
+    colorType: number,
+    channels: number,
+    palette?: PngPalette
+): [number, number, number, number] {
     const offset = pixelIndex * channels;
     switch (colorType) {
         case 0: {
             const gray = decoded[offset];
             return [gray, gray, gray, 255];
+        }
+        case 3: {
+            const paletteIndex = decoded[offset];
+            const color = palette?.colors[paletteIndex];
+            if (!color) {
+                throw new Error(`PNG indexed-color pixel references missing palette entry: ${paletteIndex}.`);
+            }
+            return [color[0], color[1], color[2], palette.alpha[paletteIndex] ?? 255];
         }
         case 2:
             return [decoded[offset], decoded[offset + 1], decoded[offset + 2], 255];
@@ -1443,6 +1486,7 @@ function extractPngSmoke(pngBytes: Buffer): CircuitikzPngSmokeReport {
     if (header.width <= 0 || header.height <= 0) {
         throw new Error('PNG dimensions must be positive.');
     }
+    const palette = parsePngPalette(chunks, header.colorType);
 
     const idatChunks = chunks.filter(chunk => chunk.type === 'IDAT');
     if (idatChunks.length === 0) {
@@ -1452,7 +1496,7 @@ function extractPngSmoke(pngBytes: Buffer): CircuitikzPngSmokeReport {
     const inflated = zlib.inflateSync(Buffer.concat(idatChunks.map(chunk => chunk.data)));
     const decoded = unfilterPngScanlines(inflated, header.width, header.height, channels);
     const decodedPixelCount = header.width * header.height;
-    const background = readPixel(decoded, 0, header.colorType, channels);
+    const background = readPixel(decoded, 0, header.colorType, channels, palette);
     let nonBackgroundPixelCount = 0;
     let minX = header.width;
     let minY = header.height;
@@ -1460,7 +1504,7 @@ function extractPngSmoke(pngBytes: Buffer): CircuitikzPngSmokeReport {
     let maxY = -1;
 
     for (let pixelIndex = 0; pixelIndex < decodedPixelCount; pixelIndex += 1) {
-        const pixel = readPixel(decoded, pixelIndex, header.colorType, channels);
+        const pixel = readPixel(decoded, pixelIndex, header.colorType, channels, palette);
         if (pixel[3] > 0 && colorDistance(pixel, background) > 8) {
             nonBackgroundPixelCount += 1;
             const x = pixelIndex % header.width;
@@ -1591,7 +1635,7 @@ export function inspectCircuitikzRenderArtifact(request: CircuitikzRenderSmokeRe
                     kind: message.startsWith('Unsupported PNG format') ? 'render-png-unsupported' : 'render-png-invalid',
                     message: `Expected PNG render artifact could not be inspected: ${message}`,
                     excerpt: expectedArtifactPath,
-                    advice: 'Use a non-interlaced 8-bit grayscale, RGB, or RGBA PNG for screenshot-level smoke checks.'
+                    advice: 'Use a non-interlaced 8-bit indexed-color, grayscale, RGB, or RGBA PNG for screenshot-level smoke checks.'
                 }]
             };
         }

@@ -51,6 +51,47 @@ function createRgbaPng(width: number, height: number, pixels: Array<[number, num
     ]);
 }
 
+function createIndexedPng(
+    width: number,
+    height: number,
+    palette: Array<[number, number, number]>,
+    indexes: number[],
+    alpha?: number[]
+): Buffer {
+    const signature = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
+    const ihdr = Buffer.alloc(13);
+    ihdr.writeUInt32BE(width, 0);
+    ihdr.writeUInt32BE(height, 4);
+    ihdr[8] = 8;
+    ihdr[9] = 3;
+    ihdr[10] = 0;
+    ihdr[11] = 0;
+    ihdr[12] = 0;
+
+    const scanlines: number[] = [];
+    for (let row = 0; row < height; row += 1) {
+        scanlines.push(0);
+        for (let column = 0; column < width; column += 1) {
+            scanlines.push(indexes[row * width + column]);
+        }
+    }
+
+    const chunks = [
+        signature,
+        pngChunk('IHDR', ihdr),
+        pngChunk('PLTE', Buffer.from(palette.flat()))
+    ];
+    if (alpha) {
+        chunks.push(pngChunk('tRNS', Buffer.from(alpha)));
+    }
+    chunks.push(
+        pngChunk('IDAT', zlib.deflateSync(Buffer.from(scanlines))),
+        pngChunk('IEND', Buffer.alloc(0))
+    );
+
+    return Buffer.concat(chunks);
+}
+
 describe('circuitikz render smoke inspection', () => {
     test('accepts a bounded non-empty SVG artifact with expected text', () => {
         const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'notemd-circuitikz-svg-smoke-'));
@@ -1083,6 +1124,98 @@ describe('circuitikz render smoke inspection', () => {
                     maxY: 1
                 }
             });
+        } finally {
+            fs.rmSync(tempRoot, { recursive: true, force: true });
+        }
+    });
+
+    test('accepts a nonblank indexed-color PNG screenshot artifact', () => {
+        const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'notemd-circuitikz-png-indexed-smoke-'));
+        const pngPath = path.join(tempRoot, 'indexed-render.png');
+        fs.writeFileSync(
+            pngPath,
+            createIndexedPng(
+                3,
+                3,
+                [
+                    [255, 255, 255],
+                    [0, 0, 0]
+                ],
+                [
+                    0, 0, 0,
+                    0, 1, 0,
+                    0, 0, 0
+                ]
+            )
+        );
+
+        try {
+            const report = inspectCircuitikzRenderArtifact({
+                expectedArtifactPath: pngPath
+            });
+
+            expect(report.artifactKind).toBe('png');
+            expect(report.diagnostics).toEqual([]);
+            expect(report.png).toEqual({
+                width: 3,
+                height: 3,
+                bitDepth: 8,
+                colorType: 3,
+                interlaceMethod: 0,
+                decodedPixelCount: 9,
+                nonBackgroundPixelCount: 1,
+                foregroundDensity: 1,
+                foregroundBounds: {
+                    minX: 1,
+                    minY: 1,
+                    maxX: 1,
+                    maxY: 1
+                }
+            });
+        } finally {
+            fs.rmSync(tempRoot, { recursive: true, force: true });
+        }
+    });
+
+    test('honors indexed-color PNG transparency metadata', () => {
+        const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'notemd-circuitikz-png-indexed-alpha-smoke-'));
+        const pngPath = path.join(tempRoot, 'indexed-alpha-render.png');
+        fs.writeFileSync(
+            pngPath,
+            createIndexedPng(
+                3,
+                3,
+                [
+                    [255, 255, 255],
+                    [0, 0, 0]
+                ],
+                [
+                    0, 0, 0,
+                    0, 1, 0,
+                    0, 0, 0
+                ],
+                [0, 255]
+            )
+        );
+
+        try {
+            const report = inspectCircuitikzRenderArtifact({
+                expectedArtifactPath: pngPath
+            });
+
+            expect(report.artifactKind).toBe('png');
+            expect(report.diagnostics).toEqual([]);
+            expect(report.png).toEqual(expect.objectContaining({
+                colorType: 3,
+                nonBackgroundPixelCount: 1,
+                foregroundDensity: 1,
+                foregroundBounds: {
+                    minX: 1,
+                    minY: 1,
+                    maxX: 1,
+                    maxY: 1
+                }
+            }));
         } finally {
             fs.rmSync(tempRoot, { recursive: true, force: true });
         }
