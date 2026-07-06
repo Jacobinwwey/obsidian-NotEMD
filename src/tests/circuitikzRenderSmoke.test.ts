@@ -68,6 +68,50 @@ function createRgbaPng(width: number, height: number, pixels: Array<[number, num
     ]);
 }
 
+function createDirect16Png(width: number, height: number, colorType: number, samples: number[][]): Buffer {
+    const channelsByColorType: Record<number, number> = {
+        0: 1,
+        2: 3,
+        4: 2,
+        6: 4
+    };
+    const channels = channelsByColorType[colorType];
+    if (!channels) {
+        throw new Error(`Unsupported test color type: ${colorType}`);
+    }
+
+    const signature = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
+    const ihdr = Buffer.alloc(13);
+    ihdr.writeUInt32BE(width, 0);
+    ihdr.writeUInt32BE(height, 4);
+    ihdr[8] = 16;
+    ihdr[9] = colorType;
+    ihdr[10] = 0;
+    ihdr[11] = 0;
+    ihdr[12] = 0;
+
+    const scanline = Buffer.alloc(height * (1 + width * channels * 2));
+    let offset = 0;
+    for (let row = 0; row < height; row += 1) {
+        scanline[offset] = 0;
+        offset += 1;
+        for (let column = 0; column < width; column += 1) {
+            const pixelSamples = samples[row * width + column];
+            for (let channel = 0; channel < channels; channel += 1) {
+                scanline.writeUInt16BE(pixelSamples[channel], offset);
+                offset += 2;
+            }
+        }
+    }
+
+    return Buffer.concat([
+        signature,
+        pngChunk('IHDR', ihdr),
+        pngChunk('IDAT', zlib.deflateSync(scanline)),
+        pngChunk('IEND', Buffer.alloc(0))
+    ]);
+}
+
 function createGrayscalePng(
     width: number,
     height: number,
@@ -1206,6 +1250,73 @@ describe('circuitikz render smoke inspection', () => {
             expect(report.png).toEqual(expect.objectContaining({
                 bitDepth,
                 colorType: 0,
+                decodedPixelCount: 9,
+                nonBackgroundPixelCount: 1,
+                foregroundDensity: 1,
+                foregroundBounds: {
+                    minX: 1,
+                    minY: 1,
+                    maxX: 1,
+                    maxY: 1
+                }
+            }));
+        } finally {
+            fs.rmSync(tempRoot, { recursive: true, force: true });
+        }
+    });
+
+    test.each([
+        {
+            label: 'grayscale',
+            colorType: 0,
+            background: [0],
+            foreground: [65535]
+        },
+        {
+            label: 'rgb',
+            colorType: 2,
+            background: [0, 0, 0],
+            foreground: [65535, 65535, 65535]
+        },
+        {
+            label: 'grayscale-alpha',
+            colorType: 4,
+            background: [0, 65535],
+            foreground: [65535, 65535]
+        },
+        {
+            label: 'rgba',
+            colorType: 6,
+            background: [0, 0, 0, 65535],
+            foreground: [65535, 65535, 65535, 65535]
+        }
+    ])('accepts a nonblank 16-bit $label PNG screenshot artifact', ({ label, colorType, background, foreground }) => {
+        const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), `notemd-circuitikz-png-16bit-${label}-smoke-`));
+        const pngPath = path.join(tempRoot, `${label}-16bit-render.png`);
+        fs.writeFileSync(
+            pngPath,
+            createDirect16Png(
+                3,
+                3,
+                colorType,
+                [
+                    background, background, background,
+                    background, foreground, background,
+                    background, background, background
+                ]
+            )
+        );
+
+        try {
+            const report = inspectCircuitikzRenderArtifact({
+                expectedArtifactPath: pngPath
+            });
+
+            expect(report.artifactKind).toBe('png');
+            expect(report.diagnostics).toEqual([]);
+            expect(report.png).toEqual(expect.objectContaining({
+                bitDepth: 16,
+                colorType,
                 decodedPixelCount: 9,
                 nonBackgroundPixelCount: 1,
                 foregroundDensity: 1,

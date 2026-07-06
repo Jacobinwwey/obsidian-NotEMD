@@ -75,14 +75,16 @@ interface PngPalette {
 type PngPixelLayout = {
     kind: 'direct';
     colorType: number;
+    bitDepth: number;
     bytesPerPixel: number;
+    bytesPerSample: number;
     scanlineByteLength: number;
     filterByteStride: number;
 } | {
     kind: 'grayscale';
     bitDepth: number;
     scanlineByteLength: number;
-    filterByteStride: 1;
+    filterByteStride: number;
 } | {
     kind: 'indexed';
     bitDepth: number;
@@ -1367,14 +1369,14 @@ function channelsForColorType(colorType: number): number | undefined {
 
 function createPngPixelLayout(header: PngHeader): PngPixelLayout | undefined {
     if (header.colorType === 0) {
-        if (![1, 2, 4, 8].includes(header.bitDepth)) {
+        if (![1, 2, 4, 8, 16].includes(header.bitDepth)) {
             return undefined;
         }
         return {
             kind: 'grayscale',
             bitDepth: header.bitDepth,
             scanlineByteLength: Math.ceil(header.width * header.bitDepth / 8),
-            filterByteStride: 1
+            filterByteStride: header.bitDepth === 16 ? 2 : 1
         };
     }
 
@@ -1391,15 +1393,18 @@ function createPngPixelLayout(header: PngHeader): PngPixelLayout | undefined {
     }
 
     const channels = channelsForColorType(header.colorType);
-    if (!channels || header.bitDepth !== 8) {
+    if (!channels || ![8, 16].includes(header.bitDepth)) {
         return undefined;
     }
+    const bytesPerSample = header.bitDepth / 8;
     return {
         kind: 'direct',
         colorType: header.colorType,
-        bytesPerPixel: channels,
-        scanlineByteLength: header.width * channels,
-        filterByteStride: channels
+        bitDepth: header.bitDepth,
+        bytesPerPixel: channels * bytesPerSample,
+        bytesPerSample,
+        scanlineByteLength: header.width * channels * bytesPerSample,
+        filterByteStride: channels * bytesPerSample
     };
 }
 
@@ -1490,12 +1495,31 @@ function readPackedSample(decoded: Buffer, pixelIndex: number, width: number, bi
     if (bitDepth === 8) {
         return decoded[pixelIndex];
     }
+    if (bitDepth === 16) {
+        const row = Math.floor(pixelIndex / width);
+        const column = pixelIndex % width;
+        return decoded.readUInt16BE(row * scanlineByteLength + column * 2);
+    }
     const row = Math.floor(pixelIndex / width);
     const column = pixelIndex % width;
     const bitOffset = column * bitDepth;
     const packed = decoded[row * scanlineByteLength + Math.floor(bitOffset / 8)];
     const shift = 8 - bitDepth - (bitOffset % 8);
     return (packed >> shift) & ((1 << bitDepth) - 1);
+}
+
+function normalizePngSample(sample: number, bitDepth: number): number {
+    if (bitDepth === 8) {
+        return sample;
+    }
+    return Math.round(sample * 255 / ((1 << bitDepth) - 1));
+}
+
+function readDirectSample(decoded: Buffer, offset: number, bitDepth: number): number {
+    if (bitDepth === 16) {
+        return normalizePngSample(decoded.readUInt16BE(offset), bitDepth);
+    }
+    return decoded[offset];
 }
 
 function readPixel(
@@ -1507,8 +1531,7 @@ function readPixel(
 ): [number, number, number, number] {
     if (layout.kind === 'grayscale') {
         const sample = readPackedSample(decoded, pixelIndex, width, layout.bitDepth, layout.scanlineByteLength);
-        const maxSample = (1 << layout.bitDepth) - 1;
-        const gray = Math.round(sample * 255 / maxSample);
+        const gray = normalizePngSample(sample, layout.bitDepth);
         return [gray, gray, gray, 255];
     }
 
@@ -1524,17 +1547,27 @@ function readPixel(
     const offset = pixelIndex * layout.bytesPerPixel;
     switch (layout.colorType) {
         case 0: {
-            const gray = decoded[offset];
+            const gray = readDirectSample(decoded, offset, layout.bitDepth);
             return [gray, gray, gray, 255];
         }
         case 2:
-            return [decoded[offset], decoded[offset + 1], decoded[offset + 2], 255];
+            return [
+                readDirectSample(decoded, offset, layout.bitDepth),
+                readDirectSample(decoded, offset + layout.bytesPerSample, layout.bitDepth),
+                readDirectSample(decoded, offset + layout.bytesPerSample * 2, layout.bitDepth),
+                255
+            ];
         case 4: {
-            const gray = decoded[offset];
-            return [gray, gray, gray, decoded[offset + 1]];
+            const gray = readDirectSample(decoded, offset, layout.bitDepth);
+            return [gray, gray, gray, readDirectSample(decoded, offset + layout.bytesPerSample, layout.bitDepth)];
         }
         case 6:
-            return [decoded[offset], decoded[offset + 1], decoded[offset + 2], decoded[offset + 3]];
+            return [
+                readDirectSample(decoded, offset, layout.bitDepth),
+                readDirectSample(decoded, offset + layout.bytesPerSample, layout.bitDepth),
+                readDirectSample(decoded, offset + layout.bytesPerSample * 2, layout.bitDepth),
+                readDirectSample(decoded, offset + layout.bytesPerSample * 3, layout.bitDepth)
+            ];
         default:
             throw new Error(`Unsupported PNG color type: ${layout.colorType}.`);
     }
@@ -1706,7 +1739,7 @@ export function inspectCircuitikzRenderArtifact(request: CircuitikzRenderSmokeRe
                     kind: message.startsWith('Unsupported PNG format') ? 'render-png-unsupported' : 'render-png-invalid',
                     message: `Expected PNG render artifact could not be inspected: ${message}`,
                     excerpt: expectedArtifactPath,
-                    advice: 'Use a non-interlaced 1/2/4/8-bit indexed-color or grayscale PNG, or an 8-bit grayscale-alpha/RGB/RGBA PNG for screenshot-level smoke checks.'
+                    advice: 'Use a non-interlaced 1/2/4/8-bit indexed-color PNG, 1/2/4/8/16-bit grayscale PNG, or 8/16-bit grayscale-alpha/RGB/RGBA PNG for screenshot-level smoke checks.'
                 }]
             };
         }
