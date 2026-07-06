@@ -68,6 +68,8 @@ describe('circuitikz export docs contract', () => {
             expect(doc).toContain('SVG number grammar');
             expect(doc).toContain('leading-dot decimals');
             expect(doc).toContain('explicit plus signs');
+            expect(doc).toContain('stroke-width-aware SVG bounds');
+            expect(doc).toContain('label overlap checks');
             expect(doc).toContain('exact arc bounds');
             expect(doc).toContain('A/a arc extrema');
             expect(doc).toContain('exact Bezier curve bounds');
@@ -134,6 +136,8 @@ describe('circuitikz export docs contract', () => {
             expect(doc).toContain('SVG number grammar');
             expect(doc).toContain('leading-dot decimals');
             expect(doc).toContain('explicit plus signs');
+            expect(doc).toContain('stroke-width-aware SVG bounds');
+            expect(doc).toContain('label overlap checks');
             expect(doc).toContain('exact arc bounds');
             expect(doc).toContain('A/a arc extrema');
             expect(doc).toContain('exact Bezier curve bounds');
@@ -172,6 +176,8 @@ describe('circuitikz export docs contract', () => {
             expect(doc).toContain('A/a arc extrema');
             expect(doc).toContain('exact Bezier curve bounds');
             expect(doc).toContain('C/S/Q/T curve extrema');
+            expect(doc).toContain('stroke-width-aware SVG bounds');
+            expect(doc).toContain('label overlap checks');
             expect(doc).toContain('path-only glyph overlap diagnostics');
             expect(doc).toContain('polyline');
             expect(doc).toContain('polygon');

@@ -181,7 +181,32 @@ function countVisibleSvgElements(svgText: string): number {
 }
 
 function parseNumericAttribute(tag: string, attributeName: string): number | undefined {
-    const value = readAttribute(tag, attributeName);
+    return parseSvgNumberPrefix(readAttribute(tag, attributeName));
+}
+
+function readStyleProperty(tag: string, propertyName: string): string | undefined {
+    const style = readAttribute(tag, 'style');
+    if (!style) {
+        return undefined;
+    }
+
+    const normalizedName = propertyName.toLowerCase();
+    for (const declaration of style.split(';')) {
+        const separatorIndex = declaration.indexOf(':');
+        if (separatorIndex < 0) {
+            continue;
+        }
+
+        const name = declaration.slice(0, separatorIndex).trim().toLowerCase();
+        if (name === normalizedName) {
+            return declaration.slice(separatorIndex + 1).trim();
+        }
+    }
+
+    return undefined;
+}
+
+function parseSvgNumberPrefix(value: string | undefined): number | undefined {
     if (!value) {
         return undefined;
     }
@@ -193,6 +218,34 @@ function parseNumericAttribute(tag: string, attributeName: string): number | und
 
     const numericValue = Number(match[0]);
     return Number.isFinite(numericValue) ? numericValue : undefined;
+}
+
+function strokeIsActive(tag: string): boolean {
+    const stroke = readStyleProperty(tag, 'stroke') ?? readAttribute(tag, 'stroke');
+    return Boolean(stroke && stroke.trim().toLowerCase() !== 'none');
+}
+
+function parseStrokeWidth(tag: string): number {
+    if (!strokeIsActive(tag)) {
+        return 0;
+    }
+
+    const strokeWidth = parseSvgNumberPrefix(readStyleProperty(tag, 'stroke-width') ?? readAttribute(tag, 'stroke-width'));
+    if (strokeWidth === undefined) {
+        return 1;
+    }
+
+    return strokeWidth > 0 ? strokeWidth : 0;
+}
+
+function expandBoxForStroke(box: SvgBox, tag: string): SvgBox {
+    const strokeWidth = parseStrokeWidth(tag);
+    if (strokeWidth <= 0) {
+        return box;
+    }
+
+    const padding = strokeWidth / 2;
+    return expandBox(box, padding);
 }
 
 function boxFromPoints(label: string, points: Array<[number, number]>): SvgBox | undefined {
@@ -801,11 +854,13 @@ function pointListBox(label: string, tag: string): SvgBox | undefined {
 
 function elementBox(tagName: string, tag: string): SvgBox | undefined {
     if (tagName === 'path') {
-        return pathBox(tag);
+        const box = pathBox(tag);
+        return box ? expandBoxForStroke(box, tag) : undefined;
     }
 
     if (tagName === 'polyline' || tagName === 'polygon') {
-        return pointListBox(tagName, tag);
+        const box = pointListBox(tagName, tag);
+        return box ? expandBoxForStroke(box, tag) : undefined;
     }
 
     if (tagName === 'line') {
@@ -816,7 +871,8 @@ function elementBox(tagName: string, tag: string): SvgBox | undefined {
         if (x1 === undefined || y1 === undefined || x2 === undefined || y2 === undefined) {
             return undefined;
         }
-        return boxFromPoints('line', [[x1, y1], [x2, y2]]);
+        const box = boxFromPoints('line', [[x1, y1], [x2, y2]]);
+        return box ? expandBoxForStroke(box, tag) : undefined;
     }
 
     if (tagName === 'rect') {
@@ -827,13 +883,13 @@ function elementBox(tagName: string, tag: string): SvgBox | undefined {
         if (width === undefined || height === undefined) {
             return undefined;
         }
-        return {
+        return expandBoxForStroke({
             label: 'rect',
             minX: x,
             minY: y,
             maxX: x + width,
             maxY: y + height
-        };
+        }, tag);
     }
 
     if (tagName === 'circle') {
@@ -843,13 +899,13 @@ function elementBox(tagName: string, tag: string): SvgBox | undefined {
         if (cx === undefined || cy === undefined || r === undefined) {
             return undefined;
         }
-        return {
+        return expandBoxForStroke({
             label: 'circle',
             minX: cx - r,
             minY: cy - r,
             maxX: cx + r,
             maxY: cy + r
-        };
+        }, tag);
     }
 
     if (tagName === 'ellipse') {
@@ -860,13 +916,13 @@ function elementBox(tagName: string, tag: string): SvgBox | undefined {
         if (cx === undefined || cy === undefined || rx === undefined || ry === undefined) {
             return undefined;
         }
-        return {
+        return expandBoxForStroke({
             label: 'ellipse',
             minX: cx - rx,
             minY: cy - ry,
             maxX: cx + rx,
             maxY: cy + ry
-        };
+        }, tag);
     }
 
     return undefined;

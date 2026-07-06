@@ -89,6 +89,8 @@ describe('website documentation contract', () => {
             expect(content).toContain('SVG number grammar');
             expect(content).toContain('leading-dot decimals');
             expect(content).toContain('explicit plus signs');
+            expect(content).toContain('stroke-width-aware SVG bounds');
+            expect(content).toContain('label overlap checks');
             expect(content).toContain('exact arc bounds');
             expect(content).toContain('A/a arc extrema');
             expect(content).toContain('exact Bezier curve bounds');

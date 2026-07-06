@@ -260,6 +260,79 @@ describe('circuitikz render smoke inspection', () => {
         }
     });
 
+    test('reports SVG stroked drawing elements clipped by the viewBox edge', () => {
+        const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'notemd-circuitikz-svg-stroke-bounds-'));
+        const svgPath = path.join(tempRoot, 'stroke-width-out-of-bounds.svg');
+        fs.writeFileSync(
+            svgPath,
+            '<svg viewBox="0 0 100 80"><line x1="10" y1="2" x2="90" y2="2" stroke="black" stroke-width="8"/></svg>',
+            'utf8'
+        );
+
+        try {
+            const report = inspectCircuitikzRenderArtifact({
+                expectedArtifactPath: svgPath
+            });
+
+            expect(report.artifactKind).toBe('svg');
+            expect(report.diagnostics).toEqual([
+                expect.objectContaining({
+                    kind: 'render-svg-out-of-bounds',
+                    message: expect.stringContaining('line')
+                })
+            ]);
+        } finally {
+            fs.rmSync(tempRoot, { recursive: true, force: true });
+        }
+    });
+
+    test('reports SVG style-declared stroked drawing elements clipped by the viewBox edge', () => {
+        const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'notemd-circuitikz-svg-style-stroke-bounds-'));
+        const svgPath = path.join(tempRoot, 'style-stroke-width-out-of-bounds.svg');
+        fs.writeFileSync(
+            svgPath,
+            '<svg viewBox="0 0 100 80"><line x1="10" y1="2" x2="90" y2="2" style="stroke: #000; stroke-width: 8"/></svg>',
+            'utf8'
+        );
+
+        try {
+            const report = inspectCircuitikzRenderArtifact({
+                expectedArtifactPath: svgPath
+            });
+
+            expect(report.artifactKind).toBe('svg');
+            expect(report.diagnostics).toEqual([
+                expect.objectContaining({
+                    kind: 'render-svg-out-of-bounds',
+                    message: expect.stringContaining('line')
+                })
+            ]);
+        } finally {
+            fs.rmSync(tempRoot, { recursive: true, force: true });
+        }
+    });
+
+    test('does not expand SVG drawing boxes for stroke-width when stroke is none', () => {
+        const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'notemd-circuitikz-svg-stroke-none-'));
+        const svgPath = path.join(tempRoot, 'stroke-none-width.svg');
+        fs.writeFileSync(
+            svgPath,
+            '<svg viewBox="0 0 100 80"><line x1="10" y1="2" x2="90" y2="2" style="stroke: none; stroke-width: 8"/></svg>',
+            'utf8'
+        );
+
+        try {
+            const report = inspectCircuitikzRenderArtifact({
+                expectedArtifactPath: svgPath
+            });
+
+            expect(report.artifactKind).toBe('svg');
+            expect(report.diagnostics).toEqual([]);
+        } finally {
+            fs.rmSync(tempRoot, { recursive: true, force: true });
+        }
+    });
+
     test('reports SVG arc path endpoints that extend outside the viewBox', () => {
         const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'notemd-circuitikz-svg-arc-bounds-'));
         const svgPath = path.join(tempRoot, 'arc-out-of-bounds.svg');
@@ -825,6 +898,32 @@ describe('circuitikz render smoke inspection', () => {
                 expect.objectContaining({
                     kind: 'render-svg-text-overlap',
                     message: expect.stringContaining('overlap')
+                })
+            ]);
+        } finally {
+            fs.rmSync(tempRoot, { recursive: true, force: true });
+        }
+    });
+
+    test('reports SVG labels overlapped by stroked drawing elements', () => {
+        const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'notemd-circuitikz-svg-stroke-label-overlap-'));
+        const svgPath = path.join(tempRoot, 'stroke-label-overlap.svg');
+        fs.writeFileSync(
+            svgPath,
+            '<svg viewBox="0 0 160 100"><line x1="20" y1="50" x2="120" y2="50" stroke="black" stroke-width="12"/><text x="40" y="43" font-size="8">VIN</text></svg>',
+            'utf8'
+        );
+
+        try {
+            const report = inspectCircuitikzRenderArtifact({
+                expectedArtifactPath: svgPath
+            });
+
+            expect(report.artifactKind).toBe('svg');
+            expect(report.diagnostics).toEqual([
+                expect.objectContaining({
+                    kind: 'render-svg-label-overlap',
+                    message: expect.stringContaining('VIN / line')
                 })
             ]);
         } finally {
