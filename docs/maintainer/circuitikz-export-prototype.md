@@ -53,6 +53,17 @@ node scripts/export-circuitikz.js \
 
 The repair brief uses schema `notemd.circuitikz.repair-brief.v1`. It records the topology signature, source `CircuitSpec`, compile/render diagnostics, allowed changes such as labels and layout hints, and prohibited changes such as `circuitKind`, `goldenReferenceId`, nets, component ids, component types, terminals, and connections. This is the handoff format for a later topology-preserving repair loop; it is not an autonomous visual repair engine yet.
 
+A repaired candidate can then be checked against the brief without carrying the original reference spec:
+
+```bash
+node scripts/export-circuitikz.js \
+  --input repaired-cmos-inverter.json \
+  --repair-brief cmos-inverter.repair-brief.json \
+  --output repaired-cmos-inverter.tex
+```
+
+`--repair-brief` validates the candidate's canonical topology signature against the brief before writing output. It is mutually exclusive with `--topology-reference` so automation has a single source of topology truth for each run. Passing this gate only proves topology preservation; the candidate must still be re-rendered and checked with compile diagnostics and render-smoke gates before it is accepted visually.
+
 ## Compile-Log Diagnostics
 
 The exporter can also parse an existing LaTeX/TikZJax compile log and return machine-readable diagnostics without executing a local compiler:
@@ -123,7 +134,7 @@ The SVG bounded-canvas, path-only label classification, path-only glyph placemen
 
 The runner lives in `src/diagram/adapters/circuitikz/circuitikzCompileRunner.ts`. It reads the generated `{jobName}.log` from `{outputDir}`, reuses the same diagnostics parser, and returns `compileExecution` plus `compileDiagnostics` in the CLI JSON result. Artifact checks live in `src/diagram/adapters/circuitikz/circuitikzRenderSmoke.ts` so SVG structure rules remain testable without spawning a renderer. A non-ok diagnostic report still makes the CLI exit nonzero.
 
-If `--repair-brief-output` is provided, it must be paired with `--topology-reference` and either `--compile-log` or `--compile-executable`. The brief is written after diagnostics are available, and it reuses the same topology signature check before writing any repair handoff.
+If `--repair-brief-output` is provided, it must be paired with `--topology-reference` and either `--compile-log` or `--compile-executable`. The brief is written after diagnostics are available, and it reuses the same topology signature check before writing any repair handoff. If `--repair-brief` is provided, the candidate spec is compared with the topology signature embedded in the brief before any output is written.
 
 The SVG geometry parser now follows SVG number grammar for supported elements, including leading-dot decimals and explicit plus signs, so dvisvgm output such as `.5`, `-.5`, or `+.5` is not misread as integer coordinates or skipped during bounded-canvas checks.
 
@@ -219,6 +230,7 @@ The tests verify:
 - shell-free compile execution with placeholder-expanded argument arrays;
 - render-smoke artifact existence and non-empty checks through `--expected-artifact`;
 - topology-preserving repair brief output through `--repair-brief-output` and schema `notemd.circuitikz.repair-brief.v1`;
+- repair candidate validation against an existing brief through `--repair-brief`;
 - SVG artifact structure checks and optional text-token checks through repeated `--expected-svg-text`;
 - path-only SVG label classification through `pathOnlyGlyphUseCount` and `render-svg-text-path-only`;
 - bounded SVG viewBox, exact arc bounds for A/a arc extrema, exact Bezier curve bounds for C/S/Q/T curve extrema, stroke-width-aware SVG bounds and label overlap checks, obvious text-overlap, positioned `tspan` label overlap, path-only glyph label overlap, and label-vs-drawing overlap checks, including transform-aware geometry for common SVG transforms;

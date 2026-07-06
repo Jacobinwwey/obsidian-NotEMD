@@ -1,6 +1,9 @@
 import { CircuitSpec } from '../diagram/adapters/circuitikz/circuitSpec';
 import { createCircuitTopologySignature } from '../diagram/adapters/circuitikz/circuitikzExporter';
-import { createCircuitikzRepairBrief } from '../diagram/adapters/circuitikz/circuitikzRepairBrief';
+import {
+    assertCircuitikzRepairCandidateMatchesBrief,
+    createCircuitikzRepairBrief
+} from '../diagram/adapters/circuitikz/circuitikzRepairBrief';
 import { CircuitikzCompileDiagnosticReport } from '../diagram/adapters/circuitikz/circuitikzDiagnostics';
 
 function createCmosInverterSpec(): CircuitSpec {
@@ -113,5 +116,52 @@ describe('circuitikz repair brief', () => {
                 diagnostics: []
             }
         })).toThrow(/Circuit topology drift detected/);
+    });
+
+    test('accepts repair candidates that match a repair brief topology signature', () => {
+        const referenceSpec = createCmosInverterSpec();
+        const candidateSpec = createCmosInverterSpec();
+        candidateSpec.title = 'CMOS inverter repaired layout';
+        candidateSpec.components = candidateSpec.components.map(component => ({
+            ...component,
+            label: component.id === 'MP' ? '$P_1$' : '$N_1$'
+        }));
+        candidateSpec.layoutHints = {
+            inputSide: 'right',
+            outputSide: 'left',
+            routingStyle: 'orthogonal'
+        };
+        const brief = createCircuitikzRepairBrief({
+            referenceSpec,
+            sourceSpec: referenceSpec,
+            diagnostics: {
+                ok: false,
+                summary: '1 error(s), 0 warning(s)',
+                diagnostics: []
+            }
+        });
+
+        expect(assertCircuitikzRepairCandidateMatchesBrief(brief, candidateSpec)).toBe(candidateSpec);
+    });
+
+    test('rejects repair candidates that drift from a repair brief topology signature', () => {
+        const referenceSpec = createCmosInverterSpec();
+        const candidateSpec = createCmosInverterSpec();
+        candidateSpec.connections = [
+            ...candidateSpec.connections,
+            { from: 'VDD', to: 'MN.D' }
+        ];
+        const brief = createCircuitikzRepairBrief({
+            referenceSpec,
+            sourceSpec: referenceSpec,
+            diagnostics: {
+                ok: false,
+                summary: '1 error(s), 0 warning(s)',
+                diagnostics: []
+            }
+        });
+
+        expect(() => assertCircuitikzRepairCandidateMatchesBrief(brief, candidateSpec))
+            .toThrow(/Circuit repair candidate does not match the repair brief topology signature/);
     });
 });

@@ -3,6 +3,7 @@ import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
 import { CircuitSpec } from '../diagram/adapters/circuitikz/circuitSpec';
+import { createCircuitTopologySignature } from '../diagram/adapters/circuitikz/circuitikzExporter';
 
 function createSpec(): CircuitSpec {
     return {
@@ -330,6 +331,130 @@ describe('circuitikz export CLI', () => {
             expect(result.stderr).toContain('--repair-brief-output requires --topology-reference.');
             expect(fs.existsSync(outputPath)).toBe(false);
             expect(fs.existsSync(repairBriefPath)).toBe(false);
+        } finally {
+            fs.rmSync(tempRoot, { recursive: true, force: true });
+        }
+    });
+
+    test('exports repair candidates that match an existing repair brief topology signature', () => {
+        const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'notemd-circuitikz-cli-repair-brief-candidate-'));
+        const referenceSpec = createSpec();
+        const candidateSpec = createSpec();
+        candidateSpec.title = 'CMOS inverter repaired labels';
+        candidateSpec.components = candidateSpec.components.map(component => ({
+            ...component,
+            label: component.id === 'MP' ? '$P_1$' : '$N_1$'
+        }));
+        const candidatePath = path.join(tempRoot, 'candidate.json');
+        const repairBriefPath = path.join(tempRoot, 'repair-brief.json');
+        const outputPath = path.join(tempRoot, 'candidate.tex');
+        fs.writeFileSync(candidatePath, JSON.stringify(candidateSpec, null, 2), 'utf8');
+        fs.writeFileSync(repairBriefPath, JSON.stringify({
+            schemaVersion: 'notemd.circuitikz.repair-brief.v1',
+            topologySignature: createCircuitTopologySignature(referenceSpec)
+        }, null, 2), 'utf8');
+
+        try {
+            const stdout = execFileSync(
+                process.execPath,
+                [
+                    scriptPath,
+                    '--input', candidatePath,
+                    '--repair-brief', repairBriefPath,
+                    '--output', outputPath
+                ],
+                {
+                    cwd: repoRoot,
+                    encoding: 'utf8'
+                }
+            );
+
+            const result = JSON.parse(stdout);
+            expect(result.repairBriefPath).toBe(repairBriefPath);
+            expect(result.topologyCheck).toEqual({
+                ok: true,
+                repairBriefPath,
+                referenceSignature: createCircuitTopologySignature(referenceSpec),
+                candidateSignature: createCircuitTopologySignature(candidateSpec)
+            });
+            expect(fs.readFileSync(outputPath, 'utf8')).toContain('node[pmos, anchor=S] (MP) {$P_1$}');
+        } finally {
+            fs.rmSync(tempRoot, { recursive: true, force: true });
+        }
+    }, 30000);
+
+    test('rejects repair candidates that drift from an existing repair brief topology signature', () => {
+        const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'notemd-circuitikz-cli-repair-brief-candidate-drift-'));
+        const referenceSpec = createSpec();
+        const candidateSpec = createSpec();
+        candidateSpec.connections = [
+            ...candidateSpec.connections,
+            { from: 'VDD', to: 'MN.D' }
+        ];
+        const candidatePath = path.join(tempRoot, 'candidate.json');
+        const repairBriefPath = path.join(tempRoot, 'repair-brief.json');
+        const outputPath = path.join(tempRoot, 'candidate.tex');
+        fs.writeFileSync(candidatePath, JSON.stringify(candidateSpec, null, 2), 'utf8');
+        fs.writeFileSync(repairBriefPath, JSON.stringify({
+            schemaVersion: 'notemd.circuitikz.repair-brief.v1',
+            topologySignature: createCircuitTopologySignature(referenceSpec)
+        }, null, 2), 'utf8');
+
+        try {
+            const result = spawnSync(
+                process.execPath,
+                [
+                    scriptPath,
+                    '--input', candidatePath,
+                    '--repair-brief', repairBriefPath,
+                    '--output', outputPath
+                ],
+                {
+                    cwd: repoRoot,
+                    encoding: 'utf8'
+                }
+            );
+
+            expect(result.status).toBe(1);
+            expect(result.stdout).toBe('');
+            expect(result.stderr).toContain('Circuit repair candidate does not match the repair brief topology signature.');
+            expect(fs.existsSync(outputPath)).toBe(false);
+        } finally {
+            fs.rmSync(tempRoot, { recursive: true, force: true });
+        }
+    }, 30000);
+
+    test('rejects repair brief validation when a topology reference is also provided', () => {
+        const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'notemd-circuitikz-cli-repair-brief-ambiguous-reference-'));
+        const specPath = path.join(tempRoot, 'candidate.json');
+        const repairBriefPath = path.join(tempRoot, 'repair-brief.json');
+        const outputPath = path.join(tempRoot, 'candidate.tex');
+        fs.writeFileSync(specPath, JSON.stringify(createSpec(), null, 2), 'utf8');
+        fs.writeFileSync(repairBriefPath, JSON.stringify({
+            schemaVersion: 'notemd.circuitikz.repair-brief.v1',
+            topologySignature: createCircuitTopologySignature(createSpec())
+        }, null, 2), 'utf8');
+
+        try {
+            const result = spawnSync(
+                process.execPath,
+                [
+                    scriptPath,
+                    '--input', specPath,
+                    '--repair-brief', repairBriefPath,
+                    '--topology-reference', specPath,
+                    '--output', outputPath
+                ],
+                {
+                    cwd: repoRoot,
+                    encoding: 'utf8'
+                }
+            );
+
+            expect(result.status).toBe(1);
+            expect(result.stdout).toBe('');
+            expect(result.stderr).toContain('--repair-brief and --topology-reference cannot be used together.');
+            expect(fs.existsSync(outputPath)).toBe(false);
         } finally {
             fs.rmSync(tempRoot, { recursive: true, force: true });
         }

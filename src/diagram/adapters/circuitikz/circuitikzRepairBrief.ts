@@ -1,6 +1,7 @@
 import { CircuitSpec } from './circuitSpec';
 import { assertCircuitTopologyUnchanged, createCircuitTopologySignature } from './circuitikzExporter';
 import { CircuitikzCompileDiagnosticReport } from './circuitikzDiagnostics';
+import { ValidationError } from '../../../types';
 
 export interface CircuitikzRepairBriefRequest {
     referenceSpec: CircuitSpec;
@@ -58,4 +59,26 @@ export function createCircuitikzRepairBrief(request: CircuitikzRepairBriefReques
             'Re-run compile diagnostics and render-smoke checks before accepting the repair.'
         ]
     };
+}
+
+export function assertCircuitikzRepairCandidateMatchesBrief(
+    brief: Pick<CircuitikzRepairBrief, 'schemaVersion' | 'topologySignature'>,
+    candidate: CircuitSpec
+): CircuitSpec {
+    if (brief.schemaVersion !== 'notemd.circuitikz.repair-brief.v1') {
+        throw new ValidationError('Circuit repair brief uses an unsupported schemaVersion.', 'INVALID_INPUT');
+    }
+    if (!brief.topologySignature) {
+        throw new ValidationError('Circuit repair brief is missing topologySignature.', 'INVALID_INPUT');
+    }
+
+    const candidateSignature = createCircuitTopologySignature(candidate);
+    if (candidateSignature !== brief.topologySignature) {
+        throw new ValidationError(
+            'Circuit repair candidate does not match the repair brief topology signature.',
+            'INVALID_INPUT'
+        );
+    }
+
+    return candidate;
 }

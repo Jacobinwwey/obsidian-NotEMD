@@ -11,6 +11,7 @@ function printUsage() {
 Usage:
   node scripts/export-circuitikz.js --input <circuit-spec.json> --output <circuit.tex>
   node scripts/export-circuitikz.js --input <repair-candidate.json> --topology-reference <reference.json> --output <circuit.tex>
+  node scripts/export-circuitikz.js --input <repair-candidate.json> --repair-brief <repair-brief.json> --output <circuit.tex>
   node scripts/export-circuitikz.js --input <circuit-spec.json> --output <circuit.tex> --compile-log <latex.log> --diagnostics-output <diagnostics.json>
   node scripts/export-circuitikz.js --input <circuit-spec.json> --topology-reference <reference.json> --output <circuit.tex> --compile-log <latex.log> --repair-brief-output <repair-brief.json>
   node scripts/export-circuitikz.js --input <circuit-spec.json> --output <circuit.tex> --compile-executable <renderer> --compile-arg <arg>... --expected-artifact <artifact> [--expected-svg-text <text>...]
@@ -18,6 +19,7 @@ Usage:
 Example:
   node scripts/export-circuitikz.js --input cmos-inverter.json --output cmos-inverter.tex
   node scripts/export-circuitikz.js --input repaired-cmos-inverter.json --topology-reference cmos-inverter.json --output cmos-inverter.tex
+  node scripts/export-circuitikz.js --input repaired-cmos-inverter.json --repair-brief cmos-inverter.repair-brief.json --output cmos-inverter.tex
   node scripts/export-circuitikz.js --input cmos-inverter.json --output cmos-inverter.tex --compile-log cmos-inverter.log --diagnostics-output cmos-inverter.diagnostics.json
   node scripts/export-circuitikz.js --input cmos-inverter.json --topology-reference cmos-inverter.json --output cmos-inverter.tex --compile-log cmos-inverter.log --repair-brief-output cmos-inverter.repair-brief.json
   node scripts/export-circuitikz.js --input cmos-inverter.json --output cmos-inverter.tex --compile-executable pdflatex --compile-arg -interaction=nonstopmode --compile-arg -halt-on-error --compile-arg -output-directory={outputDir} --compile-arg {tex} --expected-artifact {outputDir}/{jobName}.pdf
@@ -39,6 +41,9 @@ function parseArgs(argv) {
         break;
       case '--topology-reference':
         args.topologyReference = argv[++index];
+        break;
+      case '--repair-brief':
+        args.repairBrief = argv[++index];
         break;
       case '--compile-log':
         args.compileLog = argv[++index];
@@ -83,6 +88,9 @@ function assertRequiredArgs(args) {
   if (args.compileLog && args.compileExecutable) {
     throw new Error('--compile-log and --compile-executable cannot be used together.');
   }
+  if (args.repairBrief && args.topologyReference) {
+    throw new Error('--repair-brief and --topology-reference cannot be used together.');
+  }
   if (args.compileArgs.length > 0 && !args.compileExecutable) {
     throw new Error('--compile-arg requires --compile-executable.');
   }
@@ -112,6 +120,15 @@ function loadCircuitSpec(inputPath) {
   return spec;
 }
 
+function loadRepairBrief(inputPath) {
+  const source = fs.readFileSync(inputPath, 'utf8').replace(/^\uFEFF/, '');
+  const brief = JSON.parse(source);
+  if (!brief || typeof brief !== 'object' || Array.isArray(brief)) {
+    throw new Error('Circuitikz repair brief JSON must be an object.');
+  }
+  return brief;
+}
+
 function ensureOutputDirectory(outputPath) {
   fs.mkdirSync(path.dirname(outputPath), { recursive: true });
 }
@@ -124,7 +141,7 @@ function buildExporterBundle(repoRoot) {
     import { assertCircuitTopologyUnchanged, createCircuitTopologySignature } from './src/diagram/adapters/circuitikz/circuitikzExporter';
     import { diagnoseCircuitikzCompileLog } from './src/diagram/adapters/circuitikz/circuitikzDiagnostics';
     import { runCircuitikzCompile } from './src/diagram/adapters/circuitikz/circuitikzCompileRunner';
-    import { createCircuitikzRepairBrief } from './src/diagram/adapters/circuitikz/circuitikzRepairBrief';
+    import { assertCircuitikzRepairCandidateMatchesBrief, createCircuitikzRepairBrief } from './src/diagram/adapters/circuitikz/circuitikzRepairBrief';
 
     export function exportCircuitikz(spec) {
       return exportCircuitSpecToCircuitikz(spec);
@@ -148,6 +165,10 @@ function buildExporterBundle(repoRoot) {
 
     export function createRepairBrief(request) {
       return createCircuitikzRepairBrief(request);
+    }
+
+    export function assertRepairCandidateMatchesBrief(brief, candidate) {
+      return assertCircuitikzRepairCandidateMatchesBrief(brief, candidate);
     }
   `;
 
@@ -184,19 +205,38 @@ async function run(args, repoRoot = path.resolve(__dirname, '..')) {
   const spec = loadCircuitSpec(inputPath);
   const topologyReferencePath = args.topologyReference ? path.resolve(args.topologyReference) : undefined;
   const topologyReferenceSpec = topologyReferencePath ? loadCircuitSpec(topologyReferencePath) : undefined;
+  const repairBriefPath = args.repairBrief ? path.resolve(args.repairBrief) : undefined;
+  const repairBrief = repairBriefPath ? loadRepairBrief(repairBriefPath) : undefined;
   const bundle = buildExporterBundle(repoRoot);
 
   try {
-    const { assertTopologyUnchanged, createRepairBrief, diagnoseCompileLog, exportCircuitikz, runCompile, topologySignature } = require(bundle.outfile);
+    const {
+      assertRepairCandidateMatchesBrief,
+      assertTopologyUnchanged,
+      createRepairBrief,
+      diagnoseCompileLog,
+      exportCircuitikz,
+      runCompile,
+      topologySignature
+    } = require(bundle.outfile);
     const topologyCheck = topologyReferenceSpec
       ? {
           ok: true,
           referenceSignature: topologySignature(topologyReferenceSpec),
           candidateSignature: topologySignature(spec)
         }
+      : repairBrief
+        ? {
+            ok: true,
+            repairBriefPath,
+            referenceSignature: repairBrief.topologySignature,
+            candidateSignature: topologySignature(spec)
+          }
       : undefined;
     if (topologyReferenceSpec) {
       assertTopologyUnchanged(topologyReferenceSpec, spec);
+    } else if (repairBrief) {
+      assertRepairCandidateMatchesBrief(repairBrief, spec);
     }
     const content = exportCircuitikz(spec);
     ensureOutputDirectory(outputPath);
@@ -212,6 +252,9 @@ async function run(args, repoRoot = path.resolve(__dirname, '..')) {
     };
     if (topologyReferencePath && topologyCheck) {
       result.topologyReferencePath = topologyReferencePath;
+      result.topologyCheck = topologyCheck;
+    } else if (repairBriefPath && topologyCheck) {
+      result.repairBriefPath = repairBriefPath;
       result.topologyCheck = topologyCheck;
     }
 
