@@ -210,6 +210,8 @@ npm run diagram:smoke-circuitikz -- \
 
 This is the first real-environment smoke boundary. It still does not make LaTeX or TikZJax mandatory for normal CI or plugin startup; it gives maintainers a repeatable command for local release evidence when a renderer is installed. The command stays cross-platform because the fixture runner delegates to the existing shell-free compile runner instead of resolving a platform shell.
 
+Obsidian's Preview diagram command can also reopen saved circuitikz source artifacts as a circuitikz source-only preview when the file extension is `.tex` or `.tikz` and the source contains `\usepackage{circuitikz}` or `\begin{circuitikz}`. This front-end path uses the generic source-only preview and artifact diagnostics surface; it does not compile LaTeX, invoke TikZJax, or promote circuitikz into the generic `DiagramSpec` render-target planner.
+
 ## Supported Circuit Families
 
 This is not a generic TikZ generator. The current prototype supports only golden-reference families whose topology and layout can be validated before export:

@@ -1,12 +1,12 @@
 import { RenderPreviewSession } from '../rendering/host/renderHost';
-import { RenderTarget } from '../diagram/types';
+import { RenderArtifactTarget } from '../rendering/types';
 
 export interface DiagramPreviewHistoryEntry {
     id: string;
     key: string;
     label: string;
     sourcePath?: string;
-    target: RenderTarget;
+    target: RenderArtifactTarget;
     session: RenderPreviewSession;
     openedAt: number;
 }

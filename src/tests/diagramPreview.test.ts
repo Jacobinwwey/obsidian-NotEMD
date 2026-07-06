@@ -113,6 +113,19 @@ describe('diagram preview helpers', () => {
         expect(supportsDiagramPreviewModal(artifact)).toBe(true);
     });
 
+    test('uses source-only modal fallback for circuitikz artifacts without treating them as html', () => {
+        const artifact = {
+            target: 'circuitikz' as any,
+            content: '\\usepackage{circuitikz}\n\\begin{document}\n\\begin{circuitikz}\n\\end{circuitikz}\n\\end{document}',
+            mimeType: 'text/x-tex',
+            sourceIntent: 'flowchart' as const
+        };
+
+        expect(supportsIframeHtmlPreview(artifact)).toBe(false);
+        expect(supportsSourceOnlyDiagramPreview(artifact)).toBe(true);
+        expect(supportsDiagramPreviewModal(artifact)).toBe(true);
+    });
+
     test('does not open source-only modal for blank artifact content', () => {
         expect(supportsSourceOnlyDiagramPreview({
             target: 'html',

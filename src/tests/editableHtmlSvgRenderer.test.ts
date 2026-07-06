@@ -110,7 +110,8 @@ describe('editable html/svg renderer', () => {
         const spec = createArchitectureSpec();
 
         expect(registry.resolve(spec, 'editable-html-svg')).toBe(renderer);
-        expect(getRenderTargetDisplayName('editable-html-svg')).toBe('Editable HTML/SVG');
+    expect(getRenderTargetDisplayName('editable-html-svg')).toBe('Editable HTML/SVG');
+    expect(getRenderTargetDisplayName('circuitikz' as any)).toBe('Circuitikz');
     });
 
     test('uses html preview passthrough instead of escaping editable svg artifacts as source text', () => {

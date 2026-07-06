@@ -32,6 +32,8 @@ function getArtifactPathSpec(artifact: RenderArtifact): ArtifactPathSpec {
         case 'html':
         case 'editable-html-svg':
             return { suffix: '_diagram', extension: '.html' };
+        case 'circuitikz':
+            return { suffix: '_diagram', extension: '.tex' };
         default:
             return { suffix: '_diagram', extension: '.txt' };
     }

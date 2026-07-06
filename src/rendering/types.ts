@@ -1,8 +1,10 @@
 import { DiagramIntent, DiagramSpec, RenderTarget } from '../diagram/types';
 import { RenderWebviewTheme } from './theme';
 
+export type RenderArtifactTarget = RenderTarget | 'circuitikz';
+
 export interface RenderArtifact {
-    target: RenderTarget;
+    target: RenderArtifactTarget;
     content: string;
     mimeType: string;
     sourceIntent: DiagramIntent;

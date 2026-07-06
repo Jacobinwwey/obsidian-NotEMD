@@ -187,12 +187,12 @@ export class MissingVegaLiteFenceError extends Error {
 
 export class MissingPreviewableDiagramArtifactError extends Error {
     constructor() {
-        super('No previewable diagram artifact found in this file. Supported direct preview sources are Mermaid or Vega-Lite markdown fences, raw Mermaid markdown artifacts, Vega-Lite JSON (.json), JSON Canvas (.canvas), and HTML (.html) files.');
+        super('No previewable diagram artifact found in this file. Supported direct preview sources are Mermaid or Vega-Lite markdown fences, raw Mermaid markdown artifacts, Vega-Lite JSON (.json), JSON Canvas (.canvas), HTML (.html), and circuitikz TeX (.tex/.tikz) files.');
         this.name = 'MissingPreviewableDiagramArtifactError';
     }
 }
 
-const DIRECT_PREVIEWABLE_DIAGRAM_EXTENSIONS = new Set(['md', 'json', 'canvas', 'html', 'htm']);
+const DIRECT_PREVIEWABLE_DIAGRAM_EXTENSIONS = new Set(['md', 'json', 'canvas', 'html', 'htm', 'tex', 'tikz']);
 
 export function isDirectPreviewableDiagramExtension(extension: string): boolean {
     return typeof extension === 'string'
@@ -396,6 +396,20 @@ function buildHtmlPreviewArtifact(htmlContent: string): RenderArtifact {
     };
 }
 
+function looksLikeCircuitikzSource(sourceContent: string): boolean {
+    return /\\begin\{circuitikz\}/i.test(sourceContent)
+        || /\\usepackage(?:\[[^\]]*\])?\{circuitikz\}/i.test(sourceContent);
+}
+
+function buildCircuitikzPreviewArtifact(circuitikzContent: string): RenderArtifact {
+    return {
+        target: 'circuitikz',
+        content: circuitikzContent.trim(),
+        mimeType: 'text/x-tex',
+        sourceIntent: 'flowchart'
+    };
+}
+
 type SupportedMarkdownFence = 'mermaid' | 'vega-lite';
 
 interface MarkdownFenceMatch {
@@ -489,6 +503,14 @@ function resolveDirectPreviewArtifact(sourceContent: string, sourcePath: string)
             artifact: buildHtmlPreviewArtifact(sourceContent),
             artifactSaved: true,
             detectionLabel: 'HTML artifact'
+        };
+    }
+
+    if ((normalizedPath.endsWith('.tex') || normalizedPath.endsWith('.tikz')) && looksLikeCircuitikzSource(sourceContent)) {
+        return {
+            artifact: buildCircuitikzPreviewArtifact(sourceContent),
+            artifactSaved: true,
+            detectionLabel: 'circuitikz TeX artifact'
         };
     }
 

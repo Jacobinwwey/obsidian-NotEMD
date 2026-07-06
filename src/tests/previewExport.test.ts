@@ -152,6 +152,21 @@ describe('diagram preview export helpers', () => {
         );
     });
 
+    test('saves circuitikz source-only artifacts as tex documents', async () => {
+        const outputPath = await saveDiagramSourceArtifact(mockApp, 'Notes/Inverter.md', {
+            target: 'circuitikz' as any,
+            content: '\\usepackage{circuitikz}\n\\begin{document}\n\\begin{circuitikz}\n\\end{circuitikz}\n\\end{document}',
+            mimeType: 'text/x-tex',
+            sourceIntent: 'flowchart'
+        });
+
+        expect(outputPath).toBe('Notes/Inverter_diagram.tex');
+        expect(mockApp.vault.create).toHaveBeenCalledWith(
+            'Notes/Inverter_diagram.tex',
+            expect.stringContaining('\\begin{circuitikz}')
+        );
+    });
+
     test('saves a png preview artifact beside the source file', async () => {
         const outputPath = await saveDiagramPreviewPng(mockApp, 'Notes/Topic.md', {
             target: 'mermaid',

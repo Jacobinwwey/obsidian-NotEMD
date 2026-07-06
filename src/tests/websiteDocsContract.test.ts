@@ -95,6 +95,9 @@ describe('website documentation contract', () => {
             expect(content).toContain('error/warning/info');
             expect(content).toContain('diagnostics-aware history entries');
             expect(content).toContain('source-only');
+            expect(content).toContain('.tex');
+            expect(content).toContain('.tikz');
+            expect(content).toContain('circuitikz source-only');
             expect(content).toContain('artifact diagnostics');
             expect(content).toContain('compileExecution');
             expect(content).toContain('compileExecution.renderSmoke');

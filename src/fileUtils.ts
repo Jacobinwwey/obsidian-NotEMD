@@ -1696,6 +1696,9 @@ export async function saveDiagramArtifactFile(
         case 'html':
             extension = '.html';
             break;
+        case 'circuitikz':
+            extension = '.tex';
+            break;
     }
 
     const outputFileName = `${originalFile.basename}${suffix}${extension}`;

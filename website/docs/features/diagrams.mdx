@@ -226,6 +226,8 @@ The prototype adds a separate `CircuitSpec` boundary and deterministic exporter 
 
 This is not a general TikZ generator yet. It does not compile LaTeX, call TikZJax, inspect screenshots, or run automated image-feedback repair. Those remain later gates.
 
+The Preview diagram command can reopen saved circuitikz source artifacts directly when the file extension is `.tex` or `.tikz` and the source contains `\usepackage{circuitikz}` or `\begin{circuitikz}`. That route is a circuitikz source-only preview: the modal shows the source, diagnostics, copy/save controls, and history metadata, but it does not compile LaTeX or call TikZJax inside the plugin runtime.
+
 For topology-preserving repair, pass the pre-repair spec as a reference before accepting a repaired candidate:
 
 ```bash

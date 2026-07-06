@@ -236,4 +236,31 @@ describe('diagram command host adapter', () => {
             true
         );
     });
+
+    test('preview wrapper supports saved circuitikz tex artifacts as source-only previews', async () => {
+        const { host, reporter } = createDiagramHost();
+        const file = { name: 'Inverter_diagram.tex', path: 'Notes/Inverter_diagram.tex' };
+        host.readFile.mockResolvedValue('\\usepackage{circuitikz}\n\\begin{document}\n\\begin{circuitikz}\n\\draw (0,0) to[short] (1,0);\n\\end{circuitikz}\n\\end{document}');
+
+        const result = await runPreviewDiagramCommandWithHost(host as any, file as any, reporter as any);
+
+        expect(result).toMatchObject({
+            kind: 'success',
+            sourcePath: 'Notes/Inverter_diagram.tex',
+            previewOpened: true,
+            artifact: expect.objectContaining({
+                target: 'circuitikz',
+                mimeType: 'text/x-tex',
+                sourceIntent: 'flowchart'
+            })
+        });
+        expect(host.createDiagramHostAdapter().openPreview).toHaveBeenCalledWith(
+            expect.objectContaining({
+                target: 'circuitikz',
+                content: expect.stringContaining('\\begin{circuitikz}')
+            }),
+            'Notes/Inverter_diagram.tex',
+            true
+        );
+    });
 });

@@ -1,13 +1,14 @@
-import { RenderTarget } from '../diagram/types';
+import { RenderArtifactTarget } from './types';
 
-const RENDER_TARGET_DISPLAY_NAMES: Record<RenderTarget, string> = {
+const RENDER_TARGET_DISPLAY_NAMES: Record<RenderArtifactTarget, string> = {
     mermaid: 'Mermaid',
     'json-canvas': 'JSON Canvas',
     'vega-lite': 'Vega-Lite',
     html: 'HTML',
-    'editable-html-svg': 'Editable HTML/SVG'
+    'editable-html-svg': 'Editable HTML/SVG',
+    circuitikz: 'Circuitikz'
 };
 
-export function getRenderTargetDisplayName(target: RenderTarget): string {
+export function getRenderTargetDisplayName(target: RenderArtifactTarget): string {
     return RENDER_TARGET_DISPLAY_NAMES[target] ?? target;
 }

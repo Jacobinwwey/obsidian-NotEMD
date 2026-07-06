@@ -226,6 +226,8 @@ npm run diagram:export-circuitikz -- --input cmos-inverter.json --output cmos-in
 
 这还不是通用 TikZ 生成器。它不会编译 LaTeX、调用 TikZJax、检查截图或运行自动化图像反馈修复；这些仍是后续 gate。
 
+Preview diagram 命令可以直接重新打开已保存的 circuitikz source artifacts：文件扩展名必须是 `.tex` 或 `.tikz`，且源码包含 `\usepackage{circuitikz}` 或 `\begin{circuitikz}`。这条路径是 circuitikz source-only preview：modal 会显示源码、diagnostics、复制/保存 controls 与 history metadata，但不会在插件 runtime 内编译 LaTeX 或调用 TikZJax。
+
 对于 topology-preserving repair，在接受修复后的 candidate 前，把修复前 spec 作为 reference 传入：
 
 ```bash

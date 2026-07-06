@@ -210,6 +210,8 @@ npm run diagram:smoke-circuitikz -- \
 
 这是第一条真实环境 smoke 边界。它仍然不会让 LaTeX 或 TikZJax 成为普通 CI 或插件启动的硬依赖；它给维护者提供一个在本地安装 renderer 后可重复执行的 release evidence 命令。命令保持跨平台，因为 fixture runner 继续委托给现有 shell-free compile runner，而不是解析平台 shell。
 
+Obsidian 的 Preview diagram 命令也可以把已保存的 circuitikz source artifact 重新打开为 circuitikz source-only preview：文件扩展名必须是 `.tex` 或 `.tikz`，且源码包含 `\usepackage{circuitikz}` 或 `\begin{circuitikz}`。这个前端路径复用通用 source-only preview 与 artifact diagnostics surface；它不会编译 LaTeX、不会调用 TikZJax，也不会把 circuitikz 提升为通用 `DiagramSpec` render-target planner 的目标。
+
 ## 已支持的电路族
 
 这不是通用 TikZ 生成器。当前原型只支持能够在导出前验证拓扑与布局约束的 golden-reference families：

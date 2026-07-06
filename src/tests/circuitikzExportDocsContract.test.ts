@@ -78,6 +78,9 @@ describe('circuitikz export docs contract', () => {
             expect(doc).toContain('remainingChecks');
             expect(doc).toContain('--repair-acceptance-output');
             expect(doc).toContain('compileExecution.renderSmoke');
+            expect(doc).toContain('circuitikz source-only');
+            expect(doc).toContain('.tex');
+            expect(doc).toContain('.tikz');
             expect(doc).toContain('createCircuitTopologySignature');
             expect(doc).toContain('assertCircuitTopologyUnchanged');
             expect(doc).toContain('render-artifact-missing');
@@ -209,6 +212,9 @@ describe('circuitikz export docs contract', () => {
             expect(doc).toContain('diagnostic summary');
             expect(doc).toContain('src/rendering/diagnostics.ts');
             expect(doc).toContain('source-only preview fallback');
+            expect(doc).toContain('circuitikz source-only');
+            expect(doc).toContain('.tex');
+            expect(doc).toContain('.tikz');
             expect(doc).toContain('DiagramPreviewModal.ts');
             expect(doc).toContain('src/tests/renderArtifactDiagnostics.test.ts');
             expect(doc).toContain('TikZJax/LaTeX');

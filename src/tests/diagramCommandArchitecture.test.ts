@@ -597,6 +597,33 @@ describe('diagram command architecture', () => {
         expect(previewSpy).toHaveBeenCalledWith(canvasFile, expect.anything());
     });
 
+    test('canonical preview command stays available for saved circuitikz tex artifacts', async () => {
+        const commandCalls: any[] = [];
+        plugin.addCommand = jest.fn((command: any) => {
+            commandCalls.push(command);
+        }) as any;
+        const previewSpy = jest.spyOn(plugin as any, 'previewDiagramCommand').mockResolvedValue(undefined);
+        const circuitFile = {
+            name: 'Inverter_diagram.tex',
+            basename: 'Inverter_diagram',
+            path: 'Notes/Inverter_diagram.tex',
+            extension: 'tex',
+            parent: { path: 'Notes' }
+        };
+        (mockApp.workspace.getActiveFile as jest.Mock).mockReturnValue(circuitFile);
+
+        await plugin.onload();
+
+        const previewCommand = commandCalls.find(command => command.id === 'notemd-preview-diagram');
+        expect(previewCommand).toBeDefined();
+        expect(previewCommand.checkCallback(true)).toBe(true);
+
+        previewCommand.checkCallback(false);
+        await Promise.resolve();
+
+        expect(previewSpy).toHaveBeenCalledWith(circuitFile, expect.anything());
+    });
+
     test('canonical generate command delegates to the canonical save flow', async () => {
         const canonicalCall = jest
             .spyOn(plugin as any, 'generateDiagramCommand')

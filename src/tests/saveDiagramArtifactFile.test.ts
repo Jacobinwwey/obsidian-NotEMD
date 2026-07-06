@@ -100,4 +100,20 @@ describe('saveDiagramArtifactFile', () => {
             expect.stringContaining('vega-lite')
         );
     });
+
+    test('saves circuitikz artifacts as tex files for source-only preview', async () => {
+        const reporter = createReporter();
+        const path = await saveDiagramArtifactFile(mockApp, mockSettings, originalFile, {
+            target: 'circuitikz' as any,
+            content: '\\usepackage{circuitikz}\n\\begin{document}\n\\begin{circuitikz}\n\\end{circuitikz}\n\\end{document}',
+            mimeType: 'text/x-tex',
+            sourceIntent: 'flowchart'
+        }, reporter);
+
+        expect(path).toBe('Notes/Source_diagram.tex');
+        expect(mockApp.vault.create).toHaveBeenCalledWith(
+            'Notes/Source_diagram.tex',
+            expect.stringContaining('\\begin{circuitikz}')
+        );
+    });
 });
