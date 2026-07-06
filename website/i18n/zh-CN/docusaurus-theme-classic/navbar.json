@@ -4,7 +4,7 @@
     "description": "The title in the navbar"
   },
   "logo.alt": {
-    "message": "Notemd Logo",
+    "message": "Notemd 标志",
     "description": "The alt text of navbar logo"
   },
   "item.label.Docs": {

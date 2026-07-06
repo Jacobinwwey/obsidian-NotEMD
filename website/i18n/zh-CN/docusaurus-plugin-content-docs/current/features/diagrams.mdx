@@ -23,7 +23,7 @@ import TLDR from '@site/src/components/TLDR';
 
 这是 [Obsidian AI Knowledge Management Guide](/docs/pillar-ai-knowledge) 的一部分。
 
-## 架构：Spec-First Pipeline
+## 架构：Spec 优先管线
 
 Notemd 不要求 LLM 直接生成 Mermaid、Vega 或 Canvas 语法。核心路径是：
 
@@ -55,7 +55,7 @@ graph LR
 | `canvasMap` | JSON Canvas | Mermaid → HTML | 概念图、知识图谱 |
 | `dataChart` | Vega-Lite | Mermaid → HTML | 柱状图、折线图、面积图、散点图、饼图、表格 |
 
-## Intent Detection
+## 意图识别
 
 Notemd 会根据笔记内容用关键词评分推断最合适的图表类型：
 
@@ -84,9 +84,9 @@ Notemd 会根据笔记内容用关键词评分推断最合适的图表类型：
 
 这种分离很关键：同一个 `flowchart` intent 现在可以渲染为适合 Markdown 笔记的 Mermaid、用于鲁棒 fallback 的 HTML，或用于后续编辑的可编辑 HTML/SVG。Draw.io 和 Drawnix 仍然是 CLI artifact exporter，而不是插件内 render target。
 
-## Usage
+## 使用方式
 
-### Generate a Diagram
+### 生成图表
 
 1. 打开一篇笔记
 2. 从 command palette 运行 **"Notemd: Generate diagram"**
@@ -102,7 +102,7 @@ Notemd 会根据笔记内容用关键词评分推断最合适的图表类型：
 | HTML | `.html` | `{note}_diagram.html` |
 | Editable HTML/SVG | `.html` | `{note}_diagram.html` |
 
-### Preview a Diagram
+### 预览图表
 
 1. 运行 **"Notemd: Preview diagram"**
 2. modal 会打开渲染后的图表
@@ -112,11 +112,11 @@ Notemd 会根据笔记内容用关键词评分推断最合适的图表类型：
 
 preview modal 现在也有 artifact diagnostics panel。renderer 和 smoke checks 可以把诊断挂到 `RenderArtifact.diagnostics`；modal 会先显示包含 error/warning/info 数量的 diagnostic summary，再在预览旁显示 severity、diagnostic kind、message 与 repair advice。同一个 summary 也会出现在 preview history entries 中，因此多次 circuitikz smoke 尝试不必逐条打开也能比较状态。对于有 source content 但不能 inline 渲染、也不能走 HTML iframe path 的 artifact，modal 会回退到 source-only preview，而不是强行塞进空 iframe。这样 circuitikz compile/render smoke、SVG text-token checks、PNG blank-screenshot checks 和未来 overlap reports 都有用户可见的 UI surface，同时不把 TikZJax 或 LaTeX 变成插件 runtime 硬依赖，也不把源码文本伪装成已经验证过的视觉渲染。
 
-### Legacy Mermaid Mode
+### 旧版 Mermaid 模式
 
 当 `enableExperimentalDiagramPipeline` 关闭时，Notemd 会把直接 Mermaid prompt 发送给 LLM。这会完全绕过 spec pipeline。如果 experimental pipeline 失败，也会 fallback 到这个模式。
 
-## Rendering Backends
+## 渲染后端
 
 ### Mermaid
 
@@ -151,7 +151,7 @@ dark / light theme patch 会在 compilation 前 deep-merge。
 - 20 个 locale 的本地化 UI labels
 - Sections：hero、structure（node tree）、relationships、callouts、data series tables
 
-### Editable HTML/SVG
+### 可编辑 HTML/SVG
 
 面向 editable export workflow 的显式 figure target。它把 `DiagramSpec` 投影为 deterministic `SemanticFigureModel`，再渲染为自包含 HTML 文档，inline SVG group 带 Draw.io-style annotations：
 
@@ -162,7 +162,7 @@ dark / light theme patch 会在 compilation 前 deep-merge。
 
 这个 target 目前有意不作为默认 planner route。它作为显式 render target 可用，同时产品路径继续验证真实工具中的编辑行为。
 
-### Draw.io and Drawnix Export Boundaries
+### Draw.io 与 Drawnix 导出边界
 
 当前实现把第三方编辑器支持保持在 artifact boundary：
 
@@ -173,7 +173,7 @@ dark / light theme patch 会在 compilation 前 deep-merge。
 
 这个权衡是有意的：Notemd 可以验证 visible labels、stable IDs 和 supported primitive coverage，而不把 diagrams.net Desktop、Drawnix、Plait 或 browser-only editor state 嵌入插件。
 
-### circuitikz / TikZJax Direction
+### circuitikz / TikZJax 方向
 
 电路图不是普通流程图问题。电学电路通常正确的语法 target 是 **circuitikz**，在 Obsidian 中可以通过 TikZJax 等插件渲染。TikZJax 可以加载 `circuitikz`、`pgfplots`、`tikz-cd`、`chemfig` 等包，因此对物理、电路、化学和数学笔记很有吸引力。
 
@@ -312,7 +312,7 @@ npm run diagram:smoke-circuitikz -- --output-dir docs/export/circuitikz-smoke --
 
 这条路径仍会写出确定性的 fixture `.tex` artifacts，但会返回 `ok: false`，并把 `rendererAvailability.status` 设为 `missing-configuration`，同时给出 `compile-executable-invalid` diagnostic。它只能作为 renderer availability evidence，不能当作 compile、render-smoke 或 visual acceptance 通过。
 
-### Golden Reference Prompt Shape
+### Golden Reference Prompt 形态
 
 近期使用时，应该在要求生成电路变体前给出一个可渲染 golden reference。强约束 prompt 应保留 preamble、coordinate scale、anchor style 和 routing conventions：
 
@@ -344,7 +344,7 @@ npm run diagram:smoke-circuitikz -- --output-dir docs/export/circuitikz-smoke --
 - 使用 named anchors（`PM1.G`、`NM1.G`、`PM1.D`、`NM1.D`），不要依赖视觉推断坐标；
 - 除非电气上必要，避免 diagonal 或 crossing wires。
 
-### Current Progress And Next Phases
+### 当前进展与后续阶段
 
 | Area | Current status | Next move |
 |------|----------------|-----------|
@@ -354,7 +354,7 @@ npm run diagram:smoke-circuitikz -- --output-dir docs/export/circuitikz-smoke --
 | circuitikz | `CircuitSpec -> circuitikz` 原型已经可通过 `npm run diagram:export-circuitikz` 导出 common-source、CMOS inverter、`cmos-buffer` / `cmos-buffer-v1`、`cmos-transmission-gate` / `cmos-transmission-gate-v1`、`cmos-nand2` / `cmos-nand2-v1` 和 `cmos-nor2` / `cmos-nor2-v1` golden templates、把 `layoutHints.inputSide` 与 `layoutHints.outputSide` 投影为不改变拓扑的确定性 input/output port placement、通过 `--topology-reference` 拒绝 repair topology drift、通过 `--repair-brief-output` 和 schema `notemd.circuitikz.repair-brief.v1` 写出 topology-preserving repair briefs、内含带 `diagnosticFocus`、`acceptanceCriteria` 与 role `topology-preserving-circuitikz-repair` 的结构化 `repairPrompt` handoff、通过 `--repair-brief` 校验 repair candidates、通过 schema `notemd.circuitikz.repair-acceptance.v1` 返回带 `readyForVisualAcceptance` 与 `remainingChecks` 的 `repairAcceptance` gate evidence、通过 `--repair-acceptance-output` 持久化这份 evidence、解析 compile logs，并在不经过 shell parsing 的情况下运行显式本地 renderer、`--expected-artifact`、SVG `--expected-svg-text`、通过 `aria-label`、`<title>` 与 `<desc>` 执行 accessibility metadata checks、hidden/transparent SVG element exclusion、用于 path-only labels 的 `render-svg-text-path-only` / `pathOnlyGlyphUseCount` 分类、针对 `<use href="#...">` 的 path-only glyph placement checks、通过 `render-svg-path-glyph-overlap` 执行的 path-only glyph overlap diagnostics、针对 `Z/z` 的 close-path current-point handling、针对 A/a arc extrema 的 exact arc bounds、针对 C/S/Q/T curve extrema 的 exact Bezier curve bounds、stroke-width-aware SVG bounds 与 label overlap checks、`polyline` / `polygon` drawing geometry checks、positioned `tspan` label geometry、`text-anchor`-aware positioned text geometry、带 transform-aware geometry 的 SVG bounded-canvas / text-overlap 以及通过 `render-svg-label-overlap` 报告的 label-vs-drawing smoke，以及通过 `foregroundBounds`、`foregroundDensity`、`render-png-content-clipped` 和 `render-png-foreground-dense` 执行的 PNG nonblank / clipped / dense-foreground screenshot smoke checks，包含 indexed-color palette alpha、grayscale/RGB tRNS transparent samples，以及针对 Adam7 interlaced PNG 与 indexed bit-depth failures 的 format-specific `render-png-unsupported` guidance；现在还通过 `npm run diagram:smoke-circuitikz` 提供聚合 maintainer smoke fixtures，通过 `rendererAvailability.status: "missing-configuration"` 与 `compile-executable-invalid` 记录缺失 renderer 配置，并通过 `RenderArtifact.diagnostics` 和 preview modal 具备通用 preview diagnostics、diagnostic summary counts、diagnostics-aware history entries 与 source-only fallback | 增加 path-only visual text 的 OCR-level label recognition、精确 pixel-level overlap checks、按需补齐更完整 SVG path coverage；只有能保持可选时才考虑 automatic renderer installation/discovery；继续推进自动化 topology-preserving repair execution |
 | TikZJax integration | Obsidian-side display 的候选 render host | 保持可选，不把 TikZJax 变成硬 runtime 依赖 |
 
-## Configuration
+## 配置
 
 | Setting | Default | Effect |
 |---------|---------|--------|
@@ -366,16 +366,16 @@ npm run diagram:smoke-circuitikz -- --output-dir docs/export/circuitikz-smoke --
 | `autoMermaidFixAfterGenerate` | 来自 constants | 对 Mermaid 输出自动运行 legacy fixer |
 | `enableLocalKnowledgeForDiagramGeneration` | `false` | 用本地 vault knowledge 增强 source |
 
-### Local Knowledge Augmentation
+### 本地知识增强
 
 启用后，Notemd 会从 vault 的 local knowledge base（基于 MiniSearch）检索相关 context snippet，并把它们加到 source markdown 前。增强 prompt 会说明：“supporting reference only; keep the primary structure faithful to the source note.”
 
-### Compatibility Modes
+### 兼容模式
 
 - **`legacy-mermaid`**：所有 intent 都路由到 Mermaid。非 Mermaid intent（canvasMap、dataChart）会被强制转成 `flowchart` 或 `mindmap`。没有 fallback chain。
 - **`best-fit`**：每类 intent 路由到 native target。如果 primary 失败，就遍历 fallback chain（例如 Vega-Lite → Mermaid → HTML）。
 
-## Preview & Export
+## 预览与导出
 
 | Action | Method |
 |--------|--------|
@@ -387,7 +387,7 @@ npm run diagram:smoke-circuitikz -- --output-dir docs/export/circuitikz-smoke --
 
 **Caching**：RenderCache 使用 `{spec, target, theme}` 的 deterministic JSON key。In-flight deduplication 会避免重复渲染。
 
-## Tips
+## 建议
 
 - **从 `best-fit` mode 开始**：它会为每类 intent 选择更合适的视觉输出。
 - **复杂图表使用更强模型**：flowchart 和 ER diagram 通常更受益于 GPT-4o 或 Claude。
@@ -397,7 +397,7 @@ npm run diagram:smoke-circuitikz -- --output-dir docs/export/circuitikz-smoke --
 
 ---
 
-## Next Steps
+## 下一步
 
 - 🔗 [Wiki-Links](https://jacobinwwey.github.io/obsidian-NotEMD/docs/features/wiki-links) — 概念如何被内联链接（英文）
 - 📝 [Concept Notes](https://jacobinwwey.github.io/obsidian-NotEMD/docs/features/concept-notes) — 为 diagram source material 抽取概念（英文）

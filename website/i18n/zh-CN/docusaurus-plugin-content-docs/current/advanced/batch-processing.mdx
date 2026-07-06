@@ -23,15 +23,15 @@ import TLDR from '@site/src/components/TLDR';
 这是 [Obsidian AI Knowledge Management Guide](/docs/pillar-ai-knowledge) 的一部分。
 </TLDR>
 
-## Overview
+## 概览
 
 批处理把一个文件夹中的笔记变成一次操作。你不需要逐篇打开笔记运行命令，而是右键文件夹并选择任务。Notemd 会遍历所有 `.md` 文件，执行对应动作，并实时报告进度。
 
 这对 vault-wide knowledge extraction 很关键。导入几十篇 PDF 后，先 batch-add-links 再 batch-extract-concepts，可以在几分钟内建立知识图谱，而不是手工花几个小时。
 
-## How It Works
+## 工作机制
 
-### Batch Execution Model
+### 批处理执行模型
 
 ```mermaid
 graph LR
@@ -52,7 +52,7 @@ graph LR
 5. **Error handling** -- 某个文件失败时，错误会记录下来，batch 继续执行。最终 summary 会列出失败文件。
 6. **Completion** -- summary toast 报告总数、成功数和失败数。
 
-### Overwrite Behavior
+### 批处理：核心说明
 
 处理已经包含 wiki-links、概念笔记或翻译内容的文件时，Notemd 的行为由 overwrite 设置决定：
 
@@ -64,7 +64,7 @@ graph LR
 
 对 wiki-linking 来说：如果笔记已有 `[[wiki-links]]`，**skip** 会保持不动；**replace** 会重新把整篇笔记发送给 LLM 做链接插入。增量处理用 **skip**，模型升级后重处理用 **replace**。
 
-### Concurrency Control
+### 并发控制
 
 `batchConcurrency` 限制并行 API 调用数量，避免在大文件夹处理时触发 provider 的 HTTP 429 rate limit。
 
@@ -77,7 +77,7 @@ graph LR
 
 如果批处理遇到 429，将 concurrency 降到 1 或 2。
 
-## Configuration
+## 配置
 
 | Setting | Default | Effect |
 |---------|---------|--------|
@@ -87,11 +87,11 @@ graph LR
 | `batchRecursive` | `true` | 扫描文件夹时包含子目录 |
 | `enableStableApiCall` | `false` | 为每个文件启用最多 4 次 retry |
 
-### Per-Task Models in Batch
+### 批处理中的按任务模型
 
 每个 batch operation 使用对应任务的 per-task model。batch-add-links 使用 `addLinksProvider`，batch-research 使用 `researchProvider`，以此类推。这样可以给高频任务配置便宜模型，把高质量模型留给质量敏感任务。
 
-## Example
+## 示例
 
 假设 `papers/` 文件夹里有 40 篇导入的研究笔记，你想给它们添加 wiki-links 并抽取概念：
 
@@ -104,7 +104,7 @@ graph LR
 
 失败文件会记录下来。你可以之后只对那一个文件重跑。
 
-## Tips
+## 建议
 
 - **先用低并发** -- 不确定 provider rate limit 时，从 `1` 开始再逐步提高。
 - **增量更新用 skip mode** -- 首次完整 batch 后，启用 `batchSkipProcessed: true`，后续只处理新笔记。
@@ -113,7 +113,7 @@ graph LR
 
 ---
 
-## Next Steps
+## 下一步
 
 - [Workflows](https://jacobinwwey.github.io/obsidian-NotEMD/docs/features/workflows) -- 将 batch tasks 串成一键侧边栏按钮（英文）
 - [Custom Prompts](/docs/advanced/custom-prompts) -- 为 batch extraction 自定义 prompts

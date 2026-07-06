@@ -19,11 +19,11 @@ import TLDR from '@site/src/components/TLDR';
 **Notemd 配置主要分 6 类：** LLM providers 与 API keys、按任务选择模型、输出路径与模板、UI/输出语言、搜索服务（Tavily/DuckDuckGo）、自定义工作流。所有设置都在 Obsidian Settings → Notemd 中，修改后立即生效。
 </TLDR>
 
-## 设置入口
+## 设置概览
 
 路径：**Obsidian Settings → Notemd**
 
-### 主要区域
+### 配置：核心说明
 
 1. **Provider Configuration**：API keys、base URLs、models
 2. **Task Settings**：按任务选择 provider 与模型
@@ -35,9 +35,9 @@ import TLDR from '@site/src/components/TLDR';
 
 ---
 
-## 1. Provider Configuration
+## 1. Provider 配置
 
-### 添加 Provider
+### 配置：配置与模型
 
 1. 从下拉框选择 provider（30+ 可用）
 2. 输入 API Key
@@ -56,7 +56,7 @@ Base URL: https://api.openai.com/v1 (default)
 Model: gpt-4o-mini
 ```
 
-#### Anthropic
+#### 配置：核心说明
 
 ```text
 Provider: Anthropic
@@ -64,7 +64,7 @@ API Key: sk-ant-...
 Model: claude-sonnet-4-6
 ```
 
-#### Ollama（本地）
+#### 配置：边界与治理
 
 ```text
 Provider: Ollama
@@ -81,7 +81,7 @@ API Key: sk-...
 Model: deepseek-chat
 ```
 
-### 多 Provider
+### 配置：配置与模型
 
 你可以配置多个 provider，并按任务切换：
 
@@ -90,7 +90,7 @@ Model: deepseek-chat
 
 ---
 
-## 2. Task-Specific Models
+## 2. 按任务选择模型
 
 用不同模型处理不同任务，可以在成本和质量之间做更细的取舍。
 
@@ -102,7 +102,7 @@ Model: deepseek-chat
 | **Translation** | Main provider | 翻译文本 |
 | **Diagram Generation** | Main provider | 生成 Mermaid / Canvas 图表 |
 
-### 成本优化示例
+### 配置：工作流与任务
 
 ```text
 Linking: gpt-4o-mini (fast, many calls)
@@ -112,7 +112,7 @@ Translation: gemini-flash (multilingual)
 Diagram: ollama/llama3.1 (free, local)
 ```
 
-### 配置方式
+### 配置：安装与准备
 
 1. **Settings → Notemd → Task Settings**
 2. 对每个任务选择：
@@ -121,9 +121,9 @@ Diagram: ollama/llama3.1 (free, local)
 
 ---
 
-## 3. Output Configuration
+## 配置：配置与模型
 
-### 概念笔记输出
+### 3. 输出配置
 
 新概念笔记保存位置：
 
@@ -140,15 +140,15 @@ tags: [concept]
 created: {{date}}
 ---
 
-# {{concept}}
+# 配置
 
 {{description}}
 
-## Backlinks
+## 配置：工作流与任务
 {{backlinks}}
 ```
 
-### 文件夹结构
+### 图表输出
 
 **扁平结构：**
 
@@ -174,7 +174,7 @@ vault/
 
 配置入口：**Settings → Output → Use Hierarchical Folders**
 
-### 图表输出
+### 4. 语言设置
 
 ```text
 Settings → Output → Diagram Folder
@@ -189,9 +189,9 @@ Default: diagrams/
 
 ---
 
-## 4. Language Settings
+## 界面语言
 
-### UI Language
+### 输出语言
 
 界面语言控制按钮、菜单、对话框：
 
@@ -203,7 +203,7 @@ Default: System language
 
 支持 English、简体中文、繁體中文、日本語、한국어、Español、Français、Deutsch、Русский、العربية 等。
 
-### Output Language
+### 翻译目标
 
 生成内容语言控制概念笔记、研究摘要等：
 
@@ -215,7 +215,7 @@ Default: Same as UI
 
 典型场景：中文界面 + 英文输出，用于双语研究。
 
-### Translation Target
+### 5. 搜索集成
 
 翻译任务的默认目标语言：
 
@@ -226,9 +226,9 @@ Default: English
 
 ---
 
-## 5. Search Integration
+## 配置：研究与检索
 
-### Tavily（推荐）
+### 配置：研究与检索
 
 面向 AI 场景优化的搜索服务：
 
@@ -245,7 +245,7 @@ API Key: tvly-...
 - 更适合 AI 汇总
 - 支持来源引用
 
-### DuckDuckGo（实验）
+### 6. 工作流配置
 
 无需 API key：
 
@@ -257,7 +257,7 @@ Settings → Search → Service: DuckDuckGo
 
 ---
 
-## 6. Workflow Configuration
+## 创建自定义工作流
 
 工作流把多个任务串成一个按钮。
 
@@ -268,7 +268,7 @@ Settings → Search → Service: DuckDuckGo
 
 新按钮会出现在左侧边栏。
 
-### DSL 语法
+### 配置：核心说明
 
 格式：`action1>action2>action3`
 
@@ -291,9 +291,9 @@ translate-current>process-current-add-links>extract-concepts-current
 
 ---
 
-## 7. Advanced Settings
+## 7. 高级设置
 
-### Batch Processing
+### 批处理
 
 ```text
 Settings → Advanced → Batch Processing
@@ -302,7 +302,7 @@ Concurrency: 3 (default)
 
 更高并发更快，但会产生更多 API 调用。
 
-### Smart Chunking
+### 智能分块
 
 ```text
 Settings → Advanced → Smart Chunking
@@ -312,7 +312,7 @@ Overlap: 200 words (default)
 
 用于长笔记，避免超过模型 token 限制。
 
-### Diagnostics Panel
+### 诊断面板
 
 ```text
 Settings → Advanced → Enable Diagnostics
@@ -320,7 +320,7 @@ Settings → Advanced → Enable Diagnostics
 
 可查看 API 请求/响应、token 使用量、处理耗时和错误。
 
-### Duplicate Concept Detection
+### 重复概念检测
 
 ```text
 Settings → Advanced → Synonym Suppression
@@ -333,7 +333,7 @@ Threshold: 0.8 (default, 0-1)
 
 ## 配置档案
 
-### 导出/导入设置
+### 配置：配置与模型
 
 **跨设备共享配置：**
 
@@ -351,7 +351,7 @@ Threshold: 0.8 (default, 0-1)
 
 ## 推荐配置
 
-### 学生
+### 配置：核心说明
 
 ```text
 Provider: OpenAI (gpt-4o-mini)
@@ -361,7 +361,7 @@ Output Language: System
 Workflow: "Study Flow" (add-links>extract-concepts)
 ```
 
-### 研究者
+### 配置：研究与检索
 
 ```text
 Providers:
@@ -373,7 +373,7 @@ Hierarchical: Yes
 Workflow: "Paper Flow" (add-links>extract>research>diagram)
 ```
 
-### 隐私优先
+### 配置：边界与治理
 
 ```text
 Provider: Ollama (llama3.1)
@@ -382,7 +382,7 @@ Search: DuckDuckGo (no API)
 Diagnostics: Off
 ```
 
-### 双语工作
+### 配置：翻译与语言
 
 ```text
 UI Language: Chinese
@@ -391,20 +391,20 @@ Translation Target: Chinese
 Provider: Gemini (multilingual)
 ```
 
-## 配置排查
+## 配置故障排查
 
-### 设置没有保存
+### 配置：配置与模型
 
 - 检查 `.obsidian/plugins/notemd/` 文件权限
 - 尝试禁用插件后重新启用
 
-### API Key Invalid
+### API Key 无效
 
 - 检查前后空格
 - 检查 key 是否过期
 - 确认 provider 账号有额度
 
-### Models Not Loading
+### 模型列表加载失败
 
 - 点击 "Get Model List" 刷新
 - 检查网络连接

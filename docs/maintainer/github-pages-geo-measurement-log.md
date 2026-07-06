@@ -47,8 +47,17 @@ This log separates source-side GEO proof from live indexing proof. `npm run audi
 | 2026-07-05 repeat failure | Runs `28739659512` and `28739750578` both passed website build, `audit:build`, and artifact upload, then failed only in the Pages deploy service with `Deployment failed, try again later.` | GitHub Pages deploy service / workflow action boundary |
 | Deploy retry hardening | `.github/workflows/deploy-docs.yml` now retries the official `actions/deploy-pages@v5` step up to three times with waits between attempts, without masking build or audit failures | Repository workflow |
 | Contract test | `src/tests/githubPagesWorkflow.test.ts` locks the Pages workflow away from the old `checkout@v4`, `setup-node@v4`, `upload-pages-artifact@v3`, and `deploy-pages@v4` combination | Jest |
-| Source-side interpretation | No current Docusaurus build or `audit:build` failure was found on remote `main`; Pages remains gated by the workflow when `website/**` or the workflow file changes | Local operator |
-| Next measurement | After this closeout deploy, inspect root, zh-CN root, FAQ, provider overview, one provider detail, and one unpublished zh-CN fallback in Search Console | External manual check |
+
+## 2026-07-07 Multilingual Docs Expansion
+
+| Evidence | Current state | Owner |
+|---|---|---|
+| Language policy | The previous partial zh-CN fallback boundary is superseded by full docs route publication for `zh-CN`, `zh-Hant`, `ja`, `fr`, `de`, `es`, and `ko` | `website/docusaurus.config.js`, `website/README.md` |
+| Localized source coverage | Every source page under `website/docs/` must have a localized counterpart under every public locale before deploy | `website/scripts/generate-localized-docs.cjs`, `src/tests/websiteDocsContract.test.ts` |
+| Build audit | `npm run audit:build` must verify localized source coverage, localized build output, sitemap entries, `llms.txt` entry points, and absence of `noindex,follow` on public localized docs | `website/scripts/audit-build.cjs` |
+| Answer-engine map | `llms.txt` now states that English remains canonical while the full public docs route set is available in Simplified Chinese, Traditional Chinese, Japanese, French, German, Spanish, and Korean | `website/static/llms.txt` |
+| Search Console | Not locally verifiable; submit and inspect representative localized docs after the Pages workflow deploys the multilingual update | External manual check |
+| AI visibility | Not locally verifiable; retest multilingual answer-engine visibility after deploy and indexing window | External/manual or API-backed check |
 
 ## 2026-07-04 Source-Side GEO Closure
 

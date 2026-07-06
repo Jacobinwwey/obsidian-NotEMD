@@ -6,7 +6,7 @@ This directory contains the Docusaurus-based documentation site for Notemd.
 
 - **Docusaurus 3.10.1** with GitHub Pages deployment
 - **Automatic JSON-LD injection** via swizzled `DocItem/Layout`
-- **Published locales**: English (`en`) complete, plus partial Simplified Chinese (`zh-CN`) critical path and FAQ
+- **Published locales**: English (`en`) plus full docs routes for Simplified Chinese (`zh-CN`), Traditional Chinese (`zh-Hant`), Japanese (`ja`), French (`fr`), German (`de`), Spanish (`es`), and Korean (`ko`)
 - **AI-readable structure**: TLDR components, FAQPage Schema, TechArticle Schema, citations, concept metadata, and `llms.txt`
 
 ## Local Development
@@ -28,15 +28,15 @@ npm run audit:build
 
 The build generates static content into `build`. The audit checks the public contract that source review cannot prove by itself:
 
-- root and zh-CN root pages exist;
+- root and localized root pages exist;
 - canonical and JSON-LD URLs match GitHub Pages routes;
-- homepage GEO text, `llms.txt` link, release version, and partial-language boundary are present on both root homepages;
+- homepage GEO text, `llms.txt` link, release version, and multilingual route boundary are present on localized homepages;
 - every localized zh-CN doc file is declared in `publishedLanguageScopeData.mjs`;
-- published zh-CN docs are indexable and expose correct alternates;
-- unpublished zh-CN fallback docs are `noindex,follow`, have no alternates, are excluded from zh-CN sitemap output, and are not linked from published zh-CN docs;
-- English docs expose zh-CN alternates only for published translations;
+- published localized docs are indexable and expose correct alternates;
+- the old unpublished zh-CN fallback path is retired because the docs route set is now localized end-to-end;
+- English docs expose locale alternates for the full published docs route set;
 - Provider docs contain setup, endpoint/auth, model discovery, troubleshooting, and use-case sections;
-- `llms.txt` states the real language boundary;
+- `llms.txt` states the real multilingual route boundary;
 - GEO measurement docs mention Search Console, AI visibility, and sitemap evidence.
 
 ## Deployment
@@ -67,21 +67,21 @@ npm run audit:build
 
 - `src/theme/DocItem/Layout/index.js`: swizzled layout component
 - Auto-generates TechArticle schema from frontmatter
-- Adds `noindex,follow` for unpublished zh-CN fallback docs
+- Keeps TechArticle metadata aligned across localized docs
 - Supports author, keywords, concepts, citations
 
 ### 3. Language Signal Ownership
 
 - `website/src/lib/publishedLanguageScopeData.mjs`: published zh-CN doc ids, route paths, source paths, homepage paths, and critical paths
 - `website/src/lib/publishedLanguageScope.js`: runtime set helpers derived from the data file
-- `website/src/lib/languageRoutePolicy.js`: route policy helpers for doc path extraction, zh-CN fallback decisions, canonical English targets, and zh-CN root fallback
+- `website/src/lib/languageRoutePolicy.js`: route policy helpers for doc path extraction, locale-prefix stripping, canonical English targets, and zh-CN compatibility helpers
 
 ### 4. Docusaurus Theme Policy Overrides
 
-- `src/theme/SiteMetadata/index.js`: filters hreflang and Open Graph locale alternates for unpublished zh-CN fallback docs
-- `src/theme/NavbarItem/LocaleDropdownNavbarItem/index.js`: avoids switching users into unpublished zh-CN fallback docs
-- `src/theme/DocRoot/Layout/Sidebar/index.js`: filters zh-CN sidebar entries to published zh-CN docs
-- `src/theme/DocItem/Paginator/index.js`: filters zh-CN previous/next targets to published zh-CN docs
+- `src/theme/SiteMetadata/index.js`: owns hreflang and Open Graph locale alternate emission
+- `src/theme/NavbarItem/LocaleDropdownNavbarItem/index.js`: keeps locale switching on same-domain routes
+- `src/theme/DocRoot/Layout/Sidebar/index.js`: preserves the historical zh-CN published-doc filter, which is now full-route because every docs page is published
+- `src/theme/DocItem/Paginator/index.js`: preserves the historical zh-CN previous/next filter, which is now full-route because every docs page is published
 
 These overrides are intentionally policy-bearing. Do not replace them with a generic wrapper layer unless the new abstraction owns the same invariant.
 
@@ -90,13 +90,13 @@ These overrides are intentionally policy-bearing. Do not replace them with a gen
 - `src/pages/index.js`: real root route for `/obsidian-NotEMD/` and `/obsidian-NotEMD/zh-CN/`
 - Prevents navbar/logo/footer root links from pointing to a missing page
 - Routes readers and crawlers to Intro, Quick Start, FAQ, provider docs, and the AI knowledge pillar
-- Owns visible GEO facts that answer engines and humans should see first: write-first workflow model, provider surface, local-vault boundary, current release, answer-engine source map, and partial zh-CN language boundary
+- Owns visible GEO facts that answer engines and humans should see first: write-first workflow model, provider surface, local-vault boundary, current release, answer-engine source map, and multilingual docs route boundary
 
 ### 6. AI Retrieval Entry Point
 
 - `static/llms.txt`: high-signal canonical map for AI crawlers and answer engines
-- Lists canonical docs, provider/runtime topics, published zh-CN docs, and the partial-language boundary
-- Keeps GEO strategy focused on verified source pages instead of empty locale expansion
+- Lists canonical docs, provider/runtime topics, localized docs entrypoints, and the multilingual route boundary
+- Keeps GEO strategy focused on verified source pages while exposing localized docs routes for supported languages
 
 ### 7. Build Output Language Gate
 
@@ -169,18 +169,18 @@ citations:
 ## Adding New Languages
 
 1. Add locale to `docusaurus.config.js` -> `i18n.locales`.
-2. Run `npm run write-translations -- --locale <locale>`.
-3. Translate content in `i18n/<locale>/`.
-4. Translate at least the homepage copy, FAQ, intro, installation, quick start, configuration, provider overview, and AI knowledge pillar before publishing the locale.
-5. Add published docs to the locale's scope data and extend the build audit if the locale has a different policy.
+2. Run or update `node scripts/generate-localized-docs.cjs`.
+3. Translate content in `i18n/<locale>/docusaurus-plugin-content-docs/current/`.
+4. Translate navbar, footer, and docs sidebar messages under `i18n/<locale>/`.
+5. Build and audit the site before publishing the locale.
 
 ## Language Publishing Policy
 
-Do not add a locale to `i18n.locales` just because a translation folder exists. Docusaurus publishes fallback English docs under a locale path when docs are untranslated, which creates weak hreflang signals for search and AI crawlers.
+Do not add a locale to `i18n.locales` just because a translation folder exists. The supported policy is now full docs-route publication: every source page under `website/docs/` must have a localized counterpart before the locale appears in the public language dropdown.
 
-Current zh-CN policy: the localized homepage, intro, installation, quick start, configuration, provider overview, AI knowledge pillar, and FAQ are published. Untranslated zh-CN doc fallbacks are excluded from sitemap output, marked `noindex,follow`, excluded from alternates, and hidden from zh-CN sidebar/paginator traversal. A locale should only become fully indexable after the remaining docs are translated and reviewed.
+Current policy: English remains the canonical source surface, and Simplified Chinese, Traditional Chinese, Japanese, French, German, Spanish, and Korean expose the complete docs route set. Provider names, CLI commands, configuration keys, file extensions, and package names intentionally remain stable across languages so users can match documentation to the plugin UI, CLI output, and logs.
 
-When promoting a zh-CN doc from fallback to published content, update `website/src/lib/publishedLanguageScopeData.mjs` in the same change as the translation and rerun:
+`website/src/lib/publishedLanguageScopeData.mjs` still exists because older GEO gates and zh-CN theme overrides consume it, but it now declares the full docs route set rather than a partial-publishing allowlist. When adding or removing docs pages, update that data file and rerun:
 
 ```bash
 npm run build

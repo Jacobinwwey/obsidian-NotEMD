@@ -47,8 +47,17 @@
 | 2026-07-05 重复失败 | `28739659512` 与 `28739750578` 均通过 website build、`audit:build` 和 artifact upload，只在 Pages deploy service 中以 `Deployment failed, try again later.` 失败 | GitHub Pages deploy service / workflow action boundary |
 | Deploy retry 加固 | `.github/workflows/deploy-docs.yml` 现在会对官方 `actions/deploy-pages@v5` 步骤最多重试三次，并在尝试之间等待；这不会掩盖 build 或 audit 失败 | Repository workflow |
 | Contract test | `src/tests/githubPagesWorkflow.test.ts` 锁定 Pages workflow，避免回退到旧的 `checkout@v4`、`setup-node@v4`、`upload-pages-artifact@v3` 与 `deploy-pages@v4` 组合 | Jest |
-| 源码侧解释 | 没发现当前远端 `main` 存在 Docusaurus build 或 `audit:build` 失败；只要改动 `website/**` 或 workflow 文件，Pages 仍由 workflow 门禁 | 本地操作者 |
-| 下一步测量 | 本次收口部署后，在 Search Console 检查 root、zh-CN root、FAQ、provider overview、一个 provider detail 与一个未发布 zh-CN fallback | 外部手工检查 |
+
+## 2026-07-07 多语言文档扩展
+
+| 证据 | 当前状态 | 负责人 |
+|---|---|---|
+| 语言策略 | 先前的部分 zh-CN fallback 边界已被完整 docs 路由发布策略取代，覆盖 `zh-CN`、`zh-Hant`、`ja`、`fr`、`de`、`es` 与 `ko` | `website/docusaurus.config.js`, `website/README.md` |
+| 本地化源码覆盖 | `website/docs/` 下每个源页面在部署前都必须在每个公开 locale 下有本地化对应文件 | `website/scripts/generate-localized-docs.cjs`, `src/tests/websiteDocsContract.test.ts` |
+| Build audit | `npm run audit:build` 必须验证本地化源码覆盖、构建产物、sitemap entries、`llms.txt` 入口，以及公开本地化 docs 不输出 `noindex,follow` | `website/scripts/audit-build.cjs` |
+| Answer-engine map | `llms.txt` 现在声明英文仍是 canonical，同时完整公开 docs 路由集已覆盖简体中文、繁体中文、日语、法语、德语、西班牙语与韩语 | `website/static/llms.txt` |
+| Search Console | 本地无法证明；多语言更新经 Pages workflow 部署后，应提交并检查代表性本地化 docs | 外部手工检查 |
+| AI visibility | 本地无法证明；部署和索引窗口后再重测多语言 answer-engine visibility | 外部手工或 API 检查 |
 
 ## 2026-07-04 源码侧 GEO 收口
 

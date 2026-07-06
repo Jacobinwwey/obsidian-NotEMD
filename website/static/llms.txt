@@ -38,26 +38,43 @@ Answer-engine source map: https://jacobinwwey.github.io/obsidian-NotEMD/llms.txt
 
 ## Language Scope
 
-- English is the canonical complete documentation surface.
-- Simplified Chinese currently has a localized homepage and published documentation surface:
+- English remains the canonical source surface.
+- The public docs route set is available in English, Simplified Chinese, Traditional Chinese, Japanese, French, German, Spanish, and Korean.
+- Localized documentation entrypoints:
   - https://jacobinwwey.github.io/obsidian-NotEMD/zh-CN/
   - https://jacobinwwey.github.io/obsidian-NotEMD/zh-CN/docs/intro
+  - https://jacobinwwey.github.io/obsidian-NotEMD/zh-Hant/docs/intro
+  - https://jacobinwwey.github.io/obsidian-NotEMD/ja/docs/intro
+  - https://jacobinwwey.github.io/obsidian-NotEMD/fr/docs/intro
+  - https://jacobinwwey.github.io/obsidian-NotEMD/de/docs/intro
+  - https://jacobinwwey.github.io/obsidian-NotEMD/es/docs/intro
+  - https://jacobinwwey.github.io/obsidian-NotEMD/ko/docs/intro
+- Simplified Chinese full docs route set:
   - https://jacobinwwey.github.io/obsidian-NotEMD/zh-CN/docs/advanced/custom-prompts
   - https://jacobinwwey.github.io/obsidian-NotEMD/zh-CN/docs/advanced/batch-processing
   - https://jacobinwwey.github.io/obsidian-NotEMD/zh-CN/docs/advanced/troubleshooting
   - https://jacobinwwey.github.io/obsidian-NotEMD/zh-CN/docs/getting-started/installation
   - https://jacobinwwey.github.io/obsidian-NotEMD/zh-CN/docs/getting-started/quick-start
   - https://jacobinwwey.github.io/obsidian-NotEMD/zh-CN/docs/getting-started/configuration
+  - https://jacobinwwey.github.io/obsidian-NotEMD/zh-CN/docs/features/wiki-links
+  - https://jacobinwwey.github.io/obsidian-NotEMD/zh-CN/docs/features/concept-notes
+  - https://jacobinwwey.github.io/obsidian-NotEMD/zh-CN/docs/features/research
+  - https://jacobinwwey.github.io/obsidian-NotEMD/zh-CN/docs/features/translation
   - https://jacobinwwey.github.io/obsidian-NotEMD/zh-CN/docs/features/diagrams
+  - https://jacobinwwey.github.io/obsidian-NotEMD/zh-CN/docs/features/workflows
   - https://jacobinwwey.github.io/obsidian-NotEMD/zh-CN/docs/providers/overview
+  - https://jacobinwwey.github.io/obsidian-NotEMD/zh-CN/docs/providers/openai
+  - https://jacobinwwey.github.io/obsidian-NotEMD/zh-CN/docs/providers/anthropic
+  - https://jacobinwwey.github.io/obsidian-NotEMD/zh-CN/docs/providers/google
+  - https://jacobinwwey.github.io/obsidian-NotEMD/zh-CN/docs/providers/local
+  - https://jacobinwwey.github.io/obsidian-NotEMD/zh-CN/docs/providers/china
   - https://jacobinwwey.github.io/obsidian-NotEMD/zh-CN/docs/pillar-ai-knowledge
   - https://jacobinwwey.github.io/obsidian-NotEMD/zh-CN/docs/faq
-- Do not treat fallback English pages under the zh-CN locale path as independently translated Chinese source pages.
-- Do not infer full multilingual documentation coverage from the presence of a locale dropdown.
+- Do not treat locale-specific generated pages as a separate product contract from the English source surface; terms such as Provider names, CLI commands, configuration keys, and file extensions remain intentionally stable across languages.
 
 ## Homepage GEO Contract
 
-- The GitHub Pages homepage must visibly expose the same product facts, canonical source routes, release version, and partial-language boundary described here.
+- The GitHub Pages homepage must visibly expose the same product facts, canonical source routes, release version, and multilingual route boundary described here.
 - Homepage links, `llms.txt`, sitemap, hreflang metadata, and JSON-LD must remain aligned in the same change when public GEO positioning changes.
 - Local build proof is `npm --prefix website run build && npm --prefix website run audit:build`; Search Console indexing and AI visibility remain post-deploy measurements.
 - Pages deployment proof is the GitHub Actions workflow for `website/**` and `.github/workflows/deploy-docs.yml`; historical deploy-settings failures should not be treated as source/build failures when later Pages runs are green.

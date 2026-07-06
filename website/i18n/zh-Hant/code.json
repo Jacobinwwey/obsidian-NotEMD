@@ -1,0 +1,106 @@
+{
+  "theme.colorToggle.ariaLabel": {
+    "message": "切換深色/淺色模式",
+    "description": "The ARIA label for the color mode toggle"
+  },
+  "theme.common.editThisPage": {
+    "message": "編輯此頁",
+    "description": "The link label to edit the current page"
+  },
+  "theme.common.lastUpdatedAt": {
+    "message": "最後更新於"
+  },
+  "theme.docs.breadcrumbs.navAriaLabel": {
+    "message": "麵包屑導覽",
+    "description": "The ARIA label for the breadcrumbs"
+  },
+  "theme.docs.paginator.navAriaLabel": {
+    "message": "文件側邊欄",
+    "description": "The ARIA label for the docs pagination"
+  },
+  "theme.docs.paginator.next": {
+    "message": "下一頁",
+    "description": "The label used to navigate to the next doc"
+  },
+  "theme.docs.paginator.previous": {
+    "message": "上一頁",
+    "description": "The label used to navigate to the previous doc"
+  },
+  "theme.docs.sidebar.closeSidebarButtonAriaLabel": {
+    "message": "關閉",
+    "description": "The ARIA label for close button of mobile sidebar"
+  },
+  "theme.docs.sidebar.collapseButtonTitle": {
+    "message": "收合側邊欄",
+    "description": "The title attribute for collapse button of doc sidebar"
+  },
+  "theme.docs.sidebar.expandButtonTitle": {
+    "message": "展開側邊欄",
+    "description": "The ARIA label and title attribute for expand button of doc sidebar"
+  },
+  "theme.NotFound.p1": {
+    "message": "找不到你要查看的頁面。",
+    "description": "The first paragraph of the 404 page"
+  },
+  "theme.NotFound.title": {
+    "message": "找不到頁面",
+    "description": "The title of the 404 page"
+  },
+  "theme.SearchBar.label": {
+    "message": "搜尋"
+  },
+  "theme.SearchBar.noResultsText": {
+    "message": "找不到結果"
+  },
+  "theme.SearchBar.seeAll": {
+    "message": "查看全部結果"
+  },
+  "theme.TOCCollapsible.toggleButtonLabel": {
+    "message": "本頁目錄",
+    "description": "The label used by the button on the collapsible TOC component"
+  },
+  "theme.navbar.mobileLanguageDropdown.label": {
+    "message": "語言",
+    "description": "The label for the mobile language switcher dropdown"
+  },
+  "theme.BackToTopButton.buttonAriaLabel": {
+    "message": "回到頂部",
+    "description": "The ARIA label for the back to top button"
+  },
+  "theme.IconExternalLink.ariaLabel": {
+    "message": "(opens in new tab)",
+    "description": "The ARIA label for the external link icon"
+  },
+  "theme.NavBar.navAriaLabel": {
+    "message": "主導覽",
+    "description": "The ARIA label for the main navigation"
+  },
+  "theme.CodeBlock.copy": {
+    "message": "複製",
+    "description": "The copy button label on code blocks"
+  },
+  "theme.CodeBlock.copied": {
+    "message": "已複製",
+    "description": "The copied button label on code blocks"
+  },
+  "theme.CodeBlock.copyButtonAriaLabel": {
+    "message": "複製程式碼到剪貼簿",
+    "description": "The ARIA label for copy code blocks button"
+  },
+  "theme.docs.breadcrumbs.home": {
+    "message": "文件",
+    "description": "The ARIA label for the home page in the breadcrumbs"
+  },
+  "theme.docs.sidebar.navAriaLabel": {
+    "message": "文件側邊欄",
+    "description": "The ARIA label for the sidebar navigation"
+  },
+  "theme.docs.sidebar.toggleSidebarButtonAriaLabel": {
+    "message": "展開側邊欄",
+    "description": "The ARIA label for hamburger menu button of mobile navigation"
+  },
+  "theme.common.skipToMainContent": {
+    "message": "跳到主要內容",
+    "description": "The skip to content label used for accessibility"
+  }
+}

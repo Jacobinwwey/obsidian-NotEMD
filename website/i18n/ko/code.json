@@ -1,0 +1,106 @@
+{
+  "theme.colorToggle.ariaLabel": {
+    "message": "어두운/밝은 모드 전환",
+    "description": "The ARIA label for the color mode toggle"
+  },
+  "theme.common.editThisPage": {
+    "message": "이 페이지 편집",
+    "description": "The link label to edit the current page"
+  },
+  "theme.common.lastUpdatedAt": {
+    "message": "마지막 업데이트"
+  },
+  "theme.docs.breadcrumbs.navAriaLabel": {
+    "message": "이동 경로",
+    "description": "The ARIA label for the breadcrumbs"
+  },
+  "theme.docs.paginator.navAriaLabel": {
+    "message": "문서 사이드바",
+    "description": "The ARIA label for the docs pagination"
+  },
+  "theme.docs.paginator.next": {
+    "message": "다음 페이지",
+    "description": "The label used to navigate to the next doc"
+  },
+  "theme.docs.paginator.previous": {
+    "message": "이전 페이지",
+    "description": "The label used to navigate to the previous doc"
+  },
+  "theme.docs.sidebar.closeSidebarButtonAriaLabel": {
+    "message": "닫기",
+    "description": "The ARIA label for close button of mobile sidebar"
+  },
+  "theme.docs.sidebar.collapseButtonTitle": {
+    "message": "사이드바 접기",
+    "description": "The title attribute for collapse button of doc sidebar"
+  },
+  "theme.docs.sidebar.expandButtonTitle": {
+    "message": "사이드바 펼치기",
+    "description": "The ARIA label and title attribute for expand button of doc sidebar"
+  },
+  "theme.NotFound.p1": {
+    "message": "찾고 있는 페이지를 찾을 수 없습니다.",
+    "description": "The first paragraph of the 404 page"
+  },
+  "theme.NotFound.title": {
+    "message": "페이지를 찾을 수 없습니다",
+    "description": "The title of the 404 page"
+  },
+  "theme.SearchBar.label": {
+    "message": "검색"
+  },
+  "theme.SearchBar.noResultsText": {
+    "message": "결과를 찾을 수 없습니다"
+  },
+  "theme.SearchBar.seeAll": {
+    "message": "모든 결과 보기"
+  },
+  "theme.TOCCollapsible.toggleButtonLabel": {
+    "message": "이 페이지의 목차",
+    "description": "The label used by the button on the collapsible TOC component"
+  },
+  "theme.navbar.mobileLanguageDropdown.label": {
+    "message": "언어",
+    "description": "The label for the mobile language switcher dropdown"
+  },
+  "theme.BackToTopButton.buttonAriaLabel": {
+    "message": "맨 위로",
+    "description": "The ARIA label for the back to top button"
+  },
+  "theme.IconExternalLink.ariaLabel": {
+    "message": "(opens in new tab)",
+    "description": "The ARIA label for the external link icon"
+  },
+  "theme.NavBar.navAriaLabel": {
+    "message": "기본 탐색",
+    "description": "The ARIA label for the main navigation"
+  },
+  "theme.CodeBlock.copy": {
+    "message": "복사",
+    "description": "The copy button label on code blocks"
+  },
+  "theme.CodeBlock.copied": {
+    "message": "복사됨",
+    "description": "The copied button label on code blocks"
+  },
+  "theme.CodeBlock.copyButtonAriaLabel": {
+    "message": "코드를 클립보드에 복사",
+    "description": "The ARIA label for copy code blocks button"
+  },
+  "theme.docs.breadcrumbs.home": {
+    "message": "문서",
+    "description": "The ARIA label for the home page in the breadcrumbs"
+  },
+  "theme.docs.sidebar.navAriaLabel": {
+    "message": "문서 사이드바",
+    "description": "The ARIA label for the sidebar navigation"
+  },
+  "theme.docs.sidebar.toggleSidebarButtonAriaLabel": {
+    "message": "사이드바 펼치기",
+    "description": "The ARIA label for hamburger menu button of mobile navigation"
+  },
+  "theme.common.skipToMainContent": {
+    "message": "주요 콘텐츠로 이동",
+    "description": "The skip to content label used for accessibility"
+  }
+}

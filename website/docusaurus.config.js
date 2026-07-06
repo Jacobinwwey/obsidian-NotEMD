@@ -5,7 +5,6 @@
 // See: https://docusaurus.io/docs/api/docusaurus-config
 
 import {themes as prismThemes} from 'prism-react-renderer';
-import {publishedZhCnDocPaths} from './src/lib/publishedLanguageScope.js';
 
 const siteUrl = 'https://jacobinwwey.github.io';
 const baseUrl = '/obsidian-NotEMD/';
@@ -13,15 +12,6 @@ const siteBaseUrl = `${siteUrl}${baseUrl}`;
 const currentSoftwareVersion = '1.9.3';
 const personId = `${siteBaseUrl}#person-jacobinwwey`;
 const logoUrl = `${siteBaseUrl}img/logo.svg`;
-const publishedZhCnDocUrls = new Set(
-  Array.from(publishedZhCnDocPaths, (docPath) => `${siteBaseUrl}zh-CN${docPath}`),
-);
-
-function sitemapItemMatchesPublishedLanguageScope(item) {
-  const itemUrl = item.url.replace(/\/$/, '');
-  const zhCnDocsPrefix = `${siteBaseUrl}zh-CN/docs/`;
-  return !itemUrl.startsWith(zhCnDocsPrefix) || publishedZhCnDocUrls.has(itemUrl);
-}
 
 /** @type {import('@docusaurus/types').Config} */
 const config = {
@@ -118,10 +108,16 @@ const config = {
   // may want to replace "en" with "zh-Hans".
   i18n: {
     defaultLocale: 'en',
-    locales: ['en', 'zh-CN'],
+    locales: ['en', 'zh-CN', 'zh-Hant', 'ja', 'fr', 'de', 'es', 'ko'],
     localeConfigs: {
       en: { label: 'English', direction: 'ltr', htmlLang: 'en-US' },
       'zh-CN': { label: '简体中文', direction: 'ltr', htmlLang: 'zh-CN' },
+      'zh-Hant': { label: '繁體中文', direction: 'ltr', htmlLang: 'zh-Hant' },
+      ja: { label: '日本語', direction: 'ltr', htmlLang: 'ja-JP' },
+      fr: { label: 'Français', direction: 'ltr', htmlLang: 'fr-FR' },
+      de: { label: 'Deutsch', direction: 'ltr', htmlLang: 'de-DE' },
+      es: { label: 'Español', direction: 'ltr', htmlLang: 'es-ES' },
+      ko: { label: '한국어', direction: 'ltr', htmlLang: 'ko-KR' },
     },
   },
 
@@ -157,7 +153,7 @@ const config = {
           createSitemapItems: async (params) => {
             const {defaultCreateSitemapItems, ...rest} = params;
             const items = await defaultCreateSitemapItems(rest);
-            return items.filter(sitemapItemMatchesPublishedLanguageScope);
+            return items;
           },
         },
       }),

@@ -1,0 +1,22 @@
+{
+  "version.label": {
+    "message": "次へ",
+    "description": "The label for version current"
+  },
+  "sidebar.tutorialSidebar.category.Getting Started": {
+    "message": "はじめに",
+    "description": "The label for category 'Getting Started' in sidebar 'tutorialSidebar'"
+  },
+  "sidebar.tutorialSidebar.category.Core Features": {
+    "message": "主要機能",
+    "description": "The label for category 'Core Features' in sidebar 'tutorialSidebar'"
+  },
+  "sidebar.tutorialSidebar.category.LLM Providers": {
+    "message": "LLM プロバイダー",
+    "description": "The label for category 'LLM Providers' in sidebar 'tutorialSidebar'"
+  },
+  "sidebar.tutorialSidebar.category.Advanced": {
+    "message": "高度な設定",
+    "description": "The label for category 'Advanced' in sidebar 'tutorialSidebar'"
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "version.label": {
+    "message": "Étape suivante",
+    "description": "The label for version current"
+  },
+  "sidebar.tutorialSidebar.category.Getting Started": {
+    "message": "Démarrage",
+    "description": "The label for category 'Getting Started' in sidebar 'tutorialSidebar'"
+  },
+  "sidebar.tutorialSidebar.category.Core Features": {
+    "message": "Fonctions clés",
+    "description": "The label for category 'Core Features' in sidebar 'tutorialSidebar'"
+  },
+  "sidebar.tutorialSidebar.category.LLM Providers": {
+    "message": "Fournisseurs LLM",
+    "description": "The label for category 'LLM Providers' in sidebar 'tutorialSidebar'"
+  },
+  "sidebar.tutorialSidebar.category.Advanced": {
+    "message": "Avancé",
+    "description": "The label for category 'Advanced' in sidebar 'tutorialSidebar'"
+  }
+}

@@ -23,7 +23,7 @@ import TLDR from '@site/src/components/TLDR';
 
 Notemd 将 **30+ 大语言模型**（OpenAI、Anthropic、Google、DeepSeek、Qwen、Ollama 等）接入 Obsidian 工作流，用来自动完成知识抽取、组织、翻译、研究与图表生成。
 
-### 关键差异：短暂知识 vs. 持久知识
+### 关键差异：临时对话与持久知识
 
 | 维度 | 对话式 AI（ChatGPT 等） | Notemd |
 |------|--------------------------|--------|
@@ -34,29 +34,29 @@ Notemd 将 **30+ 大语言模型**（OpenAI、Anthropic、Google、DeepSeek、Qw
 
 ## 核心能力
 
-### 1. **自动 Wiki 链接**
+### 1. 自动 Wiki 链接
 - LLM 识别笔记中的关键概念
 - 在每个出现位置插入 `[[wiki-links]]`
 - 可选地创建链接到的概念笔记
 - 通过同义词抑制避免重复
 
-### 2. **概念笔记生成**
+### 2. 概念笔记生成
 - 从论文、文章、笔记中抽取核心概念
 - 生成带反向链接的独立概念文件
 - 支持自定义输出路径和模板
 
-### 3. **Web 研究集成**
+### 3. 网页研究集成
 - 在 Obsidian 内调用 Tavily 或 DuckDuckGo
 - LLM 基于来源引用总结结果
 - 将研究发现追加到当前笔记
 
-### 4. **多语言翻译**
+### 4. 多语言翻译
 - 翻译选中文本或整篇笔记
 - 支持 21+ 种 UI 语言
 - 输出语言可独立配置
 - 支持批量翻译
 
-### 5. **图表生成**
+### 5. 图表生成
 - **Mermaid**：流程图、时序图、类图、状态图、ER 图、甘特图
 - **JSON Canvas**：Obsidian 原生布局
 - **Vega-Lite**：数据图、时间序列、散点图
@@ -66,7 +66,7 @@ Notemd 将 **30+ 大语言模型**（OpenAI、Anthropic、Google、DeepSeek、Qw
 - **预览诊断**：render artifact 可以展示 compile/render smoke diagnostics，非 inline source 也可以在不要求插件侧 LaTeX runtime 的情况下检查
 - Mermaid 语法错误自动修复
 
-### 6. **一键工作流**
+### 6. 一键工作流
 - 将多个动作串联成侧边栏按钮
 - 使用 DSL 定义工作流
 - 示例：`add-links > extract-concepts > research > diagram`
@@ -80,7 +80,7 @@ Notemd 将 **30+ 大语言模型**（OpenAI、Anthropic、Google、DeepSeek、Qw
 - ✅ **隐私优先用户**：需要本地 LLM 支持（Ollama）
 - ✅ **高级用户**：希望自定义 prompt 和工作流
 
-## 为什么是 Notemd + Obsidian？
+## 为什么选择 Notemd + Obsidian？
 
 **Obsidian** 是本地优先、基于 Markdown 的知识库。**Notemd** 增加 AI 能力：
 - 数据保留在你的 vault 中，而不是云端服务
@@ -89,7 +89,7 @@ Notemd 将 **30+ 大语言模型**（OpenAI、Anthropic、Google、DeepSeek、Qw
 - 可融入现有 Obsidian 插件生态
 - 能扩展到数万篇笔记
 
-## Getting Started
+## 入门
 
 1. **安装**：Settings → Community Plugins → Browse → "Notemd"
 2. **配置**：添加 LLM provider API key，或使用本地 Ollama
@@ -134,7 +134,7 @@ graph LR
     G --> K[Research Summaries]
 ```
 
-## Notemd vs Other Obsidian AI Plugins
+## Notemd 与其他 Obsidian AI 插件对比
 
 大多数 Obsidian AI 插件是 conversation-first：你提问，AI 回答，洞察留在聊天里。Notemd 是 **write-first**：AI 处理你的笔记，并把结构化结果直接写入 vault。
 
@@ -160,7 +160,7 @@ graph LR
 
 **什么时候选择 Smart Connections**：你想通过语义搜索发现已有笔记之间的关系。
 
-## Philosophy
+## 理念
 
 **Notemd 相信 AI 应该增强人类知识工作，而不是替代它。** 插件会：
 - 保持你对变更的控制（应用前可审阅）
@@ -168,7 +168,7 @@ graph LR
 - 尊重隐私（支持本地 LLM，无遥测）
 - 保持可扩展（开放 API、自定义工作流）
 
-## Open Source
+## 开源
 
 - **License**：MIT
 - **Source**：[github.com/Jacobinwwey/obsidian-NotEMD](https://github.com/Jacobinwwey/obsidian-NotEMD)

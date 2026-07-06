@@ -6,13 +6,13 @@
 
 ## 当前契约
 
-文档站发布一个完整语言面和一个部分语言面：
+文档站现在发布一个 canonical 源语言面和七个完整本地化文档路由集：
 
-1. 英文是完整 canonical 文档面，路径为 `https://jacobinwwey.github.io/obsidian-NotEMD/docs/...`。
-2. 简体中文发布首页和已 review 的 critical path：intro、installation、quick start、configuration、provider overview、AI knowledge pillar 与 FAQ。
-3. Docusaurus 仍可能生成未翻译 zh-CN fallback docs，但这些页面必须是 `noindex,follow`，必须从 zh-CN sitemap 排除，必须从 zh-CN sidebar/paginator 遍历中隐藏，也不能暴露 hreflang alternates。
-4. 从未发布 zh-CN fallback route 切换语言时，必须进入真实 route：中文去 zh-CN root，英文去 canonical English。
-5. `llms.txt` 必须声明同一语言边界，避免 answer engine 推断出不存在的完整多语言覆盖。
+1. 英文仍是完整 canonical 文档面，路径为 `https://jacobinwwey.github.io/obsidian-NotEMD/docs/...`。
+2. 简体中文（`zh-CN`）、繁体中文（`zh-Hant`）、日语（`ja`）、法语（`fr`）、德语（`de`）、西班牙语（`es`）和韩语（`ko`）必须暴露与 `website/docs` 完全相同的 docs 路由集。
+3. 只有当 `website/docs/` 下每个源页面都在 `website/i18n/<locale>/docusaurus-plugin-content-docs/current/` 下有本地化对应文件时，才能把该 locale 加入 `docusaurus.config.js`。
+4. 先前的部分 zh-CN fallback 策略对公开 docs 已经退役。构建后的本地化 docs 不应依赖英文 fallback 页面，也不应输出 `noindex,follow`。
+5. `llms.txt`、sitemap 输出、hreflang metadata、首页语言边界与 build-audit 预期必须描述同一套完整多语言路由契约。
 6. 任何公开 GEO / product-positioning 变更，都必须在同一次变更中同步 GitHub Pages 首页可见内容、首页 JSON-LD、`llms.txt` 与 build-audit 预期。只更新 maintainer notes 不算完成。
 
 ## 已落地门禁
@@ -27,19 +27,16 @@ npm run audit:build
 
 `npm run audit:build` 执行 `website/scripts/audit-build.cjs`。脚本同时检查 build 产物和源码契约点：
 
-1. root 页面存在：`build/index.html` 与 `build/zh-CN/index.html`；
-2. root 页面具有预期的 `lang`、canonical URL 与 WebPage JSON-LD URL；
-3. 每个已发布 zh-CN source file 都存在，且每个 localized zh-CN doc file 都已声明在 `publishedLanguageScopeData.mjs`；
-4. critical zh-CN doc paths 都已发布；
-5. 已发布 zh-CN docs 不输出 `noindex,follow`；
-6. 未发布 zh-CN fallback docs 输出 `noindex,follow`，且不输出 alternates；
-7. 英文 docs 只有在 zh-CN translation 已发布时才暴露 zh-CN alternate；
-8. 已发布 zh-CN docs 不链接到未发布 zh-CN fallback docs；
-9. sitemap 包含 canonical 英文 docs，包含已发布 zh-CN docs，并排除未发布 zh-CN fallback docs；
-10. `llms.txt` 记录当前语言范围；
-11. provider docs 必须包含 setup、endpoint/auth、model discovery、troubleshooting 与 use-case sections；
-12. `GEO_ROADMAP.md` 与 measurement logs 必须提到 2026-06-22 baseline evidence、2026-06-24 homepage sync evidence、Search Console、AI visibility 与 sitemap 证据。
-13. 首页必须暴露 source-backed product facts、answer-engine source map、`llms.txt` link、当前 release version 与 partial zh-CN language boundary。
+1. 英文和每个公开 locale 的 root 页面都存在；
+2. root 页面具有预期的 `lang`、canonical URL，以及适用的 WebPage JSON-LD URL；
+3. 每个英文源文档在 `zh-CN`、`zh-Hant`、`ja`、`fr`、`de`、`es` 与 `ko` 中都有本地化源文档；
+4. `publishedLanguageScopeData.mjs` 为 zh-CN 兼容门禁声明完整 docs 路由集；
+5. 每个支持 locale 的本地化 docs 都能构建，并且不输出 `noindex,follow`；
+6. sitemap 输出包含 canonical 英文 docs 和每个本地化 docs 路由；
+7. `llms.txt` 记录当前多语言路由集与本地化入口；
+8. provider docs 必须包含 setup、endpoint/auth、model discovery、troubleshooting 与 use-case sections；
+9. `GEO_ROADMAP.md` 与 measurement logs 必须提到基线证据、首页同步证据、Search Console、AI visibility 与 sitemap 证据；
+10. 首页必须暴露 source-backed product facts、answer-engine source map、`llms.txt` link、当前 release version 与完整多语言 docs 边界。
 
 GitHub Pages workflow 会在上传 Pages artifact 前运行这个审计：
 
@@ -50,13 +47,11 @@ GitHub Pages workflow 会在上传 Pages artifact 前运行这个审计：
   -> upload-pages-artifact
 ```
 
-截至 2026-07-05，workflow 已固定到 Node 24 兼容的 action 主版本：`actions/checkout@v7`、`actions/setup-node@v6` 且 `node-version: 24`、`actions/upload-pages-artifact@v5` 与 `actions/deploy-pages@v5`。这能让 Pages gate 避开此前 deploy 重试时暴露的旧 Node 20 deprecation 路径。
-
-deploy job 会对官方 `actions/deploy-pages@v5` 步骤最多重试三次，并在尝试之间短暂等待。这个 retry 只覆盖 GitHub Pages 服务端部署失败，例如 `Deployment failed, try again later.`。它不会掩盖 checkout、install、build、audit 或 artifact upload 失败，因为 deploy job 仍依赖已经完成的 `build` job，且 retry steps 只有在 Pages deploy action 本身失败后才会运行。
+截至 2026-07-05，workflow 已固定到 Node 24 兼容的 action 主版本：`actions/checkout@v7`、`actions/setup-node@v6` 且 `node-version: 24`、`actions/upload-pages-artifact@v5` 与 `actions/deploy-pages@v5`。deploy job 会对官方 `actions/deploy-pages@v5` 步骤最多重试三次，并在尝试之间短暂等待。这个 retry 只覆盖 GitHub Pages 服务端部署失败，不会掩盖 checkout、install、build、audit 或 artifact upload 失败。
 
 ## Source Ownership
 
-语言发布数据在：
+完整 zh-CN 兼容 scope 在：
 
 ```text
 website/src/lib/publishedLanguageScopeData.mjs
@@ -69,54 +64,75 @@ website/src/lib/publishedLanguageScope.js
 website/src/lib/languageRoutePolicy.js
 ```
 
-当前已发布 zh-CN doc paths：
+本地化文档由以下脚本生成和补丁：
+
+```text
+website/scripts/generate-localized-docs.cjs
+```
+
+当前公开的本地化 docs 路由集就是 `website/docs/` 下的完整集合，包括：
 
 ```text
 /docs/intro
 /docs/getting-started/installation
 /docs/getting-started/quick-start
 /docs/getting-started/configuration
+/docs/features/wiki-links
+/docs/features/concept-notes
+/docs/features/research
+/docs/features/translation
+/docs/features/diagrams
+/docs/features/workflows
 /docs/providers/overview
+/docs/providers/openai
+/docs/providers/anthropic
+/docs/providers/google
+/docs/providers/local
+/docs/providers/china
+/docs/advanced/custom-prompts
+/docs/advanced/batch-processing
+/docs/advanced/troubleshooting
 /docs/pillar-ai-knowledge
 /docs/faq
 ```
 
 这份 scope 被以下位置消费：
 
-1. `website/docusaurus.config.js` 用于 sitemap 过滤；
-2. `website/src/theme/DocItem/Layout/index.js` 用于 fallback doc 的 `noindex,follow`；
-3. `website/src/theme/SiteMetadata/index.js` 用于 hreflang 与 Open Graph locale alternates；
-4. `website/src/theme/NavbarItem/LocaleDropdownNavbarItem/index.js` 用于 locale switch target；
-5. `website/src/theme/DocRoot/Layout/Sidebar/index.js` 用于 zh-CN sidebar 过滤；
-6. `website/src/theme/DocItem/Paginator/index.js` 用于 zh-CN previous/next 过滤；
-7. `website/src/pages/index.js`、`website/docusaurus.config.js` 与 `website/static/llms.txt` 用于公开入口、首页 JSON-LD、release version 与 answer-engine source map。
+1. `website/src/theme/DocItem/Layout/index.js` 用于遗留 zh-CN fallback 的 `noindex,follow` 围栏。在完整路由本地化后，它对公开 docs 应该是 no-op。
+2. `website/src/theme/SiteMetadata/index.js` 用于 hreflang 与 Open Graph locale alternates。
+3. `website/src/theme/NavbarItem/LocaleDropdownNavbarItem/index.js` 用于 locale switch target。
+4. `website/src/theme/DocRoot/Layout/Sidebar/index.js` 用于 zh-CN sidebar filtering 兼容逻辑。
+5. `website/src/theme/DocItem/Paginator/index.js` 用于 zh-CN previous/next filtering 兼容逻辑。
+6. `website/src/pages/index.js`、`website/docusaurus.config.js` 与 `website/static/llms.txt` 用于公开入口、首页 JSON-LD、release version 与 answer-engine source map。
 
-关键规则不是“新增一个翻译文件”。关键规则是“翻译文件和 scope data 必须同批发布”。缺任一边，audit 都应该失败。
+关键规则不再是“把一个 zh-CN 页面从 fallback 晋升为 published”。当前规则是“保持每个公开 locale 完整”。一旦源文档新增或删除，就必须在同一变更中更新每个 locale，并重新运行生成器与审计。
 
 同样还有一条 homepage 规则：不要只在一个位置修改公开 GEO 事实。如果 answer-engine framing、provider count、language scope、release version 或 canonical source routes 发生变化，首页文案、JSON-LD、`llms.txt` 与 `audit-build.cjs` 必须一起更新。
 
-## Promotion Checklist
+## Locale 更新清单
 
-当一个 zh-CN doc 从 fallback 晋升为 published：
+新增或修改 docs 页面时：
 
-1. 在 `website/i18n/zh-CN/docusaurus-plugin-content-docs/current/...` 下完成翻译。
-2. 把 doc id、route path、source path 加入 `publishedLanguageScopeData.mjs`。
-3. 确认该页面应该进入 zh-CN sidebar 和 paginator 遍历。
-4. 如果该页面属于公开 AI retrieval map，同步更新 `website/static/llms.txt`。
-5. 如果晋升页面改变首页 source map 或可见语言边界，同步更新 `website/src/pages/index.js`。
-6. 执行 `npm --prefix website run build && npm --prefix website run audit:build`。
-7. 部署后在 `docs/maintainer/github-pages-geo-measurement-log.zh-CN.md` 中记录 Search Console 与 AI visibility 观察。
+1. 更新 `website/docs/...` 下的英文源页面。
+2. 运行或更新 `website/scripts/generate-localized-docs.cjs`，确保每个支持 locale 都得到对应页面。
+3. 先 review `zh-CN` 的可见标题、章节标题和正文漂移。`Notemd`、`LLM`、`Provider`、CLI flags、配置键、文件扩展名和代码标识符是 runtime contract，可按需要保留英文。
+4. 检查 `zh-Hant`、`ja`、`fr`、`de`、`es` 与 `ko` 中是否还有可见英文标题残留。
+5. 如果 docs 路由集变化，同步更新 `website/src/lib/publishedLanguageScopeData.mjs`。
+6. 如果页面影响公开 AI retrieval map，同步更新 `website/static/llms.txt`。
+7. 如果页面改变首页 source map 或可见语言边界，同步更新 `website/src/pages/index.js`。
+8. 执行 `npm --prefix website run build && npm --prefix website run audit:build`。
+9. 部署后在 `docs/maintainer/github-pages-geo-measurement-log.zh-CN.md` 中记录 Search Console 与 AI visibility 观察。
 
 ## 为什么这样做
 
-最容易犯的错，是把 Docusaurus locale fallback 当成 GEO 面积。这是错误假设。它会制造看似中文、实际英文的 URL，削弱 hreflang 真值，并把用户带进没有经过本地化 review 的路线。
+先前的部分 zh-CN 模型，比让 Docusaurus 在中文 URL 下发布英文 fallback 内容更安全；但当公开需求变成完整多语言 docs 后，它已经不是正确抽象。继续把 fallback fencing 当作主策略，会隐藏真实本地化页面，让 sitemap 真值复杂化，也会让 locale 扩展看起来始终未完成。
 
-更严格的 scope-data 模型有维护成本：每次晋升都要同时动翻译内容、数据、`llms.txt` 与 build proof。收益是 sitemap、robots、alternates、UI navigation 与 AI retrieval 会讲同一个事实。
+更严格的完整路由模型有维护成本：每次 docs 变化都要同步所有本地化源树和 build proof。收益是 sitemap、robots、alternates、UI navigation 与 AI retrieval 会讲同一个事实。
 
 ## 当前最佳方向
 
 1. 英文继续保持 canonical 且完整。
-2. zh-CN 通过已 review 的 critical-path 页面增长，而不是通过 locale 数量增长。
-3. 先保证 provider pages 具备操作价值，再考虑增加更多 provider landing pages。
+2. 每次部署前，保持所有公开 locale 的 docs 路由集完整。
+3. 使用 `generate-localized-docs.cjs` 保证可重复生成，但必须优先 review 可见 zh-CN 文本，因为机器式泛化标题比明确本地化标题更差。
 4. Search Console 与 AI visibility 是部署后的 measurement，不是本地 build proof。
-5. 不要给 Docusaurus theme components 增加新的泛化 wrapper。本次 theme overrides 可以接受，是因为它们承接了具体 policy：alternates、locale switching、sidebar filtering 与 paginator filtering。
+5. 不要给 Docusaurus theme components 增加新的泛化 wrapper。现有 theme overrides 可以接受，只是因为它们承接了具体 policy：alternates、locale switching、sidebar filtering 与 paginator filtering。

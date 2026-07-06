@@ -4,7 +4,6 @@ import Head from '@docusaurus/Head';
 import Layout from '@theme/Layout';
 import useDocusaurusContext from '@docusaurus/useDocusaurusContext';
 import useBaseUrl from '@docusaurus/useBaseUrl';
-import {isPublishedZhCnDocPath} from '../lib/publishedLanguageScope';
 import styles from './index.module.css';
 
 const copyByLocale = {
@@ -27,11 +26,11 @@ const copyByLocale = {
     retrievalHeading: 'Answer-engine source map',
     retrievalLead:
       'The public site now exposes the same canonical routes that llms.txt, sitemap, hreflang metadata, and JSON-LD describe. Use these pages as the source of truth for AI search and citation workflows.',
-    languageBoundary: 'Language boundary: English is complete; Simplified Chinese is partial and scoped to reviewed critical paths.',
+    languageBoundary: 'Language boundary: English and all published documentation locales now expose the full docs route set.',
     retrievalLinks: [
       {
         title: 'llms.txt retrieval map',
-        body: 'Compact route map for answer engines, canonical docs, provider topics, and the current language boundary.',
+        body: 'Compact route map for answer engines, canonical docs, provider topics, and the current multilingual route set.',
         href: '/llms.txt',
         kind: 'static',
       },
@@ -83,7 +82,7 @@ const copyByLocale = {
     retrievalHeading: 'Answer engine 来源地图',
     retrievalLead:
       '项目网页现在公开展示与 llms.txt、sitemap、hreflang metadata 和 JSON-LD 一致的 canonical routes。AI search 与引用场景应以这些页面为真值来源。',
-    languageBoundary: '语言边界：英文文档完整；简体中文部分翻译，仅覆盖已审核的关键路径。',
+    languageBoundary: '语言边界：英文、简体中文、繁体中文、日语、法语、德语、西班牙语和韩语均暴露完整 docs 路由集。',
     retrievalLinks: [
       {
         title: 'llms.txt 检索地图',
@@ -130,18 +129,7 @@ export default function Home() {
   const canonicalBasePath = siteConfig.customFields?.canonicalBasePath || siteConfig.baseUrl;
   const llmsHref = `${canonicalBasePath}llms.txt`;
   const softwareVersion = siteConfig.customFields?.softwareVersion || '1.9.3';
-  const englishDocHref = (docPath) => `${canonicalBasePath}${docPath.replace(/^\//, '')}`;
-  const docLinkProps = (docPath) => {
-    if (i18n.currentLocale === 'zh-CN' && !isPublishedZhCnDocPath(docPath)) {
-      return {
-        href: englishDocHref(docPath),
-        autoAddBaseUrl: false,
-        'data-noBrokenLinkCheck': true,
-      };
-    }
-
-    return {to: docPath};
-  };
+  const docLinkProps = (docPath) => ({to: docPath});
   const sourceLinkProps = (source) => {
     if (source.kind === 'static') {
       return {

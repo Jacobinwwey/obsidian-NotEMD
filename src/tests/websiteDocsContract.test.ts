@@ -29,12 +29,32 @@ describe('website documentation contract', () => {
         path.join(websiteRoot, 'i18n', 'zh-CN', 'docusaurus-plugin-content-docs', 'current.json'),
         'utf8'
     ));
+    const localizedLocales = ['zh-CN', 'zh-Hant', 'ja', 'fr', 'de', 'es', 'ko'];
+
+    function listMdxFiles(root: string): string[] {
+        return fs.readdirSync(root, { withFileTypes: true }).flatMap(entry => {
+            const entryPath = path.join(root, entry.name);
+            if (entry.isDirectory()) {
+                return listMdxFiles(entryPath);
+            }
+            return entry.name.endsWith('.mdx') ? [entryPath] : [];
+        });
+    }
+
+    function sourceDocPaths(): string[] {
+        const docsRoot = path.join(websiteRoot, 'docs');
+        return listMdxFiles(docsRoot)
+            .map(filePath => path.relative(docsRoot, filePath).replace(/\\/g, '/'))
+            .sort();
+    }
 
     test('intro pages keep English and zh-CN content surfaces one-to-one', () => {
         expect(markdownHeadings(chineseIntro)).toHaveLength(markdownHeadings(englishIntro).length);
 
         expect(englishIntro).toContain('Diagram Capability Direction');
         expect(chineseIntro).toContain('图表能力方向');
+        expect(englishIntro).toContain('Notemd vs Other Obsidian AI Plugins');
+        expect(chineseIntro).toContain('Notemd 与其他 Obsidian AI 插件对比');
 
         for (const content of [englishIntro, chineseIntro]) {
             expect(content).toContain('DiagramSpec');
@@ -43,7 +63,6 @@ describe('website documentation contract', () => {
             expect(content).toContain('Draw.io');
             expect(content).toContain('Drawnix');
             expect(content).toContain('source-only');
-            expect(content).toContain('Notemd vs Other Obsidian AI Plugins');
         }
     });
 
@@ -53,9 +72,8 @@ describe('website documentation contract', () => {
         expect(chineseDiagrams).toContain('当前 circuitikz 原型');
 
         for (const content of [englishDiagrams, chineseDiagrams]) {
-            expect(content).toContain('circuitikz / TikZJax Direction');
-            expect(content).toContain('Golden Reference Prompt Shape');
-            expect(content).toContain('Current Progress And Next Phases');
+            expect(content).toContain('circuitikz');
+            expect(content).toContain('TikZJax');
             expect(content).toContain('CircuitSpec');
             expect(content).toContain('common-source-amplifier');
             expect(content).toContain('cmos-inverter-v1');
@@ -150,7 +168,7 @@ describe('website documentation contract', () => {
             expect(content).toContain('foregroundBounds');
             expect(content).toContain('foregroundDensity');
             expect(content).toContain('circuitikz.sty');
-            expect(content).toContain('Golden Reference Template');
+            expect(content).toContain('Golden Reference');
             expect(content).toContain('TikZJax Render');
             expect(content).toContain('\\usepackage{circuitikz}');
             expect(content).toContain('pmos');
@@ -168,20 +186,75 @@ describe('website documentation contract', () => {
         }
     });
 
-    test('zh-CN scope publishes the Advanced sidebar pages used by intro', () => {
-        expect(chineseDocsPluginMessages['sidebar.tutorialSidebar.category.Advanced'].message)
-            .toContain('Advanced');
+    test('all published documentation locales mirror the English docs route set', () => {
+        const expectedSourceDocs = sourceDocPaths();
 
-        for (const [sourcePath, routePath] of [
-            ['advanced/custom-prompts.mdx', '/docs/advanced/custom-prompts'],
-            ['advanced/batch-processing.mdx', '/docs/advanced/batch-processing'],
-            ['advanced/troubleshooting.mdx', '/docs/advanced/troubleshooting']
-        ]) {
+        for (const locale of localizedLocales) {
+            const localeRoot = path.join(
+                websiteRoot,
+                'i18n',
+                locale,
+                'docusaurus-plugin-content-docs',
+                'current'
+            );
+            const actualSourceDocs = listMdxFiles(localeRoot)
+                .map(filePath => path.relative(localeRoot, filePath).replace(/\\/g, '/'))
+                .sort();
+            expect(actualSourceDocs).toEqual(expectedSourceDocs);
+        }
+    });
+
+    test('zh-CN scope publishes the full docs route set and localized sidebar labels', () => {
+        expect(chineseDocsPluginMessages['sidebar.tutorialSidebar.category.Advanced'].message)
+            .toBe('高级');
+        expect(chineseDocsPluginMessages['sidebar.tutorialSidebar.category.Getting Started'].message)
+            .toBe('入门');
+
+        for (const sourcePath of sourceDocPaths()) {
+            const routePath = `/docs/${sourcePath.replace(/\.mdx$/, '')}`;
             expect(fs.existsSync(
                 path.join(websiteRoot, 'i18n', 'zh-CN', 'docusaurus-plugin-content-docs', 'current', sourcePath)
             )).toBe(true);
             expect(publishedLanguageScope).toContain(`path: '${routePath}'`);
             expect(publishedLanguageScope).toContain(`sourcePath: '${sourcePath}'`);
+        }
+    });
+
+    test('zh-CN visible titles and headings do not keep stale English documentation labels', () => {
+        const staleHeadingMarkers = [
+            /^title:\s+(Getting Started|Quick Start|Configuration|LLM Providers|Advanced)$/m,
+            /^#{1,4}\s+(Getting Started|Intent Detection|Usage|Generate a Diagram|Preview a Diagram)$/m,
+            /^#{1,4}\s+(Rendering Backends|Provider Categories|Cloud Providers|Local Providers)$/m,
+            /^#{1,4}\s+(API Call Architecture|Transport Layers|Retry Logic|Response Caching|Model Discovery)$/m,
+            /^#{1,4}\s+(Current Progress And Next Phases|Golden Reference Prompt Shape|Endpoint And Authentication)$/m,
+        ];
+
+        const zhRoot = path.join(websiteRoot, 'i18n', 'zh-CN', 'docusaurus-plugin-content-docs', 'current');
+        for (const filePath of listMdxFiles(zhRoot)) {
+            const content = fs.readFileSync(filePath, 'utf8');
+            for (const marker of staleHeadingMarkers) {
+                expect(content).not.toMatch(marker);
+            }
+        }
+    });
+
+    test('non-Chinese website locales do not reuse Simplified Chinese Docusaurus chrome', () => {
+        const simplifiedChineseChromeMarkers = [
+            '编辑此页',
+            '最后更新于',
+            '下一页',
+            '上一页',
+            '搜索',
+            '跳到主要内容',
+            '复制成功',
+            '回到顶部',
+        ];
+
+        for (const locale of ['ja', 'fr', 'de', 'es', 'ko']) {
+            const codeJson = fs.readFileSync(path.join(websiteRoot, 'i18n', locale, 'code.json'), 'utf8');
+            for (const marker of simplifiedChineseChromeMarkers) {
+                expect(codeJson).not.toContain(marker);
+            }
         }
     });
 });

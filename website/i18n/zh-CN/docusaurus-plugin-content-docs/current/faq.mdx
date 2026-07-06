@@ -48,9 +48,9 @@ import TLDR from '@site/src/components/TLDR';
 
 ---
 
-## 安装与设置
+## 常见问题：安装与准备
 
-### 如何在 Obsidian 中安装 Notemd？
+### 常见问题：安装与准备
 
 打开 Obsidian **设置 → 社区插件 → 浏览** → 搜索 **"Notemd"** → **安装** → **启用**。
 
@@ -67,9 +67,9 @@ import TLDR from '@site/src/components/TLDR';
 
 ---
 
-## LLM 配置
+## 常见问题：配置与模型
 
-### Notemd 支持哪些 LLM 提供商？
+### 常见问题：配置与模型
 
 Notemd 支持 **30+ 个提供商**：
 
@@ -94,7 +94,7 @@ Notemd 支持 **30+ 个提供商**：
 - GitHub Models、Fireworks、LiteLLM、Nebius、Cerebras
 - Hugging Face、Vercel AI Gateway、Requesty
 
-### Notemd 可以使用本地 LLM 吗？
+### 常见问题：配置与模型
 
 **可以，完全支持。** Notemd 支持：
 - **Ollama**（原生集成）
@@ -108,7 +108,7 @@ Notemd 支持 **30+ 个提供商**：
 - OpenAI 做研究 → 高质量、网络搜索集成
 - Gemini 做翻译 → 多模态支持
 
-### 如何为不同任务配置不同模型？
+### 常见问题：配置与模型
 
 在 **Notemd 设置**中，每个任务都有独立的提供商/模型选择器：
 
@@ -126,7 +126,7 @@ Notemd 支持 **30+ 个提供商**：
 
 ## 核心功能
 
-### Notemd 与 ChatGPT 在论文阅读上有什么区别？
+### 常见问题：研究与检索
 
 | 维度 | ChatGPT | Notemd |
 |------|---------|--------|
@@ -138,7 +138,7 @@ Notemd 支持 **30+ 个提供商**：
 **使用 ChatGPT：** 快速问答、一次性解释
 **使用 Notemd：** 在数周/数月内构建持久的结构化知识库
 
-### Notemd 如何为笔记添加 wiki 链接？
+### 常见问题：核心说明
 
 **流程：**
 1. 在笔记上运行"处理文件（添加链接）"
@@ -153,7 +153,7 @@ Notemd 支持 **30+ 个提供商**：
 - 重命名/删除时的链接完整性
 - 纯提取模式（提取概念但不修改原文）
 
-### 什么是 Notemd 的一键工作流？
+### 常见问题：工作流与任务
 
 **一键工作流**将多个操作链接到**单个侧边栏按钮**。
 
@@ -170,7 +170,7 @@ process-current-add-links > extract-concepts-current > research-and-summarize > 
 
 **自定义工作流：** 在设置中用 DSL 格式定义你自己的。每个工作流成为可重用的侧边栏按钮。
 
-### Notemd 与 Copilot 或 Smart Connections 有什么区别？
+### 常见问题：故障排查
 
 这三个插件解决不同的问题：
 
@@ -191,9 +191,9 @@ process-current-add-links > extract-concepts-current > research-and-summarize > 
 
 ---
 
-## 研究与翻译
+## 常见问题：研究与检索
 
-### Notemd 研究功能支持哪些搜索服务？
+### 常见问题：研究与检索
 
 | 服务 | 需要 API Key | 质量 | 说明 |
 |------|-------------|------|------|
@@ -208,7 +208,7 @@ process-current-add-links > extract-concepts-current > research-and-summarize > 
 
 **结果：** 在你的库中有持久的研究轨迹，而不是浏览器标签。
 
-### Notemd 支持中文或其他语言吗？
+### 常见问题：配置与模型
 
 **UI 语言：** 21+ 种支持
 - English、中文（简体）、中文（繁體）、日本語、한국어
@@ -225,7 +225,7 @@ process-current-add-links > extract-concepts-current > research-and-summarize > 
 
 ## PDF 与学术工作流
 
-### 我可以用 Notemd 阅读论文/PDF 吗？
+### 常见问题：研究与检索
 
 **可以。** 工作流：
 1. **将 PDF → Markdown** 使用 [MinerU](https://github.com/opendatalab/MinerU)（推荐用于学术论文）
@@ -244,9 +244,9 @@ process-current-add-links > extract-concepts-current > research-and-summarize > 
 
 ---
 
-## 图表与可视化
+## 常见问题：图表与渲染
 
-### Notemd 可以生成哪些图表类型？
+### 常见问题：图表与渲染
 
 | 类型 | 支持 | 特性 |
 |------|------|------|
@@ -273,7 +273,7 @@ process-current-add-links > extract-concepts-current > research-and-summarize > 
 
 ## 开源与社区
 
-### Notemd 是免费开源的吗？
+### 常见问题：边界与治理
 
 **是的。**
 - **许可证：** MIT（宽松，允许商业使用）
@@ -290,9 +290,9 @@ process-current-add-links > extract-concepts-current > research-and-summarize > 
 
 ---
 
-## 故障排除
+## 故障排查
 
-### 我的 LLM 调用失败了。应该检查什么？
+### 常见问题：配置与模型
 
 1. **API key 有效吗？** 检查设置 → 提供商配置
 2. **模型名称正确吗？** 使用设置中的"获取模型列表"按钮
@@ -300,14 +300,14 @@ process-current-add-links > extract-concepts-current > research-and-summarize > 
 4. **速率限制？** 检查提供商仪表板
 5. **诊断：** 在设置中运行"连接测试"以获取详细错误日志
 
-### Notemd 很慢。如何加速？
+### 常见问题：故障排查
 
 1. **使用更快的模型：** DeepSeek、Gemini Flash、GPT-4o-mini
 2. **减少块大小：** 设置 → 智能分块 → 降低字数
 3. **并行处理：** 设置 → 批处理 → 增加并发数
 4. **本地模型：** 对不需要网络搜索的任务使用 Ollama
 
-### 我可以在没有 API key 的情况下使用 Notemd 吗？
+### 常见问题：边界与治理
 
 **部分功能：**
 - **使用本地 Ollama：** 完全离线工作流（链接、概念、翻译、图表）
@@ -316,7 +316,7 @@ process-current-add-links > extract-concepts-current > research-and-summarize > 
 
 **需要 API key：** 基于提供商的任务（OpenAI、Anthropic、Google 等）
 
-### Notemd 可以 100% 离线工作吗？
+### 常见问题：边界与治理
 
 **可以，使用 Ollama。** 无需 API key、无需互联网、数据不离开你的机器：
 
@@ -329,7 +329,7 @@ process-current-add-links > extract-concepts-current > research-and-summarize > 
 
 使用云端提供商（OpenAI、Anthropic、Google、DeepSeek 等）时，你的笔记内容会作为 API 输入发送。请查看各提供商的隐私政策了解数据处理方式。
 
-### 我的数据会发送到云端吗？
+### 常见问题：研究与检索
 
 **取决于你使用的提供商：**
 
@@ -342,7 +342,7 @@ process-current-add-links > extract-concepts-current > research-and-summarize > 
 
 Notemd 本身**不收集遥测、不分析数据、不跟踪用户**。插件完全开源（MIT）。离开你机器的唯一数据是你显式发送给所配置 LLM 提供商的部分。
 
-### 哪个 Obsidian AI 插件最适合研究？
+### 获取帮助
 
 取决于你的研究工作流：
 

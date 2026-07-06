@@ -2,17 +2,17 @@
 
 Language: **English** | [简体中文](./github-pages-language-geo-workflow.zh-CN.md)
 
-This workflow records the public documentation-site gate for `website/`. It is intentionally separate from runtime plugin i18n and from Slidev export acceptance.
+This workflow records the public documentation-site gate for `website/`. It is separate from runtime plugin i18n and from Slidev export acceptance.
 
 ## Current Contract
 
-The website publishes one complete language surface and one partial language surface:
+The website now publishes one canonical source surface and seven complete localized documentation route sets:
 
-1. English is the canonical complete documentation surface under `https://jacobinwwey.github.io/obsidian-NotEMD/docs/...`.
-2. Simplified Chinese publishes the homepage plus the reviewed critical path: intro, installation, quick start, configuration, provider overview, AI knowledge pillar, and FAQ.
-3. Docusaurus may still generate untranslated zh-CN fallback docs, but those pages must be `noindex,follow`, excluded from the zh-CN sitemap, hidden from zh-CN sidebar/paginator traversal, and excluded from hreflang alternates.
-4. Locale switching from an unpublished zh-CN fallback route must go to a real route: zh-CN root for Chinese, canonical English for English.
-5. `llms.txt` must describe the same language boundary so answer engines do not infer full multilingual coverage.
+1. English remains the canonical complete documentation surface under `https://jacobinwwey.github.io/obsidian-NotEMD/docs/...`.
+2. Simplified Chinese (`zh-CN`), Traditional Chinese (`zh-Hant`), Japanese (`ja`), French (`fr`), German (`de`), Spanish (`es`), and Korean (`ko`) must each expose the same docs route set as `website/docs`.
+3. A locale must not be added to `docusaurus.config.js` unless every source page under `website/docs/` has a localized counterpart under `website/i18n/<locale>/docusaurus-plugin-content-docs/current/`.
+4. The previous partial zh-CN fallback policy is retired for public docs. Built localized docs must not rely on English fallback pages and must not emit `noindex,follow`.
+5. `llms.txt`, sitemap output, hreflang metadata, the homepage language boundary, and build-audit expectations must describe the same full-route multilingual contract.
 6. Public GEO/product-positioning changes must update the visible GitHub Pages homepage, homepage JSON-LD, `llms.txt`, and build-audit expectations in the same change. Updating only maintainer notes is not enough.
 
 ## Implemented Gate
@@ -27,19 +27,16 @@ npm run audit:build
 
 `npm run audit:build` executes `website/scripts/audit-build.cjs`. The script checks built output and source contract points:
 
-1. root pages exist: `build/index.html` and `build/zh-CN/index.html`;
-2. root pages have the expected `lang`, canonical URL, and WebPage JSON-LD URL;
-3. every published zh-CN source file exists and every localized zh-CN doc file is declared in `publishedLanguageScopeData.mjs`;
-4. critical zh-CN doc paths are published;
-5. published zh-CN docs do not emit `noindex,follow`;
-6. unpublished zh-CN fallback docs emit `noindex,follow` and do not emit alternates;
-7. English docs expose zh-CN alternates only when the zh-CN translation is published;
-8. published zh-CN docs do not link to unpublished zh-CN fallback docs;
-9. sitemap output includes canonical English docs, includes published zh-CN docs, and excludes unpublished zh-CN fallback docs;
-10. `llms.txt` records the current language scope;
-11. provider docs contain setup, endpoint/auth, model discovery, troubleshooting, and use-case sections;
-12. `GEO_ROADMAP.md` and the measurement logs mention 2026-06-22 baseline evidence plus 2026-06-24 homepage sync evidence, Search Console, AI visibility, and sitemap evidence.
-13. the homepage exposes source-backed product facts, an answer-engine source map, the `llms.txt` link, the current release version, and the partial zh-CN language boundary.
+1. root pages exist for English and every published locale;
+2. root pages have the expected `lang`, canonical URL, and WebPage JSON-LD URL where applicable;
+3. every English source doc has a matching localized source doc for `zh-CN`, `zh-Hant`, `ja`, `fr`, `de`, `es`, and `ko`;
+4. `publishedLanguageScopeData.mjs` declares the full docs route set for zh-CN compatibility gates;
+5. localized docs build for every supported locale and do not emit `noindex,follow`;
+6. sitemap output includes canonical English docs and each localized docs route;
+7. `llms.txt` records the current multilingual route set and localized entry points;
+8. provider docs contain setup, endpoint/auth, model discovery, troubleshooting, and use-case sections;
+9. `GEO_ROADMAP.md` and the measurement logs mention baseline evidence, homepage sync evidence, Search Console, AI visibility, and sitemap evidence;
+10. the homepage exposes source-backed product facts, an answer-engine source map, the `llms.txt` link, the current release version, and the full multilingual docs boundary.
 
 The GitHub Pages workflow runs this audit before uploading the Pages artifact:
 
@@ -50,13 +47,11 @@ The GitHub Pages workflow runs this audit before uploading the Pages artifact:
   -> upload-pages-artifact
 ```
 
-As of 2026-07-05, the workflow is pinned to Node 24 compatible action major versions: `actions/checkout@v7`, `actions/setup-node@v6` with `node-version: 24`, `actions/upload-pages-artifact@v5`, and `actions/deploy-pages@v5`. This keeps the Pages gate away from the older Node 20 deprecation path that previously surfaced during deploy retries.
-
-The deploy job retries the official `actions/deploy-pages@v5` step up to three times with short waits between attempts. This retry only covers GitHub Pages service-side deployment failures such as `Deployment failed, try again later.` It does not mask checkout, install, build, audit, or artifact upload failures, because the deploy job still depends on the completed `build` job and the retry steps run only after the Pages deploy action itself fails.
+As of 2026-07-05, the workflow is pinned to Node 24 compatible action major versions: `actions/checkout@v7`, `actions/setup-node@v6` with `node-version: 24`, `actions/upload-pages-artifact@v5`, and `actions/deploy-pages@v5`. The deploy job retries the official `actions/deploy-pages@v5` step up to three times with short waits between attempts. This retry only covers GitHub Pages service-side deployment failures and does not mask checkout, install, build, audit, or artifact upload failures.
 
 ## Source Ownership
 
-The published language data lives in:
+The full zh-CN compatibility scope lives in:
 
 ```text
 website/src/lib/publishedLanguageScopeData.mjs
@@ -69,54 +64,75 @@ website/src/lib/publishedLanguageScope.js
 website/src/lib/languageRoutePolicy.js
 ```
 
-Current published zh-CN doc paths:
+Localized docs are generated and patched by:
+
+```text
+website/scripts/generate-localized-docs.cjs
+```
+
+The currently published localized docs route set is the complete set under `website/docs/`, including:
 
 ```text
 /docs/intro
 /docs/getting-started/installation
 /docs/getting-started/quick-start
 /docs/getting-started/configuration
+/docs/features/wiki-links
+/docs/features/concept-notes
+/docs/features/research
+/docs/features/translation
+/docs/features/diagrams
+/docs/features/workflows
 /docs/providers/overview
+/docs/providers/openai
+/docs/providers/anthropic
+/docs/providers/google
+/docs/providers/local
+/docs/providers/china
+/docs/advanced/custom-prompts
+/docs/advanced/batch-processing
+/docs/advanced/troubleshooting
 /docs/pillar-ai-knowledge
 /docs/faq
 ```
 
 This scope is consumed by:
 
-1. `website/docusaurus.config.js` for sitemap filtering;
-2. `website/src/theme/DocItem/Layout/index.js` for fallback-doc `noindex,follow`;
-3. `website/src/theme/SiteMetadata/index.js` for hreflang and Open Graph locale alternates;
-4. `website/src/theme/NavbarItem/LocaleDropdownNavbarItem/index.js` for locale-switch targets;
-5. `website/src/theme/DocRoot/Layout/Sidebar/index.js` for zh-CN sidebar filtering;
-6. `website/src/theme/DocItem/Paginator/index.js` for zh-CN previous/next filtering;
-7. `website/src/pages/index.js`, `website/docusaurus.config.js`, and `website/static/llms.txt` for public entry points, homepage JSON-LD, release version, and the answer-engine source map.
+1. `website/src/theme/DocItem/Layout/index.js` for legacy zh-CN fallback `noindex,follow` fencing. With full-route localization this should be a no-op for public docs.
+2. `website/src/theme/SiteMetadata/index.js` for hreflang and Open Graph locale alternates.
+3. `website/src/theme/NavbarItem/LocaleDropdownNavbarItem/index.js` for locale-switch targets.
+4. `website/src/theme/DocRoot/Layout/Sidebar/index.js` for zh-CN sidebar filtering compatibility.
+5. `website/src/theme/DocItem/Paginator/index.js` for zh-CN previous/next filtering compatibility.
+6. `website/src/pages/index.js`, `website/docusaurus.config.js`, and `website/static/llms.txt` for public entry points, homepage JSON-LD, release version, and the answer-engine source map.
 
-The important rule is not "add a translation file." The rule is "add the translation file and publish it through the scope data in the same change." If either side is missing, the audit should fail.
+The important rule is no longer "promote a zh-CN page from fallback." The current rule is "keep every public locale complete." If a source doc is added or removed, update every locale and rerun the generator and audit in the same change.
 
 The parallel homepage rule is similar: do not change public GEO facts in only one place. If the answer-engine framing, provider count, language scope, release version, or canonical source routes change, update the homepage copy, JSON-LD, `llms.txt`, and `audit-build.cjs` together.
 
-## Promotion Checklist
+## Locale Update Checklist
 
-When promoting a zh-CN doc from fallback to published:
+When adding or changing a docs page:
 
-1. Translate the source file under `website/i18n/zh-CN/docusaurus-plugin-content-docs/current/...`.
-2. Add the doc id, route path, and source path to `publishedLanguageScopeData.mjs`.
-3. Confirm the page should appear in zh-CN sidebar and paginator traversal.
-4. Update `website/static/llms.txt` if the doc becomes part of the public AI retrieval map.
-5. Update `website/src/pages/index.js` if the promoted page changes the homepage source map or the visible language boundary.
-6. Run `npm --prefix website run build && npm --prefix website run audit:build`.
-7. After deploy, update `docs/maintainer/github-pages-geo-measurement-log.md` with Search Console and AI visibility observations.
+1. Update the English source under `website/docs/...`.
+2. Run or update `website/scripts/generate-localized-docs.cjs` so every supported locale receives the page.
+3. Review `zh-CN` first for visible title, heading, and body drift. Product tokens such as `Notemd`, `LLM`, `Provider`, CLI flags, config keys, file extensions, and code identifiers may remain in English when they are runtime contracts.
+4. Review `zh-Hant`, `ja`, `fr`, `de`, `es`, and `ko` for visible stale English headings.
+5. Update `website/src/lib/publishedLanguageScopeData.mjs` if the docs route set changed.
+6. Update `website/static/llms.txt` if the page changes the public AI retrieval map.
+7. Update `website/src/pages/index.js` if the page changes the homepage source map or visible language boundary.
+8. Run `npm --prefix website run build && npm --prefix website run audit:build`.
+9. After deploy, update `docs/maintainer/github-pages-geo-measurement-log.md` with Search Console and AI visibility observations.
 
 ## Why This Shape
 
-The tempting shortcut is to treat Docusaurus locale fallback as useful GEO surface area. That is wrong. It produces URLs that look Chinese but serve English content, weakens hreflang truth, and sends users into routes that were never reviewed as localized pages.
+The previous partial zh-CN model was safer than letting Docusaurus publish English fallback content under Chinese URLs, but it became the wrong abstraction once the public requirement changed to full multilingual docs. Keeping fallback fencing as the main policy would now hide real localized pages, complicate sitemap truth, and make locale expansion look unfinished even when source files exist.
 
-The stricter scope-data model has a maintenance cost: every promotion touches translation content, data, `llms.txt`, and build proof. The payoff is that sitemap, robots, alternates, UI navigation, and AI retrieval all tell the same truth.
+The stricter full-route model has a maintenance cost: every docs change touches all localized source trees and build proof. The payoff is that sitemap, robots, alternates, UI navigation, and AI retrieval all tell the same truth.
 
 ## Current Best Direction
 
 1. Keep English canonical and complete.
-2. Grow zh-CN by reviewed critical-path pages, not by locale count.
-3. Keep provider pages operationally useful before adding more provider landing pages.
+2. Keep all public locale docs route sets complete before deploy.
+3. Use `generate-localized-docs.cjs` for repeatability, but review visible zh-CN text first because machine-style generic headings are worse than explicit localized headings.
 4. Treat Search Console and AI visibility as post-deploy measurement, not local build proof.
-5. Avoid new generic wrappers around Docusaurus theme components. Theme overrides are acceptable here only because they own concrete policy: alternates, locale switching, sidebar filtering, and paginator filtering.
+5. Avoid new generic wrappers around Docusaurus theme components. Existing theme overrides are acceptable only because they own concrete policy: alternates, locale switching, sidebar filtering, and paginator filtering.

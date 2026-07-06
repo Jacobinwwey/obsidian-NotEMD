@@ -13,6 +13,15 @@ const zhRoot = `${siteRoot}zh-CN/`;
 const zhBasePath = `${basePath}zh-CN/`;
 const expectedSoftwareVersion = '1.9.3';
 const providerSourceRoot = path.join(websiteRoot, 'docs', 'providers');
+const supportedLocalizedLocales = [
+  {locale: 'zh-CN', htmlLang: 'zh-CN', name: 'Simplified Chinese'},
+  {locale: 'zh-Hant', htmlLang: 'zh-Hant', name: 'Traditional Chinese'},
+  {locale: 'ja', htmlLang: 'ja-JP', name: 'Japanese'},
+  {locale: 'fr', htmlLang: 'fr-FR', name: 'French'},
+  {locale: 'de', htmlLang: 'de-DE', name: 'German'},
+  {locale: 'es', htmlLang: 'es-ES', name: 'Spanish'},
+  {locale: 'ko', htmlLang: 'ko-KR', name: 'Korean'},
+];
 const providerDetailHeadings = [
   '## Setup',
   '## Endpoint And Authentication',
@@ -118,6 +127,35 @@ function zhCnDocSitePath(routePath) {
   return `${zhBasePath}${routePath.slice(1)}`;
 }
 
+function localizedDocSitePath(locale, routePath) {
+  return `${basePath}${locale}/${routePath.slice(1)}`;
+}
+
+function localizedDocUrl(locale, routePath) {
+  return `${siteRoot}${locale}${routePath}`;
+}
+
+function localizedDocsSourceRoot(locale) {
+  return path.join(websiteRoot, 'i18n', locale, 'docusaurus-plugin-content-docs', 'current');
+}
+
+function englishSourceDocs() {
+  const docsRoot = path.join(websiteRoot, 'docs');
+  const files = [];
+  const collect = (directory) => {
+    for (const entry of fs.readdirSync(directory, {withFileTypes: true})) {
+      const entryPath = path.join(directory, entry.name);
+      if (entry.isDirectory()) {
+        collect(entryPath);
+      } else if (entry.name.endsWith('.mdx')) {
+        files.push(path.relative(docsRoot, entryPath).replace(/\\/g, '/'));
+      }
+    }
+  };
+  collect(docsRoot);
+  return files.sort();
+}
+
 async function loadPublishedLanguageScope() {
   const moduleUrl = pathToFileURL(path.join(websiteRoot, 'src', 'lib', 'publishedLanguageScopeData.mjs')).href;
   const languageScope = await import(moduleUrl);
@@ -199,7 +237,7 @@ function auditHomepageRoutes(languageScope) {
   assertContains(englishHome, `${basePath}llms.txt`, 'English homepage GEO source map link');
   assertContains(
     englishHome,
-    'English is complete; Simplified Chinese is partial and scoped to reviewed critical paths.',
+    'English and all published documentation locales now expose the full docs route set.',
     'English homepage language boundary',
   );
 
@@ -210,7 +248,7 @@ function auditHomepageRoutes(languageScope) {
   assertContains(zhHome, '可索引的产品事实', 'zh-CN homepage GEO surface');
   assertContains(zhHome, 'Answer engine 来源地图', 'zh-CN homepage GEO surface');
   assertContains(zhHome, `${basePath}llms.txt`, 'zh-CN homepage GEO source map link');
-  assertContains(zhHome, '简体中文部分翻译，仅覆盖已审核的关键路径。', 'zh-CN homepage language boundary');
+  assertContains(zhHome, '均暴露完整 docs 路由集。', 'zh-CN homepage language boundary');
   assertContains(zhHome, `href="${zhBasePath}docs/faq"`, 'zh-CN homepage');
 
   for (const docPath of languageScope.zhCnHomepageDocPaths) {
@@ -218,6 +256,12 @@ function auditHomepageRoutes(languageScope) {
     assertNotContains(zhHome, `href="${basePath}${docPath.slice(1)}" target="_blank"`, 'zh-CN homepage');
     assertNotContains(zhHome, `href="${siteRoot}${docPath.slice(1)}"`, 'zh-CN homepage');
     assertNotContains(zhHome, `href="${zhBasePath}${basePath.slice(1)}${docPath.slice(1)}"`, 'zh-CN homepage');
+  }
+
+  for (const {locale, htmlLang} of supportedLocalizedLocales) {
+    const localizedHome = readBuildFile(path.join(locale, 'index.html'));
+    assertContains(localizedHome, `<html lang="${htmlLang}"`, `${locale} homepage`);
+    assertContains(localizedHome, `rel="canonical" href="${siteRoot}${locale}/"`, `${locale} homepage`);
   }
 }
 
@@ -310,6 +354,14 @@ function auditSitemaps(languageScope) {
       assertNotContains(zhSitemap, `${siteRoot}zh-CN${routePath}`, 'zh-CN sitemap');
     }
   }
+
+  for (const {locale} of supportedLocalizedLocales) {
+    const localeSitemap = readBuildFile(path.join(locale, 'sitemap.xml'));
+    assertContains(localeSitemap, `${siteRoot}${locale}/`, `${locale} sitemap`);
+    for (const docPath of languageScope.publishedZhCnDocPaths) {
+      assertContains(localeSitemap, localizedDocUrl(locale, docPath), `${locale} sitemap`);
+    }
+  }
 }
 
 function auditAiRetrievalMap(languageScope) {
@@ -319,13 +371,39 @@ function auditAiRetrievalMap(languageScope) {
   assertContains(llmsText, `Current documented release: ${expectedSoftwareVersion}`, 'llms.txt');
   assertContains(llmsText, `${siteRoot}llms.txt`, 'llms.txt');
   assertContains(llmsText, '## Homepage GEO Contract', 'llms.txt');
-  assertContains(llmsText, 'English is the canonical complete documentation surface.', 'llms.txt');
+  assertContains(llmsText, 'English remains the canonical source surface.', 'llms.txt');
   assertContains(llmsText, `${siteRoot}zh-CN/`, 'llms.txt');
 
   for (const docPath of languageScope.publishedZhCnDocPaths) {
     assertContains(llmsText, `${siteRoot}zh-CN${docPath}`, 'llms.txt');
   }
-  assertContains(llmsText, 'Do not infer full multilingual documentation coverage from the presence of a locale dropdown.', 'llms.txt');
+  for (const {locale} of supportedLocalizedLocales) {
+    assertContains(llmsText, `${siteRoot}${locale}/docs/intro`, 'llms.txt');
+  }
+  assertContains(llmsText, 'The public docs route set is available in English, Simplified Chinese, Traditional Chinese, Japanese, French, German, Spanish, and Korean.', 'llms.txt');
+}
+
+function auditLocalizedDocBuildCoverage(languageScope) {
+  const sourceDocCount = englishSourceDocs().length;
+  const publishedDocPaths = Array.from(languageScope.publishedZhCnDocPaths).sort();
+
+  if (publishedDocPaths.length !== sourceDocCount) {
+    fail(`Published docs scope has ${publishedDocPaths.length} docs but English source has ${sourceDocCount}`);
+  }
+
+  for (const {locale, htmlLang} of supportedLocalizedLocales) {
+    const docsRoot = path.join(buildRoot, locale, 'docs');
+    if (!fs.existsSync(docsRoot)) {
+      fail(`Missing ${locale} docs build directory`);
+    }
+
+    for (const docPath of publishedDocPaths) {
+      const html = readBuildFile(routePathToBuildIndex(docPath, locale));
+      assertContains(html, `<html lang="${htmlLang}"`, `${locale} doc ${docPath}`);
+      assertNotContains(html, 'content="noindex,follow"', `${locale} doc ${docPath}`);
+      assertContains(html, htmlHrefForSitePath(localizedDocSitePath(locale, docPath)), `${locale} doc ${docPath}`);
+    }
+  }
 }
 
 function auditProviderDocs() {
@@ -340,6 +418,24 @@ function auditProviderDocs() {
     const requiredHeadings = entry.name === 'overview.mdx' ? providerOverviewHeadings : providerDetailHeadings;
     for (const heading of requiredHeadings) {
       assertContains(content, heading, relativePath);
+    }
+  }
+}
+
+function auditLocalizedSourceCoverage(languageScope) {
+  const sourceDocs = englishSourceDocs();
+  const publishedSourcePaths = new Set(languageScope.publishedZhCnDocs.map((doc) => doc.sourcePath));
+
+  for (const sourceDoc of sourceDocs) {
+    if (!publishedSourcePaths.has(sourceDoc)) {
+      fail(`Full zh-CN docs route set is missing source scope entry: ${sourceDoc}`);
+    }
+  }
+
+  for (const {locale} of supportedLocalizedLocales) {
+    const localeRoot = localizedDocsSourceRoot(locale);
+    for (const sourceDoc of sourceDocs) {
+      readSourceFile(path.join(localeRoot, sourceDoc));
     }
   }
 }
@@ -392,7 +488,7 @@ function auditDiagramDocs() {
   assertContains(zhCnDiagrams, 'compileExecution', 'zh-CN diagrams doc');
   assertContains(zhCnDiagrams, 'compileExecution.renderSmoke', 'zh-CN diagrams doc');
   assertContains(zhCnDiagrams, 'circuitikz.sty', 'zh-CN diagrams doc');
-  assertContains(zhCnDiagrams, 'Golden Reference Prompt Shape', 'zh-CN diagrams doc');
+  assertContains(zhCnDiagrams, 'Golden Reference Prompt 形态', 'zh-CN diagrams doc');
   assertContains(zhCnDiagrams, 'SemanticFigureModel', 'zh-CN diagrams doc');
   assertNotContains(zhCnDiagrams, 'content="noindex,follow"', 'zh-CN diagrams doc');
 }
@@ -422,7 +518,7 @@ function auditIntroDocs() {
 
 function auditAdvancedDocs() {
   for (const [relativePath, requiredText] of [
-    [path.join('zh-CN', 'docs', 'advanced', 'custom-prompts', 'index.html'), '自定义 Prompts'],
+    [path.join('zh-CN', 'docs', 'advanced', 'custom-prompts', 'index.html'), '自定义 Prompt'],
     [path.join('zh-CN', 'docs', 'advanced', 'batch-processing', 'index.html'), '批处理'],
     [path.join('zh-CN', 'docs', 'advanced', 'troubleshooting', 'index.html'), '故障排查'],
   ]) {
@@ -456,14 +552,21 @@ function auditMeasurementEvidence() {
 }
 
 function auditRequiredFiles() {
-  for (const relativePath of [
+  const requiredFiles = [
     'index.html',
     'zh-CN/index.html',
     'llms.txt',
     'robots.txt',
     'sitemap.xml',
     'zh-CN/sitemap.xml',
-  ]) {
+  ];
+  for (const {locale} of supportedLocalizedLocales) {
+    requiredFiles.push(path.join(locale, 'index.html'));
+    requiredFiles.push(path.join(locale, 'docs', 'intro', 'index.html'));
+    requiredFiles.push(path.join(locale, 'sitemap.xml'));
+  }
+
+  for (const relativePath of requiredFiles) {
     readBuildFile(relativePath);
   }
 }
@@ -471,10 +574,12 @@ function auditRequiredFiles() {
 function auditGeneratedTextIntegrity() {
   const htmlFiles = [
     ...listHtmlFiles(englishDocsRoot),
-    ...listHtmlFiles(zhDocsRoot),
     path.join(buildRoot, 'index.html'),
-    path.join(buildRoot, 'zh-CN', 'index.html'),
   ];
+  for (const {locale} of supportedLocalizedLocales) {
+    htmlFiles.push(...listHtmlFiles(path.join(buildRoot, locale, 'docs')));
+    htmlFiles.push(path.join(buildRoot, locale, 'index.html'));
+  }
 
   for (const filePath of htmlFiles) {
     const content = fs.readFileSync(filePath, 'utf8');
@@ -489,11 +594,13 @@ async function main() {
   auditRequiredFiles();
   auditGeneratedTextIntegrity();
   auditPublishedScopeSourceFiles(languageScope);
+  auditLocalizedSourceCoverage(languageScope);
   auditHomepageRoutes(languageScope);
   auditZhCnDocFallbacks(languageScope);
   auditLanguageAlternates(languageScope);
   auditSitemaps(languageScope);
   auditAiRetrievalMap(languageScope);
+  auditLocalizedDocBuildCoverage(languageScope);
   auditProviderDocs();
   auditIntroDocs();
   auditDiagramDocs();

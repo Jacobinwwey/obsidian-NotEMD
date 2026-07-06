@@ -1,5 +1,7 @@
 import {isPublishedZhCnDocPath, normalizeDocPath} from './publishedLanguageScope';
 
+const localizedSitePrefixes = ['zh-CN', 'zh-Hant', 'ja', 'fr', 'de', 'es', 'ko'];
+
 function normalizeBasePath(baseUrl) {
   if (!baseUrl || baseUrl === '/') {
     return '/';
@@ -9,7 +11,11 @@ function normalizeBasePath(baseUrl) {
 }
 
 function canonicalSiteBasePath(baseUrl) {
-  return normalizeBasePath(baseUrl).replace(/\/zh-CN\/$/, '/');
+  let normalizedBasePath = normalizeBasePath(baseUrl);
+  for (const locale of localizedSitePrefixes) {
+    normalizedBasePath = normalizedBasePath.replace(new RegExp(`/${locale}/$`), '/');
+  }
+  return normalizedBasePath;
 }
 
 function stripBasePath(pathname, baseUrl) {
@@ -31,12 +37,15 @@ function stripBasePath(pathname, baseUrl) {
 
 function stripLocalePrefix(siteRelativePath) {
   const normalizedPath = siteRelativePath.replace(/\/$/, '') || '/';
-  if (normalizedPath === '/zh-CN') {
-    return '/';
-  }
+  for (const locale of localizedSitePrefixes) {
+    const localePrefix = `/${locale}`;
+    if (normalizedPath === localePrefix) {
+      return '/';
+    }
 
-  if (normalizedPath.startsWith('/zh-CN/')) {
-    return normalizedPath.slice('/zh-CN'.length);
+    if (normalizedPath.startsWith(`${localePrefix}/`)) {
+      return normalizedPath.slice(localePrefix.length);
+    }
   }
 
   return normalizedPath;

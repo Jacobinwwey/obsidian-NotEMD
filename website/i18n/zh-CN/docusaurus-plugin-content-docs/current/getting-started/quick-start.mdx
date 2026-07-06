@@ -1,6 +1,6 @@
 ---
 id: quick-start
-title: 快速开始
+title: 快速开始指南
 description: 5 分钟上手 Notemd
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
@@ -13,13 +13,13 @@ citations:
 
 import TLDR from '@site/src/components/TLDR';
 
-# 快速开始
+# 快速开始指南
 
 <TLDR>
 **5 分钟开始使用 Notemd。** 三步：配置 LLM API key（或本地 Ollama），打开笔记运行 "Process file (add links)"，再试用侧边栏一键工作流。支持 30+ providers，无需写代码；配合 Ollama 可离线运行。
 </TLDR>
 
-## 第 1 步：配置第一个 LLM Provider（2 分钟）
+## 步骤 1：配置第一个 LLM Provider（2 分钟）
 
 ### 选项 A：云端 Provider（OpenAI、Anthropic 等）
 
@@ -35,16 +35,16 @@ import TLDR from '@site/src/components/TLDR';
 - **Anthropic**：`claude-sonnet-4-6`，质量高
 - **DeepSeek**：`deepseek-chat`，成本很低
 
-### 选项 B：本地 Ollama（无需 API key）
+### 选项 B：本地 Ollama（无需 API Key）
 
 1. 安装 [Ollama](https://ollama.com/)
 2. 下载模型：`ollama pull llama3.1`
 3. 在 Notemd 设置中选择 **Ollama**
 4. 模型名填写 `llama3.1`，或你已下载的其他模型
 
-## 第 2 步：运行第一个任务（1 分钟）
+## 步骤 2：尝试第一个任务（1 分钟）
 
-### 给笔记添加 Wiki-Link
+### 快速开始指南：核心说明
 
 1. 打开一篇有实际内容的笔记
 2. 在编辑器中右键
@@ -66,16 +66,16 @@ Machine learning models use neural networks to process data.
 [[Machine learning]] models use [[neural networks]] to process data.
 ```
 
-## 第 3 步：继续探索（2 分钟）
+## 步骤 3：探索功能（2 分钟）
 
-### 抽取概念笔记
+### 快速开始指南：核心说明
 
 1. 右键 → **"Extract concepts from current file"**
 2. Notemd 为每个概念创建独立文件
 3. 查看配置的概念目录，默认是 `concepts/`
 4. 每个概念笔记都会回链到原始笔记
 
-### Research & Summarize
+### 研究并总结
 
 1. 在笔记中选中一个主题
 2. 右键 → **"Research and summarize"**
@@ -89,7 +89,7 @@ Machine learning models use neural networks to process data.
 3. 它会依次运行：add links → extract concepts → research → generate diagram
 4. 一个按钮完成整条流程
 
-## 常见第一批任务
+## 常见首批任务
 
 ### 任务 1：处理论文或文章
 
@@ -109,7 +109,7 @@ Machine learning models use neural networks to process data.
 3. 先在设置里配置 target language
 ```
 
-### 任务 3：创建知识地图
+### 任务 3：创建知识图谱
 
 ```text
 1. 用 "add links" 处理 5-10 篇相关笔记
@@ -118,7 +118,7 @@ Machine learning models use neural networks to process data.
 4. 知识图谱开始成形
 ```
 
-## 配置建议
+## 快速开始指南：后续建议
 
 ### 按任务选择模型
 
@@ -144,26 +144,26 @@ Machine learning models use neural networks to process data.
 4. 命名为 "My Research Flow"
 5. 侧边栏会出现新的按钮
 
-## Troubleshooting
+## 故障排查
 
-### "API Key Invalid"
+### 快速开始指南：配置与模型
 
 - 检查 key 是否正确，尤其是前后空格
 - 确认账号有额度
 - 在设置里使用 "Connection Test"
 
-### "Model Not Found"
+### 快速开始指南：配置与模型
 
 - 点击 "Get Model List" 查看可用模型
 - 部分 provider 要求精确模型名，例如 `gpt-4o` 不是 `gpt-4`
 
-### 没有出现链接
+### 快速开始指南：核心说明
 
 - 确认笔记内容足够多，建议超过 50 词
 - 换用能力更强的模型
 - 检查 LLM 调用是否成功，可看 diagnostics panel
 
-### 速度慢
+### 快速开始指南：故障排查
 
 - 使用更快模型，例如 `gpt-4o-mini`
 - 调小 chunk size
@@ -176,7 +176,7 @@ Machine learning models use neural networks to process data.
 - [LLM Provider 设置](../providers/overview)
 - [FAQ](../faq)
 
-## 视频教程
+## 快速开始指南：核心说明
 
 3 分钟中文速通视频：
 [【全开源免费！NotEMD 三分钟速通】](https://b23.tv/lqR0RlA)

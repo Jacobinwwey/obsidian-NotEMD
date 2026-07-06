@@ -1,0 +1,22 @@
+{
+  "version.label": {
+    "message": "Nächster Schritt",
+    "description": "The label for version current"
+  },
+  "sidebar.tutorialSidebar.category.Getting Started": {
+    "message": "Einstieg",
+    "description": "The label for category 'Getting Started' in sidebar 'tutorialSidebar'"
+  },
+  "sidebar.tutorialSidebar.category.Core Features": {
+    "message": "Kernfunktionen",
+    "description": "The label for category 'Core Features' in sidebar 'tutorialSidebar'"
+  },
+  "sidebar.tutorialSidebar.category.LLM Providers": {
+    "message": "LLM-Anbieter",
+    "description": "The label for category 'LLM Providers' in sidebar 'tutorialSidebar'"
+  },
+  "sidebar.tutorialSidebar.category.Advanced": {
+    "message": "Erweitert",
+    "description": "The label for category 'Advanced' in sidebar 'tutorialSidebar'"
+  }
+}
