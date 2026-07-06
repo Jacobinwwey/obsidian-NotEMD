@@ -88,6 +88,12 @@ interface SvgTransform {
     f: number;
 }
 
+const SVG_NUMBER_SOURCE = String.raw`[+-]?(?:(?:\d+\.\d*)|(?:\.\d+)|(?:\d+))(?:e[-+]?\d+)?`;
+
+function svgNumberPattern(flags = ''): RegExp {
+    return new RegExp(SVG_NUMBER_SOURCE, flags);
+}
+
 function decodeXmlEntities(text: string): string {
     return text
         .replace(/&lt;/g, '<')
@@ -102,7 +108,7 @@ function parsePositiveLength(value: string | undefined): number | undefined {
         return undefined;
     }
 
-    const match = value.trim().match(/^([0-9]+(?:\.[0-9]+)?)(?:px|pt|bp|mm|cm|in)?$/i);
+    const match = value.trim().match(new RegExp(`^(${SVG_NUMBER_SOURCE})(?:px|pt|bp|mm|cm|in)?$`, 'i'));
     if (!match) {
         return undefined;
     }
@@ -180,7 +186,7 @@ function parseNumericAttribute(tag: string, attributeName: string): number | und
         return undefined;
     }
 
-    const match = value.trim().match(/^-?[0-9]+(?:\.[0-9]+)?/);
+    const match = value.trim().match(new RegExp(`^${SVG_NUMBER_SOURCE}`, 'i'));
     if (!match) {
         return undefined;
     }
@@ -221,7 +227,7 @@ function multiplyTransforms(left: SvgTransform, right: SvgTransform): SvgTransfo
 }
 
 function parseTransformNumbers(value: string): number[] {
-    return Array.from(value.matchAll(/-?[0-9]+(?:\.[0-9]+)?(?:e[-+]?[0-9]+)?/gi))
+    return Array.from(value.matchAll(svgNumberPattern('gi')))
         .map(match => Number(match[0]))
         .filter(Number.isFinite);
 }
@@ -538,7 +544,7 @@ function pathBox(tag: string): SvgBox | undefined {
         return undefined;
     }
 
-    const tokens = Array.from(d.matchAll(/[MLHVZACSQTAmlhvzacsqt]|-?[0-9]+(?:\.[0-9]+)?(?:e[-+]?[0-9]+)?/g))
+    const tokens = Array.from(d.matchAll(new RegExp(`[MLHVZACSQTAmlhvzacsqt]|${SVG_NUMBER_SOURCE}`, 'gi')))
         .map(match => match[0]);
     const commandPattern = /^[MLHVZACSQTAmlhvzacsqt]$/;
     const points: Array<[number, number]> = [];
@@ -782,7 +788,7 @@ function pointListBox(label: string, tag: string): SvgBox | undefined {
         return undefined;
     }
 
-    const coordinates = Array.from(pointsAttribute.matchAll(/-?[0-9]+(?:\.[0-9]+)?(?:e[-+]?[0-9]+)?/gi))
+    const coordinates = Array.from(pointsAttribute.matchAll(svgNumberPattern('gi')))
         .map(match => Number(match[0]))
         .filter(Number.isFinite);
     const points: Array<[number, number]> = [];

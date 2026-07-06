@@ -86,6 +86,9 @@ describe('website documentation contract', () => {
             expect(content).toContain('pathOnlyGlyphUseCount');
             expect(content).toContain('path-only glyph placement');
             expect(content).toContain('path-only glyph overlap');
+            expect(content).toContain('SVG number grammar');
+            expect(content).toContain('leading-dot decimals');
+            expect(content).toContain('explicit plus signs');
             expect(content).toContain('exact arc bounds');
             expect(content).toContain('A/a arc extrema');
             expect(content).toContain('exact Bezier curve bounds');

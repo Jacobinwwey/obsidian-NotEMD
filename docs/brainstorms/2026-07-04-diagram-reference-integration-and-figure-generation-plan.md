@@ -213,6 +213,7 @@ Phase E implementation status on 2026-07-05: `scripts/export-diagram-artifact.js
 - [x] Add path-only glyph label-vs-drawing overlap diagnostics through `render-svg-path-glyph-overlap`.
 - [x] Add exact arc bounds for A/a arc extrema so curved circuit-symbol arc interiors participate in bounded-canvas diagnostics.
 - [x] Add exact Bezier curve bounds for C/S/Q/T curve extrema so dvisvgm curve interiors participate in bounded-canvas diagnostics.
+- [x] Add SVG number grammar support for leading-dot decimals and explicit plus signs so dvisvgm coordinates are not misread or silently skipped.
 - [x] Add a front-end artifact diagnostics surface in the diagram preview modal.
 - [x] Add source-only preview fallback for non-inline artifacts so future circuitikz, Draw.io, and Drawnix sources can expose content and diagnostics without pretending to be visually rendered.
 - [x] Add maintainer smoke fixtures and an aggregate runner for the two supported circuitikz golden families.

@@ -65,6 +65,9 @@ describe('circuitikz export docs contract', () => {
             expect(doc).toContain('pathOnlyGlyphUseCount');
             expect(doc).toContain('path-only glyph placement');
             expect(doc).toContain('path-only glyph overlap');
+            expect(doc).toContain('SVG number grammar');
+            expect(doc).toContain('leading-dot decimals');
+            expect(doc).toContain('explicit plus signs');
             expect(doc).toContain('exact arc bounds');
             expect(doc).toContain('A/a arc extrema');
             expect(doc).toContain('exact Bezier curve bounds');
@@ -128,6 +131,9 @@ describe('circuitikz export docs contract', () => {
             expect(doc).toContain('transform-aware geometry');
             expect(doc).toContain('path-only glyph placement');
             expect(doc).toContain('path-only glyph overlap');
+            expect(doc).toContain('SVG number grammar');
+            expect(doc).toContain('leading-dot decimals');
+            expect(doc).toContain('explicit plus signs');
             expect(doc).toContain('exact arc bounds');
             expect(doc).toContain('A/a arc extrema');
             expect(doc).toContain('exact Bezier curve bounds');
@@ -159,6 +165,9 @@ describe('circuitikz export docs contract', () => {
     test('records SVG exact arc smoke coverage in the bilingual roadmap', () => {
         for (const doc of [roadmapDoc, roadmapDocZh]) {
             expect(doc).toContain('circuitikzRenderSmoke.ts');
+            expect(doc).toContain('SVG number grammar');
+            expect(doc).toContain('leading-dot decimals');
+            expect(doc).toContain('explicit plus signs');
             expect(doc).toContain('exact arc bounds');
             expect(doc).toContain('A/a arc extrema');
             expect(doc).toContain('exact Bezier curve bounds');

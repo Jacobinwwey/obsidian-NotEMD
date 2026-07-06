@@ -110,6 +110,8 @@ The SVG bounded-canvas, path-only label classification, path-only glyph placemen
 
 The runner lives in `src/diagram/adapters/circuitikz/circuitikzCompileRunner.ts`. It reads the generated `{jobName}.log` from `{outputDir}`, reuses the same diagnostics parser, and returns `compileExecution` plus `compileDiagnostics` in the CLI JSON result. Artifact checks live in `src/diagram/adapters/circuitikz/circuitikzRenderSmoke.ts` so SVG structure rules remain testable without spawning a renderer. A non-ok diagnostic report still makes the CLI exit nonzero.
 
+The SVG geometry parser now follows SVG number grammar for supported elements, including leading-dot decimals and explicit plus signs, so dvisvgm output such as `.5`, `-.5`, or `+.5` is not misread as integer coordinates or skipped during bounded-canvas checks.
+
 ## Maintainer Smoke Fixtures
 
 The repository now includes maintainer fixtures for every supported golden family:

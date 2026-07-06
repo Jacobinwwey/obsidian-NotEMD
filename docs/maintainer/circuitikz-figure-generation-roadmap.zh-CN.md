@@ -152,6 +152,8 @@ Phase A 已经文档化。Phase B/C 现在有了受约束的仓库内原型：
 
 Phase D 现在已经具备 log parsing、opt-in local renderer execution、artifact-level smoke checks、带 transform-aware geometry、path-only label classification、path-only glyph placement checks、path-only glyph overlap diagnostics、针对 A/a arc extrema 的 exact arc bounds、针对 C/S/Q/T curve extrema 的 exact Bezier curve bounds、`polyline` / `polygon` geometry coverage、positioned `tspan` label geometry、text/text 与 label/drawing overlap diagnostics 的 SVG structure smoke checks、第一层 PNG screenshot nonblank、edge-clipping 与 dense-foreground checks、topology-preserving repair guard，以及前端 diagnostics surface，但实现仍有意停在 required renderer availability、path-only glyph text 的 OCR recognition、精确 pixel-level overlap detection、完整 SVG path coverage 和自动化 Phase E repair 之前。它不会捆绑 LaTeX、不会把 TikZJax 变成插件 runtime 依赖，也不会运行视觉修复闭环。
 
+SVG geometry smoke 也覆盖 leading-dot decimals 与 explicit plus signs 的 SVG number grammar。这是一个很小但关键的 renderer-compatibility gate，因为 dvisvgm 可能输出紧凑小数，bounds checks 中必须保留其小数语义。
+
 ## Best Current Practice
 
 在 `CircuitSpec` 尚未存在前，使用强约束 prompt：

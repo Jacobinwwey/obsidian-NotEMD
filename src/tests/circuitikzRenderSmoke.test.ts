@@ -286,6 +286,97 @@ describe('circuitikz render smoke inspection', () => {
         }
     });
 
+    test('accepts bounded SVG path coordinates written as leading-dot decimals', () => {
+        const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'notemd-circuitikz-svg-leading-dot-path-'));
+        const svgPath = path.join(tempRoot, 'leading-dot-path.svg');
+        fs.writeFileSync(
+            svgPath,
+            '<svg viewBox="0 0 1 1"><path d="M.5 .5 L.6 .5"/></svg>',
+            'utf8'
+        );
+
+        try {
+            const report = inspectCircuitikzRenderArtifact({
+                expectedArtifactPath: svgPath
+            });
+
+            expect(report.artifactKind).toBe('svg');
+            expect(report.diagnostics).toEqual([]);
+        } finally {
+            fs.rmSync(tempRoot, { recursive: true, force: true });
+        }
+    });
+
+    test('accepts bounded SVG point lists written as leading-dot decimals', () => {
+        const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'notemd-circuitikz-svg-leading-dot-points-'));
+        const svgPath = path.join(tempRoot, 'leading-dot-points.svg');
+        fs.writeFileSync(
+            svgPath,
+            '<svg viewBox="0 0 1 1"><polyline points=".5,.5 .6,.5"/></svg>',
+            'utf8'
+        );
+
+        try {
+            const report = inspectCircuitikzRenderArtifact({
+                expectedArtifactPath: svgPath
+            });
+
+            expect(report.artifactKind).toBe('svg');
+            expect(report.diagnostics).toEqual([]);
+        } finally {
+            fs.rmSync(tempRoot, { recursive: true, force: true });
+        }
+    });
+
+    test('accepts bounded SVG numeric attributes written with explicit plus signs', () => {
+        const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'notemd-circuitikz-svg-plus-signed-attributes-'));
+        const svgPath = path.join(tempRoot, 'plus-signed-attributes.svg');
+        fs.writeFileSync(
+            svgPath,
+            '<svg viewBox="0 0 1 1"><circle cx="+.5" cy="+.5" r="+.1"/></svg>',
+            'utf8'
+        );
+
+        try {
+            const report = inspectCircuitikzRenderArtifact({
+                expectedArtifactPath: svgPath
+            });
+
+            expect(report.artifactKind).toBe('svg');
+            expect(report.svg?.visibleElementCount).toBe(1);
+            expect(report.diagnostics).toEqual([]);
+        } finally {
+            fs.rmSync(tempRoot, { recursive: true, force: true });
+        }
+    });
+
+    test('reports SVG numeric attributes written with explicit plus signs outside the viewBox', () => {
+        const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'notemd-circuitikz-svg-plus-signed-attribute-bounds-'));
+        const svgPath = path.join(tempRoot, 'plus-signed-attribute-out-of-bounds.svg');
+        fs.writeFileSync(
+            svgPath,
+            '<svg viewBox="0 0 1 1"><circle cx="+2" cy="+.5" r="+.1"/></svg>',
+            'utf8'
+        );
+
+        try {
+            const report = inspectCircuitikzRenderArtifact({
+                expectedArtifactPath: svgPath
+            });
+
+            expect(report.artifactKind).toBe('svg');
+            expect(report.svg?.visibleElementCount).toBe(1);
+            expect(report.diagnostics).toEqual([
+                expect.objectContaining({
+                    kind: 'render-svg-out-of-bounds',
+                    message: expect.stringContaining('circle')
+                })
+            ]);
+        } finally {
+            fs.rmSync(tempRoot, { recursive: true, force: true });
+        }
+    });
+
     test('reports SVG arc bounds that extend outside the viewBox between endpoints', () => {
         const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'notemd-circuitikz-svg-arc-curve-bounds-'));
         const svgPath = path.join(tempRoot, 'arc-curve-out-of-bounds.svg');

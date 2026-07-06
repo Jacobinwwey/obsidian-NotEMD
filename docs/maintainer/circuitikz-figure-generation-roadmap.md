@@ -152,6 +152,8 @@ Phase A is documented. Phase B/C now have a constrained repository prototype:
 
 Phase D now has log parsing, opt-in local renderer execution, artifact-level smoke checks, SVG structure smoke checks with transform-aware geometry, path-only label classification, path-only glyph placement checks, path-only glyph overlap diagnostics, exact arc bounds for A/a arc extrema, exact Bezier curve bounds for C/S/Q/T curve extrema, `polyline` / `polygon` geometry coverage, positioned `tspan` label geometry, text/text and label/drawing overlap diagnostics, first PNG screenshot nonblank, edge-clipping, and dense-foreground checks, a topology-preserving repair guard, and a front-end diagnostics surface, but the implementation still deliberately stops before required renderer availability, OCR recognition for path-only glyph text, precise pixel-level overlap detection, full SVG path coverage, and automated Phase E repair. It does not bundle LaTeX, make TikZJax a plugin runtime dependency, or run a visual repair loop.
 
+The SVG geometry smoke also covers SVG number grammar for leading-dot decimals and explicit plus signs. This is a small but important renderer-compatibility gate because dvisvgm can emit compact decimals that should remain fractional during bounds checks.
+
 ## Best Current Practice
 
 Until `CircuitSpec` exists, use constrained prompts:
