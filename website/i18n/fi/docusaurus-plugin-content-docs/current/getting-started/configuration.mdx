@@ -1,0 +1,435 @@
+---
+id: configuration
+title: "Konfigurointi"
+description: "Konfigoi Notemd-asetukset ja eelistöt"
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [configuration, settings, customization, preferences]
+concepts: [Configuration, Per-Task Models, Output Paths, Custom Workflows]
+citations:
+  - title: Obsidian
+    url: https://obsidian.md
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# Konfigurointi
+
+<TLDR>
+**Notemd-konfigurointi kattaa 6 pääaluea:** (1) LLM-tarjoajat ja API-avainet, (2) Tekstinvalintat yksittäisten tehtävien mukaan, (3) Tulostuspaatit ja mallit, (4) UI-kieli ja tulostuskieli, (5) Palautteenpalvelut (Tavily/DuckDuckGo), (6) Kohdanomaiset työprosessit. Kaikki asetukset ovat Obsidian Asetukset → Notemd. Muutokset voivat toimia heti.
+</TLDR>
+
+## Asetuksien yleenvaate
+
+Pääsy: **Obsidian Asetukset (⚙️) → Notemd**
+
+### Pääosat
+
+1. **Tarjoajan konfigurointi** — API-avainet, perus URL-tiedot, mallit
+2. **Tehtävin asetukset** — Tekstinvalintat yksittäisten tehtävien mukaan
+3. **Tulostuskonfigurointi** — Missä salata luodut tiedostot
+4. **Kielikoneet** — UI-kieli ja tulostuskieli
+5. **Palautteenyhteydet** — Tavily/DuckDuckGo-asetukset
+6. **Työprosessit** — Kohdanomaiset painikkeojärjestelmät
+7. **Edistyneet asetukset** — Diagnostiikka, pakettiprosessointi, osien jakaminen
+
+---
+
+## 1. Tarjoajan konfigurointi
+
+### Tarjoajan lisääminen
+
+1. **Valitse tarjoaja** valikosta (30+ saatavilla)
+2. **Sisesta API-avaini**
+3. **Valinta**: Määritä omat perus URL -arvot (proksi-/gateway-tarkoituksissa)
+4. **Klikkaa "Get Model List"**, jotta voit vahvistaa yhteyden
+5. **Valitse vaihtoehtoinen malli**
+
+### Yleiset tarjoajat
+
+#### OpenAI
+```
+Provider: OpenAI
+API Key: sk-...
+Base URL: https://api.openai.com/v1 (default)
+Model: gpt-4o-mini
+```
+
+#### Anthropic (Claude)
+```
+Provider: Anthropic
+API Key: sk-ant-...
+Model: claude-sonnet-4-6
+```
+
+#### Ollama (Local)
+```
+Provider: Ollama
+Base URL: http://localhost:11434 (default)
+Model: llama3.1
+API Key: (not required)
+```
+
+#### DeepSeek
+```
+Provider: DeepSeek
+API Key: sk-...
+Model: deepseek-chat
+```
+
+### Usein tarjoajat
+
+Voit konfiguroida useita tarjoajia ja vaihtaa niiden välillä yksittäisen tehtävän kohdalla:
+- **Päätarjoaja**: Käytetään varauksena
+- **Tehtävän mukaiset tarjoajat**: Korvataan erillisten tehtävien kohdalla
+
+---
+
+## 2. Tehtävän mukaiset mallit
+
+Konfiguroi erilaisia mallia eri tehtäville, jotta voit optimoittaa kustannuksia ja laadua:
+
+### Tehtävän tyypit
+
+| Tehtävä | Vaihtoehtoinen malli | Tarkoitus |
+|------|--------------|---------|
+| **Yhdistäminen** | Päätarjoaja | Tunnistaa konsepttejä wiki-linkkejä kohdalla |
+| **Konseptin luominen** | Päätarjoaja | Eritä ja kirjelda konseptteja |
+| **Tutkimus** | Päätarjoaja | Yhteenvetöitä web-pyyhkäysjen tuloksista |
+| **Kääntö** | Päätarjoaja | Kääntä teksti |
+| **Diagrammin luominen** | Päätarjoaja | Luo Mermaid/Canvas-diagrammit |
+
+### Esimerkki: Kustannustehokas asetus
+
+```
+Linking: gpt-4o-mini (fast, many calls)
+Concept Generation: claude-sonnet-4-6 (quality extraction)
+Research: gpt-4o (web-grounded)
+Translation: gemini-flash (multilingual)
+Diagram: ollama/llama3.1 (free, local)
+```
+
+### Kuidas konfiguroida
+
+1. **Asetukset → Notemd → Tehtäön asetukset**
+2. Ihmeen mukaan valitse:
+   - ✅ **Käytä päätarjoajaa** (ominaisuus)
+   - 🔄 **Käytä omakustannuslistaa** → valitse tarjoaja + malli
+
+---
+
+## 3. Tulostusasetukset
+
+### Konsepttipisteiden tulostus
+
+**Kunne uusi konseptikirjeet tallennetaan:**
+
+```
+Settings → Output → Concept Folder
+Default: concepts/
+```
+
+**Malli:**
+```
+Settings → Output → Concept Template
+Default:
+---
+tags: [concept]
+created: {{date}}
+---
+
+# {{concept}}
+
+{{description}}
+
+## Backlinks
+{{backlinks}}
+```
+
+### Kaustakonstruktion valintat
+
+**Valinta 1: Sisempi (kaikki konseptit yhdessä kaustassa)**
+```
+vault/
+└── concepts/
+    ├── Machine Learning.md
+    ├── Neural Networks.md
+    └── Deep Learning.md
+```
+
+**Valinta 2: Hierarktilinen (lähteekaustan mukaan)**
+```
+vault/
+├── papers/
+│   └── concepts/
+│       └── Transformer.md
+└── notes/
+    └── concepts/
+        └── Attention Mechanism.md
+```
+
+Konfiguroi: **Asetukset → Tulostus → Käytä hierarktisia kaustoja**
+
+### Diagrammin tulostus
+
+**Kunne diagrammit tallennetaan:**
+```
+Settings → Output → Diagram Folder
+Default: diagrams/
+```
+
+**Muoto:**
+- `.mmd` (Mermaid lähteä)
+- `.canvas` (JSON Canvas)
+- `.html` (Vega-Lite)
+
+---
+
+## 4. Kielitilat
+
+### UI Kieli
+
+**Ympäristön kieli** (painikkeet, menyt, dialoigot):
+
+```
+Settings → Language → UI Language
+Options: 21+ languages
+Default: System language
+```
+
+Tukittu: englanti, 简体中文, 繁體中文, 日本語, 한국어, Español, Français, Deutsch, Русский, العربية ja muut.
+
+### Tulostuskieli
+
+**Luoettu sisältön kieli** (konceptikirjeet, tutkimusyhteenvetot):
+
+```
+Settings → Language → Output Language
+Options: Same as UI languages
+Default: Same as UI
+```
+
+**Käyttötila:** Kiinaan UI + englanninkielinen tulostus kaksikielisen tutkimuksen jaoks.
+
+### Kääntösihtti
+
+**Vaikuttavimmat kääntökielit** kääntötöidön tilanteissa:
+
+```
+Settings → Translation → Target Language
+Default: English
+```
+
+---
+
+## 5. Palautteen yhdistäminen
+
+### Tavily (soovitatu)
+
+**AI-optimoitu palautteenpalvelu:**
+
+```
+Settings → Search → Service: Tavily
+API Key: tvly-...
+```
+
+Get key: [tavily.com](https://tavily.com/)
+
+**Ominaisuudet:**
+- Kvalitettomat tulokset
+- AI-optimoituut yhteenvetot
+- Lähtöviiteet
+
+### DuckDuckGo (eksperimentaali)
+
+**Ei API-avainaa tarvita:**
+
+```
+Settings → Search → Service: DuckDuckGo
+```
+
+**Merkkus:** Halvempi laatu, ilman käsittelemistä.
+
+---
+
+## 6. Työprosessin konfigurointi
+
+### Omien työprosessien luominen
+
+**Töövoimat yhdistävät useat tehtävät yhteiseen painikkeeseen.**
+
+1. **Asetukset → Töövoimat → Lisää töövoima**
+2. **Nimi**: "Paper Analysis Flow"
+3. **DSL**: `process-current-add-links>extract-concepts-current>research-and-summarize>summarize-as-mermaid`
+4. **Salvaa**
+
+Uusi painikkei ilmenee vasemmassa puolekaluun.
+
+### DSL-syntaksi
+
+**Muoto:** `action1>action2>action3`
+
+**Saadaulliset toimintat:**
+- `process-current-add-links` — Lisää wiki-linkkejä nykyiseen merkintään
+- `extract-concepts-current` — Luo konseptimerkintät
+- `research-and-summarize` — Web-tutkimus + yhteenveto
+- `translate-current` — Kääntä nykyinen merkintä
+- `summarize-as-mermaid` — Luo Mermaid-diagramma
+- `process-folder-add-links` — Päivitä koko kaustaa
+
+**Esimerkkitöövoimat:**
+
+**Nopea konsepttien poistaminen:**
+```
+process-current-add-links>extract-concepts-current
+```
+
+**Syvällinen tutkimus:**
+```
+process-current-add-links>research-and-summarize>extract-concepts-current
+```
+
+**Monikielinen analyysi:**
+```
+translate-current>process-current-add-links>extract-concepts-current
+```
+
+---
+
+## 7. Edistyneet asetukset
+
+### Pakettiprosessointi
+
+**Täydennä useita failia yhtä aikaa:**
+
+```
+Settings → Advanced → Batch Processing
+Concurrency: 3 (default)
+```
+
+Suurempi arvo = nopeampi, mutta enemmän API kutsuja.
+
+### Tarkka osien jakaminen
+
+**Pikkojen notitoinnin korjaamiseksi jakaa ne osiin:**
+
+```
+Settings → Advanced → Smart Chunking
+Chunk Size: 2000 words (default)
+Overlap: 200 words (default)
+```
+
+Ehdottaa tokenin määrän liikkeiden välttämiseksi.
+
+### Diagnostiikkapaneeli
+
+**Tarkista yksityiskohtaiset logit:**
+
+```
+Settings → Advanced → Enable Diagnostics
+```
+
+Näyttää:
+- API pyytäksi/tulokset
+- Tokenien käyttö
+- Käsitelyntai
+- Viannot
+
+### Kerran olevien konsepttien tunnistaminen
+
+**Vältä läheisesti duplikaatteja olevia konseptteja:**
+
+```
+Settings → Advanced → Synonym Suppression
+Threshold: 0.8 (default, 0-1)
+```
+
+Yleisempi = aggressiivisempi yhdistäminen.
+
+---
+
+## Konfigurointiprofiilit
+
+### Tilannusten eksportointi/importointi
+
+**Jaa konfigurointia eri laitteilla:**
+
+1. **Tilat → Edistyneet → Konfiguroinnin eksportointi**
+2. Säästää `notemd-config.json`
+3. Uudella laitteella: **Impordi konfigurointi**
+
+**Miten se sisältää:**
+- Tarjoajan API-avainet (valittava)
+- Mallivalintat
+- Tulostuspathit
+- Kohdanomaiset työprosessit
+
+---
+
+## Suositeltu konfigurointi
+
+### Opiskelijoille
+
+```
+Provider: OpenAI (gpt-4o-mini)
+Concept Folder: concepts/
+UI Language: System
+Output Language: System
+Workflow: "Study Flow" (add-links>extract-concepts)
+```
+
+### Tutkijoiden käyttöön
+
+```
+Providers:
+  - Linking: DeepSeek (cheap, many calls)
+  - Concepts: Claude Sonnet (high quality)
+  - Research: GPT-4o (web-grounded)
+Concept Folder: notes/concepts/
+Hierarchical: Yes
+Workflow: "Paper Flow" (add-links>extract>research>diagram)
+```
+
+### Yksityisyystä huolehtivien käyttäjien tilanne
+
+```
+Provider: Ollama (llama3.1)
+All tasks: Local model
+Search: DuckDuckGo (no API)
+Diagnostics: Off
+```
+
+### Kaksikielisen työn tilanne
+
+```
+UI Language: Chinese
+Output Language: English
+Translation Target: Chinese
+Provider: Gemini (multilingual)
+```
+
+---
+
+## Konfiguroinnin vianohjaus
+
+### Asetukset ei salvesteta
+- Tarkista tiedostojen oikeudet `.obsidian/plugins/notemd/`-ssä
+- Yritä: Poista sovelluslaitteisto → Aktivoi uudelleen
+
+### API-virto on epäsisällinen
+- Ei lisätiloja
+- Tarkista aikakierroksia
+- Veroita krediteja tarjoajan tilastollisessa ympyrössä
+
+### Mallit ei laadu
+- Klikkaa "Saada mallilistaus" uudistamiseen
+- Tarkista verkon yhteyttä
+- Yritä toinen tarjoaja
+
+---
+
+## Järguvät toimet
+
+- 📖 [Tutkita ominaisuuksia](../features/wiki-links)
+- 🔌 [Tarjoajan asennusohjeet](../providers/overview)
+- ❓ [Kysymyksiä ja vastauksia](../faq)

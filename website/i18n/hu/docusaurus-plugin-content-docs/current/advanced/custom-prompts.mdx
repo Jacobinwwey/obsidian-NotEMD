@@ -1,0 +1,134 @@
+---
+id: custom-prompts
+title: "Szerkeszthető kérdések"
+description: "A saját igényeidhez megfelelően szerkeszthetők a LLM kérdések."
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [custom prompts, prompts, focused learning, domain]
+concepts: [Custom Prompts, Focused Learning, Prompt Engineering]
+citations:
+  - title: Obsidian
+    url: https://obsidian.md
+  - title: LLM Prompt Engineering
+    url: https://platform.openai.com/docs/guides/prompt-engineering
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# Szerkeszthető kérdések
+
+<TLDR>
+**A Notemd lehetőségével lehet módosítani a helyettesítő LLM kérdést minden munkaterületre.** A szerkeszthető kérdések lehetővé teszik, hogy kontrollálhassz, mire prioritászt ad a model: lehet korlátozni a konceptek kiemelését egy specifikus tudományterületről, megváltoztatni a kötési stílust vagy átirányítani a fordítás hangulatát. A `{{content}}` és `{{concept}}` tulajdonképpen kérdési változók helyettesítők formájában kerülnek be az elvételek során. A fokozott tanulási terület funkció automatikusan hozzáadja a tudományod terünetét, hogy korlátozzon a kiemelés eredményeit.
+
+Ez része a [Obsidian AI tudományos kezelési útmutatójának](/docs/pillar-ai-knowledge).
+</TLDR>
+
+## Áttekintés
+
+A Notemd belső kérdései általános tudalmi munkákhoz írva vannak. Jóan működnek több területen is, de lehetőséget adnak a területhez specifikus fejlesztésre is. A szerkeszthető kérdések lehetővé teszik, hogy pontosan megnevezhetsz a LLM, hogyan kell elkövetkeznie a saját használatodhoz – legyen az csak a médicai terminológia kiemelése, a nevű entitások kötése vagy formális stílusban fordítás.
+
+A szerkeszthető kérdések nem helyettesítik el az összes rendszeri kérdést. Azok módosítják vagy bővítenek a **munkaterületspecifikus instrukciók részét**, miközben megőrizik a struktúrálatos kijelző formátumot (pl. `CONCEPT:` sorok, wiki-köti szintaxis), amelyre a Notemd függ a tárgyak analíziséhez.
+
+## Hogyan működik
+
+### Kérdési architektúra
+
+Minden Notemd munka követi az egyetlen kérdési struktúrat:
+
+```
+[System role: You are a helpful assistant...]
+[Domain constraint: Relevant Fields: [{domain}]]   <-- focused learning (optional)
+[Custom task prompt]                                <-- your override (optional)
+[Output format instructions]                        <-- always preserved
+[Content: {{content}}]                              <-- runtime substitution
+```
+
+1. **Alap rendszeri kérdés** – Megadja a segédfigyelmeket. Nem lehet módosítani.
+2. **Fokozott tanulási terület** – Hozzáadja az `Relevant Fields: [medicine / law / computer science / ...]`-ot, hogy korlátozza a körzetet. Ez egy beállításik nyomogató, nem egy egyszerű kérdés.
+3. **Szerkeszthető munkaterületi kérdés** – Az helyettesíti a helyettesítő munkai instrukciókat (pl. milyen típusú koncepteket kell kiemelni, mennyire agresszívnak kell lennie a kötés).
+4. **Kijelző formátum** – Struktúrálatos szabályok (`CONCEPT:` sorok, wiki-köti formátum). Mindig hozzáadja az Notemd, hogy biztosítsa a tárgyak megértését.
+5. **Tartalom** – A valós írási tartalom, amely az elvételek során a `{{content}}`-ot használva helyettesítők formájában kerül be.
+
+### Kérdési változók
+
+A változók az elvételek futtatása során helyettesítők formájában kerülnek be. Az elérhető változók attól függnek, milyen munkát végezünk:
+
+| Változó | Feladatok | Cserélt ki az alával |
+|----------|-------|---------------|
+| `{{content}}` | Mind | A jegyzet vagy választott szöveg |
+| `{{concept}}` | Konceptjegyzet szabványformátuma | Kivonott koncept neve |
+| `{{description}}` | Konceptjegyzet szabványformátuma | LLM-képzett koncept leírása |
+| `{{backlinks}}` | Konceptjegyzet szabványformátuma | Forrásjegyzetek listája hivatkozásokkal |
+| `{{date}}` | Konceptjegyzet szabványformátuma | Jelenlegi dátum (YYYY-MM-DD) |
+| `{{language}}` | Übersetzung | Célképző nyelv |
+| `{{source}}` | Konceptjegyzet szabványformátuma | Forrásjegyzet alneve |
+
+### Fokozott tanulási terület
+
+A fokozott tanulási funkció egy gyorsút a területi korlátozáshoz. Nem kell írni egy különleges leírást, amelyben említetne a szakterületét, hanem beállítmányokban állítja be a `focusedLearningDomain`-t:
+
+```
+Settings → Advanced → Focused Learning Domain
+Example: "medicine" or "computer science" or "Chinese philosophy"
+```
+
+Ez az `Relevant Fields: [medicine]`-t előírja a kiemelési leíráshoz, így a LLM prioritásba teszi a területre kapcsolódó koncepteket és lelassítja a általánosakat. Ez egyszerűbb, mint egy teljes különleges leírás, és működik minden kiemelési munkában.
+
+## Konfiguráció
+
+| Beállítás | Alapértelmezett | Hatás |
+|---------|---------|--------|
+| `customAddLinksPrompt` | `''` | Átírja a helyettesítő hivatkozások kiemelési leírást |
+| `customExtractConceptsPrompt` | `''` | Átírja a helyettesítő konceptek kiemelési leírást |
+| `customResearchPrompt` | `''` | Átírja a helyettesítő kutatás + összefoglalás leírást |
+| `customTranslatePrompt` | `''` | Átírja a helyettesítő fordítási leírást |
+| `customDiagramPrompt` | `''` | Átírja a helyettesítő diagram kialakítási leírást |
+| `focusedLearningDomain` | `''` | Előírja a disciplínai kontextust a kiemelési és hivatkozások leíráshoz |
+| `extractConceptsMinimalTemplate` | `true` | Használja a cím-kizárólagú koncept jellegzési szablont (ez befolyásolja a `{{concept}}` szablon határait) |
+| `customConceptNoteTemplate` | `''` | Átírja a koncept jellegzési fájl szablont teljes változó támogatással |
+
+**Ha egy különleges leírási mező üres, akkor használódik a belső, helyettesítő leírás.**
+
+## példa
+
+Ön egy orvosi kutató, aki koncepteket kivágtat a klinikai kísérleti feljegyzésekből. A helyettesítő leírás kivágtatja az általános névmutatókat is az orvosi kifejezésekkel együtt, ami zavarba ejtő a koncept mappáját.
+
+**Löszer:** Beállítsa egy fokozott tanulási területet és egy különleges kiemelési leírást.
+
+1. Beállítsa a `focusedLearningDomain`-t a `medicine`-re
+2. Beállítsa a `customExtractConceptsPrompt`-t:
+
+```
+Extract only clinically relevant concepts: diseases, drug names,
+anatomical terms, measurement endpoints, and statistical methods.
+Ignore generic English nouns, brand names, and institutional names.
+Prioritize MeSH terminology where applicable.
+```
+
+Most ha egy klinikai jegyzeten futtatja az "Extract concepts" parancsot, a LLM ezt hozza létre:
+
+```
+CONCEPT: Randomized Controlled Trial
+CONCEPT: Double-Blind Method
+CONCEPT: Myocardial Infarction
+CONCEPT: Creatine Kinase-MB
+CONCEPT: Kaplan-Meier Estimate
+```
+
+Nem az alapértelmezett viselkedéshez, amely esetleg is olyan nem kívánt, általános kifejezéseket extrahálhat, mint például "hospital" vagy "month".
+
+## Tippek
+
+- **Kezdje el a specifikus tanulási területtel**, mielőtt írja egy teljes, személyre szabott parancsot. Egy beállítás alatt ezt tudja megoldani 80%-a a használati esetekből.
+- **Tartson meg a kiadási formátumot** – Soha ne távolítsa el a formátumirányítókat, például "one per line" vagy "CONCEPT: prefix" a személyre szabott parancsokból. A Notemd parserja azokról függ.
+- **Próbálja el először egyetlen jegyzettel** – A személyre szabott parancsok olyan érvelhetetlen hatásokat is hozhatnak a kivonási mértéknek. Előtt batch feldolgozást végezzen, ellenőrizze egy jegyzettel.
+- **Tartson a parancsok összefoglalóként** – Nagyon hosszú személyre szabott parancsok használják fel a tokenokat és lehetővé teszik, hogy a model az érzelmeit elhaladjon.
+
+---
+
+## További lépések
+
+- [Wiki-Links](/docs/features/wiki-links) – Mi kerül kötésre, amikor személyre szabja a add-links parancsot
+- [Concept Notes](/docs/features/concept-notes) – A koncept jellegű jegyzetek szablontai és a `{{concept}}` változó
+- [Batch Processing](/docs/advanced/batch-processing) – Használja a személyre szabott parancsokat az összes mappában
+- [Troubleshooting](/docs/advanced/troubleshooting) – Előre megoldja a problémákat, amikor a személyre szabott parancsok érvelhetetlen kiadásokat hoznak létre

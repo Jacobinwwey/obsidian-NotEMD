@@ -1,0 +1,67 @@
+---
+id: google
+title: "Google"
+description: "Configureer Google Gemini"
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [google, gemini, provider, configuration]
+concepts: [Google, Gemini, API Configuration]
+citations:
+  - title: Gemini API
+    url: https://ai.google.dev
+  - title: Google AI Studio
+    url: https://aistudio.google.com
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# Google Provider
+
+<TLDR>
+**Google maakt gebruik van de geïntegreerde Gemini Generative Language API transport.** De huidige instellingen zijn standaard ingesteld op `gemini-2.0-flash-exp`, `https://generativelanguage.googleapis.com/v1` en `temperature: 0.5`. Het is geen OpenAI-compatibele profiel.
+
+Dit maakt deel uit van de [Obsidian AI Knowledge Management Guide](/docs/pillar-ai-knowledge).
+</TLDR>
+
+## Setup
+
+Maak een Google AI Studio of Google Cloud API sleutel aan met Gemini-toegang, voeg een `Google` provider profiel toe en behoud de geïntegreerde Generative Language Base URL. Gebruik het standaard Gemini Flash profiel voor snelle vertalingen en uitgebreide notitiewerkflows, en passeer vervolgens de modellen per taak wanneer je een groter of krachtiger Gemini model nodig hebt.
+
+Vermeed het plaatsen van Gemini model IDs in een OpenAI-compatibele profiel tenzij je expliciet een gateway gebruikt die Gemini via een OpenAI-compatibele API exposeert.
+
+## Endpoint En Authenticatie
+
+| Veld | Huidige instellingen |
+|-------|----------------|
+| Transport | `google` |
+| API sleutel | vereist |
+| Base URL | `https://generativelanguage.googleapis.com/v1` |
+| Standaardmodel | `gemini-2.0-flash-exp` |
+| Temperature | `0.5` |
+| Verbindingstest | Alleen chat |
+
+De runtime roept `/models/{model}:generateContent?key={apiKey}` aan. De sleutel wordt doorgegeven als queryparameter omdat dit de manier is waarop het geïntegreerde Gemini endpoint in het plugin is aangesloten.
+
+## Modelontdekking
+
+Google maakt gebruik van de `google-models` ontdekkingmodus. Ontdekking moet Gemini modellen teruggeven die beschikbaar zijn voor de API sleutel; als de selector leeg is, test de sleutel tegen dezelfde Base URL en bevestig of de modelfamilie voor dat account is geactiveerd.
+
+Bekende limieten voor uitvoer-tokens zijn modelafhankelijk in het provider register. Als een lange vertaling of diagramuitleg wordt afgeknipt, kies dan een Gemini model met een hogere ondersteunde uitvoerlimiet of verlaag de vereiste uitvoergrootte.
+
+## Probleemoplossing
+
+- `400`: de model ID komt meestal niet overeen met de geïntegreerde Gemini route of de vraag overschrijdt de ondersteunde vorm van het model.
+- `401` of `403`: controleer de beperkingen van de sleutel, de activatie van het project/API en of de sleutel toegang heeft tot Gemini.
+- `404`: de model ID is niet beschikbaar bij de geselecteerde API versie.
+- Gateway voorbeelden falen onder dit profiel: gebruik in plaats daarvan het gateway preset in plaats van de geïntegreerde Google provider.
+
+## Wanneer te gebruiken
+
+Gebruik Google voor snelle vertalingen, grote hoeveelheden notitieopruiming en workflows waarbij de kosten/performance balans van Gemini beter is dan directe OpenAI of Anthropic. Kies een andere provider voor workflows die OpenAI-compatibele redeneringsmodelbehandeling vereisen.
+
+---
+
+## Volgende stappen
+
+- [LLM Providers](/docs/providers/overview) -- Volledige configuratie, modellen per taak en herprobeerlogica
+- [Vertaling](/docs/features/translation) -- Gemini Flash wordt aanbevolen voor taken met hoge volumes aan vertalingen

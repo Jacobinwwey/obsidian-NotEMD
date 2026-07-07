@@ -1,0 +1,75 @@
+---
+id: china
+title: "ارائه‌دهندگان چین"
+description: "پیکربندی Qwen، DeepSeek، GLM و غیره."
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [china providers, deepseek, qwen, glm, doubao, moonshot, mimo, minimax, baidu, siliconflow, huawei]
+concepts: [China Providers, DeepSeek, Qwen, Doubao, Moonshot, MiMo, GLM, MiniMax, Baidu, SiliconFlow, Huawei]
+citations:
+  - title: Qwen API
+    url: https://help.aliyun.com/zh/dashscope
+  - title: DeepSeek API
+    url: https://platform.deepseek.com
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# ارائه‌دهندگان چین
+
+<TLDR>
+**Notemd از طریق پایانه‌های سازگار با OpenAI، ارائه‌دهندگان منطقه چین و با منشأ چین را پشتیبانی می‌کند.** مجموعه فعلی شامل DeepSeek، Qwen، Qwen Code، Doubao، Moonshot، Xiaomi MiMo، GLM، MiniMax، Baidu Qianfan، SiliconFlow، Huawei Cloud MaaS و Z AI است. مزیت آن دسترسی منطقه‌ای و کنترل هزینه است؛ ریسک آن نام‌گذاری مدل‌های مخصوص ارائه‌دهنده و محدودیت‌های حساب است.
+
+این بخشی از [Obsidian راهنمای مدیریت دانش هوش مصنوعی](/docs/pillar-ai-knowledge) است.
+</TLDR>
+
+## برپایی
+
+حساب ارائه‌دهنده را ایجاد کنید، یک کلید API تولید نمایید، سپس به جای استفاده از پروفایل عمومی OpenAI، از پیش‌تنظیم متناظر Notemd استفاده کنید. این پیش‌تنظیم شامل Base URL پیش‌فرض، حالت آزمایشی API، رفتار کشف مدل و هر فیلد مخصوص ارائه‌دهنده مانند UI است.
+
+در اینجا از انتخاب مدل بر حسب وظیفه به طور فعال استفاده کنید. به عنوان مثال، در فرآیندهایی که نیاز به استدلال زیادی دارند، از DeepSeek یا GLM استفاده کنید، برای کارهای گسترده به زبان چینی از Qwen یا Moonshot استفاده کنید، و وظایف کدنویسی را به Qwen Code ارجاع دهید زمانی که آن حساب مدل‌های کدنویسی را فراهم می‌کند.
+
+## انتهای پایگاه و احراز هویت
+
+| ارائه‌دهنده | مدل پیش‌فرض | Base URL |
+|----------|---------------|----------|
+| DeepSeek | `deepseek-v4-pro` | `api.deepseek.com` |
+| Qwen | `qwen3-235b-a22b` | `dashscope.aliyuncs.com/compatible-mode/v1` |
+| Qwen Code | `qwen3-coder-plus` | `dashscope.aliyuncs.com/compatible-mode/v1` |
+| Doubao | (شناسه پایانه الزامی است) | `ark.cn-beijing.volces.com/api/v3` |
+| Moonshot | `kimi-k2-0905-preview` | `api.moonshot.cn/v1` |
+| Xiaomi MiMo | `mimo-v2.5-pro` | `api.xiaomimimo.com/v1` |
+| GLM | `glm-5` | `open.bigmodel.cn/api/paas/v4` |
+| MiniMax | `MiniMax-M2.7` | `api.minimaxi.com/v1` |
+| Baidu Qianfan | `ernie-4.5-turbo-32k` | `qianfan.baidubce.com/v2` |
+| SiliconFlow | `Qwen/QwQ-32B` | `api.siliconflow.cn/v1` |
+| Huawei Cloud MaaS | `DeepSeek-V3` | `api.modelarts-maas.com/v1` |
+| Z AI | `glm-5` | `api.z.ai/api/paas/v4` |
+
+**توجه:** Doubao به جای نام مدل استاندارد، به یک شناسه پایانه Ark (فرمت: `ep-xxxxxxxx-xxxx-xxxx`) نیاز دارد.
+
+اکثر این ارائه‌دهندگان از زمان‌بندی مشترک سازگار با OpenAI استفاده می‌کنند، اما معانی حساب و مدل آن‌ها متفاوت است. مگر اینکه شناسه پایانه جایگزین حساب را بررسی کرده باشید، از Base URL مخصوص پیش‌تنظیم استفاده کنید.
+
+## کشف مدل‌ها
+
+DeepSeek، Qwen، Qwen Code، Doubao، Moonshot، Xiaomi MiMo، GLM، Z AI، MiniMax، Baidu Qianfan و SiliconFlow در صورتی که ارائه‌دهنده امکان فهرست‌بندی را داشته باشد، از روش کشف مدل سازگار با OpenAI استفاده می‌کنند. Huawei Cloud MaaS از حالت `huaweicloud-modelarts-models` استفاده می‌کند زیرا فراداده‌های استقرار ModelArts با لیست عمومی `/v1/models` یکسان نیست.
+
+شکست در کشف را به عنوان دلیلی بر عدم امکان گفت‌وگو در نظر نگیرید. برخی ارائه‌دهندگان اجازه گفت‌وگو را در حالی که مجوزهای فهرست مدل را محدود می‌کنند، فراهم می‌کنند. در چنین مواردی، یک شناسه مدل صریح را در پروفایل نگه دارید و آن را با تست اتصال بررسی کنید.
+
+## رفع اشکالات
+
+- احراز هویت موفق بود اما گفت‌وگو شکست خورد: نام مدل ممکن است خارج از مجوزها یا منطقه حساب باشد.
+- Doubao با یک نام مدل عادی شکست می‌خورد: هنگامی که استقرار شما نیاز به آن دارد، از شناسه پایانه Ark در فیلد مدل استفاده کنید.
+- پاسخ‌های استدلالی کوتاه می‌شوند: حداکثر تعداد توکن خروجی مخصوص ارائه‌دهنده و تنظیمات حداکثر توکن مبتنی بر مدل Notemd را بررسی کنید.
+- شبکه‌های منطقه‌ای متفاوت هستند: هنگامی که ماشین خزانه در داخل چین است، از پایانه منطقه چین ارائه‌دهنده استفاده کنید؛ تنها زمانی از پایانه بین‌المللی استفاده کنید که هم حساب و هم مسیر شبکه معتبر باشند.
+
+## زمان استفاده
+
+در صورتی که تأخیر منطقه‌ای، دسترسی به پرداخت/حساب، کیفیت زبان چینی یا هزینه محدودیت اصلی باشند، از ارائه‌دهندگان چینی استفاده کنید. هنگامی که نیاز به مرز پروتکل ساده‌تر یا یکپارچگی قوی‌تر در اشکال‌زدایی بین ارائه‌دهندگان دارید، ارائه‌دهندگان مستقیم OpenAI، Anthropic، Google یا محلی را ترجیح دهید.
+
+---
+
+## گام‌های بعدی
+
+- [LLM Providers](/docs/providers/overview) -- پیکربندی کامل، مدل‌های مخصوص هر وظیفه و منطق تلاش مجدد
+- [رفع اشکال](/docs/advanced/troubleshooting) -- رفع خطاهای اتصال منطقه‌ای و احراز هویت

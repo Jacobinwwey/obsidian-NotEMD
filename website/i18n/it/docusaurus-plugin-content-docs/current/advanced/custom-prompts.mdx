@@ -1,0 +1,134 @@
+---
+id: custom-prompts
+title: "Prompt personalizzati"
+description: "Personalizza i prompt di LLM in base alle tue esigenze"
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [custom prompts, prompts, focused learning, domain]
+concepts: [Custom Prompts, Focused Learning, Prompt Engineering]
+citations:
+  - title: Obsidian
+    url: https://obsidian.md
+  - title: LLM Prompt Engineering
+    url: https://platform.openai.com/docs/guides/prompt-engineering
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# Prompt personalizzati
+
+<TLDR>
+**Notemd ti permette di sovrascrivere il prompt predefinito LLM per ogni tipo di task.** I prompt personalizzati ti danno il controllo su ciò che il modello priorizza: puoi limitare l’estrazione dei concetti a una disciplina specifica, modificare lo stile di collegamento o reindirizzare il tono della traduzione. Le variabili del prompt come `{{content}}` e `{{concept}}` vengono sostituite in tempo di esecuzione. La funzionalità relativa al dominio di apprendimento mirato aggiunge automaticamente il tuo campo di studio ai risultati dell’estrazione.
+
+Questo fa parte della [Obsidian Guida alla gestione delle conoscenze AI](/docs/pillar-ai-knowledge).
+</TLDR>
+
+## Panoramica
+
+I prompt integrati di Notemd sono stati creati per attività di conoscenza a scopo generale. Funzionano bene in diversi ambiti, ma lasciano comunque spazio per miglioramenti specifici per ciascun dominio. I prompt personalizzati permettono di indicare esattamente a LLM come comportarsi nel proprio caso d’uso: che si tratti di estrarre soltanto terminologia medica, di collegare soltanto entità denominate o di tradurre in un registro formale.
+
+I prompt personalizzati non sostituiscono l’intero prompt di sistema. Essi sovrappongono o integrano la **parte delle istruzioni specifiche per il compito**, mantenendo al contempo il formato strutturale dell’output (ad esempio le righe `CONCEPT:`, la sintassi dei link wiki) di cui Notemd ha bisogno per l’elaborazione.
+
+## Come funziona
+
+### Architettura del Prompt
+
+Ogni task Notemd segue la stessa struttura di prompt:
+
+```
+[System role: You are a helpful assistant...]
+[Domain constraint: Relevant Fields: [{domain}]]   <-- focused learning (optional)
+[Custom task prompt]                                <-- your override (optional)
+[Output format instructions]                        <-- always preserved
+[Content: {{content}}]                              <-- runtime substitution
+```
+
+1. **Prompt di sistema di base** -- Imposta la personalità dell’assistente. Non può essere sovrascritto.
+2. **Dominio di apprendimento mirato** -- Aggiunge `Relevant Fields: [medicine / law / computer science / ...]` all’inizio per limitare l’ambito. Si tratta di un interruttore di impostazioni, non di un prompt grezzo.
+3. **Prompt personalizzato per il compito** -- Sostituisce le istruzioni di default del compito (ad esempio, quali tipi di concetti estrarre, con quanta aggressività effettuare i collegamenti).
+4. **Formato di output** -- Regole strutturali (linee `CONCEPT:`, formato link wiki). Viene sempre aggiunto Notemd per garantire la parzializzabilità.
+5. **Contenuto** -- Il testo effettivo della nota, sostituito in tempo di esecuzione tramite `{{content}}`.
+
+### Variabili del prompt
+
+Le variabili vengono sostituite al momento dell’esecuzione. Le variabili disponibili variano in base al compito:
+
+| Variabile | Compiti | Sostituito con |
+|----------|-------|---------------|
+| `{{content}}` | Tutto | Il testo della nota o della selezione |
+| `{{concept}}` | Modello di nota concettuale | Il nome del concetto estratto |
+| `{{description}}` | Modello di nota concettuale | Descrizione del concetto generata da LLM |
+| `{{backlinks}}` | Modello di nota concettuale | Elenco delle note di origine con link |
+| `{{date}}` | Modello di nota concettuale | Data attuale (YYYY-MM-DD) |
+| `{{language}}` | Traduzione | Lingua di output target |
+| `{{source}}` | Modello di nota concettuale | Nota di origine nome del file |
+
+### Dominio di apprendimento mirato
+
+La funzione di apprendimento mirato è un’abbreviazione per la definizione dell’ambito di applicazione. Invece di scrivere un prompt personalizzato che menzioni il proprio campo, basta impostare `focusedLearningDomain` nelle impostazioni:
+
+```
+Settings → Advanced → Focused Learning Domain
+Example: "medicine" or "computer science" or "Chinese philosophy"
+```
+
+Questo aggiunge `Relevant Fields: [medicine]` all’inizio della richiesta di estrazione, facendo sì che LLM dia priorità ai concetti rilevanti per il dominio e ne sopprima quelli generici. È più leggero di una richiesta personalizzata completa e funziona in tutti i compiti di estrazione.
+
+## Configurazione
+
+| Impostazioni | Predefinito | Effetto |
+|---------|---------|--------|
+| `customAddLinksPrompt` | `''` | Sovrascrivere la richiesta predefinita del compito add-links |
+| `customExtractConceptsPrompt` | `''` | Sovrascrivere la richiesta predefinita per l’estrazione dei concetti |
+| `customResearchPrompt` | `''` | Sovrascrivere la richiesta di ricerca predefinita + riassumere |
+| `customTranslatePrompt` | `''` | Sovrascrivere la richiesta di traduzione predefinita |
+| `customDiagramPrompt` | `''` | Sovrascrivere la richiesta predefinita per la generazione del diagramma |
+| `focusedLearningDomain` | `''` | Aggiungi il contesto della disciplina alle istruzioni di estrazione e collegamento |
+| `extractConceptsMinimalTemplate` | `true` | Utilizza il modello di nota concettuale con solo il titolo (influenza l’ambito del modello `{{concept}}`) |
+| `customConceptNoteTemplate` | `''` | Sovrascrivere il modello del file di nota concettuale con pieno supporto per le variabili |
+
+**Quando un campo di prompt personalizzato è vuoto, viene utilizzato il prompt predefinito integrato.**
+
+## Esempio
+
+Sei un ricercatore medico che estrae concetti dalle note di studi clinici. Il prompt predefinito estrae sostantivi generici insieme ai termini medici, il che appesantisce la tua cartella dei concetti.
+
+**Soluzione:** Impostare un dominio di apprendimento specifico e una richiesta di estrazione personalizzata.
+
+1. Imposta `focusedLearningDomain` su `medicine`
+2. Imposta `customExtractConceptsPrompt` su:
+
+```
+Extract only clinically relevant concepts: diseases, drug names,
+anatomical terms, measurement endpoints, and statistical methods.
+Ignore generic English nouns, brand names, and institutional names.
+Prioritize MeSH terminology where applicable.
+```
+
+Ora, quando si esegue “Extract concepts” su una nota clinica, il LLM produce:
+
+```
+CONCEPT: Randomized Controlled Trial
+CONCEPT: Double-Blind Method
+CONCEPT: Myocardial Infarction
+CONCEPT: Creatine Kinase-MB
+CONCEPT: Kaplan-Meier Estimate
+```
+
+Invece del comportamento predefinito che potrebbe estrarre anche termini generici indesiderati come “ospedale” o “mese”.
+
+## Consigli
+
+- Inizia con il dominio di apprendimento specificato prima di scrivere una richiesta personalizzata completa. Con una sola impostazione è sufficiente per coprire l’80% dei casi d’uso.
+- **Mantieni il formato di output** -- Non rimuovere mai le istruzioni di formattazione come "uno per riga" o "CONCEPT: prefix" dalle richieste personalizzate. Il parser di Notemd dipende da esse.
+- **Testare prima con un’unica nota** -- I prompt personalizzati possono avere effetti inaspettati sull’ampiezza dell’estrazione. Verificare su una nota prima del processing batch.
+- **Mantieni i prompt concisi** -- I prompt personalizzati eccessivamente lunghi consumano token e possono ridurre la concentrazione del modello.
+
+---
+
+## Prossimi passi
+
+- [Wiki-Links](/docs/features/wiki-links) -- Cosa viene collegato quando si personalizza la richiesta di aggiunta dei link
+- [Note di concetto](/docs/features/concept-notes) -- Modelli di nota di concetto e la variabile `{{concept}}`
+- [Elaborazione batch](/docs/advanced/batch-processing) -- Applicare prompt personalizzati a intere cartelle
+- [Resoluzione dei problemi](/docs/advanced/troubleshooting) -- Correggi i problemi in cui le istruzioni personalizzate producono output inaspettato

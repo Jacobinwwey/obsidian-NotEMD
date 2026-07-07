@@ -1,0 +1,435 @@
+---
+id: configuration
+title: "הגדרה"
+description: "להגדיר את הגדרות וההעדפות של Notemd"
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [configuration, settings, customization, preferences]
+concepts: [Configuration, Per-Task Models, Output Paths, Custom Workflows]
+citations:
+  - title: Obsidian
+    url: https://obsidian.md
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# הגדרה
+
+<TLDR>
+**ההגדרה של Notemd כוללת 6 תחומים עיקריים:** (1) ספקי LLM ומפתחות API, (2) בחירת מודל לכל משימה, (3) מסלולי הפלט ותבניות, (4) שפת UI ושפת הפלט, (5) שירותי חיפוש (Tavily/DuckDuckGo), (6) זרמי עבודה מותאמים אישית. כל ההגדרות נמצאות ב‑Obsidian Settings → Notemd. השינויים נכנסים לתוקף מיד.
+</TLDR>
+
+## סקירת ההגדרות
+
+גישה: **Obsidian Settings (⚙️) → Notemd**
+
+### פרקים עיקריים
+
+1. **הגדרת ספק** — מפתחות API, URLs בסיסיים, מודלים
+2. **הגדרות משימה** — בחירת מודל לכל משימה
+3. **הגדרת הפלט** — היכן לשמור את הקבצים שנוצרו
+4. **הגדרות שפה** — UI ושפות הפלט
+5. **אינטגרציית חיפוש** — הגדרת Tavily/DuckDuckGo
+6. **זרמי עבודה** — שרשראות כפתורים מותאמות אישית
+7. **מתקדם** — אבחון, עיבוד בלוחות, חלוקה לחלקים
+
+---
+
+## 1. הגדרת ספק
+
+### הוספת ספק
+
+1. **בחרו ספק** מהרשימה הנפתחת (יותר מ‑30 זמינים)
+2. **הזינו את המפתח API**
+3. **אופציונלי**: הגדרת בסיס מותאם אישית URL (לפרוקסים/שערים)
+4. **לחץ על "Get Model List"** כדי לבדוק את החיבור
+5. **בחר מודל ברירת המחדל**
+
+### ספקים נפוצים
+
+#### OpenAI
+```
+Provider: OpenAI
+API Key: sk-...
+Base URL: https://api.openai.com/v1 (default)
+Model: gpt-4o-mini
+```
+
+#### Anthropic (Claude)
+```
+Provider: Anthropic
+API Key: sk-ant-...
+Model: claude-sonnet-4-6
+```
+
+#### Ollama (Local)
+```
+Provider: Ollama
+Base URL: http://localhost:11434 (default)
+Model: llama3.1
+API Key: (not required)
+```
+
+#### DeepSeek
+```
+Provider: DeepSeek
+API Key: sk-...
+Model: deepseek-chat
+```
+
+### ספקים מרובים
+
+ניתן להגדיר מספר ספקים ולעבור ביניהם לפי משימה:
+- **ספק ראשי**: משמש כחלופה
+- **ספקים ספציפיים למשימה**: להחליף עבור משימות ספציפיות
+
+---
+
+## 2. מודלים ספציפיים למשימה
+
+הגדרת מודלים שונים למשימות שונות כדי לאופטימיזציה של עלויות/איכות:
+
+### סוגי משימות
+
+| משימה | מודל ברירת המחדל | מטרה |
+|------|--------------|---------|
+| **חיבור** | ספק ראשי | זיהוי רעיונות לקישורי wiki |
+| **ייצור רעיונות** | ספק ראשי | שלוף ותאר מושגים |
+| **מחקר** | ספק ראשי | סכם תוצאות חיפוש אינטרנט |
+| **תרגום** | ספק ראשי | תרגם טקסט |
+| **ייצור תרשימים** | ספק ראשי | יצר diagram Mermaid/Canvas |
+
+### דוגמה: הגדרה מושכלת מבחינת עלויות
+
+```
+Linking: gpt-4o-mini (fast, many calls)
+Concept Generation: claude-sonnet-4-6 (quality extraction)
+Research: gpt-4o (web-grounded)
+Translation: gemini-flash (multilingual)
+Diagram: ollama/llama3.1 (free, local)
+```
+
+### כיצד להגדיר
+
+1. **הגדרות → Notemd → הגדרות משימה**
+2. עבור כל משימה, בחרו:
+   - ✅ **להשתמש בספק הראשי** (ברירת מחדל)
+   - 🔄 **להשתמש בספק מותאם אישית** → בחרו ספק + מודל
+
+---
+
+## 3. הגדרות פלט
+
+### פלט הערות על מושגים
+
+**לאן נשמרות רשימות הרעיונות החדשות:**
+
+```
+Settings → Output → Concept Folder
+Default: concepts/
+```
+
+**תבנית:**
+```
+Settings → Output → Concept Template
+Default:
+---
+tags: [concept]
+created: {{date}}
+---
+
+# {{concept}}
+
+{{description}}
+
+## Backlinks
+{{backlinks}}
+```
+
+### אפשרויות מבנה התיקיות
+
+**אפשרות 1: שטוח (כל הרעיונות בתיקייה אחת)**
+```
+vault/
+└── concepts/
+    ├── Machine Learning.md
+    ├── Neural Networks.md
+    └── Deep Learning.md
+```
+
+**אפשרות 2: היררכי (לפי תיקיית המקור)**
+```
+vault/
+├── papers/
+│   └── concepts/
+│       └── Transformer.md
+└── notes/
+    └── concepts/
+        └── Attention Mechanism.md
+```
+
+להגדרה: **הגדרות → פלט → להשתמש בתיקיות היררכיות**
+
+### פלט של דיאגרמות
+
+**לאן נשמרות הדיאגרמות:**
+```
+Settings → Output → Diagram Folder
+Default: diagrams/
+```
+
+**פורמט:**
+- `.mmd` (Mermaid מקור)
+- `.canvas` (JSON Canvas)
+- `.html` (Vega-Lite)
+
+---
+
+## 4. הגדרות שפה
+
+### UI שפה
+
+**שפת הממשק** (כפתורים, מנויים, חלונות שיח):
+
+```
+Settings → Language → UI Language
+Options: 21+ languages
+Default: System language
+```
+
+נתמכות: אנגלית, 简体中文, 繁體中文, 日本語, 한국어, Español, Français, Deutsch, Русский, العربية, ועוד.
+
+### שפת הפלט
+
+שפת התוכן שנוצר (**הערות רעיוניות, סיכומי מחקר**):
+
+```
+Settings → Language → Output Language
+Options: Same as UI languages
+Default: Same as UI
+```
+
+**מקרה שימוש:** סינית UI + תוצאות באנגלית למחקר דו‑לשוני.
+
+### יעד התרגום
+
+**שפת היעד הבסיסית** למשימות תרגום:
+
+```
+Settings → Translation → Target Language
+Default: English
+```
+
+---
+
+## 5. אינטגרציה של חיפוש
+
+### Tavily (מומלץ)
+
+**שירות חיפוש מותאם AI:**
+
+```
+Settings → Search → Service: Tavily
+API Key: tvly-...
+```
+
+קבל מפתח: [tavily.com](https://tavily.com/)
+
+**תכונות:**
+- תוצאות איכותיות
+- סיכומים מותאמים AI
+- ציטוטי מקור
+
+### DuckDuckGo (ניסיוני)
+
+**אין צורך במפתח API:**
+
+```
+Settings → Search → Service: DuckDuckGo
+```
+
+**הערה:** איכות נמוכה, ללא אפשרויות התאמה.
+
+---
+
+## 6. קונפיגורציית עבודה
+
+### יצירת עבודות קסטומיות
+
+**שרשראות עבודה מחברות מספר משימות לכפתור אחד.**
+
+1. **הגדרות → שרשראות עבודה → הוסף שרשרת עבודה**
+2. **שם**: "Paper Analysis Flow"
+3. **DSL**: `process-current-add-links>extract-concepts-current>research-and-summarize>summarize-as-mermaid`
+4. **שמור**
+
+כפתור חדש מופיע בצד השמאלי.
+
+### תחביר DSL
+
+**פורמט:** `action1>action2>action3`
+
+**פעולות זמינות:**
+- `process-current-add-links` — הוסף קישורי wiki לרשימה הנוכחית
+- `extract-concepts-current` — יצירת רשימות רעיונות
+- `research-and-summarize` — מחקר באינטרנט + סיכום
+- `translate-current` — תרגום הרשימה הנוכחית
+- `summarize-as-mermaid` — יצירת דיאגרמת Mermaid
+- `process-folder-add-links` — עיבוד מאגר קבצים בקבוצה
+
+**שרשראות עבודה לדוגמה:**
+
+**שליפת רעיונות מהירה:**
+```
+process-current-add-links>extract-concepts-current
+```
+
+**מחקר מעמיק:**
+```
+process-current-add-links>research-and-summarize>extract-concepts-current
+```
+
+**ניתוח רב-לשוני:**
+```
+translate-current>process-current-add-links>extract-concepts-current
+```
+
+---
+
+## 7. הגדרות מתקדמות
+
+### עיבוד בקבוצות
+
+**עיבוד מספר קבצים במקביל:**
+
+```
+Settings → Advanced → Batch Processing
+Concurrency: 3 (default)
+```
+
+ערך גבוה יותר = מהירות גבוהה יותר אך יותר קריאות API.
+
+### חלוקה חכמה לחתיכות
+
+**עבור הערות ארוכות, חלקו לחתיכות:**
+
+```
+Settings → Advanced → Smart Chunking
+Chunk Size: 2000 words (default)
+Overlap: 200 words (default)
+```
+
+מונע שגיאות של מגבלת טוקנים.
+
+### לוח האבחון
+
+**צפייה ביומני לוג מפורטים:**
+
+```
+Settings → Advanced → Enable Diagnostics
+```
+
+מציג:
+- API בקשות/תגובות
+- שימוש בטוקנים
+- זמני עיבוד
+- שגיאות
+
+### זיהוי רעיונות חוזרים
+
+**הימנעו מרעיונות כמעט זהים:**
+
+```
+Settings → Advanced → Synonym Suppression
+Threshold: 0.8 (default, 0-1)
+```
+
+גבוה יותר = איחוד אגרסיבי יותר.
+
+---
+
+## תצורות פרופילים
+
+### ייצוא/ייבוא הגדרות
+
+**שתפו תצורות בין מכשירים:**
+
+1. **הגדרות → מתקדם → ייצוא תצורה**
+2. שומר `notemd-config.json`
+3. במכשיר חדש: **ייבוא תצורה**
+
+**מה כלול:**
+- מפתחות ספק API (אופציונלי)
+- בחירות מודלים
+- נתיבי יציאה
+- תהליכי עבודה מותאמים אישית
+
+---
+
+## תצורות מומלצות
+
+### לסטודנטים
+
+```
+Provider: OpenAI (gpt-4o-mini)
+Concept Folder: concepts/
+UI Language: System
+Output Language: System
+Workflow: "Study Flow" (add-links>extract-concepts)
+```
+
+### לחוקרים
+
+```
+Providers:
+  - Linking: DeepSeek (cheap, many calls)
+  - Concepts: Claude Sonnet (high quality)
+  - Research: GPT-4o (web-grounded)
+Concept Folder: notes/concepts/
+Hierarchical: Yes
+Workflow: "Paper Flow" (add-links>extract>research>diagram)
+```
+
+### למשתמשים הדואגים לפרטיות
+
+```
+Provider: Ollama (llama3.1)
+All tasks: Local model
+Search: DuckDuckGo (no API)
+Diagnostics: Off
+```
+
+### לעבודה דו-לשונית
+
+```
+UI Language: Chinese
+Output Language: English
+Translation Target: Chinese
+Provider: Gemini (multilingual)
+```
+
+---
+
+## פתרון בעיות בהגדרות
+
+### ההגדרות לא נשמרו
+- בדקו את זכויות הגישה לקובץ ב-`.obsidian/plugins/notemd/`
+- נסו: כבו את התוסף → הפעילו אותו שוב
+
+### מפתח API לא תקין
+- אין מרווחים נוספים
+- בדקו את תאריך התפוגה
+- בדקו את הזיכויים בלוח הבקרה של הספק
+
+### המודלים לא מוטענים
+- לחצו על "קבל רשימת מודלים" כדי לעדכן
+- בדקו את חיבור הרשת
+- נסו ספק אחר
+
+---
+
+## צעדים באופק
+
+- 📖 [לחקור את התכונות](../features/wiki-links)
+- 🔌 [מדריכי הגדרת הספק](../providers/overview)
+- ❓ [שאלות נפוצות](../faq)

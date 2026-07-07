@@ -1,0 +1,67 @@
+---
+id: google
+title: "Google"
+description: "Configurare Google Gemini"
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [google, gemini, provider, configuration]
+concepts: [Google, Gemini, API Configuration]
+citations:
+  - title: Gemini API
+    url: https://ai.google.dev
+  - title: Google AI Studio
+    url: https://aistudio.google.com
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# Provider Google
+
+<TLDR>
+**Google utilizza il trasporto nativo del linguaggio generativo Gemini API.** La configurazione predefinita attuale è `gemini-2.0-flash-exp`, `https://generativelanguage.googleapis.com/v1` e `temperature: 0.5`. Non si tratta di un profilo compatibile con OpenAI.
+
+Questo fa parte della [Obsidian Guida alla gestione delle conoscenze AI](/docs/pillar-ai-knowledge).
+</TLDR>
+
+## Impostazioni
+
+Creare una chiave Cloud API di tipo Google AI Studio o Google con accesso a Gemini, aggiungere un profilo fornitore `Google` e mantenere la base del linguaggio generativo nativo URL. Utilizzare il profilo predefinito Gemini Flash per traduzioni rapide e flussi di lavoro di note ampi, poi sovrascrivere i modelli per task specifici quando si ha bisogno di un modello Gemini più grande o potente.
+
+Evitare di inserire gli ID dei modelli Gemini in un profilo compatibile con OpenAI a meno che non si stia utilizzando esplicitamente un gateway che esponga Gemini tramite un API compatibile con OpenAI.
+
+## Endpoint e autenticazione
+
+| Campo | Configurazione predefinita attuale |
+|-------|----------------|
+| Trasporto | `google` |
+| Chiave API | Richiesto |
+| Base URL | `https://generativelanguage.googleapis.com/v1` |
+| Modello predefinito | `gemini-2.0-flash-exp` |
+| Temperature | `0.5` |
+| Test di connessione | Solo chat |
+
+Il runtime chiama `/models/{model}:generateContent?key={apiKey}`. La chiave viene passata come parametro di query poiché è così che l’endpoint nativo di Gemini è collegato nel plugin.
+
+## Scoperta dei modelli
+
+Google utilizza il modalità di scoperta `google-models`. La scoperta dovrebbe restituire i modelli Gemini disponibili per la chiave API; se il selezionatore è vuoto, verificare la chiave contro la stessa base URL e confermare che la famiglia di modelli sia abilitata per quell’account.
+
+I limiti noti dei token di output sono riconosciuti dal modello nel registro dei fornitori. Se una traduzione lunga o una spiegazione di diagramma viene troncata, selezionare un modello Gemini con una capacità di output maggiore o ridurre la dimensione dell’output richiesta.
+
+## Risoluzione dei problemi
+
+- `400`: l’ID del modello di solito non corrisponde alla rotta nativa di Gemini oppure la richiesta supera la forma supportata dal modello.
+- `401` o `403`: verificare le restrizioni della chiave, l’abilitazione del progetto/API e se la chiave può accedere a Gemini.
+- `404`: l’ID del modello non è disponibile nella versione API configurata.
+- Gli esempi di gateway falliscono in questo profilo: utilizzare invece la configurazione predefinita del gateway anziché il fornitore nativo Google.
+
+## Quando utilizzarlo
+
+Utilizzare Google per traduzioni rapide, pulizia di grandi volumi di note e flussi di lavoro in cui il rapporto costo/performance di Gemini è migliore rispetto a OpenAI o Anthropic diretti. Preferire un altro fornitore per flussi di lavoro che richiedono l’elaborazione di modelli di ragionamento compatibili con OpenAI.
+
+---
+
+## Prossimi passi
+
+- [LLM Fornitori](/docs/providers/overview) -- Configurazione completa, modelli per task e logica di riprova
+- [Traduzione](/docs/features/translation) -- Gemini Flash è consigliato per i compiti di traduzione ad alto volume

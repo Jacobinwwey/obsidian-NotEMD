@@ -1,0 +1,134 @@
+---
+id: custom-prompts
+title: "تعليمات مخصصة"
+description: "قم بتخصيص تعليمات LLM حسب احتياجاتك"
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [custom prompts, prompts, focused learning, domain]
+concepts: [Custom Prompts, Focused Learning, Prompt Engineering]
+citations:
+  - title: Obsidian
+    url: https://obsidian.md
+  - title: LLM Prompt Engineering
+    url: https://platform.openai.com/docs/guides/prompt-engineering
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# تعليمات مخصصة
+
+<TLDR>
+**Notemd يتيح لك تعديل التعليمات الافتراضية LLM لكل نوع من أنواع المهام.** التعليمات المخصصة تمنحك السيطرة على ما يعطيه النموذج الأولوية: يمكنك تقييد استخراج المفاهيم لتخصص معين، أو تغيير أسلوب الربط، أو توجيه نبرة الترجمة. متغيرات التعليمات مثل `{{content}}` و `{{concept}}` يتم استبدالها أثناء التنفيذ. ميزة المجال التعليمي المركز تضيف مجال دراستك في البداية لتحديد نطاق نتائج الاستخراج تلقائيًا.
+
+هذا جزء من [Obsidian دليل إدارة المعرفة الذكية](/docs/pillar-ai-knowledge).
+</TLDR>
+
+## نظرة عامة
+
+تعليمات Notemd الجاهزة مكتوبة لأعمال المعرفة ذات الاستخدامات العامة. إنها تعمل بشكل جيد عبر مختلف المجالات، لكنها تترك أيضًا مجالًا للتحسين حسب كل مجال. التعليمات المخصصة تسمح لك بتوجيه LLM بدقة حول كيفية العمل في حالتك الخاصة -- سواء كان ذلك يعني استخراج المصطلحات الطبية فقط، أو ربط الكيانات المسماة فقط، أو الترجمة بلغة رسمية.
+
+التعليمات المخصصة لا تحل محل التعليمات النظامية بأكملها. إنها تعدل أو تضيف إلى **الجزء المتعلق بتعليمات المهمة المحددة** مع الحفاظ على تنسيق الإخراج الهيكلي (مثل أسطر `CONCEPT:`، صيغة روابط ويكي) التي يعتمد عليها Notemd للتحليل.
+
+## كيف يعمل
+
+### هندسة التعليمات
+
+كل مهمة Notemd تتبع نفس هيكل التعليمات:
+
+```
+[System role: You are a helpful assistant...]
+[Domain constraint: Relevant Fields: [{domain}]]   <-- focused learning (optional)
+[Custom task prompt]                                <-- your override (optional)
+[Output format instructions]                        <-- always preserved
+[Content: {{content}}]                              <-- runtime substitution
+```
+
+1. **التعليمات النظامية الأساسية** -- تحدد شخصية المساعد. لا يمكن تعديلها.
+2. **المجال التعليمي المركز** -- تضيف `Relevant Fields: [medicine / law / computer science / ...]` في البداية لتقييد النطاق. هذا خيار في الإعدادات، وليس تعليمة أصلية.
+3. **التعليمات المخصصة للمهمة** -- تحل محل تعليمات المهمة الافتراضية (مثل أنواع المفاهيم التي يجب استخراجها، ومدى شدة الربط).
+4. **تنسيق الإخراج** -- قواعد هيكلية (أسطر `CONCEPT:`، صيغة روابط ويكي). يتم إضافتها دائمًا بواسطة Notemd لضمان القابلية للتحليل.
+5. **المحتوى** -- نص الملاحظة الفعلي، يتم استبداله أثناء التنفيذ عبر `{{content}}`.
+
+### متغيرات التعليمات
+
+يتم استبدال المتغيرات أثناء وقت التنفيذ. المتغيرات المتاحة تختلف حسب المهمة:
+
+| Variable | المهام | تم استبداله بـ |
+|----------|-------|---------------|
+| `{{content}}` | كل شيء | نص الملاحظة أو الاختيار |
+| `{{concept}}` | قالب مذكرة المفهوم | اسم المفهوم المستخرج |
+| `{{description}}` | قالب مذكرة المفهوم | وصف المفهوم المولد من LLM |
+| `{{backlinks}}` | قالب مذكرة المفهوم | قائمة الملاحظات الأصلية مع الروابط |
+| `{{date}}` | قالب مذكرة المفهوم | التاريخ الحالي (YYYY-MM-DD) |
+| `{{language}}` | الترجمة | لغة الإخراج المستهدفة |
+| `{{source}}` | قالب مذكرة المفهوم | اسم الملف الأساسي للملاحظة الأصلية |
+
+### مجال التعلم المركز
+
+ميزة التعلم المركزة هي اختصار لتحديد نطاق المجال. بدلاً من كتابة استعلام مخصص يذكر مجالك، قم بتحديد `focusedLearningDomain` في الإعدادات:
+
+```
+Settings → Advanced → Focused Learning Domain
+Example: "medicine" or "computer science" or "Chinese philosophy"
+```
+
+هذا يضيف `Relevant Fields: [medicine]` إلى استعلام الاستخراج، مما يجعل LLM يعطي الأولوية للمفاهيم ذات الصلة بالمجال ويقمع المفاهيم العامة. إنه أخف وزناً من استعلام مخصص كامل ويعمل في جميع مهام الاستخراج.
+
+## التكوين
+
+| الإعداد | افتراضي | التأثير |
+|---------|---------|--------|
+| `customAddLinksPrompt` | `''` | تجاوز استعلام مهمة إضافة الروابط الافتراضي |
+| `customExtractConceptsPrompt` | `''` | تجاوز استعلام استخراج المفاهيم الافتراضي |
+| `customResearchPrompt` | `''` | تجاوز استعلام البحث + التلخيص الافتراضي |
+| `customTranslatePrompt` | `''` | تجاوز استعلام الترجمة الافتراضي |
+| `customDiagramPrompt` | `''` | تجاوز استعلام إنشاء الرسوم البيانية الافتراضي |
+| `focusedLearningDomain` | `''` | إضافة سياق التخصص إلى استعلامات الاستخراج والربط |
+| `extractConceptsMinimalTemplate` | `true` | استخدام قالب ملاحظة المفهوم الذي يحتوي فقط على العنوان (يؤثر على نطاق قالب `{{concept}}`) |
+| `customConceptNoteTemplate` | `''` | تجاوز قالب ملف ملاحظة المفهوم بدعم كامل للمتغيرات |
+
+**عندما يكون حقل الاستعلام المخصص فارغاً، يتم استخدام الاستعلام الافتراضي المدمج.**
+
+## مثال
+
+أنت باحث طبي تقوم باستخراج المفاهيم من ملاحظات التجارب السريرية. الاستعلام الافتراضي يستخرج أسماء عامة إلى جانب المصطلحات الطبية، مما يزيد من تشويش مجلد المفاهيم الخاص بك.
+
+**الحل:** حدد مجال التعلم المركز واستعلام استخراج مخصص.
+
+1. ضع `focusedLearningDomain` على قيمة `medicine`
+2. ضع `customExtractConceptsPrompt` على:
+
+```
+Extract only clinically relevant concepts: diseases, drug names,
+anatomical terms, measurement endpoints, and statistical methods.
+Ignore generic English nouns, brand names, and institutional names.
+Prioritize MeSH terminology where applicable.
+```
+
+عند تشغيل أمر "Extract concepts" على ملاحظة سريرية، يُنتج LLM ما يلي:
+
+```
+CONCEPT: Randomized Controlled Trial
+CONCEPT: Double-Blind Method
+CONCEPT: Myocardial Infarction
+CONCEPT: Creatine Kinase-MB
+CONCEPT: Kaplan-Meier Estimate
+```
+
+بدلاً من السلوك الافتراضي الذي قد يستخرج أيضاً مصطلحات عامة غير مرغوب فيها مثل "hospital" أو "month".
+
+## نصائح
+
+- **ابدأ بمجال التعلم المحدد** قبل كتابة استعلام مخصص كامل. يغطي هذا النهج 80% من حالات الاستخدام باستخدام إعداد واحد فقط.
+- **حافظ على تنسيق النتائج** -- لا تزيل أبداً تعليمات التنسيق مثل "one per line" أو "CONCEPT: prefix" من الاستعلامات المخصصة. يعتمد محلل Notemd على هذه التعليمات.
+- **جرب مع ملاحظة واحدة أولاً** -- قد تؤدي الاستعلامات المخصصة إلى آثار غير متوقعة على نطاق الاستخراج. تحقق منها على ملاحظة واحدة قبل المعالجة الجماعية.
+- **اجعل الاستعلامات موجزة** -- الاستعلامات المخصصة الطويلة جداً تستهلك الرموز وقد تضعف تركيز النموذج.
+
+---
+
+## الخطوات التالية
+
+- [Wiki-Links](/docs/features/wiki-links) -- ما يتم ربطه عند تخصيص استعلام add-links
+- [Concept Notes](/docs/features/concept-notes) -- قوالب ملاحظات المفاهيم ومتغير `{{concept}}`
+- [Batch Processing](/docs/advanced/batch-processing) -- تطبيق الاستعلامات المخصصة على مجلدات كاملة
+- [Troubleshooting](/docs/advanced/troubleshooting) -- إصلاح المشكلات التي تنتج فيها الاستعلامات المخصصة نتائج غير متوقعة

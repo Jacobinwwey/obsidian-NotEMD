@@ -1,0 +1,435 @@
+---
+id: configuration
+title: "Configuratie"
+description: "Installeer de Notemd instellingen en voorkeuren"
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [configuration, settings, customization, preferences]
+concepts: [Configuration, Per-Task Models, Output Paths, Custom Workflows]
+citations:
+  - title: Obsidian
+    url: https://obsidian.md
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# Configuratie
+
+<TLDR>
+**De Notemd configuratie omvat 6 belangrijke gebieden:** (1) LLM providers en API sleutels, (2) Selectie van model per taak, (3) Outputpaden en templates, (4) UI taal en uitvoerstaal, (5) Zoekservices (Tavily/DuckDuckGo), (6) Aanpasbare workflows. Alle instellingen bevinden zich in Obsidian Settings → Notemd. Veranderingen zijn onmiddellijk van toepassing.
+</TLDR>
+
+## Overzicht van instellingen
+
+Toegang: **Obsidian Settings (⚙️) → Notemd**
+
+### Hoofdsecties
+
+1. **Providerconfiguratie** — API sleutels, basis URLs, modellen
+2. **Taakinstellingen** — Modelselectie per taak
+3. **Outputconfiguratie** — Waar genereerde bestanden worden opgeslagen
+4. **Taalinstellingen** — UI en uitvoer talen
+5. **Zoekintegratie** — Tavily/DuckDuckGo instellingen
+6. **Workflows** — Aanpasbare knoppenketens
+7. **Geavanceerd** — Diagnostiek, batchverwerking, chunking
+
+---
+
+## 1. Providerconfiguratie
+
+### Een provider toevoegen
+
+1. **Kies een provider** uit het dropdown-menu (30+ beschikbaar)
+2. **Voer de API sleutel in**
+3. **Optioneel**: Stel een aangepaste basis URL in (voor proxies/gateways)
+4. **Klik op "Get Model List"** om de verbinding te controleren
+5. **Selecteer het standaardmodel**
+
+### Algemene providers
+
+#### OpenAI
+```
+Provider: OpenAI
+API Key: sk-...
+Base URL: https://api.openai.com/v1 (default)
+Model: gpt-4o-mini
+```
+
+#### Anthropic (Claude)
+```
+Provider: Anthropic
+API Key: sk-ant-...
+Model: claude-sonnet-4-6
+```
+
+#### Ollama (Lokal)
+```
+Provider: Ollama
+Base URL: http://localhost:11434 (default)
+Model: llama3.1
+API Key: (not required)
+```
+
+#### DeepSeek
+```
+Provider: DeepSeek
+API Key: sk-...
+Model: deepseek-chat
+```
+
+### Meerdere providers
+
+U kunt meerdere providers configureren en tussen hen wisselen per taak:
+- **Hoofdprovider**: Wordt gebruikt als fallback
+- **Taakspecifieke providers**: Worden overgenomen voor specifieke taken
+
+---
+
+## 2. Taakspecifieke modellen
+
+Stel verschillende modellen in voor verschillende taken om kosten/kwaliteit te optimaliseren:
+
+### Taaktypen
+
+| Taak | Standaardmodel | Doel |
+|------|--------------|---------|
+| **Linken** | Hoofdprovider | Identificeer concepten voor wiki-links |
+| **Conceptgeneratie** | Hoofdprovider | Extracteer en beschrijf concepten |
+| **Onderzoek** | Hoofdprovider | Vat webzoekresultaten samen |
+| **Vertaling** | Hoofdprovider | Vertaal tekst |
+| **Diagramgeneratie** | Hoofdprovider | Genereer Mermaid/Canvas-diagrammen |
+
+### Voorbeeld: Kostenoptimaliseerde instelling
+
+```
+Linking: gpt-4o-mini (fast, many calls)
+Concept Generation: claude-sonnet-4-6 (quality extraction)
+Research: gpt-4o (web-grounded)
+Translation: gemini-flash (multilingual)
+Diagram: ollama/llama3.1 (free, local)
+```
+
+### Hoe te configureren
+
+1. **Instellingen → Notemd → Taakinstellingen**
+2. Voor elke taak kies je:
+   - ✅ **Gebruik hoofdprovider** (standaard)
+   - 🔄 **Gebruik aangepaste provider** → selecteer provider + model
+
+---
+
+## 3. Outputconfiguratie
+
+### Uitvoer van conceptnotities
+
+**Waar nieuwe conceptnotities worden opgeslagen:**
+
+```
+Settings → Output → Concept Folder
+Default: concepts/
+```
+
+**Template:**
+```
+Settings → Output → Concept Template
+Default:
+---
+tags: [concept]
+created: {{date}}
+---
+
+# {{concept}}
+
+{{description}}
+
+## Backlinks
+{{backlinks}}
+```
+
+### Opties voor mapstructuur
+
+**Optie 1: Flat (alle concepten in één map)**
+```
+vault/
+└── concepts/
+    ├── Machine Learning.md
+    ├── Neural Networks.md
+    └── Deep Learning.md
+```
+
+**Optie 2: Hiërarchisch (per bronmap)**
+```
+vault/
+├── papers/
+│   └── concepts/
+│       └── Transformer.md
+└── notes/
+    └── concepts/
+        └── Attention Mechanism.md
+```
+
+Configureren: **Instellingen → Output → Gebruik hiërarchische mappen**
+
+### Diagramoutput
+
+**Waar diagrammen worden opgeslagen:**
+```
+Settings → Output → Diagram Folder
+Default: diagrams/
+```
+
+**Formaat:**
+- `.mmd` (Mermaid bron)
+- `.canvas` (JSON Canvas)
+- `.html` (Vega-Lite)
+
+---
+
+## 4. Taalinstellingen
+
+### UI Taal
+
+**Interfaetaal** (knoppen, menu’s, dialoogvensters):
+
+```
+Settings → Language → UI Language
+Options: 21+ languages
+Default: System language
+```
+
+Gedekt: Engels, 简体中文, 繁體中文, 日本語, 한국어, Español, Français, Deutsch, Русский, العربية en nog veel meer.
+
+### Uitvoertaal
+
+**Taal van gegenereerd inhoud** (conceptnotities, onderzoeks samenvattingen):
+
+```
+Settings → Language → Output Language
+Options: Same as UI languages
+Default: Same as UI
+```
+
+**Gebruiksgeval:** Chinees UI + Engelse uitvoer voor tweetalig onderzoek.
+
+### Doeltaal voor vertaling
+
+**Standaard doeltaal** voor vertaaltaken:
+
+```
+Settings → Translation → Target Language
+Default: English
+```
+
+---
+
+## 5. Integratie met zoekfunctie
+
+### Tavily (Aanbevolen)
+
+**AI-geoptimaliseerde zoekservice:**
+
+```
+Settings → Search → Service: Tavily
+API Key: tvly-...
+```
+
+Krijg sleutel: [tavily.com](https://tavily.com/)
+
+**Kenmerken:**
+- Hogekwalitatieve resultaten
+- AI-geoptimaliseerde samenvattingen
+- Bronverwijzingen
+
+### DuckDuckGo (Experimenteel)
+
+**Geen API sleutel nodig:**
+
+```
+Settings → Search → Service: DuckDuckGo
+```
+
+**Opmerking:** Lagere kwaliteit, geen personalisatie.
+
+---
+
+## 6. Configuratie van workflow
+
+### Het maken van aangepaste workflows
+
+**Workflows verbinden meerdere taken met elkaar in één knop.**
+
+1. **Instellingen → Workflows → Workflow toevoegen**
+2. **Naam**: "Paper Analysis Flow"
+3. **DSL**: `process-current-add-links>extract-concepts-current>research-and-summarize>summarize-as-mermaid`
+4. **Opslaan**
+
+Een nieuwe knop verschijnt in de linkerbalk.
+
+### DSL-syntaxis
+
+**Vormgeving:** `action1>action2>action3`
+
+**Beschikbare acties:**
+- `process-current-add-links` — Wiki-links toevoegen aan de huidige notitie
+- `extract-concepts-current` — Conceptnotities genereren
+- `research-and-summarize` — Webonderzoek + samenvatting
+- `translate-current` — Huidige notitie vertalen
+- `summarize-as-mermaid` — Diagram Mermaid genereren
+- `process-folder-add-links` — Map verwerken
+
+**Voorbeelden van workflows:**
+
+**Snelle conceptextractie:**
+```
+process-current-add-links>extract-concepts-current
+```
+
+**Diepgaand onderzoek:**
+```
+process-current-add-links>research-and-summarize>extract-concepts-current
+```
+
+**Meertalige analyse:**
+```
+translate-current>process-current-add-links>extract-concepts-current
+```
+
+---
+
+## 7. Geavanceerde instellingen
+
+### Batchverwerking
+
+**Meerdere bestanden gelijktijdig verwerken:**
+
+```
+Settings → Advanced → Batch Processing
+Concurrency: 3 (default)
+```
+
+Hoger = sneller, maar meer API oproepen.
+
+### Slim chunking
+
+**Voor lange notities: opdelen in chunks:**
+
+```
+Settings → Advanced → Smart Chunking
+Chunk Size: 2000 words (default)
+Overlap: 200 words (default)
+```
+
+Voorkomt fouten door tokenlimiet.
+
+### Diagnostisch paneel
+
+**Gedetailleerde logs bekijken:**
+
+```
+Settings → Advanced → Enable Diagnostics
+```
+
+Toont:
+- API verzoeken/antwoorden
+- Tokengebruik
+- Verwerkingstijden
+- Fouten
+
+### Detectie van dubbele concepten
+
+**Vermeid bijna-identieke concepten:**
+
+```
+Settings → Advanced → Synonym Suppression
+Threshold: 0.8 (default, 0-1)
+```
+
+Hoger = agressiever samenvoegen.
+
+---
+
+## Configuratieprofielen
+
+### Export/Import instellingen
+
+**Deel configuraties tussen apparaten:**
+
+1. **Instellingen → Geavanceerd → Exporteer configuratie**
+2. Slaat `notemd-config.json` op
+3. Op nieuw apparaat: **Importeer configuratie**
+
+**Wat is inbegrepen:**
+- Provider API sleutels (optioneel)
+- Modelkeuzes
+- Uitvoerpaden
+- Aanpasbare workflows
+
+---
+
+## Aanbevolen configuraties
+
+### Voor studenten
+
+```
+Provider: OpenAI (gpt-4o-mini)
+Concept Folder: concepts/
+UI Language: System
+Output Language: System
+Workflow: "Study Flow" (add-links>extract-concepts)
+```
+
+### Voor onderzoekers
+
+```
+Providers:
+  - Linking: DeepSeek (cheap, many calls)
+  - Concepts: Claude Sonnet (high quality)
+  - Research: GPT-4o (web-grounded)
+Concept Folder: notes/concepts/
+Hierarchical: Yes
+Workflow: "Paper Flow" (add-links>extract>research>diagram)
+```
+
+### Voor gebruikers die geheimhouding belangrijk vinden
+
+```
+Provider: Ollama (llama3.1)
+All tasks: Local model
+Search: DuckDuckGo (no API)
+Diagnostics: Off
+```
+
+### Voor tweetalig werk
+
+```
+UI Language: Chinese
+Output Language: English
+Translation Target: Chinese
+Provider: Gemini (multilingual)
+```
+
+---
+
+## Problemen oplossen met configuratie
+
+### Instellingen worden niet opgeslagen
+- Controleer de bestandsrechten in `.obsidian/plugins/notemd/`
+- Probeer: Plugin uitschakelen → Opnieuw inschakelen
+
+### API Sleutel ongeldig
+- Geen extra ruimtes
+- Controleer de vervaldatum
+- Controleer de credits op het dashboard van de provider
+
+### Modellen worden niet geladen
+- Klik op "Lijst met modellen bekijken" om te vernieuwen
+- Controleer de netwerkverbinding
+- Probeer een andere provider
+
+---
+
+## Volgende stappen
+
+- 📖 [Kenmerken ontdekken](../features/wiki-links)
+- 🔌 [Gidsen voor provider instellingen](../providers/overview)
+- ❓ [FAQ](../faq)

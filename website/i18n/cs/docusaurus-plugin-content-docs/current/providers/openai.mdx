@@ -1,0 +1,67 @@
+---
+id: openai
+title: "OpenAI"
+description: "Nastavit OpenAI (GPT-4, GPT-4o)"
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [openai, gpt-4o, provider, configuration]
+concepts: [OpenAI, GPT-4o, API Configuration]
+citations:
+  - title: OpenAI API
+    url: https://platform.openai.com
+  - title: GPT-4
+    url: https://openai.com/gpt-4
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# OpenAI Provider
+
+<TLDR>
+**OpenAI využívá sdílený transport kompatibilní s OpenAI.** Aktuální přednastavení vychází ze `gpt-4o`, `https://api.openai.com/v1`, `temperature: 0.5` a testování spojení `models-then-chat`. Použijte tuto stránku, pokud potřebujete přesné sémantiky polí; pro výběr na úrovni kategorií použijte přehled [LLM Poskytovatelé](/docs/providers/overview).
+
+Toto je součástí [Obsidian Průvodce AI pro správu znalostí](/docs/pillar-ai-knowledge).
+</TLDR>
+
+## Nastavení
+
+Vytvořte klíč OpenAI API, přidejte profil poskytovatele `OpenAI` do nastavení Notemd a ponechte výchozí Base URL, pokud záměrně neukazujete na bránu kompatibilní s OpenAI. Pole modelu může zůstat na `gpt-4o` pro obecnou práci nebo být nahrazeno jiným ID modelu OpenAI, které váš účet může volat.
+
+Pro kontrolu nákladů používejte modely specifické pro úkol: uchovávejte silnější modely pro výzkum, extrakci konceptů a strukturování dlouhých textů; používejte levnější nebo rychlejší modely pro překlady, návrhy odkazů a krátké shrnutí.
+
+## Koncový bod a autentizace
+
+| Pole | Aktuální přednastavení |
+|-------|----------------|
+| Transport | `openai-compatible` |
+| Klíč API | Požadované |
+| Základní URL | `https://api.openai.com/v1` |
+| Výchozí model | `gpt-4o` |
+| Teplota | `0.5` |
+| Test spojení | `/models`, poté `/chat/completions` |
+
+Notemd normalizuje základní URLs kompatibilní s OpenAI před přidáním `chat/completions` nebo `models`. V Base URL nezahrnujte koncový `/chat/completions`; to vytváří duplikovanou cestu.
+
+## Objevování modelů
+
+OpenAI využívá obecnou cestu pro nalezení modelů kompatibilní s OpenAI. Nastavení UI nejprve požádají `/v1/models` a poté ověří vybraný model pomocí lehké chatovací žádosti. Pokud nalezení selže, ale chat stále funguje, zkontrolujte, zda váš klíč má oprávnění k seznamu modelů nebo zda brána blokuje výpis modelů.
+
+Modely pro uvažování jsou považovány za speciální případ protokolu: Notemd slučuje obsah systémového a uživatelského výzvy pro ID uvažování OpenAI, která odmítají samostatnou roli `system`, a zpřístupňuje `reasoningEffort` pouze tam, kde to definice poskytovatele podporuje.
+
+## Řešení problémů
+
+- `401` nebo `403`: ověřte klíč, přístup k projektu, stav fakturování a zda je vybraný model pro klíč povolen.
+- `404` v chatu: Base URL je obvykle chybný nebo již obsahuje `/chat/completions`.
+- Model se objevuje v dokumentaci, ale není ve výběru: přístup k seznamu modelů a přístup k chatu jsou oddělené body selhání; ručně otestujte přesné ID modelu v profilu poskytovatele.
+- Model pro uvažování odmítá zprávy: použijte ID modelu pokryté cestou zpracování uvažování OpenAI nebo přejděte na model chatu bez uvažování.
+
+## Kdy použít
+
+Používejte OpenAI, když chcete co nejpředvídatelnější výchozí hostovanou cestu, když je důležité nalezení `/v1/models`, nebo když pracovní postup závisí na sémantice modelu uvažování OpenAI. Přednostně používejte bránu nebo místního poskytovatele, pokud jsou pro směrování, soukromí nebo kontrolu nákladů důležitější než přímé chování OpenAI API.
+
+---
+
+## Další kroky
+
+- [LLM Providers](/docs/providers/overview) -- Kompletní konfigurace, modely na jednu úlohu a logika opakování
+- [Řešení problémů](/docs/advanced/troubleshooting) -- Oprava chyb 401/403 a omezení rychlosti

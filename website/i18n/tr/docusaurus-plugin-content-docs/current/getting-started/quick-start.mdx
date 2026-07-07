@@ -1,0 +1,181 @@
+---
+id: quick-start
+title: "Hızlı Başlangıç Kılavuzu"
+description: "5 dakikada Notemd ile başlayın"
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [quick start, tutorial, getting started, first steps]
+concepts: [Quick Start, LLM Configuration, One-Click Workflow, Ollama]
+citations:
+  - title: Obsidian
+    url: https://obsidian.md
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# Hızlı Başlangıç Kılavuzu
+
+<TLDR>
+**5 dakikada Notemd kullanmaya başlayın.** Üç adım: (1) Bir LLM API anahtarı ekleyin (veya yerel Ollama kullanın), (2) Bir not açın ve "Dosyayı İşle (bağlantılar ekle)" komutunu çalıştırın, (3) Kenar çubuğundaki tek tıklamalı iş akışlarını keşfedin. 30’dan fazla sağlayıcıyı destekler. Kodlama gerekmez. Ollama ile çevrimdışı da çalışır.
+</TLDR>
+
+## 1. Adım: İlk LLM Sağlayıcınızı yapılandırın (2 dakika)
+
+### Seçenek A: Bulut Sağlayıcısı (OpenAI, Anthropic vb.)
+
+1. **Ayarlar** → **Notemd** yolunu açın
+2. **LLM Sağlayıcı Yapılandırması** bölümünde açılır menüden bir sağlayıcı seçin
+3. **API Anahtarınızı** girin
+4. (İsteğe bağlı) Mevcut modelleri görmek için **"Model Listesi Al"** butonuna tıklayın
+5. Her görev türü için bir model seçin
+
+**Popüler seçenekler:**
+- **OpenAI**: `gpt-4o-mini` (hızlı, uygun fiyatlı)
+- **Anthropic**: `claude-sonnet-4-6` (yüksek kaliteli)
+- **DeepSeek**: `deepseek-chat` (çok uygun fiyatlı)
+
+### Seçenek B: Yerel Ollama (API anahtarı gerekmez)
+
+1. [Ollama](https://ollama.com/) kurun
+2. Bir model indirin: `ollama pull llama3.1`
+3. Notemd ayarlarında sağlayıcı olarak **"Ollama"** seçin
+4. Model adı: `llama3.1` (veya indirdiğiniz herhangi bir model)
+
+## Adım 2: İlk görevinizi deneyin (1 dakika)
+
+### Bir nota Wiki bağlantıları ekleyin
+
+1. Anlamlı içerikli herhangi bir notu açın
+2. Düzenleyicide sağ tıklayın
+3. **"Dosyayı işle (bağlantılar ekle)"** seçeneğini seçin
+4. Birkaç saniye bekleyin
+5. Ana kavramlar artık `[[wiki-linked]]`!
+
+**Örnek:**
+
+**Önce:**
+```
+Machine learning models use neural networks to process data.
+```
+
+**Sonra:**
+```
+[[Machine learning]] models use [[neural networks]] to process data.
+```
+
+## Adım 3: Özellikleri keşfedin (2 dakika)
+
+### Kavram notları çıkarın
+
+1. Sağ tıklayın → **"Mevcut dosyadan kavramlar çıkar"**
+2. Notemd her bir kavram için ayrı dosyalar oluşturur
+3. Yapılandırdığınız kavram klasörünüze bakın (varsayılan: `concepts/`)
+4. Her kavram notunun orijinal notunuza bir geri bağlantısı vardır
+
+### Araştırma ve Özetleme
+
+1. Notunuzdaki bir konuyu vurgulayın
+2. Sağ tık → **"Araştırma ve özetleme"**
+3. Notemd web araması yapar (Tavily veya DuckDuckGo)
+4. Özet, kaynaklarla birlikte notunuza eklenir
+
+### Tek Tıklamalı İş Akışları
+
+1. İş akışı düğmeleri için **sol kenar çubuğuna** bakın
+2. Herhangi bir not üzerinde **"Tek Tıklamalı Çıkarma"** ya tıklayın
+3. İşlem şu şekilde gerçekleşir: bağlantılar ekle → kavramları çıkar → araştırma yap → diyagram oluştur
+4. Hepsi tek tıklamada!
+
+## Yaygın İlk Görevler
+
+### Görev 1: Bir makaleyi işleyin
+
+```
+1. Paste article content into a note
+2. Run "Process file (add links)"
+3. Run "Extract concepts"
+4. Run "Research and summarize" on unfamiliar terms
+5. Run "Summarize as Mermaid diagram" for visual structure
+```
+
+### Görev 2: Notları çevirin
+
+```
+1. Highlight text to translate
+2. Right-click → "Translate to target language"
+3. Set target language in settings first
+```
+
+### Görev 3: Bir bilgi haritası oluşturun
+
+```
+1. Process 5-10 related notes with "add links"
+2. Run "Extract concepts" on each
+3. Open Graph view to see connections
+4. Your knowledge graph is forming!
+```
+
+## Özelleştirme İpuçları
+
+### Görev Bazlı Model Seçimi
+
+Farklı görevler için farklı modeller kullanabilirsiniz:
+
+| Görev | Önerilen Model | Neden |
+|------|------------------|-----|
+| Bağlantı Ekle | `gpt-4o-mini`, `deepseek-chat` | Hızlı, çok sayıda çağrı |
+| Kavram Çıkarma | `claude-sonnet-4-6`, `gpt-4o` | Kaliteli çıkarma |
+| Araştırma | `perplexity`, `gpt-4o` | Web tabanlı |
+| Çeviri | `gemini-flash`, `gpt-4o` | Çok dillilik |
+| Şemalar | `claude-opus`, yerel model | Karmaşık akıl yürütme |
+
+Yapılandırma yeri: **Ayarlar → Notemd → Görev Özelinde Modeller**
+
+### Özel İş Akışları
+
+Kendi düğmenizi oluşturun:
+
+1. Ayarlar → Notemd → İş Akışları
+2. "İş Akışı Ekle"ye tıklayın
+3. DSL girin: `process-current-add-links>extract-concepts-current>research-and-summarize`
+4. Adını "My Research Flow" olarak belirleyin
+5. Kenar çubuğunda yeni bir düğme görünür
+
+## Sorun Giderme
+
+### "API Anahtarı Geçersiz"
+- Anahtarın doğru olup olmadığını kontrol edin (ekstra boşluk yok)
+- Hesabın krediye sahip olduğundan emin olun
+- Ayarlar içindeki "Connection Test" düğmesiyle test edin
+
+### "Model Bulunamadı"
+- Mevcut modelleri görmek için "Get Model List"e tıklayın
+- Bazı sağlayıcılar belirli model adları gerektirir (örneğin, `gpt-4o` yerine `gpt-4` değil)
+
+### Bağlantılar Görünmüyor
+- Notun yeterli içeriğe sahip olduğundan emin olun (>50 kelime)
+- Daha güçlü bir model deneyin
+- LLM çağrısının başarılı olup olmadığını kontrol edin (teşhis paneline bakın)
+
+### Yavaş Performans
+- Daha hızlı modeller kullanın (`gpt-4o-mini` yerine `gpt-4o`)
+- Ayarlar içinde parça boyutunu azaltın
+- Toplu görevler için paralel işleme etkinleştirin
+
+## Sonraki Adımlar
+
+- 📖 [Tüm Özellikleri Keşfedin](../features/wiki-links)
+- ⚙️ [Gelişmiş Yapılandırma](./configuration)
+- 🔧 [LLM Sağlayıcı Ayarları](../providers/overview)
+- ❓ [Sık Sorulan Sorular](../faq)
+
+## Video Eğitimi
+
+3 dakikalık hızlı başlangıç videosunu izleyin (Çince):
+[【Tamamen Açık Kaynaklı ve Ücretsiz! NotEMD 3 Dakikalık Hızlı Başlangıç】](https://b23.tv/lqR0RlA)
+
+## Yardım Almak
+
+- 💬 **Discord**: [discord.gg/qnGgsQ9W](https://discord.gg/qnGgsQ9W)
+- 🐛 **Sorunlar**: [GitHub Issues](https://github.com/Jacobinwwey/obsidian-NotEMD/issues)
+- 📚 **Belgeler**: [Tam Dokümantasyon](https://jacobinwwey.github.io/obsidian-NotEMD/)

@@ -1,0 +1,75 @@
+---
+id: china
+title: "Các nhà cung cấp tại Trung Quốc"
+description: "Cấu hình Qwen, DeepSeek, GLM, v.v."
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [china providers, deepseek, qwen, glm, doubao, moonshot, mimo, minimax, baidu, siliconflow, huawei]
+concepts: [China Providers, DeepSeek, Qwen, Doubao, Moonshot, MiMo, GLM, MiniMax, Baidu, SiliconFlow, Huawei]
+citations:
+  - title: Qwen API
+    url: https://help.aliyun.com/zh/dashscope
+  - title: DeepSeek API
+    url: https://platform.deepseek.com
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# Các nhà cung cấp tại Trung Quốc
+
+<TLDR>
+**Notemd hỗ trợ các nhà cung cấp trong khu vực và có nguồn gốc từ Trung Quốc thông qua các điểm cuối tương thích với OpenAI.** Danh sách hiện tại bao gồm DeepSeek, Qwen, Qwen Code, Doubao, Moonshot, Xiaomi MiMo, GLM, MiniMax, Baidu Qianfan, SiliconFlow, Huawei Cloud MaaS và Z AI. Lợi ích là khả năng tiếp cận theo khu vực và kiểm soát chi phí; rủi ro nằm ở việc đặt tên mô hình và các quy định tài khoản riêng của từng nhà cung cấp.
+
+Đây là một phần của [Obsidian Hướng dẫn Quản lý Kiến thức AI](/docs/pillar-ai-knowledge).
+</TLDR>
+
+## Cài đặt
+
+Tạo tài khoản nhà cung cấp, tạo khóa API, sau đó chọn bộ cài đặt sẵn Notemd phù hợp thay vì sử dụng thiết lập tổng quát OpenAI. Bộ cài đặt này chứa các giá trị mặc định như Base URL, mô hình, chế độ kiểm tra API, hành vi khám phá mô hình và bất kỳ trường dữ liệu riêng nào của nhà cung cấp UI.
+
+Hãy sử dụng việc chọn mô hình theo từng nhiệm vụ một cách triệt để. Ví dụ, giữ DeepSeek hoặc GLM cho các công việc yêu cầu suy luận nhiều, sử dụng Qwen hoặc Moonshot cho các công việc bằng tiếng Trung rộng rãi, và chuyển các nhiệm vụ lập trình sang Qwen Code khi tài khoản đó hỗ trợ các mô hình lập trình viên.
+
+## Endpoint Và Xác thực
+
+| Nhà cung cấp | Mô hình mặc định | Base URL |
+|----------|---------------|----------|
+| DeepSeek | `deepseek-v4-pro` | `api.deepseek.com` |
+| Qwen | `qwen3-235b-a22b` | `dashscope.aliyuncs.com/compatible-mode/v1` |
+| Qwen Code | `qwen3-coder-plus` | `dashscope.aliyuncs.com/compatible-mode/v1` |
+| Doubao | (yêu cầu ID điểm cuối) | `ark.cn-beijing.volces.com/api/v3` |
+| Moonshot | `kimi-k2-0905-preview` | `api.moonshot.cn/v1` |
+| Xiaomi MiMo | `mimo-v2.5-pro` | `api.xiaomimimo.com/v1` |
+| GLM | `glm-5` | `open.bigmodel.cn/api/paas/v4` |
+| MiniMax | `MiniMax-M2.7` | `api.minimaxi.com/v1` |
+| Baidu Qianfan | `ernie-4.5-turbo-32k` | `qianfan.baidubce.com/v2` |
+| SiliconFlow | `Qwen/QwQ-32B` | `api.siliconflow.cn/v1` |
+| Huawei Cloud MaaS | `DeepSeek-V3` | `api.modelarts-maas.com/v1` |
+| Z AI | `glm-5` | `api.z.ai/api/paas/v4` |
+
+**Lưu ý:** Doubao yêu cầu ID điểm cuối Ark (định dạng: `ep-xxxxxxxx-xxxx-xxxx`) thay vì tên mô hình thông thường.
+
+Hầu hết các nhà cung cấp này sử dụng môi trường chạy chung tương thích với OpenAI, nhưng cách xử lý tài khoản và mô hình của họ khác nhau. Hãy giữ nguyên Base URL tương ứng với bộ cài đặt trừ khi bạn đã kiểm tra xong điểm cuối thay thế của tài khoản đó.
+
+## Khám phá mô hình
+
+DeepSeek, Qwen, Qwen Code, Doubao, Moonshot, Xiaomi MiMo, GLM, Z AI, MiniMax, Baidu Qianfan và SiliconFlow sử dụng cơ chế khám phá mô hình tương thích với OpenAI khi nhà cung cấp hỗ trợ việc liệt kê. Huawei Cloud MaaS sử dụng chế độ `huaweicloud-modelarts-models` vì siêu dữ liệu triển khai của ModelArts không giống hệt với danh sách tổng quát `/v1/models`.
+
+Đừng coi việc thất bại trong việc khám phá mô hình là bằng chứng cho thấy không thể trò chuyện được. Một số nhà cung cấp cho phép trò chuyện nhưng hạn chế quyền truy cập vào danh sách mô hình. Trong trường hợp đó, hãy giữ ID mô hình rõ ràng trong thiết lập và kiểm tra bằng thử nối kết.
+
+## Khắc phục sự cố
+
+- Xác thực thành công nhưng trò chuyện thất bại: tên môhình có thể nằm ngoài phạm vi hoặc khu vực được cấp quyền của tài khoản.
+- Doubao thất bại với tên môhình thông thường: hãy sử dụng ID điểm cuối Ark trong trường môhình khi việc triển khai của bạn yêu cầu điều đó.
+- Các phản hồi suy luận bị cắt ngắn: kiểm tra giới hạn số token đầu ra riêng của nhà cung cấp và các thiết lập giới hạn token dựa trên môhình của Notemd.
+- Mạng lưới theo khu vực khác nhau: sử dụng điểm cuối khu vực Trung Quốc của nhà cung cấp khi máy chứa dữ liệu nằm trong Trung Quốc; chỉ sử dụng điểm cuối quốc tế khi cả tài khoản và đường truyền mạng đều hợp lệ.
+
+## Khi nào nên sử dụng
+
+Hãy sử dụng các nhà cung cấp ở Trung Quốc khi độ trễ khu vực, khả năng thanh toán/truy cập tài khoản, chất lượng ngôn ngữ Trung Quốc hoặc chi phí là những ràng buộc chính. Hãy ưu tiên các nhà cung cấp trực tiếp OpenAI, Anthropic, Google hoặc các nhà cung cấp địa phương khi bạn cần một ranh giới giao thức đơn giản hơn hoặc tính nhất quán cao hơn trong việc gỡ lỗi giữa các nhà cung cấp.
+
+---
+
+## Các bước tiếp theo
+
+- [LLM Providers](/docs/providers/overview) -- Cấu hình đầy đủ, mô hình mỗi nhiệm vụ và logic thử lại
+- [Gỡ lỗi](/docs/advanced/troubleshooting) -- Khắc phục các lỗi kết nối khu vực và xác thực

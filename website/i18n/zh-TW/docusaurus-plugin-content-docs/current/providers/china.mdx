@@ -1,0 +1,75 @@
+---
+id: china
+title: "中國供應商"
+description: "設定 Qwen、DeepSeek、GLM 等。"
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [china providers, deepseek, qwen, glm, doubao, moonshot, mimo, minimax, baidu, siliconflow, huawei]
+concepts: [China Providers, DeepSeek, Qwen, Doubao, Moonshot, MiMo, GLM, MiniMax, Baidu, SiliconFlow, Huawei]
+citations:
+  - title: Qwen API
+    url: https://help.aliyun.com/zh/dashscope
+  - title: DeepSeek API
+    url: https://platform.deepseek.com
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# 中國供應商
+
+<TLDR>
+**Notemd** 可透過大多符合 OpenAI 標準的端點，支援中國地區及中國出身的供應商。目前的列表包含 DeepSeek、Qwen、Qwen Code、Doubao、Moonshot、Xiaomi MiMo、GLM、MiniMax、Baidu Qianfan、SiliconFlow、Huawei Cloud MaaS 與 Z AI。其優點在於能覆蓋更多地區並控制成本；缺點則是供應商特定的模型命名方式及帳戶限制。
+
+這是[Obsidian AI知識管理指南](/docs/pillar-ai-knowledge)的一部分。
+</TLDR>
+
+## 安裝
+
+建立供應商帳戶，產生一個 API 金鑰，然後選擇對應的 Notemd 供應商預設值，而非使用通用的 OpenAI 设定檔。該預設值包含預設的 Base URL、模型、API 測試模式、模型探索行為，以及任何供應商專屬的 UI 欄位。
+
+在這裡應積極採用每個任務的模型選擇方式。例如，在需要大量推理的工作流程中，保留 DeepSeek 或 GLM；對於廣泛的中文處理任務，則使用 Qwen 或 Moonshot；而當該帳號能使用程式設計師模型時，則將編碼任務轉交給 Qwen Code。
+
+## 端點與認證
+
+| 供應商 | 預設模型 | 基底 URL |
+|----------|---------------|----------|
+| DeepSeek | `deepseek-v4-pro` | `api.deepseek.com` |
+| Qwen | `qwen3-235b-a22b` | `dashscope.aliyuncs.com/compatible-mode/v1` |
+| Qwen Code | `qwen3-coder-plus` | `dashscope.aliyuncs.com/compatible-mode/v1` |
+| Doubao | （需要端點 ID） | `ark.cn-beijing.volces.com/api/v3` |
+| Moonshot | `kimi-k2-0905-preview` | `api.moonshot.cn/v1` |
+| Xiaomi MiMo | `mimo-v2.5-pro` | `api.xiaomimimo.com/v1` |
+| GLM | `glm-5` | `open.bigmodel.cn/api/paas/v4` |
+| MiniMax | `MiniMax-M2.7` | `api.minimaxi.com/v1` |
+| Baidu Qianfan | `ernie-4.5-turbo-32k` | `qianfan.baidubce.com/v2` |
+| SiliconFlow | `Qwen/QwQ-32B` | `api.siliconflow.cn/v1` |
+| Huawei Cloud MaaS | `DeepSeek-V3` | `api.modelarts-maas.com/v1` |
+| Z AI | `glm-5` | `api.z.ai/api/paas/v4` |
+
+**注意：** Doubao 需要一個 Ark 終點 ID（格式：`ep-xxxxxxxx-xxxx-xxxx`），而非一般的模型名稱。
+
+這些供應商大多使用與 OpenAI 相容的共享執行環境，但他們的帳戶與模型語意卻有所不同。除非您已確認該帳戶的替代端點，否則請保持專屬於預設值的 Base URL 不變。
+
+## 模型探索
+
+DeepSeek、Qwen、Qwen Code、Doubao、Moonshot、Xiaomi MiMo、GLM、Z AI、MiniMax、Baidu Qianfan 與 SiliconFlow 在供應商支援列出功能時，會使用與 OpenAI 相容的模型探索機制。由於 ModelArts 的部署元資料與一般的 `/v1/models` 列表並不相同，因此 Huawei Cloud MaaS 會使用 `huaweicloud-modelarts-models` 模式。
+
+不要將探索失敗視為無法進行聊天 的證據。有幾個服務供應商在限制模型清單的權限時，仍允許使用者聊天。在這種情況下，請在個人檔案中保留明確的模型 ID，並透過連線測試來驗證。
+
+## 故障排除
+
+- 認證成功但聊天失敗：模型名稱可能超出了帳戶的授權範圍或地區限制。
+- 使用普通模型名時 Doubao 會失敗：若您的部署需求如此，請在模型欄位中填入 Ark 端點 ID。
+- 推理回應被截斷：請檢查供應商特定的最大輸出代數，以及 Notemd 的模型相關最大代數設定。
+- 區域網路連線方式會有所不同：若金庫機器位於中國境內，請使用供應商的中國區端點；唯有在帳戶與網路路徑皆有效時，才可使用國際端點。
+
+## 何時使用
+
+當地延遲、付款/帳戶存取、中文語言品質或成本是主要限制時，請使用中國的服務供應商。若需要更簡化的協定架構或更穩定的跨供應商除錯一致性，則建議選用直接的 OpenAI、Anthropic、Google 或本地供應商。
+
+---
+
+## 接下來的步驟
+
+- [LLM 提供商](/docs/providers/overview) -- 完整的設定、每個任務的模型，以及重試邏輯
+- [故障排除](/docs/advanced/troubleshooting) -- 修復區域連線及認證錯誤

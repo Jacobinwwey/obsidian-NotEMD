@@ -1,0 +1,161 @@
+---
+id: troubleshooting
+title: "Solução de problemas"
+description: "Problemas comuns e soluções"
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [troubleshooting, errors, diagnostics, connection test]
+concepts: [Troubleshooting, Error Handling, Diagnostics]
+citations:
+  - title: Obsidian
+    url: https://obsidian.md
+  - title: Obsidian API
+    url: https://docs.obsidian.md
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# Solução de problemas
+
+<TLDR>
+**A maioria dos Notemd problemas se enquadra em quatro categorias: problemas principais API, conectividade de rede, erros de autenticação (401/403) e limites de taxa (429).** O teste de conexão embutido e o painel de diagnóstico identificam rapidamente a causa raiz. Esta página aborda cada mensagem de erro comum, sua causa e a correção. Para problemas que não estão listados aqui, relate‑os no GitHub Issues com a saída dos diagnósticos.
+
+Isso faz parte do [Obsidian Guia de Gestão de Conhecimento de IA](/docs/pillar-ai-knowledge).
+</TLDR>
+
+## Visão Geral
+
+Notemd depende de serviços externos -- provedores LLM e mecanismos de busca API -- portanto a maioria dos problemas tem origem fora do próprio plugin. O painel de diagnóstico nas configurações oferece uma visão estruturada da última chamada API, incluindo o pedido URL, o status da resposta e o corpo do erro. Sempre verifique isso primeiro antes de investigar mais.
+
+## Como funciona: Diagnósticos
+
+### Teste de conexão
+
+Cada seção de configuração do provedor possui um botão **"Testar Conexão"**. Ao clicar nele, é enviado um pedido mínimo API (geralmente uma lista de modelos ou uma conclusão breve) e é informado se houve sucesso ou qual erro HTTP específico ocorreu. Esta é a maneira mais rápida de verificar se sua chave API e o URL base estão corretos.
+
+### Painel de diagnósticos
+
+**Configurações --> Notemd --> Diagnósticos** exibe:
+
+| Campo | Conteúdo |
+|-------|---------|
+| Último provedor | Qual provedor foi chamado por último |
+| Último modelo | Qual modelo foi chamado por último |
+| Último status | Código de status HTTP ou erro de transporte |
+| Último erro | Mensagem de erro bruta do API |
+| Último pedido URL | Conteúdo completo URL do último pedido (chave API redigida) |
+| Corpo da última resposta | Corpo da resposta truncado (primeiros 500 caracteres) |
+
+Copie a saída completa dos diagnósticos ao relatar problemas no GitHub.
+
+## Erros comuns
+
+### Chave API inválida ou ausente
+
+**Sintoma:** HTTP 401 ou "Chave API incorreta fornecida"
+
+**Causa:** A chave API está faltando, contém espaços em branco ou pertence a um provedor diferente.
+
+**Solução:**
+1. Verifique se a chave não possui espaços no início ou no final
+2. Confirme se a chave corresponde ao provedor selecionado (uma chave OpenAI não funcionará com Anthropic)
+3. Verifique se sua conta possui créditos ou uma assinatura ativa
+4. Clique em **"Test Connection"** para verificar
+
+### Erros de rede/conexão
+
+**Sintoma:** `ERR_CONNECTION_REFUSED`, `ERR_TIMED_OUT`, `Socket hang up`, `Network request failed`
+
+**Causa:** O endpoint API não está acessível a partir da sua máquina.
+
+**Solução:**
+1. Verifique sua conexão com a internet
+2. Se estiver atrás de um proxy ou firewall, confira se o domínio API não está bloqueado
+3. Para Ollama: confirme que `ollama serve` está em execução (`ollama list` deve retornar modelos)
+4. Para LMStudio: confirme que o servidor está rodando em `localhost:1234`
+5. Tente um transporte diferente -- usuários móveis devem garantir que o transporte `requestUrl` esteja ativo
+6. Habilite `enableStableApiCall` para tentativas automáticas em caso de erros temporários
+
+### 403 Proibido
+
+**Sintoma:** HTTP 403
+
+**Causa:** Sua chave API é válida, mas não possui permissão para o recurso solicitado.
+
+**Solução:**
+1. Alguns modelos exigem acesso especial (por exemplo, o GPT-4 via Azure requer um nome de implantação)
+2. Alguns provedores restringem modelos por nível de plano -- verifique sua conta
+3. Podem haver restrições regionais (alguns provedores na China bloqueiam IPs internacionais e vice‑versa)
+4. Verifique se o nome do modelo está escrito corretamente (por exemplo, `gpt-4o` e não `gpt-4o-mini` quando o modelo mini é tudo o que seu plano permite)
+
+### Limite de taxa (429)
+
+**Sintoma:** HTTP 429 ou "Limite de taxa excedido"
+
+**Causa:** Demasias solicitações em um curto período de tempo.
+
+**Solução:**
+1. Reduza `batchConcurrency` para `1` ou `2`
+2. Aguarde alguns minutos antes de tentar novamente
+3. Consulte a documentação de limite de taxa do seu provedor para o seu nível de plano
+4. Ative `enableStableApiCall` para tentativa automática com backoff
+5. Considere mudar para um provedor com limites maiores (DeepSeek, Ollama)
+
+### Modelo não encontrado
+
+**Sintoma:** "Modelo não encontrado" ou HTTP 404
+
+**Causa:** O nome do modelo não existe no provedor selecionado.
+
+**Solução:**
+1. Clique em **"Obter Lista de Modelos"** para ver todos os modelos disponíveis para o seu provedor
+2. Alguns nomes de modelos mudam ao longo do tempo -- verifique o nome atual na documentação do provedor
+3. Para Ollama: execute `ollama list` para visualizar os modelos baixados; apenas os modelos baixados estão disponíveis
+
+### Nenhum link / Nenhum conceito gerado
+
+**Sintoma:** O comando é executado, mas não gera nenhuma saída
+
+**Causa:** O LLM retornou uma resposta vazia ou inválida.
+
+**Solução:**
+1. Verifique o painel de diagnóstico para a resposta real do LLM
+2. Tente usar um modelo mais potente (alguns modelos pequenos têm dificuldade com saídas estruturadas)
+3. Certifique‑se de que a nota tenha conteúdo suficiente (>50 palavras)
+4. Revise seu prompt personalizado em busca de instruções conflitantes
+5. Desative temporariamente a supressão de sinônimos para ver se ela está filtrando de forma excessiva
+
+### ID do endpoint Doubao faltando
+
+**Sintoma:** Erro ao usar o provedor ByteDance Doubao
+
+**Causa:** Doubao requer um ID de endpoint Ark (formato: `ep-xxxxxxxx-xxxx-xxxx`) em vez de um nome de modelo.
+
+**Correção:** Substitua o modelo de placeholder padrão pelo seu ID real do endpoint na console do Volcengine.
+
+## Configuração
+
+| Configuração de Diagnóstico | Localização | Finalidade |
+|--------------------|----------|---------|
+| **Testar Conexão** | Seções de Configurações --> Provedor | Verifique a chave API e a conectividade |
+| **Obter Lista de Modelos** | Seções de Configurações --> Provedor | Confirme quais modelos estão acessíveis |
+| `enableStableApiCall` | Configurações --> Avançado | Habilite tentativas repetidas com backoff |
+| `batchConcurrency` | Configurações --> Lote | Controle o paralelismo para evitar limites de taxa |
+
+## Como Relatar Problemas
+
+Se o seu problema não for abordado acima:
+
+1. Abrir **Configurações --> Notemd --> Diagnóstico**
+2. Copiar a saída completa do diagnóstico
+3. Abrir um problema no GitHub em [github.com/Jacobinwwey/obsidian-NotEMD/issues](https://github.com/Jacobinwwey/obsidian-NotEMD/issues)
+4. Incluir: versão Obsidian, versão Notemd, provedor, modelo, saída do diagnóstico e passos para reproduzir
+5. Remover sua chave API de quaisquer logs compartilhados
+
+---
+
+## Próximos passos
+
+- [LLM Provedores](/docs/providers/overview) -- Referência completa de configuração de provedores
+- [Processamento em Lote](/docs/advanced/batch-processing) -- Configurações de concorrência e tentativa novamente para operações grandes
+- [Promptes Personalizados](/docs/advanced/custom-prompts) -- Corrigir comportamentos inesperados de LLM ajustando os promptes

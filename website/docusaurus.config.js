@@ -5,6 +5,7 @@
 // See: https://docusaurus.io/docs/api/docusaurus-config
 
 import {themes as prismThemes} from 'prism-react-renderer';
+import {publishedLocaleCodes, publishedLocaleConfigMap} from './src/lib/publishedLocales.mjs';
 
 const siteUrl = 'https://jacobinwwey.github.io';
 const baseUrl = '/obsidian-NotEMD/';
@@ -108,17 +109,8 @@ const config = {
   // may want to replace "en" with "zh-Hans".
   i18n: {
     defaultLocale: 'en',
-    locales: ['en', 'zh-CN', 'zh-Hant', 'ja', 'fr', 'de', 'es', 'ko'],
-    localeConfigs: {
-      en: { label: 'English', direction: 'ltr', htmlLang: 'en-US' },
-      'zh-CN': { label: '简体中文', direction: 'ltr', htmlLang: 'zh-CN' },
-      'zh-Hant': { label: '繁體中文', direction: 'ltr', htmlLang: 'zh-Hant' },
-      ja: { label: '日本語', direction: 'ltr', htmlLang: 'ja-JP' },
-      fr: { label: 'Français', direction: 'ltr', htmlLang: 'fr-FR' },
-      de: { label: 'Deutsch', direction: 'ltr', htmlLang: 'de-DE' },
-      es: { label: 'Español', direction: 'ltr', htmlLang: 'es-ES' },
-      ko: { label: '한국어', direction: 'ltr', htmlLang: 'ko-KR' },
-    },
+    locales: publishedLocaleCodes,
+    localeConfigs: publishedLocaleConfigMap(),
   },
 
   themes: ['@docusaurus/theme-mermaid'],

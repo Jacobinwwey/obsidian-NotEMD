@@ -1,0 +1,67 @@
+---
+id: openai
+title: "OpenAI"
+description: "OpenAI'yi yapılandırın (GPT-4, GPT-4o)"
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [openai, gpt-4o, provider, configuration]
+concepts: [OpenAI, GPT-4o, API Configuration]
+citations:
+  - title: OpenAI API
+    url: https://platform.openai.com
+  - title: GPT-4
+    url: https://openai.com/gpt-4
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# OpenAI Sağlayıcı
+
+<TLDR>
+**OpenAI, ortak OpenAI-uyumlu taşıma mekanizmasını kullanır.** Mevcut öncelikli ayarlar `gpt-4o`, `https://api.openai.com/v1`, `temperature: 0.5` ve `models-then-chat` bağlantı testine ayarlanmıştır. Kesin alan semantiği gerektiğinde bu sayfayı kullanın; kategori düzeyinde seçim yapmak için [LLM Sağlayıcılar](/docs/providers/overview) genel bakışını kullanın.
+
+Bu içerik [Obsidian AI Bilgi Yönetimi Kılavuzu](/docs/pillar-ai-knowledge) serisinin bir parçasıdır.
+</TLDR>
+
+## Kurulum
+
+Bir OpenAI API anahtarı oluşturun, Notemd ayarlarına bir `OpenAI` sağlayıcı profili ekleyin ve kasıtlı olarak OpenAI-uyumlu bir ağ geçidi işaretlemiyorsanız varsayılan Base URL'yi koruyun. Model alanı genel işler için `gpt-4o` üzerinde kalabilir veya hesabınızın çağırabileceği başka bir OpenAI model ID ile değiştirilebilir.
+
+Maliyet kontrolü için göreve özel modeller kullanın: araştırma, kavram çıkarma ve uzun formatlı yeniden yapılandırma için daha güçlü modelleri kullanın; çeviri, bağlantı önerileri ve kısa özetler için daha ucuz veya daha hızlı modelleri kullanın.
+
+## Uç Nokta ve Kimlik Doğrulama
+
+| Alan | Mevcut ayarlar |
+|-------|----------------|
+| Taşıma | `openai-compatible` |
+| API anahtarı | Gerekli |
+| Base URL | `https://api.openai.com/v1` |
+| Varsayılan model | `gpt-4o` |
+| Sıcaklık | `0.5` |
+| Bağlantı testi | `/models`, ardından `/chat/completions` |
+
+Notemd, `chat/completions` veya `models` eklenmeden önce OpenAI-uyumlu temel URL'ları normalleştirir. Base URL içinde sonunda `/chat/completions` bulunmamalıdır; bu durum çiftlenmiş bir yol oluşturur.
+
+## Model Keşfi
+
+OpenAI, genel OpenAI-uyumlu model keşif yolunu kullanır. Ayarlar UI önce `/v1/models`'ya sorar, ardından hafif bir sohbet isteğiyle seçilen modeli doğrular. Keşif başarısız olsa da sohbet hâlâ çalışıyorsa, anahtarınızın model-list izni olup olmadığını veya bir ağ geçidinin model listesini engelleyip engellemediğini kontrol edin.
+
+Mantık modelleri bir protokol istisnası olarak ele alınır: Notemd, sistem ve kullanıcı istek içeriklerini birleştirerek OpenAI mantık ID'leri oluşturur ve ayrı bir `system` rolünü reddeder; ayrıca sağlayıcı tanımı bunu desteklediğinde yalnızca `reasoningEffort`'yi açığa çıkarır.
+
+## Sorun Giderme
+
+- `401` veya `403`: anahtarı, proje erişimini, faturalandırma durumunu ve seçilen modelin anahtar için etkin olup olmadığını doğrulayın.
+- Sohbet üzerinde `404`: Base URL genellikle yanlıştır veya zaten `/chat/completions` içerir.
+- Model belgelerde görünüyor ancak seçicide yok: model-list erişimi ve sohbet erişimi ayrı hata noktalarıdır; sağlayıcı profilinde doğru model ID'sini manuel olarak test edin.
+- Mantık modeli mesajları reddediyor: OpenAI mantık işleme yolunu kapsayan bir model ID kullanın veya mantık özelliği olmayan bir sohbet modeline geçin.
+
+## Ne Zaman Kullanılmalı
+
+En öngörülebilir varsayılan barındırma yolunu istediğinizde, `/v1/models` keşfinin önemli olduğu durumlarda veya bir iş akışının OpenAI mantık modeli semantiğine bağlı olduğunda OpenAI kullanın. Yönlendirme, gizlilik veya maliyet kontrolü doğrudan OpenAI API davranışından daha önemliyse bir ağ geçidi veya yerel sağlayıcı tercih edin.
+
+---
+
+## Sonraki Adımlar
+
+- [LLM Sağlayıcılar](/docs/providers/overview) -- Tam yapılandırma, görev başına modeller ve yeniden deneme mantığı
+- [Sorun Giderme](/docs/advanced/troubleshooting) -- 401/403 ve sınırlama hatalarını düzeltin

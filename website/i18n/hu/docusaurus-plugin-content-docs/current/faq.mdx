@@ -1,0 +1,359 @@
+---
+id: faq
+title: "Szeretettel kérdezett kérdések"
+description: "Általános kérdések a Notemd telepítésére, funkcióinak és használatára vonatkozóan"
+keywords: [faq, installation, LLM providers, obsidian plugin, wiki-links, concept notes, Copilot alternative, Smart Connections alternative, obsidian AI plugin comparison]
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+concepts: [Notemd, Obsidian, LLM, wiki-links, concept notes, knowledge base, Copilot Alternative, AI Plugin Comparison]
+citations:
+  - title: Obsidian
+    url: https://obsidian.md
+  - title: Ollama
+    url: https://ollama.com
+faqItems:
+  - question: How do I install Notemd in Obsidian?
+    answer: Open Obsidian Settings, go to Community Plugins, Browse, search Notemd, Install, and Enable. Requires Obsidian 0.15.0 or later. Manual installation is also available via GitHub Releases.
+  - question: What LLM providers does Notemd support?
+    answer: Notemd supports 30+ providers including OpenAI, Anthropic, Google, xAI, Mistral, DeepSeek, Qwen, Ollama, LM Studio, Azure OpenAI, OpenRouter, and many China-focused providers like Qwen, Doubao, Moonshot, and GLM.
+  - question: Can Notemd work with local LLMs?
+    answer: Yes. Notemd works with Ollama, LM Studio, vLLM, LocalAI, and any OpenAI-compatible endpoint. All tasks work with local models including linking, concept generation, translation, research, and diagram generation.
+  - question: How does Notemd differ from ChatGPT?
+    answer: ChatGPT produces ephemeral chat answers. Notemd writes persistent structured results directly into your Obsidian vault as wiki-linked files, concept notes, diagrams, and translations that accumulate into a knowledge base.
+  - question: How does Notemd compare to Copilot or Smart Connections?
+    answer: Copilot is conversation-first for chatting about notes. Smart Connections is discovery-first for finding similar notes. Notemd is write-first, processing notes with AI and writing structured results into your vault. All three complement each other.
+  - question: Which search services work with Notemd research?
+    answer: Tavily (recommended, AI-optimized search, requires API key) and DuckDuckGo (experimental, no API key needed). Research results are summarized by LLM and appended to your note with source citations.
+  - question: Does Notemd support Chinese or other languages?
+    answer: The UI supports 21+ languages. Task output language is independently configurable, allowing mixed setups like Chinese UI with English output or vice versa.
+  - question: Can I use Notemd for paper or PDF reading?
+    answer: Yes. Convert PDF to Markdown using MinerU, open in Obsidian, then run Notemd tasks to add wiki-links, generate concept notes, extract text, research background, translate sections, and create Mermaid diagrams.
+  - question: What diagram types can Notemd generate?
+    answer: Mermaid (flowchart, sequence, class, state, ER, Gantt with syntax auto-fix), JSON Canvas (Obsidian native), Vega-Lite (data charts), HTML fallback, and explicit editable HTML/SVG figure artifacts. Draw.io XML and Drawnix JSON exporter boundaries are available for deterministic artifact testing.
+  - question: Is Notemd free and open source?
+    answer: Yes. MIT licensed, no paid tiers, no cloud lock-in, no telemetry. Source code on GitHub with 234+ stars. Pull requests welcome.
+  - question: Can Notemd work 100% offline?
+    answer: Yes with Ollama. No API key, no internet needed. All features work offline including wiki-links, concept notes, translation, and diagrams. DuckDuckGo research also works without an API key.
+  - question: Is my data sent to the cloud?
+    answer: With Ollama or LM Studio, no data leaves your machine. With cloud providers like OpenAI or Anthropic, your note content is sent as API input. Notemd itself collects no telemetry or user data.
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# Szeretettel kérdezett kérdések
+
+<TLDR>
+**Rácsok a leggyakoribb Notemd kérdésekre.** Érinti a telepítést (5 percű beállítás), 30+ LLM fornalmazó támogatást, helyi/mentési modell opciókat, egy kattintással futtató munkafolyamatokat, több nyelvű UI (21 nyelv), wiki-hivatkozások automatizálását, kutatási integrációt, PDF olvasási munkafolyamatokat, diagramok készítését és az open-source licencelést. Minden funkció működik offline-ül Ollama-vel.
+</TLDR>
+
+---
+
+## Telepítés & Beállítás
+
+### Hogyan telepíthetem a Notemd-t a Obsidian-ban?
+
+Nyitja meg a Obsidian **Beállítások → Közösségi pluginek → Keresés** → keresze **"Notemd"** → **Telepítsen** → **Engedélyezzen**.
+
+**Elvárások:**
+- Obsidian 0.15.0+
+- Támogatott a számítógépen (Windows, macOS, Linux) és mobilon (iOS, Android)
+
+**Manuális telepítés:**
+1. Letöltse a `main.js`, `styles.css`, `manifest.json`-t a [GitHub Releases](https://github.com/Jacobinwwey/obsidian-NotEMD/releases)-ből
+2. Rakja őket be a `<your-vault>/.obsidian/plugins/notemd/`-ba
+3. Uramollítsa a Obsidian-t és engedélyezze a plugint
+
+**Statistika:** 4k+ letöltés, 44 kiadás, MIT licencelés.
+
+---
+
+## LLM konfiguráció
+
+### Milyen LLM szolgáltatókat támogat Notemd?
+
+Notemd **30+ szolgáltatót** támogat:
+
+**Mégközösségi szolgáltatók:**
+- OpenAI (GPT-4, GPT-4o, GPT-4o-mini, o1, o3)
+- Anthropic (Claude Opus, Sonnet, Haiku)
+- Google (Gemini Pro, Flash, Ultra)
+- xAI (Grok)
+- Mistral, DeepSeek, Qwen, Moonshot, GLM
+
+**Kínára kifejezetten:**
+- Qwen, Qwen Code, Doubao, Moonshot, Xiaomi MiMo, GLM, Z AI, MiniMax
+- Huawei Cloud MaaS, Baidu Qianfan, SiliconFlow
+
+**Lokális/önmagukat futtatók:**
+- Ollama
+- LM Studio
+- Bármely OpenAI-kompatibilis végpont
+
+**Gatewekek:**
+- Azure OpenAI, OpenRouter, Together AI, Groq, AIHubMix
+- GitHub Models, Fireworks, LiteLLM, Nebius, Cerebras
+- Hugging Face, Vercel AI Gateway, Requesty
+
+### Hogyan működhet Notemd a helyi LLM-ekkel?
+
+**Igen, teljesen támogatott.** Notemd működik az alábbiakkal:
+- **Ollama** (nativ integráció)
+- **LM Studio** (OpenAI-kompatibilis végpont keresztül)
+- **vLLM, LocalAI, text-generation-webui** (OpenAI-kompatibilis módban)
+
+Minden munka helyi modellekkel működik: kötés, koncept generálás, fordítás, kutatás és diagram generálás.
+
+**Összekeverési példa:**
+- Ollama (helyi) kötéshez → gyors, privát, ingyenes
+- OpenAI kutatáshoz → magas minőség, webkeresés integrációja
+- Gemini fordításhez → multimodális támogatás
+
+### Hogyan konfigurálom különböző modellt különböző munkákhoz?
+
+A **Notemd Beállítások**ban minden munkának külön felelősségi területi/modell választói vannak:
+
+| Munka | Példai beállítások |
+|------|----------------------|
+| **Összekötés** | DeepSeek (gyors, olcsó) |
+| **Koncept kialakítása** | Claude Opus (magas minőség) |
+| **Tudományos kutatás** | Perplexity vagy GPT-4o (web-alapú) |
+| **Übersetzung** | Gemini Flash (multimodális) |
+| **Diagram kialakítása** | Ollama (lokal, privát) |
+
+Ez a munkaalapú optimalizálás egyenlegeséget teremt a sebesség, a költség és a minőség között.
+
+---
+
+## Fő funkciók
+
+### Hogy különbözik a Notemd a ChatGPT-tól papírú könyvek olvasásában?
+
+| Dimenzió | ChatGPT | Notemd |
+|-----------|---------|--------|
+| **Kielégítés helye** | Chatt-történet (tüntető) | Obsidian tárgyár (továbbítható fájlok) |
+| **Eredmény formátuma** | Szöveges válasz | Wiki-hivatkozások, koncepti leírások, diagramok, fordítások |
+| **Hosszú távú értéke** | Seszió után eltűnik | Összejön egy tudományos bázisba |
+| **Használati lehetőségei** | Először kell kérdezni újra | A fájlok maradnak, a hivatkozások változnak |
+
+**Használja ChatGPT-t:** Gyors kérdés-összefoglalásokhoz, egyetlen alkalomú leírásokhoz
+**Használja Notemd-t:** Hosszú távú, struktúrált tudományos bázis kialakításához hétök/hónapok alatt
+
+### Hogyan hozzáadja Notemd wiki-hivatkozásokat a jegyeikhez?
+
+**Proces:**
+1. Egy jegyenél futtatja az "Process file (add links)" parancsot
+2. Notemd küldi a szöveget a beállított LLM-ébe
+3. A LLM az összefüggésekben lévő kulcskoncepteket azonosítja
+4. Notemd beilleszi a `[[wiki-links]]`-t minden koncept jelentkezésén
+5. Választhatóan automatikusan létrehoz személyre szabott mappában konceptjelöltetéseket
+
+**Funkciók:**
+- Szinonimus elszámolása (kerüli a "transformer" és "transformers" duplikátusait)
+- Konceptjelöltetésekből forrásokra vezető hivatkozások
+- Hivatkozások intézete újnevezés vagy törléskor
+- Tisztas extraction módszer (kivonja a koncepteket, anélkül hogy módosítaná az eredeti anyagot)
+
+### Mi a Notemd egy kattintással futó munkafolyam?
+
+**Egy kattintással futó munkafolyamok** több műveletet összeköti egy **egyetlen oldalsávon lévő gombba**.
+
+**Alapértelmezett munkafolyam:** `One-Click Extract`
+```
+process-current-add-links > extract-concepts-current > research-and-summarize > summarize-as-mermaid
+```
+
+**Eredmény:** Egy kattintásra megjelenik az alábbiak:
+1. Jelölje be wikihivatkozásokat a jelen jelöltetéshez
+2. Készítsen ki konceptjelöltetéseket új kifejezéseknek
+3. Keressön és adjon hozzá háttérinformációkat
+4. Súrjon össze egy Mermaid diagramként
+
+**Szerkeszthető munkafolyamatok:** A beállításokban a DSL formátumban hozhatsz létre saját munkafolyamatodat. Minden munkafolyamat egy újrahasználható oldalsávon lévő gombként jelenik meg.
+
+### Mi a különbség Notemd között Copilot vagy Smart Connections és?
+
+Ezek a pluginek megoldják különböző problémákat:
+
+- **Copilot** — Beszélgetés előnyben. Az AI-vel beszélhetsz a jegyeidről. Az AI válaszai a beszélgetési panelban maradnak; ők nem módosítják a tárgyaidat.
+- **Smart Connections** — Keresés előnyben. A plugin semantikailag hasonló jegyeket az embeddingek segítségével találja ki. Így nem teremt vagy módosít tartalmakat.
+- **Notemd** — Irodás előnyben. Az AI feldolgozza a jegyeidet és struktúrált eredményeket (wiki-hivatkozásokat, konceptjelölt jegyeket, kutatási információkat, diagramokat, fordításokat) közvetlenül a tárgyaidba, örökös fájlokként ír be.
+
+| Mi szükséges neked | Tajározott plugin |
+|----------------|-------------------|
+| Beszélgetés az AI-vel a jegyeidről | Copilot |
+| Hasonló/keresett jegyeek találata | Smart Connections |
+| Automatikus wiki-hivatkozások beillesztése és tudományos grafikon kialakítása | **Notemd** |
+| Konceptjelölt jegyek készítése visszahivatkozásokkal | **Notemd** |
+| Diagramok kialakítása a jegyek tartalmából | **Notemd** |
+| Egy téma kutatására és összefoglalások hozzáadására | **Notemd** |
+
+A három is együtt használható – egymást teljesíti, nem konkurelik.
+
+---
+
+## Kutatás & Übersetzung
+
+### Mely keresési szolgáltatások működnek Notemd kutatással?
+
+| Szolgáltatás | API kulcs szükséges | Minőség | Megjegyzések |
+|---------|-----------------|---------|-------|
+| **Tavily** | Igen | Magas | Tajározott, AI-optimális keresés |
+| **DuckDuckGo** | Nem | Kísérleti | Nincs beállítás, alacsonyabb minőség |
+
+**Hogyan működik a „Tudományos kutatás és összefoglalás“:**
+1. Kiválaszol egy témát vagy futtathatsz azt a jelenlegi figyelemen
+2. Notemd kérdezi a keresési szolgáltatást
+3. Eredmények → LLM összefoglalása
+4. Az összefoglalás csatlakozik a figyelemhez forrásokkal együtt
+
+**Eredmény:** Hosszú távú kutatási követés a tárolódban, nem a böngésző ablakainak benne.
+
+### Képes-e Notemd kínai vagy más nyelveket támogatni?
+
+**UI nyelvek:** 21+ támogatott nyelv
+- Angol, 中文 (简体), 中文 (繁體), 日本語, 한국어
+- Arabul, németül, franciaul, spanyolul, ruszul, portugálul, italánul
+- Hindit, bengáliul, thaít, vietnámít, törökül, polgáriul, csehül és többekkel
+
+**Feladat kiinduló nyelve:** Független beállítás
+- UI kínai nyelven + kiinduló angolul: ✅
+- UI angol nyelven + kiinduló kínaiul: ✅
+
+**Használati eset:** Kétnyelvű kutatók lehetővé teszik, hogy UI-t a hivatalos nyelükben tartják, ugyanakkor angol nyelven írják a publikációhoz szóló figyelemeket.
+
+---
+
+## PDF és akadémiai munkafolyamatok
+
+### Hogyan használhatom Notemd papír/PDF olvasására?
+
+**Igen.** Munkafolyam:
+1. **Átváltson PDF → Markdown** a [MinerU](https://github.com/opendatalab/MinerU) segítségével (ajánlott akadémiai papírokhoz)
+2. Nyitja meg a Markdown fájlt Obsidian-ban
+3. Hajtson el Notemd munkáit:
+   - **Hozza létre wiki-hivatkozásokat** a kulcstermekhez
+   - **Készítse ki konceptleírásokat** az ismeretlen terminológiahoz
+   - **Kivágtasson a valódi szöveget** különleges kérdésekkel (pl. "Mik vannak a korlátai?")
+   - **Keressön ki a háttérinformációt** a citált metodák/könyvtákokhoz
+   - **Ügyelje meg** a nehéz részeket
+   - **Komprimálja az Mermaid diagramként** a struktúrái megértéshez
+
+**Verzió 1.9.1+:** Kötetstruktúra kivágtatása TOC támogatással
+
+**Eredmény:** A papír olvasása egy struktúrizált, hivatkozható tudományi elemként jutszik létre a tárgyárnyaiban.
+
+---
+
+## Diagramok és vizualizálás
+
+### Milyen típusú grafikonok/diagramokat tud generálni Notemd?
+
+| Típus | Támogatás | Funkciók |
+|------|---------|----------|
+| **Mermaid** | Teljes | Flussdiagram, sorrend, osztály, állapot, ER, Gantt, automatikus szintaxis kihirdése, batch valósítási ellenőrzés |
+| **JSON Canvas** | Teljes | Obsidian helyi canvas layoutok |
+| **Vega-Lite** | Teljes | Adatdiagramok, időszakos sorok, sütők, szórások, szabványozhatóak |
+| **HTML** | Választékos megoldás | Nem támogatott diagramtípusoknál |
+| **Írható HTML/SVG** | Kifejezett cél | Semleges belső SVG semantikus Draw.io-stílusú figyelemekkel |
+| **Draw.io / Drawnix artefektumok** | Eksport szabálya | Deterministikus XML/JSON a `SemanticFigureModel` alapján; nincs editor futtatási függősége |
+
+**Mermaid automatikus kihelyezés:** Mély debug módban helyreállítások:
+- Rombult szívek (`-->`, `-.->`, `==>`)
+- Néveltelenség, kommentek
+- Alkotógrafikon szintaxis hibái
+- Forma jelölése (`[`, `(`, `{`, `((`)
+- Szivattyú karakterek a névekben
+- Megjegyzés függvények
+
+**Munkafolyam:**
+1. Indítson az "Összefoglalja mint Mermaid diagramot" egy megjegyzésen
+2. Előnézet modális ablakban
+3. Eksportáljon SVG vagy PNG formátumban
+4. Vagy tárolja meg `.mmd` fájlként a tárgyában
+
+---
+
+## Otvorható forráskód és közösség
+
+### A Notemd ingyenes és otvorható forráskódú?
+
+**Igen.**
+- **Lizens:** MIT (engedélyes, kereskedelmi használás engedélyezett)
+- **Forráskód:** https://github.com/Jacobinwwey/obsidian-NotEMD
+- **Nem van fizetős szintek, nincs felhőben kötés, nincs telemetriá**
+- **Közösség:** 234+ GitHub csillag, aktív Discord
+
+**Ön tulajdonosa:**
+- Adatai (maradnak a tárgyában)
+- A munkafolyamai (szabályozható a kérelemek, modellek, sorok)
+- A privátossága (lokal LLM támogatás)
+
+**Közvetkezés:** Elkövethető pull request-k. Lépjen hozzá a [CONTRIBUTING.md](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/CONTRIBUTING.md)-hez
+
+---
+
+## Hibaelhárítás
+
+### A LLM kéréseim nem működnek. Mit kell ellenőrizni?
+
+1. **A API kulcs változatos?** Ellenőrizze a Beállítások → Feltételek konfigurációját
+2. **A modell neve helyes?** Használja a beállításokban lévő "获取模型列表" (Get Model List) gombot
+3. **Hálózati hozzáférhetőség?** Some providers require VPN
+4. **Hárfogáskorlátok?** Check provider dashboard
+5. **Diagnozis:** Run "Connection Test" in settings for detailed error logs
+
+### Notemd is lass. Hogyan lehetővé tenni a gyorsítást?
+
+1. **Használj gyorsabb modellt:** DeepSeek, Gemini Flash, GPT-4o-mini
+2. **Kecselsd le a blokk méretét:** Settings → Smart Chunking → lower word count
+3. **Paralel feldolgozás:** Settings → Batch Processing → increase concurrency
+4. **Lokális modellt:** Ollama for tasks that don't need web search
+
+### Can Notemd work 100% offline?
+
+**Igen, Ollama-vel.** No API key, no internet, no data leaves your machine:
+
+1. Install [Ollama](https://ollama.com) and run `ollama serve`
+2. In Notemd settings, select **Ollama** as your provider
+3. Pull a model: `ollama pull llama3` (or qwen2.5, gemma2, etc.)
+4. All features work: wiki-links, concept notes, translation, diagrams
+
+**DuckDuckGo research** also works without an API key (experimental quality).
+
+With cloud providers (OpenAI, Anthropic, Google, DeepSeek, etc.), your note content is sent as API input. Check each provider's privacy policy for data handling details.
+
+### A adatomaim az égboltba küldődnek?
+
+**Ez attól függ, melyt használ:**
+
+| Társító típusa | Adatomaim az égboltba küldődnek? | Megjegyzések |
+|--------------|---------------------|-------|
+| **Ollama (lokal)** | Nem | Mind a számítógépeden marad |
+| **LMStudio (lokal)** | Nem | Ugyanaz, mint a Ollama |
+| **DeepSeek, OpenAI, stb.** | Igen | A megjegyzés tartalmát API beállításaként küldjük a feldolgozásra |
+| **OpenRouter, AIHubMix** | Igen | Mégközvetítő, amely irányít a felhőszolgáltatókhoz |
+
+Notemd maga nem gyűjti **sem telemetriát, sem analitikát, sem használóadatokat**. A plug-in teljesen nyílt forrású (MIT). A legyenek azonban a gépedtől kiszállók azok, amit te szintén küldel a konfigurált LLM szolgáltatódhoz.
+
+### Mely Obsidian AI plug-in a kutatásokhoz a legjobb?
+
+Ez attól függ, milyen kutatási munkafolyamatot használod:
+
+| Szükség van | Plug-in | Miért |
+|------|--------|-----|
+| Kapcsolódó tanulmányok/figyelemkönyvek találása | Smart Connections | Semantikus hasonlóságok keresése |
+| Forrásaidról beszélgetés | Copilot | A tároló kontextusaival való konverszác |
+| Konceptek automatikus kötésé + figyelemkönyvek készítése | **Notemd** | A AI azonosítja a koncepteket, beilleszi a hivatkozásokat, készíti fel a figyelemkönyveket |
+| Webes kutatás + összefoglalás a figyelemkönyvekben | **Notemd** | Tavily/DuckDuckGo keresés → LLM összefoglalás → a jegyzethez csatlakoztatás |
+| Tudományi adatokból diagramok készítése | **Notemd** | Mermaid/Canvas/Vega-Lite a jegyzet tartalmából |
+
+**Tanácsolt kombináció:** Smart Connections (keresés) + Notemd (struktúrizálás) + Copilot (beszélgetés).
+
+---
+
+## Segítség kérés
+
+- **Dokumentáció:** https://jacobinwwey.github.io/obsidian-NotEMD/
+- **GitHub kérdések:** https://github.com/Jacobinwwey/obsidian-NotEMD/issues
+- **Discord:** https://discord.gg/qnGgsQ9W
+- **Támogatók:** https://github.com/sponsors/Jacobinwwey

@@ -1,0 +1,134 @@
+---
+id: custom-prompts
+title: "Aanpasbare prompts"
+description: "Pas de LLM prompts aan op uw behoeften"
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [custom prompts, prompts, focused learning, domain]
+concepts: [Custom Prompts, Focused Learning, Prompt Engineering]
+citations:
+  - title: Obsidian
+    url: https://obsidian.md
+  - title: LLM Prompt Engineering
+    url: https://platform.openai.com/docs/guides/prompt-engineering
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# Aanpasbare prompts
+
+<TLDR>
+**Notemd stelt u in staat om de standaard LLM prompt voor elk taaktype te overschrijven.** Aanpasbare prompts geven u controle over wat het model prioriteert: u kunt conceptuitwinning beperken tot een specifieke discipline, de linkstijl wijzigen of de toon van de vertaling sturen. Promptvariabelen zoals `{{content}}` en `{{concept}}` worden op runtime vervangen. De functie ‘gerichte leerdomen’ voegt uw studierichting toe om de resultaten van de uitwinning automatisch te beperken.
+
+Dit maakt deel uit van de [Obsidian AI Knowledge Management Guide](/docs/pillar-ai-knowledge).
+</TLDR>
+
+## Overzicht
+
+De ingebouwde prompts van Notemd zijn geschreven voor algemeen gebruik in kenniswerk. Ze werken goed in verschillende domeinen, maar laten ook ruimte voor verbeteringen die specifiek zijn voor een bepaald domein. Aanpasbare prompts stellen u in staat om aan LLM precies te vertellen hoe het zich moet gedragen voor uw gebruikssituatie – of dat nu betekent dat alleen medische terminologie wordt uitgewerkt, alleen genoemde entiteiten worden gelinkt of er in een formeel register wordt vertaald.
+
+Aanpasbare prompts vervangen de volledige systeemprompt niet. Ze overschrijven of versterken het **taakspecifieke instructiegedeelte** terwijl ze het structurele uitvoerformaat (bijv. `CONCEPT:`-regels, wiki-link-syntaxis) behouden dat Notemd nodig heeft voor parsing.
+
+## Hoe het werkt
+
+### Promptarchitectuur
+
+Elke Notemd taak volgt dezelfde promptstructuur:
+
+```
+[System role: You are a helpful assistant...]
+[Domain constraint: Relevant Fields: [{domain}]]   <-- focused learning (optional)
+[Custom task prompt]                                <-- your override (optional)
+[Output format instructions]                        <-- always preserved
+[Content: {{content}}]                              <-- runtime substitution
+```
+
+1. **Basis systeemprompt** -- Stelt de assistentenpersoon vast. Niet overschrijfbaar.
+2. **Gerichte leerdomen** -- Voegt `Relevant Fields: [medicine / law / computer science / ...]` toe om het bereik te beperken. Dit is een instellingstoets, geen brute prompt.
+3. **Aanpasbare taakprompt** -- Vervangt de standaard taakinstructies (bijv. welke soorten concepten er uitgewerkt moeten worden, hoe agressief er gelinkt moet worden).
+4. **Uitvoerformat** -- Structuurregels (`CONCEPT:`-regels, wiki-link-formaat). Wordt altijd door Notemd toegevoegd om parseerbaarheid te garanderen.
+5. **Inhoud** -- De daadwerkelijke notetekst, die op runtime wordt vervangen via `{{content}}`.
+
+### Promptvariabelen
+
+Variabelen worden bij uitvoering vervangen. De beschikbare variabelen verschillen per taak:
+
+| Variable | Taakken | Vervangen door |
+|----------|-------|---------------|
+| `{{content}}` | Alle | Het notitie- of selectietekst |
+| `{{concept}}` | Template voor conceptnotitie | De geëxtraheerde conceptnaam |
+| `{{description}}` | Template voor conceptnotitie | Beschrijving van het concept gegenereerd door LLM |
+| `{{backlinks}}` | Template voor conceptnotitie | Lijst van bronnotities met links |
+| `{{date}}` | Template voor conceptnotitie | Huidige datum (YYYY-MM-DD) |
+| `{{language}}` | Vertaling | Doeltaal voor de uitvoer |
+| `{{source}}` | Template voor conceptnotitie | Basisnaam van de bronnotitie |
+
+### Gefocust leergebied
+
+De gefocuste leerfunctie is een snelkoppeling voor het beperken van het leergebied. In plaats van een aangepaste prompt te schrijven waarin uw vakgebied wordt genoemd, stelt u `focusedLearningDomain` in de instellingen in:
+
+```
+Settings → Advanced → Focused Learning Domain
+Example: "medicine" or "computer science" or "Chinese philosophy"
+```
+
+Dit voegt `Relevant Fields: [medicine]` toe aan de extractieprompt, waardoor de LLM prioriteit geeft aan concepten die relevant zijn voor het gebied en generieke concepten onderdrukt. Het is lichter dan een volledig aangepaste prompt en werkt bij alle extractietaken.
+
+## Configuratie
+
+| Instelling | Standaard | Effect |
+|---------|---------|--------|
+| `customAddLinksPrompt` | `''` | De standaard prompt voor het toevoegen van links overschrijven |
+| `customExtractConceptsPrompt` | `''` | De standaard prompt voor conceptextractie overschrijven |
+| `customResearchPrompt` | `''` | De standaard prompt voor onderzoek + samenvatting overschrijven |
+| `customTranslatePrompt` | `''` | De standaard prompt voor vertaling overschrijven |
+| `customDiagramPrompt` | `''` | De standaard prompt voor diagramgeneratie overschrijven |
+| `focusedLearningDomain` | `''` | Disciplinaire context toevoegen aan extractie- en linkerprompten |
+| `extractConceptsMinimalTemplate` | `true` | Gebruik het conceptnotitietemplate met alleen de titel (beïnvloedt het bereik van het `{{concept}}` template) |
+| `customConceptNoteTemplate` | `''` | Het conceptnotitiefilamentemplate overschrijven met volledige variabelenondersteuning |
+
+**Wanneer een veld van de aangepaste prompt leeg is, wordt de ingebouwde standaardprompt gebruikt.**
+
+## Voorbeeld
+
+U bent een medisch onderzoeker die concepten uit klinische proefnotities extrahiert. De standaardprompt haalt zowel generieke zelfstandige naamwoorden als medische termen op, waardoor uw conceptmap overvol raakt.
+
+**Oplossing:** Stel een gefocust leergebied in en gebruik een aangepaste extractieprompt.
+
+1. Stel `focusedLearningDomain` in op `medicine`
+2. Stel `customExtractConceptsPrompt` in op:
+
+```
+Extract only clinically relevant concepts: diseases, drug names,
+anatomical terms, measurement endpoints, and statistical methods.
+Ignore generic English nouns, brand names, and institutional names.
+Prioritize MeSH terminology where applicable.
+```
+
+Nu wanneer je "Extract concepts" uitvoert op een klinisch verslag, genereert de LLM:
+
+```
+CONCEPT: Randomized Controlled Trial
+CONCEPT: Double-Blind Method
+CONCEPT: Myocardial Infarction
+CONCEPT: Creatine Kinase-MB
+CONCEPT: Kaplan-Meier Estimate
+```
+
+In plaats van het standaardgedrag dat ook ongewenste algemene termen zoals "hospital" of "month" kan extraheren.
+
+## Tips
+
+- **Begin met het gefocuste leergebied** voordat je een volledige aangepaste prompt schrijft. Dit dekt 80% van de gebruiksscenario’s met één instelling.
+- **Behoud de uitvoerformat** -- Verwijder nooit instructies over het formaat zoals "one per line" of "CONCEPT: prefix" uit aangepaste prompts. De parser van Notemd is hiervan afhankelijk.
+- **Test eerst met één verslag** -- Aangepaste prompts kunnen onverwachte effecten hebben op de breedte van de extractie. Controleer dit op één verslag voordat je in batch verwerkt.
+- **Houd prompts beknopt** -- Te lange aangepaste prompts verbruiken tokens en kunnen de focus van het model verminderen.
+
+---
+
+## Volgende stappen
+
+- [Wiki-Links](/docs/features/wiki-links) -- Wat wordt gelinkt wanneer je de add-links prompt aanpast
+- [Concept Notes](/docs/features/concept-notes) -- Templates voor conceptnotities en de `{{concept}}` variabele
+- [Batch Processing](/docs/advanced/batch-processing) -- Pas aangepaste prompts toe op hele mappen
+- [Troubleshooting](/docs/advanced/troubleshooting) -- Oplossingen voor problemen waarbij aangepaste prompts onverwachte uitvoer geven

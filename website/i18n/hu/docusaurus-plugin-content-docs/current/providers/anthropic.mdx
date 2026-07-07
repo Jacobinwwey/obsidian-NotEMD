@@ -1,0 +1,67 @@
+---
+id: anthropic
+title: "Anthropic"
+description: "Konfigurálja a Anthropic Claude-t"
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [anthropic, claude, provider, configuration]
+concepts: [Anthropic, Claude, API Configuration]
+citations:
+  - title: Anthropic API
+    url: https://docs.anthropic.com
+  - title: Claude
+    url: https://www.anthropic.com/claude
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# Anthropic Társító
+
+<TLDR>
+**Anthropic használja a natív Messages API transzportot, nem a OpenAI-kompatibilis transzportot.** A jelen beállítás alapértelmezetten `claude-3-5-sonnet-20240620`, `https://api.anthropic.com` és `temperature: 0.5`-t használ. Hibaelhárítás során tekintse benne egy külön protokollkövetkezetnek.
+
+Ez része a [Obsidian AI tudományos kezelési útmutatójának](/docs/pillar-ai-knowledge).
+</TLDR>
+
+## Elhajtás
+
+Írja be egy Anthropic API kulcsot, hozzáadja egy `Anthropic` társító profilot, és hagyja a Base URL-t a natív végponton, esetleg ha nincs összekötés speciális gateway profiljúl. Válassza ki a Claude model ID-t, amit szereti használni a model mezőben; az alapértelmezett változat fenntartja a meglévő termék alapvető állapotát.
+
+Anthropic jó választás magas minőségű összefoglalásokhoz, kutatási összeállításokhoz és konceptek kiemeléséhez. Ha összekapcsolja azt kevésbé drágább társítókkal, használja csak azok a munkákban, ahol előnyös a számlált eredmény minősége.
+
+## Végpont és autentikáció
+
+| Feltérváltozó | Jelen beállítás |
+|-------|----------------|
+| Transzport | `anthropic` |
+| API kulcs | Előírás |
+| Base URL | `https://api.anthropic.com` |
+| Alapértelmezett model | `claude-3-5-sonnet-20240620` |
+| Temperatúra | `0.5` |
+| Kapcsolati ellenőrzés | Csatornázás nélkül |
+
+A futtatási idő kéréseket küld `/v1/messages`-hoz az `x-api-key` és `anthropic-version: 2023-06-01` segítségével. Ne konfigurálja egy OpenAI-stílusú `/v1/chat/completions` végpontot ebben a beállításban; használja helyett egy OpenAI-kompatibilis gateway beállítást.
+
+## Model felfedezése
+
+Anthropic használja a `anthropic-models` felfedezési módot a fornincs-eregyszerekben. Ha a kulcsod vagy kontój nem tud modellt listázni, tárold egy ismert modell ID-t a profilban és ellenőrizd az összeköttetés tesztével.
+
+A transzport nem lehet cserélhető ki a OpenAI-kompatibilis fornincs-eregyszerekkel. Egy Claude modell, amely átmenetül OpenRouter, LiteLLM vagy egy másik átmeneti ponton kerül el, tartozik az illeszkedő átmeneti pont profiljába, nem a natív Anthropic profiljába.
+
+## Hibaelhárítás
+
+- `401` vagy `403`: ellenőrizd a kulcs mértékeit, a munkaterületi hozzáférést, a fizetést, és hogy a kulcs a kívánt Anthropic munkaterülethez tartozik-e.
+- `404`: A alap URL téves, vagy a kiválasztott modell ID nem áll rendelkezésre a kontónak.
+- Átmeneti pont stílusú Claude modell ID-ek nem működnek: helyezd a profilot az illeszkedő átmeneti pont fornincs-eregyszékébe, mert a natív Anthropic elvárja a natív modellneveket.
+- Hosszú kérések később失敗olnak: csökkentsd a munkaalkalmazásokhoz szóló modellkimenet méretét, vagy használj olyan modellt, amelynek nagyobb ismert kimenet-token határa van.
+
+## Kikorlátlan használat
+
+Használj a Anthropic-t akkor, ha a szintézis, kutatási felvételek vagy struktúrált írás minősége fontosabb, mint a brutt költség. Ne használj azt általános OpenAI-kompatibilis lehetséges megoldásként; a külön transzport az elsődleges, és a protokollok összekeverése megnehezíti a diagnózist.
+
+---
+
+## További lépések
+
+- [LLM Fornincs-eregyszerek](/docs/providers/overview) -- Teljes konfiguráció, munkaalkalmazásokhoz szóló modellek és újrapróbálási logika
+- [Hibakeresés](/docs/advanced/troubleshooting) -- 401/403 hibák és összeköttetési hibák megoldása

@@ -1,0 +1,134 @@
+---
+id: custom-prompts
+title: "Özel İstekler"
+description: "İhtiyaçlarınıza göre LLM isteklerini özelleştirin"
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [custom prompts, prompts, focused learning, domain]
+concepts: [Custom Prompts, Focused Learning, Prompt Engineering]
+citations:
+  - title: Obsidian
+    url: https://obsidian.md
+  - title: LLM Prompt Engineering
+    url: https://platform.openai.com/docs/guides/prompt-engineering
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# Özel İstekler
+
+<TLDR>
+**Notemd, her görev türü için varsayılan LLM isteğini geçersiz kılmanızı sağlar.** Özel istekler, modelin neyi önceliklendireceği konusunda size kontrol verir: kavram çıkarma işlemini belirli bir alana sınırlayabilir, bağlantı stilini değiştirebilir veya çeviri tonunu yönlendirebilirsiniz. `{{content}}` ve `{{concept}}` gibi istek değişkenleri çalışma zamanında yerine konur. Odaklanmış öğrenme alanı özelliği, çıkarma sonuçlarını otomatik olarak kapsamlandırmak için çalışma alanınızı başına ekler.
+
+Bu içerik [Obsidian AI Bilgi Yönetimi Kılavuzu](/docs/pillar-ai-knowledge) serisinin bir parçasıdır.
+</TLDR>
+
+## Genel Bakış
+
+Notemd'nin yerleşik istekleri genel amaçlı bilgi işleri için yazılmıştır. Bu istekler farklı alanlarda iyi çalışır, ancak alan özelinde iyileştirme yapılmasına da olanak tanır. Özel istekler, LLM'e kullanım durumunuz için tam olarak nasıl davranması gerektiğini söylemenizi sağlar -- bu, yalnızca tıbbi terimleri çıkarmak, yalnızca adlandırılmış varlıkları bağlamak veya resmi bir üslupla çevirmek anlamına gelebilir.
+
+Özel istekler tüm sistem isteğinin yerine geçmez. Bunlar, Notemd'in ayrıştırma işlemi için bağımlı olduğu yapısal çıktı formatını (örneğin `CONCEPT:` satırları, wiki bağlantısı sözdizimi) korurken **görev özelindeki talimat bölümünü** geçersiz kılar veya genişletir.
+
+## Nasıl Çalışır
+
+### İstek Mimarisi
+
+Her Notemd görevi aynı istek yapısını takip eder:
+
+```
+[System role: You are a helpful assistant...]
+[Domain constraint: Relevant Fields: [{domain}]]   <-- focused learning (optional)
+[Custom task prompt]                                <-- your override (optional)
+[Output format instructions]                        <-- always preserved
+[Content: {{content}}]                              <-- runtime substitution
+```
+
+1. **Temel sistem isteği** -- Asistan kişiliğini belirler. Geçersiz kılınamaz.
+2. **Odaklanmış öğrenme alanı** -- Kapsamı sınırlamak için `Relevant Fields: [medicine / law / computer science / ...]`'yi başına ekler. Bu, ham bir istek değil, bir ayar düğmesidir.
+3. **Özel görev isteği** -- Varsayılan görev talimatlarının yerine geçer (örneğin hangi tür kavramların çıkarılacağı, ne kadar agresif bağlantı yapılacağı).
+4. **Çıktı formatı** -- Yapısal kurallar (`CONCEPT:` satırları, wiki bağlantısı formatı). Ayrıştırılabilirliği sağlamak için her zaman Notemd tarafından eklenir.
+5. **İçerik** -- Gerçek not metni, çalışma zamanında `{{content}}` aracılığıyla yerine konur.
+
+### İstek Değişkenleri
+
+Değişkenler çalışma zamanında yerine konur. Mevcut değişkenler göreve göre farklılık gösterir:
+
+| Değişken | Görevler | Yerine Konulan |
+|----------|-------|---------------|
+| `{{content}}` | Hepsi | Not veya seçilen metin |
+| `{{concept}}` | Kavram notu şablonu | Çıkarılan kavram adı |
+| `{{description}}` | Kavram notu şablonu | LLM-oluşturulan kavram açıklaması |
+| `{{backlinks}}` | Kavram notu şablonu | Bağlantılarla birlikte kaynak notların listesi |
+| `{{date}}` | Kavram notu şablonu | Mevcut tarih (YYYY-MM-DD) |
+| `{{language}}` | Çeviri | Hedef çıktı dili |
+| `{{source}}` | Kavram notu şablonu | Kaynak notun temel adı |
+
+### Odaklanmış Öğrenme Alanı
+
+Odaklanmış öğrenme özelliği, alan sınırlaması için bir kısayoldur. Alanınızı belirten özel bir istem yazmak yerine, ayarlar içinde `focusedLearningDomain` değerini belirlersiniz:
+
+```
+Settings → Advanced → Focused Learning Domain
+Example: "medicine" or "computer science" or "Chinese philosophy"
+```
+
+Bu işlem, çıkarma istemine `Relevant Fields: [medicine]` ekler ve böylece LLM'ın alanla ilgili kavramlara öncelik vermesini ve genel kavramları bastırmasını sağlar. Bu yöntem, tamamen özel bir istemden daha hafiftir ve tüm çıkarma görevlerinde çalışır.
+
+## Yapılandırma
+
+| Ayar | Varsayılan | Etki |
+|---------|---------|--------|
+| `customAddLinksPrompt` | `''` | Varsayılan bağlantı ekleme görev istemini geçersiz kıl |
+| `customExtractConceptsPrompt` | `''` | Varsayılan kavram çıkarma istemini geçersiz kıl |
+| `customResearchPrompt` | `''` | Varsayılan araştırma + özetleme istemini geçersiz kıl |
+| `customTranslatePrompt` | `''` | Varsayılan çeviri istemini geçersiz kıl |
+| `customDiagramPrompt` | `''` | Varsayılan diyagram oluşturma istemini geçersiz kıl |
+| `focusedLearningDomain` | `''` | Çıkarma ve bağlantı istemlerine disiplin bağlamını ekleyin |
+| `extractConceptsMinimalTemplate` | `true` | Sadece başlık içeren kavram notu şablonunu kullanın (bu, `{{concept}}` şablon kapsamını etkiler) |
+| `customConceptNoteTemplate` | `''` | Tam değişken desteğiyle kavram notu dosya şablonunu geçersiz kıl |
+
+**Özel bir istem alanı boş olduğunda, yerleşik varsayılan istem kullanılır.**
+
+## Örnek
+
+Siz bir tıp araştırmacısısınız ve klinik deneme notlarından kavramlar çıkarıyorsunuz. Varsayılan istem, tıbbi terimlerin yanı sıra genel isimleri de çıkarır ve bu da kavram dosyanızı karıştırır.
+
+**Çözüm:** Bir odaklanmış öğrenme alanı ve özel bir çıkarma istemi belirleyin.
+
+1. `focusedLearningDomain` değerini `medicine` olarak ayarlayın
+2. `customExtractConceptsPrompt` değerini şu şekilde ayarlayın:
+
+```
+Extract only clinically relevant concepts: diseases, drug names,
+anatomical terms, measurement endpoints, and statistical methods.
+Ignore generic English nouns, brand names, and institutional names.
+Prioritize MeSH terminology where applicable.
+```
+
+Şimdi bir klinik not üzerinde "Extract concepts" komutunu çalıştırdığınızda, LLM şu sonucu üretir:
+
+```
+CONCEPT: Randomized Controlled Trial
+CONCEPT: Double-Blind Method
+CONCEPT: Myocardial Infarction
+CONCEPT: Creatine Kinase-MB
+CONCEPT: Kaplan-Meier Estimate
+```
+
+"hospital" veya "month" gibi istenmeyen genel terimleri de çıkarabilen varsayılan davranışın aksine.
+
+## İpuçları
+
+- Tamamen özel bir komut yazmadan önce **odaklanmış öğrenme alanından** başlayın. Bu yaklaşım tek bir ayarla kullanım durumlarının %80’ini kapsar.
+- **Çıktı formatını koruyun** -- Özel komutlarda "one per line" veya "CONCEPT: prefix" gibi format talimatlarını asla kaldırmayın. Notemd’nin parser’ı bunlara bağlıdır.
+- **Önce tek bir not ile test edin** -- Özel komutlar çıkarma genişliği üzerinde beklenmedik etkilere sahip olabilir. Toplu işleme yapmadan önce tek bir not üzerinde doğrulama yapın.
+- **Komutları özlü tutun** -- Aşırı uzun özel komutlar token tüketir ve modelin odaklanmasını zayıflatabilir.
+
+---
+
+## Sonraki Adımlar
+
+- [Wiki-Links](/docs/features/wiki-links) -- add-links komutunu özelleştirdiğinizde neyin bağlantılandırılacağı
+- [Concept Notes](/docs/features/concept-notes) -- Kavram notu şablonları ve `{{concept}}` değişkeni
+- [Batch Processing](/docs/advanced/batch-processing) -- Özel komutları tüm klasörlerde uygulama
+- [Troubleshooting](/docs/advanced/troubleshooting) -- Özel komutların beklenmedik çıktılar ürettiği durumların düzeltilmesi

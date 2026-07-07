@@ -1,0 +1,63 @@
+---
+id: local
+title: "Modelos locais"
+description: "Configure Ollama e os LLMs locais"
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [local, ollama, lmstudio, provider, configuration, offline]
+concepts: [Local Models, Ollama, LMStudio, Offline]
+citations:
+  - title: Ollama
+    url: https://ollama.com
+  - title: LM Studio
+    url: https://lmstudio.ai
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# Modelos locais
+
+<TLDR>
+**Os provedores locais mantêm o conteúdo da nota fora dos APIs hospedados.** O caminho local atual cobre Ollama com o transporte nativo `ollama` e LMStudio por meio do transporte compatível com OpenAI. Nenhuma chave API é necessária para nenhum dos caminhos, mas o servidor local e o modelo já devem estar em execução.
+
+Isso faz parte do [Obsidian Guia de Gestão de Conhecimento de IA](/docs/pillar-ai-knowledge).
+</TLDR>
+
+## Configuração
+
+Para Ollama, instale Ollama, baixe o modelo desejado, inicie o servidor e adicione um perfil de provedor `Ollama` em Notemd. Para LMStudio, carregue um modelo no servidor local do LM Studio e adicione um perfil de provedor `LMStudio`.
+
+Os modelos locais são dependências operacionais, não apenas configurações. Notemd só pode chamar o que o processo local expõe, portanto verifique o modelo local fora de Obsidian antes de depurar o plugin.
+
+## Endpoint e Autenticação
+
+| Fornecedor | Base URL | Modelo Padrão | Chave API | Observações |
+|----------|----------|---------------|---------|-------|
+| Ollama | `localhost:11434/api` | `llama3` | Não necessário | Transmissão NDJSON; descoberta de modelos por meio de `/api/tags` |
+| LMStudio | `localhost:1234/v1` | `local-model` | Não necessário | Envia `"EMPTY"` como token de portador; compatível com OpenAI |
+
+Ollama utiliza o caminho nativo `/chat` abaixo de seu Base URL. LMStudio segue a rota `chat/completions` compatível com OpenAI e espera um modelo carregado no servidor local.
+
+## Descoberta de modelos
+
+Ollama usa o modo de descoberta `ollama-tags` e lista as tags baixadas localmente. LMStudio usa a descoberta de modelos compatível com OpenAI quando seu servidor expõe `/v1/models`.
+
+Se a descoberta não retornar nada, isso geralmente é um problema de estado do servidor local: o modelo não foi baixado, não carregado ou o servidor está vinculado a um host/porta diferente do perfil.
+
+## Solução de problemas
+
+- Conexão recusada: inicie Ollama ou o LM Studio e confirme a porta configurada.
+- Modelo não encontrado: baixe a tag Ollama ou carregue o modelo do LM Studio antes de testar.
+- Saída lenta: reduza o tamanho do contexto, use um modelo local menor ou direcione tarefas pesadas para um provedor hospedado.
+- Respostas vazias ou mal formatadas: confirme que o perfil de provedor selecionado corresponde ao protocolo do servidor local; Ollama e LMStudio não são intercambiáveis.
+
+## Quando Usar
+
+Use provedores locais para cofres privados, trabalho off-line ou tarefas repetitivas e baratas. Não presuma que o uso local seja automaticamente melhor para síntese de pesquisa ou raciocínio prolongado; a qualidade do modelo e os limites do hardware são o tradeoff.
+
+---
+
+## Próximos passos
+
+- [LLM Provedores](/docs/providers/overview) -- Configuração completa e configuração do modelo por tarefa
+- [Solução de problemas](/docs/advanced/troubleshooting) -- Corrija erros de connection-refused quando o servidor local não está em execução

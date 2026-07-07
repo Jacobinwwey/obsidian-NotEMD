@@ -1,0 +1,181 @@
+---
+id: quick-start
+title: "Snabbstartguide"
+description: "Börja använda Notemd på 5 minuter"
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [quick start, tutorial, getting started, first steps]
+concepts: [Quick Start, LLM Configuration, One-Click Workflow, Ollama]
+citations:
+  - title: Obsidian
+    url: https://obsidian.md
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# Snabbstartguide
+
+<TLDR>
+**Börja använda Notemd på 5 minuter.** Tre steg: (1) Lägg till en LLM API-nyckel (eller använd lokalt Ollama), (2) Öppna en anteckning och kör “Processera fil (lägg till länkar)”, (3) Utforska enkla arbetsflöden i sidofältet. Stöder över 30 leverantörer. Ingen kodning nödvändig. Fungerar offline med Ollama.
+</TLDR>
+
+## Steg 1: Konfigurera din första LLM-leverantör (2 min)
+
+### Alternativ A: Molnleverantör (OpenAI, Anthropic osv.)
+
+1. Öppna **Inställningar** → **Notemd**
+2. Under **LLM-leverantörskonfiguration** välj en leverantör från rullgardinen
+3. Ange din **API-nyckel**
+4. (Valfritt) Klicka på **“Få modelllista”** för att se tillgängliga modeller
+5. Välj en modell för varje typ av uppgift
+
+**Populära val:**
+- **OpenAI**: `gpt-4o-mini` (snabb, prisvärt)
+- **Anthropic**: `claude-sonnet-4-6` (hög kvalitet)
+- **DeepSeek**: `deepseek-chat` (mycket prisvärt)
+
+### Alternativ B: Lokalt Ollama (inget API-nyckel nödvändigt)
+
+1. Installera [Ollama](https://ollama.com/)
+2. Ladda ner en modell: `ollama pull llama3.1`
+3. I Notemd inställningar, välj **"Ollama"** som leverantör
+4. Modellnamn: `llama3.1` (eller vilken modell du som helst har laddat ner)
+
+## Steg 2: Prova din första uppgift (1 min)
+
+### Lägg till Wiki-länkar i en anteckning
+
+1. Öppna en vilken anteckning som helst med meningsfull innehåll
+2. Klicka med höger mus i redigeraren
+3. Välj **"Processera fil (lägg till länkar)"**
+4. Vänta några sekunder
+5. Nyckelkoncepten är nu `[[wiki-linked]]`!
+
+**Exempel:**
+
+**Förut:**
+```
+Machine learning models use neural networks to process data.
+```
+
+**Efter:**
+```
+[[Machine learning]] models use [[neural networks]] to process data.
+```
+
+## Steg 3: Utforska funktionerna (2 min)
+
+### Extrahera konceptanteckningar
+
+1. Högerklicka → **"Extrahera koncept från aktuell fil"**
+2. Notemd skapar separata filer för varje koncept
+3. Kontrollera din konfigurerade konceptmapp (standard: `concepts/`)
+4. Varje konceptanteckning har en baklänk till din ursprungliga anteckning
+
+### Forskning och sammanfattning
+
+1. Highlightera ett ämne i din anteckning
+2. Högerklicka → **"Forskning och sammanfattning"**
+3. Notemd söker i webben (Tavily eller DuckDuckGo)
+4. Sammanfattningen läggs till i din anteckning tillsammans med källor
+
+### En-klicks-arbetsflöden
+
+1. Kolla **vänstra sidofältet** efter arbetsflödesknappar
+2. Klicka på **"En-klicks-extrahera"** i vilken anteckning som helst
+3. Det körs: lägg till länkar → extrahera koncept → forskning → generera diagram
+4. Allt i en klick!
+
+## Vanliga första uppgifter
+
+### Uppgift 1: Bearbeta en artikel/papper
+
+```
+1. Paste article content into a note
+2. Run "Process file (add links)"
+3. Run "Extract concepts"
+4. Run "Research and summarize" on unfamiliar terms
+5. Run "Summarize as Mermaid diagram" for visual structure
+```
+
+### Uppgift 2: Översätta anteckningar
+
+```
+1. Highlight text to translate
+2. Right-click → "Translate to target language"
+3. Set target language in settings first
+```
+
+### Uppgift 3: Skapa en kunskapskarta
+
+```
+1. Process 5-10 related notes with "add links"
+2. Run "Extract concepts" on each
+3. Open Graph view to see connections
+4. Your knowledge graph is forming!
+```
+
+## Tips för anpassning
+
+### Modellval per uppgift
+
+Du kan använda olika modeller för olika uppgifter:
+
+| Uppgift | Rekommenderad modell | Anledning |
+|------|------------------|-----|
+| Lägg till länkar | `gpt-4o-mini`, `deepseek-chat` | Snabb, många anrop |
+| Extrahera koncept | `claude-sonnet-4-6`, `gpt-4o` | Kvalitetsfull extraktion |
+| Forskning | `perplexity`, `gpt-4o` | Webbbaserat |
+| Översättning | `gemini-flash`, `gpt-4o` | Flerspråkigt |
+| Diagram | `claude-opus`, lokalt modell | Komplex resonemang |
+
+Konfigurera i: **Inställningar → Notemd → Task-specifika modeller**
+
+### Anpassade arbetsflöden
+
+Skapa din egen knapp:
+
+1. Inställningar → Notemd → Arbetsflöden
+2. Klicka på "Lägg till arbetsflöde"
+3. Ange DSL: `process-current-add-links>extract-concepts-current>research-and-summarize`
+4. Namnge det: "Min forskningsflöde"
+5. En ny knapp visas i sidofältet
+
+## Felaktighetsfelsökning
+
+### "API Nyckel ogiltig"
+- Kontrollera om nyckeln är korrekt (inga extra rum)
+- Kontrollera om kontot har krediter
+- Testa med "Connection Test"-knappen i inställningarna
+
+### "Modell inte hittad"
+- Klicka på "Get Model List" för att se tillgängliga modeller
+- Vissa leverantörer kräver specifika modellnamn (t.ex. `gpt-4o` istället för `gpt-4`)
+
+### Länkar visas inte
+- Se till att notan har tillräckligt med innehåll (>50 ord)
+- Prova en mer kraftig modell
+- Kontrollera om LLM-anropet lyckades (se diagnostikpanelen)
+
+### Långsam prestanda
+- Använd snabbare modeller (`gpt-4o-mini` istället för `gpt-4o`)
+- Minsk chunk-storleken i inställningarna
+- Aktivera parallell bearbetning för batchuppgifter
+
+## Nästa steg
+
+- 📖 [Utforska alla funktioner](../features/wiki-links)
+- ⚙️ [Avancerad konfiguration](./configuration)
+- 🔧 [LLM Provider-inställning](../providers/overview)
+- ❓ [FAQ](../faq)
+
+## Videotutorial
+
+Titta på den 3-minutersa snabbstartvideon (kinesisk):
+[【Fullständigt öppen källkod, gratis! NotEMD 3 minuter i snabbt gång】](https://b23.tv/lqR0RlA)
+
+## Få hjälp
+
+- 💬 **Discord**: [discord.gg/qnGgsQ9W](https://discord.gg/qnGgsQ9W)
+- 🐛 **Problemer**: [GitHub Issues](https://github.com/Jacobinwwey/obsidian-NotEMD/issues)
+- 📚 **Dokumentation**: [Fullständig dokumentation](https://jacobinwwey.github.io/obsidian-NotEMD/)

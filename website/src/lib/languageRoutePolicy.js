@@ -1,6 +1,7 @@
 import {isPublishedZhCnDocPath, normalizeDocPath} from './publishedLanguageScope';
+import {publishedDocumentationLocaleCodes} from './publishedLocales.mjs';
 
-const localizedSitePrefixes = ['zh-CN', 'zh-Hant', 'ja', 'fr', 'de', 'es', 'ko'];
+const localizedSitePrefixes = publishedDocumentationLocaleCodes;
 
 function normalizeBasePath(baseUrl) {
   if (!baseUrl || baseUrl === '/') {

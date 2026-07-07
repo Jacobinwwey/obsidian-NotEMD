@@ -1,0 +1,75 @@
+---
+id: china
+title: "furnizorii din China"
+description: "Configurați Qwen, DeepSeek, GLM etc."
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [china providers, deepseek, qwen, glm, doubao, moonshot, mimo, minimax, baidu, siliconflow, huawei]
+concepts: [China Providers, DeepSeek, Qwen, Doubao, Moonshot, MiMo, GLM, MiniMax, Baidu, SiliconFlow, Huawei]
+citations:
+  - title: Qwen API
+    url: https://help.aliyun.com/zh/dashscope
+  - title: DeepSeek API
+    url: https://platform.deepseek.com
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# furnizorii din China
+
+<TLDR>
+**Notemd suportă furnizorii din regiunea China și cu origine din China prin endpoint-uri în mare parte compatibile cu OpenAI.** Setul actual include DeepSeek, Qwen, Qwen Code, Doubao, Moonshot, Xiaomi MiMo, GLM, MiniMax, Baidu Qianfan, SiliconFlow, Huawei Cloud MaaS și Z AI. Valorile sunt acces regional și controlul costurilor; riscurile sunt denumirile modelelor specifice furnizorului și mecanismele de blocare a conturilor.
+
+Acesta face parte din [Obsidian Ghidul de gestionare a cunoștințelor AI](/docs/pillar-ai-knowledge).
+</TLDR>
+
+## Configurare
+
+Creați contul furnizorului, generați o cheie API, apoi alegeți presetul corespunzător de furnizor Notemd în loc de a folosi un profil generic OpenAI. Presetul include valorile default pentru Base URL, model, modul de test API, comportamentul de descoperire a modelelor și orice câmpuri specifice furnizorului UI.
+
+Folosiți selectarea modelelor în funcție de sarcină în mod intensiv aici. De exemplu, păstrați DeepSeek sau GLM în fluxurile de lucru cu multe calcule, folosiți Qwen sau Moonshot pentru activități largi în limba chineză și direcționați sarcinile de programare către Qwen Code atunci când acel cont oferă modele pentru programatori.
+
+## Endpoint și autentificare
+
+| Furnizor | Modelul implicit | Base URL |
+|----------|---------------|----------|
+| DeepSeek | `deepseek-v4-pro` | `api.deepseek.com` |
+| Qwen | `qwen3-235b-a22b` | `dashscope.aliyuncs.com/compatible-mode/v1` |
+| Qwen Code | `qwen3-coder-plus` | `dashscope.aliyuncs.com/compatible-mode/v1` |
+| Doubao | (eșantionul endpointului este obligatoriu) | `ark.cn-beijing.volces.com/api/v3` |
+| Moonshot | `kimi-k2-0905-preview` | `api.moonshot.cn/v1` |
+| Xiaomi MiMo | `mimo-v2.5-pro` | `api.xiaomimimo.com/v1` |
+| GLM | `glm-5` | `open.bigmodel.cn/api/paas/v4` |
+| MiniMax | `MiniMax-M2.7` | `api.minimaxi.com/v1` |
+| Baidu Qianfan | `ernie-4.5-turbo-32k` | `qianfan.baidubce.com/v2` |
+| SiliconFlow | `Qwen/QwQ-32B` | `api.siliconflow.cn/v1` |
+| Huawei Cloud MaaS | `DeepSeek-V3` | `api.modelarts-maas.com/v1` |
+| Z AI | `glm-5` | `api.z.ai/api/paas/v4` |
+
+**Notă:** Doubao necesită un eșantion de endpoint Ark (format: `ep-xxxxxxxx-xxxx-xxxx`) în loc de un nume standard al modelei.
+
+Majoritatea acestor furnizori folosesc runtime-ul comun compatibil cu OpenAI, dar semantica conturilor și a modelelor lor diferă. Păstrați valorile default pentru Base URL dacă nu ați verificat endpointul alternativ al contului.
+
+## Descoperirea modelelor
+
+DeepSeek, Qwen, Qwen Code, Doubao, Moonshot, Xiaomi MiMo, GLM, Z AI, MiniMax, Baidu Qianfan și SiliconFlow folosesc descoperirea modelelor compatibilă cu OpenAI atunci când furnizorul permite listarea. Huawei Cloud MaaS folosește modul `huaweicloud-modelarts-models` deoarece metadatele de implementare ModelArts nu sunt identice cu o listă generică `/v1/models`.
+
+Nu considerați eșecul descoperirii drept dovadă că chat-ul este imposibil. Mai mulți furnizori permit chatul în timp ce limitează permisiunile de listare a modelelor. În acest caz, păstrați un ID explicit al modelei în profil și validați cu testul de conexiune.
+
+## Dezvoltarea de soluții
+
+- Autentificarea are succes, dar chat-ul eșuează: numele modelului ar putea fi în afara drepturilor sau regiunii contului.
+- Doubao eșuează cu un nume normal al modelului: utilizați ID-ul endpoint-ului Ark în câmpul model atunci când implementarea dumneavoastră este necesară.
+- Răspunsurile de raționament sunt trunchiate: verificați limita maximă de tokeni de ieșire specifică furnizorului și setările Notemd de tokeni max sensibile la model.
+- Rețelele regionale variază: utilizați endpoint-ul regiunii China al furnizorului atunci când mașina vault se află în China; utilizați doar endpointul internațional atunci când contul și calea de rețea sunt ambele valide.
+
+## Când să fiți utilizatori
+
+Utilizați furnizorii din China atunci când latența regională, accesul la plăți/conturi, calitatea în limba chineză sau costul reprezintă principala restricție. Preferați OpenAI, Anthropic, Google directe sau furnizorii locali atunci când aveți nevoie de o graniță de protocol mai simplă sau o consistență mai mare în depanarea între furnizori.
+
+---
+
+## Următoarele pași
+
+- [LLM Furnizori](/docs/providers/overview) -- Configurație completă, modele pentru fiecare sarcină și logică de reîncercare
+- [Depanare](/docs/advanced/troubleshooting) -- Rezolvați erorile de conectivitate regională și autentificare

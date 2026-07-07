@@ -1,0 +1,435 @@
+---
+id: configuration
+title: "Konfiguration"
+description: "Konfigurér Notemd-indstillinger og preferencer"
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [configuration, settings, customization, preferences]
+concepts: [Configuration, Per-Task Models, Output Paths, Custom Workflows]
+citations:
+  - title: Obsidian
+    url: https://obsidian.md
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# Konfiguration
+
+<TLDR>
+**Notemd-konfigurationen omfatter 6 hovedområder:** (1) LLM-udbydere og API-nyckler, (2) Valg af modell per opgave, (3) Udskriftspfade og maller, (4) UI-sprog og udskriftssprog, (5) Søgtilbud (Tavily/DuckDuckGo), (6) Egen arbejdsmæssige processer. Alle indstillinger findes i Obsidian Settings → Notemd. Endringer trer i kraft umiddelbart.
+</TLDR>
+
+## Oversigt over indstillinger
+
+Adgang: **Obsidian Settings (⚙️) → Notemd**
+
+### Hovedsektioner
+
+1. **Udbyderkonfiguration** — API-nyckler, base URLs, modeller
+2. **Opgavesindstillinger** — Valg af modell per opgave
+3. **Udskriftskonfiguration** — Hvor genererede filer skal gemmes
+4. **Sprogindstillinger** — UI- og udskriftssprog
+5. **Søgintegration** — Tavily/DuckDuckGo-indstilling
+6. **Arbejdsmæssige processer** — Egen knapskeder
+7. **Avanceret** — Diagnostik, batchbehandling, chunking
+
+---
+
+## 1. Udbyderkonfiguration
+
+### At tilføje en udbyder
+
+1. **Vælg udbyder** fra dropdown (30+ tilgængelige)
+2. **Indtast API-nyckel**
+3. **Valgfrit**: Stil din egen base URL (for proxyer/gateways)
+4. **Klik på "Få modellliste"** for at overholde forbindelsen
+5. **Vælg standardmodell**
+
+### Almindelige leverandører
+
+#### OpenAI
+```
+Provider: OpenAI
+API Key: sk-...
+Base URL: https://api.openai.com/v1 (default)
+Model: gpt-4o-mini
+```
+
+#### Anthropic (Claude)
+```
+Provider: Anthropic
+API Key: sk-ant-...
+Model: claude-sonnet-4-6
+```
+
+#### Ollama (Local)
+```
+Provider: Ollama
+Base URL: http://localhost:11434 (default)
+Model: llama3.1
+API Key: (not required)
+```
+
+#### DeepSeek
+```
+Provider: DeepSeek
+API Key: sk-...
+Model: deepseek-chat
+```
+
+### Mere end én leverandør
+
+Du kan konfigurere flere leverandører og skifte mellem dem for hver opgave:
+- **Hovedleverandør**: Bruges som fallback
+- **Opgavespecifikke leverandører**: Overskrives for specifikke opgaver
+
+---
+
+## 2. Opgavespecifikke modeller
+
+Konfigurér forskellige modeller for forskellige opgaver for at optimere kost/niveau:
+
+### Opgavetyper
+
+| Opgave | Standardmodell | Formål |
+|------|--------------|---------|
+| **Forbindelse** | Hovedleverandør | Identificer koncepter for wiki-linker |
+| **Konceptgenerering** | Hovedudbyder | Udtræk og beskriv koncepter |
+| **Forskning** | Hovedudbyder | Sammanfatt resultater fra websearch |
+| **Oversættelse** | Hovedudbyder | Oversæt tekst |
+| **Diagramgenerering** | Hovedudbyder | Generer Mermaid/Canvas-diagrammer |
+
+### Eksempel: Kostoptimeret indstilling
+
+```
+Linking: gpt-4o-mini (fast, many calls)
+Concept Generation: claude-sonnet-4-6 (quality extraction)
+Research: gpt-4o (web-grounded)
+Translation: gemini-flash (multilingual)
+Diagram: ollama/llama3.1 (free, local)
+```
+
+### Hvad man gør for at konfigurere
+
+1. **Indstillinger → Notemd → Opgaveindstillinger**
+2. For hver opgave vælg:
+   - ✅ **Brug hovedudbyder** (standard)
+   - 🔄 **Brug egen udbyder** → vælg udbyder + modell
+
+---
+
+## 3. Udgangskonfiguration
+
+### Udgivelse af konceptnoter
+
+**Hvor nye konceptnoter gemmes:**
+
+```
+Settings → Output → Concept Folder
+Default: concepts/
+```
+
+**Mall:**
+```
+Settings → Output → Concept Template
+Default:
+---
+tags: [concept]
+created: {{date}}
+---
+
+# {{concept}}
+
+{{description}}
+
+## Backlinks
+{{backlinks}}
+```
+
+### Muligheder for mappstruktur
+
+**Valg 1: Flad (alle koncepter i en mapp)**
+```
+vault/
+└── concepts/
+    ├── Machine Learning.md
+    ├── Neural Networks.md
+    └── Deep Learning.md
+```
+
+**Valg 2: Hierarkisk (afhængigt af kildemapp)**
+```
+vault/
+├── papers/
+│   └── concepts/
+│       └── Transformer.md
+└── notes/
+    └── concepts/
+        └── Attention Mechanism.md
+```
+
+Konfigurér: **Indstillinger → Udskrift → Brug hierarkiske mapper**
+
+### Udskrift af diagrammer
+
+**Hvor diagrammer gemmes:**
+```
+Settings → Output → Diagram Folder
+Default: diagrams/
+```
+
+**Format:**
+- `.mmd` (Mermaid kilde)
+- `.canvas` (JSON Canvas)
+- `.html` (Vega-Lite)
+
+---
+
+## 4. Sprogindstillinger
+
+### UI Sprog
+
+**Indstillinger for grænsefladen** (knapper, menuer, dialoger):
+
+```
+Settings → Language → UI Language
+Options: 21+ languages
+Default: System language
+```
+
+Støttet: Engelsk, 简体中文, 繁體中文, 日本語, 한국어, Español, Français, Deutsch, Русский, العربية, og flere.
+
+### Udskriftssprog
+
+**Genereret indholdssprog** (konceptnoter, forskningsopsummeringer):
+
+```
+Settings → Language → Output Language
+Options: Same as UI languages
+Default: Same as UI
+```
+
+**Brugsmål:** Kinesisk UI + engelsk output for bilingual forskning.
+
+### Sprogmål for oversætning
+
+**Standardmæssigt sprogmål** for oversætningstasker:
+
+```
+Settings → Translation → Target Language
+Default: English
+```
+
+---
+
+## 5. Søgintegration
+
+### Tavily (Anbefales)
+
+**AI-optimiseret søgestjerneste:**
+
+```
+Settings → Search → Service: Tavily
+API Key: tvly-...
+```
+
+Hent nøgle: [tavily.com](https://tavily.com/)
+
+**Egenskaber:**
+- Højkvalitetsresultater
+- AI-optimiserede opsummeringer
+- Kilderreferencer
+
+### DuckDuckGo (Experimental)
+
+**Der er ikke behov for API-nøgle:**
+
+```
+Settings → Search → Service: DuckDuckGo
+```
+
+**Opmerkning:** Lavere kvalitet, ingen personalisering.
+
+---
+
+## 6. Arbejdsmarkedskonfiguration
+
+### Skabe egne arbejdsmarkeder
+
+**Arbejdsmuligheder forbinder flere opgaver til en enkelt knap.**
+
+1. **Indstillinger → Arbejdsmuligheder → Tilføj arbejdsmulighed**
+2. **Navn**: "Paper Analysis Flow"
+3. **DSL**: `process-current-add-links>extract-concepts-current>research-and-summarize>summarize-as-mermaid`
+4. **Spara**
+
+En ny knap vises i den venstre sidebark.
+
+### DSL-syntax
+
+**Format:** `action1>action2>action3`
+
+**Tilgængelige handlinger:**
+- `process-current-add-links` — Tilføj wiki-linker til den aktuelle note
+- `extract-concepts-current` — Generer konceptnoter
+- `research-and-summarize` — Veb-research + sammanfattelse
+- `translate-current` — Oversæt den aktuelle note
+- `summarize-as-mermaid` — Generer Mermaid-diagram
+- `process-folder-add-links` — Batch-process mappen
+
+**Eksempler på arbejdsmuligheder:**
+
+**Snabb konceptudhulling:**
+```
+process-current-add-links>extract-concepts-current
+```
+
+**Dybtgående forskning:**
+```
+process-current-add-links>research-and-summarize>extract-concepts-current
+```
+
+**Flerspråkig analyse:**
+```
+translate-current>process-current-add-links>extract-concepts-current
+```
+
+---
+
+## 7. Avancerede indstillinger
+
+### Batchbehandling
+
+**Behandle flere filer parallelt:**
+
+```
+Settings → Advanced → Batch Processing
+Concurrency: 3 (default)
+```
+
+Højere = hurtigere men flere API anrop.
+
+### Smart deling i deler
+
+**For lange notater, del dem i deler:**
+
+```
+Settings → Advanced → Smart Chunking
+Chunk Size: 2000 words (default)
+Overlap: 200 words (default)
+```
+
+Forhindrer fejl på grund af tokenlimiter.
+
+### Diagnostikpanelen
+
+**Vis detaljerede logger:**
+
+```
+Settings → Advanced → Enable Diagnostics
+```
+
+Viser:
+- API anmodninger/svar
+- Tokenbrug
+- Behandlingstid
+- Fejl
+
+### Detektering af duplikate koncepter
+
+**Undgå nærliggende duplikate koncepter:**
+
+```
+Settings → Advanced → Synonym Suppression
+Threshold: 0.8 (default, 0-1)
+```
+
+Højere = mere aggressiv fusions.
+
+---
+
+## Konfigurationsprofiler
+
+### Eksport/Import af indstillinger
+
+**Del konfigurationer mellem enheder:**
+
+1. **Indstillinger → Avanceret → Eksportér konfiguration**
+2. Sparer `notemd-config.json`
+3. På ny enhed: **Importér konfiguration**
+
+**Hva som er inkluderet:**
+- Provider API-nyckler (valgfrit)
+- Modellvalg
+- Utdragsveje
+- Kostomiserede arbejdsmetoder
+
+---
+
+## Anbefalede konfigurationer
+
+### For studenter
+
+```
+Provider: OpenAI (gpt-4o-mini)
+Concept Folder: concepts/
+UI Language: System
+Output Language: System
+Workflow: "Study Flow" (add-links>extract-concepts)
+```
+
+### For forskere
+
+```
+Providers:
+  - Linking: DeepSeek (cheap, many calls)
+  - Concepts: Claude Sonnet (high quality)
+  - Research: GPT-4o (web-grounded)
+Concept Folder: notes/concepts/
+Hierarchical: Yes
+Workflow: "Paper Flow" (add-links>extract>research>diagram)
+```
+
+### For brugere, der gør digt om privatlivet
+
+```
+Provider: Ollama (llama3.1)
+All tasks: Local model
+Search: DuckDuckGo (no API)
+Diagnostics: Off
+```
+
+### For bilingvale arbejde
+
+```
+UI Language: Chinese
+Output Language: English
+Translation Target: Chinese
+Provider: Gemini (multilingual)
+```
+
+---
+
+## Løsning af konfigurationsproblemer
+
+### Indstillinger gemmes ikke
+- Kontroller filadgangsrigheder i `.obsidian/plugins/notemd/`
+- Prøv: Afaktiver plugin → Aktiver igen
+
+### API-koden er ugyldig
+- Ingen ekstra mellemrum
+- Kontroller udløbstid
+- Kontroller kreditter i leverandørens dashboard
+
+### Modeller lades ikke
+- Klik på "Få modellliste" for at opdatere
+- Kontroller nettverksforbindelse
+- Prøv en ander leverandør
+
+---
+
+## Næste trin
+
+- 📖 [Udforsk funktioner](../features/wiki-links)
+- 🔌 [Leverandørssætningssikter](../providers/overview)
+- ❓ [FAQ](../faq)

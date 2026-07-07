@@ -1,0 +1,67 @@
+---
+id: anthropic
+title: "Anthropic"
+description: "Konfigurér Anthropic Claude"
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [anthropic, claude, provider, configuration]
+concepts: [Anthropic, Claude, API Configuration]
+citations:
+  - title: Anthropic API
+    url: https://docs.anthropic.com
+  - title: Claude
+    url: https://www.anthropic.com/claude
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# Anthropic Provider
+
+<TLDR>
+**Anthropic bruger den indbyggede Messages API-transport, ikke den OpenAI-kompatible transport.** Den nuværende forvalg standardiseres til `claude-3-5-sonnet-20240620`, `https://api.anthropic.com` og `temperature: 0.5`. Behandle det som en separat protokollyde ved fejlfinding.
+
+Dette er en del af [Obsidian AI Knowledge Management Guide](/docs/pillar-ai-knowledge).
+</TLDR>
+
+## Indstilling
+
+Skap en Anthropic API-klæde, tilføj en `Anthropic`-providerprofil, og lade Base URL på den indbyggede endpoint, så lenge du ikke routerer gennem en dedikeret gatewayprofil. Vælg den Claude-modell-ID du vil bruge i feltet modell; standardværdien holder den nuværende produktbasen stabil.
+
+Anthropic er en god valgmulighed for højkvalitativ sammanfattelse, forskningssynthese og konceptuddrag. Hvis du blander det med billigere leverandører, sæt det kun på de opgaver, der benefiterer af dens udgangskvalitet.
+
+## Endpoint og autentisering
+
+| Felt | Nuværende forvalg |
+|-------|----------------|
+| Transport | `anthropic` |
+| API-klæde | Required |
+| Base URL | `https://api.anthropic.com` |
+| Standardmodell | `claude-3-5-sonnet-20240620` |
+| Temperature | `0.5` |
+| Kontakttest | Kun chat |
+
+Køringsmiljøet sender anmodninger til `/v1/messages` med `x-api-key` og `anthropic-version: 2023-06-01`. Konfigurér ikke en OpenAI-stil `/v1/chat/completions`-endpoint under dette forvalg; brug istedet et OpenAI-kompatibelt gatewayforvalg.
+
+## Modelludvikling
+
+Anthropic bruger `anthropic-models`-discovery-modusen i provider-registret. Hvis din nøgle eller konto ikke kan liste modeller, gem en kendt model-ID i profilen og valider gennem forbindelsesprøven.
+
+Transporten er ikke udskiftelig med OpenAI-kompatible providere. En Claude-modell, der ruteres gennem OpenRouter, LiteLLM eller en anden gateway, tilhører den respektive gateway-profil, ikke den nativte Anthropic-profilen.
+
+## Felsøgning
+
+- `401` eller `403`: Kontroller nøkkelområde, adgang til arbejdsområde, fakturering og om nøkkelnen tilhører det forventede Anthropic-arbejdsområde.
+- `404`: Den base URL er fejl eller den valgte model-ID er ikke tilgængelig for kontoen.
+- Gateway-stil Claude-modell-IDs falder: Flyt profilen til den tilsvarende gateway-provider, fordi nativ Anthropic forventer nativte modellnavne.
+- Lange anmodninger falder senere: Redskær deg af større modeludgangstørrelser per opgave eller brug en modell med højere kendt udgangstoken-ceiling.
+
+## Når man skal bruge det
+
+Brug Anthropic, når kvaliteten på syntese, forskningsnoter eller struktureret skrivning er vigtigere end ren kost. Brug ikke det som en generel OpenAI-kompatibel fallback; den separate transport er poenget, og at blande protokoller gør diagnosen sværere.
+
+---
+
+## Næste trin
+
+- [LLM Providere](/docs/providers/overview) -- Full konfiguration, modeller per opgave og retry-logik
+- [Løsning af problemer](/docs/advanced/troubleshooting) -- Fix 401/403 og forbindelsesfejl

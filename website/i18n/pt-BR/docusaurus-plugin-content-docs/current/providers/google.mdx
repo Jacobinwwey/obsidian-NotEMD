@@ -1,0 +1,67 @@
+---
+id: google
+title: "Google"
+description: "Configurar Google Gemini"
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [google, gemini, provider, configuration]
+concepts: [Google, Gemini, API Configuration]
+citations:
+  - title: Gemini API
+    url: https://ai.google.dev
+  - title: Google AI Studio
+    url: https://aistudio.google.com
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# Google Provider
+
+<TLDR>
+**Google utiliza o transporte nativo de linguagem gerativa Gemini API.** O preset atual tem como padrão `gemini-2.0-flash-exp`, `https://generativelanguage.googleapis.com/v1` e `temperature: 0.5`. Não se trata de um perfil compatível com OpenAI.
+
+Isso faz parte do [Obsidian Guia de Gestão de Conhecimento de IA](/docs/pillar-ai-knowledge).
+</TLDR>
+
+## Configuração
+
+Criar uma chave Cloud API de tipo Google AI Studio ou Google com acesso ao Gemini, adicionar um perfil de provedor `Google` e manter a Base de Linguagem Gerativa nativa URL. Use o perfil padrão Gemini Flash para traduções rápidas e fluxos de trabalho de notas abrangentes, e sobrescreva os modelos por tarefa quando precisar de um modelo Gemini maior ou mais potente.
+
+Evite colocar IDs de modelos Gemini em um perfil compatível com OpenAI, a menos que esteja usando explicitamente uma gateway que expõe o Gemini por meio de um API compatível com OpenAI.
+
+## Endpoint e Autenticação
+
+| Campo | Predefinição atual |
+|-------|----------------|
+| Transporte | `google` |
+| Chave API | Necessário |
+| Base URL | `https://generativelanguage.googleapis.com/v1` |
+| Modelo padrão | `gemini-2.0-flash-exp` |
+| Temperatura | `0.5` |
+| Teste de conexão | Apenas chat |
+
+O tempo de execução chama `/models/{model}:generateContent?key={apiKey}`. A chave é passada como parâmetro de consulta, pois é assim que o endpoint nativo do Gemini é conectado no plugin.
+
+## Descoberta de modelos
+
+Google utiliza o modo de descoberta `google-models`. A descoberta deve retornar os modelos Gemini disponíveis para a chave API; se o seletor estiver vazio, teste a chave contra a mesma Base URL e confirme se a família de modelos está habilitada para aquela conta.
+
+Os limites conhecidos de tokens de saída são considerados pelo modelo no registro do provedor. Se uma tradução longa ou uma explicação de diagrama for truncada, selecione um modelo Gemini com capacidade maior de saída suportada ou reduza o tamanho da saída solicitado.
+
+## Solução de problemas
+
+- `400`: o ID do modelo geralmente não corresponde à rota nativa do Gemini ou a solicitação excede o formato suportado pelo modelo.
+- `401` ou `403`: verifique as restrições da chave, a ativação do projeto/API e se a chave pode acessar o Gemini.
+- `404`: o ID do modelo não está disponível na versão API configurada.
+- Exemplos de gateway falham nesse perfil: use o preset de gateway em vez do provedor nativo Google.
+
+## Quando Usar
+
+Use Google para traduções rápidas, limpeza em grande volume de notas e fluxos de trabalho em que o custo/desempenho do Gemini é melhor do que o de OpenAI ou Anthropic diretos. Prefira outro provedor para fluxos de trabalho que exigem tratamento de modelos de raciocínio compatíveis com OpenAI.
+
+---
+
+## Próximos passos
+
+- [LLM Providers](/docs/providers/overview) -- Configuração completa, modelos por tarefa e lógica de tentativa
+- [Tradução](/docs/features/translation) -- O Gemini Flash é recomendado para tarefas de tradução em grande volume

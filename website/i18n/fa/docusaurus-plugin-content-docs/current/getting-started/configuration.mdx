@@ -1,0 +1,435 @@
+---
+id: configuration
+title: "پیکربندی"
+description: "پیکربندی تنظیمات و ترجیحات Notemd"
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [configuration, settings, customization, preferences]
+concepts: [Configuration, Per-Task Models, Output Paths, Custom Workflows]
+citations:
+  - title: Obsidian
+    url: https://obsidian.md
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# پیکربندی
+
+<TLDR>
+**پیکربندی Notemd شامل ۶ حوزه اصلی است:** (۱) ارائه‌دهندگان LLM و کلیدهای API، (۲) انتخاب مدل برای هر وظیفه، (۳) مسیرها و الگوهای خروجی، (۴) زبان UI و زبان خروجی، (۵) سرویس‌های جستجو (Tavily/DuckDuckGo)، (۶) فرآیندهای کاربردی سفارشی. تمام تنظیمات در Obsidian Settings → Notemd قرار دارند. تغییرات بلافاصله اعمال می‌شوند.
+</TLDR>
+
+## مرور کلی تنظیمات
+
+دسترسی: **Obsidian Settings (⚙️) → Notemd**
+
+### بخش‌های اصلی
+
+1. **پیکربندی ارائه‌دهنده** — کلیدهای API، URLهای پایه، مدل‌ها
+2. **تنظیمات وظیفه** — انتخاب مدل برای هر وظیفه
+3. **پیکربندی خروجی** — محل ذخیره فایل‌های تولیدشده
+4. **تنظیمات زبان** — UI و زبان‌های خروجی
+5. **یکپارچه‌سازی جستجو** — پیکربندی Tavily/DuckDuckGo
+6. **فرآیندهای کاربردی** — زنجیره‌های دکمه سفارشی
+7. **پیشرفته** — تشخیص اشکال، پردازش دسته‌ای، بلوک‌بندی
+
+---
+
+## ۱. پیکربندی ارائه‌دهنده
+
+### افزودن یک ارائه‌دهنده
+
+1. **ارائه‌دهنده را** از لیست کشویی انتخاب کنید (۳۰+ گزینه موجود)
+2. **کلید API را وارد کنید**
+3. **اختیاری**: مقدار پایه سفارشی URL را تنظیم کنید (برای پروکسی‌ها/گیت‌وی‌ها)
+4. **روی «Get Model List» کلیک کنید** تا اتصال را بررسی کنید
+5. **مدل پیش‌فرض را انتخاب کنید**
+
+### ارائه‌دهندگان رایج
+
+#### OpenAI
+```
+Provider: OpenAI
+API Key: sk-...
+Base URL: https://api.openai.com/v1 (default)
+Model: gpt-4o-mini
+```
+
+#### Anthropic (Claude)
+```
+Provider: Anthropic
+API Key: sk-ant-...
+Model: claude-sonnet-4-6
+```
+
+#### Ollama (Local)
+```
+Provider: Ollama
+Base URL: http://localhost:11434 (default)
+Model: llama3.1
+API Key: (not required)
+```
+
+#### DeepSeek
+```
+Provider: DeepSeek
+API Key: sk-...
+Model: deepseek-chat
+```
+
+### ارائه‌دهندگان چندگانه
+
+شما می‌توانید چندین ارائه‌دهنده را پیکربندی کرده و بر حسب هر وظیفه بین آن‌ها تغییر دهید:
+- **ارائه‌دهنده اصلی**: به عنوان گزینه جایگزین استفاده می‌شود
+- **ارائه‌دهندگان مخصوص وظیفه**: برای وظایف خاص راهکارهای جایگزین فراهم می‌کنند
+
+---
+
+## ۲. مدل‌های مخصوص وظیفه
+
+برای بهینه‌سازی هزینه/کیفیت، مدل‌های متفاوتی را برای وظایف مختلف پیکربندی کنید:
+
+### انواع وظایف
+
+| وظیفه | مدل پیش‌فرض | هدف |
+|------|--------------|---------|
+| **پیوند‌زنی** | ارائه‌دهنده اصلی | شناسایی مفاهیم برای لینک‌های ویکی |
+| **تولید مفاهیم** | ارائه‌دهنده اصلی | استخراج و توصیف مفاهیم |
+| **تحقیق** | ارائه‌دهنده اصلی | خلاصه کردن نتایج جستجوی وب |
+| **ترجمه** | ارائه‌دهنده اصلی | ترجمه متن |
+| **تولید نمودار** | ارائه‌دهنده اصلی | تولید نمودارهای Mermaid/Canvas |
+
+### مثال: پیکربندی بهینه‌شده از نظر هزینه
+
+```
+Linking: gpt-4o-mini (fast, many calls)
+Concept Generation: claude-sonnet-4-6 (quality extraction)
+Research: gpt-4o (web-grounded)
+Translation: gemini-flash (multilingual)
+Diagram: ollama/llama3.1 (free, local)
+```
+
+### نحوه پیکربندی
+
+1. **تنظیمات → Notemd → تنظیمات وظیفه**
+2. برای هر وظیفه، انتخاب کنید:
+   - ✅ **از ارائه‌دهنده اصلی استفاده کنید** (پیش‌فرض)
+   - 🔄 **از ارائه‌دهنده سفارشی استفاده کنید** → ارائه‌دهنده و مدل را انتخاب کنید
+
+---
+
+## ۳. پیکربندی خروجی
+
+### خروجی یادداشت‌های مفهوم
+
+**محل ذخیره‌سازی یادداشت‌های مفهوم جدید:**
+
+```
+Settings → Output → Concept Folder
+Default: concepts/
+```
+
+**الگو:**
+```
+Settings → Output → Concept Template
+Default:
+---
+tags: [concept]
+created: {{date}}
+---
+
+# {{concept}}
+
+{{description}}
+
+## Backlinks
+{{backlinks}}
+```
+
+### گزینه‌های ساختار پوشه
+
+**گزینه ۱: صاف (تمام مفاهیم در یک پوشه)**
+```
+vault/
+└── concepts/
+    ├── Machine Learning.md
+    ├── Neural Networks.md
+    └── Deep Learning.md
+```
+
+**گزینه ۲: سلسله‌مراتبی (بر اساس پوشه منبع)**
+```
+vault/
+├── papers/
+│   └── concepts/
+│       └── Transformer.md
+└── notes/
+    └── concepts/
+        └── Attention Mechanism.md
+```
+
+پیکربندی: **تنظیمات → خروجی → استفاده از پوشه‌های سلسله‌مراتبی**
+
+### خروجی نمودار
+
+**محل ذخیره‌سازی نمودارها:**
+```
+Settings → Output → Diagram Folder
+Default: diagrams/
+```
+
+**فرمت:**
+- `.mmd` (Mermaid منبع)
+- `.canvas` (JSON Canvas)
+- `.html` (Vega-Lite)
+
+---
+
+## ۴. تنظیمات زبان
+
+### UI زبان
+
+**زبان رابط کاربری** (دکمه‌ها، منوها، پنجره‌های گفت‌وگو):
+
+```
+Settings → Language → UI Language
+Options: 21+ languages
+Default: System language
+```
+
+زبان‌های پشتیبانی‌شده: انگلیسی، 简体中文، 繁體中文، 日本語، 한국어، Español، Français، Deutsch، Русский، العربية و بسیاری دیگر.
+
+### زبان خروجی
+
+زبان محتوای تولیدشده** (یادداشت‌های مفهومی، خلاصه‌های تحقیقاتی):
+
+```
+Settings → Language → Output Language
+Options: Same as UI languages
+Default: Same as UI
+```
+
+**مورد استفاده:** چینی UI + خروجی به زبان انگلیسی برای تحقیقات دوزبانه.
+
+### هدف ترجمه
+
+**زبان هدف پیش‌فرض** برای وظایف ترجمه:
+
+```
+Settings → Translation → Target Language
+Default: English
+```
+
+---
+
+## ۵. یکپارچه‌سازی جستجو
+
+### Tavily (توصیه‌شده)
+
+**سرویس جستجوی بهینه‌شده با هوش مصنوعی:**
+
+```
+Settings → Search → Service: Tavily
+API Key: tvly-...
+```
+
+کلید دریافت کنید: [tavily.com](https://tavily.com/)
+
+**ویژگی‌ها:**
+- نتایج با کیفیت بالا
+- خلاصه‌های بهینه‌شده با هوش مصنوعی
+- منابع استنادی
+
+### DuckDuckGo (آزمایشی)
+
+**نیازی به کلید API نیست:**
+
+```
+Settings → Search → Service: DuckDuckGo
+```
+
+**توجه:** کیفیت پایین‌تر، بدون امکان سفارشی‌سازی.
+
+---
+
+## ۶. پیکربندی فرآیند کار
+
+### ایجاد فرآیندهای کار سفارشی
+
+**فرآیندهای کاری، چندین وظیفه را در یک دکمه ادغام می‌کنند.**
+
+1. **تنظیمات → فرآیندهای کاری → افزودن فرآیند کاری**
+2. **نام**: "فرآیند تحلیل کاغذ"
+3. **DSL**: `process-current-add-links>extract-concepts-current>research-and-summarize>summarize-as-mermaid`
+4. **ذخیره کردن**
+
+دکمه جدیدی در نوار سمت چپ ظاهر می‌شود.
+
+### سینتکس DSL
+
+**فرمت:** `action1>action2>action3`
+
+**اقدامات موجود:**
+- `process-current-add-links` — افزودن لینک‌های ویکی به یادداشت فعلی
+- `extract-concepts-current` — تولید یادداشت‌های مفهومی
+- `research-and-summarize` — تحقیق در وب + خلاصه‌سازی
+- `translate-current` — ترجمه یادداشت فعلی
+- `summarize-as-mermaid` — تولید نمودار Mermaid
+- `process-folder-add-links` — پردازش دسته‌ای پوشه
+
+**فرآیندهای کاری نمونه:**
+
+**استخراج سریع مفاهیم:**
+```
+process-current-add-links>extract-concepts-current
+```
+
+**تحقیق عمیق:**
+```
+process-current-add-links>research-and-summarize>extract-concepts-current
+```
+
+**تحلیل چندزبانه:**
+```
+translate-current>process-current-add-links>extract-concepts-current
+```
+
+---
+
+## 7. تنظیمات پیشرفته
+
+### پردازش دسته‌ای
+
+**پردازش چندین فایل به صورت همزمان:**
+
+```
+Settings → Advanced → Batch Processing
+Concurrency: 3 (default)
+```
+
+مقدار بالاتر = سرعت بیشتر اما تعداد API فراخوانی‌ها بیشتر است.
+
+### بخش‌بندی هوشمند
+
+**برای یادداشت‌های طولانی، آن‌ها را به بخش‌ها تقسیم کنید:**
+
+```
+Settings → Advanced → Smart Chunking
+Chunk Size: 2000 words (default)
+Overlap: 200 words (default)
+```
+
+جلوگیری از خطاهای مربوط به محدودیت توکن.
+
+### پنل تشخیصی
+
+**مشاهده لاگ‌های مفصل:**
+
+```
+Settings → Advanced → Enable Diagnostics
+```
+
+نمایش موارد زیر:
+- API درخواست/پاسخ
+- میزان استفاده از توکن‌ها
+- زمان‌های پردازش
+- خطاها
+
+### تشخیص مفاهیم تکراری
+
+**از مفاهیم تقریباً مشابه اجتناب کنید:**
+
+```
+Settings → Advanced → Synonym Suppression
+Threshold: 0.8 (default, 0-1)
+```
+
+مقدار بالاتر = ادغام پرخروش‌تر.
+
+---
+
+## پروفایل‌های پیکربندی
+
+### صادر/وارد کردن تنظیمات
+
+**پیکربندی‌ها را بین دستگاه‌ها به اشتراک بگذارید:**
+
+1. **تنظیمات → پیشرفته → صادر کردن پیکربندی**
+2. `notemd-config.json` را ذخیره می‌کند
+3. در دستگاه جدید: **وارد کردن پیکربندی**
+
+**چه چیزهایی دربرمی‌گیرد:**
+- کلیدهای ارائه‌دهنده API (اختیاری)
+- انتخاب مدل‌ها
+- مسیرهای خروجی
+- فرآیندهای کاری سفارشی
+
+---
+
+## پیکربندی‌های توصیه‌شده
+
+### برای دانشجویان
+
+```
+Provider: OpenAI (gpt-4o-mini)
+Concept Folder: concepts/
+UI Language: System
+Output Language: System
+Workflow: "Study Flow" (add-links>extract-concepts)
+```
+
+### برای پژوهشگران
+
+```
+Providers:
+  - Linking: DeepSeek (cheap, many calls)
+  - Concepts: Claude Sonnet (high quality)
+  - Research: GPT-4o (web-grounded)
+Concept Folder: notes/concepts/
+Hierarchical: Yes
+Workflow: "Paper Flow" (add-links>extract>research>diagram)
+```
+
+### برای کاربرانی که به حریم خصوصی اهمیت می‌دهند
+
+```
+Provider: Ollama (llama3.1)
+All tasks: Local model
+Search: DuckDuckGo (no API)
+Diagnostics: Off
+```
+
+### برای کار دوزبانه
+
+```
+UI Language: Chinese
+Output Language: English
+Translation Target: Chinese
+Provider: Gemini (multilingual)
+```
+
+---
+
+## رفع اشکالات پیکربندی
+
+### تنظیمات ذخیره نشدند
+- مجوزهای فایل را در `.obsidian/plugins/notemd/` بررسی کنید
+- تلاش کنید: پلاگین را غیرفعال کنید → دوباره فعال کنید
+
+### کلید API معتبر نیست
+- فاصله اضافی وجود ندارد
+- تاریخ انقضا را بررسی کنید
+- اعتبارات را در داشبورد ارائه‌دهنده بررسی کنید
+
+### مدل‌ها بارگذاری نمی‌شوند
+- برای به‌روزرسانی، روی "فهرست مدل‌ها را دریافت کنید" کلیک کنید
+- اتصال شبکه را بررسی کنید
+- ارائه‌دهنده دیگری را امتحان کنید
+
+---
+
+## گام‌های بعدی
+
+- 📖 [ویژگی‌ها را بررسی کنید](../features/wiki-links)
+- 🔌 [راهنمای پیکربندی ارائه‌دهنده](../providers/overview)
+- ❓ [پرسش‌های متداول](../faq)

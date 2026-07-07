@@ -1,0 +1,67 @@
+---
+id: anthropic
+title: "Anthropic"
+description: "Configura Anthropic Claude"
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [anthropic, claude, provider, configuration]
+concepts: [Anthropic, Claude, API Configuration]
+citations:
+  - title: Anthropic API
+    url: https://docs.anthropic.com
+  - title: Claude
+    url: https://www.anthropic.com/claude
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# Providerul Anthropic
+
+<TLDR>
+**Anthropic utilizează transportul nativ Messages API, nu transportul compatibil cu OpenAI.** Presetul curent este setat în mod implicit pe `claude-3-5-sonnet-20240620`, `https://api.anthropic.com` și `temperature: 0.5`. Tratează-l ca o suprafață de protocol separată atunci când depanarezi.
+
+Acesta face parte din [Obsidian Ghidul de gestionare a cunoștințelor AI](/docs/pillar-ai-knowledge).
+</TLDR>
+
+## Configurare
+
+Crea o cheie Anthropic API, adaugă un profil de provider `Anthropic` și lăsa Base URL la endpointul nativ, cu excepția cazului în care direcționezi printr-un profil de gateway dedicat. Alege ID-ul modelului Claude pe care dorești să-l folosești în câmpul model; valoarea implicită menține stabilă linia de bază a produsului existent.
+
+Anthropic este un candidat bun pentru sumarizare de înaltă calitate, sinteză a cercetărilor și extracție a conceptelor. Dacă îl combinzi cu provideri mai ieftini, setează-l doar pe sarcinile care beneficiază de calitatea sa de rezultat.
+
+## Endpoint și autentificare
+
+| Câmp | Presetul curent |
+|-------|----------------|
+| Transport | `anthropic` |
+| Cheia API | Requerit |
+| Base URL | `https://api.anthropic.com` |
+| Modelul implicit | `claude-3-5-sonnet-20240620` |
+| Temperature | `0.5` |
+| Test de conectare | Doar chat |
+
+Momentul de rulare trimite cereri la `/v1/messages` cu `x-api-key` și `anthropic-version: 2023-06-01`. Nu configurați un endpoint de tip OpenAI-style `/v1/chat/completions` în cadrul acestui preset; folosiți în schimb un preset de gateway compatibil cu OpenAI.
+
+## Descoperirea modelelor
+
+Anthropic utilizează modul de descoperire `anthropic-models` în registruul furnizorilor. Dacă cheia sau contul dumneavoastră nu poate lista modele, păstrați o ID cunoscută a unei modele în profil și validați prin testul de conectare.
+
+Transportul nu este interschimbabil cu furnizorii compatibili cu OpenAI. O model Claude rutată prin OpenRouter, LiteLLM sau un alt gateway aparține acelui profil de gateway, nu în profilul nativ Anthropic.
+
+## Dezvoltarea de soluții
+
+- `401` sau `403`: verificați domeniul cheii, accesul la spațiul de lucru, facturarea și dacă cheia aparține spațiului de lucru Anthropic așteptat.
+- `404`: Basea URL este greșită sau ID-ul modelei selectate nu este disponibil pentru cont.
+- ID-urile modelelor Claude de tip gateway eșuează: mutați profilul către furnizorul gateway corespunzător, deoarece Anthropic nativ așteaptă nume de modele native.
+- Cererile lungi eșuează târziu: reduceți dimensiunea outputului modelului pe sarcină sau folosiți o model cu un limit superior cunoscut mai mare pentru tokenuri de output.
+
+## Când să fiți utilizatori
+
+Folosiți Anthropic atunci când calitatea în sinteză, notele de cercetare sau scrierea structurată sunt mai importante decât costul brut. Nu îl folosiți ca soluție generică compatibilă cu OpenAI; caracterul separat al transportului este esențial, iar amestecarea protocoalelor face diagnosticul mai dificil.
+
+---
+
+## Următoarele pași
+
+- [LLM Furnizori](/docs/providers/overview) -- Configurație completă, modele pentru fiecare sarcină și logică de reîncercare
+- [Rezolvarea problemelor](/docs/advanced/troubleshooting) -- Corectare a erorilor 401/403 și a erorilor de conexiune

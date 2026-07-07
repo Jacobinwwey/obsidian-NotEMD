@@ -1,0 +1,134 @@
+---
+id: custom-prompts
+title: "הוראות מותאמות אישית"
+description: "להתאים הוראות LLM לצרכים שלכם"
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [custom prompts, prompts, focused learning, domain]
+concepts: [Custom Prompts, Focused Learning, Prompt Engineering]
+citations:
+  - title: Obsidian
+    url: https://obsidian.md
+  - title: LLM Prompt Engineering
+    url: https://platform.openai.com/docs/guides/prompt-engineering
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# הוראות מותאמות אישית
+
+<TLDR>
+**Notemd מאפשר לכם לעקוף את ההוראה הבסיסית LLM עבור כל סוג משימה.** הוראות מותאמות אישית מעניקות לכם שליטה על מה שהמודל מעדיף: ניתן להגביל את חילוץ הרעיונות לתחום מסוים, לשנות את סגנון הקישורים, או לשנות את טון התרגום. משתני הוראה כמו `{{content}}` ו-`{{concept}}` מוחלפים בזמן ביצוע. מאפיין תחום הלמידה הממוקד מוסיף את תחום הלימוד שלכם בראש הטקסט כדי להגביל אוטומטית את תוצאות החילוץ.
+
+זהו חלק מה[Obsidian מדריך ניהול ידע AI](/docs/pillar-ai-knowledge).
+</TLDR>
+
+## סקירה
+
+ההוראות המובנות של Notemd נכתבו לעבודה בידע בשימוש כללי. הן עובדות היטב בין תחומים שונים, אך הן גם משאירות מקום לשיפורים ספציפיים לתחום. הוראות מותאמות אישית מאפשרות לכם להגיד ל-LLM בדיוק איך לפעול עבור השימוש שלכם – בין אם זה אומר לחלץ רק מונחים רפואיים, לקשר רק ישויות מוגדרות, או לתרגם בסגנון רשמי.
+
+הוראות מותאמות אישית אינן מחליפות את הוראת המערכת כולה. הן מעקבות או משלימות את **החלק של ההוראות הספציפיות למשימה** תוך שמירה על פורמט הפלט המבני (למשל, שורות `CONCEPT:`, תחביר קישורי wiki) ש-Notemd מסתמך עליו לצורך פענוח.
+
+## אופן הפעולה
+
+### ארכיטקטורת ההוראות
+
+כל משימה Notemd עוקבת אחר אותה מבנה הוראות:
+
+```
+[System role: You are a helpful assistant...]
+[Domain constraint: Relevant Fields: [{domain}]]   <-- focused learning (optional)
+[Custom task prompt]                                <-- your override (optional)
+[Output format instructions]                        <-- always preserved
+[Content: {{content}}]                              <-- runtime substitution
+```
+
+1. **הוראת המערכת הבסיסית** -- קובעת את דמות העוזר. אינה ניתנת לעקיפה.
+2. **תחום הלמידה הממוקד** -- מוסיף `Relevant Fields: [medicine / law / computer science / ...]` בראש הטקסט כדי להגביל את ההיקף. זהו מתג בהגדרות, ולא הוראה גולמית.
+3. **הוראת המשימה המותאמת** -- מחליפה את ההוראות הבסיסיות של המשימה (למשל, אילו סוגי רעיונות לחלץ, באיזו עוצמה ליצור קישורים).
+4. **פורמט הפלט** -- חוקים מבניים (שורות `CONCEPT:`, פורמט קישורי wiki). תמיד מוסף על ידי Notemd כדי להבטיח ניתנות פענוח.
+5. **תוכן** -- טקסט ההערה האמיתי, המוחלף בזמן ביצוע באמצעות `{{content}}`.
+
+### משתני הוראה
+
+המשתנים מוחלפים בזמן ביצוע. המשתנים הזמינים משתנים לפי המשימה:
+
+| Variable | משימות | הוחלף ב- |
+|----------|-------|---------------|
+| `{{content}}` | כולם | טקסט ההערה או הבחירה |
+| `{{concept}}` | תבנית הערת רעיון | שם הרעיון שהופק |
+| `{{description}}` | תבנית הערת רעיון | תיאור הרעיון שנוצר על ידי LLM |
+| `{{backlinks}}` | תבנית הערת רעיון | רשימת ההערות המקוריות עם לינקים |
+| `{{date}}` | תבנית הערת רעיון | תאריך היום (YYYY-MM-DD) |
+| `{{language}}` | תרגום | שפת הפלט היעד |
+| `{{source}}` | תבנית הערת רעיון | שם הקובץ של ההערה המקורית |
+
+### תחום למידה ממוקד
+
+התכונה של למידה ממוקדת היא דרך מהירה להגביל את התחום. במקום לכתוב הוראה מותאמת אישית שמציינת את התחום שלכם, יש להגדיר `focusedLearningDomain` בהגדרות:
+
+```
+Settings → Advanced → Focused Learning Domain
+Example: "medicine" or "computer science" or "Chinese philosophy"
+```
+
+זה מוסיף את `Relevant Fields: [medicine]` להוראת החילוץ, מה שגורם ל-LLM להעדיף רעיונות הקשורים לתחום ולדכא רעיונות כלליים. זה קל יותר מהוראה מותאמת אישית מלאה ופועל בכל משימות החילוץ.
+
+## הגדרה
+
+| ערך | ברירת מחדל | השפעה |
+|---------|---------|--------|
+| `customAddLinksPrompt` | `''` | לעקוף את הוראת המשימה הרגילה להוספת קישורים |
+| `customExtractConceptsPrompt` | `''` | לעקוף את הוראת החילוץ של הרעיונות הרגילה |
+| `customResearchPrompt` | `''` | לעקוף את הוראת המחקר + סיכום הרגילה |
+| `customTranslatePrompt` | `''` | לעקוף את הוראת התרגום הרגילה |
+| `customDiagramPrompt` | `''` | לעקוף את הוראת יצירת הדיאגרמה הרגילה |
+| `focusedLearningDomain` | `''` | להוסיף רקע של תחום להוראות החילוץ והקישורים |
+| `extractConceptsMinimalTemplate` | `true` | להשתמש בתבנית רשימת רעיונות עם רק שם (זה משפיע על היקף התבנית של `{{concept}}`) |
+| `customConceptNoteTemplate` | `''` | לעקוף את תבנית קובץ רשימת הרעיונות עם תמיכה מלאה במשתנים |
+
+**כאשר שדה ההוראה המותאמת אישית ריק, נעשה שימוש בהוראה הרגילה המובנית.**
+
+## דוגמה
+
+אתם חוקרים רפואיים שחולצים רעיונות מרשימות של ניסויים קליניים. ההוראה הרגילה חולצת שמות עצם כלליים יחד עם מושגים רפואיים, מה שמסבך את תיק הרעיונות שלכם.
+
+**פתרון:** להגדיר תחום למידה ממוקד והוראת חילוץ מותאמת אישית.
+
+1. להגדיר `focusedLearningDomain` ל-`medicine`
+2. להגדיר `customExtractConceptsPrompt` ל:
+
+```
+Extract only clinically relevant concepts: diseases, drug names,
+anatomical terms, measurement endpoints, and statistical methods.
+Ignore generic English nouns, brand names, and institutional names.
+Prioritize MeSH terminology where applicable.
+```
+
+כעת, כאשר אתם מריצים את "Extract concepts" על רשומה קלינית, ה‑LLM מייצר:
+
+```
+CONCEPT: Randomized Controlled Trial
+CONCEPT: Double-Blind Method
+CONCEPT: Myocardial Infarction
+CONCEPT: Creatine Kinase-MB
+CONCEPT: Kaplan-Meier Estimate
+```
+
+במקום ההתנהגות הבסיסית שעלולה גם היא לשלוף מושגים כלליים לא רצויים כמו "hospital" או "month".
+
+## טיפים
+
+- **התחילו עם תחום הלמידה הממוקד** לפני כתיבת בקשה מותאמת מלאה. הוא מכסה 80% ממקרי השימוש עם הגדרה אחת בלבד.
+- **שמרו על פורמט הפלט** – אל תסירו לעולם הוראות פורמט כמו "one per line" או "CONCEPT: prefix" מבקשות מותאמות. המפרש של Notemd תלוי בהן.
+- **בדקו תחילה עם רשומה אחת** – בקשות מותאמות עלולות לגרום להשפעות בלתי צפויות על רוחב השליפה. בדקו על רשומה אחת לפני עיבוד המוני.
+- **שמרו על בקשות תמציתיות** – בקשות מותאמות ארוכות מדי צורכות יותר טוקנים ועלולות להחליש את הריכוז של המודל.
+
+---
+
+## צעדים באופק
+
+- [Wiki-Links](/docs/features/wiki-links) – מה נקשר כאשר אתם מתאימים את הבקשה להוספת קישורים
+- [Concept Notes](/docs/features/concept-notes) – תבניות של רשומות רעיונות והמשתנה `{{concept}}`
+- [Batch Processing](/docs/advanced/batch-processing) – יישום בקשות מותאמות על תיקיות שלמות
+- [Troubleshooting](/docs/advanced/troubleshooting) – תיקון בעיות שבהן בקשות מותאמות יוצרות פלט בלתי צפוי

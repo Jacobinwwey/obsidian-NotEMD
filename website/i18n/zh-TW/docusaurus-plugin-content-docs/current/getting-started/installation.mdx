@@ -1,0 +1,133 @@
+---
+id: installation
+title: "安裝"
+description: "如何在 Obsidian 中安裝 Notemd"
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [installation, setup, obsidian plugin]
+concepts: [Installation, Community Plugins, BRAT, Manual Install]
+citations:
+  - title: Obsidian
+    url: https://obsidian.md
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# 安裝
+
+<TLDR>
+**在 2 分鐘內安裝 Notemd。** 共有兩種方式：(1) 使用 Obsidian 社群插件（建議選擇，可一鍵安裝），或 (2) 透過 GitHub Releases 手動安裝。需安裝版本為 Obsidian 0.15.0+ 以上。適用於 Windows、macOS、Linux、iOS 與 Android，且無外部依賴項目。已有 4k 次以上下載，採用 MIT 授權。
+</TLDR>
+
+## 方法 1：社群插件（建議使用）
+
+1. 開啟 **Obsidian 設定**（⚙️ 圖示或 `Ctrl/Cmd + ,`）
+2. 前往 **Community plugins**
+3. 點擊 **Browse**
+4. 搜尋 **"Notemd"**
+5. 點擊 **Install**
+6. 點擊 **Enable**
+
+**完成！**您會在左側邊欄看到 Notemd 圖示。
+
+## 方法二：手動安裝
+
+### 先決條件
+- Obsidian 0.15.0 或更高版本
+- Git（可選，用於複製）
+
+### 步驟
+
+1. 從 [GitHub Releases](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/latest) **下載檔案**：
+   - `main.js`
+   - `styles.css`
+   - `manifest.json`
+
+2. **找出您保險庫的插件資料夾位置：**
+   ```
+   <your-vault>/.obsidian/plugins/
+   ```
+
+如果 `plugins` 資料夾不存在，請建立它。
+
+3. **建立 Notemd 資料夾：**
+   ```
+   <your-vault>/.obsidian/plugins/notemd/
+   ```
+
+4. 將這三個檔案**複製**到 `notemd` 資料夾中。
+
+5. **重新載入 Obsidian：**
+   - 按下 `Ctrl/Cmd + R`，或
+   - 重新啟動 Obsidian
+
+6. **啟用外掛程式：**
+   - 設定 → 社群外掛程式
+   - 在清單中尋找 "Notemd"
+   - 將它開啟
+
+## 替代方案：透過 BRAT 安裝
+
+如果您使用 [BRAT 插件](https://github.com/TfTHacker/obsidian42-brat)：
+
+1. 打開 BRAT 設定
+2. 點擊「新增 Beta 外掛」
+3. 輸入：`Jacobinwwey/obsidian-NotEMD`
+4. 點擊「新增外掛」
+5. 在 Community 外掛中啟用 Notemd
+
+## 驗證
+
+安裝完成後，請確認 Notemd 能正常運作：
+
+1. 打開任意筆記
+2. 在編輯器中按右鍵
+3. 你應該會看到類似 Notemd 的指令如下：
+   - 「處理檔案（新增連結）」
+   - 「提取概念」
+   - 「研究並總結」
+
+## 接下來的步驟
+
+- **設定 LLM 提供者：** [快速開始 →](./quick-start)
+- **故障排除：** [常見問題 →](../advanced/troubleshooting)
+
+## 系統需求
+
+| 平台 | 版本 | 狀態 |
+|----------|---------|--------|
+| **Obsidian** | 0.15.0+ | 必填項目 |
+| **Windows** | 7+ | ✅ 已支援 |
+| **macOS** | 10.15+ | ✅ 已支援 |
+| **Linux** | 任何 | ✅ 已支援 |
+| **iOS** | 15+ | ✅ 已支援 |
+| **Android** | 5+ | ✅ 已支援 |
+
+## 解除安裝
+
+要移除 Notemd：
+
+1. 設定 → 社群外掛程式
+2. 尋找 "Notemd"
+3. 點擊 ❌ 圖示
+4. 可選地，刪除外掛程式資料夾：`<vault>/.obsidian/plugins/notemd/`
+
+您的資料（筆記、概念說明等）將保持原樣，不受影響。
+
+## 正在更新中
+
+### 自動更新（建議）
+Obsidian 會自動檢查外掛程式的更新。當有新版本可用時：
+1. 設定 → 社群外掛程式
+2. 點擊「檢查更新」
+3. 點擊 Notemd 旁邊的「更新」
+
+### 手動更新
+下載最新版本，並替換您插件資料夾中的三個檔案。
+
+## 尋求協助
+
+- 📖 [快速入門指南](./quick-start)
+- ❓ [常見問題](../faq)
+- 💬 [Discord 社群](https://discord.gg/qnGgsQ9W)
+- 🐛 [回報問題](https://github.com/Jacobinwwey/obsidian-NotEMD/issues)

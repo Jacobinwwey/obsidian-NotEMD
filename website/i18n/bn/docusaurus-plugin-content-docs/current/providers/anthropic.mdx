@@ -1,0 +1,67 @@
+---
+id: anthropic
+title: "Anthropic"
+description: "Configure Anthropic Claude"
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [anthropic, claude, provider, configuration]
+concepts: [Anthropic, Claude, API Configuration]
+citations:
+  - title: Anthropic API
+    url: https://docs.anthropic.com
+  - title: Claude
+    url: https://www.anthropic.com/claude
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# Anthropic Provider
+
+<TLDR>
+**Anthropic uses the native Messages API transport, not the OpenAI-compatible transport.** The current preset defaults to `claude-3-5-sonnet-20240620`, `https://api.anthropic.com`, and `temperature: 0.5`. Treat it as a separate protocol surface when debugging.
+
+এটি [Obsidian AI Knowledge Management Guide](/docs/pillar-ai-knowledge)-এর অংশ।
+</TLDR>
+
+## Setup
+
+Create an Anthropic API key, add an `Anthropic` provider profile, and leave the Base URL on the native endpoint unless you are routing through a dedicated gateway profile. Choose the Claude model ID you want to use in the model field; the default keeps the existing product baseline stable.
+
+Anthropic is a good candidate for high-quality summarization, research synthesis, and concept extraction. If you mix it with cheaper providers, set it only on the tasks that benefit from its output quality.
+
+## Endpoint And Authentication
+
+| ফিল্ড | Current preset |
+|-------|----------------|
+| Transport | `anthropic` |
+| API কী | প্রয়োজনীয় |
+| Base URL | `https://api.anthropic.com` |
+| Default model | `claude-3-5-sonnet-20240620` |
+| Temperature | `0.5` |
+| Connection test | Chat-only |
+
+The runtime sends requests to `/v1/messages` with `x-api-key` and `anthropic-version: 2023-06-01`. Do not configure an OpenAI-style `/v1/chat/completions` endpoint under this preset; use an OpenAI-compatible gateway preset instead.
+
+## Model Discovery
+
+Anthropic প্রোভাইডার রেজিস্ট্রির মধ্যে `anthropic-models` ডিসকভারি মোড ব্যবহার করে। যদি আপনার কী বা অ্যাকাউন্ট মডেলগুলো তালিকাভুক্ত করতে না পারে, তবে প্রোফাইলে একটি পরিচিত মডেল ID রাখুন এবং কানেকশন টেস্টের মাধ্যমে এটি যাচাই করুন.
+
+ট্রান্সপোর্টটি OpenAI-সামঞ্জস্যপূর্ণ প্রোভাইডারগুলোর সাথে বিনিময়যোগ্য নয়। OpenRouter, LiteLLM অথবা অন্য কোনো গেটওয়ের মাধ্যমে রাউট হওয়া একটি Claude মডেলকে সেই গেটওয়ে প্রোফাইলে রাখা উচিত, নেটিভ Anthropic প্রোফাইলে নয়.
+
+## সমস্যা সমাধান
+
+- `401` অথবা `403`: কীর স্কোপ, ওয়ার্কস্পেস অ্যাক্সেস, বিলিং এবং কীটি কি প্রত্যাশিত Anthropic ওয়ার্কস্পেসের অন্তর্গত কিনা তা পরীক্ষা করুন.
+- `404`: Base URL ভুল হয়েছে অথবা নির্বাচিত মডেল IDটি অ্যাকাউন্টের জন্য উপলব্ধ নয়.
+- গেটওয়ে-স্টাইল Claude মডেল IDগুলো ব্যর্থ হয়: প্রোফাইলটিকে সংশ্লিষ্ট গেটওয়ে প্রোভাইডারে সরিয়ে নিন, কারণ নেটিভ Anthropic নেটিভ মডেল নামগুলোকেই আশা করে.
+- দীর্ঘ রিকোয়েস্টগুলো শেষ পর্যায়ে ব্যর্থ হয়: প্রতি-টাস্ক মডেল আউটপুটের আকার কমান অথবা বড় জানা আউটপুট-টোকেন সিলিংযুক্ত একটি মডেল ব্যবহার করুন.
+
+## কখন ব্যবহার করবেন
+
+যখন সিন্থেসিস, গবেষণা নোট অথবা কাঠামোবদ্ধ লেখার গুণমান কাঁচা খরচের চেয়ে বেশি গুরুত্বপূর্ণ হয়, তখন Anthropic ব্যবহার করুন। এটিকে সাধারণ OpenAI-সামঞ্জস্যপূর্ণ ফলব্যাক হিসেবে ব্যবহার করবেন না; আলাদা ট্রান্সপোর্টটিই হলো মূল বিষয়, এবং প্রোটোকলগুলো মিশিয়ে ফেললে রোগ নির্ণয় কঠিন হয়ে যায়.
+
+---
+
+## পরবর্তী ধাপসমূহ
+
+- [LLM Providers](/docs/providers/overview) -- পূর্ণ কনফিগারেশন, প্রতি-টাস্ক মডেল এবং রিট্রাই লজিক
+- [Troubleshooting](/docs/advanced/troubleshooting) -- 401/403 এবং কানেকশন ত্রুটিগুলো সংশোধন করুন

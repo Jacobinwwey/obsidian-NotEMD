@@ -1,0 +1,189 @@
+---
+id: overview
+title: "LLM Tjänsteleverantörer"
+description: "Konfigurera 36 LLM tjänsteleverantörer — moln, gateway och lokalt — med val av modell per uppgift"
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [LLM providers, API, OpenAI, Anthropic, Google, DeepSeek, Qwen, Ollama, per-task model]
+concepts: [LLM Integration, API Providers, Per-Task Models, OpenAI Compatible, Ollama, China Providers]
+citations:
+  - title: OpenAI API
+    url: https://platform.openai.com
+  - title: Anthropic API
+    url: https://docs.anthropic.com
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# LLM Tjänsteleverantörer
+
+<TLDR>
+**Notemd stöder 36 LLM tjänsteleverantörer över 4 transporttyper.** Alla API anrop använder rå HTTP (inga SDK:er) med automatisk återförsök, transportfallback och 5-minuters cache för svar. Val av modell per uppgift gör att du kan använda billiga modeller för konceptextraktion och kraftfulla modeller för forskning. Ingen API nyckel behövs för lokala leverantörer (Ollama, LMStudio).
+</TLDR>
+
+Detta ingår i [Obsidian AI Knowledge Management Guide](/docs/pillar-ai-knowledge).
+
+## Kategorier för tjänsteleverantörer
+
+### Molntjänsteleverantörer
+
+| Leverantör | Standardbas URL | Standardmodell | Temperature |
+|----------|-----------------|---------------|-------------|
+| **DeepSeek** | `api.deepseek.com` | `deepseek-v4-pro` | 0.5 |
+| **OpenAI** | `api.openai.com/v1` | `gpt-4o` | 0.5 |
+| **Anthropic** | `api.anthropic.com` | `claude-3-5-sonnet-20240620` | 0.5 |
+| **Google** | `generativelanguage.googleapis.com/v1` | `gemini-2.0-flash-exp` | 0.5 |
+| **Mistral** | `api.mistral.ai/v1` | `mistral-large-latest` | 0.5 |
+| **xAI** | `api.x.ai/v1` | `grok-4` | 0.7 |
+| **Cerebras** | `api.cerebras.ai/v1` | `gpt-oss-120b` | 0.5 |
+| **Fireworks** | `api.fireworks.ai/inference/v1` | `kimi-k2p5` | 0.5 |
+| **Nebius** | `api.studio.nebius.com/v1` | `openai/gpt-oss-120b` | 0.3 |
+
+### Gateway-/Proxy-tjänsteleverantörer
+
+| Leverantör | Standardbas URL | Standardmodell | Noter |
+|----------|-----------------|---------------|-------|
+| **OpenRouter** | `openrouter.ai/api/v1` | `anthropic/claude-3.7-sonnet` | Lägger till `HTTP-Referer` + `X-Title`-header |
+| **GitHub Models** | `models.github.ai/inference` | `gpt-4o-mini` | Lägger till `X-GitHub-Api-Version`-header |
+| **AIHubMix** | `aihubmix.com/v1` | `gpt-4o-mini` | Lägger till `APP-Code`-header |
+| **PPIO** | `api.ppinfra.com/v3/openai` | `qwen/qwen3-32b` | |
+| **Hugging Face** | `router.huggingface.co/v1` | `openai/gpt-oss-120b` | |
+| **Vercel AI Gateway** | `ai-gateway.vercel.sh/v1` | `anthropic/claude-sonnet-4.5` | |
+| **Requesty** | `router.requesty.ai/v1` | `anthropic/claude-3-7-sonnet-latest` | |
+| **Together** | `api.together.xyz/v1` | `meta-llama/Meta-Llama-3.1-70B-Instruct-Turbo` | |
+| **LiteLLM** | `localhost:4000/v1` | `your-proxy-model` | Valfri API-nyckel |
+| **Nytt API** | `localhost:3000/v1` | `gpt-4.1` | Valfri API-nyckel |
+| **OpenAI Compatible** | (användarkonfigurerat) | `your-model-id` | Custom endpoint |
+
+### Kinesiska leverantörer
+
+| Leverantör | Default Base URL | Standardmodell | Noter |
+|----------|-----------------|---------------|-------|
+| **Qwen** | `dashscope.aliyuncs.com/compatible-mode/v1` | `qwen3-235b-a22b` | Alibaba DashScope |
+| **Qwen Code** | `dashscope.aliyuncs.com/compatible-mode/v1` | `qwen3-coder-plus` | Inriktat på kodning |
+| **Doubao** | `ark.cn-beijing.volces.com/api/v3` | (krävs slutpunkts-ID) | ByteDance Volcengine |
+| **Moonshot** | `api.moonshot.cn/v1` | `kimi-k2-0905-preview` | Kimi |
+| **Xiaomi MiMo** | `api.xiaomimimo.com/v1` | `mimo-v2.5-pro` | |
+| **GLM** | `open.bigmodel.cn/api/paas/v4` | `glm-5` | Zhipu, Kinas endpoint |
+| **Z AI** | `api.z.ai/api/paas/v4` | `glm-5` | Zhipu, internationell endpoint |
+| **MiniMax** | `api.minimaxi.com/v1` | `MiniMax-M2.7` | |
+| **Baidu Qianfan** | `qianfan.baidubce.com/v2` | `ernie-4.5-turbo-32k` | |
+| **SiliconFlow** | `api.siliconflow.cn/v1` | `Qwen/QwQ-32B` | Plattform för modellhosting |
+| **Huawei Cloud MaaS** | `api.modelarts-maas.com/v1` | `DeepSeek-V3` | |
+
+**Doubao kräver en Ark-endpoint-ID** (format: `ep-xxxxxxxx-xxxx-xxxx`). Den standardmässiga placeringen måste ersättas.
+
+### Lokala leverantörer
+
+| Leverantör | Default Base URL | Standardmodell | Noter |
+|----------|-----------------|---------------|-------|
+| **Ollama** | `localhost:11434/api` | `llama3` | Ingen API-nyckel. NDJSON-strömning. Modellupptäckt via `/api/tags` |
+| **LMStudio** | `localhost:1234/v1` | `local-model` | Skickar `"EMPTY"` som bearer-token. OpenAI-kompatibel upptäckt |
+| **OVMS** | `localhost:8000/v3` | `openvino-model` | OpenVINO Model Server |
+| **Azure OpenAI** | (anpassat av användaren) | `gpt-4o` | Namnet på distributionen i URL. `api-key`-header |
+
+## Modellval per uppgift
+
+Notemd stöder en oberoende leverantör och modell för varje uppgift. Aktivera med `useMultiModelSettings: true`.
+
+### Tillgängliga uppgifter
+
+| Uppgift | Inställningsnyckel | Standardleverantör |
+|------|-------------|-----------------|
+| Lägg till länkar (insering av wiki-länkar) | `addLinksProvider` / `addLinksModel` | DeepSeek |
+| Forskning (webbsökning + sammanfattning) | `researchProvider` / `researchModel` | DeepSeek |
+| Generera från titel | `generateTitleProvider` / `generateTitleModel` | DeepSeek |
+| Översättning | `translateProvider` / `translateModel` | DeepSeek |
+| Diagramgenerering | `summarizeToMermaidProvider` / `Model` | DeepSeek |
+| Konceptextraktion | `extractConceptsProvider` / `Model` | DeepSeek |
+| Ursprungstextextraktion | `extractOriginalTextProvider` / `Model` | DeepSeek |
+
+### Lösningsordning
+
+1. Om `useMultiModelSettings` är aktiverat → använd den uppgiftsspecifika leverantören + modellen
+2. Om överskrivningen av uppgiftsmodellen är tom → fall tillbaka till leverantörens standardmodell
+3. Om uppgiftsleverantören är ogiltig → fall tillbaka till den globala `activeProvider`
+4. Om `useMultiModelSettings` är avstängt → alla uppgifter använder den globala `activeProvider`
+
+### Rekommenderade konfigurationer
+
+```
+# Researcher: power for research, cheap for everything else
+activeProvider: DeepSeek
+extractConceptsProvider: DeepSeek
+researchProvider: OpenAI        # GPT-4o for better research quality
+summarizeToMermaidProvider: DeepSeek
+
+# Privacy-first: local only
+activeProvider: Ollama
+addLinksProvider: Ollama
+extractConceptsProvider: Ollama
+
+# Budget bilingual
+activeProvider: DeepSeek
+translateProvider: Google      # Gemini Flash for translation
+researchProvider: SiliconFlow  # Cheaper China-based routing
+```
+
+## API Call Architecture
+
+### Transportlagrar
+
+1. **Obsidian `requestUrl`** — primär (inbyggd, fungerar på alla plattformar)
+2. **Desktop HTTP** — Node.js `http`/`https`-moduler (strömning + långa förfrågningar)
+3. **Web `fetch`** — fallback när Node.js-moduler inte är tillgängliga
+
+Pluginen kaskaderas automatiskt mellan transportlagrar vid tillfälliga nätverksfel.
+
+### Återförsökslogik
+
+- **Normalläge** (`enableStableApiCall: false`): En enda försök. Vid tillfällig misslyckande eskaleras det automatiskt till ett stabilt återförsök.
+- **Stabilt återförsöksläge** (`enableStableApiCall: true`): Upp till 4 försök (1 + 3 återförsök) med 5 sekunders intervallar.
+- **Tillfälliga fel som utlöser återförsök**: `err_connection_closed`, `err_connection_reset`, `err_timed_out`, `econnreset`, `econnaborted`, `etimedout`, `socket hang up`, `network request failed`
+- **Inte återförsökbara**: HTTP 400, 401, 403, 404
+
+### Svarcaching
+
+5-minuters LRU-cache i minnet med nycklar baserade på leverantör + modell + temperatur + prompt + innehåll. Efterföljande identiska förfrågningar inom 5 minuter returnerar omedelbart cacherade resultat.
+
+### Hantering av resonemangsmodeller
+
+Modeller som inte stöder `system`-rollen (DeepSeek R1, OpenAI o1/o3/o4/gpt-5) har automatiskt system- och användarprompts sammanfogade till en enda användarmeddelande.
+
+DeepSeek-specifik: `thinkingEnabled` lägger till `{ thinking: { type: 'enabled' } }` i förfrågan. `reasoningEffort` (låg/mellanlig/hög) skickas som `reasoning_effort`. Kontrollerar att maximal utdataantal token är ≥ 8000 när tänkning är aktiverad.
+
+### Tokenuppskattning
+
+`estimateTokens(text)`: `Math.ceil(text.length / 4)` — heuristik med 4 tecken per token. Används för att upprätthålla `maxResearchContentTokens` innan det skickas till LLM.
+
+Ingen kostnadsförfoljning är implementerad.
+
+## Modellupptäckt
+
+| Modus | Tillhandahållare | Endpoint |
+|------|-----------|----------|
+| `ollama-tags` | Ollama | `/api/tags` |
+| `google-models` | Google | Modelllista API |
+| `anthropic-models` | Anthropic | Modelllista API |
+| `openai-compatible-models` | DeepSeek, Qwen, Mistral, osv. | `/v1/models` |
+| `openrouter-models` | OpenRouter | Modelllista API |
+| `github-models` | GitHub Models | Inférsion API |
+| `none` | Azure OpenAI | Inaktiverat (kräver distributionsnamn) |
+
+## Snabbstart
+
+1. **Välj en tillhandahållare** — DeepSeek (Kina), OpenAI (Internationellt) eller Ollama (Lokal/Gratis)
+2. **Ange API-nyckeln** — Inställningar → Notemd → Tillhandahållare → API-nyckel
+3. **Testa anslutningen** — Klicka på testknappen
+4. **Valfritt: Modeller per uppgift** — Aktivera `useMultiModelSettings` och konfigurera separat
+
+För Ollama: inget API-nyckel behövs. Se bara till att `ollama serve` körs.
+
+---
+
+## Nästa steg
+
+- 📝 [Konceptnoter](/docs/features/concept-notes) — Använder modell för extraktion per uppgift
+- 🎨 [Diagram](/docs/features/diagrams) — Använder diagrammodell per uppgift
+- 🔍 [Forskning](/docs/features/research) — Använder modell specifik för forskning
+- ⚙️ [Konfiguration](/docs/getting-started/configuration) — Fullständig referens för inställningar

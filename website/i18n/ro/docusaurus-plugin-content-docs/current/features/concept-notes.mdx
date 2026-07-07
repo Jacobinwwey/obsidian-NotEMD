@@ -1,0 +1,184 @@
+---
+id: concept-notes
+title: "Note conceptuale"
+description: "Genera și gestionează note conceptuale — note independente pentru conceptele cheie extrase din seiful dumneavoastră"
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [concept notes, knowledge extraction, concept folder, deduplication, backlinks]
+concepts: [Concept Notes, Knowledge Graph, LLM Extraction, Deduplication, Backlinks]
+citations:
+  - title: Obsidian
+    url: https://obsidian.md
+  - title: Zettelkasten Method
+    url: https://zettelkasten.de
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# Note conceptuale
+
+<TLDR>
+**Notemd extrage conceptele cheie din notele tale și creează fișiere independente de tip concept note.** LLM identifică termenii esențiali, generează o fișier `.md` pentru fiecare concept într-o folder configurabilă și, opțional, adaugă backlink-uri către nota sursă. Suportă suprimarea sinonimelor, selecția modelului pentru fiecare sarcină, sanitizarea numelurilor fișierelor și un motor de deduplicare în 4 pași. Acesta face parte din [Obsidian Ghidul de Management al Cunoștințelor AI](/docs/pillar-ai-knowledge).
+</TLDR>
+
+## Prezentare generală
+
+Notele conceptuale reprezintă elementele de bază ale unei baze de cunoștințe interconectate. Atunci când procesați o notă, Notemd:
+
+1. **Trimite textul tău către un LLM** cu o instrucțiune de extracție structurată
+2. **Analizează rândurile `CONCEPT:`** din răspunsul LLM
+3. **Creează un fișier `.md` pentru fiecare concept** într-o foldere specificată
+4. **Adaugă backlink-uri** în nota sursă (atunci când este activat)
+
+## Cum funcționează
+
+### Pipeline de extracție
+
+```
+Source Note → Split into Chunks → LLM per Chunk → Parse CONCEPT: Lines
+    → Deduplicate via Set → Create .md Files → Add Backlinks
+    → (Optional: Generate Log)
+```
+
+### Promptul de extracție
+
+LLM primește un mesaj care îl instruiește să:
+
+- Extrageți **substantivele sau expresiile substantivale** esențiale pentru subiectul documentului
+- **Prioritați specificitatea** — „Dielectric Relaxation” în loc de „Relaxation”
+- **Normalizează la singular** — „models” devine „model”
+- **Suprimă sub-conceptele** — dacă apare „dielectric relaxation“, nu extrageți și „relaxation“.
+- **Sărate** secțiuni de referințe/bibliografie, substantive comune, nume de companii/produse
+- Afișa un concept pe linie ca `CONCEPT: Term Name`
+
+**Suprimarea sinonimilor** (opțional): se adaugă înainte „Evita extragerea sinonimilor, conceptelor centrale semantic similare sau cuvintelor cheie ori de câte ori este posibil“ la prompt.
+
+**Domeniul de învățare concentrat** (opțional): se adaugă `Relevant Fields: [domain]` înainte pentru a limita extragerea la o anumită disciplină.
+
+**Suprascrierea limbajului** (opțional): se adaugă în final „Conceptele de ieșire MUST fi în [language].“
+
+### Fragmentare
+
+Notele lungi sunt împărțite prin `settings.chunkWordCount`. Fiecare fragment este trimis independent. Conceptele din toate fragmentele sunt acumulate într-un `Set` — duplicatele dintre fragmente sunt eliminate în tăcere. Erorile LLM de pe fiecare fragment nu opresc operația.
+
+## Crearea notei de concept
+
+### Reguli pentru numele fișierului
+
+| Regulă | Comportament |
+|------|----------|
+| Hifene/subliniere | Sunt înlocuite cu spații |
+| Caractere speciale | Sunt eliminate: backslash, forward slash, colon, asterisk, question mark, quote-uri, angle brackets, pipe, hash, caret, bracketuri |
+| Spațiile golă | Sunt comprimate și curățate |
+| Lungime maximă | 100 de caractere (truncat + retrimat) |
+| Rezultat gol/tot puncte | Sărit în tăcere |
+
+Exemplu: `A-B: Key*Term` devine `A B KeyTerm.md`
+
+### Șabloane
+
+**Șablon complet** (backlink-uri activate, șablon minimal dezactivat):
+
+```markdown
+# Concept Name
+
+## Linked From
+- [[SourceNoteBasename]]
+```
+
+**Șablon minimal** (când `extractConceptsMinimalTemplate: true`):
+
+```markdown
+# Concept Name
+```
+
+### Actualizarea noteurilor existente
+
+Când un fișier de concept există deja:
+
+1. Dacă backlink-urile sunt activate și nota sursă nu este deja listată, se adaugă un backlink
+2. Dacă există o secțiune `## Linked From`, se inseră înainte de următorul titlu `##`
+3. Dacă nu există `## Linked From`, se adaugă secțiunea la sfârșit
+4. Se verifică și se sărute backlink-urile duplicate
+
+### Configurație
+
+| Setare | Implicit | Efect |
+|---------|---------|--------|
+| `useCustomConceptNoteFolder` | `true` | Comutator principal. Dezactivat = fără note create |
+| `conceptNoteFolder` | `''` (dezactivat) | Căilărea de folder pentru note conceptuale |
+| `extractConceptsMinimalTemplate` | `true` | Note doar cu titlu (fără Linked From) |
+| `extractConceptsAddBacklink` | `false` | Adaugă backlink-uri în timpul extracției independente |
+| `extractConceptsProvider` / `extractConceptsModel` | DeepSeek | LLM pe sarcină pentru extracția conceptelor |
+| `extractConceptsLanguage` | `'en'` | Limba de ieșire pentru numele conceptelor |
+| `replaceSynonymsDuringConceptExtraction` | `false` | Activează suprimarea sinonimilor în prompt |
+| `generateConceptLogFile` | `false` | Scrie o listă `.log` cu conceptele create |
+
+**Important:** Setările `extractConceptsAddBacklink` și `extractConceptsMinimalTemplate` afectează doar **comanda de extracție dedicată**. Comanda „Adaugă Linkuri” creează întotdeauna note cu model complet și backlink-uri.
+
+## Deduplare
+
+Comanda dedup (`Notemd: Check & remove duplicate concept notes`) efectuează o analiză în 5 pași:
+
+### Pasul 1: Coincidență exactă a numelui fișier
+
+Comparare fără a ține cont de majuscule a numelui bazal în întregul domeniu configurat.
+
+### Pasul 2: Detectarea formei plurielle
+
+Îndepărtează sufixele: `-ies` până la `-y`, `-es` eliminat, `-s` eliminat. Compare forma singulară cu fișierele din domeniu. Nu gestionează pluralele iregulare (children/child).
+
+### Pasul 3: Normalizare a simbolurilor
+
+Se aplică: `toLowerCase()`, înlocuiți tirele/sublinierele cu spații, eliminați elementele nealfanumerice, reduceți spațiile goale. Cele care se normalizează în mod identic sunt marcate.
+
+### Pasul 4: Conținut unic de cuvânt
+
+Notele cu concepte de un singur cuvânt sunt verificate în raport cu numele fișierelor de scop cu mai multe cuvinte. Nu se execută atunci când scopul este `concept_folder_only`.
+
+### Pasul 5: Confirmare și ștergere
+
+Toate candidații sunt afișate într-un modal de confirmare. Elementele aprobate sunt mutate în coșul sistemului. Operația poate fi anulată între fiecare ștergere.
+
+### Modele de scop
+
+| Mod | Comparat cu |
+|------|-------------------|
+| `vault` (implicit) | Toate fișierele vault `.md` cu excepția folderului concept |
+| `concept_folder_only` | Alte note de concept din același folder |
+| `include` | Fișierele din folderele specificate |
+| `exclude` | Toate fișierele vault cu excepția folderului concept + folderele specificate |
+
+## Utilizare
+
+### Extrage concepte (Standalone)
+
+1. Deschideți o notă
+2. Rulați **"Notemd: Extrage concepte"** din palettea de comenzi
+3. Notele de concept sunt create în folderul configurat
+
+### Extrage și generează conținut
+
+**"Notemd: Extrage concepte și generează titluri"** — extrage conceptele, apoi rulează „Generează din Titlu” pentru fiecare notă din folderul de concepte. Acest lucru generează conținut pentru **toate** notele de concept din folder, nu doar pentru cele create recent.
+
+### Creează un link wiki din selecție
+
+1. Highlight text in editor
+2. Rulează **"Notemd: Creează link wiki din selecție"**
+3. Textul este înconjurat de `[[...]]` și se creează o notă de concept
+
+## Sfaturi
+
+- **Setați mai întâi folderul de concepte** — fără el, nu se creează note. Apare un modal de avertizare dacă nu este setat.
+- **Folosiți modele pentru fiecare sarcină** — extragerea conceptelor funcționează bine cu modele mai ieftine (GPT-4o-mini, DeepSeek). Păstrați modelele scumpe pentru cercetare/traducere.
+- **Activezați suprimarea sinonimilor** în domenii tehnice unde mai multe termeni se referă la același concept.
+- **Dedupați regulat** — ruleazăți comanda de deduplație după procesarea în lot pentru a detecta duplicate apropiate.
+- **Fișierul de log este suprascris** la fiecare rulare, nu adăugat. Copiați-l dacă aveți nevoie de rezultate anterioare.
+
+---
+
+## Următoarele pași
+
+- [Wiki-Links](./wiki-links) — Cum se fac linkuri între concepte în text
+- [Diagrams](./diagrams) — Visualizarea relațiilor dintre concepte
+- [Workflows](./workflows) — Îmbinarea extragerii cu alte sarcini

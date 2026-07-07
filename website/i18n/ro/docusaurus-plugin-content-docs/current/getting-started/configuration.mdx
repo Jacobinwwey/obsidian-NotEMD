@@ -1,0 +1,435 @@
+---
+id: configuration
+title: "Configurație"
+description: "Configurați setările și preferințele Notemd"
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [configuration, settings, customization, preferences]
+concepts: [Configuration, Per-Task Models, Output Paths, Custom Workflows]
+citations:
+  - title: Obsidian
+    url: https://obsidian.md
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# Configurație
+
+<TLDR>
+**Configurația Notemd acoperă 6 domenii principale:** (1) furnizori LLM și chei API, (2) selecția modelului pentru fiecare sarcină, (3) căile de ieșire și șabloanele, (4) limbajul UI și limbajul de ieșire, (5) serviciile de căutare (Tavily/DuckDuckGo), (6) fluxuri de lucru personalizate. Toate setările se găsesc în Obsidian Settings → Notemd. Schimbările intră în vigoare imediat.
+</TLDR>
+
+## Prezentare generală a setărilor
+
+Acces: **Obsidian Settings (⚙️) → Notemd**
+
+### Secțiuni principale
+
+1. **Configurația furnizorului** — chei API, URLs de bază, modele
+2. **Setările sarcinii** — selecția modelului pentru fiecare sarcină
+3. **Configurația ieșirii** — unde se salvează fișierele generate
+4. **Setările limbajului** — UI și limbajul de ieșire
+5. **Integrarea căutării** — configurarea Tavily/DuckDuckGo
+6. **Fluxuri de lucru** — lanțuri personalizate de butoane
+7. **Avansate** — diagnostic, procesare în lot, fragmentare
+
+---
+
+## 1. Configurația furnizorului
+
+### Adăugarea unui furnizor
+
+1. **Selectați furnizorul** din listă deschisă (peste 30 disponibile)
+2. **Introduceți cheia API**
+3. **Opțional**: Setați o bază personalizată URL (pentru proxy-uri/gatewee)
+4. **Faceți clic pe „Get Model List"** pentru a verifica conexiunea
+5. **Selectați modelul implicit**
+
+### Provideri comuni
+
+#### OpenAI
+```
+Provider: OpenAI
+API Key: sk-...
+Base URL: https://api.openai.com/v1 (default)
+Model: gpt-4o-mini
+```
+
+#### Anthropic (Claude)
+```
+Provider: Anthropic
+API Key: sk-ant-...
+Model: claude-sonnet-4-6
+```
+
+#### Ollama (Local)
+```
+Provider: Ollama
+Base URL: http://localhost:11434 (default)
+Model: llama3.1
+API Key: (not required)
+```
+
+#### DeepSeek
+```
+Provider: DeepSeek
+API Key: sk-...
+Model: deepseek-chat
+```
+
+### Provideri multiple
+
+Puteți configura mai mulți provideri și să schimbați între ei pentru fiecare sarcină:
+- **Providerul principal**: Folosit ca soluție de rezervă
+- **Provideri specifici pentru sarcini**: Suprascrie pentru sarcini specifice
+
+---
+
+## 2. Modele specifice sarcinii
+
+Configurați modele diferite pentru sarcini diferite pentru a optimiza costul/calitatea:
+
+### Tipuri de sarcini
+
+| Sarcină | Modelul implicit | Scop |
+|------|--------------|---------|
+| **Legături** | Providerul principal | Identificați conceptele pentru link-urile wiki |
+| **Generare a conceptului** | furnizor principal | Extrage și descrie conceptele |
+| **Cercetare** | furnizor principal | Rezumă rezultatele căutării pe web |
+| **Traducere** | furnizor principal | Traduce textul |
+| **Generarea diagramelor** | furnizor principal | Generează diagrame Mermaid/Canvas |
+
+### Exemplu: Configurație optimizată din punct de vedere al costurilor
+
+```
+Linking: gpt-4o-mini (fast, many calls)
+Concept Generation: claude-sonnet-4-6 (quality extraction)
+Research: gpt-4o (web-grounded)
+Translation: gemini-flash (multilingual)
+Diagram: ollama/llama3.1 (free, local)
+```
+
+### Cum se configurează
+
+1. **Setări → Notemd → Setări ale sarcinii**
+2. Pentru fiecare sarcină, alegeți:
+   - ✅ **Utiliza furnizorul principal** (valoare implicită)
+   - 🔄 **Utiliza furnizor personalizat** → selectați furnizor + model
+
+---
+
+## 3. Configurația de ieșire
+
+### Outputul notițelor despre concepte
+
+**Unde sunt salvate notele de concept nou:**
+
+```
+Settings → Output → Concept Folder
+Default: concepts/
+```
+
+**Șablonul:**
+```
+Settings → Output → Concept Template
+Default:
+---
+tags: [concept]
+created: {{date}}
+---
+
+# {{concept}}
+
+{{description}}
+
+## Backlinks
+{{backlinks}}
+```
+
+### Opțiuni de structură a folderului
+
+**Opțiunea 1: Plată (toate conceptele într-un singur folder)**
+```
+vault/
+└── concepts/
+    ├── Machine Learning.md
+    ├── Neural Networks.md
+    └── Deep Learning.md
+```
+
+**Opțiunea 2: Ierarhică (după folderul sursă)**
+```
+vault/
+├── papers/
+│   └── concepts/
+│       └── Transformer.md
+└── notes/
+    └── concepts/
+        └── Attention Mechanism.md
+```
+
+Configurație: **Settings → Output → Use Hierarchical Folders**
+
+### Rezultatul diagramului
+
+**Unde sunt salvate diagramele:**
+```
+Settings → Output → Diagram Folder
+Default: diagrams/
+```
+
+**Format:**
+- `.mmd` (Mermaid sursă)
+- `.canvas` (JSON Canvas)
+- `.html` (Vega-Lite)
+
+---
+
+## 4. Setări de limbă
+
+### UI Limbă
+
+**Limbajul interfeței** (butoane, meniuri, dialoguri):
+
+```
+Settings → Language → UI Language
+Options: 21+ languages
+Default: System language
+```
+
+Suportate: English, 简体中文, 繁體中文, 日本語, 한국어, Español, Français, Deutsch, Русский, العربية și altele.
+
+### Limbajul de ieșire
+
+**Limba conținutului generat** (note conceptuale, rezumate de cercetare):
+
+```
+Settings → Language → Output Language
+Options: Same as UI languages
+Default: Same as UI
+```
+
+**Caz de utilizare:** Chineză UI + rezultate în engleză pentru cercetare bilingvă.
+
+### Destinația traduceri
+
+**Limba țintă implicită** pentru sarcinile de traducere:
+
+```
+Settings → Translation → Target Language
+Default: English
+```
+
+---
+
+## 5. Integrare cu căutare
+
+### Tavily (Recomandat)
+
+**Serviciu de căutare optimizat pentru AI:**
+
+```
+Settings → Search → Service: Tavily
+API Key: tvly-...
+```
+
+Obține cheie: [tavily.com](https://tavily.com/)
+
+**Caracteristici:**
+- Rezultate de înaltă calitate
+- Rezumate optimizate pentru AI
+- Citești sursă
+
+### DuckDuckGo (Experimental)
+
+**Nu este necesară cheia API:**
+
+```
+Settings → Search → Service: DuckDuckGo
+```
+
+**Notă:** Calitate mai scăzută, fără personalizare.
+
+---
+
+## 6. Configurarea fluxului de lucru
+
+### Crearea de fluxuri de lucru personalizate
+
+**Fluxurile de lucru combină mai multe sarcini într-un singur buton.**
+
+1. **Setări → Fluxuri de lucru → Adăuga flux de lucru**
+2. **Nume**: "Paper Analysis Flow"
+3. **DSL**: `process-current-add-links>extract-concepts-current>research-and-summarize>summarize-as-mermaid`
+4. **Salvează**
+
+Un nou buton apare în bara laterală stângă.
+
+### Sintaxa DSL
+
+**Format:** `action1>action2>action3`
+
+**Acțiuni disponibile:**
+- `process-current-add-links` — Adaugă linkuri wiki în nota curentă
+- `extract-concepts-current` — Generează note conceptuale
+- `research-and-summarize` — Cercetare pe web + rezumat
+- `translate-current` — Traduce nota curentă
+- `summarize-as-mermaid` — Generează diagrama Mermaid
+- `process-folder-add-links` — Procesează în lot folderul
+
+**Exemple de fluxuri de lucru:**
+
+**Extracție rapidă a conceptelor:**
+```
+process-current-add-links>extract-concepts-current
+```
+
+**Cercetare profundă:**
+```
+process-current-add-links>research-and-summarize>extract-concepts-current
+```
+
+**Analiză multilingvă:**
+```
+translate-current>process-current-add-links>extract-concepts-current
+```
+
+---
+
+## 7. Setări avansate
+
+### Procesare în loturi
+
+**Procesează mai multe fișiere în paralel:**
+
+```
+Settings → Advanced → Batch Processing
+Concurrency: 3 (default)
+```
+
+Valoare mai mare = mai rapid, dar mai multe apeluri API.
+
+### Fragmentare inteligentă
+
+**Pentru note lungi, împarteți-le în fragmente:**
+
+```
+Settings → Advanced → Smart Chunking
+Chunk Size: 2000 words (default)
+Overlap: 200 words (default)
+```
+
+Previnerea erorilor din cauza limitelor de token.
+
+### Panoul de diagnostic
+
+**Vizualizați jurnale detaliate:**
+
+```
+Settings → Advanced → Enable Diagnostics
+```
+
+Afișează:
+- API cereri/răspunsuri
+- Utilizarea tokenilor
+- Timpurile de procesare
+- Erori
+
+### Detectarea conceptelor duplicate
+
+**Evita concepte aproape duplicate:**
+
+```
+Settings → Advanced → Synonym Suppression
+Threshold: 0.8 (default, 0-1)
+```
+
+Cât mai mare = fuziune mai agresivă.
+
+---
+
+## Profiluri de configurare
+
+### Setări de export/import
+
+**Partajează configurațiile între dispozitive:**
+
+1. **Setări → Avansate → Exporta configurație**
+2. Salvează `notemd-config.json`
+3. Pe un dispozitiv nou: **Importa configurație**
+
+**Ce este inclus:**
+- Chei API ale furnizorului (opțional)
+- Selecții de model
+- Căi de ieșire
+- Fluxuri de lucru personalizate
+
+---
+
+## Configurații recomandate
+
+### Pentru studenți
+
+```
+Provider: OpenAI (gpt-4o-mini)
+Concept Folder: concepts/
+UI Language: System
+Output Language: System
+Workflow: "Study Flow" (add-links>extract-concepts)
+```
+
+### Pentru cercetători
+
+```
+Providers:
+  - Linking: DeepSeek (cheap, many calls)
+  - Concepts: Claude Sonnet (high quality)
+  - Research: GPT-4o (web-grounded)
+Concept Folder: notes/concepts/
+Hierarchical: Yes
+Workflow: "Paper Flow" (add-links>extract>research>diagram)
+```
+
+### Pentru utilizatorii care se preocupează de confidențialitate
+
+```
+Provider: Ollama (llama3.1)
+All tasks: Local model
+Search: DuckDuckGo (no API)
+Diagnostics: Off
+```
+
+### Pentru lucrări bilingve
+
+```
+UI Language: Chinese
+Output Language: English
+Translation Target: Chinese
+Provider: Gemini (multilingual)
+```
+
+---
+
+## Dezolvarea problemelor de configurare
+
+### Setările nu sunt salvate
+- Verificați permisiunile fișierului în `.obsidian/plugins/notemd/`
+- Încercați: Dezactivați pluginul → Reactivați-l
+
+### Cheia API este invalidă
+- Fără spații suplimentare
+- Verificați expirarea
+- Verificați creditele în panoul de control al furnizorului
+
+### Modelele nu se încarcă
+- Faceți clic pe „Obține lista modelelor“ pentru a actualiza
+- Verificați conectivitatea rețelei
+- Încercați un alt furnizor
+
+---
+
+## Următoarele pași
+
+- 📖 [Explorați funcțiile](../features/wiki-links)
+- 🔌 [Ghiduri de configurare a furnizorului](../providers/overview)
+- ❓ [FAQ](../faq)

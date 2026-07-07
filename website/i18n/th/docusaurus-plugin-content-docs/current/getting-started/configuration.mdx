@@ -1,0 +1,435 @@
+---
+id: configuration
+title: "การตั้งค่า"
+description: "กำหนดค่าและตัวเลือกการตั้งค่า Notemd"
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [configuration, settings, customization, preferences]
+concepts: [Configuration, Per-Task Models, Output Paths, Custom Workflows]
+citations:
+  - title: Obsidian
+    url: https://obsidian.md
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# การตั้งค่า
+
+<TLDR>
+**การตั้งค่า Notemd ครอบคลุม 6 หัวข้อหลัก:** (1) ผู้ให้บริการ LLM และคีย์ API, (2) การเลือกโมเดลตามงาน, (3) เส้นทางและแม่แบบผลลัพธ์, (4) ภาษา UI และภาษาผลลัพธ์, (5) บริการค้นหา (Tavily/DuckDuckGo), (6) วิธีการทำงานแบบกำหนดเอง ค่าทั้งหมดอยู่ที่ Obsidian Settings → Notemd การเปลี่ยนแปลงจะมีผลทันที.
+</TLDR>
+
+## ภาพรวมของการตั้งค่า
+
+การเข้าถึง: **Obsidian Settings (⚙️) → Notemd**
+
+### หัวข้อหลัก
+
+1. **การตั้งค่าผู้ให้บริการ** — คีย์ API, URLs พื้นฐาน, โมเดล
+2. **การตั้งค่างาน** — การเลือกโมเดลตามงาน
+3. **การตั้งค่าผลลัพธ์** — ที่อยู่สำหรับบันทึกไฟล์ที่สร้างขึ้น
+4. **การตั้งค่าภาษา** — UI และภาษาผลลัพธ์
+5. **การผสานรวมการค้นหา** — การตั้งค่า Tavily/DuckDuckGo
+6. **วิธีการทำงาน** — ลำดับปุ่มแบบกำหนดเอง
+7. **ขั้นสูง** — การวินิจฉัย การประมวลผลแบบชุด การแบ่งส่วน
+
+---
+
+## 1. การตั้งค่าผู้ให้บริการ
+
+### การเพิ่มผู้ให้บริการ
+
+1. **เลือกผู้ให้บริการ** จากรายการแบบดรอปดาวน์ (มีให้เลือกมากกว่า 30 รายการ)
+2. **ป้อนคีย์ API**
+3. **ตัวเลือก**: ตั้งค่าฐาน URL ที่กำหนดเอง (สำหรับพร็อกซี/เกตเวย์)
+4. **คลิก "Get Model List"** เพื่อตรวจสอบการเชื่อมต่อ
+5. **เลือกโมเดลเริ่มต้น**
+
+### ผู้ให้บริการทั่วไป
+
+#### OpenAI
+```
+Provider: OpenAI
+API Key: sk-...
+Base URL: https://api.openai.com/v1 (default)
+Model: gpt-4o-mini
+```
+
+#### Anthropic (Claude)
+```
+Provider: Anthropic
+API Key: sk-ant-...
+Model: claude-sonnet-4-6
+```
+
+#### Ollama (Local)
+```
+Provider: Ollama
+Base URL: http://localhost:11434 (default)
+Model: llama3.1
+API Key: (not required)
+```
+
+#### DeepSeek
+```
+Provider: DeepSeek
+API Key: sk-...
+Model: deepseek-chat
+```
+
+### ผู้ให้บริการหลายราย
+
+คุณสามารถกำหนดค่าผู้ให้บริการหลายรายและสลับระหว่างกันตามแต่ละงานได้:
+- **ผู้ให้บริการหลัก**: ใช้เป็นทางเลือกสำรอง
+- **ผู้ให้บริการเฉพาะงาน**: ใช้แทนสำหรับงานเฉพาะ
+
+---
+
+## 2. โมเดลเฉพาะงาน
+
+กำหนดค่าโมเดลที่แตกต่างกันสำหรับงานต่างๆ เพื่อปรับปรุงต้นทุน/คุณภาพ:
+
+### ประเภทของงาน
+
+| งาน | โมเดลเริ่มต้น | วัตถุประสงค์ |
+|------|--------------|---------|
+| **การเชื่อมโยง** | ผู้ให้บริการหลัก | ระบุแนวคิดสำหรับลิงก์ wiki |
+| **การสร้างแนวคิด** | ผู้ให้บริการหลัก | ดึงข้อมูลและอธิบายแนวคิด |
+| **การวิจัย** | ผู้ให้บริการหลัก | สรุปผลการค้นหาบนเว็บ |
+| **การแปล** | ผู้ให้บริการหลัก | แปลข้อความ |
+| **การสร้างแผนภาพ** | ผู้ให้บริการหลัก | สร้างแผนภาพ Mermaid/Canvas |
+
+### ตัวอย่าง: การตั้งค่าเพื่อลดต้นทุน
+
+```
+Linking: gpt-4o-mini (fast, many calls)
+Concept Generation: claude-sonnet-4-6 (quality extraction)
+Research: gpt-4o (web-grounded)
+Translation: gemini-flash (multilingual)
+Diagram: ollama/llama3.1 (free, local)
+```
+
+### วิธีการตั้งค่า
+
+1. **Settings → Notemd → Task Settings**
+2. สำหรับแต่ละงาน ให้เลือก:
+   - ✅ **ใช้ผู้ให้บริการหลัก** (ค่าเริ่มต้น)
+   - 🔄 **ใช้ผู้ให้บริการที่กำหนดเอง** → เลือกผู้ให้บริการ + โมเดล
+
+---
+
+## 3. การตั้งค่าผลลัพธ์
+
+### การแสดงข้อความสรุปแนวคิด
+
+**ที่เก็บบันทึกแนวคิดใหม่:**
+
+```
+Settings → Output → Concept Folder
+Default: concepts/
+```
+
+**แม่แบบ:**
+```
+Settings → Output → Concept Template
+Default:
+---
+tags: [concept]
+created: {{date}}
+---
+
+# {{concept}}
+
+{{description}}
+
+## Backlinks
+{{backlinks}}
+```
+
+### ตัวเลือกโครงสร้างโฟลเดอร์
+
+**ตัวเลือกที่ 1: แบบแบน (แนวคิดทั้งหมดอยู่ในโฟลเดอร์เดียว)**
+```
+vault/
+└── concepts/
+    ├── Machine Learning.md
+    ├── Neural Networks.md
+    └── Deep Learning.md
+```
+
+**ตัวเลือกที่ 2: แบบลำดับชั้น (ตามโฟลเดอร์ต้นทาง)**
+```
+vault/
+├── papers/
+│   └── concepts/
+│       └── Transformer.md
+└── notes/
+    └── concepts/
+        └── Attention Mechanism.md
+```
+
+กำหนดค่า: **Settings → Output → Use Hierarchical Folders**
+
+### ผลลัพธ์รูปแบบแผนภาพ
+
+**ที่เก็บแผนภาพ:**
+```
+Settings → Output → Diagram Folder
+Default: diagrams/
+```
+
+**รูปแบบ:**
+- `.mmd` (Mermaid source)
+- `.canvas` (JSON Canvas)
+- `.html` (Vega-Lite)
+
+---
+
+## 4. การตั้งค่าภาษา
+
+### UI ภาษา
+
+**ภาษาของอินเทอร์เฟซ** (ปุ่ม, เมนู, กล่องโต้ตอบ):
+
+```
+Settings → Language → UI Language
+Options: 21+ languages
+Default: System language
+```
+
+รองรับ: ภาษาอังกฤษ, 简体中文, 繁體中文, 日本語, 한국어, Español, Français, Deutsch, Русский, العربية และอื่นๆ.
+
+### ภาษาสำหรับผลลัพธ์
+
+**ภาษาของเนื้อหาที่สร้างขึ้น** (บันทึกแนวคิด สรุปผลการวิจัย):
+
+```
+Settings → Language → Output Language
+Options: Same as UI languages
+Default: Same as UI
+```
+
+**กรณีการใช้งาน:** ภาษาจีน UI ร่วมกับภาษาอังกฤษสำหรับการวิจัยแบบสองภาษา.
+
+### เป้าหมายการแปล
+
+**ภาษาเป้าหมายเริ่มต้น** สำหรับงานแปล:
+
+```
+Settings → Translation → Target Language
+Default: English
+```
+
+---
+
+## 5. การผสานรวมการค้นหา
+
+### Tavily (แนะนำ)
+
+**บริการค้นหาที่ปรับให้เหมาะกับ AI:**
+
+```
+Settings → Search → Service: Tavily
+API Key: tvly-...
+```
+
+Get key: [tavily.com](https://tavily.com/)
+
+**คุณสมบัติ:**
+- ผลลัพธ์คุณภาพสูง
+- สรุปผลที่ปรับให้เหมาะกับ AI
+- การอ้างอิงแหล่งที่มา
+
+### DuckDuckGo (ทดลอง)
+
+**ไม่จำเป็นต้องมีคีย์ API:**
+
+```
+Settings → Search → Service: DuckDuckGo
+```
+
+**หมายเหตุ:** คุณภาพต่ำ ไม่สามารถปรับแต่งได้.
+
+---
+
+## 6. การกำหนดค่ากระบวนการทำงาน
+
+### การสร้างกระบวนการทำงานแบบกำหนดเอง
+
+**กระบวนการทำงานจะเชื่อมต่องานหลายอย่างเข้าด้วยกันผ่านปุ่มเดียว**
+
+1. **การตั้งค่า → กระบวนการทำงาน → เพิ่มกระบวนการทำงาน**
+2. **ชื่อ**: "Paper Analysis Flow"
+3. **DSL**: `process-current-add-links>extract-concepts-current>research-and-summarize>summarize-as-mermaid`
+4. **บันทึก**
+
+ปุ่มใหม่จะปรากฏขึ้นในแถบด้านซ้าย
+
+### ไวยากรณ์ DSL
+
+**รูปแบบ:** `action1>action2>action3`
+
+**การดำเนินการที่มีให้:**
+- `process-current-add-links` — เพิ่มลิงก์ wiki ลงในบันทึกปัจจุบัน
+- `extract-concepts-current` — สร้างบันทึกแนวคิด
+- `research-and-summarize` — ค้นหาข้อมูลบนเว็บพร้อมสรุป
+- `translate-current` — แปลบันทึกปัจจุบัน
+- `summarize-as-mermaid` — สร้างแผนภูมิ Mermaid
+- `process-folder-add-links` — ประมวลผลโฟลเดอร์แบบกลุ่ม
+
+**ตัวอย่างกระบวนการทำงาน:**
+
+**การสกัดแนวคิดอย่างรวดเร็ว:**
+```
+process-current-add-links>extract-concepts-current
+```
+
+**การวิจัยลึกซึ้ง:**
+```
+process-current-add-links>research-and-summarize>extract-concepts-current
+```
+
+**การวิเคราะห์หลายภาษา:**
+```
+translate-current>process-current-add-links>extract-concepts-current
+```
+
+---
+
+## 7. การตั้งค่าขั้นสูง
+
+### การประมวลผลแบบกลุ่ม
+
+**ประมวลผลไฟล์หลายไฟล์พร้อมกัน:**
+
+```
+Settings → Advanced → Batch Processing
+Concurrency: 3 (default)
+```
+
+ค่าที่สูงขึ้นจะทำให้เร็วขึ้นแต่มีการเรียกใช้ API มากขึ้น.
+
+### การแบ่งส่วนอัจฉริยะ
+
+**สำหรับบันทึกที่ยาว ให้แบ่งออกเป็นส่วนๆ:**
+
+```
+Settings → Advanced → Smart Chunking
+Chunk Size: 2000 words (default)
+Overlap: 200 words (default)
+```
+
+ช่วยป้องกันข้อผิดพลาดจากขีดจำกัดตัวอักษร.
+
+### แผงวินิจฉัย
+
+**ดูบันทึกโดยละเอียด:**
+
+```
+Settings → Advanced → Enable Diagnostics
+```
+
+แสดงข้อมูลดังนี้:
+- API คำขอ/การตอบกลับ
+- การใช้ตัวอักษร
+- เวลาประมวลผล
+- ข้อผิดพลาด
+
+### การตรวจจับแนวคิดซ้ำ
+
+**หลีกเลี่ยงแนวคิดที่ใกล้เคียงกันมากเกินไป:**
+
+```
+Settings → Advanced → Synonym Suppression
+Threshold: 0.8 (default, 0-1)
+```
+
+ค่าสูง = การรวมข้อมูลที่เข้มข้นมากขึ้น.
+
+---
+
+## โปรไฟล์การตั้งค่า
+
+### ส่งออก/นำเข้าการตั้งค่า
+
+**แบ่งปันการตั้งค่าระหว่างอุปกรณ์ต่างๆ:**
+
+1. **การตั้งค่า → ขั้นสูง → ส่งออกการตั้งค่า**
+2. บันทึก `notemd-config.json`
+3. บนอุปกรณ์ใหม่: **นำเข้าการตั้งค่า**
+
+**สิ่งที่รวมอยู่ด้วย:**
+- คีย์ผู้ให้บริการ API (ไม่จำเป็น)
+- ตัวเลือกโมเดล
+- เส้นทางการส่งออก
+- กระบวนการทำงานแบบกำหนดเอง
+
+---
+
+## การตั้งค่าที่แนะนำ
+
+### สำหรับนักเรียน
+
+```
+Provider: OpenAI (gpt-4o-mini)
+Concept Folder: concepts/
+UI Language: System
+Output Language: System
+Workflow: "Study Flow" (add-links>extract-concepts)
+```
+
+### สำหรับนักวิจัย
+
+```
+Providers:
+  - Linking: DeepSeek (cheap, many calls)
+  - Concepts: Claude Sonnet (high quality)
+  - Research: GPT-4o (web-grounded)
+Concept Folder: notes/concepts/
+Hierarchical: Yes
+Workflow: "Paper Flow" (add-links>extract>research>diagram)
+```
+
+### สำหรับผู้ใช้ที่ให้ความสำคัญกับความเป็นส่วนตัว
+
+```
+Provider: Ollama (llama3.1)
+All tasks: Local model
+Search: DuckDuckGo (no API)
+Diagnostics: Off
+```
+
+### สำหรับการทำงานสองภาษา
+
+```
+UI Language: Chinese
+Output Language: English
+Translation Target: Chinese
+Provider: Gemini (multilingual)
+```
+
+---
+
+## การแก้ไขปัญหาด้านการตั้งค่า
+
+### ไม่มีการบันทึกการตั้งค่า
+- ตรวจสอบสิทธิ์การเข้าถึงไฟล์ใน `.obsidian/plugins/notemd/`
+- ลองทำดังนี้: ปิดการใช้งานปลั๊กอิน → เปิดการใช้งานอีกครั้ง
+
+### คีย์ API ไม่ถูกต้อง
+- ไม่มีช่องว่างเพิ่มเติม
+- ตรวจสอบวันหมดอายุ
+- ตรวจสอบคะแนนเครดิตในแดชบอร์ดของผู้ให้บริการ
+
+### ไม่มีการโหลดโมเดล
+- คลิก "Get Model List" เพื่ออัปเดตข้อมูล
+- ตรวจสอบการเชื่อมต่อเครือข่าย
+- ลองใช้ผู้ให้บริการรายอื่น
+
+---
+
+## ขั้นตอนต่อไป
+
+- 📖 [สำรวจฟีเจอร์](../features/wiki-links)
+- 🔌 [คู่มือการตั้งค่าผู้ให้บริการ](../providers/overview)
+- ❓ [FAQ](../faq)

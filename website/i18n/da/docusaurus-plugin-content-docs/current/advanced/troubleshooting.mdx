@@ -1,0 +1,161 @@
+---
+id: troubleshooting
+title: "Felsøgning"
+description: "Almindelige problemer og løsninger"
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [troubleshooting, errors, diagnostics, connection test]
+concepts: [Troubleshooting, Error Handling, Diagnostics]
+citations:
+  - title: Obsidian
+    url: https://obsidian.md
+  - title: Obsidian API
+    url: https://docs.obsidian.md
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# Felsøgning
+
+<TLDR>
+**De fleste Notemd-problemer faller ind i fire kategorier: API-problemer, nettverksforbindelse, autentifiseringsfejl (401/403) og hastighedsbegrænsninger (429).** Den innebygde forbindelsesprøve og diagnostikpanelen identificerer den grundlæggende årsag hurtigt. Dette side dekker alle almindelige fejlmeddelelser, deres årsag og løsning. For problemer, der ikke er oplyst her, rapportér dem på GitHub Issues med diagnostikoutput.
+
+Dette er en del af [Obsidian AI Knowledge Management Guide](/docs/pillar-ai-knowledge).
+</TLDR>
+
+## Översikt
+
+Notemd er afhængig af eksterne tjenester -- LLM-udbydere og søg API-tjenester -- så de fleste problemer har deres oprindelse udenfor pluginen selv. Diagnostikpanelen i indstillingerne giver en strukturret oversigt over den seneste API-kall, herunder anmodningen URL, svarstatusen og fejlkroppen. Kontroller det alltid først før du undersøger videre.
+
+## Hvordan det virker: Diagnostik
+
+### Forbindelsesprøve
+
+Hver konfigurationssektion for udbyder har en **"Prøv forbindelse"**-knap. Ved at klikke på den sendes en minimal API-anmodning (typisk en modellliste eller en kort komplettering) og det rapporteres, om prøven var succesfuld eller om der opstod en specifik HTTP-fejl. Dette er den hurtigste måde at overholde, at din API-nyckel og base URL er korrekte.
+
+### Diagnostikpanelen
+
+**Indstillinger --> Notemd --> Diagnostik** viser:
+
+| Felt | Indhold |
+|-------|---------|
+| Siste udbyder | Hvilken udbyder blev kaldet sidst |
+| Siste modell | Hvilken modell blev kaldet sidst |
+| Siste statusen | HTTP statuskode eller transportfejl |
+| Siste fejl | Rå feilmelding fra API |
+| Siste anmodning URL | Komplet URL for den sidste anmodningen (redigeret API-klæde) |
+| Siste svarstykken | Trunkeret svarstykke (første 500 tegn) |
+
+Kopier hele diagnostikudgangen når du rapporterer problemer på GitHub.
+
+## Almindelige fejl
+
+### API-klæden er ugyldig eller fejlt
+
+**Symptom:** HTTP 401 eller "Udløselig API-klæde fornødtes"
+
+**Orsag:** API-klæden fejler, indeholder mellemrum eller tilhører en anden leverandør.
+
+**Løsning:**
+1. Kontroller at klæden ikke har ledende/afslutende mellemrum
+2. Sikre dig på, at klæden stemmer overens med den valgte leverandør (en OpenAI-klæde vil ikke virke med Anthropic)
+3. Kontroller, om din konto har krediter eller en aktiv abonnement
+4. Klik på **"Test Connection"** for at verificere
+
+### Netværks-/forbindelsesfejl
+
+**Symptom:** `ERR_CONNECTION_REFUSED`, `ERR_TIMED_OUT`, `Socket hang up`, `Network request failed`
+
+**Ursache:** API-endpointen er uerreichbar fra din maskine.
+
+**Løsning:**
+1. Kontroller din internetforbindelse
+2. Hvis du er bakom en proxy eller firewall, kontroller, at API-domænen ikke er blokeret
+3. For Ollama: Bekræft, at `ollama serve` er i gang (`ollama list` bør returnere modeller)
+4. For LMStudio: Bekræft, at serveren kører på `localhost:1234`
+5. Prøv en ander transport – mobilbrugere bør sikre sig på, at `requestUrl`-transporten er aktiveret
+6. Aktiver `enableStableApiCall` for automatiske forsøg ved tidsvis fejl
+
+### 403 Forbudt
+
+**Symptom:** HTTP 403
+
+**Ursache:** Din API-nyckel er gyldig, men har ikke tilladelse til den forespurgte ressource.
+
+**Løsning:**
+1. Nogle modeller kræver særlig adgang (f.eks. GPT-4 via Azure kræver en udviklingsnavn)
+2. Nogle leverandører begrænser modeller efter planlaget -- kontroller din konto
+3. Regionale begrænsninger kan gælde (nogle kinesiske leverandører blokerer internationale IP-adresser og omvendt)
+4. Kontroller, at modellens navn staves korrekt (f.eks. `gpt-4o` ikke `gpt-4o-mini` når mini-modellen er alt, der din plan tillader)
+
+### Rate Limit (429)
+
+**Symptom:** HTTP 429 eller "Rate limit exceeded"
+
+**Ursache:** For mange anmodninger i en kort tidsperiode.
+
+**Løsning:**
+1. Redskær `batchConcurrency` til `1` eller `2`
+2. Vænt et par minutter før du prøver igen
+3. Kontroller din leverandørers dokumentation om rate limit for dit planlaget
+4. Aktiver `enableStableApiCall` for automatisk gennemprøvning med backoff
+5. Overvej at skifte til en leverandør med højere limiter (DeepSeek, Ollama)
+
+### Model Not Found
+
+**Symptom:** "Model not found" eller HTTP 404
+
+**Ursache:** Modellens navn eksisterer ikke hos den valgte leverandør.
+
+**Løsning:**
+1. Klik på **"Få modellliste"** for at se alle tilgængelige modeller for din udbyder
+2. Nogle modellnamner ændres med tiden -- kontroller den aktuelle navn i udbyders dokumentation
+3. For Ollama: køre `ollama list` for at se de hentede modeller; kun de nedladdede modeller er tilgængelige
+
+### Ingen links / Ingen koncepter genereres
+
+**Symptom:** Kommandoen kører men giver ingen udgang
+
+**Ursache:** LLM returnerede en tom eller uoplysningelig svar.
+
+**Løsning:**
+1. Kontroller diagnostikpanelen for den faktiske LLM-svar
+2. Prøv en mere kapabel modell (nogle små modeller har svært med struktureret udgang)
+3. Sikre dig, at bemærkelsen har tilstrekkelig indhold (>50 ord)
+4. Gennemgå din egne prompt for konflikterende instruktioner
+5. Deaktiver synonymsuppressionen midlertidigt for at se, om den filtrerer for aggressivt
+
+### Doubao Endpoint ID mangler
+
+**Symptom:** Fejl ved brug af ByteDance Doubao-udbyder
+
+**Ursache:** Doubao kræver en Ark endpoint ID (format: `ep-xxxxxxxx-xxxx-xxxx`) i stedet for en modellnavn.
+
+**Løsning:** Erstat den standardiske placeholder-modellen med din egentlige endpoint-ID fra Volcengine-konsollen.
+
+## Konfiguration
+
+| Diagnostisk indstilling | Standort | Formål |
+|--------------------|----------|---------|
+| **Prøv forbindelse** | Indstillinger --> Provider-afsnit | Kontroller tilgangskoden API og forbindelsen |
+| **Få modellliste** | Indstillinger --> Provider-afsnit | Kontroller hvilke modeller der er tilgængelige |
+| `enableStableApiCall` | Indstillinger --> Avanceret | Aktiver gennemprøvning med backoff |
+| `batchConcurrency` | Indstillinger --> Batch | Styr parallellitet for at undgå ratebegrænsninger |
+
+## Hvordan rapportere problemer
+
+Hvis dit problem ikke er beskrevet ovenfor:
+
+1. Åbne **Indstillinger --> Notemd --> Diagnostik**
+2. Kopiere den fulde diagnostikudgangen
+3. Åbne en GitHub Issue på [github.com/Jacobinwwey/obsidian-NotEMD/issues](https://github.com/Jacobinwwey/obsidian-NotEMD/issues)
+4. Include: Obsidian version, Notemd version, provider, model, diagnostics output, og trin til at reproducere
+5. Redigér din API key fra alle delte logfiler
+
+---
+
+## Næste trin
+
+- [LLM Providers](/docs/providers/overview) -- Full reference til providerindstillinger
+- [Batch Processing](/docs/advanced/batch-processing) -- Konkurrens og gennemprøvingsindstillinger for store operationer
+- [Custom Prompts](/docs/advanced/custom-prompts) -- Rettigøre uforventet LLM behavior ved at justere prompts

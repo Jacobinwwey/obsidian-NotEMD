@@ -1,0 +1,75 @@
+---
+id: china
+title: "Kínábeli szolgáltatók"
+description: "Konfiguráljuk a Qwen, DeepSeek, GLM stb.-t."
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [china providers, deepseek, qwen, glm, doubao, moonshot, mimo, minimax, baidu, siliconflow, huawei]
+concepts: [China Providers, DeepSeek, Qwen, Doubao, Moonshot, MiMo, GLM, MiniMax, Baidu, SiliconFlow, Huawei]
+citations:
+  - title: Qwen API
+    url: https://help.aliyun.com/zh/dashscope
+  - title: DeepSeek API
+    url: https://platform.deepseek.com
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# Kínábeli szolgáltatók
+
+<TLDR>
+**Notemd támogatja a Kína-regió és Kína-beli forrású fornalmakat főleg OpenAI-kompatibilis végpontok keresztül.** A jelenlegi lista be tartalma: DeepSeek, Qwen, Qwen Code, Doubao, Moonshot, Xiaomi MiMo, GLM, MiniMax, Baidu Qianfan, SiliconFlow, Huawei Cloud MaaS és Z AI. A előnye a régios hatékonyság és a költségkezelés; a kockázat pedig a fornalmakhoz specifikus modellnevek és fiókok szabályozása.
+
+Ez része a [Obsidian AI tudományos kezelési útmutatójának](/docs/pillar-ai-knowledge).
+</TLDR>
+
+## Elhajtás
+
+Írj le a fornecedési fiókot, készítsen egy API kulcsot, majd válassza ki a megfelelő Notemd fornecedési beállítást, helyett hogy használja egy általános OpenAI profilt. A beállítás tartalmazza a határidős Base URL-t, a modellt, a API tesztmódot, a modellkeresési viselkedést, valamint az összes fornecedés-specifikus UI mezőt.
+
+Használj ide erősen a munkaalapú modellezés választását. Pl. használj a DeepSeek vagy GLM-t olyan munkafolyamatoknál, amelyekben nagy jelentőségű logikai gondolkodás szükséges; használj a Qwen vagy Moonshot-t az összefogott kínai nyelvű munkáknak, és irányítd a programozási munkákat a Qwen Code-ra, ha az account a programozói modelleket biztosít.
+
+## Végpont és autentikáció
+
+| Társító | Alapértelmezett modell | Base URL |
+|----------|---------------|----------|
+| DeepSeek | `deepseek-v4-pro` | `api.deepseek.com` |
+| Qwen | `qwen3-235b-a22b` | `dashscope.aliyuncs.com/compatible-mode/v1` |
+| Qwen Code | `qwen3-coder-plus` | `dashscope.aliyuncs.com/compatible-mode/v1` |
+| Doubao | (endpoint ID szükséges) | `ark.cn-beijing.volces.com/api/v3` |
+| Moonshot | `kimi-k2-0905-preview` | `api.moonshot.cn/v1` |
+| Xiaomi MiMo | `mimo-v2.5-pro` | `api.xiaomimimo.com/v1` |
+| GLM | `glm-5` | `open.bigmodel.cn/api/paas/v4` |
+| MiniMax | `MiniMax-M2.7` | `api.minimaxi.com/v1` |
+| Baidu Qianfan | `ernie-4.5-turbo-32k` | `qianfan.baidubce.com/v2` |
+| SiliconFlow | `Qwen/QwQ-32B` | `api.siliconflow.cn/v1` |
+| Huawei Cloud MaaS | `DeepSeek-V3` | `api.modelarts-maas.com/v1` |
+| Z AI | `glm-5` | `api.z.ai/api/paas/v4` |
+
+**Megjegyzés:** Doubaonek szüksége van egy Ark endpoint ID-re (formátum: `ep-xxxxxxxx-xxxx-xxxx`), nem egy hagyományos modellnevere.
+
+A legtöbbi szolgáltató ezek közül használja a közös OpenAI-kompatibilis futási környezetet, de azok konténk és modelljük semantikája eltér. Használjuk a konfigurációs beállításokhoz szóló Base URL-t, esetleg ha nem ellenőrizték az account alternatív végpontját.
+
+## Model felfedezése
+
+DeepSeek, Qwen, Qwen Code, Doubao, Moonshot, Xiaomi MiMo, GLM, Z AI, MiniMax, Baidu Qianfan és SiliconFlow használják a OpenAI-kompatibilis modellkeresést, ha a fornecedés támogatja a listázást. Huawei Cloud MaaS használja a `huaweicloud-modelarts-models` módot, mert a ModelArts telepítési metadatái nem egyeznek egy általános `/v1/models` listaival.
+
+Ne tekintse el a felfedezési hibát az igazságként, hogy a chát nem lehető. Néhány szolgáltató engedi a chát használatát, de korlátozza a modelllistákhoz való hozzáférést. Ebben az esetben tárolja be a profílban egy kifejezetten meghatározott modell ID-t, és ellenőrizze azt a kapcsolati tesztelés által.
+
+## Hibaelhárítás
+
+- Az autentikáció sikerült, de a chat nem működik: a modell neve lehet a fiók jogosultságai vagy regiója határai között nélkül.
+- Doubao nem működik normál modellnevvel: ha a telepítéséhez szükséges, használja a modell mezőben a Ark végpont ID-t.
+- A logikai válaszok rögzítve vannak: ellenőrizze a szolgáltatók specifikus maximális kijelző token-ait és a Notemd modellal kapcsolatos maximális token beállításait.
+- A régionalisített hálózati kapcsolatok eltérnek: ha a biztonsági szolgáltató gépe Kínában találódik, használjuk a fornecedéki Kínába szóló végpontot; csak akkor használjuk az internacionális végpontot, ha az account és a hálózati út mindkétük valós.
+
+## Kikorlátlan használat
+
+Ha a régionalis azonosítási idő, a fizetési/ügyfélhozzáférés, a kínai nyelvű minőség vagy a költség a fő korlát, használj Kína-beli szolgáltatókat. Ha egy egyszerűbb protokollhatárolást vagy jobb különböző szolgáltatók közötti hibalegésztést szeretnéd, előnyben adj a közvetlen OpenAI, Anthropic, Google vagy helyi szolgáltatókra.
+
+---
+
+## További lépések
+
+- [LLM Fornincs-eregyszerek](/docs/providers/overview) -- Teljes konfiguráció, munkaalkalmazásokhoz szóló modellek és újrapróbálási logika
+- [Hibalegésztés](/docs/advanced/troubleshooting) -- Előreállítja a régionalis kapcsolati és autentikációs hibákat

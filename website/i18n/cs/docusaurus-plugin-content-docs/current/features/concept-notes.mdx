@@ -1,0 +1,184 @@
+---
+id: concept-notes
+title: "Konceptuální poznámky"
+description: "Vytváření a správa konceptuálních poznámek – samostatné poznámky pro klíčové koncepty extrahované z vašeho úložiště"
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [concept notes, knowledge extraction, concept folder, deduplication, backlinks]
+concepts: [Concept Notes, Knowledge Graph, LLM Extraction, Deduplication, Backlinks]
+citations:
+  - title: Obsidian
+    url: https://obsidian.md
+  - title: Zettelkasten Method
+    url: https://zettelkasten.de
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# Konceptuální poznámky
+
+<TLDR>
+**Notemd extrahuje klíčové koncepty z vašich poznámek a vytváří samostatné soubory konceptuálních poznámek.** LLM identifikuje základní termíny, vytváří jeden soubor `.md` na každý koncept v konfigurovatelné složce a volitelně přidává zpětné odkazy na původní poznámku. Podporuje potlačování synonym, výběr modelu podle úkolu, čištění názvů souborů a 4krokový engine pro odstranění duplicit. Toto je součástí [Obsidian Průvodce AI řízením znalostí](/docs/pillar-ai-knowledge).
+</TLDR>
+
+## Přehled
+
+Konceptuální poznámky jsou základními stavebními kameny propojené znalostní báze. Při zpracování poznámky Notemd:
+
+1. **Odesílá váš text do LLM** s strukturovaným pokynem k extrakci
+2. **Analizuje řádky `CONCEPT:`** z odpovědi LLM
+3. **Vytváří jeden soubor `.md` na každý koncept** v určené složce
+4. **Přidává zpětné odkazy** na původní poznámku (pokud je to povoleno)
+
+## Jak to funguje
+
+### Pipeline extrakce
+
+```
+Source Note → Split into Chunks → LLM per Chunk → Parse CONCEPT: Lines
+    → Deduplicate via Set → Create .md Files → Add Backlinks
+    → (Optional: Generate Log)
+```
+
+### Pokyn k extrakci
+
+LLM dostává pokyn, který mu říká, aby:
+
+- Extrahoval **podstatná jména nebo fráze podstatných jmen** klíčové pro téma dokumentu
+- **Upřednostňoval specifičnost** – „Dielectric Relaxation“ před „Relaxation“
+- **Normalizoval na jednotné číslo** – „models“ se mění na „model“
+- **Potlačoval podkoncepty** – pokud se objeví „dielectric relaxation“, neextrahovat také „relaxation“
+- Přeskočit** odkazy/sekce bibliografie, běžná podstatná jména, názvy společností/výrobků
+- Vytvořit jeden koncept na řádek jako `CONCEPT: Term Name`
+
+**Potlačení synonym** (volitelné): přidat na začátek prompty „Vyhněte se extrakci synonym, sémanticky podobných základních konceptů nebo klíčových slov, pokud je to možné".
+
+**Zaměřená oblast učení** (volitelné): přidat na začátek `Relevant Fields: [domain]` pro omezení extrakce na konkrétní disciplínu.
+
+**Přepsání jazyka** (volitelné): přidat na konec „Výstupní koncepty MUSÍ být v [jazyk]."
+
+### Řezání na části
+
+Dlouhé poznámky jsou rozděleny pomocí `settings.chunkWordCount`. Každá část je odeslána samostatně. Koncepty ze všech částí jsou shromážděny v `Set` – duplikáty mezi částmi jsou potichu odstraněny. Chyby LLM u jednotlivých částí nezastaví celou operaci.
+
+## Vytváření poznámky k konceptu
+
+### Pravidla názvů souborů
+
+| Pravidlo | Chování |
+|------|----------|
+| Dlouhé tečky/podtržítkové značky | Nahradit prostředníky |
+| Speciální znaky | Odstranit: zpětná lomítka, přední lomítka, středník, hvězdičku, otazník, uvozovky, úhlové závorky, trubici, hash, šipku, hranaté závorky |
+| Mezery | Sjednotit a odfiltrovat |
+| Maximální délka | 100 znaků (zkráceno + znovu oříznuto) |
+| Prázdný/výsledek se všemi tečkami | Potichu přeskočeno |
+
+Příklad: `A-B: Key*Term` se změní na `A B KeyTerm.md`
+
+### Šablony
+
+**Plná šablona** (zpětné odkazy povoleny, minimální šablona vypnutá):
+
+```markdown
+# Concept Name
+
+## Linked From
+- [[SourceNoteBasename]]
+```
+
+**Minimální šablona** (při `extractConceptsMinimalTemplate: true`):
+
+```markdown
+# Concept Name
+```
+
+### Aktualizace stávajících poznámek
+
+Pokud soubor konceptu již existuje:
+
+1. Pokud jsou zpětné odkazy povoleny a zdrojová poznámka ještě není uvedena, přidejte zpětný odkaz
+2. Pokud existuje sekce `## Linked From`, vložte ji před další záhlaví `##`
+3. Pokud `## Linked From` neexistuje, přidejte sekci na konec
+4. Dvojité zpětné odkazy se kontrolují a přeskočí
+
+### Konfigurace
+
+| Nastavení | Výchozí | Účinek |
+|---------|---------|--------|
+| `useCustomConceptNoteFolder` | `true` | Hlavní přepínač. Vypnuté = žádné poznámky nevytvořeny |
+| `conceptNoteFolder` | `''` (vypnuto) | Cesta ke složce pro konceptové poznámky |
+| `extractConceptsMinimalTemplate` | `true` | Poznámky pouze s názvem (bez odkazu Linked From) |
+| `extractConceptsAddBacklink` | `false` | Přidat zpětné odkazy během samostatné extrakce |
+| `extractConceptsProvider` / `extractConceptsModel` | DeepSeek | LLM na úrovni úkolu pro extrakci konceptů |
+| `extractConceptsLanguage` | `'en'` | Jazyk výstupu pro názvy konceptů |
+| `replaceSynonymsDuringConceptExtraction` | `false` | Povolit potlačení synonym v pokynu |
+| `generateConceptLogFile` | `false` | Napsat seznam vytvořených konceptů ve formátu `.log` |
+
+**Důležité:** Nastavení `extractConceptsAddBacklink` a `extractConceptsMinimalTemplate` ovlivňují pouze **speciální příkaz na extrakci**. Příkaz "Přidat odkazy" vždy vytváří poznámky s plným šablonováním a zpětnými odkazy.
+
+## Odstranění duplicit
+
+Příkaz na odstranění duplicit (`Notemd: Check & remove duplicate concept notes`) provádí 5krokovou analýzu:
+
+### Krok 1: Přesná shoda názvu souboru
+
+Porovnání názvu bez ohledu na velikost písmen v rámci nakonfigurované oblasti.
+
+### Krok 2: Detekce množného čísla
+
+Odstranění koncovek: `-ies` až `-y`, `-es` je odstraněno, `-s` je odstraněno. Porovnává se jednotné číslo s soubory v oblasti. Nezpracovává nepravidelná množná čísla (children/child).
+
+### Krok 3: Normalizace symbolů
+
+Použije se: `toLowerCase()`, nahraďte dlouhé tečky/podtržítkové znaky mezerami, odstraňte vše kromě alfanumerických znaků a zredukujte mezery. Záznamy, které se po normalizaci shodují, jsou označeny.
+
+### Krok 4: Obsah jednoho slova
+
+Poznámky o konceptech sestávající z jednoho slova jsou porovnávány s názvy souborů v rámci víceslovného rozsahu. Tento krok se neprovádí, pokud je rozsah `concept_folder_only`.
+
+### Krok 5: Potvrzení a smazání
+
+Všechny kandidáty jsou zobrazeny v modálním okně pro potvrzení. Schválené položky jsou přesunuty do systémového koše. Operaci lze zrušit mezi každým smazáním.
+
+### Režimy rozsahu
+
+| Režim | Srovnává se s |
+|------|-------------------|
+| `vault` (výchozí) | Všemi soubory v trezoru `.md` kromě složky s koncepty |
+| `concept_folder_only` | Ostatními poznámkami o konceptech uvnitř této složky |
+| `include` | Soubory v konkrétně uvedených složkách |
+| `exclude` | Všemi soubory v trezoru kromě složky s koncepty a uvedených složek |
+
+## Použití
+
+### Extrahování konceptů (samostatně)
+
+1. Otevřete poznámku
+2. Spusťte **"Notemd: Extrahování konceptů"** z panelu příkazů
+3. Poznámky o konceptech jsou vytvářeny v nakonfigurované složce
+
+### Vytáhnout a vytvořit obsah
+
+**"Notemd: Vytáhnout koncepty a vytvořit nadpisy"** — vytáhne koncepty a poté spustí „Vytvořit z nadpisu“ u každé poznámky v složce s koncepty. Tím se vytvoří obsah pro **všechny** poznámky s koncepty v této složce, nejen pro ty nově vytvořené.
+
+### Vytvořit odkaz na wiki z výběru
+
+1. Vybrat text v editoru
+2. Spustit **"Notemd: Vytvořit odkaz na wiki z výběru"**
+3. Text je uzavřen v `[[...]]` a je vytvořena poznámka s konceptem
+
+## Tipy
+
+- **Nejprve nastavte složku s koncepty** — bez ní nebudou vytvořeny žádné poznámky. Pokud není nastavena, objeví se varovné okno.
+- **Používejte modely na úrovni úkolu** — pro extrakci konceptů jsou vhodné levnější modely (GPT-4o-mini, DeepSeek). Drahé modely ušetřete pro výzkum/překlad.
+- **Povolte potlačení synonym** v technických oblastech, kde více termínů odkazuje na stejný koncept.
+- **Pravidelně odstraňujte duplikáty** — po hromadné úpravě spusťte příkaz na odstranění duplikátů, abyste zachytili téměř shodné položky.
+- **Soubor s protokolem se pokaždé přepíše** – nejsou do něj přidávány nové záznamy. Zkopírujte ho, pokud potřebujete předchozí výsledky.
+
+---
+
+## Další kroky
+
+- [Wiki-Links](./wiki-links) — Jak jsou koncepty propojovány v textu
+- [Diagrams](./diagrams) — Vizualizace vztahů mezi koncepty
+- [Workflows](./workflows) — Spojení extrakce s dalšími úkoly

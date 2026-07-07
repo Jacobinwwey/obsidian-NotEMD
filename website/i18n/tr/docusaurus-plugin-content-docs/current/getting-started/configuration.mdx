@@ -1,0 +1,435 @@
+---
+id: configuration
+title: "Yapılandırma"
+description: "Notemd ayarlarını ve tercihlerini yapılandırın"
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [configuration, settings, customization, preferences]
+concepts: [Configuration, Per-Task Models, Output Paths, Custom Workflows]
+citations:
+  - title: Obsidian
+    url: https://obsidian.md
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# Yapılandırma
+
+<TLDR>
+**Notemd yapılandırması 6 ana alana sahiptir:** (1) LLM sağlayıcıları ve API anahtarları, (2) Görev bazlı model seçimi, (3) Çıktı yolları ve şablonlar, (4) UI dil ve çıktı dili, (5) Arama hizmetleri (Tavily/DuckDuckGo), (6) Özel iş akışları. Tüm ayarlar Obsidian Ayarlar → Notemd bölümündedir. Değişiklikler hemen etkili olur.
+</TLDR>
+
+## Ayarlar Genel Bakışı
+
+Erişim: **Obsidian Ayarlar (⚙️) → Notemd**
+
+### Ana Bölümler
+
+1. **Sağlayıcı Yapılandırması** — API anahtarları, temel URLs’ler, modeller
+2. **Görev Ayarları** — Görev bazlı model seçimi
+3. **Çıktı Yapılandırması** — Oluşturulan dosyaların nereye kaydedileceği
+4. **Dil Ayarları** — UI ve çıktı dilleri
+5. **Arama Entegrasyonu** — Tavily/DuckDuckGo kurulumu
+6. **İş Akışları** — Özel düğme zincirleri
+7. **Gelişmiş** — Teşhis, toplu işleme, parçalama
+
+---
+
+## 1. Sağlayıcı Yapılandırması
+
+### Bir Sağlayıcı Ekleme
+
+1. Açılır menüden **sağlayıcı seçin** (30’dan fazla seçenek mevcuttur)
+2. **API Anahtarını girin**
+3. **İsteğe bağlı**: Özel bir temel URL ayarlayın (proxy/gateway'lar için)
+4. **Bağlantıyı doğrulamak için "Model Listesi Al"a tıklayın**
+5. **Varsayılan modeli seçin**
+
+### Yaygın Sağlayıcılar
+
+#### OpenAI
+```
+Provider: OpenAI
+API Key: sk-...
+Base URL: https://api.openai.com/v1 (default)
+Model: gpt-4o-mini
+```
+
+#### Anthropic (Claude)
+```
+Provider: Anthropic
+API Key: sk-ant-...
+Model: claude-sonnet-4-6
+```
+
+#### Ollama (Yerel)
+```
+Provider: Ollama
+Base URL: http://localhost:11434 (default)
+Model: llama3.1
+API Key: (not required)
+```
+
+#### DeepSeek
+```
+Provider: DeepSeek
+API Key: sk-...
+Model: deepseek-chat
+```
+
+### Çoklu Sağlayıcılar
+
+Birden fazla sağlayıcıyı yapılandırabilir ve her görev için aralarında geçiş yapabilirsiniz:
+- **Ana sağlayıcı**: Yedek olarak kullanılır
+- **Göreve özel sağlayıcılar**: Belirli görevler için bunları geçersiz kılın
+
+---
+
+## 2. Göreve Özel Modeller
+
+Maliyeti/kaliteyi optimize etmek için farklı görevler için farklı modeller yapılandırın:
+
+### Görev Türleri
+
+| Görev | Varsayılan Model | Amaç |
+|------|--------------|---------|
+| **Bağlantı Oluşturma** | Ana sağlayıcı | Wiki bağlantıları için kavramları belirleyin |
+| **Kavram Oluşturma** | Ana sağlayıcı | Kavramları çıkarın ve açıklayın |
+| **Araştırma** | Ana sağlayıcı | Web arama sonuçlarını özetleyin |
+| **Çeviri** | Ana sağlayıcı | Metni çevirin |
+| **Diyagram Oluşturma** | Ana sağlayıcı | Mermaid/Canvas diyagramları oluşturun |
+
+### Örnek: Maliyet Açısından Optimize Edilmiş Kurulum
+
+```
+Linking: gpt-4o-mini (fast, many calls)
+Concept Generation: claude-sonnet-4-6 (quality extraction)
+Research: gpt-4o (web-grounded)
+Translation: gemini-flash (multilingual)
+Diagram: ollama/llama3.1 (free, local)
+```
+
+### Nasıl yapılandırılır
+
+1. **Ayarlar → Notemd → Görev Ayarları**
+2. Her görev için şunu seçin:
+   - ✅ **Ana sağlayıcıyı kullanın** (varsayılan)
+   - 🔄 **Özel sağlayıcıyı kullanın** → sağlayıcı ve model seçin
+
+---
+
+## 3. Çıktı Yapısı
+
+### Kavram Notları Çıktısı
+
+**Yeni konsept notlarının nerede kaydedileceği:**
+
+```
+Settings → Output → Concept Folder
+Default: concepts/
+```
+
+**Şablon:**
+```
+Settings → Output → Concept Template
+Default:
+---
+tags: [concept]
+created: {{date}}
+---
+
+# {{concept}}
+
+{{description}}
+
+## Backlinks
+{{backlinks}}
+```
+
+### Klasör Yapısı Seçenekleri
+
+**Seçenek 1: Düz (tüm konseptler tek bir klasörde)**
+```
+vault/
+└── concepts/
+    ├── Machine Learning.md
+    ├── Neural Networks.md
+    └── Deep Learning.md
+```
+
+**Seçenek 2: Hiyerarşik (kaynak klasöre göre)**
+```
+vault/
+├── papers/
+│   └── concepts/
+│       └── Transformer.md
+└── notes/
+    └── concepts/
+        └── Attention Mechanism.md
+```
+
+Yapılandırma: **Ayarlar → Çıktı → Hiyerarşik Klasörleri Kullan**
+
+### Şema Çıktısı
+
+**Şemaların nerede kaydedileceği:**
+```
+Settings → Output → Diagram Folder
+Default: diagrams/
+```
+
+**Format:**
+- `.mmd` (Mermaid kaynak)
+- `.canvas` (JSON Canvas)
+- `.html` (Vega-Lite)
+
+---
+
+## 4. Dil Ayarları
+
+### UI Dil
+
+**Arayüz dili** (düğmeler, menüler, iletişim kutuları):
+
+```
+Settings → Language → UI Language
+Options: 21+ languages
+Default: System language
+```
+
+Desteklenen diller: İngilizce, 简体中文, 繁體中文, 日本語, 한국어, Español, Français, Deutsch, Русский, العربية ve daha fazlası.
+
+### Çıktı Dil
+
+**Oluşturulan içerik dilinin** (kavram notları, araştırma özetleri):
+
+```
+Settings → Language → Output Language
+Options: Same as UI languages
+Default: Same as UI
+```
+
+**Kullanım durumu:** Çince UI + İngilizce çıktı ile çift dilli araştırma.
+
+### Çeviri Hedefi
+
+**Çeviri görevleri için varsayılan hedef dil:**
+
+```
+Settings → Translation → Target Language
+Default: English
+```
+
+---
+
+## 5. Arama Entegrasyonu
+
+### Tavily (Önerilen)
+
+**Yapay zeka ile optimize edilmiş arama servisi:**
+
+```
+Settings → Search → Service: Tavily
+API Key: tvly-...
+```
+
+Anahtar alın: [tavily.com](https://tavily.com/)
+
+**Özellikler:**
+- Yüksek kaliteli sonuçlar
+- Yapay zeka ile optimize edilmiş özetler
+- Kaynak atıfları
+
+### DuckDuckGo (Deneysel)
+
+**API anahtarı gerekmez:**
+
+```
+Settings → Search → Service: DuckDuckGo
+```
+
+**Not:** Daha düşük kalite, özelleştirme yok.
+
+---
+
+## 6. İş Akışı Yapılandırması
+
+### Özel İş Akışları Oluşturma
+
+**İş akışları, birden fazla görevi tek bir düğmeye bağlar.**
+
+1. **Ayarlar → İş Akışları → İş Akışı Ekle**
+2. **Ad**: "Kağıt Analizi Akışı"
+3. **DSL**: `process-current-add-links>extract-concepts-current>research-and-summarize>summarize-as-mermaid`
+4. **Kaydet**
+
+Sol kenar çubuğunda yeni bir düğme belirir.
+
+### DSL Sözdizimi
+
+**Biçim:** `action1>action2>action3`
+
+**Mevcut Eylemler:**
+- `process-current-add-links` — Mevcut nota wiki bağlantıları ekle
+- `extract-concepts-current` — Kavram notları oluştur
+- `research-and-summarize` — Web araştırması + özet
+- `translate-current` — Mevcut notu çevir
+- `summarize-as-mermaid` — Mermaid diyagramı oluştur
+- `process-folder-add-links` — Klasörü toplu olarak işle
+
+**Örnek İş Akışları:**
+
+**Hızlı Kavram Çıkarma:**
+```
+process-current-add-links>extract-concepts-current
+```
+
+**Derin Araştırma:**
+```
+process-current-add-links>research-and-summarize>extract-concepts-current
+```
+
+**Çok Dilli Analiz:**
+```
+translate-current>process-current-add-links>extract-concepts-current
+```
+
+---
+
+## 7. Gelişmiş Ayarlar
+
+### Toplu İşleme
+
+**Birden fazla dosyayı paralel olarak işle:**
+
+```
+Settings → Advanced → Batch Processing
+Concurrency: 3 (default)
+```
+
+Daha yüksek değer = daha hızlı ancak daha fazla API çağrısı.
+
+### Akıllı Bölme
+
+**Uzun notlar için bölümlere ayırın:**
+
+```
+Settings → Advanced → Smart Chunking
+Chunk Size: 2000 words (default)
+Overlap: 200 words (default)
+```
+
+Token sınırı hatalarını önler.
+
+### Teşhis Paneli
+
+**Ayrıntılı günlükleri görüntüle:**
+
+```
+Settings → Advanced → Enable Diagnostics
+```
+
+Gösterir:
+- API istek/yanıt sayısı
+- Token kullanımı
+- İşleme süreleri
+- Hatalar
+
+### Tekrarlayan Kavram Tespiti
+
+**Neredeyse aynı kavramlardan kaçının:**
+
+```
+Settings → Advanced → Synonym Suppression
+Threshold: 0.8 (default, 0-1)
+```
+
+Daha yüksek = daha agresif birleştirme.
+
+---
+
+## Yapılandırma Profilleri
+
+### Ayarları Dışa Aktar/İçe Aktar
+
+**Cihazlar arasında yapılandırmaları paylaşın:**
+
+1. **Ayarlar → Gelişmiş → Yapılandırmayı Dışa Aktar**
+2. `notemd-config.json` kaydeder
+3. Yeni cihazda: **Yapılandırmayı İçe Aktar**
+
+**Neler dahildir:**
+- Sağlayıcı API anahtarları (isteğe bağlı)
+- Model seçimleri
+- Çıktı yolları
+- Özel iş akışları
+
+---
+
+## Önerilen Yapılandırmalar
+
+### Öğrenciler için
+
+```
+Provider: OpenAI (gpt-4o-mini)
+Concept Folder: concepts/
+UI Language: System
+Output Language: System
+Workflow: "Study Flow" (add-links>extract-concepts)
+```
+
+### Araştırmacılar için
+
+```
+Providers:
+  - Linking: DeepSeek (cheap, many calls)
+  - Concepts: Claude Sonnet (high quality)
+  - Research: GPT-4o (web-grounded)
+Concept Folder: notes/concepts/
+Hierarchical: Yes
+Workflow: "Paper Flow" (add-links>extract>research>diagram)
+```
+
+### Gizliliğe Önem Veren Kullanıcılar İçin
+
+```
+Provider: Ollama (llama3.1)
+All tasks: Local model
+Search: DuckDuckGo (no API)
+Diagnostics: Off
+```
+
+### Çift Dilli Çalışma İçin
+
+```
+UI Language: Chinese
+Output Language: English
+Translation Target: Chinese
+Provider: Gemini (multilingual)
+```
+
+---
+
+## Yapılandırma Sorunlarının Giderilmesi
+
+### Ayarlar Kaydedilmiyor
+- `.obsidian/plugins/notemd/` içindeki dosya izinlerini kontrol edin
+- Deneyin: Eklentiyi devre dışı bırakın → Tekrar etkinleştirin
+
+### API Anahtarı Geçersiz
+- Ekstra boşluk yok
+- Son kullanma tarihini kontrol edin
+- Sağlayıcı panosundaki kredileri doğrulayın
+
+### Modeller Yüklenmiyor
+- Yenilemek için "Model Listesi Al"a tıklayın
+- Ağ bağlantısını kontrol edin
+- Farklı bir sağlayıcı deneyin
+
+---
+
+## Sonraki Adımlar
+
+- 📖 [Özellikleri Keşfedin](../features/wiki-links)
+- 🔌 [Sağlayıcı Kurulum Kılavuzları](../providers/overview)
+- ❓ [Sık Sorulan Sorular](../faq)

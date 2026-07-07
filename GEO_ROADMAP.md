@@ -2,7 +2,7 @@
 
 **Created:** 2026-06-12
 **Updated:** 2026-07-07
-**Status:** Phase 1-8 shipped. The 2026-07-07 multilingual docs slice supersedes the old partial zh-CN boundary with full docs routes for `zh-CN`, `zh-Hant`, `ja`, `fr`, `de`, `es`, and `ko`; Search Console plus AI visibility remain external post-deploy work.
+**Status:** Phase 1-8 shipped. The 2026-07-07 multilingual docs slice supersedes the old partial zh-CN boundary with full docs routes for every README/UI locale declared in `website/src/lib/publishedLocales.mjs`; Search Console plus AI visibility remain external post-deploy work.
 **Scope:** Documentation-site GEO for AI search visibility, language truth, GitHub Pages reliability, and answer-engine retrieval quality. This does not cover plugin runtime i18n.
 
 ---
@@ -20,7 +20,7 @@ The current public language surface is complete for every published documentatio
 | English docs | Complete canonical docs under `website/docs/` | Primary crawl and answer source |
 | Simplified Chinese | Full docs route set under `website/i18n/zh-CN/.../current/` | Public localized docs surface, aligned one-to-one with English routes |
 | Traditional Chinese | Full docs route set under `website/i18n/zh-Hant/.../current/` | Public localized docs surface, aligned one-to-one with English routes |
-| Japanese, French, German, Spanish, Korean | Full docs route sets under their locale folders | Public localized docs surfaces, aligned one-to-one with English routes |
+| README/UI locale matrix | Full docs route sets for `zh-CN`, `zh-Hant`, `zh-TW`, `ja`, `fr`, `de`, `es`, `ko`, `it`, `pt`, `pt-BR`, `ru`, `ar`, `fa`, `hi`, `bn`, `nl`, `sv`, `fi`, `da`, `no`, `pl`, `tr`, `he`, `th`, `el`, `cs`, `hu`, `ro`, `uk`, `vi`, `id`, and `ms` | Public localized docs surfaces, aligned one-to-one with English routes |
 | Fallback localized docs | Retired for the public docs route set | Public localized docs should not rely on English fallback pages or emit `noindex,follow` |
 | Plugin UI i18n | Separate runtime feature | Do not treat runtime language support as website documentation coverage |
 | Localized UI chrome (navbar, footer, sidebar labels, pagination) | Generated per public locale by `website/scripts/generate-localized-docs.cjs` plus Docusaurus i18n JSON | Visible docs navigation should not expose stale English category labels |
@@ -35,7 +35,7 @@ The previous GEO language policy was correct for a partial zh-CN release, but it
 
 | Fix | Files | Result |
 |---|---|---|
-| Expand published locales | `website/docusaurus.config.js` | Public docs locales now include English, Simplified Chinese, Traditional Chinese, Japanese, French, German, Spanish, and Korean |
+| Expand published locales | `website/src/lib/publishedLocales.mjs`, `website/docusaurus.config.js` | Public docs locales now include English plus every README/UI locale declared for documentation publishing |
 | Generate localized docs | `website/scripts/generate-localized-docs.cjs`, `website/i18n/**` | Every source page under `website/docs/` has a localized counterpart in each public locale |
 | Retire partial zh-CN scope | `website/src/lib/publishedLanguageScopeData.mjs`, `website/src/lib/languageRoutePolicy.js` | zh-CN scope now declares the full docs route set and locale-prefix parsing covers all public locales |
 | Extend build audit | `website/scripts/audit-build.cjs` | Build audit checks localized source coverage, localized build output, sitemap entries, `llms.txt`, and non-`noindex` localized docs |
@@ -46,7 +46,7 @@ The previous GEO language policy was correct for a partial zh-CN release, but it
 | Requirement | Status | Evidence target |
 |---|---|---|
 | `/zh-CN/docs` aligns one-to-one with `/docs` | Implemented | `src/tests/websiteDocsContract.test.ts`, `npm --prefix website run audit:build` |
-| `zh-Hant`, `ja`, `fr`, `de`, `es`, `ko` expose the same docs routes | Implemented | `website/i18n/<locale>/docusaurus-plugin-content-docs/current/**` |
+| Every README/UI documentation locale exposes the same docs routes | Implemented | `website/i18n/<locale>/docusaurus-plugin-content-docs/current/**`, `src/tests/websiteDocsContract.test.ts` |
 | Visible zh-CN headings do not keep stale English labels | Implemented | stale-heading contract in `src/tests/websiteDocsContract.test.ts` |
 | Full multilingual docs route boundary is represented in answer-engine metadata | Implemented | `website/static/llms.txt`, sitemap, hreflang, homepage copy |
 
@@ -57,7 +57,7 @@ The remaining GEO work is external measurement, not another source-only route re
 1. deploy the multilingual docs update through the Pages workflow;
 2. submit or refresh `sitemap.xml` plus representative localized sitemaps in Search Console;
 3. inspect root, zh-CN root, FAQ, provider overview, representative provider detail, and representative localized docs across the new locales;
-4. rerun English, Chinese, Japanese, French, German, Spanish, and Korean AI visibility prompts after the deployed Pages artifact is crawled.
+4. rerun English, Chinese, Japanese, French, German, Spanish, Korean, and representative long-tail locale AI visibility prompts after the deployed Pages artifact is crawled.
 
 ## 2026-07-02 CI, Pages, CLI, And Slidev Closeout
 
@@ -83,7 +83,7 @@ The remaining GEO work is external measurement, not another source-only route re
 
 1. submit or refresh `sitemap.xml` and localized sitemaps in Search Console;
 2. inspect root, zh-CN root, FAQ, provider overview, representative provider detail, and representative localized docs across public locales;
-3. rerun English, Chinese, Japanese, French, German, Spanish, and Korean AI visibility prompts after the deployed Pages artifact is crawled;
+3. rerun English, Chinese, Japanese, French, German, Spanish, Korean, and representative long-tail locale AI visibility prompts after the deployed Pages artifact is crawled;
 4. keep future locale expansion scoped to complete docs route sets declared and audited in the repository.
 
 ## 2026-06-26 Phase 7 zh-CN Content Parity & UI Alignment
@@ -246,8 +246,8 @@ The previous GEO work improved language scope, `llms.txt`, provider docs, and bu
 The effective strategy is truth-first and route-first, not locale-volume-first.
 
 1. **Make canonical routes boring and stable.** Root, locale root, sitemap, robots, FAQ, intro, quick start, provider overview, and pillar pages must build without broken-link warnings.
-2. **Publish only reviewed language surfaces.** Keep `en` complete and grow `zh-CN` by declared, translated, reviewed paths. Do not count Docusaurus fallback pages as Chinese content.
-3. **Let one scope own all language signals.** Sitemap, noindex, hreflang, locale dropdown, sidebar, paginator, homepage links, and `llms.txt` must all follow `publishedLanguageScopeData.mjs`.
+2. **Publish only complete language surfaces.** Keep `en` canonical and keep every locale in `publishedLocales.mjs` route-complete before exposing it publicly. Do not count Docusaurus fallback pages as localized content.
+3. **Let explicit scope files own language signals.** `publishedLocales.mjs` owns public locale metadata; `publishedLanguageScopeData.mjs` owns legacy zh-CN route compatibility. Sitemap, noindex, hreflang, locale dropdown, sidebar, paginator, homepage links, and `llms.txt` must follow those sources.
 4. **Treat the homepage as a source surface.** Public GEO/product-positioning updates must appear on the GitHub Pages homepage when they affect how users or answer engines should describe Notemd.
 5. **Use `llms.txt` as the compact answer-engine map.** It should point to canonical docs, state partial zh-CN coverage, and reject generated exports or stale issue text as primary sources.
 6. **Prefer fewer provider pages with real operational content.** Thin pages dilute answer quality. Provider docs need setup, endpoint/auth, model discovery, troubleshooting, and use boundaries.
@@ -261,7 +261,7 @@ The effective strategy is truth-first and route-first, not locale-volume-first.
 |---|---|---|
 | Live Search Console verification | Local build cannot prove Google has accepted canonical, sitemap, and language signals | Submit `sitemap.xml` and `zh-CN/sitemap.xml`, inspect root, zh-CN root, and representative docs |
 | AI visibility retest after deployment | The old 0-citation baseline predates this route/content cleanup | Run EN and ZH prompts after Pages deploy, record exact prompts and citations |
-| Full zh-CN documentation | Critical path is translated with content parity; feature, advanced, and provider detail docs are still English-only | Keep zh-CN partial and promote pages only through the scope data plus audit |
+| Post-deploy multilingual indexing verification | Source-side route parity is implemented, but local build cannot prove search engines have accepted every new localized route | Submit/inspect root and representative localized sitemaps after Pages deploy |
 | `SoftwareApplication` JSON-LD locale conditioning | Global headTags in `docusaurus.config.js` cannot be locale-conditional | Later add locale-conditional wrapping or move to per-page injection via swizzled component |
 | Automated provider content freshness | Heading gates prevent stubs, not stale provider facts | Later add source-backed checks against provider registry defaults, not public marketing pages |
 | `llms.txt` drift protection beyond language scope | Current audit checks required route markers, not full semantic parity | Generate or snapshot route lists from Docusaurus metadata when docs volume grows |
@@ -286,11 +286,11 @@ The effective strategy is truth-first and route-first, not locale-volume-first.
 |---|---|---|---|
 | Immediate | Docusaurus build | No root broken-link or deprecated markdown-hook warnings | Re-verify on Phase 7 deploy |
 | Immediate | Build-output GEO audit | `npm run audit:build` passes | Re-verify on Phase 7 deploy |
-| Immediate | zh-CN critical path | Homepage plus 7 doc routes translated and published with content parity | Source-side aligned on 2026-06-26 |
-| Immediate | zh-CN UI chrome | Navbar, footer, sidebar labels, pagination in Chinese | `code.json` + `docusaurus.config.json` deployed |
+| Immediate | README/UI locale docs route parity | Every published documentation locale has the full 21-page docs route set | Source-side aligned on 2026-07-07 |
+| Immediate | Localized UI chrome | Navbar, footer, sidebar labels, pagination, and Docusaurus theme strings exist for every public docs locale | Generated i18n JSON deployed |
 | Immediate | zh-CN FAQPage schema | `faqItems` frontmatter present for structured data | Implemented in Phase 7 |
 | Immediate | Homepage JSON-LD locale conditioning | `about` keywords and `isPartOf.name` reflect current locale | Implemented in Phase 7 |
-| Immediate | AI retrieval map | `llms.txt` lists canonical docs and published zh-CN docs | Covered by audit |
+| Immediate | AI retrieval map | `llms.txt` lists canonical docs and all published documentation locale entrypoints | Covered by audit |
 | Immediate | Homepage GEO sync | Homepage, JSON-LD, `llms.txt`, and audit share the same public facts | Covered by audit as of 2026-06-24 |
 | Post-deploy | Search Console sitemap acceptance | Root and zh-CN sitemaps submitted and inspectable | Pending external console check |
 | Post-deploy | First AI visibility signal | 1+ ChatGPT/Perplexity/GLM mention for target prompts | 0 baseline, pending retest |
@@ -302,7 +302,7 @@ The effective strategy is truth-first and route-first, not locale-volume-first.
 |---|---|
 | 2026-06-22 | Verify Phase 5 source-side build, audit, zh-CN scope, provider docs, measurement log, `llms.txt`, and sitemap contract |
 | 2026-06-24 | Verify homepage GEO sync across visible homepage, JSON-LD, `llms.txt`, audit, and measurement logs |
-| 2026-06-26 | Verify Phase 7 zh-CN content parity, UI chrome translations, homepage JSON-LD locale conditioning, and `languageBoundary` fix |
+| 2026-07-07 | Verify Phase 8 README/UI locale docs route parity, generated i18n chrome JSON, homepage/`llms.txt` language boundary, Docusaurus build, and build audit |
 | After deploy | Submit sitemap and inspect canonical root, zh-CN root, FAQ, provider overview, and representative fallback pages in Search Console |
 | 2026-07-01 | Retest AI visibility baseline in EN and ZH after the fixed Pages deployment |
 | 2026-08-01 | Second retest; if citations remain 0, audit indexed pages and provider-page freshness |

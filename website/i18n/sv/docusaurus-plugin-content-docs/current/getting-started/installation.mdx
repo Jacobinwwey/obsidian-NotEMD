@@ -1,0 +1,133 @@
+---
+id: installation
+title: "Installation"
+description: "Så här installerar du Notemd i Obsidian"
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [installation, setup, obsidian plugin]
+concepts: [Installation, Community Plugins, BRAT, Manual Install]
+citations:
+  - title: Obsidian
+    url: https://obsidian.md
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# Installation
+
+<TLDR>
+**Installera Notemd på under 2 minuter.** Två metoder: (1) Obsidian Community Plugins (rekommenderat, en-klicksinstallation), eller (2) Manuell installation via GitHub Releases. Krävs Obsidian 0.15.0+. Fungerar på Windows, macOS, Linux, iOS och Android. Inga externa beroenden. 4k+ nedladdningar, licensierat enligt MIT.
+</TLDR>
+
+## Metod 1: Community Plugins (Rekommenderat)
+
+1. Öppna **Obsidian Settings** (⚙️-ikonen eller `Ctrl/Cmd + ,`)
+2. Gå till **Community plugins**
+3. Klicka på **Browse**
+4. Sök efter **"Notemd"**
+5. Klicka på **Install**
+6. Klicka på **Enable**
+
+**Klart!** Du kommer att se Notemd-ikonen i din vänstra sidofält.
+
+## Metod 2: Manuell installation
+
+### Förutsättningar
+- Obsidian 0.15.0 eller nyare
+- Git (valfritt, för klonning)
+
+### Steg
+
+1. **Ladda ner filer** från [GitHub Releases](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/latest):
+   - `main.js`
+   - `styles.css`
+   - `manifest.json`
+
+2. **Hitta pluginsmappan för din skåp:**
+   ```
+   <your-vault>/.obsidian/plugins/
+   ```
+
+Om `plugins`-mappen inte existerar, skapa den.
+
+3. **Skapa Notemd-mappen:**
+   ```
+   <your-vault>/.obsidian/plugins/notemd/
+   ```
+
+4. **Kopiera de tre filerna** in i `notemd`-mappen.
+
+5. **Ladda om Obsidian:**
+   - Tryck på `Ctrl/Cmd + R`, eller
+   - Starta om Obsidian
+
+6. **Aktivera pluginet:**
+   - Inställningar → Community-plugins
+   - Hitta "Notemd" i listan
+   - Slå på det
+
+## Alternativ: Installera via BRAT
+
+Om du använder [BRAT pluginet](https://github.com/TfTHacker/obsidian42-brat):
+
+1. Öppna BRAT-inställningarna
+2. Klicka på "Lägg till Beta-plugin"
+3. Skriv in: `Jacobinwwey/obsidian-NotEMD`
+4. Klicka på "Lägg till Plugin"
+5. Aktivera Notemd i Community-plugins
+
+## Verifikation
+
+Efter installationen, verifiera att Notemd fungerar:
+
+1. Öppna en vilken anteckning som helst
+2. Klicka med höger mus i redigeraren
+3. Du bör se Notemd-kommandon som:
+   - "Processera fil (lägg till länkar)"
+   - "Extrahera koncept"
+   - "Undersöka och sammanfatta"
+
+## Nästa steg
+
+- **Konfigurera LLM-leverantören:** [Snabbstart →](./quick-start)
+- **Felaktighetsfelsökning:** [Vanliga problem →](../advanced/troubleshooting)
+
+## Systemkrav
+
+| Plattform | Version | Status |
+|----------|---------|--------|
+| **Obsidian** | 0.15.0+ | Required |
+| **Windows** | 7+ | ✅ Stöds |
+| **macOS** | 10.15+ | ✅ Stöds |
+| **Linux** | Allt | ✅ Stöds |
+| **iOS** | 15+ | ✅ Stöds |
+| **Android** | 5+ | ✅ Stöds |
+
+## Avinstallering
+
+För att ta bort Notemd:
+
+1. Inställningar → Gemenskapsplugins
+2. Hitta "Notemd"
+3. Klicka på ❌-ikonen
+4. Vill du kan du ta bort pluginsmappen: `<vault>/.obsidian/plugins/notemd/`
+
+Dina data (anteckningar, konceptanteckningar osv.) förblir oförändrade.
+
+## Uppdatering
+
+### Automatisk uppdatering (rekommenderas)
+Obsidian kontrollerar automatiskt efter pluginsuppdateringar. När en ny version finns tillgänglig:
+1. Inställningar → Gemenskapsplugins
+2. Klicka på "Kolla efter uppdateringar"
+3. Klicka på "Uppdatera" bredvid Notemd
+
+### Manuell uppdatering
+Ladda ner den senaste versionen och byt ut de tre filerna i din pluginsmappa.
+
+## Få hjälp
+
+- 📖 [Snabbstartguide](./quick-start)
+- ❓ [FAQ](../faq)
+- 💬 [Discord-gemenskapen](https://discord.gg/qnGgsQ9W)
+- 🐛 [Rapportera problem](https://github.com/Jacobinwwey/obsidian-NotEMD/issues)

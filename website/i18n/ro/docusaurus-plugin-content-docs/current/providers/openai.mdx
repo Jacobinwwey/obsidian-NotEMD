@@ -1,0 +1,67 @@
+---
+id: openai
+title: "OpenAI"
+description: "Configura OpenAI (GPT-4, GPT-4o)"
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [openai, gpt-4o, provider, configuration]
+concepts: [OpenAI, GPT-4o, API Configuration]
+citations:
+  - title: OpenAI API
+    url: https://platform.openai.com
+  - title: GPT-4
+    url: https://openai.com/gpt-4
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# Providerul OpenAI
+
+<TLDR>
+**OpenAI utilizează transportul compatibil cu OpenAI.** Setarea predefinită actuală este `gpt-4o`, `https://api.openai.com/v1`, `temperature: 0.5` și testul de conectare `models-then-chat`. Folosiți această pagină atunci când aveți nevoie de semantica exactă a câmpurilor; folosiți prezentarea [LLM Providers](/docs/providers/overview) pentru selecția la nivel de categorie.
+
+Acesta face parte din [Obsidian Ghidul de gestionare a cunoștințelor AI](/docs/pillar-ai-knowledge).
+</TLDR>
+
+## Configurare
+
+Creați o cheie OpenAI API, adăugați un profil de furnizor `OpenAI` în setările Notemd și păstrați valorile predefinite ale Base URL, cu excepția cazului în care intenționat vă orientați spre o gateway compatibilă cu OpenAI. Câmpul model poate rămâne la `gpt-4o` pentru lucrări generale sau poate fi înlocuit cu un alt ID de model OpenAI pe care contul dumneavoastră îl poate apela.
+
+Folosiți modele specifice sarcinilor pentru controlul costurilor: păstrați modele mai puternice pentru cercetare, extracție a conceptelor și restructurare a textelor lungi; folosiți modele mai ieftine sau mai rapide pentru traducere, sugestii de linkuri și rezumate scurte.
+
+## Endpoint și autentificare
+
+| Câmp | Presetul curent |
+|-------|----------------|
+| Transport | `openai-compatible` |
+| Cheia API | Requerit |
+| Base URL | `https://api.openai.com/v1` |
+| Modelul implicit | `gpt-4o` |
+| Temperature | `0.5` |
+| Test de conectare | `/models`, apoi `/chat/completions` |
+
+Notemd normalizează bazele URL compatibile cu OpenAI înainte de a adăuga `chat/completions` sau `models`. Nu includeți un `/chat/completions` la sfârșit în Base URL; acest lucru creează o cale dublată.
+
+## Descoperirea modelelor
+
+OpenAI folosește calea generică de descoperire a modelurilor compatibile cu OpenAI. Setările UI întreabă mai întâi `/v1/models`, apoi validează modelul selectat printr-o cerere ușoară de chat. Dacă descoperirea eșuează dar chatul funcționează, verificați dacă cheia dumneavoastră are permisiunea model-list sau dacă o gateway blochează listarea modelurilor.
+
+Modelele de raționament sunt tratate ca un caz de limită al protocolului: Notemd mergechează conținutul sistemului și al promptului utilizatorului pentru ID-urile de raționament OpenAI care resping un rol separat `system`, și expune doar `reasoningEffort` acolo unde definiția furnizorului o suportă.
+
+## Dezvoltarea de soluții
+
+- `401` sau `403`: verificați cheia, accesul la proiect, starea facturării și dacă modelul selectat este activat pentru cheie.
+- `404` în chat: Base URL este de obicei greșită sau include deja `/chat/completions`.
+- Modelul apare în documentație dar nu în selector: accesul model-list și accesul chat sunt puncte de eșec separate; testați ID-ul exact al modelului manual în profilul furnizorului.
+- Modelul de raționament respinge mesajele: folosiți un ID de model acoperit de calea de gestionare a raționamentului OpenAI sau treceti la un model de chat fără funcție de raționament.
+
+## Când să fiți utilizatori
+
+Folosiți OpenAI atunci când doriți calea implicită găzduită cea mai previzibilă, atunci când descoperirea prin `/v1/models` este importantă, sau atunci când un flux de lucru depinde de semantica modelului de raționament OpenAI. Preferați un gateway sau un furnizor local atunci când rutarea, confidențialitatea sau controlul costurilor sunt mai importante decât comportamentul direct OpenAI API.
+
+---
+
+## Următoarele pași
+
+- [LLM Furnizori](/docs/providers/overview) -- Configurație completă, modele pentru fiecare sarcină și logică de reîncercare
+- [Rezolvare a problemelor](/docs/advanced/troubleshooting) -- Corectați erorile 401/403 și problemele de rate-limiting

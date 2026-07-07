@@ -1,0 +1,435 @@
+---
+id: configuration
+title: "Konfigurace"
+description: "Nastavte parametry a předvolby Notemd"
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [configuration, settings, customization, preferences]
+concepts: [Configuration, Per-Task Models, Output Paths, Custom Workflows]
+citations:
+  - title: Obsidian
+    url: https://obsidian.md
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# Konfigurace
+
+<TLDR>
+**Konfigurace Notemd zahrnuje 6 hlavních oblastí:** (1) poskytovatele LLM a klíče API, (2) výběr modelu pro jednotlivé úlohy, (3) cesty a šablony výstupu, (4) jazyk UI a jazyk výstupu, (5) vyhledávací služby (Tavily/DuckDuckGo), (6) vlastní pracovní postupy. Všechny nastavení se nacházejí v Obsidian Nastavení → Notemd. Změny nabývají účinnosti okamžitě.
+</TLDR>
+
+## Přehled nastavení
+
+Přístup: **Obsidian Nastavení (⚙️) → Notemd**
+
+### Hlavní sekce
+
+1. **Konfigurace poskytovatele** — klíče API, základní URLs, modely
+2. **Nastavení úlohy** — výběr modelu pro jednotlivé úlohy
+3. **Konfigurace výstupu** — kam ukládat generované soubory
+4. **Nastavení jazyka** — UI a jazyk výstupu
+5. **Integrace vyhledávání** — nastavení Tavily/DuckDuckGo
+6. **Pracovní postupy** — vlastní řetězce tlačítek
+7. **Pokročilé** — diagnostika, hromadná zpracování, dělení na části
+
+---
+
+## 1. Konfigurace poskytovatele
+
+### Přidání poskytovatele
+
+1. **Vyberte poskytovatele** z rozbalovacího seznamu (30+ dostupných)
+2. **Zadejte klíč API
+3. **Volitelné**: Nastavte vlastní základ URL (pro proxye/brány)
+4. **Klikněte na "Získat seznam modelů"**, abyste ověřili spojení
+5. **Vyberte výchozí model**
+
+### Běžní poskytovatelé
+
+#### OpenAI
+```
+Provider: OpenAI
+API Key: sk-...
+Base URL: https://api.openai.com/v1 (default)
+Model: gpt-4o-mini
+```
+
+#### Anthropic (Claude)
+```
+Provider: Anthropic
+API Key: sk-ant-...
+Model: claude-sonnet-4-6
+```
+
+#### Ollama (Lokální)
+```
+Provider: Ollama
+Base URL: http://localhost:11434 (default)
+Model: llama3.1
+API Key: (not required)
+```
+
+#### DeepSeek
+```
+Provider: DeepSeek
+API Key: sk-...
+Model: deepseek-chat
+```
+
+### Více poskytovatelů
+
+Můžete nakonfigurovat více poskytovatelů a přepínat mezi nimi podle úlohy:
+- **Hlavní poskytovatel**: Používá se jako náhrada
+- **Poskytovatelé specifické pro úlohu**: Přepsání pro konkrétní úlohy
+
+---
+
+## 2. Modely specifické pro úlohu
+
+Nakonfigurujte různé modely pro různé úlohy za účelem optimalizace nákladů/kvality:
+
+### Typy úloh
+
+| Úloha | Výchozí model | Účel |
+|------|--------------|---------|
+| **Propojování** | Hlavní poskytovatel | Identifikace konceptů pro wiki-odkazy |
+| **Generování konceptů** | Hlavní poskytovatel | Vytáhnout a popsat koncepty |
+| **Výzkum** | Hlavní poskytovatel | Shrnutí výsledků vyhledávání na webu |
+| **Překlad** | Hlavní poskytovatel | Přeložit text |
+| **Generování diagramů** | Hlavní poskytovatel | Vytvořit diagramy Mermaid/Canvas |
+
+### Příklad: Nastavení optimalizované z hlediska nákladů
+
+```
+Linking: gpt-4o-mini (fast, many calls)
+Concept Generation: claude-sonnet-4-6 (quality extraction)
+Research: gpt-4o (web-grounded)
+Translation: gemini-flash (multilingual)
+Diagram: ollama/llama3.1 (free, local)
+```
+
+### Jak to nakonfigurovat
+
+1. **Nastavení → Notemd → Nastavení úlohy**
+2. Pro každou úlohu vyberte:
+   - ✅ **Použít hlavní poskytovatel** (výchozí)
+   - 🔄 **Použít vlastní poskytovatel** → vybrat poskytovatele + model
+
+---
+
+## 3. Konfigurace výstupu
+
+### Výstup poznámek ke konceptům
+
+**Kde se ukládají nové poznámky k konceptům:**
+
+```
+Settings → Output → Concept Folder
+Default: concepts/
+```
+
+**Šablona:**
+```
+Settings → Output → Concept Template
+Default:
+---
+tags: [concept]
+created: {{date}}
+---
+
+# {{concept}}
+
+{{description}}
+
+## Backlinks
+{{backlinks}}
+```
+
+### Možnosti struktury složek
+
+**Možnost 1: Plochá (všechny koncepty v jedné složce)**
+```
+vault/
+└── concepts/
+    ├── Machine Learning.md
+    ├── Neural Networks.md
+    └── Deep Learning.md
+```
+
+**Možnost 2: Hierarchická (podle zdrojové složky)**
+```
+vault/
+├── papers/
+│   └── concepts/
+│       └── Transformer.md
+└── notes/
+    └── concepts/
+        └── Attention Mechanism.md
+```
+
+Nastavit: **Nastavení → Výstup → Použít hierarchické složky**
+
+### Výstup diagramů
+
+**Kde se ukládají diagramy:**
+```
+Settings → Output → Diagram Folder
+Default: diagrams/
+```
+
+**Formát:**
+- `.mmd` (Mermaid zdroj)
+- `.canvas` (JSON Canvas)
+- `.html` (Vega-Lite)
+
+---
+
+## 4. Nastavení jazyka
+
+### UI Jazyk
+
+**Jazyk rozhraní** (tlačítka, menu, dialogy):
+
+```
+Settings → Language → UI Language
+Options: 21+ languages
+Default: System language
+```
+
+Podporovány: angličtina, 简体中文, 繁體中文, 日本語, 한국어, Español, Français, Deutsch, Русский, العربية a další.
+
+### Jazyk výstupu
+
+**Jazyk generovaného obsahu** (konceptuální poznámky, shrnutí výzkumu):
+
+```
+Settings → Language → Output Language
+Options: Same as UI languages
+Default: Same as UI
+```
+
+**Případ použití:** čínština UI + anglický výstup pro dvoujazyčný výzkum.
+
+### Cílový jazyk překladu
+
+**Výchozí cílový jazyk** pro úlohy překladu:
+
+```
+Settings → Translation → Target Language
+Default: English
+```
+
+---
+
+## 5. Integrace do vyhledávání
+
+### Tavily (doporučeno)
+
+**Vyhledávací služba optimalizovaná pro AI:**
+
+```
+Settings → Search → Service: Tavily
+API Key: tvly-...
+```
+
+Získat klíč: [tavily.com](https://tavily.com/)
+
+**Vlastnosti:**
+- Vysoce kvalitní výsledky
+- Shrnutí optimalizovaná pro AI
+- Citace zdrojů
+
+### DuckDuckGo (experimentální)
+
+**Není potřeba klíč API:**
+
+```
+Settings → Search → Service: DuckDuckGo
+```
+
+**Poznámka:** nižší kvalita, bez možnosti přizpůsobení.
+
+---
+
+## 6. Konfigurace pracovního postupu
+
+### Vytváření vlastních pracovních postupů
+
+**Pracovní postupy spojují více úloh do jednoho tlačítka.**
+
+1. **Nastavení → Pracovní postupy → Přidat pracovní postup**
+2. **Název**: "Analýza dokumentů"
+3. **DSL**: `process-current-add-links>extract-concepts-current>research-and-summarize>summarize-as-mermaid`
+4. **Uložit**
+
+V levé nabídce se objeví nové tlačítko.
+
+### Syntaxe DSL
+
+**Formát:** `action1>action2>action3`
+
+**Dostupné akce:**
+- `process-current-add-links` — Přidat odkazy na wiki do aktuální poznámky
+- `extract-concepts-current` — Vytvořit poznámky k konceptům
+- `research-and-summarize` — Výzkum na webu + shrnutí
+- `translate-current` — Přeložit aktuální poznámku
+- `summarize-as-mermaid` — Vytvořit diagram Mermaid
+- `process-folder-add-links` — Hromadná úprava složky
+
+**Příklady pracovních postupů:**
+
+**Rychlé extrakce konceptů:**
+```
+process-current-add-links>extract-concepts-current
+```
+
+**Hluboký výzkum:**
+```
+process-current-add-links>research-and-summarize>extract-concepts-current
+```
+
+**Vícejazyčná analýza:**
+```
+translate-current>process-current-add-links>extract-concepts-current
+```
+
+---
+
+## 7. Pokročilé nastavení
+
+### Hromadná zpracování
+
+**Zpracování více souborů paralelně:**
+
+```
+Settings → Advanced → Batch Processing
+Concurrency: 3 (default)
+```
+
+Vyšší hodnota = rychlejší, ale více API volání.
+
+### Chytré dělení na části
+
+**U dlouhých poznámek – rozdělte na části:**
+
+```
+Settings → Advanced → Smart Chunking
+Chunk Size: 2000 words (default)
+Overlap: 200 words (default)
+```
+
+Zabraňuje chybám kvůli limitu tokenů.
+
+### Diagnostická panela
+
+**Zobrazit podrobné protokoly:**
+
+```
+Settings → Advanced → Enable Diagnostics
+```
+
+Zobrazuje:
+- API požadavků/odpovědí
+- Použití tokenů
+- Doby zpracování
+- Chyby
+
+### Detekce duplicitních konceptů
+
+**Vyhýbejte se téměř shodným konceptům:**
+
+```
+Settings → Advanced → Synonym Suppression
+Threshold: 0.8 (default, 0-1)
+```
+
+Vyšší hodnota = agresivnější sloučení.
+
+---
+
+## Konfigurační profily
+
+### Export/Návrh nastavení
+
+**Sdílejte konfigurace mezi zařízeními:**
+
+1. **Nastavení → Pokročilé → Exportovat konfiguraci**
+2. Uloží `notemd-config.json`
+3. Na novém zařízení: **Importovat konfiguraci**
+
+**Co je zahrnuto:**
+- Klíče poskytovatele API (volitelné)
+- Výběr modelů
+- Cesty výstupu
+- Vlastní pracovní postupy
+
+---
+
+## Doporučené konfigurace
+
+### Pro studenty
+
+```
+Provider: OpenAI (gpt-4o-mini)
+Concept Folder: concepts/
+UI Language: System
+Output Language: System
+Workflow: "Study Flow" (add-links>extract-concepts)
+```
+
+### Pro výzkumníky
+
+```
+Providers:
+  - Linking: DeepSeek (cheap, many calls)
+  - Concepts: Claude Sonnet (high quality)
+  - Research: GPT-4o (web-grounded)
+Concept Folder: notes/concepts/
+Hierarchical: Yes
+Workflow: "Paper Flow" (add-links>extract>research>diagram)
+```
+
+### Pro uživatele, kteří dbají na soukromí
+
+```
+Provider: Ollama (llama3.1)
+All tasks: Local model
+Search: DuckDuckGo (no API)
+Diagnostics: Off
+```
+
+### Pro dvojjazyčnou práci
+
+```
+UI Language: Chinese
+Output Language: English
+Translation Target: Chinese
+Provider: Gemini (multilingual)
+```
+
+---
+
+## Řešení problémů s konfigurací
+
+### Nastavení nebyla uložena
+- Zkontrolujte oprávnění souboru v `.obsidian/plugins/notemd/`
+- Zkuste: Deaktivovat plugin → Znovu aktivovat
+
+### Klíč API je neplatný
+- Žádné další mezery
+- Zkontrolujte dobu platnosti
+- Ověřte kredity na panelu poskytovatele
+
+### Modely se nenačítají
+- Klikněte na "Získat seznam modelů" pro obnovu
+- Zkontrolujte síťové připojení
+- Zkuste jiného poskytovatele
+
+---
+
+## Další kroky
+
+- 📖 [Prozkoumat funkce](../features/wiki-links)
+- 🔌 [Návody k nastavení poskytovatele](../providers/overview)
+- ❓ [FAQ](../faq)

@@ -1,0 +1,161 @@
+---
+id: troubleshooting
+title: "Pemecahan masalah"
+description: "Isu biasa dan penyelesaiannya"
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [troubleshooting, errors, diagnostics, connection test]
+concepts: [Troubleshooting, Error Handling, Diagnostics]
+citations:
+  - title: Obsidian
+    url: https://obsidian.md
+  - title: Obsidian API
+    url: https://docs.obsidian.md
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# Pemecahan masalah
+
+<TLDR>
+**Kebanyakan Notemd isu tergolong dalam empat kategori: masalah utama API, sambungan rangkaian, ralat pengesahan (401/403), dan had kelajuan (429).** Ujian sambungan terbina dalam serta panel diagnostik dapat mengenal pasti punca asal dengan cepat. Halaman ini merangkumi setiap mesej ralat biasa, punca ia berlaku, dan cara memperbaikinya. Untuk isu yang tidak disenaraikan di sini, laporkannya di GitHub Issues bersama output diagnostik.
+
+Ini merupakan sebahagian daripada [Obsidian Panduan Pengurusan Pengetahuan AI](/docs/pillar-ai-knowledge).
+</TLDR>
+
+## Gambaran Keseluruhan
+
+Notemd bergantung pada perkhidmatan luaran -- penyedia LLM dan alat carian API -- jadi kebanyakan masalah berpunca dari luar plugin itu sendiri. Panel diagnostik dalam tetapan menyediakan pandangan terstruktur bagi panggilan terakhir API, termasuk permintaan URL, status respons, dan badan ralat. Sentiasa periksa ia terlebih dahulu sebelum menyiasat lebih lanjut.
+
+## Cara Ia Berfungsi: Diagnostik
+
+### Ujian Sambungan
+
+Setiap bahagian konfigurasi penyedia mempunyai butang **“Uji Sambungan”**. Dengan mengkliknya, permintaan API yang minimum dihantar (biasanya senarai model atau penyelesaian ringkas) dan laporan kejayaan atau ralat HTTP tertentu akan diberikan. Ini merupakan cara paling cepat untuk memastikan kunci API dan asas URL anda betul.
+
+### Panel Diagnostik
+
+**Tetapan --> Notemd --> Diagnostik** menunjukkan:
+
+| Medan | Kandungan |
+|-------|---------|
+| Penyedia Terakhir | Penyedia mana yang dipanggil terakhir |
+| Model Terakhir | Model mana yang dipanggil terakhir |
+| Status terakhir | Kod status HTTP atau ralat penghantaran |
+| Ralat terakhir | Mesej ralat asli daripada API |
+| Permintaan terakhir URL | Seluruh URL permintaan terakhir (kunci API dipadamkan) |
+| Kandungan respons terakhir | Kandungan respons yang dipotong (500 aksara pertama) |
+
+Salin output diagnostik penuh semasa melaporkan masalah di GitHub.
+
+## Ralat biasa
+
+### Kunci API tidak sah atau hilang
+
+**Simptom:** HTTP 401 atau "Kunci API yang diberikan tidak betul"
+
+**Punca:** Kunci API hilang, mengandungi ruang kosong, atau milik penyedia yang berbeza.
+
+**Penyelesaian:**
+1. Semak bahawa kunci tiada ruang di awal/akhir
+2. Pastikan kunci sepadan dengan penyedia yang dipilih (kunci OpenAI tidak akan berfungsi dengan Anthropic)
+3. Semak sama ada akaun anda mempunyai kredit atau langganan yang aktif
+4. Klik **"Test Connection"** untuk mengesahkan
+
+### Ralat Rangkaian / Sambungan
+
+**Gejala:** `ERR_CONNECTION_REFUSED`, `ERR_TIMED_OUT`, `Socket hang up`, `Network request failed`
+
+**Punca:** Titik hujung API tidak dapat diakses dari mesin anda.
+
+**Penyelesaian:**
+1. Semak sambungan internet anda
+2. Jika berada di belakang proxy atau firewall, pastikan domain API tidak disekat
+3. Untuk Ollama: sahkan `ollama serve` sedang berjalan (`ollama list` sepatutnya mengembalikan model)
+4. Untuk LMStudio: sahkan pelayan sedang berjalan pada `localhost:1234`
+5. Cuba kaedah penghantaran yang berbeza -- pengguna mudah alih harus pastikan kaedah penghantaran `requestUrl` aktif
+6. Aktifkan `enableStableApiCall` untuk percubaan semula automatik bagi ralat sementara
+
+### 403 Dilarang
+
+**Gejala:** HTTP 403
+
+**Punca:** Kunci API anda sah tetapi tidak mempunyai kebenaran untuk sumber yang diminta.
+
+**Penyelesaian:**
+1. Beberapa model memerlukan akses khas (contohnya, GPT-4 melalui Azure memerlukan nama penempatan)
+2. Beberapa penyedia mengehadkan model mengikut tahap pelan -- semak akaun anda
+3. Had serantau mungkin dikenakan (beberapa penyedia di China menyekat IP antarabangsa dan sebaliknya)
+4. Sahkan nama model ditulis dengan betul (contohnya, `gpt-4o` bukan `gpt-4o-mini` apabila model mini adalah satu-satunya yang dibenarkan oleh pelan anda)
+
+### Had kelajuan (429)
+
+**Gejala:** HTTP 429 atau “Had kelajuan telah melebihi”
+
+**Punca:** Terlalu banyak permintaan dalam tempoh masa yang singkat.
+
+**Penyelesaian:**
+1. Kurangkan `batchConcurrency` kepada `1` atau `2`
+2. Tunggu beberapa minit sebelum mencuba semula
+3. Semak dokumentasi had kelajuan penyedia anda untuk tahap pelan anda
+4. Aktifkan `enableStableApiCall` untuk percubaan semula automatik dengan penundaan
+5. Pertimbangkan untuk beralih ke penyedia dengan had yang lebih tinggi (DeepSeek, Ollama)
+
+### Model Tidak Ditemui
+
+**Gejala:** “Model tidak ditemui” atau HTTP 404
+
+**Punca:** Nama model tidak wujud pada penyedia yang dipilih.
+
+**Penyelesaian:**
+1. Klik **"Get Model List"** untuk melihat semua model yang tersedia untuk penyedia anda
+2. Nama beberapa model berubah dari semasa ke semasa -- sahkan nama terkini dalam dokumentasi penyedia
+3. Untuk Ollama: jalankan `ollama list` untuk melihat model yang telah dipanggil; hanya model yang telah dimuat turun sahaja yang tersedia
+
+### Tiada Pautan / Tiada Konsep Dijana
+
+**Gejala:** Arahan berjalan tetapi tidak menghasilkan sebarang output
+
+**Punca:** LLM mengembalikan respons kosong atau tidak boleh diproses.
+
+**Penyelesaian:**
+1. Semak panel diagnostik untuk melihat respons LLM yang sebenar
+2. Cuba gunakan model yang lebih berkuasa (beberapa model kecil sukar menghasilkan output terstruktur)
+3. Pastikan nota mempunyai kandungan yang mencukupi (>50 perkataan)
+4. Semak prompt khas anda untuk arahan yang bercanggah
+5. Matikan penindasan sinonim sementara waktu untuk melihat sama ada ia menapis terlalu ketat
+
+### ID Titik Akhir Doubao Tidak Ada
+
+**Gejala:** Ralat apabila menggunakan penyedia ByteDance Doubao
+
+**Punca:** Doubao memerlukan ID titik akhir Ark (format: `ep-xxxxxxxx-xxxx-xxxx`) bukannya nama model.
+
+**Pembaikan:** Gantikan model penanda tempat lalai dengan ID titik hujung sebenar anda daripada konsol Volcengine.
+
+## Konfigurasi
+
+| Tetapan Diagnostik | Lokasi | Tujuan |
+|--------------------|----------|---------|
+| **Uji Sambungan** | Bahagian Provider dalam Tetapan | Semak kunci API dan sambungan |
+| **Dapatkan Senarai Model** | Bahagian Provider dalam Tetapan | Pastikan model mana yang boleh diakses |
+| `enableStableApiCall` | Tetapan --> Lanjutan | Aktifkan percubaan semula dengan backoff |
+| `batchConcurrency` | Tetapan --> Batch | Kawal keserentakan untuk elakkan had kelajuan |
+
+## Cara Melaporkan Isu
+
+Jika isu anda tidak disenaraikan di atas:
+
+1. Buka **Tetapan --> Notemd --> Diagnostik**
+2. Salin hasil diagnostik sepenuhnya
+3. Buka isu GitHub di [github.com/Jacobinwwey/obsidian-NotEMD/issues](https://github.com/Jacobinwwey/obsidian-NotEMD/issues)
+4. Sertakan: versi Obsidian, versi Notemd, penyedia, model, hasil diagnostik, dan langkah-langkah untuk mengulangi masalah
+5. Padamkan kunci API anda daripada sebarang log yang dikongsi
+
+---
+
+## Langkah Seterusnya
+
+- [LLM Penyedia](/docs/providers/overview) -- Rujukan penuh konfigurasi penyedia
+- [Pemprosesan Berkumpulan](/docs/advanced/batch-processing) -- Tetapan serentak dan percubaan semula untuk operasi berskala besar
+- [Prompt Khas](/docs/advanced/custom-prompts) -- Perbaiki tingkah laku LLM yang tidak dijangka dengan menyesuaikan prompt

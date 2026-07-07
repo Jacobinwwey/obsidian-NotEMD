@@ -1,5 +1,6 @@
 const fs = require('fs');
 const path = require('path');
+const {pathToFileURL} = require('url');
 
 const root = path.join(__dirname, '..');
 const docsRoot = path.join(root, 'docs');
@@ -746,7 +747,7 @@ function writeJson(filePath, value) {
 }
 
 function writeTranslationJson(locale) {
-  const ui = locales[locale];
+  const ui = locales[locale] || defaultUiChrome;
   writeJson(path.join(i18nRoot, locale, 'docusaurus-plugin-content-docs', 'current.json'), {
     'version.label': {
       message: ui.next,
@@ -795,8 +796,34 @@ function writeTranslationJson(locale) {
   });
 }
 
+const defaultCodeJsonValues = {
+  edit: 'Edit this page',
+  lastUpdated: 'Last updated on',
+  next: 'Next page',
+  previous: 'Previous page',
+  search: 'Search',
+  noResults: 'No results found',
+  seeAll: 'See all results',
+  toc: 'On this page',
+  skip: 'Skip to main content',
+  breadcrumbs: 'Breadcrumbs',
+  docsSidebar: 'Docs sidebar',
+  mainNav: 'Main navigation',
+  backToTop: 'Back to top',
+  copy: 'Copy',
+  copied: 'Copied',
+  copyAria: 'Copy code to clipboard',
+  notFoundTitle: 'Page not found',
+  notFoundBody: 'We could not find the page you were looking for.',
+  language: 'Language',
+  colorToggle: 'Switch between dark and light mode',
+  close: 'Close',
+  expand: 'Expand sidebar',
+  collapse: 'Collapse sidebar',
+};
+
 function codeJsonFor(locale) {
-  const values = {
+  const values = ({
     'zh-Hant': {
       edit: '編輯此頁',
       lastUpdated: '最後更新於',
@@ -947,11 +974,8 @@ function codeJsonFor(locale) {
       expand: '사이드바 펼치기',
       collapse: '사이드바 접기',
     },
-  }[locale];
-
-  if (!values) {
-    return undefined;
-  }
+  })[locale] || defaultCodeJsonValues;
+  const ui = locales[locale] || defaultUiChrome;
 
   return {
     'theme.colorToggle.ariaLabel': {message: values.colorToggle, description: 'The ARIA label for the color mode toggle'},
@@ -977,7 +1001,7 @@ function codeJsonFor(locale) {
     'theme.CodeBlock.copy': {message: values.copy, description: 'The copy button label on code blocks'},
     'theme.CodeBlock.copied': {message: values.copied, description: 'The copied button label on code blocks'},
     'theme.CodeBlock.copyButtonAriaLabel': {message: values.copyAria, description: 'The ARIA label for copy code blocks button'},
-    'theme.docs.breadcrumbs.home': {message: locales[locale].docs, description: 'The ARIA label for the home page in the breadcrumbs'},
+    'theme.docs.breadcrumbs.home': {message: ui.docs, description: 'The ARIA label for the home page in the breadcrumbs'},
     'theme.docs.sidebar.navAriaLabel': {message: values.docsSidebar, description: 'The ARIA label for the sidebar navigation'},
     'theme.docs.sidebar.toggleSidebarButtonAriaLabel': {message: values.expand, description: 'The ARIA label for hamburger menu button of mobile navigation'},
     'theme.common.skipToMainContent': {message: values.skip, description: 'The skip to content label used for accessibility'},
@@ -989,14 +1013,35 @@ function writeCodeJson(locale) {
     return;
   }
   const codeJson = codeJsonFor(locale);
-  if (codeJson) {
-    writeJson(path.join(i18nRoot, locale, 'code.json'), codeJson);
-  }
+  writeJson(path.join(i18nRoot, locale, 'code.json'), codeJson);
 }
 
-function generateDocs() {
+const defaultUiChrome = {
+  next: 'Next',
+  docs: 'Docs',
+  faq: 'FAQ',
+  gettingStarted: 'Getting Started',
+  coreFeatures: 'Core Features',
+  providers: 'LLM Providers',
+  advanced: 'Advanced',
+  community: 'Community',
+  more: 'More',
+  sponsor: 'Sponsor',
+  logoAlt: 'Notemd logo',
+  built: 'Built with Docusaurus.',
+  license: 'MIT License',
+};
+
+async function loadPublishedDocumentationLocales() {
+  const moduleUrl = pathToFileURL(path.join(root, 'src', 'lib', 'publishedLocales.mjs')).href;
+  const {publishedDocumentationLocales} = await import(moduleUrl);
+  return publishedDocumentationLocales;
+}
+
+async function generateDocs() {
+  const publishedDocumentationLocales = await loadPublishedDocumentationLocales();
   const sourceFiles = listMdxFiles(docsRoot);
-  for (const [locale] of Object.entries(locales)) {
+  for (const {locale} of publishedDocumentationLocales) {
     const targetRoot = path.join(i18nRoot, locale, 'docusaurus-plugin-content-docs', 'current');
     ensureDir(targetRoot);
     for (const sourceFile of sourceFiles) {
@@ -1017,4 +1062,7 @@ function generateDocs() {
   }
 }
 
-generateDocs();
+generateDocs().catch((error) => {
+  console.error(error);
+  process.exitCode = 1;
+});

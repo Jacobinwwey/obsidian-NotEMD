@@ -1,0 +1,435 @@
+---
+id: configuration
+title: "Konfigurasi"
+description: "Konfigurasikan tetapan dan pilihan Notemd"
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [configuration, settings, customization, preferences]
+concepts: [Configuration, Per-Task Models, Output Paths, Custom Workflows]
+citations:
+  - title: Obsidian
+    url: https://obsidian.md
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# Konfigurasi
+
+<TLDR>
+**Konfigurasi Notemd meliputi 6 kawasan utama:** (1) penyedia LLM dan kunci API, (2) pemilihan model mengikut tugas, (3) laluan keluaran dan templat, (4) bahasa UI dan bahasa keluaran, (5) perkhidmatan carian (Tavily/DuckDuckGo), (6) aliran kerja khusus. Semua tetapan berada di Obsidian Settings → Notemd. Perubahan akan berkuat kuasa serta-merta.
+</TLDR>
+
+## Gambaran Keseluruhan Tetapan
+
+Akses: **Obsidian Settings (⚙️) → Notemd**
+
+### Bahagian Utama
+
+1. **Konfigurasi Penyedia** — kunci API, URL asas, model
+2. **Tetapan Tugas** — pemilihan model mengikut tugas
+3. **Konfigurasi Keluaran** — tempat menyimpan fail yang dijana
+4. **Tetapan Bahasa** — UI dan bahasa keluaran
+5. **Penggabungan Carian** — tetapan Tavily/DuckDuckGo
+6. **Aliran Kerja** — rantaian butang khusus
+7. **Tingkat Lanjut** — diagnostik, pemprosesan berkumpulan, penggolongan
+
+---
+
+## 1. Konfigurasi Penyedia
+
+### Menambah Penyedia
+
+1. **Pilih penyedia** daripada senarai turun (lebih 30 tersedia)
+2. **Masukkan kunci API**
+3. **Pilihan**: Tetapkan asas khusus URL (untuk proksi/pintu gerbang)
+4. **Klik "Dapatkan Senarai Model"** untuk sahkan sambungan
+5. **Pilih model lalai**
+
+### Penyedia Biasa
+
+#### OpenAI
+```
+Provider: OpenAI
+API Key: sk-...
+Base URL: https://api.openai.com/v1 (default)
+Model: gpt-4o-mini
+```
+
+#### Anthropic (Claude)
+```
+Provider: Anthropic
+API Key: sk-ant-...
+Model: claude-sonnet-4-6
+```
+
+#### Ollama (Lokal)
+```
+Provider: Ollama
+Base URL: http://localhost:11434 (default)
+Model: llama3.1
+API Key: (not required)
+```
+
+#### DeepSeek
+```
+Provider: DeepSeek
+API Key: sk-...
+Model: deepseek-chat
+```
+
+### Penyedia Pelbagai
+
+Anda boleh konfigurasi beberapa penyedia dan tukar di antara mereka mengikut tugas:
+- **Penyedia utama**: Digunakan sebagai alternatif
+- **Penyedia khusus tugas**: Gantikan untuk tugas tertentu
+
+---
+
+## 2. Model Khusus Tugas
+
+Konfigurasi model yang berbeza untuk tugas yang berbeza untuk optimumkan kos/kualiti:
+
+### Jenis Tugas
+
+| Tugas | Model Lalai | Tujuan |
+|------|--------------|---------|
+| **Penghubungan** | Penyedia Utama | Kenal pasti konsep untuk pautan wiki |
+| **Penghasilan Konsep** | Penyedia utama | Keluarkan dan terangkan konsep |
+| **Penyelidikan** | Penyedia utama | Ringkaskan hasil carian web |
+| **Terjemahan** | Penyedia utama | Terjemahkan teks |
+| **Penghasilan Diagram** | Penyedia utama | Jana diagram Mermaid/Canvas |
+
+### Contoh: Tetapan yang Optimum dari Segi Kos
+
+```
+Linking: gpt-4o-mini (fast, many calls)
+Concept Generation: claude-sonnet-4-6 (quality extraction)
+Research: gpt-4o (web-grounded)
+Translation: gemini-flash (multilingual)
+Diagram: ollama/llama3.1 (free, local)
+```
+
+### Cara untuk Mengkonfigurasi
+
+1. **Tetapan → Notemd → Tetapan Tugas**
+2. Untuk setiap tugas, pilih:
+   - ✅ **Gunakan penyedia utama** (lazim)
+   - 🔄 **Gunakan penyedia khusus** → pilih penyedia + model
+
+---
+
+## 3. Konfigurasi Keluaran
+
+### Keluaran Nota Konsep
+
+**Tempat nota konsep baru disimpan:**
+
+```
+Settings → Output → Concept Folder
+Default: concepts/
+```
+
+**Templat:**
+```
+Settings → Output → Concept Template
+Default:
+---
+tags: [concept]
+created: {{date}}
+---
+
+# {{concept}}
+
+{{description}}
+
+## Backlinks
+{{backlinks}}
+```
+
+### Pilihan Struktur Folder
+
+**Pilihan 1: Rata (semua konsep dalam satu folder)**
+```
+vault/
+└── concepts/
+    ├── Machine Learning.md
+    ├── Neural Networks.md
+    └── Deep Learning.md
+```
+
+**Pilihan 2: Hierarki (menurut folder sumber)**
+```
+vault/
+├── papers/
+│   └── concepts/
+│       └── Transformer.md
+└── notes/
+    └── concepts/
+        └── Attention Mechanism.md
+```
+
+Konfigurasikan: **Settings → Output → Use Hierarchical Folders**
+
+### Keluaran Diagram
+
+**Tempat diagram disimpan:**
+```
+Settings → Output → Diagram Folder
+Default: diagrams/
+```
+
+**Format:**
+- `.mmd` (Mermaid sumber)
+- `.canvas` (JSON Canvas)
+- `.html` (Vega-Lite)
+
+---
+
+## 4. Tetapan Bahasa
+
+### UI Bahasa
+
+**Bahasa antaramuka** (butang, menu, dialog):
+
+```
+Settings → Language → UI Language
+Options: 21+ languages
+Default: System language
+```
+
+Ditokok: English, 简体中文, 繁體中文, 日本語, 한국어, Español, Français, Deutsch, Русский, العربية, dan lain-lain.
+
+### Bahasa Keluaran
+
+**Bahasa kandungan yang dijana** (nota konsep, ringkasan penyelidikan):
+
+```
+Settings → Language → Output Language
+Options: Same as UI languages
+Default: Same as UI
+```
+
+**Kes penggunaan:** Cina UI + hasil dalam Bahasa Inggeris untuk penyelidikan dwibahasa.
+
+### Sasaran Terjemahan
+
+**Bahasa sasaran lalai** untuk tugas terjemahan:
+
+```
+Settings → Translation → Target Language
+Default: English
+```
+
+---
+
+## 5. Penyepaduan Pencarian
+
+### Tavily (Disyorkan)
+
+**Perkhidmatan pencarian yang dioptimumkan oleh AI:**
+
+```
+Settings → Search → Service: Tavily
+API Key: tvly-...
+```
+
+Dapatkan kunci: [tavily.com](https://tavily.com/)
+
+**Ciri-ciri:**
+- Hasil berkualiti tinggi
+- Ringkasan yang dioptimumkan oleh AI
+- Rujukan sumber
+
+### DuckDuckGo (Eksperimen)
+
+**Tiada kunci API diperlukan:**
+
+```
+Settings → Search → Service: DuckDuckGo
+```
+
+**Nota:** Kualiti lebih rendah, tiada penyesuaian.
+
+---
+
+## 6. Konfigurasi Aliran Kerja
+
+### Mencipta Aliran Kerja Khas
+
+**Aliran kerja menggabungkan beberapa tugas ke dalam satu butang.**
+
+1. **Tetapan → Aliran Kerja → Tambah Aliran Kerja**
+2. **Nama**: "Aliran Analisis Kertas"
+3. **DSL**: `process-current-add-links>extract-concepts-current>research-and-summarize>summarize-as-mermaid`
+4. **Simpan**
+
+Butang baru muncul di sidebar kiri.
+
+### Sintaks DSL
+
+**Format:** `action1>action2>action3`
+
+**Tindakan yang tersedia:**
+- `process-current-add-links` — Tambah pautan wiki ke nota semasa
+- `extract-concepts-current` — Jana nota konsep
+- `research-and-summarize` — Penyelidikan web + ringkasan
+- `translate-current` — Terjemahkan nota semasa
+- `summarize-as-mermaid` — Jana diagram Mermaid
+- `process-folder-add-links` — Proses folder secara berkumpulan
+
+**Contoh Aliran Kerja:**
+
+**Pengeluaran Konsep Cepat:**
+```
+process-current-add-links>extract-concepts-current
+```
+
+**Penyelidikan Mendalam:**
+```
+process-current-add-links>research-and-summarize>extract-concepts-current
+```
+
+**Analisis Pelbagai Bahasa:**
+```
+translate-current>process-current-add-links>extract-concepts-current
+```
+
+---
+
+## 7. Tetapan Lanjutan
+
+### Pemprosesan Secara Pukal
+
+**Proses berbilang fail secara serentak:**
+
+```
+Settings → Advanced → Batch Processing
+Concurrency: 3 (default)
+```
+
+Lebih tinggi = lebih cepat tetapi lebih banyak panggilan API.
+
+### Pembahagian Bijak
+
+**Untuk nota yang panjang, bahagikan kepada bahagian:**
+
+```
+Settings → Advanced → Smart Chunking
+Chunk Size: 2000 words (default)
+Overlap: 200 words (default)
+```
+
+Mengelakkan ralat had token.
+
+### Panel Diagnostik
+
+**Tonton log terperinci:**
+
+```
+Settings → Advanced → Enable Diagnostics
+```
+
+Menunjukkan:
+- API permintaan/jawapan
+- Penggunaan token
+- Masa pemprosesan
+- Ralat
+
+### Pengesanan Konsep Berulang
+
+**Elakkan konsep yang hampir serupa:**
+
+```
+Settings → Advanced → Synonym Suppression
+Threshold: 0.8 (default, 0-1)
+```
+
+Lebih tinggi = penggabungan yang lebih agresif.
+
+---
+
+## Profil Konfigurasi
+
+### Tetapan Eksport/Import
+
+**Kongsi konfigurasi antara peranti:**
+
+1. **Tetapan → Lanjutan → Eksport Konfigurasi**
+2. Menyimpan `notemd-config.json`
+3. Pada peranti baru: **Import Konfigurasi**
+
+**Apa yang termasuk:**
+- Kunci Penyedia API (pilihan)
+- Pemilihan model
+- Laluan keluaran
+- Aliran kerja khusus
+
+---
+
+## Konfigurasi yang disyorkan
+
+### Untuk Pelajar
+
+```
+Provider: OpenAI (gpt-4o-mini)
+Concept Folder: concepts/
+UI Language: System
+Output Language: System
+Workflow: "Study Flow" (add-links>extract-concepts)
+```
+
+### Untuk Penyelidik
+
+```
+Providers:
+  - Linking: DeepSeek (cheap, many calls)
+  - Concepts: Claude Sonnet (high quality)
+  - Research: GPT-4o (web-grounded)
+Concept Folder: notes/concepts/
+Hierarchical: Yes
+Workflow: "Paper Flow" (add-links>extract>research>diagram)
+```
+
+### Untuk Pengguna yang Mengutamakan Privasi
+
+```
+Provider: Ollama (llama3.1)
+All tasks: Local model
+Search: DuckDuckGo (no API)
+Diagnostics: Off
+```
+
+### Untuk Kerja Dua Bahasa
+
+```
+UI Language: Chinese
+Output Language: English
+Translation Target: Chinese
+Provider: Gemini (multilingual)
+```
+
+---
+
+## Penyelesaian Masalah Konfigurasi
+
+### Tetapan Tidak Disimpan
+- Semak kebenaran fail di `.obsidian/plugins/notemd/`
+- Cuba: Nonaktifkan plugin → Aktifkan semula
+
+### Kunci API Tidak Sah
+- Tiada Ruang Tambahan
+- Semak Tempoh Tamat
+- Sahkan Kredit dalam Papan Pemuka Penyedia
+
+### Model Tidak Dimuat
+- Klik "Dapatkan Senarai Model" untuk Memperbaharui
+- Semak Sambungan Rangkaian
+- Cuba Penyedia yang Berbeza
+
+---
+
+## Langkah Seterusnya
+
+- 📖 [Terokai Ciri-ciri](../features/wiki-links)
+- 🔌 [Panduan Tetapan Penyedia](../providers/overview)
+- ❓ [FAQ](../faq)

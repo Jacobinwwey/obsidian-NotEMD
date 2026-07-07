@@ -1,0 +1,67 @@
+---
+id: google
+title: "Google"
+description: "Nastavit Google Gemini"
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [google, gemini, provider, configuration]
+concepts: [Google, Gemini, API Configuration]
+citations:
+  - title: Gemini API
+    url: https://ai.google.dev
+  - title: Google AI Studio
+    url: https://aistudio.google.com
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# Google Provider
+
+<TLDR>
+**Google využívá nativní transport generativního jazyka Gemini API.** Aktuální přednastavení vychází ze `gemini-2.0-flash-exp`, `https://generativelanguage.googleapis.com/v1` a `temperature: 0.5`. Nejedná se o profil kompatibilní s OpenAI.
+
+Toto je součástí [Obsidian Průvodce AI pro správu znalostí](/docs/pillar-ai-knowledge).
+</TLDR>
+
+## Nastavení
+
+Vytvořte klíč Cloud API typu Google AI Studio nebo Google s přístupem k Gemini, přidejte profil poskytovatele `Google` a ponechte nativní základnu generativního jazyka URL. Pro rychlý překlad a široké pracovní postupy s poznámkami použijte výchozí profil Gemini Flash a poté přepněte modely podle úlohy, pokud potřebujete větší nebo schopnější model Gemini.
+
+Vyhýbejte se umisťování ID modelů Gemini do profilu kompatibilního s OpenAI, pokud výslovně nepoužíváte bránu, která zpřístupňuje Gemini prostřednictvím profilu kompatibilního s OpenAI a API.
+
+## Koncový bod a autentizace
+
+| Pole | Aktuální přednastavení |
+|-------|----------------|
+| Transport | `google` |
+| Klíč API | Požadované |
+| Základní URL | `https://generativelanguage.googleapis.com/v1` |
+| Výchozí model | `gemini-2.0-flash-exp` |
+| Teplota | `0.5` |
+| Test spojení | Pouze chat |
+
+Běhový prostředí volá `/models/{model}:generateContent?key={apiKey}`. Klíč je předán jako parametr dotazu, protože tak je nativní koncový bod Gemini v pluginu propojen.
+
+## Objevování modelů
+
+Google využívá režim objevování `google-models`. Objevování by mělo vrátit modely Gemini dostupné pro klíč API; pokud je selektor prázdný, otestujte klíč na stejné základně URL a potvrďte, že je pro daný účet povolena rodina modelů.
+
+Známé limity tokenů výstupu jsou v registru poskytovatelů závislé na modelu. Pokud je dlouhý překlad nebo vysvětlení diagramu zkráceno, vyberte model Gemini s větším podporovaným limitem výstupu nebo snižte požadovanou velikost výstupu.
+
+## Řešení problémů
+
+- `400`: ID modelu obvykle neodpovídá nativní trase Gemini nebo požadavek přesahuje podporovaný formát modelu.
+- `401` nebo `403`: ověřte omezení klíče, aktivaci projektu/API a zda může klíč přistupovat k Gemini.
+- `404`: ID modelu není k dispozici v konfigurované verzi API.
+- Příklady bran selhávají v tomto profilu: použijte místo nativního poskytovatele Google přednastavenou bránu.
+
+## Kdy použít
+
+Použijte Google pro rychlý překlad, úklid velkého množství poznámek a pracovní postupy, kde je poměr nákladů a výkonu Gemini lepší než u přímého použití OpenAI nebo Anthropic. Pro pracovní postupy vyžadující zpracování modelů s rozumovým myšlením kompatibilních s OpenAI preferujte jiného poskytovatele.
+
+---
+
+## Další kroky
+
+- [LLM Providers](/docs/providers/overview) -- Kompletní konfigurace, modely na jednu úlohu a logika opakování
+- [Překlad](/docs/features/translation) -- Pro velké množství překladových úloh se doporučuje Gemini Flash

@@ -1,0 +1,67 @@
+---
+id: anthropic
+title: "Anthropic"
+description: "Konfigoi Anthropic Claude"
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [anthropic, claude, provider, configuration]
+concepts: [Anthropic, Claude, API Configuration]
+citations:
+  - title: Anthropic API
+    url: https://docs.anthropic.com
+  - title: Claude
+    url: https://www.anthropic.com/claude
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# Anthropic Provider
+
+<TLDR>
+**Anthropic käyttää omat Messages API-transportoja, ei OpenAI-sovelluvia transportoja.** Nykyinen asetus vaihtuu automaattisesti `claude-3-5-sonnet-20240620`-, `https://api.anthropic.com`- ja `temperature: 0.5`-. Käsittele sitä erillisen protokollin pinnana ohjelmistovirheiden korjaamisel.
+
+Tämä kuuluu [Obsidian AI-tietojen hallintasuunnitelmaan](/docs/pillar-ai-knowledge).
+</TLDR>
+
+## Asetukset
+
+Luo Anthropic API-avain, lisää `Anthropic`-tarjoajan profiili ja jätä Base URL omalle päätöspisteelle, ilman että käytät erillistä gateway-profiilia. Valitse Claude-mallin ID, jota haluat käyttää mallivalikossa; vaihtoehtoinen asetus säilyttää olemassa olevan tuotteen perustasoinnin stabilina.
+
+Anthropic on suosittu valinta korkealaatuisen yhteenvetön, tutkimusten synteesin ja konsepttien extraktointin tilanteissa. Jos se käytetään yhdessä halvempien tarjoajien kanssa, aseta se vain niille tehtäville, jotka saavat hyöty sen tulostuslaadusta.
+
+## Päätöspiste ja tunnistus
+
+| Poliivi | Nykyinen asetus |
+|-------|----------------|
+| Transporto | `anthropic` |
+| API-avain | Tarvittava |
+| Base URL | `https://api.anthropic.com` |
+| Vaikuttava malli | `claude-3-5-sonnet-20240620` |
+| Tempertatuuri | `0.5` |
+| Yhteystesti | Ainoastaan chat |
+
+Käyttöajalla lähetetään pyytelut `/v1/messages`:hin käyttäen `x-api-key`-ja `anthropic-version: 2023-06-01`-. Älä konfiguroi OpenAI-tyylin `/v1/chat/completions`-päätöspisteä tässä asetuksessa; käytä sijaan OpenAI-sovelluvaa gateway-asetusta.
+
+## Mallien löytö
+
+Anthropic käyttää `anthropic-models`-tukijärjestelmän avastusrežiimiä. Jos tehtävänavainne tai tilisi ei voi listata malleja, säilyttä tunttu mallin ID profiilissa ja vahvista se yhteystestin kautta.
+
+Transportti ei ole vaihtoehto OpenAI-sovelluksellisille tukijille. Claude-malli, joka suunnitetaan OpenRouter, LiteLLM tai toisen käytäntöpöytän kautta, kuuluu siihen käytäntöpöytän profiiliin, ei alkuperäiseen Anthropic-profiiliin.
+
+## Virheiden ratkaiseminen
+
+- `401` tai `403`: kontrolloi tehtävänavainnin päällepanoa, työtilin pääsyä, tilastointia sekä sitä, käykö tehtävänavainne oletetun Anthropic-työtilille.
+- `404`: Alkuperäinen URL on väärin tai valittu mallin ID ei ole tilillä saatavilla.
+- Käytäntöpöytästyylin Claude-mallien ID:t eivät toimi: siirrä profiili sopivaan käytäntöpöytäntukijalle, koska alkuperäinen Anthropic ootaa alkuperäisiä mallinimejä.
+- Pikat pyytökset eivät toimi hiljaisesti: vähentä mallin tulostusmäärää tehtävän kohdalla tai käytä mallia, jolla on suurempi tunttu tulostustoimiston alampi raja.
+
+## Kun käyttää
+
+Käytä Anthropic, kun synteesin laatu, tutkimusnotat tai strukturoitu kirjoitus ovat tärkeämpää kuin raaka hinta. Älä käytä sitä yleisän OpenAI-sovelluksellisen varaukseena; erillinen transportti on tärkeä, ja protokollien sekoittaminen raskentaa diagnoosintaa.
+
+---
+
+## Järguvät toimet
+
+- [LLM Tukijat](/docs/providers/overview) -- Täysin konfigurointi, tehtävänkohdalliset mallit ja uudellepyyntologiikka
+- [Virheiden ratkaiseminen](/docs/advanced/troubleshooting) -- Paranna 401/403-virheet ja yhteyshäiriöt

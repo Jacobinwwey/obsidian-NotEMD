@@ -1,0 +1,184 @@
+---
+id: concept-notes
+title: "Kavram Notları"
+description: "Kavram Notları oluşturun ve yönetin — vault'unuzdan çıkarılan ana kavramlar için bağımsız notlar"
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [concept notes, knowledge extraction, concept folder, deduplication, backlinks]
+concepts: [Concept Notes, Knowledge Graph, LLM Extraction, Deduplication, Backlinks]
+citations:
+  - title: Obsidian
+    url: https://obsidian.md
+  - title: Zettelkasten Method
+    url: https://zettelkasten.de
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# Kavram Notları
+
+<TLDR>
+**Notemd**, notlarınızdan temel kavramları çıkarır ve bağımsız kavram notu dosyaları oluşturur. LLM, temel terimleri belirler, yapılandırılabilir bir klasörde her kavram için bir `.md` dosyası oluşturur ve isteğe bağlı olarak kaynak nota geri bağlantılar ekler. Eşanlamlı kelime engelleme, görev bazlı model seçimi, dosya adı temizleme ve 4 aşamalı tekrar önleme mekanizması gibi özellikleri destekler. Bu özellik, [Obsidian AI Bilgi Yönetimi Kılavuzu](/docs/pillar-ai-knowledge) kapsamındadır.
+</TLDR>
+
+## Genel Bakış
+
+Kavram notları, bağlantılı bir bilgi tabanının temel yapı taşlarıdır. Bir notu işlediğinizde, Notemd:
+
+1. **Metninizi yapılandırılmış bir çıkarma isteğiyle LLM'ya gönderir**
+2. LLM yanıtından **`CONCEPT:` satırını** ayrıştırır
+3. Belirlenen bir klasörde her konsept için bir `.md` dosyası oluşturur.
+4. Kaynak notuna **geri bağlantılar ekler** (etkinleştirildiğinde)
+
+## Nasıl Çalışır
+
+### Çıkarma İşlem Akışı
+
+```
+Source Note → Split into Chunks → LLM per Chunk → Parse CONCEPT: Lines
+    → Deduplicate via Set → Create .md Files → Add Backlinks
+    → (Optional: Generate Log)
+```
+
+### Çıkarma İstemi
+
+LLM, ona şunu yapmasını söyleyen bir komut alır:
+
+- Belgenin konusuna odaklı **isimler veya isim öbekleri** çıkarın
+- **Özgüllüğe öncelik verin** — "Dielectric Relaxation" yerine "Relaxation"
+- **Tekil haline getir** — "models" "model" olur
+- **Alt kavramları bastır** — eğer "dielectric relaxation" görünürse, "relaxation"ı da çıkarmayın
+- **Atla** referans/bibliyografi bölümlerini, yaygın isimleri, şirket/ürün adlarını
+- Her bir kavramı satır başına `CONCEPT: Term Name` olarak çıktılayın
+
+**Eşanlamlı kelime bastırma** (isteğe bağlı): istemin başına "Mümkün olduğunca eşanlamlı kelimeleri, anlamsal olarak benzer temel kavramları veya anahtar kelimeleri çıkarmaktan kaçının" ifadesini ekleyin.
+
+**Odaklanmış öğrenme alanı** (isteğe bağlı): çıkarma işlemini belirli bir disipline sınırlamak için `Relevant Fields: [domain]`'yı istemin başına ekleyin.
+
+**Dil önceliği** (isteğe bağlı): "Çıktıdaki kavramlar MUTLAKA [dil] dilinde olmalıdır." ifadesini ekleyin.
+
+### Bloklandırma
+
+Uzun notlar `settings.chunkWordCount` ile bölünür. Her blok ayrı ayrı gönderilir. Tüm bloklardan gelen kavramlar bir `Set` içinde biriktirilir — bloklar arasındaki tekrarlar sessizce silinir. Tek tek bloklardaki LLM hataları işlemi durdurmaz.
+
+## Kavram Notu Oluşturma
+
+### Dosya Adı Kuralları
+
+| Kural | Davranış |
+|------|----------|
+| Çizgiler/alt çizgiler | Boşluklarla değiştirilir |
+| Özel karakterler | Kaldırılır: ters çizgi, düz çizgi, noktalı virgül, yıldız işareti, soru işareti, tırnak işaretleri, açı köşeli parantezler, boru işareti, hash işareti, caret işareti, köşeli parantezler |
+| Boşluklar | Yok edilir ve düzeltilir |
+| Maksimum uzunluk | 100 karakter (kısaltılmış + tekrar düzenlenmiş) |
+| Boş/tüm noktalı sonuç | Sessizce atlanır |
+
+Örnek: `A-B: Key*Term`, `A B KeyTerm.md` olarak değişir
+
+### Şablonlar
+
+**Tam şablon** (geri bağlantılar etkin, minimum şablon devre dışı):
+
+```markdown
+# Concept Name
+
+## Linked From
+- [[SourceNoteBasename]]
+```
+
+**Minimum şablon** ( `extractConceptsMinimalTemplate: true` olduğunda):
+
+```markdown
+# Concept Name
+```
+
+### Mevcut Notları Güncelleme
+
+Bir kavram dosyası zaten mevcut olduğunda:
+
+1. Eğer geri bağlantılar etkinse ve kaynak not henüz listelenmemişse bir geri bağlantı eklenir
+2. Eğer bir `## Linked From` bölümü varsa, bir sonraki `##` başlığından önce eklenir
+3. Eğer hiç `## Linked From` yoksa, bölüm sona eklenir
+4. Tekrarlayan geri bağlantılar kontrol edilip atlanır
+
+### Yapılandırma
+
+| Ayar | Varsayılan | Etki |
+|---------|---------|--------|
+| `useCustomConceptNoteFolder` | `true` | Anahtar açma/kapama. Kapalı = hiç not oluşturulmaz |
+| `conceptNoteFolder` | `''` (devre dışı) | Kavram notları için klasör yolu |
+| `extractConceptsMinimalTemplate` | `true` | Sadece başlık içeren notlar (Bağlantılı Olmayan) |
+| `extractConceptsAddBacklink` | `false` | Bağımsız çıkarma sırasında geri bağlantı ekle |
+| `extractConceptsProvider` / `extractConceptsModel` | DeepSeek | Kavram çıkarması için görev bazlı LLM |
+| `extractConceptsLanguage` | `'en'` | Kavram adları için çıktı dili |
+| `replaceSynonymsDuringConceptExtraction` | `false` | İstekte eşanlamlı kelime baskılamasını etkinleştir |
+| `generateConceptLogFile` | `false` | Oluşturulan kavramların `.log` listesini yaz |
+
+**Önemli:** `extractConceptsAddBacklink` ve `extractConceptsMinimalTemplate` ayarları yalnızca **özel çıkarma komutunu** etkiler. "Bağlantı Ekle" komutu her zaman geri bağlantılarla tam şablonlu notlar oluşturur.
+
+## Tekillik giderme
+
+Tekillik giderme komutu (`Notemd: Check & remove duplicate concept notes`) 5 adımlı bir analiz yapar:
+
+### Adım 1: Tam dosya adı eşleşmesi
+
+Yapılandırılan kapsam genelinde büyük/küçük harf duyarsız ad tabanı karşılaştırması.
+
+### Adım 2: Çoğul biçim tespiti
+
+Sonekler çıkarılır: `-ies` dan `-y` a, `-es` çıkarılır, `-s` çıkarılır. Tekil biçim kapsam dosyalarıyla karşılaştırılır. Düzensiz çoğullar (children/child) işlenmez.
+
+### Adım 3: Sembol normalizasyonu
+
+Uygulanır: `toLowerCase()`, tireler/karşılıklı çizgiler boşlukla değiştirilir, alfanümerik olmayan karakterler kaldırılır, boşluklar birleştirilir. Aynı şekilde normalleştirilenler işaretlenir.
+
+### Adım 4: Tek Kelime Kapsamı
+
+Tek kelimelik kavram notları, çok kelimelik kapsam dosya adlarıyla karşılaştırılır. Kapsam `concept_folder_only` olduğunda çalıştırılmaz.
+
+### Adım 5: Onay ve Silme
+
+Tüm adaylar bir onay modülünde gösterilir. Onaylanan öğeler sistem çöp kutusuna taşınır. Her silme işlemi arasında işlem iptal edilebilir.
+
+### Kapsam Modları
+
+| Mod | Karşılaştırma Ölçütü |
+|------|-------------------|
+| `vault` (varsayılan) | Kavram klasörü hariç tüm vault `.md` dosyaları |
+| `concept_folder_only` | Klasör içindeki diğer kavram notları |
+| `include` | Belirtilen özel klasörlerdeki dosyalar |
+| `exclude` | Kavram klasörü ve belirtilen klasörler hariç tüm vault dosyaları |
+
+## Kullanım
+
+### Kavramları Çıkarma (Bağımsız)
+
+1. Bir notu açın
+2. Komut paletinden **"Notemd: Kavramları çıkarma"** komutunu çalıştırın
+3. Kavram notları, yapılandırılan klasörde oluşturulur
+
+### İçerik Çıkarma + Oluşturma
+
+**"Notemd: Kavramları çıkarın ve başlıklar oluşturun"** — kavramları çıkarır, ardından kavram klasöründeki her not üzerinde "Başlıktan Oluştur" komutunu çalıştırır. Bu işlem yalnızca yeni oluşturulan notlar için değil, klasördeki **tüm** kavram notları için içerik üretir.
+
+### Seçimden Viki Bağlantısı Oluşturma
+
+1. Düzenleyicide metni vurgula
+2. **"Notemd: Seçimden viki bağlantısı oluşturun"** komutunu çalıştırın
+3. Metin `[[...]]` içinde sarılır ve bir kavram notu oluşturulur
+
+## İpuçları
+
+- **Önce kavram klasörünü belirleyin** — bu ayar yapılmadığında hiçbir not oluşturulmaz. Ayar yapılmamışsa bir uyarı modali görünür.
+- **Görev başına özel modeller kullanın** — kavram çıkarma işlemi daha ucuz modellerle (GPT-4o-mini, DeepSeek) daha iyi sonuç verir. Pahalı modelleri araştırma/çeviri için saklayın.
+- Tek bir kavramı ifade eden birden fazla terim bulunan teknik alanlar için **eşanlamlı kelime bastırma** özelliğini etkinleştirin.
+- **Düzenli olarak tekrarları ortadan kaldırın** — toplu işlemden sonra yakın tekrarları tespit etmek için tekrar ortadan kaldırma komutunu çalıştırın.
+- Her çalıştırmada **günlük dosyası üzerine yazılır**, eklenmez. Önceki sonuçlara ihtiyacınız varsa onu kopyalayın.
+
+---
+
+## Sonraki Adımlar
+
+- [Viki-Linkler](./wiki-links) — Kavramların nasıl doğrudan bağlandığı
+- [Şemalar](./diagrams) — Kavram ilişkilerini görselleştirme
+- [İş Akışları](./workflows) — Çıkarma işlemini diğer görevlerle zincirleme

@@ -1,0 +1,181 @@
+---
+id: quick-start
+title: "Hướng dẫn sử dụng nhanh"
+description: "Bắt đầu sử dụng Notemd trong 5 phút"
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [quick start, tutorial, getting started, first steps]
+concepts: [Quick Start, LLM Configuration, One-Click Workflow, Ollama]
+citations:
+  - title: Obsidian
+    url: https://obsidian.md
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# Hướng dẫn sử dụng nhanh
+
+<TLDR>
+**Bắt đầu sử dụng Notemd trong vòng 5 phút.** Ba bước: (1) Thêm khóa LLM API (hoặc sử dụng Ollama tại chỗ), (2) Mở một ghi chú và chạy lệnh “Xử lý tập tin (thêm liên kết)”, (3) Khám phá các quy trình một cú nhấp chuột trong thanh bên. Hỗ trợ hơn 30 nhà cung cấp. Không cần biết lập trình. Hoạt động ngoại tuyến với Ollama.
+</TLDR>
+
+## Bước 1: Cấu hình nhà cung cấp LLM đầu tiên của bạn (2 phút)
+
+### Tùy chọn A: Nhà cung cấp dịch vụ đám mây (OpenAI, Anthropic, v.v.)
+
+1. Mở **Settings** → **Notemd**
+2. Dưới mục **LLM Cấu hình nhà cung cấp**, hãy chọn một nhà cung cấp từ danh sách thả xuống
+3. Nhập **API Key** của bạn
+4. (Tùy chọn) Nhấp vào **“Get Model List”** để xem các mô hình có sẵn
+5. Chọn một mô hình cho mỗi loại nhiệm vụ
+
+**Các lựa chọn phổ biến:**
+- **OpenAI**: `gpt-4o-mini` (nhanh, giá cả phải chăng)
+- **Anthropic**: `claude-sonnet-4-6` (chất lượng cao)
+- **DeepSeek**: `deepseek-chat` (rất phải chăng)
+
+### Tùy chọn B: Địa phương Ollama (Không cần khóa API)
+
+1. Cài đặt [Ollama](https://ollama.com/)
+2. Tải mô hình: `ollama pull llama3.1`
+3. Trong cài đặt Notemd, chọn **"Ollama"** làm nhà cung cấp
+4. Tên mô hình: `llama3.1` (hoặc bất kỳ mô hình nào bạn đã tải)
+
+## Bước 2: Thử nghiệm nhiệm vụ đầu tiên (1 phút)
+
+### Thêm liên kết Wiki vào ghi chú
+
+1. Mở bất kỳ ghi chú nào có nội dung có ý nghĩa
+2. Nhấp chuột phải trong trình soạn thảo
+3. Chọn **"Xử lý tập tin (thêm liên kết)"**
+4. Chờ vài giây
+5. Các khái niệm chính giờ đây đã được `[[wiki-linked]]`!
+
+**Ví dụ:**
+
+**Trước khi xử lý:**
+```
+Machine learning models use neural networks to process data.
+```
+
+**Sau khi xử lý:**
+```
+[[Machine learning]] models use [[neural networks]] to process data.
+```
+
+## Bước 3: Khám phá các tính năng (2 phút)
+
+### Trích xuất ghi chú khái niệm
+
+1. Nhấp chuột phải → **"Trích xuất khái niệm từ tập tin hiện tại"**
+2. Notemd tạo ra các tập tin riêng biệt cho mỗi khái niệm
+3. Kiểm tra thư mục khái niệm đã cấu hình (mặc định: `concepts/`)
+4. Mỗi ghi chú khái niệm đều có liên kết ngược đến ghi chú gốc của bạn
+
+### Nghiên cứu và tóm tắt
+
+1. Đánh dấu một chủ đề trong ghi chú của bạn
+2. Nhấp chuột phải → **"Nghiên cứu và tóm tắt"**
+3. Notemd thực hiện tìm kiếm trên web (Tavily hoặc DuckDuckGo)
+4. Bản tóm tắt được thêm vào ghi chú của bạn kèm theo nguồn tài liệu
+
+### Các quy trình một cú nhấp
+
+1. Kiểm tra **thanh bên trái** để tìm các nút quy trình
+2. Nhấp **"Trích xuất một cú nhấp"** trên bất kỳ ghi chú nào
+3. Nó sẽ thực hiện: thêm liên kết → trích xuất khái niệm → nghiên cứu → tạo sơ đồ
+4. Tất cả chỉ trong một cú nhấp!
+
+## Các nhiệm vụ phổ biến ban đầu
+
+### Nhiệm vụ 1: Xử lý bài báo/khóa luận
+
+```
+1. Paste article content into a note
+2. Run "Process file (add links)"
+3. Run "Extract concepts"
+4. Run "Research and summarize" on unfamiliar terms
+5. Run "Summarize as Mermaid diagram" for visual structure
+```
+
+### Nhiệm vụ 2: Dịch ghi chú
+
+```
+1. Highlight text to translate
+2. Right-click → "Translate to target language"
+3. Set target language in settings first
+```
+
+### Nhiệm vụ 3: Tạo bản đồ kiến thức
+
+```
+1. Process 5-10 related notes with "add links"
+2. Run "Extract concepts" on each
+3. Open Graph view to see connections
+4. Your knowledge graph is forming!
+```
+
+## Mẹo tùy chỉnh
+
+### Lựa chọn mô hình theo nhiệm vụ
+
+Bạn có thể sử dụng các mô hình khác nhau cho các nhiệm vụ khác nhau:
+
+| Nhiệm vụ | Mô hình được khuyến nghị | Lý do |
+|------|------------------|-----|
+| Thêm liên kết | `gpt-4o-mini`, `deepseek-chat` | Nhanh, nhiều cuộc gọi |
+| Trích xuất khái niệm | `claude-sonnet-4-6`, `gpt-4o` | Trích xuất chất lượng cao |
+| Nghiên cứu | `perplexity`, `gpt-4o` | Dựa trên web |
+| Dịch thuật | `gemini-flash`, `gpt-4o` | Đa ngôn ngữ |
+| Sơ đồ | `claude-opus`, mô hình địa phương | Lý luận phức tạp |
+
+Cấu hình tại: **Settings → Notemd → Task-Specific Models**
+
+### Các công việc tự định nghĩa
+
+Tạo nút riêng của bạn:
+
+1. Settings → Notemd → Workflows
+2. Nhấp vào "Add Workflow"
+3. Nhập DSL: `process-current-add-links>extract-concepts-current>research-and-summarize`
+4. Đặt tên: "My Research Flow"
+5. Một nút mới xuất hiện ở thanh bên
+
+## Khắc phục sự cố
+
+### "API Key Invalid"
+- Kiểm tra xem khóa có chính xác không (không có khoảng trắng thừa)
+- Xác nhận tài khoản có điểm kredit
+- Thử với nút "Connection Test" trong phần cài đặt
+
+### "Model Not Found"
+- Nhấn "Get Model List" để xem các mô hình có sẵn
+- Một số nhà cung cấp yêu cầu tên mô hình cụ thể (ví dụ: `gpt-4o` chứ không phải `gpt-4`)
+
+### Các liên kết không hiển thị
+- Đảm bảo ghi chú có đủ nội dung (>50 từ)
+- Thử sử dụng mô hình mạnh hơn
+- Kiểm tra xem cuộc gọi LLM có thành công hay không (xem bảng chẩn đoán)
+
+### Hiệu suất chậm
+- Sử dụng các mô hình nhanh hơn (`gpt-4o-mini` thay vì `gpt-4o`)
+- Giảm kích thước từng phần trong phần cài đặt
+- Kích hoạt xử lý song song cho các tác vụ theo nhóm
+
+## Các bước tiếp theo
+
+- 📖 [Khám phá tất cả các tính năng](../features/wiki-links)
+- ⚙️ [Cấu hình nâng cao](./configuration)
+- 🔧 [Thiết lập nhà cung cấp LLM](../providers/overview)
+- ❓ [Hỏi đáp](../faq)
+
+## Hướng dẫn video
+
+Xem video hướng dẫn nhanh 3 phút (tiếng Trung):
+[【Hoàn toàn mã nguồn mở và miễn phí! NotEMD hướng dẫn nhanh 3 phút】](https://b23.tv/lqR0RlA)
+
+## Nhận trợ giúp
+
+- 💬 **Discord**: [discord.gg/qnGgsQ9W](https://discord.gg/qnGgsQ9W)
+- 🐛 **Vấn đề**: [GitHub Issues](https://github.com/Jacobinwwey/obsidian-NotEMD/issues)
+- 📚 **Tài liệu**: [Tài liệu đầy đủ](https://jacobinwwey.github.io/obsidian-NotEMD/)

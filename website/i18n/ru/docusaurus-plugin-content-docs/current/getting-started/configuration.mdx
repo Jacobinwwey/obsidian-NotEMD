@@ -1,0 +1,435 @@
+---
+id: configuration
+title: "Конфигурация"
+description: "Настройка параметров и предпочтений Notemd"
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [configuration, settings, customization, preferences]
+concepts: [Configuration, Per-Task Models, Output Paths, Custom Workflows]
+citations:
+  - title: Obsidian
+    url: https://obsidian.md
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# Конфигурация
+
+<TLDR>
+**Конфигурация Notemd охватывает 6 основных областей:** (1) поставщики LLM и ключи API, (2) выбор модели для каждой задачи, (3) пути сохранения и шаблоны вывода, (4) язык UI и язык вывода, (5) сервисы поиска (Tavily/DuckDuckGo), (6) пользовательские рабочие процессы. Все настройки находятся в разделе Obsidian Settings → Notemd. Изменения вступают в силу немедленно.
+</TLDR>
+
+## Обзор настроек
+
+Доступ: **Obsidian Settings (⚙️) → Notemd**
+
+### Основные разделы
+
+1. **Настройка поставщика** — ключи API, базовые URLs, модели
+2. **Настройки задачи** — выбор модели для каждой задачи
+3. **Настройка вывода** — место сохранения генерируемых файлов
+4. **Настройки языка** — UI и язык вывода
+5. **Интеграция поиска** — настройка Tavily/DuckDuckGo
+6. **Рабочие процессы** — пользовательские цепочки кнопок
+7. **Расширенные настройки** — диагностика, пакетная обработка, разбиение на части
+
+---
+
+## 1. Настройка поставщика
+
+### Добавление поставщика
+
+1. **Выберите поставщика** из выпадающего списка (более 30 доступных)
+2. **Введите ключ API**
+3. **Необязательно**: укажите собственную базу URL (для прокси/шлюзов)
+4. **Нажмите "Получить список моделей"**, чтобы проверить подключение
+5. **Выберите стандартную модель**
+
+### Распространённые поставщики
+
+#### OpenAI
+```
+Provider: OpenAI
+API Key: sk-...
+Base URL: https://api.openai.com/v1 (default)
+Model: gpt-4o-mini
+```
+
+#### Anthropic (Claude)
+```
+Provider: Anthropic
+API Key: sk-ant-...
+Model: claude-sonnet-4-6
+```
+
+#### Ollama (Локальный)
+```
+Provider: Ollama
+Base URL: http://localhost:11434 (default)
+Model: llama3.1
+API Key: (not required)
+```
+
+#### DeepSeek
+```
+Provider: DeepSeek
+API Key: sk-...
+Model: deepseek-chat
+```
+
+### Множественные поставщики
+
+Вы можете настроить несколько поставщиков и переключаться между ними для каждой задачи:
+- **Основной поставщик**: используется в качестве резерва
+- **Поставщики, специфичные для задачи**: заменяются для конкретных задач
+
+---
+
+## 2. Модели, специфичные для задачи
+
+Настройте разные модели для разных задач, чтобы оптимизировать стоимость/качество:
+
+### Типы задач
+
+| Задача | Стандартная модель | Цель |
+|------|--------------|---------|
+| **Создание ссылок** | Основной поставщик | Идентификация концепций для ссылок вики |
+| **Генерация концепций** | Основной поставщик | Извлекать и описывать концепции |
+| **Исследования** | Основной поставщик | Кратко обобщать результаты поиска в интернете |
+| **Перевод** | Основной поставщик | Переводить текст |
+| **Генерация диаграмм** | Основной поставщик | Генерировать диаграммы Mermaid/Canvas |
+
+### Пример: Оптимизированная конфигурация с точки зрения затрат
+
+```
+Linking: gpt-4o-mini (fast, many calls)
+Concept Generation: claude-sonnet-4-6 (quality extraction)
+Research: gpt-4o (web-grounded)
+Translation: gemini-flash (multilingual)
+Diagram: ollama/llama3.1 (free, local)
+```
+
+### Как настроить
+
+1. **Настройки → Notemd → Настройки задачи**
+2. Для каждой задачи выберите:
+   - ✅ **Использовать основной поставщик** (по умолчанию)
+   - 🔄 **Использовать пользовательского поставщика** → выбрать поставщика + модель
+
+---
+
+## 3. Настройки вывода
+
+### Вывод заметок о концепциях
+
+**Где сохраняются новые заметки с концепциями:**
+
+```
+Settings → Output → Concept Folder
+Default: concepts/
+```
+
+**Шаблон:**
+```
+Settings → Output → Concept Template
+Default:
+---
+tags: [concept]
+created: {{date}}
+---
+
+# {{concept}}
+
+{{description}}
+
+## Backlinks
+{{backlinks}}
+```
+
+### Варианты структуры папок
+
+**Вариант 1: Плоская (все концепции в одной папке)**
+```
+vault/
+└── concepts/
+    ├── Machine Learning.md
+    ├── Neural Networks.md
+    └── Deep Learning.md
+```
+
+**Вариант 2: Иерархическая (по исходной папке)**
+```
+vault/
+├── papers/
+│   └── concepts/
+│       └── Transformer.md
+└── notes/
+    └── concepts/
+        └── Attention Mechanism.md
+```
+
+Настройка: **Параметры → Результат → Использовать иерархические папки**
+
+### Результат в виде диаграмм
+
+**Где сохраняются диаграммы:**
+```
+Settings → Output → Diagram Folder
+Default: diagrams/
+```
+
+**Формат:**
+- `.mmd` (Mermaid источник)
+- `.canvas` (JSON Canvas)
+- `.html` (Vega-Lite)
+
+---
+
+## 4. Настройки языка
+
+### UI Язык
+
+**Язык интерфейса** (кнопки, меню, диалоговые окна):
+
+```
+Settings → Language → UI Language
+Options: 21+ languages
+Default: System language
+```
+
+Поддерживаемые языки: английский, 简体中文, 繁體中文, 日本語, 한국어, Español, Français, Deutsch, Русский, العربية и другие.
+
+### Язык вывода
+
+**Язык генерируемого контента** (концептуальные заметки, краткие обзоры исследований):
+
+```
+Settings → Language → Output Language
+Options: Same as UI languages
+Default: Same as UI
+```
+
+**Сценарий использования:** китайский UI + английский вывод для двуязычных исследований.
+
+### Цель перевода
+
+**Стандартный язык цели** для задач перевода:
+
+```
+Settings → Translation → Target Language
+Default: English
+```
+
+---
+
+## 5. Интеграция с поиском
+
+### Tavily (рекомендуется)
+
+**Сервис поиска, оптимизированный для ИИ:**
+
+```
+Settings → Search → Service: Tavily
+API Key: tvly-...
+```
+
+Ключ получения: [tavily.com](https://tavily.com/)
+
+**Особенности:**
+- Высококачественные результаты
+- Резюме, оптимизированные для ИИ
+- Цитаты из источников
+
+### DuckDuckGo (экспериментально)
+
+**Ключ API не требуется:**
+
+```
+Settings → Search → Service: DuckDuckGo
+```
+
+**Примечание:** ниже качество, отсутствует настройка.
+
+---
+
+## 6. Настройка рабочего процесса
+
+### Создание пользовательских рабочих процессов
+
+**Рабочие процессы объединяют несколько задач в одну кнопку.**
+
+1. **Настройки → Рабочие процессы → Добавить рабочий процесс**
+2. **Имя**: "Анализ документа"
+3. **DSL**: `process-current-add-links>extract-concepts-current>research-and-summarize>summarize-as-mermaid`
+4. **Сохранить**
+
+Новая кнопка появляется в левой панели.
+
+### Синтаксис DSL
+
+**Формат:** `action1>action2>action3`
+
+**Доступные действия:**
+- `process-current-add-links` — Добавить ссылки на wiki в текущую запись
+- `extract-concepts-current` — Сгенерировать концептуальные заметки
+- `research-and-summarize` — Исследование в интернете + краткое резюме
+- `translate-current` — Перевести текущую запись
+- `summarize-as-mermaid` — Сгенерировать диаграмму Mermaid
+- `process-folder-add-links` — Обработка папки пакетно
+
+**Примеры рабочих процессов:**
+
+**Быстрое извлечение концепций:**
+```
+process-current-add-links>extract-concepts-current
+```
+
+**Глубокое исследование:**
+```
+process-current-add-links>research-and-summarize>extract-concepts-current
+```
+
+**Мультиязычный анализ:**
+```
+translate-current>process-current-add-links>extract-concepts-current
+```
+
+---
+
+## 7. Расширенные настройки
+
+### Пакетная обработка
+
+**Обработка нескольких файлов параллельно:**
+
+```
+Settings → Advanced → Batch Processing
+Concurrency: 3 (default)
+```
+
+Чем выше значение, тем быстрее работа, но увеличивается количество API вызовов.
+
+### Умное разбиение на части
+
+**Для длинных заметок: разделите их на части:**
+
+```
+Settings → Advanced → Smart Chunking
+Chunk Size: 2000 words (default)
+Overlap: 200 words (default)
+```
+
+Предотвращает ошибки из-за ограничения количества токенов.
+
+### Панель диагностики
+
+**Просмотр подробных логов:**
+
+```
+Settings → Advanced → Enable Diagnostics
+```
+
+Отображает следующее:
+- API запросов/ответов
+- Использование токенов
+- Время обработки
+- Ошибки
+
+### Обнаружение дублирующихся концепций
+
+**Избегайте почти одинаковых концепций:**
+
+```
+Settings → Advanced → Synonym Suppression
+Threshold: 0.8 (default, 0-1)
+```
+
+Чем выше значение, тем агрессивнее происходит слияние.
+
+---
+
+## Профили конфигурации
+
+### Экспорт/импорт настроек
+
+**Обмен конфигурациями между устройствами:**
+
+1. **Настройки → Расширенные → Экспорт конфигурации**
+2. Сохраняет `notemd-config.json`
+3. На новом устройстве: **Импорт конфигурации**
+
+**Что входит в комплект:**
+- Ключи провайдера API (необязательно)
+- Выбор моделей
+- Пути вывода
+- Персонализированные рабочие процессы
+
+---
+
+## Рекомендуемые конфигурации
+
+### Для студентов
+
+```
+Provider: OpenAI (gpt-4o-mini)
+Concept Folder: concepts/
+UI Language: System
+Output Language: System
+Workflow: "Study Flow" (add-links>extract-concepts)
+```
+
+### Для исследователей
+
+```
+Providers:
+  - Linking: DeepSeek (cheap, many calls)
+  - Concepts: Claude Sonnet (high quality)
+  - Research: GPT-4o (web-grounded)
+Concept Folder: notes/concepts/
+Hierarchical: Yes
+Workflow: "Paper Flow" (add-links>extract>research>diagram)
+```
+
+### Для пользователей, заботящихся о конфиденциальности
+
+```
+Provider: Ollama (llama3.1)
+All tasks: Local model
+Search: DuckDuckGo (no API)
+Diagnostics: Off
+```
+
+### Для двуязычной работы
+
+```
+UI Language: Chinese
+Output Language: English
+Translation Target: Chinese
+Provider: Gemini (multilingual)
+```
+
+---
+
+## Устранение неполадок конфигурации
+
+### Настройки не сохраняются
+- Проверьте права доступа к файлу в `.obsidian/plugins/notemd/`
+- Попробуйте: отключить плагин → снова включить
+
+### Ключ API недействителен
+- Нет лишних пробелов
+- Проверьте срок действия
+- Проверьте кредиты на панели управления провайдера
+
+### Модели не загружаются
+- Нажмите «Получить список моделей», чтобы обновить
+- Проверьте подключение к сети
+- Попробуйте другого провайдера
+
+---
+
+## Следующие шаги
+
+- 📖 [Изучить функции](../features/wiki-links)
+- 🔌 [Руководства по настройке провайдера](../providers/overview)
+- ❓ [FAQ](../faq)

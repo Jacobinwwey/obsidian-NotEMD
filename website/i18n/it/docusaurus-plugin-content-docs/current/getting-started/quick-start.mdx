@@ -1,0 +1,181 @@
+---
+id: quick-start
+title: "Guida di avvio rapido"
+description: "Inizia a utilizzare Notemd in 5 minuti"
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [quick start, tutorial, getting started, first steps]
+concepts: [Quick Start, LLM Configuration, One-Click Workflow, Ollama]
+citations:
+  - title: Obsidian
+    url: https://obsidian.md
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# Guida di avvio rapido
+
+<TLDR>
+**Inizia a usare Notemd in 5 minuti.** Tre passaggi: (1) Aggiungi una chiave LLM API (oppure usa Ollama locale), (2) Apri una nota e esegui "Process file (add links)", (3) Esplora i flussi di lavoro con un clic nel pannello laterale. Supporta più di 30 fornitori. Nessuna conoscenza di programmazione richiesta. Funziona offline con Ollama.
+</TLDR>
+
+## Passo 1: Configura il tuo primo fornitore LLM (2 min)
+
+### Opzione A: Fornitore cloud (OpenAI, Anthropic, ecc.)
+
+1. Apri **Impostazioni** → **Notemd**
+2. Nella sezione **Configurazione del fornitore LLM**, seleziona un fornitore dal menu a tendina
+3. Inserisci la tua **Chiave API**
+4. (Opzionale) Clicca su **"Otteni elenco modelli"** per visualizzare i modelli disponibili
+5. Scegli un modello per ogni tipo di attività
+
+**Scelte popolari:**
+- **OpenAI**: `gpt-4o-mini` (veloce, economico)
+- **Anthropic**: `claude-sonnet-4-6` (alta qualità)
+- **DeepSeek**: `deepseek-chat` (molto economico)
+
+### Opzione B: Ollama locale (non è necessaria la chiave API)
+
+1. Installare [Ollama](https://ollama.com/)
+2. Scaricare un modello: `ollama pull llama3.1`
+3. Nelle impostazioni di Notemd, selezionare **"Ollama"** come fornitore
+4. Nome del modello: `llama3.1` (o qualsiasi modello scaricato)
+
+## Passo 2: Provare il primo compito (1 minuto)
+
+### Aggiungere link Wiki a una nota
+
+1. Aprire qualsiasi nota con contenuto significativo
+2. Clic destro nell'editor
+3. Selezionare **"Elabora file (aggiungi link)"**
+4. Aspettare alcuni secondi
+5. I concetti chiave sono ora `[[wiki-linked]]`!
+
+**Esempio:**
+
+**Prima:**
+```
+Machine learning models use neural networks to process data.
+```
+
+**Dopo:**
+```
+[[Machine learning]] models use [[neural networks]] to process data.
+```
+
+## Passo 3: Esplorare le funzionalità (2 min)
+
+### Estrai note sui concetti
+
+1. Clic destro → **"Estrai concetti dal file attuale"**
+2. Notemd crea file separati per ciascun concetto
+3. Verifica la cartella dei concetti configurata (predefinita: `concepts/`)
+4. Ogni nota sui concetti contiene un link di ritorno alla nota originale
+
+### Ricerca e riassunto
+
+1. Seleziona un argomento nella tua nota
+2. Clic destro → **"Ricerca e riassumi"**
+3. Notemd effettua ricerche sul web (Tavily o DuckDuckGo)
+4. Riepilogo aggiunto alla tua nota con le fonti
+
+### Flussi di lavoro con un clic
+
+1. Controlla la **barra laterale sinistra** per i pulsanti dei flussi di lavoro
+2. Clicca su **"Estrai con un clic"** su qualsiasi nota
+3. Esegue: aggiungi link → estrai concetti → fai ricerche → genera un diagramma
+4. Tutto in un solo clic!
+
+## Compiti principali comuni
+
+### Compito 1: Elaborare un articolo/saggio
+
+```
+1. Paste article content into a note
+2. Run "Process file (add links)"
+3. Run "Extract concepts"
+4. Run "Research and summarize" on unfamiliar terms
+5. Run "Summarize as Mermaid diagram" for visual structure
+```
+
+### Compito 2: Tradurre le note
+
+```
+1. Highlight text to translate
+2. Right-click → "Translate to target language"
+3. Set target language in settings first
+```
+
+### Compito 3: Creare una mappa delle conoscenze
+
+```
+1. Process 5-10 related notes with "add links"
+2. Run "Extract concepts" on each
+3. Open Graph view to see connections
+4. Your knowledge graph is forming!
+```
+
+## Consigli per la personalizzazione
+
+### Selezione del modello per attività
+
+Puoi utilizzare modelli diversi per compiti diversi:
+
+| Compito | Modello consigliato | Perché |
+|------|------------------|-----|
+| Aggiungi link | `gpt-4o-mini`, `deepseek-chat` | Velocità, molte chiamate |
+| Estrai concetti | `claude-sonnet-4-6`, `gpt-4o` | Estrazione di qualità |
+| Ricerca | `perplexity`, `gpt-4o` | Basato sul web |
+| Traduzione | `gemini-flash`, `gpt-4o` | Multilingue |
+| Diagrammi | `claude-opus`, modello locale | Ragionamento complesso |
+
+Configura in: **Impostazioni → Notemd → Modelli specifici per attività**
+
+### Flussi di lavoro personalizzati
+
+Crea il tuo pulsante personalizzato:
+
+1. Impostazioni → Notemd → Flussi di lavoro
+2. Clicca su "Aggiungi flusso di lavoro"
+3. Inserisci DSL: `process-current-add-links>extract-concepts-current>research-and-summarize`
+4. Dagli un nome: "My Research Flow"
+5. Un nuovo pulsante appare nella barra laterale
+
+## Risoluzione dei problemi
+
+### "Chiave API non valida"
+- Verifica che la chiave sia corretta (nessun spazio in più)
+- Assicurati che il conto abbia crediti
+- Testa con il pulsante "Test di connessione" nelle impostazioni
+
+### "Modello non trovato"
+- Clicca su "Elenco modelli" per visualizzare i modelli disponibili
+- Alcuni fornitori richiedono nomi di modello specifici (ad esempio, `gpt-4o` e non `gpt-4`)
+
+### I link non appaiono
+- Assicurarsi che la nota contenga abbastanza contenuto (>50 parole)
+- Provare un modello più potente
+- Verificare se la chiamata a LLM è riuscita (vedi pannello diagnostico)
+
+### Performance lenta
+- Utilizzare modelli più veloci (`gpt-4o-mini` invece di `gpt-4o`)
+- Ridurre le dimensioni del blocco nelle impostazioni
+- Abilitare il processing parallelo per i task in batch
+
+## Prossimi passi
+
+- 📖 [Esplorare tutte le funzionalità](../features/wiki-links)
+- ⚙️ [Configurazione avanzata](./configuration)
+- 🔧 [Impostazione del fornitore LLM](../providers/overview)
+- ❓ [FAQ](../faq)
+
+## Video Tutorial
+
+Guarda il video introduttivo di 3 minuti (cinese):
+[【Completamente open source e gratuito! NotEMD guida rapida in 3 minuti】](https://b23.tv/lqR0RlA)
+
+## Ottenere assistenza
+
+- 💬 **Discord**: [discord.gg/qnGgsQ9W](https://discord.gg/qnGgsQ9W)
+- 🐛 **Problemi**: [GitHub Issues](https://github.com/Jacobinwwey/obsidian-NotEMD/issues)
+- 📚 **Documentazione**: [Full Documentation](https://jacobinwwey.github.io/obsidian-NotEMD/)

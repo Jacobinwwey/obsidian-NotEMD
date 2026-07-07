@@ -1,0 +1,189 @@
+---
+id: overview
+title: "ผู้ให้บริการ LLM"
+description: "กำหนดค่าผู้ให้บริการ LLM จำนวน 36 ราย — ทั้งแบบคลาวด์, เกตเวย์ และแบบท้องถิ่น — พร้อมการเลือกโมเดลตามแต่ละงาน"
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [LLM providers, API, OpenAI, Anthropic, Google, DeepSeek, Qwen, Ollama, per-task model]
+concepts: [LLM Integration, API Providers, Per-Task Models, OpenAI Compatible, Ollama, China Providers]
+citations:
+  - title: OpenAI API
+    url: https://platform.openai.com
+  - title: Anthropic API
+    url: https://docs.anthropic.com
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# ผู้ให้บริการ LLM
+
+<TLDR>
+**Notemd รองรับผู้ให้บริการ LLM จำนวน 36 รายใน 4 ประเภทการส่งข้อมูล** การเรียกใช้งานทั้งหมด API จะใช้ HTTP แบบดิบ (ไม่ใช้ SDK) พร้อมการพยายามใหม่โดยอัตโนมัติ, การสลับวิธีการส่งข้อมูล และการเก็บค่าตอบกลับไว้เป็นเวลา 5 นาที การเลือกโมเดลตามแต่ละงานช่วยให้คุณสามารถใช้โมเดลราคาถูกสำหรับการสกัดแนวคิดและโมเดลที่ทรงพลังสำหรับการวิจัยได้ ไม่จำเป็นต้องมีคีย์ API สำหรับผู้ให้บริการแบบท้องถิ่น (Ollama, LMStudio)
+</TLDR>
+
+นี่เป็นส่วนหนึ่งของ [Obsidian คู่มือการจัดการความรู้ด้วย AI](/docs/pillar-ai-knowledge)
+
+## หมวดหมู่ของผู้ให้บริการ
+
+### ผู้ให้บริการคลาวด์
+
+| ผู้ให้บริการ | ค่าเริ่มต้นของ URL | โมเดลเริ่มต้น | Temperature |
+|----------|-----------------|---------------|-------------|
+| **DeepSeek** | `api.deepseek.com` | `deepseek-v4-pro` | 0.5 |
+| **OpenAI** | `api.openai.com/v1` | `gpt-4o` | 0.5 |
+| **Anthropic** | `api.anthropic.com` | `claude-3-5-sonnet-20240620` | 0.5 |
+| **Google** | `generativelanguage.googleapis.com/v1` | `gemini-2.0-flash-exp` | 0.5 |
+| **Mistral** | `api.mistral.ai/v1` | `mistral-large-latest` | 0.5 |
+| **xAI** | `api.x.ai/v1` | `grok-4` | 0.7 |
+| **Cerebras** | `api.cerebras.ai/v1` | `gpt-oss-120b` | 0.5 |
+| **Fireworks** | `api.fireworks.ai/inference/v1` | `kimi-k2p5` | 0.5 |
+| **Nebius** | `api.studio.nebius.com/v1` | `openai/gpt-oss-120b` | 0.3 |
+
+### ผู้ให้บริการเกตเวย์/พร็อกซี่
+
+| ผู้ให้บริการ | ค่าเริ่มต้นของ URL | โมเดลเริ่มต้น | หมายเหตุ |
+|----------|-----------------|---------------|-------|
+| **OpenRouter** | `openrouter.ai/api/v1` | `anthropic/claude-3.7-sonnet` | เพิ่มหัวเรื่อง `HTTP-Referer` + `X-Title` |
+| **GitHub Models** | `models.github.ai/inference` | `gpt-4o-mini` | เพิ่มหัวเรื่อง `X-GitHub-Api-Version` |
+| **AIHubMix** | `aihubmix.com/v1` | `gpt-4o-mini` | เพิ่มหัวเรื่อง `APP-Code` |
+| **PPIO** | `api.ppinfra.com/v3/openai` | `qwen/qwen3-32b` | |
+| **Hugging Face** | `router.huggingface.co/v1` | `openai/gpt-oss-120b` | |
+| **Vercel AI Gateway** | `ai-gateway.vercel.sh/v1` | `anthropic/claude-sonnet-4.5` | |
+| **Requesty** | `router.requesty.ai/v1` | `anthropic/claude-3-7-sonnet-latest` | |
+| **Together** | `api.together.xyz/v1` | `meta-llama/Meta-Llama-3.1-70B-Instruct-Turbo` | |
+| **LiteLLM** | `localhost:4000/v1` | `your-proxy-model` | คีย์ที่สามารถเลือกใช้ได้ API |
+| **New API** | `localhost:3000/v1` | `gpt-4.1` | คีย์ที่สามารถเลือกใช้ได้ API |
+| **OpenAI Compatible** | (user-configured) | `your-model-id` | จุดปลายทางที่กำหนดเอง |
+
+### ผู้ให้บริการจากประเทศจีน
+
+| ผู้ให้บริการ | Base URL แบบเริ่มต้น | โมเดลเริ่มต้น | หมายเหตุ |
+|----------|-----------------|---------------|-------|
+| **Qwen** | `dashscope.aliyuncs.com/compatible-mode/v1` | `qwen3-235b-a22b` | Alibaba DashScope |
+| **Qwen Code** | `dashscope.aliyuncs.com/compatible-mode/v1` | `qwen3-coder-plus` | เน้นการเขียนโค้ด |
+| **Doubao** | `ark.cn-beijing.volces.com/api/v3` | (ต้องมี ID จุดสิ้นสุด) | ByteDance Volcengine |
+| **Moonshot** | `api.moonshot.cn/v1` | `kimi-k2-0905-preview` | Kimi |
+| **Xiaomi MiMo** | `api.xiaomimimo.com/v1` | `mimo-v2.5-pro` | |
+| **GLM** | `open.bigmodel.cn/api/paas/v4` | `glm-5` | จุดปลายทางในประเทศจีน Zhipu |
+| **Z AI** | `api.z.ai/api/paas/v4` | `glm-5` | จิปู, จุดปลายทางระดับนานาชาติ |
+| **MiniMax** | `api.minimaxi.com/v1` | `MiniMax-M2.7` | |
+| **Baidu Qianfan** | `qianfan.baidubce.com/v2` | `ernie-4.5-turbo-32k` | |
+| **SiliconFlow** | `api.siliconflow.cn/v1` | `Qwen/QwQ-32B` | แพลตฟอร์มโฮสต์โมเดล |
+| **Huawei Cloud MaaS** | `api.modelarts-maas.com/v1` | `DeepSeek-V3` | |
+
+**Doubao ต้องการหมายเลขจุดปลายทาง Ark** (รูปแบบ: `ep-xxxxxxxx-xxxx-xxxx`) ต้องแทนที่ค่า placeholder ดีฟอลต์ให้หมด.
+
+### ผู้ให้บริการในท้องถิ่น
+
+| ผู้ให้บริการ | Base ดีฟอลต์ URL | โมเดลเริ่มต้น | หมายเหตุ |
+|----------|-----------------|---------------|-------|
+| **Ollama** | `localhost:11434/api` | `llama3` | ไม่มีคีย์ API การสตรีม NDJSON การค้นหาโมเดลผ่าน `/api/tags` |
+| **LMStudio** | `localhost:1234/v1` | `local-model` | ส่ง `"EMPTY"` เป็น bearer token การค้นหาที่รองรับ OpenAI |
+| **OVMS** | `localhost:8000/v3` | `openvino-model` | OpenVINO Model Server |
+| **Azure OpenAI** | (ตั้งค่าโดยผู้ใช้) | `gpt-4o` | ชื่อการจัดจำหน่ายใน URL หัวข้อ `api-key` |
+
+## การเลือกโมเดลตามงาน
+
+Notemd รองรับผู้ให้บริการและโมเดลที่แยกจากกันสำหรับแต่ละงาน สามารถเปิดใช้งานได้ด้วย `useMultiModelSettings: true`.
+
+### งานที่มีให้บริการ
+
+| งาน | คีย์การตั้งค่า | ผู้ให้บริการเริ่มต้น |
+|------|-------------|-----------------|
+| เพิ่มลิงก์ (การแทรกลิงก์วิกิ) | `addLinksProvider` / `addLinksModel` | DeepSeek |
+| การค้นคว้า (ค้นหาบนเว็บ + สรุปผล) | `researchProvider` / `researchModel` | DeepSeek |
+| สร้างจากชื่อ | `generateTitleProvider` / `generateTitleModel` | DeepSeek |
+| การแปล | `translateProvider` / `translateModel` | DeepSeek |
+| การสร้างแผนภาพ | `summarizeToMermaidProvider` / `Model` | DeepSeek |
+| การดึงข้อมูลแนวคิด | `extractConceptsProvider` / `Model` | DeepSeek |
+| การดึงข้อความต้นฉบับ | `extractOriginalTextProvider` / `Model` | DeepSeek |
+
+### ลำดับการแก้ไข
+
+1. หาก `useMultiModelSettings` อยู่ → ใช้ผู้ให้บริการและโมเดลที่เฉพาะเจาะจงกับงาน
+2. หากการเปลี่ยนแปลงโมเดลของงานว่างเปล่า → กลับไปใช้โมเดลเริ่มต้นของผู้ให้บริการ
+3. หากผู้ให้บริการของงานไม่ถูกต้อง → กลับไปใช้ `activeProvider` ระดับโลก
+4. หาก `useMultiModelSettings` ปิดอยู่ → งานทั้งหมดจะใช้ `activeProvider` แบบกลาง
+
+### การตั้งค่าที่แนะนำ
+
+```
+# Researcher: power for research, cheap for everything else
+activeProvider: DeepSeek
+extractConceptsProvider: DeepSeek
+researchProvider: OpenAI        # GPT-4o for better research quality
+summarizeToMermaidProvider: DeepSeek
+
+# Privacy-first: local only
+activeProvider: Ollama
+addLinksProvider: Ollama
+extractConceptsProvider: Ollama
+
+# Budget bilingual
+activeProvider: DeepSeek
+translateProvider: Google      # Gemini Flash for translation
+researchProvider: SiliconFlow  # Cheaper China-based routing
+```
+
+## API Call Architecture
+
+### Transport Layers
+
+1. **Obsidian `requestUrl`** — รูปแบบหลัก (มาพร้อมกับระบบ ทำงานได้บนทุกแพลตฟอร์ม)
+2. **Desktop HTTP** — โมดูล Node.js `http`/`https` (สตรีมมิ่ง + คำขอยาว)
+3. **Web `fetch`** — ใช้เป็นทางเลือกสำรองเมื่อไม่สามารถใช้โมดูล Node.js ได้
+
+ปลั๊กอินจะสลับรูปแบบการส่งข้อมูลโดยอัตโนมัติเมื่อเกิดข้อผิดพลาดชั่วคราวบนเครือข่าย.
+
+### ตรรกะการทดลองใหม่
+
+- **โหมดปกติ** (`enableStableApiCall: false`): ทดลองใหม่เพียงครั้งเดียว หากเกิดความล้มเหลวชั่วคราว จะทำการยกระดับเป็นการทดลองใหม่แบบมั่นคงโดยอัตโนมัติ.
+- **โหมดการทดลองใหม่แบบมั่นคง** (`enableStableApiCall: true`): ทดลองใหม่สูงสุด 4 ครั้ง (1 ครั้งแรก + 3 ครั้งทดลองใหม่) โดยมีช่วงเวลาห่างกัน 5 วินาที.
+- **ข้อผิดพลาดชั่วคราวที่กระตุ้นให้ทดลองใหม่**: `err_connection_closed`, `err_connection_reset`, `err_timed_out`, `econnreset`, `econnaborted`, `etimedout`, `socket hang up`, `network request failed`
+- **ข้อผิดพลาดที่ไม่สามารถทดลองใหม่ได้**: HTTP 400, 401, 403, 404
+
+### การเก็บข้อมูลตอบกลับ
+
+คิวอาร์ซีแบบในหน่วยความจำที่ใช้เวลา 5 นาที โดยใช้คีย์จากผู้ให้บริการ + โมเดล + อุณหภูมิ + คำขอ + เนื้อหา คำขอที่เหมือนกันภายใน 5 นาทีจะได้รับผลลัพธ์จากคิวอาร์ซีที่เก็บไว้ทันที.
+
+### การจัดการโมเดลการให้เหตุผล
+
+โมเดลที่ไม่รองรับบทบาท `system` (DeepSeek R1, OpenAI o1/o3/o4/gpt-5) จะถูกรวมคำขอจากระบบและผู้ใช้เข้าด้วยกันเป็นข้อความผู้ใช้เดียวโดยอัตโนมัติ.
+
+DeepSeek-specific: `thinkingEnabled` จะเพิ่ม `{ thinking: { type: 'enabled' } }` เข้าไปในคำขอ ส่วน `reasoningEffort` (ต่ำ/ปานกลาง/สูง) จะถูกส่งในรูปแบบ `reasoning_effort` และจะมีการตรวจสอบให้แน่ใจว่าจำนวนโทเค็นผลลัพธ์สูงสุด ≥ 8000 เมื่อเปิดการคิด.
+
+### การประมาณค่าโทเค็น
+
+`estimateTokens(text)`: `Math.ceil(text.length / 4)` — ใช้หลักการประมาณการ 4 ตัวอักษรต่อโทเค็น ใช้เพื่อบังคับใช้ `maxResearchContentTokens` ก่อนส่งไปยัง LLM.
+
+ไม่มีการติดตามค่าใช้จ่ายที่ถูกนำมาใช้.
+
+## การค้นหาโมเดล
+
+| โหมด | ผู้ให้บริการ | จุดจบของเซิร์ฟเวอร์ |
+|------|-----------|----------|
+| `ollama-tags` | Ollama | `/api/tags` |
+| `google-models` | Google | รายการโมเดล API |
+| `anthropic-models` | Anthropic | รายการโมเดล API |
+| `openai-compatible-models` | DeepSeek, Qwen, Mistral ฯลฯ | `/v1/models` |
+| `openrouter-models` | OpenRouter | รายการโมเดล API |
+| `github-models` | GitHub Models | การประมวลผล API |
+| `none` | Azure OpenAI | ถูกปิดใช้งาน (ต้องมีชื่อการจัดส่ง) |
+
+## เริ่มต้นอย่างรวดเร็ว
+
+1. **เลือกผู้ให้บริการ** — DeepSeek (ประเทศจีน), OpenAI (ระดับนานาชาติ) หรือ Ollama (ท้องถิ่น/ฟรี)
+2. **ป้อนคีย์ API** — การตั้งค่า → Notemd → ผู้ให้บริการ → คีย์ API
+3. **ทดสอบการเชื่อมต่อ** — คลิกปุ่มทดสอบ
+4. **ตัวเลือก: โมเดลตามงาน** — เปิดใช้งาน `useMultiModelSettings` และกำหนดค่าแยกกัน
+
+สำหรับ Ollama: ไม่จำเป็นต้องมีคีย์ API เพียงแค่ตรวจสอบให้แน่ใจว่า `ollama serve` กำลังทำงานอยู่.
+
+---
+
+## ขั้นตอนต่อไป
+
+- 📝 [บันทึกแนวคิด](/docs/features/concept-notes) — ใช้โมเดลการสกัดข้อมูลตามงาน
+- 🎨 [แผนภาพ](/docs/features/diagrams) — ใช้โมเดลแผนภาพตามงาน
+- 🔍 [Research](/docs/features/research) — ใช้โมเดลสำหรับการวิจัย
+- ⚙️ [Configuration](/docs/getting-started/configuration) — คู่มือการตั้งค่าทั้งหมด

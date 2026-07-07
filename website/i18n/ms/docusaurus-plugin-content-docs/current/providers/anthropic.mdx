@@ -1,0 +1,67 @@
+---
+id: anthropic
+title: "Anthropic"
+description: "Konfigurasikan Anthropic Claude"
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [anthropic, claude, provider, configuration]
+concepts: [Anthropic, Claude, API Configuration]
+citations:
+  - title: Anthropic API
+    url: https://docs.anthropic.com
+  - title: Claude
+    url: https://www.anthropic.com/claude
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# Pembekal Anthropic
+
+<TLDR>
+**Anthropic menggunakan pengangkutan Messages API asli, bukan pengangkutan yang serasi dengan OpenAI.** Tetapan pra‑tetap semasa menggunakan `claude-3-5-sonnet-20240620`, `https://api.anthropic.com`, dan `temperature: 0.5`. Anggap ia sebagai antaramuka protokol berasingan semasa menyahpepijat.
+
+Ini merupakan sebahagian daripada [Obsidian Panduan Pengurusan Pengetahuan AI](/docs/pillar-ai-knowledge).
+</TLDR>
+
+## Pengaturan
+
+Buat kunci Anthropic API, tambah profil pembekal `Anthropic`, dan biarkan Base URL pada titik hujung asli kecuali anda menghala melalui profil gateway khusus. Pilih ID model Claude yang ingin digunakan dalam medan model; tetapan lalai mengekalkan asas produk sedia ada stabil.
+
+Anthropic merupakan pilihan yang baik untuk ringkasan berkualiti tinggi, sintesis penyelidikan, dan pengekstrakan konsep. Jika anda menggabungkannya dengan pembekal yang lebih murah, gunakannya hanya pada tugas yang mendapat manfaat daripada kualiti outputnya.
+
+## Titik Hujung Dan Pengesahan
+
+| Medan | Tetapan pra‑tetap semasa |
+|-------|----------------|
+| Pengangkutan | `anthropic` |
+| Kunci API | Diperlukan |
+| Base URL | `https://api.anthropic.com` |
+| Model lalai | `claude-3-5-sonnet-20240620` |
+| Suhu | `0.5` |
+| Ujian sambungan | Hanya sembang |
+
+Runtimes menghantar permintaan ke `/v1/messages` dengan `x-api-key` dan `anthropic-version: 2023-06-01`. Jangan konfigurasikan titik hujung `/v1/chat/completions` gaya OpenAI di bawah tetapan pra‑tetap ini; gunakan tetapan gateway yang serasi dengan OpenAI sebaliknya.
+
+## Penemuan Model
+
+Anthropic menggunakan mod penemuan `anthropic-models` dalam daftar penyedia. Jika kunci atau akaun anda tidak dapat senaraikan model, simpan ID model yang diketahui dalam profil dan sahkan melalui ujian sambungan.
+
+Pengangkutan ini tidak boleh digantikan dengan penyedia yang serasi dengan OpenAI. Model Claude yang diarahkan melalui OpenRouter, LiteLLM, atau pintu gerbang lain harus berada dalam profil pintu gerbang tersebut, bukan dalam profil Anthropic asli.
+
+## Pemecahan masalah
+
+- `401` atau `403`: periksa skop kunci, akses ruang kerja, bilangan, dan sama ada kunci itu milik ruang kerja Anthropic yang dijangkakan.
+- `404`: Base URL adalah salah atau ID model yang dipilih tidak tersedia untuk akaun tersebut.
+- ID model Claude gaya pintu gerbang gagal: pindahkan profil ke penyedia pintu gerbang yang sesuai kerana Anthropic asli mengharapkan nama model asli.
+- Permintaan yang panjang gagal pada akhir: kurangkan saiz output model setiap tugas atau gunakan model dengan had token output yang lebih tinggi.
+
+## Bila Perlu Digunakan
+
+Guna Anthropic apabila kualiti sintesis, nota penyelidikan, atau penulisan berstruktur lebih penting daripada kos asas. Jangan gunakannya sebagai alternatif umum yang serasi dengan OpenAI; pengangkutan yang berasingan itulah tujuannya, dan mencampurkan protokol menjadikan diagnosis lebih sukar.
+
+---
+
+## Langkah Seterusnya
+
+- [LLM Providers](/docs/providers/overview) -- Konfigurasi penuh, model setiap tugas, dan logik percubaan semula
+- [Troubleshooting](/docs/advanced/troubleshooting) -- Perbaiki ralat 401/403 dan masalah sambungan

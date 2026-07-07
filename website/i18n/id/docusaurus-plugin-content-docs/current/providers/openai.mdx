@@ -1,0 +1,67 @@
+---
+id: openai
+title: "OpenAI"
+description: "Konfigurasi OpenAI (GPT-4, GPT-4o)"
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [openai, gpt-4o, provider, configuration]
+concepts: [OpenAI, GPT-4o, API Configuration]
+citations:
+  - title: OpenAI API
+    url: https://platform.openai.com
+  - title: GPT-4
+    url: https://openai.com/gpt-4
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# Provider OpenAI
+
+<TLDR>
+**OpenAI menggunakan transportasi yang kompatibel dengan OpenAI.** Preset saat ini menggunakan `gpt-4o`, `https://api.openai.com/v1`, `temperature: 0.5`, dan pengujian koneksi `models-then-chat` secara default. Gunakan halaman ini bila Anda membutuhkan semantik field yang tepat; gunakan tinjauan [LLM Providers](/docs/providers/overview) untuk pemilihan tingkat kategori.
+
+Ini merupakan bagian dari [Obsidian Panduan Manajemen Pengetahuan AI](/docs/pillar-ai-knowledge).
+</TLDR>
+
+## Pengaturan
+
+Buat kunci OpenAI API, tambahkan profil penyedia `OpenAI` di pengaturan Notemd, dan pertahankan Base URL default kecuali Anda sengaja mengarahkan ke gateway yang kompatibel dengan OpenAI. Field model dapat tetap di `gpt-4o` untuk pekerjaan umum atau diganti dengan ID model OpenAI lain yang dapat dipanggil oleh akun Anda.
+
+Gunakan model khusus tugas untuk pengendalian biaya: simpan model yang lebih kuat untuk penelitian, ekstraksi konsep, dan restrukturisasi teks panjang; gunakan model yang lebih murah atau lebih cepat untuk penerjemahan, saran tautan, dan ringkasan singkat.
+
+## Endpoint dan Autentikasi
+
+| Field | Preset saat ini |
+|-------|----------------|
+| Transportasi | `openai-compatible` |
+| Kunci API | Diperlukan |
+| Base URL | `https://api.openai.com/v1` |
+| Model default | `gpt-4o` |
+| Temperature | `0.5` |
+| Uji koneksi | `/models`, lalu `/chat/completions` |
+
+Notemd menormalisasi base URL yang kompatibel dengan OpenAI sebelum menambahkan `chat/completions` atau `models`. Jangan tambahkan `/chat/completions` di akhir Base URL; hal itu akan membuat path menjadi duplikat.
+
+## Penemuan Model
+
+OpenAI menggunakan jalur penemuan model umum yang kompatibel dengan OpenAI. Pengaturan UI pertama kali menanyakan `/v1/models`, lalu memverifikasi model yang dipilih dengan permintaan chat ringan. Jika penemuan gagal tetapi chat masih berfungsi, periksa apakah kunci Anda memiliki izin model-list atau apakah gateway memblokir daftar model.
+
+Model reasoning diperlakukan sebagai kasus ekstrem protokol: Notemd menggabungkan konten prompt sistem dan pengguna untuk ID reasoning OpenAI yang menolak peran `system` terpisah, dan hanya menampilkan `reasoningEffort` bila definisi penyedia mendukungnya.
+
+## Pemecahan Masalah
+
+- `401` atau `403`: periksa kunci, akses proyek, status billing, dan apakah model yang dipilih diaktifkan untuk kunci tersebut.
+- `404` pada chat: Base URL biasanya salah atau sudah mencakup `/chat/completions`.
+- Model muncul di dokumen tetapi tidak di selector: akses model-list dan akses chat merupakan titik kegagalan yang terpisah; uji ID model yang tepat secara manual di profil penyedia.
+- Model reasoning menolak pesan: gunakan ID model yang termasuk dalam jalur penanganan reasoning OpenAI atau beralih ke model chat non-reasoning.
+
+## Kapan Digunakan
+
+Gunakan OpenAI bila Anda menginginkan path default yang paling dapat diprediksi, ketika penemuan `/v1/models` penting, atau ketika alur kerja bergantung pada semantik model reasoning OpenAI. Pilih gateway atau penyedia lokal bila routing, privasi, atau pengendalian biaya lebih penting daripada perilaku langsung OpenAI API.
+
+---
+
+## Langkah Selanjutnya
+
+- [LLM Providers](/docs/providers/overview) -- Konfigurasi lengkap, model per tugas, dan logika pengulangan
+- [Troubleshooting](/docs/advanced/troubleshooting) -- Perbaiki kesalahan 401/403 dan batasan kecepatan

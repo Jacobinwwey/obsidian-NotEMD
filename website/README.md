@@ -6,7 +6,7 @@ This directory contains the Docusaurus-based documentation site for Notemd.
 
 - **Docusaurus 3.10.1** with GitHub Pages deployment
 - **Automatic JSON-LD injection** via swizzled `DocItem/Layout`
-- **Published locales**: English (`en`) plus full docs routes for Simplified Chinese (`zh-CN`), Traditional Chinese (`zh-Hant`), Japanese (`ja`), French (`fr`), German (`de`), Spanish (`es`), and Korean (`ko`)
+- **Published locales**: English (`en`) plus full docs routes for Simplified Chinese (`zh-CN`), Traditional Chinese (`zh-Hant`), Traditional Chinese for Taiwan (`zh-TW`), Japanese (`ja`), French (`fr`), German (`de`), Spanish (`es`), Korean (`ko`), Italian (`it`), Portuguese (`pt`), Brazilian Portuguese (`pt-BR`), Russian (`ru`), Arabic (`ar`), Persian (`fa`), Hindi (`hi`), Bengali (`bn`), Dutch (`nl`), Swedish (`sv`), Finnish (`fi`), Danish (`da`), Norwegian (`no`), Polish (`pl`), Turkish (`tr`), Hebrew (`he`), Thai (`th`), Greek (`el`), Czech (`cs`), Hungarian (`hu`), Romanian (`ro`), Ukrainian (`uk`), Vietnamese (`vi`), Indonesian (`id`), and Malay (`ms`)
 - **AI-readable structure**: TLDR components, FAQPage Schema, TechArticle Schema, citations, concept metadata, and `llms.txt`
 
 ## Local Development
@@ -31,7 +31,8 @@ The build generates static content into `build`. The audit checks the public con
 - root and localized root pages exist;
 - canonical and JSON-LD URLs match GitHub Pages routes;
 - homepage GEO text, `llms.txt` link, release version, and multilingual route boundary are present on localized homepages;
-- every localized zh-CN doc file is declared in `publishedLanguageScopeData.mjs`;
+- every published localized docs locale mirrors the English source MDX route set;
+- the legacy route inventory in `publishedLanguageScopeData.mjs` stays aligned with the source docs consumed by older GEO gates;
 - published localized docs are indexable and expose correct alternates;
 - the old unpublished zh-CN fallback path is retired because the docs route set is now localized end-to-end;
 - English docs expose locale alternates for the full published docs route set;
@@ -72,7 +73,8 @@ npm run audit:build
 
 ### 3. Language Signal Ownership
 
-- `website/src/lib/publishedLanguageScopeData.mjs`: published zh-CN doc ids, route paths, source paths, homepage paths, and critical paths
+- `website/src/lib/publishedLocales.mjs`: the single source of truth for Docusaurus locale codes, labels, `htmlLang`, text direction, and the public language-scope sentence
+- `website/src/lib/publishedLanguageScopeData.mjs`: published doc ids, route paths, source paths, homepage paths, and critical paths consumed by legacy zh-CN GEO gates
 - `website/src/lib/publishedLanguageScope.js`: runtime set helpers derived from the data file
 - `website/src/lib/languageRoutePolicy.js`: route policy helpers for doc path extraction, locale-prefix stripping, canonical English targets, and zh-CN compatibility helpers
 
@@ -87,7 +89,7 @@ These overrides are intentionally policy-bearing. Do not replace them with a gen
 
 ### 5. Root Homepage for GitHub Pages
 
-- `src/pages/index.js`: real root route for `/obsidian-NotEMD/` and `/obsidian-NotEMD/zh-CN/`
+- `src/pages/index.js`: real root route for `/obsidian-NotEMD/` and every localized root path
 - Prevents navbar/logo/footer root links from pointing to a missing page
 - Routes readers and crawlers to Intro, Quick Start, FAQ, provider docs, and the AI knowledge pillar
 - Owns visible GEO facts that answer engines and humans should see first: write-first workflow model, provider surface, local-vault boundary, current release, answer-engine source map, and multilingual docs route boundary
@@ -106,7 +108,7 @@ These overrides are intentionally policy-bearing. Do not replace them with a gen
 ### 8. FAQ with FAQPage Schema
 
 - `docs/faq.mdx`: English FAQ
-- `i18n/zh-CN/docusaurus-plugin-content-docs/current/faq.mdx`: Simplified Chinese FAQ
+- `i18n/<locale>/docusaurus-plugin-content-docs/current/faq.mdx`: localized FAQ for every published documentation locale
 - The swizzled doc layout emits FAQPage schema for FAQ docs
 
 ## File Structure
@@ -125,21 +127,22 @@ website/
 │   ├── faq.mdx
 │   └── providers/
 ├── i18n/
-│   └── zh-CN/
+│   └── <locale>/
 │       └── docusaurus-plugin-content-docs/
-│           └── current/       # Published zh-CN critical path plus FAQ
+│           └── current/       # Published localized docs route mirror
 ├── src/
 │   ├── pages/
 │   │   └── index.js           # Locale-aware root homepage
 │   ├── lib/
 │   │   ├── languageRoutePolicy.js
 │   │   ├── publishedLanguageScope.js
-│   │   └── publishedLanguageScopeData.mjs
+│   │   ├── publishedLanguageScopeData.mjs
+│   │   └── publishedLocales.mjs
 │   ├── components/
 │   │   └── TLDR/
 │   ├── theme/
 │   │   ├── DocItem/Layout/    # JSON-LD + fallback noindex
-│   │   ├── DocItem/Paginator/ # zh-CN published-scope paginator
+│   │   ├── DocItem/Paginator/ # legacy zh-CN published-scope paginator
 │   │   ├── DocRoot/Layout/Sidebar/
 │   │   ├── NavbarItem/LocaleDropdownNavbarItem/
 │   │   └── SiteMetadata/      # hreflang/Open Graph locale policy
@@ -168,7 +171,7 @@ citations:
 
 ## Adding New Languages
 
-1. Add locale to `docusaurus.config.js` -> `i18n.locales`.
+1. Add locale metadata to `src/lib/publishedLocales.mjs`.
 2. Run or update `node scripts/generate-localized-docs.cjs`.
 3. Translate content in `i18n/<locale>/docusaurus-plugin-content-docs/current/`.
 4. Translate navbar, footer, and docs sidebar messages under `i18n/<locale>/`.
@@ -178,9 +181,9 @@ citations:
 
 Do not add a locale to `i18n.locales` just because a translation folder exists. The supported policy is now full docs-route publication: every source page under `website/docs/` must have a localized counterpart before the locale appears in the public language dropdown.
 
-Current policy: English remains the canonical source surface, and Simplified Chinese, Traditional Chinese, Japanese, French, German, Spanish, and Korean expose the complete docs route set. Provider names, CLI commands, configuration keys, file extensions, and package names intentionally remain stable across languages so users can match documentation to the plugin UI, CLI output, and logs.
+Current policy: English remains the canonical source surface, and every README/UI locale declared in `src/lib/publishedLocales.mjs` exposes the complete docs route set: Simplified Chinese (`zh-CN`), Traditional Chinese (`zh-Hant`), Traditional Chinese for Taiwan (`zh-TW`), Japanese (`ja`), French (`fr`), German (`de`), Spanish (`es`), Korean (`ko`), Italian (`it`), Portuguese (`pt`), Brazilian Portuguese (`pt-BR`), Russian (`ru`), Arabic (`ar`), Persian (`fa`), Hindi (`hi`), Bengali (`bn`), Dutch (`nl`), Swedish (`sv`), Finnish (`fi`), Danish (`da`), Norwegian (`no`), Polish (`pl`), Turkish (`tr`), Hebrew (`he`), Thai (`th`), Greek (`el`), Czech (`cs`), Hungarian (`hu`), Romanian (`ro`), Ukrainian (`uk`), Vietnamese (`vi`), Indonesian (`id`), and Malay (`ms`). Provider names, CLI commands, configuration keys, file extensions, and package names intentionally remain stable across languages so users can match documentation to the plugin UI, CLI output, and logs.
 
-`website/src/lib/publishedLanguageScopeData.mjs` still exists because older GEO gates and zh-CN theme overrides consume it, but it now declares the full docs route set rather than a partial-publishing allowlist. When adding or removing docs pages, update that data file and rerun:
+`website/src/lib/publishedLanguageScopeData.mjs` still exists because older GEO gates and zh-CN theme overrides consume it, but it now declares the full docs route set rather than a partial-publishing allowlist. `website/src/lib/publishedLocales.mjs` owns the public language matrix used by Docusaurus, the docs generator, and the build audit. When adding or removing docs pages or locales, update the matching source file and rerun:
 
 ```bash
 npm run build

@@ -13,15 +13,8 @@ const zhRoot = `${siteRoot}zh-CN/`;
 const zhBasePath = `${basePath}zh-CN/`;
 const expectedSoftwareVersion = '1.9.3';
 const providerSourceRoot = path.join(websiteRoot, 'docs', 'providers');
-const supportedLocalizedLocales = [
-  {locale: 'zh-CN', htmlLang: 'zh-CN', name: 'Simplified Chinese'},
-  {locale: 'zh-Hant', htmlLang: 'zh-Hant', name: 'Traditional Chinese'},
-  {locale: 'ja', htmlLang: 'ja-JP', name: 'Japanese'},
-  {locale: 'fr', htmlLang: 'fr-FR', name: 'French'},
-  {locale: 'de', htmlLang: 'de-DE', name: 'German'},
-  {locale: 'es', htmlLang: 'es-ES', name: 'Spanish'},
-  {locale: 'ko', htmlLang: 'ko-KR', name: 'Korean'},
-];
+let supportedLocalizedLocales = [];
+let publishedLanguageScopeText = '';
 const localizedFillerMarkers = [
   '这一部分解释产品行为',
   '這一部分說明產品行為',
@@ -32,6 +25,7 @@ const localizedFillerMarkers = [
   '제품 동작',
 ];
 const placeholderPollutionPattern = /NMDPH|NMDSEGMENT|@@\d+@@/;
+const trailingWhitespacePattern = /[ \t]+$/m;
 const providerDetailHeadings = [
   '## Setup',
   '## Endpoint And Authentication',
@@ -207,6 +201,9 @@ function auditLocalizedSourceTextIntegrity() {
       if (placeholderPollutionPattern.test(localizedContent)) {
         fail(`${context} contains placeholder pollution`);
       }
+      if (trailingWhitespacePattern.test(localizedContent)) {
+        fail(`${context} contains trailing whitespace`);
+      }
 
       const englishHeadings = markdownHeadings(englishContent).map((heading) => heading.level);
       const localizedHeadings = markdownHeadings(localizedContent).map((heading) => heading.level);
@@ -326,6 +323,16 @@ function auditHomepageRoutes(languageScope) {
   }
 }
 
+async function loadPublishedLocales() {
+  const moduleUrl = pathToFileURL(path.join(websiteRoot, 'src', 'lib', 'publishedLocales.mjs')).href;
+  const locales = await import(moduleUrl);
+  supportedLocalizedLocales = locales.publishedDocumentationLocales || [];
+  publishedLanguageScopeText = locales.publishedLanguageScopeSentence();
+  if (!supportedLocalizedLocales.length || !publishedLanguageScopeText) {
+    fail('Published locale metadata must define documentation locales and language scope text');
+  }
+}
+
 function auditZhCnDocFallbacks(languageScope) {
   if (!fs.existsSync(zhDocsRoot)) {
     fail('Missing zh-CN docs build directory');
@@ -441,7 +448,7 @@ function auditAiRetrievalMap(languageScope) {
   for (const {locale} of supportedLocalizedLocales) {
     assertContains(llmsText, `${siteRoot}${locale}/docs/intro`, 'llms.txt');
   }
-  assertContains(llmsText, 'The public docs route set is available in English, Simplified Chinese, Traditional Chinese, Japanese, French, German, Spanish, and Korean.', 'llms.txt');
+  assertContains(llmsText, publishedLanguageScopeText, 'llms.txt');
 }
 
 function auditLocalizedDocBuildCoverage(languageScope) {
@@ -658,6 +665,7 @@ function auditGeneratedTextIntegrity() {
 }
 
 async function main() {
+  await loadPublishedLocales();
   const languageScope = await loadPublishedLanguageScope();
   auditRequiredFiles();
   auditGeneratedTextIntegrity();

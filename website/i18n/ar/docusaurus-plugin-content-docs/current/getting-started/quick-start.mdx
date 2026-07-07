@@ -1,0 +1,181 @@
+---
+id: quick-start
+title: "دليل البدء السريع"
+description: "ابدأ باستخدام Notemd في 5 دقائق"
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [quick start, tutorial, getting started, first steps]
+concepts: [Quick Start, LLM Configuration, One-Click Workflow, Ollama]
+citations:
+  - title: Obsidian
+    url: https://obsidian.md
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# دليل البدء السريع
+
+<TLDR>
+**ابدأ باستخدام Notemd في 5 دقائق.** ثلاث خطوات: (1) أضف مفتاح LLM API (أو استخدم Ollama المحلي)، (2) افتح ملاحظة ونفّذ "Process file (add links)"، (3) استكشف سير العمل بنقرة واحدة في الشريط الجانبي. يدعم أكثر من 30 مزودًا. لا حاجة إلى كتابة كود. يعمل دون اتصال بالإنترنت باستخدام Ollama.
+</TLDR>
+
+## الخطوة الأولى: قم بتكوين أول مزود LLM لديك (2 دقيقة)
+
+### الخيار أ: مزود سحابي (OpenAI، Anthropic، إلخ.)
+
+1. افتح **Settings** → **Notemd**
+2. تحت **LLM Provider Configuration**، اختر مزودًا من القائمة المنسدلة
+3. أدخل **API Key** الخاص بك
+4. (اختياري) انقر على **"Get Model List"** لعرض النماذج المتاحة
+5. اختر نموذجًا لكل نوع مهمة
+
+**الخيارات الشائعة:**
+- **OpenAI**: `gpt-4o-mini` (سريع، بسعر معقول)
+- **Anthropic**: `claude-sonnet-4-6` (جودة عالية)
+- **DeepSeek**: `deepseek-chat` (بسعر منخفض جدًا)
+
+### الخيار ب: Ollama محلي (لا حاجة إلى مفتاح API)
+
+1. تثبيت [Ollama](https://ollama.com/)
+2. تنزيل نموذج: `ollama pull llama3.1`
+3. في إعدادات Notemd، حدد **"Ollama"** كمزود
+4. اسم النموذج: `llama3.1` (أو أي نموذج قمت بتنزيله)
+
+## الخطوة 2: جرب مهمتك الأولى (دقيقة واحدة)
+
+### إضافة روابط ويكي إلى ملاحظة
+
+1. افتح أي ملاحظة تحتوي على محتوى ذي معنى
+2. انقر بزر الماوس الأيمن داخل المحرر
+3. حدد **"معالجة الملف (إضافة روابط)"**
+4. انتظر بضع ثوانٍ
+5. المفاهيم الرئيسية أصبحت الآن `[[wiki-linked]]`!
+
+**مثال:**
+
+**قبل:**
+```
+Machine learning models use neural networks to process data.
+```
+
+**بعد:**
+```
+[[Machine learning]] models use [[neural networks]] to process data.
+```
+
+## الخطوة 3: استكشف الميزات (دقيقتان)
+
+### استخراج ملاحظات المفاهيم
+
+1. اضغط بزر الماوس الأيمن → **"استخراج المفاهيم من الملف الحالي"**
+2. Notemd يُنشئ ملفات منفصلة لكل مفهوم
+3. تحقق من مجلد المفاهيم المُعدّل لديك (الافتراضي: `concepts/`)
+4. كل ملاحظة مفهوم تحتوي على رابط عكسي إلى الملاحظة الأصلية
+
+### البحث والتلخيص
+
+1. تسليط الضوء على موضوع في ملاحظاتك
+2. النقر بزر الماوس الأيمن → **"البحث والتلخيص"**
+3. Notemd يجري بحثًا على الويب (Tavily أو DuckDuckGo)
+4. يضيف التطبيق التلخيص مع المصادر إلى ملاحظاتك
+
+### سير العمل بنقرة واحدة
+
+1. تحقق من **الشريط الجانبي الأيسر** لزرّات سير العمل
+2. انقر على **"استخراج بنقرة واحدة"** في أي ملاحظة
+3. يتم تنفيذه: إضافة روابط → استخراج المفاهيم → البحث → إنشاء مخطط
+4. كل ذلك بنقرة واحدة!
+
+## المهام الشائعة الأولى
+
+### المهمة 1: معالجة ورقة/مقالة
+
+```
+1. Paste article content into a note
+2. Run "Process file (add links)"
+3. Run "Extract concepts"
+4. Run "Research and summarize" on unfamiliar terms
+5. Run "Summarize as Mermaid diagram" for visual structure
+```
+
+### المهمة 2: ترجمة الملاحظات
+
+```
+1. Highlight text to translate
+2. Right-click → "Translate to target language"
+3. Set target language in settings first
+```
+
+### المهمة 3: إنشاء خريطة معرفية
+
+```
+1. Process 5-10 related notes with "add links"
+2. Run "Extract concepts" on each
+3. Open Graph view to see connections
+4. Your knowledge graph is forming!
+```
+
+## نصائح للتخصيص
+
+### اختيار النموذج حسب المهمة
+
+يمكنك استخدام نماذج مختلفة لمهام مختلفة:
+
+| المهمة | النموذج الموصى به | السبب |
+|------|------------------|-----|
+| إضافة روابط | `gpt-4o-mini`، `deepseek-chat` | سريع، عدد كبير من الاتصالات |
+| استخراج المفاهيم | `claude-sonnet-4-6`، `gpt-4o` | استخراج عالي الجودة |
+| البحث | `perplexity`، `gpt-4o` | مبني على الويب |
+| الترجمة | `gemini-flash`، `gpt-4o` | متعدد اللغات |
+| رسومات تخطيطية | `claude-opus`، نموذج محلي | الاستدلال المعقد |
+
+التكوين في: **الإعدادات → Notemd → النماذج الخاصة بالمهام**
+
+### سلاسل عمل مخصصة
+
+إنشاء زر خاص بك:
+
+1. الإعدادات → Notemd → سلاسل العمل
+2. انقر فوق "إضافة سلسلة عمل"
+3. أدخل DSL: `process-current-add-links>extract-concepts-current>research-and-summarize`
+4. أسمِها: "تدفق بحثي"
+5. يظهر زر جديد في الشريط الجانبي
+
+## حل المشكلات
+
+### "مفتاح API غير صالح"
+- تحقق مما إذا كان المفتاح صحيحًا (بدون مسافات إضافية)
+- تحقق من أن الحساب يحتوي على ائتمانات
+- اختبر باستخدام زر "اختبار الاتصال" في الإعدادات
+
+### "لم يتم العثور على النموذج"
+- انقر على "Get Model List" لعرض النماذج المتاحة
+- يتطلب بعض المزودين أسماء نماذج محددة (مثل `gpt-4o` وليس `gpt-4`).
+
+### الروابط لا تظهر
+- تأكد من أن الملاحظة تحتوي على محتوى كافٍ (>50 كلمة)
+- جرب نموذجًا أقوى
+- تحقق مما إذا كانت عملية الاتصال بـ LLM قد نجحت (انظر لوحة التشخيص)
+
+### أداء بطيء
+- استخدم النماذج الأسرع (`gpt-4o-mini` بدلاً من `gpt-4o`)
+- قلل حجم الكتل في الإعدادات
+- تفعيل المعالجة المتوازية للمهام الجماعية
+
+## الخطوات التالية
+
+- 📖 [استكشف جميع الميزات](../features/wiki-links)
+- ⚙️ [الإعدادات المتقدمة](./configuration)
+- 🔧 [إعداد مزود LLM](../providers/overview)
+- ❓ [الأسئلة الشائعة](../faq)
+
+## دليل فيديو
+
+شاهد فيديو البدء السريع مدته 3 دقائق (بالصينية):
+[【مفتوح المصدر بالكامل ومجاني! NotEMD دليل سريع مدته 3 دقائق】](https://b23.tv/lqR0RlA)
+
+## طلب المساعدة
+
+- 💬 **Discord**: [discord.gg/qnGgsQ9W](https://discord.gg/qnGgsQ9W)
+- 🐛 **المشاكل**: [GitHub Issues](https://github.com/Jacobinwwey/obsidian-NotEMD/issues)
+- 📚 **الوثائق**: [الوثائق الكاملة](https://jacobinwwey.github.io/obsidian-NotEMD/)

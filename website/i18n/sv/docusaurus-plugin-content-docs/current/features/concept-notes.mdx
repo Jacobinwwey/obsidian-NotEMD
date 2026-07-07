@@ -1,0 +1,184 @@
+---
+id: concept-notes
+title: "Konceptnoter"
+description: "Generera och hantera konceptnoter – fristående noter för viktiga koncept som extraheras från din säkerhetslåda"
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [concept notes, knowledge extraction, concept folder, deduplication, backlinks]
+concepts: [Concept Notes, Knowledge Graph, LLM Extraction, Deduplication, Backlinks]
+citations:
+  - title: Obsidian
+    url: https://obsidian.md
+  - title: Zettelkasten Method
+    url: https://zettelkasten.de
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# Konceptnoter
+
+<TLDR>
+**Notemd extraherar viktiga koncept från dina noter och skapar fristående konceptnotefiler.** LLM identifierar kärntermer, genererar en `.md` fil per koncept i en konfigurerbar mapp och kan valfritt lägga till baklänkar till den ursprungliga noten. Stöd för synonymsuppression, modellval per uppgift, namnfilsanering samt en 4-stegs deduplikeringsmotor. Detta ingår i [Obsidian AI Knowledge Management Guide](/docs/pillar-ai-knowledge).
+</TLDR>
+
+## Översikt
+
+Konceptnoter är byggstenarna i en sammanlänkad kunskapsbas. När du bearbetar en not, Notemd:
+
+1. **Skickar din text till en LLM** med en strukturerad extraktionsinstruktion
+2. **Parserar `CONCEPT:` rader** från LLM svar
+3. **Skapar en `.md` fil per koncept** i en angiven mapp
+4. **Lägger till baklänkar** till den ursprungliga noten (när det är aktiverat)
+
+## Så här fungerar det
+
+### Extraktionspipelinen
+
+```
+Source Note → Split into Chunks → LLM per Chunk → Parse CONCEPT: Lines
+    → Deduplicate via Set → Create .md Files → Add Backlinks
+    → (Optional: Generate Log)
+```
+
+### Extraktionsinstruktionen
+
+LLM tar emot en instruktion som instruerar den att:
+
+- Extrahera **substantiv eller substantivfraser** som är centrala för dokumentets tema
+- **Prioritera specificitet** – "Dielectric Relaxation" framför "Relaxation"
+- **Normalisera till singular** – "models" blir "model"
+- **Supprimera underkoncept** – om "dielectric relaxation" förekommer, extrahera inte även "relaxation"
+- **Ignorera** referenser/bibliografisektioner, vanliga substantiv, företags/productnamn
+- Skriv ut ett koncept per rad som `CONCEPT: Term Name`
+
+**Undanhållning av synonym** (valfritt): lägg till "Undvik att extrahera synonym, semantiskt liknande kärnkoncept eller nyckelord när det är möjligt" i början av instruktionen.
+
+**Fokuserad inlärningsområde** (valfritt): lägg till `Relevant Fields: [domain]` i början för att begränsa extraktionen till ett visst område.
+
+**Språksoverställning** (valfritt): lägg till "Utdatakoncepten MÅSTE vara på [språk]."
+
+### Delning i chunkar
+
+Långa noter delas med `settings.chunkWordCount`. Varje chunk skickas separat. Koncept från alla chunkar samlas i en `Set` — dubbletter mellan chunkar tas bort tystligen. LLM-fel i enskilda chunkar avbryter inte operationen.
+
+## Skapande av konceptnoter
+
+### Regler för filnamn
+
+| Regel | Beteende |
+|------|----------|
+| Striktecken/underskott | Erstatts med mellanrum |
+| Särskilda tecken | Ta bort: bakstrikt, framsikt, kolon, stjärka, frågetecken, citattecken, vinkelmärken, rör, hash-tecken, caret-tecken, parenteser |
+| Whitespace | Kollapsas och trimmas |
+| Max längd | 100 tecken (avklippat + återtrimmat) |
+| Tom/alla punkter resultat | Övergå tyst |
+
+Exempel: `A-B: Key*Term` blir `A B KeyTerm.md`
+
+### Mallar
+
+**Fullständig mall** (baklänkar aktiverade, minimal mall avstängd):
+
+```markdown
+# Concept Name
+
+## Linked From
+- [[SourceNoteBasename]]
+```
+
+**Minimal mall** (när `extractConceptsMinimalTemplate: true`):
+
+```markdown
+# Concept Name
+```
+
+### Uppdatera befintliga anteckningar
+
+När en konceptfil redan existerar:
+
+1. Om baklänkar är aktiverade och källanteckningen inte redan listas, lägg till en baklänk
+2. Om en `## Linked From`-sektion existerar, infog den före nästa `##`-huvud
+3. Om inget `## Linked From` finns, lägg till sektionen i slutet
+4. Duplicerade baklänkar kontrolleras och överskogs
+
+### Konfiguration
+
+| Inställning | Standard | Effekt |
+|---------|---------|--------|
+| `useCustomConceptNoteFolder` | `true` | Huvudstängare. Avstängt = inga anteckningar skapas |
+| `conceptNoteFolder` | `''` (inaktiverat) | Mappväg för konceptanteckningar |
+| `extractConceptsMinimalTemplate` | `true` | Endast titel-anteckningar (inga Linked From) |
+| `extractConceptsAddBacklink` | `false` | Lägg till backlänkar vid fristående extraktion |
+| `extractConceptsProvider` / `extractConceptsModel` | DeepSeek | Per-uppgift LLM för konceptextraktion |
+| `extractConceptsLanguage` | `'en'` | Utdata språk för konceptnamn |
+| `replaceSynonymsDuringConceptExtraction` | `false` | Aktivera synonymsuppression i prompten |
+| `generateConceptLogFile` | `false` | Skriv en `.log`-lista över skapade koncept |
+
+**Viktigt:** Inställningarna `extractConceptsAddBacklink` och `extractConceptsMinimalTemplate` påverkar endast **den dedikerade extraktionskommandot**. Kommandot "Lägg till länkar" skapar alltid anteckningar med fullständigt mallformat och backlänkar.
+
+## Deduplikering
+
+Dedup-kommandot (`Notemd: Check & remove duplicate concept notes`) kör en 5-stegsanalys:
+
+### Steg 1: Exakt filnamnmatchning
+
+Jämförelse av basnamn oberoende av storlek inom den konfigurerade omfattningen.
+
+### Steg 2: Detektering av pluralform
+
+Ta bort suffixer: `-ies` till `-y`, `-es` tas bort, `-s` tas bort. Jämför singularformen med omfattningsfilerna. Hanterar inte oregelbundna pluraler (children/child).
+
+### Steg 3: Normalisering av symboler
+
+Gäller: `toLowerCase()`, byt ut streck- och underströk tecken mot mellanrum, ta bort icke-alfanumeriska tecken, sammanfoga whitespace. De som normaliseras på samma sätt märks.
+
+### Steg 4: Enordig innehållshållning
+
+Enordiga konceptanteckningar kontrolleras mot basnamn på flerordiga scope-filer. Ej köras när scope är `concept_folder_only`.
+
+### Steg 5: Bekräftelse och radering
+
+Alla kandidater visas i en bekännelse-modal. Godkända objekt flyttas till systemets soptask. Operationen kan ställas in mellan varje radering.
+
+### Scope-läges
+
+| Modus | Jämförs mot |
+|------|-------------------|
+| `vault` (standard) | Alla vault `.md`-filer utom konceptmappen |
+| `concept_folder_only` | Andra konceptanteckningar i mappen |
+| `include` | Filer i specifika listade mappar |
+| `exclude` | Alla vault-filer utom konceptmappen + listade mappar |
+
+## Användning
+
+### Extrahera koncept (Standalone)
+
+1. Öppna en anteckning
+2. Kör **"Notemd: Extrahera koncept"** från kommandopalletten
+3. Konceptanteckningar skapas i den konfigurerade mappen
+
+### Extrahera och generera innehåll
+
+**"Notemd: Extrahera koncept och skapa titlar"** — extraherar koncept och kör sedan "Generera från titel" för varje anteckning i konceptmappen. Detta genererar innehåll för **alla** konceptanteckningar i mappen, inte bara de nyligen skapade.
+
+### Skapa wiki-länk från val
+
+1. Highlightera text i redigeraren
+2. Kör **"Notemd: Skapa wiki-länk från val"**
+3. Texten omsluts av `[[...]]` och en konceptanteckning skapas
+
+## Tips
+
+- **Ställ in konceptmappen först** — utan den skapas inga anteckningar. En varningsdialog visas om den inte är inställd.
+- **Använd modeller per uppgift** — konceptextraktion fungerar bra med billigare modeller (GPT-4o-mini, DeepSeek). Spara dyra modeller för forskning/översättning.
+- **Aktivera synonymsuppression** för tekniska domäner där flera termer syftar till samma koncept.
+- **Dedupliera regelbundet** — kör dedup-kommandot efter batchbearbetning för att upptäcka nära-duplikater.
+- **Loggfilen skrivs över** vid varje körning, inte till den. Kopiera den om du behöver tidigare resultat.
+
+---
+
+## Nästa steg
+
+- [Wiki-länkar](./wiki-links) — Hur koncept länkas inlinet
+- [Diagram](./diagrams) — Visualisera konceptrelationer
+- [Arbetsflöden](./workflows) — Kedja extraktion med andra uppgifter

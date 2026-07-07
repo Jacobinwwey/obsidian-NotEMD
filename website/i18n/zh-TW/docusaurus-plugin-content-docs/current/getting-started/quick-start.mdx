@@ -1,0 +1,181 @@
+---
+id: quick-start
+title: "快速入門指南"
+description: "5分鐘內開始使用 Notemd"
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [quick start, tutorial, getting started, first steps]
+concepts: [Quick Start, LLM Configuration, One-Click Workflow, Ollama]
+citations:
+  - title: Obsidian
+    url: https://obsidian.md
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# 快速入門指南
+
+<TLDR>
+**5分鐘內即可開始使用 Notemd。** 只需三個步驟：(1) 加入 LLM API 金鑰（或使用本地的 Ollama），(2) 開啟筆記並執行「處理檔案（加入連結）」，(3) 在側邊欄探索一次點擊即可完成的工作流程。支援 30 多家服務供應商。無需編碼。搭配 Ollama 即可在離線環境下使用。
+</TLDR>
+
+## 步驟 1：設定您的第一個 LLM 提供商（2 分鐘）
+
+### 選項 A：雲端服務供應商 (OpenAI, Anthropic, 等等)
+
+1. 打開 **設定** → **Notemd**
+2. 在 **LLM 提供者設定** 下，從下拉式選單中選擇一個提供者
+3. 輸入您的 **API Key**
+4. (可選) 點擊 **「取得模型清單」** 以查看可用的模型
+5. 為每種任務類型選擇一個模型
+
+**熱門選項：**
+- **OpenAI**：`gpt-4o-mini`（快速、實惠）
+- **Anthropic**：`claude-sonnet-4-6`（高品質）
+- **DeepSeek**：`deepseek-chat`（性價比極高）
+
+### 選項 B：本地 Ollama（不需要 API 金鑰）
+
+1. 安裝 [Ollama](https://ollama.com/)
+2. 下載模型：`ollama pull llama3.1`
+3. 在 Notemd 設定中，選擇 **"Ollama"** 作為供應商
+4. 型號名稱：`llama3.1`（或您下載的任何型號）
+
+## 步驟 2：嘗試您的第一個任務（1 分鐘）
+
+### 在筆記中加入維基連結
+
+1. 打開任何包含有意義內容的筆記
+2. 在編輯器中按右鍵
+3. 選擇 **「處理檔案（新增連結）」**
+4. 請稍等幾秒鐘。
+5. 關鍵概念現在已經是 `[[wiki-linked]]` 了！
+
+**範例：**
+
+**之前：**
+```
+Machine learning models use neural networks to process data.
+```
+
+**完成後：**
+```
+[[Machine learning]] models use [[neural networks]] to process data.
+```
+
+## 步驟 3：探索功能（2 分鐘）
+
+### 提取概念說明
+
+1. 按右鍵 → **「從目前檔案提取概念」**
+2. Notemd 會為每個概念建立不同的檔案
+3. 檢查您所設定的概念資料夾（預設值：`concepts/`）
+4. 每個概念說明都有一個連結回您原始的說明。
+
+### 研究與總結
+
+1. 在您的筆記中標出某個主題
+2. 按右鍵 → **「研究並總結」**
+3. Notemd 查詢網路搜尋（Tavily 或 DuckDuckGo）
+4. 摘要會將來源資料附加到您的筆記中
+
+### 一次點擊工作流程
+
+1. 請查看**左側邊欄**中的工作流程按鈕
+2. 在任意筆記上按一下 **「一鍵提取」**
+3. 它的運作流程為：新增連結 → 提取概念 → 進行研究 → 產生圖表
+4. 一次點擊搞定！
+
+## 常見的初始任務
+
+### 任務 1：處理文件/文章
+
+```
+1. Paste article content into a note
+2. Run "Process file (add links)"
+3. Run "Extract concepts"
+4. Run "Research and summarize" on unfamiliar terms
+5. Run "Summarize as Mermaid diagram" for visual structure
+```
+
+### 任務 2：翻譯筆記
+
+```
+1. Highlight text to translate
+2. Right-click → "Translate to target language"
+3. Set target language in settings first
+```
+
+### 任務 3：建立知識地圖
+
+```
+1. Process 5-10 related notes with "add links"
+2. Run "Extract concepts" on each
+3. Open Graph view to see connections
+4. Your knowledge graph is forming!
+```
+
+## 自訂技巧
+
+### 每任務模型選擇
+
+你可以根據不同的任務使用不同的模型：
+
+| 任務 | 推薦型號 | 為什麼 |
+|------|------------------|-----|
+| 新增連結 | `gpt-4o-mini`，`deepseek-chat` | 快速，可進行大量通話 |
+| 提取概念 | `claude-sonnet-4-6`，`gpt-4o` | 品質提取 |
+| 研究 | `perplexity`，`gpt-4o` | 基於網路的 |
+| 翻譯 | `gemini-flash`，`gpt-4o` | 多語言 |
+| 圖表 | `claude-opus`，本地模型 | 複雜推理 |
+
+設定位置：**Settings → Notemd → Task-Specific Models**
+
+### 自訂工作流程
+
+建立您自己的按鈕：
+
+1. 設定 → Notemd → 工作流程
+2. 點擊「新增工作流程」
+3. 輸入 DSL：`process-current-add-links>extract-concepts-current>research-and-summarize`
+4. 命名為：「我的研究流程」
+5. 側邊欄出現了新的按鈕
+
+## 故障排除
+
+### "API 金鑰無效"
+- 檢查金鑰是否正確（不得有額外空格）
+- 驗證帳戶是否有剩餘點數
+- 在設定中使用「Connection Test」按鈕進行測試
+
+### 「未找到模型」
+- 點擊「取得模型清單」即可查看可用的模型
+- 有些服務供應商要求使用特定的型號名稱（例如 `gpt-4o`，而非 `gpt-4`）
+
+### 連結沒有顯示出來
+- 請確保備註的內容足夠多（>50個字）。
+- 試試更強大的模型吧
+- 檢查 LLM 呼叫是否成功（請參見診斷面板）
+
+### 運作效能緩慢
+- 使用速度更快的模型（`gpt-4o-mini` 而非 `gpt-4o`）
+- 在設定中減小區塊大小
+- 為批次任務啟用平行處理
+
+## 接下來的步驟
+
+- 📖 [探索所有功能](../features/wiki-links)
+- ⚙️ [進階設定](./configuration)
+- 🔧 [LLM 提供商設定](../providers/overview)
+- ❓ [常見問題](../faq)
+
+## 影片教學
+
+觀看 3 分鐘的快速入門影片（中文）：
+[【完全開源免費！NotEMD 三分鐘快速入門】](https://b23.tv/lqR0RlA)
+
+## 尋求協助
+
+- 💬 **Discord**: [discord.gg/qnGgsQ9W](https://discord.gg/qnGgsQ9W)
+- 🐛 **問題報告**：[GitHub Issues](https://github.com/Jacobinwwey/obsidian-NotEMD/issues)
+- 📚 **文件說明**：[完整文件說明](https://jacobinwwey.github.io/obsidian-NotEMD/)

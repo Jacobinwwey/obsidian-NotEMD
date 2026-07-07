@@ -1,0 +1,75 @@
+---
+id: china
+title: "Kinesiska leverantörer"
+description: "Konfigurera Qwen, DeepSeek, GLM, osv."
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [china providers, deepseek, qwen, glm, doubao, moonshot, mimo, minimax, baidu, siliconflow, huawei]
+concepts: [China Providers, DeepSeek, Qwen, Doubao, Moonshot, MiMo, GLM, MiniMax, Baidu, SiliconFlow, Huawei]
+citations:
+  - title: Qwen API
+    url: https://help.aliyun.com/zh/dashscope
+  - title: DeepSeek API
+    url: https://platform.deepseek.com
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# Kinesiska leverantörer
+
+<TLDR>
+**Notemd stöder leverantörer i Kina och med ursprung i Kina genom främst OpenAI-kompatibla slutpunkter.** Den nuvarande uppsättningen inkluderar DeepSeek, Qwen, Qwen Code, Doubao, Moonshot, Xiaomi MiMo, GLM, MiniMax, Baidu Qianfan, SiliconFlow, Huawei Cloud MaaS och Z AI. Värdet är regional tillgänglighet och kostkontroll; risken är leverantörsspecifika modellnamn och kontokontroller.
+
+Detta ingår i [Obsidian AI Knowledge Management Guide](/docs/pillar-ai-knowledge).
+</TLDR>
+
+## Inställning
+
+Skapa leverantörskontot, generera en API-nyckel, och välj sedan den motsvarande Notemd-presettet istället för att använda ett generiskt OpenAI-profil. Presetet innehåller standarden Base URL, modell, API-testläge, modellupptäcktsbeteende samt alla leverantörsspecifika UI-fält.
+
+Använd aggressiv modellval för varje uppgift här. Till exempel håll DeepSeek eller GLM vid arbetsflöden med mycket resonemang, använd Qwen eller Moonshot för breda kinesiska språkuppgifter, och dirigera kodningstasker till Qwen Code när det kontot exponerar kodermodeller.
+
+## Endpoint och autentisering
+
+| Leverantör | Standardmodell | Base URL |
+|----------|---------------|----------|
+| DeepSeek | `deepseek-v4-pro` | `api.deepseek.com` |
+| Qwen | `qwen3-235b-a22b` | `dashscope.aliyuncs.com/compatible-mode/v1` |
+| Qwen Code | `qwen3-coder-plus` | `dashscope.aliyuncs.com/compatible-mode/v1` |
+| Doubao | (krävs slutpunkts-ID) | `ark.cn-beijing.volces.com/api/v3` |
+| Moonshot | `kimi-k2-0905-preview` | `api.moonshot.cn/v1` |
+| Xiaomi MiMo | `mimo-v2.5-pro` | `api.xiaomimimo.com/v1` |
+| GLM | `glm-5` | `open.bigmodel.cn/api/paas/v4` |
+| MiniMax | `MiniMax-M2.7` | `api.minimaxi.com/v1` |
+| Baidu Qianfan | `ernie-4.5-turbo-32k` | `qianfan.baidubce.com/v2` |
+| SiliconFlow | `Qwen/QwQ-32B` | `api.siliconflow.cn/v1` |
+| Huawei Cloud MaaS | `DeepSeek-V3` | `api.modelarts-maas.com/v1` |
+| Z AI | `glm-5` | `api.z.ai/api/paas/v4` |
+
+**Obs!** Doubao kräver ett Ark-slutpunkts-ID (format: `ep-xxxxxxxx-xxxx-xxxx`) istället för en standardmodellnamn.
+
+De flesta av dessa leverantörer använder den delade OpenAI-kompatibla körmiljön, men deras konto- och modellsemantik skiljer sig. Håll den presettspecifika Base URL om du inte har verifierat kontotets alternativa slutpunkt.
+
+## Modellupptäckt
+
+DeepSeek, Qwen, Qwen Code, Doubao, Moonshot, Xiaomi MiMo, GLM, Z AI, MiniMax, Baidu Qianfan och SiliconFlow använder OpenAI-kompatibell modellupptäckt när leverantören stöder listning. Huawei Cloud MaaS använder `huaweicloud-modelarts-models`-läget eftersom ModelArts-deployeringsmetadatan inte är identisk med en generisk `/v1/models`-lista.
+
+Behandla misslyckanden vid upptäckt inte som bevis på att chatt är omöjlig. Flera leverantörer tillåter chatt samtidigt som de begränsar rättigheterna till modelllistor. I så fall håll en explicit modell-ID i profilen och validera med anslutningstestet.
+
+## Felaktighetsfelsökning
+
+- Autentiseringen lyckas men chatten misslyckas: modellnamnet kan ligga utanför kontotets rättigheter eller region.
+- Doubao misslyckas med en vanlig modellnamn: använd Ark-slutpunkts-ID:t i modellfältet när din deployment kräver det.
+- Resonemangsresponser är avklippta: kontrollera leverantörsspecifika maximala utdata-token samt Notemd-s modellmedvetna maximala-tokeninställningar.
+- Regional nätverk skiljer sig: använd leverantörens Kina-regionslutpunkt när vault-maskinen finns i Kina; använd den internationella slutpunkten endast när både kontot och nätverksvägen är giltiga.
+
+## När att använda
+
+Använd kinesiska leverantörer när regional latens, betalnings-/kontoåtkomst, kinesisk språkkvalitet eller kostnad är den huvudsakliga begränsningen. Välj direkta OpenAI, Anthropic, Google eller lokala leverantörer om du behöver en enklare protokollgräns eller starkare enhetlighet vid felsökning mellan olika leverantörer.
+
+---
+
+## Nästa steg
+
+- [LLM Leverantörer](/docs/providers/overview) -- Full konfiguration, modeller per uppgift och återförsöklogik
+- [Felsökning](/docs/advanced/troubleshooting) -- Lägg till räddning på regionala anslutnings- och autentiseringsfel

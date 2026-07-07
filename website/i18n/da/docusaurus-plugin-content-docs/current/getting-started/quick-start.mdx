@@ -1,0 +1,181 @@
+---
+id: quick-start
+title: "Snabbstartguide"
+description: "Start med Notemd på 5 minutter"
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [quick start, tutorial, getting started, first steps]
+concepts: [Quick Start, LLM Configuration, One-Click Workflow, Ollama]
+citations:
+  - title: Obsidian
+    url: https://obsidian.md
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# Snabbstartguide
+
+<TLDR>
+**Begynd at bruge Notemd på 5 minutter.** Tre trin: (1) Tilføj en LLM API-klæde (eller brug lokal Ollama), (2) Åbne en note og køre "Process file (add links)", (3) Udforske en-klik-virksomheder i sidebaren. Støder over 30 leverandører. Ingen kodning nødvendig. Virker offline med Ollama.
+</TLDR>
+
+## Trin 1: Konfigurér din første LLM-leverandør (2 minutter)
+
+### Option A: Cloudleverandør (OpenAI, Anthropic osv.)
+
+1. Åbne **Settings** → **Notemd**
+2. Under **LLM-leverandørskonfiguration** vælg en leverandør fra dropdown-listen
+3. Indtast din **API-klæde**
+4. (Valgfrit) Klik på **"Get Model List"** for at se de tilgængelige modeller
+5. Vælg en modell for hver opgavetyp
+
+**Populære valg:**
+- **OpenAI**: `gpt-4o-mini` (snart, billig)
+- **Anthropic**: `claude-sonnet-4-6` (høj kvalitet)
+- **DeepSeek**: `deepseek-chat` (mye billig)
+
+### Option B: Lokal Ollama (Ingen API-klæde nødvendig)
+
+1. Installér [Ollama](https://ollama.com/)
+2. Download en modell: `ollama pull llama3.1`
+3. I Notemd indstillingerne, vælg **"Ollama"** som leverandør
+4. Modellnavn: `llama3.1` (eller enhver modell du har downloadet)
+
+## Trin 2: Prøv din første opgave (1 min)
+
+### Føj Wiki-linker til en note
+
+1. Åbne enhver note med meningsfuld indhold
+2. Højreklik i editoren
+3. Vælg **"Processer fil (føj linker)"**
+4. Vente nogle sekunder
+5. Kernbegreberne er nu `[[wiki-linked]]`!
+
+**Eksempel:**
+
+**Forud:**
+```
+Machine learning models use neural networks to process data.
+```
+
+**Efter:**
+```
+[[Machine learning]] models use [[neural networks]] to process data.
+```
+
+## Trin 3: Udforsk funktioner (2 min)
+
+### Udtak af konceptnoter
+
+1. Højreklik → **"Udtak koncept fra aktuelle fil"**
+2. Notemd skaber separate filer for hver koncept
+3. Kontroller din konfigurerede konceptmappe (standard: `concepts/`)
+4. Hver konceptnote har en baklink til din oprindelige note
+
+### Forsk og sammanfatt
+
+1. Highlighter en emne i din note
+2. Højreklik → **"Forsk og sammanfatt"**
+3. Notemd forespørger websearch (Tavily eller DuckDuckGo)
+4. Sammenfattelsen tilføjes til din note med kilder
+
+### En-klik-virksomheder
+
+1. Kig på **venstre sidebaren** for virksomhedsknapper
+2. Klik på **"En-klik-uddrag"** i enhver note
+3. Det køres: tilføj links → uddrag koncepter → forsøg → generer diagram
+4. Allt i én klik!
+
+## Vanlige første opgaver
+
+### Opgave 1: Behandle en artikel/papir
+
+```
+1. Paste article content into a note
+2. Run "Process file (add links)"
+3. Run "Extract concepts"
+4. Run "Research and summarize" on unfamiliar terms
+5. Run "Summarize as Mermaid diagram" for visual structure
+```
+
+### Opgave 2: Oversætte noter
+
+```
+1. Highlight text to translate
+2. Right-click → "Translate to target language"
+3. Set target language in settings first
+```
+
+### Opgave 3: Skabe en kunstnemskort
+
+```
+1. Process 5-10 related notes with "add links"
+2. Run "Extract concepts" on each
+3. Open Graph view to see connections
+4. Your knowledge graph is forming!
+```
+
+## Tips til anpassning
+
+### Modellval per opgave
+
+Du kan bruge forskellige modeller for forskellige opgaver:
+
+| Opgave | Anbefales modell | Hvorfor |
+|------|------------------|-----|
+| Tilføj links | `gpt-4o-mini`, `deepseek-chat` | Snabb, mange kaller |
+| Udtræk koncepter | `claude-sonnet-4-6`, `gpt-4o` | Høj kvalitet ved udtrækning |
+| Forskning | `perplexity`, `gpt-4o` | Web-baseret |
+| Oversætning | `gemini-flash`, `gpt-4o` | Flerspråkigt |
+| Diagrammer | `claude-opus`, lokal modell | Kompleks resonemang |
+
+Konfigurér i: **Indstillinger → Notemd → Modeller til specifikke opgaver**
+
+### Egen arbejdsmæssig processer
+
+Skab din egen knap:
+
+1. Indstillinger → Notemd → Arbejdsmæssig processer
+2. Klik på "Tilføj arbejdsmæssig process"
+3. Indtast DSL: `process-current-add-links>extract-concepts-current>research-and-summarize`
+4. Navngiv det: "Min Forskningsflød"
+5. En ny knap vises i sidemenuet
+
+## Felsøgning
+
+### "API Key Invalid"
+- Kontroller, om nøkken er korrekt (ingen ekstra rum)
+- Verificer, om kontoen har kreditter
+- Prøv med "Connection Test"-knappen i indstillingerne
+
+### "Model Not Found"
+- Klik på "Get Model List" for at se de tilgængelige modeller
+- Nogle leverandører kræver specifikke modellnamner (f.eks. `gpt-4o` ikke `gpt-4`)
+
+### Linkerne vises ikke
+- Sikrer dig, at noten har nok indhold (>50 ord)
+- Prøv en mere kraftig modell
+- Kontroller, om LLM-kallen lykkedes (se diagnostics panel)
+
+### Langsomm performance
+- Brug hurtigere modeller (`gpt-4o-mini` i stedet for `gpt-4o`)
+- Redskærmlæg størrelsen i indstillingerne
+- Aktiver parallel bearbejdning for batch-opgaver
+
+## Næste trin
+
+- 📖 [Udforsk alle funktioner](../features/wiki-links)
+- ⚙️ [Avanceret konfiguration](./configuration)
+- 🔧 [LLM Provider-indstilling](../providers/overview)
+- ❓ [FAQ](../faq)
+
+## Videotutorial
+
+Se den 3-minutters hurtigstartvideon (kinesisk):
+[【Fullt åbent og gratis! NotEMD 3 minutter i sekunder】](https://b23.tv/lqR0RlA)
+
+## Få hjælp
+
+- 💬 **Discord**: [discord.gg/qnGgsQ9W](https://discord.gg/qnGgsQ9W)
+- 🐛 **Problemer**: [GitHub Issues](https://github.com/Jacobinwwey/obsidian-NotEMD/issues)
+- 📚 **Dokumentation**: [Komplet dokumentation](https://jacobinwwey.github.io/obsidian-NotEMD/)

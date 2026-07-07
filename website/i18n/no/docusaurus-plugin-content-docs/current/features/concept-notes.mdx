@@ -1,0 +1,184 @@
+---
+id: concept-notes
+title: "Konseptnotater"
+description: "Generer og administrere konseptnotater – uavhengige notater for nøkkelkonsepter som er utvidet fra din vault"
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [concept notes, knowledge extraction, concept folder, deduplication, backlinks]
+concepts: [Concept Notes, Knowledge Graph, LLM Extraction, Deduplication, Backlinks]
+citations:
+  - title: Obsidian
+    url: https://obsidian.md
+  - title: Zettelkasten Method
+    url: https://zettelkasten.de
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# Konseptnotater
+
+<TLDR>
+**Notemd tar ut nøkkelkonsepter fra dine notater og skaper uavhengige konseptnotatfiler.** LLM identifiserer kjentegn, genererer én `.md` fil per konsept i en konfigurerbare mappe, og kan tilfeldigvis legge til baklenger til den opprinnelige notaten. Støtter synonymsuppresjon, valg av modell per oppgave, sanitering av filnamn og en 4-trinnig deduplikasjonsmotor. Dette er en del av [Obsidian AI Knowledge Management Guide](/docs/pillar-ai-knowledge).
+</TLDR>
+
+## Oversikt
+
+Konseptnotater er byggstenene i en koblet kunnskapsbas. Når du bearbeider en notat, Notemd:
+
+1. **Sender din tekst til en LLM** med en strukturert utvidingsprompt
+2. **Parserer `CONCEPT:` linjer** fra LLM svar
+3. **Skaper én `.md` fil per konsept** i en bestemt mappe
+4. **Legger til baklenger** til den opprinnelige notaten (hvis aktivert)
+
+## Hvordan det fungerer
+
+### Utvidingspipeline
+
+```
+Source Note → Split into Chunks → LLM per Chunk → Parse CONCEPT: Lines
+    → Deduplicate via Set → Create .md Files → Add Backlinks
+    → (Optional: Generate Log)
+```
+
+### Utvidingsprompten
+
+LLM mottar en prompt som instruerer det til å:
+
+- Utvidle **substantiver eller substantivphrase** som er sentrale for dokumentets tema
+- **Prioritere spesifisitet** – "Dielectric Relaxation" fremfor "Relaxation"
+- **Normalisere til singular** – "models" blir "model"
+- **Suppresjon av underkonsepter** – hvis "dielectric relaxation" aparerer, utvidle ikke også "relaxation"
+- **Slett** referanser/bibliografiavsnitt, vanlige substantiver, selskaps-/produktnavn
+- Utskriv én konsept per linje som `CONCEPT: Term Name`
+
+**Undertrykk synonymer** (valgfritt): førstegjør "Unngå å extrahere synonymer, semantisk liknende kjernekonsepter eller nøkkelord når mulig" til oppgaven.
+
+**Fokusert læringdomen** (valgfritt): førstegjør `Relevant Fields: [domain]` for å begrense extraksjonen til en disciplin.
+
+**Språksoverstilling** (valgfritt): lagter til "Utskrivekonseptene MÅ være på [språk]."
+
+### Deling i deler
+
+Lange notater delges med `settings.chunkWordCount`. Hver del sendes separat. Konseptene fra alle deler samles inn i en `Set` — duplikater mellom deler fjernes tyst. LLM-feil i enkelte deler stopper ikke prosessen.
+
+## Skapelse av konseptnotater
+
+### Regler for filnamn
+
+| Regel | Verdien |
+|------|----------|
+| Strikker/underskriver | Erstattes med rom |
+| Spesielle tegn | Fjernet: bakstrig, fremstrig, kolon, stjjerne, spørsmålstecken, kutter, hornbracker, rør, hash, caret, bracker |
+| Whitespace | Kollapsert og trimmet |
+| Maksimal lengde | 100 tegn (klippet + endret til lengde) |
+| Tomt/all-punktresultat | Ignoreret i stilhed |
+
+Eksempel: `A-B: Key*Term` blir `A B KeyTerm.md`
+
+### Mallar
+
+**Fullt mall** (baklinker aktivert, minimal mall av):
+
+```markdown
+# Concept Name
+
+## Linked From
+- [[SourceNoteBasename]]
+```
+
+**Minimalt mall** (når `extractConceptsMinimalTemplate: true`):
+
+```markdown
+# Concept Name
+```
+
+### Oppdatering av eksisterende notater
+
+Når en konseptfil allerede eksisterer:
+
+1. Hvis baklinker er aktiveret og kilden ikke allerede er oppgitte, tilføyg en baklink
+2. Hvis en `## Linked From`-seksjon eksisterer, førställ den før næste `##`-overskrift
+3. Hvis det ikke finnes noen `## Linked From`, tilføyg en sekvensjon i slutten
+4. Dupliserte baklinker blir kontrollert og oversettet
+
+### Konfigurasjon
+
+| Innstilling | Standard | Effekt |
+|---------|---------|--------|
+| `useCustomConceptNoteFolder` | `true` | Hovedslått på/slett. Slått av = ingen notater skapt |
+| `conceptNoteFolder` | `''` (inaktiveret) | Mappvei for konseptnotater |
+| `extractConceptsMinimalTemplate` | `true` | Notater med bare titel (ingen Linked From) |
+| `extractConceptsAddBacklink` | `false` | Legg til baklenger under fristående extraksjon |
+| `extractConceptsProvider` / `extractConceptsModel` | DeepSeek | LLM per oppgave for konseptextraksjon |
+| `extractConceptsLanguage` | `'en'` | Utdata-språk for konseptnamn |
+| `replaceSynonymsDuringConceptExtraction` | `false` | Aktiver synonymsuppresjon i prompten |
+| `generateConceptLogFile` | `false` | Skriv en `.log`-liste over skapte konsepter |
+
+**Viktig:** Innstillingene `extractConceptsAddBacklink` og `extractConceptsMinimalTemplate` påvirker kun **den dedikerte extraksjonskommandoen**. Kommandot "Legg til linker" skaper alltid notater med fullt mall og baklenger.
+
+## Deduplisering
+
+Dedup-kommandot (`Notemd: Check & remove duplicate concept notes`) utfører en 5-trinnig analyse:
+
+### Trinn 1: Nøyaktig filnavnsmatch
+
+Jegnskiftsløs sammenligning av basnamn innenfor konfigurert område.
+
+### Trinn 2: Deteksjon av pluralform
+
+Fjerner suffixer: `-ies` til `-y`, `-es` fjernet, `-s` fjernet. Sammenligner singularformen med filene i området. Hanterer ikke uregulære pluraler (children/child).
+
+### Trinn 3: Normalisering av symboler
+
+Gelder for: `toLowerCase()`, erstatt hypper-/understreker med mellomrom, fjerne ikke-alfanumeriske tegn, samle sammen mellomrom. Elementer som normaliseres på samme måte mærkes.
+
+### Trinn 4: Enordig innehold
+
+Enordige konseptnotater kontrolleres mot basenavner for flere ord. Kjøres ikke når området er `concept_folder_only`.
+
+### Trinn 5: Bekreftelse og slettning
+
+Alle kandidater vises i en bekreftelsesmodus. Godkjente elementer flyttes til systemets skrappemappe. Operasjonen kan annulleres mellom hver slettning.
+
+### Områdemoder
+
+| Modus | Jegløres mot |
+|------|-------------------|
+| `vault` (standard) | Alle `.md`-filer i vaultet utenfor konseptmappen |
+| `concept_folder_only` | Ande konseptnotater innenfor mappen |
+| `include` | Filer i spesifikke oppgitte mapper |
+| `exclude` | Alle vaultfiler utenfor konseptmappen + oppgitte mapper |
+
+## Bruk
+
+### Ekstraher konsepter (Standalone)
+
+1. Åpne en notat
+2. Kør **"Notemd: Ekstraher konsepter"** fra kommandoPaletteen
+3. Konseptnotater erstattes i den konfigurerte mappen
+
+### Utvinne og generere innhold
+
+**"Notemd: Utvinne konsepter og generere titler"** — utvinner konsepter, og kjører deretter "Generere fra titel" for hver notate i konseptmappen. Dette genererer innhold for **alle** konseptnotater i mappen, ikke bare de nylig skapte.
+
+### Skape wiki-link fra valg
+
+1. Hajre ut tekst i redaktoren
+2. Kjør **"Notemd: Skape wiki-link fra valg"**
+3. Teksten er innbundet i `[[...]]` og en konseptnotate blir skapt
+
+## Tips
+
+- **Ställ inn konseptmappen først** — uten den blir ingen notater skapt. En varningsmodus vises dersom den ikke er stillt.
+- **Bruk modeller per oppgave** — konseptutvinning fungerer godt med billigere modeller (GPT-4o-mini, DeepSeek). Bruk dyre modeller for forskning/oversettelse.
+- **Aktiver synonymsuppresjon** for tekniske domener der flere termer refererer til samme konsept.
+- **Fjerne duplikater regelmessig** — kjør dedup-kommandoen etter batchbehandling for å få opp nær-duplikater.
+- **Loggfilen overskrives** ved hver kjøring, ikke lagt til. Kopier den dersom du trenger tidligere resultater.
+
+---
+
+## Neste trinn
+
+- [Wiki-Links](./wiki-links) — Hvordan konsepter kobles innlignende
+- [Diagrams](./diagrams) — Visualisere konseptrelasjoner
+- [Workflows](./workflows) — Koble utvinning til andre oppgaver

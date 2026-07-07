@@ -1,0 +1,67 @@
+---
+id: openai
+title: "OpenAI"
+description: "Konfiguruj OpenAI (GPT-4, GPT-4o)"
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [openai, gpt-4o, provider, configuration]
+concepts: [OpenAI, GPT-4o, API Configuration]
+citations:
+  - title: OpenAI API
+    url: https://platform.openai.com
+  - title: GPT-4
+    url: https://openai.com/gpt-4
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# OpenAI Provider
+
+<TLDR>
+**OpenAI wykorzystuje wspólny transport kompatybilny z OpenAI.** Obecne ustawienia domyślne obejmują `gpt-4o`, `https://api.openai.com/v1`, `temperature: 0.5` oraz test połączenia `models-then-chat`. Użyj tej strony, gdy potrzebujesz dokładnej semantyki pól; skorzystaj z przeglądu [LLM Providers](/docs/providers/overview) do wyboru na poziomie kategorii.
+
+To jest część [Obsidian Przewodnika po zarządzaniu wiedzą AI](/docs/pillar-ai-knowledge).
+</TLDR>
+
+## Ustawianie
+
+Stwórz klucz OpenAI API, dodaj profil dostawcy `OpenAI` w ustawieniach Notemd i zachowaj domyślny Base URL, chyba że celowo wskazujesz na bramkę kompatybilną z OpenAI. Pole modelu może pozostać na `gpt-4o` do zadań ogólnych lub zostać zastąpione innym identyfikatorem modelu OpenAI, który twoje konto może wywołać.
+
+Używaj modeli specyficznych dla zadań w celu kontrolowania kosztów: zachowuj silniejsze modele do badań, wydobywania koncepcji i długiej restrukturyzacji; używaj tańszych lub szybszych modeli do tłumaczenia, sugestii linków i krótkich streszczeń.
+
+## Endpoint i autoryzacja
+
+| Pole | Obecna predefinicja |
+|-------|----------------|
+| Transport | `openai-compatible` |
+| Klucz API | Wymagane |
+| Base URL | `https://api.openai.com/v1` |
+| Domyślny model | `gpt-4o` |
+| Temperatura | `0.5` |
+| Test połączenia | `/models`, następnie `/chat/completions` |
+
+Notemd normalizuje bazowe URL kompatybilne z OpenAI przed dodaniem `chat/completions` lub `models`. Nie umieszczaj końcowego `/chat/completions` w Base URL; powoduje to duplikację ścieżki.
+
+## Odkrywanie modeli
+
+OpenAI wykorzystuje ogólną ścieżkę odkrywania modeli kompatybilną z OpenAI. Ustawienia UI najpierw pytają `/v1/models`, a następnie weryfikują wybrany model za pomocą lekkiej prośby o rozmowę. Jeśli odkrycie się nie uda, ale rozmowa nadal działa, sprawdź, czy twój klucz ma uprawnienia do listy modeli lub czy bramka blokuje wyświetlanie listy modeli.
+
+Modele rozumowania są traktowane jako przypadek krawędziowy protokołu: Notemd łączy treść promptu systemowego i użytkownika w celu utworzenia identyfikatorów rozumowania OpenAI, które odrzucają oddzielną rolę `system`, i udostępniają `reasoningEffort` tylko tam, gdzie definicja dostawcy to obsługuje.
+
+## Rozwiązywanie problemów
+
+- `401` lub `403`: sprawdź klucz, dostęp do projektu, stan fakturowania oraz to, czy wybrany model jest włączony dla tego klucza.
+- `404` w rozmowie: Base URL jest zazwyczaj błędny lub już zawiera `/chat/completions`.
+- Model pojawia się w dokumentacji, ale nie w selektorze: dostęp do listy modeli i dostęp do rozmowy to oddzielne punkty awarii; ręcznie sprawdź dokładny identyfikator modelu w profilu dostawcy.
+- Model rozumowania odrzuca wiadomości: użyj identyfikatora modelu objętego ścieżką obsługi rozumowania OpenAI lub przejdź na model rozmowy nierozumujący.
+
+## Kiedy używać
+
+Używaj OpenAI, gdy chcesz najprzewidywalniejszą domyślną ścieżkę hostowaną, gdy odkrywanie `/v1/models` jest ważne lub gdy proces pracy zależy od semantyki modelu rozumowania OpenAI. Wybieraj bramkę lub lokalnego dostawcę, gdy routing, prywatność lub kontrola kosztów są ważniejsze niż bezpośrednie zachowanie OpenAI API.
+
+---
+
+## Kolejne kroki
+
+- [LLM Providers](/docs/providers/overview) -- Pełna konfiguracja, modele na zadanie oraz logika ponawiania prób
+- [Rozwiązywanie problemów](/docs/advanced/troubleshooting) -- Naprawa błędów 401/403 i ograniczeń szybkości

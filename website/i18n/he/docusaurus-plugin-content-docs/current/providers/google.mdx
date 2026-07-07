@@ -1,0 +1,67 @@
+---
+id: google
+title: "Google"
+description: "להגדיר Google Gemini"
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [google, gemini, provider, configuration]
+concepts: [Google, Gemini, API Configuration]
+citations:
+  - title: Gemini API
+    url: https://ai.google.dev
+  - title: Google AI Studio
+    url: https://aistudio.google.com
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# Google Provider
+
+<TLDR>
+**Google משתמש במערכת ההעברה המובנית של שפת הייצור Gemini API.** ההגדרות המוגדרות מראש משתמשות באופן אוטומטי ב-`gemini-2.0-flash-exp`, `https://generativelanguage.googleapis.com/v1` ו-`temperature: 0.5`. זה אינו פרופיל תואם OpenAI.
+
+זהו חלק מה[Obsidian מדריך ניהול ידע AI](/docs/pillar-ai-knowledge).
+</TLDR>
+
+## הגדרה
+
+ליצור מפתח Cloud API של Google AI Studio או Google עם גישה ל-Gemini, להוסיף פרופיל ספק `Google`, ולשמור על הבסיס של שפת הייצור המובנית URL. השתמשו בפרופיל Gemini Flash המוגדר מראש לתרגום מהיר ולעבודות עם הערות נרחבות, ואז שנו את המודלים לפי משימה כאשר נדרש מודל Gemini גדול יותר או בעל יכולות גבוהות יותר.
+
+הימנעו מהכנסת מזהי מודלי Gemini לפרופיל תואם OpenAI אלא אם כן אתם משתמשים באופן מפורש בשער שמציג את Gemini דרך API תואם OpenAI.
+
+## קצה ואימות
+
+| שדה | ההגדרה הנוכחית |
+|-------|----------------|
+| תשלוח | `google` |
+| מפתח API | נדרש |
+| Base URL | `https://generativelanguage.googleapis.com/v1` |
+| מודל ברירת המחדל | `gemini-2.0-flash-exp` |
+| טמפרטורה | `0.5` |
+| בדיקת חיבור | רק שיחה |
+
+הביצועים מקראים את `/models/{model}:generateContent?key={apiKey}`. המפתח נמסר כפרמטר של שאילתה מכיוון שזו הדרך שבה נקשר קצה Gemini המובנית בתוסף.
+
+## גילוי מודלים
+
+Google משתמש במודול הגילוי `google-models`. הגילוי צריך להחזיר את מודלי Gemini הזמינים למפתח API; אם הבוחר ריק, בדקו את המפתח כנגד אותו בסיס URL ווודאו שמשפחת המודלים מאושרת עבור החשבון.
+
+הגבולות הידועים של טוקני הפלט תלויים במודל ברשומת הספקים. אם תרגום ארוך או הסבר של תרשים נקטע, בחרו מודל Gemini עם קיבולת פלט גדולה יותר או הפחיתו את גודל הפלט המבוקש.
+
+## פתרון בעיות
+
+- `400`: מזהה המודל בדרך כלל אינו תואם לנתיב המובנית של Gemini או הבקשה חורגת מהצורה התומכת של המודל.
+- `401` או `403`: בדקו את המגבלות של המפתח, את ההפעלה של הפרויקט/API, והאם המפתח יכול לגשת ל-Gemini.
+- `404`: מזהי המודל אינה זמינה בגרסה API המוגדרת.
+- דוגמאות של שערים כושלות תחת פרופיל זה: השתמשו בהגדרה של שער במקום בספק המובנית Google.
+
+## מתי להשתמש
+
+השתמשו ב-Google לתרגום מהיר, לניקוי הערות בכמויות גדולות, ולעבודות שבהן האיזון בין עלות לביצועים של Gemini טוב יותר מאשר OpenAI או Anthropic ישירים. העדיפו ספק אחר לעבודות שדורשות טיפול במודלי היגיון תואמי OpenAI.
+
+---
+
+## צעדים באופק
+
+- [LLM Providers](/docs/providers/overview) -- תצורה מלאה, מודלים לכל משימה, ולוגיקת ניסיונות חוזרים
+- [תרגום](/docs/features/translation) -- Gemini Flash מומלץ למשימות תרגום בכמויות גדולות

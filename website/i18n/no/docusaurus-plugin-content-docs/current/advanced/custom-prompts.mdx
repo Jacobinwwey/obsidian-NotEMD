@@ -1,0 +1,134 @@
+---
+id: custom-prompts
+title: "Skrivetilpassede prompter"
+description: "Tilpasse LLM promptene til dine behov"
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [custom prompts, prompts, focused learning, domain]
+concepts: [Custom Prompts, Focused Learning, Prompt Engineering]
+citations:
+  - title: Obsidian
+    url: https://obsidian.md
+  - title: LLM Prompt Engineering
+    url: https://platform.openai.com/docs/guides/prompt-engineering
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# Skrivetilpassede prompter
+
+<TLDR>
+**Notemd gjør det mulig å overskrive den standard LLM prompten for hver typ av oppgave.** Skrivetilpassede prompter gir deg kontroll over hva modellen prioriterer: du kan begrense konseptutvinning til en spesifikk disciplin, endre koblingsstilen eller rette om oversettelsestonen. Promptvariabler som `{{content}}` og `{{concept}}` erstattes ved kjøring. Funktionaliteten for fokusert læring domener legger til din studieområde for å automatisk begrense utvinningresultatene.
+
+Dette er en del av [Obsidian AI Knowledge Management Guide](/docs/pillar-ai-knowledge).
+</TLDR>
+
+## Oversikt
+
+De innebygde promptene for Notemd er skrevet for allmennbrukskunnskapstjenester. De fungerer godt over ulike domener, men de lar også rom for tilpasninger spesifikt for en domen. Skrivetilpassede prompter lar deg si til LLM nøyaktig hvordan den skal handle for din brukssituasjon – enten det handler om å utvinne kun medisinsk terminologi, kun navngitt entiteter eller oversette i en formell stil.
+
+Skrivetilpassede prompter er ikke en ersättning for hele systemprompten. De overskriver eller tilbyr ytterligere informasjon i **oppgavespesifiske instruksjonsdeler** samtidig som de bevarer den strukturelle utdataformaten (f.eks. `CONCEPT:`-linjer, wiki-koblingssyntax) som Notemd trenger for å parse.
+
+## Hvordan det fungerer
+
+### Promptarkitektur
+
+Hver Notemd-oppgave følger samme promptstruktur:
+
+```
+[System role: You are a helpful assistant...]
+[Domain constraint: Relevant Fields: [{domain}]]   <-- focused learning (optional)
+[Custom task prompt]                                <-- your override (optional)
+[Output format instructions]                        <-- always preserved
+[Content: {{content}}]                              <-- runtime substitution
+```
+
+1. **Grunnsystemprompt** -- Setter assistentens persona. Uoverskrivelig.
+2. **Fokusert læring domener** -- Legger til `Relevant Fields: [medicine / law / computer science / ...]` for å begrense omfanget. Dette er en slå-av-knapp, ikke en raw prompt.
+3. **Skrivetilpasset oppgaveprompt** -- Ersetter de standardoppgav instruksjonene (f.eks. hvilke konsepter som skal utvinnes, hvor aggressivt man skal koble).
+4. **Utdataformat** -- Strukturelle regler (`CONCEPT:`-linjer, wiki-koblingsformat). Alltid lagt til av Notemd for å sikre parsebarhet.
+5. **Innehold** -- Den faktiske teksten, erstattet ved kjøring gjennom `{{content}}`.
+
+### Promptvariabler
+
+Variabler erstattes ved utføringstid. Tilgjengelige variabler varierer etter oppgave:
+
+| Variable | Oppgaver | Erstatte med |
+|----------|-------|---------------|
+| `{{content}}` | Alle | Notatet eller valgt tekst |
+| `{{concept}}` | Mall for konseptnotat | Det extraherte konseptnavnet |
+| `{{description}}` | Mall for konseptnotat | Beskrivelse av konsept generert av LLM |
+| `{{backlinks}}` | Mall for konseptnotat | Liste over kilde-notater med lenker |
+| `{{date}}` | Mall for konseptnotat | Dagens dato (YYYY-MM-DD) |
+| `{{language}}` | Oversettelse | Mål-språk for utdata |
+| `{{source}}` | Mall for konseptnotat | Basenavn på kilde-notaten |
+
+### Fokusert læringssområde
+
+Funktionen for fokusert læring er en genväg til å definere område. Istedenfor å skrive en egenskapt innlegg som nevner ditt felt, setter du `focusedLearningDomain` i innstillingene:
+
+```
+Settings → Advanced → Focused Learning Domain
+Example: "medicine" or "computer science" or "Chinese philosophy"
+```
+
+Dette fører inn `Relevant Fields: [medicine]` i utvinningsspørsmålet, noe som får LLM til å prioritere konsepknyttet til domenet og undertrykke generiske konsep. Det er lettere enn en fulle, egne spørsmålsskema og fungerer for alle utvinningstegninger.
+
+## Konfigurasjon
+
+| Innstilling | Standard | Effekt |
+|---------|---------|--------|
+| `customAddLinksPrompt` | `''` | Överskriv standardinnstillingen for oppgavebeskjedet ved å legge til lenker |
+| `customExtractConceptsPrompt` | `''` | Överskriv standardinnstillingen for konseptutvinning |
+| `customResearchPrompt` | `''` | Överskriv standardinnstillingen for forskning + sammanfatta innkall |
+| `customTranslatePrompt` | `''` | Överskriv standardoversettelsesprompten |
+| `customDiagramPrompt` | `''` | Överskriv standardinnstillingen for diagramgenerering |
+| `focusedLearningDomain` | `''` | Først tilføyg disciplinkontekst til utvinning- og koblingsoppgaver |
+| `extractConceptsMinimalTemplate` | `true` | Bruk kun titell-innehåndsnotat-mallen (hvorfor det påvirker `{{concept}}`-mallens omfang) |
+| `customConceptNoteTemplate` | `''` | Överskriv mallen for konseptnotat-filen med full støtte for variabler |
+
+**Når et egent skrivefelt er tomt, brukes den innebygde standardinnstillingen.**
+
+## Eksempel
+
+Du er en medisinsk forsker som tar ut konsepter fra protokoller for kliniske prøver. Den standardmæssige instruksjonen tar ut generelle substantiver sammen med medisinske termer, hvilket overflader din konsepmapp.
+
+**Løsning:** Ställ in en fokusert læringdomen og en anpasset utvinningsspørsmål.
+
+1. Ställ in `focusedLearningDomain` på `medicine`
+2. Ställ in `customExtractConceptsPrompt` til:
+
+```
+Extract only clinically relevant concepts: diseases, drug names,
+anatomical terms, measurement endpoints, and statistical methods.
+Ignore generic English nouns, brand names, and institutional names.
+Prioritize MeSH terminology where applicable.
+```
+
+Nå når du kjører "Extract concepts" på en klinisk notat, genererer LLM:
+
+```
+CONCEPT: Randomized Controlled Trial
+CONCEPT: Double-Blind Method
+CONCEPT: Myocardial Infarction
+CONCEPT: Creatine Kinase-MB
+CONCEPT: Kaplan-Meier Estimate
+```
+
+I stedet for den standardverdien som også kan extrahere uønskede generiske termer som "hospital" eller "month".
+
+## Tips
+
+- **Start med den fokuserte læringdomenet** før du skriver en fullstendig brukerskreddersydd prompt. Det dekker 80% av brukemålene med én innstilling.
+- **Bevar utdataformatet** -- Fjern aldri formatinstruksjoner som "one per line" eller "CONCEPT: prefix" fra brukerskreddersyddede prompter. Notemd's parser er avhengig av dem.
+- **Prøv først med en enkelt notat** -- Brukerskreddersyddede prompter kan ha uforutsette effekter på utvidelsen av extraksjonen. Sjekk på én notat før batchbehandling.
+- **Hold promptene kort** -- Overlang brukerskreddersyddede prompter bruker tokener og kan forsvakte modellenes fokus.
+
+---
+
+## Neste trinn
+
+- [Wiki-Links](/docs/features/wiki-links) -- Vad som kobles sammen når du anpasser add-links prompten
+- [Concept Notes](/docs/features/concept-notes) -- Konseptnotattempler og `{{concept}}`-variabelen
+- [Batch Processing](/docs/advanced/batch-processing) -- Bruk brukerskreddersyddede prompter på hele mappene
+- [Troubleshooting](/docs/advanced/troubleshooting) -- Løs problemer der brukerskreddersyddede prompter gir uforutsett utdata

@@ -1,0 +1,435 @@
+---
+id: configuration
+title: "कॉन्फ़िगरेशन"
+description: "Notemd की सेटिंग्स एवं प्राथमिकताओं को कॉन्फ़िगर करें"
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [configuration, settings, customization, preferences]
+concepts: [Configuration, Per-Task Models, Output Paths, Custom Workflows]
+citations:
+  - title: Obsidian
+    url: https://obsidian.md
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# कॉन्फ़िगरेशन
+
+<TLDR>
+**Notemd कॉन्फ़िगरेशन 6 मुख्य क्षेत्रों को कवर करता है:** (1) LLM प्रोवाइडर एवं API कुंजियाँ, (2) प्रति-कार्य मॉडल चयन, (3) आउटपुट पथ एवं टेम्पलेट, (4) UI भाषा एवं आउटपुट भाषा, (5) खोज सेवाएँ (Tavily/DuckDuckGo), (6) कस्टम वर्कफ़्लो। सभी सेटिंग्स Obsidian Settings → Notemd में हैं। परिवर्तन तुरंत प्रभावी हो जाते हैं.
+</TLDR>
+
+## सेटिंग्स अवलोकन
+
+पहुँच: **Obsidian Settings (⚙️) → Notemd**
+
+### मुख्य विभाग
+
+1. **प्रोवाइडर कॉन्फ़िगरेशन** — API कुंजियाँ, बेस URLs, मॉडल
+2. **कार्य सेटिंग्स** — प्रति-कार्य मॉडल चयन
+3. **आउटपुट कॉन्फ़िगरेशन** — जहाँ जेनरेट किए गए फ़ाइलों को सहेजा जाता है
+4. **भाषा सेटिंग्स** — UI एवं आउटपुट भाषाएँ
+5. **खोज एकीकरण** — Tavily/DuckDuckGo सेटअप
+6. **वर्कफ़्लो** — कस्टम बटन श्रृंखलाएँ
+7. **उन्नत** — डायग्नोस्टिक्स, बैच प्रोसेसिंग, चंकिंग
+
+---
+
+## 1. प्रोवाइडर कॉन्फ़िगरेशन
+
+### प्रोवाइडर जोड़ना
+
+1. ड्रॉपडाउन से **प्रोवाइडर चुनें** (30+ उपलब्ध)
+2. **API कुंजी दर्ज करें**
+3. **वैकल्पिक**: कस्टम बेस URL सेट करें (प्रॉक्सी/गेटवे के लिए)
+4. **‘Get Model List’ पर क्लिक करें** ताकि कनेक्शन की जाँच हो सके
+5. **डिफ़ॉल्ट मॉडल चुनें**
+
+### सामान्य प्रदाता
+
+#### OpenAI
+```
+Provider: OpenAI
+API Key: sk-...
+Base URL: https://api.openai.com/v1 (default)
+Model: gpt-4o-mini
+```
+
+#### Anthropic (Claude)
+```
+Provider: Anthropic
+API Key: sk-ant-...
+Model: claude-sonnet-4-6
+```
+
+#### Ollama (Local)
+```
+Provider: Ollama
+Base URL: http://localhost:11434 (default)
+Model: llama3.1
+API Key: (not required)
+```
+
+#### DeepSeek
+```
+Provider: DeepSeek
+API Key: sk-...
+Model: deepseek-chat
+```
+
+### बहुल प्रदाता
+
+आप कई प्रदाताओं को कॉन्फ़िगर कर सकते हैं एवं प्रत्येक कार्य के लिए उनके बीच स्विच कर सकते हैं:
+- **मुख्य प्रदाता**: फ़ॉलबैक के रूप में उपयोग होता है
+- **कार्य-विशिष्ट प्रदाता**: विशिष्ट कार्यों के लिए ओवरराइड किया जाता है
+
+---
+
+## 2. कार्य-विशिष्ट मॉडल
+
+लागत/गुणवत्ता को अनुकूलित करने हेतु विभिन्न कार्यों के लिए अलग-अलग मॉडल कॉन्फ़िगर करें:
+
+### कार्य प्रकार
+
+| कार्य | डिफ़ॉल्ट मॉडल | उद्देश्य |
+|------|--------------|---------|
+| **लिंकिंग** | मुख्य प्रदाता | विकि-लिंकों के लिए अवधारणाओं की पहचान करें |
+| **कॉन्सेप्ट जनरेशन** | मुख्य प्रदाता | अवधारणाओं को निकालें एवं वर्णन करें |
+| **अनुसंधान** | मुख्य प्रदाता | वेब खोज परिणामों का सारांश दें |
+| **अनुवाद** | मुख्य प्रदाता | पाठ का अनुवाद करें |
+| **डायग्राम जनरेशन** | मुख्य प्रदाता | Mermaid/Canvas आरेख बनाएँ |
+
+### उदाहरण: लागत-अनुकूल सेटअप
+
+```
+Linking: gpt-4o-mini (fast, many calls)
+Concept Generation: claude-sonnet-4-6 (quality extraction)
+Research: gpt-4o (web-grounded)
+Translation: gemini-flash (multilingual)
+Diagram: ollama/llama3.1 (free, local)
+```
+
+### कैसे कॉन्फ़िगर करें
+
+1. **सेटिंग्स → Notemd → टास्क सेटिंग्स**
+2. प्रत्येक टास्क के लिए, चुनें:
+   - ✅ **मुख्य प्रदाता का उपयोग करें** (डिफ़ॉल्ट)
+   - 🔄 **कस्टम प्रदाता का उपयोग करें** → प्रदाता + मॉडल चुनें
+
+---
+
+## 3. आउटपुट कॉन्फ़िगरेशन
+
+### अवधारणा नोट्स आउटपुट
+
+**नए कॉन्सेप्ट नोट्स कहाँ संग्रहीत होते हैं:**
+
+```
+Settings → Output → Concept Folder
+Default: concepts/
+```
+
+**टेम्पलेट:**
+```
+Settings → Output → Concept Template
+Default:
+---
+tags: [concept]
+created: {{date}}
+---
+
+# {{concept}}
+
+{{description}}
+
+## Backlinks
+{{backlinks}}
+```
+
+### फ़ोल्डर संरचना विकल्प
+
+**विकल्प 1: फ्लैट (सभी कॉन्सेप्ट एक ही फ़ोल्डर में)**
+```
+vault/
+└── concepts/
+    ├── Machine Learning.md
+    ├── Neural Networks.md
+    └── Deep Learning.md
+```
+
+**विकल्प 2: हायरार्किकल (स्रोत फ़ोल्डर के अनुसार)**
+```
+vault/
+├── papers/
+│   └── concepts/
+│       └── Transformer.md
+└── notes/
+    └── concepts/
+        └── Attention Mechanism.md
+```
+
+कॉन्फ़िगर करें: **Settings → Output → Use Hierarchical Folders**
+
+### डायग्राम आउटपुट
+
+**डायग्राम कहाँ संग्रहीत होते हैं:**
+```
+Settings → Output → Diagram Folder
+Default: diagrams/
+```
+
+**फ़ॉर्मेट:**
+- `.mmd` (Mermaid स्रोत)
+- `.canvas` (JSON Canvas)
+- `.html` (Vega-Lite)
+
+---
+
+## 4. भाषा सेटिंग्स
+
+### UI भाषा
+
+**इंटरफ़ेस भाषा** (बटन, मेनू, डायलॉग):
+
+```
+Settings → Language → UI Language
+Options: 21+ languages
+Default: System language
+```
+
+समर्थित: English, 简体中文, 繁體中文, 日本語, 한국어, Español, Français, Deutsch, Русский, العربية, एवं अन्य.
+
+### आउटपुट भाषा
+
+**जनरेटेड कंटेंट भाषा** (कॉन्सेप्ट नोट्स, अनुसंधान सारांश):
+
+```
+Settings → Language → Output Language
+Options: Same as UI languages
+Default: Same as UI
+```
+
+**उपयोग केस:** चीनी UI + अंग्रेजी आउटपुट द्विभाषी अनुसंधान के लिए.
+
+### अनुवाद लक्ष्य
+
+**अनुवाद कार्यों के लिए डिफ़ॉल्ट लक्ष्य भाषा:**
+
+```
+Settings → Translation → Target Language
+Default: English
+```
+
+---
+
+## 5. खोज एकीकरण
+
+### Tavily (अनुशंसित)
+
+**AI-ऑप्टिमाइज्ड खोज सेवा:**
+
+```
+Settings → Search → Service: Tavily
+API Key: tvly-...
+```
+
+Get key: [tavily.com](https://tavily.com/)
+
+**विशेषताएँ:**
+- उच्च गुणवत्ता वाले परिणाम
+- AI-ऑप्टिमाइज्ड सारांश
+- स्रोत संदर्भ
+
+### DuckDuckGo (प्रयोगात्मक)
+
+**कोई API कुंजी आवश्यक नहीं:**
+
+```
+Settings → Search → Service: DuckDuckGo
+```
+
+**नोट:** कम गुणवत्ता, कोई कस्टमाइजेशन नहीं.
+
+---
+
+## 6. वर्कफ्लो कॉन्फ़िगरेशन
+
+### कस्टम वर्कफ्लो बनाना
+
+**वर्कफ्लो, कई कार्यों को एक बटन में जोड़ते हैं.**
+
+1. **सेटिंग्स → वर्कफ्लो → वर्कफ्लो जोड़ें**
+2. **नाम**: "पेपर एनालिसिस फ्लो"
+3. **DSL**: `process-current-add-links>extract-concepts-current>research-and-summarize>summarize-as-mermaid`
+4. **सहेजें**
+
+बाएँ साइडबार में एक नया बटन दिखाई देता है.
+
+### DSL सिंटैक्स
+
+**फॉर्मेट:** `action1>action2>action3`
+
+**उपलब्ध क्रियाएँ:**
+- `process-current-add-links` — वर्तमान नोट में विकि-लिंक जोड़ें
+- `extract-concepts-current` — कॉन्सेप्ट नोट बनाएँ
+- `research-and-summarize` — वेब शोध + सारांश
+- `translate-current` — वर्तमान नोट का अनुवाद करें
+- `summarize-as-mermaid` — Mermaid आरेख बनाएँ
+- `process-folder-add-links` — फोल्डर को बैच में संसाधित करें
+
+**उदाहरण वर्कफ्लो:**
+
+**त्वरित अवधारणा निष्कर्षण:**
+```
+process-current-add-links>extract-concepts-current
+```
+
+**गहन अनुसंधान:**
+```
+process-current-add-links>research-and-summarize>extract-concepts-current
+```
+
+**बहुभाषी विश्लेषण:**
+```
+translate-current>process-current-add-links>extract-concepts-current
+```
+
+---
+
+## 7. उन्नत सेटिंग्स
+
+### बैच प्रोसेसिंग
+
+**समानांतर में कई फ़ाइलों को संसाधित करें:**
+
+```
+Settings → Advanced → Batch Processing
+Concurrency: 3 (default)
+```
+
+अधिक = तेज़, लेकिन अधिक API कॉल होती हैं.
+
+### स्मार्ट चंकिंग
+
+**लंबे नोट्स के लिए, उन्हें चंक्स में विभाजित करें:**
+
+```
+Settings → Advanced → Smart Chunking
+Chunk Size: 2000 words (default)
+Overlap: 200 words (default)
+```
+
+टोकन सीमा संबंधी त्रुटियों को रोकता है.
+
+### निदान पैनल
+
+**विस्तृत लॉग देखें:**
+
+```
+Settings → Advanced → Enable Diagnostics
+```
+
+दर्शाता है:
+- API अनुरोध/प्रतिक्रियाएँ
+- टोकन उपयोग
+- संसाधन समय
+- त्रुटियाँ
+
+### डुप्लिकेट अवधारणा पहचान
+
+**निकट-डुप्लिकेट अवधारणाओं से बचें:**
+
+```
+Settings → Advanced → Synonym Suppression
+Threshold: 0.8 (default, 0-1)
+```
+
+उच्च = अधिक आक्रामक मर्जिंग.
+
+---
+
+## कॉन्फ़िगरेशन प्रोफ़ाइल्स
+
+### एक्सपोर्ट/इम्पोर्ट सेटिंग्स
+
+**डिवाइसों के बीच कॉन्फ़िगरेशन साझा करें:**
+
+1. **सेटिंग्स → एडवांस्ड → एक्सपोर्ट कॉन्फ़िगरेशन**
+2. `notemd-config.json` को सहेजता है
+3. नए डिवाइस पर: **कॉन्फ़िगरेशन इम्पोर्ट करें**
+
+**इसमें क्या शामिल है:**
+- प्रोवाइडर API कुंजियाँ (वैकल्पिक)
+- मॉडल चयन
+- आउटपुट पथ
+- कस्टम वर्कफ्लोज़
+
+---
+
+## अनुशंसित कॉन्फ़िगरेशन्स
+
+### छात्रों के लिए
+
+```
+Provider: OpenAI (gpt-4o-mini)
+Concept Folder: concepts/
+UI Language: System
+Output Language: System
+Workflow: "Study Flow" (add-links>extract-concepts)
+```
+
+### शोधकर्ताओं के लिए
+
+```
+Providers:
+  - Linking: DeepSeek (cheap, many calls)
+  - Concepts: Claude Sonnet (high quality)
+  - Research: GPT-4o (web-grounded)
+Concept Folder: notes/concepts/
+Hierarchical: Yes
+Workflow: "Paper Flow" (add-links>extract>research>diagram)
+```
+
+### गोपनीयता के प्रति सजग उपयोगकर्ताओं के लिए
+
+```
+Provider: Ollama (llama3.1)
+All tasks: Local model
+Search: DuckDuckGo (no API)
+Diagnostics: Off
+```
+
+### द्विभाषी कार्य हेतु
+
+```
+UI Language: Chinese
+Output Language: English
+Translation Target: Chinese
+Provider: Gemini (multilingual)
+```
+
+---
+
+## कॉन्फ़िगरेशन संबंधी समस्याओं का समाधान
+
+### सेटिंग्स सहेजी नहीं गईं
+- `.obsidian/plugins/notemd/` में फ़ाइल अनुमतियों की जाँच करें
+- प्रयास करें: प्लगइन निष्क्रिय करें → पुनः सक्रिय करें
+
+### API कुंजी अमान्य है
+- कोई अतिरिक्त स्पेस नहीं
+- समाप्ति तिथि की जाँच करें
+- प्रदाता डैशबोर्ड में क्रेडिट्स की पुष्टि करें
+
+### मॉडल लोड नहीं हो रहे हैं
+- ताज़ा जानकारी हेतु "Get Model List" पर क्लिक करें
+- नेटवर्क कनेक्टिविटी की जाँच करें
+- अलग प्रदाता का प्रयास करें
+
+---
+
+## अगले चरण
+
+- 📖 [Explore Features](../features/wiki-links)
+- 🔌 [Provider Setup Guides](../providers/overview)
+- ❓ [FAQ](../faq)

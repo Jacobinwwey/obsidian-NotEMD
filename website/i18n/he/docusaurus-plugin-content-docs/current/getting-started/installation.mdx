@@ -1,0 +1,133 @@
+---
+id: installation
+title: "התקנה"
+description: "איך להתקין Notemd ב- Obsidian"
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [installation, setup, obsidian plugin]
+concepts: [Installation, Community Plugins, BRAT, Manual Install]
+citations:
+  - title: Obsidian
+    url: https://obsidian.md
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# התקנה
+
+<TLDR>
+**התקינו את Notemd תוך פחות מ-2 דקות.** שתי שיטות: (1) תוספי קהילה של Obsidian (מומלץ, התקנה בלחיצה אחת), או (2) התקנה ידנית דרך GitHub Releases. נדרשת גרסת Obsidian 0.15.0+ או חדשה יותר. עובד על Windows, macOS, Linux, iOS ו-Android. אין תלות בכלים חיצוניים. למעלה מ-4k הורדות, רישיון MIT.
+</TLDR>
+
+## שיטה 1: תוספי קהילה (מומלץ)
+
+1. פתחו **הגדרות של Obsidian** (אייקון ⚙️ או `Ctrl/Cmd + ,`)
+2. עברו ל-**תוספי קהילה**
+3. לחצו על **לחפש**
+4. חפשו **"Notemd"**
+5. לחצו על **להתקין**
+6. לחצו על **להפעיל**
+
+**הכל!** תראו את האייקון של Notemd בסרגל הצד השמאלי שלכם.
+
+## שיטה 2: התקנה ידנית
+
+### דרישות מוקדמות
+- גרסת Obsidian 0.15.0 או חדשה יותר
+- Git (אופציונלי, לצורך קלונים)
+
+### שלבים
+
+1. **הורד את הקבצים** מ-[GitHub Releases](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/latest):
+   - `main.js`
+   - `styles.css`
+   - `manifest.json`
+
+2. **מצא את תיקיית הפלגין של ה-vault שלך:**
+   ```
+   <your-vault>/.obsidian/plugins/
+   ```
+
+אם התיקייה `plugins` אינה קיימת, יצור אותה.
+
+3. **יצור תיקייה Notemd:**
+   ```
+   <your-vault>/.obsidian/plugins/notemd/
+   ```
+
+4. **העתק את שלושת הקבצים** לתיקייה `notemd`.
+
+5. **טעינה מחדש של Obsidian:**
+   - לחץ על `Ctrl/Cmd + R`, או
+   - הפעל מחדש את Obsidian
+
+6. **הפעלת הפלגין:**
+   - הגדרות → פלגינים של הקהילה
+   - מצא את "Notemd" ברשימה
+   - הפעל אותו
+
+## אלטרנטיבה: התקן דרך BRAT
+
+אם אתה משתמש ב[BRAT plugin](https://github.com/TfTHacker/obsidian42-brat):
+
+1. פתח את הגדרות BRAT
+2. לחץ על "הוסף תוסף בטא"
+3. הזן: `Jacobinwwey/obsidian-NotEMD`
+4. לחץ על "הוסף תוסף"
+5. הפעל את Notemd בתוספים של הקהילה
+
+## אימות
+
+לאחר ההתקנה, בדוק ש- Notemd פועל:
+
+1. פתח כל רשימת רשימות
+2. לחץ בכפתור הימני במערכת העריכה
+3. אתה אמור לראות פקודות Notemd כגון:
+   - "עיבוד קובץ (הוספת קישורים)"
+   - "שליפת רעיונות"
+   - "מחקר וסיכום"
+
+## צעדים באופק
+
+- **הגדר את ספק LLM:** [התחלה מהירה →](./quick-start)
+- **פתרון בעיות:** [בעיות נפוצות →](../advanced/troubleshooting)
+
+## דרישות המערכת
+
+| פלטפורמה | גרסה | מצב |
+|----------|---------|--------|
+| **Obsidian** | 0.15.0+ | נדרש |
+| **Windows** | 7+ | ✅ תומך |
+| **macOS** | 10.15+ | ✅ תומך |
+| **Linux** | כל | ✅ תומך |
+| **iOS** | 15+ | ✅ תומך |
+| **Android** | 5+ | ✅ תומך |
+
+## הסרה
+
+כדי להסיר Notemd:
+
+1. הגדרות → תוספי קהילה
+2. מצאו את "Notemd"
+3. לחצו על האייקון ❌
+4. באופציונלי, מחקו את תיקיית התוסף: `<vault>/.obsidian/plugins/notemd/`
+
+הנתונים שלכם (רשימות, רשימות רעיונות וכו') נשארים ללא שינוי.
+
+## עדכון
+
+### עדכון אוטומטי (מומלץ)
+Obsidian בודק אוטומטית אחר עדכוני תוספים. כאשר גרסה חדשה זמינה:
+1. הגדרות → תוספי קהילה
+2. לחצו על "בדוק אחר עדכונים"
+3. לחצו על "עדכן" ליד Notemd
+
+### עדכון ידני
+הורידו את הגרסה האחרונה והחליפו את שלושת הקבצים בתיקיית התוסף שלכם.
+
+## קבלת עזרה
+
+- 📖 [מדריך התחלה מהירה](./quick-start)
+- ❓ [שאלות נפוצות](../faq)
+- 💬 [קהילת Discord](https://discord.gg/qnGgsQ9W)
+- 🐛 [דווח על בעיות](https://github.com/Jacobinwwey/obsidian-NotEMD/issues)

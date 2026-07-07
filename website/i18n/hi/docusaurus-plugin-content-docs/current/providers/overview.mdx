@@ -1,0 +1,189 @@
+---
+id: overview
+title: "LLM प्रदाता"
+description: "36 LLM प्रदाताओं — क्लाउड, गेटवे एवं स्थानीय — को प्रति-कार्य मॉडल चयन के साथ कॉन्फ़िगर करें"
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [LLM providers, API, OpenAI, Anthropic, Google, DeepSeek, Qwen, Ollama, per-task model]
+concepts: [LLM Integration, API Providers, Per-Task Models, OpenAI Compatible, Ollama, China Providers]
+citations:
+  - title: OpenAI API
+    url: https://platform.openai.com
+  - title: Anthropic API
+    url: https://docs.anthropic.com
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# LLM प्रदाता
+
+<TLDR>
+**Notemd 4 परिवहन प्रकारों में 36 LLM प्रदाताओं का समर्थन करता है.** सभी API कॉलें कच्चे HTTP का उपयोग करती हैं (कोई SDK नहीं) एवं स्वचालित पुनः प्रयास, परिवहन फ़ॉलबैक एवं 5 मिनट की प्रतिक्रिया कैशिंग की सुविधा देती हैं. प्रति-कार्य मॉडल चयन के कारण आप अवधारणा निष्कर्षण हेतु सस्ते मॉडल एवं अनुसंधान हेतु शक्तिशाली मॉडल का उपयोग कर सकते हैं. स्थानीय प्रदाताओं (Ollama, LMStudio) के लिए कोई API कुंजी आवश्यक नहीं है.
+</TLDR>
+
+यह [Obsidian AI Knowledge Management Guide](/docs/pillar-ai-knowledge) का हिस्सा है.
+
+## प्रदाता श्रेणियाँ
+
+### क्लाउड प्रदाता
+
+| प्रदाता | डिफ़ॉल्ट बेस URL | डिफ़ॉल्ट मॉडल | टेम्परेचर |
+|----------|-----------------|---------------|-------------|
+| **DeepSeek** | `api.deepseek.com` | `deepseek-v4-pro` | 0.5 |
+| **OpenAI** | `api.openai.com/v1` | `gpt-4o` | 0.5 |
+| **Anthropic** | `api.anthropic.com` | `claude-3-5-sonnet-20240620` | 0.5 |
+| **Google** | `generativelanguage.googleapis.com/v1` | `gemini-2.0-flash-exp` | 0.5 |
+| **Mistral** | `api.mistral.ai/v1` | `mistral-large-latest` | 0.5 |
+| **xAI** | `api.x.ai/v1` | `grok-4` | 0.7 |
+| **Cerebras** | `api.cerebras.ai/v1` | `gpt-oss-120b` | 0.5 |
+| **Fireworks** | `api.fireworks.ai/inference/v1` | `kimi-k2p5` | 0.5 |
+| **Nebius** | `api.studio.nebius.com/v1` | `openai/gpt-oss-120b` | 0.3 |
+
+### गेटवे / प्रॉक्सी प्रदाता
+
+| प्रदाता | डिफ़ॉल्ट बेस URL | डिफ़ॉल्ट मॉडल | नोट्स |
+|----------|-----------------|---------------|-------|
+| **OpenRouter** | `openrouter.ai/api/v1` | `anthropic/claude-3.7-sonnet` | `HTTP-Referer` + `X-Title` हेडर जोड़ता है |
+| **GitHub Models** | `models.github.ai/inference` | `gpt-4o-mini` | `X-GitHub-Api-Version` हेडर जोड़ता है |
+| **AIHubMix** | `aihubmix.com/v1` | `gpt-4o-mini` | `APP-Code` हेडर जोड़ता है |
+| **PPIO** | `api.ppinfra.com/v3/openai` | `qwen/qwen3-32b` | |
+| **Hugging Face** | `router.huggingface.co/v1` | `openai/gpt-oss-120b` | |
+| **Vercel AI Gateway** | `ai-gateway.vercel.sh/v1` | `anthropic/claude-sonnet-4.5` | |
+| **Requesty** | `router.requesty.ai/v1` | `anthropic/claude-3-7-sonnet-latest` | |
+| **Together** | `api.together.xyz/v1` | `meta-llama/Meta-Llama-3.1-70B-Instruct-Turbo` | |
+| **LiteLLM** | `localhost:4000/v1` | `your-proxy-model` | वैकल्पिक API कुंजी |
+| **नया API** | `localhost:3000/v1` | `gpt-4.1` | वैकल्पिक API कुंजी |
+| **OpenAI Compatible** | (user-configured) | `your-model-id` | कस्टम एंडपॉइंट |
+
+### चीन के प्रदाता
+
+| प्रदाता | डिफ़ॉल्ट बेस URL | डिफ़ॉल्ट मॉडल | नोट्स |
+|----------|-----------------|---------------|-------|
+| **Qwen** | `dashscope.aliyuncs.com/compatible-mode/v1` | `qwen3-235b-a22b` | Alibaba DashScope |
+| **Qwen Code** | `dashscope.aliyuncs.com/compatible-mode/v1` | `qwen3-coder-plus` | कोडिंग-केंद्रित |
+| **Doubao** | `ark.cn-beijing.volces.com/api/v3` | (एंडपॉइंट ID आवश्यक है) | ByteDance Volcengine |
+| **Moonshot** | `api.moonshot.cn/v1` | `kimi-k2-0905-preview` | Kimi |
+| **Xiaomi MiMo** | `api.xiaomimimo.com/v1` | `mimo-v2.5-pro` | |
+| **GLM** | `open.bigmodel.cn/api/paas/v4` | `glm-5` | Zhipu, China एंडपॉइंट |
+| **Z AI** | `api.z.ai/api/paas/v4` | `glm-5` | Zhipu, अंतर्राष्ट्रीय एंडपॉइंट |
+| **MiniMax** | `api.minimaxi.com/v1` | `MiniMax-M2.7` | |
+| **Baidu Qianfan** | `qianfan.baidubce.com/v2` | `ernie-4.5-turbo-32k` | |
+| **SiliconFlow** | `api.siliconflow.cn/v1` | `Qwen/QwQ-32B` | मॉडल होस्टिंग प्लेटफ़ॉर्म |
+| **Huawei Cloud MaaS** | `api.modelarts-maas.com/v1` | `DeepSeek-V3` | |
+
+**Doubao के लिए एक Ark एंडपॉइंट ID आवश्यक है** (फ़ॉर्मेट: `ep-xxxxxxxx-xxxx-xxxx`). डिफ़ॉल्ट प्लेसहोल्डर को बदलना आवश्यक है.
+
+### स्थानीय प्रदाता
+
+| प्रदाता | डिफ़ॉल्ट बेस URL | डिफ़ॉल्ट मॉडल | नोट्स |
+|----------|-----------------|---------------|-------|
+| **Ollama** | `localhost:11434/api` | `llama3` | कोई API कुंजी नहीं. NDJSON स्ट्रीमिंग. `/api/tags` के माध्यम से मॉडल खोज |
+| **LMStudio** | `localhost:1234/v1` | `local-model` | `"EMPTY"` को बेयरर टोकन के रूप में भेजता है. OpenAI-संगत खोज |
+| **OVMS** | `localhost:8000/v3` | `openvino-model` | OpenVINO Model Server |
+| **Azure OpenAI** | (user-configured) | `gpt-4o` | URL में डिप्लॉयमेंट का नाम। `api-key` हेडर |
+
+## कार्य-वार मॉडल चयन
+
+Notemd प्रत्येक टास्क के लिए स्वतंत्र प्रोवाइडर और मॉडल का समर्थन करता है। `useMultiModelSettings: true` के साथ इसे सक्षम करें.
+
+### उपलब्ध टास्क
+
+| कार्य | सेटिंग्स कुंजी | डिफ़ॉल्ट प्रोवाइडर |
+|------|-------------|-----------------|
+| लिंक जोड़ें (विकि-लिंक सम्मिलन) | `addLinksProvider` / `addLinksModel` | DeepSeek |
+| अनुसंधान (वेब खोज + सारांशीकरण) | `researchProvider` / `researchModel` | DeepSeek |
+| शीर्षक से जनरेट करें | `generateTitleProvider` / `generateTitleModel` | DeepSeek |
+| अनुवाद | `translateProvider` / `translateModel` | DeepSeek |
+| डायग्राम जनरेशन | `summarizeToMermaidProvider` / `Model` | DeepSeek |
+| अवधारणा निष्कर्षण | `extractConceptsProvider` / `Model` | DeepSeek |
+| मूल पाठ निष्कर्षण | `extractOriginalTextProvider` / `Model` | DeepSeek |
+
+### रिज़ॉल्यूशन क्रम
+
+1. यदि `useMultiModelSettings` सक्षम है → टास्क-विशिष्ट प्रोवाइडर + मॉडल का उपयोग करें
+2. यदि टास्क मॉडल ओवरराइड खाली है → प्रोवाइडर के डिफ़ॉल्ट मॉडल पर वापस जाएं
+3. यदि टास्क प्रोवाइडर अमान्य है → ग्लोबल `activeProvider` पर वापस जाएं
+4. यदि `useMultiModelSettings` बंद है → सभी कार्य ग्लोबल `activeProvider` का उपयोग करते हैं
+
+### अनुशंसित कॉन्फ़िगरेशन्स
+
+```
+# Researcher: power for research, cheap for everything else
+activeProvider: DeepSeek
+extractConceptsProvider: DeepSeek
+researchProvider: OpenAI        # GPT-4o for better research quality
+summarizeToMermaidProvider: DeepSeek
+
+# Privacy-first: local only
+activeProvider: Ollama
+addLinksProvider: Ollama
+extractConceptsProvider: Ollama
+
+# Budget bilingual
+activeProvider: DeepSeek
+translateProvider: Google      # Gemini Flash for translation
+researchProvider: SiliconFlow  # Cheaper China-based routing
+```
+
+## API कॉल आर्किटेक्चर
+
+### ट्रांसपोर्ट लेयर्स
+
+1. **Obsidian `requestUrl`** — प्राथमिक (बिल्ट-इन, सभी प्लेटफॉर्मों पर कार्य करता है)
+2. **डेस्कटॉप HTTP** — Node.js `http`/`https` मॉड्यूल (स्ट्रीमिंग + लंबे अनुरोध)
+3. **वेब `fetch`** — जब Node.js मॉड्यूल उपलब्ध न हों तो वैकल्पिक विकल्प
+
+अस्थायी नेटवर्क त्रुटियों के समय प्लगइन स्वचालित रूप से ट्रांसपोर्ट्स के बीच स्विच कर देता है.
+
+### रिट्राई लॉजिक
+
+- **सामान्य मोड** (`enableStableApiCall: false`): एक ही प्रयास। अस्थायी विफलता पर, स्वचालित रूप से स्थिर रिट्राई मोड में स्विच हो जाता है.
+- **स्थिर रिट्राई मोड** (`enableStableApiCall: true`): 4 बार तक प्रयास (1 + 3 रिट्राई) 5 सेकंड के अंतराल पर.
+- **जो अस्थायी त्रुटियाँ रिट्राई को ट्रिगर करती हैं**: `err_connection_closed`, `err_connection_reset`, `err_timed_out`, `econnreset`, `econnaborted`, `etimedout`, `socket hang up`, `network request failed`
+- **जिन्हें रिट्राई नहीं किया जा सकता**: HTTP 400, 401, 403, 404
+
+### रिस्पॉन्स कैशिंग
+
+प्रोवाइडर + मॉडल + टेम्परेचर + प्रॉम्प्ट + कंटेंट के आधार पर 5 मिनट की इन-मेमोरी LRU कैश। 5 मिनट के भीतर आने वाले समान अनुरोधों को तुरंत कैश्ड परिणाम मिल जाते हैं.
+
+### रीज़निंग मॉडल हैंडलिंग
+
+वे मॉडल जो `system` भूमिका का समर्थन नहीं करते (DeepSeek R1, OpenAI o1/o3/o4/gpt-5) स्वचालित रूप से सिस्टम + यूज़र प्रॉम्प्ट्स को एक ही यूज़र मैसेज में जोड़ देते हैं.
+
+DeepSeek-विशिष्ट: `thinkingEnabled` अनुरोध में `{ thinking: { type: 'enabled' } }` जोड़ता है। `reasoningEffort` (कम/मध्यम/उच्च) को `reasoning_effort` के रूप में पास किया जाता है। जब सोच चालू होती है तो अधिकतम आउटपुट टोकन ≥ 8000 होने की पुष्टि करता है।
+
+### टोकन अनुमान
+
+`estimateTokens(text)`: `Math.ceil(text.length / 4)` — प्रति टोकन 4 अक्षरों की विधि। LLM को भेजने से पहले `maxResearchContentTokens` को लागू करने हेतु इसका उपयोग किया जाता है।
+
+लागत ट्रैकिंग लागू नहीं की गई है।
+
+## मॉडल खोज
+
+| मोड | प्रदाता | एंडपॉइंट |
+|------|-----------|----------|
+| `ollama-tags` | Ollama | `/api/tags` |
+| `google-models` | Google | मॉडल सूची API |
+| `anthropic-models` | Anthropic | मॉडल सूची API |
+| `openai-compatible-models` | DeepSeek, Qwen, Mistral, आदि. | `/v1/models` |
+| `openrouter-models` | OpenRouter | मॉडल सूची API |
+| `github-models` | GitHub Models | इन्फरेंस API |
+| `none` | Azure OpenAI | अक्षम (डिप्लॉयमेंट नाम की आवश्यकता है) |
+
+## त्वरित प्रारंभ
+
+1. **प्रदाता चुनें** — DeepSeek (चीन), OpenAI (अंतरराष्ट्रीय), या Ollama (स्थानीय/मुफ्त)
+2. **API कुंजी दर्ज करें** — सेटिंग्स → Notemd → प्रदाता → API कुंजी
+3. **कनेक्शन जाँचें** — टेस्ट बटन पर क्लिक करें
+4. **वैकल्पिक: प्रति-कार्य मॉडल** — `useMultiModelSettings` को सक्षम करें एवं इसे अलग से कॉन्फ़िगर करें
+
+Ollama के लिए: API कुंजी की कोई आवश्यकता नहीं है। बस यह सुनिश्चित करें कि `ollama serve` चल रहा है.
+
+---
+
+## अगले चरण
+
+- 📝 [कॉन्सेप्ट नोट्स](/docs/features/concept-notes) — प्रति-कार्य निष्कर्षण मॉडल का उपयोग करता है
+- 🎨 [डायग्राम](/docs/features/diagrams) — प्रति-कार्य डायग्राम मॉडल का उपयोग करता है
+- 🔍 [अनुसंधान](/docs/features/research) — अनुसंधान-विशिष्ट मॉडल का उपयोग करता है
+- ⚙️ [कॉन्फ़िगरेशन](/docs/getting-started/configuration) — पूर्ण सेटिंग्स संदर्भ

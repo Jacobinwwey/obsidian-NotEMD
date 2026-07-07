@@ -1,0 +1,184 @@
+---
+id: concept-notes
+title: "Note di concetto"
+description: "Genera e gestisci note concettuali: note autonome per i concetti chiave estratti dal tuo archivio"
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [concept notes, knowledge extraction, concept folder, deduplication, backlinks]
+concepts: [Concept Notes, Knowledge Graph, LLM Extraction, Deduplication, Backlinks]
+citations:
+  - title: Obsidian
+    url: https://obsidian.md
+  - title: Zettelkasten Method
+    url: https://zettelkasten.de
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# Note di concetto
+
+<TLDR>
+**Notemd estrae i concetti chiave dalle tue note e crea file di nota concettuale autonomi.** Il LLM identifica i termini principali, genera un file `.md` per concetto in una cartella configurabile e, opzionalmente, aggiunge collegamenti di ritorno alla nota di origine. Supporta la soppressione dei sinonimi, la selezione del modello per task, la sanificazione dei nomi dei file e un motore di deduplicazione a 4 passaggi. Questo fa parte della [Obsidian Guida alla Gestione delle Conoscenze AI](/docs/pillar-ai-knowledge).
+</TLDR>
+
+## Panoramica
+
+Le note concettuali sono i mattoni fondamentali di una base di conoscenza interconnessa. Quando si elabora una nota, Notemd:
+
+1. **Invia il tuo testo a un LLM** con una richiesta di estrazione strutturata
+2. **Analizza le righe `CONCEPT:`** della risposta LLM
+3. **Crea un file `.md` per concetto** in una cartella specificata
+4. **Aggiunge backlink** alla nota di origine (quando abilitato)
+
+## Come funziona
+
+### Pipeline di estrazione
+
+```
+Source Note → Split into Chunks → LLM per Chunk → Parse CONCEPT: Lines
+    → Deduplicate via Set → Create .md Files → Add Backlinks
+    → (Optional: Generate Log)
+```
+
+### Il prompt di estrazione
+
+Il LLM riceve un comando che gli indica di:
+
+- Estrai **sostantivi o frasi nominali** centrali per l’argomento del documento
+- **Dare priorità alla specificità** — "Relassazione dielettrica" invece di "Relassazione"
+- **Normalizza al singolare** — "models" diventa "model"
+- **Supprimi i sott concetti** — se compare “rilassamento dielettrico”, non estrarre anche “rilassamento”
+- Ometti le sezioni di riferimenti/bibliografia, i sostantivi comuni, i nomi di aziende/prodotti
+- Esegui un concetto per riga come `CONCEPT: Term Name`
+
+**Suppressione dei sinonimi** (opzionale): aggiunge all’inizio della richiesta “Evitare di estrarre sinonimi, concetti principali semanticamente simili o parole chiave ogni volta che possibile”.
+
+**Dominio di apprendimento mirato** (opzionale): aggiunge `Relevant Fields: [domain]` all’inizio per limitare l’estrazione a una specifica disciplina.
+
+**Sovrascrittura della lingua** (opzionale): aggiunge "I concetti di output DEVONO essere in [language]."
+
+### Chunking
+
+Le note lunghe vengono suddivise da `settings.chunkWordCount`. Ogni frammento viene inviato separatamente. I concetti di tutti i frammenti vengono accumulati in un `Set` — le duplicati tra i frammenti vengono rimossi silenziosamente. Gli errori LLM su singoli frammenti non interrompono l’operazione.
+
+## Creazione della nota concettuale
+
+### Regole per i nomi dei file
+
+| Regola | Comportamento |
+|------|----------|
+| Tratti bassi/_ | Sostituito con spazi |
+| Caratteri speciali | Strappato: barra inversa, barra orizzontale, due punti, asterisco, punto di domanda, virgolette, parentesi angolari, pipe, hash, caret, parentesi quadre |
+| Spazi bianchi | Contratto e ritagliato |
+| Lunghezza massima | 100 caratteri (troncati + rifiniti) |
+| Risultato vuoto/tutti punti | Ssaltato in silenzio |
+
+Esempio: `A-B: Key*Term` diventa `A B KeyTerm.md`
+
+### Template
+
+**Template completo** (backlink abilitati, template minimo disattivato):
+
+```markdown
+# Concept Name
+
+## Linked From
+- [[SourceNoteBasename]]
+```
+
+**Template minimo** (quando `extractConceptsMinimalTemplate: true`):
+
+```markdown
+# Concept Name
+```
+
+### Aggiornamento delle note esistenti
+
+Quando un file di concetto esiste già:
+
+1. Se i backlink sono abilitati e la nota di origine non è ancora elencata, aggiungi un backlink
+2. Se esiste una sezione `## Linked From`, inseriscila prima del prossimo intestazione `##`
+3. Se non esiste alcun `## Linked From`, aggiungi una sezione alla fine
+4. I backlink duplicati vengono controllati e ignorati
+
+### Configurazione
+
+| Impostazioni | Predefinito | Effetto |
+|---------|---------|--------|
+| `useCustomConceptNoteFolder` | `true` | Interruttore principale. Spento = nessuna nota creata |
+| `conceptNoteFolder` | `''` (disabilitato) | Percorso della cartella per le note di concetto |
+| `extractConceptsMinimalTemplate` | `true` | Note solo con titolo (nessun collegamento esterno) |
+| `extractConceptsAddBacklink` | `false` | Aggiungere backlink durante l’estrazione autonoma |
+| `extractConceptsProvider` / `extractConceptsModel` | DeepSeek | Per-task LLM per l'estrazione di concetti |
+| `extractConceptsLanguage` | `'en'` | Lingua di output per i nomi dei concetti |
+| `replaceSynonymsDuringConceptExtraction` | `false` | Abilita la soppressione dei sinonimi nel prompt |
+| `generateConceptLogFile` | `false` | Scrivi un elenco `.log` con i concetti creati |
+
+**Importante:** Le impostazioni `extractConceptsAddBacklink` e `extractConceptsMinimalTemplate` influenzano soltanto il **comando di estrazione dedicato**. Il comando “Aggiungi link” crea sempre note con template completo e collegamenti indietro.
+
+## Eliminazione delle duplicati
+
+Il comando dedup (`Notemd: Check & remove duplicate concept notes`) esegue un’analisi in 5 passaggi:
+
+### Passo 1: Corrispondenza esatta del nome del file
+
+Confronto del nome di base insensibile a maiuscole e minuscole nell’ambito configurato.
+
+### Passo 2: Rilevamento della forma plurale
+
+Rimuove i suffissi: da `-ies` a `-y`, `-es` rimosso, `-s` rimosso. Confronta la forma singolare con i file di scope. Non gestisce i plurali irregolari (children/child).
+
+### Passo 3: Normalizzazione dei simboli
+
+Applica: `toLowerCase()`, sostituisci trattini e underscore con spazi, rimuovi caratteri non alfanumerici, unifica gli spazi bianchi. Vengono segnalati quelli che si normalizzano in modo identico.
+
+### Passo 4: Contenimento a singola parola
+
+Le note concettuali monosillabiche vengono controllate rispetto ai nomi dei file di scope multisillabici. Non viene eseguito quando lo scope è `concept_folder_only`.
+
+### Passo 5: Conferma e cancellazione
+
+Tutti i candidati vengono visualizzati in un modulo di conferma. Gli elementi approvati vengono spostati nella cartella della spazzatura del sistema. L’operazione può essere annullata tra ciascuna eliminazione.
+
+### Modalità di raggio d’azione
+
+| Modalità | Rispetto a |
+|------|-------------------|
+| `vault` (predefinito) | Tutti i file del vault `.md` escludendo la cartella concept |
+| `concept_folder_only` | Altre note di concetto all’interno della cartella |
+| `include` | File nelle cartelle elencate specifiche |
+| `exclude` | Tutti i file del vault esclusi la cartella concept e le cartelle elencate |
+
+## Uso
+
+### Estrai Concetti (Standalone)
+
+1. Apri una nota
+2. Esegui **"Notemd: Estrai concetti"** dal pannello dei comandi
+3. Le note concettuali vengono create nella cartella configurata
+
+### Estrai + Genera Contenuto
+
+**"Notemd: Estrai concetti e genera titoli"** — estrae i concetti, poi esegue "Genera dal Titolo" su ogni nota nella cartella dei concetti. Questo genera contenuto per **tutte** le note concettuali nella cartella, non solo quelle appena create.
+
+### Crea un collegamento Wiki dalla selezione
+
+1. Evidenzia il testo nell’editor
+2. Esegui **"Notemd: Crea collegamento Wiki dalla selezione"**
+3. Il testo viene racchiuso in `[[...]]` e viene creata una nota concettuale
+
+## Consigli
+
+- **Imposta prima la cartella dei concetti** — senza di essa non vengono create note. Appare un modulo di avviso se non è impostata.
+- **Utilizza modelli per task** — l’estrazione dei concetti funziona bene con modelli più economici (GPT-4o-mini, DeepSeek). Riserva i modelli costosi per ricerche/traduzioni.
+- **Abilita la soppressione dei sinonimi** nei domini tecnici dove più termini si riferiscono allo stesso concetto.
+- **Esegui la deduplicazione regolarmente** — avvia il comando dedup dopo l’elaborazione batch per individuare i casi quasi duplicati.
+- **Il file di log viene sovrascritto** ad ogni esecuzione, non aggiunto. Copialo se hai bisogno dei risultati precedenti.
+
+---
+
+## Prossimi passi
+
+- [Wiki-Links](./wiki-links) — Come i concetti vengono collegati inline
+- [Diagrams](./diagrams) — Visualizza le relazioni tra i concetti
+- [Workflows](./workflows) — Collega l’estrazione ad altre attività

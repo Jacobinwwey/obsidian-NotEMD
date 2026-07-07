@@ -1,0 +1,161 @@
+---
+id: troubleshooting
+title: "Khắc phục sự cố"
+description: "Các vấn đề thường gặp và giải pháp"
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [troubleshooting, errors, diagnostics, connection test]
+concepts: [Troubleshooting, Error Handling, Diagnostics]
+citations:
+  - title: Obsidian
+    url: https://obsidian.md
+  - title: Obsidian API
+    url: https://docs.obsidian.md
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# Khắc phục sự cố
+
+<TLDR>
+**Hầu hết Notemd các sự cố thuộc về bốn nhóm: các vấn đề chính API, kết nối mạng, lỗi xác thực (401/403), và giới hạn tần suất (429).** Bộ kiểm tra kết nối tích hợp và bảng chẩn đoán giúp xác định nguyên nhân gốc rễ một cách nhanh chóng. Trang này trình bày mọi thông báo lỗi phổ biến, nguyên nhân và cách sửa chữa. Đối với các sự cố không được liệt kê ở đây, hãy báo cáo chúng trên GitHub Issues kèm theo kết quả chẩn đoán.
+
+Đây là một phần của [Obsidian Hướng dẫn Quản lý Kiến thức AI](/docs/pillar-ai-knowledge).
+</TLDR>
+
+## Tổng quan
+
+Notemd phụ thuộc vào các dịch vụ bên ngoài -- các nhà cung cấp LLM và công cụ tìm kiếm API -- vì vậy hầu hết các vấn đề xuất phát từ bên ngoài chính plugin. Bảng chẩn đoán trong phần cài đặt cung cấp cái nhìn có cấu trúc về cuộc gọi API gần nhất, bao gồm yêu cầu URL, trạng thái phản hồi và nội dung lỗi. Hãy kiểm tra nó trước mỗi khi tiếp tục điều tra.
+
+## Cách hoạt động: Chẩn đoán
+
+### Kiểm tra kết nối
+
+Mỗi mục cấu hình nhà cung cấp đều có nút **“Kiểm tra kết nối”**. Khi nhấp vào nó sẽ gửi một yêu cầu API tối giản (thường là danh sách mô hình hoặc kết quả hoàn thành ngắn) và báo cáo kết quả thành công hoặc lỗi HTTP cụ thể. Đây là cách nhanh nhất để xác minh rằng khóa API và cơ sở URL của bạn đúng.
+
+### Bảng chẩn đoán
+
+**Cài đặt --> Notemd --> Chẩn đoán** hiển thị:
+
+| Trường | Nội dung |
+|-------|---------|
+| Nhà cung cấp cuối cùng | Nhà cung cấp nào được gọi gần nhất |
+| Mô hình cuối cùng | Mô hình nào được gọi gần nhất |
+| Trạng thái cuối cùng | Mã trạng thái HTTP hoặc lỗi truyền dữ liệu |
+| Lỗi cuối cùng | Thông báo lỗi nguyên bản từ API |
+| Yêu cầu cuối cùng URL | Toàn bộ URL của yêu cầu cuối cùng (giá trị API đã được ẩn) |
+| Nội dung phản hồi cuối cùng | Phần nội dung phản hồi bị cắt ngắn (500 ký tự đầu tiên) |
+
+Hãy sao chép toàn bộ kết quả chẩn đoán khi báo cáo sự cố trên GitHub.
+
+## Các lỗi thường gặp
+
+### Khóa API không hợp lệ hoặc thiếu
+
+**Triệu chứng:** HTTP 401 hoặc "Khóa API được cung cấp không chính xác"
+
+**Nguyên nhân:** Khóa API bị thiếu, chứa khoảng trắng, hoặc thuộc về nhà cung cấp khác.
+
+**Cách khắc phục:**
+1. Kiểm tra xem khóa không có khoảng trắng ở đầu hoặc cuối
+2. Đảm bảo khóa tương ứng với nhà cung cấp đã chọn (khóa OpenAI sẽ không hoạt động với Anthropic)
+3. Kiểm tra xem tài khoản của bạn có điểm tín dụng hoặc gói đăng ký hiệu lực hay không
+4. Nhấp vào **"Test Connection"** để xác minh
+
+### Lỗi mạng / Kết nối
+
+**Triệu chứng:** `ERR_CONNECTION_REFUSED`, `ERR_TIMED_OUT`, `Socket hang up`, `Network request failed`
+
+**Nguyên nhân:** Đầu cuối API không thể truy cập được từ máy của bạn.
+
+**Giải pháp:**
+1. Kiểm tra kết nối Internet của bạn
+2. Nếu đang ở sau proxy hoặc tường lửa, hãy kiểm tra xem tên miền API có bị chặn hay không
+3. Đối với Ollama: xác nhận rằng `ollama serve` đang chạy (`ollama list` nên trả về các mô hình)
+4. Đối với LMStudio: xác nhận rằng máy chủ đang chạy trên `localhost:1234`
+5. Thử phương thức truyền dữ liệu khác – người dùng di động nên đảm bảo rằng phương thức `requestUrl` đang được kích hoạt
+6. Kích hoạt `enableStableApiCall` để tự động thử lại khi xảy ra lỗi tạm thời
+
+### 403 Forbidden
+
+**Triệu chứng:** HTTP 403
+
+**Nguyên nhân:** Khóa API của bạn vẫn hợp lệ nhưng không có quyền truy cập vào tài nguyên được yêu cầu.
+
+**Giải pháp:**
+1. Một số mô hình yêu cầu quyền truy cập đặc biệt (ví dụ, GPT-4 qua Azure đòi hỏi tên triển khai)
+2. Một số nhà cung cấp hạn chế các mô hình theo cấp độ gói – vui lòng kiểm tra tài khoản của bạn
+3. Có thể có các hạn chế theo khu vực (một số nhà cung cấp ở Trung Quốc chặn IP quốc tế và ngược lại)
+4. Hãy kiểm tra xem tên mô hình có được viết đúng không (ví dụ, `gpt-4o` chứ không phải `gpt-4o-mini` khi mô hình nhỏ là tất cả những gì gói của bạn cho phép)
+
+### Giới hạn tốc độ (429)
+
+**Triệu chứng:** HTTP 429 hoặc "Giới hạn tốc độ đã vượt quá"
+
+**Nguyên nhân:** Có quá nhiều yêu cầu trong một khoảng thời gian ngắn.
+
+**Giải pháp:**
+1. Giảm `batchConcurrency` xuống còn `1` hoặc `2`
+2. Chờ vài phút trước khi thử lại
+3. Kiểm tra tài liệu về giới hạn tốc độ của nhà cung cấp dành cho cấp độ gói của bạn
+4. Kích hoạt `enableStableApiCall` để tự động thử lại với việc trì hoãn
+5. Cân nhắc chuyển sang nhà cung cấp có giới hạn cao hơn (DeepSeek, Ollama)
+
+### Mô hình không tìm thấy
+
+**Triệu chứng:** "Mô hình không tìm thấy" hoặc HTTP 404
+
+**Nguyên nhân:** Tên mô hình không tồn tại trên nhà cung cấp đã chọn.
+
+**Giải pháp:**
+1. Nhấn **"Get Model List"** để xem tất cả các mô hình có sẵn cho nhà cung cấp của bạn
+2. Một số tên mô hình thay đổi theo thời gian -- hãy kiểm tra tên hiện tại trong tài liệu hướng dẫn của nhà cung cấp
+3. Đối với Ollama: chạy `ollama list` để xem các mô hình đã được tải; chỉ những mô hình đã tải xuống mới có sẵn
+
+### Không có liên kết / Không tạo ra khái niệm nào
+
+**Triệu chứng:** Lệnh được chạy nhưng không tạo ra đầu ra nào
+
+**Nguyên nhân:** LLM trả về phản hồi trống hoặc không thể giải mã được.
+
+**Giải pháp:**
+1. Kiểm tra bảng điều khiển chẩn đoán để xem phản hồi thực tế của LLM
+2. Thử sử dụng một mô hình mạnh hơn (một số mô hình nhỏ gặp khó khăn trong việc tạo đầu ra có cấu trúc)
+3. Đảm bảo ghi chú có nội dung đủ dài (>50 từ)
+4. Xem xét lời nhắc tùy chỉnh của bạn để loại bỏ các hướng dẫn mâu thuẫn
+5. Tạm thời vô hiệu hóa việc ức chế từ đồng nghĩa để xem liệu nó có đang lọc quá mức hay không
+
+### ID Đầu cuối Doubao bị thiếu
+
+**Triệu chứng:** Xuất hiện lỗi khi sử dụng nhà cung cấp ByteDance Doubao
+
+**Nguyên nhân:** Doubao yêu cầu một ID đầu cuối Ark (định dạng: `ep-xxxxxxxx-xxxx-xxxx`) thay vì tên mô hình.
+
+**Sửa lỗi:** Thay thế mô hình đại diện mặc định bằng ID endpoint thực tế của bạn từ bảng điều khiển Volcengine.
+
+## Cấu hình
+
+| Cài đặt chẩn đoán | Vị trí | Mục đích |
+|--------------------|----------|---------|
+| **Kiểm tra kết nối** | Mục Cài đặt --> Mục Provider | Kiểm tra khóa API và khả năng kết nối |
+| **Lấy danh sách mô hình** | Mục Cài đặt --> Mục Provider | Xác nhận các mô hình nào có thể truy cập được |
+| `enableStableApiCall` | Mục Cài đặt --> Nâng cao | Kích hoạt việc thử lại với chế độ backoff |
+| `batchConcurrency` | Mục Cài đặt --> Nhóm xử lý | Kiểm soát tính song song để tránh giới hạn tốc độ |
+
+## Cách báo cáo sự cố
+
+Nếu sự cố của bạn không được đề cập ở trên:
+
+1. Mở **Cài đặt --> Notemd --> Chẩn đoán**
+2. Sao chép toàn bộ kết quả chẩn đoán
+3. Mở một vấn đề trên GitHub tại [github.com/Jacobinwwey/obsidian-NotEMD/issues](https://github.com/Jacobinwwey/obsidian-NotEMD/issues)
+4. Bao gồm: phiên bản Obsidian, phiên bản Notemd, nhà cung cấp, mô hình, kết quả chẩn đoán và các bước để tái tạo tình huống
+5. Che giấu khóa API của bạn khỏi bất kỳ log nào được chia sẻ
+
+---
+
+## Các bước tiếp theo
+
+- [LLM Providers](/docs/providers/overview) -- Tài liệu tham khảo đầy đủ về cấu hình nhà cung cấp
+- [Batch Processing](/docs/advanced/batch-processing) -- Cài đặt đồng thời và thử lại cho các thao tác lớn
+- [Custom Prompts](/docs/advanced/custom-prompts) -- Sửa chữa hành vi bất ngờ của LLM bằng cách điều chỉnh các mệnh lệnh

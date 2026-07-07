@@ -6,11 +6,11 @@ This workflow records the public documentation-site gate for `website/`. It is s
 
 ## Current Contract
 
-The website now publishes one canonical source surface and seven complete localized documentation route sets:
+The website now publishes one canonical source surface and a complete localized documentation route set for every README/UI locale declared in `website/src/lib/publishedLocales.mjs`:
 
 1. English remains the canonical complete documentation surface under `https://jacobinwwey.github.io/obsidian-NotEMD/docs/...`.
-2. Simplified Chinese (`zh-CN`), Traditional Chinese (`zh-Hant`), Japanese (`ja`), French (`fr`), German (`de`), Spanish (`es`), and Korean (`ko`) must each expose the same docs route set as `website/docs`.
-3. A locale must not be added to `docusaurus.config.js` unless every source page under `website/docs/` has a localized counterpart under `website/i18n/<locale>/docusaurus-plugin-content-docs/current/`.
+2. The public localized docs matrix is `zh-CN`, `zh-Hant`, `zh-TW`, `ja`, `fr`, `de`, `es`, `ko`, `it`, `pt`, `pt-BR`, `ru`, `ar`, `fa`, `hi`, `bn`, `nl`, `sv`, `fi`, `da`, `no`, `pl`, `tr`, `he`, `th`, `el`, `cs`, `hu`, `ro`, `uk`, `vi`, `id`, and `ms`; each locale must expose the same docs route set as `website/docs`.
+3. A locale must not be added to `publishedLocales.mjs` unless every source page under `website/docs/` has a localized counterpart under `website/i18n/<locale>/docusaurus-plugin-content-docs/current/`.
 4. The previous partial zh-CN fallback policy is retired for public docs. Built localized docs must not rely on English fallback pages and must not emit `noindex,follow`.
 5. `llms.txt`, sitemap output, hreflang metadata, the homepage language boundary, and build-audit expectations must describe the same full-route multilingual contract.
 6. Public GEO/product-positioning changes must update the visible GitHub Pages homepage, homepage JSON-LD, `llms.txt`, and build-audit expectations in the same change. Updating only maintainer notes is not enough.
@@ -29,7 +29,7 @@ npm run audit:build
 
 1. root pages exist for English and every published locale;
 2. root pages have the expected `lang`, canonical URL, and WebPage JSON-LD URL where applicable;
-3. every English source doc has a matching localized source doc for `zh-CN`, `zh-Hant`, `ja`, `fr`, `de`, `es`, and `ko`;
+3. every English source doc has a matching localized source doc for every locale declared in `publishedLocales.mjs`;
 4. `publishedLanguageScopeData.mjs` declares the full docs route set for zh-CN compatibility gates;
 5. localized docs build for every supported locale and do not emit `noindex,follow`;
 6. sitemap output includes canonical English docs and each localized docs route;
@@ -55,6 +55,12 @@ The full zh-CN compatibility scope lives in:
 
 ```text
 website/src/lib/publishedLanguageScopeData.mjs
+```
+
+The public locale matrix lives in:
+
+```text
+website/src/lib/publishedLocales.mjs
 ```
 
 Runtime helpers live in:
@@ -116,7 +122,7 @@ When adding or changing a docs page:
 1. Update the English source under `website/docs/...`.
 2. Run or update `website/scripts/generate-localized-docs.cjs` so every supported locale receives the page.
 3. Review `zh-CN` first for visible title, heading, and body drift. Product tokens such as `Notemd`, `LLM`, `Provider`, CLI flags, config keys, file extensions, and code identifiers may remain in English when they are runtime contracts.
-4. Review `zh-Hant`, `ja`, `fr`, `de`, `es`, and `ko` for visible stale English headings.
+4. Run the full locale heading/frontmatter/placeholder audit for every public locale, then manually inspect zh-CN plus representative non-Latin and RTL locales (`ar`, `fa`, `he`) for visible stale English headings or broken direction-sensitive layout.
 5. Update `website/src/lib/publishedLanguageScopeData.mjs` if the docs route set changed.
 6. Update `website/static/llms.txt` if the page changes the public AI retrieval map.
 7. Update `website/src/pages/index.js` if the page changes the homepage source map or visible language boundary.
@@ -133,6 +139,6 @@ The stricter full-route model has a maintenance cost: every docs change touches 
 
 1. Keep English canonical and complete.
 2. Keep all public locale docs route sets complete before deploy.
-3. Use `generate-localized-docs.cjs` for repeatability, but review visible zh-CN text first because machine-style generic headings are worse than explicit localized headings.
+3. Use `generate-localized-docs.cjs` for repeatability, but review visible zh-CN text and representative RTL/non-Latin output because machine-style generic headings are worse than explicit localized headings.
 4. Treat Search Console and AI visibility as post-deploy measurement, not local build proof.
 5. Avoid new generic wrappers around Docusaurus theme components. Existing theme overrides are acceptable only because they own concrete policy: alternates, locale switching, sidebar filtering, and paginator filtering.

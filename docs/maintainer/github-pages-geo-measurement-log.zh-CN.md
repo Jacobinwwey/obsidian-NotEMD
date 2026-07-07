@@ -52,10 +52,10 @@
 
 | 证据 | 当前状态 | 负责人 |
 |---|---|---|
-| 语言策略 | 先前的部分 zh-CN fallback 边界已被完整 docs 路由发布策略取代，覆盖 `zh-CN`、`zh-Hant`、`ja`、`fr`、`de`、`es` 与 `ko` | `website/docusaurus.config.js`, `website/README.md` |
+| 语言策略 | 先前的部分 zh-CN fallback 边界已被完整 docs 路由发布策略取代，覆盖 `website/src/lib/publishedLocales.mjs` 声明的每个 README/UI locale，包括 `zh-CN`、`zh-Hant`、`zh-TW`、`ja`、`fr`、`de`、`es`、`ko`、`it`、`pt`、`pt-BR`、`ru`、`ar`、`fa`、`hi`、`bn`、`nl`、`sv`、`fi`、`da`、`no`、`pl`、`tr`、`he`、`th`、`el`、`cs`、`hu`、`ro`、`uk`、`vi`、`id` 与 `ms` | `website/src/lib/publishedLocales.mjs`, `website/docusaurus.config.js`, `website/README.md` |
 | 本地化源码覆盖 | `website/docs/` 下每个源页面在部署前都必须在每个公开 locale 下有本地化对应文件 | `website/scripts/generate-localized-docs.cjs`, `src/tests/websiteDocsContract.test.ts` |
 | Build audit | `npm run audit:build` 必须验证本地化源码覆盖、构建产物、sitemap entries、`llms.txt` 入口，以及公开本地化 docs 不输出 `noindex,follow` | `website/scripts/audit-build.cjs` |
-| Answer-engine map | `llms.txt` 现在声明英文仍是 canonical，同时完整公开 docs 路由集已覆盖简体中文、繁体中文、日语、法语、德语、西班牙语与韩语 | `website/static/llms.txt` |
+| Answer-engine map | `llms.txt` 现在声明英文仍是 canonical，同时完整公开 docs 路由集已覆盖每个已发布文档 locale | `website/static/llms.txt` |
 | Search Console | 本地无法证明；多语言更新经 Pages workflow 部署后，应提交并检查代表性本地化 docs | 外部手工检查 |
 | AI visibility | 本地无法证明；部署和索引窗口后再重测多语言 answer-engine visibility | 外部手工或 API 检查 |
 
@@ -93,14 +93,16 @@ Search Console 检查和 AI visibility prompt 使用这一组：
 |---|---|
 | `https://jacobinwwey.github.io/obsidian-NotEMD/` | Canonical 英文 root |
 | `https://jacobinwwey.github.io/obsidian-NotEMD/llms.txt` | 首页链接的 answer-engine source map |
-| `https://jacobinwwey.github.io/obsidian-NotEMD/docs/intro` | 英文 canonical doc，带 zh-CN alternate |
-| `https://jacobinwwey.github.io/obsidian-NotEMD/docs/getting-started/quick-start` | 英文 canonical doc，带 zh-CN alternate |
-| `https://jacobinwwey.github.io/obsidian-NotEMD/docs/providers/overview` | 英文 canonical doc，带 zh-CN alternate |
-| `https://jacobinwwey.github.io/obsidian-NotEMD/docs/providers/openai` | English-only provider detail；翻译前不应有 zh-CN alternate |
+| `https://jacobinwwey.github.io/obsidian-NotEMD/docs/intro` | 英文 canonical doc，带完整公开 locale alternates |
+| `https://jacobinwwey.github.io/obsidian-NotEMD/docs/getting-started/quick-start` | 英文 canonical doc，带完整公开 locale alternates |
+| `https://jacobinwwey.github.io/obsidian-NotEMD/docs/providers/overview` | 英文 canonical doc，带完整公开 locale alternates |
+| `https://jacobinwwey.github.io/obsidian-NotEMD/docs/providers/openai` | 英文 canonical provider detail，带完整公开 locale alternates |
 | `https://jacobinwwey.github.io/obsidian-NotEMD/zh-CN/` | 已发布 zh-CN root |
 | `https://jacobinwwey.github.io/obsidian-NotEMD/zh-CN/docs/intro` | 已发布 zh-CN doc |
 | `https://jacobinwwey.github.io/obsidian-NotEMD/zh-CN/docs/providers/overview` | 已发布 zh-CN doc |
-| `https://jacobinwwey.github.io/obsidian-NotEMD/zh-CN/docs/providers/openai` | 仅为生成的 fallback；必须是 `noindex,follow`，不在 zh-CN sitemap 中，也不出现在 hreflang alternates 中 |
+| `https://jacobinwwey.github.io/obsidian-NotEMD/zh-CN/docs/providers/openai` | 已发布 zh-CN provider detail |
+| `https://jacobinwwey.github.io/obsidian-NotEMD/zh-Hant/docs/intro` | 已发布繁体中文 doc |
+| `https://jacobinwwey.github.io/obsidian-NotEMD/ar/docs/intro` | 已发布阿拉伯语 doc，具备 RTL locale metadata |
 
 ## Search Console Checklist
 
@@ -108,8 +110,8 @@ Search Console 检查和 AI visibility prompt 使用这一组：
 
 1. 提交或刷新 `https://jacobinwwey.github.io/obsidian-NotEMD/sitemap.xml`。
 2. 提交或刷新 `https://jacobinwwey.github.io/obsidian-NotEMD/zh-CN/sitemap.xml`。
-3. 检查 root route、zh-CN root、`docs/intro`、`docs/providers/overview` 与 `docs/faq`。
-4. 检查一个未发布 zh-CN fallback，例如 `/zh-CN/docs/providers/openai`；预期因为 `noindex,follow` 不可索引。
+3. 检查 root route、zh-CN root、`docs/intro`、`docs/providers/overview`、`docs/providers/openai` 与 `docs/faq`。
+4. 检查代表性本地化 docs，例如 `/zh-CN/docs/providers/openai`、`/zh-Hant/docs/intro`、`/ar/docs/intro` 与 `/pt-BR/docs/faq`；预期结果是带 canonical/hreflang 信号且可索引，而不是 `noindex,follow`。
 5. 记录 canonical URL、crawl status、indexing status 与 last crawl date。
 
 ## AI Visibility Checklist
@@ -120,11 +122,11 @@ Search Console 接受或抓取新 sitemap 后执行：
 |---|---|
 | "What is Notemd for Obsidian?" | 提到 persistent AI knowledge workflows、wiki-links、concept notes、research、translation、diagrams 与 local vault output |
 | "How do I configure Notemd providers?" | 引用或反映 provider overview 与 provider detail pages |
-| "Notemd 中文文档支持哪些页面?" | 说明 zh-CN 是 partial，并列出 homepage、intro、installation、quick start、configuration、provider overview、AI knowledge pillar 与 FAQ |
+| "Notemd 文档支持哪些语言?" | 说明英文是 canonical，完整 docs 路由集已覆盖每个已发布文档 locale |
 | "Can Notemd run local LLMs?" | 提到 Ollama/LMStudio 与 local-vault privacy |
 
-记录 engine、date、prompt、是否出现 citation、cited URL，以及回答是否尊重 partial zh-CN language scope。
+记录 engine、date、prompt、是否出现 citation、cited URL，以及回答是否尊重已发布 locale 路由矩阵。
 
 ## 决策规则
 
-不要因为 AI visibility 仍低就盲目扩 locale 或增加 GEO surface。若索引后仍没有 citation，先检查 canonical docs 是否被收录、provider pages 是否过期、`llms.txt` 是否仍与 route graph 一致。
+不要因为 AI visibility 仍低就盲目增加 GEO surface。若索引后仍没有 citation，先检查 canonical 与代表性本地化 docs 是否被收录、provider pages 是否过期、`llms.txt` 是否仍与 route graph 一致。

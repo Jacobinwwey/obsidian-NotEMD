@@ -1,0 +1,67 @@
+---
+id: google
+title: "Google"
+description: "Konfigurálja a Google Gemini-t"
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [google, gemini, provider, configuration]
+concepts: [Google, Gemini, API Configuration]
+citations:
+  - title: Gemini API
+    url: https://ai.google.dev
+  - title: Google AI Studio
+    url: https://aistudio.google.com
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# Google Társító
+
+<TLDR>
+**A Google használja a natív Gemini Generative Language API transzportmódot.** A jelen beállítás alapértelmezeként `gemini-2.0-flash-exp`, `https://generativelanguage.googleapis.com/v1` és `temperature: 0.5`-t használ. Ez nem egy OpenAI-kompatibilis profill.
+
+Ez része a [Obsidian AI tudományos kezelési útmutatójának](/docs/pillar-ai-knowledge).
+</TLDR>
+
+## Elhajtás
+
+Írja létre egy Google AI Studio vagy Google Cloud API kulcsot, amelynek van Gemini hozzáférése, adja hozzá egy `Google` fornalmi profilot, és tartson meg a natív Generative Language Base URL-t. Használja a helyettesítő Gemini Flash profillt gyors übersetésekhez és széles körű munkavégzéshez, majd módosítsa a munkától függően a modellt, ha szüksége van nagyobb vagy hatékonyabb Gemini modellre.
+
+Képzelje el, hogy a Gemini modell ID-t helyezzi egy OpenAI-kompatibilis profillba, csak ha kifejezetten használ egy átmenetet, amely a Gemini-t egy OpenAI-kompatibilis API-ön keresztül nyíltatja.
+
+## Végpont és autentikáció
+
+| Feltérváltozó | Jelen beállítás |
+|-------|----------------|
+| Transzport | `google` |
+| API kulcs | Előírás |
+| Base URL | `https://generativelanguage.googleapis.com/v1` |
+| Alapértelmezett model | `gemini-2.0-flash-exp` |
+| Temperatúra | `0.5` |
+| Kapcsolati ellenőrzés | Csatornázás nélkül |
+
+A futás időben hívja fel a `/models/{model}:generateContent?key={apiKey}`-t. A kulcsot kérésparaméntként küldik el, mert így van konfigurált a natív Gemini végpont a pluginek benne.
+
+## Model felfedezése
+
+A Google használja a `google-models` felfedezési módot. A felfedezésnek kell visszatérnie a API kulcsra kiszolgálható Gemini modellekkel; ha a választó tömökké van, ellenőrizze a kulcsot a sama Base URL-vel és bizonyítsa meg, hogy a modellfamilia aktív az account számára.
+
+A ismert kimeneti token korlátok modellezőként működnek a fornalmi regisztrumban. Ha egy hosszú übersetés vagy diagram magyarázata leoml, válassza egy nagyobb kimeneti kapacitással rendelkező Gemini modellt, vagy csökkentse a kérött kimeneti méretet.
+
+## Hibaelhárítás
+
+- `400`: a modell ID általában nem illik a natív Gemini útjával, vagy a kérések meghaladják a modell támogatott formátumát.
+- `401` vagy `403`: ellenőrizze a kulcs korlátait, a projekt/API aktiválását, és hogy a kulcs képes-e hozzáférni a Gemini-hez.
+- `404`: a modell ID nem áll rendelkezésre a konfigurált API verzióban.
+- Ez a profill alatt a átmenet példái nem működnek: használja az átmeneti beállítást helyett a natív Google fornalmat.
+
+## Kikorlátlan használat
+
+Használja a Google-t gyors übersetésekhez, nagy mennyiségű jegy tisztításához, és olyan munkavégzésekhez, ahol a Gemini költség/tehetségi arány jobb, mint a direkta OpenAI vagy Anthropic használata. Használja más fornalmat azoknak a munkavégzéseknek, amelyeknek szüksége van OpenAI-kompatibilis logikai modell kezelésre.
+
+---
+
+## További lépések
+
+- [LLM Fornincs-eregyszerek](/docs/providers/overview) -- Teljes konfiguráció, munkaalkalmazásokhoz szóló modellek és újrapróbálási logika
+- [Übersetés](/docs/features/translation) -- A nagy mennyiségű übersetési munkákhoz ajánlott a Gemini Flash

@@ -1,0 +1,184 @@
+---
+id: concept-notes
+title: "Notatki koncepcyjne"
+description: "Tworzenie i zarządzanie notatkami koncepcyjnymi — samodzielne notatki dotyczące kluczowych koncepcji wydobytych z twojego sejfu"
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [concept notes, knowledge extraction, concept folder, deduplication, backlinks]
+concepts: [Concept Notes, Knowledge Graph, LLM Extraction, Deduplication, Backlinks]
+citations:
+  - title: Obsidian
+    url: https://obsidian.md
+  - title: Zettelkasten Method
+    url: https://zettelkasten.de
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# Notatki koncepcyjne
+
+<TLDR>
+**Notemd wyodrębnia kluczowe koncepcje z twoich notatek i tworzy osobne pliki z notatkami koncepcyjnymi.** LLM identyfikuje podstawowe terminy, generuje po jednym pliku `.md` na koncepcję w konfigurowalnej folderze i opcjonalnie dodaje powrotnie linki do oryginalnej notatki. Obsługuje eliminację synonimów, wybór modelu dla poszczególnych zadań, oczyszczanie nazw plików oraz silnik deduplikacji składający się z 4 kroków. Jest to część [Obsidian Przewodnika po zarządzaniu wiedzą w AI](/docs/pillar-ai-knowledge).
+</TLDR>
+
+## Przegląd
+
+Notatki koncepcyjne są elementami budulcowymi połączonej bazy wiedzy. Gdy przetwarzasz notatkę, Notemd:
+
+1. **Wysyła twój tekst do LLM** z ustrukturyzowanym poleceniem wyodrębnienia
+2. **Analizuje linie `CONCEPT:`** z odpowiedzi LLM
+3. **Tworzy jeden plik `.md` na koncepcję** w wyznaczonej folderze
+4. **Dodaje backlinki** do notatki źródłowej (gdy jest włączone)
+
+## Jak to działa
+
+### Przepływ ekstrakcji
+
+```
+Source Note → Split into Chunks → LLM per Chunk → Parse CONCEPT: Lines
+    → Deduplicate via Set → Create .md Files → Add Backlinks
+    → (Optional: Generate Log)
+```
+
+### Wskazówka dotycząca wydobywania
+
+LLM otrzymuje polecenie, które nakazuje mu:
+
+- Wyodrębnić **rzeczowniki lub frazy rzeczownikowe** stanowiące istotę tematu dokumentu
+- **Nadaj priorytet specyficzności** — „Dielectric Relaxation” zamiast „Relaxation”
+- **Unormalizuj do liczby pojedynczej** — „models” staje się „model”
+- **Tłumić podkoncepcje** — jeśli pojawi się „relaksacja dielektryczna”, nie wydobywać również „relaksacji”.
+- Pomijaj**** sekcje odniesień/bibliografii, rzeczowniki pospolite oraz nazwy firm/prodуктów
+- Wydaj jeden pojęcie na linii w formacie `CONCEPT: Term Name`
+
+**Tłumienie synonimów** (opcjonalne): dodaj na początku promptu „Unikaj wyodrębniania synonimów, pojęć podstawowych semantycznie podobnych lub słów kluczowych, o ile to możliwe".
+
+**Skupiony obszar nauki** (opcjonalny): dodaj `Relevant Fields: [domain]` na początku, aby ograniczyć wyodrębnianie do określonej dziedziny.
+
+**Przejęcie języka** (opcjonalne): dodaj na końcu „Pojęcia wyjściowe MUSZĄ być w [języku]."
+
+### Podział na fragmenty
+
+Długie notatki są dzielone za pomocą `settings.chunkWordCount`. Każdy fragment jest wysyłany oddzielnie. Pojęcia ze wszystkich fragmentów są gromadzone w `Set` — duplikaty pomiędzy fragmentami są cicho usuwane. Błędy LLM w poszczególnych fragmentach nie powodują przerwania operacji.
+
+## Tworzenie notatki pojęciowej
+
+### Zasady nazw plików
+
+| Zasada | Zachowanie |
+|------|----------|
+| Długie spisy/underline'y | Zastępowane przestrzeniami |
+| Znaki specjalne | Usuwane: backslash, forward slash, kropka kolonowa, gwiazdka, znak zapytania, cudzysłowy, nawiasy kątowe, pipe, hash, caret, nawiasy |
+| Przestrzenie | Składane i wycięte |
+| Maksymalna długość | 100 znaków (skrócone i ponownie wycięte) |
+| Wynik pusty/wszystkie kropki | Przepracowane w tle |
+
+Przykład: `A-B: Key*Term` staje się `A B KeyTerm.md`
+
+### Szablony
+
+**Pełny szablon** (odnośniki włączone, minimalny szablon wyłączony):
+
+```markdown
+# Concept Name
+
+## Linked From
+- [[SourceNoteBasename]]
+```
+
+**Minimalny szablon** (gdy `extractConceptsMinimalTemplate: true`):
+
+```markdown
+# Concept Name
+```
+
+### Aktualizacja istniejących notatek
+
+Gdy plik koncepcyjny już istnieje:
+
+1. Jeśli odnośniki są włączone, a notatka źródłowa jeszcze nie jest wymieniona, dodaj odnośnik
+2. Jeśli istnieje sekcja `## Linked From`, wstaw ją przed następnym nagłówkiem `##`
+3. Jeśli nie ma `## Linked From`, dodaj sekcję na końcu
+4. Sprawdzane są duplikatowe odnośniki i są one pomijane
+
+### Konfiguracja
+
+| Ustawienie | Domyślny | Efekt |
+|---------|---------|--------|
+| `useCustomConceptNoteFolder` | `true` | Przełącznik główny. Wyłączone = brak tworzenia notatek |
+| `conceptNoteFolder` | `''` (wyłączone) | Ścieżka folderu dla notatek koncepcyjnych |
+| `extractConceptsMinimalTemplate` | `true` | Notatki tylko z tytułem (bez powiązań) |
+| `extractConceptsAddBacklink` | `false` | Dodawanie odnośników zwrotnych podczas wyodrębniania samodzielnie |
+| `extractConceptsProvider` / `extractConceptsModel` | DeepSeek | LLM na zasadzie zadania dla wyodrębniania koncepcji |
+| `extractConceptsLanguage` | `'en'` | Język wyjściowy dla nazw koncepcji |
+| `replaceSynonymsDuringConceptExtraction` | `false` | Włączenie tłumienia synonimów w instrukcji |
+| `generateConceptLogFile` | `false` | Napisanie listy `.log` utworzonych koncepcji |
+
+**Ważne:** Ustawienia `extractConceptsAddBacklink` i `extractConceptsMinimalTemplate` wpływają tylko na **specjalny polecenie wyodrębniania**. Polecenie "Dodaj linki" zawsze tworzy notatki w pełnym szablonie z odnośnikami zwrotnymi.
+
+## Deduplikacja
+
+Polecenie deduplikacji (`Notemd: Check & remove duplicate concept notes`) przeprowadza analizę 5-krokową:
+
+### Krok 1: Dokładne dopasowanie nazwy pliku
+
+Porównanie nazwy bez uwzględniania wielkości liter w całym skonfigurowanym zakresie.
+
+### Krok 2: Wykrywanie formy liczby mnogiej
+
+Usuwanie sufiksów: `-ies` do `-y`, `-es` usuwane, `-s` usuwane. Porównuje formę pojedynczą z plikami z zakresu. Nie obsługuje nieregularnych form liczby mnogiej (children/child).
+
+### Krok 3: Normalizacja symboli
+
+Zastosowanie: `toLowerCase()`, zastąpij myślniki/i podkreślenia przestrzeniami, usuń wszystko, co nie jest literami i cyframi, połącz białe spacje. Zaznaczone są te, które po normalizacji są identyczne.
+
+### Krok 4: Zamknięcie w jedno słowo
+
+Notatki opisujące pojedyncze słowa są sprawdzane w odniesieniu do nazw plików z zakresem wielosłowowym. Nie jest to wykonywane, gdy zakres to `concept_folder_only`.
+
+### Krok 5: Potwierdzenie i usunięcie
+
+Wszystkie kandydaty są pokazywane w oknie potwierdzenia. Zatwierdzone elementy trafiają do kosza systemowego. Operację można anulować między każdym usunięciem.
+
+### Tryby zakresu
+
+| Tryb | Porównywane z |
+|------|-------------------|
+| `vault` (domyślny) | Wszystkie pliki skarbca `.md` z wyłączeniem folderu z notatkami |
+| `concept_folder_only` | Inne notatki konceptualne w tym folderze |
+| `include` | Pliki w określonych wymienionych folderach |
+| `exclude` | Wszystkie pliki skarbca z wyłączeniem foldera z notatkami + wymienionych folderów |
+
+## Zastosowanie
+
+### Wyciąganie koncepcji (samodzielnie)
+
+1. Otwórz notatkę
+2. Uruchom **"Notemd: Wyciąganie koncepcji"** z palety poleceń
+3. Notatki konceptualne są tworzone w ustawionym folderze
+
+### Wyciąganie i generowanie treści
+
+**"Notemd: Wyciąganie koncepcji i generowanie tytułów"** — wyciąga koncepcje, a następnie uruchamia „Generuj na podstawie tytułu” dla każdej notatki w folderze z koncepcjami. Dzięki temu generowane są treści dla **wszystkich** notatek koncepcyjnych w tym folderze, a nie tylko tych nowo utworzonych.
+
+### Tworzenie linku wiki z wybranej części tekstu
+
+1. Wyróżnienie tekstu w edytorze
+2. Uruchomienie **"Notemd: Tworzenie linku wiki z wybranej części tekstu"**
+3. Tekst jest ujęty w `[[...]]` i tworzona zostaje notatka koncepcyjna
+
+## Wskazówki
+
+- **Najpierw ustaw folder koncepcji** — bez niego nie powstaną żadne notatki. Jeśli nie zostanie on ustawiony, pojawi się okno ostrzegawcze.
+- **Wykorzystuj modele do poszczególnych zadań** — do wyciągania koncepcji doskonale nadają się tańsze modele (GPT-4o-mini, DeepSeek). Drogie modele należy zachować do zadań badawczych lub tłumaczeń.
+- **Włącz tłumienie synonimów** w dziedzinach technicznych, gdzie wiele terminów odnosi się do tej samej koncepcji.
+- **Regularnie usuwaj duplikaty** — uruchom polecenie usuwania duplikatów po przetwarzaniu zbiorczym, aby wykryć niemal identyczne elementy.
+- **Plik logu jest zapisywany na nowo** przy każdym uruchomieniu, a nie dodawany do niego. Skopiuj go, jeśli potrzebujesz wcześniejszych wyników.
+
+---
+
+## Kolejne kroki
+
+- [Wiki-Links](./wiki-links) — Jak koncepcje są łączone w tekście
+- [Diagrams](./diagrams) — Wizualizacja związków między koncepcjami
+- [Workflows](./workflows) — Łączenie wyciągania z innymi zadaniami

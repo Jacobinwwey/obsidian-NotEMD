@@ -1,0 +1,189 @@
+---
+id: overview
+title: "فراهم‌کنندگان LLM"
+description: "پیکربندی ۳۶ فراهم‌کننده LLM — ابری، گیت‌وی و محلی — با انتخاب مدل بر حسب وظیفه"
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [LLM providers, API, OpenAI, Anthropic, Google, DeepSeek, Qwen, Ollama, per-task model]
+concepts: [LLM Integration, API Providers, Per-Task Models, OpenAI Compatible, Ollama, China Providers]
+citations:
+  - title: OpenAI API
+    url: https://platform.openai.com
+  - title: Anthropic API
+    url: https://docs.anthropic.com
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# فراهم‌کنندگان LLM
+
+<TLDR>
+**Notemd از ۳۶ فراهم‌کننده LLM در ۴ نوع انتقال پشتیبانی می‌کند.** تمام فراخوانی‌های API از HTTP خام (بدون SDKها) استفاده کرده و دارای تلاش مجدد خودکار، جایگزینی انتقال و ذخیره‌سازی پاسخ به مدت ۵ دقیقه هستند. انتخاب مدل بر حسب وظیفه امکان استفاده از مدل‌های ارزان برای استخراج مفاهیم و مدل‌های قدرتمند برای تحقیقات را فراهم می‌کند. برای فراهم‌کنندگان محلی (Ollama، LMStudio) نیازی به کلید API نیست.
+</TLDR>
+
+این بخشی از [Obsidian راهنمای مدیریت دانش هوش مصنوعی](/docs/pillar-ai-knowledge) است.
+
+## رده‌های فراهم‌کننده
+
+### فراهم‌کنندگان ابری
+
+| ارائه‌دهنده | پایه‌ی پیش‌فرض URL | مدل پیش‌فرض | دمای خروجی |
+|----------|-----------------|---------------|-------------|
+| **DeepSeek** | `api.deepseek.com` | `deepseek-v4-pro` | 0.5 |
+| **OpenAI** | `api.openai.com/v1` | `gpt-4o` | 0.5 |
+| **Anthropic** | `api.anthropic.com` | `claude-3-5-sonnet-20240620` | 0.5 |
+| **Google** | `generativelanguage.googleapis.com/v1` | `gemini-2.0-flash-exp` | 0.5 |
+| **Mistral** | `api.mistral.ai/v1` | `mistral-large-latest` | 0.5 |
+| **xAI** | `api.x.ai/v1` | `grok-4` | 0.7 |
+| **Cerebras** | `api.cerebras.ai/v1` | `gpt-oss-120b` | 0.5 |
+| **Fireworks** | `api.fireworks.ai/inference/v1` | `kimi-k2p5` | 0.5 |
+| **Nebius** | `api.studio.nebius.com/v1` | `openai/gpt-oss-120b` | 0.3 |
+
+### فراهم‌کنندگان گیت‌وی / پروکسی
+
+| ارائه‌دهنده | پایه‌ی پیش‌فرض URL | مدل پیش‌فرض | یادداشت‌ها |
+|----------|-----------------|---------------|-------|
+| **OpenRouter** | `openrouter.ai/api/v1` | `anthropic/claude-3.7-sonnet` | افزودن هدرهای `HTTP-Referer` + `X-Title` |
+| **GitHub Models** | `models.github.ai/inference` | `gpt-4o-mini` | افزودن هدر `X-GitHub-Api-Version` |
+| **AIHubMix** | `aihubmix.com/v1` | `gpt-4o-mini` | افزودن هدر `APP-Code` |
+| **PPIO** | `api.ppinfra.com/v3/openai` | `qwen/qwen3-32b` | |
+| **Hugging Face** | `router.huggingface.co/v1` | `openai/gpt-oss-120b` | |
+| **Vercel AI Gateway** | `ai-gateway.vercel.sh/v1` | `anthropic/claude-sonnet-4.5` | |
+| **Requesty** | `router.requesty.ai/v1` | `anthropic/claude-3-7-sonnet-latest` | |
+| **Together** | `api.together.xyz/v1` | `meta-llama/Meta-Llama-3.1-70B-Instruct-Turbo` | |
+| **LiteLLM** | `localhost:4000/v1` | `your-proxy-model` | کلید اختیاری API |
+| **نوع جدید API** | `localhost:3000/v1` | `gpt-4.1` | کلید اختیاری API |
+| **OpenAI Compatible** | (تنظیم‌شده توسط کاربر) | `your-model-id` | نقطه پایان سفارشی |
+
+### ارائه‌دهندگان چین
+
+| ارائه‌دهنده | پایه پیش‌فرض URL | مدل پیش‌فرض | یادداشت‌ها |
+|----------|-----------------|---------------|-------|
+| **Qwen** | `dashscope.aliyuncs.com/compatible-mode/v1` | `qwen3-235b-a22b` | Alibaba DashScope |
+| **Qwen Code** | `dashscope.aliyuncs.com/compatible-mode/v1` | `qwen3-coder-plus` | متمرکز بر برنامه‌نویسی |
+| **Doubao** | `ark.cn-beijing.volces.com/api/v3` | (شناسه پایانه الزامی است) | ByteDance Volcengine |
+| **Moonshot** | `api.moonshot.cn/v1` | `kimi-k2-0905-preview` | Kimi |
+| **Xiaomi MiMo** | `api.xiaomimimo.com/v1` | `mimo-v2.5-pro` | |
+| **GLM** | `open.bigmodel.cn/api/paas/v4` | `glm-5` | نقطه پایان Zhipu، چین |
+| **Z AI** | `api.z.ai/api/paas/v4` | `glm-5` | نقطه پایان بین‌المللی Zhipu |
+| **MiniMax** | `api.minimaxi.com/v1` | `MiniMax-M2.7` | |
+| **Baidu Qianfan** | `qianfan.baidubce.com/v2` | `ernie-4.5-turbo-32k` | |
+| **SiliconFlow** | `api.siliconflow.cn/v1` | `Qwen/QwQ-32B` | پلتفرم میزبانی مدل‌ها |
+| **Huawei Cloud MaaS** | `api.modelarts-maas.com/v1` | `DeepSeek-V3` | |
+
+**Doubao نیاز به شناسه نقطه پایان Ark دارد** (فرمت: `ep-xxxxxxxx-xxxx-xxxx`). جایگزینی جایگزین پیش‌فرض الزامی است.
+
+### ارائه‌دهندگان محلی
+
+| ارائه‌دهنده | پایه پیش‌فرض URL | مدل پیش‌فرض | یادداشت‌ها |
+|----------|-----------------|---------------|-------|
+| **Ollama** | `localhost:11434/api` | `llama3` | هیچ کلید API وجود ندارد. پخش NDJSON. کشف مدل از طریق `/api/tags` |
+| **LMStudio** | `localhost:1234/v1` | `local-model` | ارسال `"EMPTY"` به عنوان توکن بیرر. کشف سازگار با OpenAI |
+| **OVMS** | `localhost:8000/v3` | `openvino-model` | OpenVINO Model Server |
+| **Azure OpenAI** | (تنظیم‌شده توسط کاربر) | `gpt-4o` | نام استقرار در URL. هدر `api-key` |
+
+## انتخاب مدل بر حسب وظیفه
+
+Notemd از ارائه‌دهنده و مدل مستقل برای هر وظیفه پشتیبانی می‌کند. آن را با `useMultiModelSettings: true` فعال کنید.
+
+### وظایف موجود
+
+| وظیفه | کلید تنظیمات | ارائه‌دهنده پیش‌فرض |
+|------|-------------|-----------------|
+| افزودن لینک‌ها (قرار دادن لینک ویکی) | `addLinksProvider` / `addLinksModel` | DeepSeek |
+| تحقیق (جستجوی وب + خلاصه‌سازی) | `researchProvider` / `researchModel` | DeepSeek |
+| تولید از عنوان | `generateTitleProvider` / `generateTitleModel` | DeepSeek |
+| ترجمه | `translateProvider` / `translateModel` | DeepSeek |
+| تولید نمودار | `summarizeToMermaidProvider` / `Model` | DeepSeek |
+| استخراج مفهوم | `extractConceptsProvider` / `Model` | DeepSeek |
+| استخراج متن اصلی | `extractOriginalTextProvider` / `Model` | DeepSeek |
+
+### ترتیب رفع مشکلات
+
+1. اگر `useMultiModelSettings` فعال باشد → از ارائه‌دهنده و مدل مخصوص وظیفه استفاده کنید
+2. اگر تغییر مدل وظیفه خالی باشد → به مدل پیش‌فرض ارائه‌دهنده رجوع کنید
+3. اگر ارائه‌دهنده وظیفه نامعتبر باشد → به `activeProvider` جهانی رجوع کنید
+4. اگر `useMultiModelSettings` خاموش باشد → تمام وظایف از `activeProvider` جهانی استفاده می‌کنند
+
+### پیکربندی‌های توصیه‌شده
+
+```
+# Researcher: power for research, cheap for everything else
+activeProvider: DeepSeek
+extractConceptsProvider: DeepSeek
+researchProvider: OpenAI        # GPT-4o for better research quality
+summarizeToMermaidProvider: DeepSeek
+
+# Privacy-first: local only
+activeProvider: Ollama
+addLinksProvider: Ollama
+extractConceptsProvider: Ollama
+
+# Budget bilingual
+activeProvider: DeepSeek
+translateProvider: Google      # Gemini Flash for translation
+researchProvider: SiliconFlow  # Cheaper China-based routing
+```
+
+## معماری فراخوانی API
+
+### لایه‌های انتقال
+
+1. **Obsidian `requestUrl`** — اصلی (داخلی، روی تمام پلتفرم‌ها کار می‌کند)
+2. **Desktop HTTP** — ماژول‌های Node.js `http`/`https` (ستریمینگ + درخواست‌های طولانی)
+3. **Web `fetch`** — گزینه جایگزین هنگام عدم در دسترس بودن ماژول‌های Node.js
+
+این پلاگین به‌طور خودکار در صورت خطاهای موقت شبکه، بین لایه‌های انتقال جابجا می‌شود.
+
+### منطق تلاش مجدد
+
+- **حالت عادی** (`enableStableApiCall: false`): یک تلاش. در صورت خطا موقت، به‌طور خودکار به تلاش مجدد پایدار ارتقا می‌یابد.
+- **حالت تلاش مجدد پایدار** (`enableStableApiCall: true`): تا ۴ تلاش (۱ + ۳ تلاش مجدد) با فواصل ۵ ثانیه‌ای.
+- **خطاهای موقتی که باعث تلاش مجدد می‌شوند**: `err_connection_closed`, `err_connection_reset`, `err_timed_out`, `econnreset`, `econnaborted`, `etimedout`, `socket hang up`, `network request failed`
+- **غیرقابل تلاش مجدد**: HTTP 400, 401, 403, 404
+
+### کش‌سازی پاسخ‌ها
+
+کش LRU در حافظه با مدت زمان ۵ دقیقه که بر اساس ارائه‌دهنده + مدل + دما + پرامپت + محتوا کلیدگذاری می‌شود. درخواست‌های یکسان بعدی در عرض ۵ دقیقه بلافاصله با نتایج کش‌شده پاسخ داده می‌شوند.
+
+### مدیریت مدل‌های استدلالی
+
+مدل‌هایی که از نقش `system` پشتیبانی نمی‌کنند (DeepSeek R1, OpenAI o1/o3/o4/gpt-5) به‌طور خودکار پرامپت‌های سیستم و کاربر را در یک پیام کاربری واحد ترکیب می‌کنند.
+
+DeepSeek-مشخص: `thinkingEnabled` `{ thinking: { type: 'enabled' } }` را به درخواست اضافه می‌کند. `reasoningEffort` (پایین/متوسط/بالا) به عنوان `reasoning_effort` منتقل می‌شود. هنگام فعال بودن حالت تفکر، اطمینان حاصل می‌شود که حداکثر توکن‌های خروجی ≥ 8000 باشد.
+
+### تخمین توکن
+
+`estimateTokens(text)`: `Math.ceil(text.length / 4)` — روش هیوریستیک ۴ کاراکتر برای هر توکن. برای اعمال `maxResearchContentTokens` قبل از ارسال به LLM استفاده می‌شود.
+
+هیچ ردیابی هزینه‌ای پیاده‌سازی نشده است.
+
+## کشف مدل‌ها
+
+| حالت | ارائه‌دهندگان | نقطه پایان |
+|------|-----------|----------|
+| `ollama-tags` | Ollama | `/api/tags` |
+| `google-models` | Google | لیست مدل‌ها API |
+| `anthropic-models` | Anthropic | لیست مدل‌ها API |
+| `openai-compatible-models` | DeepSeek، Qwen، Mistral و غیره. | `/v1/models` |
+| `openrouter-models` | OpenRouter | لیست مدل‌ها API |
+| `github-models` | GitHub Models | استنتاج API |
+| `none` | Azure OpenAI | غیرفعال (نیاز به نام پیاده‌سازی دارد) |
+
+## شروع سریع
+
+1. **یک ارائه‌دهنده انتخاب کنید** — DeepSeek (چین)، OpenAI (بین‌المللی) یا Ollama (محلی/رایگان)
+2. **کلید API را وارد کنید** — تنظیمات → Notemd → ارائه‌دهنده → کلید API
+3. **اتصال را آزمایش کنید** — روی دکمه آزمایش کلیک کنید
+4. **گزینه‌ای: مدل‌های مخصوص هر وظیفه** — `useMultiModelSettings` را فعال کنید و به‌طور جداگانه پیکربندی نمایید
+
+برای Ollama: نیازی به کلید API نیست. فقط مطمئن شوید که `ollama serve` در حال اجراست.
+
+---
+
+## گام‌های بعدی
+
+- 📝 [یادداشت‌های مفهومی](/docs/features/concept-notes) — از مدل استخراج مخصوص هر وظیفه استفاده می‌کند
+- 🎨 [نمودارها](/docs/features/diagrams) — از مدل نمودار مخصوص هر وظیفه استفاده می‌کند
+- 🔍 [تحقیقات](/docs/features/research) — از مدل مخصوص تحقیقات استفاده می‌کند
+- ⚙️ [پیکربندی](/docs/getting-started/configuration) — منبع کامل تنظیمات

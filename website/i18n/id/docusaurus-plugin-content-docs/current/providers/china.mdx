@@ -1,0 +1,75 @@
+---
+id: china
+title: "Penyedia di Cina"
+description: "Konfigurasi Qwen, DeepSeek, GLM, dan seterusnya."
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [china providers, deepseek, qwen, glm, doubao, moonshot, mimo, minimax, baidu, siliconflow, huawei]
+concepts: [China Providers, DeepSeek, Qwen, Doubao, Moonshot, MiMo, GLM, MiniMax, Baidu, SiliconFlow, Huawei]
+citations:
+  - title: Qwen API
+    url: https://help.aliyun.com/zh/dashscope
+  - title: DeepSeek API
+    url: https://platform.deepseek.com
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# Penyedia di Cina
+
+<TLDR>
+**Notemd mendukung penyedia dari wilayah Cina dan asal Cina melalui endpoint yang sebagian besar kompatibel dengan OpenAI.** Daftar saat ini mencakup DeepSeek, Qwen, Qwen Code, Doubao, Moonshot, Xiaomi MiMo, GLM, MiniMax, Baidu Qianfan, SiliconFlow, Huawei Cloud MaaS, dan Z AI. Manfaatnya adalah jangkauan regional dan pengendalian biaya; risikonya adalah penamaan model khusus penyedia serta pembatasan akun.
+
+Ini merupakan bagian dari [Obsidian Panduan Manajemen Pengetahuan AI](/docs/pillar-ai-knowledge).
+</TLDR>
+
+## Pengaturan
+
+Buat akun penyedia, hasilkan kunci API, lalu pilih preset penyedia Notemd yang sesuai alih-alih menggunakan profil umum OpenAI. Preset tersebut memiliki Base URL default, mode uji API, perilaku penemuan model, serta field UI khusus penyedia.
+
+Gunakan pemilihan model per-tugas secara agresif di sini. Misalnya, gunakan DeepSeek atau GLM untuk pekerjaan yang membutuhkan penalaran intensif, gunakan Qwen atau Moonshot untuk pekerjaan berbahasa Cina yang luas, dan arahkan tugas pemrograman ke Qwen Code bila akun tersebut menyediakan model pemrograman.
+
+## Endpoint dan Autentikasi
+
+| Penyedia | Model Default | Base URL |
+|----------|---------------|----------|
+| DeepSeek | `deepseek-v4-pro` | `api.deepseek.com` |
+| Qwen | `qwen3-235b-a22b` | `dashscope.aliyuncs.com/compatible-mode/v1` |
+| Qwen Code | `qwen3-coder-plus` | `dashscope.aliyuncs.com/compatible-mode/v1` |
+| Doubao | (ID endpoint diperlukan) | `ark.cn-beijing.volces.com/api/v3` |
+| Moonshot | `kimi-k2-0905-preview` | `api.moonshot.cn/v1` |
+| Xiaomi MiMo | `mimo-v2.5-pro` | `api.xiaomimimo.com/v1` |
+| GLM | `glm-5` | `open.bigmodel.cn/api/paas/v4` |
+| MiniMax | `MiniMax-M2.7` | `api.minimaxi.com/v1` |
+| Baidu Qianfan | `ernie-4.5-turbo-32k` | `qianfan.baidubce.com/v2` |
+| SiliconFlow | `Qwen/QwQ-32B` | `api.siliconflow.cn/v1` |
+| Huawei Cloud MaaS | `DeepSeek-V3` | `api.modelarts-maas.com/v1` |
+| Z AI | `glm-5` | `api.z.ai/api/paas/v4` |
+
+**Catatan:** Doubao memerlukan ID endpoint Ark (format: `ep-xxxxxxxx-xxxx-xxxx`) bukan nama model standar.
+
+Sebagian besar penyedia ini menggunakan runtime yang kompatibel dengan OpenAI, tetapi semantik akun dan model mereka berbeda. Pertahankan Base URL khusus preset kecuali Anda telah memverifikasi endpoint alternatif akun tersebut.
+
+## Penemuan Model
+
+DeepSeek, Qwen, Qwen Code, Doubao, Moonshot, Xiaomi MiMo, GLM, Z AI, MiniMax, Baidu Qianfan, dan SiliconFlow menggunakan penemuan model yang kompatibel dengan OpenAI bila penyedia mendukung daftar. Huawei Cloud MaaS menggunakan mode `huaweicloud-modelarts-models` karena metadata penyebaran ModelArts tidak sama dengan daftar umum `/v1/models`.
+
+Jangan anggap kegagalan penemuan sebagai bukti bahwa chat tidak mungkin dilakukan. Beberapa penyedia memungkinkan chat sambil membatasi hak akses daftar model. Dalam kasus itu, simpan ID model yang eksplisit di profil dan verifikasi dengan tes koneksi.
+
+## Pemecahan Masalah
+
+- Autentikasi berhasil tetapi chat gagal: nama model mungkin berada di luar hak atau wilayah akun.
+- Doubao gagal dengan nama model biasa: gunakan ID endpoint Ark di field model bila penyebaran Anda memerlukannya.
+- Respons penalaran terpotong: periksa batas token keluaran khusus penyedia dan pengaturan batas token berbasis model dari Notemd.
+- Jaringan regional bervariasi: gunakan endpoint wilayah Cina penyedia bila mesin vault berada di Cina; gunakan endpoint internasional hanya bila akun dan jalur jaringan keduanya valid.
+
+## Kapan Digunakan
+
+Gunakan penyedia di Tiongkok ketika latensi regional, akses pembayaran/akun, kualitas bahasa Mandarin, atau biaya merupakan batasan utama. Pilih OpenAI, Anthropic, Google, atau penyedia lokal secara langsung bila Anda membutuhkan batas protokol yang lebih sederhana atau konsistensi debugging antar penyedia yang lebih baik.
+
+---
+
+## Langkah Selanjutnya
+
+- [LLM Providers](/docs/providers/overview) -- Konfigurasi lengkap, model per tugas, dan logika pengulangan
+- [Pemecahan Masalah](/docs/advanced/troubleshooting) -- Perbaiki masalah koneksi regional dan kesalahan autentikasi

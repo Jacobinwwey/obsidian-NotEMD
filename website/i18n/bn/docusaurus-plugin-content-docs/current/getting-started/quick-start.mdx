@@ -1,0 +1,181 @@
+---
+id: quick-start
+title: "দ্রুত শুরু করার গাইড"
+description: "5 মিনিটে Notemd দিয়ে শুরু করুন"
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [quick start, tutorial, getting started, first steps]
+concepts: [Quick Start, LLM Configuration, One-Click Workflow, Ollama]
+citations:
+  - title: Obsidian
+    url: https://obsidian.md
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# দ্রুত শুরু করার গাইড
+
+<TLDR>
+**5 মিনিটে Notemd ব্যবহার শুরু করুন।** তিনটি ধাপ: (1) একটি LLM API কী যোগ করুন (অথবা স্থানীয় Ollama ব্যবহার করুন), (2) একটি নোট খুলুন এবং “Process file (add links)” চালান, (3) সাইডবারে ওয়ান-ক্লিক ওয়ার্কফ্লো দেখুন। 30+ প্রদানকারীকে সমর্থন করে। কোডিংয়ের দরকার নেই। Ollama দিয়ে অফলাইনেও কাজ করে.
+</TLDR>
+
+## ধাপ 1: আপনার প্রথম LLM প্রদানকারী কনফিগার করুন (2 মিনিট)
+
+### বিকল্প A: ক্লাউড প্রদানকারী (OpenAI, Anthropic, ইত্যাদি)
+
+1. **Settings** → **Notemd** খুলুন
+2. **LLM Provider Configuration**-এর নিচে, ড্রপডাউন থেকে একটি প্রদানকারী নির্বাচন করুন
+3. আপনার **API Key** লিখুন
+4. (ঐচ্ছিক) উপলব্ধ মডেলগুলো দেখতে **“Get Model List”**-এ ক্লিক করুন
+5. প্রতিটি টাস্ক টাইপের জন্য একটি মডেল নির্বাচন করুন
+
+**জনপ্রিয় বিকল্পসমূহ:**
+- **OpenAI**: `gpt-4o-mini` (দ্রুত, সাশ্রয়ী)
+- **Anthropic**: `claude-sonnet-4-6` (উচ্চ গুণমান)
+- **DeepSeek**: `deepseek-chat` (অত্যন্ত সাশ্রয়ী)
+
+### বিকল্প B: স্থানীয় Ollama (API কীর দরকার নেই)
+
+1. [Ollama](https://ollama.com/) ইনস্টল করুন
+2. একটি মডেল ডাউনলোড করুন: `ollama pull llama3.1`
+3. Notemd সেটিংসে, প্রোভাইডার হিসেবে **"Ollama"** নির্বাচন করুন
+4. মডেলের নাম: `llama3.1` (অথবা আপনি যেকোনো মডেল ডাউনলোড করতে পারেন)
+
+## ধাপ ২: আপনার প্রথম টাস্ক চেষ্টা করুন (১ মিনিট)
+
+### একটি নোটে উইকি-লিঙ্ক যোগ করুন
+
+1. অর্থপূর্ণ বিষয়বস্তুসহ যেকোনো নোট খুলুন
+2. এডিটরে রাইট-ক্লিক করুন
+3. **"Process file (add links)"** নির্বাচন করুন
+4. কয়েক সেকেন্ড অপেক্ষা করুন
+5. এখন মূল ধারণাগুলো `[[wiki-linked]]` হয়ে গেছে!
+
+**উদাহরণ:**
+
+**প্রক্রিয়ার আগে:**
+```
+Machine learning models use neural networks to process data.
+```
+
+**প্রক্রিয়ার পরে:**
+```
+[[Machine learning]] models use [[neural networks]] to process data.
+```
+
+## ধাপ ৩: বৈশিষ্ট্যগুলো অন্বেষণ করুন (২ মিনিট)
+
+### কনসেপ্ট নোট বের করুন
+
+1. রাইট-ক্লিক → **"Extract concepts from current file"**
+2. Notemd প্রতিটি ধারণার জন্য আলাদা ফাইল তৈরি করে
+3. আপনার কনফিগার করা কনসেপ্ট ফোল্ডারটি পরীক্ষা করুন (ডিফল্ট: `concepts/`)
+4. প্রতিটি কনসেপ্ট নোটে আপনার মূল নোটের একটি ব্যাকলিঙ্ক রয়েছে
+
+### গবেষণা ও সারাংশ তৈরি করুন
+
+1. আপনার নোটে একটি বিষয়কে হাইলাইট করুন
+2. রাইট-ক্লিক → **"Research and summarize"**
+3. Notemd ওয়েব সার্চ করে (Tavily অথবা DuckDuckGo)
+4. সারাংশটি উৎসসহ আপনার নোটে যুক্ত হয়
+
+### ওয়ান-ক্লিক ওয়ার্কফ্লো
+
+1. ওয়ার্কফ্লো বাটনগুলোর জন্য **বাম সাইডবার** দেখুন
+2. যেকোনো নোটে **"One-Click Extract"**-এ ক্লিক করুন
+3. এটি চালায়: লিঙ্ক যোগ করুন → ধারণা বের করুন → গবেষণা করুন → ডায়াগ্রাম তৈরি করুন
+4. সবকিছু এক ক্লিকেই!
+
+## সাধারণ প্রথম কাজসমূহ
+
+### কাজ ১: একটি পেপার/আর্টিকেল প্রক্রিয়াকরণ করুন
+
+```
+1. Paste article content into a note
+2. Run "Process file (add links)"
+3. Run "Extract concepts"
+4. Run "Research and summarize" on unfamiliar terms
+5. Run "Summarize as Mermaid diagram" for visual structure
+```
+
+### কাজ ২: নোটগুলো অনুবাদ করুন
+
+```
+1. Highlight text to translate
+2. Right-click → "Translate to target language"
+3. Set target language in settings first
+```
+
+### কাজ ৩: একটি জ্ঞান মানচিত্র তৈরি করুন
+
+```
+1. Process 5-10 related notes with "add links"
+2. Run "Extract concepts" on each
+3. Open Graph view to see connections
+4. Your knowledge graph is forming!
+```
+
+## কাস্টমাইজেশনের টিপস
+
+### টাস্ক-ভিত্তিক মডেল নির্বাচন
+
+বিভিন্ন কাজের জন্য আপনি ভিন্ন ভিন্ন মডেল ব্যবহার করতে পারেন:
+
+| কাজ | সুপারিশকৃত মডেল | কারণ |
+|------|------------------|-----|
+| লিঙ্ক যোগ করুন | `gpt-4o-mini`, `deepseek-chat` | দ্রুত, অনেক কল |
+| ধারণা বের করুন | `claude-sonnet-4-6`, `gpt-4o` | গুণমানসম্পন্ন বের করা |
+| গবেষণা | `perplexity`, `gpt-4o` | ওয়েব-ভিত্তিক |
+| অনুবাদ | `gemini-flash`, `gpt-4o` | বহুভাষিক |
+| ডায়াগ্রাম | `claude-opus`, স্থানীয় মডেল | জটিল যুক্তি |
+
+**Settings → Notemd → Task-Specific Models**-এ কনফিগার করুন
+
+### কাস্টম ওয়ার্কফ্লো
+
+নিজস্ব বাটন তৈরি করুন:
+
+1. Settings → Notemd → Workflows
+2. "Add Workflow"-এ ক্লিক করুন
+3. DSL লিখুন: `process-current-add-links>extract-concepts-current>research-and-summarize`
+4. নাম দিন: "My Research Flow"
+5. সাইডবারে একটি নতুন বাটন দেখা যাচ্ছে
+
+## সমস্যা সমাধান
+
+### "API Key Invalid"
+- চেক করুন কি কীটি সঠিক (অতিরিক্ত স্পেস নেই)
+- নিশ্চিত হওয়া উচিত যে অ্যাকাউন্টে ক্রেডিট আছে
+- সেটিংসের "Connection Test" বাটন ব্যবহার করে পরীক্ষা করুন
+
+### "Model Not Found"
+- উপলব্ধ মডেলগুলি দেখতে "Get Model List"-এ ক্লিক করুন
+- কিছু প্রদানকারী নির্দিষ্ট মডেলের নাম চায় (যেমন, `gpt-4o` নয় `gpt-4`)
+
+### লিঙ্কগুলি দেখা যাচ্ছে না
+- নিশ্চিত হওয়া উচিত যে নোটটিতে যথেষ্ট বিষয়বস্তু আছে (>50 শব্দ)
+- আরও শক্তিশালী মডেল চেষ্টা করুন
+- চেক করুন LLM কলটি সফল হয়েছে কিনা (ডায়াগনস্টিক্স প্যানেল দেখুন)
+
+### ধীর পারফরম্যান্স
+- আরও দ্রুত মডেল ব্যবহার করুন (`gpt-4o-mini`-এ `gpt-4o`-এর পরিবর্তে)
+- সেটিংসে চাঙ্ক সাইজ কমান
+- ব্যাচ টাস্কগুলোর জন্য সমান্তরাল প্রক্রিয়াকরণ সক্রিয় করুন
+
+## পরবর্তী ধাপসমূহ
+
+- 📖 [সমস্ত বৈশিষ্ট্য অন্বেষণ করুন](../features/wiki-links)
+- ⚙️ [উন্নত কনফিগারেশন](./configuration)
+- 🔧 [LLM প্রদানকারী সেটআপ](../providers/overview)
+- ❓ [FAQ](../faq)
+
+## ভিডিও টিউটোরিয়াল
+
+৩-মিনিটের কুইকস্টার্ট ভিডিওটি দেখুন (চীনা):
+[【সম্পূর্ণ ওপেন-সোর্স, বিনামূল্যে! NotEMD ৩-মিনিটের দ্রুত গাইড】](https://b23.tv/lqR0RlA)
+
+## সাহায্য পাওয়া
+
+- 💬 **Discord**: [discord.gg/qnGgsQ9W](https://discord.gg/qnGgsQ9W)
+- 🐛 **Issues**: [GitHub Issues](https://github.com/Jacobinwwey/obsidian-NotEMD/issues)
+- 📚 **Docs**: [পূর্ণ ডকুমেন্টেশন](https://jacobinwwey.github.io/obsidian-NotEMD/)

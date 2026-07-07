@@ -1,0 +1,161 @@
+---
+id: troubleshooting
+title: "Řešení problémů"
+description: "Běžné problémy a jejich řešení"
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [troubleshooting, errors, diagnostics, connection test]
+concepts: [Troubleshooting, Error Handling, Diagnostics]
+citations:
+  - title: Obsidian
+    url: https://obsidian.md
+  - title: Obsidian API
+    url: https://docs.obsidian.md
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# Řešení problémů
+
+<TLDR>
+**Většina Notemd problémů spadá do čtyř kategorií: základní problémy API, síťová připojení, chyby autentizace (401/403) a limity rychlosti (429).** Vestavěný test připojení a diagnostická panela rychle identifikují kořenovou příčinu. Tato stránka pokrývá všechny běžné zprávy o chybách, jejich příčiny a nápravy. U problémů, které zde nejsou uvedeny, je nutné je nahlásit na GitHub Issues spolu s výstupem z diagnostiky.
+
+Toto je součástí [Obsidian Průvodce AI pro správu znalostí](/docs/pillar-ai-knowledge).
+</TLDR>
+
+## Přehled
+
+Notemd závisí na externích službách – poskytovatelích LLM a vyhledávacích API službách – takže většina problémů vzniká mimo samotný plugin. Diagnostická panela v nastaveních poskytuje strukturovaný pohled na poslední API volání, včetně požadavku URL, stavu odpovědi a těla chyby. Vždy ji nejprve zkontrolujte, než budete pokračovat ve vyšetřování.
+
+## Jak to funguje: Diagnostika
+
+### Test připojení
+
+V každé sekci konfigurace poskytovatele je tlačítko **„Testovat připojení“**. Kliknutím na něj se odešle minimální API požadavek (obvykle seznam modelů nebo krátké doplnění) a bude uvedeno, zda bylo úspěšné, nebo jaká konkrétní chyba HTTP nastala. To je nejrychlejší způsob, jak ověřit, zda jsou vaše API klíče a základní URL údaje správné.
+
+### Diagnostická panela
+
+**Nastavení --> Notemd --> Diagnostika** zobrazuje:
+
+| Pole | Obsah |
+|-------|---------|
+| Poslední poskytovatel | Který poskytovatel byl naposledy volán |
+| Poslední model | Který model byl naposledy volán |
+| Poslední stav | Kód stavu HTTP nebo chyba přenosu |
+| Poslední chyba | Surová zpráva o chybě od API |
+| Poslední požadavek URL | Úplný URL posledního požadavku (s vynechaným klíčem API) |
+| Tělo poslední odpovědi | Uříznuté tělo odpovědi (prvních 500 znaků) |
+
+Při hlášení problémů na GitHubu zkopírujte úplný výstup diagnostiky.
+
+## Běžné chyby
+
+### Klíč API je neplatný nebo chybí
+
+**Příznak:** Chyba HTTP 401 nebo „Byl poskytnut nesprávný klíč API“
+
+**Příčina:** Klíč API chybí, obsahuje mezery nebo patří jinému poskytovateli.
+
+**Náprava:**
+1. Ověřte, že klíč nemá počáteční/nekončící mezery
+2. Ujistěte se, že klíč odpovídá vybranému poskytovateli (klíč OpenAI nebude fungovat s Anthropic)
+3. Zkontrolujte, zda váš účet má kredity nebo aktivní předplatné
+4. Klikněte na **"Testovat spojení"**, abyste to ověřili
+
+### Chyby sítě / spojení
+
+**Příznaky:** `ERR_CONNECTION_REFUSED`, `ERR_TIMED_OUT`, `Socket hang up`, `Network request failed`
+
+**Příčina:** Koncový bod API není z vašeho počítače přístupný.
+
+**Náprava:**
+1. Zkontrolujte své internetové připojení
+2. Pokud jste za proxy nebo firewallem, ověřte, že doména API není zakázána
+3. V případě Ollama: potvrďte, že `ollama serve` běží (`ollama list` by měl vrátit modely)
+4. V případě LMStudio: potvrďte, že server běží na `localhost:1234`
+5. Zkuste jiný transport – uživatelé mobilních zařízení by měli zajistit, aby byl transport `requestUrl` aktivní
+6. Povolte `enableStableApiCall` pro automatické opakování při dočasných chybách
+
+### 403 Zakázáno
+
+**Příznaky:** HTTP 403
+
+**Příčina:** Vaše klíče API jsou platné, ale nemají oprávnění k požadovanému zdroji.
+
+**Náprava:**
+1. Některé modely vyžadují zvláštní přístup (např. GPT-4 prostřednictvím Azure vyžaduje název nasazení)
+2. Někteří poskytovatelé omezují modely podle úrovně plánu – zkontrolujte svůj účet
+3. Mohou platit regionální omezení (někteří čínští poskytovatelé blokují mezinárodní IP adresy a naopak)
+4. Ověřte, zda je název modelu správně napsán (např. `gpt-4o`, nikoli `gpt-4o-mini`, pokud mini model odpovídá všemu, co váš plán umožňuje)
+
+### Rate Limit (429)
+
+**Příznaky:** HTTP 429 nebo „Rate limit exceeded“
+
+**Příčina:** Příliš mnoho požadavků v krátkém časovém období.
+
+**Řešení:**
+1. Snížte `batchConcurrency` na `1` nebo `2`
+2. Počkejte několik minut a poté zkuste znovu
+3. Prohlédněte si dokumentaci k limitům počtu požadavků vašeho poskytovatele podle úrovně plánu
+4. Povolte `enableStableApiCall` pro automatické opakování s odložením
+5. Zvažte přechod na poskytovatele s vyššími limity (DeepSeek, Ollama)
+
+### Model Not Found
+
+**Příznaky:** „Model not found“ nebo HTTP 404
+
+**Příčina:** Název modelu neexistuje u vybraného poskytovatele.
+
+**Náprava:**
+1. Klikněte na **"Získat seznam modelů"**, abyste viděli všechny dostupné modely pro vašeho poskytovatele
+2. Názvy některých modelů se časem mění – ověřte aktuální název v dokumentaci poskytovatele
+3. Pro Ollama: spusťte `ollama list`, abyste viděli stažené modely; dostupné jsou pouze stažené modely
+
+### Žádné odkazy / nebyly generovány žádné koncepty
+
+**Příznak:** Příkaz se spustí, ale nevyprodukuje žádný výstup
+
+**Příčina:** LLM vrátil prázdnou nebo nerozluštitelnou odpověď.
+
+**Náprava:**
+1. Zkontrolujte panel diagnostiky pro skutečnou odpověď LLM
+2. Zkuste schopnější model (některé malé modely mají potíže se strukturovaným výstupem)
+3. Ujistěte se, že poznámka obsahuje dostatek obsahu (>50 slov)
+4. Prozkoumejte svůj vlastní prompt kvůli protichůdným pokynům
+5. Dočasně deaktivujte potlačování synonym, abyste zjistili, zda to nefiltruje příliš přísně
+
+### Chybí ID koncového bodu Doubao
+
+**Příznak:** Chyba při použití poskytovatele ByteDance Doubao
+
+**Příčina:** Doubao vyžaduje ID koncového bodu Ark (formát: `ep-xxxxxxxx-xxxx-xxxx`) místo názvu modelu.
+
+**Náprava:** Nahraďte výchozí model s náhradním textem skutečným ID koncového bodu z konzole Volcengine.
+
+## Konfigurace
+
+| Nastavení diagnostiky | Umístění | Účel |
+|--------------------|----------|---------|
+| **Ověření spojení** | Sekce Nastavení --> Poskytovatel | Ověřte klíč API a připojení |
+| **Získání seznamu modelů** | Sekce Nastavení --> Poskytovatel | Potvrďte, které modely jsou dostupné |
+| `enableStableApiCall` | Sekce Nastavení --> Pokročilé | Povolte opakování s odložením |
+| `batchConcurrency` | Sekce Nastavení --> Hromadná práce | Řiďte paralelismus, abyste se vyhnuli omezením rychlosti |
+
+## Jak nahlásit problémy
+
+Pokud váš problém není výše uvedený:
+
+1. Otevřete **Nastavení --> Notemd --> Diagnostika**
+2. Zkopírujte celý výstup diagnostiky
+3. Otevřete zprávu na GitHubu na adrese [github.com/Jacobinwwey/obsidian-NotEMD/issues](https://github.com/Jacobinwwey/obsidian-NotEMD/issues)
+4. Zahrňte: verzi Obsidian, verzi Notemd, poskytovatele, model, výstup diagnostiky a kroky k reprodukci
+5. Vymažte svůj klíč API ze všech sdílených protokolů
+
+---
+
+## Další kroky
+
+- [LLM Poskytovatelé](/docs/providers/overview) -- Kompletní referenční materiál k konfiguraci poskytovatelů
+- [Hromadná zpracování](/docs/advanced/batch-processing) -- Nastavení souběhu a opakování pro velké operace
+- [Vlastní dotazy](/docs/advanced/custom-prompts) -- Oprava nečekaného chování LLM úpravou dotazů

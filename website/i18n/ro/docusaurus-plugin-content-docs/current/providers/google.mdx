@@ -1,0 +1,67 @@
+---
+id: google
+title: "Google"
+description: "Configura Google Gemini"
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [google, gemini, provider, configuration]
+concepts: [Google, Gemini, API Configuration]
+citations:
+  - title: Gemini API
+    url: https://ai.google.dev
+  - title: Google AI Studio
+    url: https://aistudio.google.com
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# Providerul Google
+
+<TLDR>
+**Google utilizează transportul nativ de limbaj generativ Gemini API.** Presetul curent este setat în mod implicit pe `gemini-2.0-flash-exp`, `https://generativelanguage.googleapis.com/v1` și `temperature: 0.5`. Acesta nu este un profil compatibil cu OpenAI.
+
+Acesta face parte din [Obsidian Ghidul de gestionare a cunoștințelor AI](/docs/pillar-ai-knowledge).
+</TLDR>
+
+## Configurare
+
+Crea o cheie Cloud API de tip Google AI Studio sau Google cu acces la Gemini, adaugă un profil de furnizor `Google` și păstrează baza nativă de limbaj generativ URL. Folosește profilul Gemini Flash implicit pentru traduceri rapide și fluxuri de lucru extinse, apoi suprascrie modelele pe fiecare sarcină atunci când ai nevoie de un model Gemini mai puternic.
+
+Evită plasarea ID-urilor modelelor Gemini într-un profil compatibil cu OpenAI decât dacă folosești explicit o gateway care expune Gemini prin intermediul unui API compatibil cu OpenAI.
+
+## Endpoint și autentificare
+
+| Câmp | Presetul curent |
+|-------|----------------|
+| Transport | `google` |
+| Cheia API | Requerit |
+| Base URL | `https://generativelanguage.googleapis.com/v1` |
+| Modelul implicit | `gemini-2.0-flash-exp` |
+| Temperature | `0.5` |
+| Test de conectare | Doar chat |
+
+La execuție se apelează `/models/{model}:generateContent?key={apiKey}`. Cheia este transmisă ca parametru de interogare, deoarece așa este conectat endpoint-ul nativ Gemini în plugin.
+
+## Descoperirea modelelor
+
+Google folosește modul de descoperire `google-models`. Descoperirea ar trebui să returneze modelele Gemini disponibile pentru cheia API; dacă selectorul este gol, testează cheia cu aceeași bază URL și confirmă că familia de modele este activată pentru acel cont.
+
+Limitările cunoscute ale token-urilor de ieșire sunt conștiente de model în registruul furnizorilor. Dacă o traducere lungă sau o explicație a unui diagram este trunchiată, selectează un model Gemini cu capacitate mai mare de ieșire sau reduce dimensiunea solicitată a rezultatului.
+
+## Dezvoltarea de soluții
+
+- `400`: ID-ul modelului de obicei nu se potrivește cu rutea nativă Gemini sau cererea depășește forma suportată de model.
+- `401` sau `403`: verifică restricțiile cheii, activarea proiectului/API și dacă cheia poate accesa Gemini.
+- `404`: ID-ul modelului nu este disponibil la versiunea configurată API.
+- Exemplele de gateway eșuează în acest profil: folosește presetul gateway în loc de furnizorul nativ Google.
+
+## Când să fiți utilizatori
+
+Folosește Google pentru traduceri rapide, curățarea volumelor mari de note și fluxuri de lucru unde echilibrul cost/performanță al Gemini este mai bun decât cel al unui OpenAI sau Anthropic direct. Preferă alt furnizor pentru fluxuri de lucru care necesită gestionare a modelelor de raționament compatibile cu OpenAI.
+
+---
+
+## Următoarele pași
+
+- [LLM Furnizori](/docs/providers/overview) -- Configurație completă, modele pentru fiecare sarcină și logică de reîncercare
+- [Traducerea](/docs/features/translation) -- Gemini Flash este recomandat pentru sarcini de traducere cu volum mare

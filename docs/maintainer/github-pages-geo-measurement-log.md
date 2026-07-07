@@ -52,10 +52,10 @@ This log separates source-side GEO proof from live indexing proof. `npm run audi
 
 | Evidence | Current state | Owner |
 |---|---|---|
-| Language policy | The previous partial zh-CN fallback boundary is superseded by full docs route publication for `zh-CN`, `zh-Hant`, `ja`, `fr`, `de`, `es`, and `ko` | `website/docusaurus.config.js`, `website/README.md` |
+| Language policy | The previous partial zh-CN fallback boundary is superseded by full docs route publication for every README/UI locale declared in `website/src/lib/publishedLocales.mjs`, including `zh-CN`, `zh-Hant`, `zh-TW`, `ja`, `fr`, `de`, `es`, `ko`, `it`, `pt`, `pt-BR`, `ru`, `ar`, `fa`, `hi`, `bn`, `nl`, `sv`, `fi`, `da`, `no`, `pl`, `tr`, `he`, `th`, `el`, `cs`, `hu`, `ro`, `uk`, `vi`, `id`, and `ms` | `website/src/lib/publishedLocales.mjs`, `website/docusaurus.config.js`, `website/README.md` |
 | Localized source coverage | Every source page under `website/docs/` must have a localized counterpart under every public locale before deploy | `website/scripts/generate-localized-docs.cjs`, `src/tests/websiteDocsContract.test.ts` |
 | Build audit | `npm run audit:build` must verify localized source coverage, localized build output, sitemap entries, `llms.txt` entry points, and absence of `noindex,follow` on public localized docs | `website/scripts/audit-build.cjs` |
-| Answer-engine map | `llms.txt` now states that English remains canonical while the full public docs route set is available in Simplified Chinese, Traditional Chinese, Japanese, French, German, Spanish, and Korean | `website/static/llms.txt` |
+| Answer-engine map | `llms.txt` now states that English remains canonical while the full public docs route set is available in every published documentation locale | `website/static/llms.txt` |
 | Search Console | Not locally verifiable; submit and inspect representative localized docs after the Pages workflow deploys the multilingual update | External manual check |
 | AI visibility | Not locally verifiable; retest multilingual answer-engine visibility after deploy and indexing window | External/manual or API-backed check |
 
@@ -93,14 +93,16 @@ Use this set for Search Console inspection and manual AI visibility prompts:
 |---|---|
 | `https://jacobinwwey.github.io/obsidian-NotEMD/` | Canonical English root |
 | `https://jacobinwwey.github.io/obsidian-NotEMD/llms.txt` | Answer-engine source map linked from the homepage |
-| `https://jacobinwwey.github.io/obsidian-NotEMD/docs/intro` | English canonical doc with zh-CN alternate |
-| `https://jacobinwwey.github.io/obsidian-NotEMD/docs/getting-started/quick-start` | English canonical doc with zh-CN alternate |
-| `https://jacobinwwey.github.io/obsidian-NotEMD/docs/providers/overview` | English canonical doc with zh-CN alternate |
-| `https://jacobinwwey.github.io/obsidian-NotEMD/docs/providers/openai` | English-only provider detail; no zh-CN alternate until translated |
+| `https://jacobinwwey.github.io/obsidian-NotEMD/docs/intro` | English canonical doc with full published locale alternates |
+| `https://jacobinwwey.github.io/obsidian-NotEMD/docs/getting-started/quick-start` | English canonical doc with full published locale alternates |
+| `https://jacobinwwey.github.io/obsidian-NotEMD/docs/providers/overview` | English canonical doc with full published locale alternates |
+| `https://jacobinwwey.github.io/obsidian-NotEMD/docs/providers/openai` | English canonical provider detail with full published locale alternates |
 | `https://jacobinwwey.github.io/obsidian-NotEMD/zh-CN/` | Published zh-CN root |
 | `https://jacobinwwey.github.io/obsidian-NotEMD/zh-CN/docs/intro` | Published zh-CN doc |
 | `https://jacobinwwey.github.io/obsidian-NotEMD/zh-CN/docs/providers/overview` | Published zh-CN doc |
-| `https://jacobinwwey.github.io/obsidian-NotEMD/zh-CN/docs/providers/openai` | Generated fallback only; must be `noindex,follow`, absent from zh-CN sitemap, and absent from hreflang alternates |
+| `https://jacobinwwey.github.io/obsidian-NotEMD/zh-CN/docs/providers/openai` | Published zh-CN provider detail |
+| `https://jacobinwwey.github.io/obsidian-NotEMD/zh-Hant/docs/intro` | Published Traditional Chinese doc |
+| `https://jacobinwwey.github.io/obsidian-NotEMD/ar/docs/intro` | Published Arabic doc with RTL locale metadata |
 
 ## Search Console Checklist
 
@@ -108,8 +110,8 @@ Run after the deployed Pages artifact contains the 2026-06-22 build:
 
 1. Submit or refresh `https://jacobinwwey.github.io/obsidian-NotEMD/sitemap.xml`.
 2. Submit or refresh `https://jacobinwwey.github.io/obsidian-NotEMD/zh-CN/sitemap.xml`.
-3. Inspect the root route, zh-CN root, `docs/intro`, `docs/providers/overview`, and `docs/faq`.
-4. Inspect one unpublished zh-CN fallback such as `/zh-CN/docs/providers/openai`; expected result is not indexable because of `noindex,follow`.
+3. Inspect the root route, zh-CN root, `docs/intro`, `docs/providers/overview`, `docs/providers/openai`, and `docs/faq`.
+4. Inspect representative localized docs such as `/zh-CN/docs/providers/openai`, `/zh-Hant/docs/intro`, `/ar/docs/intro`, and `/pt-BR/docs/faq`; expected result is indexable with canonical/hreflang signals, not `noindex,follow`.
 5. Record canonical URL, crawl status, indexing status, and last crawl date.
 
 ## AI Visibility Checklist
@@ -120,11 +122,11 @@ Run after Search Console has accepted or crawled the updated sitemap:
 |---|---|
 | "What is Notemd for Obsidian?" | Mentions persistent AI knowledge workflows, wiki-links, concept notes, research, translation, diagrams, and local vault output |
 | "How do I configure Notemd providers?" | Cites or reflects provider overview and provider detail pages |
-| "Notemd 中文文档支持哪些页面?" | States zh-CN is partial and includes homepage, intro, installation, quick start, configuration, provider overview, AI knowledge pillar, and FAQ |
+| "Notemd 文档支持哪些语言?" | States English is canonical and the full docs route set is available in every published documentation locale |
 | "Can Notemd run local LLMs?" | Mentions Ollama/LMStudio and local-vault privacy |
 
-Record engine, date, prompt, whether a citation appeared, cited URL, and whether the answer respected the partial zh-CN language scope.
+Record engine, date, prompt, whether a citation appeared, cited URL, and whether the answer respected the published locale route matrix.
 
 ## Decision Rule
 
-Do not expand locales or add more GEO surfaces because AI visibility is still low. If citations remain absent after indexing, first check whether canonical docs are indexed, whether provider pages are too stale, and whether `llms.txt` still matches the route graph.
+Do not add more GEO surfaces because AI visibility is still low. If citations remain absent after indexing, first check whether canonical and representative localized docs are indexed, whether provider pages are too stale, and whether `llms.txt` still matches the route graph.

@@ -1,0 +1,435 @@
+---
+id: configuration
+title: "Ρυθμίσεις"
+description: "Ρυθμίστε τις ρυθμίσεις και τις προτιμήσεις του Notemd"
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [configuration, settings, customization, preferences]
+concepts: [Configuration, Per-Task Models, Output Paths, Custom Workflows]
+citations:
+  - title: Obsidian
+    url: https://obsidian.md
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# Ρυθμίσεις
+
+<TLDR>
+**Η ρύθμιση Notemd καλύπτει 6 κύριες περιοχές:** (1) πάροχοι LLM και κλειδιά API, (2) επιλογή μοντέλου ανά εργασία, (3) διαδρομές έξοδου και πρότυπα, (4) γλώσσα UI και γλώσσα έξοδου, (5) υπηρεσίες αναζήτησης (Tavily/DuckDuckGo), (6) προσαρμοσμένα ρολόι εργασίας. Όλες οι ρυθμίσεις βρίσκονται στο Obsidian Settings → Notemd. Οι αλλαγές ισχύουν αμέσως.
+</TLDR>
+
+## Επισκόπηση Ρυθμίσεων
+
+Πρόσβαση: **Obsidian Settings (⚙️) → Notemd**
+
+### Κύριες Ανασκοπήσεις
+
+1. **Ρύθμιση Πάροχου** — κλειδιά API, βασικά URLs, μοντέλα
+2. **Ρυθμίσεις Εργασίας** — επιλογή μοντέλου ανά εργασία
+3. **Ρύθμιση Έξοδου** — Πού να αποθηκεύσετε τα δημιουργημένα αρχεία
+4. **Ρυθμίσεις Γλώσσας** — UI και γλώσσες έξοδου
+5. **Ενσωμάτωση Αναζήτησης** — ρύθμιση Tavily/DuckDuckGo
+6. **Ρολόι Εργασίας** — προσαρμοσμένες αλυσίδες κουμπιών
+7. **Προχωρημένες ρυθμίσεις** — Διαγνώσεις, μαζική επεξεργασία, κομμάτιακος προσδιορισμός
+
+---
+
+## 1. Ρύθμιση Πάροχου
+
+### Προσθήκη Πάροχου
+
+1. **Επιλέξτε πάροχο** από το dropdown (πάνω από 30 διαθέσιμα)
+2. **Εισάγετε το κλειδί API**
+3. **Επιλεκτικά**: Ορίστε προσαρμοσμένη βάση URL (για πρόξι/γέιτγουεις)
+4. **Κάντε κλικ στο "Get Model List"** για να επαληθεύσετε τη σύνδεση
+5. **Επιλέξτε προεπιλεγμένο μοντέλο**
+
+### Συνηθισμένοι πάροχοι
+
+#### OpenAI
+```
+Provider: OpenAI
+API Key: sk-...
+Base URL: https://api.openai.com/v1 (default)
+Model: gpt-4o-mini
+```
+
+#### Anthropic (Claude)
+```
+Provider: Anthropic
+API Key: sk-ant-...
+Model: claude-sonnet-4-6
+```
+
+#### Ollama (Local)
+```
+Provider: Ollama
+Base URL: http://localhost:11434 (default)
+Model: llama3.1
+API Key: (not required)
+```
+
+#### DeepSeek
+```
+Provider: DeepSeek
+API Key: sk-...
+Model: deepseek-chat
+```
+
+### Πολλαπλοί πάροχοι
+
+Μπορείτε να ρυθμίσετε πολλούς πάροχους και να μεταβαίνετε μεταξύ τους ανά εργασία:
+- **Βασικός πάροχος**: Χρησιμοποιείται ως εναλλακτική λύση
+- **Πάροχοι συγκεκριμένων εργασιών**: Αντικαθιστούνται για συγκεκριμένες εργασίες
+
+---
+
+## 2. Μοντέλα συγκεκριμένων εργασιών
+
+Ρυθμίστε διαφορετικά μοντέλα για διαφορετικές εργασίες για βελτιστοποίηση κόστους/ποιότητας:
+
+### Τύποι εργασιών
+
+| Εργασία | Προεπιλεγμένο μοντέλο | Σκοπός |
+|------|--------------|---------|
+| **Σύνδεση** | Βασικός πάροχος | Αναγνώριση έννοιων για συνδέσμους wiki |
+| **Δημιουργία Εννοιών** | Κύριος πάροχος υπηρεσιών | Ανάγνωση και περιγραφή έννοιων |
+| **Έρευνα** | Κύριος πάροχος υπηρεσιών | Συνοπτική ανάλυση αποτελεσμάτων αναζήτησης στο Διαδίκτυο |
+| **Μετάφραση** | Κύριος πάροχος υπηρεσιών | Μετάφραση κειμένου |
+| **Δημιουργία Διαγράμματων** | Κύριος πάροχος υπηρεσιών | Δημιουργία διαγραμμάτων Mermaid/Canvas |
+
+### Παράδειγμα: Οπτιμοποιημένη ρύθμιση κόστους
+
+```
+Linking: gpt-4o-mini (fast, many calls)
+Concept Generation: claude-sonnet-4-6 (quality extraction)
+Research: gpt-4o (web-grounded)
+Translation: gemini-flash (multilingual)
+Diagram: ollama/llama3.1 (free, local)
+```
+
+### Πώς να ρυθμίσετε
+
+1. **Ρυθμίσεις → Notemd → Ρυθμίσεις εργασίας**
+2. Για κάθε εργασία, επιλέξτε:
+   - ✅ **Χρησιμοποίηση κύριου πάροχου υπηρεσιών** (προεπιλογή)
+   - 🔄 **Χρησιμοποίηση προσαρμοσμένου πάροχου υπηρεσιών** → επιλέξτε πάροχο + μοντέλο
+
+---
+
+## 3. Ρυθμίσεις εξόδου
+
+### Εξόδος σημειώσεων έννοιας
+
+**Πού αποθηκεύονται οι νέες σημειώσεις έννοιας:**
+
+```
+Settings → Output → Concept Folder
+Default: concepts/
+```
+
+**Πρότυπο:**
+```
+Settings → Output → Concept Template
+Default:
+---
+tags: [concept]
+created: {{date}}
+---
+
+# {{concept}}
+
+{{description}}
+
+## Backlinks
+{{backlinks}}
+```
+
+### Επιλογές δομής φακέλων
+
+**Επιλογή 1: Επίπεδη (όλες οι έννοιες σε έναν φάκελο)**
+```
+vault/
+└── concepts/
+    ├── Machine Learning.md
+    ├── Neural Networks.md
+    └── Deep Learning.md
+```
+
+**Επιλογή 2: Ιεραρχική (ανά φάκελο πηγής)**
+```
+vault/
+├── papers/
+│   └── concepts/
+│       └── Transformer.md
+└── notes/
+    └── concepts/
+        └── Attention Mechanism.md
+```
+
+Ρυθμίσεις: **Settings → Output → Use Hierarchical Folders**
+
+### Απόδοση διαγράμματος
+
+**Πού αποθηκεύονται τα διαγράμματα:**
+```
+Settings → Output → Diagram Folder
+Default: diagrams/
+```
+
+**Μορφή:**
+- `.mmd` (Mermaid πηγή)
+- `.canvas` (JSON Canvas)
+- `.html` (Vega-Lite)
+
+---
+
+## 4. Ρυθμίσεις γλώσσας
+
+### UI Γλώσσα
+
+**Γλώσσα διεπαφής** (κουμπιά, μενού, διαλόγια):
+
+```
+Settings → Language → UI Language
+Options: 21+ languages
+Default: System language
+```
+
+Υποστηρίζονται: Αγγλικά, 简体中文, 繁體中文, 日本語, 한국어, Español, Français, Deutsch, Русский, العربية και άλλες.
+
+### Γλώσσα αποδόσης
+
+**Γλώσσα παραγόμενου περιεχομένου** (σημειώσεις έννοιας, συνοπτικά αναλύσεις έρευνας):
+
+```
+Settings → Language → Output Language
+Options: Same as UI languages
+Default: Same as UI
+```
+
+**Χρήση περιπτώσεων:** Κινέζι UI + αγγλική έξοδος για διπλόγλωσση έρευνα.
+
+### Στόχος μετάφρασης
+
+**Προεπιλεγμένη γλώσσα στόχου** για εργασίες μετάφρασης:
+
+```
+Settings → Translation → Target Language
+Default: English
+```
+
+---
+
+## 5. Ενσωμάτωση αναζήτησης
+
+### Tavily (Συνιστώμενο)
+
+**Υπηρεσία αναζήτησης βελτιστοποιημένη με AI:**
+
+```
+Settings → Search → Service: Tavily
+API Key: tvly-...
+```
+
+Πάρτηση κλειδί: [tavily.com](https://tavily.com/)
+
+**Χαρακτηριστικά:**
+- Αξιόπιστα αποτελέσματα
+- Συνοπτικά αναλύσεις βελτιστοποιημένα με AI
+- Αναφορές πηγής
+
+### DuckDuckGo (Πειραματικό)
+
+**Δεν απαιτείται κλειδί API:**
+
+```
+Settings → Search → Service: DuckDuckGo
+```
+
+**Σημείωση:** Χαμηλότερη ποιότητα, χωρίς προσαρμογές.
+
+---
+
+## 6. Ρυθμίσεις ροής εργασίας
+
+### Δημιουργία προσαρμοσμένων ροών εργασίας
+
+**Οι ροή εργασιών συνδέουν πολλές εργασίες σε ένα κουμπί.**
+
+1. **Ρυθμίσεις → Ροή εργασιών → Προσθήκη ροής εργασιών**
+2. **Όνομα**: "Ροή ανάλυσης χαρτίου"
+3. **DSL**: `process-current-add-links>extract-concepts-current>research-and-summarize>summarize-as-mermaid`
+4. **Αποθήκευση**
+
+Ένα νέο κουμπί εμφανίζεται στο αριστερό πλάιμπαρ.
+
+### Σύνταξη DSL
+
+**Μορφή:** `action1>action2>action3`
+
+**Διαθέσιμες ενέργειες:**
+- `process-current-add-links` — Προσθήκη συνδέσμων wiki στην τρέχουσα σημείωση
+- `extract-concepts-current` — Δημιουργία σημειώσεων έννοιας
+- `research-and-summarize` — Ιστοσυνοδευτική έρευνα + σύνοψη
+- `translate-current` —Μετάφραση της τρέχουσας σημείωσης
+- `summarize-as-mermaid` — Δημιουργία διάγραμματος Mermaid
+- `process-folder-add-links` — Μαζική επεξεργασία φακέλου
+
+**Παραδείγματα ροήων εργασιών:**
+
+**Γρήγορη Ανάγραφη Στοιχείων Συνέπειας:**
+```
+process-current-add-links>extract-concepts-current
+```
+
+**Βαθιά Έρευνα:**
+```
+process-current-add-links>research-and-summarize>extract-concepts-current
+```
+
+**Πολυγλωσσική Ανάλυση:**
+```
+translate-current>process-current-add-links>extract-concepts-current
+```
+
+---
+
+## 7. Προχωρημένες Ρυθμίσεις
+
+### Μαζική επεξεργασία
+
+**Επεξεργασία πολλών αρχείων ταυτόχρονα:**
+
+```
+Settings → Advanced → Batch Processing
+Concurrency: 3 (default)
+```
+
+Υψηλότερο = γρηγορότερο αλλά περισσότερες κλήσεις API.
+
+### Σμαρτή Μεροποίηση
+
+**Για μεγάλα σημειώματα, χωρίστε τα σε μέρη:**
+
+```
+Settings → Advanced → Smart Chunking
+Chunk Size: 2000 words (default)
+Overlap: 200 words (default)
+```
+
+Μεταφράζει τα προβλήματα από περιορισμό των τόκεν.
+
+### Πάνελ διαγνώσεων
+
+**Εμφάνιση λεπτομερών ιστορικών:**
+
+```
+Settings → Advanced → Enable Diagnostics
+```
+
+Δείχνει:
+- API αιτήματα/απαντήσεις
+- Χρήση τόκεν
+- Χρόνοι επεξεργασίας
+- Σφάλματα
+
+### Ανίχνευση διπλότυπων στοιχείων Συνέπειας
+
+**Αποφύγετε τα σχεδόν παρόμοια έννοια:**
+
+```
+Settings → Advanced → Synonym Suppression
+Threshold: 0.8 (default, 0-1)
+```
+
+Υψηλότερο = πιο επιθετική συνένωση.
+
+---
+
+## Προφίλ διαμόρφωσης
+
+### Εξάγωση/Εισαγωγή ρυθμίσεων
+
+**Μοιράζονται οι διαμόρφωσεις μεταξύ συσκευών:**
+
+1. **Ρυθμίσεις → Προχωρημένες → Εξάγωση διαμόρφωσης**
+2. Αποθηκεύει `notemd-config.json`
+3. Σε νέα συσκευή: **Εισαγωγή διαμόρφωσης**
+
+**Τι περιλαμβάνεται:**
+- Κλειδιά παρόχου API (προαιρετικά)
+- Επιλογές μοντέλων
+- Μονοπάτια εξόδου
+- Προσαρμοσμένα ροή εργασίας
+
+---
+
+## Συνιστώμενες διαμόρφωσεις
+
+### Για φοιτητές
+
+```
+Provider: OpenAI (gpt-4o-mini)
+Concept Folder: concepts/
+UI Language: System
+Output Language: System
+Workflow: "Study Flow" (add-links>extract-concepts)
+```
+
+### Για ερευνητές
+
+```
+Providers:
+  - Linking: DeepSeek (cheap, many calls)
+  - Concepts: Claude Sonnet (high quality)
+  - Research: GPT-4o (web-grounded)
+Concept Folder: notes/concepts/
+Hierarchical: Yes
+Workflow: "Paper Flow" (add-links>extract>research>diagram)
+```
+
+### Για χρήστες που δίνουν σημασία στην ιδιωτικότητα
+
+```
+Provider: Ollama (llama3.1)
+All tasks: Local model
+Search: DuckDuckGo (no API)
+Diagnostics: Off
+```
+
+### Για διπλόγλωσση στην εργασία
+
+```
+UI Language: Chinese
+Output Language: English
+Translation Target: Chinese
+Provider: Gemini (multilingual)
+```
+
+---
+
+## Αντιμετώπιση προβλημάτων στην ρύθμιση
+
+### Οι ρυθμίσεις δεν αποθηκεύονται
+- Ελέγξτε τα δικαιώματα απόδοσης του αρχείου στο `.obsidian/plugins/notemd/`
+- Δοκιμάστε: Απενεργοποιήστε το πλαγινό → Ενεργοποιήστε ξανά
+
+### Το κλειδί API είναι μη έγκυρο
+- Δεν υπάρχουν επιπλέον διαστήματα
+- Ελέγξτε την περιόδο λήξης
+- Επαληθεύστε τα κρεδίτα στο πάνελ ελέγχου του παρόχου
+
+### Τα μοντέλα δεν φορτώνονται
+- Κάντε κλικ στο "Προβολή λίστας μοντέλων" για ενημέρωση
+- Ελέγξτε τη σύνδεση δικτύου
+- Δοκιμάστε διαφορετικό παρόχο
+
+---
+
+## Επόμενα βήματα
+
+- 📖 [Εξερευνήστε τις λειτουργίες](../features/wiki-links)
+- 🔌 [Οδηγίες ρύθμισης παρόχου](../providers/overview)
+- ❓ [FAQ](../faq)

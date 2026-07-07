@@ -1,0 +1,181 @@
+---
+id: quick-start
+title: "Rácsoló felhasználói útmutató"
+description: "5 perc alatt kezdjük el a használatot Notemd-vel"
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [quick start, tutorial, getting started, first steps]
+concepts: [Quick Start, LLM Configuration, One-Click Workflow, Ollama]
+citations:
+  - title: Obsidian
+    url: https://obsidian.md
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# Rácsolási útmutató
+
+<TLDR>
+**5 perc alatt kezdje használatát a Notemd-vel.** Három lépés: (1) Hozzáfűzzön egy LLM API kulcsot (vagy használja a helyi Ollama-t), (2) Nyitja egy jegyet és futtassa el a „Process file (add links)” parancsot, (3) Az oldalsávon keresse fel az egyszer kattintással futtató munkafolyamatokat. Támogatja 30+ szolgáltatót. Nincs programozás szüksége. Működik offline-ban is a Ollama segítségével.
+</TLDR>
+
+## 1. lépés: Konfigurálja a első LLM fornítóját (2 perc)
+
+### Opció A: Felhőszolgáltató (OpenAI, Anthropic stb.)
+
+1. Nyisd meg a **Beállításokat** → **Notemd**
+2. **LLM Feltőltő konfigurációja** alatt válassza ki egy feltőltőt a lehulló menüből
+3. Írd be a **API kulcsodat**
+4. (Vagy) Kattints a **"Get Model List"** gombra, hogy lásd a létrehozható modelleket
+5. Válassza ki egy modellt minden munkaterület számára
+
+**Populáris választások:**
+- **OpenAI**: `gpt-4o-mini` (gyors, olcsó)
+- **Anthropic**: `claude-sonnet-4-6` (magas minőség)
+- **DeepSeek**: `deepseek-chat` (kiválóan olcsó)
+
+### Opcion B: Lokális Ollama (Nem szükséges API kulcs)
+
+1. Telepítsük a [Ollama](https://ollama.com/)-t
+2. Letöltse egy modellt: `ollama pull llama3.1`
+3. A Notemd beállításainál válassza ki **"Ollama"**-t a fornalmaként
+4. Modellneve: `llama3.1` (vagy bármely más letöltött modell)
+
+## 2. lépés: Próbálja el az első munkát (1 perc)
+
+### Hozzáadja Wiki-hivatkozásokat egy jegyhez
+
+1. Nyitja bármilyen jelentős tartalmú jegyet
+2. Kattints jobb kattintással a szerkesztőben
+3. Válassza ki **"Fájlt kezelje (hivatkozások hozzáadása)"**
+4. Várjon néhány másodpercet
+5. A kulcsfontosságú konceptek most `[[wiki-linked]]`!
+
+**Példa:**
+
+**Előtt:**
+```
+Machine learning models use neural networks to process data.
+```
+
+**Után:**
+```
+[[Machine learning]] models use [[neural networks]] to process data.
+```
+
+## 3. lépés: Felismerje a funkciókat (2 perc)
+
+### Kiemelje a konceptjelölt jegyeket
+
+1. Kattintson jobb kattintással → **"Kiemelje a koncepteket a jelen fájlból"**
+2. Notemd készít el külön fájlokat minden koncept számára
+3. Ellenőrizze a beállított konceptmappát (alapértelmezett: `concepts/`)
+4. Minden konceptjelölt jegynek van hivatkozása a következő, eredeti jegyeire
+
+### Tudományos kutatás és összefoglalás
+
+1. A jegyzetében egy témát felhívjuk a figyelmet
+2. Jobb kattintás → **"Tudományos kutatás és összefoglalás"**
+3. Notemd kérel a webes keresést (Tavily vagy DuckDuckGo)
+4. A összefoglalás a forrásokkal együtt kerül hozzá a jegyzetedhez
+
+### Egy kattintással működő munkafolyamatok
+
+1. A munkafolyamatárgyútó gombokért nézd meg a **bal oldalt**
+2. Bármely jegyzeten kattints **"Egy kattintással kihozás"**-ra
+3. Ez elindítja: hivatkozások hozzáadása → konceptek kihozása → kutatás → diagram készítése
+4. Mind ezt egy kattintással!
+
+## Általános első munkák
+
+### Munka 1: Irodalmi munkát/irányítványt kezelés
+
+```
+1. Paste article content into a note
+2. Run "Process file (add links)"
+3. Run "Extract concepts"
+4. Run "Research and summarize" on unfamiliar terms
+5. Run "Summarize as Mermaid diagram" for visual structure
+```
+
+### Munka 2: Jegyzetek fordítása
+
+```
+1. Highlight text to translate
+2. Right-click → "Translate to target language"
+3. Set target language in settings first
+```
+
+### Munka 3: Ismeretek térképének készítése
+
+```
+1. Process 5-10 related notes with "add links"
+2. Run "Extract concepts" on each
+3. Open Graph view to see connections
+4. Your knowledge graph is forming!
+```
+
+## Szabályozási tippek
+
+### Munkaalapú modell választása
+
+Különböző munkákhoz használhatsz különböző modelleket:
+
+| Munka | Tajározott modell | Miért |
+|------|------------------|-----|
+| Hivatkozások hozzáadása | `gpt-4o-mini`, `deepseek-chat` | Gyors, több kérések |
+| Konceptek kihozása | `claude-sonnet-4-6`, `gpt-4o` | Magas minőségű kihozás |
+| Tudományos kutatás | `perplexity`, `gpt-4o` | Web-re alapuló |
+| Übersetzung | `gemini-flash`, `gpt-4o` | Köznyelvi |
+| Diagramok | `claude-opus`, helyi modell | Komplexes gondolkodás |
+
+Beállítások: **Beállítások → Notemd → Feladatspecifikus modellek**
+
+### Szerkesztett munkafolyamok
+
+Sa próp gombot létrehozása:
+
+1. Beállítások → Notemd → Munkafolyamok
+2. Kattintsz a "Munkafolyam hozzáadása" gombra
+3. Írd be a DSL-t: `process-current-add-links>extract-concepts-current>research-and-summarize`
+4. Ne nevezze meg: "My Research Flow"
+5. Új gomb jelentkezik meg a sávoldalban
+
+## Hibaelhárítás
+
+### "API Key Invalid"
+- Ellenőrizze, hogy a kulcs helyes-e (nem legyen extra tér)
+- Ellenőrizze, hogy a fióknak krediteje van
+- Próbálja az "Connection Test" gombot a beállításokban
+
+### "Model Not Found"
+- Kattintson a "Get Model List" gombra, hogy lássa a létrehozható modelleket
+- Neki adókhoz speciális modellnevek szükségesek (pl. `gpt-4o`, nem `gpt-4`)
+
+### Hivatkozások nem jelennek meg
+- Biztosítsa, hogy a figyelemhez elég tartalom van (>50 szó)
+- Próbálja egy erősebb modellt
+- Ellenőrizze, hogy a LLM kérések sikerültek-e (lássza a diagnostikai panelt)
+
+### Lentes teljesítmény
+- Használja gyorsabb modelleket (`gpt-4o-mini` helyett `gpt-4o`)
+- Kecselni a blokk méretét a beállításokban
+- Paralel feldolgozást engedélyez a batch munkáknak
+
+## További lépések
+
+- 📖 [Mindent megtekinteni](../features/wiki-links)
+- ⚙️ [Fejlesztett beállítások](./configuration)
+- 🔧 [LLM Társító beállítása](../providers/overview)
+- ❓ [FAQ](../faq)
+
+## Videótanulmány
+
+Megtekintse a 3 percös gyorsindulási videót (kínai nyelvben):
+[【Teljesen nyílt forráskódú, ingyenes! NotEMD 3 percös tanulmány】](https://b23.tv/lqR0RlA)
+
+## Segítség kérés
+
+- 💬 **Discord**: [discord.gg/qnGgsQ9W](https://discord.gg/qnGgsQ9W)
+- 🐛 **Problémák**: [GitHub Issues](https://github.com/Jacobinwwey/obsidian-NotEMD/issues)
+- 📚 **Documéntációk**: [Teljes dokumentáció](https://jacobinwwey.github.io/obsidian-NotEMD/)

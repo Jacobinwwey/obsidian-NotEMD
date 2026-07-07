@@ -3,6 +3,30 @@ import * as path from 'path';
 
 const matter = require('../../website/node_modules/gray-matter');
 
+type PublishedDocumentationLocale = {
+    locale: string;
+    htmlLang: string;
+    englishName: string;
+};
+
+function loadPublishedLocaleContract(websiteRoot: string): {
+    documentationLocales: PublishedDocumentationLocale[];
+    languageScopeSentence: string;
+} {
+    const sourcePath = path.join(websiteRoot, 'src', 'lib', 'publishedLocales.mjs');
+    const source = fs.readFileSync(sourcePath, 'utf8');
+    const runnableSource = source
+        .replace(/\bexport const\b/g, 'const')
+        .replace(/\bexport function\b/g, 'function');
+    return new Function(`
+        ${runnableSource}
+        return {
+            documentationLocales: publishedDocumentationLocales,
+            languageScopeSentence: publishedLanguageScopeSentence(),
+        };
+    `)();
+}
+
 function markdownHeadings(content: string): string[] {
     const headings: string[] = [];
     let inFence = false;
@@ -42,6 +66,12 @@ function markdownHeadingLevels(content: string): number[] {
     return levels;
 }
 
+function expectNoTrailingWhitespace(content: string, context: string): void {
+    if (/[ \t]+$/m.test(content)) {
+        throw new Error(`${context} contains trailing whitespace`);
+    }
+}
+
 describe('website documentation contract', () => {
     const repoRoot = path.join(__dirname, '..', '..');
     const websiteRoot = path.join(repoRoot, 'website');
@@ -63,7 +93,8 @@ describe('website documentation contract', () => {
         path.join(websiteRoot, 'i18n', 'zh-CN', 'docusaurus-plugin-content-docs', 'current.json'),
         'utf8'
     ));
-    const localizedLocales = ['zh-CN', 'zh-Hant', 'ja', 'fr', 'de', 'es', 'ko'];
+    const publishedLocaleContract = loadPublishedLocaleContract(websiteRoot);
+    const localizedLocales = publishedLocaleContract.documentationLocales.map(({ locale }) => locale);
     const localizedFillerMarkers = [
         '这一部分解释产品行为',
         '這一部分說明產品行為',
@@ -250,6 +281,50 @@ describe('website documentation contract', () => {
         }
     });
 
+    test('published locale metadata covers the README and UI locale documentation matrix', () => {
+        expect(localizedLocales).toEqual([
+            'zh-CN',
+            'zh-Hant',
+            'zh-TW',
+            'ja',
+            'fr',
+            'de',
+            'es',
+            'ko',
+            'it',
+            'pt',
+            'pt-BR',
+            'ru',
+            'ar',
+            'fa',
+            'hi',
+            'bn',
+            'nl',
+            'sv',
+            'fi',
+            'da',
+            'no',
+            'pl',
+            'tr',
+            'he',
+            'th',
+            'el',
+            'cs',
+            'hu',
+            'ro',
+            'uk',
+            'vi',
+            'id',
+            'ms',
+        ]);
+        expect(publishedLocaleContract.languageScopeSentence)
+            .toContain('Traditional Chinese for Taiwan');
+        expect(publishedLocaleContract.languageScopeSentence)
+            .toContain('Brazilian Portuguese');
+        expect(publishedLocaleContract.languageScopeSentence)
+            .toContain('Malay');
+    });
+
     test('all published documentation locales mirror the English docs route set', () => {
         const expectedSourceDocs = sourceDocPaths();
 
@@ -274,6 +349,7 @@ describe('website documentation contract', () => {
         for (const sourcePath of sourceDocPaths()) {
             const englishContent = fs.readFileSync(path.join(docsRoot, sourcePath), 'utf8');
             const expectedHeadingLevels = markdownHeadingLevels(englishContent);
+            expectNoTrailingWhitespace(englishContent, `English source doc ${sourcePath}`);
 
             for (const locale of localizedLocales) {
                 const localizedPath = path.join(
@@ -289,6 +365,7 @@ describe('website documentation contract', () => {
                 expect(() => matter(localizedContent)).not.toThrow();
                 expect(markdownHeadingLevels(localizedContent)).toEqual(expectedHeadingLevels);
                 expect(localizedContent).not.toMatch(placeholderPollutionPattern);
+                expectNoTrailingWhitespace(localizedContent, `${locale} source doc ${sourcePath}`);
                 for (const marker of localizedFillerMarkers) {
                     expect(localizedContent).not.toContain(marker);
                 }
@@ -342,8 +419,10 @@ describe('website documentation contract', () => {
             '回到顶部',
         ];
 
-        for (const locale of ['ja', 'fr', 'de', 'es', 'ko']) {
-            const codeJson = fs.readFileSync(path.join(websiteRoot, 'i18n', locale, 'code.json'), 'utf8');
+        for (const locale of localizedLocales.filter(locale => locale !== 'zh-CN')) {
+            const codeJsonPath = path.join(websiteRoot, 'i18n', locale, 'code.json');
+            expect(fs.existsSync(codeJsonPath)).toBe(true);
+            const codeJson = fs.readFileSync(codeJsonPath, 'utf8');
             for (const marker of simplifiedChineseChromeMarkers) {
                 expect(codeJson).not.toContain(marker);
             }

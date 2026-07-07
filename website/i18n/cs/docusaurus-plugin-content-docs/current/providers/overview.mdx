@@ -1,0 +1,189 @@
+---
+id: overview
+title: "LLM poskytovatelé"
+description: "Konfigurujte 36 LLM poskytovatelů — cloud, brána a lokální — s výběrem modelu podle úlohy"
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [LLM providers, API, OpenAI, Anthropic, Google, DeepSeek, Qwen, Ollama, per-task model]
+concepts: [LLM Integration, API Providers, Per-Task Models, OpenAI Compatible, Ollama, China Providers]
+citations:
+  - title: OpenAI API
+    url: https://platform.openai.com
+  - title: Anthropic API
+    url: https://docs.anthropic.com
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# LLM poskytovatelé
+
+<TLDR>
+**Notemd podporuje 36 LLM poskytovatelů napříč 4 typy přenosu.** Všechny API volání využívají syrový HTTP (bez SDK) s automatickým opakováním, náhradním přenosem a ukládáním odpovědí na 5 minut. Výběr modelu podle úlohy vám umožňuje použít levné modely pro extrakci konceptů a výkonné modely pro výzkum. Pro lokální poskytovatele (Ollama, LMStudio) není potřeba žádný API klíč.
+</TLDR>
+
+Toto je součástí [Obsidian Průvodce AI pro správu znalostí](/docs/pillar-ai-knowledge).
+
+## Kategorie poskytovatelů
+
+### Cloudoví poskytovatelé
+
+| Poskytovatel | Výchozí základ URL | Výchozí model | Teplota |
+|----------|-----------------|---------------|-------------|
+| **DeepSeek** | `api.deepseek.com` | `deepseek-v4-pro` | 0.5 |
+| **OpenAI** | `api.openai.com/v1` | `gpt-4o` | 0.5 |
+| **Anthropic** | `api.anthropic.com` | `claude-3-5-sonnet-20240620` | 0.5 |
+| **Google** | `generativelanguage.googleapis.com/v1` | `gemini-2.0-flash-exp` | 0.5 |
+| **Mistral** | `api.mistral.ai/v1` | `mistral-large-latest` | 0.5 |
+| **xAI** | `api.x.ai/v1` | `grok-4` | 0.7 |
+| **Cerebras** | `api.cerebras.ai/v1` | `gpt-oss-120b` | 0.5 |
+| **Fireworks** | `api.fireworks.ai/inference/v1` | `kimi-k2p5` | 0.5 |
+| **Nebius** | `api.studio.nebius.com/v1` | `openai/gpt-oss-120b` | 0.3 |
+
+### Bránoví / proxy poskytovatelé
+
+| Poskytovatel | Výchozí základ URL | Výchozí model | Poznámky |
+|----------|-----------------|---------------|-------|
+| **OpenRouter** | `openrouter.ai/api/v1` | `anthropic/claude-3.7-sonnet` | Přidává hlavičky `HTTP-Referer` + `X-Title` |
+| **GitHub Models** | `models.github.ai/inference` | `gpt-4o-mini` | Přidává hlavičku `X-GitHub-Api-Version` |
+| **AIHubMix** | `aihubmix.com/v1` | `gpt-4o-mini` | Přidává hlavičku `APP-Code` |
+| **PPIO** | `api.ppinfra.com/v3/openai` | `qwen/qwen3-32b` | |
+| **Hugging Face** | `router.huggingface.co/v1` | `openai/gpt-oss-120b` | |
+| **Vercel AI Gateway** | `ai-gateway.vercel.sh/v1` | `anthropic/claude-sonnet-4.5` | |
+| **Requesty** | `router.requesty.ai/v1` | `anthropic/claude-3-7-sonnet-latest` | |
+| **Together** | `api.together.xyz/v1` | `meta-llama/Meta-Llama-3.1-70B-Instruct-Turbo` | |
+| **LiteLLM** | `localhost:4000/v1` | `your-proxy-model` | Volitelný API klíč |
+| **Nový API** | `localhost:3000/v1` | `gpt-4.1` | Volitelný API klíč |
+| **OpenAI Compatible** | (user-configured) | `your-model-id` | Vlastní koncový bod |
+
+### Čínští poskytovatelé
+
+| Poskytovatel | Výchozí základna URL | Výchozí model | Poznámky |
+|----------|-----------------|---------------|-------|
+| **Qwen** | `dashscope.aliyuncs.com/compatible-mode/v1` | `qwen3-235b-a22b` | Alibaba DashScope |
+| **Qwen Code** | `dashscope.aliyuncs.com/compatible-mode/v1` | `qwen3-coder-plus` | Zaměřené na programování |
+| **Doubao** | `ark.cn-beijing.volces.com/api/v3` | (je vyžadován ID koncového bodu) | ByteDance Volcengine |
+| **Moonshot** | `api.moonshot.cn/v1` | `kimi-k2-0905-preview` | Kimi |
+| **Xiaomi MiMo** | `api.xiaomimimo.com/v1` | `mimo-v2.5-pro` | |
+| **GLM** | `open.bigmodel.cn/api/paas/v4` | `glm-5` | Koncový bod Zhipu v Číně |
+| **Z AI** | `api.z.ai/api/paas/v4` | `glm-5` | Mezinárodní koncový bod Zhipu |
+| **MiniMax** | `api.minimaxi.com/v1` | `MiniMax-M2.7` | |
+| **Baidu Qianfan** | `qianfan.baidubce.com/v2` | `ernie-4.5-turbo-32k` | |
+| **SiliconFlow** | `api.siliconflow.cn/v1` | `Qwen/QwQ-32B` | Platforma pro hostování modelů |
+| **Huawei Cloud MaaS** | `api.modelarts-maas.com/v1` | `DeepSeek-V3` | |
+
+**Doubao vyžaduje ID koncového bodu Ark** (formát: `ep-xxxxxxxx-xxxx-xxxx`). Výchozí zástupný symbol je třeba nahradit.
+
+### Lokální poskytovatelé
+
+| Poskytovatel | Výchozí základna URL | Výchozí model | Poznámky |
+|----------|-----------------|---------------|-------|
+| **Ollama** | `localhost:11434/api` | `llama3` | Žádný klíč API. Přenos NDJSON. Objevování modelů prostřednictvím `/api/tags` |
+| **LMStudio** | `localhost:1234/v1` | `local-model` | Odesílá `"EMPTY"` jako token nositele. Objevování kompatibilní s OpenAI |
+| **OVMS** | `localhost:8000/v3` | `openvino-model` | OpenVINO Model Server |
+| **Azure OpenAI** | (uživatelem nakonfigurováno) | `gpt-4o` | Název nasazení v URL. Záhlaví `api-key` |
+
+## Výběr modelu pro jednotlivé úlohy
+
+Notemd podporuje nezávislého poskytovatele a model pro každý úkol. Aktivujte pomocí `useMultiModelSettings: true`.
+
+### Dostupné úkoly
+
+| Úloha | Klíč nastavení | Výchozí poskytovatel |
+|------|-------------|-----------------|
+| Přidání odkazů (vložení wiki odkazu) | `addLinksProvider` / `addLinksModel` | DeepSeek |
+| Výzkum (vyhledávání na webu + shrnutí) | `researchProvider` / `researchModel` | DeepSeek |
+| Generování z názvu | `generateTitleProvider` / `generateTitleModel` | DeepSeek |
+| Překlad | `translateProvider` / `translateModel` | DeepSeek |
+| Generování diagramů | `summarizeToMermaidProvider` / `Model` | DeepSeek |
+| Extrakce konceptů | `extractConceptsProvider` / `Model` | DeepSeek |
+| Extrakce původního textu | `extractOriginalTextProvider` / `Model` | DeepSeek |
+
+### Pořadí řešení
+
+1. Pokud je `useMultiModelSettings` zapnuto → použijte poskytovatele a model specifické pro úkol
+2. Pokud je přepsání modelu úkolu prázdné → vraťte se k výchozímu modelu poskytovatele
+3. Pokud je poskytovatel úkolu neplatný → vraťte se ke globálnímu `activeProvider`
+4. Pokud je `useMultiModelSettings` vypnuté → všechny úlohy používají globální `activeProvider`
+
+### Doporučené konfigurace
+
+```
+# Researcher: power for research, cheap for everything else
+activeProvider: DeepSeek
+extractConceptsProvider: DeepSeek
+researchProvider: OpenAI        # GPT-4o for better research quality
+summarizeToMermaidProvider: DeepSeek
+
+# Privacy-first: local only
+activeProvider: Ollama
+addLinksProvider: Ollama
+extractConceptsProvider: Ollama
+
+# Budget bilingual
+activeProvider: DeepSeek
+translateProvider: Google      # Gemini Flash for translation
+researchProvider: SiliconFlow  # Cheaper China-based routing
+```
+
+## Architektura volání API
+
+### Transportní vrstvy
+
+1. **Obsidian `requestUrl`** — primární (vestavěné, funguje na všech platformách)
+2. **Desktop HTTP** — moduly Node.js `http`/`https` (streaming + dlouhé požadavky)
+3. **Web `fetch`** — náhrada, pokud nejsou k dispozici moduly Node.js
+
+Plugin automaticky přepíná mezi transporty při dočasných síťových chybách.
+
+### Logika opakování
+
+- **Normální režim** (`enableStableApiCall: false`): Jeden pokus. Při dočasné chybě se automaticky přejde na stabilní opakování.
+- **Režim stabilního opakování** (`enableStableApiCall: true`): Až 4 pokusy (1 + 3 opakování) s intervaly 5 sekund.
+- **Dočasné chyby, které spouštějí opakování**: `err_connection_closed`, `err_connection_reset`, `err_timed_out`, `econnreset`, `econnaborted`, `etimedout`, `socket hang up`, `network request failed`
+- **Nepřipustitelné k opakování**: HTTP 400, 401, 403, 404
+
+### Caching odpovědí
+
+5minutová paměťová cache LRU se klíči založenými na poskytovateli + modelu + teplotě + promptu + obsahu. Následující identické požadavky během 5 minut vracejí výsledky z cache okamžitě.
+
+### Zpracování modelů pro uvažování
+
+Modely, které nepodporují roli `system` (DeepSeek R1, OpenAI o1/o3/o4/gpt-5), automaticky spojují systémové a uživatelské prompty do jediné uživatelské zprávy.
+
+DeepSeek-specifické: `thinkingEnabled` přidává `{ thinking: { type: 'enabled' } }` do požadavku. `reasoningEffort` (nízký/střední/vysoký) je předán jako `reasoning_effort`. Ověřuje, zda maximální počet výstupních tokenů ≥ 8000, když je aktivní režim uvažování.
+
+### Odhad tokenů
+
+`estimateTokens(text)`: `Math.ceil(text.length / 4)` — heuristika 4 znaků na token. Používá se k zajištění `maxResearchContentTokens` před odesláním do LLM.
+
+Není implementováno sledování nákladů.
+
+## Objevování modelů
+
+| Režim | Poskytovatelé | Koncový bod |
+|------|-----------|----------|
+| `ollama-tags` | Ollama | `/api/tags` |
+| `google-models` | Google | Seznam modelů API |
+| `anthropic-models` | Anthropic | Seznam modelů API |
+| `openai-compatible-models` | DeepSeek, Qwen, Mistral atd. | `/v1/models` |
+| `openrouter-models` | OpenRouter | Seznam modelů API |
+| `github-models` | GitHub Models | Inference API |
+| `none` | Azure OpenAI | Vypnuto (vyžaduje název nasazení) |
+
+## Rychlý start
+
+1. **Vyberte poskytovatele** — DeepSeek (Čína), OpenAI (Mezinárodní) nebo Ollama (Místní/Bezplatné)
+2. **Zadejte klíč API** — Nastavení → Notemd → Poskytovatel → Klíč API
+3. **Otestujte spojení** — Klikněte na tlačítko testování
+4. **Volitelné: Modely na úroveň úkolu** — Povolte `useMultiModelSettings` a nakonfigurujte je individuálně
+
+Pro Ollama: klíč API není potřeba. Stačí se ujistit, že `ollama serve` běží.
+
+---
+
+## Další kroky
+
+- 📝 [Poznámky ke konceptu](/docs/features/concept-notes) — Využívá model extrakce na úroveň úkolu
+- 🎨 [Diagramy](/docs/features/diagrams) — Využívá model diagramů na úroveň úkolu
+- 🔍 [Výzkum](/docs/features/research) — Využívá model specifický pro výzkum
+- ⚙️ [Konfigurace](/docs/getting-started/configuration) — Kompletní referenční sady nastavení

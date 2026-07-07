@@ -1,0 +1,133 @@
+---
+id: installation
+title: "การติดตั้ง"
+description: "วิธีติดตั้ง Notemd ใน Obsidian"
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [installation, setup, obsidian plugin]
+concepts: [Installation, Community Plugins, BRAT, Manual Install]
+citations:
+  - title: Obsidian
+    url: https://obsidian.md
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# การติดตั้ง
+
+<TLDR>
+**ติดตั้ง Notemd ภายในเวลาไม่ถึง 2 นาที** มีวิธีสองวิธี: (1) ปลั๊กอินชุมชนของ Obsidian (แนะนำ ติดตั้งได้ด้วยการคลิกเดียว) หรือ (2) การติดตั้งแบบมืออาชีพผ่าน GitHub Releases ต้องใช้ Obsidian เวอร์ชัน 0.15.0+ ทำงานได้บน Windows, macOS, Linux, iOS และ Android ไม่มีการพึ่งพาไลบรารีภายนอก มีผู้ดาวน์โหลดมากกว่า 4k รองรับใบอนุญาต MIT.
+</TLDR>
+
+## วิธีที่ 1: ปลั๊กอินชุมชน (แนะนำ)
+
+1. เปิด **การตั้งค่า Obsidian** (ไอคอน ⚙️ หรือ `Ctrl/Cmd + ,`)
+2. เลือกไปที่ **ปลั๊กอินชุมชน**
+3. คลิกที่ **ดู**
+4. ค้นหา **"Notemd"**
+5. คลิกที่ **ติดตั้ง**
+6. คลิกที่ **เปิดใช้งาน**
+
+**เสร็จสิ้น!** คุณจะเห็นไอคอน Notemd อยู่ที่แถบด้านซ้ายของคุณ.
+
+## วิธีที่ 2: การติดตั้งแบบมืออาชีพ
+
+### ข้อกำหนดเบื้องต้น
+- Obsidian เวอร์ชัน 0.15.0 หรือสูงกว่า
+- Git (ไม่จำเป็น สำหรับการคลอน)
+
+### ขั้นตอน
+
+1. **ดาวน์โหลดไฟล์** จาก [GitHub Releases](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/latest):
+   - `main.js`
+   - `styles.css`
+   - `manifest.json`
+
+2. **ค้นหาโฟลเดอร์ plugin ของ vault ของคุณ:**
+   ```
+   <your-vault>/.obsidian/plugins/
+   ```
+
+หากโฟลเดอร์ `plugins` ยังไม่มีอยู่ ให้สร้างมันขึ้นมา.
+
+3. **สร้างโฟลเดอร์ Notemd:**
+   ```
+   <your-vault>/.obsidian/plugins/notemd/
+   ```
+
+4. **คัดลอกไฟล์ทั้งสามไฟล์** เข้าไปในโฟลเดอร์ `notemd`.
+
+5. **โหลด Obsidian ใหม่:**
+   - กด `Ctrl/Cmd + R` หรือ
+   - รีสตาร์ท Obsidian
+
+6. **เปิดใช้งาน plugin:**
+   - Settings → Community plugins
+   - ค้นหา "Notemd" ในรายการ
+   - เปิดใช้งานมัน
+
+## ทางเลือกอื่น: ติดตั้งผ่าน BRAT
+
+หากคุณใช้ [BRAT plugin](https://github.com/TfTHacker/obsidian42-brat):
+
+1. เปิดการตั้งค่าของ BRAT
+2. คลิก "Add Beta plugin"
+3. ป้อนข้อมูล: `Jacobinwwey/obsidian-NotEMD`
+4. คลิก "Add Plugin"
+5. เปิดใช้งาน Notemd ใน Community plugins
+
+## การตรวจสอบ
+
+หลังจากติดตั้งแล้ว ให้ตรวจสอบว่า Notemd ทำงานได้หรือไม่:
+
+1. เปิดบันทึกใดก็ได้
+2. คลิกขวาในตัวแก้ไข
+3. คุณควรจะเห็นคำสั่ง Notemd เช่น:
+   - "Process file (add links)"
+   - "Extract concepts"
+   - "Research and summarize"
+
+## ขั้นตอนต่อไป
+
+- **กำหนดค่าผู้ให้บริการ LLM:** [Quick Start →](./quick-start)
+- **การแก้ไขปัญหา:** [Common Issues →](../advanced/troubleshooting)
+
+## ข้อกำหนดของระบบ
+
+| แพลตฟอร์ม | เวอร์ชัน | สถานะ |
+|----------|---------|--------|
+| **Obsidian** | 0.15.0+ | จำเป็นหรือไม่ |
+| **Windows** | 7+ | ✅ รองรับ |
+| **macOS** | 10.15+ | ✅ รองรับ |
+| **Linux** | ใดก็ได้ | ✅ รองรับ |
+| **iOS** | 15+ | ✅ รองรับ |
+| **Android** | 5+ | ✅ รองรับ |
+
+## การถอนการติดตั้ง
+
+เพื่อลบ Notemd:
+
+1. การตั้งค่า → ปลั๊กอินชุมชน
+2. ค้นหา "Notemd"
+3. คลิกที่ไอคอน ❌
+4. หากต้องการ ให้ลบโฟลเดอร์ปลั๊กอิน: `<vault>/.obsidian/plugins/notemd/`
+
+ข้อมูลของคุณ (บันทึก บันทึกแนวคิด ฯลฯ) จะยังคงไม่เปลี่ยนแปลง.
+
+## การอัปเดต
+
+### อัปเดตอัตโนมัติ (แนะนำ)
+Obsidian จะตรวจสอบการอัปเดตปลั๊กอินโดยอัตโนมัติ เมื่อมีเวอร์ชันใหม่พร้อมใช้งาน:
+1. การตั้งค่า → ปลั๊กอินชุมชน
+2. คลิก "ตรวจสอบการอัปเดต"
+3. คลิก "อัปเดต" ที่อยู่ข้าง Notemd
+
+### การอัปเดตแบบมืออาชีพ
+ดาวน์โหลดเวอร์ชันล่าสุดแล้วแทนที่ไฟล์สามไฟล์ในโฟลเดอร์ปลั๊กอินของคุณ.
+
+## ขอความช่วยเหลือ
+
+- 📖 [คู่มือเริ่มต้นใช้งาน](./quick-start)
+- ❓ [FAQ](../faq)
+- 💬 [ชุมชน Discord](https://discord.gg/qnGgsQ9W)
+- 🐛 [รายงานปัญหา](https://github.com/Jacobinwwey/obsidian-NotEMD/issues)

@@ -1,0 +1,359 @@
+---
+id: faq
+title: "Syventäin esitettyjä kysymyksiä"
+description: "Yleisimmät kysymykset Notemd asentamiseen, ominaisuuksille ja käyttöön"
+keywords: [faq, installation, LLM providers, obsidian plugin, wiki-links, concept notes, Copilot alternative, Smart Connections alternative, obsidian AI plugin comparison]
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+concepts: [Notemd, Obsidian, LLM, wiki-links, concept notes, knowledge base, Copilot Alternative, AI Plugin Comparison]
+citations:
+  - title: Obsidian
+    url: https://obsidian.md
+  - title: Ollama
+    url: https://ollama.com
+faqItems:
+  - question: How do I install Notemd in Obsidian?
+    answer: Open Obsidian Settings, go to Community Plugins, Browse, search Notemd, Install, and Enable. Requires Obsidian 0.15.0 or later. Manual installation is also available via GitHub Releases.
+  - question: What LLM providers does Notemd support?
+    answer: Notemd supports 30+ providers including OpenAI, Anthropic, Google, xAI, Mistral, DeepSeek, Qwen, Ollama, LM Studio, Azure OpenAI, OpenRouter, and many China-focused providers like Qwen, Doubao, Moonshot, and GLM.
+  - question: Can Notemd work with local LLMs?
+    answer: Yes. Notemd works with Ollama, LM Studio, vLLM, LocalAI, and any OpenAI-compatible endpoint. All tasks work with local models including linking, concept generation, translation, research, and diagram generation.
+  - question: How does Notemd differ from ChatGPT?
+    answer: ChatGPT produces ephemeral chat answers. Notemd writes persistent structured results directly into your Obsidian vault as wiki-linked files, concept notes, diagrams, and translations that accumulate into a knowledge base.
+  - question: How does Notemd compare to Copilot or Smart Connections?
+    answer: Copilot is conversation-first for chatting about notes. Smart Connections is discovery-first for finding similar notes. Notemd is write-first, processing notes with AI and writing structured results into your vault. All three complement each other.
+  - question: Which search services work with Notemd research?
+    answer: Tavily (recommended, AI-optimized search, requires API key) and DuckDuckGo (experimental, no API key needed). Research results are summarized by LLM and appended to your note with source citations.
+  - question: Does Notemd support Chinese or other languages?
+    answer: The UI supports 21+ languages. Task output language is independently configurable, allowing mixed setups like Chinese UI with English output or vice versa.
+  - question: Can I use Notemd for paper or PDF reading?
+    answer: Yes. Convert PDF to Markdown using MinerU, open in Obsidian, then run Notemd tasks to add wiki-links, generate concept notes, extract text, research background, translate sections, and create Mermaid diagrams.
+  - question: What diagram types can Notemd generate?
+    answer: Mermaid (flowchart, sequence, class, state, ER, Gantt with syntax auto-fix), JSON Canvas (Obsidian native), Vega-Lite (data charts), HTML fallback, and explicit editable HTML/SVG figure artifacts. Draw.io XML and Drawnix JSON exporter boundaries are available for deterministic artifact testing.
+  - question: Is Notemd free and open source?
+    answer: Yes. MIT licensed, no paid tiers, no cloud lock-in, no telemetry. Source code on GitHub with 234+ stars. Pull requests welcome.
+  - question: Can Notemd work 100% offline?
+    answer: Yes with Ollama. No API key, no internet needed. All features work offline including wiki-links, concept notes, translation, and diagrams. DuckDuckGo research also works without an API key.
+  - question: Is my data sent to the cloud?
+    answer: With Ollama or LM Studio, no data leaves your machine. With cloud providers like OpenAI or Anthropic, your note content is sent as API input. Notemd itself collects no telemetry or user data.
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# Syventäin esitettyjä kysymyksiä
+
+<TLDR>
+**Nopeat vastaukset yleisimpiin Notemd kysymyksiin.** Käsitellään asentaminen (5 minuutin asetelu), 30+ LLM tarjoajan tuki, paikallinen/pilvimerkkinen mallivalikot, yhden klikkin kanssa toimintatiedot, monikielinen UI (21 kieltä), wiki-yhteyksien automatisointi, tutkimusten yhdistäminen, PDF lukutoimintatiedot, diagrammien luontaminen ja avoimen lähtekoodin litsentsointi. Kaikki ominaisuudet toimivat offline -tilassa Ollama-lla.
+</TLDR>
+
+---
+
+## Asentaminen & asetelu
+
+### Kuidas asentaa Notemd Obsidian-lle?
+
+Avaa Obsidian **Asetukset → Yhteisön lisäsovellukset → Selvitä** → etsi **"Notemd"** → **Asenta** → **Aktivoi**.
+
+**Ehdot:**
+- Obsidian 0.15.0+
+- Tukitaan laitteilla (Windows, macOS, Linux) ja mobiililaitteilla (iOS, Android)
+
+**Käsin asentaminen:**
+1. Lae downlaadita `main.js`, `styles.css`, `manifest.json` [GitHub Releases](https://github.com/Jacobinwwey/obsidian-NotEMD/releases)-ltä
+2. Aseta ne `<your-vault>/.obsidian/plugins/notemd/`-lle
+3. Uuenda Obsidian ja aktivoi lisäsovellus
+
+**Tulostot:** 4k+ asentusta, 44 versiota, MIT-litsenssi.
+
+---
+
+## LLM Konfigurointi
+
+### Mitä LLM-palvelijoita Notemd tukee?
+
+Notemd toetaa **30+ palveluntarjoajaa**:
+
+**Pilvapalveluntarjoajat:**
+- OpenAI (GPT-4, GPT-4o, GPT-4o-mini, o1, o3)
+- Anthropic (Claude Opus, Sonnet, Haiku)
+- Google (Gemini Pro, Flash, Ultra)
+- xAI (Grok)
+- Mistral, DeepSeek, Qwen, Moonshot, GLM
+
+**Kiinan keskittyvä:**
+- Qwen, Qwen Code, Doubao, Moonshot, Xiaomi MiMo, GLM, Z AI, MiniMax
+- Huawei Cloud MaaS, Baidu Qianfan, SiliconFlow
+
+**Sisäiset/itsehostitu:**
+- Ollama
+- LM Studio
+- Jokin OpenAI-sovelluksellinen päätuspiste
+
+**Gatewayt:**
+- Azure OpenAI, OpenRouter, Together AI, Groq, AIHubMix
+- GitHub Models, Fireworks, LiteLLM, Nebius, Cerebras
+- Hugging Face, Vercel AI Gateway, Requesty
+
+### Voiko Notemd toimia lokalisoiduilla LLM-illa?
+
+**Kyllä, täysin tuettu.** Notemd toimii seuraavien kanssa:
+- **Ollama** (omaiset yhdistykset)
+- **LM Studio** (via OpenAI-sovelluvan päätuspiste)
+- **vLLM, LocalAI, text-generation-webui** (via OpenAI-sovelluvan režimi)
+
+**Kaikki tehtävät toimivat lokalisoiduilla mallien kanssa: yhdistäminen, konseptin luominen, kääntö, tutkimus ja diagrammin luominen.
+
+**Seurauksia sekä yhdistämistä että muutoksia:**
+- **Ollama (lokali) yhdistämiseen → nopea, privaatista, ilman kustannuksia
+- **OpenAI tutkimukseen → korkea laatu, web‑otsingun yhdistys
+- **Gemini kääntöön → monimodaalinen tukea
+
+### **Kuidas konfiguroida eri mallit eri tehtäville?
+
+****Notemd Asetukset**-ssä on iga tehtävän jaoks erilliset tarjoajan/mallin valintat:
+
+| Tehtävä | Esimerkkikonfigurointi |
+|------|----------------------|
+| **Yhdistäminen** | DeepSeek (nopea, halpa) |
+| **Konseptin luominen** | Claude Opus (korkea laatu) |
+| **Tutkimus** | Perplexity tai GPT-4o (web-pohjainen) |
+| **Kääntö** | Gemini Flash (monimodaalinen) |
+| **Diagrammin luominen** | Ollama (sisäistä, privaatista) |
+
+Tämä tehtäväkohtainen optimointi tasakaaluttaa nopeuden, hintan ja laadun.
+
+---
+
+## Pääominaudet
+
+### Miten Notemd erottuu ChatGPT pappereiden lukemisen osalta?
+
+| Määrä | ChatGPT | Notemd |
+|-----------|---------|--------|
+| **Lähetyspaikka** | Viestintähistoria (ajatuksellinen) | Obsidian varastointi (pystyviat tiedostot) |
+| **Tulostusmuoto** | Tekstilainen vastaus | Wiki-liitokset, käsitteelliset tiedot, diagrammit, käännökset |
+| **Pikaaikainen arvo** | Kohtaa kaduu puhelun jälkeen | Säilyy tietojankostossa |
+| **Kasutettavuus** | Tulee uudelleen pyytää | Tiedostot pysyvät, linkit kehittyvät |
+
+**Käytä ChatGPT:in** – nopeille kysymyksille ja yksinkertaisille selityksille
+**Käytä Notemd:in** – pystyvän, strukturoituun tietojankoston luomiseen viikkojen tai kuukauden ajan jälkeen
+
+### Kuidas Notemd lisää wiki-liitoksia märkintöihin?
+
+**Prosessi:**
+1. Käytät käskyn "Process file (add links)" märkintön kanssa
+2. Notemd lähettää tekstin sinun konfiguroituun LLM:si
+3. LLM tunnistaa keskitykselliset käsitteet kontekstissa
+4. Notemd lisää `[[wiki-links]]` jokaisen käsiteen ilmuminnin yhteydessä
+5. Valitettavasti luodaan automaattisesti käsitekirjoitukset määritetyssä kaustassa
+
+**Ominaisuudet:**
+- Synonyymien poistaminen (vältää "transformer" vs "transformers" duplikaateja)
+- Palautuslinkit käsitekirjoituksista lähteeseen
+- Linkkin turvallisuus muuttamisen tai poistaman yhteydessä
+- Puhtaasti extraktointimodi (extrahoi käsitteet ilman alkuperäisen tiedoston muutokset)
+
+### Mitä on Notemd yhdellä painikkeella toimivat työprosessit?
+
+**Yhdellä painikkeella toimivat työprosessit** yhdistävät useat toimet **yhteen vasempan puoleen olevaan painikkeeseen**.
+
+**Perustyöprosessi:** `One-Click Extract`
+```
+process-current-add-links > extract-concepts-current > research-and-summarize > summarize-as-mermaid
+```
+
+**Tulos:** Yhdellä painikkeella suoritetaan:
+1. Lisää wiki-linkkejä aktiiviseen kirjoituksiin
+2. Luo käsitekirjoitukset uuteen termiin
+3. Tutkita ja lisätä taustatietoa
+4. Sulkita kokonaan Mermaid diagrammiksi
+
+**Omakustannut työprosessit:** Määritä omat Settingsissä DSL-muodossa. Jokainen työprosessi muuttuu uudelleen käytettävän sivupalkkinpainikkeeksi.
+
+### Kuidas Notemd vertaaan Copilot tai Smart Connections?
+
+Nämä lisäsovellukset ratkaistaan erilaisia ongelmia:
+
+- **Copilot** — Vaiheena keskittyvä. Puhuta AI:n kanssa omaa tiedonnotioita koskeen. AI:n vastaukset jäävät chat-paneeliin; ne ei muuttaa sinun avaruksesi sisältöä.
+- **Smart Connections** — Avastuskeskittyvä. Se löytää semantisesti sarnait tiedonnotiot käyttäen embeddingsia. Se ei luoda eikä muoda sisältöä.
+- **Notemd** — Kirjoituskeskittyvä. AI-tuottaa sinun tiedonnotioistasi strukturoituja tuloksia (wiki-linkkejä, konseptitiedonnotioita, tutkimusta, diagrammeja, käännöksiä) suoraan sinun avaruksesi pystyviin failiin.
+
+| Mitä sinun on tarpeen | Suositeltu lisäsovellus |
+|----------------|-------------------|
+| Puhuta AI:n kanssa tiedonnotioista | Copilot |
+| Löydä sarnait/tuoreet tiedonnotiot | Smart Connections |
+| Automaattisesti lisää wiki-linkkejä ja luoda tietojärjestelmä | **Notemd** |
+| Luo konseptitiedonnotioita taaslinkkejä kanssa | **Notemd** |
+| Luo diagrammeja tiedonnotion sisältöstä | **Notemd** |
+| Tutka aiheen ja lisa yhteenvetot | **Notemd** |
+
+Kolmea voidaan käyttää yhdessä — ne täydentävät toisia, ei konkureeri toisiinsa.
+
+---
+
+## Tutkimus & Kääntö
+
+### Mitä hakupalveluita toimivat Notemd tutkimuksessa?
+
+| Palvelu | API Key Required | Laatu | Huomiot |
+|---------|-----------------|---------|-------|
+| **Tavily** | Jaa | Korkea | Suositeltava, AI-optimoitu hakupalvelu |
+| **DuckDuckGo** | Ei | Eksperimentaali | Ei tarvitse asentaa, halvempia laatuja |
+
+**Kuidas „Research & summarize“ toimii:**
+1. Valitset teeman tai käytät sen nykyisessä tiedonnotissa
+2. Notemd kysyy hakupalvelusta
+3. Tulokset → LLM yhteenveto
+4. Yhteenveto lisätään tiedonnotiisi lähtöviiteiden kanssa
+
+**Tulos:** Pidevä tutkimusjäljä sinun avarassasi, ei selaimen sivuissa.
+
+### Kas Notemd toetaa kiiniaa tai muija kieliä?
+
+**UI kielet:** 21+ toetatua
+- English, 中文 (简体), 中文 (繁體), 日本語, 한국어
+- Arabic, German, French, Spanish, Russian, Portuguese, Italian
+- Hindi, Bengali, Thai, Vietnamese, Turkish, Polish, Czech, ja muut
+
+**Tehtäön tulosten kieli:** Itsevalittava konfigurointi
+- UI kiiniassa + tulostus englanniksi: ✅
+- UI englanniksi + tulostus kiiniaksi: ✅
+
+**Käytöskaso:** Kaksikieliset tutkijat voivat säilyttää UI oma kielessä samalla kun he tekevät englanninkielisiä tiedonnottoja kirjastamiseen.
+
+---
+
+## PDF ja akateemiset työprosessit
+
+### Käytäkönnään Notemd artikkelin/PDF lähdötekstin lukeamiseen?
+
+**Kyllä.** Työprosessi:
+1. **Muuntaa PDF → Markdown** käyttäen [MinerU](https://github.com/opendatalab/MinerU) (soovitatavissa akateemisten artikkelien puhul)
+2. Avoa Markdown-tiedosto Obsidian-ssä
+3. Käynnista Notemd -työt:
+   - **Lisää wiki-linkkejä** tärkeille termille
+   - **Luo käsitelmällisen tiedon** tundetun terminologian kohtaan
+   - **Eritä alkuperäinen teksti** käyttäen käsiteltäviä kysymyksiä (esim. "Mitä on rajoitteet?")
+   - **Tutka tausta** viitettyjen metodien/tietokoneiden kohta
+   - **Kääntä** vaikeita osia
+   - **Sulkuta Mermaid -diagrammiksi** struktuurisen ymmärryksen saamiseksi
+
+**Versio 1.9.1+:** Kapiteleiden strukturiin erottaminen TOC-tuken kanssa
+
+**Tulos:** Artikkelin lähdötekstin lukuaminen muuttuu strukturoituksi, linkittavaksi tietoisuuskoneeksi sinun avarassasi.
+
+---
+
+## Diagrammit ja visualisointi
+
+### Mitä graafikuja/diagrammityyppejä voi Notemd luoda?
+
+| Tyyppi | Tukea | Ominaisuudet |
+|------|---------|----------|
+| **Mermaid** | Täysin | Viestitaulukko, järjestys, klassi, tila, ER, Gantt, syntaksin automaattinen korjaus, pakettipäätös |
+| **JSON Canvas** | Täysin | Obsidian-mallien omat paikannusmuodot |
+| **Vega-Lite** | Täysin | Tietoluettelot, aikaseriat, sulkupylöt, hajutus, käyttäjän määritettävät |
+| **HTML** | Varausvaihtoehto | Ei tuetun diagrammityypin korjaamiseen |
+| **Muokattavaa HTML/SVG** | Etsytyvä tarkoitus | Itsetoimiv sisäistä SVG semantisten Draw.io-tyylisissä annotaatioissa |
+| **Draw.io / Drawnix artefaktit** | Ekspordin rajoite | Deterministinen XML/JSON `SemanticFigureModel`-lta; ei edittimen käyttöajan riippuvuutta |
+
+**Mermaid automatisointi:** Syvällinen vianparannusrežimi parantaa:
+- Kerrunnoitettu nopeat (`-->`, `-.->`, `==>`)
+- Eivätkä oikeita siltiä, komenttejä
+- Alamgraafin syntyyhteyden virheet
+- Kuvannotointi (`[`, `(`, `{`, `((`)
+- Pipitähemärkit siltissä
+- Merkkien liitettykset
+
+**Töövoima:**
+1. Käytä „Yhteenveto Mermaid-diagrammina“ merkkille
+2. Edistyskatselu modaalissa
+3. Ekspordi SVG- tai PNG-formaatilla
+4. Tai salaa tiedosto `.mmd`-ena avaruudessa
+
+---
+
+## Avoin lähtekoodi & yhteisö
+
+### Onko Notemd ilmaista ja avoinna lähtekoodilla?
+
+**Jah.**
+- **Litsenssi:** MIT (lennollinen, kaupallinen käyttö mahdollista)
+- **Lähtekoodi:** https://github.com/Jacobinwwey/obsidian-NotEMD
+- **Ei maksullisia tasoja, ei pilvistettua kiinnitystä, ei telemetriaa**
+- **Yhteisö:** 234+ GitHub-tähden, aktiivinen Discord
+
+**Sinulla on:**
+- Sinun dataasi (jää sinun avaruudessasi)
+- Sinun työprosessitasi (kohdista esityksiä, mallia, ahelmoja)
+- Sinun yksityisyysesi (lokalisoinen LLM-tuki)
+
+**Panostaa:** Pull-requestit ovat terveet. Katso [CONTRIBUTING.md](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/CONTRIBUTING.md)
+
+---
+
+## Virheiden ratkaiseminen
+
+### Minun LLM-kutsujenni eivät toimi. Mitä minun tarkistaisin?
+
+1. **Onko API-avain validi?** Tarkista Asetukset → Tarjoajan konfigurointi
+2. **Onko mallin nimi oikea?** Käytä „获取模型列表“ (Get Model List)-painiketta asetuksissa
+3. **Yhteys verkkoon mahdollista?** Monet tarjoajat vaativat VPN:n
+4. **Kuormakoe?** Tarkista tarjoajan dashboardia
+5. **Diagnostiikka:** Käytä asetuksissa "Connection Test" yksityiskohtaisien virheilmojen saamiseksi
+
+### Notemd on aike. Kuinka voitan se nopeuttaa?
+
+1. **Käytä nopeampia malleja:** DeepSeek, Gemini Flash, GPT-4o-mini
+2. **Vähentä chunkin suurusta:** Asetukset → Smart Chunking → alenta sanojen määrää
+3. **Parallinen käyttö:** Asetukset → Batch Processing → suurenda samalla käytettyjä prosesseja
+4. **Paikalliset malleet:** Ollama tehtäville, jotka eivät vaadi verkkoyhdistystä
+
+### Kan Notemd toimia 100% offline?
+
+**Jaa, Ollama kanssa.** Ilmaisilla API-avainilla, ilman internetia, ei data lähe sinun laitteestasi:
+
+1. Asenna [Ollama](https://ollama.com) ja käytä `ollama serve`
+2. Notemd-asetuksissa valitse **Ollama** oma tarjoajana
+3. Taa malle: `ollama pull llama3` (tai qwen2.5, gemma2 jne.)
+4. Kaikki ominaisuudet toimivat: wiki-linkit, concept notes, kääntö, diagrammit
+
+**DuckDuckGo-tutkimus** toimii myös ilmaisilla API-avainilla (eksperimentaaliinen laatu).
+
+Pilvetarjoajien (OpenAI, Anthropic, Google, DeepSeek jne.) kanssa sinun tiedot lähetetään API-aineena. Tarkista iga tarjoajan yksityisyyspoliittikkaa datan käyttöön liittyvien tietojen vuoksi.
+
+### Onko minun dataani lähetetty pilveen?
+
+**Se riippuu sinun palveluntekijästäsi:**
+
+| Palveluntekijän tyyppi | Data sent to cloud? | Huomiot |
+|--------------|---------------------|-------|
+| **Ollama (lokali)** | Ei | Kaikki jää sinun laitteeseesi |
+| **LMStudio (lokali)** | Ei | Sama kuin Ollama |
+| **DeepSeek, OpenAI, jne.** | Jaa | Huomio: sisältö lähetetään API-aineena käsiteltäväksi |
+| **OpenRouter, AIHubMix** | Jaa | Pääsisä, joka suunnittaa verkkoyhteyden pilvapalvelijoille |
+
+Notemd itse kerää **eikä telemetriaa, eikä analyysiä, eikä käyttäjädataa**. Palvelintarakentu on täysin avoimen lähtekoodin perusteella (MIT). Ainoat tiedot, jotka lähevät laitteestasi, ovat ne, jotka saatat selkeästi lähettää asetettuun LLM palvelijalle.
+
+### Kumpi Obsidian AI-palvelintarakentu on parhaiten tutkimukseen?
+
+Se riippuu tutkimusprosessistasi:
+
+| Tarvitaan | Palvelintarakentu | Miksi |
+|------|--------|-----|
+| Suosittujen artikkelien/tietojen löytö | Smart Connections | Semantinen sarnaisuuden tunnistaminen |
+| Viestintä lähteistesi kanssa | Copilot | Vestintä varastokontekstin kanssa |
+| Automaattiset yhdistykset käsitteille + nottien luominen | **Notemd** | AI tunnistaa käsitteet, lisää yhdistykset ja luoo notit |
+| Web-tutkimus + yhteenveto nottien muodossa | **Notemd** | Tavily/DuckDuckGo hakua → LLM yhteenveto → lisätään tiedonnotkoon |
+| Luo diagrammeja tutkimuksista | **Notemd** | Mermaid/Canvas/Vega-Lite tiedonnotkon sisältöstä |
+
+**Suositeltu kombinatio:** Smart Connections (avastus) + Notemd (strukturointi) + Copilot (arvio).
+
+---
+
+## Apua
+
+- **Dokumentaatio:** https://jacobinwwey.github.io/obsidian-NotEMD/
+- **GitHub Issues:** https://github.com/Jacobinwwey/obsidian-NotEMD/issues
+- **Discord:** https://discord.gg/qnGgsQ9W
+- **Sponsor:** https://github.com/sponsors/Jacobinwwey

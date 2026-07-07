@@ -1,0 +1,133 @@
+---
+id: installation
+title: "ইনস্টলেশন"
+description: "Obsidian-এ Notemd কীভাবে ইনস্টল করবেন"
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [installation, setup, obsidian plugin]
+concepts: [Installation, Community Plugins, BRAT, Manual Install]
+citations:
+  - title: Obsidian
+    url: https://obsidian.md
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# ইনস্টলেশন
+
+<TLDR>
+**২ মিনিটের মধ্যে Notemd ইনস্টল করুন।** দুটি পদ্ধতি: (১) Obsidian Community Plugins (সুপারিশকৃত, ওয়ান-ক্লিক ইনস্টল), অথবা (২) GitHub Releases এর মাধ্যমে ম্যানুয়াল ইনস্টলেশন। Obsidian 0.15.0+ প্রয়োজন। Windows, macOS, Linux, iOS এবং Android-এ কাজ করে। কোনো বাহ্যিক ডিপেন্ডেন্সি নেই। 4k+ ডাউনলোড, MIT লাইসেন্সযুক্ত.
+</TLDR>
+
+## পদ্ধতি ১: Community Plugins (সুপারিশকৃত)
+
+1. **Obsidian Settings** খুলুন (⚙️ আইকন অথবা `Ctrl/Cmd + ,`)
+2. **Community plugins**-এ যান
+3. **Browse**-এ ক্লিক করুন
+4. **"Notemd"** খুঁজুন
+5. **Install**-এ ক্লিক করুন
+6. **Enable**-এ ক্লিক করুন
+
+**সম্পন্ন!** আপনার বাম সাইডবারে Notemd আইকনটি দেখা যাবে.
+
+## পদ্ধতি ২: ম্যানুয়াল ইনস্টলেশন
+
+### পূর্বশর্ত
+- Obsidian 0.15.0 অথবা তার বেশি
+- Git (ক্লোনিংয়ের জন্য ঐচ্ছিক)
+
+### ধাপসমূহ
+
+1. [GitHub Releases](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/latest) থেকে **ফাইলগুলি ডাউনলোড** করুন:
+   - `main.js`
+   - `styles.css`
+   - `manifest.json`
+
+2. **আপনার ভল্টের প্লাগইন ফোল্ডারটি খুঁজে বের করুন:**
+   ```
+   <your-vault>/.obsidian/plugins/
+   ```
+
+যদি `plugins` ফোল্ডারটি না থাকে, তবে এটি তৈরি করুন.
+
+3. **Notemd ফোল্ডার তৈরি করুন:**
+   ```
+   <your-vault>/.obsidian/plugins/notemd/
+   ```
+
+4. **তিনটি ফাইল** এই `notemd` ফোল্ডারে কপি করুন.
+
+5. **Obsidian পুনরায় লোড করুন:**
+   - `Ctrl/Cmd + R` চাপুন, অথবা
+   - Obsidian পুনরায় শুরু করুন
+
+6. **প্লাগইনটি সক্রিয় করুন:**
+   - Settings → Community plugins
+   - তালিকায় "Notemd" খুঁজে বের করুন
+   - এটিকে চালু করুন
+
+## বিকল্প: BRAT এর মাধ্যমে ইনস্টল করুন
+
+যদি আপনি [BRAT plugin](https://github.com/TfTHacker/obsidian42-brat) ব্যবহার করেন:
+
+1. BRAT এর সেটিংস খুলুন
+2. "বেটা প্লাগইন যোগ করুন"-এ ক্লিক করুন
+3. ইনপুট করুন: `Jacobinwwey/obsidian-NotEMD`
+4. "প্লাগইন যোগ করুন"-এ ক্লিক করুন
+5. কমিউনিটি প্লাগইনগুলিতে Notemd সক্রিয় করুন
+
+## যাচাই
+
+ইনস্টলেশনের পর, Notemd ঠিকমতো কাজ করছে কিনা যাচাই করুন:
+
+1. যেকোনো নোট খুলুন
+2. এডিটরে রাইট-ক্লিক করুন
+3. আপনি Notemd কমান্ডগুলি দেখতে পাবেন যেমন:
+   - "ফাইল প্রক্রিয়াকরণ (লিঙ্ক যোগ করুন)"
+   - "ধারণা বের করুন"
+   - "গবেষণা ও সারসংক্ষেপ তৈরি করুন"
+
+## পরবর্তী ধাপসমূহ
+
+- **LLM প্রদানকারী কনফিগার করুন:** [Quick Start →](./quick-start)
+- **সমস্যা সমাধান:** [Common Issues →](../advanced/troubleshooting)
+
+## সিস্টেমের প্রয়োজনীয়তা
+
+| প্ল্যাটফর্ম | সংস্করণ | অবস্থা |
+|----------|---------|--------|
+| **Obsidian** | 0.15.0+ | প্রয়োজনীয় |
+| **Windows** | 7+ | ✅ সমর্থিত |
+| **macOS** | 10.15+ | ✅ সমর্থিত |
+| **Linux** | যেকোনো | ✅ সমর্থিত |
+| **iOS** | 15+ | ✅ সমর্থিত |
+| **Android** | 5+ | ✅ সমর্থিত |
+
+## অনইনস্টলেশন
+
+Notemd অপসারণ করতে:
+
+1. সেটিংস → কমিউনিটি প্লাগইনস
+2. "Notemd" খুঁজুন
+3. ❌ আইকনে ক্লিক করুন
+4. ঐচ্ছিকভাবে, প্লাগইন ফোল্ডারটি মুছে ফেলুন: `<vault>/.obsidian/plugins/notemd/`
+
+আপনার ডেটা (নোট, কনসেপ্ট নোট ইত্যাদি) অক্ষত থাকবে।
+
+## আপডেট করা
+
+### অটো-আপডেট (সুপারিশকৃত)
+Obsidian স্বয়ংক্রিয়ভাবে প্লাগইন আপডেটের জন্য চেক করে। যখন নতুন সংস্করণ উপলব্ধ থাকে:
+1. সেটিংস → কমিউনিটি প্লাগইনস
+2. "আপডেট চেক করুন"-এ ক্লিক করুন
+3. Notemd-এর পাশে থাকা "আপডেট"-এ ক্লিক করুন
+
+### ম্যানুয়াল আপডেট
+সর্বশেষ রিলিজটি ডাউনলোড করুন এবং আপনার প্লাগইন ফোল্ডারের তিনটি ফাইল প্রতিস্থাপন করুন।
+
+## সাহায্য পাওয়া
+
+- 📖 [কুইক স্টার্ট গাইড](./quick-start)
+- ❓ [FAQ](../faq)
+- 💬 [ডিসকর্ড কমিউনিটি](https://discord.gg/qnGgsQ9W)
+- 🐛 [সমস্যা রিপোর্ট করুন](https://github.com/Jacobinwwey/obsidian-NotEMD/issues)

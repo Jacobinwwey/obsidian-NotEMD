@@ -1,0 +1,189 @@
+---
+id: overview
+title: "Fornitori LLM"
+description: "Configura 36 fornitori LLM — cloud, gateway e local — con selezione del modello per task"
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [LLM providers, API, OpenAI, Anthropic, Google, DeepSeek, Qwen, Ollama, per-task model]
+concepts: [LLM Integration, API Providers, Per-Task Models, OpenAI Compatible, Ollama, China Providers]
+citations:
+  - title: OpenAI API
+    url: https://platform.openai.com
+  - title: Anthropic API
+    url: https://docs.anthropic.com
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# Fornitori LLM
+
+<TLDR>
+**Notemd supporta 36 fornitori LLM su 4 tipi di trasporto.** Tutte le chiamate API utilizzano il formato grezzo HTTP (senza SDK) con riprovazione automatica, fallback di trasporto e caching delle risposte per 5 minuti. La selezione del modello per task permette di utilizzare modelli economici per l’estrazione dei concetti e modelli potenti per la ricerca. Non è necessaria alcuna chiave API per i fornitori locali (Ollama, LMStudio).
+</TLDR>
+
+Questo fa parte della [Obsidian Guida alla gestione delle conoscenze AI](/docs/pillar-ai-knowledge).
+
+## Categorie di fornitore
+
+### Fornitori cloud
+
+| Fornitore | Base predefinita URL | Modello predefinito | Temperature |
+|----------|-----------------|---------------|-------------|
+| **DeepSeek** | `api.deepseek.com` | `deepseek-v4-pro` | 0.5 |
+| **OpenAI** | `api.openai.com/v1` | `gpt-4o` | 0.5 |
+| **Anthropic** | `api.anthropic.com` | `claude-3-5-sonnet-20240620` | 0.5 |
+| **Google** | `generativelanguage.googleapis.com/v1` | `gemini-2.0-flash-exp` | 0.5 |
+| **Mistral** | `api.mistral.ai/v1` | `mistral-large-latest` | 0.5 |
+| **xAI** | `api.x.ai/v1` | `grok-4` | 0.7 |
+| **Cerebras** | `api.cerebras.ai/v1` | `gpt-oss-120b` | 0.5 |
+| **Fireworks** | `api.fireworks.ai/inference/v1` | `kimi-k2p5` | 0.5 |
+| **Nebius** | `api.studio.nebius.com/v1` | `openai/gpt-oss-120b` | 0.3 |
+
+### Fornitori gateway/proxy
+
+| Fornitore | Base predefinita URL | Modello predefinito | Note |
+|----------|-----------------|---------------|-------|
+| **OpenRouter** | `openrouter.ai/api/v1` | `anthropic/claude-3.7-sonnet` | Aggiunge intestazioni `HTTP-Referer` + `X-Title` |
+| **GitHub Models** | `models.github.ai/inference` | `gpt-4o-mini` | Aggiunge intestazione `X-GitHub-Api-Version` |
+| **AIHubMix** | `aihubmix.com/v1` | `gpt-4o-mini` | Aggiunge intestazione `APP-Code` |
+| **PPIO** | `api.ppinfra.com/v3/openai` | `qwen/qwen3-32b` | |
+| **Hugging Face** | `router.huggingface.co/v1` | `openai/gpt-oss-120b` | |
+| **Vercel AI Gateway** | `ai-gateway.vercel.sh/v1` | `anthropic/claude-sonnet-4.5` | |
+| **Requesty** | `router.requesty.ai/v1` | `anthropic/claude-3-7-sonnet-latest` | |
+| **Together** | `api.together.xyz/v1` | `meta-llama/Meta-Llama-3.1-70B-Instruct-Turbo` | |
+| **LiteLLM** | `localhost:4000/v1` | `your-proxy-model` | Chiave opzionale API |
+| **Nuovo API** | `localhost:3000/v1` | `gpt-4.1` | Chiave opzionale API |
+| **OpenAI Compatible** | (configurato dall'utente) | `your-model-id` | Endpoint personalizzato |
+
+### Fornitori Cina
+
+| Fornitore | Base predefinita URL | Modello predefinito | Note |
+|----------|-----------------|---------------|-------|
+| **Qwen** | `dashscope.aliyuncs.com/compatible-mode/v1` | `qwen3-235b-a22b` | Alibaba DashScope |
+| **Qwen Code** | `dashscope.aliyuncs.com/compatible-mode/v1` | `qwen3-coder-plus` | Orientato alla programmazione |
+| **Doubao** | `ark.cn-beijing.volces.com/api/v3` | (richiesto ID endpoint) | ByteDance Volcengine |
+| **Moonshot** | `api.moonshot.cn/v1` | `kimi-k2-0905-preview` | Kimi |
+| **Xiaomi MiMo** | `api.xiaomimimo.com/v1` | `mimo-v2.5-pro` | |
+| **GLM** | `open.bigmodel.cn/api/paas/v4` | `glm-5` | Endpoint di Zhipu, Cina |
+| **Z AI** | `api.z.ai/api/paas/v4` | `glm-5` | Zhipu, endpoint internazionale |
+| **MiniMax** | `api.minimaxi.com/v1` | `MiniMax-M2.7` | |
+| **Baidu Qianfan** | `qianfan.baidubce.com/v2` | `ernie-4.5-turbo-32k` | |
+| **SiliconFlow** | `api.siliconflow.cn/v1` | `Qwen/QwQ-32B` | Piattaforma di hosting per modelli |
+| **Huawei Cloud MaaS** | `api.modelarts-maas.com/v1` | `DeepSeek-V3` | |
+
+**Doubao richiede un ID di endpoint Ark** (formato: `ep-xxxxxxxx-xxxx-xxxx`). Il placeholder predefinito deve essere sostituito.
+
+### Fornitori locali
+
+| Fornitore | Base predefinita URL | Modello predefinito | Note |
+|----------|-----------------|---------------|-------|
+| **Ollama** | `localhost:11434/api` | `llama3` | Nessuna chiave API. Streaming NDJSON. Scoperta dei modelli tramite `/api/tags` |
+| **LMStudio** | `localhost:1234/v1` | `local-model` | Invia `"EMPTY"` come token di autenticazione. Scoperta compatibile con OpenAI |
+| **OVMS** | `localhost:8000/v3` | `openvino-model` | OpenVINO Model Server |
+| **Azure OpenAI** | (configurato dall'utente) | `gpt-4o` | Nome della distribuzione in URL. Intestazione `api-key` |
+
+## Selezione del modello per attività
+
+Notemd supporta fornitori e modelli indipendenti per ogni task. Abilitare con `useMultiModelSettings: true`.
+
+### Task disponibili
+
+| Compito | Chiave delle Impostazioni | Fornitore Predefinito |
+|------|-------------|-----------------|
+| Aggiungere Link (inserimento di link wiki) | `addLinksProvider` / `addLinksModel` | DeepSeek |
+| Ricerca (ricerca web + riassunto) | `researchProvider` / `researchModel` | DeepSeek |
+| Generare dal Titolo | `generateTitleProvider` / `generateTitleModel` | DeepSeek |
+| Traduzione | `translateProvider` / `translateModel` | DeepSeek |
+| Generazione di Diagrammi | `summarizeToMermaidProvider` / `Model` | DeepSeek |
+| Estrazione dei Concetti | `extractConceptsProvider` / `Model` | DeepSeek |
+| Estrazione del Testo Originale | `extractOriginalTextProvider` / `Model` | DeepSeek |
+
+### Ordine di Risoluzione
+
+1. Se `useMultiModelSettings` è attivo → utilizzare il fornitore e il modello specifici per il compito
+2. Se l’override del modello del compito è vuoto → tornare al modello predefinito del fornitore
+3. Se il fornitore del compito è invalido → tornare al `activeProvider` globale
+4. Se `useMultiModelSettings` è disattivato → tutti i task utilizzano il globale `activeProvider`
+
+### Configurazioni consigliate
+
+```
+# Researcher: power for research, cheap for everything else
+activeProvider: DeepSeek
+extractConceptsProvider: DeepSeek
+researchProvider: OpenAI        # GPT-4o for better research quality
+summarizeToMermaidProvider: DeepSeek
+
+# Privacy-first: local only
+activeProvider: Ollama
+addLinksProvider: Ollama
+extractConceptsProvider: Ollama
+
+# Budget bilingual
+activeProvider: DeepSeek
+translateProvider: Google      # Gemini Flash for translation
+researchProvider: SiliconFlow  # Cheaper China-based routing
+```
+
+## Architettura di chiamata di API
+
+### Strati di trasporto
+
+1. **Obsidian `requestUrl`** — primario (integrato, funziona su tutte le piattaforme)
+2. **Desktop HTTP** — moduli Node.js `http`/`https` (streaming + richieste lunghe)
+3. **Web `fetch`** — soluzione di fallback quando i moduli Node.js non sono disponibili
+
+Il plugin passa automaticamente da un trasporto all’altro in caso di errori temporanei di rete.
+
+### Logica di ripetizione
+
+- **Modalità normale** (`enableStableApiCall: false`): Un’unica tentativa. In caso di fallimento temporaneo, si passa automaticamente a una ripetizione stabile.
+- **Modalità di ripetizione stabile** (`enableStableApiCall: true`): Fino a 4 tentativi (1 + 3 ripetizioni) con intervalli di 5 secondi.
+- **Errori temporanei che attivano la ripetizione**: `err_connection_closed`, `err_connection_reset`, `err_timed_out`, `econnreset`, `econnaborted`, `etimedout`, `socket hang up`, `network request failed`
+- **Non ripetibili**: HTTP 400, 401, 403, 404
+
+### Caching delle risposte
+
+Cache in memoria LRU da 5 minuti, chiaviata da provider + modello + temperatura + prompt + contenuto. Le richieste identiche successive entro 5 minuti restituiscono immediatamente i risultati memorizzati.
+
+### Gestione del modello di ragionamento
+
+I modelli che non supportano il ruolo `system` (DeepSeek R1, OpenAI o1/o3/o4/gpt-5) combinano automaticamente le istanze di sistema e utente in un unico messaggio utente.
+
+Specifico per DeepSeek: `thinkingEnabled` aggiunge `{ thinking: { type: 'enabled' } }` alla richiesta. `reasoningEffort` (basso/medio/alto) viene passato come `reasoning_effort`. Verifica che i token massimi di output siano ≥ 8000 quando è attiva la funzione di riflessione.
+
+### Stima dei token
+
+`estimateTokens(text)`: `Math.ceil(text.length / 4)` — euristica di 4 caratteri per token. Utilizzata per applicare la regola `maxResearchContentTokens` prima dell’invio a LLM.
+
+Non è implementato il tracciamento dei costi.
+
+## Scoperta dei modelli
+
+| Modalità | Fornitori | Endpoint |
+|------|-----------|----------|
+| `ollama-tags` | Ollama | `/api/tags` |
+| `google-models` | Google | Elenco modelli API |
+| `anthropic-models` | Anthropic | Elenco modelli API |
+| `openai-compatible-models` | DeepSeek, Qwen, Mistral, ecc. | `/v1/models` |
+| `openrouter-models` | OpenRouter | Elenco modelli API |
+| `github-models` | GitHub Models | Inferenza API |
+| `none` | Azure OpenAI | Disattivato (richiede nome di deployment) |
+
+## Avvio rapido
+
+1. **Scegli un fornitore** — DeepSeek (Cina), OpenAI (Internazionale) o Ollama (Locale/Gratuito)
+2. **Inserisci la chiave API** — Impostazioni → Notemd → Fornitore → Chiave API
+3. **Testa la connessione** — Clicca sul pulsante di test
+4. **Opzionale: modelli per task** — Abilita `useMultiModelSettings` e configurali individualmente
+
+Per Ollama: non è necessaria alcuna chiave API. Assicurati solo che `ollama serve` sia in esecuzione.
+
+---
+
+## Prossimi passi
+
+- 📝 [Note concettuali](/docs/features/concept-notes) — Utilizza il modello di estrazione per task
+- 🎨 [Diagrammi](/docs/features/diagrams) — Utilizza il modello di diagramma per task
+- 🔍 [Ricerca](/docs/features/research) — Utilizza il modello specifico per la ricerca
+- ⚙️ [Configurazione](/docs/getting-started/configuration) — Riferimento completo alle impostazioni

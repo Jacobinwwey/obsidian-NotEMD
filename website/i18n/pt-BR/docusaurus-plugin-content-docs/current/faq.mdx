@@ -1,0 +1,359 @@
+---
+id: faq
+title: "Perguntas Frequentes"
+description: "Perguntas comuns sobre a instalação, funcionalidades e uso do Notemd"
+keywords: [faq, installation, LLM providers, obsidian plugin, wiki-links, concept notes, Copilot alternative, Smart Connections alternative, obsidian AI plugin comparison]
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+concepts: [Notemd, Obsidian, LLM, wiki-links, concept notes, knowledge base, Copilot Alternative, AI Plugin Comparison]
+citations:
+  - title: Obsidian
+    url: https://obsidian.md
+  - title: Ollama
+    url: https://ollama.com
+faqItems:
+  - question: How do I install Notemd in Obsidian?
+    answer: Open Obsidian Settings, go to Community Plugins, Browse, search Notemd, Install, and Enable. Requires Obsidian 0.15.0 or later. Manual installation is also available via GitHub Releases.
+  - question: What LLM providers does Notemd support?
+    answer: Notemd supports 30+ providers including OpenAI, Anthropic, Google, xAI, Mistral, DeepSeek, Qwen, Ollama, LM Studio, Azure OpenAI, OpenRouter, and many China-focused providers like Qwen, Doubao, Moonshot, and GLM.
+  - question: Can Notemd work with local LLMs?
+    answer: Yes. Notemd works with Ollama, LM Studio, vLLM, LocalAI, and any OpenAI-compatible endpoint. All tasks work with local models including linking, concept generation, translation, research, and diagram generation.
+  - question: How does Notemd differ from ChatGPT?
+    answer: ChatGPT produces ephemeral chat answers. Notemd writes persistent structured results directly into your Obsidian vault as wiki-linked files, concept notes, diagrams, and translations that accumulate into a knowledge base.
+  - question: How does Notemd compare to Copilot or Smart Connections?
+    answer: Copilot is conversation-first for chatting about notes. Smart Connections is discovery-first for finding similar notes. Notemd is write-first, processing notes with AI and writing structured results into your vault. All three complement each other.
+  - question: Which search services work with Notemd research?
+    answer: Tavily (recommended, AI-optimized search, requires API key) and DuckDuckGo (experimental, no API key needed). Research results are summarized by LLM and appended to your note with source citations.
+  - question: Does Notemd support Chinese or other languages?
+    answer: The UI supports 21+ languages. Task output language is independently configurable, allowing mixed setups like Chinese UI with English output or vice versa.
+  - question: Can I use Notemd for paper or PDF reading?
+    answer: Yes. Convert PDF to Markdown using MinerU, open in Obsidian, then run Notemd tasks to add wiki-links, generate concept notes, extract text, research background, translate sections, and create Mermaid diagrams.
+  - question: What diagram types can Notemd generate?
+    answer: Mermaid (flowchart, sequence, class, state, ER, Gantt with syntax auto-fix), JSON Canvas (Obsidian native), Vega-Lite (data charts), HTML fallback, and explicit editable HTML/SVG figure artifacts. Draw.io XML and Drawnix JSON exporter boundaries are available for deterministic artifact testing.
+  - question: Is Notemd free and open source?
+    answer: Yes. MIT licensed, no paid tiers, no cloud lock-in, no telemetry. Source code on GitHub with 234+ stars. Pull requests welcome.
+  - question: Can Notemd work 100% offline?
+    answer: Yes with Ollama. No API key, no internet needed. All features work offline including wiki-links, concept notes, translation, and diagrams. DuckDuckGo research also works without an API key.
+  - question: Is my data sent to the cloud?
+    answer: With Ollama or LM Studio, no data leaves your machine. With cloud providers like OpenAI or Anthropic, your note content is sent as API input. Notemd itself collects no telemetry or user data.
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# Perguntas Frequentes
+
+<TLDR>
+**Respostas rápidas para as perguntas mais comuns sobre o Notemd.** Aborda instalação (configuração em 5 minutos), suporte a mais de 30 provedores LLM, opções de modelo local/nuvem, fluxos de trabalho com um clique, UI multilíngue (21 idiomas), automação de links para wiki, integração com pesquisas, fluxos de leitura PDF, geração de diagramas e licenciamento de código aberto. Todas as funcionalidades funcionam off-line com Ollama.
+</TLDR>
+
+---
+
+## Instalação e Configuração
+
+### Como instalar o Notemd no Obsidian?
+
+Abra o Obsidian **Configurações → Plugins da Comunidade → Navegar** → pesquise por **"Notemd"** → **Instalar** → **Ativar**.
+
+**Requisitos:**
+- Obsidian 0.15.0+
+- Compatível com Desktop (Windows, macOS, Linux) e Mobile (iOS, Android)
+
+**Instalação manual:**
+1. Baixe o `main.js`, o `styles.css` e o `manifest.json` em [GitHub Releases](https://github.com/Jacobinwwey/obsidian-NotEMD/releases)
+2. Coloque-os dentro do `<your-vault>/.obsidian/plugins/notemd/`
+3. Recarregue o Obsidian e ative o plugin
+
+**Estatísticas:** mais de 4 mil downloads, 44 versões lançadas, licenciado sob MIT.
+
+---
+
+## Configuração do LLM
+
+### Qual é LLM os provedores que Notemd suporta?
+
+Notemd suporta **mais de 30 provedores**:
+
+**Provedores em nuvem:**
+- OpenAI (GPT-4, GPT-4o, GPT-4o-mini, o1, o3)
+- Anthropic (Claude Opus, Sonnet, Haiku)
+- Google (Gemini Pro, Flash, Ultra)
+- xAI (Grok)
+- Mistral, DeepSeek, Qwen, Moonshot, GLM
+
+**Focados na China:**
+- Qwen, Qwen Code, Doubao, Moonshot, Xiaomi MiMo, GLM, Z AI, MiniMax
+- Huawei Cloud MaaS, Baidu Qianfan, SiliconFlow
+
+**Locais/auto-hospedados:**
+- Ollama
+- LM Studio
+- Qualquer endpoint compatível com OpenAI
+
+**Gateways:**
+- Azure OpenAI, OpenRouter, Together AI, Groq, AIHubMix
+- GitHub Models, Fireworks, LiteLLM, Nebius, Cerebras
+- Hugging Face, Vercel AI Gateway, Requesty
+
+### O Notemd pode funcionar com LLMs locais?
+
+**Sim, totalmente suportado.** O Notemd funciona com:
+- **Ollama** (integração nativa)
+- **LM Studio** (por meio de endpoint compatível com OpenAI)
+- **vLLM, LocalAI, text-generation-webui** (em modo compatível com OpenAI)
+
+Todas as tarefas funcionam com modelos locais: vinculação, geração de conceitos, tradução, pesquisa e geração de diagramas.
+
+**Exemplo de combinação:**
+- Ollama (local) para vinculação → rápido, privado, sem custo
+- OpenAI para pesquisa → alta qualidade, integração com busca na web
+- Gemini para tradução → suporte multimodal
+
+### Como configurar modelos diferentes para tarefas distintas?
+
+Em **Configurações do Notemd**, cada tarefa tem seletores independentes de provedor/modelo:
+
+| Tarefa | Exemplo de configuração |
+|------|----------------------|
+| **Vinculação** | DeepSeek (rápido, barato) |
+| **Geração de Conceitos** | Claude Opus (alta qualidade) |
+| **Pesquisa** | Perplexity ou GPT-4o (baseado na web) |
+| **Tradução** | Gemini Flash (multimodal) |
+| **Geração de Diagramas** | Ollama (local, privado) |
+
+Essa otimização por tarefa equilibra velocidade, custo e qualidade.
+
+---
+
+## Recursos Básicos
+
+### Como Notemd difere de ChatGPT na leitura de artigos?
+
+| Dimensão | ChatGPT | Notemd |
+|-----------|---------|--------|
+| **Local de saída** | Histórico de conversas (efêmero) | Obsidian vault (arquivos persistentes) |
+| **Formato do resultado** | Resposta de texto | Links da wiki, notas conceituais, diagramas, traduções |
+| **Valor a longo prazo** | Desaparece após a sessão | Acumula em uma base de conhecimento |
+| **Reutilizabilidade** | É necessário fazer nova consulta | Os arquivos permanecem, o link evolui |
+
+**Use ChatGPT para:** Perguntas e respostas rápidas, explicações únicas
+**Use Notemd para:** Criar uma base de conhecimento persistente e estruturada ao longo de semanas/meses
+
+### Como Notemd adiciona links da wiki às notas?
+
+**Processo:**
+1. Você executa "Processar arquivo (adicionar links)" em uma nota
+2. Notemd envia o texto para o LLM configurado por você
+3. O LLM identifica conceitos-chave no contexto
+4. Notemd insere `[[wiki-links]]` em cada ocorrência do conceito
+5. Opcionalmente, ele cria automaticamente notas de conceito em uma pasta que você especificar
+
+**Recursos:**
+- Supressão de sinônimos (evita duplicatas como "transformer" vs "transformers")
+- Backlinks das notas de conceito para a fonte
+- Integridade dos links ao renomear/excluir
+- Modo de extração pura (extrai conceitos sem modificar o original)
+
+### O que é o fluxo de trabalho de um clique do Notemd?
+
+**Fluxos de trabalho de um clique** conectam várias ações em um **único botão na barra lateral**.
+
+**Fluxo de trabalho padrão:** `One-Click Extract`
+```
+process-current-add-links > extract-concepts-current > research-and-summarize > summarize-as-mermaid
+```
+
+**Resultado:** Um clique executa:
+1. Adicionar links wiki à nota atual
+2. Gerar notas de conceito para novos termos
+3. Pesquisar e acrescentar contexto
+4. Comprimir em um diagrama Mermaid
+
+**Fluxos de trabalho personalizados:** Defina os seus próprios fluxos nas Configurações usando o formato DSL. Cada fluxo se torna um botão reutilizável na barra lateral.
+
+### Como Notemd se compara com Copilot ou Smart Connections?
+
+Esses plugins resolvem problemas diferentes:
+
+- **Copilot** — Foco em conversação. Você conversa com uma IA sobre suas anotações. As respostas da IA ficam no painel de chat; elas não modificam seu vault.
+- **Smart Connections** — Foco em descoberta. Ele encontra anotações semanticamente semelhantes usando embeddings. Ele não cria nem modifica conteúdo.
+- **Notemd** — Foco em escrita. A IA processa suas anotações e gera resultados estruturados (links de wiki, notas conceituais, pesquisas, diagramas, traduções) diretamente em seu vault como arquivos persistentes.
+
+| O que você precisa | Plugin recomendado |
+|----------------|-------------------|
+| Conversar com IA sobre anotações | Copilot |
+| Encontrar anotações semelhantes ou relacionadas | Smart Connections |
+| Inserir automaticamente links de wiki e criar um grafo de conhecimento | **Notemd** |
+| Gerar notas conceituais com backlinks | **Notemd** |
+| Criar diagramas a partir do conteúdo das anotações | **Notemd** |
+| Pesquisar um tópico e adicionar resumos | **Notemd** |
+
+Todos os três podem ser usados juntos — eles se complementam em vez de competir.
+
+---
+
+## Pesquisa e Tradução
+
+### Quais serviços de busca funcionam com a pesquisa Notemd?
+
+| Serviço | É necessário o API Key | Qualidade | Observações |
+|---------|-----------------|---------|-------|
+| **Tavily** | Sim | Alta | Busca recomendada, otimizada por IA |
+| **DuckDuckGo** | Não | Experimental | Sem configuração, qualidade inferior |
+
+**Como funciona "Pesquisar e resumir":**
+1. Você seleciona um tópico ou executa a operação na nota atual
+2. Notemd consulta o serviço de busca
+3. Resultados → resumo por LLM
+4. O resumo é anexado à sua nota com citações das fontes
+
+**Resultado:** Rastro de pesquisa persistente no seu vault, não em abas do navegador.
+
+### O Notemd suporta chinês ou outros idiomas?
+
+**Idiomas do UI:** mais de 21 suportados
+- Inglês, 中文 (简体), 中文 (繁體), 日本語, 한국어
+- Árabe, Alemão, Francês, Espanhol, Russo, Português, Italiano
+- Hindi, Bengali, Tailandês, Vietnamita, Turco, Polonês, Tcheco e mais
+
+**Idioma de saída da tarefa:** Configuração independente
+- UI em chinês + saída em inglês: ✅
+- UI em inglês + saída em chinês: ✅
+
+**Caso de uso:** Pesquisadores bilíngues podem manter o UI no idioma nativo enquanto geram notas em inglês para publicação.
+
+---
+
+## PDF e fluxos de trabalho acadêmicos
+
+### Posso usar Notemd para leitura de artigos/PDF?
+
+**Sim.** Fluxo de trabalho:
+1. **Converter PDF em Markdown** usando [MinerU](https://github.com/opendatalab/MinerU) (recomendado para artigos acadêmicos)
+2. Abrir o arquivo Markdown no Obsidian
+3. Executar tarefas do Notemd:
+   - **Adicionar links wiki** aos termos-chave
+   - **Gerar notas conceituais** para terminologia desconhecida
+   - **Extrair texto original** por meio de perguntas personalizadas (por exemplo, "Quais são as limitações?")
+   - **Pesquisar o contexto** dos métodos/datasets citados
+   - **Traduzir** seções difíceis
+   - **Comprimir para diagrama Mermaid** a fim de facilitar a compreensão estrutural
+
+**Versão 1.9.1+:** Extração da estrutura do capítulo com suporte a TOC
+
+**Resultado:** A leitura do seu artigo se torna um artefato de conhecimento estruturado e linkável em seu vault.
+
+---
+
+## Diagramas e visualização
+
+### Quais tipos de gráficos/diagramas o Notemd pode gerar?
+
+| Tipo | Suporte | Recursos |
+|------|---------|----------|
+| **Mermaid** | Completo | Diagrama de fluxo, sequência, classe, estado, ER, Gantt, correção automática de sintaxe, validação em lote |
+| **JSON Canvas** | Completo | Layouts nativos do Obsidian |
+| **Vega-Lite** | Completo | Gráficos de dados, séries temporais, barras, dispersão, personalizáveis |
+| **HTML** | Alternativa | Para tipos de diagrama não suportados |
+| **Editável HTML/SVG** | Alvo explícito | Inline autônomo SVG com anotações no estilo Draw.io semântico |
+| **Artefatos Draw.io / Drawnix** | Limite de exportação | XML/JSON determinístico a partir de `SemanticFigureModel`; sem dependência de tempo de execução do editor |
+
+**Correção automática Mermaid:** Modo de depuração avançado para reparos:
+- Setas quebradas (`-->`, `-.->`, `==>`)
+- Rótulos e comentários inválidos
+- Erros de sintaxe de subgráfico
+- Notação de forma (`[`, `(`, `{`, `((`)
+- Caracteres de pipe em rótulos
+- Anexos de nota
+
+**Fluxo de trabalho:**
+1. Execute "Resumir como diagrama Mermaid" em uma nota
+2. Pré-visualizar em modal
+3. Exportar como SVG ou PNG
+4. Ou salve como arquivo `.mmd` no vault
+
+---
+
+## Código Aberto e Comunidade
+
+### O Notemd é gratuito e de código aberto?
+
+**Sim.**
+- **Licença:** MIT (permissiva, uso comercial permitido)
+- **Código-fonte:** https://github.com/Jacobinwwey/obsidian-NotEMD
+- **Sem planos pagos, sem dependência de nuvem, sem telemetria**
+- **Comunidade:** 234+ estrelas no GitHub, Discord ativo
+
+**Você possui:**
+- Seus dados (ficam no seu vault)
+- Seus fluxos de trabalho (personalize prompts, modelos, chains)
+- Sua privacidade (suporte local LLM)
+
+**Contribuir:** Solicitações de pull request são bem-vindas. Veja [CONTRIBUTING.md](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/CONTRIBUTING.md)
+
+---
+
+## Solução de problemas
+
+### Minhas chamadas LLM estão falhando. O que devo verificar?
+
+1. **A chave API está válida?** Verifique Configurações → Configuração do Fornecedor
+2. **O nome do modelo está correto?** Use o botão "获取模型列表" (Obter Lista de Modelos) nas configurações
+3. **A rede está acessível?** Alguns provedores exigem VPN
+4. **Limites de taxa?** Verifique o painel do provedor
+5. **Diagnóstico:** Execute "Teste de Conexão" nas configurações para obter logs de erro detalhados
+
+### Notemd está lento. Como posso acelerá‑lo?
+
+1. **Use modelos mais rápidos:** DeepSeek, Gemini Flash, GPT-4o-mini
+2. **Reduza o tamanho dos blocos:** Configurações → Smart Chunking → diminua a contagem de palavras
+3. **Processamento paralelo:** Configurações → Processamento em Lote → aumente a concorrência
+4. **Modelos locais:** Ollama para tarefas que não precisam de busca na web
+
+### O Notemd pode funcionar 100% off‑line?
+
+**Sim, com Ollama.** Sem chave API, sem internet, nenhum dado sai da sua máquina:
+
+1. Instale [Ollama](https://ollama.com) e execute `ollama serve`
+2. Nas configurações do Notemd, selecione **Ollama** como seu provedor
+3. Baixe um modelo: `ollama pull llama3` (ou qwen2.5, gemma2, etc.)
+4. Todos os recursos funcionam: links da wiki, notas conceituais, tradução, diagramas
+
+**Pesquisa DuckDuckGo** também funciona sem chave API (qualidade experimental).
+
+Com provedores em nuvem (OpenAI, Anthropic, Google, DeepSeek, etc.), o conteúdo da sua nota é enviado como entrada API. Verifique a política de privacidade de cada provedor para detalhes sobre o tratamento de dados.
+
+### Meus dados são enviados para a nuvem?
+
+**Depende do seu provedor:**
+
+| Tipo de provedor | Dados enviados para a nuvem? | Observações |
+|--------------|---------------------|-------|
+| **Ollama (local)** | Não | Tudo fica no seu computador |
+| **LMStudio (local)** | Não | Idêntico ao Ollama |
+| **DeepSeek, OpenAI, etc.** | Sim | O conteúdo da observação é enviado como entrada API para processamento |
+| **OpenRouter, AIHubMix** | Sim | Gateway que roteia para provedores de nuvem |
+
+O Notemd em si não coleta **nenhuma telemetria, nenhuma análise, nenhum dado do usuário**. O plugin é totalmente de código aberto (MIT). Os únicos dados que saem da sua máquina são aqueles que você envia explicitamente para o provedor LLM configurado.
+
+### Qual plugin de IA do Obsidian é o melhor para pesquisa?
+
+Depende do seu fluxo de trabalho de pesquisa:
+
+| Necessário | Plugin | Por quê |
+|------|--------|-----|
+| Encontrar artigos/notas relacionadas | Smart Connections | Descoberta de similaridade semântica |
+| Conversar sobre suas fontes | Copilot | Conversa com contexto do vault |
+| Vincular conceitos automaticamente + gerar notas | **Notemd** | A IA identifica conceitos, insere links e cria notas |
+| Pesquisa na web + resumo em notas | **Notemd** | Tavily/DuckDuckGo busca → LLM resumo → anexado à nota |
+| Gerar diagramas a partir da pesquisa | **Notemd** | Mermaid/Canvas/Vega-Lite a partir do conteúdo da nota |
+
+**Combinação recomendada:** Smart Connections (descoberta) + Notemd (estruturação) + Copilot (discussão).
+
+---
+
+## Obter ajuda
+
+- **Documentação:** https://jacobinwwey.github.io/obsidian-NotEMD/
+- **Problemas no GitHub:** https://github.com/Jacobinwwey/obsidian-NotEMD/issues
+- **Discord:** https://discord.gg/qnGgsQ9W
+- **Patrocinador:** https://github.com/sponsors/Jacobinwwey

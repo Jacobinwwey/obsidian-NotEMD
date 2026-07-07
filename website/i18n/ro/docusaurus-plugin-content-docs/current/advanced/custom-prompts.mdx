@@ -1,0 +1,134 @@
+---
+id: custom-prompts
+title: "Prompturi personalizate"
+description: "Personalizați prompturile LLM în funcție de nevoile dumneavoastră"
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [custom prompts, prompts, focused learning, domain]
+concepts: [Custom Prompts, Focused Learning, Prompt Engineering]
+citations:
+  - title: Obsidian
+    url: https://obsidian.md
+  - title: LLM Prompt Engineering
+    url: https://platform.openai.com/docs/guides/prompt-engineering
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# Prompturi personalizate
+
+<TLDR>
+**Notemd vă permite să înlocuiți promptul implicit LLM pentru fiecare tip de sarcină.** Prompturile personalizate vă oferă control asupra ceea ce priorizează modelul: puteți limita extracția conceptelor la o anumită disciplină, modifica stilul de legare sau redirecționa tonul traducerii. Variabilele de prompt precum `{{content}}` și `{{concept}}` sunt înlocuite în timpul execuției. Funcția de domeniu de învățare concentrată adaugă înaintea textului domeniul dumneavoastră de studiu pentru a limita automat rezultatele extracției.
+
+Acesta face parte din [Obsidian Ghidul de gestionare a cunoștințelor AI](/docs/pillar-ai-knowledge).
+</TLDR>
+
+## Prezentare generală
+
+Prompturile integrate ale Notemd sunt scrise pentru lucrări cu cunoștințe generale. Ele funcționează bine în diferite domenii, dar lase și spațiu pentru îmbunătățiri specifice domenului. Prompturile personalizate vă permit să spuneți LLM exact cum să se comporte pentru cazul dumneavoastră – fie că este vorba de extracția doar a terminologiei medicale, legarea doar a entităților denumite sau traducerea într-un registru formal.
+
+Prompturile personalizate nu înlocuiesc întregul prompt sistem. Ele înlocuiesc sau completă **partea de instrucțiuni specifice sarcinii**, păstrând în același timp formatul structural al rezultatului (de exemplu, linii `CONCEPT:`, sintaxa linkurilor wiki) de care depinde Notemd pentru analiză.
+
+## Cum funcționează
+
+### Arhitectura promptului
+
+Fiecare sarcină Notemd urmează aceeași structură de prompt:
+
+```
+[System role: You are a helpful assistant...]
+[Domain constraint: Relevant Fields: [{domain}]]   <-- focused learning (optional)
+[Custom task prompt]                                <-- your override (optional)
+[Output format instructions]                        <-- always preserved
+[Content: {{content}}]                              <-- runtime substitution
+```
+
+1. **Promptul sistem de bază** -- Stabilizează personalitatea asistentului. Nu poate fi înlocuit.
+2. **Domeniul de învățare concentrată** -- Adaugă înaintea textului `Relevant Fields: [medicine / law / computer science / ...]` pentru a limita domeniul. Acesta este un comutator de setări, nu un prompt brut.
+3. **Promptul personalizat pentru sarcină** -- Înlocuiește instrucțiunile implicite pentru sarcină (de exemplu, ce tipuri de concepte să se extragă, cât de intensiv să se facă legările).
+4. **Formatul de ieșire** -- Reguli structurale (linii `CONCEPT:`, format wiki-link). Este adăugat întotdeauna de Notemd pentru a asigura analizabilitatea.
+5. **Conținutul** -- Textul real al notei, înlocuit în timpul execuției prin `{{content}}`.
+
+### Variabilele de prompt
+
+Variabilele sunt înlocuite la momentul execuției. Variabilele disponibile diferă în funcție de sarcină:
+
+| Variable | Lucrări | Înlocuit cu |
+|----------|-------|---------------|
+| `{{content}}` | Toate | Textul notei sau al selecției |
+| `{{concept}}` | Șablon de nota conceptuală | Numele conceptului extras |
+| `{{description}}` | Șablon de nota conceptuală | Descrierea conceptului generată de LLM |
+| `{{backlinks}}` | Șablon de nota conceptuală | Listă de note sursă cu linkuri |
+| `{{date}}` | Șablon de nota conceptuală | Data curentă (YYYY-MM-DD) |
+| `{{language}}` | Traducere | Limbajul țintă pentru output |
+| `{{source}}` | Șablon de nota conceptuală | Numele bazal al notei sursă |
+
+### Domeniul de învățare concentrat
+
+Funcția de învățare concentrată reprezintă o scorțișoară pentru delimitarea domeniului. În loc să scrieți un prompt personal care menționează domeniul dumneavoastră, setați `focusedLearningDomain` în setările:
+
+```
+Settings → Advanced → Focused Learning Domain
+Example: "medicine" or "computer science" or "Chinese philosophy"
+```
+
+Acest lucru adaugă `Relevant Fields: [medicine]` la începutul promptului de extracție, făcând ca LLM să priorizeze conceptele relevante pentru domeniu și să suprimă cele generice. Este mai ușor decât un prompt personal complet și funcționează în toate sarcinile de extracție.
+
+## Configurație
+
+| Setare | Implicit | Efect |
+|---------|---------|--------|
+| `customAddLinksPrompt` | `''` | Suprascrieți promptul implicit al sarcinii de adăugare a legăturilor |
+| `customExtractConceptsPrompt` | `''` | Suprascrieți promptul implicit al extracției de concepte |
+| `customResearchPrompt` | `''` | Suprascrieți promptul implicit de cercetare + rezumat |
+| `customTranslatePrompt` | `''` | Suprascrieți promptul implicit de traducere |
+| `customDiagramPrompt` | `''` | Suprascrieți promptul implicit de generare a diagramelor |
+| `focusedLearningDomain` | `''` | Adăugați contextul disciplinar la prompturile de extracție și de legături |
+| `extractConceptsMinimalTemplate` | `true` | Folosiți șablonul de notă de concept doar cu titlu (afectează domeniul șablonului `{{concept}}`) |
+| `customConceptNoteTemplate` | `''` | Suprascrieți șablonul de fișier de notă de concept cu suport complet pentru variabile |
+
+**Când câmpul de prompt personal este gol, se folosește promptul implicit integrat.**
+
+## Exemplu
+
+Sunteți un cercetător medical care extrage concepte din notele de studii clinice. Promptul implicit extrage nume generici alături de termeni medicali, ceea ce încurcă folderul dumneavoastră de concepte.
+
+**Soluție:** Setați un domeniu de învățare concentrat și un prompt personal de extracție.
+
+1. Setați `focusedLearningDomain` la `medicine`
+2. Setați `customExtractConceptsPrompt` la:
+
+```
+Extract only clinically relevant concepts: diseases, drug names,
+anatomical terms, measurement endpoints, and statistical methods.
+Ignore generic English nouns, brand names, and institutional names.
+Prioritize MeSH terminology where applicable.
+```
+
+Acum, atunci când rulați „Extract concepts” pe o notă clinică, LLM generează:
+
+```
+CONCEPT: Randomized Controlled Trial
+CONCEPT: Double-Blind Method
+CONCEPT: Myocardial Infarction
+CONCEPT: Creatine Kinase-MB
+CONCEPT: Kaplan-Meier Estimate
+```
+
+În loc de comportamentul implicit care ar putea extrage și termeni generei nedorite precum „hospital” sau „month”.
+
+## Sfaturi
+
+- **Începeți cu domeniul de învățare specificat** înainte de a scrie un prompt personalizat complet. Acest lucru acoperă 80% dintre cazuri de utilizare cu o singură setare.
+- **Păstrați formatul de ieșire** – Nu eliminați niciodată instrucțiunile de format precum „una pe linie” sau „CONCEPT: prefix” din prompturile personalizate. Parser-ul Notemd depinde de ele.
+- **Testați mai întâi cu o singură notă** – Prompturile personalizate pot avea efecte neașteptate asupra amploarei extracției. Verificați pe o singură notă înainte de procesare în lot.
+- **Păstrați prompturile concise** – Prompturile personalizate prea lungi consumă tokeni și pot dilua concentrarea modelului.
+
+---
+
+## Următoarele pași
+
+- [Wiki-Links](/docs/features/wiki-links) – Ce este linkat atunci când personalizați promptul add-links
+- [Concept Notes](/docs/features/concept-notes) – Șabloane de note conceptuale și variabila `{{concept}}`
+- [Batch Processing](/docs/advanced/batch-processing) – Aplicați prompturile personalizate pe întregi foldere
+- [Troubleshooting](/docs/advanced/troubleshooting) – Rezolvați problemele în care prompturile personalizate generează ieșiri neașteptate

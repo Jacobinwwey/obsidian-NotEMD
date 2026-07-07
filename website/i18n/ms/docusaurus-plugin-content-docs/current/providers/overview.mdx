@@ -1,0 +1,189 @@
+---
+id: overview
+title: "Penyedia LLM"
+description: "Konfigurasikan 36 penyedia LLM — awan, pintu gerbang, dan tempatan — dengan pemilihan model mengikut tugas"
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [LLM providers, API, OpenAI, Anthropic, Google, DeepSeek, Qwen, Ollama, per-task model]
+concepts: [LLM Integration, API Providers, Per-Task Models, OpenAI Compatible, Ollama, China Providers]
+citations:
+  - title: OpenAI API
+    url: https://platform.openai.com
+  - title: Anthropic API
+    url: https://docs.anthropic.com
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# Penyedia LLM
+
+<TLDR>
+**Notemd menyokong 36 penyedia LLM merentasi 4 jenis pengangkutan.** Semua panggilan API menggunakan HTTP mentah (tanpa SDK) dengan percubaan semula automatik, alternatif pengangkutan, dan pengecapan respons selama 5 minit. Pemilihan model mengikut tugas membolehkan anda menggunakan model murah untuk pengekstrakan konsep dan model berkuasa untuk penyelidikan. Tiada kunci API diperlukan untuk penyedia tempatan (Ollama, LMStudio).
+</TLDR>
+
+Ini merupakan sebahagian daripada [Obsidian Panduan Pengurusan Pengetahuan AI](/docs/pillar-ai-knowledge).
+
+## Kategori Penyedia
+
+### Penyedia Awan
+
+| Penyedia | Asas URL lalai | Model Lalai | Suhu |
+|----------|-----------------|---------------|-------------|
+| **DeepSeek** | `api.deepseek.com` | `deepseek-v4-pro` | 0.5 |
+| **OpenAI** | `api.openai.com/v1` | `gpt-4o` | 0.5 |
+| **Anthropic** | `api.anthropic.com` | `claude-3-5-sonnet-20240620` | 0.5 |
+| **Google** | `generativelanguage.googleapis.com/v1` | `gemini-2.0-flash-exp` | 0.5 |
+| **Mistral** | `api.mistral.ai/v1` | `mistral-large-latest` | 0.5 |
+| **xAI** | `api.x.ai/v1` | `grok-4` | 0.7 |
+| **Cerebras** | `api.cerebras.ai/v1` | `gpt-oss-120b` | 0.5 |
+| **Fireworks** | `api.fireworks.ai/inference/v1` | `kimi-k2p5` | 0.5 |
+| **Nebius** | `api.studio.nebius.com/v1` | `openai/gpt-oss-120b` | 0.3 |
+
+### Penyedia Pintu Gerbang / Proksi
+
+| Penyedia | Asas URL lalai | Model Lalai | Nota |
+|----------|-----------------|---------------|-------|
+| **OpenRouter** | `openrouter.ai/api/v1` | `anthropic/claude-3.7-sonnet` | Menambah header `HTTP-Referer` + `X-Title` |
+| **GitHub Models** | `models.github.ai/inference` | `gpt-4o-mini` | Menambah header `X-GitHub-Api-Version` |
+| **AIHubMix** | `aihubmix.com/v1` | `gpt-4o-mini` | Menambah header `APP-Code` |
+| **PPIO** | `api.ppinfra.com/v3/openai` | `qwen/qwen3-32b` | |
+| **Hugging Face** | `router.huggingface.co/v1` | `openai/gpt-oss-120b` | |
+| **Vercel AI Gateway** | `ai-gateway.vercel.sh/v1` | `anthropic/claude-sonnet-4.5` | |
+| **Requesty** | `router.requesty.ai/v1` | `anthropic/claude-3-7-sonnet-latest` | |
+| **Together** | `api.together.xyz/v1` | `meta-llama/Meta-Llama-3.1-70B-Instruct-Turbo` | |
+| **LiteLLM** | `localhost:4000/v1` | `your-proxy-model` | Kunci API pilihan |
+| **API baru** | `localhost:3000/v1` | `gpt-4.1` | Kunci API pilihan |
+| **OpenAI Compatible** | (disusun oleh pengguna) | `your-model-id` | Titik hujung khusus |
+
+### Penyedia di China
+
+| Penyedia | Asas lalai URL | Model Lalai | Nota |
+|----------|-----------------|---------------|-------|
+| **Qwen** | `dashscope.aliyuncs.com/compatible-mode/v1` | `qwen3-235b-a22b` | Alibaba DashScope |
+| **Qwen Code** | `dashscope.aliyuncs.com/compatible-mode/v1` | `qwen3-coder-plus` | Fokus pada pengaturcaraan |
+| **Doubao** | `ark.cn-beijing.volces.com/api/v3` | (ID titik hujung diperlukan) | ByteDance Volcengine |
+| **Moonshot** | `api.moonshot.cn/v1` | `kimi-k2-0905-preview` | Kimi |
+| **Xiaomi MiMo** | `api.xiaomimimo.com/v1` | `mimo-v2.5-pro` | |
+| **GLM** | `open.bigmodel.cn/api/paas/v4` | `glm-5` | Titik hujung Zhipu, China |
+| **Z AI** | `api.z.ai/api/paas/v4` | `glm-5` | Titik hujung antarabangsa Zhipu |
+| **MiniMax** | `api.minimaxi.com/v1` | `MiniMax-M2.7` | |
+| **Baidu Qianfan** | `qianfan.baidubce.com/v2` | `ernie-4.5-turbo-32k` | |
+| **SiliconFlow** | `api.siliconflow.cn/v1` | `Qwen/QwQ-32B` | Platform hos model |
+| **Huawei Cloud MaaS** | `api.modelarts-maas.com/v1` | `DeepSeek-V3` | |
+
+**Doubao memerlukan ID titik hujung Ark** (format: `ep-xxxxxxxx-xxxx-xxxx`). Tempat letak lalai mesti digantikan.
+
+### Penyedia tempatan
+
+| Penyedia | Asas lalai URL | Model Lalai | Nota |
+|----------|-----------------|---------------|-------|
+| **Ollama** | `localhost:11434/api` | `llama3` | Tiada kunci API. Penstriman NDJSON. Penemuan model melalui `/api/tags` |
+| **LMStudio** | `localhost:1234/v1` | `local-model` | Menghantar `"EMPTY"` sebagai token pembawa. Penemuan yang serasi dengan OpenAI |
+| **OVMS** | `localhost:8000/v3` | `openvino-model` | OpenVINO Model Server |
+| **Azure OpenAI** | (dikonfigurasikan oleh pengguna) | `gpt-4o` | Nama penempatan dalam URL. Tajuk `api-key` |
+
+## Pemilihan Model Mengikut Tugas
+
+Notemd menyokong penyedia dan model yang berasingan untuk setiap tugas. Aktifkan dengan `useMultiModelSettings: true`.
+
+### Tugas yang tersedia
+
+| Tugas | Kunci tetapan | Penyedia lalai |
+|------|-------------|-----------------|
+| Tambah pautan (penyisipan pautan wiki) | `addLinksProvider` / `addLinksModel` | DeepSeek |
+| Penyelidikan (carian web + ringkasan) | `researchProvider` / `researchModel` | DeepSeek |
+| Jana daripada tajuk | `generateTitleProvider` / `generateTitleModel` | DeepSeek |
+| Terjemahan | `translateProvider` / `translateModel` | DeepSeek |
+| Penghasilan diagram | `summarizeToMermaidProvider` / `Model` | DeepSeek |
+| Pengeluaran konsep | `extractConceptsProvider` / `Model` | DeepSeek |
+| Pengeluaran teks asal | `extractOriginalTextProvider` / `Model` | DeepSeek |
+
+### Urutan penyelesaian
+
+1. Jika `useMultiModelSettings` diaktifkan → gunakan penyedia dan model khusus tugas
+2. Jika penggantian model tugas kosong → gunakan model lalai penyedia
+3. Jika penyedia tugas tidak sah → gunakan `activeProvider` global
+4. Jika `useMultiModelSettings` dimatikan → semua tugas menggunakan `activeProvider` global
+
+### Konfigurasi yang disyorkan
+
+```
+# Researcher: power for research, cheap for everything else
+activeProvider: DeepSeek
+extractConceptsProvider: DeepSeek
+researchProvider: OpenAI        # GPT-4o for better research quality
+summarizeToMermaidProvider: DeepSeek
+
+# Privacy-first: local only
+activeProvider: Ollama
+addLinksProvider: Ollama
+extractConceptsProvider: Ollama
+
+# Budget bilingual
+activeProvider: DeepSeek
+translateProvider: Google      # Gemini Flash for translation
+researchProvider: SiliconFlow  # Cheaper China-based routing
+```
+
+## Arsitektur Panggilan API
+
+### Lapisan Pengangkutan
+
+1. **Obsidian `requestUrl`** — utama (terbina dalam, berfungsi pada semua platform)
+2. **Desktop HTTP** — modul Node.js `http`/`https` (penstriman + permintaan panjang)
+3. **Web `fetch`** — alternatif apabila modul Node.js tidak tersedia
+
+Plug-in ini secara automatik beralih antara lapisan pengangkutan sekiranya berlaku ralat rangkaian sementara.
+
+### Logik Ulang Cuba
+
+- **Mod biasa** (`enableStableApiCall: false`): Satu percubaan. Jika gagal sementara, ia akan dinaik taraf secara automatik ke ulangan yang stabil.
+- **Mod ulangan stabil** (`enableStableApiCall: true`): Sehingga 4 percubaan (1 + 3 ulangan) dengan selang masa 5 saat.
+- **Ralat sementara yang mencetuskan ulangan**: `err_connection_closed`, `err_connection_reset`, `err_timed_out`, `econnreset`, `econnaborted`, `etimedout`, `socket hang up`, `network request failed`
+- **Yang tidak boleh diulang cuba**: HTTP 400, 401, 403, 404
+
+### Penyimpanan Cache Respons
+
+Cache LRU dalam memori selama 5 minit yang dikunci mengikut penyedia + model + suhu + gesaan + kandungan. Permintaan yang serupa selepas 5 minit akan mendapat hasil cache dengan segera.
+
+### Pengendalian Model Penalaran
+
+Model yang tidak menyokong peranan `system` (DeepSeek R1, OpenAI o1/o3/o4/gpt-5) secara automatik menggabungkan gesaan sistem dan pengguna menjadi satu mesej pengguna sahaja.
+
+DeepSeek-specific: `thinkingEnabled` menambah `{ thinking: { type: 'enabled' } }` ke dalam permintaan. `reasoningEffort` (rendah/medium/tinggi) dihantar sebagai `reasoning_effort`. Memastikan bahawa maksimum token keluaran ≥ 8000 apabila mod pemikiran diaktifkan.
+
+### Anggaran Token
+
+`estimateTokens(text)`: `Math.ceil(text.length / 4)` — heuristik 4 aksara setiap token. Digunakan untuk mematuhi `maxResearchContentTokens` sebelum dihantar ke LLM.
+
+Tiada penjejak kos yang dilaksanakan.
+
+## Penemuan Model
+
+| Mod | Penyedia | Titik Akhir |
+|------|-----------|----------|
+| `ollama-tags` | Ollama | `/api/tags` |
+| `google-models` | Google | Senarai Model API |
+| `anthropic-models` | Anthropic | Senarai Model API |
+| `openai-compatible-models` | DeepSeek, Qwen, Mistral, dan sebagainya. | `/v1/models` |
+| `openrouter-models` | OpenRouter | Senarai Model API |
+| `github-models` | GitHub Models | Inferensi API |
+| `none` | Azure OpenAI | Dihentikan (memerlukan nama penempatan) |
+
+## Permulaan Cepat
+
+1. **Pilih penyedia** — DeepSeek (China), OpenAI (Antarabangsa), atau Ollama (Tempatan/Bebas)
+2. **Masukkan kunci API** — Tetapan → Notemd → Penyedia → Kunci API
+3. **Uji sambungan** — Klik butang ujian
+4. **Pilihan: Model mengikut tugas** — Aktifkan `useMultiModelSettings` dan tetapkan secara berasingan
+
+Untuk Ollama: tiada kunci API diperlukan. Pastikan `ollama serve` sedang berjalan.
+
+---
+
+## Langkah Seterusnya
+
+- 📝 [Nota Konsep](/docs/features/concept-notes) — Menggunakan model pengekstrakan mengikut tugas
+- 🎨 [Diagram](/docs/features/diagrams) — Menggunakan model diagram mengikut tugas
+- 🔍 [Penyelidikan](/docs/features/research) — Menggunakan model khusus penyelidikan
+- ⚙️ [Konfigurasi](/docs/getting-started/configuration) — Rujukan tetapan penuh

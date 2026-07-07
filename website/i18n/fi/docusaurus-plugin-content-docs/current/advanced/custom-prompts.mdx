@@ -1,0 +1,134 @@
+---
+id: custom-prompts
+title: "Kohdanomaiset pyyntöt"
+description: "Kohanna LLM-kysymyksiä omaisiin tarpeisiin"
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [custom prompts, prompts, focused learning, domain]
+concepts: [Custom Prompts, Focused Learning, Prompt Engineering]
+citations:
+  - title: Obsidian
+    url: https://obsidian.md
+  - title: LLM Prompt Engineering
+    url: https://platform.openai.com/docs/guides/prompt-engineering
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# Kohdanomaiset pyyntöt
+
+<TLDR>
+**Notemd mahdollistaa sinulle vaihtaa vaihtoehtoisen LLM-kysymyksen jokaisen tehtäystyyppin jaoks.** Kohdanomaiset kysymykset annavat sinulle kontrollin siitä, mitä malli prioriteettiksi ottaa: voit rajoittaa konsepttien poistamisen specifickkaan alueeseen, muuttaa yhdistämismusta tai suunnitella käännön tonia. Kysymyksen muuttujat kuten `{{content}}` ja `{{concept}}` asetetaan käytössä aikana. Tarkoituksellinen oppimisalue-ominaisuus lisää automaattisesti sinun tutkimusalueesi, jotta poistamismuutokset piirataan automaattisesti.
+
+Tämä kuuluu [Obsidian AI-tietojen hallintasuunnitelmaan](/docs/pillar-ai-knowledge).
+</TLDR>
+
+## Yleenvaate
+
+Notemd:n sisäistä viestejä on kirjoitettu yleisten tietojen käyttöön. Ne toimivat hyvin eri alueissa, mutta ne jätävät myös mahdollisuuden alueelliselle parantamiseen. Kohdanomaiset viesteet mahdollistavat sinun ilmoittamaan LLM:lle täpseltä, miten se pitää käyttäytyä sinun käyttöolosuhteen kanssa – olipa se vain meditsiiniterminologian poistaminen, nimettyjen entiteetien yhdistäminen tai suomenkielisen tekstin muotoilu formalisessa kielenmuodossa.
+
+Kohdanomaiset käskyt ei asenda koko sistemakäskyä. Ne asettavat uudelleen tai laajentavat **työtekstin-specificoituja ohjeita**, säilyttäen samalla struktuurisen väljundiformaatin (esim. `CONCEPT:`-rivit, wiki-link-syntaksi), jota Notemd käyttää analysoinnissaan.
+
+## Kuidas se toimii
+
+### Kysymyksen arkkitehtuuri
+
+Jokainen Notemd-työ noudattaa saman pyyntystruktuurin:
+
+```
+[System role: You are a helpful assistant...]
+[Domain constraint: Relevant Fields: [{domain}]]   <-- focused learning (optional)
+[Custom task prompt]                                <-- your override (optional)
+[Output format instructions]                        <-- always preserved
+[Content: {{content}}]                              <-- runtime substitution
+```
+
+1. **Perusjärjestelmän pyyntö** -- Määrittelee apun henkilömerkin. Ei voi asettaa uutta.
+2. **Kenttä keskittyneelle oppimiseen** – Lisäätyy `Relevant Fields: [medicine / law / computer science / ...]` alkuun piirron rajoittamiseksi. Tämä on asetusten päällyttäjä, ei raaka pyyntö.
+3. **Custom task prompt** -- Asentaa vaihtoehtoiset tehtävän ohjeet (esim. mitaisia konseptteja on poistaa, kuin aggressiivisesti yhdistää).
+4. **Väljontomuoto** -- Struktuurireeglid (`CONCEPT:` rivit, wiki-linkimuoto). Aina lisätään Notemd lopuun varmistaakseen parsattavuus.
+5. **Sisältö** -- Todellinen tiedon teksti, joka asetetaan käytön aikana `{{content}}` kautta.
+
+### Kysymyksen muuttujat
+
+Muuttujat asetetaan suorittuminen aikana. Saadaulliset muuttujat erottuvat tehtävän mukaan:
+
+| Muuttuja | Tehtävät | Sulkettiin |
+|----------|-------|---------------|
+| `{{content}}` | Kaikki | Notin tai valituksen teksti |
+| `{{concept}}` | Kontekstitieton malli | Eritetty kontekstin nimi |
+| `{{description}}` | Kontekstitieton malli | LLM-luokiteltu kontekstin kirjeldus |
+| `{{backlinks}}` | Kontekstitieton malli | Lähteetietojen lista linkkeillä |
+| `{{date}}` | Kontekstitieton malli | Täytäntöpäivä (YYYY-MM-DD) |
+| `{{language}}` | Käännös | Tarkoituksikieli |
+| `{{source}}` | Kontekstitieton malli | Lähteetieton perusnimi |
+
+### Keskittyty oppimisalue
+
+Keskittyvä oppimisfunktion on nopea tapa alueen piirtämiseen. Sijaan siitä että kirjoitat omat käskyt, jotka mainovat sinun aluetta, määrität `focusedLearningDomain` asetuksissa:
+
+```
+Settings → Advanced → Focused Learning Domain
+Example: "medicine" or "computer science" or "Chinese philosophy"
+```
+
+Tämä lisää `Relevant Fields: [medicine]` alkuperäiseen käskyyn, mikä saattaa LLM prioriteettiksi alueelle liittyvät käsitteet ja estää yleiset. Se on kevyempi kuin täysin omat käskyt ja toimii kaikissa poistamisoperaatioidessa.
+
+## Konfigurointi
+
+| Asetus | Omistusasetus | Vaikutus |
+|---------|---------|--------|
+| `customAddLinksPrompt` | `''` | Päättä omaksumalla vaihtoehtoisen linkkien lisääminen käskyyn |
+| `customExtractConceptsPrompt` | `''` | Päättä omaksumalla vaihtoehtoisen käsitteiden poistamiseen käskyyn |
+| `customResearchPrompt` | `''` | Päättä omaksumalla vaihtoehtoisen tutkimus + yhteenvetön käskyyn |
+| `customTranslatePrompt` | `''` | Päättä omaksumalla vaihtoehtoisen käännökseen käskyyn |
+| `customDiagramPrompt` | `''` | Päättä omaksumalla vaihtoehtoisen diagrammin luomiseen käskyyn |
+| `focusedLearningDomain` | `''` | Lisää alueellinen konteksti poistamis- ja linkityskäskyihin |
+| `extractConceptsMinimalTemplate` | `true` | Käytä vain nimien sisältävää käsitteetiedoston mallia (se vaikuttaa `{{concept}}` mallin ulottuvuuteen) |
+| `customConceptNoteTemplate` | `''` | Päättä käsitteetiedoston mallin omaksumalla täysin muuttujatukemalla |
+
+**Kun omat käskyt ovat tyhjät, käytetään sisällä olevaa vaihtoehtoista käskyä.**
+
+## Esimerkki
+
+Sinä olet meditsiini-tutkija, joka poistaa käsitteet kliinisten tutkimusten tiedostojista. Vaihtoehtoinen käsky poistaa yleiset nimet sekä meditsiinilaiset terminit, mikä täyttää sinun käsitteetiedostosi.
+
+**Lahjentus:** Määritä keskittyvyysalue ja omat poistamiskäskyt.
+
+1. Määritä `focusedLearningDomain` arvoon `medicine`
+2. Määritä `customExtractConceptsPrompt` arvoon:
+
+```
+Extract only clinically relevant concepts: diseases, drug names,
+anatomical terms, measurement endpoints, and statistical methods.
+Ignore generic English nouns, brand names, and institutional names.
+Prioritize MeSH terminology where applicable.
+```
+
+Nyt kun käytät käskyn "Extract concepts" kliinisen tiedon puhelussa, LLM tuottaa:
+
+```
+CONCEPT: Randomized Controlled Trial
+CONCEPT: Double-Blind Method
+CONCEPT: Myocardial Infarction
+CONCEPT: Creatine Kinase-MB
+CONCEPT: Kaplan-Meier Estimate
+```
+
+Sille asemelle että perustapa voi myös poistaa ei tarvittavia yleisiä terminejä kuten "hospital" tai "month".
+
+## Vinkit
+
+- **Alka keskittyneen oppimisalueen kanssa** ennen täysin omakkeutettun käskyn kirjoittamista. Se kattaa 80% käyttöolosuhteista yhdellä asetuksella.
+- **Säilytä väljundiformaatiot** -- Älä koskaan poista formaatikäytäntöjä kuten "one per line" tai "CONCEPT: prefix" omakkeutettujen käskyn muodostuksessa. Notemd:n analysointi riippuu niistä.
+- **Testaa ensin yhdellä tiedolla** -- Omakkeutettut käskyt voivat vaikuttaa ootamatkaan tavalla tiedon poistamisen laajuuteen. Verraa yhdellä tiedolla ennen paketointiprosessia.
+- **Pidä käskyt lyhyillä** -- Liian pitkät omakkeutettut käskyt käyttävät tokeneja ja voivat heikentää mallin keskitymistä.
+
+---
+
+## Järguvät toimet
+
+- [Wiki-Links](/docs/features/wiki-links) -- Mitä liitetään, kun omakkeutat add-links-käskyn
+- [Concept Notes](/docs/features/concept-notes) -- Concept-note-mallit ja `{{concept}}`-muuttuja
+- [Batch Processing](/docs/advanced/batch-processing) -- Sovellaa omakkeutettuja käskyejä koko kansioon
+- [Troubleshooting](/docs/advanced/troubleshooting) -- Korjaa ongelmat, joissa omakkeutettut käskyt tuottavat ootamatkaan väljundia

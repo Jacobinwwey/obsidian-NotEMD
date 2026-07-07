@@ -1,0 +1,184 @@
+---
+id: concept-notes
+title: "Nota Konsep"
+description: "Jana dan urus nota konsep — nota berdiri sendiri untuk konsep utama yang diekstrak daripada peti simpanan anda"
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [concept notes, knowledge extraction, concept folder, deduplication, backlinks]
+concepts: [Concept Notes, Knowledge Graph, LLM Extraction, Deduplication, Backlinks]
+citations:
+  - title: Obsidian
+    url: https://obsidian.md
+  - title: Zettelkasten Method
+    url: https://zettelkasten.de
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# Nota Konsep
+
+<TLDR>
+**Notemd mengekstrak konsep utama daripada nota anda dan mencipta fail nota konsep yang berdiri sendiri.** LLM mengenal pasti istilah utama, menjana satu fail `.md` untuk setiap konsep dalam folder yang boleh dikonfigurasikan, dan secara pilihan menambah pautan balik ke nota sumber. Ia menyokong penindasan sinonim, pemilihan model mengikut tugas, penyucian nama fail, dan enjin penghapusan duplikasi 4 langkah. Ini merupakan sebahagian daripada [Obsidian Panduan Pengurusan Pengetahuan AI](/docs/pillar-ai-knowledge).
+</TLDR>
+
+## Gambaran Keseluruhan
+
+Nota konsep merupakan blok asas bagi pangkalan pengetahuan yang bersambung. Apabila anda memproses sebuah nota, Notemd:
+
+1. **Menghantar teks anda ke LLM** dengan arahan ekstraksi yang terstruktur
+2. **Menganalisis baris `CONCEPT:`** daripada respons LLM
+3. **Mencipta satu fail `.md` untuk setiap konsep** dalam folder yang ditetapkan
+4. **Menambah pautan balik** ke nota sumber (jika diaktifkan)
+
+## Cara Ia Berfungsi
+
+### Pipelajn Ekstraksi
+
+```
+Source Note → Split into Chunks → LLM per Chunk → Parse CONCEPT: Lines
+    → Deduplicate via Set → Create .md Files → Add Backlinks
+    → (Optional: Generate Log)
+```
+
+### Arahan Ekstraksi
+
+LLM menerima arahan yang menyuruhnya untuk:
+
+- Ekstrak **kata nama atau frasa kata nama** yang menjadi inti topik dokumen
+- **Utamakan kekhususan** — “Dielectric Relaxation” berbanding “Relaxation”,
+- **Normalisasi kepada bentuk tunggal** — “models” menjadi “model”,
+- **Menindas konsep subordinat** — jika “dielectric relaxation” muncul, jangan ekstrak “relaxation” juga
+- **Lompat** bahagian rujukan/katalog, kata nama umum, nama syarikat/produk
+- Keluarkan satu konsep setiap baris sebagai `CONCEPT: Term Name`
+
+**Penindasan sinonim** (pilihan): tambahkan “Elakkan mengeluarkan sinonim, konsep asas yang serupa dari segi semantik, atau kata kunci setiap kali boleh” di hadapan gesaan.
+
+**Domain pembelajaran yang ditumpukan** (pilihan): menambahkan `Relevant Fields: [domain]` di hadapan untuk membataskan pengeluaran kepada satu bidang khusus.
+
+**Tetapan bahasa gantian** (pilihan): menambahkan “Konsep keluaran MESTI berada dalam [bahasa].”
+
+### Pemecahan kepada bahagian
+
+Nota yang panjang akan dipisahkan oleh `settings.chunkWordCount`. Setiap bahagian dihantar secara berasingan. Konsep daripada semua bahagian akan dikumpulkan dalam `Set` — duplikasi antara bahagian akan dibuang tanpa notis. Ralat LLM pada setiap bahagian tidak akan menghentikan operasi tersebut.
+
+## Penciptaan Nota Konsep
+
+### Peraturan Nama Fail
+
+| Peraturan | Kelakuan |
+|------|----------|
+| Tanda garis bawah/tanda garis sempang | Digantikan dengan ruang |
+| Akar aksara khas | Dibuang: backslash, forward slash, colon, asterisk, tanda soal, tanda petik, kurungan sudut, pipe, hash, caret, kurungan |
+| Ruang kosong | Runtuh dan dipotong |
+| Panjang maksimum | 100 aksara (dipotong + dipadatkan semula) |
+| Hasil kosong/semua titik | Dihabaikan secara senyap |
+
+Contoh: `A-B: Key*Term` menjadi `A B KeyTerm.md`
+
+### Templat
+
+**Templat penuh** (pautan balik diaktifkan, templat minimum dimatikan):
+
+```markdown
+# Concept Name
+
+## Linked From
+- [[SourceNoteBasename]]
+```
+
+**Templat minimum** (apabila `extractConceptsMinimalTemplate: true`):
+
+```markdown
+# Concept Name
+```
+
+### Memperbaharui Nota Sedia Ada
+
+Apabila fail konsep sudah wujud:
+
+1. Jika pautan balik diaktifkan dan nota sumber belum disenaraikan, tambahkan pautan balik
+2. Jika terdapat bahagian `## Linked From`, masukkan sebelum tajuk `##` seterusnya
+3. Jika tiada `## Linked From`, tambahkan bahagian di akhir
+4. Pautan balik yang berulang akan diperiksa dan diabaikan
+
+### Konfigurasi
+
+| Pengaturan | Lalai | Kesan |
+|---------|---------|--------|
+| `useCustomConceptNoteFolder` | `true` | Tombol utama. Dimatikan = tiada nota dibuat |
+| `conceptNoteFolder` | `''` (dihentikan) | Laluan folder untuk nota konsep |
+| `extractConceptsMinimalTemplate` | `true` | Nota hanya tajuk (tanpa Linked From) |
+| `extractConceptsAddBacklink` | `false` | Tambahkan pautan balik semasa pengekstrakan berdiri sendiri |
+| `extractConceptsProvider` / `extractConceptsModel` | DeepSeek | LLM setiap tugas untuk pengekstrakan konsep |
+| `extractConceptsLanguage` | `'en'` | Bahasa keluaran untuk nama konsep |
+| `replaceSynonymsDuringConceptExtraction` | `false` | Aktifkan penindasan sinonim dalam promp |
+| `generateConceptLogFile` | `false` | Tulis senarai `.log` konsep yang dihasilkan |
+
+**Penting:** Tetapan `extractConceptsAddBacklink` dan `extractConceptsMinimalTemplate` hanya mempengaruhi **arahan pengekstrakan khusus**. Arahan "Add Links" sentiasa menghasilkan nota templat penuh dengan pautan balik.
+
+## Penghapusan duplikasi
+
+Arahan dedup (`Notemd: Check & remove duplicate concept notes`) menjalankan analisis 5 langkah:
+
+### Langkah 1: Padanan nama fail yang tepat
+
+Perbandingan nama fail tanpa mengira huruf besar/kecil dalam skop yang ditetapkan.
+
+### Langkah 2: Pengesanan bentuk jamak
+
+Menghilangkan akhiran: `-ies` hingga `-y`, `-es` dihapuskan, `-s` dihapuskan. Membandingkan bentuk tunggal dengan fail skop. Tidak mengendalikan bentuk jamak yang tidak teratur (children/child).
+
+### Langkah 3: Normalisasi simbol
+
+Digunakan pada: `toLowerCase()`, gantikan tanda hubung/tanda bawah dengan ruang, padamkan aksara bukan alfanumerik, padatkan ruang kosong. Entri yang dinormalisasi secara serupa akan ditandakan.
+
+### Langkah 4: Pengasingan Perkataan Tunggal
+
+Nota konsep perkataan tunggal diperiksa berbanding nama fail skop berbilang perkataan. Tidak dijalankan apabila skopnya ialah `concept_folder_only`.
+
+### Langkah 5: Pengesahan dan Pemadaman
+
+Semua calon dipaparkan dalam modul pengesahan. Item yang diluluskan dipindahkan ke tong sampah sistem. Operasi boleh dibatalkan antara setiap pemadaman.
+
+### Mod Skop
+
+| Mod | Dibandingkan Dengan |
+|------|-------------------|
+| `vault` (lalai) | Semua fail vault `.md` kecuali folder konsep |
+| `concept_folder_only` | Nota konsep lain dalam folder tersebut |
+| `include` | Fail dalam folder yang disenaraikan secara khusus |
+| `exclude` | Semua fail vault kecuali folder konsep + folder yang disenaraikan |
+
+## Penggunaan
+
+### Ekstrak Konsep (Berdiri Sendiri)
+
+1. Buka sebuah nota
+2. Jalankan **"Notemd: Ekstrak konsep"** daripada panel arahan
+3. Nota konsep diwujudkan dalam folder yang telah dikonfigurasikan
+
+### Ekstrak + Jana Kandungan
+
+**"Notemd: Ekstrak konsep dan jana tajuk"** — ekstrak konsep, kemudian jalankan "Jana daripada Tajuk" pada setiap nota dalam folder konsep. Ini menjana kandungan untuk **semua** nota konsep dalam folder, bukan hanya yang baru dibuat.
+
+### Cipta Pautan Wiki daripada Pemilihan
+
+1. Sorot teks dalam editor
+2. Jalankan **"Notemd: Cipta pautan wiki daripada pemilihan"**
+3. Teks dibalut dengan `[[...]]` dan sebuah nota konsep akan dihasilkan
+
+## Tips
+
+- **Sediakan folder konsep terlebih dahulu** — tanpanya, tiada nota yang dihasilkan. Tetingkap amaran akan muncul jika ia tidak ditetapkan.
+- **Guna model mengikut tugas** — ekstrak konsep berfungsi dengan baik menggunakan model yang lebih murah (GPT-4o-mini, DeepSeek). Simpan model yang mahal untuk tujuan penyelidikan/terjemahan.
+- **Aktifkan penindasan sinonim** untuk domain teknikal di mana beberapa istilah merujuk kepada konsep yang sama.
+- **Padamkan duplikasi secara berkala** — jalankan arahan padam duplikasi selepas pemprosesan berkelompok untuk mengesan duplikasi hampir sama.
+- **Fail log akan ditulis semula** setiap kali dijalankan, bukan ditambah. Salininya jika anda memerlukan hasil sebelumnya.
+
+---
+
+## Langkah Seterusnya
+
+- [Wiki-Links](./wiki-links) — Cara konsep dipautkan secara dalam talian
+- [Diagrams](./diagrams) — Visualisasikan hubungan antara konsep
+- [Workflows](./workflows) — Gabungkan ekstrak dengan tugas lain

@@ -1,0 +1,133 @@
+---
+id: installation
+title: "Írásbeállítás"
+description: "Hogyan írjuk be Notemd-t a Obsidian-ban"
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [installation, setup, obsidian plugin]
+concepts: [Installation, Community Plugins, BRAT, Manual Install]
+citations:
+  - title: Obsidian
+    url: https://obsidian.md
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# Írásbeállítás
+
+<TLDR>
+**Írjuk be Notemd-t 2 perc alatt.** Két módszer: (1) Obsidian közösségi pluginek (ajánlott, egy kattintással írásbeállítás), vagy (2) manuális írásbeállítás a GitHub Releases által. Elvégzéshez szükség van Obsidian 0.15.0+ verzióra. Működik Windows, macOS, Linux, iOS és Android rendszereken. Nincs külső függőségek. 4k+ letöltés, MIT licenc alatt.
+</TLDR>
+
+## Módszer 1: Közösségi pluginek (ajánlott)
+
+1. Nyitjuk meg a **Obsidian beállításait** (⚙️ ikon vagy `Ctrl/Cmd + ,`)
+2. Menjünk a **Közösségi pluginek** részére
+3. Kattintjunk a **Browszolás**-ra
+4. Keresjük a **"Notemd"** nevűt
+5. Kattintjuk a **Írásbeállítás**-ra
+6. Kattintjuk a **Engedélyezés**-re
+
+**Szia!** A bal oldalsávon látjuk a Notemd ikont.
+
+## Módszer 2: Manuális írásbeállítás
+
+### Elvárások
+- Obsidian 0.15.0 vagy annál újabb verzió
+- Git (opcionális, klónoláshoz)
+
+### Lépések
+
+1. **Letöltse a fájlokat** a [GitHub Releases](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/latest) számítól:
+   - `main.js`
+   - `styles.css`
+   - `manifest.json`
+
+2. **Keresse ki a vault-jának plugin mappáját:**
+   ```
+   <your-vault>/.obsidian/plugins/
+   ```
+
+Ha a `plugins` mappa nem létezik, hozz létre azt.
+
+3. **Hozz létre a Notemd mappát:**
+   ```
+   <your-vault>/.obsidian/plugins/notemd/
+   ```
+
+4. **Kopítsa be a három fájlt** a `notemd` mappába.
+
+5. **Uramollítson a Obsidian-t:**
+   - Nyomja meg a `Ctrl/Cmd + R`-t, vagy
+   - Újra indítson a Obsidian-t
+
+6. **Engedélyezze a plugin-t:**
+   - Beállítások → Közösségi pluginek
+   - Keresse ki a „Notemd”-ot a listában
+   - Nyomja be az engedélyezés gombot
+
+## Alternatíva: Instáláljon az BRAT útján
+
+Ha használja a [BRAT plugin](https://github.com/TfTHacker/obsidian42-brat)-t:
+
+1. Nyitja meg a BRAT beállításait
+2. Kattints a "Hozzáadja a Beta-pluginet" gombra
+3. Írd be: `Jacobinwwey/obsidian-NotEMD`
+4. Kattints a "Hozzáadja a pluginet" gombra
+5. Engedélyezze a Notemd-t a Community-pluginekben
+
+## Ellenőrzés
+
+Az installáció után ellenőrizze, hogy a Notemd működik-e:
+
+1. Nyitja bármely jegyet
+2. Kattints jobb kattintással a szerkesztőben
+3. Létrejönnek az Notemd parancsok, például:
+   - "Fájl kezelése (hivatkozások hozzáadása)"
+   - "Konceptek kihozása"
+   - "Kutatás és összefoglalás"
+
+## További lépések
+
+- **Konfigurálja a LLM forrásot:** [Rácsomagolás →](./quick-start)
+- **Problémamegoldás:** [Általános problémák →](../advanced/troubleshooting)
+
+## Szerverteljesítmények
+
+| Platform | Verzió | Státusz |
+|----------|---------|--------|
+| **Obsidian** | 0.15.0+ | Előírás |
+| **Windows** | 7+ | ✅ Támogatott |
+| **macOS** | 10.15+ | ✅ Támogatott |
+| **Linux** | Bármilyen | ✅ Támogatott |
+| **iOS** | 15+ | ✅ Támogatott |
+| **Android** | 5+ | ✅ Támogatott |
+
+## Előreállítás
+
+Notemd elszüntetéséhez:
+
+1. Beállítások → Közösségi plug-inek
+2. Keressük az "Notemd"-t
+3. Kattints a ❌ ikonra
+4. Választhatóan törljük a plug-in mappát: `<vault>/.obsidian/plugins/notemd/`
+
+A adataid (figyelemek, konceptfigyelemek stb.) nem érintetek meg.
+
+## Frissítés
+
+### Autófrissítés (tajánlott)
+Obsidian automatikusan ellenőrzi a plug-in frissítéseket. Ha új verzió elérhető:
+1. Beállítások → Közösségi plug-inek
+2. Kattints a "Frissítések ellenőrzése" gombra
+3. Kattints a Notemd mellett lévő "Frissíts" gombra
+
+### Manuális frissítés
+Letöltse a legújabb verziót és cserélje ki a három fájlt a plug-in mappájában.
+
+## Segítség kérés
+
+- 📖 [Szybki kezdőguida](./quick-start)
+- ❓ [FAQ](../faq)
+- 💬 [Discord Közössége](https://discord.gg/qnGgsQ9W)
+- 🐛 [Problémák jelentése](https://github.com/Jacobinwwey/obsidian-NotEMD/issues)

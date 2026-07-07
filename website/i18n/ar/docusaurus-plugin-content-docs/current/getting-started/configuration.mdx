@@ -1,0 +1,435 @@
+---
+id: configuration
+title: "التكوين"
+description: "تكوين إعدادات Notemd وتفضيلاتها"
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [configuration, settings, customization, preferences]
+concepts: [Configuration, Per-Task Models, Output Paths, Custom Workflows]
+citations:
+  - title: Obsidian
+    url: https://obsidian.md
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# التكوين
+
+<TLDR>
+**إعدادات Notemd تشمل 6 مجالات رئيسية:** (1) مزودو LLM ومفاتيح API، (2) اختيار النموذج لكل مهمة، (3) مسارات الإخراج والقوالب، (4) لغة UI ولغة الإخراج، (5) خدمات البحث (Tavily/DuckDuckGo)، (6) سلاسل العمليات المخصصة. جميع الإعدادات موجودة في Obsidian Settings → Notemd. تصبح التغييرات سارية فورًا.
+</TLDR>
+
+## نظرة عامة على الإعدادات
+
+الوصول: **Obsidian Settings (⚙️) → Notemd**
+
+### الأقسام الرئيسية
+
+1. **تكوين المزود** — مفاتيح API، URLs الأساسية، النماذج
+2. **إعدادات المهمة** — اختيار النموذج لكل مهمة
+3. **تكوين الإخراج** — مكان حفظ الملفات المولدة
+4. **إعدادات اللغة** — UI ولغات الإخراج
+5. **التكامل مع البحث** — إعداد Tavily/DuckDuckGo
+6. **سلاسل العمليات** — سلاسل أزرار مخصصة
+7. **الميزات المتقدمة** — التشخيص، المعالجة الدفعية، التقسيم إلى كتل
+
+---
+
+## 1. تكوين المزود
+
+### إضافة مزود
+
+1. **اختر المزود** من القائمة المنسدلة (أكثر من 30 مزودًا متاحًا)
+2. **أدخل مفتاح API**
+3. **اختياري**: حدد قاعدة أساسية مخصصة URL (للبروكسيات/البوابات)
+4. **انقر على "Get Model List"** للتحقق من الاتصال
+5. **اختر النموذج الافتراضي**
+
+### مزودون شائعون
+
+#### OpenAI
+```
+Provider: OpenAI
+API Key: sk-...
+Base URL: https://api.openai.com/v1 (default)
+Model: gpt-4o-mini
+```
+
+#### Anthropic (Claude)
+```
+Provider: Anthropic
+API Key: sk-ant-...
+Model: claude-sonnet-4-6
+```
+
+#### Ollama (Local)
+```
+Provider: Ollama
+Base URL: http://localhost:11434 (default)
+Model: llama3.1
+API Key: (not required)
+```
+
+#### DeepSeek
+```
+Provider: DeepSeek
+API Key: sk-...
+Model: deepseek-chat
+```
+
+### مزودون متعددون
+
+يمكنك تكوين مزودين متعددين والتبديل بينهم حسب المهمة:
+- **المزود الرئيسي**: يُستخدم كبديل
+- **المزودون المخصصون للمهمة**: لتعديل الإعدادات لمهام محددة
+
+---
+
+## 2. النماذج المخصصة للمهمة
+
+قم بتكوين نماذج مختلفة لمهام مختلفة لتحسين التكلفة/الجودة:
+
+### أنواع المهام
+
+| المهمة | النموذج الافتراضي | الغرض |
+|------|--------------|---------|
+| **الربط** | المزود الرئيسي | تحديد المفاهيم لروابط ويكي |
+| **توليد المفاهيم** | المزود الرئيسي | استخراج ووصف المفاهيم |
+| **البحث** | المزود الرئيسي | تلخيص نتائج البحث على الويب |
+| **الترجمة** | المزود الرئيسي | ترجمة النصوص |
+| **توليد الرسوم البيانية** | المزود الرئيسي | إنشاء رسومات Mermaid/Canvas |
+
+### مثال: إعداد مُحسّن للتكلفة
+
+```
+Linking: gpt-4o-mini (fast, many calls)
+Concept Generation: claude-sonnet-4-6 (quality extraction)
+Research: gpt-4o (web-grounded)
+Translation: gemini-flash (multilingual)
+Diagram: ollama/llama3.1 (free, local)
+```
+
+### كيفية الإعداد
+
+1. **الإعدادات → Notemd → إعدادات المهمة**
+2. لكل مهمة، اختر:
+   - ✅ **استخدام المزود الرئيسي** (القيمة الافتراضية)
+   - 🔄 **استخدام مزود مخصص** → اختر المزود + النموذج
+
+---
+
+## 3. إعدادات الإخراج
+
+### إخراج ملاحظات المفاهيم
+
+**أين يتم حفظ ملاحظات المفاهيم الجديدة:**
+
+```
+Settings → Output → Concept Folder
+Default: concepts/
+```
+
+**القالب:**
+```
+Settings → Output → Concept Template
+Default:
+---
+tags: [concept]
+created: {{date}}
+---
+
+# {{concept}}
+
+{{description}}
+
+## Backlinks
+{{backlinks}}
+```
+
+### خيارات هيكل المجلدات
+
+**الخيار 1: مسطح (جميع المفاهيم في مجلد واحد)**
+```
+vault/
+└── concepts/
+    ├── Machine Learning.md
+    ├── Neural Networks.md
+    └── Deep Learning.md
+```
+
+**الخيار 2: هرمي (حسب مجلد المصدر)**
+```
+vault/
+├── papers/
+│   └── concepts/
+│       └── Transformer.md
+└── notes/
+    └── concepts/
+        └── Attention Mechanism.md
+```
+
+التكوين: **الإعدادات → الإخراج → استخدام مجلدات هرمية**
+
+### إخراج الرسوم البيانية
+
+**أين يتم حفظ الرسوم البيانية:**
+```
+Settings → Output → Diagram Folder
+Default: diagrams/
+```
+
+**التنسيق:**
+- `.mmd` (Mermaid المصدر)
+- `.canvas` (JSON Canvas)
+- `.html` (Vega-Lite)
+
+---
+
+## 4. إعدادات اللغة
+
+### UI اللغة
+
+**لغة واجهة المستخدم** (الأزرار، القوائم، النوافذ):
+
+```
+Settings → Language → UI Language
+Options: 21+ languages
+Default: System language
+```
+
+اللغات المدعومة: الإنجليزية، 简体中文، 繁體中文، 日本語، 한국어، Español، Français، Deutsch، Русский، العربية، وغيرها.
+
+### لغة الإخراج
+
+**لغة المحتوى المولد** (ملاحظات مفاهيمية، ملخصات بحثية):
+
+```
+Settings → Language → Output Language
+Options: Same as UI languages
+Default: Same as UI
+```
+
+**حالة الاستخدام:** الصينية UI + نتائج باللغة الإنجليزية للبحث الثنائي اللغة.
+
+### الهدف من الترجمة
+
+**اللغة المستهدفة الافتراضية** لمهام الترجمة:
+
+```
+Settings → Translation → Target Language
+Default: English
+```
+
+---
+
+## 5. تكامل البحث
+
+### Tavily (موصى به)
+
+**خدمة بحث مُحسّنة بواسطة الذكاء الاصطناعي:**
+
+```
+Settings → Search → Service: Tavily
+API Key: tvly-...
+```
+
+الحصول على المفتاح: [tavily.com](https://tavily.com/)
+
+**الميزات:**
+- نتائج عالية الجودة
+- ملخصات مُحسّنة بواسطة الذكاء الاصطناعي
+- اقتباسات المصادر
+
+### DuckDuckGo (تجريبي)
+
+**لا حاجة إلى مفتاح API:**
+
+```
+Settings → Search → Service: DuckDuckGo
+```
+
+**ملاحظة:** جودة أقل، بدون إمكانية تخصيص.
+
+---
+
+## 6. تكوين سير العمل
+
+### إنشاء سير عمل مخصصة
+
+**تربط سلاسل العمليات المهام المتعددة في زر واحد.**
+
+1. **الإعدادات → سلاسل العمليات → إضافة سلسلة عمليات**
+2. **الاسم**: "تدفق تحليل الورق"
+3. **DSL**: `process-current-add-links>extract-concepts-current>research-and-summarize>summarize-as-mermaid`
+4. **حفظ**
+
+يظهر زر جديد في الشريط الجانبي الأيسر.
+
+### صيغة DSL
+
+**التنسيق:** `action1>action2>action3`
+
+**الإجراءات المتاحة:**
+- `process-current-add-links` — إضافة روابط ويكي إلى الملاحظة الحالية
+- `extract-concepts-current` — إنشاء ملاحظات مفاهيمية
+- `research-and-summarize` — بحث على الويب + ملخص
+- `translate-current` — ترجمة الملاحظة الحالية
+- `summarize-as-mermaid` — إنشاء رسم Mermaid
+- `process-folder-add-links` — معالجة مجلدات بشكل جماعي
+
+**أمثلة على سلاسل العمليات:**
+
+**استخراج المفاهيم السريع:**
+```
+process-current-add-links>extract-concepts-current
+```
+
+**البحث المعمق:**
+```
+process-current-add-links>research-and-summarize>extract-concepts-current
+```
+
+**التحليل متعدد اللغات:**
+```
+translate-current>process-current-add-links>extract-concepts-current
+```
+
+---
+
+## 7. الإعدادات المتقدمة
+
+### معالجة دفعات
+
+**معالجة ملفات متعددة بشكل متوازي:**
+
+```
+Settings → Advanced → Batch Processing
+Concurrency: 3 (default)
+```
+
+كلما كان القيمة أعلى، كانت السرعة أكبر لكن عدد استدعاءات API يزداد.
+
+### التقسيم الذكي للكتل
+
+**بالنسبة للملاحظات الطويلة، قم بتقسيمها إلى كتل:**
+
+```
+Settings → Advanced → Smart Chunking
+Chunk Size: 2000 words (default)
+Overlap: 200 words (default)
+```
+
+يمنع أخطاء حدود الرموز.
+
+### لوحة التشخيص
+
+**عرض سجلات مفصلة:**
+
+```
+Settings → Advanced → Enable Diagnostics
+```
+
+يعرض:
+- API طلبات/استجابات
+- استخدام الرموز
+- أوقات المعالجة
+- الأخطاء
+
+### كشف المفاهيم المكررة
+
+**تجنب المفاهيم شبه المتطابقة:**
+
+```
+Settings → Advanced → Synonym Suppression
+Threshold: 0.8 (default, 0-1)
+```
+
+القيمة الأعلى تعني دمجًا أكثر عدوانية.
+
+---
+
+## ملفات تعريف الإعدادات
+
+### تصدير/استيراد الإعدادات
+
+**مشاركة الإعدادات بين الأجهزة:**
+
+1. **الإعدادات → المتقدمة → تصدير الإعدادات**
+2. يتم حفظ `notemd-config.json`
+3. على جهاز جديد: **استيراد الإعدادات**
+
+**ما يتم تضمينه:**
+- مفاتيح المزود API (اختياري)
+- اختيارات النموذج
+- مسارات الإخراج
+- سلاسل عمل مخصصة
+
+---
+
+## الإعدادات الموصى بها
+
+### للطلاب
+
+```
+Provider: OpenAI (gpt-4o-mini)
+Concept Folder: concepts/
+UI Language: System
+Output Language: System
+Workflow: "Study Flow" (add-links>extract-concepts)
+```
+
+### للباحثين
+
+```
+Providers:
+  - Linking: DeepSeek (cheap, many calls)
+  - Concepts: Claude Sonnet (high quality)
+  - Research: GPT-4o (web-grounded)
+Concept Folder: notes/concepts/
+Hierarchical: Yes
+Workflow: "Paper Flow" (add-links>extract>research>diagram)
+```
+
+### للمستخدمين المهتمين بالخصوصية
+
+```
+Provider: Ollama (llama3.1)
+All tasks: Local model
+Search: DuckDuckGo (no API)
+Diagnostics: Off
+```
+
+### للعمل بلغتين
+
+```
+UI Language: Chinese
+Output Language: English
+Translation Target: Chinese
+Provider: Gemini (multilingual)
+```
+
+---
+
+## حل مشاكل الإعدادات
+
+### لم يتم حفظ الإعدادات
+- تحقق من صلاحيات الملف في `.obsidian/plugins/notemd/`
+- جرب: أوقف الإضافة → أعد تشغيلها
+
+### مفتاح API غير صالح
+- لا توجد مسافات إضافية
+- تحقق من تاريخ الانتهاء
+- تحقق من الرصيد في لوحة تحكم المزود
+
+### النماذج لا تُحمّل
+- انقر على "احصل على قائمة النماذج" لتحديثها
+- تحقق من اتصال الشبكة
+- جرب مزودًا آخر
+
+---
+
+## الخطوات التالية
+
+- 📖 [استكشف الميزات](../features/wiki-links)
+- 🔌 [دليل إعدادات المزود](../providers/overview)
+- ❓ [الأسئلة الشائعة](../faq)

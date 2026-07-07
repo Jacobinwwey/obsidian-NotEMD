@@ -82,7 +82,7 @@ const copyByLocale = {
     retrievalHeading: 'Answer engine 来源地图',
     retrievalLead:
       '项目网页现在公开展示与 llms.txt、sitemap、hreflang metadata 和 JSON-LD 一致的 canonical routes。AI search 与引用场景应以这些页面为真值来源。',
-    languageBoundary: '语言边界：英文、简体中文、繁体中文、日语、法语、德语、西班牙语和韩语均暴露完整 docs 路由集。',
+    languageBoundary: '语言边界：英文与 README / UI locale 发布矩阵声明的全部文档语言均暴露完整 docs 路由集。',
     retrievalLinks: [
       {
         title: 'llms.txt 检索地图',

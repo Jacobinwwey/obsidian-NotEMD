@@ -1,0 +1,133 @@
+---
+id: installation
+title: "Installatie"
+description: "Hoe installeer je Notemd in Obsidian"
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [installation, setup, obsidian plugin]
+concepts: [Installation, Community Plugins, BRAT, Manual Install]
+citations:
+  - title: Obsidian
+    url: https://obsidian.md
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# Installatie
+
+<TLDR>
+**Installeer Notemd in minder dan 2 minuten.** Twee methoden: (1) Obsidian Community Plugins (aanbevolen, één-klik installatie), of (2) Handmatige installatie via GitHub Releases. Vereist Obsidian 0.15.0+. Werkt op Windows, macOS, Linux, iOS en Android. Geen externe afhankelijkheden. Meer dan 4k downloads, onder MIT-licentie.
+</TLDR>
+
+## Methode 1: Community-plugins (aanbevolen)
+
+1. Open **Obsidian Instellingen** (icoon ⚙️ of `Ctrl/Cmd + ,`)
+2. Ga naar **Community plugins**
+3. Klik op **Browse**
+4. Zoek naar **"Notemd"**
+5. Klik op **Installeren**
+6. Klik op **Enable**
+
+**Gedaan!** U ziet het Notemd-icoon in uw linkerbalk.
+
+## Methode 2: Handmatige installatie
+
+### Voorwaarden
+- Obsidian 0.15.0 of hoger
+- Git (optioneel, voor klonen)
+
+### Stappen
+
+1. **Bestand downloaden** van [GitHub Releases](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/latest):
+   - `main.js`
+   - `styles.css`
+   - `manifest.json`
+
+2. **Vind de pluginmap van je vault:**
+   ```
+   <your-vault>/.obsidian/plugins/
+   ```
+
+Als de map `plugins` niet bestaat, maak hem dan aan.
+
+3. **Maak map Notemd aan:**
+   ```
+   <your-vault>/.obsidian/plugins/notemd/
+   ```
+
+4. **Kopieer de drie bestanden** naar de `notemd` map.
+
+5. **Herlaad Obsidian:**
+   - Druk op `Ctrl/Cmd + R`, of
+   - Herstart Obsidian
+
+6. **De plugin inschakelen:**
+   - Instellingen → Community plugins
+   - Vind "Notemd" in de lijst
+   - Zet het aan
+
+## Alternatief: Installeer via BRAT
+
+Als je de [BRAT plugin](https://github.com/TfTHacker/obsidian42-brat) gebruikt:
+
+1. Open de instellingen van BRAT
+2. Klik op "Add Beta plugin"
+3. Voer in: `Jacobinwwey/obsidian-NotEMD`
+4. Klik op "Add Plugin"
+5. Activeer Notemd in Community plugins
+
+## Verificatie
+
+Na de installatie controleren of Notemd werkt:
+
+1. Open een willekeurige notitie
+2. Rechtermuisknop in de editor
+3. U ziet Notemd-commando's zoals:
+   - "Process file (add links)"
+   - "Extract concepts"
+   - "Research and summarize"
+
+## Volgende stappen
+
+- **Stel de LLM-provider in:** [Quick Start →](./quick-start)
+- **Probleemoplossing:** [Common Issues →](../advanced/troubleshooting)
+
+## Systeemeisen
+
+| Platform | Versie | Status |
+|----------|---------|--------|
+| **Obsidian** | 0.15.0+ | vereist |
+| **Windows** | 7+ | ✅ Ondersteund |
+| **macOS** | 10.15+ | ✅ Ondersteund |
+| **Linux** | Elk | ✅ Ondersteund |
+| **iOS** | 15+ | ✅ Ondersteund |
+| **Android** | 5+ | ✅ Ondersteund |
+
+## Oninstallatie
+
+Om Notemd te verwijderen:
+
+1. Instellingen → Community plugins
+2. Zoek "Notemd"
+3. Klik op het ❌-icoon
+4. Optioneel: verwijder de pluginmap: `<vault>/.obsidian/plugins/notemd/`
+
+Uw gegevens (notities, conceptnotities, etc.) blijven onveranderd.
+
+## Updaten
+
+### Automatische update (aanbevolen)
+Obsidian controleert automatisch op updates voor plugins. Wanneer er een nieuwe versie beschikbaar is:
+1. Instellingen → Community plugins
+2. Klik op "Controleer op updates"
+3. Klik op "Update" naast Notemd
+
+### Handmatige update
+Download de nieuwste versie en vervang de drie bestanden in uw pluginmap.
+
+## Hulp krijgen
+
+- 📖 [Quick Start Guide](./quick-start)
+- ❓ [FAQ](../faq)
+- 💬 [Discord Community](https://discord.gg/qnGgsQ9W)
+- 🐛 [Problemen melden](https://github.com/Jacobinwwey/obsidian-NotEMD/issues)

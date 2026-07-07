@@ -1,0 +1,75 @@
+---
+id: china
+title: "Penyedia di China"
+description: "Sila konfigurasi Qwen, DeepSeek, GLM, dan sebagainya."
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [china providers, deepseek, qwen, glm, doubao, moonshot, mimo, minimax, baidu, siliconflow, huawei]
+concepts: [China Providers, DeepSeek, Qwen, Doubao, Moonshot, MiMo, GLM, MiniMax, Baidu, SiliconFlow, Huawei]
+citations:
+  - title: Qwen API
+    url: https://help.aliyun.com/zh/dashscope
+  - title: DeepSeek API
+    url: https://platform.deepseek.com
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# Penyedia di China
+
+<TLDR>
+**Notemd menyokong penyedia dari kawasan China serta yang berasal dari China melalui titik hujung yang kebanyakannya serasi dengan OpenAI.** Senarai semasa termasuk DeepSeek, Qwen, Qwen Code, Doubao, Moonshot, Xiaomi MiMo, GLM, MiniMax, Baidu Qianfan, SiliconFlow, Huawei Cloud MaaS, dan Z AI. Kelebihannya ialah jangkauan serantau serta kawalan kos; risikonya pula ialah penamaan model yang berbeza mengikut penyedia serta sekatan akaun.
+
+Ini merupakan sebahagian daripada [Obsidian Panduan Pengurusan Pengetahuan AI](/docs/pillar-ai-knowledge).
+</TLDR>
+
+## Pengaturan
+
+Buat akaun penyedia, hasilkan kunci API, kemudian pilih tetapan awal Notemd yang sesuai daripada menggunakan profil OpenAI umum. Tetapan awal tersebut mempunyai Base URL lalai, model, mod ujian API, tingkah laku penemuan model, serta sebarang medan UI khusus penyedia.
+
+Gunakan pemilihan model mengikut tugas dengan agresif di sini. Sebagai contoh, gunakan DeepSeek atau GLM untuk kerja yang memerlukan penaakulan yang banyak, gunakan Qwen atau Moonshot untuk kerja bahasa Cina yang meluas, dan hantar tugas pengaturcaraan ke Qwen Code apabila akaun tersebut menyokong model pengaturcaraan.
+
+## Titik Hujung Dan Pengesahan
+
+| Penyedia | Model Lalai | Base URL |
+|----------|---------------|----------|
+| DeepSeek | `deepseek-v4-pro` | `api.deepseek.com` |
+| Qwen | `qwen3-235b-a22b` | `dashscope.aliyuncs.com/compatible-mode/v1` |
+| Qwen Code | `qwen3-coder-plus` | `dashscope.aliyuncs.com/compatible-mode/v1` |
+| Doubao | (ID titik hujung diperlukan) | `ark.cn-beijing.volces.com/api/v3` |
+| Moonshot | `kimi-k2-0905-preview` | `api.moonshot.cn/v1` |
+| Xiaomi MiMo | `mimo-v2.5-pro` | `api.xiaomimimo.com/v1` |
+| GLM | `glm-5` | `open.bigmodel.cn/api/paas/v4` |
+| MiniMax | `MiniMax-M2.7` | `api.minimaxi.com/v1` |
+| Baidu Qianfan | `ernie-4.5-turbo-32k` | `qianfan.baidubce.com/v2` |
+| SiliconFlow | `Qwen/QwQ-32B` | `api.siliconflow.cn/v1` |
+| Huawei Cloud MaaS | `DeepSeek-V3` | `api.modelarts-maas.com/v1` |
+| Z AI | `glm-5` | `api.z.ai/api/paas/v4` |
+
+**Nota:** Doubao memerlukan ID titik hujung Ark (format: `ep-xxxxxxxx-xxxx-xxxx`) dan bukannya nama model standard.
+
+Kebanyakan penyedia ini menggunakan runtime yang serasi dengan OpenAI, tetapi semantik akaun serta model mereka berbeza. Gunakan Base URL khusus untuk setiap tetapan awal kecuali jika anda telah sahkan titik hujung alternatif akaun tersebut.
+
+## Penemuan Model
+
+DeepSeek, Qwen, Qwen Code, Doubao, Moonshot, Xiaomi MiMo, GLM, Z AI, MiniMax, Baidu Qianfan, dan SiliconFlow menggunakan penemuan model yang serasi dengan OpenAI apabila penyedia menyokong senarai. Huawei Cloud MaaS menggunakan mod `huaweicloud-modelarts-models` kerana metadata pelaksanaan ModelArts tidak sama dengan senarai `/v1/models` umum.
+
+Jangan anggap kegagalan penemuan sebagai bukti bahawa perbualan tidak boleh dilakukan. Beberapa penyedia membenarkan perbualan sambil membataskan kebenaran senarai model. Dalam kes itu, simpan ID model yang jelas dalam profil dan sahkan dengan ujian sambungan.
+
+## Pemecahan masalah
+
+- Autentikasi berjaya tetapi perbualan gagal: nama model mungkin berada di luar hak atau kawasan akaun.
+- Doubao gagal dengan nama model biasa: gunakan ID titik hujung Ark dalam medan model apabila pelaksanaan anda memerlukannya.
+- Jawapan penaakulan dipotong: periksa had token keluaran khusus penyedia serta tetapan had token berdasarkan model milik Notemd.
+- Rangkaian serantau berbeza: gunakan titik hujung kawasan China penyedia apabila mesin vault berada di dalam China; gunakan titik hujung antarabangsa hanya apabila akaun serta laluan rangkaian kedua-duanya sah.
+
+## Bila Perlu Digunakan
+
+Gunakan penyedia di China apabila kelewatan serantau, akses pembayaran/akaun, kualiti bahasa Cina, atau kos merupakan kekangan utama. Pilih OpenAI, Anthropic, Google, atau penyedia tempatan secara langsung apabila anda memerlukan sempadan protokol yang lebih mudah atau konsistensi penyelidikan ralat antara penyedia yang lebih baik.
+
+---
+
+## Langkah Seterusnya
+
+- [LLM Providers](/docs/providers/overview) -- Konfigurasi penuh, model setiap tugas, dan logik percubaan semula
+- [Penyelesaian Masalah](/docs/advanced/troubleshooting) -- Perbaiki masalah sambungan serantau dan ralat pengesahan

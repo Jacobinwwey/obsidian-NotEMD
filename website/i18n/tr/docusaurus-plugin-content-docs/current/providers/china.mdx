@@ -1,0 +1,75 @@
+---
+id: china
+title: "Çin Sağlayıcıları"
+description: "Qwen, DeepSeek, GLM vb. ayarlarını yapılandırın."
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [china providers, deepseek, qwen, glm, doubao, moonshot, mimo, minimax, baidu, siliconflow, huawei]
+concepts: [China Providers, DeepSeek, Qwen, Doubao, Moonshot, MiMo, GLM, MiniMax, Baidu, SiliconFlow, Huawei]
+citations:
+  - title: Qwen API
+    url: https://help.aliyun.com/zh/dashscope
+  - title: DeepSeek API
+    url: https://platform.deepseek.com
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# Çin Sağlayıcıları
+
+<TLDR>
+**Notemd, çoğunlukla OpenAI ile uyumlu uç noktalar aracılığıyla Çin bölgesine ve Çin menşeli sağlayıcılara destek sağlar.** Mevcut liste DeepSeek, Qwen, Qwen Code, Doubao, Moonshot, Xiaomi MiMo, GLM, MiniMax, Baidu Qianfan, SiliconFlow, Huawei Cloud MaaS ve Z AI içerir. Faydası bölgesel erişim ve maliyet kontrolüdür; risk ise sağlayıcıya özgü model adlandırması ve hesap kısıtlamalarıdır.
+
+Bu içerik [Obsidian AI Bilgi Yönetimi Kılavuzu](/docs/pillar-ai-knowledge) serisinin bir parçasıdır.
+</TLDR>
+
+## Kurulum
+
+Sağlayıcı hesabını oluşturun, bir API anahtarı üretin ve genel OpenAI profili yerine uygun Notemd sağlayıcı ön ayarını seçin. Bu ön ayar varsayılan Base URL, model, API test modu, model keşif davranışı ve sağlayıcıya özgü herhangi bir UI alanını içerir.
+
+Burada görev bazlı model seçimini aktif bir şekilde kullanın. Örneğin, mantık gerektiren iş akışlarında DeepSeek veya GLM kullanın, geniş Çince içerikli işler için Qwen veya Moonshot kullanın ve kodlama görevleri için hesabın kodlayıcı modellerini sunduğunda Qwen Code kullanın.
+
+## Uç Nokta ve Kimlik Doğrulama
+
+| Sağlayıcı | Varsayılan Model | Base URL |
+|----------|---------------|----------|
+| DeepSeek | `deepseek-v4-pro` | `api.deepseek.com` |
+| Qwen | `qwen3-235b-a22b` | `dashscope.aliyuncs.com/compatible-mode/v1` |
+| Qwen Code | `qwen3-coder-plus` | `dashscope.aliyuncs.com/compatible-mode/v1` |
+| Doubao | (Uç nokta kimliği gereklidir) | `ark.cn-beijing.volces.com/api/v3` |
+| Moonshot | `kimi-k2-0905-preview` | `api.moonshot.cn/v1` |
+| Xiaomi MiMo | `mimo-v2.5-pro` | `api.xiaomimimo.com/v1` |
+| GLM | `glm-5` | `open.bigmodel.cn/api/paas/v4` |
+| MiniMax | `MiniMax-M2.7` | `api.minimaxi.com/v1` |
+| Baidu Qianfan | `ernie-4.5-turbo-32k` | `qianfan.baidubce.com/v2` |
+| SiliconFlow | `Qwen/QwQ-32B` | `api.siliconflow.cn/v1` |
+| Huawei Cloud MaaS | `DeepSeek-V3` | `api.modelarts-maas.com/v1` |
+| Z AI | `glm-5` | `api.z.ai/api/paas/v4` |
+
+**Not:** Standart bir model adı yerine Doubao, `ep-xxxxxxxx-xxxx-xxxx` formatındaki bir Ark uç nokta kimliği gerektirir.
+
+Bu sağlayıcıların çoğu ortak OpenAI ile uyumlu çalışma zamanını kullanır, ancak hesap ve model semantiği farklıdır. Hesabın alternatif uç noktasını doğrulamadığınız sürece özel ön ayara ait Base URL kullanın.
+
+## Model Keşfi
+
+DeepSeek, Qwen, Qwen Code, Doubao, Moonshot, Xiaomi MiMo, GLM, Z AI, MiniMax, Baidu Qianfan ve SiliconFlow, sağlayıcı liste oluşturmayı desteklediğinde OpenAI ile uyumlu model keşfi kullanır. Huawei Cloud MaaS, ModelArts dağıtım meta verileri genel `/v1/models` listesiyle aynı olmadığı için `huaweicloud-modelarts-models` modunu kullanır.
+
+Keşif başarısızlığını sohbetin mümkün olmadığının kanıti olarak görmeyin. Bazı sağlayıcılar model liste izinlerini sınırlarken de sohbete izin verir. Bu durumda profilde açık bir model kimliği tutun ve bağlantı testiyle doğrulama yapın.
+
+## Sorun Giderme
+
+- Kimlik doğrulaması başarılı ancak sohbet başarısız: Model adı hesabın yetki kapsamı veya bölgesi dışında olabilir.
+- Normal bir model adıyla Doubao başarısız olursa: Dağıtımınız bunu gerektiriyorsa model alanına Ark uç nokta kimliğini kullanın.
+- Mantık tabanlı yanıtlar kısaltılıyor: Sağlayıcıya özgü maksimum çıktı token sayısını ve Notemd'nun model bilgisine dayalı maksimum token ayarlarını kontrol edin.
+- Bölgesel ağ yapıları farklılık gösterir: Vault makinesi Çin içindeyse sağlayıcının Çin bölgesi uç noktasını kullanın; hem hesap hem de ağ yolu geçerli olduğunda yalnızca uluslararası uç noktayı kullanın.
+
+## Ne Zaman Kullanılmalı
+
+Bölgesel gecikme, ödeme/hesap erişimi, Çince kalitesi veya maliyet birincil kısıtlama olduğunda Çinli sağlayıcıları kullanın. Daha basit bir protokol sınırı veya sağlayıcılar arası daha güçlü hata ayıklama tutarlılığı istiyorsanız doğrudan OpenAI, Anthropic, Google veya yerel sağlayıcıları tercih edin.
+
+---
+
+## Sonraki Adımlar
+
+- [LLM Sağlayıcılar](/docs/providers/overview) -- Tam yapılandırma, görev başına modeller ve yeniden deneme mantığı
+- [Sorun Giderme](/docs/advanced/troubleshooting) -- Bölgesel bağlantı ve kimlik doğrulama hatalarını düzeltin

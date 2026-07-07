@@ -1,0 +1,435 @@
+---
+id: configuration
+title: "Configuração"
+description: "Configure as configurações e preferências de Notemd"
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [configuration, settings, customization, preferences]
+concepts: [Configuration, Per-Task Models, Output Paths, Custom Workflows]
+citations:
+  - title: Obsidian
+    url: https://obsidian.md
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# Configuração
+
+<TLDR>
+**A configuração Notemd abrange 6 áreas principais:** (1) provedores LLM e chaves API, (2) seleção do modelo por tarefa, (3) caminhos e modelos de saída, (4) idioma UI e idioma de saída, (5) serviços de busca (Tavily/DuckDuckGo), (6) fluxos de trabalho personalizados. Todas as configurações ficam em Obsidian Settings → Notemd. As alterações entram em vigor imediatamente.
+</TLDR>
+
+## Visão Geral das Configurações
+
+Acesso: **Obsidian Settings (⚙️) → Notemd**
+
+### Seções Principais
+
+1. **Configuração do Provedor** — chaves API, base URLs, modelos
+2. **Configurações da Tarefa** — seleção do modelo por tarefa
+3. **Configuração de Saída** — onde salvar os arquivos gerados
+4. **Configurações de Idioma** — UI e idiomas de saída
+5. **Integração de Busca** — configuração Tavily/DuckDuckGo
+6. **Fluxos de Trabalho** — cadeias personalizadas de botões
+7. **Avançado** — diagnósticos, processamento em lote, chunking
+
+---
+
+## 1. Configuração do Provedor
+
+### Adicionando um Provedor
+
+1. **Selecione o provedor** na lista suspensa (mais de 30 disponíveis)
+2. **Insira a chave API**
+3. **Opcional**: Defina uma base personalizada URL (para proxies/gateways)
+4. **Clique em "Obter Lista de Modelos"** para verificar a conexão
+5. **Selecione o modelo padrão**
+
+### Provedores Comuns
+
+#### OpenAI
+```
+Provider: OpenAI
+API Key: sk-...
+Base URL: https://api.openai.com/v1 (default)
+Model: gpt-4o-mini
+```
+
+#### Anthropic (Claude)
+```
+Provider: Anthropic
+API Key: sk-ant-...
+Model: claude-sonnet-4-6
+```
+
+#### Ollama (Local)
+```
+Provider: Ollama
+Base URL: http://localhost:11434 (default)
+Model: llama3.1
+API Key: (not required)
+```
+
+#### DeepSeek
+```
+Provider: DeepSeek
+API Key: sk-...
+Model: deepseek-chat
+```
+
+### Vários Provedores
+
+É possível configurar vários provedores e alternar entre eles por tarefa:
+- **Provedor principal**: Usado como fallback
+- **Provedores específicos da tarefa**: Substituem para tarefas específicas
+
+---
+
+## 2. Modelos Específicos da Tarefa
+
+Configure modelos diferentes para tarefas distintas a fim de otimizar custo/qualidade:
+
+### Tipos de Tarefa
+
+| Tarefa | Modelo Padrão | Finalidade |
+|------|--------------|---------|
+| **Vinculação** | Provedor Principal | Identificar conceitos para links da wiki |
+| **Geração de Conceitos** | Fornecedor principal | Extrair e descrever conceitos |
+| **Pesquisa** | Fornecedor principal | Resumir resultados de busca na web |
+| **Tradução** | Fornecedor principal | Traduzir texto |
+| **Geração de Diagramas** | Fornecedor principal | Gerar diagramas Mermaid/Canvas |
+
+### Exemplo: Configuração otimizada em termos de custo
+
+```
+Linking: gpt-4o-mini (fast, many calls)
+Concept Generation: claude-sonnet-4-6 (quality extraction)
+Research: gpt-4o (web-grounded)
+Translation: gemini-flash (multilingual)
+Diagram: ollama/llama3.1 (free, local)
+```
+
+### Como configurar
+
+1. **Configurações → Notemd → Configurações da tarefa**
+2. Para cada tarefa, escolha:
+   - ✅ **Usar o fornecedor principal** (padrão)
+   - 🔄 **Usar fornecedor personalizado** → selecionar fornecedor + modelo
+
+---
+
+## 3. Configuração de saída
+
+### Saída das notas dos conceitos
+
+**Onde as notas de conceito novas são salvas:**
+
+```
+Settings → Output → Concept Folder
+Default: concepts/
+```
+
+**Modelo:**
+```
+Settings → Output → Concept Template
+Default:
+---
+tags: [concept]
+created: {{date}}
+---
+
+# {{concept}}
+
+{{description}}
+
+## Backlinks
+{{backlinks}}
+```
+
+### Opções de Estrutura de Pastas
+
+**Opção 1: Plana (todos os conceitos em uma única pasta)**
+```
+vault/
+└── concepts/
+    ├── Machine Learning.md
+    ├── Neural Networks.md
+    └── Deep Learning.md
+```
+
+**Opção 2: Hierárquica (por pasta de origem)**
+```
+vault/
+├── papers/
+│   └── concepts/
+│       └── Transformer.md
+└── notes/
+    └── concepts/
+        └── Attention Mechanism.md
+```
+
+Configurar: **Configurações → Saída → Usar Pastas Hierárquicas**
+
+### Saída do Diagrama
+
+**Onde os diagramas são salvos:**
+```
+Settings → Output → Diagram Folder
+Default: diagrams/
+```
+
+**Formato:**
+- `.mmd` (Mermaid origem)
+- `.canvas` (JSON Canvas)
+- `.html` (Vega-Lite)
+
+---
+
+## 4. Configurações de Idioma
+
+### UI Idioma
+
+**Idioma da interface** (botões, menus, diálogos):
+
+```
+Settings → Language → UI Language
+Options: 21+ languages
+Default: System language
+```
+
+Suportados: Inglês, 简体中文, 繁體中文, 日本語, 한국어, Español, Français, Deutsch, Русский, العربية e mais.
+
+### Idioma de Saída
+
+**Linguagem do conteúdo gerado** (notas conceituais, resumos de pesquisa):
+
+```
+Settings → Language → Output Language
+Options: Same as UI languages
+Default: Same as UI
+```
+
+**Caso de uso:** Chinês UI + saída em inglês para pesquisas bilíngues.
+
+### Alvo de tradução
+
+**Linguagem alvo padrão** para tarefas de tradução:
+
+```
+Settings → Translation → Target Language
+Default: English
+```
+
+---
+
+## 5. Integração de busca
+
+### Tavily (Recomendado)
+
+**Serviço de busca otimizado por IA:**
+
+```
+Settings → Search → Service: Tavily
+API Key: tvly-...
+```
+
+Obter chave: [tavily.com](https://tavily.com/)
+
+**Recursos:**
+- Resultados de alta qualidade
+- Resumos otimizados por IA
+- Citações da fonte
+
+### DuckDuckGo (Experimental)
+
+**Nenhuma chave API necessária:**
+
+```
+Settings → Search → Service: DuckDuckGo
+```
+
+**Observação:** Qualidade inferior, sem personalização.
+
+---
+
+## 6. Configuração do fluxo de trabalho
+
+### Criando fluxos de trabalho personalizados
+
+**Os fluxos de trabalho conectam várias tarefas em um único botão.**
+
+1. **Configurações → Fluxos de trabalho → Adicionar fluxo de trabalho**
+2. **Nome**: "Fluxo de Análise de Papel"
+3. **DSL**: `process-current-add-links>extract-concepts-current>research-and-summarize>summarize-as-mermaid`
+4. **Salvar**
+
+Um novo botão aparece na barra lateral esquerda.
+
+### Sintaxe do DSL
+
+**Formato:** `action1>action2>action3`
+
+**Ações disponíveis:**
+- `process-current-add-links` — Adicionar links da wiki à nota atual
+- `extract-concepts-current` — Gerar notas conceituais
+- `research-and-summarize` — Pesquisa na web + resumo
+- `translate-current` — Traduzir a nota atual
+- `summarize-as-mermaid` — Gerar diagrama Mermaid
+- `process-folder-add-links` — Processar pastas em lote
+
+**Exemplos de fluxos de trabalho:**
+
+**Extração Rápida de Conceitos:**
+```
+process-current-add-links>extract-concepts-current
+```
+
+**Pesquisa Profunda:**
+```
+process-current-add-links>research-and-summarize>extract-concepts-current
+```
+
+**Análise Multilíngue:**
+```
+translate-current>process-current-add-links>extract-concepts-current
+```
+
+---
+
+## 7. Configurações Avançadas
+
+### Processamento em Lote
+
+**Processar vários arquivos em paralelo:**
+
+```
+Settings → Advanced → Batch Processing
+Concurrency: 3 (default)
+```
+
+Quanto maior, mais rápido, mas mais chamadas API.
+
+### Fragmentação Inteligente
+
+**Para notas longas, divida em fragmentos:**
+
+```
+Settings → Advanced → Smart Chunking
+Chunk Size: 2000 words (default)
+Overlap: 200 words (default)
+```
+
+Impede erros de limite de token.
+
+### Painel de diagnósticos
+
+**Visualizar logs detalhados:**
+
+```
+Settings → Advanced → Enable Diagnostics
+```
+
+Mostra:
+- API solicitações/respostas
+- Uso de tokens
+- Tempos de processamento
+- Erros
+
+### Detecção de Conceitos Duplicados
+
+**Evite conceitos quase idênticos:**
+
+```
+Settings → Advanced → Synonym Suppression
+Threshold: 0.8 (default, 0-1)
+```
+
+Quanto maior, mais agressiva é a fusão.
+
+---
+
+## Perfis de Configuração
+
+### Configurações de Exportação/Importação
+
+**Compartilhe configurações entre dispositivos:**
+
+1. **Configurações → Avançado → Exportar Configuração**
+2. Salva `notemd-config.json`
+3. Em novo dispositivo: **Importar Configuração**
+
+**O que está incluído:**
+- Chaves do provedor API (opcional)
+- Seleções de modelo
+- Caminhos de saída
+- Fluxos de trabalho personalizados
+
+---
+
+## Configurações Recomendadas
+
+### Para Estudantes
+
+```
+Provider: OpenAI (gpt-4o-mini)
+Concept Folder: concepts/
+UI Language: System
+Output Language: System
+Workflow: "Study Flow" (add-links>extract-concepts)
+```
+
+### Para Pesquisadores
+
+```
+Providers:
+  - Linking: DeepSeek (cheap, many calls)
+  - Concepts: Claude Sonnet (high quality)
+  - Research: GPT-4o (web-grounded)
+Concept Folder: notes/concepts/
+Hierarchical: Yes
+Workflow: "Paper Flow" (add-links>extract>research>diagram)
+```
+
+### Para usuários preocupados com privacidade
+
+```
+Provider: Ollama (llama3.1)
+All tasks: Local model
+Search: DuckDuckGo (no API)
+Diagnostics: Off
+```
+
+### Para trabalho bilíngue
+
+```
+UI Language: Chinese
+Output Language: English
+Translation Target: Chinese
+Provider: Gemini (multilingual)
+```
+
+---
+
+## Solução de problemas de configuração
+
+### As configurações não foram salvas
+- Verifique as permissões do arquivo em `.obsidian/plugins/notemd/`
+- Tente: Desativar o plugin → Reativá-lo
+
+### Chave API inválida
+- Sem espaços extras
+- Verifique a data de expiração
+- Verifique os créditos no painel do provedor
+
+### Os modelos não estão sendo carregados
+- Clique em "Obter lista de modelos" para atualizar
+- Verifique a conectividade da rede
+- Tente outro provedor
+
+---
+
+## Próximos passos
+
+- 📖 [Explorar recursos](../features/wiki-links)
+- 🔌 [Guias de configuração do provedor](../providers/overview)
+- ❓ [Perguntas Frequentes](../faq)

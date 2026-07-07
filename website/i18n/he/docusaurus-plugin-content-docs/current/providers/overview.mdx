@@ -1,0 +1,189 @@
+---
+id: overview
+title: "ספקי LLM"
+description: "להגדיר 36 ספקי LLM — ענן, שער ומקומי — עם בחירת מודל לכל משימה"
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [LLM providers, API, OpenAI, Anthropic, Google, DeepSeek, Qwen, Ollama, per-task model]
+concepts: [LLM Integration, API Providers, Per-Task Models, OpenAI Compatible, Ollama, China Providers]
+citations:
+  - title: OpenAI API
+    url: https://platform.openai.com
+  - title: Anthropic API
+    url: https://docs.anthropic.com
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# ספקי LLM
+
+<TLDR>
+**Notemd תומך ב-36 ספקי LLM ב-4 סוגי תעבורה.** כל הקריאות API משתמשות ב-HTTP גולמי (בלי SDKs) עם ניסיונות חוזרים אוטומטיים, חלופת תעבורה ואחסון תגובות ל-5 דקות. בחירת מודל לכל משימה מאפשרת להשתמש במודלים זולים לשליפת רעיונות ובמודלים חזקים למחקר. אין צורך במפתח API עבור ספקים מקומיים (Ollama, LMStudio).
+</TLDR>
+
+זהו חלק מה[Obsidian מדריך ניהול ידע AI](/docs/pillar-ai-knowledge).
+
+## קטגוריות של ספקים
+
+### ספקי ענן
+
+| ספק | בסיס URL ברירת מחדל | מודל ברירת המחדל | טמפרטורה |
+|----------|-----------------|---------------|-------------|
+| **DeepSeek** | `api.deepseek.com` | `deepseek-v4-pro` | 0.5 |
+| **OpenAI** | `api.openai.com/v1` | `gpt-4o` | 0.5 |
+| **Anthropic** | `api.anthropic.com` | `claude-3-5-sonnet-20240620` | 0.5 |
+| **Google** | `generativelanguage.googleapis.com/v1` | `gemini-2.0-flash-exp` | 0.5 |
+| **Mistral** | `api.mistral.ai/v1` | `mistral-large-latest` | 0.5 |
+| **xAI** | `api.x.ai/v1` | `grok-4` | 0.7 |
+| **Cerebras** | `api.cerebras.ai/v1` | `gpt-oss-120b` | 0.5 |
+| **Fireworks** | `api.fireworks.ai/inference/v1` | `kimi-k2p5` | 0.5 |
+| **Nebius** | `api.studio.nebius.com/v1` | `openai/gpt-oss-120b` | 0.3 |
+
+### ספקי שער/פרוקסי
+
+| ספק | בסיס URL ברירת מחדל | מודל ברירת המחדל | הערות |
+|----------|-----------------|---------------|-------|
+| **OpenRouter** | `openrouter.ai/api/v1` | `anthropic/claude-3.7-sonnet` | מוסיף כותרות `HTTP-Referer` + `X-Title` |
+| **GitHub Models** | `models.github.ai/inference` | `gpt-4o-mini` | מוסיף כותרת `X-GitHub-Api-Version` |
+| **AIHubMix** | `aihubmix.com/v1` | `gpt-4o-mini` | מוסיף כותרת `APP-Code` |
+| **PPIO** | `api.ppinfra.com/v3/openai` | `qwen/qwen3-32b` | |
+| **Hugging Face** | `router.huggingface.co/v1` | `openai/gpt-oss-120b` | |
+| **Vercel AI Gateway** | `ai-gateway.vercel.sh/v1` | `anthropic/claude-sonnet-4.5` | |
+| **Requesty** | `router.requesty.ai/v1` | `anthropic/claude-3-7-sonnet-latest` | |
+| **Together** | `api.together.xyz/v1` | `meta-llama/Meta-Llama-3.1-70B-Instruct-Turbo` | |
+| **LiteLLM** | `localhost:4000/v1` | `your-proxy-model` | מפתח API אופציונלי |
+| **New API** | `localhost:3000/v1` | `gpt-4.1` | מפתח API אופציונלי |
+| **OpenAI Compatible** | (user-configured) | `your-model-id` | קצה מותאם אישית |
+
+### ספקים בסין
+
+| ספק | בסיס ברירת המחדל URL | מודל ברירת המחדל | הערות |
+|----------|-----------------|---------------|-------|
+| **Qwen** | `dashscope.aliyuncs.com/compatible-mode/v1` | `qwen3-235b-a22b` | Alibaba DashScope |
+| **Qwen Code** | `dashscope.aliyuncs.com/compatible-mode/v1` | `qwen3-coder-plus` | ממוקד קידוד |
+| **Doubao** | `ark.cn-beijing.volces.com/api/v3` | (נדרש מזהה קצה) | ByteDance Volcengine |
+| **Moonshot** | `api.moonshot.cn/v1` | `kimi-k2-0905-preview` | Kimi |
+| **Xiaomi MiMo** | `api.xiaomimimo.com/v1` | `mimo-v2.5-pro` | |
+| **GLM** | `open.bigmodel.cn/api/paas/v4` | `glm-5` | קצה Zhipu, סין |
+| **Z AI** | `api.z.ai/api/paas/v4` | `glm-5` | קצה Zhipu, בינלאומי |
+| **MiniMax** | `api.minimaxi.com/v1` | `MiniMax-M2.7` | |
+| **Baidu Qianfan** | `qianfan.baidubce.com/v2` | `ernie-4.5-turbo-32k` | |
+| **SiliconFlow** | `api.siliconflow.cn/v1` | `Qwen/QwQ-32B` | פלטפורמת אחסון מודלים |
+| **Huawei Cloud MaaS** | `api.modelarts-maas.com/v1` | `DeepSeek-V3` | |
+
+**Doubao דורש מזהה קצה Ark** (פורמט: `ep-xxxxxxxx-xxxx-xxxx`). יש להחליף את המקום התופס הברירתי.
+
+### ספקים מקומיים
+
+| ספק | בסיס ברירת המחדל URL | מודל ברירת המחדל | הערות |
+|----------|-----------------|---------------|-------|
+| **Ollama** | `localhost:11434/api` | `llama3` | אין מפתח API. שידור NDJSON. גילוי מודלים דרך `/api/tags` |
+| **LMStudio** | `localhost:1234/v1` | `local-model` | שולח `"EMPTY"` כטוקן בארר. גילוי תואם OpenAI |
+| **OVMS** | `localhost:8000/v3` | `openvino-model` | OpenVINO Model Server |
+| **Azure OpenAI** | (מוגדר על ידי המשתמש) | `gpt-4o` | שם ההפצה ב- URL. כותרת `api-key` |
+
+## בחירת מודל למשימה
+
+Notemd תומך בספק ובמודל עצמאיים לכל משימה. הפעלה באמצעות `useMultiModelSettings: true`.
+
+### משימות זמינות
+
+| משימה | מפתח הגדרות | ספק ברירת המחדל |
+|------|-------------|-----------------|
+| הוספת לינקים (הכנסת לינק wiki) | `addLinksProvider` / `addLinksModel` | DeepSeek |
+| מחקר (חיפוש אינטרנט + סיכום) | `researchProvider` / `researchModel` | DeepSeek |
+| יצירה מהכותרת | `generateTitleProvider` / `generateTitleModel` | DeepSeek |
+| תרגום | `translateProvider` / `translateModel` | DeepSeek |
+| ייצור דיאגרמות | `summarizeToMermaidProvider` / `Model` | DeepSeek |
+| שליפת רעיונות | `extractConceptsProvider` / `Model` | DeepSeek |
+| שליפת טקסט מקורי | `extractOriginalTextProvider` / `Model` | DeepSeek |
+
+### סדר הפתרון
+
+1. אם `useMultiModelSettings` פעיל → השתמש בספק ובמודל הספציפיים למשימה
+2. אם עריכת מודל המשימה ריקה → חזור למודל הברירת המחדל של הספק
+3. אם ספק המשימה בלתי תקין → חזור ל- `activeProvider` הגלובלי
+4. אם `useMultiModelSettings` כבוי → כל המשימות משתמשות ב-`activeProvider` הגלובלי
+
+### תצורות מומלצות
+
+```
+# Researcher: power for research, cheap for everything else
+activeProvider: DeepSeek
+extractConceptsProvider: DeepSeek
+researchProvider: OpenAI        # GPT-4o for better research quality
+summarizeToMermaidProvider: DeepSeek
+
+# Privacy-first: local only
+activeProvider: Ollama
+addLinksProvider: Ollama
+extractConceptsProvider: Ollama
+
+# Budget bilingual
+activeProvider: DeepSeek
+translateProvider: Google      # Gemini Flash for translation
+researchProvider: SiliconFlow  # Cheaper China-based routing
+```
+
+## ארכיטקטורת הקריאה של API
+
+### שכבות ההעברה
+
+1. **Obsidian `requestUrl`** — ראשית (מובנה, עובד על כל הפלטפורמות)
+2. **Desktop HTTP** — מודולי Node.js `http`/`https` (שידור + בקשות ארוכות)
+3. **Web `fetch`** — חלופה כאשר מודולי Node.js אינם זמינים
+
+התוסף מעביר אוטומטית בין שכבות ההעברה במקרה של שגיאות רשת זמניות.
+
+### לוגיקת ניסיונות מחדש
+
+- **מצב רגיל** (`enableStableApiCall: false`): ניסיון אחד. במקרה של כישלון זמני, הוא מעלה אוטומטית לניסיון חוזר יציב.
+- **מצב ניסיונות מחדש יציב** (`enableStableApiCall: true`): עד 4 ניסיונות (1 + 3 ניסיונות חוזרים) עם מרווחים של 5 שניות.
+- **שגיאות זמניות הגורמות לניסיון מחדש**: `err_connection_closed`, `err_connection_reset`, `err_timed_out`, `econnreset`, `econnaborted`, `etimedout`, `socket hang up`, `network request failed`
+- **לא ניתנים לניסיון מחדש**: HTTP 400, 401, 403, 404
+
+### אחסון בקשות בזיכרון
+
+מאגר זיכרון LRU של 5 דקות המבוסס על מפתח של ספק + מודל + טמפרטורה + הודעה + תוכן. בקשות זהות שמגיעות לאחר 5 דקות מקבלות את התוצאות המאוחסנות מיד.
+
+### טיפול במודלי החשיבה
+
+מודלים שאינם תומכים בתפקיד `system` (DeepSeek R1, OpenAI o1/o3/o4/gpt-5) משלבים אוטומטית את ההודעות של המערכת והמשתמש להודעת משתמש אחת.
+
+DeepSeek-specific: `thinkingEnabled` מוסיף `{ thinking: { type: 'enabled' } }` לבקשה. `reasoningEffort` (נמוך/בינוני/גבוה) נמסר כ- `reasoning_effort`. בודק שמספר הטוקנים המרבי בפלט ≥ 8000 כאשר החשיבה מופעלת.
+
+### הערכת טוקנים
+
+`estimateTokens(text)`: `Math.ceil(text.length / 4)` — הירור של 4 אותיות לכל טוקן. משמש לאכיפת `maxResearchContentTokens` לפני שליחה ל- LLM.
+
+אין מעקב אחר עלויות מיושם.
+
+## גילוי מודלים
+
+| מצב | ספקים | קצה |
+|------|-----------|----------|
+| `ollama-tags` | Ollama | `/api/tags` |
+| `google-models` | Google | רשימת המודלים API |
+| `anthropic-models` | Anthropic | רשימת המודלים API |
+| `openai-compatible-models` | DeepSeek, Qwen, Mistral, וכו' | `/v1/models` |
+| `openrouter-models` | OpenRouter | רשימת המודלים API |
+| `github-models` | GitHub Models | הסקה API |
+| `none` | Azure OpenAI | מושבת (דורש שם פריסה) |
+
+## התחלה מהירה
+
+1. **בחרו ספק** — DeepSeek (סין), OpenAI (בינלאומי), או Ollama (מקומי/חינמי)
+2. **הזינו מפתח API** — הגדרות → Notemd → ספק → מפתח API
+3. **בדקו חיבור** — לחצו על כפתור הבדיקה
+4. **אופציונלי: מודלים לכל משימה** — הפעילו `useMultiModelSettings` והגדירו אותו בנפרד
+
+עבור Ollama: אין צורך במפתח API. רק ודאו ש`ollama serve` פועל.
+
+---
+
+## צעדים באופק
+
+- 📝 [הערות רעיוניות](/docs/features/concept-notes) — משתמש במודל חילוץ לכל משימה
+- 🎨 [דיאגרמות](/docs/features/diagrams) — משתמש במודל דיאגרמות לכל משימה
+- 🔍 [מחקר](/docs/features/research) — משתמש במודל ספציפי למחקר
+- ⚙️ [הגדרות](/docs/getting-started/configuration) — הפנייה לכל ההגדרות

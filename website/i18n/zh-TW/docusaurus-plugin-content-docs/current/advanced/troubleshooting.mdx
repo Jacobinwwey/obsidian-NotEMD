@@ -1,0 +1,161 @@
+---
+id: troubleshooting
+title: "故障排除"
+description: "常見問題與解決方法"
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [troubleshooting, errors, diagnostics, connection test]
+concepts: [Troubleshooting, Error Handling, Diagnostics]
+citations:
+  - title: Obsidian
+    url: https://obsidian.md
+  - title: Obsidian API
+    url: https://docs.obsidian.md
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# 故障排除
+
+<TLDR>
+**大多數 Notemd 問題可分為四類： API 關鍵問題、網路連線問題、認證錯誤（401/403），以及速率限制（429）。** 內建的連線測試與診斷面板能快速找出根本原因。此頁面涵蓋了所有常見的錯誤訊息、其成因及解決方法。對於未在此列出的問題，請搭配診斷輸出結果在 GitHub Issues 上報告。
+
+這是[Obsidian AI知識管理指南](/docs/pillar-ai-knowledge)的一部分。
+</TLDR>
+
+## 概覽
+
+Notemd 取決於外部服務──包括 LLM 提供商與搜尋 API 服務──因此大多數問題都源自於外部的插件。設定中的診斷面板可提供最後一次 API 呼叫的結構化資訊，包含請求 URL、回應狀態以及錯誤內容。在進一步調查之前，請務必先查看此面板。
+
+## 運作原理：診斷功能
+
+### 連線測試
+
+每個供應商的設定區段都有一個**「測試連線」**按鈕。點擊它會傳送一個最簡化的 API 請求（通常是模型清單或簡短的補全內容），並回報成功狀態或具體的 HTTP 錯誤。這是驗證您的 API 金鑰與基礎 URL 是否正確的最快速方式。
+
+### 診斷面板
+
+**設定 --> Notemd --> 診斷**顯示：
+
+| 字段 | 內容 |
+|-------|---------|
+| 最後的供應商 | 最後呼叫的是哪個供應商 |
+| 最後的型號 | 最後一次稱呼的是哪個型號 |
+| 最後狀態 | HTTP 狀態碼或傳輸錯誤 |
+| 最後的錯誤 | 來自 API 的原始錯誤訊息 |
+| 最後一次請求 URL | 上次請求的完整內容 URL（已隱藏 API 關鍵字） |
+| 最後的回應內容 | 回應內容被截斷（前 500 個字元） |
+
+在 GitHub 上回報問題時，請複製完整的診斷輸出。
+
+## 常見錯誤
+
+### API 金鑰無效或遺失
+
+**症狀：** HTTP 401 或「提供的 API 金鑰不正確」
+
+**原因：** API 金鑰遺失、包含空白字元，或屬於其他供應商。
+
+**修復：**
+1. 驗證金鑰是否沒有開頭或結尾的空白。
+2. 確認金鑰與所選供應商相符（OpenAI 金鑰無法與 Anthropic 一起使用）
+3. 檢查您的帳戶是否有剩餘點數或有效的訂閱。
+4. 點擊 **“Test Connection”** 以進行驗證
+
+### 網路/連線錯誤
+
+**症狀：** `ERR_CONNECTION_REFUSED`, `ERR_TIMED_OUT`, `Socket hang up`, `Network request failed`
+
+**原因：** 從您的電腦無法連接到 API 這個端點。
+
+**修復：**
+1. 檢查您的網際網路連線。
+2. 如果在代理或防火牆後，請確認 API 域名未被封鎖
+3. 針對 Ollama：確認 `ollama serve` 正在運作（`ollama list` 應該會回傳模型）
+4. 關於 LMStudio：確認伺服器正在 `localhost:1234` 上運作
+5. 試著使用不同的傳輸方式——行動用戶應確保 `requestUrl` 傳輸方式已啟用
+6. 啟用 `enableStableApiCall` 以在暫時性錯誤時自動重試
+
+### 403 禁止訪問
+
+**症狀：** HTTP 403
+
+**原因：** 您的 API 金鑰雖然有效，但沒有對所請求資源的存取權限。
+
+**修復：**
+1. 部分模型需要特殊權限（例如，透過 Azure 使用的 GPT-4 需要指定部署名稱）
+2. 有些服務供應商會依計劃等級限制模型使用 -- 請檢查您的帳戶
+3. 可能會有地區限制（部分中國的服務供應商會封鎖國際 IP，反之亦然）
+4. 驗證模型名稱的拼寫是否正確（例如，當您的方案只允許使用迷你模型時，應為 `gpt-4o` 而非 `gpt-4o-mini`）
+
+### 速率限制 (429)
+
+**症狀：** HTTP 429 或「速率限制已達上限」
+
+**原因：** 短時間內的請求數量過多。
+
+**修復：**
+1. 將 `batchConcurrency` 減少為 `1` 或 `2`
+2. 請稍等幾分鐘後再重試。
+3. 請查閱您所選方案等級的供應商速率限制說明文件。
+4. 啟用 `enableStableApiCall` 以實現帶有延遲的自動重試
+5. 考慮轉換為提供更高上限的服務商（DeepSeek, Ollama）
+
+### 未找到模型
+
+**症狀：**「未找到模型」或 HTTP 404
+
+**原因：** 所選供應商上並不存在該模型名稱。
+
+**修復：**
+1. 點擊 **「取得模型清單」**，即可查看您所使用服務供應商的所有可用模型
+2. 有些型號名稱會隨時間改變——請在供應商的文件中確認目前的名稱。
+3. 對於 Ollama：執行 `ollama list` 可以查看已下載的模型；僅有已下載的模型可用
+
+### 未產生連結 / 未產生概念
+
+**症狀：** 指令已執行，但沒有產生任何輸出
+
+**原因：** LLM 返回了空值或無法解析的回應。
+
+**修復：**
+1. 檢查診斷面板，查看實際的 LLM 回應
+2. 試試功能更強大的模型（有些小型模型在處理結構化輸出時會有困難）。
+3. 請確保該備註的內容足夠豐富（超過 50 個字）。
+4. 檢視您的自訂提示詞，確認其中沒有衝突的指示。
+5. 暫時關閉同義詞壓制功能，查看是否過度進行過濾
+
+### Doubao 缺少端點 ID
+
+**症狀：** 使用 ByteDance Doubao 提供服務時出現錯誤
+
+**原因：** Doubao 需要的是 Ark 終點 ID（格式：`ep-xxxxxxxx-xxxx-xxxx`），而非模型名稱。
+
+**修正方式：** 以 Volcengine 控制台中的實際端點 ID，取代預設的佔位模型。
+
+## 設定
+
+| 診斷設定 | 位置 | 用途 |
+|--------------------|----------|---------|
+| **測試連線** | 設定 --> 提供者區段 | 驗證 API 金鑰及連線狀態 |
+| **取得模型清單** | 設定 --> 提供者區段 | 確認哪些型號可以存取 |
+| `enableStableApiCall` | 設定 --> 進階 | 啟用帶有延遲重試功能 |
+| `batchConcurrency` | 設定 --> 批次處理 | 控制平行處理數量以避免速率限制 |
+
+## 如何回報問題
+
+如果您的問題未在上述範圍內：
+
+1. 打開 **設定 --> Notemd --> 診斷**
+2. 複製完整的診斷輸出
+3. 在 [github.com/Jacobinwwey/obsidian-NotEMD/issues](https://github.com/Jacobinwwey/obsidian-NotEMD/issues) 開啟一個 GitHub Issue。
+4. 包含：Obsidian 版本、Notemd 版本、供應商、型號、診斷輸出，以及重現問題的步驟
+5. 將您在所有共享日誌中的 API 金鑰加以隱藏
+
+---
+
+## 接下來的步驟
+
+- [LLM 提供者](/docs/providers/overview) -- 完整的提供者設定參考資料
+- [批次處理](/docs/advanced/batch-processing) -- 大規模作業的並發與重試設定
+- [Custom Prompts](/docs/advanced/custom-prompts) -- 透過調整提示語句來修正意外的 LLM 行為

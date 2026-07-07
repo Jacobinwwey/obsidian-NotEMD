@@ -1,0 +1,75 @@
+---
+id: china
+title: "चीन के प्रदाता"
+description: "Qwen, DeepSeek, GLM आदि को कॉन्फ़िगर करें."
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [china providers, deepseek, qwen, glm, doubao, moonshot, mimo, minimax, baidu, siliconflow, huawei]
+concepts: [China Providers, DeepSeek, Qwen, Doubao, Moonshot, MiMo, GLM, MiniMax, Baidu, SiliconFlow, Huawei]
+citations:
+  - title: Qwen API
+    url: https://help.aliyun.com/zh/dashscope
+  - title: DeepSeek API
+    url: https://platform.deepseek.com
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# चीन के प्रदाता
+
+<TLDR>
+**Notemd मुख्यतः OpenAI-संगत एंडपॉइंट्स के माध्यम से चीन-क्षेत्र और चीन-मूल प्रदाताओं का समर्थन करता है.** वर्तमान सेट में DeepSeek, Qwen, Qwen Code, Doubao, Moonshot, Xiaomi MiMo, GLM, MiniMax, Baidu Qianfan, SiliconFlow, Huawei Cloud MaaS और Z AI शामिल हैं. इसका लाभ क्षेत्रीय पहुँच और लागत नियंत्रण है; जबकि जोखिम प्रदाता-विशिष्ट मॉडल नामकरण और खाता प्रवेश नियंत्रण है.
+
+यह [Obsidian AI Knowledge Management Guide](/docs/pillar-ai-knowledge) का हिस्सा है.
+</TLDR>
+
+## सेटअप
+
+प्रदाता खाता बनाएँ, एक API कुंजी बनाएँ, फिर सामान्य OpenAI प्रोफ़ाइल के बजाय मेल खाने वाला Notemd प्रदाता प्रीसेट चुनें. यह प्रीसेट डिफ़ॉल्ट बेस URL, मॉडल, API टेस्ट मोड, मॉडल-डिस्कवरी व्यवहार और किसी भी प्रदाता-विशिष्ट UI फ़ील्ड्स को संभालता है.
+
+यहाँ प्रति-कार्य मॉडल चयन का अधिकतम उपयोग करें. उदाहरण के लिए, तर्क-भारी वर्कफ़्लो में DeepSeek या GLM रखें, व्यापक चीनी भाषा के कार्यों के लिए Qwen या Moonshot का उपयोग करें, और जब खाता कोडर मॉडल प्रदान करता हो तो कोडिंग कार्यों को Qwen Code पर भेजें.
+
+## एंडपॉइंट एवं प्रमाणीकरण
+
+| प्रदाता | डिफ़ॉल्ट मॉडल | Base URL |
+|----------|---------------|----------|
+| DeepSeek | `deepseek-v4-pro` | `api.deepseek.com` |
+| Qwen | `qwen3-235b-a22b` | `dashscope.aliyuncs.com/compatible-mode/v1` |
+| Qwen Code | `qwen3-coder-plus` | `dashscope.aliyuncs.com/compatible-mode/v1` |
+| Doubao | (एंडपॉइंट ID आवश्यक है) | `ark.cn-beijing.volces.com/api/v3` |
+| Moonshot | `kimi-k2-0905-preview` | `api.moonshot.cn/v1` |
+| Xiaomi MiMo | `mimo-v2.5-pro` | `api.xiaomimimo.com/v1` |
+| GLM | `glm-5` | `open.bigmodel.cn/api/paas/v4` |
+| MiniMax | `MiniMax-M2.7` | `api.minimaxi.com/v1` |
+| Baidu Qianfan | `ernie-4.5-turbo-32k` | `qianfan.baidubce.com/v2` |
+| SiliconFlow | `Qwen/QwQ-32B` | `api.siliconflow.cn/v1` |
+| Huawei Cloud MaaS | `DeepSeek-V3` | `api.modelarts-maas.com/v1` |
+| Z AI | `glm-5` | `api.z.ai/api/paas/v4` |
+
+**नोट:** Doubao के लिए मानक मॉडल नाम के बजाय एक आर्क एंडपॉइंट ID (प्रारूप: `ep-xxxxxxxx-xxxx-xxxx`) आवश्यक है.
+
+इनमें से अधिकांश प्रदाता साझा OpenAI-संगत रनटाइम का उपयोग करते हैं, लेकिन उनके खाता और मॉडल सेमैंटिक्स अलग-अलग होते हैं. जब तक आप खाते के वैकल्पिक एंडपॉइंट की पुष्टि नहीं कर लेते, तब तक प्रीसेट-विशिष्ट बेस URL ही रखें.
+
+## मॉडल खोज
+
+DeepSeek, Qwen, Qwen Code, Doubao, Moonshot, Xiaomi MiMo, GLM, Z AI, MiniMax, Baidu Qianfan और SiliconFlow, जब प्रदाता सूचीबद्धता का समर्थन करता है, तो OpenAI-संगत मॉडल डिस्कवरी का उपयोग करते हैं. Huawei Cloud MaaS `huaweicloud-modelarts-models` मोड का उपयोग करता है क्योंकि मॉडलआर्ट्स डिप्लॉयमेंट मेटाडेटा सामान्य `/v1/models` सूची से अलग होता है.
+
+डिस्कवरी विफल होने को यह साबित करने के रूप में न लें कि चैट संभव नहीं है. कई प्रदाता मॉडल-सूची अनुमतियों को सीमित करते हुए भी चैट की अनुमति देते हैं. ऐसी स्थिति में, प्रोफ़ाइल में एक स्पष्ट मॉडल ID रखें और कनेक्शन परीक्षण से इसकी पुष्टि करें.
+
+## समस्या निवारण
+
+- प्रमाणीकरण सफल होता है लेकिन चैट विफल हो जाती है: मॉडल नाम खाते के अधिकारों या क्षेत्र से बाहर हो सकता है.
+- Doubao सामान्य मॉडल नाम के साथ विफल हो जाता है: यदि आपके डिप्लॉयमेंट के लिए आवश्यक हो तो मॉडल फ़ील्ड में आर्क एंडपॉइंट ID का उपयोग करें.
+- तर्क-आधारित प्रतिक्रियाएँ संक्षिप्त हो जाती हैं: प्रदाता-विशिष्ट अधिकतम आउटपुट टोकन और Notemd की मॉडल-संवेदनशील अधिकतम-टोकन सेटिंग्स की जाँच करें.
+- क्षेत्रीय नेटवर्किंग अलग-अलग होती है: जब वॉल्ट मशीन चीन के भीतर हो तो प्रदाता के चीन-क्षेत्र एंडपॉइंट का उपयोग करें; केवल तभी अंतरराष्ट्रीय एंडपॉइंट का उपयोग करें जब खाता और नेटवर्क पथ दोनों ही वैध हों.
+
+## कब उपयोग करें
+
+जब क्षेत्रीय विलंबता, भुगतान/खाता पहुँच, चीनी भाषा में गुणवत्ता, या लागत प्रमुख सीमाबद्धता हों, तो चीनी प्रदाताओं का उपयोग करें। जब आपको एक सरल प्रोटोकॉल सीमा या प्रदाताओं के बीच मजबूत डीबगिंग सुसंगतता चाहिए, तो सीधे OpenAI, Anthropic, Google, या स्थानीय प्रदाताओं को प्राथमिकता दें.
+
+---
+
+## अगले चरण
+
+- [LLM Providers](/docs/providers/overview) -- पूर्ण कॉन्फ़िगरेशन, प्रति‑टास्क मॉडल और रिट्राय लॉजिक
+- [Troubleshooting](/docs/advanced/troubleshooting) -- क्षेत्रीय कनेक्टिविटी एवं प्रमाणीकरण संबंधी त्रुटियों को ठीक करें

@@ -39,16 +39,42 @@ Answer-engine source map: https://jacobinwwey.github.io/obsidian-NotEMD/llms.txt
 ## Language Scope
 
 - English remains the canonical source surface.
-- The public docs route set is available in English, Simplified Chinese, Traditional Chinese, Japanese, French, German, Spanish, and Korean.
+- The public docs route set is available in English, Simplified Chinese, Traditional Chinese, Traditional Chinese for Taiwan, Japanese, French, German, Spanish, Korean, Italian, Portuguese, Brazilian Portuguese, Russian, Arabic, Persian, Hindi, Bengali, Dutch, Swedish, Finnish, Danish, Norwegian, Polish, Turkish, Hebrew, Thai, Greek, Czech, Hungarian, Romanian, Ukrainian, Vietnamese, Indonesian, Malay.
 - Localized documentation entrypoints:
   - https://jacobinwwey.github.io/obsidian-NotEMD/zh-CN/
   - https://jacobinwwey.github.io/obsidian-NotEMD/zh-CN/docs/intro
   - https://jacobinwwey.github.io/obsidian-NotEMD/zh-Hant/docs/intro
+  - https://jacobinwwey.github.io/obsidian-NotEMD/zh-TW/docs/intro
   - https://jacobinwwey.github.io/obsidian-NotEMD/ja/docs/intro
   - https://jacobinwwey.github.io/obsidian-NotEMD/fr/docs/intro
   - https://jacobinwwey.github.io/obsidian-NotEMD/de/docs/intro
   - https://jacobinwwey.github.io/obsidian-NotEMD/es/docs/intro
   - https://jacobinwwey.github.io/obsidian-NotEMD/ko/docs/intro
+  - https://jacobinwwey.github.io/obsidian-NotEMD/it/docs/intro
+  - https://jacobinwwey.github.io/obsidian-NotEMD/pt/docs/intro
+  - https://jacobinwwey.github.io/obsidian-NotEMD/pt-BR/docs/intro
+  - https://jacobinwwey.github.io/obsidian-NotEMD/ru/docs/intro
+  - https://jacobinwwey.github.io/obsidian-NotEMD/ar/docs/intro
+  - https://jacobinwwey.github.io/obsidian-NotEMD/fa/docs/intro
+  - https://jacobinwwey.github.io/obsidian-NotEMD/hi/docs/intro
+  - https://jacobinwwey.github.io/obsidian-NotEMD/bn/docs/intro
+  - https://jacobinwwey.github.io/obsidian-NotEMD/nl/docs/intro
+  - https://jacobinwwey.github.io/obsidian-NotEMD/sv/docs/intro
+  - https://jacobinwwey.github.io/obsidian-NotEMD/fi/docs/intro
+  - https://jacobinwwey.github.io/obsidian-NotEMD/da/docs/intro
+  - https://jacobinwwey.github.io/obsidian-NotEMD/no/docs/intro
+  - https://jacobinwwey.github.io/obsidian-NotEMD/pl/docs/intro
+  - https://jacobinwwey.github.io/obsidian-NotEMD/tr/docs/intro
+  - https://jacobinwwey.github.io/obsidian-NotEMD/he/docs/intro
+  - https://jacobinwwey.github.io/obsidian-NotEMD/th/docs/intro
+  - https://jacobinwwey.github.io/obsidian-NotEMD/el/docs/intro
+  - https://jacobinwwey.github.io/obsidian-NotEMD/cs/docs/intro
+  - https://jacobinwwey.github.io/obsidian-NotEMD/hu/docs/intro
+  - https://jacobinwwey.github.io/obsidian-NotEMD/ro/docs/intro
+  - https://jacobinwwey.github.io/obsidian-NotEMD/uk/docs/intro
+  - https://jacobinwwey.github.io/obsidian-NotEMD/vi/docs/intro
+  - https://jacobinwwey.github.io/obsidian-NotEMD/id/docs/intro
+  - https://jacobinwwey.github.io/obsidian-NotEMD/ms/docs/intro
 - Simplified Chinese full docs route set:
   - https://jacobinwwey.github.io/obsidian-NotEMD/zh-CN/docs/advanced/custom-prompts
   - https://jacobinwwey.github.io/obsidian-NotEMD/zh-CN/docs/advanced/batch-processing

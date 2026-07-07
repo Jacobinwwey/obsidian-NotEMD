@@ -1,0 +1,63 @@
+---
+id: local
+title: "Modele locale"
+description: "Configurați Ollama și LLM-urile locale"
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [local, ollama, lmstudio, provider, configuration, offline]
+concepts: [Local Models, Ollama, LMStudio, Offline]
+citations:
+  - title: Ollama
+    url: https://ollama.com
+  - title: LM Studio
+    url: https://lmstudio.ai
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# Modele locale
+
+<TLDR>
+**Furnizorii locali nu stochează conținutul note-urilor pe APIs găzduite.** Calea locală actuală acoperă Ollama cu transportul nativ `ollama` și LMStudio prin transportul compatibil cu OpenAI. Nu este necesar niciun cheie API pentru niciuna dintre căile acestea, dar serverul local și modelul trebuie deja să ruleze.
+
+Acesta face parte din [Obsidian Ghidul de gestionare a cunoștințelor AI](/docs/pillar-ai-knowledge).
+</TLDR>
+
+## Configurare
+
+Pentru Ollama, instalați Ollama, trageți modelul dorit, porniți serverul și adăugați un profil de furnizor `Ollama` în Notemd. Pentru LMStudio, încărcați un model pe serverul local al LM Studio și adăugați un profil de furnizor `LMStudio`.
+
+Modelele locale sunt dependențe operaționale, nu doar setări. Notemd poate apela doar ceea ce procesul local expune, așa că verificați modelul local din afara Obsidian înainte de a depana pluginul.
+
+## Endpoint și autentificare
+
+| Furnizor | Base URL | Modelul implicit | API Cheie | Note |
+|----------|----------|---------------|---------|-------|
+| Ollama | `localhost:11434/api` | `llama3` | Nu este necesar | NDJSON streaming; descoperirea modelului prin `/api/tags` |
+| LMStudio | `localhost:1234/v1` | `local-model` | Nu este necesar | Trimite `"EMPTY"` ca token de poartă; compatibil cu OpenAI |
+
+Ollama utilizează calea nativă `/chat` de sub Base-ul său URL. LMStudio urmează rutina compatibilă cu OpenAI, specificată de `chat/completions`, și așteaptă un model care este încărcat pe serverul local.
+
+## Descoperirea modelelor
+
+Ollama utilizează modul de descoperire `ollama-tags` și afișează etichetele extrase local. LMStudio folosește descoperirea modelurilor compatibile cu OpenAI atunci când serverul său expune `/v1/models`.
+
+Dacă descoperirea nu returnează nimic, este de obicei o problemă legată de starea serverului local: modelul nu a fost extrat, nu a fost încărcat, sau serverul este conectat la un host/port diferit față de cel specificat în profil.
+
+## Dezvoltarea de soluții
+
+- Refuz de conexiune: porniți Ollama sau LM Studio și confirmați portul configurat.
+- Modelul nu a fost găsit: trageți eticheta Ollama sau încărcați modelul LM Studio înainte de testare.
+- Rezultate lente: reduceți dimensiunea contextului, folosiți un model local mai mic sau direcționați sarcini grele către un furnizor găzduit.
+- Răspunsuri goale sau malformate: confirmați că profilul furnizorului selectat corespunde protocolului serverului local; Ollama și LMStudio nu pot fi interschimbate.
+
+## Când să fiți utilizatori
+
+Folosiți furnizori locali pentru seifuri private, lucru offline sau sarcini repetitive ieftine. Nu presupuneți că varianta locală este automat mai bună pentru sinteză de cercetare sau raționament lung; calitatea modelului și limitele hardware sunt factorii de echilibru.
+
+---
+
+## Următoarele pași
+
+- [LLM Furnizori](/docs/providers/overview) -- Configurație completă și setare a modelului pentru fiecare sarcină
+- [Dezolvarea problemelor](/docs/advanced/troubleshooting) -- Corectați erorile de refuz de conexiune atunci când serverul local nu este rulat

@@ -1,0 +1,189 @@
+---
+id: overview
+title: "LLM Sağlayıcılar"
+description: "Görev başına model seçimi özelliğiyle bulut, ağ geçidi ve yerel olmak üzere 36 LLM sağlayıcıyı yapılandırın"
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [LLM providers, API, OpenAI, Anthropic, Google, DeepSeek, Qwen, Ollama, per-task model]
+concepts: [LLM Integration, API Providers, Per-Task Models, OpenAI Compatible, Ollama, China Providers]
+citations:
+  - title: OpenAI API
+    url: https://platform.openai.com
+  - title: Anthropic API
+    url: https://docs.anthropic.com
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# LLM Sağlayıcılar
+
+<TLDR>
+**Notemd, 4 farklı taşıma türünde 36 LLM sağlayıcıyı destekler.** Tüm API çağrıları otomatik yeniden deneme, taşıma geri dönüşü ve 5 dakikalık yanıt önbellekleme özellikleriyle ham HTTP kullanır (SDK yoktur). Görev başına model seçimi sayesinde kavram çıkarma için ucuz modelleri ve araştırma için güçlü modelleri kullanabilirsiniz. Yerel sağlayıcılar (Ollama, LMStudio) için herhangi bir API anahtarı gerekmez.
+</TLDR>
+
+Bu içerik [Obsidian AI Bilgi Yönetimi Kılavuzu](/docs/pillar-ai-knowledge) serisinin bir parçasıdır.
+
+## Sağlayıcı Kategorileri
+
+### Bulut Sağlayıcıları
+
+| Sağlayıcı | Varsayılan Temel URL | Varsayılan Model | Sıcaklık |
+|----------|-----------------|---------------|-------------|
+| **DeepSeek** | `api.deepseek.com` | `deepseek-v4-pro` | 0.5 |
+| **OpenAI** | `api.openai.com/v1` | `gpt-4o` | 0.5 |
+| **Anthropic** | `api.anthropic.com` | `claude-3-5-sonnet-20240620` | 0.5 |
+| **Google** | `generativelanguage.googleapis.com/v1` | `gemini-2.0-flash-exp` | 0.5 |
+| **Mistral** | `api.mistral.ai/v1` | `mistral-large-latest` | 0.5 |
+| **xAI** | `api.x.ai/v1` | `grok-4` | 0.7 |
+| **Cerebras** | `api.cerebras.ai/v1` | `gpt-oss-120b` | 0.5 |
+| **Fireworks** | `api.fireworks.ai/inference/v1` | `kimi-k2p5` | 0.5 |
+| **Nebius** | `api.studio.nebius.com/v1` | `openai/gpt-oss-120b` | 0.3 |
+
+### Ağ Geçidi / Proxy Sağlayıcıları
+
+| Sağlayıcı | Varsayılan Temel URL | Varsayılan Model | Notlar |
+|----------|-----------------|---------------|-------|
+| **OpenRouter** | `openrouter.ai/api/v1` | `anthropic/claude-3.7-sonnet` | `HTTP-Referer` + `X-Title` başlıkları ekler |
+| **GitHub Models** | `models.github.ai/inference` | `gpt-4o-mini` | `X-GitHub-Api-Version` başlığı ekler |
+| **AIHubMix** | `aihubmix.com/v1` | `gpt-4o-mini` | `APP-Code` başlığı ekler |
+| **PPIO** | `api.ppinfra.com/v3/openai` | `qwen/qwen3-32b` | |
+| **Hugging Face** | `router.huggingface.co/v1` | `openai/gpt-oss-120b` | |
+| **Vercel AI Gateway** | `ai-gateway.vercel.sh/v1` | `anthropic/claude-sonnet-4.5` | |
+| **Requesty** | `router.requesty.ai/v1` | `anthropic/claude-3-7-sonnet-latest` | |
+| **Together** | `api.together.xyz/v1` | `meta-llama/Meta-Llama-3.1-70B-Instruct-Turbo` | |
+| **LiteLLM** | `localhost:4000/v1` | `your-proxy-model` | İsteğe bağlı API anahtarı |
+| **Yeni API** | `localhost:3000/v1` | `gpt-4.1` | İsteğe bağlı API anahtarı |
+| **OpenAI Compatible** | (kullanıcı tarafından yapılandırıldı) | `your-model-id` | Özel uç nokta |
+
+### Çin Sağlayıcıları
+
+| Sağlayıcı | Varsayılan Temel URL | Varsayılan Model | Notlar |
+|----------|-----------------|---------------|-------|
+| **Qwen** | `dashscope.aliyuncs.com/compatible-mode/v1` | `qwen3-235b-a22b` | Alibaba DashScope |
+| **Qwen Code** | `dashscope.aliyuncs.com/compatible-mode/v1` | `qwen3-coder-plus` | Kodlamaya odaklı |
+| **Doubao** | `ark.cn-beijing.volces.com/api/v3` | (Uç nokta kimliği gereklidir) | ByteDance Volcengine |
+| **Moonshot** | `api.moonshot.cn/v1` | `kimi-k2-0905-preview` | Kimi |
+| **Xiaomi MiMo** | `api.xiaomimimo.com/v1` | `mimo-v2.5-pro` | |
+| **GLM** | `open.bigmodel.cn/api/paas/v4` | `glm-5` | Çin uç noktası Zhipu |
+| **Z AI** | `api.z.ai/api/paas/v4` | `glm-5` | Uluslararası uç noktası Zhipu |
+| **MiniMax** | `api.minimaxi.com/v1` | `MiniMax-M2.7` | |
+| **Baidu Qianfan** | `qianfan.baidubce.com/v2` | `ernie-4.5-turbo-32k` | |
+| **SiliconFlow** | `api.siliconflow.cn/v1` | `Qwen/QwQ-32B` | Model barındırma platformu |
+| **Huawei Cloud MaaS** | `api.modelarts-maas.com/v1` | `DeepSeek-V3` | |
+
+**Doubao, bir Ark uç nokta ID'si gerektirir** (format: `ep-xxxxxxxx-xxxx-xxxx`). Varsayılan yer tutucu değiştirilmelidir.
+
+### Yerel Sağlayıcılar
+
+| Sağlayıcı | Varsayılan Temel URL | Varsayılan Model | Notlar |
+|----------|-----------------|---------------|-------|
+| **Ollama** | `localhost:11434/api` | `llama3` | API anahtarı yok. NDJSON akışı. `/api/tags` aracılığıyla model keşfi |
+| **LMStudio** | `localhost:1234/v1` | `local-model` | `"EMPTY"`'yı taşıyıcı token olarak gönderir. OpenAI-uyumlu keşif |
+| **OVMS** | `localhost:8000/v3` | `openvino-model` | OpenVINO Model Server |
+| **Azure OpenAI** | (kullanıcı tarafından yapılandırıldı) | `gpt-4o` | URL içindeki dağıtım adı. `api-key` başlığı |
+
+## Görev Bazlı Model Seçimi
+
+Notemd, her görev için ayrı sağlayıcı ve model destekler. `useMultiModelSettings: true` ile etkinleştirin.
+
+### Mevcut Görevler
+
+| Görev | Ayarlar Anahtarı | Varsayılan Sağlayıcı |
+|------|-------------|-----------------|
+| Bağlantı Ekleme (wiki bağlantısı ekleme) | `addLinksProvider` / `addLinksModel` | DeepSeek |
+| Araştırma (web araması + özetleme) | `researchProvider` / `researchModel` | DeepSeek |
+| Başlıktan Oluşturma | `generateTitleProvider` / `generateTitleModel` | DeepSeek |
+| Çeviri | `translateProvider` / `translateModel` | DeepSeek |
+| Diyagram Oluşturma | `summarizeToMermaidProvider` / `Model` | DeepSeek |
+| Kavram Çıkarma | `extractConceptsProvider` / `Model` | DeepSeek |
+| Orijinal Metin Çıkarma | `extractOriginalTextProvider` / `Model` | DeepSeek |
+
+### Çözüm Sırası
+
+1. Eğer `useMultiModelSettings` etkinse → göreve özel sağlayıcı + model kullanılır
+2. Görev modeli özel ayarı boşsa → sağlayıcının varsayılan modeline dönülür
+3. Görev sağlayıcısı geçersizse → küresel `activeProvider` kullanılır
+4. Eğer `useMultiModelSettings` kapalıysa → tüm görevler küresel `activeProvider` kullanır
+
+### Önerilen Yapılandırmalar
+
+```
+# Researcher: power for research, cheap for everything else
+activeProvider: DeepSeek
+extractConceptsProvider: DeepSeek
+researchProvider: OpenAI        # GPT-4o for better research quality
+summarizeToMermaidProvider: DeepSeek
+
+# Privacy-first: local only
+activeProvider: Ollama
+addLinksProvider: Ollama
+extractConceptsProvider: Ollama
+
+# Budget bilingual
+activeProvider: DeepSeek
+translateProvider: Google      # Gemini Flash for translation
+researchProvider: SiliconFlow  # Cheaper China-based routing
+```
+
+## API Çağrı Mimarisi
+
+### Taşıma Katmanları
+
+1. **Obsidian `requestUrl`** — birincil (yerleşik, tüm platformlarda çalışır)
+2. **Masaüstü HTTP** — Node.js `http`/`https` modülleri (akışlı + uzun istekler)
+3. **Web `fetch`** — Node.js modülleri kullanılamadığında yedek çözüm
+
+Eklenti, geçici ağ hatalarında otomatik olarak taşıma yöntemleri arasında geçiş yapar.
+
+### Yeniden Deneme Mantığı
+
+- **Normal mod** (`enableStableApiCall: false`): Tek deneme. Geçici bir hata durumunda otomatik olarak daha istikrarlı bir yeniden denemeye geçilir.
+- **İstikrarlı yeniden deneme modu** (`enableStableApiCall: true`): 5 saniyelik aralıklarla toplam 4 deneme (1 + 3 yeniden deneme)
+- **Yeniden denemeyi tetikleyen geçici hatalar**: `err_connection_closed`, `err_connection_reset`, `err_timed_out`, `econnreset`, `econnaborted`, `etimedout`, `socket hang up`, `network request failed`
+- **Yeniden deneme yapılamayanlar**: HTTP 400, 401, 403, 404
+
+### Yanıt Önbellekleme
+
+Sağlayıcı + model + sıcaklık + istek + içerik anahtarlarıyla 5 dakikalık bellek içi LRU önbellek. 5 dakika içinde gelen benzer istekler anında önbellekten yanıt alır.
+
+### Mantık Modeli İşleme
+
+`system` rolünü desteklemeyen modeller (DeepSeek R1, OpenAI o1/o3/o4/gpt-5) otomatik olarak sistem + kullanıcı isteklerini tek bir kullanıcı mesajı halinde birleştirir.
+
+DeepSeek-özel: `thinkingEnabled` isteğe `{ thinking: { type: 'enabled' } }` ekler. `reasoningEffort` (düşük/orta/yüksek) değeri `reasoning_effort` olarak iletilir. Düşünme modu açıkken maksimum çıktı token sayısının ≥ 8000 olup olmadığı doğrulanır.
+
+### Token Tahmini
+
+`estimateTokens(text)`: `Math.ceil(text.length / 4)` — her token için 4 karakterlik bir yaklaşım. LLM'a göndermeden önce `maxResearchContentTokens` koşulunu sağlamak için kullanılır.
+
+Maliyet takibi uygulanmamıştır.
+
+## Model Keşfi
+
+| Mod | Sağlayıcılar | Uç Nokta |
+|------|-----------|----------|
+| `ollama-tags` | Ollama | `/api/tags` |
+| `google-models` | Google | Modeller listesi API |
+| `anthropic-models` | Anthropic | Modeller listesi API |
+| `openai-compatible-models` | DeepSeek, Qwen, Mistral vb. | `/v1/models` |
+| `openrouter-models` | OpenRouter | Model listesi API |
+| `github-models` | GitHub Models | Çıkarım API |
+| `none` | Azure OpenAI | Devre dışı (dağıtım adı gereklidir) |
+
+## Hızlı Başlangıç
+
+1. **Bir sağlayıcı seçin** — DeepSeek (Çin), OpenAI (Uluslararası) veya Ollama (Yerel/Ücretsiz)
+2. **API anahtarını girin** — Ayarlar → Notemd → Sağlayıcı → API Anahtarı
+3. **Bağlantıyı test edin** — Test butonuna tıklayın
+4. **İsteğe bağlı: Görev bazlı modeller** — `useMultiModelSettings`'yı etkinleştirin ve ayrı ayrı yapılandırın
+
+Ollama için: API anahtarı gerekmez. Sadece `ollama serve`'ın çalıştığından emin olun.
+
+---
+
+## Sonraki Adımlar
+
+- 📝 [Kavram Notları](/docs/features/concept-notes) — Görev bazlı çıkarma modelini kullanır
+- 🎨 [Şemalar](/docs/features/diagrams) — Görev bazlı şema modelini kullanır
+- 🔍 [Araştırma](/docs/features/research) — Araştırma özelindeki modeli kullanır
+- ⚙️ [Yapılandırma](/docs/getting-started/configuration) — Tüm ayar referansları

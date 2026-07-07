@@ -1,0 +1,181 @@
+---
+id: quick-start
+title: "Panduan Permulaan Cepat"
+description: "Mulakan dengan Notemd dalam masa 5 minit"
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [quick start, tutorial, getting started, first steps]
+concepts: [Quick Start, LLM Configuration, One-Click Workflow, Ollama]
+citations:
+  - title: Obsidian
+    url: https://obsidian.md
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# Panduan Permulaan Cepat
+
+<TLDR>
+**Mula gunakan Notemd dalam masa 5 minit.** Tiga langkah: (1) Tambah kunci LLM API (atau gunakan Ollama tempatan), (2) Buka nota dan jalankan “Process file (add links)”, (3) Terokai aliran kerja satu klik di sidebar. Menyokong lebih daripada 30 penyedia. Tiada keperluan untuk menulis kod. Berfungsi tanpa sambungan internet dengan Ollama.
+</TLDR>
+
+## Langkah 1: Konfigurasikan Penyedia LLM Pertama Anda (2 min)
+
+### Pilihan A: Penyedia Awan (OpenAI, Anthropic, dll.)
+
+1. Buka **Settings** → **Notemd**
+2. Di bawah **LLM Provider Configuration**, pilih penyedia daripada senarai turun
+3. Masukkan **API Key** anda
+4. (Pilihan) Klik **“Get Model List”** untuk lihat model yang tersedia
+5. Pilih model untuk setiap jenis tugas
+
+**Pilihan popular:**
+- **OpenAI**: `gpt-4o-mini` (cepat, berpatutan)
+- **Anthropic**: `claude-sonnet-4-6` (kualiti tinggi)
+- **DeepSeek**: `deepseek-chat` (sangat berpatutan)
+
+### Pilihan B: Ollama Tempatan (Tiada kunci API diperlukan)
+
+1. Pasang [Ollama](https://ollama.com/)
+2. Muat turun model: `ollama pull llama3.1`
+3. Dalam tetapan Notemd, pilih **"Ollama"** sebagai penyedia
+4. Nama model: `llama3.1` (atau mana-mana model yang telah dimuat turun)
+
+## Langkah 2: Cuba Tugas Pertama Anda (1 minit)
+
+### Tambah Pautan Wiki ke Nota
+
+1. Buka sebarang nota yang mengandungi kandungan bermakna
+2. Klik kanan di editor
+3. Pilih **"Proses fail (tambah pautan)"**
+4. Tunggu beberapa saat
+5. Konsep utama kini berada di `[[wiki-linked]]`!
+
+**Contoh:**
+
+**Sebelum:**
+```
+Machine learning models use neural networks to process data.
+```
+
+**Selepas:**
+```
+[[Machine learning]] models use [[neural networks]] to process data.
+```
+
+## Langkah 3: Terokai Ciri-ciri (2 minit)
+
+### Keluarkan Nota Konsep
+
+1. Klik kanan → **"Keluarkan konsep daripada fail semasa"**
+2. Notemd akan mencipta fail berasingan untuk setiap konsep
+3. Semak folder konsep yang telah dikonfigurasikan (lazimnya: `concepts/`)
+4. Setiap nota konsep mempunyai pautan balik ke nota asal anda
+
+### Penyelidikan & Ringkasan
+
+1. Menyorot topik dalam nota anda
+2. Klik kanan → **"Penyelidikan dan ringkasan"**
+3. Notemd mencari di web (Tavily atau DuckDuckGo)
+4. Ringkasan ditambahkan ke nota anda bersama sumbernya
+
+### Aliran Kerja Satu Klik
+
+1. Semak **bar sisi kiri** untuk butang aliran kerja
+2. Klik **"Ekstrak Satu Klik"** pada mana-mana nota
+3. Ia berjalan: tambah pautan → ekstrak konsep → penyelidikan → hasilkan diagram
+4. Semua dalam satu klik!
+
+## Tugas Pertama yang Biasa
+
+### Tugas 1: Memproses Kertas/Artikel
+
+```
+1. Paste article content into a note
+2. Run "Process file (add links)"
+3. Run "Extract concepts"
+4. Run "Research and summarize" on unfamiliar terms
+5. Run "Summarize as Mermaid diagram" for visual structure
+```
+
+### Tugas 2: Menterjemah Nota
+
+```
+1. Highlight text to translate
+2. Right-click → "Translate to target language"
+3. Set target language in settings first
+```
+
+### Tugas 3: Cipta Peta Pengetahuan
+
+```
+1. Process 5-10 related notes with "add links"
+2. Run "Extract concepts" on each
+3. Open Graph view to see connections
+4. Your knowledge graph is forming!
+```
+
+## Petua Penyesuaian
+
+### Pemilihan Model Mengikut Tugas
+
+Anda boleh menggunakan model yang berbeza untuk tugas yang berbeza:
+
+| Tugas | Model yang Disyorkan | Sebab |
+|------|------------------|-----|
+| Tambah Pautan | `gpt-4o-mini`, `deepseek-chat` | Cepat, banyak panggilan |
+| Keluarkan Konsep | `claude-sonnet-4-6`, `gpt-4o` | Pengeluaran Kualiti Tinggi |
+| Penyelidikan | `perplexity`, `gpt-4o` | Berdasarkan Web |
+| Terjemahan | `gemini-flash`, `gpt-4o` | Berbilang Bahasa |
+| Diagram | `claude-opus`, model tempatan | Penalaran yang Kompleks |
+
+Konfigurasikan di: **Tetapan → Notemd → Model Khusus Tugas**
+
+### Aliran Kerja Buatan
+
+Buat butang anda sendiri:
+
+1. Tetapan → Notemd → Aliran Kerja
+2. Klik "Tambah Aliran Kerja"
+3. Masukkan DSL: `process-current-add-links>extract-concepts-current>research-and-summarize`
+4. Namakan ia: "Aliran Penyelidikan Saya"
+5. Butang baru muncul di sidebar
+
+## Pemecahan masalah
+
+### "Kunci API Tidak Sah"
+- Semak sama ada kunci itu betul (tiada ruang tambahan)
+- Pastikan akaun mempunyai kredit
+- Uji dengan butang "Ujian Sambungan" dalam tetapan
+
+### "Model Tidak Ditemui"
+- Klik "Dapatkan Senarai Model" untuk lihat model yang tersedia
+- Beberapa penyedia memerlukan nama model tertentu (contohnya, `gpt-4o` bukan `gpt-4`)
+
+### Pautan Tidak Muncul
+- Pastikan nota mengandungi kandungan yang mencukupi (>50 perkataan)
+- Cuba model yang lebih berkuasa
+- Semak sama ada panggilan LLM berjaya (lihat panel diagnostik)
+
+### Prestasi Perlahan
+- Gunakan model yang lebih cepat (`gpt-4o-mini` bukannya `gpt-4o`)
+- Kurangkan saiz segmen dalam tetapan
+- Aktifkan pemprosesan selari untuk tugas berkumpulan
+
+## Langkah Seterusnya
+
+- 📖 [Terokai Semua Ciri](../features/wiki-links)
+- ⚙️ [Konfigurasi Lanjutan](./configuration)
+- 🔧 [Pengaturan Penyedia LLM](../providers/overview)
+- ❓ [FAQ](../faq)
+
+## Tutorial Video
+
+Tonton video panduan cepat 3 minit (Bahasa Cina):
+[【Sumber Terbuka Percuma! Panduan Cepat NotEMD 3 Minit】](https://b23.tv/lqR0RlA)
+
+## Dapatkan Bantuan
+
+- 💬 **Discord**: [discord.gg/qnGgsQ9W](https://discord.gg/qnGgsQ9W)
+- 🐛 **Isu**: [GitHub Issues](https://github.com/Jacobinwwey/obsidian-NotEMD/issues)
+- 📚 **Dokumen**: [Dokumentasi Penuh](https://jacobinwwey.github.io/obsidian-NotEMD/)

@@ -1,0 +1,133 @@
+---
+id: installation
+title: "Indstilling"
+description: "Hvad gør man for at installere Notemd i Obsidian"
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [installation, setup, obsidian plugin]
+concepts: [Installation, Community Plugins, BRAT, Manual Install]
+citations:
+  - title: Obsidian
+    url: https://obsidian.md
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# Indstilling
+
+<TLDR>
+**Installér Notemd på under 2 minutter.** To metoder: (1) Obsidian Community Plugins (anbefales, en-klik-installation), eller (2) Manuell installation via GitHub Releases. Kræver Obsidian 0.15.0+. Virker på Windows, macOS, Linux, iOS og Android. Ingen eksterne afhængigheder. 4k+ downloads, licenseret under MIT.
+</TLDR>
+
+## Metode 1: Community-plugins (anbefales)
+
+1. Åbne **Obsidian Indstillinger** (⚙️-ikon eller `Ctrl/Cmd + ,`)
+2. Gå til **Community plugins**
+3. Klik på **Browse**
+4. Søg efter **"Notemd"**
+5. Klik på **Install**
+6. Klik på **Enable**
+
+**Gjort!** Du vil se Notemd-ikonen i din venstre sidebark.
+
+## Metode 2: Manuell installation
+
+### Forudsætninger
+- Obsidian 0.15.0 eller højere
+- Git (valgfrit, til klonering)
+
+### Trin
+
+1. **Hent filer** fra [GitHub Releases](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/latest):
+   - `main.js`
+   - `styles.css`
+   - `manifest.json`
+
+2. **Fin din plugins mapp i vaulten:**
+   ```
+   <your-vault>/.obsidian/plugins/
+   ```
+
+Hvis `plugins`-mappen ikke eksisterer, skap den.
+
+3. **Skap Notemd-mappen:**
+   ```
+   <your-vault>/.obsidian/plugins/notemd/
+   ```
+
+4. **Kopier de tre filene** ind i `notemd`-mappen.
+
+5. **Lad om Obsidian:**
+   - Tryk på `Ctrl/Cmd + R`, eller
+   - Start op igen Obsidian
+
+6. **Aktiver pluginen:**
+   - Indstillinger → Community plugins
+   - Find "Notemd" i listen
+   - Slå den til
+
+## Alternativ: Installer gennem BRAT
+
+Hvis du bruger [BRAT pluginen](https://github.com/TfTHacker/obsidian42-brat):
+
+1. Opn BRAT indstillinger
+2. Klik på "Add Beta plugin"
+3. Indtast: `Jacobinwwey/obsidian-NotEMD`
+4. Klik på "Add Plugin"
+5. Aktiver Notemd i Community plugins
+
+## Verifikation
+
+Efter installation, overprøv, om Notemd virker:
+
+1. Åbne en hvilken som helst note
+2. Højreklik i editoren
+3. Du bør se Notemd-kommandoen som:
+   - "Process file (add links)"
+   - "Extract concepts"
+   - "Research and summarize"
+
+## Næste trin
+
+- **Konfigurér LLM-udbyderen:** [Quick Start →](./quick-start)
+- **Løsning af problemer:** [Common Issues →](../advanced/troubleshooting)
+
+## Systemkrav
+
+| Platform | Version | Status |
+|----------|---------|--------|
+| **Obsidian** | 0.15.0+ | Required |
+| **Windows** | 7+ | ✅ Støttet |
+| **macOS** | 10.15+ | ✅ Støttet |
+| **Linux** | Alle | ✅ Støttet |
+| **iOS** | 15+ | ✅ Støttet |
+| **Android** | 5+ | ✅ Støttet |
+
+## Uninstallation
+
+For at fjerne Notemd:
+
+1. Indstillinger → Community-plugins
+2. Find "Notemd"
+3. Klik på ❌-ikonet
+4. Valgfrit: Fjern pluginmappen: `<vault>/.obsidian/plugins/notemd/`
+
+Dina data (noter, konceptnoter osv.) forbliver óændret.
+
+## Opdatering
+
+### Automatisk opdatering (Anbefales)
+Obsidian kontrollerer automatisk efter pluginopdateringer. Når en ny version er tilgængelig:
+1. Indstillinger → Community-plugins
+2. Klik på "Kontroller opdateringer"
+3. Klik på "Opdater" ved side af Notemd
+
+### Manuell opdatering
+Download den seneste udgave og ersätt de tre filer i din pluginmappen.
+
+## Få hjælp
+
+- 📖 [Snabbstartguide](./quick-start)
+- ❓ [FAQ](../faq)
+- 💬 [Discord Community](https://discord.gg/qnGgsQ9W)
+- 🐛 [Rapportér problemer](https://github.com/Jacobinwwey/obsidian-NotEMD/issues)

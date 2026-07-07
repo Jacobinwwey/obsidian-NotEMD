@@ -1,0 +1,161 @@
+---
+id: troubleshooting
+title: "Probleemoplossing"
+description: "Veelvoorkomende problemen en oplossingen"
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [troubleshooting, errors, diagnostics, connection test]
+concepts: [Troubleshooting, Error Handling, Diagnostics]
+citations:
+  - title: Obsidian
+    url: https://obsidian.md
+  - title: Obsidian API
+    url: https://docs.obsidian.md
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# Probleemoplossing
+
+<TLDR>
+**De meeste Notemd problemen vallen onder vier categorieën: API kernproblemen, netwerkverbinding, authenticatiefouten (401/403) en snelheidsbeperkingen (429).** De ingebouwde verbindingstest en het diagnostische paneel helpen snel de oorzaak te vinden. Op deze pagina staan alle veelvoorkomende foutmeldingen, hun oorzaak en de oplossing. Voor problemen die hier niet staan, rapporteer ze dan op GitHub Issues met de diagnostische uitvoer.
+
+Dit maakt deel uit van de [Obsidian AI Knowledge Management Guide](/docs/pillar-ai-knowledge).
+</TLDR>
+
+## Overzicht
+
+Notemd is afhankelijk van externe diensten -- LLM providers en zoek APIs -- waardoor de meeste problemen zich buiten de plugin zelf voordoen. Het diagnostische paneel in de instellingen geeft een gestructureerd overzicht van de laatste API oproep, inclusief de verzoek URL, status van het antwoord en de foutinhoud. Controleer dit altijd eerst voordat je verder onderzoekt.
+
+## Hoe het werkt: Diagnostiek
+
+### Verbindingstest
+
+Elke configuratiesectie voor providers heeft een **"Test Connection"**-knop. Door erop te klikken wordt een minimale API aanvraag gestuurd (meestal een lijst met modellen of een korte voltooiing) en wordt aangegeven of het succesvol was of dat er een specifieke HTTP fout optreedt. Dit is de snelste manier om te controleren of je API sleutel en basis URL correct zijn.
+
+### Diagnostisch paneel
+
+**Instellingen --> Notemd --> Diagnostiek** toont:
+
+| Veld | Inhoud |
+|-------|---------|
+| Laatste provider | Welke provider werd het laatst aangeroepen |
+| Laatste model | Welk model werd het laatst aangeroepen |
+| Laatste status | Statuscode HTTP of transportfout |
+| Laatste fout | Ruwe foutmelding van de API |
+| Laatste verzoek URL | Volledige URL van het laatste verzoek (vertrouwelijke API sleutel gecensureerd) |
+| Lichaam van de laatste reactie | Gekortwiekt lichaam van de reactie (eerste 500 tekens) |
+
+Kopieer de volledige diagnostische uitvoer wanneer je problemen rapporteert op GitHub.
+
+## Veelvoorkomende fouten
+
+### Sleutel API is ongeldig of ontbreekt
+
+**Symptoom:** HTTP 401 of "Onjuiste API sleutel verstrekt"
+
+**Oorzaak:** De API sleutel ontbreekt, bevat witruimte of behoort tot een andere provider.
+
+**Oplossing:**
+1. Controleer of de sleutel geen voor- of achterwaartse ruimtes heeft
+2. Zorg dat de sleutel overeenkomt met de geselecteerde provider (een OpenAI sleutel werkt niet met Anthropic)
+3. Controleer of uw account credits heeft of een actieve abonnement is
+4. Klik op **"Test Connection"** om dit te verifiëren
+
+### Netwerk-/verbindingsschade
+
+**Symptomen:** `ERR_CONNECTION_REFUSED`, `ERR_TIMED_OUT`, `Socket hang up`, `Network request failed`
+
+**Oorzaak:** Het API-eindepunt is vanaf uw apparaat niet bereikbaar.
+
+**Oplossing:**
+1. Controleer uw internetverbinding
+2. Als u zich achter een proxy of firewall bevindt, controleer of de API-domain niet geblokkeerd is
+3. Voor Ollama: controleer of `ollama serve` draait (`ollama list` moet modellen teruggeven)
+4. Voor LMStudio: controleer of de server op `localhost:1234` draait
+5. Probeer een andere transportmethode – mobiele gebruikers moeten ervoor zorgen dat de `requestUrl`-transportmethode actief is
+6. Activeer `enableStableApiCall` voor automatische herproberingen bij tijdelijke fouten
+
+### 403 Verboden
+
+**Symptomen:** HTTP 403
+
+**Oorzaak:** Uw API-sleutel is geldig, maar heeft geen toestemming voor de opgevraagde resource.
+
+**Oplossing:**
+1. Sommige modellen vereisen speciale toegang (bijv. GPT-4 via Azure heeft een benodigde deploynaam)
+2. Sommige aanbieders beperken modellen op basis van planniveau – controleer uw account
+3. Regionale beperkingen kunnen van toepassing zijn (sommige Chinese aanbieders blokkeren internationale IP’s en omgekeerd)
+4. Controleer of de naam van het model correct gespeld is (bijv. `gpt-4o` in plaats van `gpt-4o-mini` wanneer het mini-model alles is wat uw plan toestaat)
+
+### Rate Limit (429)
+
+**Symptoom:** HTTP 429 of "Rate limit exceeded"
+
+**Oorzaak:** Te veel verzoeken in een korte tijdspanne.
+
+**Oplossing:**
+1. Verlaag `batchConcurrency` naar `1` of `2`
+2. Wacht enkele minuten voordat u opnieuw probeert
+3. Bekijk de documentatie van uw aanbieder over de rate limit voor uw planniveau
+4. Activeer `enableStableApiCall` voor automatische herprobering met backoff
+5. Overweeg om over te stappen naar een aanbieder met hogere limieten (DeepSeek, Ollama)
+
+### Model Not Found
+
+**Symptoom:** "Model not found" of HTTP 404
+
+**Oorzaak:** De naam van het model bestaat niet bij de geselecteerde aanbieder.
+
+**Oplossing:**
+1. Klik op **"Get Model List"** om alle beschikbare modellen voor uw provider te zien
+2. Sommige modelnamen veranderen in de loop der tijd -- controleer de huidige naam in de documentatie van de provider
+3. Voor Ollama: voer `ollama list` uit om de opgehaalde modellen te bekijken; alleen gedownloade modellen zijn beschikbaar
+
+### Geen links / Geen concepten gegenereerd
+
+**Symptoom:** Het commando wordt uitgevoerd maar er wordt geen output gegenereerd
+
+**Oorzaak:** De LLM heeft een lege of onleesbare respons teruggegeven.
+
+**Oplossing:**
+1. Controleer het diagnostische paneel voor de werkelijke LLM-respons
+2. Probeer een krachtiger model (sommige kleine modellen hebben moeite met gestructureerde output)
+3. Zorg ervoor dat de notitie voldoende inhoud bevat (>50 woorden)
+4. Bekijk uw aangepaste prompt op conflicterende instructies
+5. Schakel tijdelijk de synoniemsuppressie uit om te zien of deze te agressief filtert
+
+### Doubao Endpoint ID ontbreekt
+
+**Symptoom:** Fout wanneer de ByteDance Doubao provider wordt gebruikt
+
+**Oorzaak:** Doubao vereist een Ark endpoint ID (formaat: `ep-xxxxxxxx-xxxx-xxxx`) in plaats van een modelnaam.
+
+**Oplossing:** Vervang het standaard placeholder-model door je eigen endpoint-ID uit de Volcengine-console.
+
+## Configuratie
+
+| Diagnostische instellingen | Locatie | Doel |
+|--------------------|----------|---------|
+| **Verbindingstest** | Instellingen --> Provider-sectie | Controleer de API-sleutel en de verbinding |
+| **Modellijst opvragen** | Instellingen --> Provider-sectie | Bevestig welke modellen toegankelijk zijn |
+| `enableStableApiCall` | Instellingen --> Geavanceerd | Activeer herproberen met backoff |
+| `batchConcurrency` | Instellingen --> Batch | Stuur paralleliteit aan om rate limits te vermijden |
+
+## Hoe problemen te melden
+
+Als je probleem hierboven niet wordt behandeld:
+
+1. Open **Instellingen --> Notemd --> Diagnostics**
+2. Kopieer de volledige diagnostische uitvoer
+3. Open een GitHub Issue op [github.com/Jacobinwwey/obsidian-NotEMD/issues](https://github.com/Jacobinwwey/obsidian-NotEMD/issues)
+4. Inclusief: Obsidian versie, Notemd versie, provider, model, diagnostische uitvoer en stappen om het probleem na te bootsen
+5. Verberg je API sleutel uit alle gedeelde logs
+
+---
+
+## Volgende stappen
+
+- [LLM Providers](/docs/providers/overview) -- Volledige referentie voor providerconfiguratie
+- [Batch Processing](/docs/advanced/batch-processing) -- Configuratie voor gelijktijdigheid en herproberingen bij grote operaties
+- [Custom Prompts](/docs/advanced/custom-prompts) -- Verwijder onverwacht LLM gedrag door prompts aan te passen

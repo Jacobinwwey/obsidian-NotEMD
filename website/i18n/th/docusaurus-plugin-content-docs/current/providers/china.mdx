@@ -1,0 +1,75 @@
+---
+id: china
+title: "ผู้ให้บริการจากประเทศจีน"
+description: "กำหนดค่า Qwen, DeepSeek, GLM และอื่นๆ"
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [china providers, deepseek, qwen, glm, doubao, moonshot, mimo, minimax, baidu, siliconflow, huawei]
+concepts: [China Providers, DeepSeek, Qwen, Doubao, Moonshot, MiMo, GLM, MiniMax, Baidu, SiliconFlow, Huawei]
+citations:
+  - title: Qwen API
+    url: https://help.aliyun.com/zh/dashscope
+  - title: DeepSeek API
+    url: https://platform.deepseek.com
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# ผู้ให้บริการจากประเทศจีน
+
+<TLDR>
+**Notemd รองรับผู้ให้บริการในภูมิภาคและที่มีต้นกำเนิดจากประเทศจีนผ่านจุดสิ้นสุดที่สอดคล้องกับ OpenAI เป็นหลัก** ชุดปัจจุบันประกอบด้วย DeepSeek, Qwen, Qwen Code, Doubao, Moonshot, Xiaomi MiMo, GLM, MiniMax, Baidu Qianfan, SiliconFlow, Huawei Cloud MaaS และ Z AI ประโยชน์คือการเข้าถึงในระดับภูมิภาคและการควบคุมต้นทุน ส่วนความเสี่ยงคือการตั้งชื่อโมเดลและการควบคุมบัญชีที่แตกต่างกันในแต่ละผู้ให้บริการ
+
+นี่เป็นส่วนหนึ่งของ [Obsidian คู่มือการจัดการความรู้ด้วย AI](/docs/pillar-ai-knowledge)
+</TLDR>
+
+## การตั้งค่า
+
+สร้างบัญชีผู้ให้บริการ สร้างคีย์ API จากนั้นเลือกการตั้งค่าเริ่มต้นของผู้ให้บริการ Notemd ที่เหมาะสมแทนการใช้โปรไฟล์ OpenAI ทั่วไป การตั้งค่าเริ่มต้นนี้จะกำหนด Base URL มาตรฐาน โมเดล โหมดทดสอบ API พฤติกรรมการค้นหาโมเดล และฟิลด์ UI ที่เฉพาะของผู้ให้บริการ
+
+ใช้การเลือกโมเดลตามงานอย่างเต็มที่ในกรณีนี้ ตัวอย่างเช่น ใช้ DeepSeek หรือ GLM สำหรับงานที่ต้องใช้การคิดเชิงเหตุผลมาก ใช้ Qwen หรือ Moonshot สำหรับงานภาษาจีนทั่วไป และส่งงานเขียนโค้ดไปยัง Qwen Code เมื่อบัญชีนั้นมีโมเดลสำหรับนักเขียนโค้ด
+
+## จุดจบและการยืนยันตัวตน
+
+| ผู้ให้บริการ | โมเดลเริ่มต้น | Base URL |
+|----------|---------------|----------|
+| DeepSeek | `deepseek-v4-pro` | `api.deepseek.com` |
+| Qwen | `qwen3-235b-a22b` | `dashscope.aliyuncs.com/compatible-mode/v1` |
+| Qwen Code | `qwen3-coder-plus` | `dashscope.aliyuncs.com/compatible-mode/v1` |
+| Doubao | (ต้องมี ID จุดสิ้นสุด) | `ark.cn-beijing.volces.com/api/v3` |
+| Moonshot | `kimi-k2-0905-preview` | `api.moonshot.cn/v1` |
+| Xiaomi MiMo | `mimo-v2.5-pro` | `api.xiaomimimo.com/v1` |
+| GLM | `glm-5` | `open.bigmodel.cn/api/paas/v4` |
+| MiniMax | `MiniMax-M2.7` | `api.minimaxi.com/v1` |
+| Baidu Qianfan | `ernie-4.5-turbo-32k` | `qianfan.baidubce.com/v2` |
+| SiliconFlow | `Qwen/QwQ-32B` | `api.siliconflow.cn/v1` |
+| Huawei Cloud MaaS | `DeepSeek-V3` | `api.modelarts-maas.com/v1` |
+| Z AI | `glm-5` | `api.z.ai/api/paas/v4` |
+
+**หมายเหตุ:** Doubao ต้องใช้ ID จุดสิ้นสุดของ Ark (รูปแบบ: `ep-xxxxxxxx-xxxx-xxxx`) แทนชื่อโมเดลมาตรฐาน
+
+ผู้ให้บริการส่วนใหญ่ใช้ไลบรารี runtime ที่สอดคล้องกับ OpenAI เดียวกัน แต่โครงสร้างบัญชีและความหมายของโมเดลจะแตกต่างกัน ให้ใช้ Base URL ที่เฉพาะกับการตั้งค่าเริ่มต้นจนกว่าจะตรวจสอบจุดสิ้นสุดอื่นของบัญชีแล้ว
+
+## การค้นหาโมเดล
+
+DeepSeek, Qwen, Qwen Code, Doubao, Moonshot, Xiaomi MiMo, GLM, Z AI, MiniMax, Baidu Qianfan และ SiliconFlow จะใช้การค้นหาโมเดลที่สอดคล้องกับ OpenAI เมื่อผู้ให้บริการรองรับการแสดงรายการ ส่วน Huawei Cloud MaaS จะใช้โหมด `huaweicloud-modelarts-models` เนื่องจากข้อมูลเมตาของการติดตั้ง ModelArts ไม่เหมือนกับรายการทั่วไปของ `/v1/models`
+
+อย่าถือว่าความล้มเหลวในการค้นหาเป็นหลักฐานว่าไม่สามารถสนทนาได้ ผู้ให้บริการหลายรายอนุญาตให้สนทนาได้แม้จะจำกัดสิทธิ์ในการดูรายการโมเดล ในกรณีนั้น ให้เก็บ ID โมเดลที่ชัดเจนไว้ในโปรไฟล์และตรวจสอบด้วยการทดสอบการเชื่อมต่อ
+
+## การแก้ไขปัญหา
+
+- การยืนยันตัวตนสำเร็จแต่การสนทนาล้มเหลว: ชื่อโมเดลอาจอยู่นอกขอบเขตสิทธิ์หรือภูมิภาคของบัญชี.
+- Doubao ล้มเหลวด้วยชื่อโมเดลปกติ: ให้ใช้ ID จุดสิ้นสุด Ark ในฟิลด์ model เมื่อการติดตั้งของคุณต้องการ.
+- คำตอบที่ให้เหตุผลถูกตัดออก: ตรวจสอบจำนวนโทเค็นผลลัพธ์สูงสุดที่กำหนดโดยผู้ให้บริการและการตั้งค่าโทเค็นสูงสุดที่รู้จักโมเดลของ Notemd.
+- การเชื่อมต่อเครือข่ายในแต่ละภูมิภาคแตกต่างกัน: ให้ใช้จุดสิ้นสุดภูมิภาคจีนของผู้ให้บริการเมื่อเครื่อง vault อยู่ในประเทศจีน; ใช้จุดสิ้นสุดระดับนานาชาติก็ต่อเมื่อบัญชีและเส้นทางเครือข่ายทั้งหมดถูกต้อง.
+
+## เมื่อควรใช้
+
+ให้ใช้ผู้ให้บริการในประเทศจีนเมื่อความล่าช้าในภูมิภาค การชำระเงิน/การเข้าถึงบัญชี คุณภาพภาษาจีน หรือต้นทุนเป็นข้อจำกัดหลัก ควรเลือกใช้ OpenAI, Anthropic, Google โดยตรง หรือผู้ให้บริการในท้องถิ่นเมื่อคุณต้องการขอบเขตโปรโตคอลที่เรียบง่ายกว่าหรือความสอดคล้องในการดีบักระหว่างผู้ให้บริการที่ดีขึ้น.
+
+---
+
+## ขั้นตอนต่อไป
+
+- [LLM ผู้ให้บริการ](/docs/providers/overview) -- การกำหนดค่าแบบเต็มรูปแบบ, โมเดลตามงาน, และตรรกะการทดลองใหม่
+- [การแก้ไขปัญหา](/docs/advanced/troubleshooting) -- แก้ไขข้อผิดพลาดด้านการเชื่อมต่อในภูมิภาคและการยืนยันตัวตน

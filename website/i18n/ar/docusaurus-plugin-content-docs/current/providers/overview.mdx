@@ -1,0 +1,189 @@
+---
+id: overview
+title: "مزودو LLM"
+description: "تكوين 36 مزود LLM — سحابي، بوابة، ومحلي — مع اختيار النموذج حسب المهمة"
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [LLM providers, API, OpenAI, Anthropic, Google, DeepSeek, Qwen, Ollama, per-task model]
+concepts: [LLM Integration, API Providers, Per-Task Models, OpenAI Compatible, Ollama, China Providers]
+citations:
+  - title: OpenAI API
+    url: https://platform.openai.com
+  - title: Anthropic API
+    url: https://docs.anthropic.com
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# مزودو LLM
+
+<TLDR>
+**Notemd يدعم 36 مزود LLM عبر 4 أنواع نقل.** جميع الاتصالات API تستخدم HTTP الخام (بدون SDKs) مع إعادة محاولة تلقائية، وبديل للنقل، وتخزين مؤقت للردود لمدة 5 دقائق. يسمح اختيار النموذج حسب المهمة باستخدام نماذج رخيصة لاستخراج المفاهيم ونماذج قوية للبحث. لا يلزم مفتاح API للمزودات المحلية (Ollama، LMStudio).
+</TLDR>
+
+هذا جزء من [Obsidian دليل إدارة المعرفة الذكية](/docs/pillar-ai-knowledge).
+
+## فئات المزودين
+
+### مزودو السحابة
+
+| المزود | القاعدة الافتراضية URL | النموذج الافتراضي | درجة الحرارة |
+|----------|-----------------|---------------|-------------|
+| **DeepSeek** | `api.deepseek.com` | `deepseek-v4-pro` | 0.5 |
+| **OpenAI** | `api.openai.com/v1` | `gpt-4o` | 0.5 |
+| **Anthropic** | `api.anthropic.com` | `claude-3-5-sonnet-20240620` | 0.5 |
+| **Google** | `generativelanguage.googleapis.com/v1` | `gemini-2.0-flash-exp` | 0.5 |
+| **Mistral** | `api.mistral.ai/v1` | `mistral-large-latest` | 0.5 |
+| **xAI** | `api.x.ai/v1` | `grok-4` | 0.7 |
+| **Cerebras** | `api.cerebras.ai/v1` | `gpt-oss-120b` | 0.5 |
+| **Fireworks** | `api.fireworks.ai/inference/v1` | `kimi-k2p5` | 0.5 |
+| **Nebius** | `api.studio.nebius.com/v1` | `openai/gpt-oss-120b` | 0.3 |
+
+### مزودو البوابة/البروكسي
+
+| المزود | القاعدة الافتراضية URL | النموذج الافتراضي | ملاحظات |
+|----------|-----------------|---------------|-------|
+| **OpenRouter** | `openrouter.ai/api/v1` | `anthropic/claude-3.7-sonnet` | يضيف رؤوس `HTTP-Referer` + `X-Title` |
+| **GitHub Models** | `models.github.ai/inference` | `gpt-4o-mini` | يضيف رأس `X-GitHub-Api-Version` |
+| **AIHubMix** | `aihubmix.com/v1` | `gpt-4o-mini` | يضيف رأس `APP-Code` |
+| **PPIO** | `api.ppinfra.com/v3/openai` | `qwen/qwen3-32b` | |
+| **Hugging Face** | `router.huggingface.co/v1` | `openai/gpt-oss-120b` | |
+| **Vercel AI Gateway** | `ai-gateway.vercel.sh/v1` | `anthropic/claude-sonnet-4.5` | |
+| **Requesty** | `router.requesty.ai/v1` | `anthropic/claude-3-7-sonnet-latest` | |
+| **Together** | `api.together.xyz/v1` | `meta-llama/Meta-Llama-3.1-70B-Instruct-Turbo` | |
+| **LiteLLM** | `localhost:4000/v1` | `your-proxy-model` | مفتاح اختياري API |
+| **النوع الجديد API** | `localhost:3000/v1` | `gpt-4.1` | مفتاح اختياري API |
+| **OpenAI Compatible** | (مُعدّ من قبل المستخدم) | `your-model-id` | نقطة نهاية مخصصة |
+
+### مزودو الصين
+
+| المزود | القاعدة الافتراضية URL | النموذج الافتراضي | ملاحظات |
+|----------|-----------------|---------------|-------|
+| **Qwen** | `dashscope.aliyuncs.com/compatible-mode/v1` | `qwen3-235b-a22b` | Alibaba DashScope |
+| **Qwen Code** | `dashscope.aliyuncs.com/compatible-mode/v1` | `qwen3-coder-plus` | موجه للبرمجة |
+| **Doubao** | `ark.cn-beijing.volces.com/api/v3` | (مطلوب رقم نقطة النهاية) | ByteDance Volcengine |
+| **Moonshot** | `api.moonshot.cn/v1` | `kimi-k2-0905-preview` | Kimi |
+| **Xiaomi MiMo** | `api.xiaomimimo.com/v1` | `mimo-v2.5-pro` | |
+| **GLM** | `open.bigmodel.cn/api/paas/v4` | `glm-5` | نقطة نهاية Zhipu في الصين |
+| **Z AI** | `api.z.ai/api/paas/v4` | `glm-5` | نقطة نهاية Zhipu الدولية |
+| **MiniMax** | `api.minimaxi.com/v1` | `MiniMax-M2.7` | |
+| **Baidu Qianfan** | `qianfan.baidubce.com/v2` | `ernie-4.5-turbo-32k` | |
+| **SiliconFlow** | `api.siliconflow.cn/v1` | `Qwen/QwQ-32B` | منصة استضافة النماذج |
+| **Huawei Cloud MaaS** | `api.modelarts-maas.com/v1` | `DeepSeek-V3` | |
+
+**Doubao يتطلب معرف نقطة نهاية Ark** (التنسيق: `ep-xxxxxxxx-xxxx-xxxx`). يجب استبدال القيمة الافتراضية.
+
+### مزودون محليون
+
+| المزود | القاعدة الافتراضية URL | النموذج الافتراضي | ملاحظات |
+|----------|-----------------|---------------|-------|
+| **Ollama** | `localhost:11434/api` | `llama3` | لا توجد مفتاح API. بث NDJSON. اكتشاف النماذج عبر `/api/tags` |
+| **LMStudio** | `localhost:1234/v1` | `local-model` | يُرسل `"EMPTY"` كرمز حامل. اكتشاف متوافق مع OpenAI |
+| **OVMS** | `localhost:8000/v3` | `openvino-model` | OpenVINO Model Server |
+| **Azure OpenAI** | (مُعدّ من قبل المستخدم) | `gpt-4o` | اسم النشر في URL. رأس `api-key` |
+
+## اختيار النموذج حسب المهمة
+
+Notemd يدعم مزودًا ونموذجًا مستقلين لكل مهمة. قم بتفعيل ذلك باستخدام `useMultiModelSettings: true`.
+
+### المهام المتاحة
+
+| المهمة | مفتاح الإعدادات | المزود الافتراضي |
+|------|-------------|-----------------|
+| إضافة روابط (إدخال روابط ويكي) | `addLinksProvider` / `addLinksModel` | DeepSeek |
+| البحث (بحث على الويب + تلخيص) | `researchProvider` / `researchModel` | DeepSeek |
+| إنشاء من العنوان | `generateTitleProvider` / `generateTitleModel` | DeepSeek |
+| الترجمة | `translateProvider` / `translateModel` | DeepSeek |
+| إنشاء المخططات | `summarizeToMermaidProvider` / `Model` | DeepSeek |
+| استخراج المفاهيم | `extractConceptsProvider` / `Model` | DeepSeek |
+| استخراج النص الأصلي | `extractOriginalTextProvider` / `Model` | DeepSeek |
+
+### ترتيب الحلول
+
+1. إذا كان `useMultiModelSettings` مفعّلاً → استخدم المزود والنموذج الخاص بالمهمة
+2. إذا كان تعديل نموذج المهمة فارغًا → ارجع إلى النموذج الافتراضي للمزود
+3. إذا كان مزود المهمة غير صالح → ارجع إلى `activeProvider` العالمي
+4. إذا كان `useMultiModelSettings` مغلقًا → تستخدم جميع المهام `activeProvider` العالمي
+
+### الإعدادات الموصى بها
+
+```
+# Researcher: power for research, cheap for everything else
+activeProvider: DeepSeek
+extractConceptsProvider: DeepSeek
+researchProvider: OpenAI        # GPT-4o for better research quality
+summarizeToMermaidProvider: DeepSeek
+
+# Privacy-first: local only
+activeProvider: Ollama
+addLinksProvider: Ollama
+extractConceptsProvider: Ollama
+
+# Budget bilingual
+activeProvider: DeepSeek
+translateProvider: Google      # Gemini Flash for translation
+researchProvider: SiliconFlow  # Cheaper China-based routing
+```
+
+## هندسة استدعاء API
+
+### طبقات النقل
+
+1. **Obsidian `requestUrl`** — الأساسية (مدمجة، تعمل على جميع المنصات)
+2. **Desktop HTTP** — وحدات Node.js `http`/`https` (بث + طلبات طويلة)
+3. **Web `fetch`** — خيار بديل عند عدم توفر وحدات Node.js
+
+يقوم الإضافة تلقائيًا بالانتقال بين طبقات النقل في حالة أخطاء شبكية مؤقتة.
+
+### منطق التكرار
+
+- **الوضع العادي** (`enableStableApiCall: false`): محاولة واحدة. عند فشل مؤقت، يتم الترقية تلقائيًا إلى تكرار مستقر.
+- **وضع التكرار المستقر** (`enableStableApiCall: true`): ما يصل إلى 4 محاولات (1 + 3 تكرارات) بفواصل زمنية قدرها 5 ثوانٍ.
+- **أخطاء مؤقتة تُحفّز التكرار**: `err_connection_closed`، `err_connection_reset`، `err_timed_out`، `econnreset`، `econnaborted`، `etimedout`، `socket hang up`، `network request failed`
+- **غير قابلة للتكرار**: HTTP 400، 401، 403، 404
+
+### تخزين الاستجابات في الذاكرة
+
+ذاكرة تخزين مؤقت LRU داخل الذاكرة لمدة 5 دقائق مُفتاحها المزود + النموذج + درجة الحرارة + الطلب + المحتوى. تُرجع الطلبات المتشابهة التالية خلال 5 دقائق النتائج المخزنة فورًا.
+
+### معالجة نماذج التفكير
+
+النماذج التي لا تدعم الدور `system` (DeepSeek R1، OpenAI o1/o3/o4/gpt-5) تُدمج تلقائيًا رسائل النظام ورسائل المستخدم في رسالة مستخدم واحدة.
+
+DeepSeek-محدد: `thinkingEnabled` يضيف `{ thinking: { type: 'enabled' } }` إلى الطلب. يتم تمرير `reasoningEffort` (منخفض/متوسط/عالي) كـ `reasoning_effort`. يتحقق من أن أقصى عدد رموز الإخراج ≥ 8000 عند تفعيل وضع التفكير.
+
+### تقدير الرموز
+
+`estimateTokens(text)`: `Math.ceil(text.length / 4)` — استراتيجية 4 أحرف لكل رمز. تُستخدم لتطبيق `maxResearchContentTokens` قبل إرسالها إلى LLM.
+
+لا يتم تنفيذ تتبع التكلفة.
+
+## اكتشاف النماذج
+
+| الوضع | المزودون | نقطة النهاية |
+|------|-----------|----------|
+| `ollama-tags` | Ollama | `/api/tags` |
+| `google-models` | Google | قائمة النماذج API |
+| `anthropic-models` | Anthropic | قائمة النماذج API |
+| `openai-compatible-models` | DeepSeek، Qwen، Mistral، إلخ. | `/v1/models` |
+| `openrouter-models` | OpenRouter | قائمة النماذج API |
+| `github-models` | GitHub Models | عملية التنبؤ API |
+| `none` | Azure OpenAI | معطل (يتطلب اسم النشر) |
+
+## البدء السريع
+
+1. **اختر مزودًا** — DeepSeek (الصين)، OpenAI (دولي)، أو Ollama (محلي/مجاني)
+2. **أدخل مفتاح API** — الإعدادات → Notemd → المزود → مفتاح API
+3. **اختبار الاتصال** — انقر على زر الاختبار
+4. **اختياري: نماذج حسب المهمة** — قم بتفعيل `useMultiModelSettings` وضبطها بشكل منفصل
+
+بالنسبة لـ Ollama: لا يلزم وجود مفتاح API. فقط تأكد من أن `ollama serve` يعمل.
+
+---
+
+## الخطوات التالية
+
+- 📝 [ملاحظات المفهوم](/docs/features/concept-notes) — تستخدم نموذج الاستخراج حسب المهمة
+- 🎨 [الرسوم التوضيحية](/docs/features/diagrams) — تستخدم نموذج الرسوم التوضيحية حسب المهمة
+- 🔍 [البحث](/docs/features/research) — تستخدم نموذجًا مخصصًا للبحث
+- ⚙️ [التكوين](/docs/getting-started/configuration) — مرجع لجميع الإعدادات

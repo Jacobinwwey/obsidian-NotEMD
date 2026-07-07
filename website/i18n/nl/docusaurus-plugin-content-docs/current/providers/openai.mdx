@@ -1,0 +1,67 @@
+---
+id: openai
+title: "OpenAI"
+description: "Configureer OpenAI (GPT-4, GPT-4o)"
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [openai, gpt-4o, provider, configuration]
+concepts: [OpenAI, GPT-4o, API Configuration]
+citations:
+  - title: OpenAI API
+    url: https://platform.openai.com
+  - title: GPT-4
+    url: https://openai.com/gpt-4
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# OpenAI Provider
+
+<TLDR>
+**OpenAI maakt gebruik van het gedeelde OpenAI-compatibele transport.** De huidige voorkeursinstellingen zijn `gpt-4o`, `https://api.openai.com/v1`, `temperature: 0.5` en de `models-then-chat` verbindingstest. Gebruik deze pagina wanneer u exacte veldsemantiek nodig heeft; gebruik het overzicht [LLM Providers](/docs/providers/overview) voor selectie op categorie-niveau.
+
+Dit maakt deel uit van de [Obsidian AI Knowledge Management Guide](/docs/pillar-ai-knowledge).
+</TLDR>
+
+## Setup
+
+Maak een OpenAI API sleutel aan, voeg een `OpenAI` providerprofiel toe in de Notemd instellingen en houd de standaard Base URL behouden tenzij u bewust naar een OpenAI-compatibele gateway verwijst. Het modelveld kan op `gpt-4o` blijven voor algemene werkzaamheden of worden vervangen door een andere OpenAI model-ID die uw account kan oproepen.
+
+Gebruik modelen specifiek voor taken om kosten onder controle te houden: houd sterkere modellen voor onderzoek, conceptuitwinning en langvormige herstructurering; gebruik goedkopere of snelere modellen voor vertaling, linkvoorstellen en korte samenvattingen.
+
+## Endpoint En Authenticatie
+
+| Veld | Huidige instellingen |
+|-------|----------------|
+| Transport | `openai-compatible` |
+| API sleutel | vereist |
+| Base URL | `https://api.openai.com/v1` |
+| Standaardmodel | `gpt-4o` |
+| Temperature | `0.5` |
+| Verbindingstest | `/models`, vervolgens `/chat/completions` |
+
+Notemd normaliseert de OpenAI-compatibele base URLs voordat `chat/completions` of `models` wordt toegevoegd. Voeg geen eind `/chat/completions` toe aan de Base URL; dat zorgt voor een dubbele route.
+
+## Modelontdekking
+
+OpenAI maakt gebruik van de algemene OpenAI-compatibele modelontdekkingroute. De instellingen UI vragen eerst `/v1/models` en valideren vervolgens het geselecteerde model met een lichtgewicht chatverzoek. Als de ontdekking mislukt maar de chat nog werkt, controleer of uw sleutel toestemming heeft voor modellijsten of of een gateway het weergeven van modellen blokkeert.
+
+Reasoning modellen worden behandeld als een protocolrandgeval: Notemd mengt systeem- en gebruikerspromptinhoud om OpenAI reasoning IDs te genereren die een apart `system` rol weigeren, en het exposeert `reasoningEffort` alleen waar de providerdefinitie dit ondersteunt.
+
+## Probleemoplossing
+
+- `401` of `403`: controleer de sleutel, projecttoegang, facturatoestand en of het geselecteerde model voor de sleutel is geactiveerd.
+- `404` in chat: de Base URL is meestal verkeerd of bevat al `/chat/completions`.
+- Het model verschijnt in de documentatie maar niet in de selector: toegang tot modellijsten en chattoegang zijn aparte foutpunten; test de exacte model-ID handmatig in het providerprofiel.
+- Reasoning model weigert berichten: gebruik een model-ID die valt onder de OpenAI reasoning‑handleerroute of schakel over op een niet‑reasoning chatmodel.
+
+## Wanneer te gebruiken
+
+Gebruik OpenAI wanneer u de meest voorspelbare standaard gehoste route wilt, wanneer `/v1/models` ontdekking belangrijk is, of wanneer een workflow afhankelijk is van de OpenAI reasoning modelsemantiek. Gebruik liever een gateway of lokale provider wanneer routing, privacy of kostenbeheersing belangrijker zijn dan het directe OpenAI API gedrag.
+
+---
+
+## Volgende stappen
+
+- [LLM Providers](/docs/providers/overview) -- Volledige configuratie, modellen per taak en herprobeerlogica
+- [Troubleshooting](/docs/advanced/troubleshooting) -- Verhelp 401/403 en rate‑limit fouten

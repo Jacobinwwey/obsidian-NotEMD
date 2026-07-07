@@ -1,0 +1,133 @@
+---
+id: installation
+title: "Instalare"
+description: "Cum să instalați Notemd în Obsidian"
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [installation, setup, obsidian plugin]
+concepts: [Installation, Community Plugins, BRAT, Manual Install]
+citations:
+  - title: Obsidian
+    url: https://obsidian.md
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# Instalare
+
+<TLDR>
+**Instalați Notemd în mai puțin de 2 minute.** Două metode: (1) Pluginuri comunitare Obsidian (recomandate, instalare cu un clic), sau (2) Instalare manuală prin GitHub Releases. Este necesar Obsidian 0.15.0+. Funcționează pe Windows, macOS, Linux, iOS și Android. Fără dependențe externe. Peste 4k de descărcări, licențiat cu MIT.
+</TLDR>
+
+## Metodul 1: Pluginuri comunitare (Recomandat)
+
+1. Deschideți **Setările Obsidian** (icona ⚙️ sau `Ctrl/Cmd + ,`)
+2. Alăturați-vă la **Pluginurile comunitare**
+3. Apăsați pe **Cautare**
+4. Căutați **"Notemd"**
+5. Apăsați pe **Instalare**
+6. Apăsați pe **Activare**
+
+**Gata!** Veți vedea icona Notemd în bara laterală din stânga.
+
+## Metoda 2: Instalare manuală
+
+### Prerechizite
+- Obsidian 0.15.0 sau o versiune mai nouă
+- Git (opțional, pentru clonare)
+
+### Pași
+
+1. **Descărcați fișierele** de la [GitHub Releases](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/latest):
+   - `main.js`
+   - `styles.css`
+   - `manifest.json`
+
+2. **Găsiți folderul plugin-ului vault-ului dumneavoastră:**
+   ```
+   <your-vault>/.obsidian/plugins/
+   ```
+
+Dacă folderul `plugins` nu există, creați-l.
+
+3. **Creați folderul Notemd:**
+   ```
+   <your-vault>/.obsidian/plugins/notemd/
+   ```
+
+4. **Copiați cele trei fișiere** în folderul `notemd`.
+
+5. **Reîncărcați Obsidian:**
+   - Apăsați `Ctrl/Cmd + R`, sau
+   - Reînnoi Obsidian
+
+6. **Activează pluginul:**
+   - Setări → Pluginuri comunitare
+   - Găsește „Notemd“ în listă
+   - Activează-l
+
+## Alternativă: Instalează prin BRAT
+
+Dacă folosești pluginul [BRAT](https://github.com/TfTHacker/obsidian42-brat):
+
+1. Deschide setările BRAT
+2. Face clic pe „Adaugă plugin beta“
+3. Introdu: `Jacobinwwey/obsidian-NotEMD`
+4. Face clic pe „Adaugă plugin“
+5. Activează Notemd în Pluginuri comunitare
+
+## Verificare
+
+După instalare, verificați dacă Notemd funcționează corect:
+
+1. Deschideți orice notată
+2. Faceți clic dreapta în editor
+3. Ar trebui să vedeți comenzi Notemd precum:
+   - "Procesează fișierul (adaugă linkuri)"
+   - "Extrage concepte"
+   - "Cercetează și rezumă"
+
+## Următoarele pași
+
+- **Configurați furnizorul LLM:** [Quick Start →](./quick-start)
+- **Rezolvare a problemelor:** [Common Issues →](../advanced/troubleshooting)
+
+## Requisite de sistem
+
+| Platformă | Versiune | Stare |
+|----------|---------|--------|
+| **Obsidian** | 0.15.0+ | Requerit |
+| **Windows** | 7+ | ✅ Suportat |
+| **macOS** | 10.15+ | ✅ Suportat |
+| **Linux** | Orice | ✅ Suportat |
+| **iOS** | 15+ | ✅ Suportat |
+| **Android** | 5+ | ✅ Suportat |
+
+## Dezinstalare
+
+Pentru a elimina Notemd:
+
+1. Setări → Pluginuri comunitare
+2. Găsiți „Notemd“
+3. Faceți clic pe icona ❌
+4. Opțional, ștergeți folderul pluginului: `<vault>/.obsidian/plugins/notemd/`
+
+Datele dumneavoastră (note, note conceptuale etc.) rămân neschimbate.
+
+## Actualizare
+
+### Actualizare automată (Recomandată)
+Obsidian verifică automat actualizările pluginului. Când apare o versiune nouă:
+1. Setări → Pluginuri comunitare
+2. Faceți clic pe „Verifică actualizări“
+3. Faceți clic pe „Actualizează“ lângă Notemd
+
+### Actualizare manuală
+Descărcați cea mai recentă versiune și înlocuiți cele trei fișiere din folderul dumneavoastră de plugin.
+
+## Obținere de ajutor
+
+- 📖 [Ghid rapid de începere](./quick-start)
+- ❓ [FAQ](../faq)
+- 💬 [Comunitatea Discord](https://discord.gg/qnGgsQ9W)
+- 🐛 [Raportați probleme](https://github.com/Jacobinwwey/obsidian-NotEMD/issues)

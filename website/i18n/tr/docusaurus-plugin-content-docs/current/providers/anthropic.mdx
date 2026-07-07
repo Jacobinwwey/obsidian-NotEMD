@@ -1,0 +1,67 @@
+---
+id: anthropic
+title: "Anthropic"
+description: "Anthropic Claude'ı yapılandırın"
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [anthropic, claude, provider, configuration]
+concepts: [Anthropic, Claude, API Configuration]
+citations:
+  - title: Anthropic API
+    url: https://docs.anthropic.com
+  - title: Claude
+    url: https://www.anthropic.com/claude
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# Anthropic Sağlayıcı
+
+<TLDR>
+**Anthropic, OpenAI ile uyumlu taşıma yerine yerel Messages API taşımasını kullanır.** Mevcut ayarlar varsayılan olarak `claude-3-5-sonnet-20240620`, `https://api.anthropic.com` ve `temperature: 0.5` olarak belirlenmiştir. Hata ayıklama sırasında bunu ayrı bir protokol yüzeyi olarak değerlendirin.
+
+Bu içerik [Obsidian AI Bilgi Yönetimi Kılavuzu](/docs/pillar-ai-knowledge) serisinin bir parçasıdır.
+</TLDR>
+
+## Kurulum
+
+Bir Anthropic API anahtarı oluşturun, bir `Anthropic` sağlayıcı profili ekleyin ve özel bir ağ geçidi profili üzerinden yönlendirme yapmıyorsanız Base URL'ü yerel uç noktada bırakın. Model alanında kullanmak istediğiniz Claude model ID'sini seçin; varsayılan değer mevcut ürün temelini stabil tutar.
+
+Anthropic, yüksek kaliteli özetleme, araştırma sentezi ve kavram çıkarma işlemleri için iyi bir seçenektir. Daha ucuz sağlayıcılarla birleştirirseniz, yalnızca çıktı kalitesinden fayda sağlayan görevlerde kullanın.
+
+## Uç Nokta ve Kimlik Doğrulama
+
+| Alan | Mevcut ayarlar |
+|-------|----------------|
+| Taşıma | `anthropic` |
+| API anahtarı | Gerekli |
+| Base URL | `https://api.anthropic.com` |
+| Varsayılan model | `claude-3-5-sonnet-20240620` |
+| Sıcaklık | `0.5` |
+| Bağlantı testi | Yalnızca sohbet |
+
+Çalıştırma zamanı, `x-api-key` ve `anthropic-version: 2023-06-01` ile birlikte istekleri `/v1/messages`'a gönderir. Bu ayarlar altında OpenAI tarzı bir `/v1/chat/completions` uç noktası yapılandırmayın; bunun yerine OpenAI ile uyumlu bir ağ geçidi ayarını kullanın.
+
+## Model Keşfi
+
+Anthropic, sağlayıcı kayıt defterinde `anthropic-models` keşif modunu kullanır. Anahtarınız veya hesabınız modelleri listelleyemiyorsa, profilde bilinen bir model ID’si bulundurun ve bağlantı testi yoluyla doğrulama yapın.
+
+Bu taşıma yöntemi OpenAI ile uyumlu sağlayıcılarla değiştirilemez. OpenRouter, LiteLLM veya başka bir ağ geçidi aracılığıyla yönlendirilen bir Claude modeli, yerel Anthropic profiline değil, ilgili ağ geçidi profiline aittir.
+
+## Sorun Giderme
+
+- `401` veya `403`: anahtar kapsamını, çalışma alanı erişimini, faturalandırmayı ve anahtarın beklenen Anthropic çalışma alanına ait olup olmadığını kontrol edin.
+- `404`: Temel URL yanlış veya seçilen model ID’si hesap tarafından kullanılamıyor.
+- Ağ geçidi tarzı Claude model ID’leri başarısız olur: yerel Anthropic yerel model adlarını beklediğinden, profili uygun ağ geçidi sağlayıcısına taşıyın.
+- Uzun istekler geç aşamada başarısız olur: görev başına model çıktı boyutunu azaltın veya daha yüksek bilinen çıktı-token sınırına sahip bir model kullanın.
+
+## Ne Zaman Kullanılmalı
+
+Sentez kalitesi, araştırma notları veya yapılandırılmış yazım konusunda ham maliyetten daha fazla önem veriliyorsa Anthropic kullanın. Genel bir OpenAI-uyumlu yedek olarak kullanmayın; ayrı taşıma yöntemi asıl amaçtır ve protokollerin karıştırılması teşhis işlemini zorlaştırır.
+
+---
+
+## Sonraki Adımlar
+
+- [LLM Sağlayıcılar](/docs/providers/overview) -- Tam yapılandırma, görev başına modeller ve yeniden deneme mantığı
+- [Sorun Giderme](/docs/advanced/troubleshooting) -- 401/403 ve bağlantı hatalarını düzeltme

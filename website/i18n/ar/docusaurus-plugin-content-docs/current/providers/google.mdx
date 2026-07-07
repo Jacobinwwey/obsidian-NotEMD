@@ -1,0 +1,67 @@
+---
+id: google
+title: "Google"
+description: "تكوين Google Gemini"
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [google, gemini, provider, configuration]
+concepts: [Google, Gemini, API Configuration]
+citations:
+  - title: Gemini API
+    url: https://ai.google.dev
+  - title: Google AI Studio
+    url: https://aistudio.google.com
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# مزود Google
+
+<TLDR>
+**Google يستخدم وسيلة النقل الأصلية للغة التوليدية Gemini API.** الإعداد المسبق الحالي يفضل `gemini-2.0-flash-exp` و `https://generativelanguage.googleapis.com/v1` و `temperature: 0.5`. إنه ليس ملفًا متوافقًا مع OpenAI.
+
+هذا جزء من [Obsidian دليل إدارة المعرفة الذكية](/docs/pillar-ai-knowledge).
+</TLDR>
+
+## الإعداد
+
+أنشئ مفتاح Cloud API من نوع Google AI Studio أو Google مع صلاحيات الوصول إلى Gemini، وأضف ملف مزود `Google`، واحتفظ بالقاعدة الأصلية للغة التوليدية URL. استخدم الإعداد المسبق Gemini Flash الافتراضي للترجمة السريعة وأتمتة الملاحظات الواسعة، ثم عدّل النماذج حسب المهمة عند الحاجة إلى نموذج Gemini أكبر أو أكثر قدرة.
+
+تجنب وضع معرفات نماذج Gemini في ملف متوافق مع OpenAI ما لم تستخدم بوابة تكشف عن Gemini عبر ملف متوافق مع OpenAI و API.
+
+## النهاية والمصادقة
+
+| الحقل | الإعداد المسبق الحالي |
+|-------|----------------|
+| وسيلة النقل | `google` |
+| مفتاح API | مطلوب |
+| URL الأساسية | `https://generativelanguage.googleapis.com/v1` |
+| النموذج الافتراضي | `gemini-2.0-flash-exp` |
+| درجة الحرارة | `0.5` |
+| اختبار الاتصال | فقط للدردشة |
+
+يقوم الوقت التشغيلي بالاتصال بـ `/models/{model}:generateContent?key={apiKey}`. يتم إرسال المفتاح كمعامل استعلام لأن هذه هي الطريقة التي يتم بها ربط نقطة نهاية Gemini الأصلية في الإضافة.
+
+## اكتشاف النماذج
+
+Google يستخدم وضع الاكتشاف `google-models`. يجب أن يعيد الاكتشاف نماذج Gemini المتاحة للمفتاح API؛ إذا كان المحدد فارغًا، اختبر المفتاح مع نفس القاعدة URL وتأكد من تفعيل عائلة النماذج لذلك الحساب.
+
+الحدود المعروفة لرموز الإخراج مرتبطة بالنموذج في سجل المزودين. إذا تم قص ترجمة طويلة أو شرح رسم تخطيطي، اختر نموذج Gemini يدعم حدًا أكبر للإخراج أو خفّض حجم الإخراج المطلوب.
+
+## حل المشكلات
+
+- `400`: عادةً ما لا يتطابق معرف النموذج مع مسار Gemini الأصلي أو تتجاوز الطلبات الشكل المدعوم من النموذج.
+- `401` أو `403`: تحقق من قيود المفتاح، وتفعيل المشروع/ API، وما إذا كان المفتاح يمكنه الوصول إلى Gemini.
+- `404`: معرف النموذج غير متاح في الإصدار API المُعد.
+- تفشل أمثلة البوابات تحت هذا الملف: استخدم إعداد البوابة بدلاً من مزود Google الأصلي.
+
+## متى يجب استخدامه
+
+استخدم Google للترجمة السريعة، وتنظيف كميات كبيرة من الملاحظات، والأتمتة التي يكون فيها توازن تكلفة/أداء Gemini أفضل من استخدام OpenAI أو Anthropic مباشرةً. فضّل مزودًا آخر للأتمتة التي تتطلب معالجة نماذج الاستدلال المتوافقة مع OpenAI.
+
+---
+
+## الخطوات التالية
+
+- [LLM Providers](/docs/providers/overview) -- إعدادات كاملة، نماذج لكل مهمة، ومنطق إعادة المحاولة
+- [Translation](/docs/features/translation) -- يُوصى باستخدام Gemini Flash لمهام الترجمة ذات الحجم الكبير

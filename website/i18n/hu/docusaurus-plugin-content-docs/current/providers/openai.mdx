@@ -1,0 +1,67 @@
+---
+id: openai
+title: "OpenAI"
+description: "Konfigurálja a OpenAI-t (GPT-4, GPT-4o)"
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [openai, gpt-4o, provider, configuration]
+concepts: [OpenAI, GPT-4o, API Configuration]
+citations:
+  - title: OpenAI API
+    url: https://platform.openai.com
+  - title: GPT-4
+    url: https://openai.com/gpt-4
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# OpenAI Társító
+
+<TLDR>
+**A OpenAI használja az összefüggő OpenAI-kompatibilis transzportot.** A jelenlegi beállítások alapértelmezettént a `gpt-4o`-, `https://api.openai.com/v1`-, `temperature: 0.5`-t és a `models-then-chat` kapcsolati ellenőrzést használják. Használja ezt a oldalt, ha precíz mezősemantikát szeretne; a kategóriái szintű választásokhoz használja a [LLM Társítók](/docs/providers/overview) áttekintést.
+
+Ez része a [Obsidian AI tudományos kezelési útmutatójának](/docs/pillar-ai-knowledge).
+</TLDR>
+
+## Elhajtás
+
+Írjon be egy OpenAI API kulcsot, hozzáadja egy `OpenAI` társító profilt a Notemd beállításokba, és tartson meg a alapértelmezett Base URL-t, amíg nem kívánatosan utal egy OpenAI-kompatibilis kapuhoz. A modellezési mező általában a `gpt-4o`-en marható a hagyományos munkákhoz, vagy helyettesíthető más OpenAI modellezési ID-vel, amit a fiók használhat.
+
+Használja a feladatspecifikus modelleket költségszerkezés érdekében: használja a erősebb modelleket kutatásokhoz, konceptek kiemeléséhez és hosszabb formájú átalakításokhoz; használja a olcsóbb vagy gyorsabb modelleket fordításokhoz, hivatkozási javaslatokhoz és rövid összefoglalásokhoz.
+
+## Végpont és autentikáció
+
+| Feltérváltozó | Jelen beállítás |
+|-------|----------------|
+| Transzport | `openai-compatible` |
+| API kulcs | Előírás |
+| Base URL | `https://api.openai.com/v1` |
+| Alapértelmezett model | `gpt-4o` |
+| Temperatúra | `0.5` |
+| Kapcsolati ellenőrzés | `/models`, majd `/chat/completions` |
+
+A Notemd normalizálja a OpenAI-kompatibilis alap URL-ket, mielőtt hozzáadjon a `chat/completions`-t vagy a `models`-t. Ne tartalmazza egy végén lévő `/chat/completions`-t a Base URL-ban; ez okoz duplikált útvonalot.
+
+## Model felfedezése
+
+A OpenAI használja a generikus OpenAI-kompatibilis modellezési felfedezési útvonalat. A beállítások a UI először kérdezik a `/v1/models`-t, majd ellenőrizik a választott modelletet egy légképes chat kéréssel. Ha a felfedezés nem sikerül, de a chat még is működik, ellenőrizze, hogy a kulcsa modellezési listájhoz való hozzáférést tartalmaz-e, vagy hogy egy kapu blokkolja a modellezési listázást.
+
+A logikai modelleket tekintjük egy protokoll-specifikus kivételnek: a Notemd összevonja a rendszeri és a felhasználói kéreleteket az OpenAI logikai ID-ekhez, amelyek elutasítják egy külön `system` szerepét, és csak akkor nyíltatja meg a `reasoningEffort`-t, ha a társító definició ezet támogatja.
+
+## Hibaelhárítás
+
+- `401` vagy `403`: ellenőrizze a kulcsot, a projekt hozzáférését, a fizetési állapotot és azt, hogy a választott modellet engedélyezett-e a kulcsnak.
+- A chatben a `404`: az alap Base URL általában hibás vagy már tartalmazza a `/chat/completions`-t.
+- A modellek jelenek a dokumentációban, de nem a választóban: a modellezési listájhoz való hozzáférés és a chat hozzáférése külön kockázati pontok; ellenőrizze manuálisan a pontos modellezési ID-t a társító profilban.
+- A logikai modellek elutasítják a üzeneteket: használja egy OpenAI logikai kezelési útvonal alatt lévő modellezési ID-t, vagy váltson egy nem-logikai chat modellekre.
+
+## Kikorlátlan használat
+
+Használja a OpenAI-t, ha kívánja a leg előrejelzhetőbb alaphelyezkedésű tartalmazást, ha az `/v1/models` felfedezése fontos, vagy ha egy munkafolyam attól függ, hogy a OpenAI logikai modellezési semantika működik-e. Ha a irányítás, a privátosság vagy a költségszerkezés fontosabb, előnyben adjon a kapuhoz vagy helyi társítóhoz, mint az közvetlen OpenAI API viselkedéshez.
+
+---
+
+## További lépések
+
+- [LLM Fornincs-eregyszerek](/docs/providers/overview) -- Teljes konfiguráció, munkaalkalmazásokhoz szóló modellek és újrapróbálási logika
+- [Hibajavítás](/docs/advanced/troubleshooting) -- 401/403 hibák és szabálykorlátok megoldása

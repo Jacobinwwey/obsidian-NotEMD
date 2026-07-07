@@ -1,0 +1,67 @@
+---
+id: openai
+title: "OpenAI"
+description: "Configura OpenAI (GPT-4, GPT-4o)"
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [openai, gpt-4o, provider, configuration]
+concepts: [OpenAI, GPT-4o, API Configuration]
+citations:
+  - title: OpenAI API
+    url: https://platform.openai.com
+  - title: GPT-4
+    url: https://openai.com/gpt-4
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# Provider OpenAI
+
+<TLDR>
+**OpenAI utilizza il trasporto compatibile con OpenAI condiviso.** La impostazione predefinita attuale è `gpt-4o`, `https://api.openai.com/v1`, `temperature: 0.5` e il test di connessione `models-then-chat`. Utilizza questa pagina quando hai bisogno di una semantica dei campi precisa; utilizza la panoramica [LLM Provider](/docs/providers/overview) per la selezione a livello di categoria.
+
+Questo fa parte della [Obsidian Guida alla gestione delle conoscenze AI](/docs/pillar-ai-knowledge).
+</TLDR>
+
+## Impostazioni
+
+Crea una chiave OpenAI API, aggiungi un profilo provider `OpenAI` nelle impostazioni Notemd e mantieni il Base URL predefinito a meno che non tu intenda puntare intenzionalmente a un gateway compatibile con OpenAI. Il campo del modello può rimanere su `gpt-4o` per lavori generali oppure essere sostituito da un altro ID di modello OpenAI che il tuo account può chiamare.
+
+Utilizza modelli specifici per la gestione dei costi: conserva modelli più potenti per la ricerca, l’estrazione di concetti e la ristrutturazione di testi lunghi; utilizza modelli più economici o più veloci per la traduzione, le suggerimenti di link e i riassunti brevi.
+
+## Endpoint e autenticazione
+
+| Campo | Configurazione predefinita attuale |
+|-------|----------------|
+| Trasporto | `openai-compatible` |
+| Chiave API | Richiesto |
+| Base URL | `https://api.openai.com/v1` |
+| Modello predefinito | `gpt-4o` |
+| Temperature | `0.5` |
+| Test di connessione | `/models`, poi `/chat/completions` |
+
+Notemd normalizza i Base URL compatibili con OpenAI prima di aggiungere `chat/completions` o `models`. Non includere un `/chat/completions` finale nel Base URL; ciò crea un percorso duplicato.
+
+## Scoperta dei modelli
+
+OpenAI utilizza il percorso generico di scoperta dei modelli compatibile con OpenAI. Le impostazioni UI chiedono prima `/v1/models`, poi verificano il modello selezionato con una richiesta di chat leggera. Se la scoperta fallisce ma la chat funziona comunque, verifica se la tua chiave ha l’autorizzazione model-list o se un gateway blocca l’elenco dei modelli.
+
+I modelli di ragionamento vengono trattati come un caso limite del protocollo: Notemd fonde il contenuto della prompt del sistema e dell’utente per generare ID di ragionamento OpenAI che rifiutano un ruolo separato `system`, e ne espongono `reasoningEffort` solo laddove la definizione del provider lo supporta.
+
+## Risoluzione dei problemi
+
+- `401` o `403`: verifica la chiave, l’accesso al progetto, lo stato di fatturazione e se il modello selezionato è abilitato per la chiave.
+- `404` nella chat: il Base URL è solitamente errato o include già `/chat/completions`.
+- Il modello appare nelle documentazioni ma non nel selettore: l’accesso model-list e l’accesso chat sono punti di fallimento separati; verifica manualmente l’ID esatto del modello nel profilo del provider.
+- Il modello di ragionamento rifiuta i messaggi: utilizza un ID di modello coperto dal percorso di gestione della ragionamento OpenAI oppure passa a un modello di chat non basato sulla ragionamento.
+
+## Quando utilizzarlo
+
+Utilizza OpenAI quando si desidera il percorso predefinito ospitato più prevedibile, quando la scoperta di `/v1/models` è importante, o quando un flusso di lavoro dipende dalle semantiche del modello di ragionamento OpenAI. Preferisci un gateway o un provider locale quando la routing, la privacy o i controlli dei costi sono più importanti rispetto al comportamento diretto di OpenAI API.
+
+---
+
+## Prossimi passi
+
+- [LLM Fornitori](/docs/providers/overview) -- Configurazione completa, modelli per task e logica di riprova
+- [Risoluzione dei problemi](/docs/advanced/troubleshooting) -- Correggi gli errori 401/403 e i limiti di frequenza

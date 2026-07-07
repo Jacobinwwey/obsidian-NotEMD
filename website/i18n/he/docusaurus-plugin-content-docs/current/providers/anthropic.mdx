@@ -1,0 +1,67 @@
+---
+id: anthropic
+title: "Anthropic"
+description: "להגדיר Anthropic Claude"
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [anthropic, claude, provider, configuration]
+concepts: [Anthropic, Claude, API Configuration]
+citations:
+  - title: Anthropic API
+    url: https://docs.anthropic.com
+  - title: Claude
+    url: https://www.anthropic.com/claude
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# Anthropic Provider
+
+<TLDR>
+**Anthropic משתמש בתשלוח Messages API המובנה, ולא בתשלוח התואם OpenAI.** ההגדרה הקיימת משתמשת באופן אוטומטי ב-`claude-3-5-sonnet-20240620`, `https://api.anthropic.com` ו-`temperature: 0.5`. יש להתייחס אליה כאל שכבת פרוטוקול נפרדת בזמן ניפוי שגיאות.
+
+זהו חלק מה[Obsidian מדריך ניהול ידע AI](/docs/pillar-ai-knowledge).
+</TLDR>
+
+## הגדרה
+
+יצרו מפתח Anthropic API, הוסיפו פרופיל של ספק `Anthropic`, והשאירו את Base URL בקצה המובנה אלא אם כן אתם מנתבים דרך פרופיל של שער מיוחד. בחרו את מספר המודל של Claude שברצונכם להשתמש בו בשדה המודל; ההגדרה הבסיסית שומרת על יציבות הבסיס של המוצר הקיים.
+
+Anthropic הוא מועמד מצוין לסיכום באיכות גבוהה, סינתזת מחקר ושליפת רעיונות. אם משלבים אותו עם ספקים זולים יותר, השתמשו בו רק במשימות שמפיקות תועלת מאיכות התוצאה שלו.
+
+## קצה ואימות
+
+| שדה | ההגדרה הנוכחית |
+|-------|----------------|
+| תשלוח | `anthropic` |
+| מפתח API | נדרש |
+| Base URL | `https://api.anthropic.com` |
+| מודל ברירת המחדל | `claude-3-5-sonnet-20240620` |
+| טמפרטורה | `0.5` |
+| בדיקת חיבור | רק שיחה |
+
+המנוע שולח בקשות ל-`/v1/messages` עם `x-api-key` ו-`anthropic-version: 2023-06-01`. אל תגדירו קצה `/v1/chat/completions` בסגנון OpenAI תחת ההגדרה הזו; השתמשו במקום זאת בהגדרת שער התואמת OpenAI.
+
+## גילוי מודלים
+
+Anthropic משתמש במוד הגילוי `anthropic-models` ברשומת הספקים. אם המפתח או החשבון שלכם אינם יכולים לרשום מודלים, שמרו מזהה מודל ידוע בפרופיל ואשרו זאת דרך מבחן החיבור.
+
+התעבורה אינה ניתנת להחלפה עם ספקים תואמי OpenAI. מודל Claude שמופנה דרך OpenRouter, LiteLLM או שער אחר צריך להיות בפרופיל של אותו שער, ולא בפרופיל המקורי Anthropic.
+
+## פתרון בעיות
+
+- `401` או `403`: בדקו את טווח המפתח, גישה למרחב עבודה, חיובים, והאם המפתח שייך למרחב העבודה Anthropic הצפוי.
+- `404`: ה‑Base URL שגוי או שמזהה המודל הנבחר אינו זמין לחשבון.
+- מזהים מודלי Claude בסגנון שער נכשלים: העבירו את הפרופיל לספק השער התואם, מכיוון ש‑Anthropic המקורי מצפה לשמות מודל מקוריים.
+- בקשות ארוכות נכשלות בשלב מאוחר: הקטינו את גודל הפלט של המודל לכל משימה או השתמשו במודל עם תקרת טוקני פלט גדולה יותר.
+
+## מתי להשתמש
+
+השתמשו ב‑Anthropic כאשר האיכות בסינתזה, ברשימות מחקר או בכתיבה ממוקדת חשובה יותר מהעלות הגולמית. אל תשתמשו בו כחלופה כללית תואמת OpenAI; התעבורה הנפרדת היא הנקודה, ושילוב הפרוטוקולים מקשה על אבחון.
+
+---
+
+## צעדים באופק
+
+- [LLM Providers](/docs/providers/overview) -- תצורה מלאה, מודלים לכל משימה, ולוגיקת ניסיונות חוזרים
+- [Troubleshooting](/docs/advanced/troubleshooting) -- תיקון שגיאות 401/403 ושגיאות חיבור

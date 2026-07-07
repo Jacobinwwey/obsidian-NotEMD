@@ -1,0 +1,189 @@
+---
+id: overview
+title: "Các nhà cung cấp LLM"
+description: "Cấu hình 36 nhà cung cấp LLM — đám mây, cổng và cục bộ — với việc chọn mô hình theo từng nhiệm vụ"
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [LLM providers, API, OpenAI, Anthropic, Google, DeepSeek, Qwen, Ollama, per-task model]
+concepts: [LLM Integration, API Providers, Per-Task Models, OpenAI Compatible, Ollama, China Providers]
+citations:
+  - title: OpenAI API
+    url: https://platform.openai.com
+  - title: Anthropic API
+    url: https://docs.anthropic.com
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# Các nhà cung cấp LLM
+
+<TLDR>
+**Notemd hỗ trợ 36 nhà cung cấp LLM trên 4 loại giao thức.** Tất cả các cuộc gọi API đều sử dụng dữ liệu thô HTTP (không dùng SDK) kèm theo việc tự động thử lại, chuyển sang giao thức dự phòng và lưu trữ kết quả phản hồi trong 5 phút. Việc chọn mô hình theo từng nhiệm vụ cho phép bạn dùng các mô hình rẻ tiền để trích xuất khái niệm và các mô hình mạnh mẽ cho mục đích nghiên cứu. Không cần khóa API đối với các nhà cung cấp cục bộ (Ollama, LMStudio).
+</TLDR>
+
+Đây là một phần của [Obsidian Hướng dẫn Quản lý Kiến thức AI](/docs/pillar-ai-knowledge).
+
+## Các danh mục nhà cung cấp
+
+### Các nhà cung cấp đám mây
+
+| Nhà cung cấp | Giá trị mặc định của URL | Mô hình mặc định | Temperature |
+|----------|-----------------|---------------|-------------|
+| **DeepSeek** | `api.deepseek.com` | `deepseek-v4-pro` | 0.5 |
+| **OpenAI** | `api.openai.com/v1` | `gpt-4o` | 0.5 |
+| **Anthropic** | `api.anthropic.com` | `claude-3-5-sonnet-20240620` | 0.5 |
+| **Google** | `generativelanguage.googleapis.com/v1` | `gemini-2.0-flash-exp` | 0.5 |
+| **Mistral** | `api.mistral.ai/v1` | `mistral-large-latest` | 0.5 |
+| **xAI** | `api.x.ai/v1` | `grok-4` | 0.7 |
+| **Cerebras** | `api.cerebras.ai/v1` | `gpt-oss-120b` | 0.5 |
+| **Fireworks** | `api.fireworks.ai/inference/v1` | `kimi-k2p5` | 0.5 |
+| **Nebius** | `api.studio.nebius.com/v1` | `openai/gpt-oss-120b` | 0.3 |
+
+### Các nhà cung cấp cổng / proxy
+
+| Nhà cung cấp | Giá trị mặc định của URL | Mô hình mặc định | Ghi chú |
+|----------|-----------------|---------------|-------|
+| **OpenRouter** | `openrouter.ai/api/v1` | `anthropic/claude-3.7-sonnet` | Thêm tiêu đề `HTTP-Referer` + `X-Title` |
+| **GitHub Models** | `models.github.ai/inference` | `gpt-4o-mini` | Thêm tiêu đề `X-GitHub-Api-Version` |
+| **AIHubMix** | `aihubmix.com/v1` | `gpt-4o-mini` | Thêm tiêu đề `APP-Code` |
+| **PPIO** | `api.ppinfra.com/v3/openai` | `qwen/qwen3-32b` | |
+| **Hugging Face** | `router.huggingface.co/v1` | `openai/gpt-oss-120b` | |
+| **Vercel AI Gateway** | `ai-gateway.vercel.sh/v1` | `anthropic/claude-sonnet-4.5` | |
+| **Requesty** | `router.requesty.ai/v1` | `anthropic/claude-3-7-sonnet-latest` | |
+| **Together** | `api.together.xyz/v1` | `meta-llama/Meta-Llama-3.1-70B-Instruct-Turbo` | |
+| **LiteLLM** | `localhost:4000/v1` | `your-proxy-model` | Khóa API là tùy chọn |
+| **API mới** | `localhost:3000/v1` | `gpt-4.1` | Khóa API là tùy chọn |
+| **OpenAI Compatible** | (được người dùng cấu hình) | `your-model-id` | Đầu cuối tùy chỉnh |
+
+### Các nhà cung cấp tại Trung Quốc
+
+| Nhà cung cấp | Cơ sở mặc định URL | Mô hình mặc định | Ghi chú |
+|----------|-----------------|---------------|-------|
+| **Qwen** | `dashscope.aliyuncs.com/compatible-mode/v1` | `qwen3-235b-a22b` | Alibaba DashScope |
+| **Qwen Code** | `dashscope.aliyuncs.com/compatible-mode/v1` | `qwen3-coder-plus` | Tập trung vào lập trình |
+| **Doubao** | `ark.cn-beijing.volces.com/api/v3` | (yêu cầu ID điểm cuối) | ByteDance Volcengine |
+| **Moonshot** | `api.moonshot.cn/v1` | `kimi-k2-0905-preview` | Kimi |
+| **Xiaomi MiMo** | `api.xiaomimimo.com/v1` | `mimo-v2.5-pro` | |
+| **GLM** | `open.bigmodel.cn/api/paas/v4` | `glm-5` | Đầu cuối Zhipu, Trung Quốc |
+| **Z AI** | `api.z.ai/api/paas/v4` | `glm-5` | Đầu cuối Zhipu, quốc tế |
+| **MiniMax** | `api.minimaxi.com/v1` | `MiniMax-M2.7` | |
+| **Baidu Qianfan** | `qianfan.baidubce.com/v2` | `ernie-4.5-turbo-32k` | |
+| **SiliconFlow** | `api.siliconflow.cn/v1` | `Qwen/QwQ-32B` | Nền tảng lưu trữ mô hình |
+| **Huawei Cloud MaaS** | `api.modelarts-maas.com/v1` | `DeepSeek-V3` | |
+
+**Doubao yêu cầu ID đầu cuối Ark** (định dạng: `ep-xxxxxxxx-xxxx-xxxx`). Giá trị mặc định của ký tự thay thế phải được thay thế.
+
+### Nhà cung cấp địa phương
+
+| Nhà cung cấp | Cơ sở mặc định URL | Mô hình mặc định | Ghi chú |
+|----------|-----------------|---------------|-------|
+| **Ollama** | `localhost:11434/api` | `llama3` | Không có khóa API. Phát trực tiếp NDJSON. Tìm kiếm mô hình thông qua `/api/tags` |
+| **LMStudio** | `localhost:1234/v1` | `local-model` | Gửi `"EMPTY"` dưới dạng token bearer. Tìm kiếm tương thích OpenAI |
+| **OVMS** | `localhost:8000/v3` | `openvino-model` | OpenVINO Model Server |
+| **Azure OpenAI** | (được người dùng cấu hình) | `gpt-4o` | Tên triển khai trong URL. Tiêu đề `api-key` |
+
+## Lựa chọn mô hình theo nhiệm vụ
+
+Notemd hỗ trợ nhà cung cấp và mô hình riêng biệt cho mỗi nhiệm vụ. Kích hoạt bằng `useMultiModelSettings: true`.
+
+### Các nhiệm vụ có sẵn
+
+| Nhiệm vụ | Khóa cài đặt | Nhà cung cấp mặc định |
+|------|-------------|-----------------|
+| Thêm liên kết (chèn liên kết wiki) | `addLinksProvider` / `addLinksModel` | DeepSeek |
+| Nghiên cứu (tìm kiếm web + tóm tắt) | `researchProvider` / `researchModel` | DeepSeek |
+| Tạo từ tiêu đề | `generateTitleProvider` / `generateTitleModel` | DeepSeek |
+| Dịch thuật | `translateProvider` / `translateModel` | DeepSeek |
+| Tạo sơ đồ | `summarizeToMermaidProvider` / `Model` | DeepSeek |
+| Trích xuất khái niệm | `extractConceptsProvider` / `Model` | DeepSeek |
+| Trích xuất văn bản gốc | `extractOriginalTextProvider` / `Model` | DeepSeek |
+
+### Thứ tự giải quyết
+
+1. Nếu `useMultiModelSettings` được kích hoạt → sử dụng nhà cung cấp và mô hình riêng cho nhiệm vụ
+2. Nếu phần thay thế mô hình nhiệm vụ trống → quay lại sử dụng mô hình mặc định của nhà cung cấp
+3. Nếu nhà cung cấp nhiệm vụ không hợp lệ → quay lại sử dụng `activeProvider` toàn cục
+4. Nếu `useMultiModelSettings` bị tắt → tất cả các nhiệm vụ sẽ sử dụng `activeProvider` toàn cục
+
+### Các cấu hình được khuyến nghị
+
+```
+# Researcher: power for research, cheap for everything else
+activeProvider: DeepSeek
+extractConceptsProvider: DeepSeek
+researchProvider: OpenAI        # GPT-4o for better research quality
+summarizeToMermaidProvider: DeepSeek
+
+# Privacy-first: local only
+activeProvider: Ollama
+addLinksProvider: Ollama
+extractConceptsProvider: Ollama
+
+# Budget bilingual
+activeProvider: DeepSeek
+translateProvider: Google      # Gemini Flash for translation
+researchProvider: SiliconFlow  # Cheaper China-based routing
+```
+
+## Kiến trúc gọi API
+
+### Các tầng truyền tải
+
+1. **Obsidian `requestUrl`** — chính (tích hợp sẵn, hoạt động trên mọi nền tảng)
+2. **Desktop HTTP** — các module Node.js `http`/`https` (phát trực tiếp + yêu cầu dài)
+3. **Web `fetch`** — phương án dự phòng khi các module Node.js không khả dụng
+
+Plugin sẽ tự động chuyển sang tầng truyền tải khác khi xảy ra lỗi mạng tạm thời.
+
+### Logic thử lại
+
+- **Chế độ bình thường** (`enableStableApiCall: false`): Chỉ thử một lần. Nếu thất bại tạm thời, sẽ tự động nâng cấp lên chế độ thử lại ổn định.
+- **Chế độ thử lại ổn định** (`enableStableApiCall: true`): Tối đa 4 lần thử lại (1 lần ban đầu + 3 lần thử lại) với khoảng cách 5 giây.
+- **Các lỗi tạm thời gây ra việc thử lại**: `err_connection_closed`, `err_connection_reset`, `err_timed_out`, `econnreset`, `econnaborted`, `etimedout`, `socket hang up`, `network request failed`
+- **Không thể thử lại**: HTTP 400, 401, 403, 404
+
+### Lưu trữ phản hồi
+
+Bộ nhớ đệm LRU trong 5 phút dựa trên provider + model + temperature + prompt + content. Các yêu cầu giống nhau trong vòng 5 phút sẽ nhận kết quả đã được lưu trữ ngay lập tức.
+
+### Xử lý mô hình suy luận
+
+Các mô hình không hỗ trợ vai trò `system` (DeepSeek R1, OpenAI o1/o3/o4/gpt-5) sẽ tự động kết hợp các prompt của hệ thống và người dùng thành một tin nhắn người dùng duy nhất.
+
+DeepSeek-specific: `thinkingEnabled` thêm `{ thinking: { type: 'enabled' } }` vào yêu cầu. `reasoningEffort` (thấp/trung/cao) được truyền dưới dạng `reasoning_effort`. Kiểm tra xem số token đầu ra tối đa có ≥ 8000 khi chức năng suy luận được bật hay không.
+
+### Dự đoán số token
+
+`estimateTokens(text)`: `Math.ceil(text.length / 4)` — phương pháp gợi ý 4 ký tự mỗi token. Được dùng để áp dụng `maxResearchContentTokens` trước khi gửi đến LLM.
+
+Không có chức năng theo dõi chi phí được triển khai.
+
+## Khám phá mô hình
+
+| Chế độ | Nhà cung cấp | Điểm cuối |
+|------|-----------|----------|
+| `ollama-tags` | Ollama | `/api/tags` |
+| `google-models` | Google | Danh sách mô hình API |
+| `anthropic-models` | Anthropic | Danh sách mô hình API |
+| `openai-compatible-models` | DeepSeek, Qwen, Mistral, v.v. | `/v1/models` |
+| `openrouter-models` | OpenRouter | Danh sách mô hình API |
+| `github-models` | GitHub Models | Suy luận API |
+| `none` | Azure OpenAI | Bị vô hiệu hóa (cần tên triển khai) |
+
+## Khởi động nhanh
+
+1. **Chọn nhà cung cấp** — DeepSeek (Trung Quốc), OpenAI (Quốc tế), hoặc Ollama (Địa phương/Tự do)
+2. **Nhập khóa API** — Cài đặt → Notemd → Nhà cung cấp → Khóa API
+3. **Kiểm tra kết nối** — Nhấn nút kiểm tra
+4. **Tùy chọn: Các mô hình theo nhiệm vụ** — Kích hoạt `useMultiModelSettings` và cấu hình riêng lẻ
+
+Đối với Ollama: không cần khóa API. Chỉ cần đảm bảo `ollama serve` đang chạy.
+
+---
+
+## Các bước tiếp theo
+
+- 📝 [Ghi chú ý tưởng](/docs/features/concept-notes) — Sử dụng mô hình trích xuất theo nhiệm vụ
+- 🎨 [Sơ đồ](/docs/features/diagrams) — Sử dụng mô hình sơ đồ theo nhiệm vụ
+- 🔍 [Nghiên cứu](/docs/features/research) — Sử dụng mô hình dành riêng cho nghiên cứu
+- ⚙️ [Cấu hình](/docs/getting-started/configuration) — Tham chiếu toàn bộ thiết lập

@@ -1,0 +1,67 @@
+---
+id: openai
+title: "OpenAI"
+description: "Cấu hình OpenAI (GPT-4, GPT-4o)"
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [openai, gpt-4o, provider, configuration]
+concepts: [OpenAI, GPT-4o, API Configuration]
+citations:
+  - title: OpenAI API
+    url: https://platform.openai.com
+  - title: GPT-4
+    url: https://openai.com/gpt-4
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# Nhà cung cấp OpenAI
+
+<TLDR>
+**OpenAI sử dụng giao thức chia sẻ tương thích với OpenAI.** Cài đặt mặc định hiện tại là `gpt-4o`, `https://api.openai.com/v1`, `temperature: 0.5` và bài kiểm tra kết nối `models-then-chat`. Hãy dùng trang này khi bạn cần ý nghĩa chính xác của các trường; hãy dùng tổng quan [LLM Providers](/docs/providers/overview) để chọn theo danh mục.
+
+Đây là một phần của [Obsidian Hướng dẫn Quản lý Kiến thức AI](/docs/pillar-ai-knowledge).
+</TLDR>
+
+## Cài đặt
+
+Tạo một khóa OpenAI API, thêm hồ sơ nhà cung cấp `OpenAI` vào cài đặt Notemd, và giữ nguyên Base URL mặc định trừ khi bạn cố ý chỉ định một cổng tương thích với OpenAI. Trường mô hình có thể giữ nguyên ở `gpt-4o` cho công việc tổng quát hoặc được thay thế bằng ID mô hình OpenAI khác mà tài khoản của bạn có thể gọi.
+
+Sử dụng các mô hình dành riêng cho nhiệm vụ để kiểm soát chi phí: giữ các mô hình mạnh hơn cho nghiên cứu, trích xuất khái niệm và tái cấu trúc văn bản dài; sử dụng các mô hình rẻ hơn hoặc nhanh hơn cho việc dịch, đề xuất liên kết và tóm tắt ngắn.
+
+## Endpoint Và Xác thực
+
+| Trường | Cài đặt mặc định |
+|-------|----------------|
+| Giao thức truyền tin | `openai-compatible` |
+| Khóa API | Yêu cầu |
+| Base URL | `https://api.openai.com/v1` |
+| Mô hình mặc định | `gpt-4o` |
+| Temperature | `0.5` |
+| Kiểm tra kết nối | `/models`, sau đó là `/chat/completions` |
+
+Notemd chuẩn hóa các base URL tương thích với OpenAI trước khi thêm `chat/completions` hoặc `models`. Đừng bao gồm `/chat/completions` cuối cùng trong Base URL; điều đó sẽ tạo ra một đường dẫn trùng lặp.
+
+## Khám phá mô hình
+
+OpenAI sử dụng con đường khám phá mô hình tổng quát tương thích với OpenAI. Cài đặt UI trước tiên hỏi `/v1/models`, sau đó xác minh mô hình được chọn bằng yêu cầu chat nhẹ. Nếu việc khám phá thất bại nhưng chat vẫn hoạt động, hãy kiểm tra xem khóa của bạn có quyền truy cập danh sách mô hình hay không hoặc liệu có cổng nào chặn việc liệt kê mô hình hay không.
+
+Các mô hình lý luận được coi là trường hợp đặc biệt của giao thức: Notemd kết hợp nội dung mệnh lệnh hệ thống và người dùng thành các ID lý luận OpenAI mà từ chối vai trò `system` riêng biệt, và chỉ hiển thị `reasoningEffort` khi định nghĩa nhà cung cấp hỗ trợ nó.
+
+## Khắc phục sự cố
+
+- `401` hoặc `403`: kiểm tra khóa, quyền truy cập dự án, trạng thái thanh toán và xem mô hình được chọn có được kích hoạt cho khóa đó hay không.
+- `404` trên chat: Base URL thường sai hoặc đã bao gồm `/chat/completions` rồi.
+- Mô hình xuất hiện trong tài liệu nhưng không có trong bộ lựa chọn: quyền truy cập danh sách mô hình và quyền truy cập chat là hai điểm thất bại riêng biệt; hãy kiểm tra ID mô hình chính xác bằng tay trong hồ sơ nhà cung cấp.
+- Mô hình lý luận từ chối tin nhắn: hãy dùng ID mô hình nằm trong con đường xử lý lý luận OpenAI hoặc chuyển sang mô hình chat không lý luận.
+
+## Khi nào nên sử dụng
+
+Hãy dùng OpenAI khi bạn muốn con đường lưu trữ mặc định dễ dự đoán nhất, khi việc khám phá `/v1/models` rất quan trọng, hoặc khi quy trình làm việc phụ thuộc vào ý nghĩa mô hình lý luận OpenAI. Hãy ưu tiên sử dụng cổng hoặc nhà cung cấp địa phương khi việc định tuyến, bảo mật hoặc kiểm soát chi phí quan trọng hơn hành vi trực tiếp của OpenAI API.
+
+---
+
+## Các bước tiếp theo
+
+- [LLM Providers](/docs/providers/overview) -- Cấu hình đầy đủ, mô hình mỗi nhiệm vụ và logic thử lại
+- [Giải quyết sự cố](/docs/advanced/troubleshooting) -- Sửa lỗi 401/403 và lỗi giới hạn tần suất

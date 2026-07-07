@@ -1,0 +1,435 @@
+---
+id: configuration
+title: "কনফিগারেশন"
+description: "Notemd-এর সেটিংস ও প্রেফারেন্সগুলো কনফিগার করুন"
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [configuration, settings, customization, preferences]
+concepts: [Configuration, Per-Task Models, Output Paths, Custom Workflows]
+citations:
+  - title: Obsidian
+    url: https://obsidian.md
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# কনফিগারেশন
+
+<TLDR>
+**Notemd কনফিগারেশন 6টি মূল অঞ্চলকে অন্তর্ভুক্ত করে:** (1) LLM প্রোভাইডার ও API কী, (2) টাস্ক-ভিত্তিক মডেল নির্বাচন, (3) আউটপুট পাথ ও টেমপ্লেট, (4) UI ভাষা ও আউটপুট ভাষা, (5) সার্চ সার্ভিস (Tavily/DuckDuckGo), (6) কাস্টম ওয়ার্কফ্লো। সমস্ত সেটিংস Obsidian Settings → Notemd-এ রয়েছে। পরিবর্তনগুলো তৎক্ষণাৎ কার্যকর হয়.
+</TLDR>
+
+## Settings Overview
+
+Access: **Obsidian Settings (⚙️) → Notemd**
+
+### Main Sections
+
+1. **Provider Configuration** — API কী, বেস URLs, মডেলসমূহ
+2. **Task Settings** — টাস্ক-ভিত্তিক মডেল নির্বাচন
+3. **Output Configuration** — জেনারেট করা ফাইলগুলো কোথায় সংরক্ষণ করতে হবে
+4. **Language Settings** — UI ও আউটপুট ভাষাসমূহ
+5. **Search Integration** — Tavily/DuckDuckGo সেটআপ
+6. **Workflows** — কাস্টম বাটন চেইনস
+7. **Advanced** — ডায়াগনস্টিক্স, ব্যাচ প্রসেসিং, চাঙ্কিং
+
+---
+
+## 1. Provider Configuration
+
+### Adding a Provider
+
+1. ড্রপডাউন থেকে **প্রোভাইডার নির্বাচন** করুন (30+ উপলব্ধ)
+2. **API কী লিখুন**
+3. **ঐচ্ছিক**: কাস্টম বেস URL সেট করুন (প্রক্সি/গেটওয়ের জন্য)
+4. **"Get Model List"-এ ক্লিক করুন** যাতে সংযোগ যাচাই করা যায়
+5. **ডিফল্ট মডেল নির্বাচন করুন**
+
+### সাধারণ প্রদানকারীগণ
+
+#### OpenAI
+```
+Provider: OpenAI
+API Key: sk-...
+Base URL: https://api.openai.com/v1 (default)
+Model: gpt-4o-mini
+```
+
+#### Anthropic (Claude)
+```
+Provider: Anthropic
+API Key: sk-ant-...
+Model: claude-sonnet-4-6
+```
+
+#### Ollama (Local)
+```
+Provider: Ollama
+Base URL: http://localhost:11434 (default)
+Model: llama3.1
+API Key: (not required)
+```
+
+#### DeepSeek
+```
+Provider: DeepSeek
+API Key: sk-...
+Model: deepseek-chat
+```
+
+### একাধিক প্রদানকারী
+
+আপনি একাধিক প্রদানকারী কনফিগার করতে পারেন এবং প্রতিটি টাস্কের জন্য সেগুলোর মধ্যে সুইচ করতে পারেন:
+- **মূল প্রদানকারী**: ফলব্যাক হিসেবে ব্যবহৃত হয়
+- **টাস্ক-নির্দিষ্ট প্রদানকারী**: নির্দিষ্ট টাস্কগুলোর জন্য ওভাররাইড করা হয়
+
+---
+
+## 2. টাস্ক-নির্দিষ্ট মডেলসমূহ
+
+খরচ/গুণমান অপ্টিমাইজ করার জন্য বিভিন্ন টাস্কের জন্য ভিন্ন মডেল কনফিগার করুন:
+
+### টাস্কের ধরণ
+
+| কাজ | ডিফল্ট মডেল | উদ্দেশ্য |
+|------|--------------|---------|
+| **লিঙ্কিং** | মূল প্রদানকারী | wiki-লিঙ্কগুলোর জন্য ধারণাসমূহ চিহ্নিত করুন |
+| **কনসেপ্ট জেনারেশন** | মূল প্রদানকারী | ধারণাগুলি বের করুন এবং বর্ণনা করুন |
+| **রিসার্চ** | মূল প্রদানকারী | ওয়েব সার্চের ফলাফলগুলি সারসংক্ষেপ করুন |
+| **অনুবাদ** | মূল প্রদানকারী | টেক্সট অনুবাদ করুন |
+| **ডায়াগ্রাম জেনারেশন** | মূল প্রদানকারী | Mermaid/Canvas ডায়াগ্রাম তৈরি করুন |
+
+### উদাহরণ: খরচ-অপ্টিমাইজড সেটআপ
+
+```
+Linking: gpt-4o-mini (fast, many calls)
+Concept Generation: claude-sonnet-4-6 (quality extraction)
+Research: gpt-4o (web-grounded)
+Translation: gemini-flash (multilingual)
+Diagram: ollama/llama3.1 (free, local)
+```
+
+### কীভাবে কনফিগার করতে হয়
+
+1. **Settings → Notemd → Task Settings**
+2. প্রতিটি টাস্কের জন্য, নির্বাচন করুন:
+   - ✅ **Use main provider** (default)
+   - 🔄 **Use custom provider** → প্রদানকারী + মডেল নির্বাচন করুন
+
+---
+
+## 3. Output Configuration
+
+### Concept Notes Output
+
+**নতুন কনসেপ্ট নোটগুলো কোথায় সংরক্ষিত হয়:**
+
+```
+Settings → Output → Concept Folder
+Default: concepts/
+```
+
+**টেমপ্লেট:**
+```
+Settings → Output → Concept Template
+Default:
+---
+tags: [concept]
+created: {{date}}
+---
+
+# {{concept}}
+
+{{description}}
+
+## Backlinks
+{{backlinks}}
+```
+
+### ফোল্ডার স্ট্রাকচার অপশনস
+
+**অপশন ১: ফ্ল্যাট (সমস্ত কনসেপ্ট একটি ফোল্ডারে)**
+```
+vault/
+└── concepts/
+    ├── Machine Learning.md
+    ├── Neural Networks.md
+    └── Deep Learning.md
+```
+
+**অপশন ২: হায়ারার্কিক্যাল (সোর্স ফোল্ডার অনুযায়ী)**
+```
+vault/
+├── papers/
+│   └── concepts/
+│       └── Transformer.md
+└── notes/
+    └── concepts/
+        └── Attention Mechanism.md
+```
+
+কনফিগার করুন: **Settings → Output → Use Hierarchical Folders**
+
+### ডায়াগ্রাম আউটপুট
+
+**ডায়াগ্রামগুলো কোথায় সংরক্ষিত হয়:**
+```
+Settings → Output → Diagram Folder
+Default: diagrams/
+```
+
+**ফরম্যাট:**
+- `.mmd` (Mermaid source)
+- `.canvas` (JSON Canvas)
+- `.html` (Vega-Lite)
+
+---
+
+## 4. ভাষা সেটিংস
+
+### UI Language
+
+**ইন্টারফেস ভাষা** (বাটন, মেনু, ডায়ালগস):
+
+```
+Settings → Language → UI Language
+Options: 21+ languages
+Default: System language
+```
+
+সমর্থিত: English, 简体中文, 繁體中文, 日本語, 한국어, Español, Français, Deutsch, Русский, العربية, এবং আরও.
+
+### আউটপুট ভাষা
+
+**জেনারেটেড কন্টেন্টের ভাষা** (ধারণা নোট, গবেষণা সারসংক্ষেপ):
+
+```
+Settings → Language → Output Language
+Options: Same as UI languages
+Default: Same as UI
+```
+
+**ব্যবহারের ক্ষেত্র:** চীনা UI + ইংরেজি আউটপুট দিয়ে দ্বিভাষিক গবেষণা।
+
+### অনুবাদের লক্ষ্য
+
+**অনুবাদ কাজের জন্য ডিফল্ট লক্ষ্য ভাষা:**
+
+```
+Settings → Translation → Target Language
+Default: English
+```
+
+---
+
+## 5. সার্চ ইন্টিগ্রেশন
+
+### Tavily (সুপারিশকৃত)
+
+**AI-অপ্টিমাইজড সার্চ সার্ভিস:**
+
+```
+Settings → Search → Service: Tavily
+API Key: tvly-...
+```
+
+Get key: [tavily.com](https://tavily.com/)
+
+**বৈশিষ্ট্যসমূহ:**
+- উচ্চ-মানের ফলাফল
+- AI-অপ্টিমাইজড সারসংক্ষেপ
+- সূত্রের উদ্ধৃতি
+
+### DuckDuckGo (পরীক্ষামূলক)
+
+**API কী প্রয়োজন নয়:**
+
+```
+Settings → Search → Service: DuckDuckGo
+```
+
+**নোট:** কম মান, কোনো কাস্টমাইজেশন নেই।
+
+---
+
+## 6. ওয়ার্কফ্লো কনফিগারেশন
+
+### কাস্টম ওয়ার্কফ্লো তৈরি করা
+
+**ওয়ার্কফ্লোগুলো একাধিক টাস্ককে একটি বাটনে চেইন করে।**
+
+1. **Settings → Workflows → Add Workflow**
+2. **Name**: "Paper Analysis Flow"
+3. **DSL**: `process-current-add-links>extract-concepts-current>research-and-summarize>summarize-as-mermaid`
+4. **Save**
+
+বাম সাইডবারে একটি নতুন বাটন দেখা যায়।
+
+### DSL Syntax
+
+**Format:** `action1>action2>action3`
+
+**Available Actions:**
+- `process-current-add-links` — বর্তমান নোটে উইকি-লিঙ্ক যোগ করা
+- `extract-concepts-current` — কনসেপ্ট নোট তৈরি করা
+- `research-and-summarize` — ওয়েব রিসার্চ + সারাংশ
+- `translate-current` — বর্তমান নোট অনুবাদ করা
+- `summarize-as-mermaid` — Mermaid ডায়াগ্রাম তৈরি করা
+- `process-folder-add-links` — ফোল্ডারগুলো ব্যাচ প্রসেস করা
+
+**Example Workflows:**
+
+**দ্রুত ধারণা বের করা:**
+```
+process-current-add-links>extract-concepts-current
+```
+
+**গভীর গবেষণা:**
+```
+process-current-add-links>research-and-summarize>extract-concepts-current
+```
+
+**বহুভাষিক বিশ্লেষণ:**
+```
+translate-current>process-current-add-links>extract-concepts-current
+```
+
+---
+
+## 7. উন্নত সেটিংস
+
+### ব্যাচ প্রক্রিয়াকরণ
+
+**একই সাথে একাধিক ফাইল প্রক্রিয়া করা:**
+
+```
+Settings → Advanced → Batch Processing
+Concurrency: 3 (default)
+```
+
+বেশি = দ্রুত কিন্তু আরও API কল হয়.
+
+### স্মার্ট চাঙ্কিং
+
+**দীর্ঘ নোটের জন্য, চাঙ্কে ভাগ করা:**
+
+```
+Settings → Advanced → Smart Chunking
+Chunk Size: 2000 words (default)
+Overlap: 200 words (default)
+```
+
+টোকেন লিমিট সংক্রান্ত ত্রুটি রোধ করে.
+
+### ডায়াগনস্টিক্স প্যানেল
+
+**বিস্তারিত লগ দেখা:**
+
+```
+Settings → Advanced → Enable Diagnostics
+```
+
+দেখায়:
+- API রিকোয়েস্ট/রেসপন্স
+- টোকেন ব্যবহার
+- প্রক্রিয়াকরণ সময়
+- ত্রুটি
+
+### ডুপ্লিকেট ধারণা সনাক্তকরণ
+
+**নিকটবর্তী ডুপ্লিকেট ধারণাগুলি এড়ান:**
+
+```
+Settings → Advanced → Synonym Suppression
+Threshold: 0.8 (default, 0-1)
+```
+
+উচ্চতর = আরও আক্রমণাত্মক মার্জিং.
+
+---
+
+## Configuration Profiles
+
+### Export/Import Settings
+
+**ডিভাইসগুলির মধ্যে কনফিগারেশন শেয়ার করুন:**
+
+1. **Settings → Advanced → Export Configuration**
+2. Saves `notemd-config.json`
+3. নতুন ডিভাইসে: **Import Configuration**
+
+**কী অন্তর্ভুক্ত রয়েছে:**
+- Provider API keys (optional)
+- Model selections
+- Output paths
+- Custom workflows
+
+---
+
+## Recommended Configurations
+
+### For Students
+
+```
+Provider: OpenAI (gpt-4o-mini)
+Concept Folder: concepts/
+UI Language: System
+Output Language: System
+Workflow: "Study Flow" (add-links>extract-concepts)
+```
+
+### For Researchers
+
+```
+Providers:
+  - Linking: DeepSeek (cheap, many calls)
+  - Concepts: Claude Sonnet (high quality)
+  - Research: GPT-4o (web-grounded)
+Concept Folder: notes/concepts/
+Hierarchical: Yes
+Workflow: "Paper Flow" (add-links>extract>research>diagram)
+```
+
+### গোপনীয়তা-সচেতন ব্যবহারকারীদের জন্য
+
+```
+Provider: Ollama (llama3.1)
+All tasks: Local model
+Search: DuckDuckGo (no API)
+Diagnostics: Off
+```
+
+### দ্বিভাষিক কাজের জন্য
+
+```
+UI Language: Chinese
+Output Language: English
+Translation Target: Chinese
+Provider: Gemini (multilingual)
+```
+
+---
+
+## কনফিগারেশন সমস্যা সমাধান
+
+### সেটিংস সংরক্ষিত হয়নি
+- `.obsidian/plugins/notemd/`-এ ফাইলের অনুমতি পরীক্ষা করুন
+- চেষ্টা করুন: প্লাগইন নিষ্ক্রিয় করুন → পুনরায় সক্রিয় করুন
+
+### API কী অবৈধ
+- অতিরিক্ত স্পেস নেই
+- মেয়াদ পরীক্ষা করুন
+- প্রদানকারীর ড্যাশবোর্ডে ক্রেডিট যাচাই করুন
+
+### মডেলগুলি লোড হচ্ছে না
+- রিফ্রেশ করতে "Get Model List"-এ ক্লিক করুন
+- নেটওয়ার্ক সংযোগ পরীক্ষা করুন
+- ভিন্ন প্রদানকারী চেষ্টা করুন
+
+---
+
+## পরবর্তী ধাপসমূহ
+
+- 📖 [Explore Features](../features/wiki-links)
+- 🔌 [Provider Setup Guides](../providers/overview)
+- ❓ [FAQ](../faq)

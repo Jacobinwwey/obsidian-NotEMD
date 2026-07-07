@@ -1,0 +1,63 @@
+---
+id: local
+title: "Mô hình địa phương"
+description: "Cấu hình Ollama và các LLM địa phương"
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [local, ollama, lmstudio, provider, configuration, offline]
+concepts: [Local Models, Ollama, LMStudio, Offline]
+citations:
+  - title: Ollama
+    url: https://ollama.com
+  - title: LM Studio
+    url: https://lmstudio.ai
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# Mô hình địa phương
+
+<TLDR>
+**Các nhà cung cấp địa phương giữ nội dung ghi chú khỏi các API được lưu trữ trên mạng.** Đường dẫn địa phương hiện tại bao phủ Ollama bằng giao thức vận chuyển `ollama` gốc và LMStudio thông qua giao thức tương thích OpenAI. Không cần khóa API cho bất kỳ đường dẫn nào, nhưng máy chủ và mô hình địa phương phải đã đang chạy.
+
+Đây là một phần của [Obsidian Hướng dẫn Quản lý Kiến thức AI](/docs/pillar-ai-knowledge).
+</TLDR>
+
+## Cài đặt
+
+Đối với Ollama, hãy cài đặt Ollama, tải xuống mô hình bạn muốn, khởi động máy chủ, và thêm hồ sơ nhà cung cấp `Ollama` vào Notemd. Đối với LMStudio, tải mô hình vào máy chủ địa phương của LM Studio và thêm hồ sơ nhà cung cấp `LMStudio`.
+
+Các mô hình địa phương là các yếu tố phụ thuộc vận hành, không chỉ là thiết lập. Notemd chỉ có thể gọi những gì quy trình địa phương cung cấp, vì vậy hãy kiểm tra mô hình địa phương bên ngoài Obsidian trước khi gỡ lỗi plugin.
+
+## Endpoint Và Xác thực
+
+| Nhà cung cấp | Base URL | Mô hình mặc định | Khóa API | Ghi chú |
+|----------|----------|---------------|---------|-------|
+| Ollama | `localhost:11434/api` | `llama3` | Không cần thiết | Phát trực tiếp NDJSON; khám phá mô hình thông qua `/api/tags` |
+| LMStudio | `localhost:1234/v1` | `local-model` | Không cần thiết | Gửi `"EMPTY"` dưới dạng token xác thực; tương thích OpenAI |
+
+Ollama sử dụng đường dẫn `/chat` gốc dưới Base URL của nó. LMStudio tuân theo đường dẫn `chat/completions` tương thích OpenAI và yêu cầu một mô hình đã được tải vào máy chủ địa phương.
+
+## Khám phá mô hình
+
+Ollama sử dụng chế độ khám phá `ollama-tags` và liệt kê các thẻ được tải xuống địa phương. LMStudio sử dụng cơ chế khám phá mô hình tương thích OpenAI khi máy chủ của nó cung cấp `/v1/models`.
+
+Nếu việc khám phá không trả về kết quả gì, đó thường là vấn đề về trạng thái máy chủ địa phương: mô hình chưa được tải xuống, chưa được tải, hoặc máy chủ đang được kết nối đến host/port khác so với hồ sơ đã cấu hình.
+
+## Khắc phục sự cố
+
+- Từ chối kết nối: hãy khởi động Ollama hoặc LM Studio và kiểm tra lại cổng đã cấu hình.
+- Không tìm thấy mô hình: hãy tải xuống thẻ Ollama hoặc tải mô hình của LM Studio trước khi thử nghiệm.
+- Kết quả xuất ra chậm: hãy giảm kích thước bối cảnh, sử dụng mô hình địa phương nhỏ hơn, hoặc chuyển các tác vụ nặng sang nhà cung cấp được lưu trữ trên mạng.
+- Phản hồi trống hoặc bị lỗi: hãy kiểm tra xem hồ sơ nhà cung cấp đã chọn có tương thích với giao thức máy chủ địa phương hay không; Ollama và LMStudio không thể thay thế cho nhau.
+
+## Khi nào nên sử dụng
+
+Sử dụng các nhà cung cấp địa phương cho các kho lưu trữ riêng tư, công việc ngoại tuyến, hoặc các nhiệm vụ lặp đi lặp lại có chi phí thấp. Đừng cho rằng việc sử dụng phiên bản địa phương luôn tốt hơn cho việc tổng hợp nghiên cứu hoặc suy luận dài hạn; chất lượng mô hình và giới hạn phần cứng chính là những yếu tố cần cân nhắc.
+
+---
+
+## Các bước tiếp theo
+
+- [LLM Các nhà cung cấp](/docs/providers/overview) -- Cấu hình đầy đủ và thiết lập mô hình cho từng nhiệm vụ
+- [Giải quyết sự cố](/docs/advanced/troubleshooting) -- Khắc phục lỗi connection-refused khi máy chủ địa phương không đang chạy

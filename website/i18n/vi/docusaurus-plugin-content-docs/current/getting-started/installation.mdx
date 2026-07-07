@@ -1,0 +1,133 @@
+---
+id: installation
+title: "Cài đặt"
+description: "Làm thế nào để cài đặt Notemd trên Obsidian"
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [installation, setup, obsidian plugin]
+concepts: [Installation, Community Plugins, BRAT, Manual Install]
+citations:
+  - title: Obsidian
+    url: https://obsidian.md
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# Cài đặt
+
+<TLDR>
+**Cài đặt Notemd trong chưa đầy 2 phút.** Có hai phương thức: (1) Các plugin cộng đồng Obsidian (được khuyến nghị, cài đặt chỉ với một cú nhấp), hoặc (2) Cài đặt thủ công thông qua GitHub Releases. Yêu cầu phiên bản Obsidian 0.15.0+ trở lên. Hoạt động trên Windows, macOS, Linux, iOS và Android. Không yêu cầu phụ thuộc bên ngoài. Hơn 4k lần tải về, được cấp phép theo giấy phép MIT.
+</TLDR>
+
+## Phương pháp 1: Các plugin cộng đồng (Được khuyến nghị)
+
+1. Mở **Obsidian Cài đặt** (biểu tượng ⚙️ hoặc `Ctrl/Cmd + ,`)
+2. Di chuyển đến **Community plugins**
+3. Nhấp vào **Browse**
+4. Tìm kiếm **"Notemd"**
+5. Nhấp vào **Install**
+6. Nhấp vào **Enable**
+
+**Xong rồi!** Bạn sẽ thấy biểu tượng Notemd ở thanh bên trái của mình.
+
+## Phương pháp 2: Cài đặt thủ công
+
+### Điều kiện tiên quyết
+- Obsidian 0.15.0 hoặc phiên bản mới hơn
+- Git (tùy chọn, dùng để sao chép)
+
+### Các bước
+
+1. **Tải xuống các tệp** từ [GitHub Releases](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/latest):
+   - `main.js`
+   - `styles.css`
+   - `manifest.json`
+
+2. **Tìm thư mục plugin của kho lưu trữ:**
+   ```
+   <your-vault>/.obsidian/plugins/
+   ```
+
+Nếu thư mục `plugins` chưa tồn tại, hãy tạo nó.
+
+3. **Tạo thư mục Notemd:**
+   ```
+   <your-vault>/.obsidian/plugins/notemd/
+   ```
+
+4. **Sao chép ba tệp** vào thư mục `notemd`.
+
+5. **Tải lại Obsidian:**
+   - Nhấn `Ctrl/Cmd + R`, hoặc
+   - Khởi động lại Obsidian
+
+6. **Kích hoạt plugin:**
+   - Cài đặt → Các plugin cộng đồng
+   - Tìm "Notemd" trong danh sách
+   - Bật nó lên
+
+## Phương án thay thế: Cài đặt qua BRAT
+
+Nếu bạn sử dụng plugin [BRAT](https://github.com/TfTHacker/obsidian42-brat):
+
+1. Mở cài đặt của BRAT
+2. Nhấp vào "Thêm plugin Beta"
+3. Nhập: `Jacobinwwey/obsidian-NotEMD`
+4. Nhấp vào "Thêm Plugin"
+5. Kích hoạt Notemd trong các plugin cộng đồng
+
+## Xác thực
+
+Sau khi cài đặt, hãy kiểm tra xem Notemd có hoạt động hay không:
+
+1. Mở bất kỳ ghi chú nào
+2. Nhấp chuột phải trong trình soạn thảo
+3. Bạn sẽ thấy các lệnh Notemd như sau:
+   - "Xử lý tập tin (thêm liên kết)"
+   - "Trích xuất khái niệm"
+   - "Nghiên cứu và tóm tắt"
+
+## Các bước tiếp theo
+
+- **Cấu hình nhà cung cấp LLM:** [Bắt đầu nhanh →](./quick-start)
+- **Giải quyết sự cố:** [Vấn đề thường gặp →](../advanced/troubleshooting)
+
+## Yêu cầu hệ thống
+
+| Nền tảng | Phiên bản | Trạng thái |
+|----------|---------|--------|
+| **Obsidian** | 0.15.0+ | Yêu cầu |
+| **Windows** | 7+ | ✅ Được hỗ trợ |
+| **macOS** | 10.15+ | ✅ Được hỗ trợ |
+| **Linux** | Bất kỳ | ✅ Được hỗ trợ |
+| **iOS** | 15+ | ✅ Được hỗ trợ |
+| **Android** | 5+ | ✅ Được hỗ trợ |
+
+## Gỡ cài đặt
+
+Để xóa Notemd:
+
+1. Cài đặt → Các tiện ích mở rộng cộng đồng
+2. Tìm "Notemd"
+3. Nhấp vào biểu tượng ❌
+4. Tùy chọn, xóa thư mục tiện ích mở rộng: `<vault>/.obsidian/plugins/notemd/`
+
+Dữ liệu của bạn (ghi chú, ghi chú ý tưởng, v.v.) sẽ không bị ảnh hưởng.
+
+## Đang cập nhật
+
+### Cập nhật tự động (Khuyến nghị)
+Obsidian sẽ tự động kiểm tra xem có bản cập nhật tiện ích mở rộng nào không. Khi có phiên bản mới sẵn có:
+1. Cài đặt → Các tiện ích mở rộng cộng đồng
+2. Nhấp vào "Kiểm tra bản cập nhật"
+3. Nhấp vào "Cập nhật" bên cạnh Notemd
+
+### Cập nhật thủ công
+Tải xuống phiên bản mới nhất và thay thế ba tệp trong thư mục tiện ích mở rộng của bạn.
+
+## Nhận trợ giúp
+
+- 📖 [Hướng dẫn sử dụng nhanh](./quick-start)
+- ❓ [Hỏi đáp](../faq)
+- 💬 [Cộng đồng Discord](https://discord.gg/qnGgsQ9W)
+- 🐛 [Báo cáo lỗi](https://github.com/Jacobinwwey/obsidian-NotEMD/issues)

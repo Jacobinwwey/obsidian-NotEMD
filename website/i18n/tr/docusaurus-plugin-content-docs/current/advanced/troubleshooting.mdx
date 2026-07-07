@@ -1,0 +1,161 @@
+---
+id: troubleshooting
+title: "Sorun Giderme"
+description: "Yaygın sorunlar ve çözümler"
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [troubleshooting, errors, diagnostics, connection test]
+concepts: [Troubleshooting, Error Handling, Diagnostics]
+citations:
+  - title: Obsidian
+    url: https://obsidian.md
+  - title: Obsidian API
+    url: https://docs.obsidian.md
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# Sorun Giderme
+
+<TLDR>
+**En Notemd sorunları dört kategoriye ayrılır: API anahtar sorunları, ağ bağlantısı, kimlik doğrulama hataları (401/403) ve sınırlama hataları (429).** Dahili bağlantı testi ve teşhis paneli temel nedeni hızlıca belirler. Bu sayfa her bir yaygın hata mesajını, bunun nedenini ve düzeltme yöntemini kapsar. Burada listelenmeyen sorunlar için teşhis çıktılarıyla birlikte GitHub Issues üzerinden rapor edin.
+
+Bu içerik [Obsidian AI Bilgi Yönetimi Kılavuzu](/docs/pillar-ai-knowledge) serisinin bir parçasıdır.
+</TLDR>
+
+## Genel Bakış
+
+Notemd, harici servislere -- LLM sağlayıcılarına ve arama API hizmetlerine -- bağlıdır; bu yüzden sorunların çoğu eklentinin kendisinden ziyade dışarıda ortaya çıkar. Ayarlar bölümündeki teşhis paneli, istek URL, yanıt durumu ve hata içeriği dahil olmak üzere son API çağrının yapılandırılmış bir görünümünü sunar. Daha fazla araştırma yapmadan önce her zaman bunu kontrol edin.
+
+## Nasıl Çalışır: Teşhis
+
+### Bağlantı Testi
+
+Her sağlayıcı ayar bölümünde **"Bağlantıyı Test Et"** butonu bulunur. Buna tıklandığında minimal bir API isteği gönderilir (genellikle bir model listesi veya kısa bir tamamlama) ve başarı durumu ya da belirli bir HTTP hata mesajı rapor edilir. Bu, API anahtarınızın ve temel URL değerinizin doğru olup olmadığını kontrol etmenin en hızlı yoludur.
+
+### Teşhis Paneli
+
+**Ayarlar --> Notemd --> Teşhis** şunları gösterir:
+
+| Alan | İçerik |
+|-------|---------|
+| Son sağlayıcı | En son hangi sağlayıcı çağrıldı |
+| Son model | En son hangi model çağrıldı |
+| Son durum | HTTP durum kodu veya iletim hatası |
+| Son hata | API'dan gelen ham hata mesajı |
+| Son istek URL | Son isteğin tamamı URL (gizlenmiş API anahtarı) |
+| Son yanıt gövdesi | Kısaltılmış yanıt gövdesi (ilk 500 karakter) |
+
+GitHub'da sorunları raporlarken tüm teşhis çıktısını kopyalayın.
+
+## Yaygın Hatalar
+
+### API Anahtar geçersiz veya bulunamıyor
+
+**Belirti:** HTTP 401 veya "Yanlış API anahtarı sağlandı"
+
+**Neden:** API anahtarı eksik, boşluk içeriyor veya farklı bir sağlayıcıya ait.
+
+**Çözüm:**
+1. Anahtarın başında veya sonunda boşluk olmadığını doğrula
+2. Anahtarın seçilen sağlayıcıyla eşleştiğinden emin olun (bir OpenAI anahtarı Anthropic ile çalışmayacaktır).
+3. Hesabınızda kredi bulunduğundan veya aktif bir abonelik olduğundan emin olun
+4. Doğrulamak için **"Test Connection"** seçeneğine tıklayın
+
+### Ağ / Bağlantı Hataları
+
+**Belirtiler:** `ERR_CONNECTION_REFUSED`, `ERR_TIMED_OUT`, `Socket hang up`, `Network request failed`
+
+**Neden:** Makinenizden API uç noktasına erişilemiyor.
+
+**Çözüm:**
+1. İnternet bağlantınızı kontrol edin
+2. Eğer bir proxy veya güvenlik duvarının arkasındaysanız, API alan adının engellenmediğinden emin olun
+3. Ollama için: `ollama serve`'ın çalıştığından emin olun (`ollama list` modelleri döndürmelidir)
+4. LMStudio için: Sunucunun `localhost:1234` üzerinde çalıştığından emin olun
+5. Farklı bir taşıma yöntemi deneyin -- mobil kullanıcılar `requestUrl` taşıma yönteminin aktif olduğundan emin olmalıdır
+6. Geçici hatalarda otomatik yeniden deneme için `enableStableApiCall`'ı etkinleştirin
+
+### 403 Yasaklandı
+
+**Belirtiler:** HTTP 403
+
+**Neden:** API anahtarınız geçerli ancak istenen kaynak için izinlere sahip değil.
+
+**Çözüm:**
+1. Bazı modeller özel erişim gerektirir (örneğin, Azure üzerinden GPT-4 için bir dağıtım adı gerekir)
+2. Bazı sağlayıcılar modelleri plan seviyesine göre sınırlar -- hesabınızı kontrol edin
+3. Bölgesel kısıtlamalar uygulanabilir (bazı Çin sağlayıcıları uluslararası IP'leri engeller ve bunun tersi de geçerlidir)
+4. Model adının doğru yazıldığından emin olun (örneğin, mini model tüm planınızın izin verdiği durumlarda `gpt-4o` değil `gpt-4o-mini` olmalıdır)
+
+### Hız Sınırı (429)
+
+**Belirti:** HTTP 429 veya "Hız sınırı aşıldı"
+
+**Neden:** Kısa bir süre içinde çok fazla istek gönderilmiştir.
+
+**Çözüm:**
+1. `batchConcurrency` değerini `1` veya `2`'ye düşürün
+2. Yeniden denemeden önce birkaç dakika bekleyin
+3. Plan seviyeniz için sağlayıcınızın hız sınırı belgelerine bakın
+4. Otomatik yeniden deneme ve geri sayım için `enableStableApiCall`'yı etkinleştirin
+5. Daha yüksek sınırlara sahip bir sağlayıcıya geçmeyi düşünün (DeepSeek, Ollama)
+
+### Model Bulunamadı
+
+**Belirti:** "Model bulunamadı" veya HTTP 404
+
+**Neden:** Seçilen sağlayıcıda model adı mevcut değildir.
+
+**Çözüm:**
+1. Sağlayıcınız için mevcut tüm modelleri görmek üzere **"Model Listesi Al"** seçeneğine tıklayın
+2. Bazı model adları zamanla değişir -- mevcut adı sağlayıcının dokümantasyonunda doğrulayın
+3. Ollama için: çekilen modelleri görmek üzere `ollama list` komutunu çalıştırın; yalnızca indirilen modeller kullanılabilir
+
+### Bağlantı yok / Kavram oluşturulmadı
+
+**Belirti:** Komut çalışıyor ancak hiç çıktı vermiyor
+
+**Neden:** LLM boş veya işlenemeyen bir yanıt döndürdü.
+
+**Çözüm:**
+1. Gerçek LLM yanıtını görmek üzere teşhis paneline bakın
+2. Daha güçlü bir model deneyin (bazı küçük modeller yapılandırılmış çıktılarla başa çıkamaz)
+3. Notun yeterli içeriğe sahip olduğundan emin olun (>50 kelime)
+4. Çelişen talimatlar içeren özel isteğinizi gözden geçirin
+5. Aşırı filtreleme yapıp yapmadığını görmek üzere eş anlamlı kelime baskılamasını geçici olarak devre dışı bırakın
+
+### Doubao Uç Nokta Kimliği Eksik
+
+**Belirti:** ByteDance Doubao sağlayıcısını kullanırken hata oluşuyor
+
+**Neden:** Doubao, model adı yerine Ark uç nokta kimliği (format: `ep-xxxxxxxx-xxxx-xxxx`) gerektirir.
+
+**Düzeltme:** Volcengine konsolundan aldığınız gerçek uç nokta ID’siyle varsayılan yer tutucu modelini değiştirin.
+
+## Yapılandırma
+
+| Teşhis Ayarı | Konum | Amaç |
+|--------------------|----------|---------|
+| **Bağlantıyı Test Et** | Ayarlar --> Sağlayıcı bölümü | API anahtarını ve bağlantı durumunu doğrulayın |
+| **Model Listesini Al** | Ayarlar --> Sağlayıcı bölümü | Hangi modellerin erişilebilir olduğundan emin olun |
+| `enableStableApiCall` | Ayarlar --> Gelişmiş | Gecikmeli yeniden deneme özelliğini etkinleştirin |
+| `batchConcurrency` | Ayarlar --> Toplu İşlemler | Oran sınırlamalarından kaçınmak için paralellik kontrolü yapın |
+
+## Sorunları Nasıl Bildirirsiniz
+
+Yukarıdakiler kapsamında olmayan bir sorununuz varsa:
+
+1. **Ayarlar --> Notemd --> Teşhis** bölümünü açın
+2. Tam teşhis çıktısını kopyalayın
+3. [github.com/Jacobinwwey/obsidian-NotEMD/issues](https://github.com/Jacobinwwey/obsidian-NotEMD/issues) adresinde bir GitHub Issue’si açın
+4. Şunları dahil edin: Obsidian sürümü, Notemd sürümü, sağlayıcı, model, teşhis çıktısı ve sorunu yeniden üretmek için adımlar
+5. Paylaşılan herhangi bir günlükten API anahtarını gizleyin
+
+---
+
+## Sonraki Adımlar
+
+- [LLM Sağlayıcılar](/docs/providers/overview) -- Tüm sağlayıcı yapılandırma referansları
+- [Toplu İşleme](/docs/advanced/batch-processing) -- Büyük işlemler için eşzamanlılık ve yeniden deneme ayarları
+- [Özel İstekler](/docs/advanced/custom-prompts) -- İstekleri ayarlayarak beklenmeyen LLM davranışlarını düzeltin

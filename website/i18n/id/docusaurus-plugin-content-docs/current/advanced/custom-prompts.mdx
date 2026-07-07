@@ -1,0 +1,134 @@
+---
+id: custom-prompts
+title: "Prompt Kustom"
+description: "Kustomisasi prompt LLM sesuai kebutuhan Anda"
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [custom prompts, prompts, focused learning, domain]
+concepts: [Custom Prompts, Focused Learning, Prompt Engineering]
+citations:
+  - title: Obsidian
+    url: https://obsidian.md
+  - title: LLM Prompt Engineering
+    url: https://platform.openai.com/docs/guides/prompt-engineering
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# Prompt Kustom
+
+<TLDR>
+**Notemd memungkinkan Anda menggantikan prompt LLM bawaan untuk setiap jenis tugas.** Prompt kustom memberi Anda kendali atas apa yang menjadi prioritas model: Anda dapat membatasi ekstraksi konsep pada disiplin tertentu, mengubah gaya penghubungan, atau mengarahkan nada terjemahan. Variabel prompt seperti `{{content}}` dan `{{concept}}` akan digantikan saat eksekusi. Fitur domain pembelajaran terfokus menambahkan bidang studi Anda di awal untuk secara otomatis membatasi hasil ekstraksi.
+
+Ini merupakan bagian dari [Obsidian Panduan Manajemen Pengetahuan AI](/docs/pillar-ai-knowledge).
+</TLDR>
+
+## Gambaran Umum
+
+Prompt bawaan Notemd ditulis untuk pekerjaan pengetahuan umum. Prompt tersebut berfungsi dengan baik di berbagai domain, tetapi masih membutuhkan peningkatan khusus untuk setiap bidang. Prompt kustom memungkinkan Anda memberi petunjuk yang jelas kepada LLM tentang cara bertindak sesuai kasus penggunaan Anda — entah itu hanya mengekstrak terminologi medis, hanya menghubungkan entitas bernama, atau menerjemahkan dalam gaya formal.
+
+Prompt kustom tidak menggantikan seluruh prompt sistem. Prompt ini menggantikan atau melengkapi bagian instruksi spesifik tugas sambil mempertahankan format output struktural (misalnya baris `CONCEPT:`, sintaks tautan wiki) yang diperlukan Notemd untuk pemrosesan.
+
+## Cara Kerjanya
+
+### Arsitektur Prompt
+
+Setiap tugas Notemd mengikuti struktur prompt yang sama:
+
+```
+[System role: You are a helpful assistant...]
+[Domain constraint: Relevant Fields: [{domain}]]   <-- focused learning (optional)
+[Custom task prompt]                                <-- your override (optional)
+[Output format instructions]                        <-- always preserved
+[Content: {{content}}]                              <-- runtime substitution
+```
+
+1. **Prompt sistem dasar** -- Menetapkan persona asisten. Tidak dapat digantikan.
+2. **Domain pembelajaran terfokus** -- Menambahkan `Relevant Fields: [medicine / law / computer science / ...]` di awal untuk membatasi cakupan. Ini merupakan opsi pengaturan, bukan prompt mentah.
+3. **Prompt tugas kustom** -- Menggantikan instruksi tugas bawaan (misalnya jenis konsep yang akan diekstrak, seberapa agresifnya penghubungan dilakukan).
+4. **Format output** -- Aturan struktural (baris `CONCEPT:`, format tautan wiki). Selalu ditambahkan oleh Notemd untuk memastikan dapat diproses.
+5. **Isi** -- Teks catatan yang sebenarnya, digantikan saat eksekusi melalui `{{content}}`.
+
+### Variabel Prompt
+
+Variabel akan digantikan pada saat eksekusi. Variabel yang tersedia berbeda tergantung tugas:
+
+| Variable | Tugas | Diganti Dengan |
+|----------|-------|---------------|
+| `{{content}}` | Semua | Teks catatan atau pilihan |
+| `{{concept}}` | Template catatan konsep | Nama konsep yang diekstrak |
+| `{{description}}` | Template catatan konsep | Deskripsi konsep yang dihasilkan oleh LLM |
+| `{{backlinks}}` | Template catatan konsep | Daftar catatan sumber beserta tautannya |
+| `{{date}}` | Template catatan konsep | Tanggal saat ini (YYYY-MM-DD) |
+| `{{language}}` | Terjemahan | Bahasa output target |
+| `{{source}}` | Template catatan konsep | Nama file dasar catatan sumber |
+
+### Domain Pembelajaran Terfokus
+
+Fitur pembelajaran terfokus merupakan pintasan untuk membatasi cakupan bidang. Alih-alih menulis prompt khusus yang menyebutkan bidang Anda, Anda atur `focusedLearningDomain` di pengaturan:
+
+```
+Settings → Advanced → Focused Learning Domain
+Example: "medicine" or "computer science" or "Chinese philosophy"
+```
+
+Hal ini akan menambahkan `Relevant Fields: [medicine]` di awal prompt ekstraksi, sehingga LLM akan memprioritaskan konsep yang relevan dengan bidang dan menekan konsep umum. Cara ini lebih ringan dibandingkan prompt khusus penuh dan berfungsi pada semua tugas ekstraksi.
+
+## Konfigurasi
+
+| Pengaturan | Default | Efek |
+|---------|---------|--------|
+| `customAddLinksPrompt` | `''` | Gantikan prompt tugas tambah tautan bawaan |
+| `customExtractConceptsPrompt` | `''` | Gantikan prompt ekstraksi konsep bawaan |
+| `customResearchPrompt` | `''` | Gantikan prompt penelitian + ringkasan bawaan |
+| `customTranslatePrompt` | `''` | Gantikan prompt terjemahan bawaan |
+| `customDiagramPrompt` | `''` | Gantikan prompt pembuatan diagram bawaan |
+| `focusedLearningDomain` | `''` | Tambahkan konteks disiplin di awal prompt ekstraksi dan tautan |
+| `extractConceptsMinimalTemplate` | `true` | Gunakan template catatan konsep hanya berupa judul (mempengaruhi cakupan template `{{concept}}`) |
+| `customConceptNoteTemplate` | `''` | Gantikan template file catatan konsep dengan dukungan variabel penuh |
+
+**Jika bidang prompt khusus kosong, maka akan digunakan prompt bawaan yang sudah ada.**
+
+## Contoh
+
+Anda adalah peneliti medis yang mengekstrak konsep dari catatan uji klinis. Prompt bawaan mengekstrak kata benda umum bersama istilah medis, yang menyebabkan folder konsep Anda menjadi berantakan.
+
+**Solusinya:** Atur domain pembelajaran terfokus dan prompt ekstraksi khusus.
+
+1. Atur `focusedLearningDomain` ke `medicine`
+2. Atur `customExtractConceptsPrompt` ke:
+
+```
+Extract only clinically relevant concepts: diseases, drug names,
+anatomical terms, measurement endpoints, and statistical methods.
+Ignore generic English nouns, brand names, and institutional names.
+Prioritize MeSH terminology where applicable.
+```
+
+Sekarang ketika Anda menjalankan "Extract concepts" pada catatan klinis, LLM menghasilkan:
+
+```
+CONCEPT: Randomized Controlled Trial
+CONCEPT: Double-Blind Method
+CONCEPT: Myocardial Infarction
+CONCEPT: Creatine Kinase-MB
+CONCEPT: Kaplan-Meier Estimate
+```
+
+Bukan perilaku bawaan yang mungkin juga mengekstrak istilah umum yang tidak diinginkan seperti "hospital" atau "month".
+
+## Tips
+
+- **Mulailah dengan domain pembelajaran yang terfokus** sebelum membuat prompt kustom penuh. Cara ini mencakup 80% kasus penggunaan hanya dengan satu pengaturan.
+- **Jaga format output** -- Jangan pernah menghapus instruksi format seperti "one per line" atau "CONCEPT: prefix" dari prompt kustom. Parser Notemd bergantung pada instruksi tersebut.
+- **Uji terlebih dahulu pada satu catatan** -- Prompt kustom dapat berdampak tak terduga pada luasnya ekstraksi. Periksa pada satu catatan sebelum memproses secara massal.
+- **Jaga prompt tetap ringkas** -- Prompt kustom yang terlalu panjang akan menghabiskan token dan dapat mengurangi fokus model.
+
+---
+
+## Langkah Selanjutnya
+
+- [Wiki-Links](/docs/features/wiki-links) -- Apa yang akan terhubung ketika Anda mengkustomisasi prompt add-links
+- [Concept Notes](/docs/features/concept-notes) -- Template catatan konsep dan variabel `{{concept}}`
+- [Batch Processing](/docs/advanced/batch-processing) -- Menerapkan prompt kustom ke seluruh folder
+- [Troubleshooting](/docs/advanced/troubleshooting) -- Memperbaiki masalah di mana prompt kustom menghasilkan output yang tidak diharapkan

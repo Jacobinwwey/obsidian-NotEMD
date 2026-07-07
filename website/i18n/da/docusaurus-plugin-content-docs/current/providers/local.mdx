@@ -1,0 +1,63 @@
+---
+id: local
+title: "Lokale modeller"
+description: "Konfigurér Ollama og lokale LLMs"
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [local, ollama, lmstudio, provider, configuration, offline]
+concepts: [Local Models, Ollama, LMStudio, Offline]
+citations:
+  - title: Ollama
+    url: https://ollama.com
+  - title: LM Studio
+    url: https://lmstudio.ai
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# Lokale modeller
+
+<TLDR>
+**Lokale leverandører holder indholdet bort fra hostede APIs.** Den aktuelle lokale path dekker Ollama med den nativte `ollama`-transporten og LMStudio gennem den OpenAI-kompatible transporten. Ingen API-klæde er nødvendig for hvilken path som helst, men den lokale server og modellen må allerede være i gang.
+
+Dette er en del af [Obsidian AI Knowledge Management Guide](/docs/pillar-ai-knowledge).
+</TLDR>
+
+## Indstilling
+
+For Ollama: Installer Ollama, hente den modell du ønsker, starte serveren og tilføj en `Ollama`-leverandørprofil i Notemd. For LMStudio: Læd en modell i LM Studios lokale server og tilføj en `LMStudio`-leverandørprofil.
+
+Lokale modeller er operationelle afhængigheder, ikke bare indstillinger. Notemd kan kun kalle det, som den lokale proces exponerer, så overvåg den lokale modellen udenfor Obsidian før du felsøger pluginen.
+
+## Endpoint og autentisering
+
+| Leverandør | Base URL | Standardmodell | API-Klæde | Opmerkninger |
+|----------|----------|---------------|---------|-------|
+| Ollama | `localhost:11434/api` | `llama3` | Ikke nødvendigt | NDJSON-strømning; modelludvikling gennem `/api/tags` |
+| LMStudio | `localhost:1234/v1` | `local-model` | Ikke nødvendigt | Sendes `"EMPTY"` som bearer-token; OpenAI-kompatibelt |
+
+Ollama bruger den nativte `/chat`-path under sin Base URL. LMStudio følger den OpenAI-kompatible `chat/completions`-rute og forventer en modell, der er læst i den lokale server.
+
+## Modelludvikling
+
+Ollama bruger `ollama-tags`-udviklingsmodusen og listar lokalt hentede tags. LMStudio bruger OpenAI-kompatibel modelludvikling, når dens server exponerer `/v1/models`.
+
+Hvis udviklingen returnerer ingenting, er det ofte en problem med tilstanden på den lokale server: modellen er ikke hentet, ikke læst, eller serveren er bundet til en anden host/port end profilen.
+
+## Felsøgning
+
+- Kontakt afvist: Start Ollama eller LM Studio og confirmer den konfigurerede port.
+- Modell ikke fundet: Hent Ollama-taggen eller læd den LM Studio-model før du prøver.
+- Langsommelig udgang: Redukér kontekststørrelsen, brug en mindre lokal modell, eller diriger tunge opgaver til en hostet leverandør.
+- Tomme eller fejlformede svar: Confirrer, at den valgte leverandørprofil overensstemmer med den lokale servers protokol; Ollama og LMStudio er ikke udskiftelige.
+
+## Når man skal bruge det
+
+Brug lokale leverandører for private skatterommer, offline-arbejde eller billige, repetitive opgaver. Antag ikke automatisk, at lokal løsninger er bedre for forskningssynthese eller langvarigt resonemang; modellkvalitet og hardwarebegrænsninger er kompromissen.
+
+---
+
+## Næste trin
+
+- [LLM Leverandører](/docs/providers/overview) -- Full konfiguration og modellindstilling per opgave
+- [Løsning af problemer](/docs/advanced/troubleshooting) -- Fikser fejl for connection-refused, når den lokale server ikke køres

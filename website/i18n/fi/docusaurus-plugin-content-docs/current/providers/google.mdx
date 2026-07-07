@@ -1,0 +1,67 @@
+---
+id: google
+title: "Google"
+description: "Konfigoi Google Gemini"
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [google, gemini, provider, configuration]
+concepts: [Google, Gemini, API Configuration]
+citations:
+  - title: Gemini API
+    url: https://ai.google.dev
+  - title: Google AI Studio
+    url: https://aistudio.google.com
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# Google Provider
+
+<TLDR>
+**Google käyttää perus Gemini Generative Language API-liikenteä.** Nykyinen asetukset ovat vaihtoehtoisesti `gemini-2.0-flash-exp`, `https://generativelanguage.googleapis.com/v1` ja `temperature: 0.5`. Se ei ole OpenAI-sovelluksellinen profiili.
+
+Tämä kuuluu [Obsidian AI-tietojen hallintasuunnitelmaan](/docs/pillar-ai-knowledge).
+</TLDR>
+
+## Asetukset
+
+Luo Google AI Studio tai Google Cloud API-avain Gemini-pääsyllä, lisää `Google`-tarjoajan profiili ja säilytä perus Generative Language Base URL. Käytä vaihtoehtoisesti vaihtoehtoisen Gemini Flash-profiilin nopeaan kääntöön ja laajempiin tiedonhallintatoimintoihin, mutta asenna erilliset mallit yksittäisten tehtävien kanssa, jos tarvitset suurempaa tai tehokkaampaa Gemini-mallia.
+
+Vältä Gemini-mallin ID:jen asettamista OpenAI-sovellukselliseen profiiliin, ilman että käytät selkeästi gatewaya, joka paljastaa Gemini OpenAI-sovelluksellisen API-menetelmän kautta.
+
+## Päätöspiste ja tunnistus
+
+| Poliivi | Nykyinen asetus |
+|-------|----------------|
+| Transporto | `google` |
+| API-avain | Tarvittava |
+| Base URL | `https://generativelanguage.googleapis.com/v1` |
+| Vaikuttava malli | `gemini-2.0-flash-exp` |
+| Tempertatuuri | `0.5` |
+| Yhteystesti | Ainoastaan chat |
+
+Käyttöajalla kutsutaan `/models/{model}:generateContent?key={apiKey}`. Avain lähetetään kyselyparametrina, koska tässä tavassa on yhdistetty perus Gemini-päätyppi sovelluksessa.
+
+## Mallien löytö
+
+Google käyttää `google-models`-avastusrežiimiä. Avastusprosessi pitää palauttaamaan API-avainelle saatavat Gemini-mallit; jos valinta on tyhjä, testaa avaintia samalla Base URL-menetelmällä ja vahvista, että mallikunta on aktivoitu tilille.
+
+Tuntut välittömisten tulostustokenien rajoitteet ovat tiedossa tarjoajarejistössä mallien perusteella. Jos pitkä kääntö tai diagrammin selitys lopetetaan keskellä, valitse Gemini-malli, jolla on suurempi tuettu välittömisten tulostustokenien määrä, tai vähentä pyytettyä välittömisten tulostustokenien määrää.
+
+## Virheiden ratkaiseminen
+
+- `400`: mallin ID ei yleensä sopi perus Gemini-marsmariin tai pyyntö ületää mallin tuettua muotoa.
+- `401` tai `403`: kontrolloi avainen rajoitteet, projektin/API-aktivoinnin sekä sitä, onko avain pääsyis Gemini:hin.
+- `404`: mallin ID ei ole saatavilla konfiguroituessa API-versioissa.
+- Gateway-näytävät esimerkit eivät toimi tässä profiilissa: käytä sitten gateway-asetuksia sijaan perus Google-tarjoajaa.
+
+## Kun käyttää
+
+Käytä Google nopeaan kääntöön, suuremman määrän tiedon puhastamiseen sekä toimintoihin, joissa Gemini:n hinna/tehokkuus-suhteella on parempi kuin suora OpenAI tai Anthropic. Ehdotetaan toinen tarjoaja toimintoille, jotka vaativat OpenAI-sovelluksellista puhelumallien käyttöä.
+
+---
+
+## Järguvät toimet
+
+- [LLM Tukijat](/docs/providers/overview) -- Täysin konfigurointi, tehtävänkohdalliset mallit ja uudellepyyntologiikka
+- [Kääntö](/docs/features/translation) -- Gemini Flash on suositeltava suuremman määrän kääntötöiden tilanteissa

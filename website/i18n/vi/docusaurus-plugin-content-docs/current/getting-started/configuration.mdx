@@ -1,0 +1,435 @@
+---
+id: configuration
+title: "Cấu hình"
+description: "Cấu hình các thiết lập và tùy chọn cho Notemd"
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [configuration, settings, customization, preferences]
+concepts: [Configuration, Per-Task Models, Output Paths, Custom Workflows]
+citations:
+  - title: Obsidian
+    url: https://obsidian.md
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# Cấu hình
+
+<TLDR>
+**Cấu hình Notemd bao gồm 6 lĩnh vực chính:** (1) các nhà cung cấp LLM và khóa API, (2) việc chọn mô hình theo nhiệm vụ, (3) đường dẫn và mẫu kết quả, (4) ngôn ngữ UI và ngôn ngữ đầu ra, (5) các dịch vụ tìm kiếm (Tavily/DuckDuckGo), (6) các luồng công việc tùy chỉnh. Tất cả các thiết lập nằm trong Obsidian Settings → Notemd. Các thay đổi sẽ có hiệu lực ngay lập tức.
+</TLDR>
+
+## Tổng quan về thiết lập
+
+Truy cập: **Obsidian Settings (⚙️) → Notemd**
+
+### Các mục chính
+
+1. **Cấu hình nhà cung cấp** — các khóa API, URLs cơ bản, các mô hình
+2. **Thiết lập nhiệm vụ** — việc chọn mô hình theo từng nhiệm vụ
+3. **Cấu hình đầu ra** — nơi lưu các tệp được tạo ra
+4. **Thiết lập ngôn ngữ** — UI và ngôn ngữ đầu ra
+5. **Tích hợp tìm kiếm** — cài đặt Tavily/DuckDuckGo
+6. **Luồng công việc** — chuỗi nút tùy chỉnh
+7. **Nâng cao** — chẩn đoán, xử lý theo lô, phân mảnh
+
+---
+
+## 1. Cấu hình nhà cung cấp
+
+### Thêm nhà cung cấp
+
+1. **Chọn nhà cung cấp** từ danh sách thả xuống (có hơn 30 nhà cung cấp)
+2. **Nhập khóa API**
+3. **Tùy chọn**: Đặt URL cơ sở tùy chỉnh (dành cho proxy/cổng mạng)
+4. **Nhấp "Get Model List"** để kiểm tra kết nối
+5. **Chọn mô hình mặc định**
+
+### Các nhà cung cấp phổ biến
+
+#### OpenAI
+```
+Provider: OpenAI
+API Key: sk-...
+Base URL: https://api.openai.com/v1 (default)
+Model: gpt-4o-mini
+```
+
+#### Anthropic (Claude)
+```
+Provider: Anthropic
+API Key: sk-ant-...
+Model: claude-sonnet-4-6
+```
+
+#### Ollama (Local)
+```
+Provider: Ollama
+Base URL: http://localhost:11434 (default)
+Model: llama3.1
+API Key: (not required)
+```
+
+#### DeepSeek
+```
+Provider: DeepSeek
+API Key: sk-...
+Model: deepseek-chat
+```
+
+### Nhiều nhà cung cấp
+
+Bạn có thể cấu hình nhiều nhà cung cấp và chuyển đổi giữa chúng tùy theo từng nhiệm vụ:
+- **Nhà cung cấp chính**: Dùng làm giải pháp dự phòng
+- **Nhà cung cấp riêng cho nhiệm vụ**: Đặt lại giá trị cho các nhiệm vụ cụ thể
+
+---
+
+## 2. Các mô hình riêng cho nhiệm vụ
+
+Cấu hình các mô hình khác nhau cho từng nhiệm vụ để tối ưu hóa chi phí/chất lượng:
+
+### Loại nhiệm vụ
+
+| Nhiệm vụ | Mô hình mặc định | Mục đích |
+|------|--------------|---------|
+| **Kết nối** | Nhà cung cấp chính | Xác định các khái niệm cho các liên kết wiki |
+| **Tạo khái niệm** | Nhà cung cấp chính | Trích xuất và mô tả các khái niệm |
+| **Nghiên cứu** | Nhà cung cấp chính | Tóm tắt kết quả tìm kiếm trên web |
+| **Dịch thuật** | Nhà cung cấp chính | Dịch văn bản |
+| **Tạo sơ đồ** | Nhà cung cấp chính | Tạo sơ đồ Mermaid/Canvas |
+
+### Ví dụ: Thiết lập tối ưu hóa chi phí
+
+```
+Linking: gpt-4o-mini (fast, many calls)
+Concept Generation: claude-sonnet-4-6 (quality extraction)
+Research: gpt-4o (web-grounded)
+Translation: gemini-flash (multilingual)
+Diagram: ollama/llama3.1 (free, local)
+```
+
+### Cách cấu hình
+
+1. **Settings → Notemd → Task Settings**
+2. Đối với mỗi nhiệm vụ, hãy chọn:
+   - ✅ **Sử dụng nhà cung cấp chính** (mặc định)
+   - 🔄 **Sử dụng nhà cung cấp tùy chỉnh** → chọn nhà cung cấp + mô hình
+
+---
+
+## 3. Cấu hình đầu ra
+
+### Đầu ra ghi chú về khái niệm
+
+**Vị trí lưu các ghi chú ý tưởng mới:**
+
+```
+Settings → Output → Concept Folder
+Default: concepts/
+```
+
+**Mẫu:**
+```
+Settings → Output → Concept Template
+Default:
+---
+tags: [concept]
+created: {{date}}
+---
+
+# {{concept}}
+
+{{description}}
+
+## Backlinks
+{{backlinks}}
+```
+
+### Tùy chọn cấu trúc thư mục
+
+**Tùy chọn 1: Dạng phẳng (tất cả các ý tưởng trong một thư mục)**
+```
+vault/
+└── concepts/
+    ├── Machine Learning.md
+    ├── Neural Networks.md
+    └── Deep Learning.md
+```
+
+**Tùy chọn 2: Dạng phân cấp (theo thư mục nguồn)**
+```
+vault/
+├── papers/
+│   └── concepts/
+│       └── Transformer.md
+└── notes/
+    └── concepts/
+        └── Attention Mechanism.md
+```
+
+Cấu hình: **Settings → Output → Use Hierarchical Folders**
+
+### Kết quả đồ thị
+
+**Vị trí lưu các đồ thị:**
+```
+Settings → Output → Diagram Folder
+Default: diagrams/
+```
+
+**Định dạng:**
+- `.mmd` (Mermaid nguồn)
+- `.canvas` (JSON Canvas)
+- `.html` (Vega-Lite)
+
+---
+
+## 4. Cài đặt ngôn ngữ
+
+### UI Ngôn ngữ
+
+**Ngôn ngữ giao diện** (nút, menu, hộp thoại):
+
+```
+Settings → Language → UI Language
+Options: 21+ languages
+Default: System language
+```
+
+Hỗ trợ: Tiếng Anh, 简体中文, 繁體中文, 日本語, 한국어, Español, Français, Deutsch, Русский, العربية, và nhiều ngôn ngữ khác.
+
+### Ngôn ngữ đầu ra
+
+**Ngôn ngữ nội dung được tạo ra** (ghi chú khái niệm, tóm tắt nghiên cứu):
+
+```
+Settings → Language → Output Language
+Options: Same as UI languages
+Default: Same as UI
+```
+
+**Trường hợp sử dụng:** Tiếng Trung UI + kết quả bằng tiếng Anh cho nghiên cứu song ngữ.
+
+### Mục tiêu dịch thuật
+
+**Ngôn ngữ mục tiêu mặc định** cho các nhiệm vụ dịch thuật:
+
+```
+Settings → Translation → Target Language
+Default: English
+```
+
+---
+
+## 5. Tích hợp tìm kiếm
+
+### Tavily (Được khuyến nghị)
+
+**Dịch vụ tìm kiếm tối ưu hóa bởi AI:**
+
+```
+Settings → Search → Service: Tavily
+API Key: tvly-...
+```
+
+Lấy khóa: [tavily.com](https://tavily.com/)
+
+**Các tính năng:**
+- Kết quả chất lượng cao
+- Tóm tắt tối ưu hóa bởi AI
+- Trích dẫn nguồn
+
+### DuckDuckGo (Thử nghiệm)
+
+**Không cần khóa API:**
+
+```
+Settings → Search → Service: DuckDuckGo
+```
+
+**Ghi chú:** Chất lượng thấp, không thể tùy chỉnh.
+
+---
+
+## 6. Cấu hình quy trình làm việc
+
+### Tạo các quy trình làm việc tùy chỉnh
+
+**Các công việc được liên kết thành một nút duy nhất.**
+
+1. **Cài đặt → Công việc → Thêm công việc**
+2. **Tên**: "Quy trình phân tích giấy tờ"
+3. **DSL**: `process-current-add-links>extract-concepts-current>research-and-summarize>summarize-as-mermaid`
+4. **Lưu**
+
+Một nút mới sẽ xuất hiện ở thanh bên trái.
+
+### Cú pháp DSL
+
+**Định dạng:** `action1>action2>action3`
+
+**Các thao tác có sẵn:**
+- `process-current-add-links` — Thêm liên kết wiki vào ghi chú hiện tại
+- `extract-concepts-current` — Tạo ghi chú khái niệm
+- `research-and-summarize` — Nghiên cứu trên web + tóm tắt
+- `translate-current` — Dịch ghi chú hiện tại
+- `summarize-as-mermaid` — Tạo sơ đồ Mermaid
+- `process-folder-add-links` — Xử lý theo nhóm các thư mục
+
+**Các công việc mẫu:**
+
+**Trích xuất khái niệm nhanh:**
+```
+process-current-add-links>extract-concepts-current
+```
+
+**Nghiên cứu sâu:**
+```
+process-current-add-links>research-and-summarize>extract-concepts-current
+```
+
+**Phân tích đa ngôn ngữ:**
+```
+translate-current>process-current-add-links>extract-concepts-current
+```
+
+---
+
+## 7. Cài đặt nâng cao
+
+### Xử lý theo lô
+
+**Xử lý nhiều tập tin song song:**
+
+```
+Settings → Advanced → Batch Processing
+Concurrency: 3 (default)
+```
+
+Giá trị cao hơn = nhanh hơn nhưng có nhiều lần gọi API hơn.
+
+### Phân mảnh thông minh
+
+**Đối với ghi chú dài, chia thành các mảnh:**
+
+```
+Settings → Advanced → Smart Chunking
+Chunk Size: 2000 words (default)
+Overlap: 200 words (default)
+```
+
+Ngăn chặn lỗi do giới hạn token.
+
+### Bảng chẩn đoán
+
+**Xem nhật ký chi tiết:**
+
+```
+Settings → Advanced → Enable Diagnostics
+```
+
+Hiển thị:
+- API yêu cầu/phản hồi
+- Số lượng token sử dụng
+- Thời gian xử lý
+- Lỗi
+
+### Phát hiện khái niệm trùng lặp
+
+**Tránh các khái niệm gần giống nhau:**
+
+```
+Settings → Advanced → Synonym Suppression
+Threshold: 0.8 (default, 0-1)
+```
+
+Giá trị cao hơn = việc hợp nhất mạnh mẽ hơn.
+
+---
+
+## Các chế độ cấu hình
+
+### Xuất/Nhập thiết lập
+
+**Chia sẻ cấu hình giữa các thiết bị:**
+
+1. **Thiết lập → Nâng cao → Xuất cấu hình**
+2. Lưu vào `notemd-config.json`
+3. Trên thiết bị mới: **Nhập cấu hình**
+
+**Những gì được bao gồm:**
+- Các khóa nhà cung cấp API (tùy chọn)
+- Các lựa chọn mô hình
+- Đường dẫn đầu ra
+- Các quy trình làm việc tùy chỉnh
+
+---
+
+## Các cấu hình được khuyến nghị
+
+### Dành cho sinh viên
+
+```
+Provider: OpenAI (gpt-4o-mini)
+Concept Folder: concepts/
+UI Language: System
+Output Language: System
+Workflow: "Study Flow" (add-links>extract-concepts)
+```
+
+### Dành cho nhà nghiên cứu
+
+```
+Providers:
+  - Linking: DeepSeek (cheap, many calls)
+  - Concepts: Claude Sonnet (high quality)
+  - Research: GPT-4o (web-grounded)
+Concept Folder: notes/concepts/
+Hierarchical: Yes
+Workflow: "Paper Flow" (add-links>extract>research>diagram)
+```
+
+### Dành cho người dùng quan tâm đến quyền riêng tư
+
+```
+Provider: Ollama (llama3.1)
+All tasks: Local model
+Search: DuckDuckGo (no API)
+Diagnostics: Off
+```
+
+### Dành cho công việc song ngữ
+
+```
+UI Language: Chinese
+Output Language: English
+Translation Target: Chinese
+Provider: Gemini (multilingual)
+```
+
+---
+
+## Khắc phục sự cố cấu hình
+
+### Cài đặt không được lưu
+- Kiểm tra quyền truy cập tệp trong `.obsidian/plugins/notemd/`
+- Thử: Tắt plugin → Kích hoạt lại
+
+### Khóa API không hợp lệ
+- Không có khoảng trắng thừa
+- Kiểm tra thời hạn hết hạn
+- Kiểm tra số tín dụng trên bảng điều khiển nhà cung cấp
+
+### Các mô hình không được tải
+- Nhấn "Get Model List" để làm mới
+- Kiểm tra kết nối mạng
+- Thử với nhà cung cấp khác
+
+---
+
+## Các bước tiếp theo
+
+- 📖 [Khám phá các tính năng](../features/wiki-links)
+- 🔌 [Hướng dẫn thiết lập nhà cung cấp](../providers/overview)
+- ❓ [Hỏi đáp](../faq)

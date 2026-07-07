@@ -1,0 +1,67 @@
+---
+id: google
+title: "Google"
+description: "Cấu hình Google Gemini"
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [google, gemini, provider, configuration]
+concepts: [Google, Gemini, API Configuration]
+citations:
+  - title: Gemini API
+    url: https://ai.google.dev
+  - title: Google AI Studio
+    url: https://aistudio.google.com
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# Nhà cung cấp Google
+
+<TLDR>
+**Google sử dụng giao thức ngôn ngữ tạo sinh Gemini API bản gốc.** Cài đặt mặc định hiện tại là `gemini-2.0-flash-exp`, `https://generativelanguage.googleapis.com/v1` và `temperature: 0.5`. Đây không phải là thiết lập tương thích với OpenAI.
+
+Đây là một phần của [Obsidian Hướng dẫn Quản lý Kiến thức AI](/docs/pillar-ai-knowledge).
+</TLDR>
+
+## Cài đặt
+
+Tạo một khóa Cloud API loại Google AI Studio hoặc Google có quyền truy cập vào Gemini, thêm hồ sơ nhà cung cấp `Google`, và giữ nguyên Base URL ngôn ngữ tạo sinh bản gốc. Hãy dùng thiết lập Gemini Flash mặc định để dịch nhanh và xử lý công việc ghi chú quy mô lớn, sau đó thay thế các mô hình theo từng nhiệm vụ khi bạn cần mô hình Gemini lớn hơn hoặc mạnh mẽ hơn.
+
+Tránh đặt ID mô hình Gemini vào hồ sơ tương thích với OpenAI trừ khi bạn đang sử dụng rõ ràng một cổng kết nối giúp truy cập Gemini thông qua API tương thích với OpenAI.
+
+## Endpoint Và Xác thực
+
+| Trường | Cài đặt mặc định |
+|-------|----------------|
+| Giao thức truyền tin | `google` |
+| Khóa API | Yêu cầu |
+| Base URL | `https://generativelanguage.googleapis.com/v1` |
+| Mô hình mặc định | `gemini-2.0-flash-exp` |
+| Temperature | `0.5` |
+| Kiểm tra kết nối | Chỉ chat |
+
+Thời gian chạy gọi `/models/{model}:generateContent?key={apiKey}`. Khóa được truyền dưới dạng tham số truy vấn vì đó là cách mà điểm cuối Gemini bản gốc được kết nối trong plugin.
+
+## Khám phá mô hình
+
+Google sử dụng chế độ khám phá `google-models`. Việc khám phá nên trả về các mô hình Gemini có sẵn cho khóa API; nếu bộ lọc trống, hãy kiểm tra khóa so với cùng một Base URL và xác nhận rằng gia đình mô hình đã được kích hoạt cho tài khoản đó.
+
+Giới hạn ký tự đầu ra đã biết phụ thuộc vào mô hình trong danh bạ nhà cung cấp. Nếu bản dịch dài hoặc giải thích sơ đồ bị cắt ngắn, hãy chọn mô hình Gemini có khả năng đầu ra lớn hơn hoặc giảm kích thước đầu ra yêu cầu.
+
+## Khắc phục sự cố
+
+- `400`: ID mô hình thường không trùng với đường dẫn Gemini bản gốc hoặc yêu cầu vượt quá kích thước mà mô hình hỗ trợ.
+- `401` hoặc `403`: Kiểm tra các hạn chế của khóa, việc kích hoạt dự án/API, và xem khóa có thể truy cập Gemini hay không.
+- `404`: ID mô hình không có sẵn ở phiên bản API đã cấu hình.
+- Các ví dụ về cổng kết nối sẽ thất bại trong thiết lập này: hãy dùng cài đặt cổng kết nối thay vì nhà cung cấp Google bản gốc.
+
+## Khi nào nên sử dụng
+
+Hãy dùng Google cho việc dịch nhanh, dọn dẹp ghi chú quy mô lớn, và các công việc mà sự cân bằng giữa chi phí và hiệu suất của Gemini tốt hơn so với việc dùng trực tiếp OpenAI hoặc Anthropic. Hãy chọn nhà cung cấp khác cho các công việc yêu cầu xử lý mô hình suy luận tương thích với OpenAI.
+
+---
+
+## Các bước tiếp theo
+
+- [LLM Providers](/docs/providers/overview) -- Cấu hình đầy đủ, mô hình mỗi nhiệm vụ và logic thử lại
+- [Dịch](/docs/features/translation) -- Gemini Flash được khuyến nghị cho các nhiệm vụ dịch quy mô lớn

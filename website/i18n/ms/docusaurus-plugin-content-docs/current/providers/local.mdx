@@ -1,0 +1,63 @@
+---
+id: local
+title: "Model Tempatan"
+description: "Konfigurasikan Ollama dan LLM tempatan"
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [local, ollama, lmstudio, provider, configuration, offline]
+concepts: [Local Models, Ollama, LMStudio, Offline]
+citations:
+  - title: Ollama
+    url: https://ollama.com
+  - title: LM Studio
+    url: https://lmstudio.ai
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# Model Tempatan
+
+<TLDR>
+**Pembekal tempatan menyimpan kandungan nota di luar API yang dihoskan.** Laluan tempatan semasa meliputi Ollama menggunakan pengangkutan natif `ollama` dan LMStudio melalui pengangkutan yang serasi dengan OpenAI. Tiada kunci API diperlukan untuk mana-mana laluan, tetapi pelayan tempatan dan model mesti sudah berjalan.
+
+Ini merupakan sebahagian daripada [Obsidian Panduan Pengurusan Pengetahuan AI](/docs/pillar-ai-knowledge).
+</TLDR>
+
+## Pengaturan
+
+Untuk Ollama, pasang Ollama, tarik model yang diinginkan, mulakan pelayan, dan tambah profil pembekal `Ollama` dalam Notemd. Untuk LMStudio, muatkan model dalam pelayan tempatan LM Studio dan tambah profil pembekal `LMStudio`.
+
+Model tempatan merupakan kebergantungan operasi, bukan sekadar tetapan. Notemd hanya boleh memanggil apa yang dipaparkan oleh proses tempatan, jadi sahkan model tempatan di luar Obsidian sebelum menyahpepijat plugin.
+
+## Titik Hujung Dan Pengesahan
+
+| Penyedia | Base URL | Model Lalai | Kunci API | Nota |
+|----------|----------|---------------|---------|-------|
+| Ollama | `localhost:11434/api` | `llama3` | Tidak diperlukan | Penstriman NDJSON; penemuan model melalui `/api/tags` |
+| LMStudio | `localhost:1234/v1` | `local-model` | Tidak diperlukan | Menghantar `"EMPTY"` sebagai token pembawa; serasi dengan OpenAI |
+
+Ollama menggunakan laluan natif `/chat` di bawah Base URLnya. LMStudio mengikuti laluan `chat/completions` yang serasi dengan OpenAI dan mengharapkan model yang dimuatkan dalam pelayan tempatan.
+
+## Penemuan Model
+
+Ollama menggunakan mod penemuan `ollama-tags` dan menyenaraikan tag yang ditarik secara tempatan. LMStudio menggunakan penemuan model yang serasi dengan OpenAI apabila pelayannya memaparkan `/v1/models`.
+
+Jika penemuan tidak menghasilkan apa-apa, biasanya ia disebabkan masalah keadaan pelayan tempatan: model belum ditarik, belum dimuatkan, atau pelayan terikat pada hos/port yang berbeza daripada profil.
+
+## Pemecahan masalah
+
+- Sambungan ditolak: mulakan Ollama atau LM Studio dan sahkan port yang dikonfigurasikan.
+- Model tidak ditemui: tarik tag Ollama atau muatkan model LM Studio sebelum menguji.
+- Keluaran perlahan: kurangkan saiz konteks, gunakan model tempatan yang lebih kecil, atau hantar tugas berat kepada pembekal yang dihoskan.
+- Jawapan kosong atau rosak: sahkan profil pembekal yang dipilih sepadan dengan protokol pelayan tempatan; Ollama dan LMStudio tidak boleh ditukar ganti.
+
+## Bila Perlu Digunakan
+
+Guna penyedia tempatan untuk peti simpanan peribadi, kerja luar talian, atau tugas berulang yang murah. Jangan anggap bahawa penggunaan tempatan sentiasa lebih baik untuk sintesis penyelidikan atau penaakulan jangka panjang; kualiti model dan had perkakasan merupakan pertukaran yang perlu dipertimbangkan.
+
+---
+
+## Langkah Seterusnya
+
+- [LLM Penyedia](/docs/providers/overview) -- Tetapan penuh dan konfigurasi model untuk setiap tugas
+- [Penyelesaian masalah](/docs/advanced/troubleshooting) -- Perbaiki ralat connection-refused apabila pelayan tempatan tidak berjalan

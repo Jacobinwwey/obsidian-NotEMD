@@ -1,0 +1,359 @@
+---
+id: faq
+title: "अक्सर पूछे जाने वाले प्रश्न"
+description: "Notemd की स्थापना, सुविधाओं एवं उपयोग से संबंधित सामान्य प्रश्न"
+keywords: [faq, installation, LLM providers, obsidian plugin, wiki-links, concept notes, Copilot alternative, Smart Connections alternative, obsidian AI plugin comparison]
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+concepts: [Notemd, Obsidian, LLM, wiki-links, concept notes, knowledge base, Copilot Alternative, AI Plugin Comparison]
+citations:
+  - title: Obsidian
+    url: https://obsidian.md
+  - title: Ollama
+    url: https://ollama.com
+faqItems:
+  - question: How do I install Notemd in Obsidian?
+    answer: Open Obsidian Settings, go to Community Plugins, Browse, search Notemd, Install, and Enable. Requires Obsidian 0.15.0 or later. Manual installation is also available via GitHub Releases.
+  - question: What LLM providers does Notemd support?
+    answer: Notemd supports 30+ providers including OpenAI, Anthropic, Google, xAI, Mistral, DeepSeek, Qwen, Ollama, LM Studio, Azure OpenAI, OpenRouter, and many China-focused providers like Qwen, Doubao, Moonshot, and GLM.
+  - question: Can Notemd work with local LLMs?
+    answer: Yes. Notemd works with Ollama, LM Studio, vLLM, LocalAI, and any OpenAI-compatible endpoint. All tasks work with local models including linking, concept generation, translation, research, and diagram generation.
+  - question: How does Notemd differ from ChatGPT?
+    answer: ChatGPT produces ephemeral chat answers. Notemd writes persistent structured results directly into your Obsidian vault as wiki-linked files, concept notes, diagrams, and translations that accumulate into a knowledge base.
+  - question: How does Notemd compare to Copilot or Smart Connections?
+    answer: Copilot is conversation-first for chatting about notes. Smart Connections is discovery-first for finding similar notes. Notemd is write-first, processing notes with AI and writing structured results into your vault. All three complement each other.
+  - question: Which search services work with Notemd research?
+    answer: Tavily (recommended, AI-optimized search, requires API key) and DuckDuckGo (experimental, no API key needed). Research results are summarized by LLM and appended to your note with source citations.
+  - question: Does Notemd support Chinese or other languages?
+    answer: The UI supports 21+ languages. Task output language is independently configurable, allowing mixed setups like Chinese UI with English output or vice versa.
+  - question: Can I use Notemd for paper or PDF reading?
+    answer: Yes. Convert PDF to Markdown using MinerU, open in Obsidian, then run Notemd tasks to add wiki-links, generate concept notes, extract text, research background, translate sections, and create Mermaid diagrams.
+  - question: What diagram types can Notemd generate?
+    answer: Mermaid (flowchart, sequence, class, state, ER, Gantt with syntax auto-fix), JSON Canvas (Obsidian native), Vega-Lite (data charts), HTML fallback, and explicit editable HTML/SVG figure artifacts. Draw.io XML and Drawnix JSON exporter boundaries are available for deterministic artifact testing.
+  - question: Is Notemd free and open source?
+    answer: Yes. MIT licensed, no paid tiers, no cloud lock-in, no telemetry. Source code on GitHub with 234+ stars. Pull requests welcome.
+  - question: Can Notemd work 100% offline?
+    answer: Yes with Ollama. No API key, no internet needed. All features work offline including wiki-links, concept notes, translation, and diagrams. DuckDuckGo research also works without an API key.
+  - question: Is my data sent to the cloud?
+    answer: With Ollama or LM Studio, no data leaves your machine. With cloud providers like OpenAI or Anthropic, your note content is sent as API input. Notemd itself collects no telemetry or user data.
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# अक्सर पूछे जाने वाले प्रश्न
+
+<TLDR>
+**Notemd से संबंधित सबसे आम प्रश्नों के त्वरित उत्तर।** इसमें स्थापना (5 मिनट की सेटअप), 30+ LLM प्रदाताओं का समर्थन, स्थानीय/क्लाउड मॉडल विकल्प, वन-क्लिक वर्कफ्लो, बहुभाषी UI (21 भाषाएँ), विकि-लिंकिंग स्वचालन, अनुसंधान एकीकरण, PDF पठन वर्कफ्लो, आरेख निर्माण एवं ओपन-सोर्स लाइसेंसिंग शामिल है। सभी सुविधाएँ Ollama के साथ ऑफलाइन भी कार्य करती हैं.
+</TLDR>
+
+---
+
+## स्थापना एवं सेटअप
+
+### मैं Obsidian में Notemd कैसे स्थापित करूँ?
+
+**Settings → Community Plugins → Browse** पर जाएँ → **"Notemd"** खोजें → **Install** करें → **Enable** करें.
+
+**आवश्यकताएँ:**
+- Obsidian 0.15.0+
+- डेस्कटॉप (Windows, macOS, Linux) एवं मोबाइल (iOS, Android) पर समर्थित
+
+**मैनुअल स्थापना:**
+1. [GitHub Releases](https://github.com/Jacobinwwey/obsidian-NotEMD/releases) से `main.js`, `styles.css`, `manifest.json` डाउनलोड करें
+2. उन्हें `<your-vault>/.obsidian/plugins/notemd/` में रखें
+3. Obsidian को पुनः लोड करें एवं प्लगइन सक्रिय करें
+
+**आँकड़े:** 4k+ डाउनलोड, 44 रिलीज़, MIT लाइसेंसित.
+
+---
+
+## LLM कॉन्फ़िगरेशन
+
+### Notemd कौन-से LLM प्रदाता समर्थित हैं?
+
+Notemd **30+ प्रदाताओं** को समर्थन देता है:
+
+**क्लाउड प्रदाता:**
+- OpenAI (GPT-4, GPT-4o, GPT-4o-mini, o1, o3)
+- Anthropic (Claude Opus, Sonnet, Haiku)
+- Google (Gemini Pro, Flash, Ultra)
+- xAI (Grok)
+- Mistral, DeepSeek, Qwen, Moonshot, GLM
+
+**चीन-केंद्रित:**
+- Qwen, Qwen Code, Doubao, Moonshot, Xiaomi MiMo, GLM, Z AI, MiniMax
+- Huawei Cloud MaaS, Baidu Qianfan, SiliconFlow
+
+**स्थानीय/स्व-होस्टेड:**
+- Ollama
+- LM Studio
+- कोई भी OpenAI-संगत एंडपॉइंट
+
+**गेटवे:**
+- Azure OpenAI, OpenRouter, Together AI, Groq, AIHubMix
+- GitHub Models, Fireworks, LiteLLM, Nebius, Cerebras
+- Hugging Face, Vercel AI Gateway, Requesty
+
+### क्या Notemd स्थानीय LLMs के साथ काम कर सकता है?
+
+**हाँ, पूरी तरह से समर्थित।** Notemd निम्नलिखित के साथ काम करता है:
+- **Ollama** (नेटिव एकीकरण)
+- **LM Studio** (OpenAI-संगत एंडपॉइंट के माध्यम से)
+- **vLLM, LocalAI, text-generation-webui** (OpenAI-संगत मोड के माध्यम से)
+
+सभी कार्य स्थानीय मॉडलों के साथ काम करते हैं: लिंकिंग, अवधारणा निर्माण, अनुवाद, अनुसंधान, एवं आरेख निर्माण.
+
+**मिक्स एंड मैच उदाहरण:**
+- लिंकिंग के लिए Ollama (स्थानीय) → तेज़, निजी, बिना लागत के
+- अनुसंधान के लिए OpenAI → उच्च गुणवत्ता, वेब खोज एकीकरण
+- अनुवाद के लिए Gemini → बहु-मोडल समर्थन
+
+### मैं विभिन्न कार्यों के लिए अलग-अलग मॉडल कैसे कॉन्फ़िगर करूँ?
+
+**Notemd सेटिंग्स** में, प्रत्येक कार्य के लिए स्वतंत्र प्रदाता/मॉडल चयनकर्ता होते हैं:
+
+| कार्य | उदाहरण कॉन्फ़िगरेशन |
+|------|----------------------|
+| **लिंकिंग** | DeepSeek (तेज़, सस्ता) |
+| **कॉन्सेप्ट जनरेशन** | Claude Opus (उच्च गुणवत्ता) |
+| **अनुसंधान** | Perplexity या GPT-4o (वेब-आधारित) |
+| **अनुवाद** | Gemini Flash (मल्टीमोडल) |
+| **डायग्राम जनरेशन** | Ollama (स्थानीय, निजी) |
+
+यह प्रति-कार्य अनुकूलन गति, लागत और गुणवत्ता के बीच संतुलन बनाता है.
+
+---
+
+## मुख्य विशेषताएँ
+
+### पेपर पढ़ने के लिए Notemd, ChatGPT से कैसे अलग है?
+
+| आयाम | ChatGPT | Notemd |
+|-----------|---------|--------|
+| **आउटपुट स्थान** | चैट इतिहास (क्षणिक) | Obsidian वॉल्ट (स्थायी फ़ाइलें) |
+| **परिणाम प्रारूप** | पाठ उत्तर | विकि-लिंक, अवधारणा संदेश, आरेख, अनुवाद |
+| **दीर्घकालिक मूल्य** | सत्र समाप्त होने के बाद गायब हो जाता है | ज्ञान आधार में संचित हो जाता है |
+| **पुन: उपयोगिता** | पुनः प्रश्न करना आवश्यक है | फ़ाइलें बनी रहती हैं, लिंक बने रहते हैं, विकसित होते रहते हैं |
+
+**ChatGPT का उपयोग करें:** त्वरित प्रश्न-उत्तर, एकल व्याख्याओं के लिए
+**Notemd का उपयोग करें:** हफ्तों/महीनों तक एक स्थायी, संरचित ज्ञान आधार बनाने के लिए
+
+### Notemd नोट्स में विकि-लिंक कैसे जोड़ता है?
+
+**प्रक्रिया:**
+1. आप किसी नोट पर "Process file (add links)" चलाते हैं
+2. Notemd उस पाठ को आपके कॉन्फ़िगर किए गए LLM में भेजता है
+3. यह LLM संदर्भ में मुख्य अवधारणाओं की पहचान करता है
+4. Notemd प्रत्येक अवधारणा के उल्लेख पर `[[wiki-links]]` जोड़ता है
+5. वैकल्पिक रूप से, यह आपके द्वारा निर्दिष्ट फ़ोल्डर में स्वचालित रूप से कॉन्सेप्ट नोट्स बनाता है
+
+**विशेषताएँ:**
+- समानार्थी शब्दों का दमन ("transformer" एवं "transformers" जैसे डुप्लिकेट्स से बचता है)
+- कॉन्सेप्ट नोट्स से स्रोत तक बैकलिंक्स
+- नाम बदलने/हटाने पर लिंकों की अखंडता
+- शुद्ध निष्कर्षण मोड (मूल डेटा को बदले बिना अवधारणाएँ निकालता है)
+
+### Notemd वन-क्लिक वर्कफ्लो क्या है?
+
+**वन-क्लिक वर्कफ्लो** कई क्रियाओं को एक **एकल साइडबार बटन** में जोड़ता है.
+
+**डिफ़ॉल्ट वर्कफ्लो:** `One-Click Extract`
+```
+process-current-add-links > extract-concepts-current > research-and-summarize > summarize-as-mermaid
+```
+
+**परिणाम:** एक क्लिक से निम्नलिखित कार्य होते हैं:
+1. वर्तमान नोट में विकि-लिंक्स जोड़ना
+2. नए शब्दों के लिए कॉन्सेप्ट नोट्स बनाना
+3. अनुसंधान करके पृष्ठभूमि जोड़ना
+4. इसे एक Mermaid आरेख में संपीड़ित करना
+
+**कस्टम वर्कफ्लो:** DSL प्रारूप का उपयोग करके सेटिंग्स में अपने स्वयं के वर्कफ्लो परिभाषित करें। प्रत्येक वर्कफ्लो एक पुनः उपयोग योग्य साइडबार बटन बन जाता है.
+
+### Notemd, Copilot और Smart Connections की तुलना कैसे की जाती है?
+
+ये प्लगइन अलग-अलग समस्याओं का समाधान करते हैं:
+
+- **Copilot** — संवाद-प्रथम। आप अपने नोट्स के बारे में एक AI के साथ चैट करते हैं। AI के उत्तर चैट पैनल में ही रहते हैं; वे आपके वॉल्ट को संशोधित नहीं करते.
+- **Smart Connections** — खोज-प्रथम। यह एम्बेडिंग्स का उपयोग करके अर्थात्मक रूप से समान नोट्स खोजता है। यह सामग्री बनाता या संशोधित नहीं करता.
+- **Notemd** — लेखन-प्रथम। AI आपके नोट्स को संसाधित करके संरचित परिणाम (विकी-लिंक, कॉन्सेप्ट नोट्स, शोध, आरेख, अनुवाद) को सीधे आपके वॉल्ट में स्थायी फ़ाइलों के रूप में लिख देता है.
+
+| आपको क्या चाहिए | अनुशंसित प्लगइन |
+|----------------|-------------------|
+| नोट्स के बारे में AI के साथ चैट करें | Copilot |
+| समान/संबंधित नोट्स खोजें | Smart Connections |
+| स्वचालित रूप से विकी-लिंक डालें और एक ज्ञान ग्राफ़ बनाएं | **Notemd** |
+| बैकलिंक के साथ कॉन्सेप्ट नोट्स बनाएं | **Notemd** |
+| नोट सामग्री से आरेख बनाएं | **Notemd** |
+| किसी विषय पर शोध करें और सारांश जोड़ें | **Notemd** |
+
+तीनों का उपयोग एक साथ किया जा सकता है — वे आपस में प्रतिस्पर्धा नहीं करते, बल्कि एक-दूसरे को पूरक बनाते हैं.
+
+---
+
+## शोध एवं अनुवाद
+
+### Notemd शोध के साथ कौन-सी खोज सेवाएँ काम करती हैं?
+
+| सेवा | API कुंजी आवश्यक है | गुणवत्ता | नोट्स |
+|---------|-----------------|---------|-------|
+| **Tavily** | हाँ | उच्च | अनुशंसित, AI-ऑप्टिमाइज्ड खोज |
+| **DuckDuckGo** | नहीं | प्रयोगात्मक | कोई सेटअप नहीं, कम गुणवत्ता |
+
+**"Research & summarize" कैसे काम करता है:**
+1. आप एक विषय चुनते हैं या उसे वर्तमान नोट पर चलाते हैं
+2. Notemd सर्च सर्विस से पूछताछ करता है
+3. परिणाम → LLM सारांशन
+4. स्रोत संदर्भों के साथ सारांश आपके नोट में जुड़ जाता है
+
+**परिणाम:** आपके वॉल्ट में स्थायी अनुसंधान ट्रेल, ब्राउज़र टैब्स में नहीं.
+
+### क्या Notemd चीनी या अन्य भाषाओं का समर्थन करता है?
+
+**UI भाषाएँ:** 21+ समर्थित
+- अंग्रेज़ी, 中文 (简体), 中文 (繁體), 日本語, 한국어
+- अरबी, जर्मन, फ्रांसीसी, स्पेनिश, रूसी, पुर्तगाली, इतालवी
+- हिंदी, बंगाली, थाई, वियतनामी, तुर्की, पोलिश, चेक एवं अन्य
+
+**टास्क आउटपुट भाषा:** स्वतंत्र कॉन्फ़िगरेशन
+- UI चीनी में + आउटपुट अंग्रेज़ी में: ✅
+- UI अंग्रेज़ी में + आउटपुट चीनी में: ✅
+
+**उपयोग का मामला:** द्विभाषी शोधकर्ता अपनी मूल भाषा में UI रख सकते हैं जबकि प्रकाशन के लिए अंग्रेज़ी नोट तैयार कर सकते हैं.
+
+---
+
+## PDF एवं शैक्षणिक कार्यप्रवाह
+
+### क्या मैं पेपर/PDF पढ़ने हेतु Notemd का उपयोग कर सकता हूँ?
+
+**हाँ.** कार्यप्रवाह:
+1. [MinerU](https://github.com/opendatalab/MinerU) का उपयोग करके **PDF को Markdown में बदलें** (शैक्षणिक पेपरों के लिए अनुशंसित)
+2. Obsidian में Markdown फ़ाइल खोलें
+3. Notemd कार्यों को चलाएँ:
+   - मुख्य शब्दों में **विकि-लिंक जोड़ें**
+   - अपरिचित शब्दावली के लिए **अवधारणा संदेश बनाएँ**
+   - स्वयं निर्धारित प्रश्नों के माध्यम से **मूल पाठ निकालें** (उदाहरण: "सीमाएँ क्या हैं?")
+   - उद्धृत विधियों/डेटासेटों के लिए **पृष्ठभूमि अनुसंधान** करें
+   - कठिन खंडों का **अनुवाद** करें
+   - संरचनात्मक समझ हेतु **Mermaid** आरेख में संपीड़ित करें
+
+**संस्करण 1.9.1+:** TOC सहायता के साथ अध्याय संरचना निकालना
+
+**परिणाम:** आपका पेपर पढ़ना आपके वॉल्ट में एक संरचित, लिंक योग्य ज्ञान सामग्री बन जाता है.
+
+---
+
+## आरेख एवं दृश्यीकरण
+
+### Notemd किस प्रकार के ग्राफ/आरेख बना सकता है?
+
+| प्रकार | समर्थन | विशेषताएँ |
+|------|---------|----------|
+| **Mermaid** | पूर्ण | फ्लोचार्ट, अनुक्रम, क्लास, स्टेट, ER, गैंट, सिंटैक्स ऑटो-फिक्स, बैच वैलिडेशन |
+| **JSON Canvas** | पूर्ण | Obsidian नेटिव कैनवास लेआउट्स |
+| **Vega-Lite** | पूर्ण | डेटा चार्ट, टाइम सीरीज़, बार, स्कैटर, कस्टमाइज़ेबल |
+| **HTML** | फॉलबैक | असमर्थित डायग्राम प्रकारों के लिए |
+| **एडिटेबल HTML/SVG** | स्पष्ट लक्ष्य | अर्थपूर्ण Draw.io-शैली की टिप्पणियों के साथ स्व-निहित इनलाइन SVG |
+| **Draw.io / Drawnix आर्टिफैक्ट्स** | निर्यात सीमा | `SemanticFigureModel` से निर्धारित XML/JSON; कोई एडिटर रनटाइम निर्भरता नहीं |
+
+**Mermaid ऑटो-फिक्स:** गहरे डीबग मोड द्वारा मरम्मत:
+- टूटे हुए तीर (`-->`, `-.->`, `==>`)
+- अमान्य लेबल, टिप्पणियाँ
+- सबग्राफ सिंटैक्स त्रुटियाँ
+- आकृति संकेतन (`[`, `(`, `{`, `((`)
+- लेबल में पाइप चराहे
+- नोट अटैचमेंट
+
+**वर्कफ्लो:**
+1. किसी नोट पर "Summarize as Mermaid diagram" चलाएँ
+2. मोडल में प्रीव्यू करें
+3. SVG या PNG के रूप में निर्यात करें
+4. या इसे vault में `.mmd` फ़ाइल के रूप में सहेजें
+
+---
+
+## ओपन सोर्स एवं समुदाय
+
+### क्या Notemd मुफ्त एवं ओपन सोर्स है?
+
+**हाँ.**
+- **लाइसेंस:** MIT (उदार, वाणिज्यिक उपयोग अनुमत),
+- **स्रोत कोड:** https://github.com/Jacobinwwey/obsidian-NotEMD
+- **कोई भुगतान श्रेणियाँ नहीं, कोई क्लाउड लॉक-इन नहीं, कोई टेलीमेट्री नहीं**
+- **समुदाय:** 234+ GitHub स्टार, सक्रिय Discord
+
+**आपके पास है:**
+- आपका डेटा (आपके vault में ही रहता है)
+- आपके वर्कफ्लो (प्रॉम्प्ट, मॉडल, चेन कस्टमाइज़ करें)
+- आपकी गोपनीयता (स्थानीय LLM सहायता)
+
+**योगदान दें:** पुल रिक्वेस्ट स्वागत हैं। [CONTRIBUTING.md](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/CONTRIBUTING.md) देखें
+
+---
+
+## समस्या निवारण
+
+### मेरे LLM कॉल विफल हो रहे हैं। मुझे क्या जाँचना चाहिए?
+
+1. **API कुंजी वैध है?** सेटिंग्स → प्रोवाइडर कॉन्फ़िगरेशन देखें
+2. **मॉडल का नाम सही है?** सेटिंग्स में “获取模型列表” (Get Model List) बटन का उपयोग करें
+3. **नेटवर्क तक पहुँच संभव है?** कुछ प्रदाता VPN की आवश्यकता रखते हैं
+4. **रेट लिमिट्स?** प्रदाता के डैशबोर्ड की जाँच करें
+5. **निदान:** विस्तृत त्रुटि लॉग के लिए सेटिंग्स में "Connection Test" चलाएँ
+
+### Notemd धीमा है। मैं इसे कैसे तेज़ कर सकता हूँ?
+
+1. **तेज़ मॉडलों का उपयोग करें:** DeepSeek, Gemini Flash, GPT-4o-mini
+2. **चंक साइज़ कम करें:** सेटिंग्स → Smart Chunking → शब्द संख्या कम करें
+3. **समानांतर प्रसंस्करण:** सेटिंग्स → Batch Processing → समवर्तीता बढ़ाएँ
+4. **लोकल मॉडल:** ऐसे कार्यों के लिए Ollama जिन्हें वेब खोज की आवश्यकता नहीं है
+
+### क्या Notemd 100% ऑफ़लाइन काम कर सकता है?
+
+**हाँ, Ollama के साथ।** कोई API कुंजी नहीं, कोई इंटरनेट नहीं, कोई डेटा आपके मशीन से बाहर नहीं जाता:
+
+1. [Ollama](https://ollama.com) इंस्टॉल करें और `ollama serve` चलाएँ
+2. Notemd की सेटिंग्स में, अपने प्रदाता के रूप में **Ollama** चुनें
+3. एक मॉडल लाएँ: `ollama pull llama3` (या qwen2.5, gemma2, आदि)
+4. सभी सुविधाएँ काम करती हैं: विकि-लिंक, कॉन्सेप्ट नोट्स, अनुवाद, डायग्राम
+
+**DuckDuckGo रिसर्च** भी API कुंजी के बिना काम करता है (प्रायोगिक गुणवत्ता)।
+
+क्लाउड प्रदाताओं (OpenAI, Anthropic, Google, DeepSeek, आदि) के साथ, आपकी नोट सामग्री API इनपुट के रूप में भेजी जाती है। डेटा हैंडलिंग के विवरण के लिए प्रत्येक प्रदाता की गोपनीयता नीति देखें.
+
+### क्या मेरा डेटा क्लाउड में भेजा जाता है?
+
+**यह आपके प्रदाता पर निर्भर करता है:**
+
+| प्रदाता प्रकार | क्या डेटा क्लाउड में भेजा जाता है? | नोट्स |
+|--------------|---------------------|-------|
+| **Ollama (स्थानीय)** | नहीं | सब कुछ आपके मशीन पर ही रहता है |
+| **LMStudio (स्थानीय)** | नहीं | Ollama के समान ही |
+| **DeepSeek, OpenAI, आदि** | हाँ | नोट की सामग्री प्रसंस्करण के लिए API इनपुट के रूप में भेजी जाती है |
+| **OpenRouter, AIHubMix** | हाँ | वह गेटवे जो क्लाउड प्रदाताओं तक मार्ग प्रदान करता है |
+
+Notemd स्वयं **कोई टेलीमेट्री, कोई एनालिटिक्स, कोई उपयोगकर्ता डेटा** एकत्र नहीं करता है। यह प्लगइन पूरी तरह से ओपन सोर्स (MIT) है। आपके मशीन से बाहर जाने वाला एकमात्र डेटा वह है जिसे आप स्पष्ट रूप से अपने कॉन्फ़िगर किए गए LLM प्रदाता को भेजते हैं.
+
+### अनुसंधान के लिए कौन सा Obsidian AI प्लगइन सबसे अच्छा है?
+
+यह आपकी अनुसंधान कार्यप्रणाली पर निर्भर करता है:
+
+| आवश्यकता | प्लगइन | कारण |
+|------|--------|-----|
+| संबंधित पेपर/नोट्स खोजना | Smart Connections | सेमेंटिक समानता की खोज |
+| अपने स्रोतों के बारे में चैट करना | Copilot | वॉल्ट संदर्भ के साथ बातचीत करना |
+| संकल्पनाओं को स्वचालित रूप से जोड़ना + नोट्स बनाना | **Notemd** | AI संकल्पनाओं की पहचान करता है, लिंक जोड़ता है, नोट्स बनाता है |
+| वेब अनुसंधान + नोट्स में सारांश बनाना | **Notemd** | Tavily/DuckDuckGo खोज → LLM सारांश → नोट में जोड़ा गया |
+| अनुसंधान से आरेख बनाएँ | **Notemd** | नोट की सामग्री से Mermaid/Canvas/Vega-Lite |
+
+**अनुशंसित संयोजन:** Smart Connections (खोज) + Notemd (संरचना) + Copilot (चर्चा).
+
+---
+
+## सहायता प्राप्त करें
+
+- **दस्तावेज़ीकरण:** https://jacobinwwey.github.io/obsidian-NotEMD/
+- **GitHub Issues:** https://github.com/Jacobinwwey/obsidian-NotEMD/issues
+- **Discord:** https://discord.gg/qnGgsQ9W
+- **Sponsor:** https://github.com/sponsors/Jacobinwwey

@@ -1,0 +1,181 @@
+---
+id: quick-start
+title: "מדריך התחלה מהירה"
+description: "התחלו לעבוד עם Notemd תוך 5 דקות"
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [quick start, tutorial, getting started, first steps]
+concepts: [Quick Start, LLM Configuration, One-Click Workflow, Ollama]
+citations:
+  - title: Obsidian
+    url: https://obsidian.md
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# מדריך התחלה מהירה
+
+<TLDR>
+**התחילו להשתמש ב-Notemd תוך 5 דקות.** שלושה שלבים: (1) הוסיפו מפתח LLM API (או השתמשו ב-Ollama מקומי), (2) פתחו רשימת תזכורות והריצו את הפקודה "Process file (add links)", (3) גלו תהליכי עבודה בלחיצה אחת בסרגל הצד. תומך ב-30+ ספקים. אין צורך בכתיבת קוד. עובד בלי אינטרנט עם Ollama.
+</TLDR>
+
+## שלב 1: הגדרת הספק הראשון שלכם LLM (2 דקות)
+
+### אפשרות א': ספק ענן (OpenAI, Anthropic, וכו')
+
+1. פתחו **הגדרות** → **Notemd**
+2. תחת **LLM תצורת ספק**, בחרו ספק מהרשימה הנפתחת
+3. הזינו את **API Key** שלכם
+4. (אופציונלי) לחץ על **"Get Model List"** כדי לראות את המודלים הזמינים
+5. בחרו מודל לכל סוג משימה
+
+**אפשרויות פופולריות:**
+- **OpenAI**: `gpt-4o-mini` (מהיר, במחיר נוח)
+- **Anthropic**: `claude-sonnet-4-6` (איכות גבוהה)
+- **DeepSeek**: `deepseek-chat` (במחיר נוח מאוד)
+
+### אפשרות B: מקומי Ollama (אין צורך במפתח API)
+
+1. התקנת [Ollama](https://ollama.com/)
+2. הורדת מודל: `ollama pull llama3.1`
+3. בהגדרות Notemd, בחרו **"Ollama"** כספק
+4. שם המודל: `llama3.1` (או כל מודל שהורדתם)
+
+## שלב 2: נסו את המשימה הראשונה שלכם (1 דקה)
+
+### הוספת קישורי Wiki לרשימת רשימות
+
+1. פתחו כל רשימת רשימות עם תוכן משמעותי
+2. לחץ בכפתור הימני במערכת העריכה
+3. בחרו **"עיבוד קובץ (הוספת קישורים)"**
+4. המתנה של מספר שניות
+5. המושגים העיקריים כעת `[[wiki-linked]]`!
+
+**דוגמה:**
+
+**לפני:**
+```
+Machine learning models use neural networks to process data.
+```
+
+**אחרי:**
+```
+[[Machine learning]] models use [[neural networks]] to process data.
+```
+
+## שלב 3: חקר התכונות (2 דקות)
+
+### שליפת רשימות מושגים
+
+1. לחץ ימין → **"שלוף מושגים מהקובץ הנוכחי"**
+2. Notemd יוצר קבצים נפרדים לכל מושג
+3. בדקו את תיקיית המושגים שהוגדרה (באופן אוטומטי: `concepts/`)
+4. לכל רשימת מושגים יש קישור חזרה לרשימת הרשימות המקורית שלכם
+
+### מחקר וסיכום
+
+1. להדגיש נושא ברשימת ההערות שלך
+2. לחיצה ימנית → **"מחקר וסיכום"**
+3. Notemd שואל את מנוע החיפוש (Tavily או DuckDuckGo)
+4. הסיכום מתווסף לרשימת ההערות שלך יחד עם המקורות
+
+### תהליכי עבודה בלחיצה אחת
+
+1. בדקו את **הסרגל השמאלי** לחיצוניות של תהליכי העבודה
+2. לחצו על **"שליפה בלחיצה אחת"** בכל הערה
+3. הוא מבצע: הוספת לינקים → שליפת רעיונות → מחקר → יצירת דיאגרמה
+4. הכל בלחיצה אחת!
+
+## משימות ראשוניות נפוצות
+
+### משימה 1: לעבד מאמר/עיתון
+
+```
+1. Paste article content into a note
+2. Run "Process file (add links)"
+3. Run "Extract concepts"
+4. Run "Research and summarize" on unfamiliar terms
+5. Run "Summarize as Mermaid diagram" for visual structure
+```
+
+### משימה 2: לתרגם הערות
+
+```
+1. Highlight text to translate
+2. Right-click → "Translate to target language"
+3. Set target language in settings first
+```
+
+### משימה 3: ליצור מפת ידע
+
+```
+1. Process 5-10 related notes with "add links"
+2. Run "Extract concepts" on each
+3. Open Graph view to see connections
+4. Your knowledge graph is forming!
+```
+
+## טיפים להתאמה אישית
+
+### בחירת מודל למשימה
+
+ניתן להשתמש במודלים שונים למשימות שונות:
+
+| משימה | מודל מומלץ | מדוע |
+|------|------------------|-----|
+| הוסף קישורים | `gpt-4o-mini`, `deepseek-chat` | מהיר, שיחות רבות |
+| שליפת רעיונות | `claude-sonnet-4-6`, `gpt-4o` | שליפת איכות |
+| מחקר | `perplexity`, `gpt-4o` | מבוסס אינטרנט |
+| תרגום | `gemini-flash`, `gpt-4o` | רב-לשוני |
+| תרשימים | `claude-opus`, מודל מקומי | היגיון מורכב |
+
+להגדיר ב: **הגדרות → Notemd → מודלים למשימות ספציפיות**
+
+### תהליכי עבודה מותאמים אישית
+
+יצירת הכפתור שלך:
+
+1. הגדרות → Notemd → תהליכי עבודה
+2. לחץ על "הוסף תהליך עבודה"
+3. הזן DSL: `process-current-add-links>extract-concepts-current>research-and-summarize`
+4. שמו: "My Research Flow"
+5. כפתור חדש מופיע בצד הצדדי
+
+## פתרון בעיות
+
+### "API Key Invalid"
+- בדקו האם המפתח נכון (בלי רווחים נוספים)
+- וודאו שלחשבון יש אשראי
+- בדקו עם כפתור "Connection Test" בהגדרות
+
+### "Model Not Found"
+- לחצו על "Get Model List" כדי לראות את המודלים הזמינים
+- חלק מהספקים דורשים שמות מודל מסוימים (למשל, `gpt-4o` ולא `gpt-4`)
+
+### הקישורים לא מופיעים
+- ודאו שלהערה יש מספיק תוכן (>50 מילים)
+- נסו מודל חזק יותר
+- בדקו האם הקריאה ל‑LLM הצליחה (ראו לוח האבחון)
+
+### ביצועים איטיים
+- השתמשו במודלים מהירים יותר (`gpt-4o-mini` במקום `gpt-4o`)
+- הקטינו את גודל החתיכה בהגדרות
+- להפעיל עיבוד מקביל למשימות בלוק
+
+## צעדים באופק
+
+- 📖 [לחקור את כל התכונות](../features/wiki-links)
+- ⚙️ [הגדרות מתקדמות](./configuration)
+- 🔧 [הגדרת ספק LLM](../providers/overview)
+- ❓ [שאלות נפוצות](../faq)
+
+## הדרכה בווידאו
+
+צפו בווידאו של 3 דקות להתחלה מהירה (סינית):
+[【מקורי לחלוטין ובחינם! NotEMD – הדרכה מהירה של 3 דקות】](https://b23.tv/lqR0RlA)
+
+## קבלת עזרה
+
+- 💬 **Discord**: [discord.gg/qnGgsQ9W](https://discord.gg/qnGgsQ9W)
+- 🐛 **בעיות**: [GitHub Issues](https://github.com/Jacobinwwey/obsidian-NotEMD/issues)
+- 📚 **מדריכים**: [מדריכים מלאים](https://jacobinwwey.github.io/obsidian-NotEMD/)

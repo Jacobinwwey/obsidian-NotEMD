@@ -1,0 +1,189 @@
+---
+id: overview
+title: "LLM Társítók"
+description: "36 LLM társítót konfigurálható – felhő, átjáró és helyi – műveletenkénti modellelem választásával"
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [LLM providers, API, OpenAI, Anthropic, Google, DeepSeek, Qwen, Ollama, per-task model]
+concepts: [LLM Integration, API Providers, Per-Task Models, OpenAI Compatible, Ollama, China Providers]
+citations:
+  - title: OpenAI API
+    url: https://platform.openai.com
+  - title: Anthropic API
+    url: https://docs.anthropic.com
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# LLM Társítók
+
+<TLDR>
+**Notemd 36 LLM társítót támogat 4 transzporttípusban.** Minden API kérésekhez használódik az összetett HTTP (nem vannak SDK-k), amelyben automatikus újrakövetés, transzportállapító átváltás és 5 percös válaszmezőtárolás van. A műveletenkénti modellelem lehetősége lehetővé teszi, hogy a konceptek kivonásához olcsó modelleket, a kutatásokhoz pedig erős modelleket használjunk. A helyi társítókhoz (Ollama, LMStudio) nincs szükség API kulcsra.
+</TLDR>
+
+Ez része a [Obsidian AI tudományos kezelési útmutatójának](/docs/pillar-ai-knowledge).
+
+## Társítók kategóriái
+
+### Felhőtársítók
+
+| Társító | Alapértelmezett alap URL | Alapértelmezett modell | Temperatúra |
+|----------|-----------------|---------------|-------------|
+| **DeepSeek** | `api.deepseek.com` | `deepseek-v4-pro` | 0.5 |
+| **OpenAI** | `api.openai.com/v1` | `gpt-4o` | 0.5 |
+| **Anthropic** | `api.anthropic.com` | `claude-3-5-sonnet-20240620` | 0.5 |
+| **Google** | `generativelanguage.googleapis.com/v1` | `gemini-2.0-flash-exp` | 0.5 |
+| **Mistral** | `api.mistral.ai/v1` | `mistral-large-latest` | 0.5 |
+| **xAI** | `api.x.ai/v1` | `grok-4` | 0.7 |
+| **Cerebras** | `api.cerebras.ai/v1` | `gpt-oss-120b` | 0.5 |
+| **Fireworks** | `api.fireworks.ai/inference/v1` | `kimi-k2p5` | 0.5 |
+| **Nebius** | `api.studio.nebius.com/v1` | `openai/gpt-oss-120b` | 0.3 |
+
+### Átjáró / Proxy társítók
+
+| Társító | Alapértelmezett alap URL | Alapértelmezett modell | Megjegyzések |
+|----------|-----------------|---------------|-------|
+| **OpenRouter** | `openrouter.ai/api/v1` | `anthropic/claude-3.7-sonnet` | Hozzáadja a `HTTP-Referer` + `X-Title` fejleteket |
+| **GitHub Models** | `models.github.ai/inference` | `gpt-4o-mini` | Hozzáadja a `X-GitHub-Api-Version` fejlet |
+| **AIHubMix** | `aihubmix.com/v1` | `gpt-4o-mini` | Hozzáadja a `APP-Code` fejlet |
+| **PPIO** | `api.ppinfra.com/v3/openai` | `qwen/qwen3-32b` | |
+| **Hugging Face** | `router.huggingface.co/v1` | `openai/gpt-oss-120b` | |
+| **Vercel AI Gateway** | `ai-gateway.vercel.sh/v1` | `anthropic/claude-sonnet-4.5` | |
+| **Requesty** | `router.requesty.ai/v1` | `anthropic/claude-3-7-sonnet-latest` | |
+| **Together** | `api.together.xyz/v1` | `meta-llama/Meta-Llama-3.1-70B-Instruct-Turbo` | |
+| **LiteLLM** | `localhost:4000/v1` | `your-proxy-model` | Választható API kulcs |
+| **Új API** | `localhost:3000/v1` | `gpt-4.1` | Választható API kulcs |
+| **OpenAI Compatible** | (használó-konfigurált) | `your-model-id` | Szerkeszthető végpont |
+
+### Kínábeli szolgáltatók
+
+| Társító | Alapértelmezett bázis URL | Alapértelmezett modell | Megjegyzések |
+|----------|-----------------|---------------|-------|
+| **Qwen** | `dashscope.aliyuncs.com/compatible-mode/v1` | `qwen3-235b-a22b` | Alibaba DashScope |
+| **Qwen Code** | `dashscope.aliyuncs.com/compatible-mode/v1` | `qwen3-coder-plus` | Kódoláshoz specializált |
+| **Doubao** | `ark.cn-beijing.volces.com/api/v3` | (endpoint ID szükséges) | ByteDance Volcengine |
+| **Moonshot** | `api.moonshot.cn/v1` | `kimi-k2-0905-preview` | Kimi |
+| **Xiaomi MiMo** | `api.xiaomimimo.com/v1` | `mimo-v2.5-pro` | |
+| **GLM** | `open.bigmodel.cn/api/paas/v4` | `glm-5` | Zhipu, Kína végpontja |
+| **Z AI** | `api.z.ai/api/paas/v4` | `glm-5` | Zhipu, nemzetközi végpontja |
+| **MiniMax** | `api.minimaxi.com/v1` | `MiniMax-M2.7` | |
+| **Baidu Qianfan** | `qianfan.baidubce.com/v2` | `ernie-4.5-turbo-32k` | |
+| **SiliconFlow** | `api.siliconflow.cn/v1` | `Qwen/QwQ-32B` | Modell-hostelési platform |
+| **Huawei Cloud MaaS** | `api.modelarts-maas.com/v1` | `DeepSeek-V3` | |
+
+**Doubaonek egy Ark végpont ID-re van szüksége** (formátum: `ep-xxxxxxxx-xxxx-xxxx`). A alapértelmezett helyettesítőt kell cserélni.
+
+### Lokális fornítók
+
+| Társító | Alapértelmezett bázis URL | Alapértelmezett modell | Megjegyzések |
+|----------|-----------------|---------------|-------|
+| **Ollama** | `localhost:11434/api` | `llama3` | Nincs API kulcs. NDJSON streamelés. Modellkeresés `/api/tags` keresztül |
+| **LMStudio** | `localhost:1234/v1` | `local-model` | Írja el `"EMPTY"`-t bármérő tokenként. OpenAI-kompatibilis keresés |
+| **OVMS** | `localhost:8000/v3` | `openvino-model` | OpenVINO Model Server |
+| **Azure OpenAI** | (használó-konfigurált) | `gpt-4o` | Elhelyezési nevű URL-ban. `api-key` címzete |
+
+## Munkaalapú modell választása
+
+Notemd támogatja külön felelőt és modellt minden munkához. Engedélyezze az `useMultiModelSettings: true`-vel.
+
+### Lelévő munkák
+
+| Munka | Beállítások kulcsa | Alapfelelő |
+|------|-------------|-----------------|
+| Hivatkozások hozzáadása (wiki-hivatkozás beillesztése) | `addLinksProvider` / `addLinksModel` | DeepSeek |
+| Tudományos kutatás (web-keresés + összefoglalás) | `researchProvider` / `researchModel` | DeepSeek |
+| Cím alapján készítés | `generateTitleProvider` / `generateTitleModel` | DeepSeek |
+| Übersetzung | `translateProvider` / `translateModel` | DeepSeek |
+| Diagram készítése | `summarizeToMermaidProvider` / `Model` | DeepSeek |
+| Konceptek kiemelése | `extractConceptsProvider` / `Model` | DeepSeek |
+| Összességi szöveg kiemelése | `extractOriginalTextProvider` / `Model` | DeepSeek |
+
+### Löszerőrend
+
+1. Ha `useMultiModelSettings` aktív → használja a munkához specifikus felelőt és modellt
+2. Ha a munka modellének módosítása üres → válassza ki a felelő alapmodellt
+3. Ha a munka felelője érvénytelen → válassza ki a globális `activeProvider`-t
+4. Ha `useMultiModelSettings` nincs bekapcsolva → az összes munkahasználja a globális `activeProvider`-t
+
+### Tanácsolt konfigurációk
+
+```
+# Researcher: power for research, cheap for everything else
+activeProvider: DeepSeek
+extractConceptsProvider: DeepSeek
+researchProvider: OpenAI        # GPT-4o for better research quality
+summarizeToMermaidProvider: DeepSeek
+
+# Privacy-first: local only
+activeProvider: Ollama
+addLinksProvider: Ollama
+extractConceptsProvider: Ollama
+
+# Budget bilingual
+activeProvider: DeepSeek
+translateProvider: Google      # Gemini Flash for translation
+researchProvider: SiliconFlow  # Cheaper China-based routing
+```
+
+## API hívás architektúrája
+
+### Transzportrétegek
+
+1. **Obsidian `requestUrl`** — primáris (beépített, működik minden platformon)
+2. **Asztali HTTP** — Node.js `http`/`https` modulok (streaming + hosszú kérések)
+3. **Web `fetch`** — lehetséges választó, ha a Node.js modulok nem elérhetőek
+
+A plug-in automatikusan átmeneti hálózati hibák esetén átmeni a transzportrétegek között.
+
+### Ugyanírás logika
+
+- **Normál módszer** (`enableStableApiCall: false`): Egy kísérlet. Átmeneti hiba esetén automatikusan emelkedik egy stabilabb ugyanírásra.
+- **Stabil ugyanírás módszer** (`enableStableApiCall: true`): Legfeljebb 4 kísérlet (1 + 3 ugyanírás) 5 másodperces intervallumokkal.
+- **Átmeneti hibák, amelyek indítják az ugyanírást**: `err_connection_closed`, `err_connection_reset`, `err_timed_out`, `econnreset`, `econnaborted`, `etimedout`, `socket hang up`, `network request failed`
+- **Nem ugyanírhatók**: HTTP 400, 401, 403, 404
+
+### Válasz tárolása
+
+5 percös memóriában lévő LRU tároló, amely kulcsa a fornító + modell + temperatúra + kérdés + tartalom. A következő egyező kérések 5 perc alatt azonnal adják vissza a tárolt eredményeket.
+
+### Logikai modell kezelése
+
+Akik a `system` szerepét (DeepSeek R1, OpenAI o1/o3/o4/gpt-5) nem támogatják, azoknál a rendszeri + felhasználói kérdések automatikusan összevonódnak egyetlen felhasználói üzenettel.
+
+DeepSeek-specifikus: `thinkingEnabled` hozzáadja `{ thinking: { type: 'enabled' } }` a kéréhez. `reasoningEffort` (alacsony/közepes/felső) kerül át jako `reasoning_effort`. ellenőrizi, hogy a maximális kijelölt token száma ≥ 8000, ha aktiválva a gondolkodás.
+
+### Token-értékelés
+
+`estimateTokens(text)`: `Math.ceil(text.length / 4)` — 4 karakteres token-heuristikus. Használódik az `maxResearchContentTokens` megkövetésére, mielőtt küldjük az LLM-he.
+
+Nincs implementált költségkövetés.
+
+## Model felfedezése
+
+| Módszer | Társítók | Végpont |
+|------|-----------|----------|
+| `ollama-tags` | Ollama | `/api/tags` |
+| `google-models` | Google | Modellek listája API |
+| `anthropic-models` | Anthropic | Modellek listája API |
+| `openai-compatible-models` | DeepSeek, Qwen, Mistral stb. | `/v1/models` |
+| `openrouter-models` | OpenRouter | Modellek listája API |
+| `github-models` | GitHub Models | Inferenciális folyamat API |
+| `none` | Azure OpenAI | Kikapcsolva (kötelező a telepítésnev) |
+
+## Rágratkozás
+
+1. **Válassza egy társítót** — DeepSeek (Kína), OpenAI (Internacionális) vagy Ollama (Lokális/Tiszta)
+2. **Írja be a API kulcsot** — Beállítások → Notemd → Társító → API Kulcs
+3. **Próbálja ki a kapcsolatot** — Kattintson a teszt gombra
+4. **Választható: Feladatspecifikus modellek** — Engedélyezze a `useMultiModelSettings`-t és konfigurálja azokat külön-külön
+
+Ollama esetén: nincs szükség API kulcsra. Csak ellenőrizze, hogy a `ollama serve` működik.
+
+---
+
+## További lépések
+
+- 📝 [Koncepti leírások](/docs/features/concept-notes) — Használja a feladatspecifikus extrakciós modellt
+- 🎨 [Diagramok](/docs/features/diagrams) — Használja a feladatspecifikus diagrammodellt
+- 🔍 [Tudományos kutatások](/docs/features/research) — Használja a kutatásspecifikus modellt
+- ⚙️ [Konfiguráció](/docs/getting-started/configuration) — Teljes beállítások referenciája

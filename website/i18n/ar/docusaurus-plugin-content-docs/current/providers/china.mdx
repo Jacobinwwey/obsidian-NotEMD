@@ -1,0 +1,75 @@
+---
+id: china
+title: "مزودو الصين"
+description: "قم بتكوين Qwen، DeepSeek، GLM، إلخ."
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [china providers, deepseek, qwen, glm, doubao, moonshot, mimo, minimax, baidu, siliconflow, huawei]
+concepts: [China Providers, DeepSeek, Qwen, Doubao, Moonshot, MiMo, GLM, MiniMax, Baidu, SiliconFlow, Huawei]
+citations:
+  - title: Qwen API
+    url: https://help.aliyun.com/zh/dashscope
+  - title: DeepSeek API
+    url: https://platform.deepseek.com
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# مزودو الصين
+
+<TLDR>
+**Notemd يدعم المزودين في المنطقة الصينية والمصدر الصيني من خلال نقاط نهاية متوافقة في الغالب مع OpenAI.** تشمل المجموعة الحالية DeepSeek، Qwen، Qwen Code، Doubao، Moonshot، Xiaomi MiMo، GLM، MiniMax، Baidu Qianfan، SiliconFlow، Huawei Cloud MaaS، و Z AI. الفائدة تكمن في الوصول الإقليمي والتحكم في التكلفة؛ أما المخاطر فهي تسمية النماذج الخاصة بكل مزود وإجراءات التحكم في الحسابات.
+
+هذا جزء من [Obsidian دليل إدارة المعرفة الذكية](/docs/pillar-ai-knowledge).
+</TLDR>
+
+## الإعداد
+
+أنشئ حساب المزود، ثم أنتج مفتاح API، وبعد ذلك اختر إعدادات المزود Notemd المناسبة بدلاً من استخدام ملف تعريف OpenAI العام. تحتوي هذه الإعدادات على القيمة الافتراضية Base URL، والنموذج، ووضع الاختبار API، وسلوك اكتشاف النماذج، بالإضافة إلى أي حقول خاصة بالمزود UI.
+
+استخدم اختيار النموذج حسب المهمة بشكل فعّال هنا. على سبيل المثال، احتفظ بـ DeepSeek أو GLM في سيناريوهات التفكير المعقد، واستخدم Qwen أو Moonshot للمهام الواسعة باللغة الصينية، وأوجه مهام البرمجة إلى Qwen Code عندما يكشف هذا الحساب عن نماذج المبرمجين.
+
+## النهاية والمصادقة
+
+| المزود | النموذج الافتراضي | URL الأساسية |
+|----------|---------------|----------|
+| DeepSeek | `deepseek-v4-pro` | `api.deepseek.com` |
+| Qwen | `qwen3-235b-a22b` | `dashscope.aliyuncs.com/compatible-mode/v1` |
+| Qwen Code | `qwen3-coder-plus` | `dashscope.aliyuncs.com/compatible-mode/v1` |
+| Doubao | (مطلوب رقم نقطة النهاية) | `ark.cn-beijing.volces.com/api/v3` |
+| Moonshot | `kimi-k2-0905-preview` | `api.moonshot.cn/v1` |
+| Xiaomi MiMo | `mimo-v2.5-pro` | `api.xiaomimimo.com/v1` |
+| GLM | `glm-5` | `open.bigmodel.cn/api/paas/v4` |
+| MiniMax | `MiniMax-M2.7` | `api.minimaxi.com/v1` |
+| Baidu Qianfan | `ernie-4.5-turbo-32k` | `qianfan.baidubce.com/v2` |
+| SiliconFlow | `Qwen/QwQ-32B` | `api.siliconflow.cn/v1` |
+| Huawei Cloud MaaS | `DeepSeek-V3` | `api.modelarts-maas.com/v1` |
+| Z AI | `glm-5` | `api.z.ai/api/paas/v4` |
+
+**ملاحظة:** Doubao يتطلب رقم نقطة نهاية Ark (التنسيق: `ep-xxxxxxxx-xxxx-xxxx`) بدلاً من اسم نموذج قياسي.
+
+يستخدم معظم هؤلاء المزودين بيئة التشغيل المشتركة المتوافقة مع OpenAI، لكن مفاهيم الحسابات والنماذج لديهم تختلف. احتفظ بـ Base URL الخاص بالإعدادات المحددة ما لم تتأكد من وجود نقطة نهاية بديلة للحساب.
+
+## اكتشاف النماذج
+
+DeepSeek، Qwen، Qwen Code، Doubao، Moonshot، Xiaomi MiMo، GLM، Z AI، MiniMax، Baidu Qianfan، و SiliconFlow يستخدمون اكتشاف النماذج المتوافق مع OpenAI عندما يدعم المزود عرض القائمة. أما Huawei Cloud MaaS فيستخدم وضع `huaweicloud-modelarts-models` لأن بيانات نشر ModelArts ليست مطابقة لقائمة `/v1/models` العامة.
+
+لا تعتبر فشل عملية الاكتشاف دليلاً على استحالة إجراء المحادثة. يسمح بعض المزودين بالمحادثة مع تقييد صلاحيات عرض القائمة. في هذه الحالة، احتفظ برقم نموذج واضح في ملف التعريف وقم بالتحقق باستخدام اختبار الاتصال.
+
+## حل المشكلات
+
+- نجحت عملية المصادقة لكن المحادثة فشلت: قد يكون اسم النموذج خارج نطاق صلاحيات الحساب أو المنطقة.
+- Doubao يفشل مع اسم نموذج عادي: استخدم رقم نقطة نهاية Ark في حقل النموذج عندما تتطلب عملية النشر ذلك.
+- تكون ردود التفكير مقتطعة: تحقق من الحد الأقصى لعدد رموز الإخراج الخاص بكل مزود وإعدادات الحد الأقصى للرموز المدعومة من Notemd.
+- تختلف شبكات المنطقة: استخدم نقطة نهاية المزود في المنطقة الصينية عندما تكون آلة الخزنة داخل الصين؛ واستخدم نقطة النهاية الدولية فقط عندما يكون كل من الحساب ومسار الشبكة صالحين.
+
+## متى يجب استخدامه
+
+استخدم مزودي الصين عندما يكون التأخير الإقليمي، أو الوصول إلى المدفوعات/الحسابات، أو جودة اللغة الصينية، أو التكلفة هي القيود الرئيسية. يُفضّل استخدام OpenAI مباشرةً، أو Anthropic، أو Google، أو المزودين المحليين عندما تحتاج إلى حدود بروتوكول أبسط أو توافق أقوى في التصحيح بين المزودين.
+
+---
+
+## الخطوات التالية
+
+- [LLM Providers](/docs/providers/overview) -- إعدادات كاملة، نماذج لكل مهمة، ومنطق إعادة المحاولة
+- [حل المشكلات](/docs/advanced/troubleshooting) -- إصلاح أخطاء الاتصال الإقليمي والتحقق من الهوية

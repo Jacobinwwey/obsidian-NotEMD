@@ -1,0 +1,435 @@
+---
+id: configuration
+title: "Configurazione"
+description: "Configurare le impostazioni e le preferenze di Notemd"
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [configuration, settings, customization, preferences]
+concepts: [Configuration, Per-Task Models, Output Paths, Custom Workflows]
+citations:
+  - title: Obsidian
+    url: https://obsidian.md
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# Configurazione
+
+<TLDR>
+**La configurazione Notemd copre 6 aree principali:** (1) fornitori LLM e chiavi API, (2) selezione del modello per task, (3) percorsi di output e template, (4) lingua UI e lingua di output, (5) servizi di ricerca (Tavily/DuckDuckGo), (6) flussi di lavoro personalizzati. Tutte le impostazioni si trovano in Obsidian Impostazioni → Notemd. I cambiamenti entrano in vigore immediatamente.
+</TLDR>
+
+## Panoramica delle impostazioni
+
+Accesso: **Obsidian Impostazioni (⚙️) → Notemd**
+
+### Sezioni principali
+
+1. **Configurazione del fornitore** — chiavi API, URL di base, modelli
+2. **Impostazioni del task** — selezione del modello per task
+3. **Configurazione dell’output** — dove salvare i file generati
+4. **Impostazioni linguistiche** — UI e lingue di output
+5. **Integrazione di ricerca** — configurazione Tavily/DuckDuckGo
+6. **Flussi di lavoro** — catene di pulsanti personalizzate
+7. **Avanzate** — diagnosi, elaborazione batch, chunking
+
+---
+
+## 1. Configurazione del fornitore
+
+### Aggiungere un fornitore
+
+1. **Scegli il fornitore** dal menu a discesa (più di 30 disponibili)
+2. **Inserisci la chiave API**
+3. **Opzionale**: Imposta una base URL personalizzata (per proxy/gateway)
+4. **Clicca su "Otteni elenco modelli"** per verificare la connessione
+5. **Scegli il modello predefinito**
+
+### Fornitori comuni
+
+#### OpenAI
+```
+Provider: OpenAI
+API Key: sk-...
+Base URL: https://api.openai.com/v1 (default)
+Model: gpt-4o-mini
+```
+
+#### Anthropic (Claude)
+```
+Provider: Anthropic
+API Key: sk-ant-...
+Model: claude-sonnet-4-6
+```
+
+#### Ollama (Local)
+```
+Provider: Ollama
+Base URL: http://localhost:11434 (default)
+Model: llama3.1
+API Key: (not required)
+```
+
+#### DeepSeek
+```
+Provider: DeepSeek
+API Key: sk-...
+Model: deepseek-chat
+```
+
+### Molti fornitori
+
+È possibile configurare più fornitori e passare da uno all’altro a seconda del compito:
+- **Fornitore principale**: utilizzato come fallback
+- **Fornitori specifici per attività**: da sovrascrivere per attività specifiche
+
+---
+
+## 2. Modelli specifici per attività
+
+Configurare modelli diversi per attività diverse per ottimizzare costo/qualità:
+
+### Tipi di attività
+
+| Compito | Modello predefinito | Scopo |
+|------|--------------|---------|
+| **Collegamento** | Fornitore principale | Identificare concetti per collegamenti wiki |
+| **Generazione di concetti** | Fornitore principale | Estrarre e descrivere concetti |
+| **Ricerca** | Fornitore principale | Riepilogare i risultati di ricerca web |
+| **Traduzione** | Fornitore principale | Traduci testo |
+| **Generazione di diagrammi** | Fornitore principale | Genera diagrammi Mermaid/Canvas |
+
+### Esempio: Configurazione ottimizzata per i costi
+
+```
+Linking: gpt-4o-mini (fast, many calls)
+Concept Generation: claude-sonnet-4-6 (quality extraction)
+Research: gpt-4o (web-grounded)
+Translation: gemini-flash (multilingual)
+Diagram: ollama/llama3.1 (free, local)
+```
+
+### Come configurare
+
+1. **Impostazioni → Notemd → Impostazioni task**
+2. Per ogni task, scegli:
+   - ✅ **Usare il fornitore principale** (predefinito)
+   - 🔄 **Usare un fornitore personalizzato** → seleziona fornitore + modello
+
+---
+
+## 3. Configurazione di output
+
+### Output delle note concettuali
+
+**Dove vengono salvate le note di concetto nuove:**
+
+```
+Settings → Output → Concept Folder
+Default: concepts/
+```
+
+**Modello:**
+```
+Settings → Output → Concept Template
+Default:
+---
+tags: [concept]
+created: {{date}}
+---
+
+# {{concept}}
+
+{{description}}
+
+## Backlinks
+{{backlinks}}
+```
+
+### Opzioni di struttura della cartella
+
+**Opzione 1: Piana (tutti i concetti in una sola cartella)**
+```
+vault/
+└── concepts/
+    ├── Machine Learning.md
+    ├── Neural Networks.md
+    └── Deep Learning.md
+```
+
+**Opzione 2: Gerarchica (per cartella di origine)**
+```
+vault/
+├── papers/
+│   └── concepts/
+│       └── Transformer.md
+└── notes/
+    └── concepts/
+        └── Attention Mechanism.md
+```
+
+Configurazione: **Impostazioni → Output → Utilizzare cartelle gerarchiche**
+
+### Output del diagramma
+
+**Dove vengono salvati i diagrammi:**
+```
+Settings → Output → Diagram Folder
+Default: diagrams/
+```
+
+**Formato:**
+- `.mmd` (Mermaid origine)
+- `.canvas` (JSON Canvas)
+- `.html` (Vega-Lite)
+
+---
+
+## 4. Impostazioni di lingua
+
+### UI Lingua
+
+**Lingua dell'interfaccia** (pulsanti, menu, finestre di dialogo):
+
+```
+Settings → Language → UI Language
+Options: 21+ languages
+Default: System language
+```
+
+Supportato: inglese, 简体中文, 繁體中文, 日本語, 한국어, Español, Français, Deutsch, Русский, العربية e altre.
+
+### Lingua di output
+
+**Lingua del contenuto generato** (note concettuali, riassunti di ricerca):
+
+```
+Settings → Language → Output Language
+Options: Same as UI languages
+Default: Same as UI
+```
+
+**Caso d'uso:** UI cinese + output in inglese per ricerche bilingue.
+
+### Destinazione della traduzione
+
+**Lingua di destinazione predefinita** per le attività di traduzione:
+
+```
+Settings → Translation → Target Language
+Default: English
+```
+
+---
+
+## 5. Integrazione con la ricerca
+
+### Tavily (Consigliato)
+
+**Servizio di ricerca ottimizzato per l'AI:**
+
+```
+Settings → Search → Service: Tavily
+API Key: tvly-...
+```
+
+Chiave di accesso: [tavily.com](https://tavily.com/)
+
+**Caratteristiche:**
+- Risultati di alta qualità
+- Riepiloghi ottimizzati per l'AI
+- Citazioni delle fonti
+
+### DuckDuckGo (Sperimentale)
+
+**Non è necessaria alcuna chiave API:**
+
+```
+Settings → Search → Service: DuckDuckGo
+```
+
+**Nota:** Qualità inferiore, nessuna personalizzazione.
+
+---
+
+## 6. Configurazione del flusso di lavoro
+
+### Creazione di flussi di lavoro personalizzati
+
+**I flussi di lavoro collegano più attività in un unico pulsante.**
+
+1. **Impostazioni → Flussi di lavoro → Aggiungi flusso di lavoro**
+2. **Nome**: "Flusso di analisi del paper"
+3. **DSL**: `process-current-add-links>extract-concepts-current>research-and-summarize>summarize-as-mermaid`
+4. **Salva**
+
+Appare un nuovo pulsante nella barra laterale sinistra.
+
+### Sintassi DSL
+
+**Formato:** `action1>action2>action3`
+
+**Azioni disponibili:**
+- `process-current-add-links` — Aggiungere link wiki alla nota attuale
+- `extract-concepts-current` — Generare note concettuali
+- `research-and-summarize` — Ricerca web + riassunto
+- `translate-current` — Traduci la nota attuale
+- `summarize-as-mermaid` — Generare diagramma Mermaid
+- `process-folder-add-links` — Elaborazione batch della cartella
+
+**Flussi di lavoro di esempio:**
+
+**Estrazione rapida dei concetti:**
+```
+process-current-add-links>extract-concepts-current
+```
+
+**Ricerca approfondita:**
+```
+process-current-add-links>research-and-summarize>extract-concepts-current
+```
+
+**Analisi multilingue:**
+```
+translate-current>process-current-add-links>extract-concepts-current
+```
+
+---
+
+## 7. Impostazioni avanzate
+
+### Elaborazione batch
+
+**Elaborare più file in parallelo:**
+
+```
+Settings → Advanced → Batch Processing
+Concurrency: 3 (default)
+```
+
+Valori più alti = velocità maggiore ma più chiamate API.
+
+### Chunking intelligente
+
+**Per note lunghe, suddividere in blocchi:**
+
+```
+Settings → Advanced → Smart Chunking
+Chunk Size: 2000 words (default)
+Overlap: 200 words (default)
+```
+
+Previene errori legati al limite dei token.
+
+### Pannello di Diagnostica
+
+**Visualizzare log dettagliati:**
+
+```
+Settings → Advanced → Enable Diagnostics
+```
+
+Mostra:
+- API richieste/risposte
+- Utilizzo del token
+- Tempi di elaborazione
+- Errori
+
+### Rilevamento di concetti duplicati
+
+**Evitare concetti quasi duplicati:**
+
+```
+Settings → Advanced → Synonym Suppression
+Threshold: 0.8 (default, 0-1)
+```
+
+Valore più alto = fusione più aggressiva.
+
+---
+
+## Profili di configurazione
+
+### Impostazioni di esportazione/importazione
+
+**Condividere le configurazioni tra dispositivi:**
+
+1. **Impostazioni → Avanzate → Esporta configurazione**
+2. Salva `notemd-config.json`
+3. Su nuovo dispositivo: **Importa configurazione**
+
+**Cosa è incluso:**
+- Chiavi del fornitore API (opzionali)
+- Selezione dei modelli
+- Percorsi di output
+- Flussi di lavoro personalizzati
+
+---
+
+## Configurazioni consigliate
+
+### Per studenti
+
+```
+Provider: OpenAI (gpt-4o-mini)
+Concept Folder: concepts/
+UI Language: System
+Output Language: System
+Workflow: "Study Flow" (add-links>extract-concepts)
+```
+
+### Per ricercatori
+
+```
+Providers:
+  - Linking: DeepSeek (cheap, many calls)
+  - Concepts: Claude Sonnet (high quality)
+  - Research: GPT-4o (web-grounded)
+Concept Folder: notes/concepts/
+Hierarchical: Yes
+Workflow: "Paper Flow" (add-links>extract>research>diagram)
+```
+
+### Per utenti attenti alla privacy
+
+```
+Provider: Ollama (llama3.1)
+All tasks: Local model
+Search: DuckDuckGo (no API)
+Diagnostics: Off
+```
+
+### Per il lavoro bilingue
+
+```
+UI Language: Chinese
+Output Language: English
+Translation Target: Chinese
+Provider: Gemini (multilingual)
+```
+
+---
+
+## Risoluzione dei problemi di configurazione
+
+### Impostazioni non salvate
+- Verifica i permessi del file in `.obsidian/plugins/notemd/`
+- Prova: Disattiva il plugin → Riattivalo
+
+### Chiave API non valida
+- Nessun spazio aggiuntivo
+- Verifica la scadenza
+- Verifica i crediti nel pannello di controllo del fornitore
+
+### I modelli non vengono caricati
+- Clicca su "Otteni elenco modelli" per aggiornare
+- Verifica la connettività di rete
+- Prova con un altro fornitore
+
+---
+
+## Prossimi passi
+
+- 📖 [Esplora le funzionalità](../features/wiki-links)
+- 🔌 [Guida all'impostazione del fornitore](../providers/overview)
+- ❓ [FAQ](../faq)

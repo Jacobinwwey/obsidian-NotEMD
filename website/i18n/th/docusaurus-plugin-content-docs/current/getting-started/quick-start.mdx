@@ -1,0 +1,181 @@
+---
+id: quick-start
+title: "คู่มือเริ่มต้นอย่างรวดเร็ว"
+description: "เริ่มใช้ Notemd ภายใน 5 นาที"
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [quick start, tutorial, getting started, first steps]
+concepts: [Quick Start, LLM Configuration, One-Click Workflow, Ollama]
+citations:
+  - title: Obsidian
+    url: https://obsidian.md
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# คู่มือเริ่มต้นอย่างรวดเร็ว
+
+<TLDR>
+**เริ่มใช้ Notemd ภายใน 5 นาที.** มี 3 ขั้นตอน: (1) เพิ่มคีย์ LLM API (หรือใช้ Ollama แบบท้องถิ่น), (2) เปิดบันทึกแล้วรัน “Process file (add links)”, (3) สำรวจวิธีการทำงานแบบคลิกเดียวในแถบข้าง รองรับผู้ให้บริการมากกว่า 30 ราย ไม่จำเป็นต้องเขียนโค้ด สามารถทำงานแบบออฟไลน์ด้วย Ollama.
+</TLDR>
+
+## ขั้นตอนที่ 1: กำหนดค่าผู้ให้บริการ LLM รายแรกของคุณ (2 นาที)
+
+### ตัวเลือก A: ผู้ให้บริการบนคลาวด์ (OpenAI, Anthropic ฯลฯ)
+
+1. เปิด **Settings** → **Notemd**
+2. ภายใต้ **LLM Provider Configuration** เลือกผู้ให้บริการจากรายการแบบดรอปดาวน์
+3. ป้อน **API Key** ของคุณ
+4. (เลือกใช้) คลิก **“Get Model List”** เพื่อดูรายการโมเดลที่มีอยู่
+5. เลือกโมเดลสำหรับแต่ละประเภทงาน
+
+**ตัวเลือกยอดนิยม:**
+- **OpenAI**: `gpt-4o-mini` (เร็ว ราคาไม่แพง)
+- **Anthropic**: `claude-sonnet-4-6` (คุณภาพสูง)
+- **DeepSeek**: `deepseek-chat` (ราคาถูกมาก)
+
+### ตัวเลือก B: Ollama แบบท้องถิ่น (ไม่จำเป็นต้องมีคีย์ API)
+
+1. ติดตั้ง [Ollama](https://ollama.com/)
+2. ดาวน์โหลดโมเดล: `ollama pull llama3.1`
+3. ในการตั้งค่า Notemd ให้เลือก **"Ollama"** เป็นผู้ให้บริการ
+4. ชื่อโมเดล: `llama3.1` (หรือโมเดลใดก็ได้ที่คุณดาวน์โหลดมา)
+
+## ขั้นตอนที่ 2: ลองทำงานแรกของคุณ (1 นาที)
+
+### เพิ่มลิงก์ Wiki เข้าไปในบันทึก
+
+1. เปิดบันทึกใดก็ได้ที่มีเนื้อหามีความหมาย
+2. คลิกขวาในตัวแก้ไข
+3. เลือก **"Process file (add links)"**
+4. รอสักครู่
+5. แนวคิดสำคัญต่างๆ ตอนนี้อยู่ใน `[[wiki-linked]]`!
+
+**ตัวอย่าง:**
+
+**ก่อนหน้านี้:**
+```
+Machine learning models use neural networks to process data.
+```
+
+**หลังจากนั้น:**
+```
+[[Machine learning]] models use [[neural networks]] to process data.
+```
+
+## ขั้นตอนที่ 3: สำรวจฟีเจอร์ต่างๆ (2 นาที)
+
+### ดึงข้อมูลบันทึกแนวคิด
+
+1. คลิกขวา → **"Extract concepts from current file"**
+2. Notemd จะสร้างไฟล์แยกต่างหากสำหรับแต่ละแนวคิด
+3. ตรวจสอบโฟลเดอร์แนวคิดที่คุณตั้งค่าไว้ (ค่าเริ่มต้น: `concepts/`)
+4. แต่ละบันทึกแนวคิดจะมีลิงก์ย้อนกลับไปยังบันทึกต้นฉบับของคุณ
+
+### วิจัยและสรุป
+
+1. เน้นหัวข้อในบันทึกของคุณ
+2. คลิกขวา → **"Research and summarize"**
+3. Notemd ส่งคำขอค้นหาบนเว็บ (Tavily หรือ DuckDuckGo)
+4. สรุปจะถูกเพิ่มเข้าไปในบันทึกพร้อมแหล่งที่มา
+
+### กระบวนการทำงานด้วยการคลิกเดียว
+
+1. ตรวจสอบ **แถบด้านซ้าย** เพื่อหาปุ่มกระบวนการทำงาน
+2. คลิก **"One-Click Extract"** บนบันทึกใดก็ได้
+3. มันจะทำงาน: เพิ่มลิงก์ → ดึงแนวคิด → วิจัย → สร้างแผนภาพ
+4. ทั้งหมดในการคลิกเดียว!
+
+## งานเริ่มต้นที่พบบ่อย
+
+### งานที่ 1: ประมวลผลเอกสาร/บทความ
+
+```
+1. Paste article content into a note
+2. Run "Process file (add links)"
+3. Run "Extract concepts"
+4. Run "Research and summarize" on unfamiliar terms
+5. Run "Summarize as Mermaid diagram" for visual structure
+```
+
+### งานที่ 2: แปลบันทึก
+
+```
+1. Highlight text to translate
+2. Right-click → "Translate to target language"
+3. Set target language in settings first
+```
+
+### งานที่ 3: สร้างแผนที่ความรู้
+
+```
+1. Process 5-10 related notes with "add links"
+2. Run "Extract concepts" on each
+3. Open Graph view to see connections
+4. Your knowledge graph is forming!
+```
+
+## เคล็ดลับการปรับแต่ง
+
+### การเลือกโมเดลตามงาน
+
+คุณสามารถใช้โมเดลที่แตกต่างกันสำหรับงานที่แตกต่างกันได้:
+
+| งาน | รุ่นที่แนะนำ | เหตุผล |
+|------|------------------|-----|
+| เพิ่มลิงก์ | `gpt-4o-mini`, `deepseek-chat` | เร็ว สามารถโทรได้หลายครั้ง |
+| ดึงข้อมูลแนวคิด | `claude-sonnet-4-6`, `gpt-4o` | การดึงข้อมูลคุณภาพสูง |
+| การวิจัย | `perplexity`, `gpt-4o` | อิงจากเว็บ |
+| การแปล | `gemini-flash`, `gpt-4o` | หลายภาษา |
+| แผนภาพ | `claude-opus`, รุ่นท้องถิ่น | การใช้เหตุผลที่ซับซ้อน |
+
+กำหนดค่าได้ที่: **Settings → Notemd → Task-Specific Models**
+
+### กระบวนการทำงานแบบกำหนดเอง
+
+สร้างปุ่มของคุณเอง:
+
+1. Settings → Notemd → Workflows
+2. คลิก "Add Workflow"
+3. ป้อน DSL: `process-current-add-links>extract-concepts-current>research-and-summarize`
+4. ตั้งชื่อมันว่า "My Research Flow"
+5. ปุ่มใหม่ปรากฏขึ้นในแถบด้านข้าง
+
+## การแก้ไขปัญหา
+
+### "API Key Invalid"
+- ตรวจสอบว่าคีย์ถูกต้องหรือไม่ (ไม่มีช่องว่างเพิ่มเติม)
+- ตรวจสอบว่าบัญชีมีคะแนนเครดิตหรือไม่
+- ทดสอบโดยใช้ปุ่ม "Connection Test" ในการตั้งค่า
+
+### "Model Not Found"
+- คลิก "Get Model List" เพื่อดูรายการโมเดลที่มีอยู่
+- ผู้ให้บริการบางรายต้องการชื่อโมเดลที่เฉพาะเจาะจง (เช่น `gpt-4o` ไม่ใช่ `gpt-4`)
+
+### ลิงก์ไม่ปรากฏขึ้น
+- ตรวจสอบให้แน่ใจว่าบันทึกมีเนื้อหาเพียงพอ (>50 คำ)
+- ลองใช้โมเดลที่มีประสิทธิภาพสูงกว่า
+- ตรวจสอบว่าการเรียก LLM ประสบความสำเร็จหรือไม่ (ดูแผงการวินิจฉัย)
+
+### ประสิทธิภาพช้า
+- ใช้โมเดลที่เร็วกว่า (`gpt-4o-mini` แทน `gpt-4o`)
+- ลดขนาดชิ้นส่วนในการตั้งค่า
+- เปิดใช้งานการประมวลผลแบบขนานสำหรับงานแบบกลุ่ม
+
+## ขั้นตอนต่อไป
+
+- 📖 [สำรวจคุณสมบัติทั้งหมด](../features/wiki-links)
+- ⚙️ [การตั้งค่าขั้นสูง](./configuration)
+- 🔧 [การตั้งค่าผู้ให้บริการ LLM](../providers/overview)
+- ❓ [FAQ](../faq)
+
+## วิดีโอสอน
+
+รับชมวิดีโอสอนเริ่มต้นใช้งาน 3 นาที (ภาษาจีน):
+[【โอเพนซอร์สฟรี! NotEMD สอนเร็ว 3 นาที】](https://b23.tv/lqR0RlA)
+
+## ขอความช่วยเหลือ
+
+- 💬 **Discord**: [discord.gg/qnGgsQ9W](https://discord.gg/qnGgsQ9W)
+- 🐛 **ปัญหา**: [GitHub Issues](https://github.com/Jacobinwwey/obsidian-NotEMD/issues)
+- 📚 **เอกสาร**: [เอกสารฉบับเต็ม](https://jacobinwwey.github.io/obsidian-NotEMD/)

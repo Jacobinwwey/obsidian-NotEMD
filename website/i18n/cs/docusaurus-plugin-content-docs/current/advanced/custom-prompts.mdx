@@ -1,0 +1,134 @@
+---
+id: custom-prompts
+title: "Vlastní pokyny"
+description: "Přizpůsobte si pokyny LLM podle svých potřeb"
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [custom prompts, prompts, focused learning, domain]
+concepts: [Custom Prompts, Focused Learning, Prompt Engineering]
+citations:
+  - title: Obsidian
+    url: https://obsidian.md
+  - title: LLM Prompt Engineering
+    url: https://platform.openai.com/docs/guides/prompt-engineering
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# Vlastní pokyny
+
+<TLDR>
+**Notemd vám umožňuje přepsat výchozí pokyn LLM pro každý typ úlohy.** Vlastní pokyny vám dávají kontrolu nad tím, co model upřednostňuje: můžete omezit extrakci konceptů na konkrétní obor, změnit styl propojování nebo upravit tón překladu. Proměnné pokynů jako `{{content}}` a `{{concept}}` jsou nahrazovány během provozu. Funkce zaměřeného učení přidává na začátek váš obor studia, aby automaticky omezila výsledky extrakce.
+
+Toto je součástí [Obsidian Průvodce AI pro správu znalostí](/docs/pillar-ai-knowledge).
+</TLDR>
+
+## Přehled
+
+Vestavěné pokyny Notemd jsou napsány pro práci s obecnými znalostmi. Fungují dobře napříč různými obory, ale zároveň ponechávají prostor pro vylepšení specifické pro daný obor. Vlastní pokyny vám umožňují přesně říct LLM, jak se má chovat v vašem konkrétním případě – ať už jde o extrakci pouze lékařské terminologie, propojování pouze pojmenovaných entit nebo překlad formálním stylem.
+
+Vlastní pokyny nenahrazují celý systémový pokyn. Přepisují nebo doplňují **část instrukcí specifických pro úlohu**, přičemž zachovávají strukturální formát výstupu (např. řádky `CONCEPT:`, syntaxi wiki odkazů), na kterém Notemd závisí při analýze.
+
+## Jak to funguje
+
+### Architektura pokynů
+
+Každá úloha Notemd se řídí stejnou strukturou pokynů:
+
+```
+[System role: You are a helpful assistant...]
+[Domain constraint: Relevant Fields: [{domain}]]   <-- focused learning (optional)
+[Custom task prompt]                                <-- your override (optional)
+[Output format instructions]                        <-- always preserved
+[Content: {{content}}]                              <-- runtime substitution
+```
+
+1. **Základní systémový pokyn** – Určuje osobnost asistenta. Nelze ho přepsat.
+2. **Zaměřený obor učení** – Přidává na začátek `Relevant Fields: [medicine / law / computer science / ...]` pro omezení rozsahu. Jedná se o přepínač nastavení, nikoli o samotný pokyn.
+3. **Vlastní pokyn pro úlohu** – Nahrazuje výchozí instrukce k úloze (např. jaké koncepty extrahovat, jak intenzivně propojovat).
+4. **Formát výstupu** – Strukturální pravidla (řádky `CONCEPT:`, formát wiki odkazů). Vždy je přidává Notemd pro zajištění srozumitelnosti.
+5. **Obsah** – Samotný text poznámky, který je během provozu nahrazen pomocí `{{content}}`.
+
+### Proměnné pokynů
+
+Proměnné jsou nahrazovány v okamžiku spuštění. Dostupné proměnné se liší podle úlohy:
+
+| Proměnná | Úkoly | Nahrazeno za |
+|----------|-------|---------------|
+| `{{content}}` | Všechno | Text poznámky nebo výběru |
+| `{{concept}}` | Šablona poznámky k konceptu | Název extrahovaného konceptu |
+| `{{description}}` | Šablona poznámky k konceptu | Popis konceptu generovaný LLM |
+| `{{backlinks}}` | Šablona poznámky k konceptu | Seznam zdrojových poznámek s odkazy |
+| `{{date}}` | Šablona poznámky k konceptu | Současný datum (YYYY-MM-DD) |
+| `{{language}}` | Překlad | Cílový jazyk výstupu |
+| `{{source}}` | Šablona poznámky k konceptu | Základní název zdrojové poznámky |
+
+### Orientovaná oblast učení
+
+Funkce orientovaného učení představuje zkratku pro vymezení oblasti. Místo psaní vlastního pokynu, který uvádí váš obor, nastavíte `focusedLearningDomain` v nastaveních:
+
+```
+Settings → Advanced → Focused Learning Domain
+Example: "medicine" or "computer science" or "Chinese philosophy"
+```
+
+Tím se do výstupního pokynu přidá `Relevant Fields: [medicine]`, což způsobí, že LLM upřednostní koncepty relevantní pro danou oblast a potlačí obecné. Jedná se o lehčí variantu oproti plně vlastnímu pokynu a funguje u všech úloh na extrakci.
+
+## Konfigurace
+
+| Nastavení | Výchozí | Účinek |
+|---------|---------|--------|
+| `customAddLinksPrompt` | `''` | Přepsat výchozí pokyn úlohy přidání odkazů |
+| `customExtractConceptsPrompt` | `''` | Přepsat výchozí pokyn na extrakci konceptů |
+| `customResearchPrompt` | `''` | Přepsat výchozí pokyn pro výzkum a shrnutí |
+| `customTranslatePrompt` | `''` | Přepsat výchozí pokyn pro překlad |
+| `customDiagramPrompt` | `''` | Přepsat výchozí pokyn pro generování diagramů |
+| `focusedLearningDomain` | `''` | Přidat kontext oboru na začátek pokynů na extrakci a vytváření odkazů |
+| `extractConceptsMinimalTemplate` | `true` | Použít šablonu poznámky konceptů pouze s názvem (ovlivňuje rozsah šablony `{{concept}}`) |
+| `customConceptNoteTemplate` | `''` | Přepsat šablonu souboru poznámky konceptů s plnou podporou proměnných |
+
+**Pokud je pole vlastního pokynu prázdné, použije se vestavěný výchozí pokyn.**
+
+## Příklad
+
+Jste lékařský výzkumník, který extrahuje koncepty z poznámek k klinickým studiím. Výchozí pokyn extrahuje obecná podstatná jména spolu s lékařskými termíny, což způsobuje znečištění vaší složky s koncepty.
+
+**Řešení:** Nastavte orientovanou oblast učení a vlastní pokyn na extrakci.
+
+1. Nastavte `focusedLearningDomain` na `medicine`
+2. Nastavte `customExtractConceptsPrompt` na:
+
+```
+Extract only clinically relevant concepts: diseases, drug names,
+anatomical terms, measurement endpoints, and statistical methods.
+Ignore generic English nouns, brand names, and institutional names.
+Prioritize MeSH terminology where applicable.
+```
+
+Nyní, když spustíte „Extract concepts“ na klinické poznámce, LLM vytvoří:
+
+```
+CONCEPT: Randomized Controlled Trial
+CONCEPT: Double-Blind Method
+CONCEPT: Myocardial Infarction
+CONCEPT: Creatine Kinase-MB
+CONCEPT: Kaplan-Meier Estimate
+```
+
+Místo výchozího chování, které může také extrahovat nežádoucí obecné termíny jako „hospital“ nebo „month".
+
+## Tipy
+
+- **Začněte s cílenou oblastí učení** před napsáním kompletního vlastního promptu. Jedna nastavení pokrývají 80 % případů použití.
+- **Uchovejte formát výstupu** – Nikdy neodstraňujte pokyny k formátování, jako je „jeden na řádek“ nebo „CONCEPT: prefix“, z vlastních promptů. Parser Notemd na nich závisí.
+- **Nejprve otestujte s jednou poznámkou** – Vlastní prompty mohou mít nečekané účinky na šířku extrakce. Ověřte to na jedné poznámce před hromadným zpracováním.
+- **Udržujte prompty stručné** – Příliš dlouhé vlastní prompty spotřebovávají tokeny a mohou oslabit zaměření modelu.
+
+---
+
+## Další kroky
+
+- [Wiki-Links](/docs/features/wiki-links) – Co se odkáže, když upravíte prompt add-links
+- [Concept Notes](/docs/features/concept-notes) – Šablony konceptových poznámek a proměnná `{{concept}}`
+- [Batch Processing](/docs/advanced/batch-processing) – Aplikujte vlastní prompty na celé složky
+- [Troubleshooting](/docs/advanced/troubleshooting) – Opravte problémy, kdy vlastní prompty vytvářejí nečekaný výstup

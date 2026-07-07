@@ -1,0 +1,189 @@
+---
+id: overview
+title: "Provezoare LLM"
+description: "Configurați 36 de provezoare LLM – cloud, gateway și local – cu selecție a modelului pe sarcină"
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [LLM providers, API, OpenAI, Anthropic, Google, DeepSeek, Qwen, Ollama, per-task model]
+concepts: [LLM Integration, API Providers, Per-Task Models, OpenAI Compatible, Ollama, China Providers]
+citations:
+  - title: OpenAI API
+    url: https://platform.openai.com
+  - title: Anthropic API
+    url: https://docs.anthropic.com
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# Provezoare LLM
+
+<TLDR>
+**Notemd susține 36 de provezoare LLM în 4 tipuri de transport.** Toate apelurile API folosesc HTTP brut (fără SDK-uri) cu reîncercări automate, fallback de transport și cacheare a răspunsurilor pe 5 minute. Seleția modelului pe sarcină vă permite să utilizați modele ieftine pentru extracția conceptelor și modele puternice pentru cercetare. Nu este necesară nicio cheie API pentru provezoarele locale (Ollama, LMStudio).
+</TLDR>
+
+Acesta face parte din [Obsidian Ghidul de gestionare a cunoștințelor AI](/docs/pillar-ai-knowledge).
+
+## Categorie de provezoare
+
+### Provezoare cloud
+
+| Furnizor | Baza implicită URL | Modelul implicit | Temperature |
+|----------|-----------------|---------------|-------------|
+| **DeepSeek** | `api.deepseek.com` | `deepseek-v4-pro` | 0.5 |
+| **OpenAI** | `api.openai.com/v1` | `gpt-4o` | 0.5 |
+| **Anthropic** | `api.anthropic.com` | `claude-3-5-sonnet-20240620` | 0.5 |
+| **Google** | `generativelanguage.googleapis.com/v1` | `gemini-2.0-flash-exp` | 0.5 |
+| **Mistral** | `api.mistral.ai/v1` | `mistral-large-latest` | 0.5 |
+| **xAI** | `api.x.ai/v1` | `grok-4` | 0.7 |
+| **Cerebras** | `api.cerebras.ai/v1` | `gpt-oss-120b` | 0.5 |
+| **Fireworks** | `api.fireworks.ai/inference/v1` | `kimi-k2p5` | 0.5 |
+| **Nebius** | `api.studio.nebius.com/v1` | `openai/gpt-oss-120b` | 0.3 |
+
+### Provezoare gateway/proxy
+
+| Furnizor | Baza implicită URL | Modelul implicit | Note |
+|----------|-----------------|---------------|-------|
+| **OpenRouter** | `openrouter.ai/api/v1` | `anthropic/claude-3.7-sonnet` | Adaugă en-titlurile `HTTP-Referer` + `X-Title` |
+| **GitHub Models** | `models.github.ai/inference` | `gpt-4o-mini` | Adaugă en-titlul `X-GitHub-Api-Version` |
+| **AIHubMix** | `aihubmix.com/v1` | `gpt-4o-mini` | Adaugă en-titlul `APP-Code` |
+| **PPIO** | `api.ppinfra.com/v3/openai` | `qwen/qwen3-32b` | |
+| **Hugging Face** | `router.huggingface.co/v1` | `openai/gpt-oss-120b` | |
+| **Vercel AI Gateway** | `ai-gateway.vercel.sh/v1` | `anthropic/claude-sonnet-4.5` | |
+| **Requesty** | `router.requesty.ai/v1` | `anthropic/claude-3-7-sonnet-latest` | |
+| **Together** | `api.together.xyz/v1` | `meta-llama/Meta-Llama-3.1-70B-Instruct-Turbo` | |
+| **LiteLLM** | `localhost:4000/v1` | `your-proxy-model` | Cheie opționala API |
+| **New API** | `localhost:3000/v1` | `gpt-4.1` | Cheie opționala API |
+| **OpenAI Compatible** | (configurat de utilizator) | `your-model-id` | Endpoint personalizat |
+
+### furnizorii din China
+
+| Furnizor | Base implicită URL | Modelul implicit | Note |
+|----------|-----------------|---------------|-------|
+| **Qwen** | `dashscope.aliyuncs.com/compatible-mode/v1` | `qwen3-235b-a22b` | Alibaba DashScope |
+| **Qwen Code** | `dashscope.aliyuncs.com/compatible-mode/v1` | `qwen3-coder-plus` | Focusat pe programare |
+| **Doubao** | `ark.cn-beijing.volces.com/api/v3` | (eșantionul endpointului este obligatoriu) | ByteDance Volcengine |
+| **Moonshot** | `api.moonshot.cn/v1` | `kimi-k2-0905-preview` | Kimi |
+| **Xiaomi MiMo** | `api.xiaomimimo.com/v1` | `mimo-v2.5-pro` | |
+| **GLM** | `open.bigmodel.cn/api/paas/v4` | `glm-5` | Endpoint Zhipu, China |
+| **Z AI** | `api.z.ai/api/paas/v4` | `glm-5` | Zhipu, endpoint internațional |
+| **MiniMax** | `api.minimaxi.com/v1` | `MiniMax-M2.7` | |
+| **Baidu Qianfan** | `qianfan.baidubce.com/v2` | `ernie-4.5-turbo-32k` | |
+| **SiliconFlow** | `api.siliconflow.cn/v1` | `Qwen/QwQ-32B` | Platformă de găzduire a modelelor |
+| **Huawei Cloud MaaS** | `api.modelarts-maas.com/v1` | `DeepSeek-V3` | |
+
+**Doubao necesită un ID de endpoint Ark** (format: `ep-xxxxxxxx-xxxx-xxxx`). Placeholder-ul implicit trebuie înlocuit.
+
+### furnizori locali
+
+| Furnizor | Base implicită URL | Modelul implicit | Note |
+|----------|-----------------|---------------|-------|
+| **Ollama** | `localhost:11434/api` | `llama3` | Fără cheie API. Streamare NDJSON. Descoperire a modelelor prin `/api/tags` |
+| **LMStudio** | `localhost:1234/v1` | `local-model` | Trimite `"EMPTY"` ca token de portare. Descoperire compatibilă cu OpenAI |
+| **OVMS** | `localhost:8000/v3` | `openvino-model` | OpenVINO Model Server |
+| **Azure OpenAI** | (configurat de utilizator) | `gpt-4o` | Numele de implementare în URL. Înaltarea `api-key` |
+
+## Selectare a modelului pe sarcină
+
+Notemd suportă un furnizor și o model independentă pentru fiecare sarcină. Activează cu `useMultiModelSettings: true`.
+
+### Sarcini disponibile
+
+| Sarcină | Cheia de setări | Furnizor implicit |
+|------|-------------|-----------------|
+| Adăugare de linkuri (insertare de link wiki) | `addLinksProvider` / `addLinksModel` | DeepSeek |
+| Cercetare (căutare pe web + rezumat) | `researchProvider` / `researchModel` | DeepSeek |
+| Generare din titlu | `generateTitleProvider` / `generateTitleModel` | DeepSeek |
+| Traducere | `translateProvider` / `translateModel` | DeepSeek |
+| Generare de diagrame | `summarizeToMermaidProvider` / `Model` | DeepSeek |
+| Extracție de concepte | `extractConceptsProvider` / `Model` | DeepSeek |
+| Extracție de text original | `extractOriginalTextProvider` / `Model` | DeepSeek |
+
+### Ordine de rezolvare
+
+1. Dacă `useMultiModelSettings` este activ → se folosește furnizorul și modelul specific pentru sarcină
+2. Dacă suprascrierea modelului pentru sarcină este golă → se revine la modelul implicit al furnizorului
+3. Dacă furnizorul pentru sarcină este invalid → se revine la `activeProvider` global
+4. Dacă `useMultiModelSettings` este dezactivat → toate sarcinile folosesc `activeProvider` global
+
+### Configurații recomandate
+
+```
+# Researcher: power for research, cheap for everything else
+activeProvider: DeepSeek
+extractConceptsProvider: DeepSeek
+researchProvider: OpenAI        # GPT-4o for better research quality
+summarizeToMermaidProvider: DeepSeek
+
+# Privacy-first: local only
+activeProvider: Ollama
+addLinksProvider: Ollama
+extractConceptsProvider: Ollama
+
+# Budget bilingual
+activeProvider: DeepSeek
+translateProvider: Google      # Gemini Flash for translation
+researchProvider: SiliconFlow  # Cheaper China-based routing
+```
+
+## Arhitectura de apel a API
+
+### Straturile de transport
+
+1. **Obsidian `requestUrl`** — principal (în integrare, funcționează pe toate platformele)
+2. **Desktop HTTP** — module Node.js `http`/`https` (streaming + cereri lungi)
+3. **Web `fetch`** — soluție de rezervă atunci când modulele Node.js nu sunt disponibile
+
+Pluginul cascadează automat între straturile de transport în cazul erorilor temporare de rețea.
+
+### Logică de repetare
+
+- **Mod normal** (`enableStableApiCall: false`): O tentativă singură. În caz de eșec temporar, se face o escaladare automată la o repetare stabilă.
+- **Mod de repetare stabilă** (`enableStableApiCall: true`): Până la 4 tentative (1 + 3 repetări) cu intervale de 5 secunde.
+- **Erorile temporare care declanșează repetare**: `err_connection_closed`, `err_connection_reset`, `err_timed_out`, `econnreset`, `econnaborted`, `etimedout`, `socket hang up`, `network request failed`
+- **Nerepetabile**: HTTP 400, 401, 403, 404
+
+### Cachearea răspunsurilor
+
+Cache LRU în memorie pe 5 minute, indexată după provider + model + temperatură + prompt + conținut. Cererile identice ulterioare în decurs de 5 minute returnează instantaneu rezultatele din cache.
+
+### Gestionarea modelelor de raționament
+
+Modelele care nu suportă rolul `system` (DeepSeek R1, OpenAI o1/o3/o4/gpt-5) au automat prompturile sistemului + ale utilizatorului combinate într-un singur mesaj de utilizator.
+
+Specific pentru DeepSeek: `thinkingEnabled` adaugă `{ thinking: { type: 'enabled' } }` la cerere. `reasoningEffort` (scăzut/mediu/alt) este transmis ca `reasoning_effort`. Verifică că numărul maxim de tokeni de ieșire este ≥ 8000 atunci când este activată gândirea.
+
+### Estimarea tokenilor
+
+`estimateTokens(text)`: `Math.ceil(text.length / 4)` — heuristică de 4 caractere pe token. Folosită pentru a respecta `maxResearchContentTokens` înainte de trimitere către LLM.
+
+Nu este implementată urmărire a costurilor.
+
+## Descoperirea modelelor
+
+| Mod | Provideri | Endpoint |
+|------|-----------|----------|
+| `ollama-tags` | Ollama | `/api/tags` |
+| `google-models` | Google | Lista modelelor API |
+| `anthropic-models` | Anthropic | Lista modelelor API |
+| `openai-compatible-models` | DeepSeek, Qwen, Mistral, etc. | `/v1/models` |
+| `openrouter-models` | OpenRouter | Lista modelelor API |
+| `github-models` | GitHub Models | Inferența API |
+| `none` | Azure OpenAI | Desactivat (se necesită numele de implementare) |
+
+## Start rapid
+
+1. **Alegeți un furnizor** — DeepSeek (China), OpenAI (Internațional), sau Ollama (Local/Free)
+2. **Introduceți cheia API** — Setări → Notemd → Furnizor → Cheie API
+3. **Testați conexiunea** — Faceți clic pe butonul de test
+4. **Opțional: Modele pe sarcină** — Activați `useMultiModelSettings` și configurați-le individual
+
+Pentru Ollama: nu este necesară cheia API. Asigurați-vă doar că `ollama serve` este în funcțiune.
+
+---
+
+## Următoarele pași
+
+- 📝 [Notițe conceptuale](/docs/features/concept-notes) — Folosește modelul de extracție pe sarcină
+- 🎨 [Diagrame](/docs/features/diagrams) — Folosește modelul de diagramă pe sarcină
+- 🔍 [Cercetare](/docs/features/research) — Folosește model specific pentru cercetare
+- ⚙️ [Configurație](/docs/getting-started/configuration) — Referință completă a setărilor

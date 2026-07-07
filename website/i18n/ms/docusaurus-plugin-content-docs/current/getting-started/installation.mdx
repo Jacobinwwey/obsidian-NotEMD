@@ -1,0 +1,133 @@
+---
+id: installation
+title: "Pemasangan"
+description: "Cara memasang Notemd dalam Obsidian"
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [installation, setup, obsidian plugin]
+concepts: [Installation, Community Plugins, BRAT, Manual Install]
+citations:
+  - title: Obsidian
+    url: https://obsidian.md
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# Pemasangan
+
+<TLDR>
+**Pasang Notemd dalam masa kurang dari 2 minit.** Terdapat dua kaedah: (1) Plugin Komuniti Obsidian (disyorkan, pemasangan satu klik), atau (2) Pemasangan manual melalui GitHub Releases. Memerlukan Obsidian versi 0.15.0+ atau lebih tinggi. Berfungsi pada Windows, macOS, Linux, iOS, dan Android. Tiada kebergantungan luaran. Lebih daripada 4k muat turun, dilisensikan di bawah MIT.
+</TLDR>
+
+## Kaedah 1: Plugin Komuniti (Disyorkan)
+
+1. Buka **Tetapan Obsidian** (ikon ⚙️ atau `Ctrl/Cmd + ,`)
+2. Pergi ke **Plugin Komuniti**
+3. Klik **Cari**
+4. Cari **"Notemd"**
+5. Klik **Pasang**
+6. Klik **Aktifkan**
+
+**Selesai!** Anda akan melihat ikon Notemd di bar sisi kiri anda.
+
+## Kaedah 2: Pemasangan Manual
+
+### Prasyarat
+- Obsidian versi 0.15.0 atau lebih tinggi
+- Git (pilihan, untuk menyalin repositori)
+
+### Langkah-langkah
+
+1. **Muat turun fail-fail** dari [GitHub Releases](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/latest):
+   - `main.js`
+   - `styles.css`
+   - `manifest.json`
+
+2. **Cari folder plugin vault anda:**
+   ```
+   <your-vault>/.obsidian/plugins/
+   ```
+
+Jika folder `plugins` tidak wujud, buatlah ia.
+
+3. **Buat folder Notemd:**
+   ```
+   <your-vault>/.obsidian/plugins/notemd/
+   ```
+
+4. **Salin ketiga-tiga fail** ke dalam folder `notemd`.
+
+5. **Muat semula Obsidian:**
+   - Tekan `Ctrl/Cmd + R`, atau
+   - Mulakan semula Obsidian
+
+6. **Aktifkan plugin tersebut:**
+   - Tetapan → Plugin komuniti
+   - Cari "Notemd" dalam senarai
+   - Nyalakan ia
+
+## Pilihan lain: Pasang melalui BRAT
+
+Jika anda menggunakan [BRAT plugin](https://github.com/TfTHacker/obsidian42-brat):
+
+1. Buka tetapan BRAT
+2. Klik "Tambah plugin Beta"
+3. Masukkan: `Jacobinwwey/obsidian-NotEMD`
+4. Klik "Tambah Plugin"
+5. Aktifkan Notemd dalam plugin Komuniti
+
+## Pengesahan
+
+Selepas pemasangan, sahkan Notemd berfungsi:
+
+1. Buka sebarang nota
+2. Klik kanan di editor
+3. Anda sepatutnya nampak arahan Notemd seperti:
+   - "Proses fail (tambah pautan)"
+   - "Ekstrak konsep"
+   - "Kaji dan ringkaskan"
+
+## Langkah Seterusnya
+
+- **Konfigurasikan penyedia LLM:** [Quick Start →](./quick-start)
+- **Penyelesaian masalah:** [Common Issues →](../advanced/troubleshooting)
+
+## Keperluan sistem
+
+| Platform | Versi | Status |
+|----------|---------|--------|
+| **Obsidian** | 0.15.0+ | Diperlukan |
+| **Windows** | 7+ | ✅ Disokong |
+| **macOS** | 10.15+ | ✅ Disokong |
+| **Linux** | Bila-bila | ✅ Disokong |
+| **iOS** | 15+ | ✅ Disokong |
+| **Android** | 5+ | ✅ Disokong |
+
+## Pemadaman
+
+Untuk memadam Notemd:
+
+1. Tetapan → Plugin Komuniti
+2. Cari "Notemd"
+3. Klik ikon ❌
+4. Secara pilihan, padam folder plugin: `<vault>/.obsidian/plugins/notemd/`
+
+Data anda (nota, nota konsep, dll.) kekal tidak terganggu.
+
+## Memperbaharui
+
+### Pembaruan automatik (Disyorkan)
+Obsidian akan memeriksa pembaruan plugin secara automatik. Apabila versi baru tersedia:
+1. Tetapan → Plugin Komuniti
+2. Klik "Periksa Pembaruan"
+3. Klik "Pembaruan" di sebelah Notemd
+
+### Pembaruan manual
+Muat turun versi terkini dan gantikan tiga fail dalam folder plugin anda.
+
+## Dapatkan Bantuan
+
+- 📖 [Panduan Permulaan Cepat](./quick-start)
+- ❓ [FAQ](../faq)
+- 💬 [Komuniti Discord](https://discord.gg/qnGgsQ9W)
+- 🐛 [Laporkan Isu](https://github.com/Jacobinwwey/obsidian-NotEMD/issues)
