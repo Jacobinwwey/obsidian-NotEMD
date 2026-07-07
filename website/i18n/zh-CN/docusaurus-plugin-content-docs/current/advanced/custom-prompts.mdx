@@ -1,7 +1,7 @@
 ---
 id: custom-prompts
-title: 自定义 Prompt
-description: 按你的领域与任务需求自定义 LLM prompt
+title: 自定义提示词
+description: 根据您的需求自定义 LLM 提示词
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
 keywords: [custom prompts, prompts, focused learning, domain]
@@ -15,99 +15,99 @@ citations:
 
 import TLDR from '@site/src/components/TLDR';
 
-# 自定义 Prompt
+# 自定义提示词
 
 <TLDR>
-**Notemd 允许你为每一种任务类型覆盖默认 LLM prompt。** 自定义 prompt 能控制模型优先关注什么：你可以把概念抽取限制在某个学科，改变链接风格，或调整翻译语气。`{{content}}`、`{{concept}}` 等 prompt variables 会在运行时替换。focused learning domain 会把你的学习领域前置到 prompt 中，用来自动约束抽取结果。
+**Notemd 允许你为每种任务类型覆盖默认的 LLM 提示语。** 自定义提示语让你能够控制模型的优先级：你可以将概念提取限制在特定领域，更改链接风格，或调整翻译的语气。像 `{{content}}` 和 `{{concept}}` 这样的提示变量会在运行时被替换。专注学习领域功能会自动在提取结果前加上你的研究领域名称，从而限定结果范围。
 
-这是 [Obsidian AI Knowledge Management Guide](/docs/pillar-ai-knowledge) 的一部分。
+这是[Obsidian AI知识管理指南](/docs/pillar-ai-knowledge)的一部分。
 </TLDR>
 
 ## 概览
 
-Notemd 内置 prompt 面向通用知识工作，跨领域表现稳定，但具体领域通常需要更强约束。自定义 prompt 让你明确告诉 LLM 应该如何处理当前任务，例如只抽取医学术语、只链接命名实体，或用正式语气翻译。
+Notemd内置的提示词是为通用知识处理任务设计的。它们在多个领域都能良好运行，但仍有空间进行领域特定的优化。自定义提示词可以让您明确告知LLM针对您的具体需求应如何运作——无论是仅提取医学术语、仅关联命名实体，还是以正式语体进行翻译。
 
-自定义 prompt 不会替换整个 system prompt。它覆盖或增强的是**任务特定指令部分**，同时保留 Notemd 解析所依赖的结构化输出格式，例如 `CONCEPT:` 行和 wiki-link 语法。
+自定义提示词不会取代整个系统提示词。它们会覆盖或补充**特定任务的操作指令部分**，同时保留 Notemd 用于解析的结构化输出格式（如 `CONCEPT:` 行、维基链接语法）。
 
-## 工作机制
+## 它是如何工作的？
 
-### Prompt 架构
+### 提示词架构
 
-每个 Notemd 任务都遵循同一类 prompt 结构：
+每个 Notemd 任务都遵循相同的提示结构：
 
-```text
+```
 [System role: You are a helpful assistant...]
-[Domain constraint: Relevant Fields: [{domain}]]   <-- focused learning（可选）
-[Custom task prompt]                                <-- 你的覆盖指令（可选）
-[Output format instructions]                        <-- 始终保留
-[Content: {{content}}]                              <-- 运行时替换
+[Domain constraint: Relevant Fields: [{domain}]]   <-- focused learning (optional)
+[Custom task prompt]                                <-- your override (optional)
+[Output format instructions]                        <-- always preserved
+[Content: {{content}}]                              <-- runtime substitution
 ```
 
-1. **Base system prompt** -- 设置 assistant persona，不能覆盖。
-2. **Focused learning domain** -- 将 `Relevant Fields: [medicine]` 这类领域约束加到抽取 prompt 前。它是设置项，不是裸 prompt。
-3. **Custom task prompt** -- 替换默认任务说明，例如抽取哪些概念、链接强度如何。
-4. **Output format** -- Notemd 始终追加结构规则，保证响应可解析。
-5. **Content** -- 真实笔记内容，通过 `{{content}}` 在运行时替换。
+1. **基础系统提示** -- 设定助手的角色。不可被覆盖。
+2. **专注学习领域** -- 通过添加 `Relevant Fields: [medicine / law / computer science / ...]` 来限定范围。这是一个设置开关，而非原始提示语。
+3. **自定义任务提示** -- 用于替换默认的任务说明（例如需要提取哪些类型的概念、链接的强度如何控制）。
+4. **输出格式** -- 结构规则（`CONCEPT:` 行，wiki 链接格式）。始终以 Notemd 结尾以确保可解析性。
+5. **内容** -- 实际的笔记文本，运行时通过 `{{content}}` 进行替换。
 
-### Prompt 变量
+### 提示词变量
 
-变量会在执行时替换。不同任务支持的变量不同：
+变量会在执行时被替换。可用变量因任务而异：
 
-| Variable | Tasks | Replaced With |
+| 变量 | 任务 | 已替换为 |
 |----------|-------|---------------|
-| `{{content}}` | All | 当前笔记或选区文本 |
-| `{{concept}}` | Concept note template | 抽取出的概念名 |
-| `{{description}}` | Concept note template | LLM 生成的概念描述 |
-| `{{backlinks}}` | Concept note template | 带链接的来源笔记列表 |
-| `{{date}}` | Concept note template | 当前日期（YYYY-MM-DD） |
-| `{{language}}` | Translation | 目标输出语言 |
-| `{{source}}` | Concept note template | 来源笔记 basename |
+| `{{content}}` | 全部 | 备注或选中文本 |
+| `{{concept}}` | 概念说明模板 | 提取出的概念名称 |
+| `{{description}}` | 概念说明模板 | 由LLM生成的概念描述 |
+| `{{backlinks}}` | 概念说明模板 | 包含链接的源代码注释列表 |
+| `{{date}}` | 概念说明模板 | 当前日期（YYYY-MM-DD） |
+| `{{language}}` | 翻译 | 目标输出语言 |
+| `{{source}}` | 概念说明模板 | 源文件备注文件名 |
 
-### 聚焦学习领域
+### 专注学习领域
 
-focused learning 是领域约束的快捷方式。你不需要在每个自定义 prompt 中重复写领域，只需要在设置里配置 `focusedLearningDomain`：
+聚焦学习功能是领域范围设定的快捷方式。无需编写提及您所在领域的自定义提示语，只需在设置中输入 `focusedLearningDomain` 即可：
 
-```text
-Settings -> Advanced -> Focused Learning Domain
+```
+Settings → Advanced → Focused Learning Domain
 Example: "medicine" or "computer science" or "Chinese philosophy"
 ```
 
-这会把 `Relevant Fields: [medicine]` 加到抽取 prompt 前，让 LLM 优先保留领域相关概念，并压制过于泛化的名词。它比完整自定义 prompt 更轻量，并可覆盖抽取类任务。
+这会在提取提示的前面加上 `Relevant Fields: [medicine]`，从而使 LLM 优先考虑与领域相关的概念，同时忽略通用概念。它的体积比完整的自定义提示更小，且适用于所有的提取任务。
 
 ## 配置
 
-| Setting | Default | Effect |
+| 设置 | 默认值 | 效果 |
 |---------|---------|--------|
-| `customAddLinksPrompt` | `''` | 覆盖 add-links 任务 prompt |
-| `customExtractConceptsPrompt` | `''` | 覆盖概念抽取 prompt |
-| `customResearchPrompt` | `''` | 覆盖 research + summarize prompt |
-| `customTranslatePrompt` | `''` | 覆盖翻译 prompt |
-| `customDiagramPrompt` | `''` | 覆盖图表生成 prompt |
-| `focusedLearningDomain` | `''` | 给抽取和链接 prompt 前置学科上下文 |
-| `extractConceptsMinimalTemplate` | `true` | 使用 title-only 概念笔记模板 |
-| `customConceptNoteTemplate` | `''` | 用完整变量支持覆盖概念笔记模板 |
+| `customAddLinksPrompt` | `''` | 覆盖默认的添加链接任务提示 |
+| `customExtractConceptsPrompt` | `''` | 覆盖默认的概念提取提示词 |
+| `customResearchPrompt` | `''` | 覆盖默认的调研+总结提示词 |
+| `customTranslatePrompt` | `''` | 覆盖默认的翻译提示语 |
+| `customDiagramPrompt` | `''` | 覆盖默认的图表生成提示语 |
+| `focusedLearningDomain` | `''` | 在提取和链接提示语的前面加上领域背景信息 |
+| `extractConceptsMinimalTemplate` | `true` | 使用仅标题的概念说明模板（会影响 `{{concept}}` 模板的适用范围） |
+| `customConceptNoteTemplate` | `''` | 用完整的变量支持覆盖概念说明文件模板 |
 
-当自定义 prompt 字段为空时，Notemd 使用内置默认 prompt。
+**当自定义提示字段为空时，将使用内置的默认提示。**
 
 ## 示例
 
-你是医学研究者，正在从临床试验笔记中抽取概念。默认 prompt 可能会抽出医学术语以外的普通名词，导致概念文件夹变乱。
+你是一名医学研究员，负责从临床试验记录中提取概念。默认的提示词会同时提取普通名词和医学术语，这会让你的概念文件夹变得杂乱无章。
 
-**Solution:** 设置 focused learning domain，并配置自定义抽取 prompt。
+**解决方案：** 设定专注的学习领域以及自定义的提取提示。
 
-1. 将 `focusedLearningDomain` 设为 `medicine`
-2. 将 `customExtractConceptsPrompt` 设为：
+1. 将 `focusedLearningDomain` 设置为 `medicine`
+2. 将 `customExtractConceptsPrompt` 设置为：
 
-```text
+```
 Extract only clinically relevant concepts: diseases, drug names,
 anatomical terms, measurement endpoints, and statistical methods.
 Ignore generic English nouns, brand names, and institutional names.
 Prioritize MeSH terminology where applicable.
 ```
 
-对临床笔记运行 "Extract concepts" 后，LLM 会输出：
+现在，当你在临床笔记上运行“提取概念”功能时，LLM 会生成：
 
-```text
+```
 CONCEPT: Randomized Controlled Trial
 CONCEPT: Double-Blind Method
 CONCEPT: Myocardial Infarction
@@ -115,20 +115,20 @@ CONCEPT: Creatine Kinase-MB
 CONCEPT: Kaplan-Meier Estimate
 ```
 
-而不是同时抽出 "hospital"、"month" 这类无用泛词。
+而不是那种可能会提取出“医院”或“月份”之类不需要的通用术语的默认行为。
 
-## 建议
+## 技巧
 
-- **先从 focused learning domain 开始** -- 很多场景只需要一个领域设置，不必写完整 prompt。
-- **保留输出格式** -- 不要删掉 "one per line" 或 `CONCEPT:` prefix 这类格式要求；Notemd parser 依赖它们。
-- **先用单篇笔记测试** -- 自定义 prompt 可能改变抽取宽度，批处理前先验证一篇。
-- **保持 prompt 简洁** -- 过长 prompt 会消耗 token，也会稀释模型关注点。
+- 在编写完整的自定义提示语之前，**先从专注的学习领域开始**。通过一个设置即可覆盖80%的使用场景。
+- **保留输出格式** -- 永远不要从自定义提示中删除诸如“每行一个”或“CONCEPT: 前缀”之类的格式说明。Notemd的解析器依赖于这些说明。
+- **先使用单条笔记进行测试**——自定义提示词可能会对提取的覆盖范围产生意外影响。在批量处理之前，请先在一条笔记上验证。
+- **保持提示语简洁**——过长的自定义提示语会消耗令牌，进而削弱模型的专注度。
 
 ---
 
-## 下一步
+## 后续步骤
 
-- [Wiki-Links](https://jacobinwwey.github.io/obsidian-NotEMD/docs/features/wiki-links) -- 自定义 add-links prompt 时哪些内容会被链接（英文）
-- [Concept Notes](https://jacobinwwey.github.io/obsidian-NotEMD/docs/features/concept-notes) -- 概念笔记模板与 `{{concept}}` 变量（英文）
-- [Batch Processing](/docs/advanced/batch-processing) -- 将自定义 prompt 应用于整个文件夹
-- [Troubleshooting](/docs/advanced/troubleshooting) -- 修复自定义 prompt 导致的异常输出
+- [Wiki-Links](/docs/features/wiki-links) -- 当你自定义添加链接提示时，会链接到什么内容
+- [概念说明](/docs/features/concept-notes) -- 概念说明模板与 `{{concept}}` 变量
+- [批量处理](/docs/advanced/batch-processing) -- 对整个文件夹应用自定义提示词
+- [故障排除](/docs/advanced/troubleshooting) -- 解决自定义提示词产生意外输出的问题

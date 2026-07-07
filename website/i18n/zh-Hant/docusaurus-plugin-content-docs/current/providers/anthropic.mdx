@@ -1,39 +1,67 @@
 ---
 id: anthropic
 title: Anthropic
-description: 說明 Anthropic 在 Notemd 中的用途、設定、工作流程邊界與常見排查路徑。
+description: 設定 Anthropic Claude
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [anthropic, claude, provider, configuration]
+concepts: [Anthropic, Claude, API Configuration]
+citations:
+  - title: Anthropic API
+    url: https://docs.anthropic.com
+  - title: Claude
+    url: https://www.anthropic.com/claude
 ---
 
 import TLDR from '@site/src/components/TLDR';
 
-# Anthropic
+# Anthropic 提供服務商
 
 <TLDR>
-**本頁說明：** 說明 Anthropic 在 Notemd 中的用途、設定、工作流程邊界與常見排查路徑。 以下命令、設定鍵、檔案副檔名與 Provider 名稱保留英文，以便和外掛介面、CLI 與日誌逐一對應。
+**Anthropic 使用原生的 Messages API 傳輸方式，而非與 OpenAI 相容的傳輸方式。** 目前的預設值為 `claude-3-5-sonnet-20240620`、`https://api.anthropic.com` 和 `temperature: 0.5`。在除錯時應將其視為一種獨立的協定層面。
+
+這是[Obsidian AI知識管理指南](/docs/pillar-ai-knowledge)的一部分。
 </TLDR>
 
-## 設置
+## 安裝
 
-Anthropic 的設定應從 Notemd 設定入口完成。Provider、模型、輸出路徑、語言與批次處理不是彼此獨立的開關；修改前應確認它影響目前檔案、資料夾任務或一鍵工作流程。
+建立一個 Anthropic API 金鑰，新增一個 `Anthropic` 提供者設定檔，並將 Base URL 保留於原生端點，除非您是透過專用的閘道設定檔來進行路由。在模型欄位中選擇您想要使用的 Claude 模型 ID；預設值可讓現有的產品基準保持穩定。
 
-## 端点與鑑權
+Anthropic 是用於高品質摘要生成、研究綜合以及概念抽取的理想選擇。若將其與較便宜的服務供應商結合使用，請僅在那些能從其輸出品質中受益的任務上使用它。
 
-Anthropic 的這一部分說明產品行為、使用入口與工程邊界。介面按鈕、命令名稱、設定鍵與檔案副檔名是穩定契約，翻譯不會改變實際執行名稱。
+## 端點與認證
 
-## 模型發現
+| 欄位 | 目前的預設值 |
+|-------|----------------|
+| 運輸 | `anthropic` |
+| API 金鑰 | 必填項目 |
+| 基底 URL | `https://api.anthropic.com` |
+| 預設模型 | `claude-3-5-sonnet-20240620` |
+| 溫度 | `0.5` |
+| 連線測試 | 僅聊天功能 |
 
-Anthropic 的這一部分說明產品行為、使用入口與工程邊界。介面按鈕、命令名稱、設定鍵與檔案副檔名是穩定契約，翻譯不會改變實際執行名稱。
+執行階段會使用 `x-api-key` 和 `anthropic-version: 2023-06-01` 將請求傳送至 `/v1/messages`。請勿在此預設下配置 OpenAI 風格的 `/v1/chat/completions` 終點，應改用與 OpenAI 相容的閘道預設。
 
-## 故障排查
+## 模型探索
 
-本節用於定位 Anthropic 的常見失敗模式。優先查看 Notemd 設定中的診斷輸出、Provider 回傳的 HTTP 狀態、模型名稱、網路連線與是否觸發限流。
+Anthropic 在供應商註冊表中使用了 `anthropic-models` 的探索模式。如果您的金鑰或帳戶無法列出模型，請在設定檔中保留一個已知的模型 ID，並透過連線測試來進行驗證。
 
-## 适用场景
+此傳輸方式無法與 OpenAI 相容的供應商交換使用。透過 OpenRouter、LiteLLM 或其他閘道路由的 Claude 模型應屬於該閘道設定檔，而非原生的 Anthropic 設定檔。
 
-Anthropic 的這一部分說明產品行為、使用入口與工程邊界。介面按鈕、命令名稱、設定鍵與檔案副檔名是穩定契約，翻譯不會改變實際執行名稱。
+## 故障排除
 
-## 下一步
+- `401` 或 `403`：檢查金鑰範圍、工作區存取權、帳單狀況，以及該金鑰是否屬於預期的 Anthropic 工作區。
+- `404`：基礎 URL 不正確，或所選的模型 ID 無法被該帳戶使用。
+- Gateway 式的 Claude 模型 ID 失敗：請將該設定檔移至對應的 gateway 提供商，因為原生 Anthropic 需要使用原生模型名稱。
+- 過長的請求會在後期失敗：請降低每個任務的模型輸出大小，或使用已知輸出符號上限更高的模型。
 
-繼續閱讀相鄰頁面時，優先選擇與目前任務鏈直接相關的主題：Provider 設定、核心功能、批次處理、疑難排解或圖表匯出。
+## 何時使用
+
+當合成品質、研究筆記或結構化寫作的優先級高於原始成本時，請使用 Anthropic。請勿將其作為通用的 OpenAI 相容替代方案；使用獨立的傳輸方式正是其重點，混用各種協定會使診斷變得更加困難。
+
+---
+
+## 接下來的步驟
+
+- [LLM 提供商](/docs/providers/overview) -- 完整的設定、每個任務的模型，以及重試邏輯
+- [故障排除](/docs/advanced/troubleshooting) -- 解決 401/403 錯誤及連線問題

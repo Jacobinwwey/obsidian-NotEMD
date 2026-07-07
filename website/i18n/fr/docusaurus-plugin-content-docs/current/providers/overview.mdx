@@ -1,87 +1,189 @@
 ---
 id: overview
-title: Fournisseurs LLM
-description: Explique le rôle de Fournisseurs LLM dans Notemd, sa configuration, ses limites de workflow et les vérifications courantes.
+title: LLM Fournisseurs
+description: Configurez 36 fournisseurs LLM — cloud, gateway et local — avec une sélection de modèle par tâche
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [LLM providers, API, OpenAI, Anthropic, Google, DeepSeek, Qwen, Ollama, per-task model]
+concepts: [LLM Integration, API Providers, Per-Task Models, OpenAI Compatible, Ollama, China Providers]
+citations:
+  - title: OpenAI API
+    url: https://platform.openai.com
+  - title: Anthropic API
+    url: https://docs.anthropic.com
 ---
 
 import TLDR from '@site/src/components/TLDR';
 
-# Fournisseurs LLM
+# LLM Fournisseurs
 
 <TLDR>
-**Résumé：** Explique le rôle de Fournisseurs LLM dans Notemd, sa configuration, ses limites de workflow et les vérifications courantes. Les commandes, clés de configuration, extensions et noms de Provider ci-dessous restent en anglais afin de correspondre exactement à l’interface, au CLI et aux journaux.
+**Notemd prend en charge 36 fournisseurs LLM sur 4 types de transport.** Toutes les appels API utilisent du HTTP brut (sans SDK) avec des tentatives automatiques, un fallback de transport et un cache des réponses sur 5 minutes. Le choix du modèle par tâche vous permet d’utiliser des modèles économiques pour l’extraction de concepts et des modèles puissants pour la recherche. Aucune clé API n’est nécessaire pour les fournisseurs locaux (Ollama, LMStudio).
 </TLDR>
 
-## Catégories de Providers
+Ceci fait partie du [Obsidian Guide de gestion des connaissances IA](/docs/pillar-ai-knowledge).
 
-Cette partie de Fournisseurs LLM décrit le comportement produit, les points d’entrée et les limites d’implémentation. Les boutons, commandes, clés et extensions restent des contrats stables.
+## Catégories de fournisseurs
 
-### Fournisseurs LLM : configuration et modèles
+### Fournisseurs de services cloud
 
-Cette partie de Fournisseurs LLM décrit le comportement produit, les points d’entrée et les limites d’implémentation. Les boutons, commandes, clés et extensions restent des contrats stables.
+| Fournisseur | Base par défaut URL | Modèle par défaut | Température |
+|----------|-----------------|---------------|-------------|
+| **DeepSeek** | `api.deepseek.com` | `deepseek-v4-pro` | 0.5 |
+| **OpenAI** | `api.openai.com/v1` | `gpt-4o` | 0.5 |
+| **Anthropic** | `api.anthropic.com` | `claude-3-5-sonnet-20240620` | 0.5 |
+| **Google** | `generativelanguage.googleapis.com/v1` | `gemini-2.0-flash-exp` | 0.5 |
+| **Mistral** | `api.mistral.ai/v1` | `mistral-large-latest` | 0.5 |
+| **xAI** | `api.x.ai/v1` | `grok-4` | 0.7 |
+| **Cerebras** | `api.cerebras.ai/v1` | `gpt-oss-120b` | 0.5 |
+| **Fireworks** | `api.fireworks.ai/inference/v1` | `kimi-k2p5` | 0.5 |
+| **Nebius** | `api.studio.nebius.com/v1` | `openai/gpt-oss-120b` | 0.3 |
 
-### Fournisseurs LLM : configuration et modèles
+### Fournisseurs de passerelles / de proxys
 
-Cette partie de Fournisseurs LLM décrit le comportement produit, les points d’entrée et les limites d’implémentation. Les boutons, commandes, clés et extensions restent des contrats stables.
+| Fournisseur | Base par défaut URL | Modèle par défaut | Notes |
+|----------|-----------------|---------------|-------|
+| **OpenRouter** | `openrouter.ai/api/v1` | `anthropic/claude-3.7-sonnet` | Ajoute les en-têtes `HTTP-Referer` + `X-Title` |
+| **GitHub Models** | `models.github.ai/inference` | `gpt-4o-mini` | Ajoute l’en-tête `X-GitHub-Api-Version` |
+| **AIHubMix** | `aihubmix.com/v1` | `gpt-4o-mini` | Ajoute l’en-tête `APP-Code` |
+| **PPIO** | `api.ppinfra.com/v3/openai` | `qwen/qwen3-32b` | |
+| **Hugging Face** | `router.huggingface.co/v1` | `openai/gpt-oss-120b` | |
+| **Vercel AI Gateway** | `ai-gateway.vercel.sh/v1` | `anthropic/claude-sonnet-4.5` | |
+| **Requesty** | `router.requesty.ai/v1` | `anthropic/claude-3-7-sonnet-latest` | |
+| **Together** | `api.together.xyz/v1` | `meta-llama/Meta-Llama-3.1-70B-Instruct-Turbo` | |
+| **LiteLLM** | `localhost:4000/v1` | `your-proxy-model` | Clé API optionnelle |
+| **Nouveau API** | `localhost:3000/v1` | `gpt-4.1` | Clé API optionnelle |
+| **OpenAI Compatible** | (configuré par l’utilisateur) | `your-model-id` | Point de terminaison personnalisé |
 
-### Fournisseurs LLM : configuration et modèles
+### Fournisseurs en Chine
 
-Cette partie de Fournisseurs LLM décrit le comportement produit, les points d’entrée et les limites d’implémentation. Les boutons, commandes, clés et extensions restent des contrats stables.
+| Fournisseur | Base par défaut URL | Modèle par défaut | Notes |
+|----------|-----------------|---------------|-------|
+| **Qwen** | `dashscope.aliyuncs.com/compatible-mode/v1` | `qwen3-235b-a22b` | Alibaba DashScope |
+| **Qwen Code** | `dashscope.aliyuncs.com/compatible-mode/v1` | `qwen3-coder-plus` | Axé sur la programmation |
+| **Doubao** | `ark.cn-beijing.volces.com/api/v3` | (ID d’endpoint requis) | ByteDance Volcengine |
+| **Moonshot** | `api.moonshot.cn/v1` | `kimi-k2-0905-preview` | Kimi |
+| **Xiaomi MiMo** | `api.xiaomimimo.com/v1` | `mimo-v2.5-pro` | |
+| **GLM** | `open.bigmodel.cn/api/paas/v4` | `glm-5` | Point de terminaison à Zhipu, en Chine |
+| **Z AI** | `api.z.ai/api/paas/v4` | `glm-5` | Zhipu, point de terminaison international |
+| **MiniMax** | `api.minimaxi.com/v1` | `MiniMax-M2.7` | |
+| **Baidu Qianfan** | `qianfan.baidubce.com/v2` | `ernie-4.5-turbo-32k` | |
+| **SiliconFlow** | `api.siliconflow.cn/v1` | `Qwen/QwQ-32B` | Plateforme d’hébergement de modèles |
+| **Huawei Cloud MaaS** | `api.modelarts-maas.com/v1` | `DeepSeek-V3` | |
 
-### Fournisseurs LLM : configuration et modèles
+**Doubao nécessite un identifiant d’endpoint Ark** (format : `ep-xxxxxxxx-xxxx-xxxx`). Le placeholder par défaut doit être remplacé.
 
-Cette partie de Fournisseurs LLM décrit le comportement produit, les points d’entrée et les limites d’implémentation. Les boutons, commandes, clés et extensions restent des contrats stables.
+### Fournisseurs locaux
 
-## Sélection de modèle par tâche
+| Fournisseur | Base par défaut URL | Modèle par défaut | Notes |
+|----------|-----------------|---------------|-------|
+| **Ollama** | `localhost:11434/api` | `llama3` | Aucune clé API. Diffusion NDJSON. Découverte de modèles via `/api/tags` |
+| **LMStudio** | `localhost:1234/v1` | `local-model` | Envoie `"EMPTY"` en tant que token porteur. Découverte compatible avec OpenAI |
+| **OVMS** | `localhost:8000/v3` | `openvino-model` | Serveur de modèles OpenVINO |
+| **Azure OpenAI** | (configuré par l’utilisateur) | `gpt-4o` | Nom du déploiement dans URL. En-tête `api-key` |
 
-Cette partie de Fournisseurs LLM décrit le comportement produit, les points d’entrée et les limites d’implémentation. Les boutons, commandes, clés et extensions restent des contrats stables.
+## Sélection du modèle par tâche
 
-### Fournisseurs LLM : workflows et tâches
+Notemd prend en charge un fournisseur et un modèle indépendants pour chaque tâche. Activez-le avec `useMultiModelSettings: true`.
 
-Cette partie de Fournisseurs LLM décrit le comportement produit, les points d’entrée et les limites d’implémentation. Les boutons, commandes, clés et extensions restent des contrats stables.
+### Tâches disponibles
 
-### Fournisseurs LLM : explication principale
+| Tâche | Clé des paramètres | Fournisseur par défaut |
+|------|-------------|-----------------|
+| Ajouter des liens (insertion de lien wiki) | `addLinksProvider` / `addLinksModel` | DeepSeek |
+| Recherche (recherche sur le web + résumé) | `researchProvider` / `researchModel` | DeepSeek |
+| Générer à partir du titre | `generateTitleProvider` / `generateTitleModel` | DeepSeek |
+| Traduction | `translateProvider` / `translateModel` | DeepSeek |
+| Génération de diagrammes | `summarizeToMermaidProvider` / `Model` | DeepSeek |
+| Extraction de concepts | `extractConceptsProvider` / `Model` | DeepSeek |
+| Extraction du texte original | `extractOriginalTextProvider` / `Model` | DeepSeek |
 
-Cette partie de Fournisseurs LLM décrit le comportement produit, les points d’entrée et les limites d’implémentation. Les boutons, commandes, clés et extensions restent des contrats stables.
+### Ordre de résolution
 
-### Fournisseurs LLM : configuration et modèles
+1. Si `useMultiModelSettings` est activé → utilisez le fournisseur et le modèle spécifiques à la tâche
+2. Si la surcharge du modèle de tâche est vide → revenir au modèle par défaut du fournisseur
+3. Si le fournisseur de tâches est invalide → passer par le `activeProvider` global
+4. Si `useMultiModelSettings` est désactivé → toutes les tâches utilisent le `activeProvider` global
 
-La configuration de Fournisseurs LLM se fait dans les paramètres Notemd. Provider, modèle, sortie, langue et traitement par lots interagissent; identifiez si le changement touche le fichier courant, un dossier ou un workflow.
+### Configurations recommandées
 
-## Architecture des appels API
+```
+# Researcher: power for research, cheap for everything else
+activeProvider: DeepSeek
+extractConceptsProvider: DeepSeek
+researchProvider: OpenAI        # GPT-4o for better research quality
+summarizeToMermaidProvider: DeepSeek
 
-Cette partie de Fournisseurs LLM décrit le comportement produit, les points d’entrée et les limites d’implémentation. Les boutons, commandes, clés et extensions restent des contrats stables.
+# Privacy-first: local only
+activeProvider: Ollama
+addLinksProvider: Ollama
+extractConceptsProvider: Ollama
+
+# Budget bilingual
+activeProvider: DeepSeek
+translateProvider: Google      # Gemini Flash for translation
+researchProvider: SiliconFlow  # Cheaper China-based routing
+```
+
+## API Architecture d’appel
 
 ### Couches de transport
 
-Cette partie de Fournisseurs LLM décrit le comportement produit, les points d’entrée et les limites d’implémentation. Les boutons, commandes, clés et extensions restent des contrats stables.
+1. **Obsidian `requestUrl`** — principal (préinstallé, fonctionne sur toutes les plateformes)
+2. **Desktop HTTP** — Modules Node.js `http`/`https` (transmission en flux continu + requêtes longues)
+3. **Web `fetch`** — solution de secours en cas d’impossibilité d’utiliser les modules Node.js
 
-### Logique de nouvelle tentative
+Le plugin bascule automatiquement entre les transports en cas d’erreurs de réseau temporaires.
 
-Cette partie de Fournisseurs LLM décrit le comportement produit, les points d’entrée et les limites d’implémentation. Les boutons, commandes, clés et extensions restent des contrats stables.
+### Logique de tentative
 
-### Cache des réponses
+- **Mode normal** (`enableStableApiCall: false`) : Une seule tentative. En cas d’échec temporaire, il passe automatiquement à une tentative de récupération stable.
+- **Mode de tentative stable** (`enableStableApiCall: true`) : Jusqu’à 4 tentatives (1 + 3 réessais) avec des intervalles de 5 secondes.
+- **Erreurs transitoires déclenchant une tentative de réessai** : `err_connection_closed`, `err_connection_reset`, `err_timed_out`, `econnreset`, `econnaborted`, `etimedout`, `socket hang up`, `network request failed`
+- **Non reproductible** : HTTP 400, 401, 403, 404
 
-Cette partie de Fournisseurs LLM décrit le comportement produit, les points d’entrée et les limites d’implémentation. Les boutons, commandes, clés et extensions restent des contrats stables.
+### Mémorisation des réponses
 
-### Fournisseurs LLM : configuration et modèles
+Cache LRU en mémoire de 5 minutes, indexé par fournisseur + modèle + température + prompt + contenu. Les requêtes identiques ultérieures dans les 5 minutes renvoient instantanément les résultats en cache.
 
-Cette partie de Fournisseurs LLM décrit le comportement produit, les points d’entrée et les limites d’implémentation. Les boutons, commandes, clés et extensions restent des contrats stables.
+### Gestion du modèle de raisonnement
 
-### Estimation des tokens
+Les modèles qui ne prennent pas en charge le rôle `system` (DeepSeek R1, OpenAI o1/o3/o4/gpt-5) combinent automatiquement les prompts système et utilisateur en un seul message utilisateur.
 
-Cette partie de Fournisseurs LLM décrit le comportement produit, les points d’entrée et les limites d’implémentation. Les boutons, commandes, clés et extensions restent des contrats stables.
+Spécifique à DeepSeek : `thinkingEnabled` ajoute `{ thinking: { type: 'enabled' } }` à la requête. `reasoningEffort` (faible/moyen/haut) est transmis sous la forme de `reasoning_effort`. Vérifie que le nombre maximal de tokens de sortie soit ≥ 8000 lorsque la réflexion est activée.
 
-## Découverte des modèles
+### Estimation de token
 
-Cette partie de Fournisseurs LLM décrit le comportement produit, les points d’entrée et les limites d’implémentation. Les boutons, commandes, clés et extensions restent des contrats stables.
+`estimateTokens(text)`: `Math.ceil(text.length / 4)` — heuristique de 4 caractères par token. Utilisée pour appliquer `maxResearchContentTokens` avant d’envoyer vers LLM.
 
-## Démarrage rapide
+Aucun suivi des coûts n’est implémenté.
 
-Cette partie de Fournisseurs LLM décrit le comportement produit, les points d’entrée et les limites d’implémentation. Les boutons, commandes, clés et extensions restent des contrats stables.
+## Découverte de modèles
 
-## Étapes suivantes
+| Mode | Fournisseurs | Point d’extrémité |
+|------|-----------|----------|
+| `ollama-tags` | Ollama | `/api/tags` |
+| `google-models` | Google | Liste des modèles API |
+| `anthropic-models` | Anthropic | Liste des modèles API |
+| `openai-compatible-models` | DeepSeek, Qwen, Mistral, etc. | `/v1/models` |
+| `openrouter-models` | OpenRouter | Liste des modèles API |
+| `github-models` | GitHub Models | Inférence API |
+| `none` | Azure OpenAI | Désactivé (nécessite un nom de déploiement) |
 
-Pour continuer, choisissez la page qui correspond directement à votre chaîne de travail: Provider, fonction principale, traitement par lots, dépannage ou export de diagrammes.
+## Début rapide
+
+1. **Choisissez un fournisseur** — DeepSeek (Chine), OpenAI (International), ou Ollama (Local/Gratuit)
+2. **Appuyez sur la touche API** — Paramètres → Notemd → Fournisseur → Clé API
+3. **Tester la connexion** — Cliquez sur le bouton de test
+4. **Optionnel : Modèles par tâche** — Activer `useMultiModelSettings` et les configurer individuellement
+
+Pour Ollama : aucune clé API n’est nécessaire. Assurez-vous simplement que `ollama serve` est en cours d’exécution.
+
+---
+
+## Prochaines étapes
+
+- 📝 [Notes de concept](/docs/features/concept-notes) — Utilise un modèle d’extraction par tâche
+- 🎨 [Diagrammes](/docs/features/diagrams) — Utilise le modèle de diagramme par tâche
+- 🔍 [Recherche](/docs/features/research) — Utilise un modèle spécifique à la recherche
+- ⚙️ [Configuration](/docs/getting-started/configuration) — Référence complète des paramètres

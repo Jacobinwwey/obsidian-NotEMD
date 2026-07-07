@@ -1,39 +1,67 @@
 ---
 id: openai
 title: OpenAI
-description: Notemd에서 OpenAI의 목적, 설정, 워크플로 경계와 일반적인 점검 항목을 설명합니다.
+description: OpenAI(GPT-4, GPT-4o)를 설정하세요.
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [openai, gpt-4o, provider, configuration]
+concepts: [OpenAI, GPT-4o, API Configuration]
+citations:
+  - title: OpenAI API
+    url: https://platform.openai.com
+  - title: GPT-4
+    url: https://openai.com/gpt-4
 ---
 
 import TLDR from '@site/src/components/TLDR';
 
-# OpenAI
+# OpenAI 제공업체
 
 <TLDR>
-**요약：** Notemd에서 OpenAI의 목적, 설정, 워크플로 경계와 일반적인 점검 항목을 설명합니다. 아래의 명령, 설정 키, 파일 확장자, Provider 이름은 플러그인 UI, CLI, 로그와 정확히 대응하도록 영어로 유지합니다.
+**OpenAI는 공유된 OpenAI와 호환되는 전송 방식을 사용합니다.** 현재 기본 설정은 `gpt-4o`, `https://api.openai.com/v1`, `temperature: 0.5` 및 `models-then-chat` 연결 테스트로 지정되어 있습니다. 정확한 필드 의미가 필요할 때는 이 페이지를 사용하고, 카테고리 수준의 선택을 위해서는 [LLM 제공업체](/docs/providers/overview) 개요를 참조하십시오.
+
+이것은 [Obsidian AI 지식 관리 가이드](/docs/pillar-ai-knowledge)의 일부입니다.
 </TLDR>
 
-## 설정
+## 설치
 
-OpenAI 설정은 Notemd 설정 화면에서 합니다. Provider, 모델, 출력 경로, 언어, 일괄 처리는 서로 연결되어 있으므로 현재 파일, 폴더 작업, 워크플로 중 어디에 영향을 주는지 확인하세요.
+OpenAI API 키를 생성하고, Notemd 설정에 `OpenAI` 공급자 프로필을 추가하세요. 의도적으로 OpenAI와 호환되는 게이트웨이를 지정하지 않는 한 기본 Base URL를 그대로 사용하세요. 모델 필드는 일반적인 작업의 경우 `gpt-4o`에 그대로 두거나, 계정에서 호출할 수 있는 다른 OpenAI 모델 ID로 대체할 수 있습니다.
 
-## 엔드포인트와 인증
+비용 관리를 위해 작업별 모델을 활용하세요: 연구, 개념 추출, 장문 리구성에는 더 강력한 모델을 사용하고, 번역, 링크 제안, 짧은 요약에는 더 저렴하거나 빠른 모델을 사용하세요.
 
-OpenAI의 이 부분은 제품 동작, 사용 진입점, 엔지니어링 경계를 설명합니다. UI 버튼, 명령 이름, 설정 키, 확장자는 안정적인 계약으로 봅니다.
+## 엔드포인트 및 인증
 
-## 모델 검색
+| 필드 | 현재 프리셋 |
+|-------|----------------|
+| 전송 | `openai-compatible` |
+| API 키 | 필수 |
+| 베이스 URL | `https://api.openai.com/v1` |
+| 기본 모델 | `gpt-4o` |
+| 온도 | `0.5` |
+| 연결 테스트 | `/models`, 그 다음 `/chat/completions` |
 
-OpenAI의 이 부분은 제품 동작, 사용 진입점, 엔지니어링 경계를 설명합니다. UI 버튼, 명령 이름, 설정 키, 확장자는 안정적인 계약으로 봅니다.
+Notemd는 `chat/completions`나 `models`을 추가하기 전에 OpenAI와 호환되는 기본 URLs를 정규화합니다. Base URL에는 뒤에 `/chat/completions`가 오지 않도록 해야 하며, 그렇지 않으면 경로가 중복됩니다.
+
+## 모델 발견
+
+OpenAI은 일반적인 OpenAI와 호환되는 모델 발견 경로를 사용합니다. 설정 UI은 먼저 `/v1/models`에게 요청한 다음, 가벼운 채팅 요청을 통해 선택된 모델을 검증합니다. 모델 발견에 실패하더라도 채팅이 여전히 작동한다면, 사용 중인 키에 모델 목록 접근 권한이 있는지 또는 게이트웨이가 모델 목록 표시를 차단하고 있는지 확인해 보세요.
+
+추론 모델은 프로토콜의 특수한 경우로 취급됩니다: Notemd는 시스템 및 사용자 입력 내용을 결합하여 OpenAI 추론 ID를 생성하며, 이때 별도의 `system` 역할은 허용되지 않습니다. 또한 제공자 정의가 지원하는 경우에만 `reasoningEffort`이 노출됩니다.
 
 ## 문제 해결
 
-이 절은 OpenAI의 일반적인 실패 원인을 구분합니다. Notemd 진단 출력, Provider HTTP 상태, 모델 이름, 네트워크, 속도 제한을 먼저 확인하세요.
+- `401` 또는 `403`: 키, 프로젝트 접근 권한, 결제 상태, 그리고 선택된 모델이 해당 키에 대해 활성화되어 있는지 확인합니다.
+- `404` 채팅에서: Base URL는 보통 잘못되어 있거나 이미 `/chat/completions`가 포함되어 있습니다.
+- 문서에는 모델이 표시되지만 선저에서는 보이지 않습니다. model-list 접근과 chat 접근은 별도의 오류 지점입니다. 프로바이더 프로필에서 정확한 모델 ID를 직접 테스트해 보세요.
+- 추론 모델이 메시지를 거부합니다: OpenAI 추론 처리 경로에 해당하는 모델 ID를 사용하거나, 추론 기능이 없는 채팅 모델로 전환하십시오.
 
-## 사용할 때
+## 언제 사용할까요?
 
-OpenAI의 이 부분은 제품 동작, 사용 진입점, 엔지니어링 경계를 설명합니다. UI 버튼, 명령 이름, 설정 키, 확장자는 안정적인 계약으로 봅니다.
+가장 예측 가능한 기본 호스팅 경로가 필요하거나 `/v1/models` 발견이 중요하거나, 워크플로우가 OpenAI 추론 모델의 의미 체계에 의존하는 경우 OpenAI을 사용하세요. 라우팅, 개인정보 보호, 비용 관리가 직접적인 OpenAI API 동작보다 더 중요한 경우에는 게이트웨이나 로컬 제공자를 선호하세요.
+
+---
 
 ## 다음 단계
 
-다음에는 현재 작업 흐름과 직접 연결된 Provider 설정, 핵심 기능, 일괄 처리, 문제 해결, 다이어그램 내보내기 문서를 우선 보세요.
+- [LLM 제공업체](/docs/providers/overview) -- 전체 설정, 작업별 모델, 재시도 로직
+- [문제 해결](/docs/advanced/troubleshooting) -- 401/403 및 속도 제한 오류 수정

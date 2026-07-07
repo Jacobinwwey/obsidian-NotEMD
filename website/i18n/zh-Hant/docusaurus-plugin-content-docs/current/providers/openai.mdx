@@ -1,39 +1,67 @@
 ---
 id: openai
 title: OpenAI
-description: 說明 OpenAI 在 Notemd 中的用途、設定、工作流程邊界與常見排查路徑。
+description: 設定 OpenAI（GPT-4、GPT-4o）
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [openai, gpt-4o, provider, configuration]
+concepts: [OpenAI, GPT-4o, API Configuration]
+citations:
+  - title: OpenAI API
+    url: https://platform.openai.com
+  - title: GPT-4
+    url: https://openai.com/gpt-4
 ---
 
 import TLDR from '@site/src/components/TLDR';
 
-# OpenAI
+# OpenAI 提供服務商
 
 <TLDR>
-**本頁說明：** 說明 OpenAI 在 Notemd 中的用途、設定、工作流程邊界與常見排查路徑。 以下命令、設定鍵、檔案副檔名與 Provider 名稱保留英文，以便和外掛介面、CLI 與日誌逐一對應。
+**OpenAI 使用與 OpenAI 相容的共用傳輸方式。** 目前的預設值為 `gpt-4o`、`https://api.openai.com/v1`、`temperature: 0.5`，以及 `models-then-chat` 連線測試。當您需要精確的欄位語意時，請使用此頁面；若要進行類別層級的選擇，請參考 [LLM 提供商](/docs/providers/overview) 的概覽。
+
+這是[Obsidian AI知識管理指南](/docs/pillar-ai-knowledge)的一部分。
 </TLDR>
 
-## 設置
+## 安裝
 
-OpenAI 的設定應從 Notemd 設定入口完成。Provider、模型、輸出路徑、語言與批次處理不是彼此獨立的開關；修改前應確認它影響目前檔案、資料夾任務或一鍵工作流程。
+建立一個 OpenAI API 金鑰，在 Notemd 設定中加入 `OpenAI` 提供者設定檔，並保持預設的 Base URL，除非您刻意要連接到支援 OpenAI 的網關。模型欄位在一般用途時可保留為 `gpt-4o`，或改用您的帳戶能呼叫的其他 OpenAI 模型 ID。
 
-## 端点與鑑權
+運用專案特定的模型來控制成本：將更強大的模型用於研究、概念抽取及長篇內容的重構；則使用較便宜或速度較快的模型來處理翻譯、連結建議及簡短摘要。
 
-OpenAI 的這一部分說明產品行為、使用入口與工程邊界。介面按鈕、命令名稱、設定鍵與檔案副檔名是穩定契約，翻譯不會改變實際執行名稱。
+## 端點與認證
 
-## 模型發現
+| 欄位 | 目前的預設值 |
+|-------|----------------|
+| 運輸 | `openai-compatible` |
+| API 金鑰 | 必填項目 |
+| 基底 URL | `https://api.openai.com/v1` |
+| 預設模型 | `gpt-4o` |
+| 溫度 | `0.5` |
+| 連線測試 | `/models`，接著是 `/chat/completions` |
 
-OpenAI 的這一部分說明產品行為、使用入口與工程邊界。介面按鈕、命令名稱、設定鍵與檔案副檔名是穩定契約，翻譯不會改變實際執行名稱。
+Notemd會在附加 `chat/completions` 或 `models` 之前，將與 OpenAI 相容的基礎 URLs 進行標準化處理。在 Base URL 中不要包含尾隨的 `/chat/completions`，否則會造成路徑重複。
 
-## 故障排查
+## 模型探索
 
-本節用於定位 OpenAI 的常見失敗模式。優先查看 Notemd 設定中的診斷輸出、Provider 回傳的 HTTP 狀態、模型名稱、網路連線與是否觸發限流。
+OpenAI 使用通用的 OpenAI 相容型模型探索路徑。設定 UI 會先詢問 `/v1/models`，再透過簡易的聊天請求來驗證所選模型。如果模型探索失敗但聊天功能仍正常，請檢查您的金鑰是否具有模型列表的權限，或是是否有閘道阻擋了模型列表的顯示。
 
-## 适用场景
+推理模型被視為協定中的邊緣情況： Notemd 會將系統與使用者的提示內容合併，以產生用於 OpenAI 推理的 ID，這些 ID 會拒絕單獨的 `system` 角色，且僅在供應商定義支援時才會暴露 `reasoningEffort`。
 
-OpenAI 的這一部分說明產品行為、使用入口與工程邊界。介面按鈕、命令名稱、設定鍵與檔案副檔名是穩定契約，翻譯不會改變實際執行名稱。
+## 故障排除
 
-## 下一步
+- `401` 或 `403`：驗證金鑰、專案存取權、帳單狀態，以及所選模型是否已為該金鑰啟用。
+- 聊天中的 `404`：Base URL 通常都是錯誤的，或者已經包含了 `/chat/completions`。
+- 模型雖出現在文件中，但並不在選擇器中：model-list 存取與 chat 存取是兩個不同的故障點；請在供應商設定檔中手動測試正確的模型 ID。
+- 推理模型拒絕處理訊息：請使用屬於 OpenAI 推理處理路徑的模型 ID，或改用非推理型聊天模型。
 
-繼續閱讀相鄰頁面時，優先選擇與目前任務鏈直接相關的主題：Provider 設定、核心功能、批次處理、疑難排解或圖表匯出。
+## 何時使用
+
+當您需要最可預測的預設託管路徑、 `/v1/models` 的發現功能很重要，或工作流程取決於 OpenAI 推理模型語意時，請使用 OpenAI。若在路由、隱私或成本控制方面比直接的 OpenAI API 行為更為重要，則建議選用閘道或本地供應商。
+
+---
+
+## 接下來的步驟
+
+- [LLM 提供商](/docs/providers/overview) -- 完整的設定、每個任務的模型，以及重試邏輯
+- [故障排除](/docs/advanced/troubleshooting) -- 解決 401/403 與速率限制錯誤

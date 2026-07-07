@@ -1,9 +1,16 @@
 ---
 id: local
 title: Modèles locaux
-description: Explique le rôle de Modèles locaux dans Notemd, sa configuration, ses limites de workflow et les vérifications courantes.
+description: Configurez Ollama et les LLM locaux
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [local, ollama, lmstudio, provider, configuration, offline]
+concepts: [Local Models, Ollama, LMStudio, Offline]
+citations:
+  - title: Ollama
+    url: https://ollama.com
+  - title: LM Studio
+    url: https://lmstudio.ai
 ---
 
 import TLDR from '@site/src/components/TLDR';
@@ -11,29 +18,46 @@ import TLDR from '@site/src/components/TLDR';
 # Modèles locaux
 
 <TLDR>
-**Résumé：** Explique le rôle de Modèles locaux dans Notemd, sa configuration, ses limites de workflow et les vérifications courantes. Les commandes, clés de configuration, extensions et noms de Provider ci-dessous restent en anglais afin de correspondre exactement à l’interface, au CLI et aux journaux.
+**Les fournisseurs locaux empêchent que le contenu des notes ne soit stocké sur les API hébergés.** Le chemin local actuel couvre Ollama avec le transport natif `ollama` et LMStudio via le transport compatible avec OpenAI. Aucune clé API n’est requise pour aucun de ces chemins, mais le serveur local et le modèle doivent déjà être en cours d’exécution.
+
+Ceci fait partie du [Obsidian Guide de gestion des connaissances IA](/docs/pillar-ai-knowledge).
 </TLDR>
 
-## Mise en place
+## Installation
 
-La configuration de Modèles locaux se fait dans les paramètres Notemd. Provider, modèle, sortie, langue et traitement par lots interagissent; identifiez si le changement touche le fichier courant, un dossier ou un workflow.
+Pour Ollama, installez Ollama, téléchargez le modèle que vous souhaitez, lancez le serveur, et ajoutez un profil de fournisseur `Ollama` dans Notemd. Pour LMStudio, chargez un modèle sur le serveur local de LM Studio et ajoutez un profil de fournisseur `LMStudio`.
+
+Les modèles locaux sont des dépendances opérationnelles, et non simplement des paramètres. Notemd ne peut appeler que ce que le processus local expose, il faut donc vérifier le modèle local en dehors de Obsidian avant de déboguer le plugin.
 
 ## Point de terminaison et authentification
 
-Cette partie de Modèles locaux décrit le comportement produit, les points d’entrée et les limites d’implémentation. Les boutons, commandes, clés et extensions restent des contrats stables.
+| Fournisseur | Base URL | Modèle par défaut | Clé API | Notes |
+|----------|----------|---------------|---------|-------|
+| Ollama | `localhost:11434/api` | `llama3` | Pas requis | NDJSON streaming ; découverte de modèles via `/api/tags` |
+| LMStudio | `localhost:1234/v1` | `local-model` | Pas requis | Envoie `"EMPTY"` en tant que token porteur ; compatible avec OpenAI |
 
-## Découverte des modèles
+Ollama utilise le chemin natif `/chat` situé en dessous de son Base URL. LMStudio suit la route `chat/completions` compatible avec OpenAI et attend un modèle chargé sur le serveur local.
 
-Cette partie de Modèles locaux décrit le comportement produit, les points d’entrée et les limites d’implémentation. Les boutons, commandes, clés et extensions restent des contrats stables.
+## Découverte de modèles
 
-## Dépannage
+Ollama utilise le mode de découverte `ollama-tags` et affiche les étiquettes téléchargées localement. LMStudio utilise la découverte de modèles compatible avec OpenAI lorsque son serveur expose `/v1/models`.
 
-Cette section sert à diagnostiquer les échecs courants liés à Modèles locaux. Vérifiez d’abord les diagnostics Notemd, le statut HTTP du Provider, le nom du modèle, le réseau et les limites de débit.
+Si la découverte ne renvoie rien, c’est généralement un problème d’état du serveur local : le modèle n’a pas été récupéré ni chargé, ou bien le serveur est lié à un hôte/port différent de celui indiqué dans le profil.
 
-## Quand l’utiliser
+## Résolution de problèmes
 
-Cette partie de Modèles locaux décrit le comportement produit, les points d’entrée et les limites d’implémentation. Les boutons, commandes, clés et extensions restent des contrats stables.
+- Connexion refusée : lancez Ollama ou LM Studio et vérifiez le port configuré.
+- Modèle non trouvé : téléchargez la balise Ollama ou chargez le modèle LM Studio avant de tester.
+- Sortie lente : réduisez la taille du contexte, utilisez un modèle local plus petit, ou transférez les tâches gourmandes à un fournisseur hébergé.
+- Réponses vides ou mal formatées : assurez-vous que le profil du fournisseur sélectionné correspond au protocole du serveur local ; Ollama et LMStudio ne sont pas interchangeables.
 
-## Étapes suivantes
+## Quand l'utiliser
 
-Pour continuer, choisissez la page qui correspond directement à votre chaîne de travail: Provider, fonction principale, traitement par lots, dépannage ou export de diagrammes.
+Utilisez des fournisseurs locaux pour les coffres-forts privés, le travail hors ligne ou les tâches répétitives peu coûteuses. Ne supposez pas que le mode local soit automatiquement supérieur pour la synthèse de recherches ou le raisonnement prolongé ; la qualité du modèle et les limites matérielles constituent l’équilibre à trouver.
+
+---
+
+## Prochaines étapes
+
+- [LLM Fournisseurs](/docs/providers/overview) -- Configuration complète et configuration du modèle par tâche
+- [Dépannage](/docs/advanced/troubleshooting) -- Corriger les erreurs connection-refused lorsque le serveur local n’est pas en cours d’exécution

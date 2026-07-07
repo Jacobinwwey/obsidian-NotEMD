@@ -16,124 +16,118 @@ import TLDR from '@site/src/components/TLDR';
 # 安装
 
 <TLDR>
-**2 分钟内安装 Notemd。** 推荐方式是 Obsidian Community Plugins，一键安装；也可以从 GitHub Releases 手动安装。需要 Obsidian 0.15.0+。支持 Windows、macOS、Linux、iOS 和 Android。插件无外部依赖，MIT 许可。
+**只需2分钟即可安装 Notemd。** 提供两种方式：(1) 使用 Obsidian 社区插件（推荐，一键安装），或 (2) 通过 GitHub Releases 进行手动安装。需要 Obsidian 0.15.0+ 版本。支持 Windows、macOS、Linux、iOS 和 Android 系统，无外部依赖。已有4000多次下载，采用 MIT 许可证。
 </TLDR>
 
-## 方法 1：社区插件（推荐）
+## 方法1：社区插件（推荐）
 
-1. 打开 **Obsidian Settings**（齿轮图标，或 `Ctrl/Cmd + ,`）
-2. 进入 **Community plugins**
-3. 点击 **Browse**
-4. 搜索 **“Notemd”**
-5. 点击 **Install**
-6. 点击 **Enable**
+1. 打开**Obsidian 设置**（齿轮图标或 `Ctrl/Cmd + ,`）
+2. 导航至**社区插件**
+3. 点击**浏览**
+4. 搜索 **“Notemd"**
+5. 点击**安装**
+6. 点击**启用**
 
-完成后，左侧边栏会出现 Notemd 图标。
+**完成！** 您会在左侧侧边栏中看到 Notemd 图标。
 
-## 方法 2：手动安装
+## 方法2：手动安装
 
-### 准备条件
-
+### 先决条件
 - Obsidian 0.15.0 或更高版本
-- Git（可选，仅在克隆仓库时需要）
+- Git（可选，用于克隆）
 
-### 安装：工作流与任务
+### 步骤
 
-1. 从 [GitHub Releases](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/latest) 下载：
+1. 从 [GitHub Releases](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/latest) **下载文件**：
    - `main.js`
    - `styles.css`
    - `manifest.json`
 
-2. 找到 vault 的插件目录：
-
-   ```text
+2. **找到您的保险库插件文件夹：**
+   ```
    <your-vault>/.obsidian/plugins/
    ```
 
-   如果 `plugins` 文件夹不存在，先创建它。
+如果 `plugins` 文件夹不存在，请创建它。
 
-3. 创建 Notemd 插件目录：
-
-   ```text
+3. **创建 Notemd 文件夹：**
+   ```
    <your-vault>/.obsidian/plugins/notemd/
    ```
 
-4. 把三个文件复制到 `notemd` 文件夹。
+4. 将这三个文件复制到 `notemd` 文件夹中。
 
-5. 重新加载 Obsidian：
-   - 按 `Ctrl/Cmd + R`，或
+5. **重新加载 Obsidian：**
+   - 按下 `Ctrl/Cmd + R`，或
    - 重启 Obsidian
 
-6. 启用插件：
-   - Settings → Community plugins
-   - 在列表中找到 “Notemd”
-   - 打开开关
+6. **启用插件：**
+   - 设置 → 社区插件
+   - 在列表中查找“Notemd”
+   - 打开它。
 
-## 替代方式：通过 BRAT 安装
+## 备选方案：通过 BRAT 安装
 
-如果你使用 [BRAT plugin](https://github.com/TfTHacker/obsidian42-brat)：
+如果您使用 [BRAT 插件](https://github.com/TfTHacker/obsidian42-brat)：
 
 1. 打开 BRAT 设置
-2. 点击 “Add Beta plugin”
+2. 点击“添加测试版插件”
 3. 输入：`Jacobinwwey/obsidian-NotEMD`
-4. 点击 “Add Plugin”
-5. 在 Community plugins 中启用 Notemd
+4. 点击“添加插件”
+5. 在社区插件中启用 Notemd
 
-## 安装：后续建议
+## 验证
 
-安装后可以这样确认 Notemd 正常工作：
+安装完成后，验证 Notemd 是否正常工作：
 
 1. 打开任意笔记
-2. 在编辑器中右键
-3. 应能看到 Notemd 命令，例如：
-   - “Process file (add links)”
-   - “Extract concepts”
-   - “Research and summarize”
+2. 在编辑器中右键点击
+3. 你应该会看到类似 Notemd 的命令：
+   - “处理文件（添加链接）”
+   - “提取概念”
+   - “进行研究并总结”
 
-## 下一步
+## 后续步骤
 
-- **配置 LLM provider**：[快速开始 →](./quick-start)
-- **排查问题**：[Troubleshooting →](https://jacobinwwey.github.io/obsidian-NotEMD/docs/advanced/troubleshooting)
+- **配置 LLM 提供商：** [快速开始 →](./quick-start)
+- **故障排除：** [常见问题 →](../advanced/troubleshooting)
 
 ## 系统要求
 
 | 平台 | 版本 | 状态 |
-|---|---|---|
-| **Obsidian** | 0.15.0+ | Required |
-| **Windows** | 7+ | Supported |
-| **macOS** | 10.15+ | Supported |
-| **Linux** | Any | Supported |
-| **iOS** | 15+ | Supported |
-| **Android** | 5+ | Supported |
+|----------|---------|--------|
+| **Obsidian** | 0.15.0+ | 必需 |
+| **Windows** | 7+ | ✅ 已支持 |
+| **macOS** | 10.15+ | ✅ 已支持 |
+| **Linux** | 任意 | ✅ 已支持 |
+| **iOS** | 15+ | ✅ 已支持 |
+| **Android** | 5+ | ✅ 已支持 |
 
 ## 卸载
 
-移除 Notemd：
+要删除 Notemd：
 
-1. Settings → Community plugins
-2. 找到 “Notemd”
-3. 点击移除图标
-4. 如需彻底清理，可删除插件目录：`<vault>/.obsidian/plugins/notemd/`
+1. 设置 → 社区插件
+2. 查找“Notemd”
+3. 点击 ❌ 图标
+4. 如需，可删除插件文件夹：`<vault>/.obsidian/plugins/notemd/`
 
-你的笔记、概念笔记等数据不会被删除。
+您的数据（笔记、概念说明等）将保持原样，不会被修改。
 
-## 安装：核心说明
+## 正在更新
 
 ### 自动更新（推荐）
-
-Obsidian 会自动检查插件更新。有新版本时：
-
-1. Settings → Community plugins
-2. 点击 “Check for updates”
-3. 点击 Notemd 旁边的 “Update”
+Obsidian 会自动检查插件更新。当有新版本可用时：
+1. 设置 → 社区插件
+2. 点击“检查更新”
+3. 点击 Notemd 旁边的“更新”按钮
 
 ### 手动更新
-
-下载最新 release，替换插件目录中的三个文件。
+下载最新版本，然后替换插件文件夹中的三个文件。
 
 ## 获取帮助
 
-- [快速开始](./quick-start)
-- [FAQ](../faq)
-- [Discord Community](https://discord.gg/qnGgsQ9W)
-- [Report Issues](https://github.com/Jacobinwwey/obsidian-NotEMD/issues)
+- 📖 [快速入门指南](./quick-start)
+- ❓ [常见问题](../faq)
+- 💬 [Discord 社区](https://discord.gg/qnGgsQ9W)
+- 🐛 [报告问题](https://github.com/Jacobinwwey/obsidian-NotEMD/issues)

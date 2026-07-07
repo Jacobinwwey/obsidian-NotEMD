@@ -1,9 +1,16 @@
 ---
 id: troubleshooting
 title: Solución de problemas
-description: Explica el uso de Solución de problemas en Notemd, su configuración, límites de flujo de trabajo y comprobaciones habituales.
+description: Problemas comunes y soluciones
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [troubleshooting, errors, diagnostics, connection test]
+concepts: [Troubleshooting, Error Handling, Diagnostics]
+citations:
+  - title: Obsidian
+    url: https://obsidian.md
+  - title: Obsidian API
+    url: https://docs.obsidian.md
 ---
 
 import TLDR from '@site/src/components/TLDR';
@@ -11,65 +18,144 @@ import TLDR from '@site/src/components/TLDR';
 # Solución de problemas
 
 <TLDR>
-**Resumen：** Explica el uso de Solución de problemas en Notemd, su configuración, límites de flujo de trabajo y comprobaciones habituales. Los comandos, claves de configuración, extensiones y nombres de Provider siguientes se mantienen en inglés para coincidir exactamente con la interfaz, el CLI y los registros.
+**La mayoría de los problemas Notemd se clasifican en cuatro categorías: problemas clave API, conectividad de red, errores de autenticación (401/403) y límites de tasa (429).** La prueba de conexión integrada y el panel de diagnóstico permiten identificar rápidamente la causa raíz. Esta página abarca cada mensaje de error común, su causa y la solución correspondiente. Para problemas que no se mencionan aquí, infórmelos en GitHub Issues junto con los resultados de los diagnósticos.
+
+Esto forma parte de la [Obsidian Guía de Gestión del Conocimiento de IA](/docs/pillar-ai-knowledge).
 </TLDR>
 
-## Visión general
+## Resumen general
 
-Esta parte de Solución de problemas describe el comportamiento del producto, puntos de entrada y límites técnicos. Botones, comandos, claves y extensiones son contratos estables.
+Notemd depende de servicios externos: proveedores LLM y motores de búsqueda API; por lo tanto, la mayoría de los problemas surgen fuera del propio plugin. El panel de diagnóstico en la configuración ofrece una vista estructurada de la última llamada API, incluyendo la solicitud URL, el estado de respuesta y el cuerpo del error. Siempre revíselo primero antes de investigar más a fondo.
 
-## Solución de problemas: explicación principal
+## Cómo funciona: Diagnóstico
 
-Esta parte de Solución de problemas describe el comportamiento del producto, puntos de entrada y límites técnicos. Botones, comandos, claves y extensiones son contratos estables.
+### Prueba de conexión
 
-### Solución de problemas: solución de problemas
+Cada sección de configuración del proveedor cuenta con un botón **"Probar conexión"**. Al hacer clic en él, se envía una solicitud mínima API (generalmente una lista de modelos o una completación breve) y se informa si la operación tuvo éxito o si se produjo el error específico HTTP. Esta es la forma más rápida de verificar que su clave API y la base URL estén correctas.
 
-Esta parte de Solución de problemas describe el comportamiento del producto, puntos de entrada y límites técnicos. Botones, comandos, claves y extensiones son contratos estables.
+### Panel de Diagnóstico
 
-### Solución de problemas: explicación principal
+**Configuración --> Notemd --> Diagnóstico** muestra:
 
-Esta parte de Solución de problemas describe el comportamiento del producto, puntos de entrada y límites técnicos. Botones, comandos, claves y extensiones son contratos estables.
+| Campo | Contenido |
+|-------|---------|
+| Último proveedor | ¿Qué proveedor se llamó por última vez? |
+| Último modelo | ¿Qué modelo se llamó por última vez? |
+| Último estado | Código de estado HTTP o error de transporte |
+| Último error | Mensaje de error bruto desde el API |
+| Última solicitud URL | Contenido completo URL de la última solicitud (clave API redactada) |
+| Cuerpo de la última respuesta | Cuerpo de la respuesta truncado (primeros 500 caracteres) |
 
-## Solución de problemas: solución de problemas
+Copie la salida completa de diagnóstico al informar problemas en GitHub.
 
-Esta sección ayuda a diagnosticar fallos habituales de Solución de problemas. Revise primero los diagnósticos de Notemd, el estado HTTP del Provider, el nombre del modelo, la red y los límites de tasa.
+## Errores comunes
 
-### Solución de problemas: configuración y modelos
+### API Clave inválida o faltante
 
-Esta parte de Solución de problemas describe el comportamiento del producto, puntos de entrada y límites técnicos. Botones, comandos, claves y extensiones son contratos estables.
+**Síntoma:** HTTP 401 o "Se proporcionó una clave API incorrecta"
 
-### Solución de problemas: solución de problemas
+**Causa:** La clave API está faltando, contiene espacios en blanco o pertenece a un proveedor diferente.
 
-Esta sección ayuda a diagnosticar fallos habituales de Solución de problemas. Revise primero los diagnósticos de Notemd, el estado HTTP del Provider, el nombre del modelo, la red y los límites de tasa.
+**Solución:**
+1. Verificar que la clave no tenga espacios al principio ni al final
+2. Confirme que la clave coincide con el proveedor seleccionado (una clave OpenAI no funcionará con Anthropic).
+3. Verifique que su cuenta tenga créditos o una suscripción activa.
+4. Haga clic en **"Probar conexión"** para verificar
 
-### Solución de problemas: solución de problemas
+### Errores de red/conexión
 
-Esta parte de Solución de problemas describe el comportamiento del producto, puntos de entrada y límites técnicos. Botones, comandos, claves y extensiones son contratos estables.
+**Síntoma:** `ERR_CONNECTION_REFUSED`, `ERR_TIMED_OUT`, `Socket hang up`, `Network request failed`
 
-### Solución de problemas: solución de problemas
+**Causa:** El punto de extremo API no es accesible desde su máquina.
 
-Esta parte de Solución de problemas describe el comportamiento del producto, puntos de entrada y límites técnicos. Botones, comandos, claves y extensiones son contratos estables.
+**Solución:**
+1. Verifique su conexión a Internet.
+2. Si está detrás de un proxy o firewall, verifique que el dominio API no esté bloqueado
+3. Para Ollama: confirme que `ollama serve` está en ejecución (`ollama list` debe devolver modelos)
+4. Para LMStudio: confirme que el servidor está en ejecución en `localhost:1234`
+5. Pruebe un transporte diferente: los usuarios móviles deben asegurarse de que el transporte `requestUrl` esté activo
+6. Habilitar `enableStableApiCall` para la reintentación automática en errores transitorios
 
-### Solución de problemas: configuración y modelos
+### 403 Prohibido
 
-Esta parte de Solución de problemas describe el comportamiento del producto, puntos de entrada y límites técnicos. Botones, comandos, claves y extensiones son contratos estables.
+**Síntoma:** HTTP 403
 
-### Solución de problemas: explicación principal
+**Causa:** Su clave API es válida, pero no tiene permisos para el recurso solicitado.
 
-Esta parte de Solución de problemas describe el comportamiento del producto, puntos de entrada y límites técnicos. Botones, comandos, claves y extensiones son contratos estables.
+**Solución:**
+1. Algunos modelos requieren acceso especial (por ejemplo, GPT-4 a través de Azure necesita un nombre de despliegue).
+2. Algunos proveedores restringen los modelos según el nivel del plan: verifica tu cuenta
+3. Pueden aplicarse restricciones regionales (algunos proveedores en China bloquean IPs internacionales y viceversa).
+4. Verifique que el nombre del modelo esté escrito correctamente (por ejemplo, `gpt-4o` y no `gpt-4o-mini` cuando el modelo mini es todo lo que su plan permite).
 
-### Solución de problemas: configuración y modelos
+### Límite de tasa (429)
 
-Esta parte de Solución de problemas describe el comportamiento del producto, puntos de entrada y límites técnicos. Botones, comandos, claves y extensiones son contratos estables.
+**Síntoma:** HTTP 429 o "Se superó el límite de frecuencia"
+
+**Causa:** Demasiadas solicitudes en un corto período de tiempo.
+
+**Solución:**
+1. Reduce `batchConcurrency` a `1` o `2`
+2. Espera unos minutos antes de intentarlo de nuevo.
+3. Consulte la documentación sobre los límites de velocidad de su proveedor para su nivel de plan.
+4. Habilitar `enableStableApiCall` para la reintentación automática con retroceso temporal
+5. Considere cambiar a un proveedor con límites más altos (DeepSeek, Ollama)
+
+### Modelo no encontrado
+
+**Síntoma:** "Modelo no encontrado" o HTTP 404
+
+**Causa:** El nombre del modelo no existe en el proveedor seleccionado.
+
+**Solución:**
+1. Haga clic en **"Obtener lista de modelos"** para ver todos los modelos disponibles para su proveedor
+2. Algunos nombres de modelos cambian con el tiempo; verifica el nombre actual en la documentación del proveedor.
+3. Para Ollama: ejecute `ollama list` para ver los modelos descargados; solo están disponibles los modelos que se hayan descargado
+
+### Sin enlaces / Sin conceptos generados
+
+**Síntoma:** El comando se ejecuta pero no produce salida alguna
+
+**Causa:** El LLM devolvió una respuesta vacía o ilegible.
+
+**Solución:**
+1. Revisa el panel de diagnóstico para ver la respuesta real de LLM
+2. Pruebe un modelo más potente (algunos modelos pequeños tienen dificultades con la salida estructurada).
+3. Asegúrese de que la nota contenga suficiente contenido (más de 50 palabras).
+4. Revise su prompt personalizado en busca de instrucciones contradictorias
+5. Desactive temporalmente la supresión de sinónimos para ver si está filtrando de forma demasiado agresiva
+
+### Doubao Falta el ID del endpoint
+
+**Síntoma:** Error al usar el proveedor ByteDance Doubao
+
+**Causa:** Doubao requiere un ID de endpoint de Ark (formato: `ep-xxxxxxxx-xxxx-xxxx`) en lugar de un nombre de modelo.
+
+**Solución:** Reemplace el modelo de marcador de posición predeterminado con su ID de endpoint real de la consola de Volcengine.
 
 ## Configuración
 
-Solución de problemas se configura desde los ajustes de Notemd. Provider, modelo, salida, idioma y procesamiento por lotes se relacionan entre sí; confirme si el cambio afecta al archivo actual, carpetas o workflows.
+| Configuración de diagnóstico | Ubicación | Propósito |
+|--------------------|----------|---------|
+| **Prueba de conexión** | Ajustes --> Sección Proveedor | Verificar la clave API y la conectividad |
+| **Obtener lista de modelos** | Ajustes --> Sección Proveedor | Confirma qué modelos son accesibles |
+| `enableStableApiCall` | Ajustes --> Avanzado | Habilitar la reintentación con retroceso temporal |
+| `batchConcurrency` | Ajustes --> Lote | Controlar el paralelismo para evitar los límites de tasa |
 
-## Solución de problemas: solución de problemas
+## Cómo reportar problemas
 
-Esta parte de Solución de problemas describe el comportamiento del producto, puntos de entrada y límites técnicos. Botones, comandos, claves y extensiones son contratos estables.
+Si su problema no está cubierto anteriormente:
 
-## Siguientes pasos
+1. Abra **Configuración --> Notemd --> Diagnóstico**
+2. Copie toda la salida de diagnóstico
+3. Abre un problema en GitHub en [github.com/Jacobinwwey/obsidian-NotEMD/issues](https://github.com/Jacobinwwey/obsidian-NotEMD/issues)
+4. Incluir: versión Obsidian, versión Notemd, proveedor, modelo, salida de diagnóstico y pasos para reproducirlo
+5. Redacta tu clave API a partir de cualquier registro compartido
 
-Para continuar, elija la página que corresponda a su cadena de trabajo: Provider, función principal, procesamiento por lotes, solución de problemas o exportación de diagramas.
+---
+
+## Próximos pasos
+
+- [LLM Proveedores](/docs/providers/overview) -- Referencia completa de configuración de proveedores
+- [Procesamiento por lotes](/docs/advanced/batch-processing) -- Configuraciones de concurrencia y reintentos para operaciones grandes
+- [Custom Prompts](/docs/advanced/custom-prompts) -- Corregir el comportamiento inesperado de LLM ajustando los prompts

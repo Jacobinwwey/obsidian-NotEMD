@@ -1,9 +1,16 @@
 ---
 id: wiki-links
 title: Liens wiki
-description: Explique le rôle de Liens wiki dans Notemd, sa configuration, ses limites de workflow et les vérifications courantes.
+description: Génération automatique de liens wiki pour les concepts clés
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [wiki-links, linking, concepts, knowledge graph, Auto Link alternative, obsidian auto link, AI wiki-link]
+concepts: [Wiki-Links, Knowledge Graph, Concept Extraction, Synonym Suppression, Obsidian, Auto Link Alternative, AI Linking]
+citations:
+  - title: Obsidian
+    url: https://obsidian.md
+  - title: Auto Link Plugin
+    url: https://github.com/ov7a/obsidian-auto-link
 ---
 
 import TLDR from '@site/src/components/TLDR';
@@ -11,137 +18,302 @@ import TLDR from '@site/src/components/TLDR';
 # Liens wiki
 
 <TLDR>
-**Résumé：** Explique le rôle de Liens wiki dans Notemd, sa configuration, ses limites de workflow et les vérifications courantes. Les commandes, clés de configuration, extensions et noms de Provider ci-dessous restent en anglais afin de correspondre exactement à l’interface, au CLI et aux journaux.
+**Notemd ajoute automatiquement `[[wiki-links]]` aux concepts clés de vos notes.** Le LLM lit votre contenu, identifie les termes importants dans le contexte et insère des liens wiki au style Obsidian à chaque occurrence. Il crée éventuellement des fichiers de notes de concept avec des liens inversés. Il prend en charge la suppression des synonymes, la préservation de l’intégrité des liens en cas de renomage ou de suppression, ainsi qu’un mode d’extraction pur (sans modification de fichier). Contrairement à Auto Link qui ne correspond qu’aux titres de notes existants, Notemd utilise l’IA pour identifier de nouveaux concepts et créer des notes correspondantes. Cela fait partie du [Obsidian Guide de gestion des connaissances par IA](/docs/pillar-ai-knowledge).
 </TLDR>
 
-## Vue d’ensemble
+## Aperçu général
 
-Cette partie de Liens wiki décrit le comportement produit, les points d’entrée et les limites d’implémentation. Les boutons, commandes, clés et extensions restent des contrats stables.
+Le lien vers des wikis est la fonction principale de Notemd. Il transforme du texte brut en un graphe de connaissances interconnecté en :
 
-## Fonctionnement
+1. **Analyse de votre note** à l’aide d’un LLM
+2. **Identifier les concepts clés** (termes, personnes, méthodes, théories)
+3. **Insérer `[[wiki-links]]`** à chaque occurrence
+4. **Création de notes de concept** (facultatif) avec des liens inversés
 
-Cette partie de Liens wiki décrit le comportement produit, les points d’entrée et les limites d’implémentation. Les boutons, commandes, clés et extensions restent des contrats stables.
+## Comment ça marche
 
-### Liens wiki : workflows et tâches
+### Traiter
 
-Cette partie de Liens wiki décrit le comportement produit, les points d’entrée et les limites d’implémentation. Les boutons, commandes, clés et extensions restent des contrats stables.
+```mermaid
+graph LR
+    A[Your Note] --> B[LLM Analysis]
+    B --> C{Concepts Found}
+    C --> D[Insert Wiki-Links]
+    C --> E[Create Concept Notes]
+    D --> F[Updated Note]
+    E --> F
+    F --> G[Connected Knowledge Graph]
+```
 
 ### Exemple
 
-Cette partie de Liens wiki décrit le comportement produit, les points d’entrée et les limites d’implémentation. Les boutons, commandes, clés et extensions restent des contrats stables.
+**Avant :**
+```markdown
+Machine learning models use neural networks to learn patterns from data.
+The transformer architecture revolutionized natural language processing.
+```
+
+**Après :**
+```markdown
+[[Machine learning]] models use [[neural networks]] to learn patterns from data.
+The [[transformer architecture]] revolutionized [[natural language processing]].
+```
 
 ## Utilisation
 
-Cette partie de Liens wiki décrit le comportement produit, les points d’entrée et les limites d’implémentation. Les boutons, commandes, clés et extensions restent des contrats stables.
+### Basique : Ajouter des liens à la note actuelle
 
-### Liens wiki : explication principale
+1. Ouvrir une note
+2. Cliquez avec le bouton droit dans l’éditeur → **"Traiter le fichier (ajouter des liens)"**
+3. Attendez quelques secondes.
+4. Les concepts sont maintenant liés !
 
-Cette partie de Liens wiki décrit le comportement produit, les points d’entrée et les limites d’implémentation. Les boutons, commandes, clés et extensions restent des contrats stables.
+### Lot : Traiter plusieurs notes
 
-### Liens wiki : workflows et tâches
+1. Cliquez avec le bouton droit sur un dossier dans l’Explorateur de fichiers
+2. Sélectionnez **"Notemd: Dossier de traitement (ajouter des liens)"**
+3. Configurer :
+   - Concurrence (nombre de fichiers en parallèle)
+   - Écraser les liens existants (oui/non)
+4. Cliquez sur **Process**
 
-Cette partie de Liens wiki décrit le comportement produit, les points d’entrée et les limites d’implémentation. Les boutons, commandes, clés et extensions restent des contrats stables.
+### Sélectif : Lier un texte spécifique
 
-### Liens wiki : explication principale
+1. Sélectionner le texte à traiter
+2. Clic droit → **"Sélectionner des processus (ajouter des liens)"**
+3. Seule la partie soulignée est analysée
 
-Cette partie de Liens wiki décrit le comportement produit, les points d’entrée et les limites d’implémentation. Les boutons, commandes, clés et extensions restent des contrats stables.
+## Notemd contre Lien automatique
 
-## Liens wiki : explication principale
+Obsidian propose deux approches pour le lien automatique vers les wikis :
 
-Cette partie de Liens wiki décrit le comportement produit, les points d’entrée et les limites d’implémentation. Les boutons, commandes, clés et extensions restent des contrats stables.
+| | **Lien automatique** | **Notemd** |
+|--|---------------|-------------|
+| Source du lien | Titres des notes existantes dans le coffre-fort | Concepts identifiés dans le contenu LLM |
+| Peut relier de nouveaux concepts | Non — le titre doit déjà exister | Oui — L’IA identifie les concepts et crée des notes |
+| Gestion des synonymes | Non | Oui — suppression des synonymes |
+| Création d’une note de concept | Non | Oui — avec des liens inversés et la suppression des doublons |
+| Traitement par lots | Non (fichier unique) | Oui (au niveau du dossier) |
+| Affectation du modèle par tâche | Non | Oui |
 
-## Liens wiki : explication principale
+**Auto Link** effectue une correspondance par titre : si une note nommée « Machine Learning » existe, il encadre les occurrences dans `[[Machine Learning]]`. Si la note n’existe pas, rien ne se passe.
 
-Cette partie de Liens wiki décrit le comportement produit, les points d’entrée et les limites d’implémentation. Les boutons, commandes, clés et extensions restent des contrats stables.
+**Notemd** est piloté par l’IA : le LLM lit votre contenu, comprend le contexte, identifie les concepts qui *devraient* être liés — même s’aucune note n’existe encore — et crée à la fois le lien et la note de concept.
 
-### Liens wiki : explication principale
+## Fonctionnalités
 
-Cette partie de Liens wiki décrit le comportement produit, les points d’entrée et les limites d’implémentation. Les boutons, commandes, clés et extensions restent des contrats stables.
+### Suppression de synonymes
 
-### Liens wiki : explication principale
+**Problème :** "transformer", "transformers", "Architecture Transformer" → 3 concepts distincts
 
-Cette partie de Liens wiki décrit le comportement produit, les points d’entrée et les limites d’implémentation. Les boutons, commandes, clés et extensions restent des contrats stables.
+**Solution :** Notemd détecte les quasi-dupliques et utilise la forme canonique.
 
-### Liens wiki : explication principale
+**Configuration :**
+```
+Settings → Advanced → Synonym Suppression
+Threshold: 0.8 (0 = off, 1 = aggressive)
+```
 
-Cette partie de Liens wiki décrit le comportement produit, les points d’entrée et les limites d’implémentation. Les boutons, commandes, clés et extensions restent des contrats stables.
+### Intégrité du lien
 
-## Liens wiki : explication principale
+**Lorsque vous renommez une note de concept :**
+- Tous les liens wiki se mettent à jour automatiquement (fonctionnalité de base Obsidian)
+- Les backlinks restent intacts
 
-Cette partie de Liens wiki décrit le comportement produit, les points d’entrée et les limites d’implémentation. Les boutons, commandes, clés et extensions restent des contrats stables.
+**Lorsque vous supprimez une note de concept :**
+- Les liens restent, mais s’affichent comme des « mentions non liées ».
+- Vous pouvez recréer à partir de n’importe quelle occurrence
 
-### Liens wiki : explication principale
+### Mode d’extraction pure
 
-Cette partie de Liens wiki décrit le comportement produit, les points d’entrée et les limites d’implémentation. Les boutons, commandes, clés et extensions restent des contrats stables.
+**Extraire les concepts sans modifier le texte original :**
+
+1. Clic droit → **"Extraire les concepts (sans lien)"**
+2. Les notes de concept sont créées
+3. Le fichier original est intact.
+
+Cas d’usage : Traitement de contenus en lecture seule ou de versions finales.
+
+## Génération de note conceptuelle
+
+### Création automatique
+
+**Lorsqu’il est activé (par défaut), Notemd crée :**
+
+```markdown
+---
+tags: [concept, auto-generated]
+created: 2026-06-13
+source: [[Original Note Name]]
+---
+
+# Machine Learning
+
+A branch of artificial intelligence that enables computers
+to learn from data without explicit programming.
+
+## Occurrences in Your Vault
+
+- [[Original Note Name#Section]]
+- [[Another Note#Header]]
+
+## Related Concepts
+
+- [[Neural Networks]]
+- [[Deep Learning]]
+- [[Supervised Learning]]
+```
 
 ### Configuration
 
-La configuration de Liens wiki se fait dans les paramètres Notemd. Provider, modèle, sortie, langue et traitement par lots interagissent; identifiez si le changement touche le fichier courant, un dossier ou un workflow.
+**Dossier de sortie :**
+```
+Settings → Output → Concept Folder
+Default: concepts/
+```
 
-## Liens wiki : workflows et tâches
+**Structure hiérarchique :**
+```
+Settings → Output → Use Hierarchical Folders
+If enabled:
+  papers/my-paper.md → papers/concepts/Concept.md
+If disabled:
+  → concepts/Concept.md
+```
 
-Cette partie de Liens wiki décrit le comportement produit, les points d’entrée et les limites d’implémentation. Les boutons, commandes, clés et extensions restent des contrats stables.
+**Modèle :**
+```
+Settings → Output → Concept Template
+Customize with variables:
+  {{concept}} — Concept name
+  {{description}} — LLM-generated description
+  {{backlinks}} — List of source notes
+  {{date}} — Creation date
+```
 
-### Liens wiki : explication principale
+## Options avancées
 
-Cette partie de Liens wiki décrit le comportement produit, les points d’entrée et les limites d’implémentation. Les boutons, commandes, clés et extensions restent des contrats stables.
+### Fenêtre de contexte
 
-### Liens wiki : explication principale
+**Combien de texte environnant envoyer :**
 
-Cette partie de Liens wiki décrit le comportement produit, les points d’entrée et les limites d’implémentation. Les boutons, commandes, clés et extensions restent des contrats stables.
+```
+Settings → Linking → Context Window
+Options: Sentence | Paragraph | Full Note
+Default: Paragraph
+```
 
-### Liens wiki : workflows et tâches
+Plus grand = plus grande précision, coût plus élevé.
 
-Cette partie de Liens wiki décrit le comportement produit, les points d’entrée et les limites d’implémentation. Les boutons, commandes, clés et extensions restent des contrats stables.
+### Minimum d'occurrences
 
-### Liens wiki : explication principale
+**Seuls les concepts qui apparaissent plusieurs fois doivent être liés :**
 
-Cette partie de Liens wiki décrit le comportement produit, les points d’entrée et les limites d’implémentation. Les boutons, commandes, clés et extensions restent des contrats stables.
+```
+Settings → Linking → Min Occurrences
+Default: 1 (link all)
+```
 
-## Liens wiki : recommandations suivantes
+Définissez sur 2 ou 3 pour vous concentrer sur les thèmes récurrents.
 
-Cette partie de Liens wiki décrit le comportement produit, les points d’entrée et les limites d’implémentation. Les boutons, commandes, clés et extensions restent des contrats stables.
+### Exclure les motifs
 
-### ✅ DO
+**Ignorer certains mots :**
 
-Cette partie de Liens wiki décrit le comportement produit, les points d’entrée et les limites d’implémentation. Les boutons, commandes, clés et extensions restent des contrats stables.
+```
+Settings → Linking → Exclude List
+Example: note, idea, example, thing
+```
 
-### Liens wiki : explication principale
+Empêche la création de liens excessifs vers des termes génériques.
 
-Cette partie de Liens wiki décrit le comportement produit, les points d’entrée et les limites d’implémentation. Les boutons, commandes, clés et extensions restent des contrats stables.
+### Prompt personnalisé
 
-## Liens wiki : dépannage
+**Surcharger les instructions par défaut LLM :**
 
-Cette partie de Liens wiki décrit le comportement produit, les points d’entrée et les limites d’implémentation. Les boutons, commandes, clés et extensions restent des contrats stables.
+```
+Settings → Advanced → Custom Linking Prompt
+Default:
+  "Identify key concepts, theories, methods, and technical
+   terms in the following text. Return as a list..."
+```
 
-### Liens wiki : explication principale
+Modifier pour des besoins spécifiques au domaine (par exemple, « Se concentrer sur la terminologie médicale »).
 
-Cette partie de Liens wiki décrit le comportement produit, les points d’entrée et les limites d’implémentation. Les boutons, commandes, clés et extensions restent des contrats stables.
+## Conseils et bonnes pratiques
 
-### Liens wiki : explication principale
+### ✅ FAIT
 
-Cette partie de Liens wiki décrit le comportement produit, les points d’entrée et les limites d’implémentation. Les boutons, commandes, clés et extensions restent des contrats stables.
+- **Traiter les notes de plus de 100 mots** — Les notes courtes ne contiennent que peu de concepts
+- **Utilisez des modèles puissants** pour une meilleure identification des concepts (GPT-4o, Claude)
+- **Vérification avant acceptation** — Vérifiez que les liens suggérés soient pertinents
+- **Construire de manière itérative** — Traiter 5 à 10 notes, examiner le graphe, ajuster les paramètres
 
-## Dépannage
+### ❌ NE FAITES PAS
 
-Cette section sert à diagnostiquer les échecs courants liés à Liens wiki. Vérifiez d’abord les diagnostics Notemd, le statut HTTP du Provider, le nom du modèle, le réseau et les limites de débit.
+- **Over-link** — Tous les noms n’ont pas besoin d’un lien
+- **Traiter les brouillons en boucle** — Les concepts peuvent évoluer, attendre qu’ils soient stables
+- **Ignorer les synonymes** — Activer la suppression pour éviter « ML » et « Machine Learning »
 
-### Liens wiki : explication principale
+## Performances
 
-Cette partie de Liens wiki décrit le comportement produit, les points d’entrée et les limites d’implémentation. Les boutons, commandes, clés et extensions restent des contrats stables.
+### Vitesse
 
-### Liens wiki : explication principale
+| Taille de la note | GPT-4o-mini | Claude Sonnet | Ollama (local) |
+|-----------|-------------|---------------|----------------|
+| 500 mots | 2-3 secondes | 3 à 5 secondes | 5-10 secondes |
+| 2000 mots | 5-8 secondes | 10-15 secondes | 20-40 secondes |
+| 5000+ mots | Par lots (appels multiples) | En chunks | En chunks |
 
-Cette partie de Liens wiki décrit le comportement produit, les points d’entrée et les limites d’implémentation. Les boutons, commandes, clés et extensions restent des contrats stables.
+### Estimation des coûts
 
-### Liens wiki : explication principale
+**Exemple : note de 1000 mots avec GPT-4o-mini**
+- Entrée : ~1500 tokens
+- Sortie : ~200 tokens
+- Coût : ~0,001 $
 
-Cette partie de Liens wiki décrit le comportement produit, les points d’entrée et les limites d’implémentation. Les boutons, commandes, clés et extensions restent des contrats stables.
+**Traitement par lots de 100 notes :** ~0,10 $
 
-### Liens wiki : explication principale
+## Résolution de problèmes
 
-Cette partie de Liens wiki décrit le comportement produit, les points d’entrée et les limites d’implémentation. Les boutons, commandes, clés et extensions restent des contrats stables.
+### Aucun lien ajouté
 
-## Étapes suivantes
+**Vérifier :**
+1. LLM L'appel a réussi (Paramètres → Diagnostic)
+2. La note contient suffisamment de contenu (>50 mots)
+3. Les concepts sont techniques/spécifiques (et non seulement des pronoms)
 
-Pour continuer, choisissez la page qui correspond directement à votre chaîne de travail: Provider, fonction principale, traitement par lots, dépannage ou export de diagrammes.
+**Essayer :**
+- Utilisez un modèle plus puissant
+- Augmenter la fenêtre de contexte
+- Vérifier la validité de la clé API
+
+### Trop de liens
+
+**Solutions :**
+1. Augmenter le nombre minimal d’occurrences (2 ou 3)
+2. Ajouter des mots courants à la liste d’exclusion
+3. Utilisez un modèle moins agressif
+
+### Concepts incorrects liés
+
+**Corrections :**
+1. Utilisez un prompt personnalisé pour une spécificité de domaine
+2. Activer la suppression des synonymes
+3. Vérifier manuellement et désassocier
+
+### Les liens se brisent après le renomage
+
+**C’est un comportement normal Obsidian.**
+
+Pour mettre à jour tous les liens :
+1. Renommer la note de concept
+2. Obsidian met à jour automatiquement `[[old]]` → `[[new]]`
+
+---
+
+## Prochaines étapes
+
+- 📖 [Concept Notes](./concept-notes) — Analyse approfondie de la création de notes de concept
+- 🔍 [Intégration de la recherche](./research) — Combiner les liens avec la recherche sur le Web
+- 🎨 [Diagrammes](./diagrams) — Visualisez votre graphe de connaissances

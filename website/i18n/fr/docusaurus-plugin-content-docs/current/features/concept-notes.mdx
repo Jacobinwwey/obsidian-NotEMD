@@ -1,9 +1,16 @@
 ---
 id: concept-notes
 title: Notes de concept
-description: Explique le rôle de Notes de concept dans Notemd, sa configuration, ses limites de workflow et les vérifications courantes.
+description: Générer et gérer des notes de concept — des notes indépendantes pour les concepts clés extraits de votre coffre-fort
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [concept notes, knowledge extraction, concept folder, deduplication, backlinks]
+concepts: [Concept Notes, Knowledge Graph, LLM Extraction, Deduplication, Backlinks]
+citations:
+  - title: Obsidian
+    url: https://obsidian.md
+  - title: Zettelkasten Method
+    url: https://zettelkasten.de
 ---
 
 import TLDR from '@site/src/components/TLDR';
@@ -11,97 +18,167 @@ import TLDR from '@site/src/components/TLDR';
 # Notes de concept
 
 <TLDR>
-**Résumé：** Explique le rôle de Notes de concept dans Notemd, sa configuration, ses limites de workflow et les vérifications courantes. Les commandes, clés de configuration, extensions et noms de Provider ci-dessous restent en anglais afin de correspondre exactement à l’interface, au CLI et aux journaux.
+**Notemd extrait les concepts clés de vos notes et crée des fichiers de note de concept indépendants.** Le LLM identifie les termes essentiels, génère un fichier `.md` par concept dans un dossier configurable, et ajoute éventuellement des liens vers la note source. Il prend en charge la suppression des synonymes, le choix d’un modèle par tâche, la purification des noms de fichiers, ainsi qu’un moteur de déduplication en 4 étapes. Cela fait partie du [Obsidian Guide de gestion des connaissances IA](/docs/pillar-ai-knowledge).
 </TLDR>
 
-## Vue d’ensemble
+## Aperçu général
 
-Cette partie de Notes de concept décrit le comportement produit, les points d’entrée et les limites d’implémentation. Les boutons, commandes, clés et extensions restent des contrats stables.
+Les notes conceptuelles constituent les éléments de base d’une base de connaissances interconnectée. Lorsque vous traitez une note, Notemd :
 
-## Fonctionnement
+1. **Envoie votre texte à un LLM** avec une demande d’extraction structurée
+2. **Analyse les lignes `CONCEPT:`** de la réponse LLM
+3. **Crée un fichier `.md` par concept** dans un dossier désigné
+4. **Ajoute des backlinks** à la note source (lorsque c’est activé)
 
-Cette partie de Notes de concept décrit le comportement produit, les points d’entrée et les limites d’implémentation. Les boutons, commandes, clés et extensions restent des contrats stables.
+## Comment ça marche
 
-### Notes de concept : workflows et tâches
+### Pipeline d’extraction
 
-Cette partie de Notes de concept décrit le comportement produit, les points d’entrée et les limites d’implémentation. Les boutons, commandes, clés et extensions restent des contrats stables.
+```
+Source Note → Split into Chunks → LLM per Chunk → Parse CONCEPT: Lines
+    → Deduplicate via Set → Create .md Files → Add Backlinks
+    → (Optional: Generate Log)
+```
 
-### Notes de concept : explication principale
+### Le prompt d’extraction
 
-Cette partie de Notes de concept décrit le comportement produit, les points d’entrée et les limites d’implémentation. Les boutons, commandes, clés et extensions restent des contrats stables.
+Le LLM reçoit une instruction qui lui demande de :
 
-### Notes de concept : explication principale
+- Extraire les **noms ou groupes de noms** centraux pour le sujet du document
+- **Privilégiez la spécificité** — « Relâchement diélectrique » plutôt que « Relâchement ».
+- **Normaliser au singulier** — « models » devient « model »
+- **Supprimer les sous-concepts** — si « relaxation diélectrique » apparaît, ne pas extraire également « relaxation »
+- **Ignorer** les sections de références/bibliographie, les noms communs, les noms d’entreprise/produits
+- Affichez un concept par ligne sous la forme `CONCEPT: Term Name`
 
-Cette partie de Notes de concept décrit le comportement produit, les points d’entrée et les limites d’implémentation. Les boutons, commandes, clés et extensions restent des contrats stables.
+**Suppression des synonymes** (optionnel) : ajoute en préfixe au prompt « Éviter d’extraire des synonymes, des concepts de base sémantiquement similaires ou des mots-clés chaque fois que c’est possible ».
 
-## Notes de concept : explication principale
+**Domaine d’apprentissage ciblé** (facultatif) : ajoute `Relevant Fields: [domain]` en préfixe pour limiter l’extraction à une discipline.
 
-Cette partie de Notes de concept décrit le comportement produit, les points d’entrée et les limites d’implémentation. Les boutons, commandes, clés et extensions restent des contrats stables.
+**Remplacement de langue** (facultatif) : ajoute « Les concepts de sortie DOIVENT être en [langue]. »
 
-### Notes de concept : explication principale
+### Échelonnage
 
-Cette partie de Notes de concept décrit le comportement produit, les points d’entrée et les limites d’implémentation. Les boutons, commandes, clés et extensions restent des contrats stables.
+Les notes longues sont divisées par `settings.chunkWordCount`. Chaque partie est envoyée indépendamment. Les concepts provenant de toutes les parties sont accumulés dans un `Set` — les doublons entre les parties sont supprimés silencieusement. Les erreurs LLM sur des parties individuelles n’interrompent pas l’opération.
 
-### Notes de concept : workflows et tâches
+## Création d’une note de concept
 
-Cette partie de Notes de concept décrit le comportement produit, les points d’entrée et les limites d’implémentation. Les boutons, commandes, clés et extensions restent des contrats stables.
+### Règles de nommage des fichiers
 
-### Notes de concept : explication principale
+| Règle | Comportement |
+|------|----------|
+| Guillemets/minuscules | Remplacé par des espaces |
+| Caractères spéciaux | Déstripté : barre oblique en arrière, barre oblique en avant, deux-points, astérisque, point d’interrogation, guillemets, crochets angulaires, pipe, hash, caret, parenthèses |
+| Espace blanc | Collapsé et élagué |
+| Longueur maximale | 100 caractères (tronqué + retrimé) |
+| Résultat vide/tous-points | Ignoré en silence |
 
-Cette partie de Notes de concept décrit le comportement produit, les points d’entrée et les limites d’implémentation. Les boutons, commandes, clés et extensions restent des contrats stables.
+Exemple : `A-B: Key*Term` devient `A B KeyTerm.md`
+
+### Modèles
+
+**Modèle complet** (liens renvoyants activés, modèle minimal désactivé) :
+
+```markdown
+# Concept Name
+
+## Linked From
+- [[SourceNoteBasename]]
+```
+
+**Modèle minimal** (lors de `extractConceptsMinimalTemplate: true`) :
+
+```markdown
+# Concept Name
+```
+
+### Mettre à jour des notes existantes
+
+Lorsqu’un fichier de concept existe déjà :
+
+1. Si les liens inversés sont activés et que la note de source n’est pas encore listée, ajoutez un lien inverse.
+2. Si une section `## Linked From` existe, insérez-la avant le prochain en-tête `##`
+3. Si aucun `## Linked From` n’existe, ajoutez une section à la fin
+4. Les liens inversés dupliqués sont vérifiés et ignorés
 
 ### Configuration
 
-La configuration de Notes de concept se fait dans les paramètres Notemd. Provider, modèle, sortie, langue et traitement par lots interagissent; identifiez si le changement touche le fichier courant, un dossier ou un workflow.
+| Configuration | Par défaut | Appliquer |
+|---------|---------|--------|
+| `useCustomConceptNoteFolder` | `true` | Onglet Maître. Désactivé = aucune note créée |
+| `conceptNoteFolder` | `''` (désactivé) | Chemin du dossier pour les notes de concept |
+| `extractConceptsMinimalTemplate` | `true` | Notes uniquement avec titre (pas de lien externe) |
+| `extractConceptsAddBacklink` | `false` | Ajouter des backlinks lors de l’extraction indépendante |
+| `extractConceptsProvider` / `extractConceptsModel` | DeepSeek | LLM par tâche pour l’extraction de concepts |
+| `extractConceptsLanguage` | `'en'` | Langue de sortie pour les noms de concepts |
+| `replaceSynonymsDuringConceptExtraction` | `false` | Activer la suppression des synonymes dans le prompt |
+| `generateConceptLogFile` | `false` | Écrivez une liste `.log` des concepts créés |
 
-## Notes de concept : explication principale
+**Important :** Les paramètres `extractConceptsAddBacklink` et `extractConceptsMinimalTemplate` n’affectent que la **commande d’extraction dédiée**. La commande « Ajouter des liens » crée toujours des notes au format complet avec des liens renvoyants.
 
-Cette partie de Notes de concept décrit le comportement produit, les points d’entrée et les limites d’implémentation. Les boutons, commandes, clés et extensions restent des contrats stables.
+## Déduplication
 
-### Notes de concept : workflows et tâches
+La commande dedup (`Notemd: Check & remove duplicate concept notes`) effectue une analyse en 5 étapes :
 
-Cette partie de Notes de concept décrit le comportement produit, les points d’entrée et les limites d’implémentation. Les boutons, commandes, clés et extensions restent des contrats stables.
+### Étape 1 : Correspondance exacte du nom de fichier
 
-### Notes de concept : workflows et tâches
+Comparaison insensible à la casse du nom de fichier dans toute la portée configurée.
 
-Cette partie de Notes de concept décrit le comportement produit, les points d’entrée et les limites d’implémentation. Les boutons, commandes, clés et extensions restent des contrats stables.
+### Étape 2 : Détection de la forme plurielle
 
-### Notes de concept : workflows et tâches
+Supprime les suffixes : `-ies` à `-y`, `-es` supprimé, `-s` supprimé. Compare la forme singulière avec les fichiers de contexte. Ne gère pas les pluriels irréguliers (children/child).
 
-Cette partie de Notes de concept décrit le comportement produit, les points d’entrée et les limites d’implémentation. Les boutons, commandes, clés et extensions restent des contrats stables.
+### Étape 3 : Normalisation des symboles
 
-### Notes de concept : workflows et tâches
+S’applique à : `toLowerCase()`, remplace les traits d’union/les underscores par des espaces, supprime les caractères non alphanumériques, fusionne les espaces blancs. Les éléments qui se normalisent de la même manière sont marqués.
 
-Cette partie de Notes de concept décrit le comportement produit, les points d’entrée et les limites d’implémentation. Les boutons, commandes, clés et extensions restent des contrats stables.
+### Étape 4 : Contention à un seul mot
 
-### Notes de concept : workflows et tâches
+Les notes de concept à un seul mot sont vérifiées par rapport aux noms de fichiers de portée à plusieurs mots. Ne sont pas exécutées lorsque la portée est `concept_folder_only`.
 
-Cette partie de Notes de concept décrit le comportement produit, les points d’entrée et les limites d’implémentation. Les boutons, commandes, clés et extensions restent des contrats stables.
+### Étape 5 : Confirmation et suppression
 
-### Notes de concept : explication principale
+Tous les candidats sont affichés dans une boîte de dialogue de confirmation. Les éléments approuvés sont déplacés dans la corbeille du système. L’opération peut être annulée entre chaque suppression.
 
-Cette partie de Notes de concept décrit le comportement produit, les points d’entrée et les limites d’implémentation. Les boutons, commandes, clés et extensions restent des contrats stables.
+### Modes de portée
+
+| Mode | Comparé à |
+|------|-------------------|
+| `vault` (par défaut) | Tous les fichiers du coffre-fort `.md` à l’exception du dossier concept |
+| `concept_folder_only` | Autres notes de concept dans le dossier |
+| `include` | Fichiers dans les dossiers spécifiques listés |
+| `exclude` | Tous les fichiers du coffre-fort à l’exception du dossier concept + des dossiers listés |
 
 ## Utilisation
 
-Cette partie de Notes de concept décrit le comportement produit, les points d’entrée et les limites d’implémentation. Les boutons, commandes, clés et extensions restent des contrats stables.
+### Extraction de concepts (indépendant)
 
-### Notes de concept : explication principale
+1. Ouvrir une note
+2. Exécutez **"Notemd: Extraire les concepts"** depuis la palette de commandes
+3. Les notes de concept sont créées dans le dossier configuré
 
-Cette partie de Notes de concept décrit le comportement produit, les points d’entrée et les limites d’implémentation. Les boutons, commandes, clés et extensions restent des contrats stables.
+### Extraire + Générer du contenu
 
-### Notes de concept : explication principale
+**"Notemd : Extraire les concepts et générer des titres"** — extrait les concepts, puis exécute l’opération "Générer à partir du titre" sur chaque note dans le dossier des concepts. Cela génère du contenu pour **toutes** les notes de concept du dossier, et non seulement pour celles qui viennent d’être créées.
 
-Cette partie de Notes de concept décrit le comportement produit, les points d’entrée et les limites d’implémentation. Les boutons, commandes, clés et extensions restent des contrats stables.
+### Créer un lien Wiki à partir de la sélection
 
-### Notes de concept : explication principale
+1. Surligner du texte dans l’éditeur
+2. Exécutez **"Notemd: Créer un lien wiki à partir de la sélection"**
+3. Le texte est encadré par `[[...]]` et une note de concept est créée
 
-Cette partie de Notes de concept décrit le comportement produit, les points d’entrée et les limites d’implémentation. Les boutons, commandes, clés et extensions restent des contrats stables.
+## Conseils
 
-## Notes de concept : recommandations suivantes
+- **Définissez d’abord le dossier du concept** — sans lui, aucune note ne sera créée. Un modal d’avertissement apparaît si ce dossier n’est pas défini.
+- **Utiliser des modèles par tâche** — l’extraction de concepts se prête bien à des modèles moins coûteux (GPT-4o-mini, DeepSeek). Réservez les modèles chers pour la recherche ou la traduction.
+- **Activer la suppression des synonymes** pour les domaines techniques où plusieurs termes désignent le même concept.
+- **Déduplication régulière** — exécutez la commande de déduplication après le traitement par lots pour détecter les doublons quasi identiques.
+- **Le fichier de journal est écrasé** à chaque exécution, et non ajouté. Copiez-le si vous avez besoin des résultats précédents.
 
-Cette partie de Notes de concept décrit le comportement produit, les points d’entrée et les limites d’implémentation. Les boutons, commandes, clés et extensions restent des contrats stables.
+---
 
-## Étapes suivantes
+## Prochaines étapes
 
-Pour continuer, choisissez la page qui correspond directement à votre chaîne de travail: Provider, fonction principale, traitement par lots, dépannage ou export de diagrammes.
+- [Liens-Wiki](./wiki-links) — Comment les concepts sont liés en ligne
+- [Diagrammes](./diagrams) — Visualiser les relations entre concepts
+- [Workflows](./workflows) — Extraction en chaîne avec d’autres tâches

@@ -1,87 +1,189 @@
 ---
 id: overview
-title: LLM 제공자
-description: Notemd에서 LLM 제공자의 목적, 설정, 워크플로 경계와 일반적인 점검 항목을 설명합니다.
+title: LLM 제공업체들
+description: 작업별 모델 선택 기능을 사용하여 클라우드, 게이트웨이, 로컬 형태의 36개 LLM 프로바이더를 구성합니다.
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [LLM providers, API, OpenAI, Anthropic, Google, DeepSeek, Qwen, Ollama, per-task model]
+concepts: [LLM Integration, API Providers, Per-Task Models, OpenAI Compatible, Ollama, China Providers]
+citations:
+  - title: OpenAI API
+    url: https://platform.openai.com
+  - title: Anthropic API
+    url: https://docs.anthropic.com
 ---
 
 import TLDR from '@site/src/components/TLDR';
 
-# LLM 제공자
+# LLM 제공업체들
 
 <TLDR>
-**요약：** Notemd에서 LLM 제공자의 목적, 설정, 워크플로 경계와 일반적인 점검 항목을 설명합니다. 아래의 명령, 설정 키, 파일 확장자, Provider 이름은 플러그인 UI, CLI, 로그와 정확히 대응하도록 영어로 유지합니다.
+**Notemd은 4가지 전송 유형에 걸쳐 36개의 LLM 제공업체를 지원합니다.** 모든 API 호출은 SDK 없이 원시 HTTP 형태로 이루어지며, 자동 재시도, 전송 대체 기능, 그리고 5분간의 응답 캐싱이 적용됩니다. 작업별 모델 선택 기능을 통해 개념 추출에는 저렴한 모델을, 연구에는 강력한 모델을 사용할 수 있습니다. 로컬 제공업체(Ollama, LMStudio)의 경우 API 키가 필요하지 않습니다.
 </TLDR>
 
-## Provider 분류
+이것은 [Obsidian AI 지식 관리 가이드](/docs/pillar-ai-knowledge)의 일부입니다.
 
-LLM 제공자의 이 부분은 제품 동작, 사용 진입점, 엔지니어링 경계를 설명합니다. UI 버튼, 명령 이름, 설정 키, 확장자는 안정적인 계약으로 봅니다.
+## 공급업체 카테고리
 
-### LLM 제공자: 설정과 모델
+### 클라우드 제공업체
 
-LLM 제공자의 이 부분은 제품 동작, 사용 진입점, 엔지니어링 경계를 설명합니다. UI 버튼, 명령 이름, 설정 키, 확장자는 안정적인 계약으로 봅니다.
+| 제공업체 | 기본 베이스 URL | 기본 모델 | 온도 |
+|----------|-----------------|---------------|-------------|
+| **DeepSeek** | `api.deepseek.com` | `deepseek-v4-pro` | 0.5 |
+| **OpenAI** | `api.openai.com/v1` | `gpt-4o` | 0.5 |
+| **Anthropic** | `api.anthropic.com` | `claude-3-5-sonnet-20240620` | 0.5 |
+| **Google** | `generativelanguage.googleapis.com/v1` | `gemini-2.0-flash-exp` | 0.5 |
+| **Mistral** | `api.mistral.ai/v1` | `mistral-large-latest` | 0.5 |
+| **xAI** | `api.x.ai/v1` | `grok-4` | 0.7 |
+| **Cerebras** | `api.cerebras.ai/v1` | `gpt-oss-120b` | 0.5 |
+| **Fireworks** | `api.fireworks.ai/inference/v1` | `kimi-k2p5` | 0.5 |
+| **Nebius** | `api.studio.nebius.com/v1` | `openai/gpt-oss-120b` | 0.3 |
 
-### LLM 제공자: 설정과 모델
+### 게이트웨이 / 프록시 제공업체
 
-LLM 제공자의 이 부분은 제품 동작, 사용 진입점, 엔지니어링 경계를 설명합니다. UI 버튼, 명령 이름, 설정 키, 확장자는 안정적인 계약으로 봅니다.
+| 제공업체 | 기본 베이스 URL | 기본 모델 | 메모들 |
+|----------|-----------------|---------------|-------|
+| **OpenRouter** | `openrouter.ai/api/v1` | `anthropic/claude-3.7-sonnet` | `HTTP-Referer` + `X-Title` 헤더를 추가합니다 |
+| **GitHub Models** | `models.github.ai/inference` | `gpt-4o-mini` | `X-GitHub-Api-Version` 헤더를 추가합니다. |
+| **AIHubMix** | `aihubmix.com/v1` | `gpt-4o-mini` | `APP-Code` 헤더를 추가합니다. |
+| **PPIO** | `api.ppinfra.com/v3/openai` | `qwen/qwen3-32b` | |
+| **Hugging Face** | `router.huggingface.co/v1` | `openai/gpt-oss-120b` | |
+| **Vercel AI Gateway** | `ai-gateway.vercel.sh/v1` | `anthropic/claude-sonnet-4.5` | |
+| **Requesty** | `router.requesty.ai/v1` | `anthropic/claude-3-7-sonnet-latest` | |
+| **Together** | `api.together.xyz/v1` | `meta-llama/Meta-Llama-3.1-70B-Instruct-Turbo` | |
+| **LiteLLM** | `localhost:4000/v1` | `your-proxy-model` | 선택적 API 키 |
+| **새로운 API** | `localhost:3000/v1` | `gpt-4.1` | 선택적 API 키 |
+| **OpenAI Compatible** | (사용자가 설정함) | `your-model-id` | 커스텀 엔드포인트 |
 
-### LLM 제공자: 설정과 모델
+### 중국 공급업체들
 
-LLM 제공자의 이 부분은 제품 동작, 사용 진입점, 엔지니어링 경계를 설명합니다. UI 버튼, 명령 이름, 설정 키, 확장자는 안정적인 계약으로 봅니다.
+| 제공업체 | 기본 베이스 URL | 기본 모델 | 메모들 |
+|----------|-----------------|---------------|-------|
+| **Qwen** | `dashscope.aliyuncs.com/compatible-mode/v1` | `qwen3-235b-a22b` | 알리바바 다시스코프 |
+| **Qwen Code** | `dashscope.aliyuncs.com/compatible-mode/v1` | `qwen3-coder-plus` | 코딩 중심 |
+| **Doubao** | `ark.cn-beijing.volces.com/api/v3` | (엔드포인트 ID가 필요합니다.) | ByteDance Volcengine |
+| **Moonshot** | `api.moonshot.cn/v1` | `kimi-k2-0905-preview` | 킴이 |
+| **Xiaomi MiMo** | `api.xiaomimimo.com/v1` | `mimo-v2.5-pro` | |
+| **GLM** | `open.bigmodel.cn/api/paas/v4` | `glm-5` | 중국의 지푸 엔드포인트 |
+| **Z AI** | `api.z.ai/api/paas/v4` | `glm-5` | Zhipu, 국제 엔드포인트 |
+| **MiniMax** | `api.minimaxi.com/v1` | `MiniMax-M2.7` | |
+| **Baidu Qianfan** | `qianfan.baidubce.com/v2` | `ernie-4.5-turbo-32k` | |
+| **SiliconFlow** | `api.siliconflow.cn/v1` | `Qwen/QwQ-32B` | 모델 호스팅 플랫폼 |
+| **Huawei Cloud MaaS** | `api.modelarts-maas.com/v1` | `DeepSeek-V3` | |
 
-### LLM 제공자: 설정과 모델
+**Doubao에는 Ark 엔드포인트 ID가 필요합니다** (형식: `ep-xxxxxxxx-xxxx-xxxx`). 기본으로 사용되는 플레이스홀더는 반드시 교체해야 합니다.
 
-LLM 제공자의 이 부분은 제품 동작, 사용 진입점, 엔지니어링 경계를 설명합니다. UI 버튼, 명령 이름, 설정 키, 확장자는 안정적인 계약으로 봅니다.
+### 로컬 프로바이더
+
+| 제공업체 | 기본 베이스 URL | 기본 모델 | 메모들 |
+|----------|-----------------|---------------|-------|
+| **Ollama** | `localhost:11434/api` | `llama3` | API 키가 없습니다. NDJSON 스트리밍. `/api/tags`을 통한 모델 발견 |
+| **LMStudio** | `localhost:1234/v1` | `local-model` | `"EMPTY"`을 베어러 토큰으로 전송합니다. OpenAI과 호환되는 디스커버리 기능입니다. |
+| **OVMS** | `localhost:8000/v3` | `openvino-model` | OpenVINO 모델 서버 |
+| **Azure OpenAI** | (사용자가 설정함) | `gpt-4o` | URL의 배포 이름입니다. `api-key` 헤더 |
 
 ## 작업별 모델 선택
 
-LLM 제공자의 이 부분은 제품 동작, 사용 진입점, 엔지니어링 경계를 설명합니다. UI 버튼, 명령 이름, 설정 키, 확장자는 안정적인 계약으로 봅니다.
+Notemd은 각 작업에 대해 별도의 공급자와 모델을 지원합니다. `useMultiModelSettings: true`을 사용하여 활성화할 수 있습니다.
 
-### LLM 제공자: 워크플로와 작업
+### 사용 가능한 작업들
 
-LLM 제공자의 이 부분은 제품 동작, 사용 진입점, 엔지니어링 경계를 설명합니다. UI 버튼, 명령 이름, 설정 키, 확장자는 안정적인 계약으로 봅니다.
+| 작업 | 설정 키 | 기본 제공자 |
+|------|-------------|-----------------|
+| 링크 추가 (위키 링크 삽입) | `addLinksProvider` / `addLinksModel` | DeepSeek |
+| 조사 (웹 검색 + 요약) | `researchProvider` / `researchModel` | DeepSeek |
+| 제목에서 생성하기 | `generateTitleProvider` / `generateTitleModel` | DeepSeek |
+| 번역 | `translateProvider` / `translateModel` | DeepSeek |
+| 다이어그램 생성 | `summarizeToMermaidProvider` / `Model` | DeepSeek |
+| 개념 추출 | `extractConceptsProvider` / `Model` | DeepSeek |
+| 원본 텍스트 추출 | `extractOriginalTextProvider` / `Model` | DeepSeek |
 
-### LLM 제공자: 핵심 설명
+### 해상도 순서
 
-LLM 제공자의 이 부분은 제품 동작, 사용 진입점, 엔지니어링 경계를 설명합니다. UI 버튼, 명령 이름, 설정 키, 확장자는 안정적인 계약으로 봅니다.
+1. `useMultiModelSettings`가 활성화된 경우 → 작업별 프로바이더와 모델을 사용합니다.
+2. 작업 모델 재정의가 비어 있으면 → 제공자의 기본 모델로 복귀
+3. 작업 제공자가 유효하지 않은 경우 → 전역 `activeProvider`으로 대체
+4. `useMultiModelSettings`가 꺼져 있으면 → 모든 작업이 전역 `activeProvider`을 사용합니다.
 
-### LLM 제공자: 설정과 모델
+### 권장 설정
 
-LLM 제공자 설정은 Notemd 설정 화면에서 합니다. Provider, 모델, 출력 경로, 언어, 일괄 처리는 서로 연결되어 있으므로 현재 파일, 폴더 작업, 워크플로 중 어디에 영향을 주는지 확인하세요.
+```
+# Researcher: power for research, cheap for everything else
+activeProvider: DeepSeek
+extractConceptsProvider: DeepSeek
+researchProvider: OpenAI        # GPT-4o for better research quality
+summarizeToMermaidProvider: DeepSeek
+
+# Privacy-first: local only
+activeProvider: Ollama
+addLinksProvider: Ollama
+extractConceptsProvider: Ollama
+
+# Budget bilingual
+activeProvider: DeepSeek
+translateProvider: Google      # Gemini Flash for translation
+researchProvider: SiliconFlow  # Cheaper China-based routing
+```
 
 ## API 호출 아키텍처
 
-LLM 제공자의 이 부분은 제품 동작, 사용 진입점, 엔지니어링 경계를 설명합니다. UI 버튼, 명령 이름, 설정 키, 확장자는 안정적인 계약으로 봅니다.
-
 ### 전송 계층
 
-LLM 제공자의 이 부분은 제품 동작, 사용 진입점, 엔지니어링 경계를 설명합니다. UI 버튼, 명령 이름, 설정 키, 확장자는 안정적인 계약으로 봅니다.
+1. **Obsidian `requestUrl`** — 기본 (내장형, 모든 플랫폼에서 작동)
+2. **데스크톱 HTTP** — Node.js `http`/`https` 모듈 (스트리밍 + 장시간 요청)
+3. **Web `fetch`** — Node.js 모듈이 사용 불가능할 때의 대체 방안
+
+이 플러그인은 일시적인 네트워크 오류가 발생할 때 자동으로 전송 방식 간에 전환합니다.
 
 ### 재시도 로직
 
-LLM 제공자의 이 부분은 제품 동작, 사용 진입점, 엔지니어링 경계를 설명합니다. UI 버튼, 명령 이름, 설정 키, 확장자는 안정적인 계약으로 봅니다.
+- **일반 모드** (`enableStableApiCall: false`): 한 번의 시도만 진행됩니다. 일시적인 실패가 발생하면 자동으로 안정적인 재시도로 전환됩니다.
+- **안정적 재시도 모드** (`enableStableApiCall: true`): 5초 간격으로 최대 4회 시도(1회 기본 시도 + 3회 재시도).
+- **재시도를 유발하는 일시적 오류**: `err_connection_closed`, `err_connection_reset`, `err_timed_out`, `econnreset`, `econnaborted`, `etimedout`, `socket hang up`, `network request failed`
+- **재시도 불가능**: HTTP 400, 401, 403, 404
 
-### 응답 캐시
+### 응답 캐싱
 
-LLM 제공자의 이 부분은 제품 동작, 사용 진입점, 엔지니어링 경계를 설명합니다. UI 버튼, 명령 이름, 설정 키, 확장자는 안정적인 계약으로 봅니다.
+제공자 + 모델 + 온도 + 프롬프트 + 콘텐츠를 키로 하는 5분간 유지되는 인메모리 LRU 캐시입니다. 5분 이내에 동일한 요청이 다시 들어오면 캐시된 결과가 즉시 반환됩니다.
 
-### LLM 제공자: 설정과 모델
+### 추론 모델 처리
 
-LLM 제공자의 이 부분은 제품 동작, 사용 진입점, 엔지니어링 경계를 설명합니다. UI 버튼, 명령 이름, 설정 키, 확장자는 안정적인 계약으로 봅니다.
+`system` 롤을 지원하지 않는 모델들(DeepSeek R1, OpenAI o1/o3/o4/gpt-5)의 경우 시스템 프롬프트와 사용자 프롬프트가 자동으로 하나의 사용자 메시지로 결합됩니다.
+
+DeepSeek-specific: `thinkingEnabled`은 요청에 `{ thinking: { type: 'enabled' } }`을 추가합니다. `reasoningEffort`(낮음/중간/높음)는 `reasoning_effort`로 전달됩니다. 사고 모드가 켜져 있을 때 최대 출력 토큰 수가 8000 이상인지 확인합니다.
 
 ### 토큰 추정
 
-LLM 제공자의 이 부분은 제품 동작, 사용 진입점, 엔지니어링 경계를 설명합니다. UI 버튼, 명령 이름, 설정 키, 확장자는 안정적인 계약으로 봅니다.
+`estimateTokens(text)`: `Math.ceil(text.length / 4)` — 토큰당 4자 규칙. LLM로 전송하기 전에 `maxResearchContentTokens`를 적용하기 위해 사용됨.
 
-## 모델 검색
+비용 추적 기능이 구현되어 있지 않습니다.
 
-LLM 제공자의 이 부분은 제품 동작, 사용 진입점, 엔지니어링 경계를 설명합니다. UI 버튼, 명령 이름, 설정 키, 확장자는 안정적인 계약으로 봅니다.
+## 모델 발견
+
+| 모드 | 제공업체 | 엔드포인트 |
+|------|-----------|----------|
+| `ollama-tags` | Ollama | `/api/tags` |
+| `google-models` | Google | 모델 목록 API |
+| `anthropic-models` | Anthropic | 모델 목록 API |
+| `openai-compatible-models` | DeepSeek, Qwen, Mistral 등. | `/v1/models` |
+| `openrouter-models` | OpenRouter | 모델 목록 API |
+| `github-models` | GitHub Models | 추론 API |
+| `none` | Azure OpenAI | 비활성화됨 (배포 이름 필요) |
 
 ## 빠른 시작
 
-LLM 제공자의 이 부분은 제품 동작, 사용 진입점, 엔지니어링 경계를 설명합니다. UI 버튼, 명령 이름, 설정 키, 확장자는 안정적인 계약으로 봅니다.
+1. **제공업체 선택** — DeepSeek (중국), OpenAI (국제), 또는 Ollama (지역/무료)
+2. **API 키를 입력하세요** — 설정 → Notemd → 공급자 → API 키
+3. **연결 테스트** — 테스트 버튼을 클릭하세요
+4. **선택 사항: 작업별 모델** — `useMultiModelSettings`을 활성화하고 개별적으로 설정합니다.
+
+Ollama의 경우: API 키는 필요하지 않습니다. `ollama serve`이 실행 중인지만 확인하면 됩니다.
+
+---
 
 ## 다음 단계
 
-다음에는 현재 작업 흐름과 직접 연결된 Provider 설정, 핵심 기능, 일괄 처리, 문제 해결, 다이어그램 내보내기 문서를 우선 보세요.
+- 📝 [Concept Notes](/docs/features/concept-notes) — 작업별 추출 모델을 사용함
+- 🎨 [Diagrams](/docs/features/diagrams) — 작업별 다이어그램 모델 사용
+- 🔍 [Research](/docs/features/research) — 연구용 모델을 사용함
+- ⚙️ [Configuration](/docs/getting-started/configuration) — 전체 설정 참조

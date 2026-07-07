@@ -1,39 +1,67 @@
 ---
 id: anthropic
 title: Anthropic
-description: Notemd における Anthropic の目的、設定、ワークフロー上の境界、よくある確認点を説明します。
+description: Anthropic Claudeを設定する
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [anthropic, claude, provider, configuration]
+concepts: [Anthropic, Claude, API Configuration]
+citations:
+  - title: Anthropic API
+    url: https://docs.anthropic.com
+  - title: Claude
+    url: https://www.anthropic.com/claude
 ---
 
 import TLDR from '@site/src/components/TLDR';
 
-# Anthropic
+# Anthropic プロバイダー
 
 <TLDR>
-**このページの要点：** Notemd における Anthropic の目的、設定、ワークフロー上の境界、よくある確認点を説明します。 以下のコマンド、設定キー、拡張子、Provider 名は、プラグイン UI、CLI、ログと対応させるため英語表記のままにしています。
+**AnthropicはOpenAI互換のトランスポートではなく、ネイティブなMessages APIトランスポートを使用しています。** 現在のプリセットは`claude-3-5-sonnet-20240620`、`https://api.anthropic.com`、`temperature: 0.5`をデフォルトとしています。デバッグ時には別個のプロトコルとして扱ってください。
+
+これは[Obsidian AI知識管理ガイド](/docs/pillar-ai-knowledge)の一部です。
 </TLDR>
 
 ## セットアップ
 
-Anthropic の設定は Notemd 設定画面から行います。Provider、モデル、出力先、言語、バッチ処理は独立した項目ではなく、現在のファイル、フォルダー処理、ワークフローのどれに影響するかを確認してください。
+Anthropic APIキーを作成し、`Anthropic`プロバイダープロファイルを追加します。専用のゲートウェイプロファイルを経由していない限り、Base URLはネイティブエンドポイントのままにします。モデルフィールドには使用したいClaudeモデルIDを選択してください。デフォルト値をそのままにすると、既存の製品ベースラインが安定した状態のままになります。
+
+Anthropicは高品質な要約作成、研究の統合、概念抽出に適した候補です。より安価なサービスと組み合わせる場合は、その出力品質がメリットとなるタスクにのみ使用してください。
 
 ## エンドポイントと認証
 
-Anthropic のこの部分では、製品の挙動、利用入口、実装上の境界を説明します。UI ボタン、コマンド名、設定キー、拡張子は安定した契約として扱います。
+| フィールド | 現在のプリセット |
+|-------|----------------|
+| 転送 | `anthropic` |
+| APIキー | 必要です |
+| ベース URL | `https://api.anthropic.com` |
+| デフォルトモデル | `claude-3-5-sonnet-20240620` |
+| 温度 | `0.5` |
+| 接続テスト | チャットのみ |
+
+実行時には、`x-api-key`および`anthropic-version: 2023-06-01`を使用して`/v1/messages`にリクエストが送信されます。このプリセットではOpenAIスタイルの`/v1/chat/completions`エンドポイントを設定しないでください。代わりにOpenAI対応のゲートウェイプリセットを使用してください。
 
 ## モデル検出
 
-Anthropic のこの部分では、製品の挙動、利用入口、実装上の境界を説明します。UI ボタン、コマンド名、設定キー、拡張子は安定した契約として扱います。
+Anthropicはプロバイダーレジストリで`anthropic-models`のディスカバリーモードを使用しています。キーまたはアカウントでモデルを一覧表示できない場合は、プロファイルに既知のモデルIDを記載し、接続テストを通じて検証してください。
+
+このトランスポートはOpenAI互換のプロバイダーとは交換できません。OpenRouter、LiteLLM、または別のゲートウェイを経由してルーティングされたClaudeモデルは、ネイティブなAnthropicプロファイルではなく、そのゲートウェイプロファイルに属します。
 
 ## トラブルシューティング
 
-この節では Anthropic の典型的な失敗を切り分けます。Notemd の診断出力、Provider の HTTP ステータス、モデル名、ネットワーク、レート制限を先に確認します。
+- `401` または `403`: キーのスコープ、ワークスペースへのアクセス権、請求状況、およびそのキーが期待される Anthropic ワークスペースに属しているかを確認します。
+- `404`: ベース URL が間違っているか、選択したモデルIDがアカウントで利用できません。
+- GatewayスタイルのClaudeモデルIDは使用できません。ネイティブなAnthropicはネイティブなモデル名を要求するため、プロファイルを対応するGatewayプロバイダーに移動してください。
+- 長いリクエストは後半で失敗する：タスクあたりのモデル出力サイズを小さくするか、既知の出力トークン上限が大きいモデルを使用してください。
 
-## 使うべき場面
+## いつ使用するか
 
-Anthropic のこの部分では、製品の挙動、利用入口、実装上の境界を説明します。UI ボタン、コマンド名、設定キー、拡張子は安定した契約として扱います。
+合成の品質や研究ノート、構造化された文章作成が単なるコストよりも重要な場合にはAnthropicを使用してください。汎用的なOpenAI互換の代替手段として使ってはいけません。別途トランスポートを行うことが重要であり、プロトコルを混在させると診断が困難になります。
+
+---
 
 ## 次のステップ
 
-次に読むページは、いまの作業に直結する Provider 設定、主要機能、バッチ処理、トラブルシューティング、図表出力から選んでください。
+- [LLM プロバイダー](/docs/providers/overview) -- 完全な設定、タスクごとのモデル、および再試行ロジック
+- [トラブルシューティング](/docs/advanced/troubleshooting) – 401/403エラーや接続エラーの修正

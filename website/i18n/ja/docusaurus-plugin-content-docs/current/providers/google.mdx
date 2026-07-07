@@ -1,39 +1,67 @@
 ---
 id: google
 title: Google
-description: Notemd における Google の目的、設定、ワークフロー上の境界、よくある確認点を説明します。
+description: Google Geminiを設定する
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [google, gemini, provider, configuration]
+concepts: [Google, Gemini, API Configuration]
+citations:
+  - title: Gemini API
+    url: https://ai.google.dev
+  - title: Google AI Studio
+    url: https://aistudio.google.com
 ---
 
 import TLDR from '@site/src/components/TLDR';
 
-# Google
+# Google プロバイダー
 
 <TLDR>
-**このページの要点：** Notemd における Google の目的、設定、ワークフロー上の境界、よくある確認点を説明します。 以下のコマンド、設定キー、拡張子、Provider 名は、プラグイン UI、CLI、ログと対応させるため英語表記のままにしています。
+**GoogleはネイティブのGemini Generative Language APIトランスポートを使用しています。** 現在のプリセットはデフォルトで`gemini-2.0-flash-exp`、`https://generativelanguage.googleapis.com/v1`、`temperature: 0.5`が選択されています。これはOpenAIと互換性のあるプロファイルではありません。
+
+これは[Obsidian AI知識管理ガイド](/docs/pillar-ai-knowledge)の一部です。
 </TLDR>
 
 ## セットアップ
 
-Google の設定は Notemd 設定画面から行います。Provider、モデル、出力先、言語、バッチ処理は独立した項目ではなく、現在のファイル、フォルダー処理、ワークフローのどれに影響するかを確認してください。
+Geminiアクセス機能を持つGoogle AI StudioまたはGoogleのクラウドAPIキーを作成し、`Google`プロバイダープロファイルを追加して、ネイティブのGenerative Language Base URLはそのまま保持します。高速な翻訳や幅広いノート作業にはデフォルトのGemini Flashプロファイルを使用し、より大規模で高性能なGeminiモデルが必要な場合はタスクごとにモデルを上書きします。
+
+OpenAI互換のAPIを通じてGeminiを公開するゲートウェイを明示的に使用していない限り、OpenAI互換のプロファイルにGeminiモデルIDを配置しないでください。
 
 ## エンドポイントと認証
 
-Google のこの部分では、製品の挙動、利用入口、実装上の境界を説明します。UI ボタン、コマンド名、設定キー、拡張子は安定した契約として扱います。
+| フィールド | 現在のプリセット |
+|-------|----------------|
+| 転送 | `google` |
+| APIキー | 必要です |
+| ベース URL | `https://generativelanguage.googleapis.com/v1` |
+| デフォルトモデル | `gemini-2.0-flash-exp` |
+| 温度 | `0.5` |
+| 接続テスト | チャットのみ |
+
+実行時に`/models/{model}:generateContent?key={apiKey}`が呼び出されます。プラグイン内でネイティブなGeminiエンドポイントが接続されている方式上、キーはクエリパラメータとして渡されます。
 
 ## モデル検出
 
-Google のこの部分では、製品の挙動、利用入口、実装上の境界を説明します。UI ボタン、コマンド名、設定キー、拡張子は安定した契約として扱います。
+Googleは`google-models`のディスカバリーモードを使用しています。ディスカバリーにより、APIキーで利用可能なGeminiモデルが返されるはずです。セレクタが空の場合は、同じBase URLでそのキーをテストし、そのアカウントでモデルファミリーが有効になっているかを確認してください。
+
+プロバイダーレジストリでは、既知の出力トークンの上限はモデルに依存しています。長文の翻訳や図解の説明が切り捨てられた場合は、より大きな出力上限を持つGeminiモデルを選択するか、要求される出力サイズを小さくしてください。
 
 ## トラブルシューティング
 
-この節では Google の典型的な失敗を切り分けます。Notemd の診断出力、Provider の HTTP ステータス、モデル名、ネットワーク、レート制限を先に確認します。
+- `400`: モデルIDは通常、ネイティブなGeminiルートと一致しないか、リクエストがモデルがサポートする形状を超えています。
+- `401` または `403`: キーの制限、プロジェクト/API の有効化、およびそのキーが Gemini にアクセスできるかどうかを確認します。
+- `404`: 構成されているAPIバージョンでは、モデルIDは利用できません。
+- このプロファイルではゲートウェイの例が動作しません。ネイティブのGoogleプロバイダの代わりにゲートウェイのプリセットを使用してください。
 
-## 使うべき場面
+## いつ使用するか
 
-Google のこの部分では、製品の挙動、利用入口、実装上の境界を説明します。UI ボタン、コマンド名、設定キー、拡張子は安定した契約として扱います。
+迅速な翻訳や大量のメモの整理、Geminiのコストとパフォーマンスのバランスが直接のOpenAIやAnthropicを使用するよりも優れているワークフローにはGoogleを利用してください。OpenAI互換の推論モデルを扱う必要があるワークフローでは、別のプロバイダを選んだ方が良いでしょう。
+
+---
 
 ## 次のステップ
 
-次に読むページは、いまの作業に直結する Provider 設定、主要機能、バッチ処理、トラブルシューティング、図表出力から選んでください。
+- [LLM プロバイダー](/docs/providers/overview) -- 完全な設定、タスクごとのモデル、および再試行ロジック
+- [翻訳](/docs/features/translation) – 大量の翻訳作業にはGemini Flashが推奨されます

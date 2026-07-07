@@ -1,39 +1,67 @@
 ---
 id: anthropic
 title: Anthropic
-description: Notemd에서 Anthropic의 목적, 설정, 워크플로 경계와 일반적인 점검 항목을 설명합니다.
+description: Anthropic Claude를 설정하세요.
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [anthropic, claude, provider, configuration]
+concepts: [Anthropic, Claude, API Configuration]
+citations:
+  - title: Anthropic API
+    url: https://docs.anthropic.com
+  - title: Claude
+    url: https://www.anthropic.com/claude
 ---
 
 import TLDR from '@site/src/components/TLDR';
 
-# Anthropic
+# Anthropic 제공업체
 
 <TLDR>
-**요약：** Notemd에서 Anthropic의 목적, 설정, 워크플로 경계와 일반적인 점검 항목을 설명합니다. 아래의 명령, 설정 키, 파일 확장자, Provider 이름은 플러그인 UI, CLI, 로그와 정확히 대응하도록 영어로 유지합니다.
+**Anthropic는 OpenAI와 호환되는 전송 방식이 아닌 기본적인 Messages API 전송 방식을 사용합니다.** 현재의 기본 설정은 `claude-3-5-sonnet-20240620`, `https://api.anthropic.com`, `temperature: 0.5`로 지정되어 있습니다. 디버깅할 때는 이를 별도의 프로토콜로 간주해야 합니다.
+
+이것은 [Obsidian AI 지식 관리 가이드](/docs/pillar-ai-knowledge)의 일부입니다.
 </TLDR>
 
-## 설정
+## 설치
 
-Anthropic 설정은 Notemd 설정 화면에서 합니다. Provider, 모델, 출력 경로, 언어, 일괄 처리는 서로 연결되어 있으므로 현재 파일, 폴더 작업, 워크플로 중 어디에 영향을 주는지 확인하세요.
+Anthropic API 키를 생성하고 `Anthropic` 공급자 프로필을 추가하세요. 전용 게이트웨이 프로필을 통해 라우팅하지 않는 한 기본 URL는 네이티브 엔드포인트에 그대로 두세요. 모델 필드에 사용할 Claude 모델 ID를 선택하세요. 기본값은 기존 제품의 기준 상태를 유지합니다.
 
-## 엔드포인트와 인증
+Anthropic는 고품질 요약, 연구 종합, 개념 추출에 적합한 후보입니다. 더 저렴한 서비스 제공업체와 함께 사용할 경우, 그 결과물의 품질이 중요한 작업에만 이를 활용해야 합니다.
 
-Anthropic의 이 부분은 제품 동작, 사용 진입점, 엔지니어링 경계를 설명합니다. UI 버튼, 명령 이름, 설정 키, 확장자는 안정적인 계약으로 봅니다.
+## 엔드포인트 및 인증
 
-## 모델 검색
+| 필드 | 현재 프리셋 |
+|-------|----------------|
+| 전송 | `anthropic` |
+| API 키 | 필수 |
+| 베이스 URL | `https://api.anthropic.com` |
+| 기본 모델 | `claude-3-5-sonnet-20240620` |
+| 온도 | `0.5` |
+| 연결 테스트 | 채팅 전용 |
 
-Anthropic의 이 부분은 제품 동작, 사용 진입점, 엔지니어링 경계를 설명합니다. UI 버튼, 명령 이름, 설정 키, 확장자는 안정적인 계약으로 봅니다.
+런타임은 `x-api-key`와 `anthropic-version: 2023-06-01`를 사용하여 `/v1/messages`에 요청을 보냅니다. 이 프리셋에서는 OpenAI 스타일의 `/v1/chat/completions` 엔드포인트를 설정하지 마십시오. 대신 OpenAI와 호환되는 게이트웨이 프리셋을 사용하십시오.
+
+## 모델 발견
+
+Anthropic은 프로바이더 레지스트리에서 `anthropic-models` 발견 모드를 사용합니다. 키나 계정으로 모델을 나열할 수 없는 경우, 프로필에 알려진 모델 ID를 저장하고 연결 테스트를 통해 유효성을 확인하세요.
+
+이 전송 방식은 OpenAI와 호환되는 제공업체들과는 교체할 수 없습니다. OpenRouter, LiteLLM 또는 다른 게이트웨이를 통해 라우팅되는 Claude 모델은 네이티브 Anthropic 프로필이 아닌 해당 게이트웨이 프로필에 속해야 합니다.
 
 ## 문제 해결
 
-이 절은 Anthropic의 일반적인 실패 원인을 구분합니다. Notemd 진단 출력, Provider HTTP 상태, 모델 이름, 네트워크, 속도 제한을 먼저 확인하세요.
+- `401` 또는 `403`: 키의 범위, 작업 공간 접근 권한, 결제 정보, 그리고 해당 키가 예상된 Anthropic 작업 공간에 속하는지 확인합니다.
+- `404`: 기본 URL가 잘못되었거나 선택한 모델 ID가 계정에서 사용할 수 없습니다.
+- 게이트웨이 스타일의 Claude 모델 ID가 작동하지 않습니다: 네이티브 Anthropic는 네이티브 모델 이름을 요구하므로 프로필을 해당 게이트웨이 제공업체로 이동해 주십시오.
+- 긴 요청은 후반부에 실패합니다: 작업당 모델 출력 크기를 줄이거나, 더 높은 출력 토큰 한도를 가진 모델을 사용하십시오.
 
-## 사용할 때
+## 언제 사용할까요?
 
-Anthropic의 이 부분은 제품 동작, 사용 진입점, 엔지니어링 경계를 설명합니다. UI 버튼, 명령 이름, 설정 키, 확장자는 안정적인 계약으로 봅니다.
+합성 품질, 연구 노트, 혹은 체계적인 문서 작성이 단순한 원가보다 더 중요할 때 Anthropic를 사용하십시오. 일반적인 OpenAI과 호환되는 대체 수단으로 사용해서는 안 되며, 별도의 전송 방식이 바로 그 목적입니다. 프로토콜을 혼용하면 진단이 더 어려워집니다.
+
+---
 
 ## 다음 단계
 
-다음에는 현재 작업 흐름과 직접 연결된 Provider 설정, 핵심 기능, 일괄 처리, 문제 해결, 다이어그램 내보내기 문서를 우선 보세요.
+- [LLM 제공업체](/docs/providers/overview) -- 전체 설정, 작업별 모델, 재시도 로직
+- [문제 해결](/docs/advanced/troubleshooting) -- 401/403 오류 및 연결 오류 수정

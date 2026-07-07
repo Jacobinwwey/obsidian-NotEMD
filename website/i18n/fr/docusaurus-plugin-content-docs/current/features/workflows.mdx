@@ -1,55 +1,142 @@
 ---
 id: workflows
-title: Workflows
-description: Explique le rôle de Workflows dans Notemd, sa configuration, ses limites de workflow et les vérifications courantes.
+title: Flux de travail
+description: Enchaîner plusieurs tâches avec des boutons en un clic
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [workflows, automation, one-click, chaining]
+concepts: [Workflows, Task Chaining, Automation]
+citations:
+  - title: Obsidian
+    url: https://obsidian.md
+  - title: Obsidian API
+    url: https://docs.obsidian.md
 ---
 
 import TLDR from '@site/src/components/TLDR';
 
-# Workflows
+# Flux de travail
 
 <TLDR>
-**Résumé：** Explique le rôle de Workflows dans Notemd, sa configuration, ses limites de workflow et les vérifications courantes. Les commandes, clés de configuration, extensions et noms de Provider ci-dessous restent en anglais afin de correspondre exactement à l’interface, au CLI et aux journaux.
+**Les workflows Notemd relient plusieurs tâches en une seule action à un clic.** Définissez des séquences comme `add-links > extract-concepts > research > diagram` à l’aide d’un DSL simple. Les workflows apparaissent sous forme de boutons dans la barre latérale et exécutent toute la chaîne sur la note ou le dossier actuel. Ils sont fournis avec des workflows prédéfinis ; créez-en de personnalisés dans les paramètres. Chaque étape utilise sa propre configuration de modèle par tâche.
+
+Ceci fait partie du [Obsidian Guide de gestion des connaissances IA](/docs/pillar-ai-knowledge).
 </TLDR>
 
-## Vue d’ensemble
+## Aperçu général
 
-Cette partie de Workflows décrit le comportement produit, les points d’entrée et les limites d’implémentation. Les boutons, commandes, clés et extensions restent des contrats stables.
+Un flux de travail élimine les difficultés liées à l’exécution des tâches une par une. Au lieu de cliquer droit quatre fois pour ajouter des liens, extraire des concepts, rechercher des termes inconnus et générer un diagramme, il suffit de cliquer sur un bouton de la barre latérale et toute la chaîne s’exécute. Notemd gère le séquencement, la propagation des erreurs et la transmission des informations sur l’avancement.
 
-## Fonctionnement
+Les workflows sont définis dans un DSL léger (langage spécifique au domaine). Ils se trouvent dans les paramètres, apparaissent sous forme de boutons cliquables dans la barre latérale Obsidian, et peuvent être appliqués soit à la note actuelle, soit à un dossier entier.
 
-Cette partie de Workflows décrit le comportement produit, les points d’entrée et les limites d’implémentation. Les boutons, commandes, clés et extensions restent des contrats stables.
+## Comment ça marche
 
-### Workflows : workflows et tâches
+### Tuyau d’exécution du flux de travail
 
-Cette partie de Workflows décrit le comportement produit, les points d’entrée et les limites d’implémentation. Les boutons, commandes, clés et extensions restent des contrats stables.
+```mermaid
+graph LR
+    A[Sidebar Button Click] --> B[Parse DSL Definition]
+    B --> C[Resolve Task List]
+    C --> D[Execute Step 1]
+    D --> E{Step Succeeded?}
+    E -->|Yes| F[Execute Step 2]
+    E -->|No| G{Continue on Error?}
+    G -->|Yes| F
+    G -->|No| H[Abort Workflow]
+    F --> I[... Execute Remaining Steps]
+    I --> J[Progress Report / Toast]
+```
 
-### Workflows : explication principale
+1. **Parse** -- La chaîne DSL est divisée en fonction de `>` (ou `>`) pour obtenir une liste ordonnée d’identifiants de tâche.
+2. **Resolve** -- Chaque identifiant correspond à une commande interne (add-links, extract-concepts, research, translate, diagram, etc.).
+3. **Exécuter** -- Les étapes s’exécutent séquentiellement. Chaque étape utilise son fournisseur et son modèle configurés pour tâche.
+4. **Gestion des erreurs** -- Si une étape échoue, le flux de travail soit est interrompu, soit continue vers l’étape suivante, en fonction de votre politique d’erreur.
+5. **Terminé** -- Une notification toast indique le succès ou énumère les étapes qui ont échoué.
 
-Cette partie de Workflows décrit le comportement produit, les points d’entrée et les limites d’implémentation. Les boutons, commandes, clés et extensions restent des contrats stables.
+### Format DSL
 
-### Workflows : workflows et tâches
+Les workflows sont définis comme une séquence d’identifiants de tâches séparés par `>` :
 
-Cette partie de Workflows décrit le comportement produit, les points d’entrée et les limites d’implémentation. Les boutons, commandes, clés et extensions restent des contrats stables.
+```
+process-current-add-links>extract-concepts-current>research-and-summarize
+```
+
+**Identifiants de tâches disponibles :**
+
+| Identifier | Action |
+|------------|--------|
+| `process-current-add-links` | Ajouter des liens wiki à la note active |
+| `extract-concepts-current` | Extraire les concepts de la note active |
+| `research-and-summarize` | Rechercher le texte sélectionné ou le titre de la note |
+| `process-current-translate` | Traduire la note active |
+| `summarize-to-mermaid` | Générer un diagramme à partir de la note active |
+| `generate-from-title` | Générer du contenu à partir du titre de la note |
+| `extract-original-text` | Extraire le texte d’origine (pour l’OCR / du contenu scanné) |
+
+**Variantes au niveau du dossier** remplacent `current` par `folder` dans le nom de l’identifiant.
+
+### Flux de travail prédéfinis vs. flux de travail personnalisés
+
+Notemd est livré avec des flux de travail prêts à l’emploi pour les modèles courants :
+
+| Flux de travail | Chaîne | Cas d'utilisation |
+|----------|-------|----------|
+| **Extraction en un clic** | ajouter-des-liens > extraire-des-concepts > rechercher | Traiter un article de recherche en une seule passe |
+| **Pipeline complet** | ajouter-des-liens > extraire-des-concepts > rechercher > diagramme | Extraction complète des connaissances avec visualisation |
+| **Traduire + Lien** | Traduire > Ajouter des liens | Traduisez ensuite les concepts en langue cible |
+
+Les **flux de travail personnalisés** sont créés dans les paramètres :
+
+1. Ouvrez **Paramètres** --> **Notemd** --> **Flux de travail**
+2. Cliquez sur **« Ajouter un flux de travail »**
+3. Entrez la chaîne DSL (par exemple, `process-current-add-links>extract-concepts-current`)
+4. Donnez-lui un nom d’affichage (par exemple, « Lien rapide + Extraction »).
+5. Le nouveau bouton apparaît immédiatement dans la barre latérale
 
 ## Configuration
 
-La configuration de Workflows se fait dans les paramètres Notemd. Provider, modèle, sortie, langue et traitement par lots interagissent; identifiez si le changement touche le fichier courant, un dossier ou un workflow.
+| Configuration | Par défaut | Appliquer |
+|---------|---------|--------|
+| `workflows` | Ensemble prédéfini | Tableau des définitions de flux de travail (nom + DSL) |
+| `workflowContinueOnError` | `true` | Passez à l'étape suivante si l'étape actuelle échoue |
+| `workflowShowProgress` | `true` | Afficher une notification de progression après chaque étape terminée |
 
-### Workflows : configuration et modèles
+### Modèles par tâche dans les workflows
 
-Cette partie de Workflows décrit le comportement produit, les points d’entrée et les limites d’implémentation. Les boutons, commandes, clés et extensions restent des contrats stables.
+Chaque étape d’un flux de travail utilise sa propre configuration de modèle par tâche. Vous n’avez pas besoin de spécifier des modèles dans le DSL lui-même. L’ordre de résolution est :
+
+1. Fournisseur/modèle par tâche si `useMultiModelSettings` est activé
+2. Globale `activeProvider` sinon
+
+Cela signifie que `add-links` peut s’exécuter sur DeepSeek tandis que `research` s’exécute sur GPT-4o – tout cela au sein d’un même clic de flux de travail.
 
 ## Exemple
 
-Cette partie de Workflows décrit le comportement produit, les points d’entrée et les limites d’implémentation. Les boutons, commandes, clés et extensions restent des contrats stables.
+Vous venez d’importer un PDF d’un article sur l’apprentissage automatique dans votre coffre-fort et vous souhaitez une extraction complète des connaissances :
 
-## Workflows : recommandations suivantes
+1. Ouvrez la note importée
+2. Cliquez sur le bouton de la barre latérale **"Full Pipeline"**
+3. Notemd exécute :
+   - **Étape 1** : Ajouter des liens wiki -- `[[attention mechanism]]`, `[[transformer]]`, etc.
+   - **Étape 2** : Extraire les concepts – crée des notes de concept dans votre dossier de concepts
+   - **Étape 3** : Recherche – résume les sources Web pour les termes clés
+   - **Étape 4** : Diagramme -- génère un Mermaid organigramme de la structure du document
+4. Après environ 30 secondes, votre note contient des liens, des notes de concept sont créées, des recherches y sont ajoutées, et un fichier de diagramme est enregistré
 
-Cette partie de Workflows décrit le comportement produit, les points d’entrée et les limites d’implémentation. Les boutons, commandes, clés et extensions restent des contrats stables.
+Tout en un seul clic.
 
-## Étapes suivantes
+## Conseils
 
-Pour continuer, choisissez la page qui correspond directement à votre chaîne de travail: Provider, fonction principale, traitement par lots, dépannage ou export de diagrammes.
+- **Commencez par des flux de travail prédéfinis** – ils couvrent les schémas les plus courants. Personnalisez-les uniquement lorsque vous avez besoin d’une séquence différente.
+- **Activer `workflowContinueOnError`** -- une étape de diagramme qui échoue ne doit pas interrompre l’ensemble du pipeline.
+- **Utilisez les workflows de dossier** pour le traitement en masse – faites un clic droit sur un dossier, sélectionnez un workflow, et chaque note sera traitée.
+- **Donnez des noms clairs aux flux de travail** – l’espace dans la barre latérale est limité. Utilisez des noms courts et orientés vers une action tels que « Extraction rapide » ou « Traduire + Lier ».
+
+---
+
+## Prochaines étapes
+
+- [Recherche](./research) -- Comprendre ce que fait l'étape de recherche avant de l'ajouter aux workflows
+- [Liens Wiki](./wiki-links) -- Fonctionnalité de liaison de base utilisée dans la plupart des flux de travail
+- [Notes de concept](./concept-notes) -- Extraction de concepts en tant qu’étape du flux de travail
+- [Traitement par lots](/docs/advanced/batch-processing) -- Concurrence et rapport de progression pour les workflows de dossiers

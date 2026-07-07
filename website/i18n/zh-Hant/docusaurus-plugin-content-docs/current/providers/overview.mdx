@@ -1,9 +1,16 @@
 ---
 id: overview
 title: LLM 提供商
-description: 說明 LLM 提供商 在 Notemd 中的用途、設定、工作流程邊界與常見排查路徑。
+description: 設定 36 個 LLM 提供者——雲端、閘道及本地——並為每個任務選擇模型
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [LLM providers, API, OpenAI, Anthropic, Google, DeepSeek, Qwen, Ollama, per-task model]
+concepts: [LLM Integration, API Providers, Per-Task Models, OpenAI Compatible, Ollama, China Providers]
+citations:
+  - title: OpenAI API
+    url: https://platform.openai.com
+  - title: Anthropic API
+    url: https://docs.anthropic.com
 ---
 
 import TLDR from '@site/src/components/TLDR';
@@ -11,77 +18,172 @@ import TLDR from '@site/src/components/TLDR';
 # LLM 提供商
 
 <TLDR>
-**本頁說明：** 說明 LLM 提供商 在 Notemd 中的用途、設定、工作流程邊界與常見排查路徑。 以下命令、設定鍵、檔案副檔名與 Provider 名稱保留英文，以便和外掛介面、CLI 與日誌逐一對應。
+**Notemd 支持 4 種傳輸類型下的 36 個 LLM 提供商。** 所有的 API 呼叫皆使用原始的 HTTP（無需 SDK），並具備自動重試、傳輸方式回退以及 5 分鐘的回應快取功能。透過依任務選擇模型，您可以使用低成本模型進行概念抽取，或使用強大模型進行研究。對於本地提供商（Ollama、LMStudio），不需要 API 金鑰。
 </TLDR>
 
-## Provider 分類
+這是[Obsidian AI知識管理指南](/docs/pillar-ai-knowledge)的一部分。
 
-LLM 提供商 的這一部分說明產品行為、使用入口與工程邊界。介面按鈕、命令名稱、設定鍵與檔案副檔名是穩定契約，翻譯不會改變實際執行名稱。
+## 供應商類別
 
-### 云端 Provider
+### 雲端服務供應商
 
-LLM 提供商 的這一部分說明產品行為、使用入口與工程邊界。介面按鈕、命令名稱、設定鍵與檔案副檔名是穩定契約，翻譯不會改變實際執行名稱。
+| 供應商 | 預設基準 URL | 預設模型 | 溫度 |
+|----------|-----------------|---------------|-------------|
+| **DeepSeek** | `api.deepseek.com` | `deepseek-v4-pro` | 0.5 |
+| **OpenAI** | `api.openai.com/v1` | `gpt-4o` | 0.5 |
+| **Anthropic** | `api.anthropic.com` | `claude-3-5-sonnet-20240620` | 0.5 |
+| **Google** | `generativelanguage.googleapis.com/v1` | `gemini-2.0-flash-exp` | 0.5 |
+| **Mistral** | `api.mistral.ai/v1` | `mistral-large-latest` | 0.5 |
+| **xAI** | `api.x.ai/v1` | `grok-4` | 0.7 |
+| **Cerebras** | `api.cerebras.ai/v1` | `gpt-oss-120b` | 0.5 |
+| **Fireworks** | `api.fireworks.ai/inference/v1` | `kimi-k2p5` | 0.5 |
+| **Nebius** | `api.studio.nebius.com/v1` | `openai/gpt-oss-120b` | 0.3 |
 
-### 网關 / 代理 Provider
+### 網關／代理供應商
 
-LLM 提供商 的這一部分說明產品行為、使用入口與工程邊界。介面按鈕、命令名稱、設定鍵與檔案副檔名是穩定契約，翻譯不會改變實際執行名稱。
+| 供應商 | 預設基準 URL | 預設模型 | 備註 |
+|----------|-----------------|---------------|-------|
+| **OpenRouter** | `openrouter.ai/api/v1` | `anthropic/claude-3.7-sonnet` | 新增 `HTTP-Referer` + `X-Title` 標頭 |
+| **GitHub Models** | `models.github.ai/inference` | `gpt-4o-mini` | 新增 `X-GitHub-Api-Version` 標頭 |
+| **AIHubMix** | `aihubmix.com/v1` | `gpt-4o-mini` | 新增 `APP-Code` 標頭 |
+| **PPIO** | `api.ppinfra.com/v3/openai` | `qwen/qwen3-32b` | |
+| **Hugging Face** | `router.huggingface.co/v1` | `openai/gpt-oss-120b` | |
+| **Vercel AI Gateway** | `ai-gateway.vercel.sh/v1` | `anthropic/claude-sonnet-4.5` | |
+| **Requesty** | `router.requesty.ai/v1` | `anthropic/claude-3-7-sonnet-latest` | |
+| **Together** | `api.together.xyz/v1` | `meta-llama/Meta-Llama-3.1-70B-Instruct-Turbo` | |
+| **LiteLLM** | `localhost:4000/v1` | `your-proxy-model` | 可選的 API 金鑰 |
+| **新的 API** | `localhost:3000/v1` | `gpt-4.1` | 可選的 API 金鑰 |
+| **OpenAI Compatible** | （使用者自訂） | `your-model-id` | 自訂端點 |
 
-### 中国區 Provider
+### 中國供應商
 
-LLM 提供商 的這一部分說明產品行為、使用入口與工程邊界。介面按鈕、命令名稱、設定鍵與檔案副檔名是穩定契約，翻譯不會改變實際執行名稱。
+| 供應商 | 預設基準 URL | 預設模型 | 備註 |
+|----------|-----------------|---------------|-------|
+| **Qwen** | `dashscope.aliyuncs.com/compatible-mode/v1` | `qwen3-235b-a22b` | Alibaba DashScope |
+| **Qwen Code** | `dashscope.aliyuncs.com/compatible-mode/v1` | `qwen3-coder-plus` | 以編程為核心 |
+| **Doubao** | `ark.cn-beijing.volces.com/api/v3` | （需要端點 ID） | ByteDance Volcengine |
+| **Moonshot** | `api.moonshot.cn/v1` | `kimi-k2-0905-preview` | Kimi |
+| **Xiaomi MiMo** | `api.xiaomimimo.com/v1` | `mimo-v2.5-pro` | |
+| **GLM** | `open.bigmodel.cn/api/paas/v4` | `glm-5` | 中國的 Zhipu 終端點 |
+| **Z AI** | `api.z.ai/api/paas/v4` | `glm-5` | Zhipu，國際端點 |
+| **MiniMax** | `api.minimaxi.com/v1` | `MiniMax-M2.7` | |
+| **Baidu Qianfan** | `qianfan.baidubce.com/v2` | `ernie-4.5-turbo-32k` | |
+| **SiliconFlow** | `api.siliconflow.cn/v1` | `Qwen/QwQ-32B` | 模型託管平台 |
+| **Huawei Cloud MaaS** | `api.modelarts-maas.com/v1` | `DeepSeek-V3` | |
 
-### 本地 Provider
+**Doubao 需要一個 Ark 終點 ID**（格式：`ep-xxxxxxxx-xxxx-xxxx`）。預設的佔位符必須被替換。
 
-LLM 提供商 的這一部分說明產品行為、使用入口與工程邊界。介面按鈕、命令名稱、設定鍵與檔案副檔名是穩定契約，翻譯不會改變實際執行名稱。
+### 本地供應商
 
-## 按任務选擇模型
+| 供應商 | 預設基準 URL | 預設模型 | 備註 |
+|----------|-----------------|---------------|-------|
+| **Ollama** | `localhost:11434/api` | `llama3` | 沒有 API 金鑰。正在進行 NDJSON 流式傳輸。透過 `/api/tags` 進行模型探索 |
+| **LMStudio** | `localhost:1234/v1` | `local-model` | 以承載令牌的方式傳送 `"EMPTY"`。支援 OpenAI 的發現功能 |
+| **OVMS** | `localhost:8000/v3` | `openvino-model` | OpenVINO 模型伺服器 |
+| **Azure OpenAI** | （使用者自訂） | `gpt-4o` | 部署名位於 URL 中。`api-key` 標頭 |
 
-LLM 提供商 的這一部分說明產品行為、使用入口與工程邊界。介面按鈕、命令名稱、設定鍵與檔案副檔名是穩定契約，翻譯不會改變實際執行名稱。
+## 每任務模型選擇
 
-### LLM 提供商：工作流程與任務
+Notemd 支持為每個任務配置獨立的供應商與模型。可透過 `useMultiModelSettings: true` 啟用。
 
-LLM 提供商 的這一部分說明產品行為、使用入口與工程邊界。介面按鈕、命令名稱、設定鍵與檔案副檔名是穩定契約，翻譯不會改變實際執行名稱。
+### 可用的任務
 
-### LLM 提供商：核心說明
+| 任務 | 設定金鑰 | 預設供應商 |
+|------|-------------|-----------------|
+| 新增連結（維基連結插入） | `addLinksProvider` / `addLinksModel` | DeepSeek |
+| 研究（網路搜尋 + 總結） | `researchProvider` / `researchModel` | DeepSeek |
+| 根據標題生成 | `generateTitleProvider` / `generateTitleModel` | DeepSeek |
+| 翻譯 | `translateProvider` / `translateModel` | DeepSeek |
+| 圖表產生 | `summarizeToMermaidProvider` / `Model` | DeepSeek |
+| 概念抽取 | `extractConceptsProvider` / `Model` | DeepSeek |
+| 原始文字提取 | `extractOriginalTextProvider` / `Model` | DeepSeek |
 
-LLM 提供商 的這一部分說明產品行為、使用入口與工程邊界。介面按鈕、命令名稱、設定鍵與檔案副檔名是穩定契約，翻譯不會改變實際執行名稱。
+### 解析順序
 
-### 推荐配置
+1. 如果 `useMultiModelSettings` 為開啟狀態 → 使用該任務專用的提供者與模型
+2. 如果任務模型覆寫值為空 → 回退至提供者的預設模型
+3. 如果任務提供者無效 → 回退至全局 `activeProvider`
+4. 如果 `useMultiModelSettings` 關閉 → 所有任務都會使用全局的 `activeProvider`
 
-LLM 提供商 的設定應從 Notemd 設定入口完成。Provider、模型、輸出路徑、語言與批次處理不是彼此獨立的開關；修改前應確認它影響目前檔案、資料夾任務或一鍵工作流程。
+### 推薦的設定
 
-## API 调用架構
+```
+# Researcher: power for research, cheap for everything else
+activeProvider: DeepSeek
+extractConceptsProvider: DeepSeek
+researchProvider: OpenAI        # GPT-4o for better research quality
+summarizeToMermaidProvider: DeepSeek
 
-LLM 提供商 的這一部分說明產品行為、使用入口與工程邊界。介面按鈕、命令名稱、設定鍵與檔案副檔名是穩定契約，翻譯不會改變實際執行名稱。
+# Privacy-first: local only
+activeProvider: Ollama
+addLinksProvider: Ollama
+extractConceptsProvider: Ollama
 
-### 传輸层
+# Budget bilingual
+activeProvider: DeepSeek
+translateProvider: Google      # Gemini Flash for translation
+researchProvider: SiliconFlow  # Cheaper China-based routing
+```
 
-LLM 提供商 的這一部分說明產品行為、使用入口與工程邊界。介面按鈕、命令名稱、設定鍵與檔案副檔名是穩定契約，翻譯不會改變實際執行名稱。
+## API 呼叫架構
 
-### 重试逻辑
+### 傳輸層
 
-LLM 提供商 的這一部分說明產品行為、使用入口與工程邊界。介面按鈕、命令名稱、設定鍵與檔案副檔名是穩定契約，翻譯不會改變實際執行名稱。
+1. **Obsidian `requestUrl`** — 主要版本（內建，適用於所有平台）
+2. **桌面版 HTTP** — Node.js `http`/`https` 模組（串流處理 + 長時間請求）
+3. **Web `fetch`** — 當 Node.js 模組無法使用時的備用方案
 
-### 响應缓存
+當網路出現暫時性錯誤時，此外掛程式會自動在不同的傳輸方式之間切換。
 
-LLM 提供商 的這一部分說明產品行為、使用入口與工程邊界。介面按鈕、命令名稱、設定鍵與檔案副檔名是穩定契約，翻譯不會改變實際執行名稱。
+### 重試邏輯
+
+- **正常模式** (`enableStableApiCall: false`)：僅嘗試一次。若出現暫時性失敗，會自動升級為穩定的重試機制。
+- **穩定重試模式** (`enableStableApiCall: true`)：最多進行 4 次嘗試（1 次初次嘗試 + 3 次重試），每次間隔 5 秒。
+- **會觸發重試的暫時性錯誤**：`err_connection_closed`, `err_connection_reset`, `err_timed_out`, `econnreset`, `econnaborted`, `etimedout`, `socket hang up`, `network request failed`
+- **無法重試**：HTTP 400、401、403、404
+
+### 回應快取
+
+以供應商 + 模型 + 温度 + 提示詞 + 內容作為鍵值，建立5分鐘內存的LRU快取。在5分鐘內的後續相同請求可立即返回快取中的結果。
 
 ### 推理模型處理
 
-LLM 提供商 的這一部分說明產品行為、使用入口與工程邊界。介面按鈕、命令名稱、設定鍵與檔案副檔名是穩定契約，翻譯不會改變實際執行名稱。
+不支援 `system` 角色（DeepSeek R1、OpenAI o1/o3/o4/gpt-5）的模型，會自動將系統提示與使用者提示合併為一則單一的用戶訊息。
 
-### Token 估算
+DeepSeek-specific： `thinkingEnabled` 會在請求中加入 `{ thinking: { type: 'enabled' } }`。 `reasoningEffort`（低/中/高）會以 `reasoning_effort` 的形式傳遞。當啟用思考功能時，會驗證最大輸出代碼數量是否 ≥ 8000。
 
-LLM 提供商 的這一部分說明產品行為、使用入口與工程邊界。介面按鈕、命令名稱、設定鍵與檔案副檔名是穩定契約，翻譯不會改變實際執行名稱。
+### 令牌估計
 
-## 模型發現
+`estimateTokens(text)`: `Math.ceil(text.length / 4)` — 每個令牌四個字元的規則。用於在傳送至 LLM 之前強制符合 `maxResearchContentTokens` 的要求。
 
-LLM 提供商 的這一部分說明產品行為、使用入口與工程邊界。介面按鈕、命令名稱、設定鍵與檔案副檔名是穩定契約，翻譯不會改變實際執行名稱。
+尚未實作成本追蹤功能。
 
-## 快速開始
+## 模型探索
 
-LLM 提供商 的這一部分說明產品行為、使用入口與工程邊界。介面按鈕、命令名稱、設定鍵與檔案副檔名是穩定契約，翻譯不會改變實際執行名稱。
+| 模式 | 供應商 | 端點 |
+|------|-----------|----------|
+| `ollama-tags` | Ollama | `/api/tags` |
+| `google-models` | Google | 模型清單 API |
+| `anthropic-models` | Anthropic | 模型清單 API |
+| `openai-compatible-models` | DeepSeek、Qwen、Mistral 等等。 | `/v1/models` |
+| `openrouter-models` | OpenRouter | 模型清單 API |
+| `github-models` | GitHub Models | 推論 API |
+| `none` | Azure OpenAI | 已停用（需要部署名） |
 
-## 下一步
+## 快速入門
 
-繼續閱讀相鄰頁面時，優先選擇與目前任務鏈直接相關的主題：Provider 設定、核心功能、批次處理、疑難排解或圖表匯出。
+1. **選擇供應商** — DeepSeek（中國）、OpenAI（國際）或 Ollama（本地/免費）
+2. **輸入 API 金鑰** — 設定 → Notemd → 提供者 → API 金鑰
+3. **測試連線** — 按下測試按鈕
+4. **選用：單任務模型** — 啟用 `useMultiModelSettings` 並分別進行設定
+
+對於 Ollama：不需要 API 金鑰。只要確保 `ollama serve` 正在運作即可。
+
+---
+
+## 接下來的步驟
+
+- 📝 [概念說明](/docs/features/concept-notes) — 使用任務級別的抽取模型
+- 🎨 [圖表](/docs/features/diagrams) — 使用每任務圖表模型
+- 🔍 [研究](/docs/features/research) — 使用專為研究設計的模型
+- ⚙️ [Configuration](/docs/getting-started/configuration) — 完整設定參考手冊

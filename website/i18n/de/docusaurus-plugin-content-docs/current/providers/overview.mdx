@@ -1,87 +1,189 @@
 ---
 id: overview
-title: LLM-Anbieter
-description: Erläutert Zweck, Konfiguration, Workflow-Grenzen und typische Prüfungen für LLM-Anbieter in Notemd.
+title: LLM Anbieter
+description: Konfigurieren Sie 36 LLM Anbieter – Cloud, Gateway und lokal – mit einer pro-Aufgabe-Modellauswahl
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [LLM providers, API, OpenAI, Anthropic, Google, DeepSeek, Qwen, Ollama, per-task model]
+concepts: [LLM Integration, API Providers, Per-Task Models, OpenAI Compatible, Ollama, China Providers]
+citations:
+  - title: OpenAI API
+    url: https://platform.openai.com
+  - title: Anthropic API
+    url: https://docs.anthropic.com
 ---
 
 import TLDR from '@site/src/components/TLDR';
 
-# LLM-Anbieter
+# LLM Anbieter
 
 <TLDR>
-**Kurzfassung：** Erläutert Zweck, Konfiguration, Workflow-Grenzen und typische Prüfungen für LLM-Anbieter in Notemd. Die folgenden Befehle, Konfigurationsschlüssel, Dateiendungen und Provider-Namen bleiben englisch, damit sie exakt zur Plugin-Oberfläche, CLI und zu Logs passen.
+**Notemd unterstützt 36 LLM-Anbieter über 4 Transporttypen.** Alle API-Aufrufe verwenden rohes HTTP (ohne SDKs) mit automatischem Wiederholungsversuch, Transport-Fallback und 5-minütiger Antwortcaching. Die Auswahl des Modells pro Aufgabe ermöglicht es Ihnen, günstige Modelle für die Konzeptextraktion sowie leistungsstarke Modelle für Forschungszwecke zu verwenden. Für lokale Anbieter (Ollama, LMStudio) ist kein API-Schlüssel erforderlich.
 </TLDR>
 
-## Provider-Kategorien
+Dies ist ein Teil des [Obsidian AI-Know-how-Management-Leitfadens](/docs/pillar-ai-knowledge).
 
-Dieser Teil von LLM-Anbieter beschreibt Produktverhalten, Einstiegspunkte und technische Grenzen. UI-Schaltflächen, Befehle, Schlüssel und Dateiendungen sind stabile Verträge.
+## Kategorien von Anbietern
 
-### LLM-Anbieter: Konfiguration und Modelle
+### Cloud-Anbieter
 
-Dieser Teil von LLM-Anbieter beschreibt Produktverhalten, Einstiegspunkte und technische Grenzen. UI-Schaltflächen, Befehle, Schlüssel und Dateiendungen sind stabile Verträge.
+| Anbieter | Standardbasis URL | Standardmodell | Temperatur |
+|----------|-----------------|---------------|-------------|
+| **DeepSeek** | `api.deepseek.com` | `deepseek-v4-pro` | 0.5 |
+| **OpenAI** | `api.openai.com/v1` | `gpt-4o` | 0.5 |
+| **Anthropic** | `api.anthropic.com` | `claude-3-5-sonnet-20240620` | 0.5 |
+| **Google** | `generativelanguage.googleapis.com/v1` | `gemini-2.0-flash-exp` | 0.5 |
+| **Mistral** | `api.mistral.ai/v1` | `mistral-large-latest` | 0.5 |
+| **xAI** | `api.x.ai/v1` | `grok-4` | 0.7 |
+| **Cerebras** | `api.cerebras.ai/v1` | `gpt-oss-120b` | 0.5 |
+| **Fireworks** | `api.fireworks.ai/inference/v1` | `kimi-k2p5` | 0.5 |
+| **Nebius** | `api.studio.nebius.com/v1` | `openai/gpt-oss-120b` | 0.3 |
 
-### LLM-Anbieter: Konfiguration und Modelle
+### Gateway-/Proxy-Anbieter
 
-Dieser Teil von LLM-Anbieter beschreibt Produktverhalten, Einstiegspunkte und technische Grenzen. UI-Schaltflächen, Befehle, Schlüssel und Dateiendungen sind stabile Verträge.
+| Anbieter | Standardbasis URL | Standardmodell | Notizen |
+|----------|-----------------|---------------|-------|
+| **OpenRouter** | `openrouter.ai/api/v1` | `anthropic/claude-3.7-sonnet` | Fügt die Header `HTTP-Referer` + `X-Title` hinzu |
+| **GitHub Models** | `models.github.ai/inference` | `gpt-4o-mini` | Fügt den Header `X-GitHub-Api-Version` hinzu |
+| **AIHubMix** | `aihubmix.com/v1` | `gpt-4o-mini` | Fügt den Header `APP-Code` hinzu |
+| **PPIO** | `api.ppinfra.com/v3/openai` | `qwen/qwen3-32b` | |
+| **Hugging Face** | `router.huggingface.co/v1` | `openai/gpt-oss-120b` | |
+| **Vercel AI Gateway** | `ai-gateway.vercel.sh/v1` | `anthropic/claude-sonnet-4.5` | |
+| **Requesty** | `router.requesty.ai/v1` | `anthropic/claude-3-7-sonnet-latest` | |
+| **Together** | `api.together.xyz/v1` | `meta-llama/Meta-Llama-3.1-70B-Instruct-Turbo` | |
+| **LiteLLM** | `localhost:4000/v1` | `your-proxy-model` | Optionale API-Schlüssel |
+| **Neu API** | `localhost:3000/v1` | `gpt-4.1` | Optionale API-Schlüssel |
+| **OpenAI Compatible** | (von dem Benutzer konfiguriert) | `your-model-id` | Benutzerdefinierter Endpunkt |
 
-### LLM-Anbieter: Konfiguration und Modelle
+### Chinesische Anbieter
 
-Dieser Teil von LLM-Anbieter beschreibt Produktverhalten, Einstiegspunkte und technische Grenzen. UI-Schaltflächen, Befehle, Schlüssel und Dateiendungen sind stabile Verträge.
+| Anbieter | Standardbasis URL | Standardmodell | Notizen |
+|----------|-----------------|---------------|-------|
+| **Qwen** | `dashscope.aliyuncs.com/compatible-mode/v1` | `qwen3-235b-a22b` | Alibaba DashScope |
+| **Qwen Code** | `dashscope.aliyuncs.com/compatible-mode/v1` | `qwen3-coder-plus` | kodierungsorientiert |
+| **Doubao** | `ark.cn-beijing.volces.com/api/v3` | (Ein Endpunkt-ID ist erforderlich) | ByteDance Volcengine |
+| **Moonshot** | `api.moonshot.cn/v1` | `kimi-k2-0905-preview` | Kimi |
+| **Xiaomi MiMo** | `api.xiaomimimo.com/v1` | `mimo-v2.5-pro` | |
+| **GLM** | `open.bigmodel.cn/api/paas/v4` | `glm-5` | Zhipu, chinesischer Endpunkt |
+| **Z AI** | `api.z.ai/api/paas/v4` | `glm-5` | Zhipu, internationaler Endpunkt |
+| **MiniMax** | `api.minimaxi.com/v1` | `MiniMax-M2.7` | |
+| **Baidu Qianfan** | `qianfan.baidubce.com/v2` | `ernie-4.5-turbo-32k` | |
+| **SiliconFlow** | `api.siliconflow.cn/v1` | `Qwen/QwQ-32B` | Modell-Hosting-Plattform |
+| **Huawei Cloud MaaS** | `api.modelarts-maas.com/v1` | `DeepSeek-V3` | |
 
-### LLM-Anbieter: Konfiguration und Modelle
+**Doubao benötigt eine Ark-Endpunkt-ID** (Format: `ep-xxxxxxxx-xxxx-xxxx`). Der Standard-Ersatztext muss ersetzt werden.
 
-Dieser Teil von LLM-Anbieter beschreibt Produktverhalten, Einstiegspunkte und technische Grenzen. UI-Schaltflächen, Befehle, Schlüssel und Dateiendungen sind stabile Verträge.
+### Lokale Anbieter
+
+| Anbieter | Standardbasis URL | Standardmodell | Notizen |
+|----------|-----------------|---------------|-------|
+| **Ollama** | `localhost:11434/api` | `llama3` | Kein API-Schlüssel. NDJSON-Streaming. Modellentdeckung über `/api/tags` |
+| **LMStudio** | `localhost:1234/v1` | `local-model` | Sendet `"EMPTY"` als Trägertoken. Entdeckung, kompatibel mit OpenAI |
+| **OVMS** | `localhost:8000/v3` | `openvino-model` | OpenVINO Modellserver |
+| **Azure OpenAI** | (von dem Benutzer konfiguriert) | `gpt-4o` | Namens des Deployments in URL. `api-key`-Header |
 
 ## Modellauswahl pro Aufgabe
 
-Dieser Teil von LLM-Anbieter beschreibt Produktverhalten, Einstiegspunkte und technische Grenzen. UI-Schaltflächen, Befehle, Schlüssel und Dateiendungen sind stabile Verträge.
+Notemd unterstützt einen eigenständigen Anbieter und ein eigenständiges Modell für jede Aufgabe. Aktivieren Sie es mit `useMultiModelSettings: true`.
 
-### LLM-Anbieter: Workflows und Aufgaben
+### Verfügbare Aufgaben
 
-Dieser Teil von LLM-Anbieter beschreibt Produktverhalten, Einstiegspunkte und technische Grenzen. UI-Schaltflächen, Befehle, Schlüssel und Dateiendungen sind stabile Verträge.
+| Aufgabe | Einstellungen-Schlüssel | Standardanbieter |
+|------|-------------|-----------------|
+| Links hinzufügen (Einfügung eines Wiki-Links) | `addLinksProvider` / `addLinksModel` | DeepSeek |
+| Recherche (Websuche + Zusammenfassung) | `researchProvider` / `researchModel` | DeepSeek |
+| Erstellen aus Titel | `generateTitleProvider` / `generateTitleModel` | DeepSeek |
+| Übersetzung | `translateProvider` / `translateModel` | DeepSeek |
+| Diagrammgenerierung | `summarizeToMermaidProvider` / `Model` | DeepSeek |
+| Konzeptextraktion | `extractConceptsProvider` / `Model` | DeepSeek |
+| Extraktion des Originaltextes | `extractOriginalTextProvider` / `Model` | DeepSeek |
 
-### LLM-Anbieter: zentrale Erläuterung
+### Auflösungsreihenfolge
 
-Dieser Teil von LLM-Anbieter beschreibt Produktverhalten, Einstiegspunkte und technische Grenzen. UI-Schaltflächen, Befehle, Schlüssel und Dateiendungen sind stabile Verträge.
+1. Wenn `useMultiModelSettings` aktiv ist → verwenden Sie den für die Aufgabe spezifischen Anbieter + Modell
+2. Wenn die Task-Modell-Überwriteung leer ist → weichen Sie auf das Standardmodell des Anbieters aus
+3. Wenn der Aufgabenzuweiser ungültig ist → wechseln auf den globalen `activeProvider`
+4. Wenn `useMultiModelSettings` ausgeschaltet ist → alle Aufgaben verwenden das globale `activeProvider`
 
-### LLM-Anbieter: Konfiguration und Modelle
+### Empfohlene Konfigurationen
 
-LLM-Anbieter wird in den Notemd-Einstellungen konfiguriert. Provider, Modell, Ausgabepfad, Sprache und Batch-Verarbeitung greifen ineinander; klären Sie, ob die Änderung Datei-, Ordner- oder Workflow-Aufgaben betrifft.
+```
+# Researcher: power for research, cheap for everything else
+activeProvider: DeepSeek
+extractConceptsProvider: DeepSeek
+researchProvider: OpenAI        # GPT-4o for better research quality
+summarizeToMermaidProvider: DeepSeek
 
-## Architektur der API-Aufrufe
+# Privacy-first: local only
+activeProvider: Ollama
+addLinksProvider: Ollama
+extractConceptsProvider: Ollama
 
-Dieser Teil von LLM-Anbieter beschreibt Produktverhalten, Einstiegspunkte und technische Grenzen. UI-Schaltflächen, Befehle, Schlüssel und Dateiendungen sind stabile Verträge.
+# Budget bilingual
+activeProvider: DeepSeek
+translateProvider: Google      # Gemini Flash for translation
+researchProvider: SiliconFlow  # Cheaper China-based routing
+```
 
-### Transportschichten
+## API Aufrufarchitektur
 
-Dieser Teil von LLM-Anbieter beschreibt Produktverhalten, Einstiegspunkte und technische Grenzen. UI-Schaltflächen, Befehle, Schlüssel und Dateiendungen sind stabile Verträge.
+### Transportebenen
+
+1. **Obsidian `requestUrl`** — primär (eingebaut, funktioniert auf allen Plattformen)
+2. **Desktop HTTP** — Node.js `http`/`https`-Module (Streaming + lange Anfragen)
+3. **Web `fetch`** – Rückfall, wenn Node.js-Module nicht verfügbar sind
+
+Der Plugin wechselt bei vorübergehenden Netzwerkfehlern automatisch zwischen den Transportmethoden.
 
 ### Wiederholungslogik
 
-Dieser Teil von LLM-Anbieter beschreibt Produktverhalten, Einstiegspunkte und technische Grenzen. UI-Schaltflächen, Befehle, Schlüssel und Dateiendungen sind stabile Verträge.
+- **Normalmodus** (`enableStableApiCall: false`): Einzelversuch. Bei vorübergehendem Fehler wird automatisch auf einen stabilen Neversuch umgestiegen.
+- **Stabiler Wiederholungsmodus** (`enableStableApiCall: true`): Bis zu 4 Versuche (1 + 3 Wiederholungen) mit 5-Sekunden-Intervallen.
+- **Vorübergehende Fehler, die eine Wiederholung auslösen**: `err_connection_closed`, `err_connection_reset`, `err_timed_out`, `econnreset`, `econnaborted`, `etimedout`, `socket hang up`, `network request failed`
+- **Nicht wiederholbar**: HTTP 400, 401, 403, 404
 
-### Antwort-Cache
+### Antwort-Caching
 
-Dieser Teil von LLM-Anbieter beschreibt Produktverhalten, Einstiegspunkte und technische Grenzen. UI-Schaltflächen, Befehle, Schlüssel und Dateiendungen sind stabile Verträge.
+5-minütiger In-Memory-LRU-Cache, der nach Provider + Modell + Temperatur + Prompt + Inhalt keyt wird. Nachfolgende identische Anfragen innerhalb von 5 Minuten liefern sofort die aus dem Cache geladenen Ergebnisse.
 
-### LLM-Anbieter: Konfiguration und Modelle
+### Verarbeitung von Reasoning-Modellen
 
-Dieser Teil von LLM-Anbieter beschreibt Produktverhalten, Einstiegspunkte und technische Grenzen. UI-Schaltflächen, Befehle, Schlüssel und Dateiendungen sind stabile Verträge.
+Modelle, die die `system`-Rolle nicht unterstützen (DeepSeek R1, OpenAI o1/o3/o4/gpt-5), kombinieren automatisch die System- und Benutzereingaben zu einer einzigen Benutzernachricht.
+
+DeepSeek-spezifisch: `thinkingEnabled` fügt `{ thinking: { type: 'enabled' } }` zur Anfrage hinzu. `reasoningEffort` (niedrig/mittel/hoch) wird als `reasoning_effort` übergeben. Es wird überprüft, dass die maximale Anzahl an Ausgabetokens ≥ 8000 ist, wenn das Nachdenken aktiviert ist.
 
 ### Token-Schätzung
 
-Dieser Teil von LLM-Anbieter beschreibt Produktverhalten, Einstiegspunkte und technische Grenzen. UI-Schaltflächen, Befehle, Schlüssel und Dateiendungen sind stabile Verträge.
+`estimateTokens(text)`: `Math.ceil(text.length / 4)` — Heuristik mit 4 Zeichen pro Token. Wird verwendet, um `maxResearchContentTokens` vor dem Senden an LLM durchzusetzen.
 
-## Modellerkennung
+Es wird keine Kostenverfolgung implementiert.
 
-Dieser Teil von LLM-Anbieter beschreibt Produktverhalten, Einstiegspunkte und technische Grenzen. UI-Schaltflächen, Befehle, Schlüssel und Dateiendungen sind stabile Verträge.
+## Modellentdeckung
+
+| Moden | Anbieter | Endpunkt |
+|------|-----------|----------|
+| `ollama-tags` | Ollama | `/api/tags` |
+| `google-models` | Google | Liste der Modelle API |
+| `anthropic-models` | Anthropic | Liste der Modelle API |
+| `openai-compatible-models` | DeepSeek, Qwen, Mistral, usw. | `/v1/models` |
+| `openrouter-models` | OpenRouter | Modellliste API |
+| `github-models` | GitHub Models | Schlussfolgerung API |
+| `none` | Azure OpenAI | Deaktiviert (erfordert Namen der Bereitstellung) |
 
 ## Schnellstart
 
-Dieser Teil von LLM-Anbieter beschreibt Produktverhalten, Einstiegspunkte und technische Grenzen. UI-Schaltflächen, Befehle, Schlüssel und Dateiendungen sind stabile Verträge.
+1. **Wählen Sie einen Anbieter** – DeepSeek (China), OpenAI (International) oder Ollama (Lokal/Kostenlos)
+2. **Drücken Sie die API-Taste** — Einstellungen → Notemd → Anbieter → API-Schlüssel
+3. **Verbindung testen** — Klicken Sie auf die Test-Kнопpe
+4. **Optionell: Modell pro Aufgabe** – Aktivieren Sie `useMultiModelSettings` und konfigurieren Sie sie einzeln
+
+Für Ollama: Es ist keine API-Einstellung erforderlich. Stellen Sie einfach sicher, dass `ollama serve` läuft.
+
+---
 
 ## Nächste Schritte
 
-Wählen Sie als Nächstes die Seite, die direkt zu Ihrer Aufgabe passt: Provider-Konfiguration, Kernfunktion, Batch-Verarbeitung, Fehlerbehebung oder Diagrammexport.
+- 📝 [Konzeptnotizen](/docs/features/concept-notes) — Verwendet ein Modell zur Extraktion pro Aufgabe
+- 🎨 [Diagrams](/docs/features/diagrams) — Verwendet das Diagramm-Modell pro Aufgabe
+- 🔍 [Forschung](/docs/features/research) — Verwendet ein modell speziell für Forschungszwecke
+- ⚙️ [Konfiguration](/docs/getting-started/configuration) — Vollständige Referenz der Einstellungen

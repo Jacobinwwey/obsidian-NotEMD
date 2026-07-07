@@ -1,9 +1,16 @@
 ---
 id: wiki-links
 title: Wiki-Links
-description: Erläutert Zweck, Konfiguration, Workflow-Grenzen und typische Prüfungen für Wiki-Links in Notemd.
+description: Automatische Erstellung von Wiki-Verlinkungen für Schlüsselkonzepte
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [wiki-links, linking, concepts, knowledge graph, Auto Link alternative, obsidian auto link, AI wiki-link]
+concepts: [Wiki-Links, Knowledge Graph, Concept Extraction, Synonym Suppression, Obsidian, Auto Link Alternative, AI Linking]
+citations:
+  - title: Obsidian
+    url: https://obsidian.md
+  - title: Auto Link Plugin
+    url: https://github.com/ov7a/obsidian-auto-link
 ---
 
 import TLDR from '@site/src/components/TLDR';
@@ -11,137 +18,302 @@ import TLDR from '@site/src/components/TLDR';
 # Wiki-Links
 
 <TLDR>
-**Kurzfassung：** Erläutert Zweck, Konfiguration, Workflow-Grenzen und typische Prüfungen für Wiki-Links in Notemd. Die folgenden Befehle, Konfigurationsschlüssel, Dateiendungen und Provider-Namen bleiben englisch, damit sie exakt zur Plugin-Oberfläche, CLI und zu Logs passen.
+**Notemd fügt automatisch `[[wiki-links]]` zu den Schlüsselbegriffen in Ihren Notizen hinzu.** Der LLM liest Ihren Inhalt, erkennt wichtige Begriffe im Kontext und fügt bei jeder Vorkunft wiki-ähnliche Links im Obsidian-Stil ein. Optional werden Konzeptnotizdateien mit Rückverweisen erstellt. Es wird die Unterdrückung von Synonymen, die Integrität der Links bei Umbenennung/Löschen sowie ein reiner Extraktionsmodus (ohne Dateiänderungen) unterstützt. Im Gegensatz zu Auto Link, das nur bestehende Notentitel abgleicht, nutzt Notemd KI, um neue Konzepte zu erkennen und entsprechende Notizen anzulegen. Dies ist Teil des [Obsidian AI Knowledge Management Guide](/docs/pillar-ai-knowledge).
 </TLDR>
 
 ## Überblick
 
-Dieser Teil von Wiki-Links beschreibt Produktverhalten, Einstiegspunkte und technische Grenzen. UI-Schaltflächen, Befehle, Schlüssel und Dateiendungen sind stabile Verträge.
+Wiki-Verlinkung ist die Kernfunktion von Notemd. Sie wandelt Text in einen vernetzten Wissensgraphen um, indem sie:
 
-## Funktionsweise
+1. **Analyse Ihrer Notiz** mit einem LLM
+2. **Identifizierung von Schlüsselkonzepten** (Begriffe, Personen, Methoden, Theorien)
+3. **Einfügen von `[[wiki-links]]`** bei jedem Vorkommen
+4. **Erstellung von Konzeptnotizen** (optional) mit Rückverweisen
 
-Dieser Teil von Wiki-Links beschreibt Produktverhalten, Einstiegspunkte und technische Grenzen. UI-Schaltflächen, Befehle, Schlüssel und Dateiendungen sind stabile Verträge.
+## Wie es funktioniert
 
-### Wiki-Links: Workflows und Aufgaben
+### Verarbeiten
 
-Dieser Teil von Wiki-Links beschreibt Produktverhalten, Einstiegspunkte und technische Grenzen. UI-Schaltflächen, Befehle, Schlüssel und Dateiendungen sind stabile Verträge.
+```mermaid
+graph LR
+    A[Your Note] --> B[LLM Analysis]
+    B --> C{Concepts Found}
+    C --> D[Insert Wiki-Links]
+    C --> E[Create Concept Notes]
+    D --> F[Updated Note]
+    E --> F
+    F --> G[Connected Knowledge Graph]
+```
 
 ### Beispiel
 
-Dieser Teil von Wiki-Links beschreibt Produktverhalten, Einstiegspunkte und technische Grenzen. UI-Schaltflächen, Befehle, Schlüssel und Dateiendungen sind stabile Verträge.
+**Vorher:**
+```markdown
+Machine learning models use neural networks to learn patterns from data.
+The transformer architecture revolutionized natural language processing.
+```
+
+**Nach:**
+```markdown
+[[Machine learning]] models use [[neural networks]] to learn patterns from data.
+The [[transformer architecture]] revolutionized [[natural language processing]].
+```
 
 ## Verwendung
 
-Dieser Teil von Wiki-Links beschreibt Produktverhalten, Einstiegspunkte und technische Grenzen. UI-Schaltflächen, Befehle, Schlüssel und Dateiendungen sind stabile Verträge.
+### Grundlegend: Links zur aktuellen Notiz hinzufügen
 
-### Wiki-Links: zentrale Erläuterung
+1. Eine Notiz öffnen
+2. Rechtsklick im Editor → **„Datei verarbeiten (Verlinkungen hinzufügen)“**
+3. Warten Sie ein paar Sekunden.
+4. Die Konzepte sind jetzt verknüpft!
 
-Dieser Teil von Wiki-Links beschreibt Produktverhalten, Einstiegspunkte und technische Grenzen. UI-Schaltflächen, Befehle, Schlüssel und Dateiendungen sind stabile Verträge.
+### Batch: Mehrere Notizen verarbeiten
 
-### Wiki-Links: Workflows und Aufgaben
+1. Klicken Sie mit der rechten Maustaste auf einen Ordner im Datei-Explorer
+2. Wählen Sie **„Notemd: Verarbeitung der Ordner (Links hinzufügen)“** aus
+3. Konfigurieren:
+   - Konkurrenz (wie viele Dateien parallel)
+   - Bestehende Links überschreiben (ja/nein)
+4. Klicken Sie auf **Process**
 
-Dieser Teil von Wiki-Links beschreibt Produktverhalten, Einstiegspunkte und technische Grenzen. UI-Schaltflächen, Befehle, Schlüssel und Dateiendungen sind stabile Verträge.
+### Selektiv: Link zu spezifischem Text
 
-### Wiki-Links: zentrale Erläuterung
+1. Hervorheben des zu verarbeitenden Textes
+2. Rechtsklick → **„Prozess auswählen (Verknüpfungen hinzufügen)“**
+3. Nur der hervorgehobene Teil wird analysiert
 
-Dieser Teil von Wiki-Links beschreibt Produktverhalten, Einstiegspunkte und technische Grenzen. UI-Schaltflächen, Befehle, Schlüssel und Dateiendungen sind stabile Verträge.
+## Notemd gegen Auto Link
 
-## Wiki-Links: zentrale Erläuterung
+Obsidian bietet zwei Ansätze für die automatische Wiki-Verlinkung:
 
-Dieser Teil von Wiki-Links beschreibt Produktverhalten, Einstiegspunkte und technische Grenzen. UI-Schaltflächen, Befehle, Schlüssel und Dateiendungen sind stabile Verträge.
+| | **Auto-Link** | **Notemd** |
+|--|---------------|-------------|
+| Quelllink | Bestehende Notentitel im Vault | LLM-identifizierte Konzepte im Inhalt |
+| Kann neue Konzepte verknüpfen | Nein – der Titel muss bereits existieren. | Ja – KI erkennt Konzepte und erstellt Notizen |
+| Synonymverarbeitung | Nein | Ja – Synonymunterdrückung |
+| Erstellung einer Konzeptnote | Nein | Ja – mit Backlinks und Deduplizierung |
+| Batchverarbeitung | Nein (eine Datei) | Ja (Ebenenübersicht) |
+| Modell-Routing pro Aufgabe | Nein | Ja |
 
-## Wiki-Links: zentrale Erläuterung
+**Auto Link** führt eine Titelübereinstimmung durch: Wenn eine Notiz mit dem Namen „Machine Learning“ existiert, umschließt es die Vorkommen mit `[[Machine Learning]]`. Wenn die Notiz nicht existiert, passiert nichts.
 
-Dieser Teil von Wiki-Links beschreibt Produktverhalten, Einstiegspunkte und technische Grenzen. UI-Schaltflächen, Befehle, Schlüssel und Dateiendungen sind stabile Verträge.
+**Notemd** wird von KI gesteuert: Der LLM liest Ihren Inhalt, versteht den Kontext, erkennt Konzepte, die *verknüpft* werden sollten – selbst wenn es noch keine Notiz gibt – und erstellt sowohl die Verlinkung als auch die Konzeptnotiz.
 
-### Wiki-Links: zentrale Erläuterung
+## Funktionen
 
-Dieser Teil von Wiki-Links beschreibt Produktverhalten, Einstiegspunkte und technische Grenzen. UI-Schaltflächen, Befehle, Schlüssel und Dateiendungen sind stabile Verträge.
+### Synonymunterdrückung
 
-### Wiki-Links: zentrale Erläuterung
+**Problem:** „transformer“, „transformers“, „Transformer architecture“ → 3 getrennte Konzepte
 
-Dieser Teil von Wiki-Links beschreibt Produktverhalten, Einstiegspunkte und technische Grenzen. UI-Schaltflächen, Befehle, Schlüssel und Dateiendungen sind stabile Verträge.
+**Lösung:** Notemd erkennt nahezu identische Elemente und verwendet die kanonische Form.
 
-### Wiki-Links: zentrale Erläuterung
+**Konfiguration:**
+```
+Settings → Advanced → Synonym Suppression
+Threshold: 0.8 (0 = off, 1 = aggressive)
+```
 
-Dieser Teil von Wiki-Links beschreibt Produktverhalten, Einstiegspunkte und technische Grenzen. UI-Schaltflächen, Befehle, Schlüssel und Dateiendungen sind stabile Verträge.
+### Link-Integrität
 
-## Wiki-Links: zentrale Erläuterung
+**Wenn Sie eine Konzeptnotiz umbenennen:**
+- Alle Wiki-Links werden automatisch aktualisiert (Obsidian Kernfunktion)
+- Die Backlinks bleiben unverändert.
 
-Dieser Teil von Wiki-Links beschreibt Produktverhalten, Einstiegspunkte und technische Grenzen. UI-Schaltflächen, Befehle, Schlüssel und Dateiendungen sind stabile Verträge.
+**Wenn Sie eine Konzeptnotiz löschen:**
+- Die Links bleiben erhalten, werden aber als „unverknüpfte Erwähnungen“ angezeigt.
+- Sie können von jedem Vorkommen neu erstellen.
 
-### Wiki-Links: zentrale Erläuterung
+### Reiner Extraktionsmodus
 
-Dieser Teil von Wiki-Links beschreibt Produktverhalten, Einstiegspunkte und technische Grenzen. UI-Schaltflächen, Befehle, Schlüssel und Dateiendungen sind stabile Verträge.
+**Konzepte extrahieren, ohne den Originaltext zu verändern:**
+
+1. Rechtsklick → **„Konzepte extrahieren (ohne Verlinkung)“**
+2. Konzeptnotizen werden erstellt
+3. Die ursprüngliche Datei unberührt.
+
+Anwendungsfall: Verarbeitung von nur zum Lesen bestimmtem Inhalt oder Endentwürfen.
+
+## Erstellung einer Konzeptnote
+
+### Automatische Erstellung
+
+**Wenn es aktiviert ist (Standard), erstellt Notemd:**
+
+```markdown
+---
+tags: [concept, auto-generated]
+created: 2026-06-13
+source: [[Original Note Name]]
+---
+
+# Machine Learning
+
+A branch of artificial intelligence that enables computers
+to learn from data without explicit programming.
+
+## Occurrences in Your Vault
+
+- [[Original Note Name#Section]]
+- [[Another Note#Header]]
+
+## Related Concepts
+
+- [[Neural Networks]]
+- [[Deep Learning]]
+- [[Supervised Learning]]
+```
 
 ### Konfiguration
 
-Wiki-Links wird in den Notemd-Einstellungen konfiguriert. Provider, Modell, Ausgabepfad, Sprache und Batch-Verarbeitung greifen ineinander; klären Sie, ob die Änderung Datei-, Ordner- oder Workflow-Aufgaben betrifft.
+**Ausgabeverzeichnis:**
+```
+Settings → Output → Concept Folder
+Default: concepts/
+```
 
-## Wiki-Links: Workflows und Aufgaben
+**Hierarchische Struktur:**
+```
+Settings → Output → Use Hierarchical Folders
+If enabled:
+  papers/my-paper.md → papers/concepts/Concept.md
+If disabled:
+  → concepts/Concept.md
+```
 
-Dieser Teil von Wiki-Links beschreibt Produktverhalten, Einstiegspunkte und technische Grenzen. UI-Schaltflächen, Befehle, Schlüssel und Dateiendungen sind stabile Verträge.
+**Vorlage:**
+```
+Settings → Output → Concept Template
+Customize with variables:
+  {{concept}} — Concept name
+  {{description}} — LLM-generated description
+  {{backlinks}} — List of source notes
+  {{date}} — Creation date
+```
 
-### Wiki-Links: zentrale Erläuterung
+## Erweiterte Optionen
 
-Dieser Teil von Wiki-Links beschreibt Produktverhalten, Einstiegspunkte und technische Grenzen. UI-Schaltflächen, Befehle, Schlüssel und Dateiendungen sind stabile Verträge.
+### Kontextfenster
 
-### Wiki-Links: zentrale Erläuterung
+**Wie viel Umtext soll gesendet werden:**
 
-Dieser Teil von Wiki-Links beschreibt Produktverhalten, Einstiegspunkte und technische Grenzen. UI-Schaltflächen, Befehle, Schlüssel und Dateiendungen sind stabile Verträge.
+```
+Settings → Linking → Context Window
+Options: Sentence | Paragraph | Full Note
+Default: Paragraph
+```
 
-### Wiki-Links: Workflows und Aufgaben
+Größer = höhere Genauigkeit, höherer Preis.
 
-Dieser Teil von Wiki-Links beschreibt Produktverhalten, Einstiegspunkte und technische Grenzen. UI-Schaltflächen, Befehle, Schlüssel und Dateiendungen sind stabile Verträge.
+### Mindestanzahl der Vorkommen
 
-### Wiki-Links: zentrale Erläuterung
+**Nur Konzepte verlinken, die mehrfach auftauchen:**
 
-Dieser Teil von Wiki-Links beschreibt Produktverhalten, Einstiegspunkte und technische Grenzen. UI-Schaltflächen, Befehle, Schlüssel und Dateiendungen sind stabile Verträge.
+```
+Settings → Linking → Min Occurrences
+Default: 1 (link all)
+```
 
-## Wiki-Links: nächste Empfehlungen
+Stellen Sie es auf 2 oder 3 ein, um sich auf wiederkehrende Themen zu konzentrieren.
 
-Dieser Teil von Wiki-Links beschreibt Produktverhalten, Einstiegspunkte und technische Grenzen. UI-Schaltflächen, Befehle, Schlüssel und Dateiendungen sind stabile Verträge.
+### Muster ausschließen
 
-### ✅ DO
+**Bestimmte Wörter überspringen:**
 
-Dieser Teil von Wiki-Links beschreibt Produktverhalten, Einstiegspunkte und technische Grenzen. UI-Schaltflächen, Befehle, Schlüssel und Dateiendungen sind stabile Verträge.
+```
+Settings → Linking → Exclude List
+Example: note, idea, example, thing
+```
 
-### Wiki-Links: zentrale Erläuterung
+Verhindert das Überverknüpfen allgemeiner Begriffe.
 
-Dieser Teil von Wiki-Links beschreibt Produktverhalten, Einstiegspunkte und technische Grenzen. UI-Schaltflächen, Befehle, Schlüssel und Dateiendungen sind stabile Verträge.
+### Benutzerdefinierte Anfragen
 
-## Wiki-Links: Fehlerbehebung
+**Überschreiben der Standard-Anweisungen für LLM:**
 
-Dieser Teil von Wiki-Links beschreibt Produktverhalten, Einstiegspunkte und technische Grenzen. UI-Schaltflächen, Befehle, Schlüssel und Dateiendungen sind stabile Verträge.
+```
+Settings → Advanced → Custom Linking Prompt
+Default:
+  "Identify key concepts, theories, methods, and technical
+   terms in the following text. Return as a list..."
+```
 
-### Wiki-Links: zentrale Erläuterung
+Anpassen für domänenspezifische Anforderungen (z. B. „Fokus auf medizinische Terminologie“).
 
-Dieser Teil von Wiki-Links beschreibt Produktverhalten, Einstiegspunkte und technische Grenzen. UI-Schaltflächen, Befehle, Schlüssel und Dateiendungen sind stabile Verträge.
+## Tipps & Best Practices
 
-### Wiki-Links: zentrale Erläuterung
+### ✅ OK
 
-Dieser Teil von Wiki-Links beschreibt Produktverhalten, Einstiegspunkte und technische Grenzen. UI-Schaltflächen, Befehle, Schlüssel und Dateiendungen sind stabile Verträge.
+- **Prozessnotizen mit >100 Wörtern** – Kurze Notizen liefern nur wenige Konzepte
+- **Nutzen Sie leistungsstarke Modelle** für eine bessere Konzeptidentifizierung (GPT-4o, Claude)
+- **Überprüfung vor Annahme** – Überprüfen Sie, ob die vorgeschlagenen Links sinnvoll sind
+- **Iterativ bauen** – Verarbeiten Sie 5–10 Notizen, überprüfen Sie das Diagramm und passen Sie die Einstellungen an
+
+### ❌ NICHT
+
+- **Over-link** – Nicht jedes Substantiv benötigt einen Link
+- **Entwürfe wiederholt verarbeiten** – Die Konzepte können sich ändern, warten Sie, bis sie stabil sind
+- **Synonyme ignorieren** – Aktiviere die Unterdrückung, um „ML“ und „Machine Learning“ zu vermeiden
+
+## Leistung
+
+### Geschwindigkeit
+
+| Notengröße | GPT-4o-mini | Claude Sonnet | Ollama (lokal) |
+|-----------|-------------|---------------|----------------|
+| 500 Wörter | 2-3 Sekunden | 3-5 Sekunden | 5-10 Sekunden |
+| 2000 Wörter | 5-8 Sekunden | 10-15 Sekunden | 20-40 Sekunden |
+| 5000+ Wörter | In Blöcken (mehrere Aufrufe) | In Blöcken | In Blöcken |
+
+### Kostenabschätzung
+
+**Beispiel: 1000-Wort-Memo mit GPT-4o-mini**
+- Eingabe: ~1500 Tokens
+- Ausgabe: ~200 Token
+- Kosten: ~0,001 $
+
+**Batchverarbeitung von 100 Notizen:** ~0,10 $
 
 ## Fehlerbehebung
 
-Dieser Abschnitt grenzt typische Fehler bei Wiki-Links ein. Prüfen Sie zuerst Notemd-Diagnosen, HTTP-Status des Providers, Modellnamen, Netzwerk und Rate Limits.
+### Keine Links hinzugefügt
 
-### Wiki-Links: zentrale Erläuterung
+**Überprüfung:**
+1. LLM Aufruf erfolgreich (Einstellungen → Diagnose)
+2. Die Notiz enthält ausreichend Inhalt (>50 Wörter).
+3. Konzepte sind technisch/spezifisch (nicht nur Pronomen).
 
-Dieser Teil von Wiki-Links beschreibt Produktverhalten, Einstiegspunkte und technische Grenzen. UI-Schaltflächen, Befehle, Schlüssel und Dateiendungen sind stabile Verträge.
+**Ausprobieren:**
+- Verwende ein leistungsstärkeres Modell
+- Contextfenster erweitern
+- Überprüfe die Gültigkeit der API-Einstellung
 
-### Wiki-Links: zentrale Erläuterung
+### Zu viele Links
 
-Dieser Teil von Wiki-Links beschreibt Produktverhalten, Einstiegspunkte und technische Grenzen. UI-Schaltflächen, Befehle, Schlüssel und Dateiendungen sind stabile Verträge.
+**Lösungen:**
+1. Mindestanzahl der Vorkommen erhöhen (2 oder 3)
+2. Hinzufügen von häufigen Wörtern zur Ausklusionsliste
+3. Verwenden Sie ein weniger aggressives Modell
 
-### Wiki-Links: zentrale Erläuterung
+### Falsche Konzepte verknüpft
 
-Dieser Teil von Wiki-Links beschreibt Produktverhalten, Einstiegspunkte und technische Grenzen. UI-Schaltflächen, Befehle, Schlüssel und Dateiendungen sind stabile Verträge.
+**Verbesserungen:**
+1. Verwenden Sie einen benutzerdefinierten Prompt für Domänen-Spezifität
+2. Synonymunterdrückung aktivieren
+3. Manuell überprüfen und trennen
 
-### Wiki-Links: zentrale Erläuterung
+### Die Links brechen nach dem Umbenennen.
 
-Dieser Teil von Wiki-Links beschreibt Produktverhalten, Einstiegspunkte und technische Grenzen. UI-Schaltflächen, Befehle, Schlüssel und Dateiendungen sind stabile Verträge.
+**Dies ist ein normales Obsidian Verhalten.**
+
+Um alle Links zu aktualisieren:
+1. Den Konzeptbrief umbenennen
+2. Obsidian aktualisiert `[[old]]` automatisch auf `[[new]]`
+
+---
 
 ## Nächste Schritte
 
-Wählen Sie als Nächstes die Seite, die direkt zu Ihrer Aufgabe passt: Provider-Konfiguration, Kernfunktion, Batch-Verarbeitung, Fehlerbehebung oder Diagrammexport.
+- 📖 [Concept Notes](./concept-notes) — Einführung in die Erstellung von Konzeptnotizen
+- 🔍 [Forschungsintegration](./research) — Kombination von Verlinkungen mit Webrecherche
+- 🎨 [Diagramme](./diagrams) — Visualisieren Sie Ihren Wissensgraphen

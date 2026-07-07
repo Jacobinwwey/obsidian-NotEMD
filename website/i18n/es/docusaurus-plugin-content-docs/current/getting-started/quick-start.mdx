@@ -1,9 +1,14 @@
 ---
 id: quick-start
 title: Guía de inicio rápido
-description: Explica el uso de Guía de inicio rápido en Notemd, su configuración, límites de flujo de trabajo y comprobaciones habituales.
+description: Comienza a usar Notemd en 5 minutos
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [quick start, tutorial, getting started, first steps]
+concepts: [Quick Start, LLM Configuration, One-Click Workflow, Ollama]
+citations:
+  - title: Obsidian
+    url: https://obsidian.md
 ---
 
 import TLDR from '@site/src/components/TLDR';
@@ -11,101 +16,166 @@ import TLDR from '@site/src/components/TLDR';
 # Guía de inicio rápido
 
 <TLDR>
-**Resumen：** Explica el uso de Guía de inicio rápido en Notemd, su configuración, límites de flujo de trabajo y comprobaciones habituales. Los comandos, claves de configuración, extensiones y nombres de Provider siguientes se mantienen en inglés para coincidir exactamente con la interfaz, el CLI y los registros.
+**Comience a usar Notemd en 5 minutos.** Tres pasos: (1) Agregue una clave LLM API (o utilice Ollama local), (2) Abra una nota y ejecute “Procesar archivo (agregar enlaces)”, (3) Explore flujos de trabajo con un clic en la barra lateral. Soporta más de 30 proveedores. No se requiere programación. Funciona sin conexión con Ollama.
 </TLDR>
 
-## Guía de inicio rápido: configuración y modelos
+## Paso 1: Configure su primer proveedor LLM (2 min)
 
-Esta parte de Guía de inicio rápido describe el comportamiento del producto, puntos de entrada y límites técnicos. Botones, comandos, claves y extensiones son contratos estables.
+### Opción A: Proveedor de nube (OpenAI, Anthropic, etc.)
 
-### Guía de inicio rápido: configuración y modelos
+1. Abre **Ajustes** → **Notemd**
+2. Bajo **LLM Configuración del proveedor**, seleccione un proveedor en el menú desplegable
+3. Ingresa tu **API Key**
+4. (Opcional) Haga clic en **"Obtener lista de modelos"** para ver los modelos disponibles
+5. Seleccione un modelo para cada tipo de tarea
 
-Esta parte de Guía de inicio rápido describe el comportamiento del producto, puntos de entrada y límites técnicos. Botones, comandos, claves y extensiones son contratos estables.
+**Opciones populares:**
+- **OpenAI**: `gpt-4o-mini` (rápido, económico)
+- **Anthropic**: `claude-sonnet-4-6` (alta calidad)
+- **DeepSeek**: `deepseek-chat` (muy económico)
 
-### Guía de inicio rápido: configuración y modelos
+### Opción B: Local Ollama (No se necesita clave API)
 
-Esta parte de Guía de inicio rápido describe el comportamiento del producto, puntos de entrada y límites técnicos. Botones, comandos, claves y extensiones son contratos estables.
+1. Instalar [Ollama](https://ollama.com/)
+2. Descargar un modelo: `ollama pull llama3.1`
+3. En la configuración de Notemd, seleccione **"Ollama"** como proveedor
+4. Nombre del modelo: `llama3.1` (o cualquier modelo que hayas descargado)
 
-## Guía de inicio rápido: workflows y tareas
+## Paso 2: Pruebe su primera tarea (1 minuto)
 
-Esta parte de Guía de inicio rápido describe el comportamiento del producto, puntos de entrada y límites técnicos. Botones, comandos, claves y extensiones son contratos estables.
+### Añadir enlaces de Wiki a una nota
 
-### Guía de inicio rápido: explicación principal
+1. Abre cualquier nota con contenido significativo
+2. Haga clic con el botón derecho en el editor
+3. Seleccione **"Procesar archivo (agregar enlaces)"**
+4. Espera unos segundos.
+5. ¡Los conceptos clave ahora son `[[wiki-linked]]`!
 
-Esta parte de Guía de inicio rápido describe el comportamiento del producto, puntos de entrada y límites técnicos. Botones, comandos, claves y extensiones son contratos estables.
+**Ejemplo:**
 
-## Guía de inicio rápido: workflows y tareas
+**Antes:**
+```
+Machine learning models use neural networks to process data.
+```
 
-Esta parte de Guía de inicio rápido describe el comportamiento del producto, puntos de entrada y límites técnicos. Botones, comandos, claves y extensiones son contratos estables.
+**Después:**
+```
+[[Machine learning]] models use [[neural networks]] to process data.
+```
 
-### Guía de inicio rápido: explicación principal
+## Paso 3: Explorar funciones (2 min)
 
-Esta parte de Guía de inicio rápido describe el comportamiento del producto, puntos de entrada y límites técnicos. Botones, comandos, claves y extensiones son contratos estables.
+### Extraer notas de concepto
 
-### Guía de inicio rápido: investigación y búsqueda
+1. Hacer clic con el botón derecho → **"Extraer conceptos del archivo actual"**
+2. Notemd crea archivos separados para cada concepto
+3. Verifique la carpeta de conceptos configurada (por defecto: `concepts/`)
+4. Cada nota conceptual tiene un enlace de retroceso a tu nota original
 
-Esta parte de Guía de inicio rápido describe el comportamiento del producto, puntos de entrada y límites técnicos. Botones, comandos, claves y extensiones son contratos estables.
+### Investigar y resumir
 
-### Guía de inicio rápido: workflows y tareas
+1. Resalta un tema en tu nota
+2. Hacer clic con el botón derecho → **"Investigar y resumir"**
+3. Notemd realiza búsquedas en la web (Tavily o DuckDuckGo)
+4. El resumen se agrega al final de tu nota junto con las fuentes
 
-Esta parte de Guía de inicio rápido describe el comportamiento del producto, puntos de entrada y límites técnicos. Botones, comandos, claves y extensiones son contratos estables.
+### Flujos de trabajo de un clic
 
-## Guía de inicio rápido: workflows y tareas
+1. Revisa la **barra lateral izquierda** en busca de los botones del flujo de trabajo
+2. Haga clic en **"Extraer con un clic"** en cualquier nota
+3. Funciona de la siguiente manera: agregar enlaces → extraer conceptos → realizar investigación → generar diagrama
+4. ¡Todo en un solo clic!
 
-Esta parte de Guía de inicio rápido describe el comportamiento del producto, puntos de entrada y límites técnicos. Botones, comandos, claves y extensiones son contratos estables.
+## Tareas comunes iniciales
 
-### Guía de inicio rápido: workflows y tareas
+### Tarea 1: Procesar un documento/artículo
 
-Esta parte de Guía de inicio rápido describe el comportamiento del producto, puntos de entrada y límites técnicos. Botones, comandos, claves y extensiones son contratos estables.
+```
+1. Paste article content into a note
+2. Run "Process file (add links)"
+3. Run "Extract concepts"
+4. Run "Research and summarize" on unfamiliar terms
+5. Run "Summarize as Mermaid diagram" for visual structure
+```
 
-### Guía de inicio rápido: workflows y tareas
+### Tarea 2: Traducir notas
 
-Esta parte de Guía de inicio rápido describe el comportamiento del producto, puntos de entrada y límites técnicos. Botones, comandos, claves y extensiones son contratos estables.
+```
+1. Highlight text to translate
+2. Right-click → "Translate to target language"
+3. Set target language in settings first
+```
 
-### Guía de inicio rápido: workflows y tareas
+### Tarea 3: Crear un mapa de conocimiento
 
-Esta parte de Guía de inicio rápido describe el comportamiento del producto, puntos de entrada y límites técnicos. Botones, comandos, claves y extensiones son contratos estables.
+```
+1. Process 5-10 related notes with "add links"
+2. Run "Extract concepts" on each
+3. Open Graph view to see connections
+4. Your knowledge graph is forming!
+```
 
-## Guía de inicio rápido: siguientes recomendaciones
-
-Esta parte de Guía de inicio rápido describe el comportamiento del producto, puntos de entrada y límites técnicos. Botones, comandos, claves y extensiones son contratos estables.
+## Consejos de personalización
 
 ### Selección de modelo por tarea
 
-Esta parte de Guía de inicio rápido describe el comportamiento del producto, puntos de entrada y límites técnicos. Botones, comandos, claves y extensiones son contratos estables.
+Puedes usar modelos diferentes para tareas distintas:
 
-### Guía de inicio rápido: workflows y tareas
+| Tarea | Modelo recomendado | ¿Por qué? |
+|------|------------------|-----|
+| Agregar enlaces | `gpt-4o-mini`, `deepseek-chat` | Rápido, muchas llamadas |
+| Extraer conceptos | `claude-sonnet-4-6`, `gpt-4o` | Extracción de calidad |
+| Investigación | `perplexity`, `gpt-4o` | Basado en la web |
+| Traducción | `gemini-flash`, `gpt-4o` | Multilingüe |
+| Diagramas | `claude-opus`, modelo local | Razonamiento complejo |
 
-Esta parte de Guía de inicio rápido describe el comportamiento del producto, puntos de entrada y límites técnicos. Botones, comandos, claves y extensiones son contratos estables.
+Configurar en: **Ajustes → Notemd → Modelos específicos de tarea**
+
+### Flujos de trabajo personalizados
+
+Crea tu propio botón:
+
+1. Ajustes → Notemd → Flujos de trabajo
+2. Haz clic en "Agregar flujo de trabajo".
+3. Ingresa DSL: `process-current-add-links>extract-concepts-current>research-and-summarize`
+4. Nombre: "Mi flujo de investigación"
+5. Aparece un nuevo botón en la barra lateral
 
 ## Solución de problemas
 
-Esta sección ayuda a diagnosticar fallos habituales de Guía de inicio rápido. Revise primero los diagnósticos de Notemd, el estado HTTP del Provider, el nombre del modelo, la red y los límites de tasa.
+### "API Clave inválida"
+- Verificar si la clave es correcta (sin espacios adicionales)
+- Verificar si la cuenta tiene créditos
+- Prueba con el botón "Prueba de conexión" en la configuración
 
-### Guía de inicio rápido: configuración y modelos
+### "Modelo no encontrado"
+- Haga clic en "Obtener lista de modelos" para ver los modelos disponibles
+- Algunos proveedores requieren nombres de modelo específicos (por ejemplo, `gpt-4o` y no `gpt-4`).
 
-Esta parte de Guía de inicio rápido describe el comportamiento del producto, puntos de entrada y límites técnicos. Botones, comandos, claves y extensiones son contratos estables.
+### Los enlaces no aparecen
+- Asegúrese de que la nota tenga suficiente contenido (>50 palabras).
+- Prueba un modelo más potente
+- Verificar si la llamada a LLM tuvo éxito (ver panel de diagnóstico).
 
-### Guía de inicio rápido: configuración y modelos
+### Rendimiento lento
+- Utilice modelos más rápidos (`gpt-4o-mini` en lugar de `gpt-4o`)
+- Reduce el tamaño del bloque en la configuración
+- Habilitar el procesamiento en paralelo para tareas por lotes
 
-Esta parte de Guía de inicio rápido describe el comportamiento del producto, puntos de entrada y límites técnicos. Botones, comandos, claves y extensiones son contratos estables.
+## Próximos pasos
 
-### Guía de inicio rápido: explicación principal
+- 📖 [Explorar todas las funciones](../features/wiki-links)
+- ⚙️ [Configuración avanzada](./configuration)
+- 🔧 [Configuración del proveedor LLM](../providers/overview)
+- ❓ [Preguntas frecuentes](../faq)
 
-Esta parte de Guía de inicio rápido describe el comportamiento del producto, puntos de entrada y límites técnicos. Botones, comandos, claves y extensiones son contratos estables.
+## Tutorial en video
 
-### Guía de inicio rápido: solución de problemas
+Mira el video de inicio rápido de 3 minutos (chino):
+[【¡Completamente de código abierto y gratuito! Guía rápida de NotEMD en tres minutos】](https://b23.tv/lqR0RlA)
 
-Esta parte de Guía de inicio rápido describe el comportamiento del producto, puntos de entrada y límites técnicos. Botones, comandos, claves y extensiones son contratos estables.
+## Obtener ayuda
 
-## Siguientes pasos
-
-Para continuar, elija la página que corresponda a su cadena de trabajo: Provider, función principal, procesamiento por lotes, solución de problemas o exportación de diagramas.
-
-## Guía de inicio rápido: explicación principal
-
-Esta parte de Guía de inicio rápido describe el comportamiento del producto, puntos de entrada y límites técnicos. Botones, comandos, claves y extensiones son contratos estables.
-
-## Guía de inicio rápido: solución de problemas
-
-Esta parte de Guía de inicio rápido describe el comportamiento del producto, puntos de entrada y límites técnicos. Botones, comandos, claves y extensiones son contratos estables.
+- 💬 **Discord**: [discord.gg/qnGgsQ9W](https://discord.gg/qnGgsQ9W)
+- 🐛 **Problemas**: [GitHub Issues](https://github.com/Jacobinwwey/obsidian-NotEMD/issues)
+- 📚 **Documentación**: [Documentación completa](https://jacobinwwey.github.io/obsidian-NotEMD/)

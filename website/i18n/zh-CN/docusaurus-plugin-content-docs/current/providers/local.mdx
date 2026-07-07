@@ -1,9 +1,16 @@
 ---
 id: local
 title: 本地模型
-description: 说明 本地模型 在 Notemd 中的用途、配置、工作流边界与常见排查路径。
+description: 配置 Ollama 以及本地 LLM。
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [local, ollama, lmstudio, provider, configuration, offline]
+concepts: [Local Models, Ollama, LMStudio, Offline]
+citations:
+  - title: Ollama
+    url: https://ollama.com
+  - title: LM Studio
+    url: https://lmstudio.ai
 ---
 
 import TLDR from '@site/src/components/TLDR';
@@ -11,29 +18,46 @@ import TLDR from '@site/src/components/TLDR';
 # 本地模型
 
 <TLDR>
-**本页说明：** 说明 本地模型 在 Notemd 中的用途、配置、工作流边界与常见排查路径。 以下命令、配置键、文件扩展名和 Provider 名称按产品真实接口保留英文，以便与插件界面、CLI 和日志一一对应。
+**本地提供程序会将笔记内容保存在非托管的 API 上。** 当前的本地路径通过原生 `ollama` 传输方式处理 Ollama，而通过兼容 OpenAI 的传输方式处理 LMStudio。这两种路径均无需 API 密钥，但本地服务器和模型必须已处于运行状态。
+
+这是[Obsidian AI知识管理指南](/docs/pillar-ai-knowledge)的一部分。
 </TLDR>
 
 ## 设置
 
-本地模型 的配置应从 Notemd 设置入口完成。Provider、模型、输出路径、语言和批处理并不是彼此独立的开关；修改前应明确它会影响当前文件、文件夹任务还是一键工作流。
+对于 Ollama，需要安装 Ollama，拉取所需的模型，启动服务器，然后在 Notemd 中添加 `Ollama` 提供商配置文件。对于 LMStudio，则需要在 LM Studio 的本地服务器中加载模型，并添加 `LMStudio` 提供商配置文件。
 
-## 端点与鉴权
+本地模型属于运行时依赖项，而不仅仅是配置项。Notemd 只能调用本地进程所暴露的功能，因此在调试插件之前，请先在 Obsidian 外部验证本地模型的功能。
 
-本地模型 的这一部分解释产品行为、使用入口和工程边界。请把界面按钮、命令名称、配置键和文件扩展名视为稳定契约，文案翻译不会改变真实运行时名称。
+## 端点与身份验证
+
+| 服务提供商 | 基础 URL | 默认模型 | API 密钥 | 备注 |
+|----------|----------|---------------|---------|-------|
+| Ollama | `localhost:11434/api` | `llama3` | 无需。 | NDJSON 流式处理；通过 `/api/tags` 进行模型发现 |
+| LMStudio | `localhost:1234/v1` | `local-model` | 无需。 | 将 `"EMPTY"` 作为承载令牌发送；兼容 OpenAI |
+
+Ollama 在其 Base URL 下方使用本地的 `/chat` 路径。LMStudio 采用与 OpenAI 兼容的 `chat/completions` 路由方式，并期望使用在本地服务器中加载的模型。
 
 ## 模型发现
 
-本地模型 的这一部分解释产品行为、使用入口和工程边界。请把界面按钮、命令名称、配置键和文件扩展名视为稳定契约，文案翻译不会改变真实运行时名称。
+Ollama 使用 `ollama-tags` 发现模式，并列出本地获取的标签。当服务器提供 `/v1/models` 时，LMStudio 会使用与 OpenAI 兼容的模型发现功能。
 
-## 故障排查
+如果发现过程没有返回任何结果，那通常是本地服务器状态的问题：模型未被拉取或加载，或者服务器绑定的主机/端口与配置文件中的不一致。
 
-本节用于定位 本地模型 的常见失败模式。优先查看 Notemd 设置中的诊断输出、Provider 返回的 HTTP 状态、模型名称、网络连通性和是否触发限流。
+## 故障排除
 
-## 适用场景
+- 连接被拒绝：请启动 Ollama 或 LM Studio，并确认所配置的端口。
+- 未找到模型：请在测试前拉取 Ollama 标签或加载 LM Studio 模型。
+- 输出速度慢：可降低上下文大小，使用更小的本地模型，或将繁重任务交由托管服务处理。
+- 响应为空或格式错误：请确认所选的提供商配置文件与本地服务器协议匹配；Ollama 和 LMStudio 不能互换使用。
 
-本地模型 的这一部分解释产品行为、使用入口和工程边界。请把界面按钮、命令名称、配置键和文件扩展名视为稳定契约，文案翻译不会改变真实运行时名称。
+## 何时使用
 
-## 下一步
+对于私有保险库、离线工作或低成本的重复性任务，可使用本地提供商。切勿认为本地方案在研究综合或复杂推理方面就一定更优；模型质量与硬件限制才是需要权衡的因素。
 
-继续阅读相邻页面时，优先选择与你当前任务链直接相关的主题：Provider 配置、核心功能、批处理、故障排查或图表导出。
+---
+
+## 后续步骤
+
+- [LLM 提供商](/docs/providers/overview) -- 完整的配置及每项任务的模型设置
+- [故障排除](/docs/advanced/troubleshooting) -- 解决本地服务器未运行时出现的连接被拒绝错误

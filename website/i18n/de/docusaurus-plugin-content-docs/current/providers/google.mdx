@@ -1,39 +1,67 @@
 ---
 id: google
 title: Google
-description: Erläutert Zweck, Konfiguration, Workflow-Grenzen und typische Prüfungen für Google in Notemd.
+description: Konfiguriere Google Gemini
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [google, gemini, provider, configuration]
+concepts: [Google, Gemini, API Configuration]
+citations:
+  - title: Gemini API
+    url: https://ai.google.dev
+  - title: Google AI Studio
+    url: https://aistudio.google.com
 ---
 
 import TLDR from '@site/src/components/TLDR';
 
-# Google
+# Google Anbieter
 
 <TLDR>
-**Kurzfassung：** Erläutert Zweck, Konfiguration, Workflow-Grenzen und typische Prüfungen für Google in Notemd. Die folgenden Befehle, Konfigurationsschlüssel, Dateiendungen und Provider-Namen bleiben englisch, damit sie exakt zur Plugin-Oberfläche, CLI und zu Logs passen.
+**Google verwendet den nativen Gemini Generative Language API-Transport.** Die aktuelle Voreinstellung verwendet standardmäßig `gemini-2.0-flash-exp`, `https://generativelanguage.googleapis.com/v1` und `temperature: 0.5`. Es handelt sich nicht um ein OpenAI-kompatibles Profil.
+
+Dies ist ein Teil des [Obsidian AI-Know-how-Management-Leitfadens](/docs/pillar-ai-knowledge).
 </TLDR>
 
 ## Einrichtung
 
-Google wird in den Notemd-Einstellungen konfiguriert. Provider, Modell, Ausgabepfad, Sprache und Batch-Verarbeitung greifen ineinander; klären Sie, ob die Änderung Datei-, Ordner- oder Workflow-Aufgaben betrifft.
+Erstellen Sie einen Google AI Studio oder Google Cloud API-Schlüssel mit Gemini-Zugriff, fügen Sie ein `Google`-Anbieterprofil hinzu und behalten Sie die native Generative Language Base URL bei. Verwenden Sie das Standard-Gemini Flash-Profil für schnelle Übersetzungen und umfassende Notizwerkzeuge, und ersetzen Sie die Modelle pro Aufgabe, wenn Sie ein größeres oder leistungsstärkeres Gemini-Modell benötigen.
+
+Vermeiden Sie es, Gemini-Modell-IDen in einem OpenAI-kompatiblen Profil zu platzieren, es sei denn, Sie verwenden ausdrücklich eine Gateway-Lösung, die Gemini über ein OpenAI-kompatibles API bereitstellt.
 
 ## Endpunkt und Authentifizierung
 
-Dieser Teil von Google beschreibt Produktverhalten, Einstiegspunkte und technische Grenzen. UI-Schaltflächen, Befehle, Schlüssel und Dateiendungen sind stabile Verträge.
+| Feld | Aktuelle Voreinstellung |
+|-------|----------------|
+| Transport | `google` |
+| API Schlüssel | Erforderlich |
+| Base URL | `https://generativelanguage.googleapis.com/v1` |
+| Standardmodell | `gemini-2.0-flash-exp` |
+| Temperatur | `0.5` |
+| Verbindungsprüfung | Nur Chat |
 
-## Modellerkennung
+Die Laufzeitruoutine ruft `/models/{model}:generateContent?key={apiKey}` auf. Der Schlüssel wird als Abfrageparameter übergeben, da die native Gemini-Endpunktverbindung im Plugin so konfiguriert ist.
 
-Dieser Teil von Google beschreibt Produktverhalten, Einstiegspunkte und technische Grenzen. UI-Schaltflächen, Befehle, Schlüssel und Dateiendungen sind stabile Verträge.
+## Modellentdeckung
+
+Google verwendet den `google-models`-Entdeckungsmodus. Die Entdeckung sollte Gemini-Modelle zurückgeben, die für den API-Schlüssel verfügbar sind; wenn der Selektor leer ist, prüfen Sie den Schlüssel gegen denselben Base URL und bestätigen Sie, dass die Modellfamilie für dieses Konto aktiviert ist.
+
+Die bekannten Obergrenzen für Ausgabetoken sind im Anbieterregister modellabhängig. Wenn eine lange Übersetzung oder Diagramm-Erklärung abgeschnitten wird, wählen Sie ein Gemini-Modell mit einer höheren unterstützten Ausgabogrenze oder verringern Sie die gewünschte Ausgabegröße.
 
 ## Fehlerbehebung
 
-Dieser Abschnitt grenzt typische Fehler bei Google ein. Prüfen Sie zuerst Notemd-Diagnosen, HTTP-Status des Providers, Modellnamen, Netzwerk und Rate Limits.
+- `400`: Die Modell-ID stimmt in der Regel nicht mit dem nativen Gemini-Route überein oder die Anfrage überschreitet die vom Modell unterstützte Struktur.
+- `401` oder `403`: Überprüfen Sie die Schlüsselbeschränkungen, die Aktivierung des Projekts/API sowie ob der Schlüssel auf Gemini zugreifen kann.
+- `404`: Die Modell-ID ist in der konfigurierten API-Version nicht verfügbar.
+- Beispiele für Gateways scheitern unter diesem Profil: Verwenden Sie stattdessen die voreingestellte Gateway-Einstellung anstelle des nativen Google-Anbieters.
 
 ## Wann verwenden
 
-Dieser Teil von Google beschreibt Produktverhalten, Einstiegspunkte und technische Grenzen. UI-Schaltflächen, Befehle, Schlüssel und Dateiendungen sind stabile Verträge.
+Verwenden Sie Google für schnelle Übersetzungen, die Bereinigung großer Mengen an Notizen sowie Workflows, in denen das Kosten-Leistungs-Verhältnis von Gemini besser ist als bei direktem Einsatz von OpenAI oder Anthropic. Wählen Sie einen anderen Anbieter für Workflows, die eine mit OpenAI kompatible Verarbeitung von Reasoning-Modellen erfordern.
+
+---
 
 ## Nächste Schritte
 
-Wählen Sie als Nächstes die Seite, die direkt zu Ihrer Aufgabe passt: Provider-Konfiguration, Kernfunktion, Batch-Verarbeitung, Fehlerbehebung oder Diagrammexport.
+- [LLM Anbieter](/docs/providers/overview) -- Vollständige Konfiguration, modellbasierte Verarbeitung pro Aufgabe und Wiederholungslogik
+- [Übersetzung](/docs/features/translation) – Gemini Flash wird für Übersetzungsaufgaben in großen Mengen empfohlen

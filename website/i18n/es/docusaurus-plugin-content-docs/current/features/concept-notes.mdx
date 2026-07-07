@@ -1,9 +1,16 @@
 ---
 id: concept-notes
 title: Notas de concepto
-description: Explica el uso de Notas de concepto en Notemd, su configuración, límites de flujo de trabajo y comprobaciones habituales.
+description: "Generar y gestionar notas de concepto: notas independientes para los conceptos clave extraídos de su bóveda"
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [concept notes, knowledge extraction, concept folder, deduplication, backlinks]
+concepts: [Concept Notes, Knowledge Graph, LLM Extraction, Deduplication, Backlinks]
+citations:
+  - title: Obsidian
+    url: https://obsidian.md
+  - title: Zettelkasten Method
+    url: https://zettelkasten.de
 ---
 
 import TLDR from '@site/src/components/TLDR';
@@ -11,97 +18,167 @@ import TLDR from '@site/src/components/TLDR';
 # Notas de concepto
 
 <TLDR>
-**Resumen：** Explica el uso de Notas de concepto en Notemd, su configuración, límites de flujo de trabajo y comprobaciones habituales. Los comandos, claves de configuración, extensiones y nombres de Provider siguientes se mantienen en inglés para coincidir exactamente con la interfaz, el CLI y los registros.
+**Notemd extrae los conceptos clave de tus notas y crea archivos independientes de notas de concepto.** El LLM identifica los términos principales, genera un archivo `.md` por concepto en una carpeta configurable y, opcionalmente, agrega enlaces de retroceso a la nota original. Soporta la supresión de sinónimos, la selección de modelos por tarea, la sanitización de nombres de archivos y un motor de deduplicación de 4 pasos. Esto forma parte de la [Obsidian Guía de Gestión del Conocimiento con IA](/docs/pillar-ai-knowledge).
 </TLDR>
 
-## Visión general
+## Resumen general
 
-Esta parte de Notas de concepto describe el comportamiento del producto, puntos de entrada y límites técnicos. Botones, comandos, claves y extensiones son contratos estables.
+Las notas conceptuales son los bloques fundamentales de una base de conocimientos interconectada. Cuando procesas una nota, Notemd:
+
+1. **Envía tu texto a un LLM** con una instrucción de extracción estructurada
+2. **Analiza las líneas `CONCEPT:`** de la respuesta LLM
+3. **Crea un archivo `.md` por concepto** en una carpeta designada
+4. **Añade enlaces de retroceso** a la nota de origen (cuando está habilitado)
 
 ## Cómo funciona
 
-Esta parte de Notas de concepto describe el comportamiento del producto, puntos de entrada y límites técnicos. Botones, comandos, claves y extensiones son contratos estables.
+### Pipeline de extracción
 
-### Notas de concepto: workflows y tareas
+```
+Source Note → Split into Chunks → LLM per Chunk → Parse CONCEPT: Lines
+    → Deduplicate via Set → Create .md Files → Add Backlinks
+    → (Optional: Generate Log)
+```
 
-Esta parte de Notas de concepto describe el comportamiento del producto, puntos de entrada y límites técnicos. Botones, comandos, claves y extensiones son contratos estables.
+### El prompt de extracción
 
-### Notas de concepto: explicación principal
+El LLM recibe una instrucción que le ordena hacer lo siguiente:
 
-Esta parte de Notas de concepto describe el comportamiento del producto, puntos de entrada y límites técnicos. Botones, comandos, claves y extensiones son contratos estables.
+- Extraer **sustantivos o frases nominales** centrales en el tema del documento
+- **Priorice la especificidad**: "Relajación dieléctrica" en lugar de "Relajación".
+- **Normalizar a singular** — "models" se convierte en "model"
+- **Suprimir subconceptos**: si aparece “relajación dieléctrica”, no extraer también “relajación”.
+- **Omitir** secciones de referencias/bibliografía, sustantivos comunes, nombres de compañías/productos
+- Escribe un concepto por línea como `CONCEPT: Term Name`
 
-### Notas de concepto: explicación principal
+**Supresión de sinónimos** (opcional): añade al inicio del prompt “Evitar extraer sinónimos, conceptos centrales semánticamente similares o palabras clave siempre que sea posible”.
 
-Esta parte de Notas de concepto describe el comportamiento del producto, puntos de entrada y límites técnicos. Botones, comandos, claves y extensiones son contratos estables.
+**Dominio de aprendizaje enfocado** (opcional): agrega `Relevant Fields: [domain]` al principio para restringir la extracción a una disciplina específica.
 
-## Notas de concepto: explicación principal
+**Sobrescritura de idioma** (opcional): agrega "Los conceptos de salida DEBEN estar en [idioma]."
 
-Esta parte de Notas de concepto describe el comportamiento del producto, puntos de entrada y límites técnicos. Botones, comandos, claves y extensiones son contratos estables.
+### División en trozos
 
-### Notas de concepto: explicación principal
+Las notas largas se dividen mediante `settings.chunkWordCount`. Cada fragmento se envía de forma independiente. Los conceptos de todos los fragmentos se acumulan en un `Set`; las duplicadas entre fragmentos se eliminan silenciosamente. Los errores LLM en fragmentos individuales no interrumpen la operación.
 
-Esta parte de Notas de concepto describe el comportamiento del producto, puntos de entrada y límites técnicos. Botones, comandos, claves y extensiones son contratos estables.
+## Creación de nota conceptual
 
-### Notas de concepto: workflows y tareas
+### Reglas de nombres de archivo
 
-Esta parte de Notas de concepto describe el comportamiento del producto, puntos de entrada y límites técnicos. Botones, comandos, claves y extensiones son contratos estables.
+| Regla | Comportamiento |
+|------|----------|
+| Guiones/subrayados | Sustituido por espacios |
+| Caracteres especiales | Despojado: barra invertida, barra recta, dos puntos, asterisco, signo de interrogación, comillas, corchetes angulares, tubo, hash, carácter de careta, paréntesis |
+| Espacio en blanco | Colapsado y recortado |
+| Longitud máxima | 100 caracteres (acortado + recortado nuevamente) |
+| Resultado vacío/todos puntos | Se omitió en silencio |
 
-### Notas de concepto: explicación principal
+Ejemplo: `A-B: Key*Term` se convierte en `A B KeyTerm.md`
 
-Esta parte de Notas de concepto describe el comportamiento del producto, puntos de entrada y límites técnicos. Botones, comandos, claves y extensiones son contratos estables.
+### Plantillas
+
+**Plantilla completa** (enlaces de retroceso habilitados, plantilla mínima desactivada):
+
+```markdown
+# Concept Name
+
+## Linked From
+- [[SourceNoteBasename]]
+```
+
+**Plantilla mínima** (cuando `extractConceptsMinimalTemplate: true`):
+
+```markdown
+# Concept Name
+```
+
+### Actualizando notas existentes
+
+Cuando ya existe un archivo de concepto:
+
+1. Si los enlaces de retroceso están habilitados y la nota de origen aún no está lista, agrega un enlace de retroceso
+2. Si existe una sección `## Linked From`, insértela antes del siguiente encabezado `##`
+3. Si no existe `## Linked From`, añada una sección al final
+4. Se verifican y se omiten los backlinks duplicados.
 
 ### Configuración
 
-Notas de concepto se configura desde los ajustes de Notemd. Provider, modelo, salida, idioma y procesamiento por lotes se relacionan entre sí; confirme si el cambio afecta al archivo actual, carpetas o workflows.
+| Configuración | Predeterminado | Efecto |
+|---------|---------|--------|
+| `useCustomConceptNoteFolder` | `true` | Botón principal de alternar. Apagado = sin notas creadas |
+| `conceptNoteFolder` | `''` (desactivado) | Ruta de la carpeta para las notas de concepto |
+| `extractConceptsMinimalTemplate` | `true` | Notas solo de título (sin Enlace desde) |
+| `extractConceptsAddBacklink` | `false` | Añadir enlaces de retroceso durante la extracción independiente |
+| `extractConceptsProvider` / `extractConceptsModel` | DeepSeek | LLM por tarea para la extracción de conceptos |
+| `extractConceptsLanguage` | `'en'` | Idioma de salida para los nombres de conceptos |
+| `replaceSynonymsDuringConceptExtraction` | `false` | Habilitar la supresión de sinónimos en el prompt |
+| `generateConceptLogFile` | `false` | Escribe un `.log` con los conceptos creados |
 
-## Notas de concepto: explicación principal
+**Importante:** La configuración de `extractConceptsAddBacklink` y `extractConceptsMinimalTemplate` solo afecta al **comando de extracción dedicado**. El comando "Agregar enlaces" siempre crea notas con plantilla completa e enlaces de retroceso.
 
-Esta parte de Notas de concepto describe el comportamiento del producto, puntos de entrada y límites técnicos. Botones, comandos, claves y extensiones son contratos estables.
+## Deduplicación
 
-### Notas de concepto: workflows y tareas
+El comando dedup (`Notemd: Check & remove duplicate concept notes`) ejecuta un análisis de 5 pasos:
 
-Esta parte de Notas de concepto describe el comportamiento del producto, puntos de entrada y límites técnicos. Botones, comandos, claves y extensiones son contratos estables.
+### Paso 1: Coincidencia exacta del nombre del archivo
 
-### Notas de concepto: workflows y tareas
+Comparación insensible a mayúsculas y minúsculas del nombre de archivo en todo el ámbito configurado.
 
-Esta parte de Notas de concepto describe el comportamiento del producto, puntos de entrada y límites técnicos. Botones, comandos, claves y extensiones son contratos estables.
+### Paso 2: Detección de forma plural
 
-### Notas de concepto: workflows y tareas
+Elimina sufijos: `-ies` a `-y`, `-es` eliminado, `-s` eliminado. Compara la forma singular con los archivos de ámbito. No maneja plurales irregulares (children/child).
 
-Esta parte de Notas de concepto describe el comportamiento del producto, puntos de entrada y límites técnicos. Botones, comandos, claves y extensiones son contratos estables.
+### Paso 3: Normalización de símbolos
 
-### Notas de concepto: workflows y tareas
+Se aplica a: `toLowerCase()`, reemplaza guiones/subrayados por espacios, elimina caracteres no alfanuméricos y reduce el espacio en blanco. Se marcan aquellos que se normalizan de manera idéntica.
 
-Esta parte de Notas de concepto describe el comportamiento del producto, puntos de entrada y límites técnicos. Botones, comandos, claves y extensiones son contratos estables.
+### Paso 4: Contención de una sola palabra
 
-### Notas de concepto: workflows y tareas
+Las notas de concepto de una sola palabra se verifican en relación con los nombres de archivo de alcance de múltiples palabras. No se ejecutan cuando el alcance es `concept_folder_only`.
 
-Esta parte de Notas de concepto describe el comportamiento del producto, puntos de entrada y límites técnicos. Botones, comandos, claves y extensiones son contratos estables.
+### Paso 5: Confirmación y eliminación
 
-### Notas de concepto: explicación principal
+Todos los candidatos se muestran en un modal de confirmación. Los elementos aprobados se trasladan a la papelera del sistema. La operación puede cancelarse entre cada eliminación.
 
-Esta parte de Notas de concepto describe el comportamiento del producto, puntos de entrada y límites técnicos. Botones, comandos, claves y extensiones son contratos estables.
+### Modos de alcance
+
+| Modo | En comparación con |
+|------|-------------------|
+| `vault` (predeterminado) | Todos los archivos del vault `.md` excluyendo la carpeta concept |
+| `concept_folder_only` | Otras notas de concepto dentro de la carpeta |
+| `include` | Archivos en las carpetas específicas enumeradas |
+| `exclude` | Todos los archivos del vault, excluyendo la carpeta concept + las carpetas listadas |
 
 ## Uso
 
-Esta parte de Notas de concepto describe el comportamiento del producto, puntos de entrada y límites técnicos. Botones, comandos, claves y extensiones son contratos estables.
+### Extraer conceptos (autónomo)
 
-### Notas de concepto: explicación principal
+1. Abrir una nota
+2. Ejecuta **"Notemd: Extraer conceptos"** desde la paleta de comandos
+3. Las notas de concepto se crean en la carpeta configurada
 
-Esta parte de Notas de concepto describe el comportamiento del producto, puntos de entrada y límites técnicos. Botones, comandos, claves y extensiones son contratos estables.
+### Extraer + Generar Contenido
 
-### Notas de concepto: explicación principal
+**"Notemd: Extraer conceptos y generar títulos"** — extrae los conceptos y luego ejecuta "Generar a partir del título" en cada nota de la carpeta de conceptos. Esto genera contenido para **todas** las notas de concepto de la carpeta, no solo para las recién creadas.
 
-Esta parte de Notas de concepto describe el comportamiento del producto, puntos de entrada y límites técnicos. Botones, comandos, claves y extensiones son contratos estables.
+### Crear enlace de wiki a partir de la selección
 
-### Notas de concepto: explicación principal
+1. Resaltar texto en el editor
+2. Ejecuta **"Notemd: Crear enlace wiki a partir de la selección"**
+3. El texto está entre `[[...]]` y se crea una nota conceptual
 
-Esta parte de Notas de concepto describe el comportamiento del producto, puntos de entrada y límites técnicos. Botones, comandos, claves y extensiones son contratos estables.
+## Consejos
 
-## Notas de concepto: siguientes recomendaciones
+- **Establezca primero la carpeta de conceptos**: sin ella, no se crean notas. Aparece un modal de advertencia si no está configurada.
+- **Usar modelos por tarea**: la extracción de conceptos se beneficia mucho con modelos más económicos (GPT-4o-mini, DeepSeek). Reserve los modelos costosos para investigación/traducción.
+- **Habilitar la supresión de sinónimos** para dominios técnicos donde varios términos se refieren al mismo concepto.
+- **Deduplicar regularmente**: ejecute el comando de deduplicación después del procesamiento por lotes para detectar duplicados casi idénticos.
+- **El archivo de registro se sobrescribe** en cada ejecución, en lugar de añadirse al final. Copíelo si necesita los resultados anteriores.
 
-Esta parte de Notas de concepto describe el comportamiento del producto, puntos de entrada y límites técnicos. Botones, comandos, claves y extensiones son contratos estables.
+---
 
-## Siguientes pasos
+## Próximos pasos
 
-Para continuar, elija la página que corresponda a su cadena de trabajo: Provider, función principal, procesamiento por lotes, solución de problemas o exportación de diagramas.
+- [Wiki-Enlaces](./wiki-links) — Cómo se vinculan los conceptos de forma incrustada
+- [Diagramas](./diagrams) — Visualizar relaciones entre conceptos
+- [Flujos de trabajo](./workflows) — Extracción en cadena con otras tareas

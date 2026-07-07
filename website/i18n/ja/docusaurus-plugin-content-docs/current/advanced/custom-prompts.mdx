@@ -1,9 +1,16 @@
 ---
 id: custom-prompts
 title: カスタムプロンプト
-description: Notemd における カスタムプロンプト の目的、設定、ワークフロー上の境界、よくある確認点を説明します。
+description: ご自身のニーズに合わせてLLMプロンプトをカスタマイズしてください
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [custom prompts, prompts, focused learning, domain]
+concepts: [Custom Prompts, Focused Learning, Prompt Engineering]
+citations:
+  - title: Obsidian
+    url: https://obsidian.md
+  - title: LLM Prompt Engineering
+    url: https://platform.openai.com/docs/guides/prompt-engineering
 ---
 
 import TLDR from '@site/src/components/TLDR';
@@ -11,41 +18,117 @@ import TLDR from '@site/src/components/TLDR';
 # カスタムプロンプト
 
 <TLDR>
-**このページの要点：** Notemd における カスタムプロンプト の目的、設定、ワークフロー上の境界、よくある確認点を説明します。 以下のコマンド、設定キー、拡張子、Provider 名は、プラグイン UI、CLI、ログと対応させるため英語表記のままにしています。
+**Notemdを使えば、あらゆるタスクタイプに対してデフォルトのLLMプロンプトを上書きできます。**カスタムプロンプトにより、モデルが何を優先するかを制御でき、概念抽出を特定の分野に限定したり、リンクのスタイルを変更したり、翻訳のトーンを調整したりできます。`{{content}}`や`{{concept}}`といったプロンプト変数は実行時に置き換えられます。フォーカスドラーニングドメイン機能では、学習分野を先頭に付けることで抽出結果の範囲を自動的に絞り込みます。
+
+これは[Obsidian AI知識管理ガイド](/docs/pillar-ai-knowledge)の一部です。
 </TLDR>
 
 ## 概要
 
-カスタムプロンプト のこの部分では、製品の挙動、利用入口、実装上の境界を説明します。UI ボタン、コマンド名、設定キー、拡張子は安定した契約として扱います。
+Notemdに搭載されているプロンプトは、汎用的な知識処理を目的として作成されています。さまざまな分野で効果的に機能しますが、分野特有の改善の余地も残っています。カスタムプロンプトを使えば、LLMに対して、医療用語のみを抽出したり、名前付きエンティティのみをリンクしたり、フォーマルな文体で翻訳したりと、ご自身の用途に合わせた正確な動作方法を指示することができます。
 
-## 仕組み
+カスタムプロンプトはシステムプロンプト全体を置き換えるものではありません。それらはNotemdが解析するために依存している構造的な出力形式（例：`CONCEPT:`行、ウィキリンク構文）を保持しつつ、**タスク固有の指示部分**を上書きしたり補完したりします。
 
-カスタムプロンプト のこの部分では、製品の挙動、利用入口、実装上の境界を説明します。UI ボタン、コマンド名、設定キー、拡張子は安定した契約として扱います。
+## 動作の仕組み
 
-### カスタムプロンプト：主要な説明
+### プロンプトアーキテクチャ
 
-カスタムプロンプト のこの部分では、製品の挙動、利用入口、実装上の境界を説明します。UI ボタン、コマンド名、設定キー、拡張子は安定した契約として扱います。
+すべてのNotemdタスクは同じプロンプト構造に従います：
 
-### カスタムプロンプト：主要な説明
+```
+[System role: You are a helpful assistant...]
+[Domain constraint: Relevant Fields: [{domain}]]   <-- focused learning (optional)
+[Custom task prompt]                                <-- your override (optional)
+[Output format instructions]                        <-- always preserved
+[Content: {{content}}]                              <-- runtime substitution
+```
 
-カスタムプロンプト のこの部分では、製品の挙動、利用入口、実装上の境界を説明します。UI ボタン、コマンド名、設定キー、拡張子は安定した契約として扱います。
+1. **ベースシステムプロンプト** -- アシスタントのペルソナを設定します。上書きできません。
+2. **集中学習領域** -- スコープを制限するために `Relevant Fields: [medicine / law / computer science / ...]` を先頭に付けます。これはプロンプトそのものではなく、設定用の切り替え機能です。
+3. **カスタムタスクプロンプト** – デフォルトのタスク指示を置き換えます（例：どのような概念を抽出するか、リンクの強度はどれくらいにするか）。
+4. **出力形式** -- 構造規則（`CONCEPT:`行目、ウィキリンク形式）。解析可能性を確保するため、常にNotemdが追記されます。
+5. **内容** -- 実際のメモテキストで、実行時に `{{content}}` を通じて置き換えられます。
 
-### カスタムプロンプト：主要な説明
+### プロンプト変数
 
-カスタムプロンプト のこの部分では、製品の挙動、利用入口、実装上の境界を説明します。UI ボタン、コマンド名、設定キー、拡張子は安定した契約として扱います。
+変数は実行時に置き換えられます。利用可能な変数はタスクによって異なります：
+
+| 変数 | タスク | 置換後 |
+|----------|-------|---------------|
+| `{{content}}` | すべて | メモまたは選択されたテキスト |
+| `{{concept}}` | コンセプトノートテンプレート | 抽出されたコンセプト名 |
+| `{{description}}` | コンセプトノートテンプレート | LLMで生成されたコンセプトの説明 |
+| `{{backlinks}}` | コンセプトノートテンプレート | リンク付きの出典ノート一覧 |
+| `{{date}}` | コンセプトノートテンプレート | 現在日付 (YYYY-MM-DD) |
+| `{{language}}` | 翻訳 | ターゲット出力言語 |
+| `{{source}}` | コンセプトノートテンプレート | 出力ノートの基本名 |
+
+### 集中学習領域
+
+フォーカスドラーニング機能は、ドメインの範囲を絞り込むためのショートカットです。自分の専門分野を明記したカスタムプロンプトを作成する代わりに、設定で`focusedLearningDomain`を指定します。
+
+```
+Settings → Advanced → Focused Learning Domain
+Example: "medicine" or "computer science" or "Chinese philosophy"
+```
+
+この方法は抽出プロンプトの先頭に`Relevant Fields: [medicine]`を付加することで、LLMがドメインに関連する概念を優先し、一般的な概念を抑えるようになります。完全なカスタムプロンプトよりも軽量で、あらゆる抽出タスクで機能します。
 
 ## 設定
 
-カスタムプロンプト の設定は Notemd 設定画面から行います。Provider、モデル、出力先、言語、バッチ処理は独立した項目ではなく、現在のファイル、フォルダー処理、ワークフローのどれに影響するかを確認してください。
+| 設定 | デフォルト | エフェクト |
+|---------|---------|--------|
+| `customAddLinksPrompt` | `''` | デフォルトのadd-linksタスクプロンプトを上書きする |
+| `customExtractConceptsPrompt` | `''` | デフォルトの概念抽出プロンプトを上書きする |
+| `customResearchPrompt` | `''` | デフォルトのリサーチ＋要約プロンプトを上書きする |
+| `customTranslatePrompt` | `''` | デフォルトの翻訳プロンプトを上書きする |
+| `customDiagramPrompt` | `''` | デフォルトの図生成プロンプトを上書きする |
+| `focusedLearningDomain` | `''` | 抽出およびリンク用のプロンプトの先頭にディシプリンのコンテキストを追加してください |
+| `extractConceptsMinimalTemplate` | `true` | タイトルのみのコンセプトノートテンプレートを使用する（`{{concept}}`テンプレートの範囲に影響） |
+| `customConceptNoteTemplate` | `''` | 完全な変数サポートを備えたコンセプトノートファイルテンプレートに上書きする |
+
+**カスタムプロンプトフィールドが空の場合、組み込みのデフォルトプロンプトが使用されます。**
 
 ## 例
 
-カスタムプロンプト のこの部分では、製品の挙動、利用入口、実装上の境界を説明します。UI ボタン、コマンド名、設定キー、拡張子は安定した契約として扱います。
+あなたは臨床試験の記録から概念を抽出する医療研究者です。デフォルトのプロンプトでは一般的な名詞も医療用語と一緒に抽出されるため、概念フォルダが混乱します。
 
-## カスタムプロンプト：次の推奨事項
+**解決策：** 集中すべき学習領域とカスタムの抽出プロンプトを設定します。
 
-カスタムプロンプト のこの部分では、製品の挙動、利用入口、実装上の境界を説明します。UI ボタン、コマンド名、設定キー、拡張子は安定した契約として扱います。
+1. `focusedLearningDomain`を`medicine`に設定してください。
+2. `customExtractConceptsPrompt`を次の値に設定してください：
+
+```
+Extract only clinically relevant concepts: diseases, drug names,
+anatomical terms, measurement endpoints, and statistical methods.
+Ignore generic English nouns, brand names, and institutional names.
+Prioritize MeSH terminology where applicable.
+```
+
+今、臨床記録に対して「Extract concepts」を実行すると、LLMは次のような結果を生成します：
+
+```
+CONCEPT: Randomized Controlled Trial
+CONCEPT: Double-Blind Method
+CONCEPT: Myocardial Infarction
+CONCEPT: Creatine Kinase-MB
+CONCEPT: Kaplan-Meier Estimate
+```
+
+「hospital」や「month」といった不要な一般的な用語も抽出されがちなデフォルトの動作の代わりに。
+
+## ヒント
+
+- 完全なカスタムプロンプトを作成する前に、**焦点を絞った学習領域から始めてください**。1つの設定だけで利用シナリオの80％をカバーできます。
+- **出力形式を保持する** – カスタムプロンプトに含まれる「1行ずつ」や「CONCEPT: prefix」といった形式指定は決して削除しないでください。Notemdのパーサーはこれらに依存しています。
+- **まずは1つのノートでテストしてください** – カスタムプロンプトは抽出範囲に予期しない影響を与える可能性があります。バッチ処理を行う前に、1つのノートで確認してください。
+- **プロンプトは簡潔に** – 過度に長いカスタムプロンプトはトークンを消費し、モデルの集中力を低下させる可能性があります。
+
+---
 
 ## 次のステップ
 
-次に読むページは、いまの作業に直結する Provider 設定、主要機能、バッチ処理、トラブルシューティング、図表出力から選んでください。
+- [Wiki-Links](/docs/features/wiki-links) – add-linksプロンプトをカスタマイズすると何がリンクされるのか
+- [コンセプトノート](/docs/features/concept-notes) – コンセプトノートのテンプレートと `{{concept}}` 変数
+- [バッチ処理](/docs/advanced/batch-processing) – フォルダ全体にカスタムプロンプトを適用する
+- [トラブルシューティング](/docs/advanced/troubleshooting) – カスタムプロンプトによって予期しない出力が生成される問題の修正

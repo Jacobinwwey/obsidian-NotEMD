@@ -1,9 +1,16 @@
 ---
 id: china
 title: Proveedores de China
-description: Explica el uso de Proveedores de China en Notemd, su configuración, límites de flujo de trabajo y comprobaciones habituales.
+description: Configure Qwen, DeepSeek, GLM, etc.
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [china providers, deepseek, qwen, glm, doubao, moonshot, mimo, minimax, baidu, siliconflow, huawei]
+concepts: [China Providers, DeepSeek, Qwen, Doubao, Moonshot, MiMo, GLM, MiniMax, Baidu, SiliconFlow, Huawei]
+citations:
+  - title: Qwen API
+    url: https://help.aliyun.com/zh/dashscope
+  - title: DeepSeek API
+    url: https://platform.deepseek.com
 ---
 
 import TLDR from '@site/src/components/TLDR';
@@ -11,29 +18,58 @@ import TLDR from '@site/src/components/TLDR';
 # Proveedores de China
 
 <TLDR>
-**Resumen：** Explica el uso de Proveedores de China en Notemd, su configuración, límites de flujo de trabajo y comprobaciones habituales. Los comandos, claves de configuración, extensiones y nombres de Provider siguientes se mantienen en inglés para coincidir exactamente con la interfaz, el CLI y los registros.
+**Notemd admite proveedores de la región de China y de origen chino a través de endpoints mayormente compatibles con OpenAI.** El conjunto actual incluye DeepSeek, Qwen, Qwen Code, Doubao, Moonshot, Xiaomi MiMo, GLM, MiniMax, Baidu Qianfan, SiliconFlow, Huawei Cloud MaaS y Z AI. La ventaja es el alcance regional y el control de costos; el riesgo radica en los nombres de modelos específicos de cada proveedor y en las restricciones en las cuentas.
+
+Esto forma parte de la [Obsidian Guía de Gestión del Conocimiento de IA](/docs/pillar-ai-knowledge).
 </TLDR>
 
-## Preparación
+## Configuración
 
-Proveedores de China se configura desde los ajustes de Notemd. Provider, modelo, salida, idioma y procesamiento por lotes se relacionan entre sí; confirme si el cambio afecta al archivo actual, carpetas o workflows.
+Cree la cuenta del proveedor, genere una clave API y luego elija el preset del proveedor Notemd correspondiente en lugar de usar un perfil genérico OpenAI. El preset incluye la configuración Base URL predeterminada, el modelo, el modo de prueba API, el comportamiento de detección de modelos y cualquier campo específico del proveedor UI.
 
-## Endpoint y autenticación
+Utilice una selección de modelos por tarea de forma agresiva aquí. Por ejemplo, mantenga DeepSeek o GLM en flujos de trabajo con mucho razonamiento, use Qwen o Moonshot para tareas amplias en idioma chino, y dirija las tareas de programación a Qwen Code cuando esa cuenta tenga acceso a los modelos de programador.
 
-Esta parte de Proveedores de China describe el comportamiento del producto, puntos de entrada y límites técnicos. Botones, comandos, claves y extensiones son contratos estables.
+## Punto de extremo y autenticación
 
-## Detección de modelos
+| Proveedor | Modelo predeterminado | Base URL |
+|----------|---------------|----------|
+| DeepSeek | `deepseek-v4-pro` | `api.deepseek.com` |
+| Qwen | `qwen3-235b-a22b` | `dashscope.aliyuncs.com/compatible-mode/v1` |
+| Qwen Code | `qwen3-coder-plus` | `dashscope.aliyuncs.com/compatible-mode/v1` |
+| Doubao | (Se requiere el ID del endpoint) | `ark.cn-beijing.volces.com/api/v3` |
+| Moonshot | `kimi-k2-0905-preview` | `api.moonshot.cn/v1` |
+| Xiaomi MiMo | `mimo-v2.5-pro` | `api.xiaomimimo.com/v1` |
+| GLM | `glm-5` | `open.bigmodel.cn/api/paas/v4` |
+| MiniMax | `MiniMax-M2.7` | `api.minimaxi.com/v1` |
+| Baidu Qianfan | `ernie-4.5-turbo-32k` | `qianfan.baidubce.com/v2` |
+| SiliconFlow | `Qwen/QwQ-32B` | `api.siliconflow.cn/v1` |
+| Huawei Cloud MaaS | `DeepSeek-V3` | `api.modelarts-maas.com/v1` |
+| Z AI | `glm-5` | `api.z.ai/api/paas/v4` |
 
-Esta parte de Proveedores de China describe el comportamiento del producto, puntos de entrada y límites técnicos. Botones, comandos, claves y extensiones son contratos estables.
+**Nota:** Doubao requiere un ID de endpoint de Ark (formato: `ep-xxxxxxxx-xxxx-xxxx`) en lugar de un nombre de modelo estándar.
+
+La mayoría de estos proveedores utilizan el entorno de ejecución compartido compatible con OpenAI, pero sus semánticas de cuenta y modelo difieren. Mantenga el URL base específico del preset a menos que haya verificado el endpoint alternativo de la cuenta.
+
+## Descubrimiento de modelos
+
+DeepSeek, Qwen, Qwen Code, Doubao, Moonshot, Xiaomi MiMo, GLM, Z AI, MiniMax, Baidu Qianfan y SiliconFlow utilizan el descubrimiento de modelos compatible con OpenAI cuando el proveedor admite la lista. Huawei Cloud MaaS usa el modo `huaweicloud-modelarts-models` porque los metadatos de despliegue de ModelArts no son idénticos a una lista genérica `/v1/models`.
+
+No considere que un fallo en el descubrimiento sea prueba de que la conversación es imposible. Varios proveedores permiten la conversación al tiempo que limitan los permisos de la lista de modelos. En ese caso, mantenga un ID de modelo explícito en el perfil y valide con la prueba de conexión.
 
 ## Solución de problemas
 
-Esta sección ayuda a diagnosticar fallos habituales de Proveedores de China. Revise primero los diagnósticos de Notemd, el estado HTTP del Provider, el nombre del modelo, la red y los límites de tasa.
+- La autenticación tiene éxito pero el chat falla: el nombre del modelo podría estar fuera de los derechos o la región del cuenta.
+- Doubao falla con un nombre de modelo normal: utilice el ID del endpoint de Ark en el campo de modelo cuando su despliegue lo requiera.
+- Las respuestas de razonamiento se truncan: verifique los límites máximos de tokens de salida específicos del proveedor y la configuración de tokens máximos basada en el modelo de Notemd.
+- La red regional varía: utilice el punto de extremo de la región de China del proveedor cuando la máquina del vault se encuentre en China; utilice el punto de extremo internacional solo cuando tanto la cuenta como la ruta de red sean válidas.
 
 ## Cuándo usarlo
 
-Esta parte de Proveedores de China describe el comportamiento del producto, puntos de entrada y límites técnicos. Botones, comandos, claves y extensiones son contratos estables.
+Utilice proveedores de China cuando la latencia regional, el acceso a pagos/cuentas, la calidad en idioma chino o el costo sean la principal limitación. Prefiera OpenAI, Anthropic, Google directos o proveedores locales cuando necesite un límite de protocolo más simple o una mayor consistencia en la depuración entre proveedores.
 
-## Siguientes pasos
+---
 
-Para continuar, elija la página que corresponda a su cadena de trabajo: Provider, función principal, procesamiento por lotes, solución de problemas o exportación de diagramas.
+## Próximos pasos
+
+- [LLM Proveedores](/docs/providers/overview) -- Configuración completa, modelos por tarea y lógica de reintentos
+- [Solución de problemas](/docs/advanced/troubleshooting) -- Corregir errores de conectividad regional y de autenticación

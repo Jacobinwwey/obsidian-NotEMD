@@ -1,39 +1,63 @@
 ---
 id: local
-title: 로컬 모델
-description: Notemd에서 로컬 모델의 목적, 설정, 워크플로 경계와 일반적인 점검 항목을 설명합니다.
+title: 로컬 모델들
+description: Ollama와 로컬 LLMs를 설정하세요.
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [local, ollama, lmstudio, provider, configuration, offline]
+concepts: [Local Models, Ollama, LMStudio, Offline]
+citations:
+  - title: Ollama
+    url: https://ollama.com
+  - title: LM Studio
+    url: https://lmstudio.ai
 ---
 
 import TLDR from '@site/src/components/TLDR';
 
-# 로컬 모델
+# 로컬 모델들
 
 <TLDR>
-**요약：** Notemd에서 로컬 모델의 목적, 설정, 워크플로 경계와 일반적인 점검 항목을 설명합니다. 아래의 명령, 설정 키, 파일 확장자, Provider 이름은 플러그인 UI, CLI, 로그와 정확히 대응하도록 영어로 유지합니다.
+**로컬 프로바이더는 호스팅된 APIs에 노트 콘텐츠가 저장되지 않도록 합니다.** 현재의 로컬 경로는 네이티브 `ollama` 전송 방식을 사용하여 Ollama를 처리하며, OpenAI과 호환되는 전송 방식을 통해 LMStudio을 처리합니다. 어떤 경로에도 API 키는 필요하지 않지만, 로컬 서버와 모델은 반드시 미리 실행 중이어야 합니다.
+
+이것은 [Obsidian AI 지식 관리 가이드](/docs/pillar-ai-knowledge)의 일부입니다.
 </TLDR>
 
-## 설정
+## 설치
 
-로컬 모델 설정은 Notemd 설정 화면에서 합니다. Provider, 모델, 출력 경로, 언어, 일괄 처리는 서로 연결되어 있으므로 현재 파일, 폴더 작업, 워크플로 중 어디에 영향을 주는지 확인하세요.
+Ollama의 경우, Ollama를 설치한 후 원하는 모델을 불러오고 서버를 시작한 다음, Notemd에 `Ollama` 프로바이더 프로필을 추가해야 합니다. LMStudio의 경우에는 LM Studio의 로컬 서버에 모델을 로드한 후 `LMStudio` 프로바이더 프로필을 추가해야 합니다.
 
-## 엔드포인트와 인증
+로컬 모델은 단순한 설정이 아닌 운영상의 의존성입니다. Notemd는 로컬 프로세스가 노출하는 기능만을 호출할 수 있으므로, 플러그인을 디버깅하기 전에 Obsidian 외부에서 로컬 모델을 확인해야 합니다.
 
-로컬 모델의 이 부분은 제품 동작, 사용 진입점, 엔지니어링 경계를 설명합니다. UI 버튼, 명령 이름, 설정 키, 확장자는 안정적인 계약으로 봅니다.
+## 엔드포인트 및 인증
 
-## 모델 검색
+| 제공업체 | 베이스 URL | 기본 모델 | API 키 | 메모들 |
+|----------|----------|---------------|---------|-------|
+| Ollama | `localhost:11434/api` | `llama3` | 필요 없습니다. | NDJSON 스트리밍; `/api/tags`을 통한 모델 발견 |
+| LMStudio | `localhost:1234/v1` | `local-model` | 필요 없습니다. | `"EMPTY"`을 베어러 토큰으로 전송합니다. OpenAI과 호환됩니다. |
 
-로컬 모델의 이 부분은 제품 동작, 사용 진입점, 엔지니어링 경계를 설명합니다. UI 버튼, 명령 이름, 설정 키, 확장자는 안정적인 계약으로 봅니다.
+Ollama는 Base URL 아래에 있는 기본 `/chat` 경로를 사용합니다. LMStudio는 OpenAI와 호환되는 `chat/completions` 루트를 따르며 로컬 서버에 로드된 모델을 요구합니다.
+
+## 모델 발견
+
+Ollama는 `ollama-tags` 발견 모드를 사용하여 로컬에서 가져온 태그들을 나열합니다. LMStudio는 서버가 `/v1/models`을 노출할 때 OpenAI와 호환되는 모델 발견 기능을 사용합니다.
+
+디스커버리에서 아무것도 반환되지 않는 경우, 이는 보통 로컬 서버의 상태 문제입니다. 모델이 가져오지도, 로드되지도 않았거나, 서버가 프로필과 다른 호스트/포트에 연결되어 있기 때문입니다.
 
 ## 문제 해결
 
-이 절은 로컬 모델의 일반적인 실패 원인을 구분합니다. Notemd 진단 출력, Provider HTTP 상태, 모델 이름, 네트워크, 속도 제한을 먼저 확인하세요.
+- 연결 거부됨: Ollama 또는 LM Studio를 시작하여 설정된 포트를 확인하십시오.
+- 모델을 찾을 수 없습니다: 테스트하기 전에 Ollama 태그를 끌어오거나 LM Studio 모델을 로드하십시오.
+- 처리 속도가 느립니다: 컨텍스트 크기를 줄이거나, 더 작은 로컬 모델을 사용하거나, 복잡한 작업은 호스팅된 서비스 제공업체에 맡기세요.
+- 빈 응답 또는 잘못된 형식의 응답: 선택한 공급자 프로필이 로컬 서버 프로토콜과 일치하는지 확인하십시오. Ollama와 LMStudio은 서로 교체할 수 없습니다.
 
-## 사용할 때
+## 언제 사용할까요?
 
-로컬 모델의 이 부분은 제품 동작, 사용 진입점, 엔지니어링 경계를 설명합니다. UI 버튼, 명령 이름, 설정 키, 확장자는 안정적인 계약으로 봅니다.
+개인용 보관소, 오프라인 작업, 또는 저렴한 반복적 작업의 경우 로컬 프로바이더를 사용하십시오. 연구 종합이나 장시간 추론에 있어서 로컬이 자동으로 더 우수하다고 가정해서는 안 됩니다. 모델의 품질과 하드웨어의 한계가 그 대가입니다.
+
+---
 
 ## 다음 단계
 
-다음에는 현재 작업 흐름과 직접 연결된 Provider 설정, 핵심 기능, 일괄 처리, 문제 해결, 다이어그램 내보내기 문서를 우선 보세요.
+- [LLM 제공업체](/docs/providers/overview) -- 전체 설정 및 작업별 모델 구성
+- [문제 해결](/docs/advanced/troubleshooting) -- 로컬 서버가 실행되지 않을 때 발생하는 connection-refused 오류를 수정하기

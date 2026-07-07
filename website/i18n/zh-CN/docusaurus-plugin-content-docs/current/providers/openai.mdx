@@ -1,39 +1,67 @@
 ---
 id: openai
 title: OpenAI
-description: 说明 OpenAI 在 Notemd 中的用途、配置、工作流边界与常见排查路径。
+description: 配置 OpenAI（GPT-4，GPT-4o）
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [openai, gpt-4o, provider, configuration]
+concepts: [OpenAI, GPT-4o, API Configuration]
+citations:
+  - title: OpenAI API
+    url: https://platform.openai.com
+  - title: GPT-4
+    url: https://openai.com/gpt-4
 ---
 
 import TLDR from '@site/src/components/TLDR';
 
-# OpenAI
+# OpenAI 提供商
 
 <TLDR>
-**本页说明：** 说明 OpenAI 在 Notemd 中的用途、配置、工作流边界与常见排查路径。 以下命令、配置键、文件扩展名和 Provider 名称按产品真实接口保留英文，以便与插件界面、CLI 和日志一一对应。
+**OpenAI** 使用与 OpenAI 兼容的共享传输协议。当前的预设默认为 `gpt-4o`、`https://api.openai.com/v1`、`temperature: 0.5` 以及 `models-then-chat` 连接测试。当需要精确的字段语义时，请使用此页面；如需按类别进行选择，则可查看 [LLM 提供商](/docs/providers/overview) 的概览。
+
+这是[Obsidian AI知识管理指南](/docs/pillar-ai-knowledge)的一部分。
 </TLDR>
 
 ## 设置
 
-OpenAI 的配置应从 Notemd 设置入口完成。Provider、模型、输出路径、语言和批处理并不是彼此独立的开关；修改前应明确它会影响当前文件、文件夹任务还是一键工作流。
+创建一个 OpenAI API 密钥，在 Notemd 设置中添加一个 `OpenAI` 提供商配置文件，除非有意指向兼容 OpenAI 的网关，否则保持默认的 Base URL。模型字段在常规工作中可以保持在 `gpt-4o`，或者替换为您账户能够调用的其他 OpenAI 模型 ID。
 
-## 端点与鉴权
+采用针对特定任务的模型来控制成本：将更强大的模型用于研究、概念提取以及长文本重组；而将成本更低或速度更快的模型用于翻译、链接推荐以及简短摘要生成。
 
-OpenAI 的这一部分解释产品行为、使用入口和工程边界。请把界面按钮、命令名称、配置键和文件扩展名视为稳定契约，文案翻译不会改变真实运行时名称。
+## 端点与身份验证
+
+| 字段 | 当前预设 |
+|-------|----------------|
+| 传输 | `openai-compatible` |
+| API 键 | 必需 |
+| 基础 URL | `https://api.openai.com/v1` |
+| 默认模型 | `gpt-4o` |
+| 温度 | `0.5` |
+| 连接测试 | `/models`，然后是 `/chat/completions` |
+
+Notemd 会在追加 `chat/completions` 或 `models` 之前，将兼容 OpenAI 的基础 URLs 规范化。在 Base URL 中不要包含尾随的 `/chat/completions`，否则会导致路径重复。
 
 ## 模型发现
 
-OpenAI 的这一部分解释产品行为、使用入口和工程边界。请把界面按钮、命令名称、配置键和文件扩展名视为稳定契约，文案翻译不会改变真实运行时名称。
+OpenAI 使用通用的、与 OpenAI 兼容的模型发现路径。设置 UI 会首先询问 `/v1/models`，然后通过简化的聊天请求来验证所选模型。如果模型发现失败但聊天功能仍然正常，需检查您的密钥是否具有模型列表权限，或者是否有网关阻断了模型列表的显示。
 
-## 故障排查
+推理模型被视为协议中的边缘情况：Notemd 会合并系统提示与用户提示的内容，生成用于 OpenAI 推理的标识符，这些标识符不支持单独的 `system` 角色；同时，它仅在提供方定义支持的情况下才会暴露 `reasoningEffort`。
 
-本节用于定位 OpenAI 的常见失败模式。优先查看 Notemd 设置中的诊断输出、Provider 返回的 HTTP 状态、模型名称、网络连通性和是否触发限流。
+## 故障排除
 
-## 适用场景
+- `401` 或 `403`：验证密钥、项目访问权限、账单状态，以及所选模型是否已为该密钥启用。
+- 聊天中的`404`：Base URL通常是不正确的，或者已经包含了`/chat/completions`。
+- 该模型在文档中有所显示，但并未出现在选择器中：model-list 访问和 chat 访问是两个独立的故障点；请在提供商配置文件中手动测试确切的模型编号。
+- 推理模型拒绝接收消息：请使用属于 OpenAI 推理处理路径的模型 ID，或切换为非推理型聊天模型。
 
-OpenAI 的这一部分解释产品行为、使用入口和工程边界。请把界面按钮、命令名称、配置键和文件扩展名视为稳定契约，文案翻译不会改变真实运行时名称。
+## 何时使用
 
-## 下一步
+当您需要最可预测的默认托管路径、 `/v1/models` 发现功能非常重要，或者工作流依赖于 OpenAI 推理模型的语义时，请使用 OpenAI。如果在路由、隐私或成本控制方面比直接的 OpenAI API 行为更为重要，建议选择网关或本地提供商。
 
-继续阅读相邻页面时，优先选择与你当前任务链直接相关的主题：Provider 配置、核心功能、批处理、故障排查或图表导出。
+---
+
+## 后续步骤
+
+- [LLM 提供商](/docs/providers/overview) -- 完整配置、任务级模型以及重试逻辑
+- [故障排除](/docs/advanced/troubleshooting) -- 解决 401/403 错误及速率限制错误

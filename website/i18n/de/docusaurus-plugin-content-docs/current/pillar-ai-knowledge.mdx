@@ -1,147 +1,341 @@
 ---
 id: pillar-ai-knowledge
-title: Leitfaden für KI-Wissensmanagement in Obsidian
-description: Erläutert Zweck, Konfiguration, Workflow-Grenzen und typische Prüfungen für Leitfaden für KI-Wissensmanagement in Obsidian in Notemd.
+title: Obsidian Leitfaden zur KI-basierten Wissensverwaltung
+description: Umfassender Leitfaden zum Aufbau einer vernetzten Wissensdatenbank mit KI – von Wiki-Verknüpfungen und Konzeptextraktion bis hin zu Forschung, Übersetzung und Diagrammgenerierung
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [obsidian, AI, knowledge management, wiki-links, concept notes, LLM, diagrams, research, translation, workflows, Copilot alternative, Smart Connections alternative, obsidian AI plugin]
+concepts: [Notemd, Obsidian, AI Knowledge Management, Wiki-Links, Concept Notes, LLM Integration, Diagrams, Research, Translation, Workflows, Copilot Alternative]
+citations:
+  - title: Obsidian
+    url: https://obsidian.md
+  - title: Tavily
+    url: https://tavily.com
+  - title: Mermaid
+    url: https://mermaid.js.org
+  - title: Vega-Lite
+    url: https://vega.github.io/vega-lite/
 ---
 
 import TLDR from '@site/src/components/TLDR';
 
-# Leitfaden für KI-Wissensmanagement in Obsidian
+# Obsidian Leitfaden zur KI-basierten Wissensverwaltung
 
 <TLDR>
-**Kurzfassung：** Erläutert Zweck, Konfiguration, Workflow-Grenzen und typische Prüfungen für Leitfaden für KI-Wissensmanagement in Obsidian in Notemd. Die folgenden Befehle, Konfigurationsschlüssel, Dateiendungen und Provider-Namen bleiben englisch, damit sie exakt zur Plugin-Oberfläche, CLI und zu Logs passen.
+**Notemd verwandelt das mit LLM angetriebene Lesen in dauerhaftes Wissen: Wiki-Verlinkungen verbinden Konzepte, Konzeptnotizen erstellen ein abrufbares Netzwerk, Forschung bringt das Internet in Ihren Schatzkasten, Übersetzungen beseitigen sprachliche Barrieren, Diagramme machen die Struktur sichtbar, und Workflows verknüpfen alles mit nur einem Klick.** Dieser Leitfaden behandelt den gesamten Prozess – von Rohnotizen bis hin zu einer vernetzten, visuellen, mehrsprachigen Wissensdatenbank.
 </TLDR>
 
-## Leitfaden für KI-Wissensmanagement in Obsidian: zentrale Erläuterung
+## Warum KI-basiertes Wissensmanagement?
 
-Dieser Teil von Leitfaden für KI-Wissensmanagement in Obsidian beschreibt Produktverhalten, Einstiegspunkte und technische Grenzen. UI-Schaltflächen, Befehle, Schlüssel und Dateiendungen sind stabile Verträge.
+Traditionelles Notieren erzeugt flache Dateien. Selbst mit manuellen Wiki-Verknüpfungen bleiben die meisten Notizen unvernetzt. Notemd verwendet LLMs, um die Verbindungslogik zu automatisieren:
 
-## Leitfaden für KI-Wissensmanagement in Obsidian: Workflows und Aufgaben
+- **LLMs lesen Ihren Inhalt** und ermitteln, was wichtig ist – Begriffe, Methoden, Personen, Theorien
+- **Verlinkungen werden automatisch** bei jedem Vorkommen eines Konzepts eingefügt, nicht in „siehe auch“ versteckt.
+- **Konzeptnotizen werden** als eigenständige, abrufbare Dateien erzeugt
+- **Forschung bereichert Notizen** mit aus dem Web stammendem Kontext
+- **Diagramme machen die Struktur sichtbar** – Mind Maps, Flussdiagramme, Datencharts aus demselben Inhalt
 
-Dieser Teil von Leitfaden für KI-Wissensmanagement in Obsidian beschreibt Produktverhalten, Einstiegspunkte und technische Grenzen. UI-Schaltflächen, Befehle, Schlüssel und Dateiendungen sind stabile Verträge.
+Das Ergebnis: Ein Wissensgraphen, der mit jeder bearbeiteten Notiz wächst – und nicht nur dann, wenn man daran denkt, Links hinzuzufügen.
 
-## 1. Leitfaden für KI-Wissensmanagement in Obsidian: Fehlerbehebung
+## Der gesamte Pipeline
 
-Dieser Teil von Leitfaden für KI-Wissensmanagement in Obsidian beschreibt Produktverhalten, Einstiegspunkte und technische Grenzen. UI-Schaltflächen, Befehle, Schlüssel und Dateiendungen sind stabile Verträge.
+```mermaid
+graph TD
+    A[Raw Note] --> B[Add Links]
+    B --> C[Wiki-Linked Note]
+    B --> D[Concept Notes]
+    C --> E[Connected Knowledge Graph]
+    D --> E
+    F[Web Research] --> E
+    G[Translation] --> E
+    H[Diagram Generation] --> I[Visual Structure]
+    E --> H
+    I --> E
+    J[One-Click Workflow] --> B
+    J --> F
+    J --> G
+    J --> H
+```
 
-### Leitfaden für KI-Wissensmanagement in Obsidian: zentrale Erläuterung
+Jeder Schritt ist unabhängig. Verwenden Sie einen oder alle. Die wirksamste Reihenfolge: **Add Links → Concept Notes → Diagrams**.
 
-Dieser Teil von Leitfaden für KI-Wissensmanagement in Obsidian beschreibt Produktverhalten, Einstiegspunkte und technische Grenzen. UI-Schaltflächen, Befehle, Schlüssel und Dateiendungen sind stabile Verträge.
+---
 
-### Leitfaden für KI-Wissensmanagement in Obsidian: Konfiguration und Modelle
+## 1. Wiki-Links: Verbindungen explizit herstellen
 
-Leitfaden für KI-Wissensmanagement in Obsidian wird in den Notemd-Einstellungen konfiguriert. Provider, Modell, Ausgabepfad, Sprache und Batch-Verarbeitung greifen ineinander; klären Sie, ob die Änderung Datei-, Ordner- oder Workflow-Aufgaben betrifft.
+Wiki-Links bilden das Rückgrat eines Wissensgraphen. Notemd verwendet ein LLM, um:
 
-## 2. Leitfaden für KI-Wissensmanagement in Obsidian: zentrale Erläuterung
+1. Lesen Sie den Inhalt Ihrer Notiz (in Abschnitte aufgeteilt für lange Dokumente)
+2. Identifizieren Sie die Kernkonzepte – indem Sie spezifische, technische Begriffe vor allgemeinen Substantiven priorisieren
+3. Fügen Sie `[[wiki-links]]` bei jedem Vorkommen ein.
+4. Unterdrücke Synonyme, damit „ML“ und „Machine Learning“ keine separaten Knoten erzeugen.
 
-Dieser Teil von Leitfaden für KI-Wissensmanagement in Obsidian beschreibt Produktverhalten, Einstiegspunkte und technische Grenzen. UI-Schaltflächen, Befehle, Schlüssel und Dateiendungen sind stabile Verträge.
+### Wann verwenden
 
-### Leitfaden für KI-Wissensmanagement in Obsidian: Workflows und Aufgaben
+- **Jede Notiz >100 Wörter** – kürzere Notizen liefern nur wenige Konzepte
+- **Forschungsarbeiten, technische Dokumentationen, Meeting-Notizen** – reich an fachspezifischen Begriffen
+- **Nachdem der Inhalt stabil ist** – verarbeiten Sie Entwürfe nicht wiederholt.
 
-Dieser Teil von Leitfaden für KI-Wissensmanagement in Obsidian beschreibt Produktverhalten, Einstiegspunkte und technische Grenzen. UI-Schaltflächen, Befehle, Schlüssel und Dateiendungen sind stabile Verträge.
+### Einstellungen der Schlüssel
 
-### Leitfaden für KI-Wissensmanagement in Obsidian: zentrale Erläuterung
+| Einstellungen | Empfohlen | Warum |
+|---------|-----------|-----|
+| `addLinksProvider` | DeepSeek oder GPT-4o-mini | Gute Genauigkeit zu niedrigem Preis |
+| Synonymunterdrückung | Eingeschaltet | Verhindert doppelte Knoten |
+| Kontextfenster | Absatz | Ausgleich zwischen Genauigkeit und Kosten |
 
-Dieser Teil von Leitfaden für KI-Wissensmanagement in Obsidian beschreibt Produktverhalten, Einstiegspunkte und technische Grenzen. UI-Schaltflächen, Befehle, Schlüssel und Dateiendungen sind stabile Verträge.
+→ [Einsatz von Wiki-Links im Detail](/docs/features/wiki-links)
 
-### Leitfaden für KI-Wissensmanagement in Obsidian: zentrale Erläuterung
+---
 
-Dieser Teil von Leitfaden für KI-Wissensmanagement in Obsidian beschreibt Produktverhalten, Einstiegspunkte und technische Grenzen. UI-Schaltflächen, Befehle, Schlüssel und Dateiendungen sind stabile Verträge.
+## 2. Konzeptnotizen: Abrufbare Wissensknoten
 
-### Leitfaden für KI-Wissensmanagement in Obsidian: Konfiguration und Modelle
+Wiki-Links verbinden Ideen direkt im Text, während Konzeptnotizen es ermöglichen, jede Idee unabhängig abzurufen. Jedes Konzept erhält seine eigene `.md`-Datei:
 
-Leitfaden für KI-Wissensmanagement in Obsidian wird in den Notemd-Einstellungen konfiguriert. Provider, Modell, Ausgabepfad, Sprache und Batch-Verarbeitung greifen ineinander; klären Sie, ob die Änderung Datei-, Ordner- oder Workflow-Aufgaben betrifft.
+```markdown
+# Machine Learning
 
-## 3. Leitfaden für KI-Wissensmanagement in Obsidian: Recherche
+## Linked From
+- [[My Research Notes]]
+- [[Neural Networks Explained]]
+```
 
-Dieser Teil von Leitfaden für KI-Wissensmanagement in Obsidian beschreibt Produktverhalten, Einstiegspunkte und technische Grenzen. UI-Schaltflächen, Befehle, Schlüssel und Dateiendungen sind stabile Verträge.
+### Der Extraktionsprozess
 
-### Leitfaden für KI-Wissensmanagement in Obsidian: zentrale Erläuterung
+Der LLM-Prompt ist stark strukturiert:
+- In die Singularform normalisieren
+- Bevorzugen Sie mehrwortige Begriffe vor Einzelwörtern („Dielektrische Entspannung“ statt „Entspannung“)
+- Überspringen Sie die Abschnitte mit Referenzen/Bibliografie
+- Geben Sie den Ausgang als `CONCEPT:` Zeilen für deterministische Parsing aus
 
-Dieser Teil von Leitfaden für KI-Wissensmanagement in Obsidian beschreibt Produktverhalten, Einstiegspunkte und technische Grenzen. UI-Schaltflächen, Befehle, Schlüssel und Dateiendungen sind stabile Verträge.
+Konzepte werden über die einzelnen Blöcke hinweg mittels `Set<string>` dedupliziert. Fehler bei einzelnen Blöcken durch LLM führen nicht zum Abbruch der Operation.
 
-### Leitfaden für KI-Wissensmanagement in Obsidian: Konfiguration und Modelle
+### Backlinks
 
-Leitfaden für KI-Wissensmanagement in Obsidian wird in den Notemd-Einstellungen konfiguriert. Provider, Modell, Ausgabepfad, Sprache und Batch-Verarbeitung greifen ineinander; klären Sie, ob die Änderung Datei-, Ordner- oder Workflow-Aufgaben betrifft.
+Wenn es aktiviert ist, verfolgt jede Konzeptnotiz, welche Quellennotizen sie erwähnen. Das eingebaute Backlink-Panel von Obsidian zeigt außerdem umgekehrte Verbindungen an.
 
-## 4. Leitfaden für KI-Wissensmanagement in Obsidian: Konfiguration und Modelle
+### Deduplizierung
 
-Dieser Teil von Leitfaden für KI-Wissensmanagement in Obsidian beschreibt Produktverhalten, Einstiegspunkte und technische Grenzen. UI-Schaltflächen, Befehle, Schlüssel und Dateiendungen sind stabile Verträge.
+Der 4-Schritte-Deduplizierungsmechanismus von Notemd erkennt:
+1. **Genaue Übereinstimmungen** – unabhängige von Groß-/Kleinschreibung Vergleich der Dateinamen
+2. **Mehrzahlformen** — „Models.md“ gegenüber „Model.md“
+3. **Symbolnormalisierung** — „A-B.md“ gegenüber „A B.md“
+4. **Einzelwort-Enthaltung** – „ML.md“ wird markiert, wenn „Machine Learning.md“ vorhanden ist
 
-### Leitfaden für KI-Wissensmanagement in Obsidian: Konfiguration und Modelle
+### Einstellungen der Schlüssel
 
-Dieser Teil von Leitfaden für KI-Wissensmanagement in Obsidian beschreibt Produktverhalten, Einstiegspunkte und technische Grenzen. UI-Schaltflächen, Befehle, Schlüssel und Dateiendungen sind stabile Verträge.
+| Einstellungen | Empfohlen | Warum |
+|---------|-----------|-----|
+| `conceptNoteFolder` | `concepts/` oder `🧠 concepts/` | Hält das Tresor-Verzeichnis organisiert |
+| `extractConceptsAddBacklink` | Eingeschaltet | Ermöglicht die umgekehrte Abfrage |
+| `extractConceptsMinimalTemplate` | Aus | Vollständiges Template mit „Von“-Verlinkung |
+| Modell pro Aufgabe | DeepSeek | Konzeptextraktion benötigt keine teuren Modelle |
+| Synonymunterdrückung | Eingeschaltet | Die gleiche Einstellung beeinflusst sowohl das Verknüpfen als auch das Extrahieren. |
 
-## 5. Leitfaden für KI-Wissensmanagement in Obsidian: Diagramme und Rendering
+→ [Einsatz von Konzeptnotizen im Detail](/docs/features/concept-notes)
 
-Dieser Teil von Leitfaden für KI-Wissensmanagement in Obsidian beschreibt Produktverhalten, Einstiegspunkte und technische Grenzen. UI-Schaltflächen, Befehle, Schlüssel und Dateiendungen sind stabile Verträge.
+---
 
-### Leitfaden für KI-Wissensmanagement in Obsidian: zentrale Erläuterung
+## 3. Forschung: Die Einbeziehung des Webs
 
-Dieser Teil von Leitfaden für KI-Wissensmanagement in Obsidian beschreibt Produktverhalten, Einstiegspunkte und technische Grenzen. UI-Schaltflächen, Befehle, Schlüssel und Dateiendungen sind stabile Verträge.
+Notemd integriert die Websuche in Ihren Notizmanagement-Prozess:
 
-### Leitfaden für KI-Wissensmanagement in Obsidian: Diagramme und Rendering
+1. **Abfragen erstellen** – der Titel oder die Auswahl Ihrer Notiz wird zu einer Suchabfrage
+2. **Websuche** — Tavily (empfohlen, Schlüssel API erforderlich) oder DuckDuckGo (kostenlos, kein Schlüssel)
+3. **LLM Zusammenfassung** – Die Suchergebnisse werden zu einer relevanten Zusammenfassung gekürzt
+4. **Anmerkung hinzufügen** – Zusammenfassung wird an die Cursorposition eingefügt oder als neuer Abschnitt.
 
-Dieser Teil von Leitfaden für KI-Wissensmanagement in Obsidian beschreibt Produktverhalten, Einstiegspunkte und technische Grenzen. UI-Schaltflächen, Befehle, Schlüssel und Dateiendungen sind stabile Verträge.
+### Wann verwenden
 
-### Leitfaden für KI-Wissensmanagement in Obsidian: Konfiguration und Modelle
+- Bevor ein neues Thema verarbeitet wird – holen Sie zunächst den Web-Kontext.
+- Wenn eine Konzeptnote erweitert werden muss – fügen Sie dann Forschungslinks hinzu.
+- Für Literaturübersichten – durchführen Sie eine Batch-Forschung in einem Ordner mit Notizen
 
-Leitfaden für KI-Wissensmanagement in Obsidian wird in den Notemd-Einstellungen konfiguriert. Provider, Modell, Ausgabepfad, Sprache und Batch-Verarbeitung greifen ineinander; klären Sie, ob die Änderung Datei-, Ordner- oder Workflow-Aufgaben betrifft.
+### Einstellungen der Schlüssel
 
-## 6. Leitfaden für KI-Wissensmanagement in Obsidian: Workflows und Aufgaben
+| Einstellungen | Empfohlen | Warum |
+|---------|-----------|-----|
+| `researchProvider` | GPT-4o oder Claude | Forschung benötigt eine hochwertigere Zusammenfassung |
+| Suchdienst | Tavily | Bessere Relevanz, konfigurierbare Tiefe |
+| `maxResearchContentTokens` | 4000 | Ausgleich zwischen Tiefe und Kosten |
 
-Dieser Teil von Leitfaden für KI-Wissensmanagement in Obsidian beschreibt Produktverhalten, Einstiegspunkte und technische Grenzen. UI-Schaltflächen, Befehle, Schlüssel und Dateiendungen sind stabile Verträge.
+→ [Erforschung im Detail](/docs/features/research)
 
-### Leitfaden für KI-Wissensmanagement in Obsidian: Workflows und Aufgaben
+---
 
-Dieser Teil von Leitfaden für KI-Wissensmanagement in Obsidian beschreibt Produktverhalten, Einstiegspunkte und technische Grenzen. UI-Schaltflächen, Befehle, Schlüssel und Dateiendungen sind stabile Verträge.
+## 4. Übersetzung: Sprachbarrieren überwinden
 
-## 7. Leitfaden für KI-Wissensmanagement in Obsidian: Konfiguration und Modelle
+Notemd übersetzt Notizen mithilfe Ihrer konfigurierten LLM – es handelt sich dabei nicht um eine spezielle Übersetzungsmaschine API. Das bedeutet:
 
-Dieser Teil von Leitfaden für KI-Wissensmanagement in Obsidian beschreibt Produktverhalten, Einstiegspunkte und technische Grenzen. UI-Schaltflächen, Befehle, Schlüssel und Dateiendungen sind stabile Verträge.
+- **kontextbezogene Übersetzungen** – der LLM versteht den gesamten Dokument, nicht nur Satz für Satz
+- **Umgang mit technischen Begriffen** – „gradient descent“ bleibt als „梯度下降“ und nicht als „坡度向下“.
+- **Batch-Unterstützung** – Übersetzen Sie einen ganzen Ordner mit Notizen in einer einzigen Operation
+- **Per-Task-Modell** – verwenden Sie Gemini Flash für Übersetzungen (schnell, günstig, mehrsprachig)
 
-### Leitfaden für KI-Wissensmanagement in Obsidian: Konfiguration und Modelle
+### Sprachunterstützung
 
-Dieser Teil von Leitfaden für KI-Wissensmanagement in Obsidian beschreibt Produktverhalten, Einstiegspunkte und technische Grenzen. UI-Schaltflächen, Befehle, Schlüssel und Dateiendungen sind stabile Verträge.
+Notemd selbst unterstützt 21 UI Sprachen. Die Zielsprache der Übersetzung kann pro Aufgabe konfiguriert werden. Häufige Paare: EN↔ZH, EN↔JA, EN↔KO, EN↔DE, EN↔FR, EN↔ES.
 
-## Leitfaden für KI-Wissensmanagement in Obsidian: nächste Empfehlungen
+→ [Einsatz von Übersetzungen im Detail](/docs/features/translation)
 
-Dieser Teil von Leitfaden für KI-Wissensmanagement in Obsidian beschreibt Produktverhalten, Einstiegspunkte und technische Grenzen. UI-Schaltflächen, Befehle, Schlüssel und Dateiendungen sind stabile Verträge.
+---
 
-## Leitfaden für KI-Wissensmanagement in Obsidian: Konfiguration und Modelle
+## 5. Diagramme: Die Struktur sichtbar machen
 
-Leitfaden für KI-Wissensmanagement in Obsidian wird in den Notemd-Einstellungen konfiguriert. Provider, Modell, Ausgabepfad, Sprache und Batch-Verarbeitung greifen ineinander; klären Sie, ob die Änderung Datei-, Ordner- oder Workflow-Aufgaben betrifft.
+Der Diagramm-Pipeline von Notemd basiert auf einer spezifizierungsgestützten Vorgehensweise: Der LLM erzeugt ein strukturiertes `DiagramSpec` JSON, wobei Adapter es anschließend in das Zielformat übersetzen. Dadurch entsteht zuverlässigeres Ergebnis als wenn man vom LLM eine rohe Mermaid-Syntax anfordert.
 
-### Leitfaden für KI-Wissensmanagement in Obsidian: zentrale Erläuterung
+### Intenterkennung
 
-Dieser Teil von Leitfaden für KI-Wissensmanagement in Obsidian beschreibt Produktverhalten, Einstiegspunkte und technische Grenzen. UI-Schaltflächen, Befehle, Schlüssel und Dateiendungen sind stabile Verträge.
+Notemd ermittelt den besten Diagrammtyp aus dem Inhalt:
 
-### Leitfaden für KI-Wissensmanagement in Obsidian: Recherche
+- **Tabellen mit Zahlen** → Datengrafik (Vega-Lite)
+- **Client/Server-Vokabular** → Sequenzdiagramm (Mermaid)
+- **Entität/Primärschlüssel** → ER-Diagramm (Mermaid)
+- **Schritt/Ablauffluss** → Flussdiagramm (Mermaid)
+- **Schlüsselwörter für Konzeptkarten** → JSON Canvas (Obsidian native)
+- **Standard** → Mindmap (Mermaid)
 
-Dieser Teil von Leitfaden für KI-Wissensmanagement in Obsidian beschreibt Produktverhalten, Einstiegspunkte und technische Grenzen. UI-Schaltflächen, Befehle, Schlüssel und Dateiendungen sind stabile Verträge.
+### Renderkette
 
-### Leitfaden für KI-Wissensmanagement in Obsidian: Grenzen und Governance
+Primäres Ziel → Ersatz → Ersatz → HTML. Wenn die Syntax von Mermaid fehlschlägt, versucht es einmal erneut mit dem Fehlerkontext an LLM, bevor es auf ein minimales Diagramm zurückgreift.
 
-Dieser Teil von Leitfaden für KI-Wissensmanagement in Obsidian beschreibt Produktverhalten, Einstiegspunkte und technische Grenzen. UI-Schaltflächen, Befehle, Schlüssel und Dateiendungen sind stabile Verträge.
+### Einstellungen der Schlüssel
 
-### Leitfaden für KI-Wissensmanagement in Obsidian: Übersetzung und Sprache
+| Einstellungen | Empfohlen | Warum |
+|---------|-----------|-----|
+| `enableExperimentalDiagramPipeline` | Eingeschaltet | Bessere Qualität durch vordefinierte Spezifikationen |
+| `experimentalDiagramCompatibilityMode` | `best-fit` | Natives Ziel pro Intent |
+| `summarizeToMermaidProvider` | GPT-4o oder Claude | Die Spezifikationen für Diagramme erfordern räumliches Denken. |
+| `autoMermaidFixAfterGenerate` | Eingeschaltet | Fängt automatisch Syntaxfehler von LLM ab |
+| Erweiterung des lokalen Wissens | Eingeschaltet für domänenspezifisch | Verbessert die Genauigkeit im Vault-Kontext |
 
-Dieser Teil von Leitfaden für KI-Wissensmanagement in Obsidian beschreibt Produktverhalten, Einstiegspunkte und technische Grenzen. UI-Schaltflächen, Befehle, Schlüssel und Dateiendungen sind stabile Verträge.
+→ [Einsatz von Diagrammen im Detail](/docs/features/diagrams)
 
-## Leitfaden für KI-Wissensmanagement in Obsidian: Workflows und Aufgaben
+---
 
-Dieser Teil von Leitfaden für KI-Wissensmanagement in Obsidian beschreibt Produktverhalten, Einstiegspunkte und technische Grenzen. UI-Schaltflächen, Befehle, Schlüssel und Dateiendungen sind stabile Verträge.
+## 6. Workflows: Ein-Klick-Automatisierung
 
-### Leitfaden für KI-Wissensmanagement in Obsidian: Workflows und Aufgaben
+Workflows verknüpfen mehrere Aufgaben zu einem einzigen Schaltflächen-Button in der Seitenleiste. Das DSL-Format lautet:
 
-Dieser Teil von Leitfaden für KI-Wissensmanagement in Obsidian beschreibt Produktverhalten, Einstiegspunkte und technische Grenzen. UI-Schaltflächen, Befehle, Schlüssel und Dateiendungen sind stabile Verträge.
+```
+task1 | task2 | task3
+```
 
-### Leitfaden für KI-Wissensmanagement in Obsidian: Workflows und Aufgaben
+Beispiel: `addLinks` | Konzepte extrahieren | generateDiagram` – wandelt eine Notiz aus Rohtext in einem Klick in einen voll vernetzten, visuellen Wissensknoten um.
 
-Dieser Teil von Leitfaden für KI-Wissensmanagement in Obsidian beschreibt Produktverhalten, Einstiegspunkte und technische Grenzen. UI-Schaltflächen, Befehle, Schlüssel und Dateiendungen sind stabile Verträge.
+### Empfohlene Arbeitsabläufe
 
-### Leitfaden für KI-Wissensmanagement in Obsidian: Workflows und Aufgaben
+| Workflow | Kette | Anwendungsfall |
+|----------|-------|----------|
+| Vollständiger Prozess | `addLinks \| extractConcepts \| generateDiagram` | Neue Notizen |
+| Zuerst Forschung betreiben | `research \| addLinks` | Unbekannte Themen |
+| Polyglott | `translate \| addLinks` | Mehrsprachige Notizen |
+| Nur Diagramm | `generateDiagram` | Schnelle Visualisierung |
 
-Dieser Teil von Leitfaden für KI-Wissensmanagement in Obsidian beschreibt Produktverhalten, Einstiegspunkte und technische Grenzen. UI-Schaltflächen, Befehle, Schlüssel und Dateiendungen sind stabile Verträge.
+→ [Einsatz von Workflows im Detail](/docs/features/workflows)
+
+---
+
+## 7. LLM Anbieter: 36 Optionen von Cloud bis lokal
+
+Notemd unterstützt 36 Anbieter in 4 Transporttypen. Schlüsselgruppen:
+
+- **Internationale Cloud**: OpenAI, Anthropic, Google, Mistral, xAI
+- **China Cloud**: DeepSeek, Qwen, Doubao, Moonshot, GLM, Baidu, SiliconFlow
+- **Gateways**: OpenRouter, GitHub Models, Hugging Face, Vercel
+- **Lokal**: Ollama, LMStudio, OVMS — keine API-Einstellung, keine Daten verlassen Ihren Rechner
+
+### Strategie des Modells pro Aufgabe
+
+Die kostengünstigste Konfiguration verwendet günstige Modelle für einfache Aufgaben und leistungsstarke Modelle für komplexe Aufgaben:
+
+```
+extractConcepts  → DeepSeek (fast, cheap, accurate enough)
+addLinks          → DeepSeek or GPT-4o-mini
+research          → GPT-4o or Claude (needs quality)
+generateDiagram   → GPT-4o or Claude (needs spatial reasoning)
+translate         → Gemini Flash (fast, multilingual)
+```
+
+→ [Überblick über LLM Anbieter](/docs/providers/overview)
+
+---
+
+## Checkliste zum Einstieg
+
+1. **Installieren von Notemd** — [Community Plugins](/docs/getting-started/installation) (empfohlen) oder manuell
+2. **Anbieter konfigurieren** — DeepSeek (am einfachsten), OpenAI oder Ollama (kostenlos)
+3. **Erstes Notiz bearbeiten** – Rechtsklick → „Datei bearbeiten (Verlinkungen hinzufügen)“
+4. **Konzeptordner festlegen** — Einstellungen → Notemd → Ausgabe → Konzeptordner
+5. **Konzepte extrahieren** — führen Sie „Konzepte extrahieren“ auf derselben Notiz aus
+6. **Diagramm erstellen** – führen Sie „Diagramm erstellen“ aus, um die Verbindungen zu visualisieren
+7. **Einen Workflow erstellen** – verknüpfe die obigen Schritte zu einem Klick-Button
+
+## Empfohlene Konfigurationen
+
+### Student (Budget)
+
+```
+Provider: DeepSeek (free tier available)
+Concept extraction: DeepSeek
+Research: DuckDuckGo (free) + DeepSeek
+Diagrams: Off (or legacy Mermaid)
+Workflows: addLinks | extractConcepts
+```
+
+### Forscher (Qualität)
+
+```
+Provider: GPT-4o (primary)
+Concept extraction: DeepSeek (cost savings)
+Research: GPT-4o + Tavily
+Diagrams: best-fit mode, GPT-4o
+Workflows: research | addLinks | extractConcepts | generateDiagram
+```
+
+### Datenschutz voran (nur lokal)
+
+```
+Provider: Ollama (llama3 or qwen2.5:7b)
+All tasks: Ollama
+Research: DuckDuckGo (free, no API key)
+Diagrams: legacy Mermaid mode
+```
+
+### Zweisprachig (ZH + EN)
+
+```
+Primary: DeepSeek (Chinese queries)
+Translation: Google Gemini Flash
+Research: Tavily + DeepSeek (Chinese search context)
+Language output: per-task (extractConceptsLanguage: zh-CN)
+```
+
+---
+
+## Gängige Muster
+
+### Muster: Ein Forschungspapier verarbeiten
+
+1. Importieren Sie den Inhalt von PDF (oder kopieren Sie ihn ein).
+2. **Forschung** – erhalte Web-Kontext zum Thema
+3. **Verknüpfungen hinzufügen** – identifizieren und verknüpfen Sie Schlüsselkonzepte
+4. **Konzepte extrahieren** – eigenständige Notizen erstellen
+5. **Diagramm erstellen** – die Struktur des Papers visualisieren
+
+### Muster: Erweiterung der Tagesnotiz
+
+1. Tägliche Notiz schreiben
+2. **Links hinzufügen** – verbindet die heutigen Ideen mit bestehenden Konzepten
+3. Konzeptnotizen aktualisieren sich automatisch mit Rückverweisen
+
+### Muster: Literaturübersicht
+
+1. Erstelle einen Ordner mit papers/notes
+2. **Batch Add Links** – gesamte Ordner verarbeiten
+3. **Konzepte duplizieren** – überflüssige, nahezu identische Notizen entfernen
+4. **Diagramm erstellen** – Mindmap der gesamten Literatur
+
+---
+
+*Notemd ist Open Source (MIT) und funktioniert mit Obsidian 0.15.0+ auf allen Plattformen. [Jetzt installieren](/docs/getting-started/installation) oder [auf GitHub ansehen](https://github.com/Jacobinwwey/obsidian-NotEMD).*

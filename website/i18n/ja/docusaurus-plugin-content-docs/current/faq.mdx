@@ -1,9 +1,41 @@
 ---
 id: faq
 title: よくある質問
-description: Notemd における よくある質問 の目的、設定、ワークフロー上の境界、よくある確認点を説明します。
+description: Notemdのインストール、機能、および使用方法に関するよくある質問
+keywords: [faq, installation, LLM providers, obsidian plugin, wiki-links, concept notes, Copilot alternative, Smart Connections alternative, obsidian AI plugin comparison]
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+concepts: [Notemd, Obsidian, LLM, wiki-links, concept notes, knowledge base, Copilot Alternative, AI Plugin Comparison]
+citations:
+  - title: Obsidian
+    url: https://obsidian.md
+  - title: Ollama
+    url: https://ollama.com
+faqItems:
+  - question: How do I install Notemd in Obsidian?
+    answer: Open Obsidian Settings, go to Community Plugins, Browse, search Notemd, Install, and Enable. Requires Obsidian 0.15.0 or later. Manual installation is also available via GitHub Releases.
+  - question: What LLM providers does Notemd support?
+    answer: Notemd supports 30+ providers including OpenAI, Anthropic, Google, xAI, Mistral, DeepSeek, Qwen, Ollama, LM Studio, Azure OpenAI, OpenRouter, and many China-focused providers like Qwen, Doubao, Moonshot, and GLM.
+  - question: Can Notemd work with local LLMs?
+    answer: Yes. Notemd works with Ollama, LM Studio, vLLM, LocalAI, and any OpenAI-compatible endpoint. All tasks work with local models including linking, concept generation, translation, research, and diagram generation.
+  - question: How does Notemd differ from ChatGPT?
+    answer: ChatGPT produces ephemeral chat answers. Notemd writes persistent structured results directly into your Obsidian vault as wiki-linked files, concept notes, diagrams, and translations that accumulate into a knowledge base.
+  - question: How does Notemd compare to Copilot or Smart Connections?
+    answer: Copilot is conversation-first for chatting about notes. Smart Connections is discovery-first for finding similar notes. Notemd is write-first, processing notes with AI and writing structured results into your vault. All three complement each other.
+  - question: Which search services work with Notemd research?
+    answer: Tavily (recommended, AI-optimized search, requires API key) and DuckDuckGo (experimental, no API key needed). Research results are summarized by LLM and appended to your note with source citations.
+  - question: Does Notemd support Chinese or other languages?
+    answer: The UI supports 21+ languages. Task output language is independently configurable, allowing mixed setups like Chinese UI with English output or vice versa.
+  - question: Can I use Notemd for paper or PDF reading?
+    answer: Yes. Convert PDF to Markdown using MinerU, open in Obsidian, then run Notemd tasks to add wiki-links, generate concept notes, extract text, research background, translate sections, and create Mermaid diagrams.
+  - question: What diagram types can Notemd generate?
+    answer: Mermaid (flowchart, sequence, class, state, ER, Gantt with syntax auto-fix), JSON Canvas (Obsidian native), Vega-Lite (data charts), HTML fallback, and explicit editable HTML/SVG figure artifacts. Draw.io XML and Drawnix JSON exporter boundaries are available for deterministic artifact testing.
+  - question: Is Notemd free and open source?
+    answer: Yes. MIT licensed, no paid tiers, no cloud lock-in, no telemetry. Source code on GitHub with 234+ stars. Pull requests welcome.
+  - question: Can Notemd work 100% offline?
+    answer: Yes with Ollama. No API key, no internet needed. All features work offline including wiki-links, concept notes, translation, and diagrams. DuckDuckGo research also works without an API key.
+  - question: Is my data sent to the cloud?
+    answer: With Ollama or LM Studio, no data leaves your machine. With cloud providers like OpenAI or Anthropic, your note content is sent as API input. Notemd itself collects no telemetry or user data.
 ---
 
 import TLDR from '@site/src/components/TLDR';
@@ -11,113 +43,317 @@ import TLDR from '@site/src/components/TLDR';
 # よくある質問
 
 <TLDR>
-**このページの要点：** Notemd における よくある質問 の目的、設定、ワークフロー上の境界、よくある確認点を説明します。 以下のコマンド、設定キー、拡張子、Provider 名は、プラグイン UI、CLI、ログと対応させるため英語表記のままにしています。
+**よくあるNotemdに関するクイックな回答です。** インストール（5分で設定完了）、30社以上のLLMプロバイダーへの対応、ローカル/クラウドモデルの選択肢、ワンクリックワークフロー、多言語対応のUI（21言語）、ウィキリンクの自動生成、研究機能との連携、PDF読み取りワークフロー、図表の作成、オープンソースライセンスなどが利用可能です。すべての機能はOllamaを使えばオフラインでも動作します。
 </TLDR>
 
-## よくある質問：インストールと準備
+---
 
-よくある質問 の設定は Notemd 設定画面から行います。Provider、モデル、出力先、言語、バッチ処理は独立した項目ではなく、現在のファイル、フォルダー処理、ワークフローのどれに影響するかを確認してください。
+## インストールとセットアップ
 
-### よくある質問：インストールと準備
+### ObsidianでNotemdをどのようにインストールしますか？
 
-よくある質問 のこの部分では、製品の挙動、利用入口、実装上の境界を説明します。UI ボタン、コマンド名、設定キー、拡張子は安定した契約として扱います。
+Obsidianを開き、**設定 → コミュニティプラグイン → 取り扱いリスト**に移動し、**"Notemd"**と検索してから**インストール**→**有効化**します。
 
-## よくある質問：設定とモデル
+**要件:**
+- Obsidian 0.15.0+
+- デスクトップ（Windows、macOS、Linux）およびモバイル（iOS、Android）でサポートされています。
 
-よくある質問 の設定は Notemd 設定画面から行います。Provider、モデル、出力先、言語、バッチ処理は独立した項目ではなく、現在のファイル、フォルダー処理、ワークフローのどれに影響するかを確認してください。
+**手動インストール:**
+1. [GitHub Releases](https://github.com/Jacobinwwey/obsidian-NotEMD/releases)から`main.js`、`styles.css`、`manifest.json`をダウンロードしてください。
+2. それらを`<your-vault>/.obsidian/plugins/notemd/`に入れてください。
+3. Obsidianを再読み込みし、プラグインを有効にします。
 
-### よくある質問：設定とモデル
+**統計情報:** ダウンロード数4千回以上、リリース数44回、MITライセンスで提供されています。
 
-よくある質問 のこの部分では、製品の挙動、利用入口、実装上の境界を説明します。UI ボタン、コマンド名、設定キー、拡張子は安定した契約として扱います。
+---
 
-### よくある質問：設定とモデル
+## LLM 設定
 
-よくある質問 のこの部分では、製品の挙動、利用入口、実装上の境界を説明します。UI ボタン、コマンド名、設定キー、拡張子は安定した契約として扱います。
+### NotemdはどのようなLLMプロバイダをサポートしていますか？
 
-### よくある質問：設定とモデル
+Notemdは**30社以上のプロバイダー**をサポートしています：
 
-よくある質問 のこの部分では、製品の挙動、利用入口、実装上の境界を説明します。UI ボタン、コマンド名、設定キー、拡張子は安定した契約として扱います。
+**クラウドプロバイダー:**
+- OpenAI (GPT-4, GPT-4o, GPT-4o-mini, o1, o3)
+- Anthropic（Claude Opus、Sonnet、Haiku）
+- Google（ジェミニプロ、フラッシュ、ウルトラ）
+- xAI (Grok)
+- Mistral、DeepSeek、Qwen、Moonshot、GLM
 
-## よくある質問：主要な説明
+**中国向け：**
+- Qwen、Qwen Code、Doubao、Moonshot、Xiaomi MiMo、GLM、Z AI、MiniMax
+- Huawei Cloud MaaS、Baidu Qianfan、SiliconFlow
 
-よくある質問 のこの部分では、製品の挙動、利用入口、実装上の境界を説明します。UI ボタン、コマンド名、設定キー、拡張子は安定した契約として扱います。
+**ローカル/自前ホスト:**
+- Ollama
+- LM Studio
+- OpenAIに対応するエンドポイントはどれですか？
 
-### よくある質問：調査と検索
+**ゲートウェイ:**
+- Azure OpenAI、OpenRouter、Together AI、Groq、AIHubMix
+- GitHub Models、Fireworks、LiteLLM、Nebius、Cerebras
+- Hugging Face、Vercel AI Gateway、Requesty
 
-よくある質問 のこの部分では、製品の挙動、利用入口、実装上の境界を説明します。UI ボタン、コマンド名、設定キー、拡張子は安定した契約として扱います。
+### NotemdはローカルのLLMsと連携できますか？
 
-### よくある質問：主要な説明
+**はい、完全にサポートされています。** Notemd は以下のものと連携動作します：
+- **Ollama**（ネイティブ統合）
+- **LM Studio**（OpenAI対応のエンドポイント経由）
+- **vLLM, LocalAI, text-generation-webui**（OpenAI対応モードを経由して）
 
-よくある質問 のこの部分では、製品の挙動、利用入口、実装上の境界を説明します。UI ボタン、コマンド名、設定キー、拡張子は安定した契約として扱います。
+すべてのタスクはローカルモデルを使用して動作します。リンク作成、コンセプト生成、翻訳、調査、図表生成です。
 
-### よくある質問：ワークフローとタスク
+**ミックス＆マッチの例：**
+- Ollama (ローカル) をリンクに使用すると→高速でプライベート、無料
+- 研究用のOpenAI → 高品質、ウェブ検索連携
+- 翻訳用Gemini → マルチモーダル対応
 
-よくある質問 のこの部分では、製品の挙動、利用入口、実装上の境界を説明します。UI ボタン、コマンド名、設定キー、拡張子は安定した契約として扱います。
+### 異なるタスクに対して異なるモデルをどのように設定すればよいですか？
 
-### よくある質問：トラブルシューティング
+**Notemd 設定**では、各タスクには独立したプロバイダ/モデルセレクタがあります：
 
-よくある質問 のこの部分では、製品の挙動、利用入口、実装上の境界を説明します。UI ボタン、コマンド名、設定キー、拡張子は安定した契約として扱います。
+| タスク | 例の設定内容 |
+|------|----------------------|
+| **リンク設定** | DeepSeek（高速で安価） |
+| **コンセプト生成** | Claude Opus（高品質） |
+| **研究** | Perplexity または GPT-4o (web-grounded) |
+| **翻訳** | Gemini Flash（マルチモーダル） |
+| **図の生成** | Ollama (ローカル、プライベート) |
 
-## よくある質問：調査と検索
+このタスクごとの最適化により、速度、コスト、品質のバランスが取れています。
 
-よくある質問 のこの部分では、製品の挙動、利用入口、実装上の境界を説明します。UI ボタン、コマンド名、設定キー、拡張子は安定した契約として扱います。
+---
 
-### よくある質問：調査と検索
+## コア機能
 
-よくある質問 のこの部分では、製品の挙動、利用入口、実装上の境界を説明します。UI ボタン、コマンド名、設定キー、拡張子は安定した契約として扱います。
+### 紙の読書において、NotemdはChatGPTとどのような違いがありますか？
 
-### よくある質問：設定とモデル
+| 次元 | ChatGPT | Notemd |
+|-----------|---------|--------|
+| **出力先** | チャット履歴（一時的） | Obsidian vault（永続ファイル） |
+| **結果の形式** | テキストでの回答 | ウィキリンク、コンセプトノート、図表、翻訳 |
+| **長期的な価値** | セッション終了後に消失する | ナレッジベースに蓄積される |
+| **再利用性** | 再クエリする必要があります。 | ファイルはそのままで、リンクが変化し、進化する |
 
-よくある質問 のこの部分では、製品の挙動、利用入口、実装上の境界を説明します。UI ボタン、コマンド名、設定キー、拡張子は安定した契約として扱います。
+**ChatGPTの使用用途：** 迅速なQ&A、一回限りの説明
+**Notemdの使用目的：** 数週間から数ヶ月にわたって永続的で構造化されたナレッジベースを構築する
 
-## よくある質問：ワークフローとタスク
+### Notemdはどのようにしてノートにウィキリンクを追加するのでしょうか？
 
-よくある質問 のこの部分では、製品の挙動、利用入口、実装上の境界を説明します。UI ボタン、コマンド名、設定キー、拡張子は安定した契約として扱います。
+**処理:**
+1. メモで「Process file (add links)」を実行します
+2. Notemdは、設定されたLLMにテキストを送信します。
+3. LLMは、文脈内の重要な概念を示します。
+4. Notemdは、各コンセプトが出現するたびに`[[wiki-links]]`を挿入します
+5. 必要に応じて、指定したフォルダ内にコンセプトノートを自動的に作成します
 
-### よくある質問：調査と検索
+**機能:**
+- 同義語抑制（「transformer」と「transformers」の重複を避ける）
+- コンセプトノートからソースへのバックリンク
+- 名前の変更/削除時のリンクの完全性
+- 純粋抽出モード（元の内容を変更せずに概念のみを抽出）
 
-よくある質問 のこの部分では、製品の挙動、利用入口、実装上の境界を説明します。UI ボタン、コマンド名、設定キー、拡張子は安定した契約として扱います。
+### Notemdワンクリックワークフローとは何ですか？
 
-## よくある質問：図表とレンダリング
+**ワンクリックワークフロー**は、複数のアクションを**1つのサイドバーボタン**にまとめます。
 
-よくある質問 のこの部分では、製品の挙動、利用入口、実装上の境界を説明します。UI ボタン、コマンド名、設定キー、拡張子は安定した契約として扱います。
+**デフォルトのワークフロー:** `One-Click Extract`
+```
+process-current-add-links > extract-concepts-current > research-and-summarize > summarize-as-mermaid
+```
 
-### よくある質問：図表とレンダリング
+**結果:** 1回クリックで実行されます：
+1. 現在のノートにウィキリンクを追加する
+2. 新しい用語のコンセプトノートを作成する
+3. 調査および背景情報の追加
+4. Mermaid図に圧縮する
 
-よくある質問 のこの部分では、製品の挙動、利用入口、実装上の境界を説明します。UI ボタン、コマンド名、設定キー、拡張子は安定した契約として扱います。
+**カスタムワークフロー:** DSL形式を使って設定画面で独自のワークフローを定義できます。各ワークフローは再利用可能なサイドバーボタンとして機能します。
 
-## よくある質問：境界と運用
+### NotemdはCopilotやSmart Connectionsと比べてどうですか？
 
-よくある質問 のこの部分では、製品の挙動、利用入口、実装上の境界を説明します。UI ボタン、コマンド名、設定キー、拡張子は安定した契約として扱います。
+これらのプラグインは異なる問題を解決します：
 
-### よくある質問：境界と運用
+- **Copilot** — 会話を最優先。メモについてAIとチャットします。AIの返答はチャットパネル内に残り、あなたのバンクには変更が加えられません。
+- **Smart Connections** — ディスカバリー優先。エンベディングを使用して意味的に類似したノートを見つけ出します。コンテンツを作成したり変更したりすることはありません。
+- **Notemd** — まず書く。AIがあなたのメモを処理し、構造化された結果（ウィキリンク、コンセプトノート、調査資料、図表、翻訳文）を永続的なファイルとして直接あなたのバンクに書き込みます。
 
-よくある質問 のこの部分では、製品の挙動、利用入口、実装上の境界を説明します。UI ボタン、コマンド名、設定キー、拡張子は安定した契約として扱います。
+| 必要なもの | おすすめプラグイン |
+|----------------|-------------------|
+| AIとメモについてチャットする | Copilot |
+| 類似の/関連するノートを探す | Smart Connections |
+| Wikiリンクを自動的に挿入し、ナレッジグラフを構築する | **Notemd** |
+| バックリンク付きのコンセプトノートを生成する | **Notemd** |
+| メモの内容から図を作成する | **Notemd** |
+| トピックを調査し、要約を追加してください | **Notemd** |
+
+3つはすべて一緒に使用でき、互いに競合するのではなく補完し合います。
+
+---
+
+## 調査・翻訳
+
+### Notemdリサーチで利用できる検索サービスはどれですか？
+
+| サービス | API キーが必要です | 品質 | メモ |
+|---------|-----------------|---------|-------|
+| **Tavily** | はい | 高い | おすすめのAI最適化検索 |
+| **DuckDuckGo** | いいえ | 実験的 | 設定不要、品質が低い |
+
+「Research & summarize」の動作方法：
+1. トピックを選択するか、現在のノートで実行します
+2. Notemdが検索サービスにクエリを送信します
+3. 結果 → LLM の要約
+4. 出典の引用と共に、メモに要約が追加されました
+
+**結果：** ブラウザのタブではなく、あなたのバルト内に永続的な研究トレイルが保存されます。
+
+### Notemdは中国語やその他の言語に対応していますか？
+
+**UI のサポート言語:** 21言語以上
+- 英語, 簡体中文, 繁體中文, 日本語, 韓国語
+- アラビア語、ドイツ語、フランス語、スペイン語、ロシア語、ポルトガル語、イタリア語
+- ヒンディー語、ベンガル語、タイ語、ベトナム語、トルコ語、ポーランド語、チェコ語、その他多数
+
+**タスク出力言語:** 独立した設定
+- UIは中国語です + 出力は英語です：✅
+- UI の英語表記 + 中国語での出力：✅
+
+**使用例:** バイリンガルの研究者は、出版用の英語のメモを作成しながらも、UIを母国語のまま保持することができます。
+
+---
+
+## PDFと学術ワークフロー
+
+### Notemdをペーパー/PDF読み用に使ってもいいですか？
+
+**はい。** ワークフロー：
+1. [MinerU](https://github.com/opendatalab/MinerU)を使用して**PDFをMarkdownに変換する**（学術論文に推奨）
+2. ObsidianでMarkdownファイルを開いてください。
+3. Notemdタスクを実行する：
+   - キーワードに**wikiリンクを追加する**
+   - 馴染みのない用語について**コンセプトノートを生成する**
+   - カスタム質問（例：「制限事項は何ですか？」）を通じて**元のテキストを抽出**する
+   - 引用された手法やデータセットの**研究背景**
+   - **翻訳**しにくいセクション
+   - 構造的な理解のためにMermaid図に圧縮する
+
+**バージョン 1.9.1+:** 目次機能を備えた章構造の抽出
+
+**結果：** あなたが読んだ論文は、あなたのバンク内で構造化され、リンク可能な知識アーティファクトとして保存されます。
+
+---
+
+## 図表と可視化
+
+### Notemdはどのようなグラフ/図のタイプを生成できますか？
+
+| 入力する | サポート | 機能 |
+|------|---------|----------|
+| **Mermaid** | フル | フローチャート、シーケンス、クラス、ステート、ER図、ガントチャート、構文自動修正、バッチ検証 |
+| **JSON Canvas** | フル | Obsidian ネイティブキャンバスレイアウト |
+| **Vega-Lite** | フル | データチャート、時系列、棒グラフ、散布図、カスタマイズ可能 |
+| **HTML** | フォールバック | サポートされていない図の種類について |
+| **編集可能な HTML/SVG** | 明示的なターゲット | 意味論的なDraw.ioスタイルの注釈を持つ、自己完結型のインラインSVG |
+| **Draw.io / Drawnix のアーティファクト** | 境界をエクスポートする | `SemanticFigureModel`からの決定的なXML/JSON；エディタの実行時依存性はない |
+
+**Mermaid 自動修正機能:** 詳細デバッグモードによる修復：
+- 壊れた矢印 (`-->`, `-.->`, `==>`)
+- 無効なラベル、コメント
+- サブグラフの構文エラー
+- 形状表記 (`[`, `(`, `{`, `((`)
+- ラベル内のパイプ文字
+- メモの添付ファイル
+
+**ワークフロー:**
+1. メモに対して「Summarize as Mermaid diagram」を実行してください
+2. モーダルでプレビュー
+3. SVGまたはPNG形式でエクスポートする
+4. Vaultに`.mmd`ファイルとして保存する
+
+---
+
+## オープンソースとコミュニティ
+
+### Notemdは無料でオープンソースなのでしょうか？
+
+**はい。**
+- **ライセンス:** MIT（寛容なライセンスで、商用利用も可能）
+- **ソースコード:** https://github.com/Jacobinwwey/obsidian-NotEMD
+- **有料プランなし、クラウドへの縛りなし、テレメトリなし**
+- **コミュニティ:** GitHubの星の数234以上、活発なDiscordコミュニティ
+
+**ご所有のもの：**
+- お客様のデータは（お客様のセーフティボックスに保管されます）
+- あなたのワークフロー（プロンプト、モデル、チェーンのカスタマイズ）
+- お客様のプライバシー（ローカルのLLMサポート）
+
+**貢献する:** プルリクエストを歓迎します。[CONTRIBUTING.md](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/CONTRIBUTING.md)をご覧ください。
+
+---
 
 ## トラブルシューティング
 
-この節では よくある質問 の典型的な失敗を切り分けます。Notemd の診断出力、Provider の HTTP ステータス、モデル名、ネットワーク、レート制限を先に確認します。
+### 私のLLMの呼び出しが失敗しています。何をチェックすればいいですか？
 
-### よくある質問：設定とモデル
+1. **APIキーは有効ですか？** [設定] → [プロバイダ設定]を確認してください。
+2. **モデル名は正しいですか？** 設定画面の「获取模型列表」(Get Model List) ボタンを使用してください。
+3. **ネットワークにアクセスできますか？** 一部のプロバイダーではVPNが必要です。
+4. **レート制限ですか？**プロバイダーのダッシュボードを確認してください。
+5. **診断:** 詳細なエラーログを確認するには、設定で「接続テスト」を実行してください
 
-よくある質問 のこの部分では、製品の挙動、利用入口、実装上の境界を説明します。UI ボタン、コマンド名、設定キー、拡張子は安定した契約として扱います。
+### Notemdは遅いです。どうすれば速くできますか？
 
-### よくある質問：トラブルシューティング
+1. **より高速なモデルの使用:** DeepSeek、Gemini Flash、GPT-4o-mini
+2. **チャンクサイズを小さくする：** 設定 → スマートチャンキング → 単語数を減らす
+3. **並列処理:** 設定 → バッチ処理 → 同時実行数の増加
+4. **ローカルモデル:** ワェブ検索が不要なタスクにはOllamaを使用
 
-よくある質問 のこの部分では、製品の挙動、利用入口、実装上の境界を説明します。UI ボタン、コマンド名、設定キー、拡張子は安定した契約として扱います。
+### Notemdは100％オフラインで動作できますか？
 
-### よくある質問：境界と運用
+**はい、Ollamaを使って。** APIキーもなく、インターネットにも接続せず、データはあなたのマシンから一切外に出ません：
 
-よくある質問 のこの部分では、製品の挙動、利用入口、実装上の境界を説明します。UI ボタン、コマンド名、設定キー、拡張子は安定した契約として扱います。
+1. [Ollama](https://ollama.com)をインストールし、`ollama serve`を実行してください。
+2. Notemdの設定で、プロバイダとして**Ollama**を選択してください
+3. モデルを取得する：`ollama pull llama3`（またはqwen2.5、gemma2など）
+4. すべての機能が動作しています：ウィキリンク、コンセプトノート、翻訳、図表
 
-### よくある質問：境界と運用
+**DuckDuckGo research**はAPIキーがなくても動作します（実験的な品質）。
 
-よくある質問 のこの部分では、製品の挙動、利用入口、実装上の境界を説明します。UI ボタン、コマンド名、設定キー、拡張子は安定した契約として扱います。
+クラウドプロバイダー（OpenAI、Anthropic、Google、DeepSeekなど）を使用する場合、メモの内容はAPIとして送信されます。データの取り扱いに関する詳細については、各プロバイダーのプライバシーポリシーを確認してください。
 
-### よくある質問：調査と検索
+### 私のデータはクラウドに送信されますか？
 
-よくある質問 のこの部分では、製品の挙動、利用入口、実装上の境界を説明します。UI ボタン、コマンド名、設定キー、拡張子は安定した契約として扱います。
+**プロバイダー次第です：**
 
-## よくある質問：トラブルシューティング
+| プロバイダータイプ | クラウドにデータが送信されましたか？ | メモ |
+|--------------|---------------------|-------|
+| **Ollama (ローカル)** | いいえ | すべてはお使いのマシンに残ります。 |
+| **LMStudio (ローカル)** | いいえ | Ollamaと同じです |
+| **DeepSeek、OpenAIなど** | はい | 処理用の入力として送信されたメモ内容はAPIです |
+| **OpenRouter, AIHubMix** | はい | クラウドプロバイダーにルーティングするゲートウェイ |
 
-よくある質問 のこの部分では、製品の挙動、利用入口、実装上の境界を説明します。UI ボタン、コマンド名、設定キー、拡張子は安定した契約として扱います。
+Notemd自体は**テレメトリも、分析データも、ユーザーデータも一切収集しません**。このプラグインは完全なオープンソース（MITライセンス）です。お使いのマシンから送信される唯一のデータは、明示的に設定したLLMプロバイダーに送信するものだけです。
+
+### 研究に最適なObsidian AIプラグインはどれですか？
+
+研究ワークフローによります：
+
+| 必要です | プラグイン | なぜですか？ |
+|------|--------|-----|
+| 関連する論文やメモを探す | Smart Connections | 意味的類似性の発見 |
+| あなたの情報源について話しましょう | Copilot | Vaultコンテキストを使用した会話 |
+| コンセプトの自動リンク付け + メモの生成 | **Notemd** | AIが概念を特定し、リンクを挿入し、メモを作成する |
+| ウェブ調査 + メモにまとめる | **Notemd** | Tavily/DuckDuckGo 検索 → LLM まとめ → メモに追加 |
+| 研究から図表を生成する | **Notemd** | メモの内容からMermaid/Canvas/Vega-Liteを抽出 |
+
+**おすすめの組み合わせ：** Smart Connections（発見）+ Notemd（構造化）+ Copilot（議論）。
+
+---
+
+## ヘルプの取得
+
+- **ドキュメント:** https://jacobinwwey.github.io/obsidian-NotEMD/
+- **GitHub Issues:** https://github.com/Jacobinwwey/obsidian-NotEMD/issues
+- **Discord:** https://discord.gg/qnGgsQ9W
+- **スポンサー:** https://github.com/sponsors/Jacobinwwey

@@ -1,51 +1,134 @@
 ---
 id: custom-prompts
-title: 自訂 Prompt
-description: 說明 自訂 Prompt 在 Notemd 中的用途、設定、工作流程邊界與常見排查路徑。
+title: 自訂提示詞
+description: 根據您的需求自訂 LLM 提示詞
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [custom prompts, prompts, focused learning, domain]
+concepts: [Custom Prompts, Focused Learning, Prompt Engineering]
+citations:
+  - title: Obsidian
+    url: https://obsidian.md
+  - title: LLM Prompt Engineering
+    url: https://platform.openai.com/docs/guides/prompt-engineering
 ---
 
 import TLDR from '@site/src/components/TLDR';
 
-# 自訂 Prompt
+# 自訂提示詞
 
 <TLDR>
-**本頁說明：** 說明 自訂 Prompt 在 Notemd 中的用途、設定、工作流程邊界與常見排查路徑。 以下命令、設定鍵、檔案副檔名與 Provider 名稱保留英文，以便和外掛介面、CLI 與日誌逐一對應。
+**Notemd 讓您能為每種任務類型覆寫預設的 LLM 提示語。** 自訂提示語讓您能控制模型應優先處理什麼內容：您可以將概念抽取限制在特定領域、改變連結方式，或調整翻譯的語氣。像 `{{content}}` 和 `{{concept}}` 這樣的提示變數會在執行時被替換。聚焦式學習領域功能會在抽取結果前加上您的研究領域，以自動限定其範圍。
+
+這是[Obsidian AI知識管理指南](/docs/pillar-ai-knowledge)的一部分。
 </TLDR>
 
 ## 概覽
 
-自訂 Prompt 的這一部分說明產品行為、使用入口與工程邊界。介面按鈕、命令名稱、設定鍵與檔案副檔名是穩定契約，翻譯不會改變實際執行名稱。
+Notemd 的內建提示詞是為了通用知識工作而設計的。它們在多個領域皆表現良好，但仍有空間可進行領域特定的優化。自訂提示詞讓您能夠明確告訴 LLM 在您的使用情境中應如何運作——無論是需要僅提取醫學術語、僅連結命名實體，或是以正式的語氣進行翻譯。
 
-## 工作机制
+自訂提示語並不會取代整個系統提示語。它們會覆寫或補充**特定任務的指示部分**，同時保留 Notemd 在解析時所依賴的結構化輸出格式（例如 `CONCEPT:` 行、維基連結語法）。
 
-自訂 Prompt 的這一部分說明產品行為、使用入口與工程邊界。介面按鈕、命令名稱、設定鍵與檔案副檔名是穩定契約，翻譯不會改變實際執行名稱。
+## 它的運作原理是什麼
 
-### Prompt 架構
+### 提示詞架構
 
-自訂 Prompt 的這一部分說明產品行為、使用入口與工程邊界。介面按鈕、命令名稱、設定鍵與檔案副檔名是穩定契約，翻譯不會改變實際執行名稱。
+每個 Notemd 任務都遵循相同的提示結構：
 
-### Prompt 变量
+```
+[System role: You are a helpful assistant...]
+[Domain constraint: Relevant Fields: [{domain}]]   <-- focused learning (optional)
+[Custom task prompt]                                <-- your override (optional)
+[Output format instructions]                        <-- always preserved
+[Content: {{content}}]                              <-- runtime substitution
+```
 
-自訂 Prompt 的這一部分說明產品行為、使用入口與工程邊界。介面按鈕、命令名稱、設定鍵與檔案副檔名是穩定契約，翻譯不會改變實際執行名稱。
+1. **基礎系統提示** -- 設定助理的角色。不可覆寫。
+2. **專注學習領域** -- 會在前面加上 `Relevant Fields: [medicine / law / computer science / ...]` 以限制範圍。這是一個設定開關，而非原始提示語。
+3. **自訂任務提示** -- 用於取代預設的任務說明（例如，應提取哪類概念、連結的強度如何）。
+4. **輸出格式** -- 結構規則（`CONCEPT:` 行，維基連結格式）。最後一律附加 Notemd 以確保可解析性。
+5. **內容** -- 實際的筆記文字，會在執行時以 `{{content}}` 來取代。
 
-### 聚焦学习领域
+### 提示詞變數
 
-自訂 Prompt 的這一部分說明產品行為、使用入口與工程邊界。介面按鈕、命令名稱、設定鍵與檔案副檔名是穩定契約，翻譯不會改變實際執行名稱。
+變數會在執行時被取代。可用的變數因任務而異：
 
-## 配置
+| 變數 | 任務 | 已替換為 |
+|----------|-------|---------------|
+| `{{content}}` | 全部 | 筆記或選取的文字 |
+| `{{concept}}` | 概念說明文件範本 | 提取出的概念名稱 |
+| `{{description}}` | 概念說明文件範本 | LLM-產生的概念描述 |
+| `{{backlinks}}` | 概念說明文件範本 | 包含連結的來源筆記清單 |
+| `{{date}}` | 概念說明文件範本 | 當前日期（YYYY-MM-DD） |
+| `{{language}}` | 翻譯 | 目標輸出語言 |
+| `{{source}}` | 概念說明文件範本 | 來源備註的基本名稱 |
 
-自訂 Prompt 的設定應從 Notemd 設定入口完成。Provider、模型、輸出路徑、語言與批次處理不是彼此獨立的開關；修改前應確認它影響目前檔案、資料夾任務或一鍵工作流程。
+### 專注學習領域
 
-## 示例
+聚焦學習功能是用於界定領域範圍的快捷方式。您不必撰寫提及您所處領域的自訂提示語，只需在設定中輸入 `focusedLearningDomain` 即可：
 
-自訂 Prompt 的這一部分說明產品行為、使用入口與工程邊界。介面按鈕、命令名稱、設定鍵與檔案副檔名是穩定契約，翻譯不會改變實際執行名稱。
+```
+Settings → Advanced → Focused Learning Domain
+Example: "medicine" or "computer science" or "Chinese philosophy"
+```
 
-## 建議
+這會在提取提示語的前面加上 `Relevant Fields: [medicine]`，讓 LLM 優先考慮與領域相關的概念，並忽略一般性的內容。它比完整的自訂提示語更輕量，且適用於所有提取任務。
 
-自訂 Prompt 的這一部分說明產品行為、使用入口與工程邊界。介面按鈕、命令名稱、設定鍵與檔案副檔名是穩定契約，翻譯不會改變實際執行名稱。
+## 設定
 
-## 下一步
+| 設定 | 預設值 | 效果 |
+|---------|---------|--------|
+| `customAddLinksPrompt` | `''` | 覆寫預設的 add-links 任務提示 |
+| `customExtractConceptsPrompt` | `''` | 覆寫預設的概念抽取提示詞 |
+| `customResearchPrompt` | `''` | 覆寫預設的研究 + 摘要提示詞 |
+| `customTranslatePrompt` | `''` | 覆寫預設的翻譯提示語 |
+| `customDiagramPrompt` | `''` | 覆寫預設的圖表生成提示語 |
+| `focusedLearningDomain` | `''` | 在抽取與連結提示的前面加上領域上下文 |
+| `extractConceptsMinimalTemplate` | `true` | 使用僅含標題的概念說明檔案範本（會影響 `{{concept}}` 檔案範本的適用範圍） |
+| `customConceptNoteTemplate` | `''` | 以完整的變數支援功能覆寫概念說明檔案範本 |
 
-繼續閱讀相鄰頁面時，優先選擇與目前任務鏈直接相關的主題：Provider 設定、核心功能、批次處理、疑難排解或圖表匯出。
+**當自訂提示字元欄位為空時，會使用內建的預設提示。**
+
+## 範例
+
+你是一名醫學研究人員，負責從臨床試驗筆記中提取概念。預設的提示詞會同時擷取一般名詞與醫學術語，這會讓你的概念資料夾變得混亂。
+
+**解決方案：** 設定專注的學習領域以及自訂的提取提示。
+
+1. 將 `focusedLearningDomain` 設定為 `medicine`
+2. 將 `customExtractConceptsPrompt` 設定為：
+
+```
+Extract only clinically relevant concepts: diseases, drug names,
+anatomical terms, measurement endpoints, and statistical methods.
+Ignore generic English nouns, brand names, and institutional names.
+Prioritize MeSH terminology where applicable.
+```
+
+現在當你在臨床筆記上執行「Extract concepts」時，LLM 會產生：
+
+```
+CONCEPT: Randomized Controlled Trial
+CONCEPT: Double-Blind Method
+CONCEPT: Myocardial Infarction
+CONCEPT: Creatine Kinase-MB
+CONCEPT: Kaplan-Meier Estimate
+```
+
+而非可能會提取「醫院」或「月份」等不需要的通用詞彙的預設行為。
+
+## 技巧
+
+- 在撰寫完整的自訂提示詞之前，**先從聚焦的學習領域開始**。透過單一設定即可涵蓋 80% 的使用情境。
+- **保留輸出格式** -- 永遠不要從自訂提示中移除「每行一個」或「CONCEPT: prefix」之類的格式說明。Notemd 的解析器依賴這些說明。
+- **先以單個筆記進行測試** -- 自訂提示詞可能對資料提取的範圍產生意外影響。在批次處理之前，請先在一個筆記上進行驗證。
+- **保持提示語簡潔** -- 過於長大的自訂提示語會消耗代碼單元，並可能削弱模型的專注度。
+
+---
+
+## 接下來的步驟
+
+- [Wiki-Links](/docs/features/wiki-links) -- 當您自訂 add-links 提示時，會連結到什麼內容
+- [概念說明](/docs/features/concept-notes) -- 概念說明範本與 `{{concept}}` 變數
+- [批次處理](/docs/advanced/batch-processing) -- 對整個資料夾套用自訂提示詞
+- [故障排除](/docs/advanced/troubleshooting) -- 解決自訂提示語產生非預期輸出的問題

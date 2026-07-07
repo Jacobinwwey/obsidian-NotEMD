@@ -1,39 +1,67 @@
 ---
 id: openai
 title: OpenAI
-description: Explique le rôle de OpenAI dans Notemd, sa configuration, ses limites de workflow et les vérifications courantes.
+description: Configurer OpenAI (GPT-4, GPT-4o)
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [openai, gpt-4o, provider, configuration]
+concepts: [OpenAI, GPT-4o, API Configuration]
+citations:
+  - title: OpenAI API
+    url: https://platform.openai.com
+  - title: GPT-4
+    url: https://openai.com/gpt-4
 ---
 
 import TLDR from '@site/src/components/TLDR';
 
-# OpenAI
+# OpenAI Fournisseur
 
 <TLDR>
-**Résumé：** Explique le rôle de OpenAI dans Notemd, sa configuration, ses limites de workflow et les vérifications courantes. Les commandes, clés de configuration, extensions et noms de Provider ci-dessous restent en anglais afin de correspondre exactement à l’interface, au CLI et aux journaux.
+**OpenAI utilise le transport partagé compatible avec OpenAI.** La configuration par défaut actuelle prend en compte `gpt-4o`, `https://api.openai.com/v1`, `temperature: 0.5` ainsi que le test de connexion `models-then-chat`. Utilisez cette page lorsque vous avez besoin d’une sémantique précise des champs ; consultez l’aperçu des [LLM Fournisseurs](/docs/providers/overview) pour effectuer une sélection au niveau des catégories.
+
+Ceci fait partie du [Obsidian Guide de gestion des connaissances IA](/docs/pillar-ai-knowledge).
 </TLDR>
 
-## Mise en place
+## Installation
 
-La configuration de OpenAI se fait dans les paramètres Notemd. Provider, modèle, sortie, langue et traitement par lots interagissent; identifiez si le changement touche le fichier courant, un dossier ou un workflow.
+Créez une clé OpenAI API, ajoutez un profil de fournisseur `OpenAI` dans les paramètres Notemd, et conservez la valeur par défaut de Base URL à moins que vous ne visiez intentionnellement un gateway compatible avec OpenAI. Le champ modèle peut rester sur `gpt-4o` pour des utilisations générales ou être remplacé par un autre ID de modèle OpenAI que votre compte peut utiliser.
+
+Utilisez des modèles spécifiques à tâche pour le contrôle des coûts : conservez des modèles plus puissants pour la recherche, l’extraction de concepts et la restructuration de longs textes ; utilisez des modèles moins chers ou plus rapides pour la traduction, les suggestions de liens et les résumés courts.
 
 ## Point de terminaison et authentification
 
-Cette partie de OpenAI décrit le comportement produit, les points d’entrée et les limites d’implémentation. Les boutons, commandes, clés et extensions restent des contrats stables.
+| Champ | Préférence actuelle |
+|-------|----------------|
+| Transport | `openai-compatible` |
+| Clé API | Obligatoire |
+| Base URL | `https://api.openai.com/v1` |
+| Modèle par défaut | `gpt-4o` |
+| Température | `0.5` |
+| Test de connexion | `/models`, puis `/chat/completions` |
 
-## Découverte des modèles
+Notemd normalise les bases URL compatibles avec OpenAI avant d’ajouter `chat/completions` ou `models`. Ne pas inclure de `/chat/completions` à la fin de la base URL ; cela crée un chemin dupliqué.
 
-Cette partie de OpenAI décrit le comportement produit, les points d’entrée et les limites d’implémentation. Les boutons, commandes, clés et extensions restent des contrats stables.
+## Découverte de modèles
 
-## Dépannage
+OpenAI utilise le chemin de découverte de modèles générique compatible avec OpenAI. Les paramètres UI demandent d’abord à `/v1/models`, puis valident le modèle sélectionné via une requête de chat légère. Si la découverte échoue mais que le chat fonctionne toujours, vérifiez si votre clé dispose des permissions model-list ou si un pare-feu bloque l’affichage de la liste des modèles.
 
-Cette section sert à diagnostiquer les échecs courants liés à OpenAI. Vérifiez d’abord les diagnostics Notemd, le statut HTTP du Provider, le nom du modèle, le réseau et les limites de débit.
+Les modèles de raisonnement sont considérés comme un cas limite de protocole : Notemd fusionne le contenu des prompts système et utilisateur pour générer des identifiants de raisonnement OpenAI qui rejettent un rôle `system` distinct, et il expose `reasoningEffort` uniquement lorsque la définition du fournisseur le permet.
 
-## Quand l’utiliser
+## Résolution de problèmes
 
-Cette partie de OpenAI décrit le comportement produit, les points d’entrée et les limites d’implémentation. Les boutons, commandes, clés et extensions restent des contrats stables.
+- `401` ou `403` : vérifier la clé, l’accès au projet, l’état de facturation, et déterminer si le modèle sélectionné est activé pour cette clé.
+- `404` sur le chat : la Base URL est généralement incorrecte ou inclut déjà `/chat/completions`.
+- Le modèle apparaît dans la documentation mais pas dans le sélecteur : l’accès à model-list et l’accès au chat constituent des points de défaillance distincts ; vérifiez manuellement l’ID exact du modèle dans le profil du fournisseur.
+- Le modèle de raisonnement rejette les messages : utilisez un ID de modèle couvert par le chemin de traitement des raisonnements OpenAI ou passez à un modèle de chat sans fonction de raisonnement.
 
-## Étapes suivantes
+## Quand l'utiliser
 
-Pour continuer, choisissez la page qui correspond directement à votre chaîne de travail: Provider, fonction principale, traitement par lots, dépannage ou export de diagrammes.
+Utilisez OpenAI lorsque vous souhaitez le chemin hébergé par défaut le plus prévisible, lorsque la découverte via `/v1/models` est importante, ou lorsque un flux de travail dépend des sémantiques du modèle de raisonnement OpenAI. Préférez un gateway ou un fournisseur local lorsque le routage, la confidentialité ou les contrôles de coûts sont plus importants que le comportement direct de OpenAI API.
+
+---
+
+## Prochaines étapes
+
+- [LLM Fournisseurs](/docs/providers/overview) -- Configuration complète, modèles par tâche, et logique de tentative
+- [Dépannage](/docs/advanced/troubleshooting) -- Corriger les erreurs 401/403 et les limites de fréquence

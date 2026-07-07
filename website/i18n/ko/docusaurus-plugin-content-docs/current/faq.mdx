@@ -1,123 +1,359 @@
 ---
 id: faq
-title: 자주 묻는 질문
-description: Notemd에서 자주 묻는 질문의 목적, 설정, 워크플로 경계와 일반적인 점검 항목을 설명합니다.
+title: 자주 묻는 질문들
+description: Notemd 설치, 기능, 사용에 관한 자주 묻는 질문들
+keywords: [faq, installation, LLM providers, obsidian plugin, wiki-links, concept notes, Copilot alternative, Smart Connections alternative, obsidian AI plugin comparison]
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+concepts: [Notemd, Obsidian, LLM, wiki-links, concept notes, knowledge base, Copilot Alternative, AI Plugin Comparison]
+citations:
+  - title: Obsidian
+    url: https://obsidian.md
+  - title: Ollama
+    url: https://ollama.com
+faqItems:
+  - question: How do I install Notemd in Obsidian?
+    answer: Open Obsidian Settings, go to Community Plugins, Browse, search Notemd, Install, and Enable. Requires Obsidian 0.15.0 or later. Manual installation is also available via GitHub Releases.
+  - question: What LLM providers does Notemd support?
+    answer: Notemd supports 30+ providers including OpenAI, Anthropic, Google, xAI, Mistral, DeepSeek, Qwen, Ollama, LM Studio, Azure OpenAI, OpenRouter, and many China-focused providers like Qwen, Doubao, Moonshot, and GLM.
+  - question: Can Notemd work with local LLMs?
+    answer: Yes. Notemd works with Ollama, LM Studio, vLLM, LocalAI, and any OpenAI-compatible endpoint. All tasks work with local models including linking, concept generation, translation, research, and diagram generation.
+  - question: How does Notemd differ from ChatGPT?
+    answer: ChatGPT produces ephemeral chat answers. Notemd writes persistent structured results directly into your Obsidian vault as wiki-linked files, concept notes, diagrams, and translations that accumulate into a knowledge base.
+  - question: How does Notemd compare to Copilot or Smart Connections?
+    answer: Copilot is conversation-first for chatting about notes. Smart Connections is discovery-first for finding similar notes. Notemd is write-first, processing notes with AI and writing structured results into your vault. All three complement each other.
+  - question: Which search services work with Notemd research?
+    answer: Tavily (recommended, AI-optimized search, requires API key) and DuckDuckGo (experimental, no API key needed). Research results are summarized by LLM and appended to your note with source citations.
+  - question: Does Notemd support Chinese or other languages?
+    answer: The UI supports 21+ languages. Task output language is independently configurable, allowing mixed setups like Chinese UI with English output or vice versa.
+  - question: Can I use Notemd for paper or PDF reading?
+    answer: Yes. Convert PDF to Markdown using MinerU, open in Obsidian, then run Notemd tasks to add wiki-links, generate concept notes, extract text, research background, translate sections, and create Mermaid diagrams.
+  - question: What diagram types can Notemd generate?
+    answer: Mermaid (flowchart, sequence, class, state, ER, Gantt with syntax auto-fix), JSON Canvas (Obsidian native), Vega-Lite (data charts), HTML fallback, and explicit editable HTML/SVG figure artifacts. Draw.io XML and Drawnix JSON exporter boundaries are available for deterministic artifact testing.
+  - question: Is Notemd free and open source?
+    answer: Yes. MIT licensed, no paid tiers, no cloud lock-in, no telemetry. Source code on GitHub with 234+ stars. Pull requests welcome.
+  - question: Can Notemd work 100% offline?
+    answer: Yes with Ollama. No API key, no internet needed. All features work offline including wiki-links, concept notes, translation, and diagrams. DuckDuckGo research also works without an API key.
+  - question: Is my data sent to the cloud?
+    answer: With Ollama or LM Studio, no data leaves your machine. With cloud providers like OpenAI or Anthropic, your note content is sent as API input. Notemd itself collects no telemetry or user data.
 ---
 
 import TLDR from '@site/src/components/TLDR';
 
-# 자주 묻는 질문
+# 자주 묻는 질문들
 
 <TLDR>
-**요약：** Notemd에서 자주 묻는 질문의 목적, 설정, 워크플로 경계와 일반적인 점검 항목을 설명합니다. 아래의 명령, 설정 키, 파일 확장자, Provider 이름은 플러그인 UI, CLI, 로그와 정확히 대응하도록 영어로 유지합니다.
+**가장 자주 묻는 Notemd 질문들에 대한 간단한 답변입니다.** 설치(5분 만에 완료), 30개 이상의 LLM 제공업체 지원, 로컬/클라우드 모델 옵션, 원클릭 워크플로우, 다국어 UI(21개 언어), 위키 링크 자동화, 연구 통합, PDF 읽기 워크플로우, 다이어그램 생성, 오픈소스 라이선싱 기능을 제공합니다. 모든 기능은 Ollama을 사용하여 오프라인에서도 작동합니다.
 </TLDR>
 
-## 자주 묻는 질문: 설치와 준비
+---
 
-자주 묻는 질문 설정은 Notemd 설정 화면에서 합니다. Provider, 모델, 출력 경로, 언어, 일괄 처리는 서로 연결되어 있으므로 현재 파일, 폴더 작업, 워크플로 중 어디에 영향을 주는지 확인하세요.
+## 설치 및 설정
 
-### 자주 묻는 질문: 설치와 준비
+### Obsidian에 Notemd을 어떻게 설치하나요?
 
-자주 묻는 질문의 이 부분은 제품 동작, 사용 진입점, 엔지니어링 경계를 설명합니다. UI 버튼, 명령 이름, 설정 키, 확장자는 안정적인 계약으로 봅니다.
+Obsidian를 열고 **Settings → Community Plugins → Browse**로 이동한 후 **"Notemd"**를 검색하여 **Install**을 클릭한 다음 **Enable**을 선택하세요.
 
-## 자주 묻는 질문: 설정과 모델
+**요구 사항:**
+- Obsidian 0.15.0+
+- 데스크톱(Windows, macOS, Linux) 및 모바일(iOS, Android)에서 지원됩니다.
 
-자주 묻는 질문 설정은 Notemd 설정 화면에서 합니다. Provider, 모델, 출력 경로, 언어, 일괄 처리는 서로 연결되어 있으므로 현재 파일, 폴더 작업, 워크플로 중 어디에 영향을 주는지 확인하세요.
+**수동 설치:**
+1. [GitHub Releases](https://github.com/Jacobinwwey/obsidian-NotEMD/releases)에서 `main.js`, `styles.css`, `manifest.json`를 다운로드하세요.
+2. 그것들을 `<your-vault>/.obsidian/plugins/notemd/`에 넣어주세요.
+3. Obsidian를 다시 로드하고 플러그인을 활성화하세요.
 
-### 자주 묻는 질문: 설정과 모델
+**통계:** 4천 회 이상 다운로드, 44개 버전 출시, MIT 라이선스 적용.
 
-자주 묻는 질문의 이 부분은 제품 동작, 사용 진입점, 엔지니어링 경계를 설명합니다. UI 버튼, 명령 이름, 설정 키, 확장자는 안정적인 계약으로 봅니다.
+---
 
-### 자주 묻는 질문: 설정과 모델
+## LLM 설정
 
-자주 묻는 질문의 이 부분은 제품 동작, 사용 진입점, 엔지니어링 경계를 설명합니다. UI 버튼, 명령 이름, 설정 키, 확장자는 안정적인 계약으로 봅니다.
+### Notemd는 어떤 LLM 제공업체들을 지원하나요?
 
-### 자주 묻는 질문: 설정과 모델
+Notemd는 **30개 이상의 제공업체**를 지원합니다:
 
-자주 묻는 질문의 이 부분은 제품 동작, 사용 진입점, 엔지니어링 경계를 설명합니다. UI 버튼, 명령 이름, 설정 키, 확장자는 안정적인 계약으로 봅니다.
+**클라우드 제공업체:**
+- OpenAI (GPT-4, GPT-4o, GPT-4o-mini, o1, o3)
+- Anthropic (클로드 오푸스, 소네트, 하이쿠)
+- Google (Gemini Pro, Flash, Ultra)
+- xAI (Grok)
+- Mistral, DeepSeek, Qwen, Moonshot, GLM
 
-## 자주 묻는 질문: 핵심 설명
+**중국 중심:**
+- Qwen, Qwen Code, Doubao, Moonshot, Xiaomi MiMo, GLM, Z AI, MiniMax
+- Huawei Cloud MaaS, Baidu Qianfan, SiliconFlow
 
-자주 묻는 질문의 이 부분은 제품 동작, 사용 진입점, 엔지니어링 경계를 설명합니다. UI 버튼, 명령 이름, 설정 키, 확장자는 안정적인 계약으로 봅니다.
+**로컬/자체 호스팅:**
+- Ollama
+- LM 스튜디오
+- OpenAI와 호환되는 모든 엔드포인트
 
-### 자주 묻는 질문: 연구와 검색
+**게이트웨이:**
+- Azure OpenAI, OpenRouter, Together AI, Groq, AIHubMix
+- GitHub Models, Fireworks, LiteLLM, Nebius, Cerebras
+- Hugging Face, Vercel AI Gateway, Requesty
 
-자주 묻는 질문의 이 부분은 제품 동작, 사용 진입점, 엔지니어링 경계를 설명합니다. UI 버튼, 명령 이름, 설정 키, 확장자는 안정적인 계약으로 봅니다.
+### Notemd는 로컬 LLM들과 함께 작동할 수 있나요?
 
-### 자주 묻는 질문: 핵심 설명
+**네, 완전히 지원됩니다.** Notemd는 다음과 함께 작동합니다:
+- **Ollama** (네이티브 통합)
+- **LM Studio** (OpenAI 호환 엔드포인트를 통해)
+- **vLLM, LocalAI, text-generation-webui** (OpenAI 호환 모드를 통해)
 
-자주 묻는 질문의 이 부분은 제품 동작, 사용 진입점, 엔지니어링 경계를 설명합니다. UI 버튼, 명령 이름, 설정 키, 확장자는 안정적인 계약으로 봅니다.
+모든 작업은 로컬 모델을 사용하여 수행됩니다: 링크 생성, 개념 생성, 번역, 연구, 그리고 다이어그램 생성.
 
-### 자주 묻는 질문: 워크플로와 작업
+**믹스 앤 매치 예시:**
+- Ollama (로컬) 링크용 → 빠르고, 프라이빗하며, 비용 없음
+- 연구용 OpenAI → 고품질, 웹 검색 통합
+- 번역을 위한 Gemini → 멀티모달 지원
 
-자주 묻는 질문의 이 부분은 제품 동작, 사용 진입점, 엔지니어링 경계를 설명합니다. UI 버튼, 명령 이름, 설정 키, 확장자는 안정적인 계약으로 봅니다.
+### 서로 다른 작업에 맞게 다른 모델을 어떻게 설정하나요?
 
-### 자주 묻는 질문: 문제 해결
+**Notemd 설정**에서 각 작업은 독립적인 공급자/모델 선택기를 가지고 있습니다:
 
-자주 묻는 질문의 이 부분은 제품 동작, 사용 진입점, 엔지니어링 경계를 설명합니다. UI 버튼, 명령 이름, 설정 키, 확장자는 안정적인 계약으로 봅니다.
+| 작업 | 예제 설정 |
+|------|----------------------|
+| **링크 연결** | DeepSeek (빠르고, 저렴함) |
+| **컨셉트 생성** | Claude Opus (고품질) |
+| **연구** | Perplexity 또는 GPT-4o (web-grounded) |
+| **번역** | Gemini Flash (멀티모달) |
+| **다이어그램 생성** | Ollama (로컬, 프라이빗) |
 
-## 자주 묻는 질문: 연구와 검색
+이 작업별 최적화는 속도, 비용, 그리고 품질을 균형 있게 조절합니다.
 
-자주 묻는 질문의 이 부분은 제품 동작, 사용 진입점, 엔지니어링 경계를 설명합니다. UI 버튼, 명령 이름, 설정 키, 확장자는 안정적인 계약으로 봅니다.
+---
 
-### 자주 묻는 질문: 연구와 검색
+## 핵심 기능
 
-자주 묻는 질문의 이 부분은 제품 동작, 사용 진입점, 엔지니어링 경계를 설명합니다. UI 버튼, 명령 이름, 설정 키, 확장자는 안정적인 계약으로 봅니다.
+### 종이 책 읽기와 관련해 Notemd은 ChatGPT과 어떻게 다른가요?
 
-### 자주 묻는 질문: 설정과 모델
+| 차원 | ChatGPT | Notemd |
+|-----------|---------|--------|
+| **출력 위치** | 채팅 기록 (일시적) | Obsidian 볼트 (영구 파일) |
+| **결과 형식** | 텍스트 답변 | 위키 링크, 개념 노트, 다이어그램, 번역문 |
+| **장기적 가치** | 세션 종료 후 사라짐 | 지식 베이스에 축적됩니다. |
+| **재사용성** | 다시 조회해야 합니다. | 파일은 그대로 유지되고, 링크는 계속 연결되며, 진화합니다. |
 
-자주 묻는 질문의 이 부분은 제품 동작, 사용 진입점, 엔지니어링 경계를 설명합니다. UI 버튼, 명령 이름, 설정 키, 확장자는 안정적인 계약으로 봅니다.
+**ChatGPT를 다음 용도로 사용하세요:** 간단한 Q&A, 일회성 설명
+**Notemd를 다음 용도로 사용하세요:** 몇 주 또는 몇 달에 걸쳐 지속적이고 체계적인 지식 베이스를 구축하기 위해
 
-## 자주 묻는 질문: 워크플로와 작업
+### Notemd는 어떻게 노트에 위키 링크를 추가하나요?
 
-자주 묻는 질문의 이 부분은 제품 동작, 사용 진입점, 엔지니어링 경계를 설명합니다. UI 버튼, 명령 이름, 설정 키, 확장자는 안정적인 계약으로 봅니다.
+**처리 과정:**
+1. 노트에서 "Process file (add links)"를 실행합니다.
+2. Notemd는 설정된 LLM로 텍스트를 전송합니다.
+3. LLM는 해당 맥락에서 핵심 개념들을 식별합니다.
+4. Notemd은 각 개념이 나타날 때마다 `[[wiki-links]]`를 삽입합니다.
+5. 선택적으로, 지정한 폴더에 콘셉트 노트를 자동으로 생성합니다.
 
-### 자주 묻는 질문: 연구와 검색
+**기능:**
+- 동의어 제거 (“transformer”와 “transformers”의 중복 방지)
+- 컨셉 노트에서 소스로 가는 백링크
+- 이름 변경/삭제 시 링크 무결성
+- 순수 추출 모드(원본을 수정하지 않고 개념만 추출)
 
-자주 묻는 질문의 이 부분은 제품 동작, 사용 진입점, 엔지니어링 경계를 설명합니다. UI 버튼, 명령 이름, 설정 키, 확장자는 안정적인 계약으로 봅니다.
+### Notemd 원클릭 워크플로우란 무엇인가요?
 
-## 자주 묻는 질문: 다이어그램과 렌더링
+**원클릭 워크플로우**는 여러 작업을 **단일 사이드바 버튼**에 연결합니다.
 
-자주 묻는 질문의 이 부분은 제품 동작, 사용 진입점, 엔지니어링 경계를 설명합니다. UI 버튼, 명령 이름, 설정 키, 확장자는 안정적인 계약으로 봅니다.
+**기본 워크플로우:** `One-Click Extract`
+```
+process-current-add-links > extract-concepts-current > research-and-summarize > summarize-as-mermaid
+```
 
-### 자주 묻는 질문: 다이어그램과 렌더링
+**결과:** 한 번의 클릭으로 실행됨:
+1. 현재 노트에 위키 링크를 추가하세요
+2. 새로운 용어에 대한 콘셉트 노트를 생성합니다.
+3. 조사 및 배경 정보 추가
+4. Mermaid 다이어그램으로 압축하기
 
-자주 묻는 질문의 이 부분은 제품 동작, 사용 진입점, 엔지니어링 경계를 설명합니다. UI 버튼, 명령 이름, 설정 키, 확장자는 안정적인 계약으로 봅니다.
+**커스텀 워크플로우:** DSL 형식을 사용하여 설정에서 자신만의 워크플로우를 정의할 수 있습니다. 각 워크플로우는 재사용 가능한 사이드바 버튼으로 생성됩니다.
 
-## 자주 묻는 질문: 경계와 거버넌스
+### Notemd는 Copilot나 Smart Connections와 어떻게 비교되나요?
 
-자주 묻는 질문의 이 부분은 제품 동작, 사용 진입점, 엔지니어링 경계를 설명합니다. UI 버튼, 명령 이름, 설정 키, 확장자는 안정적인 계약으로 봅니다.
+이 플러그인들은 서로 다른 문제를 해결합니다:
 
-### 자주 묻는 질문: 경계와 거버넌스
+- **Copilot** — 대화 중심. 메모에 대해 AI와 채팅합니다. AI의 답변은 채팅 패널에 남으며, 사용자의 보관소는 변경되지 않습니다.
+- **Smart Connections** — 발견 중심. 엠베딩을 사용하여 의미적으로 유사한 노트를 찾아냅니다. 콘텐츠를 생성하거나 수정하지 않습니다.
+- **Notemd** — 먼저 작성합니다. AI가 사용자의 메모를 처리하여 위키 링크, 개념 요약, 연구 자료, 다이어그램, 번역문 등 구조화된 결과물을 영구적인 파일 형태로 직접 보관소에 저장해 줍니다.
 
-자주 묻는 질문의 이 부분은 제품 동작, 사용 진입점, 엔지니어링 경계를 설명합니다. UI 버튼, 명령 이름, 설정 키, 확장자는 안정적인 계약으로 봅니다.
+| 필요한 것은 무엇인가요? | 추천 플러그인 |
+|----------------|-------------------|
+| AI와 노트에 대해 채팅하기 | Copilot |
+| 유사하거나 관련된 노트 찾기 | Smart Connections |
+| 위키 링크를 자동으로 삽입하고 지식 그래프를 구축합니다. | **Notemd** |
+| 백링크가 포함된 콘셉트 노트 생성 | **Notemd** |
+| 노트 내용에서 다이어그램을 생성합니다. | **Notemd** |
+| 주제를 조사하고 요약을 추가하세요 | **Notemd** |
+
+세 가지를 함께 사용할 수 있습니다. 서로 경쟁하는 것이 아니라 상호 보완적인 관계입니다.
+
+---
+
+## 연구 및 번역
+
+### Notemd 리서치와 연동되는 검색 서비스는 무엇인가요?
+
+| 서비스 | API 키가 필요합니다. | 품질 | 메모들 |
+|---------|-----------------|---------|-------|
+| **Tavily** | 네 | 높음 | 추천, AI 최적화 검색 |
+| **DuckDuckGo** | 안 됨 | 실험적 | 설정 불필요, 품질 저하 |
+
+**“Research & summarize”의 작동 방식:**
+1. 주제를 선택하거나 현재 노트에서 실행합니다.
+2. Notemd가 검색 서비스에 조회를 요청합니다.
+3. 결과 → LLM 요약
+4. 출처 인용과 함께 메모에 요약이 추가되었습니다.
+
+**결과:** 브라우저 탭이 아닌, 볼트에 영구적으로 저장되는 연구 기록입니다.
+
+### Notemd는 중국어나 다른 언어를 지원하나요?
+
+**UI 지원 언어:** 21개 이상 지원
+- 영어, 중문 (간체), 중문 (번체), 일본어, 한국어
+- 아랍어, 독일어, 프랑스어, 스페인어, 러시아어, 포르투갈어, 이탈리아어
+- 힌디어, 벵골어, 태국어, 베트남어, 터키어, 폴란드어, 체코어 등
+
+**작업 출력 언어:** 독립적인 설정
+- UI 중문으로 + 영어로 출력: ✅
+- UI의 영어 표현 + 중국어로 출력: ✅
+
+**사용 사례:** 이중 언어를 구사하는 연구자들은 출판을 위한 영문 노트를 작성하면서도 모국어로 UI를 그대로 유지할 수 있습니다.
+
+---
+
+## PDF 및 학술 워크플로우
+
+### Notemd를 종이/PDF 읽기에 사용할 수 있나요?
+
+**네.** 워크플로우:
+1. [MinerU](https://github.com/opendatalab/MinerU)를 사용하여 **PDF → Markdown**로 변환하기 (학술 논문에 적합함)
+2. Obsidian에서 Markdown 파일을 엽니다.
+3. Notemd 작업 실행:
+   - 주요 용어에 **위키 링크**를 추가하세요
+   - **익숙하지 않은 용어에 대한 개념 노트 생성**
+   - 맞춤형 질문을 통해 **원본 텍스트 추출**하기 (예: "제한 사항은 무엇인가요?")
+   - 인용된 방법/데이터셋에 대한 **연구 배경**
+   - **번역** 어려운 섹션들
+   - 구조적 이해를 위해 Mermaid 형태의 다이어그램으로 압축하기
+
+**버전 1.9.1+:** 목차 지원 기능을 갖춘 챕터 구조 추출
+
+**결과:** 귀하가 읽은 논문이 귀하의 보관소에 구조화되고 링크 가능한 지식 자산으로 저장됩니다.
+
+---
+
+## 다이어그램 및 시각화
+
+### Notemd는 어떤 종류의 그래프/다이어그램을 생성할 수 있나요?
+
+| 입력하기 | 지원 | 기능들 |
+|------|---------|----------|
+| **Mermaid** | 전체 | 플로우차트, 시퀀스, 클래스, 상태, ER 다이어그램, 간트 차트, 구문 자동 수정, 일괄 검증 |
+| **JSON Canvas** | 전체 | Obsidian 네이티브 캔버스 레이아웃 |
+| **Vega-Lite** | 전체 | 데이터 차트, 시계열, 막대형, 산점형, 사용자 지정 가능 |
+| **HTML** | 대체 방안 | 지원되지 않는 다이어그램 유형의 경우 |
+| **편집 가능한 HTML/SVG** | 명시적 대상 | 의미론적 Draw.io 스타일의 주석을 갖춘 자체 포함형 인라인 SVG |
+| **Draw.io / Drawnix 아티팩트들** | 경계 내보내기 | `SemanticFigureModel`에서 결정론적 XML/JSON 생성; 에디터 런타임에 대한 의존성 없음 |
+
+**Mermaid 자동 수정:** 심층 디버그 모드로 복구:
+- 깨진 화살표 (`-->`, `-.->`, `==>`)
+- 무효한 레이블, 코멘트
+- 서브그래프 구문 오류
+- 형태 표기법 (`[`, `(`, `{`, `((`)
+- 라벨의 파이프 문자
+- 첨부 파일 참고
+
+**워크플로우:**
+1. 노트에 “Summarize as Mermaid diagram”을 실행하세요.
+2. 모달에서 미리보기
+3. SVG 또는 PNG 형식으로 내보내기
+4. 또는 볼트에 `.mmd` 파일로 저장하세요
+
+---
+
+## 오픈 소스 및 커뮤니티
+
+### Notemd는 무료이며 오픈 소스인가요?
+
+**네.**
+- **라이선스:** MIT (자유로운 라이선스, 상업적 사용 가능)
+- **소스 코드:** https://github.com/Jacobinwwey/obsidian-NotEMD
+- **유료 플랜 없음, 클라우드 종속성 없음, 원격 측정 없음**
+- **커뮤니티:** 234개 이상의 GitHub 스타, 활발한 Discord 사용
+
+**소유하고 있는 것:**
+- 귀하의 데이터(귀하의 보관소에 저장됨)
+- 귀하의 워크플로우(프롬프트, 모델, 체인 사용자 지정)
+- 귀하의 개인정보 보호(로컬 LLM 지원)
+
+**기여하기:** 풀 리퀘스트를 환영합니다. [CONTRIBUTING.md](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/CONTRIBUTING.md)를 참조하세요.
+
+---
 
 ## 문제 해결
 
-이 절은 자주 묻는 질문의 일반적인 실패 원인을 구분합니다. Notemd 진단 출력, Provider HTTP 상태, 모델 이름, 네트워크, 속도 제한을 먼저 확인하세요.
+### 제 LLM 호출이 실패하고 있어요. 무엇을 확인해야 하나요?
 
-### 자주 묻는 질문: 설정과 모델
+1. **API 키가 유효한가요?** 설정 → 공급자 구성을 확인하세요.
+2. **모델 이름이 맞나요?** 설정에서 "获取模型列表" (Get Model List) 버튼을 사용하세요.
+3. **네트워크에 접속 가능한가요?** 일부 제공업체는 VPN을 요구합니다.
+4. **속도 제한이 있나요?** 제공업체 대시보드를 확인해 보세요.
+5. **진단:** 상세한 오류 로그를 보려면 설정에서 “연결 테스트”를 실행하십시오.
 
-자주 묻는 질문의 이 부분은 제품 동작, 사용 진입점, 엔지니어링 경계를 설명합니다. UI 버튼, 명령 이름, 설정 키, 확장자는 안정적인 계약으로 봅니다.
+### Notemd이 느립니다. 어떻게 속도를 높일 수 있을까요?
 
-### 자주 묻는 질문: 문제 해결
+1. **더 빠른 모델 사용하기:** DeepSeek, Gemini Flash, GPT-4o-mini
+2. **청크 크기 줄이기:** 설정 → 스마트 청킹 → 단어 수 감소
+3. **병렬 처리:** 설정 → 일괄 처리 → 동시성 증가
+4. **로컬 모델:** 웹 검색이 필요하지 않은 작업의 경우 Ollama 사용
 
-자주 묻는 질문의 이 부분은 제품 동작, 사용 진입점, 엔지니어링 경계를 설명합니다. UI 버튼, 명령 이름, 설정 키, 확장자는 안정적인 계약으로 봅니다.
+### Notemd는 100% 오프라인에서도 작동할 수 있나요?
 
-### 자주 묻는 질문: 경계와 거버넌스
+**네, Ollama를 사용하여 가능합니다.** API 키도 없고, 인터넷도 연결되지 않으며, 데이터는 사용자의 컴퓨터를 떠나지 않습니다.
 
-자주 묻는 질문의 이 부분은 제품 동작, 사용 진입점, 엔지니어링 경계를 설명합니다. UI 버튼, 명령 이름, 설정 키, 확장자는 안정적인 계약으로 봅니다.
+1. [Ollama](https://ollama.com)를 설치하고 `ollama serve`을 실행하세요.
+2. Notemd 설정에서 제공업체로 **Ollama**를 선택하세요
+3. 모델 가져오기: `ollama pull llama3` (또는 qwen2.5, gemma2 등)
+4. 모든 기능이 정상적으로 작동합니다: 위키 링크, 콘셉트 노트, 번역, 다이어그램
 
-### 자주 묻는 질문: 경계와 거버넌스
+**DuckDuckGo research**는 API 키가 없어도 작동합니다(실험적인 품질).
 
-자주 묻는 질문의 이 부분은 제품 동작, 사용 진입점, 엔지니어링 경계를 설명합니다. UI 버튼, 명령 이름, 설정 키, 확장자는 안정적인 계약으로 봅니다.
+클라우드 제공업체(OpenAI, Anthropic, Google, DeepSeek 등)를 사용할 경우, 메모 내용은 API 형태의 입력으로 전송됩니다. 데이터 처리 방침에 대한 자세한 내용은 각 제공업체의 개인정보 보호 정책을 확인하십시오.
 
-### 자주 묻는 질문: 연구와 검색
+### 제 데이터가 클라우드로 전송되나요?
 
-자주 묻는 질문의 이 부분은 제품 동작, 사용 진입점, 엔지니어링 경계를 설명합니다. UI 버튼, 명령 이름, 설정 키, 확장자는 안정적인 계약으로 봅니다.
+**제공업체에 따라 다릅니다:**
 
-## 자주 묻는 질문: 문제 해결
+| 제공자 유형 | 클라우드로 데이터가 전송되었나요? | 메모들 |
+|--------------|---------------------|-------|
+| **Ollama (로컬)** | 안 됨 | 모든 것은 사용자의 컴퓨터에 그대로 남아 있습니다. |
+| **LMStudio (로컬)** | 안 됨 | Ollama와 동일합니다. |
+| **DeepSeek, OpenAI, 등등.** | 네 | 처리를 위해 API 입력으로 전송된 내용을 참고하세요. |
+| **OpenRouter, AIHubMix** | 네 | 클라우드 제공업체로 연결되는 게이트웨이 |
 
-자주 묻는 질문의 이 부분은 제품 동작, 사용 진입점, 엔지니어링 경계를 설명합니다. UI 버튼, 명령 이름, 설정 키, 확장자는 안정적인 계약으로 봅니다.
+Notemd 자체는 **어떠한 원격 측정 데이터도, 분석 데이터도, 사용자 데이터도 수집하지 않습니다**. 이 플러그인은 완전히 오픈 소스(MIT 라이선스)입니다. 사용자의 컴퓨터에서 나가는 유일한 데이터는 사용자가 명시적으로 설정한 LLM 제공업체로 전송하는 데이터뿐입니다.
+
+### 연구에 가장 적합한 Obsidian AI 플러그인은 무엇인가요?
+
+귀하의 연구 워크플로우에 따라 다릅니다:
+
+| 필요합니다 | 플러그인 | 왜요? |
+|------|--------|-----|
+| 관련 논문/노트 찾기 | Smart Connections | 의미적 유사성 발견 |
+| 당신의 정보 출처에 대해 이야기해 보세요. | Copilot | Vault 컨텍스트와의 대화 |
+| 자동 링크 개념 생성 + 노트 작성 | **Notemd** | AI는 개념을 식별하고, 링크를 삽입하며, 노트를 작성합니다. |
+| 웹 조사 + 요약하여 노트 작성 | **Notemd** | Tavily/DuckDuckGo 검색 → LLM 요약 → 노트에 추가됨 |
+| 연구 자료에서 다이어그램 생성 | **Notemd** | 노트 내용에서 Mermaid/Canvas/Vega-Lite |
+
+**추천 조합:** Smart Connections (발견) + Notemd (구조화) + Copilot (논의).
+
+---
+
+## 도움 받기
+
+- **문서:** https://jacobinwwey.github.io/obsidian-NotEMD/
+- **GitHub 이슈:** https://github.com/Jacobinwwey/obsidian-NotEMD/issues
+- **Discord:** https://discord.gg/qnGgsQ9W
+- **스폰서:** https://github.com/sponsors/Jacobinwwey

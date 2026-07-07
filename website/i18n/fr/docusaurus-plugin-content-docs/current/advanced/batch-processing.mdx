@@ -1,9 +1,16 @@
 ---
 id: batch-processing
 title: Traitement par lots
-description: Explique le rôle de Traitement par lots dans Notemd, sa configuration, ses limites de workflow et les vérifications courantes.
+description: Traiter plusieurs fichiers de manière efficace
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [batch processing, folders, concurrency, bulk operations]
+concepts: [Batch Processing, Concurrency, Folder Operations]
+citations:
+  - title: Obsidian
+    url: https://obsidian.md
+  - title: Node.js Worker Threads
+    url: https://nodejs.org/api/worker_threads.html
 ---
 
 import TLDR from '@site/src/components/TLDR';
@@ -11,45 +18,104 @@ import TLDR from '@site/src/components/TLDR';
 # Traitement par lots
 
 <TLDR>
-**Résumé：** Explique le rôle de Traitement par lots dans Notemd, sa configuration, ses limites de workflow et les vérifications courantes. Les commandes, clés de configuration, extensions et noms de Provider ci-dessous restent en anglais afin de correspondre exactement à l’interface, au CLI et aux journaux.
+**Notemd traite des dossiers entiers en une seule opération, avec une concurrence configurable et un contrôle de suppression.** Cliquez avec le bouton droit sur un dossier pour ajouter en lot des liens wiki, extraire des concepts, effectuer des recherches ou traduire toutes les notes qu’il contient. Les limites de concurrence empêchent les erreurs de limitation de débit API. La progression est indiquée pour chaque fichier. Le comportement de suppression est configurable : sauter les fichiers existants, les ajouter en appendice ou les remplacer. Les fichiers qui échouent sont enregistrés sans interrompre le traitement en lot.
+
+Ceci fait partie du [Obsidian Guide de gestion des connaissances IA](/docs/pillar-ai-knowledge).
 </TLDR>
 
-## Vue d’ensemble
+## Aperçu général
 
-Cette partie de Traitement par lots décrit le comportement produit, les points d’entrée et les limites d’implémentation. Les boutons, commandes, clés et extensions restent des contrats stables.
+Le traitement par lots transforme un dossier de notes en une seule opération. Au lieu d’ouvrir chaque note et d’exécuter des commandes individuellement, vous cliquez avec le bouton droit sur le dossier et sélectionnez la tâche. Notemd parcourt chaque fichier `.md`, applique l’action choisie et indique l’avancement en temps réel.
 
-## Fonctionnement
+Cette fonctionnalité est essentielle pour l’extraction des connaissances dans l’ensemble du coffre-fort. Après avoir importé des dizaines de PDF, par exemple, en utilisant d’abord batch-add-links puis batch-extract-concepts, votre graphe de connaissances est créé en quelques minutes plutôt qu’en heures.
 
-Cette partie de Traitement par lots décrit le comportement produit, les points d’entrée et les limites d’implémentation. Les boutons, commandes, clés et extensions restent des contrats stables.
+## Comment ça marche
 
-### Traitement par lots : configuration et modèles
+### Modèle d’exécution par lots
 
-Cette partie de Traitement par lots décrit le comportement produit, les points d’entrée et les limites d’implémentation. Les boutons, commandes, clés et extensions restent des contrats stables.
+```mermaid
+graph LR
+    A[Right-click Folder] --> B[Select Batch Task]
+    B --> C[Collect All .md Files]
+    C --> D[Partition by Concurrency]
+    D --> E[Execute Chunk in Parallel]
+    E --> F{All Files Done?}
+    F -->|No| G[Report Progress]
+    G --> E
+    F -->|Yes| H[Final Summary Toast]
+```
 
-### Traitement par lots : explication principale
+1. **Collecte de fichiers** -- Notemd parcourt le répertoire cible de manière récursive (ou uniquement au niveau supérieur, selon les paramètres) et collecte tous les fichiers `.md`.
+2. **Partitionnement de la concurrence** -- Les fichiers sont divisés en blocs en fonction de la valeur de `batchConcurrency`. Chaque bloc s’exécute en parallèle ; les blocs s’exécutent séquentiellement.
+3. **Exécution** -- Chaque fichier est traité selon la même logique que la commande pour un seul fichier. Les paramètres du fournisseur et du modèle par tâche sont respectés.
+4. **Rapport de progression** -- Une notification toast est mise à jour après chaque fichier terminé, affichant la progression `N / Total`.
+5. **Gestion des erreurs** -- Si un fichier échoue (erreur API, délai d’attente réseau, etc.), l’erreur est enregistrée et le traitement par lots se poursuit. Le résumé final liste tous les fichiers qui ont échoué.
+6. **Completion** -- Un toast de résumé indique le nombre total traité, les succès et les échecs.
 
-Cette partie de Traitement par lots décrit le comportement produit, les points d’entrée et les limites d’implémentation. Les boutons, commandes, clés et extensions restent des contrats stables.
+### Comportement d’écriture surchargée
 
-### Traitement par lots : explication principale
+Lors du traitement d’un fichier qui contient déjà des liens wiki, des notes conceptuelles ou des traductions, le comportement de Notemd dépend de la configuration de suppression :
 
-Cette partie de Traitement par lots décrit le comportement produit, les points d’entrée et les limites d’implémentation. Les boutons, commandes, clés et extensions restent des contrats stables.
+| Mode | Comportement |
+|------|----------|
+| **Sauter** | Le contenu existant reste inchangé. Seuls les fichiers non modifiés sont traités. |
+| **Append** (par défaut) | Un nouveau contenu est ajouté en fin. Les liens wiki, concepts ou traductions existants sont conservés. |
+| **Remplacer** | Le fichier a été entièrement rétraité. Toutes les modifications précédentes Notemd ont été écrasées. |
+
+Pour les liens wiki en particulier : si une note contient déjà `[[wiki-links]]`, le mode **skip** la laisse telle quelle, tandis que **replace** envoie à nouveau toute la note à LLM afin d’y insérer un lien frais. Utilisez **skip** pour un traitement incrémental et **replace** pour un retraitement après une mise à jour du modèle.
+
+### Contrôle de concurrence
+
+La configuration `batchConcurrency` limite le nombre de appels parallèles API. Cela évite les erreurs de limitation de débit (HTTP 429) lors du traitement de grands dossiers auprès de fournisseurs ayant des quotas stricts.
+
+| Concurrence | Recommandé pour | Impact typique de la limitation de débit |
+|-------------|----------------|---------------------------|
+| `1` | Forfaits gratuits, fournisseurs stricts | Aucun (numéros de série) |
+| `3` (par défaut) | La plupart des fournisseurs de services cloud | Bas |
+| `5` | Ollama (local), forfaits généreux | Aucun / Faible |
+| `10` | Modèles locaux avec une inférence rapide | Aucun |
+
+Si vous rencontrez des erreurs 429 lors du traitement par lots, réduisez la concurrence à 1 ou 2.
 
 ## Configuration
 
-La configuration de Traitement par lots se fait dans les paramètres Notemd. Provider, modèle, sortie, langue et traitement par lots interagissent; identifiez si le changement touche le fichier courant, un dossier ou un workflow.
+| Configuration | Par défaut | Appliquer |
+|---------|---------|--------|
+| `batchConcurrency` | `3` | Nombre maximal de appels parallèles API pendant les opérations sur les dossiers |
+| `batchOverwriteExisting` | `false` | Écraser le contenu existant de Notemd. `false` = mode d’ajout. |
+| `batchSkipProcessed` | `false` | Ignorer les fichiers qui contiennent déjà des marqueurs Notemd (par exemple, des liens wiki) |
+| `batchRecursive` | `true` | Inclure les sous-dossiers lors du balayage du dossier |
+| `enableStableApiCall` | `false` | Activer la logique de tentative répétée (jusqu’à 4 essais) par fichier lors du traitement en lot |
 
-### Traitement par lots : configuration et modèles
+### Modèles par tâche en lot
 
-Cette partie de Traitement par lots décrit le comportement produit, les points d’entrée et les limites d’implémentation. Les boutons, commandes, clés et extensions restent des contrats stables.
+Chaque opération par lot utilise le modèle correspondant à la tâche. batch-add-links utilise `addLinksProvider`, batch-research utilise `researchProvider`, et ainsi de suite. Cela signifie que vous pouvez attribuer des modèles peu coûteux aux opérations à grande échelle et réserver des modèles chers aux tâches où la qualité est importante.
 
 ## Exemple
 
-Cette partie de Traitement par lots décrit le comportement produit, les points d’entrée et les limites d’implémentation. Les boutons, commandes, clés et extensions restent des contrats stables.
+Vous avez un dossier `papers/` contenant 40 notes de recherche importées. Vous souhaitez y ajouter des liens wiki et extraire des concepts à partir de toutes.
 
-## Traitement par lots : recommandations suivantes
+1. Cliquez avec le bouton droit sur le dossier `papers/`
+2. Sélectionnez **"Notemd: Dossier de traitement (ajouter des liens)"**
+3. Notemd scanne le dossier, trouve 40 fichiers `.md`, et les traite par groupes de 3 (concurrency par défaut)
+4. Une notification de progression affiche : `12/40 files processed...`
+5. Après environ 3 minutes, un toast de résumé affiche : `39 succeeded, 1 failed (API timeout on paper-37.md)`
+6. Répétez avec **"Notemd: Process folder (extract concepts)"** pour créer des notes de concepts pour les 40 éléments.
 
-Cette partie de Traitement par lots décrit le comportement produit, les points d’entrée et les limites d’implémentation. Les boutons, commandes, clés et extensions restent des contrats stables.
+Le fichier qui a échoué a été enregistré dans les journaux. Vous pouvez le relancer uniquement sur ce fichier par la suite.
 
-## Étapes suivantes
+## Conseils
 
-Pour continuer, choisissez la page qui correspond directement à votre chaîne de travail: Provider, fonction principale, traitement par lots, dépannage ou export de diagrammes.
+- **Commencez avec une faible concurrence** – Si vous n’êtes pas sûr des limites de débit de votre fournisseur, commencez par `1` et augmentez progressivement.
+- **Utilisez le mode saut pour les mises à jour incrémentielles** -- Après le premier lot complet, passez en `batchSkipProcessed: true` afin que seules les nouvelles notes soient traitées lors des exécutions suivantes.
+- **Activer les appels stables API** -- `enableStableApiCall: true` ajoute une logique de tentative qui permet de se remettre d’erreurs réseau temporaires lors de traitements de grande envergure.
+- **Relancer après les mises à jour du modèle** -- Si vous passez à un modèle amélioré, définissez `batchOverwriteExisting: true` et relancez l’opération pour obtenir des liens et des concepts plus performants.
+
+---
+
+## Prochaines étapes
+
+- [Workflows](/docs/features/workflows) -- Enchaîner des tâches par lots en boutons de barre latérale d’un clic
+- [Custom Prompts](/docs/advanced/custom-prompts) -- Personnaliser les prompts pour l’extraction en lot
+- [Dépannage](/docs/advanced/troubleshooting) -- Corriger les erreurs de limitation de débit et les échecs de connexion lors des exécutions en lot
+- [LLM Fournisseurs](/docs/providers/overview) -- Référence de configuration du modèle par tâche

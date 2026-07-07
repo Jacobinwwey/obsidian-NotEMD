@@ -1,9 +1,16 @@
 ---
 id: overview
 title: LLM プロバイダー
-description: Notemd における LLM プロバイダー の目的、設定、ワークフロー上の境界、よくある確認点を説明します。
+description: タスクごとのモデル選択機能を備えた、クラウド、ゲートウェイ、ローカルの36種類のLLMプロバイダーを設定します
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [LLM providers, API, OpenAI, Anthropic, Google, DeepSeek, Qwen, Ollama, per-task model]
+concepts: [LLM Integration, API Providers, Per-Task Models, OpenAI Compatible, Ollama, China Providers]
+citations:
+  - title: OpenAI API
+    url: https://platform.openai.com
+  - title: Anthropic API
+    url: https://docs.anthropic.com
 ---
 
 import TLDR from '@site/src/components/TLDR';
@@ -11,77 +18,172 @@ import TLDR from '@site/src/components/TLDR';
 # LLM プロバイダー
 
 <TLDR>
-**このページの要点：** Notemd における LLM プロバイダー の目的、設定、ワークフロー上の境界、よくある確認点を説明します。 以下のコマンド、設定キー、拡張子、Provider 名は、プラグイン UI、CLI、ログと対応させるため英語表記のままにしています。
+**Notemdは、4種類の転送方式を通じて36のLLMプロバイダをサポートしています。** すべてのAPI呼び出しでは生のHTTPが使用され（SDKは不要）、自動再試行、転送方式のフォールバック、および5分間のレスポンスキャッシングが実施されます。タスクごとのモデル選択により、概念抽出には安価なモデルを、研究には高性能なモデルを使用できます。ローカルプロバイダ（Ollama、LMStudio）の場合、APIキーは不要です。
 </TLDR>
 
-## Provider の分類
+これは[Obsidian AI知識管理ガイド](/docs/pillar-ai-knowledge)の一部です。
 
-LLM プロバイダー のこの部分では、製品の挙動、利用入口、実装上の境界を説明します。UI ボタン、コマンド名、設定キー、拡張子は安定した契約として扱います。
+## プロバイダーカテゴリ
 
-### LLM プロバイダー：設定とモデル
+### クラウドプロバイダー
 
-LLM プロバイダー のこの部分では、製品の挙動、利用入口、実装上の境界を説明します。UI ボタン、コマンド名、設定キー、拡張子は安定した契約として扱います。
+| プロバイダー | デフォルトベース URL | デフォルトモデル | 温度 |
+|----------|-----------------|---------------|-------------|
+| **DeepSeek** | `api.deepseek.com` | `deepseek-v4-pro` | 0.5 |
+| **OpenAI** | `api.openai.com/v1` | `gpt-4o` | 0.5 |
+| **Anthropic** | `api.anthropic.com` | `claude-3-5-sonnet-20240620` | 0.5 |
+| **Google** | `generativelanguage.googleapis.com/v1` | `gemini-2.0-flash-exp` | 0.5 |
+| **Mistral** | `api.mistral.ai/v1` | `mistral-large-latest` | 0.5 |
+| **xAI** | `api.x.ai/v1` | `grok-4` | 0.7 |
+| **Cerebras** | `api.cerebras.ai/v1` | `gpt-oss-120b` | 0.5 |
+| **Fireworks** | `api.fireworks.ai/inference/v1` | `kimi-k2p5` | 0.5 |
+| **Nebius** | `api.studio.nebius.com/v1` | `openai/gpt-oss-120b` | 0.3 |
 
-### LLM プロバイダー：設定とモデル
+### ゲートウェイ／プロキシプロバイダー
 
-LLM プロバイダー のこの部分では、製品の挙動、利用入口、実装上の境界を説明します。UI ボタン、コマンド名、設定キー、拡張子は安定した契約として扱います。
+| プロバイダー | デフォルトベース URL | デフォルトモデル | メモ |
+|----------|-----------------|---------------|-------|
+| **OpenRouter** | `openrouter.ai/api/v1` | `anthropic/claude-3.7-sonnet` | `HTTP-Referer` + `X-Title` ヘッダーを追加する |
+| **GitHub Models** | `models.github.ai/inference` | `gpt-4o-mini` | `X-GitHub-Api-Version`ヘッダーを追加します |
+| **AIHubMix** | `aihubmix.com/v1` | `gpt-4o-mini` | `APP-Code`ヘッダーを追加します |
+| **PPIO** | `api.ppinfra.com/v3/openai` | `qwen/qwen3-32b` | |
+| **Hugging Face** | `router.huggingface.co/v1` | `openai/gpt-oss-120b` | |
+| **Vercel AI Gateway** | `ai-gateway.vercel.sh/v1` | `anthropic/claude-sonnet-4.5` | |
+| **Requesty** | `router.requesty.ai/v1` | `anthropic/claude-3-7-sonnet-latest` | |
+| **Together** | `api.together.xyz/v1` | `meta-llama/Meta-Llama-3.1-70B-Instruct-Turbo` | |
+| **LiteLLM** | `localhost:4000/v1` | `your-proxy-model` | オプションのAPIキー |
+| **新しい API** | `localhost:3000/v1` | `gpt-4.1` | オプションのAPIキー |
+| **OpenAI Compatible** | (ユーザー設定済み) | `your-model-id` | カスタムエンドポイント |
 
-### LLM プロバイダー：設定とモデル
+### 中国のプロバイダー
 
-LLM プロバイダー のこの部分では、製品の挙動、利用入口、実装上の境界を説明します。UI ボタン、コマンド名、設定キー、拡張子は安定した契約として扱います。
+| プロバイダー | デフォルトベース URL | デフォルトモデル | メモ |
+|----------|-----------------|---------------|-------|
+| **Qwen** | `dashscope.aliyuncs.com/compatible-mode/v1` | `qwen3-235b-a22b` | Alibaba DashScope |
+| **Qwen Code** | `dashscope.aliyuncs.com/compatible-mode/v1` | `qwen3-coder-plus` | コーディングに特化した |
+| **Doubao** | `ark.cn-beijing.volces.com/api/v3` | (エンドポイントIDが必要です) | ByteDance Volcengine |
+| **Moonshot** | `api.moonshot.cn/v1` | `kimi-k2-0905-preview` | 君 |
+| **Xiaomi MiMo** | `api.xiaomimimo.com/v1` | `mimo-v2.5-pro` | |
+| **GLM** | `open.bigmodel.cn/api/paas/v4` | `glm-5` | 中国のZhipuエンドポイント |
+| **Z AI** | `api.z.ai/api/paas/v4` | `glm-5` | Zhipu、国際エンドポイント |
+| **MiniMax** | `api.minimaxi.com/v1` | `MiniMax-M2.7` | |
+| **Baidu Qianfan** | `qianfan.baidubce.com/v2` | `ernie-4.5-turbo-32k` | |
+| **SiliconFlow** | `api.siliconflow.cn/v1` | `Qwen/QwQ-32B` | モデルホスティングプラットフォーム |
+| **Huawei Cloud MaaS** | `api.modelarts-maas.com/v1` | `DeepSeek-V3` | |
 
-### LLM プロバイダー：設定とモデル
+**Doubao には Ark エンドポイント ID が必要です**（形式：`ep-xxxxxxxx-xxxx-xxxx`）。デフォルトのプレースホルダーは必ず置き換える必要があります。
 
-LLM プロバイダー のこの部分では、製品の挙動、利用入口、実装上の境界を説明します。UI ボタン、コマンド名、設定キー、拡張子は安定した契約として扱います。
+### ローカルプロバイダー
 
-## タスク別モデル選択
+| プロバイダー | デフォルトベース URL | デフォルトモデル | メモ |
+|----------|-----------------|---------------|-------|
+| **Ollama** | `localhost:11434/api` | `llama3` | APIキーがありません。NDJSONストリーミング。`/api/tags`を介したモデル検出 |
+| **LMStudio** | `localhost:1234/v1` | `local-model` | `"EMPTY"`をベアラートークンとして送信します。OpenAI対応のディスカバリ |
+| **OVMS** | `localhost:8000/v3` | `openvino-model` | OpenVINOモデルサーバー |
+| **Azure OpenAI** | (ユーザー設定済み) | `gpt-4o` | URL内のデプロイメント名。`api-key`ヘッダー |
 
-LLM プロバイダー のこの部分では、製品の挙動、利用入口、実装上の境界を説明します。UI ボタン、コマンド名、設定キー、拡張子は安定した契約として扱います。
+## タスクごとのモデル選択
 
-### LLM プロバイダー：ワークフローとタスク
+Notemdは、各タスクごとに独立したプロバイダーとモデルをサポートしています。`useMultiModelSettings: true`を使用して有効にします。
 
-LLM プロバイダー のこの部分では、製品の挙動、利用入口、実装上の境界を説明します。UI ボタン、コマンド名、設定キー、拡張子は安定した契約として扱います。
+### 利用可能なタスク
 
-### LLM プロバイダー：主要な説明
+| タスク | 設定キー | デフォルトプロバイダー |
+|------|-------------|-----------------|
+| リンクの追加（ウィキリンクの挿入） | `addLinksProvider` / `addLinksModel` | DeepSeek |
+| 調査（ウェブ検索＋要約） | `researchProvider` / `researchModel` | DeepSeek |
+| タイトルから生成する | `generateTitleProvider` / `generateTitleModel` | DeepSeek |
+| 翻訳 | `translateProvider` / `translateModel` | DeepSeek |
+| 図の生成 | `summarizeToMermaidProvider` / `Model` | DeepSeek |
+| 概念抽出 | `extractConceptsProvider` / `Model` | DeepSeek |
+| 元のテキスト抽出 | `extractOriginalTextProvider` / `Model` | DeepSeek |
 
-LLM プロバイダー のこの部分では、製品の挙動、利用入口、実装上の境界を説明します。UI ボタン、コマンド名、設定キー、拡張子は安定した契約として扱います。
+### 解像度順序
 
-### LLM プロバイダー：設定とモデル
+1. `useMultiModelSettings`が有効な場合は、タスク専用のプロバイダーとモデルを使用する
+2. タスクモデルのオーバーライドが空の場合 → プロバイダーのデフォルトモデルに戻る
+3. タスクプロバイダーが無効な場合 → グローバルな`activeProvider`にフォールバックする
+4. `useMultiModelSettings`がオフの場合 → すべてのタスクでグローバルな`activeProvider`が使用されます
 
-LLM プロバイダー の設定は Notemd 設定画面から行います。Provider、モデル、出力先、言語、バッチ処理は独立した項目ではなく、現在のファイル、フォルダー処理、ワークフローのどれに影響するかを確認してください。
+### 推奨設定
 
-## API 呼び出しアーキテクチャ
+```
+# Researcher: power for research, cheap for everything else
+activeProvider: DeepSeek
+extractConceptsProvider: DeepSeek
+researchProvider: OpenAI        # GPT-4o for better research quality
+summarizeToMermaidProvider: DeepSeek
 
-LLM プロバイダー のこの部分では、製品の挙動、利用入口、実装上の境界を説明します。UI ボタン、コマンド名、設定キー、拡張子は安定した契約として扱います。
+# Privacy-first: local only
+activeProvider: Ollama
+addLinksProvider: Ollama
+extractConceptsProvider: Ollama
+
+# Budget bilingual
+activeProvider: DeepSeek
+translateProvider: Google      # Gemini Flash for translation
+researchProvider: SiliconFlow  # Cheaper China-based routing
+```
+
+## API コールアーキテクチャ
 
 ### トランスポート層
 
-LLM プロバイダー のこの部分では、製品の挙動、利用入口、実装上の境界を説明します。UI ボタン、コマンド名、設定キー、拡張子は安定した契約として扱います。
+1. **Obsidian `requestUrl`** — プライマリ（組み込みで、すべてのプラットフォームで動作）
+2. **デスクトップ HTTP** — Node.js `http`/`https` モジュール（ストリーミング＋長時間のリクエスト）
+3. **Web `fetch`** — Node.jsモジュールが利用できない場合のフォールバック
 
-### リトライロジック
+このプラグインは、一時的なネットワークエラーが発生した際に自動的にトランスポート間で切り替えを行います。
 
-LLM プロバイダー のこの部分では、製品の挙動、利用入口、実装上の境界を説明します。UI ボタン、コマンド名、設定キー、拡張子は安定した契約として扱います。
+### 再試行ロジック
 
-### レスポンスキャッシュ
+- **通常モード** (`enableStableApiCall: false`): 1回の試行のみ。一時的な失敗が発生した場合、自動的に安定した再試行に切り替わります。
+- **安定した再試行モード** (`enableStableApiCall: true`): 5秒間隔で最大4回の試行（1回の初回試行＋3回の再試行）。
+- **再試行をトリガーする一時的なエラー**: `err_connection_closed`, `err_connection_reset`, `err_timed_out`, `econnreset`, `econnaborted`, `etimedout`, `socket hang up`, `network request failed`
+- **再試行不可**: HTTP 400, 401, 403, 404
 
-LLM プロバイダー のこの部分では、製品の挙動、利用入口、実装上の境界を説明します。UI ボタン、コマンド名、設定キー、拡張子は安定した契約として扱います。
+### レスポンスキャッシング
 
-### LLM プロバイダー：設定とモデル
+provider + model + temperature + prompt + contentでキー付けされた、5分間有効なメモリ内LRUキャッシュ。5分以内に同じリクエストが再び行われると、キャッシュされた結果が即座に返されます。
 
-LLM プロバイダー のこの部分では、製品の挙動、利用入口、実装上の境界を説明します。UI ボタン、コマンド名、設定キー、拡張子は安定した契約として扱います。
+### 推論モデルの処理
 
-### トークン見積もり
+`system`ロール（DeepSeek R1、OpenAI o1/o3/o4/gpt-5）をサポートしていないモデルでは、システムプロンプトとユーザープロンプトが自動的に1つのユーザーメッセージに統合されます。
 
-LLM プロバイダー のこの部分では、製品の挙動、利用入口、実装上の境界を説明します。UI ボタン、コマンド名、設定キー、拡張子は安定した契約として扱います。
+DeepSeek-specific: `thinkingEnabled`はリクエストに `{ thinking: { type: 'enabled' } }`を追加します。レベル`reasoningEffort`（低/中/高）は`reasoning_effort`として渡されます。思考モードが有効な場合、最大出力トークン数が8000以上であることを検証します。
+
+### トークン推定
+
+`estimateTokens(text)`: `Math.ceil(text.length / 4)` — 1トークンあたり4文字のヒューリスティック。LLMに送信する前に`maxResearchContentTokens`を適用するために使用されます。
+
+コスト追跡機能は実装されていません。
 
 ## モデル検出
 
-LLM プロバイダー のこの部分では、製品の挙動、利用入口、実装上の境界を説明します。UI ボタン、コマンド名、設定キー、拡張子は安定した契約として扱います。
+| モード | プロバイダー | エンドポイント |
+|------|-----------|----------|
+| `ollama-tags` | Ollama | `/api/tags` |
+| `google-models` | Google | モデル一覧 API |
+| `anthropic-models` | Anthropic | モデル一覧 API |
+| `openai-compatible-models` | DeepSeek、Qwen、Mistralなど。 | `/v1/models` |
+| `openrouter-models` | OpenRouter | モデル一覧 API |
+| `github-models` | GitHub Models | 推論 API |
+| `none` | Azure OpenAI | 無効（デプロイメント名が必要） |
 
 ## クイックスタート
 
-LLM プロバイダー のこの部分では、製品の挙動、利用入口、実装上の境界を説明します。UI ボタン、コマンド名、設定キー、拡張子は安定した契約として扱います。
+1. **プロバイダの選択** — DeepSeek（中国）、OpenAI（国際）、または Ollama（ローカル/無料）
+2. **APIキーを入力してください** — 設定 → Notemd → プロバイダー → APIキー
+3. **接続テスト** — テストボタンをクリックしてください
+4. **オプション：タスクごとのモデル** — `useMultiModelSettings`を有効にして個別に設定します
+
+Ollamaの場合：APIキーは不要です。`ollama serve`が動作していることを確認してください。
+
+---
 
 ## 次のステップ
 
-次に読むページは、いまの作業に直結する Provider 設定、主要機能、バッチ処理、トラブルシューティング、図表出力から選んでください。
+- 📝 [Concept Notes](/docs/features/concept-notes) — タスクごとの抽出モデルを使用
+- 🎨 [Diagrams](/docs/features/diagrams) — タスクごとの図モデルを使用
+- 🔍 [Research](/docs/features/research) — 研究専用モデルを使用
+- ⚙️ [設定](/docs/getting-started/configuration) — 全ての設定リファレンス

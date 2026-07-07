@@ -1,39 +1,63 @@
 ---
 id: local
-title: 本機模型
-description: 說明 本機模型 在 Notemd 中的用途、設定、工作流程邊界與常見排查路徑。
+title: 本地模型
+description: 設定 Ollama 與本地的 LLMs
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [local, ollama, lmstudio, provider, configuration, offline]
+concepts: [Local Models, Ollama, LMStudio, Offline]
+citations:
+  - title: Ollama
+    url: https://ollama.com
+  - title: LM Studio
+    url: https://lmstudio.ai
 ---
 
 import TLDR from '@site/src/components/TLDR';
 
-# 本機模型
+# 本地模型
 
 <TLDR>
-**本頁說明：** 說明 本機模型 在 Notemd 中的用途、設定、工作流程邊界與常見排查路徑。 以下命令、設定鍵、檔案副檔名與 Provider 名稱保留英文，以便和外掛介面、CLI 與日誌逐一對應。
+**本地供應商會將內容儲存在非託管於 API 的位置。** 目前的本地路徑會使用原生的 `ollama` 傳輸方式來處理 Ollama，並透過與 OpenAI 相容的傳輸方式來處理 LMStudio。無論哪種路徑都不需要 API 金鑰，但本地伺服器與模型必須已經在運作中。
+
+這是[Obsidian AI知識管理指南](/docs/pillar-ai-knowledge)的一部分。
 </TLDR>
 
-## 設置
+## 安裝
 
-本機模型 的設定應從 Notemd 設定入口完成。Provider、模型、輸出路徑、語言與批次處理不是彼此獨立的開關；修改前應確認它影響目前檔案、資料夾任務或一鍵工作流程。
+對於 Ollama，請安裝 Ollama，下載您想要的模型，啟動伺服器，並在 Notemd 中新增一個 `Ollama` 提供者設定檔。對於 LMStudio，則需在 LM Studio 的本機伺服器中載入模型，並新增一個 `LMStudio` 提供者設定檔。
 
-## 端点與鑑權
+本地模型是運作上的依賴項，而非僅僅是設定。Notemd 只能呼叫本地處理程式所公開的功能，因此在除錯外掛程式之前，請先在 Obsidian 外部驗證本地模型。
 
-本機模型 的這一部分說明產品行為、使用入口與工程邊界。介面按鈕、命令名稱、設定鍵與檔案副檔名是穩定契約，翻譯不會改變實際執行名稱。
+## 端點與認證
 
-## 模型發現
+| 供應商 | 基底 URL | 預設模型 | API 金鑰 | 備註 |
+|----------|----------|---------------|---------|-------|
+| Ollama | `localhost:11434/api` | `llama3` | 不需要 | NDJSON 流式處理；透過 `/api/tags` 進行模型探索 |
+| LMStudio | `localhost:1234/v1` | `local-model` | 不需要 | 以承載令牌的方式傳送 `"EMPTY"`；相容於 OpenAI |
 
-本機模型 的這一部分說明產品行為、使用入口與工程邊界。介面按鈕、命令名稱、設定鍵與檔案副檔名是穩定契約，翻譯不會改變實際執行名稱。
+Ollama 會在其 Base URL 下方使用本地的 `/chat` 路徑。LMStudio 則遵循與 OpenAI 相容的 `chat/completions` 路由，並期望使用在本地伺服器上載入的模型。
 
-## 故障排查
+## 模型探索
 
-本節用於定位 本機模型 的常見失敗模式。優先查看 Notemd 設定中的診斷輸出、Provider 回傳的 HTTP 狀態、模型名稱、網路連線與是否觸發限流。
+Ollama 使用 `ollama-tags` 的探索模式，並列出本地取得的標籤。當其伺服器提供 `/v1/models` 時，LMStudio 會使用與 OpenAI 相容的模型探索功能。
 
-## 适用场景
+如果探索功能沒有返回任何結果，那通常是本地伺服器狀態的問題：模型未被下載、未載入，或是伺服器的連接主機/端口與設定檔中的不同。
 
-本機模型 的這一部分說明產品行為、使用入口與工程邊界。介面按鈕、命令名稱、設定鍵與檔案副檔名是穩定契約，翻譯不會改變實際執行名稱。
+## 故障排除
 
-## 下一步
+- 連線被拒：請啟動 Ollama 或 LM Studio，並確認所設定的連接埠。
+- 未找到模型：請在測試前拉取 Ollama 標籤或載入 LM Studio 模型。
+- 輸出速度慢：降低上下文大小、使用較小的本地模型，或將繁重的任務交給託管服務供應商處理。
+- 空值或格式錯誤的回應：請確認所選的供應商設定檔符合本機伺服器協定；Ollama 與 LMStudio 無法互相替換。
 
-繼續閱讀相鄰頁面時，優先選擇與目前任務鏈直接相關的主題：Provider 設定、核心功能、批次處理、疑難排解或圖表匯出。
+## 何時使用
+
+對於私人金庫、離線工作或廉價的重複性任務，可使用本地供應商。請勿認為本地方式在研究綜合或長時間推理方面就一定更優；模型品質與硬體限制才是需要權衡的因素。
+
+---
+
+## 接下來的步驟
+
+- [LLM 提供商](/docs/providers/overview) -- 完整的設定及每個任務的模型配置
+- [故障排除](/docs/advanced/troubleshooting) -- 解決當本地伺服器未運作時出現的 connection-refused 錯誤

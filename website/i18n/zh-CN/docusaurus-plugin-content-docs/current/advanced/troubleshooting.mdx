@@ -1,6 +1,6 @@
 ---
 id: troubleshooting
-title: 故障排查
+title: 故障排除
 description: 常见问题与解决方案
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
@@ -15,147 +15,147 @@ citations:
 
 import TLDR from '@site/src/components/TLDR';
 
-# 故障排查
+# 故障排除
 
 <TLDR>
-**大多数 Notemd 问题可以归为四类：API key 问题、网络连通性、认证错误（401/403）和 rate limit（429）。** 内置 connection test 和 diagnostics panel 能快速定位根因。本页覆盖常见错误信息、原因和修复方式。未列出的问题，请带上 diagnostics output 到 GitHub Issues 反馈。
+**大多数 Notemd 问题可归为四类：API 关键问题、网络连接问题、身份验证错误（401/403）以及速率限制问题（429）。** 内置的连接测试和诊断面板能够快速定位根本原因。本页面涵盖了所有常见的错误信息、其成因及解决方法。对于未列出的问题，请将诊断结果附上后通过 GitHub Issues 进行报告。
 
-这是 [Obsidian AI Knowledge Management Guide](/docs/pillar-ai-knowledge) 的一部分。
+这是[Obsidian AI知识管理指南](/docs/pillar-ai-knowledge)的一部分。
 </TLDR>
 
 ## 概览
 
-Notemd 依赖外部服务，包括 LLM providers 和 search APIs，所以很多问题来源于插件之外。settings 中的 diagnostics panel 会结构化显示最近一次 API 调用，包括 request URL、response status 和 error body。排查前应先查看这里。
+Notemd 依赖于外部服务——即 LLM 提供商和搜索 API 服务——因此大多数问题都源于插件本身之外。设置中的诊断面板可以以结构化的方式展示上一次 API 调用的相关信息，包括请求 URL、响应状态以及错误内容。在进一步排查之前，请务必先查看该面板。
 
-## 故障排查：核心说明
+## 工作原理：诊断功能
 
-### 故障排查：故障排查
+### 连接测试
 
-每个 provider 配置区域都有 **"Test Connection"** 按钮。点击后会发送最小 API 请求，通常是 model list 或短 completion，并报告成功或具体 HTTP 错误。这是验证 API key 与 base URL 是否正确的最快方式。
+每个提供商配置部分都有一个**“测试连接”**按钮。点击该按钮会发送一个最简的 API 请求（通常是模型列表或简短的补全内容），并反馈成功状态或具体的 HTTP 错误信息。这是验证您的 API 密钥及基础 URL 是否正确的最快方法。
 
 ### 诊断面板
 
-**Settings -> Notemd -> Diagnostics** 显示：
+**设置 --> Notemd --> 诊断** 显示：
 
-| Field | Content |
+| 字段 | 内容 |
 |-------|---------|
-| Last provider | 最近调用的 provider |
-| Last model | 最近调用的 model |
-| Last status | HTTP status code 或 transport error |
-| Last error | API 返回的原始错误信息 |
-| Last request URL | 最近请求 URL（API key 已脱敏） |
-| Last response body | 截断后的响应 body（前 500 字符） |
+| 上一个提供商 | 上次调用的是哪个提供商 |
+| 最新型号 | 上一个被调用的是哪个模型 |
+| 最后状态 | HTTP 状态码或传输错误 |
+| 上一个错误 | 来自 API 的原始错误信息 |
+| 上一个请求 URL | 上一次请求的完整内容 URL（已删除 API 关键字） |
+| 上次响应的正文内容 | 响应体被截断（前500个字符） |
 
-在 GitHub 报告问题时，请复制完整 diagnostics output。
+在 GitHub 上报告问题时，请复制完整的诊断输出。
 
 ## 常见错误
 
-### 故障排查：配置与模型
+### API 密钥无效或丢失
 
-**Symptom:** HTTP 401 或 "Incorrect API key provided"
+**症状：** HTTP 返回 401 错误或“提供的 API 密钥不正确”
 
-**Cause:** API key 缺失、包含空白，或属于另一个 provider。
+**原因：** API 键缺失、包含空白字符，或属于其他提供商。
 
-**Fix:**
-1. 确认 key 没有前后空格
-2. 确认 key 与所选 provider 匹配，OpenAI key 不能用于 Anthropic
-3. 检查账号是否有余额或有效订阅
-4. 点击 **"Test Connection"** 验证
+**修复：**
+1. 验证该密钥没有前后空格。
+2. 确认密钥与所选的提供商匹配（OpenAI 类型的密钥无法与 Anthropic 使用）
+3. 检查您的账户是否有余额或有效的订阅。
+4. 点击**“测试连接”**以进行验证
 
-### 故障排查：故障排查
+### 网络/连接错误
 
-**Symptom:** `ERR_CONNECTION_REFUSED`、`ERR_TIMED_OUT`、`Socket hang up`、`Network request failed`
+**症状：** `ERR_CONNECTION_REFUSED`, `ERR_TIMED_OUT`, `Socket hang up`, `Network request failed`
 
-**Cause:** 当前机器无法访问 API endpoint。
+**原因：** 您的机器无法访问 API 接口。
 
-**Fix:**
-1. 检查网络连接
-2. 如果在代理或防火墙后，确认 API domain 没有被阻断
-3. Ollama：确认 `ollama serve` 正在运行，`ollama list` 能返回 models
-4. LMStudio：确认 server 在 `localhost:1234` 运行
-5. 尝试不同 transport；移动端用户应确认 `requestUrl` transport 可用
-6. 启用 `enableStableApiCall`，对临时错误自动 retry
+**修复：**
+1. 检查您的互联网连接。
+2. 如果在代理或防火墙后面，请确认 API 域名未被屏蔽
+3. 针对 Ollama：确认 `ollama serve` 正在运行（`ollama list` 应返回模型信息）
+4. 关于 LMStudio：确认服务器正在 `localhost:1234` 上运行。
+5. 尝试使用其他传输方式——移动用户应确保 `requestUrl` 传输功能处于启用状态
+6. 启用 `enableStableApiCall` 以在临时错误时自动重试
 
-### 故障排查：故障排查
+### 403 禁止访问
 
-**Symptom:** HTTP 403
+**症状：** HTTP 返回 403 错误
 
-**Cause:** API key 有效，但没有访问目标资源的权限。
+**原因：** 您的 API 密钥有效，但没有访问所需资源的权限。
 
-**Fix:**
-1. 部分模型需要特殊权限，例如 Azure GPT-4 需要 deployment name
-2. 某些 provider 按套餐限制模型，检查账号权限
-3. 可能存在地区限制
-4. 确认 model name 拼写正确，例如你的套餐可能只允许 `gpt-4o-mini`
+**修复：**
+1. 某些模型需要特殊权限（例如，通过 Azure 使用的 GPT-4 需要指定部署名称）。
+2. 某些提供商会根据套餐等级限制模型使用——请查看您的账户。
+3. 可能会受到地区限制（某些中国服务商会屏蔽国际 IP，反之亦然）。
+4. 验证模型名称的拼写是否正确（例如，当迷你模型是您计划允许的全部内容时，应为 `gpt-4o` 而非 `gpt-4o-mini`）
 
-### 故障排查：故障排查
+### 速率限制（429）
 
-**Symptom:** HTTP 429 或 "Rate limit exceeded"
+**症状：** HTTP 返回 429 错误或“速率限制已达到上限”
 
-**Cause:** 短时间内请求过多。
+**原因：** 在短时间内请求过多。
 
-**Fix:**
-1. 将 `batchConcurrency` 降到 `1` 或 `2`
-2. 等几分钟再重试
-3. 查看 provider 当前套餐的 rate limit 文档
-4. 启用 `enableStableApiCall`，使用 backoff retry
-5. 考虑切换到限制更宽的 provider，例如 DeepSeek 或 Ollama
+**修复：**
+1. 将 `batchConcurrency` 转换为 `1` 或 `2`
+2. 请等待几分钟后再尝试。
+3. 请查阅您所在套餐等级的提供商速率限制相关文档。
+4. 启用 `enableStableApiCall` 以实现带退避的自动重试
+5. 考虑更换为额度更高的服务提供商（DeepSeek, Ollama）。
 
-### 故障排查：配置与模型
+### 未找到模型。
 
-**Symptom:** "Model not found" 或 HTTP 404
+**症状：**“未找到模型”或 HTTP 404 错误。
 
-**Cause:** 当前 provider 上不存在该 model name。
+**原因：** 所选提供方上不存在该模型名称。
 
-**Fix:**
-1. 点击 **"Get Model List"** 查看 provider 可访问模型
-2. 模型名可能随时间变化，检查 provider 官方文档
-3. Ollama：运行 `ollama list` 查看已拉取模型；只有本地已下载模型可用
+**修复：**
+1. 点击**“获取模型列表”**，即可查看您的提供商提供的所有可用模型。
+2. 有些型号名称会随时间变化——请在供应商的文档中确认当前名称。
+3. 针对 Ollama：运行 `ollama list` 可查看已拉取的模型；仅下载过的模型可用
 
-### 故障排查：核心说明
+### 未生成链接/概念
 
-**Symptom:** 命令运行完成但没有输出
+**症状：** 命令已运行，但未产生任何输出
 
-**Cause:** LLM 返回空内容或无法解析的响应。
+**原因：** LLM 返回了空响应或无法解析的响应。
 
-**Fix:**
-1. 查看 diagnostics panel 中真实 LLM 响应
-2. 换用更强模型，小模型可能不擅长结构化输出
-3. 确认笔记内容足够长（>50 words）
-4. 检查自定义 prompt 是否有冲突指令
-5. 临时关闭 synonym suppression，确认是否过滤过度
+**修复：**
+1. 查看诊断面板以获取实际的 LLM 响应。
+2. 试试功能更强的模型（一些小型模型在处理结构化输出时会有困难）。
+3. 确保该备注的内容足够丰富（超过50个字）。
+4. 检查您的自定义提示语中是否存在相互矛盾的指令。
+5. 暂时禁用同义词抑制功能，看看它是否过滤得过于严格。
 
-### 故障排查：配置与模型
+### Doubao 缺少端点 ID
 
-**Symptom:** 使用 ByteDance Doubao provider 时报错
+**症状：** 使用 ByteDance Doubao 提供商时出现错误
 
-**Cause:** Doubao 需要 Ark endpoint ID，格式通常为 `ep-xxxxxxxx-xxxx-xxxx`，而不是普通 model name。
+**原因：** Doubao 需要的是 Ark 端点 ID（格式：`ep-xxxxxxxx-xxxx-xxxx`），而非模型名称。
 
-**Fix:** 将默认 placeholder model 替换为 Volcengine console 中真实 endpoint ID。
+**修复方法：** 用 Volcengine 控制台中的实际端点 ID 替换默认的占位符模型。
 
 ## 配置
 
-| Diagnostic Setting | Location | Purpose |
+| 诊断设置 | 位置 | 用途 |
 |--------------------|----------|---------|
-| **Test Connection** | Settings -> Provider section | 验证 API key 和连通性 |
-| **Get Model List** | Settings -> Provider section | 确认哪些模型可访问 |
-| `enableStableApiCall` | Settings -> Advanced | 启用 backoff retry |
-| `batchConcurrency` | Settings -> Batch | 控制并行度以避免 rate limit |
+| **测试连接** | 设置 --> 提供商部分 | 验证 API 密钥及连接状态 |
+| **获取模型列表** | 设置 --> 提供商部分 | 确认哪些型号是可访问的 |
+| `enableStableApiCall` | 设置 --> 高级选项 | 启用带退避的重试功能 |
+| `batchConcurrency` | 设置 --> 批处理 | 控制并行度以避免速率限制 |
 
-## 故障排查：故障排查
+## 如何报告问题
 
-如果你的问题没有被覆盖：
+如果您的问题不在上述范围内：
 
-1. 打开 **Settings -> Notemd -> Diagnostics**
-2. 复制完整 diagnostics output
-3. 到 [github.com/Jacobinwwey/obsidian-NotEMD/issues](https://github.com/Jacobinwwey/obsidian-NotEMD/issues) 创建 GitHub Issue
-4. 附上 Obsidian version、Notemd version、provider、model、diagnostics output 和复现步骤
-5. 分享日志前删除 API key
+1. 打开**设置 --> Notemd --> 诊断**
+2. 复制完整的诊断输出
+3. 在 [github.com/Jacobinwwey/obsidian-NotEMD/issues](https://github.com/Jacobinwwey/obsidian-NotEMD/issues) 处创建一个 GitHub Issue。
+4. 包含：Obsidian版本、Notemd版本、提供商、型号、诊断输出以及复现步骤
+5. 从所有共享日志中删除您的 API 密钥
 
 ---
 
-## 下一步
+## 后续步骤
 
-- [LLM Providers](/docs/providers/overview) -- 完整 provider 配置参考
-- [Batch Processing](/docs/advanced/batch-processing) -- 大批量操作的 concurrency 与 retry 设置
-- [Custom Prompts](/docs/advanced/custom-prompts) -- 通过调整 prompt 修复意外 LLM 行为
+- [LLM 提供商](/docs/providers/overview) -- 完整的供应商配置参考手册
+- [批量处理](/docs/advanced/batch-processing) -- 大规模操作的并发与重试设置
+- [自定义提示词](/docs/advanced/custom-prompts) -- 通过调整提示词来修复意外的 LLM 行为

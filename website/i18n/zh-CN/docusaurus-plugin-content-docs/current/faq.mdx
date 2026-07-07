@@ -1,358 +1,351 @@
 ---
 id: faq
-title: 常见问题
-description: Notemd 安装、功能和使用的常见问题
-keywords: [常见问题, 安装, LLM提供商, obsidian插件, wiki链接, 概念笔记, Copilot 替代, Smart Connections 替代, Obsidian AI 插件对比]
+title: 常见问题解答
+description: 关于 Notemd 安装、功能及使用的常见问题
+keywords: [faq, installation, LLM providers, obsidian plugin, wiki-links, concept notes, Copilot alternative, Smart Connections alternative, obsidian AI plugin comparison]
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
-concepts: [Notemd, Obsidian, LLM, wiki链接, 概念笔记, 知识库, Copilot 替代, AI 插件对比]
+concepts: [Notemd, Obsidian, LLM, wiki-links, concept notes, knowledge base, Copilot Alternative, AI Plugin Comparison]
 citations:
   - title: Obsidian
     url: https://obsidian.md
   - title: Ollama
     url: https://ollama.com
 faqItems:
-  - question: 如何在 Obsidian 中安装 Notemd？
-    answer: 打开 Obsidian 设置，进入社区插件，浏览，搜索 Notemd，安装并启用。需要 Obsidian 0.15.0 或更高版本。也可以通过 GitHub Releases 手动安装。
-  - question: Notemd 支持哪些 LLM 提供商？
-    answer: Notemd 支持 30+ 个提供商，包括 OpenAI、Anthropic、Google、xAI、Mistral、DeepSeek、Qwen、Ollama、LM Studio、Azure OpenAI、OpenRouter，以及多个中国提供商如 Qwen、豆包、Moonshot、GLM 等。
-  - question: Notemd 可以使用本地 LLM 吗？
-    answer: 可以。Notemd 支持 Ollama、LM Studio、vLLM、LocalAI 以及任何 OpenAI 兼容端点。所有任务都支持本地模型，包括链接、概念生成、翻译、研究和图表生成。
-  - question: Notemd 与 ChatGPT 有什么区别？
-    answer: ChatGPT 产生短暂的聊天回答。Notemd 将持久化的结构化结果直接写入你的 Obsidian 库，表现为 wiki 链接文件、概念笔记、图表和翻译，积累成知识库。
-  - question: Notemd 与 Copilot 或 Smart Connections 有什么区别？
-    answer: Copilot 是对话优先，用 AI 聊天关于笔记的内容。Smart Connections 是发现优先，用嵌入找相似笔记。Notemd 是写入优先，用 AI 处理笔记并将结构化结果（wiki 链接、概念笔记、研究、图表、翻译）直接写入你的库。三者互补而非竞争。
-  - question: Notemd 研究功能支持哪些搜索服务？
-    answer: Tavily（推荐，AI 优化搜索，需要 API key）和 DuckDuckGo（实验性，无需 API key）。研究结果由 LLM 汇总并带来源引用追加到你的笔记。
-  - question: Notemd 支持中文或其他语言吗？
-    answer: UI 支持 21+ 种语言。任务输出语言可独立配置，支持混合设置，如中文 UI 配英文输出或反之。
-  - question: 我可以用 Notemd 阅读论文或 PDF 吗？
-    answer: 可以。用 MinerU 将 PDF 转为 Markdown，在 Obsidian 中打开，然后用 Notemd 添加 wiki 链接、生成概念笔记、提取原文、研究背景、翻译章节、创建 Mermaid 图表。
-  - question: Notemd 可以生成哪些图表类型？
-    answer: Mermaid（流程图、时序图、类图、状态图、ER 图、甘特图，带语法自动修复）、JSON Canvas（Obsidian 原生）、Vega-Lite（数据图表）和 HTML 回退。支持预览、SVG/PNG 导出和 .mmd 文件保存。
-  - question: Notemd 是免费开源的吗？
-    answer: 是的。MIT 许可，无付费层级，无云锁定，无遥测。GitHub 源代码 234+ 星。欢迎 Pull Request。
-  - question: Notemd 可以 100% 离线工作吗？
-    answer: 使用 Ollama 可以。无需 API key、无需互联网、数据不离开你的机器：安装 Ollama 并运行 ollama serve，在 Notemd 设置中选择 Ollama 作为提供商，拉取模型如 llama3，所有功能都可用：wiki 链接、概念笔记、翻译、图表。DuckDuckGo 研究也无需 API key（实验性质量）。使用云端提供商时，你的笔记内容会作为 API 输入发送。
-  - question: 我的数据会发送到云端吗？
-    answer: 使用 Ollama 或 LM Studio 时，数据不离开你的机器。使用云端提供商如 OpenAI 或 Anthropic 时，你的笔记内容会作为 API 输入发送。Notemd 本身不收集任何遥测或用户数据。
+  - question: How do I install Notemd in Obsidian?
+    answer: Open Obsidian Settings, go to Community Plugins, Browse, search Notemd, Install, and Enable. Requires Obsidian 0.15.0 or later. Manual installation is also available via GitHub Releases.
+  - question: What LLM providers does Notemd support?
+    answer: Notemd supports 30+ providers including OpenAI, Anthropic, Google, xAI, Mistral, DeepSeek, Qwen, Ollama, LM Studio, Azure OpenAI, OpenRouter, and many China-focused providers like Qwen, Doubao, Moonshot, and GLM.
+  - question: Can Notemd work with local LLMs?
+    answer: Yes. Notemd works with Ollama, LM Studio, vLLM, LocalAI, and any OpenAI-compatible endpoint. All tasks work with local models including linking, concept generation, translation, research, and diagram generation.
+  - question: How does Notemd differ from ChatGPT?
+    answer: ChatGPT produces ephemeral chat answers. Notemd writes persistent structured results directly into your Obsidian vault as wiki-linked files, concept notes, diagrams, and translations that accumulate into a knowledge base.
+  - question: How does Notemd compare to Copilot or Smart Connections?
+    answer: Copilot is conversation-first for chatting about notes. Smart Connections is discovery-first for finding similar notes. Notemd is write-first, processing notes with AI and writing structured results into your vault. All three complement each other.
+  - question: Which search services work with Notemd research?
+    answer: Tavily (recommended, AI-optimized search, requires API key) and DuckDuckGo (experimental, no API key needed). Research results are summarized by LLM and appended to your note with source citations.
+  - question: Does Notemd support Chinese or other languages?
+    answer: The UI supports 21+ languages. Task output language is independently configurable, allowing mixed setups like Chinese UI with English output or vice versa.
+  - question: Can I use Notemd for paper or PDF reading?
+    answer: Yes. Convert PDF to Markdown using MinerU, open in Obsidian, then run Notemd tasks to add wiki-links, generate concept notes, extract text, research background, translate sections, and create Mermaid diagrams.
+  - question: What diagram types can Notemd generate?
+    answer: Mermaid (flowchart, sequence, class, state, ER, Gantt with syntax auto-fix), JSON Canvas (Obsidian native), Vega-Lite (data charts), HTML fallback, and explicit editable HTML/SVG figure artifacts. Draw.io XML and Drawnix JSON exporter boundaries are available for deterministic artifact testing.
+  - question: Is Notemd free and open source?
+    answer: Yes. MIT licensed, no paid tiers, no cloud lock-in, no telemetry. Source code on GitHub with 234+ stars. Pull requests welcome.
+  - question: Can Notemd work 100% offline?
+    answer: Yes with Ollama. No API key, no internet needed. All features work offline including wiki-links, concept notes, translation, and diagrams. DuckDuckGo research also works without an API key.
+  - question: Is my data sent to the cloud?
+    answer: With Ollama or LM Studio, no data leaves your machine. With cloud providers like OpenAI or Anthropic, your note content is sent as API input. Notemd itself collects no telemetry or user data.
 ---
 
 import TLDR from '@site/src/components/TLDR';
 
-# 常见问题
+# 常见问题解答
 
 <TLDR>
-**Notemd 最常见问题的快速解答。** 涵盖安装（5分钟设置）、30+个LLM提供商支持、本地/云端模型选项、一键工作流、多语言UI（21种语言）、wiki链接自动化、研究集成、PDF阅读工作流、图表生成和开源许可。所有功能支持Ollama离线使用。
+**针对最常出现的 Notemd 问题的快速解答。** 内容涵盖安装（5分钟即可完成设置）、对30多种 LLM 提供商的支持、本地/云模式选项、一键式工作流、多语言 UI 支持（21种语言）、wiki链接自动化功能、研究数据整合、PDF 阅读工作流、图表生成以及开源许可。所有功能均可通过 Ollama 在离线状态下使用。
 </TLDR>
 
 ---
 
-## 常见问题：安装与准备
+## 安装与设置
 
-### 常见问题：安装与准备
+### 如何在 Obsidian 中安装 Notemd？
 
-打开 Obsidian **设置 → 社区插件 → 浏览** → 搜索 **"Notemd"** → **安装** → **启用**。
+打开 Obsidian **设置 → 社区插件 → 浏览** → 搜索 **“Notemd"** → **安装** → **启用**。
 
 **要求：**
 - Obsidian 0.15.0+
-- 支持桌面端（Windows、macOS、Linux）和移动端（iOS、Android）
+- 在桌面端（Windows、macOS、Linux）和移动端（iOS、Android）上均支持。
 
 **手动安装：**
 1. 从 [GitHub Releases](https://github.com/Jacobinwwey/obsidian-NotEMD/releases) 下载 `main.js`、`styles.css`、`manifest.json`
-2. 放入 `<你的库>/.obsidian/plugins/notemd/`
-3. 重新加载 Obsidian 并启用插件
+2. 把它们放到 `<your-vault>/.obsidian/plugins/notemd/` 中。
+3. 重新加载 Obsidian 并启用该插件
 
-**数据：** 4k+ 下载量，44 个版本，MIT 许可证。
+**统计信息：** 下载量超过4千次，共发布44个版本，采用MIT许可证。
 
 ---
 
-## 常见问题：配置与模型
+## LLM 配置
 
-### 常见问题：配置与模型
+### Notemd 支持哪些 LLM 提供商？
 
-Notemd 支持 **30+ 个提供商**：
+Notemd 支持 **30 多家提供商**：
 
-**云端提供商：**
-- OpenAI (GPT-4, GPT-4o, GPT-4o-mini, o1, o3)
-- Anthropic (Claude Opus, Sonnet, Haiku)
-- Google (Gemini Pro, Flash, Ultra)
-- xAI (Grok)
-- Mistral、DeepSeek、Qwen、Moonshot、GLM
+**云服务提供商：**
+- OpenAI（GPT-4、GPT-4o、GPT-4o-mini、o1、o3）
+- Anthropic（Claude Opus、Sonnet、Haiku）
+- Google（Gemini Pro、Flash、Ultra）
+- xAI（Grok）
+- Mistral，DeepSeek，Qwen，Moonshot，GLM
 
-**中国重点：**
-- Qwen、Qwen Code、豆包、Moonshot、小米 MiMo、GLM、Z AI、MiniMax
-- 华为云 MaaS、百度千帆、SiliconFlow
+**以中国市场为重点：**
+- Qwen, Qwen Code, Doubao, Moonshot, Xiaomi MiMo, GLM, Z AI, MiniMax
+- Huawei Cloud MaaS，Baidu Qianfan，SiliconFlow
 
 **本地/自托管：**
 - Ollama
 - LM Studio
-- 任何 OpenAI 兼容端点
+- 任何与 OpenAI 兼容的端点
 
 **网关：**
 - Azure OpenAI、OpenRouter、Together AI、Groq、AIHubMix
-- GitHub Models、Fireworks、LiteLLM、Nebius、Cerebras
-- Hugging Face、Vercel AI Gateway、Requesty
+- GitHub Models, Fireworks, LiteLLM, Nebius, Cerebras
+- Hugging Face，Vercel AI Gateway，Requesty
 
-### 常见问题：配置与模型
+### Notemd 能与本地的 LLMs 配合使用吗？
 
-**可以，完全支持。** Notemd 支持：
+**是的，完全支持。** Notemd 可以与以下内容配合使用：
 - **Ollama**（原生集成）
-- **LM Studio**（通过 OpenAI 兼容端点）
+- **LM Studio**（通过 OpenAI 兼容的端点）
 - **vLLM、LocalAI、text-generation-webui**（通过 OpenAI 兼容模式）
 
-所有任务都支持本地模型：链接、概念生成、翻译、研究和图表生成。
+所有任务均使用本地模型完成：链接、概念生成、翻译、研究以及图表生成。
 
-**混合示例：**
-- Ollama（本地）做链接 → 快速、隐私、无成本
-- OpenAI 做研究 → 高质量、网络搜索集成
-- Gemini 做翻译 → 多模态支持
+**混搭示例：**
+- Ollama（本地）用于链接 → 速度快、私密且免费
+- 用于研究的 OpenAI → 高质量，支持网页搜索集成
+- Gemini翻译功能 → 多模态支持
 
-### 常见问题：配置与模型
+### 如何为不同的任务配置不同的模型？
 
-在 **Notemd 设置**中，每个任务都有独立的提供商/模型选择器：
+在**Notemd 设置**中，每个任务都有独立的提供者/模型选择器：
 
 | 任务 | 示例配置 |
-|------|----------|
-| **链接** | DeepSeek（快速、便宜）|
-| **概念生成** | Claude Opus（高质量）|
-| **研究** | Perplexity 或 GPT-4o（网络基础）|
-| **翻译** | Gemini Flash（多模态）|
-| **图表生成** | Ollama（本地、隐私）|
+|------|----------------------|
+| **链接** | DeepSeek（快速、便宜） |
+| **概念生成** | Claude Opus（高质量版） |
+| **研究** | Perplexity 或 GPT-4o（基于网络的版本） |
+| **翻译** | Gemini Flash（多模态） |
+| **图表生成** | Ollama（本地，私有） |
 
-这种按任务优化平衡了速度、成本和质量。
+这种按任务进行的优化能够在速度、成本和质量之间取得平衡。
 
 ---
 
 ## 核心功能
 
-### 常见问题：研究与检索
+### 在阅读纸质文档方面，Notemd 与 ChatGPT 有什么区别？
 
-| 维度 | ChatGPT | Notemd |
-|------|---------|--------|
-| **输出位置** | 聊天记录（短暂）| Obsidian 库（持久文件）|
-| **结果格式** | 文本回答 | Wiki 链接、概念笔记、图表、翻译 |
-| **长期价值** | 会话后消失 | 积累到知识库 |
-| **可重用性** | 必须重新查询 | 文件保留、链接、演化 |
+| 尺寸 | ChatGPT | Notemd |
+|-----------|---------|--------|
+| **输出位置** | 聊天记录（临时） | Obsidian vault（持久化文件） |
+| **结果格式** | 文本回复 | 维基链接、概念说明、图表、翻译内容 |
+| **长期价值** | 会话结束后消失 | 累积到知识库中 |
+| **可重用性** | 必须重新查询 | 文件保留，链接不变，持续演进 |
 
-**使用 ChatGPT：** 快速问答、一次性解释
-**使用 Notemd：** 在数周/数月内构建持久的结构化知识库
+**使用 ChatGPT 的场景：** 快速问答、一次性解释
+**请使用 Notemd 来：** 在数周或数月的时间里构建一个持久且结构化的知识库
 
-### 常见问题：核心说明
+### Notemd 是如何为笔记添加维基链接的？
 
-**流程：**
-1. 在笔记上运行"处理文件（添加链接）"
-2. Notemd 将文本发送给你配置的 LLM
-3. LLM 识别上下文中的关键概念
-4. Notemd 在每次出现时插入 `[[wiki-links]]`
-5. 可选地，在你指定的文件夹中自动创建概念笔记
+**处理流程：**
+1. 你在笔记上运行了“处理文件（添加链接）”功能。
+2. Notemd 会将文本发送到您配置的 LLM。
+3. LLM 用于标识上下文中的关键概念
+4. Notemd 会在每个概念出现的位置插入 `[[wiki-links]]`
+5. 可选地，它会在您指定的文件夹中自动创建概念笔记。
 
-**特性：**
-- 同义词抑制（避免"transformer"与"transformers"重复）
-- 概念笔记到源的回链
+**功能特性：**
+- 同义词抑制（避免“transformer”与“transformers”的重复）
+- 从概念说明到来源的反向链接
 - 重命名/删除时的链接完整性
-- 纯提取模式（提取概念但不修改原文）
+- 纯提取模式（提取概念而不修改原文）
 
-### 常见问题：工作流与任务
+### 什么是 Notemd 一键工作流？
 
-**一键工作流**将多个操作链接到**单个侧边栏按钮**。
+**一键工作流**可将多个操作串联到一个**单个侧边栏按钮**中。
 
-**默认工作流：** `一键提取`
+**默认工作流：** `One-Click Extract`
 ```
 process-current-add-links > extract-concepts-current > research-and-summarize > summarize-as-mermaid
 ```
 
-**结果：** 一次点击运行：
-1. 为当前笔记添加 wiki 链接
-2. 为新术语生成概念笔记
-3. 研究并附加背景
+**结果：** 点击一次即可运行：
+1. 在当前笔记中添加维基链接
+2. 为新术语生成概念说明。
+3. 研究并补充背景信息
 4. 压缩为 Mermaid 图表
 
-**自定义工作流：** 在设置中用 DSL 格式定义你自己的。每个工作流成为可重用的侧边栏按钮。
+**自定义工作流：** 可以通过 DSL 格式在设置中定义自己的工作流。每个工作流都会变成一个可重复使用的侧边栏按钮。
 
-### 常见问题：故障排查
+### Notemd与Copilot或Smart Connections相比如何？
 
-这三个插件解决不同的问题：
+这些插件可以解决不同的问题：
 
-- **Copilot** — 对话优先。你用 AI 聊天关于笔记的内容。AI 回答留在聊天面板，不会修改你的库。
-- **Smart Connections** — 发现优先。它用嵌入向量找到语义相似的笔记。不会创建或修改内容。
-- **Notemd** — 写入优先。AI 处理你的笔记并将结构化结果（wiki 链接、概念笔记、研究、图表、翻译）直接写入你的库作为持久文件。
+- **Copilot** — 以对话为核心。您可以与人工智能讨论您的笔记，人工智能的回复会显示在聊天面板中，而不会修改您的存储库。
+- **Smart Connections** — 以发现为核心。它通过嵌入技术查找语义上相似的笔记，不会创建或修改内容。
+- **Notemd** — 先撰写。AI会处理您的笔记，并将结构化的结果（维基链接、概念说明、研究资料、图表、翻译内容）直接作为持久性文件保存到您的存储库中。
 
-| 需求 | 推荐插件 |
-|------|----------|
-| 与 AI 聊天关于笔记 | Copilot |
-| 查找相似/相关笔记 | Smart Connections |
-| 自动插入 wiki 链接并构建知识图谱 | **Notemd** |
-| 生成带反向链接的概念笔记 | **Notemd** |
-| 从笔记内容创建图表 | **Notemd** |
-| 研究主题并追加摘要 | **Notemd** |
+| 你需要什么 | 推荐插件 |
+|----------------|-------------------|
+| 与AI聊聊笔记 | Copilot |
+| 查找相似/相关的笔记 | Smart Connections |
+| 自动插入维基链接并构建知识图谱 | **Notemd** |
+| 生成包含反向链接的概念说明文档 | **Notemd** |
+| 根据笔记内容创建图表 | **Notemd** |
+| 研究一个主题并附上总结 | **Notemd** |
 
-三者可以搭配使用——它们互补而非竞争。
+这三个可以一起使用——它们是互补关系，而非竞争关系。
 
 ---
 
-## 常见问题：研究与检索
+## 研究与翻译
 
-### 常见问题：研究与检索
+### 哪些搜索服务可以与 Notemd 研究功能配合使用？
 
-| 服务 | 需要 API Key | 质量 | 说明 |
-|------|-------------|------|------|
-| **Tavily** | 是 | 高 | 推荐，AI 优化搜索 |
-| **DuckDuckGo** | 否 | 实验性 | 无需设置，质量较低 |
+| 服务 | API 需要密钥 | 质量 | 备注 |
+|---------|-----------------|---------|-------|
+| **Tavily** | 是的 | 高 | 推荐：经过人工智能优化的搜索功能 |
+| **DuckDuckGo** | 不行 | 实验性版本 | 无需设置，质量较低 |
 
-**"研究与总结"工作原理：**
-1. 你选择主题或在当前笔记上运行
-2. Notemd 查询搜索服务
-3. 结果 → LLM 总结
-4. 总结附加到你的笔记，包含来源引用
+**“研究与总结”功能的工作原理：**
+1. 您选择一个主题或在其当前笔记上运行它。
+2. Notemd 向搜索服务发起查询
+3. 结果 → LLM 摘要
+4. 摘要已附在您的笔记中，并标注了来源引用
 
-**结果：** 在你的库中有持久的研究轨迹，而不是浏览器标签。
+**结果：** 研究记录会保存在您的保险库中，而非浏览器标签页里。
 
-### 常见问题：配置与模型
+### Notemd 是否支持中文或其他语言？
 
-**UI 语言：** 21+ 种支持
-- English、中文（简体）、中文（繁體）、日本語、한국어
-- Arabic、German、French、Spanish、Russian、Portuguese、Italian
-- Hindi、Bengali、Thai、Vietnamese、Turkish、Polish、Czech 等
+**UI 支持的语言：** 21种以上
+- 英语, 中文 (简体), 中文 (繁體), 日本语, 韩国语
+- 阿拉伯语、德语、法语、西班牙语、俄语、葡萄牙语、意大利语
+- 印地语、孟加拉语、泰语、越南语、土耳其语、波兰语、捷克语等更多语言
 
 **任务输出语言：** 独立配置
-- UI 中文 + 输出英文：✅
-- UI 英文 + 输出中文：✅
+- UI 的中文翻译 + 英文输出：✅
+- 英语中的UI + 中文输出：✅
 
-**用例：** 双语研究人员可以保持 UI 为母语，同时生成用于发表的英文笔记。
+**使用场景：** 双语研究人员在为出版物生成英文笔记时，可以保留 UI 的原文语言版本。
 
 ---
 
-## PDF 与学术工作流
+## PDF与学术工作流程
 
-### 常见问题：研究与检索
+### 我可以使用 Notemd 来进行纸质/PDF 阅读吗？
 
-**可以。** 工作流：
-1. **将 PDF → Markdown** 使用 [MinerU](https://github.com/opendatalab/MinerU)（推荐用于学术论文）
+**是的。** 工作流：
+1. 使用 [MinerU](https://github.com/opendatalab/MinerU) 将 PDF **转换为 Markdown**（适用于学术论文）
 2. 在 Obsidian 中打开 Markdown 文件
 3. 运行 Notemd 任务：
-   - **添加 wiki 链接**到关键术语
-   - **生成概念笔记**用于陌生术语
-   - **提取原文**通过自定义问题（例如："有哪些局限性？"）
-   - **研究背景**关于引用的方法/数据集
-   - **翻译**困难章节
-   - **压缩为 Mermaid**图表以理解结构
+   - 在关键术语中**添加维基链接**
+   - **为不熟悉的术语生成概念说明**
+   - 通过自定义问题**提取原文内容**（例如：“有哪些局限性？”）
+   - 引用方法/数据集的**研究背景**
+   - **翻译**难懂的部分
+   - **压缩为 Mermaid** 图表以便理解结构
 
-**1.9.1+ 版本：** 带 TOC 支持的章节结构提取
+**版本 1.9.1+：** 支持目录功能的章节结构提取功能
 
-**结果：** 你的论文阅读成为你库中结构化、可链接的知识产物。
+**结果：** 您的论文阅读内容将转化为存储在您知识库中的结构化、可链接的知识资源。
 
 ---
 
-## 常见问题：图表与渲染
+## 图表与可视化
 
-### 常见问题：图表与渲染
+### Notemd 能生成哪些类型的图表/图示？
 
-| 类型 | 支持 | 特性 |
-|------|------|------|
-| **Mermaid** | 完全 | 流程图、时序图、类图、状态图、ER 图、甘特图、语法自动修复、批量验证 |
-| **JSON Canvas** | 完全 | Obsidian 原生画布布局 |
-| **Vega-Lite** | 完全 | 数据图表、时间序列、柱状图、散点图、可自定义 |
-| **HTML** | 回退 | 用于不支持的图表类型 |
+| 输入类型 | 支持 | 功能特性 |
+|------|---------|----------|
+| **Mermaid** | 完整版 | 流程图、时序图、类图、状态图、实体关系图、甘特图、语法自动修正、批量验证 |
+| **JSON Canvas** | 完整版 | Obsidian 原生画布布局 |
+| **Vega-Lite** | 完整版 | 数据图表、时间序列图、柱状图、散点图，可自定义 |
+| **HTML** | 备用方案 | 对于不支持的图表类型 |
+| **可编辑的 HTML/SVG** | 明确的目标 | 自带功能的内联 SVG，带有语义化的 Draw.io 风格注释 |
+| **Draw.io / Drawnix 构建产物** | 导出边界 | 基于 `SemanticFigureModel` 的确定性 XML/JSON；无需编辑器运行时依赖 |
 
-**Mermaid 自动修复：** 深度调试模式修复：
-- 断裂箭头（`-->`、`-.->`、`==>`）
-- 无效标签、注释
+**Mermaid 自动修复：** 深度调试模式进行修复：
+- 损坏的箭头（`-->`, `-.->`, `==>`）
+- 标签无效，注释错误
 - 子图语法错误
-- 形状符号（`[`、`(`、`{`、`((`）
+- 形状标记（`[`, `(`, `{`, `((`）
 - 标签中的管道字符
-- 附注
+- 注意附件
 
-**工作流：**
-1. 在笔记上运行"总结为 Mermaid 图表"
+**工作流程：**
+1. 在笔记上运行“Summarize as Mermaid diagram”命令。
 2. 在模态框中预览
-3. 导出为 SVG 或 PNG
-4. 或保存为库中的 `.mmd` 文件
+3. 导出为 SVG 或 PNG 格式
+4. 或将其保存为保险库中的 `.mmd` 文件
 
 ---
 
 ## 开源与社区
 
-### 常见问题：边界与治理
+### Notemd 是免费且开源的吗？
 
 **是的。**
-- **许可证：** MIT（宽松，允许商业使用）
+- **许可证：** MIT（宽松许可，允许商业使用）
 - **源代码：** https://github.com/Jacobinwwey/obsidian-NotEMD
-- **无付费层级、无云锁定、无遥测**
-- **社区：** 234+ GitHub 星，活跃的 Discord
+- **无付费层级，无云锁定，无遥测功能**
+- **社区：** 拥有234个以上的GitHub星标，Discord频道活跃度较高
 
-**你拥有：**
-- 你的数据（留在你的库中）
-- 你的工作流（自定义提示、模型、链）
-- 你的隐私（本地 LLM 支持）
+**您拥有：**
+- 您的数据（保存在您的保险箱中）
+- 您的工作流（自定义提示词、模型及流程）
+- 您的隐私（本地 LLM 支持）
 
-**贡献：** 欢迎 Pull Request。见 [CONTRIBUTING.md](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/CONTRIBUTING.md)
+**贡献：** 欢迎提交拉取请求。请参阅[CONTRIBUTING.md](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/CONTRIBUTING.md)
 
 ---
 
-## 故障排查
+## 故障排除
 
-### 常见问题：配置与模型
+### 我的 LLM 调用失败了。我应该检查什么？
 
-1. **API key 有效吗？** 检查设置 → 提供商配置
-2. **模型名称正确吗？** 使用设置中的"获取模型列表"按钮
-3. **网络可访问吗？** 某些提供商需要 VPN
-4. **速率限制？** 检查提供商仪表板
-5. **诊断：** 在设置中运行"连接测试"以获取详细错误日志
+1. **API 密钥有效吗？** 请检查“设置”→“提供商配置”。
+2. **模型名称正确吗？** 请在设置中使用“获取模型列表”按钮。
+3. **可以访问网络吗？**某些提供商要求使用VPN。
+4. **速率限制？**查看提供商控制面板。
+5. **诊断信息：** 在设置中运行“连接测试”以获取详细的错误日志。
 
-### 常见问题：故障排查
+### Notemd 运行速度很慢。我该如何加快它的速度？
 
 1. **使用更快的模型：** DeepSeek、Gemini Flash、GPT-4o-mini
-2. **减少块大小：** 设置 → 智能分块 → 降低字数
-3. **并行处理：** 设置 → 批处理 → 增加并发数
-4. **本地模型：** 对不需要网络搜索的任务使用 Ollama
+2. **减小分块大小：** 设置 → 智能分块 → 降低字数限制
+3. **并行处理：** 设置 → 批量处理 → 增加并发数
+4. **本地模型：** 用于无需网络搜索的任务的 Ollama
 
-### 常见问题：边界与治理
+### Notemd 能够完全离线运行吗？
 
-**部分功能：**
-- **使用本地 Ollama：** 完全离线工作流（链接、概念、翻译、图表）
-- **DuckDuckGo 研究：** 无需 API key（实验性质量）
-- **公式修复、章节分割：** 不需要 LLM
+**可以，使用 Ollama 即可。** 没有 API 密钥，无需网络连接，数据也不会离开您的机器：
 
-**需要 API key：** 基于提供商的任务（OpenAI、Anthropic、Google 等）
-
-### 常见问题：边界与治理
-
-**可以，使用 Ollama。** 无需 API key、无需互联网、数据不离开你的机器：
-
-1. 安装 [Ollama](https://ollama.com) 并运行 `ollama serve`
-2. 在 Notemd 设置中选择 **Ollama** 作为提供商
+1. 安装 [Ollama](https://ollama.com)，然后运行 `ollama serve`
+2. 在 Notemd 设置中，选择 **Ollama** 作为您的服务提供商
 3. 拉取模型：`ollama pull llama3`（或 qwen2.5、gemma2 等）
-4. 所有功能都可用：wiki 链接、概念笔记、翻译、图表
+4. 所有功能均正常运行：wiki链接、概念笔记、翻译、图表
 
-**DuckDuckGo 研究**也无需 API key（实验性质量）。
+**DuckDuckGo研究**在没有 API密钥的情况下也能运行（效果为实验性水平）。
 
-使用云端提供商（OpenAI、Anthropic、Google、DeepSeek 等）时，你的笔记内容会作为 API 输入发送。请查看各提供商的隐私政策了解数据处理方式。
+通过云服务提供商（OpenAI、Anthropic、Google、DeepSeek等），您的笔记内容会以API的形式被发送。请查看各提供商的隐私政策以了解数据处理细节。
 
-### 常见问题：研究与检索
+### 我的数据会被发送到云端吗？
 
-**取决于你使用的提供商：**
+**这取决于您的服务提供商：**
 
-| 提供商类型 | 数据发送到云端？ | 说明 |
-|-----------|----------------|------|
-| **Ollama（本地）** | 否 | 所有数据留在你的机器上 |
-| **LMStudio（本地）** | 否 | 同 Ollama |
-| **DeepSeek、OpenAI 等** | 是 | 笔记内容作为 API 输入处理 |
-| **OpenRouter、AIHubMix** | 是 | 网关，路由至云端提供商 |
+| 提供商类型 | 数据被发送到云端了吗？ | 备注 |
+|--------------|---------------------|-------|
+| **Ollama（本地）** | 不行 | 所有内容都会保留在您的机器上。 |
+| **LMStudio（本地）** | 不行 | 与 Ollama 相同 |
+| **DeepSeek、OpenAI 等。** | 是的 | 请将内容作为 API 输入以供处理 |
+| **OpenRouter, AIHubMix** | 是的 | 用于路由至云服务提供商的网关 |
 
-Notemd 本身**不收集遥测、不分析数据、不跟踪用户**。插件完全开源（MIT）。离开你机器的唯一数据是你显式发送给所配置 LLM 提供商的部分。
+Notemd 本身不会收集任何遥测数据、分析数据或用户数据。该插件是完全开源的（采用 MIT 许可证）。唯一会离开您设备的数据，就是您主动发送给已配置的 LLM 提供商的内容。
 
-### 获取帮助
+### 哪种 Obsidian AI 插件最适合用于研究？
 
-取决于你的研究工作流：
+这取决于您的研究工作流程：
 
-| 需求 | 插件 | 原因 |
-|------|------|------|
+| 需要 | 插件 | 为什么 |
+|------|--------|-----|
 | 查找相关论文/笔记 | Smart Connections | 语义相似性发现 |
-| 与资料进行对话 | Copilot | 带库上下文的对话 |
-| 自动链接概念 + 生成笔记 | **Notemd** | AI 识别概念、插入链接、创建笔记 |
-| Web 研究 + 摘要写入笔记 | **Notemd** | Tavily/DuckDuckGo 搜索 → LLM 摘要 → 追加到笔记 |
-| 从研究内容生成图表 | **Notemd** | Mermaid/Canvas/Vega-Lite 从笔记内容生成 |
+| 聊聊你的信息来源吧 | Copilot | 与保险库上下文的对话 |
+| 自动关联概念 + 生成笔记 | **Notemd** | AI识别概念，插入链接，创建笔记 |
+| 网络调研 + 撰写总结笔记 | **Notemd** | Tavily/DuckDuckGo 搜索 → LLM 摘要 → 追加到笔记中 |
+| 根据研究生成图表 | **Notemd** | 来自笔记内容的 Mermaid/Canvas/Vega-Lite |
 
 **推荐组合：** Smart Connections（发现）+ Notemd（结构化）+ Copilot（讨论）。
 
@@ -360,7 +353,7 @@ Notemd 本身**不收集遥测、不分析数据、不跟踪用户**。插件完
 
 ## 获取帮助
 
-- **文档：** https://jacobinwwey.github.io/obsidian-NotEMD/
-- **GitHub Issues：** https://github.com/Jacobinwwey/obsidian-NotEMD/issues
+- **文档说明：** https://jacobinwwey.github.io/obsidian-NotEMD/
+- **GitHub 问题列表：** https://github.com/Jacobinwwey/obsidian-NotEMD/issues
 - **Discord：** https://discord.gg/qnGgsQ9W
-- **赞助：** https://github.com/sponsors/Jacobinwwey
+- **赞助商：** https://github.com/sponsors/Jacobinwwey

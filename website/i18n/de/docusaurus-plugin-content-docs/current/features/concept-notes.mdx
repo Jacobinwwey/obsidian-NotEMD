@@ -1,9 +1,16 @@
 ---
 id: concept-notes
 title: Konzeptnotizen
-description: Erläutert Zweck, Konfiguration, Workflow-Grenzen und typische Prüfungen für Konzeptnotizen in Notemd.
+description: Konzeptnotizen erstellen und verwalten – eigenständige Notizen zu wichtigen Konzepten, die aus Ihrem Vault extrahiert wurden
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [concept notes, knowledge extraction, concept folder, deduplication, backlinks]
+concepts: [Concept Notes, Knowledge Graph, LLM Extraction, Deduplication, Backlinks]
+citations:
+  - title: Obsidian
+    url: https://obsidian.md
+  - title: Zettelkasten Method
+    url: https://zettelkasten.de
 ---
 
 import TLDR from '@site/src/components/TLDR';
@@ -11,97 +18,167 @@ import TLDR from '@site/src/components/TLDR';
 # Konzeptnotizen
 
 <TLDR>
-**Kurzfassung：** Erläutert Zweck, Konfiguration, Workflow-Grenzen und typische Prüfungen für Konzeptnotizen in Notemd. Die folgenden Befehle, Konfigurationsschlüssel, Dateiendungen und Provider-Namen bleiben englisch, damit sie exakt zur Plugin-Oberfläche, CLI und zu Logs passen.
+**Notemd extrahiert die wichtigsten Konzepte aus Ihren Notizen und erstellt eigenständige Konzeptnotiz-Dateien.** Der LLM erkennt Schlüsselbegriffe, generiert eine `.md` Datei pro Konzept in einem konfigurierbaren Ordner und fügt optional Rückverweise zur Quellennotiz hinzu. Es unterstützt die Unterdrückung von Synonymen, die Auswahl eines Modells pro Aufgabe, die Sanitierung von Dateinamen sowie einen 4-stufigen Deduplizierungsmechanismus. Dies ist Teil des [Obsidian AI Knowledge Management Guide](/docs/pillar-ai-knowledge).
 </TLDR>
 
 ## Überblick
 
-Dieser Teil von Konzeptnotizen beschreibt Produktverhalten, Einstiegspunkte und technische Grenzen. UI-Schaltflächen, Befehle, Schlüssel und Dateiendungen sind stabile Verträge.
+Konzeptnotizen sind die Bausteine einer vernetzten Wissensdatenbank. Wenn Sie eine Notiz verarbeiten, Notemd:
 
-## Funktionsweise
+1. **Sendet Ihren Text an einen LLM** mit einer strukturierten Extraktionsanfrage
+2. **Analysiert die `CONCEPT:` Zeilen** aus der LLM Antwort
+3. **Erstellt eine `.md`-Datei pro Konzept** in einem bestimmten Ordner
+4. **Fügt Backlinks** zur Quellennotiz hinzu (wenn aktiviert)
 
-Dieser Teil von Konzeptnotizen beschreibt Produktverhalten, Einstiegspunkte und technische Grenzen. UI-Schaltflächen, Befehle, Schlüssel und Dateiendungen sind stabile Verträge.
+## Wie es funktioniert
 
-### Konzeptnotizen: Workflows und Aufgaben
+### Extraktionspipeline
 
-Dieser Teil von Konzeptnotizen beschreibt Produktverhalten, Einstiegspunkte und technische Grenzen. UI-Schaltflächen, Befehle, Schlüssel und Dateiendungen sind stabile Verträge.
+```
+Source Note → Split into Chunks → LLM per Chunk → Parse CONCEPT: Lines
+    → Deduplicate via Set → Create .md Files → Add Backlinks
+    → (Optional: Generate Log)
+```
 
-### Konzeptnotizen: zentrale Erläuterung
+### Der Extraktions-Aufforderungstext
 
-Dieser Teil von Konzeptnotizen beschreibt Produktverhalten, Einstiegspunkte und technische Grenzen. UI-Schaltflächen, Befehle, Schlüssel und Dateiendungen sind stabile Verträge.
+Der LLM erhält eine Anweisung, die ihm vorschreibt:
 
-### Konzeptnotizen: zentrale Erläuterung
+- Extrahieren Sie **Substantive oder Substantivphrasen**, die zum zentralen Thema des Dokuments gehören
+- **Setzen Sie auf Spezifität** – „Dielektrische Entspannung“ anstelle von „Entspannung“.
+- **In Singular normalisieren** – „models“ wird zu „model“
+- **Unterkonzepte unterdrücken** – wenn „dielektrische Entspannung“ auftaucht, soll „Entspannung“ nicht ebenfalls extrahiert werden
+- **Überspringen** von Referenz-/Bibliografieabschnitten, Allgemeinbegriffen, Firmen-/Produktnamen
+- Geben Sie ein Konzept pro Zeile als `CONCEPT: Term Name` aus
 
-Dieser Teil von Konzeptnotizen beschreibt Produktverhalten, Einstiegspunkte und technische Grenzen. UI-Schaltflächen, Befehle, Schlüssel und Dateiendungen sind stabile Verträge.
+**Synonymunterdrückung** (optional): Fügt dem Prompt voran „Vermeiden Sie es, soweit möglich, Synonyme, semantisch ähnliche Kernkonzepte oder Schlüsselwörter zu extrahieren“.
 
-## Konzeptnotizen: zentrale Erläuterung
+**Fokussiertes Lerngebiet** (optional): Fügt `Relevant Fields: [domain]` voran, um die Extraktion auf ein bestimmtes Fachgebiet zu beschränken.
 
-Dieser Teil von Konzeptnotizen beschreibt Produktverhalten, Einstiegspunkte und technische Grenzen. UI-Schaltflächen, Befehle, Schlüssel und Dateiendungen sind stabile Verträge.
+**Sprachüberschreibung** (optional): fügt hinzu „Die Ausgabekonzepte MÜSSEN in [Sprache] sein.“
 
-### Konzeptnotizen: zentrale Erläuterung
+### Chunking
 
-Dieser Teil von Konzeptnotizen beschreibt Produktverhalten, Einstiegspunkte und technische Grenzen. UI-Schaltflächen, Befehle, Schlüssel und Dateiendungen sind stabile Verträge.
+Lange Notizen werden durch `settings.chunkWordCount` geteilt. Jeder Teil wird unabhängig gesendet. Konzepte aus allen Teilen werden in einem `Set` zusammengefasst – Duplikate zwischen den Teilen werden stillschweigend entfernt. LLM-Fehler bei einzelnen Teilen beenden die Operation nicht.
 
-### Konzeptnotizen: Workflows und Aufgaben
+## Erstellung einer Konzeptnote
 
-Dieser Teil von Konzeptnotizen beschreibt Produktverhalten, Einstiegspunkte und technische Grenzen. UI-Schaltflächen, Befehle, Schlüssel und Dateiendungen sind stabile Verträge.
+### Regeln für Dateinamen
 
-### Konzeptnotizen: zentrale Erläuterung
+| Regel | Verhalten |
+|------|----------|
+| Bindestriche/Unterstriche | Ersetzt durch Leerzeichen |
+| Spezielle Zeichen | Entfernt: Backslash, Schrägstrich, Kolon, Stern, Fragezeichen, Anführungszeichen, Eckklammern, Pipe, Hash, Caret, Klammern |
+| Leerzeichen | Zusammengefasst und gekürzt |
+| Maximale Länge | 100 Zeichen (abgeschnitten + erneut gekürzt) |
+| Leeres/Ein-Punkt-Ergebnis | Wurde leise übersprungen |
 
-Dieser Teil von Konzeptnotizen beschreibt Produktverhalten, Einstiegspunkte und technische Grenzen. UI-Schaltflächen, Befehle, Schlüssel und Dateiendungen sind stabile Verträge.
+Beispiel: `A-B: Key*Term` wird zu `A B KeyTerm.md`
+
+### Vorlagen
+
+**Vollständiges Template** (Backlinks aktiviert, minimales Template deaktiviert):
+
+```markdown
+# Concept Name
+
+## Linked From
+- [[SourceNoteBasename]]
+```
+
+**Minimaler Vorlage** (wenn `extractConceptsMinimalTemplate: true`):
+
+```markdown
+# Concept Name
+```
+
+### Bestehende Notizen aktualisieren
+
+Wenn eine Konzeptdatei bereits existiert:
+
+1. Wenn Backlinks aktiviert sind und die Quellennotiz noch nicht aufgelistet ist, fügen Sie einen Backlink hinzu.
+2. Wenn ein `## Linked From`-Abschnitt vorhanden ist, fügen Sie ihn vor den nächsten `##`-Header ein.
+3. Wenn kein `## Linked From` vorhanden ist, füge einen Abschnitt am Ende hinzu.
+4. Doppelte Backlinks werden überprüft und übersprungen
 
 ### Konfiguration
 
-Konzeptnotizen wird in den Notemd-Einstellungen konfiguriert. Provider, Modell, Ausgabepfad, Sprache und Batch-Verarbeitung greifen ineinander; klären Sie, ob die Änderung Datei-, Ordner- oder Workflow-Aufgaben betrifft.
+| Einstellungen | Standard | Effekt |
+|---------|---------|--------|
+| `useCustomConceptNoteFolder` | `true` | Master-Schalter. Aus = keine Notizen erstellt |
+| `conceptNoteFolder` | `''` (deaktiviert) | Pfad zum Ordner für Konzeptnotizen |
+| `extractConceptsMinimalTemplate` | `true` | Notizen nur mit Titel (kein „Von“-Link) |
+| `extractConceptsAddBacklink` | `false` | Zusätzliche Backlinks während der eigenständigen Extraktion hinzufügen |
+| `extractConceptsProvider` / `extractConceptsModel` | DeepSeek | Per-Aufgabe LLM zur Konzeptextraktion |
+| `extractConceptsLanguage` | `'en'` | Ausgabesprache für Konzeptnamen |
+| `replaceSynonymsDuringConceptExtraction` | `false` | Aktiviere die Unterdrückung von Synonymen im Prompt |
+| `generateConceptLogFile` | `false` | Schreiben Sie eine `.log`-Liste mit erstellten Konzepten |
 
-## Konzeptnotizen: zentrale Erläuterung
+**Wichtig:** Die Einstellungen `extractConceptsAddBacklink` und `extractConceptsMinimalTemplate` beeinflussen nur den **eigenen Extraktionsbefehl**. Der Befehl „Links hinzufügen“ erstellt stets Notizen im vollständigen Template mit Rückverweisen.
 
-Dieser Teil von Konzeptnotizen beschreibt Produktverhalten, Einstiegspunkte und technische Grenzen. UI-Schaltflächen, Befehle, Schlüssel und Dateiendungen sind stabile Verträge.
+## Deduplizierung
 
-### Konzeptnotizen: Workflows und Aufgaben
+Der dedup-Befehl (`Notemd: Check & remove duplicate concept notes`) führt eine 5-stufige Analyse durch:
 
-Dieser Teil von Konzeptnotizen beschreibt Produktverhalten, Einstiegspunkte und technische Grenzen. UI-Schaltflächen, Befehle, Schlüssel und Dateiendungen sind stabile Verträge.
+### Schritt 1: Genaue Übereinstimmung des Dateinamens
 
-### Konzeptnotizen: Workflows und Aufgaben
+Vergleich des Basennamens unabhängig von Groß-/Kleinschreibung im konfigurierten Umfang.
 
-Dieser Teil von Konzeptnotizen beschreibt Produktverhalten, Einstiegspunkte und technische Grenzen. UI-Schaltflächen, Befehle, Schlüssel und Dateiendungen sind stabile Verträge.
+### Schritt 2: Erkennung der Pluralform
 
-### Konzeptnotizen: Workflows und Aufgaben
+Entfernt Suffixe: `-ies` zu `-y`, `-es` wurde entfernt, `-s` wurde entfernt. Vergleicht die Singularform mit den Scope-Dateien. Behandelt unregelmäßige Pluralformen (children/child) nicht.
 
-Dieser Teil von Konzeptnotizen beschreibt Produktverhalten, Einstiegspunkte und technische Grenzen. UI-Schaltflächen, Befehle, Schlüssel und Dateiendungen sind stabile Verträge.
+### Schritt 3: Symbolnormalisierung
 
-### Konzeptnotizen: Workflows und Aufgaben
+Anwendbar auf: `toLowerCase()`, ersetze Bindestriche/Unterstriche durch Leerzeichen, entferne nicht-alphanumerische Zeichen, kollabiere Leerzeichen. Äquivalent normalisierte Einträge werden markiert.
 
-Dieser Teil von Konzeptnotizen beschreibt Produktverhalten, Einstiegspunkte und technische Grenzen. UI-Schaltflächen, Befehle, Schlüssel und Dateiendungen sind stabile Verträge.
+### Schritt 4: Einfachwortsperre
 
-### Konzeptnotizen: Workflows und Aufgaben
+Einzelwortige Konzeptnotizen werden mit den Mehrworts-Namen der Skopier-Dateien abgeglichen. Wird nicht ausgeführt, wenn das Skopier `concept_folder_only` ist.
 
-Dieser Teil von Konzeptnotizen beschreibt Produktverhalten, Einstiegspunkte und technische Grenzen. UI-Schaltflächen, Befehle, Schlüssel und Dateiendungen sind stabile Verträge.
+### Schritt 5: Bestätigung und Löschung
 
-### Konzeptnotizen: zentrale Erläuterung
+Alle Kandidaten werden in einem Bestätigungsmodal angezeigt. Genehmigte Elemente werden in den System-Müll verschoben. Die Aktion kann zwischen jeder Löschung storniert werden.
 
-Dieser Teil von Konzeptnotizen beschreibt Produktverhalten, Einstiegspunkte und technische Grenzen. UI-Schaltflächen, Befehle, Schlüssel und Dateiendungen sind stabile Verträge.
+### Bereichsmodi
+
+| Moden | Im Vergleich zu |
+|------|-------------------|
+| `vault` (Standard) | Alle Vault `.md`-Dateien außer der Concept-Ordner |
+| `concept_folder_only` | Weitere Konzeptnotizen im Ordner |
+| `include` | Dateien in den aufgelisteten Ordnern |
+| `exclude` | Alle Vault-Dateien außer der Concept-Ordner- und den aufgelisteten Ordnern |
 
 ## Verwendung
 
-Dieser Teil von Konzeptnotizen beschreibt Produktverhalten, Einstiegspunkte und technische Grenzen. UI-Schaltflächen, Befehle, Schlüssel und Dateiendungen sind stabile Verträge.
+### Konzepte extrahieren (Einzeln)
 
-### Konzeptnotizen: zentrale Erläuterung
+1. Eine Notiz öffnen
+2. Führen Sie **"Notemd: Extract concepts"** aus der Befehlspalette aus
+3. Konzeptnotizen werden im konfigurierten Ordner erstellt.
 
-Dieser Teil von Konzeptnotizen beschreibt Produktverhalten, Einstiegspunkte und technische Grenzen. UI-Schaltflächen, Befehle, Schlüssel und Dateiendungen sind stabile Verträge.
+### Inhalt extrahieren + erstellen
 
-### Konzeptnotizen: zentrale Erläuterung
+**"Notemd: Konzepte extrahieren und Titel erzeugen"** – es werden die Konzepte extrahiert, anschließend wird für jede Notiz im Konzeptordner der Befehl „Aus Titel erzeugen“ ausgeführt. Dadurch wird Inhalt für **alle** Konzeptnotizen im Ordner erzeugt, nicht nur für die neu erstellten.
 
-Dieser Teil von Konzeptnotizen beschreibt Produktverhalten, Einstiegspunkte und technische Grenzen. UI-Schaltflächen, Befehle, Schlüssel und Dateiendungen sind stabile Verträge.
+### Wiki-Link aus der Auswahl erstellen
 
-### Konzeptnotizen: zentrale Erläuterung
+1. Text hervorheben im Editor
+2. Führen Sie **„Notemd: Wiki-Link aus der Auswahl erstellen“** aus.
+3. Der Text ist in `[[...]]` eingebettet und es wird eine Konzeptnote erstellt
 
-Dieser Teil von Konzeptnotizen beschreibt Produktverhalten, Einstiegspunkte und technische Grenzen. UI-Schaltflächen, Befehle, Schlüssel und Dateiendungen sind stabile Verträge.
+## Tipps
 
-## Konzeptnotizen: nächste Empfehlungen
+- **Stellen Sie zunächst das Konzeptverzeichnis ein** – ohne dieses werden keine Notizen erstellt. Wenn es nicht gesetzt ist, erscheint ein Warnungsmodal.
+- **Modelle pro Aufgabe verwenden** – Die Konzeptextraktion wird gut von günstigeren Modellen abgedeckt (GPT-4o-mini, DeepSeek). Sparen Sie teure Modelle für Forschung/Übersetzung auf.
+- **Aktiviere die Unterdrückung von Synonymen** für technische Domänen, in denen mehrere Begriffe auf dasselbe Konzept verweisen.
+- **Regelmäßig Duplikate entfernen** – führen Sie den Dedup-Befehl nach der Batchverarbeitung aus, um nahezu identische Einträge zu erkennen.
+- **Die Protokolldatei wird** bei jedem Ausführungsvorgang überschrieben, anstatt hinzugefügt. Kopieren Sie sie, wenn Sie frühere Ergebnisse benötigen.
 
-Dieser Teil von Konzeptnotizen beschreibt Produktverhalten, Einstiegspunkte und technische Grenzen. UI-Schaltflächen, Befehle, Schlüssel und Dateiendungen sind stabile Verträge.
+---
 
 ## Nächste Schritte
 
-Wählen Sie als Nächstes die Seite, die direkt zu Ihrer Aufgabe passt: Provider-Konfiguration, Kernfunktion, Batch-Verarbeitung, Fehlerbehebung oder Diagrammexport.
+- [Wiki-Links](./wiki-links) – Wie Konzepte inline verknüpft werden
+- [Diagramme](./diagrams) — Konzeptionsbeziehungen visualisieren
+- [Workflows](./workflows) – Kette der Extraktion mit anderen Aufgaben

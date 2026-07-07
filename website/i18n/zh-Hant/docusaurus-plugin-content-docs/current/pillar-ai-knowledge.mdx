@@ -1,147 +1,341 @@
 ---
 id: pillar-ai-knowledge
-title: Obsidian AI 知識管理指南
-description: 說明 Obsidian AI 知識管理指南 在 Notemd 中的用途、設定、工作流程邊界與常見排查路徑。
+title: Obsidian AI知識管理指南
+description: 運用 AI 建構連結式知識庫的完整指南——從維基連結與概念抽取，到研究、翻譯及圖表生成
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [obsidian, AI, knowledge management, wiki-links, concept notes, LLM, diagrams, research, translation, workflows, Copilot alternative, Smart Connections alternative, obsidian AI plugin]
+concepts: [Notemd, Obsidian, AI Knowledge Management, Wiki-Links, Concept Notes, LLM Integration, Diagrams, Research, Translation, Workflows, Copilot Alternative]
+citations:
+  - title: Obsidian
+    url: https://obsidian.md
+  - title: Tavily
+    url: https://tavily.com
+  - title: Mermaid
+    url: https://mermaid.js.org
+  - title: Vega-Lite
+    url: https://vega.github.io/vega-lite/
 ---
 
 import TLDR from '@site/src/components/TLDR';
 
-# Obsidian AI 知識管理指南
+# Obsidian AI知識管理指南
 
 <TLDR>
-**本頁說明：** 說明 Obsidian AI 知識管理指南 在 Notemd 中的用途、設定、工作流程邊界與常見排查路徑。 以下命令、設定鍵、檔案副檔名與 Provider 名稱保留英文，以便和外掛介面、CLI 與日誌逐一對應。
+**Notemd 能將由 LLM 提供動力的閱讀內容轉化為持續性的知識：維基連結可串接各種概念，概念筆記能建立可搜尋的圖譜，研究功能可將網路上的資訊納入您的知識庫，翻譯功能可打破語言障礙，圖表則能讓結構一目了然，而工作流程則能讓所有功能僅透過一次點擊即可串聯起來。** 本指南將完整介紹從原始筆記到具有連結性、視覺化且多語言的知識庫的整個流程。
 </TLDR>
 
-## 为什么需要 AI 知识管理？
+## 為何選擇 AI 知識管理？
 
-Obsidian AI 知識管理指南 的這一部分說明產品行為、使用入口與工程邊界。介面按鈕、命令名稱、設定鍵與檔案副檔名是穩定契約，翻譯不會改變實際執行名稱。
+傳統的筆記方式會產生純文本檔案。即便有手動建立的維基連結，大多數筆記仍保持分離狀態。Notemd 利用 LLM 來自動化處理這些連結層：
 
-## Obsidian AI 知識管理指南：工作流程與任務
+- **LLMs 會讀取您的內容**，並辨別出重點——包括術語、方法、人物與理論。
+- **連結會自動插入**在每個概念出現的位置，而非藏在「另請參見」中。
+- **概念說明文件會以獨立的可取得檔案形式產生**
+- **研究透過網路取得的背景資料來豐富筆記**
+- **圖表讓結構一目了然** — 由相同內容所產生的思維導圖、流程圖與資料圖表
 
-Obsidian AI 知識管理指南 的這一部分說明產品行為、使用入口與工程邊界。介面按鈕、命令名稱、設定鍵與檔案副檔名是穩定契約，翻譯不會改變實際執行名稱。
+結果就是：一個會隨著您處理的每條筆記而不斷擴充的知識圖譜，而非只有在您想起要添加連結時才會更新。
 
-## 1. Obsidian AI 知識管理指南：疑難排解
+## 完整的處理流程
 
-Obsidian AI 知識管理指南 的這一部分說明產品行為、使用入口與工程邊界。介面按鈕、命令名稱、設定鍵與檔案副檔名是穩定契約，翻譯不會改變實際執行名稱。
+```mermaid
+graph TD
+    A[Raw Note] --> B[Add Links]
+    B --> C[Wiki-Linked Note]
+    B --> D[Concept Notes]
+    C --> E[Connected Knowledge Graph]
+    D --> E
+    F[Web Research] --> E
+    G[Translation] --> E
+    H[Diagram Generation] --> I[Visual Structure]
+    E --> H
+    I --> E
+    J[One-Click Workflow] --> B
+    J --> F
+    J --> G
+    J --> H
+```
 
-### Obsidian AI 知識管理指南：核心說明
+每個步驟都是獨立的。可選擇使用其中一個或全部。最具影響力的順序為：**添加連結 → 概念說明 → 圖表**。
 
-Obsidian AI 知識管理指南 的這一部分說明產品行為、使用入口與工程邊界。介面按鈕、命令名稱、設定鍵與檔案副檔名是穩定契約，翻譯不會改變實際執行名稱。
+---
 
-### Obsidian AI 知識管理指南：設定與模型
+## 1. Wiki-連結：明確建立連接
 
-Obsidian AI 知識管理指南 的設定應從 Notemd 設定入口完成。Provider、模型、輸出路徑、語言與批次處理不是彼此獨立的開關；修改前應確認它影響目前檔案、資料夾任務或一鍵工作流程。
+維基連結是知識圖譜的支柱。Notemd 使用 LLM 來：
 
-## 2. Obsidian AI 知識管理指南：核心說明
+1. 讀取您的筆記內容（長文件會分割成多個區塊）
+2. 辨別核心概念——優先考慮具體的技術術語，而非一般名詞
+3. 在每個出現的位置插入 `[[wiki-links]]`
+4. 抑制同義詞，如此一來「ML」和「Machine Learning」就不會產生不同的節點
 
-Obsidian AI 知識管理指南 的這一部分說明產品行為、使用入口與工程邊界。介面按鈕、命令名稱、設定鍵與檔案副檔名是穩定契約，翻譯不會改變實際執行名稱。
+### 何時使用
 
-### Obsidian AI 知識管理指南：工作流程與任務
+- **每則筆記超過 100 個字** — 字數較少的筆記所含概念較少
+- **研究論文、技術文件、會議筆記** — 內含大量領域專有術語
+- **在內容穩定之後** — 請勿反複處理草稿
 
-Obsidian AI 知識管理指南 的這一部分說明產品行為、使用入口與工程邊界。介面按鈕、命令名稱、設定鍵與檔案副檔名是穩定契約，翻譯不會改變實際執行名稱。
+### 關鍵設定
 
-### 反向鏈接
+| 設定 | 推薦 | 為什麼 |
+|---------|-----------|-----|
+| `addLinksProvider` | DeepSeek 或 GPT-4o-mini | 低成本下仍具良好精確度 |
+| 同義詞抑制 | 開啟 | 防止重複節點 |
+| 上下文視窗 | 段落 | 精確度與成本的平衡 |
 
-Obsidian AI 知識管理指南 的這一部分說明產品行為、使用入口與工程邊界。介面按鈕、命令名稱、設定鍵與檔案副檔名是穩定契約，翻譯不會改變實際執行名稱。
+→ [Wiki-Links 深入探討](/docs/features/wiki-links)
 
-### Obsidian AI 知識管理指南：核心說明
+---
 
-Obsidian AI 知識管理指南 的這一部分說明產品行為、使用入口與工程邊界。介面按鈕、命令名稱、設定鍵與檔案副檔名是穩定契約，翻譯不會改變實際執行名稱。
+## 2. 概念說明：可檢索的知識節點
 
-### Obsidian AI 知識管理指南：設定與模型
+維基連結可將概念以內聯方式串接起來，但概念筆記則能讓每個概念被獨立查詢。每個概念都會有自己的 `.md` 檔案：
 
-Obsidian AI 知識管理指南 的設定應從 Notemd 設定入口完成。Provider、模型、輸出路徑、語言與批次處理不是彼此獨立的開關；修改前應確認它影響目前檔案、資料夾任務或一鍵工作流程。
+```markdown
+# Machine Learning
 
-## 3. 研究：引入网頁信息
+## Linked From
+- [[My Research Notes]]
+- [[Neural Networks Explained]]
+```
 
-Obsidian AI 知識管理指南 的這一部分說明產品行為、使用入口與工程邊界。介面按鈕、命令名稱、設定鍵與檔案副檔名是穩定契約，翻譯不會改變實際執行名稱。
+### 提取流程
 
-### Obsidian AI 知識管理指南：核心說明
+LLM 的提示語結構相當嚴謹：
+- 轉換為單數形式
+- 較偏好多字詞概念而非單字詞（例如使用「介電弛豫」而非「弛豫」）
+- 跳過參考文獻/參考資料章節
+- 以 `CONCEPT:` 行的形式輸出，以便進行確定性解析
 
-Obsidian AI 知識管理指南 的這一部分說明產品行為、使用入口與工程邊界。介面按鈕、命令名稱、設定鍵與檔案副檔名是穩定契約，翻譯不會改變實際執行名稱。
+概念會透過 `Set<string>` 在各個區塊之間去除重複。單個區塊出現的 LLM 錯誤不會中斷整個操作。
 
-### Obsidian AI 知識管理指南：設定與模型
+### 反向連結
 
-Obsidian AI 知識管理指南 的設定應從 Notemd 設定入口完成。Provider、模型、輸出路徑、語言與批次處理不是彼此獨立的開關；修改前應確認它影響目前檔案、資料夾任務或一鍵工作流程。
+啟用後，每個概念筆記都會追蹤有哪些來源筆記提到了它。Obsidian 的原生反向連結面板也會顯示反向連線。
 
-## 4. Obsidian AI 知識管理指南：設定與模型
+### 去重
 
-Obsidian AI 知識管理指南 的這一部分說明產品行為、使用入口與工程邊界。介面按鈕、命令名稱、設定鍵與檔案副檔名是穩定契約，翻譯不會改變實際執行名稱。
+Notemd的4步去重引擎可偵測：
+1. **完全匹配** — 不區分大小寫的檔名比對
+2. **複數形式** — 「Models.md」與「Model.md」的差異
+3. **符號標準化** — 「A-B.md」與「A B.md」的差異
+4. **單字包含** — 當存在「Machine Learning.md」時，「ML.md」會被標記
 
-### Obsidian AI 知識管理指南：設定與模型
+### 關鍵設定
 
-Obsidian AI 知識管理指南 的這一部分說明產品行為、使用入口與工程邊界。介面按鈕、命令名稱、設定鍵與檔案副檔名是穩定契約，翻譯不會改變實際執行名稱。
+| 設定 | 推薦 | 為什麼 |
+|---------|-----------|-----|
+| `conceptNoteFolder` | `concepts/` 或 `🧠 concepts/` | 保持金庫井然有序 |
+| `extractConceptsAddBacklink` | 開啟 | 啟用反向查詢 |
+| `extractConceptsMinimalTemplate` | 關閉 | 包含「Linked From」的完整模板 |
+| 每任務模型 | DeepSeek | 概念抽取不需要昂貴的模型。 |
+| 同義詞抑制 | 開啟 | 相同的設定會同時影響連結與提取。 |
 
-## 5. Obsidian AI 知識管理指南：圖表與渲染
+→ [概念說明深入解析](/docs/features/concept-notes)
 
-Obsidian AI 知識管理指南 的這一部分說明產品行為、使用入口與工程邊界。介面按鈕、命令名稱、設定鍵與檔案副檔名是穩定契約，翻譯不會改變實際執行名稱。
+---
 
-### 意圖识别
+## 3. 研究：將網路引入
 
-Obsidian AI 知識管理指南 的這一部分說明產品行為、使用入口與工程邊界。介面按鈕、命令名稱、設定鍵與檔案副檔名是穩定契約，翻譯不會改變實際執行名稱。
+Notemd 將網路搜尋整合到您的筆記工作流程中：
+
+1. **查詢建構** — 您的筆記標題或選取內容會成為搜尋查詢
+2. **網路搜尋** — Tavily（推薦，需 API 金鑰）或 DuckDuckGo（免費，無需金鑰）
+3. **LLM 摘要功能** — 將搜尋結果簡化為相關的摘要
+4. **新增到筆記** — 在游標位置或作為新章節加入摘要
+
+### 何時使用
+
+- 在處理新主題之前——先取得網路上下文
+- 當概念說明需要補充內容時——進行研究後再添加連結
+- 用於文獻回顧——對資料夾中的筆記進行批次研究
+
+### 關鍵設定
+
+| 設定 | 推薦 | 為什麼 |
+|---------|-----------|-----|
+| `researchProvider` | GPT-4o 或 Claude | 研究需要更高品質的摘要生成 |
+| 搜尋服務 | Tavily | 更高的相關性，可設定的深度 |
+| `maxResearchContentTokens` | 4000 | 深度與成本之間的平衡 |
+
+→ [深入研究](/docs/features/research)
+
+---
+
+## 4. 翻譯：打破語言障礙
+
+Notemd 會使用您所設定的 LLM 來翻譯筆記——而非專用的翻譯 API。這意味著：
+
+- **情境感知式翻譯** — LLM 能理解整份文件，而非僅逐句翻譯
+- **技術術語處理** — "gradient descent" 仍保持為「梯度下降」，而非「坡度向下」
+- **批次支援** — 一次操作即可翻譯整個筆記資料夾
+- **每任務模型** — 使用 Gemini Flash 進行翻譯（快速、便宜且支援多語言）
+
+### 語言支援
+
+Notemd 本身支援 21 種 UI 語言。翻譯目標語言可依任務進行設定。常見的語言組合包括：EN↔ZH、EN↔JA、EN↔KO、EN↔DE、EN↔FR、EN↔ES。
+
+→ [翻譯深入解析](/docs/features/translation)
+
+---
+
+## 5. 圖表：讓結構顯現出來
+
+Notemd的圖表處理流程是以規格為優先： LLM會產生結構化的 `DiagramSpec` JSON，接著轉換器會將其轉換為目標格式。這種方式比要求 LLM直接處理原始的 Mermaid 語法，能產出更可靠的輸出結果。
+
+### 意圖偵測
+
+Notemd 會根據內容判斷最適合的圖表類型：
+
+- **帶有數字的表格** → 數據圖表 (Vega-Lite)
+- **用戶端/伺服器術語** → 序列圖 (Mermaid)
+- **實體/主鍵** → ER圖表 (Mermaid)
+- **步驟/流程圖** → 流程圖 (Mermaid)
+- **概念圖關鍵字** → JSON Canvas (Obsidian 本機)
+- **預設** → 思維導圖 (Mermaid)
 
 ### 渲染鏈路
 
-Obsidian AI 知識管理指南 的這一部分說明產品行為、使用入口與工程邊界。介面按鈕、命令名稱、設定鍵與檔案副檔名是穩定契約，翻譯不會改變實際執行名稱。
+主要目標 → 替代方案 → 替代方案 → HTML。如果 Mermaid 的語法出錯，它會帶著錯誤內容向 LLM 重試一次，否則就退而使用最簡化的圖表。
 
-### Obsidian AI 知識管理指南：設定與模型
+### 關鍵設定
 
-Obsidian AI 知識管理指南 的設定應從 Notemd 設定入口完成。Provider、模型、輸出路徑、語言與批次處理不是彼此獨立的開關；修改前應確認它影響目前檔案、資料夾任務或一鍵工作流程。
+| 設定 | 推薦 | 為什麼 |
+|---------|-----------|-----|
+| `enableExperimentalDiagramPipeline` | 開啟 | 以規格為先，提升品質 |
+| `experimentalDiagramCompatibilityMode` | `best-fit` | 每個意圖的本機目標 |
+| `summarizeToMermaidProvider` | GPT-4o 或 Claude | 圖表規格需要空間推理能力 |
+| `autoMermaidFixAfterGenerate` | 開啟 | 自動偵測 LLM 語法錯誤 |
+| 本地知識增強 | 針對特定領域啟用 | 透過金庫上下文提升精確度 |
 
-## 6. Obsidian AI 知識管理指南：工作流程與任務
+→ [圖表深入解析](/docs/features/diagrams)
 
-Obsidian AI 知識管理指南 的這一部分說明產品行為、使用入口與工程邊界。介面按鈕、命令名稱、設定鍵與檔案副檔名是穩定契約，翻譯不會改變實際執行名稱。
+---
 
-### Obsidian AI 知識管理指南：工作流程與任務
+## 6. 工作流程：一鍵自動化
 
-Obsidian AI 知識管理指南 的這一部分說明產品行為、使用入口與工程邊界。介面按鈕、命令名稱、設定鍵與檔案副檔名是穩定契約，翻譯不會改變實際執行名稱。
+工作流程可將多個任務串聯成一個側邊欄按鈕。其 DSL 格式為：
 
-## 7. Obsidian AI 知識管理指南：設定與模型
+```
+task1 | task2 | task3
+```
 
-Obsidian AI 知識管理指南 的這一部分說明產品行為、使用入口與工程邊界。介面按鈕、命令名稱、設定鍵與檔案副檔名是穩定契約，翻譯不會改變實際執行名稱。
+範例：`addLinks` | 提取概念 | generateDiagram` — 一鍵將筆記從原始文字轉換為完全連接的視覺化知識節點。
 
-### Obsidian AI 知識管理指南：設定與模型
+### 推薦的工作流程
 
-Obsidian AI 知識管理指南 的這一部分說明產品行為、使用入口與工程邊界。介面按鈕、命令名稱、設定鍵與檔案副檔名是穩定契約，翻譯不會改變實際執行名稱。
+| 工作流程 | 鏈條 | 使用案例 |
+|----------|-------|----------|
+| 完整流程 | `addLinks \| extractConcepts \| generateDiagram` | 新筆記 |
+| 先進行研究 | `research \| addLinks` | 不熟悉的話題 |
+| 多語言支援 | `translate \| addLinks` | 多語言筆記 |
+| 僅圖表 | `generateDiagram` | 快速視覺化 |
 
-## Obsidian AI 知識管理指南：後續建議
+→ [工作流程深入探討](/docs/features/workflows)
 
-Obsidian AI 知識管理指南 的這一部分說明產品行為、使用入口與工程邊界。介面按鈕、命令名稱、設定鍵與檔案副檔名是穩定契約，翻譯不會改變實際執行名稱。
+---
 
-## 推荐配置
+## 7. LLM 提供商：從雲端到本地的 36 種選項
 
-Obsidian AI 知識管理指南 的設定應從 Notemd 設定入口完成。Provider、模型、輸出路徑、語言與批次處理不是彼此獨立的開關；修改前應確認它影響目前檔案、資料夾任務或一鍵工作流程。
+Notemd 支持 4 種傳輸類型下的 36 家供應商。關鍵群組：
 
-### Obsidian AI 知識管理指南：核心說明
+- **國際雲端**：OpenAI、Anthropic、Google、Mistral、xAI
+- **中國雲端**：DeepSeek、Qwen、Doubao、Moonshot、GLM、百度、SiliconFlow
+- **網關**：OpenRouter、GitHub Models、Hugging Face、Vercel
+- **本地**：Ollama、LMStudio、OVMS — 沒有 API 金鑰，資料不會離開您的電腦
 
-Obsidian AI 知識管理指南 的這一部分說明產品行為、使用入口與工程邊界。介面按鈕、命令名稱、設定鍵與檔案副檔名是穩定契約，翻譯不會改變實際執行名稱。
+### 每任務模型策略
 
-### Obsidian AI 知識管理指南：研究與檢索
+最具成本效益的設定方式是，對於簡單任務使用便宜的模型，對於複雜任務則使用強大的模型：
 
-Obsidian AI 知識管理指南 的這一部分說明產品行為、使用入口與工程邊界。介面按鈕、命令名稱、設定鍵與檔案副檔名是穩定契約，翻譯不會改變實際執行名稱。
+```
+extractConcepts  → DeepSeek (fast, cheap, accurate enough)
+addLinks          → DeepSeek or GPT-4o-mini
+research          → GPT-4o or Claude (needs quality)
+generateDiagram   → GPT-4o or Claude (needs spatial reasoning)
+translate         → Gemini Flash (fast, multilingual)
+```
 
-### 隐私優先（仅本地）
+→ [LLM 提供商概覽](/docs/providers/overview)
 
-Obsidian AI 知識管理指南 的這一部分說明產品行為、使用入口與工程邊界。介面按鈕、命令名稱、設定鍵與檔案副檔名是穩定契約，翻譯不會改變實際執行名稱。
+---
 
-### Obsidian AI 知識管理指南：翻譯與語言
+## 入門檢查清單
 
-Obsidian AI 知識管理指南 的這一部分說明產品行為、使用入口與工程邊界。介面按鈕、命令名稱、設定鍵與檔案副檔名是穩定契約，翻譯不會改變實際執行名稱。
+1. **安裝 Notemd** — [Community Plugins](/docs/getting-started/installation)（建議使用）或手動安裝
+2. **設定供應商** — DeepSeek（最簡單）、OpenAI，或 Ollama（免費）
+3. **處理您的第一張筆記** — 右鍵點擊 → 「處理檔案（新增連結）」
+4. **設定概念資料夾** — 設定 → Notemd → 输出 → 概念資料夾
+5. **提取概念** — 在同一張筆記上執行「提取概念」指令
+6. **產生圖表** — 執行「Generate diagram」以視覺化這些連線
+7. **建立工作流程** — 將上述步驟串聯成一個按一下即可執行的按鈕
 
-## Obsidian AI 知識管理指南：工作流程與任務
+## 推薦的設定
 
-Obsidian AI 知識管理指南 的這一部分說明產品行為、使用入口與工程邊界。介面按鈕、命令名稱、設定鍵與檔案副檔名是穩定契約，翻譯不會改變實際執行名稱。
+### 學生（預算）
 
-### Obsidian AI 知識管理指南：工作流程與任務
+```
+Provider: DeepSeek (free tier available)
+Concept extraction: DeepSeek
+Research: DuckDuckGo (free) + DeepSeek
+Diagrams: Off (or legacy Mermaid)
+Workflows: addLinks | extractConcepts
+```
 
-Obsidian AI 知識管理指南 的這一部分說明產品行為、使用入口與工程邊界。介面按鈕、命令名稱、設定鍵與檔案副檔名是穩定契約，翻譯不會改變實際執行名稱。
+### 研究員（品質）
 
-### Obsidian AI 知識管理指南：工作流程與任務
+```
+Provider: GPT-4o (primary)
+Concept extraction: DeepSeek (cost savings)
+Research: GPT-4o + Tavily
+Diagrams: best-fit mode, GPT-4o
+Workflows: research | addLinks | extractConcepts | generateDiagram
+```
 
-Obsidian AI 知識管理指南 的這一部分說明產品行為、使用入口與工程邊界。介面按鈕、命令名稱、設定鍵與檔案副檔名是穩定契約，翻譯不會改變實際執行名稱。
+### 以隱私為首（僅限本地）
 
-### Obsidian AI 知識管理指南：工作流程與任務
+```
+Provider: Ollama (llama3 or qwen2.5:7b)
+All tasks: Ollama
+Research: DuckDuckGo (free, no API key)
+Diagrams: legacy Mermaid mode
+```
 
-Obsidian AI 知識管理指南 的這一部分說明產品行為、使用入口與工程邊界。介面按鈕、命令名稱、設定鍵與檔案副檔名是穩定契約，翻譯不會改變實際執行名稱。
+### 雙語（ZH + EN）
+
+```
+Primary: DeepSeek (Chinese queries)
+Translation: Google Gemini Flash
+Research: Tavily + DeepSeek (Chinese search context)
+Language output: per-task (extractConceptsLanguage: zh-CN)
+```
+
+---
+
+## 常見模式
+
+### 模式：處理一篇研究論文
+
+1. 匯入 PDF 內容（或貼上）
+2. **研究** — 取得該主題的網路相關資料
+3. **新增連結** — 檢出並連結關鍵概念
+4. **提取概念** — 建立獨立筆記
+5. **產生圖表** — 可視化論文的結構
+
+### 模式：每日筆記豐富化
+
+1. 寫每日筆記
+2. **新增連結** — 將今日的構想與現有的概念相連結
+3. 概念說明會隨著反向連結自動更新
+
+### 模式：文獻綜述
+
+1. 建立名為 papers/notes 的資料夾
+2. **批次新增連結** — 處理整個資料夾
+3. **去除重複概念** — 清理幾乎重複的筆記
+4. **產生圖表** — 整個文獻的思維導圖
+
+---
+
+*Notemd 是開源軟體（MIT 授權），且可在所有平台上與 Obsidian 0.15.0+ 一起使用。[立即安裝](/docs/getting-started/installation) 或 [在 GitHub 上查看](https://github.com/Jacobinwwey/obsidian-NotEMD)。*

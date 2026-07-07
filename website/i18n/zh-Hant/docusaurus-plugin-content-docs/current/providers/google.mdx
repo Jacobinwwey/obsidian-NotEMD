@@ -1,39 +1,67 @@
 ---
 id: google
 title: Google
-description: 說明 Google 在 Notemd 中的用途、設定、工作流程邊界與常見排查路徑。
+description: 設定 Google Gemini
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [google, gemini, provider, configuration]
+concepts: [Google, Gemini, API Configuration]
+citations:
+  - title: Gemini API
+    url: https://ai.google.dev
+  - title: Google AI Studio
+    url: https://aistudio.google.com
 ---
 
 import TLDR from '@site/src/components/TLDR';
 
-# Google
+# Google 提供服務商
 
 <TLDR>
-**本頁說明：** 說明 Google 在 Notemd 中的用途、設定、工作流程邊界與常見排查路徑。 以下命令、設定鍵、檔案副檔名與 Provider 名稱保留英文，以便和外掛介面、CLI 與日誌逐一對應。
+**Google 使用原生的 Gemini 生成式語言 API 傳輸機制。** 目前的預設值為 `gemini-2.0-flash-exp`、`https://generativelanguage.googleapis.com/v1` 與 `temperature: 0.5`。它並非與 OpenAI 相容的設定檔。
+
+這是[Obsidian AI知識管理指南](/docs/pillar-ai-knowledge)的一部分。
 </TLDR>
 
-## 設置
+## 安裝
 
-Google 的設定應從 Notemd 設定入口完成。Provider、模型、輸出路徑、語言與批次處理不是彼此獨立的開關；修改前應確認它影響目前檔案、資料夾任務或一鍵工作流程。
+建立一個具有 Gemini 存取權的 Google AI Studio 或 Google 雲端 API 金鑰，新增一個 `Google` 提供商設定檔，並保留原生的生成式語言基礎 URL。可使用預設的 Gemini Flash 設定檔以實現快速翻譯及廣泛的筆記工作流程，而在需要更大或功能更強大的 Gemini 模型時，則可針對每個任務覆寫模型。
 
-## 端点與鑑權
+除非您明確使用能透過 OpenAI 相容的 API 來呈現 Gemini 的網關，否則請避免在 OpenAI 相容的設定檔中放入 Gemini 模型識別碼。
 
-Google 的這一部分說明產品行為、使用入口與工程邊界。介面按鈕、命令名稱、設定鍵與檔案副檔名是穩定契約，翻譯不會改變實際執行名稱。
+## 端點與認證
 
-## 模型發現
+| 欄位 | 目前的預設值 |
+|-------|----------------|
+| 運輸 | `google` |
+| API 金鑰 | 必填項目 |
+| 基底 URL | `https://generativelanguage.googleapis.com/v1` |
+| 預設模型 | `gemini-2.0-flash-exp` |
+| 溫度 | `0.5` |
+| 連線測試 | 僅聊天功能 |
 
-Google 的這一部分說明產品行為、使用入口與工程邊界。介面按鈕、命令名稱、設定鍵與檔案副檔名是穩定契約，翻譯不會改變實際執行名稱。
+執行階段會呼叫 `/models/{model}:generateContent?key={apiKey}`。該金鑰是以查詢參數的方式傳遞，因為這是插件中原生 Gemini 終端點的連線方式。
 
-## 故障排查
+## 模型探索
 
-本節用於定位 Google 的常見失敗模式。優先查看 Notemd 設定中的診斷輸出、Provider 回傳的 HTTP 狀態、模型名稱、網路連線與是否觸發限流。
+Google 使用 `google-models` 的探索模式。探索功能應該能返回 API 金鑰可使用的 Gemini 模型；如果選擇器為空，則需以相同的 Base URL 來測試該金鑰，並確認該帳戶已啟用相關的模型系列。
 
-## 适用场景
+供應商註冊表中已知的輸出令牌上限會根據模型類型而有所不同。如果長篇的翻譯或圖表說明被截斷，請選擇支援更大輸出上限的 Gemini 模型，或降低所需的輸出大小。
 
-Google 的這一部分說明產品行為、使用入口與工程邊界。介面按鈕、命令名稱、設定鍵與檔案副檔名是穩定契約，翻譯不會改變實際執行名稱。
+## 故障排除
 
-## 下一步
+- `400`：模型 ID 通常與原生 Gemini 路由不符，或者請求的格式超出了該模型所支援的範圍。
+- `401` 或 `403`：驗證金鑰限制、專案/API 的啟用狀態，以及該金鑰是否可以存取 Gemini。
+- `404`：在所設定的 API 版本中，無法取得模型識別碼。
+- 在此設定檔下，網關範例會失敗：請改用預設的網關，而非原生的 Google 提供者。
 
-繼續閱讀相鄰頁面時，優先選擇與目前任務鏈直接相關的主題：Provider 設定、核心功能、批次處理、疑難排解或圖表匯出。
+## 何時使用
+
+在需要快速翻譯、大量筆記整理，以及 Gemini 的成本/效能比優於直接使用 OpenAI 或 Anthropic 的工作流程中，請使用 Google。對於需要支援 OpenAI 兼容型推理模型的工作流程，則建議選用其他供應商。
+
+---
+
+## 接下來的步驟
+
+- [LLM 提供商](/docs/providers/overview) -- 完整的設定、每個任務的模型，以及重試邏輯
+- [翻譯](/docs/features/translation) -- 對於大量翻譯任務，建議使用 Gemini Flash

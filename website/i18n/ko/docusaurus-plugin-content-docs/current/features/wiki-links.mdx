@@ -1,147 +1,319 @@
 ---
 id: wiki-links
-title: Wiki 링크
-description: Notemd에서 Wiki 링크의 목적, 설정, 워크플로 경계와 일반적인 점검 항목을 설명합니다.
+title: 위키 링크들
+description: 주요 개념에 대한 자동 위키 링크 생성
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [wiki-links, linking, concepts, knowledge graph, Auto Link alternative, obsidian auto link, AI wiki-link]
+concepts: [Wiki-Links, Knowledge Graph, Concept Extraction, Synonym Suppression, Obsidian, Auto Link Alternative, AI Linking]
+citations:
+  - title: Obsidian
+    url: https://obsidian.md
+  - title: Auto Link Plugin
+    url: https://github.com/ov7a/obsidian-auto-link
 ---
 
 import TLDR from '@site/src/components/TLDR';
 
-# Wiki 링크
+# 위키 링크들
 
 <TLDR>
-**요약：** Notemd에서 Wiki 링크의 목적, 설정, 워크플로 경계와 일반적인 점검 항목을 설명합니다. 아래의 명령, 설정 키, 파일 확장자, Provider 이름은 플러그인 UI, CLI, 로그와 정확히 대응하도록 영어로 유지합니다.
+**Notemd는 노트의 핵심 개념들에 자동으로 `[[wiki-links]]`를 추가합니다.** LLM은 콘텐츠를 읽고 문맥 내에서 중요한 용어들을 식별한 다음, 각각의 출현 지점에 Obsidian 스타일의 위키 링크를 삽입합니다. 필요에 따라 백링크가 포함된 개념 노트 파일도 생성할 수 있습니다. 동의어 제거, 이름 변경/삭제 시의 링크 무결성 유지, 그리고 파일 수정이 이루어지지 않는 순수 추출 모드도 지원합니다. 기존 노트 제목만 일치시키는 Auto Link와 달리, Notemd는 AI를 활용하여 새로운 개념들을 식별하고 해당 노트를 생성합니다. 이 기능은 [Obsidian AI 지식 관리 가이드](/docs/pillar-ai-knowledge)의 일부입니다.
 </TLDR>
 
 ## 개요
 
-Wiki 링크의 이 부분은 제품 동작, 사용 진입점, 엔지니어링 경계를 설명합니다. UI 버튼, 명령 이름, 설정 키, 확장자는 안정적인 계약으로 봅니다.
+위키 링크 기능은 Notemd의 핵심 기능입니다. 이 기능은 다음과 같은 방식으로 일반 텍스트를 연결된 지식 그래프로 변환합니다:
 
-## 작동 방식
+1. LLM를 사용하여 **노트 분석** 중입니다.
+2. **핵심 개념 식별** (용어, 인물, 방법, 이론)
+3. 각 발생 지점에 `[[wiki-links]]`를 삽입합니다.
+4. **개념 노트 작성** (선택 사항) 및 백링크
 
-Wiki 링크의 이 부분은 제품 동작, 사용 진입점, 엔지니어링 경계를 설명합니다. UI 버튼, 명령 이름, 설정 키, 확장자는 안정적인 계약으로 봅니다.
+## 작동 원리
 
-### Wiki 링크: 워크플로와 작업
+### 처리
 
-Wiki 링크의 이 부분은 제품 동작, 사용 진입점, 엔지니어링 경계를 설명합니다. UI 버튼, 명령 이름, 설정 키, 확장자는 안정적인 계약으로 봅니다.
+```mermaid
+graph LR
+    A[Your Note] --> B[LLM Analysis]
+    B --> C{Concepts Found}
+    C --> D[Insert Wiki-Links]
+    C --> E[Create Concept Notes]
+    D --> F[Updated Note]
+    E --> F
+    F --> G[Connected Knowledge Graph]
+```
 
 ### 예시
 
-Wiki 링크의 이 부분은 제품 동작, 사용 진입점, 엔지니어링 경계를 설명합니다. UI 버튼, 명령 이름, 설정 키, 확장자는 안정적인 계약으로 봅니다.
+**이전:**
+```markdown
+Machine learning models use neural networks to learn patterns from data.
+The transformer architecture revolutionized natural language processing.
+```
 
-## 사용 방법
+**완료 후:**
+```markdown
+[[Machine learning]] models use [[neural networks]] to learn patterns from data.
+The [[transformer architecture]] revolutionized [[natural language processing]].
+```
 
-Wiki 링크의 이 부분은 제품 동작, 사용 진입점, 엔지니어링 경계를 설명합니다. UI 버튼, 명령 이름, 설정 키, 확장자는 안정적인 계약으로 봅니다.
+## 사용법
 
-### Wiki 링크: 핵심 설명
+### 기본: 현재 노트에 링크 추가
 
-Wiki 링크의 이 부분은 제품 동작, 사용 진입점, 엔지니어링 경계를 설명합니다. UI 버튼, 명령 이름, 설정 키, 확장자는 안정적인 계약으로 봅니다.
+1. 메모 열기
+2. 편집기에서 마우스 오른쪽 버튼 클릭 → **"파일 처리 (링크 추가)"**
+3. 몇 초 기다려 주세요.
+4. 개념들이 이제 연결되었습니다!
 
-### Wiki 링크: 워크플로와 작업
+### 일괄 처리: 여러 노트 처리
 
-Wiki 링크의 이 부분은 제품 동작, 사용 진입점, 엔지니어링 경계를 설명합니다. UI 버튼, 명령 이름, 설정 키, 확장자는 안정적인 계약으로 봅니다.
+1. 파일 탐색기에서 폴더를 마우스 오른쪽 버튼으로 클릭하세요.
+2. **"Notemd: 폴더 처리 (링크 추가)"**를 선택하세요.
+3. 구성하기:
+   - 동시성 (동시에 처리하는 파일의 수)
+   - 기존 링크 덮어쓰기 (예/아니오)
+4. **Process**를 클릭하세요.
 
-### Wiki 링크: 핵심 설명
+### 선택적: 특정 텍스트 링크하기
 
-Wiki 링크의 이 부분은 제품 동작, 사용 진입점, 엔지니어링 경계를 설명합니다. UI 버튼, 명령 이름, 설정 키, 확장자는 안정적인 계약으로 봅니다.
+1. 처리할 텍스트를 강조 표시하세요
+2. 마우스 오른쪽 버튼 클릭 → **"프로세스 선택 (링크 추가)"**
+3. 강조된 부분만 분석됩니다.
 
-## Wiki 링크: 핵심 설명
+## Notemd 대 자동 링크
 
-Wiki 링크의 이 부분은 제품 동작, 사용 진입점, 엔지니어링 경계를 설명합니다. UI 버튼, 명령 이름, 설정 키, 확장자는 안정적인 계약으로 봅니다.
+Obsidian에는 자동 위키 링크 생성을 위한 두 가지 방법이 있습니다:
 
-## Wiki 링크: 핵심 설명
+| | **자동 링크** | **Notemd** |
+|--|---------------|-------------|
+| 링크 출처 | 볼트에 있는 기존 노트 제목들 | LLM-콘텐츠 내 식별된 개념들 |
+| 새로운 개념을 연결할 수 있나요? | 아니요 — 제목은 이미 존재해야 합니다. | 네 — AI가 개념을 파악하고 메모를 작성합니다. |
+| 동의어 처리 | 안 됨 | 네 — 동의어 억제 |
+| 컨셉 노트 작성 | 안 됨 | 네 — 백링크와 중복 제거 기능이 있습니다. |
+| 배치 처리 | 아니요 (단일 파일) | 예 (폴더 수준) |
+| 작업별 모델 라우팅 | 안 됨 | 네 |
 
-Wiki 링크의 이 부분은 제품 동작, 사용 진입점, 엔지니어링 경계를 설명합니다. UI 버튼, 명령 이름, 설정 키, 확장자는 안정적인 계약으로 봅니다.
+**Auto Link**는 제목 일치 방식을 사용합니다: “Machine Learning”이라는 이름의 노트가 존재하면 해당 부분을 `[[Machine Learning]]`로 감싸줍니다. 노트가 존재하지 않으면 아무런 작업도 이루어지지 않습니다.
 
-### Wiki 링크: 핵심 설명
+**Notemd**는 AI가 구동합니다. LLM은 사용자의 콘텐츠를 읽고 맥락을 이해한 뒤, 아직 메모가 없더라도 연결되어야 하는 개념들을 파악하여 링크와 개념 메모를 모두 생성합니다.
 
-Wiki 링크의 이 부분은 제품 동작, 사용 진입점, 엔지니어링 경계를 설명합니다. UI 버튼, 명령 이름, 설정 키, 확장자는 안정적인 계약으로 봅니다.
+## 기능들
 
-### Wiki 링크: 핵심 설명
+### 동의어 억제
 
-Wiki 링크의 이 부분은 제품 동작, 사용 진입점, 엔지니어링 경계를 설명합니다. UI 버튼, 명령 이름, 설정 키, 확장자는 안정적인 계약으로 봅니다.
+**문제:** "transformer", "transformers", "Transformer architecture" → 3개의 별개 개념
 
-### Wiki 링크: 핵심 설명
+**해결 방법:** Notemd은 거의 동일한 데이터를 감지하고 표준 형태를 사용합니다.
 
-Wiki 링크의 이 부분은 제품 동작, 사용 진입점, 엔지니어링 경계를 설명합니다. UI 버튼, 명령 이름, 설정 키, 확장자는 안정적인 계약으로 봅니다.
+**구성 설정:**
+```
+Settings → Advanced → Synonym Suppression
+Threshold: 0.8 (0 = off, 1 = aggressive)
+```
 
-## Wiki 링크: 핵심 설명
+### 링크 무결성
 
-Wiki 링크의 이 부분은 제품 동작, 사용 진입점, 엔지니어링 경계를 설명합니다. UI 버튼, 명령 이름, 설정 키, 확장자는 안정적인 계약으로 봅니다.
+**컨셉 노트의 이름을 변경할 때:**
+- 모든 위키 링크는 자동으로 업데이트됩니다 (Obsidian 핵심 기능)
+- 백링크는 그대로 유지됩니다.
 
-### Wiki 링크: 핵심 설명
+**컨셉 노트를 삭제할 때:**
+- 링크는 그대로 남아 있지만 “비연결된 언급”으로 표시됩니다.
+- 어떤 발생 사례에서든 다시 만들 수 있습니다.
 
-Wiki 링크의 이 부분은 제품 동작, 사용 진입점, 엔지니어링 경계를 설명합니다. UI 버튼, 명령 이름, 설정 키, 확장자는 안정적인 계약으로 봅니다.
+### 순수 추출 모드
 
-### 설정
+**원본을 변경하지 않고 개념을 추출합니다:**
 
-Wiki 링크 설정은 Notemd 설정 화면에서 합니다. Provider, 모델, 출력 경로, 언어, 일괄 처리는 서로 연결되어 있으므로 현재 파일, 폴더 작업, 워크플로 중 어디에 영향을 주는지 확인하세요.
+1. 마우스 오른쪽 버튼 클릭 → **"개념 추출 (링크 없음)"**
+2. 컨셉 노트가 생성됩니다.
+3. 원본 파일은 그대로 유지됨
 
-## Wiki 링크: 워크플로와 작업
+사용 사례: 읽기 전용 콘텐츠나 최종 초안을 처리하는 경우.
 
-Wiki 링크의 이 부분은 제품 동작, 사용 진입점, 엔지니어링 경계를 설명합니다. UI 버튼, 명령 이름, 설정 키, 확장자는 안정적인 계약으로 봅니다.
+## 컨셉 노트 생성
 
-### Wiki 링크: 핵심 설명
+### 자동 생성
 
-Wiki 링크의 이 부분은 제품 동작, 사용 진입점, 엔지니어링 경계를 설명합니다. UI 버튼, 명령 이름, 설정 키, 확장자는 안정적인 계약으로 봅니다.
+**활성화되면(기본값), Notemd는 다음을 생성합니다:**
 
-### Wiki 링크: 핵심 설명
+```markdown
+---
+tags: [concept, auto-generated]
+created: 2026-06-13
+source: [[Original Note Name]]
+---
 
-Wiki 링크의 이 부분은 제품 동작, 사용 진입점, 엔지니어링 경계를 설명합니다. UI 버튼, 명령 이름, 설정 키, 확장자는 안정적인 계약으로 봅니다.
+# Machine Learning
 
-### Wiki 링크: 워크플로와 작업
+A branch of artificial intelligence that enables computers
+to learn from data without explicit programming.
 
-Wiki 링크의 이 부분은 제품 동작, 사용 진입점, 엔지니어링 경계를 설명합니다. UI 버튼, 명령 이름, 설정 키, 확장자는 안정적인 계약으로 봅니다.
+## Occurrences in Your Vault
 
-### Wiki 링크: 핵심 설명
+- [[Original Note Name#Section]]
+- [[Another Note#Header]]
 
-Wiki 링크의 이 부분은 제품 동작, 사용 진입점, 엔지니어링 경계를 설명합니다. UI 버튼, 명령 이름, 설정 키, 확장자는 안정적인 계약으로 봅니다.
+## Related Concepts
 
-## Wiki 링크: 다음 권장 사항
+- [[Neural Networks]]
+- [[Deep Learning]]
+- [[Supervised Learning]]
+```
 
-Wiki 링크의 이 부분은 제품 동작, 사용 진입점, 엔지니어링 경계를 설명합니다. UI 버튼, 명령 이름, 설정 키, 확장자는 안정적인 계약으로 봅니다.
+### 구성 설정
 
-### ✅ DO
+**출력 폴더:**
+```
+Settings → Output → Concept Folder
+Default: concepts/
+```
 
-Wiki 링크의 이 부분은 제품 동작, 사용 진입점, 엔지니어링 경계를 설명합니다. UI 버튼, 명령 이름, 설정 키, 확장자는 안정적인 계약으로 봅니다.
+**계층 구조:**
+```
+Settings → Output → Use Hierarchical Folders
+If enabled:
+  papers/my-paper.md → papers/concepts/Concept.md
+If disabled:
+  → concepts/Concept.md
+```
 
-### Wiki 링크: 핵심 설명
+**템플릿:**
+```
+Settings → Output → Concept Template
+Customize with variables:
+  {{concept}} — Concept name
+  {{description}} — LLM-generated description
+  {{backlinks}} — List of source notes
+  {{date}} — Creation date
+```
 
-Wiki 링크의 이 부분은 제품 동작, 사용 진입점, 엔지니어링 경계를 설명합니다. UI 버튼, 명령 이름, 설정 키, 확장자는 안정적인 계약으로 봅니다.
+## 고급 옵션
 
-## Wiki 링크: 문제 해결
+### 컨텍스트 윈도우
 
-Wiki 링크의 이 부분은 제품 동작, 사용 진입점, 엔지니어링 경계를 설명합니다. UI 버튼, 명령 이름, 설정 키, 확장자는 안정적인 계약으로 봅니다.
+**보낼 주변 텍스트의 양:**
 
-### Wiki 링크: 핵심 설명
+```
+Settings → Linking → Context Window
+Options: Sentence | Paragraph | Full Note
+Default: Paragraph
+```
 
-Wiki 링크의 이 부분은 제품 동작, 사용 진입점, 엔지니어링 경계를 설명합니다. UI 버튼, 명령 이름, 설정 키, 확장자는 안정적인 계약으로 봅니다.
+크기가 클수록 정확도는 높아지지만 비용은 증가합니다.
 
-### Wiki 링크: 핵심 설명
+### 최소 발생 횟수
 
-Wiki 링크의 이 부분은 제품 동작, 사용 진입점, 엔지니어링 경계를 설명합니다. UI 버튼, 명령 이름, 설정 키, 확장자는 안정적인 계약으로 봅니다.
+**여러 번 나타나는 개념만 링크로 연결하세요:**
+
+```
+Settings → Linking → Min Occurrences
+Default: 1 (link all)
+```
+
+반복되는 주제에 집중하려면 2 또는 3으로 설정하세요.
+
+### 패턴 제외
+
+**특정 단어 건너뛰기:**
+
+```
+Settings → Linking → Exclude List
+Example: note, idea, example, thing
+```
+
+일반적인 용어의 과도한 링크를 방지합니다.
+
+### 커스텀 프롬프트
+
+**기본 LLM 지침 덮어쓰기:**
+
+```
+Settings → Advanced → Custom Linking Prompt
+Default:
+  "Identify key concepts, theories, methods, and technical
+   terms in the following text. Return as a list..."
+```
+
+도메인별 요구사항에 맞게 수정하기 (예: “의료 용어에 중점을 둠”).
+
+## 팁 및 모범 사례
+
+### ✅ 완료
+
+- **100단어 이상의 메모 처리** — 짧은 메모는 핵심 개념이 적습니다
+- 더 나은 개념 식별을 위해 강력한 모델을 사용하세요(GPT-4o, Claude)
+- **수락하기 전에 검토하세요** — 제안된 링크들이 적절한지 확인하십시오
+- **반복적으로 빌드하기** — 5~10개의 노트를 처리하고, 그래프를 검토한 후 설정을 조정합니다.
+
+### ❌ 하지 마세요
+
+- **Over-link** — 모든 명사에 링크가 필요한 것은 아닙니다
+- **초안을 반복적으로 처리하기** — 개념이 변할 수 있으므로 안정화될 때까지 기다립니다.
+- **동의어 무시** — “ML”과 “Machine Learning”을 구분하지 않도록 억제 기능을 활성화합니다.
+
+## 성능
+
+### 속도
+
+| 노트 크기 | GPT-4o-mini | 클로드 소네트 | Ollama (로컬) |
+|-----------|-------------|---------------|----------------|
+| 500단어 | 2-3초 | 3-5초 | 5-10초 |
+| 2000단어 | 5-8초 | 10-15초 | 20-40초 |
+| 5000단어 이상 | 분할 처리 (여러 번 호출) | 분할된 | 분할된 |
+
+### 비용 산정
+
+**예시: GPT-4o-mini를 사용한 1000단어 노트**
+- 입력: 약 1500 토큰
+- 출력: ~200 토큰
+- 비용: 약 $0.001
+
+**100개의 노트 일괄 처리:** 약 $0.10
 
 ## 문제 해결
 
-이 절은 Wiki 링크의 일반적인 실패 원인을 구분합니다. Notemd 진단 출력, Provider HTTP 상태, 모델 이름, 네트워크, 속도 제한을 먼저 확인하세요.
+### 링크가 추가되지 않았습니다.
 
-### Wiki 링크: 핵심 설명
+**확인:**
+1. LLM 호출이 성공했습니다 (설정 → 진단).
+2. 노트에는 충분한 내용이 있습니다(50단어 이상).
+3. 개념은 기술적이고 구체적입니다(단순한 대명사가 아닙니다).
 
-Wiki 링크의 이 부분은 제품 동작, 사용 진입점, 엔지니어링 경계를 설명합니다. UI 버튼, 명령 이름, 설정 키, 확장자는 안정적인 계약으로 봅니다.
+**시도해 보세요:**
+- 더 강력한 모델을 사용하세요.
+- 컨텍스트 윈도우를 확장합니다.
+- API 키의 유효성을 확인하세요.
 
-### Wiki 링크: 핵심 설명
+### 링크가 너무 많습니다.
 
-Wiki 링크의 이 부분은 제품 동작, 사용 진입점, 엔지니어링 경계를 설명합니다. UI 버튼, 명령 이름, 설정 키, 확장자는 안정적인 계약으로 봅니다.
+**솔루션:**
+1. 최소 발생 횟수를 (2 또는 3)으로 늘리기
+2. 제외 목록에 일반적인 단어들을 추가하세요
+3. 덜 공격적인 모델을 사용하세요
 
-### Wiki 링크: 핵심 설명
+### 잘못된 개념이 연결되었습니다.
 
-Wiki 링크의 이 부분은 제품 동작, 사용 진입점, 엔지니어링 경계를 설명합니다. UI 버튼, 명령 이름, 설정 키, 확장자는 안정적인 계약으로 봅니다.
+**수정 사항:**
+1. 도메인 특수성에 맞는 사용자 지정 프롬프트를 사용하세요
+2. 동의어 억제 기능 활성화
+3. 수동으로 검토하고 연결을 해제합니다.
 
-### Wiki 링크: 핵심 설명
+### 이름을 바꾼 후 링크가 깨짐
 
-Wiki 링크의 이 부분은 제품 동작, 사용 진입점, 엔지니어링 경계를 설명합니다. UI 버튼, 명령 이름, 설정 키, 확장자는 안정적인 계약으로 봅니다.
+**이것은 정상적인 Obsidian 동작입니다.**
+
+모든 링크를 업데이트하려면:
+1. 컨셉 노트의 이름을 변경하세요
+2. Obsidian는 자동으로 `[[old]]`를 `[[new]]`로 업데이트합니다.
+
+---
 
 ## 다음 단계
 
-다음에는 현재 작업 흐름과 직접 연결된 Provider 설정, 핵심 기능, 일괄 처리, 문제 해결, 다이어그램 내보내기 문서를 우선 보세요.
+- 📖 [Concept Notes](./concept-notes) — 콘셉트 노트 작성에 대한 심층 분석
+- 🔍 [Research Integration](./research) — 웹 검색과 링크 연동하기
+- 🎨 [Diagrams](./diagrams) — 당신의 지식 그래프를 시각화하세요

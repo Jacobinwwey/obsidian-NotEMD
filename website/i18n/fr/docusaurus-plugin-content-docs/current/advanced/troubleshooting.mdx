@@ -1,75 +1,161 @@
 ---
 id: troubleshooting
-title: Dépannage
-description: Explique le rôle de Dépannage dans Notemd, sa configuration, ses limites de workflow et les vérifications courantes.
+title: Résolution de problèmes
+description: Problèmes courants et solutions
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [troubleshooting, errors, diagnostics, connection test]
+concepts: [Troubleshooting, Error Handling, Diagnostics]
+citations:
+  - title: Obsidian
+    url: https://obsidian.md
+  - title: Obsidian API
+    url: https://docs.obsidian.md
 ---
 
 import TLDR from '@site/src/components/TLDR';
 
-# Dépannage
+# Résolution de problèmes
 
 <TLDR>
-**Résumé：** Explique le rôle de Dépannage dans Notemd, sa configuration, ses limites de workflow et les vérifications courantes. Les commandes, clés de configuration, extensions et noms de Provider ci-dessous restent en anglais afin de correspondre exactement à l’interface, au CLI et aux journaux.
+**La plupart des problèmes Notemd se répartissent en quatre catégories : les problèmes majeurs de API, la connectivité réseau, les erreurs d’authentification (401/403) et les limites de fréquence (429).** Le test de connexion intégré ainsi que le panneau de diagnostic permettent d’identifier rapidement la cause racine. Cette page couvre chaque message d’erreur courant, sa cause et la solution correspondante. Pour les problèmes non listés ici, signalez-les sur GitHub Issues en joignant les résultats des diagnostics.
+
+Ceci fait partie du [Obsidian Guide de gestion des connaissances IA](/docs/pillar-ai-knowledge).
 </TLDR>
 
-## Vue d’ensemble
+## Aperçu général
 
-Cette partie de Dépannage décrit le comportement produit, les points d’entrée et les limites d’implémentation. Les boutons, commandes, clés et extensions restent des contrats stables.
+Notemd dépend de services externes -- des fournisseurs LLM et des moteurs de recherche API -- donc la plupart des problèmes proviennent en dehors du plugin lui-même. Le panneau de diagnostic dans les paramètres offre une vue structurée de la dernière appel API, y compris la requête URL, l’état de réponse et le corps de l’erreur. Vérifiez-le toujours en premier avant d’enquêter davantage.
 
-## Dépannage : explication principale
+## Comment ça marche : Diagnostic
 
-Cette partie de Dépannage décrit le comportement produit, les points d’entrée et les limites d’implémentation. Les boutons, commandes, clés et extensions restent des contrats stables.
+### Test de connexion
 
-### Dépannage : dépannage
+Chaque section de configuration du fournisseur dispose d’un bouton **« Tester la connexion »**. En le cliquant, une requête minimale API est envoyée (généralement une liste de modèles ou une complétion courte) et un rapport indique si l’opération a réussi ou si une erreur spécifique HTTP est survenue. C’est le moyen le plus rapide de vérifier que votre clé API ainsi que la base URL sont correctes.
 
-Cette partie de Dépannage décrit le comportement produit, les points d’entrée et les limites d’implémentation. Les boutons, commandes, clés et extensions restent des contrats stables.
+### Panneau de diagnostic
 
-### Dépannage : explication principale
+**Paramètres --> Notemd --> Diagnostic** affiche :
 
-Cette partie de Dépannage décrit le comportement produit, les points d’entrée et les limites d’implémentation. Les boutons, commandes, clés et extensions restent des contrats stables.
+| Champ | Contenu |
+|-------|---------|
+| Dernier fournisseur | Quel fournisseur a été appelé en dernier |
+| Dernier modèle | Quel modèle a été appelé en dernier |
+| Dernier état | Code d'état HTTP ou erreur de transport |
+| Dernière erreur | Message d’erreur brut provenant de API |
+| Dernière demande URL | Total URL de la dernière demande (clé API supprimée) |
+| Dernier corps de réponse | Corps de réponse tronqué (premiers 500 caractères) |
 
-## Dépannage : dépannage
+Copiez la sortie complète des diagnostics lors de la signalement de problèmes sur GitHub.
 
-Cette section sert à diagnostiquer les échecs courants liés à Dépannage. Vérifiez d’abord les diagnostics Notemd, le statut HTTP du Provider, le nom du modèle, le réseau et les limites de débit.
+## Erreurs courantes
 
-### Dépannage : configuration et modèles
+### API Clé invalide ou manquante
 
-Cette partie de Dépannage décrit le comportement produit, les points d’entrée et les limites d’implémentation. Les boutons, commandes, clés et extensions restent des contrats stables.
+**Symptôme :** HTTP 401 ou « Clé API incorrecte fournie »
 
-### Dépannage : dépannage
+**Cause :** La clé API est manquante, contient des espaces blancs, ou appartient à un fournisseur différent.
 
-Cette section sert à diagnostiquer les échecs courants liés à Dépannage. Vérifiez d’abord les diagnostics Notemd, le statut HTTP du Provider, le nom du modèle, le réseau et les limites de débit.
+**Correction :**
+1. Vérifier que la clé ne contient pas d’espaces en début ou en fin.
+2. Veuillez confirmer que la clé correspond au fournisseur sélectionné (une clé OpenAI ne fonctionnera pas avec Anthropic).
+3. Vérifiez que votre compte dispose de crédits ou d’une abonnement activé
+4. Cliquez sur **"Test Connection"** pour vérifier
 
-### Dépannage : dépannage
+### Erreurs de réseau / de connexion
 
-Cette partie de Dépannage décrit le comportement produit, les points d’entrée et les limites d’implémentation. Les boutons, commandes, clés et extensions restent des contrats stables.
+**Symptôme :** `ERR_CONNECTION_REFUSED`, `ERR_TIMED_OUT`, `Socket hang up`, `Network request failed`
 
-### Dépannage : dépannage
+**Cause :** L’endpoint API n’est pas accessible depuis votre machine.
 
-Cette partie de Dépannage décrit le comportement produit, les points d’entrée et les limites d’implémentation. Les boutons, commandes, clés et extensions restent des contrats stables.
+**Correction :**
+1. Vérifiez votre connexion Internet.
+2. Si vous êtes derrière un proxy ou un pare-feu, vérifiez que le domaine API n’est pas bloqué
+3. Pour Ollama : confirmer que `ollama serve` est en cours d’exécution (`ollama list` doit retourner les modèles)
+4. Pour LMStudio : confirmer que le serveur est en cours d’exécution sur `localhost:1234`
+5. Essayez un transport différent – les utilisateurs mobiles doivent s’assurer que le transport `requestUrl` est actif
+6. Activer `enableStableApiCall` pour une tentative automatique en cas d’erreurs temporaires
 
-### Dépannage : configuration et modèles
+### 403 Interdit
 
-Cette partie de Dépannage décrit le comportement produit, les points d’entrée et les limites d’implémentation. Les boutons, commandes, clés et extensions restent des contrats stables.
+**Symptôme :** HTTP 403
 
-### Dépannage : explication principale
+**Cause :** Votre clé API est valide, mais elle n’a pas les permissions nécessaires pour accéder au ressource demandée.
 
-Cette partie de Dépannage décrit le comportement produit, les points d’entrée et les limites d’implémentation. Les boutons, commandes, clés et extensions restent des contrats stables.
+**Correction :**
+1. Certains modèles nécessitent un accès spécial (par exemple, GPT-4 via Azure requiert un nom de déploiement).
+2. Certains fournisseurs restreignent les modèles en fonction du niveau de plan – vérifiez votre compte
+3. Des restrictions régionales peuvent s’appliquer (certains fournisseurs en Chine bloquent les adresses IP internationales et inversement).
+4. Vérifiez que le nom du modèle est orthographié correctement (par exemple, `gpt-4o` et non `gpt-4o-mini` lorsque le mini-modèle correspond à tout ce que votre forfait autorise).
 
-### Dépannage : configuration et modèles
+### Limite de débit (429)
 
-Cette partie de Dépannage décrit le comportement produit, les points d’entrée et les limites d’implémentation. Les boutons, commandes, clés et extensions restent des contrats stables.
+**Symptôme :** HTTP 429 ou « Limite de vitesse dépassée »
+
+**Cause :** Trop de requêtes dans une courte période de temps.
+
+**Correction :**
+1. Réduire `batchConcurrency` en `1` ou `2`
+2. Attendez quelques minutes avant de réessayer.
+3. Vérifiez la documentation sur les limites de débit de votre fournisseur pour votre niveau de forfait
+4. Activer `enableStableApiCall` pour une tentative automatique avec retards progressifs
+5. Envisagez de passer à un fournisseur offrant des limites plus élevées (DeepSeek, Ollama).
+
+### Modèle non trouvé
+
+**Symptôme :** « Modèle non trouvé » ou HTTP 404
+
+**Cause :** Le nom du modèle n’existe pas chez le fournisseur sélectionné.
+
+**Correction :**
+1. Cliquez sur **"Obtenir la liste des modèles"** pour voir tous les modèles disponibles pour votre fournisseur
+2. Certains noms de modèles changent avec le temps – vérifiez le nom actuel dans la documentation du fournisseur
+3. Pour Ollama : exécutez `ollama list` pour voir les modèles téléchargés ; seuls les modèles téléchargés sont disponibles
+
+### Aucun lien / Aucun concept généré
+
+**Symptôme :** La commande s’exécute mais ne produit aucun résultat
+
+**Cause :** Le LLM a renvoyé une réponse vide ou indéchiffrable.
+
+**Correction :**
+1. Vérifiez le panneau de diagnostic pour obtenir la réponse réelle LLM
+2. Essayez un modèle plus performant (certains petits modèles ont du mal avec les sorties structurées)
+3. Assurez-vous que la note contient suffisamment de contenu (plus de 50 mots).
+4. Vérifiez votre prompt personnalisé pour détecter d’éventuelles instructions contradictoires
+5. Désactivez temporairement la suppression des synonymes pour voir si elle filtre de manière trop agressive
+
+### Doubao Identifiant de l’endpoint manquant
+
+**Symptôme :** Erreur lors de l’utilisation du fournisseur ByteDance Doubao
+
+**Cause :** Doubao nécessite un identifiant d’endpoint Ark (format : `ep-xxxxxxxx-xxxx-xxxx`) plutôt qu’un nom de modèle.
+
+**Correction :** Remplacez le modèle de placeholder par défaut par votre véritable ID d’endpoint provenant de la console de Volcengine.
 
 ## Configuration
 
-La configuration de Dépannage se fait dans les paramètres Notemd. Provider, modèle, sortie, langue et traitement par lots interagissent; identifiez si le changement touche le fichier courant, un dossier ou un workflow.
+| Paramètres de diagnostic | Location | But |
+|--------------------|----------|---------|
+| **Tester la connexion** | Paramètres --> Section Fournisseur | Vérifier la clé API et la connectivité |
+| **Obtenir la liste des modèles** | Paramètres --> Section Fournisseur | Confirmer quels modèles sont accessibles |
+| `enableStableApiCall` | Paramètres --> Avancé | Activer la tentative de réessai avec un délai d’attente |
+| `batchConcurrency` | Paramètres --> Groupe | Contrôler le parallélisme pour éviter les limites de débit |
 
-## Dépannage : dépannage
+## Comment signaler des problèmes
 
-Cette partie de Dépannage décrit le comportement produit, les points d’entrée et les limites d’implémentation. Les boutons, commandes, clés et extensions restent des contrats stables.
+Si votre problème n’est pas couvert ci-dessus :
 
-## Étapes suivantes
+1. Ouvrez **Paramètres --> Notemd --> Diagnostic**
+2. Copiez la sortie complète des diagnostics
+3. Ouvrez un problème GitHub à [github.com/Jacobinwwey/obsidian-NotEMD/issues](https://github.com/Jacobinwwey/obsidian-NotEMD/issues)
+4. Inclure : version Obsidian, version Notemd, fournisseur, modèle, sortie des diagnostics, et étapes pour reproduire le problème
+5. Rédigez votre clé API à partir de tout journal partagé
 
-Pour continuer, choisissez la page qui correspond directement à votre chaîne de travail: Provider, fonction principale, traitement par lots, dépannage ou export de diagrammes.
+---
+
+## Prochaines étapes
+
+- [LLM Fournisseurs](/docs/providers/overview) -- Référence complète de la configuration des fournisseurs
+- [Traitement par lots](/docs/advanced/batch-processing) -- Paramètres de concurrence et de réessai pour les opérations volumineuses
+- [Custom Prompts](/docs/advanced/custom-prompts) -- Corriger le comportement inattendu de LLM en ajustant les prompts

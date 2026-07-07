@@ -1,111 +1,181 @@
 ---
 id: quick-start
-title: Schnellstartanleitung
-description: Erläutert Zweck, Konfiguration, Workflow-Grenzen und typische Prüfungen für Schnellstartanleitung in Notemd.
+title: Leitfaden für eine schnelle Einrichtung
+description: Einführung in Notemd in 5 Minuten
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [quick start, tutorial, getting started, first steps]
+concepts: [Quick Start, LLM Configuration, One-Click Workflow, Ollama]
+citations:
+  - title: Obsidian
+    url: https://obsidian.md
 ---
 
 import TLDR from '@site/src/components/TLDR';
 
-# Schnellstartanleitung
+# Leitfaden für eine schnelle Einrichtung
 
 <TLDR>
-**Kurzfassung：** Erläutert Zweck, Konfiguration, Workflow-Grenzen und typische Prüfungen für Schnellstartanleitung in Notemd. Die folgenden Befehle, Konfigurationsschlüssel, Dateiendungen und Provider-Namen bleiben englisch, damit sie exakt zur Plugin-Oberfläche, CLI und zu Logs passen.
+**Beginnen Sie bereits in 5 Minuten mit der Verwendung von Notemd.** Drei Schritte: (1) Fügen Sie eine LLM API-Schlüssel hinzu (oder verwenden Sie einen lokalen Ollama), (2) Öffnen Sie eine Notiz und führen Sie „Datei verarbeiten (Verlinkungen hinzufügen)“ aus, (3) Entdecken Sie One-Click-Arbeitsabläufe im Seitenbereich. Unterstützt mehr als 30 Anbieter. Keine Programmierkenntnisse erforderlich. Funktioniert auch offline mit Ollama.
 </TLDR>
 
-## Schnellstartanleitung: Konfiguration und Modelle
+## Schritt 1: Konfigurieren Sie Ihren ersten LLM-Anbieter (2 Min.)
 
-Dieser Teil von Schnellstartanleitung beschreibt Produktverhalten, Einstiegspunkte und technische Grenzen. UI-Schaltflächen, Befehle, Schlüssel und Dateiendungen sind stabile Verträge.
+### Option A: Cloud-Anbieter (OpenAI, Anthropic, usw.)
 
-### Schnellstartanleitung: Konfiguration und Modelle
+1. Öffnen Sie **Einstellungen** → **Notemd**
+2. Unter **LLM Provider-Konfiguration** wählen Sie einen Anbieter aus dem Dropdown-Menü aus
+3. Geben Sie Ihren **API Schlüssel** ein
+4. (Optional) Klicken Sie auf **„Modellliste anfordern“**, um die verfügbaren Modelle anzusehen
+5. Wählen Sie ein Modell für jede Aufgabentyp.
 
-Dieser Teil von Schnellstartanleitung beschreibt Produktverhalten, Einstiegspunkte und technische Grenzen. UI-Schaltflächen, Befehle, Schlüssel und Dateiendungen sind stabile Verträge.
+**Beliebte Auswahl:**
+- **OpenAI**: `gpt-4o-mini` (schnell, günstig)
+- **Anthropic**: `claude-sonnet-4-6` (hohe Qualität)
+- **DeepSeek**: `deepseek-chat` (sehr günstig)
 
-### Schnellstartanleitung: Konfiguration und Modelle
+### Option B: Lokal Ollama (Kein API Schlüssel erforderlich)
 
-Dieser Teil von Schnellstartanleitung beschreibt Produktverhalten, Einstiegspunkte und technische Grenzen. UI-Schaltflächen, Befehle, Schlüssel und Dateiendungen sind stabile Verträge.
+1. Installieren Sie [Ollama](https://ollama.com/)
+2. Modell herunterladen: `ollama pull llama3.1`
+3. Wählen Sie in den Einstellungen von Notemd **„Ollama"** als Anbieter aus
+4. Modellname: `llama3.1` (oder jedes andere heruntergeladene Modell)
 
-## Schnellstartanleitung: Workflows und Aufgaben
+## Schritt 2: Versuchen Sie Ihre erste Aufgabe (1 Min.)
 
-Dieser Teil von Schnellstartanleitung beschreibt Produktverhalten, Einstiegspunkte und technische Grenzen. UI-Schaltflächen, Befehle, Schlüssel und Dateiendungen sind stabile Verträge.
+### Wiki-Links zu einer Notiz hinzufügen
 
-### Schnellstartanleitung: zentrale Erläuterung
+1. Öffnen Sie jede Notiz mit sinnvollem Inhalt
+2. Rechtsklick im Editor
+3. Wählen Sie **„Datei verarbeiten (Verknüpfungen hinzufügen)“** aus
+4. Warten Sie ein paar Sekunden.
+5. Die Schlüsselkonzepte sind jetzt `[[wiki-linked]]`!
 
-Dieser Teil von Schnellstartanleitung beschreibt Produktverhalten, Einstiegspunkte und technische Grenzen. UI-Schaltflächen, Befehle, Schlüssel und Dateiendungen sind stabile Verträge.
+**Beispiel:**
 
-## Schnellstartanleitung: Workflows und Aufgaben
+**Vorher:**
+```
+Machine learning models use neural networks to process data.
+```
 
-Dieser Teil von Schnellstartanleitung beschreibt Produktverhalten, Einstiegspunkte und technische Grenzen. UI-Schaltflächen, Befehle, Schlüssel und Dateiendungen sind stabile Verträge.
+**Nach:**
+```
+[[Machine learning]] models use [[neural networks]] to process data.
+```
 
-### Schnellstartanleitung: zentrale Erläuterung
+## Schritt 3: Funktionen erkunden (2 Min.)
 
-Dieser Teil von Schnellstartanleitung beschreibt Produktverhalten, Einstiegspunkte und technische Grenzen. UI-Schaltflächen, Befehle, Schlüssel und Dateiendungen sind stabile Verträge.
+### Konzeptnotizen extrahieren
 
-### Schnellstartanleitung: Recherche
+1. Rechtsklick → **„Konzepte aus der aktuellen Datei extrahieren“**
+2. Notemd erstellt separate Dateien für jedes Konzept
+3. Überprüfen Sie Ihren konfigurierten Konzeptordner (Standard: `concepts/`)
+4. Jede Konzeptnotiz enthält einen Backlink zu Ihrer ursprünglichen Notiz
 
-Dieser Teil von Schnellstartanleitung beschreibt Produktverhalten, Einstiegspunkte und technische Grenzen. UI-Schaltflächen, Befehle, Schlüssel und Dateiendungen sind stabile Verträge.
+### Forschung und Zusammenfassung
 
-### Schnellstartanleitung: Workflows und Aufgaben
+1. Heben Sie ein Thema in Ihrer Notiz hervor
+2. Rechtsklick → **„Forschung und Zusammenfassung“**
+3. Notemd führt eine Websuche durch (Tavily oder DuckDuckGo)
+4. Zusammenfassung fügt Ihrer Notiz zusammen mit Quellen hinzu
 
-Dieser Teil von Schnellstartanleitung beschreibt Produktverhalten, Einstiegspunkte und technische Grenzen. UI-Schaltflächen, Befehle, Schlüssel und Dateiendungen sind stabile Verträge.
+### Einst-Klick-Abläufe
 
-## Schnellstartanleitung: Workflows und Aufgaben
+1. Überprüfen Sie die **linke Seitenleiste** auf Schaltflächen für den Workflow
+2. Klicken Sie auf **„One-Click Extract“** in jeder Notiz
+3. Es läuft wie folgt: Links hinzufügen → Konzepte extrahieren → Recherche durchführen → Diagramm erstellen
+4. Alles mit einem Klick!
 
-Dieser Teil von Schnellstartanleitung beschreibt Produktverhalten, Einstiegspunkte und technische Grenzen. UI-Schaltflächen, Befehle, Schlüssel und Dateiendungen sind stabile Verträge.
+## Häufige Erstaufgaben
 
-### Schnellstartanleitung: Workflows und Aufgaben
+### Aufgabe 1: Ein Papier/Artikel verarbeiten
 
-Dieser Teil von Schnellstartanleitung beschreibt Produktverhalten, Einstiegspunkte und technische Grenzen. UI-Schaltflächen, Befehle, Schlüssel und Dateiendungen sind stabile Verträge.
+```
+1. Paste article content into a note
+2. Run "Process file (add links)"
+3. Run "Extract concepts"
+4. Run "Research and summarize" on unfamiliar terms
+5. Run "Summarize as Mermaid diagram" for visual structure
+```
 
-### Schnellstartanleitung: Workflows und Aufgaben
+### Aufgabe 2: Notizen übersetzen
 
-Dieser Teil von Schnellstartanleitung beschreibt Produktverhalten, Einstiegspunkte und technische Grenzen. UI-Schaltflächen, Befehle, Schlüssel und Dateiendungen sind stabile Verträge.
+```
+1. Highlight text to translate
+2. Right-click → "Translate to target language"
+3. Set target language in settings first
+```
 
-### Schnellstartanleitung: Workflows und Aufgaben
+### Aufgabe 3: Erstellen Sie eine Wissenskarte
 
-Dieser Teil von Schnellstartanleitung beschreibt Produktverhalten, Einstiegspunkte und technische Grenzen. UI-Schaltflächen, Befehle, Schlüssel und Dateiendungen sind stabile Verträge.
+```
+1. Process 5-10 related notes with "add links"
+2. Run "Extract concepts" on each
+3. Open Graph view to see connections
+4. Your knowledge graph is forming!
+```
 
-## Schnellstartanleitung: nächste Empfehlungen
-
-Dieser Teil von Schnellstartanleitung beschreibt Produktverhalten, Einstiegspunkte und technische Grenzen. UI-Schaltflächen, Befehle, Schlüssel und Dateiendungen sind stabile Verträge.
+## Tipps zur Anpassung
 
 ### Modellauswahl pro Aufgabe
 
-Dieser Teil von Schnellstartanleitung beschreibt Produktverhalten, Einstiegspunkte und technische Grenzen. UI-Schaltflächen, Befehle, Schlüssel und Dateiendungen sind stabile Verträge.
+Sie können unterschiedliche Modelle für verschiedene Aufgaben verwenden:
 
-### Schnellstartanleitung: Workflows und Aufgaben
+| Aufgabe | Empfohlenes Modell | Warum |
+|------|------------------|-----|
+| Links hinzufügen | `gpt-4o-mini`, `deepseek-chat` | Schnell, viele Anrufe |
+| Konzepte extrahieren | `claude-sonnet-4-6`, `gpt-4o` | Qualitätsextraktion |
+| Forschung | `perplexity`, `gpt-4o` | webbasiert |
+| Übersetzung | `gemini-flash`, `gpt-4o` | Mehrsprachig |
+| Diagramme | `claude-opus`, lokales Modell | Komplexe Logik |
 
-Dieser Teil von Schnellstartanleitung beschreibt Produktverhalten, Einstiegspunkte und technische Grenzen. UI-Schaltflächen, Befehle, Schlüssel und Dateiendungen sind stabile Verträge.
+Konfigurieren in: **Einstellungen → Notemd → modell-spezifische Aufgaben**
+
+### Benutzerdefinierte Workflows
+
+Erstellen Sie Ihre eigene Schaltfläche:
+
+1. Einstellungen → Notemd → Arbeitsabläufe
+2. Klicken Sie auf „Workflow hinzufügen“.
+3. Geben Sie den DSL ein: `process-current-add-links>extract-concepts-current>research-and-summarize`
+4. Nennen Sie es: „Mein Forschungsfluss“
+5. Ein neuer Button erscheint im Seitenbereich
 
 ## Fehlerbehebung
 
-Dieser Abschnitt grenzt typische Fehler bei Schnellstartanleitung ein. Prüfen Sie zuerst Notemd-Diagnosen, HTTP-Status des Providers, Modellnamen, Netzwerk und Rate Limits.
+### "API Schlüssel ungültig"
+- Überprüfen, ob der Schlüssel korrekt ist (keine zusätzlichen Leerzeichen)
+- Überprüfen, ob das Konto Überziehungskredite hat
+- Testen Sie mit der Schaltfläche „Verbindungsprüfung“ in den Einstellungen
 
-### Schnellstartanleitung: Konfiguration und Modelle
+### „Modell nicht gefunden“
+- Klicken Sie auf „Modellliste anfordern“, um die verfügbaren Modelle anzusehen.
+- Einige Anbieter verlangen bestimmte Modellnamen (z. B. `gpt-4o` und nicht `gpt-4`).
 
-Dieser Teil von Schnellstartanleitung beschreibt Produktverhalten, Einstiegspunkte und technische Grenzen. UI-Schaltflächen, Befehle, Schlüssel und Dateiendungen sind stabile Verträge.
+### Links erscheinen nicht.
+- Stellen Sie sicher, dass die Notiz ausreichend Inhalt enthält (>50 Wörter).
+- Probieren Sie ein leistungsstärkeres Modell aus.
+- Überprüfen, ob der Aufruf von LLM erfolgreich war (siehe Diagnosepanel).
 
-### Schnellstartanleitung: Konfiguration und Modelle
-
-Dieser Teil von Schnellstartanleitung beschreibt Produktverhalten, Einstiegspunkte und technische Grenzen. UI-Schaltflächen, Befehle, Schlüssel und Dateiendungen sind stabile Verträge.
-
-### Schnellstartanleitung: zentrale Erläuterung
-
-Dieser Teil von Schnellstartanleitung beschreibt Produktverhalten, Einstiegspunkte und technische Grenzen. UI-Schaltflächen, Befehle, Schlüssel und Dateiendungen sind stabile Verträge.
-
-### Schnellstartanleitung: Fehlerbehebung
-
-Dieser Teil von Schnellstartanleitung beschreibt Produktverhalten, Einstiegspunkte und technische Grenzen. UI-Schaltflächen, Befehle, Schlüssel und Dateiendungen sind stabile Verträge.
+### Langsame Leistung
+- Verwenden Sie schnellere Modelle (`gpt-4o-mini` anstelle von `gpt-4o`)
+- Größe des Chunk in den Einstellungen verringern
+- Parallelverarbeitung für Batch-Aufgaben aktivieren
 
 ## Nächste Schritte
 
-Wählen Sie als Nächstes die Seite, die direkt zu Ihrer Aufgabe passt: Provider-Konfiguration, Kernfunktion, Batch-Verarbeitung, Fehlerbehebung oder Diagrammexport.
+- 📖 [Alle Funktionen entdecken](../features/wiki-links)
+- ⚙️ [Erweiterte Konfiguration](./configuration)
+- 🔧 [LLM Anbieter-Einrichtung](../providers/overview)
+- ❓ [FAQ](../faq)
 
-## Schnellstartanleitung: zentrale Erläuterung
+## Video-Tutorial
 
-Dieser Teil von Schnellstartanleitung beschreibt Produktverhalten, Einstiegspunkte und technische Grenzen. UI-Schaltflächen, Befehle, Schlüssel und Dateiendungen sind stabile Verträge.
+Schauen Sie sich das 3-minütige Einführungsvideo (Chinesisch) an:
+[【Vollständig open source und kostenlos! Schnelle Einführung in NotEMD in drei Minuten】](https://b23.tv/lqR0RlA)
 
-## Schnellstartanleitung: Fehlerbehebung
+## Hilfe holen
 
-Dieser Teil von Schnellstartanleitung beschreibt Produktverhalten, Einstiegspunkte und technische Grenzen. UI-Schaltflächen, Befehle, Schlüssel und Dateiendungen sind stabile Verträge.
+- 💬 **Discord**: [discord.gg/qnGgsQ9W](https://discord.gg/qnGgsQ9W)
+- 🐛 **Probleme**: [GitHub Issues](https://github.com/Jacobinwwey/obsidian-NotEMD/issues)
+- 📚 **Dokumentation**: [Vollständige Dokumentation](https://jacobinwwey.github.io/obsidian-NotEMD/)

@@ -1,39 +1,67 @@
 ---
 id: anthropic
 title: Anthropic
-description: Erläutert Zweck, Konfiguration, Workflow-Grenzen und typische Prüfungen für Anthropic in Notemd.
+description: Konfiguriere Anthropic Claude
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [anthropic, claude, provider, configuration]
+concepts: [Anthropic, Claude, API Configuration]
+citations:
+  - title: Anthropic API
+    url: https://docs.anthropic.com
+  - title: Claude
+    url: https://www.anthropic.com/claude
 ---
 
 import TLDR from '@site/src/components/TLDR';
 
-# Anthropic
+# Anthropic Anbieter
 
 <TLDR>
-**Kurzfassung：** Erläutert Zweck, Konfiguration, Workflow-Grenzen und typische Prüfungen für Anthropic in Notemd. Die folgenden Befehle, Konfigurationsschlüssel, Dateiendungen und Provider-Namen bleiben englisch, damit sie exakt zur Plugin-Oberfläche, CLI und zu Logs passen.
+**Anthropic verwendet den nativen Messages API-Transport, nicht den mit OpenAI kompatiblen Transport.** Die aktuelle Voreinstellung verwendet standardmäßig `claude-3-5-sonnet-20240620`, `https://api.anthropic.com` und `temperature: 0.5`. Behandeln Sie es beim Debuggen als eigenständige Protokolloberfläche.
+
+Dies ist ein Teil des [Obsidian AI-Know-how-Management-Leitfadens](/docs/pillar-ai-knowledge).
 </TLDR>
 
 ## Einrichtung
 
-Anthropic wird in den Notemd-Einstellungen konfiguriert. Provider, Modell, Ausgabepfad, Sprache und Batch-Verarbeitung greifen ineinander; klären Sie, ob die Änderung Datei-, Ordner- oder Workflow-Aufgaben betrifft.
+Erstellen Sie einen Anthropic API-Schlüssel, fügen Sie ein `Anthropic`-Anbieterprofil hinzu und belassen Sie den Base URL am nativen Endpunkt – es sei denn, Sie leiten den Verkehr über ein spezielles Gatewayprofil. Wählen Sie im Feld „Modell“ das Claude-Modell-ID, das Sie verwenden möchten; die Standard-Einstellung hält die bestehende Produktbasis stabil.
+
+Anthropic eignet sich hervorragend für hochwertige Zusammenfassungen, Forschungssynthesen und Konzeptextraktion. Wenn Sie es mit günstigeren Anbietern kombinieren, verwenden Sie es nur bei Aufgaben, bei denen die Qualität der Ergebnisse von Vorteil ist.
 
 ## Endpunkt und Authentifizierung
 
-Dieser Teil von Anthropic beschreibt Produktverhalten, Einstiegspunkte und technische Grenzen. UI-Schaltflächen, Befehle, Schlüssel und Dateiendungen sind stabile Verträge.
+| Feld | Aktuelle Voreinstellung |
+|-------|----------------|
+| Transport | `anthropic` |
+| API Schlüssel | Erforderlich |
+| Base URL | `https://api.anthropic.com` |
+| Standardmodell | `claude-3-5-sonnet-20240620` |
+| Temperatur | `0.5` |
+| Verbindungsprüfung | Nur Chat |
 
-## Modellerkennung
+Die Laufzeit sendet Anfragen an `/v1/messages` mit `x-api-key` und `anthropic-version: 2023-06-01`. Konfigurieren Sie unter dieser Einstellung keinen OpenAI-stiligen `/v1/chat/completions`-Endpunkt; verwenden Sie stattdessen eine OpenAI-kompatible Gateway-Einstellung.
 
-Dieser Teil von Anthropic beschreibt Produktverhalten, Einstiegspunkte und technische Grenzen. UI-Schaltflächen, Befehle, Schlüssel und Dateiendungen sind stabile Verträge.
+## Modellentdeckung
+
+Anthropic verwendet im Provider-Register den `anthropic-models`-Entdeckungsmodus. Wenn Ihre Schlüssel oder Ihr Konto keine Modelle auflisten können, speichern Sie eine bekannte Modell-ID im Profil und überprüfen Sie dies durch den Verbindungstest.
+
+Der Transport ist nicht mit OpenAI-kompatiblen Anbietern austauschbar. Ein Claude-Modell, das über OpenRouter, LiteLLM oder ein anderes Gateway geleitet wird, gehört in das Profil dieses Gateways und nicht in das native Anthropic-Profil.
 
 ## Fehlerbehebung
 
-Dieser Abschnitt grenzt typische Fehler bei Anthropic ein. Prüfen Sie zuerst Notemd-Diagnosen, HTTP-Status des Providers, Modellnamen, Netzwerk und Rate Limits.
+- `401` oder `403`: Überprüfen Sie den Schlüsselbereich, den Zugriff auf die Arbeitsumgebung, die Abrechnung sowie ob der Schlüssel zur erwarteten Anthropic Arbeitsumgebung gehört.
+- `404`: Die Basis URL ist falsch oder die ausgewählte Modell-ID steht dem Konto nicht zur Verfügung.
+- Fehler bei Gateway-ähnlichen Claude-Modell-IDen: Verschieben Sie das Profil zum entsprechenden Gateway-Anbieter, da das native Anthropic native Modellnamen erwartet.
+- Lange Anfragen scheitern spät: Verringern Sie die Ausgabegröße des Modells pro Aufgabe oder verwenden Sie ein Modell mit einer höheren bekannten Obergrenze für Ausgabetoken.
 
 ## Wann verwenden
 
-Dieser Teil von Anthropic beschreibt Produktverhalten, Einstiegspunkte und technische Grenzen. UI-Schaltflächen, Befehle, Schlüssel und Dateiendungen sind stabile Verträge.
+Verwenden Sie Anthropic, wenn bei der Synthese, in Forschungsnotizen oder bei strukturiertem Schreiben die Qualität wichtiger ist als die reine Kostenersparnis. Verwenden Sie es nicht als allgemeinen Ersatz, der mit OpenAI kompatibel ist; der getrennte Transport ist schließlich das Ziel, und das Mischen der Protokolle erschwert die Diagnose.
+
+---
 
 ## Nächste Schritte
 
-Wählen Sie als Nächstes die Seite, die direkt zu Ihrer Aufgabe passt: Provider-Konfiguration, Kernfunktion, Batch-Verarbeitung, Fehlerbehebung oder Diagrammexport.
+- [LLM Anbieter](/docs/providers/overview) -- Vollständige Konfiguration, modellbasierte Verarbeitung pro Aufgabe und Wiederholungslogik
+- [Fehlerbehebung](/docs/advanced/troubleshooting) -- Behebung von 401/403-Fehlern und Verbindungsproblemen

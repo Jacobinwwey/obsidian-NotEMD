@@ -1,9 +1,14 @@
 ---
 id: quick-start
 title: Guide de démarrage rapide
-description: Explique le rôle de Guide de démarrage rapide dans Notemd, sa configuration, ses limites de workflow et les vérifications courantes.
+description: Démarrer avec Notemd en 5 minutes
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [quick start, tutorial, getting started, first steps]
+concepts: [Quick Start, LLM Configuration, One-Click Workflow, Ollama]
+citations:
+  - title: Obsidian
+    url: https://obsidian.md
 ---
 
 import TLDR from '@site/src/components/TLDR';
@@ -11,101 +16,166 @@ import TLDR from '@site/src/components/TLDR';
 # Guide de démarrage rapide
 
 <TLDR>
-**Résumé：** Explique le rôle de Guide de démarrage rapide dans Notemd, sa configuration, ses limites de workflow et les vérifications courantes. Les commandes, clés de configuration, extensions et noms de Provider ci-dessous restent en anglais afin de correspondre exactement à l’interface, au CLI et aux journaux.
+**Commencez à utiliser Notemd en 5 minutes.** Trois étapes : (1) Ajoutez une clé LLM API (ou utilisez Ollama local), (2) Ouvrez une note et exécutez « Process file (add links) », (3) Découvrez les workflows en un clic dans la barre latérale. Prend en charge plus de 30 fournisseurs. Aucun codage requis. Fonctionne hors ligne avec Ollama.
 </TLDR>
 
-## Guide de démarrage rapide : configuration et modèles
+## Étape 1 : Configurer votre premier fournisseur LLM (2 min)
 
-Cette partie de Guide de démarrage rapide décrit le comportement produit, les points d’entrée et les limites d’implémentation. Les boutons, commandes, clés et extensions restent des contrats stables.
+### Option A : Fournisseur de cloud (OpenAI, Anthropic, etc.)
 
-### Guide de démarrage rapide : configuration et modèles
+1. Ouvrez **Paramètres** → **Notemd**
+2. Sous **LLM Configuration du fournisseur**, sélectionnez un fournisseur dans la liste déroulante
+3. Entrez votre clé **API**
+4. (Optionnel) Cliquez sur **« Obtenir la liste des modèles »** pour voir les modèles disponibles
+5. Sélectionnez un modèle pour chaque type de tâche
 
-Cette partie de Guide de démarrage rapide décrit le comportement produit, les points d’entrée et les limites d’implémentation. Les boutons, commandes, clés et extensions restent des contrats stables.
+**Choix populaires :**
+- **OpenAI**: `gpt-4o-mini` (rapide, abordable)
+- **Anthropic**: `claude-sonnet-4-6` (haute qualité)
+- **DeepSeek**: `deepseek-chat` (très abordable)
 
-### Guide de démarrage rapide : configuration et modèles
+### Option B : Local Ollama (Aucune clé API requise)
 
-Cette partie de Guide de démarrage rapide décrit le comportement produit, les points d’entrée et les limites d’implémentation. Les boutons, commandes, clés et extensions restent des contrats stables.
+1. Installez [Ollama](https://ollama.com/)
+2. Télécharger un modèle : `ollama pull llama3.1`
+3. Dans les paramètres de Notemd, sélectionnez **"Ollama"** comme fournisseur
+4. Nom du modèle : `llama3.1` (ou tout modèle que vous avez téléchargé)
 
-## Guide de démarrage rapide : workflows et tâches
+## Étape 2 : Essayez votre première tâche (1 min)
 
-Cette partie de Guide de démarrage rapide décrit le comportement produit, les points d’entrée et les limites d’implémentation. Les boutons, commandes, clés et extensions restent des contrats stables.
+### Ajouter des liens Wiki à une note
 
-### Guide de démarrage rapide : explication principale
+1. Ouvrez n’importe quelle note contenant du contenu significatif
+2. Cliquez avec le bouton droit dans l’éditeur
+3. Sélectionnez **« Traiter le fichier (ajouter des liens) »**
+4. Attendez quelques secondes.
+5. Les concepts clés sont maintenant `[[wiki-linked]]` !
 
-Cette partie de Guide de démarrage rapide décrit le comportement produit, les points d’entrée et les limites d’implémentation. Les boutons, commandes, clés et extensions restent des contrats stables.
+**Exemple :**
 
-## Guide de démarrage rapide : workflows et tâches
+**Avant :**
+```
+Machine learning models use neural networks to process data.
+```
 
-Cette partie de Guide de démarrage rapide décrit le comportement produit, les points d’entrée et les limites d’implémentation. Les boutons, commandes, clés et extensions restent des contrats stables.
+**Après :**
+```
+[[Machine learning]] models use [[neural networks]] to process data.
+```
 
-### Guide de démarrage rapide : explication principale
+## Étape 3 : Découvrir les fonctionnalités (2 min)
 
-Cette partie de Guide de démarrage rapide décrit le comportement produit, les points d’entrée et les limites d’implémentation. Les boutons, commandes, clés et extensions restent des contrats stables.
+### Extraire les notes de concept
 
-### Guide de démarrage rapide : recherche
+1. Clic droit → **"Extraire les concepts du fichier actuel"**
+2. Notemd crée des fichiers séparés pour chaque concept
+3. Vérifiez votre dossier de concept configuré (par défaut : `concepts/`)
+4. Chaque note de concept contient un lien vers votre note originale
 
-Cette partie de Guide de démarrage rapide décrit le comportement produit, les points d’entrée et les limites d’implémentation. Les boutons, commandes, clés et extensions restent des contrats stables.
+### Recherche et résumé
 
-### Guide de démarrage rapide : workflows et tâches
+1. Sélectionnez un sujet dans votre note
+2. Clic droit → **« Rechercher et résumer »**
+3. Notemd effectue des recherches sur le web (Tavily ou DuckDuckGo)
+4. Résumé : ajoutez des sources à votre note
 
-Cette partie de Guide de démarrage rapide décrit le comportement produit, les points d’entrée et les limites d’implémentation. Les boutons, commandes, clés et extensions restent des contrats stables.
+### Flux de travail en un clic
 
-## Guide de démarrage rapide : workflows et tâches
+1. Vérifiez la **barre latérale gauche** pour les boutons de flux de travail
+2. Cliquez sur **"Extraction en un clic"** dans n’importe quelle note
+3. Il s’exécute ainsi : ajouter des liens → extraire des concepts → effectuer des recherches → générer un diagramme
+4. Tout en un clic !
 
-Cette partie de Guide de démarrage rapide décrit le comportement produit, les points d’entrée et les limites d’implémentation. Les boutons, commandes, clés et extensions restent des contrats stables.
+## Tâches courantes initiales
 
-### Guide de démarrage rapide : workflows et tâches
+### Tâche 1 : Traiter un papier/un article
 
-Cette partie de Guide de démarrage rapide décrit le comportement produit, les points d’entrée et les limites d’implémentation. Les boutons, commandes, clés et extensions restent des contrats stables.
+```
+1. Paste article content into a note
+2. Run "Process file (add links)"
+3. Run "Extract concepts"
+4. Run "Research and summarize" on unfamiliar terms
+5. Run "Summarize as Mermaid diagram" for visual structure
+```
 
-### Guide de démarrage rapide : workflows et tâches
+### Tâche 2 : Traduire les notes
 
-Cette partie de Guide de démarrage rapide décrit le comportement produit, les points d’entrée et les limites d’implémentation. Les boutons, commandes, clés et extensions restent des contrats stables.
+```
+1. Highlight text to translate
+2. Right-click → "Translate to target language"
+3. Set target language in settings first
+```
 
-### Guide de démarrage rapide : workflows et tâches
+### Tâche 3 : Créer une carte de connaissances
 
-Cette partie de Guide de démarrage rapide décrit le comportement produit, les points d’entrée et les limites d’implémentation. Les boutons, commandes, clés et extensions restent des contrats stables.
+```
+1. Process 5-10 related notes with "add links"
+2. Run "Extract concepts" on each
+3. Open Graph view to see connections
+4. Your knowledge graph is forming!
+```
 
-## Guide de démarrage rapide : recommandations suivantes
+## Conseils de personnalisation
 
-Cette partie de Guide de démarrage rapide décrit le comportement produit, les points d’entrée et les limites d’implémentation. Les boutons, commandes, clés et extensions restent des contrats stables.
+### Sélection du modèle par tâche
 
-### Sélection de modèle par tâche
+Vous pouvez utiliser des modèles différents pour des tâches différentes :
 
-Cette partie de Guide de démarrage rapide décrit le comportement produit, les points d’entrée et les limites d’implémentation. Les boutons, commandes, clés et extensions restent des contrats stables.
+| Tâche | Modèle recommandé | Pourquoi |
+|------|------------------|-----|
+| Ajouter des liens | `gpt-4o-mini`, `deepseek-chat` | Vite, de nombreuses appels |
+| Extraire les concepts | `claude-sonnet-4-6`, `gpt-4o` | Extraction de qualité |
+| Recherche | `perplexity`, `gpt-4o` | Basé sur le Web |
+| Traduction | `gemini-flash`, `gpt-4o` | Multilingue |
+| Diagrammes | `claude-opus`, modèle local | Raisonnement complexe |
 
-### Guide de démarrage rapide : workflows et tâches
+Configurer dans : **Paramètres → Notemd → Modèles spécifiques aux tâches**
 
-Cette partie de Guide de démarrage rapide décrit le comportement produit, les points d’entrée et les limites d’implémentation. Les boutons, commandes, clés et extensions restent des contrats stables.
+### Flux de travail personnalisés
 
-## Dépannage
+Créez votre propre bouton :
 
-Cette section sert à diagnostiquer les échecs courants liés à Guide de démarrage rapide. Vérifiez d’abord les diagnostics Notemd, le statut HTTP du Provider, le nom du modèle, le réseau et les limites de débit.
+1. Paramètres → Notemd → Flux de travail
+2. Cliquez sur « Ajouter un flux de travail »
+3. Entrez le DSL : `process-current-add-links>extract-concepts-current>research-and-summarize`
+4. Nommez-le : « Mon flux de recherche »
+5. Un nouveau bouton apparaît dans la barre latérale
 
-### Guide de démarrage rapide : configuration et modèles
+## Résolution de problèmes
 
-Cette partie de Guide de démarrage rapide décrit le comportement produit, les points d’entrée et les limites d’implémentation. Les boutons, commandes, clés et extensions restent des contrats stables.
+### "Clé API invalide"
+- Vérifier si la clé est correcte (pas d’espaces supplémentaires)
+- Vérifier si le compte dispose de crédits
+- Testez avec le bouton « Test de connexion » dans les paramètres
 
-### Guide de démarrage rapide : configuration et modèles
+### "Modèle non trouvé"
+- Cliquez sur « Obtenir la liste des modèles » pour voir les modèles disponibles
+- Certains fournisseurs exigent des noms de modèle spécifiques (par exemple, `gpt-4o` et non `gpt-4`).
 
-Cette partie de Guide de démarrage rapide décrit le comportement produit, les points d’entrée et les limites d’implémentation. Les boutons, commandes, clés et extensions restent des contrats stables.
+### Les liens ne s’affichent pas
+- Assurez-vous que la note contient suffisamment de contenu (plus de 50 mots).
+- Essayez un modèle plus puissant
+- Vérifier si l’appel LLM a réussi (voir le panneau de diagnostic)
 
-### Guide de démarrage rapide : explication principale
+### Performance lente
+- Utilisez des modèles plus rapides (`gpt-4o-mini` au lieu de `gpt-4o`)
+- Réduire la taille du chunk dans les paramètres
+- Activer le traitement parallèle pour les tâches en lot
 
-Cette partie de Guide de démarrage rapide décrit le comportement produit, les points d’entrée et les limites d’implémentation. Les boutons, commandes, clés et extensions restent des contrats stables.
+## Prochaines étapes
 
-### Guide de démarrage rapide : dépannage
+- 📖 [Découvrir toutes les fonctionnalités](../features/wiki-links)
+- ⚙️ [Configuration avancée](./configuration)
+- 🔧 [Configuration du fournisseur LLM](../providers/overview)
+- ❓ [FAQ](../faq)
 
-Cette partie de Guide de démarrage rapide décrit le comportement produit, les points d’entrée et les limites d’implémentation. Les boutons, commandes, clés et extensions restent des contrats stables.
+## Tutoriel vidéo
 
-## Étapes suivantes
+Regardez la vidéo de démarrage rapide de 3 minutes (chinois) :
+[【Entièrement open source et gratuit ! Guide rapide de NotEMD en trois minutes】](https://b23.tv/lqR0RlA)
 
-Pour continuer, choisissez la page qui correspond directement à votre chaîne de travail: Provider, fonction principale, traitement par lots, dépannage ou export de diagrammes.
+## Obtenir de l’aide
 
-## Guide de démarrage rapide : explication principale
-
-Cette partie de Guide de démarrage rapide décrit le comportement produit, les points d’entrée et les limites d’implémentation. Les boutons, commandes, clés et extensions restent des contrats stables.
-
-## Guide de démarrage rapide : dépannage
-
-Cette partie de Guide de démarrage rapide décrit le comportement produit, les points d’entrée et les limites d’implémentation. Les boutons, commandes, clés et extensions restent des contrats stables.
+- 💬 **Discord** : [discord.gg/qnGgsQ9W](https://discord.gg/qnGgsQ9W)
+- 🐛 **Problèmes** : [GitHub Issues](https://github.com/Jacobinwwey/obsidian-NotEMD/issues)
+- 📚 **Documents** : [Documentation complète](https://jacobinwwey.github.io/obsidian-NotEMD/)

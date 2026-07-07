@@ -1,39 +1,75 @@
 ---
 id: china
-title: 中国系プロバイダー
-description: Notemd における 中国系プロバイダー の目的、設定、ワークフロー上の境界、よくある確認点を説明します。
+title: 中国のプロバイダー
+description: Qwen、DeepSeek、GLMなどを設定してください。
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [china providers, deepseek, qwen, glm, doubao, moonshot, mimo, minimax, baidu, siliconflow, huawei]
+concepts: [China Providers, DeepSeek, Qwen, Doubao, Moonshot, MiMo, GLM, MiniMax, Baidu, SiliconFlow, Huawei]
+citations:
+  - title: Qwen API
+    url: https://help.aliyun.com/zh/dashscope
+  - title: DeepSeek API
+    url: https://platform.deepseek.com
 ---
 
 import TLDR from '@site/src/components/TLDR';
 
-# 中国系プロバイダー
+# 中国のプロバイダー
 
 <TLDR>
-**このページの要点：** Notemd における 中国系プロバイダー の目的、設定、ワークフロー上の境界、よくある確認点を説明します。 以下のコマンド、設定キー、拡張子、Provider 名は、プラグイン UI、CLI、ログと対応させるため英語表記のままにしています。
+**Notemdは、主にOpenAIと互換性のあるエンドポイントを通じて、中国地域および中国発のプロバイダーをサポートしています。** 現在対応しているものにはDeepSeek、Qwen、Qwen Code、Doubao、Moonshot、Xiaomi MiMo、GLM、MiniMax、Baidu Qianfan、SiliconFlow、Huawei Cloud MaaS、そしてZ AIが含まれます。利点は地域的なカバレッジとコスト管理ですが、リスクとしてはプロバイダー固有のモデル名やアカウント制限が挙げられます。
+
+これは[Obsidian AI知識管理ガイド](/docs/pillar-ai-knowledge)の一部です。
 </TLDR>
 
 ## セットアップ
 
-中国系プロバイダー の設定は Notemd 設定画面から行います。Provider、モデル、出力先、言語、バッチ処理は独立した項目ではなく、現在のファイル、フォルダー処理、ワークフローのどれに影響するかを確認してください。
+プロバイダーアカウントを作成し、APIキーを生成した後、一般的なOpenAIプロファイルを使用する代わりに、対応するNotemdプロバイダープリセットを選択してください。このプリセットには、デフォルトのBase URL、モデル、APIテストモード、モデル検出動作、およびプロバイダー固有のUIフィールドが含まれます。
+
+ここではタスクごとのモデル選択を積極的に活用しましょう。例えば、推論が多いワークフローではDeepSeekやGLMを使用し、中国語での広範な処理にはQwenやMoonshotを利用し、そのアカウントがコーダーモデルを提供している場合はコーディングタスクをQwen Codeに振り分けます。
 
 ## エンドポイントと認証
 
-中国系プロバイダー のこの部分では、製品の挙動、利用入口、実装上の境界を説明します。UI ボタン、コマンド名、設定キー、拡張子は安定した契約として扱います。
+| プロバイダー | デフォルトモデル | ベース URL |
+|----------|---------------|----------|
+| DeepSeek | `deepseek-v4-pro` | `api.deepseek.com` |
+| Qwen | `qwen3-235b-a22b` | `dashscope.aliyuncs.com/compatible-mode/v1` |
+| Qwen Code | `qwen3-coder-plus` | `dashscope.aliyuncs.com/compatible-mode/v1` |
+| Doubao | (エンドポイントIDが必要です) | `ark.cn-beijing.volces.com/api/v3` |
+| Moonshot | `kimi-k2-0905-preview` | `api.moonshot.cn/v1` |
+| Xiaomi MiMo | `mimo-v2.5-pro` | `api.xiaomimimo.com/v1` |
+| GLM | `glm-5` | `open.bigmodel.cn/api/paas/v4` |
+| MiniMax | `MiniMax-M2.7` | `api.minimaxi.com/v1` |
+| Baidu Qianfan | `ernie-4.5-turbo-32k` | `qianfan.baidubce.com/v2` |
+| SiliconFlow | `Qwen/QwQ-32B` | `api.siliconflow.cn/v1` |
+| Huawei Cloud MaaS | `DeepSeek-V3` | `api.modelarts-maas.com/v1` |
+| Z AI | `glm-5` | `api.z.ai/api/paas/v4` |
+
+**注意:** Doubaoには標準的なモデル名の代わりにArkエンドポイントID（形式: `ep-xxxxxxxx-xxxx-xxxx`）が必要です。
+
+これらのプロバイダのほとんどは共有されたOpenAI互換のランタイムを使用していますが、アカウントやモデルの仕様は異なります。アカウントの代替エンドポイントを確認していない限り、プリセット固有のBase URLのままにしておいてください。
 
 ## モデル検出
 
-中国系プロバイダー のこの部分では、製品の挙動、利用入口、実装上の境界を説明します。UI ボタン、コマンド名、設定キー、拡張子は安定した契約として扱います。
+DeepSeek、Qwen、Qwen Code、Doubao、Moonshot、Xiaomi MiMo、GLM、Z AI、MiniMax、Baidu Qianfan、およびSiliconFlowは、プロバイダーが一覧表示をサポートしている場合にOpenAI互換のモデル検出機能を使用します。Huawei Cloud MaaSは、ModelArtsのデプロイメントメタデータが一般的な`/v1/models`リストと同一ではないため、`huaweicloud-modelarts-models`モードを使用します。
+
+ディスカバリーに失敗したからといって、チャットが不可能だと判断してはいけません。モデル一覧の権限を制限しつつもチャットを許可するプロバイダもあります。その場合は、プロファイルに明示的なモデルIDを記載し、接続テストで有効性を確認してください。
 
 ## トラブルシューティング
 
-この節では 中国系プロバイダー の典型的な失敗を切り分けます。Notemd の診断出力、Provider の HTTP ステータス、モデル名、ネットワーク、レート制限を先に確認します。
+- 認証は成功しましたがチャットが失敗しました。モデル名がアカウントの利用権限や地域の範囲外にある可能性があります。
+- Doubaoは通常のモデル名では動作しません。デプロイに必要な場合は、モデルフィールドにArkエンドポイントIDを使用してください。
+- 推論結果の応答が切り捨てられている：プロバイダー固有の最大出力トークン数とNotemdのモデルに基づく最大トークン設定を確認してください。
+- 地域によってネットワーク環境は異なります。Vaultマシンが中国国内にある場合はプロバイダの中国地域エンドポイントを使用し、アカウントとネットワークパスの両方が有効な場合のみ国際エンドポイントを使用してください。
 
-## 使うべき場面
+## いつ使用するか
 
-中国系プロバイダー のこの部分では、製品の挙動、利用入口、実装上の境界を説明します。UI ボタン、コマンド名、設定キー、拡張子は安定した契約として扱います。
+地域的な遅延、支払い/アカウントへのアクセス、中国語での品質、またはコストが主な制約要因の場合は、中国のプロバイダを利用してください。よりシンプルなプロトコル構造や、プロバイダ間でのデバッグの一貫性を求める場合は、直接 OpenAI、Anthropic、Google、または現地のプロバイダを利用することを推奨します。
+
+---
 
 ## 次のステップ
 
-次に読むページは、いまの作業に直結する Provider 設定、主要機能、バッチ処理、トラブルシューティング、図表出力から選んでください。
+- [LLM プロバイダー](/docs/providers/overview) -- 完全な設定、タスクごとのモデル、および再試行ロジック
+- [トラブルシューティング](/docs/advanced/troubleshooting) – 地域的な接続問題や認証エラーの修正

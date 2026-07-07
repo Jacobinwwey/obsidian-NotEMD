@@ -1,9 +1,16 @@
 ---
 id: troubleshooting
 title: Fehlerbehebung
-description: Erläutert Zweck, Konfiguration, Workflow-Grenzen und typische Prüfungen für Fehlerbehebung in Notemd.
+description: Häufige Probleme und Lösungen
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [troubleshooting, errors, diagnostics, connection test]
+concepts: [Troubleshooting, Error Handling, Diagnostics]
+citations:
+  - title: Obsidian
+    url: https://obsidian.md
+  - title: Obsidian API
+    url: https://docs.obsidian.md
 ---
 
 import TLDR from '@site/src/components/TLDR';
@@ -11,65 +18,144 @@ import TLDR from '@site/src/components/TLDR';
 # Fehlerbehebung
 
 <TLDR>
-**Kurzfassung：** Erläutert Zweck, Konfiguration, Workflow-Grenzen und typische Prüfungen für Fehlerbehebung in Notemd. Die folgenden Befehle, Konfigurationsschlüssel, Dateiendungen und Provider-Namen bleiben englisch, damit sie exakt zur Plugin-Oberfläche, CLI und zu Logs passen.
+**Die meisten Notemd-Probleme fallen in vier Kategorien: grundlegende API-Probleme, Netzwerkverbindungen, Authentifizierungsfehler (401/403) sowie Rate-Limits (429).** Der integrierte Verbindungs-Test und das Diagnosepanel helfen dabei, die Ursache schnell zu ermitteln. Auf dieser Seite werden alle gängigen Fehlermeldungen, ihre Ursachen sowie die Lösungen beschrieben. Bei Problemen, die hier nicht aufgeführt sind, melden Sie diese bitte über GitHub Issues zusammen mit dem Diagnoseausgabe.
+
+Dies ist ein Teil des [Obsidian AI-Know-how-Management-Leitfadens](/docs/pillar-ai-knowledge).
 </TLDR>
 
 ## Überblick
 
-Dieser Teil von Fehlerbehebung beschreibt Produktverhalten, Einstiegspunkte und technische Grenzen. UI-Schaltflächen, Befehle, Schlüssel und Dateiendungen sind stabile Verträge.
+Notemd hängt von externen Diensten ab -- LLM-Anbietern und Such-API-Diensten -- daher entstehen die meisten Probleme außerhalb des Plugins selbst. Das Diagnosepanel in den Einstellungen bietet einen strukturierten Überblick über den letzten API-Aufruf, einschließlich der Anfrage URL, des Antwortstatus und des Fehlerinhalts. Überprüfen Sie es immer zuerst, bevor Sie weiter ermitteln.
 
-## Fehlerbehebung: zentrale Erläuterung
+## Wie es funktioniert: Diagnose
 
-Dieser Teil von Fehlerbehebung beschreibt Produktverhalten, Einstiegspunkte und technische Grenzen. UI-Schaltflächen, Befehle, Schlüssel und Dateiendungen sind stabile Verträge.
+### Verbindungsprüfung
 
-### Fehlerbehebung: Fehlerbehebung
+Jede Konfigurationssektion des Anbieters verfügt über einen Button „Testverbindung“. Durch Klicken darauf wird eine minimale API-Anfrage gesendet (in der Regel eine Liste von Modellen oder eine kurze Vervollständigung), und es wird angezeigt, ob die Verbindung erfolgreich war oder ein spezifischer HTTP-Fehler auftrat. Dies ist die schnellste Möglichkeit, um zu überprüfen, ob Ihre API-Einstellungen sowie der Basis-URL korrekt sind.
 
-Dieser Teil von Fehlerbehebung beschreibt Produktverhalten, Einstiegspunkte und technische Grenzen. UI-Schaltflächen, Befehle, Schlüssel und Dateiendungen sind stabile Verträge.
+### Diagnosepanel
 
-### Fehlerbehebung: zentrale Erläuterung
+**Einstellungen --> Notemd --> Diagnose** zeigt an:
 
-Dieser Teil von Fehlerbehebung beschreibt Produktverhalten, Einstiegspunkte und technische Grenzen. UI-Schaltflächen, Befehle, Schlüssel und Dateiendungen sind stabile Verträge.
+| Feld | Inhalt |
+|-------|---------|
+| Letzter Anbieter | Welchen Anbieter wurde zuletzt aufgerufen |
+| Letztes Modell | Welches Modell wurde zuletzt aufgerufen |
+| Letzter Status | Statuscode HTTP oder Transportfehler |
+| Letzter Fehler | Rohes Fehlermeldung vom API |
+| Letzte Anfrage URL | Vollständiger URL des letzten Anfrages (redigierte API-Einstellung) |
+| Letzter Antwortinhalt | Kurzer Antwortkörper (erste 500 Zeichen) |
 
-## Fehlerbehebung: Fehlerbehebung
+Kopieren Sie die vollständige Diagnoseausgabe, wenn Sie Probleme auf GitHub melden.
 
-Dieser Abschnitt grenzt typische Fehler bei Fehlerbehebung ein. Prüfen Sie zuerst Notemd-Diagnosen, HTTP-Status des Providers, Modellnamen, Netzwerk und Rate Limits.
+## Häufige Fehler
 
-### Fehlerbehebung: Konfiguration und Modelle
+### API Schlüssel ungültig oder fehlend
 
-Dieser Teil von Fehlerbehebung beschreibt Produktverhalten, Einstiegspunkte und technische Grenzen. UI-Schaltflächen, Befehle, Schlüssel und Dateiendungen sind stabile Verträge.
+**Symptom:** HTTP 401 oder „Falscher API-Schlüssel angegeben“
 
-### Fehlerbehebung: Fehlerbehebung
+**Ursache:** Der Schlüssel API fehlt, enthält Leerzeichen oder gehört zu einem anderen Anbieter.
 
-Dieser Abschnitt grenzt typische Fehler bei Fehlerbehebung ein. Prüfen Sie zuerst Notemd-Diagnosen, HTTP-Status des Providers, Modellnamen, Netzwerk und Rate Limits.
+**Lösung:**
+1. Überprüfen Sie, ob der Schlüssel keine vorangehenden/nachfolgenden Leerzeichen hat.
+2. Bestätigen Sie, dass der Schlüssel zum ausgewählten Anbieter passt (ein OpenAI-Schlüssel funktioniert nicht mit Anthropic).
+3. Überprüfen Sie, ob Ihr Konto über Guthaben oder ein aktives Abonnement verfügt.
+4. Klicken Sie auf **„Testverbindung“**, um zu überprüfen
 
-### Fehlerbehebung: Fehlerbehebung
+### Netzwerk-/Verbindungsfehler
 
-Dieser Teil von Fehlerbehebung beschreibt Produktverhalten, Einstiegspunkte und technische Grenzen. UI-Schaltflächen, Befehle, Schlüssel und Dateiendungen sind stabile Verträge.
+**Symptom:** `ERR_CONNECTION_REFUSED`, `ERR_TIMED_OUT`, `Socket hang up`, `Network request failed`
 
-### Fehlerbehebung: Fehlerbehebung
+**Ursache:** Die API-Endpunkt ist von Ihrem Rechner aus nicht erreichbar.
 
-Dieser Teil von Fehlerbehebung beschreibt Produktverhalten, Einstiegspunkte und technische Grenzen. UI-Schaltflächen, Befehle, Schlüssel und Dateiendungen sind stabile Verträge.
+**Lösung:**
+1. Überprüfen Sie Ihre Internetverbindung.
+2. Wenn Sie sich hinter einem Proxy oder Firewall befinden, überprüfen Sie, ob die API-Domain nicht blockiert ist.
+3. Für Ollama: Bestätigen Sie, dass `ollama serve` läuft (`ollama list` sollte Modelle zurückgeben)
+4. Für LMStudio: Bestätigen Sie, dass der Server auf `localhost:1234` läuft.
+5. Versuchen Sie einen anderen Transport – Mobilnutzer sollten sicherstellen, dass der `requestUrl`-Transport aktiv ist
+6. Aktivieren Sie `enableStableApiCall` für eine automatische Wiederholung bei vorübergehenden Fehlern
 
-### Fehlerbehebung: Konfiguration und Modelle
+### 403 Verboten
 
-Dieser Teil von Fehlerbehebung beschreibt Produktverhalten, Einstiegspunkte und technische Grenzen. UI-Schaltflächen, Befehle, Schlüssel und Dateiendungen sind stabile Verträge.
+**Symptom:** HTTP 403
 
-### Fehlerbehebung: zentrale Erläuterung
+**Ursache:** Ihre API-Schlüssel ist gültig, besitzt jedoch keine Berechtigung für die angeforderte Ressource.
 
-Dieser Teil von Fehlerbehebung beschreibt Produktverhalten, Einstiegspunkte und technische Grenzen. UI-Schaltflächen, Befehle, Schlüssel und Dateiendungen sind stabile Verträge.
+**Lösung:**
+1. Einige Modelle erfordern einen speziellen Zugriff (z. B. GPT-4 über Azure benötigt einen Bereitstellungsnamen).
+2. Einige Anbieter beschränken die Modelle nach Tarifstufe – überprüfen Sie Ihr Konto.
+3. Es können regionale Einschränkungen gelten (einige chinesische Anbieter blockieren internationale IP-Adressen und umgekehrt).
+4. Überprüfen Sie, ob der Modellname korrekt geschrieben ist (z. B. `gpt-4o` und nicht `gpt-4o-mini`, wenn das Mini-Modell alles ist, was Ihr Plan zulässt).
 
-### Fehlerbehebung: Konfiguration und Modelle
+### Rate Limitierung (429)
 
-Dieser Teil von Fehlerbehebung beschreibt Produktverhalten, Einstiegspunkte und technische Grenzen. UI-Schaltflächen, Befehle, Schlüssel und Dateiendungen sind stabile Verträge.
+**Symptom:** HTTP 429 oder „Rate limit exceeded“
+
+**Ursache:** Zu viele Anfragen innerhalb eines kurzen Zeitraums.
+
+**Lösung:**
+1. Verringere `batchConcurrency` auf `1` oder `2`
+2. Warten Sie ein paar Minuten, bevor Sie es erneut versuchen.
+3. Prüfen Sie die Dokumentation zu den Rate-Limit-Einschränkungen Ihres Anbieters für Ihre Tarifstufe.
+4. Aktivieren Sie `enableStableApiCall` für automatische Wiederholungsversuche mit Backoff.
+5. Überlegen Sie einen Wechsel zu einem Anbieter mit höheren Limits (DeepSeek, Ollama).
+
+### Modell nicht gefunden
+
+**Symptom:** „Modell nicht gefunden“ oder HTTP 404
+
+**Ursache:** Der Modellname existiert beim ausgewählten Anbieter nicht.
+
+**Lösung:**
+1. Klicken Sie auf **„Modellliste anfordern“**, um alle verfügbaren Modelle Ihres Anbieters anzusehen
+2. Einige Modellnamen ändern sich im Laufe der Zeit – überprüfen Sie den aktuellen Namen in der Dokumentation des Anbieters.
+3. Für Ollama: Führen Sie `ollama list` aus, um die heruntergeladenen Modelle anzuzeigen; nur heruntergeladene Modelle sind verfügbar
+
+### Keine Links / Keine Konzepte erzeugt
+
+**Symptom:** Der Befehl wird ausgeführt, aber es wird keine Ausgabe erzeugt
+
+**Ursache:** Der LLM hat eine leere oder unverarbeitbare Antwort zurückgegeben.
+
+**Lösung:**
+1. Überprüfen Sie das Diagnosepanel auf die tatsächliche LLM-Antwort
+2. Versuchen Sie ein leistungsstärkeres Modell (einige kleine Modelle haben Schwierigkeiten mit strukturierten Ausgaben).
+3. Stellen Sie sicher, dass die Notiz ausreichend Inhalt enthält (>50 Wörter).
+4. Überprüfen Sie Ihren benutzerdefinierten Prompt auf widersprüchliche Anweisungen
+5. Deaktivieren Sie vorübergehend die Unterdrückung von Synonymen, um zu prüfen, ob sie zu aggressiv filtert.
+
+### Doubao Endpunkt-ID fehlt
+
+**Symptom:** Fehler beim Verwenden des ByteDance Doubao-Anbieters
+
+**Ursache:** Doubao erfordert eine Ark-Endpunkt-ID (Format: `ep-xxxxxxxx-xxxx-xxxx`) anstelle eines Modellnamens.
+
+**Lösung:** Ersetzen Sie den Standard-Platzhaltermodell durch Ihre tatsächliche Endpoint-ID aus der Volcengine-Konsole.
 
 ## Konfiguration
 
-Fehlerbehebung wird in den Notemd-Einstellungen konfiguriert. Provider, Modell, Ausgabepfad, Sprache und Batch-Verarbeitung greifen ineinander; klären Sie, ob die Änderung Datei-, Ordner- oder Workflow-Aufgaben betrifft.
+| Diagnoseeinstellungen | Standort | Zweck |
+|--------------------|----------|---------|
+| **Verbindungsprüfung** | Einstellungen --> Abschnitt Provider | Überprüfen Sie den Schlüssel API und die Verbindbarkeit |
+| **Modellliste abrufen** | Einstellungen --> Abschnitt Provider | Bestätigen Sie, welche Modelle zugänglich sind |
+| `enableStableApiCall` | Einstellungen --> Erweitert | Wiederholung mit Zeitverzögerung aktivieren |
+| `batchConcurrency` | Einstellungen --> Batch | Parallelität steuern, um Rate Limits zu vermeiden |
 
-## Fehlerbehebung: Fehlerbehebung
+## Wie man Probleme melden kann
 
-Dieser Teil von Fehlerbehebung beschreibt Produktverhalten, Einstiegspunkte und technische Grenzen. UI-Schaltflächen, Befehle, Schlüssel und Dateiendungen sind stabile Verträge.
+Falls Ihr Problem nicht oben abgedeckt ist:
+
+1. Öffnen Sie **Einstellungen --> Notemd --> Diagnose**
+2. Kopiere die vollständige Diagnoseausgabe
+3. Öffnen Sie ein GitHub Issue unter [github.com/Jacobinwwey/obsidian-NotEMD/issues](https://github.com/Jacobinwwey/obsidian-NotEMD/issues)
+4. Enthält: Obsidian Version, Notemd Version, Anbieter, Modell, Diagnoseausgabe sowie Schritte zur Wiederholung des Problems
+5. Reduzieren Sie Ihren API-Schlüssel in allen geteilten Protokollen.
+
+---
 
 ## Nächste Schritte
 
-Wählen Sie als Nächstes die Seite, die direkt zu Ihrer Aufgabe passt: Provider-Konfiguration, Kernfunktion, Batch-Verarbeitung, Fehlerbehebung oder Diagrammexport.
+- [LLM Anbieter](/docs/providers/overview) -- Vollständige Referenz zur Anbieterkonfiguration
+- [Batch Processing](/docs/advanced/batch-processing) -- Konkurrenz- und Wiederholungs-Einstellungen für große Operationen
+- [Custom Prompts](/docs/advanced/custom-prompts) -- Beheben Sie das unerwartete LLM-Verhalten durch Anpassung der Prompts

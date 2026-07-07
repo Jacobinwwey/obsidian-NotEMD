@@ -1,9 +1,14 @@
 ---
 id: configuration
 title: Konfiguration
-description: Erläutert Zweck, Konfiguration, Workflow-Grenzen und typische Prüfungen für Konfiguration in Notemd.
+description: Konfigurieren Sie die Einstellungen und Vorlieben von Notemd
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [configuration, settings, customization, preferences]
+concepts: [Configuration, Per-Task Models, Output Paths, Custom Workflows]
+citations:
+  - title: Obsidian
+    url: https://obsidian.md
 ---
 
 import TLDR from '@site/src/components/TLDR';
@@ -11,185 +16,420 @@ import TLDR from '@site/src/components/TLDR';
 # Konfiguration
 
 <TLDR>
-**Kurzfassung：** Erläutert Zweck, Konfiguration, Workflow-Grenzen und typische Prüfungen für Konfiguration in Notemd. Die folgenden Befehle, Konfigurationsschlüssel, Dateiendungen und Provider-Namen bleiben englisch, damit sie exakt zur Plugin-Oberfläche, CLI und zu Logs passen.
+**Notemd Die Konfiguration umfasst 6 Hauptbereiche:** (1) LLM-Anbieter und API-Schlüssel, (2) Auswahl des Modells pro Aufgabe, (3) Ausgabepfade und Vorlagen, (4) UI-Sprache und Ausgabesprache, (5) Suchdienste (Tavily/DuckDuckGo), (6) Benutzerdefinierte Workflows. Alle Einstellungen befinden sich in Obsidian Einstellungen → Notemd. Änderungen treten sofort in Kraft.
 </TLDR>
 
-## Konfiguration: Konfiguration und Modelle
+## Überblick über Einstellungen
 
-Konfiguration wird in den Notemd-Einstellungen konfiguriert. Provider, Modell, Ausgabepfad, Sprache und Batch-Verarbeitung greifen ineinander; klären Sie, ob die Änderung Datei-, Ordner- oder Workflow-Aufgaben betrifft.
+Zugriff: **Obsidian Einstellungen (⚙️) → Notemd**
 
-### Konfiguration: zentrale Erläuterung
+### Hauptabschnitte
 
-Dieser Teil von Konfiguration beschreibt Produktverhalten, Einstiegspunkte und technische Grenzen. UI-Schaltflächen, Befehle, Schlüssel und Dateiendungen sind stabile Verträge.
+1. **Anbieterkonfiguration** — API-Schlüssel, Basis URLs, Modelle
+2. **Aufgaben-Einstellungen** — Modellauswahl pro Aufgabe
+3. **Ausgabekonfiguration** – Wo die generierten Dateien gespeichert werden sollen
+4. **Spracheinstellungen** — UI und Ausgabesprachen
+5. **Suchintegration** – Einrichtung von Tavily/DuckDuckGo
+6. **Workflows** – Benutzerdefinierte Schaltflächenketten
+7. **Erweitert** — Diagnose, Batch-Verarbeitung, Chunking
 
-## 1. Provider-Konfiguration
+---
 
-Konfiguration wird in den Notemd-Einstellungen konfiguriert. Provider, Modell, Ausgabepfad, Sprache und Batch-Verarbeitung greifen ineinander; klären Sie, ob die Änderung Datei-, Ordner- oder Workflow-Aufgaben betrifft.
+## 1. Konfiguration des Anbieters
 
-### Konfiguration: Konfiguration und Modelle
+### Einen Anbieter hinzufügen
 
-Dieser Teil von Konfiguration beschreibt Produktverhalten, Einstiegspunkte und technische Grenzen. UI-Schaltflächen, Befehle, Schlüssel und Dateiendungen sind stabile Verträge.
+1. **Anbieter auswählen** aus dem Dropdown-Menü (mehr als 30 verfügbar)
+2. **Drücken Sie die API-Taste**
+3. **Optional**: Legen Sie eine benutzerdefinierte Basis URL fest (für Proxye/Gateways)
+4. Klicken Sie auf „Modellliste anfordern“, um die Verbindung zu überprüfen
+5. **Standardmodell auswählen**
 
-### Konfiguration: Konfiguration und Modelle
-
-Dieser Teil von Konfiguration beschreibt Produktverhalten, Einstiegspunkte und technische Grenzen. UI-Schaltflächen, Befehle, Schlüssel und Dateiendungen sind stabile Verträge.
+### Gängige Anbieter
 
 #### OpenAI
+```
+Provider: OpenAI
+API Key: sk-...
+Base URL: https://api.openai.com/v1 (default)
+Model: gpt-4o-mini
+```
 
-Dieser Teil von Konfiguration beschreibt Produktverhalten, Einstiegspunkte und technische Grenzen. UI-Schaltflächen, Befehle, Schlüssel und Dateiendungen sind stabile Verträge.
+#### Anthropic (Claude)
+```
+Provider: Anthropic
+API Key: sk-ant-...
+Model: claude-sonnet-4-6
+```
 
-#### Konfiguration: zentrale Erläuterung
-
-Dieser Teil von Konfiguration beschreibt Produktverhalten, Einstiegspunkte und technische Grenzen. UI-Schaltflächen, Befehle, Schlüssel und Dateiendungen sind stabile Verträge.
-
-#### Konfiguration: Grenzen und Governance
-
-Dieser Teil von Konfiguration beschreibt Produktverhalten, Einstiegspunkte und technische Grenzen. UI-Schaltflächen, Befehle, Schlüssel und Dateiendungen sind stabile Verträge.
+#### Ollama (Lokal)
+```
+Provider: Ollama
+Base URL: http://localhost:11434 (default)
+Model: llama3.1
+API Key: (not required)
+```
 
 #### DeepSeek
+```
+Provider: DeepSeek
+API Key: sk-...
+Model: deepseek-chat
+```
 
-Dieser Teil von Konfiguration beschreibt Produktverhalten, Einstiegspunkte und technische Grenzen. UI-Schaltflächen, Befehle, Schlüssel und Dateiendungen sind stabile Verträge.
+### Mehrere Anbieter
 
-### Konfiguration: Konfiguration und Modelle
+Sie können mehrere Anbieter konfigurieren und je nach Aufgabe zwischen ihnen wechseln:
+- **Hauptanbieter**: Wird als Ersatz verwendet
+- **Aufgabenbezogene Anbieter**: Überschreiben für spezifische Aufgaben
 
-Dieser Teil von Konfiguration beschreibt Produktverhalten, Einstiegspunkte und technische Grenzen. UI-Schaltflächen, Befehle, Schlüssel und Dateiendungen sind stabile Verträge.
+---
 
-## 2. Aufgabenspezifische Modelle
+## 2. modell spezifisch für Aufgaben
 
-Dieser Teil von Konfiguration beschreibt Produktverhalten, Einstiegspunkte und technische Grenzen. UI-Schaltflächen, Befehle, Schlüssel und Dateiendungen sind stabile Verträge.
+Konfigurieren Sie verschiedene Modelle für unterschiedliche Aufgaben, um Kosten und Qualität zu optimieren:
 
-### Konfiguration: Workflows und Aufgaben
+### Aufgabentypen
 
-Dieser Teil von Konfiguration beschreibt Produktverhalten, Einstiegspunkte und technische Grenzen. UI-Schaltflächen, Befehle, Schlüssel und Dateiendungen sind stabile Verträge.
+| Aufgabe | Standardmodell | Zweck |
+|------|--------------|---------|
+| **Verlinken** | Hauptanbieter | Identifiziere Konzepte für Wiki-Links |
+| **Konzepterstellung** | Hauptanbieter | Konzepte extrahieren und beschreiben |
+| **Forschung** | Hauptanbieter | Zusammenfassung der Web-Suchergebnisse |
+| **Übersetzung** | Hauptanbieter | Übersetzen Sie den Text |
+| **Diagrammgenerierung** | Hauptanbieter | Erstelle Mermaid/Canvas-Diagramme |
 
-### Konfiguration: Installation und Vorbereitung
+### Beispiel: kosteneffiziente Einrichtung
 
-Konfiguration wird in den Notemd-Einstellungen konfiguriert. Provider, Modell, Ausgabepfad, Sprache und Batch-Verarbeitung greifen ineinander; klären Sie, ob die Änderung Datei-, Ordner- oder Workflow-Aufgaben betrifft.
+```
+Linking: gpt-4o-mini (fast, many calls)
+Concept Generation: claude-sonnet-4-6 (quality extraction)
+Research: gpt-4o (web-grounded)
+Translation: gemini-flash (multilingual)
+Diagram: ollama/llama3.1 (free, local)
+```
 
-### Konfiguration: Konfiguration und Modelle
+### Wie konfiguriere ich
 
-Dieser Teil von Konfiguration beschreibt Produktverhalten, Einstiegspunkte und technische Grenzen. UI-Schaltflächen, Befehle, Schlüssel und Dateiendungen sind stabile Verträge.
+1. **Einstellungen → Notemd → Aufgabeneinstellungen**
+2. Für jede Aufgabe wählen Sie aus:
+   - ✅ **Verwenden Sie den Hauptanbieter** (Standard)
+   - 🔄 **Benutzerdefinierter Anbieter verwenden** → Anbieter + Modell auswählen
+
+---
 
 ## 3. Ausgabekonfiguration
 
-Konfiguration wird in den Notemd-Einstellungen konfiguriert. Provider, Modell, Ausgabepfad, Sprache und Batch-Verarbeitung greifen ineinander; klären Sie, ob die Änderung Datei-, Ordner- oder Workflow-Aufgaben betrifft.
+### Ausgabe der Konzeptnotizen
 
-### Konfiguration: Konfiguration und Modelle
+**Wo neue Konzeptnotizen gespeichert werden:**
 
-Dieser Teil von Konfiguration beschreibt Produktverhalten, Einstiegspunkte und technische Grenzen. UI-Schaltflächen, Befehle, Schlüssel und Dateiendungen sind stabile Verträge.
+```
+Settings → Output → Concept Folder
+Default: concepts/
+```
 
-### Konfiguration: Workflows und Aufgaben
+**Vorlage:**
+```
+Settings → Output → Concept Template
+Default:
+---
+tags: [concept]
+created: {{date}}
+---
 
-Dieser Teil von Konfiguration beschreibt Produktverhalten, Einstiegspunkte und technische Grenzen. UI-Schaltflächen, Befehle, Schlüssel und Dateiendungen sind stabile Verträge.
+# {{concept}}
 
-### Konfiguration: Konfiguration und Modelle
+{{description}}
 
-Dieser Teil von Konfiguration beschreibt Produktverhalten, Einstiegspunkte und technische Grenzen. UI-Schaltflächen, Befehle, Schlüssel und Dateiendungen sind stabile Verträge.
+## Backlinks
+{{backlinks}}
+```
+
+### Optionen für die Ordnerstruktur
+
+**Option 1: Flach (alle Konzepte in einer einzigen Ordner)**
+```
+vault/
+└── concepts/
+    ├── Machine Learning.md
+    ├── Neural Networks.md
+    └── Deep Learning.md
+```
+
+**Option 2: Hierarchisch (nach Quellordner)**
+```
+vault/
+├── papers/
+│   └── concepts/
+│       └── Transformer.md
+└── notes/
+    └── concepts/
+        └── Attention Mechanism.md
+```
+
+Konfigurieren: **Einstellungen → Ausgabe → Hierarchische Ordner verwenden**
+
+### Diagramm-Ausgabe
+
+**Wo Diagramme gespeichert werden:**
+```
+Settings → Output → Diagram Folder
+Default: diagrams/
+```
+
+**Format:**
+- `.mmd` (Mermaid Quelle)
+- `.canvas` (JSON Canvas)
+- `.html` (Vega-Lite)
+
+---
 
 ## 4. Spracheinstellungen
 
-Konfiguration wird in den Notemd-Einstellungen konfiguriert. Provider, Modell, Ausgabepfad, Sprache und Batch-Verarbeitung greifen ineinander; klären Sie, ob die Änderung Datei-, Ordner- oder Workflow-Aufgaben betrifft.
+### UI Sprache
 
-### Konfiguration: Konfiguration und Modelle
+**Sprache der Benutzeroberfläche** (Schaltflächen, Menüs, Dialoge):
 
-Dieser Teil von Konfiguration beschreibt Produktverhalten, Einstiegspunkte und technische Grenzen. UI-Schaltflächen, Befehle, Schlüssel und Dateiendungen sind stabile Verträge.
+```
+Settings → Language → UI Language
+Options: 21+ languages
+Default: System language
+```
 
-### Konfiguration: Konfiguration und Modelle
+Unterstützt: Englisch, 简体中文, 繁體中文, 日本語, 한국어, Español, Français, Deutsch, Русский, العربية und weitere Sprachen.
 
-Dieser Teil von Konfiguration beschreibt Produktverhalten, Einstiegspunkte und technische Grenzen. UI-Schaltflächen, Befehle, Schlüssel und Dateiendungen sind stabile Verträge.
+### Ausgabesprache
 
-### Konfiguration: Übersetzung und Sprache
+**Sprache der generierten Inhalte** (Konzeptnotizen, Forschungszusammenfassungen):
 
-Dieser Teil von Konfiguration beschreibt Produktverhalten, Einstiegspunkte und technische Grenzen. UI-Schaltflächen, Befehle, Schlüssel und Dateiendungen sind stabile Verträge.
+```
+Settings → Language → Output Language
+Options: Same as UI languages
+Default: Same as UI
+```
 
-## 5. Konfiguration: Recherche
+**Anwendungsfall:** Chinesisch UI + englische Ausgabe für zweisprachige Forschung.
 
-Dieser Teil von Konfiguration beschreibt Produktverhalten, Einstiegspunkte und technische Grenzen. UI-Schaltflächen, Befehle, Schlüssel und Dateiendungen sind stabile Verträge.
+### Übersetzungsziel
 
-### Konfiguration: Recherche
+**StandardzielSprache** für Übersetzungsaufgaben:
 
-Dieser Teil von Konfiguration beschreibt Produktverhalten, Einstiegspunkte und technische Grenzen. UI-Schaltflächen, Befehle, Schlüssel und Dateiendungen sind stabile Verträge.
+```
+Settings → Translation → Target Language
+Default: English
+```
 
-### Konfiguration: Recherche
+---
 
-Dieser Teil von Konfiguration beschreibt Produktverhalten, Einstiegspunkte und technische Grenzen. UI-Schaltflächen, Befehle, Schlüssel und Dateiendungen sind stabile Verträge.
+## 5. Suchintegrierung
 
-## 6. Workflow-Konfiguration
+### Tavily (Empfohlen)
 
-Konfiguration wird in den Notemd-Einstellungen konfiguriert. Provider, Modell, Ausgabepfad, Sprache und Batch-Verarbeitung greifen ineinander; klären Sie, ob die Änderung Datei-, Ordner- oder Workflow-Aufgaben betrifft.
+**AI-gestützter Suchdienst mit Optimierung:**
 
-### Konfiguration: Workflows und Aufgaben
+```
+Settings → Search → Service: Tavily
+API Key: tvly-...
+```
 
-Dieser Teil von Konfiguration beschreibt Produktverhalten, Einstiegspunkte und technische Grenzen. UI-Schaltflächen, Befehle, Schlüssel und Dateiendungen sind stabile Verträge.
+Schlüssel abrufen: [tavily.com](https://tavily.com/)
 
-### Konfiguration: zentrale Erläuterung
+**Eigenschaften:**
+- Hochwertige Ergebnisse
+- Von KI optimierte Zusammenfassungen
+- Quellenangaben
 
-Dieser Teil von Konfiguration beschreibt Produktverhalten, Einstiegspunkte und technische Grenzen. UI-Schaltflächen, Befehle, Schlüssel und Dateiendungen sind stabile Verträge.
+### DuckDuckGo (Experimentell)
+
+**Kein API-Schlüssel erforderlich:**
+
+```
+Settings → Search → Service: DuckDuckGo
+```
+
+**Hinweis:** Geringere Qualität, keine Anpassungsmöglichkeiten.
+
+---
+
+## 6. Konfiguration des Workflows
+
+### Erstellen von benutzerdefinierten Workflows
+
+**Workflows verknüpfen mehrere Aufgaben zu einer einzigen Schaltfläche.**
+
+1. **Einstellungen → Workflows → Workflow hinzufügen**
+2. **Name**: „Paper Analysis Flow“
+3. **DSL**: `process-current-add-links>extract-concepts-current>research-and-summarize>summarize-as-mermaid`
+4. **Speichern**
+
+Ein neuer Button erscheint im linken Seitenbereich.
+
+### DSL-Syntax
+
+**Format:** `action1>action2>action3`
+
+**Verfügbare Aktionen:**
+- `process-current-add-links` — Wiki-Links zur aktuellen Notiz hinzufügen
+- `extract-concepts-current` — Konzeptnotizen erstellen
+- `research-and-summarize` — Web-Recherche + Zusammenfassung
+- `translate-current` — Übersetze die aktuelle Notiz
+- `summarize-as-mermaid` — Erstelle ein Mermaid-Diagramm
+- `process-folder-add-links` — Batch-Verarbeitung von Ordnern
+
+**Beispiele für Arbeitsabläufe:**
+
+**Schnelle Konzeptextraktion:**
+```
+process-current-add-links>extract-concepts-current
+```
+
+**Tiefergehende Recherche:**
+```
+process-current-add-links>research-and-summarize>extract-concepts-current
+```
+
+**Mehrsprachige Analyse:**
+```
+translate-current>process-current-add-links>extract-concepts-current
+```
+
+---
 
 ## 7. Erweiterte Einstellungen
 
-Konfiguration wird in den Notemd-Einstellungen konfiguriert. Provider, Modell, Ausgabepfad, Sprache und Batch-Verarbeitung greifen ineinander; klären Sie, ob die Änderung Datei-, Ordner- oder Workflow-Aufgaben betrifft.
+### Batchverarbeitung
 
-### Konfiguration: Workflows und Aufgaben
+**Mehrere Dateien parallel verarbeiten:**
 
-Dieser Teil von Konfiguration beschreibt Produktverhalten, Einstiegspunkte und technische Grenzen. UI-Schaltflächen, Befehle, Schlüssel und Dateiendungen sind stabile Verträge.
+```
+Settings → Advanced → Batch Processing
+Concurrency: 3 (default)
+```
 
-### Konfiguration: zentrale Erläuterung
+Höher = schneller, aber mehr API Aufrufe.
 
-Dieser Teil von Konfiguration beschreibt Produktverhalten, Einstiegspunkte und technische Grenzen. UI-Schaltflächen, Befehle, Schlüssel und Dateiendungen sind stabile Verträge.
+### Intelligente Teilung
 
-### Konfiguration: zentrale Erläuterung
+**Für lange Notizen: Teilen Sie sie in Abschnitte auf:**
 
-Dieser Teil von Konfiguration beschreibt Produktverhalten, Einstiegspunkte und technische Grenzen. UI-Schaltflächen, Befehle, Schlüssel und Dateiendungen sind stabile Verträge.
+```
+Settings → Advanced → Smart Chunking
+Chunk Size: 2000 words (default)
+Overlap: 200 words (default)
+```
 
-### Konfiguration: zentrale Erläuterung
+Verhindert Fehler aufgrund der Token-Limitierung.
 
-Dieser Teil von Konfiguration beschreibt Produktverhalten, Einstiegspunkte und technische Grenzen. UI-Schaltflächen, Befehle, Schlüssel und Dateiendungen sind stabile Verträge.
+### Diagnosepanel
 
-## Konfiguration: Konfiguration und Modelle
+**Detaillierte Protokolle ansehen:**
 
-Konfiguration wird in den Notemd-Einstellungen konfiguriert. Provider, Modell, Ausgabepfad, Sprache und Batch-Verarbeitung greifen ineinander; klären Sie, ob die Änderung Datei-, Ordner- oder Workflow-Aufgaben betrifft.
+```
+Settings → Advanced → Enable Diagnostics
+```
 
-### Konfiguration: Konfiguration und Modelle
+Anzeige:
+- API Anfragen/Antworten
+- Tokenverwendung
+- Verarbeitungsdauer
+- Fehler
 
-Konfiguration wird in den Notemd-Einstellungen konfiguriert. Provider, Modell, Ausgabepfad, Sprache und Batch-Verarbeitung greifen ineinander; klären Sie, ob die Änderung Datei-, Ordner- oder Workflow-Aufgaben betrifft.
+### Erkennung doppelter Konzepte
 
-## Konfiguration: Konfiguration und Modelle
+**Vermeiden Sie nahezu identische Konzepte:**
 
-Konfiguration wird in den Notemd-Einstellungen konfiguriert. Provider, Modell, Ausgabepfad, Sprache und Batch-Verarbeitung greifen ineinander; klären Sie, ob die Änderung Datei-, Ordner- oder Workflow-Aufgaben betrifft.
+```
+Settings → Advanced → Synonym Suppression
+Threshold: 0.8 (default, 0-1)
+```
 
-### Konfiguration: zentrale Erläuterung
+Höher = aggressivere Zusammenführung.
 
-Dieser Teil von Konfiguration beschreibt Produktverhalten, Einstiegspunkte und technische Grenzen. UI-Schaltflächen, Befehle, Schlüssel und Dateiendungen sind stabile Verträge.
+---
 
-### Konfiguration: Recherche
+## Konfigurationsprofile
 
-Dieser Teil von Konfiguration beschreibt Produktverhalten, Einstiegspunkte und technische Grenzen. UI-Schaltflächen, Befehle, Schlüssel und Dateiendungen sind stabile Verträge.
+### Einstellungen für Export/Import
 
-### Konfiguration: Grenzen und Governance
+**Konfigurationen über Geräte hinweg teilen:**
 
-Dieser Teil von Konfiguration beschreibt Produktverhalten, Einstiegspunkte und technische Grenzen. UI-Schaltflächen, Befehle, Schlüssel und Dateiendungen sind stabile Verträge.
+1. **Einstellungen → Erweitert → Konfiguration exportieren**
+2. Speichert `notemd-config.json`
+3. Auf neuem Gerät: **Konfiguration importieren**
 
-### Konfiguration: Übersetzung und Sprache
+**Was enthalten ist:**
+- Provider API Schlüssel (optional)
+- Modellauswahlen
+- Ausgabepfade
+- Benutzerdefinierte Workflows
 
-Dieser Teil von Konfiguration beschreibt Produktverhalten, Einstiegspunkte und technische Grenzen. UI-Schaltflächen, Befehle, Schlüssel und Dateiendungen sind stabile Verträge.
+---
 
-## Konfiguration: Konfiguration und Modelle
+## Empfohlene Konfigurationen
 
-Dieser Abschnitt grenzt typische Fehler bei Konfiguration ein. Prüfen Sie zuerst Notemd-Diagnosen, HTTP-Status des Providers, Modellnamen, Netzwerk und Rate Limits.
+### Für Studenten
 
-### Konfiguration: Konfiguration und Modelle
+```
+Provider: OpenAI (gpt-4o-mini)
+Concept Folder: concepts/
+UI Language: System
+Output Language: System
+Workflow: "Study Flow" (add-links>extract-concepts)
+```
 
-Konfiguration wird in den Notemd-Einstellungen konfiguriert. Provider, Modell, Ausgabepfad, Sprache und Batch-Verarbeitung greifen ineinander; klären Sie, ob die Änderung Datei-, Ordner- oder Workflow-Aufgaben betrifft.
+### Für Forscher
 
-### Konfiguration: Konfiguration und Modelle
+```
+Providers:
+  - Linking: DeepSeek (cheap, many calls)
+  - Concepts: Claude Sonnet (high quality)
+  - Research: GPT-4o (web-grounded)
+Concept Folder: notes/concepts/
+Hierarchical: Yes
+Workflow: "Paper Flow" (add-links>extract>research>diagram)
+```
 
-Dieser Teil von Konfiguration beschreibt Produktverhalten, Einstiegspunkte und technische Grenzen. UI-Schaltflächen, Befehle, Schlüssel und Dateiendungen sind stabile Verträge.
+### Für privatsphärenbewusste Nutzer
 
-### Konfiguration: Konfiguration und Modelle
+```
+Provider: Ollama (llama3.1)
+All tasks: Local model
+Search: DuckDuckGo (no API)
+Diagnostics: Off
+```
 
-Dieser Teil von Konfiguration beschreibt Produktverhalten, Einstiegspunkte und technische Grenzen. UI-Schaltflächen, Befehle, Schlüssel und Dateiendungen sind stabile Verträge.
+### Für zweisprachige Arbeit
+
+```
+UI Language: Chinese
+Output Language: English
+Translation Target: Chinese
+Provider: Gemini (multilingual)
+```
+
+---
+
+## Fehlerbehebung der Konfiguration
+
+### Einstellungen nicht gespeichert
+- Überprüfe die Dateiberechtigungen in `.obsidian/plugins/notemd/`
+- Versuchen Sie: Plugin deaktivieren → Wieder aktivieren
+
+### API Schlüssel ungültig
+- Keine zusätzlichen Leerzeichen
+- Überprüfe Ablaufdatum
+- Überprüfen Sie die Credits im Anbieter-Dashboard
+
+### Modelle werden nicht geladen.
+- Klicken Sie auf „Modellliste abrufen“, um sie zu aktualisieren
+- Überprüfe die Netzwerkverbindung
+- Versuchen Sie einen anderen Anbieter.
+
+---
 
 ## Nächste Schritte
 
-Wählen Sie als Nächstes die Seite, die direkt zu Ihrer Aufgabe passt: Provider-Konfiguration, Kernfunktion, Batch-Verarbeitung, Fehlerbehebung oder Diagrammexport.
+- 📖 [Eigenschaften entdecken](../features/wiki-links)
+- 🔌 [Anleitungen zur Provider-Einrichtung](../providers/overview)
+- ❓ [FAQ](../faq)

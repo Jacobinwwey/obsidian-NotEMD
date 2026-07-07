@@ -1,39 +1,67 @@
 ---
 id: anthropic
 title: Anthropic
-description: 说明 Anthropic 在 Notemd 中的用途、配置、工作流边界与常见排查路径。
+description: 配置 Anthropic Claude
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [anthropic, claude, provider, configuration]
+concepts: [Anthropic, Claude, API Configuration]
+citations:
+  - title: Anthropic API
+    url: https://docs.anthropic.com
+  - title: Claude
+    url: https://www.anthropic.com/claude
 ---
 
 import TLDR from '@site/src/components/TLDR';
 
-# Anthropic
+# Anthropic 提供商
 
 <TLDR>
-**本页说明：** 说明 Anthropic 在 Notemd 中的用途、配置、工作流边界与常见排查路径。 以下命令、配置键、文件扩展名和 Provider 名称按产品真实接口保留英文，以便与插件界面、CLI 和日志一一对应。
+**Anthropic 使用的是原生的 Messages API 传输方式，而非兼容 OpenAI 的传输方式。** 当前的预设默认为 `claude-3-5-sonnet-20240620`、`https://api.anthropic.com` 和 `temperature: 0.5`。在调试时应将其视为独立的协议层。
+
+这是[Obsidian AI知识管理指南](/docs/pillar-ai-knowledge)的一部分。
 </TLDR>
 
 ## 设置
 
-Anthropic 的配置应从 Notemd 设置入口完成。Provider、模型、输出路径、语言和批处理并不是彼此独立的开关；修改前应明确它会影响当前文件、文件夹任务还是一键工作流。
+创建一个 Anthropic API 密钥，添加一个 `Anthropic` 提供商配置文件，除非通过专用的网关配置文件进行路由，否则将 Base URL 保持在原生端点上。在模型字段中选择您想要使用的 Claude 模型 ID；默认值可保持现有产品基线的稳定性。
 
-## 端点与鉴权
+Anthropic 非常适合用于高质量摘要生成、研究综合以及概念提取。如果将其与价格较低的服务提供商结合使用，只需在那些能从它的高质量输出中受益的任务上启用它即可。
 
-Anthropic 的这一部分解释产品行为、使用入口和工程边界。请把界面按钮、命令名称、配置键和文件扩展名视为稳定契约，文案翻译不会改变真实运行时名称。
+## 端点与身份验证
+
+| 字段 | 当前预设 |
+|-------|----------------|
+| 传输 | `anthropic` |
+| API 键 | 必需 |
+| 基础 URL | `https://api.anthropic.com` |
+| 默认模型 | `claude-3-5-sonnet-20240620` |
+| 温度 | `0.5` |
+| 连接测试 | 仅聊天模式 |
+
+运行时会使用 `x-api-key` 和 `anthropic-version: 2023-06-01` 向 `/v1/messages` 发送请求。请勿在此预设下配置 OpenAI 风格的 `/v1/chat/completions` 端点，而应使用与 OpenAI 兼容的网关预设。
 
 ## 模型发现
 
-Anthropic 的这一部分解释产品行为、使用入口和工程边界。请把界面按钮、命令名称、配置键和文件扩展名视为稳定契约，文案翻译不会改变真实运行时名称。
+Anthropic 在提供程序注册表中使用了 `anthropic-models` 发现模式。如果您的密钥或账户无法列出模型，请在配置文件中保留一个已知的模型 ID，并通过连接测试进行验证。
 
-## 故障排查
+该传输方式无法与支持 OpenAI 的提供商互换。通过 OpenRouter、LiteLLM 或其他网关路由的 Claude 模型应属于相应的网关配置文件，而非默认的 Anthropic 配置文件。
 
-本节用于定位 Anthropic 的常见失败模式。优先查看 Notemd 设置中的诊断输出、Provider 返回的 HTTP 状态、模型名称、网络连通性和是否触发限流。
+## 故障排除
 
-## 适用场景
+- `401` 或 `403`：检查密钥的作用域、工作区访问权限、计费情况，以及该密钥是否属于预期的 Anthropic 工作区。
+- `404`：基础 URL 不正确，或者该账户无法使用所选的模型编号。
+- 网关型 Claude 模型 ID 失败：请将配置文件移至对应的网关提供商，因为原生 Anthropic 需要使用原生模型名称。
+- 过长的请求会在后期失败：请减小每个任务的模型输出大小，或使用已知输出token上限更高的模型。
 
-Anthropic 的这一部分解释产品行为、使用入口和工程边界。请把界面按钮、命令名称、配置键和文件扩展名视为稳定契约，文案翻译不会改变真实运行时名称。
+## 何时使用
 
-## 下一步
+当合成质量、研究笔记或结构化文档的完整性比原始成本更为重要时，请使用 Anthropic。切勿将其作为通用的 OpenAI 兼容替代方案使用；独立的传输方式才是关键，混用不同协议会增加诊断难度。
 
-继续阅读相邻页面时，优先选择与你当前任务链直接相关的主题：Provider 配置、核心功能、批处理、故障排查或图表导出。
+---
+
+## 后续步骤
+
+- [LLM 提供商](/docs/providers/overview) -- 完整配置、任务级模型以及重试逻辑
+- [故障排除](/docs/advanced/troubleshooting) -- 解决 401/403 错误及连接问题

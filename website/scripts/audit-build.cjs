@@ -22,6 +22,16 @@ const supportedLocalizedLocales = [
   {locale: 'es', htmlLang: 'es-ES', name: 'Spanish'},
   {locale: 'ko', htmlLang: 'ko-KR', name: 'Korean'},
 ];
+const localizedFillerMarkers = [
+  '这一部分解释产品行为',
+  '這一部分說明產品行為',
+  '製品の挙動',
+  'comportement produit',
+  'Produktverhalten',
+  'comportamiento del producto',
+  '제품 동작',
+];
+const placeholderPollutionPattern = /NMDPH|NMDSEGMENT|@@\d+@@/;
 const providerDetailHeadings = [
   '## Setup',
   '## Endpoint And Authentication',
@@ -61,6 +71,12 @@ function readSourceFile(filePath) {
 function assertContains(content, expected, context) {
   if (!content.includes(expected)) {
     fail(`${context} is missing ${expected}`);
+  }
+}
+
+function assertMatches(content, expected, context) {
+  if (!expected.test(content)) {
+    fail(`${context} does not match ${expected}`);
   }
 }
 
@@ -154,6 +170,51 @@ function englishSourceDocs() {
   };
   collect(docsRoot);
   return files.sort();
+}
+
+function markdownHeadings(content) {
+  const headings = [];
+  let inFence = false;
+  for (const line of content.split(/\r?\n/)) {
+    const trimmed = line.trim();
+    if (trimmed.startsWith('```')) {
+      inFence = !inFence;
+      continue;
+    }
+    if (inFence) {
+      continue;
+    }
+    const match = line.match(/^(#{1,6})\s+(.+)$/);
+    if (match) {
+      headings.push({level: match[1].length, text: match[2].trim()});
+    }
+  }
+  return headings;
+}
+
+function auditLocalizedSourceTextIntegrity() {
+  for (const {locale} of supportedLocalizedLocales) {
+    const localeRoot = localizedDocsSourceRoot(locale);
+    for (const sourceDoc of englishSourceDocs()) {
+      const filePath = path.join(localeRoot, sourceDoc);
+      const localizedContent = readSourceFile(filePath);
+      const englishContent = readSourceFile(path.join(websiteRoot, 'docs', sourceDoc));
+      const context = `${locale} source doc ${sourceDoc}`;
+
+      for (const marker of localizedFillerMarkers) {
+        assertNotContains(localizedContent, marker, context);
+      }
+      if (placeholderPollutionPattern.test(localizedContent)) {
+        fail(`${context} contains placeholder pollution`);
+      }
+
+      const englishHeadings = markdownHeadings(englishContent).map((heading) => heading.level);
+      const localizedHeadings = markdownHeadings(localizedContent).map((heading) => heading.level);
+      if (JSON.stringify(localizedHeadings) !== JSON.stringify(englishHeadings)) {
+        fail(`${context} heading structure does not mirror the English source`);
+      }
+    }
+  }
 }
 
 async function loadPublishedLanguageScope() {
@@ -468,7 +529,7 @@ function auditDiagramDocs() {
   assertContains(englishDiagrams, 'scripts/diagram-semantic-verification.js', 'English diagrams doc');
 
   assertContains(zhCnDiagrams, '<html lang="zh-CN"', 'zh-CN diagrams doc');
-  assertContains(zhCnDiagrams, 'Editable HTML/SVG', 'zh-CN diagrams doc');
+  assertMatches(zhCnDiagrams, /Editable HTML\/SVG|可编辑.*HTML\/SVG/, 'zh-CN diagrams doc');
   assertContains(zhCnDiagrams, 'Draw.io', 'zh-CN diagrams doc');
   assertContains(zhCnDiagrams, 'Drawnix', 'zh-CN diagrams doc');
   assertContains(zhCnDiagrams, 'circuitikz', 'zh-CN diagrams doc');
@@ -488,7 +549,7 @@ function auditDiagramDocs() {
   assertContains(zhCnDiagrams, 'compileExecution', 'zh-CN diagrams doc');
   assertContains(zhCnDiagrams, 'compileExecution.renderSmoke', 'zh-CN diagrams doc');
   assertContains(zhCnDiagrams, 'circuitikz.sty', 'zh-CN diagrams doc');
-  assertContains(zhCnDiagrams, 'Golden Reference Prompt 形态', 'zh-CN diagrams doc');
+  assertMatches(zhCnDiagrams, /金色参考.*提示.*形状|Golden Reference Prompt/, 'zh-CN diagrams doc');
   assertContains(zhCnDiagrams, 'SemanticFigureModel', 'zh-CN diagrams doc');
   assertNotContains(zhCnDiagrams, 'content="noindex,follow"', 'zh-CN diagrams doc');
 }
@@ -506,7 +567,7 @@ function auditIntroDocs() {
   assertContains(englishIntro, `${basePath}docs/advanced/custom-prompts`, 'English intro sidebar');
 
   assertContains(zhCnIntro, '<html lang="zh-CN"', 'zh-CN intro doc');
-  assertContains(zhCnIntro, '图表能力方向', 'zh-CN intro doc');
+  assertMatches(zhCnIntro, /图表.*方向/, 'zh-CN intro doc');
   assertContains(zhCnIntro, 'circuitikz', 'zh-CN intro doc');
   assertContains(zhCnIntro, 'TikZJax', 'zh-CN intro doc');
   assertContains(zhCnIntro, 'Draw.io', 'zh-CN intro doc');
@@ -518,13 +579,13 @@ function auditIntroDocs() {
 
 function auditAdvancedDocs() {
   for (const [relativePath, requiredText] of [
-    [path.join('zh-CN', 'docs', 'advanced', 'custom-prompts', 'index.html'), '自定义 Prompt'],
-    [path.join('zh-CN', 'docs', 'advanced', 'batch-processing', 'index.html'), '批处理'],
-    [path.join('zh-CN', 'docs', 'advanced', 'troubleshooting', 'index.html'), '故障排查'],
+    [path.join('zh-CN', 'docs', 'advanced', 'custom-prompts', 'index.html'), /自定义.*(提示词|Prompt)/],
+    [path.join('zh-CN', 'docs', 'advanced', 'batch-processing', 'index.html'), /批(量)?处理/],
+    [path.join('zh-CN', 'docs', 'advanced', 'troubleshooting', 'index.html'), /故障(排查|排除)/],
   ]) {
     const html = readBuildFile(relativePath);
     assertContains(html, '<html lang="zh-CN"', `zh-CN advanced doc ${relativePath}`);
-    assertContains(html, requiredText, `zh-CN advanced doc ${relativePath}`);
+    assertMatches(html, requiredText, `zh-CN advanced doc ${relativePath}`);
     assertContains(html, '高级', `zh-CN advanced doc ${relativePath}`);
     assertNotContains(html, 'content="noindex,follow"', `zh-CN advanced doc ${relativePath}`);
   }
@@ -583,8 +644,15 @@ function auditGeneratedTextIntegrity() {
 
   for (const filePath of htmlFiles) {
     const content = fs.readFileSync(filePath, 'utf8');
+    const context = path.relative(buildRoot, filePath);
     if (content.includes('\u0000')) {
-      fail(`Generated HTML contains a NUL character: ${path.relative(buildRoot, filePath)}`);
+      fail(`Generated HTML contains a NUL character: ${context}`);
+    }
+    for (const marker of localizedFillerMarkers) {
+      assertNotContains(content, marker, `generated HTML ${context}`);
+    }
+    if (placeholderPollutionPattern.test(content)) {
+      fail(`Generated HTML contains placeholder pollution: ${context}`);
     }
   }
 }
@@ -595,6 +663,7 @@ async function main() {
   auditGeneratedTextIntegrity();
   auditPublishedScopeSourceFiles(languageScope);
   auditLocalizedSourceCoverage(languageScope);
+  auditLocalizedSourceTextIntegrity();
   auditHomepageRoutes(languageScope);
   auditZhCnDocFallbacks(languageScope);
   auditLanguageAlternates(languageScope);

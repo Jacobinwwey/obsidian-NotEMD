@@ -1,9 +1,14 @@
 ---
 id: configuration
 title: Configuración
-description: Explica el uso de Configuración en Notemd, su configuración, límites de flujo de trabajo y comprobaciones habituales.
+description: Configure los ajustes y preferencias de Notemd
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [configuration, settings, customization, preferences]
+concepts: [Configuration, Per-Task Models, Output Paths, Custom Workflows]
+citations:
+  - title: Obsidian
+    url: https://obsidian.md
 ---
 
 import TLDR from '@site/src/components/TLDR';
@@ -11,185 +16,420 @@ import TLDR from '@site/src/components/TLDR';
 # Configuración
 
 <TLDR>
-**Resumen：** Explica el uso de Configuración en Notemd, su configuración, límites de flujo de trabajo y comprobaciones habituales. Los comandos, claves de configuración, extensiones y nombres de Provider siguientes se mantienen en inglés para coincidir exactamente con la interfaz, el CLI y los registros.
+**La configuración Notemd abarca 6 áreas principales:** (1) proveedores LLM y claves API, (2) selección del modelo por tarea, (3) rutas de salida y plantillas, (4) idioma UI e idioma de salida, (5) servicios de búsqueda (Tavily/DuckDuckGo), (6) flujos de trabajo personalizados. Todos los ajustes se encuentran en Obsidian Ajustes → Notemd. Los cambios surten efecto de inmediato.
 </TLDR>
 
-## Configuración: configuración y modelos
+## Resumen de configuraciones
 
-Configuración se configura desde los ajustes de Notemd. Provider, modelo, salida, idioma y procesamiento por lotes se relacionan entre sí; confirme si el cambio afecta al archivo actual, carpetas o workflows.
+Acceso: **Obsidian Ajustes (⚙️) → Notemd**
 
-### Configuración: explicación principal
+### Secciones principales
 
-Esta parte de Configuración describe el comportamiento del producto, puntos de entrada y límites técnicos. Botones, comandos, claves y extensiones son contratos estables.
+1. **Configuración del proveedor** — claves API, URLs base, modelos
+2. **Configuración de tareas** — Selección de modelo por tarea
+3. **Configuración de salida** — Dónde guardar los archivos generados
+4. **Ajustes de idioma** — UI e idiomas de salida
+5. **Integración de Búsqueda** — configuración de Tavily/DuckDuckGo
+6. **Flujos de trabajo** — Cadenas de botones personalizadas
+7. **Avanzado** — Diagnóstico, procesamiento por lotes, fragmentación
 
-## 1. Configuración del Provider
+---
 
-Configuración se configura desde los ajustes de Notemd. Provider, modelo, salida, idioma y procesamiento por lotes se relacionan entre sí; confirme si el cambio afecta al archivo actual, carpetas o workflows.
+## 1. Configuración del proveedor
 
-### Configuración: configuración y modelos
+### Agregar un proveedor
 
-Esta parte de Configuración describe el comportamiento del producto, puntos de entrada y límites técnicos. Botones, comandos, claves y extensiones son contratos estables.
+1. **Seleccionar proveedor** del menú desplegable (más de 30 disponibles)
+2. **Introduce la tecla API**
+3. **Opcional**: Establecer una base personalizada URL (para proxies/puertas de enlace)
+4. **Haga clic en "Obtener lista de modelos"** para verificar la conexión
+5. **Seleccionar modelo predeterminado**
 
-### Configuración: configuración y modelos
-
-Esta parte de Configuración describe el comportamiento del producto, puntos de entrada y límites técnicos. Botones, comandos, claves y extensiones son contratos estables.
+### Proveedores comunes
 
 #### OpenAI
+```
+Provider: OpenAI
+API Key: sk-...
+Base URL: https://api.openai.com/v1 (default)
+Model: gpt-4o-mini
+```
 
-Esta parte de Configuración describe el comportamiento del producto, puntos de entrada y límites técnicos. Botones, comandos, claves y extensiones son contratos estables.
+#### Anthropic (Claude)
+```
+Provider: Anthropic
+API Key: sk-ant-...
+Model: claude-sonnet-4-6
+```
 
-#### Configuración: explicación principal
-
-Esta parte de Configuración describe el comportamiento del producto, puntos de entrada y límites técnicos. Botones, comandos, claves y extensiones son contratos estables.
-
-#### Configuración: límites y gobernanza
-
-Esta parte de Configuración describe el comportamiento del producto, puntos de entrada y límites técnicos. Botones, comandos, claves y extensiones son contratos estables.
+#### Ollama (Local)
+```
+Provider: Ollama
+Base URL: http://localhost:11434 (default)
+Model: llama3.1
+API Key: (not required)
+```
 
 #### DeepSeek
+```
+Provider: DeepSeek
+API Key: sk-...
+Model: deepseek-chat
+```
 
-Esta parte de Configuración describe el comportamiento del producto, puntos de entrada y límites técnicos. Botones, comandos, claves y extensiones son contratos estables.
+### Múltiples proveedores
 
-### Configuración: configuración y modelos
+Puede configurar varios proveedores e intercambiarlos según la tarea:
+- **Proveedor principal**: Se utiliza como solución de respaldo
+- **Proveedores específicos de tarea**: Sobrescribir para tareas concretas
 
-Esta parte de Configuración describe el comportamiento del producto, puntos de entrada y límites técnicos. Botones, comandos, claves y extensiones son contratos estables.
+---
 
-## 2. Modelos por tarea
+## 2. Modelos específicos para tareas
 
-Esta parte de Configuración describe el comportamiento del producto, puntos de entrada y límites técnicos. Botones, comandos, claves y extensiones son contratos estables.
+Configure modelos diferentes para tareas distintas a fin de optimizar costo/calidad:
 
-### Configuración: workflows y tareas
+### Tipos de tareas
 
-Esta parte de Configuración describe el comportamiento del producto, puntos de entrada y límites técnicos. Botones, comandos, claves y extensiones son contratos estables.
+| Tarea | Modelo predeterminado | Propósito |
+|------|--------------|---------|
+| **Vinculación** | Proveedor principal | Identificar conceptos para enlaces de wiki |
+| **Generación de conceptos** | Proveedor principal | Extraer y describir conceptos |
+| **Investigación** | Proveedor principal | Resumir los resultados de búsqueda en la web |
+| **Traducción** | Proveedor principal | Traducir texto |
+| **Generación de diagramas** | Proveedor principal | Generar diagramas Mermaid/Canvas |
 
-### Configuración: instalación y preparación
+### Ejemplo: Configuración optimizada en costos
 
-Configuración se configura desde los ajustes de Notemd. Provider, modelo, salida, idioma y procesamiento por lotes se relacionan entre sí; confirme si el cambio afecta al archivo actual, carpetas o workflows.
+```
+Linking: gpt-4o-mini (fast, many calls)
+Concept Generation: claude-sonnet-4-6 (quality extraction)
+Research: gpt-4o (web-grounded)
+Translation: gemini-flash (multilingual)
+Diagram: ollama/llama3.1 (free, local)
+```
 
-### Configuración: configuración y modelos
+### Cómo configurar
 
-Esta parte de Configuración describe el comportamiento del producto, puntos de entrada y límites técnicos. Botones, comandos, claves y extensiones son contratos estables.
+1. **Ajustes → Notemd → Ajustes de tarea**
+2. Para cada tarea, elige:
+   - ✅ **Usar proveedor principal** (predeterminado)
+   - 🔄 **Usar proveedor personalizado** → seleccionar proveedor + modelo
+
+---
 
 ## 3. Configuración de salida
 
-Configuración se configura desde los ajustes de Notemd. Provider, modelo, salida, idioma y procesamiento por lotes se relacionan entre sí; confirme si el cambio afecta al archivo actual, carpetas o workflows.
+### Salida de notas conceptuales
 
-### Configuración: configuración y modelos
+**Dónde se guardan las notas de concepto nuevas:**
 
-Esta parte de Configuración describe el comportamiento del producto, puntos de entrada y límites técnicos. Botones, comandos, claves y extensiones son contratos estables.
+```
+Settings → Output → Concept Folder
+Default: concepts/
+```
 
-### Configuración: workflows y tareas
+**Plantilla:**
+```
+Settings → Output → Concept Template
+Default:
+---
+tags: [concept]
+created: {{date}}
+---
 
-Esta parte de Configuración describe el comportamiento del producto, puntos de entrada y límites técnicos. Botones, comandos, claves y extensiones son contratos estables.
+# {{concept}}
 
-### Configuración: configuración y modelos
+{{description}}
 
-Esta parte de Configuración describe el comportamiento del producto, puntos de entrada y límites técnicos. Botones, comandos, claves y extensiones son contratos estables.
+## Backlinks
+{{backlinks}}
+```
+
+### Opciones de estructura de carpetas
+
+**Opción 1: Plano (todos los conceptos en una sola carpeta)**
+```
+vault/
+└── concepts/
+    ├── Machine Learning.md
+    ├── Neural Networks.md
+    └── Deep Learning.md
+```
+
+**Opción 2: Jerárquico (por carpeta de origen)**
+```
+vault/
+├── papers/
+│   └── concepts/
+│       └── Transformer.md
+└── notes/
+    └── concepts/
+        └── Attention Mechanism.md
+```
+
+Configurar: **Ajustes → Salida → Usar carpetas jerárquicas**
+
+### Salida del diagrama
+
+**Dónde se guardan los diagramas:**
+```
+Settings → Output → Diagram Folder
+Default: diagrams/
+```
+
+**Formato:**
+- `.mmd` (Mermaid fuente)
+- `.canvas` (JSON Canvas)
+- `.html` (Vega-Lite)
+
+---
 
 ## 4. Ajustes de idioma
 
-Configuración se configura desde los ajustes de Notemd. Provider, modelo, salida, idioma y procesamiento por lotes se relacionan entre sí; confirme si el cambio afecta al archivo actual, carpetas o workflows.
+### UI Idioma
 
-### Configuración: configuración y modelos
+**Idioma de la interfaz** (botones, menús, diálogos):
 
-Esta parte de Configuración describe el comportamiento del producto, puntos de entrada y límites técnicos. Botones, comandos, claves y extensiones son contratos estables.
+```
+Settings → Language → UI Language
+Options: 21+ languages
+Default: System language
+```
 
-### Configuración: configuración y modelos
+Se admite: inglés, 简体中文, 繁體中文, 日本語, 한국어, Español, Français, Deutsch, Русский, العربية y más.
 
-Esta parte de Configuración describe el comportamiento del producto, puntos de entrada y límites técnicos. Botones, comandos, claves y extensiones son contratos estables.
+### Idioma de salida
 
-### Configuración: traducción e idioma
+**Idioma del contenido generado** (notas conceptuales, resúmenes de investigación):
 
-Esta parte de Configuración describe el comportamiento del producto, puntos de entrada y límites técnicos. Botones, comandos, claves y extensiones son contratos estables.
+```
+Settings → Language → Output Language
+Options: Same as UI languages
+Default: Same as UI
+```
 
-## 5. Configuración: investigación y búsqueda
+**Caso de uso:** UI en chino + salida en inglés para investigación bilingüe.
 
-Esta parte de Configuración describe el comportamiento del producto, puntos de entrada y límites técnicos. Botones, comandos, claves y extensiones son contratos estables.
+### Destino de la traducción
 
-### Configuración: investigación y búsqueda
+**Idioma de destino predeterminado** para las tareas de traducción:
 
-Esta parte de Configuración describe el comportamiento del producto, puntos de entrada y límites técnicos. Botones, comandos, claves y extensiones son contratos estables.
+```
+Settings → Translation → Target Language
+Default: English
+```
 
-### Configuración: investigación y búsqueda
+---
 
-Esta parte de Configuración describe el comportamiento del producto, puntos de entrada y límites técnicos. Botones, comandos, claves y extensiones son contratos estables.
+## 5. Integración de búsquedas
 
-## 6. Configuración de workflows
+### Tavily (Recomendado)
 
-Configuración se configura desde los ajustes de Notemd. Provider, modelo, salida, idioma y procesamiento por lotes se relacionan entre sí; confirme si el cambio afecta al archivo actual, carpetas o workflows.
+**Servicio de búsqueda optimizado para IA:**
 
-### Configuración: workflows y tareas
+```
+Settings → Search → Service: Tavily
+API Key: tvly-...
+```
 
-Esta parte de Configuración describe el comportamiento del producto, puntos de entrada y límites técnicos. Botones, comandos, claves y extensiones son contratos estables.
+Obtener clave: [tavily.com](https://tavily.com/)
 
-### Configuración: explicación principal
+**Características:**
+- Resultados de alta calidad
+- Resúmenes optimizados por IA
+- Citaciones de fuentes
 
-Esta parte de Configuración describe el comportamiento del producto, puntos de entrada y límites técnicos. Botones, comandos, claves y extensiones son contratos estables.
+### DuckDuckGo (Experimental)
 
-## 7. Ajustes avanzados
+**No se necesita la clave API:**
 
-Configuración se configura desde los ajustes de Notemd. Provider, modelo, salida, idioma y procesamiento por lotes se relacionan entre sí; confirme si el cambio afecta al archivo actual, carpetas o workflows.
+```
+Settings → Search → Service: DuckDuckGo
+```
 
-### Configuración: workflows y tareas
+**Nota:** Calidad inferior, sin personalización.
 
-Esta parte de Configuración describe el comportamiento del producto, puntos de entrada y límites técnicos. Botones, comandos, claves y extensiones son contratos estables.
+---
 
-### Configuración: explicación principal
+## 6. Configuración del flujo de trabajo
 
-Esta parte de Configuración describe el comportamiento del producto, puntos de entrada y límites técnicos. Botones, comandos, claves y extensiones son contratos estables.
+### Creación de flujos de trabajo personalizados
 
-### Configuración: explicación principal
+**Los flujos de trabajo combinan varias tareas en un único botón.**
 
-Esta parte de Configuración describe el comportamiento del producto, puntos de entrada y límites técnicos. Botones, comandos, claves y extensiones son contratos estables.
+1. **Ajustes → Flujos de trabajo → Agregar flujo de trabajo**
+2. **Nombre**: "Flujo de Análisis de Papel"
+3. **DSL**: `process-current-add-links>extract-concepts-current>research-and-summarize>summarize-as-mermaid`
+4. Guardar
 
-### Configuración: explicación principal
+Aparece un nuevo botón en la barra lateral izquierda.
 
-Esta parte de Configuración describe el comportamiento del producto, puntos de entrada y límites técnicos. Botones, comandos, claves y extensiones son contratos estables.
+### Sintaxis de DSL
 
-## Configuración: configuración y modelos
+**Formato:** `action1>action2>action3`
 
-Configuración se configura desde los ajustes de Notemd. Provider, modelo, salida, idioma y procesamiento por lotes se relacionan entre sí; confirme si el cambio afecta al archivo actual, carpetas o workflows.
+**Acciones disponibles:**
+- `process-current-add-links` — Agregar enlaces wiki a la nota actual
+- `extract-concepts-current` — Generar notas de concepto
+- `research-and-summarize` — Búsqueda en la web + resumen
+- `translate-current` — Traducir nota actual
+- `summarize-as-mermaid` — Generar diagrama Mermaid
+- `process-folder-add-links` — Procesar carpetas por lotes
 
-### Configuración: configuración y modelos
+**Flujos de trabajo de ejemplo:**
 
-Configuración se configura desde los ajustes de Notemd. Provider, modelo, salida, idioma y procesamiento por lotes se relacionan entre sí; confirme si el cambio afecta al archivo actual, carpetas o workflows.
+**Extracción rápida de conceptos:**
+```
+process-current-add-links>extract-concepts-current
+```
 
-## Configuración: configuración y modelos
+**Investigación profunda:**
+```
+process-current-add-links>research-and-summarize>extract-concepts-current
+```
 
-Configuración se configura desde los ajustes de Notemd. Provider, modelo, salida, idioma y procesamiento por lotes se relacionan entre sí; confirme si el cambio afecta al archivo actual, carpetas o workflows.
+**Análisis multilingüe:**
+```
+translate-current>process-current-add-links>extract-concepts-current
+```
 
-### Configuración: explicación principal
+---
 
-Esta parte de Configuración describe el comportamiento del producto, puntos de entrada y límites técnicos. Botones, comandos, claves y extensiones son contratos estables.
+## 7. Configuración avanzada
 
-### Configuración: investigación y búsqueda
+### Procesamiento por lotes
 
-Esta parte de Configuración describe el comportamiento del producto, puntos de entrada y límites técnicos. Botones, comandos, claves y extensiones son contratos estables.
+**Procesar múltiples archivos en paralelo:**
 
-### Configuración: límites y gobernanza
+```
+Settings → Advanced → Batch Processing
+Concurrency: 3 (default)
+```
 
-Esta parte de Configuración describe el comportamiento del producto, puntos de entrada y límites técnicos. Botones, comandos, claves y extensiones son contratos estables.
+Mayor = más rápido, pero más llamadas a API.
 
-### Configuración: traducción e idioma
+### Fragmentación inteligente
 
-Esta parte de Configuración describe el comportamiento del producto, puntos de entrada y límites técnicos. Botones, comandos, claves y extensiones son contratos estables.
+**Para notas largas, divídalas en fragmentos:**
 
-## Configuración: configuración y modelos
+```
+Settings → Advanced → Smart Chunking
+Chunk Size: 2000 words (default)
+Overlap: 200 words (default)
+```
 
-Esta sección ayuda a diagnosticar fallos habituales de Configuración. Revise primero los diagnósticos de Notemd, el estado HTTP del Provider, el nombre del modelo, la red y los límites de tasa.
+Evita errores por límite de tokens.
 
-### Configuración: configuración y modelos
+### Panel de Diagnóstico
 
-Configuración se configura desde los ajustes de Notemd. Provider, modelo, salida, idioma y procesamiento por lotes se relacionan entre sí; confirme si el cambio afecta al archivo actual, carpetas o workflows.
+**Ver registros detallados:**
 
-### Configuración: configuración y modelos
+```
+Settings → Advanced → Enable Diagnostics
+```
 
-Esta parte de Configuración describe el comportamiento del producto, puntos de entrada y límites técnicos. Botones, comandos, claves y extensiones son contratos estables.
+Programas:
+- API solicitudes/respuestas
+- Uso de tokens
+- Tiempos de procesamiento
+- Errores
 
-### Configuración: configuración y modelos
+### Detección de conceptos duplicados
 
-Esta parte de Configuración describe el comportamiento del producto, puntos de entrada y límites técnicos. Botones, comandos, claves y extensiones son contratos estables.
+**Evitar conceptos casi idénticos:**
 
-## Siguientes pasos
+```
+Settings → Advanced → Synonym Suppression
+Threshold: 0.8 (default, 0-1)
+```
 
-Para continuar, elija la página que corresponda a su cadena de trabajo: Provider, función principal, procesamiento por lotes, solución de problemas o exportación de diagramas.
+Mayor = fusión más agresiva.
+
+---
+
+## Perfiles de configuración
+
+### Configuración de exportación/importación
+
+**Compartir configuraciones entre dispositivos:**
+
+1. **Ajustes → Avanzado → Exportar configuración**
+2. Guarda `notemd-config.json`
+3. En el dispositivo nuevo: **Importar configuración**
+
+**Qué está incluido:**
+- Claves del proveedor API (opcional)
+- Selecciones de modelo
+- Rutas de salida
+- Flujos de trabajo personalizados
+
+---
+
+## Configuraciones recomendadas
+
+### Para estudiantes
+
+```
+Provider: OpenAI (gpt-4o-mini)
+Concept Folder: concepts/
+UI Language: System
+Output Language: System
+Workflow: "Study Flow" (add-links>extract-concepts)
+```
+
+### Para investigadores
+
+```
+Providers:
+  - Linking: DeepSeek (cheap, many calls)
+  - Concepts: Claude Sonnet (high quality)
+  - Research: GPT-4o (web-grounded)
+Concept Folder: notes/concepts/
+Hierarchical: Yes
+Workflow: "Paper Flow" (add-links>extract>research>diagram)
+```
+
+### Para usuarios preocupados por la privacidad
+
+```
+Provider: Ollama (llama3.1)
+All tasks: Local model
+Search: DuckDuckGo (no API)
+Diagnostics: Off
+```
+
+### Para trabajo bilingüe
+
+```
+UI Language: Chinese
+Output Language: English
+Translation Target: Chinese
+Provider: Gemini (multilingual)
+```
+
+---
+
+## Solución de problemas de configuración
+
+### Ajustes no guardados
+- Verificar los permisos del archivo en `.obsidian/plugins/notemd/`
+- Prueba: Deshabilitar el complemento → Volver a habilitarlo
+
+### API Clave inválida
+- Sin espacios adicionales
+- Verificar fecha de vencimiento
+- Verificar créditos en el panel del proveedor
+
+### Los modelos no se están cargando.
+- Haga clic en "Obtener lista de modelos" para actualizarla
+- Verificar la conectividad de red
+- Prueba con diferentes proveedores
+
+---
+
+## Próximos pasos
+
+- 📖 [Explorar características](../features/wiki-links)
+- 🔌 [Guías de configuración del proveedor](../providers/overview)
+- ❓ [Preguntas frecuentes](../faq)

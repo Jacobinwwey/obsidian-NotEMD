@@ -1,9 +1,14 @@
 ---
 id: configuration
 title: Configuration
-description: Explique le rôle de Configuration dans Notemd, sa configuration, ses limites de workflow et les vérifications courantes.
+description: Configurer les paramètres et préférences de Notemd
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [configuration, settings, customization, preferences]
+concepts: [Configuration, Per-Task Models, Output Paths, Custom Workflows]
+citations:
+  - title: Obsidian
+    url: https://obsidian.md
 ---
 
 import TLDR from '@site/src/components/TLDR';
@@ -11,185 +16,420 @@ import TLDR from '@site/src/components/TLDR';
 # Configuration
 
 <TLDR>
-**Résumé：** Explique le rôle de Configuration dans Notemd, sa configuration, ses limites de workflow et les vérifications courantes. Les commandes, clés de configuration, extensions et noms de Provider ci-dessous restent en anglais afin de correspondre exactement à l’interface, au CLI et aux journaux.
+**La configuration Notemd couvre 6 domaines principaux :** (1) les fournisseurs LLM et les clés API, (2) le choix du modèle par tâche, (3) les chemins de sortie et les modèles, (4) la langue UI et la langue de sortie, (5) les services de recherche (Tavily/DuckDuckGo), (6) les workflows personnalisés. Tous les paramètres se trouvent dans Obsidian Settings → Notemd. Les modifications prennent effet immédiatement.
 </TLDR>
 
-## Configuration : configuration et modèles
+## Aperçu des paramètres
 
-La configuration de Configuration se fait dans les paramètres Notemd. Provider, modèle, sortie, langue et traitement par lots interagissent; identifiez si le changement touche le fichier courant, un dossier ou un workflow.
+Accès : **Obsidian Paramètres (⚙️) → Notemd**
 
-### Configuration : explication principale
+### Sections principales
 
-Cette partie de Configuration décrit le comportement produit, les points d’entrée et les limites d’implémentation. Les boutons, commandes, clés et extensions restent des contrats stables.
+1. **Configuration du fournisseur** — clés API, URL de base, modèles
+2. **Paramètres de tâche** — Sélection du modèle par tâche
+3. **Configuration de sortie** — Où enregistrer les fichiers générés
+4. **Paramètres de langue** — UI et langues de sortie
+5. **Intégration de recherche** — configuration Tavily/DuckDuckGo
+6. **Flux de travail** — Chaînes de boutons personnalisées
+7. **Avancé** — Diagnostic, traitement par lots, segmentation en blocs
 
-## 1. Configuration du Provider
+---
 
-La configuration de Configuration se fait dans les paramètres Notemd. Provider, modèle, sortie, langue et traitement par lots interagissent; identifiez si le changement touche le fichier courant, un dossier ou un workflow.
+## 1. Configuration du fournisseur
 
-### Configuration : configuration et modèles
+### Ajout d’un fournisseur
 
-Cette partie de Configuration décrit le comportement produit, les points d’entrée et les limites d’implémentation. Les boutons, commandes, clés et extensions restent des contrats stables.
+1. **Sélectionner un fournisseur** dans la liste déroulante (plus de 30 disponibles)
+2. **Appuyez sur la touche API**
+3. **Optionnel** : Définir une base personnalisée URL (pour les proxys/gatesways)
+4. Cliquez sur « Obtenir la liste des modèles » pour vérifier la connexion
+5. **Sélectionner le modèle par défaut**
 
-### Configuration : configuration et modèles
-
-Cette partie de Configuration décrit le comportement produit, les points d’entrée et les limites d’implémentation. Les boutons, commandes, clés et extensions restent des contrats stables.
+### Fournisseurs courants
 
 #### OpenAI
+```
+Provider: OpenAI
+API Key: sk-...
+Base URL: https://api.openai.com/v1 (default)
+Model: gpt-4o-mini
+```
 
-Cette partie de Configuration décrit le comportement produit, les points d’entrée et les limites d’implémentation. Les boutons, commandes, clés et extensions restent des contrats stables.
+#### Anthropic (Claude)
+```
+Provider: Anthropic
+API Key: sk-ant-...
+Model: claude-sonnet-4-6
+```
 
-#### Configuration : explication principale
-
-Cette partie de Configuration décrit le comportement produit, les points d’entrée et les limites d’implémentation. Les boutons, commandes, clés et extensions restent des contrats stables.
-
-#### Configuration : limites et gouvernance
-
-Cette partie de Configuration décrit le comportement produit, les points d’entrée et les limites d’implémentation. Les boutons, commandes, clés et extensions restent des contrats stables.
+#### Ollama (Local)
+```
+Provider: Ollama
+Base URL: http://localhost:11434 (default)
+Model: llama3.1
+API Key: (not required)
+```
 
 #### DeepSeek
+```
+Provider: DeepSeek
+API Key: sk-...
+Model: deepseek-chat
+```
 
-Cette partie de Configuration décrit le comportement produit, les points d’entrée et les limites d’implémentation. Les boutons, commandes, clés et extensions restent des contrats stables.
+### Plusieurs fournisseurs
 
-### Configuration : configuration et modèles
+Vous pouvez configurer plusieurs fournisseurs et les alterner selon la tâche :
+- **Fournisseur principal** : Utilisé en cas de défaillance
+- **Fournisseurs spécifiques aux tâches** : Surcharger pour des tâches spécifiques
 
-Cette partie de Configuration décrit le comportement produit, les points d’entrée et les limites d’implémentation. Les boutons, commandes, clés et extensions restent des contrats stables.
+---
 
-## 2. Modèles par tâche
+## 2. Modèles spécifiques aux tâches
 
-Cette partie de Configuration décrit le comportement produit, les points d’entrée et les limites d’implémentation. Les boutons, commandes, clés et extensions restent des contrats stables.
+Configurez différents modèles pour différentes tâches afin d’optimiser le rapport coût/qualité :
 
-### Configuration : workflows et tâches
+### Types de tâches
 
-Cette partie de Configuration décrit le comportement produit, les points d’entrée et les limites d’implémentation. Les boutons, commandes, clés et extensions restent des contrats stables.
+| Tâche | Modèle par défaut | But |
+|------|--------------|---------|
+| **Lien** | Fournisseur principal | Identifier des concepts pour des liens wiki |
+| **Génération de concepts** | Fournisseur principal | Extraire et décrire les concepts |
+| **Recherche** | Fournisseur principal | Résumer les résultats de recherche sur le Web |
+| **Traduction** | Fournisseur principal | Traduire le texte |
+| **Génération de diagrammes** | Fournisseur principal | Générer des diagrammes Mermaid/Canvas |
 
-### Configuration : installation et préparation
+### Exemple : Configuration optimisée en termes de coûts
 
-La configuration de Configuration se fait dans les paramètres Notemd. Provider, modèle, sortie, langue et traitement par lots interagissent; identifiez si le changement touche le fichier courant, un dossier ou un workflow.
+```
+Linking: gpt-4o-mini (fast, many calls)
+Concept Generation: claude-sonnet-4-6 (quality extraction)
+Research: gpt-4o (web-grounded)
+Translation: gemini-flash (multilingual)
+Diagram: ollama/llama3.1 (free, local)
+```
 
-### Configuration : configuration et modèles
+### Comment configurer
 
-Cette partie de Configuration décrit le comportement produit, les points d’entrée et les limites d’implémentation. Les boutons, commandes, clés et extensions restent des contrats stables.
+1. **Paramètres → Notemd → Paramètres de tâche**
+2. Pour chaque tâche, choisissez :
+   - ✅ **Utiliser le fournisseur principal** (par défaut)
+   - 🔄 **Utiliser un fournisseur personnalisé** → sélectionner le fournisseur + le modèle
+
+---
 
 ## 3. Configuration de sortie
 
-La configuration de Configuration se fait dans les paramètres Notemd. Provider, modèle, sortie, langue et traitement par lots interagissent; identifiez si le changement touche le fichier courant, un dossier ou un workflow.
+### Résultat des notes de concept
 
-### Configuration : configuration et modèles
+**Où sont enregistrées les nouvelles notes de concept :**
 
-Cette partie de Configuration décrit le comportement produit, les points d’entrée et les limites d’implémentation. Les boutons, commandes, clés et extensions restent des contrats stables.
+```
+Settings → Output → Concept Folder
+Default: concepts/
+```
 
-### Configuration : workflows et tâches
+**Modèle :**
+```
+Settings → Output → Concept Template
+Default:
+---
+tags: [concept]
+created: {{date}}
+---
 
-Cette partie de Configuration décrit le comportement produit, les points d’entrée et les limites d’implémentation. Les boutons, commandes, clés et extensions restent des contrats stables.
+# {{concept}}
 
-### Configuration : configuration et modèles
+{{description}}
 
-Cette partie de Configuration décrit le comportement produit, les points d’entrée et les limites d’implémentation. Les boutons, commandes, clés et extensions restent des contrats stables.
+## Backlinks
+{{backlinks}}
+```
+
+### Options de structure de dossier
+
+**Option 1 : Plat (tous les concepts dans un seul dossier)**
+```
+vault/
+└── concepts/
+    ├── Machine Learning.md
+    ├── Neural Networks.md
+    └── Deep Learning.md
+```
+
+**Option 2 : Hiérarchique (par dossier de source)**
+```
+vault/
+├── papers/
+│   └── concepts/
+│       └── Transformer.md
+└── notes/
+    └── concepts/
+        └── Attention Mechanism.md
+```
+
+Configurer : **Paramètres → Sortie → Utiliser des dossiers hiérarchiques**
+
+### Sortie du diagramme
+
+**Où les diagrammes sont enregistrés :**
+```
+Settings → Output → Diagram Folder
+Default: diagrams/
+```
+
+**Format :**
+- `.mmd` (Mermaid source)
+- `.canvas` (JSON Canvas)
+- `.html` (Vega-Lite)
+
+---
 
 ## 4. Paramètres de langue
 
-La configuration de Configuration se fait dans les paramètres Notemd. Provider, modèle, sortie, langue et traitement par lots interagissent; identifiez si le changement touche le fichier courant, un dossier ou un workflow.
+### UI Langue
 
-### Configuration : configuration et modèles
+**Langue de l’interface** (boutons, menus, boîtes de dialogue) :
 
-Cette partie de Configuration décrit le comportement produit, les points d’entrée et les limites d’implémentation. Les boutons, commandes, clés et extensions restent des contrats stables.
+```
+Settings → Language → UI Language
+Options: 21+ languages
+Default: System language
+```
 
-### Configuration : configuration et modèles
+Pris en charge : anglais, 简体中文, 繁體中文, japonais, coréen, espagnol, français, allemand, russe, العربية, et bien d’autres.
 
-Cette partie de Configuration décrit le comportement produit, les points d’entrée et les limites d’implémentation. Les boutons, commandes, clés et extensions restent des contrats stables.
+### Langue de sortie
 
-### Configuration : traduction et langues
+**Langue du contenu généré** (notes de concept, résumés de recherche) :
 
-Cette partie de Configuration décrit le comportement produit, les points d’entrée et les limites d’implémentation. Les boutons, commandes, clés et extensions restent des contrats stables.
+```
+Settings → Language → Output Language
+Options: Same as UI languages
+Default: Same as UI
+```
 
-## 5. Configuration : recherche
+**Cas d’usage :** UI en chinois + sortie en anglais pour des recherches bilingues.
 
-Cette partie de Configuration décrit le comportement produit, les points d’entrée et les limites d’implémentation. Les boutons, commandes, clés et extensions restent des contrats stables.
+### Cible de traduction
 
-### Configuration : recherche
+**Langue cible par défaut** pour les tâches de traduction :
 
-Cette partie de Configuration décrit le comportement produit, les points d’entrée et les limites d’implémentation. Les boutons, commandes, clés et extensions restent des contrats stables.
+```
+Settings → Translation → Target Language
+Default: English
+```
 
-### Configuration : recherche
+---
 
-Cette partie de Configuration décrit le comportement produit, les points d’entrée et les limites d’implémentation. Les boutons, commandes, clés et extensions restent des contrats stables.
+## 5. Intégration de la recherche
 
-## 6. Configuration des workflows
+### Tavily (Recommandé)
 
-La configuration de Configuration se fait dans les paramètres Notemd. Provider, modèle, sortie, langue et traitement par lots interagissent; identifiez si le changement touche le fichier courant, un dossier ou un workflow.
+**Service de recherche optimisé par l’IA :**
 
-### Configuration : workflows et tâches
+```
+Settings → Search → Service: Tavily
+API Key: tvly-...
+```
 
-Cette partie de Configuration décrit le comportement produit, les points d’entrée et les limites d’implémentation. Les boutons, commandes, clés et extensions restent des contrats stables.
+Obtenir la clé : [tavily.com](https://tavily.com/)
 
-### Configuration : explication principale
+**Fonctionnalités :**
+- Résultats de haute qualité
+- Résumés optimisés par l’IA
+- Citations de source
 
-Cette partie de Configuration décrit le comportement produit, les points d’entrée et les limites d’implémentation. Les boutons, commandes, clés et extensions restent des contrats stables.
+### DuckDuckGo (Expérimental)
+
+**Aucune clé API nécessaire :**
+
+```
+Settings → Search → Service: DuckDuckGo
+```
+
+**Remarque :** Qualité inférieure, sans personnalisation.
+
+---
+
+## 6. Configuration du flux de travail
+
+### Création de flux de travail personnalisés
+
+**Les workflows associent plusieurs tâches à un seul bouton.**
+
+1. **Paramètres → Flux de travail → Ajouter un flux de travail**
+2. **Nom** : « Flux d’analyse de papier »
+3. **DSL** : `process-current-add-links>extract-concepts-current>research-and-summarize>summarize-as-mermaid`
+4. **Enregistrer**
+
+Un nouveau bouton apparaît dans la barre latérale gauche.
+
+### Syntaxe DSL
+
+**Format :** `action1>action2>action3`
+
+**Actions disponibles :**
+- `process-current-add-links` — Ajouter des liens wiki à la note actuelle
+- `extract-concepts-current` — Générer des notes de concept
+- `research-and-summarize` — Recherche sur le web + résumé
+- `translate-current` — Traduire la note actuelle
+- `summarize-as-mermaid` — Générer le diagramme Mermaid
+- `process-folder-add-links` — Traitement par lots de dossier
+
+**Exemples de flux de travail :**
+
+**Extraction rapide de concepts :**
+```
+process-current-add-links>extract-concepts-current
+```
+
+**Recherche approfondie :**
+```
+process-current-add-links>research-and-summarize>extract-concepts-current
+```
+
+**Analyse multilingue :**
+```
+translate-current>process-current-add-links>extract-concepts-current
+```
+
+---
 
 ## 7. Paramètres avancés
 
-La configuration de Configuration se fait dans les paramètres Notemd. Provider, modèle, sortie, langue et traitement par lots interagissent; identifiez si le changement touche le fichier courant, un dossier ou un workflow.
+### Traitement par lots
 
-### Configuration : workflows et tâches
+**Traiter plusieurs fichiers en parallèle :**
 
-Cette partie de Configuration décrit le comportement produit, les points d’entrée et les limites d’implémentation. Les boutons, commandes, clés et extensions restent des contrats stables.
+```
+Settings → Advanced → Batch Processing
+Concurrency: 3 (default)
+```
 
-### Configuration : explication principale
+Plus élevé = plus rapide, mais plus d’appels API.
 
-Cette partie de Configuration décrit le comportement produit, les points d’entrée et les limites d’implémentation. Les boutons, commandes, clés et extensions restent des contrats stables.
+### Éclatement intelligent
 
-### Configuration : explication principale
+**Pour les notes longues, divisez-les en parties :**
 
-Cette partie de Configuration décrit le comportement produit, les points d’entrée et les limites d’implémentation. Les boutons, commandes, clés et extensions restent des contrats stables.
+```
+Settings → Advanced → Smart Chunking
+Chunk Size: 2000 words (default)
+Overlap: 200 words (default)
+```
 
-### Configuration : explication principale
+Empêche les erreurs de limite de tokens.
 
-Cette partie de Configuration décrit le comportement produit, les points d’entrée et les limites d’implémentation. Les boutons, commandes, clés et extensions restent des contrats stables.
+### Panneau de diagnostic
 
-## Configuration : configuration et modèles
+**Afficher les journaux détaillés :**
 
-La configuration de Configuration se fait dans les paramètres Notemd. Provider, modèle, sortie, langue et traitement par lots interagissent; identifiez si le changement touche le fichier courant, un dossier ou un workflow.
+```
+Settings → Advanced → Enable Diagnostics
+```
 
-### Configuration : configuration et modèles
+Affiche :
+- API requêtes/réponses
+- Utilisation des tokens
+- Délais de traitement
+- Erreurs
 
-La configuration de Configuration se fait dans les paramètres Notemd. Provider, modèle, sortie, langue et traitement par lots interagissent; identifiez si le changement touche le fichier courant, un dossier ou un workflow.
+### Détection de concepts dupliqués
 
-## Configuration : configuration et modèles
+**Éviter les concepts presque identiques :**
 
-La configuration de Configuration se fait dans les paramètres Notemd. Provider, modèle, sortie, langue et traitement par lots interagissent; identifiez si le changement touche le fichier courant, un dossier ou un workflow.
+```
+Settings → Advanced → Synonym Suppression
+Threshold: 0.8 (default, 0-1)
+```
 
-### Configuration : explication principale
+Plus élevé = fusion plus agressive.
 
-Cette partie de Configuration décrit le comportement produit, les points d’entrée et les limites d’implémentation. Les boutons, commandes, clés et extensions restent des contrats stables.
+---
 
-### Configuration : recherche
+## Profils de configuration
 
-Cette partie de Configuration décrit le comportement produit, les points d’entrée et les limites d’implémentation. Les boutons, commandes, clés et extensions restent des contrats stables.
+### Paramètres d’exportation/importation
 
-### Configuration : limites et gouvernance
+**Partager les configurations entre appareils :**
 
-Cette partie de Configuration décrit le comportement produit, les points d’entrée et les limites d’implémentation. Les boutons, commandes, clés et extensions restent des contrats stables.
+1. **Paramètres → Avancé → Exporter la configuration**
+2. Enregistre `notemd-config.json`
+3. Sur le nouveau dispositif : **Importer la configuration**
 
-### Configuration : traduction et langues
+**Ce qui est inclus :**
+- Clés du fournisseur API (facultatif)
+- Sélections de modèles
+- Chemins de sortie
+- Flux de travail personnalisés
 
-Cette partie de Configuration décrit le comportement produit, les points d’entrée et les limites d’implémentation. Les boutons, commandes, clés et extensions restent des contrats stables.
+---
 
-## Configuration : configuration et modèles
+## Configurations recommandées
 
-Cette section sert à diagnostiquer les échecs courants liés à Configuration. Vérifiez d’abord les diagnostics Notemd, le statut HTTP du Provider, le nom du modèle, le réseau et les limites de débit.
+### Pour les étudiants
 
-### Configuration : configuration et modèles
+```
+Provider: OpenAI (gpt-4o-mini)
+Concept Folder: concepts/
+UI Language: System
+Output Language: System
+Workflow: "Study Flow" (add-links>extract-concepts)
+```
 
-La configuration de Configuration se fait dans les paramètres Notemd. Provider, modèle, sortie, langue et traitement par lots interagissent; identifiez si le changement touche le fichier courant, un dossier ou un workflow.
+### Pour les chercheurs
 
-### Configuration : configuration et modèles
+```
+Providers:
+  - Linking: DeepSeek (cheap, many calls)
+  - Concepts: Claude Sonnet (high quality)
+  - Research: GPT-4o (web-grounded)
+Concept Folder: notes/concepts/
+Hierarchical: Yes
+Workflow: "Paper Flow" (add-links>extract>research>diagram)
+```
 
-Cette partie de Configuration décrit le comportement produit, les points d’entrée et les limites d’implémentation. Les boutons, commandes, clés et extensions restent des contrats stables.
+### Pour les utilisateurs soucieux de leur vie privée
 
-### Configuration : configuration et modèles
+```
+Provider: Ollama (llama3.1)
+All tasks: Local model
+Search: DuckDuckGo (no API)
+Diagnostics: Off
+```
 
-Cette partie de Configuration décrit le comportement produit, les points d’entrée et les limites d’implémentation. Les boutons, commandes, clés et extensions restent des contrats stables.
+### Pour le travail bilingue
 
-## Étapes suivantes
+```
+UI Language: Chinese
+Output Language: English
+Translation Target: Chinese
+Provider: Gemini (multilingual)
+```
 
-Pour continuer, choisissez la page qui correspond directement à votre chaîne de travail: Provider, fonction principale, traitement par lots, dépannage ou export de diagrammes.
+---
+
+## Résolution des problèmes de configuration
+
+### Les paramètres ne sont pas enregistrés
+- Vérifier les permissions du fichier dans `.obsidian/plugins/notemd/`
+- Essayez : Désactiver le plugin → Réactiver
+
+### API Clé invalide
+- Aucun espace supplémentaire
+- Vérifier l’expiration
+- Vérifier les crédits dans le tableau de bord du fournisseur
+
+### Les modèles ne s’chargent pas.
+- Cliquez sur « Obtenir la liste des modèles » pour mettre à jour
+- Vérifier la connectivité réseau
+- Essayez différents fournisseurs
+
+---
+
+## Prochaines étapes
+
+- 📖 [Découvrir les fonctionnalités](../features/wiki-links)
+- 🔌 [Guides de configuration du fournisseur](../providers/overview)
+- ❓ [FAQ](../faq)

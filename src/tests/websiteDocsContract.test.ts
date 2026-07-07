@@ -1,11 +1,45 @@
 import * as fs from 'fs';
 import * as path from 'path';
 
+const matter = require('../../website/node_modules/gray-matter');
+
 function markdownHeadings(content: string): string[] {
-    return content
-        .split(/\r?\n/)
-        .filter(line => /^#{1,3} /.test(line))
-        .map(line => line.replace(/^#+\s+/, '').trim());
+    const headings: string[] = [];
+    let inFence = false;
+
+    for (const line of content.split(/\r?\n/)) {
+        if (line.trim().startsWith('```')) {
+            inFence = !inFence;
+            continue;
+        }
+        if (inFence || !/^#{1,6} /.test(line)) {
+            continue;
+        }
+        headings.push(line.replace(/^#+\s+/, '').trim());
+    }
+
+    return headings;
+}
+
+function markdownHeadingLevels(content: string): number[] {
+    const levels: number[] = [];
+    let inFence = false;
+
+    for (const line of content.split(/\r?\n/)) {
+        if (line.trim().startsWith('```')) {
+            inFence = !inFence;
+            continue;
+        }
+        if (inFence) {
+            continue;
+        }
+        const match = line.match(/^(#{1,6})\s+/);
+        if (match) {
+            levels.push(match[1].length);
+        }
+    }
+
+    return levels;
 }
 
 describe('website documentation contract', () => {
@@ -30,6 +64,16 @@ describe('website documentation contract', () => {
         'utf8'
     ));
     const localizedLocales = ['zh-CN', 'zh-Hant', 'ja', 'fr', 'de', 'es', 'ko'];
+    const localizedFillerMarkers = [
+        '这一部分解释产品行为',
+        '這一部分說明產品行為',
+        '製品の挙動',
+        'comportement produit',
+        'Produktverhalten',
+        'comportamiento del producto',
+        '제품 동작',
+    ];
+    const placeholderPollutionPattern = /NMDPH|NMDSEGMENT|@@\d+@@/;
 
     function listMdxFiles(root: string): string[] {
         return fs.readdirSync(root, { withFileTypes: true }).flatMap(entry => {
@@ -52,7 +96,7 @@ describe('website documentation contract', () => {
         expect(markdownHeadings(chineseIntro)).toHaveLength(markdownHeadings(englishIntro).length);
 
         expect(englishIntro).toContain('Diagram Capability Direction');
-        expect(chineseIntro).toContain('图表能力方向');
+        expect(chineseIntro).toMatch(/图表.*方向/);
         expect(englishIntro).toContain('Notemd vs Other Obsidian AI Plugins');
         expect(chineseIntro).toContain('Notemd 与其他 Obsidian AI 插件对比');
 
@@ -62,127 +106,147 @@ describe('website documentation contract', () => {
             expect(content).toContain('TikZJax');
             expect(content).toContain('Draw.io');
             expect(content).toContain('Drawnix');
-            expect(content).toContain('source-only');
         }
     });
 
     test('diagram pages document circuitikz as a constrained prototype in both languages', () => {
         expect(markdownHeadings(chineseDiagrams)).toHaveLength(markdownHeadings(englishDiagrams).length);
         expect(englishDiagrams).toContain('Current circuitikz Prototype');
-        expect(chineseDiagrams).toContain('当前 circuitikz 原型');
+        expect(chineseDiagrams).toMatch(/当前.*circuitikz.*原型/);
+
+        const sharedDiagramContractTerms = [
+            'circuitikz',
+            'TikZJax',
+            'CircuitSpec',
+            'common-source-amplifier',
+            'cmos-inverter-v1',
+            'cmos-buffer',
+            'cmos-buffer-v1',
+            'cmos-transmission-gate',
+            'cmos-transmission-gate-v1',
+            'cmos-nand2',
+            'cmos-nand2-v1',
+            'cmos-nor2',
+            'cmos-nor2-v1',
+            'layoutHints.inputSide',
+            'layoutHints.outputSide',
+            '--compile-log',
+            '--diagnostics-output',
+            '--compile-executable',
+            '--compile-arg',
+            '--expected-artifact',
+            '--expected-svg-text',
+            '--topology-reference',
+            '--repair-brief-output',
+            '--repair-brief',
+            'notemd.circuitikz.repair-brief.v1',
+            'repairPrompt',
+            'diagnosticFocus',
+            'acceptanceCriteria',
+            'topology-preserving-circuitikz-repair',
+            'repairAcceptance',
+            'notemd.circuitikz.repair-acceptance.v1',
+            'readyForVisualAcceptance',
+            'remainingChecks',
+            '--repair-acceptance-output',
+            'shell: false',
+            'RenderArtifact.diagnostics',
+            '.tex',
+            '.tikz',
+            '.drawio',
+            '.drawnix',
+            'Draw.io',
+            'Drawnix',
+            'mxfile',
+            'mxGraphModel',
+            'type: "drawnix"',
+            'elements',
+            'diagrams.net',
+            'compileExecution',
+            'compileExecution.renderSmoke',
+            'render-svg-text-missing',
+            'render-svg-text-path-only',
+            'aria-label',
+            '<title>',
+            '<desc>',
+            'render-svg-out-of-bounds',
+            'render-svg-text-overlap',
+            'render-svg-label-overlap',
+            'render-svg-path-glyph-overlap',
+            'pathOnlyGlyphUseCount',
+            'A/a',
+            'C/S/Q/T',
+            '<use href="#...">',
+            'polyline',
+            'polygon',
+            'tspan',
+            'text-anchor',
+            'render-png-blank',
+            'render-png-foreground-dense',
+            'render-png-foreground-too-small',
+            'render-png-content-clipped',
+            'foregroundBounds',
+            'foregroundDensity',
+            'circuitikz.sty',
+            'Golden Reference',
+            'TikZJax Render',
+            '\\usepackage{circuitikz}',
+            'pmos',
+            'nmos',
+            'npm run diagram:export-artifact',
+            'npm run diagram:export-circuitikz',
+            'npm run diagram:smoke-circuitikz',
+            'docs/maintainer/fixtures/circuitikz/common-source-nmos-v1.json',
+            'docs/maintainer/fixtures/circuitikz/cmos-inverter-v1.json',
+            'docs/maintainer/fixtures/circuitikz/cmos-buffer-v1.json',
+            'docs/maintainer/fixtures/circuitikz/cmos-transmission-gate-v1.json',
+            'docs/maintainer/fixtures/circuitikz/cmos-nand2-v1.json',
+            'docs/maintainer/fixtures/circuitikz/cmos-nor2-v1.json',
+        ];
 
         for (const content of [englishDiagrams, chineseDiagrams]) {
-            expect(content).toContain('circuitikz');
-            expect(content).toContain('TikZJax');
-            expect(content).toContain('CircuitSpec');
-            expect(content).toContain('common-source-amplifier');
-            expect(content).toContain('cmos-inverter-v1');
-            expect(content).toContain('cmos-buffer');
-            expect(content).toContain('cmos-buffer-v1');
-            expect(content).toContain('cmos-transmission-gate');
-            expect(content).toContain('cmos-transmission-gate-v1');
-            expect(content).toContain('cmos-nand2');
-            expect(content).toContain('cmos-nand2-v1');
-            expect(content).toContain('cmos-nor2');
-            expect(content).toContain('cmos-nor2-v1');
-            expect(content).toContain('layoutHints.inputSide');
-            expect(content).toContain('layoutHints.outputSide');
-            expect(content).toContain('port placement');
-            expect(content).toContain('--compile-log');
-            expect(content).toContain('--diagnostics-output');
-            expect(content).toContain('TikZ path syntax');
-            expect(content).toContain('runaway arguments');
-            expect(content).toContain('--compile-executable');
-            expect(content).toContain('--compile-arg');
-            expect(content).toContain('--expected-artifact');
-            expect(content).toContain('--expected-svg-text');
-            expect(content).toContain('--topology-reference');
-            expect(content).toContain('--repair-brief-output');
-            expect(content).toContain('--repair-brief');
-            expect(content).toContain('notemd.circuitikz.repair-brief.v1');
-            expect(content).toContain('repairPrompt');
-            expect(content).toContain('diagnosticFocus');
-            expect(content).toContain('acceptanceCriteria');
-            expect(content).toContain('topology-preserving-circuitikz-repair');
-            expect(content).toContain('repairAcceptance');
-            expect(content).toContain('notemd.circuitikz.repair-acceptance.v1');
-            expect(content).toContain('readyForVisualAcceptance');
-            expect(content).toContain('remainingChecks');
-            expect(content).toContain('--repair-acceptance-output');
-            expect(content).toContain('shell: false');
-            expect(content).toContain('RenderArtifact.diagnostics');
-            expect(content).toContain('diagnostic summary');
-            expect(content).toContain('error/warning/info');
-            expect(content).toContain('diagnostics-aware history entries');
-            expect(content).toContain('source-only');
-            expect(content).toContain('.tex');
-            expect(content).toContain('.tikz');
-            expect(content).toContain('circuitikz source-only');
-            expect(content).toContain('.drawio');
-            expect(content).toContain('.drawnix');
-            expect(content).toContain('Draw.io');
-            expect(content).toContain('Drawnix');
-            expect(content).toContain('source-only preview boundary');
-            expect(content).toContain('mxfile');
-            expect(content).toContain('mxGraphModel');
-            expect(content).toContain('type: "drawnix"');
-            expect(content).toContain('elements');
-            expect(content).toContain('diagrams.net');
-            expect(content).toContain('whiteboard host');
-            expect(content).toContain('artifact diagnostics');
-            expect(content).toContain('compileExecution');
-            expect(content).toContain('compileExecution.renderSmoke');
-            expect(content).toContain('render-svg-text-missing');
-            expect(content).toContain('render-svg-text-path-only');
-            expect(content).toContain('accessibility metadata');
-            expect(content).toContain('aria-label');
-            expect(content).toContain('<title>');
-            expect(content).toContain('<desc>');
-            expect(content).toContain('render-svg-out-of-bounds');
-            expect(content).toContain('render-svg-text-overlap');
-            expect(content).toContain('render-svg-label-overlap');
-            expect(content).toContain('render-svg-path-glyph-overlap');
-            expect(content).toContain('label-vs-drawing');
-            expect(content).toContain('transform-aware geometry');
-            expect(content).toContain('pathOnlyGlyphUseCount');
-            expect(content).toContain('path-only glyph placement');
-            expect(content).toContain('path-only glyph overlap');
-            expect(content).toContain('SVG number grammar');
-            expect(content).toContain('leading-dot decimals');
-            expect(content).toContain('explicit plus signs');
-            expect(content).toContain('stroke-width-aware SVG bounds');
-            expect(content).toContain('label overlap checks');
-            expect(content).toContain('exact arc bounds');
-            expect(content).toContain('A/a arc extrema');
-            expect(content).toContain('exact Bezier curve bounds');
-            expect(content).toContain('C/S/Q/T curve extrema');
-            expect(content).toContain('<use href="#...">');
-            expect(content).toContain('polyline');
-            expect(content).toContain('polygon');
-            expect(content).toContain('tspan');
-            expect(content).toContain('text-anchor');
-            expect(content).toContain('render-png-blank');
-            expect(content).toContain('render-png-foreground-dense');
-            expect(content).toContain('render-png-foreground-too-small');
-            expect(content).toContain('render-png-content-clipped');
-            expect(content).toContain('foregroundBounds');
-            expect(content).toContain('foregroundDensity');
-            expect(content).toContain('circuitikz.sty');
-            expect(content).toContain('Golden Reference');
-            expect(content).toContain('TikZJax Render');
-            expect(content).toContain('\\usepackage{circuitikz}');
-            expect(content).toContain('pmos');
-            expect(content).toContain('nmos');
-            expect(content).toContain('npm run diagram:export-artifact');
-            expect(content).toContain('npm run diagram:export-circuitikz');
-            expect(content).toContain('npm run diagram:smoke-circuitikz');
-            expect(content).toContain('topology-preserving repair');
-            expect(content).toContain('docs/maintainer/fixtures/circuitikz/common-source-nmos-v1.json');
-            expect(content).toContain('docs/maintainer/fixtures/circuitikz/cmos-inverter-v1.json');
-            expect(content).toContain('docs/maintainer/fixtures/circuitikz/cmos-buffer-v1.json');
-            expect(content).toContain('docs/maintainer/fixtures/circuitikz/cmos-transmission-gate-v1.json');
-            expect(content).toContain('docs/maintainer/fixtures/circuitikz/cmos-nand2-v1.json');
-            expect(content).toContain('docs/maintainer/fixtures/circuitikz/cmos-nor2-v1.json');
+            for (const term of sharedDiagramContractTerms) {
+                expect(content).toContain(term);
+            }
+        }
+
+        for (const englishPhrase of [
+            'port placement',
+            'TikZ path syntax',
+            'runaway arguments',
+            'diagnostic summary',
+            'error/warning/info',
+            'diagnostics-aware history entries',
+            'source-only',
+            'circuitikz source-only',
+            'source-only preview boundary',
+            'whiteboard host',
+            'artifact diagnostics',
+            'accessibility metadata',
+            'transform-aware geometry',
+            'label-vs-drawing',
+            'path-only glyph placement',
+            'path-only glyph overlap',
+            'SVG number grammar',
+            'leading-dot decimals',
+            'explicit plus signs',
+            'stroke-width-aware SVG bounds',
+            'label overlap checks',
+            'exact arc bounds',
+            'exact Bezier curve bounds',
+            'topology-preserving repair',
+        ]) {
+            expect(englishDiagrams).toContain(englishPhrase);
+        }
+
+        for (const chineseSemanticMarker of [
+            '仅源代码',
+            '拓扑',
+            '诊断',
+            '黄金参考',
+            '保持拓扑结构',
+        ]) {
+            expect(chineseDiagrams).toContain(chineseSemanticMarker);
         }
     });
 
@@ -201,6 +265,34 @@ describe('website documentation contract', () => {
                 .map(filePath => path.relative(localeRoot, filePath).replace(/\\/g, '/'))
                 .sort();
             expect(actualSourceDocs).toEqual(expectedSourceDocs);
+        }
+    });
+
+    test('all localized docs mirror English heading structure without generated filler or placeholder leakage', () => {
+        const docsRoot = path.join(websiteRoot, 'docs');
+
+        for (const sourcePath of sourceDocPaths()) {
+            const englishContent = fs.readFileSync(path.join(docsRoot, sourcePath), 'utf8');
+            const expectedHeadingLevels = markdownHeadingLevels(englishContent);
+
+            for (const locale of localizedLocales) {
+                const localizedPath = path.join(
+                    websiteRoot,
+                    'i18n',
+                    locale,
+                    'docusaurus-plugin-content-docs',
+                    'current',
+                    sourcePath
+                );
+                const localizedContent = fs.readFileSync(localizedPath, 'utf8');
+
+                expect(() => matter(localizedContent)).not.toThrow();
+                expect(markdownHeadingLevels(localizedContent)).toEqual(expectedHeadingLevels);
+                expect(localizedContent).not.toMatch(placeholderPollutionPattern);
+                for (const marker of localizedFillerMarkers) {
+                    expect(localizedContent).not.toContain(marker);
+                }
+            }
         }
     });
 

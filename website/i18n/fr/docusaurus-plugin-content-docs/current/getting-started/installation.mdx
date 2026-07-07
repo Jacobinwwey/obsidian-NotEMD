@@ -1,9 +1,14 @@
 ---
 id: installation
 title: Installation
-description: Explique le rôle de Installation dans Notemd, sa configuration, ses limites de workflow et les vérifications courantes.
+description: Comment installer Notemd dans Obsidian
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [installation, setup, obsidian plugin]
+concepts: [Installation, Community Plugins, BRAT, Manual Install]
+citations:
+  - title: Obsidian
+    url: https://obsidian.md
 ---
 
 import TLDR from '@site/src/components/TLDR';
@@ -11,57 +16,118 @@ import TLDR from '@site/src/components/TLDR';
 # Installation
 
 <TLDR>
-**Résumé：** Explique le rôle de Installation dans Notemd, sa configuration, ses limites de workflow et les vérifications courantes. Les commandes, clés de configuration, extensions et noms de Provider ci-dessous restent en anglais afin de correspondre exactement à l’interface, au CLI et aux journaux.
+**Installez Notemd en moins de 2 minutes.** Deux méthodes : (1) les plugins communautaires Obsidian (recommandés, installation en un clic), ou (2) installation manuelle via GitHub Releases. Nécessite Obsidian 0.15.0+. Fonctionne sous Windows, macOS, Linux, iOS et Android. Aucune dépendance externe. Plus de 4 000 téléchargements, sous licence MIT.
 </TLDR>
 
-## Installation : workflows et tâches
+## Méthode 1 : Plugins communautaires (recommandé)
 
-Cette partie de Installation décrit le comportement produit, les points d’entrée et les limites d’implémentation. Les boutons, commandes, clés et extensions restent des contrats stables.
+1. Ouvrez les **Obsidian Paramètres** (icône ⚙️ ou `Ctrl/Cmd + ,`)
+2. Aller vers **Plugins communautaires**
+3. Cliquez sur **Parcourir**
+4. Rechercher **"Notemd"**
+5. Cliquez sur **Installer**
+6. Cliquez sur **Activer**
 
-## Installation : installation et préparation
+**Fait !** Vous verrez l’icône Notemd dans votre barre latérale gauche.
 
-Cette partie de Installation décrit le comportement produit, les points d’entrée et les limites d’implémentation. Les boutons, commandes, clés et extensions restent des contrats stables.
+## Méthode 2 : Installation manuelle
 
-### Installation : installation et préparation
+### Prérequis
+- Obsidian 0.15.0 ou une version ultérieure
+- Git (facultatif, pour le clonage)
 
-Cette partie de Installation décrit le comportement produit, les points d’entrée et les limites d’implémentation. Les boutons, commandes, clés et extensions restent des contrats stables.
+### Étapes
 
-### Installation : workflows et tâches
+1. **Télécharger des fichiers** depuis [GitHub Releases](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/latest) :
+   - `main.js`
+   - `styles.css`
+   - `manifest.json`
 
-Cette partie de Installation décrit le comportement produit, les points d’entrée et les limites d’implémentation. Les boutons, commandes, clés et extensions restent des contrats stables.
+2. **Localisez le dossier des plugins de votre coffre-fort :**
+   ```
+   <your-vault>/.obsidian/plugins/
+   ```
 
-## Installation : installation et préparation
+Si le dossier `plugins` n’existe pas, créez-le.
 
-Cette partie de Installation décrit le comportement produit, les points d’entrée et les limites d’implémentation. Les boutons, commandes, clés et extensions restent des contrats stables.
+3. **Créer le dossier Notemd :**
+   ```
+   <your-vault>/.obsidian/plugins/notemd/
+   ```
 
-## Installation : recommandations suivantes
+4. **Copiez les trois fichiers** dans le dossier `notemd`.
 
-Cette partie de Installation décrit le comportement produit, les points d’entrée et les limites d’implémentation. Les boutons, commandes, clés et extensions restent des contrats stables.
+5. **Recharger Obsidian:**
+   - Appuyez sur `Ctrl/Cmd + R`, ou
+   - Redémarrer Obsidian
 
-## Étapes suivantes
+6. **Activer le plugin :**
+   - Paramètres → Plugins communautaires
+   - Trouver "Notemd" dans la liste
+   - Le mettre en marche
 
-Pour continuer, choisissez la page qui correspond directement à votre chaîne de travail: Provider, fonction principale, traitement par lots, dépannage ou export de diagrammes.
+## Alternative : Installer via BRAT
 
-## Installation : installation et préparation
+Si vous utilisez le [BRAT plugin](https://github.com/TfTHacker/obsidian42-brat) :
 
-Cette partie de Installation décrit le comportement produit, les points d’entrée et les limites d’implémentation. Les boutons, commandes, clés et extensions restent des contrats stables.
+1. Ouvrir les paramètres de BRAT
+2. Cliquez sur « Ajouter le plugin bêta ».
+3. Entrer : `Jacobinwwey/obsidian-NotEMD`
+4. Cliquez sur « Ajouter un plugin »
+5. Activer Notemd dans les plugins communautaires
 
-## Installation : installation et préparation
+## Vérification
 
-Cette partie de Installation décrit le comportement produit, les points d’entrée et les limites d’implémentation. Les boutons, commandes, clés et extensions restent des contrats stables.
+Après l'installation, vérifiez que Notemd fonctionne :
 
-## Installation : explication principale
+1. Ouvrir n’importe quelle note
+2. Cliquez avec le bouton droit dans l’éditeur
+3. Vous devriez voir des commandes Notemd telles que :
+   - "Traiter le fichier (ajouter des liens)"
+   - « Extraire les concepts »
+   - « Rechercher et résumer »
 
-Cette partie de Installation décrit le comportement produit, les points d’entrée et les limites d’implémentation. Les boutons, commandes, clés et extensions restent des contrats stables.
+## Prochaines étapes
 
-### Installation : installation et préparation
+- **Configurer le fournisseur LLM :** [Début rapide →](./quick-start)
+- **Résolution de problèmes :** [Problèmes courants →](../advanced/troubleshooting)
 
-Cette partie de Installation décrit le comportement produit, les points d’entrée et les limites d’implémentation. Les boutons, commandes, clés et extensions restent des contrats stables.
+## Exigences système
 
-### Installation : installation et préparation
+| Plateforme | Version | Statut |
+|----------|---------|--------|
+| **Obsidian** | 0.15.0+ | Obligatoire |
+| **Windows** | 7+ | ✅ Supporté |
+| **macOS** | 10.15+ | ✅ Supporté |
+| **Linux** | N’importe lequel | ✅ Supporté |
+| **iOS** | 15+ | ✅ Supporté |
+| **Android** | 5+ | ✅ Supporté |
 
-Cette partie de Installation décrit le comportement produit, les points d’entrée et les limites d’implémentation. Les boutons, commandes, clés et extensions restent des contrats stables.
+## Désinstallation
 
-## Installation : dépannage
+Pour supprimer Notemd :
 
-Cette partie de Installation décrit le comportement produit, les points d’entrée et les limites d’implémentation. Les boutons, commandes, clés et extensions restent des contrats stables.
+1. Paramètres → Plugins communautaires
+2. Trouver Notemd
+3. Cliquez sur l’icône ❌
+4. Optionnellement, supprimez le dossier du plugin : `<vault>/.obsidian/plugins/notemd/`
+
+Vos données (notes, notes de concept, etc.) restent inchangées.
+
+## Mise à jour
+
+### Mise à jour automatique (recommandé)
+Obsidian vérifie automatiquement la présence de mises à jour de plugins. Lorsqu’une nouvelle version est disponible :
+1. Paramètres → Plugins communautaires
+2. Cliquez sur « Vérifier les mises à jour ».
+3. Cliquez sur « Mettre à jour » à côté de Notemd
+
+### Mise à jour manuelle
+Téléchargez la dernière version et remplacez les trois fichiers dans votre dossier de plugin.
+
+## Obtenir de l’aide
+
+- 📖 [Guide de démarrage rapide](./quick-start)
+- ❓ [FAQ](../faq)
+- 💬 [Communauté Discord](https://discord.gg/qnGgsQ9W)
+- 🐛 [Signaler des problèmes](https://github.com/Jacobinwwey/obsidian-NotEMD/issues)

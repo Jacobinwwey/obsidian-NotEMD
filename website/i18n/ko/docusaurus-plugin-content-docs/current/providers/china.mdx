@@ -1,39 +1,75 @@
 ---
 id: china
-title: 중국 제공자
-description: Notemd에서 중국 제공자의 목적, 설정, 워크플로 경계와 일반적인 점검 항목을 설명합니다.
+title: 중국 공급업체들
+description: Qwen, DeepSeek, GLM 등을 설정하세요.
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [china providers, deepseek, qwen, glm, doubao, moonshot, mimo, minimax, baidu, siliconflow, huawei]
+concepts: [China Providers, DeepSeek, Qwen, Doubao, Moonshot, MiMo, GLM, MiniMax, Baidu, SiliconFlow, Huawei]
+citations:
+  - title: Qwen API
+    url: https://help.aliyun.com/zh/dashscope
+  - title: DeepSeek API
+    url: https://platform.deepseek.com
 ---
 
 import TLDR from '@site/src/components/TLDR';
 
-# 중국 제공자
+# 중국 공급업체들
 
 <TLDR>
-**요약：** Notemd에서 중국 제공자의 목적, 설정, 워크플로 경계와 일반적인 점검 항목을 설명합니다. 아래의 명령, 설정 키, 파일 확장자, Provider 이름은 플러그인 UI, CLI, 로그와 정확히 대응하도록 영어로 유지합니다.
+**Notemd는 주로 OpenAI와 호환되는 엔드포인트를 통해 중국 지역 및 중국 기반의 제공업체들을 지원합니다.** 현재 포함된 항목은 DeepSeek, Qwen, Qwen Code, Doubao, Moonshot, Xiaomi MiMo, GLM, MiniMax, Baidu Qianfan, SiliconFlow, Huawei Cloud MaaS, 그리고 Z AI입니다. 이 방식의 장점은 지역적 접근성과 비용 관리이며, 단점은 제공업체별로 다른 모델 명명법과 계정 접근 제한입니다.
+
+이것은 [Obsidian AI 지식 관리 가이드](/docs/pillar-ai-knowledge)의 일부입니다.
 </TLDR>
 
-## 설정
+## 설치
 
-중국 제공자 설정은 Notemd 설정 화면에서 합니다. Provider, 모델, 출력 경로, 언어, 일괄 처리는 서로 연결되어 있으므로 현재 파일, 폴더 작업, 워크플로 중 어디에 영향을 주는지 확인하세요.
+공급자 계정을 생성한 다음 API 키를 만들고, 일반적인 OpenAI 프로필을 사용하는 대신 해당하는 Notemd 공급자 사전 설정을 선택하세요. 이 사전 설정에는 기본적인 Base URL, 모델, API 테스트 모드, 모델 발견 동작, 그리고 공급자에 특정된 UI 필드들이 포함됩니다.
 
-## 엔드포인트와 인증
+여기서는 작업별 모델 선택을 적극적으로 활용하세요. 예를 들어, 추론이 많이 필요한 워크플로우의 경우 DeepSeek 또는 GLM를 사용하고, 중국어 관련 작업에는 Qwen 또는 Moonshot를 활용하며, 해당 계정에서 코드 생성 모델을 제공하는 경우 코딩 작업은 Qwen Code로 전달하세요.
 
-중국 제공자의 이 부분은 제품 동작, 사용 진입점, 엔지니어링 경계를 설명합니다. UI 버튼, 명령 이름, 설정 키, 확장자는 안정적인 계약으로 봅니다.
+## 엔드포인트 및 인증
 
-## 모델 검색
+| 제공업체 | 기본 모델 | 베이스 URL |
+|----------|---------------|----------|
+| DeepSeek | `deepseek-v4-pro` | `api.deepseek.com` |
+| Qwen | `qwen3-235b-a22b` | `dashscope.aliyuncs.com/compatible-mode/v1` |
+| Qwen Code | `qwen3-coder-plus` | `dashscope.aliyuncs.com/compatible-mode/v1` |
+| Doubao | (엔드포인트 ID가 필요합니다.) | `ark.cn-beijing.volces.com/api/v3` |
+| Moonshot | `kimi-k2-0905-preview` | `api.moonshot.cn/v1` |
+| Xiaomi MiMo | `mimo-v2.5-pro` | `api.xiaomimimo.com/v1` |
+| GLM | `glm-5` | `open.bigmodel.cn/api/paas/v4` |
+| MiniMax | `MiniMax-M2.7` | `api.minimaxi.com/v1` |
+| Baidu Qianfan | `ernie-4.5-turbo-32k` | `qianfan.baidubce.com/v2` |
+| SiliconFlow | `Qwen/QwQ-32B` | `api.siliconflow.cn/v1` |
+| Huawei Cloud MaaS | `DeepSeek-V3` | `api.modelarts-maas.com/v1` |
+| Z AI | `glm-5` | `api.z.ai/api/paas/v4` |
 
-중국 제공자의 이 부분은 제품 동작, 사용 진입점, 엔지니어링 경계를 설명합니다. UI 버튼, 명령 이름, 설정 키, 확장자는 안정적인 계약으로 봅니다.
+**참고:** Doubao은 표준 모델 이름 대신 Ark 엔드포인트 ID(형식: `ep-xxxxxxxx-xxxx-xxxx`)가 필요합니다.
+
+이러한 제공업체들 대부분은 공유된 OpenAI 호환 런타임을 사용하지만, 계정 및 모델의 의미 체계는 서로 다릅니다. 계정의 대체 엔드포인트를 확인하지 않았다면 사전 설정에 맞는 Base URL 값을 그대로 유지하십시오.
+
+## 모델 발견
+
+DeepSeek, Qwen, Qwen Code, Doubao, Moonshot, Xiaomi MiMo, GLM, Z AI, MiniMax, Baidu Qianfan, 그리고 SiliconFlow는 제공자가 목록 조회를 지원할 경우 OpenAI과 호환되는 모델 발견 기능을 사용합니다. Huawei Cloud MaaS는 ModelArts 배포 메타데이터가 일반적인 `/v1/models` 목록과 동일하지 않기 때문에 `huaweicloud-modelarts-models` 모드를 사용합니다.
+
+디스커버리 실패를 채팅이 불가능하다는 증거로 간주해서는 안 됩니다. 일부 제공업체는 모델 목록 접근 권한을 제한한 상태에서도 채팅을 허용합니다. 그런 경우 프로필에 명시적인 모델 ID를 저장하고 연결 테스트를 통해 유효성을 확인해야 합니다.
 
 ## 문제 해결
 
-이 절은 중국 제공자의 일반적인 실패 원인을 구분합니다. Notemd 진단 출력, Provider HTTP 상태, 모델 이름, 네트워크, 속도 제한을 먼저 확인하세요.
+- 인증은 성공했지만 채팅은 실패했습니다: 모델 이름이 계정의 권한 범위나 지역 외에 있을 수 있습니다.
+- Doubao는 일반적인 모델 이름을 사용할 경우 실패합니다. 배포에 필요한 경우 모델 필드에 Ark 엔드포인트 ID를 사용하십시오.
+- 추론 응답이 잘렸습니다: 제공업체별 최대 출력 토큰 수와 Notemd의 모델 기반 최대 토큰 설정을 확인해 주세요.
+- 지역별 네트워킹 방식은 다릅니다. 볼트 머신이 중국 내에 있을 경우 제공업체의 중국 지역 엔드포인트를 사용해야 하며, 계정과 네트워크 경로가 모두 유효할 때에만 국제 엔드포인트를 사용해야 합니다.
 
-## 사용할 때
+## 언제 사용할까요?
 
-중국 제공자의 이 부분은 제품 동작, 사용 진입점, 엔지니어링 경계를 설명합니다. UI 버튼, 명령 이름, 설정 키, 확장자는 안정적인 계약으로 봅니다.
+지역적 지연 시간, 결제/계정 접근성, 중국어 품질, 또는 비용이 주요 제약 요소인 경우 중국 내 서비스 제공업체를 사용하세요. 보다 단순한 프로토콜 구조나 더 강력한 서비스 제공업체 간 디버깅 일관성이 필요할 때는 직접 연결되는 OpenAI, Anthropic, Google 또는 현지 서비스 제공업체를 선호하세요.
+
+---
 
 ## 다음 단계
 
-다음에는 현재 작업 흐름과 직접 연결된 Provider 설정, 핵심 기능, 일괄 처리, 문제 해결, 다이어그램 내보내기 문서를 우선 보세요.
+- [LLM 제공업체](/docs/providers/overview) -- 전체 설정, 작업별 모델, 재시도 로직
+- [문제 해결](/docs/advanced/troubleshooting) -- 지역 연결 및 인증 오류 수정
