@@ -187,12 +187,12 @@ export class MissingVegaLiteFenceError extends Error {
 
 export class MissingPreviewableDiagramArtifactError extends Error {
     constructor() {
-        super('No previewable diagram artifact found in this file. Supported direct preview sources are Mermaid or Vega-Lite markdown fences, raw Mermaid markdown artifacts, Vega-Lite JSON (.json), JSON Canvas (.canvas), HTML (.html), circuitikz TeX (.tex/.tikz), Draw.io (.drawio), and Drawnix (.drawnix) files.');
+        super('No previewable diagram artifact found in this file or beside this source note. Supported direct preview sources are Mermaid or Vega-Lite markdown fences, raw Mermaid markdown artifacts, Vega-Lite JSON (.json), JSON Canvas (.canvas), HTML (.html), SVG (.svg), circuitikz TeX (.tex/.tikz), Draw.io (.drawio), and Drawnix (.drawnix) files.');
         this.name = 'MissingPreviewableDiagramArtifactError';
     }
 }
 
-const DIRECT_PREVIEWABLE_DIAGRAM_EXTENSIONS = new Set(['md', 'json', 'canvas', 'html', 'htm', 'tex', 'tikz', 'drawio', 'drawnix']);
+const DIRECT_PREVIEWABLE_DIAGRAM_EXTENSIONS = new Set(['md', 'json', 'canvas', 'html', 'htm', 'svg', 'tex', 'tikz', 'drawio', 'drawnix']);
 
 export function isDirectPreviewableDiagramExtension(extension: string): boolean {
     return typeof extension === 'string'
@@ -396,6 +396,40 @@ function buildHtmlPreviewArtifact(htmlContent: string): RenderArtifact {
     };
 }
 
+function looksLikeSvgSource(sourceContent: string): boolean {
+    return /<svg\b[\s\S]*<\/svg>/i.test(sourceContent);
+}
+
+function buildSvgHtmlPreviewArtifact(svgContent: string): RenderArtifact {
+    const svg = svgContent.trim();
+
+    return {
+        target: 'html',
+        content: `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; img-src data:;" />
+    <title>SVG diagram preview</title>
+    <style>
+        body { margin: 0; padding: 16px; background: Canvas; color: CanvasText; }
+        svg { display: block; max-width: 100%; height: auto; margin: 0 auto; }
+    </style>
+</head>
+<body>
+${svg}
+</body>
+</html>`,
+        mimeType: 'text/html',
+        sourceIntent: 'flowchart',
+        previewSvg: {
+            content: svg,
+            mimeType: 'image/svg+xml'
+        }
+    };
+}
+
 function looksLikeCircuitikzSource(sourceContent: string): boolean {
     return /\\begin\{circuitikz\}/i.test(sourceContent)
         || /\\usepackage(?:\[[^\]]*\])?\{circuitikz\}/i.test(sourceContent);
@@ -543,6 +577,14 @@ function resolveDirectPreviewArtifact(sourceContent: string, sourcePath: string)
         };
     }
 
+    if (normalizedPath.endsWith('.svg') && looksLikeSvgSource(sourceContent)) {
+        return {
+            artifact: buildSvgHtmlPreviewArtifact(sourceContent),
+            artifactSaved: true,
+            detectionLabel: 'SVG artifact'
+        };
+    }
+
     if ((normalizedPath.endsWith('.tex') || normalizedPath.endsWith('.tikz')) && looksLikeCircuitikzSource(sourceContent)) {
         return {
             artifact: buildCircuitikzPreviewArtifact(sourceContent),
@@ -606,6 +648,142 @@ function previewArtifactFromFile(params: {
     };
 }
 
+function getVaultPathDirectory(vaultPath: string): string {
+    const normalized = vaultPath.trim().replace(/\/+$/, '');
+    const slashIndex = normalized.lastIndexOf('/');
+    return slashIndex >= 0 ? normalized.slice(0, slashIndex) : '';
+}
+
+function getVaultPathFileName(vaultPath: string): string {
+    const normalized = vaultPath.trim().replace(/\/+$/, '');
+    const slashIndex = normalized.lastIndexOf('/');
+    return slashIndex >= 0 ? normalized.slice(slashIndex + 1) : normalized;
+}
+
+function getVaultPathBasename(vaultPath: string): string {
+    return getVaultPathFileName(vaultPath).replace(/\.[^./]+$/, '');
+}
+
+function joinVaultPath(directory: string, fileName: string): string {
+    return directory ? `${directory.replace(/\/+$/, '')}/${fileName.replace(/^\/+/, '')}` : fileName.replace(/^\/+/, '');
+}
+
+function resolveGeneratedDiagramDirectory(file: TFile, settings?: NotemdSettings): string {
+    if (settings?.useCustomSummarizeToMermaidSavePath && settings.summarizeToMermaidSavePath?.trim()) {
+        return settings.summarizeToMermaidSavePath.trim().replace(/^\/|\/$/g, '');
+    }
+
+    return getVaultPathDirectory(file.path);
+}
+
+function buildLocalGeneratedDiagramArtifactCandidates(file: TFile, settings?: NotemdSettings): string[] {
+    const directory = resolveGeneratedDiagramDirectory(file, settings);
+    const sourceBase = getVaultPathBasename(file.path);
+    const candidates = [
+        `${sourceBase}_diagram.drawio.md`,
+        `${sourceBase}_diagram.drawnix.md`,
+        `${sourceBase}_diagram.tex.md`,
+        `${sourceBase}_diagram.drawio`,
+        `${sourceBase}_diagram.drawnix`,
+        `${sourceBase}_diagram.tex`,
+        `${sourceBase}_diagram.tikz`,
+        `${sourceBase}_diagram.drawio.svg`,
+        `${sourceBase}_diagram.drawnix.svg`,
+        `${sourceBase}_diagram.tex.svg`,
+        `${sourceBase}_diagram.canvas`,
+        `${sourceBase}_diagram.html`,
+        `${sourceBase}_diagram.json`,
+        `${sourceBase}_diagram.md`,
+        `${sourceBase}_summ.md`
+    ].map(fileName => joinVaultPath(directory, fileName));
+
+    return candidates.filter((candidate, index, allCandidates) =>
+        candidate !== file.path && allCandidates.indexOf(candidate) === index
+    );
+}
+
+function resolveEmbeddedSvgPath(markdownContent: string, sourcePath: string): string | null {
+    const wikilinkMatch = markdownContent.match(/!\[\[([^\]|#]+\.svg)(?:[|#][^\]]*)?\]\]/i);
+    const markdownImageMatch = markdownContent.match(/!\[[^\]]*]\(([^)]+\.svg)\)/i);
+    const rawTarget = wikilinkMatch?.[1] ?? markdownImageMatch?.[1];
+    if (!rawTarget?.trim()) {
+        return null;
+    }
+
+    const target = decodeURIComponent(rawTarget.trim()).replace(/^\/+/, '');
+    if (target.includes('/')) {
+        return target;
+    }
+
+    return joinVaultPath(getVaultPathDirectory(sourcePath), target);
+}
+
+async function readVaultTextFile(
+    host: Pick<DiagramCommandHostAdapter, 'getFileByPath' | 'readFile'>,
+    path: string
+): Promise<string | null> {
+    if (typeof host.readFile !== 'function') {
+        return null;
+    }
+
+    const file = host.getFileByPath(path);
+    if (!(file instanceof TFile || file)) {
+        return null;
+    }
+
+    return host.readFile(file);
+}
+
+async function tryBuildSvgWrapperPreview(params: {
+    host: Pick<DiagramCommandHostAdapter, 'getFileByPath' | 'readFile'>;
+    sourceContent: string;
+    sourcePath: string;
+}): Promise<DirectPreviewArtifactResult | null> {
+    const svgPath = resolveEmbeddedSvgPath(params.sourceContent, params.sourcePath);
+    if (!svgPath) {
+        return null;
+    }
+
+    const svgContent = await readVaultTextFile(params.host, svgPath);
+    if (!svgContent || !looksLikeSvgSource(svgContent)) {
+        return null;
+    }
+
+    return {
+        artifact: buildSvgHtmlPreviewArtifact(svgContent),
+        artifactSaved: true,
+        detectionLabel: 'Obsidian SVG preview wrapper'
+    };
+}
+
+async function attachCompanionSvgPreview(params: {
+    host: Pick<DiagramCommandHostAdapter, 'getFileByPath' | 'readFile'>;
+    artifact: RenderArtifact;
+    sourcePath: string;
+}): Promise<RenderArtifact> {
+    if (params.artifact.previewSvg?.content?.trim()) {
+        return params.artifact;
+    }
+
+    if (!['circuitikz', 'drawio', 'drawnix'].includes(params.artifact.target)) {
+        return params.artifact;
+    }
+
+    const svgPath = `${params.sourcePath}.svg`;
+    const svgContent = await readVaultTextFile(params.host, svgPath);
+    if (!svgContent || !looksLikeSvgSource(svgContent)) {
+        return params.artifact;
+    }
+
+    return {
+        ...params.artifact,
+        previewSvg: {
+            content: svgContent,
+            mimeType: 'image/svg+xml'
+        }
+    };
+}
+
 async function previewArtifactFromSavedPath(params: {
     host: Pick<DiagramCommandHostAdapter, 'getFileByPath' | 'readFile' | 'openPreview'>;
     sourcePath: string;
@@ -621,12 +799,75 @@ async function previewArtifactFromSavedPath(params: {
     }
 
     const sourceContent = await params.host.readFile(savedFile);
-    return previewArtifactFromFile({
+    let directPreview: DirectPreviewArtifactResult;
+    try {
+        directPreview = previewArtifactFromFile({
+            host: params.host,
+            sourceContent,
+            sourcePath: params.sourcePath,
+            artifactSavedOverride: params.artifactSavedOverride
+        });
+    } catch (error) {
+        if (!(error instanceof MissingPreviewableDiagramArtifactError)) {
+            throw error;
+        }
+
+        const svgWrapperPreview = await tryBuildSvgWrapperPreview({
+            host: params.host,
+            sourceContent,
+            sourcePath: params.sourcePath
+        });
+        if (!svgWrapperPreview) {
+            throw error;
+        }
+
+        directPreview = svgWrapperPreview;
+        params.host.openPreview(directPreview.artifact, params.sourcePath, true);
+    }
+
+    const artifact = await attachCompanionSvgPreview({
         host: params.host,
-        sourceContent,
-        sourcePath: params.sourcePath,
-        artifactSavedOverride: params.artifactSavedOverride
+        artifact: directPreview.artifact,
+        sourcePath: params.sourcePath
     });
+    if (artifact !== directPreview.artifact) {
+        const artifactSaved = params.artifactSavedOverride ?? directPreview.artifactSaved;
+        params.host.openPreview(artifact, params.sourcePath, artifactSaved);
+        return {
+            ...directPreview,
+            artifact,
+            artifactSaved
+        };
+    }
+
+    return directPreview;
+}
+
+async function previewLocalGeneratedDiagramArtifact(params: {
+    host: Pick<DiagramCommandHostAdapter, 'getFileByPath' | 'readFile' | 'openPreview'>;
+    file: TFile;
+    settings?: NotemdSettings;
+    reporter: ProgressReporter;
+}): Promise<DirectPreviewArtifactResult | null> {
+    for (const candidatePath of buildLocalGeneratedDiagramArtifactCandidates(params.file, params.settings)) {
+        const preview = await previewArtifactFromSavedPath({
+            host: params.host,
+            sourcePath: candidatePath,
+            artifactSavedOverride: true
+        }).catch((error: unknown) => {
+            if (error instanceof MissingPreviewableDiagramArtifactError) {
+                return null;
+            }
+            throw error;
+        });
+
+        if (preview) {
+            params.reporter.log(`Found generated diagram artifact for preview: ${candidatePath}`);
+            return preview;
+        }
+    }
+
+    return null;
 }
 
 function getEmptyFileErrorMessage(executionMode: DiagramCommandExecutionMode): string {
@@ -780,6 +1021,7 @@ export async function runPreviewDiagramCommandWithHost(
     host: Pick<
         DiagramCommandRunHost,
         | 'getUiStrings'
+        | 'getSettings'
         | 'isBusy'
         | 'getBusyNotice'
         | 'startReporterAction'
@@ -809,11 +1051,52 @@ export async function runPreviewDiagramCommandWithHost(
 
     try {
         const fileContent = await host.readFile(file);
-        const directPreview = previewArtifactFromFile({
+        let directPreview: DirectPreviewArtifactResult | null = null;
+        try {
+            directPreview = previewArtifactFromFile({
+                host: diagramHost,
+                sourceContent: fileContent,
+                sourcePath: file.path
+            });
+        } catch (error) {
+            if (!(error instanceof MissingPreviewableDiagramArtifactError)) {
+                throw error;
+            }
+
+            directPreview = await tryBuildSvgWrapperPreview({
+                host: diagramHost,
+                sourceContent: fileContent,
+                sourcePath: file.path
+            });
+
+            if (directPreview) {
+                diagramHost.openPreview(directPreview.artifact, file.path, true);
+            } else {
+                directPreview = await previewLocalGeneratedDiagramArtifact({
+                    host: diagramHost,
+                    file,
+                    settings: host.getSettings(),
+                    reporter
+                });
+            }
+
+            if (!directPreview) {
+                throw error;
+            }
+        }
+        const artifactWithCompanionSvg = await attachCompanionSvgPreview({
             host: diagramHost,
-            sourceContent: fileContent,
+            artifact: directPreview.artifact,
             sourcePath: file.path
         });
+        if (artifactWithCompanionSvg !== directPreview.artifact) {
+            const artifactSaved = directPreview.artifactSaved;
+            diagramHost.openPreview(artifactWithCompanionSvg, file.path, artifactSaved);
+            directPreview = {
+                ...directPreview,
+                artifact: artifactWithCompanionSvg
+            };
+        }
         const { artifact } = directPreview;
 
         reporter.log(

@@ -4,6 +4,7 @@ import {
     exportSemanticFigureModelToDrawioXml
 } from '../diagram/adapters/drawio/drawioExporter';
 import { DiagramSpec } from '../diagram/types';
+import { DrawioRenderer } from '../rendering/renderers/drawioRenderer';
 
 function createDrawioSpec(): DiagramSpec {
     return {
@@ -69,5 +70,14 @@ describe('draw.io exporter', () => {
         expect(xml).toContain('id="worker" value="Worker" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontStyle=1;"');
         expect(xml).toContain('id="edge-1-client-to-gateway" value="HTTPS &lt;request&gt;" style="endArrow=block;html=1;rounded=1;strokeColor=#64748b;"');
         expect(xml).toContain('id="edge-2-gateway-to-worker" value="queue job" style="endArrow=block;html=1;rounded=1;strokeColor=#64748b;dashed=1;"');
+    });
+
+    test('renderer returns draw.io source with a companion svg preview artifact', async () => {
+        const artifact = await new DrawioRenderer().render(createDrawioSpec());
+
+        expect(artifact.target).toBe('drawio');
+        expect(artifact.content).toContain('<mxfile');
+        expect(artifact.previewSvg?.content).toContain('<svg');
+        expect(artifact.previewSvg?.content).toContain('data-drawio-type="node"');
     });
 });

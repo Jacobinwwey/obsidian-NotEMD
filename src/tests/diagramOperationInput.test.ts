@@ -69,4 +69,21 @@ describe('diagram operation input helpers', () => {
         expect(input.compatibilityMode).toBe('legacy-mermaid');
         expect(input.requestedRenderTarget).toBeUndefined();
     });
+
+    test('accepts Draw.io and Drawnix render target preferences for artifact mode', () => {
+        for (const preferredDiagramRenderTarget of ['drawio', 'drawnix'] as const) {
+            const input = buildDiagramOperationInput({
+                sourcePath: 'Notes/Topic.md',
+                sourceMarkdown: '# Topic',
+                executionMode: 'save-artifact',
+                settings: {
+                    ...mockSettings,
+                    preferredDiagramRenderTarget,
+                    experimentalDiagramCompatibilityMode: 'best-fit'
+                }
+            });
+
+            expect(input.requestedRenderTarget).toBe(preferredDiagramRenderTarget);
+        }
+    });
 });

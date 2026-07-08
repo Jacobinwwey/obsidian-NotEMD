@@ -7,6 +7,7 @@ import {
     validateDrawnixExportedDataSubset
 } from '../diagram/adapters/drawnix/drawnixExporter';
 import { DiagramSpec } from '../diagram/types';
+import { DrawnixRenderer } from '../rendering/renderers/drawnixRenderer';
 
 function createDrawnixSpec(): DiagramSpec {
     return {
@@ -80,5 +81,14 @@ describe('drawnix exporter', () => {
         expect(validateDrawnixExportedDataSubset(invalid)).toEqual([
             'element freehand-1 uses unsupported drawnix subset type "freehand"'
         ]);
+    });
+
+    test('renderer returns drawnix source with a companion svg preview artifact', async () => {
+        const artifact = await new DrawnixRenderer().render(createDrawnixSpec());
+
+        expect(artifact.target).toBe('drawnix');
+        expect(JSON.parse(artifact.content)).toMatchObject({ type: 'drawnix' });
+        expect(artifact.previewSvg?.content).toContain('<svg');
+        expect(artifact.previewSvg?.content).toContain('data-drawio-type="node"');
     });
 });

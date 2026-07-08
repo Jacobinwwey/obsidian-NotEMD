@@ -154,6 +154,40 @@ function ensureTrailingNewlines(content: string): string {
     return content.replace(/\n+$/, '') + '\n\n\n';
 }
 
+function getVaultFileName(vaultPath: string): string {
+    const normalized = vaultPath.replace(/\/+$/, '');
+    const slashIndex = normalized.lastIndexOf('/');
+    return slashIndex >= 0 ? normalized.slice(slashIndex + 1) : normalized;
+}
+
+function buildDiagramSvgCompanionPath(sourceArtifactPath: string): string {
+    return `${sourceArtifactPath}.svg`;
+}
+
+function buildDiagramObsidianPreviewWrapperPath(sourceArtifactPath: string): string {
+    return `${sourceArtifactPath}.md`;
+}
+
+function buildDiagramObsidianPreviewWrapperContent(params: {
+    title: string;
+    sourceArtifactPath: string;
+    svgArtifactPath: string;
+    target: RenderArtifact['target'];
+}): string {
+    const sourceFileName = getVaultFileName(params.sourceArtifactPath);
+    const svgFileName = getVaultFileName(params.svgArtifactPath);
+
+    return [
+        `# ${params.title || sourceFileName}`,
+        '',
+        `![[${svgFileName}]]`,
+        '',
+        `Source artifact: [[${sourceFileName}]]`,
+        `Render target: ${params.target}`,
+        ''
+    ].join('\n');
+}
+
 export async function handleFileRename(app: App, oldPath: string, newPath: string, uiLocale = 'auto') {
     const oldName = oldPath.split('/').pop()?.replace('.md', '') || '';
     const newName = newPath.split('/').pop()?.replace('.md', '') || '';
@@ -1711,30 +1745,46 @@ export async function saveDiagramArtifactFile(
     const outputPath = `${saveDir}${outputFileName}`;
     progressReporter.log(`Saving diagram artifact to: ${outputPath}`);
 
-    const existingOutputFile = app.vault.getAbstractFileByPath(outputPath);
-    if (existingOutputFile instanceof TFile) {
-        let finalContent = artifact.content;
-        if (artifact.target === 'mermaid') {
-            finalContent = ensureTrailingNewlines(artifact.content);
-        } else if (artifact.target === 'vega-lite') {
-            // Wrap Vega-Lite JSON in a readable markdown file
-            const vlTitle = artifact.sourceIntent || 'Data Chart';
-            finalContent = `# ${vlTitle}\n\n> Preview this chart using the "Preview diagram" command in Notemd.\n\n\`\`\`vega-lite\n${artifact.content}\n\`\`\`\n`;
+    const writeTextArtifact = async (path: string, content: string, label: string): Promise<void> => {
+        const existingFile = app.vault.getAbstractFileByPath(path);
+        if (existingFile instanceof TFile) {
+            await app.vault.modify(existingFile, content);
+            progressReporter.log(`Overwrote existing ${label}: ${path}`);
+        } else {
+            await app.vault.create(path, content);
+            progressReporter.log(`Created ${label}: ${path}`);
         }
-        await app.vault.modify(existingOutputFile, finalContent);
-        progressReporter.log(`Overwrote existing diagram artifact file: ${outputPath}`);
-    } else {
-        let finalContent = artifact.content;
-        if (artifact.target === 'mermaid') {
-            finalContent = ensureTrailingNewlines(artifact.content);
-        } else if (artifact.target === 'vega-lite') {
-            // Wrap Vega-Lite JSON in a readable markdown file
-            const vlTitle = artifact.sourceIntent || 'Data Chart';
-            finalContent = `# ${vlTitle}\n\n> Preview this chart using the "Preview diagram" command in Notemd.\n\n\`\`\`vega-lite\n${artifact.content}\n\`\`\`\n`;
-        }
-        await app.vault.create(outputPath, finalContent);
-        progressReporter.log(`Created diagram artifact file: ${outputPath}`);
+    };
+
+    let finalContent = artifact.content;
+    if (artifact.target === 'mermaid') {
+        finalContent = ensureTrailingNewlines(artifact.content);
+    } else if (artifact.target === 'vega-lite') {
+        // Wrap Vega-Lite JSON in a readable markdown file.
+        const vlTitle = artifact.sourceIntent || 'Data Chart';
+        finalContent = `# ${vlTitle}\n\n> Preview this chart using the "Preview diagram" command in Notemd.\n\n\`\`\`vega-lite\n${artifact.content}\n\`\`\`\n`;
     }
+
+    await writeTextArtifact(outputPath, finalContent, 'diagram artifact file');
+
+    if (artifact.previewSvg?.content?.trim()) {
+        const svgPath = buildDiagramSvgCompanionPath(outputPath);
+        const wrapperPath = buildDiagramObsidianPreviewWrapperPath(outputPath);
+        await writeTextArtifact(svgPath, artifact.previewSvg.content, 'diagram SVG preview file');
+        await writeTextArtifact(
+            wrapperPath,
+            buildDiagramObsidianPreviewWrapperContent({
+                title: `${originalFile.basename} diagram preview`,
+                sourceArtifactPath: outputPath,
+                svgArtifactPath: svgPath,
+                target: artifact.target
+            }),
+            'diagram Obsidian preview wrapper'
+        );
+        progressReporter.log(`Saved diagram SVG companion for Obsidian preview: ${svgPath}`);
+        return wrapperPath;
+    }
+
     return outputPath;
 }
 

@@ -23,7 +23,9 @@ export const SUPPORTED_RENDER_TARGETS = [
     'json-canvas',
     'vega-lite',
     'html',
-    'editable-html-svg'
+    'editable-html-svg',
+    'drawio',
+    'drawnix'
 ] as const;
 
 export type RenderTarget = typeof SUPPORTED_RENDER_TARGETS[number];

@@ -2504,6 +2504,8 @@ export class NotemdSettingTab extends PluginSettingTab {
                     dropdown.addOption('vega-lite', experimentalDiagramI18n.renderTargetVegaLite);
                     dropdown.addOption('html', experimentalDiagramI18n.renderTargetHtml);
                     dropdown.addOption('editable-html-svg', experimentalDiagramI18n.renderTargetEditableHtmlSvg);
+                    dropdown.addOption('drawio', experimentalDiagramI18n.renderTargetDrawio);
+                    dropdown.addOption('drawnix', experimentalDiagramI18n.renderTargetDrawnix);
                     dropdown
                         .setValue(this.plugin.settings.preferredDiagramRenderTarget || 'auto')
                         .onChange(async (value: string) => {

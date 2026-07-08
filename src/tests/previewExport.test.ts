@@ -71,6 +71,26 @@ describe('diagram preview export helpers', () => {
             mimeType: 'text/html',
             sourceIntent: 'flowchart'
         })).toBe(false);
+        expect(supportsPreviewSvgExport({
+            target: 'html',
+            content: '<!DOCTYPE html><html><body><svg /></body></html>',
+            mimeType: 'text/html',
+            sourceIntent: 'flowchart',
+            previewSvg: {
+                content: '<svg><rect /></svg>',
+                mimeType: 'image/svg+xml'
+            }
+        })).toBe(true);
+        expect(supportsPreviewSvgExport({
+            target: 'drawio' as any,
+            content: '<mxfile />',
+            mimeType: 'application/vnd.jgraph.mxfile',
+            sourceIntent: 'flowchart',
+            previewSvg: {
+                content: '<svg><rect /></svg>',
+                mimeType: 'image/svg+xml'
+            }
+        })).toBe(true);
     });
 
     test('renders preview svg through the target-specific renderer', async () => {
@@ -89,6 +109,19 @@ describe('diagram preview export helpers', () => {
             theme: 'dark'
         })).resolves.toContain('<svg>');
         expect(initialize).toHaveBeenCalledWith(expect.objectContaining({ theme: 'dark' }));
+    });
+
+    test('renders persisted companion preview svg without invoking target runtime', async () => {
+        await expect(renderPreviewArtifactSvg({
+            target: 'drawnix' as any,
+            content: '{"type":"drawnix","elements":[]}',
+            mimeType: 'application/vnd.drawnix+json',
+            sourceIntent: 'flowchart',
+            previewSvg: {
+                content: '<svg><text>Drawnix preview</text></svg>',
+                mimeType: 'image/svg+xml'
+            }
+        })).resolves.toContain('Drawnix preview');
     });
 
     test('saves a new exported preview svg beside the source file', async () => {

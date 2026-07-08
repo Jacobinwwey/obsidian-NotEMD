@@ -317,4 +317,114 @@ describe('diagram command host adapter', () => {
             true
         );
     });
+
+    test('preview wrapper finds a previously generated Obsidian svg wrapper beside the source note', async () => {
+        const { host, diagramHost, reporter } = createDiagramHost();
+        const file = { name: 'Topic.md', path: 'Notes/Topic.md' };
+        host.readFile.mockResolvedValue('# Topic without inline diagram');
+        diagramHost.getFileByPath.mockImplementation((path: string) => {
+            if (path === 'Notes/Topic_diagram.drawio.md' || path === 'Notes/Topic_diagram.drawio.svg') {
+                return { path };
+            }
+            return null;
+        });
+        (diagramHost as any).readFile = jest.fn(async (loadedFile: { path: string }) => {
+            if (loadedFile.path === 'Notes/Topic_diagram.drawio.md') {
+                return '# Topic diagram preview\n\n![[Topic_diagram.drawio.svg]]\n';
+            }
+            if (loadedFile.path === 'Notes/Topic_diagram.drawio.svg') {
+                return '<svg><text>Generated preview</text></svg>';
+            }
+            return '';
+        });
+
+        const result = await runPreviewDiagramCommandWithHost(host as any, file as any, reporter as any);
+
+        expect(result).toMatchObject({
+            kind: 'success',
+            sourcePath: 'Notes/Topic.md',
+            artifact: expect.objectContaining({
+                target: 'html',
+                content: expect.stringContaining('Generated preview'),
+                previewSvg: expect.objectContaining({
+                    content: expect.stringContaining('Generated preview')
+                })
+            })
+        });
+        expect(diagramHost.openPreview).toHaveBeenCalledWith(
+            expect.objectContaining({
+                target: 'html',
+                content: expect.stringContaining('Generated preview'),
+                previewSvg: expect.objectContaining({
+                    content: expect.stringContaining('Generated preview')
+                })
+            }),
+            'Notes/Topic_diagram.drawio.md',
+            true
+        );
+    });
+
+    test('preview wrapper supports saved svg artifacts with exportable svg content', async () => {
+        const { host, reporter } = createDiagramHost();
+        const file = { name: 'Architecture_diagram.drawio.svg', path: 'Notes/Architecture_diagram.drawio.svg' };
+        host.readFile.mockResolvedValue('<svg><text>Direct SVG preview</text></svg>');
+
+        const result = await runPreviewDiagramCommandWithHost(host as any, file as any, reporter as any);
+
+        expect(result).toMatchObject({
+            kind: 'success',
+            sourcePath: 'Notes/Architecture_diagram.drawio.svg',
+            artifact: expect.objectContaining({
+                target: 'html',
+                previewSvg: expect.objectContaining({
+                    content: expect.stringContaining('Direct SVG preview')
+                })
+            })
+        });
+        expect(host.createDiagramHostAdapter().openPreview).toHaveBeenCalledWith(
+            expect.objectContaining({
+                target: 'html',
+                previewSvg: expect.objectContaining({
+                    content: expect.stringContaining('Direct SVG preview')
+                })
+            }),
+            'Notes/Architecture_diagram.drawio.svg',
+            true
+        );
+    });
+
+    test('preview wrapper uses companion svg when a saved drawio source has one', async () => {
+        const { host, diagramHost, reporter } = createDiagramHost();
+        const file = { name: 'Architecture_diagram.drawio', path: 'Notes/Architecture_diagram.drawio' };
+        host.readFile.mockResolvedValue('<mxfile><diagram name="Page-1"><mxGraphModel /></diagram></mxfile>');
+        diagramHost.getFileByPath.mockImplementation((path: string) => {
+            if (path === 'Notes/Architecture_diagram.drawio.svg') {
+                return { path };
+            }
+            return null;
+        });
+        (diagramHost as any).readFile = jest.fn(async () => '<svg><text>Draw.io companion</text></svg>');
+
+        const result = await runPreviewDiagramCommandWithHost(host as any, file as any, reporter as any);
+
+        expect(result).toMatchObject({
+            kind: 'success',
+            artifact: expect.objectContaining({
+                target: 'drawio',
+                previewSvg: expect.objectContaining({
+                    content: expect.stringContaining('Draw.io companion')
+                })
+            })
+        });
+        expect(diagramHost.openPreview).toHaveBeenLastCalledWith(
+            expect.objectContaining({
+                target: 'drawio',
+                previewSvg: expect.objectContaining({
+                    content: expect.stringContaining('Draw.io companion')
+                })
+            }),
+            'Notes/Architecture_diagram.drawio',
+            true
+        );
+    });
 });

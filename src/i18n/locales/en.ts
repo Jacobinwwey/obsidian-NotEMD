@@ -150,6 +150,8 @@ export const STRINGS_EN = {
                 renderTargetVegaLite: 'Vega-Lite',
                 renderTargetHtml: 'HTML',
                 renderTargetEditableHtmlSvg: 'Editable HTML/SVG',
+                renderTargetDrawio: 'Draw.io + SVG preview',
+                renderTargetDrawnix: 'Drawnix + SVG preview',
             },
             diagnosticBlocked: 'Cannot run developer diagnostic for {provider}: {issues}',
             diagnosticRunning: 'Running developer diagnostic for {provider}...',

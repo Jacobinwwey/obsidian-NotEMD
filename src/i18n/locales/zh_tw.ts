@@ -153,6 +153,8 @@ export const STRINGS_ZH_TW: DeepPartial<NotemdEnglishStrings> = {
                 renderTargetVegaLite: 'Vega-Lite',
                 renderTargetHtml: 'HTML',
                 renderTargetEditableHtmlSvg: '可編輯 HTML/SVG',
+                renderTargetDrawio: 'Draw.io + SVG 預覽',
+                renderTargetDrawnix: 'Drawnix + SVG 預覽',
             },
             diagnosticBlocked: '無法為 {provider} 執行開發者診斷：{issues}',
             diagnosticRunning: '正在為 {provider} 執行開發者診斷...',

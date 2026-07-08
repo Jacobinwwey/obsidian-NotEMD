@@ -5,21 +5,23 @@ const os = require('os');
 const path = require('path');
 const { buildSync } = require('esbuild');
 
-const SUPPORTED_TARGETS = ['editable-html-svg', 'drawio', 'drawnix'];
+const SUPPORTED_TARGETS = ['editable-html-svg', 'drawio', 'drawnix', 'svg'];
 
 function printUsage() {
   console.log(`Notemd diagram artifact export
 
 Usage:
-  node scripts/export-diagram-artifact.js --input <diagram-spec.json> --target <target> --output <artifact-path>
+  node scripts/export-diagram-artifact.js --input <diagram-spec.json> --target <target> --output <artifact-path> [--preview-svg-output <svg-path>]
 
 Targets:
   editable-html-svg   Self-contained HTML with inline editable SVG annotations
   drawio              Uncompressed diagrams.net mxfile XML
   drawnix             Minimal .drawnix JSON subset
+  svg                 Obsidian-viewable SVG generated from the same SemanticFigureModel
 
 Example:
   node scripts/export-diagram-artifact.js --input spec.json --target drawio --output figure.drawio
+  node scripts/export-diagram-artifact.js --input spec.json --target drawio --output figure.drawio --preview-svg-output figure.drawio.svg
 `);
 }
 
@@ -37,6 +39,9 @@ function parseArgs(argv) {
         break;
       case '--output':
         args.output = argv[++index];
+        break;
+      case '--preview-svg-output':
+        args.previewSvgOutput = argv[++index];
         break;
       case '--help':
       case '-h':
@@ -94,7 +99,7 @@ function buildExporterBundle(repoRoot) {
     import { buildSemanticFigureModel } from './src/diagram/adapters/editableSvg/semanticFigureModel';
     import { exportSemanticFigureModelToDrawioXml, collectDrawioVisibleLabelMismatches } from './src/diagram/adapters/drawio/drawioExporter';
     import { exportSemanticFigureModelToDrawnixData, stringifyDrawnixExportedData, validateDrawnixExportedDataSubset } from './src/diagram/adapters/drawnix/drawnixExporter';
-    import { EditableHtmlSvgRenderer, collectEditableSvgAnnotationGaps } from './src/rendering/renderers/editableHtmlSvgRenderer';
+    import { EditableHtmlSvgRenderer, collectEditableSvgAnnotationGaps, renderSemanticFigureSvg } from './src/rendering/renderers/editableHtmlSvgRenderer';
 
     export async function exportDiagramArtifact(spec, target) {
       const model = buildSemanticFigureModel(spec);
@@ -125,6 +130,7 @@ function buildExporterBundle(repoRoot) {
         }
         return {
           content: xml,
+          previewSvgContent: renderSemanticFigureSvg(model),
           summary: {
             mimeType: 'application/vnd.jgraph.mxfile',
             nodeCount: model.nodes.length,
@@ -142,11 +148,24 @@ function buildExporterBundle(repoRoot) {
         }
         return {
           content: stringifyDrawnixExportedData(data),
+          previewSvgContent: renderSemanticFigureSvg(model),
           summary: {
             mimeType: 'application/json',
             nodeCount: model.nodes.length,
             edgeCount: model.edges.length,
             validationErrorCount: validationErrors.length
+          }
+        };
+      }
+
+      if (target === 'svg') {
+        return {
+          content: renderSemanticFigureSvg(model),
+          previewSvgContent: renderSemanticFigureSvg(model),
+          summary: {
+            mimeType: 'image/svg+xml',
+            nodeCount: model.nodes.length,
+            edgeCount: model.edges.length
           }
         };
       }
@@ -184,6 +203,7 @@ async function run(args, repoRoot = path.resolve(__dirname, '..')) {
 
   const inputPath = path.resolve(args.input);
   const outputPath = path.resolve(args.output);
+  const previewSvgOutputPath = args.previewSvgOutput ? path.resolve(args.previewSvgOutput) : undefined;
   const spec = loadDiagramSpec(inputPath);
   const bundle = buildExporterBundle(repoRoot);
 
@@ -192,11 +212,20 @@ async function run(args, repoRoot = path.resolve(__dirname, '..')) {
     const artifact = await exportDiagramArtifact(spec, target);
     ensureOutputDirectory(outputPath);
     fs.writeFileSync(outputPath, artifact.content, 'utf8');
+    if (previewSvgOutputPath) {
+      const previewSvgContent = artifact.previewSvgContent || (target === 'svg' ? artifact.content : undefined);
+      if (!previewSvgContent) {
+        throw new Error(`Target "${target}" does not provide a preview SVG artifact.`);
+      }
+      ensureOutputDirectory(previewSvgOutputPath);
+      fs.writeFileSync(previewSvgOutputPath, previewSvgContent, 'utf8');
+    }
 
     return {
       target,
       inputPath,
       outputPath,
+      ...(previewSvgOutputPath ? { previewSvgOutputPath } : {}),
       ...artifact.summary
     };
   } finally {

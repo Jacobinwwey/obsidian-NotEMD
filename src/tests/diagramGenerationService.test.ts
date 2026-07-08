@@ -180,6 +180,34 @@ describe('diagram generation service', () => {
         expect(result.artifact.content).toContain('data-notemd-renderer="notemd-editable-html-svg@0.1.0"');
     });
 
+    test('honors drawio and drawnix render target overrides with svg companions', async () => {
+        for (const requestedRenderTarget of ['drawio', 'drawnix'] as const) {
+            const result = await generateDiagramArtifact(`# Runtime Flow
+
+Client sends work to a queue-backed worker.
+`, {
+                compatibilityMode: 'best-fit',
+                requestedRenderTarget,
+                targetLanguage: 'en',
+                llmInvoker: async () => JSON.stringify({
+                    intent: 'flowchart',
+                    title: 'Runtime Flow',
+                    nodes: [
+                        { id: 'client', label: 'Client', kind: 'actor' },
+                        { id: 'worker', label: 'Worker', kind: 'processor' }
+                    ],
+                    edges: [
+                        { from: 'client', to: 'worker', label: 'queue job', relation: 'async' }
+                    ]
+                })
+            });
+
+            expect(result.plan.renderTarget).toBe(requestedRenderTarget);
+            expect(result.artifact.target).toBe(requestedRenderTarget);
+            expect(result.artifact.previewSvg?.content).toContain('<svg');
+        }
+    });
+
     test('keeps legacy-mermaid output pinned even when a render target override is provided', async () => {
         const result = await generateDiagramArtifact(`# Release Checklist
 

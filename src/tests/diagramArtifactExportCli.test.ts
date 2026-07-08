@@ -44,9 +44,11 @@ describe('diagram artifact export CLI', () => {
             expect(runbook).toContain('--input');
             expect(runbook).toContain('--target');
             expect(runbook).toContain('--output');
+            expect(runbook).toContain('--preview-svg-output');
             expect(runbook).toContain('editable-html-svg');
             expect(runbook).toContain('drawio');
             expect(runbook).toContain('drawnix');
+            expect(runbook).toContain('svg');
             expect(runbook).toContain('DiagramSpec');
             expect(runbook).toContain('SemanticFigureModel');
             expect(runbook).toContain('no Obsidian runtime');
@@ -60,28 +62,31 @@ describe('diagram artifact export CLI', () => {
         const specPath = path.join(tempRoot, 'spec.json');
         const htmlPath = path.join(tempRoot, 'figure.html');
         const drawioPath = path.join(tempRoot, 'figure.drawio');
+        const drawioSvgPath = path.join(tempRoot, 'figure.drawio.svg');
         const drawnixPath = path.join(tempRoot, 'figure.drawnix');
+        const svgPath = path.join(tempRoot, 'figure.svg');
         fs.writeFileSync(specPath, JSON.stringify(createSpec(), null, 2), 'utf8');
 
         try {
             for (const [target, outputPath] of [
                 ['editable-html-svg', htmlPath],
                 ['drawio', drawioPath],
-                ['drawnix', drawnixPath]
+                ['drawnix', drawnixPath],
+                ['svg', svgPath]
             ] as const) {
-                const stdout = execFileSync(
-                    process.execPath,
-                    [
-                        scriptPath,
-                        '--input', specPath,
-                        '--target', target,
-                        '--output', outputPath
-                    ],
-                    {
-                        cwd: repoRoot,
-                        encoding: 'utf8'
-                    }
-                );
+                const args = [
+                    scriptPath,
+                    '--input', specPath,
+                    '--target', target,
+                    '--output', outputPath
+                ];
+                if (target === 'drawio') {
+                    args.push('--preview-svg-output', drawioSvgPath);
+                }
+                const stdout = execFileSync(process.execPath, args, {
+                    cwd: repoRoot,
+                    encoding: 'utf8'
+                });
 
                 const result = JSON.parse(stdout);
                 expect(result).toEqual(expect.objectContaining({
@@ -105,6 +110,8 @@ describe('diagram artifact export CLI', () => {
             expect(drawio).toContain('id="client-app-2"');
             expect(drawio).toContain('value="Client App Alias"');
             expect(drawio).toContain('dashed=1;');
+            expect(fs.readFileSync(drawioSvgPath, 'utf8')).toContain('<svg');
+            expect(fs.readFileSync(drawioSvgPath, 'utf8')).toContain('data-drawio-type="node"');
 
             const drawnix = JSON.parse(fs.readFileSync(drawnixPath, 'utf8'));
             expect(drawnix).toMatchObject({
@@ -122,6 +129,10 @@ describe('diagram artifact export CLI', () => {
                     style: expect.objectContaining({ dashed: true })
                 })
             ]));
+
+            const svg = fs.readFileSync(svgPath, 'utf8');
+            expect(svg).toContain('<svg');
+            expect(svg).toContain('data-drawio-type="node"');
         } finally {
             fs.rmSync(tempRoot, { recursive: true, force: true });
         }
@@ -185,7 +196,7 @@ describe('diagram artifact export CLI', () => {
             expect(result.status).toBe(1);
             expect(result.stdout).toBe('');
             expect(result.stderr).toContain('Unsupported export target "png"');
-            expect(result.stderr).toContain('editable-html-svg, drawio, drawnix');
+            expect(result.stderr).toContain('editable-html-svg, drawio, drawnix, svg');
             expect(fs.existsSync(outputPath)).toBe(false);
         } finally {
             fs.rmSync(tempRoot, { recursive: true, force: true });

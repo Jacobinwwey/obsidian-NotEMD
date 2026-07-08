@@ -13,14 +13,15 @@ topic: diagram-artifact-export-cli
 
 ```bash
 npm run diagram:export-artifact -- --input spec.json --target editable-html-svg --output figure.html
-npm run diagram:export-artifact -- --input spec.json --target drawio --output figure.drawio
-npm run diagram:export-artifact -- --input spec.json --target drawnix --output figure.drawnix
+npm run diagram:export-artifact -- --input spec.json --target drawio --output figure.drawio --preview-svg-output figure.drawio.svg
+npm run diagram:export-artifact -- --input spec.json --target drawnix --output figure.drawnix --preview-svg-output figure.drawnix.svg
+npm run diagram:export-artifact -- --input spec.json --target svg --output figure.svg
 ```
 
 直接入口：
 
 ```bash
-node scripts/export-diagram-artifact.js --input spec.json --target drawio --output figure.drawio
+node scripts/export-diagram-artifact.js --input spec.json --target drawio --output figure.drawio --preview-svg-output figure.drawio.svg
 ```
 
 ## Targets
@@ -28,8 +29,21 @@ node scripts/export-diagram-artifact.js --input spec.json --target drawio --outp
 | Target | 输出 | Source model | CLI 内验证 |
 |---|---|---|---|
 | `editable-html-svg` | 自包含 `.html`，包含 inline SVG | `DiagramSpec -> SemanticFigureModel -> EditableHtmlSvgRenderer` | `collectEditableSvgAnnotationGaps()` 必须为空 |
-| `drawio` | 未压缩 diagrams.net `mxfile` XML | `DiagramSpec -> SemanticFigureModel -> exportSemanticFigureModelToDrawioXml()` | visible label mismatch 必须为空 |
-| `drawnix` | 最小 `.drawnix` JSON subset | `DiagramSpec -> SemanticFigureModel -> exportSemanticFigureModelToDrawnixData()` | subset validation error 必须为空 |
+| `drawio` | 未压缩 diagrams.net `mxfile` XML，可通过 `--preview-svg-output` 同步写出 companion SVG | `DiagramSpec -> SemanticFigureModel -> exportSemanticFigureModelToDrawioXml()` 加 `renderSemanticFigureSvg()` | visible label mismatch 必须为空 |
+| `drawnix` | 最小 `.drawnix` JSON subset，可通过 `--preview-svg-output` 同步写出 companion SVG | `DiagramSpec -> SemanticFigureModel -> exportSemanticFigureModelToDrawnixData()` 加 `renderSemanticFigureSvg()` | subset validation error 必须为空 |
+| `svg` | Obsidian 可直接查看的 `.svg` | `DiagramSpec -> SemanticFigureModel -> renderSemanticFigureSvg()` | 必须保留 semantic node/edge annotations |
+
+## Obsidian 预览 companion 契约
+
+Draw.io、Drawnix 与 circuitikz source files 是有用的交换格式，但 Obsidian 默认不会把 `.drawio`、`.drawnix` 或 raw `.tex` 渲染成图形。因此插件保存路径在 renderer 能提供 SVG 时，会把 SVG 当作可审查的 companion artifact：
+
+```text
+Topic_diagram.drawio
+Topic_diagram.drawio.svg
+Topic_diagram.drawio.md
+```
+
+Markdown wrapper 使用 `![[Topic_diagram.drawio.svg]]` 嵌入 SVG，并链接回 source artifact。Preview diagram 命令在当前 source note 没有 inline diagram fence 时，也会查找这些已生成的 wrapper/source/SVG 路径，因此维护者可以直接验证本地已生成 artifact，而不必重新生成。
 
 ## 为什么放在这个边界
 
@@ -56,6 +70,8 @@ npm test -- --runInBand src/tests/diagramArtifactExportCli.test.ts --runTestsByP
 - 节点 id 在空白归一化后仍保持唯一。
 - `drawio` XML 保留可见节点与边 label。
 - `drawnix` JSON 包含支持的 `geometry` 与 `arrow-line` element。
+- `drawio` 与 `drawnix` 可以写出用于 Obsidian 预览验证的 SVG companion 文件。
+- `svg` 可以直接输出同一个 annotated semantic figure sheet。
 - 不支持的 target 会在写输出前失败。
 
 ## 非目标

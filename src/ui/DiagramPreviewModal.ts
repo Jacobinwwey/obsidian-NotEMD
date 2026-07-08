@@ -289,6 +289,13 @@ export class DiagramPreviewModal extends Modal {
             return;
         }
 
+        if (supportsPreviewSvgExport(this.session.payload.artifact)) {
+            const rendered = await this.tryRenderPreviewSvg(container);
+            if (rendered) {
+                return;
+            }
+        }
+
         if (supportsSourceOnlyDiagramPreview(this.session.payload.artifact)) {
             this.renderSourceOnlyPreview(container);
             return;
@@ -308,6 +315,21 @@ export class DiagramPreviewModal extends Modal {
             return true;
         } catch (error) {
             console.error('Failed to render JSON Canvas preview. Falling back to srcdoc preview.', error);
+            return false;
+        }
+    }
+
+    private async tryRenderPreviewSvg(container: HTMLElement): Promise<boolean> {
+        try {
+            const svg = await renderPreviewArtifactSvg(this.session.payload.artifact, {
+                theme: this.session.payload.resolvedTheme ?? this.session.payload.theme
+            });
+            container.empty();
+            container.addClass('is-svg-preview');
+            container.innerHTML = svg;
+            return true;
+        } catch (error) {
+            console.error('Failed to render diagram SVG preview. Falling back to source preview.', error);
             return false;
         }
     }

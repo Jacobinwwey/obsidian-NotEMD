@@ -143,4 +143,36 @@ describe('saveDiagramArtifactFile', () => {
             expect.stringContaining('"type":"drawnix"')
         );
     });
+
+    test('saves non-native diagram artifacts with svg companion and Obsidian wrapper when available', async () => {
+        const reporter = createReporter();
+        const path = await saveDiagramArtifactFile(mockApp, mockSettings, originalFile, {
+            target: 'drawio' as any,
+            content: '<mxfile><diagram /></mxfile>',
+            mimeType: 'application/vnd.jgraph.mxfile',
+            sourceIntent: 'flowchart',
+            previewSvg: {
+                content: '<svg><text>Architecture</text></svg>',
+                mimeType: 'image/svg+xml'
+            }
+        }, reporter);
+
+        expect(path).toBe('Notes/Source_diagram.drawio.md');
+        expect(mockApp.vault.create).toHaveBeenCalledWith(
+            'Notes/Source_diagram.drawio',
+            expect.stringContaining('<mxfile')
+        );
+        expect(mockApp.vault.create).toHaveBeenCalledWith(
+            'Notes/Source_diagram.drawio.svg',
+            expect.stringContaining('<svg')
+        );
+        expect(mockApp.vault.create).toHaveBeenCalledWith(
+            'Notes/Source_diagram.drawio.md',
+            expect.stringContaining('![[Source_diagram.drawio.svg]]')
+        );
+        expect(mockApp.vault.create).toHaveBeenCalledWith(
+            'Notes/Source_diagram.drawio.md',
+            expect.stringContaining('[[Source_diagram.drawio]]')
+        );
+    });
 });

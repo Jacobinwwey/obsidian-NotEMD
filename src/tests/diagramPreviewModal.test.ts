@@ -334,6 +334,29 @@ describe('diagram preview modal', () => {
         expect(iframe?.sandbox).toBe('allow-same-origin');
     });
 
+    test('shows export actions for html svg wrappers with persisted preview svg', async () => {
+        const modal = mountModal(new DiagramPreviewModal(mockApp, createSession({
+            target: 'html',
+            content: '<!DOCTYPE html><html><body><svg><text>Wrapper SVG</text></svg></body></html>',
+            mimeType: 'text/html',
+            sourceIntent: 'flowchart',
+            previewSvg: {
+                content: '<svg><text>Wrapper SVG</text></svg>',
+                mimeType: 'image/svg+xml'
+            }
+        }, 'Notes/Topic_diagram.drawio.md'), 'en') as any);
+
+        modal.onOpen();
+        await flushPromises();
+
+        const buttons = collectButtons(modal.contentEl);
+        expect(buttons.some(button => button.text === 'Export SVG')).toBe(true);
+        expect(buttons.some(button => button.text === 'Export PNG')).toBe(true);
+
+        const iframe = findByTag(modal.contentEl, 'iframe');
+        expect(iframe?.sandbox).toBe('allow-same-origin');
+    });
+
     test('renders source-only artifacts without iframe or svg export actions', async () => {
         const source = '\\usepackage{circuitikz}\n\\begin{document}\n\\end{document}';
         const modal = mountModal(new DiagramPreviewModal(mockApp, createSession({
@@ -360,6 +383,34 @@ describe('diagram preview modal', () => {
         expect(buttons.some(button => button.text === 'Export SVG')).toBe(false);
         expect(buttons.some(button => button.text === 'Export PNG')).toBe(false);
         expect(findByClass(modal.contentEl, 'notemd-diagram-preview-diagnostics')).not.toBeNull();
+    });
+
+    test('renders companion svg artifacts instead of source-only fallback', async () => {
+        (previewExport.renderPreviewArtifactSvg as jest.Mock).mockResolvedValueOnce('<svg><text>Draw.io SVG</text></svg>');
+        const modal = mountModal(new DiagramPreviewModal(mockApp, createSession({
+            target: 'drawio',
+            content: '<mxfile><diagram /></mxfile>',
+            mimeType: 'application/vnd.jgraph.mxfile',
+            sourceIntent: 'flowchart',
+            previewSvg: {
+                content: '<svg><text>Draw.io SVG</text></svg>',
+                mimeType: 'image/svg+xml'
+            }
+        }), 'en') as any);
+
+        modal.onOpen();
+        await flushPromises();
+
+        const iframe = findByTag(modal.contentEl, 'iframe');
+        const sourcePreview = findByClass(modal.contentEl, 'notemd-diagram-preview-source-only-code');
+        const svgPreview = findByClass(modal.contentEl, 'is-svg-preview');
+        const buttons = collectButtons(modal.contentEl);
+
+        expect(iframe).toBeNull();
+        expect(sourcePreview).toBeNull();
+        expect(svgPreview?.innerHTML).toContain('Draw.io SVG');
+        expect(buttons.some(button => button.text === 'Export SVG')).toBe(true);
+        expect(buttons.some(button => button.text === 'Export PNG')).toBe(true);
     });
 
     test('hides save-source button when preview already points at saved artifact', async () => {

@@ -96,7 +96,7 @@ function renderCallouts(model: SemanticFigureModel): string {
     </section>`;
 }
 
-function renderSvg(model: SemanticFigureModel): string {
+export function renderSemanticFigureSvg(model: SemanticFigureModel): string {
     return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${model.width} ${model.height}" role="img" aria-labelledby="notemd-editable-svg-title notemd-editable-svg-desc" data-notemd-renderer="${NOTEMD_EDITABLE_SVG_RENDERER_VERSION}">
         <title id="notemd-editable-svg-title">${escapeHtml(model.title)}</title>
         <desc id="notemd-editable-svg-desc">${escapeHtml(model.summary ?? `${model.intent} figure`)}</desc>
@@ -113,7 +113,7 @@ function renderSvg(model: SemanticFigureModel): string {
     </svg>`;
 }
 
-function renderHtmlDocument(model: SemanticFigureModel): string {
+export function renderSemanticFigureHtmlDocument(model: SemanticFigureModel): string {
     return `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -260,7 +260,7 @@ function renderHtmlDocument(model: SemanticFigureModel): string {
 <body>
     <main data-notemd-renderer="${NOTEMD_EDITABLE_SVG_RENDERER_VERSION}">
         <section class="notemd-editable-svg-sheet" aria-label="Editable SVG figure">
-            ${renderSvg(model)}
+            ${renderSemanticFigureSvg(model)}
         </section>
         ${renderCallouts(model)}
     </main>
@@ -339,7 +339,7 @@ export class EditableHtmlSvgRenderer implements DiagramRenderer {
         const model = buildSemanticFigureModel(spec);
         return {
             target: this.target,
-            content: renderHtmlDocument(model),
+            content: renderSemanticFigureHtmlDocument(model),
             mimeType: 'text/html',
             sourceIntent: spec.intent
         };

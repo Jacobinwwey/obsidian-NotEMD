@@ -3,6 +3,8 @@ import { JsonCanvasRenderer } from '../rendering/renderers/jsonCanvasRenderer';
 import { VegaLiteRenderer } from '../rendering/renderers/vegaLiteRenderer';
 import { HtmlRenderer } from '../rendering/renderers/htmlRenderer';
 import { EditableHtmlSvgRenderer } from '../rendering/renderers/editableHtmlSvgRenderer';
+import { DrawioRenderer } from '../rendering/renderers/drawioRenderer';
+import { DrawnixRenderer } from '../rendering/renderers/drawnixRenderer';
 import { RendererRegistry } from '../rendering/rendererRegistry';
 import { RenderArtifact } from '../rendering/types';
 import { RendererService } from '../rendering/rendererService';
@@ -127,6 +129,8 @@ function createDefaultRendererService(): RendererService {
         new JsonCanvasRenderer(),
         new VegaLiteRenderer(),
         new EditableHtmlSvgRenderer(),
+        new DrawioRenderer(),
+        new DrawnixRenderer(),
         new HtmlRenderer()
     ]));
 }

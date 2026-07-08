@@ -9,6 +9,7 @@ export interface RenderArtifact {
     mimeType: string;
     sourceIntent: DiagramIntent;
     diagnostics?: RenderArtifactDiagnostic[];
+    previewSvg?: RenderArtifactPreviewSvg;
 }
 
 export interface RenderArtifactDiagnostic {
@@ -16,6 +17,12 @@ export interface RenderArtifactDiagnostic {
     kind: string;
     message: string;
     advice?: string;
+}
+
+export interface RenderArtifactPreviewSvg {
+    content: string;
+    mimeType: 'image/svg+xml';
+    diagnostics?: RenderArtifactDiagnostic[];
 }
 
 export interface RenderOptions {

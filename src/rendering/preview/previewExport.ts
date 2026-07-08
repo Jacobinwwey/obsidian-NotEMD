@@ -44,7 +44,8 @@ function getArtifactPathSpec(artifact: RenderArtifact): ArtifactPathSpec {
 }
 
 export function supportsPreviewSvgExport(artifact: RenderArtifact): boolean {
-    return artifact.target === 'mermaid'
+    return Boolean(artifact.previewSvg?.content?.trim())
+        || artifact.target === 'mermaid'
         || artifact.target === 'json-canvas'
         || artifact.target === 'vega-lite';
 }
@@ -53,6 +54,10 @@ export async function renderPreviewArtifactSvg(
     artifact: RenderArtifact,
     deps: PreviewSvgRenderDeps = {}
 ): Promise<string> {
+    if (artifact.previewSvg?.content?.trim()) {
+        return artifact.previewSvg.content;
+    }
+
     switch (artifact.target) {
         case 'mermaid':
             return renderMermaidArtifactSvg(artifact, deps.mermaid, deps.theme);

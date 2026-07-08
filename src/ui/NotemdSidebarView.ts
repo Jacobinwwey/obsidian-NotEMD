@@ -1724,6 +1724,8 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
             { value: 'vega-lite', label: i18n.settings.developer.experimentalDiagramPipeline.renderTargetVegaLite },
             { value: 'html', label: i18n.settings.developer.experimentalDiagramPipeline.renderTargetHtml },
             { value: 'editable-html-svg', label: i18n.settings.developer.experimentalDiagramPipeline.renderTargetEditableHtmlSvg },
+            { value: 'drawio', label: i18n.settings.developer.experimentalDiagramPipeline.renderTargetDrawio },
+            { value: 'drawnix', label: i18n.settings.developer.experimentalDiagramPipeline.renderTargetDrawnix },
         ];
 
         renderTargets.forEach(item => {
