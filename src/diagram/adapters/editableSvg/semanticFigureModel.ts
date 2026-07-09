@@ -49,6 +49,13 @@ interface FigureNodeProjection {
     semanticIdBySourceId: Map<string, string>;
 }
 
+interface EdgeConnectionPoints {
+    startX: number;
+    startY: number;
+    endX: number;
+    endY: number;
+}
+
 function flattenNodes(nodes: DiagramNode[], flattened: DiagramNode[] = []): DiagramNode[] {
     for (const node of nodes) {
         flattened.push(node);
@@ -123,6 +130,49 @@ function createFigureNodeProjection(spec: DiagramSpec): FigureNodeProjection {
     };
 }
 
+function resolveEdgeConnectionPoints(source: SemanticFigureNode, target: SemanticFigureNode): EdgeConnectionPoints {
+    const sourceCenterX = source.x + source.width / 2;
+    const sourceCenterY = source.y + source.height / 2;
+    const targetCenterX = target.x + target.width / 2;
+    const targetCenterY = target.y + target.height / 2;
+    const horizontalDistance = Math.abs(targetCenterX - sourceCenterX);
+    const verticalDistance = Math.abs(targetCenterY - sourceCenterY);
+
+    if (horizontalDistance >= verticalDistance) {
+        if (sourceCenterX <= targetCenterX) {
+            return {
+                startX: source.x + source.width,
+                startY: sourceCenterY,
+                endX: target.x,
+                endY: targetCenterY
+            };
+        }
+
+        return {
+            startX: source.x,
+            startY: sourceCenterY,
+            endX: target.x + target.width,
+            endY: targetCenterY
+        };
+    }
+
+    if (sourceCenterY <= targetCenterY) {
+        return {
+            startX: sourceCenterX,
+            startY: source.y + source.height,
+            endX: targetCenterX,
+            endY: target.y
+        };
+    }
+
+    return {
+        startX: sourceCenterX,
+        startY: source.y,
+        endX: targetCenterX,
+        endY: target.y + target.height
+    };
+}
+
 function createFigureEdges(
     edges: DiagramEdge[],
     nodes: SemanticFigureNode[],
@@ -141,10 +191,7 @@ function createFigureEdges(
                 return null;
             }
 
-            const startX = source.x + source.width;
-            const startY = source.y + source.height / 2;
-            const endX = target.x;
-            const endY = target.y + target.height / 2;
+            const { startX, startY, endX, endY } = resolveEdgeConnectionPoints(source, target);
 
             return {
                 id: `edge-${index + 1}-${sourceId}-to-${targetId}`,

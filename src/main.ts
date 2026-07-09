@@ -255,7 +255,9 @@ export default class NotemdPlugin extends Plugin {
         const targetLabel = getRenderTargetDisplayName(artifact.target);
         const previewTitle = formatI18n(i18n.previewModal.title, { target: targetLabel });
         const session = new IframeRenderHost().createSession(artifact, { sourcePath, artifactSaved, previewTitle });
-        new DiagramPreviewModal(this.app, session, this.settings.uiLocale).open();
+        new DiagramPreviewModal(this.app, session, this.settings.uiLocale, {
+            exportPpi: this.settings.diagramPreviewExportPpi
+        }).open();
     }
 
     private createDiagramCommandHostAdapter(): DiagramCommandHostAdapter {

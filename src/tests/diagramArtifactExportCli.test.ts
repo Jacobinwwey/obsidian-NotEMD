@@ -35,8 +35,14 @@ describe('diagram artifact export CLI', () => {
         const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
         const englishRunbook = fs.readFileSync(englishRunbookPath, 'utf8');
         const chineseRunbook = fs.readFileSync(chineseRunbookPath, 'utf8');
+        const cli = require(scriptPath);
 
         expect(packageJson.scripts['diagram:export-artifact']).toBe('node scripts/export-diagram-artifact.js');
+        expect(cli.SUPPORTED_TARGETS).toEqual(expect.arrayContaining(['svg', 'png', 'pdf']));
+        expect(cli.normalizePpi(undefined)).toBe(300);
+        expect(cli.normalizePpi('450')).toBe(450);
+        expect(cli.normalizePpi('1200')).toBe(600);
+        expect(cli.pngPixelsPerMeterFromPpi(300)).toBe(11811);
 
         for (const runbook of [englishRunbook, chineseRunbook]) {
             expect(runbook).toContain('npm run diagram:export-artifact');
@@ -45,10 +51,14 @@ describe('diagram artifact export CLI', () => {
             expect(runbook).toContain('--target');
             expect(runbook).toContain('--output');
             expect(runbook).toContain('--preview-svg-output');
+            expect(runbook).toContain('--ppi');
+            expect(runbook).toContain('pHYs');
             expect(runbook).toContain('editable-html-svg');
             expect(runbook).toContain('drawio');
             expect(runbook).toContain('drawnix');
             expect(runbook).toContain('svg');
+            expect(runbook).toContain('png');
+            expect(runbook).toContain('pdf');
             expect(runbook).toContain('DiagramSpec');
             expect(runbook).toContain('SemanticFigureModel');
             expect(runbook).toContain('no Obsidian runtime');
@@ -184,7 +194,7 @@ describe('diagram artifact export CLI', () => {
                 [
                     scriptPath,
                     '--input', specPath,
-                    '--target', 'png',
+                    '--target', 'bad-target',
                     '--output', outputPath
                 ],
                 {
@@ -195,8 +205,8 @@ describe('diagram artifact export CLI', () => {
 
             expect(result.status).toBe(1);
             expect(result.stdout).toBe('');
-            expect(result.stderr).toContain('Unsupported export target "png"');
-            expect(result.stderr).toContain('editable-html-svg, drawio, drawnix, svg');
+            expect(result.stderr).toContain('Unsupported export target "bad-target"');
+            expect(result.stderr).toContain('editable-html-svg, drawio, drawnix, svg, png, pdf');
             expect(fs.existsSync(outputPath)).toBe(false);
         } finally {
             fs.rmSync(tempRoot, { recursive: true, force: true });

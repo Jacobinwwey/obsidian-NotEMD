@@ -155,6 +155,8 @@ export const STRINGS_ZH_CN: DeepPartial<NotemdEnglishStrings> = {
                 renderTargetEditableHtmlSvg: '可编辑 HTML/SVG',
                 renderTargetDrawio: 'Draw.io + SVG 预览',
                 renderTargetDrawnix: 'Drawnix + SVG 预览',
+                exportPpiName: '图形图片导出 PPI',
+                exportPpiDesc: '图形 PNG/PDF 预览导出的分辨率。默认 300 ppi，最高 600 ppi。SVG 保持矢量尺寸，不受此设置影响。',
             },
             diagnosticBlocked: '无法为 {provider} 运行开发者诊断：{issues}',
             diagnosticRunning: '正在为 {provider} 运行开发者诊断...',

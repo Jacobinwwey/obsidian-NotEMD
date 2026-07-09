@@ -16,6 +16,7 @@ jest.mock('../rendering/preview/previewExport', () => {
         renderPreviewArtifactSvg: jest.fn().mockResolvedValue('<svg><rect /></svg>'),
         saveDiagramPreviewSvg: jest.fn().mockResolvedValue('Notes/Topic_preview.svg'),
         saveDiagramPreviewPng: jest.fn().mockResolvedValue('Notes/Topic_preview.png'),
+        saveDiagramPreviewPdf: jest.fn().mockResolvedValue('Notes/Topic_preview.pdf'),
         saveDiagramSourceArtifact: jest.fn().mockResolvedValue('Notes/Topic_diagram.json')
     };
 });
@@ -207,9 +208,11 @@ describe('diagram preview modal', () => {
         const buttons = collectButtons(modal.contentEl);
         const exportButton = buttons.find(button => button.text === 'Export SVG');
         const exportPngButton = buttons.find(button => button.text === 'Export PNG');
+        const exportPdfButton = buttons.find(button => button.text === 'Export PDF');
 
         expect(exportButton).toBeDefined();
         expect(exportPngButton).toBeDefined();
+        expect(exportPdfButton).toBeDefined();
         expect(mermaidPreview.renderMermaidArtifactSvg).not.toHaveBeenCalled();
 
         await exportButton?.onclick?.();
@@ -244,6 +247,48 @@ describe('diagram preview modal', () => {
             expect.objectContaining({ theme: 'dark' })
         );
         expect(Notice).toHaveBeenCalledWith('Diagram PNG exported to Notes/Topic_preview.png');
+    });
+
+    test('shows pdf export button and saves pdf preview with configured ppi on click', async () => {
+        const modal = mountModal(new DiagramPreviewModal(mockApp, createSession({}, 'Notes/Topic.md', 'dark'), 'en', {
+            exportPpi: 450
+        }) as any);
+
+        modal.onOpen();
+        await flushPromises();
+
+        const buttons = collectButtons(modal.contentEl);
+        const exportPdfButton = buttons.find(button => button.text === 'Export PDF');
+        expect(exportPdfButton).toBeDefined();
+
+        await exportPdfButton?.onclick?.();
+
+        expect(previewExport.saveDiagramPreviewPdf).toHaveBeenCalledWith(
+            mockApp,
+            'Notes/Topic.md',
+            expect.objectContaining({ target: 'mermaid' }),
+            expect.objectContaining({ theme: 'dark', ppi: 450 })
+        );
+        expect(Notice).toHaveBeenCalledWith('Diagram PDF exported to Notes/Topic_preview.pdf');
+    });
+
+    test('clamps pdf export ppi at 600 when modal receives an oversized value', async () => {
+        const modal = mountModal(new DiagramPreviewModal(mockApp, createSession({}, 'Notes/Topic.md', 'dark'), 'en', {
+            exportPpi: 1200
+        }) as any);
+
+        modal.onOpen();
+        await flushPromises();
+
+        const exportPdfButton = collectButtons(modal.contentEl).find(button => button.text === 'Export PDF');
+        await exportPdfButton?.onclick?.();
+
+        expect(previewExport.saveDiagramPreviewPdf).toHaveBeenCalledWith(
+            mockApp,
+            'Notes/Topic.md',
+            expect.objectContaining({ target: 'mermaid' }),
+            expect.objectContaining({ ppi: 600 })
+        );
     });
 
     test('shows save-source button for unsaved preview artifacts and writes target file on click', async () => {
@@ -328,6 +373,7 @@ describe('diagram preview modal', () => {
         const buttons = collectButtons(modal.contentEl);
         expect(buttons.some(button => button.text === 'Export SVG')).toBe(false);
         expect(buttons.some(button => button.text === 'Export PNG')).toBe(false);
+        expect(buttons.some(button => button.text === 'Export PDF')).toBe(false);
 
         const iframe = findByTag(modal.contentEl, 'iframe');
 
@@ -352,6 +398,7 @@ describe('diagram preview modal', () => {
         const buttons = collectButtons(modal.contentEl);
         expect(buttons.some(button => button.text === 'Export SVG')).toBe(true);
         expect(buttons.some(button => button.text === 'Export PNG')).toBe(true);
+        expect(buttons.some(button => button.text === 'Export PDF')).toBe(true);
 
         const iframe = findByTag(modal.contentEl, 'iframe');
         expect(iframe?.sandbox).toBe('allow-same-origin');
@@ -382,6 +429,7 @@ describe('diagram preview modal', () => {
         expect(buttons.some(button => button.text === 'Save source file')).toBe(true);
         expect(buttons.some(button => button.text === 'Export SVG')).toBe(false);
         expect(buttons.some(button => button.text === 'Export PNG')).toBe(false);
+        expect(buttons.some(button => button.text === 'Export PDF')).toBe(false);
         expect(findByClass(modal.contentEl, 'notemd-diagram-preview-diagnostics')).not.toBeNull();
     });
 
@@ -411,6 +459,7 @@ describe('diagram preview modal', () => {
         expect(svgPreview?.innerHTML).toContain('Draw.io SVG');
         expect(buttons.some(button => button.text === 'Export SVG')).toBe(true);
         expect(buttons.some(button => button.text === 'Export PNG')).toBe(true);
+        expect(buttons.some(button => button.text === 'Export PDF')).toBe(true);
     });
 
     test('hides save-source button when preview already points at saved artifact', async () => {
@@ -438,6 +487,7 @@ describe('diagram preview modal', () => {
         const buttons = collectButtons(modal.contentEl);
         expect(buttons.some(button => button.text === '导出 SVG')).toBe(true);
         expect(buttons.some(button => button.text === '导出 PNG')).toBe(true);
+        expect(buttons.some(button => button.text === '导出 PDF')).toBe(true);
         expect(buttons.some(button => button.text === '保存源码文件')).toBe(true);
     });
 

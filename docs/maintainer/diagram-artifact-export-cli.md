@@ -9,29 +9,37 @@ topic: diagram-artifact-export-cli
 
 `scripts/export-diagram-artifact.js` is the offline CLI boundary for the diagram figure work that came from the Cloudy-style technical-diagram reference and the Drawnix reference spike.
 
-It accepts a checked `DiagramSpec` JSON file and writes one artifact without requiring Obsidian, `obsidian-cli`, diagrams.net Desktop, Drawnix, Plait, or a browser runtime. The input may be UTF-8 with or without a BOM, which keeps files produced by Windows PowerShell usable without a separate normalization step.
+It accepts a checked `DiagramSpec` JSON file and writes one artifact without requiring Obsidian, `obsidian-cli`, diagrams.net Desktop, Drawnix, or Plait. SVG and source targets are pure TypeScript exports. PNG and PDF targets use Playwright Chromium to render the same standalone SVG into fixed-size visual evidence. The input may be UTF-8 with or without a BOM, which keeps files produced by Windows PowerShell usable without a separate normalization step.
 
 ```bash
 npm run diagram:export-artifact -- --input spec.json --target editable-html-svg --output figure.html
 npm run diagram:export-artifact -- --input spec.json --target drawio --output figure.drawio --preview-svg-output figure.drawio.svg
-npm run diagram:export-artifact -- --input spec.json --target drawnix --output figure.drawnix --preview-svg-output figure.drawnix.svg
+npm run diagram:export-artifact -- --input spec.json --target drawnix --output figure.drawnix --preview-svg-output figure.drawnix.svg --preview-png-output figure.drawnix.png --preview-pdf-output figure.drawnix.pdf --ppi 300
 npm run diagram:export-artifact -- --input spec.json --target svg --output figure.svg
+npm run diagram:export-artifact -- --input spec.json --target png --output figure.png --ppi 300
+npm run diagram:export-artifact -- --input spec.json --target pdf --output figure.pdf --ppi 300
 ```
 
 Direct entrypoint:
 
 ```bash
-node scripts/export-diagram-artifact.js --input spec.json --target drawio --output figure.drawio --preview-svg-output figure.drawio.svg
+node scripts/export-diagram-artifact.js --input spec.json --target drawio --output figure.drawio --preview-svg-output figure.drawio.svg --preview-png-output figure.drawio.png --preview-pdf-output figure.drawio.pdf --ppi 300
 ```
+
+`--ppi` controls raster density for PNG/PDF output. The default is `300`; values above `600` are clamped to `600`. SVG stays vector-sized and ignores this value.
+
+PNG output also writes or replaces the `pHYs` physical pixel density chunk, so the selected PPI is visible to image viewers and layout tools instead of only being reflected in pixel dimensions.
 
 ## Targets
 
 | Target | Output | Source model | Verification in CLI |
 |---|---|---|---|
 | `editable-html-svg` | self-contained `.html` with inline SVG | `DiagramSpec -> SemanticFigureModel -> EditableHtmlSvgRenderer` | annotation gaps from `collectEditableSvgAnnotationGaps()` must be empty |
-| `drawio` | uncompressed diagrams.net `mxfile` XML, optionally with `--preview-svg-output` companion SVG | `DiagramSpec -> SemanticFigureModel -> exportSemanticFigureModelToDrawioXml()` plus `renderSemanticFigureSvg()` | visible label mismatches must be empty |
-| `drawnix` | minimal `.drawnix` JSON subset, optionally with `--preview-svg-output` companion SVG | `DiagramSpec -> SemanticFigureModel -> exportSemanticFigureModelToDrawnixData()` plus `renderSemanticFigureSvg()` | subset validation errors must be empty |
+| `drawio` | uncompressed diagrams.net `mxfile` XML, optionally with `--preview-svg-output`, `--preview-png-output`, and `--preview-pdf-output` companions | `DiagramSpec -> SemanticFigureModel -> exportSemanticFigureModelToDrawioXml()` plus `renderSemanticFigureSvg()` | visible label mismatches must be empty |
+| `drawnix` | minimal `.drawnix` JSON subset, optionally with `--preview-svg-output`, `--preview-png-output`, and `--preview-pdf-output` companions | `DiagramSpec -> SemanticFigureModel -> exportSemanticFigureModelToDrawnixData()` plus `renderSemanticFigureSvg()` | subset validation errors must be empty |
 | `svg` | Obsidian-viewable `.svg` generated from the same semantic model | `DiagramSpec -> SemanticFigureModel -> renderSemanticFigureSvg()` | semantic node/edge annotations must be present |
+| `png` | `.png` visual evidence rendered from the same standalone SVG | `DiagramSpec -> SemanticFigureModel -> renderSemanticFigureSvg() -> Playwright screenshot` | output dimensions follow SVG CSS size at the selected PPI, with `pHYs` metadata aligned to the selected density |
+| `pdf` | single-page `.pdf` visual evidence rendered from the same standalone SVG | `DiagramSpec -> SemanticFigureModel -> renderSemanticFigureSvg() -> Playwright PDF` | page size follows SVG CSS size; `--ppi` controls raster/screenshot companions |
 
 ## Obsidian Preview Companion Contract
 
@@ -72,6 +80,7 @@ The test writes a single `DiagramSpec` and verifies:
 - `drawnix` JSON contains supported `geometry` and `arrow-line` elements.
 - `drawio` and `drawnix` can produce SVG companion files for Obsidian preview validation.
 - `svg` emits the same annotated semantic figure sheet directly.
+- `png` and `pdf` are part of the public CLI target list, use `--ppi`, and clamp oversized PPI values to `600`.
 - unsupported targets fail before writing an output file.
 
 ## Non-Goals

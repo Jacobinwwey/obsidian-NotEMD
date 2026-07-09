@@ -4,6 +4,7 @@ import { DiagramGenerationResult } from '../diagram/diagramGenerationService';
 import { DiagramIntent, isSupportedDiagramIntent } from '../diagram/types';
 import { LocalKnowledgeRetrievalSummary } from '../localKnowledgeBase';
 import { RenderArtifact } from '../rendering/types';
+import { ensureSemanticFigureSvgStandaloneStyles } from '../rendering/renderers/editableHtmlSvgRenderer';
 import { DiagramOperationInput, DiagramOperationExecutionMode, buildDiagramOperationInput } from '../diagram/diagramGenerationService';
 import { isSupportedInputFileForTask } from '../inputFileSupport';
 import { LLMProviderConfig, NotemdSettings, ProgressReporter } from '../types';
@@ -401,7 +402,7 @@ function looksLikeSvgSource(sourceContent: string): boolean {
 }
 
 function buildSvgHtmlPreviewArtifact(svgContent: string): RenderArtifact {
-    const svg = svgContent.trim();
+    const svg = ensureSemanticFigureSvgStandaloneStyles(svgContent.trim());
 
     return {
         target: 'html',

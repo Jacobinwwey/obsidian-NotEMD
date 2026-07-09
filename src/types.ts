@@ -214,6 +214,7 @@ export interface NotemdSettings {
     experimentalDiagramCompatibilityMode: 'legacy-mermaid' | 'best-fit';
     preferredDiagramIntent?: string;
     preferredDiagramRenderTarget?: RenderTarget;
+    diagramPreviewExportPpi: number;
     globalModelAwareMaxTokensTracking?: GlobalModelAwareMaxTokensTracking;
     discoveredModelMaxOutputTokensTracking?: ProviderDiscoveredModelMaxOutputTokensTracking;
     _firstLaunch?: boolean;

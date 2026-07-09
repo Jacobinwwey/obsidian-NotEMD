@@ -10,6 +10,7 @@ import {
 } from '../types';
 import { DEFAULT_SETTINGS } from '../constants';
 import type { RenderTarget } from '../diagram/types';
+import { MAX_PREVIEW_EXPORT_PPI, MIN_PREVIEW_EXPORT_PPI } from '../rendering/preview/pngPreview';
 import {
     getLLMProviderDefinition,
     getKnownModelMaxOutputTokens,
@@ -2515,6 +2516,22 @@ export class NotemdSettingTab extends PluginSettingTab {
                             await this.plugin.saveSettings();
                         });
                 });
+
+            new Setting(containerEl)
+                .setName(experimentalDiagramI18n.exportPpiName)
+                .setDesc(experimentalDiagramI18n.exportPpiDesc)
+                .addText(text => text
+                    .setPlaceholder(String(DEFAULT_SETTINGS.diagramPreviewExportPpi))
+                    .setValue(String(this.plugin.settings.diagramPreviewExportPpi ?? DEFAULT_SETTINGS.diagramPreviewExportPpi))
+                    .onChange(async (rawValue) => {
+                        this.plugin.settings.diagramPreviewExportPpi = this.sanitizePositiveInteger(
+                            rawValue,
+                            DEFAULT_SETTINGS.diagramPreviewExportPpi,
+                            MIN_PREVIEW_EXPORT_PPI,
+                            MAX_PREVIEW_EXPORT_PPI
+                        );
+                        await this.plugin.saveSettings();
+                    }));
 
             new Setting(containerEl)
                 .setName(stableApiI18n.longRequestName)

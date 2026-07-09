@@ -1,6 +1,7 @@
 import { NotemdSettings } from './types';
 import { createDefaultProviders } from './llmProviders';
 import { DEFAULT_CUSTOM_WORKFLOW_BUTTONS_DSL } from './workflowButtons';
+import { DEFAULT_PREVIEW_EXPORT_PPI } from './rendering/preview/pngPreview';
 
 // Default settings for the plugin
 export const DEFAULT_SETTINGS: NotemdSettings = {
@@ -198,6 +199,7 @@ export const DEFAULT_SETTINGS: NotemdSettings = {
     enableExperimentalDiagramPipeline: false,
     experimentalDiagramCompatibilityMode: 'legacy-mermaid',
     preferredDiagramRenderTarget: undefined,
+    diagramPreviewExportPpi: DEFAULT_PREVIEW_EXPORT_PPI,
     discoveredModelMaxOutputTokensTracking: undefined,
 
     // Slide Export Defaults

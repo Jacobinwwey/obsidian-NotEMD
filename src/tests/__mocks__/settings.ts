@@ -140,6 +140,7 @@ export const mockSettings: NotemdSettings = {
     enableExperimentalDiagramPipeline: false,
     experimentalDiagramCompatibilityMode: 'legacy-mermaid',
     preferredDiagramRenderTarget: undefined,
+    diagramPreviewExportPpi: 300,
     enableSlideExport: false,
     slideExportDefaultFormat: 'html',
     slideExportOutputSubfolder: 'slidev-export',

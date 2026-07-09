@@ -2,11 +2,13 @@ import { App, Modal, Notice } from 'obsidian';
 import { formatI18n, getI18nStrings } from '../i18n';
 import {
     renderPreviewArtifactSvg,
+    saveDiagramPreviewPdf,
     saveDiagramPreviewPng,
     saveDiagramPreviewSvg,
     saveDiagramSourceArtifact,
     supportsPreviewSvgExport
 } from '../rendering/preview/previewExport';
+import { resolvePreviewExportPpi } from '../rendering/preview/pngPreview';
 import { RenderPreviewSession } from '../rendering/host/renderHost';
 import {
     supportsIframeHtmlPreview,
@@ -29,14 +31,17 @@ import {
 export class DiagramPreviewModal extends Modal {
     private session: RenderPreviewSession;
     private currentHistoryEntryId: string | null = null;
+    private readonly exportPpi: number;
 
     constructor(
         app: App,
         session: RenderPreviewSession,
-        private readonly uiLocale = 'auto'
+        private readonly uiLocale = 'auto',
+        options: { exportPpi?: number } = {}
     ) {
         super(app);
         this.session = session;
+        this.exportPpi = resolvePreviewExportPpi(options.exportPpi);
     }
 
     onOpen() {
@@ -147,7 +152,10 @@ export class DiagramPreviewModal extends Modal {
                         this.app,
                         this.session.payload.sourcePath as string,
                         this.session.payload.artifact,
-                        { theme: this.session.payload.resolvedTheme ?? this.session.payload.theme }
+                        {
+                            theme: this.session.payload.resolvedTheme ?? this.session.payload.theme,
+                            ppi: this.exportPpi
+                        }
                     );
                     new Notice(formatI18n(i18n.previewModal.exportPngSuccessNotice, { path: outputPath }));
                 } catch (error) {
@@ -157,6 +165,33 @@ export class DiagramPreviewModal extends Modal {
                 } finally {
                     exportPngButton.disabled = false;
                     exportPngButton.setText(i18n.previewModal.exportPng);
+                }
+            };
+
+            const exportPdfButton = actions.createEl('button', {
+                text: i18n.previewModal.exportPdf
+            });
+            exportPdfButton.onclick = async () => {
+                exportPdfButton.disabled = true;
+                exportPdfButton.setText(i18n.previewModal.exportingPdf);
+                try {
+                    const outputPath = await saveDiagramPreviewPdf(
+                        this.app,
+                        this.session.payload.sourcePath as string,
+                        this.session.payload.artifact,
+                        {
+                            theme: this.session.payload.resolvedTheme ?? this.session.payload.theme,
+                            ppi: this.exportPpi
+                        }
+                    );
+                    new Notice(formatI18n(i18n.previewModal.exportPdfSuccessNotice, { path: outputPath }));
+                } catch (error) {
+                    const message = error instanceof Error ? error.message : String(error);
+                    new Notice(formatI18n(i18n.previewModal.exportPdfFailedNotice, { message }));
+                    console.error('Failed to export diagram preview PDF:', error);
+                } finally {
+                    exportPdfButton.disabled = false;
+                    exportPdfButton.setText(i18n.previewModal.exportPdf);
                 }
             };
         }

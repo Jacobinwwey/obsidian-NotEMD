@@ -3,7 +3,9 @@ import { buildSemanticFigureModel } from '../diagram/adapters/editableSvg/semant
 import {
     collectEditableSvgAnnotationGaps,
     EditableHtmlSvgRenderer,
-    NOTEMD_EDITABLE_SVG_RENDERER_VERSION
+    ensureSemanticFigureSvgStandaloneStyles,
+    NOTEMD_EDITABLE_SVG_RENDERER_VERSION,
+    renderSemanticFigureSvg
 } from '../rendering/renderers/editableHtmlSvgRenderer';
 import { RendererRegistry } from '../rendering/rendererRegistry';
 import { getRenderTargetDisplayName } from '../rendering/targetLabel';
@@ -68,6 +70,82 @@ describe('editable html/svg renderer', () => {
         expect(artifact.content).toContain('data-drawio-target="api"');
         expect(artifact.content).not.toContain('<script');
         expect(artifact.content).not.toContain('https://fonts.');
+    });
+
+    test('renders standalone svg with explicit dimensions and light fallback colors', () => {
+        const model = buildSemanticFigureModel(createArchitectureSpec());
+        const svg = renderSemanticFigureSvg(model);
+
+        expect(svg).toContain(`width="${model.width}"`);
+        expect(svg).toContain(`height="${model.height}"`);
+        expect(svg).toContain('<style>');
+        expect(svg).toContain('--notemd-editable-svg-panel, #ffffff');
+        expect(svg).toContain('class="notemd-editable-svg-canvas"');
+        expect(svg).toContain('fill: var(--notemd-editable-svg-panel, #ffffff);');
+        expect(svg).toContain('class="notemd-editable-svg-canvas" x="0" y="0"');
+        expect(svg).toContain('fill="#ffffff"');
+        expect(svg).toContain('stroke="#cbd5e1"');
+        expect(svg).not.toContain('fill: black');
+    });
+
+    test('normalizes older semantic svg companions that were saved without standalone styles', () => {
+        const legacySvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 200" data-notemd-renderer="${NOTEMD_EDITABLE_SVG_RENDERER_VERSION}"><title>Legacy</title><rect class="notemd-editable-svg-canvas" x="0" y="0" width="400" height="200" /></svg>`;
+        const normalized = ensureSemanticFigureSvgStandaloneStyles(legacySvg);
+
+        expect(normalized).toContain('width="400"');
+        expect(normalized).toContain('height="200"');
+        expect(normalized).toContain('<style>');
+        expect(normalized).toContain('fill: var(--notemd-editable-svg-panel, #ffffff);');
+    });
+
+    test('does not duplicate existing root dimensions when normalizing legacy semantic svg', () => {
+        const legacySvg = `<svg xmlns="http://www.w3.org/2000/svg" height="200" viewBox="0 0 400 200" data-notemd-renderer="${NOTEMD_EDITABLE_SVG_RENDERER_VERSION}"><title>Legacy</title><rect class="notemd-editable-svg-canvas" x="0" y="0" width="400" height="200" /></svg>`;
+        const normalized = ensureSemanticFigureSvgStandaloneStyles(legacySvg);
+        const root = normalized.match(/<svg\b[^>]*>/)?.[0] ?? '';
+
+        expect(normalized).toContain('width="400"');
+        expect((root.match(/\bwidth="/g) ?? [])).toHaveLength(1);
+        expect((root.match(/\bheight="/g) ?? [])).toHaveLength(1);
+    });
+
+    test('renders edge labels above nodes so long labels are not hidden by node rectangles', () => {
+        const model = buildSemanticFigureModel(createArchitectureSpec({
+            nodes: [
+                { id: 'source', label: 'Source' },
+                { id: 'middle', label: 'Middle' },
+                { id: 'target', label: 'Target' }
+            ],
+            edges: [
+                { from: 'middle', to: 'target', label: 'render self-contained artifact' }
+            ]
+        }));
+        const svg = renderSemanticFigureSvg(model);
+        const labelIndex = svg.indexOf('render self-contained artifact');
+        const lastNodeIndex = svg.lastIndexOf('class="notemd-editable-svg-node"');
+
+        expect(labelIndex).toBeGreaterThan(lastNodeIndex);
+    });
+
+    test('routes backward cross-row edges between facing node sides instead of toward the canvas margin', () => {
+        const model = buildSemanticFigureModel(createArchitectureSpec({
+            nodes: [
+                { id: 'a', label: 'A' },
+                { id: 'b', label: 'B' },
+                { id: 'c', label: 'C' },
+                { id: 'd', label: 'D' }
+            ],
+            edges: [
+                { from: 'c', to: 'd', label: 'backward' }
+            ]
+        }));
+        const source = model.nodes.find(node => node.id === 'c');
+        const target = model.nodes.find(node => node.id === 'd');
+        const edge = model.edges[0];
+
+        expect(source).toBeDefined();
+        expect(target).toBeDefined();
+        expect(edge.startX).toBe(source?.x);
+        expect(edge.endX).toBe((target?.x ?? 0) + (target?.width ?? 0));
     });
 
     test('requires every meaningful svg group to carry drawio annotations or an explicit ignore reason', async () => {

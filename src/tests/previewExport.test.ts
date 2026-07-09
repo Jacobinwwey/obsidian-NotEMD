@@ -1,9 +1,11 @@
 import { TFile } from 'obsidian';
 import {
+    buildDiagramPreviewPdfExportPath,
     buildDiagramSourceArtifactPath,
     buildDiagramPreviewExportPath,
     buildDiagramPreviewPngExportPath,
     renderPreviewArtifactSvg,
+    saveDiagramPreviewPdf,
     saveDiagramPreviewPng,
     saveDiagramSourceArtifact,
     saveDiagramPreviewSvg,
@@ -28,6 +30,11 @@ describe('diagram preview export helpers', () => {
     test('builds a stable png export path beside the source file', () => {
         expect(buildDiagramPreviewPngExportPath('Notes/Topic_diagram.canvas')).toBe('Notes/Topic_diagram_preview.png');
         expect(buildDiagramPreviewPngExportPath('Topic.md')).toBe('Topic_preview.png');
+    });
+
+    test('builds a stable pdf export path beside the source file', () => {
+        expect(buildDiagramPreviewPdfExportPath('Notes/Topic_diagram.canvas')).toBe('Notes/Topic_diagram_preview.pdf');
+        expect(buildDiagramPreviewPdfExportPath('Topic.md')).toBe('Topic_preview.pdf');
     });
 
     test('builds a target-aware raw artifact path beside the source note', () => {
@@ -118,10 +125,10 @@ describe('diagram preview export helpers', () => {
             mimeType: 'application/vnd.drawnix+json',
             sourceIntent: 'flowchart',
             previewSvg: {
-                content: '<svg><text>Drawnix preview</text></svg>',
+                content: '<svg viewBox="0 0 400 200" data-notemd-renderer="notemd-editable-html-svg@0.1.0"><rect class="notemd-editable-svg-canvas" /></svg>',
                 mimeType: 'image/svg+xml'
             }
-        })).resolves.toContain('Drawnix preview');
+        })).resolves.toContain('fill: var(--notemd-editable-svg-panel, #ffffff);');
     });
 
     test('saves a new exported preview svg beside the source file', async () => {
@@ -268,6 +275,52 @@ describe('diagram preview export helpers', () => {
 
         expect(outputPath).toBe('Notes/Topic_preview.png');
         expect(mockApp.vault.createBinary).toHaveBeenCalledWith('Notes/Topic_preview.png', expect.any(ArrayBuffer));
+    });
+
+    test('saves a pdf preview artifact beside the source file using the selected ppi', async () => {
+        const createCanvas = jest.fn((width: number, height: number) => ({
+            width,
+            height,
+            getContext: () => ({
+                scale: jest.fn(),
+                drawImage: jest.fn()
+            }),
+            toBlob: (callback: (blob: Blob | null) => void) => callback(new Blob(['jpeg'], { type: 'image/jpeg' }))
+        }));
+        const outputPath = await saveDiagramPreviewPdf(mockApp, 'Notes/Topic.md', {
+            target: 'mermaid',
+            content: '```mermaid\nflowchart TD\nA --> B\n```',
+            mimeType: 'text/vnd.mermaid',
+            sourceIntent: 'flowchart'
+        }, {
+            ppi: 600,
+            mermaid: {
+                initialize: jest.fn(),
+                parse: jest.fn(),
+                render: jest.fn().mockResolvedValue({ svg: '<svg viewBox="0 0 400 200"></svg>' })
+            },
+            raster: {
+                createBlob: (parts, options) => new Blob(parts, options),
+                createImage: () => {
+                    const image = {
+                        onload: null as null | (() => void),
+                        onerror: null as null | ((event?: unknown) => void),
+                        set src(_value: string) {
+                            this.onload?.();
+                        }
+                    };
+                    return image;
+                },
+                createCanvas,
+                createObjectURL: () => 'blob:pdf',
+                revokeObjectURL: jest.fn(),
+                blobToArrayBuffer: async () => new Uint8Array([0xff, 0xd8, 0xff, 0xd9]).buffer
+            }
+        });
+
+        expect(outputPath).toBe('Notes/Topic_preview.pdf');
+        expect(createCanvas).toHaveBeenCalledWith(2500, 1250);
+        expect(mockApp.vault.createBinary).toHaveBeenCalledWith('Notes/Topic_preview.pdf', expect.any(ArrayBuffer));
     });
 
     test('rejects unsupported export targets', async () => {

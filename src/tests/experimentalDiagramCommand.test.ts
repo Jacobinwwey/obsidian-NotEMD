@@ -127,7 +127,8 @@ describe('experimental diagram command', () => {
                     artifactSaved: true
                 })
             }),
-            plugin.settings.uiLocale
+            plugin.settings.uiLocale,
+            expect.objectContaining({ exportPpi: 300 })
         );
         const modalInstance = (DiagramPreviewModal as jest.Mock).mock.results[0]?.value;
         expect(modalInstance.open).toHaveBeenCalledTimes(1);
@@ -171,7 +172,8 @@ describe('experimental diagram command', () => {
                     artifactSaved: true
                 })
             }),
-            plugin.settings.uiLocale
+            plugin.settings.uiLocale,
+            expect.objectContaining({ exportPpi: 300 })
         );
         const modalInstance = (DiagramPreviewModal as jest.Mock).mock.results[0]?.value;
         expect(modalInstance.open).toHaveBeenCalledTimes(1);
@@ -197,7 +199,8 @@ describe('experimental diagram command', () => {
                     artifactSaved: false
                 })
             }),
-            plugin.settings.uiLocale
+            plugin.settings.uiLocale,
+            expect.objectContaining({ exportPpi: 300 })
         );
     });
 });
