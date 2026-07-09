@@ -1,4 +1,5 @@
 import { ValidationError } from '../types';
+import { validateCircuitSpec } from './adapters/circuitikz/circuitikzExporter';
 import { isSupportedVegaLiteChartType, SUPPORTED_VEGA_LITE_CHART_TYPES } from './adapters/vega/schema';
 import { DiagramDataSeries, DiagramNode, DiagramSpec, isSupportedDiagramIntent, SUPPORTED_DIAGRAM_INTENTS } from './types';
 
@@ -117,6 +118,27 @@ function validateNonChartLayoutHints(spec: DiagramSpec, errors: string[]): void 
     }
 }
 
+function validateCircuitPayload(spec: DiagramSpec, errors: string[]): void {
+    if (spec.circuitSpec && spec.intent !== 'circuit') {
+        errors.push('DiagramSpec.circuitSpec is only valid when intent is "circuit".');
+        return;
+    }
+
+    if (spec.intent !== 'circuit') {
+        return;
+    }
+
+    if (!spec.circuitSpec) {
+        errors.push('Diagram intent "circuit" requires a CircuitSpec payload.');
+        return;
+    }
+
+    const circuitValidation = validateCircuitSpec(spec.circuitSpec);
+    for (const error of circuitValidation.errors) {
+        errors.push(`CircuitSpec: ${error}`);
+    }
+}
+
 export function validateDiagramSpec(spec: DiagramSpec): DiagramSpecValidationResult {
     const errors: string[] = [];
 
@@ -129,7 +151,7 @@ export function validateDiagramSpec(spec: DiagramSpec): DiagramSpecValidationRes
     const nodeIds = new Set<string>();
     collectNodeIds(spec.nodes ?? [], nodeIds, errors);
 
-    if (spec.intent !== 'dataChart' && nodeIds.size === 0) {
+    if (spec.intent !== 'dataChart' && spec.intent !== 'circuit' && nodeIds.size === 0) {
         errors.push(`Diagram intent "${spec.intent}" requires at least one node.`);
     }
 
@@ -148,6 +170,8 @@ export function validateDiagramSpec(spec: DiagramSpec): DiagramSpecValidationRes
     } else {
         validateNonChartLayoutHints(spec, errors);
     }
+
+    validateCircuitPayload(spec, errors);
 
     return {
         valid: errors.length === 0,

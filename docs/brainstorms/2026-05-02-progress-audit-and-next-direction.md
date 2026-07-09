@@ -34,6 +34,8 @@ This audit is not a redesign pass. It is a repo-truth alignment pass. The bigges
 5. **Runtime support for 8 intents is not the same thing as UI exposure.**
    `SUPPORTED_DIAGRAM_INTENTS` still includes `mindmap / flowchart / sequence / classDiagram / erDiagram / stateDiagram / canvasMap / dataChart`, but the settings/sidebar selector currently exposes only `auto + flowchart + sequence + classDiagram + erDiagram + stateDiagram + dataChart`. `mindmap` and `canvasMap` remain runtime capabilities, not current first-class UI choices.
 
+   2026-07-09 update: current main now supports 9 intents by adding `circuit`, and the UI exposes both the circuit intent and the `circuitikz` render target. The historical 2026-05 audit remains useful as evidence that runtime capability and UI exposure must be checked separately.
+
 6. **Command orchestration is partially unified, not fully unified.**
    Legacy Mermaid save and experimental save still route through shared diagram orchestration, but `previewExperimentalDiagramCommand` now reads a local `vega-lite` fenced block and previews it directly. That matches the current saved artifact shape for `dataChart`, but it is not the final command-surface end state.
 
@@ -108,9 +110,11 @@ This means the roadmap should no longer be interpreted as "build the platform". 
 
 **Diagram platform**
 - The runtime still supports 8 intents.
+- 2026-07-09 update: the runtime now supports 9 intents after adding constrained `circuit` / `circuitikz` support.
 - The main extension seam is now `DiagramSpec -> adapter -> renderer`, not direct Mermaid text generation.
 - `dataChart` is no longer just "save JSON"; it now saves a Markdown fenced `vega-lite` artifact and previews locally.
 - `canvasMap` is supported but intentionally not exposed as a current preferred selector option, which is a healthy separation between runtime capability and product surface.
+- Circuitikz now has UI-visible intent/render-target options, a constrained `CircuitSpec` renderer, inline-white SVG preview companions, SVG/PNG/PDF artifact export, and npm 11 positional fallback handling at the offline CLI boundary.
 
 **Infrastructure**
 - Progress persistence, architecture docs, release workflow, and README alignment tests are all on mainline.
@@ -171,6 +175,7 @@ For remote truth:
 These are useful directional signals, but they should no longer be documented as hard automated repo gates:
 
 - A local DeepSeek verification run covered all 8 intents on 2026-05-02
+- A later local/CI-verifiable path covers the constrained ninth circuit intent through renderer and CLI tests rather than live LLM calls.
 - The harness was removed from mainline because it depended on a local vault path, live secrets, and nondeterministic network calls
 
 ## Drawnix Reference Conclusion

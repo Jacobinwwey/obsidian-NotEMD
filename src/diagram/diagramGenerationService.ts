@@ -5,6 +5,7 @@ import { HtmlRenderer } from '../rendering/renderers/htmlRenderer';
 import { EditableHtmlSvgRenderer } from '../rendering/renderers/editableHtmlSvgRenderer';
 import { DrawioRenderer } from '../rendering/renderers/drawioRenderer';
 import { DrawnixRenderer } from '../rendering/renderers/drawnixRenderer';
+import { CircuitikzRenderer } from '../rendering/renderers/circuitikzRenderer';
 import { RendererRegistry } from '../rendering/rendererRegistry';
 import { RenderArtifact } from '../rendering/types';
 import { RendererService } from '../rendering/rendererService';
@@ -131,6 +132,7 @@ function createDefaultRendererService(): RendererService {
         new EditableHtmlSvgRenderer(),
         new DrawioRenderer(),
         new DrawnixRenderer(),
+        new CircuitikzRenderer(),
         new HtmlRenderer()
     ]));
 }
@@ -141,9 +143,32 @@ function resolveRenderTargetForIntent(intent: DiagramIntent): DiagramPlan['rende
             return 'json-canvas';
         case 'dataChart':
             return 'vega-lite';
+        case 'circuit':
+            return 'circuitikz';
         default:
             return 'mermaid';
     }
+}
+
+function resolvePromptPreferredIntent(plan: DiagramPlan, requestedIntent?: DiagramIntent): DiagramIntent {
+    if (requestedIntent) {
+        return requestedIntent;
+    }
+
+    return plan.renderTarget === 'circuitikz' ? 'circuit' : plan.intent;
+}
+
+function buildGenerationPrompt(
+    plan: DiagramPlan,
+    options: Pick<DiagramGenerationOptions, 'requestedIntent' | 'targetLanguage'>
+): string {
+    return buildDiagramSpecPrompt({
+        preferredIntent: resolvePromptPreferredIntent(plan, options.requestedIntent),
+        requiredIntent: options.requestedIntent,
+        preferredChartType: plan.preferredChartType,
+        preferredRenderTarget: plan.renderTarget,
+        targetLanguage: options.targetLanguage
+    });
 }
 
 function resolveLegacyCompatibleIntent(spec: DiagramSpec, plan: DiagramPlan): DiagramIntent {
@@ -185,6 +210,7 @@ function mergeSpecDefaults(spec: DiagramSpec, plan: DiagramPlan): DiagramSpec {
         sections: spec.sections ?? [],
         callouts: spec.callouts ?? [],
         dataSeries: spec.dataSeries ?? [],
+        circuitSpec: resolvedIntent === 'circuit' ? spec.circuitSpec : undefined,
         layoutHints: Object.keys(normalizedLayoutHints).length > 0 ? normalizedLayoutHints : undefined,
         evidenceRefs: spec.evidenceRefs ?? []
     };
@@ -221,12 +247,7 @@ export async function generateDiagramArtifact(
         requestedRenderTarget: options.requestedRenderTarget
     });
 
-    const prompt = buildDiagramSpecPrompt({
-        preferredIntent: plan.intent,
-        requiredIntent: options.requestedIntent,
-        preferredChartType: plan.preferredChartType,
-        targetLanguage: options.targetLanguage
-    });
+    const prompt = buildGenerationPrompt(plan, options);
 
     let rawResponse = await options.llmInvoker(prompt, markdown);
     let parsedSpec = parseDiagramSpecResponse(rawResponse);
@@ -235,12 +256,8 @@ export async function generateDiagramArtifact(
 
     // If user requested a specific intent and LLM returned a different one, retry with stronger prompt
     if (options.requestedIntent && spec.intent !== options.requestedIntent) {
-        const retryPrompt = buildDiagramSpecPrompt({
-            preferredIntent: plan.intent,
-            requiredIntent: options.requestedIntent,
-            preferredChartType: plan.preferredChartType,
-            targetLanguage: options.targetLanguage
-        }) + `\n\nCRITICAL: Your previous response used intent "${spec.intent}" but the required intent is "${options.requestedIntent}". This is incorrect. You MUST use "${options.requestedIntent}" as the diagram intent. Do not choose any other intent. Regenerate the DiagramSpec with the correct intent.`;
+        const retryPrompt = buildGenerationPrompt(plan, options)
+            + `\n\nCRITICAL: Your previous response used intent "${spec.intent}" but the required intent is "${options.requestedIntent}". This is incorrect. You MUST use "${options.requestedIntent}" as the diagram intent. Do not choose any other intent. Regenerate the DiagramSpec with the correct intent.`;
 
         rawResponse = await options.llmInvoker(retryPrompt, markdown);
         parsedSpec = parseDiagramSpecResponse(rawResponse);
@@ -265,11 +282,9 @@ export async function generateDiagramArtifact(
         const errorMsg = renderError instanceof Error ? renderError.message : String(renderError);
         // If Mermaid parse failed, retry once with the LLM asking for valid Mermaid syntax
         if (errorMsg.includes('Mermaid diagram failed validation') || errorMsg.includes('Parse error')) {
-            const retryPrompt = buildDiagramSpecPrompt({
-                preferredIntent: spec.intent,
-                requiredIntent: options.requestedIntent,
-                preferredChartType: plan.preferredChartType,
-                targetLanguage: options.targetLanguage
+            const retryPrompt = buildGenerationPrompt(plan, {
+                ...options,
+                requestedIntent: options.requestedIntent ?? spec.intent
             }) + `\n\nCRITICAL: Your previous diagram spec rendered invalid Mermaid syntax. The error was: ${errorMsg}. Please regenerate the DiagramSpec with valid, well-formed content. Ensure entity names have no trailing spaces, all braces are properly closed, and the syntax follows standard Mermaid conventions.`;
 
             const retryResponse = await options.llmInvoker(retryPrompt, markdown);

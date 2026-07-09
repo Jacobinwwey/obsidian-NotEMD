@@ -32,7 +32,9 @@ export const EXPERIMENTAL_DIAGRAM_PIPELINE_LOCALE_EXTENSIONS: Record<string, Dee
                     compatibilityDesc:
                         'Wählen Sie, wie offensiv experimentelle Diagrammerzeugung und Vorschau Ziele auswählen. "Mermaid-kompatibel" hält Mermaid-kompatible Ausgabe bei. "Beste Passung" versucht zuerst reichere Intents und fällt bei fehlender Unterstützung zurück. Der Standardbefehl "Als Mermaid-Diagramm zusammenfassen" pinnt den spec-first-Pfad immer auf Mermaid-kompatible Ausgabe.',
                     compatibilityLegacy: 'Mermaid-kompatibel',
-                    compatibilityBestFit: 'Beste Passung'
+                    compatibilityBestFit: 'Beste Passung',
+                    intentCircuit: 'Schaltung (Circuitikz)',
+                    renderTargetCircuitikz: 'Circuitikz + SVG-Vorschau'
                 }
             }
         }
@@ -49,7 +51,9 @@ export const EXPERIMENTAL_DIAGRAM_PIPELINE_LOCALE_EXTENSIONS: Record<string, Dee
                     compatibilityDesc:
                         'Elige con qué agresividad la generación y vista previa experimentales seleccionan el destino del diagrama. "Compatible con Mermaid" mantiene una salida compatible con Mermaid. "Mejor ajuste" puede probar primero intenciones más ricas y retroceder cuando no haya soporte. El comando estándar "Resumir como diagrama Mermaid" siempre fija la ruta spec-first a una salida compatible con Mermaid.',
                     compatibilityLegacy: 'Compatible con Mermaid',
-                    compatibilityBestFit: 'Mejor ajuste'
+                    compatibilityBestFit: 'Mejor ajuste',
+                    intentCircuit: 'Circuito (Circuitikz)',
+                    renderTargetCircuitikz: 'Circuitikz + vista previa SVG'
                 }
             }
         }
@@ -83,7 +87,9 @@ export const EXPERIMENTAL_DIAGRAM_PIPELINE_LOCALE_EXTENSIONS: Record<string, Dee
                     compatibilityDesc:
                         'Choisissez à quel point la génération et l’aperçu expérimentaux sélectionnent agressivement la cible du diagramme. « Compatible Mermaid » conserve une sortie compatible Mermaid. « Meilleur ajustement » peut essayer d’abord des intentions plus riches puis revenir en arrière si elles ne sont pas prises en charge. La commande standard « Résumer en diagramme Mermaid » force toujours le chemin spec-first à rester compatible Mermaid.',
                     compatibilityLegacy: 'Compatible Mermaid',
-                    compatibilityBestFit: 'Meilleur ajustement'
+                    compatibilityBestFit: 'Meilleur ajustement',
+                    intentCircuit: 'Circuit (Circuitikz)',
+                    renderTargetCircuitikz: 'Circuitikz + aperçu SVG'
                 }
             }
         }
@@ -134,7 +140,9 @@ export const EXPERIMENTAL_DIAGRAM_PIPELINE_LOCALE_EXTENSIONS: Record<string, Dee
                     compatibilityDesc:
                         '実験的な図生成とプレビューがどれだけ積極的に図ターゲットを選ぶかを指定します。「Mermaid 互換」は Mermaid 互換出力を維持します。「最適一致」はより豊かな intent を先に試し、未対応ならフォールバックします。標準の「Mermaid 図として要約」コマンドは、spec-first 経路を常に Mermaid 互換出力へ固定します。',
                     compatibilityLegacy: 'Mermaid 互換',
-                    compatibilityBestFit: '最適一致'
+                    compatibilityBestFit: '最適一致',
+                    intentCircuit: '回路 (Circuitikz)',
+                    renderTargetCircuitikz: 'Circuitikz + SVG プレビュー'
                 }
             }
         }
@@ -151,7 +159,9 @@ export const EXPERIMENTAL_DIAGRAM_PIPELINE_LOCALE_EXTENSIONS: Record<string, Dee
                     compatibilityDesc:
                         '실험적 다이어그램 생성과 미리보기가 얼마나 적극적으로 다이어그램 대상을 선택할지 지정합니다. "Mermaid 호환"은 Mermaid 호환 출력을 유지합니다. "최적 적합"은 더 풍부한 intent를 먼저 시도하고 지원되지 않으면 되돌아갑니다. 기본 "Mermaid 다이어그램으로 요약" 명령은 spec-first 경로를 항상 Mermaid 호환 출력으로 고정합니다.',
                     compatibilityLegacy: 'Mermaid 호환',
-                    compatibilityBestFit: '최적 적합'
+                    compatibilityBestFit: '최적 적합',
+                    intentCircuit: '회로 (Circuitikz)',
+                    renderTargetCircuitikz: 'Circuitikz + SVG 미리보기'
                 }
             }
         }

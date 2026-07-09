@@ -70,8 +70,8 @@ describe('diagram operation input helpers', () => {
         expect(input.requestedRenderTarget).toBeUndefined();
     });
 
-    test('accepts Draw.io and Drawnix render target preferences for artifact mode', () => {
-        for (const preferredDiagramRenderTarget of ['drawio', 'drawnix'] as const) {
+    test('accepts source-plus-preview render target preferences for artifact mode', () => {
+        for (const preferredDiagramRenderTarget of ['drawio', 'drawnix', 'circuitikz'] as const) {
             const input = buildDiagramOperationInput({
                 sourcePath: 'Notes/Topic.md',
                 sourceMarkdown: '# Topic',

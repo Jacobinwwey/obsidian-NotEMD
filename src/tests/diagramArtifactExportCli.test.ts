@@ -24,6 +24,52 @@ function createSpec(): DiagramSpec {
     };
 }
 
+function createCircuitSpec(): DiagramSpec {
+    return {
+        intent: 'circuit',
+        title: 'CLI Circuit Export',
+        nodes: [],
+        circuitSpec: {
+            circuitKind: 'cmos-inverter',
+            title: 'CLI Circuit Export',
+            goldenReferenceId: 'cmos-inverter-v1',
+            style: {
+                package: 'circuitikz',
+                voltageConvention: 'american voltages'
+            },
+            nets: ['VDD', 'GND', 'vin', 'vout', 'shared_gate', 'shared_drain'],
+            components: [
+                {
+                    id: 'MP',
+                    type: 'pmos',
+                    label: '$M_P$',
+                    terminals: { S: 'VDD', G: 'shared_gate', D: 'shared_drain' }
+                },
+                {
+                    id: 'MN',
+                    type: 'nmos',
+                    label: '$M_N$',
+                    terminals: { D: 'shared_drain', G: 'shared_gate', S: 'GND' }
+                }
+            ],
+            connections: [
+                { from: 'VDD', to: 'MP.S' },
+                { from: 'MP.D', to: 'MN.D' },
+                { from: 'MN.S', to: 'GND' },
+                { from: 'vin', to: 'MP.G' },
+                { from: 'vin', to: 'MN.G' },
+                { from: 'MP.D', to: 'vout' },
+                { from: 'MN.D', to: 'vout' }
+            ],
+            layoutHints: {
+                inputSide: 'left',
+                outputSide: 'right',
+                routingStyle: 'orthogonal'
+            }
+        }
+    };
+}
+
 describe('diagram artifact export CLI', () => {
     const repoRoot = path.join(__dirname, '..', '..');
     const packageJsonPath = path.join(repoRoot, 'package.json');
@@ -38,11 +84,28 @@ describe('diagram artifact export CLI', () => {
         const cli = require(scriptPath);
 
         expect(packageJson.scripts['diagram:export-artifact']).toBe('node scripts/export-diagram-artifact.js');
-        expect(cli.SUPPORTED_TARGETS).toEqual(expect.arrayContaining(['svg', 'png', 'pdf']));
+        expect(cli.SUPPORTED_TARGETS).toEqual(expect.arrayContaining(['circuitikz', 'svg', 'png', 'pdf']));
         expect(cli.normalizePpi(undefined)).toBe(300);
         expect(cli.normalizePpi('450')).toBe(450);
         expect(cli.normalizePpi('1200')).toBe(600);
         expect(cli.pngPixelsPerMeterFromPpi(300)).toBe(11811);
+        expect(cli.parseArgs([
+            'spec.json',
+            'circuitikz',
+            'circuit.tex',
+            'circuit.svg',
+            'circuit.png',
+            'circuit.pdf',
+            '300'
+        ])).toEqual({
+            input: 'spec.json',
+            target: 'circuitikz',
+            output: 'circuit.tex',
+            previewSvgOutput: 'circuit.svg',
+            previewPngOutput: 'circuit.png',
+            previewPdfOutput: 'circuit.pdf',
+            ppi: '300'
+        });
 
         for (const runbook of [englishRunbook, chineseRunbook]) {
             expect(runbook).toContain('npm run diagram:export-artifact');
@@ -56,6 +119,7 @@ describe('diagram artifact export CLI', () => {
             expect(runbook).toContain('editable-html-svg');
             expect(runbook).toContain('drawio');
             expect(runbook).toContain('drawnix');
+            expect(runbook).toContain('circuitikz');
             expect(runbook).toContain('svg');
             expect(runbook).toContain('png');
             expect(runbook).toContain('pdf');
@@ -66,6 +130,54 @@ describe('diagram artifact export CLI', () => {
             expect(runbook).toContain('BOM');
         }
     });
+
+    test('exports circuitikz TeX and SVG/PNG/PDF preview companions from one DiagramSpec file', () => {
+        const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'notemd-diagram-artifact-cli-circuitikz-'));
+        const specPath = path.join(tempRoot, 'circuit.json');
+        const texPath = path.join(tempRoot, 'circuit.tex');
+        const svgPath = path.join(tempRoot, 'circuit.svg');
+        const pngPath = path.join(tempRoot, 'circuit.png');
+        const pdfPath = path.join(tempRoot, 'circuit.pdf');
+        fs.writeFileSync(specPath, JSON.stringify(createCircuitSpec(), null, 2), 'utf8');
+
+        try {
+            const stdout = execFileSync(
+                process.execPath,
+                [
+                    scriptPath,
+                    '--input', specPath,
+                    '--target', 'circuitikz',
+                    '--output', texPath,
+                    '--preview-svg-output', svgPath,
+                    '--preview-png-output', pngPath,
+                    '--preview-pdf-output', pdfPath,
+                    '--ppi', '300'
+                ],
+                {
+                    cwd: repoRoot,
+                    encoding: 'utf8'
+                }
+            );
+
+            const result = JSON.parse(stdout);
+            expect(result).toEqual(expect.objectContaining({
+                target: 'circuitikz',
+                outputPath: texPath,
+                previewSvgOutputPath: svgPath,
+                previewPngOutputPath: pngPath,
+                previewPdfOutputPath: pdfPath,
+                ppi: 300,
+                circuitKind: 'cmos-inverter',
+                goldenReferenceId: 'cmos-inverter-v1'
+            }));
+            expect(fs.readFileSync(texPath, 'utf8')).toContain('\\usepackage{circuitikz}');
+            expect(fs.readFileSync(svgPath, 'utf8')).toContain('notemd-circuitikz-preview-svg@0.1.0');
+            expect(fs.statSync(pngPath).size).toBeGreaterThan(0);
+            expect(fs.readFileSync(pdfPath).subarray(0, 5).toString('ascii')).toBe('%PDF-');
+        } finally {
+            fs.rmSync(tempRoot, { recursive: true, force: true });
+        }
+    }, 30000);
 
     test('exports editable HTML/SVG, Draw.io XML, and Drawnix JSON from one DiagramSpec file', () => {
         const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'notemd-diagram-artifact-cli-'));
@@ -206,7 +318,7 @@ describe('diagram artifact export CLI', () => {
             expect(result.status).toBe(1);
             expect(result.stdout).toBe('');
             expect(result.stderr).toContain('Unsupported export target "bad-target"');
-            expect(result.stderr).toContain('editable-html-svg, drawio, drawnix, svg, png, pdf');
+            expect(result.stderr).toContain('editable-html-svg, drawio, drawnix, circuitikz, svg, png, pdf');
             expect(fs.existsSync(outputPath)).toBe(false);
         } finally {
             fs.rmSync(tempRoot, { recursive: true, force: true });

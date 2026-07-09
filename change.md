@@ -4,6 +4,28 @@ This document summarizes the major functional and architectural changes implemen
 
 ---
 
+## Unreleased
+
+### English
+
+- Added first-class experimental diagram UI support for `circuit` intent and the `circuitikz` render target.
+- Added `CircuitikzRenderer` for constrained `DiagramSpec.circuitSpec` payloads. It writes deterministic circuitikz `.tex` source and attaches a white-background SVG preview companion for Obsidian viewing.
+- Extended the offline diagram artifact CLI so `--target circuitikz` can write TeX plus SVG/PNG/PDF preview companions. Direct `svg`, `png`, and `pdf` targets can also render validated circuit specs through the same companion SVG path.
+- Hardened the artifact CLI for npm 11 argument rewriting on Windows by accepting the ordered positional fallback shape, and made the circuitikz SVG canvas background inline white so standalone viewers do not show transparent SVGs as black.
+- Kept the circuit path topology-first: the prompt asks for structured `CircuitSpec`, validation rejects free-form/non-circuit payloads, and the preview companion is documented as review evidence rather than a LaTeX/TikZJax compile result.
+- Updated the GitHub Pages diagram documentation and maintainer runbooks. The MDX synchronization policy is explicit: do not blindly commit every generated locale file for small feature increments; commit localized MDX only when published route/frontmatter/heading or visible behavior parity requires it.
+
+### 中文
+
+- 为实验性图表 UI 增加一等 `circuit` intent 与 `circuitikz` render target 支持。
+- 新增 `CircuitikzRenderer`，用于受约束的 `DiagramSpec.circuitSpec` payload。它会写出确定性 circuitikz `.tex` 源文件，并附加白底 SVG preview companion 供 Obsidian 查看。
+- 扩展离线 diagram artifact CLI，使 `--target circuitikz` 可以写出 TeX 以及 SVG/PNG/PDF 预览 companion。直接 `svg`、`png` 与 `pdf` target 也可以通过同一条 companion SVG 路径渲染已验证电路 spec。
+- 加固 artifact CLI，使其兼容 Windows 上 npm 11 参数重写后的有序位置参数形态；同时将 circuitikz SVG 画布背景改为 inline 白色，避免 standalone viewer 把透明 SVG 显示成黑底。
+- 电路路径继续保持 topology-first：prompt 要求结构化 `CircuitSpec`，校验拒绝自由形式/非电路 payload，并且文档明确 preview companion 是审查证据，不是 LaTeX/TikZJax 编译结果。
+- 更新 GitHub Pages 图表文档与维护者 runbook。MDX 同步策略已明确：小功能增量不要盲目提交所有 generated locale 文件；只有公开 route/frontmatter/heading 或可见行为需要对齐时，才提交对应 localized MDX。
+
+---
+
 ## 1.9.3
 
 ### Highlights

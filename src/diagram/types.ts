@@ -1,4 +1,5 @@
 import type { SupportedVegaLiteChartType } from './adapters/vega/schema';
+import type { CircuitSpec } from './adapters/circuitikz/circuitSpec';
 
 export const SUPPORTED_DIAGRAM_INTENTS = [
     'mindmap',
@@ -8,6 +9,7 @@ export const SUPPORTED_DIAGRAM_INTENTS = [
     'erDiagram',
     'stateDiagram',
     'canvasMap',
+    'circuit',
     'dataChart'
 ] as const;
 
@@ -25,7 +27,8 @@ export const SUPPORTED_RENDER_TARGETS = [
     'html',
     'editable-html-svg',
     'drawio',
-    'drawnix'
+    'drawnix',
+    'circuitikz'
 ] as const;
 
 export type RenderTarget = typeof SUPPORTED_RENDER_TARGETS[number];
@@ -89,6 +92,7 @@ export interface DiagramSpec {
     sections?: DiagramSection[];
     callouts?: DiagramCallout[];
     dataSeries?: DiagramDataSeries[];
+    circuitSpec?: CircuitSpec;
     layoutHints?: Record<string, string | number | boolean>;
     sourceLanguage?: string;
     outputLanguage?: string;

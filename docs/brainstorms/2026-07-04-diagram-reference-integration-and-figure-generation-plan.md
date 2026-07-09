@@ -291,15 +291,44 @@ Phase F implementation status on 2026-07-05: `src/diagram/adapters/circuitikz/ci
 
 2026-07-06 SVG text-anchor geometry increment: positioned SVG `text` and `tspan` boxes now honor `text-anchor` values `start`, `middle`, and `end` from attributes or inline style. This makes centered and right-aligned labels participate in the same bounded-canvas, text-overlap, and `render-svg-label-overlap` checks as start-anchored labels, while still avoiding a browser-grade text-layout claim.
 
+## 2026-07-09 circuitikz UI And Artifact Export Increment
+
+The previous architecture deliberately kept circuitikz outside the generic planner until the topology contract was strong enough. That condition is now met for the constrained path, so the implementation advances without changing the core rule: Notemd still does not accept arbitrary TikZ from the LLM.
+
+Implemented changes:
+
+- `DiagramIntent` now includes `circuit`; `RenderTarget` now includes `circuitikz`.
+- UI settings and the sidebar selector expose **Circuit (Circuitikz)** and **Circuitikz + SVG preview**.
+- `DiagramSpec` can carry `circuitSpec` only when `intent` is `circuit`; validation rejects missing circuit payloads and rejects circuit payloads attached to non-circuit intents.
+- `buildDiagramSpecPrompt()` asks for structured `CircuitSpec` output and known golden references when the user selects circuit/circuitikz, instead of asking for raw TikZ.
+- `CircuitikzRenderer` emits deterministic `.tex` through the existing circuitikz exporter and supplies a white-background SVG preview companion from the same `CircuitSpec`. The canvas background is now an inline `fill="#ffffff"` contract, not only a CSS class, so standalone viewers that strip style blocks do not show a transparent canvas as black.
+- `scripts/export-diagram-artifact.js` accepts `--target circuitikz` and can write SVG/PNG/PDF companions from the circuit preview SVG. Direct `svg`, `png`, and `pdf` targets also support `intent: "circuit"` by using the same preview companion.
+- The artifact CLI accepts both explicit long-option arguments and the npm 11 positional fallback shape observed on Windows (`input target output previewSvg previewPng previewPdf ppi`), while the maintainer runbook recommends the direct `node` entrypoint for warning-free smoke scripts.
+- Preview/export keeps the distinction between source and visual evidence: the SVG/PNG/PDF companion is Obsidian-viewable validation output, not a LaTeX/TikZJax compile result.
+
+Architecture comparison against prior requirements:
+
+| Requirement | Current state | Assessment |
+|---|---|---|
+| Do not generate free-form TikZ | Prompt and validation require `CircuitSpec`; renderer rejects non-circuit specs | Satisfied |
+| Make circuitikz discoverable in UI | Settings and sidebar render target/intent options are wired | Satisfied |
+| Support Obsidian-viewable outputs for non-renderable source formats | circuitikz now follows Draw.io/Drawnix with `previewSvg`, PNG, and PDF companions | Satisfied for preview evidence |
+| Preserve cross-platform execution discipline | The new path does not add shell execution; existing compile runner remains `shell: false` for optional real renderers; npm 11 positional argument rewriting is handled at the CLI boundary | Satisfied |
+| Prove real LaTeX rendering quality | Still optional maintainer smoke evidence, not plugin runtime behavior | Open by design |
+
+MDX synchronization policy:
+
+Do not blindly commit every generated localized MDX file for each feature increment. The Docusaurus i18n tree is a published website surface, but all-locale generated churn makes code review noisy and hides product changes. Commit localized MDX when route/frontmatter/heading contracts or visible published behavior require parity. For this increment, update the English source page and the explicit zh-CN page that the user called out; leave the rest of the generated locale tree untouched unless website build or localization contract tests require regeneration.
+
 ## Current Architecture Progress Audit
 
 | Prior requirement | Current code evidence | Status | Next direction |
 |---|---|---|---|
-| Keep model output semantic instead of free-form renderer text | `DiagramSpec`, `SemanticFigureModel`, and the separate `CircuitSpec` boundary keep renderer syntax behind adapters | Implemented for current targets | Do not widen `DiagramSpec` for circuit-only terminal/layout fields until another target needs them |
+| Keep model output semantic instead of free-form renderer text | `DiagramSpec`, `SemanticFigureModel`, and constrained `DiagramSpec.circuitSpec` for `intent: "circuit"` keep renderer syntax behind adapters | Implemented for current targets | Keep rejecting free-form TikZ; promote circuit fields only when another non-circuit target needs them |
 | Keep editor integrations at artifact boundaries | Draw.io XML, Drawnix JSON, editable HTML/SVG, circuitikz, and SVG companions all export through CLI or render artifacts without embedding third-party editors | Implemented | Add richer primitives only when structural editability tests exist |
-| Make renderer execution cross-platform | `circuitikzCompileRunner.ts` uses `shell: false` with placeholder-expanded argument arrays and structured executable diagnostics; `run-circuitikz-smoke-fixtures.js` records missing renderer configuration as JSON evidence instead of probing shell resolution | Implemented | Keep Windows/POSIX behavior in argument arrays, not shell command strings; keep renderer discovery optional unless it can preserve that contract |
+| Make renderer execution cross-platform | `circuitikzCompileRunner.ts` uses `shell: false` with placeholder-expanded argument arrays and structured executable diagnostics; `run-circuitikz-smoke-fixtures.js` records missing renderer configuration as JSON evidence instead of probing shell resolution; `export-diagram-artifact.js` accepts npm 11 stripped-flag positional arguments | Implemented | Keep Windows/POSIX behavior in argument arrays, not shell command strings; keep renderer discovery optional unless it can preserve that contract |
 | Verify circuit output before visual repair | Compile-log diagnostics, topology-preserving repair guard, structured repair prompt handoff, repair acceptance evidence, deterministic layout-hint projection, SVG structural smoke, accessibility metadata label checks through `aria-label`, `<title>`, and `<desc>`, 1/2/4/8-bit indexed-color, grayscale/RGB `tRNS` transparent samples, format-specific Adam7/interlaced and indexed bit-depth rejection guidance, 1/2/4/8/16-bit grayscale, and 8/16-bit grayscale-alpha/RGB/RGBA PNG foreground smoke are in place | Partially implemented | Add OCR-level recognition for path-only visual text, precise pixel overlap gates, and automated topology-preserving repair execution |
-| Expose diagnostics to users without pretending source is rendered | `RenderArtifact.diagnostics`, localized diagnostic summary counts, preview history entries, source-only fallback, and explicit `previewSvg` companions are implemented | Implemented | Connect external renderer artifacts only when evidence distinguishes raw source from rendered output |
+| Expose diagnostics to users without pretending source is rendered | `RenderArtifact.diagnostics`, localized diagnostic summary counts, preview history entries, source-only fallback, and explicit `previewSvg` companions are implemented; circuitikz preview companions are labeled as semantic preview evidence and carry an inline white canvas background | Implemented | Connect external renderer artifacts only when evidence distinguishes raw source from rendered output |
 
 ## Tradeoffs
 
@@ -343,6 +372,6 @@ The HTML/SVG, Draw.io, Drawnix, and first circuitikz export boundaries now exist
 2. add screenshot/OCR-level checks beyond structural SVG coordinates, including OCR recognition for path-only glyph text and more precise pixel-level overlap than the current foreground-density and label-vs-drawing box heuristics;
 3. keep topology locked during any repair prompt so visual repair cannot change the circuit;
 4. connect source-only preview sessions to external artifact outputs only after the renderer evidence is available, keeping raw source and real visual render states distinct;
-5. only then consider more circuit families or a plugin-side circuit preview target.
+5. expand circuit families only when the golden-reference topology and companion-preview contracts can be validated together; keep real LaTeX/TikZJax visual acceptance behind explicit renderer evidence.
 
 Drawnix remains a good export format, not a reason to embed a whiteboard product in the plugin. circuitikz remains a constrained circuit target, not a reason to accept arbitrary TikZ from the LLM.

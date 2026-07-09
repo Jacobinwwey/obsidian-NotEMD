@@ -3,6 +3,53 @@ import { RendererRegistry } from '../rendering/rendererRegistry';
 import { RendererService } from '../rendering/rendererService';
 import { HtmlRenderer } from '../rendering/renderers/htmlRenderer';
 import { DiagramRenderer } from '../rendering/types';
+import { DiagramSpec } from '../diagram/types';
+
+function createCircuitDiagramSpec(): DiagramSpec {
+    return {
+        intent: 'circuit',
+        title: 'CMOS Inverter',
+        nodes: [],
+        circuitSpec: {
+            circuitKind: 'cmos-inverter',
+            title: 'CMOS Inverter',
+            goldenReferenceId: 'cmos-inverter-v1',
+            style: {
+                package: 'circuitikz',
+                voltageConvention: 'american voltages'
+            },
+            nets: ['VDD', 'GND', 'vin', 'vout', 'shared_gate', 'shared_drain'],
+            components: [
+                {
+                    id: 'MP',
+                    type: 'pmos',
+                    label: '$M_P$',
+                    terminals: { S: 'VDD', G: 'shared_gate', D: 'shared_drain' }
+                },
+                {
+                    id: 'MN',
+                    type: 'nmos',
+                    label: '$M_N$',
+                    terminals: { D: 'shared_drain', G: 'shared_gate', S: 'GND' }
+                }
+            ],
+            connections: [
+                { from: 'VDD', to: 'MP.S' },
+                { from: 'MP.D', to: 'MN.D' },
+                { from: 'MN.S', to: 'GND' },
+                { from: 'vin', to: 'MP.G' },
+                { from: 'vin', to: 'MN.G' },
+                { from: 'MP.D', to: 'vout' },
+                { from: 'MN.D', to: 'vout' }
+            ],
+            layoutHints: {
+                inputSide: 'left',
+                outputSide: 'right',
+                routingStyle: 'orthogonal'
+            }
+        }
+    };
+}
 
 describe('diagram generation service', () => {
     test('generates mermaid content through the experimental pipeline when spec output is valid', async () => {
@@ -206,6 +253,28 @@ Client sends work to a queue-backed worker.
             expect(result.artifact.target).toBe(requestedRenderTarget);
             expect(result.artifact.previewSvg?.content).toContain('<svg');
         }
+    });
+
+    test('honors circuitikz render target overrides with TeX source and svg companion', async () => {
+        const llmInvoker = jest.fn().mockResolvedValue(JSON.stringify(createCircuitDiagramSpec()));
+
+        const result = await generateDiagramArtifact(`# CMOS Inverter
+
+Draw a circuitikz schematic with PMOS pull-up, NMOS pull-down, VDD, GND, vin, and vout.
+`, {
+            compatibilityMode: 'best-fit',
+            requestedRenderTarget: 'circuitikz',
+            targetLanguage: 'en',
+            llmInvoker
+        });
+
+        expect(result.plan.renderTarget).toBe('circuitikz');
+        expect(result.plan.fallbackTargets).toEqual([]);
+        expect(result.spec.intent).toBe('circuit');
+        expect(result.artifact.target).toBe('circuitikz');
+        expect(result.artifact.content).toContain('\\begin{circuitikz}');
+        expect(result.artifact.previewSvg?.content).toContain('<svg');
+        expect(llmInvoker.mock.calls[0][0]).toMatch(/circuitSpec/i);
     });
 
     test('keeps legacy-mermaid output pinned even when a render target override is provided', async () => {

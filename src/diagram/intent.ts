@@ -20,6 +20,32 @@ export function inferDiagramIntent(markdown: string): DiagramIntentResult {
         return scoreResult('mindmap', 0.2, ['empty content defaults to hierarchical summary']);
     }
 
+    const circuitReasons: string[] = [];
+    const circuitKeywords = countMatches(normalized, [
+        /\bcircuitikz\b/g,
+        /\btikzjax\b/g,
+        /\bcircuit\b/g,
+        /\bschematic\b/g,
+        /\bcmos\b/g,
+        /\bnmos\b/g,
+        /\bpmos\b/g,
+        /\bmosfet\b/g,
+        /\btransistor\b/g,
+        /\binverter\b/g,
+        /\bcommon-source\b/g,
+        /\btransmission gate\b/g,
+        /\bnand\b/g,
+        /\bnor\b/g,
+        /\bvdd\b/g,
+        /\bgnd\b/g,
+        /\bvin\b/g,
+        /\bvout\b/g
+    ]);
+    if (circuitKeywords >= 2) {
+        circuitReasons.push('circuit/cmos/mos vocabulary detected');
+        return scoreResult('circuit', 0.86, circuitReasons);
+    }
+
     const chartReasons: string[] = [];
     const hasMarkdownTable = /\|.+\|/.test(normalized) && /\|\s*-+\s*\|/.test(normalized);
     const numericCells = (normalized.match(/\|\s*\d+(?:\.\d+)?\s*\|/g) ?? []).length;

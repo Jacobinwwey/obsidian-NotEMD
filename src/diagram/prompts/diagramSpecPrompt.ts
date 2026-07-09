@@ -1,10 +1,11 @@
 import { SUPPORTED_VEGA_LITE_CHART_TYPES, SupportedVegaLiteChartType } from '../adapters/vega/schema';
-import { DiagramIntent } from '../types';
+import { DiagramIntent, RenderTarget } from '../types';
 
 export interface DiagramSpecPromptOptions {
     preferredIntent?: DiagramIntent;
     requiredIntent?: DiagramIntent;
     preferredChartType?: SupportedVegaLiteChartType;
+    preferredRenderTarget?: RenderTarget;
     targetLanguage?: string;
 }
 
@@ -17,6 +18,15 @@ export function buildDiagramSpecPrompt(options: DiagramSpecPromptOptions = {}): 
         : 'Preferred diagram intent: choose the most suitable intent from the supported list.';
     const preferredChartTypeLine = options.preferredIntent === 'dataChart' && options.preferredChartType
         ? `Preferred chart template: ${options.preferredChartType}. Use it when the extracted data supports it.`
+        : '';
+    const circuitikzTargetLine = options.preferredIntent === 'circuit' || options.preferredRenderTarget === 'circuitikz'
+        ? `Circuitikz target rules:
+- Set intent: circuit.
+- Include a circuitSpec object. Do not encode circuit topology in generic nodes/edges only.
+- circuitSpec.style.package must be "circuitikz".
+- Use only supported goldenReferenceId values: common-source-nmos-v1, cmos-inverter-v1, cmos-buffer-v1, cmos-transmission-gate-v1, cmos-nand2-v1, cmos-nor2-v1.
+- Use layoutHints.inputSide, layoutHints.outputSide, and layoutHints.routingStyle: "orthogonal" when placement is known.
+- Do not output raw TikZ or circuitikz source. Return structured JSON only.`
         : '';
 
     const targetLanguageLine = options.targetLanguage
@@ -40,10 +50,12 @@ Supported intents:
 - erDiagram
 - stateDiagram
 - canvasMap
+- circuit
 - dataChart
 
 ${preferredIntentLine}
 ${preferredChartTypeLine}
+${circuitikzTargetLine}
 ${targetLanguageLine}
 
 Required DiagramSpec fields:

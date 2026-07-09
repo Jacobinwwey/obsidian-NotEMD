@@ -203,4 +203,68 @@ describe('diagram spec validation', () => {
         expect(result.errors.join(' ')).toMatch(/pie/i);
         expect(result.errors.join(' ')).toMatch(/non-negative/i);
     });
+
+    test('accepts circuit specs without generic flowchart nodes', () => {
+        const spec: DiagramSpec = {
+            intent: 'circuit',
+            title: 'CMOS Inverter',
+            nodes: [],
+            circuitSpec: {
+                circuitKind: 'cmos-inverter',
+                title: 'CMOS Inverter',
+                goldenReferenceId: 'cmos-inverter-v1',
+                style: {
+                    package: 'circuitikz',
+                    voltageConvention: 'american voltages'
+                },
+                nets: ['VDD', 'GND', 'vin', 'vout', 'shared_gate', 'shared_drain'],
+                components: [
+                    {
+                        id: 'MP',
+                        type: 'pmos',
+                        label: '$M_P$',
+                        terminals: { S: 'VDD', G: 'shared_gate', D: 'shared_drain' }
+                    },
+                    {
+                        id: 'MN',
+                        type: 'nmos',
+                        label: '$M_N$',
+                        terminals: { D: 'shared_drain', G: 'shared_gate', S: 'GND' }
+                    }
+                ],
+                connections: [
+                    { from: 'VDD', to: 'MP.S' },
+                    { from: 'MP.D', to: 'MN.D' },
+                    { from: 'MN.S', to: 'GND' },
+                    { from: 'vin', to: 'MP.G' },
+                    { from: 'vin', to: 'MN.G' },
+                    { from: 'MP.D', to: 'vout' },
+                    { from: 'MN.D', to: 'vout' }
+                ],
+                layoutHints: {
+                    inputSide: 'left',
+                    outputSide: 'right',
+                    routingStyle: 'orthogonal'
+                }
+            }
+        };
+
+        const result = validateDiagramSpec(spec);
+
+        expect(result.valid).toBe(true);
+        expect(result.errors).toHaveLength(0);
+    });
+
+    test('rejects circuit intent without CircuitSpec topology', () => {
+        const spec: DiagramSpec = {
+            intent: 'circuit',
+            title: 'Missing Circuit',
+            nodes: []
+        };
+
+        const result = validateDiagramSpec(spec);
+
+        expect(result.valid).toBe(false);
+        expect(result.errors.join(' ')).toMatch(/CircuitSpec/i);
+    });
 });

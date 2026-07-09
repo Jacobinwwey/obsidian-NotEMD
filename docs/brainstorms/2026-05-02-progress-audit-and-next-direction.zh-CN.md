@@ -34,6 +34,8 @@ topic: progress-audit-next-direction
 5. **运行时支持 8 种意图，不等于 UI 首选项全部暴露。**
    `SUPPORTED_DIAGRAM_INTENTS` 仍覆盖 `mindmap / flowchart / sequence / classDiagram / erDiagram / stateDiagram / canvasMap / dataChart`，但设置页与侧边栏当前只暴露 `auto + flowchart + sequence + classDiagram + erDiagram + stateDiagram + dataChart`。`mindmap` 与 `canvasMap` 仍属运行时能力，不是当前 UI 首选图表选择器的一部分。
 
+   2026-07-09 更新：当前 main 已通过新增 `circuit` 支持 9 种意图，UI 也已经暴露 circuit intent 与 `circuitikz` render target。2026-05 的历史审计仍然有价值，因为它提醒我们必须分别检查运行时能力与 UI 暴露面。
+
 6. **命令编排“部分统一”，不是“完全统一”。**
    `generateExperimentalDiagramCommand` 与 legacy Mermaid 保存命令仍经过共享 `generateDiagramCommand` 编排，但 `previewExperimentalDiagramCommand` 现在直接读取当前 Markdown 中的 `vega-lite` 围栏并本地预览，不再走共享 LLM 生成路径。这是为了匹配当前 `dataChart` 产物以 Markdown fenced block 保存的现实，而不是最终命令收口形态。
 
@@ -108,9 +110,11 @@ topic: progress-audit-next-direction
 
 **图表平台：**
 - 运行时仍支持 8 种图表意图。
+- 2026-07-09 更新：新增受约束 `circuit` / `circuitikz` 后，运行时现在支持 9 种图表意图。
 - `DiagramSpec -> adapter -> renderer` 的主链已经成立，核心扩展点不再绑死在 Mermaid 文本。
 - `dataChart` 已经不再只是“保存 JSON”，而是保存为 Markdown fenced `vega-lite` 并支持本地预览。
 - `canvasMap` 是已支持但未在当前 UI 中首选暴露的目标，说明“运行时能力”和“产品默认表面”已开始分层。
+- Circuitikz 现在已有 UI 可见的 intent/render-target 选项、受约束 `CircuitSpec` renderer、inline 白底 SVG preview companion、SVG/PNG/PDF artifact export，并且离线 CLI 边界已兼容 npm 11 的位置参数 fallback。
 
 **基础设施：**
 - 进度状态持久化、架构文档、release workflow、README 对齐测试都在主线。
@@ -171,6 +175,7 @@ topic: progress-audit-next-direction
 以下结论可以作为方向判断的参考，但不能再被文档表述成“仓库当前的硬性自动门槛”：
 
 - 2026-05-02 曾对全部 8 种图表意图做过一次实时 DeepSeek API 验证
+- 后续新增的第九种 circuit intent 走受约束 renderer 与 CLI tests，而不是 live LLM gate。
 - 相关 harness 已从主线删除，原因是它依赖本地 vault 路径、真实密钥和非确定性网络调用
 
 ## Drawnix 外部参考结论

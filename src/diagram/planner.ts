@@ -13,6 +13,8 @@ function resolvePreferredRenderTarget(intent: DiagramIntent): RenderTarget {
     switch (intent) {
         case 'canvasMap':
             return 'json-canvas';
+        case 'circuit':
+            return 'circuitikz';
         case 'dataChart':
             return 'vega-lite';
         default:
@@ -46,6 +48,10 @@ function resolveFallbackTargets(
     preferredMermaidType: MermaidDiagramType | null
 ): RenderTarget[] {
     if (compatibilityMode === 'legacy-mermaid') {
+        return [];
+    }
+
+    if (primaryTarget === 'circuitikz') {
         return [];
     }
 

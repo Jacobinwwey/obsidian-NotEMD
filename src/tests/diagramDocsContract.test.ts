@@ -10,11 +10,14 @@ describe('diagram documentation contract', () => {
     test('README documents HTML fallback preview, Mermaid validation, and chart template inference', () => {
         const readme = fs.readFileSync(readmePath, 'utf8');
 
-        expect(readme).toContain('| HTML | `_diagram.html` | Yes (iframe fallback) | No | No | Yes |');
+        expect(readme).toContain('| HTML | `_diagram.html` | Yes (iframe fallback) | No | No | No | Yes |');
         expect(readme).toContain('Generated Mermaid artifacts are now validated with `mermaid.parse` before the renderer returns them');
         expect(readme).toContain('Invalid Mermaid artifacts now fail early with explicit validation errors before preview/export.');
         expect(readme).toContain('HTML fallback previews');
         expect(readme).toContain('planner now seeds preferred Vega-Lite chart templates');
+        expect(readme).toContain('| Circuitikz | `_diagram.tex` + companion SVG/MD | SVG companion | Yes | Yes | Yes | Yes |');
+        expect(readme).toContain('PNG/PDF export defaulting to 300 PPI and clamped at 600 PPI');
+        expect(readme).toContain('the companion is not a LaTeX/TikZJax compile result');
     });
 
     test('1.8.2 release notes mention HTML fallback preview, Mermaid validation hardening, and chart template inference', () => {

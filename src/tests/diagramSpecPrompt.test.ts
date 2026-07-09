@@ -51,4 +51,18 @@ describe('diagram spec prompt builder', () => {
 
         expect(prompt).toMatch(/choose a non-dataChart intent/i);
     });
+
+    test('requires constrained CircuitSpec output for circuitikz render target', () => {
+        const prompt = buildDiagramSpecPrompt({
+            preferredIntent: 'circuit',
+            preferredRenderTarget: 'circuitikz'
+        });
+
+        expect(prompt).toMatch(/intent:\s*circuit/i);
+        expect(prompt).toMatch(/circuitSpec/i);
+        expect(prompt).toMatch(/goldenReferenceId/i);
+        expect(prompt).toMatch(/style\.package/i);
+        expect(prompt).toMatch(/cmos-inverter-v1/i);
+        expect(prompt).toMatch(/Do not output raw TikZ/i);
+    });
 });

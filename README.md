@@ -172,24 +172,29 @@ That's it! Explore the settings to unlock more features like web research, trans
 <img width="596" height="239" alt="SUMM" src="https://github.com/user-attachments/assets/08f44a41-9ec0-472c-91ee-19c8477ec639" />
 
 - **Experimental Diagram Pipeline**:
-    - A spec-first diagram path can route note content into Mermaid, Obsidian JSON Canvas, or Vega-Lite instead of forcing every case through Mermaid text generation.
+    - A spec-first diagram path can route note content into Mermaid, Obsidian JSON Canvas, Vega-Lite, HTML, editable HTML/SVG, Draw.io, Drawnix, or constrained circuitikz instead of forcing every case through Mermaid text generation.
     - Current Mermaid adapter coverage in the spec-first path includes `mindmap`, `flowchart`, `sequenceDiagram`, `classDiagram`, `erDiagram`, and `stateDiagram-v2`.
     - Current Vega-Lite adapter coverage in the spec-first path includes cartesian `bar`, `line`, `area`, and `point` charts, plus controlled `scatter`, `pie`, and `table` layout hints that map onto safe built-in Vega-Lite templates.
     - For `dataChart` plans, the planner now seeds preferred Vega-Lite chart templates (`line`, `pie`, `scatter`, `table`, or fallback `bar`) so omitted `layoutHints.chartType` values do not silently collapse to the wrong chart shape.
     - Generated Mermaid artifacts are now validated with `mermaid.parse` before the renderer returns them, so malformed diagrams fail early instead of quietly leaking into preview/export steps.
     - Generated `.canvas` and `.json` artifacts are saved through the same output-path policy as Mermaid summaries, and preview surfaces now cover Mermaid, JSON Canvas, and Vega-Lite results.
     - HTML fallback artifacts are now generated as dedicated `.html` summaries when a richer renderer is not available, and the preview modal can open them through the iframe fallback path instead of only showing escaped source text.
-    - Preview modals can now export rendered Mermaid/Canvas/Vega-Lite output as `.svg` and `.png` files beside the source note or beside the generated artifact, giving you stable image handoff paths without flattening everything into screenshots first.
-    - Preview-only runs can also persist the raw generated artifact beside the current note using target-aware extensions and suffixes (`_summ.md`, `_diagram.canvas`, `_diagram.json`), so validation and handoff do not require rerunning the LLM step.
+    - Preview modals can now export rendered Mermaid/Canvas/Vega-Lite and SVG-companion output as `.svg`, `.png`, and `.pdf` files beside the source note or beside the generated artifact, with PNG/PDF export defaulting to 300 PPI and clamped at 600 PPI.
+    - Preview-only runs can also persist the raw generated artifact beside the current note using target-aware extensions and suffixes (`_summ.md`, `_diagram.canvas`, `_diagram.json`, `_diagram.drawio`, `_diagram.drawnix`, `_diagram.tex`), so validation and handoff do not require rerunning the LLM step.
+    - Circuit diagrams are exposed as `intent: "circuit"` plus `circuitikz` render target. They require a validated `CircuitSpec`, write deterministic `.tex`, and attach an SVG preview companion for Obsidian viewing and SVG/PNG/PDF export; the companion is not a LaTeX/TikZJax compile result.
     - The existing Mermaid auto-fix path remains intact for Mermaid outputs only; non-Mermaid artifacts bypass the fixer instead of being pushed through incompatible post-processing.
     - Preview UI strings continue to follow the plugin UI locale (`uiLocale: auto` follows Obsidian), and preview/export theme defaults to the active Obsidian light/dark theme so Mermaid, JSON Canvas, Vega-Lite, and HTML fallback previews do not stay locked to the wrong palette after a theme switch.
 
-| Target | Generated artifact | Inline preview | Export SVG | Export PNG | Save raw source | Notes |
-| --- | --- | --- | --- | --- | --- | --- |
-| Mermaid | `_summ.md` | Yes | Yes | Yes | Yes | Mermaid auto-fix remains available for Mermaid-only flows. |
-| JSON Canvas | `_diagram.canvas` | Yes | Yes | Yes | Yes | Preview/export uses a theme-aware Canvas palette. |
-| Vega-Lite | `_diagram.json` | Yes | Yes | Yes | Yes | Preview/export uses a theme-aware Vega-Lite config patch. |
-| HTML | `_diagram.html` | Yes (iframe fallback) | No | No | Yes | Current pipeline does not promise raster/vector export for HTML artifacts yet. |
+| Target | Generated artifact | Inline preview | Export SVG | Export PNG | Export PDF | Save raw source | Notes |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| Mermaid | `_summ.md` | Yes | Yes | Yes | Yes | Yes | Mermaid auto-fix remains available for Mermaid-only flows. |
+| JSON Canvas | `_diagram.canvas` | Yes | Yes | Yes | Yes | Yes | Preview/export uses a theme-aware Canvas palette. |
+| Vega-Lite | `_diagram.json` | Yes | Yes | Yes | Yes | Yes | Preview/export uses a theme-aware Vega-Lite config patch. |
+| Editable HTML/SVG | `_diagram.html` | Yes | Yes | Yes | Yes | Yes | SVG is generated from the semantic figure model. |
+| Draw.io | `_diagram.drawio` + companion SVG/MD | SVG companion | Yes | Yes | Yes | Yes | No diagrams.net runtime is bundled. |
+| Drawnix | `_diagram.drawnix` + companion SVG/MD | SVG companion | Yes | Yes | Yes | Yes | No Drawnix or Plait runtime is bundled. |
+| Circuitikz | `_diagram.tex` + companion SVG/MD | SVG companion | Yes | Yes | Yes | Yes | Requires `intent: "circuit"` and validated `CircuitSpec`; no runtime LaTeX compile. |
+| HTML | `_diagram.html` | Yes (iframe fallback) | No | No | No | Yes | Current pipeline does not promise raster/vector export for generic HTML fallback artifacts yet. |
 
 - **Simple Formula Format Correction**:
     - Quickly fixes single-line math formulas delimited by single `$` to standard double `$$` blocks.

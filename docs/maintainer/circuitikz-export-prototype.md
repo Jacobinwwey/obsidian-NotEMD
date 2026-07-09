@@ -212,7 +212,9 @@ npm run diagram:smoke-circuitikz -- \
 
 This is the first real-environment smoke boundary. PNG screenshot smoke checks cover positive dimensions, non-background pixels, foreground bounds, foreground density, too-small foreground footprints through `render-png-foreground-too-small`, edge-touching clipped content, and unusually dense foreground blocks. It still does not make LaTeX or TikZJax mandatory for normal CI or plugin startup; it gives maintainers a repeatable command for local release evidence when a renderer is installed. The command stays cross-platform because the fixture runner delegates to the existing shell-free compile runner instead of resolving a platform shell.
 
-Obsidian's Preview diagram command can also reopen saved circuitikz source artifacts as a circuitikz source-only preview when the file extension is `.tex` or `.tikz` and the source contains `\usepackage{circuitikz}` or `\begin{circuitikz}`. This front-end path uses the generic source-only preview and artifact diagnostics surface; it does not compile LaTeX, invoke TikZJax, or promote circuitikz into the generic `DiagramSpec` render-target planner.
+Obsidian's Preview diagram command can also reopen saved circuitikz source artifacts as a circuitikz source-only preview when the file extension is `.tex` or `.tikz` and the source contains `\usepackage{circuitikz}` or `\begin{circuitikz}`. This front-end path uses the generic source-only preview and artifact diagnostics surface; it does not compile LaTeX or invoke TikZJax.
+
+2026-07-09 UI/render-target increment: circuit diagrams are now exposed in the experimental diagram UI as `intent: "circuit"` plus render target `circuitikz`. The generic `DiagramSpec` is still not widened with free-form TikZ fields; it may embed a validated `DiagramSpec.circuitSpec` only when the intent is `circuit`. `CircuitikzRenderer` emits the deterministic `.tex` artifact through the existing circuitikz exporter and supplies a white-background SVG preview companion derived from the same `CircuitSpec`. That companion enables Obsidian-viewable SVG plus PNG/PDF export at the preview/export boundary, while real LaTeX/TikZJax compile evidence remains an optional smoke-runner concern.
 
 ## Supported Circuit Families
 
@@ -242,20 +244,21 @@ The CMOS NAND template adds a stronger digital-logic invariant: `MPA` and `MPB` 
 
 The CMOS NOR template mirrors the digital-logic constraint in the opposite networks: `MPA` and `MPB` must be PMOS devices in a series pull-up stack from `VDD` to `vout`; `MNA` and `MNB` must be NMOS devices in the parallel pull-down network from `vout` to `GND`; `va` must drive `MPA.G` and `MNA.G`; and `vb` must drive `MPB.G` and `MNB.G`. The same layout-hint projection rule applies: port placement can move, but the topology signature cannot.
 
-## Why `CircuitSpec` Is Separate
+## Why `CircuitSpec` Remains Constrained
 
-`DiagramSpec` is intentionally not widened for circuit diagrams yet. Circuit diagrams need topology, terminal references, layout lanes, and package conventions that generic flowcharts and data charts do not use.
+`CircuitSpec` remains a constrained circuit payload rather than a free-form renderer syntax field. Circuit diagrams need topology, terminal references, layout lanes, and package conventions that generic flowcharts and data charts do not use. The current compromise is deliberate: `DiagramSpec` can carry `circuitSpec` only when `intent` is `circuit`, and validation rejects circuit payloads attached to non-circuit intents.
 
-The boundary is:
+The boundary is now:
 
 ```text
-CircuitSpec
-  -> topology/template validation
+DiagramSpec(intent: "circuit", circuitSpec)
+  -> CircuitSpec topology/template validation
   -> deterministic golden-reference circuitikz adapter
   -> .tex artifact
+  -> optional SVG preview companion for Obsidian / PNG / PDF review
 ```
 
-This keeps the model-facing contract narrow and makes topology drift testable. The exporter rejects invalid topology before writing an output file.
+This keeps the model-facing contract narrow and makes topology drift testable. The exporter rejects invalid topology before writing an output file, and the companion SVG is a preview artifact from the same validated topology rather than a claim that LaTeX was compiled in the plugin runtime.
 
 For the current golden templates, `layoutHints.inputSide` and `layoutHints.outputSide` are projected into deterministic input/output port placement. A topology-preserving repair can move input or output ports to the other side through layout hints while keeping the same `topologySignature`; the exporter rewrites only the presentation route and node anchor. This is not a general autorouter. It is a constrained layout projection for the supported golden families.
 
@@ -265,6 +268,7 @@ Canonical regression commands:
 
 ```bash
 npm test -- --runInBand src/tests/circuitikzExporter.test.ts src/tests/circuitikzCompileDiagnostics.test.ts src/tests/circuitikzRenderSmoke.test.ts src/tests/circuitikzCompileRunner.test.ts src/tests/circuitikzExportCli.test.ts --runTestsByPath
+npm test -- --runInBand src/tests/circuitikzRenderer.test.ts src/tests/diagramGenerationService.test.ts src/tests/diagramArtifactExportCli.test.ts src/tests/diagramPreviewModal.test.ts --runTestsByPath
 ```
 
 The tests verify:

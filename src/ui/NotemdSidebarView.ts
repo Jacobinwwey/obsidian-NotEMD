@@ -1696,6 +1696,7 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
             { value: 'classDiagram', label: i18n.settings.developer.experimentalDiagramPipeline.intentClassDiagram },
             { value: 'erDiagram', label: i18n.settings.developer.experimentalDiagramPipeline.intentErDiagram },
             { value: 'stateDiagram', label: i18n.settings.developer.experimentalDiagramPipeline.intentStateDiagram },
+            { value: 'circuit', label: i18n.settings.developer.experimentalDiagramPipeline.intentCircuit },
             { value: 'dataChart', label: i18n.settings.developer.experimentalDiagramPipeline.intentDataChart },
         ];
 
@@ -1726,6 +1727,7 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
             { value: 'editable-html-svg', label: i18n.settings.developer.experimentalDiagramPipeline.renderTargetEditableHtmlSvg },
             { value: 'drawio', label: i18n.settings.developer.experimentalDiagramPipeline.renderTargetDrawio },
             { value: 'drawnix', label: i18n.settings.developer.experimentalDiagramPipeline.renderTargetDrawnix },
+            { value: 'circuitikz', label: i18n.settings.developer.experimentalDiagramPipeline.renderTargetCircuitikz },
         ];
 
         renderTargets.forEach(item => {

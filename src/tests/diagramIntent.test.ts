@@ -72,6 +72,18 @@ Run B: latency 180 ms, throughput 70 req/s
         expect(result.reasons.join(' ')).toMatch(/ranked|numeric/i);
     });
 
+    test('infers circuit intent for CMOS circuit notes', () => {
+        const markdown = `# CMOS Inverter
+
+Draw a circuitikz schematic with a PMOS pull-up, NMOS pull-down, VDD, GND, vin, and vout.
+`;
+
+        const result = inferDiagramIntent(markdown);
+
+        expect(result.intent).toBe('circuit');
+        expect(result.reasons.join(' ')).toMatch(/circuit|cmos|mos/i);
+    });
+
     test('falls back to mindmap for general hierarchical notes', () => {
         const markdown = `# Distributed Systems
 

@@ -5,7 +5,7 @@ const os = require('os');
 const path = require('path');
 const { buildSync } = require('esbuild');
 
-const SUPPORTED_TARGETS = ['editable-html-svg', 'drawio', 'drawnix', 'svg', 'png', 'pdf'];
+const SUPPORTED_TARGETS = ['editable-html-svg', 'drawio', 'drawnix', 'circuitikz', 'svg', 'png', 'pdf'];
 const DEFAULT_EXPORT_PPI = 300;
 const MIN_EXPORT_PPI = 72;
 const MAX_EXPORT_PPI = 600;
@@ -17,11 +17,13 @@ function printUsage() {
 
 Usage:
   node scripts/export-diagram-artifact.js --input <diagram-spec.json> --target <target> --output <artifact-path> [--preview-svg-output <svg-path>] [--preview-png-output <png-path>] [--preview-pdf-output <pdf-path>] [--ppi <72-600>]
+  node scripts/export-diagram-artifact.js <diagram-spec.json> <target> <artifact-path> [preview-svg-path] [preview-png-path] [preview-pdf-path] [ppi]
 
 Targets:
   editable-html-svg   Self-contained HTML with inline editable SVG annotations
   drawio              Uncompressed diagrams.net mxfile XML
   drawnix             Minimal .drawnix JSON subset
+  circuitikz          Circuitikz TeX source from a constrained DiagramSpec.circuitSpec payload
   svg                 Obsidian-viewable SVG generated from the same SemanticFigureModel
   png                 PNG generated from the same SemanticFigureModel
   pdf                 PDF generated from the same SemanticFigureModel
@@ -29,6 +31,7 @@ Targets:
 Example:
   node scripts/export-diagram-artifact.js --input spec.json --target drawio --output figure.drawio
   node scripts/export-diagram-artifact.js --input spec.json --target drawio --output figure.drawio --preview-svg-output figure.drawio.svg
+  node scripts/export-diagram-artifact.js --input circuit-spec.json --target circuitikz --output circuit.tex --preview-svg-output circuit.svg --preview-png-output circuit.png --preview-pdf-output circuit.pdf
   node scripts/export-diagram-artifact.js --input spec.json --target png --output figure.png --ppi 300
   node scripts/export-diagram-artifact.js --input spec.json --target pdf --output figure.pdf --ppi 300
 `);
@@ -36,6 +39,7 @@ Example:
 
 function parseArgs(argv) {
   const args = {};
+  const positional = [];
 
   for (let index = 0; index < argv.length; index += 1) {
     const token = argv[index];
@@ -66,11 +70,46 @@ function parseArgs(argv) {
         args.help = true;
         break;
       default:
+        if (!token.startsWith('-')) {
+          positional.push(token);
+          break;
+        }
         throw new Error(`Unknown argument: ${token}`);
     }
   }
 
+  applyPositionalArgs(args, positional);
   return args;
+}
+
+function applyPositionalArgs(args, positional) {
+  if (positional.length === 0) {
+    return;
+  }
+
+  const positionalFields = [
+    'input',
+    'target',
+    'output',
+    'previewSvgOutput',
+    'previewPngOutput',
+    'previewPdfOutput',
+    'ppi'
+  ];
+  if (positional.length > positionalFields.length) {
+    throw new Error(`Unknown positional argument: ${positional[positionalFields.length]}`);
+  }
+
+  positional.forEach((value, index) => {
+    const field = positionalFields[index];
+    if (args[field] === undefined) {
+      args[field] = value;
+      return;
+    }
+    if (args[field] !== value) {
+      throw new Error(`Positional argument "${value}" conflicts with --${field}.`);
+    }
+  });
 }
 
 function normalizePpi(value) {
@@ -335,8 +374,40 @@ function buildExporterBundle(repoRoot) {
     import { exportSemanticFigureModelToDrawioXml, collectDrawioVisibleLabelMismatches } from './src/diagram/adapters/drawio/drawioExporter';
     import { exportSemanticFigureModelToDrawnixData, stringifyDrawnixExportedData, validateDrawnixExportedDataSubset } from './src/diagram/adapters/drawnix/drawnixExporter';
     import { EditableHtmlSvgRenderer, collectEditableSvgAnnotationGaps, renderSemanticFigureSvg } from './src/rendering/renderers/editableHtmlSvgRenderer';
+    import { CircuitikzRenderer, renderCircuitSpecPreviewSvg } from './src/rendering/renderers/circuitikzRenderer';
 
     export async function exportDiagramArtifact(spec, target) {
+      if (target === 'circuitikz') {
+        const renderer = new CircuitikzRenderer();
+        const artifact = await renderer.render(spec);
+        return {
+          content: artifact.content,
+          previewSvgContent: artifact.previewSvg?.content,
+          summary: {
+            mimeType: artifact.mimeType,
+            circuitKind: spec.circuitSpec?.circuitKind,
+            goldenReferenceId: spec.circuitSpec?.goldenReferenceId,
+            componentCount: Array.isArray(spec.circuitSpec?.components) ? spec.circuitSpec.components.length : 0,
+            connectionCount: Array.isArray(spec.circuitSpec?.connections) ? spec.circuitSpec.connections.length : 0
+          }
+        };
+      }
+
+      if ((target === 'svg' || target === 'png' || target === 'pdf') && spec?.intent === 'circuit' && spec.circuitSpec) {
+        const svg = renderCircuitSpecPreviewSvg(spec.circuitSpec);
+        return {
+          content: svg,
+          previewSvgContent: svg,
+          summary: {
+            mimeType: target === 'svg' ? 'image/svg+xml' : target === 'png' ? 'image/png' : 'application/pdf',
+            circuitKind: spec.circuitSpec.circuitKind,
+            goldenReferenceId: spec.circuitSpec.goldenReferenceId,
+            componentCount: Array.isArray(spec.circuitSpec.components) ? spec.circuitSpec.components.length : 0,
+            connectionCount: Array.isArray(spec.circuitSpec.connections) ? spec.circuitSpec.connections.length : 0
+          }
+        };
+      }
+
       const model = buildSemanticFigureModel(spec);
 
       if (target === 'editable-html-svg') {

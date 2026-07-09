@@ -170,6 +170,24 @@ Notemd 是一个**开源 Obsidian 插件**，集成 30+ 种大型语言模型 (L
 
 <img width="596" height="239" alt="SUMM" src="https://github.com/user-attachments/assets/803d444f-e477-428a-9ce6-4aac8075062a" />
 
+- **实验性图表流水线**:
+    - 规范优先的图表路径可以把笔记内容路由到 Mermaid、Obsidian JSON Canvas、Vega-Lite、HTML、可编辑 HTML/SVG、Draw.io、Drawnix 或受约束 circuitikz，而不是把所有场景都压回 Mermaid 文本生成。
+    - `mindmap`、`flowchart`、`sequenceDiagram`、`classDiagram`、`erDiagram` 与 `stateDiagram-v2` 仍由 Mermaid adapter 覆盖；`dataChart` 使用受控 Vega-Lite 模板；`circuit` 使用 `circuitikz` render target。
+    - 预览弹窗可把可渲染输出或 SVG companion 导出为 `.svg`、`.png` 与 `.pdf`；PNG/PDF 默认 300 PPI，超过 600 PPI 的配置会被夹到 600。
+    - Draw.io、Drawnix 与 Circuitikz 都保持 artifact 边界：插件不捆绑 diagrams.net、Drawnix、Plait、LaTeX 或 TikZJax runtime，而是写出原生源文件和 Obsidian 可查看的 SVG companion。
+    - 电路图必须使用 `intent: "circuit"` 与已验证 `CircuitSpec`。`CircuitikzRenderer` 会写出确定性 `.tex`，并附加用于 Obsidian 预览和 SVG/PNG/PDF 导出的 SVG companion；该 companion 不是 LaTeX/TikZJax 编译结果。
+
+| 目标 | 生成 artifact | 内联预览 | 导出 SVG | 导出 PNG | 导出 PDF | 保存源文件 | 备注 |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| Mermaid | `_summ.md` | 是 | 是 | 是 | 是 | 是 | Mermaid-only 流程仍可使用 Mermaid auto-fix。 |
+| JSON Canvas | `_diagram.canvas` | 是 | 是 | 是 | 是 | 是 | 预览/导出使用主题感知 Canvas 配色。 |
+| Vega-Lite | `_diagram.json` | 是 | 是 | 是 | 是 | 是 | 预览/导出使用主题感知 Vega-Lite 配置补丁。 |
+| 可编辑 HTML/SVG | `_diagram.html` | 是 | 是 | 是 | 是 | 是 | SVG 从语义 figure model 生成。 |
+| Draw.io | `_diagram.drawio` + SVG/MD companion | SVG companion | 是 | 是 | 是 | 是 | 不捆绑 diagrams.net runtime。 |
+| Drawnix | `_diagram.drawnix` + SVG/MD companion | SVG companion | 是 | 是 | 是 | 是 | 不捆绑 Drawnix 或 Plait runtime。 |
+| Circuitikz | `_diagram.tex` + SVG/MD companion | SVG companion | 是 | 是 | 是 | 是 | 需要 `intent: "circuit"` 与已验证 `CircuitSpec`；不在 runtime 编译 LaTeX。 |
+| HTML | `_diagram.html` | 是（iframe fallback） | 否 | 否 | 否 | 是 | 通用 HTML fallback 暂不承诺栅格/矢量导出。 |
+
 - **简单公式格式修正**:
     - 快速将单行 `$` 分隔的数学公式转换为标准的 `$$` 块。
     - **单文件**: 通过侧边栏按钮或命令面板处理当前文件。

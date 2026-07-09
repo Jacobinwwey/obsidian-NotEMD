@@ -462,6 +462,35 @@ describe('diagram preview modal', () => {
         expect(buttons.some(button => button.text === 'Export PDF')).toBe(true);
     });
 
+    test('renders circuitikz companion svg artifacts with svg png and pdf export actions', async () => {
+        (previewExport.renderPreviewArtifactSvg as jest.Mock).mockResolvedValueOnce('<svg><text>CMOS Inverter</text></svg>');
+        const modal = mountModal(new DiagramPreviewModal(mockApp, createSession({
+            target: 'circuitikz',
+            content: '\\usepackage{circuitikz}\n\\begin{document}\n\\begin{circuitikz}\n\\end{circuitikz}\n\\end{document}',
+            mimeType: 'text/x-tex',
+            sourceIntent: 'circuit',
+            previewSvg: {
+                content: '<svg><text>CMOS Inverter</text></svg>',
+                mimeType: 'image/svg+xml'
+            }
+        }), 'en') as any);
+
+        modal.onOpen();
+        await flushPromises();
+
+        const iframe = findByTag(modal.contentEl, 'iframe');
+        const sourcePreview = findByClass(modal.contentEl, 'notemd-diagram-preview-source-only-code');
+        const svgPreview = findByClass(modal.contentEl, 'is-svg-preview');
+        const buttons = collectButtons(modal.contentEl);
+
+        expect(iframe).toBeNull();
+        expect(sourcePreview).toBeNull();
+        expect(svgPreview?.innerHTML).toContain('CMOS Inverter');
+        expect(buttons.some(button => button.text === 'Export SVG')).toBe(true);
+        expect(buttons.some(button => button.text === 'Export PNG')).toBe(true);
+        expect(buttons.some(button => button.text === 'Export PDF')).toBe(true);
+    });
+
     test('hides save-source button when preview already points at saved artifact', async () => {
         const modal = mountModal(new DiagramPreviewModal(mockApp, {
             ...createSession(),

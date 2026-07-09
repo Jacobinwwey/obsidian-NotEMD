@@ -2486,6 +2486,7 @@ export class NotemdSettingTab extends PluginSettingTab {
                     dropdown.addOption('classDiagram', experimentalDiagramI18n.intentClassDiagram);
                     dropdown.addOption('erDiagram', experimentalDiagramI18n.intentErDiagram);
                     dropdown.addOption('stateDiagram', experimentalDiagramI18n.intentStateDiagram);
+                    dropdown.addOption('circuit', experimentalDiagramI18n.intentCircuit);
                     dropdown.addOption('dataChart', experimentalDiagramI18n.intentDataChart);
                     dropdown
                         .setValue(this.plugin.settings.preferredDiagramIntent || 'auto')
@@ -2507,6 +2508,7 @@ export class NotemdSettingTab extends PluginSettingTab {
                     dropdown.addOption('editable-html-svg', experimentalDiagramI18n.renderTargetEditableHtmlSvg);
                     dropdown.addOption('drawio', experimentalDiagramI18n.renderTargetDrawio);
                     dropdown.addOption('drawnix', experimentalDiagramI18n.renderTargetDrawnix);
+                    dropdown.addOption('circuitikz', experimentalDiagramI18n.renderTargetCircuitikz);
                     dropdown
                         .setValue(this.plugin.settings.preferredDiagramRenderTarget || 'auto')
                         .onChange(async (value: string) => {

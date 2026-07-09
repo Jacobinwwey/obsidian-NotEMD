@@ -217,6 +217,7 @@ function normalizeSpec(candidate: any): DiagramSpec {
         sections: Array.isArray(payload.sections) ? payload.sections : [],
         callouts: Array.isArray(payload.callouts) ? payload.callouts : [],
         dataSeries: normalizeDataSeries(payload.dataSeries, title),
+        circuitSpec: payload.circuitSpec && typeof payload.circuitSpec === 'object' ? payload.circuitSpec : undefined,
         layoutHints: payload.layoutHints && typeof payload.layoutHints === 'object' ? payload.layoutHints : undefined,
         sourceLanguage: typeof payload.sourceLanguage === 'string' ? payload.sourceLanguage : undefined,
         outputLanguage: typeof payload.outputLanguage === 'string' ? payload.outputLanguage : undefined,
