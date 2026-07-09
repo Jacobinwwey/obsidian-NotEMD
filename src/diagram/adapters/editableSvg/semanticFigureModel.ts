@@ -43,6 +43,7 @@ const PADDING_X = 72;
 const HEADER_HEIGHT = 116;
 const CALLOUT_HEIGHT = 88;
 const MIN_WIDTH = 720;
+const ASYNC_EDGE_RELATIONS = new Set(['async', 'asynchronous', 'queue', 'queued']);
 
 interface FigureNodeProjection {
     nodes: SemanticFigureNode[];
@@ -97,6 +98,11 @@ function normalizeLabel(value: string | undefined, fallback: string): string {
 function inferNodeRole(node: DiagramNode): string {
     const kind = node.kind?.trim();
     return kind || 'process';
+}
+
+export function isAsyncSemanticFigureEdge(edge: Pick<SemanticFigureEdge, 'relation'>): boolean {
+    const relation = edge.relation?.trim().toLowerCase();
+    return Boolean(relation && ASYNC_EDGE_RELATIONS.has(relation));
 }
 
 function createFigureNodeProjection(spec: DiagramSpec): FigureNodeProjection {

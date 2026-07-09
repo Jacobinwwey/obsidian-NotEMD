@@ -2,6 +2,7 @@ import { assertValidDiagramSpec } from '../../diagram/spec';
 import { DiagramSpec } from '../../diagram/types';
 import {
     buildSemanticFigureModel,
+    isAsyncSemanticFigureEdge,
     SemanticFigureEdge,
     SemanticFigureModel,
     SemanticFigureNode
@@ -18,6 +19,9 @@ const SUPPORTED_EDITABLE_FIGURE_INTENTS = new Set<DiagramSpec['intent']>([
     'erDiagram',
     'stateDiagram'
 ]);
+
+const ASYNC_EDGE_DASH_ARRAY = '8 6';
+const EDGE_ARROWHEAD_SEGMENT_LENGTH = 18;
 
 const STANDALONE_SEMANTIC_FIGURE_SVG_STYLE = `.notemd-editable-svg-canvas {
     fill: var(--notemd-editable-svg-panel, #ffffff);
@@ -47,10 +51,14 @@ const STANDALONE_SEMANTIC_FIGURE_SVG_STYLE = `.notemd-editable-svg-canvas {
     font-weight: 700;
     text-transform: uppercase;
 }
-.notemd-editable-svg-edge path {
+.notemd-editable-svg-edge path,
+.notemd-editable-svg-edge-arrowhead {
     fill: none;
     stroke: var(--notemd-editable-svg-edge, #334155);
     stroke-width: 1.8;
+}
+.notemd-editable-svg-edge.is-async path {
+    stroke-dasharray: ${ASYNC_EDGE_DASH_ARRAY};
 }
 .notemd-editable-svg-edge-label {
     fill: var(--notemd-editable-svg-muted, #475569);
@@ -117,13 +125,47 @@ function renderNode(node: SemanticFigureNode): string {
     </g>`;
 }
 
-function renderEdgePath(edge: SemanticFigureEdge): string {
+function buildEdgeCurvePath(edge: SemanticFigureEdge): { path: string; endTangentX: number; endTangentY: number } {
     const midX = (edge.startX + edge.endX) / 2;
-    const path = `M ${edge.startX} ${edge.startY} C ${midX} ${edge.startY}, ${midX} ${edge.endY}, ${edge.endX} ${edge.endY}`;
+    return {
+        path: `M ${edge.startX} ${edge.startY} C ${midX} ${edge.startY}, ${midX} ${edge.endY}, ${edge.endX} ${edge.endY}`,
+        endTangentX: midX,
+        endTangentY: edge.endY
+    };
+}
 
-    return `<g id="${escapeAttribute(edge.id)}" class="notemd-editable-svg-edge" data-drawio-type="edge" data-drawio-id="${escapeAttribute(edge.id)}" data-drawio-source="${escapeAttribute(edge.sourceId)}" data-drawio-target="${escapeAttribute(edge.targetId)}">
-        <path data-drawio-ignore="part-of-parent-edge" d="${path}" fill="none" stroke="#334155" stroke-width="1.8" marker-end="url(#notemd-editable-svg-arrow)" />
+function renderEdgePath(edge: SemanticFigureEdge): string {
+    const { path } = buildEdgeCurvePath(edge);
+    const asyncClass = isAsyncSemanticFigureEdge(edge) ? ' is-async' : '';
+    const dashAttribute = isAsyncSemanticFigureEdge(edge) ? ` stroke-dasharray="${ASYNC_EDGE_DASH_ARRAY}"` : '';
+
+    return `<g id="${escapeAttribute(edge.id)}" class="notemd-editable-svg-edge${asyncClass}" data-drawio-type="edge" data-drawio-id="${escapeAttribute(edge.id)}" data-drawio-source="${escapeAttribute(edge.sourceId)}" data-drawio-target="${escapeAttribute(edge.targetId)}">
+        <path data-drawio-ignore="part-of-parent-edge" d="${path}" fill="none" stroke="#334155" stroke-width="1.8"${dashAttribute} />
     </g>`;
+}
+
+function renderEdgeArrowhead(edge: SemanticFigureEdge): string {
+    const curve = buildEdgeCurvePath(edge);
+    let deltaX = edge.endX - curve.endTangentX;
+    let deltaY = edge.endY - curve.endTangentY;
+    if (deltaX === 0 && deltaY === 0) {
+        deltaX = edge.endX - edge.startX;
+        deltaY = edge.endY - edge.startY;
+    }
+
+    const length = Math.hypot(deltaX, deltaY);
+    if (length === 0) {
+        return '';
+    }
+
+    const unitX = deltaX / length;
+    const unitY = deltaY / length;
+    const segmentStartX = edge.endX - unitX * EDGE_ARROWHEAD_SEGMENT_LENGTH;
+    const segmentStartY = edge.endY - unitY * EDGE_ARROWHEAD_SEGMENT_LENGTH;
+    const asyncClass = isAsyncSemanticFigureEdge(edge) ? ' is-async' : '';
+    const path = `M ${segmentStartX.toFixed(3)} ${segmentStartY.toFixed(3)} L ${edge.endX} ${edge.endY}`;
+
+    return `<path data-drawio-ignore="edge-arrowhead" class="notemd-editable-svg-edge-arrowhead${asyncClass}" d="${path}" fill="none" stroke="#334155" stroke-width="1.8" marker-end="url(#notemd-editable-svg-arrow)" />`;
 }
 
 function renderEdgeLabel(edge: SemanticFigureEdge): string {
@@ -163,6 +205,7 @@ export function renderSemanticFigureSvg(model: SemanticFigureModel): string {
         ${model.summary ? `<text data-drawio-ignore="document-summary" x="72" y="78" class="notemd-editable-svg-summary" fill="#475569">${escapeHtml(model.summary)}</text>` : ''}
         ${model.edges.map(renderEdgePath).join('')}
         ${model.nodes.map(renderNode).join('')}
+        ${model.edges.map(renderEdgeArrowhead).join('')}
         ${model.edges.map(renderEdgeLabel).join('')}
     </svg>`;
 }

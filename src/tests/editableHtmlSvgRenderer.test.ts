@@ -126,6 +126,56 @@ describe('editable html/svg renderer', () => {
         expect(labelIndex).toBeGreaterThan(lastNodeIndex);
     });
 
+    test('renders async semantic edges as dashed svg connector paths', () => {
+        const model = buildSemanticFigureModel(createArchitectureSpec({
+            edges: [
+                { from: 'client', to: 'api', label: 'fire and forget', relation: 'async' }
+            ]
+        }));
+        const svg = renderSemanticFigureSvg(model);
+        const edgeGroup = svg.match(/<g id="edge-1-client-to-api"[\s\S]*?<\/g>/)?.[0] ?? '';
+
+        expect(edgeGroup).toContain('class="notemd-editable-svg-edge is-async"');
+        expect(edgeGroup).toContain('stroke-dasharray="8 6"');
+    });
+
+    test('renders arrowhead segments above nodes so target rectangles cannot hide arrows', () => {
+        const model = buildSemanticFigureModel(createArchitectureSpec({
+            nodes: [
+                { id: 'source', label: 'Source' },
+                { id: 'target', label: 'Target' }
+            ],
+            edges: [
+                { from: 'source', to: 'target', label: 'visible arrow' }
+            ]
+        }));
+        const svg = renderSemanticFigureSvg(model);
+        const arrowheadIndex = svg.indexOf('class="notemd-editable-svg-edge-arrowhead"');
+        const lastNodeIndex = svg.lastIndexOf('class="notemd-editable-svg-node"');
+
+        expect(arrowheadIndex).toBeGreaterThan(lastNodeIndex);
+        expect(svg.slice(arrowheadIndex)).toContain('marker-end="url(#notemd-editable-svg-arrow)"');
+    });
+
+    test('aligns foreground arrowheads with the rendered bezier endpoint tangent', () => {
+        const model = buildSemanticFigureModel(createArchitectureSpec({
+            nodes: [
+                { id: 'a', label: 'A' },
+                { id: 'b', label: 'B' },
+                { id: 'c', label: 'C' },
+                { id: 'd', label: 'D' }
+            ],
+            edges: [
+                { from: 'c', to: 'd', label: 'backward', relation: 'async' }
+            ]
+        }));
+        const svg = renderSemanticFigureSvg(model);
+        const arrowhead = svg.match(/<path data-drawio-ignore="edge-arrowhead"[^>]+>/)?.[0] ?? '';
+
+        expect(arrowhead).toContain('d="M 330.000 348.000 L 312 348"');
+        expect(arrowhead).not.toContain('stroke-dasharray');
+    });
+
     test('routes backward cross-row edges between facing node sides instead of toward the canvas margin', () => {
         const model = buildSemanticFigureModel(createArchitectureSpec({
             nodes: [

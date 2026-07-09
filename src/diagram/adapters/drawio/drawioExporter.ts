@@ -1,4 +1,5 @@
 import {
+    isAsyncSemanticFigureEdge,
     SemanticFigureEdge,
     SemanticFigureModel,
     SemanticFigureNode
@@ -16,7 +17,6 @@ const DRAWIO_NODE_STYLE_BY_ROLE: Record<string, string> = {
 
 const DEFAULT_NODE_STYLE = 'rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontStyle=1;';
 const DEFAULT_EDGE_STYLE = 'endArrow=block;html=1;rounded=1;strokeColor=#64748b;';
-const ASYNC_RELATIONS = new Set(['async', 'asynchronous', 'queue', 'queued']);
 
 function escapeXml(value: string): string {
     return value
@@ -51,8 +51,7 @@ function resolveNodeStyle(node: SemanticFigureNode): string {
 }
 
 function resolveEdgeStyle(edge: SemanticFigureEdge): string {
-    const relation = edge.relation?.trim().toLowerCase();
-    if (relation && ASYNC_RELATIONS.has(relation)) {
+    if (isAsyncSemanticFigureEdge(edge)) {
         return `${DEFAULT_EDGE_STYLE}dashed=1;`;
     }
 
