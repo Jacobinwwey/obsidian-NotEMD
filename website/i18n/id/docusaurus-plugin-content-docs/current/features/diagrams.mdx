@@ -1,7 +1,7 @@
 ---
 id: diagrams
 title: "Diagram"
-description: "Menghasilkan Mermaid, JSON Canvas, Vega-Lite, HTML, artefak gambar yang dapat diedit, serta diagram circuitikz terbatas di masa depan dari catatan Anda menggunakan arsitektur berbasis spesifikasi terlebih dahulu"
+description: "Menghasilkan diagram Mermaid, JSON Canvas, Vega-Lite, HTML, artefak gambar yang dapat diedit, Draw.io, Drawnix, serta diagram circuitikz terbatas dari catatan Anda menggunakan arsitektur berbasis spesifikasi terlebih dahulu"
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
 keywords: [diagrams, mermaid, vega-lite, canvas, visualization, spec-first, drawio, drawnix, editable svg, circuitikz, TikZJax]
@@ -18,7 +18,7 @@ import TLDR from '@site/src/components/TLDR';
 # Diagram
 
 <TLDR>
-**Notemd membuat diagram dari catatan Anda melalui pipeline berbasis spesifikasi terlebih dahulu.** LLM menghasilkan `DiagramSpec` JSON yang tidak bergantung pada renderer, lalu adapter khusus menerjemahkannya menjadi Mermaid, JSON Canvas, Vega-Lite, HTML, atau output HTML/SVG yang dapat diedit. Dukungan untuk 8 tipe intent, rantai fallback otomatis, pratinjau langsung dengan ekspor SVG/PNG, verifikasi semantik, dan generasi yang diperkuat pengetahuan lokal.
+**Notemd menghasilkan diagram dari catatan Anda melalui pipeline berbasis spesifikasi terlebih dahulu.** LLM akan menghasilkan file JSON `DiagramSpec` yang independen dari renderer, kemudian adapter khusus menerjemahkannya menjadi format Mermaid, JSON Canvas, Vega-Lite, HTML, HTML/SVG yang dapat diedit, Draw.io, Drawnix, atau output circuitikz terbatas. Fitur ini mendukung 9 tipe intent, rantai fallback otomatis, pratinjau langsung beserta ekspor SVG/PNG/PDF, verifikasi semantik, serta generasi yang diperkuat oleh pengetahuan lokal.
 </TLDR>
 
 Ini merupakan bagian dari [Obsidian Panduan Manajemen Pengetahuan AI](/docs/pillar-ai-knowledge).
@@ -54,6 +54,7 @@ graph LR
 | `stateDiagram` | Mermaid | HTML | Mesin keadaan, model siklus hidup |
 | `canvasMap` | JSON Canvas | Mermaid → HTML | Peta konsep, graf pengetahuan |
 | `dataChart` | Vega-Lite | Mermaid → HTML | Graf batang, garis, area, scatter, pie, tabel |
+| `circuit` | circuitikz | none | Diagram circuit terbatas dari payload `CircuitSpec` yang telah diverifikasi |
 
 ## Deteksi niat
 
@@ -67,6 +68,7 @@ Notemd menentukan jenis diagram terbaik dari konten catatan Anda menggunakan sko
 | `stateDiagram` | Keadaan, transisi, dalam proses, sedang berjalan, gagal (3+ kesesuaian) | 0.76 |
 | `flowchart` | Langkah bernomor (2+) atau kosakata if/then/else/workflow | 0.74 |
 | `canvasMap` | Peta konsep, graf pengetahuan, spasial, kluster | 0.72 |
+| `circuit` | circuitikz, TikZJax, circuit, schematic, CMOS, NMOS, PMOS, MOSFET, VDD/GND, `vin`/`vout` | 0.78 |
 | `mindmap` | Nilai default sebagai pengganti | 0.55 |
 
 Atur ulang menggunakan pengaturan **Tipe diagram yang diinginkan**, pilihan di sidebar, atau opsi panel perintah yang eksplisit.
@@ -80,10 +82,9 @@ Pipeline berbasis spesifikasi eksperimental kini memiliki dua kontrol terpisah:
 | Tipe diagram yang diinginkan | `preferredDiagramIntent` | Membimbing bentuk semantik dari `DiagramSpec` yang dihasilkan |
 | Target render yang diinginkan | `preferredDiagramRenderTarget` | Memilih renderer artefak untuk **Menghasilkan diagram** dan **Pratinjau diagram** |
 
-Atur **Target render yang diinginkan** menjadi **Auto** sebagai default untuk perencana, atau pilih secara eksplisit Mermaid, JSON Canvas, Vega-Lite, HTML, atau Editable HTML/SVG. Pengaturan ulang hanya berlaku untuk perintah artefak dan pratinjau. Perintah standar **Merangkum sebagai diagram Mermaid** tetap menggunakan output yang kompatibel dengan Mermaid sehingga alur kerja Markdown yang ada tidak secara diam-diam mengubah formatnya.
+Atur **Preferred render target** menjadi **Auto** sebagai pengaturan default untuk alat perencana, atau pilih secara eksplisit Mermaid, JSON Canvas, Vega-Lite, HTML, Editable HTML/SVG, Draw.io, Drawnix, atau Circuitikz. Pengaturan override ini hanya berlaku untuk perintah artefak dan pratinjau. Perintah standar **Summarise as Mermaid diagram** tetap menghasilkan output yang kompatibel dengan Mermaid agar alur kerja Markdown yang sudah ada tidak secara diam-diam mengubah formatnya.
 
-Pemisahan ini penting karena niat `flowchart` kini dapat dirender sebagai Mermaid untuk catatan Markdown, HTML sebagai pengganti yang andal, atau Editable HTML/SVG untuk penyuntingan selanjutnya. Draw.io dan Drawnix tetap merupakan ekspor artefak jenis CLI, bukan target render di dalam plugin.
-
+Pemisahan ini penting karena intent `flowchart` kini dapat dirender sebagai Mermaid untuk catatan Markdown, HTML sebagai fallback yang andal, Editable HTML/SVG untuk pengeditan lebih lanjut, atau artefak sumber berformat Draw.io/Drawnix beserta file pendamping berformat SVG untuk peninjauan. Intent `circuit` akan dialihkan ke Circuitikz dan memerlukan file `CircuitSpec` yang telah diverifikasi; ini bukan permintaan untuk teks TikZ sembarangan.
 ## Penggunaan
 
 ### Menghasilkan Diagram
@@ -101,16 +102,21 @@ Pemisahan ini penting karena niat `flowchart` kini dapat dirender sebagai Mermai
 | Vega-Lite | `.json` | `{note}_diagram.json` |
 | HTML | `.html` | `{note}_diagram.html` |
 | Dapat Diubah HTML/SVG | `.html` | `{note}_diagram.html` |
+| Draw.io | `.drawio` + `.drawio.svg` + `.drawio.md` | `{note}_diagram.drawio` beserta file pendamping untuk peninjauan |
+| Drawnix | `.drawnix` + `.drawnix.svg` + `.drawnix.md` | `{note}_diagram.drawnix` beserta file pendamping untuk peninjauan |
+| Circuitikz | `.tex` + `.tex.svg` + `.tex.md` | `{note}_diagram.tex` beserta file pendamping untuk peninjauan |
 
 ### Pratinjau Diagram
 
 1. Jalankan **"Notemd: Pratinjau diagram"**
 2. Sebuah modal terbuka dengan diagram yang telah dirender
-3. Ekspor sebagai SVG atau PNG menggunakan tombol toolbar
+3. Ekspor sebagai SVG, PNG, atau PDF menggunakan tombol-tombol di toolbar
 
 **Buka pratinjau otomatis** tersedia di pengaturan — setelah generasi, modal pratinjau akan dibuka secara otomatis.
 
-Modal pratinjau juga memiliki panel diagnosis artefak. Renderer dan pemeriksaan smoke dapat menambahkan `RenderArtifact.diagnostics`; modal tersebut menampilkan ringkasan diagnosis dengan jumlah kesalahan/peringatan/informasi, lalu tingkat keparahan, jenis diagnosis, pesan, dan saran perbaikan di samping pratinjau. Ringkasan yang sama ditampilkan dalam entri sejarah pratinjau, sehingga percobaan smoke circuitikz yang berulang dapat dibandingkan tanpa membuka setiap entri. Untuk artefak yang memiliki konten sumber tetapi tidak dapat dirender secara inline atau melalui jalur iframe HTML, modal kini beralih ke pratinjau hanya berbasis sumber alih-alih memaksakan iframe kosong. Hal ini memberikan permukaan visual UI yang jelas untuk pemeriksaan compile/render smoke circuitikz, pemeriksaan token teks SVG, pemeriksaan screenshot PNG kosong, dan laporan tumpang tindih di masa depan, tanpa menjadikan TikZJax atau LaTeX sebagai ketergantungan runtime plugin yang wajib atau berpura-pura bahwa teks sumber merupakan render visual yang telah diverifikasi.
+Ekspor pratinjau berformat PNG dan PDF menggunakan tingkat kepadatan titik (PPI) pratinjau yang telah dikonfigurasi. Nilai defaultnya adalah 300 PPI, dan nilai di atas 600 PPI akan dibatasi hingga 600. SVG tetap mempertahankan ukuran vektor. Artefak sumber seperti `.drawio`, `.drawnix`, dan `.tex` dapat menyediakan file pendamping berformat `previewSvg` sehingga Obsidian dapat menampilkan dan mengekspor gambar yang siap ditinjau tanpa perlu memasukkan diagram.net, Drawnix, LaTeX, atau TikZJax ke dalam lingkungan eksekusi plugin.
+
+Modal pratinjau juga memiliki panel diagnosis artifact. Alat render dan pemeriksaan dasar dapat menambahkan data `RenderArtifact.diagnostics`; modal tersebut akan menampilkan ringkasan diagnosis berupa jumlah kesalahan/peringatan/informasi, diikuti tingkat keparahan, jenis diagnosis, pesan, serta saran perbaikan di samping tampilan pratinjau. Ringkasan yang sama juga ditampilkan pada entri sejarah yang mendukung fitur diagnosis, sehingga percobaan pemeriksaan dasar circuitikz yang berulang dapat dibandingkan tanpa perlu membuka setiap entri secara terpisah. Untuk artifact yang memiliki konten sumber namun tidak dapat dirender secara langsung atau melalui jalur iframe HTML, modal kini beralih ke tampilan pratinjau berbasis sumber saja alih-alih memaksa penggunaan iframe kosong. Hal ini memberikan antarmuka visual yang jelas bagi pemeriksaan kompilasi/render circuitikz, pemeriksaan teks token SVG, pemeriksaan screenshot PNG kosong, laporan tumpang tindih glyph berbasis jalur saja, serta laporan tumpang tindih di masa depan, tanpa menjadikan TikZJax atau LaTeX sebagai ketergantungan runtime plugin yang wajib, maupun berpura-pura bahwa teks sumber merupakan hasil render visual yang sudah diverifikasi.
 
 ### Mode Mermaid Lama
 
@@ -164,12 +170,12 @@ Target ini sengaja belum menjadi rute perencanaan default. Target ini tersedia s
 
 ### Draw.io dan Drawnix Batas Ekspor
 
-Implementasi saat ini mempertahankan dukungan editor pihak ketiga di batas artefak:
+Implementasi saat ini mempertahankan dukungan editor pihak ketiga di batas artefak, sambil tetap menyediakan target render yang eksplisit:
 
 | Target | Kontrak | Ketergantungan Runtime |
 |--------|----------|--------------------|
-| Draw.io | `mxfile` XML yang tidak dikompresi secara deterministik dari `SemanticFigureModel` | tidak ada di runtime plugin atau CI |
-| Drawnix | subset minimal `.drawnix` JSON menggunakan elemen `geometry` dan `arrow-line` | tidak ada di runtime plugin atau CI |
+| Draw.io | XML `mxfile` yang deterministik dan tidak terkompresi dari `SemanticFigureModel`, ditambah file bantu berformat SVG/PNG/PDF untuk peninjauan | Tidak ada komponen semacam itu di masa eksekusi plugin maupun dalam proses CI |
+| Drawnix | Subset JSON `.drawnix` yang minimal yang menggunakan elemen `geometry` dan `arrow-line`, ditambah file bantu berformat SVG/PNG/PDF untuk peninjauan | Tidak ada komponen semacam itu di masa eksekusi plugin maupun dalam proses CI |
 
 Kompromi ini disengaja: Notemd dapat memverifikasi label yang terlihat, ID yang stabil, dan cakupan primitif yang didukung tanpa memasukkan diagram.net Desktop, Drawnix, Plait, atau keadaan editor khusus browser ke dalam plugin.
 
@@ -213,7 +219,11 @@ Notemd kini mencakup prototipe repositori terbatas pertama untuk arah ini. Proto
 npm run diagram:export-circuitikz -- --input cmos-inverter.json --output cmos-inverter.tex
 ```
 
-Prototipe ini menambahkan batas `CircuitSpec` yang terpisah serta ekspor deterministik untuk enam keluarga referensi emas:
+Prototipe ini menambahkan batas `CircuitSpec` yang terbatas serta alat ekspor yang deterministik untuk enam keluarga referensi utama:
+
+Dalam pipeline diagram eksperimental ini, akses juga kini dapat dilakukan melalui `intent: "circuit"` dan target render `circuitikz`. File `DiagramSpec` yang dihasilkan hanya boleh memasukkan elemen `circuitSpec` untuk intent jenis circuit. `CircuitikzRenderer` menulis sumber kode `.tex` yang deterministik dan menambahkan file bantu berformat SVG yang dihasilkan dari topologi circuit yang telah diverifikasi, sehingga memungkinkan tampilan pratinjau di Obsidian serta ekspor ke format SVG/PNG/PDF. File bantu tersebut bukan hasil kompilasi LaTeX/TikZJax; bukti eksekusi renderer yang sebenarnya tetap berasal dari perintah khusus untuk verifikasi di bawahnya.
+
+Untuk template referensi yang didukung, `layoutHints.inputSide` dan `layoutHints.outputSide` tetap merupakan kontrol yang hanya digunakan untuk presentasi. Kontrol tersebut dapat memindahkan posisi port input/output yang bersifat deterministik, namun tidak mengubah tanda tangan topologi maupun tidak memungkinkan proses perbaikan untuk menghubungkan kembali sirkuit.
 
 | Jenis rangkaian | Referensi emas | Jaminan arus |
 |--------------|------------------|-------------------|
@@ -224,7 +234,7 @@ Prototipe ini menambahkan batas `CircuitSpec` yang terpisah serta ekspor determi
 | `cmos-nand2` | `cmos-nand2-v1` | Memvalidasi pull-up PMOS paralel, pull-down NMOS seri, dua masukan `va` / `vb`, dan `vout` sebelum menulis LaTeX |
 | `cmos-nor2` | `cmos-nor2-v1` | Memvalidasi pull-up PMOS seri, pull-down NMOS paralel, dua masukan `va` / `vb`, dan `vout` sebelum menulis LaTeX |
 
-Ini belum merupakan generator TikZ umum. Alat ini tidak mengkompilasi LaTeX, memanggil TikZJax, memeriksa tangkapan layar, atau menjalankan perbaikan otomatis berbasis gambar. Fitur-fitur tersebut masih menjadi bagian tahap selanjutnya.
+Ini bukan generator TikZ umum. Alat ini tidak menerima kode TikZ sembarangan, tidak mengompilasi LaTeX, tidak memanggil TikZJax, tidak memeriksa tangkapan layar selama masa eksekusi plugin, dan tidak menjalankan proses perbaikan otomatis berbasis umpan balik gambar. Fungsi-fungsi tersebut masih merupakan tahap selanjutnya.
 
 Perintah Diagram Pratinjau dapat membuka kembali artefak sumber circuitikz yang disimpan langsung bila ekstensi file adalah `.tex` atau `.tikz` dan sumbernya mengandung `\usepackage{circuitikz}` atau `\begin{circuitikz}`. Jalur ini merupakan pratinjau berbasis sumber saja: tampilan modal menampilkan sumber, diagnosis, kontrol salin/simpan, serta metadata sejarah, tetapi tidak mengkompilasi LaTeX atau memanggil TikZJax selama runtime plugin.
 
@@ -350,8 +360,8 @@ Untuk inverter CMOS, prompt seharusnya meminta topologi eksplisit beserta batasa
 |------|----------------|-----------|
 | Diagram umum | Pipeline berbasis spesifikasi telah diimplementasikan untuk Mermaid, JSON Canvas, Vega-Lite, HTML | Terus perluas cakupan verifikasi semantik |
 | Gambar yang dapat diedit | Batas artefak `editable-html-svg`, Draw.io XML, dan Drawnix JSON telah diimplementasikan | Tambahkan primitif yang lebih kompleks hanya setelah tes membuktikan kemampuan edisi |
-| Dukungan CLI | `npm run diagram:export-artifact` mengekspor HTML/SVG, Draw.io, dan Drawnix yang dapat diedit dari satu `DiagramSpec` | Menambahkan perangkat asap khusus target saat target baru dikirim |
-| circuitikz | `CircuitSpec -> circuitikz` prototipe mengekspor sumber umum, inverter CMOS, `cmos-buffer` / `cmos-buffer-v1`, `cmos-transmission-gate` / `cmos-transmission-gate-v1`, `cmos-nand2` / `cmos-nand2-v1`, dan `cmos-nor2` / `cmos-nor2-v1` template emas, proyek `layoutHints.inputSide` dan `layoutHints.outputSide` ke penempatan port input/output yang deterministik tanpa mengubah topologi, menolak penyimpangan topologi perbaikan melalui `--topology-reference`, mengeluarkan ringkasan perbaikan yang mempertahankan topologi melalui `--repair-brief-output` dan skema `notemd.circuitikz.repair-brief.v1`, mencakup konten penyerahan terstruktur `repairPrompt` dengan `diagnosticFocus`, `acceptanceCriteria`, dan peran `topology-preserving-circuitikz-repair`, memvalidasi kandidat perbaikan melalui `--repair-brief`, mengembalikan bukti gerbang `repairAcceptance` melalui skema `notemd.circuitikz.repair-acceptance.v1` dengan `readyForVisualAcceptance` dan `remainingChecks`, menyimpan bukti tersebut melalui `--repair-acceptance-output`, menganalisis log kompilasi, dapat menjalankan renderer lokal eksplisit ditambah `--expected-artifact`, SVG `--expected-svg-text`, pemeriksaan metadata aksesibilitas melalui `aria-label`, `<title>`, dan `<desc>`, pengecualian elemen SVG tersembunyi/transparan, klasifikasi `render-svg-text-path-only` / `pathOnlyGlyphUseCount` untuk label hanya jalur, pemeriksaan penempatan glyph hanya jalur untuk `<use href="#...">`, diagnosis tumpang tindih glyph hanya jalur melalui `render-svg-path-glyph-overlap`, penanganan titik arus jalur tertutup untuk `Z/z`, batas lengkung tepat untuk ekstrem A/a, batas kurva Bezier tepat untuk ekstrem C/S/Q/T, pemeriksaan tumpang tindih label dengan batas lebar garis yang disadari SVG, pemeriksaan geometri gambar `polyline` / `polygon`, geometri label yang diposisikan `tspan`, geometri teks yang diposisikan dengan memperhatikan `text-anchor`, geometri yang memperhatikan transformasi untuk SVG bounded-canvas/text-overlap dan label-vs-drawing asap melalui `render-svg-label-overlap`, serta pemeriksaan screenshot PNG nonblank / terpotong / foreground padat, termasuk palet warna indeks dengan alpha, sampel transparan grayscale/RGB tRNS, dan panduan spesifik format `render-png-unsupported` untuk PNG Adam7 interlaced dan kegagalan kedalaman bit indeks, melalui `foregroundBounds`, `foregroundDensity`, `render-png-content-clipped`, dan `render-png-foreground-dense` tanpa parsing shell, mencakup perangkat asap pemeliharaan agregat melalui `npm run diagram:smoke-circuitikz`, mencatat konfigurasi renderer yang hilang melalui `rendererAvailability.status: "missing-configuration"` dan `compile-executable-invalid`, serta memiliki diagnosis pratinjau umum, hitungan ringkasan diagnosis, entri sejarah yang memperhatikan diagnosis, dan fallback hanya sumber melalui `RenderArtifact.diagnostics` dan modal pratinjau | Menambahkan pengenalan label tingkat OCR untuk teks visual hanya jalur, pemeriksaan tumpang tindih tingkat piksel yang akurat, cakupan jalur SVG yang lebih luas bila diperlukan, instalasi/deteksi renderer otomatis hanya jika tetap opsional, dan eksekusi perbaikan yang mempertahankan topologi secara otomatis |
+| Dukungan CLI | `npm run diagram:export-artifact` mengekspor bukti tinjauan berupa HTML/SVG yang dapat diedit, file Draw.io, Drawnix, Circuitikz, serta SVG/PNG/PDF dari satu `DiagramSpec` yang telah diverifikasi | Tambahkan fixture uji khusus untuk target tertentu saat versi baru dari target tersebut dirilis |
+| circuitikz | `DiagramSpec(intent: "circuit", circuitSpec) -> CircuitikzRenderer -> circuitikz` mengekspor template emas untuk sumber umum, inverter CMOS, `cmos-buffer` / `cmos-buffer-v1`, `cmos-transmission-gate` / `cmos-transmission-gate-v1`, `cmos-nand2` / `cmos-nand2-v1`, dan `cmos-nor2` / `cmos-nor2-v1`, menampilkan opsi intent UI/rendernya, menulis kode TeX beserta file pratinjau SVG/PNG/PDF, memverifikasi topologi sebelum menghasilkan output, menganalisis log kompilasi, dapat menjalankan renderer lokal secara eksplisit beserta opsi `--expected-artifact`, serta menyediakan alternatif berupa sumber kode saja ditambah diagnosis pratinjau yang terlihat melalui `RenderArtifact.diagnostics` dan modal pratinjau | Tambahkan fitur pengenalan label tingkat OCR untuk teks visual yang hanya berupa path, pemeriksaan tumpang tindih pada tingkat piksel yang lebih akurat, cakupan path SVG yang lebih luas bila diperlukan, instalasi/deteksi renderer otomatis hanya jika hal tersebut tetap dapat dipilih secara opsional, serta eksekusi perbaikan otomatis yang mempertahankan struktur topologi asli |
 | Integrasi TikZJax | Host render kandidat untuk tampilan sisi Obsidian | Jadikannya opsional; jangan jadikan TikZJax sebagai ketergantungan runtime plugin yang wajib |
 
 ## Konfigurasi
@@ -361,6 +371,7 @@ Untuk inverter CMOS, prompt seharusnya meminta topologi eksplisit beserta batasa
 | `enableExperimentalDiagramPipeline` | `false` | Beralih antara versi berbasis spesifikasi dan versi lama Mermaid |
 | `experimentalDiagramCompatibilityMode` | `'legacy-mermaid'` | `'legacy-mermaid'` = Mermaid saja; `'best-fit'` = target native + fallback |
 | `preferredDiagramIntent` | `undefined` (otomatis) | Mengganti deteksi intent otomatis |
+| `preferredDiagramRenderTarget` | `undefined` (otomatis) | Menggantikan renderer artefak, termasuk Draw.io, Drawnix, dan Circuitikz |
 | `summarizeToMermaidLanguage` | `'en'` | Bahasa target untuk label diagram |
 | `summarizeToMermaidProvider` / `Model` | DeepSeek | LLM per tugas untuk pembuatan diagram |
 | `autoMermaidFixAfterGenerate` | (Dari konstanta) | Menjalankan perbaiki lama secara otomatis pada output Mermaid |
@@ -380,10 +391,11 @@ Ketika diaktifkan, Notemd mengambil potongan konteks yang relevan dari basis pen
 | Aksi | Metode |
 |--------|--------|
 | Ekspor SVG | Pembangun `mermaid.render()` / `vega.View.toSVG()` / SVG untuk Canvas |
-| Ekspor PNG | SVG → Image → Canvas (rasio piksel perangkat 1x-3x) → PNG ArrayBuffer |
+| Ekspor ke PNG | SVG → Gambar → Canvas / rasterizer pratinjau pada PPI yang telah dikonfigurasi → Buffer Array PNG |
+| Ekspor ke PDF | SVG → gambar raster pada PPI yang telah dikonfigurasi → PDF satu halaman |
 | Simpan Sumber | Konten artefak mentah disimpan dengan ekstensi khusus target |
 | Pratinjau Hanya Sumber | Artefak non-inline dengan konten sumber ditampilkan sebagai kode beserta diagnosis, tanpa rendering iframe |
-| Audit Semantik | Mermaid, JSON Canvas, Vega-Lite, dan HTML/SVG yang dapat diedit telah diperiksa oleh `scripts/diagram-semantic-verification.js` |
+| Audit semantik | Mermaid, JSON Canvas, Vega-Lite, HTML/SVG yang dapat diedit, Draw.io, Drawnix, dan circuitikz yang terbatas diperiksa oleh `scripts/diagram-semantic-verification.js` beserta tes renderer/CLI |
 
 **Penyimpanan dalam cache**: RenderCache menggunakan kunci JSON yang deterministik dari `{spec, target, theme}`. Proses penghapusan duplikat saat rendering mencegah hasil rendering yang sama berulang.
 

@@ -1,7 +1,7 @@
 ---
 id: diagrams
 title: "Diagrammen"
-description: "Genereer Mermaid, JSON Canvas, Vega-Lite, HTML, bewerkbare afbeeldingen en toekomstige beperkte circuitikz diagrammen uit je notities met een spec-first architectuur"
+description: "Genereer Mermaid-, JSON Canvas-, Vega-Lite-, HTML-, bewerkbare afbeeldingsbestanden, Draw.io-, Drawnix- en beperkte circuitikz-diagrammen uit je notities met behulp van een architectuur die eerst de specificaties gebruikt"
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
 keywords: [diagrams, mermaid, vega-lite, canvas, visualization, spec-first, drawio, drawnix, editable svg, circuitikz, TikZJax]
@@ -18,7 +18,7 @@ import TLDR from '@site/src/components/TLDR';
 # Diagrammen
 
 <TLDR>
-**Notemd genereert diagrammen uit je notities via een spec-first pipeline.** De LLM levert een renderer-agnostisch `DiagramSpec` JSON op, waarna gespecialiseerde adapters dit omzetten in Mermaid, JSON Canvas, Vega-Lite, HTML of bewerkbare HTML/SVG uitvoer. Er wordt ondersteuning geboden voor 8 intentietypen, automatische fallbackketens, live preview met SVG/PNG export, semantische verificatie en generatie aangevuld met lokale kennis.
+**Notemd genereert diagrammen uit je notities via een pipeline die eerst de specificaties verwerkt.** De LLM genereert een renderer-onafhankelijk `DiagramSpec`-JSON-bestand, waarna gespecialiseerde adapters dit omzetten in Mermaid-, JSON Canvas-, Vega-Lite-, HTML-, bewerkbare HTML/SVG-, Draw.io-, Drawnix- of beperkte circuitikz-output. Er wordt ondersteuning geboden voor 9 intentietypen, automatische fallbackketens, een live preview met mogelijkheid om bestanden als SVG/PNG/PDF te exporteren, semantische verificatie en generatie aangevuld met lokale kennis.
 </TLDR>
 
 Dit maakt deel uit van de [Obsidian AI Knowledge Management Guide](/docs/pillar-ai-knowledge).
@@ -54,6 +54,7 @@ graph LR
 | `stateDiagram` | Mermaid | HTML | Toestandsmachines, levenscyclusmodellen |
 | `canvasMap` | JSON Canvas | Mermaid → HTML | Conceptkaarten, kennisgraphen |
 | `dataChart` | Vega-Lite | Mermaid → HTML | Staven, lijnen, gebieden, verspreide punten, piecharts, tabellen |
+| `circuit` | circuitikz | geen | Beperkte circuitdiagrammen op basis van geverifieerde `CircuitSpec`-bestanden |
 
 ## Intent Detectie
 
@@ -67,6 +68,7 @@ Notemd bepaalt op basis van woordscoren de beste diagramtype uit de inhoud van j
 | `stateDiagram` | Toestand, overgang, in afwachting, actief, mislukt (3+ overeenkomsten) | 0.76 |
 | `flowchart` | Genummerde stappen (2+) of if/then/else/workflow vocabulaire | 0.74 |
 | `canvasMap` | Conceptkaart, kennisgraaf, ruimtelijk, cluster | 0.72 |
+| `circuit` | circuitikz, TikZJax, circuit, schematic, CMOS, NMOS, PMOS, MOSFET, VDD/GND, `vin`/`vout` | 0.78 |
 | `mindmap` | Default fallback | 0.55 |
 
 Overtuig met de **Preferred diagram type**-instelling, de selector in de zijbalk of een expliciete optie in het commandopalette.
@@ -75,15 +77,9 @@ Overtuig met de **Preferred diagram type**-instelling, de selector in de zijbalk
 
 De experimentele spec-first pipeline heeft nu twee onafhankelijke controles:
 
-| Control | Instelling | Effect |
-|---------|---------|--------|
-| Preferred diagram type | `preferredDiagramIntent` | Stuurt de semantische vorm van de gegenereerde `DiagramSpec` aan |
-| Preferred render target | `preferredDiagramRenderTarget` | Kiest de renderer voor **Generate diagram** en **Preview diagram** |
+Stel **Preferred render target** in op **Auto** voor de standaardinstelling van de planner, of kies expliciet voor Mermaid, JSON Canvas, Vega-Lite, HTML, Editable HTML/SVG, Draw.io, Drawnix of Circuitikz. Deze override heeft alleen invloed op de commands voor het genereren van artefacten en het bekijken ervan. De standaardcommando **Summarise as Mermaid diagram** blijft gericht op Mermaid-compatibele output zodat bestaande Markdown-workflows niet stilletjes van formaat wisselen.
 
-Stel **Preferred render target** in op **Auto** voor de standaard planner, of kies expliciet Mermaid, JSON Canvas, Vega-Lite, HTML of Editable HTML/SVG. De override is alleen van toepassing op artifact- en preview-commando's. Het standaardcommando **Summarise as Mermaid diagram** blijft gekoppeld aan Mermaid-compatibele uitvoer zodat bestaande Markdown-workflows niet stilletjes van formaat wisselen.
-
-Deze scheiding is belangrijk omdat een `flowchart`-intent nu kan worden weergegeven als Mermaid voor Markdown-notities, HTML voor een betrouwbare fallback, of Editable HTML/SVG voor verdere bewerking. Draw.io en Drawnix blijven CLI-artikelformaatexporteurs in plaats van renderdoelstellingen binnen de plugin.
-
+Deze scheiding is belangrijk omdat een `flowchart`-intent nu kan worden weergegeven als Mermaid voor Markdown-notities, als HTML voor een betrouwbare fallback, als Editable HTML/SVG voor verdere bewerking, of als Draw.io/Drawnix-bronbestanden vergezeld van SVG-bestanden ter beoordeling. Een `circuit`-intent leidt naar Circuitikz en vereist een geverifieerd `CircuitSpec`; het is geen verzoek om willekeurige TikZ-tekst.
 ## Gebruik
 
 ### Een diagram genereren
@@ -101,16 +97,21 @@ Deze scheiding is belangrijk omdat een `flowchart`-intent nu kan worden weergege
 | Vega-Lite | `.json` | `{note}_diagram.json` |
 | HTML | `.html` | `{note}_diagram.html` |
 | Editabel HTML/SVG | `.html` | `{note}_diagram.html` |
+| Draw.io | `.drawio` + `.drawio.svg` + `.drawio.md` | `{note}_diagram.drawio` samen met bijbehorende bestanden voor beoordeling |
+| Drawnix | `.drawnix` + `.drawnix.svg` + `.drawnix.md` | `{note}_diagram.drawnix` samen met bijbehorende bestanden voor beoordeling |
+| Circuitikz | `.tex` + `.tex.svg` + `.tex.md` | `{note}_diagram.tex` samen met bijbehorende bestanden voor beoordeling |
 
 ### Voorbeeld van een diagram bekijken
 
 1. Uitvoeren **"Notemd: Voorbeeld diagram bekijken"**
 2. Een modaal venster wordt geopend met het weergegeven diagram
-3. Exporteer als SVG of PNG met behulp van de knoppen op het werkbalk
+3. Exporteer als SVG, PNG of PDF met behulp van de knoppen op het werkbalk
 
 **Automatisch voorbeeld openen** is beschikbaar in de instellingen — na generatie wordt het voorbeeldmodaal venster automatisch geopend.
 
-Het voorbeeldmodaal venster heeft ook een paneel voor diagnostiek van artefacten. Renderers en smoke checks kunnen `RenderArtifact.diagnostics` toevoegen; het venster toont een samenvatting van de diagnostiek met tellers voor fouten/waarschuwingen/informatie, gevolgd door ernst, type diagnostiek, bericht en reparatieadvies naast het voorbeeld. Dezelfde samenvatting wordt weergegeven in de historische voorbeeldingen, zodat herhaalde circuitikz smoke-pogingen vergeleken kunnen worden zonder elke ingang te openen. Voor artefacten die broninhoud hebben maar niet inline of via de HTML iframe-path kunnen worden gerenderd, valt het venster nu terug op een voorbeeld alleen van de bron in plaats van een lege iframe af te dwingen. Dit biedt circuitikz compile/render smoke, SVG tekst-token checks, PNG-blank-schermopnames checks en toekomstige overlaprapporten een zichtbare UI oppervlakte zonder TikZJax of LaTeX als harde plugin-runtimeafhankelijkheid te maken of te doen alsof brontekst een geverifieerde visuele weergave is.
+Bij het exporteren van previews in PNG en PDF wordt de opgegeven preview PPI gebruikt. De standaardwaarde is 300 PPI en waarden hoger dan 600 PPI worden beperkt tot 600. SVG blijft vectorgrootte hebben. Bronbestanden zoals `.drawio`, `.drawnix` en `.tex` kunnen een `previewSvg`-bestand leveren zodat Obsidian beeldbestanden kan weergeven en exporteren die kunnen worden bekeken, zonder dat diagram.net, Drawnix, LaTeX of TikZJax in de plugin-runtime worden opgenomen.
+
+Het voorbeeldvenster bevat ook een paneel met diagnoses van artefacten. Renderers en smoke checks kunnen `RenderArtifact.diagnostics` toevoegen; het venster toont een samenvatting van de diagnoses met tellingen van fouten/waarschuwingen/informatie, gevolgd door de ernst, het type diagnose, de boodschap en advies voor reparatie naast het voorbeeld. Hetzelfde samenvatting wordt weergegeven in historische entry’s die diagnoses ondersteunen, zodat herhaalde circuitikz smoke-tests vergeleken kunnen worden zonder elke entry afzonderlijk te openen. Voor artefacten die broninhoud hebben maar niet inline of via de HTML iframe-pfad kunnen worden weergegeven, gebruikt het venster nu in plaats van een lege iframe een voorbeeld dat uitsluitend uit de bron bestaat. Hierdoor krijgen circuitikz compile/render smoke-tests, SVG-text-tokencontroles, PNG-blank-screencastcontroles, rapporten over overlap van glyph’s die alleen op paden zijn gebaseerd, en toekomstige overlaprapporten een zichtbare gebruikersinterface, zonder dat TikZJax of LaTeX als strikte runtime-dependentie voor plugins moeten dienen of alsof de brontekst al als gevalideerde visuele weergave wordt beschouwd.
 
 ### Legendarische Mermaid Modus
 
@@ -164,12 +165,12 @@ Deze doelwaarde is nog niet opzettelijk de standaardplannerroute. Het is beschik
 
 ### Draw.io en Drawnix Exportgrenzen
 
-De huidige implementatie houdt de ondersteuning van derdeneditoren bij de artifactgrens:
+De huidige implementatie houdt de ondersteuning voor derdepartijeditoren binnen de grenzen van het artefact, terwijl er toch expliciete weergave-doelwitten worden geexposeerd:
 
 | Doelwit | Contract | Runtijdafhankelijkheid |
 |--------|----------|--------------------|
-| Draw.io | deterministisch ongecomprimeerd `mxfile` XML afkomstig van `SemanticFigureModel` | niets in de plugin-runtijd of CI |
-| Drawnix | minimalistisch `.drawnix` JSON subset met `geometry` en `arrow-line` elementen | niets in de plugin-runtijd of CI |
+| Draw.io | deterministische, ongecomprimeerde `mxfile`-XML uit `SemanticFigureModel`, plus SVG/PNG/PDF-bestanden voor review | niets in de plugin-runtime of CI |
+| Drawnix | een minimale subset van JSON in `.drawnix` die `geometry` en `arrow-line`-elementen gebruikt, plus SVG/PNG/PDF-bestanden voor review | niets in de plugin-runtime of CI |
 
 De afweging is bewust: Notemd kan zichtbare labels, stabiele IDs en ondersteunde primitieve dekking controleren zonder diagram.net Desktop, Drawnix, Plait of alleen-browser editorstatus in de plugin op te nemen.
 
@@ -213,7 +214,11 @@ Notemd bevat nu het eerste beperkte repository-prototype voor deze richting. Het
 npm run diagram:export-circuitikz -- --input cmos-inverter.json --output cmos-inverter.tex
 ```
 
-Het prototype voegt een apart `CircuitSpec`-grensgebied en een deterministische exporter toe voor zes gouden referentiefamilies:
+Het prototype voegt een beperkte `CircuitSpec`-grens toe en een deterministische exporter voor zes gouden referentiefamilies:
+
+In het experimentele diagrampijpleid kan dit nu ook worden bereikt via `intent: "circuit"` en het weergave-doelwit `circuitikz`. Het gegenereerde `DiagramSpec` mag alleen `circuitSpec` bevatten voor een circuit-intent. `CircuitikzRenderer` genereert dezelfde deterministische `.tex`-bron en voegt een SVG-preview toe die is afgeleid van die geverifieerde circuittopologie, waardoor er een preview in Obsidian mogelijk is plus export naar SVG/PNG/PDF. De preview is geen resultaat van een LaTeX/TikZJax-compilatie; het echte renderresultaat blijft behouden in de expliciete smoke-commando’s hieronder.
+
+Voor ondersteunde gouden templates blijven `layoutHints.inputSide` en `layoutHints.outputSide` enkel controle-elementen voor presentatie. Ze kunnen de plaatsing van de deterministische invoer-/uitvoerpoorten verplaatsen, maar ze veranderen de topologische specificaties niet en maken het niet mogelijk om via een reparatieprocedure de circuittopologie opnieuw te configureren.
 
 | Circuittype | Gouden referentie | Stroomgarantie |
 |--------------|------------------|-------------------|
@@ -224,7 +229,7 @@ Het prototype voegt een apart `CircuitSpec`-grensgebied en een deterministische 
 | `cmos-nand2` | `cmos-nand2-v1` | Controleert de parallelle PMOS pull-up, seriële NMOS pull-down, dubbele invoeren `va` / `vb` en `vout` voordat LaTeX wordt geschreven |
 | `cmos-nor2` | `cmos-nor2-v1` | Controleert de seriële PMOS pull-up, parallele NMOS pull-down, dubbele invoeren `va` / `vb` en `vout` voordat LaTeX wordt geschreven |
 
-Dit is nog geen algemene TikZ generator. Het compileert geen LaTeX, roept TikZJax niet op, inspecteert geen screenshots of voert geen geautomatiseerde afbeeldingsherstelacties uit. Die functies komen later.
+Dit is geen algemene TikZ-generator. Het accepteert geen willekeurige TikZ-code, compileert geen LaTeX, roept geen TikZJax aan, inspecteert geen screenshots in de plugin-runtime en voert geen geautomatiseerde reparatie van afbeeldingen uit. Die functies maken nog deel uit van latere stappen.
 
 De Preview diagram commando kan direct opgeslagen circuitikz bronbestanden openen wanneer de bestandsextensie `.tex` of `.tikz` is en de bron `\usepackage{circuitikz}` of `\begin{circuitikz}` bevat. Die route is een circuitikz bron-gebaseerde preview: het venster toont de bron, diagnostiek, kopieer/sla op controls en historische metadata, maar compileert geen LaTeX of roept TikZJax niet op tijdens de plugin‑uitvoering.
 
@@ -350,8 +355,8 @@ Voor een CMOS-inverter moet de prompt expliciete topologie plus layoutbeperkinge
 |------|----------------|-----------|
 | Algemene diagrammen | Spec-first pipeline geïmplementeerd voor Mermaid, JSON Canvas, Vega-Lite, HTML | Bouw de semantische verificatieverwerking verder uit |
 | Editabele figuren | `editable-html-svg`, Draw.io XML en Drawnix JSON artefactgrenzen geïmplementeerd | Voeg rijkere primitieven alleen toe nadat tests de editabiliteit hebben bewezen |
-| CLI ondersteuning | `npm run diagram:export-artifact` exporteert editabele HTML/SVG, Draw.io en Drawnix vanuit één `DiagramSpec` | Voeg rookinstallaties toe die specifiek zijn voor een doel wanneer nieuwe doelen worden geleverd |
-| circuitikz | `CircuitSpec -> circuitikz` prototype exporteert gemeenschappelijke bronnen, CMOS omvormer, `cmos-buffer` / `cmos-buffer-v1`, `cmos-transmission-gate` / `cmos-transmission-gate-v1`, `cmos-nand2` / `cmos-nand2-v1`, en `cmos-nor2` / `cmos-nor2-v1` gouden templates, projecten `layoutHints.inputSide` en `layoutHints.outputSide` naar een deterministische invoer/uitvoerpoortindeling zonder de topologie te veranderen, wijst topologische afwijkingen af via `--topology-reference`, genereert topologiebehoudende reparatieverslagen via `--repair-brief-output` en schema `notemd.circuitikz.repair-brief.v1`, bevat gestructureerd `repairPrompt` overdrachtsinhoud met `diagnosticFocus`, `acceptanceCriteria`, en rol `topology-preserving-circuitikz-repair`, valideert reparatiekandidaten via `--repair-brief`, geeft `repairAcceptance` poortbewijs terug via schema `notemd.circuitikz.repair-acceptance.v1` met `readyForVisualAcceptance` en `remainingChecks`, bewaart dat bewijs via `--repair-acceptance-output`, parseert compilatielogs, kan expliciete lokale renderers uitvoeren plus `--expected-artifact`, SVG `--expected-svg-text`, controle van toegankelijkheidsmetadata via `aria-label`, `<title>`, en `<desc>`, uitsluiting van verborgen/transparante SVG elementen, `render-svg-text-path-only` / `pathOnlyGlyphUseCount` classificatie voor alleen-padlabels, controle van plaatsing van alleen-padglyphs voor `<use href="#...">`, diagnose van overlap van alleen-padglyphs via `render-svg-path-glyph-overlap`, afhandeling van huidig punt bij gesloten paden voor `Z/z`, exacte randen voor A/a boogextrema, exacte randen voor Bezier-krommeextrema voor C/S/Q/T, SVG grenzen rekening houdend met stiftbreedte en controle op labeloverlap, `polyline` / `polygon` controle van tekeningen geometrie, gepositioneerde `tspan` labelgeometrie, tekstgeometrie die `text-anchor` rekening houdt, geometrie die SVG rekening houdt met beperkte canvas/textoverlap en label versus tekening rooktests, inclusief PNG niet-leeg / afgesneden / dichte voorgrond screenshot rooktests, inclusief indexcolormap alpha, grijs/wit/RGB tRNS transparante monsters, en format-specifieke `render-png-unsupported` richtlijnen voor Adam7 gestapelde PNG’s en fouten bij gecodeerde bitdiepte, via `foregroundBounds`, `foregroundDensity`, `render-png-content-clipped`, en `render-png-foreground-dense` zonder shell parsing, bevat samengestelde onderhoudsrookinstallaties via `npm run diagram:smoke-circuitikz`, registreert ontbrekende rendererconfiguratie via `rendererAvailability.status: "missing-configuration"` en `compile-executable-invalid`, en heeft algemene voorbeelddiagnosen, tellingen van diagnostische samenvattingen, historieën die rekening houden met diagnoses, en fallback alleen op bronmateriaal via `RenderArtifact.diagnostics` en het voorbeeldvenster | Voeg OCR-niveau labelherkenning toe voor alleen-pad visuele tekst, nauwkeurige pixelniveau overlapcontroles, bredere SVG paddekking waar nodig, automatische installeren/ontdekken van renderer alleen als dit optioneel kan blijven, en geautomatiseerde topologiebehoudende reparatieuitvoering |
+| CLI-ondersteuning | `npm run diagram:export-artifact` exporteert bewerkbare HTML/SVG-, Draw.io-, Drawnix-, Circuitikz- en SVG/PNG/PDF-bestanden als bewijsmateriaal, afkomstig van één geverifieerde `DiagramSpec` | Voeg doelspecifieke smoke fixtures toe wanneer nieuwe doelen worden uitgebracht |
+| circuitikz | `DiagramSpec(intent: "circuit", circuitSpec) -> CircuitikzRenderer -> circuitikz` exporteert gouden templates voor common-source, CMOS inverter, `cmos-buffer` / `cmos-buffer-v1`, `cmos-transmission-gate` / `cmos-transmission-gate-v1`, `cmos-nand2` / `cmos-nand2-v1` en `cmos-nor2` / `cmos-nor2-v1`, geeft UI-intentie-/renderdoelopties weer, genereert TeX-bestanden samen met SVG/PNG/PDF-previewbestanden, valideert de topologie vóór export, analyseert compilatieloggen, kan expliciete lokale renderers gebruiken samen met `--expected-artifact`, en biedt een fallback op alleen broncode naast previewdiagnoses die zichtbaar zijn via `RenderArtifact.diagnostics` en het preview-modal | Voeg OCR-niveau labelherkenning toe voor visueel tekst dat alleen uit paden bestaat, nauwkeurige overlapcontroles op pixelniveau, een bredere dekking van SVG-paden waar nodig, automatische installatie/ontdekking van renderers alleen als deze optioneel kunnen blijven, en geautomatiseerde reparatieprocessen die de topologie behouden |
 | TikZJax integratie | Kandidaat renderhost voor Obsidian-kant weergave | Houd het optioneel; maak TikZJax geen harde plugin-runtimeafhankelijkheid |
 
 ## Configuratie
@@ -361,6 +366,7 @@ Voor een CMOS-inverter moet de prompt expliciete topologie plus layoutbeperkinge
 | `enableExperimentalDiagramPipeline` | `false` | Schakel tussen spec-first en legacy Mermaid over |
 | `experimentalDiagramCompatibilityMode` | `'legacy-mermaid'` | `'legacy-mermaid'` = Mermaid alleen; `'best-fit'` = native doelen + fallbacks |
 | `preferredDiagramIntent` | `undefined` (auto) | Overtikkel automatische intentiedetectie |
+| `preferredDiagramRenderTarget` | `undefined` (auto) | Renderer van het artefact overschrijven, inclusief Draw.io, Drawnix en Circuitikz |
 | `summarizeToMermaidLanguage` | `'en'` | Doeltaal voor diagramlabels |
 | `summarizeToMermaidProvider` / `Model` | DeepSeek | Per taak LLM voor diagramgeneratie |
 | `autoMermaidFixAfterGenerate` | (uit constanten) | Auto uitvoeren van legacy fixer op Mermaid output |
@@ -380,10 +386,11 @@ Wanneer geactiveerd haalt Notemd relevante contextfragmenten op uit de lokale ke
 | Actie | Methode |
 |--------|--------|
 | SVG export | `mermaid.render()` / `vega.View.toSVG()` / SVG builder voor Canvas |
-| PNG export | SVG → Afbeelding → Canvas (device pixel ratio 1x-3x) → PNG ArrayBuffer |
+| Export naar PNG | SVG → Afbeelding → Canvas / rasterizer voor voorvertoning bij de ingestelde PPI → PNG ArrayBuffer |
+| Export naar PDF | SVG → rasterafbeelding bij de ingestelde PPI → eendaags PDF |
 | Opslaan van bron | De ruwe artefactinhoud wordt opgeslagen met een extensie die specifiek is voor het doel. |
 | Alleen voorbeeldweergave van de bron | Niet-inline artefacten met broninhoud worden weergegeven als code samen met diagnostische informatie, zonder iframe-rendering. |
-| Semantische audit | Mermaid, JSON Canvas, Vega-Lite en bewerkbare HTML/SVG gecontroleerd door `scripts/diagram-semantic-verification.js` |
+| Semantische audit | Mermaid, JSON Canvas, Vega-Lite, bewerkbare HTML/SVG, Draw.io, Drawnix en beperkte Circuitikz worden gecontroleerd door `scripts/diagram-semantic-verification.js` samen met tests voor de renderer en CLI |
 
 **Caching**: RenderCache gebruikt een deterministische JSON sleutel van `{spec, target, theme}`. In-flight deduplicatie voorkomt dubbele renders.
 

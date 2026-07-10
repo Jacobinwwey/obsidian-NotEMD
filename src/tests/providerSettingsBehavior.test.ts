@@ -599,6 +599,35 @@ describe('provider settings behavior', () => {
         };
     });
 
+    test('shows diagram render target controls without developer mode', async () => {
+        const plugin = createPlugin();
+        plugin.settings.enableDeveloperMode = false;
+        plugin.settings.enableExperimentalDiagramPipeline = true;
+        plugin.settings.experimentalDiagramCompatibilityMode = 'best-fit';
+
+        const tab = new NotemdSettingTab(mockApp as any, plugin as any) as any;
+        tab.display();
+
+        const intentSetting = findSettingByName(tab.containerEl, 'Preferred diagram type');
+        const targetSetting = findSettingByName(tab.containerEl, 'Preferred render target');
+
+        expect(intentSetting).toBeDefined();
+        expect(targetSetting).toBeDefined();
+
+        const intentDropdown = intentSetting?.controls.find(control => control.kind === 'dropdown') as MockDropdownControl | undefined;
+        const targetDropdown = targetSetting?.controls.find(control => control.kind === 'dropdown') as MockDropdownControl | undefined;
+
+        expect(intentDropdown?.options.circuit).toBe('Circuit (Circuitikz)');
+        expect(targetDropdown?.options.circuitikz).toBe('Circuitikz + SVG preview');
+
+        await intentDropdown?.onChangeHandler?.('circuit');
+        await targetDropdown?.onChangeHandler?.('circuitikz');
+
+        expect(plugin.settings.preferredDiagramIntent).toBe('circuit');
+        expect(plugin.settings.preferredDiagramRenderTarget).toBe('circuitikz');
+        expect(plugin.saveSettings).toHaveBeenCalledTimes(2);
+    });
+
     test('keeps advanced settings collapsed after the user closes them and reopens the settings tab', () => {
         const plugin = createPlugin();
         const provider = plugin.settings.providers.find((entry: any) => entry.name === 'DeepSeek');

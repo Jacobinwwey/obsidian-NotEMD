@@ -1,7 +1,7 @@
 ---
 id: diagrams
 title: "Diagramy"
-description: "Vytváří Mermaid, JSON Canvas, Vega-Lite, HTML, upravitelné grafické artefakty a budoucí omezené circuitikz diagramy z vašich poznámek pomocí architektury založené na specifikaci"
+description: "Vytváří diagramy typu Mermaid, JSON Canvas, Vega-Lite, HTML, upravitelné soubory s obrázky, Draw.io, Drawnix a omezené diagramy circuitikz z vašich poznámek pomocí architektury založené na specifikacích."
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
 keywords: [diagrams, mermaid, vega-lite, canvas, visualization, spec-first, drawio, drawnix, editable svg, circuitikz, TikZJax]
@@ -18,7 +18,7 @@ import TLDR from '@site/src/components/TLDR';
 # Diagramy
 
 <TLDR>
-**Notemd vytváří diagramy z vašich poznámek prostřednictvím pipeline založeného na specifikaci.** LLM vytváří renderer-nezávislý `DiagramSpec` JSON, poté specializované adaptéry jej převádějí na Mermaid, JSON Canvas, Vega-Lite, HTML nebo upravitelný výstup HTML/SVG. Podporuje 8 typů záměrů, automatické řetězce náhrad, živou náhledovou funkci s exportem do SVG/PNG, sémantickou ověřovací funkci a generování rozšířené o místní znalosti.
+**Notemd vytváří diagramy z vašich poznámek prostřednictvím procesu založeného na specifikacích.** LLM vytvoří JSON soubor `DiagramSpec`, který je nezávislý na konkrétním rendereru, a následně specializované adaptéry jej převedou na formáty Mermaid, JSON Canvas, Vega-Lite, HTML, upravitelný HTML/SVG, Draw.io, Drawnix nebo omezené diagramy circuitikz. Podporuje 9 typů záměrů, automatické záložní řetězce, živou náhledovou verzi s možností exportu do SVG/PNG/PDF, semantickou kontrolu a generování vylepšené o místní znalosti.
 </TLDR>
 
 Toto je součástí [Obsidian Průvodce AI pro správu znalostí](/docs/pillar-ai-knowledge).
@@ -54,6 +54,7 @@ graph LR
 | `stateDiagram` | Mermaid | HTML | Stroje stavů, modely životního cyklu |
 | `canvasMap` | JSON Canvas | Mermaid → HTML | Konceptuální mapy, znalostní grafy |
 | `dataChart` | Vega-Lite | Mermaid → HTML | Sloupcové, čarové, plošné, rozptylové, kruhové, tabulkové grafy |
+| `circuit` | circuitikz | none | Omezené diagramy obvodů z ověřených datových balíčků `CircuitSpec` |
 
 ## Detekce záměru
 
@@ -67,6 +68,7 @@ Notemd odhadne nejlepší typ diagramu na základě obsahu vaší poznámky pomo
 | `stateDiagram` | Stav, přechod, čekající, běžící, selhalo (3+ shody) | 0.76 |
 | `flowchart` | Číslované kroky (2+) nebo slovník if/then/else/workflow | 0.74 |
 | `canvasMap` | Konceptuální mapa, graf znalostí, prostorový, shluk | 0.72 |
+| `circuit` | circuitikz, TikZJax, circuit, schematic, CMOS, NMOS, PMOS, MOSFET, VDD/GND, `vin`/`vout` | 0.78 |
 | `mindmap` | Výchozí náhradní režim | 0.55 |
 
 Přepsat pomocí nastavení **Preferovaný typ diagramu**, výběru v postranním panelu nebo explicitní volby z palety příkazů.
@@ -80,10 +82,9 @@ Experimentální pipeline založený na specifikacích nyní má dva nezávislé
 | Preferovaný typ diagramu | `preferredDiagramIntent` | Určuje sémantickou formu generovaného `DiagramSpec` |
 | Preferovaný cíl renderování | `preferredDiagramRenderTarget` | Vybírá renderer artefaktu pro **Vytvořit diagram** a **Náhled diagramu** |
 
-Nastavte **Preferovaný cíl renderování** na **Auto** jako výchozí hodnotu pro plánovač, nebo zvolte explicitně Mermaid, JSON Canvas, Vega-Lite, HTML nebo Editable HTML/SVG. Toto přepsání se vztahuje pouze na příkazy týkající se artefaktů a náhledů. Standardní příkaz **Shrnutí do diagramu Mermaid** zůstává vázán na výstup kompatibilní s Mermaid, aby stávající pracovní postupy s Markdownem nezměnily formát bez upozornění.
+Nastavte **Preferred render target** na **Auto** jako výchozí hodnotu pro plánovač, nebo zvolte výslovně Mermaid, JSON Canvas, Vega-Lite, HTML, Editable HTML/SVG, Draw.io, Drawnix nebo Circuitikz. Tato překrytí platí pouze pro příkazy týkající se souborů a náhledu. Standardní příkaz **Summarise as Mermaid diagram** zůstává vázán na výstup kompatibilní s Mermaid, aby stávající pracovní postupy v Markdownu nezměnily formát bez varování.
 
-Toto oddělení je důležité, protože záměr `flowchart` může být nyní renderován jako Mermaid pro poznámky v Markdownu, jako HTML pro spolehlivou náhradu nebo jako Editable HTML/SVG pro další úpravy. Draw.io a Drawnix zůstávají exportéry artefaktů typu CLI místo renderovacích cílů uvnitř pluginu.
-
+Toto oddělení je důležité, protože záměr `flowchart` nyní může být vykreslen jako Mermaid pro poznámky v Markdownu, jako HTML pro spolehlivý záložní formát, jako upravitelný HTML/SVG pro další úpravy, nebo jako zdrojové soubory Draw.io/Drawnix doplněné o soubory SVG určené k revizi. Záměr `circuit` směřuje k nástroji Circuitikz a vyžaduje ověřený soubor `CircuitSpec`; nejedná se o požadavek na libovolný text v formátu TikZ.
 ## Použití
 
 ### Vytvořit diagram
@@ -101,16 +102,21 @@ Toto oddělení je důležité, protože záměr `flowchart` může být nyní r
 | Vega-Lite | `.json` | `{note}_diagram.json` |
 | HTML | `.html` | `{note}_diagram.html` |
 | Upravitelné HTML/SVG | `.html` | `{note}_diagram.html` |
+| Draw.io | `.drawio` + `.drawio.svg` + `.drawio.md` | `{note}_diagram.drawio` spolu s doplňkovými soubory určenými k revizi |
+| Drawnix | `.drawnix` + `.drawnix.svg` + `.drawnix.md` | `{note}_diagram.drawnix` spolu s doplňkovými soubory určenými k revizi |
+| Circuitikz | `.tex` + `.tex.svg` + `.tex.md` | `{note}_diagram.tex` spolu s doplňkovými soubory určenými k revizi |
 
 ### Náhled diagramu
 
 1. Spustit **"Notemd: Náhled diagramu"**
 2. Otevře se modální okno s vykresleným diagramem
-3. Exportovat jako SVG nebo PNG pomocí tlačítek na panelu nástrojů
+3. Exportujte do formátů SVG, PNG nebo PDF pomocí tlačítek na panelu nástrojů.
 
 **Automatické otevření náhledu** je k dispozici v nastaveních — po generování se modální okno s náhledem spustí automaticky.
 
-Modální okno s náhledem má také panel diagnostiky artefaktů. Renderery a kontrolní testy mohou přidat `RenderArtifact.diagnostics`; okno zobrazuje souhrnnou zprávu s počty chyb/warning/info, poté závažnost, typ diagnostiky, zprávu a doporučení k opravě vedle náhledu. Stejný souhrn se zobrazuje v záznamech historie náhledů, takže lze porovnat opakované pokusy circuitikz bez otevírání každého záznamu. U artefaktů, které mají zdrojový obsah, ale nemohou být vykresleny inline nebo prostřednictvím cesty HTML iframe, se nyní modální okno přepne na náhled pouze ze zdroje místo nutnosti prázdného iframe. To umožňuje circuitikz kontrolu kompilace/vykreslování, SVG kontroly textových tokenů, kontroly prázdných snímků PNG a budoucí zprávy o překrytech s viditelným UI povrchem, aniž by se TikZJax nebo LaTeX staly povinnou závislostí během provozu pluginu nebo se předstíralo, že zdrojový text je ověřené vizuální vykreslení.
+Při exportu náhledu ve formátech PNG a PDF se použije nakonfigurované rozlišení PPI. Výchozí hodnota je 300 PPI a hodnoty vyšší než 600 PPI jsou omezeny na 600. SVG zůstává ve vektorové velikosti. Zdrojové soubory jako `.drawio`, `.drawnix` a `.tex` mohou poskytnout doplňkový soubor `previewSvg`, aby Obsidian mohl zobrazovat a exportovat obrázky určené k revizi bez nutnosti vkládání obsahu z diagram.net, Drawnix, LaTeX nebo TikZJax během provozu pluginu.
+
+Modálka náhledu také obsahuje panel diagnostiky artefaktů. Renderery a kontrolní testy mohou přidat hodnotu `RenderArtifact.diagnostics`; modálka poté zobrazí souhrn diagnostických údajů včetně počtu chyb, varování a informací, následovaně stupně závažnosti, typu diagnostiky, zprávy a doporučení k nápravě vedle samotného náhledu. Stejný souhrn se zobrazuje také v záznamech historie podporujících diagnostiku, takže lze porovnávat opakované pokusy o spuštění kontrol circuitikz bez nutnosti otevírat každý jednotlivý záznam. U artefaktů, které mají zdrojový obsah, ale nemohou být zobrazeny inline nebo prostřednictvím cesty HTML iframe, nyní modálka místo nutnosti použít prázdný iframe přechází na náhled pouze ze zdrojového kódu. To umožňuje kontrolám jako je kompilace a renderování circuitikz, kontroly textových tokenů v SVG, kontroly prázdných snímků obrazovky v PNG, hlášení o překryvu glyfů pouze na základě cesty a budoucí hlášení o překryvech mít viditelné uživatelské rozhraní, aniž by bylo nutné záviset na TikZJax nebo LaTeX jako na hardwarové pluginové runtime součásti, nebo předstírat, že zdrojový text je již ověřený vizuální výstup.
 
 ### Režim staré verze Mermaid
 
@@ -164,12 +170,12 @@ Tento cíl záměrně zatím není výchozí trasou plánovače. Je k dispozici 
 
 ### Draw.io a Drawnix Hranice exportu
 
-Současná implementace udržuje podporu třetích stran v rámci hranic artefaktu:
+Současná implementace udržuje podporu třetích stran v rámci hranic artefaktu, přičemž zároveň poskytuje explicitní cíle pro renderování:
 
 | Cíl | Smlouva | Závislost na běhu |
 |--------|----------|--------------------|
-| Draw.io | deterministický nekomprimovaný `mxfile` XML z `SemanticFigureModel` | žádné v běhu pluginu ani v CI |
-| Drawnix | minimální podmnožina `.drawnix` JSON pomocí prvků `geometry` a `arrow-line` | žádné v běhu pluginu ani v CI |
+| Draw.io | deterministický nekomprimovaný XML soubor typu `mxfile` pocházející z `SemanticFigureModel`, spolu se soubory SVG/PNG/PDF určenými k revizi | v běhu pluginu ani v CI nic takového |
+| Drawnix | minimální podmnožina JSON souboru `.drawnix` využívající prvky `geometry` a `arrow-line`, spolu se soubory SVG/PNG/PDF určenými k revizi | v běhu pluginu ani v CI nic takového |
 
 Tato kompromisní volba je záměrná: Notemd může ověřit viditelné nápisy, stabilní ID a podporovanou pokrytí primitivů, aniž by do pluginu začlenil diagram.net Desktop, Drawnix, Plait nebo stav editoru určený pouze pro prohlížeč.
 
@@ -213,7 +219,11 @@ Notemd nyní zahrnuje první omezený prototyp repozitáře pro tuto směr. Je z
 npm run diagram:export-circuitikz -- --input cmos-inverter.json --output cmos-inverter.tex
 ```
 
-Prototyp přidává samostatnou hranici `CircuitSpec` a deterministického exportéra pro šest rodin zlatých referencí:
+Prototyp přidává omezenou hranici typu `CircuitSpec` a deterministický exportér pro šest základních rodin referenčních schémat:
+
+V experimentálním pipeline pro diagramy lze k tomuto cíli nyní také přistupovat pomocí parametru `intent: "circuit"` a cíle renderování `circuitikz`. Vytvořený soubor typu `DiagramSpec` může obsahovat element `circuitSpec` pouze v případě záměru vytvořit schéma typu circuit. Nástroj `CircuitikzRenderer` vytváří stejný deterministický zdrojový soubor ve formátu `.tex` a připojuje k němu soubor SVG určený k náhledu, který vznikl na základě ověřené topologie obvodu, čímž umožňuje náhled v Obsidianu a export do formátů SVG/PNG/PDF. Tento doplňkový soubor není výsledkem kompilace v LaTeXu/TikZJax; skutečné důkazy o renderování pocházejí stále z níže uvedených explicitních testovacích příkazů.
+
+U podporovaných šablon typu golden zůstávají proměnné `layoutHints.inputSide` a `layoutHints.outputSide` pouze kontrolami určenými k prezentaci. Mohou posunout umístění deterministických vstupních/výstupních portů, ale nemění podpis topologie ani neumožňují opravný proces pro přepojení obvodu.
 
 | Druh obvodu | Zlatá referenční hodnota | Záruka proudu |
 |--------------|------------------|-------------------|
@@ -224,7 +234,7 @@ Prototyp přidává samostatnou hranici `CircuitSpec` a deterministického expor
 | `cmos-nand2` | `cmos-nand2-v1` | ověřuje paralelní PMOS pull-up, sériový NMOS pull-down, dvojí vstupy `va` / `vb` a `vout` před zápisem do LaTeXu |
 | `cmos-nor2` | `cmos-nor2-v1` | ověřuje sériový PMOS pull-up, paralelní NMOS pull-down, dvojí vstupy `va` / `vb` a `vout` před zápisem do LaTeXu |
 
-Toto zatím není obecný generátor TikZ. Nepřekládá LaTeX, nevolá TikZJax, nekontroluje snímky obrazovky ani neprovádí automatickou opravu na základě obrázků. Tyto funkce zůstávají pro pozdější verze.
+Toto není obecný generátor pro TikZ. Nepřijímá libovolné kódy v formátu TikZ, nekompiluje LaTeX, nevyvolává TikZJax, nekontroluje snímky obrazovky během běhu pluginu a neprovádí automatické opravy na základě obrázkových zpětných vazeb. Tyto funkce patří k pozdějším fázím procesu.
 
 Příkaz Preview diagram umožňuje přímo znovu otevřít uložené artefakty zdroje circuitikz, pokud je přípona souboru `.tex` nebo `.tikz` a zdroj obsahuje `\usepackage{circuitikz}` nebo `\begin{circuitikz}`. Tato cesta je preview pouze ze zdroje circuitikz: modální okno zobrazuje zdroj, diagnostiku, ovládací prvky pro kopírování/ukládání a metadaty historie, ale nepřekládá LaTeX ani nevolá TikZJax během provozu pluginu.
 
@@ -350,8 +360,8 @@ U CMOS inverze by prompt měl požadovat explicitní topologii spolu s omezením
 |------|----------------|-----------|
 | Obecné diagramy | Implementován pipeline založený na specifikacích pro Mermaid, JSON Canvas, Vega-Lite, HTML | Pokračujte ve rozšiřování pokrytí sémantické kontroly |
 | Upravitelné obrázky | Byly implementovány hranice artefaktů `editable-html-svg`, Draw.io XML a Drawnix JSON | Přidávejte bohatší primitivy až poté, co testy prokážou jejich upravitelnost |
-| Podpora CLI | `npm run diagram:export-artifact` exportuje upravitelné HTML/SVG, Draw.io a Drawnix z jednoho `DiagramSpec` | Přidat specifické zařízení pro kouřové testy pro nové cíle při jejich doručení |
-| circuitikz | `CircuitSpec -> circuitikz` prototyp exportuje společné zdroje, invertor CMOS, `cmos-buffer` / `cmos-buffer-v1`, `cmos-transmission-gate` / `cmos-transmission-gate-v1`, `cmos-nand2` / `cmos-nand2-v1` a `cmos-nor2` / `cmos-nor2-v1` zlaté šablony, projekty `layoutHints.inputSide` a `layoutHints.outputSide` do deterministického umístění vstupních/výstupních portů bez změny topologie, odmítá drift topologie opravami prostřednictvím `--topology-reference`, vydává zprávy o opravách zachovávajících topologii prostřednictvím `--repair-brief-output` a schématu `notemd.circuitikz.repair-brief.v1`, zahrnuje strukturovaný obsah předání `repairPrompt` s `diagnosticFocus`, `acceptanceCriteria` a rolí `topology-preserving-circuitikz-repair`, ověřuje kandidáty na opravu prostřednictvím `--repair-brief`, vrací důkazy o bránách prostřednictvím schématu `notemd.circuitikz.repair-acceptance.v1` s `readyForVisualAcceptance` a `remainingChecks`, uchovává tyto důkazy prostřednictvím `--repair-acceptance-output`, analyzuje protokoly kompilace, může spouštět výslovné lokální renderery plus `--expected-artifact`, SVG `--expected-svg-text`, kontroly metadat dostupnosti prostřednictvím `aria-label`, `<title>` a `<desc>`, vyloučení skrytých/průhledných prvků SVG, klasifikace `render-svg-text-path-only` / `pathOnlyGlyphUseCount` pro nápisy pouze na cestách, kontroly umístění glyfů pouze na cestách pro `<use href="#...">`, diagnostika překrytí glyfů pouze na cestách prostřednictvím `render-svg-path-glyph-overlap`, zpracování aktuálního bodu uzavřených cest pro `Z/z`, přesné hranice oblouků pro extrémy oblouků A/a, přesné hranice křivek Bezier pro extrémy křivek C/S/Q/T, kontroly překrytí s ohledem na šířku tahu SVG a nápisů, kontroly geometrie kreslení `polyline` / `polygon`, geometrie umístěných nápisů `tspan`, geometrie textu umístěného s ohledem na `text-anchor`, geometrie s ohledem na transformaci pro SVG ohraničené plátno/překrytí textu a kouřové testy nápisů vs. kresby prostřednictvím `render-svg-label-overlap`, a kontroly snímků obrazovky PNG neprázdných/ostříhaných/hustě vyplněných s pozadím, včetně alfy indexované palety barev, průhledných vzorků v šedé/grafické RGB tRNS a specifických pokynů `render-png-unsupported` pro interleaved PNG Adam7 a selhání indexované hloubky bitů, prostřednictvím `foregroundBounds`, `foregroundDensity`, `render-png-content-clipped` a `render-png-foreground-dense` bez analýzy shellu, zahrnuje agregovaná zařízení pro testy udržovatelů prostřednictvím `npm run diagram:smoke-circuitikz`, zaznamenává chybějící konfiguraci rendereru prostřednictvím `rendererAvailability.status: "missing-configuration"` a `compile-executable-invalid`, a má obecné diagnostické nástroje, souhrnný počet diagnostik, záznamy historie s ohledem na diagnostiku a náhradu pouze ze zdroje prostřednictvím `RenderArtifact.diagnostics` a modálního přehledu | Přidat rozpoznávání nápisů na úrovni OCR pro vizuální text pouze na cestách, přesné kontroly překrytí na úrovni pixelů, širší pokrytí cest SVG tam, kde je to potřeba, automatickou instalaci/nalezení rendereru pouze tehdy, pokud může zůstat volitelné, a automatizované provedení oprav zachovávajících topologii |
+| Podpora CLI | Příkaz `npm run diagram:export-artifact` exportuje upravitelné soubory HTML/SVG, Draw.io, Drawnix, Circuitikz a také soubory SVG/PNG/PDF jako důkazy pro revizi z jednoho ověřeného souboru `DiagramSpec` | Při vydání nových cílů přidávají se specifické testovací skripty pro daný cíl |
+| circuitikz | `DiagramSpec(intent: "circuit", circuitSpec) -> CircuitikzRenderer -> circuitikz` exportuje zlaté šablony pro obvyklé zdroje, invertory CMOS, `cmos-buffer` / `cmos-buffer-v1`, `cmos-transmission-gate` / `cmos-transmission-gate-v1`, `cmos-nand2` / `cmos-nand2-v1` a `cmos-nor2` / `cmos-nor2-v1`, zpřístupňuje možnosti účelu UI a cíle renderování, vytváří soubory TeX spolu s náhledy ve formátech SVG/PNG/PDF, ověřuje topologii před výstupem, analyzuje protokoly kompilace, umožňuje spuštění výslovných lokálních rendererů pomocí parametru `--expected-artifact` a zároveň udržuje zálohu pouze se zdrojovým kódem a zobrazuje diagnostiku náhledu prostřednictvím `RenderArtifact.diagnostics` a modálního okna s náhledem | Přidání rozpoznávání štítků na úrovni OCR pro vizuální text obsažený pouze v pathech, přesné kontroly překrytí na úrovni pixelů, širší pokrytí SVG pathů tam, kde je to potřeba, automatická instalace nebo vyhledávání rendererů pouze tehdy, pokud mohou zůstat volitelné, a automatizované provádění oprav s zachováním topologie |
 | Integrace TikZJax | Kandidátský host pro renderování na straně Obsidian | Udržet to volitelné; neudělejte z TikZJax povinnou závislost během provozu pluginu |
 
 ## Konfigurace
@@ -361,6 +371,7 @@ U CMOS inverze by prompt měl požadovat explicitní topologii spolu s omezením
 | `enableExperimentalDiagramPipeline` | `false` | Přepínat mezi přístupem zaměřeným na specifikace a starším Mermaid |
 | `experimentalDiagramCompatibilityMode` | `'legacy-mermaid'` | `'legacy-mermaid'` = Mermaid pouze; `'best-fit'` = nativní cíle + náhrady |
 | `preferredDiagramIntent` | `undefined` (automaticky) | Přepsat automatické detekování záměru |
+| `preferredDiagramRenderTarget` | `undefined` (automaticky) | Přepsání renderera artefaktů, včetně Draw.io, Drawnix a Circuitikz |
 | `summarizeToMermaidLanguage` | `'en'` | Jazyk cíle pro nápisy diagramů |
 | `summarizeToMermaidProvider` / `Model` | DeepSeek | LLM na úrovni úlohy pro generování diagramů |
 | `autoMermaidFixAfterGenerate` | (z konstant) | Automaticky spustit starší opravovač na výstupu Mermaid |
@@ -380,10 +391,11 @@ Když je aktivováno, Notemd načítá relevantní úryvky kontextu z místní b
 | Akce | Metoda |
 |--------|--------|
 | SVG export | `mermaid.render()` / `vega.View.toSVG()` / SVG builder pro Canvas |
-| Export do PNG | SVG → Obraz → Canvas (poměr pixelů zařízení 1x-3x) → PNG ArrayBuffer |
+| Export do PNG | SVG → Obrázek → Canvas / predvolený rasterizér při nastaveném PPI → PNG ArrayBuffer |
+| Export do PDF | SVG → rastrový obrázek při nastaveném PPI → jednostránkový PDF |
 | Uložení zdroje | Obsah surového artefaktu je uložen s koncovou extenzí specifickou pro cíl |
 | Náhled pouze zdroje | Nelineární artefakty se zdrojovým obsahem jsou zobrazeny jako kód spolu s diagnostikou, bez renderování iframe |
-| Sémantická kontrola | Mermaid, JSON Canvas, Vega-Lite a upravitelný HTML/SVG ověřený `scripts/diagram-semantic-verification.js` |
+| Semantická kontrola | Mermaid, JSON Canvas, Vega-Lite, upravitelný HTML/SVG, Draw.io, Drawnix a omezený Circuitikz jsou kontrolovány skriptem `scripts/diagram-semantic-verification.js` spolu s testy renderera a CLI |
 
 **Caching**: RenderCache využívá deterministický klíč JSON od `{spec, target, theme}`. Odstranění duplicit během zpracování zabraňuje opakovanému generování.
 

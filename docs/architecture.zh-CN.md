@@ -1,6 +1,6 @@
 # Notemd 系统架构总览
 
-> 更新：2026-05-07
+> 更新：2026-07-10
 
 ## 系统架构
 
@@ -36,7 +36,7 @@ flowchart TB
     subgraph Output["输出"]
         VAULT["Vault 文件<br/>(.md, .canvas, .json)"]
         PREVIEW["图表预览弹窗"]
-        EXPORT["SVG / PNG 导出"]
+        EXPORT["源文件 / SVG / PNG / PDF 导出"]
     end
 
     CMD --> DISPATCH
@@ -142,7 +142,7 @@ flowchart LR
     end
 
     subgraph Render["渲染层"]
-        REGISTRY["RendererRegistry<br/>7 个渲染器"]
+        REGISTRY["RendererRegistry<br/>8 个渲染器"]
         SERVICE["RendererService"]
         CACHE2["RenderCache"]
     end
@@ -152,12 +152,15 @@ flowchart LR
         CANVAS["JSON Canvas<br/>（画布图）"]
         VEGA["Vega-Lite<br/>（数据图表）"]
         HTML["HTML 回退"]
+        FIGURE["可编辑 HTML/SVG"]
+        BOARD["Draw.io / Drawnix"]
+        CIRCUIT["Circuitikz"]
     end
 
     subgraph Host["预览层"]
         IFRAME["IframeRenderHost"]
         MODAL["DiagramPreviewModal"]
-        EXPORT2["SVG / PNG 导出"]
+        EXPORT2["源文件 / SVG / PNG / PDF 导出"]
     end
 
     MD --> PLAN
@@ -172,6 +175,9 @@ flowchart LR
     REGISTRY --> CANVAS
     REGISTRY --> VEGA
     REGISTRY --> HTML
+    REGISTRY --> FIGURE
+    REGISTRY --> BOARD
+    REGISTRY --> CIRCUIT
     MERMAID --> IFRAME
     CANVAS --> IFRAME
     VEGA --> IFRAME
@@ -189,8 +195,22 @@ flowchart LR
 | `classDiagram` | mermaid | MermaidRenderer | 弹窗/iframe | SVG、PNG |
 | `erDiagram` | mermaid | MermaidRenderer | 弹窗/iframe | SVG、PNG |
 | `stateDiagram` | mermaid | MermaidRenderer | 弹窗/iframe | SVG、PNG |
-| `canvasMap` | json-canvas | JsonCanvasRenderer | 弹窗/iframe | SVG、源文件 |
-| `dataChart` | vega-lite | VegaLiteRenderer | 弹窗/iframe（沙盒） | SVG、源文件 |
+| `canvasMap` | json-canvas | JsonCanvasRenderer | 弹窗/iframe | 源文件、SVG、PNG、PDF |
+| `dataChart` | vega-lite | VegaLiteRenderer | 弹窗/iframe（沙盒） | 源文件、SVG、PNG、PDF |
+| `circuit` | circuitikz | CircuitikzRenderer | SVG companion 或 source-only 预览 | `.tex`、SVG、PNG、PDF |
+
+### 显式渲染目标
+
+对 `Generate diagram` 与 `Preview diagram` 而言，规格优先 pipeline 可以在意图推断之外显式指定渲染目标。标准的 `Summarise as Mermaid diagram` 命令仍保持 Mermaid 兼容输出。
+
+| 渲染目标 | Artifact 边界 | Runtime 依赖策略 |
+|---|---|---|
+| `editable-html-svg` | 带语义 inline SVG 的自包含 HTML | 不依赖外部编辑器 runtime |
+| `drawio` | `.drawio` XML 加 SVG/MD review companion | 插件内不嵌入 diagrams.net runtime |
+| `drawnix` | `.drawnix` JSON 子集加 SVG/MD review companion | 插件内不嵌入 Drawnix 或 Plait runtime |
+| `circuitikz` | 经过验证的 `.tex` 源文件加 SVG/MD review companion | 不捆绑 LaTeX 或 TikZJax runtime |
+
+Circuitikz 支持仍然是受约束的。前端设置现在无需开启 Developer mode 就会显示 `Circuit (Circuitikz)` 首选图表类型与 `Circuitikz + SVG preview` 首选渲染目标，但 renderer 仍只接受经过验证的 `DiagramSpec(intent: "circuit", circuitSpec)`。它会写出确定性的 circuitikz TeX 和可审阅的 SVG companion；真实 LaTeX/TikZJax 编译证据仍属于可选的维护者 smoke check。
 
 ## 模块地图
 

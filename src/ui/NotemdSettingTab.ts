@@ -2314,6 +2314,94 @@ export class NotemdSettingTab extends PluginSettingTab {
                     await this.plugin.saveSettings();
                 }));
 
+        const experimentalDiagramI18n = i18n.settings.developer.experimentalDiagramPipeline;
+
+        new Setting(containerEl).setName(experimentalDiagramI18n.heading).setHeading();
+
+        new Setting(containerEl)
+            .setName(experimentalDiagramI18n.enableName)
+            .setDesc(experimentalDiagramI18n.enableDesc)
+            .addToggle(toggle => toggle
+                .setValue(this.plugin.settings.enableExperimentalDiagramPipeline)
+                .onChange(async (value) => {
+                    this.plugin.settings.enableExperimentalDiagramPipeline = value;
+                    await this.plugin.saveSettings();
+                    this.display();
+                }));
+
+        new Setting(containerEl)
+            .setName(experimentalDiagramI18n.compatibilityName)
+            .setDesc(experimentalDiagramI18n.compatibilityDesc)
+            .addDropdown(dropdown => {
+                dropdown.addOption('legacy-mermaid', experimentalDiagramI18n.compatibilityLegacy);
+                dropdown.addOption('best-fit', experimentalDiagramI18n.compatibilityBestFit);
+                dropdown
+                    .setValue(this.plugin.settings.experimentalDiagramCompatibilityMode)
+                    .onChange(async (value: 'legacy-mermaid' | 'best-fit') => {
+                        this.plugin.settings.experimentalDiagramCompatibilityMode = value;
+                        await this.plugin.saveSettings();
+                    });
+            });
+
+        new Setting(containerEl)
+            .setName(experimentalDiagramI18n.intentName)
+            .setDesc(experimentalDiagramI18n.intentDesc)
+            .addDropdown(dropdown => {
+                dropdown.addOption('auto', experimentalDiagramI18n.intentAuto);
+                dropdown.addOption('flowchart', experimentalDiagramI18n.intentFlowchart);
+                dropdown.addOption('sequence', experimentalDiagramI18n.intentSequence);
+                dropdown.addOption('classDiagram', experimentalDiagramI18n.intentClassDiagram);
+                dropdown.addOption('erDiagram', experimentalDiagramI18n.intentErDiagram);
+                dropdown.addOption('stateDiagram', experimentalDiagramI18n.intentStateDiagram);
+                dropdown.addOption('circuit', experimentalDiagramI18n.intentCircuit);
+                dropdown.addOption('dataChart', experimentalDiagramI18n.intentDataChart);
+                dropdown
+                    .setValue(this.plugin.settings.preferredDiagramIntent || 'auto')
+                    .onChange(async (value: string) => {
+                        this.plugin.settings.preferredDiagramIntent = value === 'auto' ? undefined : value;
+                        await this.plugin.saveSettings();
+                    });
+            });
+
+        new Setting(containerEl)
+            .setName(experimentalDiagramI18n.renderTargetName)
+            .setDesc(experimentalDiagramI18n.renderTargetDesc)
+            .addDropdown(dropdown => {
+                dropdown.addOption('auto', experimentalDiagramI18n.renderTargetAuto);
+                dropdown.addOption('mermaid', experimentalDiagramI18n.renderTargetMermaid);
+                dropdown.addOption('json-canvas', experimentalDiagramI18n.renderTargetJsonCanvas);
+                dropdown.addOption('vega-lite', experimentalDiagramI18n.renderTargetVegaLite);
+                dropdown.addOption('html', experimentalDiagramI18n.renderTargetHtml);
+                dropdown.addOption('editable-html-svg', experimentalDiagramI18n.renderTargetEditableHtmlSvg);
+                dropdown.addOption('drawio', experimentalDiagramI18n.renderTargetDrawio);
+                dropdown.addOption('drawnix', experimentalDiagramI18n.renderTargetDrawnix);
+                dropdown.addOption('circuitikz', experimentalDiagramI18n.renderTargetCircuitikz);
+                dropdown
+                    .setValue(this.plugin.settings.preferredDiagramRenderTarget || 'auto')
+                    .onChange(async (value: string) => {
+                        this.plugin.settings.preferredDiagramRenderTarget = value === 'auto'
+                            ? undefined
+                            : value as RenderTarget;
+                        await this.plugin.saveSettings();
+                    });
+            });
+
+        new Setting(containerEl)
+            .setName(experimentalDiagramI18n.exportPpiName)
+            .setDesc(experimentalDiagramI18n.exportPpiDesc)
+            .addText(text => text
+                .setPlaceholder(String(DEFAULT_SETTINGS.diagramPreviewExportPpi))
+                .setValue(String(this.plugin.settings.diagramPreviewExportPpi ?? DEFAULT_SETTINGS.diagramPreviewExportPpi))
+                .onChange(async (rawValue) => {
+                    this.plugin.settings.diagramPreviewExportPpi = this.sanitizePositiveInteger(
+                        rawValue,
+                        DEFAULT_SETTINGS.diagramPreviewExportPpi,
+                        MIN_PREVIEW_EXPORT_PPI,
+                        MAX_PREVIEW_EXPORT_PPI
+                    );
+                    await this.plugin.saveSettings();
+                }));
+
         new Setting(containerEl)
             .setName(i18n.settings.developer.modeName)
             .setDesc(i18n.settings.developer.modeDesc)
@@ -2350,8 +2438,6 @@ export class NotemdSettingTab extends PluginSettingTab {
         }
 
         if (this.plugin.settings.enableDeveloperMode && activeProvider) {
-            const experimentalDiagramI18n = i18n.settings.developer.experimentalDiagramPipeline;
-
             const diagnosticModeOptions = getProviderDiagnosticCallModeOptions(activeProvider);
             const modeSet = new Set(diagnosticModeOptions.map(option => option.value));
             let effectiveCallMode = this.plugin.settings.developerDiagnosticCallMode as ProviderDiagnosticCallMode;
@@ -2448,92 +2534,6 @@ export class NotemdSettingTab extends PluginSettingTab {
                         }
                     });
                 });
-
-            new Setting(containerEl).setName(experimentalDiagramI18n.heading).setHeading();
-
-            new Setting(containerEl)
-                .setName(experimentalDiagramI18n.enableName)
-                .setDesc(experimentalDiagramI18n.enableDesc)
-                .addToggle(toggle => toggle
-                    .setValue(this.plugin.settings.enableExperimentalDiagramPipeline)
-                    .onChange(async (value) => {
-                        this.plugin.settings.enableExperimentalDiagramPipeline = value;
-                        await this.plugin.saveSettings();
-                        this.display();
-                    }));
-
-            new Setting(containerEl)
-                .setName(experimentalDiagramI18n.compatibilityName)
-                .setDesc(experimentalDiagramI18n.compatibilityDesc)
-                .addDropdown(dropdown => {
-                    dropdown.addOption('legacy-mermaid', experimentalDiagramI18n.compatibilityLegacy);
-                    dropdown.addOption('best-fit', experimentalDiagramI18n.compatibilityBestFit);
-                    dropdown
-                        .setValue(this.plugin.settings.experimentalDiagramCompatibilityMode)
-                        .onChange(async (value: 'legacy-mermaid' | 'best-fit') => {
-                            this.plugin.settings.experimentalDiagramCompatibilityMode = value;
-                            await this.plugin.saveSettings();
-                        });
-                });
-
-            new Setting(containerEl)
-                .setName(experimentalDiagramI18n.intentName)
-                .setDesc(experimentalDiagramI18n.intentDesc)
-                .addDropdown(dropdown => {
-                    dropdown.addOption('auto', experimentalDiagramI18n.intentAuto);
-                    dropdown.addOption('flowchart', experimentalDiagramI18n.intentFlowchart);
-                    dropdown.addOption('sequence', experimentalDiagramI18n.intentSequence);
-                    dropdown.addOption('classDiagram', experimentalDiagramI18n.intentClassDiagram);
-                    dropdown.addOption('erDiagram', experimentalDiagramI18n.intentErDiagram);
-                    dropdown.addOption('stateDiagram', experimentalDiagramI18n.intentStateDiagram);
-                    dropdown.addOption('circuit', experimentalDiagramI18n.intentCircuit);
-                    dropdown.addOption('dataChart', experimentalDiagramI18n.intentDataChart);
-                    dropdown
-                        .setValue(this.plugin.settings.preferredDiagramIntent || 'auto')
-                        .onChange(async (value: string) => {
-                            this.plugin.settings.preferredDiagramIntent = value === 'auto' ? undefined : value;
-                            await this.plugin.saveSettings();
-                        });
-                });
-
-            new Setting(containerEl)
-                .setName(experimentalDiagramI18n.renderTargetName)
-                .setDesc(experimentalDiagramI18n.renderTargetDesc)
-                .addDropdown(dropdown => {
-                    dropdown.addOption('auto', experimentalDiagramI18n.renderTargetAuto);
-                    dropdown.addOption('mermaid', experimentalDiagramI18n.renderTargetMermaid);
-                    dropdown.addOption('json-canvas', experimentalDiagramI18n.renderTargetJsonCanvas);
-                    dropdown.addOption('vega-lite', experimentalDiagramI18n.renderTargetVegaLite);
-                    dropdown.addOption('html', experimentalDiagramI18n.renderTargetHtml);
-                    dropdown.addOption('editable-html-svg', experimentalDiagramI18n.renderTargetEditableHtmlSvg);
-                    dropdown.addOption('drawio', experimentalDiagramI18n.renderTargetDrawio);
-                    dropdown.addOption('drawnix', experimentalDiagramI18n.renderTargetDrawnix);
-                    dropdown.addOption('circuitikz', experimentalDiagramI18n.renderTargetCircuitikz);
-                    dropdown
-                        .setValue(this.plugin.settings.preferredDiagramRenderTarget || 'auto')
-                        .onChange(async (value: string) => {
-                            this.plugin.settings.preferredDiagramRenderTarget = value === 'auto'
-                                ? undefined
-                                : value as RenderTarget;
-                            await this.plugin.saveSettings();
-                        });
-                });
-
-            new Setting(containerEl)
-                .setName(experimentalDiagramI18n.exportPpiName)
-                .setDesc(experimentalDiagramI18n.exportPpiDesc)
-                .addText(text => text
-                    .setPlaceholder(String(DEFAULT_SETTINGS.diagramPreviewExportPpi))
-                    .setValue(String(this.plugin.settings.diagramPreviewExportPpi ?? DEFAULT_SETTINGS.diagramPreviewExportPpi))
-                    .onChange(async (rawValue) => {
-                        this.plugin.settings.diagramPreviewExportPpi = this.sanitizePositiveInteger(
-                            rawValue,
-                            DEFAULT_SETTINGS.diagramPreviewExportPpi,
-                            MIN_PREVIEW_EXPORT_PPI,
-                            MAX_PREVIEW_EXPORT_PPI
-                        );
-                        await this.plugin.saveSettings();
-                    }));
 
             new Setting(containerEl)
                 .setName(stableApiI18n.longRequestName)

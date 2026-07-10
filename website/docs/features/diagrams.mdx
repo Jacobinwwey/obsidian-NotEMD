@@ -82,7 +82,7 @@ The experimental spec-first pipeline now has two independent controls:
 | Preferred diagram type | `preferredDiagramIntent` | Guides the semantic shape of the generated `DiagramSpec` |
 | Preferred render target | `preferredDiagramRenderTarget` | Chooses the artifact renderer for **Generate diagram** and **Preview diagram** |
 
-Set **Preferred render target** to **Auto** for the planner default, or choose Mermaid, JSON Canvas, Vega-Lite, HTML, Editable HTML/SVG, Draw.io, Drawnix, or Circuitikz explicitly. The override applies only to artifact and preview commands. The standard **Summarise as Mermaid diagram** command remains pinned to Mermaid-compatible output so existing Markdown workflows do not silently switch formats.
+Set **Preferred render target** to **Auto** for the planner default, or choose Mermaid, JSON Canvas, Vega-Lite, HTML, Editable HTML/SVG, Draw.io, Drawnix, or Circuitikz explicitly. These controls are regular diagram settings and sidebar controls rather than Developer mode diagnostics. The override applies only to artifact and preview commands. The standard **Summarise as Mermaid diagram** command remains pinned to Mermaid-compatible output so existing Markdown workflows do not silently switch formats.
 
 This separation matters because a `flowchart` intent can now be rendered as Mermaid for Markdown notes, HTML for robust fallback, Editable HTML/SVG for downstream editing, or Draw.io/Drawnix source artifacts with SVG review companions. A `circuit` intent routes to Circuitikz and requires a validated `CircuitSpec`; it is not a request for arbitrary TikZ text.
 
@@ -362,7 +362,7 @@ For a CMOS inverter, the prompt should request an explicit topology plus layout 
 | General diagrams | Spec-first pipeline implemented for Mermaid, JSON Canvas, Vega-Lite, HTML | Keep expanding semantic verification coverage |
 | Editable figures | `editable-html-svg`, Draw.io XML, and Drawnix JSON artifact boundaries implemented | Add richer primitives only after tests prove editability |
 | CLI support | `npm run diagram:export-artifact` exports editable HTML/SVG, Draw.io, Drawnix, Circuitikz, and SVG/PNG/PDF review evidence from one validated `DiagramSpec` | Add target-specific smoke fixtures when new targets ship |
-| circuitikz | `DiagramSpec(intent: "circuit", circuitSpec) -> CircuitikzRenderer -> circuitikz` exports common-source, CMOS inverter, `cmos-buffer` / `cmos-buffer-v1`, `cmos-transmission-gate` / `cmos-transmission-gate-v1`, `cmos-nand2` / `cmos-nand2-v1`, and `cmos-nor2` / `cmos-nor2-v1` golden templates, exposes UI intent/render-target options, writes TeX plus SVG/PNG/PDF preview companions, validates topology before output, parses compile logs, can run explicit local renderers plus `--expected-artifact`, and keeps source-only fallback plus preview diagnostics visible through `RenderArtifact.diagnostics` and the preview modal | Add OCR-level label recognition for path-only visual text, precise pixel-level overlap checks, broader SVG path coverage where needed, automatic renderer installation/discovery only if it can remain optional, and automated topology-preserving repair execution |
+| circuitikz | `DiagramSpec(intent: "circuit", circuitSpec) -> CircuitikzRenderer -> circuitikz` exports common-source, CMOS inverter, `cmos-buffer` / `cmos-buffer-v1`, `cmos-transmission-gate` / `cmos-transmission-gate-v1`, `cmos-nand2` / `cmos-nand2-v1`, and `cmos-nor2` / `cmos-nor2-v1` golden templates, exposes UI intent/render-target options without Developer mode, writes TeX plus SVG/PNG/PDF preview companions, validates topology before output, parses compile logs, can run explicit local renderers plus `--expected-artifact`, and keeps source-only fallback plus preview diagnostics visible through `RenderArtifact.diagnostics` and the preview modal | Add OCR-level label recognition for path-only visual text, precise pixel-level overlap checks, broader SVG path coverage where needed, automatic renderer installation/discovery only if it can remain optional, and automated topology-preserving repair execution |
 | TikZJax integration | Candidate render host for Obsidian-side display | Keep it optional; do not make TikZJax a hard plugin runtime dependency |
 
 ## Configuration
@@ -396,7 +396,7 @@ When enabled, Notemd retrieves relevant context snippets from your vault's local
 | PDF export | SVG → raster image at configured PPI → single-page PDF |
 | Source save | Raw artifact content saved with target-specific extension |
 | Source-only preview | Non-inline artifacts with source content shown as code plus diagnostics, without iframe rendering |
-| Semantic audit | Mermaid, JSON Canvas, Vega-Lite, editable HTML/SVG, Draw.io, Drawnix, and constrained circuitikz checked by renderer/CLI tests |
+| Semantic audit | Mermaid, JSON Canvas, Vega-Lite, editable HTML/SVG, Draw.io, Drawnix, and constrained circuitikz checked by `scripts/diagram-semantic-verification.js` plus renderer/CLI tests |
 
 **Caching**: RenderCache uses deterministic JSON key of `{spec, target, theme}`. In-flight deduplication prevents duplicate renders.
 

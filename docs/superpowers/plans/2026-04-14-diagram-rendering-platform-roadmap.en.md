@@ -64,6 +64,14 @@ What this changes:
 - The correct future target boundary is still `DiagramSpec -> target-specific adapter -> renderer/export artifact`; production code should not route `DiagramSpec` back through Mermaid text just to reuse string-to-board converters.
 - The next implementation priority remains boundary hardening before expansion. When new target work resumes, editable HTML/SVG should precede `.drawnix` because it proves layout, text fitting, and Draw.io export claims without importing a heavy whiteboard runtime.
 
+## 2026-07-10 circuitikz UI And Export Truth Sync
+
+The constrained circuitikz path is now a current-main product surface rather than only a maintainer prototype. `CircuitikzRenderer` writes deterministic `.tex` from a validated `DiagramSpec(intent: "circuit", circuitSpec)` and attaches an SVG companion that the preview/export UI can export as SVG, PNG, and PDF. The CLI export path also supports `circuitikz`, `svg`, `png`, and `pdf` review evidence from one `DiagramSpec`.
+
+The important correction is front-end visibility: the settings page should expose the diagram pipeline controls, including `Circuit (Circuitikz)` and `Circuitikz + SVG preview`, without requiring Developer mode. Developer mode remains the home for diagnostics and relaxed input gates, not for normal diagram target discovery.
+
+The detailed current-main comparison and MDX publishing decision are recorded in `docs/maintainer/circuitikz-ui-export-and-docs-sync-2026-07-10.md`.
+
 ---
 
 **Goal:** Evolve Notemd from a single Mermaid-text generation path into an extensible diagram platform built around intent detection, structured specs, specialized renderers, and multi-format output inside Obsidian.

@@ -1,7 +1,7 @@
 ---
 id: diagrams
 title: "Diagramok"
-description: "A spec-first architektúra segítségével a figyelmeketből Mermaid, JSON Canvas, Vega-Lite, HTML formátumban működő, szerkeszthető képek, valamint jövőbeli korlátozott circuitikz diagramok készülnek ki."
+description: "Egy spec-first architektúra segítségével a jegyzékeidből Mermaid, JSON Canvas, Vega-Lite, HTML, módosítható képformátkú artefektumok, Draw.io, Drawnix, valamint korlátozott circuitikz diagramok készülnek ki."
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
 keywords: [diagrams, mermaid, vega-lite, canvas, visualization, spec-first, drawio, drawnix, editable svg, circuitikz, TikZJax]
@@ -18,7 +18,7 @@ import TLDR from '@site/src/components/TLDR';
 # Diagramok
 
 <TLDR>
-**Notemd a figyelmeketből spec-first folyamatú módon diagramokká alakítja.** A LLM egy renderer-agnostikus `DiagramSpec` JSON-t készít, majd speciális adapterek ezt Mermaid, JSON Canvas, Vega-Lite, HTML formátumba vagy szerkeszthető HTML/SVG formátumba átvitték. 8 intenzitípus támogatása, automatikus fallback folyamatok, live preview valamint SVG/PNG kiszállítás, semantikus ellenőrzés és helyi tudásokkal bővített generálás is lehetőségként létezik.
+**Notemd egy spec-first folyamat útján készít ki diagramokat a jegyzékeidből.** Az LLM egy renderer-agnostikus `DiagramSpec` JSON-fájlt készít, majd speciális adapterek átváltják ezt Mermaid, JSON Canvas, Vega-Lite, HTML, módosítható HTML/SVG, Draw.io, Drawnix vagy korlátozott circuitikz formátumba. Támogatja 9 kívánt típusot, automatikus lehetséges változások sorrendjét, közvetlen előnézetet SVG/PNG/PDF kiszállítással, semantikai ellenőrzést, illetve helyi tudnivalókkal bővített készítést.
 </TLDR>
 
 Ez része a [Obsidian AI tudományos kezelési útmutatójának](/docs/pillar-ai-knowledge).
@@ -54,6 +54,7 @@ graph LR
 | `stateDiagram` | Mermaid | HTML | Állapotmásházak, életciklusmodellek |
 | `canvasMap` | JSON Canvas | Mermaid → HTML | Koncepciókártyák, tudományos grafikonok |
 | `dataChart` | Vega-Lite | Mermaid → HTML | Sárga, linia, terület, szórás, kör, táblák |
+| `circuit` | circuitikz | none | Validerált `CircuitSpec` adatokból készült korlátozott circuitikz diagramok |
 
 ## Intenciós felismerés
 
@@ -67,6 +68,7 @@ Notemd az összefoglaló tartalmából kulcszavak értékelésével az optimalab
 | `stateDiagram` | Állapot, átmenet, felfüggesztve, futtatásban, sérült (3+ megfelelés) | 0.76 |
 | `flowchart` | Numérozott lépések (2+) vagy if/then/else/workflow szókincse | 0.74 |
 | `canvasMap` | Konceptusrajz, tudományos graf, térképes, csoport | 0.72 |
+| `circuit` | circuitikz, TikZJax, circuit, schematic, CMOS, NMOS, PMOS, MOSFET, VDD/GND, `vin`/`vout` | 0.78 |
 | `mindmap` | Alapértelmezett lehetséges választék | 0.55 |
 
 Átírjuk a **Előnyös diagramtípus** beállításával, a sárú selektortól vagy egy kifejezett parancssorpaletái opciójával.
@@ -80,10 +82,9 @@ A kísérleti specifikációk alapú folyamat most két külön kontrollt tartal
 | Előnyös diagramtípus | `preferredDiagramIntent` | Irányítja a készült `DiagramSpec` semántikai formátumát |
 | Előnyös renderelési célpont | `preferredDiagramRenderTarget` | Válaszol a **Diagram készítése** és **Diagram előnézetéhez** szükséges artefakt rendererét |
 
-Beállítsa a **Előnyös renderelési célpontot** **Auto**-ra az alapértelmezett tervezőhez, vagy válassza kifejezetten Mermaid, JSON Canvas, Vega-Lite, HTML, vagy Editable HTML/SVG-t. Az átírás csak a artefakt- és előnézetparancsokra vonatkozik. A standard **Summarise as Mermaid diagram** parancs továbbra is Mermaid-kompatibilis kimenethez van kötve, így a meglévő Markdown munkafolyamok nem változnak titkosan formátumukat.
+A plánoló alapértelmezettének megadásához állítson be a **Preferred render target**-ot **Auto**-ra, vagy kifejezetten válassza ki Mermaid, JSON Canvas, Vega-Lite, HTML, Editable HTML/SVG, Draw.io, Drawnix vagy Circuitikz-t. Ez a változtatás csak az artefektumok és az előnézet parancsokra vonatkozik. A standard **Summarise as Mermaid diagram** parancs továbbra is Mermaid-kompatibilis kiszállításra van kötve, így a meglévő Markdown munkafolyamok nem változnak titkosan formátumukat.
 
-Ez a különbség fontos, mert egy `flowchart` cél most lehet Markdown jegyzetekhez Mermaid formában, biztonságos lehetséges választékhoz HTML formában, vagy további módosításokhoz Editable HTML/SVG formában renderelni. A Draw.io és Drawnix továbbra is CLI artefakt exportálók maradnak, nem plug-in belüli renderelési célpontokká.
-
+Ez a különbség fontos, mert egy `flowchart` kívánt típus most Mermaid formátumban lehet renderelni Markdown jegyzékekhez, HTML formátumban erős lehetséges változásokhoz, Editable HTML/SVG formátumban további módosításokhoz, vagy Draw.io/Drawnix forrásartefektumokkával SVG ellenőrzési fájlokkal. Az `circuit` kívánt típus a Circuitikz-re irányul és egy validerált `CircuitSpec`-t igényel; ez nem egy bármilyen TikZ szöveg kérése.
 ## Használat
 
 ### Diagram készítése
@@ -101,16 +102,21 @@ Ez a különbség fontos, mert egy `flowchart` cél most lehet Markdown jegyzete
 | Vega-Lite | `.json` | `{note}_diagram.json` |
 | HTML | `.html` | `{note}_diagram.html` |
 | Írható HTML/SVG | `.html` | `{note}_diagram.html` |
+| Draw.io | `.drawio` + `.drawio.svg` + `.drawio.md` | `{note}_diagram.drawio` plusz ellenőrzési fájlok |
+| Drawnix | `.drawnix` + `.drawnix.svg` + `.drawnix.md` | `{note}_diagram.drawnix` plusz ellenőrzési fájlok |
+| Circuitikz | `.tex` + `.tex.svg` + `.tex.md` | `{note}_diagram.tex` plusz ellenőrzési fájlok |
 
 ### Diagram előnézetének megtekintése
 
 1. Indítson **"Notemd: Diagram előnézetének megtekintése"**
 2. Egy modál ablak nyílik meg a renderelt diagrammal
-3. Exportáljon SVG vagy PNG formátumban a szolgáltatási sor parancsainak használatával
+3. Használja a szolgáltatási sor parancsait, hogy SVG, PNG vagy PDF formátumban kiszállítsa a képet.
 
 **Autó-előnézet** beállításokban elérhető – készítés után az előnézet modál ablaka automatikusan nyílik.
 
-Az előnézet modál ablakán van egy artefakt-diagnozis panel is. A renderelők és a smoke ellenőrzések `RenderArtifact.diagnostics`-t köthetnek hozzá; a modál ablak egy diagnozis összefoglalást mutat beállításokkal az hibák, figyelmeztetések és információk számára, majd a súlyosság, a diagnozis típus, a üzenet és a reparációs tanácsokkal a előnézet mellett. Ugyanaz az összefoglalat jelenik meg a előnézet történeti bejegyeikben is, így az összefüggő circuitikz smoke ellenőrzéseket lehet összevetni, anélkül hogy minden bejegyzést nyitnánk. Azok az artefaktoknál, amelyeknek van forrás tartalma, de nem lehet őket inline formában vagy a HTML iframe útja mellett renderelni, a modál ablak most helyettesítően csak forrásbázisú előnézetet ad, így nincs szükség üres iframe használatára. Ez lehetővé teszi a circuitikz kompilálási/renderelési smoke ellenőrzéseket, a SVG szöveg-tokén ellenőrzéseket, a PNG tömött képernyőkép ellenőrzéseket és a jövőbeli összeütközési jelentéseknek egy látható UI felületet adni, anélkül hogy a TikZJax vagy LaTeX legyenek szigorú plugin futtatási függőségek vagy azonképpen az forrás szövegnek kellene bizonyítva lennie egy ellenőrzött visuális renderelésnek.
+A PNG és PDF előnézet kiszállítása az konfigurált előnézet PPI-jét használja. A alapértelmezett 300 PPI, és a 600 PPI-nél magasabb értékek 600-re korlátozódnak. Az SVG továbbra is vektortípusú marad. A `.drawio`, `.drawnix` és `.tex` szintű forrásartefektumok egy `previewSvg` ellenőrzési fájlt is adhatnak, így a Obsidian képes megjeleníteni és kiszállítani ellenőrizhető képeket, anélkül hogy a plugin működése során diagram.net, Drawnix, LaTeX vagy TikZJax-t beillesztené.
+
+A előnyölt nézet ablakában is létezik egy hibadiagnózis panel. A renderelők és a „smoke check”-ek hozzá tudják tartani a `RenderArtifact.diagnostics`-ot; az ablak az előnyölt kép mellett mutatja be egy összefoglalót a hiba, figyelmeztetés és információ számairól, majd a súlyosság, a diagnostikai típus, a üzenet és a reparációs tanácsokat. Ugyanaz az összefoglalat jelenik meg a diagnostikákat támogató históriai bejegyzésekben is, így a többszörre ismétlődő circuitikz „smoke”-próbákat lehet egymással összevetni, anélkül hogy minden bejegyzést kellene nyitni. Azok az artefektek esetében, amelyeknek van forrásíneke, de nem lehet őket inline formában vagy az HTML iframe útja melaljánk renderelni, az ablak most helyett egy teljesen forrásínekre épülő előnyölt nézetet használ, így nincs szükség üres iframe-t használni. Ez lehetővé teszi a circuitikz kompilálási/renderelési „smoke”-próbákat, az SVG szöveg-token ellenőrzéseit, a PNG tömött képernyőképek ellenőrzéseit, a csak útinformációkra épülő glifák összeütközési jelentésekét, valamint a jövőbeli összeütközési jelentésekét egy látható felületen mutatni, anélkül hogy a TikZJax vagy LaTeX legyenek szigorú plugin futtatási függőségeknek, vagy pedig az forrásínekeknek kellene mintha ellenőrzött visuális renderelésnek tűnnie.
 
 ### Örökségű Mermaid módszer
 
@@ -164,12 +170,12 @@ Ez a célpont intenzíven nem a helyettesítő tervezési útja még. Ez elérhe
 
 ### Draw.io és Drawnix Export határai
 
-A jelen implementáció a harmadik fél editor támogatását az artefakt határában tartja:
+A jelenlegi implementáció a harmadik fél szerkesztők támogatását az artefakt határában tartja, ugyanakkor viszont elérhetőek maradnak a kifejezetten megadott renderelési célok:
 
 | Célpont | Kontraktus | Működési időkéntes függőség |
 |--------|----------|--------------------|
-| Draw.io | Deterministikus, komprimálhatatlan `mxfile` XML a `SemanticFigureModel`-től | Nem vannak sem a plugin működési időben, sem a CI-ben |
-| Drawnix | Minimalista `.drawnix` JSON alamagom, amely használja a `geometry` és `arrow-line` elemeket | Nem vannak sem a plugin működési időben, sem a CI-ben |
+| Draw.io | `SemanticFigureModel` által generált determiniszmusos, komprimálás nélküli `mxfile` XML-ö, továbbá SVG/PNG/PDF formátumban lévő ellenőrzési fájlok | a plugin futtatása vagy CI-ben semmi nincs |
+| Drawnix | `geometry` és `arrow-line` elemeket használó minimális `.drawnix` JSON-komponensek, továbbá SVG/PNG/PDF formátumban lévő ellenőrzési fájlok | a plugin futtatása vagy CI-ben semmi nincs |
 
 A kiegyensúlyozás intenzíven választott: a Notemd lehetővé teszi a látólagos címkek, stabil azonosítók és támogatott primitívek összefoglalásának ellenőrzését, anélkül hogy beépítené a diagrams.net Desktop, Drawnix, Plait vagy csak böngészőben működő editor állapotot a pluginbe.
 
@@ -213,7 +219,11 @@ Notemd tartalmaz now a felszólított tárgykör számára első korlátozott re
 npm run diagram:export-circuitikz -- --input cmos-inverter.json --output cmos-inverter.tex
 ```
 
-A prototípus hozzáad egy külön `CircuitSpec` határt és deterministikus kiszolgálót három aranyreferenciái családhoz:
+A prototípus egy korlátozott `CircuitSpec` határat ad, illetve determiniszmusos exportálót biztosít számos klasszikus referenciációs családhoz:
+
+A kísérleti diagrammállományú folyamatban ezt most is elérhetővé teszi a `intent: "circuit"` és a renderelési cél `circuitikz`. A generált `DiagramSpec` csak a circuit céllal használhatja a `circuitSpec`-t. A `CircuitikzRenderer` ugyanazt a determiniszmusos `.tex` forráskódot ír le, és olyan SVG előnézetfájlt csatlakoztat, amely az ellenőrzött circuit topológiából készül; ez lehetővé teszi az Obsidian előnézetét, valamint a SVG/PNG/PDF exportálást. Ez a fájl nem egy LaTeX/TikZJax kompilációs eredmény; a valós renderer részletek továbbra is az alábbi kifejezetten megadott parancsokban vannak.
+
+A támogatott klasszikus szablónképek esetén a `layoutHints.inputSide` és a `layoutHints.outputSide` továbbra is csak bemutatási céllal használt kontrollok maradnak. Ezek lehetővé teszik a determiniszmusos be-/kimeneti port helyezését, de nem változtatják a topológiái jellegzetét, és nem engedélyezik egy reparációs lépést, amely átrendelne a circuitot.
 
 | Környezet típu | Aranyreferencia | Folyamennyelv garancia |
 |--------------|------------------|-------------------|
@@ -224,7 +234,7 @@ A prototípus hozzáad egy külön `CircuitSpec` határt és deterministikus kis
 | `cmos-nand2` | `cmos-nand2-v1` | Ellenőrizi a paralel PMOS pull-up, soros NMOS pull-down, két bevezetés `va` / `vb` és `vout` működését, mielőtt LaTeX-ot írjon le |
 | `cmos-nor2` | `cmos-nor2-v1` | Ellenőrizi a soros PMOS pull-up, paralel NMOS pull-down, két bevezetés `va` / `vb` és `vout` működését, mielőtt LaTeX-ot írjon le |
 
-Ez még nem egy általános TikZ generátor. Nem kompilálja a LaTeX-ot, nem hívja fel TikZJax, nem ellenőrizi a képeket, és nem futtat automatikus kép-fejlesztési műveleteket. Ezek a funkciók később kerülnek be.
+Ez nem egy általános TikZ generátor. Ez nem fogadja el bármilyen TikZ kódot, nem kompilálja LaTeX-kódot, nem hívja fel a TikZJax-t, nem ellenőrzi képeket a plugin futtatása során, és nem futtat automatikus kép-alapú reparációs folyamatokat. Ezek továbbra is későbbi lépéseknek tartoznak.
 
 A Preview diagram parancsa lehetővé teszi az összeállított circuitikz forrásfájlok újra megnyitását közvetlenül, ha a fájl extenzíja `.tex` vagy `.tikz`, és a forrásban vannak `\usepackage{circuitikz}` vagy `\begin{circuitikz}`. Ez egy circuitikz forráskörű előnézet: a modális ablak mutatja be a forrásot, a diagnostikákat, a kopiálás/megőrzés kezelőket és a históriai adatokat, de nem kompilálja a LaTeX-ot vagy nem hívja fel TikZJax a plug-in működési időszakában.
 
@@ -350,8 +360,8 @@ Egy CMOS invertér esetében a kérésnek egy konkrét topológiát és tervezé
 |------|----------------|-----------|
 | Általános diagramok | Spec-first pipeline implementálva Mermaid, JSON Canvas, Vega-Lite, HTML számára | Folytatjuk a semantikus ellenőrzés körét bővítését |
 | Módosítható képek | `editable-html-svg`, Draw.io XML, és Drawnix JSON artefaktus határai implementálva | Hozz létre több információt tartalmazó primitívumokat csak azután, ha a tesztek bizonyítják a módosíthatóságát |
-| CLI támogatása | `npm run diagram:export-artifact` exportálja módosítható HTML/SVG, Draw.io, és Drawnix-t egy `DiagramSpec`-ból | Új célok elérkezésekor célként specifikus tárgyfüggő tárgyak hozzáadása |
-| circuitikz | `CircuitSpec -> circuitikz` prototípus exportálja közös forrásokat, CMOS invertert, `cmos-buffer` / `cmos-buffer-v1`, `cmos-transmission-gate` / `cmos-transmission-gate-v1`, `cmos-nand2` / `cmos-nand2-v1`, és `cmos-nor2` / `cmos-nor2-v1` aranyos szabályokat, projekteteket `layoutHints.inputSide` és `layoutHints.outputSide` determinisztikus be-/kimeneti port helyezésére, anélkül hogy a topológiá változna, elutasítja a topológiai hibák módosítását `--topology-reference` keresztül, kiadja a topológiát megőrző működési leírásokat `--repair-brief-output` és szkémákkal `notemd.circuitikz.repair-brief.v1`, tartalmaz struktúrált `repairPrompt` átadási tartalmat `diagnosticFocus`, `acceptanceCriteria`, és szerepkeléssel `topology-preserving-circuitikz-repair`, ellenőrizi a működési kandidátumokat `--repair-brief` keresztül, adja vissza `repairAcceptance` kapu bizonyítékait a szkémákkal `notemd.circuitikz.repair-acceptance.v1`, valamint `readyForVisualAcceptance` és `remainingChecks` keresztül, tárolja ezt a bizonyítékot `--repair-acceptance-output` keresztül, elemzéli a kompilálási logokat, lehetőség van futtatni kifejezetten helyi renderereket plusz `--expected-artifact`, SVG `--expected-svg-text`, hozzáférhetőség metaadat ellenőrzéseit `aria-label`, `<title>`, és `<desc>` keresztül, elrejtett/transparent SVG elemek kizárása, `render-svg-text-path-only` / `pathOnlyGlyphUseCount` osztályozás csak út-orientált jelzőknek, út-orientált glifák helyezés ellenőrzései `<use href="#...">` keresztül, út-orientált glifák összeütközés diagnostikája `render-svg-path-glyph-overlap` keresztül, záró út current-point kezelése `Z/z` keresztül, pontos kör határai A/a kör extremumainak érdekében, pontos Bezier kurva határai C/S/Q/T kurva extremumainak érdekében, stroke-width-re szabott SVG határok és jelzők összeütközés ellenőrzései, `polyline` / `polygon` rajz geometriája ellenőrzései, pozicionált `tspan` jelző geometriája, `text-anchor`-re szabott pozicionált szöveg geometriája, transform-re szabott geometria SVG korlátozott canvas/szöveg összeütközés és jelző-kép összeütközés érdekében `render-svg-label-overlap` keresztül, valamint PNG nemtüntető / kizáró / sűrű előnyölt képek ellenőrzései, beleértve indexelt színpaletta alfa-tartalmát, szürke/RGB tRNS transparent példákat, és formátumspecifikus `render-png-unsupported` irányításokat Adam7 interlaced PNG-knek és indexelt bit-dereség hibáinak érdekében, `foregroundBounds`, `foregroundDensity`, `render-png-content-clipped`, és `render-png-foreground-dense` keresztül, anélkül hogy shell elemzés legyen, tartalmaz összefoglaló karbantartó tárgyfüggő tárgyakat `npm run diagram:smoke-circuitikz` keresztül, rögzíti hiányzó renderer konfigurációt `rendererAvailability.status: "missing-configuration"` és `compile-executable-invalid` keresztül, és rendelkezik általános előnézet diagnostikájával, diagnostikai összefoglaló számokkal, diagnostikára alapuló történelmi bejegyzésekkel, és forrás-orientált fallback-kal `RenderArtifact.diagnostics` és a előnézet modálján keresztül | Út-orientált visuális szövegnek OCR-szintű jelzőkigenlét eléréséhez, precíz pixel-szintű összeütközés ellenőrzésekre, szükség esetén szélesbb SVG út lefedésre, automatikus renderer telepítése/keresése csak akkor, ha lehetőségként maradhat, és automatikus topológiát megőrző működési elvégzés |
+| CLI támogatás | `npm run diagram:export-artifact` kiszolgálható HTML/SVG, Draw.io, Drawnix, Circuitikz formátumban való fájlokat, illetve SVG/PNG/PDF formátumban lévő ellenőrzési adatokat egy megerősített `DiagramSpec` alapján | Új célok elérhetővé válnak korán a célspecifikus smoke fixtureek hozzáadásával |
+| circuitikz | `DiagramSpec(intent: "circuit", circuitSpec) -> CircuitikzRenderer -> circuitikz` kiszolgál egyéb típusú forrásokat, CMOS invertereket, `cmos-buffer` / `cmos-buffer-v1`, `cmos-transmission-gate` / `cmos-transmission-gate-v1`, `cmos-nand2` / `cmos-nand2-v1` és `cmos-nor2` / `cmos-nor2-v1` típusú általános szabványos modelljeket; nyílt a UI célok és renderelési célok beállításához, ír le TeX fájlokat, valamint SVG/PNG/PDF formátumban lévő előnyugrásokat; előnyel kiszolgálja a topológiát, áttekinti a kompilációs logokat, lehetőség van használni specifikus helyi renderereket és a `--expected-artifact` paramétert, továbbá biztosít egy forráskód-alapú lehetséges alternatívát, illetve előnyugrásokhoz kapcsolódó diagnostikai információkat a `RenderArtifact.diagnostics` és a előnyugrás modális ablak keresztül | Hozzáadás OCR-szintű jelképezések azonosításához csak útinformációt tartalmazó kézi szövegeknek, precíz pixel-szintű összeütközés ellenőrzésekre, szükség esetén szélesebb SVG út-követelmények teljesítésére; az automatikus renderer telepítése vagy keresése csak akkor történik, ha ez továbbra is választható lehet, illetve automatikus topológiát megőrző reparációs folyamatok ellátása |
 | TikZJax integráció | Obsidian oldalának megjelenítéséhez kandidát render host | Tartsonk ezt lehetőségként; ne tegyük TikZJax szigorú plugin futászási függőséggé |
 
 ## Konfiguráció
@@ -361,6 +371,7 @@ Egy CMOS invertér esetében a kérésnek egy konkrét topológiát és tervezé
 | `enableExperimentalDiagramPipeline` | `false` | Specifikáció-első és régiódi Mermaid között váltás |
 | `experimentalDiagramCompatibilityMode` | `'legacy-mermaid'` | `'legacy-mermaid'` = Mermaid csak; `'best-fit'` = natív célok + fallbackok |
 | `preferredDiagramIntent` | `undefined` (auto) | Automatikus célis azonosítás leírásának összeírása |
+| `preferredDiagramRenderTarget` | `undefined` (automatikus) | Az artefakt renderelőt módosítja, beleértve a Draw.io, Drawnix és Circuitikz-t |
 | `summarizeToMermaidLanguage` | `'en'` | Diagram jelzői számára cél nyelv |
 | `summarizeToMermaidProvider` / `Model` | DeepSeek | Munka alapján LLM diagram készítéséhez |
 | `autoMermaidFixAfterGenerate` | (konstantákból) | Autómódos régiódi működési elvégzés Mermaid kiindulókön |
@@ -380,10 +391,11 @@ Ha aktiválva van, Notemd keresi el a releváns kontextus részleteket a vault h
 | Ellenőrzés | Métód |
 |--------|--------|
 | SVG exportálás | `mermaid.render()` / `vega.View.toSVG()` / SVG építő a Canvas számára |
-| PNG exportálás | SVG → Image → Canvas (eszköz pixel arány 1x-3x) → PNG ArrayBuffer |
+| PNG-k exportálása | SVG → kép → konfigurált PPI-re szabályozott canvas / előnézetes rasterizáló → PNG ArrayBuffer |
+| PDF-k exportálása | SVG → konfigurált PPI-re szabályozott rasterkép → egyoldalas PDF |
 | Forrás mentése | A gyümölcs összetevői mentésre kerülnek a célspecifikus kiterjesztéssel |
 | Kizárólag forrás előnézet | A nem-inline gyümölcsök a forrás tartalmával együtt kódként és diagnostikákkel jelennek meg, nincs iframe renderelése |
-| Semantikus ellenőrzés | Mermaid, JSON Canvas, Vega-Lite, és módosítható HTML/SVG-t `scripts/diagram-semantic-verification.js` ellenőriz |
+| Semantikai ellenőrzés | A Mermaid, JSON Canvas, Vega-Lite, módosítható HTML/SVG, Draw.io, Drawnix és korlátozott Circuitikz összeállítása a `scripts/diagram-semantic-verification.js` segítségével, továbbá a renderelő/CLI tesztekkel |
 
 **Caching**: RenderCache használja `{spec, target, theme}` determiniszmusos JSON kulcsát. Az útban történő duplikácsok elszűrése megakadályozza a duplán készített képeket.
 

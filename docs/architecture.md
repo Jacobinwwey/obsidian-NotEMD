@@ -1,6 +1,6 @@
 # Notemd Architecture Overview
 
-> Updated: 2026-05-07
+> Updated: 2026-07-10
 
 ## System Architecture
 
@@ -36,7 +36,7 @@ flowchart TB
     subgraph Output["Output"]
         VAULT["Vault Files<br/>(.md, .canvas, .json)"]
         PREVIEW["Diagram Preview Modal"]
-        EXPORT["SVG / PNG Export"]
+        EXPORT["Source / SVG / PNG / PDF Export"]
     end
 
     CMD --> DISPATCH
@@ -142,7 +142,7 @@ flowchart LR
     end
 
     subgraph Render["Render Plane"]
-        REGISTRY["RendererRegistry<br/>7 renderers"]
+        REGISTRY["RendererRegistry<br/>8 renderers"]
         SERVICE["RendererService"]
         CACHE2["RenderCache"]
     end
@@ -152,12 +152,15 @@ flowchart LR
         CANVAS["JSON Canvas<br/>(canvasMap)"]
         VEGA["Vega-Lite<br/>(dataChart)"]
         HTML["HTML Fallback"]
+        FIGURE["Editable HTML/SVG"]
+        BOARD["Draw.io / Drawnix"]
+        CIRCUIT["Circuitikz"]
     end
 
     subgraph Host["Preview Layer"]
         IFRAME["IframeRenderHost"]
         MODAL["DiagramPreviewModal"]
-        EXPORT2["SVG / PNG Export"]
+        EXPORT2["Source / SVG / PNG / PDF Export"]
     end
 
     MD --> PLAN
@@ -172,6 +175,9 @@ flowchart LR
     REGISTRY --> CANVAS
     REGISTRY --> VEGA
     REGISTRY --> HTML
+    REGISTRY --> FIGURE
+    REGISTRY --> BOARD
+    REGISTRY --> CIRCUIT
     MERMAID --> IFRAME
     CANVAS --> IFRAME
     VEGA --> IFRAME
@@ -189,8 +195,22 @@ flowchart LR
 | `classDiagram` | mermaid | MermaidRenderer | modal/iframe | SVG, PNG |
 | `erDiagram` | mermaid | MermaidRenderer | modal/iframe | SVG, PNG |
 | `stateDiagram` | mermaid | MermaidRenderer | modal/iframe | SVG, PNG |
-| `canvasMap` | json-canvas | JsonCanvasRenderer | modal/iframe | SVG, source |
-| `dataChart` | vega-lite | VegaLiteRenderer | modal/iframe (sandboxed) | SVG, source |
+| `canvasMap` | json-canvas | JsonCanvasRenderer | modal/iframe | source, SVG, PNG, PDF |
+| `dataChart` | vega-lite | VegaLiteRenderer | modal/iframe (sandboxed) | source, SVG, PNG, PDF |
+| `circuit` | circuitikz | CircuitikzRenderer | SVG companion or source-only preview | `.tex`, SVG, PNG, PDF |
+
+### Explicit Render Targets
+
+The spec-first pipeline can also force a render target independently from the inferred intent for `Generate diagram` and `Preview diagram`. The standard `Summarise as Mermaid diagram` command remains Mermaid-compatible.
+
+| Render target | Artifact boundary | Runtime dependency policy |
+|---|---|---|
+| `editable-html-svg` | Self-contained HTML with semantic inline SVG | no external editor runtime |
+| `drawio` | `.drawio` XML plus SVG/MD review companions | no diagrams.net runtime in the plugin |
+| `drawnix` | `.drawnix` JSON subset plus SVG/MD review companions | no Drawnix or Plait runtime in the plugin |
+| `circuitikz` | validated `.tex` source plus SVG/MD review companions | no bundled LaTeX or TikZJax runtime |
+
+Circuitikz support is intentionally constrained. The front-end settings now expose `Circuit (Circuitikz)` as a preferred diagram type and `Circuitikz + SVG preview` as a preferred render target without requiring Developer mode, but the renderer still accepts only a validated `DiagramSpec(intent: "circuit", circuitSpec)`. It writes deterministic circuitikz TeX and a reviewable SVG companion; real LaTeX/TikZJax compile evidence remains an optional maintainer smoke check.
 
 ## Module Map
 

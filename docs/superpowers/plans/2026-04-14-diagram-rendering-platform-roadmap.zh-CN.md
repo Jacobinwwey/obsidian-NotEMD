@@ -64,6 +64,14 @@ Cloudy 与 Drawnix 的参考项目分析已记录在 `docs/brainstorms/2026-07-0
 - 后续正确 target 边界仍应保持为 `DiagramSpec -> target-specific adapter -> renderer/export artifact`；生产路径不应为了复用 string-to-board converter，把 `DiagramSpec` 绕回 Mermaid 文本。
 - 下一步实现优先级仍然是先做边界硬化，再做扩展。等新 target 工作恢复时，可编辑 HTML/SVG 应先于 `.drawnix`，因为它可以在不引入重型白板 runtime 的前提下先证明 layout、text fitting 与 Draw.io export claim。
 
+## 2026-07-10 circuitikz UI 与导出真值同步
+
+受约束的 circuitikz 路径现在已经是当前 main 上的产品表面，而不只是维护者原型。`CircuitikzRenderer` 会从经过验证的 `DiagramSpec(intent: "circuit", circuitSpec)` 写出确定性 `.tex`，并附加一个 SVG companion；预览/导出 UI 可以把该 companion 导出为 SVG、PNG 与 PDF。CLI 导出路径也支持从同一个 `DiagramSpec` 生成 `circuitikz`、`svg`、`png` 与 `pdf` review evidence。
+
+关键校正是前端可见性：设置页应无需 Developer mode 就暴露图表 pipeline 控制项，包括 `Circuit (Circuitikz)` 与 `Circuitikz + SVG preview`。Developer mode 仍负责诊断与宽松输入 gate，而不负责普通图表目标发现。
+
+详细的当前 main 对照与 MDX 发布决策记录在 `docs/maintainer/circuitikz-ui-export-and-docs-sync-2026-07-10.zh-CN.md`。
+
 ---
 
 **目标：** 将 Notemd 从“LLM 直接生成 Mermaid 文本并事后修补”的单一路径，升级为“图形意图识别 + 中间规格 + 专门渲染 + 多格式输出”的可扩展图形平台，在 Obsidian 内稳定支持更多图像与图表类型。
