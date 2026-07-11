@@ -28,27 +28,33 @@ import {
     summarizeRenderArtifactDiagnostics
 } from '../rendering/diagnostics';
 import { DiagramHistoryModal } from './DiagramHistoryModal';
-import type { DiagramHistoryQuery } from '../diagram/history/diagramHistoryRepository';
+import type { DiagramHistoryExportKind, DiagramHistoryQuery } from '../diagram/history/diagramHistoryRepository';
+
+interface DiagramHistoryStore {
+    loadPage: (query: DiagramHistoryQuery) => Promise<any>;
+    removeEntry: (id: string) => Promise<void>;
+    recordArtifactPath?: (id: string, path: string) => Promise<unknown>;
+    recordExportPath?: (id: string, kind: DiagramHistoryExportKind, path: string) => Promise<unknown>;
+}
 
 export class DiagramPreviewModal extends Modal {
     private session: RenderPreviewSession;
     private currentHistoryEntryId: string | null = null;
     private readonly exportPpi: number;
-    private readonly historyStore?: {
-        loadPage: (query: DiagramHistoryQuery) => Promise<any>;
-        removeEntry: (id: string) => Promise<void>;
-    };
+    private readonly historyStore?: DiagramHistoryStore;
+    private readonly historyEntryId?: string;
 
     constructor(
         app: App,
         session: RenderPreviewSession,
         private readonly uiLocale = 'auto',
-        options: { exportPpi?: number; historyStore?: { loadPage: (query: DiagramHistoryQuery) => Promise<any>; removeEntry: (id: string) => Promise<void> } } = {}
+        options: { exportPpi?: number; historyEntryId?: string; historyStore?: DiagramHistoryStore } = {}
     ) {
         super(app);
         this.session = session;
         this.exportPpi = resolvePreviewExportPpi(options.exportPpi);
         this.historyStore = options.historyStore;
+        this.historyEntryId = options.historyEntryId;
     }
 
     onOpen() {
@@ -111,6 +117,7 @@ export class DiagramPreviewModal extends Modal {
                         this.session.payload.sourcePath as string,
                         this.session.payload.artifact
                     );
+                    await this.recordArtifactPath(outputPath);
                     new Notice(formatI18n(i18n.previewModal.saveSourceSuccessNotice, { path: outputPath }));
                 } catch (error) {
                     const message = error instanceof Error ? error.message : String(error);
@@ -137,6 +144,7 @@ export class DiagramPreviewModal extends Modal {
                         this.session.payload.artifact,
                         { theme: this.session.payload.resolvedTheme ?? this.session.payload.theme }
                     );
+                    await this.recordExportPath('svg', outputPath);
                     new Notice(formatI18n(i18n.previewModal.exportSuccessNotice, { path: outputPath }));
                 } catch (error) {
                     const message = error instanceof Error ? error.message : String(error);
@@ -164,6 +172,7 @@ export class DiagramPreviewModal extends Modal {
                             ppi: this.exportPpi
                         }
                     );
+                    await this.recordExportPath('png', outputPath);
                     new Notice(formatI18n(i18n.previewModal.exportPngSuccessNotice, { path: outputPath }));
                 } catch (error) {
                     const message = error instanceof Error ? error.message : String(error);
@@ -191,6 +200,7 @@ export class DiagramPreviewModal extends Modal {
                             ppi: this.exportPpi
                         }
                     );
+                    await this.recordExportPath('pdf', outputPath);
                     new Notice(formatI18n(i18n.previewModal.exportPdfSuccessNotice, { path: outputPath }));
                 } catch (error) {
                     const message = error instanceof Error ? error.message : String(error);
@@ -263,6 +273,18 @@ export class DiagramPreviewModal extends Modal {
                     cls: 'notemd-diagram-preview-diagnostic-advice'
                 });
             }
+        }
+    }
+
+    private async recordArtifactPath(path: string): Promise<void> {
+        if (this.historyEntryId && this.historyStore?.recordArtifactPath) {
+            await this.historyStore.recordArtifactPath(this.historyEntryId, path);
+        }
+    }
+
+    private async recordExportPath(kind: DiagramHistoryExportKind, path: string): Promise<void> {
+        if (this.historyEntryId && this.historyStore?.recordExportPath) {
+            await this.historyStore.recordExportPath(this.historyEntryId, kind, path);
         }
     }
 

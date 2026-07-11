@@ -102,6 +102,30 @@ export function createDiagramHistoryRepository(load: LoadEntries, save: SaveEntr
             const entry = (await load()).find(candidate => candidate.id === id);
             return entry ? cloneEntry(entry) : null;
         },
+        async recordArtifactPath(id: string, artifactPath: string): Promise<boolean> {
+            let updated = false;
+            await write(async () => {
+                const entries = await load();
+                const entry = entries.find(candidate => candidate.id === id);
+                if (!entry) return;
+                entry.artifactPath = artifactPath;
+                updated = true;
+                await save(entries.map(cloneEntry));
+            });
+            return updated;
+        },
+        async recordExportPath(id: string, kind: DiagramHistoryExportKind, exportPath: string): Promise<boolean> {
+            let updated = false;
+            await write(async () => {
+                const entries = await load();
+                const entry = entries.find(candidate => candidate.id === id);
+                if (!entry) return;
+                entry.exportPaths = { ...entry.exportPaths, [kind]: exportPath };
+                updated = true;
+                await save(entries.map(cloneEntry));
+            });
+            return updated;
+        },
         async removeIndexEntry(id: string): Promise<boolean> {
             let removed = false;
             await write(async () => {

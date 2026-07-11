@@ -55,3 +55,21 @@ describe('diagram history repository', () => {
         expect((await repository.get('safe'))?.title).toBe('Diagram safe');
     });
 });
+
+test('updates source and visual export paths without replacing existing metadata', async () => {
+    let stored = [entry('one', 10, { artifactPath: undefined, exportPaths: {} })];
+    const repository = createDiagramHistoryRepository(async () => stored, async entries => { stored = entries; });
+
+    await repository.recordArtifactPath('one', 'Notes/Topic_diagram.tex');
+    await repository.recordExportPath('one', 'png', 'Notes/Topic_preview.png');
+    await repository.recordExportPath('one', 'pdf', 'Notes/Topic_preview.pdf');
+
+    expect(await repository.get('one')).toEqual(expect.objectContaining({
+        title: stored[0].title,
+        artifactPath: 'Notes/Topic_diagram.tex',
+        exportPaths: {
+            png: 'Notes/Topic_preview.png',
+            pdf: 'Notes/Topic_preview.pdf'
+        }
+    }));
+});

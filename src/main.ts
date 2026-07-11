@@ -265,8 +265,9 @@ export default class NotemdPlugin extends Plugin {
             },
             this.settings.diagramHistoryRetentionLimit
         );
+        const historyEntryId = `diagram-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
         void historyRepository.recordCompleted({
-            id: `diagram-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+            id: historyEntryId,
             completedAt: Date.now(),
             title: previewTitle,
             sourcePath,
@@ -277,9 +278,12 @@ export default class NotemdPlugin extends Plugin {
         }).catch(error => console.warn('Diagram history persistence failed; preview remains available.', error));
         new DiagramPreviewModal(this.app, session, this.settings.uiLocale, {
             exportPpi: this.settings.diagramPreviewExportPpi,
+            historyEntryId,
             historyStore: {
                 loadPage: query => historyRepository.query(query),
-                removeEntry: async id => { await historyRepository.removeIndexEntry(id); }
+                removeEntry: async id => { await historyRepository.removeIndexEntry(id); },
+                recordArtifactPath: (id, path) => historyRepository.recordArtifactPath(id, path),
+                recordExportPath: (id, kind, path) => historyRepository.recordExportPath(id, kind, path)
             }
         }).open();
     }

@@ -14,6 +14,7 @@ The previous batch title flow validated the selected path only inside `batchGene
 
 - Vault diagram history domain with newest-first query, fuzzy search, filters, 20-item default pages, retention, clone safety, and index-only removal.
 - History recording when a preview session is opened and a management modal for search, diagram/source/export filters, configurable page size, page navigation, export availability, and index removal.
+- Preview source saves and SVG/PNG/PDF exports now update the same serialized Vault history entry, preserving real artifact paths across plugin reloads.
 - Settings search header, heading navigation, responsive layout, and per-setting favorites saved in plugin data.
 - Batch-folder preparation domain and integration before title-generation batch execution.
 - New defaults: `favoriteSettingIds`, `diagramHistoryRetentionLimit`, `diagramHistoryEntries`, and `autoCreateMissingBatchTargetFolders`.
@@ -29,6 +30,6 @@ The previous batch title flow validated the selected path only inside `batchGene
 ## Next Direction
 
 1. Promote every setting declaration from ordinal fallback identity to an explicit catalog ID.
-2. Record actual source/export artifact paths directly from save/export completions so history can reopen and re-export files after plugin restart.
+2. Add reopen, source-note navigation, and separately confirmed artifact deletion to the history manager using the persisted paths now recorded by save/export completions.
 3. Add date-range controls to the dedicated history modal without increasing preview-modal density; source-format and export filters are now present.
 4. Expose structured CLI policy inputs for missing and non-empty batch folders.

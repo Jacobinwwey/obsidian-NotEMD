@@ -229,7 +229,11 @@ describe('diagram preview modal', () => {
     });
 
     test('shows png export button and saves png preview on click', async () => {
-        const modal = mountModal(new DiagramPreviewModal(mockApp, createSession({}, 'Notes/Topic.md', 'dark'), 'en') as any);
+        const recordExportPath = jest.fn().mockResolvedValue(undefined);
+        const modal = mountModal(new DiagramPreviewModal(mockApp, createSession({}, 'Notes/Topic.md', 'dark'), 'en', {
+            historyEntryId: 'diagram-one',
+            historyStore: { loadPage: jest.fn(), removeEntry: jest.fn(), recordExportPath }
+        }) as any);
 
         modal.onOpen();
         await flushPromises();
@@ -247,6 +251,7 @@ describe('diagram preview modal', () => {
             expect.objectContaining({ theme: 'dark' })
         );
         expect(Notice).toHaveBeenCalledWith('Diagram PNG exported to Notes/Topic_preview.png');
+        expect(recordExportPath).toHaveBeenCalledWith('diagram-one', 'png', 'Notes/Topic_preview.png');
     });
 
     test('shows pdf export button and saves pdf preview with configured ppi on click', async () => {
