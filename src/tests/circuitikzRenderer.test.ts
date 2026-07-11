@@ -58,10 +58,14 @@ describe('circuitikz renderer', () => {
         expect(artifact.content).toContain('\\begin{circuitikz}');
         expect(artifact.previewSvg?.mimeType).toBe('image/svg+xml');
         expect(artifact.previewSvg?.content).toContain('<svg');
-        expect(artifact.previewSvg?.content).toContain('data-notemd-renderer="notemd-circuitikz-preview-svg@0.1.0"');
+        expect(artifact.previewSvg?.content).toContain('data-notemd-renderer="notemd-circuitikz-preview-svg@0.2.0"');
         expect(artifact.previewSvg?.content).toContain('class="notemd-circuit-canvas" x="0" y="0" width="720" height="580" fill="#ffffff"');
         expect(artifact.previewSvg?.content).toContain('CMOS Inverter');
-        expect(artifact.previewSvg?.content).toContain('v_{out}');
+        expect(artifact.previewSvg?.content).toContain('vout');
+        expect(artifact.previewSvg?.content).not.toContain('v_{out}');
+        expect(artifact.previewSvg?.content).toContain('.notemd-circuit-stage text { stroke: none; }');
+        expect(artifact.previewSvg?.content).toContain('font: 400 15px');
+        expect(artifact.previewSvg?.content).not.toContain('cmos-inverter / cmos-inverter-v1');
     });
 
     test('refuses non-circuit diagram specs instead of silently drawing a flowchart', async () => {

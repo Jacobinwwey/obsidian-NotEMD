@@ -171,7 +171,7 @@ describe('diagram artifact export CLI', () => {
                 goldenReferenceId: 'cmos-inverter-v1'
             }));
             expect(fs.readFileSync(texPath, 'utf8')).toContain('\\usepackage{circuitikz}');
-            expect(fs.readFileSync(svgPath, 'utf8')).toContain('notemd-circuitikz-preview-svg@0.1.0');
+            expect(fs.readFileSync(svgPath, 'utf8')).toContain('notemd-circuitikz-preview-svg@0.2.0');
             expect(fs.statSync(pngPath).size).toBeGreaterThan(0);
             expect(fs.readFileSync(pdfPath).subarray(0, 5).toString('ascii')).toBe('%PDF-');
         } finally {

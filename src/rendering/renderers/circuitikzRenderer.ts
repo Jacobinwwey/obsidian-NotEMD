@@ -8,7 +8,7 @@ import {
 import { ValidationError } from '../../types';
 import { DiagramRenderer, RenderArtifact } from '../types';
 
-export const NOTEMD_CIRCUITIKZ_PREVIEW_SVG_RENDERER_VERSION = 'notemd-circuitikz-preview-svg@0.1.0';
+export const NOTEMD_CIRCUITIKZ_PREVIEW_SVG_RENDERER_VERSION = 'notemd-circuitikz-preview-svg@0.2.0';
 
 type Point = {
     x: number;
@@ -30,6 +30,8 @@ function normalizeMathLabel(value: string): string {
     return value
         .replace(/^\$|\$$/g, '')
         .replace(/\\bar\{([^}]+)\}/g, '$1_bar')
+        .replace(/_\{([^}]+)\}/g, '$1')
+        .replace(/_([A-Za-z0-9]+)/g, '$1')
         .replace(/\\/g, '');
 }
 
@@ -58,7 +60,7 @@ function port(label: string, at: Point, side: 'left' | 'right' | 'top' | 'bottom
     }[side];
 
     return `<circle cx="${at.x}" cy="${at.y}" r="4" class="notemd-circuit-port" />
-        ${text(label, { x: at.x + textOffset.x, y: at.y + textOffset.y }, ` text-anchor="${textOffset.anchor}" class="notemd-circuit-label"`)}
+        ${text(normalizeMathLabel(label), { x: at.x + textOffset.x, y: at.y + textOffset.y }, ` text-anchor="${textOffset.anchor}" class="notemd-circuit-label"`)}
     `;
 }
 
@@ -135,7 +137,6 @@ function renderCommonSource(spec: CircuitSpec): SvgFragment {
         ${wire([{ x: 360, y: 236 }, { x: 604, y: 236 }])}
         ${junction({ x: 360, y: 236 })}
         ${port('v_{out}', { x: 604, y: 236 }, 'right')}
-        ${connectionLabel('common-source-amplifier', { x: 360, y: 488 })}
     `;
 }
 
@@ -285,13 +286,8 @@ function renderCircuitBody(spec: CircuitSpec): SvgFragment {
 }
 
 function renderCircuitMetadata(spec: CircuitSpec): SvgFragment {
-    const componentSummary = spec.components
-        .map(component => `${component.id}:${component.type}`)
-        .join('  ');
     return `<g class="notemd-circuit-metadata">
-        ${text(spec.title, { x: 56, y: 48 }, ' class="notemd-circuit-title"')}
-        ${text(`${spec.circuitKind} / ${spec.goldenReferenceId}`, { x: 56, y: 76 }, ' class="notemd-circuit-subtitle"')}
-        ${text(componentSummary, { x: 56, y: 548 }, ' class="notemd-circuit-footnote"')}
+        ${text(spec.title, { x: 40, y: 42 }, ' class="notemd-circuit-title"')}
     </g>`;
 }
 
@@ -306,18 +302,17 @@ export function renderCircuitSpecPreviewSvg(spec: CircuitSpec): string {
         <desc id="notemd-circuit-desc">${escapeHtml(`${spec.circuitKind} circuitikz preview companion for ${spec.goldenReferenceId}`)}</desc>
         <style>
             .notemd-circuit-canvas { fill: #ffffff; }
-            .notemd-circuit-stage { fill: none; stroke: #111827; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
-            .notemd-circuit-component rect { fill: #ffffff; stroke: #111827; stroke-width: 2; }
+            .notemd-circuit-stage { fill: none; stroke: #1f2937; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+            .notemd-circuit-stage text { stroke: none; }
+            .notemd-circuit-component rect { fill: #ffffff; stroke: #1f2937; stroke-width: 1.6; }
             .notemd-circuit-pmos rect { fill: #fff7ed; }
             .notemd-circuit-nmos rect { fill: #eff6ff; }
-            .notemd-circuit-mos-bubble { fill: #ffffff; stroke: #111827; stroke-width: 2; }
-            .notemd-circuit-port { fill: #ffffff; stroke: #111827; stroke-width: 2; }
+            .notemd-circuit-mos-bubble { fill: #ffffff; stroke: #1f2937; stroke-width: 1.6; }
+            .notemd-circuit-port { fill: #ffffff; stroke: #1f2937; stroke-width: 1.6; }
             .notemd-circuit-junction { fill: #111827; stroke: none; }
-            .notemd-circuit-label { fill: #111827; font: 600 16px "Segoe UI", Arial, sans-serif; }
-            .notemd-circuit-net-label { fill: #334155; font: 600 14px "Segoe UI", Arial, sans-serif; }
-            .notemd-circuit-title { fill: #111827; font: 700 24px "Segoe UI", Arial, sans-serif; }
-            .notemd-circuit-subtitle { fill: #475569; font: 600 13px "Segoe UI", Arial, sans-serif; }
-            .notemd-circuit-footnote { fill: #64748b; font: 12px "Segoe UI", Arial, sans-serif; }
+            .notemd-circuit-label { fill: #111827; font: 400 15px "Segoe UI", Arial, sans-serif; }
+            .notemd-circuit-net-label { fill: #334155; font: 400 13px "Segoe UI", Arial, sans-serif; }
+            .notemd-circuit-title { fill: #111827; font: 500 22px "Segoe UI", Arial, sans-serif; }
         </style>
         <rect class="notemd-circuit-canvas" x="0" y="0" width="720" height="580" fill="#ffffff" />
         ${renderCircuitMetadata(spec)}
