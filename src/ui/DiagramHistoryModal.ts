@@ -1,4 +1,4 @@
-import { App, Modal } from 'obsidian';
+import { App, Modal, Notice } from 'obsidian';
 import type { DiagramHistoryEntry, DiagramHistoryQuery } from '../diagram/history/diagramHistoryRepository';
 import { collectDiagramHistoryArtifactPaths } from '../diagram/history/diagramHistoryActions';
 import { formatI18n, getI18nStrings } from '../i18n';
@@ -63,7 +63,9 @@ export class DiagramHistoryModal extends Modal {
             const actions = item.createDiv({ cls: 'notemd-diagram-history-actions' });
             if (entry.artifactPath && this.reopenArtifact) {
                 const reopen = actions.createEl('button', { text: copy.reopen, cls: 'mod-cta' });
-                reopen.onclick = async () => { await this.reopenArtifact!(entry); };
+                reopen.onclick = async () => {
+                    if (!(await this.reopenArtifact!(entry))) new Notice(copy.reopenFailed);
+                };
             }
             if (entry.sourcePath) {
                 const openNote = actions.createEl('button', { text: copy.openSource });

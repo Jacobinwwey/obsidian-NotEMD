@@ -999,7 +999,7 @@ export const STRINGS_EN = {
         allTypes: 'All diagram types', allFormats: 'All source formats', anyExport: 'Any export',
         itemsPerPage: '{count} per page', completedFrom: 'Completed from', completedTo: 'Completed to',
         summary: '{count} diagrams · newest first', noExports: 'No visual exports recorded', exports: 'Exports: {formats}',
-        reopen: 'Reopen preview', openSource: 'Open source note', openFile: 'Open {name}',
+        reopen: 'Reopen preview', reopenFailed: 'The saved diagram artifact is missing or cannot be previewed.', openSource: 'Open source note', openFile: 'Open {name}',
         removeIndex: 'Remove from history', deleteArtifacts: 'Delete artifacts…',
         previous: 'Previous', next: 'Next', page: '{page} / {total}'
     },
