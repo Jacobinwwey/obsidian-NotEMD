@@ -1,6 +1,10 @@
 import { NotemdSettings } from '../../types';
 
 export const mockSettings: NotemdSettings = {
+    favoriteSettingIds: [],
+    diagramHistoryRetentionLimit: 500,
+    diagramHistoryEntries: [],
+    autoCreateMissingBatchTargetFolders: false,
     chunkWordCount: 3000,
     maxTokens: 4096,
     globalModelAwareMaxTokensTracking: undefined,

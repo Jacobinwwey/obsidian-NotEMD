@@ -70,4 +70,14 @@ describe('docs bilingual support contract', () => {
             expect(content.includes('## English') && content.includes('## 中文')).toBe(false);
         }
     );
+
+    test('all localized root README files explain settings discovery and safe batch folders', () => {
+        const readmes = fs.readdirSync(repoRoot)
+            .filter(fileName => /^README(?:_[A-Za-z_-]+)?\.md$/.test(fileName));
+        expect(readmes.length).toBeGreaterThan(20);
+        for (const fileName of readmes) {
+            const content = fs.readFileSync(path.join(repoRoot, fileName), 'utf8');
+            expect(content).toContain('<!-- notemd-settings-discovery-guide -->');
+        }
+    });
 });

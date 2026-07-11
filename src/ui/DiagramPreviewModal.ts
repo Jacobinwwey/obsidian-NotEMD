@@ -27,21 +27,28 @@ import {
     formatRenderArtifactDiagnosticSummary,
     summarizeRenderArtifactDiagnostics
 } from '../rendering/diagnostics';
+import { DiagramHistoryModal } from './DiagramHistoryModal';
+import type { DiagramHistoryQuery } from '../diagram/history/diagramHistoryRepository';
 
 export class DiagramPreviewModal extends Modal {
     private session: RenderPreviewSession;
     private currentHistoryEntryId: string | null = null;
     private readonly exportPpi: number;
+    private readonly historyStore?: {
+        loadPage: (query: DiagramHistoryQuery) => Promise<any>;
+        removeEntry: (id: string) => Promise<void>;
+    };
 
     constructor(
         app: App,
         session: RenderPreviewSession,
         private readonly uiLocale = 'auto',
-        options: { exportPpi?: number } = {}
+        options: { exportPpi?: number; historyStore?: { loadPage: (query: DiagramHistoryQuery) => Promise<any>; removeEntry: (id: string) => Promise<void> } } = {}
     ) {
         super(app);
         this.session = session;
         this.exportPpi = resolvePreviewExportPpi(options.exportPpi);
+        this.historyStore = options.historyStore;
     }
 
     onOpen() {
@@ -265,6 +272,10 @@ export class DiagramPreviewModal extends Modal {
             text: i18n.previewModal.historyTitle,
             cls: 'notemd-diagram-preview-history-title'
         });
+        if (this.historyStore) {
+            const manage = historyEl.createEl('button', { text: 'Manage Vault history' });
+            manage.onclick = () => new DiagramHistoryModal(this.app, this.historyStore!.loadPage, this.historyStore!.removeEntry).open();
+        }
 
         const historyList = historyEl.createDiv({ cls: 'notemd-diagram-preview-history-list' });
         for (const entry of listDiagramPreviewHistory()) {

@@ -258,6 +258,34 @@ That's it! Explore the settings to unlock more features like web research, trans
 
 ## Configuration
 
+<!-- notemd-settings-discovery-guide -->
+### Finding And Reusing Settings
+
+Notemd has a broad settings surface because providers, note workflows, diagrams, batch processing, slides, and developer diagnostics have different controls. The settings page now provides a fuzzy search field, large category navigation, and per-setting favorites. Favorites are stored for the current Vault and remain available after restarting Obsidian.
+
+Important newer settings include:
+
+- **Diagram history retention limit**: limits the Vault history index; pruning never deletes generated files.
+- **Diagram preview export PPI**: controls PNG and PDF clarity while SVG remains vector-based.
+- **Preferred diagram type / source format**: separates diagram meaning from Mermaid, Draw.io, Drawnix, CircuitikZ, and other editable source formats.
+- **Advanced batch file selection**: enables saved folder/file-selection profiles and rule previews.
+- **Automatically create missing batch target folders**: available after the user approves creation once. Existing non-empty folders still require one confirmation before each batch run.
+- **Developer mode**: reveals provider diagnostics and advanced file-selection tools intended for troubleshooting.
+
+### Diagram History
+
+Completed diagram previews are indexed at Vault scope and ordered by completion time, newest first. Open **Manage Vault history** from a diagram preview to search by title, note, diagram type, or source format and browse results in pages of 20. History stores lightweight metadata and artifact paths rather than duplicating SVG, PNG, PDF, or source contents. Removing a history entry does not delete its generated files.
+
+### Safe Batch Folder Handling
+
+Before a title-generation batch starts, Notemd validates the selected folder once:
+
+- A missing folder can be created after confirmation. The dialog can remember permission to create future missing batch target folders automatically.
+- An existing empty folder is used directly.
+- An existing non-empty folder requires one confirmation for the whole batch, not one prompt per generated file.
+- A path that points to a file is rejected with an actionable message.
+- Non-interactive CLI calls return a recoverable outcome instead of silently creating or authorizing folders.
+
 Access plugin settings via:
 **Settings** → **Community Plugins** → **Notemd** (Click the gear icon).
 

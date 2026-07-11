@@ -706,3 +706,16 @@ _Naposledy obnoveno pro tag vydání `1.9.3` dne 2026-06-24. Datum posledního c
 
 
 ![Star History Chart](https://api.star-history.com/svg?repos=Jacobinwwey/obsidian-NotEMD&type=Date)
+
+<!-- notemd-settings-discovery-guide -->
+## Objevování nastavení, historie diagramů a bezpečné složky pro hromadnou práci
+
+Stránka s nastaveními Notemd nabízí fuzzy vyhledávání, navigaci v rozsáhlých kategoriích a možnost uložit si oblíbená nastavení pro aktuální Vault.
+
+- Historie diagramů je ukládána na úrovni Vault, seřazena od nejnovějších po starší, je vyhledatelná a stránkována ve skupinách po 20 položkách. Odstranění záznamu z historie neodstraňuje vytvořené soubory.
+- Export náhledu diagramu pomocí PPI ovlivňuje ostrost souborů ve formátech PNG a PDF. SVG zůstává vektorovým formátem.
+- Preferovaný typ diagramu a preferovaný zdrojový formát jsou samostatné volby.
+- Pokročilá funkce výběru souborů do skupin umožňuje použít uložené profily výběru a náhled pravidel.
+- Chybějící cílovou složku pro hromadnou práci lze po potvrzení vytvořit, přičemž existuje možnost zapamatovat si automatické vytváření pro budoucí chybějící složky.
+- U již existující neprázdné složky je vyžadována jedna potvrzení před zpracováním celé skupiny souborů, nikoli jedna potvrzení pro každý vytvořený soubor.
+- Režim vývojáře odhaluje diagnostické informace poskytovatele a pokročilé nástroje na řešení problémů.

@@ -76,6 +76,59 @@ export class NotemdSettingTab extends PluginSettingTab {
     plugin: NotemdPlugin;
     private providerPanelState = new Map<string, ProviderPanelState>();
 
+    private enhanceSettingsDiscovery(containerEl: HTMLElement): void {
+        if (typeof containerEl.querySelectorAll !== 'function' || typeof containerEl.prepend !== 'function') {
+            return;
+        }
+        const settingItems = Array.from(containerEl.querySelectorAll<HTMLElement>('.setting-item'));
+        const favorites = new Set(this.plugin.settings.favoriteSettingIds ?? []);
+        const header = containerEl.createDiv({ cls: 'notemd-settings-discovery' });
+        containerEl.prepend(header);
+        const search = header.createEl('input', { type: 'search', placeholder: 'Search settings…', cls: 'notemd-settings-search' });
+        search.setAttribute('aria-label', 'Search settings');
+        const favoritesButton = header.createEl('button', { text: '★ Favorites', cls: 'notemd-settings-favorites-filter' });
+        favoritesButton.type = 'button';
+        let favoritesOnly = false;
+        const navigation = header.createDiv({ cls: 'notemd-settings-category-navigation' });
+        Array.from(containerEl.querySelectorAll<HTMLElement>('h2, .setting-item-heading')).forEach((heading, index) => {
+            const label = heading.textContent?.trim();
+            if (!label) return;
+            heading.id = `notemd-settings-category-${index}`;
+            const button = navigation.createEl('button', { text: label });
+            button.type = 'button';
+            button.onclick = () => heading.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        });
+        const applyFilter = () => {
+            const tokens = search.value.toLocaleLowerCase().normalize('NFKC').trim().split(/\s+/).filter(Boolean);
+            settingItems.forEach((item, index) => {
+                const settingId = `setting-${index}`;
+                const searchable = (item.textContent ?? '').toLocaleLowerCase().normalize('NFKC');
+                item.toggleAttribute('hidden', !tokens.every(token => searchable.includes(token)) || (favoritesOnly && !favorites.has(settingId)));
+            });
+        };
+        settingItems.forEach((item, index) => {
+            const settingId = `setting-${index}`;
+            item.dataset.notemdSettingId = settingId;
+            const star = item.createEl('button', { text: favorites.has(settingId) ? '★' : '☆', cls: 'notemd-setting-favorite-button' });
+            star.type = 'button';
+            star.setAttribute('aria-label', favorites.has(settingId) ? 'Remove setting from favorites' : 'Add setting to favorites');
+            star.onclick = async () => {
+                favorites.has(settingId) ? favorites.delete(settingId) : favorites.add(settingId);
+                this.plugin.settings.favoriteSettingIds = [...favorites];
+                await this.plugin.saveSettings();
+                star.textContent = favorites.has(settingId) ? '★' : '☆';
+                applyFilter();
+            };
+        });
+        search.addEventListener('input', applyFilter);
+        favoritesButton.onclick = () => {
+            favoritesOnly = !favoritesOnly;
+            favoritesButton.toggleClass('is-active', favoritesOnly);
+            favoritesButton.setAttribute('aria-pressed', String(favoritesOnly));
+            applyFilter();
+        };
+    }
+
     constructor(app: App, plugin: NotemdPlugin) {
         super(app, plugin);
         this.plugin = plugin;
@@ -3496,5 +3549,6 @@ export class NotemdSettingTab extends PluginSettingTab {
                         }
                     }));
         }
+        this.enhanceSettingsDiscovery(containerEl);
     }
 }

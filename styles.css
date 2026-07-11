@@ -2092,3 +2092,10 @@
 .notemd-recheck-btn {
     margin-top: 1em;
 }
+.notemd-settings-discovery { position: sticky; top: 0; z-index: 5; display: grid; grid-template-columns: minmax(14rem, 1fr) auto; gap: 0.6rem; padding: 0.75rem 0; background: var(--background-primary); border-bottom: 1px solid var(--background-modifier-border); }
+.notemd-settings-search { min-width: 0; width: 100%; }
+.notemd-settings-category-navigation { grid-column: 1 / -1; display: flex; gap: 0.35rem; overflow-x: auto; padding-bottom: 0.2rem; }
+.notemd-settings-category-navigation button, .notemd-settings-favorites-filter { white-space: nowrap; }
+.notemd-settings-favorites-filter.is-active { color: var(--text-on-accent); background: var(--interactive-accent); }
+.notemd-setting-favorite-button { align-self: center; flex: 0 0 auto; margin-inline-start: 0.4rem; padding: 0.2rem 0.45rem; color: var(--text-accent); background: transparent; border: 0; box-shadow: none; }
+@media (max-width: 720px) { .notemd-settings-discovery { grid-template-columns: 1fr; } }

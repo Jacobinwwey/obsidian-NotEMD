@@ -1,6 +1,6 @@
-# Vault Diagram History, Settings Navigation, And Batch Folder Safety Design
+﻿# Vault Diagram History, Settings Navigation, And Batch Folder Safety Design
 
-Language: **English** | [简体中文](./2026-07-11-vault-history-settings-navigation-batch-folder-design.zh-CN.md)
+Language: **English** | [ç®€ä½“ä¸­æ–‡](./2026-07-11-vault-history-settings-navigation-batch-folder-design.zh-CN.md)
 
 ## Outcome
 
@@ -36,7 +36,7 @@ Settings continue to use their existing controls and save behavior. The catalog 
 
 Create a folder preparation operation used before a batch starts:
 
-- Missing folder: ask once whether to create it. The dialog offers “Automatically create missing batch target folders in the future.”
+- Missing folder: ask once whether to create it. The dialog offers â€œAutomatically create missing batch target folders in the future.â€
 - Existing empty folder: proceed without prompting.
 - Existing non-empty folder: show item count and a small sample, then ask once for the whole batch.
 - Existing file at the path: reject with a specific actionable error.

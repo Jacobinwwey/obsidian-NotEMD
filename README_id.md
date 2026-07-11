@@ -714,3 +714,16 @@ _Terakhir diperbarui untuk tag rilis `1.9.3` pada 2026-06-24. Tanggal commit ter
 
 
 ![Star History Chart](https://api.star-history.com/svg?repos=Jacobinwwey/obsidian-NotEMD&type=Date)
+
+<!-- notemd-settings-discovery-guide -->
+## Penemuan pengaturan, riwayat diagram, dan folder batch yang aman
+
+Halaman pengaturan Notemd menyediakan fitur pencarian kasar, navigasi kategori yang luas, serta daftar favorit per pengaturan yang disimpan untuk Vault saat ini.
+
+- Riwayat diagram disimpan pada skala Vault, diurutkan dari yang terbaru ke yang paling lama, dapat dicari, dan ditampilkan dalam kelompok berisi 20 entri. Menghapus catatan riwayat tidak akan menghapus file yang telah dihasilkan.
+- Kontrol PPI saat mengekspor pratinjau diagram memengaruhi tingkat kejelasan file PNG dan PDF. File SVG tetap bersifat vektor.
+- Jenis diagram favorit dan format sumber favorit merupakan pilihan yang terpisah.
+- Fitur pemilihan file batch lanjutan memungkinkan penggunaan profil pemilihan yang telah disimpan serta pratinjau aturan.
+- Jika folder tujuan batch tidak ada, folder tersebut dapat dibuat setelah mendapat konfirmasi, dengan opsi untuk mengingat pembuatan otomatisnya untuk folder yang hilang di masa depan.
+- Untuk folder yang sudah ada dan tidak kosong, diperlukan satu konfirmasi untuk seluruh file dalam batch, bukan satu konfirmasi per file yang dihasilkan.
+- Mode pengembang menampilkan informasi diagnosis dari penyedia layanan serta kontrol pemecahan masalah tingkat lanjut.

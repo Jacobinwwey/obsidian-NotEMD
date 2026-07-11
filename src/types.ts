@@ -1,4 +1,5 @@
 import type { RenderTarget } from './diagram/types';
+import type { DiagramHistoryEntry } from './diagram/history/diagramHistoryRepository';
 
 // Configuration for a single LLM Provider
 export interface LLMProviderConfig {
@@ -215,6 +216,10 @@ export interface NotemdSettings {
     preferredDiagramIntent?: string;
     preferredDiagramRenderTarget?: RenderTarget;
     diagramPreviewExportPpi: number;
+    favoriteSettingIds: string[];
+    diagramHistoryRetentionLimit: number;
+    diagramHistoryEntries: DiagramHistoryEntry[];
+    autoCreateMissingBatchTargetFolders: boolean;
     globalModelAwareMaxTokensTracking?: GlobalModelAwareMaxTokensTracking;
     discoveredModelMaxOutputTokensTracking?: ProviderDiscoveredModelMaxOutputTokensTracking;
     _firstLaunch?: boolean;

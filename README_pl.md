@@ -705,3 +705,16 @@ _Ostatnio odświeżono dla tagu wydania `1.9.3`: 2026-06-24. Data ostatniego com
 
 
 ![Star History Chart](https://api.star-history.com/svg?repos=Jacobinwwey/obsidian-NotEMD&type=Date)
+
+<!-- notemd-settings-discovery-guide -->
+## Odkrywanie ustawień, historia diagramów oraz bezpieczne foldery grupowe
+
+Strona ustawień Notemd oferuje wyszukiwanie nieprecyzyjne, nawigację po dużych kategoriach oraz ulubione ustawienia przechowywane dla bieżącego Vault.
+
+- Historia diagramów jest przechowywana na poziomie Vault, uszeregowana od najnowszych do najstarszych, dostępna do wyszukiwania i paginowana w grupach po 20 elementów. Usunięcie wpisu z historii nie usuwa utworzonych plików.
+- Eksport wersji wstępnej diagramu umożliwia kontrolę rozdzielczości PNG i PDF za pomocą parametru PPI. SVG pozostaje formatem wektorowym.
+- Wybrany typ diagramu oraz preferowany format źródłowy to dwie odrębne opcje do wyboru.
+- Zaawansowane funkcje wyboru plików grupowych umożliwiają korzystanie z zapisanych profili wyboru oraz przeglądanie reguł.
+- Brakujący folder docelowy dla plików grupowych można utworzyć po potwierdzeniu, przy czym istnieje opcja zapamiętania tej automatycznej operacji na przyszłość.
+- Dla istniejącego, niepustego folderu wymagane jest jedno potwierdzenie przed przetworzeniem całej grupy plików, a nie jedno potwierdzenie dla każdego utworzonego pliku.
+- Tryb programisty ujawnia informacje diagnostyczne dostawcy oraz zaawansowane narzędzia do rozwiązywania problemów.

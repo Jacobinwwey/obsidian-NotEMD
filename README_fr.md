@@ -713,3 +713,16 @@ _Dernière actualisation pour le tag de publication `1.9.3` le 2026-06-24. Date 
 
 
 ![Star History Chart](https://api.star-history.com/svg?repos=Jacobinwwey/obsidian-NotEMD&type=Date)
+
+<!-- notemd-settings-discovery-guide -->
+## Découverte des paramètres, historique des diagrammes et dossiers de lot sécurisés
+
+La page des paramètres de Notemd propose une recherche floue, une navigation par grandes catégories, ainsi que des favoris par paramètre stockés pour le Vault actuel.
+
+- L’historique des diagrammes est conservé au niveau du Vault, classé du plus récent au plus ancien, et peut être recherché et paginé par groupes de 20 éléments. La suppression d’un enregistrement de l’historique ne supprime pas les fichiers générés.
+- L’export de la prévisualisation du diagramme permet de contrôler la résolution (PPI) des fichiers PNG et PDF. Les fichiers SVG restent vectoriels.
+- Le type de diagramme préféré et le format source préféré sont deux choix distincts.
+- La sélection avancée des fichiers de lot permet d’utiliser des profils de sélection enregistrés ainsi que des prévisualisations de règles.
+- Un dossier cible de lot manquant peut être créé après confirmation, avec la possibilité de mémoriser cette création automatique pour les dossiers manquants ultérieurs.
+- Un dossier existant et non vide nécessite une seule confirmation pour l’ensemble du lot, et jamais une confirmation par fichier généré.
+- Le mode développeur affiche des diagnostics sur le fournisseur ainsi que des outils avancés de dépannage.

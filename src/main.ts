@@ -8,6 +8,8 @@ import {
     ProviderDiscoveredModelMaxOutputTokensTracking
 } from './types';
 import { DEFAULT_SETTINGS, NOTEMD_SIDEBAR_VIEW_TYPE, NOTEMD_SIDEBAR_ICON } from './constants';
+import { prepareBatchTargetFolder } from './operations/batchTargetFolderPreparation';
+import { createDiagramHistoryRepository } from './diagram/history/diagramHistoryRepository';
 import {
     canonicalizeProviderConfigs,
     resolveCanonicalProviderName
@@ -255,8 +257,30 @@ export default class NotemdPlugin extends Plugin {
         const targetLabel = getRenderTargetDisplayName(artifact.target);
         const previewTitle = formatI18n(i18n.previewModal.title, { target: targetLabel });
         const session = new IframeRenderHost().createSession(artifact, { sourcePath, artifactSaved, previewTitle });
+        const historyRepository = createDiagramHistoryRepository(
+            async () => this.settings.diagramHistoryEntries ?? [],
+            async entries => {
+                this.settings.diagramHistoryEntries = entries;
+                await this.saveSettings();
+            },
+            this.settings.diagramHistoryRetentionLimit
+        );
+        void historyRepository.recordCompleted({
+            id: `diagram-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+            completedAt: Date.now(),
+            title: previewTitle,
+            sourcePath,
+            intent: artifact.sourceIntent ?? 'mindmap',
+            sourceFormat: artifact.target,
+            exportPaths: {},
+            status: 'completed'
+        }).catch(error => console.warn('Diagram history persistence failed; preview remains available.', error));
         new DiagramPreviewModal(this.app, session, this.settings.uiLocale, {
-            exportPpi: this.settings.diagramPreviewExportPpi
+            exportPpi: this.settings.diagramPreviewExportPpi,
+            historyStore: {
+                loadPage: query => historyRepository.query(query),
+                removeEntry: async id => { await historyRepository.removeIndexEntry(id); }
+            }
         }).open();
     }
 
@@ -386,6 +410,73 @@ export default class NotemdPlugin extends Plugin {
         };
     }
 
+    private confirmBatchFolder(message: string, allowRemember: boolean): Promise<{ confirmed: boolean; remember: boolean }> {
+        return new Promise(resolve => {
+            const copy = this.settings.uiLocale?.startsWith('zh') ? {
+                title: '确认批处理文件夹', remember: '以后自动创建缺失的批处理目标文件夹', cancel: '取消', confirm: '继续'
+            } : {
+                title: 'Confirm batch folder', remember: 'Automatically create missing batch target folders in the future', cancel: 'Cancel', confirm: 'Continue'
+            };
+            const modal = new Modal(this.app);
+            let remember = false;
+            modal.titleEl.setText(copy.title);
+            modal.contentEl.createEl('p', { text: message });
+            if (allowRemember) {
+                new Setting(modal.contentEl)
+                    .setName(copy.remember)
+                    .addToggle(toggle => toggle.onChange(value => { remember = value; }));
+            }
+            const actions = modal.contentEl.createDiv({ cls: 'modal-button-container' });
+            const cancel = actions.createEl('button', { text: copy.cancel });
+            const confirm = actions.createEl('button', { text: copy.confirm, cls: 'mod-cta' });
+            let settled = false;
+            const finish = (confirmed: boolean) => {
+                if (settled) return;
+                settled = true;
+                modal.close();
+                resolve({ confirmed, remember: confirmed && remember });
+            };
+            cancel.onclick = () => finish(false);
+            confirm.onclick = () => finish(true);
+            modal.onClose = () => finish(false);
+            modal.open();
+        });
+    }
+
+    private async prepareBatchFolderForRun(folderPath: string): Promise<'ready' | 'cancelled' | 'requires-interaction'> {
+        const result = await prepareBatchTargetFolder({
+            path: folderPath,
+            inspect: async () => {
+                const target = this.app.vault.getAbstractFileByPath(folderPath);
+                if (!target) return { kind: 'missing' } as const;
+                if (!(target instanceof TFolder)) return { kind: 'file' } as const;
+                return {
+                    kind: 'folder' as const,
+                    childCount: target.children.length,
+                    sample: target.children.slice(0, 5).map(child => child.name)
+                };
+            },
+            createFolder: async path => { await this.app.vault.createFolder(path); },
+            confirmMissing: path => this.confirmBatchFolder(`The batch folder "${path}" does not exist. Create it before running this batch?`, true),
+            confirmNonEmpty: async details => (await this.confirmBatchFolder(
+                `The batch folder "${details.path}" contains ${details.childCount} items (${details.sample.join(', ')}). Use this non-empty folder for this batch?`,
+                false
+            )).confirmed,
+            rememberAutoCreate: async enabled => {
+                this.settings.autoCreateMissingBatchTargetFolders = enabled;
+                await this.saveSettings();
+            },
+            autoCreateMissing: this.settings.autoCreateMissingBatchTargetFolders,
+            interactive: true
+        });
+        if (result.reason === 'path-is-file') {
+            const prefix = this.settings.uiLocale?.startsWith('zh') ? '批处理目标路径是文件而不是文件夹' : 'Batch target path is a file, not a folder';
+            const message = `${prefix}: ${folderPath}`;
+            new Notice(message, 10000);
+        }
+        return result.status;
+    }
+
     private createNoteProcessingCommandHost(): NoteProcessingCommandHost {
         return {
             getApp: () => this.app,
@@ -407,6 +498,7 @@ export default class NotemdPlugin extends Plugin {
             getFiles: () => this.app.vault.getFiles(),
             getFolderSelection: () => this.getFolderSelection(),
             getFolderTaskSelection: (taskKind, initialOverride) => this.getFolderTaskSelection(taskKind, initialOverride),
+            prepareBatchTargetFolder: folderPath => this.prepareBatchFolderForRun(folderPath),
             getTaskLanguageCode: (task) => resolveTaskLanguageCode(this.settings, task),
             resolveCompleteFolderPath: (sourceFolderPath) => this.resolveCompleteFolderPath(sourceFolderPath),
             getStepStatusText: (current, total, label) => this.getStepStatusText(current, total, label),

@@ -200,6 +200,10 @@ export const DEFAULT_SETTINGS: NotemdSettings = {
     experimentalDiagramCompatibilityMode: 'legacy-mermaid',
     preferredDiagramRenderTarget: undefined,
     diagramPreviewExportPpi: DEFAULT_PREVIEW_EXPORT_PPI,
+    favoriteSettingIds: [],
+    diagramHistoryRetentionLimit: 500,
+    diagramHistoryEntries: [],
+    autoCreateMissingBatchTargetFolders: false,
     discoveredModelMaxOutputTokensTracking: undefined,
 
     // Slide Export Defaults

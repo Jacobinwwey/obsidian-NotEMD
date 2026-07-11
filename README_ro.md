@@ -702,3 +702,16 @@ _Actualizat ultima dată pentru tagul de release `1.9.3` la 2026-06-24. Data ult
 
 
 ![Star History Chart](https://api.star-history.com/svg?repos=Jacobinwwey/obsidian-NotEMD&type=Date)
+
+<!-- notemd-settings-discovery-guide -->
+## Descoperirea setărilor, istoricul diagramelor și folderele în lot sigure
+
+Pagina de setări a Notemd oferă căutare fuzzy, navigare prin categorii extinse și preferințe pentru fiecare setare, stocate pentru Vault-ul curent.
+
+- istoricul diagramelor este stocat la nivelul Vault-ului, ordonat din cel mai recent înainte, fiind posibilă căutarea și paginarea în grupuri de 20. Ștergerea unei înregistrări din istoric nu șterge fișierele generate.
+- Exportul vizualizării preliminare a diagramelor permite controlul clarității în format PNG și PDF prin parametrul PPI. SVG rămâne bazat pe vectori.
+- Tipul de diagramă preferat și formatul sursă preferat sunt alegeri separate.
+- Opțiunea avansată de selecție a fișierelor în lot permite utilizarea profilurilor de selecție salvate și vizualizarea preliminară a regulilor.
+- Dacă o folderă țintă pentru lot lipsește, aceasta poate fi creată după confirmare, cu opțiunea de a memora crearea automată pentru folderele lipsite viitoare.
+- Pentru o folderă existentă și necăptușită, este necesară o singură confirmare pentru întregul lot, nu o confirmare pentru fiecare fișier generat.
+- Modul de dezvoltator dezvăluie diagnosticele furnizorului și instrumentele avansate de rezolvare a problemelor.

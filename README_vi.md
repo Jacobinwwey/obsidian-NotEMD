@@ -707,3 +707,16 @@ _Lần làm mới gần nhất cho thẻ phát hành `1.9.3` vào 2026-06-24. Ng
 
 
 ![Star History Chart](https://api.star-history.com/svg?repos=Jacobinwwey/obsidian-NotEMD&type=Date)
+
+<!-- notemd-settings-discovery-guide -->
+## Khám phá cài đặt, lịch sử sơ đồ và các thư mục xử lý theo nhóm an toàn
+
+Trang cài đặt của Notemd cung cấp chức năng tìm kiếm mơ hồ, hệ thống điều hướng theo các danh mục lớn, cùng tính năng lưu các mục yêu thích cho từng cài đặt trong Vault hiện tại.
+
+- Lịch sử sơ đồ được lưu ở cấp độ Vault, được sắp xếp theo thứ tự mới nhất trước, có thể tìm kiếm và hiển thị theo từng nhóm 20 mục. Việc xóa một bản ghi lịch sử không làm xóa các tập tin đã được tạo ra.
+- Tùy chọn PPI khi xuất bản trước sơ đồ giúp kiểm soát độ rõ nét của các tập tin PNG và PDF. Còn định dạng SVG vẫn giữ nguyên tính chất vector.
+- Loại sơ đồ ưu tiên và định dạng nguồn ưu tiên là hai tùy chọn riêng biệt.
+- Chế độ chọn tập tin theo nhóm nâng cao cho phép sử dụng các thiết lập đã lưu và xem trước các quy tắc xử lý.
+- Nếu thư mục đích dành cho việc xử lý theo nhóm chưa tồn tại, người dùng có thể tạo nó sau khi xác nhận; đồng thời có tùy chọn để hệ thống tự động tạo thư mục này mỗi khi gặp trường hợp tương tự trong tương lai.
+- Đối với một thư mục đã tồn tại và không trống, chỉ cần một lần xác nhận cho toàn bộ các tập tin trong thư mục đó, chứ không phải một lần xác nhận cho từng tập tin được tạo ra.
+- Chế độ nhà phát triển giúp hiển thị thông tin chẩn đoán từ nhà cung cấp và các công cụ khắc phục sự cố nâng cao.

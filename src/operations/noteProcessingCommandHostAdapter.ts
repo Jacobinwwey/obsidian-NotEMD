@@ -123,6 +123,7 @@ export interface NoteProcessingCommandHost {
         taskKind: FolderTaskKind,
         initialOverride?: FolderTaskFileSelectionOverride
     ) => Promise<FolderTaskInteractiveSelection | null>;
+    prepareBatchTargetFolder?: (folderPath: string) => Promise<'ready' | 'cancelled' | 'requires-interaction'>;
     getTaskLanguageCode: (task: Extract<TaskKey, 'translate'>) => string;
     resolveCompleteFolderPath: (sourceFolderPath: string) => string | null;
     getStepStatusText: (current: number, total: number, label: string) => string;
@@ -333,6 +334,14 @@ async function runBatchGenerateContentForTitlesCommandCoreWithHost(
         throw new Error(uiStrings.notices.batchGenerationCancelled);
     }
     const folderPath = selection.folderPath;
+    if (host.prepareBatchTargetFolder) {
+        const preparation = await host.prepareBatchTargetFolder(folderPath);
+        if (preparation !== 'ready') {
+            useReporter.log(uiStrings.notices.batchGenerationCancelled);
+            useReporter.updateStatus(uiStrings.notices.batchGenerationCancelled, -1);
+            return null;
+        }
+    }
     const effectiveSettings = applyFolderTaskSelectionOverride(host.getSettings(), selection.fileSelectionOverride);
 
     host.updateStatusBar(host.getRunningActionText(actionLabel));

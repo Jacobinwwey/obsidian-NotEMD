@@ -702,3 +702,16 @@ _Utoljára a(z) `1.9.3` kiadási címkéhez frissítve: 2026-06-24. A legutóbbi
 
 
 ![Star History Chart](https://api.star-history.com/svg?repos=Jacobinwwey/obsidian-NotEMD&type=Date)
+
+<!-- notemd-settings-discovery-guide -->
+## Beállítások megtalálása, diagramok története és biztonságos batch mappák
+
+A Notemd beállítások oldala biztosítja a zöldeléses keresést, nagy kategóriák közötti navigációt, valamint az aktuális Vault számára tárolt, egyes beállításokhoz tartozó előnépsorolásokat.
+
+- A diagramok története a Vault szintén tárolódik, újabbakból kezdve sorrendben, és 20 egységként osztva kereshető és oldalazható. Egy történelmi leírás törlése nem törli a készült fájlokat.
+- A diagramok előnézetének exportálásában a PPI értékek határozzák meg a PNG és PDF fájlok minőségét. Az SVG fájlok viszont vektortípusú maradnak.
+- A preferált diagramtípus és a preferált forrásformátum külön kiegészítő választásokként állnak rendelkezésre.
+- A fejlett batch fájlképezés lehetősége lehetővé teszi a megmentett kielegzési profillumokat és a szabályok előnézetét.
+- Ha egy batch mappája nincs, ezt az igazolás után hozható létre, és lehetőség van arra, hogy a jövőben is automatikusan lépjenek létre a hiányzó mappák.
+- Egy már létező, nem tömött mappához az összes fájlt elmentéhez egy igazolás szükséges, soha nem egy igazolás az egyes készült fájlokhoz.
+- A fejlesztő módban láthatók a fornecederek diagnostikai információi és a fejlett hibamegtávolítási eszközök.

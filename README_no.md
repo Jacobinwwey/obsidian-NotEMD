@@ -705,3 +705,16 @@ _Sist oppdatert for utgivelsestaggen `1.9.3` 2026-06-24. Dato for siste commit: 
 
 
 ![Star History Chart](https://api.star-history.com/svg?repos=Jacobinwwey/obsidian-NotEMD&type=Date)
+
+<!-- notemd-settings-discovery-guide -->
+## Oppdagelse av innstillinger, historik over diagrammer og sikre batch-mapper
+
+Notemds innstillingsside tilbyr uskyttet søk, navigasjon gjennom store kategorier, samt favoritter for hver enkelt innstilling som lagres for den aktuelle Vaulten.
+
+- Historikken over diagrammer lagres på Vault-nivå, sortert fra nyeste først, og er søkelig samt paginerbar i grupper på 20 elementer. Når en historiekpost fjernes, blir genererte filer ikke slettet.
+- Ekspor av diagramforhandsvisninger gjør det mulig å kontrollere klarheten i PNG- og PDF-filer via PPI. SVG-forfiler forblir vektorbaserte.
+- Favorditt diagramtyp og favorditt kildemålformat er to separate valgmuligheter.
+- Avansert valg av batch-filer muliggjør å bruke lagrede valgprofiler og forhandsvisninger av regler.
+- En manglende målmappe for batch-oppgifter kan erstattes etter bekreftelse, med mulighet til å huske automatisk opprettelse for fremtidige manglende mapper.
+- En eksisterende, ikke tom mappe krever én bekreftelse før hele batchen kan behandles, aldri én bekreftelse per generert fil.
+- Utviklermodus viser diagnostikkinformasjon fra leverandøren og avanserte kontroller for feilforskning.
