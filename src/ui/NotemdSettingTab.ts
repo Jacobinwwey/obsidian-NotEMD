@@ -44,7 +44,8 @@ import { UI_LOCALE_AUTO } from '../i18n/languageContext';
 import { SUPPORTED_UI_LOCALES } from '../i18n/uiLocales';
 import { formatI18n, getI18nStrings } from '../i18n';
 import { createLocalizedSettingIdResolver, retainKnownSettingIds } from './settings/settingCatalog';
-import { searchSettingCatalog, SettingCatalogEntry } from './settings/settingSearch';
+import { SettingCatalogEntry } from './settings/settingSearch';
+import { resolveSettingsNavigation } from './settings/SettingsNavigation';
 import { runProviderConnectionTestWithHost } from '../operations/providerConnectionTestCommandHostAdapter';
 import { getFolderTaskFileSelectionProfiles, getFolderTaskRegexValidationError } from '../folderTaskFileSelector';
 import { DiscoveredProviderModel, discoverProviderModelsDetailed } from '../providerModelDiscovery';
@@ -114,6 +115,7 @@ export class NotemdSettingTab extends PluginSettingTab {
         favoritesButton.type = 'button';
         let favoritesOnly = false;
         const navigation = header.createDiv({ cls: 'notemd-settings-category-navigation' });
+        const categoryButtons = new Map<string, HTMLButtonElement>();
         const resultCount = header.createDiv({ cls: 'notemd-settings-result-count' });
         resultCount.setAttribute('aria-live', 'polite');
         const emptyState = header.createDiv({ cls: 'notemd-settings-empty-state', text: copy.noResults });
@@ -125,18 +127,21 @@ export class NotemdSettingTab extends PluginSettingTab {
             const button = navigation.createEl('button', { text: label });
             button.type = 'button';
             button.onclick = () => heading.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            const settingIndex = settingItems.indexOf(heading);
+            if (settingIndex >= 0) categoryButtons.set(catalog[settingIndex].id, button);
         });
         const applyFilter = () => {
-            const matchedIds = new Set(searchSettingCatalog(catalog, search.value).map(entry => entry.id));
-            let visibleCount = 0;
+            const navigationState = resolveSettingsNavigation(catalog, { query: search.value, favoritesOnly, favoriteIds: favorites });
             settingItems.forEach((item, index) => {
                 const settingId = catalog[index].id;
-                const hidden = !matchedIds.has(settingId) || (favoritesOnly && !favorites.has(settingId));
+                const hidden = !navigationState.visibleIds.has(settingId);
                 item.toggleAttribute('hidden', hidden);
-                if (!hidden) visibleCount += 1;
             });
-            resultCount.setText(formatI18n(copy.resultCount, { visible: visibleCount, total: settingItems.length }));
-            emptyState.hidden = visibleCount !== 0;
+            categoryButtons.forEach((button, categoryId) => {
+                button.hidden = !navigationState.visibleCategoryIds.has(categoryId);
+            });
+            resultCount.setText(formatI18n(copy.resultCount, { visible: navigationState.visibleCount, total: navigationState.totalCount }));
+            emptyState.hidden = navigationState.visibleCount !== 0;
         };
         settingItems.forEach((item, index) => {
             const settingId = catalog[index].id;

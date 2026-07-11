@@ -4,7 +4,7 @@ Language: **English** | [简体中文](./vault-history-settings-navigation-progr
 
 ## Architecture Comparison
 
-The previous preview history was a 12-item process-local session list. The current implementation adds a Vault-persisted metadata repository with completion-time ordering, normalized token search, intent/source-format/export filters, pagination, retention, and serialized writes. The in-modal list remains the fast recent-session surface; **Manage Vault history** opens the broader searchable index.
+The previous preview history was a 12-item process-local session list. The current implementation adds a Vault-persisted metadata repository with completion-time ordering, normalized token search, intent/source-format/export filters, pagination, retention, and serialized writes. Pure query behavior now lives in `diagramHistoryQuery.ts`, independently of persistence writes. The in-modal list remains the fast recent-session surface; **Manage Vault history** opens the broader searchable index.
 
 The previous settings page was one sequential renderer with no discovery layer. The current page adds a sticky search/navigation surface and Vault-persisted favorites while retaining existing Obsidian `Setting` controls. A pure fuzzy-search module provides the matching boundary. Favorites now resolve IDs from canonical translation paths, so changing locale or inserting an unrelated setting no longer shifts every saved favorite; dynamically generated provider rows receive deterministic content-derived fallback IDs.
 
@@ -19,6 +19,7 @@ The previous batch title flow validated the selected path only inside `batchGene
 - Persisted editable artifacts can now reconstruct the existing direct-preview pipeline from history. Reopening reuses the original history identity instead of creating a misleading new generation record, while subsequent exports continue updating that record.
 - Settings search header, heading navigation, responsive layout, and per-setting favorites saved in plugin data.
 - Settings discovery now announces localized visible/total result counts, shows a localized empty state, assigns catalog entries to their nearest heading category, and prunes obsolete or duplicate favorite IDs without disturbing valid saved order.
+- `SettingsNavigation.ts` now owns the combined fuzzy-query/favorites visibility calculation and visible-category set, so category buttons disappear when their group has no matching settings rather than presenting dead navigation choices.
 - Batch-folder preparation domain and integration before title-generation batch execution.
 - Hosts without an interactive preparation callback now use a read-only Vault inspection fallback. Missing, non-empty, or file-collision targets stop before generation with a recoverable interaction-required status; they do not create folders, emit an error log, or authorize writes.
 - New defaults: `favoriteSettingIds`, `diagramHistoryRetentionLimit`, `diagramHistoryEntries`, and `autoCreateMissingBatchTargetFolders`.

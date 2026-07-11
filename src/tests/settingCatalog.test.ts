@@ -1,5 +1,6 @@
 import { searchSettingCatalog, SettingCatalogEntry } from '../ui/settings/settingSearch';
 import { createLocalizedSettingIdResolver, retainKnownSettingIds } from '../ui/settings/settingCatalog';
+import { resolveSettingsNavigation } from '../ui/settings/SettingsNavigation';
 
 const entries: SettingCatalogEntry[] = [
     { id: 'diagrams.export-ppi', categoryId: 'diagrams', name: 'Image export PPI', description: 'Controls PNG and PDF clarity.', aliases: ['resolution', 'dpi'] },
@@ -45,5 +46,17 @@ describe('localized setting identity', () => {
             ['settings.model', 'removed.setting', 'settings.model', 'settings.timeout'],
             ['settings.model', 'settings.timeout']
         )).toEqual(['settings.model', 'settings.timeout']);
+    });
+});
+
+describe('settings navigation state', () => {
+    test('combines fuzzy search and favorites while reporting visible categories', () => {
+        const result = resolveSettingsNavigation(entries, {
+            query: 'model', favoritesOnly: true, favoriteIds: new Set(['providers.active', 'batch.parallelism'])
+        });
+        expect([...result.visibleIds]).toEqual(['providers.active']);
+        expect([...result.visibleCategoryIds]).toEqual(['providers']);
+        expect(result.visibleCount).toBe(1);
+        expect(result.totalCount).toBe(3);
     });
 });

@@ -2,6 +2,7 @@ import {
     createDiagramHistoryRepository,
     DiagramHistoryEntry
 } from '../diagram/history/diagramHistoryRepository';
+import { queryDiagramHistoryEntries } from '../diagram/history/diagramHistoryQuery';
 
 function entry(id: string, completedAt: number, overrides: Partial<DiagramHistoryEntry> = {}): DiagramHistoryEntry {
     return {
@@ -19,6 +20,10 @@ function entry(id: string, completedAt: number, overrides: Partial<DiagramHistor
 }
 
 describe('diagram history repository', () => {
+    test('exposes storage-independent history querying', () => {
+        const page = queryDiagramHistoryEntries([entry('older', 1), entry('newer', 2)], { pageSize: 20 });
+        expect(page.items.map(item => item.id)).toEqual(['newer', 'older']);
+    });
     test('queries Vault history newest first with fuzzy text, filters, and pagination', async () => {
         let stored = [
             entry('old', 10, { title: 'Quarterly Revenue Flow' }),
