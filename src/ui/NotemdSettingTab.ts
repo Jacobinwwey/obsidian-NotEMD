@@ -43,6 +43,8 @@ import {
 import { UI_LOCALE_AUTO } from '../i18n/languageContext';
 import { SUPPORTED_UI_LOCALES } from '../i18n/uiLocales';
 import { formatI18n, getI18nStrings } from '../i18n';
+import { createLocalizedSettingIdResolver } from './settings/settingCatalog';
+import { searchSettingCatalog, SettingCatalogEntry } from './settings/settingSearch';
 import { runProviderConnectionTestWithHost } from '../operations/providerConnectionTestCommandHostAdapter';
 import { getFolderTaskFileSelectionProfiles, getFolderTaskRegexValidationError } from '../folderTaskFileSelector';
 import { DiscoveredProviderModel, discoverProviderModelsDetailed } from '../providerModelDiscovery';
@@ -81,6 +83,19 @@ export class NotemdSettingTab extends PluginSettingTab {
             return;
         }
         const settingItems = Array.from(containerEl.querySelectorAll<HTMLElement>('.setting-item'));
+        const resolveSettingId = createLocalizedSettingIdResolver(
+            getI18nStrings({ uiLocale: this.plugin.settings.uiLocale }) as unknown as Record<string, unknown>,
+            getI18nStrings({ uiLocale: 'en' }) as unknown as Record<string, unknown>
+        );
+        const duplicateCounts = new Map<string, number>();
+        const catalog = settingItems.map((item): SettingCatalogEntry => {
+            const name = item.querySelector<HTMLElement>('.setting-item-name')?.textContent?.trim() ?? '';
+            const description = item.querySelector<HTMLElement>('.setting-item-description')?.textContent?.trim() ?? '';
+            const baseId = resolveSettingId(name, description);
+            const occurrence = duplicateCounts.get(baseId) ?? 0;
+            duplicateCounts.set(baseId, occurrence + 1);
+            return { id: occurrence === 0 ? baseId : `${baseId}.${occurrence + 1}`, categoryId: 'settings', name, description };
+        });
         const favorites = new Set(this.plugin.settings.favoriteSettingIds ?? []);
         const header = containerEl.createDiv({ cls: 'notemd-settings-discovery' });
         containerEl.prepend(header);
@@ -99,15 +114,14 @@ export class NotemdSettingTab extends PluginSettingTab {
             button.onclick = () => heading.scrollIntoView({ behavior: 'smooth', block: 'start' });
         });
         const applyFilter = () => {
-            const tokens = search.value.toLocaleLowerCase().normalize('NFKC').trim().split(/\s+/).filter(Boolean);
+            const matchedIds = new Set(searchSettingCatalog(catalog, search.value).map(entry => entry.id));
             settingItems.forEach((item, index) => {
-                const settingId = `setting-${index}`;
-                const searchable = (item.textContent ?? '').toLocaleLowerCase().normalize('NFKC');
-                item.toggleAttribute('hidden', !tokens.every(token => searchable.includes(token)) || (favoritesOnly && !favorites.has(settingId)));
+                const settingId = catalog[index].id;
+                item.toggleAttribute('hidden', !matchedIds.has(settingId) || (favoritesOnly && !favorites.has(settingId)));
             });
         };
         settingItems.forEach((item, index) => {
-            const settingId = `setting-${index}`;
+            const settingId = catalog[index].id;
             item.dataset.notemdSettingId = settingId;
             const star = item.createEl('button', { text: favorites.has(settingId) ? '★' : '☆', cls: 'notemd-setting-favorite-button' });
             star.type = 'button';

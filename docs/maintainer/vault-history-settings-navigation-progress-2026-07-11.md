@@ -6,7 +6,7 @@ Language: **English** | [简体中文](./vault-history-settings-navigation-progr
 
 The previous preview history was a 12-item process-local session list. The current implementation adds a Vault-persisted metadata repository with completion-time ordering, normalized token search, intent/source-format/export filters, pagination, retention, and serialized writes. The in-modal list remains the fast recent-session surface; **Manage Vault history** opens the broader searchable index.
 
-The previous settings page was one sequential renderer with no discovery layer. The current page adds a sticky search/navigation surface and Vault-persisted favorites while retaining existing Obsidian `Setting` controls. A pure fuzzy-search module now provides a stable test boundary. The remaining architecture improvement is replacing ordinal fallback IDs with explicit IDs at each setting declaration; the current IDs are locale-independent but can shift when settings are inserted earlier in the page.
+The previous settings page was one sequential renderer with no discovery layer. The current page adds a sticky search/navigation surface and Vault-persisted favorites while retaining existing Obsidian `Setting` controls. A pure fuzzy-search module provides the matching boundary. Favorites now resolve IDs from canonical translation paths, so changing locale or inserting an unrelated setting no longer shifts every saved favorite; dynamically generated provider rows receive deterministic content-derived fallback IDs.
 
 The previous batch title flow validated the selected path only inside `batchGenerateContentForTitles`, which converted a missing folder into a late generic error and error log. The new preparation boundary runs before the batch: missing folders can be created after consent, empty folders continue, non-empty folders require one batch-level confirmation, file collisions are rejected, and non-interactive callers receive a recoverable result. Only missing-folder auto-creation can be remembered.
 
@@ -29,7 +29,7 @@ The previous batch title flow validated the selected path only inside `batchGene
 
 ## Next Direction
 
-1. Promote every setting declaration from ordinal fallback identity to an explicit catalog ID.
+1. Move catalog metadata into setting declarations so category and alias information no longer needs to be reconstructed from the rendered Obsidian controls; stable canonical IDs are already in use.
 2. Add reopen, source-note navigation, and separately confirmed artifact deletion to the history manager using the persisted paths now recorded by save/export completions.
 3. Add date-range controls to the dedicated history modal without increasing preview-modal density; source-format and export filters are now present.
 4. Expose structured CLI policy inputs for missing and non-empty batch folders.
