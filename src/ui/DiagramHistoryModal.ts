@@ -1,5 +1,6 @@
 import { App, Modal } from 'obsidian';
 import type { DiagramHistoryEntry, DiagramHistoryQuery } from '../diagram/history/diagramHistoryRepository';
+import { collectDiagramHistoryArtifactPaths } from '../diagram/history/diagramHistoryActions';
 
 export class DiagramHistoryModal extends Modal {
     private query: DiagramHistoryQuery = { page: 1, pageSize: 20 };
@@ -7,7 +8,8 @@ export class DiagramHistoryModal extends Modal {
     constructor(
         app: App,
         private readonly loadPage: (query: DiagramHistoryQuery) => Promise<{ items: DiagramHistoryEntry[]; page: number; totalPages: number; totalItems: number }>,
-        private readonly removeEntry: (id: string) => Promise<void>
+        private readonly removeEntry: (id: string) => Promise<void>,
+        private readonly deleteArtifacts?: (entry: DiagramHistoryEntry) => Promise<boolean>
     ) { super(app); }
 
     onOpen(): void { void this.render(); }
@@ -33,6 +35,17 @@ export class DiagramHistoryModal extends Modal {
         for (const size of [10, 20, 50]) pageSize.createEl('option', { value: String(size), text: `${size} per page` });
         pageSize.value = String(this.query.pageSize ?? 20);
         pageSize.onchange = () => { this.query.pageSize = Number(pageSize.value); this.query.page = 1; void this.render(); };
+        const addDateFilter = (label: string, current: number | undefined, update: (value: number | undefined) => void) => {
+            const input = toolbar.createEl('input', { type: 'date', attr: { 'aria-label': label } });
+            if (current !== undefined) input.value = new Date(current).toISOString().slice(0, 10);
+            input.onchange = () => {
+                update(input.value ? new Date(`${input.value}T00:00:00`).getTime() : undefined);
+                this.query.page = 1;
+                void this.render();
+            };
+        };
+        addDateFilter('Completed from', this.query.completedFrom, value => { this.query.completedFrom = value; });
+        addDateFilter('Completed to', this.query.completedTo, value => { this.query.completedTo = value === undefined ? undefined : value + 86_399_999; });
         const page = await this.loadPage(this.query);
         this.contentEl.createEl('p', { text: `${page.totalItems} diagrams · newest first`, cls: 'setting-item-description' });
         const list = this.contentEl.createDiv({ cls: 'notemd-diagram-history-list' });
@@ -43,8 +56,26 @@ export class DiagramHistoryModal extends Modal {
             if (entry.sourcePath) item.createDiv({ text: entry.sourcePath, cls: 'setting-item-description' });
             const exports = Object.keys(entry.exportPaths);
             item.createDiv({ text: exports.length ? `Exports: ${exports.join(', ').toUpperCase()}` : 'No visual exports recorded' });
+            const actions = item.createDiv({ cls: 'notemd-diagram-history-actions' });
+            if (entry.sourcePath) {
+                const openNote = actions.createEl('button', { text: 'Open source note' });
+                openNote.onclick = () => { void this.app.workspace.openLinkText(entry.sourcePath as string, '', false); };
+            }
+            for (const path of collectDiagramHistoryArtifactPaths(entry)) {
+                const openArtifact = actions.createEl('button', { text: `Open ${path.split('/').pop() ?? path}` });
+                openArtifact.onclick = () => { void this.app.workspace.openLinkText(path, '', false); };
+            }
             const remove = item.createEl('button', { text: 'Remove from history' });
             remove.onclick = async () => { await this.removeEntry(entry.id); await this.render(); };
+            if (this.deleteArtifacts && collectDiagramHistoryArtifactPaths(entry).length > 0) {
+                const deleteArtifacts = item.createEl('button', { text: 'Delete artifacts…', cls: 'mod-warning' });
+                deleteArtifacts.onclick = async () => {
+                    if (await this.deleteArtifacts!(entry)) {
+                        await this.removeEntry(entry.id);
+                        await this.render();
+                    }
+                };
+            }
         }
         const pager = this.contentEl.createDiv({ cls: 'notemd-diagram-history-pager' });
         const previous = pager.createEl('button', { text: 'Previous' });

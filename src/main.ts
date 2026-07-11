@@ -10,6 +10,8 @@ import {
 import { DEFAULT_SETTINGS, NOTEMD_SIDEBAR_VIEW_TYPE, NOTEMD_SIDEBAR_ICON } from './constants';
 import { prepareBatchTargetFolder } from './operations/batchTargetFolderPreparation';
 import { createDiagramHistoryRepository } from './diagram/history/diagramHistoryRepository';
+import type { DiagramHistoryEntry } from './diagram/history/diagramHistoryRepository';
+import { collectDiagramHistoryArtifactPaths } from './diagram/history/diagramHistoryActions';
 import {
     canonicalizeProviderConfigs,
     resolveCanonicalProviderName
@@ -283,7 +285,8 @@ export default class NotemdPlugin extends Plugin {
                 loadPage: query => historyRepository.query(query),
                 removeEntry: async id => { await historyRepository.removeIndexEntry(id); },
                 recordArtifactPath: (id, path) => historyRepository.recordArtifactPath(id, path),
-                recordExportPath: (id, kind, path) => historyRepository.recordExportPath(id, kind, path)
+                recordExportPath: (id, kind, path) => historyRepository.recordExportPath(id, kind, path),
+                deleteArtifacts: entry => this.deleteDiagramHistoryArtifacts(entry)
             }
         }).open();
     }
@@ -412,6 +415,38 @@ export default class NotemdPlugin extends Plugin {
             configHost: this.createPluginConfigCommandHost(),
             logError: (message, error) => console.error(message, error)
         };
+    }
+
+    private async deleteDiagramHistoryArtifacts(entry: DiagramHistoryEntry): Promise<boolean> {
+        const files = collectDiagramHistoryArtifactPaths(entry)
+            .map(path => this.app.vault.getAbstractFileByPath(path))
+            .filter((file): file is TFile => file instanceof TFile);
+        if (files.length === 0) return true;
+        const copy = this.getUiStrings().previewModal;
+        const confirmed = await new Promise<boolean>(resolve => {
+            const modal = new Modal(this.app);
+            modal.titleEl.setText(copy.deleteArtifactsTitle);
+            modal.contentEl.createEl('p', { text: formatI18n(copy.deleteArtifactsMessage, { count: files.length }) });
+            const list = modal.contentEl.createEl('ul');
+            files.forEach(file => list.createEl('li', { text: file.path }));
+            const actions = modal.contentEl.createDiv({ cls: 'modal-button-container' });
+            const cancel = actions.createEl('button', { text: copy.deleteArtifactsCancel });
+            const remove = actions.createEl('button', { text: copy.deleteArtifactsConfirm, cls: 'mod-warning' });
+            let settled = false;
+            const finish = (value: boolean) => {
+                if (settled) return;
+                settled = true;
+                modal.close();
+                resolve(value);
+            };
+            cancel.onclick = () => finish(false);
+            remove.onclick = () => finish(true);
+            modal.onClose = () => finish(false);
+            modal.open();
+        });
+        if (!confirmed) return false;
+        for (const file of files) await this.app.vault.trash(file, true);
+        return true;
     }
 
     private confirmBatchFolder(message: string, allowRemember: boolean): Promise<{ confirmed: boolean; remember: boolean }> {

@@ -988,7 +988,11 @@ export const STRINGS_EN = {
             warnings: 'warning(s)',
             info: 'info'
         },
-        diagnosticAdvice: 'Advice: {advice}'
+        diagnosticAdvice: 'Advice: {advice}',
+        deleteArtifactsTitle: 'Delete generated diagram artifacts?',
+        deleteArtifactsMessage: 'Move {count} generated file(s) to the Vault trash? The source note will not be deleted.',
+        deleteArtifactsCancel: 'Cancel',
+        deleteArtifactsConfirm: 'Move to trash'
     },
     slideExport: {
         settingsHeading: 'Slide Export',
