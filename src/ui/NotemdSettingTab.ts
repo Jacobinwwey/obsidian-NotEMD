@@ -43,7 +43,7 @@ import {
 import { UI_LOCALE_AUTO } from '../i18n/languageContext';
 import { SUPPORTED_UI_LOCALES } from '../i18n/uiLocales';
 import { formatI18n, getI18nStrings } from '../i18n';
-import { createLocalizedSettingIdResolver, retainKnownSettingIds } from './settings/settingCatalog';
+import { createLocalizedSettingMetadataResolver, retainKnownSettingIds } from './settings/settingCatalog';
 import { SettingCatalogEntry } from './settings/settingSearch';
 import { resolveSettingsNavigation } from './settings/SettingsNavigation';
 import { runProviderConnectionTestWithHost } from '../operations/providerConnectionTestCommandHostAdapter';
@@ -78,27 +78,56 @@ type ProviderPanelState = {
 export class NotemdSettingTab extends PluginSettingTab {
     plugin: NotemdPlugin;
     private providerPanelState = new Map<string, ProviderPanelState>();
+    private readonly settingDeclarationCopy = new Map<HTMLElement, { name: string; description: string }>();
+
+    private createCatalogSetting(containerEl: HTMLElement): Setting {
+        const setting = new Setting(containerEl);
+        const copy = { name: '', description: '' };
+        this.settingDeclarationCopy.set(setting.settingEl, copy);
+        const setName = setting.setName.bind(setting);
+        const setDesc = setting.setDesc.bind(setting);
+        setting.setName = (name) => {
+            copy.name = typeof name === 'string' ? name : name.textContent ?? '';
+            setName(name);
+            return setting;
+        };
+        setting.setDesc = (description) => {
+            copy.description = typeof description === 'string' ? description : description.textContent ?? '';
+            setDesc(description);
+            return setting;
+        };
+        return setting;
+    }
 
     private enhanceSettingsDiscovery(containerEl: HTMLElement): void {
         if (typeof containerEl.querySelectorAll !== 'function' || typeof containerEl.prepend !== 'function') {
             return;
         }
         const settingItems = Array.from(containerEl.querySelectorAll<HTMLElement>('.setting-item'));
-        const resolveSettingId = createLocalizedSettingIdResolver(
+        const resolveSettingMetadata = createLocalizedSettingMetadataResolver(
             getI18nStrings({ uiLocale: this.plugin.settings.uiLocale }) as unknown as Record<string, unknown>,
             getI18nStrings({ uiLocale: 'en' }) as unknown as Record<string, unknown>
         );
         const duplicateCounts = new Map<string, number>();
         let currentCategoryId = 'settings.general';
         const catalog = settingItems.map((item): SettingCatalogEntry => {
-            const name = item.querySelector<HTMLElement>('.setting-item-name')?.textContent?.trim() ?? '';
-            const description = item.querySelector<HTMLElement>('.setting-item-description')?.textContent?.trim() ?? '';
-            const baseId = resolveSettingId(name, description);
+            const declaredCopy = this.settingDeclarationCopy.get(item);
+            const name = declaredCopy?.name.trim() ?? '';
+            const description = declaredCopy?.description.trim() ?? '';
+            const metadata = resolveSettingMetadata(name, description);
+            const baseId = metadata.id;
             const occurrence = duplicateCounts.get(baseId) ?? 0;
             duplicateCounts.set(baseId, occurrence + 1);
             const id = occurrence === 0 ? baseId : `${baseId}.${occurrence + 1}`;
             if (item.matches('.setting-item-heading')) currentCategoryId = id;
-            return { id, categoryId: currentCategoryId, name, description };
+            return {
+                id,
+                categoryId: currentCategoryId,
+                name,
+                description,
+                aliases: metadata.aliases,
+                advanced: Boolean(item.closest('.notemd-provider-advanced-settings'))
+            };
         });
         const retainedFavoriteIds = retainKnownSettingIds(this.plugin.settings.favoriteSettingIds ?? [], catalog.map(entry => entry.id));
         const favorites = new Set(retainedFavoriteIds);
@@ -225,7 +254,7 @@ export class NotemdSettingTab extends PluginSettingTab {
         const customValue = '__custom__';
         const currentValue = this.plugin.settings[settingKey] || placeholder;
         const presetSet = new Set(presets);
-        const setting = new Setting(containerEl).setName(name).setDesc(desc);
+        const setting = this.createCatalogSetting(containerEl).setName(name).setDesc(desc);
         setting.addDropdown(dropdown => {
             for (const preset of presets) {
                 dropdown.addOption(preset, preset);
@@ -869,7 +898,7 @@ export class NotemdSettingTab extends PluginSettingTab {
             ? providerI18n.fetchModelsUnavailableReasons[discovery.disableReasonKey]
             : providerI18n.fetchModelsUnavailableReasonDefault;
 
-        new Setting(containerEl)
+        this.createCatalogSetting(containerEl)
             .setName(providerI18n.fetchModelsName)
             .setDesc(
                 discovery.mode === 'none'
@@ -933,7 +962,7 @@ export class NotemdSettingTab extends PluginSettingTab {
                     });
             });
 
-        new Setting(containerEl)
+        this.createCatalogSetting(containerEl)
             .setName(providerI18n.discoveredModelTokenSyncName)
             .setDesc(providerI18n.discoveredModelTokenSyncDesc)
             .addToggle(toggle => toggle
@@ -1073,7 +1102,7 @@ export class NotemdSettingTab extends PluginSettingTab {
                         provider: provider.name,
                         extra: provider.name === 'LMStudio' ? providerI18n.apiKeyExtraLmStudio : ''
                     });
-                const setting = new Setting(containerEl)
+                const setting = this.createCatalogSetting(containerEl)
                     .setName(providerI18n.apiKeyName)
                     .setDesc(apiKeyDescription);
                 this.addProviderTextField(
@@ -1086,7 +1115,7 @@ export class NotemdSettingTab extends PluginSettingTab {
                 break;
             }
             case 'baseUrl': {
-                const setting = new Setting(containerEl)
+                const setting = this.createCatalogSetting(containerEl)
                     .setName(providerI18n.baseUrlName)
                     .setDesc(formatI18n(providerI18n.baseUrlDesc, {
                         provider: provider.name,
@@ -1102,7 +1131,7 @@ export class NotemdSettingTab extends PluginSettingTab {
                 break;
             }
             case 'model': {
-                const setting = new Setting(containerEl)
+                const setting = this.createCatalogSetting(containerEl)
                     .setName(providerI18n.modelName)
                     .setDesc(this.getProviderModelDescription(provider, formatI18n(providerI18n.modelDesc, { provider: provider.name })));
                 this.addProviderTextField(
@@ -1115,7 +1144,7 @@ export class NotemdSettingTab extends PluginSettingTab {
                 break;
             }
             case 'temperature': {
-                const setting = new Setting(containerEl)
+                const setting = this.createCatalogSetting(containerEl)
                     .setName(providerI18n.temperatureName)
                     .setDesc(providerI18n.temperatureDesc);
                 setting.addSlider(slider => slider
@@ -1129,7 +1158,7 @@ export class NotemdSettingTab extends PluginSettingTab {
                 break;
             }
             case 'topP': {
-                const setting = new Setting(containerEl)
+                const setting = this.createCatalogSetting(containerEl)
                     .setName(providerI18n.topPName)
                     .setDesc(providerI18n.topPDesc);
                 this.addProviderNumberField(
@@ -1152,7 +1181,7 @@ export class NotemdSettingTab extends PluginSettingTab {
                 break;
             }
             case 'reasoningEffort': {
-                const setting = new Setting(containerEl)
+                const setting = this.createCatalogSetting(containerEl)
                     .setName(providerI18n.reasoningEffortName)
                     .setDesc(providerI18n.reasoningEffortDesc);
                 this.addProviderTextField(
@@ -1174,7 +1203,7 @@ export class NotemdSettingTab extends PluginSettingTab {
                 break;
             }
             case 'thinkingEnabled': {
-                new Setting(containerEl)
+                this.createCatalogSetting(containerEl)
                     .setName(providerI18n.thinkingEnabledName)
                     .setDesc(providerI18n.thinkingEnabledDesc)
                     .addToggle(toggle => toggle
@@ -1186,7 +1215,7 @@ export class NotemdSettingTab extends PluginSettingTab {
                 break;
             }
             case 'apiVersion': {
-                const setting = new Setting(containerEl)
+                const setting = this.createCatalogSetting(containerEl)
                     .setName(providerI18n.apiVersionName)
                     .setDesc(providerI18n.apiVersionDesc);
                 this.addProviderTextField(
@@ -1199,7 +1228,7 @@ export class NotemdSettingTab extends PluginSettingTab {
                 break;
             }
             case 'maxOutputTokens': {
-                const setting = new Setting(containerEl)
+                const setting = this.createCatalogSetting(containerEl)
                     .setName(providerI18n.maxOutputTokensName)
                     .setDesc(this.getProviderMaxOutputTokensDescription(provider, providerI18n.maxOutputTokensDesc));
                 this.addProviderNumberField(
@@ -1455,7 +1484,7 @@ export class NotemdSettingTab extends PluginSettingTab {
     }
 
     private renderFolderTaskFileSelectionProfileManager(containerEl: HTMLElement, folderTaskFilterI18n: any): void {
-        new Setting(containerEl)
+        this.createCatalogSetting(containerEl)
             .setName(folderTaskFilterI18n.profilesHeading)
             .setDesc(folderTaskFilterI18n.profilesDesc);
 
@@ -1512,7 +1541,7 @@ export class NotemdSettingTab extends PluginSettingTab {
 
         profiles.forEach((profile, index) => {
             const fallbackProfileName = this.getDefaultFolderTaskProfileName(folderTaskFilterI18n, index + 1);
-            new Setting(containerEl)
+            this.createCatalogSetting(containerEl)
                 .setName(profile.name || fallbackProfileName)
                 .setDesc(folderTaskFilterI18n.profileCardDesc)
                 .addButton(button => button
@@ -1527,7 +1556,7 @@ export class NotemdSettingTab extends PluginSettingTab {
                     }));
 
             this.addDeferredTextSetting(
-                new Setting(containerEl)
+                this.createCatalogSetting(containerEl)
                     .setName(folderTaskFilterI18n.profileNameName)
                     .setDesc(folderTaskFilterI18n.profileNameDesc),
                 {
@@ -1543,7 +1572,7 @@ export class NotemdSettingTab extends PluginSettingTab {
             );
 
             this.addDeferredTextSetting(
-                new Setting(containerEl)
+                this.createCatalogSetting(containerEl)
                     .setName(folderTaskFilterI18n.profileFolderPathName)
                     .setDesc(folderTaskFilterI18n.profileFolderPathDesc),
                 {
@@ -1558,7 +1587,7 @@ export class NotemdSettingTab extends PluginSettingTab {
                 }
             );
 
-            new Setting(containerEl)
+            this.createCatalogSetting(containerEl)
                 .setName(folderTaskFilterI18n.modeName)
                 .setDesc(folderTaskFilterI18n.modeDesc)
                 .addDropdown(dropdown => dropdown
@@ -1586,7 +1615,7 @@ export class NotemdSettingTab extends PluginSettingTab {
                     }));
 
             this.addDeferredTextSetting(
-                new Setting(containerEl)
+                this.createCatalogSetting(containerEl)
                     .setName(folderTaskFilterI18n.patternName)
                     .setDesc(folderTaskFilterI18n.patternDesc),
                 {
@@ -1612,7 +1641,7 @@ export class NotemdSettingTab extends PluginSettingTab {
                 }
             );
 
-            new Setting(containerEl)
+            this.createCatalogSetting(containerEl)
                 .setName(folderTaskFilterI18n.targetName)
                 .setDesc(folderTaskFilterI18n.targetDesc)
                 .addDropdown(dropdown => dropdown
@@ -1626,7 +1655,7 @@ export class NotemdSettingTab extends PluginSettingTab {
                         }));
                     }));
 
-            new Setting(containerEl)
+            this.createCatalogSetting(containerEl)
                 .setName(folderTaskFilterI18n.caseSensitiveName)
                 .setDesc(folderTaskFilterI18n.caseSensitiveDesc)
                 .addToggle(toggle => toggle
@@ -1638,7 +1667,7 @@ export class NotemdSettingTab extends PluginSettingTab {
                         }));
                     }));
 
-            new Setting(containerEl)
+            this.createCatalogSetting(containerEl)
                 .setName(folderTaskFilterI18n.invertName)
                 .setDesc(folderTaskFilterI18n.invertDesc)
                 .addToggle(toggle => toggle
@@ -1650,7 +1679,7 @@ export class NotemdSettingTab extends PluginSettingTab {
                         }));
                     }));
 
-            new Setting(containerEl)
+            this.createCatalogSetting(containerEl)
                 .setName(folderTaskFilterI18n.includeSubfoldersName)
                 .setDesc(folderTaskFilterI18n.includeSubfoldersDesc)
                 .addDropdown(dropdown => dropdown
@@ -1675,6 +1704,7 @@ export class NotemdSettingTab extends PluginSettingTab {
     display(): void {
         const { containerEl } = this;
         containerEl.empty();
+        this.settingDeclarationCopy.clear();
         const i18n = getI18nStrings({ uiLocale: this.plugin.settings.uiLocale });
         const providerI18n = i18n.settings.providerConfig;
         const multiModelI18n = i18n.settings.multiModel;
@@ -1720,8 +1750,8 @@ export class NotemdSettingTab extends PluginSettingTab {
             containerEl.createEl('hr');
         }
 
-        new Setting(containerEl).setName(settingsResetI18n.heading).setHeading();
-        new Setting(containerEl)
+        this.createCatalogSetting(containerEl).setName(settingsResetI18n.heading).setHeading();
+        this.createCatalogSetting(containerEl)
             .setName(settingsResetI18n.completeName)
             .setDesc(settingsResetI18n.completeDesc)
             .addButton(button => button
@@ -1734,7 +1764,7 @@ export class NotemdSettingTab extends PluginSettingTab {
                     new Notice(settingsResetI18n.completeNotice);
                 }));
 
-        new Setting(containerEl)
+        this.createCatalogSetting(containerEl)
             .setName(settingsResetI18n.partialName)
             .setDesc(settingsResetI18n.partialDesc)
             .addButton(button => button
@@ -1749,7 +1779,7 @@ export class NotemdSettingTab extends PluginSettingTab {
         containerEl.createEl('hr');
 
         // --- Provider Configuration ---
-        new Setting(containerEl).setName(providerI18n.heading).setHeading();
+        this.createCatalogSetting(containerEl).setName(providerI18n.heading).setHeading();
         const providerSupportCallout = containerEl.createDiv({ cls: 'notemd-provider-callout' });
         providerSupportCallout.createEl('strong', {
             text: formatI18n(providerI18n.summaryTitle, { count: this.plugin.settings.providers.length })
@@ -1758,7 +1788,7 @@ export class NotemdSettingTab extends PluginSettingTab {
             text: providerI18n.summaryDesc
         });
 
-        const providerMgmtSetting = new Setting(containerEl)
+        const providerMgmtSetting = this.createCatalogSetting(containerEl)
             .setName(providerI18n.manageName)
             .setDesc(providerI18n.manageDesc);
         providerMgmtSetting.addButton(button => button
@@ -1766,7 +1796,7 @@ export class NotemdSettingTab extends PluginSettingTab {
         providerMgmtSetting.addButton(button => button
             .setButtonText(providerI18n.importButton).setTooltip(providerI18n.importTooltip).onClick(() => this.importProviderSettings()));
 
-        new Setting(containerEl)
+        this.createCatalogSetting(containerEl)
             .setName(providerI18n.activeProviderName)
             .setDesc(providerI18n.activeProviderDesc)
             .addDropdown(dropdown => {
@@ -1784,7 +1814,7 @@ export class NotemdSettingTab extends PluginSettingTab {
         const activeProvider = this.plugin.settings.providers.find(p => p.name === this.plugin.settings.activeProvider);
 
         if (activeProvider) {
-            new Setting(containerEl).setName(formatI18n(providerI18n.providerDetailsHeading, { provider: activeProvider.name })).setHeading();
+            this.createCatalogSetting(containerEl).setName(formatI18n(providerI18n.providerDetailsHeading, { provider: activeProvider.name })).setHeading();
             this.renderProviderSummary(containerEl, activeProvider);
             this.renderProviderValidation(containerEl, activeProvider);
 
@@ -1799,7 +1829,7 @@ export class NotemdSettingTab extends PluginSettingTab {
 
             const hasContextualFields = providerFields.some(field => field.group === 'contextual');
             if (hasContextualFields) {
-                new Setting(containerEl)
+                this.createCatalogSetting(containerEl)
                     .setName(providerI18n.contextualSettingsName)
                     .setHeading();
                 providerFields
@@ -1828,7 +1858,7 @@ export class NotemdSettingTab extends PluginSettingTab {
                 advancedFields.forEach(field => this.renderProviderField(advancedDetails, activeProvider, field));
             }
 
-            new Setting(containerEl)
+            this.createCatalogSetting(containerEl)
                 .setName(formatI18n(providerI18n.testConnectionName, { provider: activeProvider.name }))
                 .setDesc(providerI18n.testConnectionDesc)
                 .addButton(button => button
@@ -1864,7 +1894,7 @@ export class NotemdSettingTab extends PluginSettingTab {
         } else {
             containerEl.createEl('p', { text: providerI18n.missingActiveProvider, cls: 'notemd-error-text' });
 
-            new Setting(containerEl)
+            this.createCatalogSetting(containerEl)
                 .setName(providerI18n.localOnlyName)
                 .setDesc(providerI18n.localOnlyDesc)
                 .addToggle(toggle => toggle
@@ -1876,8 +1906,8 @@ export class NotemdSettingTab extends PluginSettingTab {
         }
 
         // --- Multi-Model Settings ---
-        new Setting(containerEl).setName(multiModelI18n.heading).setHeading();
-        new Setting(containerEl)
+        this.createCatalogSetting(containerEl).setName(multiModelI18n.heading).setHeading();
+        this.createCatalogSetting(containerEl)
             .setName(multiModelI18n.usePerTaskProvidersName)
                 .setDesc(multiModelI18n.usePerTaskProvidersDesc)
             .addToggle(toggle => toggle
@@ -1901,7 +1931,7 @@ export class NotemdSettingTab extends PluginSettingTab {
             const providerNames = getOrderedProviderNames(this.plugin.settings.providers);
             // Use the specific key types defined above
             const createTaskModelSettings = (providerSettingName: keyof NotemdSettings, modelSettingName: keyof NotemdSettings, taskDesc: string) => {
-                const taskSetting = new Setting(containerEl)
+                const taskSetting = this.createCatalogSetting(containerEl)
                     .setName(formatI18n(multiModelI18n.taskProviderModelLabel, { task: taskDesc }))
                     .setDesc(formatI18n(multiModelI18n.taskProviderModelDesc, { task: taskDesc }));
                 taskSetting.addDropdown(dropdown => {
@@ -1932,11 +1962,11 @@ export class NotemdSettingTab extends PluginSettingTab {
         }
 
         // --- General Settings ---
-        this.markSection(new Setting(containerEl).setName(generalOutputI18n.processedHeading).setHeading(), 'processed-output');
-        new Setting(containerEl).setName(generalOutputI18n.processedSavePathName).setDesc(generalOutputI18n.processedSavePathDesc).addToggle(toggle => toggle.setValue(this.plugin.settings.useCustomProcessedFileFolder).onChange(async (value) => { this.plugin.settings.useCustomProcessedFileFolder = value; await this.plugin.saveSettings(); this.display(); }));
+        this.markSection(this.createCatalogSetting(containerEl).setName(generalOutputI18n.processedHeading).setHeading(), 'processed-output');
+        this.createCatalogSetting(containerEl).setName(generalOutputI18n.processedSavePathName).setDesc(generalOutputI18n.processedSavePathDesc).addToggle(toggle => toggle.setValue(this.plugin.settings.useCustomProcessedFileFolder).onChange(async (value) => { this.plugin.settings.useCustomProcessedFileFolder = value; await this.plugin.saveSettings(); this.display(); }));
         if (this.plugin.settings.useCustomProcessedFileFolder) {
             this.addDeferredTextSetting(
-                new Setting(containerEl).setName(generalOutputI18n.processedFolderPathName).setDesc(generalOutputI18n.processedFolderPathDesc),
+                this.createCatalogSetting(containerEl).setName(generalOutputI18n.processedFolderPathName).setDesc(generalOutputI18n.processedFolderPathDesc),
                 {
                     placeholder: generalOutputI18n.processedFolderPathPlaceholder,
                     value: this.plugin.settings.processedFileFolder,
@@ -1947,11 +1977,11 @@ export class NotemdSettingTab extends PluginSettingTab {
                 }
             );
         }
-        new Setting(containerEl).setName(generalOutputI18n.moveOriginalName).setDesc(generalOutputI18n.moveOriginalDesc).addToggle(toggle => toggle.setValue(this.plugin.settings.moveOriginalFileOnProcess).onChange(async (value) => { this.plugin.settings.moveOriginalFileOnProcess = value; await this.plugin.saveSettings(); }));
-        new Setting(containerEl).setName(generalOutputI18n.customAddLinksFilenameName).setDesc(generalOutputI18n.customAddLinksFilenameDesc).addToggle(toggle => toggle.setValue(this.plugin.settings.useCustomAddLinksSuffix).onChange(async (value) => { this.plugin.settings.useCustomAddLinksSuffix = value; await this.plugin.saveSettings(); this.display(); }));
+        this.createCatalogSetting(containerEl).setName(generalOutputI18n.moveOriginalName).setDesc(generalOutputI18n.moveOriginalDesc).addToggle(toggle => toggle.setValue(this.plugin.settings.moveOriginalFileOnProcess).onChange(async (value) => { this.plugin.settings.moveOriginalFileOnProcess = value; await this.plugin.saveSettings(); }));
+        this.createCatalogSetting(containerEl).setName(generalOutputI18n.customAddLinksFilenameName).setDesc(generalOutputI18n.customAddLinksFilenameDesc).addToggle(toggle => toggle.setValue(this.plugin.settings.useCustomAddLinksSuffix).onChange(async (value) => { this.plugin.settings.useCustomAddLinksSuffix = value; await this.plugin.saveSettings(); this.display(); }));
         if (this.plugin.settings.useCustomAddLinksSuffix) {
             this.addDeferredTextSetting(
-                new Setting(containerEl).setName(generalOutputI18n.addLinksSuffixName).setDesc(generalOutputI18n.addLinksSuffixDesc),
+                this.createCatalogSetting(containerEl).setName(generalOutputI18n.addLinksSuffixName).setDesc(generalOutputI18n.addLinksSuffixDesc),
                 {
                     placeholder: generalOutputI18n.addLinksSuffixPlaceholder,
                     value: this.plugin.settings.addLinksCustomSuffix,
@@ -1962,7 +1992,7 @@ export class NotemdSettingTab extends PluginSettingTab {
                 }
             );
         }
-        new Setting(containerEl)
+        this.createCatalogSetting(containerEl)
             .setName(generalOutputI18n.removeCodeFencesName)
             .setDesc(generalOutputI18n.removeCodeFencesDesc)
             .addToggle(toggle => toggle
@@ -1972,11 +2002,11 @@ export class NotemdSettingTab extends PluginSettingTab {
                     await this.plugin.saveSettings();
                 }));
 
-        this.markSection(new Setting(containerEl).setName(generalOutputI18n.conceptNoteHeading).setHeading(), 'concept-note-output');
-        new Setting(containerEl).setName(generalOutputI18n.conceptNotePathName).setDesc(generalOutputI18n.conceptNotePathDesc).addToggle(toggle => toggle.setValue(this.plugin.settings.useCustomConceptNoteFolder).onChange(async (value) => { this.plugin.settings.useCustomConceptNoteFolder = value; await this.plugin.saveSettings(); this.display(); }));
+        this.markSection(this.createCatalogSetting(containerEl).setName(generalOutputI18n.conceptNoteHeading).setHeading(), 'concept-note-output');
+        this.createCatalogSetting(containerEl).setName(generalOutputI18n.conceptNotePathName).setDesc(generalOutputI18n.conceptNotePathDesc).addToggle(toggle => toggle.setValue(this.plugin.settings.useCustomConceptNoteFolder).onChange(async (value) => { this.plugin.settings.useCustomConceptNoteFolder = value; await this.plugin.saveSettings(); this.display(); }));
         if (this.plugin.settings.useCustomConceptNoteFolder) {
             this.addDeferredTextSetting(
-                new Setting(containerEl).setName(generalOutputI18n.conceptNoteFolderName).setDesc(generalOutputI18n.conceptNoteFolderDesc),
+                this.createCatalogSetting(containerEl).setName(generalOutputI18n.conceptNoteFolderName).setDesc(generalOutputI18n.conceptNoteFolderDesc),
                 {
                     placeholder: generalOutputI18n.conceptNoteFolderPlaceholder,
                     value: this.plugin.settings.conceptNoteFolder,
@@ -1988,10 +2018,10 @@ export class NotemdSettingTab extends PluginSettingTab {
             );
         }
 
-        new Setting(containerEl).setName(generalOutputI18n.conceptLogHeading).setHeading();
-        new Setting(containerEl).setName(generalOutputI18n.generateConceptLogName).setDesc(generalOutputI18n.generateConceptLogDesc).addToggle(toggle => toggle.setValue(this.plugin.settings.generateConceptLogFile).onChange(async (value) => { this.plugin.settings.generateConceptLogFile = value; await this.plugin.saveSettings(); this.display(); }));
+        this.createCatalogSetting(containerEl).setName(generalOutputI18n.conceptLogHeading).setHeading();
+        this.createCatalogSetting(containerEl).setName(generalOutputI18n.generateConceptLogName).setDesc(generalOutputI18n.generateConceptLogDesc).addToggle(toggle => toggle.setValue(this.plugin.settings.generateConceptLogFile).onChange(async (value) => { this.plugin.settings.generateConceptLogFile = value; await this.plugin.saveSettings(); this.display(); }));
         if (this.plugin.settings.generateConceptLogFile) {
-            const logFolderSetting = new Setting(containerEl).setName(generalOutputI18n.customLogPathName);
+            const logFolderSetting = this.createCatalogSetting(containerEl).setName(generalOutputI18n.customLogPathName);
             const logFolderDesc = this.plugin.settings.useCustomConceptNoteFolder && this.plugin.settings.conceptNoteFolder
                 ? formatI18n(generalOutputI18n.customLogPathDescWithConceptFolder, { folder: this.plugin.settings.conceptNoteFolder })
                 : generalOutputI18n.customLogPathDescVault;
@@ -1999,7 +2029,7 @@ export class NotemdSettingTab extends PluginSettingTab {
             logFolderSetting.addToggle(toggle => toggle.setValue(this.plugin.settings.useCustomConceptLogFolder).onChange(async (value) => { this.plugin.settings.useCustomConceptLogFolder = value; await this.plugin.saveSettings(); this.display(); }));
             if (this.plugin.settings.useCustomConceptLogFolder) {
                 this.addDeferredTextSetting(
-                    new Setting(containerEl).setName(generalOutputI18n.conceptLogFolderName).setDesc(generalOutputI18n.conceptLogFolderDesc),
+                    this.createCatalogSetting(containerEl).setName(generalOutputI18n.conceptLogFolderName).setDesc(generalOutputI18n.conceptLogFolderDesc),
                     {
                         placeholder: generalOutputI18n.conceptLogFolderPlaceholder,
                         value: this.plugin.settings.conceptLogFolderPath,
@@ -2010,12 +2040,12 @@ export class NotemdSettingTab extends PluginSettingTab {
                     }
                 );
             }
-            const logFileNameSetting = new Setting(containerEl).setName(generalOutputI18n.customLogFileNameToggleName);
+            const logFileNameSetting = this.createCatalogSetting(containerEl).setName(generalOutputI18n.customLogFileNameToggleName);
             logFileNameSetting.setDesc(formatI18n(generalOutputI18n.customLogFileNameToggleDesc, { defaultName: DEFAULT_SETTINGS.conceptLogFileName }));
             logFileNameSetting.addToggle(toggle => toggle.setValue(this.plugin.settings.useCustomConceptLogFileName).onChange(async (value) => { this.plugin.settings.useCustomConceptLogFileName = value; await this.plugin.saveSettings(); this.display(); }));
             if (this.plugin.settings.useCustomConceptLogFileName) {
                 this.addDeferredTextSetting(
-                    new Setting(containerEl).setName(generalOutputI18n.conceptLogFileNameName).setDesc(generalOutputI18n.conceptLogFileNameDesc),
+                    this.createCatalogSetting(containerEl).setName(generalOutputI18n.conceptLogFileNameName).setDesc(generalOutputI18n.conceptLogFileNameDesc),
                     {
                         placeholder: DEFAULT_SETTINGS.conceptLogFileName,
                         value: this.plugin.settings.conceptLogFileName,
@@ -2028,9 +2058,9 @@ export class NotemdSettingTab extends PluginSettingTab {
             }
         }
 
-        new Setting(containerEl).setName(i18n.settings.processing.heading).setHeading();
+        this.createCatalogSetting(containerEl).setName(i18n.settings.processing.heading).setHeading();
         this.addDeferredNumberSetting(
-            new Setting(containerEl)
+            this.createCatalogSetting(containerEl)
                 .setName(i18n.settings.processing.maxTokensName)
                 .setDesc(this.getGlobalMaxTokensDescription(i18n.settings.processing.maxTokensDesc)),
             {
@@ -2055,7 +2085,7 @@ export class NotemdSettingTab extends PluginSettingTab {
             }
         );
         this.addDeferredNumberSetting(
-            new Setting(containerEl)
+            this.createCatalogSetting(containerEl)
                 .setName(i18n.settings.processing.chunkWordCountName)
                 .setDesc(i18n.settings.processing.chunkWordCountDesc),
             {
@@ -2069,7 +2099,7 @@ export class NotemdSettingTab extends PluginSettingTab {
                 }
             }
         );
-        new Setting(containerEl)
+        this.createCatalogSetting(containerEl)
             .setName(i18n.settings.processing.duplicateDetectionName)
             .setDesc(i18n.settings.processing.duplicateDetectionDesc)
             .addToggle(toggle => toggle
@@ -2079,8 +2109,8 @@ export class NotemdSettingTab extends PluginSettingTab {
                     await this.plugin.saveSettings();
                 }));
 
-        new Setting(containerEl).setName(i18n.settings.batchProcessing.heading).setHeading();
-        new Setting(containerEl)
+        this.createCatalogSetting(containerEl).setName(i18n.settings.batchProcessing.heading).setHeading();
+        this.createCatalogSetting(containerEl)
             .setName(i18n.settings.batchProcessing.parallelismName)
             .setDesc(i18n.settings.batchProcessing.parallelismDesc)
             .addToggle(t => t
@@ -2092,7 +2122,7 @@ export class NotemdSettingTab extends PluginSettingTab {
                 }));
 
         if (this.plugin.settings.enableBatchParallelism) {
-            new Setting(containerEl)
+            this.createCatalogSetting(containerEl)
                 .setName(i18n.settings.batchProcessing.concurrencyName)
                 .setDesc(i18n.settings.batchProcessing.concurrencyDesc)
                 .addSlider(s => s
@@ -2106,8 +2136,8 @@ export class NotemdSettingTab extends PluginSettingTab {
         }
 
         if (this.plugin.settings.enableDeveloperMode && this.plugin.settings.enableAdvancedFileSelectionProfiles) {
-            new Setting(containerEl).setName(folderTaskFilterI18n.heading).setHeading();
-            new Setting(containerEl)
+            this.createCatalogSetting(containerEl).setName(folderTaskFilterI18n.heading).setHeading();
+            this.createCatalogSetting(containerEl)
                 .setName(folderTaskFilterI18n.modeName)
                 .setDesc(folderTaskFilterI18n.modeDesc)
                 .addDropdown(dropdown => dropdown
@@ -2131,7 +2161,7 @@ export class NotemdSettingTab extends PluginSettingTab {
                     }));
 
             this.addDeferredTextSetting(
-                new Setting(containerEl)
+                this.createCatalogSetting(containerEl)
                     .setName(folderTaskFilterI18n.patternName)
                     .setDesc(folderTaskFilterI18n.patternDesc),
                 {
@@ -2153,11 +2183,11 @@ export class NotemdSettingTab extends PluginSettingTab {
                 }
             );
 
-            new Setting(containerEl)
+            this.createCatalogSetting(containerEl)
                 .setName(folderTaskFilterI18n.syntaxGuideName)
                 .setDesc(folderTaskFilterI18n.syntaxGuideDesc);
 
-            new Setting(containerEl)
+            this.createCatalogSetting(containerEl)
                 .setName(folderTaskFilterI18n.targetName)
                 .setDesc(folderTaskFilterI18n.targetDesc)
                 .addDropdown(dropdown => dropdown
@@ -2169,7 +2199,7 @@ export class NotemdSettingTab extends PluginSettingTab {
                         await this.plugin.saveSettings();
                     }));
 
-            new Setting(containerEl)
+            this.createCatalogSetting(containerEl)
                 .setName(folderTaskFilterI18n.caseSensitiveName)
                 .setDesc(folderTaskFilterI18n.caseSensitiveDesc)
                 .addToggle(toggle => toggle
@@ -2179,7 +2209,7 @@ export class NotemdSettingTab extends PluginSettingTab {
                         await this.plugin.saveSettings();
                     }));
 
-            new Setting(containerEl)
+            this.createCatalogSetting(containerEl)
                 .setName(folderTaskFilterI18n.invertName)
                 .setDesc(folderTaskFilterI18n.invertDesc)
                 .addToggle(toggle => toggle
@@ -2189,7 +2219,7 @@ export class NotemdSettingTab extends PluginSettingTab {
                         await this.plugin.saveSettings();
                     }));
 
-            new Setting(containerEl)
+            this.createCatalogSetting(containerEl)
                 .setName(folderTaskFilterI18n.includeSubfoldersName)
                 .setDesc(folderTaskFilterI18n.includeSubfoldersDesc)
                 .addDropdown(dropdown => dropdown
@@ -2206,10 +2236,10 @@ export class NotemdSettingTab extends PluginSettingTab {
         }
 
         // --- Translate Task Settings ---
-        new Setting(containerEl).setName(translationTaskI18n.heading).setHeading();
+        this.createCatalogSetting(containerEl).setName(translationTaskI18n.heading).setHeading();
 
         // New setting: Toggle for custom translation save path
-        new Setting(containerEl)
+        this.createCatalogSetting(containerEl)
             .setName(translationTaskI18n.customSavePathName)
             .setDesc(translationTaskI18n.customSavePathDesc)
             .addToggle(toggle => toggle
@@ -2223,7 +2253,7 @@ export class NotemdSettingTab extends PluginSettingTab {
         // Conditionally display the path input
         if (this.plugin.settings.useCustomTranslationSavePath) {
             this.addDeferredTextSetting(
-                new Setting(containerEl)
+                this.createCatalogSetting(containerEl)
                     .setName(translationTaskI18n.savePathName)
                     .setDesc(translationTaskI18n.savePathDesc),
                 {
@@ -2237,7 +2267,7 @@ export class NotemdSettingTab extends PluginSettingTab {
             );
         }
 
-        new Setting(containerEl)
+        this.createCatalogSetting(containerEl)
             .setName(translationTaskI18n.customSuffixToggleName)
             .setDesc(translationTaskI18n.customSuffixToggleDesc)
             .addToggle(toggle => toggle
@@ -2250,7 +2280,7 @@ export class NotemdSettingTab extends PluginSettingTab {
 
         if (this.plugin.settings.useCustomTranslationSuffix) {
             this.addDeferredTextSetting(
-                new Setting(containerEl)
+                this.createCatalogSetting(containerEl)
                     .setName(translationTaskI18n.customSuffixName)
                     .setDesc(translationTaskI18n.customSuffixDesc),
                 {
@@ -2265,9 +2295,9 @@ export class NotemdSettingTab extends PluginSettingTab {
         }
 
         // --- Summarize to Mermaid Task Settings ---
-        new Setting(containerEl).setName(mermaidTaskI18n.heading).setHeading();
+        this.createCatalogSetting(containerEl).setName(mermaidTaskI18n.heading).setHeading();
 
-        new Setting(containerEl)
+        this.createCatalogSetting(containerEl)
             .setName(mermaidTaskI18n.customSavePathName)
             .setDesc(mermaidTaskI18n.customSavePathDesc)
             .addToggle(toggle => toggle
@@ -2280,7 +2310,7 @@ export class NotemdSettingTab extends PluginSettingTab {
 
         if (this.plugin.settings.useCustomSummarizeToMermaidSavePath) {
             this.addDeferredTextSetting(
-                new Setting(containerEl)
+                this.createCatalogSetting(containerEl)
                     .setName(mermaidTaskI18n.savePathName)
                     .setDesc(mermaidTaskI18n.savePathDesc),
                 {
@@ -2294,7 +2324,7 @@ export class NotemdSettingTab extends PluginSettingTab {
             );
         }
 
-        new Setting(containerEl)
+        this.createCatalogSetting(containerEl)
             .setName(mermaidTaskI18n.customSuffixToggleName)
             .setDesc(mermaidTaskI18n.customSuffixToggleDesc)
             .addToggle(toggle => toggle
@@ -2307,7 +2337,7 @@ export class NotemdSettingTab extends PluginSettingTab {
 
         if (this.plugin.settings.useCustomSummarizeToMermaidSuffix) {
             this.addDeferredTextSetting(
-                new Setting(containerEl)
+                this.createCatalogSetting(containerEl)
                     .setName(mermaidTaskI18n.customSuffixName)
                     .setDesc(mermaidTaskI18n.customSuffixDesc),
                 {
@@ -2321,7 +2351,7 @@ export class NotemdSettingTab extends PluginSettingTab {
             );
         }
 
-        new Setting(containerEl)
+        this.createCatalogSetting(containerEl)
             .setName(mermaidTaskI18n.translateOutputName)
             .setDesc(mermaidTaskI18n.translateOutputDesc)
             .addToggle(toggle => toggle
@@ -2332,9 +2362,9 @@ export class NotemdSettingTab extends PluginSettingTab {
                 }));
 
         // --- Extract Concepts Task Settings ---
-        new Setting(containerEl).setName(extractConceptsTaskI18n.heading).setHeading();
+        this.createCatalogSetting(containerEl).setName(extractConceptsTaskI18n.heading).setHeading();
 
-        new Setting(containerEl)
+        this.createCatalogSetting(containerEl)
             .setName(extractConceptsTaskI18n.minimalName)
             .setDesc(extractConceptsTaskI18n.minimalDesc)
             .addToggle(toggle => toggle
@@ -2344,7 +2374,7 @@ export class NotemdSettingTab extends PluginSettingTab {
                     await this.plugin.saveSettings();
                 }));
 
-        new Setting(containerEl)
+        this.createCatalogSetting(containerEl)
             .setName(extractConceptsTaskI18n.backlinkName)
             .setDesc(extractConceptsTaskI18n.backlinkDesc)
             .addToggle(toggle => toggle
@@ -2354,7 +2384,7 @@ export class NotemdSettingTab extends PluginSettingTab {
                     await this.plugin.saveSettings();
                 }));
 
-        new Setting(containerEl)
+        this.createCatalogSetting(containerEl)
             .setName(extractConceptsTaskI18n.replaceSynonymsName)
             .setDesc(extractConceptsTaskI18n.replaceSynonymsDesc)
             .addToggle(toggle => toggle
@@ -2365,14 +2395,14 @@ export class NotemdSettingTab extends PluginSettingTab {
                 }));
 
         // --- Stable API Call Settings ---
-        new Setting(containerEl).setName(stableApiI18n.heading).setHeading();
-        new Setting(containerEl)
+        this.createCatalogSetting(containerEl).setName(stableApiI18n.heading).setHeading();
+        this.createCatalogSetting(containerEl)
             .setName(stableApiI18n.enableName)
             .setDesc(stableApiI18n.enableDesc)
             .addToggle(toggle => toggle.setValue(this.plugin.settings.enableStableApiCall).onChange(async (value) => { this.plugin.settings.enableStableApiCall = value; await this.plugin.saveSettings(); this.display(); }));
         if (this.plugin.settings.enableStableApiCall) {
             this.addDeferredNumberSetting(
-                new Setting(containerEl).setName(stableApiI18n.retryIntervalName).setDesc(stableApiI18n.retryIntervalDesc),
+                this.createCatalogSetting(containerEl).setName(stableApiI18n.retryIntervalName).setDesc(stableApiI18n.retryIntervalDesc),
                 {
                     placeholder: String(DEFAULT_SETTINGS.apiCallInterval),
                     value: this.plugin.settings.apiCallInterval,
@@ -2384,7 +2414,7 @@ export class NotemdSettingTab extends PluginSettingTab {
                 }
             );
             this.addDeferredNumberSetting(
-                new Setting(containerEl).setName(stableApiI18n.maxRetriesName).setDesc(stableApiI18n.maxRetriesDesc),
+                this.createCatalogSetting(containerEl).setName(stableApiI18n.maxRetriesName).setDesc(stableApiI18n.maxRetriesDesc),
                 {
                     placeholder: String(DEFAULT_SETTINGS.apiCallMaxRetries),
                     value: this.plugin.settings.apiCallMaxRetries,
@@ -2397,7 +2427,7 @@ export class NotemdSettingTab extends PluginSettingTab {
             );
         }
 
-        new Setting(containerEl)
+        this.createCatalogSetting(containerEl)
             .setName(stableApiI18n.debugModeName)
             .setDesc(stableApiI18n.debugModeDesc)
             .addToggle(toggle => toggle
@@ -2409,9 +2439,9 @@ export class NotemdSettingTab extends PluginSettingTab {
 
         const experimentalDiagramI18n = i18n.settings.developer.experimentalDiagramPipeline;
 
-        new Setting(containerEl).setName(experimentalDiagramI18n.heading).setHeading();
+        this.createCatalogSetting(containerEl).setName(experimentalDiagramI18n.heading).setHeading();
 
-        new Setting(containerEl)
+        this.createCatalogSetting(containerEl)
             .setName(experimentalDiagramI18n.enableName)
             .setDesc(experimentalDiagramI18n.enableDesc)
             .addToggle(toggle => toggle
@@ -2422,7 +2452,7 @@ export class NotemdSettingTab extends PluginSettingTab {
                     this.display();
                 }));
 
-        new Setting(containerEl)
+        this.createCatalogSetting(containerEl)
             .setName(experimentalDiagramI18n.compatibilityName)
             .setDesc(experimentalDiagramI18n.compatibilityDesc)
             .addDropdown(dropdown => {
@@ -2436,7 +2466,7 @@ export class NotemdSettingTab extends PluginSettingTab {
                     });
             });
 
-        new Setting(containerEl)
+        this.createCatalogSetting(containerEl)
             .setName(experimentalDiagramI18n.intentName)
             .setDesc(experimentalDiagramI18n.intentDesc)
             .addDropdown(dropdown => {
@@ -2460,7 +2490,7 @@ export class NotemdSettingTab extends PluginSettingTab {
                     });
             });
 
-        new Setting(containerEl)
+        this.createCatalogSetting(containerEl)
             .setName(experimentalDiagramI18n.renderTargetName)
             .setDesc(experimentalDiagramI18n.renderTargetDesc)
             .addDropdown(dropdown => {
@@ -2483,11 +2513,11 @@ export class NotemdSettingTab extends PluginSettingTab {
                     });
             });
 
-        new Setting(containerEl)
+        this.createCatalogSetting(containerEl)
             .setName(experimentalDiagramI18n.exportFormatsName)
             .setDesc(experimentalDiagramI18n.exportFormatsDesc);
 
-        new Setting(containerEl)
+        this.createCatalogSetting(containerEl)
             .setName(experimentalDiagramI18n.exportPpiName)
             .setDesc(experimentalDiagramI18n.exportPpiDesc)
             .addText(text => text
@@ -2503,7 +2533,7 @@ export class NotemdSettingTab extends PluginSettingTab {
                     await this.plugin.saveSettings();
                 }));
 
-        new Setting(containerEl)
+        this.createCatalogSetting(containerEl)
             .setName(i18n.settings.developer.modeName)
             .setDesc(i18n.settings.developer.modeDesc)
             .addToggle(toggle => toggle
@@ -2515,8 +2545,8 @@ export class NotemdSettingTab extends PluginSettingTab {
                 }));
 
         if (this.plugin.settings.enableDeveloperMode) {
-            new Setting(containerEl).setName(i18n.settings.developer.heading).setHeading();
-            new Setting(containerEl)
+            this.createCatalogSetting(containerEl).setName(i18n.settings.developer.heading).setHeading();
+            this.createCatalogSetting(containerEl)
                 .setName(i18n.settings.developer.advancedFileSelectionName)
                 .setDesc(i18n.settings.developer.advancedFileSelectionDesc)
                 .addToggle(toggle => toggle
@@ -2526,7 +2556,7 @@ export class NotemdSettingTab extends PluginSettingTab {
                         await this.plugin.saveSettings();
                         this.display();
                     }));
-            new Setting(containerEl)
+            this.createCatalogSetting(containerEl)
                 .setName(i18n.settings.developer.relaxedInputFileTypesName)
                 .setDesc(i18n.settings.developer.relaxedInputFileTypesDesc)
                 .addToggle(toggle => toggle
@@ -2547,7 +2577,7 @@ export class NotemdSettingTab extends PluginSettingTab {
                 this.plugin.settings.developerDiagnosticCallMode = effectiveCallMode;
             }
 
-            new Setting(containerEl)
+            this.createCatalogSetting(containerEl)
                 .setName(stableApiI18n.diagnosticCallModeName)
                 .setDesc(stableApiI18n.diagnosticCallModeDesc)
                 .addDropdown(dropdown => {
@@ -2570,7 +2600,7 @@ export class NotemdSettingTab extends PluginSettingTab {
                 modeHint.createEl('p', { text: selectedMode.description });
             }
 
-            new Setting(containerEl)
+            this.createCatalogSetting(containerEl)
                 .setName(stableApiI18n.diagnosticTimeoutName)
                 .setDesc(stableApiI18n.diagnosticTimeoutDesc)
                 .addText(text => {
@@ -2603,7 +2633,7 @@ export class NotemdSettingTab extends PluginSettingTab {
                     });
                 });
 
-            new Setting(containerEl)
+            this.createCatalogSetting(containerEl)
                 .setName(stableApiI18n.stabilityRunsName)
                 .setDesc(stableApiI18n.stabilityRunsDesc)
                 .addText(text => {
@@ -2636,7 +2666,7 @@ export class NotemdSettingTab extends PluginSettingTab {
                     });
                 });
 
-            new Setting(containerEl)
+            this.createCatalogSetting(containerEl)
                 .setName(stableApiI18n.longRequestName)
                 .setDesc(stableApiI18n.longRequestDesc)
                 .addButton(button => button
@@ -2655,10 +2685,10 @@ export class NotemdSettingTab extends PluginSettingTab {
                     }));
         }
 
-        new Setting(containerEl).setName(contentGenerationI18n.heading).setHeading();
-        new Setting(containerEl).setName(contentGenerationI18n.enableResearchName).setDesc(contentGenerationI18n.enableResearchDesc).addToggle(toggle => toggle.setValue(this.plugin.settings.enableResearchInGenerateContent).onChange(async (value) => { this.plugin.settings.enableResearchInGenerateContent = value; await this.plugin.saveSettings(); }));
+        this.createCatalogSetting(containerEl).setName(contentGenerationI18n.heading).setHeading();
+        this.createCatalogSetting(containerEl).setName(contentGenerationI18n.enableResearchName).setDesc(contentGenerationI18n.enableResearchDesc).addToggle(toggle => toggle.setValue(this.plugin.settings.enableResearchInGenerateContent).onChange(async (value) => { this.plugin.settings.enableResearchInGenerateContent = value; await this.plugin.saveSettings(); }));
         
-        new Setting(containerEl)
+        this.createCatalogSetting(containerEl)
             .setName(contentGenerationI18n.autoMermaidFixName)
             .setDesc(contentGenerationI18n.autoMermaidFixDesc)
             .addToggle(toggle => toggle
@@ -2668,8 +2698,8 @@ export class NotemdSettingTab extends PluginSettingTab {
                     await this.plugin.saveSettings();
                 }));
 
-        new Setting(containerEl).setName(localKnowledgeI18n.heading).setHeading();
-        new Setting(containerEl)
+        this.createCatalogSetting(containerEl).setName(localKnowledgeI18n.heading).setHeading();
+        this.createCatalogSetting(containerEl)
             .setName(localKnowledgeI18n.enableName)
             .setDesc(localKnowledgeI18n.enableDesc)
             .addToggle(toggle => toggle
@@ -2695,7 +2725,7 @@ export class NotemdSettingTab extends PluginSettingTab {
                 settingKey: LocalKnowledgePathSettingKey
             ) => {
                 this.addDeferredTextAreaSetting(
-                    new Setting(containerEl)
+                    this.createCatalogSetting(containerEl)
                         .setName(name)
                         .setDesc(desc),
                     {
@@ -2717,7 +2747,7 @@ export class NotemdSettingTab extends PluginSettingTab {
             );
 
             this.addDeferredNumberSetting(
-                new Setting(containerEl)
+                this.createCatalogSetting(containerEl)
                     .setName(localKnowledgeI18n.topKName)
                     .setDesc(localKnowledgeI18n.topKDesc),
                 {
@@ -2737,7 +2767,7 @@ export class NotemdSettingTab extends PluginSettingTab {
             );
 
             this.addDeferredNumberSetting(
-                new Setting(containerEl)
+                this.createCatalogSetting(containerEl)
                     .setName(localKnowledgeI18n.slidingWindowSizeName)
                     .setDesc(localKnowledgeI18n.slidingWindowSizeDesc),
                 {
@@ -2757,7 +2787,7 @@ export class NotemdSettingTab extends PluginSettingTab {
             );
 
             this.addDeferredNumberSetting(
-                new Setting(containerEl)
+                this.createCatalogSetting(containerEl)
                     .setName(localKnowledgeI18n.maxSnippetCharsName)
                     .setDesc(localKnowledgeI18n.maxSnippetCharsDesc),
                 {
@@ -2776,7 +2806,7 @@ export class NotemdSettingTab extends PluginSettingTab {
                 }
             );
 
-            new Setting(containerEl)
+            this.createCatalogSetting(containerEl)
                 .setName(localKnowledgeI18n.excludeCurrentFileName)
                 .setDesc(localKnowledgeI18n.excludeCurrentFileDesc)
                 .addToggle(toggle => toggle
@@ -2786,7 +2816,7 @@ export class NotemdSettingTab extends PluginSettingTab {
                         await this.plugin.saveSettings();
                     }));
 
-            new Setting(containerEl)
+            this.createCatalogSetting(containerEl)
                 .setName(localKnowledgeI18n.generateTitleName)
                 .setDesc(localKnowledgeI18n.generateTitleDesc)
                 .addToggle(toggle => toggle
@@ -2803,7 +2833,7 @@ export class NotemdSettingTab extends PluginSettingTab {
                 'localKnowledgeGenerateTitlePaths'
             );
 
-            new Setting(containerEl)
+            this.createCatalogSetting(containerEl)
                 .setName(localKnowledgeI18n.batchGenerateName)
                 .setDesc(localKnowledgeI18n.batchGenerateDesc)
                 .addToggle(toggle => toggle
@@ -2820,7 +2850,7 @@ export class NotemdSettingTab extends PluginSettingTab {
                 'localKnowledgeBatchGenerateFromTitlesPaths'
             );
 
-            new Setting(containerEl)
+            this.createCatalogSetting(containerEl)
                 .setName(localKnowledgeI18n.researchSummarizeName)
                 .setDesc(localKnowledgeI18n.researchSummarizeDesc)
                 .addToggle(toggle => toggle
@@ -2837,7 +2867,7 @@ export class NotemdSettingTab extends PluginSettingTab {
                 'localKnowledgeResearchSummarizePaths'
             );
 
-            new Setting(containerEl)
+            this.createCatalogSetting(containerEl)
                 .setName(localKnowledgeI18n.generateDiagramName)
                 .setDesc(localKnowledgeI18n.generateDiagramDesc)
                 .addToggle(toggle => toggle
@@ -2855,8 +2885,8 @@ export class NotemdSettingTab extends PluginSettingTab {
             );
         }
 
-        new Setting(containerEl).setName(chapterSplitI18n.heading).setHeading();
-        new Setting(containerEl)
+        this.createCatalogSetting(containerEl).setName(chapterSplitI18n.heading).setHeading();
+        this.createCatalogSetting(containerEl)
             .setName(chapterSplitI18n.headingLevelName)
             .setDesc(chapterSplitI18n.headingLevelDesc)
             .addDropdown(dropdown => dropdown
@@ -2873,9 +2903,9 @@ export class NotemdSettingTab extends PluginSettingTab {
                     await this.plugin.saveSettings();
                 }));
 
-        new Setting(containerEl).setName(workflowBuilderI18n.heading).setHeading();
+        this.createCatalogSetting(containerEl).setName(workflowBuilderI18n.heading).setHeading();
 
-        new Setting(containerEl)
+        this.createCatalogSetting(containerEl)
             .setName(workflowBuilderI18n.errorStrategyName)
             .setDesc(workflowBuilderI18n.errorStrategyDesc)
             .addDropdown(dropdown => dropdown
@@ -2887,12 +2917,12 @@ export class NotemdSettingTab extends PluginSettingTab {
                     await this.plugin.saveSettings();
                 }));
 
-        new Setting(containerEl)
+        this.createCatalogSetting(containerEl)
             .setName(workflowBuilderI18n.visualBuilderName)
             .setDesc(workflowBuilderI18n.visualBuilderDesc);
         this.renderWorkflowVisualBuilder(containerEl);
 
-        new Setting(containerEl)
+        this.createCatalogSetting(containerEl)
             .setName(workflowBuilderI18n.advancedDslName)
             .setDesc(workflowBuilderI18n.advancedDslDesc)
             .addTextArea((text: TextAreaComponent) => {
@@ -2908,18 +2938,18 @@ export class NotemdSettingTab extends PluginSettingTab {
 
         const parsedWorkflowButtons = resolveCustomWorkflowButtons(this.plugin.settings.customWorkflowButtonsDsl);
         if (parsedWorkflowButtons.errors.length > 0) {
-            new Setting(containerEl)
+            this.createCatalogSetting(containerEl)
                 .setName(workflowBuilderI18n.dslValidationName)
                 .setDesc(formatI18n(workflowBuilderI18n.dslValidationDesc, { count: parsedWorkflowButtons.errors.length }));
         }
 
-        new Setting(containerEl)
+        this.createCatalogSetting(containerEl)
             .setName(workflowBuilderI18n.availableActionIdsName)
             .setDesc(getWorkflowActionHelpText(i18n));
 
         // --- Extract Original Text Settings ---
-        new Setting(containerEl).setName(i18n.settings.extractOriginalText.heading).setHeading();
-        new Setting(containerEl)
+        this.createCatalogSetting(containerEl).setName(i18n.settings.extractOriginalText.heading).setHeading();
+        this.createCatalogSetting(containerEl)
             .setName(i18n.settings.extractOriginalText.questionsName)
             .setDesc(i18n.settings.extractOriginalText.questionsDesc)
             .addTextArea(text => text
@@ -2931,11 +2961,11 @@ export class NotemdSettingTab extends PluginSettingTab {
                 })
                 .inputEl.setAttrs({ rows: 6, style: 'width: 100%;' }));
 
-        new Setting(containerEl)
+        this.createCatalogSetting(containerEl)
             .setName(i18n.settings.extractOriginalText.batchModeName)
             .setDesc(i18n.settings.extractOriginalText.batchModeDesc);
 
-        new Setting(containerEl)
+        this.createCatalogSetting(containerEl)
             .setName(i18n.settings.generateTitleOutput.useCustomFolderName)
             .setDesc(i18n.settings.generateTitleOutput.useCustomFolderDesc)
             .addToggle(toggle => toggle
@@ -2947,7 +2977,7 @@ export class NotemdSettingTab extends PluginSettingTab {
                 }));
         if (this.plugin.settings.useCustomGenerateTitleOutputFolder) {
             this.addDeferredTextSetting(
-                new Setting(containerEl)
+                this.createCatalogSetting(containerEl)
                     .setName(i18n.settings.generateTitleOutput.customFolderName)
                     .setDesc(i18n.settings.generateTitleOutput.customFolderDesc),
                 {
@@ -2961,8 +2991,8 @@ export class NotemdSettingTab extends PluginSettingTab {
             );
         }
 
-        new Setting(containerEl).setName(i18n.settings.webResearch.heading).setHeading();
-        new Setting(containerEl)
+        this.createCatalogSetting(containerEl).setName(i18n.settings.webResearch.heading).setHeading();
+        this.createCatalogSetting(containerEl)
             .setName(i18n.settings.webResearch.searchProviderName)
             .setDesc(i18n.settings.webResearch.searchProviderDesc)
             .addDropdown(dropdown => dropdown
@@ -2976,7 +3006,7 @@ export class NotemdSettingTab extends PluginSettingTab {
                 }));
         if (this.plugin.settings.searchProvider === 'tavily') {
             this.addDeferredTextSetting(
-                new Setting(containerEl)
+                this.createCatalogSetting(containerEl)
                     .setName(i18n.settings.webResearch.tavilyApiKeyName)
                     .setDesc(i18n.settings.webResearch.tavilyApiKeyDesc),
                 {
@@ -2989,7 +3019,7 @@ export class NotemdSettingTab extends PluginSettingTab {
                 }
             );
             this.addDeferredNumberSetting(
-                new Setting(containerEl)
+                this.createCatalogSetting(containerEl)
                     .setName(i18n.settings.webResearch.tavilyMaxResultsName)
                     .setDesc(i18n.settings.webResearch.tavilyMaxResultsDesc),
                 {
@@ -3002,7 +3032,7 @@ export class NotemdSettingTab extends PluginSettingTab {
                     }
                 }
             );
-            new Setting(containerEl)
+            this.createCatalogSetting(containerEl)
                 .setName(i18n.settings.webResearch.tavilySearchDepthName)
                 .setDesc(i18n.settings.webResearch.tavilySearchDepthDesc)
                 .addDropdown(dropdown => dropdown
@@ -3014,7 +3044,7 @@ export class NotemdSettingTab extends PluginSettingTab {
                         await this.plugin.saveSettings();
                     }));
         } else if (this.plugin.settings.searchProvider === 'duckduckgo') {
-            new Setting(containerEl)
+            this.createCatalogSetting(containerEl)
                 .setName(i18n.settings.webResearch.duckduckgoMaxResultsName)
                 .setDesc(i18n.settings.webResearch.duckduckgoMaxResultsDesc)
                 .addSlider(slider => slider
@@ -3025,7 +3055,7 @@ export class NotemdSettingTab extends PluginSettingTab {
                         this.plugin.settings.ddgMaxResults = value;
                         await this.plugin.saveSettings();
                     }));
-            new Setting(containerEl)
+            this.createCatalogSetting(containerEl)
                 .setName(i18n.settings.webResearch.duckduckgoFetchTimeoutName)
                 .setDesc(i18n.settings.webResearch.duckduckgoFetchTimeoutDesc)
                 .addSlider(slider => slider
@@ -3038,7 +3068,7 @@ export class NotemdSettingTab extends PluginSettingTab {
                     }));
         }
         this.addDeferredNumberSetting(
-            new Setting(containerEl)
+            this.createCatalogSetting(containerEl)
                 .setName(i18n.settings.webResearch.maxResearchTokensName)
                 .setDesc(i18n.settings.webResearch.maxResearchTokensDesc),
             {
@@ -3053,8 +3083,8 @@ export class NotemdSettingTab extends PluginSettingTab {
         );
 
 
-        new Setting(containerEl).setName(i18n.settings.language.heading).setHeading();
-        new Setting(containerEl)
+        this.createCatalogSetting(containerEl).setName(i18n.settings.language.heading).setHeading();
+        this.createCatalogSetting(containerEl)
             .setName(i18n.settings.language.uiLocaleName)
             .setDesc(i18n.settings.language.uiLocaleDesc)
             .addDropdown(dropdown => {
@@ -3078,7 +3108,7 @@ export class NotemdSettingTab extends PluginSettingTab {
                     });
             });
 
-        new Setting(containerEl)
+        this.createCatalogSetting(containerEl)
             .setName(i18n.settings.language.outputName)
             .setDesc(i18n.settings.language.outputDesc)
             .addDropdown(dropdown => {
@@ -3093,7 +3123,7 @@ export class NotemdSettingTab extends PluginSettingTab {
                     });
             });
 
-        new Setting(containerEl)
+        this.createCatalogSetting(containerEl)
             .setName(i18n.settings.language.perTaskName)
             .setDesc(i18n.settings.language.perTaskDesc)
             .addToggle(toggle => toggle
@@ -3104,7 +3134,7 @@ export class NotemdSettingTab extends PluginSettingTab {
                     this.display();
                 }));
 
-        new Setting(containerEl)
+        this.createCatalogSetting(containerEl)
             .setName(i18n.settings.language.disableAutoTranslationName)
             .setDesc(i18n.settings.language.disableAutoTranslationDesc)
             .addToggle(toggle =>
@@ -3120,7 +3150,7 @@ export class NotemdSettingTab extends PluginSettingTab {
             const availableLanguages = this.plugin.settings.availableLanguages || DEFAULT_SETTINGS.availableLanguages;
 
             const createTaskLanguageSettings = (languageSettingName: keyof NotemdSettings, taskDesc: string) => {
-                new Setting(containerEl)
+                this.createCatalogSetting(containerEl)
                     .setName(formatI18n(i18n.settings.language.taskLanguageLabel, { task: taskDesc }))
                     .setDesc(formatI18n(i18n.settings.language.taskLanguageDesc, { task: taskDesc }))
                     .addDropdown(dropdown => {
@@ -3144,7 +3174,7 @@ export class NotemdSettingTab extends PluginSettingTab {
             createTaskLanguageSettings('extractOriginalTextLanguage', extractOriginalTextTaskLabel);
         }
 
-        new Setting(containerEl)
+        this.createCatalogSetting(containerEl)
             .setName(i18n.settings.extractOriginalText.translateOutputName)
             .setDesc(i18n.settings.extractOriginalText.translateOutputDesc)
             .addToggle(toggle => toggle
@@ -3154,7 +3184,7 @@ export class NotemdSettingTab extends PluginSettingTab {
                     await this.plugin.saveSettings();
                 }));
 
-        new Setting(containerEl)
+        this.createCatalogSetting(containerEl)
             .setName(i18n.settings.extractOriginalText.mergedQueryName)
             .setDesc(i18n.settings.extractOriginalText.mergedQueryDesc)
             .addToggle(toggle => toggle
@@ -3164,7 +3194,7 @@ export class NotemdSettingTab extends PluginSettingTab {
                     await this.plugin.saveSettings();
                 }));
 
-        new Setting(containerEl)
+        this.createCatalogSetting(containerEl)
             .setName(i18n.settings.extractOriginalText.customOutputName)
             .setDesc(i18n.settings.extractOriginalText.customOutputDesc)
             .addToggle(toggle => toggle
@@ -3177,7 +3207,7 @@ export class NotemdSettingTab extends PluginSettingTab {
 
         if (this.plugin.settings.extractOriginalTextUseCustomOutput) {
             this.addDeferredTextSetting(
-                new Setting(containerEl)
+                this.createCatalogSetting(containerEl)
                     .setName(i18n.settings.extractOriginalText.savePathName)
                     .setDesc(i18n.settings.extractOriginalText.savePathDesc),
                 {
@@ -3191,7 +3221,7 @@ export class NotemdSettingTab extends PluginSettingTab {
             );
 
             this.addDeferredTextSetting(
-                new Setting(containerEl)
+                this.createCatalogSetting(containerEl)
                     .setName(i18n.settings.extractOriginalText.customSuffixName)
                     .setDesc(i18n.settings.extractOriginalText.customSuffixDesc),
                 {
@@ -3206,9 +3236,9 @@ export class NotemdSettingTab extends PluginSettingTab {
         }
 
         // --- Mermaid Batch Fix ---
-        new Setting(containerEl).setName(i18n.settings.batchMermaidFix.heading).setHeading();
+        this.createCatalogSetting(containerEl).setName(i18n.settings.batchMermaidFix.heading).setHeading();
         
-        new Setting(containerEl)
+        this.createCatalogSetting(containerEl)
             .setName(i18n.settings.batchMermaidFix.enableDetectionName)
             .setDesc(i18n.settings.batchMermaidFix.enableDetectionDesc)
             .addToggle(toggle => toggle
@@ -3219,7 +3249,7 @@ export class NotemdSettingTab extends PluginSettingTab {
                     this.display(); // Refresh to show/hide related settings if needed
                 }));
 
-        new Setting(containerEl)
+        this.createCatalogSetting(containerEl)
             .setName(i18n.settings.batchMermaidFix.moveErrorFilesName)
             .setDesc(i18n.settings.batchMermaidFix.moveErrorFilesDesc)
             .addToggle(toggle => toggle
@@ -3232,7 +3262,7 @@ export class NotemdSettingTab extends PluginSettingTab {
 
         if (this.plugin.settings.moveMermaidErrorFiles) {
             this.addDeferredTextSetting(
-                new Setting(containerEl)
+                this.createCatalogSetting(containerEl)
                     .setName(i18n.settings.batchMermaidFix.errorFolderPathName)
                     .setDesc(i18n.settings.batchMermaidFix.errorFolderPathDesc),
                 {
@@ -3247,9 +3277,9 @@ export class NotemdSettingTab extends PluginSettingTab {
         }
 
         // --- Duplicate Check Scope ---
-        new Setting(containerEl).setName(i18n.settings.duplicateScope.heading).setHeading();
+        this.createCatalogSetting(containerEl).setName(i18n.settings.duplicateScope.heading).setHeading();
 
-        new Setting(containerEl)
+        this.createCatalogSetting(containerEl)
             .setName(i18n.settings.duplicateScope.modeName)
             .setDesc(i18n.settings.duplicateScope.modeDesc)
             .addDropdown(dropdown => dropdown
@@ -3268,7 +3298,7 @@ export class NotemdSettingTab extends PluginSettingTab {
             const scopeModeVerb = this.plugin.settings.duplicateCheckScopeMode === 'include'
                 ? i18n.settings.duplicateScope.pathsModeInclude
                 : i18n.settings.duplicateScope.pathsModeExclude;
-            new Setting(containerEl)
+            this.createCatalogSetting(containerEl)
                 .setName(this.plugin.settings.duplicateCheckScopeMode === 'include'
                     ? i18n.settings.duplicateScope.includeFoldersName
                     : i18n.settings.duplicateScope.excludeFoldersName)
@@ -3315,9 +3345,9 @@ export class NotemdSettingTab extends PluginSettingTab {
         // --- End Duplicate Check Scope ---
 
         // --- Custom Prompt Settings ---
-        new Setting(containerEl).setName(customPromptsI18n.heading).setHeading();
+        this.createCatalogSetting(containerEl).setName(customPromptsI18n.heading).setHeading();
 
-        new Setting(containerEl)
+        this.createCatalogSetting(containerEl)
             .setName(customPromptsI18n.enableName)
             .setDesc(customPromptsI18n.enableDesc)
             .addToggle(toggle => toggle
@@ -3345,7 +3375,7 @@ export class NotemdSettingTab extends PluginSettingTab {
             ];
 
             tasksToCustomize.forEach(task => {
-                new Setting(containerEl)
+                this.createCatalogSetting(containerEl)
                     .setName(formatI18n(customPromptsI18n.taskToggleName, { task: task.name }))
                     .setDesc(customPromptsI18n.taskToggleDesc)
                     .addToggle(toggle => toggle
@@ -3375,7 +3405,7 @@ export class NotemdSettingTab extends PluginSettingTab {
                     defaultPromptDisplay.style.marginBottom = "10px";
 
 
-                    new Setting(containerEl)
+                    this.createCatalogSetting(containerEl)
                         .setName(formatI18n(customPromptsI18n.customPromptName, { task: task.name }))
                         .setDesc(customPromptsI18n.customPromptDesc)
                         .addTextArea(textarea => textarea
@@ -3393,9 +3423,9 @@ export class NotemdSettingTab extends PluginSettingTab {
         // --- End Custom Prompt Settings ---
 
         // --- Focused Learning ---
-        new Setting(containerEl).setName(i18n.settings.focusedLearning.heading).setHeading();
+        this.createCatalogSetting(containerEl).setName(i18n.settings.focusedLearning.heading).setHeading();
 
-        new Setting(containerEl)
+        this.createCatalogSetting(containerEl)
             .setName(i18n.settings.focusedLearning.enableName)
             .setDesc(i18n.settings.focusedLearning.enableDesc)
             .addToggle(toggle => toggle
@@ -3408,7 +3438,7 @@ export class NotemdSettingTab extends PluginSettingTab {
 
         if (this.plugin.settings.enableFocusedLearning) {
             this.addDeferredTextSetting(
-                new Setting(containerEl)
+                this.createCatalogSetting(containerEl)
                     .setName(i18n.settings.focusedLearning.domainName)
                     .setDesc(i18n.settings.focusedLearning.domainDesc),
                 {
@@ -3425,9 +3455,9 @@ export class NotemdSettingTab extends PluginSettingTab {
         // --- Slide Export (Desktop only) ---
         if ((globalThis as any).Platform?.isDesktopApp !== false) {
             containerEl.createEl('hr');
-            new Setting(containerEl).setName(i18n.slideExport.settingsHeading).setHeading();
+            this.createCatalogSetting(containerEl).setName(i18n.slideExport.settingsHeading).setHeading();
 
-            new Setting(containerEl)
+            this.createCatalogSetting(containerEl)
                 .setName(i18n.slideExport.enableName)
                 .setDesc(i18n.slideExport.enableDesc)
                 .addToggle(toggle => toggle
@@ -3438,7 +3468,7 @@ export class NotemdSettingTab extends PluginSettingTab {
                         this.display();
                     }));
 
-            new Setting(containerEl)
+            this.createCatalogSetting(containerEl)
                 .setName(i18n.slideExport.defaultFormatName)
                 .setDesc(i18n.slideExport.defaultFormatDesc)
                 .addDropdown(dropdown => dropdown
@@ -3455,7 +3485,7 @@ export class NotemdSettingTab extends PluginSettingTab {
                     }));
 
             if (this.plugin.settings.slideExportDefaultFormat === 'html') {
-                new Setting(containerEl)
+                this.createCatalogSetting(containerEl)
                     .setName(i18n.slideExport.htmlModeName)
                     .setDesc(i18n.slideExport.htmlModeDesc)
                     .addDropdown(dropdown => dropdown
@@ -3499,7 +3529,7 @@ export class NotemdSettingTab extends PluginSettingTab {
             }
 
             this.addDeferredTextSetting(
-                new Setting(containerEl)
+                this.createCatalogSetting(containerEl)
                     .setName(i18n.slideExport.outputSubfolderName)
                     .setDesc(i18n.slideExport.outputSubfolderDesc),
                 {
@@ -3513,7 +3543,7 @@ export class NotemdSettingTab extends PluginSettingTab {
             );
 
             this.addDeferredTextSetting(
-                new Setting(containerEl)
+                this.createCatalogSetting(containerEl)
                     .setName(i18n.slideExport.themeName)
                     .setDesc(i18n.slideExport.themeDesc),
                 {
@@ -3526,7 +3556,7 @@ export class NotemdSettingTab extends PluginSettingTab {
                 }
             );
 
-            new Setting(containerEl)
+            this.createCatalogSetting(containerEl)
                 .setName(i18n.slideExport.imageClarityName)
                 .setDesc(i18n.slideExport.imageClarityDesc)
                 .addDropdown(dropdown => dropdown
@@ -3539,7 +3569,7 @@ export class NotemdSettingTab extends PluginSettingTab {
                         await this.plugin.saveSettings();
                     }));
 
-            new Setting(containerEl)
+            this.createCatalogSetting(containerEl)
                 .setName(i18n.slideExport.withClicksName)
                 .setDesc(i18n.slideExport.withClicksDesc)
                 .addToggle(toggle => toggle
@@ -3549,7 +3579,7 @@ export class NotemdSettingTab extends PluginSettingTab {
                         await this.plugin.saveSettings();
                     }));
 
-            new Setting(containerEl)
+            this.createCatalogSetting(containerEl)
                 .setName(i18n.slideExport.ffmpegFpsName)
                 .setDesc(i18n.slideExport.ffmpegFpsDesc)
                 .addText(text => text
@@ -3562,7 +3592,7 @@ export class NotemdSettingTab extends PluginSettingTab {
                         }
                     }));
 
-            new Setting(containerEl)
+            this.createCatalogSetting(containerEl)
                 .setName(i18n.slideExport.ffmpegCrfName)
                 .setDesc(i18n.slideExport.ffmpegCrfDesc)
                 .addText(text => text
@@ -3575,7 +3605,7 @@ export class NotemdSettingTab extends PluginSettingTab {
                         }
                     }));
 
-            new Setting(containerEl)
+            this.createCatalogSetting(containerEl)
                 .setName(i18n.slideExport.timeoutName)
                 .setDesc(i18n.slideExport.timeoutDesc)
                 .addText(text => text

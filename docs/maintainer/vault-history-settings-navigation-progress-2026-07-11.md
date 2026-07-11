@@ -6,7 +6,7 @@ Language: **English** | [简体中文](./vault-history-settings-navigation-progr
 
 The previous preview history was a 12-item process-local session list. The current implementation adds a Vault-persisted metadata repository with completion-time ordering, normalized token search, intent/source-format/export filters, pagination, retention, and serialized writes. Pure query behavior now lives in `diagramHistoryQuery.ts`, independently of persistence writes. The in-modal list remains the fast recent-session surface; **Manage Vault history** opens the broader searchable index.
 
-The previous settings page was one sequential renderer with no discovery layer. The current page adds a sticky search/navigation surface and Vault-persisted favorites while retaining existing Obsidian `Setting` controls. A pure fuzzy-search module provides the matching boundary. Favorites now resolve IDs from canonical translation paths, so changing locale or inserting an unrelated setting no longer shifts every saved favorite; dynamically generated provider rows receive deterministic content-derived fallback IDs.
+The previous settings page was one sequential renderer with no discovery layer. The current page adds a sticky search/navigation surface and Vault-persisted favorites while retaining existing Obsidian `Setting` controls. Catalog copy is captured at the `Setting.setName/setDesc` declaration boundary rather than scraped from rendered name/description DOM. Favorites resolve IDs from canonical translation paths; localized settings receive canonical English aliases, advanced provider declarations carry structured `advanced` metadata, and dynamic rows receive deterministic fallback IDs.
 
 The previous batch title flow validated the selected path only inside `batchGenerateContentForTitles`, which converted a missing folder into a late generic error and error log. The new preparation boundary runs before the batch: missing folders can be created after consent, empty folders continue, non-empty folders require one batch-level confirmation, file collisions are rejected, and non-interactive callers receive a recoverable result. Only missing-folder auto-creation can be remembered.
 
@@ -27,18 +27,17 @@ The previous batch title flow validated the selected path only inside `batchGene
 
 ## Verification State
 
-- Fresh full verification after the query/navigation extraction and missing-artifact feedback passed: 220 Jest suites and 1,883 tests, the TypeScript production build, the UI i18n audit, and `git diff --check`.
+- Final full verification after declaration-bound catalog capture passed: 220 Jest suites and 1,885 tests, the TypeScript production build, the UI i18n audit, and `git diff --check`.
 - The built plugin was copied into the `Study` Vault and `obsidian vault="Study" plugin:reload id=notemd` returned `Reloaded: notemd`.
 - The official `obsidian help` CLI surface executed successfully. A separate `obsidian-cli` executable is not installed, so no success is claimed for that compatibility alias.
 - After a full Obsidian restart cleared the Electron module cache, official CLI evaluation opened the real `notemd` settings tab and observed 128 settings/favorite controls. Searching `provider` reduced the live result count to 5. A favorite persisted across plugin reload and was then restored to the original empty state.
 - A synthetic Vault history record persisted across plugin reload and was removed afterward. Real batch-folder preparation used a dedicated temporary Vault folder: missing-folder confirmation created it, the empty folder returned ready without a prompt, and adding one file produced exactly one batch-level non-empty confirmation. The temporary note/folder were deleted after the check and `dev:errors` remained empty.
 - A final one-file batch used the model already configured inside Obsidian, not LM Studio. It processed, generated, and moved 1/1 note with no errors; the generated Common Source Amplifier note contained substantive Chinese technical content, equations, a parameter table, references, and Mermaid diagrams. Both temporary source and completion folders were deleted afterward.
+- The final deployed build reopened the real settings tab after restart with no captured errors. Searching the Chinese-rendered settings using the canonical English phrase `model identifier` returned live results, proving declaration-derived English aliases are active without reading rendered name/description DOM.
 - History-manager copy is now localized through the shared English/Simplified-Chinese registry. A Frontend Law Auditor strict run based on CSS and contract evidence scored 100/100 after raising critical favorites, filters, and history actions to 44 px targets and adding explicit focus-visible rings. Windows screenshot capture still failed at the platform interface (`0x80004002`), so the score is a code-level gate, not a substitute for future screenshot comparison.
 - Automated coverage confirms the repository/query behavior and batch-folder policies. Final clean-worktree evidence is obtained after commit and push.
 
 ## Next Direction
 
-1. Move aliases and advanced-status metadata into setting declarations; stable canonical IDs, heading categories, result counts, and stale-favorite cleanup are already in use.
-2. Add explicit missing-artifact feedback and localized history-manager copy; persisted source reconstruction and re-export are now wired.
-3. Add date-range controls to the dedicated history modal without increasing preview-modal density; source-format and export filters are now present.
-4. Expose optional structured CLI policy inputs so automation can explicitly authorize missing-folder creation or a known non-empty target; the safe non-interactive default is now enforced.
+1. Consider explicit opt-in CLI authorization flags in a future automation-focused release; the current safe non-interactive behavior intentionally requires interaction for missing or non-empty targets.
+2. Preserve the current query, catalog, navigation, and folder-preparation boundaries as new settings and diagram targets are added.

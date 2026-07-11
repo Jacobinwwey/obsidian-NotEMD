@@ -1,6 +1,8 @@
 import { searchSettingCatalog, SettingCatalogEntry } from '../ui/settings/settingSearch';
-import { createLocalizedSettingIdResolver, retainKnownSettingIds } from '../ui/settings/settingCatalog';
+import { createLocalizedSettingIdResolver, createLocalizedSettingMetadataResolver, retainKnownSettingIds } from '../ui/settings/settingCatalog';
 import { resolveSettingsNavigation } from '../ui/settings/SettingsNavigation';
+import * as fs from 'fs';
+import * as path from 'path';
 
 const entries: SettingCatalogEntry[] = [
     { id: 'diagrams.export-ppi', categoryId: 'diagrams', name: 'Image export PPI', description: 'Controls PNG and PDF clarity.', aliases: ['resolution', 'dpi'] },
@@ -35,6 +37,13 @@ describe('localized setting identity', () => {
         expect(chineseResolver('模型', '模型标识符')).toBe('settings.model');
     });
 
+    test('adds canonical English aliases for localized setting declarations', () => {
+        const resolve = createLocalizedSettingMetadataResolver(chinese, english);
+        expect(resolve('模型', '模型标识符')).toEqual({
+            id: 'settings.model', aliases: ['Model', 'Model identifier']
+        });
+    });
+
     test('creates a deterministic fallback for dynamically generated settings', () => {
         const resolve = createLocalizedSettingIdResolver(english, english);
         expect(resolve('Custom provider', 'Endpoint profile')).toBe(resolve('Custom provider', 'Endpoint profile'));
@@ -59,4 +68,12 @@ describe('settings navigation state', () => {
         expect(result.visibleCount).toBe(1);
         expect(result.totalCount).toBe(3);
     });
+});
+
+test('settings catalog captures declaration copy instead of reading rendered name and description DOM', () => {
+    const source = fs.readFileSync(path.join(__dirname, '..', 'ui', 'NotemdSettingTab.ts'), 'utf8');
+    expect(source).toContain('this.createCatalogSetting(containerEl)');
+    expect(source).toContain('this.settingDeclarationCopy.get(item)');
+    expect(source).not.toContain("querySelector<HTMLElement>('.setting-item-name')");
+    expect(source).not.toContain("querySelector<HTMLElement>('.setting-item-description')");
 });

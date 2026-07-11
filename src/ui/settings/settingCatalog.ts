@@ -12,6 +12,18 @@ function collectStringPaths(value: unknown, prefix = '', paths = new Map<string,
     return paths;
 }
 
+function collectPathStrings(value: unknown, prefix = '', paths = new Map<string, string>()): Map<string, string> {
+    if (typeof value === 'string') {
+        paths.set(prefix, value);
+        return paths;
+    }
+    if (!value || typeof value !== 'object' || Array.isArray(value)) return paths;
+    for (const [key, child] of Object.entries(value as TranslationTree)) {
+        collectPathStrings(child, prefix ? `${prefix}.${key}` : key, paths);
+    }
+    return paths;
+}
+
 function settingRoot(path: string): string {
     return path.replace(/\.(name|description|desc|title|label)$/, '');
 }
@@ -34,6 +46,18 @@ export function createLocalizedSettingIdResolver(current: TranslationTree, canon
         const path = namePath ?? descriptionPath;
         if (path) return settingRoot(path);
         return `dynamic.${stableHash(`${name}\u0000${description}`)}`;
+    };
+}
+
+export function createLocalizedSettingMetadataResolver(current: TranslationTree, canonicalEnglish: TranslationTree) {
+    const resolveId = createLocalizedSettingIdResolver(current, canonicalEnglish);
+    const currentPaths = collectStringPaths(current);
+    const englishByPath = collectPathStrings(canonicalEnglish);
+    return (name: string, description: string) => {
+        const aliases = [currentPaths.get(name), currentPaths.get(description)]
+            .map(path => path ? englishByPath.get(path) : undefined)
+            .filter((value): value is string => Boolean(value && value !== name && value !== description));
+        return { id: resolveId(name, description), aliases: [...new Set(aliases)] };
     };
 }
 
