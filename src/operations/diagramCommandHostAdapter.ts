@@ -785,7 +785,7 @@ async function attachCompanionSvgPreview(params: {
     };
 }
 
-async function previewArtifactFromSavedPath(params: {
+export async function previewArtifactFromSavedPath(params: {
     host: Pick<DiagramCommandHostAdapter, 'getFileByPath' | 'readFile' | 'openPreview'>;
     sourcePath: string;
     artifactSavedOverride?: boolean;

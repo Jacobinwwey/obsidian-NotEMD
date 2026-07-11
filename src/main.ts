@@ -98,6 +98,7 @@ import {
     DiagramCommandRunHost,
     DiagramCommandUiStrings,
     isDirectPreviewableDiagramExtension,
+    previewArtifactFromSavedPath,
     runGenerateDiagramCommandWithHost,
     runPreviewDiagramCommandWithHost
 } from './operations/diagramCommandHostAdapter';
@@ -254,7 +255,7 @@ export default class NotemdPlugin extends Plugin {
         return supportsDiagramPreviewModal(artifact);
     }
 
-    private openDiagramPreviewModal(artifact: RenderArtifact, sourcePath: string, artifactSaved = false) {
+    private openDiagramPreviewModal(artifact: RenderArtifact, sourcePath: string, artifactSaved = false, existingHistoryEntryId?: string) {
         const i18n = this.getUiStrings();
         const targetLabel = getRenderTargetDisplayName(artifact.target);
         const previewTitle = formatI18n(i18n.previewModal.title, { target: targetLabel });
@@ -267,8 +268,8 @@ export default class NotemdPlugin extends Plugin {
             },
             this.settings.diagramHistoryRetentionLimit
         );
-        const historyEntryId = `diagram-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
-        void historyRepository.recordCompleted({
+        const historyEntryId = existingHistoryEntryId ?? `diagram-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+        if (!existingHistoryEntryId) void historyRepository.recordCompleted({
             id: historyEntryId,
             completedAt: Date.now(),
             title: previewTitle,
@@ -286,7 +287,8 @@ export default class NotemdPlugin extends Plugin {
                 removeEntry: async id => { await historyRepository.removeIndexEntry(id); },
                 recordArtifactPath: (id, path) => historyRepository.recordArtifactPath(id, path),
                 recordExportPath: (id, kind, path) => historyRepository.recordExportPath(id, kind, path),
-                deleteArtifacts: entry => this.deleteDiagramHistoryArtifacts(entry)
+                deleteArtifacts: entry => this.deleteDiagramHistoryArtifacts(entry),
+                reopenArtifact: entry => this.reopenDiagramHistoryArtifact(entry)
             }
         }).open();
     }
@@ -415,6 +417,22 @@ export default class NotemdPlugin extends Plugin {
             configHost: this.createPluginConfigCommandHost(),
             logError: (message, error) => console.error(message, error)
         };
+    }
+
+    private async reopenDiagramHistoryArtifact(entry: DiagramHistoryEntry): Promise<boolean> {
+        if (!entry.artifactPath) return false;
+        const host = this.createDiagramCommandHostAdapter();
+        const reopened = await previewArtifactFromSavedPath({
+            host: {
+                getFileByPath: host.getFileByPath,
+                readFile: host.readFile,
+                openPreview: (artifact, sourcePath, artifactSaved) =>
+                    this.openDiagramPreviewModal(artifact, sourcePath, artifactSaved, entry.id)
+            },
+            sourcePath: entry.artifactPath,
+            artifactSavedOverride: true
+        });
+        return reopened !== null;
     }
 
     private async deleteDiagramHistoryArtifacts(entry: DiagramHistoryEntry): Promise<boolean> {

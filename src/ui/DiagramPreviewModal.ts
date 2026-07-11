@@ -36,6 +36,7 @@ interface DiagramHistoryStore {
     recordArtifactPath?: (id: string, path: string) => Promise<unknown>;
     recordExportPath?: (id: string, kind: DiagramHistoryExportKind, path: string) => Promise<unknown>;
     deleteArtifacts?: (entry: import('../diagram/history/diagramHistoryRepository').DiagramHistoryEntry) => Promise<boolean>;
+    reopenArtifact?: (entry: import('../diagram/history/diagramHistoryRepository').DiagramHistoryEntry) => Promise<boolean>;
 }
 
 export class DiagramPreviewModal extends Modal {
@@ -297,7 +298,7 @@ export class DiagramPreviewModal extends Modal {
         });
         if (this.historyStore) {
             const manage = historyEl.createEl('button', { text: 'Manage Vault history' });
-            manage.onclick = () => new DiagramHistoryModal(this.app, this.historyStore!.loadPage, this.historyStore!.removeEntry, this.historyStore!.deleteArtifacts).open();
+            manage.onclick = () => new DiagramHistoryModal(this.app, this.historyStore!.loadPage, this.historyStore!.removeEntry, this.historyStore!.deleteArtifacts, this.historyStore!.reopenArtifact).open();
         }
 
         const historyList = historyEl.createDiv({ cls: 'notemd-diagram-preview-history-list' });

@@ -9,7 +9,8 @@ export class DiagramHistoryModal extends Modal {
         app: App,
         private readonly loadPage: (query: DiagramHistoryQuery) => Promise<{ items: DiagramHistoryEntry[]; page: number; totalPages: number; totalItems: number }>,
         private readonly removeEntry: (id: string) => Promise<void>,
-        private readonly deleteArtifacts?: (entry: DiagramHistoryEntry) => Promise<boolean>
+        private readonly deleteArtifacts?: (entry: DiagramHistoryEntry) => Promise<boolean>,
+        private readonly reopenArtifact?: (entry: DiagramHistoryEntry) => Promise<boolean>
     ) { super(app); }
 
     onOpen(): void { void this.render(); }
@@ -57,6 +58,10 @@ export class DiagramHistoryModal extends Modal {
             const exports = Object.keys(entry.exportPaths);
             item.createDiv({ text: exports.length ? `Exports: ${exports.join(', ').toUpperCase()}` : 'No visual exports recorded' });
             const actions = item.createDiv({ cls: 'notemd-diagram-history-actions' });
+            if (entry.artifactPath && this.reopenArtifact) {
+                const reopen = actions.createEl('button', { text: 'Reopen preview', cls: 'mod-cta' });
+                reopen.onclick = async () => { await this.reopenArtifact!(entry); };
+            }
             if (entry.sourcePath) {
                 const openNote = actions.createEl('button', { text: 'Open source note' });
                 openNote.onclick = () => { void this.app.workspace.openLinkText(entry.sourcePath as string, '', false); };
