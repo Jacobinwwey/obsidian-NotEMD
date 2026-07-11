@@ -986,6 +986,11 @@ export const STRINGS_ZH_CN: DeepPartial<NotemdEnglishStrings> = {
         removeIndex: '从历史中移除', deleteArtifacts: '删除产物…',
         previous: '上一页', next: '下一页', page: '第 {page} / {total} 页'
     },
+    settingsDiscovery: {
+        searchPlaceholder: '搜索设置…', searchLabel: '搜索设置', favorites: '★ 收藏',
+        addFavorite: '收藏此设置', removeFavorite: '取消收藏此设置',
+        resultCount: '显示 {visible} / {total} 项设置', noResults: '没有设置符合当前搜索和筛选条件。'
+    },
     slideExport: {
         settingsHeading: '演示导出',
         enableName: '启用演示导出',

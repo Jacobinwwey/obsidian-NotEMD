@@ -42,6 +42,8 @@ describe('provider settings styles', () => {
         expect(styles).toContain('.notemd-setting-favorite-button { min-width: 44px; min-height: 44px;');
         expect(styles).toContain('.notemd-diagram-history-toolbar');
         expect(styles).toContain('.notemd-diagram-history-actions');
+        expect(styles).toContain('.notemd-settings-result-count');
+        expect(styles).toContain('.notemd-settings-empty-state');
         expect(styles).toContain('@media (max-width: 720px)');
     });
 });

@@ -43,7 +43,7 @@ import {
 import { UI_LOCALE_AUTO } from '../i18n/languageContext';
 import { SUPPORTED_UI_LOCALES } from '../i18n/uiLocales';
 import { formatI18n, getI18nStrings } from '../i18n';
-import { createLocalizedSettingIdResolver } from './settings/settingCatalog';
+import { createLocalizedSettingIdResolver, retainKnownSettingIds } from './settings/settingCatalog';
 import { searchSettingCatalog, SettingCatalogEntry } from './settings/settingSearch';
 import { runProviderConnectionTestWithHost } from '../operations/providerConnectionTestCommandHostAdapter';
 import { getFolderTaskFileSelectionProfiles, getFolderTaskRegexValidationError } from '../folderTaskFileSelector';
@@ -88,23 +88,36 @@ export class NotemdSettingTab extends PluginSettingTab {
             getI18nStrings({ uiLocale: 'en' }) as unknown as Record<string, unknown>
         );
         const duplicateCounts = new Map<string, number>();
+        let currentCategoryId = 'settings.general';
         const catalog = settingItems.map((item): SettingCatalogEntry => {
             const name = item.querySelector<HTMLElement>('.setting-item-name')?.textContent?.trim() ?? '';
             const description = item.querySelector<HTMLElement>('.setting-item-description')?.textContent?.trim() ?? '';
             const baseId = resolveSettingId(name, description);
             const occurrence = duplicateCounts.get(baseId) ?? 0;
             duplicateCounts.set(baseId, occurrence + 1);
-            return { id: occurrence === 0 ? baseId : `${baseId}.${occurrence + 1}`, categoryId: 'settings', name, description };
+            const id = occurrence === 0 ? baseId : `${baseId}.${occurrence + 1}`;
+            if (item.matches('.setting-item-heading')) currentCategoryId = id;
+            return { id, categoryId: currentCategoryId, name, description };
         });
-        const favorites = new Set(this.plugin.settings.favoriteSettingIds ?? []);
+        const retainedFavoriteIds = retainKnownSettingIds(this.plugin.settings.favoriteSettingIds ?? [], catalog.map(entry => entry.id));
+        const favorites = new Set(retainedFavoriteIds);
+        if (retainedFavoriteIds.length !== (this.plugin.settings.favoriteSettingIds ?? []).length) {
+            this.plugin.settings.favoriteSettingIds = retainedFavoriteIds;
+            void this.plugin.saveSettings();
+        }
+        const copy = getI18nStrings({ uiLocale: this.plugin.settings.uiLocale }).settingsDiscovery;
         const header = containerEl.createDiv({ cls: 'notemd-settings-discovery' });
         containerEl.prepend(header);
-        const search = header.createEl('input', { type: 'search', placeholder: 'Search settings…', cls: 'notemd-settings-search' });
-        search.setAttribute('aria-label', 'Search settings');
-        const favoritesButton = header.createEl('button', { text: '★ Favorites', cls: 'notemd-settings-favorites-filter' });
+        const search = header.createEl('input', { type: 'search', placeholder: copy.searchPlaceholder, cls: 'notemd-settings-search' });
+        search.setAttribute('aria-label', copy.searchLabel);
+        const favoritesButton = header.createEl('button', { text: copy.favorites, cls: 'notemd-settings-favorites-filter' });
         favoritesButton.type = 'button';
         let favoritesOnly = false;
         const navigation = header.createDiv({ cls: 'notemd-settings-category-navigation' });
+        const resultCount = header.createDiv({ cls: 'notemd-settings-result-count' });
+        resultCount.setAttribute('aria-live', 'polite');
+        const emptyState = header.createDiv({ cls: 'notemd-settings-empty-state', text: copy.noResults });
+        emptyState.hidden = true;
         Array.from(containerEl.querySelectorAll<HTMLElement>('h2, .setting-item-heading')).forEach((heading, index) => {
             const label = heading.textContent?.trim();
             if (!label) return;
@@ -115,22 +128,28 @@ export class NotemdSettingTab extends PluginSettingTab {
         });
         const applyFilter = () => {
             const matchedIds = new Set(searchSettingCatalog(catalog, search.value).map(entry => entry.id));
+            let visibleCount = 0;
             settingItems.forEach((item, index) => {
                 const settingId = catalog[index].id;
-                item.toggleAttribute('hidden', !matchedIds.has(settingId) || (favoritesOnly && !favorites.has(settingId)));
+                const hidden = !matchedIds.has(settingId) || (favoritesOnly && !favorites.has(settingId));
+                item.toggleAttribute('hidden', hidden);
+                if (!hidden) visibleCount += 1;
             });
+            resultCount.setText(formatI18n(copy.resultCount, { visible: visibleCount, total: settingItems.length }));
+            emptyState.hidden = visibleCount !== 0;
         };
         settingItems.forEach((item, index) => {
             const settingId = catalog[index].id;
             item.dataset.notemdSettingId = settingId;
             const star = item.createEl('button', { text: favorites.has(settingId) ? '★' : '☆', cls: 'notemd-setting-favorite-button' });
             star.type = 'button';
-            star.setAttribute('aria-label', favorites.has(settingId) ? 'Remove setting from favorites' : 'Add setting to favorites');
+            star.setAttribute('aria-label', favorites.has(settingId) ? copy.removeFavorite : copy.addFavorite);
             star.onclick = async () => {
                 favorites.has(settingId) ? favorites.delete(settingId) : favorites.add(settingId);
                 this.plugin.settings.favoriteSettingIds = [...favorites];
                 await this.plugin.saveSettings();
                 star.textContent = favorites.has(settingId) ? '★' : '☆';
+                star.setAttribute('aria-label', favorites.has(settingId) ? copy.removeFavorite : copy.addFavorite);
                 applyFilter();
             };
         });
@@ -141,6 +160,7 @@ export class NotemdSettingTab extends PluginSettingTab {
             favoritesButton.setAttribute('aria-pressed', String(favoritesOnly));
             applyFilter();
         };
+        applyFilter();
     }
 
     constructor(app: App, plugin: NotemdPlugin) {

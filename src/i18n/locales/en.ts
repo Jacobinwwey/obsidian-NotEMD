@@ -1003,6 +1003,11 @@ export const STRINGS_EN = {
         removeIndex: 'Remove from history', deleteArtifacts: 'Delete artifacts…',
         previous: 'Previous', next: 'Next', page: '{page} / {total}'
     },
+    settingsDiscovery: {
+        searchPlaceholder: 'Search settings…', searchLabel: 'Search settings', favorites: '★ Favorites',
+        addFavorite: 'Add setting to favorites', removeFavorite: 'Remove setting from favorites',
+        resultCount: '{visible} of {total} settings', noResults: 'No settings match the current search and filters.'
+    },
     slideExport: {
         settingsHeading: 'Slide Export',
         enableName: 'Enable slide export',

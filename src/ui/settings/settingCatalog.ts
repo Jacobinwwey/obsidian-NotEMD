@@ -36,3 +36,12 @@ export function createLocalizedSettingIdResolver(current: TranslationTree, canon
         return `dynamic.${stableHash(`${name}\u0000${description}`)}`;
     };
 }
+
+export function retainKnownSettingIds(savedIds: readonly string[], knownIds: readonly string[]): string[] {
+    const known = new Set(knownIds);
+    const retained = new Set<string>();
+    for (const id of savedIds) {
+        if (known.has(id)) retained.add(id);
+    }
+    return [...retained];
+}

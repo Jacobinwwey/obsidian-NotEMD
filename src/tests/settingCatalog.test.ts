@@ -1,5 +1,5 @@
 import { searchSettingCatalog, SettingCatalogEntry } from '../ui/settings/settingSearch';
-import { createLocalizedSettingIdResolver } from '../ui/settings/settingCatalog';
+import { createLocalizedSettingIdResolver, retainKnownSettingIds } from '../ui/settings/settingCatalog';
 
 const entries: SettingCatalogEntry[] = [
     { id: 'diagrams.export-ppi', categoryId: 'diagrams', name: 'Image export PPI', description: 'Controls PNG and PDF clarity.', aliases: ['resolution', 'dpi'] },
@@ -38,5 +38,12 @@ describe('localized setting identity', () => {
         const resolve = createLocalizedSettingIdResolver(english, english);
         expect(resolve('Custom provider', 'Endpoint profile')).toBe(resolve('Custom provider', 'Endpoint profile'));
         expect(resolve('Custom provider', 'Endpoint profile')).toMatch(/^dynamic\./);
+    });
+
+    test('suppresses unknown and duplicate favorite ids while preserving order', () => {
+        expect(retainKnownSettingIds(
+            ['settings.model', 'removed.setting', 'settings.model', 'settings.timeout'],
+            ['settings.model', 'settings.timeout']
+        )).toEqual(['settings.model', 'settings.timeout']);
     });
 });
