@@ -298,7 +298,7 @@ export class DiagramPreviewModal extends Modal {
         });
         if (this.historyStore) {
             const manage = historyEl.createEl('button', { text: 'Manage Vault history' });
-            manage.onclick = () => new DiagramHistoryModal(this.app, this.historyStore!.loadPage, this.historyStore!.removeEntry, this.historyStore!.deleteArtifacts, this.historyStore!.reopenArtifact).open();
+            manage.onclick = () => new DiagramHistoryModal(this.app, this.historyStore!.loadPage, this.historyStore!.removeEntry, this.historyStore!.deleteArtifacts, this.historyStore!.reopenArtifact, this.uiLocale).open();
         }
 
         const historyList = historyEl.createDiv({ cls: 'notemd-diagram-preview-history-list' });

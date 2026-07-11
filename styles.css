@@ -2097,5 +2097,24 @@
 .notemd-settings-category-navigation { grid-column: 1 / -1; display: flex; gap: 0.35rem; overflow-x: auto; padding-bottom: 0.2rem; }
 .notemd-settings-category-navigation button, .notemd-settings-favorites-filter { white-space: nowrap; }
 .notemd-settings-favorites-filter.is-active { color: var(--text-on-accent); background: var(--interactive-accent); }
-.notemd-setting-favorite-button { align-self: center; flex: 0 0 auto; margin-inline-start: 0.4rem; padding: 0.2rem 0.45rem; color: var(--text-accent); background: transparent; border: 0; box-shadow: none; }
-@media (max-width: 720px) { .notemd-settings-discovery { grid-template-columns: 1fr; } }
+.notemd-setting-favorite-button { min-width: 44px; min-height: 44px; align-self: center; flex: 0 0 auto; margin-inline-start: 0.4rem; padding: 0.2rem 0.45rem; color: var(--text-accent); background: transparent; border: 0; box-shadow: none; }
+.notemd-settings-discovery button:focus-visible,
+.notemd-settings-discovery input:focus-visible,
+.notemd-diagram-history-toolbar :is(input, select, button):focus-visible,
+.notemd-diagram-history-actions button:focus-visible {
+    outline: 2px solid var(--notemd-focus);
+    outline-offset: 2px;
+}
+.notemd-diagram-history-toolbar { display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; }
+.notemd-diagram-history-toolbar :is(input, select, button) { min-height: 44px; }
+.notemd-diagram-history-list { display: flex; flex-direction: column; gap: 0.75rem; margin-top: 0.75rem; }
+.notemd-diagram-history-item { padding: 0.75rem; border: 1px solid var(--notemd-border); border-radius: 12px; background: var(--notemd-surface-alt); }
+.notemd-diagram-history-actions { display: flex; flex-wrap: wrap; gap: 0.45rem; margin-top: 0.55rem; }
+.notemd-diagram-history-actions button { min-height: 44px; }
+.notemd-diagram-history-pager { display: flex; align-items: center; justify-content: center; gap: 0.75rem; margin-top: 0.9rem; }
+@media (max-width: 720px) {
+    .notemd-settings-discovery { grid-template-columns: 1fr; }
+    .notemd-diagram-history-toolbar { align-items: stretch; }
+    .notemd-diagram-history-toolbar :is(input, select) { flex: 1 1 100%; width: 100%; }
+    .notemd-diagram-history-actions button { flex: 1 1 12rem; min-height: 44px; }
+}

@@ -977,6 +977,15 @@ export const STRINGS_ZH_CN: DeepPartial<NotemdEnglishStrings> = {
         },
         diagnosticAdvice: '建议：{advice}'
     },
+    diagramHistory: {
+        title: '图形历史', searchPlaceholder: '搜索标题、笔记、类型或格式…',
+        allTypes: '全部图形类型', allFormats: '全部源格式', anyExport: '任意导出格式',
+        itemsPerPage: '每页 {count} 条', completedFrom: '完成时间起点', completedTo: '完成时间终点',
+        summary: '共 {count} 个图形 · 最新完成优先', noExports: '尚未记录视觉导出', exports: '导出：{formats}',
+        reopen: '重新打开预览', openSource: '打开源笔记', openFile: '打开 {name}',
+        removeIndex: '从历史中移除', deleteArtifacts: '删除产物…',
+        previous: '上一页', next: '下一页', page: '第 {page} / {total} 页'
+    },
     slideExport: {
         settingsHeading: '演示导出',
         enableName: '启用演示导出',

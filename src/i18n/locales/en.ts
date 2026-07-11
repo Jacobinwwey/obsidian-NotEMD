@@ -994,6 +994,15 @@ export const STRINGS_EN = {
         deleteArtifactsCancel: 'Cancel',
         deleteArtifactsConfirm: 'Move to trash'
     },
+    diagramHistory: {
+        title: 'Diagram history', searchPlaceholder: 'Search title, note, type, or format…',
+        allTypes: 'All diagram types', allFormats: 'All source formats', anyExport: 'Any export',
+        itemsPerPage: '{count} per page', completedFrom: 'Completed from', completedTo: 'Completed to',
+        summary: '{count} diagrams · newest first', noExports: 'No visual exports recorded', exports: 'Exports: {formats}',
+        reopen: 'Reopen preview', openSource: 'Open source note', openFile: 'Open {name}',
+        removeIndex: 'Remove from history', deleteArtifacts: 'Delete artifacts…',
+        previous: 'Previous', next: 'Next', page: '{page} / {total}'
+    },
     slideExport: {
         settingsHeading: 'Slide Export',
         enableName: 'Enable slide export',

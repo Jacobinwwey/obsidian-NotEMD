@@ -34,4 +34,14 @@ describe('provider settings styles', () => {
         expect(styles).toContain('.notemd-debug-toggle');
         expect(styles).toContain('.notemd-debug-toggle-input');
     });
+
+    test('settings discovery and history controls provide keyboard focus and usable targets', () => {
+        const styles = fs.readFileSync(stylesPath, 'utf8');
+
+        expect(styles).toContain('.notemd-settings-discovery button:focus-visible');
+        expect(styles).toContain('.notemd-setting-favorite-button { min-width: 44px; min-height: 44px;');
+        expect(styles).toContain('.notemd-diagram-history-toolbar');
+        expect(styles).toContain('.notemd-diagram-history-actions');
+        expect(styles).toContain('@media (max-width: 720px)');
+    });
 });

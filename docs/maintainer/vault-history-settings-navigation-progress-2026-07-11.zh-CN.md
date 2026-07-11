@@ -25,10 +25,11 @@
 
 ## 验证状态
 
-- 历史重开和非交互批处理完成后的最新全量验证通过：220 个 Jest 套件、1,879 项测试、TypeScript 生产构建、UI 国际化审计和 `git diff --check`。
+- 历史本地化和前端点击区域修复后的最新全量验证通过：220 个 Jest 套件、1,880 项测试、TypeScript 生产构建、UI 国际化审计和 `git diff --check`。
 - 已把构建产物复制到 `Study` Vault，并执行 `obsidian vault="Study" plugin:reload id=notemd`，返回 `Reloaded: notemd`。
 - 官方 `obsidian help` CLI 可正常执行；本机未安装独立的 `obsidian-cli` 可执行文件，因此不对该兼容别名宣称验证成功。
 - 已再次把构建产物复制到 `Study` Vault；Obsidian 1.12.7 可正常响应，`dev:errors` 返回 `No errors captured`。通过 `eval` 自动进入插件设置页的操作发生超时，因此视觉交互覆盖仍明确列为待验证项，不以“错误缓冲为空”间接代替。
+- 历史管理器文案现已接入共享的英文/简体中文注册表。基于 CSS 与合同测试证据的 Frontend Law Auditor 严格门禁，在把收藏、筛选和历史操作提升到 44 px 点击区域并增加明确的键盘焦点环后得到 100/100。Windows 截图捕获仍在平台接口处失败（`0x80004002`），因此该分数只是代码级门禁，不能替代后续截图对比。
 - 自动化测试已覆盖仓库查询行为与批处理文件夹策略；提交并推送后再记录最终 clean 工作区证据。
 
 ## 后续方向

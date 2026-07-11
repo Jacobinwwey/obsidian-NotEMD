@@ -25,10 +25,11 @@ The previous batch title flow validated the selected path only inside `batchGene
 
 ## Verification State
 
-- Fresh full verification after the history-reopen and non-interactive batch work passed: 220 Jest suites and 1,879 tests, the TypeScript production build, the UI i18n audit, and `git diff --check`.
+- Fresh full verification after history localization and frontend target-size fixes passed: 220 Jest suites and 1,880 tests, the TypeScript production build, the UI i18n audit, and `git diff --check`.
 - The built plugin was copied into the `Study` Vault and `obsidian vault="Study" plugin:reload id=notemd` returned `Reloaded: notemd`.
 - The official `obsidian help` CLI surface executed successfully. A separate `obsidian-cli` executable is not installed, so no success is claimed for that compatibility alias.
 - The rebuilt bundle was copied to the `Study` Vault again; Obsidian 1.12.7 remained reachable and `dev:errors` reported `No errors captured`. Automated settings-tab navigation through `eval` timed out, so visual interaction coverage remains explicitly pending rather than being inferred from the clean error buffer.
+- History-manager copy is now localized through the shared English/Simplified-Chinese registry. A Frontend Law Auditor strict run based on CSS and contract evidence scored 100/100 after raising critical favorites, filters, and history actions to 44 px targets and adding explicit focus-visible rings. Windows screenshot capture still failed at the platform interface (`0x80004002`), so the score is a code-level gate, not a substitute for future screenshot comparison.
 - Automated coverage confirms the repository/query behavior and batch-folder policies. Final clean-worktree evidence is obtained after commit and push.
 
 ## Next Direction
