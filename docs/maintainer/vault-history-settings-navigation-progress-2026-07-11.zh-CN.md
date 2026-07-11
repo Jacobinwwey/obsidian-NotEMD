@@ -25,9 +25,10 @@
 
 ## 验证状态
 
-- 2026-07-11 的最新全量验证通过：219 个 Jest 套件、1,871 项测试、TypeScript 生产构建、UI 国际化审计和 `git diff --check`。
+- 历史重开和非交互批处理完成后的最新全量验证通过：220 个 Jest 套件、1,879 项测试、TypeScript 生产构建、UI 国际化审计和 `git diff --check`。
 - 已把构建产物复制到 `Study` Vault，并执行 `obsidian vault="Study" plugin:reload id=notemd`，返回 `Reloaded: notemd`。
 - 官方 `obsidian help` CLI 可正常执行；本机未安装独立的 `obsidian-cli` 可执行文件，因此不对该兼容别名宣称验证成功。
+- 已再次把构建产物复制到 `Study` Vault；Obsidian 1.12.7 可正常响应，`dev:errors` 返回 `No errors captured`。通过 `eval` 自动进入插件设置页的操作发生超时，因此视觉交互覆盖仍明确列为待验证项，不以“错误缓冲为空”间接代替。
 - 自动化测试已覆盖仓库查询行为与批处理文件夹策略；提交并推送后再记录最终 clean 工作区证据。
 
 ## 后续方向

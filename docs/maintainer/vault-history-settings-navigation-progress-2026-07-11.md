@@ -25,9 +25,10 @@ The previous batch title flow validated the selected path only inside `batchGene
 
 ## Verification State
 
-- Fresh full verification on 2026-07-11 passed: 219 Jest suites and 1,871 tests, the TypeScript production build, the UI i18n audit, and `git diff --check`.
+- Fresh full verification after the history-reopen and non-interactive batch work passed: 220 Jest suites and 1,879 tests, the TypeScript production build, the UI i18n audit, and `git diff --check`.
 - The built plugin was copied into the `Study` Vault and `obsidian vault="Study" plugin:reload id=notemd` returned `Reloaded: notemd`.
 - The official `obsidian help` CLI surface executed successfully. A separate `obsidian-cli` executable is not installed, so no success is claimed for that compatibility alias.
+- The rebuilt bundle was copied to the `Study` Vault again; Obsidian 1.12.7 remained reachable and `dev:errors` reported `No errors captured`. Automated settings-tab navigation through `eval` timed out, so visual interaction coverage remains explicitly pending rather than being inferred from the clean error buffer.
 - Automated coverage confirms the repository/query behavior and batch-folder policies. Final clean-worktree evidence is obtained after commit and push.
 
 ## Next Direction
