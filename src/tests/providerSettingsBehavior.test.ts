@@ -599,7 +599,7 @@ describe('provider settings behavior', () => {
         };
     });
 
-    test('shows diagram render target controls without developer mode', async () => {
+    test('separates diagram type, source format, and available export formats without developer mode', async () => {
         const plugin = createPlugin();
         plugin.settings.enableDeveloperMode = false;
         plugin.settings.enableExperimentalDiagramPipeline = true;
@@ -609,16 +609,21 @@ describe('provider settings behavior', () => {
         tab.display();
 
         const intentSetting = findSettingByName(tab.containerEl, 'Preferred diagram type');
-        const targetSetting = findSettingByName(tab.containerEl, 'Preferred render target');
+        const targetSetting = findSettingByName(tab.containerEl, 'Preferred source format');
+        const exportSetting = findSettingByName(tab.containerEl, 'Available export formats');
 
         expect(intentSetting).toBeDefined();
         expect(targetSetting).toBeDefined();
+        expect(exportSetting).toBeDefined();
+        expect(exportSetting?.desc).toBe('Source file, SVG, PNG, and PDF are available from diagram preview.');
 
         const intentDropdown = intentSetting?.controls.find(control => control.kind === 'dropdown') as MockDropdownControl | undefined;
         const targetDropdown = targetSetting?.controls.find(control => control.kind === 'dropdown') as MockDropdownControl | undefined;
 
-        expect(intentDropdown?.options.circuit).toBe('Circuit (Circuitikz)');
-        expect(targetDropdown?.options.circuitikz).toBe('Circuitikz + SVG preview');
+        expect(intentDropdown?.options.circuit).toBe('Circuit diagram');
+        expect(targetDropdown?.options.drawio).toBe('Draw.io source file');
+        expect(targetDropdown?.options.drawnix).toBe('Drawnix source file');
+        expect(targetDropdown?.options.circuitikz).toBe('CircuitikZ source file');
 
         await intentDropdown?.onChangeHandler?.('circuit');
         await targetDropdown?.onChangeHandler?.('circuitikz');
@@ -626,6 +631,31 @@ describe('provider settings behavior', () => {
         expect(plugin.settings.preferredDiagramIntent).toBe('circuit');
         expect(plugin.settings.preferredDiagramRenderTarget).toBe('circuitikz');
         expect(plugin.saveSettings).toHaveBeenCalledTimes(2);
+    });
+
+    test('keeps CircuitikZ settings compatible when the diagram type changes', async () => {
+        const plugin = createPlugin();
+        plugin.settings.enableExperimentalDiagramPipeline = true;
+        plugin.settings.experimentalDiagramCompatibilityMode = 'legacy-mermaid';
+        plugin.settings.preferredDiagramIntent = 'flowchart';
+        plugin.settings.preferredDiagramRenderTarget = 'drawio';
+
+        const tab = new NotemdSettingTab(mockApp as any, plugin as any) as any;
+        tab.display();
+
+        const intentSetting = findSettingByName(tab.containerEl, 'Preferred diagram type');
+        const intentDropdown = intentSetting?.controls.find(control => control.kind === 'dropdown') as MockDropdownControl | undefined;
+
+        await intentDropdown?.onChangeHandler?.('circuit');
+
+        expect(plugin.settings.preferredDiagramIntent).toBe('circuit');
+        expect(plugin.settings.preferredDiagramRenderTarget).toBe('circuitikz');
+        expect(plugin.settings.experimentalDiagramCompatibilityMode).toBe('best-fit');
+
+        await intentDropdown?.onChangeHandler?.('flowchart');
+
+        expect(plugin.settings.preferredDiagramIntent).toBe('flowchart');
+        expect(plugin.settings.preferredDiagramRenderTarget).toBeUndefined();
     });
 
     test('keeps advanced settings collapsed after the user closes them and reopens the settings tab', () => {

@@ -458,6 +458,106 @@ Referral share: 35%
         })).rejects.toThrow(/does not match requested intent "sequence"/i);
     });
 
+    test('falls back to the constrained CMOS inverter template when the LLM ignores an explicit circuit intent', async () => {
+        const llmInvoker = jest.fn().mockResolvedValue(JSON.stringify({
+            intent: 'mindmap',
+            title: 'CMOS Inverter Notes',
+            nodes: [{ id: 'topic', label: 'CMOS inverter' }]
+        }));
+
+        const result = await generateDiagramArtifact(`
+现在用 tikz 写一个 CMOS 反相器
+`, {
+            compatibilityMode: 'best-fit',
+            requestedIntent: 'circuit',
+            requestedRenderTarget: 'circuitikz',
+            targetLanguage: 'zh-CN',
+            llmInvoker
+        });
+
+        expect(llmInvoker).toHaveBeenCalledTimes(2);
+        expect(result.spec.intent).toBe('circuit');
+        expect(result.spec.circuitSpec?.circuitKind).toBe('cmos-inverter');
+        expect(result.spec.circuitSpec?.goldenReferenceId).toBe('cmos-inverter-v1');
+        expect(result.artifact.target).toBe('circuitikz');
+        expect(result.artifact.content).toContain('\\begin{circuitikz}');
+        expect(result.artifact.previewSvg?.content).toContain('<svg');
+    });
+
+    test('falls back to a constrained circuit template when the LLM returns an invalid CircuitSpec', async () => {
+        const llmInvoker = jest.fn().mockResolvedValue(JSON.stringify({
+            intent: 'circuit',
+            title: 'Common-source NMOS amplifier',
+            nodes: [],
+            circuitSpec: {
+                circuitKind: 'common-source-amplifier',
+                goldenReferenceId: 'common-source-nmos-v1',
+                components: [],
+                connections: []
+            }
+        }));
+
+        const result = await generateDiagramArtifact(`
+请生成一个共源 NMOS 放大器电路图：VDD 经过漏极电阻 RD 接到 NMOS M1 的漏极，输出 vout 从漏极节点引出；源极接地；输入 vin 接栅极。
+`, {
+            compatibilityMode: 'best-fit',
+            requestedIntent: 'circuit',
+            requestedRenderTarget: 'circuitikz',
+            targetLanguage: 'zh-CN',
+            llmInvoker
+        });
+
+        expect(llmInvoker).toHaveBeenCalledTimes(1);
+        expect(result.spec.circuitSpec?.goldenReferenceId).toBe('common-source-nmos-v1');
+        expect(result.artifact.content).toContain('\\usepackage{circuitikz}');
+        expect(result.artifact.content).toContain('\\begin{document}');
+        expect(result.artifact.content).toContain('\\begin{circuitikz}');
+        expect(result.artifact.content).toContain('\\end{document}');
+    });
+
+    test('does not substitute a golden circuit template for an unsupported circuit request', async () => {
+        const llmInvoker = jest.fn().mockResolvedValue(JSON.stringify({
+            intent: 'mindmap',
+            title: 'Operational Amplifier Notes',
+            nodes: [{ id: 'topic', label: 'operational amplifier' }]
+        }));
+
+        await expect(generateDiagramArtifact(`
+Draw a two-stage operational amplifier with frequency compensation in circuitikz.
+`, {
+            compatibilityMode: 'best-fit',
+            requestedIntent: 'circuit',
+            requestedRenderTarget: 'circuitikz',
+            targetLanguage: 'en',
+            llmInvoker
+        })).rejects.toThrow(/does not match requested intent "circuit"/i);
+
+        expect(llmInvoker).toHaveBeenCalledTimes(2);
+    });
+
+    test('uses the latest explicit supported circuit request when falling back from an ignored LLM response', async () => {
+        const llmInvoker = jest.fn().mockResolvedValue(JSON.stringify({
+            intent: 'mindmap',
+            title: 'Circuit Notes',
+            nodes: [{ id: 'topic', label: 'circuit notes' }]
+        }));
+
+        const result = await generateDiagramArtifact(`
+Earlier notes mention a CMOS NAND gate and its pull-down network.
+
+Now draw a CMOS inverter in circuitikz.
+`, {
+            compatibilityMode: 'best-fit',
+            requestedIntent: 'circuit',
+            requestedRenderTarget: 'circuitikz',
+            targetLanguage: 'en',
+            llmInvoker
+        });
+
+        expect(result.spec.circuitSpec?.circuitKind).toBe('cmos-inverter');
+        expect(result.spec.circuitSpec?.goldenReferenceId).toBe('cmos-inverter-v1');
+    });
+
     test('rejects ambiguous multi-series pie specs before renderer fallback', async () => {
         await expect(generateDiagramArtifact(`# Traffic Mix
 

@@ -508,56 +508,79 @@ function auditLocalizedSourceCoverage(languageScope) {
   }
 }
 
-function auditDiagramDocs() {
+function auditLegacyDiagramDocs() {
   const englishDiagrams = readBuildFile(path.join('docs', 'features', 'diagrams', 'index.html'));
   const zhCnDiagrams = readBuildFile(path.join('zh-CN', 'docs', 'features', 'diagrams', 'index.html'));
 
-  assertContains(englishDiagrams, 'Editable HTML/SVG', 'English diagrams doc');
+  assertContains(englishDiagrams, 'Understand the three choices', 'English diagrams doc');
+  assertContains(englishDiagrams, 'Diagram type', 'English diagrams doc');
+  assertContains(englishDiagrams, 'Source format', 'English diagrams doc');
+  assertContains(englishDiagrams, 'Export format', 'English diagrams doc');
   assertContains(englishDiagrams, 'Draw.io', 'English diagrams doc');
   assertContains(englishDiagrams, 'Drawnix', 'English diagrams doc');
-  assertContains(englishDiagrams, 'circuitikz', 'English diagrams doc');
+  assertContains(englishDiagrams, 'CircuitikZ', 'English diagrams doc');
   assertContains(englishDiagrams, 'TikZJax', 'English diagrams doc');
-  assertContains(englishDiagrams, 'preferredDiagramRenderTarget', 'English diagrams doc');
-  assertContains(englishDiagrams, 'Render Target Selection', 'English diagrams doc');
-  assertContains(englishDiagrams, 'diagram:export-circuitikz', 'English diagrams doc');
-  assertContains(englishDiagrams, 'CircuitSpec', 'English diagrams doc');
-  assertContains(englishDiagrams, 'cmos-inverter-v1', 'English diagrams doc');
-  assertContains(englishDiagrams, 'cmos-nand2-v1', 'English diagrams doc');
-  assertContains(englishDiagrams, 'cmos-nor2-v1', 'English diagrams doc');
-  assertContains(englishDiagrams, '--compile-log', 'English diagrams doc');
-  assertContains(englishDiagrams, '--diagnostics-output', 'English diagrams doc');
-  assertContains(englishDiagrams, '--compile-executable', 'English diagrams doc');
-  assertContains(englishDiagrams, '--compile-arg', 'English diagrams doc');
-  assertContains(englishDiagrams, '--expected-artifact', 'English diagrams doc');
-  assertContains(englishDiagrams, 'compileExecution', 'English diagrams doc');
-  assertContains(englishDiagrams, 'compileExecution.renderSmoke', 'English diagrams doc');
-  assertContains(englishDiagrams, 'circuitikz.sty', 'English diagrams doc');
-  assertContains(englishDiagrams, 'Golden Reference Prompt Shape', 'English diagrams doc');
-  assertContains(englishDiagrams, 'scripts/diagram-semantic-verification.js', 'English diagrams doc');
+  assertContains(englishDiagrams, 'Save source file', 'English diagrams doc');
+  assertContains(englishDiagrams, 'Export SVG', 'English diagrams doc');
+  assertContains(englishDiagrams, 'Export PNG', 'English diagrams doc');
+  assertContains(englishDiagrams, 'Export PDF', 'English diagrams doc');
+  assertNotContains(englishDiagrams, 'preferredDiagramRenderTarget', 'English diagrams doc');
+  assertNotContains(englishDiagrams, 'cmos-inverter-v1', 'English diagrams doc');
+  assertNotContains(englishDiagrams, '--compile-executable', 'English diagrams doc');
+  assertNotContains(englishDiagrams, 'Golden Reference Prompt Shape', 'English diagrams doc');
 
   assertContains(zhCnDiagrams, '<html lang="zh-CN"', 'zh-CN diagrams doc');
   assertMatches(zhCnDiagrams, /Editable HTML\/SVG|可编辑.*HTML\/SVG/, 'zh-CN diagrams doc');
   assertContains(zhCnDiagrams, 'Draw.io', 'zh-CN diagrams doc');
   assertContains(zhCnDiagrams, 'Drawnix', 'zh-CN diagrams doc');
-  assertContains(zhCnDiagrams, 'circuitikz', 'zh-CN diagrams doc');
+  assertContains(zhCnDiagrams, 'CircuitikZ', 'zh-CN diagrams doc');
   assertContains(zhCnDiagrams, 'TikZJax', 'zh-CN diagrams doc');
-  assertContains(zhCnDiagrams, 'preferredDiagramRenderTarget', 'zh-CN diagrams doc');
   assertContains(zhCnDiagrams, '渲染目标选择', 'zh-CN diagrams doc');
-  assertContains(zhCnDiagrams, 'diagram:export-circuitikz', 'zh-CN diagrams doc');
-  assertContains(zhCnDiagrams, 'CircuitSpec', 'zh-CN diagrams doc');
-  assertContains(zhCnDiagrams, 'cmos-inverter-v1', 'zh-CN diagrams doc');
-  assertContains(zhCnDiagrams, 'cmos-nand2-v1', 'zh-CN diagrams doc');
-  assertContains(zhCnDiagrams, 'cmos-nor2-v1', 'zh-CN diagrams doc');
-  assertContains(zhCnDiagrams, '--compile-log', 'zh-CN diagrams doc');
-  assertContains(zhCnDiagrams, '--diagnostics-output', 'zh-CN diagrams doc');
-  assertContains(zhCnDiagrams, '--compile-executable', 'zh-CN diagrams doc');
-  assertContains(zhCnDiagrams, '--compile-arg', 'zh-CN diagrams doc');
-  assertContains(zhCnDiagrams, '--expected-artifact', 'zh-CN diagrams doc');
-  assertContains(zhCnDiagrams, 'compileExecution', 'zh-CN diagrams doc');
-  assertContains(zhCnDiagrams, 'compileExecution.renderSmoke', 'zh-CN diagrams doc');
-  assertContains(zhCnDiagrams, 'circuitikz.sty', 'zh-CN diagrams doc');
   assertMatches(zhCnDiagrams, /金色参考.*提示.*形状|Golden Reference Prompt/, 'zh-CN diagrams doc');
-  assertContains(zhCnDiagrams, 'SemanticFigureModel', 'zh-CN diagrams doc');
+  assertContains(zhCnDiagrams, 'SVG', 'zh-CN diagrams doc');
+  assertContains(zhCnDiagrams, 'PNG', 'zh-CN diagrams doc');
+  assertContains(zhCnDiagrams, 'PDF', 'zh-CN diagrams doc');
+  assertNotContains(zhCnDiagrams, 'preferredDiagramRenderTarget', 'zh-CN diagrams doc');
+  assertNotContains(zhCnDiagrams, 'cmos-inverter-v1', 'zh-CN diagrams doc');
+  assertNotContains(zhCnDiagrams, '--compile-executable', 'zh-CN diagrams doc');
+  assertNotContains(zhCnDiagrams, 'content="noindex,follow"', 'zh-CN diagrams doc');
+}
+
+function auditDiagramDocs() {
+  const englishDiagrams = readBuildFile(path.join('docs', 'features', 'diagrams', 'index.html'));
+  const zhCnDiagrams = readBuildFile(path.join('zh-CN', 'docs', 'features', 'diagrams', 'index.html'));
+
+  for (const requiredText of [
+    'Understand the three choices',
+    'Diagram type',
+    'Source format',
+    'Export format',
+    'Draw.io',
+    'Drawnix',
+    'CircuitikZ',
+    'TikZJax',
+    'Save source file',
+    'Export SVG',
+    'Export PNG',
+    'Export PDF'
+  ]) {
+    assertContains(englishDiagrams, requiredText, 'English diagrams doc');
+  }
+
+  for (const maintainerText of [
+    'preferredDiagramRenderTarget',
+    'cmos-inverter-v1',
+    '--compile-executable',
+    'Golden Reference Prompt Shape'
+  ]) {
+    assertNotContains(englishDiagrams, maintainerText, 'English diagrams doc');
+    assertNotContains(zhCnDiagrams, maintainerText, 'zh-CN diagrams doc');
+  }
+
+  assertContains(zhCnDiagrams, '<html lang="zh-CN"', 'zh-CN diagrams doc');
+  for (const requiredText of ['Draw.io', 'Drawnix', 'CircuitikZ', 'TikZJax', 'SVG', 'PNG', 'PDF']) {
+    assertContains(zhCnDiagrams, requiredText, 'zh-CN diagrams doc');
+  }
   assertNotContains(zhCnDiagrams, 'content="noindex,follow"', 'zh-CN diagrams doc');
 }
 

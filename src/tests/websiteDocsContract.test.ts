@@ -140,145 +140,33 @@ describe('website documentation contract', () => {
         }
     });
 
-    test('diagram pages document circuitikz as a constrained prototype in both languages', () => {
+    test('diagram pages explain diagram types, editable sources, and visual exports in both languages', () => {
         expect(markdownHeadings(chineseDiagrams)).toHaveLength(markdownHeadings(englishDiagrams).length);
-        expect(englishDiagrams).toContain('Current circuitikz Prototype');
-        expect(chineseDiagrams).toMatch(/当前.*circuitikz.*原型/);
-
-        const sharedDiagramContractTerms = [
-            'circuitikz',
-            'TikZJax',
-            'CircuitSpec',
-            'common-source-amplifier',
-            'cmos-inverter-v1',
-            'cmos-buffer',
-            'cmos-buffer-v1',
-            'cmos-transmission-gate',
-            'cmos-transmission-gate-v1',
-            'cmos-nand2',
-            'cmos-nand2-v1',
-            'cmos-nor2',
-            'cmos-nor2-v1',
-            'layoutHints.inputSide',
-            'layoutHints.outputSide',
-            '--compile-log',
-            '--diagnostics-output',
-            '--compile-executable',
-            '--compile-arg',
-            '--expected-artifact',
-            '--expected-svg-text',
-            '--topology-reference',
-            '--repair-brief-output',
-            '--repair-brief',
-            'notemd.circuitikz.repair-brief.v1',
-            'repairPrompt',
-            'diagnosticFocus',
-            'acceptanceCriteria',
-            'topology-preserving-circuitikz-repair',
-            'repairAcceptance',
-            'notemd.circuitikz.repair-acceptance.v1',
-            'readyForVisualAcceptance',
-            'remainingChecks',
-            '--repair-acceptance-output',
-            'shell: false',
-            'RenderArtifact.diagnostics',
-            '.tex',
-            '.tikz',
-            '.drawio',
-            '.drawnix',
-            'Draw.io',
-            'Drawnix',
-            'mxfile',
-            'mxGraphModel',
-            'type: "drawnix"',
-            'elements',
-            'diagrams.net',
-            'compileExecution',
-            'compileExecution.renderSmoke',
-            'render-svg-text-missing',
-            'render-svg-text-path-only',
-            'aria-label',
-            '<title>',
-            '<desc>',
-            'render-svg-out-of-bounds',
-            'render-svg-text-overlap',
-            'render-svg-label-overlap',
-            'render-svg-path-glyph-overlap',
-            'pathOnlyGlyphUseCount',
-            'A/a',
-            'C/S/Q/T',
-            '<use href="#...">',
-            'polyline',
-            'polygon',
-            'tspan',
-            'text-anchor',
-            'render-png-blank',
-            'render-png-foreground-dense',
-            'render-png-foreground-too-small',
-            'render-png-content-clipped',
-            'foregroundBounds',
-            'foregroundDensity',
-            'circuitikz.sty',
-            'Golden Reference',
-            'TikZJax Render',
-            '\\usepackage{circuitikz}',
-            'pmos',
-            'nmos',
-            'npm run diagram:export-artifact',
-            'npm run diagram:export-circuitikz',
-            'npm run diagram:smoke-circuitikz',
-            'docs/maintainer/fixtures/circuitikz/common-source-nmos-v1.json',
-            'docs/maintainer/fixtures/circuitikz/cmos-inverter-v1.json',
-            'docs/maintainer/fixtures/circuitikz/cmos-buffer-v1.json',
-            'docs/maintainer/fixtures/circuitikz/cmos-transmission-gate-v1.json',
-            'docs/maintainer/fixtures/circuitikz/cmos-nand2-v1.json',
-            'docs/maintainer/fixtures/circuitikz/cmos-nor2-v1.json',
-        ];
+        expect(englishDiagrams).toContain('Understand the three choices');
+        expect(chineseDiagrams).toContain('理解三个不同选择');
 
         for (const content of [englishDiagrams, chineseDiagrams]) {
-            for (const term of sharedDiagramContractTerms) {
+            for (const term of ['Draw.io', 'Drawnix', 'CircuitikZ', '.drawio', '.drawnix', '.tex', 'SVG', 'PNG', 'PDF']) {
                 expect(content).toContain(term);
+            }
+            for (const maintainerOnlyTerm of [
+                'preferredDiagramRenderTarget',
+                'cmos-inverter-v1',
+                '--compile-executable',
+                'Golden Reference Prompt Shape',
+                'RenderArtifact.diagnostics',
+                'layoutHints.inputSide',
+            ]) {
+                expect(content).not.toContain(maintainerOnlyTerm);
             }
         }
 
-        for (const englishPhrase of [
-            'port placement',
-            'TikZ path syntax',
-            'runaway arguments',
-            'diagnostic summary',
-            'error/warning/info',
-            'diagnostics-aware history entries',
-            'source-only',
-            'circuitikz source-only',
-            'source-only preview boundary',
-            'whiteboard host',
-            'artifact diagnostics',
-            'accessibility metadata',
-            'transform-aware geometry',
-            'label-vs-drawing',
-            'path-only glyph placement',
-            'path-only glyph overlap',
-            'SVG number grammar',
-            'leading-dot decimals',
-            'explicit plus signs',
-            'stroke-width-aware SVG bounds',
-            'label overlap checks',
-            'exact arc bounds',
-            'exact Bezier curve bounds',
-            'topology-preserving repair',
-        ]) {
-            expect(englishDiagrams).toContain(englishPhrase);
-        }
-
-        for (const chineseSemanticMarker of [
-            '仅源代码',
-            '拓扑',
-            '诊断',
-            '黄金参考',
-            '保持拓扑结构',
-        ]) {
-            expect(chineseDiagrams).toContain(chineseSemanticMarker);
-        }
+        expect(englishDiagrams).toContain('Draw.io and Drawnix are **source formats**, not diagram types.');
+        expect(englishDiagrams).toContain('Current CircuitikZ support is intentionally constrained.');
+        expect(englishDiagrams).toContain('Save source file');
+        expect(chineseDiagrams).toContain('Draw.io 和 Drawnix 是**源格式**，不是图表类型。');
+        expect(chineseDiagrams).toContain('当前 CircuitikZ 支持有意保持受约束范围。');
+        expect(chineseDiagrams).toContain('保存源文件');
     });
 
     test('published locale metadata covers the README and UI locale documentation matrix', () => {

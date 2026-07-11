@@ -86,4 +86,33 @@ describe('diagram operation input helpers', () => {
             expect(input.requestedRenderTarget).toBe(preferredDiagramRenderTarget);
         }
     });
+
+    test('resolves an automatic diagram type to circuit when CircuitikZ is selected', () => {
+        const input = buildDiagramOperationInput({
+            sourceMarkdown: '画一个共源 NMOS 放大器',
+            executionMode: 'save-artifact',
+            settings: {
+                ...mockSettings,
+                preferredDiagramIntent: undefined,
+                preferredDiagramRenderTarget: 'circuitikz',
+                experimentalDiagramCompatibilityMode: 'best-fit'
+            }
+        });
+
+        expect(input.requestedIntent).toBe('circuit');
+        expect(input.requestedRenderTarget).toBe('circuitikz');
+    });
+
+    test('rejects a non-circuit diagram type paired with CircuitikZ', () => {
+        expect(() => buildDiagramOperationInput({
+            sourceMarkdown: 'Draw a release flow.',
+            executionMode: 'save-artifact',
+            settings: {
+                ...mockSettings,
+                preferredDiagramIntent: 'flowchart',
+                preferredDiagramRenderTarget: 'circuitikz',
+                experimentalDiagramCompatibilityMode: 'best-fit'
+            }
+        })).toThrow(/CircuitikZ source format requires the circuit diagram type/i);
+    });
 });

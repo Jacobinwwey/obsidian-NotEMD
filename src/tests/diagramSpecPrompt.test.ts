@@ -65,4 +65,34 @@ describe('diagram spec prompt builder', () => {
         expect(prompt).toMatch(/cmos-inverter-v1/i);
         expect(prompt).toMatch(/Do not output raw TikZ/i);
     });
+
+    test('includes a complete CircuitSpec schema and example for circuitikz render target', () => {
+        const prompt = buildDiagramSpecPrompt({
+            requiredIntent: 'circuit',
+            preferredIntent: 'circuit',
+            preferredRenderTarget: 'circuitikz'
+        });
+
+        expect(prompt).toMatch(/For circuit intent, circuitSpec is required/i);
+        expect(prompt).toMatch(/circuitSpec\.components\[\]\.terminals/i);
+        expect(prompt).toMatch(/circuitSpec\.connections\[\]\.from/i);
+        expect(prompt).toMatch(/circuitSpec\.connections\[\]\.to/i);
+        expect(prompt).toMatch(/"intent":\s*"circuit"/i);
+        expect(prompt).toMatch(/"circuitKind":\s*"cmos-inverter"/i);
+        expect(prompt).toMatch(/"goldenReferenceId":\s*"cmos-inverter-v1"/i);
+        expect(prompt).toMatch(/"terminals":\s*\{\s*"S":\s*"VDD"/i);
+        expect(prompt).toMatch(/"from":\s*"vin",\s*"to":\s*"MP\.G"/i);
+    });
+
+    test('uses a circuit-focused intent surface for an explicit circuitikz request', () => {
+        const prompt = buildDiagramSpecPrompt({
+            requiredIntent: 'circuit',
+            preferredIntent: 'circuit',
+            preferredRenderTarget: 'circuitikz'
+        });
+
+        expect(prompt).toMatch(/Supported intent:\s*circuit/i);
+        expect(prompt).not.toMatch(/Supported intents:[\s\S]*mindmap/i);
+        expect(prompt).not.toMatch(/Supported intents:[\s\S]*flowchart/i);
+    });
 });

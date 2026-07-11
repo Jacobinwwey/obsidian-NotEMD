@@ -15,402 +15,67 @@ citations:
 
 import TLDR from '@site/src/components/TLDR';
 
-# Diagrammi
+# Diagramas
 
 <TLDR>
-**Notemd genera diagrammi dalle tue note attraverso un flusso di lavoro basato sulle specifiche.** L’LLM produce un file JSON `DiagramSpec` indipendente dal renderer, dopodiché adattatori dedicati lo convertono in output Mermaid, JSON Canvas, Vega-Lite, HTML, HTML/SVG modificabili, Draw.io, Drawnix o diagrammi circuitikz con vincoli. Supporta 9 tipi di intent, catene di fallback automatiche, anteprima in tempo reale con esportazione in SVG/PNG/PDF, verifica semantica e generazione potenziata da conoscenze locali.
+Elige **qué tipo de diagrama necesitas** y, a continuación, selecciona su **formato de origen editable**. Previsualiza el resultado en Obsidian y guárdalo como SVG, PNG o PDF.
 </TLDR>
 
-Questo fa parte della [Obsidian Guida alla gestione delle conoscenze AI](/docs/pillar-ai-knowledge).
+## Comprender las tres opciones
 
-## Architettura: Pipeline basato su specifiche
+| Opción | Qué controla | Ejemplos |
+|---|---|---|
+| Tipo de diagrama | El significado del diagrama | Diagrama de flujo, diagrama de secuencia, diagrama eléctrico, gráfico de datos |
+| Formato de origen | El archivo editable o reutilizable que genera Notemd | Mermaid, JSON Canvas, Draw.io, Drawnix, CircuitikZ |
+| Formato de exportación | La imagen o documento que se usará para compartir | SVG, PNG, PDF |
 
-Notemd non chiede mai al LLM di produrre direttamente sintassi Mermaid/Vega/Canvas. Invece:
+Draw.io y Drawnix son **formatos de origen**, no tipos de diagrama. CircuitikZ es un formato de origen diseñado específicamente para diagramas eléctricos. La misma previsualización puede exportarse a varios formatos visuales, por lo que elegir CircuitikZ no te limita únicamente a SVG.
 
-```mermaid
-graph LR
-    A[Source Note] --> B[Intent Detection]
-    B --> C[Plan + Target]
-    C --> D[LLM: Generate DiagramSpec]
-    D --> E[Parse + Validate]
-    E --> F{Primary Target}
-    F -->|Success| G[Render Artifact]
-    F -->|Failure| H[Fallback Target]
-    H -->|Success| G
-    H -->|Failure| I[HTML Fallback]
-```
+## Elegir un formato de origen
 
-**Perché basarsi sulle specifiche?** I LLM producono spesso sintassi di renderer non valide (in particolare Mermaid). Un formato `DiagramSpec` strutturato può essere validato prima della rendering, e la stessa specifica può alimentare più renderer come fallback.
+| Formato | Mejor para | Archivo de origen |
+|---|---|---|
+| Mermaid | Diagramas que se mantienen directamente en Markdown | Bloque de código Mermaid |
+| JSON Canvas | Flujos de trabajo nativos en el canvas de Obsidian | `.canvas` |
+| Draw.io | Edición posterior en diagrams.net u otras herramientas compatibles | `.drawio` |
+| Drawnix | Edición al estilo de dibujo a mano o pizarra | `.drawnix` |
+| CircuitikZ | Circuitos eléctricos y de transistores estructurados | `.tex` |
 
-## Tipi di diagrammi supportati
+Deja **Formato de origen preferido** en **Automático** si no necesitas un editor específico. Notemd elegirá automáticamente un formato compatible con el tipo de diagrama seleccionado.
 
-| Intent | Renderer principale | Fallback | Caso d’uso |
-|--------|-----------------|-----------|----------|
-| `mindmap` | Mermaid | HTML | Scomposizione dei temi gerarchici |
-| `flowchart` | Mermaid | HTML | Flussi di processo, alberi decisionali |
-| `sequence` | Mermaid | HTML | Interazioni client-server, protocolli |
-| `classDiagram` | Mermaid | HTML | Relazioni tra classi OOP |
-| `erDiagram` | Mermaid | HTML | Schema di database, relazioni tra entità |
-| `stateDiagram` | Mermaid | HTML | Macchine a stati, modelli di ciclo di vita |
-| `canvasMap` | JSON Canvas | Mermaid → HTML | Mappe concettuali, grafi di conoscenza |
-| `dataChart` | Vega-Lite | Mermaid → HTML | Barre, linee, aree, dispersioni, torte, tabelle |
-| `circuit` | circuitikz | none | Diagrammi circuitici con vincoli derivati da payload `CircuitSpec` validati |
+## Generar y exportar un diagrama
 
-## Rilevamento delle intenzioni
+1. Abre la nota o selecciona el texto que deseas visualizar.
+2. Elige **Generar diagrama** desde la barra lateral de Notemd o la paleta de comandos.
+3. Selecciona un **tipo de diagrama**, o déjalo en **Detectar automáticamente**.
+4. Elige un **formato de origen**, o déjalo en **Automático**.
+5. Revisa la previsualización.
+6. Elige **Guardar archivo de origen**, **Exportar SVG**, **Exportar PNG** o **Exportar PDF**.
 
-Notemd determina il tipo di diagramma più adatto dal contenuto della nota utilizzando la valutazione delle parole chiave:
+PNG y PDF utilizan la resolución PPI configurada para la exportación de imágenes en los ajustes de Notemd. SVG sigue siendo una imagen vectorial y no se ve afectado por el valor de PPI.
 
-| Intento | Attivatori | Confidenza |
-|--------|----------|------------|
-| `dataChart` | Tabelle, celle numeriche, parole chiave relative a metriche/trend, percentuali | 0.88 |
-| `sequence` | Vocabolario richiesta/risposta (4+ corrispondenze) o marcatori `->`/`=>` | 0.82 |
-| `erDiagram` | Chiave primaria, chiave esterna, entità, schema (2+ corrispondenze) | 0.80 |
-| `stateDiagram` | Stato, transizione, in attesa, in esecuzione, fallito (3+ corrispondenze) | 0.76 |
-| `flowchart` | Passaggi numerati (2+) o vocabolario if/then/else/workflow | 0.74 |
-| `canvasMap` | Mappa concettuale, grafo di conoscenza, spaziale, cluster | 0.72 |
-| `circuit` | circuitikz, TikZJax, circuit, schematic, CMOS, NMOS, PMOS, MOSFET, VDD/GND, `vin`/`vout` | 0.78 |
-| `mindmap` | Ripiego predefinito | 0.55 |
+## Diagramas eléctricos
 
-Sovrascrivere con la impostazione **Tipo di diagramma preferito**, il selezionatore nella barra laterale o un’opzione esplicita della palette dei comandi.
+Para solicitudes de diagramas eléctricos compatibles, elige **Diagrama eléctrico** con **Archivo de origen CircuitikZ**. Notemd primero genera una descripción estructurada del circuito y luego escribe el código de origen en formato CircuitikZ. Este método es más fiable que pedir al modelo que genere LaTeX sin restricciones.
 
-## Selezione del bersaglio di rendering
+La compatibilidad actual con CircuitikZ está intencionalmente limitada. Los amplificadores NMOS de código abierto y los componentes CMOS soportados funcionan mejor. Siempre revisa la previsualización y el código fuente antes de utilizar un circuito generado en trabajos técnicos o de publicación.
 
-Il pipeline sperimentale basato sulle specifiche ora dispone di due controlli indipendenti:
+La previsualización en SVG es una herramienta de revisión generada por Notemd. No constituye prueba de que una instalación local de LaTeX o TikZJax haya compilado con éxito el archivo `.tex`.
 
-| Controllo | Impostazioni | Effetto |
-|---------|---------|--------|
-| Tipo di diagramma preferito | `preferredDiagramIntent` | Guida la forma semantica del `DiagramSpec` generato |
-| Target di rendering preferito | `preferredDiagramRenderTarget` | Sceglie il renderer per gli artefatti nelle operazioni **Genera diagramma** e **Anteprima diagramma** |
+## Solución de problemas
 
-Imposta **Preferred render target** su **Auto** come valore predefinito per il pianificatore, oppure scegli esplicitamente Mermaid, JSON Canvas, Vega-Lite, HTML, Editable HTML/SVG, Draw.io, Drawnix o Circuitikz. La sovrascrittura vale solo per i comandi relativi agli artifact e alle anteprime. Il comando standard **Summarise as Mermaid diagram** rimane configurato per produrre output compatibile con Mermaid, così da non modificare silenziosamente i formati nei workflow Markdown esistenti.
+### El resultado es del tipo de diagrama incorrecto
 
-Questa separazione è importante perché un intent di tipo `flowchart` può ora essere visualizzato come Mermaid per le note Markdown, come HTML per un fallback affidabile, come Editable HTML/SVG per modifiche successive, oppure come file sorgente Draw.io/Drawnix accompagnati da immagini SVG per la revisione. Un intent di tipo `circuit` viene inoltrato a Circuitikz e richiede un file `CircuitSpec` validato; non si tratta di una richiesta di testo TikZ arbitrario.
-## Uso
+Elige explícitamente el tipo de diagrama en lugar de usar la opción de detección automática. En el caso de circuitos, selecciona **Diagrama eléctrico** y utiliza el comando **Generar diagrama**, en lugar del comando obsoleto **Resumir como diagrama Mermaid**.
 
-### Genera un diagramma
+### Un formato de origen no es adecuado
 
-1. Apri una nota
-2. Esegui **"Notemd: Genera diagramma"** dal pannello dei comandi
-3. Notemd rileva l’intenzione, genera le specifiche, esegue la visualizzazione e salva l’artefatto
+Vuelve a establecer el formato de origen en **Automático**, o elige un formato diseñado específicamente para ese tipo de diagrama. CircuitikZ está destinado a diagramas eléctricos; Draw.io y Drawnix están pensados para diagramas estructurados compatibles.
 
-**File di output per target:**
+### Faltan los botones de exportación
 
-| Target | Estensione | Modello di nome del file |
-|--------|-----------|------------------|
-| Mermaid | `.md` | `{note}_summ.md` |
-| JSON Canvas | `.canvas` | `{note}_diagram.canvas` |
-| Vega-Lite | `.json` | `{note}_diagram.json` |
-| HTML | `.html` | `{note}_diagram.html` |
-| Editable HTML/SVG | `.html` | `{note}_diagram.html` |
-| Draw.io | `.drawio` + `.drawio.svg` + `.drawio.md` | `{note}_diagram.drawio` insieme ai file di riferimento per la revisione |
-| Drawnix | `.drawnix` + `.drawnix.svg` + `.drawnix.md` | `{note}_diagram.drawnix` insieme ai file di riferimento per la revisione |
-| Circuitikz | `.tex` + `.tex.svg` + `.tex.md` | `{note}_diagram.tex` insieme ai file di riferimento per la revisione |
+SVG, PNG y PDF requieren una previsualización visual. Si solo está disponible el texto de origen, guarda el archivo de origen y ábrelo en la herramienta externa correspondiente.
 
-### Visualizza una diagramma
+### Un archivo CircuitikZ no se compila en otro entorno
 
-1. Esegui **"Notemd: Visualizza diagramma"**
-2. Si apre un modulo modale con il diagramma visualizzato
-3. Esporta in SVG, PNG o PDF utilizzando i pulsanti della barra degli strumenti
-
-**Apri automaticamente la visualizzazione** è disponibile nelle impostazioni — dopo la generazione, il modulo modale di anteprima si avvia automaticamente.
-
-L’esportazione delle anteprime in PNG e PDF utilizza il livello di risoluzione PPI configurato. Il valore predefinito è 300 PPI e i valori superiori a 600 PPI vengono limitati a 600. SVG mantiene le dimensioni vettoriali. Gli artifact di origine come `.drawio`, `.drawnix` e `.tex` possono fornire un file `previewSvg` complementare, permettendo a Obsidian di visualizzare ed esportare immagini utilizzabili per la revisione senza includere diagram.net, Drawnix, LaTeX o TikZJax durante l’esecuzione del plugin.
-
-Il modulo di anteprima dispone inoltre di un pannello per le diagnosi degli artifact. I renderer e i controlli di base possono associare il valore `RenderArtifact.diagnostics`; il modulo visualizza un riepilogo delle diagnosi con i conteggi degli errori, degli avvisi e delle informazioni, seguiti dalla gravità, dal tipo di diagnosi, dal messaggio e dai suggerimenti per la correzione accanto all’anteprima. Lo stesso riepilogo viene mostrato nelle voci della cronologia che supportano le diagnosi, pertanto è possibile confrontare più tentativi di verifica di circuitikz senza dover aprire ogni singola voce. Per gli artifact che dispongono di contenuto sorgente ma non possono essere visualizzati in linea o tramite il percorso dell’iframe HTML, il modulo ora ricorre a un’anteprima basata esclusivamente sul contenuto sorgente, invece di forzare l’utilizzo di un iframe vuoto. Ciò consente ai controlli di compilazione/rendering di circuitikz, alle verifiche sui token di testo SVG, alle verifiche delle screenshot PNG vuote, ai report sugli sovrapposizioni dei glifi basati esclusivamente sui percorsi e ai futuri report sugli sovrapposizioni di disporre di un’interfaccia utente visibile, senza rendere TikZJax o LaTeX una dipendenza obbligatoria in tempo di esecuzione né fingere che il testo sorgente sia già una rappresentazione visiva verificata.
-
-### Modalità Mermaid legacy
-
-Quando `enableExperimentalDiagramPipeline` è disattivato, Notemd invia direttamente una richiesta Mermaid al LLM. Questo bypassa completamente il flusso di lavoro definito dalle specifiche. Se il flusso di lavoro sperimentale fallisce, si torna a questa modalità.
-
-## Backend di rendering
-
-### Mermaid
-
-6 adattatori (mindmap, flusso di lavoro, sequenza, ER, classe, stato) traducono `DiagramSpec` nella sintassi Mermaid. Dopo la generazione, `mermaid.parse()` verifica l’output. In caso di fallimento della validazione:
-
-1. **LLM retry** — un tentativo con il messaggio di errore Mermaid come contesto
-2. **Fallback minimo** — un diagramma essenziale Mermaid basato sugli ID dei nodi della specifica
-
-**Legacy Mermaid Fixer** ripara automaticamente i comuni errori di sintassi LLM: normalizzazione delle direttive note, escape delle etichette pipe, riposizionamento dei punti e virgola, citazioni intelligenti, frecce con doppio trattino, incoerenze nelle forme, e molto altro.
-
-### JSON Canvas
-
-Produce formato Obsidian JSON Canvas con disposizione spaziale:
-- Node posizionati in base alla profondità (x = profondità × 420) e all’indice (y = indice × 170)
-- Larghezza stimata in base alla lunghezza dell’etichetta
-- Bordi con `fromSide: 'right'`, `toSide: 'left'`, `toEnd: 'arrow'`
-
-### Vega-Lite
-
-Crea specifiche complete per Vega-Lite v5 JSON con codifica automatica:
-- **Grafici cartesiani** (a barre/linee/aree/punti/scatter): canali x + y + colore per più serie
-- **Pie**: theta = y (quantitativo), colore = x (nominale)
-- **Tabella**: riga = x, testo = y + colonna = serie
-
-I patch per tema scuro e chiaro vengono fusi in profondità prima della compilazione.
-
-### HTML
-
-Fallback universale. Documento autocontenuto HTML con:
-- Intestazioni meta CSP
-- Modalità chiaro/scuro tramite `prefers-color-scheme`
-- Etichette UI localizzate per 20 lingue
-- Sezioni: hero, struttura (albero nodi), relazioni, note, tabelle di serie dati
-
-### Editabile HTML/SVG
-
-Target esplicito per figure nei flussi di esportazione editabili. Proietta `DiagramSpec` in un `SemanticFigureModel` deterministico, poi genera un documento autocontenuto HTML con gruppi inline SVG che contengono annotazioni in stile Draw.io:
-
-- `data-drawio-type`, `data-drawio-id` e `data-drawio-role` sui nodi semantici
-- `data-drawio-source` e `data-drawio-target` sugli spigoli semantici
-- identificatori stabili di nodi/spigoli dopo normalizzazione degli spazi bianchi e gestione delle collisioni
-- Nessun script, nessuna font esterna e nessun asset remoto
-
-Questo obiettivo non è intenzionalmente la rotta predefinita del pianificatore. È disponibile come target di rendering esplicito mentre il percorso del prodotto dimostra il comportamento di modifica negli strumenti reali.
-
-### Draw.io e Drawnix Limiti di esportazione
-
-L'attuale implementazione mantiene il supporto per editor di terze parti al confine dell'artefatto, esponendo comunque target di rendering espliciti:
-
-| Obiettivo | Contratto | Dipendenza in tempo di esecuzione |
-|--------|----------|--------------------|
-| Draw.io | XML `mxfile` non compresso e deterministico generato da `SemanticFigureModel`, unitamente a file di revisione in formato SVG/PNG/PDF | nessun componente nel runtime del plugin o nei processi CI |
-| Drawnix | sottoinsieme minimo di JSON `.drawnix` che utilizza gli elementi `geometry` e `arrow-line`, unitamente a file di revisione in formato SVG/PNG/PDF | nessun componente nel runtime del plugin o nei processi CI |
-
-Il compromesso è intenzionale: Notemd può verificare etichette visibili, ID stabili e copertura delle primitive supportate senza incorporare diagram.net Desktop, Drawnix, Plait o lo stato dell’editor disponibile solo nei browser nel plugin.
-
-### circuitikz / TikZJax Direzione
-
-I diagrammi di circuito non rappresentano lo stesso tipo di problema dei flussogrammi generici. Il target sintattico corretto per i circuiti elettrici è solitamente **circuitikz**, visualizzato in Obsidian tramite plugin come TikZJax. TikZJax può caricare pacchetti come `circuitikz`, `pgfplots`, `tikz-cd` e `chemfig`, il che lo rende utile per appunti di fisica, circuiti, chimica e matematica.
-
-Il rischio è che il TikZ generato direttamente da LLM sia fragile:
-
-- una topologia di circuito complessa può essere corretta dal punto di vista elettrico ma illeggibile visivamente;
-- cavi e etichette sovrapposti possono rendere inutilizzabile un netlist corretto per gli appunti di studio;
-- assenza di prefazioni dei pacchetti, ancoraggi errati o nomi di componenti non validi possono impedire la visualizzazione;
-- il feedback fornito dal renderer è solitamente a livello di immagine, mentre LLM genera geometria a livello di testo.
-
-L’architettura migliore consiste nel trattare circuitikz come un target di diagramma vincolato, e non come una prompt libera:
-
-```mermaid
-graph LR
-    A[Circuit Intent] --> B[CircuitSpec]
-    B --> C[Golden Reference Template]
-    C --> D[circuitikz Adapter]
-    D --> E[TikZJax Render]
-    E --> F[Image + Log Feedback]
-    F --> G[Repair Pass]
-```
-
-Il modello di prima classe dovrebbe descrivere separatamente la topologia del circuito e la sua disposizione:
-
-| Strato | Responsabilità | Esempio |
-|-------|----------------|---------|
-| Topologia | nodi elettrici e connessioni dei componenti | `VDD -> RD -> drain(M1)`, `source(M1) -> GND` |
-| Layout | posizionamento a griglia, orientamento, corsie di routing | `M1 at (3,2.2)`, ingresso a sinistra, uscita a destra |
-| Stile | confezione, convenzione di tensione, etichette, ancoraggi | `\begin{circuitikz}[american voltages]` |
-| Validazione | registro di compilazione, ancoraggi mancanti, controlli di sovrapposizione/scrino | TikZJax/Diagnostica LaTeX più revisione visiva |
-
-### Prototipo attuale circuitikz
-
-Notemd include ora il primo prototipo di repository vincolato per questa direzione. È intenzionalmente offline e vincolato a un modello:
-
-```bash
-npm run diagram:export-circuitikz -- --input cmos-inverter.json --output cmos-inverter.tex
-```
-
-Il prototipo introduce un confine limitato da `CircuitSpec` nonché un esportatore deterministico per sei famiglie di riferimento standard:
-
-Nel pipeline sperimentale per i diagrammi, è ora possibile accedervi anche tramite `intent: "circuit"` e il target di rendering `circuitikz`. Il file `DiagramSpec` generato può includere un elemento `circuitSpec` soltanto quando l’intento è relativo a un circuito. Il `CircuitikzRenderer` scrive lo stesso codice sorgente `.tex` deterministico e aggiunge una preview in SVG ottenuta dalla topologia del circuito validata, consentendo così la visualizzazione in Obsidian nonché l’esportazione in SVG/PNG/PDF. Tale preview non rappresenta il risultato di una compilazione LaTeX/TikZJax; le prove effettive fornite dal renderer provengono comunque dai comandi specificati di seguito.
-
-Per i template golden supportati, `layoutHints.inputSide` e `layoutHints.outputSide` rimangono controlli esclusivamente per la presentazione. Essi permettono di spostare in modo deterministico la posizione delle porte di input/output, ma non modificano la firma topologica né consentono un pass di riparazione per riconnettere i componenti del circuito.
-
-| Tipo di circuito | Riferimento d’oro | Garanzia di corrente |
-|--------------|------------------|-------------------|
-| `common-source-amplifier` | `common-source-nmos-v1` | valida `VDD -> R_D -> M1.D`, `vin -> M1.G`, `M1.S -> GND` e `M1.D -> vout` prima di scrivere LaTeX |
-| `cmos-inverter` | `cmos-inverter-v1` | valida la topologia PMOS-over-NMOS, l’ingresso gate condiviso, l’uscita drain condivisa, `VDD -> MP.S` e `MN.S -> GND` prima di scrivere LaTeX |
-| `cmos-buffer` | `cmos-buffer-v1` | valida due stadi di inverter a cascata, il nodo intermedio `vmid`, il valore ripristinato `vout` e i binari VDD/GND condivisi prima di scrivere LaTeX |
-| `cmos-transmission-gate` | `cmos-transmission-gate-v1` | valida dispositivi passivi paralleli PMOS/NMOS tra `vin` e `vout` con controlli complementari `phib` / `phi` prima di scrivere LaTeX |
-| `cmos-nand2` | `cmos-nand2-v1` | valida un pull-up PMOS in serie, un pull-down NMOS in parallelo, ingressi duali `va` / `vb` e `vout` prima di scrivere LaTeX |
-| `cmos-nor2` | `cmos-nor2-v1` | valida un pull-up PMOS in serie, un pull-down NMOS in parallelo, ingressi duali `va` / `vb` e `vout` prima di scrivere LaTeX |
-
-Questo non è un generatore TikZ generico. Non accetta codice TikZ arbitrario, non compila LaTeX, non avvia TikZJax, non esamina screenshot durante l’esecuzione del plugin, né esegue riparazioni automatiche basate sul feedback visivo. Queste funzionalità rimangono fasi successive.
-
-Il comando Diagramma di anteprima può riaprire direttamente gli artefatti di sorgente salvati circuitikz quando l’estensione del file è `.tex` o `.tikz` e la sorgente contiene `\usepackage{circuitikz}` o `\begin{circuitikz}`. Quel percorso è un’anteprima basata esclusivamente sulla sorgente circuitikz: il modulo mostra la sorgente, le diagnosi, i controlli di copia/ salvataggio e i metadati della cronologia, ma non compila LaTeX né chiama TikZJax durante l’esecuzione del plugin.
-
-Il limite di anteprima basato esclusivamente sulla sorgente copre ora anche gli artefatti salvati Draw.io e Drawnix. I file `.drawio` vengono accettati se assomigliano a Draw.io XML (`mxfile` o `mxGraphModel`), mentre i file `.drawnix` vengono accettati se sono Drawnix JSON con `type: "drawnix"` e un array `elements`. Il plugin non incorpora ancora diagram.net né il host della lavagna bianca Drawnix; queste anteprime mostrano la sorgente, le diagnosi e la cronologia degli artefatti senza richiedere un editor visivo integrato.
-
-Per la riparazione che preserva la topologia, passare lo spec di pre‑riparazione come riferimento prima di accettare un candidato riparato:
-
-```bash
-npm run diagram:export-circuitikz -- --input repaired-cmos-inverter.json --topology-reference cmos-inverter.json --output cmos-inverter.tex
-```
-
-La protezione di riparazione utilizza `createCircuitTopologySignature` e `assertCircuitTopologyUnchanged` per confrontare `circuitKind`, `goldenReferenceId`, reti, ID/tipi/terminali dei componenti e estremi delle connessioni non direzionali prima dell’output. Etichette, testo del titolo, suggerimenti di layout, ordine di connessione e etichette di connessione vengono intenzionalmente ignorati. Un candidato che aggiunge un elemento breve o ridisegna un terminale fallisce con `Circuit topology drift detected` prima che il file `.tex` venga scritto.
-
-Il CLI può ora analizzare un log di compilazione esistente di LaTeX/TikZJax senza eseguire un compilatore:
-
-```bash
-npm run diagram:export-circuitikz -- --input cmos-inverter.json --output cmos-inverter.tex --compile-log cmos-inverter.log --diagnostics-output cmos-inverter.diagnostics.json
-```
-
-Questo percorso di diagnosi segnala pacchetti mancanti come `circuitikz.sty`, chiavi TikZ/circuitikz sconosciute, errori di sintassi del percorso TikZ come assenza di punti e virgola, argomenti fuori controllo da parentesi sbilanciate o etichette non chiuse, sequenze di controllo non definite, errori generici di LaTeX, arresti di emergenza e avvisi di sovraccarico del `\hbox`. Rimane basato sui log: l’esecuzione locale di LaTeX/TikZJax e i controlli di qualità simili a screenshot sono ancora lavoro futuro.
-
-Per i controlli di funzionamento per gli amministratori, lo stesso CLI può opzionalmente eseguire un renderer configurato esplicitamente senza analizzare comandi shell:
-
-```bash
-npm run diagram:export-circuitikz -- --input cmos-inverter.json --output cmos-inverter.tex --compile-executable pdflatex --compile-arg -interaction=nonstopmode --compile-arg -halt-on-error --compile-arg -output-directory={outputDir} --compile-arg {tex} --expected-artifact {outputDir}/{jobName}.pdf
-```
-
-Il runner di compilazione utilizza `shell: false`, espande i placeholder `{tex}`, `{outputDir}` e `{jobName}` in valori di array di argomenti, legge il generato `{jobName}.log` e restituisce `compileExecution` più `compileDiagnostics` nell’output CLI JSON. `--compile-executable` indica soltanto il percorso del file binario del renderer; le flag del renderer appartengono ai valori ripetuti `--compile-arg`. Gli eseguibili vuoti falliscono come `compile-executable-invalid`, quelli mancanti falliscono come `compile-executable-not-found`, e le stringhe di eseguibile a forma di comando shell ricevono indicazioni per dividere gli argomenti in modo che Windows, Linux e macOS seguano lo stesso contratto di esecuzione diretta. Con `--expected-artifact`, viene anche segnalato `compileExecution.renderSmoke` e il CLI fallisce se il renderer non crea un artefatto non vuoto. Il plugin non include ancora LaTeX, non rende TikZJax una dipendenza in tempo di esecuzione né esegue riparazioni visive a livello di screenshot.
-
-Se l’artefatto atteso è `.svg`, il controllo di funzionamento va un livello più in profondità:
-
-```bash
-npm run diagram:export-circuitikz -- --input cmos-inverter.json --output cmos-inverter.tex --compile-executable dvisvgm --compile-arg ... --expected-artifact {outputDir}/{jobName}.svg --expected-svg-text v_{in} --expected-svg-text v_{out}
-```
-
-Il controllo di fumo SVG verifica la radice `<svg>`, le dimensioni positive o `viewBox`, almeno un elemento grafico visibile dopo l’esclusione degli elementi nascosti/trasparenti, eventuali token di testo richiesti, elementi evidenti al di fuori del `viewBox`, etichette `<text>` / `<tspan>` posizionate sovrapposte in modo evidente e etichette di testo evidenti che sovrappongono gli elementi grafici tramite `render-svg-label-overlap`. Il testo atteso viene cercato nel testo visibile e decodificato dai metadati di accessibilità come `aria-label`, `<title>` e `<desc>`, così i renderer che conservano etichette semantiche al di fuori del `<text>` visibile possono comunque soddisfare il controllo dei token di testo senza necessità di OCR. La fase geometrica è ora una geometria consapevole delle trasformazioni per gli attributi comuni di gruppo ed elemento `transform`, quindi le caselle SVG tradotte, scalate, ruotate, inclinate o trasformate con matrici vengono controllate dopo la composizione delle trasformazioni. Copre i limiti esatti degli archi per gli estremi A/a, i limiti esatti delle curve Bézier per gli estremi C/S/Q/T, i limiti SVG consapevoli dello spessore del tratto e i controlli di sovrapposizione delle etichette, la geometria di disegno `polyline` / `polygon`, e risolve anche la posizionazione dei glifi basati solo su percorso da riferimenti `<use href="#...">`, così che le etichette convertite in percorsi di glifo riutilizzabili possano comunque fallire i controlli del canvas limitato quando la geometria del glifo posizionato escende dal `viewBox`. Diverse etichette `tspan` posizionate sotto un genitore `<text>` vengono confrontate come caselle di etichetta separate, il che permette di individuare output di tipo LaTeX SVG che altrimenti combinerebbero etichette distinte in un unico nodo di testo. Le caselle SVG `text` e `tspan` posizionate rispettano i valori `start`, `middle` e `end`, quindi le etichette centrate e allineate a destra possono generare diagnosi di sovrapposizione tra testo/testo e etichetta‑vs‑disegno senza richiedere un layout di testo di livello browser. I percorsi di glifo definitivi solo a livello di definizione all’interno di `<defs>` non vengono conteggiati come elementi grafici visibili, ma i loro attributi locali alla definizione `transform` vengono applicati prima della posizionazione `<use>`, così che le definizioni di glifo scalate o riflesse non vengano sottostimate. Il controllo etichetta‑vs‑disegno utilizza una piccola tolleranza per le caselle di disegno e il valore dichiarato `stroke-width`, quindi fili sottili, fili spessi e contorni di componenti poligonali possono essere considerati potenziali fallimenti di leggibilità delle etichette quando il loro tratto visibile raggiunge un’etichetta. Le etichette di glifo basate solo su percorso risolte da `<use href="#...">` vengono anch’esse confrontate con le caselle di disegno e falliscono con `render-svg-path-glyph-overlap` quando la geometria del glifo riutilizzabile sovrapponga fili o componenti. Se un renderer converte le etichette in glifi di percorso riutilizzabili invece che in `<text>` cercabili e non conserva i metadati di accessibilità, il rapporto di fumo registra `pathOnlyGlyphUseCount` e fallisce il token di testo richiesto tramite `render-svg-text-path-only` invece di fingere che l’etichetta sia semplicemente assente. Altri fallimenti vengono segnalati tramite `render-svg-invalid`, `render-svg-dimension-missing`, `render-svg-no-visible-elements`, `render-svg-text-missing`, `render-svg-out-of-bounds`, `render-svg-text-overlap`, `render-svg-label-overlap` o `render-svg-path-glyph-overlap`. I controlli dei token di testo e delle sovrapposizioni dovrebbero essere considerati solo come controllo strutturale per i renderer che conservano le etichette come testo SVG cercabile o metadati di accessibilità; l’output basato solo su percorso SVG richiede comunque il successivo controllo screenshot/OCR per dimostrare la leggibilità visiva delle etichette, e questo controllo di fumo non garantisce ancora una copertura completa del SVG percorso.
-
-I gruppi e gli elementi nascosti SVG vengono sempre saltati durante il conteggio degli elementi visibili e la raccolta della geometria. Gli attributi o gli stili inline `display:none`, `visibility:hidden`, `visibility:collapse` e l’aspetto generale `opacity:0` non possono far sì che un artefatto di rendering altrimenti vuoto superi il controllo di output visibile.
-
-Le definizioni di glifo basate solo su percorso possono essere percorsi diretti o contenitori di gruppo/simbolo all’interno di `<defs>`. Il controllo di fumo risolve la geometria dei percorsi figli da `<g id="...">` e `<symbol id="...">` prima della posizionazione `<use>`, quindi l’output di glifo incapsulato alimenta comunque `pathOnlyGlyphUseCount`, i controlli del canvas limitato e `render-svg-path-glyph-overlap`.
-
-Il parser di percorso traccia anche gli inizi dei sottopercorsi e resetta il punto corrente su `Z/z`, così che i comandi relativi dopo un sottopercorso chiuso continuino dal punto corretto SVG invece di generare false diagnosi `render-svg-out-of-bounds`.
-
-Lo stesso passaggio di geometria segue la grammatica SVG per i decimali con punto iniziale e i segni più espliciti, quindi le coordinate dvisvgm compatte come `.5`, `-.5` o `+.5` rimangono frazionali durante i controlli dei limiti anziché diventare geometrie fuori limite false o essere ignorate.
-
-Se il renderer emette `.png`, lo stesso percorso previsto per gli artefatti diventa una prima schermata di smoke: Notemd decodifica file PNG a colori indexati a 1/2/4/8 bit non interlacciati, file PNG in grigio a 1/2/4/8/16 bit e file PNG in grigio‑alpha/RGB/RGBA a 8/16 bit. Le immagini a colori indexati e in grigio sub‑byte supportano campioni compressi; le immagini a colori indexati supportano anche dati PLTE e opzionali tRNS; le immagini in grigio/RGB supportano campioni trasparenti tRNS. I campioni diretti a 16 bit vengono normalizzati nello stesso spazio di confronto RGBA a 8 bit utilizzato dai controlli smoke. Il controllo smoke verifica le dimensioni positive, registra i limiti del primo piano come `foregroundBounds`, registra la densità del primo piano all’interno di quella scatola come `foregroundDensity`, fallisce con `render-png-blank` quando ogni pixel visibile corrisponde al colore di sfondo in alto a sinistra, fallisce con `render-png-content-clipped` quando il contenuto del primo piano tocca i bordi dell’immagine, fallisce con `render-png-foreground-too-small` quando una grande schermata ha meno di quattro pixel del primo piano, e fallisce con `render-png-foreground-dense` quando i pixel del primo piano sono insolitamente densi all’interno di una scatola di delimitazione non banale. I formati PNG non supportati falliscono con `render-png-unsupported` e vengono fornite indicazioni specifiche per i PNG interlacciati Adam7 o le profondità di colore indexate non supportate. Questo permette di rilevare schermate vuote, tagli evidenti del canvas, impronte del primo piano sottorendute, fallimenti di sovrapposizione a livello di pixel e impostazioni errate di esportazione PNG del renderer, senza aggiungere dipendenze da shell specifiche per piattaforma. Non si tratta ancora di riconoscimento di etichette a livello OCR, di rilevamento preciso di sovrapposizione di testo o di riparazione delle immagini che preserva la topologia.
-
-Quando i diagnostichi mostrano un compilazione fallita o un’esecuzione render‑smoke fallita, il CLI può anche scrivere un breve di riparazione che preserva la topologia:
-
-```bash
-npm run diagram:export-circuitikz -- --input cmos-inverter.json --topology-reference cmos-inverter.json --output cmos-inverter.tex --compile-log cmos-inverter.log --repair-brief-output cmos-inverter.repair-brief.json
-```
-
-Il breve di riparazione utilizza lo schema `notemd.circuitikz.repair-brief.v1` e contiene la sorgente `CircuitSpec`, la firma topologica, i diagnostichi di compilazione/render, le modifiche consentite, le modifiche topologiche vietate, i prossimi passi di verifica e un `repairPrompt` strutturato. Il ruolo del prompt è `topology-preserving-circuitikz-repair`; la sua lista `diagnosticFocus` deriva dai diagnostichi di compilazione/render, e i suoi `acceptanceCriteria` richiedono validazione del candidato oltre a nuove compilazioni ed esecuzioni render‑smoke. È il formato di passaggio per un ciclo di riparazione successivo, non l’affermazione che Notemd esegua già una riparazione visiva autonoma.
-
-Dopo che è stato prodotto un candidato di riparazione, lo stesso CLI può validarlo rispetto al breve prima di scrivere l’output:
-
-```bash
-npm run diagram:export-circuitikz -- --input repaired-cmos-inverter.json --repair-brief cmos-inverter.repair-brief.json --output repaired-cmos-inverter.tex
-```
-
-`--repair-brief` verifica la firma topologica del candidato tratta dal breve ed è esclusiva con `--topology-reference`. Superare questa fase dimostra solo la preservazione della topologia; il candidato richiede ancora i diagnostichi di compilazione e le verifiche render‑smoke.
-
-Il risultato del `--repair-brief` include anche prove `repairAcceptance` con lo schema `notemd.circuitikz.repair-acceptance.v1`. Riporta le porte `topology-signature`, `compile-diagnostics` e `render-smoke` come `passed`, `failed` o `missing`; espone `remainingChecks`; e mantiene `readyForVisualAcceptance` falso fino a quando l’esecuzione del candidato non includa tutte le prove richieste.
-
-Utilizzare `--repair-acceptance-output` con `--repair-brief` quando le prove di CI o di rilascio necessitano di un file JSON duraturo:
-
-```bash
-npm run diagram:export-circuitikz -- --input repaired-cmos-inverter.json --repair-brief cmos-inverter.repair-brief.json --output repaired-cmos-inverter.tex --repair-acceptance-output repaired-cmos-inverter.repair-acceptance.json
-```
-
-Per le prove di rilascio o di manutenzione, eseguire ogni famiglia gold supportata tramite il runner dei fixture aggregati:
-
-```bash
-npm run diagram:smoke-circuitikz -- --output-dir docs/export/circuitikz-smoke --compile-executable pdflatex --compile-arg -interaction=nonstopmode --compile-arg -halt-on-error --compile-arg -output-directory={outputDir} --compile-arg {tex} --expected-artifact {outputDir}/{jobName}.pdf
-```
-
-Il runner utilizza `docs/maintainer/fixtures/circuitikz/common-source-nmos-v1.json`, `docs/maintainer/fixtures/circuitikz/cmos-inverter-v1.json`, `docs/maintainer/fixtures/circuitikz/cmos-buffer-v1.json`, `docs/maintainer/fixtures/circuitikz/cmos-transmission-gate-v1.json`, `docs/maintainer/fixtures/circuitikz/cmos-nand2-v1.json` e `docs/maintainer/fixtures/circuitikz/cmos-nor2-v1.json`, chiama lo stesso percorso di esportazione senza shell per ciascun fixture e restituisce un rapporto aggregato JSON con `compileExecution` e `compileDiagnostics` per ogni fixture. Rimane comunque un comando per il manutentore, non una dipendenza runtime di plugin.
-
-Quando la macchina del manutentore non ha ancora un renderer configurato, eseguire lo stesso comando del fixture senza `--compile-executable` e persistere esplicitamente la porta dell’ambiente:
-
-```bash
-npm run diagram:smoke-circuitikz -- --output-dir docs/export/circuitikz-smoke --report-output docs/export/circuitikz-smoke/renderer-availability.json
-```
-
-Quel percorso scrive comunque gli artefatti deterministici del fixture `.tex`, ma restituisce `ok: false` con `rendererAvailability.status` impostato su `missing-configuration` e un diagnostico `compile-executable-invalid`. Trattarlo solo come prova di disponibilità del renderer; non si tratta di compilazione, render‑smoke o accettazione visiva.
-
-### Forma di prompt di riferimento dorato
-
-Per un utilizzo a breve termine, fornire un riferimento dorato renderizzabile prima di richiedere una variante del circuito. Un prompt vincolato deve mantenere l’introduzione, la scala delle coordinate, lo stile degli ancoraggi e le convenzioni di routing:
-
-```latex
-\usepackage{circuitikz}
-\begin{document}
-\begin{circuitikz}[american voltages]
-\draw
-  (3,5) node[vcc]{$V_{DD}$}
-  to [R, l=$R_D$] (3,3)
-  to [short, *-o] (5,3) node[right]{$v_{out}$}
-  (3,3) to [short] (3,2.2)
-  node[nmos, anchor=D] (M1) {$M_1$}
-  (M1.S) to [short] (3,0.5)
-  node[ground]{}
-  (M1.G) to [short, -o] (0.8,2.2)
-  node[left]{$v_{in}$};
-\draw
-  (3,0.5) node[below right]{$S$};
-\end{circuitikz}
-\end{document}
-```
-
-Per un inverter CMOS, il prompt deve richiedere esplicitamente la topologia e i vincoli di layout, e non semplicemente "disegna un inverter CMOS":
-
-- mantenere `VDD` in cima, `GND` in fondo, l’ingresso a sinistra e l’uscita a destra;
-- utilizzare `pmos` sopra `nmos`, con porte e drenaggi condivisi;
-- mantenere il nodo di uscita alla giunzione del drenaggio e contrassegnarlo con `*-o`;
-- utilizzare ancoraggi nominati (`PM1.G`, `NM1.G`, `PM1.D`, `NM1.D`) invece di coordinate dedotte visivamente;
-- evitare cavi diagonali o incrociati a meno che non sia strettamente necessario dal punto di vista elettrico.
-
-### Progresso attuale e fasi successive
-
-| Area | Stato attuale | Prossimo passo |
-|------|----------------|-----------|
-| Diagrammi generali | Pipeline basata sulle specifiche implementata per Mermaid, JSON Canvas, Vega-Lite, HTML | Continuare ad ampliare la copertura della verifica semantica |
-| Figure editabili | Sono state implementate le barriere tra gli artefatti di `editable-html-svg`, Draw.io XML e Drawnix JSON | Aggiungere primitive più ricche solo dopo che i test avranno dimostrato l’editabilità |
-| Supporto CLI | `npm run diagram:export-artifact` esporta file HTML/SVG modificabili, nonché prove di revisione in formato Draw.io, Drawnix, Circuitikz, SVG/PNG/PDF, provenienti da un `DiagramSpec` validato | Aggiungere fixture di test specifici per ogni target non appena vengono rilasciati nuovi target |
-| circuitikz | `DiagramSpec(intent: "circuit", circuitSpec) -> CircuitikzRenderer -> circuitikz` esporta modelli gold standard per sorgenti comuni, invertitori CMOS, `cmos-buffer` / `cmos-buffer-v1`, `cmos-transmission-gate` / `cmos-transmission-gate-v1`, `cmos-nand2` / `cmos-nand2-v1` e `cmos-nor2` / `cmos-nor2-v1`; espone le opzioni di intento UI e di destinazione di rendering, scrive file TeX accompagnati da anteprime in SVG/PNG/PDF, verifica la topologia prima dell’output, analizza i log di compilazione, permette l’esecuzione di renderer locali espliciti tramite `--expected-artifact`, e mantiene una soluzione di fallback basata esclusivamente sulla sorgente, nonché visualizza le diagnosi delle anteprime tramite `RenderArtifact.diagnostics` e il modal delle anteprime | Aggiungere riconoscimento dei testi visivi basato su OCR per percorsi senza etichette, controlli di sovrapposizione precisi a livello di pixel, una copertura più ampia dei percorsi SVG dove necessario, installazione e scoperta automatica dei renderer solo se possibile mantenere l’opzionalità, e esecuzione automatica di operazioni di riparazione che preservano la topologia |
-| Integrazione con TikZJax | Scegliere il host di rendering per la visualizzazione sul lato Obsidian | Rimandarlo opzionale; non rendere TikZJax una dipendenza obbligatoria al runtime del plugin |
-
-## Configurazione
-
-| Impostazioni | Predefinito | Effetto |
-|---------|---------|--------|
-| `enableExperimentalDiagramPipeline` | `false` | Passare tra modalità basata sulle specifiche e modalità legacy Mermaid |
-| `experimentalDiagramCompatibilityMode` | `'legacy-mermaid'` | `'legacy-mermaid'` = Mermaid solo; `'best-fit'` = target nativi + soluzioni di fallback |
-| `preferredDiagramIntent` | `undefined` (automatico) | Sovrascrivere la rilevazione automatica delle intenzioni |
-| `preferredDiagramRenderTarget` | `undefined` (automatico) | Sovrascrivere il renderizzatore degli artefatti, inclusi Draw.io, Drawnix e Circuitikz |
-| `summarizeToMermaidLanguage` | `'en'` | Lingua di destinazione per le etichette del diagramma |
-| `summarizeToMermaidProvider` / `Model` | DeepSeek | LLM per task specifici per la generazione del diagramma |
-| `autoMermaidFixAfterGenerate` | (da costanti) | Eseguire automaticamente il correttore legacy sugli output di Mermaid |
-| `enableLocalKnowledgeForDiagramGeneration` | `false` | Arricchire il codice sorgente con conoscenze locali del vault |
-
-### Arricchimento delle conoscenze locali
-
-Quando abilitato, Notemd recupera frammenti di contesto rilevanti dalla base di conoscenza locale del tuo vault (basata su MiniSearch) e li aggiunge all’inizio del markdown di origine. La nota di integrazione indica: "solo riferimento di supporto; mantenere la struttura principale fedele alla nota di origine."
-
-### Modalità di compatibilità
-
-- **`legacy-mermaid`**: Tutte le intenzioni vengono indirizzate a Mermaid. Le intenzioni non Mermaid (canvasMap, dataChart) vengono costrette a `flowchart` o `mindmap`. Nessuna catena di fallback.
-- **`best-fit`**: Ogni intenzione viene indirizzata al suo target nativo. Se il primo fallisce, si percorre la catena di fallback (ad esempio, Vega-Lite → Mermaid → HTML).
-
-## Anteprima ed esportazione
-
-| Azione | Metodo |
-|--------|--------|
-| Esportazione SVG | Costruttore `mermaid.render()` / `vega.View.toSVG()` / SVG per Canvas |
-| Esportazione in PNG | SVG → Immagine → Canvas / rasterizzatore di anteprima al PPI configurato → ArrayBuffer PNG |
-| Esportazione in PDF | SVG → immagine rasterizzata al PPI configurato → PDF a pagina singola |
-| Salvataggio della fonte | Contenuto dell'artefatto grezzo salvato con estensione specifica per il target |
-| Anteprima solo della sorgente | Artefatti non inline con il contenuto della sorgente visualizzato come codice più diagnosi, senza rendering tramite iframe |
-| Controllo semantico | Verifica di Mermaid, JSON Canvas, Vega-Lite, HTML/SVG editabili, Draw.io, Drawnix e circuitikz con limitazioni tramite `scripts/diagram-semantic-verification.js` unitamente ai test del renderizzatore/CLI |
-
-**Caching**: RenderCache utilizza una chiave deterministica JSON di `{spec, target, theme}`. La deduplicazione in tempo reale impedisce rendering duplicati.
-
-## Consigli
-
-- **Inizia con il modo `best-fit`** — produce il miglior output visivo per ogni tipo di intent
-- **Utilizza modelli potenti per diagrammi complessi** — i diagrammi a flusso e i diagrammi ER traggono vantaggio da GPT-4o o Claude
-- **Abilita la conoscenza locale** per diagrammi specifici del dominio — il contesto del vault rilevante migliora l'accuratezza
-- **Imposta `autoMermaidFixAfterGenerate`** — gli errori di sintassi Mermaid sono comuni senza di esso
-- **Il correttore legacy è completo** — se l'anteprima Mermaid fallisce, eseguire manualmente il comando del correttore spesso risolve il problema
-
----
-
-## Prossimi passi
-
-- 🔗 [Wiki-Links](./wiki-links) — Come i concetti vengono collegati inline
-- 📝 [Note di concetto](./concept-notes) — Estrarre concetti per il materiale di partenza dei diagrammi
-- 🔍 [Ricerca](./research) — Arricchire i diagrammi con dati provenienti da Internet
+Verifica que tu entorno LaTeX incluya el paquete `circuitikz`. El plugin no incluye una distribución completa de LaTeX.

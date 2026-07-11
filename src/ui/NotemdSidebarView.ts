@@ -4,7 +4,8 @@ import { ApiLivenessEvent, ApiLivenessPhase, NotemdSettings, ProgressReporter } 
 import { NOTEMD_SIDEBAR_ICON, NOTEMD_SIDEBAR_VIEW_TYPE } from '../constants';
 import { findDuplicates } from '../fileUtils';
 import { FFMPEG_INSTALL_HINTS, type EnvironmentReport, type ProbeResult } from '../slideExport/types';
-import type { RenderTarget } from '../diagram/types';
+import type { DiagramIntent, RenderTarget } from '../diagram/types';
+import { applyDiagramIntentPreference } from '../diagram/diagramPreferenceCompatibility';
 import { NOTEMD_SLIDEV_FORK_RELEASE_URL, NOTEMD_SLIDEV_INSTALL_COMMAND } from '../slideExport/slidevDistribution';
 import {
     ActionCategory,
@@ -1707,7 +1708,8 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
         selector.value = this.plugin.settings.preferredDiagramIntent || 'auto';
         selector.onchange = async () => {
             const newValue = selector.value === 'auto' ? undefined : selector.value;
-            this.plugin.settings.preferredDiagramIntent = newValue;
+            applyDiagramIntentPreference(this.plugin.settings, newValue as DiagramIntent | undefined);
+            targetSelector.value = this.plugin.settings.preferredDiagramRenderTarget || 'auto';
             await this.plugin.saveSettings();
         };
 
@@ -1741,6 +1743,11 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
                 : targetSelector.value as RenderTarget;
             await this.plugin.saveSettings();
         };
+
+        parent.createEl('p', {
+            text: i18n.settings.developer.experimentalDiagramPipeline.exportFormatsDesc,
+            cls: 'notemd-control-hint'
+        });
     }
 
     async onOpen() {

@@ -1,6 +1,7 @@
 import { mockSettings } from './__mocks__/settings';
 import { runDiagramGenerateOperation } from '../operations/diagramGenerateOperation';
 import { ProgressReporter } from '../types';
+import { resolveCircuitTemplateFromMarkdown } from '../diagram/adapters/circuitikz/circuitTemplateCatalog';
 
 function createReporter(): ProgressReporter {
     return {
@@ -52,6 +53,54 @@ describe('diagram generate operation', () => {
             compatibilityMode: 'best-fit'
         }));
         expect(result.artifact.target).toBe('mermaid');
+    });
+
+    test('passes a circuit-focused prompt to the provider for circuitikz artifact output', async () => {
+        const reporter = createReporter();
+        const circuitSpec = resolveCircuitTemplateFromMarkdown('Draw a CMOS inverter.');
+        if (!circuitSpec) {
+            throw new Error('Expected catalog to resolve CMOS inverter fixture.');
+        }
+        const callLLMImpl = jest.fn().mockResolvedValue(JSON.stringify({
+            intent: 'circuit',
+            title: 'CMOS Inverter',
+            summary: 'CMOS inverter with PMOS pull-up and NMOS pull-down.',
+            nodes: [],
+            edges: [],
+            sections: [],
+            callouts: [],
+            dataSeries: [],
+            layoutHints: {},
+            sourceLanguage: 'en',
+            outputLanguage: 'en',
+            evidenceRefs: [],
+            circuitSpec
+        }));
+
+        const result = await runDiagramGenerateOperation({
+            input: {
+                sourcePath: 'Notes/Cmos.md',
+                sourceMarkdown: 'Draw a CMOS inverter in circuitikz.',
+                requestedIntent: 'circuit',
+                requestedRenderTarget: 'circuitikz',
+                compatibilityMode: 'best-fit',
+                outputMode: 'artifact'
+            },
+            settings: mockSettings,
+            provider: mockSettings.providers[0],
+            modelName: mockSettings.providers[0].model,
+            reporter,
+            getLegacyMermaidPrompt: () => 'legacy prompt',
+            callLLMImpl
+        });
+
+        const prompt = callLLMImpl.mock.calls[0][1];
+        expect(prompt).toMatch(/Supported intent:\s*circuit/i);
+        expect(prompt).not.toMatch(/Supported intents:[\s\S]*mindmap/i);
+        expect(prompt).toMatch(/CircuitSpec JSON example/i);
+        expect(prompt).toMatch(/Do not output raw TikZ/i);
+        expect(result.artifact.target).toBe('circuitikz');
+        expect(result.artifact.content).toContain('\\begin{circuitikz}');
     });
 
     test('falls back to legacy mermaid path when mermaid output fails structured generation', async () => {

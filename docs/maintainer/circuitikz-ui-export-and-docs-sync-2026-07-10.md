@@ -1,59 +1,79 @@
 ---
-date: 2026-07-10
+date: 2026-07-11
 topic: circuitikz-ui-export-and-docs-sync
 ---
 
-# circuitikz UI, Export, And Docs Sync Plan
+# Diagram Source Formats, CircuitikZ, And Docs Sync Plan
 
 Language: **English** | [简体中文](./circuitikz-ui-export-and-docs-sync-2026-07-10.zh-CN.md)
 
-This note records the current-main comparison for circuitikz support, the front-end visibility fix, the export boundary, and the website MDX synchronization decision.
+## Product Model
 
-## Current Code Evidence
+The user interface must expose three separate decisions:
 
-The circuitikz work is already present in the codebase. The missing product behavior was discoverability, not the renderer itself.
+1. **Diagram type** describes meaning: flowchart, sequence diagram, circuit diagram, or data chart.
+2. **Source format** describes the editable/reusable artifact: Mermaid, JSON Canvas, Draw.io, Drawnix, or CircuitikZ.
+3. **Export format** describes the visual deliverable: SVG, PNG, or PDF. Saving the source artifact remains available separately.
 
-| Requirement | Current evidence |
-|---|---|
-| Front-end circuit option | `Preferred diagram type` includes `Circuit (Circuitikz)` and `Preferred render target` includes `Circuitikz + SVG preview`. These settings are now visible without Developer mode. |
-| Constrained generation | `DiagramSpec(intent: "circuit", circuitSpec)` is validated before `CircuitikzRenderer` writes output. Raw free-form TikZ remains out of scope. |
-| Source artifact | Circuitikz output is saved as deterministic `.tex`. |
-| Preview artifact | The renderer attaches an SVG companion derived from the validated `CircuitSpec`. |
-| Multi-format export | Preview/export surfaces can export the companion as SVG, PNG, and PDF; the CLI can also write circuitikz plus SVG/PNG/PDF review evidence from one `DiagramSpec`. |
-| Maintainer smoke | `npm run diagram:export-circuitikz` and `npm run diagram:smoke-circuitikz` provide the optional LaTeX/TikZJax evidence boundary without making either runtime mandatory in the plugin. |
+Draw.io and Drawnix are source formats, not diagram types. CircuitikZ is the constrained source format for circuit diagrams. PNG and PDF must not be added to `RenderTarget`; they remain conversions from `RenderArtifact.previewSvg` through the shared preview exporter.
 
-## UI Decision
+## CircuitikZ Generation Boundary
 
-Circuit diagrams are a user-facing diagram mode, so hiding the diagram type and render target behind Developer mode made the implementation look absent. The settings page should expose the diagram pipeline controls to normal users:
+The LLM must not produce raw TeX. It produces validated `DiagramSpec(intent: "circuit", circuitSpec)` JSON. `CircuitikzRenderer` then deterministically writes the complete TeX document, including `\usepackage{circuitikz}`, `\begin{document}`, and `\begin{circuitikz}`. This preserves topology validation and keeps source, preview, and export behavior consistent.
 
-- `Enable spec-first Mermaid pipeline`
-- `Experimental compatibility mode`
-- `Preferred diagram type`
-- `Preferred render target`
-- `Diagram image export PPI`
+The investigated mind-map failure had four distinct causes:
 
-Developer mode still owns diagnostics, relaxed input gates, and advanced file-selection controls. The circuitikz labels remain deliberately precise: the product exposes `Circuitikz + SVG preview`, not a promise of in-plugin LaTeX compilation.
+- the old circuit prompt still exposed every diagram intent and provided no complete `CircuitSpec` example;
+- an explicit CircuitikZ target without an explicit circuit intent could pass compatibility checks until renderer failure;
+- `legacy-mermaid` conflicts with circuit output by design;
+- the legacy **Summarise as Mermaid diagram** command always remains a Mermaid operation.
 
-## Website And MDX Sync Decision
+The prompt fix therefore narrows explicit circuit requests to the circuit intent and includes a complete `CircuitSpec` example. Golden-template fallback is only a bounded safety net for six recognized circuit families; it must never be presented as general free-form CircuitikZ generation.
 
-The many localized `website/i18n/**/features/diagrams.mdx` files should not be treated as pollution by default. The website's publishing policy requires every public documentation locale to mirror every English docs route before deployment.
+## UI Implementation Progress
 
-The review rule is stricter:
+| Stage | Status | Evidence |
+|---|---|---|
+| Rename circuit diagram type | Implemented locally | The option is now `Circuit diagram`, without a source-format suffix. |
+| Rename render target | Implemented locally | The field is now `Preferred source format`. |
+| Clarify source targets | Implemented locally | Draw.io, Drawnix, and CircuitikZ are labeled as source files. |
+| Expose exports | Implemented locally | Settings and sidebar state that source, SVG, PNG, and PDF are available from preview. |
+| Compatibility matrix | Implemented | Circuit selection pins `best-fit` + CircuitikZ; leaving circuit clears a stale CircuitikZ preference; operation input rejects explicit incompatible combinations. |
+| Real Obsidian run | Verified | Obsidian 1.12.7 CLI reloaded the plugin and the configured provider generated the reported Chinese common-source NMOS request as a complete `.tex` document. |
 
-- Commit localized MDX only after the English source page is stable.
-- Keep `website/docs/features/diagrams.mdx` as the main authored source.
-- Use `website/scripts/generate-localized-docs.cjs` for broad regeneration and focused scripts such as `website/scripts/sync-diagrams-locale-delta.cjs` only for reviewed deltas.
-- For LM Studio-assisted translation deltas, keep batches bounded to 12 locales or fewer and keep the estimated batch context below the configured 32k model window. Finish and validate one batch before injecting the next batch.
-- Do not commit debug-output folders, partial locale files, or temporary model responses.
+## Website And MDX Decision
 
-This means localized MDX is a published artifact, not a build cache. It belongs in the repository when it is reviewed and passes the website contract tests.
+Localized MDX is currently a publication input, not a disposable build artifact. GitHub Pages builds from the tracked English page and 33 tracked locale mirrors. Removing the locale files without redesigning the publishing pipeline would fail the localization audit.
 
-## Next Direction
+For this feature, update only `website/docs/features/diagrams.mdx` and its matching localized pages. Do not regenerate unrelated routes. Never commit `website/build`, `website/.docusaurus`, `node_modules`, translation debug output, or temporary model responses.
 
-The remaining circuitikz work should focus on visual confidence rather than adding arbitrary syntax breadth:
+The public diagrams page must become a user guide containing only:
 
-- Keep `CircuitSpec` constrained to the validated golden families.
-- Add OCR-level or screenshot-level checks only after the structural SVG/PNG smoke checks stop producing obvious false positives.
-- Keep LaTeX/TikZJax optional and explicit.
-- Treat automatic topology-preserving repair as a later phase gated by compile diagnostics, render smoke, and topology signature preservation.
-- Keep the docs site aligned with the exact UI wording so users can find `Circuit (Circuitikz)` and understand the SVG/PNG/PDF export boundary.
+- the distinction between diagram type, source format, and export format;
+- when to choose Mermaid, Draw.io, Drawnix, or CircuitikZ;
+- generation, preview, source saving, and SVG/PNG/PDF export steps;
+- short troubleshooting guidance.
+
+Schemas, confidence thresholds, renderer internals, golden fixtures, compile flags, smoke algorithms, and repair contracts belong in maintainer documentation. `website/scripts/audit-build.cjs` must be changed accordingly so it tests the user contract instead of forcing maintainer details into the public page.
+
+LM Studio `hy-mt2-7b` is reserved for bounded documentation translation batches. Circuit generation tests use the provider and model already configured in Obsidian.
+
+## Verification Matrix
+
+- explicit circuit type + CircuitikZ source format + best-fit;
+- automatic type + explicit CircuitikZ source format;
+- circuit type + legacy Mermaid conflict messaging;
+- Chinese common-source NMOS request matching the reported example;
+- generated `.tex` envelope and topology assertions;
+- SVG, PNG, PDF, and source export from the same preview;
+- `obsidian help`, plugin discovery, and available Obsidian CLI plugin/command operations;
+- targeted Jest tests, full Jest suite, TypeScript build, website build/audit, and `git diff --check`.
+
+## Final Verification Evidence
+
+- Root cause reproduced in Obsidian: with `best-fit`, the model returned a circuit intent but an invalid drain path; validation threw before the constrained fallback could run.
+- Control-flow fix: supported explicit CircuitikZ requests now apply the bounded deterministic template when the returned CircuitSpec is invalid. Unsupported circuit requests still fail instead of being silently substituted.
+- Real output: `Notemd CLI Tests/CircuitikZ common-source NMOS 2026-07-11_diagram.tex` contains the package declaration, document envelope, `american voltages`, VDD-to-RD-to-M1 drain path, source ground, gate input, and drain output.
+- Obsidian CLI: official `Obsidian.com help`, plugin reload, command discovery, command execution, and developer error/console inspection succeeded. The plugin exposes 30 `notemd:*` command IDs; the exported capability, invocation-contract, and public-surface manifests remain available in the test vault.
+- Repository gates after the fix: 216 Jest suites and 1,855 tests passed; the production TypeScript/esbuild build passed; diagram semantic verification executed; the existing 34-language website build passed and `audit:build` passed.
+- MDX decision: the 33 localized diagram pages are tracked publication sources under the current Docusaurus contract. They are intentionally synchronized for this route only; generated `build/` and `.docusaurus/` outputs remain untracked.

@@ -9,7 +9,8 @@ import {
     TaskKey
 } from '../types';
 import { DEFAULT_SETTINGS } from '../constants';
-import type { RenderTarget } from '../diagram/types';
+import type { DiagramIntent, RenderTarget } from '../diagram/types';
+import { applyDiagramIntentPreference } from '../diagram/diagramPreferenceCompatibility';
 import { MAX_PREVIEW_EXPORT_PPI, MIN_PREVIEW_EXPORT_PPI } from '../rendering/preview/pngPreview';
 import {
     getLLMProviderDefinition,
@@ -2358,8 +2359,12 @@ export class NotemdSettingTab extends PluginSettingTab {
                 dropdown
                     .setValue(this.plugin.settings.preferredDiagramIntent || 'auto')
                     .onChange(async (value: string) => {
-                        this.plugin.settings.preferredDiagramIntent = value === 'auto' ? undefined : value;
+                        applyDiagramIntentPreference(
+                            this.plugin.settings,
+                            value === 'auto' ? undefined : value as DiagramIntent
+                        );
                         await this.plugin.saveSettings();
+                        this.display();
                     });
             });
 
@@ -2385,6 +2390,10 @@ export class NotemdSettingTab extends PluginSettingTab {
                         await this.plugin.saveSettings();
                     });
             });
+
+        new Setting(containerEl)
+            .setName(experimentalDiagramI18n.exportFormatsName)
+            .setDesc(experimentalDiagramI18n.exportFormatsDesc);
 
         new Setting(containerEl)
             .setName(experimentalDiagramI18n.exportPpiName)

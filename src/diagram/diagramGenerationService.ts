@@ -16,6 +16,7 @@ import { assertValidDiagramSpec } from './spec';
 import { isSupportedRenderTarget } from './types';
 import type { DiagramIntent, DiagramPlan, DiagramSpec, RenderTarget } from './types';
 import { parseDiagramSpecResponse } from './diagramSpecResponseParser';
+import { resolveCircuitTemplateFromMarkdown } from './adapters/circuitikz/circuitTemplateCatalog';
 
 export interface DiagramGenerationOptions {
     compatibilityMode: 'best-fit' | 'legacy-mermaid';
@@ -64,17 +65,27 @@ export function resolveDiagramOperationCompatibilityMode(
 }
 
 export function buildDiagramOperationInput(params: BuildDiagramOperationInputParams): DiagramOperationInput {
-    const requestedRenderTarget = params.requestedRenderTargetOverride
+    const configuredRenderTarget = params.requestedRenderTargetOverride
         ?? params.settings.preferredDiagramRenderTarget;
+    const requestedRenderTarget = params.executionMode === 'save-mermaid' || !isSupportedRenderTarget(configuredRenderTarget)
+        ? undefined
+        : configuredRenderTarget;
+    const configuredIntent = params.requestedIntentOverride
+        ?? params.settings.preferredDiagramIntent as DiagramIntent | undefined;
+
+    if (requestedRenderTarget === 'circuitikz' && configuredIntent && configuredIntent !== 'circuit') {
+        throw new Error('CircuitikZ source format requires the circuit diagram type.');
+    }
+
+    const requestedIntent = requestedRenderTarget === 'circuitikz'
+        ? 'circuit'
+        : configuredIntent;
 
     return {
         sourcePath: params.sourcePath,
         sourceMarkdown: params.sourceMarkdown,
-        requestedIntent: params.requestedIntentOverride
-            ?? params.settings.preferredDiagramIntent as DiagramIntent | undefined,
-        requestedRenderTarget: params.executionMode === 'save-mermaid' || !isSupportedRenderTarget(requestedRenderTarget)
-            ? undefined
-            : requestedRenderTarget,
+        requestedIntent,
+        requestedRenderTarget,
         compatibilityMode: resolveDiagramOperationCompatibilityMode(
             params.executionMode,
             params.compatibilityModeOverride ?? params.settings.experimentalDiagramCompatibilityMode
@@ -237,6 +248,38 @@ function assertPlanCompatibility(
     }
 }
 
+function resolveConstrainedCircuitFallback(
+    markdown: string,
+    plan: DiagramPlan,
+    options: Pick<DiagramGenerationOptions, 'compatibilityMode' | 'requestedIntent'>
+): DiagramSpec | null {
+    if (
+        options.compatibilityMode !== 'best-fit'
+        || options.requestedIntent !== 'circuit'
+        || plan.renderTarget !== 'circuitikz'
+    ) {
+        return null;
+    }
+
+    const circuitSpec = resolveCircuitTemplateFromMarkdown(markdown);
+    if (!circuitSpec) {
+        return null;
+    }
+
+    return {
+        intent: 'circuit',
+        title: circuitSpec.title,
+        summary: `Constrained ${circuitSpec.circuitKind} golden-template fallback.`,
+        nodes: [],
+        edges: [],
+        sections: [],
+        callouts: [],
+        dataSeries: [],
+        circuitSpec,
+        evidenceRefs: []
+    };
+}
+
 export async function generateDiagramArtifact(
     markdown: string,
     options: DiagramGenerationOptions
@@ -252,7 +295,16 @@ export async function generateDiagramArtifact(
     let rawResponse = await options.llmInvoker(prompt, markdown);
     let parsedSpec = parseDiagramSpecResponse(rawResponse);
     let spec = mergeSpecDefaults(parsedSpec, plan);
-    assertValidDiagramSpec(spec);
+    try {
+        assertValidDiagramSpec(spec);
+    } catch (validationError: unknown) {
+        const circuitFallback = resolveConstrainedCircuitFallback(markdown, plan, options);
+        if (!circuitFallback) {
+            throw validationError;
+        }
+        spec = circuitFallback;
+        assertValidDiagramSpec(spec);
+    }
 
     // If user requested a specific intent and LLM returned a different one, retry with stronger prompt
     if (options.requestedIntent && spec.intent !== options.requestedIntent) {
@@ -263,6 +315,15 @@ export async function generateDiagramArtifact(
         parsedSpec = parseDiagramSpecResponse(rawResponse);
         spec = mergeSpecDefaults(parsedSpec, plan);
         assertValidDiagramSpec(spec);
+
+        if (spec.intent !== options.requestedIntent) {
+            const circuitFallback = resolveConstrainedCircuitFallback(markdown, plan, options);
+            if (circuitFallback) {
+                spec = circuitFallback;
+                assertValidDiagramSpec(spec);
+            }
+        }
+
         assertPlanCompatibility(spec, plan, options);
     }
 
