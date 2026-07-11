@@ -23,6 +23,7 @@ import { researchAndSummarize } from '../searchUtils';
 import { BatchTranslateFolderResult, batchTranslateFolder, TranslateFileResult, translateFile } from '../translate';
 import { normalizeNameForFilePath } from '../utils';
 import { chunkArray, createConcurrentProcessor, delay } from '../utils';
+import { prepareBatchTargetFolder } from './batchTargetFolderPreparation';
 import { NotemdSettings, ProgressReporter, TaskKey } from '../types';
 import { SidebarActionId } from '../workflowButtons';
 import {
@@ -334,13 +335,28 @@ async function runBatchGenerateContentForTitlesCommandCoreWithHost(
         throw new Error(uiStrings.notices.batchGenerationCancelled);
     }
     const folderPath = selection.folderPath;
-    if (host.prepareBatchTargetFolder) {
-        const preparation = await host.prepareBatchTargetFolder(folderPath);
-        if (preparation !== 'ready') {
-            useReporter.log(uiStrings.notices.batchGenerationCancelled);
-            useReporter.updateStatus(uiStrings.notices.batchGenerationCancelled, -1);
-            return null;
-        }
+    const canInspectTarget = typeof host.getApp().vault.getAbstractFileByPath === 'function';
+    const preparation = host.prepareBatchTargetFolder
+        ? await host.prepareBatchTargetFolder(folderPath)
+        : !canInspectTarget ? 'ready' : (await prepareBatchTargetFolder({
+            path: folderPath,
+            inspect: async () => {
+                const target = host.getApp().vault.getAbstractFileByPath(folderPath);
+                if (!target) return { kind: 'missing' } as const;
+                if (!(target instanceof TFolder)) return { kind: 'file' } as const;
+                return { kind: 'folder', childCount: target.children.length, sample: target.children.slice(0, 5).map(child => child.path) } as const;
+            },
+            createFolder: async () => { throw new Error('Non-interactive batch preparation cannot create folders.'); },
+            confirmMissing: async () => ({ confirmed: false, remember: false }),
+            confirmNonEmpty: async () => false,
+            rememberAutoCreate: async () => undefined,
+            autoCreateMissing: false,
+            interactive: false
+        })).status;
+    if (preparation !== 'ready') {
+        useReporter.log(`Batch target folder requires interaction: ${folderPath}`);
+        useReporter.updateStatus(uiStrings.notices.batchGenerationCancelled, -1);
+        return null;
     }
     const effectiveSettings = applyFolderTaskSelectionOverride(host.getSettings(), selection.fileSelectionOverride);
 

@@ -19,6 +19,7 @@ The previous batch title flow validated the selected path only inside `batchGene
 - Persisted editable artifacts can now reconstruct the existing direct-preview pipeline from history. Reopening reuses the original history identity instead of creating a misleading new generation record, while subsequent exports continue updating that record.
 - Settings search header, heading navigation, responsive layout, and per-setting favorites saved in plugin data.
 - Batch-folder preparation domain and integration before title-generation batch execution.
+- Hosts without an interactive preparation callback now use a read-only Vault inspection fallback. Missing, non-empty, or file-collision targets stop before generation with a recoverable interaction-required status; they do not create folders, emit an error log, or authorize writes.
 - New defaults: `favoriteSettingIds`, `diagramHistoryRetentionLimit`, `diagramHistoryEntries`, and `autoCreateMissingBatchTargetFolders`.
 - Updated English, Simplified Chinese, and every existing localized root README with settings/history/batch guidance. LM Studio `hy-mt2-7b` was used only for the bounded README translation segment.
 
@@ -34,4 +35,4 @@ The previous batch title flow validated the selected path only inside `batchGene
 1. Move catalog metadata into setting declarations so category and alias information no longer needs to be reconstructed from the rendered Obsidian controls; stable canonical IDs are already in use.
 2. Add explicit missing-artifact feedback and localized history-manager copy; persisted source reconstruction and re-export are now wired.
 3. Add date-range controls to the dedicated history modal without increasing preview-modal density; source-format and export filters are now present.
-4. Expose structured CLI policy inputs for missing and non-empty batch folders.
+4. Expose optional structured CLI policy inputs so automation can explicitly authorize missing-folder creation or a known non-empty target; the safe non-interactive default is now enforced.

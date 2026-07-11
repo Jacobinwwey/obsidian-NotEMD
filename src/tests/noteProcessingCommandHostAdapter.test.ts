@@ -1392,4 +1392,27 @@ describe('note processing command host adapter', () => {
         expect(host.finalizeReporter).toHaveBeenCalledWith(reporter);
         expect(getBusy()).toBe(false);
     });
+
+    test('non-interactive batch host returns without invoking generation when target folder is missing', async () => {
+        const reporter = createReporter();
+        const { host } = createHost(reporter);
+        host.getApp.mockReturnValue({
+            vault: { getAbstractFileByPath: jest.fn(() => null) },
+            workspace: {}
+        });
+        const batchGenerateImpl = jest.fn();
+        const { runBatchGenerateContentForTitlesCommandWithHost } = loadModule();
+
+        const result = await runBatchGenerateContentForTitlesCommandWithHost(
+            host as any,
+            reporter,
+            'Missing',
+            batchGenerateImpl
+        );
+
+        expect(result).toBeNull();
+        expect(batchGenerateImpl).not.toHaveBeenCalled();
+        expect(host.saveErrorLog).not.toHaveBeenCalled();
+        expect(reporter.log).toHaveBeenCalledWith('Batch target folder requires interaction: Missing');
+    });
 });
