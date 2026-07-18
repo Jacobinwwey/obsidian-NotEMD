@@ -2,6 +2,7 @@ import { DiagramIntent } from '../../diagram/types';
 import { renderMermaidArtifactSvg } from '../preview/mermaidPreview';
 import { RenderWebviewTheme } from '../theme';
 import { renderVegaLiteArtifactSvg } from '../preview/vegaLitePreview';
+import { getBundledMermaidPreviewDeps, getBundledVegaLitePreviewDeps } from './bundledPreviewDeps';
 
 export const RENDER_HOST_BRIDGE_GLOBAL = '__NOTEMD_RENDER_BRIDGE__';
 
@@ -22,7 +23,7 @@ function createRenderHostBridge(): RenderHostBridge {
                 content,
                 mimeType: 'text/vnd.mermaid',
                 sourceIntent
-            }, undefined, theme);
+            }, getBundledMermaidPreviewDeps(), theme);
         },
         renderVegaLiteToSvg(content, theme = 'system', sourceIntent = 'dataChart') {
             return renderVegaLiteArtifactSvg({
@@ -30,17 +31,15 @@ function createRenderHostBridge(): RenderHostBridge {
                 content,
                 mimeType: 'application/json',
                 sourceIntent
-            }, undefined, theme);
+            }, async () => getBundledVegaLitePreviewDeps(), theme);
         }
     };
 }
 
 export function ensureRenderHostBridge(root: RenderHostGlobal = globalThis as RenderHostGlobal): RenderHostBridge {
-    if (!root[RENDER_HOST_BRIDGE_GLOBAL]) {
-        root[RENDER_HOST_BRIDGE_GLOBAL] = createRenderHostBridge();
-    }
-
-    return root[RENDER_HOST_BRIDGE_GLOBAL] as RenderHostBridge;
+    const bridge = createRenderHostBridge();
+    root[RENDER_HOST_BRIDGE_GLOBAL] = bridge;
+    return bridge;
 }
 
 export function buildMermaidRenderBootstrap(): string {

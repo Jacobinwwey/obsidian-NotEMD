@@ -29,6 +29,10 @@ import {
 } from '../rendering/diagnostics';
 import { DiagramHistoryModal } from './DiagramHistoryModal';
 import type { DiagramHistoryExportKind, DiagramHistoryQuery } from '../diagram/history/diagramHistoryRepository';
+import {
+    getBundledMermaidPreviewDeps,
+    getBundledVegaLitePreviewDeps
+} from '../rendering/webview/bundledPreviewDeps';
 
 interface DiagramHistoryStore {
     loadPage: (query: DiagramHistoryQuery) => Promise<any>;
@@ -144,7 +148,7 @@ export class DiagramPreviewModal extends Modal {
                         this.app,
                         this.session.payload.sourcePath as string,
                         this.session.payload.artifact,
-                        { theme: this.session.payload.resolvedTheme ?? this.session.payload.theme }
+                        this.createBundledPreviewRenderDeps()
                     );
                     await this.recordExportPath('svg', outputPath);
                     new Notice(formatI18n(i18n.previewModal.exportSuccessNotice, { path: outputPath }));
@@ -170,7 +174,7 @@ export class DiagramPreviewModal extends Modal {
                         this.session.payload.sourcePath as string,
                         this.session.payload.artifact,
                         {
-                            theme: this.session.payload.resolvedTheme ?? this.session.payload.theme,
+                            ...this.createBundledPreviewRenderDeps(),
                             ppi: this.exportPpi
                         }
                     );
@@ -198,7 +202,7 @@ export class DiagramPreviewModal extends Modal {
                         this.session.payload.sourcePath as string,
                         this.session.payload.artifact,
                         {
-                            theme: this.session.payload.resolvedTheme ?? this.session.payload.theme,
+                            ...this.createBundledPreviewRenderDeps(),
                             ppi: this.exportPpi
                         }
                     );
@@ -297,7 +301,7 @@ export class DiagramPreviewModal extends Modal {
             cls: 'notemd-diagram-preview-history-title'
         });
         if (this.historyStore) {
-            const manage = historyEl.createEl('button', { text: 'Manage Vault history' });
+            const manage = historyEl.createEl('button', { text: i18n.previewModal.manageVaultHistory });
             manage.onclick = () => new DiagramHistoryModal(this.app, this.historyStore!.loadPage, this.historyStore!.removeEntry, this.historyStore!.deleteArtifacts, this.historyStore!.reopenArtifact, this.uiLocale).open();
         }
 
@@ -376,9 +380,10 @@ export class DiagramPreviewModal extends Modal {
 
     private async tryRenderCanvas(container: HTMLElement): Promise<boolean> {
         try {
-            const svg = await renderPreviewArtifactSvg(this.session.payload.artifact, {
-                theme: this.session.payload.resolvedTheme ?? this.session.payload.theme
-            });
+            const svg = await renderPreviewArtifactSvg(
+                this.session.payload.artifact,
+                this.createBundledPreviewRenderDeps()
+            );
             container.empty();
             container.addClass('is-json-canvas');
             container.innerHTML = svg;
@@ -391,9 +396,10 @@ export class DiagramPreviewModal extends Modal {
 
     private async tryRenderPreviewSvg(container: HTMLElement): Promise<boolean> {
         try {
-            const svg = await renderPreviewArtifactSvg(this.session.payload.artifact, {
-                theme: this.session.payload.resolvedTheme ?? this.session.payload.theme
-            });
+            const svg = await renderPreviewArtifactSvg(
+                this.session.payload.artifact,
+                this.createBundledPreviewRenderDeps()
+            );
             container.empty();
             container.addClass('is-svg-preview');
             container.innerHTML = svg;
@@ -420,6 +426,14 @@ export class DiagramPreviewModal extends Modal {
             text: this.session.payload.artifact.content,
             cls: 'notemd-diagram-preview-source-only-code'
         });
+    }
+
+    private createBundledPreviewRenderDeps() {
+        return {
+            mermaid: getBundledMermaidPreviewDeps(),
+            vegaLiteDepsLoader: async () => getBundledVegaLitePreviewDeps(),
+            theme: this.session.payload.resolvedTheme ?? this.session.payload.theme
+        };
     }
 
     private getIframeSandboxPolicy(): string {

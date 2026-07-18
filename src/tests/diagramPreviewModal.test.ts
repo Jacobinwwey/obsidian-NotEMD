@@ -4,6 +4,18 @@ import { clearDiagramPreviewHistory } from '../ui/diagramPreviewHistory';
 import { mockApp } from './__mocks__/app';
 import * as mermaidPreview from '../rendering/preview/mermaidPreview';
 import * as previewExport from '../rendering/preview/previewExport';
+import * as bundledPreviewDeps from '../rendering/webview/bundledPreviewDeps';
+
+const bundledMermaidDeps = {
+    initialize: jest.fn(),
+    parse: jest.fn(),
+    render: jest.fn()
+};
+const bundledVegaLiteDeps = {
+    compile: jest.fn(),
+    parse: jest.fn(),
+    createView: jest.fn()
+};
 
 jest.mock('../rendering/preview/mermaidPreview', () => ({
     renderMermaidArtifactSvg: jest.fn().mockResolvedValue('<svg><g /></svg>')
@@ -20,6 +32,11 @@ jest.mock('../rendering/preview/previewExport', () => {
         saveDiagramSourceArtifact: jest.fn().mockResolvedValue('Notes/Topic_diagram.json')
     };
 });
+
+jest.mock('../rendering/webview/bundledPreviewDeps', () => ({
+    getBundledMermaidPreviewDeps: jest.fn(() => bundledMermaidDeps),
+    getBundledVegaLitePreviewDeps: jest.fn(() => bundledVegaLiteDeps)
+}));
 
 type MockElement = {
     tag: string;
@@ -221,8 +238,15 @@ describe('diagram preview modal', () => {
             mockApp,
             'Notes/Topic.md',
             expect.objectContaining({ target: 'mermaid' }),
-            expect.objectContaining({ theme: 'dark' })
+            expect.objectContaining({
+                theme: 'dark',
+                mermaid: bundledMermaidDeps,
+                vegaLiteDepsLoader: expect.any(Function)
+            })
         );
+        const exportDeps = (previewExport.saveDiagramPreviewSvg as jest.Mock).mock.calls[0][3];
+        await expect(exportDeps.vegaLiteDepsLoader()).resolves.toBe(bundledVegaLiteDeps);
+        expect(bundledPreviewDeps.getBundledVegaLitePreviewDeps).toHaveBeenCalled();
         expect(Notice).toHaveBeenCalledWith('Diagram preview exported to Notes/Topic_preview.svg');
         expect(exportButton?.text).toBe('Export SVG');
         expect(exportButton?.disabled).toBe(false);
@@ -523,6 +547,20 @@ describe('diagram preview modal', () => {
         expect(buttons.some(button => button.text === '导出 PNG')).toBe(true);
         expect(buttons.some(button => button.text === '导出 PDF')).toBe(true);
         expect(buttons.some(button => button.text === '保存源码文件')).toBe(true);
+    });
+
+    test('uses localized vault history label for chinese preview modal', async () => {
+        const modal = mountModal(new DiagramPreviewModal(mockApp, createSession(), 'zh-CN', {
+            historyStore: { loadPage: jest.fn(), removeEntry: jest.fn() }
+        }) as any);
+
+        modal.onOpen();
+        await flushPromises();
+
+        const historyPanel = findByClass(modal.contentEl, 'notemd-diagram-preview-history');
+        const buttons = collectButtons(historyPanel as MockElement);
+        expect(buttons.some(button => button.text === '管理 Vault 图形历史')).toBe(true);
+        expect(buttons.some(button => button.text === 'Manage Vault history')).toBe(false);
     });
 
     test('renders localized preview title when session provides one', async () => {

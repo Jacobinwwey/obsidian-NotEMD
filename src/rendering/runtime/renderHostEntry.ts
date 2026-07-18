@@ -1,59 +1,10 @@
-import mermaid from 'mermaid';
-import * as vegaLiteModule from 'vega-lite';
-import * as vegaModule from 'vega';
 import { DiagramIntent } from '../../diagram/types';
 import { normalizeMermaidDefinition } from '../preview/mermaidDefinitionShared';
-import {
-    MermaidPreviewDeps,
-    renderNormalizedMermaidDefinitionSvgWithDeps
-} from '../preview/mermaidPreviewShared';
+import { MermaidPreviewDeps, renderNormalizedMermaidDefinitionSvgWithDeps } from '../preview/mermaidPreviewShared';
 import { RenderWebviewTheme } from '../theme';
 import { VegaLitePreviewDeps, renderVegaLiteSpecSvgWithDeps } from '../preview/vegaLitePreviewShared';
 import { RenderWebviewPayload } from '../webview/contract';
-
-function resolveMermaidRuntimeExport(moduleExports: unknown): Record<string, unknown> {
-    if (moduleExports && typeof moduleExports === 'object' && 'default' in moduleExports) {
-        const defaultExport = (moduleExports as Record<string, unknown>).default;
-        if (defaultExport && typeof defaultExport === 'object') {
-            return defaultExport as Record<string, unknown>;
-        }
-    }
-
-    return (moduleExports ?? {}) as Record<string, unknown>;
-}
-
-function createBundledMermaidPreviewDeps(): MermaidPreviewDeps {
-    const mermaidRuntime = resolveMermaidRuntimeExport(mermaid);
-    const initialize = mermaidRuntime.initialize;
-    const parse = mermaidRuntime.parse;
-    const render = mermaidRuntime.render;
-
-    if (typeof initialize !== 'function' || typeof parse !== 'function' || typeof render !== 'function') {
-        throw new Error('Mermaid preview runtime is unavailable.');
-    }
-
-    return {
-        initialize: (config) => initialize(config),
-        parse: (source) => parse(source),
-        render: (id, source) => render(id, source)
-    };
-}
-
-function createBundledVegaLitePreviewDeps(): VegaLitePreviewDeps {
-    const compile = (vegaLiteModule as any).compile;
-    const parse = (vegaModule as any).parse;
-    const View = (vegaModule as any).View;
-
-    if (typeof compile !== 'function' || typeof parse !== 'function' || typeof View !== 'function') {
-        throw new Error('Vega-Lite preview runtime is unavailable.');
-    }
-
-    return {
-        compile,
-        parse,
-        createView: (runtime) => new View(runtime, { renderer: 'svg' })
-    };
-}
+import { getBundledMermaidPreviewDeps, getBundledVegaLitePreviewDeps } from '../webview/bundledPreviewDeps';
 
 function parseRenderHostPayload(source: string): RenderWebviewPayload {
     const parsed = JSON.parse(source);
@@ -154,11 +105,11 @@ export async function bootstrapRenderHostDocument(doc: Document = document): Pro
 }
 
 export function loadBundledVegaLitePreviewDeps(): VegaLitePreviewDeps {
-    return createBundledVegaLitePreviewDeps();
+    return getBundledVegaLitePreviewDeps();
 }
 
 export function loadBundledMermaidPreviewDeps(): MermaidPreviewDeps {
-    return createBundledMermaidPreviewDeps();
+    return getBundledMermaidPreviewDeps();
 }
 
 export async function renderBundledMermaidToSvg(
@@ -172,7 +123,7 @@ export async function renderBundledMermaidToSvg(
 
     return renderNormalizedMermaidDefinitionSvgWithDeps(
         definition,
-        createBundledMermaidPreviewDeps(),
+        getBundledMermaidPreviewDeps(),
         theme
     );
 }
@@ -184,7 +135,7 @@ export async function renderBundledVegaLiteToSvg(
 ): Promise<string> {
     return renderVegaLiteSpecSvgWithDeps(
         content,
-        createBundledVegaLitePreviewDeps(),
+        getBundledVegaLitePreviewDeps(),
         theme
     );
 }

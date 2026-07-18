@@ -7,7 +7,9 @@ module.exports = {
   modulePathIgnorePatterns: ['<rootDir>/.worktrees/', '<rootDir>/.cache/', '<rootDir>/.tmp_repo_saga_tool/', '<rootDir>/ref/'],
   moduleNameMapper: {
     '^obsidian$': '<rootDir>/src/__mocks__/obsidian.ts',
-    '^mermaid$': '<rootDir>/src/__mocks__/mermaid.ts'
+    '^mermaid$': '<rootDir>/src/__mocks__/mermaid.ts',
+    '^vega-lite$': '<rootDir>/src/__mocks__/vega-lite.ts',
+    '^vega$': '<rootDir>/src/__mocks__/vega.ts'
   },
   transform: {
     '^.+\\.txt$': '<rootDir>/jest-txt-transform.js',

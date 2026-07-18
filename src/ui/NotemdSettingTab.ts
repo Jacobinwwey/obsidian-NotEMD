@@ -143,8 +143,11 @@ export class NotemdSettingTab extends PluginSettingTab {
         const favoritesButton = header.createEl('button', { text: copy.favorites, cls: 'notemd-settings-favorites-filter' });
         favoritesButton.type = 'button';
         let favoritesOnly = false;
-        const navigation = header.createDiv({ cls: 'notemd-settings-category-navigation' });
-        const categoryButtons = new Map<string, HTMLButtonElement>();
+        const navigation = header.createEl('select', { cls: 'notemd-settings-category-navigation' });
+        navigation.setAttribute('aria-label', copy.categoryNavigationLabel);
+        navigation.createEl('option', { text: copy.allCategories, value: '' });
+        const categoryOptions = new Map<string, HTMLOptionElement>();
+        const categoryHeadings = new Map<string, HTMLElement>();
         const resultCount = header.createDiv({ cls: 'notemd-settings-result-count' });
         resultCount.setAttribute('aria-live', 'polite');
         const emptyState = header.createDiv({ cls: 'notemd-settings-empty-state', text: copy.noResults });
@@ -153,12 +156,16 @@ export class NotemdSettingTab extends PluginSettingTab {
             const label = heading.textContent?.trim();
             if (!label) return;
             heading.id = `notemd-settings-category-${index}`;
-            const button = navigation.createEl('button', { text: label });
-            button.type = 'button';
-            button.onclick = () => heading.scrollIntoView({ behavior: 'smooth', block: 'start' });
             const settingIndex = settingItems.indexOf(heading);
-            if (settingIndex >= 0) categoryButtons.set(catalog[settingIndex].id, button);
+            if (settingIndex < 0) return;
+            const categoryId = catalog[settingIndex].id;
+            const option = navigation.createEl('option', { text: label, value: categoryId });
+            categoryOptions.set(categoryId, option);
+            categoryHeadings.set(categoryId, heading);
         });
+        navigation.onchange = () => {
+            categoryHeadings.get(navigation.value)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        };
         const applyFilter = () => {
             const navigationState = resolveSettingsNavigation(catalog, { query: search.value, favoritesOnly, favoriteIds: favorites });
             settingItems.forEach((item, index) => {
@@ -166,9 +173,12 @@ export class NotemdSettingTab extends PluginSettingTab {
                 const hidden = !navigationState.visibleIds.has(settingId);
                 item.toggleAttribute('hidden', hidden);
             });
-            categoryButtons.forEach((button, categoryId) => {
-                button.hidden = !navigationState.visibleCategoryIds.has(categoryId);
+            categoryOptions.forEach((option, categoryId) => {
+                const visible = navigationState.visibleCategoryIds.has(categoryId);
+                option.hidden = !visible;
+                option.disabled = !visible;
             });
+            if (navigation.value && !navigationState.visibleCategoryIds.has(navigation.value)) navigation.value = '';
             resultCount.setText(formatI18n(copy.resultCount, { visible: navigationState.visibleCount, total: navigationState.totalCount }));
             emptyState.hidden = navigationState.visibleCount !== 0;
         };

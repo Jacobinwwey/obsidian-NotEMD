@@ -2,6 +2,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 
 const stylesPath = path.join(__dirname, '..', '..', 'styles.css');
+const settingTabPath = path.join(__dirname, '..', 'ui', 'NotemdSettingTab.ts');
 
 describe('provider settings styles', () => {
     test('styles ship dedicated selectors for advanced provider settings and discovered model rows', () => {
@@ -40,10 +41,18 @@ describe('provider settings styles', () => {
 
         expect(styles).toContain('.notemd-settings-discovery button:focus-visible');
         expect(styles).toContain('.notemd-setting-favorite-button { min-width: 44px; min-height: 44px;');
+        expect(styles).toContain('.notemd-settings-search, .notemd-settings-category-navigation, .notemd-settings-favorites-filter { min-height: 44px; }');
         expect(styles).toContain('.notemd-diagram-history-toolbar');
         expect(styles).toContain('.notemd-diagram-history-actions');
         expect(styles).toContain('.notemd-settings-result-count');
         expect(styles).toContain('.notemd-settings-empty-state');
         expect(styles).toContain('@media (max-width: 720px)');
+    });
+
+    test('settings categories use one progressive selector instead of parallel heading buttons', () => {
+        const source = fs.readFileSync(settingTabPath, 'utf8');
+
+        expect(source).toContain("header.createEl('select', { cls: 'notemd-settings-category-navigation' })");
+        expect(source).not.toContain("navigation.createEl('button', { text: label })");
     });
 });

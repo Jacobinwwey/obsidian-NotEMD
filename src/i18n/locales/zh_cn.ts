@@ -969,6 +969,7 @@ export const STRINGS_ZH_CN: DeepPartial<NotemdEnglishStrings> = {
         copyFailedNotice: '复制图形源码失败，请查看控制台。',
         sourceFile: '已保存文件：{path}',
         historyTitle: '历史',
+        manageVaultHistory: '管理 Vault 图形历史',
         diagnosticsTitle: 'Artifact 诊断',
         diagnosticSummary: {
             errors: '错误',
@@ -988,6 +989,7 @@ export const STRINGS_ZH_CN: DeepPartial<NotemdEnglishStrings> = {
     },
     settingsDiscovery: {
         searchPlaceholder: '搜索设置…', searchLabel: '搜索设置', favorites: '★ 收藏',
+        categoryNavigationLabel: '跳转到设置分类', allCategories: '全部设置分类',
         addFavorite: '收藏此设置', removeFavorite: '取消收藏此设置',
         resultCount: '显示 {visible} / {total} 项设置', noResults: '没有设置符合当前搜索和筛选条件。'
     },

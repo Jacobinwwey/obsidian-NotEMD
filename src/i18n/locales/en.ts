@@ -982,6 +982,7 @@ export const STRINGS_EN = {
         exportPdfFailedNotice: 'Failed to export diagram PDF: {message}',
         sourceFile: 'Saved file: {path}',
         historyTitle: 'History',
+        manageVaultHistory: 'Manage Vault history',
         diagnosticsTitle: 'Artifact diagnostics',
         diagnosticSummary: {
             errors: 'error(s)',
@@ -1005,6 +1006,7 @@ export const STRINGS_EN = {
     },
     settingsDiscovery: {
         searchPlaceholder: 'Search settings…', searchLabel: 'Search settings', favorites: '★ Favorites',
+        categoryNavigationLabel: 'Jump to settings section', allCategories: 'All settings sections',
         addFavorite: 'Add setting to favorites', removeFavorite: 'Remove setting from favorites',
         resultCount: '{visible} of {total} settings', noResults: 'No settings match the current search and filters.'
     },
