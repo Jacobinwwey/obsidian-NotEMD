@@ -1,6 +1,6 @@
-﻿# Vault Diagram History, Settings Navigation, And Batch Folder Safety Design
+# Vault Diagram History, Settings Navigation, And Batch Folder Safety Design
 
-Language: **English** | [ç®€ä½“ä¸­æ–‡](./2026-07-11-vault-history-settings-navigation-batch-folder-design.zh-CN.md)
+Language: **English** | [简体中文](./2026-07-11-vault-history-settings-navigation-batch-folder-design.zh-CN.md)
 
 ## Outcome
 
@@ -28,7 +28,7 @@ The preview modal keeps a compact recent-history section and links to a dedicate
 
 Introduce a settings catalog with stable IDs, category IDs, localized names/descriptions, search aliases, and optional advanced/developer classification. Categories are: General, Providers & models, Note processing, Diagrams, Batch processing, Slides, and Developer.
 
-The setting tab renders an Obsidian-native two-column shell: a compact category/favorites rail and the existing controls in the content column. On narrow containers the rail becomes a horizontal selector. Fuzzy search operates on normalized localized name, description, aliases, and category text. Search results remain grouped by category and show why each result matched. Favorite IDs are persisted per Vault and remain stable across locale changes.
+The setting tab keeps the existing Obsidian controls beneath a compact discovery header. Live measurement rejected a 28-button category rail because it exposed too many simultaneous choices; the delivered design uses one localized category selector alongside search and favorites. Fuzzy search operates on normalized localized names, descriptions, aliases, and category text. Matching settings remain grouped under their existing headings, while categories without matches are unavailable in the selector. Favorite IDs are persisted per Vault and remain stable across locale changes.
 
 Settings continue to use their existing controls and save behavior. The catalog adds identity and discovery; it does not duplicate configuration state or introduce a second settings backend.
 
@@ -36,7 +36,7 @@ Settings continue to use their existing controls and save behavior. The catalog 
 
 Create a folder preparation operation used before a batch starts:
 
-- Missing folder: ask once whether to create it. The dialog offers â€œAutomatically create missing batch target folders in the future.â€
+- Missing folder: ask once whether to create it. The dialog offers “Automatically create missing batch target folders in the future.”
 - Existing empty folder: proceed without prompting.
 - Existing non-empty folder: show item count and a small sample, then ask once for the whole batch.
 - Existing file at the path: reject with a specific actionable error.
@@ -73,7 +73,6 @@ Persistence writes are serialized to avoid lost updates. A failed history-index 
 
 1. Persistent history repository and query contract.
 2. History management UI and preview integration.
-3. Settings catalog, fuzzy search, category rail, and favorites.
+3. Settings catalog, fuzzy search, progressive category selector, and favorites.
 4. Batch folder preparation flow and command-host integration.
 5. README multilingual synchronization, full verification, real Obsidian checks, and main deployment.
-

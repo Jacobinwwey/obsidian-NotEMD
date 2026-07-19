@@ -981,7 +981,7 @@ export const STRINGS_ZH_CN: DeepPartial<NotemdEnglishStrings> = {
     diagramHistory: {
         title: '图形历史', searchPlaceholder: '搜索标题、笔记、类型或格式…',
         allTypes: '全部图形类型', allFormats: '全部源格式', anyExport: '任意导出格式',
-        itemsPerPage: '每页 {count} 条', completedFrom: '完成时间起点', completedTo: '完成时间终点',
+        itemsPerPageLabel: '每页显示条数', itemsPerPage: '每页 {count} 条', completedFrom: '完成时间起点', completedTo: '完成时间终点',
         summary: '共 {count} 个图形 · 最新完成优先', noExports: '尚未记录视觉导出', exports: '导出：{formats}',
         reopen: '重新打开预览', reopenFailed: '已保存的图形产物不存在或无法预览。', openSource: '打开源笔记', openFile: '打开 {name}',
         removeIndex: '从历史中移除', deleteArtifacts: '删除产物…',

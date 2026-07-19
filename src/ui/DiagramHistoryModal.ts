@@ -35,7 +35,7 @@ export class DiagramHistoryModal extends Modal {
         addFilter(copy.allTypes, ['flowchart', 'sequence', 'class', 'state', 'er', 'gantt', 'pie', 'mindmap', 'timeline', 'quadrant', 'xychart', 'sankey', 'block', 'packet', 'kanban', 'architecture', 'circuit'], this.query.intent, value => { this.query.intent = value as DiagramHistoryQuery['intent']; });
         addFilter(copy.allFormats, ['mermaid', 'drawio', 'drawnix', 'circuitikz'], this.query.sourceFormat, value => { this.query.sourceFormat = value as DiagramHistoryQuery['sourceFormat']; });
         addFilter(copy.anyExport, ['svg', 'png', 'pdf'], this.query.exportKind, value => { this.query.exportKind = value as DiagramHistoryQuery['exportKind']; });
-        const pageSize = toolbar.createEl('select', { attr: { 'aria-label': 'Items per page' } });
+        const pageSize = toolbar.createEl('select', { attr: { 'aria-label': copy.itemsPerPageLabel } });
         for (const size of [10, 20, 50]) pageSize.createEl('option', { value: String(size), text: formatI18n(copy.itemsPerPage, { count: size }) });
         pageSize.value = String(this.query.pageSize ?? 20);
         pageSize.onchange = () => { this.query.pageSize = Number(pageSize.value); this.query.page = 1; void this.render(); };
