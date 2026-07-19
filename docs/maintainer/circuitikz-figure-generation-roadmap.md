@@ -83,21 +83,24 @@ A golden reference is mandatory for reliable circuit generation. It should defin
 For example, the common-source amplifier reference should keep the working pattern:
 
 ```latex
+\documentclass[border=8pt]{standalone}
 \usepackage{circuitikz}
 \begin{document}
-\begin{circuitikz}[american voltages]
+\begin{circuitikz}[american voltages, line width=0.5pt, font=\small]
 \draw
   (3,5) node[vcc]{$V_{DD}$}
-  to [R, l=$R_D$] (3,3)
-  to [short, *-o] (5,3) node[right]{$v_{out}$}
+  to [R, l=$R_D$] (3,3);
+\draw
+  (3,3) to [short, *-o] (5,3) node[right]{$v_{out}$};
+\draw
   (3,3) to [short] (3,2.2)
-  node[nmos, anchor=D] (M1) {$M_1$}
+  node[nmos, anchor=D] (M1) {$M_1$};
+\draw
   (M1.S) to [short] (3,0.5)
-  node[ground]{}
+  node[ground]{};
+\draw
   (M1.G) to [short, -o] (0.8,2.2)
   node[left]{$v_{in}$};
-\draw
-  (3,0.5) node[below right]{$S$};
 \end{circuitikz}
 \end{document}
 ```
@@ -134,6 +137,7 @@ Screenshot feedback can be manual first. Automated screenshot checks should star
 | C. circuitikz adapter | Emit deterministic LaTeX for golden templates | generated LaTeX matches stable snapshots and contains required anchors |
 | D. render feedback | Add optional local TikZJax/LaTeX smoke path | compile failures return actionable diagnostics |
 | E. visual repair loop | Feed rendered image or overlap report back into repair prompt | repeated layout errors are corrected without changing topology |
+| F. managed desktop environment | Discover safe local compilers and offer an explicit managed Tectonic install | UI probe/install/remove works, golden fixtures compile, and dependency-free export remains intact |
 
 ## Implementation Status
 
@@ -154,20 +158,26 @@ Phase A is documented. Phase B/C now have a constrained repository prototype:
 - `src/rendering/diagnostics.ts` summarizes `RenderArtifact.diagnostics` into error/warning/info counts, and `src/ui/DiagramPreviewModal.ts` uses that summary in both the artifact diagnostics panel and preview history entries. Any render target can attach diagnostics to `RenderArtifact.diagnostics`; the preview UI shows the summary, severity, kind, message, and advice without requiring TikZJax or LaTeX in the plugin runtime.
 - `src/tests/circuitikzExporter.test.ts`, `src/tests/circuitikzRepairBrief.test.ts`, `src/tests/circuitikzCompileDiagnostics.test.ts`, `src/tests/circuitikzRenderSmoke.test.ts`, `src/tests/circuitikzCompileRunner.test.ts`, and `src/tests/circuitikzExportCli.test.ts` verify deterministic output, topology rejection, topology-preserving repair brief generation and candidate validation, package-script exposure, UTF-8 BOM handling, diagnostic parsing, shell-free compile execution, structured `compile-executable-invalid` / `compile-executable-not-found` diagnostics, diagnostics JSON output, render artifact existence/non-empty smoke checks, SVG structure checks, path-only SVG label classification, path-only glyph placement checks, definition-local glyph transform checks, path-only glyph overlap diagnostics, exact arc bounds for A/a arc extrema, exact Bezier curve bounds for C/S/Q/T curve extrema, stroke-width-aware SVG bounds and label overlap checks, `polyline` / `polygon` drawing geometry checks, positioned `tspan` label geometry checks, transform-aware SVG geometry checks, SVG label-vs-drawing overlap checks, PNG blank screenshot checks, indexed-color and grayscale PNG packed sample decoding, indexed-color PNG palette decoding, grayscale/RGB PNG tRNS transparent sample handling, format-specific unsupported PNG diagnostics, 16-bit direct PNG sample normalization, PNG foreground-bound and foreground-density reporting, PNG clipped-content diagnostics, dense-foreground diagnostics, and nonzero CLI exit for logs or smoke reports with errors.
 - `src/tests/diagramPreviewModal.test.ts` verifies that artifact diagnostics are visible in the diagram preview modal and that preview history does not collapse entries with different diagnostics.
+- `src/diagram/adapters/circuitikz/circuitikzRepairLoop.ts` now provides the opt-in Phase E execution boundary. It creates the dedicated repair prompt, accepts only one `CircuitSpec` JSON candidate, rejects topology drift before export, evaluates the generated TeX with caller-supplied compile/render evidence, and adopts the candidate only when every acceptance gate passes. The loop is deliberately capped at one attempt and remains disabled when a renderer is unavailable.
+- The common-source golden template now uses separate terminated draw paths, a lighter `0.5pt` stroke, a smaller body font, and no redundant source-terminal annotation. This removes the earlier path crowding and label collision without changing electrical topology.
+- `src/tests/circuitikzRepairLoop.test.ts` covers successful repair, topology drift, non-JSON output, failed second-pass visual acceptance, and renderer-unavailable fail-closed behavior.
+- `src/latexEnvironment/` and `src/platform/desktopProcess.ts` implement Phase F without enlarging the plugin bundle with a TeX distribution. Desktop users can reuse a custom/system compiler or explicitly install pinned Tectonic `0.16.9`; downloads are HTTPS-host allowlisted, size-bounded, SHA-256 verified, extracted through traversal/link guards, smoke-tested in staging against six deterministic fixtures, and atomically activated with rollback and cancellation cleanup.
+- `src/ui/CircuitikzEnvironmentModal.ts` exposes probe, install/repair, cancel, remove, capability, progress, and bounded-log states. The module loads desktop execution code lazily; mobile retains dependency-free preview and SVG/PNG/preview-PDF export.
+- The diagram-history drawer now establishes the Grid minimum-size invariant with `min-height: 0`; its body owns `overflow: auto` and contains overscroll, so long Vault histories remain reachable without scrolling the preview behind the drawer.
 
-Phase D now has log parsing, opt-in local renderer execution, explicit missing-renderer availability reports for fixture smoke evidence, artifact-level smoke checks, SVG structure smoke checks with hidden/transparent element exclusion, accessibility metadata expected-text checks through `aria-label`, `<title>`, and `<desc>`, transform-aware geometry, path-only label classification, path-only glyph placement checks, path-only glyph overlap diagnostics, close-path current-point handling, exact arc bounds for A/a arc extrema, exact Bezier curve bounds for C/S/Q/T curve extrema, stroke-width-aware SVG bounds and label overlap checks, `polyline` / `polygon` geometry coverage, positioned `tspan` label geometry, `text-anchor`-aware positioned text geometry, text/text and label/drawing overlap diagnostics, first PNG screenshot nonblank, indexed-color and grayscale packed-sample decoding, grayscale/RGB tRNS transparent sample handling, format-specific unsupported PNG guidance for Adam7 interlace and indexed bit-depth failures, 16-bit direct sample normalization, edge-clipping, and dense-foreground checks, deterministic layout-hint projection for input/output ports, a topology-preserving repair guard, a topology-preserving repair brief handoff with candidate validation, structured `repairPrompt` / `diagnosticFocus` guidance, `repairAcceptance` gate evidence for repair candidates, and a front-end diagnostics surface, but the implementation still deliberately stops before automatic renderer installation/discovery, OCR recognition for path-only glyph text, precise pixel-level overlap detection, full SVG path coverage, browser-grade text layout, and automated Phase E repair execution. It does not bundle LaTeX, make TikZJax a plugin runtime dependency, or run a visual repair loop.
+Phase D now provides actionable compile and artifact diagnostics, including SVG geometry/overlap and PNG nonblank/clipping/density checks. Phase E has a bounded topology-preserving execution loop and still refuses candidates without fresh compile and render-smoke evidence. Phase F adds optional desktop discovery and user-initiated managed installation while keeping the ordinary preview/export path dependency-free. Notemd still does not embed TeX Live, MiKTeX, TinyTeX, or Tectonic archives in `main.js`. OCR for path-only glyph text, precise pixel-level overlap detection, complete SVG path coverage, and browser-grade text layout remain future evidence improvements.
 
 The SVG geometry smoke also covers SVG number grammar for leading-dot decimals and explicit plus signs. This is a small but important renderer-compatibility gate because dvisvgm can emit compact decimals that should remain fractional during bounds checks.
 
 ## Best Current Practice
 
-Until `CircuitSpec` exists, use constrained prompts:
+For supported circuit families, use the structured `CircuitSpec` path:
 
 1. Provide a renderable golden reference.
 2. Ask for a named circuit family, not a vague "draw circuit."
 3. Lock orientation, anchors, and input/output sides.
-4. Require a topology checklist before LaTeX.
-5. Render once, then use the screenshot or compile log for a repair pass.
+4. Let the deterministic adapter own LaTeX rather than asking the model for raw TikZ.
+5. When a local renderer is configured, use compile/render diagnostics for the single guarded repair attempt.
 
 This will outperform unconstrained ChatGPT/Gemini TikZ generation because it limits the model's freedom to the parts that matter: choosing components and topology, not inventing every coordinate and route from scratch.
 

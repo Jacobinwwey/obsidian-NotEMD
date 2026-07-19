@@ -302,17 +302,17 @@ export function renderCircuitSpecPreviewSvg(spec: CircuitSpec): string {
         <desc id="notemd-circuit-desc">${escapeHtml(`${spec.circuitKind} circuitikz preview companion for ${spec.goldenReferenceId}`)}</desc>
         <style>
             .notemd-circuit-canvas { fill: #ffffff; }
-            .notemd-circuit-stage { fill: none; stroke: #1f2937; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+            .notemd-circuit-stage { fill: none; stroke: #1f2937; stroke-width: 1.2; stroke-linecap: round; stroke-linejoin: round; }
             .notemd-circuit-stage text { stroke: none; }
-            .notemd-circuit-component rect { fill: #ffffff; stroke: #1f2937; stroke-width: 1.6; }
+            .notemd-circuit-component rect { fill: #ffffff; stroke: #1f2937; stroke-width: 1.2; }
             .notemd-circuit-pmos rect { fill: #fff7ed; }
             .notemd-circuit-nmos rect { fill: #eff6ff; }
-            .notemd-circuit-mos-bubble { fill: #ffffff; stroke: #1f2937; stroke-width: 1.6; }
-            .notemd-circuit-port { fill: #ffffff; stroke: #1f2937; stroke-width: 1.6; }
+            .notemd-circuit-mos-bubble { fill: #ffffff; stroke: #1f2937; stroke-width: 1.2; }
+            .notemd-circuit-port { fill: #ffffff; stroke: #1f2937; stroke-width: 1.2; }
             .notemd-circuit-junction { fill: #111827; stroke: none; }
-            .notemd-circuit-label { fill: #111827; font: 400 15px "Segoe UI", Arial, sans-serif; }
-            .notemd-circuit-net-label { fill: #334155; font: 400 13px "Segoe UI", Arial, sans-serif; }
-            .notemd-circuit-title { fill: #111827; font: 500 22px "Segoe UI", Arial, sans-serif; }
+            .notemd-circuit-label { fill: #111827; font-family: "Segoe UI", Arial, sans-serif; font-size: 15px; font-weight: 350; }
+            .notemd-circuit-net-label { fill: #334155; font-family: "Segoe UI", Arial, sans-serif; font-size: 13px; font-weight: 350; }
+            .notemd-circuit-title { fill: #111827; font-family: "Segoe UI", Arial, sans-serif; font-size: 22px; font-weight: 500; }
         </style>
         <rect class="notemd-circuit-canvas" x="0" y="0" width="720" height="580" fill="#ffffff" />
         ${renderCircuitMetadata(spec)}

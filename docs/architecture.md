@@ -208,9 +208,11 @@ The spec-first pipeline can also force a render target independently from the in
 | `editable-html-svg` | Self-contained HTML with semantic inline SVG | no external editor runtime |
 | `drawio` | `.drawio` XML plus SVG/MD review companions | no diagrams.net runtime in the plugin |
 | `drawnix` | `.drawnix` JSON subset plus SVG/MD review companions | no Drawnix or Plait runtime in the plugin |
-| `circuitikz` | validated `.tex` source plus SVG/MD review companions | no bundled LaTeX or TikZJax runtime |
+| `circuitikz` | validated `.tex` source plus SVG/MD review companions | dependency-free preview/export; optional desktop compiler or managed Tectonic |
 
-Circuitikz support is intentionally constrained. The front-end settings now expose `Circuit (Circuitikz)` as a preferred diagram type and `Circuitikz + SVG preview` as a preferred render target without requiring Developer mode, but the renderer still accepts only a validated `DiagramSpec(intent: "circuit", circuitSpec)`. It writes deterministic circuitikz TeX and a reviewable SVG companion; real LaTeX/TikZJax compile evidence remains an optional maintainer smoke check.
+Circuitikz support is intentionally constrained. The front-end settings expose `Circuit (Circuitikz)` as a preferred diagram type and `Circuitikz + SVG preview` as a preferred render target without requiring Developer mode, but the renderer accepts only a validated `DiagramSpec(intent: "circuit", circuitSpec)`. It writes deterministic circuitikz TeX and a reviewable SVG companion. Desktop users may then reuse a custom/system compiler or explicitly install pinned Tectonic 0.16.9 outside the Vault for compile diagnostics, native PDF evidence, and guarded repair acceptance; mobile and ordinary preview/export do not load desktop process code.
+
+The managed-runtime boundary is ownership-based rather than name-based. Downloaded assets are host-allowlisted, size-bounded, checksum-verified, extracted without links or traversal, smoke-tested in staging, and activated under a filesystem lock. Existing paths must remain under the configured runtime root after canonical `realpath` resolution. Removal accepts only valid Notemd pointer/install-local ownership evidence, while stale-lock recovery atomically quarantines a claimed dead-owner lock and revalidates its owner and claim token before deletion.
 
 ## Module Map
 
@@ -235,8 +237,9 @@ Circuitikz support is intentionally constrained. The front-end settings now expo
 
 Current host evidence matters:
 
-- the local stable wrapper `obsidian-cli` on this machine exposes desktop/debug entrypoints such as `help`, `version`, `vaults`, `vault`, `doctor`, `native`, `gui`, and `debug`
-- the underlying official `obsidian` CLI already supports `commands` and `command id=<command-id>`, and it can list/execute plugin-registered commands
+- the optional `obsidian-cli` wrapper may expose desktop/debug entrypoints such as `native`, but it is not installed on the current Windows Study host; the stale npm package with the same name is not a safe substitute because it predates the official CLI and shadows the `obsidian` executable
+- the official `obsidian` CLI supports `commands`, `command id=<command-id>`, and `eval`; it can list/execute plugin-registered commands and invoke the maintainer bridge directly
+- `scripts/invoke-maintainer-cli-operation.js` prefers `obsidian-cli native eval` when a compatible wrapper exists, then falls back to official `obsidian eval` only when the wrapper command is unavailable; a present-but-failing wrapper is surfaced rather than masked
 - however, this is still only a **command trigger surface**, not a mature plugin integration protocol with typed arguments, result contracts, capability metadata, or stable automation semantics
 
 That means Notemd's future CLI story still cannot stop at "reuse sidebar buttons from the terminal". The real extraction targets are lower-level capabilities that already have partial independent shape:

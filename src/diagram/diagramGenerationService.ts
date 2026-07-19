@@ -293,9 +293,10 @@ export async function generateDiagramArtifact(
     const prompt = buildGenerationPrompt(plan, options);
 
     let rawResponse = await options.llmInvoker(prompt, markdown);
-    let parsedSpec = parseDiagramSpecResponse(rawResponse);
-    let spec = mergeSpecDefaults(parsedSpec, plan);
+    let spec: DiagramSpec;
     try {
+        const parsedSpec = parseDiagramSpecResponse(rawResponse);
+        spec = mergeSpecDefaults(parsedSpec, plan);
         assertValidDiagramSpec(spec);
     } catch (validationError: unknown) {
         const circuitFallback = resolveConstrainedCircuitFallback(markdown, plan, options);
@@ -312,9 +313,18 @@ export async function generateDiagramArtifact(
             + `\n\nCRITICAL: Your previous response used intent "${spec.intent}" but the required intent is "${options.requestedIntent}". This is incorrect. You MUST use "${options.requestedIntent}" as the diagram intent. Do not choose any other intent. Regenerate the DiagramSpec with the correct intent.`;
 
         rawResponse = await options.llmInvoker(retryPrompt, markdown);
-        parsedSpec = parseDiagramSpecResponse(rawResponse);
-        spec = mergeSpecDefaults(parsedSpec, plan);
-        assertValidDiagramSpec(spec);
+        try {
+            const parsedSpec = parseDiagramSpecResponse(rawResponse);
+            spec = mergeSpecDefaults(parsedSpec, plan);
+            assertValidDiagramSpec(spec);
+        } catch (retryValidationError: unknown) {
+            const circuitFallback = resolveConstrainedCircuitFallback(markdown, plan, options);
+            if (!circuitFallback) {
+                throw retryValidationError;
+            }
+            spec = circuitFallback;
+            assertValidDiagramSpec(spec);
+        }
 
         if (spec.intent !== options.requestedIntent) {
             const circuitFallback = resolveConstrainedCircuitFallback(markdown, plan, options);

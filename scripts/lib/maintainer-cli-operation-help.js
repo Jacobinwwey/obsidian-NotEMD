@@ -20,8 +20,9 @@ const OPERATION_HELP = {
   'diagram.generate': {
     summary: 'Generate a saved diagram artifact or Mermaid output.',
     required: ['sourcePath'],
-    optional: ['executionMode', 'requestedIntent', 'compatibilityMode', 'targetLanguage'],
-    exampleInput: '{"sourcePath":"index.zh-CN.md","executionMode":"save-artifact","requestedIntent":"erDiagram","targetLanguage":"en"}'
+    optional: ['executionMode', 'requestedIntent', 'requestedRenderTarget', 'compatibilityMode', 'targetLanguage'],
+    exampleInput: '{"sourcePath":"index.zh-CN.md","executionMode":"save-artifact","requestedIntent":"erDiagram","targetLanguage":"en"}',
+    additionalExamples: ['{"sourcePath":"circuits/common-source.md","executionMode":"save-artifact","requestedIntent":"circuit","requestedRenderTarget":"circuitikz","compatibilityMode":"best-fit","targetLanguage":"en"}']
   },
   'local-knowledge.inspect': {
     summary: 'Inspect task-scoped local knowledge retrieval inputs, paths, and context.',

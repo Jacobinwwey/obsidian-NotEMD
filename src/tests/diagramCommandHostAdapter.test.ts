@@ -237,6 +237,33 @@ describe('diagram command host adapter', () => {
         );
     });
 
+    test('passes an explicit CircuitikZ render target through the command boundary', async () => {
+        const { host, reporter } = createDiagramHost();
+        const file = { name: 'Topic.md', path: 'Notes/Topic.md' };
+
+        await runGenerateDiagramCommandWithHost(host as any, file as any, reporter as any, {
+            executionMode: 'save-artifact',
+            inputOverrides: {
+                requestedIntent: 'circuit',
+                requestedRenderTarget: 'circuitikz'
+            }
+        });
+
+        expect(host.executeArtifactCommand).toHaveBeenCalledWith(
+            file,
+            expect.objectContaining({
+                requestedIntent: 'circuit',
+                requestedRenderTarget: 'circuitikz'
+            }),
+            expect.anything(),
+            expect.anything(),
+            expect.anything(),
+            expect.anything(),
+            STRINGS_EN,
+            'save-artifact'
+        );
+    });
+
     test('preview wrapper supports saved circuitikz tex artifacts as source-only previews', async () => {
         const { host, reporter } = createDiagramHost();
         const file = { name: 'Inverter_diagram.tex', path: 'Notes/Inverter_diagram.tex' };
@@ -251,7 +278,7 @@ describe('diagram command host adapter', () => {
             artifact: expect.objectContaining({
                 target: 'circuitikz',
                 mimeType: 'text/x-tex',
-                sourceIntent: 'flowchart'
+                sourceIntent: 'circuit'
             })
         });
         expect(host.createDiagramHostAdapter().openPreview).toHaveBeenCalledWith(
@@ -259,6 +286,48 @@ describe('diagram command host adapter', () => {
                 target: 'circuitikz',
                 content: expect.stringContaining('\\begin{circuitikz}')
             }),
+            'Notes/Inverter_diagram.tex',
+            true
+        );
+    });
+
+    test('resolves generated circuitikz preview notes back to the typed source artifact', async () => {
+        const { host, diagramHost, reporter } = createDiagramHost();
+        const file = { name: 'Inverter_diagram.tex.md', path: 'Notes/Inverter_diagram.tex.md' };
+        host.readFile.mockResolvedValue([
+            '# Inverter diagram preview',
+            '',
+            '![[Inverter_diagram.tex.svg]]',
+            '',
+            'Source artifact: [[Inverter_diagram.tex]]',
+            'Render target: circuitikz'
+        ].join('\n'));
+        diagramHost.getFileByPath.mockImplementation((path: string) => ({ path }));
+        (diagramHost as any).readFile = jest.fn(async (loadedFile: { path: string }) => {
+            if (loadedFile.path === 'Notes/Inverter_diagram.tex') {
+                return '\\documentclass[border=8pt]{standalone}\n\\usepackage{circuitikz}\n\\begin{document}\n\\begin{circuitikz}\n\\draw (0,0) to[short] (1,0);\n\\end{circuitikz}\n\\end{document}';
+            }
+            if (loadedFile.path === 'Notes/Inverter_diagram.tex.svg') {
+                return '<svg><text>Inverter preview</text></svg>';
+            }
+            return '';
+        });
+
+        const result = await runPreviewDiagramCommandWithHost(host as any, file as any, reporter as any);
+
+        expect(result).toMatchObject({
+            kind: 'success',
+            artifact: expect.objectContaining({
+                target: 'circuitikz',
+                sourceIntent: 'circuit',
+                previewSvg: expect.objectContaining({
+                    content: expect.stringContaining('Inverter preview')
+                })
+            })
+        });
+        expect(diagramHost.openPreview).toHaveBeenCalledTimes(1);
+        expect(diagramHost.openPreview).toHaveBeenCalledWith(
+            expect.objectContaining({ target: 'circuitikz', sourceIntent: 'circuit' }),
             'Notes/Inverter_diagram.tex',
             true
         );

@@ -1,7 +1,7 @@
 import { TFile } from 'obsidian';
 import { formatI18n } from '../i18n';
 import { DiagramGenerationResult } from '../diagram/diagramGenerationService';
-import { DiagramIntent, isSupportedDiagramIntent } from '../diagram/types';
+import { DiagramIntent, isSupportedDiagramIntent, RenderTarget } from '../diagram/types';
 import { LocalKnowledgeRetrievalSummary } from '../localKnowledgeBase';
 import { RenderArtifact } from '../rendering/types';
 import { ensureSemanticFigureSvgStandaloneStyles } from '../rendering/renderers/editableHtmlSvgRenderer';
@@ -25,6 +25,7 @@ export type DiagramCommandExecutionMode = DiagramOperationExecutionMode;
 
 export interface DiagramCommandInputOverrides {
     requestedIntent?: DiagramIntent;
+    requestedRenderTarget?: RenderTarget;
     compatibilityMode?: 'best-fit' | 'legacy-mermaid';
     targetLanguage?: string;
 }
@@ -441,7 +442,7 @@ function buildCircuitikzPreviewArtifact(circuitikzContent: string): RenderArtifa
         target: 'circuitikz',
         content: circuitikzContent.trim(),
         mimeType: 'text/x-tex',
-        sourceIntent: 'flowchart'
+        sourceIntent: 'circuit'
     };
 }
 
@@ -719,6 +720,19 @@ function resolveEmbeddedSvgPath(markdownContent: string, sourcePath: string): st
     return joinVaultPath(getVaultPathDirectory(sourcePath), target);
 }
 
+function resolveEmbeddedSourceArtifactPath(markdownContent: string, sourcePath: string): string | null {
+    const sourceMatch = markdownContent.match(/Source artifact:\s*\[\[([^\]|#]+)(?:[|#][^\]]*)?\]\]/i);
+    const rawTarget = sourceMatch?.[1];
+    if (!rawTarget?.trim()) {
+        return null;
+    }
+
+    const target = decodeURIComponent(rawTarget.trim()).replace(/^\/+/, '');
+    return target.includes('/')
+        ? target
+        : joinVaultPath(getVaultPathDirectory(sourcePath), target);
+}
+
 async function readVaultTextFile(
     host: Pick<DiagramCommandHostAdapter, 'getFileByPath' | 'readFile'>,
     path: string
@@ -755,6 +769,34 @@ async function tryBuildSvgWrapperPreview(params: {
         artifactSaved: true,
         detectionLabel: 'Obsidian SVG preview wrapper'
     };
+}
+
+async function tryBuildLinkedSourceArtifactPreview(params: {
+    host: Pick<DiagramCommandHostAdapter, 'getFileByPath' | 'readFile'>;
+    sourceContent: string;
+    sourcePath: string;
+}): Promise<{ preview: DirectPreviewArtifactResult; sourcePath: string } | null> {
+    const sourceArtifactPath = resolveEmbeddedSourceArtifactPath(params.sourceContent, params.sourcePath);
+    if (!sourceArtifactPath) {
+        return null;
+    }
+
+    const artifactContent = await readVaultTextFile(params.host, sourceArtifactPath);
+    if (!artifactContent) {
+        return null;
+    }
+
+    try {
+        return {
+            preview: resolveDirectPreviewArtifact(artifactContent, sourceArtifactPath),
+            sourcePath: sourceArtifactPath
+        };
+    } catch (error) {
+        if (error instanceof MissingPreviewableDiagramArtifactError) {
+            return null;
+        }
+        throw error;
+    }
 }
 
 async function attachCompanionSvgPreview(params: {
@@ -801,47 +843,50 @@ export async function previewArtifactFromSavedPath(params: {
 
     const sourceContent = await params.host.readFile(savedFile);
     let directPreview: DirectPreviewArtifactResult;
+    let resolvedSourcePath = params.sourcePath;
     try {
-        directPreview = previewArtifactFromFile({
-            host: params.host,
-            sourceContent,
-            sourcePath: params.sourcePath,
-            artifactSavedOverride: params.artifactSavedOverride
-        });
+        directPreview = resolveDirectPreviewArtifact(sourceContent, params.sourcePath);
     } catch (error) {
         if (!(error instanceof MissingPreviewableDiagramArtifactError)) {
             throw error;
         }
 
-        const svgWrapperPreview = await tryBuildSvgWrapperPreview({
+        const linkedSourcePreview = await tryBuildLinkedSourceArtifactPreview({
             host: params.host,
             sourceContent,
             sourcePath: params.sourcePath
         });
-        if (!svgWrapperPreview) {
-            throw error;
+        if (linkedSourcePreview) {
+            directPreview = {
+                ...linkedSourcePreview.preview,
+                detectionLabel: `${linkedSourcePreview.preview.detectionLabel} via Obsidian preview wrapper`
+            };
+            resolvedSourcePath = linkedSourcePreview.sourcePath;
+        } else {
+            const svgWrapperPreview = await tryBuildSvgWrapperPreview({
+                host: params.host,
+                sourceContent,
+                sourcePath: params.sourcePath
+            });
+            if (!svgWrapperPreview) {
+                throw error;
+            }
+            directPreview = svgWrapperPreview;
         }
-
-        directPreview = svgWrapperPreview;
-        params.host.openPreview(directPreview.artifact, params.sourcePath, true);
     }
 
     const artifact = await attachCompanionSvgPreview({
         host: params.host,
         artifact: directPreview.artifact,
-        sourcePath: params.sourcePath
+        sourcePath: resolvedSourcePath
     });
-    if (artifact !== directPreview.artifact) {
-        const artifactSaved = params.artifactSavedOverride ?? directPreview.artifactSaved;
-        params.host.openPreview(artifact, params.sourcePath, artifactSaved);
-        return {
-            ...directPreview,
-            artifact,
-            artifactSaved
-        };
-    }
-
-    return directPreview;
+    const artifactSaved = params.artifactSavedOverride ?? directPreview.artifactSaved;
+    params.host.openPreview(artifact, resolvedSourcePath, artifactSaved);
+    return {
+        ...directPreview,
+        artifact,
+        artifactSaved
+    };
 }
 
 async function previewLocalGeneratedDiagramArtifact(params: {
@@ -943,6 +988,7 @@ export async function runGenerateDiagramCommandWithHost(
             settings: host.getSettings(),
             targetLanguage: host.getTaskLanguageCode('summarizeToMermaid'),
             requestedIntentOverride: options.inputOverrides?.requestedIntent,
+            requestedRenderTargetOverride: options.inputOverrides?.requestedRenderTarget,
             compatibilityModeOverride: options.inputOverrides?.compatibilityMode,
             targetLanguageOverride: options.inputOverrides?.targetLanguage
         });
@@ -1064,15 +1110,36 @@ export async function runPreviewDiagramCommandWithHost(
                 throw error;
             }
 
-            directPreview = await tryBuildSvgWrapperPreview({
+            const linkedSourcePreview = await tryBuildLinkedSourceArtifactPreview({
                 host: diagramHost,
                 sourceContent: fileContent,
                 sourcePath: file.path
             });
 
-            if (directPreview) {
-                diagramHost.openPreview(directPreview.artifact, file.path, true);
+            if (linkedSourcePreview) {
+                const artifact = await attachCompanionSvgPreview({
+                    host: diagramHost,
+                    artifact: linkedSourcePreview.preview.artifact,
+                    sourcePath: linkedSourcePreview.sourcePath
+                });
+                directPreview = {
+                    ...linkedSourcePreview.preview,
+                    artifact,
+                    artifactSaved: true,
+                    detectionLabel: `${linkedSourcePreview.preview.detectionLabel} via Obsidian preview wrapper`
+                };
+                diagramHost.openPreview(artifact, linkedSourcePreview.sourcePath, true);
             } else {
+                directPreview = await tryBuildSvgWrapperPreview({
+                    host: diagramHost,
+                    sourceContent: fileContent,
+                    sourcePath: file.path
+                });
+            }
+
+            if (directPreview && !linkedSourcePreview) {
+                diagramHost.openPreview(directPreview.artifact, file.path, true);
+            } else if (!directPreview) {
                 directPreview = await previewLocalGeneratedDiagramArtifact({
                     host: diagramHost,
                     file,

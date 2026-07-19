@@ -214,25 +214,46 @@ function createCmosNor2Spec(): CircuitSpec {
 }
 
 describe('circuitikz exporter', () => {
+    test('emits standalone LaTeX documents for every supported golden template', () => {
+        const specs = [
+            createCommonSourceSpec(),
+            createCmosInverterSpec(),
+            createCmosBufferSpec(),
+            createCmosTransmissionGateSpec(),
+            createCmosNand2Spec(),
+            createCmosNor2Spec()
+        ];
+
+        for (const spec of specs) {
+            const output = exportCircuitSpecToCircuitikz(spec);
+            expect(output.startsWith('\\documentclass[border=8pt]{standalone}\n\\usepackage{circuitikz}\n')).toBe(true);
+            expect(output).toContain('\\begin{document}');
+            expect(output).toContain('\\end{document}');
+        }
+    });
+
     test('validates and exports the common-source golden reference template deterministically', () => {
         const spec = createCommonSourceSpec();
 
         expect(validateCircuitSpec(spec)).toEqual({ valid: true, errors: [] });
-        expect(exportCircuitSpecToCircuitikz(spec)).toBe(`\\usepackage{circuitikz}
+        expect(exportCircuitSpecToCircuitikz(spec)).toBe(`\\documentclass[border=8pt]{standalone}
+\\usepackage{circuitikz}
 \\begin{document}
-\\begin{circuitikz}[american voltages]
+\\begin{circuitikz}[american voltages, line width=0.5pt, font=\\small]
 \\draw
   (3,5) node[vcc]{$V_{DD}$}
-  to [R, l=$R_D$] (3,3)
-  to [short, *-o] (5,3) node[right]{$v_{out}$}
+  to [R, l=$R_D$] (3,3);
+\\draw
+  (3,3) to [short, *-o] (5,3) node[right]{$v_{out}$};
+\\draw
   (3,3) to [short] (3,2.2)
-  node[nmos, anchor=D] (M1) {$M_1$}
+  node[nmos, anchor=D] (M1) {$M_1$};
+\\draw
   (M1.S) to [short] (3,0.5)
-  node[ground]{}
+  node[ground]{};
+\\draw
   (M1.G) to [short, -o] (0.8,2.2)
   node[left]{$v_{in}$};
-\\draw
-  (3,0.5) node[below right]{$S$};
 \\end{circuitikz}
 \\end{document}
 `);

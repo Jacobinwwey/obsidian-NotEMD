@@ -716,14 +716,15 @@ _Kali terakhir disegarkan untuk tag keluaran `1.9.3` pada 2026-06-24. Tarikh com
 </a>
 
 <!-- notemd-settings-discovery-guide -->
-## Penemuan tetapan, sejarah diagram, dan folder kumpulan yang selamat
+## Penemuan tetapan, sejarah diagram, CircuitikZ, dan folder kumpulan yang selamat
 
 Halaman tetapan Notemd menyediakan ciri carian kabur, navigasi kategori yang luas, serta senarai kegemaran untuk setiap tetapan yang disimpan untuk Vault semasa.
 
 - Sejarah diagram disimpan pada skop Vault, dikelaskan mengikut urutan terbaru dahulu, boleh dicari dan dipaparkan secara berhalaman dalam kumpulan 20. Memadam rekod sejarah tidak akan memadamkan fail yang telah dijana.
-- Ciri eksport pratonton diagram dengan kawalan PPI mempengaruhi ketajaman fail PNG dan PDF. SVG pula kekal berbentuk vektor.
+- Eksport pratonton diagram menggunakan PPI mengawal ketajaman fail PNG dan PDF. SVG pula kekal berbentuk vektor.
 - Jenis diagram kegemaran dan format sumber kegemaran merupakan pilihan yang berasingan.
-- Ciri pemilihan fail kumpulan lanjutan membolehkan pengguna menyimpan profil pemilihan dan melihat pratonton peraturan.
-- Folder sasaran kumpulan yang hilang boleh dibuat selepas pengesahan, dengan pilihan untuk menyimpan tetapan pembuatan automatik bagi folder yang hilang pada masa akan datang.
-- Folder yang sudah wujud dan tidak kosong memerlukan satu pengesahan sebelum keseluruhan fail kumpulan diproses, bukan satu pengesahan untuk setiap fail yang dijana.
+- Pengguna desktop boleh membuka persekitaran kompilasi asli CircuitikZ yang tersedia secara pilihan untuk menggunakan semula alat Tectonic/pdflatex sistem, memilih kompiler khusus, atau memasang runtime Tectonic yang diuruskan secara eksplisit. Pratonton, SVG, PNG, dan eksport PDF pratonton tidak memerlukan LaTeX.
+- Pemilihan fail kumpulan lanjutan membolehkan pengguna menggunakan profil pemilihan yang telah disimpan serta melihat pratonton peraturan.
+- Folder sasaran kumpulan yang hilang boleh dibuat selepas pengesahan, dengan pilihan untuk menyimpan pengesahan automatik bagi folder yang hilang pada masa akan datang.
+- Folder yang sudah wujud dan tidak kosong memerlukan satu pengesahan sebelum keseluruhan kumpulan diproses, bukan satu pengesahan untuk setiap fail yang dijana.
 - Mod pembangun memaparkan maklumat diagnostik penyedia serta alat penyelesaian masalah lanjutan.

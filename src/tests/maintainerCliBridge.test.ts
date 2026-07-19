@@ -141,6 +141,7 @@ describe('maintainer CLI bridge', () => {
                 sourcePath: 'docs/index.zh-CN.md',
                 executionMode: 'save-mermaid',
                 requestedIntent: 'erDiagram',
+                requestedRenderTarget: 'circuitikz',
                 compatibilityMode: 'legacy-mermaid',
                 targetLanguage: 'en'
             }
@@ -152,6 +153,7 @@ describe('maintainer CLI bridge', () => {
                 executionMode: 'save-mermaid',
                 inputOverrides: {
                     requestedIntent: 'erDiagram',
+                    requestedRenderTarget: 'circuitikz',
                     compatibilityMode: 'legacy-mermaid',
                     targetLanguage: 'en'
                 }

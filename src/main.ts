@@ -14,6 +14,7 @@ import type { DiagramHistoryEntry } from './diagram/history/diagramHistoryReposi
 import { collectDiagramHistoryArtifactPaths } from './diagram/history/diagramHistoryActions';
 import type { DiagramHistoryStore } from './ui/DiagramHistoryView';
 import { DiagramHistoryModal } from './ui/DiagramHistoryModal';
+import { CircuitikzEnvironmentModal } from './ui/CircuitikzEnvironmentModal';
 import {
     canonicalizeProviderConfigs,
     resolveCanonicalProviderName
@@ -105,6 +106,7 @@ import {
     runPreviewDiagramCommandWithHost
 } from './operations/diagramCommandHostAdapter';
 import { stopAllServers } from './slideExport/localServer';
+import { isDesktopApp } from './slideExport/platformUtils';
 import type { SlideExportConfig, SlidevExportSource } from './slideExport/types';
 import {
     DiagramCommandExecutionHost,
@@ -279,6 +281,14 @@ export default class NotemdPlugin extends Plugin {
 
     public openDiagramHistory(): void {
         new DiagramHistoryModal(this.app, this.createDiagramHistoryStore(), this.settings.uiLocale).open();
+    }
+
+    public openCircuitikzEnvironment(): void {
+        new CircuitikzEnvironmentModal(this.app, {
+            settings: this.settings,
+            uiLocale: this.settings.uiLocale,
+            isDesktop: isDesktopApp()
+        }).open();
     }
 
     private openDiagramPreviewModal(artifact: RenderArtifact, sourcePath: string, artifactSaved = false, existingHistoryEntryId?: string) {
@@ -812,6 +822,12 @@ export default class NotemdPlugin extends Plugin {
             id: 'notemd-open-diagram-history',
             name: uiStrings.commands.openDiagramHistory,
             callback: () => this.openDiagramHistory()
+        });
+
+        this.addCommand({
+            id: 'notemd-manage-circuitikz-environment',
+            name: uiStrings.commands.manageCircuitikzEnvironment,
+            callback: () => this.openCircuitikzEnvironment()
         });
 
         // Legacy compatibility aliases remain registered until downstream workflows

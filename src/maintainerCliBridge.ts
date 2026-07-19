@@ -247,11 +247,17 @@ function buildDiagramCommandOptions(input: Record<string, unknown>): DiagramComm
     ) || 'save-artifact';
     const inputOverrides: DiagramCommandInputOverrides = {};
     const requestedIntent = optionalString(input, 'requestedIntent');
+    const requestedRenderTarget = optionalEnum(input, 'requestedRenderTarget', [
+        'mermaid', 'json-canvas', 'vega-lite', 'html', 'editable-html-svg', 'drawio', 'drawnix', 'circuitikz'
+    ] as const);
     const compatibilityMode = optionalEnum(input, 'compatibilityMode', ['best-fit', 'legacy-mermaid'] as const);
     const targetLanguage = optionalString(input, 'targetLanguage');
 
     if (requestedIntent) {
         inputOverrides.requestedIntent = requestedIntent as DiagramCommandInputOverrides['requestedIntent'];
+    }
+    if (requestedRenderTarget) {
+        inputOverrides.requestedRenderTarget = requestedRenderTarget;
     }
     if (compatibilityMode) {
         inputOverrides.compatibilityMode = compatibilityMode;

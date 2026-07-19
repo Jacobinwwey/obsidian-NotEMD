@@ -216,6 +216,11 @@ export interface NotemdSettings {
     preferredDiagramIntent?: string;
     preferredDiagramRenderTarget?: RenderTarget;
     diagramPreviewExportPpi: number;
+    circuitikzCompilerPreference: 'auto' | 'managed' | 'system' | 'custom';
+    circuitikzCustomCompilerKind: 'tectonic' | 'pdflatex';
+    circuitikzCustomCompilerPath: string;
+    circuitikzManagedRuntimeRoot: string;
+    circuitikzCompileTimeoutMs: number;
     favoriteSettingIds: string[];
     diagramHistoryRetentionLimit: number;
     diagramHistoryEntries: DiagramHistoryEntry[];

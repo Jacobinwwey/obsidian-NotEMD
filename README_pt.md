@@ -722,14 +722,15 @@ _Atualizado pela última vez para a tag de release `1.9.3` em 2026-06-24. Data d
 </a>
 
 <!-- notemd-settings-discovery-guide -->
-## Descoberta de configurações, histórico de diagramas e pastas em lote seguras
+## Descoberta de configurações, histórico de diagramas, CircuitikZ e pastas em lote seguras
 
 A página de configurações do Notemd oferece busca por semelhança, navegação por grandes categorias e favoritos por configuração, armazenados para o Vault atual.
 
-- O histórico de diagramas é armazenado no escopo do Vault, organizado do mais recente para o mais antigo, sendo possível pesquisá‑lo e visualizá‑lo em páginas com 20 itens por página. A remoção de um registro do histórico não exclui os arquivos gerados.
+- O histórico de diagramas é armazenado no escopo do Vault, ordenado do mais recente para o mais antigo, sendo possível pesquisá‑lo e visualizá‑lo em páginas de 20 itens cada. A remoção de um registro do histórico não exclui os arquivos gerados.
 - A exportação da pré‑visualização do diagrama permite controlar a nitidez dos arquivos PNG e PDF por meio do PPI. O SVG permanece em formato vetorial.
 - O tipo de diagrama preferido e o formato de origem preferido são opções separadas.
-- A seleção avançada de arquivos em lote permite usar perfis de seleção salvos e visualizações de regras.
-- Uma pasta de destino em lote ausente pode ser criada após confirmação, com a opção de lembrar a criação automática para pastas faltantes futuras.
+- Os usuários de desktop podem abrir o ambiente de compilação nativo opcional CircuitikZ para reutilizar o Tectonic/pdflatex do sistema, selecionar um compilador personalizado ou instalar explicitamente a versão gerenciada do Tectonic. As exportações de pré‑visualização, SVG, PNG e PDF não exigem LaTeX.
+- A seleção avançada de arquivos em lote permite usar perfis de seleção salvos e visualizar regras.
+- Uma pasta de destino em lote ausente pode ser criada após confirmação, com a opção de lembrar a criação automática para pastas ausentes futuras.
 - Uma pasta existente e não vazia requer uma confirmação antes de processar todo o lote, nunca uma confirmação por arquivo gerado.
 - O modo desenvolvedor exibe diagnósticos do provedor e controles avançados de solução de problemas.

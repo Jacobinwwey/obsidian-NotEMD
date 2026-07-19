@@ -717,14 +717,15 @@ _Lần làm mới gần nhất cho thẻ phát hành `1.9.3` vào 2026-06-24. Ng
 </a>
 
 <!-- notemd-settings-discovery-guide -->
-## Khám phá cài đặt, lịch sử sơ đồ và các thư mục xử lý theo nhóm an toàn
+## Khám phá cài đặt, lịch sử sơ đồ, CircuitikZ và các thư mục xử lý theo nhóm an toàn
 
 Trang cài đặt của Notemd cung cấp chức năng tìm kiếm mơ hồ, hệ thống điều hướng theo các danh mục lớn, cùng tính năng lưu các mục yêu thích cho từng cài đặt trong Vault hiện tại.
 
 - Lịch sử sơ đồ được lưu ở cấp độ Vault, được sắp xếp theo thứ tự mới nhất trước, có thể tìm kiếm và hiển thị theo từng nhóm 20 mục. Việc xóa một bản ghi lịch sử không làm xóa các tập tin đã được tạo ra.
 - Tùy chọn PPI khi xuất bản trước sơ đồ giúp kiểm soát độ rõ nét của các tập tin PNG và PDF. Còn định dạng SVG vẫn giữ nguyên tính chất vector.
 - Loại sơ đồ ưu tiên và định dạng nguồn ưu tiên là hai tùy chọn riêng biệt.
-- Chế độ chọn tập tin theo nhóm nâng cao cho phép sử dụng các thiết lập đã lưu và xem trước các quy tắc xử lý.
-- Nếu thư mục đích dành cho việc xử lý theo nhóm chưa tồn tại, người dùng có thể tạo nó sau khi xác nhận; đồng thời có tùy chọn để hệ thống tự động tạo thư mục này mỗi khi gặp trường hợp tương tự trong tương lai.
-- Đối với một thư mục đã tồn tại và không trống, chỉ cần một lần xác nhận cho toàn bộ các tập tin trong thư mục đó, chứ không phải một lần xác nhận cho từng tập tin được tạo ra.
+- Người dùng máy tính để bàn có thể mở môi trường biên dịch gốc CircuitikZ (nếu có) để tái sử dụng các công cụ Tectonic/pdflatex của hệ thống, chọn công cụ biên dịch tùy chỉnh, hoặc cài đặt trực tiếp phiên bản Tectonic runtime được quản lý. Các chức năng xem trước, xuất SVG, PNG và PDF không yêu cầu sử dụng LaTeX.
+- Tính năng chọn tập tin xử lý theo nhóm nâng cao cho phép lưu các thiết lập chọn lọc đã tạo và xem trước các quy tắc áp dụng.
+- Nếu thư mục đích dành cho việc xử lý theo nhóm chưa tồn tại, người dùng có thể tạo nó sau khi xác nhận; đồng thời có tùy chọn để hệ thống tự động tạo thư mục đó mỗi khi gặp trường hợp tương tự trong tương lai.
+- Đối với các thư mục đã tồn tại và không trống, chỉ cần xác nhận một lần cho toàn bộ nhóm tập tin, chứ không phải xác nhận riêng cho từng tập tin được tạo ra.
 - Chế độ nhà phát triển giúp hiển thị thông tin chẩn đoán từ nhà cung cấp và các công cụ khắc phục sự cố nâng cao.

@@ -14,6 +14,9 @@ This document summarizes the major functional and architectural changes implemen
 - Hardened the artifact CLI for npm 11 argument rewriting on Windows by accepting the ordered positional fallback shape, and made the circuitikz SVG canvas background inline white so standalone viewers do not show transparent SVGs as black.
 - Kept the circuit path topology-first: the prompt asks for structured `CircuitSpec`, validation rejects free-form/non-circuit payloads, and the preview companion is documented as review evidence rather than a LaTeX/TikZJax compile result.
 - Updated the GitHub Pages diagram documentation and maintainer runbooks. The MDX synchronization policy is explicit: do not blindly commit every generated locale file for small feature increments; commit localized MDX only when published route/frontmatter/heading or visible behavior parity requires it.
+- Added an optional managed CircuitikZ desktop runtime. Notemd can discover trusted system Tectonic/pdfLaTeX executables, install or repair a pinned Tectonic build outside the Vault with integrity checks, remove only the managed installation, and report smoke-test capabilities while dependency-free previews remain available on mobile.
+- Fixed long diagram-history drawers so the flex container can shrink, the history body scrolls within the preview shell, and overscroll stays contained.
+- Updated the maintainer CLI bridge to prefer `obsidian-cli native eval` when that wrapper is installed and fall back to the official `obsidian eval` command only when the wrapper command is unavailable.
 
 ### 中文
 
@@ -23,6 +26,9 @@ This document summarizes the major functional and architectural changes implemen
 - 加固 artifact CLI，使其兼容 Windows 上 npm 11 参数重写后的有序位置参数形态；同时将 circuitikz SVG 画布背景改为 inline 白色，避免 standalone viewer 把透明 SVG 显示成黑底。
 - 电路路径继续保持 topology-first：prompt 要求结构化 `CircuitSpec`，校验拒绝自由形式/非电路 payload，并且文档明确 preview companion 是审查证据，不是 LaTeX/TikZJax 编译结果。
 - 更新 GitHub Pages 图表文档与维护者 runbook。MDX 同步策略已明确：小功能增量不要盲目提交所有 generated locale 文件；只有公开 route/frontmatter/heading 或可见行为需要对齐时，才提交对应 localized MDX。
+- 新增可选的 CircuitikZ 桌面端托管运行时。Notemd 可以发现受信任的系统 Tectonic/pdfLaTeX 可执行文件，在 Vault 之外通过完整性校验安装或修复固定版本的 Tectonic，仅删除托管安装，并报告 smoke-test 能力；移动端仍可使用零依赖预览。
+- 修复较长图形历史抽屉的滚动：flex 容器现在可以收缩，历史正文在预览 shell 内滚动，并限制 overscroll 外溢。
+- 更新维护者 CLI bridge：安装了 `obsidian-cli` wrapper 时优先使用 `obsidian-cli native eval`；仅当 wrapper 命令不可用时，回退到官方 `obsidian eval` 命令。
 
 ---
 

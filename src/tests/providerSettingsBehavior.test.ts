@@ -581,6 +581,7 @@ function createPlugin(overrides: Partial<any> = {}) {
         app: mockApp,
         settings,
         saveSettings: jest.fn().mockResolvedValue(undefined),
+        openCircuitikzEnvironment: jest.fn(),
         refreshLocalizedUi: jest.fn().mockResolvedValue(undefined),
         resetSettings: jest.fn().mockResolvedValue(undefined),
         ...overrides
@@ -631,6 +632,43 @@ describe('provider settings behavior', () => {
         expect(plugin.settings.preferredDiagramIntent).toBe('circuit');
         expect(plugin.settings.preferredDiagramRenderTarget).toBe('circuitikz');
         expect(plugin.saveSettings).toHaveBeenCalledTimes(2);
+    });
+
+    test('exposes searchable CircuitikZ environment management and compiler preferences', async () => {
+        const plugin = createPlugin();
+        plugin.settings.enableDeveloperMode = false;
+
+        const tab = new NotemdSettingTab(mockApp as any, plugin as any) as any;
+        tab.display();
+
+        const managementSetting = findSettingByName(tab.containerEl, 'CircuitikZ native compile environment');
+        const preferenceSetting = findSettingByName(tab.containerEl, 'CircuitikZ compiler preference');
+        const customKindSetting = findSettingByName(tab.containerEl, 'Custom compiler type');
+
+        expect(managementSetting).toBeDefined();
+        expect(preferenceSetting).toBeDefined();
+        expect(customKindSetting).toBeDefined();
+
+        const manageButton = managementSetting?.controls.find(control => control.kind === 'button') as MockButtonControl | undefined;
+        const preference = preferenceSetting?.controls.find(control => control.kind === 'dropdown') as MockDropdownControl | undefined;
+        const customKind = customKindSetting?.controls.find(control => control.kind === 'dropdown') as MockDropdownControl | undefined;
+
+        expect(manageButton?.text).toBe('Manage environment');
+        expect(preference?.options).toEqual(expect.objectContaining({
+            auto: 'Automatic (recommended)',
+            managed: 'Notemd managed Tectonic',
+            system: 'System compiler',
+            custom: 'Custom executable'
+        }));
+        expect(customKind?.options).toEqual(expect.objectContaining({ tectonic: 'Tectonic', pdflatex: 'pdfLaTeX' }));
+
+        await manageButton?.click();
+        await preference?.onChangeHandler?.('managed');
+        await customKind?.onChangeHandler?.('tectonic');
+
+        expect(plugin.openCircuitikzEnvironment).toHaveBeenCalledTimes(1);
+        expect(plugin.settings.circuitikzCompilerPreference).toBe('managed');
+        expect(plugin.settings.circuitikzCustomCompilerKind).toBe('tectonic');
     });
 
     test('keeps CircuitikZ settings compatible when the diagram type changes', async () => {

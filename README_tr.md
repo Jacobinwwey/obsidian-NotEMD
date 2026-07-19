@@ -715,14 +715,15 @@ _`1.9.3` sürüm etiketi için son yenileme tarihi: 2026-06-24. En son commit ta
 </a>
 
 <!-- notemd-settings-discovery-guide -->
-## Ayarların keşfi, diyagram geçmişi ve güvenli toplu işleme klasörleri
+## Ayarların keşfi, diyagram geçmişi, CircuitikZ ve güvenli toplu işleme klasörleri
 
-Notemd ayarlar sayfası, bulanık arama özelliği, geniş kategori navigasyonu ve mevcut Vault için her bir ayara ait favori seçenekler sunar.
+Notemd ayarlar sayfası, bulanık arama özelliği, geniş kategori navigasyonu ve mevcut Vault için her bir ayara ait favorileri saklar.
 
 - Diyagram geçmişi Vault düzeyinde saklanır; en yeni olanlardan başlayarak sıralanır, aranabilir ve 20’şerli gruplar halinde sayfalandırılır. Bir geçmiş kaydının silinmesi, oluşturulan dosyaların silinmesine neden olmaz.
-- Diyagram önizleme dışa aktarımında PPI ayarı, PNG ve PDF dosyalarının netliğini kontrol eder. SVG dosyaları ise vektör tabanlı kalır.
-- Tercih edilen diyagram türü ile tercih edilen kaynak formatı ayrı ayrı seçilir.
+- Diyagram önizleme dışa aktarımında PPI ayarı, PNG ve PDF dosyalarının netliğini kontrol eder. SVG ise vektör tabanlı kalır.
+- Tercih edilen diyagram türü ile tercih edilen kaynak formatı ayrı ayrı seçeneklerdir.
+- Masaüstü kullanıcıları, sistemdeki Tectonic/pdflatex’i yeniden kullanmak, özel bir derleyici seçmek veya sabitlenmiş yönetilen Tectonic çalışma zamanını açıkça yüklemek amacıyla isteğe bağlı CircuitikZ yerel derleme ortamını açabilirler. Önizleme, SVG, PNG ve önizleme PDF dışa aktarımları için LaTeX gerekmez.
 - Gelişmiş toplu dosya seçimi özelliği, kaydedilmiş seçim profillerini ve kural önizlemelerini mümkün kılar.
 - Eksik olan toplu işleme hedef klasörü, onay alındıktan sonra oluşturulabilir; gelecekteki eksik klasörler için otomatik oluşturma özelliği de seçilebilir.
-- Mevcut ve boş olmayan bir klasör için tüm toplu işlem yapılabilmesi için tek bir onay yeterlidir; her oluşturulan dosya için ayrı ayrı onay gerekmez.
-- Geliştirici modu, sağlayıcıya ait teşhis bilgilerini ve gelişmiş sorun giderme araçlarını gösterir.
+- Mevcut ve boş olmayan bir klasör için tüm toplu işlem için tek bir onay yeterlidir; her oluşturulan dosya için ayrı ayrı onay gerekmez.
+- Geliştirici modu, sağlayıcı teşhis bilgilerini ve gelişmiş sorun giderme araçlarını gösterir.

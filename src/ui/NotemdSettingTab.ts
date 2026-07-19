@@ -2544,6 +2544,83 @@ export class NotemdSettingTab extends PluginSettingTab {
                 }));
 
         this.createCatalogSetting(containerEl)
+            .setName(experimentalDiagramI18n.nativeEnvironmentName)
+            .setDesc(experimentalDiagramI18n.nativeEnvironmentDesc)
+            .addButton(button => button
+                .setButtonText(experimentalDiagramI18n.nativeEnvironmentButton)
+                .setCta()
+                .onClick(() => this.plugin.openCircuitikzEnvironment()));
+
+        this.createCatalogSetting(containerEl)
+            .setName(experimentalDiagramI18n.compilerPreferenceName)
+            .setDesc(experimentalDiagramI18n.compilerPreferenceDesc)
+            .addDropdown(dropdown => dropdown
+                .addOption('auto', experimentalDiagramI18n.compilerPreferenceAuto)
+                .addOption('managed', experimentalDiagramI18n.compilerPreferenceManaged)
+                .addOption('system', experimentalDiagramI18n.compilerPreferenceSystem)
+                .addOption('custom', experimentalDiagramI18n.compilerPreferenceCustom)
+                .setValue(this.plugin.settings.circuitikzCompilerPreference)
+                .onChange(async (value: 'auto' | 'managed' | 'system' | 'custom') => {
+                    this.plugin.settings.circuitikzCompilerPreference = value;
+                    await this.plugin.saveSettings();
+                }));
+
+        this.createCatalogSetting(containerEl)
+            .setName(experimentalDiagramI18n.customCompilerKindName)
+            .setDesc(experimentalDiagramI18n.customCompilerKindDesc)
+            .addDropdown(dropdown => dropdown
+                .addOption('tectonic', experimentalDiagramI18n.customCompilerKindTectonic)
+                .addOption('pdflatex', experimentalDiagramI18n.customCompilerKindPdflatex)
+                .setValue(this.plugin.settings.circuitikzCustomCompilerKind)
+                .onChange(async (value: 'tectonic' | 'pdflatex') => {
+                    this.plugin.settings.circuitikzCustomCompilerKind = value;
+                    await this.plugin.saveSettings();
+                }));
+
+        this.createCatalogSetting(containerEl)
+            .setName(experimentalDiagramI18n.customCompilerPathName)
+            .setDesc(experimentalDiagramI18n.customCompilerPathDesc)
+            .addText(text => text
+                .setPlaceholder(experimentalDiagramI18n.customCompilerPathPlaceholder)
+                .setValue(this.plugin.settings.circuitikzCustomCompilerPath)
+                .onChange(async value => {
+                    this.plugin.settings.circuitikzCustomCompilerPath = value.trim();
+                    await this.plugin.saveSettings();
+                }));
+
+        this.createCatalogSetting(containerEl)
+            .setName(experimentalDiagramI18n.managedRuntimeRootName)
+            .setDesc(experimentalDiagramI18n.managedRuntimeRootDesc)
+            .addText(text => text
+                .setPlaceholder(experimentalDiagramI18n.managedRuntimeRootPlaceholder)
+                .setValue(this.plugin.settings.circuitikzManagedRuntimeRoot)
+                .onChange(async value => {
+                    this.plugin.settings.circuitikzManagedRuntimeRoot = value.trim();
+                    await this.plugin.saveSettings();
+                }));
+
+        this.addDeferredNumberSetting(
+            this.createCatalogSetting(containerEl)
+                .setName(experimentalDiagramI18n.compileTimeoutName)
+                .setDesc(experimentalDiagramI18n.compileTimeoutDesc),
+            {
+                placeholder: String(DEFAULT_SETTINGS.circuitikzCompileTimeoutMs / 1000),
+                value: Math.round(this.plugin.settings.circuitikzCompileTimeoutMs / 1000),
+                onCommit: async rawValue => {
+                    const seconds = this.sanitizePositiveInteger(
+                        rawValue,
+                        DEFAULT_SETTINGS.circuitikzCompileTimeoutMs / 1000,
+                        5,
+                        600
+                    );
+                    this.plugin.settings.circuitikzCompileTimeoutMs = seconds * 1000;
+                    await this.plugin.saveSettings();
+                    return String(seconds);
+                }
+            }
+        );
+
+        this.createCatalogSetting(containerEl)
             .setName(i18n.settings.developer.modeName)
             .setDesc(i18n.settings.developer.modeDesc)
             .addToggle(toggle => toggle

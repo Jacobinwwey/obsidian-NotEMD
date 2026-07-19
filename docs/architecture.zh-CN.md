@@ -208,9 +208,11 @@ flowchart LR
 | `editable-html-svg` | 带语义 inline SVG 的自包含 HTML | 不依赖外部编辑器 runtime |
 | `drawio` | `.drawio` XML 加 SVG/MD review companion | 插件内不嵌入 diagrams.net runtime |
 | `drawnix` | `.drawnix` JSON 子集加 SVG/MD review companion | 插件内不嵌入 Drawnix 或 Plait runtime |
-| `circuitikz` | 经过验证的 `.tex` 源文件加 SVG/MD review companion | 不捆绑 LaTeX 或 TikZJax runtime |
+| `circuitikz` | 经过验证的 `.tex` 源文件加 SVG/MD review companion | 预览/导出零依赖；桌面端可选本机编译器或托管 Tectonic |
 
-Circuitikz 支持仍然是受约束的。前端设置现在无需开启 Developer mode 就会显示 `Circuit (Circuitikz)` 首选图表类型与 `Circuitikz + SVG preview` 首选渲染目标，但 renderer 仍只接受经过验证的 `DiagramSpec(intent: "circuit", circuitSpec)`。它会写出确定性的 circuitikz TeX 和可审阅的 SVG companion；真实 LaTeX/TikZJax 编译证据仍属于可选的维护者 smoke check。
+Circuitikz 支持仍然是受约束的。前端设置无需开启 Developer mode 就会显示 `Circuit (Circuitikz)` 首选图表类型与 `Circuitikz + SVG preview` 首选渲染目标，但 renderer 只接受经过验证的 `DiagramSpec(intent: "circuit", circuitSpec)`。它会写出确定性的 circuitikz TeX 和可审阅的 SVG companion。桌面用户随后可以复用自定义/系统编译器，或在 Vault 外显式安装固定版本 Tectonic 0.16.9，用于编译诊断、原生 PDF 证据与受保护的修复验收；移动端与常规预览/导出不会加载桌面进程代码。
+
+托管运行时边界按所有权而不是目录名称判断。下载资产经过主机白名单、体积上限和 checksum 校验，解压拒绝链接与路径穿越，在 staging 中通过 smoke 后才在文件系统锁内激活。已有路径必须在规范化 `realpath` 解析后仍位于配置的运行时根目录内。删除只接受有效 Notemd pointer 或安装目录内所有权证据；过期锁恢复会先把已声明的死亡 owner 锁原子隔离，再复核 owner 与 claim token 后删除。
 
 ## 模块地图
 
@@ -235,8 +237,9 @@ Circuitikz 支持仍然是受约束的。前端设置现在无需开启 Develope
 
 当前宿主事实必须明确写清：
 
-- 本机上的稳定包装器 `obsidian-cli` 暴露的是 `help`、`version`、`vaults`、`vault`、`doctor`、`native`、`gui`、`debug` 等桌面/调试入口
-- 底层官方 `obsidian` CLI 实际已经支持 `commands` 与 `command id=<command-id>`，并且可以列出/执行插件注册命令
+- 可选的 `obsidian-cli` 包装器可能提供 `native` 等桌面/调试入口，但当前 Windows Study 主机并未安装；npm 上同名的旧包早于官方 CLI，且会遮蔽 `obsidian` 可执行文件，因此不能作为安全替代品
+- 官方 `obsidian` CLI 已支持 `commands`、`command id=<command-id>` 与 `eval`，能够列出/执行插件命令，也可直接调用 maintainer bridge
+- `scripts/invoke-maintainer-cli-operation.js` 在兼容包装器存在时优先使用 `obsidian-cli native eval`，只在命令不存在时回退到官方 `obsidian eval`；如果包装器已存在但执行失败，则原样暴露失败，不会静默掩盖
 - 但这仍然只是**命令触发表面**，不是成熟的插件集成协议：它还缺少类型化参数、返回结果契约、能力元数据和稳定自动化语义
 
 因此，Notemd 的未来 CLI 路线仍不能停留在“把 sidebar 按钮搬到终端”。真正值得抽取的是已经开始具备独立形态的低层能力：

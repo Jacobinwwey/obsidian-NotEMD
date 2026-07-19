@@ -724,14 +724,15 @@ _Zuletzt für das Release-Tag `1.9.3` am 2026-06-24 aktualisiert. Datum des letz
 </a>
 
 <!-- notemd-settings-discovery-guide -->
-## Entdeckung von Einstellungen, Diagrammhistorie und sichere Batch-Ordnern
+## Entdeckung von Einstellungen, Diagrammhistorie, CircuitikZ sowie sichere Batch-Ordner
 
 Die Einstellungsseite von Notemd bietet eine ungenaue Suche, eine Navigation durch umfangreiche Kategorien sowie Favoriten pro Einstellung, die für den aktuellen Vault gespeichert werden.
 
-- Die Diagrammhistorie wird im Scope des Vaults gespeichert, chronologisch nach dem Neuesten geordnet, suchbar und in Gruppen von 20 Einträgen paginiert. Das Löschen eines Historie-Eintrags löscht die generierten Dateien nicht.
-- Die Exportfunktion zur Vorschau von Diagrammen ermöglicht es, über PPI die Klarheit von PNG- und PDF-Dateien zu steuern. SVG bleibt weiterhin vektorbasiert.
+- Die Diagrammhistorie wird im Scope des Vaults gespeichert, chronologisch nach dem Neuesten geordnet, suchbar und in Gruppen zu 20 Einträgen paginiert. Das Löschen eines Historie-Eintrags löscht die generierten Dateien nicht.
+- Die Exportfunktion zur Vorschau von Diagrammen ermöglicht es über die Einstellung PPI die Klarheit von PNG- und PDF-Dateien zu steuern. SVG bleibt weiterhin vektorbasiert.
 - Der bevorzugte Diagrammtyp sowie das bevorzugte Quellformat werden als getrennte Auswahlmöglichkeiten angeboten.
-- Die erweiterte Auswahl von Batch-Dateien ermöglicht das Speichern von Auswahlprofilen sowie Vorschauen von Regeln.
-- Ein fehlender Batch-Zielordner kann nach Bestätigung erstellt werden; es besteht außerdem die Option, die automatische Erstellung für zukünftig fehlende Ordnner zu merken.
-- Für einen bereits vorhandenen, nicht leeren Ordner ist eine Bestätigung für den gesamten Batch erforderlich – niemals eine Bestätigung pro generierter Datei.
+- Desktop-Nutzer können die optional verfügbare, native Compile-Umgebung von CircuitikZ öffnen, um das System‑Tectonic/pdflatex erneut zu nutzen, einen eigenen Compiler auszuwählen oder explizit die festgelegte, verwaltete Tectonic‑Laufzeitumgebung zu installieren. Für Vorschauen, SVG-, PNG- sowie PDF-Exporte ist LaTeX nicht erforderlich.
+- Die erweiterte Auswahl von Batch-Dateien ermöglicht das Verwenden gespeicherter Auswahlprofile sowie die Anzeige von Regelvorschauen.
+- Ein fehlender Batch-Zielordner kann nach Bestätigung erstellt werden; es besteht außerdem die Option, künftig automatisch solche fehlenden Ordner zu erstellen.
+- Für einen bereits vorhandenen, nicht leeren Ordner ist nur eine einzige Bestätigung für den gesamten Batch erforderlich – niemals eine Bestätigung pro generierter Datei.
 - Im Entwicklermodus werden Diagnoseinformationen des Anbieters sowie erweiterte Hilfsmittel zur Fehlerbehebung angezeigt.

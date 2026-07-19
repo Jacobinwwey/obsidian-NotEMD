@@ -485,20 +485,23 @@ function renderCommonSourceTemplate(spec: CircuitSpec): string {
   to [short, -o] (${extendedPortX(inputSide)},1.4)
   node[${inputSide}]{$v_{in}$};`;
 
-    return `\\usepackage{circuitikz}
+    return `\\documentclass[border=8pt]{standalone}
+\\usepackage{circuitikz}
 \\begin{document}
-\\begin{circuitikz}[${spec.style.voltageConvention}]
+\\begin{circuitikz}[${spec.style.voltageConvention}, line width=0.5pt, font=\\small]
 \\draw
   (3,5) node[vcc]{$V_{DD}$}
-  to [R, l=${rdLabel}] (3,3)
-  to [short, *-o] (${commonPortX(outputSide)},3) node[${outputSide}]{$v_{out}$}
-  (3,3) to [short] (3,2.2)
-  node[nmos, anchor=D] (M1) {${m1Label}}
-  (M1.S) to [short] (3,0.5)
-  node[ground]{}
-${inputRoute}
+  to [R, l=${rdLabel}] (3,3);
 \\draw
-  (3,0.5) node[below right]{$S$};
+  (3,3) to [short, *-o] (${commonPortX(outputSide)},3) node[${outputSide}]{$v_{out}$};
+\\draw
+  (3,3) to [short] (3,2.2)
+  node[nmos, anchor=D] (M1) {${m1Label}};
+\\draw
+  (M1.S) to [short] (3,0.5)
+  node[ground]{};
+\\draw
+${inputRoute}
 \\end{circuitikz}
 \\end{document}
 `;
@@ -524,7 +527,8 @@ function renderCmosInverterTemplate(spec: CircuitSpec): string {
   to [short, -o] (${extendedPortX(inputSide)},1.2)
   node[${inputSide}]{$v_{in}$};`;
 
-    return `\\usepackage{circuitikz}
+    return `\\documentclass[border=8pt]{standalone}
+\\usepackage{circuitikz}
 \\begin{document}
 \\begin{circuitikz}[${spec.style.voltageConvention}]
 \\draw
@@ -570,7 +574,8 @@ function renderCmosBufferTemplate(spec: CircuitSpec): string {
   to [short, -o] (7.2,1.2)
   node[right]{$v_{in}$};`;
 
-    return `\\usepackage{circuitikz}
+    return `\\documentclass[border=8pt]{standalone}
+\\usepackage{circuitikz}
 \\begin{document}
 \\begin{circuitikz}[${spec.style.voltageConvention}]
 \\draw
@@ -617,7 +622,8 @@ function renderCmosTransmissionGateTemplate(spec: CircuitSpec): string {
     const inputPortX = inputSide === 'left' ? '0.8' : '5.2';
     const outputPortX = outputSide === 'right' ? '5.2' : '0.8';
 
-    return `\\usepackage{circuitikz}
+    return `\\documentclass[border=8pt]{standalone}
+\\usepackage{circuitikz}
 \\begin{document}
 \\begin{circuitikz}[${spec.style.voltageConvention}]
 \\draw
@@ -679,7 +685,8 @@ function renderCmosNand2Template(spec: CircuitSpec): string {
   to [short, -o] (${dualInputPortX(inputSide)},1.85)
   node[right]{$v_B$};`;
 
-    return `\\usepackage{circuitikz}
+    return `\\documentclass[border=8pt]{standalone}
+\\usepackage{circuitikz}
 \\begin{document}
 \\begin{circuitikz}[${spec.style.voltageConvention}]
 \\draw
@@ -742,7 +749,8 @@ function renderCmosNor2Template(spec: CircuitSpec): string {
   to [short, -o] (${dualInputPortX(inputSide)},1.95)
   node[right]{$v_B$};`;
 
-    return `\\usepackage{circuitikz}
+    return `\\documentclass[border=8pt]{standalone}
+\\usepackage{circuitikz}
 \\begin{document}
 \\begin{circuitikz}[${spec.style.voltageConvention}]
 \\draw

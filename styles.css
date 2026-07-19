@@ -636,6 +636,7 @@
     grid-row: 1;
     display: flex;
     min-width: 0;
+    min-height: 0;
     max-height: 100%;
     flex-direction: column;
     background: var(--background-primary);
@@ -671,6 +672,213 @@
     min-height: 0;
     padding: 0.75rem 1rem 1rem;
     overflow: auto;
+    overscroll-behavior: contain;
+}
+
+.notemd-circuitikz-environment-shell {
+    width: min(780px, calc(100vw - 32px));
+}
+
+.notemd-circuitikz-environment-shell .modal-content {
+    max-height: min(78vh, 860px);
+    overflow: auto;
+    overscroll-behavior: contain;
+}
+
+.notemd-circuitikz-environment {
+    display: grid;
+    gap: 20px;
+    padding-bottom: 4px;
+}
+
+.notemd-circuitikz-environment-boundaries {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    border-block: 1px solid var(--background-modifier-border);
+}
+
+.notemd-circuitikz-environment-boundary {
+    min-width: 0;
+    padding: 16px 18px 18px;
+}
+
+.notemd-circuitikz-environment-boundary + .notemd-circuitikz-environment-boundary {
+    border-left: 1px solid var(--background-modifier-border);
+}
+
+.notemd-circuitikz-environment-boundary h3,
+.notemd-circuitikz-environment-capability-section h3,
+.notemd-circuitikz-environment-progress h3,
+.notemd-circuitikz-environment-log-section h3 {
+    margin: 4px 0 8px;
+    font-size: var(--font-ui-medium);
+}
+
+.notemd-circuitikz-environment-boundary p,
+.notemd-circuitikz-environment-status p,
+.notemd-circuitikz-environment-progress p {
+    margin: 0;
+    color: var(--text-muted);
+    line-height: 1.5;
+}
+
+.notemd-circuitikz-environment-eyebrow {
+    color: var(--text-accent);
+    font-size: var(--font-ui-smaller);
+    font-weight: 650;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.notemd-circuitikz-environment-status {
+    display: grid;
+    gap: 6px;
+    padding: 14px 16px;
+    background: var(--background-secondary);
+    border: 1px solid var(--background-modifier-border);
+    border-radius: var(--radius-s);
+}
+
+.notemd-circuitikz-environment-status.is-ready {
+    border-color: var(--color-green);
+}
+
+.notemd-circuitikz-environment-status.is-failed,
+.notemd-circuitikz-environment-status.is-incomplete {
+    border-color: var(--color-red);
+}
+
+.notemd-circuitikz-environment-facts {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0;
+    margin: 0;
+    border-top: 1px solid var(--background-modifier-border);
+}
+
+.notemd-circuitikz-environment-fact {
+    min-width: 0;
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--background-modifier-border);
+}
+
+.notemd-circuitikz-environment-fact dt {
+    margin-bottom: 3px;
+    color: var(--text-muted);
+    font-size: var(--font-ui-smaller);
+}
+
+.notemd-circuitikz-environment-fact dd {
+    margin: 0;
+    overflow-wrap: anywhere;
+    font-size: var(--font-ui-small);
+}
+
+.notemd-circuitikz-environment-capabilities {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+}
+
+.notemd-circuitikz-environment-capability {
+    display: grid;
+    gap: 5px;
+    min-width: 0;
+    padding: 10px 12px;
+    background: var(--background-secondary);
+    border-radius: var(--radius-s);
+    font-size: var(--font-ui-small);
+}
+
+.notemd-circuitikz-environment-capability strong {
+    color: var(--text-muted);
+}
+
+.notemd-circuitikz-environment-capability[data-notemd-capability="available"] strong {
+    color: var(--color-green);
+}
+
+.notemd-circuitikz-environment-inline-note {
+    margin: -8px 0 0;
+    color: var(--text-muted);
+}
+
+.notemd-circuitikz-environment-progress {
+    display: grid;
+    gap: 8px;
+}
+
+.notemd-circuitikz-environment-progress progress {
+    width: 100%;
+    min-height: 12px;
+}
+
+.notemd-circuitikz-environment-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+}
+
+.notemd-circuitikz-environment-actions button,
+.notemd-circuitikz-environment-actions a {
+    min-height: 44px;
+}
+
+.notemd-circuitikz-environment-actions a {
+    display: inline-flex;
+    align-items: center;
+    padding-inline: 10px;
+}
+
+.notemd-circuitikz-environment-actions button:focus-visible,
+.notemd-circuitikz-environment-actions a:focus-visible {
+    outline: 2px solid var(--interactive-accent);
+    outline-offset: 2px;
+}
+
+.notemd-circuitikz-environment-log {
+    max-height: 180px;
+    margin: 0;
+    padding: 12px;
+    overflow: auto;
+    overscroll-behavior: contain;
+    background: var(--background-secondary-alt);
+    border: 1px solid var(--background-modifier-border);
+    border-radius: var(--radius-s);
+    color: var(--text-muted);
+    font-size: var(--font-ui-smaller);
+    line-height: 1.45;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+}
+
+@media (max-width: 640px) {
+    .notemd-circuitikz-environment-shell {
+        width: calc(100vw - 16px);
+    }
+
+    .notemd-circuitikz-environment-boundaries,
+    .notemd-circuitikz-environment-facts,
+    .notemd-circuitikz-environment-capabilities {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .notemd-circuitikz-environment-boundary + .notemd-circuitikz-environment-boundary {
+        border-top: 1px solid var(--background-modifier-border);
+        border-left: 0;
+    }
+
+    .notemd-circuitikz-environment-actions {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .notemd-circuitikz-environment-actions button,
+    .notemd-circuitikz-environment-actions a {
+        justify-content: center;
+        width: 100%;
+    }
 }
 
 .notemd-diagram-history-actions {

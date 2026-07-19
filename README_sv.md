@@ -717,14 +717,15 @@ _Senast uppdaterad för release-taggen `1.9.3` den 2026-06-24. Datum för senast
 </a>
 
 <!-- notemd-settings-discovery-guide -->
-## Upptäckt av inställningar, diagramhistorik och säkra batchmappar
+## Upptäckt av inställningar, diagramhistorik, CircuitikZ och säkra batchmappar
 
 Notemds inställningsseite erbjuder suddjupssökning, navigering i stora kategorier samt favoriter för varje inställning som lagras för den aktuella Vaulten.
 
 - Diagramhistoriken lagras på Vault-nivå, sorterad från nyaste till äldsta, och kan sökas samt pagineras i grupper på 20 stycken. Att ta bort en historikpost tar inte bort de genererade filerna.
 - Export av diagramförhandsvisningar med PPI-kontroller styr klarheten i PNG- och PDF-filer. SVG förblir vektorbaserat.
 - Föredragna diagramtyp och föredragna källformat är separata valmöjligheter.
-- Avancerad val av batchfiler möjliggör sparade valprofiler samt förhandsvisningar av regler.
-- En saknad batchmålsmapp kan skapas efter bekräftelse, med möjlighet att komma ihåg automatisk skapning för framtida saknade mappar.
-- En redan existerande, icke-toämig mapp kräver en bekräftelse för hela batchen, aldrig en bekräftelse per genererad fil.
-- Utvecklarmönstret avslöjar leverantördiagnostik och avancerade felsökningstjänster.
+- Desktop-användare kan öppna det valfria CircuitikZ-nativa kompileringsmiljön för att återanvända systemets Tectonic/pdflatex, välja en anpassad kompilator eller explicit installera den fixade, hanterade Tectonic-körningen. Förhandsvisningar, SVG-, PNG- och PDF-exporter kräver inget LaTeX.
+- Avancerad val av batchfiler möjliggör sparade valprofiler och förhandsvisningar av regler.
+- En saknad batchmålsmapp kan skapas efter bekräftelse, med möjlighet att komma ihåg den automatiska skapandet för framtida saknade mappar.
+- En redan existerande, icke-tom mapp kräver en bekräftelse för hela batchen, aldrig en bekräftelse per genererad fil.
+- Utvecklarmönstret visar leverantördiagnostik och avancerade felsökningstillgängligheter.

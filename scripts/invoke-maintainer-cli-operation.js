@@ -44,6 +44,7 @@ Minimal examples:
   npm run cli:invoke -- --vault docs --operation provider.profile.export-redacted --pretty
 
 Notes:
+  - Host selection prefers obsidian-cli native eval when that wrapper exists, then falls back to the official obsidian eval command.
   - Prefer --input-file for non-trivial payloads.
   - Paths inside --input-json are vault-relative. For --vault docs, use "index.zh-CN.md" and "maintainer", not "docs/index.zh-CN.md" or "docs/maintainer".
   - Maintainer bridge only; not a public CLI surface.
@@ -140,6 +141,35 @@ function extractEvalResult(stdout) {
   return evalLine.slice(3);
 }
 
+function isCommandUnavailable(result) {
+  const code = String(result.error?.code || '').toUpperCase();
+  return result.status === null && (code === 'ENOENT' || code === 'EINVAL');
+}
+
+function invokeObsidianEval(vault, code) {
+  const options = {
+    encoding: 'utf8',
+    maxBuffer: 10 * 1024 * 1024
+  };
+  const wrapperResult = spawnSyncWithCommandResolution(
+    'obsidian-cli',
+    ['native', `vault=${vault}`, 'eval', `code=${code}`],
+    options
+  );
+  if (!isCommandUnavailable(wrapperResult)) {
+    return { commandLabel: 'obsidian-cli native eval', result: wrapperResult };
+  }
+
+  return {
+    commandLabel: 'obsidian eval',
+    result: spawnSyncWithCommandResolution(
+      'obsidian',
+      ['eval', `vault=${vault}`, `code=${code}`],
+      options
+    )
+  };
+}
+
 function main() {
   try {
     const args = parseArgs(process.argv.slice(2));
@@ -164,17 +194,11 @@ function main() {
       input
     };
     const code = buildEvalCode(args.pluginId, request);
-    const child = spawnSyncWithCommandResolution(
-      'obsidian-cli',
-      ['native', `vault=${args.vault}`, 'eval', `code=${code}`],
-      {
-        encoding: 'utf8',
-        maxBuffer: 10 * 1024 * 1024
-      }
-    );
+    const invocation = invokeObsidianEval(args.vault, code);
+    const child = invocation.result;
 
     if (child.status !== 0) {
-      process.stderr.write(child.stderr || child.stdout || 'obsidian-cli native eval failed\n');
+      process.stderr.write(child.stderr || child.stdout || `${invocation.commandLabel} failed\n`);
       process.exit(child.status || 1);
     }
 

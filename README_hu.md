@@ -712,14 +712,15 @@ _Utoljára a(z) `1.9.3` kiadási címkéhez frissítve: 2026-06-24. A legutóbbi
 </a>
 
 <!-- notemd-settings-discovery-guide -->
-## Beállítások megtalálása, diagramok története és biztonságos batch mappák
+## Beállítások megtalálása, diagramok története, CircuitikZ és biztonságos batch mappák
 
-A Notemd beállítások oldala biztosítja a zöldeléses keresést, nagy kategóriák közötti navigációt, valamint az aktuális Vault számára tárolt, egyes beállításokhoz tartozó előnépsorolásokat.
+A Notemd beállítások oldala biztosítja a zöldeléses keresést, nagy kategóriák navigációját, illetve az aktuális Vault számára tárolt, egyes beállításokhoz tartozó előnépsorolásokat.
 
-- A diagramok története a Vault szintén tárolódik, újabbakból kezdve sorrendben, és 20 egységként osztva kereshető és oldalazható. Egy történelmi leírás törlése nem törli a készült fájlokat.
-- A diagramok előnézetének exportálásában a PPI értékek határozzák meg a PNG és PDF fájlok minőségét. Az SVG fájlok viszont vektortípusú maradnak.
+- A diagramok története a Vault szintén tárolódik, újabbakból kezdve sorrendben, és 20-es csoportokban kereshető és oldalazható. Egy történelmi leírás törlése nem törli az előkészített fájlokat.
+- A diagramok előnézetének exportálása során a PPI értékek felelősek a PNG és PDF fájlok minőségeért. Az SVG fájlok viszont vektortípusú maradnak.
 - A preferált diagramtípus és a preferált forrásformátum külön kiegészítő választásokként állnak rendelkezésre.
-- A fejlett batch fájlképezés lehetősége lehetővé teszi a megmentett kielegzési profillumokat és a szabályok előnézetét.
-- Ha egy batch mappája nincs, ezt az igazolás után hozható létre, és lehetőség van arra, hogy a jövőben is automatikusan lépjenek létre a hiányzó mappák.
-- Egy már létező, nem tömött mappához az összes fájlt elmentéhez egy igazolás szükséges, soha nem egy igazolás az egyes készült fájlokhoz.
-- A fejlesztő módban láthatók a fornecederek diagnostikai információi és a fejlett hibamegtávolítási eszközök.
+- A aszterális felhasználók lehetőségük van nyitni a választólagos CircuitikZ helyi kompilációs környezetét, hogy használhassák újra a rendszerben lévő Tectonic/pdflatex programot, válasszhatják egy személyre szabott kompilátorot, vagy kifejezetten telepíthetik a beállított Tectonic futtatási környezetét. Az előnézetek, SVG, PNG fájlok, valamint az előnézet PDF-ek exportálásához LaTeX nélkül is lehet.
+- A fejlett batch fájl választása lehetősége lehetővé teszi a mentett választási profillumok és szabályok előnézetét.
+- Ha egy batch mappája nincs, ezt az bizonyítás után hozható létre, és lehetőség van arra, hogy a jövőben is automatikusan hozzanak létre ilyen hiányzó mappákat.
+- Ha már létezik egy nem türelt mappa, az összes batch fájlhoz előtt egy bizonyítás szükséges, soha nem egy bizonyítás az egyes előkészített fájlokhoz.
+- A fejlesztő módban láthatók a fornalmazó diagnostikai információk és a fejlett hibajavítási eszközök.

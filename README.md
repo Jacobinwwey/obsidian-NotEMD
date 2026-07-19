@@ -268,6 +268,7 @@ Important newer settings include:
 - **Diagram history retention limit**: limits the Vault history index; pruning never deletes generated files.
 - **Diagram preview export PPI**: controls PNG and PDF clarity while SVG remains vector-based.
 - **Preferred diagram type / source format**: separates diagram meaning from Mermaid, Draw.io, Drawnix, CircuitikZ, and other editable source formats.
+- **CircuitikZ native compile environment (optional)**: checks an existing `tectonic` or `pdflatex` installation, or installs a pinned managed Tectonic runtime after explicit confirmation. SVG, PNG, and preview PDF export continue to work without LaTeX.
 - **Advanced batch file selection**: enables saved folder/file-selection profiles and rule previews.
 - **Automatically create missing batch target folders**: available after the user approves creation once. Existing non-empty folders still require one confirmation before each batch run.
 - **Developer mode**: reveals provider diagnostics and advanced file-selection tools intended for troubleshooting.
@@ -275,6 +276,10 @@ Important newer settings include:
 ### Diagram History
 
 Completed diagram previews are indexed at Vault scope and ordered by completion time, newest first. The preview keeps the diagram canvas primary: one **Export** menu provides SVG, PNG, and PDF, while **History** opens the searchable index in a right drawer without closing the preview. The same history view is available from the command palette (`Notemd: Open diagram history`) and sidebar even when no note is active. Search by title, note, diagram type, source format, or export format and browse results in pages of 20. History stores lightweight metadata and artifact paths rather than duplicating SVG, PNG, PDF, or source contents. Removing a history entry does not delete its generated files.
+
+### Optional CircuitikZ Native Compilation
+
+Notemd does not embed a complete TeX distribution in the plugin bundle. On desktop, open **CircuitikZ native compile environment** from diagram settings or the command palette to reuse a system `tectonic`/`pdflatex` compiler, choose a custom executable, or explicitly install/repair the pinned managed Tectonic runtime. The environment panel shows readiness, download progress, install path, bounded logs, and removal controls. Mobile and users who skip installation keep dependency-free preview plus SVG, PNG, and preview PDF export.
 
 ### Safe Batch Folder Handling
 

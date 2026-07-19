@@ -5,13 +5,14 @@ const endpoint = 'http://100.80.17.113:301/v1/chat/completions';
 const model = 'hy-mt2-7b';
 const marker = '<!-- notemd-settings-discovery-guide -->';
 const source = `${marker}
-## Settings discovery, diagram history, and safe batch folders
+## Settings discovery, diagram history, CircuitikZ, and safe batch folders
 
 The Notemd settings page provides fuzzy search, large category navigation, and per-setting favorites stored for the current Vault.
 
 - Diagram history is stored at Vault scope, ordered newest first, searchable and paginated in groups of 20. Removing a history record does not delete generated files.
 - Diagram preview export PPI controls PNG and PDF clarity. SVG remains vector-based.
 - Preferred diagram type and preferred source format are separate choices.
+- Desktop users can open the optional CircuitikZ native compile environment to reuse system Tectonic/pdflatex, select a custom compiler, or explicitly install the pinned managed Tectonic runtime. Preview, SVG, PNG, and preview PDF exports do not require LaTeX.
 - Advanced batch file selection enables saved selection profiles and rule previews.
 - A missing batch target folder can be created after confirmation, with an option to remember automatic creation for future missing folders.
 - An existing non-empty folder requires one confirmation before the whole batch, never one confirmation per generated file.
@@ -59,9 +60,10 @@ async function main() {
   for (const locale of Object.keys(languageNames)) {
     const file = path.join(root, `README_${locale}.md`);
     const current = fs.readFileSync(file, 'utf8');
-    if (current.includes(marker)) continue;
     const translated = await translate(locale);
-    fs.writeFileSync(file, `${current.trimEnd()}\n\n${translated}`, 'utf8');
+    const markerOffset = current.indexOf(marker);
+    const base = markerOffset >= 0 ? current.slice(0, markerOffset).trimEnd() : current.trimEnd();
+    fs.writeFileSync(file, `${base}\n\n${translated}`, 'utf8');
     process.stdout.write(`${locale}\n`);
   }
 }

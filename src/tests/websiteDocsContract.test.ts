@@ -164,9 +164,11 @@ describe('website documentation contract', () => {
         expect(englishDiagrams).toContain('Draw.io and Drawnix are **source formats**, not diagram types.');
         expect(englishDiagrams).toContain('Current CircuitikZ support is intentionally constrained.');
         expect(englishDiagrams).toContain('Save source file');
+        expect(englishDiagrams).toContain('Choose **History** in the preview');
         expect(chineseDiagrams).toContain('Draw.io 和 Drawnix 是**源格式**，不是图表类型。');
         expect(chineseDiagrams).toContain('当前 CircuitikZ 支持有意保持受约束范围。');
         expect(chineseDiagrams).toContain('保存源文件');
+        expect(chineseDiagrams).toContain('在预览中点击**历史**');
     });
 
     test('published locale metadata covers the README and UI locale documentation matrix', () => {

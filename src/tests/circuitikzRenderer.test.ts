@@ -64,7 +64,8 @@ describe('circuitikz renderer', () => {
         expect(artifact.previewSvg?.content).toContain('vout');
         expect(artifact.previewSvg?.content).not.toContain('v_{out}');
         expect(artifact.previewSvg?.content).toContain('.notemd-circuit-stage text { stroke: none; }');
-        expect(artifact.previewSvg?.content).toContain('font: 400 15px');
+        expect(artifact.previewSvg?.content).toContain('font-size: 15px; font-weight: 350');
+        expect(artifact.previewSvg?.content).toContain('stroke-width: 1.2');
         expect(artifact.previewSvg?.content).not.toContain('cmos-inverter / cmos-inverter-v1');
     });
 

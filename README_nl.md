@@ -716,14 +716,15 @@ _Laatst vernieuwd voor releasetag `1.9.3` op 2026-06-24. Datum van de laatste co
 </a>
 
 <!-- notemd-settings-discovery-guide -->
-## Ontdekken van instellingen, diagramgeschiedenis en veilige batchmappen
+## Ontdekking van instellingen, diagramgeschiedenis, CircuitikZ en veilige batchmappen
 
 De instellingenpagina van Notemd biedt een vage zoekfunctie, navigatie door grote categorieën en favorieten per instelling die worden opgeslagen voor de huidige Vault.
 
-- De diagramgeschiedenis wordt opgeslagen op niveau van de Vault, gerangschikt van nieuwste naar oudste, zoekbaar en pagineerbaar in groepen van 20. Het verwijderen van een historisch record verwijdert de gegenereerde bestanden niet.
-- De export van diagramvoorbeelden bepaalt de scherpte van PNG- en PDF-bestanden via PPI-instellingen. SVG blijft vectorgebaseerd.
+- De diagramgeschiedenis wordt opgeslagen op niveau van de Vault, gerangschikt van nieuwste naar oudste, zoekbaar en pagineerbaar in groepen van 20. Het verwijderen van een historische record verwijdert de gegenereerde bestanden niet.
+- De export van diagramvoorbeelden met PPI-beheer zorgt voor een goede kwaliteit van PNG- en PDF-bestanden. SVG blijft vectorgebaseerd.
 - De gewenste diagramtype en de gewenste bronformat zijn aparte keuzemogelijkheden.
-- Geavanceerde selectie van batchbestanden maakt het mogelijk om opgeslagen selectieprofielen en regelvoorbeelden te gebruiken.
-- Een ontbrekende batchdoelmap kan na bevestiging worden aangemaakt, met de optie om deze automatische aanmaak voor toekomstige ontbrekende mappen te onthouden.
-- Voor een bestaande, niet-lege map is één bevestiging nodig voordat de hele batch wordt verwerkt; er is nooit één bevestiging per gegenereerd bestand nodig.
-- In ontwikkelaarstand worden diagnostische informatie van de provider en geavanceerde oplossingsmogelijkheden weergegeven.
+- Desktopgebruikers kunnen het optionele, native CircuitikZ-compilatieomgeving openen om het systeem Tectonic/pdflatex opnieuw te gebruiken, een aangepaste compiler te kiezen of expliciet de gemanageerde Tectonic-runtime te installeren. Voorbeelden, SVG-, PNG- en PDF-exporten vereisen geen LaTeX.
+- Geavanceerde selectiemogelijkheden voor batchbestanden stellen het opslaan van selectieprofielen en het bekijken van regels mogelijk.
+- Een ontbrekende batchdoelmap kan na bevestiging worden aangemaakt, met de optie om automatische aanmaak voor toekomstige ontbrekende mappen te onthouden.
+- Voor een reeds bestaande, niet-lege map is één bevestiging nodig voordat de hele batch wordt verwerkt; er is nooit één bevestiging per gegenereerd bestand nodig.
+- In ontwikkelaarsmodus worden diagnostische informatie van de provider en geavanceerde oplossingsmogelijkheden weergegeven.

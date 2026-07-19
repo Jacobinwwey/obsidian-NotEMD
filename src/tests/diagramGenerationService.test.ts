@@ -515,6 +515,26 @@ Referral share: 35%
         expect(result.artifact.content).toContain('\\end{document}');
     });
 
+    test('falls back before JSON parsing when the model returns raw circuitikz TeX', async () => {
+        const llmInvoker = jest.fn().mockResolvedValue(String.raw`\begin{circuitikz}[american voltages]
+\draw (3,5) node[vcc]{$V_{DD}$} to[R, l=$R_D$] (3,3);
+\end{circuitikz}`);
+
+        const result = await generateDiagramArtifact(`
+Draw a common-source NMOS amplifier: VDD through RD to the drain, vout at the drain, vin at the gate, and source to ground.
+`, {
+            compatibilityMode: 'best-fit',
+            requestedIntent: 'circuit',
+            requestedRenderTarget: 'circuitikz',
+            targetLanguage: 'en',
+            llmInvoker
+        });
+
+        expect(result.spec.circuitSpec?.goldenReferenceId).toBe('common-source-nmos-v1');
+        expect(result.artifact.content).toContain('\\usepackage{circuitikz}');
+        expect(result.artifact.content).toContain('\\begin{circuitikz}');
+    });
+
     test('does not substitute a golden circuit template for an unsupported circuit request', async () => {
         const llmInvoker = jest.fn().mockResolvedValue(JSON.stringify({
             intent: 'mindmap',

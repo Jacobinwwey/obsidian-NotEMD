@@ -723,14 +723,15 @@ _Aggiornato l'ultima volta per il tag di rilascio `1.9.3` il 2026-06-24. Data de
 </a>
 
 <!-- notemd-settings-discovery-guide -->
-## Scoperta delle impostazioni, storia dei diagrammi e cartelle di lotti sicure
+## Scoperta delle impostazioni, cronologia dei diagrammi, CircuitikZ e cartelle di lotti sicure
 
-La pagina delle impostazioni di Notemd offre una ricerca sfocata, una navigazione tra le categorie numerose e la possibilità di salvare i preferiti per ciascuna impostazione all’interno del Vault corrente.
+La pagina delle impostazioni di Notemd offre una ricerca sfocata, una navigazione tra le vaste categorie e la possibilità di salvare i preferiti per ciascuna impostazione all’interno del Vault corrente.
 
-- La storia dei diagrammi viene memorizzata a livello del Vault, ordinata dal più recente al più vecchio; è possibile effettuare ricerche e visualizzarla paginata in gruppi da 20 elementi. La rimozione di un record storico non cancella i file generati.
-- L’esportazione della anteprima del diagramma consente di controllare la qualità delle immagini PNG e PDF in termini di PPI; gli SVG, invece, rimangono basati su vettori.
+- La cronologia dei diagrammi viene memorizzata a livello di Vault, ordinata dal più recente al più vecchio; è possibile effettuare ricerche e visualizzarla paginata in gruppi da 20 elementi. La rimozione di un record dalla cronologia non elimina i file generati.
+- L’esportazione della anteprima del diagramma consente di controllare la qualità delle immagini PNG e PDF in base al PPI; l’SVG, invece, rimane basato su vettori.
 - Il tipo di diagramma preferito e il formato di origine preferito sono opzioni distinte.
-- La selezione avanzata dei file per lotti permette di utilizzare profili di selezione salvati e anteprime delle regole.
+- Gli utenti desktop possono aprire l’ambiente di compilazione nativo CircuitikZ (opzionale) per riutilizzare Tectonic/pdflatex del sistema, selezionare un compilatore personalizzato o installare esplicitamente l’ambiente runtime Tectonic gestito. Le anteprime, le esportazioni in SVG, PNG e PDF non richiedono LaTeX.
+- La funzione avanzata di selezione dei file di lotto permette di utilizzare profili di selezione salvati e di visualizzare anteprime delle regole.
 - È possibile creare una cartella di destinazione per i lotti assente, previa conferma; inoltre, è disponibile l’opzione per memorizzare questa creazione automatica per eventuali cartelle assenti future.
-- Per una cartella esistente e non vuota è necessaria una sola conferma per l’intero lotto, mai una conferma per ciascun file generato.
-- Il modalità sviluppatore mostra i dati diagnostici del provider e strumenti avanzati per la risoluzione dei problemi.
+- Per una cartella esistente e non vuota è necessaria una sola conferma per l’intero lotto, mai una conferma per ogni singolo file generato.
+- Il modalità sviluppatore mostra informazioni diagnostiche sul provider e strumenti avanzati per la risoluzione dei problemi.

@@ -82,6 +82,9 @@ describe('diagram spec prompt builder', () => {
         expect(prompt).toMatch(/"goldenReferenceId":\s*"cmos-inverter-v1"/i);
         expect(prompt).toMatch(/"terminals":\s*\{\s*"S":\s*"VDD"/i);
         expect(prompt).toMatch(/"from":\s*"vin",\s*"to":\s*"MP\.G"/i);
+        expect(prompt).toMatch(/"circuitKind":\s*"common-source-amplifier"/i);
+        expect(prompt).toMatch(/"goldenReferenceId":\s*"common-source-nmos-v1"/i);
+        expect(prompt).toMatch(/deterministic renderer, not the model/i);
     });
 
     test('uses a circuit-focused intent surface for an explicit circuitikz request', () => {

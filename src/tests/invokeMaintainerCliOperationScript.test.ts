@@ -39,6 +39,23 @@ ${options.stderr ? `process.stderr.write(${JSON.stringify(options.stderr)});\n` 
         return { scriptPath, argsPath };
     }
 
+    function writeFakeOfficialObsidian(
+        tempRoot: string,
+        options: { stdout?: string; stderr?: string; exitCode?: number } = {}
+    ) {
+        const scriptPath = path.join(tempRoot, 'obsidian');
+        const cmdScriptPath = path.join(tempRoot, 'obsidian.cmd');
+        const argsPath = path.join(tempRoot, 'obsidian-args.json');
+        const scriptSource = `#!/usr/bin/env node
+const fs = require('fs');
+fs.writeFileSync(${JSON.stringify(argsPath)}, JSON.stringify(process.argv.slice(2), null, 2));
+${options.stderr ? `process.stderr.write(${JSON.stringify(options.stderr)});\n` : ''}${options.stdout ? `process.stdout.write(${JSON.stringify(options.stdout)});\n` : ''}process.exit(${options.exitCode ?? 0});
+`;
+        fs.writeFileSync(scriptPath, scriptSource, { encoding: 'utf8', mode: 0o755 });
+        fs.writeFileSync(cmdScriptPath, `@echo off\r\n"${process.execPath}" "${scriptPath}" %*\r\n`, 'utf8');
+        return { argsPath };
+    }
+
     test('prints a simplified maintainer help surface with core commands, inputs, and operation summaries', () => {
         const scriptPath = path.join(__dirname, '..', '..', 'scripts', 'invoke-maintainer-cli-operation.js');
         const output = execFileSync(process.execPath, [scriptPath, '--help'], {
@@ -48,6 +65,7 @@ ${options.stderr ? `process.stderr.write(${JSON.stringify(options.stderr)});\n` 
         expect(output).toContain('Notemd maintainer CLI helper');
         expect(output).toContain('npm run cli:help');
         expect(output).toContain('npm run cli:invoke -- --vault <vault> --operation <operation-id> [--input-file <path> | --input-json');
+        expect(output).toContain('falls back to the official obsidian eval command');
         expect(output).toContain('Prefer --input-file for non-trivial payloads.');
 
         for (const [operationId, details] of Object.entries(OPERATION_HELP as MaintainerOperationHelp)) {
@@ -126,6 +144,38 @@ ${options.stderr ? `process.stderr.write(${JSON.stringify(options.stderr)});\n` 
             const codeArg = argv.find((value: string) => value.startsWith('code='));
             expect(codeArg).toContain('provider.profile.export-redacted');
             expect(output).toBe('{\n  "ok": true,\n  "nested": {\n    "count": 2\n  }\n}\n');
+        } finally {
+            fs.rmSync(tempRoot, { recursive: true, force: true });
+        }
+    });
+
+    test('falls back to the official obsidian eval command when obsidian-cli is unavailable', () => {
+        const scriptPath = path.join(__dirname, '..', '..', 'scripts', 'invoke-maintainer-cli-operation.js');
+        const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'notemd-cli-official-fallback-'));
+        const fakeCli = writeFakeOfficialObsidian(tempRoot, {
+            stdout: '=> {"transport":"official"}\n',
+            exitCode: 0
+        });
+
+        try {
+            const output = execFileSync(
+                process.execPath,
+                [
+                    scriptPath,
+                    '--vault', 'Study',
+                    '--operation', 'provider.profile.export-redacted'
+                ],
+                {
+                    encoding: 'utf8',
+                    env: { ...process.env, PATH: tempRoot, Path: tempRoot }
+                }
+            );
+
+            const argv = JSON.parse(fs.readFileSync(fakeCli.argsPath, 'utf8'));
+            expect(argv[0]).toBe('eval');
+            expect(argv).toContain('vault=Study');
+            expect(argv.some((value: string) => value.startsWith('code='))).toBe(true);
+            expect(output).toBe('{"transport":"official"}\n');
         } finally {
             fs.rmSync(tempRoot, { recursive: true, force: true });
         }

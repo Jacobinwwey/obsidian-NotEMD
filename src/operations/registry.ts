@@ -111,6 +111,10 @@ const DIAGRAM_GENERATE_INPUT_SCHEMA: OperationSchema = {
         sourcePath: { type: 'string' },
         sourceMarkdown: { type: 'string' },
         requestedIntent: { type: 'string' },
+        requestedRenderTarget: {
+            type: 'string',
+            enum: ['mermaid', 'json-canvas', 'vega-lite', 'html', 'editable-html-svg', 'drawio', 'drawnix', 'circuitikz']
+        },
         compatibilityMode: {
             type: 'string',
             enum: ['best-fit', 'legacy-mermaid']

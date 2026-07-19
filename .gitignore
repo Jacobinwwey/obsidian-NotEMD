@@ -33,7 +33,9 @@ ref
 # local git worktrees
 .worktrees
 .cache
+.tmp/
 .tmp_repo_saga_tool
+scripts/.tmp-*
 
 # local trellis workflow state
 .trellis/

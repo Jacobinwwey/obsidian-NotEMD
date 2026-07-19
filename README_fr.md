@@ -723,14 +723,15 @@ _Dernière actualisation pour le tag de publication `1.9.3` le 2026-06-24. Date 
 </a>
 
 <!-- notemd-settings-discovery-guide -->
-## Découverte des paramètres, historique des diagrammes et dossiers de lot sécurisés
+## Découverte des paramètres, historique des diagrammes, CircuitikZ et dossiers de lot sécurisés
 
 La page des paramètres de Notemd propose une recherche floue, une navigation par grandes catégories, ainsi que des favoris par paramètre stockés pour le Vault actuel.
 
 - L’historique des diagrammes est conservé au niveau du Vault, classé du plus récent au plus ancien, et peut être recherché et paginé par groupes de 20 éléments. La suppression d’un enregistrement de l’historique ne supprime pas les fichiers générés.
-- L’export de la prévisualisation du diagramme permet de contrôler la résolution (PPI) des fichiers PNG et PDF. Les fichiers SVG restent vectoriels.
+- Les paramètres de résolution PPI pour l’exportation en aperçu du diagramme contrôlent la qualité des fichiers PNG et PDF. L’format SVG reste vectoriel.
 - Le type de diagramme préféré et le format source préféré sont deux choix distincts.
-- La sélection avancée des fichiers de lot permet d’utiliser des profils de sélection enregistrés ainsi que des prévisualisations de règles.
+- Les utilisateurs de bureau peuvent ouvrir l’environnement de compilation natif CircuitikZ (optionnel) afin de réutiliser Tectonic/pdflatex du système, de sélectionner un compilateur personnalisé, ou d’installer explicitement le runtime Tectonic géré. Les exports en aperçu, SVG, PNG et PDF n’exigent pas LaTeX.
+- La sélection avancée des fichiers de lot permet d’utiliser des profils de sélection enregistrés ainsi que des aperçus de règles.
 - Un dossier cible de lot manquant peut être créé après confirmation, avec la possibilité de mémoriser cette création automatique pour les dossiers manquants ultérieurs.
 - Un dossier existant et non vide nécessite une seule confirmation pour l’ensemble du lot, et jamais une confirmation par fichier généré.
-- Le mode développeur affiche des diagnostics sur le fournisseur ainsi que des outils avancés de dépannage.
+- Le mode développeur affiche des diagnostics sur le fournisseur ainsi que des outils avancés pour la résolution des problèmes.

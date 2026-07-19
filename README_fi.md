@@ -715,14 +715,15 @@ _Päivitetty viimeksi julkaisutägille `1.9.3` 2026-06-24. Viimeisimmän commiti
 </a>
 
 <!-- notemd-settings-discovery-guide -->
-## Asetuksien löytö, diagrammien historia ja turvalliset paketitaskujen kaustat
+## Asetusten avastaminen, diagrammien historia, CircuitikZ ja turvalliset paketitaskujen kaustat
 
-Notemd:n asetukset-sivu tarjoaa hämärtöisen hakun, laajan kategorian navigoinnin sekä aktiivisen Vaultin asetuksille suunnattuja lemmikkäitä.
+Notemd:n asetusten sivu tarjoaa hämävyysotsintaa, laajaa kategorian navigointia sekä aktiivisen Vaultin asetuksille suunnattuja lemmikkäitä.
 
-- Diagrammien historia tallennetaan Vaultin tasolla, jossa se on järjestetty uusimmista alhaampaan. Se on hakettavaa ja näytetään 20:stä ryhmistä. Historian kirjan poistaminen ei poista luotuja failia.
-- Diagrammin esikatselun eksportointi määrittelee PNG- ja PDF-faileiden selkeyden; SVG-järjestelmä jää siirtolähtöiseeksi.
-- Ehdotuun diagrammityypille ja ehdotuun lähteenormiin tehdään erilliset valinnat.
-- Edistynyt paketitaskujen valinta mahdollistaa salvestettuja valintaprofiileja sekä sääntöjen esikatseluita.
-- Puuttuv paketitaskun sihtokausta voi luoda vahvistuksen jälkeen, ja on mahdollisuus muistaa automaattisen luomisen tuleviin puutuville kaustille.
-- Olemassa oleva, tyhjä ei ole – kokonaisen paketin käyttö edellyttää yhtä vahvistusta, ei yhtä vahvistusta iga luotunnan failin jälkeen.
-- Kehittäjärežiimi paljastaa tarjoajan diagnostikan sekä edistyneet vianohjelmistotulokset.
+- Diagrammien historia tallennetaan Vaultin tasolla, jossa se on järjestetty uusimmista alhaammin. Se on hakettavaa ja näytetään 20:stä ryhmistä. Historian kirjan kustannuksella genereerit tiedostot ei poisteta.
+- Diagrammin esikatselun eksportointi PPI-määrittelyllä kontrolloi PNG- ja PDF-tiedostojen selkeyttä. SVG-järjestelmät jäävät vektoripohiseiksi.
+- Ehdotuun diagrammityypille ja ehdotuun lähteenvormatteluun tehdään erilliset valinnat.
+- Tietokonekayttajat voivat avata valintaista CircuitikZ:n omat kompilaatiopimistot, jotta voivat käyttää järjestelmän Tectonic/pdflatex-tuotteita, valita omat kompilaattorit tai asentaa suoraan hallitsevan Tectonic-järjestelmän. Esikatselut, SVG-, PNG- ja PDF-esikatselut eksportoidaan ilman LaTeXia.
+- Edistyneet paketitaskujen tiedostojen valintavaihtoehto mahdollistaa salattujen valintaprofiilien ja sääntöjen esikatselun.
+- Puuttuv paketitaskujen sihtokausta voi luoda vahvistuksen jälkeen, ja on mahdollisuus muistaa automaattisen luomisen tuleviin puutteviin kaustoihin.
+- Olemassa oleva, tyhjä ei ole – täysin kausta vaatii yhtä vahvistusta koko paketitaskun suhteen, ei yhtä vahvistusta jokaisen genereerituun tiedostoon.
+- Kehittäjärežiimi paljastaa tarjoajien diagnostiikan sekä edistyneet vianohjelmistovaihtoehtoja.

@@ -99,7 +99,29 @@ CircuitSpec JSON example for a CMOS inverter request:
       "routingStyle": "orthogonal"
     }
   }
-}`
+}
+
+For a common-source NMOS request, use this exact topology contract inside circuitSpec:
+{
+  "circuitKind": "common-source-amplifier",
+  "title": "Common-Source NMOS Amplifier",
+  "goldenReferenceId": "common-source-nmos-v1",
+  "style": { "package": "circuitikz", "voltageConvention": "american voltages" },
+  "nets": ["VDD", "GND", "vin", "vout", "drain"],
+  "components": [
+    { "id": "RD", "type": "resistor", "label": "$R_D$", "terminals": { "top": "VDD", "bottom": "drain" } },
+    { "id": "M1", "type": "nmos", "label": "$M_1$", "terminals": { "D": "drain", "G": "vin", "S": "GND" } }
+  ],
+  "connections": [
+    { "from": "VDD", "to": "RD.top" },
+    { "from": "RD.bottom", "to": "M1.D" },
+    { "from": "M1.D", "to": "vout" },
+    { "from": "M1.G", "to": "vin" },
+    { "from": "M1.S", "to": "GND" }
+  ],
+  "layoutHints": { "inputSide": "left", "outputSide": "right", "routingStyle": "orthogonal" }
+}
+The deterministic renderer, not the model, emits the complete LaTeX document with the circuitikz package, document environment, voltage convention, explicit VDD/RD/M1/vin/vout/GND anchors, and terminated draw paths.`
         : '';
     const supportedIntentsSection = isCircuitikzRequest
         ? 'Supported intent: circuit'

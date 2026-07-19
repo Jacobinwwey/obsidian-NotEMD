@@ -4,6 +4,12 @@ import * as path from 'path';
 const stylesPath = path.join(__dirname, '..', '..', 'styles.css');
 const settingTabPath = path.join(__dirname, '..', 'ui', 'NotemdSettingTab.ts');
 
+function readRule(styles: string, selector: string): string {
+    const escapedSelector = selector.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const match = styles.match(new RegExp(`${escapedSelector}\\s*\\{([^}]*)\\}`));
+    return match?.[1] ?? '';
+}
+
 describe('provider settings styles', () => {
     test('styles ship dedicated selectors for advanced provider settings and discovered model rows', () => {
         const styles = fs.readFileSync(stylesPath, 'utf8');
@@ -47,6 +53,17 @@ describe('provider settings styles', () => {
         expect(styles).toContain('.notemd-settings-result-count');
         expect(styles).toContain('.notemd-settings-empty-state');
         expect(styles).toContain('@media (max-width: 720px)');
+    });
+
+    test('diagram history drawer constrains the grid item and contains its scroll region', () => {
+        const styles = fs.readFileSync(stylesPath, 'utf8');
+        const drawerRule = readRule(styles, '.notemd-diagram-history-drawer');
+        const bodyRule = readRule(styles, '.notemd-diagram-history-drawer-body');
+
+        expect(drawerRule).toMatch(/min-height:\s*0\s*;/);
+        expect(bodyRule).toMatch(/min-height:\s*0\s*;/);
+        expect(bodyRule).toMatch(/overflow:\s*auto\s*;/);
+        expect(bodyRule).toMatch(/overscroll-behavior:\s*contain\s*;/);
     });
 
     test('settings categories use one progressive selector instead of parallel heading buttons', () => {

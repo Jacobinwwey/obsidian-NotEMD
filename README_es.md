@@ -722,14 +722,15 @@ _Actualizado por última vez para la etiqueta de lanzamiento `1.9.3` el 2026-06-
 </a>
 
 <!-- notemd-settings-discovery-guide -->
-## Descubrimiento de configuraciones, historial de diagramas y carpetas por lotes seguras
+## Descubrimiento de configuraciones, historial de diagramas, CircuitikZ y carpetas de procesamiento por lotes seguras
 
-La página de configuraciones de Notemd ofrece búsquedas aproximadas, navegación por grandes categorías y favoritos por configuración guardados para el Vault actual.
+La página de configuraciones de Notemd ofrece búsqueda difusa, navegación por grandes categorías y favoritos por configuración almacenados para el Vault actual.
 
-- El historial de diagramas se almacena a nivel del Vault, ordenado de más reciente a más antiguo, y es posible buscarlo y paginarlo en grupos de 20 elementos. Eliminar un registro del historial no elimina los archivos generados.
+- El historial de diagramas se almacena a nivel del Vault, ordenado de más reciente a más antiguo, y es posible buscarlo y visualizarlo en páginas de 20 elementos cada una. Eliminar un registro del historial no elimina los archivos generados.
 - Los controles de PPI para la exportación de vistas previas de diagramas regulan la claridad de los archivos PNG y PDF. El formato SVG sigue siendo vectorial.
 - El tipo de diagrama preferido y el formato de origen preferido son opciones independientes.
+- Los usuarios de escritorio pueden abrir el entorno de compilación nativo opcional CircuitikZ para reutilizar Tectonic/pdflatex del sistema, seleccionar un compilador personalizado o instalar explícitamente la versión gestionada de Tectonic. Las exportaciones de vista previa, SVG, PNG y PDF no requieren LaTeX.
 - La selección avanzada de archivos por lotes permite utilizar perfiles de selección guardados y vistas previas de reglas.
-- Se puede crear una carpeta de destino para lotes que falte tras confirmar, con la opción de recordar la creación automática para futuras carpetas faltantes.
-- Una carpeta existente y no vacía requiere una confirmación antes de procesar todo el lote; nunca se necesita una confirmación por cada archivo generado.
+- Se puede crear una carpeta de destino para el procesamiento por lotes que falte tras confirmar, con la opción de recordar esta creación automática para futuras carpetas faltantes.
+- Para una carpeta existente y no vacía se necesita una confirmación antes de procesar todo el lote, nunca una confirmación por cada archivo generado.
 - El modo desarrollador muestra diagnósticos del proveedor y controles avanzados para solución de problemas.
