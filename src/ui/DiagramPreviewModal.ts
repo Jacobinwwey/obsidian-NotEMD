@@ -1,4 +1,4 @@
-import { App, Modal, Notice } from 'obsidian';
+import { App, Menu, Modal, Notice } from 'obsidian';
 import { formatI18n, getI18nStrings } from '../i18n';
 import {
     renderPreviewArtifactSvg,
@@ -27,21 +27,14 @@ import {
     formatRenderArtifactDiagnosticSummary,
     summarizeRenderArtifactDiagnostics
 } from '../rendering/diagnostics';
+import { DiagramHistoryDrawer } from './DiagramHistoryDrawer';
 import { DiagramHistoryModal } from './DiagramHistoryModal';
-import type { DiagramHistoryExportKind, DiagramHistoryQuery } from '../diagram/history/diagramHistoryRepository';
+import type { DiagramHistoryExportKind } from '../diagram/history/diagramHistoryRepository';
+import type { DiagramHistoryStore } from './DiagramHistoryView';
 import {
     getBundledMermaidPreviewDeps,
     getBundledVegaLitePreviewDeps
 } from '../rendering/webview/bundledPreviewDeps';
-
-interface DiagramHistoryStore {
-    loadPage: (query: DiagramHistoryQuery) => Promise<any>;
-    removeEntry: (id: string) => Promise<void>;
-    recordArtifactPath?: (id: string, path: string) => Promise<unknown>;
-    recordExportPath?: (id: string, kind: DiagramHistoryExportKind, path: string) => Promise<unknown>;
-    deleteArtifacts?: (entry: import('../diagram/history/diagramHistoryRepository').DiagramHistoryEntry) => Promise<boolean>;
-    reopenArtifact?: (entry: import('../diagram/history/diagramHistoryRepository').DiagramHistoryEntry) => Promise<boolean>;
-}
 
 export class DiagramPreviewModal extends Modal {
     private session: RenderPreviewSession;
@@ -49,6 +42,7 @@ export class DiagramPreviewModal extends Modal {
     private readonly exportPpi: number;
     private readonly historyStore?: DiagramHistoryStore;
     private readonly historyEntryId?: string;
+    private historyDrawer: DiagramHistoryDrawer | null = null;
 
     constructor(
         app: App,
@@ -66,10 +60,19 @@ export class DiagramPreviewModal extends Modal {
     onOpen() {
         this.modalEl.addClass('notemd-diagram-preview-shell');
         this.currentHistoryEntryId = rememberDiagramPreviewSession(this.session).id;
+        if (this.historyStore) {
+            this.historyDrawer = new DiagramHistoryDrawer(this.contentEl, {
+                app: this.app,
+                store: this.historyStore,
+                uiLocale: this.uiLocale
+            });
+        }
         this.renderModal();
     }
 
     onClose() {
+        this.historyDrawer?.destroy();
+        this.historyDrawer = null;
         this.modalEl.removeClass('notemd-diagram-preview-shell');
         this.contentEl.empty();
     }
@@ -81,19 +84,32 @@ export class DiagramPreviewModal extends Modal {
         contentEl.addClass('notemd-diagram-preview-modal');
         contentEl.setAttribute('data-render-theme', this.session.payload.resolvedTheme ?? this.session.payload.theme);
 
-        contentEl.createEl('h3', {
+        const heading = contentEl.createDiv({ cls: 'notemd-diagram-preview-heading' });
+        heading.createEl('h3', {
             text: this.session.payload.previewTitle
                 || formatI18n(i18n.previewModal.title, {
                     target: getRenderTargetDisplayName(this.session.payload.artifact.target)
                 })
         });
+        heading.createDiv({
+            text: getRenderTargetDisplayName(this.session.payload.artifact.target),
+            cls: 'notemd-diagram-preview-target-badge'
+        });
 
-        const layout = contentEl.createDiv({ cls: 'notemd-diagram-preview-layout' });
-        const rail = layout.createDiv({ cls: 'notemd-diagram-preview-rail' });
-        const actions = rail.createDiv({ cls: 'notemd-diagram-preview-actions' });
+        const actions = contentEl.createDiv({
+            cls: 'notemd-diagram-preview-actions',
+            attr: { role: 'toolbar', 'aria-label': i18n.previewModal.title }
+        });
+        if (this.session.payload.sourcePath && supportsPreviewSvgExport(this.session.payload.artifact)) {
+            const exportMenuButton = actions.createEl('button', {
+                text: i18n.previewModal.exportMenu,
+                cls: 'mod-cta notemd-diagram-preview-export',
+                attr: { 'aria-haspopup': 'menu' }
+            });
+            exportMenuButton.onclick = (event: MouseEvent) => this.showExportMenu(event);
+        }
         const copyButton = actions.createEl('button', {
-            text: i18n.previewModal.copySource,
-            cls: 'mod-cta'
+            text: i18n.previewModal.copySource
         });
         copyButton.onclick = () => {
             const clipboard = navigator.clipboard;
@@ -136,95 +152,15 @@ export class DiagramPreviewModal extends Modal {
             };
         }
 
-        if (this.session.payload.sourcePath && supportsPreviewSvgExport(this.session.payload.artifact)) {
-            const exportButton = actions.createEl('button', {
-                text: i18n.previewModal.exportSvg
-            });
-            exportButton.onclick = async () => {
-                exportButton.disabled = true;
-                exportButton.setText(i18n.previewModal.exportingSvg);
-                try {
-                    const outputPath = await saveDiagramPreviewSvg(
-                        this.app,
-                        this.session.payload.sourcePath as string,
-                        this.session.payload.artifact,
-                        this.createBundledPreviewRenderDeps()
-                    );
-                    await this.recordExportPath('svg', outputPath);
-                    new Notice(formatI18n(i18n.previewModal.exportSuccessNotice, { path: outputPath }));
-                } catch (error) {
-                    const message = error instanceof Error ? error.message : String(error);
-                    new Notice(formatI18n(i18n.previewModal.exportFailedNotice, { message }));
-                    console.error('Failed to export diagram preview SVG:', error);
-                } finally {
-                    exportButton.disabled = false;
-                    exportButton.setText(i18n.previewModal.exportSvg);
-                }
-            };
-
-            const exportPngButton = actions.createEl('button', {
-                text: i18n.previewModal.exportPng
-            });
-            exportPngButton.onclick = async () => {
-                exportPngButton.disabled = true;
-                exportPngButton.setText(i18n.previewModal.exportingPng);
-                try {
-                    const outputPath = await saveDiagramPreviewPng(
-                        this.app,
-                        this.session.payload.sourcePath as string,
-                        this.session.payload.artifact,
-                        {
-                            ...this.createBundledPreviewRenderDeps(),
-                            ppi: this.exportPpi
-                        }
-                    );
-                    await this.recordExportPath('png', outputPath);
-                    new Notice(formatI18n(i18n.previewModal.exportPngSuccessNotice, { path: outputPath }));
-                } catch (error) {
-                    const message = error instanceof Error ? error.message : String(error);
-                    new Notice(formatI18n(i18n.previewModal.exportPngFailedNotice, { message }));
-                    console.error('Failed to export diagram preview PNG:', error);
-                } finally {
-                    exportPngButton.disabled = false;
-                    exportPngButton.setText(i18n.previewModal.exportPng);
-                }
-            };
-
-            const exportPdfButton = actions.createEl('button', {
-                text: i18n.previewModal.exportPdf
-            });
-            exportPdfButton.onclick = async () => {
-                exportPdfButton.disabled = true;
-                exportPdfButton.setText(i18n.previewModal.exportingPdf);
-                try {
-                    const outputPath = await saveDiagramPreviewPdf(
-                        this.app,
-                        this.session.payload.sourcePath as string,
-                        this.session.payload.artifact,
-                        {
-                            ...this.createBundledPreviewRenderDeps(),
-                            ppi: this.exportPpi
-                        }
-                    );
-                    await this.recordExportPath('pdf', outputPath);
-                    new Notice(formatI18n(i18n.previewModal.exportPdfSuccessNotice, { path: outputPath }));
-                } catch (error) {
-                    const message = error instanceof Error ? error.message : String(error);
-                    new Notice(formatI18n(i18n.previewModal.exportPdfFailedNotice, { message }));
-                    console.error('Failed to export diagram preview PDF:', error);
-                } finally {
-                    exportPdfButton.disabled = false;
-                    exportPdfButton.setText(i18n.previewModal.exportPdf);
-                }
-            };
+        if (this.historyStore) {
+            const historyButton = actions.createEl('button', { text: i18n.previewModal.historyTitle });
+            historyButton.onclick = () => this.historyDrawer?.toggle(historyButton);
         }
 
         const closeButton = actions.createEl('button', { text: i18n.common.close });
         closeButton.onclick = () => this.close();
 
-        this.renderHistoryPanel(rail, i18n);
-
-        const stage = layout.createDiv({ cls: 'notemd-diagram-preview-stage' });
+        const stage = contentEl.createDiv({ cls: 'notemd-diagram-preview-stage' });
         if (this.session.payload.sourcePath) {
             stage.createEl('p', {
                 text: formatI18n(i18n.previewModal.sourceFile, { path: this.session.payload.sourcePath }),
@@ -235,6 +171,68 @@ export class DiagramPreviewModal extends Modal {
 
         const previewContainer = stage.createDiv({ cls: 'notemd-diagram-preview-body' });
         void this.renderPreview(previewContainer);
+    }
+
+    private showExportMenu(event: MouseEvent): void {
+        const menu = new Menu();
+        menu.addItem(item => item.setTitle('SVG').setIcon('image').onClick(async () => this.exportSvg()));
+        menu.addItem(item => item.setTitle('PNG').setIcon('image').onClick(async () => this.exportPng()));
+        menu.addItem(item => item.setTitle('PDF').setIcon('file-text').onClick(async () => this.exportPdf()));
+        menu.showAtMouseEvent(event);
+    }
+
+    private async exportSvg(): Promise<void> {
+        const copy = getI18nStrings({ uiLocale: this.uiLocale }).previewModal;
+        try {
+            const outputPath = await saveDiagramPreviewSvg(
+                this.app,
+                this.session.payload.sourcePath as string,
+                this.session.payload.artifact,
+                this.createBundledPreviewRenderDeps()
+            );
+            await this.recordExportPath('svg', outputPath);
+            new Notice(formatI18n(copy.exportSuccessNotice, { path: outputPath }));
+        } catch (error) {
+            const message = error instanceof Error ? error.message : String(error);
+            new Notice(formatI18n(copy.exportFailedNotice, { message }));
+            console.error('Failed to export diagram preview SVG:', error);
+        }
+    }
+
+    private async exportPng(): Promise<void> {
+        const copy = getI18nStrings({ uiLocale: this.uiLocale }).previewModal;
+        try {
+            const outputPath = await saveDiagramPreviewPng(
+                this.app,
+                this.session.payload.sourcePath as string,
+                this.session.payload.artifact,
+                { ...this.createBundledPreviewRenderDeps(), ppi: this.exportPpi }
+            );
+            await this.recordExportPath('png', outputPath);
+            new Notice(formatI18n(copy.exportPngSuccessNotice, { path: outputPath }));
+        } catch (error) {
+            const message = error instanceof Error ? error.message : String(error);
+            new Notice(formatI18n(copy.exportPngFailedNotice, { message }));
+            console.error('Failed to export diagram preview PNG:', error);
+        }
+    }
+
+    private async exportPdf(): Promise<void> {
+        const copy = getI18nStrings({ uiLocale: this.uiLocale }).previewModal;
+        try {
+            const outputPath = await saveDiagramPreviewPdf(
+                this.app,
+                this.session.payload.sourcePath as string,
+                this.session.payload.artifact,
+                { ...this.createBundledPreviewRenderDeps(), ppi: this.exportPpi }
+            );
+            await this.recordExportPath('pdf', outputPath);
+            new Notice(formatI18n(copy.exportPdfSuccessNotice, { path: outputPath }));
+        } catch (error) {
+            const message = error instanceof Error ? error.message : String(error);
+            new Notice(formatI18n(copy.exportPdfFailedNotice, { message }));
+            console.error('Failed to export diagram preview PDF:', error);
+        }
     }
 
     private renderDiagnosticsPanel(container: HTMLElement, i18n: ReturnType<typeof getI18nStrings>): void {
@@ -294,15 +292,23 @@ export class DiagramPreviewModal extends Modal {
         }
     }
 
+    /* Legacy session history is superseded by the Vault-scoped drawer. */
     private renderHistoryPanel(container: HTMLElement, i18n: ReturnType<typeof getI18nStrings>): void {
-        const historyEl = container.createDiv({ cls: 'notemd-diagram-preview-history' });
+        const historyEl = container.createDiv({
+            cls: 'notemd-diagram-preview-history',
+            attr: { role: 'region', 'aria-label': i18n.previewModal.historyTitle }
+        });
         historyEl.createEl('h4', {
             text: i18n.previewModal.historyTitle,
             cls: 'notemd-diagram-preview-history-title'
         });
         if (this.historyStore) {
-            const manage = historyEl.createEl('button', { text: i18n.previewModal.manageVaultHistory });
-            manage.onclick = () => new DiagramHistoryModal(this.app, this.historyStore!.loadPage, this.historyStore!.removeEntry, this.historyStore!.deleteArtifacts, this.historyStore!.reopenArtifact, this.uiLocale).open();
+            const manage = historyEl.createEl('button', {
+                text: i18n.previewModal.manageVaultHistory,
+                cls: 'notemd-diagram-preview-history-manage',
+                attr: { 'aria-label': i18n.previewModal.manageVaultHistory }
+            });
+            manage.onclick = () => new DiagramHistoryModal(this.app, this.historyStore!, this.uiLocale).open();
         }
 
         const historyList = historyEl.createDiv({ cls: 'notemd-diagram-preview-history-list' });

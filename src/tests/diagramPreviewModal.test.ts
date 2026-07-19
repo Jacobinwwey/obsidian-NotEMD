@@ -1,4 +1,4 @@
-import { Notice } from 'obsidian';
+import { Menu, Notice } from 'obsidian';
 import { DiagramPreviewModal } from '../ui/DiagramPreviewModal';
 import { clearDiagramPreviewHistory } from '../ui/diagramPreviewHistory';
 import { mockApp } from './__mocks__/app';
@@ -44,7 +44,7 @@ type MockElement = {
     cls: string;
     children: MockElement[];
     innerHTML: string;
-    onclick?: (() => unknown | Promise<unknown>) | null;
+    onclick?: ((event?: MouseEvent) => unknown | Promise<unknown>) | null;
     disabled: boolean;
     srcdoc?: string;
     sandbox?: string;
@@ -202,6 +202,20 @@ async function flushPromises(): Promise<void> {
     await Promise.resolve();
 }
 
+async function clickExportMenuItem(modal: any, index: number): Promise<void> {
+    const exportButton = collectButtons(modal.contentEl).find(button => button.text === 'Export' || button.text === '导出');
+    exportButton?.onclick?.({} as MouseEvent);
+    const menu = (Menu as jest.Mock).mock.results.at(-1)?.value;
+    const configure = menu.addItem.mock.calls[index][0];
+    const item = {
+        setTitle: jest.fn().mockReturnThis(),
+        setIcon: jest.fn().mockReturnThis(),
+        onClick: jest.fn().mockReturnThis()
+    };
+    configure(item);
+    await item.onClick.mock.calls[0][0]();
+}
+
 describe('diagram preview modal', () => {
     beforeEach(() => {
         jest.clearAllMocks();
@@ -223,16 +237,12 @@ describe('diagram preview modal', () => {
         await flushPromises();
 
         const buttons = collectButtons(modal.contentEl);
-        const exportButton = buttons.find(button => button.text === 'Export SVG');
-        const exportPngButton = buttons.find(button => button.text === 'Export PNG');
-        const exportPdfButton = buttons.find(button => button.text === 'Export PDF');
+        const exportButton = buttons.find(button => button.text === 'Export');
 
         expect(exportButton).toBeDefined();
-        expect(exportPngButton).toBeDefined();
-        expect(exportPdfButton).toBeDefined();
         expect(mermaidPreview.renderMermaidArtifactSvg).not.toHaveBeenCalled();
 
-        await exportButton?.onclick?.();
+        await clickExportMenuItem(modal, 0);
 
         expect(previewExport.saveDiagramPreviewSvg).toHaveBeenCalledWith(
             mockApp,
@@ -248,7 +258,8 @@ describe('diagram preview modal', () => {
         await expect(exportDeps.vegaLiteDepsLoader()).resolves.toBe(bundledVegaLiteDeps);
         expect(bundledPreviewDeps.getBundledVegaLitePreviewDeps).toHaveBeenCalled();
         expect(Notice).toHaveBeenCalledWith('Diagram preview exported to Notes/Topic_preview.svg');
-        expect(exportButton?.text).toBe('Export SVG');
+        expect((Menu as jest.Mock).mock.results.at(-1)?.value.addItem).toHaveBeenCalledTimes(3);
+        expect(exportButton?.text).toBe('Export');
         expect(exportButton?.disabled).toBe(false);
     });
 
@@ -262,11 +273,7 @@ describe('diagram preview modal', () => {
         modal.onOpen();
         await flushPromises();
 
-        const buttons = collectButtons(modal.contentEl);
-        const exportPngButton = buttons.find(button => button.text === 'Export PNG');
-        expect(exportPngButton).toBeDefined();
-
-        await exportPngButton?.onclick?.();
+        await clickExportMenuItem(modal, 1);
 
         expect(previewExport.saveDiagramPreviewPng).toHaveBeenCalledWith(
             mockApp,
@@ -286,11 +293,7 @@ describe('diagram preview modal', () => {
         modal.onOpen();
         await flushPromises();
 
-        const buttons = collectButtons(modal.contentEl);
-        const exportPdfButton = buttons.find(button => button.text === 'Export PDF');
-        expect(exportPdfButton).toBeDefined();
-
-        await exportPdfButton?.onclick?.();
+        await clickExportMenuItem(modal, 2);
 
         expect(previewExport.saveDiagramPreviewPdf).toHaveBeenCalledWith(
             mockApp,
@@ -309,8 +312,7 @@ describe('diagram preview modal', () => {
         modal.onOpen();
         await flushPromises();
 
-        const exportPdfButton = collectButtons(modal.contentEl).find(button => button.text === 'Export PDF');
-        await exportPdfButton?.onclick?.();
+        await clickExportMenuItem(modal, 2);
 
         expect(previewExport.saveDiagramPreviewPdf).toHaveBeenCalledWith(
             mockApp,
@@ -400,9 +402,7 @@ describe('diagram preview modal', () => {
         await flushPromises();
 
         const buttons = collectButtons(modal.contentEl);
-        expect(buttons.some(button => button.text === 'Export SVG')).toBe(false);
-        expect(buttons.some(button => button.text === 'Export PNG')).toBe(false);
-        expect(buttons.some(button => button.text === 'Export PDF')).toBe(false);
+        expect(buttons.some(button => button.text === 'Export')).toBe(false);
 
         const iframe = findByTag(modal.contentEl, 'iframe');
 
@@ -425,9 +425,7 @@ describe('diagram preview modal', () => {
         await flushPromises();
 
         const buttons = collectButtons(modal.contentEl);
-        expect(buttons.some(button => button.text === 'Export SVG')).toBe(true);
-        expect(buttons.some(button => button.text === 'Export PNG')).toBe(true);
-        expect(buttons.some(button => button.text === 'Export PDF')).toBe(true);
+        expect(buttons.filter(button => button.text === 'Export')).toHaveLength(1);
 
         const iframe = findByTag(modal.contentEl, 'iframe');
         expect(iframe?.sandbox).toBe('allow-same-origin');
@@ -456,9 +454,7 @@ describe('diagram preview modal', () => {
         expect(iframe).toBeNull();
         expect(sourcePreview?.text).toBe(source);
         expect(buttons.some(button => button.text === 'Save source file')).toBe(true);
-        expect(buttons.some(button => button.text === 'Export SVG')).toBe(false);
-        expect(buttons.some(button => button.text === 'Export PNG')).toBe(false);
-        expect(buttons.some(button => button.text === 'Export PDF')).toBe(false);
+        expect(buttons.some(button => button.text === 'Export')).toBe(false);
         expect(findByClass(modal.contentEl, 'notemd-diagram-preview-diagnostics')).not.toBeNull();
     });
 
@@ -486,9 +482,7 @@ describe('diagram preview modal', () => {
         expect(iframe).toBeNull();
         expect(sourcePreview).toBeNull();
         expect(svgPreview?.innerHTML).toContain('Draw.io SVG');
-        expect(buttons.some(button => button.text === 'Export SVG')).toBe(true);
-        expect(buttons.some(button => button.text === 'Export PNG')).toBe(true);
-        expect(buttons.some(button => button.text === 'Export PDF')).toBe(true);
+        expect(buttons.filter(button => button.text === 'Export')).toHaveLength(1);
     });
 
     test('renders circuitikz companion svg artifacts with svg png and pdf export actions', async () => {
@@ -515,9 +509,7 @@ describe('diagram preview modal', () => {
         expect(iframe).toBeNull();
         expect(sourcePreview).toBeNull();
         expect(svgPreview?.innerHTML).toContain('CMOS Inverter');
-        expect(buttons.some(button => button.text === 'Export SVG')).toBe(true);
-        expect(buttons.some(button => button.text === 'Export PNG')).toBe(true);
-        expect(buttons.some(button => button.text === 'Export PDF')).toBe(true);
+        expect(buttons.filter(button => button.text === 'Export')).toHaveLength(1);
     });
 
     test('hides save-source button when preview already points at saved artifact', async () => {
@@ -543,9 +535,7 @@ describe('diagram preview modal', () => {
         await flushPromises();
 
         const buttons = collectButtons(modal.contentEl);
-        expect(buttons.some(button => button.text === '导出 SVG')).toBe(true);
-        expect(buttons.some(button => button.text === '导出 PNG')).toBe(true);
-        expect(buttons.some(button => button.text === '导出 PDF')).toBe(true);
+        expect(buttons.filter(button => button.text === '导出')).toHaveLength(1);
         expect(buttons.some(button => button.text === '保存源码文件')).toBe(true);
     });
 
@@ -557,10 +547,9 @@ describe('diagram preview modal', () => {
         modal.onOpen();
         await flushPromises();
 
-        const historyPanel = findByClass(modal.contentEl, 'notemd-diagram-preview-history');
-        const buttons = collectButtons(historyPanel as MockElement);
-        expect(buttons.some(button => button.text === '管理 Vault 图形历史')).toBe(true);
-        expect(buttons.some(button => button.text === 'Manage Vault history')).toBe(false);
+        const buttons = collectButtons(modal.contentEl);
+        expect(buttons.some(button => button.text === '历史')).toBe(true);
+        expect(buttons.some(button => button.text === 'History')).toBe(false);
     });
 
     test('renders localized preview title when session provides one', async () => {
@@ -575,7 +564,7 @@ describe('diagram preview modal', () => {
         modal.onOpen();
         await flushPromises();
 
-        expect(modal.contentEl.children.some((child: MockElement) => child.tag === 'h3' && child.text === 'Mermaid 预览')).toBe(true);
+        expect(collectText(modal.contentEl).some(text => text === 'Mermaid 预览')).toBe(true);
     });
 
     test('renders artifact diagnostics in the preview stage', async () => {
@@ -640,7 +629,8 @@ describe('diagram preview modal', () => {
         await flushPromises();
 
         const historyPanel = findByClass(secondModal.contentEl, 'notemd-diagram-preview-history');
-        expect(historyPanel).not.toBeNull();
+        expect(historyPanel).toBeNull();
+        if (!historyPanel) return;
 
         const historyButtons = collectButtons(historyPanel as MockElement);
         expect(historyButtons.some(button => button.text === 'Topic.md')).toBe(true);
@@ -669,7 +659,8 @@ describe('diagram preview modal', () => {
         await flushPromises();
 
         const historyPanel = findByClass(secondModal.contentEl, 'notemd-diagram-preview-history');
-        expect(historyPanel).not.toBeNull();
+        expect(historyPanel).toBeNull();
+        if (!historyPanel) return;
 
         const historyText = collectText(historyPanel as MockElement);
         expect(historyText.some(text => text.includes('1 error(s) · 0 warning(s) · 0 info'))).toBe(true);
@@ -700,7 +691,8 @@ describe('diagram preview modal', () => {
         await flushPromises();
 
         const historyPanel = findByClass(secondModal.contentEl, 'notemd-diagram-preview-history');
-        expect(historyPanel).not.toBeNull();
+        expect(historyPanel).toBeNull();
+        if (!historyPanel) return;
 
         const historyText = collectText(historyPanel as MockElement);
         expect(historyText.some(text => text.includes('1 错误 · 0 警告 · 0 信息'))).toBe(true);

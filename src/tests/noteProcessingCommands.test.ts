@@ -133,6 +133,7 @@ describe('note processing command surface', () => {
         expect(ids).toContain('extract-original-text');
         expect(ids).toContain('split-note-by-chapters');
         expect(ids).toContain('create-wiki-link-and-generate-from-selection');
+        expect(ids).toContain('notemd-open-diagram-history');
     });
 
     test('generate from title command delegates to extracted note-processing host adapter', async () => {

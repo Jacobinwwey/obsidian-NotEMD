@@ -37,6 +37,7 @@ type MockPlugin = {
     previewDiagramCommand: jest.Mock<Promise<void>, [any, any]>;
     generateExperimentalDiagramCommand: jest.Mock<Promise<void>, [any, any]>;
     previewExperimentalDiagramCommand: jest.Mock<Promise<void>, [any, any]>;
+    openDiagramHistory: jest.Mock<void, []>;
     translateFileCommand: jest.Mock<Promise<void>, [any, any, any]>;
     batchTranslateFolderCommand: jest.Mock<Promise<void>, [any?, any?]>;
     extractConceptsCommand: jest.Mock<Promise<void>, [any]>;
@@ -103,6 +104,10 @@ class FakeElement {
         return this.createEl('div', options);
     }
 
+    createSpan(options?: { text?: string; cls?: string }): FakeElement {
+        return this.createEl('span', options);
+    }
+
     addClass(cls: string) {
         if (!this.cls.includes(cls)) this.cls.push(cls);
     }
@@ -124,6 +129,10 @@ class FakeElement {
         if (_name === 'href') this.href = _value;
         if (_name === 'title') this.title = _value;
         return;
+    }
+
+    setAttribute(name: string, value: string) {
+        this.setAttr(name, value);
     }
 
     setAttrs(_attrs: Record<string, string>) {
@@ -219,6 +228,7 @@ function createPluginMock(): MockPlugin {
         previewDiagramCommand: jest.fn().mockResolvedValue(undefined),
         generateExperimentalDiagramCommand: jest.fn().mockResolvedValue(undefined),
         previewExperimentalDiagramCommand: jest.fn().mockResolvedValue(undefined),
+        openDiagramHistory: jest.fn(),
         translateFileCommand: jest.fn().mockResolvedValue(undefined),
         batchTranslateFolderCommand: jest.fn().mockResolvedValue(undefined),
         extractConceptsCommand: jest.fn().mockResolvedValue(undefined),
@@ -339,6 +349,9 @@ describe('NotemdSidebarView DOM button wiring', () => {
 
     test('renders action buttons and clicking each triggers mapped command', async () => {
         await sidebar.onOpen();
+
+        await clickButton('Diagram history');
+        expect(plugin.openDiagramHistory).toHaveBeenCalledTimes(1);
 
         const editor = { getSelection: jest.fn(), replaceSelection: jest.fn(), getValue: jest.fn(), setValue: jest.fn() };
         const mdView = Object.assign(new (MarkdownView as any)(), { file: mdFile, editor });

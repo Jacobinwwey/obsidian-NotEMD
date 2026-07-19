@@ -708,7 +708,15 @@ _รีเฟรชล่าสุดสำหรับแท็กรุ่น 
 <!-- repo-chronicle:end -->
 
 
-![Star History Chart](https://api.star-history.com/svg?repos=Jacobinwwey/obsidian-NotEMD&type=Date)
+## Star History
+
+<a href="https://www.star-history.com/?repos=Jacobinwwey%2Fobsidian-NotEMD&type=date&legend=top-left">
+ <picture>
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=Jacobinwwey/obsidian-NotEMD&type=date&theme=dark&legend=top-left&sealed_token=Y32J_ehSQhPEtMK06bJeXYXBkFZbjjUR6tkogZgP92_f34InJDA7n9xcMmttFtW0o52nbKnU24nByb7DCiBnOrP2MOwevXU-so8BYLISzUsdeSUQRIOYg_lFXml_9MakEXjFEQStXFh7fUnsSXyIEq55QSTYNcbDOGF0k66bWhT1IyrZLnG26lJ-Mvbg" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=Jacobinwwey/obsidian-NotEMD&type=date&legend=top-left&sealed_token=Y32J_ehSQhPEtMK06bJeXYXBkFZbjjUR6tkogZgP92_f34InJDA7n9xcMmttFtW0o52nbKnU24nByb7DCiBnOrP2MOwevXU-so8BYLISzUsdeSUQRIOYg_lFXml_9MakEXjFEQStXFh7fUnsSXyIEq55QSTYNcbDOGF0k66bWhT1IyrZLnG26lJ-Mvbg" />
+   <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=Jacobinwwey/obsidian-NotEMD&type=date&legend=top-left&sealed_token=Y32J_ehSQhPEtMK06bJeXYXBkFZbjjUR6tkogZgP92_f34InJDA7n9xcMmttFtW0o52nbKnU24nByb7DCiBnOrP2MOwevXU-so8BYLISzUsdeSUQRIOYg_lFXml_9MakEXjFEQStXFh7fUnsSXyIEq55QSTYNcbDOGF0k66bWhT1IyrZLnG26lJ-Mvbg" />
+ </picture>
+</a>
 
 <!-- notemd-settings-discovery-guide -->
 ## การค้นหาการตั้งค่า, ประวัติแผนภาพ, และโฟลเดอร์จัดการไฟล์หมู่อย่างปลอดภัย

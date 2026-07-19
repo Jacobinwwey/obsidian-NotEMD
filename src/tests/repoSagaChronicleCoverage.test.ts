@@ -105,6 +105,18 @@ describe('repo-saga chronicle coverage', () => {
         }
     });
 
+    test('keeps the official responsive Star History curve embed', () => {
+        const source = fs.readFileSync(path.join(repoRoot, 'README.md'), 'utf8');
+
+        expect(source).toContain('## Star History');
+        expect(source).toContain('https://www.star-history.com/?repos=Jacobinwwey%2Fobsidian-NotEMD&type=date&legend=top-left');
+        expect(source).toContain('<picture>');
+        expect(source).toContain('media="(prefers-color-scheme: dark)"');
+        expect(source).toContain('media="(prefers-color-scheme: light)"');
+        expect(source).toContain('theme=dark&legend=top-left&sealed_token=');
+        expect(source).toContain('<img alt="Star History Chart"');
+    });
+
     test('sync script stays aligned with the upstream locale overlay and quarter granularity', () => {
         const source = fs.readFileSync(scriptPath, 'utf8');
 

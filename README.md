@@ -274,7 +274,7 @@ Important newer settings include:
 
 ### Diagram History
 
-Completed diagram previews are indexed at Vault scope and ordered by completion time, newest first. Open **Manage Vault history** from a diagram preview to search by title, note, diagram type, or source format and browse results in pages of 20. History stores lightweight metadata and artifact paths rather than duplicating SVG, PNG, PDF, or source contents. Removing a history entry does not delete its generated files.
+Completed diagram previews are indexed at Vault scope and ordered by completion time, newest first. The preview keeps the diagram canvas primary: one **Export** menu provides SVG, PNG, and PDF, while **History** opens the searchable index in a right drawer without closing the preview. The same history view is available from the command palette (`Notemd: Open diagram history`) and sidebar even when no note is active. Search by title, note, diagram type, source format, or export format and browse results in pages of 20. History stores lightweight metadata and artifact paths rather than duplicating SVG, PNG, PDF, or source contents. Removing a history entry does not delete its generated files.
 
 ### Safe Batch Folder Handling
 
@@ -831,5 +831,13 @@ _Last refreshed for release tag `1.9.3` on 2026-06-24. Latest commit date: 2026-
 <!-- repo-chronicle:end -->
 
 
-![Star History Chart](https://api.star-history.com/svg?repos=Jacobinwwey/obsidian-NotEMD&type=Date)
+## Star History
+
+<a href="https://www.star-history.com/?repos=Jacobinwwey%2Fobsidian-NotEMD&type=date&legend=top-left">
+ <picture>
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=Jacobinwwey/obsidian-NotEMD&type=date&theme=dark&legend=top-left&sealed_token=Y32J_ehSQhPEtMK06bJeXYXBkFZbjjUR6tkogZgP92_f34InJDA7n9xcMmttFtW0o52nbKnU24nByb7DCiBnOrP2MOwevXU-so8BYLISzUsdeSUQRIOYg_lFXml_9MakEXjFEQStXFh7fUnsSXyIEq55QSTYNcbDOGF0k66bWhT1IyrZLnG26lJ-Mvbg" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=Jacobinwwey/obsidian-NotEMD&type=date&legend=top-left&sealed_token=Y32J_ehSQhPEtMK06bJeXYXBkFZbjjUR6tkogZgP92_f34InJDA7n9xcMmttFtW0o52nbKnU24nByb7DCiBnOrP2MOwevXU-so8BYLISzUsdeSUQRIOYg_lFXml_9MakEXjFEQStXFh7fUnsSXyIEq55QSTYNcbDOGF0k66bWhT1IyrZLnG26lJ-Mvbg" />
+   <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=Jacobinwwey/obsidian-NotEMD&type=date&legend=top-left&sealed_token=Y32J_ehSQhPEtMK06bJeXYXBkFZbjjUR6tkogZgP92_f34InJDA7n9xcMmttFtW0o52nbKnU24nByb7DCiBnOrP2MOwevXU-so8BYLISzUsdeSUQRIOYg_lFXml_9MakEXjFEQStXFh7fUnsSXyIEq55QSTYNcbDOGF0k66bWhT1IyrZLnG26lJ-Mvbg" />
+ </picture>
+</a>
 #### Friendly Links: [Linux DO：学AI，上L站！](https://linux.do/)

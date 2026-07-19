@@ -17,6 +17,7 @@ export const STRINGS_ZH_CN: DeepPartial<NotemdEnglishStrings> = {
         unknownError: '未知错误'
     },
     commands: {
+        openDiagramHistory: '打开图形历史',
         checkDuplicatesCurrent: '检查当前文件中的重复项',
         extractConceptsAndGenerateTitles: '提取概念并生成标题',
         createWikiLinkAndGenerateNoteFromSelection: '从选中文本创建 Wiki-Link 并生成笔记',
@@ -649,6 +650,8 @@ export const STRINGS_ZH_CN: DeepPartial<NotemdEnglishStrings> = {
         }
     },
     sidebar: {
+        diagramHistoryLabel: '图形历史',
+        diagramHistoryTooltip: '打开当前 Vault 中已完成的图形预览和导出。',
         heroTitle: 'Notemd 工作台',
         heroDesc: '执行单项任务或自定义一键工作流，并查看实时进度与日志。',
         defaultWorkflowName: '一键提取',
@@ -964,6 +967,7 @@ export const STRINGS_ZH_CN: DeepPartial<NotemdEnglishStrings> = {
     },
     previewModal: {
         title: '{target} 预览',
+        exportMenu: '导出',
         copySource: '复制源码',
         copySuccessNotice: '图形源码已复制到剪贴板！',
         copyFailedNotice: '复制图形源码失败，请查看控制台。',
@@ -979,6 +983,10 @@ export const STRINGS_ZH_CN: DeepPartial<NotemdEnglishStrings> = {
         diagnosticAdvice: '建议：{advice}'
     },
     diagramHistory: {
+        filters: '筛选', hideFilters: '收起筛选', loading: '正在加载图形历史...', retry: '重试',
+        emptyTitle: '还没有图形历史', emptyDescription: '已完成的预览会按 Vault 保存，并显示在这里。',
+        noResults: '没有符合当前条件的历史记录。', clearFilters: '清除搜索和筛选',
+        count: '共 {count} 个图形', newestFirst: '最新完成优先',
         title: '图形历史', searchPlaceholder: '搜索标题、笔记、类型或格式…',
         allTypes: '全部图形类型', allFormats: '全部源格式', anyExport: '任意导出格式',
         itemsPerPageLabel: '每页显示条数', itemsPerPage: '每页 {count} 条', completedFrom: '完成时间起点', completedTo: '完成时间终点',

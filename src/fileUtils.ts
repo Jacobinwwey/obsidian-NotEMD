@@ -348,7 +348,7 @@ export async function createConceptNotes(
                     createdCount++;
                     newlyCreatedConcepts.push(concept);
                 }
-            } catch (fileOpError: unknown) { // Changed to unknown
+            } catch (fileOpError: unknown) {
                 const errorMessage = fileOpError instanceof Error ? fileOpError.message : String(fileOpError);
                 console.error(`Error processing concept note "${notePath}": ${errorMessage}`, fileOpError); // Log original error
             }
@@ -358,7 +358,7 @@ export async function createConceptNotes(
             await generateConceptLog(app, settings, newlyCreatedConcepts);
         }
 
-    } catch (error: unknown) { // Changed to unknown
+    } catch (error: unknown) {
         const errorMessage = error instanceof Error ? error.message : String(error);
         console.error("Error creating concept notes:", error);
         new Notice(formatI18n(i18n.notices.errorCreatingConceptNotes, { message: errorMessage }));
@@ -403,7 +403,7 @@ async function generateConceptLog(app: App, settings: NotemdSettings, createdCon
             await app.vault.create(logFilePath, logContent.trim());
             new Notice(formatI18n(i18n.notices.conceptLogFileCreated, { path: logFilePath }));
         }
-    } catch (error: unknown) { // Changed to unknown
+    } catch (error: unknown) {
         const errorMessage = error instanceof Error ? error.message : String(error);
         console.error(`Error writing concept log file to ${logFilePath}:`, error);
         new Notice(formatI18n(i18n.notices.conceptLogWriteError, { message: errorMessage }));
@@ -853,7 +853,7 @@ export async function generateContentForTitle(
             } else {
                 progressReporter.log(`Warning: Research for "${title}" returned no results or failed.`);
             }
-        } catch (researchError: unknown) { // Changed to unknown
+        } catch (researchError: unknown) {
             const errorMessage = researchError instanceof Error ? researchError.message : String(researchError);
             if (errorMessage.includes("cancelled by user")) throw researchError; // Propagate cancellation
             progressReporter.log(`Error during research for "${title}": ${errorMessage}. Proceeding without web context.`);
@@ -954,11 +954,11 @@ export async function generateContentForTitle(
     let generatedContent;
     try {
         generatedContent = await callLLM(provider, '', generationPrompt, settings, progressReporter, modelName);
-    } catch (error: unknown) { // Changed to unknown
+    } catch (error: unknown) {
         const errorMessage = error instanceof Error ? error.message : String(error);
         console.error(`LLM generation error for ${file.name}:`, error);
         progressReporter.log(`Error generating content for ${file.name}: ${errorMessage}`);
-        throw error instanceof Error ? error : new Error(errorMessage); // Re-throw
+        throw error instanceof Error ? error : new Error(errorMessage);
     }
 
     if (progressReporter.cancelled) throw new Error("Processing cancelled by user after API call.");
@@ -974,7 +974,7 @@ export async function generateContentForTitle(
         if (progressReporter.cancelled) throw new Error("Processing cancelled by user during post-processing.");
         finalContent = await refineMermaidBlocks(finalContent);
         progressReporter.log(`Mermaid/LaTeX cleanup applied.`);
-    } catch (cleanupError: unknown) { // Changed to unknown
+    } catch (cleanupError: unknown) {
         const errorMessage = cleanupError instanceof Error ? cleanupError.message : String(cleanupError);
         if (errorMessage.includes("cancelled by user")) throw cleanupError; // Propagate cancellation
         progressReporter.log(`Warning: Error during Mermaid/LaTeX cleanup: ${errorMessage}`);
@@ -1151,10 +1151,10 @@ export async function batchGenerateContentForTitles(
             progressReporter.log(`Created 'complete' folder: ${normalizedCompleteFolderPath}`);
         }
         else { const targetFolderStat = await app.vault.adapter.stat(normalizedCompleteFolderPath); if (targetFolderStat?.type !== 'folder') throw new Error(`Path for 'complete' folder (${normalizedCompleteFolderPath}) exists but is not a directory.`); }
-    } catch (folderError: unknown) { // Changed to unknown
+    } catch (folderError: unknown) {
         const errorMessage = folderError instanceof Error ? folderError.message : String(folderError);
         progressReporter.log(`Error ensuring 'complete' folder exists at ${completeFolderPath}: ${errorMessage}`);
-        throw folderError instanceof Error ? folderError : new Error(errorMessage); // Re-throw
+        throw folderError instanceof Error ? folderError : new Error(errorMessage);
     }
 
     if (!settings.enableBatchParallelism || settings.batchConcurrency <= 1) {
@@ -1647,7 +1647,7 @@ export async function saveMermaidSummaryFile(app: App, settings: NotemdSettings,
             const errorMsg = `Error creating Mermaid summary output folder ${targetSaveFolder}: ${errorMessage}. Please check folder permissions and path validity.`;
             progressReporter.log(errorMsg);
             new Notice(errorMsg, 10000);
-            throw folderError instanceof Error ? folderError : new Error(errorMessage); // Re-throw
+            throw folderError instanceof Error ? folderError : new Error(errorMessage);
         }
     } else if (targetSaveFolder && !(app.vault.getAbstractFileByPath(targetSaveFolder) instanceof TFolder)) {
         const errorMsg = `Mermaid summary output path '${targetSaveFolder}' exists but is not a folder.`;

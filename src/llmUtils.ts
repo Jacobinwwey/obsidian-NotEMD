@@ -2429,7 +2429,7 @@ export async function testAPI(provider: LLMProviderConfig, debugMode: boolean = 
             default:
                 return { success: false, message: `Connection test not implemented for provider: ${provider.name}` };
         }
-    } catch (error: unknown) { // Changed to unknown
+    } catch (error: unknown) {
         const message = error instanceof Error ? error.message : String(error);
         console.error(`Connection test failed for ${provider.name}:`, error);
         
@@ -2481,7 +2481,7 @@ async function callApiWithRetry(
         try {
             // Pass settings and signal to the underlying API call function
             return await apiCallFunction(provider, modelName, prompt, content, progressReporter, settings, signal);
-        } catch (error: unknown) { // Changed to unknown
+        } catch (error: unknown) {
             const errorMessage = error instanceof Error ? error.message : String(error);
             lastError = error instanceof Error ? error : new Error(errorMessage); // Store Error object if possible
             progressReporter.log(`${provider.name} API Call: Attempt ${attempt} failed: ${errorMessage}`);

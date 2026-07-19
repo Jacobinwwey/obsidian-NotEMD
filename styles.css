@@ -371,6 +371,7 @@
     font-family: var(--notemd-sidebar-font);
     box-sizing: border-box;
     overflow-x: hidden;
+    position: relative;
 }
 
 .notemd-diagram-preview-layout {
@@ -390,13 +391,16 @@
 
 .notemd-diagram-preview-actions {
     display: flex;
-    flex-direction: column;
-    gap: 0.55em;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
 }
 
 .notemd-diagram-preview-actions button,
 .notemd-diagram-preview-history-button {
-    width: 100%;
+    width: auto;
     background: var(--background-secondary);
     color: var(--text-normal);
     border: 1px solid var(--notemd-border);
@@ -505,6 +509,12 @@
     overflow-wrap: anywhere;
 }
 
+.notemd-diagram-preview-actions .notemd-diagram-preview-export {
+    min-width: 7.5rem;
+    margin-right: auto;
+    font-weight: 600;
+}
+
 .notemd-diagram-preview-diagnostics {
     margin: 0 0 0.8em;
     border: 1px solid var(--notemd-border);
@@ -606,6 +616,80 @@
     background: var(--notemd-surface-alt);
 }
 
+.notemd-diagram-history-layer {
+    position: absolute;
+    inset: 0;
+    z-index: 20;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(320px, 44%);
+    overflow: hidden;
+}
+
+.notemd-diagram-history-backdrop {
+    grid-column: 1 / -1;
+    grid-row: 1;
+    background: color-mix(in srgb, var(--background-modifier-cover) 72%, transparent);
+}
+
+.notemd-diagram-history-drawer {
+    grid-column: 2;
+    grid-row: 1;
+    display: flex;
+    min-width: 0;
+    max-height: 100%;
+    flex-direction: column;
+    background: var(--background-primary);
+    border-left: 1px solid var(--notemd-border);
+    box-shadow: -12px 0 32px color-mix(in srgb, var(--background-modifier-cover) 28%, transparent);
+    animation: notemd-history-drawer-enter 180ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.notemd-diagram-history-drawer-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    min-height: 56px;
+    padding: 0.5rem 0.75rem 0.5rem 1rem;
+    border-bottom: 1px solid var(--notemd-border);
+}
+
+.notemd-diagram-history-drawer-header h3 {
+    margin: 0;
+    font-size: 1rem;
+}
+
+.notemd-diagram-history-drawer-close {
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    font-size: 1.35rem;
+    line-height: 1;
+}
+
+.notemd-diagram-history-drawer-body {
+    min-height: 0;
+    padding: 0.75rem 1rem 1rem;
+    overflow: auto;
+}
+
+.notemd-diagram-history-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+}
+
+.notemd-diagram-history-actions button,
+.notemd-diagram-history-empty button,
+.notemd-diagram-history-error button {
+    min-height: 44px;
+}
+
+@keyframes notemd-history-drawer-enter {
+    from { opacity: 0; transform: translateX(24px); }
+    to { opacity: 1; transform: translateX(0); }
+}
+
 .notemd-diagram-preview-body.is-source-only {
     background: var(--background-primary);
     overflow: auto;
@@ -652,6 +736,127 @@
 
     .notemd-diagram-preview-history-list {
         max-height: min(26vh, 220px);
+    }
+}
+
+/* Diagram popup hierarchy: canvas-first preview and scan-friendly Vault history. */
+.modal.notemd-diagram-history-shell {
+    width: min(94vw, 980px);
+    max-width: min(94vw, 980px);
+}
+
+.modal.notemd-diagram-history-shell .modal-content {
+    max-height: 82vh;
+    overflow-y: auto;
+}
+
+.notemd-diagram-preview-heading {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.75rem;
+    margin-bottom: 0.85rem;
+}
+
+.notemd-diagram-preview-heading h3 {
+    min-width: 0;
+    margin: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.notemd-diagram-preview-target-badge {
+    flex: 0 0 auto;
+    color: var(--text-muted);
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+
+.notemd-diagram-preview-actions button,
+.notemd-diagram-preview-history button,
+.notemd-diagram-history-toolbar :is(input, select, button),
+.notemd-diagram-history-pager button {
+    min-height: 44px;
+}
+
+.notemd-diagram-preview-history-manage {
+    width: 100%;
+    margin-bottom: 0.55rem;
+}
+
+.notemd-diagram-preview-actions :is(button, input, select):focus-visible,
+.notemd-diagram-preview-history button:focus-visible,
+.notemd-diagram-history-pager button:focus-visible {
+    outline: 2px solid var(--notemd-focus);
+    outline-offset: 2px;
+}
+
+.notemd-diagram-history-header {
+    padding-bottom: 0.7rem;
+    border-bottom: 1px solid var(--notemd-border);
+}
+
+.notemd-diagram-history-header input[type='search'] {
+    flex: 1 1 16rem;
+}
+
+.notemd-diagram-history-filters {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.5rem;
+    flex: 1 0 100%;
+}
+
+.notemd-diagram-history-entry-header {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+}
+
+.notemd-diagram-history-entry-source,
+.notemd-diagram-history-entry-meta,
+.notemd-diagram-history-entry-artifacts {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+@media (max-width: 720px) {
+    .notemd-diagram-preview-heading {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .notemd-diagram-history-filters {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .notemd-diagram-history-layer {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .notemd-diagram-history-drawer {
+        grid-column: 1;
+        width: 100%;
+        border-left: 0;
+    }
+
+    .notemd-diagram-preview-actions {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .notemd-diagram-preview-actions .notemd-diagram-preview-export {
+        grid-column: 1 / -1;
+        width: 100%;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .notemd-diagram-history-drawer {
+        animation: none;
     }
 }
 

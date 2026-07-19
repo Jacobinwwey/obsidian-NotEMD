@@ -13,6 +13,7 @@ export const STRINGS_EN = {
         unknownError: 'Unknown error'
     },
     commands: {
+        openDiagramHistory: 'Open diagram history',
         checkDuplicatesCurrent: 'Check for duplicates in current file',
         extractConceptsAndGenerateTitles: 'Extract Concepts and Generate Titles',
         createWikiLinkAndGenerateNoteFromSelection: 'Create Wiki-Link & Generate Note from Selection',
@@ -646,6 +647,8 @@ export const STRINGS_EN = {
         }
     },
     sidebar: {
+        diagramHistoryLabel: 'Diagram history',
+        diagramHistoryTooltip: 'Open completed diagram previews and exports saved in this Vault.',
         heroTitle: 'Notemd Workbench',
         heroDesc: 'Run single actions or custom one-click workflows with live progress and logs.',
         defaultWorkflowName: 'One-Click Extract',
@@ -961,6 +964,7 @@ export const STRINGS_EN = {
     },
     previewModal: {
         title: '{target} preview',
+        exportMenu: 'Export',
         copySource: 'Copy source',
         saveSource: 'Save source file',
         savingSource: 'Saving...',
@@ -996,6 +1000,10 @@ export const STRINGS_EN = {
         deleteArtifactsConfirm: 'Move to trash'
     },
     diagramHistory: {
+        filters: 'Filters', hideFilters: 'Hide filters', loading: 'Loading history...', retry: 'Retry',
+        emptyTitle: 'No diagram history yet', emptyDescription: 'Completed previews are saved per Vault and appear here.',
+        noResults: 'No history entries match these filters.', clearFilters: 'Clear search and filters',
+        count: '{count} diagrams', newestFirst: 'Newest completed first',
         title: 'Diagram history', searchPlaceholder: 'Search title, note, type, or format…',
         allTypes: 'All diagram types', allFormats: 'All source formats', anyExport: 'Any export',
         itemsPerPageLabel: 'Items per page', itemsPerPage: '{count} per page', completedFrom: 'Completed from', completedTo: 'Completed to',

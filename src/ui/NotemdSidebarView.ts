@@ -1,4 +1,4 @@
-import { Editor, ItemView, MarkdownView, Notice, TFile, TFolder, WorkspaceLeaf } from 'obsidian';
+import { Editor, ItemView, MarkdownView, Notice, setIcon, TFile, TFolder, WorkspaceLeaf } from 'obsidian';
 import NotemdPlugin from '../main';
 import { ApiLivenessEvent, ApiLivenessPhase, NotemdSettings, ProgressReporter } from '../types';
 import { NOTEMD_SIDEBAR_ICON, NOTEMD_SIDEBAR_VIEW_TYPE } from '../constants';
@@ -867,6 +867,20 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
             await this.runSingleAction(actionId);
         };
         this.actionButtons.set(actionId, button);
+    }
+
+    private createDiagramHistoryButton(parent: HTMLElement): void {
+        const i18n = this.getStrings();
+        const button = parent.createEl('button', {
+            cls: 'notemd-action-button notemd-diagram-history-entry'
+        });
+        button.type = 'button';
+        button.title = i18n.sidebar.diagramHistoryTooltip;
+        button.setAttribute('aria-label', i18n.sidebar.diagramHistoryLabel);
+        const icon = button.createSpan({ cls: 'notemd-diagram-history-entry-icon' });
+        setIcon(icon, 'history');
+        button.createSpan({ text: i18n.sidebar.diagramHistoryLabel });
+        button.onclick = () => this.plugin.openDiagramHistory();
     }
 
     private getConfiguredConceptFolderPath(): string | null {
@@ -1825,6 +1839,7 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
             }
 
             if (category === 'generation') {
+                this.createDiagramHistoryButton(body);
                 this.buildDiagramIntentSelector(body);
             }
 

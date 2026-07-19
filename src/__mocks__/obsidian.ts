@@ -3,11 +3,24 @@ export const Editor = jest.fn();
 export const MarkdownView = jest.fn();
 export const Modal = jest.fn();
 export const Notice = jest.fn();
+export const Menu = jest.fn().mockImplementation(() => ({
+	addItem: jest.fn().mockImplementation((configure: (item: unknown) => void) => {
+		const item = {
+			setTitle: jest.fn().mockReturnThis(),
+			setIcon: jest.fn().mockReturnThis(),
+			onClick: jest.fn().mockReturnThis(),
+		};
+		configure(item);
+		return item;
+	}),
+	showAtMouseEvent: jest.fn(),
+}));
 export const Plugin = jest.fn();
 export const PluginSettingTab = jest.fn();
 export const requestUrl = jest.fn();
 export const getLanguage = jest.fn(() => 'en');
 export const loadPdfJs = jest.fn();
+export const setIcon = jest.fn();
 export const Setting = jest.fn().mockImplementation(() => ({
 	setName: jest.fn().mockReturnThis(),
 	setDesc: jest.fn().mockReturnThis(),

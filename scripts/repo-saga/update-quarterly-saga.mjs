@@ -757,7 +757,7 @@ function updateReadme(filePath, blockContent) {
   if (markerPattern.test(source)) {
     next = source.replace(markerPattern, replacement);
   } else {
-    const starHistoryPattern = /\n!\[Star History Chart\]\([^)]+\)/;
+    const starHistoryPattern = /\n(?:## Star History\s*<a[\s\S]*?<\/a>|!\[Star History Chart\]\([^)]+\)|\[!\[Star History Chart\]\([^)]*\)\]\([^)]+\))/;
     if (!starHistoryPattern.test(source)) {
       throw new Error(`Could not find Star History section in ${filePath}`);
     }

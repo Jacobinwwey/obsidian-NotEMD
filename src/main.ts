@@ -12,6 +12,8 @@ import { prepareBatchTargetFolder } from './operations/batchTargetFolderPreparat
 import { createDiagramHistoryRepository } from './diagram/history/diagramHistoryRepository';
 import type { DiagramHistoryEntry } from './diagram/history/diagramHistoryRepository';
 import { collectDiagramHistoryArtifactPaths } from './diagram/history/diagramHistoryActions';
+import type { DiagramHistoryStore } from './ui/DiagramHistoryView';
+import { DiagramHistoryModal } from './ui/DiagramHistoryModal';
 import {
     canonicalizeProviderConfigs,
     resolveCanonicalProviderName
@@ -255,12 +257,8 @@ export default class NotemdPlugin extends Plugin {
         return supportsDiagramPreviewModal(artifact);
     }
 
-    private openDiagramPreviewModal(artifact: RenderArtifact, sourcePath: string, artifactSaved = false, existingHistoryEntryId?: string) {
-        const i18n = this.getUiStrings();
-        const targetLabel = getRenderTargetDisplayName(artifact.target);
-        const previewTitle = formatI18n(i18n.previewModal.title, { target: targetLabel });
-        const session = new IframeRenderHost().createSession(artifact, { sourcePath, artifactSaved, previewTitle });
-        const historyRepository = createDiagramHistoryRepository(
+    private createDiagramHistoryStore(): DiagramHistoryStore {
+        const repository = createDiagramHistoryRepository(
             async () => this.settings.diagramHistoryEntries ?? [],
             async entries => {
                 this.settings.diagramHistoryEntries = entries;
@@ -268,8 +266,29 @@ export default class NotemdPlugin extends Plugin {
             },
             this.settings.diagramHistoryRetentionLimit
         );
+        return {
+            loadPage: query => repository.query(query),
+            removeEntry: id => repository.removeIndexEntry(id),
+            recordCompleted: entry => repository.recordCompleted(entry),
+            recordArtifactPath: (id, path) => repository.recordArtifactPath(id, path),
+            recordExportPath: (id, kind, path) => repository.recordExportPath(id, kind, path),
+            deleteArtifacts: entry => this.deleteDiagramHistoryArtifacts(entry),
+            reopenArtifact: entry => this.reopenDiagramHistoryArtifact(entry)
+        };
+    }
+
+    public openDiagramHistory(): void {
+        new DiagramHistoryModal(this.app, this.createDiagramHistoryStore(), this.settings.uiLocale).open();
+    }
+
+    private openDiagramPreviewModal(artifact: RenderArtifact, sourcePath: string, artifactSaved = false, existingHistoryEntryId?: string) {
+        const i18n = this.getUiStrings();
+        const targetLabel = getRenderTargetDisplayName(artifact.target);
+        const previewTitle = formatI18n(i18n.previewModal.title, { target: targetLabel });
+        const session = new IframeRenderHost().createSession(artifact, { sourcePath, artifactSaved, previewTitle });
+        const historyStore = this.createDiagramHistoryStore();
         const historyEntryId = existingHistoryEntryId ?? `diagram-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
-        if (!existingHistoryEntryId) void historyRepository.recordCompleted({
+        if (!existingHistoryEntryId) void historyStore.recordCompleted!({
             id: historyEntryId,
             completedAt: Date.now(),
             title: previewTitle,
@@ -282,14 +301,7 @@ export default class NotemdPlugin extends Plugin {
         new DiagramPreviewModal(this.app, session, this.settings.uiLocale, {
             exportPpi: this.settings.diagramPreviewExportPpi,
             historyEntryId,
-            historyStore: {
-                loadPage: query => historyRepository.query(query),
-                removeEntry: async id => { await historyRepository.removeIndexEntry(id); },
-                recordArtifactPath: (id, path) => historyRepository.recordArtifactPath(id, path),
-                recordExportPath: (id, kind, path) => historyRepository.recordExportPath(id, kind, path),
-                deleteArtifacts: entry => this.deleteDiagramHistoryArtifacts(entry),
-                reopenArtifact: entry => this.reopenDiagramHistoryArtifact(entry)
-            }
+            historyStore
         }).open();
     }
 
@@ -795,6 +807,12 @@ export default class NotemdPlugin extends Plugin {
                 await this.previewDiagramCommand(file, reporter);
             }
         );
+
+        this.addCommand({
+            id: 'notemd-open-diagram-history',
+            name: uiStrings.commands.openDiagramHistory,
+            callback: () => this.openDiagramHistory()
+        });
 
         // Legacy compatibility aliases remain registered until downstream workflows
         // and docs fully converge on the canonical diagram command ids.
