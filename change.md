@@ -4,9 +4,19 @@ This document summarizes the major functional and architectural changes implemen
 
 ---
 
-## Unreleased
+## 1.9.4 - 2026-07-21
 
 ### English
+
+#### Highlights
+
+- Expanded diagrams into a source-aware, multi-format platform with explicit CircuitikZ, Draw.io, Drawnix, SVG, PNG, PDF, HTML, and editable artifact contracts.
+- Added a managed CircuitikZ desktop environment with trusted compiler discovery, pinned Tectonic installation, integrity verification, native compile diagnostics, and dependency-free fallback previews.
+- Added Vault-persistent diagram history with search, filtering, pagination, artifact actions, direct navigation, and an adaptive right-side drawer.
+- Added settings fuzzy search, stable favorites, and section navigation, plus safer batch-folder confirmation and creation behavior.
+- Completed published multilingual documentation routes and hardened Slidev standalone export and GitHub Pages delivery.
+
+#### Changes
 
 - Added first-class experimental diagram UI support for `circuit` intent and the `circuitikz` render target.
 - Added `CircuitikzRenderer` for constrained `DiagramSpec.circuitSpec` payloads. It writes deterministic circuitikz `.tex` source and attaches a white-background SVG preview companion for Obsidian viewing.
@@ -19,6 +29,16 @@ This document summarizes the major functional and architectural changes implemen
 - Updated the maintainer CLI bridge to prefer `obsidian-cli native eval` when that wrapper is installed and fall back to the official `obsidian eval` command only when the wrapper command is unavailable.
 
 ### 中文
+
+#### 亮点
+
+- 将图表能力扩展为识别源类型的多格式平台，为 CircuitikZ、Draw.io、Drawnix、SVG、PNG、PDF、HTML 与可编辑产物建立明确契约。
+- 新增 CircuitikZ 桌面端托管环境，支持可信编译器发现、固定版本 Tectonic 安装、完整性校验、原生编译诊断与零依赖预览回退。
+- 新增按 Vault 持久化的图形历史，支持搜索、筛选、分页、产物操作、直达入口与自适应右侧抽屉。
+- 新增设置模糊搜索、稳定收藏与大项导览，并完善批处理目标文件夹的确认及创建逻辑。
+- 补齐已发布的多语言文档路由，并加固 Slidev standalone 导出与 GitHub Pages 交付。
+
+#### 变更
 
 - 为实验性图表 UI 增加一等 `circuit` intent 与 `circuitikz` render target 支持。
 - 新增 `CircuitikzRenderer`，用于受约束的 `DiagramSpec.circuitSpec` payload。它会写出确定性 circuitikz `.tex` 源文件，并附加白底 SVG preview companion 供 Obsidian 查看。

@@ -39,8 +39,8 @@ describe('release-facing version truth contract', () => {
         expect(welcomeNotesZh[0]?.version).toBe(currentVersion);
         expect(welcomeNotesZhTw[0]?.version).toBe(currentVersion);
 
-        expect(welcomeNotesEn[0]?.highlights[0]).toContain('Slidev export');
-        expect(welcomeNotesZh[0]?.highlights[0]).toContain('Slidev 导出');
-        expect(welcomeNotesZhTw[0]?.highlights[0]).toContain('Slidev 匯出');
+        expect(welcomeNotesEn[0]?.highlights[0]).toContain('Diagram workflows');
+        expect(welcomeNotesZh[0]?.highlights[0]).toContain('图表工作流');
+        expect(welcomeNotesZhTw[0]?.highlights[0]).toContain('圖表工作流程');
     });
 });

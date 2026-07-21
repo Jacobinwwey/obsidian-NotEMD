@@ -708,7 +708,7 @@ Questa cronaca trimestrale mantiene lo stile visivo originale di [repo-saga](htt
 
 ![Notemd Development Chronicle](./docs/repo-saga/notemd-development-history.it.svg)
 
-_Aggiornato l'ultima volta per il tag di rilascio `1.9.3` il 2026-06-24. Data dell'ultimo commit: 2026-06-24._
+_Aggiornato l'ultima volta per il tag di rilascio `1.9.4` il 2026-07-21. Data dell'ultimo commit: 2026-07-21._
 <!-- repo-chronicle:end -->
 
 

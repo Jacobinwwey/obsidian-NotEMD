@@ -11,6 +11,14 @@ const WELCOME_RELEASE_NOTE_LIMIT = 2;
 
 const ENTRIES_EN: WelcomeReleaseNoteEntry[] = [
     {
+        version: '1.9.4',
+        highlights: [
+            'Diagram workflows now distinguish source formats from render and export targets, with first-class CircuitikZ, Draw.io, Drawnix, SVG, PNG, PDF, HTML, and editable artifact paths.',
+            'CircuitikZ can use a managed, integrity-checked Tectonic environment while retaining dependency-free previews and explicit native compile diagnostics.',
+            'Diagram history is now Vault-persistent and available through an adaptive right drawer with search, filters, pagination, artifact actions, and corrected scrolling; settings add fuzzy search, favorites, and section navigation.'
+        ]
+    },
+    {
         version: '1.9.3',
         highlights: [
             'Slidev export now ships a report-gated HTML/PDF/PNG/PPTX path with the local Slidev fork and full Slidev skill reference set wired into the real export workflow.',
@@ -62,6 +70,14 @@ const ENTRIES_EN: WelcomeReleaseNoteEntry[] = [
 
 const ENTRIES_ZH_CN: WelcomeReleaseNoteEntry[] = [
     {
+        version: '1.9.4',
+        highlights: [
+            '图表工作流现在明确区分源格式、渲染目标与导出目标，并为 CircuitikZ、Draw.io、Drawnix、SVG、PNG、PDF、HTML 与可编辑产物提供一等路径。',
+            'CircuitikZ 现在可使用经过完整性校验的托管 Tectonic 环境，同时保留零依赖预览与明确的原生编译诊断。',
+            '图形历史现在按 Vault 持久化，并通过自适应右侧抽屉提供搜索、筛选、分页与产物操作，滚动问题也已修复；设置页新增模糊搜索、收藏与大项导览。'
+        ]
+    },
+    {
         version: '1.9.3',
         highlights: [
             'Slidev 导出现在具备经过报告门禁验证的 HTML/PDF/PNG/PPTX 路径，并在真实导出工作流中接入本地 Slidev fork 与完整 Slidev skill reference 集合。',
@@ -112,6 +128,14 @@ const ENTRIES_ZH_CN: WelcomeReleaseNoteEntry[] = [
 ];
 
 const ENTRIES_ZH_TW: WelcomeReleaseNoteEntry[] = [
+    {
+        version: '1.9.4',
+        highlights: [
+            '圖表工作流程現在明確區分來源格式、渲染目標與匯出目標，並為 CircuitikZ、Draw.io、Drawnix、SVG、PNG、PDF、HTML 與可編輯產物提供一等路徑。',
+            'CircuitikZ 現在可使用經過完整性校驗的託管 Tectonic 環境，同時保留零依賴預覽與明確的原生編譯診斷。',
+            '圖形歷史現在按 Vault 持久化，並透過自適應右側抽屜提供搜尋、篩選、分頁與產物操作，捲動問題也已修復；設定頁新增模糊搜尋、收藏與大項導覽。'
+        ]
+    },
     {
         version: '1.9.3',
         highlights: [

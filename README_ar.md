@@ -709,7 +709,7 @@
 
 ![Notemd Development Chronicle](./docs/repo-saga/notemd-development-history.ar.svg)
 
-_تم آخر تحديث للإصدار ذي الوسم `1.9.3` في 2026-06-24. تاريخ أحدث التزام: 2026-06-24._
+_تم آخر تحديث للإصدار ذي الوسم `1.9.4` في 2026-07-21. تاريخ أحدث التزام: 2026-07-21._
 <!-- repo-chronicle:end -->
 
 

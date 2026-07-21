@@ -702,7 +702,7 @@ Den här kvartalskronikan behåller den ursprungliga visuella stilen från [repo
 
 ![Notemd Development Chronicle](./docs/repo-saga/notemd-development-history.sv.svg)
 
-_Senast uppdaterad för release-taggen `1.9.3` den 2026-06-24. Datum för senaste commit: 2026-06-24._
+_Senast uppdaterad för release-taggen `1.9.4` den 2026-07-21. Datum för senaste commit: 2026-07-21._
 <!-- repo-chronicle:end -->
 
 
