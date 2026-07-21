@@ -14,6 +14,13 @@ const hostPathEnvironment = (pathValue: string): NodeJS.ProcessEnv => ({
     ...(HOST_PLATFORM === 'win32' ? { PATHEXT: '.EXE' } : {})
 });
 
+function writeHostExecutable(filePath: string, contents: string): void {
+    fs.writeFileSync(filePath, contents, 'utf8');
+    if (HOST_PLATFORM !== 'win32') {
+        fs.chmodSync(filePath, 0o755);
+    }
+}
+
 type DesktopEnvironmentApi = {
     findExecutableOnPath: (name: string, input: {
         platform: NodeJS.Platform;
@@ -104,8 +111,8 @@ describe('CircuitikZ desktop environment discovery', () => {
         const systemPdflatex = path.join(systemBin, HOST_PDFLATEX_EXECUTABLE);
         fs.mkdirSync(path.dirname(managedExecutable), { recursive: true });
         fs.mkdirSync(systemBin, { recursive: true });
-        fs.writeFileSync(managedExecutable, 'managed');
-        fs.writeFileSync(systemPdflatex, 'system');
+        writeHostExecutable(managedExecutable, 'managed');
+        writeHostExecutable(systemPdflatex, 'system');
         fs.writeFileSync(path.join(runtimeRoot, 'managed-runtime.json'), JSON.stringify({
             schemaVersion: 'notemd.managed-latex-runtime.v1',
             runtime: 'tectonic',
@@ -150,7 +157,7 @@ describe('CircuitikZ desktop environment discovery', () => {
             HOST_TECTONIC_EXECUTABLE
         );
         fs.mkdirSync(path.dirname(managedExecutable), { recursive: true });
-        fs.writeFileSync(managedExecutable, 'managed');
+        writeHostExecutable(managedExecutable, 'managed');
         const previousManifestPath = path.join(runtimeRoot, 'managed-runtime.json.previous');
         fs.writeFileSync(previousManifestPath, JSON.stringify({
             schemaVersion: 'notemd.managed-latex-runtime.v1',
@@ -190,8 +197,8 @@ describe('CircuitikZ desktop environment discovery', () => {
         fs.mkdirSync(path.dirname(previousExecutable), { recursive: true });
         fs.mkdirSync(path.dirname(pendingExecutable), { recursive: true });
         fs.mkdirSync(path.join(runtimeRoot, '.managed-runtime.lock'));
-        fs.writeFileSync(previousExecutable, 'previous');
-        fs.writeFileSync(pendingExecutable, 'pending');
+        writeHostExecutable(previousExecutable, 'previous');
+        writeHostExecutable(pendingExecutable, 'pending');
         const manifest = (executablePath: string, sha256: string) => JSON.stringify({
             schemaVersion: 'notemd.managed-latex-runtime.v1',
             runtime: 'tectonic',
@@ -232,8 +239,8 @@ describe('CircuitikZ desktop environment discovery', () => {
         const pendingExecutable = path.join(runtimeRoot, 'pending-release', HOST_PLATFORM_DIRECTORY, HOST_TECTONIC_EXECUTABLE);
         fs.mkdirSync(path.dirname(previousExecutable), { recursive: true });
         fs.mkdirSync(path.dirname(pendingExecutable), { recursive: true });
-        fs.writeFileSync(previousExecutable, 'previous');
-        fs.writeFileSync(pendingExecutable, 'pending');
+        writeHostExecutable(previousExecutable, 'previous');
+        writeHostExecutable(pendingExecutable, 'pending');
         const manifest = (executablePath: string, digest: string) => JSON.stringify({
             schemaVersion: 'notemd.managed-latex-runtime.v1',
             runtime: 'tectonic',
@@ -293,7 +300,7 @@ describe('CircuitikZ desktop environment discovery', () => {
         const unrelatedDirectory = path.join(runtimeRoot, 'tectonic-user-cache');
         fs.mkdirSync(path.dirname(ownedExecutable), { recursive: true });
         fs.mkdirSync(unrelatedDirectory, { recursive: true });
-        fs.writeFileSync(ownedExecutable, 'owned-runtime');
+        writeHostExecutable(ownedExecutable, 'owned-runtime');
         fs.writeFileSync(path.join(unrelatedDirectory, 'keep.txt'), 'user-owned');
         fs.writeFileSync(path.join(runtimeRoot, 'managed-runtime.json'), JSON.stringify({
             schemaVersion: 'notemd.managed-latex-runtime.v1',
@@ -328,7 +335,7 @@ describe('CircuitikZ desktop environment discovery', () => {
         const linkedExecutable = path.join(linkedReleaseDirectory, HOST_PLATFORM_DIRECTORY, HOST_TECTONIC_EXECUTABLE);
         fs.mkdirSync(runtimeRoot, { recursive: true });
         fs.mkdirSync(externalInstallDirectory, { recursive: true });
-        fs.writeFileSync(externalExecutable, 'external-user-runtime');
+        writeHostExecutable(externalExecutable, 'external-user-runtime');
         fs.writeFileSync(path.join(externalInstallDirectory, 'keep.txt'), 'must-survive-removal');
         fs.symlinkSync(
             externalReleaseDirectory,
@@ -363,8 +370,8 @@ describe('CircuitikZ desktop environment discovery', () => {
         const unrelatedExecutable = path.join(runtimeRoot, 'tectonic-lookalike', HOST_PLATFORM_DIRECTORY, HOST_TECTONIC_EXECUTABLE);
         fs.mkdirSync(path.dirname(inactiveExecutable), { recursive: true });
         fs.mkdirSync(path.dirname(unrelatedExecutable), { recursive: true });
-        fs.writeFileSync(inactiveExecutable, 'owned-runtime');
-        fs.writeFileSync(unrelatedExecutable, 'unrelated-runtime');
+        writeHostExecutable(inactiveExecutable, 'owned-runtime');
+        writeHostExecutable(unrelatedExecutable, 'unrelated-runtime');
         fs.writeFileSync(
             path.join(path.dirname(inactiveExecutable), '.notemd-managed-runtime.json'),
             JSON.stringify({
@@ -412,7 +419,7 @@ describe('CircuitikZ desktop environment discovery', () => {
         const createOwnedInstall = (releaseName: string, contents: string): string => {
             const executablePath = path.join(runtimeRoot, releaseName, HOST_PLATFORM_DIRECTORY, HOST_TECTONIC_EXECUTABLE);
             fs.mkdirSync(path.dirname(executablePath), { recursive: true });
-            fs.writeFileSync(executablePath, contents);
+            writeHostExecutable(executablePath, contents);
             fs.writeFileSync(
                 path.join(path.dirname(executablePath), '.notemd-managed-runtime.json'),
                 JSON.stringify({
