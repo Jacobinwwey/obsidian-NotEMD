@@ -167,7 +167,11 @@ ${options.stderr ? `process.stderr.write(${JSON.stringify(options.stderr)});\n` 
                 ],
                 {
                     encoding: 'utf8',
-                    env: { ...process.env, PATH: tempRoot, Path: tempRoot }
+                    env: {
+                        ...process.env,
+                        PATH: `${tempRoot}${path.delimiter}${path.dirname(process.execPath)}`,
+                        Path: `${tempRoot}${path.delimiter}${path.dirname(process.execPath)}`
+                    }
                 }
             );
 

@@ -1,7 +1,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 
-const matter = require('../../website/node_modules/gray-matter');
+const matter = require('gray-matter');
 
 type PublishedDocumentationLocale = {
     locale: string;

@@ -4,6 +4,16 @@ import * as os from 'os';
 import * as path from 'path';
 import { DEFAULT_SETTINGS } from '../constants';
 
+const HOST_PLATFORM = process.platform;
+const HOST_ARCHITECTURE = process.arch;
+const HOST_PLATFORM_DIRECTORY = `${HOST_PLATFORM}-${HOST_ARCHITECTURE}`;
+const HOST_TECTONIC_EXECUTABLE = HOST_PLATFORM === 'win32' ? 'tectonic.exe' : 'tectonic';
+const HOST_PDFLATEX_EXECUTABLE = HOST_PLATFORM === 'win32' ? 'pdflatex.exe' : 'pdflatex';
+const hostPathEnvironment = (pathValue: string): NodeJS.ProcessEnv => ({
+    PATH: pathValue,
+    ...(HOST_PLATFORM === 'win32' ? { PATHEXT: '.EXE' } : {})
+});
+
 type DesktopEnvironmentApi = {
     findExecutableOnPath: (name: string, input: {
         platform: NodeJS.Platform;
@@ -55,16 +65,15 @@ describe('CircuitikZ desktop environment discovery', () => {
 
     test('resolves executable names from PATH using target-platform extension rules', () => {
         const api = loadDesktopEnvironmentApi();
-        const bin = path.join(root, 'bin');
-        fs.mkdirSync(bin);
-        const pdflatex = path.join(bin, 'pdflatex.exe');
-        fs.writeFileSync(pdflatex, 'binary');
+        const windowsRoot = 'C:\\Notemd';
+        const bin = path.win32.join(windowsRoot, 'bin');
+        const pdflatex = path.win32.join(bin, 'pdflatex.exe');
 
         expect(api.findExecutableOnPath?.('pdflatex', {
             platform: 'win32',
             pathValue: `${root};${bin}`,
             pathExtValue: '.COM;.EXE;.BAT;.CMD',
-            isExecutable: fs.existsSync
+            isExecutable: candidate => candidate === pdflatex
         })).toBe(pdflatex);
         expect(api.findExecutableOnPath?.('tectonic', {
             platform: 'win32',
@@ -76,27 +85,23 @@ describe('CircuitikZ desktop environment discovery', () => {
 
     test('skips Windows batch shims and continues to an executable supported by shell-free spawning', () => {
         const api = loadDesktopEnvironmentApi();
-        const bin = path.join(root, 'bin');
-        fs.mkdirSync(bin);
-        const batchShim = path.join(bin, 'tectonic.cmd');
-        const executable = path.join(bin, 'tectonic.exe');
-        fs.writeFileSync(batchShim, 'batch shim');
-        fs.writeFileSync(executable, 'binary');
+        const bin = path.win32.join('C:\\Notemd', 'bin');
+        const executable = path.win32.join(bin, 'tectonic.exe');
 
         expect(api.findExecutableOnPath?.('tectonic', {
             platform: 'win32',
             pathValue: bin,
             pathExtValue: '.CMD;.EXE',
-            isExecutable: fs.existsSync
+            isExecutable: candidate => candidate === executable
         })).toBe(executable);
     });
 
     test('builds auto-discovery candidates from managed and system installations', () => {
         const api = loadDesktopEnvironmentApi();
         const runtimeRoot = path.join(root, 'runtime');
-        const managedExecutable = path.join(runtimeRoot, 'tectonic-0.16.9', 'win32-x64', 'tectonic.exe');
+        const managedExecutable = path.join(runtimeRoot, 'tectonic-0.16.9', HOST_PLATFORM_DIRECTORY, HOST_TECTONIC_EXECUTABLE);
         const systemBin = path.join(root, 'system-bin');
-        const systemPdflatex = path.join(systemBin, 'pdflatex.exe');
+        const systemPdflatex = path.join(systemBin, HOST_PDFLATEX_EXECUTABLE);
         fs.mkdirSync(path.dirname(managedExecutable), { recursive: true });
         fs.mkdirSync(systemBin, { recursive: true });
         fs.writeFileSync(managedExecutable, 'managed');
@@ -105,8 +110,8 @@ describe('CircuitikZ desktop environment discovery', () => {
             schemaVersion: 'notemd.managed-latex-runtime.v1',
             runtime: 'tectonic',
             version: '0.16.9',
-            platform: 'win32',
-            architecture: 'x64',
+            platform: HOST_PLATFORM,
+            architecture: HOST_ARCHITECTURE,
             executablePath: managedExecutable,
             archiveUrl: 'https://github.com/notemd/fake-tectonic.zip',
             sha256: '0'.repeat(64),
@@ -117,9 +122,9 @@ describe('CircuitikZ desktop environment discovery', () => {
             ...DEFAULT_SETTINGS,
             circuitikzManagedRuntimeRoot: runtimeRoot
         }, {
-            platform: 'win32',
-            architecture: 'x64',
-            environment: { PATH: systemBin, PATHEXT: '.EXE' },
+            platform: HOST_PLATFORM,
+            architecture: HOST_ARCHITECTURE,
+            environment: hostPathEnvironment(systemBin),
             homeDirectory: root,
             isExecutable: fs.existsSync
         });
@@ -141,8 +146,8 @@ describe('CircuitikZ desktop environment discovery', () => {
         const managedExecutable = path.join(
             runtimeRoot,
             'tectonic-0.16.9-0123456789abcdef',
-            'win32-x64',
-            'tectonic.exe'
+            HOST_PLATFORM_DIRECTORY,
+            HOST_TECTONIC_EXECUTABLE
         );
         fs.mkdirSync(path.dirname(managedExecutable), { recursive: true });
         fs.writeFileSync(managedExecutable, 'managed');
@@ -151,8 +156,8 @@ describe('CircuitikZ desktop environment discovery', () => {
             schemaVersion: 'notemd.managed-latex-runtime.v1',
             runtime: 'tectonic',
             version: '0.16.9',
-            platform: 'win32',
-            architecture: 'x64',
+            platform: HOST_PLATFORM,
+            architecture: HOST_ARCHITECTURE,
             executablePath: managedExecutable,
             archiveUrl: 'https://github.com/notemd/fake-tectonic.zip',
             sha256: '0123456789abcdef'.padEnd(64, '0'),
@@ -164,9 +169,9 @@ describe('CircuitikZ desktop environment discovery', () => {
             ...DEFAULT_SETTINGS,
             circuitikzManagedRuntimeRoot: runtimeRoot
         }, {
-            platform: 'win32',
-            architecture: 'x64',
-            environment: { PATH: '', PATHEXT: '.EXE' },
+            platform: HOST_PLATFORM,
+            architecture: HOST_ARCHITECTURE,
+            environment: hostPathEnvironment(''),
             homeDirectory: root,
             isExecutable: fs.existsSync
         });
@@ -180,8 +185,8 @@ describe('CircuitikZ desktop environment discovery', () => {
     test('reads the last valid pointer without mutating an activation in progress', () => {
         const api = loadDesktopEnvironmentApi();
         const runtimeRoot = path.join(root, 'runtime');
-        const previousExecutable = path.join(runtimeRoot, 'tectonic-old', 'win32-x64', 'tectonic.exe');
-        const pendingExecutable = path.join(runtimeRoot, 'tectonic-new', 'win32-x64', 'tectonic.exe');
+        const previousExecutable = path.join(runtimeRoot, 'tectonic-old', HOST_PLATFORM_DIRECTORY, HOST_TECTONIC_EXECUTABLE);
+        const pendingExecutable = path.join(runtimeRoot, 'tectonic-new', HOST_PLATFORM_DIRECTORY, HOST_TECTONIC_EXECUTABLE);
         fs.mkdirSync(path.dirname(previousExecutable), { recursive: true });
         fs.mkdirSync(path.dirname(pendingExecutable), { recursive: true });
         fs.mkdirSync(path.join(runtimeRoot, '.managed-runtime.lock'));
@@ -191,8 +196,8 @@ describe('CircuitikZ desktop environment discovery', () => {
             schemaVersion: 'notemd.managed-latex-runtime.v1',
             runtime: 'tectonic',
             version: '0.16.9',
-            platform: 'win32',
-            architecture: 'x64',
+            platform: HOST_PLATFORM,
+            architecture: HOST_ARCHITECTURE,
             executablePath,
             archiveUrl: 'https://github.com/notemd/fake-tectonic.zip',
             sha256,
@@ -207,9 +212,9 @@ describe('CircuitikZ desktop environment discovery', () => {
             ...DEFAULT_SETTINGS,
             circuitikzManagedRuntimeRoot: runtimeRoot
         }, {
-            platform: 'win32',
-            architecture: 'x64',
-            environment: { PATH: '', PATHEXT: '.EXE' },
+            platform: HOST_PLATFORM,
+            architecture: HOST_ARCHITECTURE,
+            environment: hostPathEnvironment(''),
             homeDirectory: root,
             isExecutable: fs.existsSync
         });
@@ -223,8 +228,8 @@ describe('CircuitikZ desktop environment discovery', () => {
     test('keeps recovery discovery read-only when a concurrent activation appears during pointer reads', () => {
         const api = loadDesktopEnvironmentApi();
         const runtimeRoot = path.join(root, 'runtime');
-        const previousExecutable = path.join(runtimeRoot, 'previous-release', 'win32-x64', 'tectonic.exe');
-        const pendingExecutable = path.join(runtimeRoot, 'pending-release', 'win32-x64', 'tectonic.exe');
+        const previousExecutable = path.join(runtimeRoot, 'previous-release', HOST_PLATFORM_DIRECTORY, HOST_TECTONIC_EXECUTABLE);
+        const pendingExecutable = path.join(runtimeRoot, 'pending-release', HOST_PLATFORM_DIRECTORY, HOST_TECTONIC_EXECUTABLE);
         fs.mkdirSync(path.dirname(previousExecutable), { recursive: true });
         fs.mkdirSync(path.dirname(pendingExecutable), { recursive: true });
         fs.writeFileSync(previousExecutable, 'previous');
@@ -233,8 +238,8 @@ describe('CircuitikZ desktop environment discovery', () => {
             schemaVersion: 'notemd.managed-latex-runtime.v1',
             runtime: 'tectonic',
             version: '0.16.9',
-            platform: 'win32',
-            architecture: 'x64',
+            platform: HOST_PLATFORM,
+            architecture: HOST_ARCHITECTURE,
             executablePath,
             archiveUrl: 'https://github.com/notemd/fake-tectonic.zip',
             sha256: digest,
@@ -264,9 +269,9 @@ describe('CircuitikZ desktop environment discovery', () => {
                 ...DEFAULT_SETTINGS,
                 circuitikzManagedRuntimeRoot: runtimeRoot
             }, {
-                platform: 'win32',
-                architecture: 'x64',
-                environment: { PATH: '', PATHEXT: '.EXE' },
+                platform: HOST_PLATFORM,
+                architecture: HOST_ARCHITECTURE,
+                environment: hostPathEnvironment(''),
                 homeDirectory: root,
                 isExecutable: fs.existsSync
             });
@@ -284,7 +289,7 @@ describe('CircuitikZ desktop environment discovery', () => {
     test('removes only manifest-owned installs and preserves unrelated tectonic-prefixed directories', async () => {
         const api = loadDesktopEnvironmentApi();
         const runtimeRoot = path.join(root, 'runtime');
-        const ownedExecutable = path.join(runtimeRoot, 'tectonic-owned', 'win32-x64', 'tectonic.exe');
+        const ownedExecutable = path.join(runtimeRoot, 'tectonic-owned', HOST_PLATFORM_DIRECTORY, HOST_TECTONIC_EXECUTABLE);
         const unrelatedDirectory = path.join(runtimeRoot, 'tectonic-user-cache');
         fs.mkdirSync(path.dirname(ownedExecutable), { recursive: true });
         fs.mkdirSync(unrelatedDirectory, { recursive: true });
@@ -294,8 +299,8 @@ describe('CircuitikZ desktop environment discovery', () => {
             schemaVersion: 'notemd.managed-latex-runtime.v1',
             runtime: 'tectonic',
             version: '0.16.9',
-            platform: 'win32',
-            architecture: 'x64',
+            platform: HOST_PLATFORM,
+            architecture: HOST_ARCHITECTURE,
             executablePath: ownedExecutable,
             archiveUrl: 'https://github.com/notemd/fake-tectonic.zip',
             sha256: '1'.repeat(64),
@@ -317,10 +322,10 @@ describe('CircuitikZ desktop environment discovery', () => {
         const api = loadDesktopEnvironmentApi();
         const runtimeRoot = path.join(root, 'runtime');
         const externalReleaseDirectory = path.join(root, 'external-user-release');
-        const externalInstallDirectory = path.join(externalReleaseDirectory, 'win32-x64');
-        const externalExecutable = path.join(externalInstallDirectory, 'tectonic.exe');
+        const externalInstallDirectory = path.join(externalReleaseDirectory, HOST_PLATFORM_DIRECTORY);
+        const externalExecutable = path.join(externalInstallDirectory, HOST_TECTONIC_EXECUTABLE);
         const linkedReleaseDirectory = path.join(runtimeRoot, 'linked-release');
-        const linkedExecutable = path.join(linkedReleaseDirectory, 'win32-x64', 'tectonic.exe');
+        const linkedExecutable = path.join(linkedReleaseDirectory, HOST_PLATFORM_DIRECTORY, HOST_TECTONIC_EXECUTABLE);
         fs.mkdirSync(runtimeRoot, { recursive: true });
         fs.mkdirSync(externalInstallDirectory, { recursive: true });
         fs.writeFileSync(externalExecutable, 'external-user-runtime');
@@ -334,8 +339,8 @@ describe('CircuitikZ desktop environment discovery', () => {
             schemaVersion: 'notemd.managed-latex-runtime.v1',
             runtime: 'tectonic',
             version: '0.16.9',
-            platform: 'win32',
-            architecture: 'x64',
+            platform: HOST_PLATFORM,
+            architecture: HOST_ARCHITECTURE,
             executablePath: linkedExecutable,
             archiveUrl: 'https://github.com/notemd/fake-tectonic.zip',
             sha256: '3'.repeat(64),
@@ -354,8 +359,8 @@ describe('CircuitikZ desktop environment discovery', () => {
     test('removes inactive installs only when install-local ownership metadata validates the exact directory', async () => {
         const api = loadDesktopEnvironmentApi();
         const runtimeRoot = path.join(root, 'runtime');
-        const inactiveExecutable = path.join(runtimeRoot, 'notemd-release', 'win32-x64', 'tectonic.exe');
-        const unrelatedExecutable = path.join(runtimeRoot, 'tectonic-lookalike', 'win32-x64', 'tectonic.exe');
+        const inactiveExecutable = path.join(runtimeRoot, 'notemd-release', HOST_PLATFORM_DIRECTORY, HOST_TECTONIC_EXECUTABLE);
+        const unrelatedExecutable = path.join(runtimeRoot, 'tectonic-lookalike', HOST_PLATFORM_DIRECTORY, HOST_TECTONIC_EXECUTABLE);
         fs.mkdirSync(path.dirname(inactiveExecutable), { recursive: true });
         fs.mkdirSync(path.dirname(unrelatedExecutable), { recursive: true });
         fs.writeFileSync(inactiveExecutable, 'owned-runtime');
@@ -366,8 +371,8 @@ describe('CircuitikZ desktop environment discovery', () => {
                 schemaVersion: 'notemd.managed-latex-runtime.v1',
                 runtime: 'tectonic',
                 version: '0.16.9',
-                platform: 'win32',
-                architecture: 'x64',
+                platform: HOST_PLATFORM,
+                architecture: HOST_ARCHITECTURE,
                 executablePath: inactiveExecutable,
                 archiveUrl: 'https://github.com/notemd/fake-tectonic.zip',
                 sha256: '2'.repeat(64),
@@ -381,8 +386,8 @@ describe('CircuitikZ desktop environment discovery', () => {
                 schemaVersion: 'notemd.managed-latex-runtime.v1',
                 runtime: 'tectonic',
                 version: '0.16.9',
-                platform: 'win32',
-                architecture: 'x64',
+                platform: HOST_PLATFORM,
+                architecture: HOST_ARCHITECTURE,
                 executablePath: unrelatedExecutable,
                 archiveUrl: 'https://github.com/notemd/fake-tectonic.zip',
                 sha256: '9'.repeat(64),
@@ -405,7 +410,7 @@ describe('CircuitikZ desktop environment discovery', () => {
         const runtimeRoot = path.join(root, 'runtime');
         const controller = new AbortController();
         const createOwnedInstall = (releaseName: string, contents: string): string => {
-            const executablePath = path.join(runtimeRoot, releaseName, 'win32-x64', 'tectonic.exe');
+            const executablePath = path.join(runtimeRoot, releaseName, HOST_PLATFORM_DIRECTORY, HOST_TECTONIC_EXECUTABLE);
             fs.mkdirSync(path.dirname(executablePath), { recursive: true });
             fs.writeFileSync(executablePath, contents);
             fs.writeFileSync(
@@ -414,8 +419,8 @@ describe('CircuitikZ desktop environment discovery', () => {
                     schemaVersion: 'notemd.managed-latex-runtime.v1',
                     runtime: 'tectonic',
                     version: '0.16.9',
-                    platform: 'win32',
-                    architecture: 'x64',
+                    platform: HOST_PLATFORM,
+                    architecture: HOST_ARCHITECTURE,
                     executablePath,
                     archiveUrl: 'https://github.com/notemd/fake-tectonic.zip',
                     sha256: '4'.repeat(64),

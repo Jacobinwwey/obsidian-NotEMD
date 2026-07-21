@@ -63,7 +63,7 @@ describe('managed Tectonic distribution contract', () => {
             platform: 'win32',
             environment: { LOCALAPPDATA: 'D:\\Users\\Ada\\AppData\\Local' },
             homeDirectory: 'D:\\Users\\Ada'
-        })).toBe(path.resolve('D:\\Users\\Ada\\AppData\\Local', 'Notemd', 'runtimes', 'latex'));
+        })).toBe(path.win32.resolve('D:\\Users\\Ada\\AppData\\Local', 'Notemd', 'runtimes', 'latex'));
         expect(api.resolveManagedLatexRuntimeRoot?.({
             platform: 'linux',
             environment: { XDG_DATA_HOME: '/mnt/data/.local-data' },
@@ -79,7 +79,7 @@ describe('managed Tectonic distribution contract', () => {
             environment: {},
             homeDirectory: 'C:\\Users\\Ada',
             configuredRoot: 'E:\\Notemd Runtime'
-        })).toBe(path.resolve('E:\\Notemd Runtime'));
+        })).toBe(path.win32.resolve('E:\\Notemd Runtime'));
     });
 
     test('rejects archive traversal and absolute entry names', () => {

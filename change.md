@@ -27,6 +27,7 @@ This document summarizes the major functional and architectural changes implemen
 - Added an optional managed CircuitikZ desktop runtime. Notemd can discover trusted system Tectonic/pdfLaTeX executables, install or repair a pinned Tectonic build outside the Vault with integrity checks, remove only the managed installation, and report smoke-test capabilities while dependency-free previews remain available on mobile.
 - Fixed long diagram-history drawers so the flex container can shrink, the history body scrolls within the preview shell, and overscroll stays contained.
 - Updated the maintainer CLI bridge to prefer `obsidian-cli native eval` when that wrapper is installed and fall back to the official `obsidian eval` command only when the wrapper command is unavailable.
+- Synchronized the npm 10 lockfile used by GitHub Actions and made CircuitikZ, CLI fallback, and website documentation contract fixtures portable across Windows and Linux release runners.
 
 ### 中文
 
@@ -49,6 +50,7 @@ This document summarizes the major functional and architectural changes implemen
 - 新增可选的 CircuitikZ 桌面端托管运行时。Notemd 可以发现受信任的系统 Tectonic/pdfLaTeX 可执行文件，在 Vault 之外通过完整性校验安装或修复固定版本的 Tectonic，仅删除托管安装，并报告 smoke-test 能力；移动端仍可使用零依赖预览。
 - 修复较长图形历史抽屉的滚动：flex 容器现在可以收缩，历史正文在预览 shell 内滚动，并限制 overscroll 外溢。
 - 更新维护者 CLI bridge：安装了 `obsidian-cli` wrapper 时优先使用 `obsidian-cli native eval`；仅当 wrapper 命令不可用时，回退到官方 `obsidian eval` 命令。
+- 同步 GitHub Actions 使用的 npm 10 lockfile，并使 CircuitikZ、CLI fallback 与网站文档契约 fixture 可在 Windows 和 Linux 发布 runner 上稳定执行。
 
 ---
 
