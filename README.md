@@ -845,4 +845,7 @@ _Last refreshed for release tag `1.9.3` on 2026-06-24. Latest commit date: 2026-
    <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=Jacobinwwey/obsidian-NotEMD&type=date&legend=top-left&sealed_token=Y32J_ehSQhPEtMK06bJeXYXBkFZbjjUR6tkogZgP92_f34InJDA7n9xcMmttFtW0o52nbKnU24nByb7DCiBnOrP2MOwevXU-so8BYLISzUsdeSUQRIOYg_lFXml_9MakEXjFEQStXFh7fUnsSXyIEq55QSTYNcbDOGF0k66bWhT1IyrZLnG26lJ-Mvbg" />
  </picture>
 </a>
-#### Friendly Links: [Linux DO：学AI，上L站！](https://linux.do/)
+
+## Friendly Links
+
+[Linux DO：学AI，上L站！](https://linux.do/)
