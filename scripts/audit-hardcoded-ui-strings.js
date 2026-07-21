@@ -42,7 +42,7 @@ const matchers = [
     { kind: 'button-text', regex: /\.setButtonText\((['"`])/ },
     { kind: 'title-text', regex: /titleEl\.setText\((['"`])/ },
     { kind: 'element-text', regex: /createEl\([^)]*\{\s*text:\s*(['"`])/ },
-    { kind: 'name-prop', regex: /\bname:\s*(['"`])/ },
+    { kind: 'name-prop', regex: /\bname:\s*(['"`])(?!\1)/ },
     { kind: 'placeholder', regex: /\.setPlaceholder\((['"`])/ },
     { kind: 'status-bar', regex: /updateStatusBar\((['"`])/ },
     { kind: 'progress-status', regex: /\.updateStatus\((['"`])/ },
@@ -84,7 +84,7 @@ const allFiles = candidateFiles
         const absolute = path.join(projectRoot, candidate);
         return fs.existsSync(absolute) ? walk(absolute) : [];
     })
-    .map(file => path.relative(projectRoot, file))
+    .map(file => path.relative(projectRoot, file).split(path.sep).join('/'))
     .filter(shouldInspect)
     .sort();
 
