@@ -680,6 +680,15 @@ Notemd は Obsidian 内でローカルに実行されますが、一部の機能
 -   **パフォーマンスの問題**: 大容量ファイルや多数のファイルの処理には時間がかかる場合があります。API 呼び出しを高速化 (ただし回数は増加) するために、「チャンク単語数」の設定を下げてみてください。別の LLM プロバイダーまたはモデルを試してください。
 -   **予期しないリンク**: リンクの品質は LLM とプロンプトに大きく依存します。異なるモデルや温度設定を試してください。
 
+<!-- notemd-acknowledgments -->
+## 謝辞と参照プロジェクト
+
+Notemd は独立して保守されています。文書化された設計判断に影響を与えた、または統合の基盤を提供するオープンソースのプロジェクトとコミュニティに感謝します。ここへの掲載は影響または相互運用性のみを示すものであり、推奨、提携、コードの同梱、またはコード再利用の主張を意味しません。
+
+- **参照プロジェクト:** [cloudy-tech-diagrams-skill](https://github.com/cloudy-liu/cloudy-tech-diagrams-skill), [Drawnix](https://github.com/plait-board/drawnix), [diagrams.net / draw.io](https://www.diagrams.net/), [repo-saga](https://github.com/teee32/repo-saga).
+- **オープンソースの基盤:** [Mermaid](https://github.com/mermaid-js/mermaid), [Vega-Lite](https://vega.github.io/vega-lite/), [Slidev](https://github.com/slidevjs/slidev), [CircuitikZ](https://github.com/circuitikz/circuitikz), [Tectonic](https://github.com/tectonic-typesetting/tectonic), [Docusaurus](https://docusaurus.io).
+- 各プロジェクトは独自のライセンスと条件を保持します。Notemd は [MIT ライセンス](./LICENSE) で提供されています。
+
 ## 貢献
 
 貢献は大歓迎です！ガイドラインについては GitHub リポジトリを参照してください：[https://github.com/Jacobinwwey/obsidian-NotEMD](https://github.com/Jacobinwwey/obsidian-NotEMD)

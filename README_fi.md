@@ -674,6 +674,15 @@ Notemd toimii paikallisesti Obsidianin sisällä, mutta osa ominaisuuksista läh
 - **Suorituskykyongelmat**: Suurten tiedostojen tai monien tiedostojen käsittely voi viedä aikaa. Pienennä "Chunk Word Count" -asetusta, jos haluat mahdollisesti nopeampia mutta useampia API-kutsuja. Kokeile toista LLM-tarjoajaa tai mallia.
 - **Odottamaton linkitys**: Linkityksen laatu riippuu voimakkaasti LLM:stä ja promptista. Kokeile eri malleja tai temperature-asetuksia.
 
+<!-- notemd-acknowledgments -->
+## Kiitokset ja viiteprojektit
+
+Notemdia ylläpidetään itsenäisesti. Kiitämme avoimen lähdekoodin projekteja ja yhteisöjä, jotka ovat vaikuttaneet dokumentoituihin suunnittelupäätöksiin tai tarjoavat integraatioiden perustan. Maininta tunnustaa vain vaikutuksen tai yhteentoimivuuden; se ei tarkoita hyväksyntää, sidossuhdetta, mukana toimitettua koodia tai väitettä koodin uudelleenkäytöstä.
+
+- **Viiteprojektit:** [cloudy-tech-diagrams-skill](https://github.com/cloudy-liu/cloudy-tech-diagrams-skill), [Drawnix](https://github.com/plait-board/drawnix), [diagrams.net / draw.io](https://www.diagrams.net/), [repo-saga](https://github.com/teee32/repo-saga).
+- **Avoimen lähdekoodin perustat:** [Mermaid](https://github.com/mermaid-js/mermaid), [Vega-Lite](https://vega.github.io/vega-lite/), [Slidev](https://github.com/slidevjs/slidev), [CircuitikZ](https://github.com/circuitikz/circuitikz), [Tectonic](https://github.com/tectonic-typesetting/tectonic), [Docusaurus](https://docusaurus.io).
+- Kukin projekti säilyttää oman lisenssinsä ja ehtonsa; Notemd on saatavilla [MIT-lisenssillä](./LICENSE).
+
 ## Osallistuminen
 
 Osallistuminen on tervetullutta. Katso ohjeet GitHub-repositoriosta: [https://github.com/Jacobinwwey/obsidian-NotEMD](https://github.com/Jacobinwwey/obsidian-NotEMD)

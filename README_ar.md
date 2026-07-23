@@ -683,6 +683,15 @@
 - **مشاكل الأداء**: قد تستغرق معالجة الملفات الكبيرة أو الكثير من الملفات وقتا. جرّب تقليل إعداد "Chunk Word Count" للحصول على استدعاءات أكثر ولكن أسرع. كما يمكن تجربة مزود أو نموذج آخر.
 - **روابط غير متوقعة**: تعتمد جودة إضافة الروابط بدرجة كبيرة على LLM والـ prompt. جرّب نماذج أخرى أو درجات Temperature مختلفة.
 
+<!-- notemd-acknowledgments -->
+## شكر ومشروعات مرجعية
+
+يُصان Notemd بصورة مستقلة. نتقدم بالشكر إلى المشروعات والمجتمعات مفتوحة المصدر التي ألهمت قراراته التصميمية الموثقة أو تشكل أساس تكاملاته. يوضح الإدراج هنا التأثير أو قابلية التشغيل البيني فقط، ولا يعني تأييدًا أو تبعية أو تضمين شفرة أو ادعاء إعادة استخدام شفرة.
+
+- **المشروعات المرجعية:** [cloudy-tech-diagrams-skill](https://github.com/cloudy-liu/cloudy-tech-diagrams-skill), [Drawnix](https://github.com/plait-board/drawnix), [diagrams.net / draw.io](https://www.diagrams.net/), [repo-saga](https://github.com/teee32/repo-saga).
+- **أسس مفتوحة المصدر:** [Mermaid](https://github.com/mermaid-js/mermaid), [Vega-Lite](https://vega.github.io/vega-lite/), [Slidev](https://github.com/slidevjs/slidev), [CircuitikZ](https://github.com/circuitikz/circuitikz), [Tectonic](https://github.com/tectonic-typesetting/tectonic), [Docusaurus](https://docusaurus.io).
+- يحتفظ كل مشروع بترخيصه وشروطه الخاصة؛ ويتاح Notemd بموجب [ترخيص MIT](./LICENSE).
+
 ## المساهمة
 
 المساهمات مرحب بها. يرجى الرجوع إلى مستودع GitHub للإرشادات: [https://github.com/Jacobinwwey/obsidian-NotEMD](https://github.com/Jacobinwwey/obsidian-NotEMD)

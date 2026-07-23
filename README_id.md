@@ -683,6 +683,15 @@ Notemd berjalan secara lokal di dalam Obsidian, tetapi beberapa fitur mengirimka
 - **Masalah Performa**: pemrosesan file besar atau banyak file bisa memakan waktu. Kurangi "Chunk Word Count" untuk mendapat API calls yang lebih pendek namun lebih banyak. Anda juga dapat mencoba penyedia atau model lain.
 - **Link Tak Terduga**: kualitas linking sangat bergantung pada LLM dan prompt. Cobalah model lain atau pengaturan temperature yang berbeda.
 
+<!-- notemd-acknowledgments -->
+## Ucapan terima kasih dan proyek rujukan
+
+Notemd dipelihara secara independen. Kami berterima kasih kepada proyek dan komunitas sumber terbuka yang menginformasikan keputusan desain terdokumentasi atau menyediakan fondasi integrasi. Pencantuman hanya mengakui pengaruh atau interoperabilitas; tidak menyiratkan dukungan, afiliasi, kode yang dibundel, atau klaim penggunaan ulang kode.
+
+- **Proyek rujukan:** [cloudy-tech-diagrams-skill](https://github.com/cloudy-liu/cloudy-tech-diagrams-skill), [Drawnix](https://github.com/plait-board/drawnix), [diagrams.net / draw.io](https://www.diagrams.net/), [repo-saga](https://github.com/teee32/repo-saga).
+- **Fondasi sumber terbuka:** [Mermaid](https://github.com/mermaid-js/mermaid), [Vega-Lite](https://vega.github.io/vega-lite/), [Slidev](https://github.com/slidevjs/slidev), [CircuitikZ](https://github.com/circuitikz/circuitikz), [Tectonic](https://github.com/tectonic-typesetting/tectonic), [Docusaurus](https://docusaurus.io).
+- Setiap proyek mempertahankan lisensi dan ketentuannya sendiri; Notemd tersedia di bawah [Lisensi MIT](./LICENSE).
+
 ## Kontribusi
 
 Kontribusi sangat diterima. Silakan lihat repositori GitHub untuk panduannya: [https://github.com/Jacobinwwey/obsidian-NotEMD](https://github.com/Jacobinwwey/obsidian-NotEMD)

@@ -674,6 +674,15 @@ Notemd draait lokaal in Obsidian, maar sommige functies versturen uitgaande requ
 - **Prestatieproblemen**: Het verwerken van grote bestanden of veel bestanden kan tijd kosten. Verlaag de instelling "Chunk Word Count" voor mogelijk snellere (maar talrijkere) API-calls. Probeer een andere LLM-provider of een ander model.
 - **Onverwachte linking**: De kwaliteit van de links hangt sterk af van de LLM en de prompt. Experimenteer met verschillende modellen of temperature-instellingen.
 
+<!-- notemd-acknowledgments -->
+## Dankbetuigingen en referentieprojecten
+
+Notemd wordt onafhankelijk onderhouden. Wij danken de open-sourceprojecten en gemeenschappen die gedocumenteerde ontwerpbeslissingen hebben beïnvloed of integratiegrondslagen bieden. Vermelding erkent alleen invloed of interoperabiliteit; zij impliceert geen goedkeuring, verbondenheid, meegeleverde code of aanspraak op hergebruik van code.
+
+- **Referentieprojecten:** [cloudy-tech-diagrams-skill](https://github.com/cloudy-liu/cloudy-tech-diagrams-skill), [Drawnix](https://github.com/plait-board/drawnix), [diagrams.net / draw.io](https://www.diagrams.net/), [repo-saga](https://github.com/teee32/repo-saga).
+- **Open-sourcefundamenten:** [Mermaid](https://github.com/mermaid-js/mermaid), [Vega-Lite](https://vega.github.io/vega-lite/), [Slidev](https://github.com/slidevjs/slidev), [CircuitikZ](https://github.com/circuitikz/circuitikz), [Tectonic](https://github.com/tectonic-typesetting/tectonic), [Docusaurus](https://docusaurus.io).
+- Elk project behoudt zijn eigen licentie en voorwaarden; Notemd is beschikbaar onder de [MIT-licentie](./LICENSE).
+
 ## Bijdragen
 
 Bijdragen zijn welkom. Raadpleeg de GitHub-repository voor richtlijnen: [https://github.com/Jacobinwwey/obsidian-NotEMD](https://github.com/Jacobinwwey/obsidian-NotEMD)

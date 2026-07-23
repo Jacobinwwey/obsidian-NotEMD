@@ -674,6 +674,15 @@ Notemd běží lokálně uvnitř Obsidianu, ale některé funkce odesílají odc
 - **Výkonové problémy**: zpracování velkých souborů nebo mnoha souborů může trvat. Snižte nastavení "Chunk Word Count", pokud chcete potenciálně rychlejší, ale četnější API volání. Zkuste jiného poskytovatele LLM nebo jiný model.
 - **Neočekávané propojování**: kvalita propojování silně závisí na LLM a promptu. Experimentujte s různými modely nebo nastavením teploty.
 
+<!-- notemd-acknowledgments -->
+## Poděkování a referenční projekty
+
+Notemd je udržován nezávisle. Děkujeme open-source projektům a komunitám, které ovlivnily zdokumentovaná návrhová rozhodnutí nebo poskytují základy integrací. Uvedení uznává pouze vliv nebo interoperabilitu; neznamená podporu, přidružení, přibalený kód ani tvrzení o opětovném použití kódu.
+
+- **Referenční projekty:** [cloudy-tech-diagrams-skill](https://github.com/cloudy-liu/cloudy-tech-diagrams-skill), [Drawnix](https://github.com/plait-board/drawnix), [diagrams.net / draw.io](https://www.diagrams.net/), [repo-saga](https://github.com/teee32/repo-saga).
+- **Open-source základy:** [Mermaid](https://github.com/mermaid-js/mermaid), [Vega-Lite](https://vega.github.io/vega-lite/), [Slidev](https://github.com/slidevjs/slidev), [CircuitikZ](https://github.com/circuitikz/circuitikz), [Tectonic](https://github.com/tectonic-typesetting/tectonic), [Docusaurus](https://docusaurus.io).
+- Každý projekt si zachovává vlastní licenci a podmínky; Notemd je dostupný pod [licencí MIT](./LICENSE).
+
 ## Přispívání
 
 Příspěvky jsou vítány. Pokyny najdete v GitHub repozitáři: [https://github.com/Jacobinwwey/obsidian-NotEMD](https://github.com/Jacobinwwey/obsidian-NotEMD)

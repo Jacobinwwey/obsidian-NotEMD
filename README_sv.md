@@ -676,6 +676,15 @@ Notemd körs lokalt inne i Obsidian, men vissa funktioner skickar utgående beg�
 - **Prestandaproblem**: Bearbetning av stora filer eller många filer kan ta tid. Minska inställningen "Chunk Word Count" för potentiellt snabbare, men fler, API-anrop. Prova en annan LLM-leverantör eller modell.
 - **Oväntad länkning**: Kvaliteten på länkningen beror starkt på LLM:en och prompten. Experimentera med olika modeller eller temperature-inställningar.
 
+<!-- notemd-acknowledgments -->
+## Tack och referensprojekt
+
+Notemd underhålls oberoende. Vi tackar de öppna källkodsprojekt och gemenskaper som har påverkat dokumenterade designbeslut eller tillhandahåller integrationsgrunder. Uppräkningen erkänner endast påverkan eller interoperabilitet; den innebär inte godkännande, anknytning, medföljande kod eller ett påstående om återanvändning av kod.
+
+- **Referensprojekt:** [cloudy-tech-diagrams-skill](https://github.com/cloudy-liu/cloudy-tech-diagrams-skill), [Drawnix](https://github.com/plait-board/drawnix), [diagrams.net / draw.io](https://www.diagrams.net/), [repo-saga](https://github.com/teee32/repo-saga).
+- **Grunder med öppen källkod:** [Mermaid](https://github.com/mermaid-js/mermaid), [Vega-Lite](https://vega.github.io/vega-lite/), [Slidev](https://github.com/slidevjs/slidev), [CircuitikZ](https://github.com/circuitikz/circuitikz), [Tectonic](https://github.com/tectonic-typesetting/tectonic), [Docusaurus](https://docusaurus.io).
+- Varje projekt behåller sin egen licens och sina egna villkor; Notemd är tillgängligt under [MIT-licensen](./LICENSE).
+
 ## Bidra
 
 Bidrag är välkomna. Se GitHub-repositoryt för riktlinjer: [https://github.com/Jacobinwwey/obsidian-NotEMD](https://github.com/Jacobinwwey/obsidian-NotEMD)

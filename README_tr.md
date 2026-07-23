@@ -674,6 +674,15 @@ Notemd, Obsidian içinde yerel olarak çalışır; ancak bazı özellikler dış
 - **Performans Sorunları**: Büyük dosyaların veya çok sayıda dosyanın işlenmesi zaman alabilir. Daha hızlı ama daha fazla API çağrısı için "Chunk Word Count" ayarını azaltın. Farklı bir LLM sağlayıcısı veya model deneyin.
 - **Beklenmeyen Bağlantılama**: Bağlantılama kalitesi büyük ölçüde LLM'e ve isteme bağlıdır. Farklı modeller veya sıcaklık ayarları deneyin.
 
+<!-- notemd-acknowledgments -->
+## Teşekkürler ve referans projeler
+
+Notemd bağımsız olarak sürdürülür. Belgelenmiş tasarım kararlarını etkileyen veya entegrasyon temelleri sağlayan açık kaynak projelerine ve topluluklarına teşekkür ederiz. Listeleme yalnızca etkiyi veya birlikte çalışabilirliği kabul eder; destek, bağlılık, paketlenmiş kod veya kod yeniden kullanımı iddiası anlamına gelmez.
+
+- **Referans projeler:** [cloudy-tech-diagrams-skill](https://github.com/cloudy-liu/cloudy-tech-diagrams-skill), [Drawnix](https://github.com/plait-board/drawnix), [diagrams.net / draw.io](https://www.diagrams.net/), [repo-saga](https://github.com/teee32/repo-saga).
+- **Açık kaynak temelleri:** [Mermaid](https://github.com/mermaid-js/mermaid), [Vega-Lite](https://vega.github.io/vega-lite/), [Slidev](https://github.com/slidevjs/slidev), [CircuitikZ](https://github.com/circuitikz/circuitikz), [Tectonic](https://github.com/tectonic-typesetting/tectonic), [Docusaurus](https://docusaurus.io).
+- Her proje kendi lisansını ve koşullarını korur; Notemd [MIT Lisansı](./LICENSE) altında sunulur.
+
 ## Katkıda Bulunma
 
 Katkılar memnuniyetle karşılanır. Yönergeler için GitHub deposuna bakın: [https://github.com/Jacobinwwey/obsidian-NotEMD](https://github.com/Jacobinwwey/obsidian-NotEMD)

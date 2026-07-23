@@ -671,6 +671,15 @@ A Notemd helyben fut az Obsidianon belül, de bizonyos funkciók külső kérés
 -   **Teljesítményproblémák**: nagy fájlok vagy sok fájl feldolgozása időbe telhet. Csökkentse a "Chunk Word Count" beállítást, ha potenciálisan gyorsabb (de több) API-hívást szeretne. Próbáljon ki másik LLM-szolgáltatót vagy modellt.
 -   **Váratlan hivatkozás-hozzáadás**: a hivatkozás-hozzáadás minősége erősen függ az LLM-től és a prompttól. Kísérletezzen különböző modellekkel vagy hőmérsékleti beállításokkal.
 
+<!-- notemd-acknowledgments -->
+## Köszönetnyilvánítás és referenciaprojektek
+
+A Notemd karbantartása függetlenül történik. Köszönjük azoknak a nyílt forráskódú projekteknek és közösségeknek a munkáját, amelyek dokumentált tervezési döntéseket inspiráltak vagy integrációs alapokat biztosítanak. A felsorolás csak a hatást vagy az interoperabilitást ismeri el; nem jelent jóváhagyást, kapcsolatot, mellékelt kódot vagy kódújrahasználati állítást.
+
+- **Referenciaprojektek:** [cloudy-tech-diagrams-skill](https://github.com/cloudy-liu/cloudy-tech-diagrams-skill), [Drawnix](https://github.com/plait-board/drawnix), [diagrams.net / draw.io](https://www.diagrams.net/), [repo-saga](https://github.com/teee32/repo-saga).
+- **Nyílt forráskódú alapok:** [Mermaid](https://github.com/mermaid-js/mermaid), [Vega-Lite](https://vega.github.io/vega-lite/), [Slidev](https://github.com/slidevjs/slidev), [CircuitikZ](https://github.com/circuitikz/circuitikz), [Tectonic](https://github.com/tectonic-typesetting/tectonic), [Docusaurus](https://docusaurus.io).
+- Minden projekt megtartja saját licencét és feltételeit; a Notemd [MIT licenc](./LICENSE) alatt érhető el.
+
 ## Közreműködés
 
 A közreműködéseket szívesen fogadjuk. Irányelvekért lásd a GitHub-tárházat: [https://github.com/Jacobinwwey/obsidian-NotEMD](https://github.com/Jacobinwwey/obsidian-NotEMD)

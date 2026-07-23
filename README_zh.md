@@ -857,6 +857,15 @@ Notemd 在本地 Obsidian 运行，但部分功能会发起外部网络请求。
 - **性能问题**：大文件或批量处理可适当调低分块字数，或更换LLM模型。
 - **链接质量问题**：可尝试不同模型或温度设置改善效果。
 
+<!-- notemd-acknowledgments -->
+## 致谢与参考项目
+
+Notemd 由独立维护。感谢为项目的设计决策提供启发，或为其集成能力提供基础的开源项目与社区。此处列出仅用于说明参考或互操作关系，不表示背书、隶属关系、内置代码，亦不表示存在代码复用。
+
+- **参考项目:** [cloudy-tech-diagrams-skill](https://github.com/cloudy-liu/cloudy-tech-diagrams-skill), [Drawnix](https://github.com/plait-board/drawnix), [diagrams.net / draw.io](https://www.diagrams.net/), [repo-saga](https://github.com/teee32/repo-saga).
+- **开源基础:** [Mermaid](https://github.com/mermaid-js/mermaid), [Vega-Lite](https://vega.github.io/vega-lite/), [Slidev](https://github.com/slidevjs/slidev), [CircuitikZ](https://github.com/circuitikz/circuitikz), [Tectonic](https://github.com/tectonic-typesetting/tectonic), [Docusaurus](https://docusaurus.io).
+- 各项目均保留自己的许可证和条款；Notemd 使用 [MIT 许可证](./LICENSE)。
+
 ## 贡献
 
 欢迎任何形式的贡献！请参考GitHub项目说明: [https://github.com/Jacobinwwey/obsidian-NotEMD](https://github.com/Jacobinwwey/obsidian-NotEMD)

@@ -800,6 +800,14 @@ Notemd runs locally inside Obsidian, but some features send outbound requests.
     3.  Exported `_preview.svg` and `_preview.png` files are snapshots. Re-export after editing the source artifact or changing theme if the saved preview is stale.
     4.  Invalid Mermaid artifacts now fail early with explicit validation errors before preview/export. Invalid JSON Canvas or Vega-Lite artifacts surface explicit preview errors. Save the raw artifact first if you need to inspect or repair the generated `.md`, `.canvas`, `.json`, or `.html` content manually.
 
+<!-- notemd-acknowledgments -->
+## Acknowledgments and Referenced Projects
+
+Notemd is independently maintained. We thank the open-source projects and communities that informed documented design decisions or provide integration foundations. Listing a project recognizes influence or interoperability only; it does not imply endorsement, affiliation, bundled code, or a claim of code reuse.
+
+- **Reference projects:** [cloudy-tech-diagrams-skill](https://github.com/cloudy-liu/cloudy-tech-diagrams-skill), [Drawnix](https://github.com/plait-board/drawnix), [diagrams.net / draw.io](https://www.diagrams.net/), [repo-saga](https://github.com/teee32/repo-saga).
+- **Open-source foundations:** [Mermaid](https://github.com/mermaid-js/mermaid), [Vega-Lite](https://vega.github.io/vega-lite/), [Slidev](https://github.com/slidevjs/slidev), [CircuitikZ](https://github.com/circuitikz/circuitikz), [Tectonic](https://github.com/tectonic-typesetting/tectonic), [Docusaurus](https://docusaurus.io).
+- Each project retains its own license and terms; Notemd is available under the [MIT License](./LICENSE).
 
 ## Contributing
 

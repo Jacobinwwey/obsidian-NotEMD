@@ -671,6 +671,15 @@
 -   **Προβλήματα απόδοσης**: η επεξεργασία μεγάλων αρχείων ή πολλών αρχείων μπορεί να χρειαστεί χρόνο. Μειώστε τη ρύθμιση "Chunk Word Count" για πιθανώς ταχύτερες (αλλά περισσότερες) API calls. Δοκιμάστε διαφορετικό πάροχο LLM ή διαφορετικό μοντέλο.
 -   **Απρόσμενη διασύνδεση**: η ποιότητα της διασύνδεσης εξαρτάται σε μεγάλο βαθμό από το LLM και το prompt. Πειραματιστείτε με διαφορετικά μοντέλα ή ρυθμίσεις θερμοκρασίας.
 
+<!-- notemd-acknowledgments -->
+## Ευχαριστίες και έργα αναφοράς
+
+Το Notemd συντηρείται ανεξάρτητα. Ευχαριστούμε τα έργα και τις κοινότητες ανοιχτού κώδικα που επηρέασαν τεκμηριωμένες αποφάσεις σχεδιασμού ή παρέχουν βάσεις ενσωμάτωσης. Η αναφορά αναγνωρίζει μόνο επιρροή ή διαλειτουργικότητα· δεν υποδηλώνει έγκριση, συνεργασία, ενσωματωμένο κώδικα ή ισχυρισμό επαναχρησιμοποίησης κώδικα.
+
+- **Έργα αναφοράς:** [cloudy-tech-diagrams-skill](https://github.com/cloudy-liu/cloudy-tech-diagrams-skill), [Drawnix](https://github.com/plait-board/drawnix), [diagrams.net / draw.io](https://www.diagrams.net/), [repo-saga](https://github.com/teee32/repo-saga).
+- **Βάσεις ανοιχτού κώδικα:** [Mermaid](https://github.com/mermaid-js/mermaid), [Vega-Lite](https://vega.github.io/vega-lite/), [Slidev](https://github.com/slidevjs/slidev), [CircuitikZ](https://github.com/circuitikz/circuitikz), [Tectonic](https://github.com/tectonic-typesetting/tectonic), [Docusaurus](https://docusaurus.io).
+- Κάθε έργο διατηρεί τη δική του άδεια και όρους· το Notemd διατίθεται με την [άδεια MIT](./LICENSE).
+
 ## Συνεισφορά
 
 Οι συνεισφορές είναι ευπρόσδεκτες. Παρακαλούμε ανατρέξτε στο αποθετήριο GitHub για οδηγίες: [https://github.com/Jacobinwwey/obsidian-NotEMD](https://github.com/Jacobinwwey/obsidian-NotEMD)
