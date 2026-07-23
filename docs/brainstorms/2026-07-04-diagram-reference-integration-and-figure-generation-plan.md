@@ -5,6 +5,10 @@ topic: diagram-reference-integration-and-figure-generation-plan
 
 # Diagram Reference Integration And Figure Generation Plan
 
+## Implemented Drawnix Boundary
+
+The planned board-export boundary is now implemented for knowledge maps: `DiagramSpec(intent: "drawnixMindmap") -> DrawnixMindMapProjection -> native .drawnix -> notemd-drawnix-mindmap-svg@1.0.0`. Standard Mermaid `mindmap` remains a separate renderer path. The Drawnix host and Plait runtime are still excluded from the plugin bundle.
+
 ## Scope And Evidence
 
 This document answers a narrow question: can Notemd extend its figure/diagram generation capability by learning from `cloudy-liu/cloudy-tech-diagrams-skill` and `plait-board/drawnix`, and if yes, where should that work enter the existing architecture?

@@ -1,66 +1,63 @@
-# Drawnix Export Spike
+# Drawnix Native Knowledge-Map Export
 
 Language: **English** | [简体中文](./drawnix-export-spike.zh-CN.md)
 
-This spike records the narrow Drawnix export path that Notemd can support without embedding Drawnix, Plait, or the Drawnix React host.
+This document records the bounded Drawnix path that Notemd supports without embedding Drawnix, Plait, or the Drawnix React host.
 
-The reference baseline is `ref/drawnix` on `develop@9939f45`. The relevant file contract is `packages/drawnix/src/data/types.ts`: `DrawnixExportedData` has the top-level shape `type/version/source/elements/viewport/theme`. The corresponding `isValidDrawnixData(...)` check in `packages/drawnix/src/data/json.ts` validates only `type === "drawnix"`, `Array.isArray(elements)`, and object-like `viewport`.
+The reference baseline is `ref/drawnix` at `develop@9939f45`. Its `DrawnixExportedData` envelope has the top-level contract `type/version/source/elements/viewport/theme`; `theme` is optional and Notemd omits it because no compatible imported theme object has been verified. The upstream JSON check is envelope-level only, so the plugin validates the native mind-map subset before writing it.
 
-## Implemented Subset
+## Implemented Contract
 
-Notemd exports a minimal `.drawnix` JSON subset from `SemanticFigureModel`:
+The public route is an independent `drawnixMindmap` diagram intent:
 
-- top-level `DrawnixExportedData` fields: `type/version/source/elements/viewport/theme`
-- `type: "drawnix"`
-- `version: 1`
-- `source: "web"`
-- `viewport: { zoom: 1, offsetX: 0, offsetY: 0 }`
-- `theme: "default"`
-- node elements as `geometry` rectangles
-- edge elements as `arrow-line`
-- text payloads as Slate-like `{ children: [{ text }] }`
-- stable pretty JSON serialization for `.drawnix` files
+```text
+DiagramSpec(intent: "drawnixMindmap")
+  -> DrawnixMindMapProjection
+  -> DrawnixMindMapExporter (.drawnix)
+  -> DrawnixMindMapSvgRenderer (SVG companion)
+```
 
-The exporter intentionally has **no Plait dependency** and no Drawnix runtime dependency. This keeps the plugin bundle isolated and prevents a spike from silently becoming a large runtime integration.
+The projection preserves one root and `node.children` ownership as nested Drawnix elements:
+
+- root element: `type: "mindmap"`
+- descendants: `type: "mind_child"`
+- cross-branch relations: `type: "arrow-line"`
+- maximum depth 3
+- at most 4 cross-branch relationships
+- deterministic coordinates and label wrapping
+- preview renderer version: `notemd-drawnix-mindmap-svg@1.0.0`
+
+The exporter writes `type: "drawnix"`, `version: 1`, `source: "web"`, a fixed viewport, the nested element tree, and any validated cross-relation arrows. It has no `SemanticFigureModel` dependency and no Plait dependency. The standard Mermaid `mindmap` intent remains a separate Mermaid path; Drawnix fallback maps a copied spec to Mermaid and never flattens the original tree.
 
 ## Automated Evidence
 
-Automated tests cover the part that can be proven without a Drawnix host:
+The focused regression command is:
 
 ```bash
-npm test -- --runInBand src/tests/drawnixExporter.test.ts src/tests/drawnixExportDocsContract.test.ts --runTestsByPath
+npm test -- --runInBand src/tests/drawnixExporter.test.ts src/tests/drawnixMindMapRenderer.test.ts src/tests/drawnixExportDocsContract.test.ts --runTestsByPath
 ```
 
-These tests verify:
+The tests verify:
 
-- top-level `DrawnixExportedData` shape
-- supported `geometry` and `arrow-line` element subset
-- stable `.drawnix` JSON serialization
-- rejection of unsupported subset drift
-- source-level absence of `@drawnix/*`, `@plait/*`, and `@plait-board/*` imports
+- the `DrawnixExportedData` envelope and native `mindmap`/`mind_child` hierarchy
+- deterministic projection layout, node rectangle separation, depth, and relation limits
+- stable `.drawnix` JSON serialization and `arrow-line` validation
+- the dedicated SVG companion uses the same node ids and projection geometry
+- source-level absence of `SemanticFigureModel`, `@drawnix/*`, `@plait/*`, and `@plait-board/*` imports
 
 ## Manual open/import Boundary
 
-The Drawnix app loads board state through `localforage` in the web app and file import through `loadFromBlob(...)`. A real manual open/import check still requires running Drawnix itself:
+The Drawnix web app loads board state through `localforage` and imports files through `loadFromBlob(...)`. A real manual open/import check still requires running Drawnix itself:
 
-1. Generate `.drawnix` JSON with `stringifyDrawnixExportedData(...)`.
-2. Save it as a local `.drawnix` file outside tracked source paths.
+1. Generate a `.drawnix` file through `scripts/export-diagram-artifact.js --target drawnix`.
+2. Keep the generated file outside tracked source paths.
 3. Open Drawnix or the Drawnix web app from `ref/drawnix`.
-4. Import/open the file.
-5. Confirm geometry rectangles, arrow-line edges, and visible labels appear.
-6. Record the file path, Drawnix commit, Notemd commit, and result.
+4. Import or open the file.
+5. Confirm the root, nested branches, cross-branch arrows, and visible labels appear.
+6. Record the file path, Drawnix commit, Notemd commit, and result in maintainer-local evidence.
 
-Do not treat the Jest JSON test as proof of full Drawnix UI import. It proves validity against the checked reference top-level contract and the Notemd-supported subset only.
+Jest proves the checked contract and deterministic output. It does not prove full Drawnix UI import.
 
 ## Dependency Decision
 
-Current decision: keep Drawnix as an export target spike only. Do not add Plait or Drawnix packages to Notemd's runtime bundle.
-
-Revisit this only if all of the following become true:
-
-- users need editable board round-tripping, not only `.drawnix` handoff
-- bundle isolation for heavy render runtimes is no longer candidate-only
-- release assets, audit logic, and docs move together
-- the Drawnix supported subset expands beyond simple `geometry` and `arrow-line` elements
-
-Until then, a small deterministic exporter is the better engineering boundary.
+Keep Drawnix at the adapter/data boundary. Do not add Plait or Drawnix packages to the Notemd runtime bundle, and do not embed the Drawnix editor, toolbar, persistence layer, or browser file APIs. A full host or read-only Plait preview remains a separate future phase that requires bundle isolation and its own acceptance evidence.

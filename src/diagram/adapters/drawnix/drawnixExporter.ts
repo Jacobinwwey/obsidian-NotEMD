@@ -1,194 +1,126 @@
 import {
-    SemanticFigureEdge,
-    SemanticFigureModel,
-    SemanticFigureNode
-} from '../editableSvg/semanticFigureModel';
+    createDrawnixMindMapArrowElements,
+    DrawnixMindMapArrowElement,
+    DrawnixMindMapElement,
+    DrawnixMindMapProjection
+} from './drawnixMindMapProjection';
 
-type DrawnixPoint = [number, number];
-type SupportedDrawnixElementType = 'geometry' | 'arrow-line';
-
-export interface DrawnixTextValue {
-    children: Array<{ text: string }>;
-}
-
-export interface DrawnixGeometryElement {
-    id: string;
-    type: 'geometry';
-    shape: 'rectangle';
-    points: [DrawnixPoint, DrawnixPoint];
-    text: DrawnixTextValue;
-    style: {
-        fill: string;
-        stroke: string;
-    };
-    data: {
-        notemdRole: string;
-        source: 'SemanticFigureModel';
-    };
-}
-
-export interface DrawnixArrowLineElement {
-    id: string;
-    type: 'arrow-line';
-    points: [DrawnixPoint, DrawnixPoint];
-    source: { id: string };
-    target: { id: string };
-    text: DrawnixTextValue;
-    style: {
-        stroke: string;
-        dashed?: boolean;
-    };
-    data: {
-        source: 'SemanticFigureModel';
-    };
-}
-
-export type DrawnixElementSubset = DrawnixGeometryElement | DrawnixArrowLineElement;
-
-export interface DrawnixExportedDataSubset {
+export interface DrawnixMindMapExportedData {
     type: 'drawnix';
     version: 1;
     source: 'web';
-    elements: DrawnixElementSubset[];
+    elements: [DrawnixMindMapElement, ...DrawnixMindMapArrowElement[]];
     viewport: {
         zoom: number;
         offsetX: number;
         offsetY: number;
     };
-    theme: 'default';
 }
 
-const NODE_STYLE_BY_ROLE: Record<string, DrawnixGeometryElement['style']> = {
-    actor: { fill: '#dae8fc', stroke: '#6c8ebf' },
-    boundary: { fill: '#fff2cc', stroke: '#d6b656' },
-    processor: { fill: '#d5e8d4', stroke: '#82b366' },
-    process: { fill: '#f8cecc', stroke: '#b85450' },
-    state: { fill: '#e1d5e7', stroke: '#9673a6' }
-};
-
-const DEFAULT_NODE_STYLE: DrawnixGeometryElement['style'] = { fill: '#f5f5f5', stroke: '#666666' };
-const ASYNC_RELATIONS = new Set(['async', 'asynchronous', 'queue', 'queued']);
-
-function createTextValue(text: string): DrawnixTextValue {
-    return { children: [{ text }] };
-}
-
-function resolveNodeStyle(node: SemanticFigureNode): DrawnixGeometryElement['style'] {
-    return NODE_STYLE_BY_ROLE[node.role.toLowerCase()] ?? DEFAULT_NODE_STYLE;
-}
-
-function exportNode(node: SemanticFigureNode): DrawnixGeometryElement {
-    return {
-        id: node.id,
-        type: 'geometry',
-        shape: 'rectangle',
-        points: [
-            [node.x, node.y],
-            [node.x + node.width, node.y + node.height]
-        ],
-        text: createTextValue(node.label),
-        style: resolveNodeStyle(node),
-        data: {
-            notemdRole: node.role,
-            source: 'SemanticFigureModel'
-        }
-    };
-}
-
-function exportEdge(edge: SemanticFigureEdge): DrawnixArrowLineElement {
-    const relation = edge.relation?.trim().toLowerCase();
-    const style: DrawnixArrowLineElement['style'] = { stroke: '#64748b' };
-    if (relation && ASYNC_RELATIONS.has(relation)) {
-        style.dashed = true;
-    }
-
-    return {
-        id: edge.id,
-        type: 'arrow-line',
-        points: [
-            [edge.startX, edge.startY],
-            [edge.endX, edge.endY]
-        ],
-        source: { id: edge.sourceId },
-        target: { id: edge.targetId },
-        text: createTextValue(edge.label ?? edge.relation ?? ''),
-        style,
-        data: {
-            source: 'SemanticFigureModel'
-        }
-    };
-}
-
-function readElementId(element: unknown): string {
-    if (!element || typeof element !== 'object' || !('id' in element)) {
-        return '<missing>';
-    }
-
-    const id = (element as { id?: unknown }).id;
-    return typeof id === 'string' && id.trim() ? id : '<missing>';
-}
-
-function readElementType(element: unknown): string {
-    if (!element || typeof element !== 'object' || !('type' in element)) {
-        return '<missing>';
-    }
-
-    const type = (element as { type?: unknown }).type;
-    return typeof type === 'string' && type.trim() ? type : '<missing>';
-}
-
-export function exportSemanticFigureModelToDrawnixData(model: SemanticFigureModel): DrawnixExportedDataSubset {
+export function exportDrawnixMindMapProjection(projection: DrawnixMindMapProjection): DrawnixMindMapExportedData {
     return {
         type: 'drawnix',
         version: 1,
         source: 'web',
         elements: [
-            ...model.nodes.map(exportNode),
-            ...model.edges.map(exportEdge)
+            projection.root,
+            ...createDrawnixMindMapArrowElements(projection.crossRelations)
         ],
         viewport: {
             zoom: 1,
             offsetX: 0,
             offsetY: 0
-        },
-        theme: 'default'
+        }
     };
 }
 
-export function stringifyDrawnixExportedData(data: DrawnixExportedDataSubset): string {
+export function stringifyDrawnixMindMapExportedData(data: DrawnixMindMapExportedData): string {
     return `${JSON.stringify(data, null, 2)}\n`;
 }
 
-export function validateDrawnixExportedDataSubset(data: unknown): string[] {
+function isRecord(value: unknown): value is Record<string, unknown> {
+    return Boolean(value) && typeof value === 'object' && !Array.isArray(value);
+}
+
+function isMindMapPoint(value: unknown): boolean {
+    return Array.isArray(value)
+        && value.length === 2
+        && typeof value[0] === 'number'
+        && Number.isFinite(value[0])
+        && typeof value[1] === 'number'
+        && Number.isFinite(value[1]);
+}
+
+function validateMindMapElement(element: unknown, isRoot: boolean, ids: Set<string>, errors: string[]): void {
+    if (!isRecord(element)) {
+        errors.push('mind-map element must be an object');
+        return;
+    }
+    const id = typeof element.id === 'string' && element.id.trim() ? element.id : '<missing>';
+    if (id === '<missing>') {
+        errors.push('mind-map element is missing an id');
+    } else if (ids.has(id)) {
+        errors.push(`mind-map element id "${id}" is duplicated`);
+    } else {
+        ids.add(id);
+    }
+    if (element.type !== (isRoot ? 'mindmap' : 'mind_child')) {
+        errors.push(`mind-map element ${id} has an invalid type`);
+    }
+    if (isRoot && (!Array.isArray(element.points) || element.points.length !== 1 || !isMindMapPoint(element.points[0]))) {
+        errors.push(`mind-map root ${id} must define one numeric point`);
+    }
+    const data = isRecord(element.data) ? element.data : undefined;
+    const topic = data && isRecord(data.topic) ? data.topic : undefined;
+    if (!topic || topic.type !== 'paragraph' || !Array.isArray(topic.children)
+        || !topic.children.every(child => isRecord(child) && typeof child.text === 'string')) {
+        errors.push(`mind-map element ${id} must define a paragraph topic`);
+    }
+    if (!Array.isArray(element.children)) {
+        errors.push(`mind-map element ${id} children must be an array`);
+        return;
+    }
+    element.children.forEach(child => validateMindMapElement(child, false, ids, errors));
+}
+
+export function validateDrawnixMindMapExportedData(data: unknown): string[] {
     const errors: string[] = [];
-    if (!data || typeof data !== 'object') {
+    if (!isRecord(data)) {
         return ['drawnix export data must be an object'];
     }
-
-    const candidate = data as { type?: unknown; version?: unknown; source?: unknown; elements?: unknown; viewport?: unknown };
-    if (candidate.type !== 'drawnix') {
+    if (data.type !== 'drawnix') {
         errors.push('drawnix export data type must be "drawnix"');
     }
-    if (candidate.version !== 1) {
+    if (data.version !== 1) {
         errors.push('drawnix export data version must be 1');
     }
-    if (candidate.source !== 'web') {
+    if (data.source !== 'web') {
         errors.push('drawnix export data source must be "web"');
     }
-    if (!Array.isArray(candidate.elements)) {
-        errors.push('drawnix export data elements must be an array');
-        return errors;
-    }
-    if (!candidate.viewport || typeof candidate.viewport !== 'object') {
+    if (!isRecord(data.viewport)) {
         errors.push('drawnix export data viewport must be an object');
     }
-
-    for (const element of candidate.elements) {
-        const type = readElementType(element);
-        if (!(['geometry', 'arrow-line'] as SupportedDrawnixElementType[]).includes(type as SupportedDrawnixElementType)) {
-            errors.push(`element ${readElementId(element)} uses unsupported drawnix subset type "${type}"`);
-        }
+    if (!Array.isArray(data.elements) || data.elements.length === 0) {
+        errors.push('drawnix mind-map export must contain one root element');
+        return errors;
     }
+
+    const ids = new Set<string>();
+    validateMindMapElement(data.elements[0], true, ids, errors);
+    data.elements.slice(1).forEach((element, index) => {
+        if (!isRecord(element) || element.type !== 'arrow-line') {
+            errors.push(`cross-relation ${index + 1} must use type "arrow-line"`);
+            return;
+        }
+        if (!Array.isArray(element.points) || element.points.length < 2 || !element.points.every(isMindMapPoint)) {
+            errors.push(`cross-relation ${index + 1} must define numeric points`);
+        }
+        const source = isRecord(element.source) && typeof element.source.id === 'string' ? element.source.id : undefined;
+        const target = isRecord(element.target) && typeof element.target.id === 'string' ? element.target.id : undefined;
+        if (!source || !ids.has(source) || !target || !ids.has(target)) {
+            errors.push(`cross-relation ${index + 1} references an unknown mind-map node`);
+        }
+    });
 
     return errors;
 }

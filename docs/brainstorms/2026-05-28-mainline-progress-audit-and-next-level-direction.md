@@ -7,6 +7,10 @@ canonical: true
 
 # Mainline Progress Audit And Next-Level Direction
 
+## 2026-07-23 Drawnix Implementation Truth
+
+The Drawnix work described by the earlier audit is now implemented as a separate `drawnixMindmap` intent. The production chain is `DiagramSpec -> DrawnixMindMapProjection -> native .drawnix -> dedicated SVG`, while standard Mermaid `mindmap` generation remains unchanged. Full Drawnix host embedding and Plait preview remain deferred.
+
 ## 1. Why This Document Exists
 
 The repository has moved again since the 2026-05-28 provider-settings/model-discovery closure audit.

@@ -22,7 +22,7 @@ Usage:
 Targets:
   editable-html-svg   Self-contained HTML with inline editable SVG annotations
   drawio              Uncompressed diagrams.net mxfile XML
-  drawnix             Minimal .drawnix JSON subset
+  drawnix             Native Drawnix knowledge-map JSON (drawnixMindmap intent)
   circuitikz          Circuitikz TeX source from a constrained DiagramSpec.circuitSpec payload
   svg                 Obsidian-viewable SVG generated from the same SemanticFigureModel
   png                 PNG generated from the same SemanticFigureModel
@@ -372,7 +372,7 @@ function buildExporterBundle(repoRoot) {
   const entrySource = `
     import { buildSemanticFigureModel } from './src/diagram/adapters/editableSvg/semanticFigureModel';
     import { exportSemanticFigureModelToDrawioXml, collectDrawioVisibleLabelMismatches } from './src/diagram/adapters/drawio/drawioExporter';
-    import { exportSemanticFigureModelToDrawnixData, stringifyDrawnixExportedData, validateDrawnixExportedDataSubset } from './src/diagram/adapters/drawnix/drawnixExporter';
+    import { DrawnixRenderer } from './src/rendering/renderers/drawnixRenderer';
     import { EditableHtmlSvgRenderer, collectEditableSvgAnnotationGaps, renderSemanticFigureSvg } from './src/rendering/renderers/editableHtmlSvgRenderer';
     import { CircuitikzRenderer, renderCircuitSpecPreviewSvg } from './src/rendering/renderers/circuitikzRenderer';
 
@@ -404,6 +404,26 @@ function buildExporterBundle(repoRoot) {
             goldenReferenceId: spec.circuitSpec.goldenReferenceId,
             componentCount: Array.isArray(spec.circuitSpec.components) ? spec.circuitSpec.components.length : 0,
             connectionCount: Array.isArray(spec.circuitSpec.connections) ? spec.circuitSpec.connections.length : 0
+          }
+        };
+      }
+
+      if (target === 'drawnix') {
+        const renderer = new DrawnixRenderer();
+        const artifact = await renderer.render(spec);
+        const data = JSON.parse(artifact.content);
+        const countMindMapNodes = (element) => 1 + element.children.reduce(
+          (count, child) => count + countMindMapNodes(child),
+          0
+        );
+        return {
+          content: artifact.content,
+          previewSvgContent: artifact.previewSvg?.content,
+          summary: {
+            mimeType: artifact.mimeType,
+            nodeCount: countMindMapNodes(data.elements[0]),
+            edgeCount: data.elements.length - 1,
+            validationErrorCount: 0
           }
         };
       }
@@ -442,24 +462,6 @@ function buildExporterBundle(repoRoot) {
             nodeCount: model.nodes.length,
             edgeCount: model.edges.length,
             labelMismatchCount: labelMismatches.length
-          }
-        };
-      }
-
-      if (target === 'drawnix') {
-        const data = exportSemanticFigureModelToDrawnixData(model);
-        const validationErrors = validateDrawnixExportedDataSubset(data);
-        if (validationErrors.length > 0) {
-          throw new Error('Drawnix subset validation failed: ' + validationErrors.join('; '));
-        }
-        return {
-          content: stringifyDrawnixExportedData(data),
-          previewSvgContent: renderSemanticFigureSvg(model),
-          summary: {
-            mimeType: 'application/json',
-            nodeCount: model.nodes.length,
-            edgeCount: model.edges.length,
-            validationErrorCount: validationErrors.length
           }
         };
       }

@@ -41,7 +41,7 @@ PNG output also writes or replaces the `pHYs` physical pixel density chunk, so t
 |---|---|---|---|
 | `editable-html-svg` | self-contained `.html` with inline SVG | `DiagramSpec -> SemanticFigureModel -> EditableHtmlSvgRenderer` | annotation gaps from `collectEditableSvgAnnotationGaps()` must be empty |
 | `drawio` | uncompressed diagrams.net `mxfile` XML, optionally with `--preview-svg-output`, `--preview-png-output`, and `--preview-pdf-output` companions | `DiagramSpec -> SemanticFigureModel -> exportSemanticFigureModelToDrawioXml()` plus `renderSemanticFigureSvg()` | visible label mismatches must be empty |
-| `drawnix` | minimal `.drawnix` JSON subset, optionally with `--preview-svg-output`, `--preview-png-output`, and `--preview-pdf-output` companions | `DiagramSpec -> SemanticFigureModel -> exportSemanticFigureModelToDrawnixData()` plus `renderSemanticFigureSvg()` | subset validation errors must be empty |
+| `drawnix` | native `.drawnix` knowledge map, optionally with `--preview-svg-output`, `--preview-png-output`, and `--preview-pdf-output` companions | `DiagramSpec(intent: "drawnixMindmap") -> DrawnixMindMapProjection -> DrawnixRenderer` plus `notemd-drawnix-mindmap-svg@1.0.0` | native hierarchy and relation validation errors must be empty |
 | `circuitikz` | constrained `.tex` circuitikz source, optionally with SVG/PNG/PDF preview companions | `DiagramSpec(intent: "circuit") -> CircuitSpec -> CircuitikzRenderer -> exportCircuitSpecToCircuitikz()` plus `renderCircuitSpecPreviewSvg()` | `CircuitSpec` validation must pass before TeX or companion output is written |
 | `svg` | Obsidian-viewable `.svg` generated from the same semantic model, or from a circuit preview companion when `intent` is `circuit` | `DiagramSpec -> SemanticFigureModel -> renderSemanticFigureSvg()` or `CircuitSpec -> renderCircuitSpecPreviewSvg()` | semantic node/edge annotations or validated circuit preview metadata must be present |
 | `png` | `.png` visual evidence rendered from the same standalone SVG or circuit preview SVG | `DiagramSpec -> SemanticFigureModel -> renderSemanticFigureSvg() -> Playwright screenshot`, or `CircuitSpec -> renderCircuitSpecPreviewSvg() -> Playwright screenshot` | output dimensions follow SVG CSS size at the selected PPI, with `pHYs` metadata aligned to the selected density |
@@ -67,6 +67,7 @@ This CLI is deliberately artifact-first:
 
 - It proves the figure exporters work outside the Obsidian UI.
 - It keeps the plugin runtime free from Drawnix, Plait, and diagrams.net Desktop dependencies.
+- It routes `drawnixMindmap` directly to the native Drawnix projection before any generic `SemanticFigureModel` is built.
 - It exercises the same TypeScript exporters used by tests by bundling a temporary internal exporter with `esbuild`.
 - It gives CI and maintainers a concrete command that can generate all supported Cloudy-style and Drawnix-relevant artifacts from one `DiagramSpec`.
 
@@ -85,7 +86,8 @@ The test writes a single `DiagramSpec` and verifies:
 - `editable-html-svg` includes semantic `data-drawio-*` annotations.
 - normalized node IDs stay unique after whitespace normalization.
 - `drawio` XML preserves visible node and edge labels.
-- `drawnix` JSON contains supported `geometry` and `arrow-line` elements.
+- `drawnix` JSON contains a `mindmap` root, nested `mind_child` elements, and validated `arrow-line` cross relations.
+- Drawnix projection layout is deterministic, bounded to maximum depth 3 and at most 4 cross-branch relationships, and emits the dedicated SVG companion.
 - `drawio`, `drawnix`, and `circuitikz` can produce SVG companion files for Obsidian preview validation.
 - `circuitikz` emits constrained TeX only after `DiagramSpec.circuitSpec` validates, and can export SVG/PNG/PDF preview companions from the same circuit payload.
 - `svg` emits the same annotated semantic figure sheet directly, or a validated circuit preview companion for `intent: "circuit"`.
@@ -94,4 +96,4 @@ The test writes a single `DiagramSpec` and verifies:
 
 ## Non-Goals
 
-This CLI does not run a full Drawnix web app import or automate diagrams.net Desktop. Those are separate local visual/import runbook checks. The CLI proves deterministic artifact generation and structural validation; it does not prove every editor UI behavior.
+This CLI does not run a full Drawnix web app import or automate diagrams.net Desktop. Those are separate local visual/import runbook checks. The CLI proves deterministic artifact generation and structural validation; it does not prove every editor UI behavior. Standard Mermaid `mindmap` generation remains a separate target and is not rewritten by the Drawnix route.

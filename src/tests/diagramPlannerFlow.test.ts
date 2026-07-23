@@ -38,6 +38,17 @@ describe('diagram planner', () => {
         expect(result.legacyCompatibilityMode).toBe(true);
     });
 
+    test('routes the dedicated Drawnix knowledge-map intent through its native renderer', () => {
+        const result = buildDiagramPlan('# Architecture', {
+            compatibilityMode: 'best-fit',
+            requestedIntent: 'drawnixMindmap' as any
+        });
+
+        expect(result.intent).toBe('drawnixMindmap');
+        expect(result.renderTarget).toBe('drawnix');
+        expect(result.fallbackTargets).toEqual(['mermaid', 'html']);
+    });
+
     test('infers pie charts for part-to-whole metric summaries', () => {
         const markdown = `# Traffic Mix
 

@@ -2,18 +2,29 @@
 date: 2026-07-22
 version: 1.9.4
 topic: drawnix-knowledge-map-quality-and-delivery
-status: planned
+status: implemented
 ---
 
 # Drawnix Knowledge-Map Quality And Delivery Plan
 
 ## Decision
 
-The current Drawnix renderer ships a file-format spike, not a Drawnix canvas projection. It is importer-tolerant only because Drawnix accepts a shallow JSON envelope. It does not preserve hierarchy or use the upstream mind-map element model.
+The implemented Drawnix route is a bounded native knowledge-map projection. It preserves hierarchy and uses the upstream mind-map element model without embedding the Drawnix application shell, toolbars, persistence layer, or browser file APIs in the Obsidian bundle.
 
-The next Drawnix work must deliver a bounded `mindmap -> editable .drawnix` path. It must not embed the Drawnix application shell, toolbars, persistence layer, or browser file APIs in the Obsidian bundle. Architecture-canvas output and a read-only Plait preview are follow-on decisions with separate acceptance gates.
+Standard Mermaid `mindmap` remains unchanged. Drawnix is a separate `drawnixMindmap` intent with its own prompt profile, validation, exporter, SVG companion, and fallback mapping that copies the spec rather than flattening it.
 
-## Evidence And Current-State Audit
+## Implemented Result
+
+```text
+DiagramSpec(intent: "drawnixMindmap")
+  -> DrawnixMindMapProjection
+  -> DrawnixMindMapExporter (.drawnix)
+  -> DrawnixMindMapSvgRenderer (notemd-drawnix-mindmap-svg@1.0.0)
+```
+
+The delivered contract is one root, nested `node.children`, `mindmap`/`mind_child` elements, maximum depth 3, and at most 4 cross-branch relationships represented by `arrow-line`. The CLI routes Drawnix before constructing the generic `SemanticFigureModel`; other targets keep their existing path. Full Drawnix host embedding and a Plait preview remain deferred.
+
+## Original Audit (Historical)
 
 | Surface | Current code | Consequence | Required correction |
 |---|---|---|---|
@@ -69,7 +80,7 @@ The projection builder owns hierarchy and visual roles. The layout owns coordina
 
 ### Scope Of The First Delivery
 
-- Accept only `intent: "mindmap"` in `DrawnixRenderer`.
+- Accept only `intent: "drawnixMindmap"` in `DrawnixRenderer`.
 - Preserve `DiagramNode.children` as the primary tree. Do not recreate parent-child relations as ordinary edges.
 - Support a bounded set of cross-branch relationships after tree placement. Cross relationships are annotations, not the primary structure.
 - Keep output deterministic for the same `DiagramSpec`.
@@ -89,7 +100,7 @@ The Drawnix profile belongs in `diagramSpecPrompt.ts` and activates only for the
 
 ```text
 Target: editable Drawnix knowledge map.
-Required intent: mindmap.
+Required intent: drawnixMindmap.
 Create one root node and 3-6 first-level branches.
 Each branch has 2-5 children; maximum hierarchy depth is 3.
 Use node.children for ownership and taxonomy.
@@ -103,23 +114,23 @@ The parser and validator must enforce the parts that can be checked mechanically
 
 ## Delivery Sequence
 
-### Stage 0: Compatibility probe and fixtures
+### Stage 0: Compatibility probe and fixtures (completed for the supported subset)
 
 Inspect the pinned `ref/drawnix` baseline to obtain a minimal mind-map fixture created by the upstream editor. Record the exact element shape, theme object, viewport semantics, and import behavior. Add the resulting fixture under tracked test fixtures with provenance. `ref/` itself remains local analysis material and cannot become a test dependency.
 
-### Stage 1: Mind-map projection and export
+### Stage 1: Mind-map projection and export (completed)
 
 Add the projection, deterministic branch layout, bounded relationship routing, exporter, SVG companion renderer, and target-specific prompt profile. Narrow `DrawnixRenderer.supports()` to the delivered `mindmap` contract. Preserve other render targets and the default best-fit behavior.
 
-### Stage 2: Product exposure and CLI verification
+### Stage 2: Product exposure and CLI verification (completed)
 
 Expose `mindmap` as a first-class diagram choice only after Stage 1 passes. Use the existing Obsidian CLI command bridge to generate a `.drawnix` artifact from `docs/architecture.zh-CN.md` with an explicit mind-map intent. This verifies the real command/artifact route without overclaiming a public CLI API.
 
-### Stage 3: Architecture-canvas decision
+### Stage 3: Architecture-canvas decision (deferred)
 
 Evaluate a separate `DrawnixArchitectureProjection` only after mind-map quality is accepted. It needs grouped modules, orthogonal routing, edge-label placement, and collision handling. It must not reuse the mind-map adapter through a mode flag. If the evidence does not justify the work, route architecture flowcharts to Draw.io or Mermaid and keep Drawnix focused on knowledge maps.
 
-### Stage 4: Optional read-only Plait preview
+### Stage 4: Optional read-only Plait preview (deferred)
 
 Consider a separately bundled, lazy-loaded, read-only Plait preview only after heavy-runtime packaging isolation exists. This is a preview enhancement, not a prerequisite for editable `.drawnix` export.
 

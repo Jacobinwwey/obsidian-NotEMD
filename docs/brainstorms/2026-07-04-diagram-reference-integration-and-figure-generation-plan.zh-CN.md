@@ -5,6 +5,10 @@ topic: diagram-reference-integration-and-figure-generation-plan
 
 # 图形参考项目集成与 Figure 生成扩展方案
 
+## 已实现的 Drawnix 边界
+
+规划中的 board export 边界已经针对知识导图落地：`DiagramSpec(intent: "drawnixMindmap") -> DrawnixMindMapProjection -> 原生 .drawnix -> notemd-drawnix-mindmap-svg@1.0.0`。标准 Mermaid `mindmap` 仍走独立 renderer 路径。Drawnix host 和 Plait runtime 继续排除在插件 bundle 之外。
+
 ## 范围与证据
 
 本文只回答一个窄问题：Notemd 是否可以参考 `cloudy-liu/cloudy-tech-diagrams-skill` 与 `plait-board/drawnix` 扩展 figure / diagram 生成能力；如果可以，这项工作应该进入现有架构的哪个边界。

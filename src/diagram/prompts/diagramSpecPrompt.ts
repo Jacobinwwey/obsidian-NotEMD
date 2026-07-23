@@ -14,6 +14,9 @@ export function buildDiagramSpecPrompt(options: DiagramSpecPromptOptions = {}): 
     const isCircuitikzRequest = options.preferredIntent === 'circuit'
         || options.requiredIntent === 'circuit'
         || options.preferredRenderTarget === 'circuitikz';
+    const isDrawnixMindMapRequest = options.preferredIntent === 'drawnixMindmap'
+        || options.requiredIntent === 'drawnixMindmap'
+        || options.preferredRenderTarget === 'drawnix';
     const preferredIntentLine = options.requiredIntent
         ? `REQUIRED diagram intent: ${options.requiredIntent}. You MUST use this exact intent. Do not choose any other intent under any circumstances.`
         : options.preferredIntent
@@ -123,8 +126,23 @@ For a common-source NMOS request, use this exact topology contract inside circui
 }
 The deterministic renderer, not the model, emits the complete LaTeX document with the circuitikz package, document environment, voltage convention, explicit VDD/RD/M1/vin/vout/GND anchors, and terminated draw paths.`
         : '';
+    const drawnixMindMapTargetLine = isDrawnixMindMapRequest
+        ? `Target: editable Drawnix knowledge map.
+
+Drawnix knowledge-map rules:
+- Set intent: drawnixMindmap.
+- Create exactly one root node and organize the map through node.children.
+- Use node.children for ownership and taxonomy. Do not duplicate parent-child relationships in edges.
+- Keep hierarchy depth at or below 3.
+- Use edges only for cross-branch runtime relationships. Emit at most 4 edges.
+- Create concise labels. Put implementation detail in leaf nodes, not the root.
+- For architecture notes, group the tree by subsystem first and place request/data flow in cross-branch relationships.
+- Return DiagramSpec fields only. The renderer owns board serialization and layout.`
+        : '';
     const supportedIntentsSection = isCircuitikzRequest
         ? 'Supported intent: circuit'
+        : isDrawnixMindMapRequest
+        ? 'Supported intent: drawnixMindmap'
         : `Supported intents:
 - mindmap
 - flowchart
@@ -154,6 +172,7 @@ ${supportedIntentsSection}
 ${preferredIntentLine}
 ${preferredChartTypeLine}
 ${circuitikzTargetLine}
+${drawnixMindMapTargetLine}
 ${targetLanguageLine}
 
 Required DiagramSpec fields:

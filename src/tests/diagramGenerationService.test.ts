@@ -227,8 +227,8 @@ describe('diagram generation service', () => {
         expect(result.artifact.content).toContain('data-notemd-renderer="notemd-editable-html-svg@0.1.0"');
     });
 
-    test('honors drawio and drawnix render target overrides with svg companions', async () => {
-        for (const requestedRenderTarget of ['drawio', 'drawnix'] as const) {
+    test('honors the Draw.io render target override with an SVG companion', async () => {
+        for (const requestedRenderTarget of ['drawio'] as const) {
             const result = await generateDiagramArtifact(`# Runtime Flow
 
 Client sends work to a queue-backed worker.
@@ -253,6 +253,62 @@ Client sends work to a queue-backed worker.
             expect(result.artifact.target).toBe(requestedRenderTarget);
             expect(result.artifact.previewSvg?.content).toContain('<svg');
         }
+    });
+
+    test('generates a Drawnix knowledge map through its dedicated intent and prompt profile', async () => {
+        const llmInvoker = jest.fn().mockResolvedValue(JSON.stringify({
+            intent: 'drawnixMindmap',
+            title: 'Runtime knowledge map',
+            nodes: [
+                {
+                    id: 'runtime',
+                    label: 'Runtime',
+                    children: [
+                        { id: 'llm', label: 'LLM' },
+                        { id: 'artifacts', label: 'Artifacts' }
+                    ]
+                }
+            ],
+            edges: []
+        }));
+
+        const result = await generateDiagramArtifact('# Runtime', {
+            compatibilityMode: 'best-fit',
+            requestedRenderTarget: 'drawnix',
+            targetLanguage: 'en',
+            llmInvoker
+        });
+
+        expect(result.plan.intent).toBe('drawnixMindmap');
+        expect(result.plan.renderTarget).toBe('drawnix');
+        expect(result.artifact.target).toBe('drawnix');
+        expect(JSON.parse(result.artifact.content).elements[0]).toMatchObject({
+            type: 'mindmap',
+            id: 'runtime'
+        });
+        expect(result.artifact.previewSvg?.content).toContain('notemd-drawnix-mindmap-svg@1.0.0');
+        expect(llmInvoker.mock.calls[0][0]).toMatch(/Target: editable Drawnix knowledge map/i);
+    });
+
+    test('falls back without flattening when a Drawnix knowledge-map response violates its tree contract', async () => {
+        const result = await generateDiagramArtifact('# Runtime', {
+            compatibilityMode: 'best-fit',
+            requestedRenderTarget: 'drawnix',
+            targetLanguage: 'en',
+            llmInvoker: async () => JSON.stringify({
+                intent: 'drawnixMindmap',
+                title: 'Invalid map',
+                nodes: [
+                    { id: 'first', label: 'First root' },
+                    { id: 'second', label: 'Second root' }
+                ],
+                edges: []
+            })
+        });
+
+        expect(result.artifact.target).toBe('mermaid');
+        expect(result.renderError).toMatch(/exactly one root/i);
+        expect(result.artifact.content).toContain('mindmap');
     });
 
     test('honors circuitikz render target overrides with TeX source and svg companion', async () => {

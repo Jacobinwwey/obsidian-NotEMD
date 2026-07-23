@@ -7,6 +7,10 @@ canonical: true
 
 # 当前主线进度审计与 Next-Level 方向
 
+## 2026-07-23 Drawnix 实现真值
+
+此前审计中标记为待完成的 Drawnix 工作现在已经落地为独立的 `drawnixMindmap` 意图。生产链路是 `DiagramSpec -> DrawnixMindMapProjection -> 原生 .drawnix -> 专用 SVG`，标准 Mermaid `mindmap` 生成保持不变。完整 Drawnix 宿主和 Plait preview 继续延期。
+
 ## 1. 为什么需要这份文档
 
 仓库在 2026-05-28 的 provider-settings/model-discovery 收口审计之后，又发生了一次需要重新落盘的真值变化。

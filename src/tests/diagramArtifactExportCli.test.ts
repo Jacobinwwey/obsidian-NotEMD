@@ -70,6 +70,33 @@ function createCircuitSpec(): DiagramSpec {
     };
 }
 
+function createDrawnixMindMapSpec(): DiagramSpec {
+    return {
+        intent: 'drawnixMindmap',
+        title: 'CLI Drawnix Knowledge Map',
+        summary: 'Native Drawnix export without the Obsidian runtime.',
+        nodes: [
+            {
+                id: 'notemd',
+                label: 'Notemd',
+                children: [
+                    {
+                        id: 'diagram',
+                        label: 'Diagram pipeline',
+                        children: [
+                            { id: 'drawnix', label: 'Drawnix renderer' }
+                        ]
+                    },
+                    { id: 'cli', label: 'CLI export' }
+                ]
+            }
+        ],
+        edges: [
+            { from: 'diagram', to: 'cli', label: 'exports' }
+        ]
+    };
+}
+
 describe('diagram artifact export CLI', () => {
     const repoRoot = path.join(__dirname, '..', '..');
     const packageJsonPath = path.join(repoRoot, 'package.json');
@@ -119,6 +146,9 @@ describe('diagram artifact export CLI', () => {
             expect(runbook).toContain('editable-html-svg');
             expect(runbook).toContain('drawio');
             expect(runbook).toContain('drawnix');
+            expect(runbook).toContain('drawnixMindmap');
+            expect(runbook).toContain('DrawnixMindMapProjection');
+            expect(runbook).toContain('notemd-drawnix-mindmap-svg@1.0.0');
             expect(runbook).toContain('circuitikz');
             expect(runbook).toContain('svg');
             expect(runbook).toContain('png');
@@ -129,6 +159,16 @@ describe('diagram artifact export CLI', () => {
             expect(runbook).toContain('UTF-8');
             expect(runbook).toContain('BOM');
         }
+    });
+
+    test('routes Drawnix before constructing the generic semantic figure model', () => {
+        const scriptSource = fs.readFileSync(scriptPath, 'utf8');
+        const drawnixBranchIndex = scriptSource.indexOf("if (target === 'drawnix')");
+        const semanticModelBuildIndex = scriptSource.indexOf('const model = buildSemanticFigureModel(spec);');
+
+        expect(drawnixBranchIndex).toBeGreaterThan(-1);
+        expect(semanticModelBuildIndex).toBeGreaterThan(-1);
+        expect(drawnixBranchIndex).toBeLessThan(semanticModelBuildIndex);
     });
 
     test('exports circuitikz TeX and SVG/PNG/PDF preview companions from one DiagramSpec file', () => {
@@ -179,13 +219,12 @@ describe('diagram artifact export CLI', () => {
         }
     }, 30000);
 
-    test('exports editable HTML/SVG, Draw.io XML, and Drawnix JSON from one DiagramSpec file', () => {
+    test('exports editable HTML/SVG and Draw.io XML from a generic DiagramSpec file', () => {
         const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'notemd-diagram-artifact-cli-'));
         const specPath = path.join(tempRoot, 'spec.json');
         const htmlPath = path.join(tempRoot, 'figure.html');
         const drawioPath = path.join(tempRoot, 'figure.drawio');
         const drawioSvgPath = path.join(tempRoot, 'figure.drawio.svg');
-        const drawnixPath = path.join(tempRoot, 'figure.drawnix');
         const svgPath = path.join(tempRoot, 'figure.svg');
         fs.writeFileSync(specPath, JSON.stringify(createSpec(), null, 2), 'utf8');
 
@@ -193,7 +232,6 @@ describe('diagram artifact export CLI', () => {
             for (const [target, outputPath] of [
                 ['editable-html-svg', htmlPath],
                 ['drawio', drawioPath],
-                ['drawnix', drawnixPath],
                 ['svg', svgPath]
             ] as const) {
                 const args = [
@@ -235,26 +273,69 @@ describe('diagram artifact export CLI', () => {
             expect(fs.readFileSync(drawioSvgPath, 'utf8')).toContain('<svg');
             expect(fs.readFileSync(drawioSvgPath, 'utf8')).toContain('data-drawio-type="node"');
 
+            const svg = fs.readFileSync(svgPath, 'utf8');
+            expect(svg).toContain('<svg');
+            expect(svg).toContain('data-drawio-type="node"');
+        } finally {
+            fs.rmSync(tempRoot, { recursive: true, force: true });
+        }
+    }, 30000);
+
+    test('exports a native Drawnix knowledge map and SVG companion through the independent renderer path', () => {
+        const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'notemd-drawnix-mind-map-cli-'));
+        const specPath = path.join(tempRoot, 'drawnix-mindmap.json');
+        const drawnixPath = path.join(tempRoot, 'knowledge-map.drawnix');
+        const svgPath = path.join(tempRoot, 'knowledge-map.svg');
+        fs.writeFileSync(specPath, JSON.stringify(createDrawnixMindMapSpec(), null, 2), 'utf8');
+
+        try {
+            const stdout = execFileSync(process.execPath, [
+                scriptPath,
+                '--input', specPath,
+                '--target', 'drawnix',
+                '--output', drawnixPath,
+                '--preview-svg-output', svgPath
+            ], {
+                cwd: repoRoot,
+                encoding: 'utf8'
+            });
+
+            const result = JSON.parse(stdout);
             const drawnix = JSON.parse(fs.readFileSync(drawnixPath, 'utf8'));
+            expect(result).toEqual(expect.objectContaining({
+                target: 'drawnix',
+                outputPath: drawnixPath,
+                previewSvgOutputPath: svgPath,
+                nodeCount: 4,
+                edgeCount: 1
+            }));
             expect(drawnix).toMatchObject({
                 type: 'drawnix',
                 version: 1,
                 source: 'web',
-                viewport: { zoom: 1, offsetX: 0, offsetY: 0 }
+                viewport: { zoom: 1, offsetX: 0, offsetY: 0 },
+                elements: [
+                    expect.objectContaining({
+                        id: 'notemd',
+                        type: 'mindmap',
+                        children: [
+                            expect.objectContaining({
+                                id: 'diagram',
+                                type: 'mind_child',
+                                children: [expect.objectContaining({ id: 'drawnix', type: 'mind_child' })]
+                            }),
+                            expect.objectContaining({ id: 'cli', type: 'mind_child' })
+                        ]
+                    }),
+                    expect.objectContaining({
+                        type: 'arrow-line',
+                        source: { id: 'diagram' },
+                        target: { id: 'cli' },
+                        data: { source: 'DrawnixMindMapProjection' }
+                    })
+                ]
             });
-            expect(drawnix.elements).toEqual(expect.arrayContaining([
-                expect.objectContaining({ id: 'client-app', type: 'geometry' }),
-                expect.objectContaining({ id: 'client-app-2', type: 'geometry' }),
-                expect.objectContaining({
-                    id: 'edge-2-client-app-2-to-worker',
-                    type: 'arrow-line',
-                    style: expect.objectContaining({ dashed: true })
-                })
-            ]));
-
-            const svg = fs.readFileSync(svgPath, 'utf8');
-            expect(svg).toContain('<svg');
-            expect(svg).toContain('data-drawio-type="node"');
+            expect(fs.readFileSync(svgPath, 'utf8')).toContain('notemd-drawnix-mindmap-svg@1.0.0');
         } finally {
             fs.rmSync(tempRoot, { recursive: true, force: true });
         }

@@ -1,66 +1,63 @@
-# Drawnix 导出 Spike
+# Drawnix 原生知识导图导出
 
 语言: [English](./drawnix-export-spike.md) | **简体中文**
 
-本文记录 Notemd 在不嵌入 Drawnix、Plait 或 Drawnix React host 的前提下，可以支持的窄 Drawnix export path。
+本文记录 Notemd 在不嵌入 Drawnix、Plait 或 Drawnix React host 的前提下支持的 Drawnix 路径。
 
-参考基线是 `ref/drawnix` 的 `develop@9939f45`。相关文件契约来自 `packages/drawnix/src/data/types.ts`：`DrawnixExportedData` 的顶层结构是 `type/version/source/elements/viewport/theme`。对应的 `packages/drawnix/src/data/json.ts` 中，`isValidDrawnixData(...)` 只校验 `type === "drawnix"`、`Array.isArray(elements)`，以及 `viewport` 是 object-like。
+参考基线是 `ref/drawnix` 的 `develop@9939f45`。上游 `DrawnixExportedData` envelope 的字段契约是 `type/version/source/elements/viewport/theme`，其中 `theme` 可选。Notemd 没有伪造未经验证的主题对象，因此当前导出省略该字段。上游 JSON 校验只检查 envelope，插件会在写文件前额外校验原生思维导图子集。
 
-## 已实现子集
+## 已实现契约
 
-Notemd 从 `SemanticFigureModel` 导出最小 `.drawnix` JSON subset：
+公开路径使用独立的 `drawnixMindmap` 图表意图：
 
-- 顶层 `DrawnixExportedData` fields：`type/version/source/elements/viewport/theme`
-- `type: "drawnix"`
-- `version: 1`
-- `source: "web"`
-- `viewport: { zoom: 1, offsetX: 0, offsetY: 0 }`
-- `theme: "default"`
-- 节点元素为 `geometry` rectangles
-- 边元素为 `arrow-line`
-- 文本 payload 使用 Slate-like `{ children: [{ text }] }`
-- 面向 `.drawnix` files 的稳定 pretty JSON serialization
+```text
+DiagramSpec(intent: "drawnixMindmap")
+  -> DrawnixMindMapProjection
+  -> DrawnixMindMapExporter (.drawnix)
+  -> DrawnixMindMapSvgRenderer (SVG companion)
+```
 
-这个 exporter 明确保持 **no Plait dependency**，也没有 Drawnix runtime dependency。这样可以保持插件 bundle 隔离，避免一个 spike 静默演变成大型运行时集成。
+投影保留一个 root，并把 `node.children` 作为嵌套 Drawnix 元素：
+
+- root 元素：`type: "mindmap"`
+- 后代元素：`type: "mind_child"`
+- 跨分支关系：`type: "arrow-line"`
+- maximum depth 3
+- at most 4 cross-branch relationships
+- 坐标和标签换行是确定性的
+- SVG renderer 版本：`notemd-drawnix-mindmap-svg@1.0.0`
+
+导出器写入 `type: "drawnix"`、`version: 1`、`source: "web"`、固定 viewport、嵌套元素树和通过校验的跨关系箭头。生产路径不依赖 `SemanticFigureModel`，并保持 no Plait dependency。标准 Mermaid `mindmap` 仍走原有 Mermaid 路径；Drawnix 失败回退时只复制 spec 并映射为 Mermaid，不会拍平原始树。
 
 ## 自动化证据
 
-不依赖 Drawnix host 能证明的部分由自动化测试覆盖：
+定向回归命令：
 
 ```bash
-npm test -- --runInBand src/tests/drawnixExporter.test.ts src/tests/drawnixExportDocsContract.test.ts --runTestsByPath
+npm test -- --runInBand src/tests/drawnixExporter.test.ts src/tests/drawnixMindMapRenderer.test.ts src/tests/drawnixExportDocsContract.test.ts --runTestsByPath
 ```
 
-这些测试验证：
+测试覆盖：
 
-- 顶层 `DrawnixExportedData` shape
-- 支持的 `geometry` 与 `arrow-line` element subset
-- 稳定 `.drawnix` JSON serialization
-- 对 unsupported subset drift 快速失败
-- 源码层面没有 `@drawnix/*`、`@plait/*` 与 `@plait-board/*` imports
+- `DrawnixExportedData` envelope 与 `mindmap`/`mind_child` 层级
+- 确定性布局、节点矩形分离、深度限制和关系数量限制
+- 稳定的 `.drawnix` JSON 序列化与 `arrow-line` 校验
+- 专用 SVG companion 使用相同的 node id 和投影坐标
+- 源码不引入 `SemanticFigureModel`、`@drawnix/*`、`@plait/*` 或 `@plait-board/*`
 
 ## manual open/import 边界
 
-Drawnix web app 通过 `localforage` 加载 board state，文件导入通过 `loadFromBlob(...)`。真实 manual open/import 检查仍然需要运行 Drawnix 本身：
+Drawnix web app 通过 `localforage` 加载 board state，通过 `loadFromBlob(...)` 导入文件。真实 manual open/import 仍需要运行 Drawnix 本身：
 
-1. 使用 `stringifyDrawnixExportedData(...)` 生成 `.drawnix` JSON。
-2. 将它保存为本地 `.drawnix` file，路径放在 tracked source paths 之外。
-3. 打开 Drawnix 或 `ref/drawnix` 中的 Drawnix web app。
+1. 使用 `scripts/export-diagram-artifact.js --target drawnix` 生成 `.drawnix` 文件。
+2. 将生成文件放在 tracked source paths 之外。
+3. 打开 Drawnix，或启动 `ref/drawnix` 中的 Drawnix web app。
 4. 导入或打开该文件。
-5. 确认 geometry rectangles、arrow-line edges 与 visible labels 都出现。
-6. 记录文件路径、Drawnix commit、Notemd commit 与结果。
+5. 确认 root、嵌套分支、跨分支箭头和可见标签都出现。
+6. 在 maintainer-local evidence 中记录文件路径、Drawnix commit、Notemd commit 和结果。
 
-不要把 Jest JSON test 当成完整 Drawnix UI import 的证明。它只证明当前数据符合已检查的参考顶层契约，以及 Notemd 支持的 subset。
+Jest 只能证明已检查的契约和确定性输出，不能证明完整 Drawnix UI import。
 
 ## 依赖决策
 
-当前决策：Drawnix 只作为 export target spike 保留。不要把 Plait 或 Drawnix packages 加入 Notemd runtime bundle。
-
-只有以下条件全部成立时，才重新评估：
-
-- 用户需要 editable board round-tripping，而不只是 `.drawnix` handoff
-- heavy render runtimes 的 bundle isolation 不再只是 candidate-only
-- release assets、audit logic 与 docs 能同批推进
-- Drawnix supported subset 超出简单 `geometry` 与 `arrow-line` elements
-
-在此之前，小型 deterministic exporter 是更合理的工程边界。
+Drawnix 保持在 adapter/data boundary。不要把 Plait 或 Drawnix packages 加入 Notemd runtime bundle，也不要在插件内嵌 Drawnix editor、toolbar、持久化层或浏览器文件 API。完整宿主或只读 Plait preview 仍是独立后续阶段，必须先具备 bundle isolation 和单独的验收证据。

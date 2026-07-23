@@ -17,6 +17,7 @@ import { isSupportedRenderTarget } from './types';
 import type { DiagramIntent, DiagramPlan, DiagramSpec, RenderTarget } from './types';
 import { parseDiagramSpecResponse } from './diagramSpecResponseParser';
 import { resolveCircuitTemplateFromMarkdown } from './adapters/circuitikz/circuitTemplateCatalog';
+import { validateDrawnixMindMapSpec } from './adapters/drawnix/drawnixMindMapProjection';
 
 export interface DiagramGenerationOptions {
     compatibilityMode: 'best-fit' | 'legacy-mermaid';
@@ -76,9 +77,14 @@ export function buildDiagramOperationInput(params: BuildDiagramOperationInputPar
     if (requestedRenderTarget === 'circuitikz' && configuredIntent && configuredIntent !== 'circuit') {
         throw new Error('CircuitikZ source format requires the circuit diagram type.');
     }
+    if (requestedRenderTarget === 'drawnix' && configuredIntent && configuredIntent !== 'drawnixMindmap') {
+        throw new Error('Drawnix source format requires the Drawnix knowledge-map diagram type.');
+    }
 
     const requestedIntent = requestedRenderTarget === 'circuitikz'
         ? 'circuit'
+        : requestedRenderTarget === 'drawnix'
+        ? 'drawnixMindmap'
         : configuredIntent;
 
     return {
@@ -126,7 +132,10 @@ async function renderWithFallbackTraversal(
 
     for (const target of targets) {
         try {
-            return await rendererService.render(spec, { target });
+            const targetSpec = target === 'mermaid' && spec.intent === 'drawnixMindmap'
+                ? { ...spec, intent: 'mindmap' as const }
+                : spec;
+            return await rendererService.render(targetSpec, { target });
         } catch (error) {
             failures.push(`${target}: ${normalizeErrorMessage(error)}`);
         }
@@ -150,6 +159,8 @@ function createDefaultRendererService(): RendererService {
 
 function resolveRenderTargetForIntent(intent: DiagramIntent): DiagramPlan['renderTarget'] {
     switch (intent) {
+        case 'drawnixMindmap':
+            return 'drawnix';
         case 'canvasMap':
             return 'json-canvas';
         case 'dataChart':
@@ -159,6 +170,19 @@ function resolveRenderTargetForIntent(intent: DiagramIntent): DiagramPlan['rende
         default:
             return 'mermaid';
     }
+}
+
+function normalizeDrawnixGenerationOptions(options: DiagramGenerationOptions): DiagramGenerationOptions {
+    if (options.requestedRenderTarget !== 'drawnix') {
+        return options;
+    }
+    if (options.requestedIntent && options.requestedIntent !== 'drawnixMindmap') {
+        throw new Error('Drawnix source format requires the Drawnix knowledge-map diagram type.');
+    }
+    return {
+        ...options,
+        requestedIntent: 'drawnixMindmap'
+    };
 }
 
 function resolvePromptPreferredIntent(plan: DiagramPlan, requestedIntent?: DiagramIntent): DiagramIntent {
@@ -282,8 +306,9 @@ function resolveConstrainedCircuitFallback(
 
 export async function generateDiagramArtifact(
     markdown: string,
-    options: DiagramGenerationOptions
+    inputOptions: DiagramGenerationOptions
 ): Promise<DiagramGenerationResult> {
+    const options = normalizeDrawnixGenerationOptions(inputOptions);
     const plan = buildDiagramPlan(markdown, {
         compatibilityMode: options.compatibilityMode,
         requestedIntent: options.requestedIntent,
@@ -340,13 +365,20 @@ export async function generateDiagramArtifact(
     assertPlanCompatibility(spec, plan, options);
 
     const rendererService = options.rendererService ?? createDefaultRendererService();
-    const targets = [plan.renderTarget, ...plan.fallbackTargets]
+    let targets = [plan.renderTarget, ...plan.fallbackTargets]
         .filter((target, index, allTargets) => allTargets.indexOf(target) === index)
         // When user explicitly chose an intent, don't fall back to HTML — let retry handle failures
         .filter(target => !(options.requestedIntent && target === 'html'));
 
     let artifact: Awaited<ReturnType<RendererService['render']>>;
     let renderError: string | undefined;
+    if (plan.renderTarget === 'drawnix') {
+        const validationErrors = validateDrawnixMindMapSpec(spec);
+        if (validationErrors.length > 0) {
+            targets = targets.filter(target => target !== 'drawnix');
+            renderError = `Drawnix knowledge-map validation rejected the source artifact: ${validationErrors.join(' ')}`;
+        }
+    }
     try {
         artifact = await renderWithFallbackTraversal(rendererService, spec, targets);
     } catch (renderError: unknown) {

@@ -11,6 +11,8 @@ import { inferDiagramIntent } from './intent';
 
 function resolvePreferredRenderTarget(intent: DiagramIntent): RenderTarget {
     switch (intent) {
+        case 'drawnixMindmap':
+            return 'drawnix';
         case 'canvasMap':
             return 'json-canvas';
         case 'circuit':
@@ -25,6 +27,7 @@ function resolvePreferredRenderTarget(intent: DiagramIntent): RenderTarget {
 function resolveMermaidDiagramType(intent: DiagramIntent): MermaidDiagramType | null {
     switch (intent) {
         case 'mindmap':
+        case 'drawnixMindmap':
             return 'mindmap';
         case 'flowchart':
             return 'flowchart';
@@ -53,6 +56,10 @@ function resolveFallbackTargets(
 
     if (primaryTarget === 'circuitikz') {
         return [];
+    }
+
+    if (primaryTarget === 'drawnix') {
+        return ['mermaid', 'html'];
     }
 
     const fallbackTargets: RenderTarget[] = [];

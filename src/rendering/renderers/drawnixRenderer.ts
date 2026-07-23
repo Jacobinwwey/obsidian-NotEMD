@@ -1,22 +1,15 @@
 import { assertValidDiagramSpec } from '../../diagram/spec';
 import { DiagramSpec } from '../../diagram/types';
-import { buildSemanticFigureModel } from '../../diagram/adapters/editableSvg/semanticFigureModel';
 import {
-    exportSemanticFigureModelToDrawnixData,
-    stringifyDrawnixExportedData,
-    validateDrawnixExportedDataSubset
+    exportDrawnixMindMapProjection,
+    stringifyDrawnixMindMapExportedData,
+    validateDrawnixMindMapExportedData
 } from '../../diagram/adapters/drawnix/drawnixExporter';
+import { buildDrawnixMindMapProjection } from '../../diagram/adapters/drawnix/drawnixMindMapProjection';
 import { DiagramRenderer, RenderArtifact } from '../types';
-import { renderSemanticFigureSvg } from './editableHtmlSvgRenderer';
+import { renderDrawnixMindMapSvg } from './drawnixMindMapSvgRenderer';
 
-const SUPPORTED_DRAWNIX_INTENTS = new Set<DiagramSpec['intent']>([
-    'mindmap',
-    'flowchart',
-    'sequence',
-    'classDiagram',
-    'erDiagram',
-    'stateDiagram'
-]);
+const SUPPORTED_DRAWNIX_INTENTS = new Set<DiagramSpec['intent']>(['drawnixMindmap']);
 
 export class DrawnixRenderer implements DiagramRenderer {
     readonly id = 'drawnix';
@@ -29,20 +22,20 @@ export class DrawnixRenderer implements DiagramRenderer {
     async render(spec: DiagramSpec): Promise<RenderArtifact> {
         assertValidDiagramSpec(spec);
 
-        const model = buildSemanticFigureModel(spec);
-        const data = exportSemanticFigureModelToDrawnixData(model);
-        const validationErrors = validateDrawnixExportedDataSubset(data);
+        const projection = buildDrawnixMindMapProjection(spec);
+        const data = exportDrawnixMindMapProjection(projection);
+        const validationErrors = validateDrawnixMindMapExportedData(data);
         if (validationErrors.length > 0) {
-            throw new Error(`Drawnix subset validation failed: ${validationErrors.join('; ')}`);
+            throw new Error(`Drawnix mind-map validation failed: ${validationErrors.join('; ')}`);
         }
 
         return {
             target: this.target,
-            content: stringifyDrawnixExportedData(data),
+            content: stringifyDrawnixMindMapExportedData(data),
             mimeType: 'application/vnd.drawnix+json',
             sourceIntent: spec.intent,
             previewSvg: {
-                content: renderSemanticFigureSvg(model),
+                content: renderDrawnixMindMapSvg(projection),
                 mimeType: 'image/svg+xml'
             }
         };

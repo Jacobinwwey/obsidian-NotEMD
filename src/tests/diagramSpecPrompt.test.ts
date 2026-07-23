@@ -98,4 +98,18 @@ describe('diagram spec prompt builder', () => {
         expect(prompt).not.toMatch(/Supported intents:[\s\S]*mindmap/i);
         expect(prompt).not.toMatch(/Supported intents:[\s\S]*flowchart/i);
     });
+
+    test('uses a dedicated Drawnix knowledge-map contract instead of a generic output-format hint', () => {
+        const prompt = buildDiagramSpecPrompt({
+            requiredIntent: 'drawnixMindmap' as any,
+            preferredIntent: 'drawnixMindmap' as any,
+            preferredRenderTarget: 'drawnix'
+        });
+
+        expect(prompt).toMatch(/Supported intent:\s*drawnixMindmap/i);
+        expect(prompt).toMatch(/Target: editable Drawnix knowledge map/i);
+        expect(prompt).toMatch(/Use node\.children for ownership and taxonomy/i);
+        expect(prompt).toMatch(/at most 4/i);
+        expect(prompt).not.toMatch(/Drawnix JSON/i);
+    });
 });

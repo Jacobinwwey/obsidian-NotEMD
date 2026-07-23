@@ -3,6 +3,7 @@ import type { CircuitSpec } from './adapters/circuitikz/circuitSpec';
 
 export const SUPPORTED_DIAGRAM_INTENTS = [
     'mindmap',
+    'drawnixMindmap',
     'flowchart',
     'sequence',
     'classDiagram',

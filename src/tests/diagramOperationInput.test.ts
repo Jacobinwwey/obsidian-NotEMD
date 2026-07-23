@@ -103,6 +103,22 @@ describe('diagram operation input helpers', () => {
         expect(input.requestedRenderTarget).toBe('circuitikz');
     });
 
+    test('resolves an automatic diagram type to the dedicated Drawnix knowledge-map intent', () => {
+        const input = buildDiagramOperationInput({
+            sourceMarkdown: '# Architecture',
+            executionMode: 'save-artifact',
+            settings: {
+                ...mockSettings,
+                preferredDiagramIntent: undefined,
+                preferredDiagramRenderTarget: 'drawnix',
+                experimentalDiagramCompatibilityMode: 'best-fit'
+            }
+        });
+
+        expect(input.requestedIntent).toBe('drawnixMindmap');
+        expect(input.requestedRenderTarget).toBe('drawnix');
+    });
+
     test('rejects a non-circuit diagram type paired with CircuitikZ', () => {
         expect(() => buildDiagramOperationInput({
             sourceMarkdown: 'Draw a release flow.',
@@ -114,5 +130,18 @@ describe('diagram operation input helpers', () => {
                 experimentalDiagramCompatibilityMode: 'best-fit'
             }
         })).toThrow(/CircuitikZ source format requires the circuit diagram type/i);
+    });
+
+    test('rejects a generic diagram type paired with Drawnix knowledge-map output', () => {
+        expect(() => buildDiagramOperationInput({
+            sourceMarkdown: 'Draw a release flow.',
+            executionMode: 'save-artifact',
+            settings: {
+                ...mockSettings,
+                preferredDiagramIntent: 'flowchart',
+                preferredDiagramRenderTarget: 'drawnix',
+                experimentalDiagramCompatibilityMode: 'best-fit'
+            }
+        })).toThrow(/Drawnix source format requires the Drawnix knowledge-map diagram type/i);
     });
 });
