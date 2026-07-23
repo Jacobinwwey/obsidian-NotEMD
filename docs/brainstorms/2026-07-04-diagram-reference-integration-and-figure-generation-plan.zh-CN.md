@@ -291,6 +291,21 @@ Phase F 于 2026-07-05 的实现状态：`src/diagram/adapters/circuitikz/circui
 
 2026-07-06 SVG text-anchor geometry increment：positioned SVG `text` 与 `tspan` boxes 现在会读取 attribute 或 inline style 中的 `text-anchor` 值 `start`、`middle` 与 `end`。这让居中和右对齐标签与 start-anchored 标签一样进入 bounded-canvas、text-overlap 和 `render-svg-label-overlap` 检查，同时仍不声称具备 browser-grade text layout。
 
+## 2026-07-22 Drawnix 质量修正
+
+原有参考结论仍然正确：不嵌入 Drawnix 宿主，也不把 `DiagramSpec` 降级回 Mermaid 或 Markdown 文本。当前生产 exporter 暴露出该结论缺少的一项前提：能被宽松导入的 `.drawnix` 外壳，不足以证明产物具备可编辑画布质量。
+
+当前代码把通用 `SemanticFigureModel` 网格导出为 `geometry` 矩形和 `arrow-line` 元素。它会拍平 `DiagramNode.children`，忽略 Drawnix 相关布局意图，并使用同一通用网格生成 SVG companion。结果属于有效的窄子集，但不是上游思维导图投影。
+
+修正交付记录在 `docs/brainstorms/2026-07-22-drawnix-knowledge-map-quality-and-delivery-plan.zh-CN.md`：
+
+1. 初始 Drawnix 支持收窄为可编辑 `mindmap` 契约；
+2. 原生目标专用投影负责层级与确定性布局；
+3. SVG companion 消费同一投影；
+4. 架构画布、完整意图覆盖和只读 Plait 预览继续作为独立后续决策。
+
+这是一项已发货目标的质量修正，不构成完整 Drawnix 宿主集成授权，也不能绕过既有打包隔离约束。
+
 ## 2026-07-09 circuitikz UI 与 artifact export 增量
 
 先前架构刻意把 circuitikz 留在通用 planner 之外，直到拓扑契约足够强。现在受约束路径已经满足这个条件，因此实现可以向前推进，但核心规则没有改变：Notemd 仍然不接受 LLM 输出任意 TikZ。

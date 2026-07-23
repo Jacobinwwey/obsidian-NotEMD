@@ -754,6 +754,20 @@ This is not cosmetic cleanup. It changes the operational rule for future batches
 1. update the canonical progress docs under `docs/` instead of dropping new root summaries;
 2. treat root-doc sprawl as a regression in repository truth maintenance, not as harmless note-taking.
 
+## 5.3 2026-07-22 Drawnix export-quality truth
+
+The Drawnix target is present in current code, but the target quality is narrower than earlier progress language implied. `DrawnixRenderer` currently receives the generic `SemanticFigureModel`: nodes are flattened into a fixed three-column rectangle grid, `DiagramNode.children` is lost, and SVG preview is rendered by the generic editable-SVG path. The generated architecture artifact therefore proves JSON-envelope compatibility only; it does not prove a Drawnix knowledge-map canvas.
+
+This changes priority in a bounded way:
+
+1. full Drawnix host embedding remains rejected;
+2. public claims for generic Drawnix support must be narrowed to the implemented subset until replacement lands;
+3. the next Drawnix delivery is a target-specific editable mind-map projection, not another general renderer or a string-converter shortcut;
+4. architecture-canvas output remains a later decision because it needs separate grouping, routing, and collision semantics;
+5. existing Obsidian CLI invocation is the integration-verification path, not a reason to broaden the public CLI contract.
+
+The detailed code/plan comparison, delivery sequence, prompt contract, and verification matrix are in `docs/brainstorms/2026-07-22-drawnix-knowledge-map-quality-and-delivery-plan.md`.
+
 ## 6. Documentation Sync Rule
 
 Any future change that updates the provider-settings/model-discovery lane must re-check, at minimum:

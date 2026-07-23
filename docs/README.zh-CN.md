@@ -36,6 +36,7 @@
 
 ## 工程规划文档
 
+- [Drawnix 知识导图质量与交付方案](./brainstorms/2026-07-22-drawnix-knowledge-map-quality-and-delivery-plan.zh-CN.md)
 - [图形参考项目集成与 Figure 生成扩展方案](./brainstorms/2026-07-04-diagram-reference-integration-and-figure-generation-plan.zh-CN.md)
 - [circuitikz Figure Generation Roadmap](./maintainer/circuitikz-figure-generation-roadmap.zh-CN.md)
 - [circuitikz 导出原型](./maintainer/circuitikz-export-prototype.zh-CN.md)

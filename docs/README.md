@@ -38,6 +38,7 @@ This directory contains repository-level documentation for maintainers and contr
 
 ## Engineering Planning Docs
 
+- [Drawnix Knowledge-Map Quality And Delivery Plan](./brainstorms/2026-07-22-drawnix-knowledge-map-quality-and-delivery-plan.md)
 - [Diagram Reference Integration And Figure Generation Plan](./brainstorms/2026-07-04-diagram-reference-integration-and-figure-generation-plan.md)
 - [circuitikz Figure Generation Roadmap](./maintainer/circuitikz-figure-generation-roadmap.md)
 - [circuitikz Export Prototype](./maintainer/circuitikz-export-prototype.md)

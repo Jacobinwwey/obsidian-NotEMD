@@ -291,6 +291,21 @@ Phase F implementation status on 2026-07-05: `src/diagram/adapters/circuitikz/ci
 
 2026-07-06 SVG text-anchor geometry increment: positioned SVG `text` and `tspan` boxes now honor `text-anchor` values `start`, `middle`, and `end` from attributes or inline style. This makes centered and right-aligned labels participate in the same bounded-canvas, text-overlap, and `render-svg-label-overlap` checks as start-anchored labels, while still avoiding a browser-grade text-layout claim.
 
+## 2026-07-22 Drawnix Quality Correction
+
+The original reference decision remains correct: do not embed the Drawnix host and do not regress `DiagramSpec` through Mermaid or Markdown text. The current production exporter exposed a missing condition in that decision: a tolerated `.drawnix` envelope is insufficient evidence of an editable-canvas-quality artifact.
+
+Current code exports a generic `SemanticFigureModel` grid as `geometry` rectangles and `arrow-line` elements. It flattens `DiagramNode.children`, ignores Drawnix-relevant layout intent, and renders the SVG companion through the same generic grid path. The result is a valid narrow subset but not an upstream mind-map projection.
+
+The corrective delivery is recorded in `docs/brainstorms/2026-07-22-drawnix-knowledge-map-quality-and-delivery-plan.md`:
+
+1. initial Drawnix support is narrowed to an editable `mindmap` contract;
+2. a native target-specific projection owns hierarchy and deterministic layout;
+3. the SVG companion consumes the same projection;
+4. architecture canvas, full intent coverage, and read-only Plait preview remain separate follow-on decisions.
+
+This is a quality correction for a shipped target. It does not authorize a full Drawnix host integration or bypass the existing packaging-isolation constraints.
+
 ## 2026-07-09 circuitikz UI And Artifact Export Increment
 
 The previous architecture deliberately kept circuitikz outside the generic planner until the topology contract was strong enough. That condition is now met for the constrained path, so the implementation advances without changing the core rule: Notemd still does not accept arbitrary TikZ from the LLM.
