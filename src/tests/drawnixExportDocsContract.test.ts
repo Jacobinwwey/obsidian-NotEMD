@@ -39,6 +39,9 @@ describe('drawnix export spike documentation contract', () => {
             expect(doc).toContain('localforage');
             expect(doc).toContain('.drawnix');
             expect(doc).not.toContain('exportSemanticFigureModelToDrawnixData');
+            expect(doc).toContain('Architecture-canvas decision: rejected');
+            expect(doc).toContain('Stage 4 decision: deferred');
+            expect(doc).toContain('bundle isolation');
         }
     });
 
@@ -50,6 +53,12 @@ describe('drawnix export spike documentation contract', () => {
             expect(plan).toContain('DrawnixMindMapProjection');
             expect(plan).toContain('notemd-drawnix-mindmap-svg@1.0.0');
             expect(plan).toContain('Mermaid `mindmap`');
+            expect(plan).toContain('Stage 3 decision: rejected');
+            expect(plan).toContain('DrawnixArchitectureProjection');
+            expect(plan).toContain('Draw.io or Mermaid');
+            expect(plan).toContain('Stage 4 decision: deferred');
+            expect(plan).toContain('Plait preview');
+            expect(plan).toContain('bundle isolation');
         }
 
         for (const docPath of [...progressAuditPaths, ...referencePlanPaths]) {

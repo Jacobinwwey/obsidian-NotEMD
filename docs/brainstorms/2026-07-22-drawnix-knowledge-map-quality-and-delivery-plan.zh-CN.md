@@ -130,13 +130,13 @@ parser 与 validator 必须承担能机械验证的部分：唯一 root、受限
 
 仅在阶段 1 通过后，把 `mindmap` 作为一等图表选择暴露。通过现有 Obsidian CLI command bridge，使用显式 mind-map intent 从 `docs/architecture.zh-CN.md` 生成 `.drawnix`。它验证真实 command/artifact 链路，不把该桥接器夸大为 public CLI API。
 
-### 阶段 3：架构画布决策
+### 阶段 3：架构画布决策（已关闭：拒绝）
 
-只有在思维导图质量验收后，再评估独立的 `DrawnixArchitectureProjection`。它需要模块分组、正交路由、边标签位置和碰撞处理；不得通过一个 mode flag 复用思维导图 adapter。若没有足够证据支撑，应让架构 flowchart 继续使用 Draw.io 或 Mermaid，并把 Drawnix 聚焦于知识导图。
+Stage 3 decision: rejected。没有独立产品需求，以及覆盖模块分组、正交路由、边标签位置和碰撞处理的验收 fixture 时，不新增 `DrawnixArchitectureProjection`。当前证据不足以支持第二套 Drawnix 算法。架构 flowchart 继续使用 Draw.io or Mermaid，Drawnix 只负责知识导图。不得给思维导图 adapter 增加 mode flag。
 
-### 阶段 4：可选只读 Plait 预览
+### 阶段 4：可选只读 Plait 预览（门禁已关闭：延期）
 
-只有重型运行时打包隔离已经存在，才考虑独立 bundle、按需加载的只读 Plait 预览。这是预览增强，不是可编辑 `.drawnix` 导出的前置条件。
+Stage 4 decision: deferred。仓库还没有通过验证的重型 runtime bundle isolation，因此不能安全地把 Plait preview 加入生产插件。当前继续使用专用 SVG companion，并保持 no Plait dependency。只有 bundle isolation、lazy-load 失败处理、bundle size budget 和 Obsidian 生命周期测试都存在时，才重新打开该门禁。只读预览不是可编辑 `.drawnix` 导出的前置条件。
 
 ## 测试与验证矩阵
 

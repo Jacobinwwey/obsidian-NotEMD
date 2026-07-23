@@ -7,7 +7,7 @@ topic: diagram-reference-integration-and-figure-generation-plan
 
 ## Implemented Drawnix Boundary
 
-The planned board-export boundary is now implemented for knowledge maps: `DiagramSpec(intent: "drawnixMindmap") -> DrawnixMindMapProjection -> native .drawnix -> notemd-drawnix-mindmap-svg@1.0.0`. Standard Mermaid `mindmap` remains a separate renderer path. The Drawnix host and Plait runtime are still excluded from the plugin bundle.
+The planned board-export boundary is now implemented for knowledge maps: `DiagramSpec(intent: "drawnixMindmap") -> DrawnixMindMapProjection -> native .drawnix -> notemd-drawnix-mindmap-svg@1.0.0`. Standard Mermaid `mindmap` remains a separate renderer path. A second architecture-canvas projection is rejected without separate product evidence, so architecture flowcharts stay on Draw.io or Mermaid. The Drawnix host and Plait runtime remain excluded until verified bundle isolation exists.
 
 ## Scope And Evidence
 

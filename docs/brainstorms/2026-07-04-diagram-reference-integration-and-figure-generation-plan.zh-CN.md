@@ -7,7 +7,7 @@ topic: diagram-reference-integration-and-figure-generation-plan
 
 ## 已实现的 Drawnix 边界
 
-规划中的 board export 边界已经针对知识导图落地：`DiagramSpec(intent: "drawnixMindmap") -> DrawnixMindMapProjection -> 原生 .drawnix -> notemd-drawnix-mindmap-svg@1.0.0`。标准 Mermaid `mindmap` 仍走独立 renderer 路径。Drawnix host 和 Plait runtime 继续排除在插件 bundle 之外。
+规划中的 board export 边界已经针对知识导图落地：`DiagramSpec(intent: "drawnixMindmap") -> DrawnixMindMapProjection -> 原生 .drawnix -> notemd-drawnix-mindmap-svg@1.0.0`。标准 Mermaid `mindmap` 仍走独立 renderer 路径。没有独立产品证据时拒绝新增架构画布投影，架构 flowchart 继续走 Draw.io 或 Mermaid。Drawnix host 和 Plait runtime 继续排除在插件 bundle 之外，直到 bundle isolation 通过验证。
 
 ## 范围与证据
 

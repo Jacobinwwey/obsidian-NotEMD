@@ -9,7 +9,7 @@ canonical: true
 
 ## 2026-07-23 Drawnix 实现真值
 
-此前审计中标记为待完成的 Drawnix 工作现在已经落地为独立的 `drawnixMindmap` 意图。生产链路是 `DiagramSpec -> DrawnixMindMapProjection -> 原生 .drawnix -> 专用 SVG`，标准 Mermaid `mindmap` 生成保持不变。完整 Drawnix 宿主和 Plait preview 继续延期。
+此前审计中标记为待完成的 Drawnix 工作现在已经落地为独立的 `drawnixMindmap` 意图。生产链路是 `DiagramSpec -> DrawnixMindMapProjection -> 原生 .drawnix -> 专用 SVG`，标准 Mermaid `mindmap` 生成保持不变。架构画布决策已关闭并拒绝新增实现，架构 flowchart 继续走 Draw.io 或 Mermaid；可选 Plait preview 仍受 bundle isolation 门禁约束。
 
 ## 1. 为什么需要这份文档
 

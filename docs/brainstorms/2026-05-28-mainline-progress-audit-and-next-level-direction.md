@@ -9,7 +9,7 @@ canonical: true
 
 ## 2026-07-23 Drawnix Implementation Truth
 
-The Drawnix work described by the earlier audit is now implemented as a separate `drawnixMindmap` intent. The production chain is `DiagramSpec -> DrawnixMindMapProjection -> native .drawnix -> dedicated SVG`, while standard Mermaid `mindmap` generation remains unchanged. Full Drawnix host embedding and Plait preview remain deferred.
+The Drawnix work described by the earlier audit is now implemented as a separate `drawnixMindmap` intent. The production chain is `DiagramSpec -> DrawnixMindMapProjection -> native .drawnix -> dedicated SVG`, while standard Mermaid `mindmap` generation remains unchanged. The architecture-canvas decision is closed as rejected; architecture flowcharts stay on Draw.io or Mermaid. The optional Plait preview remains gated on verified bundle isolation.
 
 ## 1. Why This Document Exists
 

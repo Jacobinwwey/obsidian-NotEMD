@@ -61,3 +61,9 @@ Jest 只能证明已检查的契约和确定性输出，不能证明完整 Drawn
 ## 依赖决策
 
 Drawnix 保持在 adapter/data boundary。不要把 Plait 或 Drawnix packages 加入 Notemd runtime bundle，也不要在插件内嵌 Drawnix editor、toolbar、持久化层或浏览器文件 API。完整宿主或只读 Plait preview 仍是独立后续阶段，必须先具备 bundle isolation 和单独的验收证据。
+
+## 剩余阶段决策
+
+Architecture-canvas decision: rejected。没有独立产品需求，以及覆盖分组、路由、标签和碰撞处理的验收 fixtures 时，不新增 `DrawnixArchitectureProjection`。架构 flowchart 继续走 Draw.io or Mermaid。
+
+Stage 4 decision: deferred。仓库没有通过验证的重型 runtime bundle isolation。在 lazy loading、失败恢复、bundle size budget 和 Obsidian 生命周期覆盖存在前，继续使用专用 SVG companion，并保持 no Plait dependency。

@@ -126,13 +126,13 @@ Add the projection, deterministic branch layout, bounded relationship routing, e
 
 Expose `mindmap` as a first-class diagram choice only after Stage 1 passes. Use the existing Obsidian CLI command bridge to generate a `.drawnix` artifact from `docs/architecture.zh-CN.md` with an explicit mind-map intent. This verifies the real command/artifact route without overclaiming a public CLI API.
 
-### Stage 3: Architecture-canvas decision (deferred)
+### Stage 3: Architecture-canvas decision (closed: rejected)
 
-Evaluate a separate `DrawnixArchitectureProjection` only after mind-map quality is accepted. It needs grouped modules, orthogonal routing, edge-label placement, and collision handling. It must not reuse the mind-map adapter through a mode flag. If the evidence does not justify the work, route architecture flowcharts to Draw.io or Mermaid and keep Drawnix focused on knowledge maps.
+Stage 3 decision: rejected. Do not add a `DrawnixArchitectureProjection` without a separate product requirement and acceptance fixture for grouped modules, orthogonal routing, edge-label placement, and collision handling. The current evidence does not justify a second Drawnix algorithm. Route architecture flowcharts to Draw.io or Mermaid and keep Drawnix focused on knowledge maps. The mind-map adapter must not acquire a mode flag.
 
-### Stage 4: Optional read-only Plait preview (deferred)
+### Stage 4: Optional read-only Plait preview (closed gate: deferred)
 
-Consider a separately bundled, lazy-loaded, read-only Plait preview only after heavy-runtime packaging isolation exists. This is a preview enhancement, not a prerequisite for editable `.drawnix` export.
+Stage 4 decision: deferred. The repository does not provide verified heavy-runtime bundle isolation, so a Plait preview cannot enter the production plugin safely. Keep the dedicated SVG companion and no Plait dependency. Reopen this gate only when bundle isolation, lazy-load failure handling, bundle-size budgets, and an Obsidian lifecycle test exist. A read-only preview remains an optional enhancement, not a prerequisite for editable `.drawnix` export.
 
 ## Test And Verification Matrix
 

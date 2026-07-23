@@ -61,3 +61,9 @@ Jest proves the checked contract and deterministic output. It does not prove ful
 ## Dependency Decision
 
 Keep Drawnix at the adapter/data boundary. Do not add Plait or Drawnix packages to the Notemd runtime bundle, and do not embed the Drawnix editor, toolbar, persistence layer, or browser file APIs. A full host or read-only Plait preview remains a separate future phase that requires bundle isolation and its own acceptance evidence.
+
+## Remaining Phase Decisions
+
+Architecture-canvas decision: rejected. Do not add `DrawnixArchitectureProjection` without a separate product requirement and acceptance fixtures for grouping, routing, labels, and collision handling. Architecture flowcharts continue through Draw.io or Mermaid.
+
+Stage 4 decision: deferred. The repository has no verified heavy-runtime bundle isolation. Keep the dedicated SVG companion and no Plait dependency until lazy loading, failure recovery, bundle-size budgets, and Obsidian lifecycle coverage exist.
