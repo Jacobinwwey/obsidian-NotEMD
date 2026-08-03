@@ -118,12 +118,24 @@ describe('Drawnix mind-map renderer', () => {
             }]
         });
 
+        const data = JSON.parse(artifact.content);
         expect(artifact.companions?.map(companion => companion.path)).toEqual([
             'source-visual-source-visual-1.mermaid.md',
             'source-visual-source-visual-1.svg',
             'source-visual-manifest.json'
         ]);
         expect(artifact.sourceVisualManifest?.[0]).toMatchObject({ id: 'source-visual-1', status: 'resolved' });
+        expect(data.metadata.notemd.sourceVisuals).toEqual([
+            expect.objectContaining({
+                id: 'source-visual-1',
+                kind: 'mermaid',
+                status: 'resolved',
+                companionPaths: [
+                    'source-visual-source-visual-1.mermaid.md',
+                    'source-visual-source-visual-1.svg'
+                ]
+            })
+        ]);
     });
 
     test('preserves multiple top-level roots without flattening the forest', async () => {

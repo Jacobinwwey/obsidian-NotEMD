@@ -30,6 +30,8 @@ The projection preserves one or more top-level roots and `node.children` ownersh
 
 The exporter writes `type: "drawnix"`, `version: 1`, `source: "web"`, a fixed viewport, one or more nested element trees, and any validated cross-relation arrows. It has no `SemanticFigureModel` dependency and no Plait dependency. The standard Mermaid `mindmap` intent remains a separate Mermaid path; Drawnix fallback maps a copied spec to Mermaid and never flattens the original forest.
 
+When the source note contains Mermaid fences or Obsidian image embeds, the native JSON also carries an optional `metadata.notemd.sourceVisuals` index. This is intentionally metadata rather than a new native Drawnix image element: each entry records the source hash, resolution status, source path, and companion names. The renderer writes the actual Mermaid source, sanitized SVG, and binary image into the scoped `.drawnix.assets` directory and the Obsidian wrapper embeds those files for review. This keeps the native element stream compatible with the pinned subset while making source visuals discoverable from the `.drawnix` file itself.
+
 ## Automated Evidence
 
 The focused regression command is:

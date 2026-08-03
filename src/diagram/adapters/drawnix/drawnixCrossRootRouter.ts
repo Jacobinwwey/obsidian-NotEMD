@@ -145,6 +145,34 @@ function buildLocalLaneRoute(
     return simplify([start, [laneX, start[1]], [laneX, end[1]], end]);
 }
 
+function buildParallelLaneRoute(
+    start: DrawnixPoint,
+    end: DrawnixPoint,
+    relationIndex: number,
+    obstacles: readonly RouteRect[],
+    canvasHeight: number
+): DrawnixPoint[] | null {
+    if (relationIndex <= 0) {
+        return null;
+    }
+
+    const laneSpacing = ROUTE_CLEARANCE + relationIndex * 18;
+    const offsets = [
+        laneSpacing,
+        -laneSpacing,
+        laneSpacing * 2,
+        -laneSpacing * 2
+    ];
+    for (const offset of offsets) {
+        const laneY = Math.max(ROUTE_CLEARANCE, Math.min(canvasHeight - ROUTE_CLEARANCE, start[1] + offset));
+        const points = simplify([start, [start[0], laneY], [end[0], laneY], end]);
+        if (points.length > 2 && points.slice(1).every((point, index) => segmentClear(points[index], point, obstacles))) {
+            return points;
+        }
+    }
+    return null;
+}
+
 function buildGridRoute(
     start: DrawnixPoint,
     end: DrawnixPoint,
@@ -298,6 +326,17 @@ export function routeDrawnixCrossRootRelation(input: DrawnixCrossRootRouterInput
         };
     }
 
+    const parallelLaneRoute = buildParallelLaneRoute(
+        start,
+        end,
+        input.relationIndex,
+        unrelatedObstacles,
+        input.canvasHeight
+    );
+    if (parallelLaneRoute) {
+        return { points: parallelLaneRoute, strategy: 'grid' };
+    }
+
     const gridRoute = buildGridRoute(start, end, unrelatedObstacles, input.canvasWidth, input.canvasHeight);
     if (gridRoute) {
         return { points: gridRoute, strategy: 'grid' };
@@ -312,9 +351,8 @@ export function routeDrawnixCrossRootRelation(input: DrawnixCrossRootRouterInput
         };
     }
 
-    return {
-        points: [start, end],
-        strategy: 'outer-lane',
-        warning: 'Cross-root relation could not find an obstacle-free orthogonal route; direct points were retained for diagnostics.'
-    };
+    throw new Error(
+        'Cross-root relation could not find an obstacle-free orthogonal route; '
+        + 'Drawnix generation must fall back to a non-Drawnix target.'
+    );
 }

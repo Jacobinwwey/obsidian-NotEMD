@@ -47,6 +47,8 @@ PNG 输出还会写入或替换 `pHYs` 物理像素密度 chunk，因此所选 P
 | `png` | 从同一个 standalone SVG 或电路预览 SVG 渲染出的 `.png` 视觉证据 | `DiagramSpec -> SemanticFigureModel -> renderSemanticFigureSvg() -> Playwright screenshot`，或 `CircuitSpec -> renderCircuitSpecPreviewSvg() -> Playwright screenshot` | 输出尺寸按 SVG CSS 尺寸与所选 PPI 对齐，并写入匹配所选密度的 `pHYs` 元数据 |
 | `pdf` | 从同一个 standalone SVG 或电路预览 SVG 渲染出的单页 `.pdf` 视觉证据 | `DiagramSpec -> SemanticFigureModel -> renderSemanticFigureSvg() -> Playwright PDF`，或 `CircuitSpec -> renderCircuitSpecPreviewSvg() -> Playwright PDF` | 页面尺寸按 SVG CSS 尺寸对齐；`--ppi` 控制栅格 companion |
 
+离线 CLI 只接受已验证的 `DiagramSpec`，有意不拥有 Vault 边界，因此不会解析源笔记中的 Mermaid fence 或图片嵌入。源视觉保真通过 Obsidian command host 验证：原生 `.drawnix` metadata 索引指向 scoped `.assets` companion，生成的 Markdown wrapper 则嵌入 Mermaid 源码、安全 SVG 和图片二进制。
+
 ## Obsidian 预览 companion 契约
 
 Draw.io、Drawnix 与 circuitikz source files 是有用的交换格式，但 Obsidian 默认不会把 `.drawio`、`.drawnix` 或 raw `.tex` 渲染成图形。因此插件保存路径在 renderer 能提供 SVG 时，会把 SVG 当作可审查的 companion artifact：

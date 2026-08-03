@@ -211,4 +211,89 @@ describe('saveDiagramArtifactFile', () => {
             expect.stringContaining('![[Source_diagram.drawnix.assets/source-visual-1.png]]')
         );
     });
+
+    test('rewrites native Drawnix source visual paths into the companion scope', async () => {
+        const reporter = createReporter();
+        const content = JSON.stringify({
+            type: 'drawnix',
+            version: 1,
+            source: 'web',
+            elements: [{ id: 'root', type: 'mindmap', children: [] }],
+            viewport: { zoom: 1, offsetX: 0, offsetY: 0 },
+            metadata: {
+                notemd: {
+                    version: 1,
+                    sourceVisuals: [{
+                        id: 'source-visual-1',
+                        kind: 'mermaid',
+                        status: 'resolved',
+                        sourceHash: 'abc12345',
+                        companionPaths: ['source-visual-1.svg']
+                    }]
+                }
+            }
+        });
+
+        await saveDiagramArtifactFile(mockApp, mockSettings, originalFile, {
+            target: 'drawnix',
+            content,
+            mimeType: 'application/vnd.drawnix+json',
+            sourceIntent: 'drawnixMindmap',
+            companions: [{
+                path: 'source-visual-1.svg',
+                content: '<svg />',
+                mimeType: 'image/svg+xml'
+            }]
+        }, reporter);
+
+        expect(mockApp.vault.create).toHaveBeenCalledWith(
+            'Notes/Source_diagram.drawnix',
+            expect.stringContaining('Source_diagram.drawnix.assets/source-visual-1.svg')
+        );
+    });
+
+    test('restores existing files when a later artifact write fails', async () => {
+        const reporter = createReporter();
+        const svgFile = Object.create(TFile.prototype) as TFile;
+        const artifactFile = Object.create(TFile.prototype) as TFile;
+        const wrapperFile = Object.create(TFile.prototype) as TFile;
+        const originalContents = new Map<unknown, string>([
+            [svgFile, '<svg>old</svg>'],
+            [artifactFile, 'old drawnix'],
+            [wrapperFile, 'old wrapper']
+        ]);
+        (mockApp.vault.getAbstractFileByPath as jest.Mock).mockImplementation((path: string) => {
+            if (path === 'Notes/Source_diagram.drawnix.svg') {
+                return svgFile;
+            }
+            if (path === 'Notes/Source_diagram.drawnix') {
+                return artifactFile;
+            }
+            if (path === 'Notes/Source_diagram.drawnix.md') {
+                return wrapperFile;
+            }
+            return null;
+        });
+        (mockApp.vault.read as jest.Mock).mockImplementation((file: TFile) => Promise.resolve(originalContents.get(file) ?? ''));
+        let failWrapperWrite = true;
+        (mockApp.vault.modify as jest.Mock).mockImplementation(async (file: TFile, content: string) => {
+            if (file === wrapperFile && failWrapperWrite) {
+                failWrapperWrite = false;
+                throw new Error('wrapper write failed');
+            }
+            return undefined;
+        });
+
+        await expect(saveDiagramArtifactFile(mockApp, mockSettings, originalFile, {
+            target: 'drawnix',
+            content: '{"type":"drawnix","elements":[]}',
+            mimeType: 'application/vnd.drawnix+json',
+            sourceIntent: 'drawnixMindmap',
+            previewSvg: { content: '<svg>new</svg>', mimeType: 'image/svg+xml' }
+        }, reporter)).rejects.toThrow('wrapper write failed');
+
+        expect(mockApp.vault.modify).toHaveBeenCalledWith(svgFile, '<svg>old</svg>');
+        expect(mockApp.vault.modify).toHaveBeenCalledWith(artifactFile, 'old drawnix');
+        expect(mockApp.vault.modify).toHaveBeenCalledWith(wrapperFile, 'old wrapper');
+    });
 });

@@ -4,6 +4,24 @@ import {
     DrawnixMindMapElement,
     DrawnixMindMapProjection
 } from './drawnixMindMapProjection';
+import type { SourceVisualKind, SourceVisualStatus } from '../../sourceVisuals';
+
+export interface DrawnixSourceVisualAttachment {
+    id: string;
+    kind: SourceVisualKind;
+    status: SourceVisualStatus;
+    sourceHash: string;
+    sourcePath?: string;
+    companionPaths: string[];
+    diagnostic?: string;
+}
+
+export interface DrawnixMindMapMetadata {
+    notemd: {
+        version: 1;
+        sourceVisuals: DrawnixSourceVisualAttachment[];
+    };
+}
 
 export interface DrawnixMindMapExportedData {
     type: 'drawnix';
@@ -15,9 +33,25 @@ export interface DrawnixMindMapExportedData {
         offsetX: number;
         offsetY: number;
     };
+    /**
+     * Namespaced metadata keeps source visuals discoverable without adding
+     * unverified image elements to the native Drawnix element stream.
+     */
+    metadata?: DrawnixMindMapMetadata;
 }
 
-export function exportDrawnixMindMapProjection(projection: DrawnixMindMapProjection): DrawnixMindMapExportedData {
+export function exportDrawnixMindMapProjection(
+    projection: DrawnixMindMapProjection,
+    sourceVisuals: readonly DrawnixSourceVisualAttachment[] = []
+): DrawnixMindMapExportedData {
+    const metadata = sourceVisuals.length > 0
+        ? {
+            notemd: {
+                version: 1 as const,
+                sourceVisuals: sourceVisuals.map(visual => ({ ...visual, companionPaths: [...visual.companionPaths] }))
+            }
+        }
+        : undefined;
     return {
         type: 'drawnix',
         version: 1,
@@ -30,7 +64,8 @@ export function exportDrawnixMindMapProjection(projection: DrawnixMindMapProject
             zoom: 1,
             offsetX: 0,
             offsetY: 0
-        }
+        },
+        ...(metadata ? { metadata } : {})
     };
 }
 

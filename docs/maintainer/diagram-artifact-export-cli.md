@@ -47,6 +47,8 @@ PNG output also writes or replaces the `pHYs` physical pixel density chunk, so t
 | `png` | `.png` visual evidence rendered from the same standalone SVG or circuit preview SVG | `DiagramSpec -> SemanticFigureModel -> renderSemanticFigureSvg() -> Playwright screenshot`, or `CircuitSpec -> renderCircuitSpecPreviewSvg() -> Playwright screenshot` | output dimensions follow SVG CSS size at the selected PPI, with `pHYs` metadata aligned to the selected density |
 | `pdf` | single-page `.pdf` visual evidence rendered from the same standalone SVG or circuit preview SVG | `DiagramSpec -> SemanticFigureModel -> renderSemanticFigureSvg() -> Playwright PDF`, or `CircuitSpec -> renderCircuitSpecPreviewSvg() -> Playwright PDF` | page size follows SVG CSS size; `--ppi` controls raster/screenshot companions |
 
+The offline CLI accepts a validated `DiagramSpec` and intentionally has no Vault boundary, so it does not resolve source-note Mermaid fences or image embeds. Source-visual preservation is verified through the Obsidian command host: the native `.drawnix` metadata index points to the scoped `.assets` companions, and the generated Markdown wrapper embeds the source Mermaid, sanitized SVG, and binary image files.
+
 ## Obsidian Preview Companion Contract
 
 Draw.io, Drawnix, and circuitikz source files are useful interchange formats, but Obsidian does not render `.drawio`, `.drawnix`, or raw `.tex` as figures by default. The plugin-side save path therefore treats SVG as the reviewable companion artifact when the renderer can supply one:

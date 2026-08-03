@@ -32,6 +32,8 @@ DiagramSpec(intent: "drawnixMindmap")
 
 导出器写入 `type: "drawnix"`、`version: 1`、`source: "web"`、固定 viewport、一个或多个嵌套元素树和通过校验的跨关系箭头。生产路径不依赖 `SemanticFigureModel`，并保持 no Plait dependency。标准 Mermaid `mindmap` 仍走原有 Mermaid 路径；Drawnix 失败回退时只复制 spec 并映射为 Mermaid，不会拍平原始 forest。
 
+当源笔记包含 Mermaid fence 或 Obsidian 图片嵌入时，原生 JSON 还会携带可选的 `metadata.notemd.sourceVisuals` 索引。这里有意使用 metadata，而不是新增未经验证的 Drawnix 原生图片 element：每项记录 source hash、解析状态、源路径和 companion 名称。renderer 将实际 Mermaid 源码、安全 SVG 和图片二进制写入 scoped `.drawnix.assets` 目录，Obsidian wrapper 再嵌入这些文件供审阅。这样既保持已验证子集的原生 element 流兼容，又能从 `.drawnix` 文件本身发现源视觉信息。
+
 ## 自动化证据
 
 定向回归命令：

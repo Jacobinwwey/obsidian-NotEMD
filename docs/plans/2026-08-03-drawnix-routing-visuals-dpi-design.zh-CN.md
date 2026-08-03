@@ -18,6 +18,13 @@ Drawnix 知识图可以包含多个顶层 root。当一个无关 root 位于跨 
 - Render cache key 包含已解析 source visual manifest hash。
 - 预览光栅化接受 72 到 600 之间的任意整数 DPI，默认 300，设置提示中列出 100/300/600 常用预设；超出范围的值会被夹紧。PNG `pHYs` 元数据和 PDF 光栅尺寸使用归一化后的值；SVG 与 Drawnix 几何不受 DPI 影响。
 
+## 加固增量
+
+- 跨 root 路由现在采用 fail-closed 策略。障碍路由失败后不再输出直线；路由器抛出明确的回退错误，由生成服务选择非 Drawnix 目标，避免生成一条穿过无关 root、却看起来像成功的关系线。
+- 端点完全相同的并行关系会在网格路由前分配确定性的偏移车道，保证标签和箭头笔画可读，同时不改变语义边契约。
+- 源视觉采用双层持久化契约。原生 `.drawnix` JSON 只保存命名空间 `metadata.notemd.sourceVisuals` 索引，包括 hash、解析状态、源路径和相对 companion 名称；Mermaid 源码、安全 SVG 与图片二进制继续保存在 scoped `.assets` 目录。Obsidian wrapper 负责嵌入这些 companion 供审阅。不向原生元素流注入 base64 或未经验证的 Drawnix 图片元素。
+- artifact 保存对新建文件和已有文件都具备事务语义。文本与二进制文件在覆盖前建立快照；后续 companion、artifact 或 wrapper 写入失败时恢复原内容。
+
 ## 验证
 
-定向测试覆盖障碍避让、并行关系确定性、源视觉扫描/解析、安全处理、companion 持久化、缓存失效、PNG 元数据与 DPI 归一化。完整 Jest、TypeScript 构建、官方 Obsidian CLI 验证、render-host audit 以及 `git diff --check` 是发布门禁。
+定向测试覆盖障碍避让、并行关系确定性（含重复端点）、fail-closed 路由、源视觉扫描/解析、安全处理、原生 attachment metadata、scoped companion 路径重写、事务化 companion 持久化、缓存失效、PNG 元数据与 DPI 归一化。完整 Jest、TypeScript 构建、官方 Obsidian CLI 验证、render-host audit 以及 `git diff --check` 是发布门禁。

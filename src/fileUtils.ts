@@ -247,6 +247,51 @@ function rewriteSourceVisualManifestCompanionPaths(
     }
 }
 
+function rewriteDrawnixArtifactCompanionPaths(
+    content: string,
+    companionPathMap: ReadonlyMap<string, string>
+): string {
+    try {
+        const parsed = JSON.parse(content) as unknown;
+        if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
+            return content;
+        }
+
+        const root = parsed as Record<string, unknown>;
+        if (root.type !== 'drawnix' || !root.metadata || typeof root.metadata !== 'object' || Array.isArray(root.metadata)) {
+            return content;
+        }
+        const metadata = root.metadata as Record<string, unknown>;
+        if (!metadata.notemd || typeof metadata.notemd !== 'object' || Array.isArray(metadata.notemd)) {
+            return content;
+        }
+        const notemd = metadata.notemd as Record<string, unknown>;
+        if (!Array.isArray(notemd.sourceVisuals)) {
+            return content;
+        }
+
+        notemd.sourceVisuals = notemd.sourceVisuals.map(visual => {
+            if (!visual || typeof visual !== 'object' || Array.isArray(visual)) {
+                return visual;
+            }
+            const sourceVisual = visual as Record<string, unknown>;
+            if (!Array.isArray(sourceVisual.companionPaths)) {
+                return visual;
+            }
+            return {
+                ...sourceVisual,
+                companionPaths: sourceVisual.companionPaths.map(path => (
+                    typeof path === 'string' ? companionPathMap.get(path) ?? path : path
+                ))
+            };
+        });
+
+        return `${JSON.stringify(root, null, 2)}\n`;
+    } catch {
+        return content;
+    }
+}
+
 export async function handleFileRename(app: App, oldPath: string, newPath: string, uiLocale = 'auto') {
     const oldName = oldPath.split('/').pop()?.replace('.md', '') || '';
     const newName = newPath.split('/').pop()?.replace('.md', '') || '';
@@ -1805,9 +1850,24 @@ export async function saveDiagramArtifactFile(
     progressReporter.log(`Saving diagram artifact to: ${outputPath}`);
 
     const createdPaths: string[] = [];
+    const modifiedSnapshots = new Map<string, {
+        file: TFile;
+        binary: boolean;
+        content: string | ArrayBuffer;
+    }>();
+    const snapshotExistingFile = async (path: string, file: TFile, binary: boolean): Promise<void> => {
+        if (modifiedSnapshots.has(path)) {
+            return;
+        }
+        const content = binary
+            ? (await app.vault.readBinary(file)).slice(0)
+            : await app.vault.read(file);
+        modifiedSnapshots.set(path, { file, binary, content });
+    };
     const writeTextArtifact = async (path: string, content: string, label: string): Promise<void> => {
         const existingFile = app.vault.getAbstractFileByPath(path);
         if (existingFile instanceof TFile) {
+            await snapshotExistingFile(path, existingFile, false);
             await app.vault.modify(existingFile, content);
             progressReporter.log(`Overwrote existing ${label}: ${path}`);
         } else {
@@ -1820,6 +1880,7 @@ export async function saveDiagramArtifactFile(
     const writeBinaryArtifact = async (path: string, content: ArrayBuffer, label: string): Promise<void> => {
         const existingFile = app.vault.getAbstractFileByPath(path);
         if (existingFile instanceof TFile) {
+            await snapshotExistingFile(path, existingFile, true);
             await app.vault.modifyBinary(existingFile, content);
             progressReporter.log(`Overwrote existing ${label}: ${path}`);
         } else {
@@ -1861,6 +1922,9 @@ export async function saveDiagramArtifactFile(
         // Wrap Vega-Lite JSON in a readable markdown file.
         const vlTitle = artifact.sourceIntent || 'Data Chart';
         finalContent = `# ${vlTitle}\n\n> Preview this chart using the "Preview diagram" command in Notemd.\n\n\`\`\`vega-lite\n${artifact.content}\n\`\`\`\n`;
+    }
+    if (artifact.target === 'drawnix') {
+        finalContent = rewriteDrawnixArtifactCompanionPaths(finalContent, companionPathMap);
     }
 
     const companionPaths: string[] = [];
@@ -1927,6 +1991,16 @@ export async function saveDiagramArtifactFile(
 
         return outputPath;
     } catch (error: unknown) {
+        for (const snapshot of Array.from(modifiedSnapshots.values()).reverse()) {
+            try {
+                if (snapshot.binary) {
+                    await app.vault.modifyBinary(snapshot.file, snapshot.content as ArrayBuffer);
+                } else {
+                    await app.vault.modify(snapshot.file, snapshot.content as string);
+                }
+            } catch {
+            }
+        }
         for (const path of [...createdPaths].reverse()) {
             try {
                 const createdFile = app.vault.getAbstractFileByPath(path);

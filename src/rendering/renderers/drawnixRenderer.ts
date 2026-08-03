@@ -24,13 +24,13 @@ export class DrawnixRenderer implements DiagramRenderer {
         assertValidDiagramSpec(spec);
 
         const projection = buildDrawnixMindMapProjection(spec);
-        const data = exportDrawnixMindMapProjection(projection);
+        const sourceVisualCompanions = await buildSourceVisualCompanions(options.sourceVisuals);
+        const data = exportDrawnixMindMapProjection(projection, sourceVisualCompanions.manifest);
         const validationErrors = validateDrawnixMindMapExportedData(data);
         if (validationErrors.length > 0) {
             throw new Error(`Drawnix mind-map validation failed: ${validationErrors.join('; ')}`);
         }
 
-        const sourceVisualCompanions = await buildSourceVisualCompanions(options.sourceVisuals);
         return {
             target: this.target,
             content: stringifyDrawnixMindMapExportedData(data),

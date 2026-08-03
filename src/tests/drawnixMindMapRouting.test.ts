@@ -1,5 +1,6 @@
 import { DiagramSpec } from '../diagram/types';
 import { buildDrawnixMindMapProjection } from '../diagram/adapters/drawnix/drawnixMindMapProjection';
+import { routeDrawnixCrossRootRelation } from '../diagram/adapters/drawnix/drawnixCrossRootRouter';
 import { DrawnixRenderer } from '../rendering/renderers/drawnixRenderer';
 
 function intersectsInterior(
@@ -88,5 +89,67 @@ describe('Drawnix cross-root routing', () => {
 
         expect(second.crossRelations).toEqual(first.crossRelations);
         expect(first.crossRelations[0].points).not.toEqual(first.crossRelations[1].points);
+    });
+
+    test('keeps duplicate endpoint relations on separate lanes', () => {
+        const spec: DiagramSpec = {
+            intent: 'drawnixMindmap',
+            title: 'Duplicate endpoints',
+            nodes: [
+                { id: 'left', label: 'Left', children: [{ id: 'left-child', label: 'Left child' }] },
+                { id: 'right', label: 'Right', children: [{ id: 'right-child', label: 'Right child' }] }
+            ],
+            edges: [
+                { from: 'left-child', to: 'right-child', label: 'first relation' },
+                { from: 'left-child', to: 'right-child', label: 'second relation' }
+            ]
+        };
+
+        const projection = buildDrawnixMindMapProjection(spec);
+
+        expect(projection.crossRelations[0].points).not.toEqual(projection.crossRelations[1].points);
+    });
+
+    test('fails closed instead of returning a direct route when no obstacle-free route exists', () => {
+        expect(() => routeDrawnixCrossRootRelation({
+            source: {
+                id: 'source',
+                rootId: 'source-root',
+                label: 'Source',
+                role: 'concept',
+                depth: 0,
+                branchIndex: -1,
+                x: 100,
+                y: 100,
+                width: 80,
+                height: 60,
+                textLines: ['Source']
+            },
+            target: {
+                id: 'target',
+                rootId: 'target-root',
+                label: 'Target',
+                role: 'concept',
+                depth: 0,
+                branchIndex: -1,
+                x: 1000,
+                y: 100,
+                width: 80,
+                height: 60,
+                textLines: ['Target']
+            },
+            relationIndex: 0,
+            regions: [{
+                rootId: 'unrelated-root',
+                rowIndex: 0,
+                columnIndex: 0,
+                x: 0,
+                y: 0,
+                width: 1200,
+                height: 300
+            }],
+            canvasWidth: 1200,
+            canvasHeight: 400
+        })).toThrow(/must fall back to a non-Drawnix target/i);
     });
 });

@@ -18,6 +18,13 @@ Drawnix knowledge maps may contain several top-level roots. Cross-root relations
 - Render cache keys include the resolved visual manifest hash.
 - Preview rasterization accepts any integer from 72 through 600 DPI, with 300 as the default and 100/300/600 exposed as common presets in the settings hint. Out-of-range values are clamped. PNG `pHYs` metadata and PDF raster dimensions use the normalized value; SVG and Drawnix geometry remain DPI-independent.
 
+## Hardening Increment
+
+- Cross-root routing is now fail-closed. The router never emits a direct segment after obstacle routing fails; it throws an explicit fallback error so the generation service can select a non-Drawnix target instead of producing a misleading relation that crosses an unrelated root.
+- Parallel relations with identical endpoints receive deterministic offset lanes before grid routing. This keeps labels and arrow strokes legible without changing the semantic edge contract.
+- Source visuals have a two-layer persistence contract. The native `.drawnix` JSON contains only a namespaced `metadata.notemd.sourceVisuals` index with hashes, resolution state, source paths, and relative companion names. Mermaid source, sanitized SVG, and binary image bytes remain in the scoped `.assets` directory. The Obsidian wrapper embeds those companions for review. No base64 payload or unverified Drawnix image element is injected into the native element stream.
+- Artifact saving is transactional for both newly created and already existing files. Text and binary files are snapshotted before overwrite and restored when a later companion, artifact, or wrapper write fails.
+
 ## Verification
 
-Focused tests cover obstacle avoidance, deterministic parallel routes, source scanning/resolution, sanitization, companion persistence, cache invalidation, PNG metadata, and DPI normalization. Full Jest, TypeScript build, official Obsidian CLI validation, render-host audit, and `git diff --check` are release gates.
+Focused tests cover obstacle avoidance, deterministic parallel routes (including duplicate endpoints), fail-closed routing, source scanning/resolution, sanitization, native attachment metadata, scoped companion path rewriting, transactional companion persistence, cache invalidation, PNG metadata and DPI normalization. Full Jest, TypeScript build, official Obsidian CLI validation, render-host audit, and `git diff --check` are release gates.
