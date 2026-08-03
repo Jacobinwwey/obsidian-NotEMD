@@ -1,4 +1,6 @@
 import { DiagramEdge, DiagramNode, DiagramSpec } from '../../types';
+import { routeDrawnixCrossRootRelation } from './drawnixCrossRootRouter';
+import type { DrawnixCrossRootRouteStrategy } from './drawnixCrossRootRouter';
 
 export type DrawnixPoint = [number, number];
 
@@ -39,6 +41,7 @@ export interface DrawnixMindMapArrowElement {
 
 export interface DrawnixMindMapPlacedNode {
     id: string;
+    rootId: string;
     label: string;
     role: string;
     parentId?: string;
@@ -63,8 +66,22 @@ export interface DrawnixMindMapCrossRelation {
     id: string;
     sourceId: string;
     targetId: string;
+    sourceRootId: string;
+    targetRootId: string;
     label?: string;
     points: DrawnixPoint[];
+    routeStrategy: DrawnixCrossRootRouteStrategy;
+    routeWarning?: string;
+}
+
+export interface DrawnixRootRegion {
+    rootId: string;
+    rowIndex: number;
+    columnIndex: number;
+    x: number;
+    y: number;
+    width: number;
+    height: number;
 }
 
 export interface DrawnixMindMapProjection {
@@ -78,12 +95,14 @@ export interface DrawnixMindMapProjection {
     nodes: DrawnixMindMapPlacedNode[];
     hierarchyBranches: DrawnixMindMapHierarchyBranch[];
     crossRelations: DrawnixMindMapCrossRelation[];
+    rootRegions: DrawnixRootRegion[];
     width: number;
     height: number;
 }
 
 interface MindMapTreeNode {
     id: string;
+    rootId: string;
     label: string;
     role: string;
     source: DiagramNode;
@@ -171,7 +190,8 @@ function buildTreeNode(
     source: DiagramNode,
     parent: MindMapTreeNode | undefined,
     depth: number,
-    branchIndex: number
+    branchIndex: number,
+    rootId: string
 ): MindMapTreeNode {
     const label = normalizedText(source.label, source.id || 'Untitled');
     const isRoot = depth === 0;
@@ -186,6 +206,7 @@ function buildTreeNode(
 
     const node: MindMapTreeNode = {
         id: source.id.trim(),
+        rootId,
         label,
         role: normalizedText(source.kind, 'concept'),
         source,
@@ -201,7 +222,7 @@ function buildTreeNode(
         y: 0
     };
 
-    node.children = (source.children ?? []).map(child => buildTreeNode(child, node, depth + 1, branchIndex));
+    node.children = (source.children ?? []).map(child => buildTreeNode(child, node, depth + 1, branchIndex, rootId));
     return node;
 }
 
@@ -367,29 +388,10 @@ function shiftLayout(
     };
 }
 
-function createCrossRelationPoints(
-    source: DrawnixMindMapPlacedNode,
-    target: DrawnixMindMapPlacedNode,
-    index: number,
-    canvasWidth: number
-): DrawnixPoint[] {
-    const sourceIsLeft = source.x + source.width / 2 < target.x + target.width / 2;
-    const start: DrawnixPoint = sourceIsLeft
-        ? [source.x + source.width, source.y + source.height / 2]
-        : [source.x, source.y + source.height / 2];
-    const end: DrawnixPoint = sourceIsLeft
-        ? [target.x, target.y + target.height / 2]
-        : [target.x + target.width, target.y + target.height / 2];
-    const laneX = sourceIsLeft
-        ? Math.min(canvasWidth - HORIZONTAL_MARGIN / 2, Math.max(start[0], end[0]) + 42 + index * 18)
-        : Math.max(HORIZONTAL_MARGIN / 2, Math.min(start[0], end[0]) - 42 - index * 18);
-
-    return [start, [laneX, start[1]], [laneX, end[1]], end];
-}
-
 function toPlacedNode(node: MindMapTreeNode): DrawnixMindMapPlacedNode {
     return {
         id: node.id,
+        rootId: node.rootId,
         label: node.label,
         role: node.role,
         parentId: node.parent?.id,
@@ -428,7 +430,9 @@ function toDrawnixMindElement(node: MindMapTreeNode, isRoot: boolean, rightNodeC
 function createCrossRelations(
     edges: DiagramEdge[],
     placedNodes: DrawnixMindMapPlacedNode[],
-    canvasWidth: number
+    rootRegions: readonly DrawnixRootRegion[],
+    canvasWidth: number,
+    canvasHeight: number
 ): DrawnixMindMapCrossRelation[] {
     const nodeById = new Map(placedNodes.map(node => [node.id, node]));
     return edges.map((edge, index) => {
@@ -440,12 +444,25 @@ function createCrossRelations(
             throw new Error(`Drawnix mind-map relationship ${index + 1} references an unknown node.`);
         }
 
+        const route = routeDrawnixCrossRootRelation({
+            source,
+            target,
+            relationIndex: index,
+            regions: rootRegions,
+            canvasWidth,
+            canvasHeight
+        });
+
         return {
             id: `cross-${index + 1}-${sourceId}-to-${targetId}`,
             sourceId,
             targetId,
+            sourceRootId: source.rootId,
+            targetRootId: target.rootId,
             label: normalizedText(edge.label, normalizedText(edge.relation, '')) || undefined,
-            points: createCrossRelationPoints(source, target, index, canvasWidth)
+            points: route.points,
+            routeStrategy: route.strategy,
+            routeWarning: route.warning
         };
     });
 }
@@ -517,7 +534,7 @@ function packRootLayouts(rootLayouts: RootLayout[]): {
 }
 
 function buildRootLayout(source: DiagramNode): RootLayout {
-    const root = buildTreeNode(source, undefined, 0, -1);
+    const root = buildTreeNode(source, undefined, 0, -1, source.id.trim());
     const directChildren = root.children;
     const rightNodeCount = Math.ceil(directChildren.length / 2);
     directChildren.forEach((child, index) => {
@@ -597,22 +614,42 @@ export function buildDrawnixMindMapProjection(spec: DiagramSpec): DrawnixMindMap
     const roots: DrawnixMindMapElement[] = [];
     const treeNodes: MindMapTreeNode[] = [];
     const hierarchyBranches: DrawnixMindMapHierarchyBranch[] = [];
+    const rootRegions: DrawnixRootRegion[] = [];
 
     let offsetY = 0;
-    packedForest.rows.forEach(row => {
+    packedForest.rows.forEach((row, rowIndex) => {
         let offsetX = 0;
-        row.layouts.forEach(layout => {
+        row.layouts.forEach((layout, columnIndex) => {
             shiftRootLayout(layout, offsetX, offsetY);
             roots.push(toDrawnixMindElement(layout.root, true, layout.rightNodeCount));
             treeNodes.push(...layout.treeNodes);
             hierarchyBranches.push(...layout.hierarchyBranches);
+            const minX = Math.min(...layout.treeNodes.map(node => node.x));
+            const minY = Math.min(...layout.treeNodes.map(node => node.y));
+            const maxX = Math.max(...layout.treeNodes.map(node => node.x + node.width));
+            const maxY = Math.max(...layout.treeNodes.map(node => node.y + node.height));
+            rootRegions.push({
+                rootId: layout.root.id,
+                rowIndex,
+                columnIndex,
+                x: minX,
+                y: minY,
+                width: maxX - minX,
+                height: maxY - minY
+            });
             offsetX += layout.width + ROOT_LAYOUT_GAP;
         });
         offsetY += row.height + ROOT_ROW_GAP;
     });
 
     const placedNodes = treeNodes.map(toPlacedNode);
-    const crossRelations = createCrossRelations(spec.edges ?? [], placedNodes, packedForest.width);
+    const crossRelations = createCrossRelations(
+        spec.edges ?? [],
+        placedNodes,
+        rootRegions,
+        packedForest.width,
+        packedForest.height
+    );
 
     return {
         title: normalizedText(spec.title, 'Generated knowledge map'),
@@ -622,6 +659,7 @@ export function buildDrawnixMindMapProjection(spec: DiagramSpec): DrawnixMindMap
         nodes: placedNodes,
         hierarchyBranches,
         crossRelations,
+        rootRegions,
         width: packedForest.width,
         height: packedForest.height
     };

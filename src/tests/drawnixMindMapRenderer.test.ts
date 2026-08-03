@@ -103,6 +103,29 @@ describe('Drawnix mind-map renderer', () => {
         expect(artifact.previewSvg?.content).not.toContain('data-drawio-type="node"');
     });
 
+    test('preserves source Mermaid visuals through explicit companions and manifest metadata', async () => {
+        const artifact = await new DrawnixRenderer().render(createKnowledgeMapSpec(), {
+            sourceVisuals: [{
+                id: 'source-visual-1',
+                kind: 'mermaid',
+                sourceHash: 'abc12345',
+                lineStart: 1,
+                lineEnd: 3,
+                language: 'mermaid',
+                definition: 'flowchart TD\nA --> B',
+                status: 'resolved',
+                content: 'flowchart TD\nA --> B'
+            }]
+        });
+
+        expect(artifact.companions?.map(companion => companion.path)).toEqual([
+            'source-visual-source-visual-1.mermaid.md',
+            'source-visual-source-visual-1.svg',
+            'source-visual-manifest.json'
+        ]);
+        expect(artifact.sourceVisualManifest?.[0]).toMatchObject({ id: 'source-visual-1', status: 'resolved' });
+    });
+
     test('preserves multiple top-level roots without flattening the forest', async () => {
         const forestSpec: DiagramSpec = {
             ...createKnowledgeMapSpec(),

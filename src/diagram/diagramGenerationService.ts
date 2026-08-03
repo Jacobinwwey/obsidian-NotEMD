@@ -18,6 +18,7 @@ import type { DiagramIntent, DiagramNode, DiagramPlan, DiagramSpec, RenderTarget
 import { parseDiagramSpecResponse } from './diagramSpecResponseParser';
 import { resolveCircuitTemplateFromMarkdown } from './adapters/circuitikz/circuitTemplateCatalog';
 import { validateDrawnixMindMapSpec } from './adapters/drawnix/drawnixMindMapProjection';
+import { hashResolvedSourceVisualManifest, ResolvedSourceVisual } from './sourceVisuals';
 
 export interface DiagramGenerationOptions {
     compatibilityMode: 'best-fit' | 'legacy-mermaid';
@@ -26,6 +27,7 @@ export interface DiagramGenerationOptions {
     requestedRenderTarget?: RenderTarget;
     llmInvoker: (systemPrompt: string, sourceMarkdown: string) => Promise<string>;
     rendererService?: RendererService;
+    sourceVisuals?: readonly ResolvedSourceVisual[];
 }
 
 export type DiagramOperationOutputMode = 'artifact' | 'mermaid';
@@ -40,6 +42,7 @@ export interface DiagramOperationInput {
     compatibilityMode: 'best-fit' | 'legacy-mermaid';
     outputMode: DiagramOperationOutputMode;
     targetLanguage?: string;
+    sourceVisuals?: readonly ResolvedSourceVisual[];
 }
 
 export interface BuildDiagramOperationInputParams {
@@ -126,7 +129,8 @@ function normalizeErrorMessage(error: unknown): string {
 async function renderWithFallbackTraversal(
     rendererService: RendererService,
     spec: DiagramSpec,
-    targets: Array<DiagramPlan['renderTarget']>
+    targets: Array<DiagramPlan['renderTarget']>,
+    sourceVisuals?: readonly ResolvedSourceVisual[]
 ): Promise<Awaited<ReturnType<RendererService['render']>>> {
     const failures: string[] = [];
 
@@ -135,7 +139,11 @@ async function renderWithFallbackTraversal(
             const targetSpec = target === 'mermaid' && spec.intent === 'drawnixMindmap'
                 ? { ...spec, intent: 'mindmap' as const }
                 : spec;
-            return await rendererService.render(targetSpec, { target });
+            return await rendererService.render(targetSpec, {
+                target,
+                sourceVisuals,
+                sourceVisualManifestHash: hashResolvedSourceVisualManifest(sourceVisuals)
+            });
         } catch (error) {
             failures.push(`${target}: ${normalizeErrorMessage(error)}`);
         }
@@ -454,7 +462,7 @@ export async function generateDiagramArtifact(
         }
     }
     try {
-        artifact = await renderWithFallbackTraversal(rendererService, spec, targets);
+        artifact = await renderWithFallbackTraversal(rendererService, spec, targets, options.sourceVisuals);
     } catch (renderError: unknown) {
         const errorMsg = renderError instanceof Error ? renderError.message : String(renderError);
         // If Mermaid parse failed, retry once with the LLM asking for valid Mermaid syntax
@@ -471,7 +479,7 @@ export async function generateDiagramArtifact(
             assertPlanCompatibility(retrySpec, plan, options);
 
             try {
-                artifact = await renderWithFallbackTraversal(rendererService, retrySpec, targets);
+                artifact = await renderWithFallbackTraversal(rendererService, retrySpec, targets, options.sourceVisuals);
             } catch (retryError: unknown) {
                 const retryMsg = retryError instanceof Error ? retryError.message : String(retryError);
                 const rawMermaid = spec.nodes?.length

@@ -75,7 +75,8 @@ function renderCrossRelation(relation: DrawnixMindMapCrossRelation): string {
     const label = relation.label
         ? `<text x="${labelPoint[0] + 8}" y="${labelPoint[1] - 8}" class="notemd-drawnix-mindmap-relation-label">${escapeHtml(relation.label)}</text>`
         : '';
-    return `<g data-drawnix-mindmap-relation-id="${escapeAttribute(relation.id)}" data-drawnix-mindmap-source="${escapeAttribute(relation.sourceId)}" data-drawnix-mindmap-target="${escapeAttribute(relation.targetId)}">
+    const warning = relation.routeWarning ? ` data-drawnix-mindmap-route-warning="${escapeAttribute(relation.routeWarning)}"` : '';
+    return `<g data-drawnix-mindmap-relation-id="${escapeAttribute(relation.id)}" data-drawnix-mindmap-source="${escapeAttribute(relation.sourceId)}" data-drawnix-mindmap-target="${escapeAttribute(relation.targetId)}" data-drawnix-mindmap-source-root="${escapeAttribute(relation.sourceRootId)}" data-drawnix-mindmap-target-root="${escapeAttribute(relation.targetRootId)}" data-drawnix-mindmap-route-strategy="${escapeAttribute(relation.routeStrategy)}"${warning}>
         <path d="${pathFromPoints(relation.points)}" fill="none" stroke="#64748b" stroke-width="1.6" stroke-dasharray="6 5" marker-end="url(#notemd-drawnix-mindmap-arrow)" />
         ${label}
     </g>`;

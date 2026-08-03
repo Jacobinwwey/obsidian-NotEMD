@@ -11,7 +11,12 @@ import {
 import { DEFAULT_SETTINGS } from '../constants';
 import type { DiagramIntent, RenderTarget } from '../diagram/types';
 import { applyDiagramIntentPreference } from '../diagram/diagramPreferenceCompatibility';
-import { MAX_PREVIEW_EXPORT_PPI, MIN_PREVIEW_EXPORT_PPI } from '../rendering/preview/pngPreview';
+import {
+    DEFAULT_PREVIEW_EXPORT_PPI,
+    MAX_PREVIEW_EXPORT_PPI,
+    MIN_PREVIEW_EXPORT_PPI,
+    resolvePreviewExportPpi
+} from '../rendering/preview/pngPreview';
 import {
     getLLMProviderDefinition,
     getKnownModelMaxOutputTokens,
@@ -2530,18 +2535,18 @@ export class NotemdSettingTab extends PluginSettingTab {
         this.createCatalogSetting(containerEl)
             .setName(experimentalDiagramI18n.exportPpiName)
             .setDesc(experimentalDiagramI18n.exportPpiDesc)
-            .addText(text => text
-                .setPlaceholder(String(DEFAULT_SETTINGS.diagramPreviewExportPpi))
-                .setValue(String(this.plugin.settings.diagramPreviewExportPpi ?? DEFAULT_SETTINGS.diagramPreviewExportPpi))
-                .onChange(async (rawValue) => {
-                    this.plugin.settings.diagramPreviewExportPpi = this.sanitizePositiveInteger(
-                        rawValue,
-                        DEFAULT_SETTINGS.diagramPreviewExportPpi,
-                        MIN_PREVIEW_EXPORT_PPI,
-                        MAX_PREVIEW_EXPORT_PPI
-                    );
-                    await this.plugin.saveSettings();
-                }));
+            .addText(text => {
+                text.setPlaceholder(String(DEFAULT_PREVIEW_EXPORT_PPI))
+                    .setValue(String(this.plugin.settings.diagramPreviewExportPpi ?? DEFAULT_SETTINGS.diagramPreviewExportPpi))
+                    .onChange(async (rawValue) => {
+                        this.plugin.settings.diagramPreviewExportPpi = resolvePreviewExportPpi(rawValue);
+                        await this.plugin.saveSettings();
+                    });
+                text.inputEl.type = 'number';
+                text.inputEl.min = String(MIN_PREVIEW_EXPORT_PPI);
+                text.inputEl.max = String(MAX_PREVIEW_EXPORT_PPI);
+                text.inputEl.step = '1';
+            });
 
         this.createCatalogSetting(containerEl)
             .setName(experimentalDiagramI18n.nativeEnvironmentName)

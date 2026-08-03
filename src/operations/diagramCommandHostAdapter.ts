@@ -8,12 +8,14 @@ import { ensureSemanticFigureSvgStandaloneStyles } from '../rendering/renderers/
 import { DiagramOperationInput, DiagramOperationExecutionMode, buildDiagramOperationInput } from '../diagram/diagramGenerationService';
 import { isSupportedInputFileForTask } from '../inputFileSupport';
 import { LLMProviderConfig, NotemdSettings, ProgressReporter } from '../types';
+import { resolveSourceVisualReferences, scanSourceVisualReferences } from '../diagram/sourceVisuals';
 
 export interface DiagramCommandHostAdapter {
     saveMermaidSummary: (file: TFile, mermaidContent: string, reporter: ProgressReporter) => Promise<string>;
     saveArtifact: (file: TFile, artifact: RenderArtifact, reporter: ProgressReporter) => Promise<string>;
     getFileByPath: (path: string) => TFile | null;
     readFile?: (file: TFile) => Promise<string>;
+    readBinary?: (file: TFile) => Promise<ArrayBuffer>;
     openFile: (file: TFile) => void;
     maybeAutoFixMermaid: (file: TFile, reporter: ProgressReporter, reason: string) => Promise<void>;
     supportsPreview: (artifact: RenderArtifact) => boolean;
@@ -981,7 +983,7 @@ export async function runGenerateDiagramCommandWithHost(
 
         const { provider, modelName } = host.getProviderAndModelForTask('summarizeToMermaid');
         useReporter.log(`Using provider: ${provider.name}, Model: ${modelName}`);
-        const operationInput = buildDiagramOperationInput({
+        let operationInput = buildDiagramOperationInput({
             sourcePath: file.path,
             sourceMarkdown: fileContent,
             executionMode: options.executionMode,
@@ -992,6 +994,17 @@ export async function runGenerateDiagramCommandWithHost(
             compatibilityModeOverride: options.inputOverrides?.compatibilityMode,
             targetLanguageOverride: options.inputOverrides?.targetLanguage
         });
+        const sourceVisualReferences = scanSourceVisualReferences(fileContent);
+        if (sourceVisualReferences.length > 0) {
+            const sourceVisuals = await resolveSourceVisualReferences(
+                sourceVisualReferences,
+                file.path,
+                diagramHost
+            );
+            operationInput = { ...operationInput, sourceVisuals };
+            const unresolvedCount = sourceVisuals.filter(visual => visual.status === 'unresolved').length;
+            useReporter.log(`Preserved ${sourceVisuals.length} source visual reference(s) for Drawnix export${unresolvedCount > 0 ? `; ${unresolvedCount} unresolved reference(s) remain in the manifest.` : '.'}`);
+        }
 
         const executionDetails = options.executionMode === 'save-mermaid'
             ? await host.executeSaveMermaidCommand(

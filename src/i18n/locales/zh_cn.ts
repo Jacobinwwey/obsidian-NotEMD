@@ -162,7 +162,7 @@ export const STRINGS_ZH_CN: DeepPartial<NotemdEnglishStrings> = {
                 exportFormatsName: '可用导出格式',
                 exportFormatsDesc: '可在图形预览中保存源文件，并导出 SVG、PNG 或 PDF。',
                 exportPpiName: '图形图片导出 PPI',
-                exportPpiDesc: '图形 PNG/PDF 预览导出的分辨率。默认 300 ppi，最高 600 ppi。SVG 保持矢量尺寸，不受此设置影响。',
+                exportPpiDesc: '图形 PNG/PDF 预览导出的分辨率。可输入 72 到 600 之间的任意整数 ppi（默认 300；100/300/600 为常用预设）。SVG 保持矢量尺寸，不受此设置影响。',
                 nativeEnvironmentName: 'CircuitikZ 原生编译环境',
                 nativeEnvironmentDesc: '可选的桌面端增强，用于编译诊断与原生 PDF。SVG、PNG 和预览 PDF 导出无需安装 LaTeX 也能继续使用。',
                 nativeEnvironmentButton: '管理环境',

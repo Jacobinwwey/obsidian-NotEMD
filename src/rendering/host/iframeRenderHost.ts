@@ -1,5 +1,5 @@
 import { DiagramSpec } from '../../diagram/types';
-import { DiagramRenderer, RenderArtifact } from '../types';
+import { DiagramRenderer, RenderArtifact, RenderOptions } from '../types';
 import { PreviewCapableRenderHost, RenderPreviewSession } from './renderHost';
 import {
     createRenderWebviewPayload,
@@ -8,8 +8,8 @@ import {
 import { buildRenderWebviewHtml } from '../webview/page';
 
 export class IframeRenderHost implements PreviewCapableRenderHost {
-    async render(renderer: DiagramRenderer, spec: DiagramSpec): Promise<RenderArtifact> {
-        return renderer.render(spec);
+    async render(renderer: DiagramRenderer, spec: DiagramSpec, options?: RenderOptions): Promise<RenderArtifact> {
+        return options ? renderer.render(spec, options) : renderer.render(spec);
     }
 
     createSession(artifact: RenderArtifact, options: RenderWebviewPayloadOptions = {}): RenderPreviewSession {

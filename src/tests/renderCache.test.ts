@@ -35,4 +35,13 @@ describe('render cache', () => {
 
         expect(cache.get(spec, { target: 'mermaid', theme: 'light' })).toBeNull();
     });
+
+    test('separates cache entries when source visual manifests change', () => {
+        const cache = new RenderCache();
+
+        cache.set(spec, { target: 'mermaid', sourceVisualManifestHash: 'visuals-a' }, artifact);
+
+        expect(cache.get(spec, { target: 'mermaid', sourceVisualManifestHash: 'visuals-a' })).toBe(artifact);
+        expect(cache.get(spec, { target: 'mermaid', sourceVisualManifestHash: 'visuals-b' })).toBeNull();
+    });
 });

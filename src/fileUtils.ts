@@ -160,6 +160,19 @@ function getVaultFileName(vaultPath: string): string {
     return slashIndex >= 0 ? normalized.slice(slashIndex + 1) : normalized;
 }
 
+function getVaultRelativePreviewLinkPath(sourceArtifactPath: string, targetPath: string): string {
+    const normalizedTarget = targetPath.replace(/\\/g, '/').replace(/^\/+/, '');
+    const slashIndex = sourceArtifactPath.lastIndexOf('/');
+    if (slashIndex < 0) {
+        return normalizedTarget;
+    }
+
+    const sourceDirectory = sourceArtifactPath.slice(0, slashIndex + 1);
+    return normalizedTarget.startsWith(sourceDirectory)
+        ? normalizedTarget.slice(sourceDirectory.length)
+        : getVaultFileName(normalizedTarget);
+}
+
 function buildDiagramSvgCompanionPath(sourceArtifactPath: string): string {
     return `${sourceArtifactPath}.svg`;
 }
@@ -171,21 +184,67 @@ function buildDiagramObsidianPreviewWrapperPath(sourceArtifactPath: string): str
 function buildDiagramObsidianPreviewWrapperContent(params: {
     title: string;
     sourceArtifactPath: string;
-    svgArtifactPath: string;
+    svgArtifactPath?: string;
+    companionArtifactPaths?: string[];
     target: RenderArtifact['target'];
 }): string {
     const sourceFileName = getVaultFileName(params.sourceArtifactPath);
-    const svgFileName = getVaultFileName(params.svgArtifactPath);
+    const embeddedCompanionNames = [
+        ...(params.svgArtifactPath ? [params.svgArtifactPath] : []),
+        ...(params.companionArtifactPaths ?? [])
+    ]
+        .map(path => getVaultRelativePreviewLinkPath(params.sourceArtifactPath, path))
+        .filter((path, index, allPaths) => path && allPaths.indexOf(path) === index);
 
     return [
         `# ${params.title || sourceFileName}`,
         '',
-        `![[${svgFileName}]]`,
+        ...embeddedCompanionNames.map(path => path.toLowerCase().endsWith('.md')
+            ? `[[${path}]]`
+            : `![[${path}]]`),
         '',
         `Source artifact: [[${sourceFileName}]]`,
         `Render target: ${params.target}`,
         ''
     ].join('\n');
+}
+
+function normalizeDiagramCompanionRelativePath(relativePath: string): string {
+    const normalized = relativePath.trim().replace(/\\/g, '/').replace(/^\/+/, '');
+    if (!normalized || normalized === '.' || normalized.split('/').some(segment => !segment || segment === '.' || segment === '..')) {
+        throw new Error(`Invalid diagram companion path "${relativePath}".`);
+    }
+    return normalized;
+}
+
+function rewriteSourceVisualManifestCompanionPaths(
+    content: string,
+    companionPathMap: ReadonlyMap<string, string>
+): string {
+    try {
+        const parsed = JSON.parse(content) as unknown;
+        if (!parsed || typeof parsed !== 'object' || !Array.isArray((parsed as { visuals?: unknown }).visuals)) {
+            return content;
+        }
+
+        const visuals = (parsed as { visuals: unknown[] }).visuals.map(visual => {
+            if (!visual || typeof visual !== 'object' || !Array.isArray((visual as { companionPaths?: unknown }).companionPaths)) {
+                return visual;
+            }
+
+            const companionPaths = (visual as { companionPaths: unknown[] }).companionPaths.map(path => {
+                if (typeof path !== 'string') {
+                    return path;
+                }
+                return companionPathMap.get(path) ?? path;
+            });
+            return { ...(visual as Record<string, unknown>), companionPaths };
+        });
+
+        return JSON.stringify({ ...(parsed as Record<string, unknown>), visuals }, null, 2) + '\n';
+    } catch {
+        return content;
+    }
 }
 
 export async function handleFileRename(app: App, oldPath: string, newPath: string, uiLocale = 'auto') {
@@ -1745,6 +1804,7 @@ export async function saveDiagramArtifactFile(
     const outputPath = `${saveDir}${outputFileName}`;
     progressReporter.log(`Saving diagram artifact to: ${outputPath}`);
 
+    const createdPaths: string[] = [];
     const writeTextArtifact = async (path: string, content: string, label: string): Promise<void> => {
         const existingFile = app.vault.getAbstractFileByPath(path);
         if (existingFile instanceof TFile) {
@@ -1752,8 +1812,46 @@ export async function saveDiagramArtifactFile(
             progressReporter.log(`Overwrote existing ${label}: ${path}`);
         } else {
             await app.vault.create(path, content);
+            createdPaths.push(path);
             progressReporter.log(`Created ${label}: ${path}`);
         }
+    };
+
+    const writeBinaryArtifact = async (path: string, content: ArrayBuffer, label: string): Promise<void> => {
+        const existingFile = app.vault.getAbstractFileByPath(path);
+        if (existingFile instanceof TFile) {
+            await app.vault.modifyBinary(existingFile, content);
+            progressReporter.log(`Overwrote existing ${label}: ${path}`);
+        } else {
+            await app.vault.createBinary(path, content);
+            createdPaths.push(path);
+            progressReporter.log(`Created ${label}: ${path}`);
+        }
+    };
+
+    const companionScopeFolder = artifact.target === 'drawnix' && (artifact.companions?.length ?? 0) > 0
+        ? `${outputPath}.assets`
+        : undefined;
+    const companionDirectory = outputPath.includes('/') ? outputPath.slice(0, outputPath.lastIndexOf('/') + 1) : '';
+    const companionPathMap = new Map<string, string>();
+    for (const companion of artifact.companions ?? []) {
+        const normalized = normalizeDiagramCompanionRelativePath(companion.path);
+        const scopedRelativePath = companionScopeFolder
+            ? `${getVaultFileName(companionScopeFolder)}/${normalized}`
+            : normalized;
+        if (companionPathMap.has(normalized)) {
+            throw new Error(`Diagram companion path collides with another artifact: "${companion.path}".`);
+        }
+        companionPathMap.set(normalized, scopedRelativePath);
+    }
+
+    const resolveCompanionPath = (relativePath: string): string => {
+        const normalized = normalizeDiagramCompanionRelativePath(relativePath);
+        const scopedRelativePath = companionPathMap.get(normalized);
+        if (!scopedRelativePath) {
+            throw new Error(`Diagram companion path was not registered: "${relativePath}".`);
+        }
+        return `${companionDirectory}${scopedRelativePath}`;
     };
 
     let finalContent = artifact.content;
@@ -1765,27 +1863,82 @@ export async function saveDiagramArtifactFile(
         finalContent = `# ${vlTitle}\n\n> Preview this chart using the "Preview diagram" command in Notemd.\n\n\`\`\`vega-lite\n${artifact.content}\n\`\`\`\n`;
     }
 
-    await writeTextArtifact(outputPath, finalContent, 'diagram artifact file');
+    const companionPaths: string[] = [];
+    const writtenCompanionPaths = new Set<string>();
+    try {
+        if (companionScopeFolder) {
+            const existingCompanionScope = app.vault.getAbstractFileByPath(companionScopeFolder);
+            if (!existingCompanionScope) {
+                await app.vault.createFolder(companionScopeFolder);
+                createdPaths.push(companionScopeFolder);
+                progressReporter.log(`Created diagram companion folder: ${companionScopeFolder}`);
+            } else if (!(existingCompanionScope instanceof TFolder)) {
+                throw new Error(`Diagram companion path '${companionScopeFolder}' exists but is not a folder.`);
+            }
+        }
 
-    if (artifact.previewSvg?.content?.trim()) {
-        const svgPath = buildDiagramSvgCompanionPath(outputPath);
-        const wrapperPath = buildDiagramObsidianPreviewWrapperPath(outputPath);
-        await writeTextArtifact(svgPath, artifact.previewSvg.content, 'diagram SVG preview file');
-        await writeTextArtifact(
-            wrapperPath,
-            buildDiagramObsidianPreviewWrapperContent({
-                title: `${originalFile.basename} diagram preview`,
-                sourceArtifactPath: outputPath,
-                svgArtifactPath: svgPath,
-                target: artifact.target
-            }),
-            'diagram Obsidian preview wrapper'
-        );
-        progressReporter.log(`Saved diagram SVG companion for Obsidian preview: ${svgPath}`);
-        return wrapperPath;
+        if (artifact.previewSvg?.content?.trim()) {
+            const svgPath = buildDiagramSvgCompanionPath(outputPath);
+            await writeTextArtifact(svgPath, artifact.previewSvg.content, 'diagram SVG preview file');
+            companionPaths.push(svgPath);
+            writtenCompanionPaths.add(svgPath);
+            progressReporter.log(`Saved diagram SVG companion for Obsidian preview: ${svgPath}`);
+        }
+
+        for (const companion of artifact.companions ?? []) {
+            const companionPath = resolveCompanionPath(companion.path);
+            if (companionPath === outputPath || writtenCompanionPaths.has(companionPath)) {
+                throw new Error(`Diagram companion path collides with another artifact: "${companion.path}".`);
+            }
+            if (typeof companion.content === 'string' && !companion.binary) {
+                const content = companion.mimeType === 'application/json'
+                    ? rewriteSourceVisualManifestCompanionPaths(companion.content, companionPathMap)
+                    : companion.content;
+                await writeTextArtifact(companionPath, content, 'diagram source visual companion');
+            } else if (companion.content instanceof ArrayBuffer) {
+                await writeBinaryArtifact(companionPath, companion.content, 'diagram source visual companion');
+            } else {
+                throw new Error(`Diagram companion "${companion.path}" has an unsupported content representation.`);
+            }
+            companionPaths.push(companionPath);
+            writtenCompanionPaths.add(companionPath);
+        }
+
+        await writeTextArtifact(outputPath, finalContent, 'diagram artifact file');
+
+        if (artifact.previewSvg?.content?.trim() || companionPaths.length > 0) {
+            const wrapperPath = buildDiagramObsidianPreviewWrapperPath(outputPath);
+            const svgPath = artifact.previewSvg?.content?.trim()
+                ? buildDiagramSvgCompanionPath(outputPath)
+                : undefined;
+            await writeTextArtifact(
+                wrapperPath,
+                buildDiagramObsidianPreviewWrapperContent({
+                    title: `${originalFile.basename} diagram preview`,
+                    sourceArtifactPath: outputPath,
+                    svgArtifactPath: svgPath,
+                    companionArtifactPaths: companionPaths.filter(path => path !== svgPath),
+                    target: artifact.target
+                }),
+                'diagram Obsidian preview wrapper'
+            );
+            return wrapperPath;
+        }
+
+        return outputPath;
+    } catch (error: unknown) {
+        for (const path of [...createdPaths].reverse()) {
+            try {
+                const createdFile = app.vault.getAbstractFileByPath(path);
+                if (createdFile && typeof app.vault.delete === 'function') {
+                    await app.vault.delete(createdFile);
+                }
+            } catch {
+                // Preserve the original save error; cleanup is best effort.
+            }
+        }
+        throw error;
     }
-
-    return outputPath;
 }
 
 export async function checkAndRemoveDuplicateConceptNotes(

@@ -38,6 +38,8 @@ export interface SvgDimensions {
 export const DEFAULT_PREVIEW_EXPORT_PPI = 300;
 export const MIN_PREVIEW_EXPORT_PPI = 72;
 export const MAX_PREVIEW_EXPORT_PPI = 600;
+export const SUPPORTED_PREVIEW_EXPORT_PPI = [100, 300, 600] as const;
+export type SupportedPreviewExportPpi = typeof SUPPORTED_PREVIEW_EXPORT_PPI[number];
 const CSS_PIXELS_PER_INCH = 96;
 const METERS_PER_INCH = 0.0254;
 const PNG_SIGNATURE = new Uint8Array([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);

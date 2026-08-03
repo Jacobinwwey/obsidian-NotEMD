@@ -158,7 +158,7 @@ export const STRINGS_ZH_TW: DeepPartial<NotemdEnglishStrings> = {
                 renderTargetDrawnix: 'Drawnix + SVG 預覽',
                 renderTargetCircuitikz: 'Circuitikz + SVG 預覽',
                 exportPpiName: '圖形圖片匯出 PPI',
-                exportPpiDesc: '圖形 PNG/PDF 預覽匯出的解析度。預設 300 ppi，最高 600 ppi。SVG 保持向量尺寸，不受此設定影響。',
+                exportPpiDesc: '圖形 PNG/PDF 預覽匯出的解析度。可輸入 72 到 600 之間的任意整數 ppi（預設 300；100/300/600 為常用預設）。SVG 保持向量尺寸，不受此設定影響。',
             },
             diagnosticBlocked: '無法為 {provider} 執行開發者診斷：{issues}',
             diagnosticRunning: '正在為 {provider} 執行開發者診斷...',

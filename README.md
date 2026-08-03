@@ -179,7 +179,7 @@ That's it! Explore the settings to unlock more features like web research, trans
     - Generated Mermaid artifacts are now validated with `mermaid.parse` before the renderer returns them, so malformed diagrams fail early instead of quietly leaking into preview/export steps.
     - Generated `.canvas` and `.json` artifacts are saved through the same output-path policy as Mermaid summaries, and preview surfaces now cover Mermaid, JSON Canvas, and Vega-Lite results.
     - HTML fallback artifacts are now generated as dedicated `.html` summaries when a richer renderer is not available, and the preview modal can open them through the iframe fallback path instead of only showing escaped source text.
-    - Preview modals can now export rendered Mermaid/Canvas/Vega-Lite and SVG-companion output as `.svg`, `.png`, and `.pdf` files beside the source note or beside the generated artifact, with PNG/PDF export defaulting to 300 PPI and clamped at 600 PPI.
+    - Preview modals can now export rendered Mermaid/Canvas/Vega-Lite and SVG-companion output as `.svg`, `.png`, and `.pdf` files beside the source note or beside the generated artifact. Raster export accepts any integer from 72 to 600 DPI (300 by default; 100/300/600 are common presets) and writes PNG density metadata.
     - Preview-only runs can also persist the raw generated artifact beside the current note using target-aware extensions and suffixes (`_summ.md`, `_diagram.canvas`, `_diagram.json`, `_diagram.drawio`, `_diagram.drawnix`, `_diagram.tex`), so validation and handoff do not require rerunning the LLM step.
     - Circuit diagrams are exposed as `intent: "circuit"` plus `circuitikz` render target. They require a validated `CircuitSpec`, write deterministic `.tex`, and attach an SVG preview companion for Obsidian viewing and SVG/PNG/PDF export; the companion is not a LaTeX/TikZJax compile result.
     - The existing Mermaid auto-fix path remains intact for Mermaid outputs only; non-Mermaid artifacts bypass the fixer instead of being pushed through incompatible post-processing.
@@ -192,7 +192,7 @@ That's it! Explore the settings to unlock more features like web research, trans
 | Vega-Lite | `_diagram.json` | Yes | Yes | Yes | Yes | Yes | Preview/export uses a theme-aware Vega-Lite config patch. |
 | Editable HTML/SVG | `_diagram.html` | Yes | Yes | Yes | Yes | Yes | SVG is generated from the semantic figure model. |
 | Draw.io | `_diagram.drawio` + companion SVG/MD | SVG companion | Yes | Yes | Yes | Yes | No diagrams.net runtime is bundled. |
-| Drawnix | `_diagram.drawnix` + companion SVG/MD | SVG companion | Yes | Yes | Yes | Yes | No Drawnix or Plait runtime is bundled. |
+| Drawnix | `_diagram.drawnix` + SVG/MD/media companions + manifest | SVG companion | Yes | Yes | Yes | Yes | Multiple roots, obstacle-aware cross-root arrows, source Mermaid/image preservation; no Drawnix or Plait runtime is bundled. |
 | Circuitikz | `_diagram.tex` + companion SVG/MD | SVG companion | Yes | Yes | Yes | Yes | Requires `intent: "circuit"` and validated `CircuitSpec`; no runtime LaTeX compile. |
 | HTML | `_diagram.html` | Yes (iframe fallback) | No | No | No | Yes | Current pipeline does not promise raster/vector export for generic HTML fallback artifacts yet. |
 

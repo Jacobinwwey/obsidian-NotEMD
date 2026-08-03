@@ -40,7 +40,7 @@ export class RendererService {
             return existingRender;
         }
 
-        const renderPromise = this.host.render(renderer, spec)
+        const renderPromise = this.host.render(renderer, spec, options)
             .then((artifact) => {
                 this.cache.set(spec, options, artifact);
                 return artifact;

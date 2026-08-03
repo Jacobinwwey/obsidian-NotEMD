@@ -326,6 +326,7 @@ export default class NotemdPlugin extends Plugin {
                 return abstractFile instanceof TFile ? abstractFile : null;
             },
             readFile: (file) => this.readSupportedTaskInputFile(file),
+            readBinary: (file) => this.app.vault.readBinary(file),
             openFile: (file) => {
                 const leaf = this.app.workspace.getLeaf('split', 'vertical');
                 leaf.openFile(file);

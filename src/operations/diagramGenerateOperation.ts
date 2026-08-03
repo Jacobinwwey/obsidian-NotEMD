@@ -99,6 +99,7 @@ export async function runDiagramGenerateOperation(
             requestedRenderTarget: input.requestedRenderTarget,
             compatibilityMode: input.compatibilityMode,
             targetLanguage: input.targetLanguage,
+            sourceVisuals: input.sourceVisuals,
             llmInvoker: (systemPrompt, sourceMarkdown) =>
                 llmCall(provider, systemPrompt, sourceMarkdown, settings, reporter, modelName)
         });

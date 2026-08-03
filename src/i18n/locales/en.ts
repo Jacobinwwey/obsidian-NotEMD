@@ -159,7 +159,7 @@ export const STRINGS_EN = {
                 exportFormatsName: 'Available export formats',
                 exportFormatsDesc: 'Source file, SVG, PNG, and PDF are available from diagram preview.',
                 exportPpiName: 'Diagram image export PPI',
-                exportPpiDesc: 'Resolution for diagram PNG/PDF preview exports. Default 300 ppi; maximum 600 ppi. SVG keeps vector size and ignores this value.',
+                exportPpiDesc: 'Resolution for diagram PNG/PDF preview exports. Enter any integer from 72 to 600 ppi (default 300; common presets 100/300/600). SVG keeps vector size and ignores this value.',
                 nativeEnvironmentName: 'CircuitikZ native compile environment',
                 nativeEnvironmentDesc: 'Optional desktop enhancement for compile diagnostics and native PDF. SVG, PNG, and preview PDF exports continue to work without LaTeX.',
                 nativeEnvironmentButton: 'Manage environment',

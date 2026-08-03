@@ -173,7 +173,7 @@ Notemd 是一个**开源 Obsidian 插件**，集成 30+ 种大型语言模型 (L
 - **实验性图表流水线**:
     - 规范优先的图表路径可以把笔记内容路由到 Mermaid、Obsidian JSON Canvas、Vega-Lite、HTML、可编辑 HTML/SVG、Draw.io、Drawnix 或受约束 circuitikz，而不是把所有场景都压回 Mermaid 文本生成。
     - `mindmap`、`flowchart`、`sequenceDiagram`、`classDiagram`、`erDiagram` 与 `stateDiagram-v2` 仍由 Mermaid adapter 覆盖；`dataChart` 使用受控 Vega-Lite 模板；`circuit` 使用 `circuitikz` render target。
-    - 预览弹窗可把可渲染输出或 SVG companion 导出为 `.svg`、`.png` 与 `.pdf`；PNG/PDF 默认 300 PPI，超过 600 PPI 的配置会被夹到 600。
+    - 预览弹窗可把可渲染输出或 SVG companion 导出为 `.svg`、`.png` 与 `.pdf`；光栅导出接受 72 到 600 之间的任意整数 DPI（默认 300；100/300/600 为常用预设），超出范围的配置会被安全夹紧。
     - Draw.io、Drawnix 与 Circuitikz 都保持 artifact 边界：插件不捆绑 diagrams.net、Drawnix、Plait、LaTeX 或 TikZJax runtime，而是写出原生源文件和 Obsidian 可查看的 SVG companion。
     - 电路图必须使用 `intent: "circuit"` 与已验证 `CircuitSpec`。`CircuitikzRenderer` 会写出确定性 `.tex`，并附加用于 Obsidian 预览和 SVG/PNG/PDF 导出的 SVG companion；该 companion 不是 LaTeX/TikZJax 编译结果。
 
@@ -184,7 +184,7 @@ Notemd 是一个**开源 Obsidian 插件**，集成 30+ 种大型语言模型 (L
 | Vega-Lite | `_diagram.json` | 是 | 是 | 是 | 是 | 是 | 预览/导出使用主题感知 Vega-Lite 配置补丁。 |
 | 可编辑 HTML/SVG | `_diagram.html` | 是 | 是 | 是 | 是 | 是 | SVG 从语义 figure model 生成。 |
 | Draw.io | `_diagram.drawio` + SVG/MD companion | SVG companion | 是 | 是 | 是 | 是 | 不捆绑 diagrams.net runtime。 |
-| Drawnix | `_diagram.drawnix` + SVG/MD companion | SVG companion | 是 | 是 | 是 | 是 | 不捆绑 Drawnix 或 Plait runtime。 |
+| Drawnix | `_diagram.drawnix` + SVG/MD/媒体 companion 与 manifest | SVG companion | 是 | 是 | 是 | 是 | 支持多 root、避开无关 root 的跨 root 箭头以及 Mermaid/图片保真；插件内不嵌入 Drawnix 或 Plait runtime。 |
 | Circuitikz | `_diagram.tex` + SVG/MD companion | SVG companion | 是 | 是 | 是 | 是 | 需要 `intent: "circuit"` 与已验证 `CircuitSpec`；不在 runtime 编译 LaTeX。 |
 | HTML | `_diagram.html` | 是（iframe fallback） | 否 | 否 | 否 | 是 | 通用 HTML fallback 暂不承诺栅格/矢量导出。 |
 

@@ -6,7 +6,8 @@ import {
     validateDrawnixMindMapExportedData
 } from '../../diagram/adapters/drawnix/drawnixExporter';
 import { buildDrawnixMindMapProjection } from '../../diagram/adapters/drawnix/drawnixMindMapProjection';
-import { DiagramRenderer, RenderArtifact } from '../types';
+import { buildSourceVisualCompanions } from '../../diagram/sourceVisualArtifactBuilder';
+import { DiagramRenderer, RenderArtifact, RenderOptions } from '../types';
 import { renderDrawnixMindMapSvg } from './drawnixMindMapSvgRenderer';
 
 const SUPPORTED_DRAWNIX_INTENTS = new Set<DiagramSpec['intent']>(['drawnixMindmap']);
@@ -19,7 +20,7 @@ export class DrawnixRenderer implements DiagramRenderer {
         return SUPPORTED_DRAWNIX_INTENTS.has(spec.intent) && spec.nodes.length > 0;
     }
 
-    async render(spec: DiagramSpec): Promise<RenderArtifact> {
+    async render(spec: DiagramSpec, options: RenderOptions = {}): Promise<RenderArtifact> {
         assertValidDiagramSpec(spec);
 
         const projection = buildDrawnixMindMapProjection(spec);
@@ -29,6 +30,7 @@ export class DrawnixRenderer implements DiagramRenderer {
             throw new Error(`Drawnix mind-map validation failed: ${validationErrors.join('; ')}`);
         }
 
+        const sourceVisualCompanions = await buildSourceVisualCompanions(options.sourceVisuals);
         return {
             target: this.target,
             content: stringifyDrawnixMindMapExportedData(data),
@@ -37,7 +39,12 @@ export class DrawnixRenderer implements DiagramRenderer {
             previewSvg: {
                 content: renderDrawnixMindMapSvg(projection),
                 mimeType: 'image/svg+xml'
-            }
+            },
+            companions: sourceVisualCompanions.companions,
+            sourceVisualManifest: sourceVisualCompanions.manifest,
+            diagnostics: sourceVisualCompanions.diagnostics.length > 0
+                ? sourceVisualCompanions.diagnostics
+                : undefined
         };
     }
 }

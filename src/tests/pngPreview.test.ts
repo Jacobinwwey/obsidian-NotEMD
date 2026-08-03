@@ -1,6 +1,7 @@
 import {
     DEFAULT_PREVIEW_EXPORT_PPI,
     MAX_PREVIEW_EXPORT_PPI,
+    SUPPORTED_PREVIEW_EXPORT_PPI,
     applyPngPhysicalPixelDensity,
     rasterizeSvgToPngArrayBuffer,
     resolvePngPixelsPerMeter,
@@ -92,7 +93,13 @@ describe('png preview rasterizer', () => {
     test('defaults raster export to 300 ppi and clamps manual resolution at 600 ppi', () => {
         expect(DEFAULT_PREVIEW_EXPORT_PPI).toBe(300);
         expect(MAX_PREVIEW_EXPORT_PPI).toBe(600);
+        expect(SUPPORTED_PREVIEW_EXPORT_PPI).toEqual([100, 300, 600]);
         expect(resolvePreviewExportPpi()).toBe(300);
+        expect(resolvePreviewExportPpi(72)).toBe(72);
+        expect(resolvePreviewExportPpi(71)).toBe(72);
+        expect(resolvePreviewExportPpi(100)).toBe(100);
+        expect(resolvePreviewExportPpi(600)).toBe(600);
+        expect(resolvePreviewExportPpi(601)).toBe(600);
         expect(resolvePreviewExportPpi(450)).toBe(450);
         expect(resolvePreviewExportPpi(1200)).toBe(600);
         expect(resolvePreviewExportPpi(Number.NaN)).toBe(300);

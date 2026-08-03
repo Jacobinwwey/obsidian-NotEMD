@@ -207,7 +207,7 @@ flowchart LR
 |---|---|---|
 | `editable-html-svg` | 带语义 inline SVG 的自包含 HTML | 不依赖外部编辑器 runtime |
 | `drawio` | `.drawio` XML 加 SVG/MD review companion | 插件内不嵌入 diagrams.net runtime |
-| `drawnix` | `.drawnix` JSON 子集加 SVG/MD review companion | 插件内不嵌入 Drawnix 或 Plait runtime |
+| `drawnix` | `.drawnix` JSON 子集加 SVG/MD/媒体 companion 与 manifest | 插件内不嵌入 Drawnix 或 Plait runtime；跨 root 路由避开无关 root 区域 |
 | `circuitikz` | 经过验证的 `.tex` 源文件加 SVG/MD review companion | 预览/导出零依赖；桌面端可选本机编译器或托管 Tectonic |
 
 Circuitikz 支持仍然是受约束的。前端设置无需开启 Developer mode 就会显示 `Circuit (Circuitikz)` 首选图表类型与 `Circuitikz + SVG preview` 首选渲染目标，但 renderer 只接受经过验证的 `DiagramSpec(intent: "circuit", circuitSpec)`。它会写出确定性的 circuitikz TeX 和可审阅的 SVG companion。桌面用户随后可以复用自定义/系统编译器，或在 Vault 外显式安装固定版本 Tectonic 0.16.9，用于编译诊断、原生 PDF 证据与受保护的修复验收；移动端与常规预览/导出不会加载桌面进程代码。

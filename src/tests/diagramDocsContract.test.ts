@@ -16,7 +16,7 @@ describe('diagram documentation contract', () => {
         expect(readme).toContain('HTML fallback previews');
         expect(readme).toContain('planner now seeds preferred Vega-Lite chart templates');
         expect(readme).toContain('| Circuitikz | `_diagram.tex` + companion SVG/MD | SVG companion | Yes | Yes | Yes | Yes |');
-        expect(readme).toContain('PNG/PDF export defaulting to 300 PPI and clamped at 600 PPI');
+        expect(readme).toContain('Raster export accepts any integer from 72 to 600 DPI');
         expect(readme).toContain('the companion is not a LaTeX/TikZJax compile result');
     });
 

@@ -22,7 +22,8 @@ export class RenderCache {
         return stableStringify({
             spec,
             target: options.target ?? null,
-            theme: options.theme ?? 'system'
+            theme: options.theme ?? 'system',
+            sourceVisualManifestHash: options.sourceVisualManifestHash ?? null
         });
     }
 

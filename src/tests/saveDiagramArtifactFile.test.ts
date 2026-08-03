@@ -175,4 +175,40 @@ describe('saveDiagramArtifactFile', () => {
             expect.stringContaining('[[Source_diagram.drawio]]')
         );
     });
+
+    test('saves multiple source visual companions and binary image content', async () => {
+        const reporter = createReporter();
+        const imageBytes = new Uint8Array([1, 2, 3, 4]).buffer;
+        const path = await saveDiagramArtifactFile(mockApp, mockSettings, originalFile, {
+            target: 'drawnix',
+            content: '{"type":"drawnix","elements":[]}',
+            mimeType: 'application/vnd.drawnix+json',
+            sourceIntent: 'drawnixMindmap',
+            previewSvg: { content: '<svg><text>Map</text></svg>', mimeType: 'image/svg+xml' },
+            companions: [
+                { path: 'source-visual-1.svg', content: '<svg><text>Mermaid</text></svg>', mimeType: 'image/svg+xml' },
+                { path: 'source-visual-1.png', content: imageBytes, mimeType: 'image/png', binary: true },
+                {
+                    path: 'source-visual-manifest.json',
+                    content: JSON.stringify({
+                        version: 1,
+                        visuals: [{ id: 'source-visual-1', companionPaths: ['source-visual-1.svg', 'source-visual-1.png'] }]
+                    }),
+                    mimeType: 'application/json'
+                }
+            ]
+        }, reporter);
+
+        expect(path).toBe('Notes/Source_diagram.drawnix.md');
+        expect(mockApp.vault.createFolder).toHaveBeenCalledWith('Notes/Source_diagram.drawnix.assets');
+        expect(mockApp.vault.createBinary).toHaveBeenCalledWith('Notes/Source_diagram.drawnix.assets/source-visual-1.png', imageBytes);
+        expect(mockApp.vault.create).toHaveBeenCalledWith(
+            'Notes/Source_diagram.drawnix.assets/source-visual-manifest.json',
+            expect.stringContaining('Source_diagram.drawnix.assets/source-visual-1.svg')
+        );
+        expect(mockApp.vault.create).toHaveBeenCalledWith(
+            'Notes/Source_diagram.drawnix.md',
+            expect.stringContaining('![[Source_diagram.drawnix.assets/source-visual-1.png]]')
+        );
+    });
 });

@@ -55,6 +55,51 @@ describe('diagram generate operation', () => {
         expect(result.artifact.target).toBe('mermaid');
     });
 
+    test('forwards resolved source visuals without adding them to the LLM markdown payload', async () => {
+        const reporter = createReporter();
+        const sourceVisuals = [{
+            id: 'source-visual-1',
+            kind: 'mermaid' as const,
+            sourceHash: 'abc12345',
+            lineStart: 2,
+            lineEnd: 4,
+            language: 'mermaid',
+            definition: 'flowchart TD\nA --> B',
+            status: 'resolved' as const,
+            content: 'flowchart TD\nA --> B'
+        }];
+        const generateDiagramArtifactImpl = jest.fn().mockResolvedValue({
+            plan: { intent: 'drawnixMindmap' },
+            spec: { intent: 'drawnixMindmap', title: 'Topic', nodes: [] },
+            artifact: {
+                target: 'drawnix',
+                content: '{}',
+                mimeType: 'application/vnd.drawnix+json',
+                sourceIntent: 'drawnixMindmap'
+            }
+        });
+
+        await runDiagramGenerateOperation({
+            input: {
+                sourcePath: 'Notes/Topic.md',
+                sourceMarkdown: '# Topic',
+                sourceVisuals,
+                requestedIntent: 'drawnixMindmap',
+                requestedRenderTarget: 'drawnix',
+                compatibilityMode: 'best-fit',
+                outputMode: 'artifact'
+            },
+            settings: mockSettings,
+            provider: mockSettings.providers[0],
+            modelName: mockSettings.providers[0].model,
+            reporter,
+            getLegacyMermaidPrompt: () => 'legacy prompt',
+            generateDiagramArtifactImpl
+        });
+
+        expect(generateDiagramArtifactImpl).toHaveBeenCalledWith('# Topic', expect.objectContaining({ sourceVisuals }));
+    });
+
     test('passes a circuit-focused prompt to the provider for circuitikz artifact output', async () => {
         const reporter = createReporter();
         const circuitSpec = resolveCircuitTemplateFromMarkdown('Draw a CMOS inverter.');

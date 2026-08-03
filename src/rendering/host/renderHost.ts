@@ -1,9 +1,9 @@
 import { DiagramSpec } from '../../diagram/types';
-import { DiagramRenderer, RenderArtifact } from '../types';
+import { DiagramRenderer, RenderArtifact, RenderOptions } from '../types';
 import { RenderWebviewPayload, RenderWebviewPayloadOptions } from '../webview/contract';
 
 export interface RenderHost {
-    render(renderer: DiagramRenderer, spec: DiagramSpec): Promise<RenderArtifact>;
+    render(renderer: DiagramRenderer, spec: DiagramSpec, options?: RenderOptions): Promise<RenderArtifact>;
 }
 
 export interface RenderPreviewSession {
