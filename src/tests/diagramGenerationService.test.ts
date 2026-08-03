@@ -290,7 +290,7 @@ Client sends work to a queue-backed worker.
         expect(llmInvoker.mock.calls[0][0]).toMatch(/Target: editable Drawnix knowledge map/i);
     });
 
-    test('falls back without flattening when a Drawnix knowledge-map response violates its tree contract', async () => {
+    test('falls back without flattening when a Drawnix knowledge-map response violates its relation contract', async () => {
         const result = await generateDiagramArtifact('# Runtime', {
             compatibilityMode: 'best-fit',
             requestedRenderTarget: 'drawnix',
@@ -299,16 +299,92 @@ Client sends work to a queue-backed worker.
                 intent: 'drawnixMindmap',
                 title: 'Invalid map',
                 nodes: [
-                    { id: 'first', label: 'First root' },
-                    { id: 'second', label: 'Second root' }
+                    {
+                        id: 'root',
+                        label: 'Root',
+                        children: [{ id: 'child', label: 'Child' }]
+                    }
+                ],
+                edges: [{ from: 'root', to: 'child', label: 'duplicate hierarchy' }]
+            })
+        });
+
+        expect(result.artifact.target).toBe('mermaid');
+        expect(result.renderError).toMatch(/duplicates a parent-child relationship/i);
+        expect(result.artifact.content).toContain('mindmap');
+    });
+
+    test('preserves multiple top-level Drawnix mind-map roots as a forest', async () => {
+        const result = await generateDiagramArtifact('# Architecture', {
+            compatibilityMode: 'best-fit',
+            requestedRenderTarget: 'drawnix',
+            targetLanguage: 'en',
+            llmInvoker: async () => JSON.stringify({
+                intent: 'drawnixMindmap',
+                title: 'Architecture',
+                nodes: [
+                    {
+                        id: 'client',
+                        label: 'Client',
+                        children: [{ id: 'editor', label: 'Editor' }]
+                    },
+                    {
+                        id: 'server',
+                        label: 'Server',
+                        children: [{ id: 'api', label: 'API' }]
+                    }
+                ],
+                edges: [{ from: 'editor', to: 'api', label: 'request' }]
+            })
+        });
+
+        const data = JSON.parse(result.artifact.content);
+        expect(result.artifact.target).toBe('drawnix');
+        expect(result.renderError).toBeUndefined();
+        expect(data.elements.filter((element: { type: string }) => element.type === 'mindmap')).toHaveLength(2);
+        expect(data.elements[0]).toMatchObject({
+            id: 'client',
+            type: 'mindmap',
+            children: [expect.objectContaining({ id: 'editor', type: 'mind_child' })]
+        });
+        expect(data.elements[1]).toMatchObject({
+            id: 'server',
+            type: 'mindmap',
+            children: [expect.objectContaining({ id: 'api', type: 'mind_child' })]
+        });
+        expect(data.elements[2]).toMatchObject({
+            type: 'arrow-line',
+            source: { id: 'editor' },
+            target: { id: 'api' }
+        });
+    });
+
+    test('derives deterministic Drawnix node ids when the model omits them', async () => {
+        const result = await generateDiagramArtifact('# Architecture', {
+            compatibilityMode: 'best-fit',
+            requestedRenderTarget: 'drawnix',
+            targetLanguage: 'en',
+            llmInvoker: async () => JSON.stringify({
+                intent: 'drawnixMindmap',
+                title: 'Architecture',
+                nodes: [
+                    {
+                        label: 'Client',
+                        children: [{ label: 'Editor' }]
+                    },
+                    { label: 'Server' }
                 ],
                 edges: []
             })
         });
 
-        expect(result.artifact.target).toBe('mermaid');
-        expect(result.renderError).toMatch(/exactly one root/i);
-        expect(result.artifact.content).toContain('mindmap');
+        expect(result.artifact.target).toBe('drawnix');
+        expect(result.spec.nodes.map(node => node.id)).toEqual(['client', 'server']);
+        expect(result.spec.nodes[0].children?.map(node => node.id)).toEqual(['editor']);
+        expect(JSON.parse(result.artifact.content).elements[0]).toMatchObject({
+            id: 'client',
+            children: [expect.objectContaining({ id: 'editor' })]
+        });
     });
 
     test('honors circuitikz render target overrides with TeX source and svg companion', async () => {

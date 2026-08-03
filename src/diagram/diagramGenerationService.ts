@@ -14,7 +14,7 @@ import { buildDiagramPlan } from './planner';
 import { buildDiagramSpecPrompt } from './prompts/diagramSpecPrompt';
 import { assertValidDiagramSpec } from './spec';
 import { isSupportedRenderTarget } from './types';
-import type { DiagramIntent, DiagramPlan, DiagramSpec, RenderTarget } from './types';
+import type { DiagramIntent, DiagramNode, DiagramPlan, DiagramSpec, RenderTarget } from './types';
 import { parseDiagramSpecResponse } from './diagramSpecResponseParser';
 import { resolveCircuitTemplateFromMarkdown } from './adapters/circuitikz/circuitTemplateCatalog';
 import { validateDrawnixMindMapSpec } from './adapters/drawnix/drawnixMindMapProjection';
@@ -220,6 +220,76 @@ function resolveLegacyCompatibleIntent(spec: DiagramSpec, plan: DiagramPlan): Di
     return plan.mermaidDiagramType === 'flowchart' ? 'flowchart' : 'mindmap';
 }
 
+function deriveDrawnixNodeId(label: string, fallback: string): string {
+    const normalized = label.trim().toLowerCase();
+    const asciiPart = normalized
+        .replace(/[^a-z0-9_-]+/g, '-')
+        .replace(/^-+|-+$/g, '');
+    const nonAsciiPart = Array.from(normalized)
+        .filter(character => !/[a-z0-9_-]/.test(character))
+        .map(character => character.codePointAt(0)?.toString(16))
+        .filter((codePoint): codePoint is string => Boolean(codePoint))
+        .join('-');
+
+    return [asciiPart, nonAsciiPart].filter(Boolean).join('-') || fallback;
+}
+
+function collectExplicitDrawnixNodeIds(nodes: DiagramNode[], ids: Set<string>): void {
+    nodes.forEach(node => {
+        const explicitId = node.id?.trim();
+        if (explicitId) {
+            ids.add(explicitId);
+        }
+        collectExplicitDrawnixNodeIds(node.children ?? [], ids);
+    });
+}
+
+function normalizeDrawnixNode(
+    node: DiagramNode,
+    path: number[],
+    reservedIds: Set<string>,
+    usedGeneratedIds: Set<string>
+): DiagramNode {
+    const label = node.label?.trim() || node.id?.trim() || `Untitled ${path.join('-')}`;
+    const explicitId = node.id?.trim();
+    let id = explicitId || deriveDrawnixNodeId(label, `node-${path.join('-')}`);
+
+    if (!explicitId) {
+        const baseId = id;
+        let suffix = 2;
+        while (reservedIds.has(id) || usedGeneratedIds.has(id)) {
+            id = `${baseId}-${suffix}`;
+            suffix += 1;
+        }
+        usedGeneratedIds.add(id);
+    }
+
+    return {
+        ...node,
+        id,
+        label,
+        children: (node.children ?? []).map((child, index) => normalizeDrawnixNode(
+            child,
+            [...path, index],
+            reservedIds,
+            usedGeneratedIds
+        ))
+    };
+}
+
+function normalizeDrawnixMindMapNodes(nodes: DiagramNode[]): DiagramNode[] {
+    const reservedIds = new Set<string>();
+    collectExplicitDrawnixNodeIds(nodes, reservedIds);
+    const usedGeneratedIds = new Set<string>();
+
+    return nodes.map((node, index) => normalizeDrawnixNode(
+        node,
+        [index],
+        reservedIds,
+        usedGeneratedIds
+    ));
+}
+
 function mergeSpecDefaults(spec: DiagramSpec, plan: DiagramPlan): DiagramSpec {
     const resolvedIntent = resolveLegacyCompatibleIntent(spec, plan);
     const normalizedLayoutHints = { ...(spec.layoutHints ?? {}) };
@@ -230,14 +300,18 @@ function mergeSpecDefaults(spec: DiagramSpec, plan: DiagramPlan): DiagramSpec {
         normalizedLayoutHints.chartType = plan.preferredChartType;
     }
 
+    const normalizedNodes = resolvedIntent === 'drawnixMindmap'
+        ? normalizeDrawnixMindMapNodes(spec.nodes ?? [])
+        : (spec.nodes ?? []).map(node => ({
+            ...node,
+            label: node.label?.trim() || node.id || 'Untitled'
+        }));
+
     return {
         ...spec,
         intent: resolvedIntent,
         title: spec.title?.trim() || 'Generated Diagram',
-        nodes: (spec.nodes ?? []).map(node => ({
-            ...node,
-            label: node.label?.trim() || node.id || 'Untitled'
-        })),
+        nodes: normalizedNodes,
         edges: (spec.edges ?? []).map(edge => ({
             ...edge,
             label: edge.label?.trim() || undefined

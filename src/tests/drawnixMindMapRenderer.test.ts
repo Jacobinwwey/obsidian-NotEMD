@@ -1,5 +1,8 @@
 import { DiagramSpec } from '../diagram/types';
-import { buildDrawnixMindMapProjection } from '../diagram/adapters/drawnix/drawnixMindMapProjection';
+import {
+    buildDrawnixMindMapProjection,
+    DRAWNIX_MIND_MAP_FOREST_ROW_MAX_WIDTH
+} from '../diagram/adapters/drawnix/drawnixMindMapProjection';
 import { DrawnixRenderer } from '../rendering/renderers/drawnixRenderer';
 
 function createKnowledgeMapSpec(): DiagramSpec {
@@ -100,17 +103,75 @@ describe('Drawnix mind-map renderer', () => {
         expect(artifact.previewSvg?.content).not.toContain('data-drawio-type="node"');
     });
 
-    test('rejects invalid mind-map roots before exporting a flattened fallback', async () => {
-        const invalidSpec: DiagramSpec = {
+    test('preserves multiple top-level roots without flattening the forest', async () => {
+        const forestSpec: DiagramSpec = {
             ...createKnowledgeMapSpec(),
             nodes: [
-                { id: 'first-root', label: 'First root' },
-                { id: 'second-root', label: 'Second root' }
+                {
+                    id: 'first-root',
+                    label: 'First root',
+                    children: [{ id: 'first-child', label: 'First child' }]
+                },
+                {
+                    id: 'second-root',
+                    label: 'Second root',
+                    children: [{ id: 'second-child', label: 'Second child' }]
+                }
             ],
             edges: []
         };
 
-        await expect(new DrawnixRenderer().render(invalidSpec)).rejects.toThrow(/exactly one root/i);
+        const projection = buildDrawnixMindMapProjection(forestSpec);
+        const artifact = await new DrawnixRenderer().render(forestSpec);
+        const data = JSON.parse(artifact.content);
+
+        expect(data.elements).toHaveLength(2);
+        expect(projection.roots).toHaveLength(2);
+        projection.nodes.forEach((node, index) => {
+            projection.nodes.slice(index + 1).forEach(other => {
+                const overlaps = node.x < other.x + other.width
+                    && node.x + node.width > other.x
+                    && node.y < other.y + other.height
+                    && node.y + node.height > other.y;
+                expect(overlaps).toBe(false);
+            });
+        });
+        expect(data.elements[0]).toMatchObject({
+            id: 'first-root',
+            type: 'mindmap',
+            children: [expect.objectContaining({ id: 'first-child', type: 'mind_child' })]
+        });
+        expect(data.elements[1]).toMatchObject({
+            id: 'second-root',
+            type: 'mindmap',
+            children: [expect.objectContaining({ id: 'second-child', type: 'mind_child' })]
+        });
+    });
+
+    test('wraps large forests into deterministic rows instead of creating an unbounded canvas width', () => {
+        const forestSpec: DiagramSpec = {
+            ...createKnowledgeMapSpec(),
+            nodes: Array.from({ length: 24 }, (_, index) => ({
+                id: `root-${index + 1}`,
+                label: `Subsystem ${index + 1}`
+            })),
+            edges: []
+        };
+
+        const projection = buildDrawnixMindMapProjection(forestSpec);
+
+        expect(projection.roots).toHaveLength(24);
+        expect(projection.width).toBeLessThanOrEqual(DRAWNIX_MIND_MAP_FOREST_ROW_MAX_WIDTH);
+        expect(projection.height).toBeGreaterThan(projection.nodes[0].height + 180);
+        projection.nodes.forEach((node, index) => {
+            projection.nodes.slice(index + 1).forEach(other => {
+                const overlaps = node.x < other.x + other.width
+                    && node.x + node.width > other.x
+                    && node.y < other.y + other.height
+                    && node.y + node.height > other.y;
+                expect(overlaps).toBe(false);
+            });
+        });
     });
 
     test('produces deterministic layout without overlapping node rectangles', () => {

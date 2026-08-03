@@ -22,7 +22,7 @@ DiagramSpec(intent: "drawnixMindmap")
   -> DrawnixMindMapSvgRenderer (notemd-drawnix-mindmap-svg@1.0.0)
 ```
 
-The delivered contract is one root, nested `node.children`, `mindmap`/`mind_child` elements, maximum depth 3, and at most 4 cross-branch relationships represented by `arrow-line`. The CLI routes Drawnix before constructing the generic `SemanticFigureModel`; other targets keep their existing path. Full Drawnix host embedding and a Plait preview remain deferred.
+The delivered contract is one or more top-level roots, nested `node.children` forests, `mindmap`/`mind_child` elements, maximum depth 3 per tree, and at most 4 cross-branch relationships represented by `arrow-line`. Large forests are packed into deterministic bounded-width rows so an unbounded root count cannot create a single-line canvas. The CLI routes Drawnix before constructing the generic `SemanticFigureModel`; other targets keep their existing path. Full Drawnix host embedding and a Plait preview remain deferred.
 
 ## Original Audit (Historical)
 
@@ -101,7 +101,7 @@ The Drawnix profile belongs in `diagramSpecPrompt.ts` and activates only for the
 ```text
 Target: editable Drawnix knowledge map.
 Required intent: drawnixMindmap.
-Create one root node and 3-6 first-level branches.
+Create one or more top-level root nodes and 3-6 first-level branches per tree. Keep independent subsystems as separate roots instead of inventing a container node.
 Each branch has 2-5 children; maximum hierarchy depth is 3.
 Use node.children for ownership and taxonomy.
 Do not duplicate parent-child relationships in edges.
@@ -110,7 +110,7 @@ Use concise labels. Keep operational detail in leaves, not in the root.
 For architecture notes, organize the tree by subsystem first. Treat request/data flow as cross-branch relationships.
 ```
 
-The parser and validator must enforce the parts that can be checked mechanically: one root, bounded depth, unique ids, valid child references, and a cross-relation limit. The renderer must reject an invalid mind-map projection and fall back to the ordinary requested target; it must never silently flatten the tree into the existing grid.
+The parser and validator must enforce the parts that can be checked mechanically: at least one root, bounded depth per tree, unique ids, valid child references, and a cross-relation limit. The renderer must reject an invalid mind-map projection and fall back to the ordinary requested target; it must never silently flatten the forest into the existing grid.
 
 ## Delivery Sequence
 
@@ -160,4 +160,4 @@ Run targeted Jest tests during implementation, then `npm run build`, `npm test -
 
 ## Completion Criteria
 
-The initial delivery is complete only when the exported architecture knowledge map has a visible root, stable subsystem branches, no flattened parent-child structure, no overlapping node boxes, and no generic three-column layout. The `.drawnix` artifact must import into the pinned upstream baseline, the SVG companion must match its geometry, and the public target documentation must state that Drawnix currently supports editable knowledge maps rather than all graph intents.
+The initial delivery is complete only when the exported architecture knowledge map has visible root trees, stable subsystem branches, no flattened parent-child structure, no overlapping node boxes, and no generic three-column layout. The `.drawnix` artifact must import into the pinned upstream baseline, the SVG companion must match its geometry, and the public target documentation must state that Drawnix currently supports editable knowledge-map forests rather than all graph intents.

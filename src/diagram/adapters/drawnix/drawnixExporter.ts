@@ -9,7 +9,7 @@ export interface DrawnixMindMapExportedData {
     type: 'drawnix';
     version: 1;
     source: 'web';
-    elements: [DrawnixMindMapElement, ...DrawnixMindMapArrowElement[]];
+    elements: Array<DrawnixMindMapElement | DrawnixMindMapArrowElement>;
     viewport: {
         zoom: number;
         offsetX: number;
@@ -23,7 +23,7 @@ export function exportDrawnixMindMapProjection(projection: DrawnixMindMapProject
         version: 1,
         source: 'web',
         elements: [
-            projection.root,
+            ...projection.roots,
             ...createDrawnixMindMapArrowElements(projection.crossRelations)
         ],
         viewport: {
@@ -101,26 +101,39 @@ export function validateDrawnixMindMapExportedData(data: unknown): string[] {
         errors.push('drawnix export data viewport must be an object');
     }
     if (!Array.isArray(data.elements) || data.elements.length === 0) {
-        errors.push('drawnix mind-map export must contain one root element');
+        errors.push('drawnix mind-map export must contain at least one root element');
         return errors;
     }
 
     const ids = new Set<string>();
-    validateMindMapElement(data.elements[0], true, ids, errors);
-    data.elements.slice(1).forEach((element, index) => {
+    let relationIndex = 0;
+    let rootCount = 0;
+    let relationsStarted = false;
+    data.elements.forEach(element => {
+        if (isRecord(element) && element.type === 'mindmap' && !relationsStarted) {
+            rootCount += 1;
+            validateMindMapElement(element, true, ids, errors);
+            return;
+        }
+        relationsStarted = true;
+        relationIndex += 1;
         if (!isRecord(element) || element.type !== 'arrow-line') {
-            errors.push(`cross-relation ${index + 1} must use type "arrow-line"`);
+            errors.push(`cross-relation ${relationIndex} must use type "arrow-line"`);
             return;
         }
         if (!Array.isArray(element.points) || element.points.length < 2 || !element.points.every(isMindMapPoint)) {
-            errors.push(`cross-relation ${index + 1} must define numeric points`);
+            errors.push(`cross-relation ${relationIndex} must define numeric points`);
         }
         const source = isRecord(element.source) && typeof element.source.id === 'string' ? element.source.id : undefined;
         const target = isRecord(element.target) && typeof element.target.id === 'string' ? element.target.id : undefined;
         if (!source || !ids.has(source) || !target || !ids.has(target)) {
-            errors.push(`cross-relation ${index + 1} references an unknown mind-map node`);
+            errors.push(`cross-relation ${relationIndex} references an unknown mind-map node`);
         }
     });
+
+    if (rootCount === 0) {
+        errors.push('drawnix mind-map export must contain at least one root element');
+    }
 
     return errors;
 }

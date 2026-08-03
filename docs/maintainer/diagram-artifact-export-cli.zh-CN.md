@@ -41,7 +41,7 @@ PNG 输出还会写入或替换 `pHYs` 物理像素密度 chunk，因此所选 P
 |---|---|---|---|
 | `editable-html-svg` | 自包含 `.html`，包含 inline SVG | `DiagramSpec -> SemanticFigureModel -> EditableHtmlSvgRenderer` | `collectEditableSvgAnnotationGaps()` 必须为空 |
 | `drawio` | 未压缩 diagrams.net `mxfile` XML，可通过 `--preview-svg-output`、`--preview-png-output` 与 `--preview-pdf-output` 同步写出 companion | `DiagramSpec -> SemanticFigureModel -> exportSemanticFigureModelToDrawioXml()` 加 `renderSemanticFigureSvg()` | visible label mismatch 必须为空 |
-| `drawnix` | 原生 `.drawnix` 知识导图，可通过 `--preview-svg-output`、`--preview-png-output` 与 `--preview-pdf-output` 同步写出 companion | `DiagramSpec(intent: "drawnixMindmap") -> DrawnixMindMapProjection -> DrawnixRenderer` 加 `notemd-drawnix-mindmap-svg@1.0.0` | 原生层级与关系校验错误必须为空 |
+| `drawnix` | 原生 `.drawnix` 知识导图 forest，可通过 `--preview-svg-output`、`--preview-png-output` 与 `--preview-pdf-output` 同步写出 companion | `DiagramSpec(intent: "drawnixMindmap") -> DrawnixMindMapProjection -> DrawnixRenderer` 加 `notemd-drawnix-mindmap-svg@1.0.0` | 原生 roots、层级与关系校验错误必须为空 |
 | `circuitikz` | 受约束 `.tex` circuitikz 源文件，可同步写出 SVG/PNG/PDF 预览 companion | `DiagramSpec(intent: "circuit") -> CircuitSpec -> CircuitikzRenderer -> exportCircuitSpecToCircuitikz()` 加 `renderCircuitSpecPreviewSvg()` | 写出 TeX 或 companion 前必须通过 `CircuitSpec` 校验 |
 | `svg` | Obsidian 可直接查看的 `.svg`；当 `intent` 为 `circuit` 时来自电路预览 companion | `DiagramSpec -> SemanticFigureModel -> renderSemanticFigureSvg()` 或 `CircuitSpec -> renderCircuitSpecPreviewSvg()` | 必须保留 semantic node/edge annotations，或保留已验证电路预览元数据 |
 | `png` | 从同一个 standalone SVG 或电路预览 SVG 渲染出的 `.png` 视觉证据 | `DiagramSpec -> SemanticFigureModel -> renderSemanticFigureSvg() -> Playwright screenshot`，或 `CircuitSpec -> renderCircuitSpecPreviewSvg() -> Playwright screenshot` | 输出尺寸按 SVG CSS 尺寸与所选 PPI 对齐，并写入匹配所选密度的 `pHYs` 元数据 |
@@ -86,8 +86,8 @@ npm test -- --runInBand src/tests/diagramArtifactExportCli.test.ts --runTestsByP
 - `editable-html-svg` 包含语义化 `data-drawio-*` 注解。
 - 节点 id 在空白归一化后仍保持唯一。
 - `drawio` XML 保留可见节点与边 label。
-- `drawnix` JSON 包含 `mindmap` root、嵌套 `mind_child` elements 和通过校验的 `arrow-line` 跨关系。
-- Drawnix projection 的布局是确定性的，最大深度为 3，最多 4 条跨分支关系，并生成专用 SVG companion。
+- `drawnix` JSON 包含一个或多个 `mindmap` roots、嵌套 `mind_child` elements 和通过校验的 `arrow-line` 跨关系。
+- Drawnix projection 的布局是确定性的；较大的 forest 会打包到有宽度上限的多行中，最大深度为 3，最多 4 条跨分支关系，并生成专用 SVG companion。
 - `drawio`、`drawnix` 与 `circuitikz` 可以写出用于 Obsidian 预览验证的 SVG companion 文件。
 - `circuitikz` 只有在 `DiagramSpec.circuitSpec` 通过校验后才会写出受约束 TeX，并可从同一份电路 payload 导出 SVG/PNG/PDF 预览 companion。
 - `svg` 可以直接输出同一个 annotated semantic figure sheet；当 `intent: "circuit"` 时，则输出已验证的电路预览 companion。

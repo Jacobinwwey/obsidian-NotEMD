@@ -205,7 +205,7 @@ async function flushPromises(): Promise<void> {
 async function clickExportMenuItem(modal: any, index: number): Promise<void> {
     const exportButton = collectButtons(modal.contentEl).find(button => button.text === 'Export' || button.text === '导出');
     exportButton?.onclick?.({} as MouseEvent);
-    const menu = (Menu as jest.Mock).mock.results.at(-1)?.value;
+    const menu = (Menu as unknown as jest.Mock).mock.results.at(-1)?.value;
     const configure = menu.addItem.mock.calls[index][0];
     const item = {
         setTitle: jest.fn().mockReturnThis(),
@@ -258,7 +258,7 @@ describe('diagram preview modal', () => {
         await expect(exportDeps.vegaLiteDepsLoader()).resolves.toBe(bundledVegaLiteDeps);
         expect(bundledPreviewDeps.getBundledVegaLitePreviewDeps).toHaveBeenCalled();
         expect(Notice).toHaveBeenCalledWith('Diagram preview exported to Notes/Topic_preview.svg');
-        expect((Menu as jest.Mock).mock.results.at(-1)?.value.addItem).toHaveBeenCalledTimes(3);
+        expect((Menu as unknown as jest.Mock).mock.results.at(-1)?.value.addItem).toHaveBeenCalledTimes(3);
         expect(exportButton?.text).toBe('Export');
         expect(exportButton?.disabled).toBe(false);
     });

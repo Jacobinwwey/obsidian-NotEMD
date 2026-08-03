@@ -17,17 +17,18 @@ DiagramSpec(intent: "drawnixMindmap")
   -> DrawnixMindMapSvgRenderer (SVG companion)
 ```
 
-The projection preserves one root and `node.children` ownership as nested Drawnix elements:
+The projection preserves one or more top-level roots and `node.children` ownership as a Drawnix forest:
 
-- root element: `type: "mindmap"`
+- root elements: each top-level node becomes `type: "mindmap"`
 - descendants: `type: "mind_child"`
 - cross-branch relations: `type: "arrow-line"`
 - maximum depth 3
 - at most 4 cross-branch relationships
 - deterministic coordinates and label wrapping
+- large forests are packed into deterministic rows with a bounded row width
 - preview renderer version: `notemd-drawnix-mindmap-svg@1.0.0`
 
-The exporter writes `type: "drawnix"`, `version: 1`, `source: "web"`, a fixed viewport, the nested element tree, and any validated cross-relation arrows. It has no `SemanticFigureModel` dependency and no Plait dependency. The standard Mermaid `mindmap` intent remains a separate Mermaid path; Drawnix fallback maps a copied spec to Mermaid and never flattens the original tree.
+The exporter writes `type: "drawnix"`, `version: 1`, `source: "web"`, a fixed viewport, one or more nested element trees, and any validated cross-relation arrows. It has no `SemanticFigureModel` dependency and no Plait dependency. The standard Mermaid `mindmap` intent remains a separate Mermaid path; Drawnix fallback maps a copied spec to Mermaid and never flattens the original forest.
 
 ## Automated Evidence
 

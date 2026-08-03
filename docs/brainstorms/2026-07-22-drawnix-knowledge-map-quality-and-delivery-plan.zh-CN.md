@@ -18,7 +18,7 @@ DiagramSpec(intent: "drawnixMindmap")
   -> DrawnixMindMapSvgRenderer (notemd-drawnix-mindmap-svg@1.0.0)
 ```
 
-契约包含一个 root、`node.children` 层级、`mindmap`/`mind_child` 元素、maximum depth 3，以及最多 4 条用 `arrow-line` 表示的跨分支关系。CLI 会在构建通用 `SemanticFigureModel` 前进入 Drawnix 分支；完整 Drawnix 宿主和 Plait preview 继续延期。
+契约包含一个或多个顶层 root、`node.children` forest、`mindmap`/`mind_child` 元素、每棵树 maximum depth 3，以及最多 4 条用 `arrow-line` 表示的跨分支关系。较大的 forest 会按确定性规则打包到有宽度上限的多行中，避免 root 数量增长后画布变成单行长带。CLI 会在构建通用 `SemanticFigureModel` 前进入 Drawnix 分支；完整 Drawnix 宿主和 Plait preview 继续延期。
 
 ## 原始审计（历史）
 
@@ -105,7 +105,7 @@ Drawnix profile 位于 `diagramSpecPrompt.ts`，只在 Drawnix 思维导图路�
 ```text
 Target: editable Drawnix knowledge map.
 Required intent: drawnixMindmap.
-Create one root node and 3-6 first-level branches.
+Create one or more top-level root nodes and 3-6 first-level branches per tree. Keep independent subsystems as separate roots instead of inventing a container node.
 Each branch has 2-5 children; maximum hierarchy depth is 3.
 Use node.children for ownership and taxonomy.
 Do not duplicate parent-child relationships in edges.
@@ -114,7 +114,7 @@ Use concise labels. Keep operational detail in leaves, not in the root.
 For architecture notes, organize the tree by subsystem first. Treat request/data flow as cross-branch relationships.
 ```
 
-parser 与 validator 必须承担能机械验证的部分：唯一 root、受限深度、唯一 id、合法子节点引用和跨关系数量。无效的思维导图投影需要拒绝并回退到原请求目标，不能静默拍平为旧网格。
+parser 与 validator 必须承担能机械验证的部分：至少一个 root、每棵树的受限深度、唯一 id、合法子节点引用和跨关系数量。无效的思维导图投影需要拒绝并回退到原请求目标，不能静默拍平为旧网格。
 
 ## 交付顺序
 
@@ -164,4 +164,4 @@ Stage 4 decision: deferred。仓库还没有通过验证的重型 runtime bundle
 
 ## 完成标准
 
-初始交付完成的条件：导出的架构知识导图有可见 root、稳定的子系统分支、未拍平的父子结构、无重叠节点框，也不再使用通用三列布局。`.drawnix` 能导入固定上游基线，SVG companion 几何一致，公开目标文档明确 Drawnix 当前支持可编辑知识导图，不再宣称覆盖所有图意图。
+初始交付完成的条件：导出的架构知识导图有可见 root trees、稳定的子系统分支、未拍平的父子结构、无重叠节点框，也不再使用通用三列布局。`.drawnix` 能导入固定上游基线，SVG companion 几何一致，公开目标文档明确 Drawnix 当前支持可编辑知识导图 forest，不再宣称覆盖所有图意图。

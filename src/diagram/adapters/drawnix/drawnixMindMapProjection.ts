@@ -70,6 +70,10 @@ export interface DrawnixMindMapCrossRelation {
 export interface DrawnixMindMapProjection {
     title: string;
     summary?: string;
+    roots: DrawnixMindMapElement[];
+    /**
+     * Backward-compatible alias for the first root. New consumers should use roots.
+     */
     root: DrawnixMindMapElement;
     nodes: DrawnixMindMapPlacedNode[];
     hierarchyBranches: DrawnixMindMapHierarchyBranch[];
@@ -216,8 +220,8 @@ function collectMindMapValidationErrors(spec: DiagramSpec): string[] {
     if (spec.intent !== 'drawnixMindmap') {
         errors.push('Drawnix native export requires the "drawnixMindmap" intent.');
     }
-    if (spec.nodes.length !== 1) {
-        errors.push('Drawnix mind-map export requires exactly one root node.');
+    if (spec.nodes.length === 0) {
+        errors.push('Drawnix mind-map export requires at least one root node.');
         return errors;
     }
 
@@ -250,7 +254,7 @@ function collectMindMapValidationErrors(spec: DiagramSpec): string[] {
         (node.children ?? []).forEach(child => visit(child, depth + 1, id));
         activeReferences.delete(node);
     };
-    visit(spec.nodes[0], 0);
+    spec.nodes.forEach(root => visit(root, 0));
 
     const edges = spec.edges ?? [];
     if (edges.length > MAX_CROSS_RELATIONS) {
@@ -446,10 +450,74 @@ function createCrossRelations(
     });
 }
 
-export function buildDrawnixMindMapProjection(spec: DiagramSpec): DrawnixMindMapProjection {
-    assertValidDrawnixMindMapSpec(spec);
+interface RootLayout {
+    root: MindMapTreeNode;
+    treeNodes: MindMapTreeNode[];
+    hierarchyBranches: DrawnixMindMapHierarchyBranch[];
+    rightNodeCount: number;
+    width: number;
+    height: number;
+}
 
-    const root = buildTreeNode(spec.nodes[0], undefined, 0, -1);
+const ROOT_LAYOUT_GAP = 144;
+const ROOT_ROW_GAP = 180;
+export const DRAWNIX_MIND_MAP_FOREST_ROW_MAX_WIDTH = 6400;
+
+interface RootLayoutRow {
+    layouts: RootLayout[];
+    width: number;
+    height: number;
+}
+
+function packRootLayouts(rootLayouts: RootLayout[]): {
+    rows: RootLayoutRow[];
+    width: number;
+    height: number;
+} {
+    const rows: RootLayoutRow[] = [];
+    let currentRow: RootLayoutRow | undefined;
+
+    rootLayouts.forEach(layout => {
+        const nextWidth = currentRow && currentRow.layouts.length > 0
+            ? currentRow.width + ROOT_LAYOUT_GAP + layout.width
+            : layout.width;
+
+        if (
+            currentRow
+            && currentRow.layouts.length > 0
+            && nextWidth > DRAWNIX_MIND_MAP_FOREST_ROW_MAX_WIDTH
+        ) {
+            rows.push(currentRow);
+            currentRow = undefined;
+        }
+
+        if (!currentRow) {
+            currentRow = { layouts: [], width: 0, height: 0 };
+        }
+
+        currentRow.layouts.push(layout);
+        currentRow.width = currentRow.layouts.length === 1
+            ? layout.width
+            : currentRow.width + ROOT_LAYOUT_GAP + layout.width;
+        currentRow.height = Math.max(currentRow.height, layout.height);
+    });
+
+    if (currentRow && currentRow.layouts.length > 0) {
+        rows.push(currentRow);
+    }
+
+    return {
+        rows,
+        width: Math.max(...rows.map(row => row.width)),
+        height: rows.reduce(
+            (total, row) => total + row.height,
+            ROOT_ROW_GAP * Math.max(0, rows.length - 1)
+        )
+    };
+}
+
+function buildRootLayout(source: DiagramNode): RootLayout {
+    const root = buildTreeNode(source, undefined, 0, -1);
     const directChildren = root.children;
     const rightNodeCount = Math.ceil(directChildren.length / 2);
     directChildren.forEach((child, index) => {
@@ -500,18 +568,62 @@ export function buildDrawnixMindMapProjection(spec: DiagramSpec): DrawnixMindMap
 
     const treeNodes = collectTreeNodes(root);
     const dimensions = shiftLayout(treeNodes, hierarchyBranches);
+    return {
+        root,
+        treeNodes,
+        hierarchyBranches,
+        rightNodeCount,
+        width: dimensions.width,
+        height: dimensions.height
+    };
+}
+
+function shiftRootLayout(layout: RootLayout, offsetX: number, offsetY: number): void {
+    layout.treeNodes.forEach(node => {
+        node.x += offsetX;
+        node.y += offsetY;
+    });
+    layout.hierarchyBranches.forEach(branch => {
+        branch.start = shiftPoint(branch.start, offsetX, offsetY);
+        branch.end = shiftPoint(branch.end, offsetX, offsetY);
+    });
+}
+
+export function buildDrawnixMindMapProjection(spec: DiagramSpec): DrawnixMindMapProjection {
+    assertValidDrawnixMindMapSpec(spec);
+
+    const rootLayouts = spec.nodes.map(buildRootLayout);
+    const packedForest = packRootLayouts(rootLayouts);
+    const roots: DrawnixMindMapElement[] = [];
+    const treeNodes: MindMapTreeNode[] = [];
+    const hierarchyBranches: DrawnixMindMapHierarchyBranch[] = [];
+
+    let offsetY = 0;
+    packedForest.rows.forEach(row => {
+        let offsetX = 0;
+        row.layouts.forEach(layout => {
+            shiftRootLayout(layout, offsetX, offsetY);
+            roots.push(toDrawnixMindElement(layout.root, true, layout.rightNodeCount));
+            treeNodes.push(...layout.treeNodes);
+            hierarchyBranches.push(...layout.hierarchyBranches);
+            offsetX += layout.width + ROOT_LAYOUT_GAP;
+        });
+        offsetY += row.height + ROOT_ROW_GAP;
+    });
+
     const placedNodes = treeNodes.map(toPlacedNode);
-    const crossRelations = createCrossRelations(spec.edges ?? [], placedNodes, dimensions.width);
+    const crossRelations = createCrossRelations(spec.edges ?? [], placedNodes, packedForest.width);
 
     return {
         title: normalizedText(spec.title, 'Generated knowledge map'),
         summary: spec.summary?.trim() || undefined,
-        root: toDrawnixMindElement(root, true, rightNodeCount),
+        roots,
+        root: roots[0],
         nodes: placedNodes,
         hierarchyBranches,
         crossRelations,
-        width: dimensions.width,
-        height: dimensions.height
+        width: packedForest.width,
+        height: packedForest.height
     };
 }
 

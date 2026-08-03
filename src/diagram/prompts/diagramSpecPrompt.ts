@@ -131,9 +131,9 @@ The deterministic renderer, not the model, emits the complete LaTeX document wit
 
 Drawnix knowledge-map rules:
 - Set intent: drawnixMindmap.
-- Create exactly one root node and organize the map through node.children.
+- Create one or more top-level root nodes and organize each tree through node.children. Use multiple roots when the source has independent subsystems; do not invent a container node just to force unrelated topics into one tree.
 - Use node.children for ownership and taxonomy. Do not duplicate parent-child relationships in edges.
-- Keep hierarchy depth at or below 3.
+- Keep each root tree's hierarchy depth at or below 3.
 - Use edges only for cross-branch runtime relationships. Emit at most 4 edges.
 - Create concise labels. Put implementation detail in leaf nodes, not the root.
 - For architecture notes, group the tree by subsystem first and place request/data flow in cross-branch relationships.
