@@ -616,6 +616,122 @@
     background: var(--notemd-surface-alt);
 }
 
+.notemd-diagram-preview-panels {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    min-width: 0;
+    border: 0;
+    background: transparent;
+    padding: 0;
+}
+
+.notemd-diagram-preview-panel {
+    min-width: 0;
+    overflow: hidden;
+    border: 1px solid var(--notemd-border);
+    border-radius: 10px;
+    background: var(--notemd-surface-alt);
+}
+
+.notemd-diagram-preview-panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.65rem;
+    min-width: 0;
+    border-bottom: 1px solid var(--notemd-border);
+    background: color-mix(in srgb, var(--background-secondary) 72%, var(--notemd-surface-alt) 28%);
+}
+
+.notemd-diagram-preview-panel-title {
+    margin: 0;
+    padding: 0.65rem 0.8rem;
+    min-width: 0;
+    color: var(--text-muted);
+    font-size: 12px;
+    line-height: 1.4;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    overflow-wrap: anywhere;
+}
+
+.notemd-diagram-preview-panel-export {
+    flex: 0 0 auto;
+    margin: 0 0.65rem 0 0;
+    padding: 0.38rem 0.6rem;
+    border: 1px solid var(--notemd-border);
+    border-radius: 7px;
+    background: var(--background-primary);
+    color: var(--text-normal);
+    font-size: 11px;
+    line-height: 1.2;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.notemd-diagram-preview-panel-export:hover {
+    border-color: var(--notemd-accent);
+    background: var(--background-modifier-hover);
+}
+
+.notemd-diagram-preview-panel-body {
+    min-width: 0;
+    min-height: 260px;
+    padding: 0.75rem;
+    background: var(--background-primary);
+}
+
+.notemd-diagram-preview-export-folder-modal {
+    min-width: min(34rem, 80vw);
+}
+
+.notemd-diagram-preview-export-folder-description {
+    margin: 0 0 1rem;
+    color: var(--text-muted);
+    line-height: 1.5;
+}
+
+.notemd-diagram-preview-export-folder-options {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+}
+
+.notemd-diagram-preview-export-folder-option {
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    min-height: 2.25rem;
+    color: var(--text-normal);
+    cursor: pointer;
+}
+
+.notemd-diagram-preview-export-folder-input {
+    width: 100%;
+    margin-top: 0.8rem;
+    box-sizing: border-box;
+}
+
+.notemd-diagram-preview-export-folder-error {
+    margin-top: 0.55rem;
+    color: var(--text-error);
+    font-size: 0.85em;
+    line-height: 1.4;
+    overflow-wrap: anywhere;
+}
+
+.notemd-diagram-preview-export-folder-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.55rem;
+    margin-top: 1.25rem;
+}
+
+.notemd-diagram-preview-panel-body .notemd-diagram-preview-frame {
+    min-height: 260px;
+}
+
 .notemd-diagram-history-layer {
     position: absolute;
     inset: 0;

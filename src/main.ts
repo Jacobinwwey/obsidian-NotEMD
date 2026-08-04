@@ -89,6 +89,7 @@ import { RenderArtifact } from './rendering/types';
 import { IframeRenderHost } from './rendering/host/iframeRenderHost';
 import { getRenderTargetDisplayName } from './rendering/targetLabel';
 import { supportsDiagramPreviewModal } from './ui/diagramPreview';
+import { resolvePreviewExportPpi } from './rendering/preview/pngPreview';
 import {
     createCompleteResetSettings,
     createPartialResetSettings
@@ -449,6 +450,7 @@ export default class NotemdPlugin extends Plugin {
             host: {
                 getFileByPath: host.getFileByPath,
                 readFile: host.readFile,
+                readBinary: host.readBinary,
                 openPreview: (artifact, sourcePath, artifactSaved) =>
                     this.openDiagramPreviewModal(artifact, sourcePath, artifactSaved, entry.id)
             },
@@ -1367,6 +1369,7 @@ export default class NotemdPlugin extends Plugin {
         }
 
         this.settings = Object.assign({}, DEFAULT_SETTINGS, savedData, { providers: mergedProviders });
+        this.settings.diagramPreviewExportPpi = resolvePreviewExportPpi(this.settings.diagramPreviewExportPpi);
         this.settings.globalModelAwareMaxTokensTracking = this.normalizeGlobalModelAwareMaxTokensTracking(
             this.settings.globalModelAwareMaxTokensTracking
         );

@@ -3,7 +3,11 @@ import { RenderArtifact } from '../types';
 import { RenderWebviewTheme } from '../theme';
 import { ensureSemanticFigureSvgStandaloneStyles } from '../renderers/editableHtmlSvgRenderer';
 import { renderJsonCanvasArtifactSvg } from './canvasPreview';
-import { renderMermaidArtifactSvg, MermaidPreviewDeps } from './mermaidPreview';
+import {
+    renderMermaidArtifactSvg,
+    renderMermaidArtifactSvgForRasterExport,
+    MermaidPreviewDeps
+} from './mermaidPreview';
 import { buildPdfFromRasterImage } from './pdfPreview';
 import {
     PreviewPngRasterDeps,
@@ -63,17 +67,78 @@ export function supportsPreviewSvgExport(artifact: RenderArtifact): boolean {
         || artifact.target === 'vega-lite';
 }
 
-export async function renderPreviewArtifactSvg(
+interface PreviewSvgCanvas {
+    innerMarkup: string;
+    width: number;
+    height: number;
+}
+
+function parseSvgNumber(value: string | undefined, fallback: number): number {
+    const parsed = Number.parseFloat(value ?? '');
+    return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
+}
+
+function parsePreviewSvgCanvas(svg: string): PreviewSvgCanvas {
+    const match = svg.match(/<svg\b([^>]*)>([\s\S]*?)<\/svg>/i);
+    if (!match) {
+        throw new Error('Preview renderer returned malformed SVG markup.');
+    }
+
+    const attributes = match[1] ?? '';
+    const viewBox = attributes.match(/\bviewBox\s*=\s*["']\s*[-+0-9.eE]+\s+[-+0-9.eE]+\s+([-+0-9.eE]+)\s+([-+0-9.eE]+)\s*["']/i);
+    const viewBoxWidth = parseSvgNumber(viewBox?.[1], 960);
+    const viewBoxHeight = parseSvgNumber(viewBox?.[2], 540);
+    return {
+        innerMarkup: match[2] ?? '',
+        width: viewBox ? viewBoxWidth : parseSvgNumber(attributes.match(/\bwidth\s*=\s*["']([^"']+)["']/i)?.[1], viewBoxWidth),
+        height: viewBox ? viewBoxHeight : parseSvgNumber(attributes.match(/\bheight\s*=\s*["']([^"']+)["']/i)?.[1], viewBoxHeight)
+    };
+}
+
+function composePreviewSvgCanvases(canvases: readonly PreviewSvgCanvas[]): string {
+    if (canvases.length === 0) {
+        throw new Error('No preview SVG canvases were produced.');
+    }
+
+    const gap = 32;
+    const width = Math.max(...canvases.map(canvas => canvas.width));
+    const height = canvases.reduce((total, canvas) => total + canvas.height, 0) + gap * (canvases.length - 1);
+    let offsetY = 0;
+    const groups = canvases.map(canvas => {
+        const group = `<g transform="translate(0 ${offsetY})">${canvas.innerMarkup}</g>`;
+        offsetY += canvas.height + gap;
+        return group;
+    }).join('');
+    return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" role="img">${groups}</svg>`;
+}
+
+type MermaidSvgRenderer = (
     artifact: RenderArtifact,
-    deps: PreviewSvgRenderDeps = {}
+    deps?: MermaidPreviewDeps,
+    theme?: RenderWebviewTheme
+) => Promise<string>;
+
+async function renderPreviewArtifactSvgWithRenderer(
+    artifact: RenderArtifact,
+    deps: PreviewSvgRenderDeps,
+    mermaidRenderer: MermaidSvgRenderer
 ): Promise<string> {
     if (artifact.previewSvg?.content?.trim()) {
         return ensureSemanticFigureSvgStandaloneStyles(artifact.previewSvg.content);
     }
 
+    if (artifact.previewPanels && artifact.previewPanels.length > 0) {
+        const panelSvgs: PreviewSvgCanvas[] = [];
+        for (const panel of artifact.previewPanels) {
+            const svg = await renderPreviewArtifactSvgWithRenderer(panel.artifact, deps, mermaidRenderer);
+            panelSvgs.push(parsePreviewSvgCanvas(svg));
+        }
+        return ensureSemanticFigureSvgStandaloneStyles(composePreviewSvgCanvases(panelSvgs));
+    }
+
     switch (artifact.target) {
         case 'mermaid':
-            return renderMermaidArtifactSvg(artifact, deps.mermaid, deps.theme);
+            return mermaidRenderer(artifact, deps.mermaid, deps.theme);
         case 'json-canvas':
             return renderJsonCanvasArtifactSvg(artifact, deps.theme);
         case 'vega-lite':
@@ -81,6 +146,20 @@ export async function renderPreviewArtifactSvg(
         default:
             throw new Error(`Preview SVG export is not supported for target "${artifact.target}".`);
     }
+}
+
+export async function renderPreviewArtifactSvg(
+    artifact: RenderArtifact,
+    deps: PreviewSvgRenderDeps = {}
+): Promise<string> {
+    return renderPreviewArtifactSvgWithRenderer(artifact, deps, renderMermaidArtifactSvg);
+}
+
+export async function renderPreviewArtifactSvgForRasterExport(
+    artifact: RenderArtifact,
+    deps: PreviewSvgRenderDeps = {}
+): Promise<string> {
+    return renderPreviewArtifactSvgWithRenderer(artifact, deps, renderMermaidArtifactSvgForRasterExport);
 }
 
 export function buildDiagramPreviewExportPath(sourcePath: string): string {
@@ -117,6 +196,60 @@ export function buildDiagramPreviewPdfExportPath(sourcePath: string): string {
         ? withoutExtension
         : `${withoutExtension}_preview`;
     return dir ? `${dir}/${normalizedBase}.pdf` : `${normalizedBase}.pdf`;
+}
+
+function normalizeVaultFolderPath(folderPath: string): string {
+    const trimmed = folderPath.trim().replace(/\\/g, '/');
+    if (trimmed.startsWith('//') || /^[a-zA-Z]:/.test(trimmed)) {
+        throw new Error(`Invalid Vault folder path: "${folderPath}".`);
+    }
+    const normalized = trimmed.replace(/^\/+|\/+$/g, '');
+    if (!normalized || normalized === '.') {
+        return '';
+    }
+    if (normalized.split('/').some(segment => !segment || segment === '.' || segment === '..' || segment.includes('\0'))) {
+        throw new Error(`Invalid Vault folder path: "${folderPath}".`);
+    }
+    return normalized;
+}
+
+function buildDiagramPreviewPanelExportPathInFolder(
+    sourcePath: string,
+    panelId: string,
+    extension: string,
+    folderPath: string
+): string {
+    const trimmedPath = sourcePath.trim().replace(/\/+$/, '');
+    const lastSlashIndex = trimmedPath.lastIndexOf('/');
+    const fileName = lastSlashIndex >= 0 ? trimmedPath.slice(lastSlashIndex + 1) : trimmedPath;
+    const withoutExtension = fileName.replace(/\.[^./]+$/, '');
+    const normalizedPanelId = panelId.trim().replace(/[^a-zA-Z0-9_-]+/g, '-').replace(/^-+|-+$/g, '') || 'panel';
+    const outputName = `${withoutExtension}_preview_${normalizedPanelId}.${extension}`;
+    const normalizedFolder = normalizeVaultFolderPath(folderPath);
+    return normalizedFolder ? `${normalizedFolder}/${outputName}` : outputName;
+}
+
+function buildDiagramPreviewPanelExportPath(sourcePath: string, panelId: string, extension: string): string {
+    const trimmedPath = sourcePath.trim().replace(/\/+$/, '');
+    const lastSlashIndex = trimmedPath.lastIndexOf('/');
+    const sourceFolder = lastSlashIndex >= 0 ? trimmedPath.slice(0, lastSlashIndex) : '';
+    return buildDiagramPreviewPanelExportPathInFolder(sourcePath, panelId, extension, sourceFolder);
+}
+
+export function buildDiagramPreviewPanelSvgExportPath(sourcePath: string, panelId: string): string {
+    return buildDiagramPreviewPanelExportPath(sourcePath, panelId, 'svg');
+}
+
+export function buildDiagramPreviewPanelSvgExportPathInFolder(sourcePath: string, panelId: string, folderPath: string): string {
+    return buildDiagramPreviewPanelExportPathInFolder(sourcePath, panelId, 'svg', folderPath);
+}
+
+export function buildDiagramPreviewPanelPngExportPath(sourcePath: string, panelId: string): string {
+    return buildDiagramPreviewPanelExportPath(sourcePath, panelId, 'png');
+}
+
+export function buildDiagramPreviewPanelPdfExportPath(sourcePath: string, panelId: string): string {
+    return buildDiagramPreviewPanelExportPath(sourcePath, panelId, 'pdf');
 }
 
 export function buildDiagramSourceArtifactPath(sourcePath: string, artifact: RenderArtifact): string {
@@ -156,7 +289,7 @@ export async function saveDiagramPreviewPng(
     deps: PreviewPngExportDeps = {}
 ): Promise<string> {
     const outputPath = buildDiagramPreviewPngExportPath(sourcePath);
-    const svg = await renderPreviewArtifactSvg(artifact, deps);
+    const svg = await renderPreviewArtifactSvgForRasterExport(artifact, deps);
     const png = await rasterizeSvgToPngArrayBuffer(svg, deps.pngRaster, {
         ppi: resolvePreviewExportPpi(deps.ppi)
     });
@@ -178,7 +311,7 @@ export async function saveDiagramPreviewPdf(
     deps: PreviewPdfExportDeps = {}
 ): Promise<string> {
     const outputPath = buildDiagramPreviewPdfExportPath(sourcePath);
-    const svg = await renderPreviewArtifactSvg(artifact, deps);
+    const svg = await renderPreviewArtifactSvgForRasterExport(artifact, deps);
     const raster = await rasterizeSvgToJpeg(svg, deps.raster, {
         ppi: resolvePreviewExportPpi(deps.ppi),
         backgroundColor: '#ffffff'
@@ -199,6 +332,94 @@ export async function saveDiagramPreviewPdf(
         await app.vault.createBinary(outputPath, pdf);
     }
 
+    return outputPath;
+}
+
+export async function saveDiagramPreviewPanelSvg(
+    app: App,
+    sourcePath: string,
+    panelId: string,
+    artifact: RenderArtifact,
+    deps: PreviewSvgRenderDeps = {}
+): Promise<string> {
+    const outputPath = buildDiagramPreviewPanelSvgExportPath(sourcePath, panelId);
+    const svg = await renderPreviewArtifactSvg(artifact, deps);
+    const existingFile = app.vault.getAbstractFileByPath(outputPath);
+    if (existingFile instanceof TFile) {
+        await app.vault.modify(existingFile, svg);
+    } else {
+        await app.vault.create(outputPath, svg);
+    }
+    return outputPath;
+}
+
+export async function saveDiagramPreviewPanelPng(
+    app: App,
+    sourcePath: string,
+    panelId: string,
+    artifact: RenderArtifact,
+    deps: PreviewPngExportDeps = {}
+): Promise<string> {
+    const outputPath = buildDiagramPreviewPanelPngExportPath(sourcePath, panelId);
+    const svg = await renderPreviewArtifactSvgForRasterExport(artifact, deps);
+    const png = await rasterizeSvgToPngArrayBuffer(svg, deps.pngRaster, {
+        ppi: resolvePreviewExportPpi(deps.ppi)
+    });
+    const existingFile = app.vault.getAbstractFileByPath(outputPath);
+    if (existingFile instanceof TFile) {
+        await app.vault.modifyBinary(existingFile, png);
+    } else {
+        await app.vault.createBinary(outputPath, png);
+    }
+    return outputPath;
+}
+
+export async function saveDiagramPreviewPanelPdf(
+    app: App,
+    sourcePath: string,
+    panelId: string,
+    artifact: RenderArtifact,
+    deps: PreviewPdfExportDeps = {}
+): Promise<string> {
+    const outputPath = buildDiagramPreviewPanelPdfExportPath(sourcePath, panelId);
+    const svg = await renderPreviewArtifactSvgForRasterExport(artifact, deps);
+    const raster = await rasterizeSvgToJpeg(svg, deps.raster, {
+        ppi: resolvePreviewExportPpi(deps.ppi),
+        backgroundColor: '#ffffff'
+    });
+    const pdf = buildPdfFromRasterImage({
+        imageData: raster.data,
+        imageMimeType: 'image/jpeg',
+        imageWidthPx: raster.imageWidthPx,
+        imageHeightPx: raster.imageHeightPx,
+        sourceWidthCssPx: raster.sourceWidthCssPx,
+        sourceHeightCssPx: raster.sourceHeightCssPx
+    });
+    const existingFile = app.vault.getAbstractFileByPath(outputPath);
+    if (existingFile instanceof TFile) {
+        await app.vault.modifyBinary(existingFile, pdf);
+    } else {
+        await app.vault.createBinary(outputPath, pdf);
+    }
+    return outputPath;
+}
+
+export async function saveDiagramPreviewPanelSvgToFolder(
+    app: App,
+    sourcePath: string,
+    panelId: string,
+    folderPath: string,
+    artifact: RenderArtifact,
+    deps: PreviewSvgRenderDeps = {}
+): Promise<string> {
+    const outputPath = buildDiagramPreviewPanelSvgExportPathInFolder(sourcePath, panelId, folderPath);
+    const svg = await renderPreviewArtifactSvg(artifact, deps);
+    const existingFile = app.vault.getAbstractFileByPath(outputPath);
+    if (existingFile instanceof TFile) {
+        await app.vault.modify(existingFile, svg);
+    } else {
+        await app.vault.create(outputPath, svg);
+    }
     return outputPath;
 }
 

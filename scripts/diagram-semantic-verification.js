@@ -629,7 +629,9 @@ function resolveRenderHostRuntimeConsumptionFacts({
 
         const mainCreatesIframeRenderHostSession = mainSource.includes('new IframeRenderHost().createSession(');
         const openPreviewDelegatesThroughModal = mainSource.includes('this.openDiagramPreviewModal(artifact, sourcePath, artifactSaved)');
-        const previewModalUsesIframeSrcdoc = previewModalSource.includes('iframe.srcdoc = this.session.htmlSrcdoc');
+        const previewModalUsesIframeSrcdoc = previewModalSource.includes('iframe.srcdoc =')
+            && previewModalSource.includes('createSession(artifact')
+            && previewModalSource.includes('.htmlSrcdoc');
         const pageUsesRenderArtifactMarkup = pageSource.includes('renderArtifactMarkup(payload)');
         const pageTreatsBridgeTargetsAsInlinePreviewable = pageSource.includes("payload.artifact.target === 'vega-lite' || payload.artifact.target === 'mermaid'")
             && pageSource.includes('ensureRenderHostBridge();');

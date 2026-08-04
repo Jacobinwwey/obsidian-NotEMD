@@ -2537,7 +2537,9 @@ export class NotemdSettingTab extends PluginSettingTab {
             .setDesc(experimentalDiagramI18n.exportPpiDesc)
             .addText(text => {
                 text.setPlaceholder(String(DEFAULT_PREVIEW_EXPORT_PPI))
-                    .setValue(String(this.plugin.settings.diagramPreviewExportPpi ?? DEFAULT_SETTINGS.diagramPreviewExportPpi))
+                    .setValue(String(resolvePreviewExportPpi(
+                        this.plugin.settings.diagramPreviewExportPpi ?? DEFAULT_SETTINGS.diagramPreviewExportPpi
+                    )))
                     .onChange(async (rawValue) => {
                         this.plugin.settings.diagramPreviewExportPpi = resolvePreviewExportPpi(rawValue);
                         await this.plugin.saveSettings();

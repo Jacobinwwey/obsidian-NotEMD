@@ -4,6 +4,26 @@ This document summarizes the major functional and architectural changes implemen
 
 ---
 
+## Unreleased
+
+### English
+
+- Fixed multi-panel diagram previews so every Mermaid fence and Drawnix source visual remains visible in source order.
+- Added per-panel SVG, PNG, and PDF export menus. The top-level export remains the primary/combined export, while individual outputs use deterministic `_preview_<panel-id>` names.
+- Made Drawnix image companions exportable by wrapping their binary data in a data-backed SVG, and kept the same behavior for immediate previews and history reopen.
+- Fixed preview PDF/PNG raster exports by using a Canvas-safe SVG boundary, including Mermaid `htmlLabels: false`, foreignObject-to-text conversion, and external-resource filtering.
+- Added a multi-panel SVG folder picker with source-folder and custom Vault-relative choices; panels export sequentially with a completion summary and per-panel failure isolation.
+
+### 中文
+
+- 修复多 panel 图形预览，按源文件顺序保留每个 Mermaid 代码块和 Drawnix 源图形。
+- 新增每个 panel 的 SVG、PNG、PDF 独立导出菜单。顶部导出仍表示主图/合并导出，逐图文件使用稳定的 `_preview_<panel-id>` 命名。
+- 将 Drawnix 图片 companion 的二进制内容包装为带 data URI 的 SVG，使其可导出，并让即时预览与历史重开保持一致。
+- 修复预览 PDF/PNG 光栅导出，通过 Canvas 安全的 SVG 边界处理 Mermaid `htmlLabels: false`、foreignObject 转 SVG 文本和外部资源过滤。
+- 新增多图 SVG 导出文件夹选择器，支持原文件夹或自定义 Vault 相对路径；按顺序逐图导出，汇总完成情况并隔离单图失败。
+
+---
+
 ## 1.9.4 - 2026-07-21
 
 ### English

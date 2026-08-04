@@ -3,6 +3,10 @@ import { formatI18n, getI18nStrings } from '../i18n';
 import {
     renderPreviewArtifactSvg,
     saveDiagramPreviewPdf,
+    saveDiagramPreviewPanelPdf,
+    saveDiagramPreviewPanelPng,
+    saveDiagramPreviewPanelSvg,
+    saveDiagramPreviewPanelSvgToFolder,
     saveDiagramPreviewPng,
     saveDiagramPreviewSvg,
     saveDiagramSourceArtifact,
@@ -10,6 +14,8 @@ import {
 } from '../rendering/preview/previewExport';
 import { resolvePreviewExportPpi } from '../rendering/preview/pngPreview';
 import { RenderPreviewSession } from '../rendering/host/renderHost';
+import { IframeRenderHost } from '../rendering/host/iframeRenderHost';
+import type { RenderArtifact } from '../rendering/types';
 import {
     supportsIframeHtmlPreview,
     supportsInlineCanvasPreview,
@@ -35,6 +41,7 @@ import {
     getBundledMermaidPreviewDeps,
     getBundledVegaLitePreviewDeps
 } from '../rendering/webview/bundledPreviewDeps';
+import { selectDiagramPreviewExportFolder } from './DiagramPreviewExportFolderModal';
 
 export class DiagramPreviewModal extends Modal {
     private session: RenderPreviewSession;
@@ -118,7 +125,7 @@ export class DiagramPreviewModal extends Modal {
                 return;
             }
 
-            clipboard.writeText(this.session.payload.artifact.content).then(() => {
+            clipboard.writeText(this.getCopySourceContent()).then(() => {
                 new Notice(i18n.previewModal.copySuccessNotice);
             }).catch((error) => {
                 new Notice(i18n.previewModal.copyFailedNotice);
@@ -181,8 +188,21 @@ export class DiagramPreviewModal extends Modal {
         menu.showAtMouseEvent(event);
     }
 
+    private showPanelExportMenu(event: MouseEvent, panel: NonNullable<RenderArtifact['previewPanels']>[number]): void {
+        const menu = new Menu();
+        menu.addItem(item => item.setTitle('SVG').setIcon('image').onClick(async () => this.exportPanelSvg(panel)));
+        menu.addItem(item => item.setTitle('PNG').setIcon('image').onClick(async () => this.exportPanelPng(panel)));
+        menu.addItem(item => item.setTitle('PDF').setIcon('file-text').onClick(async () => this.exportPanelPdf(panel)));
+        menu.showAtMouseEvent(event);
+    }
+
     private async exportSvg(): Promise<void> {
         const copy = getI18nStrings({ uiLocale: this.uiLocale }).previewModal;
+        const panels = this.session.payload.artifact.previewPanels;
+        if (panels && panels.length > 1) {
+            await this.exportPreviewPanelsAsSeparateSvgFiles(panels, copy);
+            return;
+        }
         try {
             const outputPath = await saveDiagramPreviewSvg(
                 this.app,
@@ -197,6 +217,57 @@ export class DiagramPreviewModal extends Modal {
             new Notice(formatI18n(copy.exportFailedNotice, { message }));
             console.error('Failed to export diagram preview SVG:', error);
         }
+    }
+
+    private async exportPreviewPanelsAsSeparateSvgFiles(
+        panels: NonNullable<RenderArtifact['previewPanels']>,
+        copy: ReturnType<typeof getI18nStrings>['previewModal']
+    ): Promise<void> {
+        const sourcePath = this.session.payload.sourcePath;
+        if (!sourcePath) {
+            return;
+        }
+
+        const folderPath = await selectDiagramPreviewExportFolder(this.app, sourcePath, this.uiLocale);
+        if (folderPath === null) {
+            return;
+        }
+
+        let successCount = 0;
+        const failures: string[] = [];
+        for (const panel of panels) {
+            try {
+                const outputPath = await saveDiagramPreviewPanelSvgToFolder(
+                    this.app,
+                    sourcePath,
+                    panel.id,
+                    folderPath,
+                    panel.artifact,
+                    this.createBundledPreviewRenderDeps()
+                );
+                await this.recordExportPath('svg', outputPath);
+                successCount += 1;
+            } catch (error) {
+                const message = error instanceof Error ? error.message : String(error);
+                failures.push(`${panel.id}: ${message}`);
+                console.error(`Failed to export diagram preview panel SVG (${panel.id}):`, error);
+            }
+        }
+
+        if (failures.length > 0) {
+            new Notice(formatI18n(copy.exportFolderBatchPartialNotice, {
+                success: successCount,
+                total: panels.length,
+                failures: failures.join('; ')
+            }));
+            return;
+        }
+
+        new Notice(formatI18n(copy.exportFolderBatchSuccessNotice, {
+            success: successCount,
+            total: panels.length,
+            path: folderPath || '/'
+        }));
     }
 
     private async exportPng(): Promise<void> {
@@ -232,6 +303,72 @@ export class DiagramPreviewModal extends Modal {
             const message = error instanceof Error ? error.message : String(error);
             new Notice(formatI18n(copy.exportPdfFailedNotice, { message }));
             console.error('Failed to export diagram preview PDF:', error);
+        }
+    }
+
+    private async exportPanelSvg(panel: NonNullable<RenderArtifact['previewPanels']>[number]): Promise<void> {
+        const copy = getI18nStrings({ uiLocale: this.uiLocale }).previewModal;
+        if (!this.session.payload.sourcePath) {
+            return;
+        }
+        try {
+            const outputPath = await saveDiagramPreviewPanelSvg(
+                this.app,
+                this.session.payload.sourcePath,
+                panel.id,
+                panel.artifact,
+                this.createBundledPreviewRenderDeps()
+            );
+            await this.recordExportPath('svg', outputPath);
+            new Notice(formatI18n(copy.exportSuccessNotice, { path: outputPath }));
+        } catch (error) {
+            const message = error instanceof Error ? error.message : String(error);
+            new Notice(formatI18n(copy.exportFailedNotice, { message }));
+            console.error('Failed to export diagram preview panel SVG:', error);
+        }
+    }
+
+    private async exportPanelPng(panel: NonNullable<RenderArtifact['previewPanels']>[number]): Promise<void> {
+        const copy = getI18nStrings({ uiLocale: this.uiLocale }).previewModal;
+        if (!this.session.payload.sourcePath) {
+            return;
+        }
+        try {
+            const outputPath = await saveDiagramPreviewPanelPng(
+                this.app,
+                this.session.payload.sourcePath,
+                panel.id,
+                panel.artifact,
+                { ...this.createBundledPreviewRenderDeps(), ppi: this.exportPpi }
+            );
+            await this.recordExportPath('png', outputPath);
+            new Notice(formatI18n(copy.exportPngSuccessNotice, { path: outputPath }));
+        } catch (error) {
+            const message = error instanceof Error ? error.message : String(error);
+            new Notice(formatI18n(copy.exportPngFailedNotice, { message }));
+            console.error('Failed to export diagram preview panel PNG:', error);
+        }
+    }
+
+    private async exportPanelPdf(panel: NonNullable<RenderArtifact['previewPanels']>[number]): Promise<void> {
+        const copy = getI18nStrings({ uiLocale: this.uiLocale }).previewModal;
+        if (!this.session.payload.sourcePath) {
+            return;
+        }
+        try {
+            const outputPath = await saveDiagramPreviewPanelPdf(
+                this.app,
+                this.session.payload.sourcePath,
+                panel.id,
+                panel.artifact,
+                { ...this.createBundledPreviewRenderDeps(), ppi: this.exportPpi }
+            );
+            await this.recordExportPath('pdf', outputPath);
+            new Notice(formatI18n(copy.exportPdfSuccessNotice, { path: outputPath }));
+        } catch (error) {
+            const message = error instanceof Error ? error.message : String(error);
+            new Notice(formatI18n(copy.exportPdfFailedNotice, { message }));
+            console.error('Failed to export diagram preview panel PDF:', error);
         }
     }
 
@@ -352,42 +489,78 @@ export class DiagramPreviewModal extends Modal {
     }
 
     private async renderPreview(container: HTMLElement): Promise<void> {
-        if (supportsInlineMermaidPreview(this.session.payload.artifact) || supportsInlineVegaLitePreview(this.session.payload.artifact)) {
-            this.renderIframePreview(container);
+        const panels = this.session.payload.artifact.previewPanels;
+        if (!panels || panels.length === 0) {
+            await this.renderArtifactPreview(container, this.session.payload.artifact);
             return;
         }
 
-        if (supportsInlineCanvasPreview(this.session.payload.artifact)) {
-            const rendered = await this.tryRenderCanvas(container);
-            if (rendered) {
-                return;
+        container.empty();
+        container.addClass('notemd-diagram-preview-panels');
+        const i18n = getI18nStrings({ uiLocale: this.uiLocale });
+        for (const [index, panel] of panels.entries()) {
+            const panelContainer = container.createDiv({
+                cls: 'notemd-diagram-preview-panel',
+                attr: { 'data-preview-panel-id': panel.id }
+            });
+            const panelHeader = panelContainer.createDiv({ cls: 'notemd-diagram-preview-panel-header' });
+            panelHeader.createEl('h4', {
+                text: panel.title ?? formatI18n(i18n.previewModal.panelTitle, {
+                    index: index + 1,
+                    total: panels.length
+                }),
+                cls: 'notemd-diagram-preview-panel-title'
+            });
+            if (this.session.payload.sourcePath && supportsPreviewSvgExport(panel.artifact)) {
+                const panelExportButton = panelHeader.createEl('button', {
+                    text: i18n.previewModal.exportMenu,
+                    cls: 'notemd-diagram-preview-panel-export',
+                    attr: { 'aria-haspopup': 'menu' }
+                });
+                panelExportButton.onclick = (event: MouseEvent) => this.showPanelExportMenu(event, panel);
             }
+            const panelBody = panelContainer.createDiv({ cls: 'notemd-diagram-preview-panel-body' });
+            await this.renderArtifactPreview(panelBody, panel.artifact);
         }
-
-        if (supportsIframeHtmlPreview(this.session.payload.artifact)) {
-            this.renderIframePreview(container);
-            return;
-        }
-
-        if (supportsPreviewSvgExport(this.session.payload.artifact)) {
-            const rendered = await this.tryRenderPreviewSvg(container);
-            if (rendered) {
-                return;
-            }
-        }
-
-        if (supportsSourceOnlyDiagramPreview(this.session.payload.artifact)) {
-            this.renderSourceOnlyPreview(container);
-            return;
-        }
-
-        this.renderIframePreview(container);
     }
 
-    private async tryRenderCanvas(container: HTMLElement): Promise<boolean> {
+    private async renderArtifactPreview(container: HTMLElement, artifact: RenderArtifact): Promise<void> {
+        if (supportsInlineMermaidPreview(artifact) || supportsInlineVegaLitePreview(artifact)) {
+            this.renderIframePreview(container, artifact);
+            return;
+        }
+
+        if (supportsInlineCanvasPreview(artifact)) {
+            const rendered = await this.tryRenderCanvas(container, artifact);
+            if (rendered) {
+                return;
+            }
+        }
+
+        if (supportsIframeHtmlPreview(artifact)) {
+            this.renderIframePreview(container, artifact);
+            return;
+        }
+
+        if (supportsPreviewSvgExport(artifact)) {
+            const rendered = await this.tryRenderPreviewSvg(container, artifact);
+            if (rendered) {
+                return;
+            }
+        }
+
+        if (supportsSourceOnlyDiagramPreview(artifact)) {
+            this.renderSourceOnlyPreview(container, artifact);
+            return;
+        }
+
+        this.renderIframePreview(container, artifact);
+    }
+
+    private async tryRenderCanvas(container: HTMLElement, artifact: RenderArtifact): Promise<boolean> {
         try {
             const svg = await renderPreviewArtifactSvg(
-                this.session.payload.artifact,
+                artifact,
                 this.createBundledPreviewRenderDeps()
             );
             container.empty();
@@ -400,10 +573,10 @@ export class DiagramPreviewModal extends Modal {
         }
     }
 
-    private async tryRenderPreviewSvg(container: HTMLElement): Promise<boolean> {
+    private async tryRenderPreviewSvg(container: HTMLElement, artifact: RenderArtifact): Promise<boolean> {
         try {
             const svg = await renderPreviewArtifactSvg(
-                this.session.payload.artifact,
+                artifact,
                 this.createBundledPreviewRenderDeps()
             );
             container.empty();
@@ -416,20 +589,25 @@ export class DiagramPreviewModal extends Modal {
         }
     }
 
-    private renderIframePreview(container: HTMLElement): void {
+    private renderIframePreview(container: HTMLElement, artifact: RenderArtifact): void {
         container.empty();
         const iframe = container.createEl('iframe', { cls: 'notemd-diagram-preview-frame' });
-        iframe.setAttribute('sandbox', this.getIframeSandboxPolicy());
+        iframe.setAttribute('sandbox', this.getIframeSandboxPolicy(artifact));
         iframe.setAttribute('referrerpolicy', 'no-referrer');
-        iframe.srcdoc = this.session.htmlSrcdoc;
+        iframe.srcdoc = new IframeRenderHost().createSession(artifact, {
+            theme: this.session.payload.theme,
+            sourcePath: this.session.payload.sourcePath,
+            artifactSaved: this.session.payload.artifactSaved,
+            previewTitle: this.session.payload.previewTitle
+        }).htmlSrcdoc;
     }
 
-    private renderSourceOnlyPreview(container: HTMLElement): void {
+    private renderSourceOnlyPreview(container: HTMLElement, artifact: RenderArtifact): void {
         container.empty();
         container.addClass('is-source-only');
         const sourceBlock = container.createEl('pre', { cls: 'notemd-diagram-preview-source-only' });
         sourceBlock.createEl('code', {
-            text: this.session.payload.artifact.content,
+            text: artifact.content,
             cls: 'notemd-diagram-preview-source-only-code'
         });
     }
@@ -442,10 +620,22 @@ export class DiagramPreviewModal extends Modal {
         };
     }
 
-    private getIframeSandboxPolicy(): string {
+    private getCopySourceContent(): string {
+        const artifact = this.session.payload.artifact;
+        const panels = artifact.previewPanels;
         if (
-            this.session.payload.artifact.target === 'vega-lite'
-            || this.session.payload.artifact.target === 'mermaid'
+            panels && panels.length > 0
+            && (artifact.target === 'mermaid' || artifact.target === 'vega-lite')
+        ) {
+            return panels.map(panel => panel.artifact.content.trim()).join('\n\n');
+        }
+        return artifact.content;
+    }
+
+    private getIframeSandboxPolicy(artifact: RenderArtifact): string {
+        if (
+            artifact.target === 'vega-lite'
+            || artifact.target === 'mermaid'
         ) {
             return 'allow-scripts allow-same-origin';
         }

@@ -989,6 +989,7 @@ export const STRINGS_ZH_CN: DeepPartial<NotemdEnglishStrings> = {
     },
     previewModal: {
         title: '{target} 预览',
+        panelTitle: '图形 {index}/{total}',
         exportMenu: '导出',
         copySource: '复制源码',
         copySuccessNotice: '图形源码已复制到剪贴板！',
@@ -1002,7 +1003,18 @@ export const STRINGS_ZH_CN: DeepPartial<NotemdEnglishStrings> = {
             warnings: '警告',
             info: '信息'
         },
-        diagnosticAdvice: '建议：{advice}'
+        diagnosticAdvice: '建议：{advice}',
+        exportFolderTitle: '将每张图分别导出为 SVG 文件',
+        exportFolderDescription: '选择 Vault 文件夹。每个预览 panel 都会写入独立的 SVG 文件。',
+        exportFolderDefaultOption: '原文件夹（{path}）',
+        exportFolderCustomOption: '自定义 Vault 文件夹',
+        exportFolderCustomPlaceholder: '例如 Exports/Architecture',
+        exportFolderConfirm: '导出 SVG 文件',
+        exportFolderCancel: '取消',
+        exportFolderInvalid: '请输入有效的 Vault 相对文件夹路径。',
+        exportFolderCreateFailed: '无法准备导出文件夹：{message}',
+        exportFolderBatchSuccessNotice: '已将 {success}/{total} 个 SVG 文件导出到 {path}',
+        exportFolderBatchPartialNotice: '已导出 {success}/{total} 个 SVG 文件。失败：{failures}。'
     },
     circuitikzEnvironment: {
         title: 'CircuitikZ 原生编译环境',

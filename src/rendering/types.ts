@@ -4,6 +4,21 @@ import { RenderWebviewTheme } from './theme';
 
 export type RenderArtifactTarget = RenderTarget | 'circuitikz' | 'drawio' | 'drawnix';
 
+export interface RenderArtifactPreviewPanelArtifact {
+    target: RenderArtifactTarget;
+    content: string;
+    mimeType: string;
+    sourceIntent: DiagramIntent;
+    diagnostics?: RenderArtifactDiagnostic[];
+    previewSvg?: RenderArtifactPreviewSvg;
+}
+
+export interface RenderArtifactPreviewPanel {
+    id: string;
+    title?: string;
+    artifact: RenderArtifactPreviewPanelArtifact;
+}
+
 export interface RenderArtifact {
     target: RenderArtifactTarget;
     content: string;
@@ -13,6 +28,11 @@ export interface RenderArtifact {
     previewSvg?: RenderArtifactPreviewSvg;
     companions?: RenderArtifactCompanion[];
     sourceVisualManifest?: RenderArtifactSourceVisualManifestEntry[];
+    /**
+     * Ordered visual panels let a single source document retain every
+     * renderable block without pretending that the source is one diagram.
+     */
+    previewPanels?: RenderArtifactPreviewPanel[];
 }
 
 export interface RenderArtifactCompanion {

@@ -18,6 +18,13 @@ export function buildMermaidPreviewConfig(theme: RenderWebviewTheme = 'system'):
     };
 }
 
+export function buildMermaidPreviewExportConfig(theme: RenderWebviewTheme = 'system'): Record<string, unknown> {
+    return {
+        ...buildMermaidPreviewConfig(theme),
+        htmlLabels: false
+    };
+}
+
 export function buildMermaidValidationConfig(): Record<string, unknown> {
     return {
         startOnLoad: false,
@@ -43,6 +50,21 @@ export async function renderNormalizedMermaidDefinitionSvgWithDeps(
     theme: RenderWebviewTheme = 'system'
 ): Promise<string> {
     deps.initialize(buildMermaidPreviewConfig(theme));
+    const result = await deps.render(createPreviewId(), definition);
+
+    if (!result || typeof result.svg !== 'string') {
+        throw new Error('Mermaid preview runtime did not return SVG markup.');
+    }
+
+    return result.svg;
+}
+
+export async function renderNormalizedMermaidDefinitionSvgForRasterExportWithDeps(
+    definition: string,
+    deps: MermaidPreviewDeps,
+    theme: RenderWebviewTheme = 'system'
+): Promise<string> {
+    deps.initialize(buildMermaidPreviewExportConfig(theme));
     const result = await deps.render(createPreviewId(), definition);
 
     if (!result || typeof result.svg !== 'string') {

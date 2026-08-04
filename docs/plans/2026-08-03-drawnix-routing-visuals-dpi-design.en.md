@@ -17,6 +17,8 @@ Drawnix knowledge maps may contain several top-level roots. Cross-root relations
 - The command host resolves vault-relative images through binary reads. Drawnix emits source Mermaid Markdown, rendered/safe SVG, image binaries, and a JSON manifest as validated companions. Unresolved references remain in the manifest with diagnostics.
 - Render cache keys include the resolved visual manifest hash.
 - Preview rasterization accepts any integer from 72 through 600 DPI, with 300 as the default and 100/300/600 exposed as common presets in the settings hint. Out-of-range values are clamped. PNG `pHYs` metadata and PDF raster dimensions use the normalized value; SVG and Drawnix geometry remain DPI-independent.
+- PNG/PDF preview rasterization crosses a Canvas-safe SVG boundary: Mermaid exports disable HTML labels, foreignObject labels are converted to SVG text, and non-data external resources are removed. Source SVG exports remain untouched and vector-based.
+- When a preview contains multiple panels, the top-level SVG action asks for the source folder or a custom Vault-relative folder, then writes one deterministic SVG per panel in order and reports isolated failures.
 
 ## Hardening Increment
 

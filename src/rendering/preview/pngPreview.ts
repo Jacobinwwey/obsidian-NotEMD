@@ -243,6 +243,204 @@ export function resolveSvgDimensions(svg: string): SvgDimensions {
     return { width: 1600, height: 900 };
 }
 
+const SVG_NAMESPACE = 'http://www.w3.org/2000/svg';
+const BLOCK_TEXT_TAGS = new Set(['article', 'div', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'li', 'p', 'section']);
+
+function escapeXmlText(value: string): string {
+    return value
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&apos;');
+}
+
+function parseSvgAttributeNumber(attributes: string, name: string): number | null {
+    const match = attributes.match(new RegExp(`\\b${name}\\s*=\\s*["']([^"']+)["']`, 'i'));
+    const parsed = parseLength(match?.[1]);
+    return parsed !== null && parsed >= 0 ? parsed : null;
+}
+
+function isRasterSafeResourceReference(value: string): boolean {
+    const normalized = value.trim().toLowerCase();
+    return normalized.startsWith('#')
+        || (normalized.startsWith('data:image/') && !normalized.startsWith('data:image/svg+xml'))
+        || normalized.startsWith('blob:');
+}
+
+function buildRasterFallbackText(attributes: string, rawContent: string): string {
+    const textContent = rawContent
+        .replace(/<br\s*\/?>/gi, '\n')
+        .replace(/<[^>]*>/g, ' ')
+        .replace(/&nbsp;/gi, ' ')
+        .replace(/&amp;/gi, '&')
+        .replace(/&lt;/gi, '<')
+        .replace(/&gt;/gi, '>')
+        .replace(/&quot;/gi, '"')
+        .replace(/&apos;/gi, "'")
+        .replace(/[ \t\f\r]+/g, ' ')
+        .split(/\n+/)
+        .map(line => line.trim())
+        .filter(Boolean);
+    if (textContent.length === 0) {
+        return '';
+    }
+
+    const width = parseSvgAttributeNumber(attributes, 'width') ?? 0;
+    const height = parseSvgAttributeNumber(attributes, 'height') ?? 0;
+    const x = parseSvgAttributeNumber(attributes, 'x') ?? width / 2;
+    const y = parseSvgAttributeNumber(attributes, 'y') ?? height / 2;
+    const escapedLines = textContent.map(line => escapeXmlText(line));
+    if (escapedLines.length === 1) {
+        return `<text x="${x}" y="${y}" text-anchor="middle" dominant-baseline="middle" data-notemd-raster-fallback="foreign-object">${escapedLines[0]}</text>`;
+    }
+
+    const lineHeight = Math.max(14, Math.min(24, height > 0 ? height / escapedLines.length : 18));
+    const tspans = escapedLines.map((line, index) => `<tspan x="${x}" dy="${index === 0 ? 0 : lineHeight}">${line}</tspan>`).join('');
+    return `<text x="${x}" y="${y - (escapedLines.length - 1) * lineHeight / 2}" text-anchor="middle" dominant-baseline="middle" data-notemd-raster-fallback="foreign-object">${tspans}</text>`;
+}
+
+function sanitizeSvgMarkupFallback(svg: string): string {
+    let sanitized = svg.replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, '');
+    sanitized = sanitized.replace(/<foreignObject\b([^>]*)>([\s\S]*?)<\/foreignObject>/gi, (_match, attributes: string, content: string) => {
+        return buildRasterFallbackText(attributes, content);
+    });
+    sanitized = sanitized.replace(/<image\b([^>]*?)(?:\/?>[\s\S]*?<\/image>|\/?>)/gi, (match: string, attributes: string) => {
+        const reference = attributes.match(/(?:xlink:)?href\s*=\s*["']([^"']+)["']/i)?.[1];
+        return reference && isRasterSafeResourceReference(reference) ? match : '';
+    });
+    sanitized = sanitized.replace(/<use\b([^>]*?)(?:\/?>[\s\S]*?<\/use>|\/?>)/gi, (match: string, attributes: string) => {
+        const reference = attributes.match(/(?:xlink:)?href\s*=\s*["']([^"']+)["']/i)?.[1];
+        return reference && isRasterSafeResourceReference(reference) ? match : '';
+    });
+    sanitized = sanitized.replace(/\s+(?:xlink:)?href\s*=\s*(["'])(?!#|data:image\/(?!svg\+xml)|blob:)[^"']*\1/gi, '');
+    sanitized = sanitized.replace(/url\(\s*(["']?)(?!#|data:|blob:)[^)]*\1\s*\)/gi, 'none');
+    sanitized = sanitized.replace(/@import[^;]+;/gi, '');
+    return sanitized;
+}
+
+function collectForeignObjectTextLines(root: Node): string[] {
+    const lines: string[] = [];
+    let current = '';
+    const flush = () => {
+        const normalized = current.replace(/[ \t\f\r]+/g, ' ').trim();
+        if (normalized) {
+            lines.push(normalized);
+        }
+        current = '';
+    };
+    const visit = (node: Node): void => {
+        if (node.nodeType === 3) {
+            current += node.nodeValue ?? '';
+            return;
+        }
+        if (node.nodeType !== 1) {
+            return;
+        }
+        const element = node as Element;
+        const tagName = element.tagName.toLowerCase();
+        if (tagName === 'br') {
+            flush();
+            return;
+        }
+        const isBlock = BLOCK_TEXT_TAGS.has(tagName);
+        if (isBlock && current.trim()) {
+            flush();
+        }
+        for (const child of Array.from(element.childNodes)) {
+            visit(child);
+        }
+        if (isBlock) {
+            flush();
+        }
+    };
+    for (const child of Array.from(root.childNodes)) {
+        visit(child);
+    }
+    flush();
+    return lines;
+}
+
+function sanitizeSvgDocument(svg: string): string | null {
+    if (typeof DOMParser === 'undefined' || typeof XMLSerializer === 'undefined') {
+        return null;
+    }
+
+    const document = new DOMParser().parseFromString(svg, 'image/svg+xml');
+    const root = document.documentElement;
+    if (!root || root.tagName.toLowerCase() !== 'svg' || root.querySelector('parsererror')) {
+        return null;
+    }
+
+    for (const script of Array.from(root.querySelectorAll('script'))) {
+        script.remove();
+    }
+
+    for (const foreignObject of Array.from(root.getElementsByTagName('foreignObject'))) {
+        const lines = collectForeignObjectTextLines(foreignObject);
+        if (lines.length === 0) {
+            foreignObject.remove();
+            continue;
+        }
+        const width = parseLength(foreignObject.getAttribute('width') ?? '') ?? 0;
+        const height = parseLength(foreignObject.getAttribute('height') ?? '') ?? 0;
+        const x = parseLength(foreignObject.getAttribute('x') ?? '') ?? width / 2;
+        const y = parseLength(foreignObject.getAttribute('y') ?? '') ?? height / 2;
+        const textElement = document.createElementNS(SVG_NAMESPACE, 'text');
+        textElement.setAttribute('x', String(x));
+        textElement.setAttribute('y', String(y));
+        textElement.setAttribute('text-anchor', 'middle');
+        textElement.setAttribute('dominant-baseline', 'middle');
+        textElement.setAttribute('data-notemd-raster-fallback', 'foreign-object');
+        if (lines.length === 1) {
+            textElement.textContent = lines[0];
+        } else {
+            const lineHeight = Math.max(14, Math.min(24, height > 0 ? height / lines.length : 18));
+            textElement.setAttribute('y', String(y - (lines.length - 1) * lineHeight / 2));
+            lines.forEach((line, index) => {
+                const tspan = document.createElementNS(SVG_NAMESPACE, 'tspan');
+                tspan.setAttribute('x', String(x));
+                tspan.setAttribute('dy', String(index === 0 ? 0 : lineHeight));
+                tspan.textContent = line;
+                textElement.appendChild(tspan);
+            });
+        }
+        foreignObject.parentNode?.replaceChild(textElement, foreignObject);
+    }
+
+    for (const element of Array.from(root.querySelectorAll('*'))) {
+        const reference = element.getAttribute('href')
+            ?? element.getAttribute('xlink:href')
+            ?? element.getAttributeNS('http://www.w3.org/1999/xlink', 'href');
+        if (!reference || isRasterSafeResourceReference(reference)) {
+            continue;
+        }
+        if (element.tagName.toLowerCase() === 'image' || element.tagName.toLowerCase() === 'use') {
+            element.remove();
+        } else {
+            element.removeAttribute('href');
+            element.removeAttribute('xlink:href');
+        }
+    }
+
+    for (const element of Array.from(root.querySelectorAll('[style]'))) {
+        const style = element.getAttribute('style') ?? '';
+        element.setAttribute('style', style.replace(/url\(\s*(["']?)(?!#|data:|blob:)[^)]*\1\s*\)/gi, 'none'));
+    }
+    for (const styleElement of Array.from(root.querySelectorAll('style'))) {
+        styleElement.textContent = (styleElement.textContent ?? '')
+            .replace(/@import[^;]+;/gi, '')
+            .replace(/url\(\s*(["']?)(?!#|data:|blob:)[^)]*\1\s*\)/gi, 'none');
+    }
+
+    return new XMLSerializer().serializeToString(root);
+}
+
+export function sanitizeSvgForRasterExport(svg: string): string {
+    const documentMarkup = sanitizeSvgDocument(svg);
+    return documentMarkup ?? sanitizeSvgMarkupFallback(svg);
+}
+
 function createDefaultPngRasterDeps(): PreviewPngRasterDeps {
     return {
         createBlob: (parts, options) => new Blob(parts, options),
@@ -284,7 +482,8 @@ export async function rasterizeSvgToImageArrayBuffer(
     const ppi = resolvePreviewExportPpi(options.ppi);
     const scale = resolveRasterScale(ppi);
     const mimeType = options.mimeType ?? 'image/png';
-    const blob = deps.createBlob([svg], { type: 'image/svg+xml;charset=utf-8' });
+    const rasterSvg = sanitizeSvgForRasterExport(svg);
+    const blob = deps.createBlob([rasterSvg], { type: 'image/svg+xml;charset=utf-8' });
     const objectUrl = deps.createObjectURL(blob);
     const imageWidthPx = Math.max(1, Math.ceil(dimensions.width * scale));
     const imageHeightPx = Math.max(1, Math.ceil(dimensions.height * scale));

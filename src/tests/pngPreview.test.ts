@@ -6,7 +6,8 @@ import {
     rasterizeSvgToPngArrayBuffer,
     resolvePngPixelsPerMeter,
     resolvePreviewExportPpi,
-    resolveSvgDimensions
+    resolveSvgDimensions,
+    sanitizeSvgForRasterExport
 } from '../rendering/preview/pngPreview';
 
 const PNG_SIGNATURE = new Uint8Array([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
@@ -82,6 +83,24 @@ function readUint32(data: Uint8Array, offset: number): number {
 }
 
 describe('png preview rasterizer', () => {
+    test('sanitizes foreignObject labels and external image references before rasterization', () => {
+        const safeSvg = sanitizeSvgForRasterExport(`
+            <svg xmlns="http://www.w3.org/2000/svg" width="240" height="120">
+                <foreignObject x="0" y="0" width="240" height="40">
+                    <div xmlns="http://www.w3.org/1999/xhtml">Architecture label</div>
+                </foreignObject>
+                <image href="https://example.com/remote.png" x="0" y="40" width="20" height="20" />
+                <image href="data:image/png;base64,AAAA" x="20" y="40" width="20" height="20" />
+            </svg>
+        `);
+
+        expect(safeSvg).not.toContain('<foreignObject');
+        expect(safeSvg).toContain('Architecture label');
+        expect(safeSvg).toContain('<text');
+        expect(safeSvg).not.toContain('https://example.com/remote.png');
+        expect(safeSvg).toContain('data:image/png;base64,AAAA');
+    });
+
     test('uses width and height attributes when present', () => {
         expect(resolveSvgDimensions('<svg width="640" height="360"></svg>')).toEqual({ width: 640, height: 360 });
     });
@@ -159,5 +178,38 @@ describe('png preview rasterizer', () => {
         expect(drawImage).toHaveBeenCalled();
         expect(blobToArrayBuffer).toHaveBeenCalled();
         expect(revokeObjectURL).toHaveBeenCalledWith('blob:mock');
+    });
+
+    test('passes raster-safe svg markup to the image blob boundary', async () => {
+        const createBlob = jest.fn((parts: BlobPart[], options?: BlobPropertyBag) => new Blob(parts, options));
+        const image = {
+            onload: null as null | (() => void),
+            onerror: null as null | ((event?: unknown) => void),
+            set src(_value: string) {
+                this.onload?.();
+            }
+        };
+
+        await rasterizeSvgToPngArrayBuffer(`
+            <svg width="100" height="50">
+                <foreignObject width="100" height="50"><div xmlns="http://www.w3.org/1999/xhtml">Label</div></foreignObject>
+            </svg>
+        `, {
+            createBlob,
+            createImage: () => image,
+            createCanvas: () => ({
+                width: 100,
+                height: 50,
+                getContext: () => ({ scale: jest.fn(), drawImage: jest.fn() }),
+                toBlob: (callback: (blob: Blob | null) => void) => callback(new Blob(['png'], { type: 'image/png' }))
+            }),
+            createObjectURL: () => 'blob:safe',
+            revokeObjectURL: jest.fn(),
+            blobToArrayBuffer: async () => buildMinimalPng()
+        });
+
+        const svgBlobMarkup = String(createBlob.mock.calls[0][0][0]);
+        expect(svgBlobMarkup).not.toContain('<foreignObject');
+        expect(svgBlobMarkup).toContain('Label');
     });
 });

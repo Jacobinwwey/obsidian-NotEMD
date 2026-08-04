@@ -3,7 +3,7 @@ import { formatI18n } from '../i18n';
 import { DiagramGenerationResult } from '../diagram/diagramGenerationService';
 import { DiagramIntent, isSupportedDiagramIntent, RenderTarget } from '../diagram/types';
 import { LocalKnowledgeRetrievalSummary } from '../localKnowledgeBase';
-import { RenderArtifact } from '../rendering/types';
+import { RenderArtifact, RenderArtifactCompanion, RenderArtifactPreviewPanel } from '../rendering/types';
 import { ensureSemanticFigureSvgStandaloneStyles } from '../rendering/renderers/editableHtmlSvgRenderer';
 import { DiagramOperationInput, DiagramOperationExecutionMode, buildDiagramOperationInput } from '../diagram/diagramGenerationService';
 import { isSupportedInputFileForTask } from '../inputFileSupport';
@@ -254,10 +254,16 @@ export async function completeArtifactDiagramCommand(
     }
 
     if (params.executionMode === 'preview-artifact') {
+        const previewArtifact = await attachCompanionVisualPreviews({
+            host: params.host,
+            artifact: params.result.artifact,
+            sourcePath: params.file.path,
+            companions: params.result.artifact.companions
+        });
         params.reporter.log(
             `Diagram preview produced target "${params.result.artifact.target}" with intent "${params.result.spec.intent}".`
         );
-        params.host.openPreview(params.result.artifact, params.file.path, false);
+        params.host.openPreview(previewArtifact, params.file.path, false);
         params.reporter.updateStatus(params.getActionCompleteText(params.actionLabel), 100);
         params.reporter.log(`Diagram preview opened for: ${params.file.path}`);
         params.host.notify(params.previewReadyNotice);
@@ -400,6 +406,20 @@ function buildHtmlPreviewArtifact(htmlContent: string): RenderArtifact {
     };
 }
 
+function buildPreviewPanel(id: string, artifact: RenderArtifact): RenderArtifactPreviewPanel {
+    return {
+        id,
+        artifact: {
+            target: artifact.target,
+            content: artifact.content,
+            mimeType: artifact.mimeType,
+            sourceIntent: artifact.sourceIntent,
+            diagnostics: artifact.diagnostics,
+            previewSvg: artifact.previewSvg
+        }
+    };
+}
+
 function looksLikeSvgSource(sourceContent: string): boolean {
     return /<svg\b[\s\S]*<\/svg>/i.test(sourceContent);
 }
@@ -497,6 +517,7 @@ interface DirectPreviewArtifactResult {
     artifact: RenderArtifact;
     artifactSaved: boolean;
     detectionLabel: string;
+    sourcePath?: string;
 }
 
 function collectMarkdownFenceMatches(
@@ -522,18 +543,40 @@ function extractDirectPreviewArtifactFromMarkdown(sourceMarkdown: string): Direc
         return null;
     }
 
-    if (firstFence.kind === 'mermaid') {
+    // Mermaid is the only markdown artifact that can be safely represented as
+    // an ordered multi-panel source. Keep the legacy first-fence behavior for
+    // Vega-Lite and mixed documents so a saved JSON artifact is never made
+    // invalid by concatenating unrelated fence types.
+    const previewFences = firstFence.kind === 'mermaid'
+        ? fenceMatches.filter(fence => fence.kind === 'mermaid')
+        : [firstFence];
+    const fenceArtifacts = previewFences.map((fence, index) => {
+        const artifact = fence.kind === 'mermaid'
+            ? buildMermaidPreviewArtifact(fence.content)
+            : buildVegaLitePreviewArtifact(fence.content);
         return {
-            artifact: buildMermaidPreviewArtifact(firstFence.content),
+            artifact,
+            panelId: `${fence.kind}-${index + 1}`
+        };
+    });
+    const firstArtifact = fenceArtifacts[0].artifact;
+
+    if (fenceArtifacts.length === 1) {
+        return {
+            artifact: firstArtifact,
             artifactSaved: false,
-            detectionLabel: 'Mermaid markdown fence'
+            detectionLabel: `${firstFence.kind === 'mermaid' ? 'Mermaid' : 'Vega-Lite'} markdown fence`
         };
     }
 
     return {
-        artifact: buildVegaLitePreviewArtifact(firstFence.content),
+        artifact: {
+            ...firstArtifact,
+            content: fenceArtifacts.map(({ artifact }) => artifact.content).join('\n\n'),
+            previewPanels: fenceArtifacts.map(({ artifact, panelId }) => buildPreviewPanel(panelId, artifact))
+        },
         artifactSaved: false,
-        detectionLabel: 'Vega-Lite markdown fence'
+        detectionLabel: `${fenceArtifacts.length} markdown diagram fences`
     };
 }
 
@@ -638,17 +681,16 @@ function resolveDirectPreviewArtifact(sourceContent: string, sourcePath: string)
 }
 
 function previewArtifactFromFile(params: {
-    host: Pick<DiagramCommandHostAdapter, 'openPreview'>;
     sourceContent: string;
     sourcePath: string;
     artifactSavedOverride?: boolean;
 }): DirectPreviewArtifactResult {
     const directPreview = resolveDirectPreviewArtifact(params.sourceContent, params.sourcePath);
     const artifactSaved = params.artifactSavedOverride ?? directPreview.artifactSaved;
-    params.host.openPreview(directPreview.artifact, params.sourcePath, artifactSaved);
     return {
         ...directPreview,
-        artifactSaved
+        artifactSaved,
+        sourcePath: params.sourcePath
     };
 }
 
@@ -751,6 +793,219 @@ async function readVaultTextFile(
     return host.readFile(file);
 }
 
+async function readVaultBinaryFile(
+    host: Pick<DiagramCommandHostAdapter, 'getFileByPath' | 'readBinary'>,
+    path: string
+): Promise<ArrayBuffer | null> {
+    if (typeof host.readBinary !== 'function') {
+        return null;
+    }
+
+    const file = host.getFileByPath(path);
+    if (!(file instanceof TFile || file)) {
+        return null;
+    }
+
+    return host.readBinary(file);
+}
+
+function buildVaultPathCandidates(sourcePath: string, companionPath: string): string[] {
+    const normalized = companionPath.trim().replace(/\\/g, '/').replace(/^\/+/, '');
+    if (!normalized || normalized.split('/').some(segment => segment === '..' || segment === '.')) {
+        return [];
+    }
+
+    const sourceDirectory = getVaultPathDirectory(sourcePath);
+    return Array.from(new Set([
+        normalized,
+        sourceDirectory ? joinVaultPath(sourceDirectory, normalized) : normalized
+    ]));
+}
+
+async function readFirstVaultTextFile(
+    host: Pick<DiagramCommandHostAdapter, 'getFileByPath' | 'readFile'>,
+    sourcePath: string,
+    companionPath: string
+): Promise<{ path: string; content: string } | null> {
+    for (const candidate of buildVaultPathCandidates(sourcePath, companionPath)) {
+        const content = await readVaultTextFile(host, candidate);
+        if (content !== null) {
+            return { path: candidate, content };
+        }
+    }
+    return null;
+}
+
+async function readFirstVaultBinaryFile(
+    host: Pick<DiagramCommandHostAdapter, 'getFileByPath' | 'readBinary'>,
+    sourcePath: string,
+    companionPath: string
+): Promise<{ path: string; content: ArrayBuffer } | null> {
+    for (const candidate of buildVaultPathCandidates(sourcePath, companionPath)) {
+        const content = await readVaultBinaryFile(host, candidate);
+        if (content !== null) {
+            return { path: candidate, content };
+        }
+    }
+    return null;
+}
+
+interface DrawnixSourceVisualPreviewMetadata {
+    id: string;
+    kind: 'mermaid' | 'image';
+    companionPaths: string[];
+}
+
+function parseDrawnixSourceVisualPreviewMetadata(content: string): DrawnixSourceVisualPreviewMetadata[] {
+    try {
+        const parsed = JSON.parse(content) as unknown;
+        if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
+            return [];
+        }
+        const metadata = (parsed as Record<string, unknown>).metadata;
+        const notemd = metadata && typeof metadata === 'object' && !Array.isArray(metadata)
+            ? (metadata as Record<string, unknown>).notemd
+            : undefined;
+        const sourceVisuals = notemd && typeof notemd === 'object' && !Array.isArray(notemd)
+            ? (notemd as Record<string, unknown>).sourceVisuals
+            : undefined;
+        if (!Array.isArray(sourceVisuals)) {
+            return [];
+        }
+
+        return sourceVisuals.flatMap((visual): DrawnixSourceVisualPreviewMetadata[] => {
+            if (!visual || typeof visual !== 'object' || Array.isArray(visual)) {
+                return [];
+            }
+            const candidate = visual as Record<string, unknown>;
+            const id = typeof candidate.id === 'string' ? candidate.id.trim() : '';
+            const kind = candidate.kind === 'mermaid' || candidate.kind === 'image' ? candidate.kind : null;
+            const companionPaths = Array.isArray(candidate.companionPaths)
+                ? candidate.companionPaths.filter((path): path is string => typeof path === 'string' && path.trim().length > 0)
+                : [];
+            return id && kind && companionPaths.length > 0 ? [{ id, kind, companionPaths }] : [];
+        });
+    } catch {
+        return [];
+    }
+}
+
+function arrayBufferToBase64(content: ArrayBuffer): string {
+    const bytes = new Uint8Array(content);
+    let binary = '';
+    const chunkSize = 0x8000;
+    for (let offset = 0; offset < bytes.length; offset += chunkSize) {
+        binary += String.fromCharCode(...bytes.subarray(offset, offset + chunkSize));
+    }
+    if (typeof btoa !== 'function') {
+        throw new Error('Binary preview encoding is unavailable in this host.');
+    }
+    return btoa(binary);
+}
+
+function buildDrawnixImagePreviewArtifact(content: ArrayBuffer, mimeType: string): RenderArtifact {
+    const dataUri = `data:${mimeType};base64,${arrayBufferToBase64(content)}`;
+    // A data-backed SVG keeps raster companions on the same per-panel export path as Mermaid and SVG companions.
+    const previewSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="960" height="540" viewBox="0 0 960 540" role="img"><rect width="960" height="540" fill="#ffffff"/><image href="${dataUri}" x="0" y="0" width="960" height="540" preserveAspectRatio="xMidYMid meet"/></svg>`;
+    return {
+        target: 'html',
+        content: `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"></head><body style="margin:0;padding:16px;background:Canvas;color:CanvasText"><img src="${dataUri}" alt="Drawnix source visual" style="display:block;max-width:100%;height:auto;margin:0 auto"></body></html>`,
+        mimeType: 'text/html',
+        sourceIntent: 'flowchart',
+        previewSvg: {
+            content: previewSvg,
+            mimeType: 'image/svg+xml'
+        }
+    };
+}
+
+function inferCompanionMimeType(path: string): string | null {
+    const extension = path.split('.').pop()?.toLowerCase();
+    switch (extension) {
+        case 'svg': return 'image/svg+xml';
+        case 'png': return 'image/png';
+        case 'jpg':
+        case 'jpeg': return 'image/jpeg';
+        case 'gif': return 'image/gif';
+        case 'webp': return 'image/webp';
+        case 'bmp': return 'image/bmp';
+        default: return null;
+    }
+}
+
+async function buildDrawnixSourceVisualPreviewPanels(params: {
+    host: Pick<DiagramCommandHostAdapter, 'getFileByPath' | 'readFile' | 'readBinary'>;
+    artifact: RenderArtifact;
+    sourcePath: string;
+    companions?: readonly RenderArtifactCompanion[];
+}): Promise<RenderArtifactPreviewPanel[]> {
+    const metadata = parseDrawnixSourceVisualPreviewMetadata(params.artifact.content);
+    if (metadata.length === 0) {
+        return [];
+    }
+
+    const panels: RenderArtifactPreviewPanel[] = [];
+    if (params.artifact.previewSvg?.content?.trim()) {
+        panels.push({
+            id: 'drawnix-primary',
+            artifact: {
+                target: params.artifact.target,
+                content: params.artifact.content,
+                mimeType: params.artifact.mimeType,
+                sourceIntent: params.artifact.sourceIntent,
+                previewSvg: params.artifact.previewSvg
+            }
+        });
+    }
+
+    const normalizeMemoryCompanionPath = (path: string): string =>
+        path.trim().replace(/\\/g, '/').replace(/^\/+/, '');
+    const companionByPath = new Map(
+        (params.companions ?? []).map(companion => [normalizeMemoryCompanionPath(companion.path), companion] as const)
+    );
+    const findMemoryCompanion = (path: string): RenderArtifactCompanion | undefined => {
+        return companionByPath.get(normalizeMemoryCompanionPath(path));
+    };
+
+    for (const visual of metadata) {
+        const svgPath = visual.companionPaths.find(path => inferCompanionMimeType(path) === 'image/svg+xml');
+        if (svgPath) {
+            const memorySvg = findMemoryCompanion(svgPath);
+            const svg = memorySvg && typeof memorySvg.content === 'string'
+                ? { path: memorySvg.path, content: memorySvg.content }
+                : await readFirstVaultTextFile(params.host, params.sourcePath, svgPath).catch(() => null);
+            if (svg?.content && looksLikeSvgSource(svg.content)) {
+                panels.push({
+                    id: visual.id,
+                    artifact: buildSvgHtmlPreviewArtifact(svg.content)
+                });
+                continue;
+            }
+        }
+
+        const imagePath = visual.companionPaths.find(path => inferCompanionMimeType(path) && inferCompanionMimeType(path) !== 'image/svg+xml');
+        const imageMimeType = imagePath ? inferCompanionMimeType(imagePath) : null;
+        if (imagePath && imageMimeType) {
+            const memoryImage = findMemoryCompanion(imagePath);
+            const image = memoryImage && memoryImage.content instanceof ArrayBuffer
+                ? { path: memoryImage.path, content: memoryImage.content }
+                : await readFirstVaultBinaryFile(params.host, params.sourcePath, imagePath).catch(() => null);
+            if (image) {
+                try {
+                    panels.push({
+                        id: visual.id,
+                        artifact: buildDrawnixImagePreviewArtifact(image.content, imageMimeType)
+                    });
+                } catch {
+                    // Keep the source visual in metadata when the host cannot encode binary data.
+                }
+            }
+        }
+    }
+
+    return panels;
+}
+
 async function tryBuildSvgWrapperPreview(params: {
     host: Pick<DiagramCommandHostAdapter, 'getFileByPath' | 'readFile'>;
     sourceContent: string;
@@ -829,10 +1084,36 @@ async function attachCompanionSvgPreview(params: {
     };
 }
 
+async function attachCompanionVisualPreviews(params: {
+    host: Pick<DiagramCommandHostAdapter, 'getFileByPath' | 'readFile' | 'readBinary'>;
+    artifact: RenderArtifact;
+    sourcePath: string;
+    companions?: readonly RenderArtifactCompanion[];
+}): Promise<RenderArtifact> {
+    const artifactWithPrimarySvg = await attachCompanionSvgPreview(params);
+    if (artifactWithPrimarySvg.previewPanels && artifactWithPrimarySvg.previewPanels.length > 0) {
+        return artifactWithPrimarySvg;
+    }
+    if (artifactWithPrimarySvg.target !== 'drawnix') {
+        return artifactWithPrimarySvg;
+    }
+
+    const previewPanels = await buildDrawnixSourceVisualPreviewPanels({
+        host: params.host,
+        artifact: artifactWithPrimarySvg,
+        sourcePath: params.sourcePath,
+        companions: params.companions
+    });
+    return previewPanels.length > 0
+        ? { ...artifactWithPrimarySvg, previewPanels }
+        : artifactWithPrimarySvg;
+}
+
 export async function previewArtifactFromSavedPath(params: {
-    host: Pick<DiagramCommandHostAdapter, 'getFileByPath' | 'readFile' | 'openPreview'>;
+    host: Pick<DiagramCommandHostAdapter, 'getFileByPath' | 'readFile' | 'readBinary' | 'openPreview'>;
     sourcePath: string;
     artifactSavedOverride?: boolean;
+    openPreview?: boolean;
 }): Promise<DirectPreviewArtifactResult | null> {
     if (typeof params.host.readFile !== 'function') {
         return null;
@@ -877,22 +1158,25 @@ export async function previewArtifactFromSavedPath(params: {
         }
     }
 
-    const artifact = await attachCompanionSvgPreview({
+    const artifact = await attachCompanionVisualPreviews({
         host: params.host,
         artifact: directPreview.artifact,
         sourcePath: resolvedSourcePath
     });
     const artifactSaved = params.artifactSavedOverride ?? directPreview.artifactSaved;
-    params.host.openPreview(artifact, resolvedSourcePath, artifactSaved);
+    if (params.openPreview !== false) {
+        params.host.openPreview(artifact, resolvedSourcePath, artifactSaved);
+    }
     return {
         ...directPreview,
         artifact,
-        artifactSaved
+        artifactSaved,
+        sourcePath: resolvedSourcePath
     };
 }
 
 async function previewLocalGeneratedDiagramArtifact(params: {
-    host: Pick<DiagramCommandHostAdapter, 'getFileByPath' | 'readFile' | 'openPreview'>;
+    host: Pick<DiagramCommandHostAdapter, 'getFileByPath' | 'readFile' | 'readBinary' | 'openPreview'>;
     file: TFile;
     settings?: NotemdSettings;
     reporter: ProgressReporter;
@@ -901,7 +1185,8 @@ async function previewLocalGeneratedDiagramArtifact(params: {
         const preview = await previewArtifactFromSavedPath({
             host: params.host,
             sourcePath: candidatePath,
-            artifactSavedOverride: true
+            artifactSavedOverride: true,
+            openPreview: false
         }).catch((error: unknown) => {
             if (error instanceof MissingPreviewableDiagramArtifactError) {
                 return null;
@@ -1114,7 +1399,6 @@ export async function runPreviewDiagramCommandWithHost(
         let directPreview: DirectPreviewArtifactResult | null = null;
         try {
             directPreview = previewArtifactFromFile({
-                host: diagramHost,
                 sourceContent: fileContent,
                 sourcePath: file.path
             });
@@ -1130,18 +1414,13 @@ export async function runPreviewDiagramCommandWithHost(
             });
 
             if (linkedSourcePreview) {
-                const artifact = await attachCompanionSvgPreview({
-                    host: diagramHost,
-                    artifact: linkedSourcePreview.preview.artifact,
-                    sourcePath: linkedSourcePreview.sourcePath
-                });
                 directPreview = {
                     ...linkedSourcePreview.preview,
-                    artifact,
+                    artifact: linkedSourcePreview.preview.artifact,
                     artifactSaved: true,
-                    detectionLabel: `${linkedSourcePreview.preview.detectionLabel} via Obsidian preview wrapper`
+                    detectionLabel: `${linkedSourcePreview.preview.detectionLabel} via Obsidian preview wrapper`,
+                    sourcePath: linkedSourcePreview.sourcePath
                 };
-                diagramHost.openPreview(artifact, linkedSourcePreview.sourcePath, true);
             } else {
                 directPreview = await tryBuildSvgWrapperPreview({
                     host: diagramHost,
@@ -1151,7 +1430,11 @@ export async function runPreviewDiagramCommandWithHost(
             }
 
             if (directPreview && !linkedSourcePreview) {
-                diagramHost.openPreview(directPreview.artifact, file.path, true);
+                directPreview = {
+                    ...directPreview,
+                    artifactSaved: true,
+                    sourcePath: file.path
+                };
             } else if (!directPreview) {
                 directPreview = await previewLocalGeneratedDiagramArtifact({
                     host: diagramHost,
@@ -1165,19 +1448,18 @@ export async function runPreviewDiagramCommandWithHost(
                 throw error;
             }
         }
-        const artifactWithCompanionSvg = await attachCompanionSvgPreview({
+        const previewSourcePath = directPreview.sourcePath ?? file.path;
+        const artifactWithCompanionSvg = await attachCompanionVisualPreviews({
             host: diagramHost,
             artifact: directPreview.artifact,
-            sourcePath: file.path
+            sourcePath: previewSourcePath
         });
-        if (artifactWithCompanionSvg !== directPreview.artifact) {
-            const artifactSaved = directPreview.artifactSaved;
-            diagramHost.openPreview(artifactWithCompanionSvg, file.path, artifactSaved);
-            directPreview = {
-                ...directPreview,
-                artifact: artifactWithCompanionSvg
-            };
-        }
+        directPreview = {
+            ...directPreview,
+            artifact: artifactWithCompanionSvg,
+            sourcePath: previewSourcePath
+        };
+        diagramHost.openPreview(artifactWithCompanionSvg, previewSourcePath, directPreview.artifactSaved);
         const { artifact } = directPreview;
 
         reporter.log(

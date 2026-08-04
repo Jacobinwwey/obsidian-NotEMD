@@ -1,11 +1,19 @@
 import { TFile } from 'obsidian';
 import {
     buildDiagramPreviewPdfExportPath,
+    buildDiagramPreviewPanelPdfExportPath,
+    buildDiagramPreviewPanelPngExportPath,
+    buildDiagramPreviewPanelSvgExportPath,
+    buildDiagramPreviewPanelSvgExportPathInFolder,
     buildDiagramSourceArtifactPath,
     buildDiagramPreviewExportPath,
     buildDiagramPreviewPngExportPath,
     renderPreviewArtifactSvg,
     saveDiagramPreviewPdf,
+    saveDiagramPreviewPanelPdf,
+    saveDiagramPreviewPanelPng,
+    saveDiagramPreviewPanelSvg,
+    saveDiagramPreviewPanelSvgToFolder,
     saveDiagramPreviewPng,
     saveDiagramSourceArtifact,
     saveDiagramPreviewSvg,
@@ -35,6 +43,17 @@ describe('diagram preview export helpers', () => {
     test('builds a stable pdf export path beside the source file', () => {
         expect(buildDiagramPreviewPdfExportPath('Notes/Topic_diagram.canvas')).toBe('Notes/Topic_diagram_preview.pdf');
         expect(buildDiagramPreviewPdfExportPath('Topic.md')).toBe('Topic_preview.pdf');
+    });
+
+    test('builds stable per-panel export paths beside the source file', () => {
+        expect(buildDiagramPreviewPanelSvgExportPath('Notes/Topic.md', 'mermaid-1')).toBe('Notes/Topic_preview_mermaid-1.svg');
+        expect(buildDiagramPreviewPanelPngExportPath('Notes/Topic.md', 'source visual/2')).toBe('Notes/Topic_preview_source-visual-2.png');
+        expect(buildDiagramPreviewPanelPdfExportPath('Topic.md', 'panel')).toBe('Topic_preview_panel.pdf');
+    });
+
+    test('builds stable per-panel svg paths inside a selected vault folder', () => {
+        expect(buildDiagramPreviewPanelSvgExportPathInFolder('Notes/Topic.md', 'mermaid-1', 'Exports')).toBe('Exports/Topic_preview_mermaid-1.svg');
+        expect(buildDiagramPreviewPanelSvgExportPathInFolder('Topic.md', 'panel', '')).toBe('Topic_preview_panel.svg');
     });
 
     test('builds a target-aware raw artifact path beside the source note', () => {
@@ -118,6 +137,50 @@ describe('diagram preview export helpers', () => {
         expect(initialize).toHaveBeenCalledWith(expect.objectContaining({ theme: 'dark' }));
     });
 
+    test('composes multiple ordered Mermaid panels for export', async () => {
+        const render = jest.fn()
+            .mockResolvedValueOnce({ svg: '<svg viewBox="0 0 400 120"><text>first diagram</text></svg>' })
+            .mockResolvedValueOnce({ svg: '<svg viewBox="0 0 320 180"><text>second diagram</text></svg>' });
+
+        const svg = await renderPreviewArtifactSvg({
+            target: 'mermaid',
+            content: 'first source\n\nsecond source',
+            mimeType: 'text/vnd.mermaid',
+            sourceIntent: 'flowchart',
+            previewPanels: [
+                {
+                    id: 'mermaid-1',
+                    artifact: {
+                        target: 'mermaid',
+                        content: '```mermaid\nflowchart TD\nA --> B\n```',
+                        mimeType: 'text/vnd.mermaid',
+                        sourceIntent: 'flowchart'
+                    }
+                },
+                {
+                    id: 'mermaid-2',
+                    artifact: {
+                        target: 'mermaid',
+                        content: '```mermaid\nsequenceDiagram\nAlice->>Bob: Hello\n```',
+                        mimeType: 'text/vnd.mermaid',
+                        sourceIntent: 'sequence'
+                    }
+                }
+            ]
+        }, {
+            mermaid: {
+                initialize: jest.fn(),
+                parse: jest.fn(),
+                render
+            }
+        });
+
+        expect(render).toHaveBeenCalledTimes(2);
+        expect(svg).toContain('first diagram');
+        expect(svg).toContain('second diagram');
+        expect(svg).toMatch(/height="332"/);
+    });
+
     test('renders persisted companion preview svg without invoking target runtime', async () => {
         await expect(renderPreviewArtifactSvg({
             target: 'drawnix' as any,
@@ -129,6 +192,39 @@ describe('diagram preview export helpers', () => {
                 mimeType: 'image/svg+xml'
             }
         })).resolves.toContain('fill: var(--notemd-editable-svg-panel, #ffffff);');
+    });
+
+    test('keeps Drawnix companion panels out of the primary SVG export', async () => {
+        const mermaidRender = jest.fn();
+        const svg = await renderPreviewArtifactSvg({
+            target: 'drawnix' as any,
+            content: '{"type":"drawnix","elements":[]}',
+            mimeType: 'application/vnd.drawnix+json',
+            sourceIntent: 'flowchart',
+            previewSvg: {
+                content: '<svg viewBox="0 0 400 200"><text>Drawnix primary</text></svg>',
+                mimeType: 'image/svg+xml'
+            },
+            previewPanels: [{
+                id: 'source-visual-1',
+                artifact: {
+                    target: 'mermaid',
+                    content: '```mermaid\nflowchart TD\nA --> B\n```',
+                    mimeType: 'text/vnd.mermaid',
+                    sourceIntent: 'flowchart'
+                }
+            }]
+        }, {
+            mermaid: {
+                initialize: jest.fn(),
+                parse: jest.fn(),
+                render: mermaidRender
+            }
+        });
+
+        expect(svg).toContain('Drawnix primary');
+        expect(svg).not.toContain('source-visual-1');
+        expect(mermaidRender).not.toHaveBeenCalled();
     });
 
     test('saves a new exported preview svg beside the source file', async () => {
@@ -321,6 +417,128 @@ describe('diagram preview export helpers', () => {
         expect(outputPath).toBe('Notes/Topic_preview.pdf');
         expect(createCanvas).toHaveBeenCalledWith(2500, 1250);
         expect(mockApp.vault.createBinary).toHaveBeenCalledWith('Notes/Topic_preview.pdf', expect.any(ArrayBuffer));
+    });
+
+    test('defaults pdf preview rasterization to 300 ppi when no ppi is supplied', async () => {
+        const createCanvas = jest.fn((width: number, height: number) => ({
+            width,
+            height,
+            getContext: () => ({
+                scale: jest.fn(),
+                drawImage: jest.fn()
+            }),
+            toBlob: (callback: (blob: Blob | null) => void) => callback(new Blob(['jpeg'], { type: 'image/jpeg' }))
+        }));
+        await saveDiagramPreviewPdf(mockApp, 'Notes/Topic.md', {
+            target: 'html',
+            content: '<!DOCTYPE html><svg width="400" height="200"></svg>',
+            mimeType: 'text/html',
+            sourceIntent: 'flowchart',
+            previewSvg: {
+                content: '<svg width="400" height="200"></svg>',
+                mimeType: 'image/svg+xml'
+            }
+        }, {
+            raster: {
+                createBlob: (parts, options) => new Blob(parts, options),
+                createImage: () => {
+                    const image = {
+                        onload: null as null | (() => void),
+                        onerror: null as null | ((event?: unknown) => void),
+                        set src(_value: string) {
+                            this.onload?.();
+                        }
+                    };
+                    return image;
+                },
+                createCanvas,
+                createObjectURL: () => 'blob:pdf-default',
+                revokeObjectURL: jest.fn(),
+                blobToArrayBuffer: async () => new Uint8Array([0xff, 0xd8, 0xff, 0xd9]).buffer
+            }
+        });
+
+        expect(createCanvas).toHaveBeenCalledWith(1250, 625);
+        expect(mockApp.vault.createBinary).toHaveBeenCalledWith('Notes/Topic_preview.pdf', expect.any(ArrayBuffer));
+    });
+
+    test('saves an individual panel svg preview without including sibling panels', async () => {
+        const outputPath = await saveDiagramPreviewPanelSvg(mockApp, 'Notes/Topic.md', 'mermaid-2', {
+            target: 'html',
+            content: '<!DOCTYPE html><svg><text>Second panel</text></svg>',
+            mimeType: 'text/html',
+            sourceIntent: 'flowchart',
+            previewSvg: {
+                content: '<svg><text>Second panel</text></svg>',
+                mimeType: 'image/svg+xml'
+            }
+        });
+
+        expect(outputPath).toBe('Notes/Topic_preview_mermaid-2.svg');
+        expect(mockApp.vault.create).toHaveBeenCalledWith(
+            outputPath,
+            expect.stringContaining('Second panel')
+        );
+    });
+
+    test('saves an individual panel svg preview into a selected vault folder', async () => {
+        const outputPath = await saveDiagramPreviewPanelSvgToFolder(mockApp, 'Notes/Topic.md', 'mermaid-1', 'Exports', {
+            target: 'html',
+            content: '<!DOCTYPE html><svg><text>First panel</text></svg>',
+            mimeType: 'text/html',
+            sourceIntent: 'flowchart',
+            previewSvg: {
+                content: '<svg><text>First panel</text></svg>',
+                mimeType: 'image/svg+xml'
+            }
+        });
+
+        expect(outputPath).toBe('Exports/Topic_preview_mermaid-1.svg');
+        expect(mockApp.vault.create).toHaveBeenCalledWith(outputPath, expect.stringContaining('First panel'));
+    });
+
+    test('saves individual panel png and pdf previews through the configured raster pipeline', async () => {
+        const raster = {
+            createBlob: (parts: BlobPart[], options?: BlobPropertyBag) => new Blob(parts, options),
+            createImage: () => {
+                const image = {
+                    onload: null as null | (() => void),
+                    onerror: null as null | ((event?: unknown) => void),
+                    set src(_value: string) {
+                        this.onload?.();
+                    }
+                };
+                return image;
+            },
+            createCanvas: () => ({
+                width: 960,
+                height: 540,
+                getContext: () => ({ scale: jest.fn(), drawImage: jest.fn() }),
+                toBlob: (callback: (blob: Blob | null) => void) => callback(new Blob(['jpeg'], { type: 'image/jpeg' }))
+            }),
+            createObjectURL: () => 'blob:panel',
+            revokeObjectURL: jest.fn(),
+            blobToArrayBuffer: async () => new Uint8Array([0xff, 0xd8, 0xff, 0xd9]).buffer
+        };
+        const artifact = {
+            target: 'html' as const,
+            content: '<!DOCTYPE html><svg><text>Panel</text></svg>',
+            mimeType: 'text/html',
+            sourceIntent: 'flowchart' as const,
+            previewSvg: { content: '<svg width="96" height="54"><text>Panel</text></svg>', mimeType: 'image/svg+xml' as const }
+        };
+
+        const pngPath = await saveDiagramPreviewPanelPng(mockApp, 'Notes/Topic.md', 'panel-1', artifact, {
+            pngRaster: raster
+        });
+        const pdfPath = await saveDiagramPreviewPanelPdf(mockApp, 'Notes/Topic.md', 'panel-1', artifact, {
+            raster
+        });
+
+        expect(pngPath).toBe('Notes/Topic_preview_panel-1.png');
+        expect(pdfPath).toBe('Notes/Topic_preview_panel-1.pdf');
+        expect(mockApp.vault.createBinary).toHaveBeenCalledWith(pngPath, expect.any(ArrayBuffer));
+        expect(mockApp.vault.createBinary).toHaveBeenCalledWith(pdfPath, expect.any(ArrayBuffer));
     });
 
     test('rejects unsupported export targets', async () => {

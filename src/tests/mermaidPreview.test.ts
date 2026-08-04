@@ -1,4 +1,7 @@
-import { renderMermaidArtifactSvg } from '../rendering/preview/mermaidPreview';
+import {
+    renderMermaidArtifactSvg,
+    renderMermaidArtifactSvgForRasterExport
+} from '../rendering/preview/mermaidPreview';
 
 describe('mermaid preview renderer', () => {
     test('renders mermaid artifacts into svg markup using injected deps', async () => {
@@ -35,6 +38,24 @@ describe('mermaid preview renderer', () => {
 
         expect(initialize).toHaveBeenCalledWith(expect.objectContaining({
             theme: 'default'
+        }));
+    });
+
+    test('uses canvas-safe Mermaid labels for raster exports', async () => {
+        const initialize = jest.fn();
+        const parse = jest.fn();
+        const render = jest.fn().mockResolvedValue({ svg: '<svg><text>Label</text></svg>' });
+
+        await renderMermaidArtifactSvgForRasterExport({
+            target: 'mermaid',
+            content: 'flowchart TD\nA --> B',
+            mimeType: 'text/vnd.mermaid',
+            sourceIntent: 'flowchart'
+        }, { initialize, parse, render }, 'dark');
+
+        expect(initialize).toHaveBeenCalledWith(expect.objectContaining({
+            theme: 'dark',
+            htmlLabels: false
         }));
     });
 

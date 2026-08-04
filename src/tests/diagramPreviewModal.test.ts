@@ -5,6 +5,7 @@ import { mockApp } from './__mocks__/app';
 import * as mermaidPreview from '../rendering/preview/mermaidPreview';
 import * as previewExport from '../rendering/preview/previewExport';
 import * as bundledPreviewDeps from '../rendering/webview/bundledPreviewDeps';
+import * as exportFolderModal from '../ui/DiagramPreviewExportFolderModal';
 
 const bundledMermaidDeps = {
     initialize: jest.fn(),
@@ -29,6 +30,10 @@ jest.mock('../rendering/preview/previewExport', () => {
         saveDiagramPreviewSvg: jest.fn().mockResolvedValue('Notes/Topic_preview.svg'),
         saveDiagramPreviewPng: jest.fn().mockResolvedValue('Notes/Topic_preview.png'),
         saveDiagramPreviewPdf: jest.fn().mockResolvedValue('Notes/Topic_preview.pdf'),
+        saveDiagramPreviewPanelSvg: jest.fn().mockResolvedValue('Notes/Topic_preview_mermaid-1.svg'),
+        saveDiagramPreviewPanelSvgToFolder: jest.fn(),
+        saveDiagramPreviewPanelPng: jest.fn().mockResolvedValue('Notes/Topic_preview_mermaid-1.png'),
+        saveDiagramPreviewPanelPdf: jest.fn().mockResolvedValue('Notes/Topic_preview_mermaid-1.pdf'),
         saveDiagramSourceArtifact: jest.fn().mockResolvedValue('Notes/Topic_diagram.json')
     };
 });
@@ -36,6 +41,10 @@ jest.mock('../rendering/preview/previewExport', () => {
 jest.mock('../rendering/webview/bundledPreviewDeps', () => ({
     getBundledMermaidPreviewDeps: jest.fn(() => bundledMermaidDeps),
     getBundledVegaLitePreviewDeps: jest.fn(() => bundledVegaLiteDeps)
+}));
+
+jest.mock('../ui/DiagramPreviewExportFolderModal', () => ({
+    selectDiagramPreviewExportFolder: jest.fn()
 }));
 
 type MockElement = {
@@ -160,6 +169,14 @@ function findByTag(root: MockElement, tag: string): MockElement | null {
     return null;
 }
 
+function collectByTag(root: MockElement, tag: string): MockElement[] {
+    const matches = root.tag === tag ? [root] : [];
+    for (const child of root.children) {
+        matches.push(...collectByTag(child, tag));
+    }
+    return matches;
+}
+
 function collectText(root: MockElement): string[] {
     const textValues = root.text ? [root.text] : [];
     for (const child of root.children) {
@@ -207,6 +224,20 @@ async function clickExportMenuItem(modal: any, index: number): Promise<void> {
     exportButton?.onclick?.({} as MouseEvent);
     const menu = (Menu as unknown as jest.Mock).mock.results.at(-1)?.value;
     const configure = menu.addItem.mock.calls[index][0];
+    const item = {
+        setTitle: jest.fn().mockReturnThis(),
+        setIcon: jest.fn().mockReturnThis(),
+        onClick: jest.fn().mockReturnThis()
+    };
+    configure(item);
+    await item.onClick.mock.calls[0][0]();
+}
+
+async function clickPanelExportMenuItem(modal: any, panelIndex: number, itemIndex: number): Promise<void> {
+    const exportButtons = collectButtons(modal.contentEl).filter(button => button.text === 'Export' || button.text === '导出');
+    exportButtons[panelIndex + 1]?.onclick?.({} as MouseEvent);
+    const menu = (Menu as unknown as jest.Mock).mock.results.at(-1)?.value;
+    const configure = menu.addItem.mock.calls[itemIndex][0];
     const item = {
         setTitle: jest.fn().mockReturnThis(),
         setIcon: jest.fn().mockReturnThis(),
@@ -363,6 +394,252 @@ describe('diagram preview modal', () => {
         expect(iframe).toBeDefined();
         expect(iframe?.sandbox).toBe('allow-scripts allow-same-origin');
         expect(iframe?.srcdoc).toContain('notemd-mermaid-mount');
+    });
+
+    test('renders every ordered preview panel in the modal', async () => {
+        const modal = mountModal(new DiagramPreviewModal(mockApp, createSession({
+            previewPanels: [
+                {
+                    id: 'mermaid-1',
+                    artifact: {
+                        target: 'mermaid',
+                        content: '```mermaid\nflowchart TD\nA --> B\n```',
+                        mimeType: 'text/vnd.mermaid',
+                        sourceIntent: 'flowchart'
+                    }
+                },
+                {
+                    id: 'mermaid-2',
+                    artifact: {
+                        target: 'mermaid',
+                        content: '```mermaid\nsequenceDiagram\nAlice->>Bob: Hello\n```',
+                        mimeType: 'text/vnd.mermaid',
+                        sourceIntent: 'sequence'
+                    }
+                }
+            ]
+        }), 'en') as any);
+
+        modal.onOpen();
+        await flushPromises();
+
+        const panels = collectByTag(modal.contentEl, 'div').filter(panel => panel.cls === 'notemd-diagram-preview-panel');
+        const iframes = collectByTag(modal.contentEl, 'iframe');
+
+        expect(panels).toHaveLength(2);
+        expect(iframes).toHaveLength(2);
+        expect(iframes[0].srcdoc).toContain('flowchart TD');
+        expect(iframes[1].srcdoc).toContain('sequenceDiagram');
+    });
+
+    test('exports an individual preview panel from its own menu', async () => {
+        const modal = mountModal(new DiagramPreviewModal(mockApp, createSession({
+            previewPanels: [
+                {
+                    id: 'mermaid-1',
+                    artifact: {
+                        target: 'mermaid',
+                        content: '```mermaid\nflowchart TD\nA --> B\n```',
+                        mimeType: 'text/vnd.mermaid',
+                        sourceIntent: 'flowchart'
+                    }
+                },
+                {
+                    id: 'mermaid-2',
+                    artifact: {
+                        target: 'mermaid',
+                        content: '```mermaid\nsequenceDiagram\nAlice->>Bob: Hello\n```',
+                        mimeType: 'text/vnd.mermaid',
+                        sourceIntent: 'sequence'
+                    }
+                }
+            ]
+        }), 'en') as any);
+
+        modal.onOpen();
+        await flushPromises();
+
+        await clickPanelExportMenuItem(modal, 1, 0);
+
+        expect(previewExport.saveDiagramPreviewPanelSvg).toHaveBeenCalledWith(
+            mockApp,
+            'Notes/Topic.md',
+            'mermaid-2',
+            expect.objectContaining({ sourceIntent: 'sequence' }),
+            expect.objectContaining({ theme: 'system', mermaid: bundledMermaidDeps })
+        );
+        expect(previewExport.saveDiagramPreviewSvg).not.toHaveBeenCalled();
+        expect(Notice).toHaveBeenCalledWith('Diagram preview exported to Notes/Topic_preview_mermaid-1.svg');
+    });
+
+    test('prompts for a folder and exports every preview panel as a separate svg', async () => {
+        (exportFolderModal.selectDiagramPreviewExportFolder as jest.Mock).mockResolvedValue('Exports');
+        (previewExport.saveDiagramPreviewPanelSvgToFolder as jest.Mock)
+            .mockResolvedValueOnce('Exports/Topic_preview_mermaid-1.svg')
+            .mockResolvedValueOnce('Exports/Topic_preview_mermaid-2.svg');
+        const recordExportPath = jest.fn().mockResolvedValue(undefined);
+        const modal = mountModal(new DiagramPreviewModal(mockApp, createSession({
+            previewPanels: [
+                {
+                    id: 'mermaid-1',
+                    artifact: {
+                        target: 'mermaid',
+                        content: '```mermaid\nflowchart TD\nA --> B\n```',
+                        mimeType: 'text/vnd.mermaid',
+                        sourceIntent: 'flowchart'
+                    }
+                },
+                {
+                    id: 'mermaid-2',
+                    artifact: {
+                        target: 'mermaid',
+                        content: '```mermaid\nsequenceDiagram\nAlice->>Bob: Hello\n```',
+                        mimeType: 'text/vnd.mermaid',
+                        sourceIntent: 'sequence'
+                    }
+                }
+            ]
+        }), 'en', {
+            historyEntryId: 'diagram-one',
+            historyStore: { loadPage: jest.fn(), removeEntry: jest.fn(), recordExportPath }
+        }) as any);
+
+        modal.onOpen();
+        await flushPromises();
+        await clickExportMenuItem(modal, 0);
+
+        expect(exportFolderModal.selectDiagramPreviewExportFolder).toHaveBeenCalledWith(mockApp, 'Notes/Topic.md', 'en');
+        expect(previewExport.saveDiagramPreviewPanelSvgToFolder).toHaveBeenNthCalledWith(
+            1,
+            mockApp,
+            'Notes/Topic.md',
+            'mermaid-1',
+            'Exports',
+            expect.objectContaining({ sourceIntent: 'flowchart' }),
+            expect.objectContaining({ theme: 'system', mermaid: bundledMermaidDeps })
+        );
+        expect(previewExport.saveDiagramPreviewPanelSvgToFolder).toHaveBeenNthCalledWith(
+            2,
+            mockApp,
+            'Notes/Topic.md',
+            'mermaid-2',
+            'Exports',
+            expect.objectContaining({ sourceIntent: 'sequence' }),
+            expect.objectContaining({ theme: 'system', mermaid: bundledMermaidDeps })
+        );
+        expect(recordExportPath).toHaveBeenNthCalledWith(1, 'diagram-one', 'svg', 'Exports/Topic_preview_mermaid-1.svg');
+        expect(recordExportPath).toHaveBeenNthCalledWith(2, 'diagram-one', 'svg', 'Exports/Topic_preview_mermaid-2.svg');
+        expect(Notice).toHaveBeenCalledWith('Exported 2 of 2 SVG files to Exports');
+        expect(previewExport.saveDiagramPreviewSvg).not.toHaveBeenCalled();
+    });
+
+    test('continues separate svg export after one panel fails', async () => {
+        (exportFolderModal.selectDiagramPreviewExportFolder as jest.Mock).mockResolvedValue('Exports');
+        (previewExport.saveDiagramPreviewPanelSvgToFolder as jest.Mock)
+            .mockRejectedValueOnce(new Error('first panel failed'))
+            .mockResolvedValueOnce('Exports/Topic_preview_mermaid-2.svg');
+        const modal = mountModal(new DiagramPreviewModal(mockApp, createSession({
+            previewPanels: [
+                {
+                    id: 'mermaid-1',
+                    artifact: {
+                        target: 'mermaid',
+                        content: '```mermaid\nflowchart TD\nA --> B\n```',
+                        mimeType: 'text/vnd.mermaid',
+                        sourceIntent: 'flowchart'
+                    }
+                },
+                {
+                    id: 'mermaid-2',
+                    artifact: {
+                        target: 'mermaid',
+                        content: '```mermaid\nsequenceDiagram\nAlice->>Bob: Hello\n```',
+                        mimeType: 'text/vnd.mermaid',
+                        sourceIntent: 'sequence'
+                    }
+                }
+            ]
+        }), 'en') as any);
+
+        modal.onOpen();
+        await flushPromises();
+        await clickExportMenuItem(modal, 0);
+
+        expect(previewExport.saveDiagramPreviewPanelSvgToFolder).toHaveBeenCalledTimes(2);
+        expect(Notice).toHaveBeenCalledWith('Exported 1 of 2 SVG files. Failed: mermaid-1: first panel failed.');
+    });
+
+    test('shows export controls for image panels represented by preview svg', async () => {
+        const modal = mountModal(new DiagramPreviewModal(mockApp, createSession({
+            target: 'drawnix',
+            content: '{"type":"drawnix","elements":[]}',
+            mimeType: 'application/vnd.drawnix+json',
+            previewSvg: { content: '<svg><text>Drawnix</text></svg>', mimeType: 'image/svg+xml' },
+            previewPanels: [{
+                id: 'source-visual-image',
+                artifact: {
+                    target: 'html',
+                    content: '<!DOCTYPE html><img src="data:image/png;base64,AAAA">',
+                    mimeType: 'text/html',
+                    sourceIntent: 'flowchart',
+                    previewSvg: { content: '<svg><image href="data:image/png;base64,AAAA" /></svg>', mimeType: 'image/svg+xml' }
+                }
+            }]
+        }), 'en') as any);
+
+        modal.onOpen();
+        await flushPromises();
+
+        const exportButtons = collectButtons(modal.contentEl).filter(button => button.text === 'Export');
+        expect(exportButtons).toHaveLength(2);
+    });
+
+    test('shows the Drawnix primary visual and persisted source visual panels together', async () => {
+        (previewExport.renderPreviewArtifactSvg as jest.Mock).mockResolvedValueOnce('<svg><text>Drawnix primary</text></svg>');
+        const modal = mountModal(new DiagramPreviewModal(mockApp, createSession({
+            target: 'drawnix',
+            content: '{"type":"drawnix","elements":[]}',
+            mimeType: 'application/vnd.drawnix+json',
+            sourceIntent: 'flowchart',
+            previewSvg: {
+                content: '<svg><text>Drawnix primary</text></svg>',
+                mimeType: 'image/svg+xml'
+            },
+            previewPanels: [
+                {
+                    id: 'drawnix-primary',
+                    artifact: {
+                        target: 'drawnix',
+                        content: '{"type":"drawnix","elements":[]}',
+                        mimeType: 'application/vnd.drawnix+json',
+                        sourceIntent: 'flowchart',
+                        previewSvg: {
+                            content: '<svg><text>Drawnix primary</text></svg>',
+                            mimeType: 'image/svg+xml'
+                        }
+                    }
+                },
+                {
+                    id: 'source-visual-1',
+                    artifact: {
+                        target: 'html',
+                        content: '<!DOCTYPE html><html><body><svg><text>Mermaid companion</text></svg></body></html>',
+                        mimeType: 'text/html',
+                        sourceIntent: 'flowchart',
+                        previewSvg: {
+                            content: '<svg><text>Mermaid companion</text></svg>',
+                            mimeType: 'image/svg+xml'
+                        }
+                    }
+                }
+            ]
+        }), 'en') as any);
+
+        modal.onOpen();
+        await flushPromises();
+
+        expect(findByClass(modal.contentEl, 'is-svg-preview')).not.toBeNull();
+        expect(collectByTag(modal.contentEl, 'iframe')).toHaveLength(1);
     });
 
     test('routes vega-lite previews through iframe host instead of plugin-runtime svg rendering', async () => {

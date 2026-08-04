@@ -1,5 +1,6 @@
 import { STRINGS_EN } from '../i18n/locales/en';
 import {
+    completeArtifactDiagramCommand,
     previewVegaLiteArtifactFromMarkdown,
     runGenerateDiagramCommandWithHost,
     runPreviewDiagramCommandWithHost
@@ -175,6 +176,59 @@ describe('diagram command host adapter', () => {
         });
         expect(host.finalizeReporter).toHaveBeenCalledWith(reporter);
         expect(host.createDiagramHostAdapter().notify).toHaveBeenCalledWith('Diagram preview is ready!');
+    });
+
+    test('preview wrapper preserves every Mermaid fence in source order', async () => {
+        const { host, diagramHost, reporter } = createDiagramHost();
+        const file = { name: 'Architecture.md', path: 'Notes/Architecture.md' };
+        host.readFile.mockResolvedValue([
+            '# Architecture',
+            '',
+            '```mermaid',
+            'flowchart TD',
+            'A --> B',
+            '```',
+            '',
+            'interstitial text',
+            '',
+            '```mermaid',
+            'sequenceDiagram',
+            'Alice->>Bob: Hello',
+            '```'
+        ].join('\n'));
+
+        const result = await runPreviewDiagramCommandWithHost(host as any, file as any, reporter as any);
+
+        expect(result).toMatchObject({
+            kind: 'success',
+            artifact: expect.objectContaining({
+                target: 'mermaid',
+                previewPanels: [
+                    expect.objectContaining({
+                        id: 'mermaid-1',
+                        artifact: expect.objectContaining({
+                            content: expect.stringContaining('flowchart TD')
+                        })
+                    }),
+                    expect.objectContaining({
+                        id: 'mermaid-2',
+                        artifact: expect.objectContaining({
+                            content: expect.stringContaining('sequenceDiagram')
+                        })
+                    })
+                ]
+            })
+        });
+        expect(diagramHost.openPreview).toHaveBeenCalledWith(
+            expect.objectContaining({
+                previewPanels: expect.arrayContaining([
+                    expect.objectContaining({ id: 'mermaid-1' }),
+                    expect.objectContaining({ id: 'mermaid-2' })
+                ])
+            }),
+            file.path,
+            false
+        );
     });
 
     test('preview helper keeps using markdown vega-lite fence extraction for direct preview', () => {
@@ -385,6 +439,167 @@ describe('diagram command host adapter', () => {
             'Notes/Architecture_diagram.drawnix',
             true
         );
+    });
+
+    test('preview wrapper exposes Drawnix Mermaid source visuals as preview panels', async () => {
+        const { host, diagramHost, reporter } = createDiagramHost();
+        const file = { name: 'Architecture_diagram.drawnix', path: 'Notes/Architecture_diagram.drawnix' };
+        host.readFile.mockResolvedValue(JSON.stringify({
+            type: 'drawnix',
+            version: 1,
+            source: 'web',
+            elements: [{ type: 'mindmap', id: 'root', children: [], data: { topic: { type: 'paragraph', children: [{ text: 'Root' }] } }, points: [[0, 0]] }],
+            viewport: { zoom: 1, offsetX: 0, offsetY: 0 },
+            metadata: {
+                notemd: {
+                    version: 1,
+                    sourceVisuals: [{
+                        id: 'source-visual-1',
+                        kind: 'mermaid',
+                        status: 'resolved',
+                        sourceHash: 'abcd1234',
+                        companionPaths: ['Notes/Architecture_diagram.drawnix.assets/source-visual-1.svg']
+                    }]
+                }
+            }
+        }));
+        diagramHost.getFileByPath.mockImplementation((path: string) => ({ path }));
+        (diagramHost as any).readFile = jest.fn(async (loadedFile: { path: string }) =>
+            loadedFile.path.endsWith('source-visual-1.svg')
+                ? '<svg><text>Mermaid companion</text></svg>'
+                : host.readFile.mock.results[0]?.value ?? ''
+        );
+
+        const result = await runPreviewDiagramCommandWithHost(host as any, file as any, reporter as any);
+
+        expect(result).toMatchObject({
+            kind: 'success',
+            artifact: expect.objectContaining({
+                target: 'drawnix',
+                previewPanels: expect.arrayContaining([
+                    expect.objectContaining({
+                        id: 'source-visual-1',
+                        artifact: expect.objectContaining({
+                            previewSvg: expect.objectContaining({
+                                content: expect.stringContaining('Mermaid companion')
+                            })
+                        })
+                    })
+                ])
+            })
+        });
+        expect(diagramHost.openPreview).toHaveBeenCalledTimes(1);
+    });
+
+    test('preview artifact execution attaches in-memory Drawnix Mermaid and image panels', async () => {
+        const { diagramHost, reporter } = createDiagramHost();
+        const imageBytes = new Uint8Array([1, 2, 3, 4]).buffer;
+        const artifactContent = JSON.stringify({
+            type: 'drawnix',
+            version: 1,
+            source: 'web',
+            elements: [],
+            metadata: {
+                notemd: {
+                    version: 1,
+                    sourceVisuals: [
+                        { id: 'source-visual-mermaid', kind: 'mermaid', companionPaths: ['source-visual-mermaid.svg'] },
+                        { id: 'source-visual-image', kind: 'image', companionPaths: ['source-visual-image.png'] }
+                    ]
+                }
+            }
+        });
+
+        await completeArtifactDiagramCommand({
+            host: diagramHost as any,
+            file: { path: 'Notes/Architecture.md' } as any,
+            reporter: reporter as any,
+            result: {
+                spec: { intent: 'drawnixMindmap' },
+                artifact: {
+                    target: 'drawnix',
+                    content: artifactContent,
+                    mimeType: 'application/vnd.drawnix+json',
+                    sourceIntent: 'drawnixMindmap',
+                    previewSvg: { content: '<svg><text>Primary</text></svg>', mimeType: 'image/svg+xml' },
+                    companions: [
+                        { path: 'source-visual-mermaid.svg', content: '<svg><text>Mermaid</text></svg>', mimeType: 'image/svg+xml' },
+                        { path: 'source-visual-image.png', content: imageBytes, mimeType: 'image/png', binary: true }
+                    ]
+                }
+            } as any,
+            actionLabel: 'Preview diagram',
+            executionMode: 'preview-artifact',
+            completeNotice: 'complete',
+            previewReadyNotice: 'ready',
+            manualFixHintNotice: 'fix',
+            autoFixAfterGenerate: false,
+            getStepStatusText: (step, total, label) => `${step}/${total} ${label}`,
+            getActionCompleteText: label => `Completed ${label}`
+        });
+
+        expect(diagramHost.openPreview).toHaveBeenCalledWith(
+            expect.objectContaining({
+                previewPanels: [
+                    expect.objectContaining({ id: 'drawnix-primary' }),
+                    expect.objectContaining({ id: 'source-visual-mermaid' }),
+                    expect.objectContaining({
+                        id: 'source-visual-image',
+                        artifact: expect.objectContaining({
+                            previewSvg: expect.objectContaining({ content: expect.stringContaining('data:image/png;base64') })
+                        })
+                    })
+                ]
+            }),
+            'Notes/Architecture.md',
+            false
+        );
+    });
+
+    test('preview wrapper reads persisted Drawnix image companions as exportable panels', async () => {
+        const { host, diagramHost, reporter } = createDiagramHost();
+        const file = { name: 'Architecture_diagram.drawnix', path: 'Notes/Architecture_diagram.drawnix' };
+        const imageBytes = new Uint8Array([5, 6, 7, 8]).buffer;
+        const drawnix = JSON.stringify({
+            type: 'drawnix',
+            version: 1,
+            source: 'web',
+            elements: [],
+            metadata: {
+                notemd: {
+                    version: 1,
+                    sourceVisuals: [{
+                        id: 'source-visual-image',
+                        kind: 'image',
+                        companionPaths: ['Notes/Architecture_diagram.drawnix.assets/source-visual-image.png']
+                    }]
+                }
+            }
+        });
+        host.readFile.mockImplementation(async (loadedFile: { path: string }) => {
+            if (loadedFile.path === file.path) return drawnix;
+            if (loadedFile.path.endsWith('.drawnix.svg')) return '<svg><text>Primary</text></svg>';
+            return '';
+        });
+        diagramHost.getFileByPath.mockImplementation((path: string) => ({ path }));
+        (diagramHost as any).readBinary = jest.fn().mockResolvedValue(imageBytes);
+
+        const result = await runPreviewDiagramCommandWithHost(host as any, file as any, reporter as any);
+
+        expect(result).toMatchObject({
+            kind: 'success',
+            artifact: expect.objectContaining({
+                previewPanels: expect.arrayContaining([
+                    expect.objectContaining({
+                        id: 'source-visual-image',
+                        artifact: expect.objectContaining({
+                            previewSvg: expect.objectContaining({ content: expect.stringContaining('data:image/png;base64') })
+                        })
+                    })
+                ])
+            })
+        });
+        expect((diagramHost as any).readBinary).toHaveBeenCalled();
     });
 
     test('preview wrapper finds a previously generated Obsidian svg wrapper beside the source note', async () => {
