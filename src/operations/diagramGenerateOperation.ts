@@ -95,6 +95,7 @@ export async function runDiagramGenerateOperation(
         }
 
         return await runStructuredGeneration(sourceMarkdownForGeneration, {
+            sourcePath: input.sourcePath,
             requestedIntent: input.requestedIntent,
             requestedRenderTarget: input.requestedRenderTarget,
             compatibilityMode: input.compatibilityMode,

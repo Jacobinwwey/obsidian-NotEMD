@@ -104,7 +104,7 @@ describe('Drawnix mind-map renderer', () => {
         expect(artifact.previewSvg?.content).not.toContain('data-drawio-type="node"');
     });
 
-    test('preserves source Mermaid visuals through explicit companions and manifest metadata', async () => {
+    test('persists source Mermaid visuals inline in Drawnix metadata', async () => {
         const artifact = await new DrawnixRenderer().render(createKnowledgeMapSpec(), {
             sourceVisuals: [{
                 id: 'source-visual-1',
@@ -120,21 +120,16 @@ describe('Drawnix mind-map renderer', () => {
         });
 
         const data = JSON.parse(artifact.content);
-        expect(artifact.companions?.map(companion => companion.path)).toEqual([
-            'source-visual-source-visual-1.mermaid.md',
-            'source-visual-source-visual-1.svg',
-            'source-visual-manifest.json'
-        ]);
+        expect(artifact.companions).toEqual([]);
         expect(artifact.sourceVisualManifest?.[0]).toMatchObject({ id: 'source-visual-1', status: 'resolved' });
         expect(data.metadata.notemd.sourceVisuals).toEqual([
             expect.objectContaining({
                 id: 'source-visual-1',
                 kind: 'mermaid',
                 status: 'resolved',
-                companionPaths: [
-                    'source-visual-source-visual-1.mermaid.md',
-                    'source-visual-source-visual-1.svg'
-                ]
+                companionPaths: [],
+                embeddedSvg: expect.stringContaining('<svg'),
+                sourceContent: 'flowchart TD\nA --> B'
             })
         ]);
     });
@@ -224,6 +219,41 @@ describe('Drawnix mind-map renderer', () => {
         expect(previewSvg).toContain('url(#notemd-source-visual-1-0-arrow)');
         expect(previewSvg).toContain('id="notemd-source-visual-2-0-arrow"');
         expect(previewSvg).toContain('url(#notemd-source-visual-2-0-arrow)');
+    });
+
+    test('preserves nested Mermaid root attributes and rewrites CSS id selectors', () => {
+        const projection = buildDrawnixMindMapProjection(createKnowledgeMapSpec());
+        const previewSvg = renderDrawnixMindMapSvg(projection, [{
+            id: 'source-visual-css',
+            kind: 'mermaid',
+            title: 'Mermaid source visual',
+            lineStart: 1,
+            lineEnd: 3,
+            svg: '<svg id="mermaid-root" class="mermaid" viewBox="0 0 100 50"><style>#mermaid-root .node { fill: #334155; }</style><g class="node" /></svg>'
+        }]);
+
+        expect(previewSvg).toContain('id="notemd-source-visual-css-0-mermaid-root"');
+        expect(previewSvg).toContain('#notemd-source-visual-css-0-mermaid-root .node');
+        expect(previewSvg).not.toContain('#mermaid-root .node');
+    });
+
+    test('namespaces only real SVG ids and rewrites whitespace-tolerant references', () => {
+        const projection = buildDrawnixMindMapProjection(createKnowledgeMapSpec());
+        const previewSvg = renderDrawnixMindMapSvg(projection, [{
+            id: 'source-visual-attributes',
+            kind: 'mermaid',
+            title: 'Mermaid source visual',
+            lineStart: 1,
+            lineEnd: 3,
+            svg: '<svg id="mermaid-root" data-id="keep" aria-labelledby="mermaid-root"><style>#mermaid-root .node { fill: url( #gradient ); }</style><defs><linearGradient id="gradient" /></defs><g class="node" fill="url( #gradient )" /></svg>'
+        }]);
+
+        expect(previewSvg).toContain('data-id="keep"');
+        expect(previewSvg).toContain('aria-labelledby="notemd-source-visual-attributes-0-mermaid-root"');
+        expect(previewSvg).toContain('id="notemd-source-visual-attributes-0-mermaid-root"');
+        expect(previewSvg).toContain('id="notemd-source-visual-attributes-1-gradient"');
+        expect(previewSvg).toContain('url(#notemd-source-visual-attributes-1-gradient)');
+        expect(previewSvg).not.toContain('url( #gradient )');
     });
 
     test('preserves multiple top-level roots without flattening the forest', async () => {

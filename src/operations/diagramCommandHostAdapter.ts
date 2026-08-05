@@ -5,6 +5,7 @@ import { DiagramIntent, isSupportedDiagramIntent, RenderTarget } from '../diagra
 import { LocalKnowledgeRetrievalSummary } from '../localKnowledgeBase';
 import { RenderArtifact, RenderArtifactCompanion, RenderArtifactPreviewPanel } from '../rendering/types';
 import { ensureSemanticFigureSvgStandaloneStyles } from '../rendering/renderers/editableHtmlSvgRenderer';
+import { sanitizeSvgForExport } from '../rendering/preview/pngPreview';
 import { DiagramOperationInput, DiagramOperationExecutionMode, buildDiagramOperationInput } from '../diagram/diagramGenerationService';
 import { isSupportedInputFileForTask } from '../inputFileSupport';
 import { LLMProviderConfig, NotemdSettings, ProgressReporter } from '../types';
@@ -854,6 +855,11 @@ interface DrawnixSourceVisualPreviewMetadata {
     id: string;
     kind: 'mermaid' | 'image';
     companionPaths: string[];
+    embeddedSvg?: string;
+    sourceContent?: string;
+    title?: string;
+    lineStart?: number;
+    lineEnd?: number;
 }
 
 function parseDrawnixSourceVisualPreviewMetadata(content: string): DrawnixSourceVisualPreviewMetadata[] {
@@ -883,7 +889,18 @@ function parseDrawnixSourceVisualPreviewMetadata(content: string): DrawnixSource
             const companionPaths = Array.isArray(candidate.companionPaths)
                 ? candidate.companionPaths.filter((path): path is string => typeof path === 'string' && path.trim().length > 0)
                 : [];
-            return id && kind && companionPaths.length > 0 ? [{ id, kind, companionPaths }] : [];
+            const embeddedSvg = typeof candidate.embeddedSvg === 'string' && candidate.embeddedSvg.trim().length > 0
+                ? candidate.embeddedSvg
+                : undefined;
+            const sourceContent = typeof candidate.sourceContent === 'string'
+                ? candidate.sourceContent
+                : undefined;
+            const title = typeof candidate.title === 'string' ? candidate.title : undefined;
+            const lineStart = typeof candidate.lineStart === 'number' ? candidate.lineStart : undefined;
+            const lineEnd = typeof candidate.lineEnd === 'number' ? candidate.lineEnd : undefined;
+            return id && kind && (companionPaths.length > 0 || embeddedSvg)
+                ? [{ id, kind, companionPaths, embeddedSvg, sourceContent, title, lineStart, lineEnd }]
+                : [];
         });
     } catch {
         return [];
@@ -968,6 +985,13 @@ async function buildDrawnixSourceVisualPreviewPanels(params: {
     };
 
     for (const visual of metadata) {
+        if (visual.embeddedSvg && looksLikeSvgSource(visual.embeddedSvg)) {
+            panels.push({
+                id: visual.id,
+                artifact: buildSvgHtmlPreviewArtifact(sanitizeSvgForExport(visual.embeddedSvg))
+            });
+            continue;
+        }
         const svgPath = visual.companionPaths.find(path => inferCompanionMimeType(path) === 'image/svg+xml');
         if (svgPath) {
             const memorySvg = findMemoryCompanion(svgPath);
@@ -977,7 +1001,7 @@ async function buildDrawnixSourceVisualPreviewPanels(params: {
             if (svg?.content && looksLikeSvgSource(svg.content)) {
                 panels.push({
                     id: visual.id,
-                    artifact: buildSvgHtmlPreviewArtifact(svg.content)
+                    artifact: buildSvgHtmlPreviewArtifact(sanitizeSvgForExport(svg.content))
                 });
                 continue;
             }

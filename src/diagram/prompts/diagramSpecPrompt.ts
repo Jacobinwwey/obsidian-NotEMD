@@ -6,7 +6,16 @@ export interface DiagramSpecPromptOptions {
     requiredIntent?: DiagramIntent;
     preferredChartType?: SupportedVegaLiteChartType;
     preferredRenderTarget?: RenderTarget;
+    sourcePath?: string;
     targetLanguage?: string;
+}
+
+function sourceDocumentLabel(sourcePath: string | undefined): string | undefined {
+    const basename = sourcePath?.split(/[\\/]/).pop()?.trim();
+    if (!basename) {
+        return undefined;
+    }
+    return basename.replace(/\.[^.]+$/, '') || basename;
 }
 
 export function buildDiagramSpecPrompt(options: DiagramSpecPromptOptions = {}): string {
@@ -131,9 +140,11 @@ The deterministic renderer, not the model, emits the complete LaTeX document wit
 
 Drawnix knowledge-map rules:
 - Set intent: drawnixMindmap.
-- Create one or more top-level root nodes and organize each tree through node.children. Use multiple roots when the source has independent subsystems; do not invent a container node just to force unrelated topics into one tree.
+- Return exactly one top-level document root. Use the source document filename as the root label${sourceDocumentLabel(options.sourcePath) ? ` (recommended: "${sourceDocumentLabel(options.sourcePath)}")` : ''}.
+- Organize H2/module/section concepts as first-level children of that document root, H3 concepts beneath their section, and concise details beneath those branches.
+- Never emit standalone top-level leaves or multiple independent roots. If a concept does not fit a section, place it under a first-level "Additional concepts" branch.
 - Use node.children for ownership and taxonomy. Do not duplicate parent-child relationships in edges.
-- Keep each root tree's hierarchy depth at or below 3.
+- Keep the document-root hierarchy depth at or below 3.
 - Use edges only for cross-branch runtime relationships. Emit at most 4 edges.
 - Create concise labels. Put implementation detail in leaf nodes, not the root.
 - For architecture notes, group the tree by subsystem first and place request/data flow in cross-branch relationships.

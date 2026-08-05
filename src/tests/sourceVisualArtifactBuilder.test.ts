@@ -2,6 +2,33 @@ import { buildSourceVisualCompanions } from '../diagram/sourceVisualArtifactBuil
 import { ResolvedSourceVisual } from '../diagram/sourceVisuals';
 
 describe('source visual artifact companions', () => {
+    test('supports a self-contained Drawnix visual mode without Mermaid companion files', async () => {
+        const visuals: ResolvedSourceVisual[] = [{
+            id: 'source-visual-inline',
+            kind: 'mermaid',
+            sourceHash: 'inline001',
+            lineStart: 1,
+            lineEnd: 3,
+            language: 'mermaid',
+            definition: 'flowchart TD\nA --> B',
+            status: 'resolved',
+            content: 'flowchart TD\nA --> B'
+        }];
+        const result = await buildSourceVisualCompanions(visuals, {
+            inlineMermaidVisuals: true
+        } as any);
+
+        expect(result.companions).toEqual([]);
+        expect(result.manifest[0]).toMatchObject({
+            id: 'source-visual-inline',
+            companionPaths: []
+        });
+        expect(result.previewVisuals[0]).toEqual(expect.objectContaining({
+            id: 'source-visual-inline',
+            svg: expect.stringContaining('<svg')
+        }));
+    });
+
     test('emits Mermaid source and sanitized SVG companions plus a manifest', async () => {
         const visuals: ResolvedSourceVisual[] = [{
             id: 'source-visual-1',
@@ -34,6 +61,26 @@ describe('source visual artifact companions', () => {
                 svg: '<svg><rect /></svg>'
             })
         ]);
+    });
+
+    test('converts Mermaid HTML labels for the Drawnix preview while preserving the companion SVG', async () => {
+        const result = await buildSourceVisualCompanions([{
+            id: 'source-visual-foreign-object',
+            kind: 'mermaid',
+            sourceHash: 'foreign001',
+            lineStart: 1,
+            lineEnd: 3,
+            definition: 'flowchart TD\\nA --> B',
+            status: 'resolved',
+            content: 'flowchart TD\\nA --> B'
+        }], {
+            renderMermaidSvg: async () => '<svg xmlns="http://www.w3.org/2000/svg"><foreignObject x="0" y="0" width="120" height="40"><div xmlns="http://www.w3.org/1999/xhtml"><span>Architecture</span></div></foreignObject></svg>'
+        });
+
+        expect(result.companions[1].content).toContain('<foreignObject');
+        expect(result.previewVisuals[0].svg).not.toContain('<foreignObject');
+        expect(result.previewVisuals[0].svg).toContain('data-notemd-raster-fallback="foreign-object"');
+        expect(result.previewVisuals[0].svg).toContain('Architecture');
     });
 
     test('keeps unresolved visuals explicit instead of dropping them', async () => {

@@ -252,6 +252,118 @@ describe('saveDiagramArtifactFile', () => {
         );
     });
 
+    test('removes stale Notemd companion scope after saving inline Drawnix visuals', async () => {
+        const reporter = createReporter();
+        const staleFolder = Object.assign(new (TFolder as any)(), {
+            path: 'Notes/Source_diagram.drawnix.assets',
+            children: [
+                Object.assign(Object.create(TFile.prototype), {
+                    name: 'source-visual-manifest.json',
+                    path: 'Notes/Source_diagram.drawnix.assets/source-visual-manifest.json'
+                }),
+                Object.assign(Object.create(TFile.prototype), {
+                    name: 'source-visual-source-visual-1.mermaid.md',
+                    path: 'Notes/Source_diagram.drawnix.assets/source-visual-source-visual-1.mermaid.md'
+                }),
+                Object.assign(Object.create(TFile.prototype), {
+                    name: 'source-visual-source-visual-1.svg',
+                    path: 'Notes/Source_diagram.drawnix.assets/source-visual-source-visual-1.svg'
+                })
+            ]
+        });
+        (mockApp.vault.getAbstractFileByPath as jest.Mock).mockImplementation((path: string) => {
+            if (path === 'Notes/Source_diagram.drawnix.assets') {
+                return staleFolder;
+            }
+            return null;
+        });
+        (mockApp.vault.read as jest.Mock).mockResolvedValue(JSON.stringify({
+            version: 1,
+            visuals: [{ id: 'source-visual-1', kind: 'mermaid', companionPaths: ['source-visual-1.svg'] }]
+        }));
+
+        await saveDiagramArtifactFile(mockApp, mockSettings, originalFile, {
+            target: 'drawnix',
+            content: JSON.stringify({
+                type: 'drawnix',
+                version: 1,
+                source: 'web',
+                elements: [{ id: 'root', type: 'mindmap', children: [] }],
+                viewport: { zoom: 1, offsetX: 0, offsetY: 0 },
+                metadata: {
+                    notemd: {
+                        version: 1,
+                        sourceVisuals: [{
+                            id: 'source-visual-1',
+                            kind: 'mermaid',
+                            status: 'resolved',
+                            sourceHash: 'abc12345',
+                            companionPaths: [],
+                            embeddedSvg: '<svg />'
+                        }]
+                    }
+                }
+            }),
+            mimeType: 'application/vnd.drawnix+json',
+            sourceIntent: 'drawnixMindmap',
+            previewSvg: { content: '<svg />', mimeType: 'image/svg+xml' }
+        }, reporter);
+
+        expect(mockApp.vault.delete).toHaveBeenCalledWith(staleFolder, true);
+    });
+
+    test('preserves companion scope when it contains non-Notemd files', async () => {
+        const reporter = createReporter();
+        const folder = Object.assign(new (TFolder as any)(), {
+            path: 'Notes/Source_diagram.drawnix.assets',
+            children: [
+                Object.assign(Object.create(TFile.prototype), {
+                    name: 'source-visual-manifest.json',
+                    path: 'Notes/Source_diagram.drawnix.assets/source-visual-manifest.json'
+                }),
+                Object.assign(Object.create(TFile.prototype), {
+                    name: 'keep-me.md',
+                    path: 'Notes/Source_diagram.drawnix.assets/keep-me.md'
+                })
+            ]
+        });
+        (mockApp.vault.getAbstractFileByPath as jest.Mock).mockImplementation((path: string) => (
+            path === 'Notes/Source_diagram.drawnix.assets' ? folder : null
+        ));
+        (mockApp.vault.read as jest.Mock).mockResolvedValue(JSON.stringify({
+            version: 1,
+            visuals: [{ id: 'source-visual-1', kind: 'mermaid', companionPaths: ['source-visual-1.svg'] }]
+        }));
+
+        await saveDiagramArtifactFile(mockApp, mockSettings, originalFile, {
+            target: 'drawnix',
+            content: JSON.stringify({
+                type: 'drawnix',
+                version: 1,
+                source: 'web',
+                elements: [{ id: 'root', type: 'mindmap', children: [] }],
+                viewport: { zoom: 1, offsetX: 0, offsetY: 0 },
+                metadata: {
+                    notemd: {
+                        version: 1,
+                        sourceVisuals: [{
+                            id: 'source-visual-1',
+                            kind: 'mermaid',
+                            status: 'resolved',
+                            sourceHash: 'abc12345',
+                            companionPaths: [],
+                            embeddedSvg: '<svg />'
+                        }]
+                    }
+                }
+            }),
+            mimeType: 'application/vnd.drawnix+json',
+            sourceIntent: 'drawnixMindmap'
+        }, reporter);
+
+        expect(mockApp.vault.delete).not.toHaveBeenCalled();
+    });
+
     test('restores existing files when a later artifact write fails', async () => {
         const reporter = createReporter();
         const svgFile = Object.create(TFile.prototype) as TFile;

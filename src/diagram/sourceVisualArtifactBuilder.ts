@@ -4,6 +4,7 @@ import {
     RenderArtifactDiagnostic,
     RenderArtifactSourceVisualManifestEntry
 } from '../rendering/types';
+import { sanitizeSvgForExport } from '../rendering/preview/pngPreview';
 import { ResolvedSourceVisual } from './sourceVisuals';
 
 export interface SourceVisualCompanionBuildResult {
@@ -21,10 +22,16 @@ export interface SourceVisualPreview {
     lineStart: number;
     lineEnd: number;
     svg: string;
+    sourceContent?: string;
 }
 
 export interface SourceVisualCompanionBuildOptions {
     renderMermaidSvg?: (definition: string) => Promise<string>;
+    /**
+     * Drawnix can persist Mermaid previews in its namespaced metadata. Keeping
+     * this opt-in avoids changing the companion contract for other renderers.
+     */
+    inlineMermaidVisuals?: boolean;
 }
 
 function escapeHtml(value: string): string {
@@ -86,18 +93,13 @@ export async function buildSourceVisualCompanions(
     const previewVisuals: SourceVisualPreview[] = [];
     const diagnostics: RenderArtifactDiagnostic[] = [];
     const renderMermaidSvg = options.renderMermaidSvg ?? defaultMermaidSvgRenderer;
+    const inlineMermaidVisuals = options.inlineMermaidVisuals === true;
 
     for (const visual of visuals ?? []) {
         const companionPaths: string[] = [];
         if (visual.status === 'resolved' && visual.kind === 'mermaid' && typeof visual.content === 'string') {
             const sourcePath = companionName(visual, '.mermaid.md');
             const svgPath = companionName(visual, '.svg');
-            companions.push({
-                path: sourcePath,
-                content: `\`\`\`mermaid\n${visual.content.trim()}\n\`\`\`\n`,
-                mimeType: 'text/markdown',
-                sourceVisualId: visual.id
-            });
             let svg: string;
             try {
                 svg = await renderMermaidSvg(visual.content);
@@ -111,12 +113,22 @@ export async function buildSourceVisualCompanions(
                 });
             }
             const sanitizedSvg = sanitizeSvg(svg);
-            companions.push({
-                path: svgPath,
-                content: sanitizedSvg,
-                mimeType: 'image/svg+xml',
-                sourceVisualId: visual.id
-            });
+            const previewSvg = sanitizeSvgForExport(sanitizedSvg);
+            if (!inlineMermaidVisuals) {
+                companions.push({
+                    path: sourcePath,
+                    content: `\`\`\`mermaid\n${visual.content.trim()}\n\`\`\`\n`,
+                    mimeType: 'text/markdown',
+                    sourceVisualId: visual.id
+                });
+                companions.push({
+                    path: svgPath,
+                    content: sanitizedSvg,
+                    mimeType: 'image/svg+xml',
+                    sourceVisualId: visual.id
+                });
+                companionPaths.push(sourcePath, svgPath);
+            }
             previewVisuals.push({
                 id: visual.id,
                 kind: visual.kind,
@@ -124,9 +136,9 @@ export async function buildSourceVisualCompanions(
                 sourcePath: visual.vaultPath ?? visual.targetPath,
                 lineStart: visual.lineStart,
                 lineEnd: visual.lineEnd,
-                svg: sanitizedSvg
+                svg: previewSvg,
+                sourceContent: visual.content
             });
-            companionPaths.push(sourcePath, svgPath);
         } else if (visual.status === 'resolved' && visual.kind === 'image' && visual.content instanceof ArrayBuffer) {
             const imagePath = companionName(visual, `.${visual.vaultPath?.split('.').pop()?.toLowerCase() || 'bin'}`);
             companions.push({
@@ -157,7 +169,7 @@ export async function buildSourceVisualCompanions(
         });
     }
 
-    if (manifest.length > 0) {
+    if (manifest.length > 0 && (!inlineMermaidVisuals || companions.length > 0)) {
         companions.push(buildManifestCompanion(manifest));
     }
 

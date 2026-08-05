@@ -44,6 +44,7 @@ function parseSvgCoordinate(value: string | undefined, fallback: number): number
 
 interface SourceVisualSvgCanvas {
     innerMarkup: string;
+    rootAttributes: string;
     viewBoxX: number;
     viewBoxY: number;
     width: number;
@@ -65,6 +66,7 @@ function parseSourceVisualSvgCanvas(svg: string): SourceVisualSvgCanvas | null {
 
     return {
         innerMarkup: match[2] ?? '',
+        rootAttributes: attributes,
         viewBoxX,
         viewBoxY,
         width: viewBox
@@ -83,20 +85,58 @@ function escapeRegExp(value: string): string {
 function namespaceSourceVisualSvgIds(svg: string, visualId: string): string {
     const slug = visualId.replace(/[^a-zA-Z0-9_-]+/g, '-') || 'visual';
     const idMap = new Map<string, string>();
-    const namespaced = svg.replace(/\bid\s*=\s*(["'])([^"']+)\1/g, (match, quote: string, id: string) => {
-        if (!idMap.has(id)) {
-            idMap.set(id, `notemd-${slug}-${idMap.size}-${id}`);
+    const namespaced = svg.replace(/<([A-Za-z][\w:.-]*)(?:\s[^<>]*)?>/g, tag => tag.replace(
+        /(\s)(id|xml:id)(\s*=\s*)(["'])([^"']+)\4/g,
+        (_match, whitespace: string, attribute: string, equals: string, quote: string, id: string) => {
+            if (!idMap.has(id)) {
+                idMap.set(id, `notemd-${slug}-${idMap.size}-${id}`);
+            }
+            return `${whitespace}${attribute}${equals}${quote}${idMap.get(id)}${quote}`;
         }
-        return `id=${quote}${idMap.get(id)}${quote}`;
-    });
+    ));
 
     let result = namespaced;
     idMap.forEach((namespacedId, originalId) => {
         const escapedId = escapeRegExp(originalId);
-        result = result.replace(new RegExp(`url\\(#${escapedId}\\)`, 'g'), `url(#${namespacedId})`);
+        result = result.replace(
+            new RegExp(`url\\(\\s*(["']?)\\s*#${escapedId}\\s*\\1\\s*\\)`, 'g'),
+            `url(#${namespacedId})`
+        );
         result = result.replace(new RegExp(`(["'])#${escapedId}(["'])`, 'g'), `$1#${namespacedId}$2`);
     });
+    result = result.replace(
+        /\s+(aria-labelledby|aria-describedby|for|begin)\s*=\s*(["'])([^"']*)\2/gi,
+        (match, attribute: string, quote: string, value: string) => {
+            let rewrittenValue = value;
+            idMap.forEach((namespacedId, originalId) => {
+                const escapedId = escapeRegExp(originalId);
+                rewrittenValue = rewrittenValue.replace(
+                    new RegExp(`(^|[\\s;,])${escapedId}(?=$|[\\s;,.])`, 'g'),
+                    `$1${namespacedId}`
+                );
+            });
+            return match.replace(value, rewrittenValue);
+        }
+    );
+    result = result.replace(/(<style\b[^>]*>)([\s\S]*?)(<\/style>)/gi, (_match, open: string, css: string, close: string) => {
+        let rewrittenCss = css;
+        idMap.forEach((namespacedId, originalId) => {
+            const escapedId = escapeRegExp(originalId);
+            rewrittenCss = rewrittenCss.replace(
+                new RegExp(`#${escapedId}(?![A-Za-z0-9_-])`, 'g'),
+                `#${namespacedId}`
+            );
+        });
+        return `${open}${rewrittenCss}${close}`;
+    });
     return result;
+}
+
+function preserveSourceSvgRootAttributes(attributes: string): string {
+    return attributes
+        .replace(/\s+(?:x|y|width|height|viewBox|preserveAspectRatio|overflow)\s*=\s*(?:"[^"]*"|'[^']*')/gi, '')
+        .replace(/\s+/g, ' ')
+        .trim();
 }
 
 function branchColor(branchIndex: number): string {
@@ -187,8 +227,11 @@ function renderSourceVisualPanel(
     const panelId = escapeAttribute(visual.id);
     const title = escapeHtml(visual.title);
     const metadata = escapeHtml(sourceVisualMetadata(visual));
+    const preservedRootAttributes = canvas
+        ? preserveSourceSvgRootAttributes(canvas.rootAttributes)
+        : '';
     const nestedSvg = canvas
-        ? `<svg x="${panelX + SOURCE_VISUAL_PANEL_PADDING}" y="${panelY + SOURCE_VISUAL_PANEL_PADDING + SOURCE_VISUAL_HEADER_HEIGHT + SOURCE_VISUAL_CONTENT_GAP}" width="${contentWidth}" height="${contentHeight}" viewBox="${canvas.viewBoxX} ${canvas.viewBoxY} ${canvas.width} ${canvas.height}" preserveAspectRatio="xMidYMid meet" overflow="hidden" data-drawnix-mindmap-source-visual-svg="${panelId}">${canvas.innerMarkup}</svg>`
+        ? `<svg x="${panelX + SOURCE_VISUAL_PANEL_PADDING}" y="${panelY + SOURCE_VISUAL_PANEL_PADDING + SOURCE_VISUAL_HEADER_HEIGHT + SOURCE_VISUAL_CONTENT_GAP}" width="${contentWidth}" height="${contentHeight}" viewBox="${canvas.viewBoxX} ${canvas.viewBoxY} ${canvas.width} ${canvas.height}" preserveAspectRatio="xMidYMid meet" overflow="hidden"${preservedRootAttributes ? ` ${preservedRootAttributes}` : ''} data-drawnix-mindmap-source-visual-svg="${panelId}">${canvas.innerMarkup}</svg>`
         : `<text x="${panelX + SOURCE_VISUAL_PANEL_PADDING}" y="${panelY + SOURCE_VISUAL_PANEL_PADDING + SOURCE_VISUAL_HEADER_HEIGHT + 32}" class="notemd-drawnix-source-visual-unavailable">Preview unavailable for this source visual.</text>`;
 
     return {

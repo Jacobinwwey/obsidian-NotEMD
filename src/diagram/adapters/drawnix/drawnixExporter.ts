@@ -14,6 +14,12 @@ export interface DrawnixSourceVisualAttachment {
     sourcePath?: string;
     companionPaths: string[];
     diagnostic?: string;
+    /** Inline source visuals make the Drawnix artifact self-contained. */
+    embeddedSvg?: string;
+    sourceContent?: string;
+    title?: string;
+    lineStart?: number;
+    lineEnd?: number;
 }
 
 export interface DrawnixMindMapMetadata {

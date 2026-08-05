@@ -292,6 +292,86 @@ function rewriteDrawnixArtifactCompanionPaths(
     }
 }
 
+function isObjectRecord(value: unknown): value is Record<string, unknown> {
+    return Boolean(value) && typeof value === 'object' && !Array.isArray(value);
+}
+
+function hasInlineDrawnixMermaidVisuals(content: string): boolean {
+    try {
+        const parsed = JSON.parse(content) as unknown;
+        if (!isObjectRecord(parsed) || parsed.type !== 'drawnix') {
+            return false;
+        }
+        const metadata = isObjectRecord(parsed.metadata) ? parsed.metadata : undefined;
+        const notemd = metadata && isObjectRecord(metadata.notemd) ? metadata.notemd : undefined;
+        const visuals = notemd?.sourceVisuals;
+        if (!Array.isArray(visuals) || visuals.length === 0) {
+            return false;
+        }
+        const hasEmbeddedMermaid = visuals.some(visual => (
+            isObjectRecord(visual)
+            && visual.kind === 'mermaid'
+            && typeof visual.embeddedSvg === 'string'
+            && visual.embeddedSvg.trim().length > 0
+        ));
+        return hasEmbeddedMermaid && visuals.every(visual => (
+            isObjectRecord(visual)
+            && Array.isArray(visual.companionPaths)
+            && visual.companionPaths.length === 0
+        ));
+    } catch {
+        return false;
+    }
+}
+
+function isGeneratedDrawnixCompanionFile(file: TFile): boolean {
+    return /^(?:source-visual-manifest\.json|source-visual-[A-Za-z0-9_-]+\.(?:mermaid\.md|svg|png|jpe?g|gif|webp|bmp|bin))$/iu.test(file.name);
+}
+
+async function removeStaleInlineDrawnixCompanionScope(
+    app: App,
+    folderPath: string,
+    progressReporter: ProgressReporter
+): Promise<void> {
+    const existingFolder = app.vault.getAbstractFileByPath(folderPath);
+    if (!(existingFolder instanceof TFolder)) {
+        return;
+    }
+
+    const children = existingFolder.children ?? [];
+    if (children.some(child => !(child instanceof TFile) || !isGeneratedDrawnixCompanionFile(child))) {
+        progressReporter.log(`Preserved Drawnix companion folder with user-managed files: ${folderPath}`);
+        return;
+    }
+
+    const manifest = children.find((child): child is TFile => (
+        child instanceof TFile && child.name === 'source-visual-manifest.json'
+    ));
+    if (children.length > 0 && !manifest) {
+        progressReporter.log(`Preserved Drawnix companion folder without a Notemd manifest: ${folderPath}`);
+        return;
+    }
+    if (manifest) {
+        try {
+            const parsedManifest = JSON.parse(await app.vault.read(manifest)) as unknown;
+            if (!isObjectRecord(parsedManifest) || parsedManifest.version !== 1 || !Array.isArray(parsedManifest.visuals)) {
+                progressReporter.log(`Preserved Drawnix companion folder with an unrecognized manifest: ${folderPath}`);
+                return;
+            }
+        } catch {
+            progressReporter.log(`Preserved Drawnix companion folder with an unreadable manifest: ${folderPath}`);
+            return;
+        }
+    }
+
+    try {
+        await app.vault.delete(existingFolder, true);
+        progressReporter.log(`Removed stale Drawnix companion folder: ${folderPath}`);
+    } catch (error: unknown) {
+        progressReporter.log(`Could not remove stale Drawnix companion folder '${folderPath}': ${error instanceof Error ? error.message : String(error)}`);
+    }
+}
+
 export async function handleFileRename(app: App, oldPath: string, newPath: string, uiLocale = 'auto') {
     const oldName = oldPath.split('/').pop()?.replace('.md', '') || '';
     const newName = newPath.split('/').pop()?.replace('.md', '') || '';
@@ -1926,6 +2006,11 @@ export async function saveDiagramArtifactFile(
     if (artifact.target === 'drawnix') {
         finalContent = rewriteDrawnixArtifactCompanionPaths(finalContent, companionPathMap);
     }
+    const staleInlineDrawnixCompanionScope = artifact.target === 'drawnix'
+        && (artifact.companions?.length ?? 0) === 0
+        && hasInlineDrawnixMermaidVisuals(finalContent)
+        ? `${outputPath}.assets`
+        : undefined;
 
     const companionPaths: string[] = [];
     const writtenCompanionPaths = new Set<string>();
@@ -1986,9 +2071,15 @@ export async function saveDiagramArtifactFile(
                 }),
                 'diagram Obsidian preview wrapper'
             );
+            if (staleInlineDrawnixCompanionScope) {
+                await removeStaleInlineDrawnixCompanionScope(app, staleInlineDrawnixCompanionScope, progressReporter);
+            }
             return wrapperPath;
         }
 
+        if (staleInlineDrawnixCompanionScope) {
+            await removeStaleInlineDrawnixCompanionScope(app, staleInlineDrawnixCompanionScope, progressReporter);
+        }
         return outputPath;
     } catch (error: unknown) {
         for (const snapshot of Array.from(modifiedSnapshots.values()).reverse()) {

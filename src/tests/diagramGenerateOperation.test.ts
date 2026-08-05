@@ -49,6 +49,7 @@ describe('diagram generate operation', () => {
         });
 
         expect(generateDiagramArtifactImpl).toHaveBeenCalledWith('# Topic', expect.objectContaining({
+            sourcePath: 'Notes/Topic.md',
             requestedIntent: 'flowchart',
             compatibilityMode: 'best-fit'
         }));

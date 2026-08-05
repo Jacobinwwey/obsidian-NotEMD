@@ -466,7 +466,7 @@ describe('diagram command host adapter', () => {
         diagramHost.getFileByPath.mockImplementation((path: string) => ({ path }));
         (diagramHost as any).readFile = jest.fn(async (loadedFile: { path: string }) =>
             loadedFile.path.endsWith('source-visual-1.svg')
-                ? '<svg><text>Mermaid companion</text></svg>'
+                ? '<svg><foreignObject x="0" y="0" width="120" height="40"><div xmlns="http://www.w3.org/1999/xhtml">Mermaid companion</div></foreignObject></svg>'
                 : host.readFile.mock.results[0]?.value ?? ''
         );
 
@@ -482,6 +482,58 @@ describe('diagram command host adapter', () => {
                         artifact: expect.objectContaining({
                             previewSvg: expect.objectContaining({
                                 content: expect.stringContaining('Mermaid companion')
+                            })
+                        })
+                    })
+                ])
+            })
+        });
+        const panels = (result as any).artifact.previewPanels as Array<{ id: string; artifact: { previewSvg?: { content: string } } }>;
+        const mermaidPanel = panels.find(panel => panel.id === 'source-visual-1');
+        expect(mermaidPanel?.artifact.previewSvg?.content).not.toContain('<foreignObject');
+        expect(diagramHost.openPreview).toHaveBeenCalledTimes(1);
+    });
+
+    test('preview wrapper restores an inline Drawnix Mermaid visual without companion files', async () => {
+        const { host, diagramHost, reporter } = createDiagramHost();
+        const file = { name: 'Architecture_diagram.drawnix', path: 'Notes/Architecture_diagram.drawnix' };
+        host.readFile.mockResolvedValue(JSON.stringify({
+            type: 'drawnix',
+            version: 1,
+            source: 'web',
+            elements: [],
+            metadata: {
+                notemd: {
+                    version: 1,
+                    sourceVisuals: [{
+                        id: 'source-visual-inline',
+                        kind: 'mermaid',
+                        status: 'resolved',
+                        sourceHash: 'inline001',
+                        companionPaths: [],
+                        embeddedSvg: '<svg xmlns="http://www.w3.org/2000/svg"><text>Inline Mermaid</text></svg>',
+                        title: 'Mermaid source visual 1',
+                        lineStart: 1,
+                        lineEnd: 3
+                    }]
+                }
+            }
+        }));
+        diagramHost.getFileByPath.mockImplementation((path: string) => ({ path }));
+        (diagramHost as any).readFile = jest.fn().mockResolvedValue('');
+
+        const result = await runPreviewDiagramCommandWithHost(host as any, file as any, reporter as any);
+
+        expect(result).toMatchObject({
+            kind: 'success',
+            artifact: expect.objectContaining({
+                target: 'drawnix',
+                previewPanels: expect.arrayContaining([
+                    expect.objectContaining({
+                        id: 'source-visual-inline',
+                        artifact: expect.objectContaining({
+                            previewSvg: expect.objectContaining({
+                                content: expect.stringContaining('Inline Mermaid')
                             })
                         })
                     })

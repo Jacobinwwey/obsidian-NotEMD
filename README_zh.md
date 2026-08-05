@@ -175,6 +175,7 @@ Notemd 是一个**开源 Obsidian 插件**，集成 30+ 种大型语言模型 (L
     - `mindmap`、`flowchart`、`sequenceDiagram`、`classDiagram`、`erDiagram` 与 `stateDiagram-v2` 仍由 Mermaid adapter 覆盖；`dataChart` 使用受控 Vega-Lite 模板；`circuit` 使用 `circuitikz` render target。
     - 预览弹窗可把可渲染输出或 SVG companion 导出为 `.svg`、`.png` 与 `.pdf`；光栅导出接受 72 到 600 之间的任意整数 DPI（默认 300；100/300/600 为常用预设），超出范围的配置会被安全夹紧。
     - 多 panel 预览会保留每个 Mermaid 代码块以及 Drawnix 持久化的每个源图形。多图时，顶部 SVG、PNG 和 PDF 导出都会要求选择原文件夹或自定义 Vault 相对文件夹，然后按 panel 顺序逐个写出稳定命名的图片（例如 `Architecture_preview_mermaid-2.svg`），某一张失败后仍会继续其余 panel；每个 panel 标题栏还提供 SVG/PNG/PDF 菜单，可单独导出某一张图或图片。
+    - Drawnix Mermaid 图会把经安全清理的 SVG 与源文本内联到 `.drawnix` metadata，因此仅包含 Mermaid 的图不会再生成独立 `.assets` 目录；重新生成时只会删除带合法 manifest 且确认为插件所有的旧 Mermaid companion，无法安全内联的外部二进制或未解析图形仍会保留 companion。
     - PNG/PDF 光栅导出会先生成适合 Canvas 的中间 SVG：Mermaid 光栅渲染关闭 HTML label，将 foreignObject 标签转换为 SVG 文本，移除外部图片引用，同时让多 panel 的样式和 defs 保留在各自的嵌套 SVG 画布中；原始 SVG 导出仍保持矢量内容。
     - Draw.io、Drawnix 与 Circuitikz 都保持 artifact 边界：插件不捆绑 diagrams.net、Drawnix、Plait、LaTeX 或 TikZJax runtime，而是写出原生源文件和 Obsidian 可查看的 SVG companion。
     - 电路图必须使用 `intent: "circuit"` 与已验证 `CircuitSpec`。`CircuitikzRenderer` 会写出确定性 `.tex`，并附加用于 Obsidian 预览和 SVG/PNG/PDF 导出的 SVG companion；该 companion 不是 LaTeX/TikZJax 编译结果。
@@ -186,7 +187,7 @@ Notemd 是一个**开源 Obsidian 插件**，集成 30+ 种大型语言模型 (L
 | Vega-Lite | `_diagram.json` | 是 | 是 | 是 | 是 | 是 | 预览/导出使用主题感知 Vega-Lite 配置补丁。 |
 | 可编辑 HTML/SVG | `_diagram.html` | 是 | 是 | 是 | 是 | 是 | SVG 从语义 figure model 生成。 |
 | Draw.io | `_diagram.drawio` + SVG/MD companion | SVG companion | 是 | 是 | 是 | 是 | 不捆绑 diagrams.net runtime。 |
-| Drawnix | `_diagram.drawnix` + SVG/MD/媒体 companion 与 manifest | SVG companion | 是 | 是 | 是 | 是 | 支持多 root、避开无关 root 的跨 root 箭头以及 Mermaid/图片保真；插件内不嵌入 Drawnix 或 Plait runtime。 |
+| Drawnix | `_diagram.drawnix` 内联 Mermaid 源图形；仅主预览或未内联/未解析媒体使用 SVG/媒体 companion | SVG companion | 是 | 是 | 是 | 是 | 默认单一文档根节点、避开无关 root 的跨 root 箭头，Mermaid 预览自包含；插件内不嵌入 Drawnix 或 Plait runtime。 |
 | Circuitikz | `_diagram.tex` + SVG/MD companion | SVG companion | 是 | 是 | 是 | 是 | 需要 `intent: "circuit"` 与已验证 `CircuitSpec`；不在 runtime 编译 LaTeX。 |
 | HTML | `_diagram.html` | 是（iframe fallback） | 否 | 否 | 否 | 是 | 通用 HTML fallback 暂不承诺栅格/矢量导出。 |
 

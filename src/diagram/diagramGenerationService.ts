@@ -23,6 +23,7 @@ import { hashResolvedSourceVisualManifest, ResolvedSourceVisual } from './source
 
 export interface DiagramGenerationOptions {
     compatibilityMode: 'best-fit' | 'legacy-mermaid';
+    sourcePath?: string;
     targetLanguage?: string;
     requestedIntent?: DiagramIntent;
     requestedRenderTarget?: RenderTarget;
@@ -210,13 +211,14 @@ function resolvePromptPreferredIntent(plan: DiagramPlan, requestedIntent?: Diagr
 
 function buildGenerationPrompt(
     plan: DiagramPlan,
-    options: Pick<DiagramGenerationOptions, 'requestedIntent' | 'targetLanguage'>
+    options: Pick<DiagramGenerationOptions, 'requestedIntent' | 'targetLanguage' | 'sourcePath'>
 ): string {
     return buildDiagramSpecPrompt({
         preferredIntent: resolvePromptPreferredIntent(plan, options.requestedIntent),
         requiredIntent: options.requestedIntent,
         preferredChartType: plan.preferredChartType,
         preferredRenderTarget: plan.renderTarget,
+        sourcePath: options.sourcePath,
         targetLanguage: options.targetLanguage
     });
 }
@@ -346,9 +348,13 @@ function mergeSpecDefaults(
     };
 }
 
-function enrichDrawnixSourceCoverage(spec: DiagramSpec, sourceMarkdown: string): DiagramSpec {
+function enrichDrawnixSourceCoverage(
+    spec: DiagramSpec,
+    sourceMarkdown: string,
+    sourcePath?: string
+): DiagramSpec {
     return spec.intent === 'drawnixMindmap'
-        ? mergeDrawnixSourceCoverage(spec, sourceMarkdown)
+        ? mergeDrawnixSourceCoverage(spec, sourceMarkdown, sourcePath)
         : spec;
 }
 
@@ -422,7 +428,11 @@ export async function generateDiagramArtifact(
     let spec: DiagramSpec;
     try {
         const parsedSpec = parseDiagramSpecResponse(rawResponse);
-        spec = enrichDrawnixSourceCoverage(mergeSpecDefaults(parsedSpec, plan, options.requestedIntent), markdown);
+        spec = enrichDrawnixSourceCoverage(
+            mergeSpecDefaults(parsedSpec, plan, options.requestedIntent),
+            markdown,
+            options.sourcePath
+        );
         assertValidDiagramSpec(spec);
     } catch (validationError: unknown) {
         const circuitFallback = resolveConstrainedCircuitFallback(markdown, plan, options);
@@ -441,7 +451,11 @@ export async function generateDiagramArtifact(
         rawResponse = await options.llmInvoker(retryPrompt, markdown);
         try {
             const parsedSpec = parseDiagramSpecResponse(rawResponse);
-            spec = enrichDrawnixSourceCoverage(mergeSpecDefaults(parsedSpec, plan, options.requestedIntent), markdown);
+            spec = enrichDrawnixSourceCoverage(
+                mergeSpecDefaults(parsedSpec, plan, options.requestedIntent),
+                markdown,
+                options.sourcePath
+            );
             assertValidDiagramSpec(spec);
         } catch (retryValidationError: unknown) {
             const circuitFallback = resolveConstrainedCircuitFallback(markdown, plan, options);
@@ -493,7 +507,11 @@ export async function generateDiagramArtifact(
 
             const retryResponse = await options.llmInvoker(retryPrompt, markdown);
             const retryParsedSpec = parseDiagramSpecResponse(retryResponse);
-            const retrySpec = enrichDrawnixSourceCoverage(mergeSpecDefaults(retryParsedSpec, plan, options.requestedIntent), markdown);
+            const retrySpec = enrichDrawnixSourceCoverage(
+                mergeSpecDefaults(retryParsedSpec, plan, options.requestedIntent),
+                markdown,
+                options.sourcePath
+            );
             assertValidDiagramSpec(retrySpec);
             assertPlanCompatibility(retrySpec, plan, options);
 

@@ -24,8 +24,26 @@ export class DrawnixRenderer implements DiagramRenderer {
         assertValidDiagramSpec(spec);
 
         const projection = buildDrawnixMindMapProjection(spec);
-        const sourceVisualCompanions = await buildSourceVisualCompanions(options.sourceVisuals);
-        const data = exportDrawnixMindMapProjection(projection, sourceVisualCompanions.manifest);
+        const sourceVisualCompanions = await buildSourceVisualCompanions(options.sourceVisuals, {
+            inlineMermaidVisuals: true
+        });
+        const embeddedVisualsById = new Map(
+            sourceVisualCompanions.previewVisuals.map(visual => [visual.id, visual] as const)
+        );
+        const sourceVisualMetadata = sourceVisualCompanions.manifest.map(visual => {
+            const embedded = embeddedVisualsById.get(visual.id);
+            return embedded
+                ? {
+                    ...visual,
+                    embeddedSvg: embedded.svg,
+                    sourceContent: embedded.sourceContent,
+                    title: embedded.title,
+                    lineStart: embedded.lineStart,
+                    lineEnd: embedded.lineEnd
+                }
+                : visual;
+        });
+        const data = exportDrawnixMindMapProjection(projection, sourceVisualMetadata);
         const validationErrors = validateDrawnixMindMapExportedData(data);
         if (validationErrors.length > 0) {
             throw new Error(`Drawnix mind-map validation failed: ${validationErrors.join('; ')}`);

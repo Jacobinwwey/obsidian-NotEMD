@@ -207,7 +207,7 @@ The spec-first pipeline can also force a render target independently from the in
 |---|---|---|
 | `editable-html-svg` | Self-contained HTML with semantic inline SVG | no external editor runtime |
 | `drawio` | `.drawio` XML plus SVG/MD review companions | no diagrams.net runtime in the plugin |
-| `drawnix` | `.drawnix` JSON subset plus SVG/MD/media companions and manifest | no Drawnix or Plait runtime in the plugin; cross-root routing avoids unrelated root regions |
+| `drawnix` | `.drawnix` JSON subset with inline Mermaid source visuals; SVG/media companions only for the primary preview or unresolved/non-inline media | no Drawnix or Plait runtime in the plugin; regeneration removes only manifest-backed plugin-owned Mermaid companion scopes, while the default document root and cross-root routing avoid unrelated root regions |
 | `circuitikz` | validated `.tex` source plus SVG/MD review companions | dependency-free preview/export; optional desktop compiler or managed Tectonic |
 
 Circuitikz support is intentionally constrained. The front-end settings expose `Circuit (Circuitikz)` as a preferred diagram type and `Circuitikz + SVG preview` as a preferred render target without requiring Developer mode, but the renderer accepts only a validated `DiagramSpec(intent: "circuit", circuitSpec)`. It writes deterministic circuitikz TeX and a reviewable SVG companion. Desktop users may then reuse a custom/system compiler or explicitly install pinned Tectonic 0.16.9 outside the Vault for compile diagnostics, native PDF evidence, and guarded repair acceptance; mobile and ordinary preview/export do not load desktop process code.

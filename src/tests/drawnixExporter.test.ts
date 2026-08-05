@@ -98,4 +98,30 @@ describe('drawnix exporter', () => {
         expect(artifact.previewSvg?.content).toContain('<svg');
         expect(artifact.previewSvg?.content).toContain('notemd-drawnix-mindmap-svg@1.0.0');
     });
+
+    test('serializes inline Mermaid metadata without companion paths', () => {
+        const projection = buildDrawnixMindMapProjection(createDrawnixSpec());
+        const data = exportDrawnixMindMapProjection(projection, [{
+            id: 'source-visual-inline',
+            kind: 'mermaid',
+            status: 'resolved',
+            sourceHash: 'inline001',
+            companionPaths: [],
+            embeddedSvg: '<svg><text>Inline Mermaid</text></svg>',
+            sourceContent: 'flowchart TD\nA --> B',
+            title: 'Mermaid source visual 1',
+            lineStart: 1,
+            lineEnd: 3
+        }]);
+
+        expect(data.metadata?.notemd.sourceVisuals).toEqual([
+            expect.objectContaining({
+                id: 'source-visual-inline',
+                companionPaths: [],
+                embeddedSvg: expect.stringContaining('Inline Mermaid'),
+                sourceContent: 'flowchart TD\nA --> B'
+            })
+        ]);
+        expect(validateDrawnixMindMapExportedData(data)).toEqual([]);
+    });
 });
