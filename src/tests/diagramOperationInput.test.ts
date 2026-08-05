@@ -87,6 +87,23 @@ describe('diagram operation input helpers', () => {
         }
     });
 
+    test('promotes an explicit non-Mermaid render target out of legacy compatibility mode', () => {
+        const input = buildDiagramOperationInput({
+            sourcePath: 'Notes/Topic.md',
+            sourceMarkdown: '# Topic',
+            executionMode: 'save-artifact',
+            settings: {
+                ...mockSettings,
+                experimentalDiagramCompatibilityMode: 'legacy-mermaid'
+            },
+            requestedIntentOverride: 'drawnixMindmap',
+            requestedRenderTargetOverride: 'drawnix'
+        });
+
+        expect(input.requestedRenderTarget).toBe('drawnix');
+        expect(input.compatibilityMode).toBe('best-fit');
+    });
+
     test('resolves an automatic diagram type to circuit when CircuitikZ is selected', () => {
         const input = buildDiagramOperationInput({
             sourceMarkdown: '画一个共源 NMOS 放大器',

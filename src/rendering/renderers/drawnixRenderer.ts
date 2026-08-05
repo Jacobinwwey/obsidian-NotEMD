@@ -37,7 +37,7 @@ export class DrawnixRenderer implements DiagramRenderer {
             mimeType: 'application/vnd.drawnix+json',
             sourceIntent: spec.intent,
             previewSvg: {
-                content: renderDrawnixMindMapSvg(projection),
+                content: renderDrawnixMindMapSvg(projection, sourceVisualCompanions.previewVisuals),
                 mimeType: 'image/svg+xml'
             },
             companions: sourceVisualCompanions.companions,

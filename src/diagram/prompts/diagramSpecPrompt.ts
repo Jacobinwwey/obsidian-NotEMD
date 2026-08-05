@@ -137,6 +137,9 @@ Drawnix knowledge-map rules:
 - Use edges only for cross-branch runtime relationships. Emit at most 4 edges.
 - Create concise labels. Put implementation detail in leaf nodes, not the root.
 - For architecture notes, group the tree by subsystem first and place request/data flow in cross-branch relationships.
+- Cover the source note rather than returning a tiny abstract summary: represent each major source section as a root or first-level branch when it contains distinct content.
+- Preserve named components, participants, modules, and target formats from Mermaid blocks as leaf nodes or branch labels. Do not discard source sections merely because exact Mermaid syntax is preserved in companions.
+- When a source section contains multiple listed or diagrammed items, include the items as separate children. The deterministic renderer adds a source-coverage safety net, but the model should still return a complete semantic tree.
 - Return DiagramSpec fields only. The renderer owns board serialization and layout.`
         : '';
     const supportedIntentsSection = isCircuitikzRequest

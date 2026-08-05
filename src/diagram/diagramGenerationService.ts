@@ -18,6 +18,7 @@ import type { DiagramIntent, DiagramNode, DiagramPlan, DiagramSpec, RenderTarget
 import { parseDiagramSpecResponse } from './diagramSpecResponseParser';
 import { resolveCircuitTemplateFromMarkdown } from './adapters/circuitikz/circuitTemplateCatalog';
 import { validateDrawnixMindMapSpec } from './adapters/drawnix/drawnixMindMapProjection';
+import { mergeDrawnixSourceCoverage } from './adapters/drawnix/drawnixSourceCoverage';
 import { hashResolvedSourceVisualManifest, ResolvedSourceVisual } from './sourceVisuals';
 
 export interface DiagramGenerationOptions {
@@ -59,10 +60,15 @@ export interface BuildDiagramOperationInputParams {
 
 export function resolveDiagramOperationCompatibilityMode(
     executionMode: DiagramOperationExecutionMode,
-    configuredMode: 'best-fit' | 'legacy-mermaid'
+    configuredMode: 'best-fit' | 'legacy-mermaid',
+    requestedRenderTarget?: RenderTarget
 ): 'best-fit' | 'legacy-mermaid' {
     if (executionMode === 'save-mermaid') {
         return 'legacy-mermaid';
+    }
+
+    if (configuredMode === 'legacy-mermaid' && requestedRenderTarget && requestedRenderTarget !== 'mermaid') {
+        return 'best-fit';
     }
 
     return configuredMode;
@@ -97,7 +103,8 @@ export function buildDiagramOperationInput(params: BuildDiagramOperationInputPar
         requestedRenderTarget,
         compatibilityMode: resolveDiagramOperationCompatibilityMode(
             params.executionMode,
-            params.compatibilityModeOverride ?? params.settings.experimentalDiagramCompatibilityMode
+            params.compatibilityModeOverride ?? params.settings.experimentalDiagramCompatibilityMode,
+            requestedRenderTarget
         ),
         outputMode: params.executionMode === 'save-mermaid' ? 'mermaid' : 'artifact',
         targetLanguage: params.targetLanguageOverride
@@ -298,8 +305,14 @@ function normalizeDrawnixMindMapNodes(nodes: DiagramNode[]): DiagramNode[] {
     ));
 }
 
-function mergeSpecDefaults(spec: DiagramSpec, plan: DiagramPlan): DiagramSpec {
-    const resolvedIntent = resolveLegacyCompatibleIntent(spec, plan);
+function mergeSpecDefaults(
+    spec: DiagramSpec,
+    plan: DiagramPlan,
+    requiredIntent?: DiagramIntent
+): DiagramSpec {
+    const resolvedIntent = requiredIntent === 'drawnixMindmap'
+        ? 'drawnixMindmap'
+        : resolveLegacyCompatibleIntent(spec, plan);
     const normalizedLayoutHints = { ...(spec.layoutHints ?? {}) };
 
     if (resolvedIntent !== 'dataChart') {
@@ -331,6 +344,12 @@ function mergeSpecDefaults(spec: DiagramSpec, plan: DiagramPlan): DiagramSpec {
         layoutHints: Object.keys(normalizedLayoutHints).length > 0 ? normalizedLayoutHints : undefined,
         evidenceRefs: spec.evidenceRefs ?? []
     };
+}
+
+function enrichDrawnixSourceCoverage(spec: DiagramSpec, sourceMarkdown: string): DiagramSpec {
+    return spec.intent === 'drawnixMindmap'
+        ? mergeDrawnixSourceCoverage(spec, sourceMarkdown)
+        : spec;
 }
 
 function assertPlanCompatibility(
@@ -403,7 +422,7 @@ export async function generateDiagramArtifact(
     let spec: DiagramSpec;
     try {
         const parsedSpec = parseDiagramSpecResponse(rawResponse);
-        spec = mergeSpecDefaults(parsedSpec, plan);
+        spec = enrichDrawnixSourceCoverage(mergeSpecDefaults(parsedSpec, plan, options.requestedIntent), markdown);
         assertValidDiagramSpec(spec);
     } catch (validationError: unknown) {
         const circuitFallback = resolveConstrainedCircuitFallback(markdown, plan, options);
@@ -422,7 +441,7 @@ export async function generateDiagramArtifact(
         rawResponse = await options.llmInvoker(retryPrompt, markdown);
         try {
             const parsedSpec = parseDiagramSpecResponse(rawResponse);
-            spec = mergeSpecDefaults(parsedSpec, plan);
+            spec = enrichDrawnixSourceCoverage(mergeSpecDefaults(parsedSpec, plan, options.requestedIntent), markdown);
             assertValidDiagramSpec(spec);
         } catch (retryValidationError: unknown) {
             const circuitFallback = resolveConstrainedCircuitFallback(markdown, plan, options);
@@ -474,7 +493,7 @@ export async function generateDiagramArtifact(
 
             const retryResponse = await options.llmInvoker(retryPrompt, markdown);
             const retryParsedSpec = parseDiagramSpecResponse(retryResponse);
-            const retrySpec = mergeSpecDefaults(retryParsedSpec, plan);
+            const retrySpec = enrichDrawnixSourceCoverage(mergeSpecDefaults(retryParsedSpec, plan, options.requestedIntent), markdown);
             assertValidDiagramSpec(retrySpec);
             assertPlanCompatibility(retrySpec, plan, options);
 

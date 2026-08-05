@@ -26,6 +26,14 @@ describe('source visual artifact companions', () => {
         expect(result.companions[1].content).not.toContain('<script');
         expect(result.companions[1].content).not.toContain('onload');
         expect(result.manifest[0]).toMatchObject({ status: 'resolved', companionPaths: expect.any(Array) });
+        expect(result.previewVisuals).toEqual([
+            expect.objectContaining({
+                id: 'source-visual-1',
+                kind: 'mermaid',
+                title: 'Mermaid source visual 1',
+                svg: '<svg><rect /></svg>'
+            })
+        ]);
     });
 
     test('keeps unresolved visuals explicit instead of dropping them', async () => {

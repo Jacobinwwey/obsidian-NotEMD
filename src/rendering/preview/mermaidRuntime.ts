@@ -1,3 +1,4 @@
+import mermaid from 'mermaid';
 import {
     defaultPackagePreviewModuleLoader,
     PackagePreviewModuleLoader
@@ -39,7 +40,9 @@ export async function loadBundledMermaidPreviewDeps(
 
 export async function loadDefaultBundledMermaidPreviewDeps(): Promise<MermaidPreviewDeps> {
     if (!defaultDepsPromise) {
-        defaultDepsPromise = loadBundledMermaidPreviewDeps();
+        // The main Obsidian bundle owns Mermaid. A runtime bare-package require
+        // cannot resolve a dependency that esbuild has already bundled.
+        defaultDepsPromise = Promise.resolve(resolveDirectMermaidDeps('bundled mermaid', mermaid));
     }
 
     return defaultDepsPromise;

@@ -387,6 +387,34 @@ Client sends work to a queue-backed worker.
         });
     });
 
+    test('normalizes a generic mindmap response when the Drawnix target is explicit', async () => {
+        const result = await generateDiagramArtifact('# Architecture', {
+            compatibilityMode: 'best-fit',
+            requestedRenderTarget: 'drawnix',
+            targetLanguage: 'en',
+            llmInvoker: async () => JSON.stringify({
+                intent: 'mindmap',
+                title: 'Architecture',
+                nodes: [
+                    { label: 'Client', children: [{ label: 'Editor' }] },
+                    { label: 'Server' }
+                ],
+                edges: [{ from: 'editor', to: 'server', label: 'request' }]
+            })
+        });
+
+        expect(result.spec.intent).toBe('drawnixMindmap');
+        expect(result.artifact.target).toBe('drawnix');
+        expect(result.spec.nodes.map(node => node.id)).toEqual(['client', 'server']);
+        expect(result.spec.nodes[0].children?.map(node => node.id)).toEqual(['editor']);
+        expect(JSON.parse(result.artifact.content).elements).toEqual(
+            expect.arrayContaining([
+                expect.objectContaining({ type: 'mindmap', id: 'client' }),
+                expect.objectContaining({ type: 'mindmap', id: 'server' })
+            ])
+        );
+    });
+
     test('honors circuitikz render target overrides with TeX source and svg companion', async () => {
         const llmInvoker = jest.fn().mockResolvedValue(JSON.stringify(createCircuitDiagramSpec()));
 

@@ -39,4 +39,13 @@ describe('mermaid runtime loader', () => {
             render
         });
     });
+
+    test('uses the statically bundled Mermaid runtime for the default loader', async () => {
+        const { loadDefaultBundledMermaidPreviewDeps } = await import('../rendering/preview/mermaidRuntime');
+        const deps = await loadDefaultBundledMermaidPreviewDeps();
+
+        expect(typeof deps.initialize).toBe('function');
+        expect(typeof deps.parse).toBe('function');
+        expect(typeof deps.render).toBe('function');
+    });
 });

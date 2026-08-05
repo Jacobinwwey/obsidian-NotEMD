@@ -4,6 +4,7 @@ import {
     DRAWNIX_MIND_MAP_FOREST_ROW_MAX_WIDTH
 } from '../diagram/adapters/drawnix/drawnixMindMapProjection';
 import { DrawnixRenderer } from '../rendering/renderers/drawnixRenderer';
+import { renderDrawnixMindMapSvg } from '../rendering/renderers/drawnixMindMapSvgRenderer';
 
 function createKnowledgeMapSpec(): DiagramSpec {
     return {
@@ -136,6 +137,93 @@ describe('Drawnix mind-map renderer', () => {
                 ]
             })
         ]);
+    });
+
+    test('embeds resolved Mermaid visuals in the Drawnix mind-map preview', async () => {
+        const artifact = await new DrawnixRenderer().render(createKnowledgeMapSpec(), {
+            sourceVisuals: [{
+                id: 'source-visual-1',
+                kind: 'mermaid',
+                sourceHash: 'abc12345',
+                lineStart: 1,
+                lineEnd: 3,
+                language: 'mermaid',
+                definition: 'flowchart TD\nA --> B',
+                status: 'resolved',
+                content: 'flowchart TD\nA --> B'
+            }]
+        });
+
+        const previewSvg = artifact.previewSvg?.content ?? '';
+        expect(previewSvg).toContain('data-drawnix-mindmap-source-visual-id="source-visual-1"');
+        expect(previewSvg).toContain('data-drawnix-mindmap-source-visual-kind="mermaid"');
+        expect(previewSvg).toContain('Mermaid source visual 1');
+        expect(previewSvg).toContain('data-drawnix-mindmap-source-visual-svg="source-visual-1"');
+        expect(previewSvg).toContain('data-drawnix-mindmap-node-id="notemd"');
+    });
+
+    test('renders every Mermaid visual in separate panels with isolated SVG ids', async () => {
+        const artifact = await new DrawnixRenderer().render(createKnowledgeMapSpec(), {
+            sourceVisuals: [
+                {
+                    id: 'source-visual-1',
+                    kind: 'mermaid',
+                    sourceHash: 'abc12345',
+                    lineStart: 1,
+                    lineEnd: 3,
+                    language: 'mermaid',
+                    definition: 'flowchart TD\nA --> B',
+                    status: 'resolved',
+                    content: 'flowchart TD\nA --> B'
+                },
+                {
+                    id: 'source-visual-2',
+                    kind: 'mermaid',
+                    sourceHash: 'def67890',
+                    lineStart: 5,
+                    lineEnd: 7,
+                    language: 'mermaid',
+                    definition: 'flowchart LR\nB --> C',
+                    status: 'resolved',
+                    content: 'flowchart LR\nB --> C'
+                }
+            ]
+        });
+
+        const previewSvg = artifact.previewSvg?.content ?? '';
+        expect(previewSvg).toContain('data-drawnix-mindmap-source-visual-panels="2"');
+        expect(previewSvg).toContain('data-drawnix-mindmap-source-visual-id="source-visual-1"');
+        expect(previewSvg).toContain('data-drawnix-mindmap-source-visual-id="source-visual-2"');
+        expect(previewSvg).toContain('data-drawnix-mindmap-source-visual-svg="source-visual-1"');
+        expect(previewSvg).toContain('data-drawnix-mindmap-source-visual-svg="source-visual-2"');
+        expect(previewSvg).toContain('width="1974"');
+    });
+
+    test('namespaces nested Mermaid SVG ids independently for each source visual', () => {
+        const projection = buildDrawnixMindMapProjection(createKnowledgeMapSpec());
+        const previewSvg = renderDrawnixMindMapSvg(projection, [
+            {
+                id: 'source-visual-1',
+                kind: 'mermaid',
+                title: 'Mermaid source visual 1',
+                lineStart: 1,
+                lineEnd: 3,
+                svg: '<svg viewBox="0 0 100 50"><defs><marker id="arrow" /></defs><path marker-end="url(#arrow)" /></svg>'
+            },
+            {
+                id: 'source-visual-2',
+                kind: 'mermaid',
+                title: 'Mermaid source visual 2',
+                lineStart: 5,
+                lineEnd: 7,
+                svg: '<svg viewBox="0 0 100 50"><defs><marker id="arrow" /></defs><path marker-end="url(#arrow)" /></svg>'
+            }
+        ]);
+
+        expect(previewSvg).toContain('id="notemd-source-visual-1-0-arrow"');
+        expect(previewSvg).toContain('url(#notemd-source-visual-1-0-arrow)');
+        expect(previewSvg).toContain('id="notemd-source-visual-2-0-arrow"');
+        expect(previewSvg).toContain('url(#notemd-source-visual-2-0-arrow)');
     });
 
     test('preserves multiple top-level roots without flattening the forest', async () => {

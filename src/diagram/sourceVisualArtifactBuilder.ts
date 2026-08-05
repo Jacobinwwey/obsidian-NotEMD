@@ -9,7 +9,18 @@ import { ResolvedSourceVisual } from './sourceVisuals';
 export interface SourceVisualCompanionBuildResult {
     companions: RenderArtifactCompanion[];
     manifest: RenderArtifactSourceVisualManifestEntry[];
+    previewVisuals: SourceVisualPreview[];
     diagnostics: RenderArtifactDiagnostic[];
+}
+
+export interface SourceVisualPreview {
+    id: string;
+    kind: ResolvedSourceVisual['kind'];
+    title: string;
+    sourcePath?: string;
+    lineStart: number;
+    lineEnd: number;
+    svg: string;
 }
 
 export interface SourceVisualCompanionBuildOptions {
@@ -52,6 +63,12 @@ function companionName(visual: ResolvedSourceVisual, suffix: string): string {
     return `source-visual-${visual.id.replace(/[^a-zA-Z0-9_-]+/g, '-')}${suffix}`;
 }
 
+function sourceVisualPreviewTitle(visual: ResolvedSourceVisual, ordinal: number): string {
+    return visual.kind === 'mermaid'
+        ? `Mermaid source visual ${ordinal}`
+        : `Source visual ${ordinal}`;
+}
+
 function buildManifestCompanion(manifest: readonly RenderArtifactSourceVisualManifestEntry[]): RenderArtifactCompanion {
     return {
         path: 'source-visual-manifest.json',
@@ -66,6 +83,7 @@ export async function buildSourceVisualCompanions(
 ): Promise<SourceVisualCompanionBuildResult> {
     const companions: RenderArtifactCompanion[] = [];
     const manifest: RenderArtifactSourceVisualManifestEntry[] = [];
+    const previewVisuals: SourceVisualPreview[] = [];
     const diagnostics: RenderArtifactDiagnostic[] = [];
     const renderMermaidSvg = options.renderMermaidSvg ?? defaultMermaidSvgRenderer;
 
@@ -92,11 +110,21 @@ export async function buildSourceVisualCompanions(
                     advice: error instanceof Error ? error.message : String(error)
                 });
             }
+            const sanitizedSvg = sanitizeSvg(svg);
             companions.push({
                 path: svgPath,
-                content: sanitizeSvg(svg),
+                content: sanitizedSvg,
                 mimeType: 'image/svg+xml',
                 sourceVisualId: visual.id
+            });
+            previewVisuals.push({
+                id: visual.id,
+                kind: visual.kind,
+                title: sourceVisualPreviewTitle(visual, previewVisuals.length + 1),
+                sourcePath: visual.vaultPath ?? visual.targetPath,
+                lineStart: visual.lineStart,
+                lineEnd: visual.lineEnd,
+                svg: sanitizedSvg
             });
             companionPaths.push(sourcePath, svgPath);
         } else if (visual.status === 'resolved' && visual.kind === 'image' && visual.content instanceof ArrayBuffer) {
@@ -133,5 +161,5 @@ export async function buildSourceVisualCompanions(
         companions.push(buildManifestCompanion(manifest));
     }
 
-    return { companions, manifest, diagnostics };
+    return { companions, manifest, previewVisuals, diagnostics };
 }
