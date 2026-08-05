@@ -64,8 +64,10 @@
 	"dependencies": {
 		"acorn": "^8.17.0",
 		"fflate": "^0.8.3",
+		"jspdf": "^4.2.1",
 		"mermaid": "11.4.1",
 		"minisearch": "^7.2.0",
+		"svg2pdf.js": "^2.7.0",
 		"vega": "^6.2.0",
 		"vega-lite": "^6.4.2"
 	},

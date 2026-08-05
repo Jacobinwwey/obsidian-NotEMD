@@ -1,113 +1,136 @@
-export interface RasterImagePdfInput {
-    imageData: ArrayBuffer;
-    imageMimeType: 'image/jpeg';
-    imageWidthPx: number;
-    imageHeightPx: number;
-    sourceWidthCssPx: number;
-    sourceHeightCssPx: number;
-}
+import { jsPDF } from 'jspdf';
+import { svg2pdf } from 'svg2pdf.js';
+import notoSansScRegularDataUrl from '../../assets/NotoSansSC-Regular.ttf';
+import { resolveSvgDimensions, sanitizeSvgForExport } from './pngPreview';
 
 const PDF_POINTS_PER_CSS_PIXEL = 72 / 96;
+const PDF_FONT_FILE_NAME = 'NotoSansSC-Regular.ttf';
+const PDF_FONT_FAMILY = 'NotoSansSC';
+const PDF_FONT_STYLES = ['normal', 'bold', 'italic', 'bolditalic'] as const;
+export type PdfPageOrientation = 'portrait' | 'landscape';
 
-function encodeAscii(value: string): Uint8Array {
-    const bytes = new Uint8Array(value.length);
-    for (let index = 0; index < value.length; index += 1) {
-        bytes[index] = value.charCodeAt(index) & 0xff;
+export interface SvgPdfDocumentLike {
+    output(type: 'arraybuffer'): ArrayBuffer;
+    addFileToVFS?(fileName: string, data: string): void;
+    addFont?(fileName: string, family: string, style: string): void;
+    setFont?(family: string, style?: string): void;
+}
+
+export interface SvgPdfExportDeps {
+    parseSvg(svg: string): unknown;
+    createDocument(
+        pageWidthPt: number,
+        pageHeightPt: number,
+        orientation: PdfPageOrientation
+    ): SvgPdfDocumentLike;
+    renderSvg(
+        element: unknown,
+        document: SvgPdfDocumentLike,
+        options: { x: number; y: number; width: number; height: number }
+    ): Promise<unknown> | unknown;
+}
+
+function parseSvgDocument(svg: string): Element {
+    if (typeof DOMParser === 'undefined') {
+        throw new Error('PDF export requires a browser SVG parser.');
     }
-    return bytes;
+
+    const document = new DOMParser().parseFromString(svg, 'image/svg+xml');
+    const root = document.documentElement;
+    if (!root || root.tagName.toLowerCase() !== 'svg' || root.querySelector('parsererror')) {
+        throw new Error('Preview renderer returned malformed SVG markup for PDF export.');
+    }
+
+    return root;
 }
 
-function toUint8Array(data: ArrayBuffer | Uint8Array): Uint8Array {
-    return data instanceof Uint8Array ? data : new Uint8Array(data);
+function createSvgPdfDocument(
+    pageWidthPt: number,
+    pageHeightPt: number,
+    orientation: PdfPageOrientation
+): SvgPdfDocumentLike {
+    return new jsPDF({
+        orientation,
+        unit: 'pt',
+        format: [pageWidthPt, pageHeightPt],
+        compress: true,
+        putOnlyUsedFonts: true
+    });
 }
 
-function concatBytes(chunks: Uint8Array[]): Uint8Array {
-    const length = chunks.reduce((sum, chunk) => sum + chunk.byteLength, 0);
-    const output = new Uint8Array(length);
-    let offset = 0;
-    for (const chunk of chunks) {
-        output.set(chunk, offset);
-        offset += chunk.byteLength;
+function extractBase64Data(dataUrl: string): string {
+    const separatorIndex = dataUrl.indexOf(',');
+    return separatorIndex >= 0 ? dataUrl.slice(separatorIndex + 1) : dataUrl;
+}
+
+function normalizeSvgFontFamilyDeclarations(svg: string): string {
+    let normalized = svg.replace(
+        /\sfont-family\s*=\s*(["'])[^"']*\1/gi,
+        ` font-family="${PDF_FONT_FAMILY}"`
+    );
+    normalized = normalized.replace(
+        /font-family\s*:\s*[^;{}\n]+/gi,
+        `font-family:${PDF_FONT_FAMILY}`
+    );
+    return normalized.replace(/<svg\b/i, `<svg font-family="${PDF_FONT_FAMILY}"`);
+}
+
+function registerPdfFont(document: SvgPdfDocumentLike): void {
+    if (
+        typeof document.addFileToVFS !== 'function'
+        || typeof document.addFont !== 'function'
+    ) {
+        return;
+    }
+
+    document.addFileToVFS(PDF_FONT_FILE_NAME, extractBase64Data(notoSansScRegularDataUrl));
+    for (const style of PDF_FONT_STYLES) {
+        document.addFont(PDF_FONT_FILE_NAME, PDF_FONT_FAMILY, style);
+    }
+    document.setFont?.(PDF_FONT_FAMILY, 'normal');
+}
+
+async function renderSvgToPdf(
+    element: unknown,
+    document: SvgPdfDocumentLike,
+    options: { x: number; y: number; width: number; height: number }
+): Promise<unknown> {
+    return svg2pdf(element as Element, document as jsPDF, options);
+}
+
+const DEFAULT_SVG_PDF_EXPORT_DEPS: SvgPdfExportDeps = {
+    parseSvg: parseSvgDocument,
+    createDocument: createSvgPdfDocument,
+    renderSvg: renderSvgToPdf
+};
+
+export async function buildPdfFromSvg(
+    svg: string,
+    deps: SvgPdfExportDeps = DEFAULT_SVG_PDF_EXPORT_DEPS
+): Promise<ArrayBuffer> {
+    // svg2pdf.js does not implement HTML foreignObject layout. Convert the
+    // browser-rendered label containers to explicit SVG text/tspan nodes first;
+    // this preserves Mermaid's source line breaks instead of asking Mermaid to
+    // lay out a second, PDF-specific version of the diagram.
+    const pdfSvg = normalizeSvgFontFamilyDeclarations(sanitizeSvgForExport(svg));
+    const dimensions = resolveSvgDimensions(pdfSvg);
+    const pageWidthPt = dimensions.width * PDF_POINTS_PER_CSS_PIXEL;
+    const pageHeightPt = dimensions.height * PDF_POINTS_PER_CSS_PIXEL;
+    const orientation: PdfPageOrientation = pageWidthPt > pageHeightPt ? 'landscape' : 'portrait';
+    const document = deps.createDocument(pageWidthPt, pageHeightPt, orientation);
+    registerPdfFont(document);
+    const element = deps.parseSvg(pdfSvg);
+
+    await deps.renderSvg(element, document, {
+        x: 0,
+        y: 0,
+        width: pageWidthPt,
+        height: pageHeightPt
+    });
+
+    const output = document.output('arraybuffer');
+    if (!(output instanceof ArrayBuffer) || output.byteLength === 0) {
+        throw new Error('SVG PDF renderer returned an empty document.');
     }
     return output;
-}
-
-function formatPdfNumber(value: number): string {
-    if (Number.isInteger(value)) {
-        return String(value);
-    }
-
-    return value.toFixed(3).replace(/0+$/, '').replace(/\.$/, '');
-}
-
-function buildObject(id: number, body: Uint8Array | string): Uint8Array {
-    const bodyBytes = typeof body === 'string' ? encodeAscii(body) : body;
-    return concatBytes([
-        encodeAscii(`${id} 0 obj\n`),
-        bodyBytes,
-        encodeAscii('\nendobj\n')
-    ]);
-}
-
-function buildStreamObject(id: number, dictionary: string, stream: Uint8Array): Uint8Array {
-    return buildObject(id, concatBytes([
-        encodeAscii(`${dictionary}\nstream\n`),
-        stream,
-        encodeAscii('\nendstream')
-    ]));
-}
-
-export function buildPdfFromRasterImage(input: RasterImagePdfInput): ArrayBuffer {
-    if (input.imageMimeType !== 'image/jpeg') {
-        throw new Error(`PDF export only supports JPEG raster input, received "${input.imageMimeType}".`);
-    }
-
-    const imageData = toUint8Array(input.imageData);
-    const pageWidthPt = input.sourceWidthCssPx * PDF_POINTS_PER_CSS_PIXEL;
-    const pageHeightPt = input.sourceHeightCssPx * PDF_POINTS_PER_CSS_PIXEL;
-    const pageWidth = formatPdfNumber(pageWidthPt);
-    const pageHeight = formatPdfNumber(pageHeightPt);
-    const contentStream = encodeAscii(`q\n${pageWidth} 0 0 ${pageHeight} 0 0 cm\n/Im0 Do\nQ\n`);
-    const objects = [
-        buildObject(1, '<< /Type /Catalog /Pages 2 0 R >>'),
-        buildObject(2, '<< /Type /Pages /Kids [3 0 R] /Count 1 >>'),
-        buildObject(
-            3,
-            `<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${pageWidth} ${pageHeight}] /Resources << /XObject << /Im0 4 0 R >> >> /Contents 5 0 R >>`
-        ),
-        buildStreamObject(
-            4,
-            `<< /Type /XObject /Subtype /Image /Width ${input.imageWidthPx} /Height ${input.imageHeightPx} /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ${imageData.byteLength} >>`,
-            imageData
-        ),
-        buildStreamObject(5, `<< /Length ${contentStream.byteLength} >>`, contentStream)
-    ];
-
-    const chunks: Uint8Array[] = [encodeAscii('%PDF-1.4\n')];
-    const offsets = [0];
-    let offset = chunks[0].byteLength;
-    for (const object of objects) {
-        offsets.push(offset);
-        chunks.push(object);
-        offset += object.byteLength;
-    }
-
-    const xrefOffset = offset;
-    const xrefEntries = offsets
-        .map((objectOffset, index) => {
-            if (index === 0) {
-                return '0000000000 65535 f ';
-            }
-            return `${String(objectOffset).padStart(10, '0')} 00000 n `;
-        })
-        .join('\n');
-
-    chunks.push(encodeAscii(
-        `xref\n0 ${offsets.length}\n${xrefEntries}\ntrailer\n<< /Size ${offsets.length} /Root 1 0 R >>\nstartxref\n${xrefOffset}\n%%EOF\n`
-    ));
-
-    const output = concatBytes(chunks);
-    const result = new ArrayBuffer(output.byteLength);
-    new Uint8Array(result).set(output);
-    return result;
 }

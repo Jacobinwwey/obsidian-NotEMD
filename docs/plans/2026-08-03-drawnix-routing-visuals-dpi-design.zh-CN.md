@@ -16,9 +16,9 @@ Drawnix 知识图可以包含多个顶层 root。当一个无关 root 位于跨 
 - `scanSourceVisualReferences` 是纯 Markdown 扫描器，记录顺序、源码行范围和 hash，忽略 fenced block 内的图片语法，且不会把源字节放入 `DiagramSpec` 或 LLM prompt。
 - command host 通过二进制读取解析 Vault 相对图片。Drawnix 以 companion 形式输出 Mermaid 源 Markdown、安全 SVG、图片二进制和 JSON manifest；未解析项也会保留在 manifest 并产生 diagnostics。
 - Render cache key 包含已解析 source visual manifest hash。
-- 预览光栅化接受 72 到 600 之间的任意整数 DPI，默认 300，设置提示中列出 100/300/600 常用预设；超出范围的值会被夹紧。PNG `pHYs` 元数据和 PDF 光栅尺寸使用归一化后的值；SVG 与 Drawnix 几何不受 DPI 影响。
-- PNG/PDF 预览光栅化会经过 Canvas 安全的 SVG 边界：Mermaid 导出关闭 HTML label，将 foreignObject 标签转换为 SVG 文本，并移除非 data URI 的外部资源；源 SVG 导出保持原样和矢量格式。
-- 当预览包含多个 panel 时，顶部 SVG 操作会要求选择原文件夹或自定义 Vault 相对文件夹，然后按顺序逐个写出确定性 SVG，并隔离报告单图失败。
+- PNG 预览光栅化接受 72 到 600 之间的任意整数 DPI，默认 300，设置提示中列出 100/300/600 常用预设；超出范围的值会被夹紧。PNG `pHYs` 元数据使用归一化后的值；SVG、矢量 PDF 与 Drawnix 几何不受 DPI 影响。
+- PNG 预览光栅化会经过 Canvas 安全的 SVG 边界：Mermaid 导出关闭 HTML label，将 foreignObject 标签转换为 SVG 文本，并移除非 data URI 的外部资源。SVG 和 PDF 预览则通过 `svg2pdf.js` 直接消费原始 SVG DOM，把路径、文本、marker 和 defs 保留为可编辑的 PDF 矢量操作。
+- 当预览包含多个 panel 时，顶部 SVG、PNG 和 PDF 操作都会要求选择原文件夹或自定义 Vault 相对文件夹，然后按顺序逐个写出确定性图片，并隔离报告单图失败。光栅合成会把每个 panel 的样式、defs 和 viewBox 保留在嵌套 SVG 画布中，避免 PDF/PNG 回退为黑色的无样式图元。
 
 ## 加固增量
 

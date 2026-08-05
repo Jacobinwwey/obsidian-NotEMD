@@ -7,7 +7,7 @@ import {
     resolvePngPixelsPerMeter,
     resolvePreviewExportPpi,
     resolveSvgDimensions,
-    sanitizeSvgForRasterExport
+    sanitizeSvgForExport
 } from '../rendering/preview/pngPreview';
 
 const PNG_SIGNATURE = new Uint8Array([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
@@ -84,7 +84,7 @@ function readUint32(data: Uint8Array, offset: number): number {
 
 describe('png preview rasterizer', () => {
     test('sanitizes foreignObject labels and external image references before rasterization', () => {
-        const safeSvg = sanitizeSvgForRasterExport(`
+        const safeSvg = sanitizeSvgForExport(`
             <svg xmlns="http://www.w3.org/2000/svg" width="240" height="120">
                 <foreignObject x="0" y="0" width="240" height="40">
                     <div xmlns="http://www.w3.org/1999/xhtml">Architecture label</div>
@@ -107,6 +107,18 @@ describe('png preview rasterizer', () => {
 
     test('falls back to viewBox dimensions when width and height are absent', () => {
         expect(resolveSvgDimensions('<svg viewBox="0 0 1200 800"></svg>')).toEqual({ width: 1200, height: 800 });
+    });
+
+    test('ignores percentage width and height so the intrinsic viewBox is preserved', () => {
+        expect(resolveSvgDimensions('<svg width="100%" height="100%" viewBox="0 0 1200 800"></svg>'))
+            .toEqual({ width: 1200, height: 800 });
+    });
+
+    test('ignores descendant viewBox attributes when the root SVG has no intrinsic viewBox', () => {
+        const svg = '<svg width="100%"><defs><marker viewBox="0 0 10 10">'
+            + '<path width="100" height="128" /></marker></defs></svg>';
+
+        expect(resolveSvgDimensions(svg)).toEqual({ width: 1600, height: 900 });
     });
 
     test('defaults raster export to 300 ppi and clamps manual resolution at 600 ppi', () => {

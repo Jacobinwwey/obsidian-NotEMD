@@ -3,6 +3,8 @@ import { formatI18n, getI18nStrings } from '../i18n';
 
 const EXPORT_FOLDER_RADIO_GROUP_NAME = 'notemd-diagram-preview-export-folder';
 
+export type DiagramPreviewExportFormat = 'SVG' | 'PNG' | 'PDF';
+
 export function getDiagramPreviewSourceFolder(sourcePath: string): string {
     const normalizedPath = sourcePath.trim().replace(/\\/g, '/').replace(/\/+$/, '');
     const lastSlashIndex = normalizedPath.lastIndexOf('/');
@@ -36,6 +38,7 @@ interface DiagramPreviewExportFolderModalOptions {
 export class DiagramPreviewExportFolderModal extends Modal {
     private readonly sourceFolder: string;
     private readonly resolveSelection: (folderPath: string | null) => void;
+    private readonly exportFormat: DiagramPreviewExportFormat;
     private completed = false;
     private customFolderInput: HTMLInputElement | null = null;
     private customFolderOption: HTMLInputElement | null = null;
@@ -47,20 +50,23 @@ export class DiagramPreviewExportFolderModal extends Modal {
         app: App,
         private readonly sourcePath: string,
         private readonly uiLocale = 'auto',
-        resolve: (folderPath: string | null) => void
+        resolve: (folderPath: string | null) => void,
+        exportFormat: DiagramPreviewExportFormat = 'SVG'
     ) {
         super(app);
         this.sourceFolder = getDiagramPreviewSourceFolder(sourcePath);
         this.resolveSelection = resolve;
+        this.exportFormat = exportFormat;
     }
 
     onOpen(): void {
         const copy = getI18nStrings({ uiLocale: this.uiLocale }).previewModal;
-        this.titleEl.setText(copy.exportFolderTitle);
+        const formatVariables = { format: this.exportFormat };
+        this.titleEl.setText(formatI18n(copy.exportFolderTitle, formatVariables));
         this.contentEl.empty();
         this.contentEl.addClass('notemd-diagram-preview-export-folder-modal');
         this.contentEl.createEl('p', {
-            text: copy.exportFolderDescription,
+            text: formatI18n(copy.exportFolderDescription, formatVariables),
             cls: 'notemd-diagram-preview-export-folder-description'
         });
 
@@ -104,7 +110,7 @@ export class DiagramPreviewExportFolderModal extends Modal {
         const cancelButton = actions.createEl('button', { text: copy.exportFolderCancel });
         cancelButton.onclick = () => this.complete(null);
         this.confirmButton = actions.createEl('button', {
-            text: copy.exportFolderConfirm,
+            text: formatI18n(copy.exportFolderConfirm, formatVariables),
             cls: 'mod-cta'
         });
         this.confirmButton.onclick = () => void this.confirmSelection();
@@ -215,9 +221,10 @@ export class DiagramPreviewExportFolderModal extends Modal {
 export function selectDiagramPreviewExportFolder(
     app: App,
     sourcePath: string,
-    uiLocale = 'auto'
+    uiLocale = 'auto',
+    exportFormat: DiagramPreviewExportFormat = 'SVG'
 ): Promise<string | null> {
     return new Promise(resolve => {
-        new DiagramPreviewExportFolderModal(app, sourcePath, uiLocale, resolve).open();
+        new DiagramPreviewExportFolderModal(app, sourcePath, uiLocale, resolve, exportFormat).open();
     });
 }

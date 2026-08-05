@@ -174,8 +174,8 @@ Notemd 是一个**开源 Obsidian 插件**，集成 30+ 种大型语言模型 (L
     - 规范优先的图表路径可以把笔记内容路由到 Mermaid、Obsidian JSON Canvas、Vega-Lite、HTML、可编辑 HTML/SVG、Draw.io、Drawnix 或受约束 circuitikz，而不是把所有场景都压回 Mermaid 文本生成。
     - `mindmap`、`flowchart`、`sequenceDiagram`、`classDiagram`、`erDiagram` 与 `stateDiagram-v2` 仍由 Mermaid adapter 覆盖；`dataChart` 使用受控 Vega-Lite 模板；`circuit` 使用 `circuitikz` render target。
     - 预览弹窗可把可渲染输出或 SVG companion 导出为 `.svg`、`.png` 与 `.pdf`；光栅导出接受 72 到 600 之间的任意整数 DPI（默认 300；100/300/600 为常用预设），超出范围的配置会被安全夹紧。
-    - 多 panel 预览会保留每个 Mermaid 代码块以及 Drawnix 持久化的每个源图形。多图时，顶部 SVG 导出会要求选择原文件夹或自定义 Vault 相对文件夹，然后按 panel 逐个写出稳定命名的 SVG（例如 `Architecture_preview_mermaid-2.svg`）；某一张失败后仍会继续其余 panel。每个 panel 标题栏还提供 SVG/PNG/PDF 菜单，可单独导出某一张图或图片。
-    - PNG/PDF 光栅导出会先生成适合 Canvas 的中间 SVG：Mermaid 光栅渲染关闭 HTML label，将 foreignObject 标签转换为 SVG 文本，并移除外部图片引用，同时保留 data-backed companion；原始 SVG 导出仍保持矢量内容。
+    - 多 panel 预览会保留每个 Mermaid 代码块以及 Drawnix 持久化的每个源图形。多图时，顶部 SVG、PNG 和 PDF 导出都会要求选择原文件夹或自定义 Vault 相对文件夹，然后按 panel 顺序逐个写出稳定命名的图片（例如 `Architecture_preview_mermaid-2.svg`），某一张失败后仍会继续其余 panel；每个 panel 标题栏还提供 SVG/PNG/PDF 菜单，可单独导出某一张图或图片。
+    - PNG/PDF 光栅导出会先生成适合 Canvas 的中间 SVG：Mermaid 光栅渲染关闭 HTML label，将 foreignObject 标签转换为 SVG 文本，移除外部图片引用，同时让多 panel 的样式和 defs 保留在各自的嵌套 SVG 画布中；原始 SVG 导出仍保持矢量内容。
     - Draw.io、Drawnix 与 Circuitikz 都保持 artifact 边界：插件不捆绑 diagrams.net、Drawnix、Plait、LaTeX 或 TikZJax runtime，而是写出原生源文件和 Obsidian 可查看的 SVG companion。
     - 电路图必须使用 `intent: "circuit"` 与已验证 `CircuitSpec`。`CircuitikzRenderer` 会写出确定性 `.tex`，并附加用于 Obsidian 预览和 SVG/PNG/PDF 导出的 SVG companion；该 companion 不是 LaTeX/TikZJax 编译结果。
 
@@ -259,7 +259,7 @@ Notemd 的设置较多，是因为模型提供商、笔记工作流、图表、�
 较新的重要设置包括：
 
 - **图形历史保留上限**：限制 Vault 历史索引数量；清理索引不会删除已生成文件。
-- **图形预览导出 PPI**：控制 PNG 和 PDF 清晰度；SVG 始终保持矢量格式。
+- **图形预览导出 PPI**：控制 PNG 的栅格分辨率；SVG 和 PDF 预览均基于矢量几何生成，质量不受此设置影响。
 - **首选图表类型 / 生成格式**：把图表语义与 Mermaid、Draw.io、Drawnix、CircuitikZ 等可编辑源格式分开。
 - **CircuitikZ 原生编译环境（可选）**：检查已有 `tectonic` 或 `pdflatex`，也可在用户明确确认后安装固定版本的托管 Tectonic。未安装 LaTeX 时，SVG、PNG 和预览 PDF 导出仍然可用。
 - **高级批处理文件选择**：启用可保存的文件夹/文件选择配置和规则预览。

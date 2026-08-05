@@ -162,7 +162,7 @@ export const STRINGS_ZH_CN: DeepPartial<NotemdEnglishStrings> = {
                 exportFormatsName: '可用导出格式',
                 exportFormatsDesc: '可在图形预览中保存源文件，并导出 SVG、PNG 或 PDF。',
                 exportPpiName: '图形图片导出 PPI',
-                exportPpiDesc: '图形 PNG/PDF 预览导出的分辨率。可输入 72 到 600 之间的任意整数 ppi（默认 300；100/300/600 为常用预设）。SVG 保持矢量尺寸，不受此设置影响。',
+                exportPpiDesc: '图形 PNG 预览导出的分辨率。可输入 72 到 600 之间的任意整数 ppi（默认 300；100/300/600 为常用预设）。SVG 和矢量 PDF 保持几何质量，不受此设置影响。',
                 nativeEnvironmentName: 'CircuitikZ 原生编译环境',
                 nativeEnvironmentDesc: '可选的桌面端增强，用于编译诊断与原生 PDF。SVG、PNG 和预览 PDF 导出无需安装 LaTeX 也能继续使用。',
                 nativeEnvironmentButton: '管理环境',
@@ -1004,17 +1004,17 @@ export const STRINGS_ZH_CN: DeepPartial<NotemdEnglishStrings> = {
             info: '信息'
         },
         diagnosticAdvice: '建议：{advice}',
-        exportFolderTitle: '将每张图分别导出为 SVG 文件',
-        exportFolderDescription: '选择 Vault 文件夹。每个预览 panel 都会写入独立的 SVG 文件。',
+        exportFolderTitle: '将每张图分别导出为 {format} 文件',
+        exportFolderDescription: '选择 Vault 文件夹。每个预览 panel 都会写入独立的 {format} 文件。',
         exportFolderDefaultOption: '原文件夹（{path}）',
         exportFolderCustomOption: '自定义 Vault 文件夹',
         exportFolderCustomPlaceholder: '例如 Exports/Architecture',
-        exportFolderConfirm: '导出 SVG 文件',
+        exportFolderConfirm: '导出 {format} 文件',
         exportFolderCancel: '取消',
         exportFolderInvalid: '请输入有效的 Vault 相对文件夹路径。',
         exportFolderCreateFailed: '无法准备导出文件夹：{message}',
-        exportFolderBatchSuccessNotice: '已将 {success}/{total} 个 SVG 文件导出到 {path}',
-        exportFolderBatchPartialNotice: '已导出 {success}/{total} 个 SVG 文件。失败：{failures}。'
+        exportFolderBatchSuccessNotice: '已将 {success}/{total} 个 {format} 文件导出到 {path}',
+        exportFolderBatchPartialNotice: '已导出 {success}/{total} 个 {format} 文件。失败：{failures}。'
     },
     circuitikzEnvironment: {
         title: 'CircuitikZ 原生编译环境',

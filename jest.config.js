@@ -9,7 +9,8 @@ module.exports = {
     '^obsidian$': '<rootDir>/src/__mocks__/obsidian.ts',
     '^mermaid$': '<rootDir>/src/__mocks__/mermaid.ts',
     '^vega-lite$': '<rootDir>/src/__mocks__/vega-lite.ts',
-    '^vega$': '<rootDir>/src/__mocks__/vega.ts'
+    '^vega$': '<rootDir>/src/__mocks__/vega.ts',
+    '^.+\\.ttf$': '<rootDir>/src/tests/ttfMock.js'
   },
   transform: {
     '^.+\\.txt$': '<rootDir>/jest-txt-transform.js',

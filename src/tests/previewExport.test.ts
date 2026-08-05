@@ -2,7 +2,9 @@ import { TFile } from 'obsidian';
 import {
     buildDiagramPreviewPdfExportPath,
     buildDiagramPreviewPanelPdfExportPath,
+    buildDiagramPreviewPanelPdfExportPathInFolder,
     buildDiagramPreviewPanelPngExportPath,
+    buildDiagramPreviewPanelPngExportPathInFolder,
     buildDiagramPreviewPanelSvgExportPath,
     buildDiagramPreviewPanelSvgExportPathInFolder,
     buildDiagramSourceArtifactPath,
@@ -11,7 +13,9 @@ import {
     renderPreviewArtifactSvg,
     saveDiagramPreviewPdf,
     saveDiagramPreviewPanelPdf,
+    saveDiagramPreviewPanelPdfToFolder,
     saveDiagramPreviewPanelPng,
+    saveDiagramPreviewPanelPngToFolder,
     saveDiagramPreviewPanelSvg,
     saveDiagramPreviewPanelSvgToFolder,
     saveDiagramPreviewPng,
@@ -49,6 +53,13 @@ describe('diagram preview export helpers', () => {
         expect(buildDiagramPreviewPanelSvgExportPath('Notes/Topic.md', 'mermaid-1')).toBe('Notes/Topic_preview_mermaid-1.svg');
         expect(buildDiagramPreviewPanelPngExportPath('Notes/Topic.md', 'source visual/2')).toBe('Notes/Topic_preview_source-visual-2.png');
         expect(buildDiagramPreviewPanelPdfExportPath('Topic.md', 'panel')).toBe('Topic_preview_panel.pdf');
+    });
+
+    test('builds stable per-panel raster export paths inside a selected vault folder', () => {
+        expect(buildDiagramPreviewPanelPngExportPathInFolder('Notes/Topic.md', 'mermaid-1', 'Exports'))
+            .toBe('Exports/Topic_preview_mermaid-1.png');
+        expect(buildDiagramPreviewPanelPdfExportPathInFolder('Notes/Topic.md', 'mermaid-1', 'Exports'))
+            .toBe('Exports/Topic_preview_mermaid-1.pdf');
     });
 
     test('builds stable per-panel svg paths inside a selected vault folder', () => {
@@ -373,16 +384,12 @@ describe('diagram preview export helpers', () => {
         expect(mockApp.vault.createBinary).toHaveBeenCalledWith('Notes/Topic_preview.png', expect.any(ArrayBuffer));
     });
 
-    test('saves a pdf preview artifact beside the source file using the selected ppi', async () => {
-        const createCanvas = jest.fn((width: number, height: number) => ({
-            width,
-            height,
-            getContext: () => ({
-                scale: jest.fn(),
-                drawImage: jest.fn()
-            }),
-            toBlob: (callback: (blob: Blob | null) => void) => callback(new Blob(['jpeg'], { type: 'image/jpeg' }))
+    test('saves a pdf preview artifact beside the source file through the SVG vector pipeline', async () => {
+        const createDocument = jest.fn(() => ({
+            output: jest.fn(() => new TextEncoder().encode('%PDF-1.4\n/vector-content\n').buffer)
         }));
+        const parseSvg = jest.fn(() => ({ tagName: 'svg' }));
+        const renderSvg = jest.fn();
         const outputPath = await saveDiagramPreviewPdf(mockApp, 'Notes/Topic.md', {
             target: 'mermaid',
             content: '```mermaid\nflowchart TD\nA --> B\n```',
@@ -395,39 +402,57 @@ describe('diagram preview export helpers', () => {
                 parse: jest.fn(),
                 render: jest.fn().mockResolvedValue({ svg: '<svg viewBox="0 0 400 200"></svg>' })
             },
-            raster: {
-                createBlob: (parts, options) => new Blob(parts, options),
-                createImage: () => {
-                    const image = {
-                        onload: null as null | (() => void),
-                        onerror: null as null | ((event?: unknown) => void),
-                        set src(_value: string) {
-                            this.onload?.();
-                        }
-                    };
-                    return image;
-                },
-                createCanvas,
-                createObjectURL: () => 'blob:pdf',
-                revokeObjectURL: jest.fn(),
-                blobToArrayBuffer: async () => new Uint8Array([0xff, 0xd8, 0xff, 0xd9]).buffer
+            svgPdf: {
+                parseSvg,
+                createDocument,
+                renderSvg
             }
         });
 
         expect(outputPath).toBe('Notes/Topic_preview.pdf');
-        expect(createCanvas).toHaveBeenCalledWith(2500, 1250);
+        expect(createDocument).toHaveBeenCalledWith(300, 150, 'landscape');
+        expect(parseSvg).toHaveBeenCalledWith(expect.stringContaining('<svg'));
+        expect(renderSvg).toHaveBeenCalledWith(
+            { tagName: 'svg' },
+            expect.objectContaining({ output: expect.any(Function) }),
+            { x: 0, y: 0, width: 300, height: 150 }
+        );
         expect(mockApp.vault.createBinary).toHaveBeenCalledWith('Notes/Topic_preview.pdf', expect.any(ArrayBuffer));
     });
 
-    test('defaults pdf preview rasterization to 300 ppi when no ppi is supplied', async () => {
-        const createCanvas = jest.fn((width: number, height: number) => ({
-            width,
-            height,
-            getContext: () => ({
-                scale: jest.fn(),
-                drawImage: jest.fn()
-            }),
-            toBlob: (callback: (blob: Blob | null) => void) => callback(new Blob(['jpeg'], { type: 'image/jpeg' }))
+    test('renders PDF Mermaid panels with the same layout configuration as SVG export', async () => {
+        const initialize = jest.fn();
+        const render = jest.fn().mockResolvedValue({
+            svg: '<svg width="100%" viewBox="0 0 400 200">'
+                + '<foreignObject width="200" height="48"><div><span><p>令牌解析<br/>(resolveProviderTokenLimit)</p></span></div></foreignObject>'
+                + '</svg>'
+        });
+
+        await saveDiagramPreviewPdf(mockApp, 'Notes/Topic.md', {
+            target: 'mermaid',
+            content: '```mermaid\nflowchart TD\nA --> B\n```',
+            mimeType: 'text/vnd.mermaid',
+            sourceIntent: 'flowchart'
+        }, {
+            mermaid: {
+                initialize,
+                parse: jest.fn(),
+                render
+            },
+            svgPdf: {
+                parseSvg: jest.fn(() => ({ tagName: 'svg' })),
+                createDocument: jest.fn(() => ({ output: jest.fn(() => new ArrayBuffer(16)) })),
+                renderSvg: jest.fn()
+            }
+        });
+
+        expect(initialize).toHaveBeenCalledTimes(1);
+        expect(initialize.mock.calls[0][0]).not.toEqual(expect.objectContaining({ htmlLabels: false }));
+    });
+
+    test('keeps the vector PDF page size independent from the configured PPI', async () => {
+        const createDocument = jest.fn(() => ({
+            output: jest.fn(() => new ArrayBuffer(16))
         }));
         await saveDiagramPreviewPdf(mockApp, 'Notes/Topic.md', {
             target: 'html',
@@ -439,26 +464,15 @@ describe('diagram preview export helpers', () => {
                 mimeType: 'image/svg+xml'
             }
         }, {
-            raster: {
-                createBlob: (parts, options) => new Blob(parts, options),
-                createImage: () => {
-                    const image = {
-                        onload: null as null | (() => void),
-                        onerror: null as null | ((event?: unknown) => void),
-                        set src(_value: string) {
-                            this.onload?.();
-                        }
-                    };
-                    return image;
-                },
-                createCanvas,
-                createObjectURL: () => 'blob:pdf-default',
-                revokeObjectURL: jest.fn(),
-                blobToArrayBuffer: async () => new Uint8Array([0xff, 0xd8, 0xff, 0xd9]).buffer
+            ppi: 600,
+            svgPdf: {
+                parseSvg: jest.fn(() => ({ tagName: 'svg' })),
+                createDocument,
+                renderSvg: jest.fn()
             }
         });
 
-        expect(createCanvas).toHaveBeenCalledWith(1250, 625);
+        expect(createDocument).toHaveBeenCalledWith(300, 150, 'landscape');
         expect(mockApp.vault.createBinary).toHaveBeenCalledWith('Notes/Topic_preview.pdf', expect.any(ArrayBuffer));
     });
 
@@ -498,7 +512,13 @@ describe('diagram preview export helpers', () => {
     });
 
     test('saves individual panel png and pdf previews through the configured raster pipeline', async () => {
-        const raster = {
+        const createDocument = jest.fn(() => ({ output: jest.fn(() => new ArrayBuffer(16)) }));
+        const svgPdf = {
+            parseSvg: jest.fn(() => ({ tagName: 'svg' })),
+            createDocument,
+            renderSvg: jest.fn()
+        };
+        const pngRaster = {
             createBlob: (parts: BlobPart[], options?: BlobPropertyBag) => new Blob(parts, options),
             createImage: () => {
                 const image = {
@@ -514,11 +534,11 @@ describe('diagram preview export helpers', () => {
                 width: 960,
                 height: 540,
                 getContext: () => ({ scale: jest.fn(), drawImage: jest.fn() }),
-                toBlob: (callback: (blob: Blob | null) => void) => callback(new Blob(['jpeg'], { type: 'image/jpeg' }))
+                toBlob: (callback: (blob: Blob | null) => void) => callback(new Blob(['png'], { type: 'image/png' }))
             }),
             createObjectURL: () => 'blob:panel',
             revokeObjectURL: jest.fn(),
-            blobToArrayBuffer: async () => new Uint8Array([0xff, 0xd8, 0xff, 0xd9]).buffer
+            blobToArrayBuffer: async () => new ArrayBuffer(12)
         };
         const artifact = {
             target: 'html' as const,
@@ -529,16 +549,108 @@ describe('diagram preview export helpers', () => {
         };
 
         const pngPath = await saveDiagramPreviewPanelPng(mockApp, 'Notes/Topic.md', 'panel-1', artifact, {
-            pngRaster: raster
+            pngRaster
         });
         const pdfPath = await saveDiagramPreviewPanelPdf(mockApp, 'Notes/Topic.md', 'panel-1', artifact, {
-            raster
+            svgPdf
         });
 
         expect(pngPath).toBe('Notes/Topic_preview_panel-1.png');
         expect(pdfPath).toBe('Notes/Topic_preview_panel-1.pdf');
         expect(mockApp.vault.createBinary).toHaveBeenCalledWith(pngPath, expect.any(ArrayBuffer));
         expect(mockApp.vault.createBinary).toHaveBeenCalledWith(pdfPath, expect.any(ArrayBuffer));
+    });
+
+    test('saves individual panel png and pdf previews into a selected vault folder', async () => {
+        const createDocument = jest.fn(() => ({ output: jest.fn(() => new ArrayBuffer(16)) }));
+        const svgPdf = {
+            parseSvg: jest.fn(() => ({ tagName: 'svg' })),
+            createDocument,
+            renderSvg: jest.fn()
+        };
+        const pngRaster = {
+            createBlob: (parts: BlobPart[], options?: BlobPropertyBag) => new Blob(parts, options),
+            createImage: () => {
+                const image = {
+                    onload: null as null | (() => void),
+                    onerror: null as null | ((event?: unknown) => void),
+                    set src(_value: string) {
+                        this.onload?.();
+                    }
+                };
+                return image;
+            },
+            createCanvas: () => ({
+                width: 960,
+                height: 540,
+                getContext: () => ({ scale: jest.fn(), drawImage: jest.fn() }),
+                toBlob: (callback: (blob: Blob | null) => void) => callback(new Blob(['png'], { type: 'image/png' }))
+            }),
+            createObjectURL: () => 'blob:panel-folder',
+            revokeObjectURL: jest.fn(),
+            blobToArrayBuffer: async () => new ArrayBuffer(12)
+        };
+        const artifact = {
+            target: 'html' as const,
+            content: '<!DOCTYPE html><svg><text>Panel</text></svg>',
+            mimeType: 'text/html',
+            sourceIntent: 'flowchart' as const,
+            previewSvg: { content: '<svg width="96" height="54"><text>Panel</text></svg>', mimeType: 'image/svg+xml' as const }
+        };
+
+        const pngPath = await saveDiagramPreviewPanelPngToFolder(mockApp, 'Notes/Topic.md', 'panel-1', 'Exports', artifact, {
+            pngRaster
+        });
+        const pdfPath = await saveDiagramPreviewPanelPdfToFolder(mockApp, 'Notes/Topic.md', 'panel-1', 'Exports', artifact, {
+            svgPdf
+        });
+
+        expect(pngPath).toBe('Exports/Topic_preview_panel-1.png');
+        expect(pdfPath).toBe('Exports/Topic_preview_panel-1.pdf');
+        expect(mockApp.vault.createBinary).toHaveBeenCalledWith(pngPath, expect.any(ArrayBuffer));
+        expect(mockApp.vault.createBinary).toHaveBeenCalledWith(pdfPath, expect.any(ArrayBuffer));
+    });
+
+    test('preserves panel styles and definitions when composing multiple preview svgs', async () => {
+        const svg = await renderPreviewArtifactSvg({
+            target: 'html',
+            content: '',
+            mimeType: 'image/svg+xml',
+            sourceIntent: 'flowchart',
+            previewPanels: [
+                {
+                    id: 'panel-1',
+                    artifact: {
+                        target: 'html',
+                        content: '',
+                        mimeType: 'image/svg+xml',
+                        sourceIntent: 'flowchart',
+                        previewSvg: {
+                            content: '<svg viewBox="-20 -10 100 50"><style>.node{fill:red}</style><defs><marker id="arrow" /></defs><rect class="node" width="100" height="50" /></svg>',
+                            mimeType: 'image/svg+xml'
+                        }
+                    }
+                },
+                {
+                    id: 'panel-2',
+                    artifact: {
+                        target: 'html',
+                        content: '',
+                        mimeType: 'image/svg+xml',
+                        sourceIntent: 'flowchart',
+                        previewSvg: {
+                            content: '<svg width="100" height="50"><style>.other{fill:blue}</style><rect class="other" width="100" height="50" /></svg>',
+                            mimeType: 'image/svg+xml'
+                        }
+                    }
+                }
+            ]
+        });
+
+        expect(svg).toContain('.node{fill:red}');
+        expect(svg).toContain('<marker id="arrow"');
+        expect(svg).toContain('.other{fill:blue}');
+        expect(svg.match(/<svg\b/gi)?.length).toBeGreaterThanOrEqual(3);
     });
 
     test('rejects unsupported export targets', async () => {

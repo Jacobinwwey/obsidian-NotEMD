@@ -1,28 +1,91 @@
-import { buildPdfFromRasterImage } from '../rendering/preview/pdfPreview';
-
-function decodePdf(buffer: ArrayBuffer): string {
-    return Buffer.from(buffer).toString('latin1');
-}
+import { buildPdfFromSvg } from '../rendering/preview/pdfPreview';
 
 describe('pdf preview exporter', () => {
-    test('embeds a 300 ppi raster image on a page matching the source svg size', () => {
-        const pdf = buildPdfFromRasterImage({
-            imageData: new Uint8Array([0xff, 0xd8, 0xff, 0xd9]).buffer,
-            imageMimeType: 'image/jpeg',
-            imageWidthPx: 1250,
-            imageHeightPx: 625,
-            sourceWidthCssPx: 400,
-            sourceHeightCssPx: 200
+    test('builds PDF through the SVG vector renderer instead of a raster image XObject', async () => {
+        const document = {
+            output: jest.fn(() => new TextEncoder().encode('%PDF-1.4\n/vector-content\n').buffer)
+        };
+        const parseSvg = jest.fn(() => ({ tagName: 'svg' }));
+        const createDocument = jest.fn(() => document);
+        const renderSvg = jest.fn((root, pdfDocument, options) => {
+            expect(root).toEqual({ tagName: 'svg' });
+            expect(pdfDocument).toBe(document);
+            expect(options).toEqual({ x: 0, y: 0, width: 300, height: 150 });
         });
-        const source = decodePdf(pdf);
 
-        expect(source).toContain('%PDF-1.4');
-        expect(source).toContain('/MediaBox [0 0 300 150]');
-        expect(source).toContain('/Subtype /Image');
-        expect(source).toContain('/Filter /DCTDecode');
-        expect(source).toContain('/Width 1250');
-        expect(source).toContain('/Height 625');
-        expect(source).toContain('q\n300 0 0 150 0 0 cm\n/Im0 Do\nQ');
-        expect(source.trimEnd()).toMatch(/%%EOF$/);
+        const pdf = await buildPdfFromSvg('<svg width="400" height="200"><rect width="400" height="200" /></svg>', {
+            parseSvg,
+            createDocument,
+            renderSvg
+        });
+
+        expect(createDocument).toHaveBeenCalledWith(300, 150, 'landscape');
+        expect(parseSvg).toHaveBeenCalledWith(expect.stringContaining('font-family="NotoSansSC"'));
+        expect(renderSvg).toHaveBeenCalledTimes(1);
+        expect(document.output).toHaveBeenCalledWith('arraybuffer');
+        expect(Buffer.from(pdf).toString('latin1')).not.toContain('/DCTDecode');
+    });
+
+    test('rejects an empty vector document returned by the renderer', async () => {
+        await expect(buildPdfFromSvg('<svg width="400" height="200" />', {
+            parseSvg: jest.fn(() => ({ tagName: 'svg' })),
+            createDocument: jest.fn(() => ({
+                output: jest.fn(() => new ArrayBuffer(0))
+            })),
+            renderSvg: jest.fn()
+        })).rejects.toThrow(/empty document/i);
+    });
+
+    test('uses the root viewBox for percentage-sized Mermaid SVGs', async () => {
+        const document = {
+            output: jest.fn(() => new TextEncoder().encode('%PDF-1.4\n/vector-content\n').buffer)
+        };
+        const createDocument = jest.fn(() => document);
+
+        await buildPdfFromSvg(
+            '<svg width="100%" viewBox="0 0 1368 1704">'
+                + '<defs><marker viewBox="0 0 10 10"><path width="100" height="128" /></marker></defs>'
+                + '</svg>',
+            {
+                parseSvg: jest.fn(() => ({ tagName: 'svg' })),
+                createDocument,
+                renderSvg: jest.fn()
+            }
+        );
+
+        expect(createDocument).toHaveBeenCalledWith(1026, 1278, 'portrait');
+    });
+
+    test('converts foreignObject labels to native SVG text before svg2pdf consumes the document', async () => {
+        const parseSvg = jest.fn((markup: string) => {
+            expect(markup).not.toContain('<foreignObject');
+            expect(markup).toContain('令牌解析');
+            const lines = Array.from(markup.matchAll(/<tspan\b[^>]*>([^<]*)<\/tspan>/g), match => match[1]);
+            expect(lines).toEqual(['令牌解析', '(resolveProviderTokenLimit)']);
+            return { tagName: 'svg' };
+        });
+
+        await buildPdfFromSvg(
+            '<svg width="200" height="100"><foreignObject width="160" height="48">'
+                + '<div><span><p>令牌解析<br/>(resolveProviderTokenLimit)</p></span></div>'
+                + '</foreignObject></svg>',
+            {
+                parseSvg,
+                createDocument: jest.fn(() => ({ output: jest.fn(() => new ArrayBuffer(16)) })),
+                renderSvg: jest.fn()
+            }
+        );
+    });
+
+    test('keeps landscape SVG dimensions in landscape PDF orientation', async () => {
+        const createDocument = jest.fn(() => ({ output: jest.fn(() => new ArrayBuffer(16)) }));
+        const pdf = await buildPdfFromSvg('<svg width="2000" height="800"></svg>', {
+            parseSvg: jest.fn(() => ({ tagName: 'svg' })),
+            createDocument,
+            renderSvg: jest.fn()
+        });
+
+        expect(pdf).toBeInstanceOf(ArrayBuffer);
+        expect(createDocument).toHaveBeenCalledWith(1500, 600, 'landscape');
     });
 });

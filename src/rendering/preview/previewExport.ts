@@ -8,10 +8,9 @@ import {
     renderMermaidArtifactSvgForRasterExport,
     MermaidPreviewDeps
 } from './mermaidPreview';
-import { buildPdfFromRasterImage } from './pdfPreview';
+import { buildPdfFromSvg, SvgPdfExportDeps } from './pdfPreview';
 import {
     PreviewPngRasterDeps,
-    rasterizeSvgToJpeg,
     rasterizeSvgToPngArrayBuffer,
     resolvePreviewExportPpi
 } from './pngPreview';
@@ -29,7 +28,7 @@ export interface PreviewPngExportDeps extends PreviewSvgRenderDeps {
 }
 
 export interface PreviewPdfExportDeps extends PreviewSvgRenderDeps {
-    raster?: PreviewPngRasterDeps;
+    svgPdf?: SvgPdfExportDeps;
     ppi?: number;
 }
 
@@ -71,11 +70,18 @@ interface PreviewSvgCanvas {
     innerMarkup: string;
     width: number;
     height: number;
+    viewBoxX: number;
+    viewBoxY: number;
 }
 
 function parseSvgNumber(value: string | undefined, fallback: number): number {
     const parsed = Number.parseFloat(value ?? '');
     return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
+}
+
+function parseSvgCoordinate(value: string | undefined, fallback: number): number {
+    const parsed = Number.parseFloat(value ?? '');
+    return Number.isFinite(parsed) ? parsed : fallback;
 }
 
 function parsePreviewSvgCanvas(svg: string): PreviewSvgCanvas {
@@ -85,11 +91,15 @@ function parsePreviewSvgCanvas(svg: string): PreviewSvgCanvas {
     }
 
     const attributes = match[1] ?? '';
-    const viewBox = attributes.match(/\bviewBox\s*=\s*["']\s*[-+0-9.eE]+\s+[-+0-9.eE]+\s+([-+0-9.eE]+)\s+([-+0-9.eE]+)\s*["']/i);
-    const viewBoxWidth = parseSvgNumber(viewBox?.[1], 960);
-    const viewBoxHeight = parseSvgNumber(viewBox?.[2], 540);
+    const viewBox = attributes.match(/\bviewBox\s*=\s*["']\s*([-+0-9.eE]+)\s+([-+0-9.eE]+)\s+([-+0-9.eE]+)\s+([-+0-9.eE]+)\s*["']/i);
+    const viewBoxX = parseSvgCoordinate(viewBox?.[1], 0);
+    const viewBoxY = parseSvgCoordinate(viewBox?.[2], 0);
+    const viewBoxWidth = parseSvgNumber(viewBox?.[3], 960);
+    const viewBoxHeight = parseSvgNumber(viewBox?.[4], 540);
     return {
         innerMarkup: match[2] ?? '',
+        viewBoxX,
+        viewBoxY,
         width: viewBox ? viewBoxWidth : parseSvgNumber(attributes.match(/\bwidth\s*=\s*["']([^"']+)["']/i)?.[1], viewBoxWidth),
         height: viewBox ? viewBoxHeight : parseSvgNumber(attributes.match(/\bheight\s*=\s*["']([^"']+)["']/i)?.[1], viewBoxHeight)
     };
@@ -104,12 +114,16 @@ function composePreviewSvgCanvases(canvases: readonly PreviewSvgCanvas[]): strin
     const width = Math.max(...canvases.map(canvas => canvas.width));
     const height = canvases.reduce((total, canvas) => total + canvas.height, 0) + gap * (canvases.length - 1);
     let offsetY = 0;
-    const groups = canvases.map(canvas => {
-        const group = `<g transform="translate(0 ${offsetY})">${canvas.innerMarkup}</g>`;
+    const nestedSvgs = canvases.map(canvas => {
+        // Keep every panel as a nested SVG so root-level style/defs and its
+        // viewBox stay attached to the resources they describe during Canvas
+        // rasterization. Hoisting only the inner graph makes browsers treat
+        // Mermaid classes as unstyled black geometry.
+        const nestedSvg = `<svg x="0" y="${offsetY}" width="${canvas.width}" height="${canvas.height}" viewBox="${canvas.viewBoxX} ${canvas.viewBoxY} ${canvas.width} ${canvas.height}" overflow="visible">${canvas.innerMarkup}</svg>`;
         offsetY += canvas.height + gap;
-        return group;
+        return nestedSvg;
     }).join('');
-    return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" role="img">${groups}</svg>`;
+    return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" role="img">${nestedSvgs}</svg>`;
 }
 
 type MermaidSvgRenderer = (
@@ -248,8 +262,24 @@ export function buildDiagramPreviewPanelPngExportPath(sourcePath: string, panelI
     return buildDiagramPreviewPanelExportPath(sourcePath, panelId, 'png');
 }
 
+export function buildDiagramPreviewPanelPngExportPathInFolder(
+    sourcePath: string,
+    panelId: string,
+    folderPath: string
+): string {
+    return buildDiagramPreviewPanelExportPathInFolder(sourcePath, panelId, 'png', folderPath);
+}
+
 export function buildDiagramPreviewPanelPdfExportPath(sourcePath: string, panelId: string): string {
     return buildDiagramPreviewPanelExportPath(sourcePath, panelId, 'pdf');
+}
+
+export function buildDiagramPreviewPanelPdfExportPathInFolder(
+    sourcePath: string,
+    panelId: string,
+    folderPath: string
+): string {
+    return buildDiagramPreviewPanelExportPathInFolder(sourcePath, panelId, 'pdf', folderPath);
 }
 
 export function buildDiagramSourceArtifactPath(sourcePath: string, artifact: RenderArtifact): string {
@@ -311,19 +341,8 @@ export async function saveDiagramPreviewPdf(
     deps: PreviewPdfExportDeps = {}
 ): Promise<string> {
     const outputPath = buildDiagramPreviewPdfExportPath(sourcePath);
-    const svg = await renderPreviewArtifactSvgForRasterExport(artifact, deps);
-    const raster = await rasterizeSvgToJpeg(svg, deps.raster, {
-        ppi: resolvePreviewExportPpi(deps.ppi),
-        backgroundColor: '#ffffff'
-    });
-    const pdf = buildPdfFromRasterImage({
-        imageData: raster.data,
-        imageMimeType: 'image/jpeg',
-        imageWidthPx: raster.imageWidthPx,
-        imageHeightPx: raster.imageHeightPx,
-        sourceWidthCssPx: raster.sourceWidthCssPx,
-        sourceHeightCssPx: raster.sourceHeightCssPx
-    });
+    const svg = await renderPreviewArtifactSvg(artifact, deps);
+    const pdf = await buildPdfFromSvg(svg, deps.svgPdf);
     const existingFile = app.vault.getAbstractFileByPath(outputPath);
 
     if (existingFile instanceof TFile) {
@@ -374,6 +393,28 @@ export async function saveDiagramPreviewPanelPng(
     return outputPath;
 }
 
+export async function saveDiagramPreviewPanelPngToFolder(
+    app: App,
+    sourcePath: string,
+    panelId: string,
+    folderPath: string,
+    artifact: RenderArtifact,
+    deps: PreviewPngExportDeps = {}
+): Promise<string> {
+    const outputPath = buildDiagramPreviewPanelPngExportPathInFolder(sourcePath, panelId, folderPath);
+    const svg = await renderPreviewArtifactSvgForRasterExport(artifact, deps);
+    const png = await rasterizeSvgToPngArrayBuffer(svg, deps.pngRaster, {
+        ppi: resolvePreviewExportPpi(deps.ppi)
+    });
+    const existingFile = app.vault.getAbstractFileByPath(outputPath);
+    if (existingFile instanceof TFile) {
+        await app.vault.modifyBinary(existingFile, png);
+    } else {
+        await app.vault.createBinary(outputPath, png);
+    }
+    return outputPath;
+}
+
 export async function saveDiagramPreviewPanelPdf(
     app: App,
     sourcePath: string,
@@ -382,19 +423,28 @@ export async function saveDiagramPreviewPanelPdf(
     deps: PreviewPdfExportDeps = {}
 ): Promise<string> {
     const outputPath = buildDiagramPreviewPanelPdfExportPath(sourcePath, panelId);
-    const svg = await renderPreviewArtifactSvgForRasterExport(artifact, deps);
-    const raster = await rasterizeSvgToJpeg(svg, deps.raster, {
-        ppi: resolvePreviewExportPpi(deps.ppi),
-        backgroundColor: '#ffffff'
-    });
-    const pdf = buildPdfFromRasterImage({
-        imageData: raster.data,
-        imageMimeType: 'image/jpeg',
-        imageWidthPx: raster.imageWidthPx,
-        imageHeightPx: raster.imageHeightPx,
-        sourceWidthCssPx: raster.sourceWidthCssPx,
-        sourceHeightCssPx: raster.sourceHeightCssPx
-    });
+    const svg = await renderPreviewArtifactSvg(artifact, deps);
+    const pdf = await buildPdfFromSvg(svg, deps.svgPdf);
+    const existingFile = app.vault.getAbstractFileByPath(outputPath);
+    if (existingFile instanceof TFile) {
+        await app.vault.modifyBinary(existingFile, pdf);
+    } else {
+        await app.vault.createBinary(outputPath, pdf);
+    }
+    return outputPath;
+}
+
+export async function saveDiagramPreviewPanelPdfToFolder(
+    app: App,
+    sourcePath: string,
+    panelId: string,
+    folderPath: string,
+    artifact: RenderArtifact,
+    deps: PreviewPdfExportDeps = {}
+): Promise<string> {
+    const outputPath = buildDiagramPreviewPanelPdfExportPathInFolder(sourcePath, panelId, folderPath);
+    const svg = await renderPreviewArtifactSvg(artifact, deps);
+    const pdf = await buildPdfFromSvg(svg, deps.svgPdf);
     const existingFile = app.vault.getAbstractFileByPath(outputPath);
     if (existingFile instanceof TFile) {
         await app.vault.modifyBinary(existingFile, pdf);

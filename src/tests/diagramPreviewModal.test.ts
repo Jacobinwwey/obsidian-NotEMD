@@ -33,7 +33,9 @@ jest.mock('../rendering/preview/previewExport', () => {
         saveDiagramPreviewPanelSvg: jest.fn().mockResolvedValue('Notes/Topic_preview_mermaid-1.svg'),
         saveDiagramPreviewPanelSvgToFolder: jest.fn(),
         saveDiagramPreviewPanelPng: jest.fn().mockResolvedValue('Notes/Topic_preview_mermaid-1.png'),
+        saveDiagramPreviewPanelPngToFolder: jest.fn(),
         saveDiagramPreviewPanelPdf: jest.fn().mockResolvedValue('Notes/Topic_preview_mermaid-1.pdf'),
+        saveDiagramPreviewPanelPdfToFolder: jest.fn(),
         saveDiagramSourceArtifact: jest.fn().mockResolvedValue('Notes/Topic_diagram.json')
     };
 });
@@ -433,6 +435,9 @@ describe('diagram preview modal', () => {
     });
 
     test('exports an individual preview panel from its own menu', async () => {
+        (exportFolderModal.selectDiagramPreviewExportFolder as jest.Mock).mockResolvedValue('Exports');
+        (previewExport.saveDiagramPreviewPanelSvgToFolder as jest.Mock)
+            .mockResolvedValue('Exports/Topic_preview_mermaid-2.svg');
         const modal = mountModal(new DiagramPreviewModal(mockApp, createSession({
             previewPanels: [
                 {
@@ -461,15 +466,70 @@ describe('diagram preview modal', () => {
 
         await clickPanelExportMenuItem(modal, 1, 0);
 
-        expect(previewExport.saveDiagramPreviewPanelSvg).toHaveBeenCalledWith(
+        expect(exportFolderModal.selectDiagramPreviewExportFolder).toHaveBeenCalledWith(
+            mockApp,
+            'Notes/Topic.md',
+            'en',
+            'SVG'
+        );
+        expect(previewExport.saveDiagramPreviewPanelSvgToFolder).toHaveBeenCalledWith(
             mockApp,
             'Notes/Topic.md',
             'mermaid-2',
+            'Exports',
             expect.objectContaining({ sourceIntent: 'sequence' }),
             expect.objectContaining({ theme: 'system', mermaid: bundledMermaidDeps })
         );
         expect(previewExport.saveDiagramPreviewSvg).not.toHaveBeenCalled();
-        expect(Notice).toHaveBeenCalledWith('Diagram preview exported to Notes/Topic_preview_mermaid-1.svg');
+        expect(Notice).toHaveBeenCalledWith('Diagram preview exported to Exports/Topic_preview_mermaid-2.svg');
+    });
+
+    test.each([
+        ['PNG', 1, 'saveDiagramPreviewPanelPngToFolder', 'Exports/Topic_preview_mermaid-2.png'],
+        ['PDF', 2, 'saveDiagramPreviewPanelPdfToFolder', 'Exports/Topic_preview_mermaid-2.pdf']
+    ])('uses the selected folder for an individual %s preview panel export', async (_label, menuIndex, saveMethod, outputPath) => {
+        (exportFolderModal.selectDiagramPreviewExportFolder as jest.Mock).mockResolvedValue('Exports');
+        const saver = (previewExport as any)[saveMethod] as jest.Mock;
+        saver.mockResolvedValue(outputPath);
+        const modal = mountModal(new DiagramPreviewModal(mockApp, createSession({
+            previewPanels: [{
+                id: 'mermaid-1',
+                artifact: {
+                    target: 'mermaid',
+                    content: '```mermaid\nflowchart TD\nA --> B\n```',
+                    mimeType: 'text/vnd.mermaid',
+                    sourceIntent: 'flowchart'
+                }
+            }, {
+                id: 'mermaid-2',
+                artifact: {
+                    target: 'mermaid',
+                    content: '```mermaid\nsequenceDiagram\nAlice->>Bob: Hello\n```',
+                    mimeType: 'text/vnd.mermaid',
+                    sourceIntent: 'sequence'
+                }
+            }]
+        }), 'en') as any);
+
+        modal.onOpen();
+        await flushPromises();
+        await clickPanelExportMenuItem(modal, 1, menuIndex as number);
+
+        expect(exportFolderModal.selectDiagramPreviewExportFolder).toHaveBeenCalledWith(
+            mockApp,
+            'Notes/Topic.md',
+            'en',
+            _label as string
+        );
+        expect(saver).toHaveBeenCalledWith(
+            mockApp,
+            'Notes/Topic.md',
+            'mermaid-2',
+            'Exports',
+            expect.objectContaining({ sourceIntent: 'sequence' }),
+            expect.objectContaining({ theme: 'system' })
+        );
+        expect(Notice).toHaveBeenCalledWith(expect.stringContaining(outputPath as string));
     });
 
     test('prompts for a folder and exports every preview panel as a separate svg', async () => {
@@ -508,7 +568,7 @@ describe('diagram preview modal', () => {
         await flushPromises();
         await clickExportMenuItem(modal, 0);
 
-        expect(exportFolderModal.selectDiagramPreviewExportFolder).toHaveBeenCalledWith(mockApp, 'Notes/Topic.md', 'en');
+        expect(exportFolderModal.selectDiagramPreviewExportFolder).toHaveBeenCalledWith(mockApp, 'Notes/Topic.md', 'en', 'SVG');
         expect(previewExport.saveDiagramPreviewPanelSvgToFolder).toHaveBeenNthCalledWith(
             1,
             mockApp,
@@ -567,6 +627,105 @@ describe('diagram preview modal', () => {
 
         expect(previewExport.saveDiagramPreviewPanelSvgToFolder).toHaveBeenCalledTimes(2);
         expect(Notice).toHaveBeenCalledWith('Exported 1 of 2 SVG files. Failed: mermaid-1: first panel failed.');
+    });
+
+    test.each([
+        ['PNG', 1, 'saveDiagramPreviewPanelPngToFolder', 'Exports/Topic_preview_mermaid-1.png'],
+        ['PDF', 2, 'saveDiagramPreviewPanelPdfToFolder', 'Exports/Topic_preview_mermaid-1.pdf']
+    ])('prompts for a folder and exports every preview panel as separate %s files', async (_label, menuIndex, saveMethod, firstOutputPath) => {
+        (exportFolderModal.selectDiagramPreviewExportFolder as jest.Mock).mockResolvedValue('Exports');
+        const saver = (previewExport as any)[saveMethod] as jest.Mock;
+        saver
+            .mockResolvedValueOnce(firstOutputPath)
+            .mockResolvedValueOnce(firstOutputPath.replace('mermaid-1', 'mermaid-2'));
+        const recordExportPath = jest.fn().mockResolvedValue(undefined);
+        const modal = mountModal(new DiagramPreviewModal(mockApp, createSession({
+            previewPanels: [
+                {
+                    id: 'mermaid-1',
+                    artifact: {
+                        target: 'mermaid',
+                        content: '```mermaid\nflowchart TD\nA --> B\n```',
+                        mimeType: 'text/vnd.mermaid',
+                        sourceIntent: 'flowchart'
+                    }
+                },
+                {
+                    id: 'mermaid-2',
+                    artifact: {
+                        target: 'mermaid',
+                        content: '```mermaid\nsequenceDiagram\nAlice->>Bob: Hello\n```',
+                        mimeType: 'text/vnd.mermaid',
+                        sourceIntent: 'sequence'
+                    }
+                }
+            ]
+        }), 'en', {
+            historyEntryId: 'diagram-one',
+            historyStore: { loadPage: jest.fn(), removeEntry: jest.fn(), recordExportPath }
+        }) as any);
+
+        modal.onOpen();
+        await flushPromises();
+        await clickExportMenuItem(modal, menuIndex as number);
+
+        expect(exportFolderModal.selectDiagramPreviewExportFolder).toHaveBeenCalledWith(mockApp, 'Notes/Topic.md', 'en', _label as string);
+        expect(saver).toHaveBeenNthCalledWith(
+            1,
+            mockApp,
+            'Notes/Topic.md',
+            'mermaid-1',
+            'Exports',
+            expect.objectContaining({ sourceIntent: 'flowchart' }),
+            expect.objectContaining({ theme: 'system', ppi: 300 })
+        );
+        expect(saver).toHaveBeenNthCalledWith(
+            2,
+            mockApp,
+            'Notes/Topic.md',
+            'mermaid-2',
+            'Exports',
+            expect.objectContaining({ sourceIntent: 'sequence' }),
+            expect.objectContaining({ theme: 'system', ppi: 300 })
+        );
+        expect(recordExportPath).toHaveBeenCalledTimes(2);
+        expect(Notice).toHaveBeenCalledWith(expect.stringContaining('Exported 2 of 2'));
+    });
+
+    test('continues separate pdf export after one panel fails', async () => {
+        (exportFolderModal.selectDiagramPreviewExportFolder as jest.Mock).mockResolvedValue('Exports');
+        (previewExport.saveDiagramPreviewPanelPdfToFolder as jest.Mock)
+            .mockRejectedValueOnce(new Error('first pdf failed'))
+            .mockResolvedValueOnce('Exports/Topic_preview_mermaid-2.pdf');
+        const modal = mountModal(new DiagramPreviewModal(mockApp, createSession({
+            previewPanels: [
+                {
+                    id: 'mermaid-1',
+                    artifact: {
+                        target: 'mermaid',
+                        content: '```mermaid\nflowchart TD\nA --> B\n```',
+                        mimeType: 'text/vnd.mermaid',
+                        sourceIntent: 'flowchart'
+                    }
+                },
+                {
+                    id: 'mermaid-2',
+                    artifact: {
+                        target: 'mermaid',
+                        content: '```mermaid\nsequenceDiagram\nAlice->>Bob: Hello\n```',
+                        mimeType: 'text/vnd.mermaid',
+                        sourceIntent: 'sequence'
+                    }
+                }
+            ]
+        }), 'en') as any);
+
+        modal.onOpen();
+        await flushPromises();
+        await clickExportMenuItem(modal, 2);
+
+        expect(previewExport.saveDiagramPreviewPanelPdfToFolder).toHaveBeenCalledTimes(2);
+        expect(Notice).toHaveBeenCalledWith('Exported 1 of 2 PDF files. Failed: mermaid-1: first pdf failed.');
     });
 
     test('shows export controls for image panels represented by preview svg', async () => {

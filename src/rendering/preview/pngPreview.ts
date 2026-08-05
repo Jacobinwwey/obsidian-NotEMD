@@ -213,7 +213,14 @@ function parseLength(value: string | undefined): number | null {
         return null;
     }
 
-    const match = value.trim().match(/^([0-9]+(?:\.[0-9]+)?)/);
+    const normalized = value.trim();
+    // Percentage dimensions describe the embedding viewport, not the SVG's
+    // intrinsic canvas. Prefer the viewBox when the renderer emits them.
+    if (normalized.endsWith('%')) {
+        return null;
+    }
+
+    const match = normalized.match(/^([0-9]+(?:\.[0-9]+)?)/);
     if (!match) {
         return null;
     }
@@ -222,19 +229,26 @@ function parseLength(value: string | undefined): number | null {
     return Number.isFinite(parsed) ? parsed : null;
 }
 
+function readSvgRootAttributes(svg: string): string {
+    return svg.match(/<svg\b([^>]*)>/i)?.[1] ?? '';
+}
+
+function readSvgAttribute(attributes: string, name: string): string | undefined {
+    return attributes.match(new RegExp(`\\b${name}\\s*=\\s*(["'])(.*?)\\1`, 'i'))?.[2];
+}
+
 export function resolveSvgDimensions(svg: string): SvgDimensions {
-    const widthMatch = svg.match(/\bwidth="([^"]+)"/i);
-    const heightMatch = svg.match(/\bheight="([^"]+)"/i);
-    const width = parseLength(widthMatch?.[1]);
-    const height = parseLength(heightMatch?.[1]);
+    const rootAttributes = readSvgRootAttributes(svg);
+    const width = parseLength(readSvgAttribute(rootAttributes, 'width'));
+    const height = parseLength(readSvgAttribute(rootAttributes, 'height'));
 
     if (width && height) {
         return { width, height };
     }
 
-    const viewBoxMatch = svg.match(/\bviewBox="([^"]+)"/i);
-    if (viewBoxMatch) {
-        const parts = viewBoxMatch[1].trim().split(/[\s,]+/).map(Number);
+    const viewBox = readSvgAttribute(rootAttributes, 'viewBox');
+    if (viewBox) {
+        const parts = viewBox.trim().split(/[\s,]+/).map(Number);
         if (parts.length === 4 && Number.isFinite(parts[2]) && Number.isFinite(parts[3]) && parts[2] > 0 && parts[3] > 0) {
             return { width: parts[2], height: parts[3] };
         }
@@ -436,7 +450,7 @@ function sanitizeSvgDocument(svg: string): string | null {
     return new XMLSerializer().serializeToString(root);
 }
 
-export function sanitizeSvgForRasterExport(svg: string): string {
+export function sanitizeSvgForExport(svg: string): string {
     const documentMarkup = sanitizeSvgDocument(svg);
     return documentMarkup ?? sanitizeSvgMarkupFallback(svg);
 }
@@ -482,7 +496,7 @@ export async function rasterizeSvgToImageArrayBuffer(
     const ppi = resolvePreviewExportPpi(options.ppi);
     const scale = resolveRasterScale(ppi);
     const mimeType = options.mimeType ?? 'image/png';
-    const rasterSvg = sanitizeSvgForRasterExport(svg);
+    const rasterSvg = sanitizeSvgForExport(svg);
     const blob = deps.createBlob([rasterSvg], { type: 'image/svg+xml;charset=utf-8' });
     const objectUrl = deps.createObjectURL(blob);
     const imageWidthPx = Math.max(1, Math.ceil(dimensions.width * scale));
