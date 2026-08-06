@@ -27,7 +27,7 @@ Notemd 通過與各種大型語言模型 (LLM) 集成來增強您的 Obsidian �
 
 如果您喜歡使用 Notemd，請考慮 [⭐ 給 GitHub 加星](https://github.com/Jacobinwwey/obsidian-NotEMD) 或 [☕️ 請喝杯咖啡](https://ko-fi.com/jacobinwwey)。
 
-**版本:** 1.9.3
+**版本:** 1.9.5
 
 ![GitHub Release](https://img.shields.io/github/v/release/Jacobinwwey/obsidian-NotEMD?label=Version&link=https%3A%2F%2Fgithub.com%2FJacobinwwey%2Fobsidian-NotEMD%2Freleases%2Flatest) ![GitHub Downloads](https://img.shields.io/github/downloads/Jacobinwwey/obsidian-NotEMD/total?logo=Obsidian&label=Downloads&labelColor=%237C3AED&color=%235b5b5b&link=https%3A%2F%2Fgithub.com%2FJacobinwwey%2Fobsidian-NotEMD%2Freleases%2Flatest)
 
@@ -773,7 +773,7 @@ MIT 授權條款 - 詳情請見 [LICENSE](LICENSE)。
 ---
 
 
-*Notemd v1.9.3 - 用 AI 提升你的 Obsidian 知識圖譜。*
+*Notemd v1.9.5 - 用 AI 提升你的 Obsidian 知識圖譜。*
 
 
 <!-- repo-chronicle:start -->
@@ -783,7 +783,7 @@ MIT 授權條款 - 詳情請見 [LICENSE](LICENSE)。
 
 ![Notemd Development Chronicle](./docs/repo-saga/notemd-development-history.zh_Hant.svg)
 
-_最近一次已針對發佈 tag `1.9.4` 於 2026-07-21 刷新。 最新提交日期：2026-07-21。_
+_最近一次已針對發佈 tag `1.9.5` 於 2026-07-21 刷新。 最新提交日期：2026-07-21。_
 <!-- repo-chronicle:end -->
 
 

@@ -18,64 +18,77 @@ import TLDR from '@site/src/components/TLDR';
 # Diagramy
 
 <TLDR>
-Wybierz **rodzaj diagramu**, który potrzebujesz, a następnie wybierz jego **edytowalny format źródłowy**. Przeglądaj wynik w Obsidian i eksportuj go jako SVG, PNG lub PDF.
+Wybierz **rodzaj diagramu**, który potrzebujesz, a następnie wybierz jego **edytowalny format źródłowy**. Przedstaw prezentację końcowego rezultatu w Obsidianie – obejmującą tablicę Drawnix oraz wplecione w nią obrazy Mermaid – i eksportuj każdą z paneli jako plik SVG, PNG lub PDF.
 </TLDR>
 
 ## Zrozumienie trzech opcji
 
 | Opcja | To, co kontroluje | Przykłady |
 |---|---|---|
-| Rodzaj diagramu | Znaczenie diagramu | Diagram przepływu, diagram sekwencyjny, diagram obwodu, wykres danych |
+| Rodzaj diagramu | Znaczenie diagramu | Diagram przepływu, diagram sekwencyjny, schemat elektryczny, wykres danych |
 | Format źródłowy | Edytowalny lub wielokrotnie używalny plik tworzony przez Notemd | Mermaid, JSON Canvas, Draw.io, Drawnix, CircuitikZ |
-| Format eksportu | Obraz lub dokument używany do udostępniania | SVG, PNG, PDF |
+| Format eksportu | Obraz lub dokument przeznaczony do udostępniania | SVG, PNG, PDF |
 
-Draw.io oraz Drawnix to **formaty źródłowe**, a nie rodzaje diagramów. CircuitikZ to format źródłowy przeznaczony specjalnie do diagramów obwodów elektrycznych. Ten sam przegląd można eksportować w kilku formatach wizualnych, więc wybór CircuitikZ nie ogranicza Cię do formatu SVG.
+Draw.io oraz Drawnix są **formatami źródłowymi**, a nie rodzajami diagramów. CircuitikZ to format źródłowy przeznaczony specjalnie do schematów elektrycznych. Ta sama prezentacja może zostać wyeksportowana w kilku różnych formatach wizualnych, więc wybór CircuitikZ nie ogranicza możliwości eksportu do formatu SVG.
 
 ## Wybór formatu źródłowego
 
 | Format | Najlepszy do | Plik źródłowy |
 |---|---|---|
 | Mermaid | Diagramów umieszczanych bezpośrednio w Markdown | Blok kodu Mermaid |
-| JSON Canvas | Pracy z natywnym interfejsem canvas w Obsidian | `.canvas` |
+| JSON Canvas | Pracy z natywnymi tablicami Obsidian | `.canvas` |
 | Draw.io | Edycji późniejszej w diagram.net lub kompatybilnych narzędziach | `.drawio` |
-| Drawnix | Edycji ręcznej lub w stylu tablicy | `.drawnix` |
+| Drawnix | Edycji ręcznej lub w stylu tablicy pisarskiej | `.drawnix` |
 | CircuitikZ | Strukturalnych obwodów elektrycznych i tranzystorowych | `.tex` |
 
 Jeśli nie potrzebujesz konkretnego edytora, pozostaw pole **Preferred source format** ustawione na **Auto**. Notemd sam wybierze odpowiedni format dla wybranego rodzaju diagramu.
 
-## Tworzenie i eksportowanie diagramu
+## Generowanie i eksportowanie diagramu
 
 1. Otwórz notatkę lub wybierz tekst, który chcesz zobrazować.
-2. Wybierz opcję **Generate diagram** z paska bocznego Notemd lub palety poleceń.
+2. Z menu bocznego Notemd lub paska poleceń wybierz opcję **Generate diagram**.
 3. Wybierz **rodzaj diagramu**, albo pozostaw ustawienie na **Auto-detect**.
-4. Wybierz **format źródłowy**, albo pozostaw ustawienie na **Auto**.
-5. Przeglądaj wynik w przeglądarce.
-6. Wybierz opcję **Save source file**, **Export SVG**, **Export PNG** lub **Export PDF**.
+4. Wybierz **format źródłowy**, albo pozostaw go na **Auto**. Wybierz **Drawnix**, jeśli chcesz mapę wiedzy z edytowalnymi węzłami oraz wplecionymi obrazami Mermaid.
+5. Przejrzyj prezentację. W przypadku wyniku wielopanelowego tablica Drawnix oraz każdy panel Mermaid pozostają w oryginalnej kolejności wewnątrz jednego pionowo przesuwalnego okna prezentacji; panele Mermaid wykorzystują swoją rzeczywistą wysokość, zamiast być obcięte.
+6. Dla pojedynczego obrazu wybierz opcję eksportu dla konkretnego panelu – **Export SVG**, **Export PNG** lub **Export PDF** – albo użyj opcji eksportu obrazu na najwyższym poziomie dla wszystkich paneli. W przypadku kilku paneli wybierz folder źródłowy lub własny folder względem Vault; Notemd tworzy jeden spójny plik dla każdego panelu i kontynuuje pracę nawet w razie błędu przy jednym z nich.
+7. Użyj opcji **Save source file**, jeśli potrzebujesz również edytowalnego pliku źródłowego.
 
-W przypadku formatów PNG i PDF stosowany jest współczynnik PPI do eksportu obrazu, ustawiony w opcjach Notemd. SVG pozostaje obrazem wektorowym i nie jest podatny na wpływ wartości PPI.
+Menu eksportu oferuje opcje **Export SVG**, **Export PNG** oraz **Export PDF** dla aktualnej prezentacji wizualnej. Nagłówek każdego panelu umożliwia wykonanie tych samych działań dla pojedynczego obrazu Mermaid lub Drawnix, dzięki czemu duże prezentacje nie muszą być eksportowane jako jeden niewidzialny plik.
 
-## Diagramy obwodów elektrycznych
+W prezentacji wybierz opcję **History**, aby otworzyć okno z historią Vault bez ukrywania diagramu. Możesz wyszukiwać i filtrować już ukończone diagramy, ponownie otwierać prezentacje lub otwierać zapisane pliki źródłowe. Historia diagramów jest również dostępna bezpośrednio z paska poleceń oraz menu bocznego Notemd, nawet gdy nie ma aktywnej notatki.
 
-Dla zapytań dotyczących obwodów elektrycznych wybierz **Circuit diagram** w połączeniu z plikiem źródłowym typu **CircuitikZ**. Notemd najpierw generuje strukturalny opis obwodu, a następnie zapisuje kod źródłowy w formacie CircuitikZ. To rozwiązanie jest bardziej niezawodne niż proszenie modelu o napisanie nieograniczonego kodu LaTeX.
+SVG i PDF są generowane na podstawie geometrii wektorowej; PDF wykorzystuje tę samą strukturę SVG oraz metryki tekstu, zamiast rasterizować całą prezentację. Parametr PPI w ustawieniach Notemd kontroluje jedynie rasteryzację plików PNG (od 72 do 600 PPI, domyślnie 300).
 
-Obecna obsługa formatu CircuitikZ jest celowo ograniczona. Najlepiej działają powszechnie dostępne wzmacniacze NMOS oraz wspierane elementy CMOS. Zawsze sprawdzaj przegląd oraz kod źródłowy przed użyciem wygenerowanego obwodu w pracach technicznych lub publikacjach.
+## Prezentacje Drawnix z wpleconymi obrazami Mermaid
 
-Przegląd w formacie SVG jest tylko narzędziem pomocniczym generowanym przez Notemd. Nie stanowi on dowodu na to, że lokalna instalacja LaTeX lub TikZJax pomyślnie skompilowała plik `.tex`.
+Gdy plik Drawnix zawiera obrazy Mermaid, Notemd oczyszcza wygenerowany plik SVG i przechowuje oryginalny kod Mermaid razem z nim w metadanych pliku `.drawnix`. Dzięki temu prezentacja może pokazywać obraz Mermaid wewnątrz mapy wiedzy Drawnix bez konieczności uruchamiania środowiska Drawnix lub Plait. Obrazy Mermaid, które są bezpiecznie wplecione, nie tworzą oddzielnego katalogu `.assets`; zewnętrzne pliki binarne lub obrazy nierozwiązane mają towarzyszący im plik, dzięki czemu żadne dane nie giną.
+
+Prezentacja jest celowo zaprojektowana jako jedna przesuwalna powierzchnia: najpierw pojawia się główna tablica Drawnix, a następnie każdy wpleczony panel Mermaid w oryginalnej kolejności. Zamknięcie i ponowne otwarcie zapisanej pozycji z historii przywraca tę samą listę paneli, ich rozmiary oraz dostępne opcje eksportu.
+
+## Schematy elektryczne
+
+Dla zapytań dotyczących schematów elektrycznych wybierz **Circuit diagram** wraz z plikiem źródłowym typu **CircuitikZ**. Notemd najpierw generuje strukturalny opis obwodu, a następnie tworzy plik źródłowy CircuitikZ. Jest to bardziej niezawodne rozwiązanie niż proszenie modelu o napisanie dowolnego kodu LaTeX.
+
+Obecna obsługa CircuitikZ jest celowo ograniczona. Najlepiej działają powszechnie dostępne wzmacniacze NMOS oraz wspierane elementy CMOS. Zawsze sprawdzaj prezentację i plik źródłowy przed użyciem wygenerowanego schematu w pracach technicznych lub publikacyjnych.
+
+Prezentacja w formacie SVG jest dodatkiem pomocniczym generowanym przez Notemd. Nie stanowi ona dowodu na to, że lokalna instalacja LaTeX lub TikZJax pomyślnie skompilowała plik `.tex`.
+
+**Opcjonalna kompilacja natywna.** Do prezentacji wewnątrz pluginu oraz do eksportu plików SVG, PNG i PDF nie jest potrzebny LaTeX. Na komputerze stacjonarnym otwórz **CircuitKZ native compile environment** z ustawień diagramu lub z paska poleceń, jeśli potrzebujesz informacji o procesie kompilacji lub pliku PDF w formacie natywnego LaTeX. Notemd może korzystać z systemowego narzędzia `tectonic` lub `pdflatex`, używać własnego wykonywalnego programu lub instalować zarządzany runtime Tectonic po wyborze opcji **Install**. Panel z informacjami o środowisku pokazuje postęp i błędy w czasie rzeczywistym oraz umożliwia późniejsze usunięcie zarządzanego runtime.
 
 ## Rozwiązywanie problemów
 
 ### Wynik to niewłaściwy rodzaj diagramu
 
-Wybierz konkretny rodzaj diagramu zamiast polegać na funkcji Auto-detect. W przypadku obwodów elektrycznych wybierz **Circuit diagram** i użyj polecenia **Generate diagram**, a nie starszego polecenia **Summarise as Mermaid diagram**.
+Wybierz konkretny rodzaj diagramu zamiast polegać na opcji Auto-detect. W przypadku schematu elektrycznego wybierz **Circuit diagram** i użyj polecenia **Generate diagram**, a nie starszego polecenia **Summarise as Mermaid diagram**.
 
-### Format źródłowy nie jest odpowiedni
+### Format źródłowy jest niewłaściwy
 
-Przywróć ustawienie formatu źródłowego na **Auto**, albo wybierz format przeznaczony do danego rodzaju diagramu. CircuitikZ służy do diagramów obwodów; Draw.io oraz Drawnix są przeznaczone do obsługiwanych diagramów strukturalnych.
+Przywróć format źródłowy do wartości **Auto** lub wybierz format odpowiedni dla danego rodzaju diagramu. CircuitikZ służy tylko do schematów elektrycznych; Draw.io oraz Drawnix są przeznaczone do specyficznych, strukturalnych diagramów.
 
-### Brak przycisków eksportu
+### Menu eksportu nie jest widoczne
 
-Formaty SVG, PNG i PDF wymagają widocznego przeglądu wizualnego. Jeśli dostępny jest tylko tekst źródłowy, zapisz plik źródłowy i otwórz go w odpowiednim narzędziu zewnętrznym.
+Aby móc eksportować pliki SVG, PNG i PDF, konieczna jest prezentacja wizualna. Jeśli dostępny jest tylko tekst źródłowy, zapisz ten plik i otwórz go w odpowiednim narzędziu zewnętrznym.
 
-### Plik CircuitikZ nie kompiluje się poza programem
+### Plik CircuitKZ nie kompiluje się na zewnątrz
 
-Sprawdź, czy Twoje środowisko LaTeX zawiera pakiet `circuitikz`. Ten plugin nie zawiera kompletnego dystrybucji LaTeX.
+Otwórz **CircuitKZ native compile environment** i uruchom sprawdzenie środowiska. Napraw zarządzany runtime lub upewnij się, że twój własny/systemowy kompilator potrafi pobrać pakiet `circuitikz`. Notemd nie zawiera w swoim pliku pluginu pełnej dystrybucji TeX.

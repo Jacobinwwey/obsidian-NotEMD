@@ -18,64 +18,77 @@ import TLDR from '@site/src/components/TLDR';
 # Diagrammen
 
 <TLDR>
-Kies **welk type diagram je nodig hebt**, en selecteer vervolgens de **bewerkbare bronformat**. Bekijk het resultaat in Obsidian en exporteer het als SVG, PNG of PDF.
+Kies eerst **welk type diagram je nodig hebt**, en selecteer daarna de **bewerkbare bronformat**. Bekijk het eindresultaat in Obsidian, inclusief een Drawnix-bord met ingebouwde Mermaid-visualisaties, en exporteer elk paneel als SVG, PNG of PDF.
 </TLDR>
 
 ## De drie mogelijkheden begrijpen
 
 | Keuze | Wat wordt bepaald | Voorbeelden |
 |---|---|---|
-| Diagramtype | Wat de betekenis van het diagram is | Stroomdiagram, sequentiële diagram, circuitdiagram, gegevensgrafiek |
+| Diagramtype | Wat het diagram voorstelt | Stroomdiagram, sequentiële diagram, circuitdiagram, gegevensgrafiek |
 | Bronformat | Het bewerkbare of herbruikbare bestand dat Notemd genereert | Mermaid, JSON Canvas, Draw.io, Drawnix, CircuitikZ |
-| Exportformat | Het afbeeldings- of documentformaat dat wordt gebruikt voor delen | SVG, PNG, PDF |
+| Exportformat | Het afbeeldings- of documentformaat voor delen | SVG, PNG, PDF |
 
-Draw.io en Drawnix zijn **bronformaten**, geen diagramtypen. CircuitikZ is een bronformat dat speciaal is ontworpen voor circuitdiagrammen. Hetzelfde voorbeeld kan in meerdere visuele formaten worden geëxporteerd, dus het kiezen van CircuitikZ beperkt je niet tot SVG.
+Draw.io en Drawnix zijn **bronformaten**, geen diagramtypen. CircuitikZ is een bronformat dat speciaal is ontworpen voor circuitdiagrammen. Hetzelfde voorlopige resultaat kan in meerdere visuele formaten worden geëxporteerd, dus het kiezen van CircuitikZ beperkt je niet tot SVG.
 
 ## Een bronformat kiezen
 
 | Format | Ideaal voor | Bronbestand |
 |---|---|---|
 | Mermaid | Diagrammen die rechtstreeks in Markdown worden opgeslagen | Mermaid-codeblok |
-| JSON Canvas | Workflow’s die gebruikmaken van Obsidian’s eigen canvas | `.canvas` |
+| JSON Canvas | Workflow’s met de ingebouwde Obsidian canvas | `.canvas` |
 | Draw.io | Verder bewerken in diagrams.net of compatibele tools | `.drawio` |
-| Drawnix | Handgetekende of whiteboard-achtige bewerkingen | `.drawnix` |
+| Drawnix | Handmatig of whiteboard-achtig bewerken | `.drawnix` |
 | CircuitikZ | Gestructureerde elektrische en transistorcircuiten | `.tex` |
 
-Laat **Preferred source format** op **Auto** staan als je geen specifieke editor nodig hebt. Notemd kiest dan automatisch een compatibel format voor het geselecteerde diagramtype.
+Laat **Preferred source format** op **Auto** staan als je geen specifieke editor nodig hebt. Notemd kiest dan een compatibel format voor het geselecteerde diagramtype.
 
 ## Een diagram genereren en exporteren
 
-1. Open het notitieblok of selecteer de tekst die je wilt visualiseren.
+1. Open de notitie of selecteer de tekst die je wilt visualiseren.
 2. Kies **Generate diagram** in de Notemd-sidemenu of commandopanel.
 3. Selecteer een **diagramtype**, of laat het op **Auto-detect** staan.
-4. Kies een **bronformat**, of laat het op **Auto** staan.
-5. Bekijk de voorbeeldweergave.
-6. Kies **Save source file**, **Export SVG**, **Export PNG** of **Export PDF**.
+4. Kies een **bronformat**, of laat het op **Auto** staan. Kies **Drawnix** wanneer je een kenniskaart wilt met bewerkbare knopen en ingebouwde Mermaid-visualisaties.
+5. Bekijk de voorlopige weergave. Een meerpanelresultaat bevat het Drawnix-bord en elk Mermaid-paneel in de oorspronkelijke volgorde, allemaal binnen één verticaal scrollbaar venster; de Mermaid-pannen gebruiken hun renderde hoogte in plaats van afgesneden te worden.
+6. Kies voor elk paneel de actie **Export SVG**, **Export PNG** of **Export PDF** om een apart visueel bestand te maken, of gebruik een top-level exportoptie voor alle panen. Voor meerdere panen kun je een bronmap kiezen of een aangepaste map ten opzichte van de Vault; Notemd genereert één deterministisch bestand per paneel en gaat door na een individueel falen.
+7. Gebruik **Save source file** wanneer je ook het bewerkbare originele bestand nodig hebt.
 
-PNG en PDF maken gebruik van de PPI-instelling voor afbeeldingsexport die in de Notemd-instellingen is gedefinieerd. SVG blijft een vectorafbeelding en wordt niet beïnvloed door de PPI-waarde.
+Het Export-menu biedt de opties **Export SVG**, **Export PNG** en **Export PDF** voor de huidige visuele weergave. Elke paneelkop geeft dezelfde acties weer voor één Mermaid- of Drawnix-visualisatie, zodat een grote voorlopige weergave niet als één ondoorzichtig afbeelding hoeft te worden geëxporteerd.
+
+Kies **History** in de voorlopige weergave om het Vault-history-scherm te openen zonder het diagram te verbergen. Je kunt voltooide diagrammen zoeken en filteren, een voorlopige weergave opnieuw openen of opgeslagen bestanden bekijken. Diagramhistorie is ook rechtstreeks beschikbaar via het commandopanel en de Notemd-sidemenu, zelfs wanneer er geen actieve notitie is.
+
+SVG en PDF worden gegenereerd uit vectorgeometrie; PDF maakt gebruik van dezelfde SVG-indeling en tekstmetrieken in plaats van het hele voorlopige resultaat te rasteriseren. De PPI-instelling voor afbeeldingsexport in de Notemd-instellingen bepaalt alleen de rasterisatie van PNG (72-600 PPI, standaard 300).
+
+## Drawnix-voorlopige weergaven met ingebouwde Mermaid
+
+Wanneer een Drawnix-bestand Mermaid-visualisaties bevat, zuivert Notemd de renderde SVG en bewaart de Mermaid-broncode samen daarmee in de metadata van het `.drawnix`-bestand. Hierdoor kan de voorlopige weergave de Mermaid-afbeelding binnen het Drawnix-kenniskaartwezen tonen, zonder dat er een Drawnix- of Plait-runtime nodig is. Mermaid-visualisaties die veilig zijn geïntegreerd, zorgen niet voor een aparte `.assets`-map; externe binair media of onopgeloste visualisaties hebben wel een bijbehorend bestand zodat geen gegevens verloren gaan.
+
+De voorlopige weergave is bewust één enkel scrollbaar oppervlak: eerst verschijnt het hoofdcanvas van Drawnix, gevolgd door elk ingebouwd Mermaid-paneel in de oorspronkelijke volgorde. Het sluiten en opnieuw openen van een opgeslagen historie-entree reconstrueert dezelfde lijst met panelen, afmetingen en exportopties.
 
 ## Circuitdiagrammen
 
-Voor circuitgerelateerde verzoeken kies je **Circuit diagram** met een **CircuitikZ bronbestand**. Notemd genereert eerst een gestructureerde beschrijving van het circuit en schrijft daarna de CircuitikZ-broncode. Dit is betrouwbaarder dan het vragen aan het model om onbeperkt LaTeX-code te genereren.
+Kies **Circuit diagram** met een **CircuitikZ bronbestand** voor circuitverzoeken die worden ondersteund. Notemd genereert eerst een gestructureerde beschrijving van het circuit en schrijft daarna de CircuitikZ-broncode. Dit is betrouwbaarder dan te vragen aan het model om onbeperkt LaTeX te genereren.
 
-De huidige ondersteuning voor CircuitikZ is bewust beperkt. NMOS-versterkers met algemene broncode en ondersteunde CMOS-bouwstenen werken het beste. Controleer altijd de voorbeeldweergave en de broncode voordat je een gegenereerd circuit gebruikt in technische of publicatiewerk.
+De huidige ondersteuning voor CircuitikZ is bewust beperkt. Gemakkelijk beschikbare NMOS-versterkers en ondersteunde CMOS-bouwblokken werken het beste. Controleer altijd de voorlopige weergave en de broncode voordat je een gegenereerd circuit gebruikt in technische of publicatiewerk.
 
-De SVG-voorbeeldweergave wordt door Notemd gemaakt als hulpmiddel bij het controleren. Het is geen bewijs dat een lokale LaTeX- of TikZJax-installatie het `.tex`-bestand succesvol heeft gecompileerd.
+De SVG-voorlopige weergave is een hulpmiddel gemaakt door Notemd ter controle. Het bewijst niet dat er op de lokale machine LaTeX of TikZJax is geïnstalleerd en het `.tex`-bestand daadwerkelijk succesvol is gecompileerd.
+
+**Optionele native compilatie.** Je hebt geen LaTeX nodig voor de preview in de plugin, noch voor de export van SVG, PNG of PDF-voorlopige weergaven. Op desktop kun je **CircuitikZ native compile environment** openen via de diagraminstellingen of het commandopanel wanneer je diagnostische informatie over de compilatie of een native LaTeX PDF nodig hebt. Notemd kan een systeemprogramma zoals `tectonic` of `pdflatex` hergebruiken, een aangepast uitvoerbaar bestand gebruiken, of na expliciete keuze voor **Install** de geprefabriceerde Tectonic-runtime installeren. Het environment-paneel toont de voortgang en fouten direct weergegeven en maakt het mogelijk om later de gemanageerde runtime te verwijderen.
 
 ## Probleemoplossing
 
 ### Het resultaat is het verkeerde diagramtype
 
-Kies expliciet het gewenste diagramtype in plaats van op **Auto-detect** te laten staan. Voor circuitdiagrammen kies je **Circuit diagram** en gebruik je de **Generate diagram**-optie, in plaats van de oudere **Summarise as Mermaid diagram**-optie.
+Kies expliciet het gewenste diagramtype in plaats van op **Auto-detect** te blijven staan. Voor een circuit kies je **Circuit diagram** en gebruik je de commando **Generate diagram**, in plaats van het oudere commando **Summarise as Mermaid diagram**.
 
 ### Een bronformat is niet geschikt
 
-Zet het bronformat terug op **Auto**, of kies een format dat geschikt is voor dat specifieke diagramtype. CircuitikZ is bedoeld voor circuitdiagrammen; Draw.io en Drawnix zijn bedoeld voor gestructureerde diagrammen die worden ondersteund.
+Zet het bronformat terug op **Auto**, of kies een format dat past bij dat specifieke diagramtype. CircuitikZ is bedoeld voor circuitdiagrammen; Draw.io en Drawnix zijn bedoeld voor gestructureerde diagrammen die worden ondersteund.
 
-### De exportknoppen ontbreken
+### Het Export-menu ontbreekt
 
-SVG, PNG en PDF vereisen een visuele voorbeeldweergave. Als er alleen brontekst beschikbaar is, sla het bronbestand op en open dit in de bijbehorende externe tool.
+SVG, PNG en PDF vereisen een visuele voorlopige weergave. Als er alleen brontekst beschikbaar is, sla dan het bronbestand op en open dit in de juiste externe tool.
 
-### Een CircuitikZ-bestand compileert niet extern
+### Een CircuitikZ-bestand kan niet extern worden gecompileerd
 
-Controleer of je LaTeX-omgeving het `circuitikz`-pakket bevat. De plugin bevat geen volledige LaTeX-distributie.
+Open **CircuitikZ native compile environment** en voer een controle van de omgeving uit. Repareer de gemanageerde runtime of controleer of je eigen/systemcompiler het `circuitikz`-pakket kan ophalen. Notemd bevat geen volledige TeX-distributie in het pluginbestand.

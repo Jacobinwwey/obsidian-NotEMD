@@ -10,67 +10,80 @@ concepts: [Diagrammtypen, Quellformate, Diagrammexport]
 
 import TLDR from '@site/src/components/TLDR';
 
-# Diagramme erstellen
+# Diagramme
 
 <TLDR>
-Wählen Sie **welchen Diagrammtyp** Sie benötigen, anschließend das entsprechende **bearbeitbare Quellformat**. Prüfen Sie das Ergebnis in Obsidian und exportieren Sie es als SVG, PNG oder PDF.
+Wählen Sie zunächst **die Art von Diagramm**, das Sie benötigen, und anschließend dessen **bearbeitbaren Quellformat**. Prüfen Sie das vollständige Ergebnis in Obsidian – einschließlich eines Drawnix-Bretts mit eingebetteten Mermaid-Visualisierungen – und exportieren Sie jedes Panel als SVG, PNG oder PDF.
 </TLDR>
 
 ## Die drei verfügbaren Optionen verstehen
 
-| Option | Was wird damit gesteuert | Beispiele |
+| Option | Was sie steuert | Beispiele |
 |---|---|---|
 | Diagrammtyp | Bedeutung des Diagramms | Flussdiagramm, Sequenzdiagramm, Schaltplan, Datenchart |
-| Quellformat | Das bearbeitbare oder wiederverwendbare Dateiformat, das von Notemd erstellt wird | Mermaid, JSON Canvas, Draw.io, Drawnix, CircuitikZ |
-| Exportformat | Das Bild oder Dokument, das zum Teilen verwendet wird | SVG, PNG, PDF |
+| Quellformat | Das bearbeitbare oder wiederverwendbare Dateiformat, das Notemd erstellt | Mermaid, JSON Canvas, Draw.io, Drawnix, CircuitikZ |
+| Exportformat | Das Bild oder Dokument zur Weitergabe | SVG, PNG, PDF |
 
-Draw.io und Drawnix sind **Quellformate**, keine Diagrammtypen. CircuitikZ ist ein Quellformat, das speziell für Schaltpläne entwickelt wurde. Dasselbe Vorschaubild kann in mehrere visuelle Formate exportiert werden, daher beschränkt die Auswahl von CircuitikZ Sie nicht auf SVG.
+Draw.io und Drawnix sind **Quellformate**, keine Diagrammtypen. CircuitikZ ist ein Quellformat, das speziell für Schaltpläne entwickelt wurde. Dasselbe Vorschauergebnis kann in mehrere visuelle Formate exportiert werden; daher beschränkt die Auswahl von CircuitikZ Sie nicht auf SVG.
 
 ## Ein Quellformat auswählen
 
 | Format | Am besten geeignet für | Quelldatei |
 |---|---|---|
 | Mermaid | Diagramme, die direkt im Markdown gespeichert werden | Mermaid-Codeblock |
-| JSON Canvas | Workflow‑Modelle, die direkt in Obsidian verwendet werden | `.canvas` |
+| JSON Canvas | Workflow‑Modelle direkt in Obsidian | `.canvas` |
 | Draw.io | Spätere Bearbeitung in diagrams.net oder kompatiblen Tools | `.drawio` |
 | Drawnix | Handgezeichnete oder Whiteboard‑ähnliche Bearbeitungen | `.drawnix` |
 | CircuitikZ | Strukturierte elektrische Schaltungen und Transistorschaltungen | `.tex` |
 
-Lassen Sie **Preferred source format** auf **Auto** stehen, wenn Sie kein bestimmtes Editor‑Tool benötigen. Notemd wählt dann automatisch ein kompatibles Format für den ausgewählten Diagrammtyp aus.
+Lassen Sie **Preferred source format** auf **Auto** stehen, wenn Sie kein bestimmtes Editor‑Tool benötigen. Notemd wählt dann ein kompatibles Format für den ausgewählten Diagrammtyp aus.
 
 ## Ein Diagramm erstellen und exportieren
 
 1. Öffnen Sie die Notiz oder wählen Sie den Text aus, den Sie visualisieren möchten.
-2. Wählen Sie **Generate diagram** im Seitenbereich oder in der Befehlsleiste von Notemd aus.
-3. Wählen Sie einen **Diagrammtyp** aus oder lassen Sie ihn auf **Auto-detect** stehen.
-4. Wählen Sie ein **Quellformat** aus oder lassen Sie es auf **Auto** stehen.
-5. Prüfen Sie die Vorschau.
-6. Wählen Sie **Save source file**, **Export SVG**, **Export PNG** oder **Export PDF**.
+2. Wählen Sie **Generate diagram** im Notemd‑Sidebar oder in der Befehlsleiste aus.
+3. Wählen Sie einen **Diagrammtyp**, oder lassen Sie ihn auf **Auto-detect** stehen.
+4. Wählen Sie ein **Quellformat**, oder lassen Sie es auf **Auto** stehen. Wählen Sie **Drawnix**, wenn Sie eine Wissenskarte mit bearbeitbaren Knoten sowie eingebetteten Mermaid‑Visualisierungen möchten.
+5. Überprüfen Sie die Vorschau. Ein mehrpaneliges Ergebnis zeigt das Drawnix‑Brett zusammen mit allen Mermaid‑Panels in der ursprünglichen Reihenfolge innerhalb eines vertikal scrollbaren Vorschaufeldes an; die Mermaid‑Panels nutzen ihre renderierte Höhe, anstatt abgeschnitten zu werden.
+6. Wählen Sie für jedes Panel die Aktion **Export SVG**, **Export PNG** oder **Export PDF**, um ein einzelnes Bild zu erzeugen, oder verwenden Sie eine oberste Ebene zum Export aller Panels. Für mehrere Panels geben Sie den Quellordner oder einen benutzerdefinierten Ordner relativ zum Vault an; Notemd erstellt für jedes Panel eine deterministische Datei und setzt die Erstellung fort, selbst wenn ein einzelnes Element fehlschlägt.
+7. Verwenden Sie **Save source file**, wenn Sie auch das bearbeitbare Original benötigen.
 
-PNG und PDF verwenden die in den Notemd‑Einstellungen konfigurierte Bildauflösung (PPI). SVG bleibt ein Vektorbild und wird nicht von diesem PPI‑Wert beeinflusst.
+Das Export‑Menü bietet die Optionen **Export SVG**, **Export PNG** und **Export PDF** für die aktuelle visuelle Vorschau. Jeder Panel‑Header zeigt dieselben Aktionen für ein einzelnes Mermaid- oder Drawnix‑Element an, sodass eine große Vorschau nicht als ein einziges undurchsichtiges Bild exportiert werden muss.
+
+Wählen Sie **History** in der Vorschau, um das Vault‑Historie‑Fenster zu öffnen, ohne das Diagramm zu verbergen. Sie können abgeschlossene Diagramme suchen und filtern, eine Vorschau erneut öffnen oder gespeicherte Dateien aufrufen. Die Diagrammhistorie ist ebenfalls direkt über die Befehlsleiste und den Notemd‑Sidebar zugänglich – auch dann, wenn keine aktive Notiz geöffnet ist.
+
+SVG- und PDF‑Dateien werden aus vektorbasierten Geometrien erzeugt; PDF verwendet dieselbe SVG‑Layout‑ und Textmetrik anstelle einer Rasterisierung der gesamten Vorschau. Die PPI‑Einstellung für den Bildexport in den Notemd‑Einstellungen steuert ausschließlich die Rasterisierung von PNGs (72–600 PPI, standardmäßig 300).
+
+## Drawnix‑Vorschauen mit eingebetteten Mermaid‑Elementen
+
+Wenn eine Drawnix‑Datei Mermaid‑Visualisierungen enthält, bereinigt Notemd das renderierte SVG und speichert den Mermaid-Quellcode zusammen damit in den Metadaten der Datei im Format `.drawnix`. Dadurch kann die Vorschau das Mermaid-Bild innerhalb des Drawnix-Wissenskartensystems anzeigen, ohne dass ein Drawnix‑ oder Plait‑Laufzeitumfeld erforderlich ist. Mermaid‑Elemente, die sicher eingebettet werden, erzeugen keinen separaten `.assets`-Ordner; externe binäre Medien oder ungelöste Visualisierungen behalten einen Begleitdatei bei, damit keine Daten verloren gehen.
+
+Die Vorschau ist absichtlich eine einzige, scrollbare Fläche: Zuerst wird das Haupt‑Drawnix‑Brett angezeigt, gefolgt von jedem eingebetteten Mermaid-Panel in der ursprünglichen Reihenfolge. Das Schließen und Wiederöffnen einer gespeicherten Historieeintragung stellt dieselbe Liste an Panels, Abmessungen sowie Exportfunktionen wieder her.
 
 ## Schaltpläne
 
-Für unterstützte Schaltplananfragen wählen Sie **Circuit diagram** zusammen mit einer **CircuitikZ Quelldatei**. Zunächst erstellt Notemd eine strukturierte Beschreibung des Schaltplans und schreibt anschließend die CircuitikZ‑Quelle. Dies ist zuverlässiger, als vom Modell eine unbeschränkte LaTeX‑Datei erstellen zu lassen.
+Für unterstützte Schaltplananfragen wählen Sie **Circuit diagram** zusammen mit dem **CircuitikZ Quelldateiformat**. Zunächst erstellt Notemd eine strukturierte Beschreibung des Schaltplans und schreibt anschließend den CircuitikZ-Quellcode dazu. Dies ist zuverlässiger, als vom Modell die Erstellung eines unbeschränkten LaTeX‑Dokuments zu verlangen.
 
-Die aktuelle Unterstützung für CircuitikZ ist absichtlich eingeschränkt. Am besten funktionieren allgemein verfügbare NMOS‑Verstärker sowie unterstützte CMOS‑Bausteine. Überprüfen Sie immer die Vorschau und die Quelle, bevor Sie einen generierten Schaltplan in technischen Arbeiten oder Publikationen verwenden.
+Die aktuelle Unterstützung für CircuitikZ ist absichtlich eingeschränkt. Am besten funktionieren allgemein verfügbare NMOS‑Verstärker sowie unterstützte CMOS‑Bausteine. Überprüfen Sie immer die Vorschau und den Quellcode, bevor Sie einen generierten Schaltplan in technischen Arbeiten oder Publikationen verwenden.
 
-Die SVG‑Vorschau wird von Notemd als Hilfsmittel zur Überprüfung erstellt. Sie ist kein Nachweis dafür, dass eine lokale LaTeX- oder TikZJax‑Installation die `.tex`-Datei erfolgreich kompiliert hat.
+Die SVG-Vorschau wird von Notemd als Hilfsmittel zur Überprüfung erstellt. Sie ist kein Nachweis dafür, dass eine lokale LaTeX- oder TikZJax‑Installation die `.tex`-Datei erfolgreich kompiliert hat.
+
+**Optionale native Kompilierung.** Für die Vorschau innerhalb des Plugins sowie für den Export von SVG-, PNG- und PDF‑Dateien benötigen Sie keine LaTeX‑Umgebung. Auf dem Desktop öffnen Sie **CircuitikZ native compile environment** über die Diagrammeinstellungen oder die Befehlsleiste, wenn Sie Diagnosen zur Kompilierung oder ein natives LaTeX‑PDF benötigen. Notemd kann eine System‑`tectonic`- oder `pdflatex`-Instanz wiederverwenden, ein benutzerdefiniertes Exekutables verwenden oder nach ausdrücklicher Auswahl von **Install** die festgelegte Tectonic‑Laufzeitumgebung installieren. Das Umgebungs‑Panel zeigt den Fortschritt und Fehler direkt an und ermöglicht es Ihnen, die verwaltete Laufzeitumgebung später zu entfernen.
 
 ## Fehlerbehebung
 
 ### Das Ergebnis ist der falsche Diagrammtyp
 
-Wählen Sie den Diagrammtyp explizit aus, anstatt auf **Auto-detect** zu setzen. Für Schaltpläne wählen Sie **Circuit diagram** und verwenden Sie den Befehl **Generate diagram**, nicht mehr den veralteten Befehl **Summarise as Mermaid diagram**.
+Wählen Sie explizit den gewünschten Diagrammtyp anstelle von „Auto-detect“. Für Schaltpläne wählen Sie **Circuit diagram** und verwenden Sie den Befehl **Generate diagram**, nicht mehr den veralteten Befehl **Summarise as Mermaid diagram**.
 
 ### Ein Quellformat eignet sich nicht
 
-Setzen Sie das Quellformat wieder auf **Auto** oder wählen Sie ein Format, das für den jeweiligen Diagrammtyp geeignet ist. CircuitikZ dient ausschließlich für Schaltpläne; Draw.io und Drawnix sind für unterstützte strukturierte Diagramme vorgesehen.
+Setzen Sie das Quellformat wieder auf **Auto**, oder wählen Sie ein Format, das für den jeweiligen Diagrammtyp geeignet ist. CircuitikZ dient ausschließlich Schaltplänen; Draw.io und Drawnix sind für unterstützte strukturierte Diagramme vorgesehen.
 
-### Die Export‑Schaltflächen fehlen
+### Das Export‑Menü fehlt
 
-SVG, PNG und PDF erfordern eine visuelle Vorschau. Wenn nur der Quelltext vorhanden ist, speichern Sie die Quelldatei und öffnen Sie sie in dem entsprechenden externen Tool.
+SVG-, PNG- und PDF-Exporte erfordern eine visuelle Vorschau. Wenn nur Quelltext vorhanden ist, speichern Sie die Datei als Quelldatei und öffnen Sie sie in dem entsprechenden externen Tool.
 
-### Eine CircuitikZ-Datei lässt sich extern nicht kompilieren
+### Eine CircuitikZ‑Datei lässt sich nicht extern kompilieren
 
-Stellen Sie sicher, dass Ihre LaTeX‑Umgebung das Paket `circuitikz` enthält. Der Plugin enthält keine vollständige LaTeX‑Distribution.
+Öffnen Sie **CircuitikZ native compile environment** und führen Sie eine Umgebungsprüfung durch. Beheben Sie die Probleme mit der verwalteten Laufzeitumgebung oder überprüfen Sie, ob Ihr benutzerdefiniertes bzw. System‑Compiler das Paket `circuitikz` abrufen kann. Notemd enthält keine vollständige TeX‑Distribution in der Plugin-Datei.

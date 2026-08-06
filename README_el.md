@@ -696,7 +696,7 @@
 ---
 
 
-*Notemd v1.9.3 - Βελτιώστε το γράφημα γνώσης σας στο Obsidian με AI.*
+*Notemd v1.9.5 - Βελτιώστε το γράφημα γνώσης σας στο Obsidian με AI.*
 
 
 <!-- repo-chronicle:start -->
@@ -706,7 +706,7 @@
 
 ![Notemd Development Chronicle](./docs/repo-saga/notemd-development-history.el.svg)
 
-_Τελευταία ανανέωση για την ετικέτα έκδοσης `1.9.4` στις 2026-07-21. Ημερομηνία τελευταίου commit: 2026-07-21._
+_Τελευταία ανανέωση για την ετικέτα έκδοσης `1.9.5` στις 2026-07-21. Ημερομηνία τελευταίου commit: 2026-07-21._
 <!-- repo-chronicle:end -->
 
 

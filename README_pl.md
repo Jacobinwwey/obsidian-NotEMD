@@ -699,7 +699,7 @@ MIT License - szczegóły znajdują się w pliku [LICENSE](LICENSE).
 ---
 
 
-*Notemd v1.9.3 - Rozwijaj swój graf wiedzy w Obsidianie dzięki AI.*
+*Notemd v1.9.5 - Rozwijaj swój graf wiedzy w Obsidianie dzięki AI.*
 
 
 <!-- repo-chronicle:start -->
@@ -709,7 +709,7 @@ Ta kwartalna kronika zachowuje oryginalny styl wizualny [repo-saga](https://gith
 
 ![Notemd Development Chronicle](./docs/repo-saga/notemd-development-history.pl.svg)
 
-_Ostatnio odświeżono dla tagu wydania `1.9.4`: 2026-07-21. Data ostatniego commita: 2026-07-21._
+_Ostatnio odświeżono dla tagu wydania `1.9.5`: 2026-07-21. Data ostatniego commita: 2026-07-21._
 <!-- repo-chronicle:end -->
 
 

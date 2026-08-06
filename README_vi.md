@@ -700,7 +700,7 @@ Giấy phép MIT. Xem file [LICENSE](LICENSE) để biết chi tiết.
 ---
 
 
-*Notemd v1.9.3 - Nâng cấp knowledge graph Obsidian của bạn bằng AI.*
+*Notemd v1.9.5 - Nâng cấp knowledge graph Obsidian của bạn bằng AI.*
 
 
 
@@ -711,7 +711,7 @@ Biên niên sử theo quý này giữ nguyên phong cách hình ảnh gốc củ
 
 ![Notemd Development Chronicle](./docs/repo-saga/notemd-development-history.vi.svg)
 
-_Lần làm mới gần nhất cho thẻ phát hành `1.9.4` vào 2026-07-21. Ngày commit mới nhất: 2026-07-21._
+_Lần làm mới gần nhất cho thẻ phát hành `1.9.5` vào 2026-07-21. Ngày commit mới nhất: 2026-07-21._
 <!-- repo-chronicle:end -->
 
 

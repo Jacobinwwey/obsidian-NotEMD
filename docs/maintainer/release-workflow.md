@@ -67,7 +67,23 @@ Before publishing, ensure version references are aligned:
 
 Release tags must use numeric `x.x.x` format. Do not add a `v` prefix: Obsidian community plugin publishing expects numeric tags only.
 
-## 4. Release Notes Contract
+## 4. Documentation Translation Delivery
+
+The public diagrams guide is localized from `website/docs/features/diagrams.mdx` through `website/scripts/translate-diagrams-user-guide.cjs`. The checked-in workflow uses the LM Studio OpenAI-compatible endpoint `http://100.80.17.113:301/v1/chat/completions` with model `hy-mt2-7b`; the address is an API endpoint, not a website URL, and no credential belongs in the repository.
+
+Run locale groups sequentially, with no more than eight locales per invocation. This keeps each request well below the model's 32k context window (the script rejects larger locale groups and validates frontmatter, heading levels, product tokens, and maintainer-content boundaries):
+
+```bash
+node website/scripts/translate-diagrams-user-guide.cjs --write --locales zh-CN,zh-Hant,zh-TW,ja,fr,de,es,ko
+node website/scripts/translate-diagrams-user-guide.cjs --write --locales it,pt,pt-BR,ru,ar,fa,hi,bn
+node website/scripts/translate-diagrams-user-guide.cjs --write --locales nl,sv,fi,da,no,pl,tr,he
+node website/scripts/translate-diagrams-user-guide.cjs --write --locales th,el,cs,hu,ro,uk,vi,id
+node website/scripts/translate-diagrams-user-guide.cjs --write --locales ms
+```
+
+Before committing, run the locale groups again with `--normalize-existing` (and without `--write` for a dry run) for a validation-only pass, then build and audit the site. Do not substitute a generic web translator: the guide contains MDX, Mermaid, file extensions, and export tokens that must remain structurally stable.
+
+## 5. Release Notes Contract
 
 Release notes now live in two complete checked-in files:
 
@@ -76,7 +92,7 @@ Release notes now live in two complete checked-in files:
 
 Each file must be independently readable. The GitHub release helper composes those two files into one bilingual release body at publish time.
 
-## 5. GitHub Release Requirements
+## 6. GitHub Release Requirements
 
 Required release assets:
 
@@ -85,7 +101,7 @@ Required release assets:
 - `styles.css`
 - `README.md`
 
-## 6. Publish Command
+## 7. Publish Command
 
 ```bash
 npm run release:github -- <tag>
@@ -101,7 +117,7 @@ The helper now enforces the required packaged assets plus both checked-in releas
 
 That second path is the repair path for cases where a release body drifted from checked-in notes or plugin assets were not uploaded.
 
-## 7. CI Automation
+## 8. CI Automation
 
 The repository also ships `.github/workflows/release.yml`:
 
@@ -125,7 +141,7 @@ The repository also ships `.github/workflows/release.yml`:
 
 The workflow intentionally reuses checked-in release helpers instead of duplicating asset lists, release-note logic, tag validation, or chronicle target defaults inside YAML-local script fragments.
 
-## 8. Diagram Semantic Layer
+## 9. Diagram Semantic Layer
 
 Renderer-affecting changes need one more layer beyond repo CI:
 

@@ -8,6 +8,9 @@ const sourcePath = path.join(websiteRoot, 'docs', 'features', 'diagrams.mdx');
 const i18nRoot = path.join(websiteRoot, 'i18n');
 const endpoint = process.env.LM_STUDIO_ENDPOINT || 'http://100.80.17.113:301/v1/chat/completions';
 const model = process.env.LM_STUDIO_MODEL || 'hy-mt2-7b';
+const MAX_LOCALES_PER_RUN = 8;
+const MAX_CONTEXT_TOKENS = 30000;
+const TRANSLATION_MAX_TOKENS = 12000;
 
 function parseArguments(argv) {
   const options = {locales: [], write: false, normalizeExisting: false};
@@ -31,10 +34,30 @@ function parseArguments(argv) {
   if (options.locales.length === 0) {
     throw new Error('--locales requires one or more comma-separated locale codes');
   }
-  if (!options.normalizeExisting && options.locales.length > 8) {
+  if (!options.normalizeExisting && options.locales.length > MAX_LOCALES_PER_RUN) {
     throw new Error('Process at most 8 locales per run to stay within the 32k model context budget');
   }
   return options;
+}
+
+function estimateTokenCount(text) {
+  return Math.ceil(text.length / 4);
+}
+
+function assertContextBudget(sourceBody, locale) {
+  const systemPrompt = [
+    'You are a documentation localization engineer.',
+    'Translate the complete MDX user guide into the requested locale.',
+    'Return only the complete translated MDX document without a code fence or explanation.',
+    'Preserve frontmatter keys, MDX imports, Markdown structure, heading levels, tables, list numbering, links, inline code, file extensions, and product names.',
+    'Do not translate: Notemd, Obsidian, Mermaid, JSON Canvas, Draw.io, Drawnix, CircuitikZ, TikZJax, SVG, PNG, PDF, TLDR.',
+    'The input starts at the H1 heading. Translate headings, prose, table descriptions, steps, and troubleshooting text.',
+  ].join(' ');
+  const userPrompt = `Target locale: ${locale}\n\n${sourceBody}`;
+  const estimatedContext = estimateTokenCount(`${systemPrompt}\n${userPrompt}`) + TRANSLATION_MAX_TOKENS;
+  if (estimatedContext >= MAX_CONTEXT_TOKENS) {
+    throw new Error(`${locale}: estimated request context ${estimatedContext} exceeds ${MAX_CONTEXT_TOKENS} token budget`);
+  }
 }
 
 function normalizeMdx(content) {
@@ -85,13 +108,14 @@ function validateTranslation(source, translated, locale) {
 }
 
 async function translateGuide(sourceBody, locale) {
+  assertContextBudget(sourceBody, locale);
   const response = await fetch(endpoint, {
     method: 'POST',
     headers: {'content-type': 'application/json'},
     body: JSON.stringify({
       model,
       temperature: 0.1,
-      max_tokens: 12000,
+      max_tokens: TRANSLATION_MAX_TOKENS,
       messages: [
         {
           role: 'system',

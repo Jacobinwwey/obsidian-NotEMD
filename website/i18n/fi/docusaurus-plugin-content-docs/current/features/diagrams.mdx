@@ -18,64 +18,77 @@ import TLDR from '@site/src/components/TLDR';
 # Diagrammit
 
 <TLDR>
-Valitse **mitä tyyppinen diagrammi sinulle tarvitsee**, sitten valitse sen **muokattavaa lähteenvormattoa**. Esitä tulemus Obsidianissa ja eksportoi se SVG-, PNG- tai PDF-muotoon.
+Valitse, **millainen diagrammi sinulle tarvitsee**, ja valitse sen **muokattavaa lähteenvormatta**. Näytä koko tuloksia Obsidianissa – mukaan lukien Drawnix-taulukko ja siinä sisältyvät Mermaid-viestot – sekä eksportoi jokaisen paneelin SVG-, PNG- tai PDF-formaattina.
 </TLDR>
 
-## Ymmärrä kolme valintaa
+## Ymmärrä kolme valinta
 
 | Valinta | Mitä se kontrolloi | Esimerkit |
 |---|---|---|
-| Diagrammityyppi | Mitä diagrammi tarkoittaa | Flowchart, sequence diagram, circuit diagram, data chart |
-| Lähteenvormatti | Muokattavaa tai uudelleen käytettävää tiedostoa, joka Notemd luoo | Mermaid, JSON Canvas, Draw.io, Drawnix, CircuitikZ |
-| Eksportivormatti | Kuvaa tai dokumenttia, jota käytetään jakamiseen | SVG, PNG, PDF |
+| Diagrammityypi | Mitä diagrammi tarkoittaa | Flowchart, sekvenssi-diagrammi, vähensuunnitelma, datataulukko |
+| Lähteenvormatti | Muokattavaa tai uudelleen käytettävää tiedostoa, jota Notemd luoo | Mermaid, JSON Canvas, Draw.io, Drawnix, CircuitikZ |
+| Eksportivormatti | Kuvaa tai dokumentti, jota käytetään jakamiseen | SVG, PNG, PDF |
 
-Draw.io ja Drawnix ovat **lähteenvormattot**, ei diagrammityyppit. CircuitikZ on lähteenvormatti, joka on suunniteltu电路diagrammien luomiseen. Saman esityksen voidaan eksportoida useihin visuaalisiin muotoihin, joten CircuitikZ-valinta ei rajoita sinua vain SVG:hen.
+Draw.io ja Drawnix ovat **lähteenvormattimet**, ei diagrammityypit. CircuitikZ on lähteenvormatti, joka on suunniteltu vähensuunnitelmien luomiseen. Saman näytön voi eksportoida useihin visuaalioikeuksille, mikä tarkoittaa, että CircuitikZ-valinta ei rajoita sinua vain SVG:hen.
 
 ## Valitse lähteenvormatti
 
-| Muoto | Parhaiten sopii | Lähteetiedosto |
+| Vormatti | Parhaiten sopii | Lähteetiedostos |
 |---|---|---|
-| Mermaid | Diagrammit, jotka pysyvät suoraan Markdownissa | Mermaid-koodiplokki |
-| JSON Canvas | Obsidianin omat canvas-toimintatiedostot | `.canvas` |
-| Draw.io | Muokkaus myöhemmin diagrammet.net:ssä tai samankaltaisissa ohjelmistoissa | `.drawio` |
-| Drawnix | Käsikirjoituksellinen tai tahvallistyylinen muokkaus | `.drawnix` |
-| CircuitikZ | Strukturoituja elektrisia ja transistoria koskevia circuiteja | `.tex` |
+| Mermaid | Diagrammit, jotka pysyvät suoraan Markdownissa | Mermaid-koodiploki |
+| JSON Canvas | Obsidianin omat canvas-toimintat | `.canvas` |
+| Draw.io | Muokkaus diagramminetissä tai samankaltaisissa sovelluksissa | `.drawio` |
+| Drawnix | Käsikirjoituksen tai tahvallistyylisen muokkauden käyttö | `.drawnix` |
+| CircuitikZ | Strukturoituja elektrisia ja transistorivähensuunnitelmia | `.tex` |
 
-Jätä **Preferred source format**-valinta **Auto**-tilaan, jos sinulle ei tarvitse konkreettista ohjelmistoa. Notemd valitsee sopivan muodon valittun diagrammityyppin perusteella.
+Jätä **Ehdotettu lähteenvormatti** vaihtoehtoona **Auto**, jos sinulle ei tarvitse konkreettista sovellusta. Notemd valitsee sopivan vormattin valituun diagrammityypille.
 
 ## Luoda ja eksportoida diagrammi
 
 1. Avoa tiedosto tai valitse teksti, jota haluat visualisoida.
-2. Valitse **Generate diagram** Notemdin puolekalustosta tai käskupalvelusta.
-3. Valitse **diagrammityyppi**, tai jätä se **Auto-detect**-tilaan.
-4. Valitse **lähteenvormatti**, tai jätä se **Auto**-tilaan.
-5. Tarkista esitys.
-6. Valitse **Save source file**, **Export SVG**, **Export PNG** tai **Export PDF**.
+2. Valitse Notemdin puolekalustasta tai käskukentästä **Luoda diagrammi**.
+3. Valitse **diagrammityypi**, tai jätä se vaihtoehtoona **Autotunnistus**.
+4. Valitse **lähteenvormatti**, tai jätä se vaihtoehtoona **Auto**. Valitse **Drawnix**, jos haluat tietoisuusmaantilaan, jossa ovat muokattavat nodit ja sisältyvät Mermaid-viestot.
+5. Tarkista näytössä oleva esimerkki. Usean paneelin tuloksessa Drawnix-taulukko ja kaikki Mermaid-paneelet pysyvät lähteenvaiheessa yhdessä vertikaalisesti kerroittavassa näytönkehässä; Mermaid-paneelet käyttävät omaa renderoidutta korkeutta, eikä ne kärjätä.
+6. Valitse jokaisen paneelin **Eksportoi SVG**, **Eksportoi PNG** tai **Eksportoi PDF** -toiminto yhdelle visuaalille, tai käytä yleistä kuvaneksportointia kaikille paneille. Useiden paneillien tapauksessa valitse lähteekanssi tai omat Vault-relatiiviset kanssit; Notemd kirjoittaa jokaiselle paneelle yhden deterministisen tiedoston ja jatkaa myöhemmin, jos yksi toiminta ehtyy.
+7. Käytä **Salaa lähteetiedostos**, kun sinulle on tarpeen myös muokattavaa artefaktia.
 
-PNG ja PDF käyttävät Notemdin asetuksissa määriteltua kuvaneksportin PPI-arvoa. SVG jää vektorikuvaksi eikä se vaikuta PPI-arvoon.
+Eksportointivalikossa on **Eksportoi SVG**, **Eksportoi PNG** ja **Eksportoi PDF** -toimintot valitun visuaalisen näytön için. Jokaisen paneelin päälle oleva otsikko tarjoaa samat toimintot yksille Mermaid- tai Drawnix-visuaalille, mikä tarkoittaa, että suuri näyttö ei tarvitse eksportoida yhdellä epäläbistyvällä kuvana.
 
-## Circuit-diagrammit
+Valitse näytön **Historia**, jotta voit avata Vaultin historian-kaustan ilman diagrammin peitämistä. Voit etsiä ja filteroida valmis diagrammeja, uudelleen avata näyttöä tai avata salattuja artefakteja. Diagrammin historia on myös saatavilla suoraan käskukentästä ja Notemdin puolekalustasta, even when no note is active.
 
-Valitse **Circuit diagram** sekä **CircuitikZ source file** tuettavien circuit-taiotuksissa. Notemd luostaa first a strukturoituun circuit-tulkinnan, sitten kirjoittaa CircuitikZ-lähteetiedoston. Tämä on todennäköisempi kuin pyytää mallia kirjoittamaan rajoitusta mittaamattoman LaTeX -koodin.
+SVG- ja PDF-tiedostot luoduttaan vektoriallugeettikäytöstä; PDF käyttää saman SVG-asennusta ja tekstimäärityksiä, eikä se rasteroi koko näyttöä. Notemdin asetuksissa oleva kuvaneksportointin PPI-rakentea koskee vain PNG:n rasteroinnista (72–600 PPI, 300 vaihtoehtoisesti).
 
-Prahtinen CircuitikZ-tukea on suositettavasti rajoitettu. Yleisimmät NMOS-voimistimet ja tuetut CMOS-komponentit toimivat parhaiten. Aseta aina tarkista esitystä ja lähteetiedostoa ennen kuin käytät luodutta circuitia teknisissä tai publikointitöissä.
+## Drawnix-näytöt Mermaid-viestojen kanssa
 
-SVG-esitys on Notemdin luottamuksentekijä, joka tuotetaan esityksen tarkistamiseen. Se ei ole tõendus siitä, että lokalisoinnin LaTeX- tai TikZJax-asennus on `.tex`-tiedoston suorittanut edullisesti.
+Kun Drawnix-artefakti sisältää Mermaid-viestot, Notemd puhastaa renderoidut SVG:t ja säilyttää Mermaid-lähteet saman tiedoston `.drawnix`-meta-tiedoissa. Tämän ansiosta näytössä voi näkyä Mermaid-kuvat Drawnix-tietoisuusmaantilan sisällä ilman tarvetta Drawnix- tai Plait-asennusta. Ainoastaan Mermaid-viestot, jotka on turvallisesti sisällyttynyt, eivät luoda erillistä `.assets`-kaustaa; ulkopuoliset binääriset mediat tai ratkaisemattomat viestot säilyttävät kanssiansa tiedoston, jotta data ei häviä.
+
+Näytö on suositeltavasti yksi kerroittava pinta: ensisijaisesti näkyy pää Drawnix-taulukko, sen jälkeen jokainen sisältyvä Mermaid-paneeli lähteenvaiheessa. Salattun historiankirjan avaminen ja uudelleen avaminen luostaa saman paneelilistan, määröiden ja eksporttoimintot.
+
+## Vähensuunnitelmat
+
+Valitse **Vähensuunnitelma** sekä **CircuitikZ-lähteetiedostos** suositeltujen vähensuunnitelmankysymyksien için. Notemd luoo ensin strukturoituun vähensuunnitelmankirjoituksen, ja sitten kirjoittaa CircuitikZ-lähteet. Tämä on vielä usaldusväärisempi kuin pyytää mallia kirjoittamaan rajoitusta mittaamattoman LaTeX-koodin.
+
+Prahtinen CircuitikZ-tukea on suositeltavasti rajoitettu. Yleisesti käytetyt NMOS-voimistimet ja suositeltut CMOS-lähteet toimivat parhaiten. Aina tarkista näyttö ja lähteet ennen kuin käytät luodutta vähensuunnitelmaa teknisiissä tai publikointityössä.
+
+SVG-näytös on Notemdin luotettu keskustelukumppani. Se ei ole tarkka osoite siitä, että lokalisoinnin LaTeX- tai TikZJax-asennus on suorittanut `.tex`-tiedoston edunvarmasti.
+
+**Valinta: omat kohdanvalmistukset.** Pluginin sisällä olevaan näytöön, SVG-, PNG- tai näytön PDF-eksportointiin ei tarvitse LaTeXia. Tietokoneella avaa **CircuitikZ:n omat kohdanvalmistusympäristöt** diagrammin asetuksista tai käskukentästä, jos haluat kompilaatiovirheiden tarkistusta tai omat LaTeX PDF:t. Notemd voi käyttää järjestelmän `tectonic`- tai `pdflatex`-sovelluksen, omat sovellukset tai asentaa suositeltun Tectonic-asennuksen, kun valitset selkeästi **Asenna**. Ympäristökentä näyttää edistymistä ja virheitä suoraan ja mahdollistaa hallita hallituja asenneita myöhemmin.
 
 ## Vianhallinta
 
-### Tulemus on väärä diagrammityyppi
+### Tuloksena on väärä diagrammityypi
 
-Valitse diagrammityyppi selkeästi sijaan siitä, että käytät Auto-detect -toimintaa. Circuit-diagrammin korjaamiseen valitse **Circuit diagram** ja käytä **Generate diagram**-komentoa, ei vanhaa **Summarise as Mermaid diagram**-komentoa.
+Valitse diagrammityypi selkeästi, sijaanettaksesi Autotunnistuksen käyttöä. Vähensuunnitelman için valitse **Vähensuunnitelma** ja käytä **Luoda diagrammi**-komentoa, ei vanhaa **Yhteenveto Mermaid-diagramminään**-komentoa.
 
-### Lähteenvormatti ei ole sopiva
+### Lähteenvormatti on epätarkka
 
-Palaa lähteenvormattin **Auto**-tilaan tai valitse muoto, joka on suunniteltu konkreettisen diagrammityyppin käyttöön. CircuitikZ on suunniteltu circuit-diagrammien luomiseen; Draw.io ja Drawnix ovat suunniteltu tuettaviin strukturoituihin diagrammiin.
+Valitse lähteenvormatti vaihtoehtoona **Auto**, tai valitse vormatti, joka sopii kyseisen diagrammityypin için. CircuitikZ on suunniteltu vähensuunnitelmien için; Draw.io ja Drawnix ovat suositeltuja strukturoituille diagrammeille.
 
-### Eksportointipainikkeet puuttuvat
+### Eksportointivalikoima ei ole näkyvää
 
-SVG-, PNG- ja PDF-muotoihin on tarpeen visuaalista esitystä. Jos on käytettävissä vain lähteeteksti, salaa lähteetiedosto ja avaa se vastaavassa ulkopuolisessa ohjelmistossa.
+SVG-, PNG- ja PDF-tiedostot vaativat visuaalista näytöä. Jos on vain lähteeteksti, salaa lähteetiedostos ja avaa se sopivaan ulkopuoliseen sovellukseen.
 
-### CircuitikZ-tiedosto ei suorita ulkopuolisissa ohjelmistoissa
+### CircuitikZ-tiedostoa ei voida kompiloita ulkopuolisesti
 
-Tarkista, että sinun LaTeX-ympäristösi sisältää `circuitikz`-paketin. Palvelin ei sisällä täysin LaTeX-asennusta.
+Avaa **CircuitikZ:n omat kohdanvalmistusympäristöt** ja käytä ympäristön tarkistusta. Paranna hallituja asenneita tai varmista, että sinun omat/järjestelmän kompilaattorit voivat hankkia `circuitikz`-paketin. Notemd ei sisällä plugin-tiedostossa täysin TeX-asennusta.

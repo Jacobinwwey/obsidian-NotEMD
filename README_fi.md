@@ -699,7 +699,7 @@ MIT License - Katso lisätiedot tiedostosta [LICENSE](LICENSE).
 ---
 
 
-*Notemd v1.9.3 - Paranna Obsidian-tietograafiasi tekoälyn avulla.*
+*Notemd v1.9.5 - Paranna Obsidian-tietograafiasi tekoälyn avulla.*
 
 
 <!-- repo-chronicle:start -->
@@ -709,7 +709,7 @@ Tämä neljännesvuosittainen kronikka säilyttää [repo-saga](https://github.c
 
 ![Notemd Development Chronicle](./docs/repo-saga/notemd-development-history.fi.svg)
 
-_Päivitetty viimeksi julkaisutägille `1.9.4` 2026-07-21. Viimeisimmän commitin päivämäärä: 2026-07-21._
+_Päivitetty viimeksi julkaisutägille `1.9.5` 2026-07-21. Viimeisimmän commitin päivämäärä: 2026-07-21._
 <!-- repo-chronicle:end -->
 
 

@@ -67,7 +67,23 @@ packaging-contract 区块现在还会记录数字 tag 规则、workflow tag-trig
 
 Release tag 必须使用纯数字 `x.x.x` 格式，不能加 `v` 前缀；Obsidian 社区插件发布仅接受数字版本 tag。
 
-## 4. Release Notes 契约
+## 4. 文档翻译交付
+
+公开图表手册的源文件是 `website/docs/features/diagrams.mdx`，通过 `website/scripts/translate-diagrams-user-guide.cjs` 生成各语言版本。检入的流程使用 LM Studio 的 OpenAI-compatible API 地址 `http://100.80.17.113:301/v1/chat/completions` 和模型 `hy-mt2-7b`；这个地址是 API 端点而不是网站 URL，仓库中不得写入任何凭据。
+
+按语言组串行执行，每次最多八个 locale。这样可以让每个请求稳定低于模型 32k 上下文窗口（脚本会拒绝过大的语言组，并校验 frontmatter、标题层级、产品术语以及维护者内容边界）：
+
+```bash
+node website/scripts/translate-diagrams-user-guide.cjs --write --locales zh-CN,zh-Hant,zh-TW,ja,fr,de,es,ko
+node website/scripts/translate-diagrams-user-guide.cjs --write --locales it,pt,pt-BR,ru,ar,fa,hi,bn
+node website/scripts/translate-diagrams-user-guide.cjs --write --locales nl,sv,fi,da,no,pl,tr,he
+node website/scripts/translate-diagrams-user-guide.cjs --write --locales th,el,cs,hu,ro,uk,vi,id
+node website/scripts/translate-diagrams-user-guide.cjs --write --locales ms
+```
+
+提交前再使用 `--normalize-existing` 执行语言组（去掉 `--write` 可只读试跑）进行不联网的结构校验，然后构建并审计网站。不要替换成普通网页翻译器：该手册包含 MDX、Mermaid、文件扩展名与导出术语，结构必须保持稳定。
+
+## 5. Release Notes 契约
 
 发布说明现已拆分为两个完整文件：
 
@@ -76,7 +92,7 @@ Release tag 必须使用纯数字 `x.x.x` 格式，不能加 `v` 前缀；Obsidi
 
 两个文件都必须独立可读。发布 GitHub Release 时，由仓库内辅助脚本组合为一个双语 release body。
 
-## 5. GitHub Release 资产要求
+## 6. GitHub Release 资产要求
 
 Release 必需资产：
 
@@ -85,7 +101,7 @@ Release 必需资产：
 - `styles.css`
 - `README.md`
 
-## 6. 发布命令
+## 7. 发布命令
 
 ```bash
 npm run release:github -- <tag>
@@ -101,7 +117,7 @@ npm run release:github -- <tag>
 
 第二条路径就是这类问题的修复路径：当 release 文案与仓库 notes 漂移，或 release 文案已发布但插件安装资产未上传时，可直接修正并补传。
 
-## 7. CI 自动化
+## 8. CI 自动化
 
 仓库现已内置 `.github/workflows/release.yml`：
 
@@ -125,7 +141,7 @@ npm run release:github -- <tag>
 
 工作流刻意复用仓库内的 release 辅助脚本，而不是在 YAML-local 脚本片段中重复维护资产清单、release notes 逻辑、tag 校验或 chronicle 目标分支默认值，避免多套规则漂移。
 
-## 8. 图表语义层
+## 9. 图表语义层
 
 凡是会影响 renderer 行为的改动，都还需要仓库 CI 之外的一层验证：
 

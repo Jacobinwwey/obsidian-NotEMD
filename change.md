@@ -4,7 +4,7 @@ This document summarizes the major functional and architectural changes implemen
 
 ---
 
-## Unreleased
+## 1.9.5 - 2026-08-06
 
 ### English
 

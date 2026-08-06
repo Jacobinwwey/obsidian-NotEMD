@@ -18,18 +18,18 @@ import TLDR from '@site/src/components/TLDR';
 # Diagrame
 
 <TLDR>
-Alegeți **tipul de diagramă de care aveți nevoie**, apoi alegeți **formatul sursă editabil** al acesteia. Previsualizați rezultatul în Obsidian și exportați-l ca SVG, PNG sau PDF.
+Alegeți **tipul de diagramă de care aveți nevoie**, apoi alegeți **formatul sursă editabil** al acesteia. Previsualizați rezultatul final în Obsidian, inclusiv o tablă Drawnix și vizualele Mermaid integrate, și exportați fiecare panou ca SVG, PNG sau PDF.
 </TLDR>
 
 ## Înțelegeți cele trei opțiuni
 
 | Opțiune | Ce controlează | Exemple |
 |---|---|---|
-| Tip diagramă | Semnificația diagramării | Fluxogramă, diagramă de secvență, diagramă electrică, grafic de date |
-| Format sursă | Fișierul editabil sau reutilizabil creat de Notemd | Mermaid, JSON Canvas, Draw.io, Drawnix, CircuitikZ |
-| Format export | Imaginea sau documentul utilizat pentru partajare | SVG, PNG, PDF |
+| Tipul diagramării | Semnificația diagramării | Fluxogramă, diagramă de secvență, schemă electrică, grafic de date |
+| Formatul sursă | Fișierul editabil sau reutilizabil creat de Notemd | Mermaid, JSON Canvas, Draw.io, Drawnix, CircuitikZ |
+| Formatul de export | Imaginea sau documentul utilizat pentru partajare | SVG, PNG, PDF |
 
-Draw.io și Drawnix sunt **formate sursă**, nu tipuri de diagrame. CircuitikZ este un format sursă conceput special pentru diagrame electrice. Aceeași previsualizare poate fi exportată în mai multe formate vizuale, deci alegerea CircuitikZ nu vă limitează doar la SVG.
+Draw.io și Drawnix sunt **formate sursă**, nu tipuri de diagrame. CircuitikZ este un format sursă conceput special pentru schemele electrice. Aceeași previsualizare poate fi exportată în mai multe formate vizuale, deci alegerea lui CircuitikZ nu vă limitează doar la SVG.
 
 ## Alegeți un format sursă
 
@@ -38,8 +38,8 @@ Draw.io și Drawnix sunt **formate sursă**, nu tipuri de diagrame. CircuitikZ e
 | Mermaid | Diagrame păstrate direct în Markdown | Bloc de cod Mermaid |
 | JSON Canvas | Fluxuri de lucru native în Obsidian | `.canvas` |
 | Draw.io | Editare ulterioară în diagrams.net sau instrumente compatibile | `.drawio` |
-| Drawnix | Editare în stil de desen manual sau pe tablou | `.drawnix` |
-| CircuitikZ | Circuite electrice și de tranzistoare structurate | `.tex` |
+| Drawnix | Editare în stil de bilet de note sau tablou alb | `.drawnix` |
+| CircuitikZ | Circuite electrice și tranzistoare structurate | `.tex` |
 
 Lăsați opțiunea **Format sursă preferat** pe **Auto** dacă nu aveți nevoie de un editor specific. Notemd alege un format compatibil pentru tipul de diagramă selectat.
 
@@ -48,34 +48,47 @@ Lăsați opțiunea **Format sursă preferat** pe **Auto** dacă nu aveți nevoie
 1. Deschideți nota sau selectați textul pe care doriți să-l vizualizați.
 2. Alegeți opțiunea **Genera diagramă** din bara laterală a Notemd sau din panoul de comenzi.
 3. Selectați un **tip de diagramă**, sau lăsați-o pe **Detectare automată**.
-4. Selectați un **format sursă**, sau lăsați-l pe **Auto**.
-5. Verificați previsualizarea.
-6. Alegeți opțiunea **Salva fișier sursă**, **Exporta SVG**, **Exporta PNG** sau **Exporta PDF**.
+4. Alegeți un **format sursă**, sau lăsați-l pe **Auto**. Alegeți **Drawnix** dacă doriți o hartă a cunoștințelor cu noduri editabile și vizuale Mermaid integrate.
+5. Verificați previsualizarea. Un rezultat cu mai multe panouri păstrează tablaua Drawnix și fiecare panou Mermaid în ordinea sursă, toate într-un singur shell de previsualizare cu rolant vertical; panourile Mermaid folosesc înălțimea lor renderizată, fără a fi tăiate.
+6. Alegeți pentru fiecare panou acțiunea **Export SVG**, **Export PNG** sau **Export PDF** pentru o singură imagine, sau utilizați o exportare de imagine la nivel superior pentru toate panourile. Pentru mai multe panouri, alegeți folderul sursă sau un folder personal relativ la Vault; Notemd scrie un fișier determinist pentru fiecare panou și continuă chiar dacă apare o eroare la unul dintre ele.
+7. Folosiți opțiunea **Salvați fișierul sursă** atunci când aveți nevoie și de fișierul editabil.
 
-PNG și PDF folosesc valoarea PPI configurată pentru exportul imaginelor în setările Notemd. SVG rămâne o imagine vectorială și nu este influențată de valoarea PPI.
+Meniul Export oferă acțiunile **Export SVG**, **Export PNG** și **Export PDF** pentru previsualizarea vizuală curentă. Fiecare titlu de panou prezintă aceleași acțiuni pentru un singur element Mermaid sau Drawnix, astfel încât o previsualizare mare nu trebuie exportată ca o singură imagine opacă.
 
-## Diagrame electrice
+Alegeți **Istoricul** în previsualizare pentru a deschide fereastra de istoric al Vault fără a ascunde diagrama. Puteți căuta și filtra diagramele finalizate, redesa previsualizarea sau deschide fișierele salvate. Istoricul diagramelor este disponibil direct din panoul de comenzi și din bara laterală a Notemd, chiar și atunci când nu există nicio notă activă.
 
-Pentru cereri de diagrame electrice suportate, alegeți **Diagramă electrică** cu **Fișier sursă CircuitikZ**. Notemd generează mai întâi o descriere structurată a circuitului, apoi scrie codul sursă CircuitikZ. Acest lucru este mai fiabil decât a solicita modelului să scrie un cod LaTeX fără restricții.
+SVG și PDF sunt generate din geometrie vectorială; PDF folosește aceeași structură SVG și măsurători de text, în loc de a rasteriza întreaga previsualizare. Parametrul PPI pentru exportarea imagini din setările Notemd controlează doar rasterizarea PNG (72-600 PPI, 300 ca valoare implicită).
 
-Suportul actual pentru CircuitikZ este intenționat limitat. Amplificatoare NMOS cu sursă comună și blocuri CMOS suportate funcționează cel mai bine. Verificați întotdeauna previsualizarea și codul sursă înainte de a utiliza un circuit generat în lucrări tehnice sau publicații.
+## Previsualizări Drawnix cu vizuale Mermaid integrate
 
-Previsualizarea SVG este generată de Notemd ca instrument de verificare. Ea nu constituie dovadă că o instalație locală de LaTeX sau TikZJax a compilat cu succes fișierul `.tex`.
+Când un fișier Drawnix conține vizuale Mermaid, Notemd sanitizează SVG-ul renderizat și păstrează sursa Mermaid alături de ea în metadatele `.drawnix`. Astfel, previsualizarea poate afișa imaginea Mermaid în cadrul hărții Drawnix fără a necesita runtime-ul Drawnix sau Plait. Vizualele doar Mermaid care sunt integrate în mod sigur nu creează un directoriu separat `.assets`; media binară externă sau vizualele nerezolvate păstrează un fișier complementar, astfel încât nu se pierd date.
 
-## Soluționare a problemelor
+Previsualizarea este intenționat o singură suprafață rolantă: mai întâi apare tabloua principală Drawnix, urmată de fiecare panou Mermaid integrat, în ordinea sursă. Închiderea și redeschiderea unei intrări din istoric salvat reconstruiește aceeași listă de panouri, dimensiuni și acțiuni de export.
+
+## Schemele electrice
+
+Alegeți **Schemă electrică** cu fișier sursă **CircuitikZ** pentru cereri de scheme electrice suportate. Notemd generează mai întâi o descriere structurată a circuitului, apoi scrie codul CircuitikZ. Acest lucru este mai fiabil decât a solicita modelului să scrie LaTeX fără restricții.
+
+Suportul actual pentru CircuitikZ este intenționat limitat. Amplificatoare NMOS cu sursă comună și blocuri CMOS suportate funcționează cel mai bine. Verificați întotdeauna previsualizarea și sursa înainte de a utiliza un circuit generat în lucrări tehnice sau publicații.
+
+Previsualizarea SVG este o ajutorare pentru revizuire, generată de Notemd. Ea nu constituie dovadă că o instalație locală de LaTeX sau TikZJax a compilat cu succes fișierul `.tex`.
+
+**Compilare nativă opțională.** Nu aveți nevoie de LaTeX pentru previsualizarea din plugin sau pentru exportul în SVG, PNG și PDF de previsualizare. Pe desktop, deschideți **Mediul de compilare nativ CircuitikZ** din setările diagramei sau din panoul de comenzi atunci când doriți diagnosticuri de compilare sau un PDF LaTeX nativ. Notemd poate reutiliza `tectonic` sau `pdflatex` din sistem, utiliza un executabil personal sau instala runtime-ul Tectonic gestionat după ce alegeți explicit opțiunea **Instalare**. Panoul cu informații despre mediul de compilare afișează progresul și erorile în timp real și vă permite să eliminați runtime-ul gestionat mai târziu.
+
+## Soluționarea problemelor
 
 ### Rezultatul este un tip de diagramă greșit
 
-Alegeți explicit tipul de diagramă în loc să folosiți opțiunea Detectare automată. Pentru circuite, alegeți **Diagramă electrică** și utilizați comanda **Genera diagramă**, nu comanda vechiță **Summarise as Mermaid diagram**.
+Alegeți explicit tipul diagramării, în loc de a folosi detectare automată. Pentru schemele electrice, alegeți **Schemă electrică** și utilizați comanda **Genera diagramă**, nu comanda vechiță **Rezumă ca diagramă Mermaid**.
 
-### Un format sursă nu este potrivit
+### Un format sursă este inadecvat
 
-Returnați formatul sursă la **Auto**, sau alegeți un format destinat acelui tip de diagramă. CircuitikZ este destinat diagramelor electrice; Draw.io și Drawnix sunt destinați diagramelor structurate suportate.
+Returnați formatul sursă la **Auto**, sau alegeți un format potrivit pentru tipul de diagramă respectiv. CircuitikZ este destinat schemelor electrice; Draw.io și Drawnix sunt concepute pentru diagrame structurate suportate.
 
-### Butoanele de export nu sunt vizibile
+### Meniul Export nu este vizibil
 
-SVG, PNG și PDF necesită o previsualizare vizuală. Dacă există doar textul sursă, salvați fișierul sursă și deschideți-l în instrumentul extern corespunzător.
+SVG, PNG și PDF necesită o previsualizare vizuală. Dacă există doar text sursă, salvați fișierul sursă și deschideți-l în instrumentul extern corespunzător.
 
-### Un fișier CircuitikZ nu se compilează în afara programului
+### Un fișier CircuitikZ nu se compilează din exterior
 
-Verificați dacă mediul LaTeX al dumneavoastră include pachetul `circuitikz`. Plugin-ul nu include o distribuție completă de LaTeX.
+Deschideți **Mediul de compilare nativ CircuitikZ** și rulați verificarea mediului. Reparați runtime-ul gestionat sau verificați dacă compilerul personal/sistematic al dumneavoastră poate obține pachetul `circuitikz`. Notemd nu include o distribuție completă TeX în fișierul plugin.

@@ -18,7 +18,7 @@ import TLDR from '@site/src/components/TLDR';
 # Diagrams
 
 <TLDR>
-Pilih **jenis diagram yang Anda butuhkan**, lalu pilih **format sumber yang dapat diedit** untuknya. Lihat pratinjau hasilnya di Obsidian, kemudian ekspor sebagai SVG, PNG, atau PDF.
+Pilih **jenis diagram yang Anda butuhkan**, lalu pilih format sumber yang dapat diedit untuknya. Lihat pratinjau hasil lengkap di Obsidian, termasuk papan Drawnix beserta visualisasi Mermaid yang terintegrasi, dan ekspor setiap panel sebagai SVG, PNG, atau PDF.
 </TLDR>
 
 ## Pahami tiga pilihan yang tersedia
@@ -29,53 +29,66 @@ Pilih **jenis diagram yang Anda butuhkan**, lalu pilih **format sumber yang dapa
 | Format sumber | File yang dapat diedit atau digunakan kembali yang dibuat oleh Notemd | Mermaid, JSON Canvas, Draw.io, Drawnix, CircuitikZ |
 | Format ekspor | Gambar atau dokumen yang digunakan untuk berbagi | SVG, PNG, PDF |
 
-Draw.io dan Drawnix merupakan **format sumber**, bukan jenis diagram. CircuitikZ adalah format sumber yang dirancang khusus untuk diagram sirkuit. Pratinjau yang sama dapat diekspor ke beberapa format visual, sehingga memilih CircuitikZ tidak membatasi Anda hanya pada format SVG.
+Draw.io dan Drawnix merupakan **format sumber**, bukan jenis diagram. CircuitikZ adalah format sumber khusus untuk diagram sirkuit. Pratinjau yang sama dapat diekspor ke beberapa format visual, sehingga memilih CircuitikZ tidak membatasi Anda hanya pada format SVG.
 
 ## Pilih format sumber
 
 | Format | Paling cocok untuk | File sumber |
 |---|---|---|
 | Mermaid | Diagram yang disimpan langsung di dalam Markdown | Blok kode Mermaid |
-| JSON Canvas | Proses kerja menggunakan canvas bawaan Obsidian | `.canvas` |
+| JSON Canvas | Proses kerja kanvas bawaan Obsidian | `.canvas` |
 | Draw.io | Mengedit lebih lanjut di diagrams.net atau alat serupa | `.drawio` |
 | Drawnix | Pengeditan bergaya gambar tangan atau papan tulis | `.drawnix` |
-| CircuitikZ | Rangkaian listrik dan transistor yang terstruktur | `.tex` |
+| CircuitikZ | Sirkuit listrik dan transistor yang terstruktur | `.tex` |
 
-Biarkan opsi **Format sumber favorit** pada nilai **Auto** jika Anda tidak memerlukan editor tertentu. Notemd akan memilih format yang kompatibel untuk jenis diagram yang dipilih.
+Jika Anda tidak memerlukan editor tertentu, biarkan opsi **Format sumber favorit** pada nilai **Auto**. Notemd akan memilih format yang kompatibel untuk jenis diagram yang dipilih.
 
 ## Buat dan ekspor diagram
 
 1. Buka catatan atau pilih teks yang ingin Anda visualisasikan.
 2. Pilih opsi **Buat diagram** dari sidebar Notemd atau panel perintah.
 3. Pilih **jenis diagram**, atau biarkan pada opsi **Deteksi otomatis**.
-4. Pilih **format sumber**, atau biarkan pada opsi **Auto**.
-5. Periksa pratinjau hasilnya.
-6. Pilih opsi **Simpan file sumber**, **Ekspor SVG**, **Ekspor PNG**, atau **Ekspor PDF**.
+4. Pilih **format sumber**, atau biarkan pada nilai **Auto**. Pilih **Drawnix** jika Anda menginginkan peta pengetahuan dengan node yang dapat diedit dan visualisasi Mermaid yang terintegrasi.
+5. Periksa pratinjau. Hasil berupa beberapa panel akan menampilkan papan Drawnix serta setiap panel Mermaid sesuai urutan asalnya di dalam satu shell pratinjau yang dapat digulir vertikal; panel Mermaid menggunakan tinggi render-nya sendiri sehingga tidak terpotong.
+6. Pilih tindakan **Ekspor SVG**, **Ekspor PNG**, atau **Ekspor PDF** untuk setiap visual, atau gunakan ekspor gambar tingkat atas untuk semua panel. Untuk beberapa panel, pilih folder sumber atau folder relatif Vault yang diinginkan; Notemd akan membuat satu file yang dapat diprediksi untuk setiap panel dan melanjutkan proses meskipun terjadi kegagalan pada salah satu panel.
+7. Gunakan opsi **Simpan file sumber** jika Anda juga membutuhkan file artefak yang dapat diedit.
 
-PNG dan PDF menggunakan nilai PPI ekspor gambar yang telah dikonfigurasi di pengaturan Notemd. SVG tetap merupakan gambar vektor dan tidak terpengaruh oleh nilai PPI.
+Menu Ekspor menyediakan tindakan **Ekspor SVG**, **Ekspor PNG**, dan **Ekspor PDF** untuk pratinjau visual saat ini. Setiap judul panel juga menampilkan tindakan yang sama untuk visual Mermaid atau Drawnix tunggal, sehingga pratinjau berukuran besar tidak perlu diekspor sebagai satu gambar transparan.
+
+Pilih opsi **Sejarah** di dalam pratinjau untuk membuka drawer sejarah Vault tanpa menyembunyikan diagram. Anda dapat mencari dan memfilter diagram yang telah diselesaikan, membuka kembali pratinjau, atau membuka artefak yang telah disimpan. Sejarah diagram juga tersedia langsung dari panel perintah dan sidebar Notemd, bahkan ketika tidak ada catatan yang aktif.
+
+SVG dan PDF dihasilkan dari geometri vektor; PDF menggunakan tata letak SVG dan metrik teks yang sama alih-alih merasterisasi seluruh pratinjau. Nilai PPI untuk ekspor gambar di pengaturan Notemd hanya mengontrol proses rasterisasi PNG (72–600 PPI, dengan nilai default 300).
+
+## Pratinjau Drawnix dengan visualisasi Mermaid yang terintegrasi
+
+Ketika artefak Drawnix berisi visualisasi Mermaid, Notemd akan menyaring SVG yang telah dirender dan menyimpan kode sumber Mermaid di sampingnya dalam metadata file `.drawnix`. Dengan demikian, pratinjau dapat menampilkan gambar Mermaid di dalam peta pengetahuan Drawnix tanpa memerlukan runtime Drawnix atau Plait. Visualisasi Mermaid saja yang terintegrasi secara aman tidak akan membuat direktori `.assets` terpisah; media biner eksternal atau visualisasi yang belum terselesaikan tetap disertai dengan file pendamping agar data tidak hilang.
+
+Pratinjau dirancang sedemikian rupa sehingga hanya merupakan satu permukaan yang dapat digulir: kanvas utama Drawnix muncul terlebih dahulu, diikuti oleh setiap panel Mermaid yang terintegrasi sesuai urutan asalnya. Menutup dan membuka kembali entri sejarah yang telah disimpan akan merekonstruksi daftar panel, dimensi, serta tindakan ekspor yang sama.
 
 ## Diagram sirkuit
 
-Pilih opsi **Diagram sirkuit** dengan **file sumber CircuitikZ** untuk permintaan diagram sirkuit yang didukung. Notemd akan membuat deskripsi rangkaian yang terstruktur terlebih dahulu, lalu menulis kode sumber berformat CircuitikZ. Cara ini lebih dapat diandalkan dibandingkan meminta model untuk menulis kode LaTeX secara bebas.
+Pilih opsi **Diagram sirkuit** dengan file sumber **CircuitikZ** untuk permintaan diagram sirkuit yang didukung. Notemd pertama-tama membuat deskripsi sirkuit yang terstruktur, lalu menulis kode sumber CircuitikZ-nya. Cara ini lebih andal dibandingkan meminta model untuk menulis kode LaTeX tanpa batasan.
 
-Dukungan untuk CircuitikZ saat ini sengaja dibatasi. Penguat NMOS berbasis sumber umum dan blok CMOS yang didukung merupakan pilihan terbaik. Selalu periksa pratinjau dan kode sumber sebelum menggunakan rangkaian yang dihasilkan dalam pekerjaan teknis atau publikasi.
+Dukungan CircuitikZ saat ini sengaja dibatasi. Penguat NMOS berbasis sumber umum dan blok CMOS yang didukung merupakan pilihan terbaik. Selalu periksa pratinjau dan kode sumber sebelum menggunakan diagram yang dihasilkan dalam pekerjaan teknis atau publikasi.
 
-Pratinjau berformat SVG hanyalah alat bantu peninjauan yang dibuat oleh Notemd. Pratinjau tersebut bukan bukti bahwa instalasi LaTeX atau TikZJax lokal telah berhasil mengompilasi file berformat `.tex`.
+Pratinjau SVG merupakan bantuan peninjauan yang dibuat oleh Notemd. Pratinjau tersebut bukanlah bukti bahwa instalasi LaTeX lokal atau TikZJax berhasil mengompilasi file `.tex`.
 
-## Penyelesaian masalah
+**Kompilasi bawaan opsional.** Anda tidak memerlukan LaTeX untuk pratinjau di dalam plugin maupun ekspor SVG, PNG, dan PDF pratinjau. Di perangkat desktop, buka **Lingkungan kompilasi bawaan CircuitikZ** dari pengaturan diagram atau panel perintah jika Anda memerlukan diagnosis kompilasi atau PDF LaTeX versi asli. Notemd dapat menggunakan `tectonic` atau `pdflatex` sistem, eksekusi khusus, atau menginstal runtime Tectonic yang terkelola setelah Anda secara eksplisit memilih opsi **Instal**. Panel lingkungan akan menampilkan kemajuan dan kesalahan secara langsung serta memungkinkan Anda menghapus runtime terkelola tersebut nantinya.
+
+## Pemecahan masalah
 
 ### Hasilnya berupa jenis diagram yang salah
 
-Pilih jenis diagram secara eksplisit, bukan menggunakan opsi Deteksi otomatis. Untuk diagram sirkuit, pilih opsi **Diagram sirkuit** dan gunakan perintah **Buat diagram**, bukan perintah lama **Ringkas sebagai diagram Mermaid**.
+Pilih jenis diagram secara eksplisit alih-alih menggunakan opsi Deteksi otomatis. Untuk diagram sirkuit, pilih opsi **Diagram sirkuit** dan gunakan perintah **Buat diagram**, bukan perintah lama **Ringkas sebagai diagram Mermaid**.
 
 ### Format sumber tidak cocok
 
-Kembalikan format sumber ke nilai **Auto**, atau pilih format yang sesuai untuk jenis diagram tersebut. CircuitikZ hanya digunakan untuk diagram sirkuit; Draw.io dan Drawnix dirancang khusus untuk diagram terstruktur yang didukung.
+Kembalikan format sumber ke nilai **Auto**, atau pilih format yang sesuai untuk jenis diagram tersebut. CircuitikZ digunakan untuk diagram sirkuit; Draw.io dan Drawnix dirancang untuk diagram terstruktur yang didukung.
 
-### Tombol ekspor tidak muncul
+### Menu Ekspor tidak muncul
 
 SVG, PNG, dan PDF memerlukan pratinjau visual. Jika hanya teks sumber yang tersedia, simpan file sumber tersebut lalu buka di alat eksternal yang sesuai.
 
-### File berformat CircuitikZ tidak dapat dikompilasi di luar aplikasi
+### File CircuitikZ tidak dapat dikompilasi secara eksternal
 
-Periksa apakah lingkungan LaTeX Anda sudah mencakup paket `circuitikz`. Plugin ini tidak menyertakan distribusi LaTeX yang lengkap.
+Buka **Lingkungan kompilasi bawaan CircuitikZ** dan jalankan pemeriksaan lingkungan. Perbaiki runtime terkelola atau pastikan kompiler kustom/sistem Anda dapat mendapatkan paket `circuitikz`. Notemd tidak menyertakan distribusi TeX lengkap di dalam file plugin-nya.

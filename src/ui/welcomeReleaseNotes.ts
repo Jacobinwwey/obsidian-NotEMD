@@ -11,6 +11,14 @@ const WELCOME_RELEASE_NOTE_LIMIT = 2;
 
 const ENTRIES_EN: WelcomeReleaseNoteEntry[] = [
     {
+        version: '1.9.5',
+        highlights: [
+            'Diagram workflows now distinguish source formats, render targets, and export targets; Drawnix previews show the complete board plus every embedded Mermaid visual in source order inside one vertically scrollable surface.',
+            'Each Mermaid or Drawnix panel can be exported independently, while multi-panel SVG, PNG, and PDF export asks for a source or custom Vault-relative folder and continues after isolated failures.',
+            'SVG and PDF keep the same vector layout and text metrics; the configurable 72-600 PPI setting is used for PNG rasterization and defaults to 300.'
+        ]
+    },
+    {
         version: '1.9.4',
         highlights: [
             'Diagram workflows now distinguish source formats from render and export targets, with first-class CircuitikZ, Draw.io, Drawnix, SVG, PNG, PDF, HTML, and editable artifact paths.',
@@ -70,6 +78,14 @@ const ENTRIES_EN: WelcomeReleaseNoteEntry[] = [
 
 const ENTRIES_ZH_CN: WelcomeReleaseNoteEntry[] = [
     {
+        version: '1.9.5',
+        highlights: [
+            '图表工作流现在明确区分源格式、渲染目标与导出目标；Drawnix 预览现在会按源文件顺序显示完整画布及所有嵌入的 Mermaid 图，并放在同一个支持纵向滚动的预览面板中。',
+            '每个 Mermaid 或 Drawnix panel 都可以单独导出；多 panel SVG、PNG 与 PDF 导出会要求选择原文件夹或自定义 Vault 相对文件夹，并在单图失败后继续处理。',
+            'SVG 与 PDF 保持相同的矢量布局和文字度量；可配置的 72-600 PPI 设置只用于 PNG 栅格化，默认值为 300。'
+        ]
+    },
+    {
         version: '1.9.4',
         highlights: [
             '图表工作流现在明确区分源格式、渲染目标与导出目标，并为 CircuitikZ、Draw.io、Drawnix、SVG、PNG、PDF、HTML 与可编辑产物提供一等路径。',
@@ -128,6 +144,14 @@ const ENTRIES_ZH_CN: WelcomeReleaseNoteEntry[] = [
 ];
 
 const ENTRIES_ZH_TW: WelcomeReleaseNoteEntry[] = [
+    {
+        version: '1.9.5',
+        highlights: [
+            '圖表工作流程現在明確區分來源格式、渲染目標與匯出目標；Drawnix 預覽現在會按來源順序顯示完整畫布及所有嵌入的 Mermaid 圖，並放在同一個支援垂直捲動的預覽面板中。',
+            '每個 Mermaid 或 Drawnix panel 都可以單獨匯出；多 panel SVG、PNG 與 PDF 匯出會要求選擇原始檔案夾或自訂 Vault 相對檔案夾，並在單圖失敗後繼續處理。',
+            'SVG 與 PDF 保持相同的向量布局和文字度量；可配置的 72-600 PPI 設定只用於 PNG 光柵化，預設值為 300。'
+        ]
+    },
     {
         version: '1.9.4',
         highlights: [

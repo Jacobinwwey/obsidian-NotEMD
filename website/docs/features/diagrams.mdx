@@ -1,7 +1,7 @@
 ---
 id: diagrams
 title: Diagrams
-description: Create diagrams from notes, choose an editable source format, and export SVG, PNG, or PDF.
+description: Create diagrams from notes, preview Drawnix and Mermaid panels together, and export each visual as SVG, PNG, or PDF.
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
 keywords: [diagrams, mermaid, drawio, drawnix, circuitikz, svg, png, pdf]
@@ -13,7 +13,7 @@ import TLDR from '@site/src/components/TLDR';
 # Diagrams
 
 <TLDR>
-Choose **what kind of diagram you need**, then choose its **editable source format**. Preview the result in Obsidian and export it as SVG, PNG, or PDF.
+Choose **what kind of diagram you need**, then choose its **editable source format**. Preview the complete result in Obsidian, including a Drawnix board and its embedded Mermaid visuals, and export each panel as SVG, PNG, or PDF.
 </TLDR>
 
 ## Understand the three choices
@@ -43,15 +43,22 @@ Leave **Preferred source format** on **Auto** if you do not need a particular ed
 1. Open the note or select the text you want to visualize.
 2. Choose **Generate diagram** from the Notemd sidebar or command palette.
 3. Select a **diagram type**, or leave it on **Auto-detect**.
-4. Select a **source format**, or leave it on **Auto**.
-5. Review the preview.
-6. Choose **Export**, then select SVG, PNG, or PDF. Use **Save source file** when you also need the editable artifact.
+4. Select a **source format**, or leave it on **Auto**. Choose **Drawnix** when you want a knowledge map with editable nodes and embedded Mermaid visuals.
+5. Review the preview. A multi-panel result keeps the Drawnix board and every Mermaid panel in source order inside one vertically scrollable preview shell; Mermaid panels use their rendered height instead of being clipped.
+6. Choose a panel's **Export SVG**, **Export PNG**, or **Export PDF** action for one visual, or use a top-level image export for all panels. For multiple panels, choose the source folder or a custom Vault-relative folder; Notemd writes one deterministic file per panel and continues after an individual failure.
+7. Use **Save source file** when you also need the editable artifact.
 
-The Export menu provides **Export SVG**, **Export PNG**, and **Export PDF** actions for the current visual preview.
+The Export menu provides **Export SVG**, **Export PNG**, and **Export PDF** actions for the current visual preview. Each panel header exposes the same actions for a single Mermaid or Drawnix visual, so a large preview does not have to be exported as one opaque image.
 
 Choose **History** in the preview to open the Vault history drawer without hiding the diagram. You can search and filter completed diagrams, reopen a preview, or open saved artifacts. Diagram history is also available directly from the command palette and Notemd sidebar, even when no note is active.
 
-PNG and PDF use the image export PPI configured in Notemd settings. SVG remains a vector image and is not affected by the PPI value.
+SVG and PDF are produced from vector geometry; PDF uses the same SVG layout and text metrics instead of rasterizing the whole preview. The image export PPI in Notemd settings controls PNG rasterization only (72-600 PPI, 300 by default).
+
+## Drawnix previews with embedded Mermaid
+
+When a Drawnix artifact contains Mermaid visuals, Notemd sanitizes the rendered SVG and keeps the Mermaid source alongside it in the `.drawnix` metadata. The preview can therefore show the Mermaid image inside the Drawnix knowledge map without requiring the Drawnix or Plait runtime. Mermaid-only visuals that are safely embedded do not create a separate `.assets` directory; external binary media or unresolved visuals keep a companion file so no data is lost.
+
+The preview is intentionally a single scrollable surface: the main Drawnix canvas appears first, followed by each embedded Mermaid panel in source order. Closing and reopening a saved history entry reconstructs the same panel list, dimensions, and export actions.
 
 ## Circuit diagrams
 

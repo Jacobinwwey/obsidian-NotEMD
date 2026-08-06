@@ -10,7 +10,7 @@ import {publishedLocaleCodes, publishedLocaleConfigMap} from './src/lib/publishe
 const siteUrl = 'https://jacobinwwey.github.io';
 const baseUrl = '/obsidian-NotEMD/';
 const siteBaseUrl = `${siteUrl}${baseUrl}`;
-const currentSoftwareVersion = '1.9.3';
+const currentSoftwareVersion = '1.9.5';
 const personId = `${siteBaseUrl}#person-jacobinwwey`;
 const logoUrl = `${siteBaseUrl}img/logo.svg`;
 

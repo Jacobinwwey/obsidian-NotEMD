@@ -21,7 +21,7 @@ const copyByLocale = {
       {label: 'Workflow model', value: 'Write-first Obsidian automation, not a chat transcript'},
       {label: 'Provider surface', value: '36 cloud, gateway, China, and local LLM providers'},
       {label: 'Vault boundary', value: 'Outputs are written back into local Markdown files'},
-      {label: 'Current release', value: 'Version 1.9.3 public docs and release assets'},
+      {label: 'Current release', value: 'Version 1.9.5 public docs and release assets'},
     ],
     retrievalHeading: 'Answer-engine source map',
     retrievalLead:
@@ -77,7 +77,7 @@ const copyByLocale = {
       {label: '工作流模型', value: '写入优先的 Obsidian 自动化，不是聊天记录'},
       {label: '模型提供商', value: '36 个云端、网关、中国与本地 LLM 提供商'},
       {label: 'Vault 边界', value: '结果写回本地 Markdown 文件'},
-      {label: '当前版本', value: '1.9.3 公开文档与 release assets'},
+      {label: '当前版本', value: '1.9.5 公开文档与 release assets'},
     ],
     retrievalHeading: 'Answer engine 来源地图',
     retrievalLead:
@@ -128,7 +128,7 @@ export default function Home() {
   const pageUrl = new URL(siteConfig.baseUrl, siteConfig.url).toString();
   const canonicalBasePath = siteConfig.customFields?.canonicalBasePath || siteConfig.baseUrl;
   const llmsHref = `${canonicalBasePath}llms.txt`;
-  const softwareVersion = siteConfig.customFields?.softwareVersion || '1.9.3';
+  const softwareVersion = siteConfig.customFields?.softwareVersion || '1.9.5';
   const docLinkProps = (docPath) => ({to: docPath});
   const sourceLinkProps = (source) => {
     if (source.kind === 'static') {

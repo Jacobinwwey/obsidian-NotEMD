@@ -18,7 +18,7 @@ import TLDR from '@site/src/components/TLDR';
 # Diagrammar
 
 <TLDR>
-Välj **vilken typ av diagram du behöver**, sedan välj dess **redigerbara källformat**. Visa förhandsvisningen i Obsidian och exportera den som SVG, PNG eller PDF.
+Välj **vilken typ av diagram du behöver**, och välj sedan dess **redigerbara källformat**. Previsualisera det slutgiltiga resultatet i Obsidian, inklusive en Drawnix-bord samt inbyggda Mermaid-visualiseringar, och exportera varje panel som SVG, PNG eller PDF.
 </TLDR>
 
 ## Förstå de tre alternativen
@@ -26,10 +26,10 @@ Välj **vilken typ av diagram du behöver**, sedan välj dess **redigerbara käl
 | Alternativ | Vad det styr | Exempel |
 |---|---|---|
 | Diagramtyp | Vad diagrammet representerar | Flödesschema, sekvensdiagram, kretsdiagram, datadiagram |
-| Källformat | Den redigerbara eller återanvändbara filen som Notemd skapar | Mermaid, JSON Canvas, Draw.io, Drawnix, CircuitikZ |
+| Källformat | Det redigerbara eller återanvändbara filen som Notemd skapar | Mermaid, JSON Canvas, Draw.io, Drawnix, CircuitikZ |
 | Exportformat | Bilden eller dokumentet som används för delning | SVG, PNG, PDF |
 
-Draw.io och Drawnix är **källformat**, inte diagramtyper. CircuitikZ är ett källformat utformat för kretsdiagram. Samma förhandsvisning kan exporteras till flera visuella format, så att val av CircuitikZ inte begränsar dig till SVG.
+Draw.io och Drawnix är **källformat**, inte diagramtyper. CircuitikZ är ett källformat utformat för kretsdiagram. Samma previsualisering kan exporteras till flera visuella format, så att val av CircuitikZ inte begränsar dig till SVG.
 
 ## Välj ett källformat
 
@@ -38,44 +38,57 @@ Draw.io och Drawnix är **källformat**, inte diagramtyper. CircuitikZ är ett k
 | Mermaid | Diagram som hålls direkt i Markdown | Mermaid-kodblock |
 | JSON Canvas | Obsidians inbyggda canvas-arbetsflöden | `.canvas` |
 | Draw.io | Redigering senare i diagrams.net eller kompatibla verktyg | `.drawio` |
-| Drawnix | Handritade eller whiteboard-liknande redigering | `.drawnix` |
+| Drawnix | Handritade eller whiteboard-liknande redigeringar | `.drawnix` |
 | CircuitikZ | Strukturerade elektriska och transistorkretsar | `.tex` |
 
-Låt **Preferred source format** vara på **Auto** om du inte behöver en specifik redigerare. Notemd väljer ett kompatibelt format för den valda diagramtypen.
+Låt **Preferred source format** vara på **Auto** om du inte behöver en specifik redigeringsprogram. Notemd väljer ett kompatibelt format för den valda diagramtypen.
 
 ## Generera och exportera ett diagram
 
 1. Öppna anteckningen eller välj texten du vill visualisera.
 2. Välj **Generate diagram** från Notemds sidofält eller kommandopanel.
 3. Välj en **diagramtyp**, eller låt det vara på **Auto-detect**.
-4. Välj ett **källformat**, eller låt det vara på **Auto**.
-5. Granska förhandsvisningen.
-6. Välj **Save source file**, **Export SVG**, **Export PNG** eller **Export PDF**.
+4. Välj ett **källformat**, eller låt det vara på **Auto**. Välj **Drawnix** om du vill ha en kunskapskarta med redigerbara noder och inbyggda Mermaid-visualiseringar.
+5. Granska previsualiseringen. Ett flerpaneligt resultat behåller Drawnix-bordet samt varje Mermaid-panel i källordning inuti en vertikalt scrollbar previsualiseringsyta; Mermaid-panele använder sin renderade höjd istället för att klippas bort.
+6. Välj en panelns **Export SVG**, **Export PNG** eller **Export PDF**-åtgärd för en enskild bild, eller använd en övergripande bildexport för alla paneel. För flera paneel välj källmappen eller en anpassad mapp relaterad till Vault; Notemd skriver en deterministisk fil per panel och fortsätter efter ett enskilt misslyckande.
+7. Använd **Save source file** om du också behöver den redigerbara filen.
 
-PNG och PDF använder den bildexport-PPI som är konfigurerad i Notemds inställningar. SVG förblir ett vektorbild och påverkas inte av PPI-värdet.
+Export-menyn erbjuder **Export SVG**, **Export PNG** och **Export PDF**-åtgärder för den aktuella visuella previsualiseringen. Varje panelrubrik ger samma åtgärder för en enskild Mermaid- eller Drawnix-visualisering, så att en stor previsualisering inte behöver exporteras som en enda ogenomskinlig bild.
+
+Välj **History** i previsualiseringen för att öppna Vault-historiekorgen utan att dölja diagrammet. Du kan söka och filtrera färdigställda diagram, återöppna en previsualisering eller öppna sparade artefakter. Diagramhistoriken finns också direkt från kommandopanelen och Notemds sidofält, även när inget anteckning är aktivt.
+
+SVG och PDF skapas från vektorgeometri; PDF använder samma SVG-läge och textmätningar istället för att rasterisera hela previsualiseringen. Bildexportens PPI i Notemds inställningar styr endast PNG-rasteriseringen (72–600 PPI, 300 som standard).
+
+## Drawnix-previsualiseringar med inbyggda Mermaid
+
+När en Drawnix-artefakt innehåller Mermaid-visualiseringar saniterar Notemd den renderade SVG:n och behåller Mermaid-källkoden tillsammans med den i metadata-filen `.drawnix`. Previsualiseringen kan därför visa Mermaid-bilden inuti Drawnix-kunskapskartan utan att kräva Drawnix eller Plait-runtimen. Endast Mermaid-visualiseringar som säkert är inbäddade skapar inte en separat `.assets`-mapp; extern binär media eller olösta visualiseringar behåller en tillhörande fil så att inga data tappas bort.
+
+Previsualiseringen är avsiktligt en enda scrollbar yta: den huvudsakliga Drawnix-canvasen visas först, följt av varje inbäddad Mermaid-panel i källordning. Att stänga och öppna en sparad historiekontroll återskapar samma panellista, dimensioner och exportåtgärder.
 
 ## Kretsdiagram
 
 Välj **Circuit diagram** med **CircuitikZ source file** för stödda kretsförfrågningar. Notemd genererar först en strukturerad beskrivning av kretsen och skriver sedan CircuitikZ-källkoden. Detta är mer tillförlitligt än att be modellen att skriva obegränsad LaTeX.
 
-Nuvarande CircuitikZ-stöd är avsiktligt begränsat. Vanliga NMOS-förstärkare med offentlig källkod samt stödda CMOS-byggblock fungerar bäst. Granska alltid förhandsvisningen och källkoden innan du använder ett genererat kretsdiagram i tekniska eller publiceringsrelaterad arbete.
+Nuvarande CircuitikZ-stöd är avsiktligt begränsat. Vanliga NMOS-förstärkare med offentlig källkod samt stödda CMOS-byggblock fungerar bäst. Granska alltid previsualiseringen och källkoden innan du använder ett genererat krets i tekniska eller publiceringsarbete.
 
-SVG-förhandsvisningen är en hjälpmedel som genereras av Notemd. Den är inte bevis på att en lokalt installerad LaTeX- eller TikZJax-installation har kompilerat `.tex`-filen framgångsrikt.
+SVG-previsualiseringen är en granskningskompanion som skapas av Notemd. Den är inte bevis på att en lokalt installerad LaTeX- eller TikZJax-installation har kompilerat `.tex`-filen framgångsrikt.
 
-## Felaktiglösning
+**Valfri inbyggd kompilering.** Du behöver inte LaTeX för previsualiseringen i pluginet eller exporten till SVG, PNG och PDF-previsualiseringar. På datorn kan du öppna **CircuitikZ native compile environment** från diagraminställningarna eller kommandopanellet när du behöver kompilationsdiagnostik eller en inbyggd LaTeX-PDF. Notemd kan återanvända ett systemmässigt `tectonic` eller `pdflatex`, använda en anpassad exekverbar fil eller installera den fixade hanterade Tectonic-runtimen efter att du uttryckligen väljer **Install**. Miljöpanelen visar framsteg och fel direkt och gör det möjligt att ta bort den hanterade runtimen senare.
+
+## Felhantering
 
 ### Resultatet är fel diagramtyp
 
-Välj diagramtypen explicit istället för att använda Auto-detect. För en krets, välj **Circuit diagram** och använd kommandot **Generate diagram**, inte det gamla kommandot **Summarise as Mermaid diagram**.
+Välj diagramtypen explicit istället för att använda Auto-detect. För ett krets välj **Circuit diagram** och använd kommandot **Generate diagram**, inte det gamla kommandot **Summarise as Mermaid diagram**.
 
 ### Ett källformat är olämpligt
 
-Ställ källformatet tillbaka till **Auto**, eller välj ett format som är avsett för den aktuella diagramtypen. CircuitikZ är endast för kretsdiagram; Draw.io och Drawnix är avsett för stödda strukturerade diagram.
+Ställ källformatet tillbaka till **Auto**, eller välj ett format som är avsett för den aktuella diagramtypen. CircuitikZ är endast för kretsdiagram; Draw.io och Drawnix är avsedda för stödda strukturerade diagram.
 
-### Exportknapparna saknas
+### Export-menyn saknas
 
-SVG, PNG och PDF kräver en visuell förhandsvisning. Om endast källtext finns tillgänglig, spara källfilen och öppna den i det motsvarande externa verktyget.
+SVG, PNG och PDF kräver en visuell previsualisering. Om endast källtext finns tillgänglig, spara källfilen och öppna den i det motsvarande externa verktyget.
 
 ### En CircuitikZ-fil kompileras inte utomhus
 
-Kontrollera att din LaTeX-miljö inkluderar paketet `circuitikz`. Pluginen innehåller inte en komplett LaTeX-distribution.
+Öppna **CircuitikZ native compile environment** och köra miljökontrollen. Reparera den hanterade runtimen eller verifiera att din egna/systemkompilator kan hämta paketet `circuitikz`. Notemd innehåller inte en komplett TeX-distribution i pluginfilen.

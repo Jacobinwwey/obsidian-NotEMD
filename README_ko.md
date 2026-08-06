@@ -705,7 +705,7 @@ MIT 라이선스 - 자세한 내용은 [LICENSE](LICENSE) 파일을 참조하세
 ---
 
 
-*Notemd v1.9.3 - AI로 Obsidian 지식 그래프를 강화하세요.*
+*Notemd v1.9.5 - AI로 Obsidian 지식 그래프를 강화하세요.*
 
 
 
@@ -716,7 +716,7 @@ MIT 라이선스 - 자세한 내용은 [LICENSE](LICENSE) 파일을 참조하세
 
 ![Notemd Development Chronicle](./docs/repo-saga/notemd-development-history.ko.svg)
 
-_릴리스 태그 `1.9.4` 기준으로 2026-07-21에 마지막 새로고침을 완료했습니다. 최신 커밋 날짜: 2026-07-21._
+_릴리스 태그 `1.9.5` 기준으로 2026-07-21에 마지막 새로고침을 완료했습니다. 최신 커밋 날짜: 2026-07-21._
 <!-- repo-chronicle:end -->
 
 

@@ -29,7 +29,7 @@ If\ you\ love\ using\ Notemd\,\ please\ consider\ \[\�\�\�\ Give\ a\ Star\
 
 Wenn du Notemd gerne nutzt, erwäge bitte [⭐ einen Stern auf GitHub zu geben](https://github.com/Jacobinwwey/obsidian-NotEMD) oder [☕️ mir einen Kaffee zu kaufen](https://ko-fi.com/jacobinwwey).
 
-**Version:** 1.9.3
+**Version:** 1.9.5
 
 <img width="1853" height="1080" alt="show" src="https://github.com/user-attachments/assets/b9f9292b-a9d8-48a3-9acf-1b6f00413966" />
 <img width="1853" height="1080" alt="multi-langu" src="https://github.com/user-attachments/assets/d9a0a4fb-1c00-425a-ac1d-0134a013a381" />
@@ -707,7 +707,7 @@ MIT-Lizenz - Siehe Datei [LICENSE](LICENSE) für Details.
 ---
 
 
-*Notemd v1.9.3 - Verbessern Sie Ihren Obsidian-Wissensgraphen mit KI.*
+*Notemd v1.9.5 - Verbessern Sie Ihren Obsidian-Wissensgraphen mit KI.*
 
 
 
@@ -718,7 +718,7 @@ Diese quartalsweise Chronik behält den ursprünglichen visuellen Stil von [repo
 
 ![Notemd Development Chronicle](./docs/repo-saga/notemd-development-history.de.svg)
 
-_Zuletzt für das Release-Tag `1.9.4` am 2026-07-21 aktualisiert. Datum des letzten Commits: 2026-07-21._
+_Zuletzt für das Release-Tag `1.9.5` am 2026-07-21 aktualisiert. Datum des letzten Commits: 2026-07-21._
 <!-- repo-chronicle:end -->
 
 

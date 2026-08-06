@@ -705,7 +705,7 @@ Licença MIT - Veja o arquivo [LICENSE](LICENSE) para mais detalhes.
 ---
 
 
-*Notemd v1.9.3 - Melhore seu grafo de conhecimento no Obsidian com IA.*
+*Notemd v1.9.5 - Melhore seu grafo de conhecimento no Obsidian com IA.*
 
 
 
@@ -716,7 +716,7 @@ Esta crônica trimestral preserva o estilo visual original do [repo-saga](https:
 
 ![Notemd Development Chronicle](./docs/repo-saga/notemd-development-history.pt.svg)
 
-_Atualizado pela última vez para a tag de release `1.9.4` em 2026-07-21. Data do commit mais recente: 2026-07-21._
+_Atualizado pela última vez para a tag de release `1.9.5` em 2026-07-21. Data do commit mais recente: 2026-07-21._
 <!-- repo-chronicle:end -->
 
 

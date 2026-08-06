@@ -18,64 +18,77 @@ import TLDR from '@site/src/components/TLDR';
 # Diagramy
 
 <TLDR>
-Vyberte **typ diagramu**, který potřebujete, a poté zvolte jeho **upravitelný zdrojový formát**. Předem si výsledek prohlédněte v Obsidianu a následně ho exportujte ve formátu SVG, PNG nebo PDF.
+Vyberte **typ diagramu**, který potřebujete, a následně zvolte jeho **upravitelný zdrojový formát**. Předem si prohlédněte celkový výsledek v Obsidianu, včetně desky Drawnix a vložených vizuálů typu Mermaid, a poté exportujte každou z oblastí jako SVG, PNG nebo PDF.
 </TLDR>
 
 ## Porozumění třem možnostem
 
 | Možnost | Co ovlivňuje | Příklady |
 |---|---|---|
-| Typ diagramu | Význam diagramu | Schéma toků, sekvenční diagram, obvodové schéma, graf dat |
+| Typ diagramu | Význam diagramu | Schéma toků, sekvenční schéma, obvodové schéma, graf dat |
 | Zdrojový formát | Upravitelný nebo opakovaně použitelný soubor vytvořený Notemdem | Mermaid, JSON Canvas, Draw.io, Drawnix, CircuitikZ |
 | Formát exportu | Obrázek nebo dokument určený k sdílení | SVG, PNG, PDF |
 
-Draw.io a Drawnix jsou **zdrojové formáty**, nikoli typy diagramů. CircuitikZ je zdrojový formát určený speciálně pro obvodové schémata. Stejný náhled lze exportovat do několika vizuálních formátů, takže výběr CircuitikZ vás neomezuje pouze na SVG.
+Draw.io a Drawnix patří mezi **zdrojové formáty**, nikoli typy diagramů. CircuitikZ je zdrojový formát určený speciálně pro obvodové schémata. Stejnou předváděcí verzi lze exportovat do několika různých vizuálních formátů, takže výběr CircuitikZ vás neomezuje pouze na SVG.
 
 ## Výběr zdrojového formátu
 
 | Formát | Nejlepší pro | Zdrojový soubor |
 |---|---|---|
-| Mermaid | Diagramy uložené přímo v Markdownu | Blok kódu Mermaid |
-| JSON Canvas | Pracovní postupy v rámci nativního Obsidian canvas | `.canvas` |
-| Draw.io | Další úpravy v nástrojích typu diagrams.net nebo kompatibilních nástrojích | `.drawio` |
-| Drawnix | Úpravy ručně kreslených schémat nebo ve stylu tabulety | `.drawnix` |
+| Mermaid | Diagramy uchované přímo v Markdownu | Blok kódu Mermaid |
+| JSON Canvas | Práci s původními canvasy v Obsidianu | `.canvas` |
+| Draw.io | Další úpravy v nástroji diagrams.net nebo kompatibilních aplikacích | `.drawio` |
+| Drawnix | Úpravy ručně nebo ve stylu tabulety | `.drawnix` |
 | CircuitikZ | Strukturované elektrické a tranzistorové obvody | `.tex` |
 
-Pokud nepotřebujete konkrétní editor, nechte pole **Preferovaný zdrojový formát** nastavené na **Auto**. Notemd poté vybere vhodný formát podle zvoleného typu diagramu.
+Pokud nepotřebujete konkrétní editor, nechte pole **Preferovaný zdrojový formát** nastaveno na **Auto**. Notemd potom vybere vhodný formát podle zvoleného typu diagramu.
 
 ## Vytvoření a export diagramu
 
 1. Otevřete poznámku nebo vyberte text, který chcete vizualizovat.
 2. Z nabídky na bočním panelu Notemd nebo z panelu příkazů zvolte možnost **Vytvořit diagram**.
-3. Vyberte **typ diagramu**, nebo ho nechte na režimu **Automatické rozpoznání**.
-4. Vyberte **zdrojový formát**, nebo ho nechte na hodnotě **Auto**.
-5. Prohlédněte si náhled.
-6. Zvolte možnost **Uložit zdrojový soubor**, **Exportovat jako SVG**, **Exportovat jako PNG** nebo **Exportovat jako PDF**.
+3. Vyberte **typ diagramu**, nebo ho ponechte na režimu **Automatické rozpoznání**.
+4. Zvolte **zdrojový formát**, nebo ho ponechte na režimu **Auto**. Zvolte **Drawnix**, pokud chcete znalostní mapu s upravitelnými uzly a vloženými vizuály typu Mermaid.
+5. Prohlédněte si předváděcí verzi. Výsledek se skládá z více oblastí – deska Drawnix spolu se všemi oblastmi typu Mermaid zůstávají v původním pořadí uvnitř jednoho vertikálně posuvného okna; oblasti typu Mermaid mají svou skutečnou výšku a nejsou oříznuty.
+6. Pro každou oblast zvolte možnost **Exportovat jako SVG**, **Exportovat jako PNG** nebo **Exportovat jako PDF**, abyste získali samostatný obrázek, nebo použijte možnost exportu celkového obrázku pro všechny oblasti najednou. U více oblastí zvolte zdrojovou složku nebo vlastní složku relativně k Vaultu; Notemd vytvoří jeden jednoznačný soubor pro každou oblast a pokračuje i v případě selhání u jedné z nich.
+7. Použijte možnost **Uložit zdrojový soubor**, pokud potřebujete také upravitelný artefakt.
 
-Formáty PNG a PDF využívají hodnotu PPI určenou pro export obrázků v nastaveních Notemd. SVG zůstává vektorovým obrázkem, a proto není ovlivněna hodnotou PPI.
+V nabídce Export jsou k dispozici možnosti **Exportovat jako SVG**, **Exportovat jako PNG** a **Exportovat jako PDF** pro aktuální předváděcí verzi. Nadpis každé oblasti obsahuje stejné možnosti pro jednotlivý vizuál typu Mermaid nebo Drawnix, takže není nutné velkou předváděcí verzi exportovat jako jeden neprůhledný obrázek.
 
-## Obvodové schémata
+V předváděcí verzi zvolte možnost **Historie**, abyste otevřeli okno s historií Vaultu, aniž byste museli skrýt diagram. Můžete vyhledávat a filtrovat dokončené diagramy, znovu otevřít předváděcí verzi nebo otevřít uložené artefakty. Historie diagramů je také dostupná přímo z panelu příkazů a bočního panelu Notemd, i když není aktivní žádná poznámka.
 
-Pro požadavky na obvodová schémata zvolte **Obvodové schéma** spolu se zdrojovým souborem typu **CircuitikZ**. Notemd nejprve vytvoří strukturovaný popis obvodu a poté napsá zdrojový kód CircuitikZ. Tento přístup je spolehlivější než požadavek na model, aby napsal neomezený LaTeX kód.
+SVG a PDF vznikají na základě vektorové geometrie; PDF využívá stejnou strukturu SVG a metriky textu místo rasterizace celé předváděcí verze. Hodnota PPI pro export obrázku v nastaveních Notemd ovlivňuje pouze rasterizaci PNG (72–600 PPI, výchozí hodnota 300).
 
-Současná podpora CircuitikZ je záměrně omezená. Nejlépe fungují běžně dostupné zdroje pro zesilovače typu NMOS a podporované bloky CMOS. Před použitím generovaného obvodu v technických nebo publikačních účelech vždy zkontrolujte náhled i zdrojový kód.
+## Předváděcí verze Drawnix s vloženými vizuály typu Mermaid
 
-Náhled ve formátu SVG je pomocný nástroj vytvořený Notemdem ke kontrole. Není to důkaz toho, že místní instalace LaTeX nebo TikZJax úspěšně zkompilovala soubor `.tex`.
+Pokud obsahuje artefakt typu Drawnix vizuály typu Mermaid, Notemd upraví generovaný SVG a uchová zdrojový kód Mermaid spolu s ním v metadatach souboru `.drawnix`. Díky tomu může předváděcí verze zobrazit obrázek typu Mermaid uvnitř znalostní mapy Drawnix bez potřeby běhu prostředí Drawnix nebo Plait. Vizuály typu Mermaid, které jsou bezpečně vloženy, nevytvářejí samostatnou složku `.assets`; externí binární média nebo nevyřešené vizuály mají doprovodný soubor, aby nedošlo ke ztrátě dat.
+
+Předváděcí verze je záměrně jedinou posuvnou plochou: nejprve se zobrazuje hlavní canvas typu Drawnix a poté všechny vložené oblasti typu Mermaid v původním pořadí. Zavření a opětovné otevření uložené položky z historie obnoví stejný seznam oblastí, rozměry a možnosti exportu.
+
+## Obvodová schémata
+
+Pro podporované požadavky na obvodová schémata zvolte **Obvodové schéma** spolu se zdrojovým souborem typu **CircuitikZ**. Notemd nejprve vytvoří strukturovaný popis obvodu a poté napsá zdrojový kód CircuitikZ. Tento postup je spolehlivější než požadavek na model, aby napsal neomezený kód typu LaTeX.
+
+Současná podpora CircuitikZ je záměrně omezená. Nejlépe fungují běžně dostupné zesilovače typu NMOS a podporované bloky CMOS. Před použitím generovaného obvodu v technických nebo publikačních účelech vždy zkontrolujte předváděcí verzi a zdrojový kód.
+
+Předváděcí verze ve formátu SVG je pomocný nástroj vytvořený Notemdem. Není to důkaz toho, že místní instalace LaTeX nebo TikZJax úspěšně zkompilovala soubor `.tex`.
+
+**Volitelná kompilace přímo v aplikaci.** Pro předváděcí verzi uvnitř pluginu, export do formátů SVG, PNG a PDF nepotřebujete LaTeX. Na desktopu otevřete **Nativní prostředí pro kompilaci CircuitikZ** z nastavení diagramu nebo z panelu příkazů, pokud potřebujete diagnostiku kompilace nebo nativní PDF ve formátu LaTeX. Notemd může využít systémové nástroje typu `tectonic` nebo `pdflatex`, použít vlastní spustitelný soubor nebo po výběru možnosti **Nainstalovat** nainstalovat spravované prostředí Tectonic. Panel s informacemi o prostředí zobrazuje průběh a chyby přímo a umožňuje později toto spravované prostředí odstranit.
 
 ## Řešení problémů
 
-### Výsledkem je špatný typ diagramu
+### Výsledek je špatného typu diagramu
 
-Místo režimu Automatického rozpoznání zvolte typ diagramu výslovně. U obvodových schémat zvolte **Obvodové schéma** a použijte příkaz **Vytvořit diagram**, nikoli starší příkaz **Shrnutí do diagramu ve formátu Mermaid**.
+Místo režimu Automatické rozpoznání zvolte konkrétní typ diagramu. U obvodových schémat zvolte **Obvodové schéma** a použijte příkaz **Vytvořit diagram**, nikoli starší příkaz **Shrnutí do diagramu typu Mermaid**.
 
 ### Zdrojový formát není vhodný
 
-Vraťte zdrojový formát na hodnotu **Auto**, nebo zvolte formát určený konkrétnímu typu diagramu. CircuitikZ je určen pouze pro obvodová schémata; Draw.io a Drawnix jsou určeny pro podporované strukturované diagramy.
+Vraťte zdrojový formát na režim **Auto** nebo zvolte formát určený konkrétnímu typu diagramu. CircuitikZ je určen pouze pro obvodová schémata; Draw.io a Drawnix jsou určeny pro podporované strukturované diagramy.
 
-### Chybí tlačítka na export
+### Nabídka Export chybí
 
-Formáty SVG, PNG a PDF vyžadují vizuální náhled. Pokud je k dispozici pouze textový zdroj, uložte zdrojový soubor a otevřete ho v odpovídajícím externím nástroji.
+Pro export do formátů SVG, PNG a PDF je potřeba předváděcí verze. Pokud je k dispozici pouze zdrojový text, uložte soubor a otevřete ho v odpovídajícím externím nástroji.
 
-### Soubor CircuitikZ se nedaří kompilovat mimo aplikaci
+### Soubor typu CircuitikZ se nemůže kompilovat externě
 
-Ujistěte se, že vaše prostředí LaTeX obsahuje balíček `circuitikz`. Tento plugin neobsahuje kompletní distribuci LaTeX.
+Otevřete **Nativní prostředí pro kompilaci CircuitikZ** a spusťte kontrolu prostředí. Opravte spravované prostředí nebo ověřte, zda váš vlastní/systémový kompilátor dokáže načíst balíček `circuitikz`. Notemd do souboru pluginu neobsahuje kompletní distribuci TeX.

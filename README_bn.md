@@ -696,7 +696,7 @@ MIT লাইসেন্স - বিস্তারিত জানতে [LICE
 ---
 
 
-*Notemd v1.9.3 - AI-এর সাহায্যে আপনার Obsidian knowledge graph আরও উন্নত করুন।*
+*Notemd v1.9.5 - AI-এর সাহায্যে আপনার Obsidian knowledge graph আরও উন্নত করুন।*
 
 
 <!-- repo-chronicle:start -->
@@ -706,7 +706,7 @@ MIT লাইসেন্স - বিস্তারিত জানতে [LICE
 
 ![Notemd Development Chronicle](./docs/repo-saga/notemd-development-history.bn.svg)
 
-_সর্বশেষ `1.9.4` রিলিজ ট্যাগের জন্য 2026-07-21 তারিখে রিফ্রেশ করা হয়েছে। সর্বশেষ কমিটের তারিখ: 2026-07-21।_
+_সর্বশেষ `1.9.5` রিলিজ ট্যাগের জন্য 2026-07-21 তারিখে রিফ্রেশ করা হয়েছে। সর্বশেষ কমিটের তারিখ: 2026-07-21।_
 <!-- repo-chronicle:end -->
 
 
