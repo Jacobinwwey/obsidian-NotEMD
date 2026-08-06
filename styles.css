@@ -626,7 +626,15 @@
     padding: 0;
 }
 
+.notemd-diagram-preview-scroll-region {
+    max-height: 72vh;
+    overflow-y: auto;
+    overflow-x: hidden;
+    overscroll-behavior: contain;
+}
+
 .notemd-diagram-preview-panel {
+    flex: 0 0 auto;
     min-width: 0;
     overflow: hidden;
     border: 1px solid var(--notemd-border);

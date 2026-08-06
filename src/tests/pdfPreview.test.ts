@@ -36,6 +36,22 @@ describe('pdf preview exporter', () => {
         })).rejects.toThrow(/empty document/i);
     });
 
+    test('keeps exactly one root font-family attribute when the SVG already declares one', async () => {
+        const parseSvg = jest.fn((markup: string) => {
+            const rootTag = markup.match(/^<svg\b[^>]*>/)?.[0] ?? '';
+            expect(rootTag.match(/\bfont-family=/g)).toHaveLength(1);
+            expect(rootTag).toContain('font-family="NotoSansSC"');
+            expect(markup).toContain('style="font-family: &quot;NotoSansSC&quot;, &quot;Segoe UI&quot;, Arial, sans-serif; fill: red"');
+            return { tagName: 'svg' };
+        });
+
+        await buildPdfFromSvg('<svg font-family="Arial" width="400" height="200"><text style="font-family: Arial; fill: red">Node</text></svg>', {
+            parseSvg,
+            createDocument: jest.fn(() => ({ output: jest.fn(() => new ArrayBuffer(16)) })),
+            renderSvg: jest.fn()
+        });
+    });
+
     test('uses the root viewBox for percentage-sized Mermaid SVGs', async () => {
         const document = {
             output: jest.fn(() => new TextEncoder().encode('%PDF-1.4\n/vector-content\n').buffer)

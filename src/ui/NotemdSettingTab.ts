@@ -10,7 +10,10 @@ import {
 } from '../types';
 import { DEFAULT_SETTINGS } from '../constants';
 import type { DiagramIntent, RenderTarget } from '../diagram/types';
-import { applyDiagramIntentPreference } from '../diagram/diagramPreferenceCompatibility';
+import {
+    applyDiagramIntentPreference,
+    applyDiagramRenderTargetPreference
+} from '../diagram/diagramPreferenceCompatibility';
 import {
     DEFAULT_PREVIEW_EXPORT_PPI,
     MAX_PREVIEW_EXPORT_PPI,
@@ -2491,6 +2494,7 @@ export class NotemdSettingTab extends PluginSettingTab {
                 dropdown.addOption('classDiagram', experimentalDiagramI18n.intentClassDiagram);
                 dropdown.addOption('erDiagram', experimentalDiagramI18n.intentErDiagram);
                 dropdown.addOption('stateDiagram', experimentalDiagramI18n.intentStateDiagram);
+                dropdown.addOption('drawnixMindmap', experimentalDiagramI18n.renderTargetDrawnix);
                 dropdown.addOption('circuit', experimentalDiagramI18n.intentCircuit);
                 dropdown.addOption('dataChart', experimentalDiagramI18n.intentDataChart);
                 dropdown
@@ -2521,10 +2525,12 @@ export class NotemdSettingTab extends PluginSettingTab {
                 dropdown
                     .setValue(this.plugin.settings.preferredDiagramRenderTarget || 'auto')
                     .onChange(async (value: string) => {
-                        this.plugin.settings.preferredDiagramRenderTarget = value === 'auto'
-                            ? undefined
-                            : value as RenderTarget;
+                        applyDiagramRenderTargetPreference(
+                            this.plugin.settings,
+                            value === 'auto' ? undefined : value as RenderTarget
+                        );
                         await this.plugin.saveSettings();
+                        this.display();
                     });
             });
 

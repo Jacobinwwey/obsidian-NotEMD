@@ -102,6 +102,10 @@ describe('Drawnix mind-map renderer', () => {
         expect(artifact.previewSvg?.content).toContain('data-drawnix-mindmap-node-id="notemd"');
         expect(artifact.previewSvg?.content).toContain('data-drawnix-mindmap-node-id="diagram"');
         expect(artifact.previewSvg?.content).not.toContain('data-drawio-type="node"');
+        expect(artifact.previewSvg?.content).toContain('font-family: "NotoSansSC", "Segoe UI", Arial, sans-serif;');
+        expect(artifact.previewSvg?.content).toContain('font-weight: 400;');
+        expect(artifact.previewSvg?.content).toContain('font-family="NotoSansSC"');
+        expect(artifact.previewSvg?.content).not.toContain('font-family=""');
     });
 
     test('persists source Mermaid visuals inline in Drawnix metadata', async () => {
@@ -191,7 +195,9 @@ describe('Drawnix mind-map renderer', () => {
         expect(previewSvg).toContain('data-drawnix-mindmap-source-visual-id="source-visual-2"');
         expect(previewSvg).toContain('data-drawnix-mindmap-source-visual-svg="source-visual-1"');
         expect(previewSvg).toContain('data-drawnix-mindmap-source-visual-svg="source-visual-2"');
-        expect(previewSvg).toContain('width="1974"');
+        const width = Number(previewSvg.match(/^<svg\b[^>]*\bwidth="([0-9.]+)"/)?.[1]);
+        expect(width).toBeGreaterThan(0);
+        expect(width).toBeGreaterThan(buildDrawnixMindMapProjection(createKnowledgeMapSpec()).width);
     });
 
     test('namespaces nested Mermaid SVG ids independently for each source visual', () => {
@@ -235,6 +241,44 @@ describe('Drawnix mind-map renderer', () => {
         expect(previewSvg).toContain('id="notemd-source-visual-css-0-mermaid-root"');
         expect(previewSvg).toContain('#notemd-source-visual-css-0-mermaid-root .node');
         expect(previewSvg).not.toContain('#mermaid-root .node');
+    });
+
+    test('normalizes embedded source visual font declarations to the shared preview family', () => {
+        const projection = buildDrawnixMindMapProjection(createKnowledgeMapSpec());
+        const previewSvg = renderDrawnixMindMapSvg(projection, [{
+            id: 'source-visual-font',
+            kind: 'mermaid',
+            title: 'Mermaid source visual',
+            lineStart: 1,
+            lineEnd: 3,
+            svg: '<svg font-family=""><style>.label { font-family: "trebuchet ms", verdana, sans-serif; }</style><text class="label" style="font-family: Trebuchet MS; fill: red">Node</text></svg>'
+        }]);
+
+        expect(previewSvg).not.toContain('font-family=""');
+        expect(previewSvg).not.toContain('trebuchet ms');
+        expect(previewSvg).toContain('font-family="NotoSansSC"');
+        expect(previewSvg).toContain('font-family: "NotoSansSC", "Segoe UI", Arial, sans-serif');
+        expect(previewSvg).toContain('style="font-family: &quot;NotoSansSC&quot;, &quot;Segoe UI&quot;, Arial, sans-serif; fill: red"');
+    });
+
+    test('exposes the primary Drawnix visual and every Mermaid visual as ordered preview panels', async () => {
+        const artifact = await new DrawnixRenderer().render(createKnowledgeMapSpec(), {
+            sourceVisuals: [
+                {
+                    id: 'visual-1', kind: 'mermaid', sourceHash: 'hash-1', lineStart: 1, lineEnd: 3,
+                    status: 'resolved', content: 'flowchart TD\nA --> B'
+                },
+                {
+                    id: 'visual-2', kind: 'mermaid', sourceHash: 'hash-2', lineStart: 5, lineEnd: 7,
+                    status: 'resolved', content: 'sequenceDiagram\nAlice->>Bob: Hello'
+                }
+            ]
+        });
+
+        expect(artifact.previewPanels?.map(panel => panel.id)).toEqual(['drawnix-primary', 'visual-1', 'visual-2']);
+        expect(artifact.previewPanels?.[0].artifact.target).toBe('drawnix');
+        expect(artifact.previewPanels?.[1].artifact).toMatchObject({ target: 'mermaid', sourceIntent: 'flowchart' });
+        expect(artifact.previewPanels?.[2].artifact).toMatchObject({ target: 'mermaid', sourceIntent: 'sequence' });
     });
 
     test('namespaces only real SVG ids and rewrites whitespace-tolerant references', () => {
@@ -373,6 +417,60 @@ describe('Drawnix mind-map renderer', () => {
                 expect(overlaps).toBe(false);
             });
         });
+    });
+
+    test('wraps mixed Chinese and identifier labels without splitting identifiers or overflowing the node width', () => {
+        const spec: DiagramSpec = {
+            ...createKnowledgeMapSpec(),
+            nodes: [{
+                id: 'root',
+                label: 'Root',
+                children: [{
+                    id: 'token-limit',
+                    label: 'LLM 调用管道: 令牌解析 (resolveProviderTokenLimit)'
+                }]
+            }],
+            edges: []
+        };
+
+        const projection = buildDrawnixMindMapProjection(spec);
+        const node = projection.nodes.find(candidate => candidate.id === 'token-limit');
+
+        expect(node).toBeDefined();
+        expect(node?.textLines).toEqual([
+            'LLM 调用管道: 令牌解析',
+            '(resolveProviderTokenLimit)'
+        ]);
+        expect(node?.textLines.length).toBeLessThanOrEqual(3);
+    });
+
+    test('retains complete long labels and shares explicit line breaks with native Drawnix', async () => {
+        const longLabel = 'A very long architecture label with enough words to require more than three lines in the rendered Drawnix node and preserve every word';
+        const spec: DiagramSpec = {
+            ...createKnowledgeMapSpec(),
+            nodes: [{
+                id: 'root',
+                label: 'Root',
+                children: [{ id: 'long-label', label: longLabel }]
+            }],
+            edges: []
+        };
+
+        const projection = buildDrawnixMindMapProjection(spec);
+        const node = projection.nodes.find(candidate => candidate.id === 'long-label');
+        const artifact = await new DrawnixRenderer().render(spec);
+        const exported = JSON.parse(artifact.content) as {
+            elements: Array<{ children?: Array<{ data?: { topic?: { children?: Array<{ text?: string }> } } }> }>;
+        };
+        const nativeText = exported.elements[0]?.children?.[0]?.data?.topic?.children?.[0]?.text;
+        const previewSvg = artifact.previewSvg?.content ?? '';
+        const svgNodeMarkup = previewSvg.match(/<g data-drawnix-mindmap-node-id="long-label"[\s\S]*?<\/g>/)?.[0] ?? '';
+        const svgLines = Array.from(svgNodeMarkup.matchAll(/<tspan\b[^>]*>([^<]*)<\/tspan>/g), match => match[1]);
+
+        expect(node?.textLines.length).toBeGreaterThan(3);
+        expect(node?.textLines.join(' ')).toBe(longLabel);
+        expect(nativeText).toBe(node?.textLines.join('\n'));
+        expect(svgLines).toEqual(node?.textLines);
     });
 
     test('rejects hierarchy depth beyond the native Drawnix contract', async () => {

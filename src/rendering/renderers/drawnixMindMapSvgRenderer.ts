@@ -5,6 +5,11 @@ import {
     DrawnixPoint
 } from '../../diagram/adapters/drawnix/drawnixMindMapProjection';
 import type { SourceVisualPreview } from '../../diagram/sourceVisualArtifactBuilder';
+import {
+    normalizeSvgFontFamilyDeclarations,
+    PREVIEW_FONT_FAMILY,
+    PREVIEW_FONT_STACK
+} from '../preview/previewTypography';
 
 export const NOTEMD_DRAWNIX_MIND_MAP_SVG_RENDERER_VERSION = 'notemd-drawnix-mindmap-svg@1.0.0';
 
@@ -282,16 +287,18 @@ export function renderDrawnixMindMapSvg(
     const canvasWidth = sourceVisualLayout.width;
     const canvasHeight = Math.max(projection.height, sourceVisualLayout.height);
 
-    return `<svg xmlns="http://www.w3.org/2000/svg" width="${canvasWidth}" height="${canvasHeight}" viewBox="0 0 ${canvasWidth} ${canvasHeight}" role="img" aria-labelledby="notemd-drawnix-mindmap-title notemd-drawnix-mindmap-desc" data-notemd-renderer="${NOTEMD_DRAWNIX_MIND_MAP_SVG_RENDERER_VERSION}">
+    // The PDF embeds one regular font face, so node labels use the same weight
+    // in-browser to keep their measured width identical across both formats.
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${canvasWidth}" height="${canvasHeight}" viewBox="0 0 ${canvasWidth} ${canvasHeight}" role="img" aria-labelledby="notemd-drawnix-mindmap-title notemd-drawnix-mindmap-desc" data-notemd-renderer="${NOTEMD_DRAWNIX_MIND_MAP_SVG_RENDERER_VERSION}">
         <title id="notemd-drawnix-mindmap-title">${escapeHtml(projection.title)}</title>
         <desc id="notemd-drawnix-mindmap-desc">${escapeHtml(projection.summary ?? 'Drawnix knowledge map')}</desc>
         <style>
-            .notemd-drawnix-mindmap-label { font-family: "Segoe UI", Arial, sans-serif; font-size: 14px; font-weight: 650; }
-            .notemd-drawnix-mindmap-relation-label { font-family: "Segoe UI", Arial, sans-serif; font-size: 12px; fill: #475569; paint-order: stroke; stroke: #ffffff; stroke-width: 4px; }
-            .notemd-drawnix-source-visual-heading { font-family: "Segoe UI", Arial, sans-serif; font-size: 19px; font-weight: 700; fill: #172033; }
-            .notemd-drawnix-source-visual-title { font-family: "Segoe UI", Arial, sans-serif; font-size: 15px; font-weight: 700; fill: #172033; }
-            .notemd-drawnix-source-visual-meta { font-family: "Segoe UI", Arial, sans-serif; font-size: 11px; fill: #64748b; }
-            .notemd-drawnix-source-visual-unavailable { font-family: "Segoe UI", Arial, sans-serif; font-size: 13px; fill: #b45309; }
+            .notemd-drawnix-mindmap-label { font-family: ${PREVIEW_FONT_STACK}; font-size: 14px; font-weight: 400; }
+            .notemd-drawnix-mindmap-relation-label { font-family: ${PREVIEW_FONT_STACK}; font-size: 12px; fill: #475569; paint-order: stroke; stroke: #ffffff; stroke-width: 4px; }
+            .notemd-drawnix-source-visual-heading { font-family: ${PREVIEW_FONT_STACK}; font-size: 19px; font-weight: 700; fill: #172033; }
+            .notemd-drawnix-source-visual-title { font-family: ${PREVIEW_FONT_STACK}; font-size: 15px; font-weight: 700; fill: #172033; }
+            .notemd-drawnix-source-visual-meta { font-family: ${PREVIEW_FONT_STACK}; font-size: 11px; fill: #64748b; }
+            .notemd-drawnix-source-visual-unavailable { font-family: ${PREVIEW_FONT_STACK}; font-size: 13px; fill: #b45309; }
         </style>
         <defs>
             <marker id="notemd-drawnix-mindmap-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto">
@@ -299,11 +306,12 @@ export function renderDrawnixMindMapSvg(
             </marker>
         </defs>
         <rect x="0" y="0" width="${canvasWidth}" height="${canvasHeight}" fill="#ffffff" />
-        <text x="72" y="44" fill="#172033" font-family="Segoe UI, Arial, sans-serif" font-size="24" font-weight="700">${escapeHtml(projection.title)}</text>
-        ${projection.summary ? `<text x="72" y="72" fill="#64748b" font-family="Segoe UI, Arial, sans-serif" font-size="14">${escapeHtml(projection.summary)}</text>` : ''}
+        <text x="72" y="44" fill="#172033" font-family="${PREVIEW_FONT_FAMILY}" font-size="24" font-weight="700">${escapeHtml(projection.title)}</text>
+        ${projection.summary ? `<text x="72" y="72" fill="#64748b" font-family="${PREVIEW_FONT_FAMILY}" font-size="14">${escapeHtml(projection.summary)}</text>` : ''}
         ${projection.hierarchyBranches.map(renderHierarchyBranch).join('')}
         ${projection.crossRelations.map(renderCrossRelation).join('')}
         ${projection.nodes.map(renderNode).join('')}
         ${sourceVisualLayout.markup}
     </svg>`;
+    return normalizeSvgFontFamilyDeclarations(svg);
 }

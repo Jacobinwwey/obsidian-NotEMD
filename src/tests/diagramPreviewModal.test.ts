@@ -57,6 +57,12 @@ type MockElement = {
     innerHTML: string;
     onclick?: ((event?: MouseEvent) => unknown | Promise<unknown>) | null;
     disabled: boolean;
+    style: { height?: string };
+    contentDocument?: {
+        body?: { scrollHeight?: number; offsetHeight?: number };
+        querySelector?: (selector: string) => { getBoundingClientRect: () => { height: number } } | null;
+    };
+    onload?: (() => void) | null;
     srcdoc?: string;
     sandbox?: string;
     attributes: Record<string, string>;
@@ -78,6 +84,9 @@ function createMockElement(tag = 'div', options: { text?: string; cls?: string }
         innerHTML: '',
         onclick: null,
         disabled: false,
+        style: {},
+        contentDocument: undefined,
+        onload: null,
         srcdoc: undefined,
         attributes: {} as Record<string, string>,
         empty: jest.fn(),
@@ -398,6 +407,56 @@ describe('diagram preview modal', () => {
         expect(iframe?.srcdoc).toContain('notemd-mermaid-mount');
     });
 
+    test('sizes iframe previews to the rendered document height', async () => {
+        const modal = mountModal(new DiagramPreviewModal(mockApp, {
+            ...createSession({}, 'Notes/Topic.md', 'dark'),
+            htmlSrcdoc: '<!DOCTYPE html><html><body><svg /></body></html>'
+        }, 'en') as any);
+
+        modal.onOpen();
+        await flushPromises();
+
+        const iframe = findByTag(modal.contentEl, 'iframe') as MockElement;
+        iframe.contentDocument = {
+            body: { scrollHeight: 928, offsetHeight: 928 },
+            querySelector: () => ({ getBoundingClientRect: () => ({ height: 900 }) })
+        };
+        iframe.onload?.();
+
+        expect(iframe.style.height).toBe('928px');
+    });
+
+    test('disconnects iframe observers before rerendering the preview', async () => {
+        const originalResizeObserver = (globalThis as any).ResizeObserver;
+        const disconnect = jest.fn();
+        (globalThis as any).ResizeObserver = class {
+            observe = jest.fn();
+            disconnect = disconnect;
+        };
+
+        try {
+            const modal = mountModal(new DiagramPreviewModal(mockApp, {
+                ...createSession({}, 'Notes/Topic.md', 'dark'),
+                htmlSrcdoc: '<!DOCTYPE html><html><body><svg /></body></html>'
+            }, 'en') as any);
+
+            modal.onOpen();
+            await flushPromises();
+
+            const iframe = findByTag(modal.contentEl, 'iframe') as MockElement;
+            iframe.contentDocument = {
+                body: { scrollHeight: 928, offsetHeight: 928 },
+                querySelector: () => ({ getBoundingClientRect: () => ({ height: 900 }) })
+            };
+            iframe.onload?.();
+            modal.renderModal();
+
+            expect(disconnect).toHaveBeenCalledTimes(1);
+        } finally {
+            (globalThis as any).ResizeObserver = originalResizeObserver;
+        }
+    });
+
     test('renders every ordered preview panel in the modal', async () => {
         const modal = mountModal(new DiagramPreviewModal(mockApp, createSession({
             previewPanels: [
@@ -432,6 +491,26 @@ describe('diagram preview modal', () => {
         expect(iframes).toHaveLength(2);
         expect(iframes[0].srcdoc).toContain('flowchart TD');
         expect(iframes[1].srcdoc).toContain('sequenceDiagram');
+    });
+
+    test('marks the preview body as a vertical scroll region for tall multi-panel previews', async () => {
+        const modal = mountModal(new DiagramPreviewModal(mockApp, createSession({
+            previewPanels: [{
+                id: 'mermaid-1',
+                artifact: {
+                    target: 'mermaid',
+                    content: '```mermaid\nflowchart TD\nA --> B\n```',
+                    mimeType: 'text/vnd.mermaid',
+                    sourceIntent: 'flowchart'
+                }
+            }]
+        }), 'en') as any);
+
+        modal.onOpen();
+        await flushPromises();
+
+        const body = findByClass(modal.contentEl, 'notemd-diagram-preview-body');
+        expect(body?.cls).toContain('notemd-diagram-preview-scroll-region');
     });
 
     test('exports an individual preview panel from its own menu', async () => {

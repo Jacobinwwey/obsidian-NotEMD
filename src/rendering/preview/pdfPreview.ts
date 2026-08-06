@@ -2,10 +2,14 @@ import { jsPDF } from 'jspdf';
 import { svg2pdf } from 'svg2pdf.js';
 import notoSansScRegularDataUrl from '../../assets/NotoSansSC-Regular.ttf';
 import { resolveSvgDimensions, sanitizeSvgForExport } from './pngPreview';
+import {
+    normalizeSvgFontFamilyDeclarations,
+    PREVIEW_FONT_FAMILY
+} from './previewTypography';
 
 const PDF_POINTS_PER_CSS_PIXEL = 72 / 96;
 const PDF_FONT_FILE_NAME = 'NotoSansSC-Regular.ttf';
-const PDF_FONT_FAMILY = 'NotoSansSC';
+const PDF_FONT_FAMILY = PREVIEW_FONT_FAMILY;
 const PDF_FONT_STYLES = ['normal', 'bold', 'italic', 'bolditalic'] as const;
 export type PdfPageOrientation = 'portrait' | 'landscape';
 
@@ -61,18 +65,6 @@ function createSvgPdfDocument(
 function extractBase64Data(dataUrl: string): string {
     const separatorIndex = dataUrl.indexOf(',');
     return separatorIndex >= 0 ? dataUrl.slice(separatorIndex + 1) : dataUrl;
-}
-
-function normalizeSvgFontFamilyDeclarations(svg: string): string {
-    let normalized = svg.replace(
-        /\sfont-family\s*=\s*(["'])[^"']*\1/gi,
-        ` font-family="${PDF_FONT_FAMILY}"`
-    );
-    normalized = normalized.replace(
-        /font-family\s*:\s*[^;{}\n]+/gi,
-        `font-family:${PDF_FONT_FAMILY}`
-    );
-    return normalized.replace(/<svg\b/i, `<svg font-family="${PDF_FONT_FAMILY}"`);
 }
 
 function registerPdfFont(document: SvgPdfDocumentLike): void {

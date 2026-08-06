@@ -1,5 +1,5 @@
 import { assertValidDiagramSpec } from '../../diagram/spec';
-import { DiagramSpec } from '../../diagram/types';
+import { DiagramIntent, DiagramSpec } from '../../diagram/types';
 import {
     exportDrawnixMindMapProjection,
     stringifyDrawnixMindMapExportedData,
@@ -11,6 +11,19 @@ import { DiagramRenderer, RenderArtifact, RenderOptions } from '../types';
 import { renderDrawnixMindMapSvg } from './drawnixMindMapSvgRenderer';
 
 const SUPPORTED_DRAWNIX_INTENTS = new Set<DiagramSpec['intent']>(['drawnixMindmap']);
+
+function resolveMermaidIntent(source: string | undefined): DiagramIntent {
+    const firstDirective = source
+        ?.split(/\r?\n/)
+        .map(line => line.trim().toLowerCase())
+        .find(line => line.length > 0 && !line.startsWith('%%')) ?? '';
+    if (firstDirective === 'sequencediagram') return 'sequence';
+    if (firstDirective === 'classdiagram') return 'classDiagram';
+    if (firstDirective === 'erdiagram') return 'erDiagram';
+    if (firstDirective.startsWith('statediagram')) return 'stateDiagram';
+    if (firstDirective === 'mindmap') return 'mindmap';
+    return 'flowchart';
+}
 
 export class DrawnixRenderer implements DiagramRenderer {
     readonly id = 'drawnix';
@@ -44,6 +57,8 @@ export class DrawnixRenderer implements DiagramRenderer {
                 : visual;
         });
         const data = exportDrawnixMindMapProjection(projection, sourceVisualMetadata);
+        const content = stringifyDrawnixMindMapExportedData(data);
+        const previewSvgContent = renderDrawnixMindMapSvg(projection, sourceVisualCompanions.previewVisuals);
         const validationErrors = validateDrawnixMindMapExportedData(data);
         if (validationErrors.length > 0) {
             throw new Error(`Drawnix mind-map validation failed: ${validationErrors.join('; ')}`);
@@ -51,15 +66,41 @@ export class DrawnixRenderer implements DiagramRenderer {
 
         return {
             target: this.target,
-            content: stringifyDrawnixMindMapExportedData(data),
+            content,
             mimeType: 'application/vnd.drawnix+json',
             sourceIntent: spec.intent,
             previewSvg: {
-                content: renderDrawnixMindMapSvg(projection, sourceVisualCompanions.previewVisuals),
+                content: previewSvgContent,
                 mimeType: 'image/svg+xml'
             },
             companions: sourceVisualCompanions.companions,
             sourceVisualManifest: sourceVisualCompanions.manifest,
+            previewPanels: sourceVisualCompanions.previewVisuals.length > 0
+                ? [
+                    {
+                        id: 'drawnix-primary',
+                        title: projection.title,
+                        artifact: {
+                            target: this.target,
+                            content,
+                            mimeType: 'application/vnd.drawnix+json',
+                            sourceIntent: spec.intent,
+                            previewSvg: { content: previewSvgContent, mimeType: 'image/svg+xml' }
+                        }
+                    },
+                    ...sourceVisualCompanions.previewVisuals.map(visual => ({
+                        id: visual.id,
+                        title: visual.title,
+                        artifact: {
+                            target: 'mermaid' as const,
+                            content: `\`\`\`mermaid\n${visual.sourceContent?.trim() ?? ''}\n\`\`\``,
+                            mimeType: 'text/vnd.mermaid',
+                            sourceIntent: resolveMermaidIntent(visual.sourceContent),
+                            previewSvg: { content: visual.svg, mimeType: 'image/svg+xml' as const }
+                        }
+                    }))
+                ]
+                : undefined,
             diagnostics: sourceVisualCompanions.diagnostics.length > 0
                 ? sourceVisualCompanions.diagnostics
                 : undefined

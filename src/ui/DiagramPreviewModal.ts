@@ -49,6 +49,7 @@ export class DiagramPreviewModal extends Modal {
     private readonly historyStore?: DiagramHistoryStore;
     private readonly historyEntryId?: string;
     private historyDrawer: DiagramHistoryDrawer | null = null;
+    private readonly iframeResizeObservers = new Map<HTMLIFrameElement, ResizeObserver>();
 
     constructor(
         app: App,
@@ -77,6 +78,7 @@ export class DiagramPreviewModal extends Modal {
     }
 
     onClose() {
+        this.disconnectIframeResizeObservers();
         this.historyDrawer?.destroy();
         this.historyDrawer = null;
         this.modalEl.removeClass('notemd-diagram-preview-shell');
@@ -84,6 +86,7 @@ export class DiagramPreviewModal extends Modal {
     }
 
     private renderModal(): void {
+        this.disconnectIframeResizeObservers();
         const i18n = getI18nStrings({ uiLocale: this.uiLocale });
         const { contentEl } = this;
         contentEl.empty();
@@ -177,6 +180,13 @@ export class DiagramPreviewModal extends Modal {
 
         const previewContainer = stage.createDiv({ cls: 'notemd-diagram-preview-body' });
         void this.renderPreview(previewContainer);
+    }
+
+    private disconnectIframeResizeObservers(): void {
+        for (const observer of this.iframeResizeObservers.values()) {
+            observer.disconnect();
+        }
+        this.iframeResizeObservers.clear();
     }
 
     private showExportMenu(event: MouseEvent): void {
@@ -628,6 +638,7 @@ export class DiagramPreviewModal extends Modal {
 
         container.empty();
         container.addClass('notemd-diagram-preview-panels');
+        container.addClass('notemd-diagram-preview-scroll-region');
         const i18n = getI18nStrings({ uiLocale: this.uiLocale });
         for (const [index, panel] of panels.entries()) {
             const panelContainer = container.createDiv({
@@ -725,12 +736,32 @@ export class DiagramPreviewModal extends Modal {
         const iframe = container.createEl('iframe', { cls: 'notemd-diagram-preview-frame' });
         iframe.setAttribute('sandbox', this.getIframeSandboxPolicy(artifact));
         iframe.setAttribute('referrerpolicy', 'no-referrer');
+        iframe.onload = () => this.resizeIframePreview(iframe);
         iframe.srcdoc = new IframeRenderHost().createSession(artifact, {
             theme: this.session.payload.theme,
             sourcePath: this.session.payload.sourcePath,
             artifactSaved: this.session.payload.artifactSaved,
             previewTitle: this.session.payload.previewTitle
         }).htmlSrcdoc;
+    }
+
+    private resizeIframePreview(iframe: HTMLIFrameElement): void {
+        const frameDocument = iframe.contentDocument;
+        const body = frameDocument?.body;
+        if (!body) {
+            return;
+        }
+
+        const renderedSvg = frameDocument.querySelector('svg');
+        const svgHeight = renderedSvg?.getBoundingClientRect().height ?? 0;
+        const contentHeight = Math.max(body.scrollHeight, body.offsetHeight, svgHeight, 260);
+        iframe.style.height = `${Math.ceil(contentHeight)}px`;
+
+        if (typeof ResizeObserver !== 'undefined' && !this.iframeResizeObservers.has(iframe)) {
+            const observer = new ResizeObserver(() => this.resizeIframePreview(iframe));
+            observer.observe(body);
+            this.iframeResizeObservers.set(iframe, observer);
+        }
     }
 
     private renderSourceOnlyPreview(container: HTMLElement, artifact: RenderArtifact): void {

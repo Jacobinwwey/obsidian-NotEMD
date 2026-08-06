@@ -3,8 +3,41 @@ import {
     buildDiagramOperationInput,
     resolveDiagramOperationCompatibilityMode
 } from '../diagram/diagramGenerationService';
+import {
+    applyDiagramIntentPreference,
+    applyDiagramRenderTargetPreference
+} from '../diagram/diagramPreferenceCompatibility';
 
 describe('diagram operation input helpers', () => {
+    test('selecting Drawnix establishes the Drawnix intent and best-fit compatibility invariant', () => {
+        const settings = {
+            ...mockSettings,
+            preferredDiagramIntent: 'flowchart',
+            preferredDiagramRenderTarget: 'mermaid' as const,
+            experimentalDiagramCompatibilityMode: 'legacy-mermaid' as const
+        };
+
+        applyDiagramRenderTargetPreference(settings, 'drawnix');
+
+        expect(settings.preferredDiagramRenderTarget).toBe('drawnix');
+        expect(settings.preferredDiagramIntent).toBe('drawnixMindmap');
+        expect(settings.experimentalDiagramCompatibilityMode).toBe('best-fit');
+    });
+
+    test('selecting the Drawnix knowledge-map intent establishes the Drawnix render target', () => {
+        const settings = {
+            ...mockSettings,
+            preferredDiagramIntent: undefined,
+            preferredDiagramRenderTarget: undefined,
+            experimentalDiagramCompatibilityMode: 'legacy-mermaid' as const
+        };
+
+        applyDiagramIntentPreference(settings, 'drawnixMindmap');
+
+        expect(settings.preferredDiagramRenderTarget).toBe('drawnix');
+        expect(settings.experimentalDiagramCompatibilityMode).toBe('best-fit');
+    });
+
     test('builds operation input for artifact generation from plugin settings', () => {
         const input = buildDiagramOperationInput({
             sourcePath: 'Notes/Topic.md',

@@ -135,22 +135,36 @@ const LINE_HEIGHT = 19;
 const ROOT_LINE_HEIGHT = 22;
 const NODE_MIN_HEIGHT = 56;
 const ROOT_MIN_HEIGHT = 68;
-const TEXT_LINE_CHARACTER_LIMIT = 24;
-const ROOT_TEXT_LINE_CHARACTER_LIMIT = 18;
+const MAX_TEXT_LINE_WIDTH = MAX_NODE_WIDTH - NODE_HORIZONTAL_PADDING;
 
 function normalizedText(value: string | undefined, fallback: string): string {
     return value?.trim() || fallback;
 }
 
 function estimateCharacterWidth(character: string): number {
-    return /[\u1100-\u11ff\u2e80-\u9fff\uf900-\ufaff\uff00-\uffef]/.test(character) ? 14 : 7.4;
+    if (/\s/.test(character)) {
+        return 4;
+    }
+    if ((character.codePointAt(0) ?? 0) > 0x7f) {
+        return 15;
+    }
+    if (/[MW@%]/.test(character)) {
+        return 14;
+    }
+    if (/[mw#&]/.test(character)) {
+        return 12;
+    }
+    if (/[A-Z0-9]/.test(character)) {
+        return 11;
+    }
+    return 8;
 }
 
 function visualLength(value: string): number {
     return Array.from(value).reduce((total, character) => total + estimateCharacterWidth(character), 0);
 }
 
-function splitLabel(label: string, maxCharacters: number): string[] {
+function splitLabel(label: string, maxLineWidth: number): string[] {
     const trimmed = label.trim();
     if (!trimmed) {
         return ['Untitled'];
@@ -160,30 +174,46 @@ function splitLabel(label: string, maxCharacters: number): string[] {
     const lines: string[] = [];
     let line = '';
 
-    for (const word of words) {
-        const candidate = line ? `${line} ${word}` : word;
-        if (Array.from(candidate).length <= maxCharacters) {
-            line = candidate;
-            continue;
-        }
-
+    const flushLine = (): void => {
         if (line) {
             lines.push(line);
             line = '';
         }
+    };
 
-        const characters = Array.from(word);
-        while (characters.length > maxCharacters) {
-            lines.push(characters.splice(0, maxCharacters).join(''));
+    const appendLongWord = (word: string): void => {
+        let chunk = '';
+        for (const character of Array.from(word)) {
+            const candidate = chunk + character;
+            if (chunk && visualLength(candidate) > maxLineWidth) {
+                lines.push(chunk);
+                chunk = character;
+            } else {
+                chunk = candidate;
+            }
         }
-        line = characters.join('');
+        line = chunk;
+    };
+
+    for (const word of words) {
+        const candidate = line ? `${line} ${word}` : word;
+        if (visualLength(candidate) <= maxLineWidth) {
+            line = candidate;
+            continue;
+        }
+
+        flushLine();
+        if (visualLength(word) <= maxLineWidth) {
+            line = word;
+            continue;
+        }
+
+        appendLongWord(word);
     }
 
-    if (line) {
-        lines.push(line);
-    }
+    flushLine();
 
-    return lines.slice(0, 3);
+    return lines;
 }
 
 function buildTreeNode(
@@ -195,10 +225,7 @@ function buildTreeNode(
 ): MindMapTreeNode {
     const label = normalizedText(source.label, source.id || 'Untitled');
     const isRoot = depth === 0;
-    const textLines = splitLabel(
-        label,
-        isRoot ? ROOT_TEXT_LINE_CHARACTER_LIMIT : TEXT_LINE_CHARACTER_LIMIT
-    );
+    const textLines = splitLabel(label, MAX_TEXT_LINE_WIDTH);
     const largestLineWidth = Math.max(...textLines.map(visualLength));
     const minWidth = isRoot ? ROOT_MIN_WIDTH : NODE_MIN_WIDTH;
     const minHeight = isRoot ? ROOT_MIN_HEIGHT : NODE_MIN_HEIGHT;
@@ -413,7 +440,7 @@ function toDrawnixMindElement(node: MindMapTreeNode, isRoot: boolean, rightNodeC
         data: {
             topic: {
                 type: 'paragraph',
-                children: [{ text: node.label }]
+                children: [{ text: node.textLines.join('\n') }]
             }
         }
     };

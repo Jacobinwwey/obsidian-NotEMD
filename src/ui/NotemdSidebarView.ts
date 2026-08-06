@@ -5,7 +5,10 @@ import { NOTEMD_SIDEBAR_ICON, NOTEMD_SIDEBAR_VIEW_TYPE } from '../constants';
 import { findDuplicates } from '../fileUtils';
 import { FFMPEG_INSTALL_HINTS, type EnvironmentReport, type ProbeResult } from '../slideExport/types';
 import type { DiagramIntent, RenderTarget } from '../diagram/types';
-import { applyDiagramIntentPreference } from '../diagram/diagramPreferenceCompatibility';
+import {
+    applyDiagramIntentPreference,
+    applyDiagramRenderTargetPreference
+} from '../diagram/diagramPreferenceCompatibility';
 import { NOTEMD_SLIDEV_FORK_RELEASE_URL, NOTEMD_SLIDEV_INSTALL_COMMAND } from '../slideExport/slidevDistribution';
 import {
     ActionCategory,
@@ -1711,6 +1714,7 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
             { value: 'classDiagram', label: i18n.settings.developer.experimentalDiagramPipeline.intentClassDiagram },
             { value: 'erDiagram', label: i18n.settings.developer.experimentalDiagramPipeline.intentErDiagram },
             { value: 'stateDiagram', label: i18n.settings.developer.experimentalDiagramPipeline.intentStateDiagram },
+            { value: 'drawnixMindmap', label: i18n.settings.developer.experimentalDiagramPipeline.renderTargetDrawnix },
             { value: 'circuit', label: i18n.settings.developer.experimentalDiagramPipeline.intentCircuit },
             { value: 'dataChart', label: i18n.settings.developer.experimentalDiagramPipeline.intentDataChart },
         ];
@@ -1752,9 +1756,11 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
 
         targetSelector.value = this.plugin.settings.preferredDiagramRenderTarget || 'auto';
         targetSelector.onchange = async () => {
-            this.plugin.settings.preferredDiagramRenderTarget = targetSelector.value === 'auto'
-                ? undefined
-                : targetSelector.value as RenderTarget;
+            applyDiagramRenderTargetPreference(
+                this.plugin.settings,
+                targetSelector.value === 'auto' ? undefined : targetSelector.value as RenderTarget
+            );
+            selector.value = this.plugin.settings.preferredDiagramIntent || 'auto';
             await this.plugin.saveSettings();
         };
 
