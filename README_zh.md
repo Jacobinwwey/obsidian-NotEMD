@@ -899,7 +899,7 @@ MIT许可证 - 详情请见[LICENSE](LICENSE)。
 
 ![Notemd Development Chronicle](./docs/repo-saga/notemd-development-history.zh.svg)
 
-_最近一次已针对发布 tag `1.9.5` 于 2026-07-21 刷新。 最新提交日期：2026-07-21。_
+_最近一次已针对发布 tag `1.9.5` 于 2026-08-06 刷新。 最新提交日期：2026-08-06。_
 <!-- repo-chronicle:end -->
 
 

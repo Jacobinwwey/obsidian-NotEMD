@@ -709,7 +709,7 @@ Tämä neljännesvuosittainen kronikka säilyttää [repo-saga](https://github.c
 
 ![Notemd Development Chronicle](./docs/repo-saga/notemd-development-history.fi.svg)
 
-_Päivitetty viimeksi julkaisutägille `1.9.5` 2026-07-21. Viimeisimmän commitin päivämäärä: 2026-07-21._
+_Päivitetty viimeksi julkaisutägille `1.9.5` 2026-08-06. Viimeisimmän commitin päivämäärä: 2026-08-06._
 <!-- repo-chronicle:end -->
 
 

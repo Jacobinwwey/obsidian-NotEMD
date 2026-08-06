@@ -711,7 +711,7 @@ Biên niên sử theo quý này giữ nguyên phong cách hình ảnh gốc củ
 
 ![Notemd Development Chronicle](./docs/repo-saga/notemd-development-history.vi.svg)
 
-_Lần làm mới gần nhất cho thẻ phát hành `1.9.5` vào 2026-07-21. Ngày commit mới nhất: 2026-07-21._
+_Lần làm mới gần nhất cho thẻ phát hành `1.9.5` vào 2026-08-06. Ngày commit mới nhất: 2026-08-06._
 <!-- repo-chronicle:end -->
 
 
