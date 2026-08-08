@@ -313,27 +313,29 @@ describe('diagram artifact export CLI', () => {
                 type: 'drawnix',
                 version: 1,
                 source: 'web',
-                viewport: { zoom: 1, offsetX: 0, offsetY: 0 },
-                elements: [
+                viewport: { zoom: 1, offsetX: 0, offsetY: 0 }
+            });
+            const rootElements = drawnix.elements.filter((element: { type?: string }) => element.type === 'mindmap');
+            const relationElements = drawnix.elements.filter((element: { type?: string }) => element.type === 'arrow-line');
+            expect(rootElements).toHaveLength(1);
+            expect(relationElements).toHaveLength(1);
+            expect(rootElements[0]).toMatchObject({
+                id: 'notemd',
+                type: 'mindmap',
+                children: [
                     expect.objectContaining({
-                        id: 'notemd',
-                        type: 'mindmap',
-                        children: [
-                            expect.objectContaining({
-                                id: 'diagram',
-                                type: 'mind_child',
-                                children: [expect.objectContaining({ id: 'drawnix', type: 'mind_child' })]
-                            }),
-                            expect.objectContaining({ id: 'cli', type: 'mind_child' })
-                        ]
+                        id: 'diagram',
+                        type: 'mind_child',
+                        children: [expect.objectContaining({ id: 'drawnix', type: 'mind_child' })]
                     }),
-                    expect.objectContaining({
-                        type: 'arrow-line',
-                        source: { id: 'diagram' },
-                        target: { id: 'cli' },
-                        data: { source: 'DrawnixMindMapProjection' }
-                    })
+                    expect.objectContaining({ id: 'cli', type: 'mind_child' })
                 ]
+            });
+            expect(relationElements[0]).toMatchObject({
+                type: 'arrow-line',
+                source: { id: 'diagram' },
+                target: { id: 'cli' },
+                data: { source: 'DrawnixMindMapProjection' }
             });
             expect(fs.readFileSync(svgPath, 'utf8')).toContain('notemd-drawnix-mindmap-svg@1.0.0');
         } finally {

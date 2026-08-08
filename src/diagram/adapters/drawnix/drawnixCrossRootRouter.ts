@@ -12,9 +12,27 @@ export interface DrawnixCrossRootRoute {
     warning?: string;
 }
 
+/**
+ * A non-node rectangle that a relation route must not cross.
+ *
+ * The projection uses this for the title/summary band. Keeping the obstacle
+ * in the router contract means every fallback (local lane, grid, and outer
+ * lane) obeys the same protected canvas regions.
+ */
+export interface DrawnixCrossRootRouteObstacle {
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+}
+
 export interface DrawnixCrossRootRouterInput {
     source: DrawnixMindMapPlacedNode;
     target: DrawnixMindMapPlacedNode;
+    /** Every placed node is used as an obstacle so local relations cannot enter a target box. */
+    nodes?: readonly DrawnixMindMapPlacedNode[];
+    /** Protected canvas regions such as the title/summary header band. */
+    additionalObstacles?: readonly DrawnixCrossRootRouteObstacle[];
     relationIndex: number;
     regions: readonly DrawnixRootRegion[];
     canvasWidth: number;
@@ -25,12 +43,7 @@ const ROUTE_CLEARANCE = 28;
 const OUTER_ROUTE_MARGIN = 64;
 const BEND_PENALTY = 160;
 
-interface RouteRect {
-    x: number;
-    y: number;
-    width: number;
-    height: number;
-}
+type RouteRect = DrawnixCrossRootRouteObstacle;
 
 interface QueueEntry {
     state: string;
@@ -67,6 +80,30 @@ function inflate(region: DrawnixRootRegion): RouteRect {
     };
 }
 
+function nodeRectangle(node: DrawnixMindMapPlacedNode, clearance: number): RouteRect {
+    return {
+        x: node.x - clearance,
+        y: node.y - clearance,
+        width: node.width + clearance * 2,
+        height: node.height + clearance * 2
+    };
+}
+
+function buildNodeObstacles(
+    nodes: readonly DrawnixMindMapPlacedNode[],
+    sourceId: string,
+    targetId: string
+): RouteRect[] {
+    return nodes.map(node => nodeRectangle(
+        node,
+        node.id === sourceId || node.id === targetId ? 0 : ROUTE_CLEARANCE
+    ));
+}
+
+function routeSegmentsAreClear(points: DrawnixPoint[], obstacles: readonly RouteRect[]): boolean {
+    return points.slice(1).every((point, index) => segmentClear(points[index], point, obstacles));
+}
+
 function pointInside(point: DrawnixPoint, rect: RouteRect): boolean {
     return point[0] > rect.x
         && point[0] < rect.x + rect.width
@@ -100,6 +137,14 @@ function segmentClear(start: DrawnixPoint, end: DrawnixPoint, obstacles: readonl
 
 function deduplicate(values: number[]): number[] {
     return Array.from(new Set(values.filter(Number.isFinite).map(value => Math.round(value * 100) / 100))).sort((a, b) => a - b);
+}
+
+function clampRouteX(value: number, canvasWidth: number): number {
+    return Math.max(ROUTE_CLEARANCE, Math.min(canvasWidth - ROUTE_CLEARANCE, value));
+}
+
+function clampRouteY(value: number, canvasHeight: number): number {
+    return Math.max(ROUTE_CLEARANCE, Math.min(canvasHeight - ROUTE_CLEARANCE, value));
 }
 
 function simplify(points: DrawnixPoint[]): DrawnixPoint[] {
@@ -140,9 +185,104 @@ function buildLocalLaneRoute(
 ): DrawnixPoint[] {
     const sourceIsLeft = start[0] <= end[0];
     const laneX = sourceIsLeft
-        ? Math.min(canvasWidth - ROUTE_CLEARANCE, Math.max(start[0], end[0]) + 42 + relationIndex * 18)
-        : Math.max(ROUTE_CLEARANCE, Math.min(start[0], end[0]) - 42 - relationIndex * 18);
+        ? clampRouteX(Math.max(start[0], end[0]) + 42 + relationIndex * 18, canvasWidth)
+        : clampRouteX(Math.min(start[0], end[0]) - 42 - relationIndex * 18, canvasWidth);
     return simplify([start, [laneX, start[1]], [laneX, end[1]], end]);
+}
+
+function buildBoundedOuterLaneRoute(
+    start: DrawnixPoint,
+    end: DrawnixPoint,
+    source: DrawnixMindMapPlacedNode,
+    target: DrawnixMindMapPlacedNode,
+    obstacles: readonly RouteRect[],
+    canvasWidth: number,
+    canvasHeight: number
+): DrawnixPoint[] | null {
+    if (obstacles.length === 0) {
+        return null;
+    }
+
+    const left = Math.max(ROUTE_CLEARANCE, Math.min(...obstacles.map(rect => rect.x)) - ROUTE_CLEARANCE);
+    const right = Math.min(canvasWidth - ROUTE_CLEARANCE, Math.max(...obstacles.map(rect => rect.x + rect.width)) + ROUTE_CLEARANCE);
+    const top = Math.max(ROUTE_CLEARANCE, Math.min(...obstacles.map(rect => rect.y)) - ROUTE_CLEARANCE);
+    const bottom = Math.min(canvasHeight - ROUTE_CLEARANCE, Math.max(...obstacles.map(rect => rect.y + rect.height)) + ROUTE_CLEARANCE);
+    const sourceIsLeft = center(source)[0] < center(target)[0];
+    const sourceLane = sourceIsLeft ? right : left;
+    const targetLane = sourceIsLeft ? left : right;
+    const candidates = [top, bottom].flatMap(laneY => [
+        simplify([start, [sourceLane, start[1]], [sourceLane, laneY], [targetLane, laneY], [targetLane, end[1]], end]),
+        simplify([start, [targetLane, start[1]], [targetLane, laneY], [sourceLane, laneY], [sourceLane, end[1]], end])
+    ]);
+    return candidates.find(points => points.length > 2 && routeSegmentsAreClear(points, obstacles)) ?? null;
+}
+
+function buildNodeAwareRoute(
+    start: DrawnixPoint,
+    end: DrawnixPoint,
+    source: DrawnixMindMapPlacedNode,
+    target: DrawnixMindMapPlacedNode,
+    relationIndex: number,
+    nodes: readonly DrawnixMindMapPlacedNode[],
+    extraObstacles: readonly RouteRect[],
+    canvasWidth: number,
+    canvasHeight: number
+): DrawnixPoint[] | null {
+    const nodeObstacles = buildNodeObstacles(nodes, source.id, target.id);
+    const obstacles = [...nodeObstacles, ...extraObstacles];
+    const sourceIsLeft = center(source)[0] < center(target)[0];
+    const laneCandidates = sourceIsLeft
+        ? [
+            clampRouteX(target.x - ROUTE_CLEARANCE - relationIndex * 18, canvasWidth),
+            clampRouteX(source.x + source.width + ROUTE_CLEARANCE + relationIndex * 18, canvasWidth)
+        ]
+        : [
+            clampRouteX(target.x + target.width + ROUTE_CLEARANCE + relationIndex * 18, canvasWidth),
+            clampRouteX(source.x - ROUTE_CLEARANCE - relationIndex * 18, canvasWidth)
+        ];
+
+    for (const laneX of laneCandidates) {
+        const points = simplify([start, [laneX, start[1]], [laneX, end[1]], end]);
+        if (points.length > 2 && routeSegmentsAreClear(points, obstacles)) {
+            return points;
+        }
+    }
+
+    const obstacleTop = Math.min(...obstacles.map(rect => rect.y));
+    const obstacleBottom = Math.max(...obstacles.map(rect => rect.y + rect.height));
+    const topLane = Math.max(ROUTE_CLEARANCE, obstacleTop - OUTER_ROUTE_MARGIN);
+    const bottomLane = Math.min(canvasHeight - ROUTE_CLEARANCE, obstacleBottom + OUTER_ROUTE_MARGIN);
+    const laneCandidatesY = [
+        clampRouteY(topLane + relationIndex * 18, canvasHeight),
+        clampRouteY(bottomLane - relationIndex * 18, canvasHeight)
+    ];
+    for (const laneY of laneCandidatesY) {
+        const points = simplify([start, [start[0], laneY], [end[0], laneY], end]);
+        if (points.length > 2 && routeSegmentsAreClear(points, obstacles)) {
+            return points;
+        }
+    }
+
+    const boundedOuterRoute = buildBoundedOuterLaneRoute(
+        start,
+        end,
+        source,
+        target,
+        obstacles,
+        canvasWidth,
+        canvasHeight
+    );
+    if (boundedOuterRoute) {
+        return boundedOuterRoute;
+    }
+
+    // A final bounded lane keeps the result deterministic when the supplied canvas
+    // is smaller than the node extents. The caller still validates the route.
+    const boundedLaneX = sourceIsLeft
+        ? Math.min(canvasWidth - ROUTE_CLEARANCE, Math.max(start[0], end[0]) + ROUTE_CLEARANCE)
+        : Math.max(ROUTE_CLEARANCE, Math.min(start[0], end[0]) - ROUTE_CLEARANCE);
+    const boundedPoints = simplify([start, [boundedLaneX, start[1]], [boundedLaneX, end[1]], end]);
+    return routeSegmentsAreClear(boundedPoints, obstacles) ? boundedPoints : null;
 }
 
 function buildParallelLaneRoute(
@@ -180,24 +320,27 @@ function buildGridRoute(
     canvasWidth: number,
     canvasHeight: number
 ): DrawnixPoint[] | null {
-    const outerLeft = Math.min(0, ...obstacles.map(rect => rect.x)) - OUTER_ROUTE_MARGIN;
-    const outerRight = Math.max(canvasWidth, ...obstacles.map(rect => rect.x + rect.width)) + OUTER_ROUTE_MARGIN;
-    const outerTop = Math.min(0, ...obstacles.map(rect => rect.y)) - OUTER_ROUTE_MARGIN;
-    const outerBottom = Math.max(canvasHeight, ...obstacles.map(rect => rect.y + rect.height)) + OUTER_ROUTE_MARGIN;
+    // Keep fallback routes inside the exported canvas. A negative perimeter
+    // coordinate is clipped by SVG/Drawnix and appears as a false dashed frame
+    // along the page edge, which can obscure the title or summary.
+    const outerLeft = ROUTE_CLEARANCE;
+    const outerRight = Math.max(ROUTE_CLEARANCE, canvasWidth - ROUTE_CLEARANCE);
+    const outerTop = ROUTE_CLEARANCE;
+    const outerBottom = Math.max(ROUTE_CLEARANCE, canvasHeight - ROUTE_CLEARANCE);
     const xs = deduplicate([
         start[0],
         end[0],
         outerLeft,
         outerRight,
         ...obstacles.flatMap(rect => [rect.x - ROUTE_CLEARANCE, rect.x + rect.width + ROUTE_CLEARANCE])
-    ]);
+    ]).filter(x => x >= ROUTE_CLEARANCE && x <= canvasWidth - ROUTE_CLEARANCE);
     const ys = deduplicate([
         start[1],
         end[1],
         outerTop,
         outerBottom,
         ...obstacles.flatMap(rect => [rect.y - ROUTE_CLEARANCE, rect.y + rect.height + ROUTE_CLEARANCE])
-    ]);
+    ]).filter(y => y >= ROUTE_CLEARANCE && y <= canvasHeight - ROUTE_CLEARANCE);
 
     const points: DrawnixPoint[] = [];
     const nodeByCoordinate = new Map<string, number>();
@@ -297,10 +440,10 @@ function buildOuterLaneRoute(
     canvasWidth: number,
     canvasHeight: number
 ): DrawnixPoint[] | null {
-    const left = Math.min(0, ...obstacles.map(rect => rect.x)) - OUTER_ROUTE_MARGIN;
-    const right = Math.max(canvasWidth, ...obstacles.map(rect => rect.x + rect.width)) + OUTER_ROUTE_MARGIN;
-    const top = Math.min(0, ...obstacles.map(rect => rect.y)) - OUTER_ROUTE_MARGIN;
-    const bottom = Math.max(canvasHeight, ...obstacles.map(rect => rect.y + rect.height)) + OUTER_ROUTE_MARGIN;
+    const left = ROUTE_CLEARANCE;
+    const right = Math.max(ROUTE_CLEARANCE, canvasWidth - ROUTE_CLEARANCE);
+    const top = ROUTE_CLEARANCE;
+    const bottom = Math.max(ROUTE_CLEARANCE, canvasHeight - ROUTE_CLEARANCE);
     const candidates: DrawnixPoint[][] = [
         [start, [left, start[1]], [left, top], [right, top], [right, end[1]], end],
         [start, [right, start[1]], [right, top], [left, top], [left, end[1]], end],
@@ -315,11 +458,60 @@ function buildOuterLaneRoute(
 export function routeDrawnixCrossRootRelation(input: DrawnixCrossRootRouterInput): DrawnixCrossRootRoute {
     const { source, target } = input;
     const { start, end } = relationEndpoint(source, target);
-    const unrelatedObstacles = input.regions
+    const protectedObstacles = input.additionalObstacles ?? [];
+    const unrelatedObstacles = [
+        ...input.regions
         .filter(region => region.rootId !== source.rootId && region.rootId !== target.rootId)
-        .map(inflate);
+        .map(inflate),
+        ...protectedObstacles
+    ];
+
+    if (input.nodes && input.nodes.length > 0) {
+        const nodeAwareRoute = buildNodeAwareRoute(
+            start,
+            end,
+            source,
+            target,
+            input.relationIndex,
+            input.nodes,
+            source.rootId === target.rootId ? protectedObstacles : unrelatedObstacles,
+            input.canvasWidth,
+            input.canvasHeight
+        );
+        if (nodeAwareRoute) {
+            return {
+                points: nodeAwareRoute,
+                strategy: source.rootId === target.rootId ? 'local-lane' : 'grid'
+            };
+        }
+    }
 
     if (source.rootId === target.rootId) {
+        if (input.nodes && input.nodes.length > 0) {
+            const nodeObstacles = [
+                ...buildNodeObstacles(input.nodes, source.id, target.id),
+                ...protectedObstacles
+            ];
+            const gridRoute = buildGridRoute(
+                start,
+                end,
+                nodeObstacles,
+                input.canvasWidth,
+                input.canvasHeight
+            );
+            if (gridRoute) {
+                return {
+                    points: gridRoute,
+                    strategy: 'grid',
+                    warning: 'Same-root relation used the sparse obstacle grid because no local lane was available.'
+                };
+            }
+
+            throw new Error(
+                'Same-root relation could not find an obstacle-free node-aware route; '
+                + 'Drawnix generation must fall back to a non-Drawnix target.'
+            );
+        }
         return {
             points: buildLocalLaneRoute(start, end, input.relationIndex, input.canvasWidth),
             strategy: 'local-lane'

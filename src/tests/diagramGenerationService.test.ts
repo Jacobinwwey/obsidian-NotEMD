@@ -437,6 +437,44 @@ Client sends work to a queue-backed worker.
         );
     });
 
+    test('fails closed when an explicitly requested Drawnix renderer cannot render', async () => {
+        const failingDrawnixRenderer: DiagramRenderer = {
+            id: 'failing-drawnix',
+            target: 'drawnix',
+            supports: () => true,
+            render: async () => {
+                throw new Error('same-root route unavailable');
+            }
+        };
+        const misleadingMermaidFallback: DiagramRenderer = {
+            id: 'misleading-mermaid',
+            target: 'mermaid',
+            supports: () => true,
+            render: async () => ({
+                target: 'mermaid',
+                content: 'flowchart TD\nA --> B',
+                mimeType: 'text/vnd.mermaid' as const,
+                sourceIntent: 'mindmap' as const
+            })
+        };
+
+        await expect(generateDiagramArtifact('# Architecture', {
+            compatibilityMode: 'best-fit',
+            requestedRenderTarget: 'drawnix',
+            targetLanguage: 'en',
+            rendererService: new RendererService(new RendererRegistry([
+                failingDrawnixRenderer,
+                misleadingMermaidFallback
+            ])),
+            llmInvoker: async () => JSON.stringify({
+                intent: 'drawnixMindmap',
+                title: 'Architecture',
+                nodes: [{ id: 'root', label: 'Root' }],
+                edges: []
+            })
+        })).rejects.toThrow(/Diagram rendering failed across targets: drawnix:/i);
+    });
+
     test('honors circuitikz render target overrides with TeX source and svg companion', async () => {
         const llmInvoker = jest.fn().mockResolvedValue(JSON.stringify(createCircuitDiagramSpec()));
 

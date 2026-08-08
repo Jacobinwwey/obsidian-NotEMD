@@ -1,7 +1,8 @@
 import { DiagramSpec } from '../diagram/types';
 import {
     buildDrawnixMindMapProjection,
-    DRAWNIX_MIND_MAP_FOREST_ROW_MAX_WIDTH
+    DRAWNIX_MIND_MAP_FOREST_ROW_MAX_WIDTH,
+    DRAWNIX_MIND_MAP_HEADER_SAFE_HEIGHT
 } from '../diagram/adapters/drawnix/drawnixMindMapProjection';
 import { DrawnixRenderer } from '../rendering/renderers/drawnixRenderer';
 import { renderDrawnixMindMapSvg } from '../rendering/renderers/drawnixMindMapSvgRenderer';
@@ -43,6 +44,48 @@ function createKnowledgeMapSpec(): DiagramSpec {
             }
         ]
     };
+}
+
+function segmentIntersectsInterior(
+    start: [number, number],
+    end: [number, number],
+    rectangle: { x: number; y: number; width: number; height: number }
+): boolean {
+    if (start[0] === end[0]) {
+        return start[0] > rectangle.x
+            && start[0] < rectangle.x + rectangle.width
+            && Math.max(Math.min(start[1], end[1]), rectangle.y)
+                < Math.min(Math.max(start[1], end[1]), rectangle.y + rectangle.height);
+    }
+    if (start[1] === end[1]) {
+        return start[1] > rectangle.y
+            && start[1] < rectangle.y + rectangle.height
+            && Math.max(Math.min(start[0], end[0]), rectangle.x)
+                < Math.min(Math.max(start[0], end[0]), rectangle.x + rectangle.width);
+    }
+    return false;
+}
+
+function pointOnPolyline(points: Array<[number, number]>, position: number): [number, number] {
+    const lengths = points.slice(1).map((point, index) => {
+        const start = points[index];
+        return Math.abs(point[0] - start[0]) + Math.abs(point[1] - start[1]);
+    });
+    const totalLength = lengths.reduce((total, length) => total + length, 0);
+    let remaining = totalLength * position;
+    for (const [index, length] of lengths.entries()) {
+        if (remaining <= length || index === lengths.length - 1) {
+            const start = points[index];
+            const end = points[index + 1];
+            const ratio = length > 0 ? remaining / length : 0;
+            return [
+                start[0] + (end[0] - start[0]) * ratio,
+                start[1] + (end[1] - start[1]) * ratio
+            ];
+        }
+        remaining -= length;
+    }
+    return points[points.length - 1] ?? [0, 0];
 }
 
 describe('Drawnix mind-map renderer', () => {
@@ -471,6 +514,219 @@ describe('Drawnix mind-map renderer', () => {
         expect(node?.textLines.join(' ')).toBe(longLabel);
         expect(nativeText).toBe(node?.textLines.join('\n'));
         expect(svgLines).toEqual(node?.textLines);
+    });
+
+    test('places long relation labels in their own collision-free boxes above node layers', async () => {
+        const label = 'RendererRegistry feeds Vault files, preview modal, and export';
+        const spec: DiagramSpec = {
+            ...createKnowledgeMapSpec(),
+            nodes: [{
+                id: 'root',
+                label: 'Root',
+                children: [
+                    { id: 'registry', label: 'RendererRegistry' },
+                    { id: 'output', label: 'Output' }
+                ]
+            }],
+            edges: [{ from: 'registry', to: 'output', label }]
+        };
+
+        const projection = buildDrawnixMindMapProjection(spec);
+        const relation = projection.crossRelations[0];
+        const layout = relation.labelLayout;
+
+        expect(layout).toBeDefined();
+        expect(layout?.lines.join(' ')).toBe(label);
+        expect(layout?.lines.length).toBeGreaterThan(1);
+        projection.nodes.forEach(node => {
+            const overlaps = layout!.x < node.x + node.width
+                && layout!.x + layout!.width > node.x
+                && layout!.y < node.y + node.height
+                && layout!.y + layout!.height > node.y;
+            expect(overlaps).toBe(false);
+        });
+
+        const artifact = await new DrawnixRenderer().render(spec);
+        const svg = artifact.previewSvg?.content ?? '';
+        expect(svg).toContain('data-drawnix-mindmap-relation-label-background');
+        expect(svg.indexOf('data-drawnix-mindmap-relation-label-background'))
+            .toBeGreaterThan(svg.indexOf('data-drawnix-mindmap-node-id="output"'));
+        expect(svg.indexOf('data-drawnix-mindmap-relation-label'))
+            .toBeGreaterThan(svg.indexOf('data-drawnix-mindmap-node-id="output"'));
+    });
+
+    test('places native Drawnix arrow text in a collision-free route position', async () => {
+        const label = 'RendererRegistry feeds Vault files, preview modal, and export';
+        const spec: DiagramSpec = {
+            intent: 'drawnixMindmap',
+            title: 'Notemd Architecture',
+            summary: '以 Notemd 插件为对象的知识地图，覆盖系统架构、LLM 调用管道、图表渲染平台。',
+            nodes: [{
+                id: 'root',
+                label: 'Root',
+                children: [
+                    { id: 'registry', label: 'RendererRegistry' },
+                    { id: 'output', label: 'Output' }
+                ]
+            }],
+            edges: [{ from: 'registry', to: 'output', label }]
+        };
+
+        const projection = buildDrawnixMindMapProjection(spec);
+        const relation = projection.crossRelations[0];
+        const artifact = await new DrawnixRenderer().render(spec);
+        const exported = JSON.parse(artifact.content) as {
+            elements: Array<{
+                type: string;
+                points?: Array<[number, number]>;
+                texts?: Array<{ position: number }>;
+            }>;
+        };
+        const nativeArrow = exported.elements.find(element => element.type === 'arrow-line');
+        const position = nativeArrow?.texts?.[0]?.position;
+        const point = pointOnPolyline(nativeArrow?.points ?? [], position ?? 0.5);
+        const layout = relation.labelLayout!;
+        const nativeRect = {
+            x: point[0] - layout.width / 2,
+            y: point[1] - layout.height / 2,
+            width: layout.width,
+            height: layout.height
+        };
+
+        expect(position).toBe(relation.nativeTextPosition);
+        projection.nodes.forEach(node => {
+            const overlaps = nativeRect.x < node.x + node.width
+                && nativeRect.x + nativeRect.width > node.x
+                && nativeRect.y < node.y + node.height
+                && nativeRect.y + nativeRect.height > node.y;
+            expect(overlaps).toBe(false);
+        });
+        expect(nativeRect.y + nativeRect.height <= DRAWNIX_MIND_MAP_HEADER_SAFE_HEIGHT
+            || nativeRect.y >= DRAWNIX_MIND_MAP_HEADER_SAFE_HEIGHT).toBe(true);
+    });
+
+    test('reserves the title and summary band from relation routes and labels', async () => {
+        const children = Array.from({ length: 40 }, (_, index) => ({
+            id: `branch-${index}`,
+            label: `Branch ${index}`,
+            children: [{ id: `branch-${index}-leaf`, label: `Leaf ${index}` }]
+        }));
+        const spec: DiagramSpec = {
+            intent: 'drawnixMindmap',
+            title: 'Notemd Architecture',
+            summary: '以 Notemd 插件为对象的知识地图，覆盖系统架构、LLM 调用管道、图表渲染平台。',
+            nodes: [{ id: 'root', label: 'Root', children }],
+            edges: [{
+                from: 'branch-0-leaf',
+                to: 'branch-39-leaf',
+                label: 'RendererRegistry feeds Vault files, preview modal, and export'
+            }]
+        };
+
+        const projection = buildDrawnixMindMapProjection(spec);
+        const relation = projection.crossRelations[0];
+        const header = {
+            x: 0,
+            y: 0,
+            width: projection.width,
+            height: DRAWNIX_MIND_MAP_HEADER_SAFE_HEIGHT
+        };
+
+        relation.points.slice(1).forEach((point, index) => {
+            expect(segmentIntersectsInterior(relation.points[index], point, header)).toBe(false);
+        });
+        expect(relation.labelLayout).toBeDefined();
+        expect(
+            relation.labelLayout!.x < header.x + header.width
+            && relation.labelLayout!.x + relation.labelLayout!.width > header.x
+            && relation.labelLayout!.y < header.y + header.height
+            && relation.labelLayout!.y + relation.labelLayout!.height > header.y
+        ).toBe(false);
+
+        const artifact = await new DrawnixRenderer().render(spec);
+        const svg = artifact.previewSvg?.content ?? '';
+        expect(svg.indexOf('data-drawnix-mindmap-layer="header"'))
+            .toBeGreaterThan(svg.indexOf('data-drawnix-mindmap-relation-layer="path"'));
+        expect(svg).toContain('id="notemd-drawnix-mindmap-content-clip"');
+        expect(svg).toContain('clip-path="url(#notemd-drawnix-mindmap-content-clip)"');
+    });
+
+    test('wraps long summaries and moves the knowledge map below the full header', async () => {
+        const summary = '以 Notemd 插件为对象的知识地图，覆盖系统架构、LLM 调用管道、图表渲染平台、模块地图、CLI 边界现实、关键设计决策与验证。';
+        const spec: DiagramSpec = {
+            intent: 'drawnixMindmap',
+            title: 'Notemd Architecture',
+            summary,
+            nodes: [{
+                id: 'root',
+                label: 'Root',
+                children: [
+                    { id: 'registry', label: 'RendererRegistry' },
+                    { id: 'output', label: 'Output' }
+                ]
+            }],
+            edges: [{
+                from: 'registry',
+                to: 'output',
+                label: 'RendererRegistry feeds Vault files, preview modal, and export'
+            }]
+        };
+
+        const projection = buildDrawnixMindMapProjection(spec);
+        const header = {
+            x: 0,
+            y: 0,
+            width: projection.width,
+            height: projection.header.safeHeight
+        };
+
+        expect(projection.header.summaryLines.length).toBeGreaterThan(1);
+        expect(projection.header.safeHeight).toBeGreaterThan(DRAWNIX_MIND_MAP_HEADER_SAFE_HEIGHT);
+        expect(projection.nodes.every(node => node.y >= projection.header.safeHeight)).toBe(true);
+        projection.crossRelations.forEach(relation => {
+            relation.points.slice(1).forEach((point, index) => {
+                expect(segmentIntersectsInterior(relation.points[index], point, header)).toBe(false);
+            });
+            expect(relation.labelLayout).toBeDefined();
+            expect(
+                relation.labelLayout!.y >= header.height
+                || relation.labelLayout!.y + relation.labelLayout!.height <= header.y
+            ).toBe(true);
+        });
+
+        const svg = renderDrawnixMindMapSvg(projection);
+        expect(svg).toContain(`data-drawnix-mindmap-header-safe-height="${projection.header.safeHeight}"`);
+        expect((svg.match(/data-drawnix-mindmap-summary-line=/g) ?? []).length)
+            .toBe(projection.header.summaryLines.length);
+    });
+
+    test('keeps multiple relation label boxes separated deterministically', () => {
+        const spec: DiagramSpec = {
+            ...createKnowledgeMapSpec(),
+            nodes: [{
+                id: 'root',
+                label: 'Root',
+                children: [
+                    { id: 'source', label: 'Source' },
+                    { id: 'target', label: 'Target' }
+                ]
+            }],
+            edges: [
+                { from: 'source', to: 'target', label: 'first dependency with a readable explanation' },
+                { from: 'source', to: 'target', label: 'second dependency with a readable explanation' }
+            ]
+        };
+
+        const projection = buildDrawnixMindMapProjection(spec);
+        const [first, second] = projection.crossRelations.map(relation => relation.labelLayout!);
+
+        expect(first).toBeDefined();
+        expect(second).toBeDefined();
+        const overlaps = first.x < second.x + second.width
+            && first.x + first.width > second.x
+            && first.y < second.y + second.height
+            && first.y + first.height > second.y;
+        expect(overlaps).toBe(false);
     });
 
     test('rejects hierarchy depth beyond the native Drawnix contract', async () => {

@@ -92,6 +92,46 @@ function isMindMapPoint(value: unknown): boolean {
         && Number.isFinite(value[1]);
 }
 
+function isArrowLineMarker(value: unknown): value is 'none' | 'arrow' {
+    return value === 'none' || value === 'arrow';
+}
+
+function validateNativeArrowLine(element: Record<string, unknown>, relationIndex: number, errors: string[]): void {
+    if (element.shape !== 'straight' && element.shape !== 'curve' && element.shape !== 'elbow') {
+        errors.push(`cross-relation ${relationIndex} must define a native arrow-line shape`);
+    }
+
+    const source = isRecord(element.source) ? element.source : undefined;
+    const target = isRecord(element.target) ? element.target : undefined;
+    if (!source || !isArrowLineMarker(source.marker)) {
+        errors.push(`cross-relation ${relationIndex} source must define a native marker`);
+    }
+    if (!target || !isArrowLineMarker(target.marker)) {
+        errors.push(`cross-relation ${relationIndex} target must define a native marker`);
+    }
+
+    if (!Array.isArray(element.texts)) {
+        errors.push(`cross-relation ${relationIndex} must define native texts`);
+    } else {
+        element.texts.forEach((text, textIndex) => {
+            if (!isRecord(text) || typeof text.position !== 'number' || !Number.isFinite(text.position)
+                || text.position < 0 || text.position > 1) {
+                errors.push(`cross-relation ${relationIndex} text ${textIndex + 1} must define a position between 0 and 1`);
+                return;
+            }
+            const paragraph = isRecord(text.text) ? text.text : undefined;
+            if (!paragraph || paragraph.type !== 'paragraph' || !Array.isArray(paragraph.children)
+                || !paragraph.children.every(child => isRecord(child) && typeof child.text === 'string')) {
+                errors.push(`cross-relation ${relationIndex} text ${textIndex + 1} must define a paragraph`);
+            }
+        });
+    }
+
+    if (typeof element.opacity !== 'number' || !Number.isFinite(element.opacity)) {
+        errors.push(`cross-relation ${relationIndex} must define native opacity`);
+    }
+}
+
 function validateMindMapElement(element: unknown, isRoot: boolean, ids: Set<string>, errors: string[]): void {
     if (!isRecord(element)) {
         errors.push('mind-map element must be an object');
@@ -165,6 +205,7 @@ export function validateDrawnixMindMapExportedData(data: unknown): string[] {
         if (!Array.isArray(element.points) || element.points.length < 2 || !element.points.every(isMindMapPoint)) {
             errors.push(`cross-relation ${relationIndex} must define numeric points`);
         }
+        validateNativeArrowLine(element, relationIndex, errors);
         const source = isRecord(element.source) && typeof element.source.id === 'string' ? element.source.id : undefined;
         const target = isRecord(element.target) && typeof element.target.id === 'string' ? element.target.id : undefined;
         if (!source || !ids.has(source) || !target || !ids.has(target)) {

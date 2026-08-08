@@ -485,6 +485,15 @@ export async function generateDiagramArtifact(
         // When user explicitly chose an intent, don't fall back to HTML — let retry handle failures
         .filter(target => !(options.requestedIntent && target === 'html'));
 
+    // A user-selected Drawnix artifact is a strict format contract. Falling back
+    // to Mermaid here would return a text artifact while callers still persist
+    // the requested Drawnix operation, making the file extension and payload
+    // disagree. Keep fallback traversal for best-fit inference, but fail closed
+    // when Drawnix was explicitly requested.
+    if (options.requestedRenderTarget === 'drawnix' || options.requestedIntent === 'drawnixMindmap') {
+        targets = ['drawnix'];
+    }
+
     let artifact: Awaited<ReturnType<RendererService['render']>>;
     let renderError: string | undefined;
     if (plan.renderTarget === 'drawnix') {

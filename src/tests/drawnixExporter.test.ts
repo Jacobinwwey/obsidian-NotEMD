@@ -51,10 +51,21 @@ describe('drawnix exporter', () => {
         });
         expect(data.elements[1]).toMatchObject({
             type: 'arrow-line',
+            shape: 'straight',
             source: { id: 'renderer' },
             target: { id: 'artifact' },
+            texts: [{
+                text: { type: 'paragraph' },
+                position: expect.any(Number)
+            }],
+            strokeColor: '#64748b',
+            strokeStyle: 'dashed',
             data: { source: 'DrawnixMindMapProjection' }
         });
+        expect((data.elements[1] as { texts: Array<{ position: number }> }).texts[0].position)
+            .toBeGreaterThanOrEqual(0);
+        expect((data.elements[1] as { texts: Array<{ position: number }> }).texts[0].position)
+            .toBeLessThanOrEqual(1);
         expect(validateDrawnixMindMapExportedData(data)).toEqual([]);
 
         const exporterSource = fs.readFileSync(

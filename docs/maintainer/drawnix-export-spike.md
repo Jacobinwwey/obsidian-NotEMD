@@ -28,9 +28,15 @@ The projection preserves one or more top-level roots and `node.children` ownersh
 - large forests are packed into deterministic rows with a bounded row width
 - preview renderer version: `notemd-drawnix-mindmap-svg@1.0.0`
 
-The exporter writes `type: "drawnix"`, `version: 1`, `source: "web"`, a fixed viewport, one or more nested element trees, and any validated cross-relation arrows. It has no `SemanticFigureModel` dependency and no Plait dependency. The standard Mermaid `mindmap` intent remains a separate Mermaid path; Drawnix fallback maps a copied spec to Mermaid and never flattens the original forest.
+The exporter writes `type: "drawnix"`, `version: 1`, `source: "web"`, a fixed viewport, one or more nested element trees, and any validated cross-relation arrows. It has no `SemanticFigureModel` dependency and no Plait dependency. The standard Mermaid `mindmap` intent remains a separate Mermaid path; best-fit inference may map a copied spec to Mermaid, while an explicitly requested Drawnix target fails closed instead of returning a Mermaid payload under a Drawnix operation.
 
-When the source note contains Mermaid fences or Obsidian image embeds, the native JSON also carries an optional `metadata.notemd.sourceVisuals` index. This is intentionally metadata rather than a new native Drawnix image element: each entry records the source hash, resolution status, source path, and companion names. The renderer writes the actual Mermaid source, sanitized SVG, and binary image into the scoped `.drawnix.assets` directory and the Obsidian wrapper embeds those files for review. This keeps the native element stream compatible with the pinned subset while making source visuals discoverable from the `.drawnix` file itself.
+### Relation Label Layering And Routing
+
+Cross-branch and same-root relations use the placed node rectangles as routing obstacles. The route leaves source and target boxes from their boundary side and uses a bounded orthogonal lane when a direct corridor would enter another node. Every local, grid, and outer fallback must stay inside the exported canvas safety inset; a negative perimeter coordinate is rejected instead of being clipped into a false dashed frame at the page edge. Each labelled relation is then measured and wrapped into a deterministic label box that avoids every node and previously placed relation label. The title/summary header is measured with the same deterministic text-width estimator as node labels; long summaries wrap into explicit lines, the whole forest is shifted below the resulting `safeHeight`, and routes/native arrow text use that exact height as an obstacle. The SVG companion renders paths first, nodes second, relation labels third, and the header last; the header is also backed by an opaque white band as a final figure-ground guard. The native Drawnix stream uses the same routed points and label text contract, so the SVG and editable export cannot diverge in z-order or geometry.
+
+Native arrow lines use the Plait-compatible contract: `shape: "straight"` preserves the supplied orthogonal polyline, `source`/`target` carry native markers, `texts[]` stores a paragraph plus a normalized `position` on the path, and `strokeColor`/`strokeWidth`/`strokeStyle`/`opacity` carry the visual style. The legacy `text` and `style` fields remain as compatibility metadata for older readers. No `boundId` is emitted for `mind_child` nodes because the upstream connector resolver expects a geometry `points` array that native mind children do not own; this keeps host import fail-safe while preserving the explicit route.
+
+When the source note contains Mermaid fences or Obsidian image embeds, the native JSON also carries an optional `metadata.notemd.sourceVisuals` index. This is intentionally metadata rather than a new native Drawnix image element: each entry records the source hash, resolution status, source path, and companion names. Resolved Mermaid visuals are embedded as sanitized SVG plus source text, so they do not create a separate `.drawnix.assets` tree; external binary or unresolved visuals keep scoped companions when they cannot be embedded safely. This keeps the native element stream compatible with the pinned subset while making source visuals discoverable from the `.drawnix` file itself.
 
 ## Automated Evidence
 
@@ -44,6 +50,7 @@ The tests verify:
 
 - the `DrawnixExportedData` envelope and native `mindmap`/`mind_child` hierarchy
 - deterministic projection layout, node rectangle separation, depth, and relation limits
+- native arrow text positions that keep the Plait text rectangle outside nodes and the protected header band
 - stable `.drawnix` JSON serialization and `arrow-line` validation
 - the dedicated SVG companion uses the same node ids and projection geometry
 - source-level absence of `SemanticFigureModel`, `@drawnix/*`, `@plait/*`, and `@plait-board/*` imports

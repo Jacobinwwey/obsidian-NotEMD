@@ -30,9 +30,15 @@ DiagramSpec(intent: "drawnixMindmap")
 - 较大的 forest 会按确定性规则分行，并限制单行画布宽度
 - SVG renderer 版本：`notemd-drawnix-mindmap-svg@1.0.0`
 
-导出器写入 `type: "drawnix"`、`version: 1`、`source: "web"`、固定 viewport、一个或多个嵌套元素树和通过校验的跨关系箭头。生产路径不依赖 `SemanticFigureModel`，并保持 no Plait dependency。标准 Mermaid `mindmap` 仍走原有 Mermaid 路径；Drawnix 失败回退时只复制 spec 并映射为 Mermaid，不会拍平原始 forest。
+导出器写入 `type: "drawnix"`、`version: 1`、`source: "web"`、固定 viewport、一个或多个嵌套元素树和通过校验的跨关系箭头。生产路径不依赖 `SemanticFigureModel`，并保持 no Plait dependency。标准 Mermaid `mindmap` 仍走原有 Mermaid 路径；best-fit 推断可以把复制的 spec 映射为 Mermaid，但用户显式选择 Drawnix 时会 fail closed，不会在 Drawnix 操作下返回 Mermaid payload，也不会拍平原始 forest。
 
-当源笔记包含 Mermaid fence 或 Obsidian 图片嵌入时，原生 JSON 还会携带可选的 `metadata.notemd.sourceVisuals` 索引。这里有意使用 metadata，而不是新增未经验证的 Drawnix 原生图片 element：每项记录 source hash、解析状态、源路径和 companion 名称。renderer 将实际 Mermaid 源码、安全 SVG 和图片二进制写入 scoped `.drawnix.assets` 目录，Obsidian wrapper 再嵌入这些文件供审阅。这样既保持已验证子集的原生 element 流兼容，又能从 `.drawnix` 文件本身发现源视觉信息。
+### 关系标签层级与路由
+
+跨分支和同 root 关系都会把已放置的节点矩形作为路由障碍物。连接线从源节点和目标节点的边界侧离开；当直接通道会进入其他节点时，使用有界的正交 lane。所有 local、grid 和 outer 兜底路由都必须留在导出画布的安全内缩范围内；如果只能生成负坐标的 perimeter 路径，必须拒绝该路由，而不能让 SVG/Drawnix 裁剪后形成贴边的假虚线框。随后，系统测量并换行每条带标签的关系，为它生成避开所有节点及此前关系标签的确定性标签框。标题/摘要页眉使用与节点标签相同的确定性宽度估算；长摘要会拆成显式多行，整个 forest 会下移到计算出的 `safeHeight` 之后，路由和原生箭头文字也使用完全相同的高度作为障碍物。SVG companion 按“连接线、节点、关系标签、页眉”的顺序绘制，页眉最后再绘制并带不透明白色背景，作为最终的图形/背景保护。原生 Drawnix 流也复用同一组路由点和标签契约，避免可编辑导出与 SVG 在层级或几何上分叉。
+
+原生箭头现在使用与 Plait 兼容的契约：`shape: "straight"` 保留显式正交折线路径，`source`/`target` 携带原生 marker，`texts[]` 保存 paragraph 以及路径上的归一化 `position`，`strokeColor`/`strokeWidth`/`strokeStyle`/`opacity` 保存视觉样式。旧版读取器仍可使用兼容性 metadata 中的 `text` 与 `style`。由于上游连接解析器要求几何元素拥有 `points`，而原生 `mind_child` 并不拥有该字段，因此不会输出 `boundId`；这样可以避免宿主导入异常，同时保留明确的关系路径。
+
+当源笔记包含 Mermaid fence 或 Obsidian 图片嵌入时，原生 JSON 还会携带可选的 `metadata.notemd.sourceVisuals` 索引。这里有意使用 metadata，而不是新增未经验证的 Drawnix 原生图片 element：每项记录 source hash、解析状态、源路径和 companion 名称。已解析的 Mermaid 图会把安全 SVG 与源文本内联，因此不会再生成独立 `.drawnix.assets` 目录；无法安全内联的外部二进制或未解析图形才保留 scoped companion。这样既保持已验证子集的原生 element 流兼容，又能从 `.drawnix` 文件本身发现源视觉信息。
 
 ## 自动化证据
 
@@ -46,6 +52,7 @@ npm test -- --runInBand src/tests/drawnixExporter.test.ts src/tests/drawnixMindM
 
 - `DrawnixExportedData` envelope 与 `mindmap`/`mind_child` 层级
 - 确定性布局、节点矩形分离、深度限制和关系数量限制
+- 原生箭头文字位置规划，保证 Plait 文字框避开节点和受保护的页眉区域
 - 稳定的 `.drawnix` JSON 序列化与 `arrow-line` 校验
 - 专用 SVG companion 使用相同的 node id 和投影坐标
 - 源码不引入 `SemanticFigureModel`、`@drawnix/*`、`@plait/*` 或 `@plait-board/*`

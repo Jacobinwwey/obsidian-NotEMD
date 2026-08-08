@@ -60,6 +60,8 @@ When a Drawnix artifact contains Mermaid visuals, Notemd sanitizes the rendered 
 
 The preview is intentionally a single scrollable surface: the main Drawnix canvas appears first, followed by each embedded Mermaid panel in source order. Closing and reopening a saved history entry reconstructs the same panel list, dimensions, and export actions.
 
+Drawnix relationship explanations are laid out as first-class visual elements. The renderer routes dashed arrows around placed node rectangles and reserves a measured title/summary header as a protected region. Long summaries and relation labels wrap to measured lines, the forest moves below the resulting header height, and an opaque label box is painted after the node layer. The header is rendered last with an opaque background, so an outer route cannot obscure text such as `以 Notemd 插件为对象的知识地图，覆盖系统架构、LLM 调用管道、图表渲染平台、模块地图、CLI 边界现实、关键设计决策与验证。` or a relation explanation such as `RendererRegistry feeds Vault files, preview modal, and export`. The native `.drawnix` arrow uses Plait-compatible `shape`, `texts[]`, markers, and stroke fields while retaining legacy metadata for older readers. If a requested Drawnix map cannot find a collision-free route or label position, generation fails with a format error instead of silently saving a Mermaid fallback under a `.drawnix` operation.
+
 ## Circuit diagrams
 
 Choose **Circuit diagram** with **CircuitikZ source file** for supported circuit requests. Notemd generates a structured circuit description first and then writes the CircuitikZ source. This is more reliable than asking the model to write unrestricted LaTeX.

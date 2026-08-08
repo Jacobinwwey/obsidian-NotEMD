@@ -22,7 +22,7 @@ export default {
             { text: 'Docs Hub', link: '/README' },
             { text: '文档中心', link: '/README.zh-CN' },
             { text: 'Plans', link: '/superpowers/plans/2026-04-14-diagram-rendering-platform-roadmap' },
-            { text: 'Releases', link: '/releases/1.8.2' }
+            { text: 'Releases', link: '/releases/1.9.5' }
         ],
         sidebar: [
             {
@@ -51,7 +51,9 @@ export default {
                     { text: '1.8.1 (EN)', link: '/releases/1.8.1' },
                     { text: '1.8.1 (zh-CN)', link: '/releases/1.8.1.zh-CN' },
                     { text: '1.8.2 (EN)', link: '/releases/1.8.2' },
-                    { text: '1.8.2 (zh-CN)', link: '/releases/1.8.2.zh-CN' }
+                    { text: '1.8.2 (zh-CN)', link: '/releases/1.8.2.zh-CN' },
+                    { text: '1.9.5 (EN)', link: '/releases/1.9.5' },
+                    { text: '1.9.5 (zh-CN)', link: '/releases/1.9.5.zh-CN' }
                 ]
             },
             {

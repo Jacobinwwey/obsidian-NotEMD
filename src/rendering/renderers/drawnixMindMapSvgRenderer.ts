@@ -23,6 +23,7 @@ const SOURCE_VISUAL_VERTICAL_GAP = 24;
 const SOURCE_VISUAL_MIN_HEIGHT = 160;
 const SOURCE_VISUAL_RIGHT_MARGIN = 72;
 const SOURCE_VISUAL_TOP_MARGIN = 24;
+const RELATION_LABEL_TEXT_OFFSET_Y = 20;
 
 function escapeHtml(value: string): string {
     return value
@@ -192,15 +193,28 @@ function pathFromPoints(points: DrawnixPoint[]): string {
     return points.map((point, index) => `${index === 0 ? 'M' : 'L'} ${point[0]} ${point[1]}`).join(' ');
 }
 
-function renderCrossRelation(relation: DrawnixMindMapCrossRelation): string {
-    const labelPoint = relation.points[Math.floor(relation.points.length / 2)];
-    const label = relation.label
-        ? `<text x="${labelPoint[0] + 8}" y="${labelPoint[1] - 8}" class="notemd-drawnix-mindmap-relation-label">${escapeHtml(relation.label)}</text>`
-        : '';
+function relationDataAttributes(relation: DrawnixMindMapCrossRelation): string {
     const warning = relation.routeWarning ? ` data-drawnix-mindmap-route-warning="${escapeAttribute(relation.routeWarning)}"` : '';
-    return `<g data-drawnix-mindmap-relation-id="${escapeAttribute(relation.id)}" data-drawnix-mindmap-source="${escapeAttribute(relation.sourceId)}" data-drawnix-mindmap-target="${escapeAttribute(relation.targetId)}" data-drawnix-mindmap-source-root="${escapeAttribute(relation.sourceRootId)}" data-drawnix-mindmap-target-root="${escapeAttribute(relation.targetRootId)}" data-drawnix-mindmap-route-strategy="${escapeAttribute(relation.routeStrategy)}"${warning}>
+    return `data-drawnix-mindmap-relation-id="${escapeAttribute(relation.id)}" data-drawnix-mindmap-source="${escapeAttribute(relation.sourceId)}" data-drawnix-mindmap-target="${escapeAttribute(relation.targetId)}" data-drawnix-mindmap-source-root="${escapeAttribute(relation.sourceRootId)}" data-drawnix-mindmap-target-root="${escapeAttribute(relation.targetRootId)}" data-drawnix-mindmap-route-strategy="${escapeAttribute(relation.routeStrategy)}"${warning}`;
+}
+
+function renderCrossRelationPath(relation: DrawnixMindMapCrossRelation): string {
+    return `<g ${relationDataAttributes(relation)} data-drawnix-mindmap-relation-layer="path" clip-path="url(#notemd-drawnix-mindmap-content-clip)">
         <path d="${pathFromPoints(relation.points)}" fill="none" stroke="#64748b" stroke-width="1.6" stroke-dasharray="6 5" marker-end="url(#notemd-drawnix-mindmap-arrow)" />
-        ${label}
+    </g>`;
+}
+
+function renderCrossRelationLabel(relation: DrawnixMindMapCrossRelation): string {
+    const layout = relation.labelLayout;
+    if (!relation.label || !layout) {
+        return '';
+    }
+    const centerX = layout.x + layout.width / 2;
+    const firstLineY = layout.y + RELATION_LABEL_TEXT_OFFSET_Y;
+    const lines = layout.lines.map((line, index) => `<tspan x="${centerX}" dy="${index === 0 ? 0 : layout.lineHeight}">${escapeHtml(line)}</tspan>`).join('');
+    return `<g ${relationDataAttributes(relation)} data-drawnix-mindmap-relation-layer="label" clip-path="url(#notemd-drawnix-mindmap-content-clip)">
+        <rect data-drawnix-mindmap-relation-label-background="true" x="${layout.x}" y="${layout.y}" width="${layout.width}" height="${layout.height}" rx="6" fill="#ffffff" fill-opacity="0.97" stroke="#cbd5e1" stroke-width="0.8" />
+        <text data-drawnix-mindmap-relation-label="true" x="${centerX}" y="${firstLineY}" text-anchor="middle" class="notemd-drawnix-mindmap-relation-label">${lines}</text>
     </g>`;
 }
 
@@ -279,6 +293,20 @@ function renderSourceVisualPanels(
     };
 }
 
+function renderCanvasHeader(projection: DrawnixMindMapProjection): string {
+    const header = projection.header;
+    const headerWidth = Math.max(0, projection.width - 96);
+    const headerHeight = Math.max(0, header.safeHeight - 16);
+    const summary = header.summaryLines.length > 0
+        ? `<text x="72" y="${header.summaryFirstBaseline}" fill="#64748b" font-family="${PREVIEW_FONT_FAMILY}" font-size="14">${header.summaryLines.map((line, index) => `<tspan data-drawnix-mindmap-summary-line="true" x="72" dy="${index === 0 ? 0 : header.summaryLineHeight}">${escapeHtml(line)}</tspan>`).join('')}</text>`
+        : '';
+    return `<g data-drawnix-mindmap-layer="header">
+        <rect data-drawnix-mindmap-header-safe-height="${header.safeHeight}" x="48" y="16" width="${headerWidth}" height="${headerHeight}" fill="#ffffff" fill-opacity="0.98" />
+        <text x="72" y="${header.titleBaseline}" fill="#172033" font-family="${PREVIEW_FONT_FAMILY}" font-size="24" font-weight="700">${escapeHtml(projection.title)}</text>
+        ${summary}
+    </g>`;
+}
+
 export function renderDrawnixMindMapSvg(
     projection: DrawnixMindMapProjection,
     sourceVisuals: readonly SourceVisualPreview[] = []
@@ -304,14 +332,17 @@ export function renderDrawnixMindMapSvg(
             <marker id="notemd-drawnix-mindmap-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto">
                 <path d="M 0 0 L 10 5 L 0 10 z" fill="#64748b" />
             </marker>
+            <clipPath id="notemd-drawnix-mindmap-content-clip">
+                <rect x="0" y="${projection.header.safeHeight}" width="${canvasWidth}" height="${Math.max(0, canvasHeight - projection.header.safeHeight)}" />
+            </clipPath>
         </defs>
         <rect x="0" y="0" width="${canvasWidth}" height="${canvasHeight}" fill="#ffffff" />
-        <text x="72" y="44" fill="#172033" font-family="${PREVIEW_FONT_FAMILY}" font-size="24" font-weight="700">${escapeHtml(projection.title)}</text>
-        ${projection.summary ? `<text x="72" y="72" fill="#64748b" font-family="${PREVIEW_FONT_FAMILY}" font-size="14">${escapeHtml(projection.summary)}</text>` : ''}
         ${projection.hierarchyBranches.map(renderHierarchyBranch).join('')}
-        ${projection.crossRelations.map(renderCrossRelation).join('')}
+        ${projection.crossRelations.map(renderCrossRelationPath).join('')}
         ${projection.nodes.map(renderNode).join('')}
+        ${projection.crossRelations.map(renderCrossRelationLabel).join('')}
         ${sourceVisualLayout.markup}
+        ${renderCanvasHeader(projection)}
     </svg>`;
     return normalizeSvgFontFamilyDeclarations(svg);
 }
