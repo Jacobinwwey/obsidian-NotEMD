@@ -73,6 +73,10 @@ describe('Drawnix source coverage', () => {
                 label: 'uses'
             })
         ]);
+        expect(enriched.sourceCoverageDiagnostics).toEqual(expect.arrayContaining([
+            expect.objectContaining({ kind: 'node-merged', sourceIds: ['model-interface'] }),
+            expect.objectContaining({ kind: 'edge-remapped', sourceIds: ['model-commands', 'model-orphan'] })
+        ]));
         enriched.edges?.forEach(edge => {
             expect(ids.has(edge.from)).toBe(true);
             expect(ids.has(edge.to)).toBe(true);
@@ -443,5 +447,29 @@ describe('Drawnix source coverage', () => {
         ]));
         expect(exportedLabels).toContain('source-section-');
         expect(result.artifact.previewSvg?.content).toContain('data-drawnix-mindmap-node-id');
+    });
+
+    test('surfaces deterministic diagnostics when coverage drops duplicate or owned edges', () => {
+        const enriched = mergeDrawnixSourceCoverage({
+            intent: 'drawnixMindmap',
+            title: 'Document',
+            nodes: [{
+                id: 'section',
+                label: 'Section',
+                children: [{ id: 'child', label: 'Child' }]
+            }],
+            edges: [
+                { from: 'section', to: 'child', label: 'owns' },
+                { from: 'missing', to: 'child', label: 'invalid' },
+                { from: 'section', to: 'child', label: 'owns' }
+            ]
+        }, '# Document\n## Section\n### Child', 'Notes/document.md');
+
+        expect(enriched.edges).toEqual([]);
+        expect(enriched.sourceCoverageDiagnostics).toEqual(expect.arrayContaining([
+            expect.objectContaining({ kind: 'edge-dropped', message: expect.stringContaining('hierarchy ownership') }),
+            expect.objectContaining({ kind: 'edge-dropped', message: expect.stringContaining('not present') }),
+            expect.objectContaining({ kind: 'edge-dropped', message: expect.stringContaining('duplicate') })
+        ]));
     });
 });

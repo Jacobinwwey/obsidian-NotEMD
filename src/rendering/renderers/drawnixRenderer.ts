@@ -66,6 +66,20 @@ export class DrawnixRenderer implements DiagramRenderer {
             throw new Error(`Drawnix mind-map validation failed: ${validationErrors.join('; ')}`);
         }
 
+        const coverageDiagnostics = (spec.sourceCoverageDiagnostics ?? []).map(diagnostic => ({
+            severity: diagnostic.kind === 'edge-dropped' || diagnostic.kind === 'node-compressed'
+                ? 'warning' as const
+                : 'info' as const,
+            kind: `drawnix-source-coverage-${diagnostic.kind}`,
+            message: diagnostic.message,
+            advice: diagnostic.sourceIds?.length
+                ? `Source ids: ${diagnostic.sourceIds.join(', ')}${diagnostic.targetId ? `; target: ${diagnostic.targetId}` : ''}`
+                : diagnostic.targetId
+                    ? `Target: ${diagnostic.targetId}`
+                    : undefined
+        }));
+        const diagnostics = [...coverageDiagnostics, ...sourceVisualCompanions.diagnostics];
+
         return {
             target: this.target,
             content,
@@ -103,8 +117,8 @@ export class DrawnixRenderer implements DiagramRenderer {
                     }))
                 ]
                 : undefined,
-            diagnostics: sourceVisualCompanions.diagnostics.length > 0
-                ? sourceVisualCompanions.diagnostics
+            diagnostics: diagnostics.length > 0
+                ? diagnostics
                 : undefined
         };
     }

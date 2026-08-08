@@ -1,4 +1,4 @@
-import { DiagramNode, DiagramSpec } from '../../types';
+import { DiagramNode, DiagramSourceCoverageDiagnostic, DiagramSpec } from '../../types';
 
 const MAX_SOURCE_LABEL_LENGTH = 160;
 const DRAWNIX_SOURCE_MAX_DEPTH = 3;
@@ -409,7 +409,8 @@ function collectParentChildPairs(nodes: readonly DiagramNode[], pairs: Set<strin
 function deduplicateAndRemapEdges(
     edges: ReadonlyArray<NonNullable<DiagramSpec['edges']>[number]>,
     idRemap: ReadonlyMap<string, string>,
-    roots: readonly DiagramNode[]
+    roots: readonly DiagramNode[],
+    diagnostics: DiagramSourceCoverageDiagnostic[]
 ): DiagramSpec['edges'] {
     const parentChildPairs = new Set<string>();
     const nodeIds = new Set<string>();
@@ -419,23 +420,44 @@ function deduplicateAndRemapEdges(
     const result: NonNullable<DiagramSpec['edges']> = [];
 
     edges.forEach(edge => {
-        const from = idRemap.get(edge.from.trim()) ?? edge.from.trim();
-        const to = idRemap.get(edge.to.trim()) ?? edge.to.trim();
-        if (
-            !from
-            || !to
-            || !nodeIds.has(from)
-            || !nodeIds.has(to)
-            || from === to
-            || parentChildPairs.has(`${from}\u0000${to}`)
-            || parentChildPairs.has(`${to}\u0000${from}`)
-        ) {
+        const originalFrom = edge.from.trim();
+        const originalTo = edge.to.trim();
+        const from = idRemap.get(originalFrom) ?? originalFrom;
+        const to = idRemap.get(originalTo) ?? originalTo;
+        const label = edge.label?.trim() || edge.relation?.trim() || undefined;
+        const dropReason = !from || !to
+            ? 'an endpoint is empty'
+            : !nodeIds.has(from) || !nodeIds.has(to)
+                ? 'an endpoint is not present in the covered tree'
+                : from === to
+                    ? 'the remapped endpoints are identical'
+                    : parentChildPairs.has(`${from}\u0000${to}`) || parentChildPairs.has(`${to}\u0000${from}`)
+                        ? 'the relationship duplicates hierarchy ownership'
+                        : undefined;
+        if (dropReason) {
+            diagnostics.push({
+                kind: 'edge-dropped',
+                sourceIds: [originalFrom, originalTo],
+                message: `Dropped source relationship ${originalFrom} -> ${originalTo}: ${dropReason}.`
+            });
             return;
         }
-        const label = edge.label?.trim() || edge.relation?.trim() || undefined;
         const key = `${from}\u0000${to}\u0000${label ?? ''}`;
         if (seen.has(key)) {
+            diagnostics.push({
+                kind: 'edge-dropped',
+                sourceIds: [originalFrom, originalTo],
+                message: `Dropped duplicate source relationship ${originalFrom} -> ${originalTo}.`
+            });
             return;
+        }
+        if (from !== originalFrom || to !== originalTo) {
+            diagnostics.push({
+                kind: 'edge-remapped',
+                sourceIds: [originalFrom, originalTo],
+                targetId: `${from} -> ${to}`,
+                message: `Remapped source relationship ${originalFrom} -> ${originalTo} to ${from} -> ${to}.`
+            });
         }
         seen.add(key);
         result.push({ ...edge, from, to, label });
@@ -448,15 +470,24 @@ function mergeModelNodeIntoTarget(
     target: DiagramNode,
     targetDepth: number,
     idRemap: Map<string, string>,
-    factory: SourceNodeFactory
+    factory: SourceNodeFactory,
+    diagnostics: DiagramSourceCoverageDiagnostic[]
 ): void {
     idRemap.set(model.id, target.id);
+    if (model.id !== target.id) {
+        diagnostics.push({
+            kind: 'node-merged',
+            sourceIds: [model.id],
+            targetId: target.id,
+            message: `Merged model node "${model.id}" into source node "${target.id}" by normalized label.`
+        });
+    }
     (model.children ?? []).forEach(child => {
         const directMatch = (target.children ?? []).find(candidate => (
             comparisonLabel(candidate.label) === comparisonLabel(child.label)
         ));
         if (directMatch) {
-            mergeModelNodeIntoTarget(child, directMatch, targetDepth + 1, idRemap, factory);
+            mergeModelNodeIntoTarget(child, directMatch, targetDepth + 1, idRemap, factory, diagnostics);
             return;
         }
 
@@ -465,6 +496,12 @@ function mergeModelNodeIntoTarget(
             // keeping the native hierarchy valid; the label remains visible on
             // the nearest legal leaf.
             idRemap.set(child.id, target.id);
+            diagnostics.push({
+                kind: 'node-compressed',
+                sourceIds: [child.id],
+                targetId: target.id,
+                message: `Remapped over-depth model node "${child.id}" to bounded Drawnix node "${target.id}".`
+            });
             return;
         }
 
@@ -478,6 +515,12 @@ function mergeModelNodeIntoTarget(
                         node.label
                     );
                     descendants.forEach(descendant => idRemap.set(descendant.id, node.id));
+                    diagnostics.push({
+                        kind: 'node-compressed',
+                        sourceIds: [node.id, ...descendants.map(descendant => descendant.id)],
+                        targetId: node.id,
+                        message: `Compressed descendants of model node "${node.id}" into its bounded Drawnix label.`
+                    });
                 }
                 node.children = [];
                 return;
@@ -551,11 +594,12 @@ function appendUnmatchedModelRoot(
     model: DiagramNode,
     factory: SourceNodeFactory,
     idRemap: Map<string, string>,
-    parentDepth: number
+    parentDepth: number,
+    diagnostics: DiagramSourceCoverageDiagnostic[]
 ): void {
     const existing = findDirectChildByLabel(parent, model.label);
     if (existing) {
-        mergeModelNodeIntoTarget(model, existing, parentDepth + 1, idRemap, factory);
+        mergeModelNodeIntoTarget(model, existing, parentDepth + 1, idRemap, factory, diagnostics);
         return;
     }
 
@@ -569,6 +613,12 @@ function appendUnmatchedModelRoot(
                     node.label
                 );
                 descendants.forEach(descendant => idRemap.set(descendant.id, node.id));
+                diagnostics.push({
+                    kind: 'node-compressed',
+                    sourceIds: [node.id, ...descendants.map(descendant => descendant.id)],
+                    targetId: node.id,
+                    message: `Compressed descendants of unmatched model node "${node.id}" into its bounded Drawnix label.`
+                });
             }
             node.children = [];
             return;
@@ -606,13 +656,14 @@ export function mergeDrawnixSourceCoverage(
     coverage.roots.forEach(root => appendChildByLabel(documentRoot, root));
 
     const idRemap = new Map<string, string>();
+    const diagnostics: DiagramSourceCoverageDiagnostic[] = [];
     const modelRoots = cloneModelForest(spec.nodes ?? []);
     modelRoots.forEach(modelRoot => {
         const documentMatch = comparisonLabel(modelRoot.label) === comparisonLabel(documentRoot.label)
             ? { node: documentRoot, depth: 0 }
             : findNodeWithDepth(documentRoot.children ?? [], modelRoot.label, 1);
         if (documentMatch) {
-            mergeModelNodeIntoTarget(modelRoot, documentMatch.node, documentMatch.depth, idRemap, factory);
+            mergeModelNodeIntoTarget(modelRoot, documentMatch.node, documentMatch.depth, idRemap, factory, diagnostics);
             return;
         }
         const additional = ensureAdditionalConcepts(documentRoot, factory);
@@ -621,7 +672,8 @@ export function mergeDrawnixSourceCoverage(
             modelRoot,
             factory,
             idRemap,
-            1
+            1,
+            diagnostics
         );
     });
 
@@ -629,6 +681,7 @@ export function mergeDrawnixSourceCoverage(
     return {
         ...spec,
         nodes: mergedNodes,
-        edges: deduplicateAndRemapEdges(spec.edges ?? [], idRemap, mergedNodes)
+        edges: deduplicateAndRemapEdges(spec.edges ?? [], idRemap, mergedNodes, diagnostics),
+        ...(diagnostics.length > 0 ? { sourceCoverageDiagnostics: diagnostics } : {})
     };
 }

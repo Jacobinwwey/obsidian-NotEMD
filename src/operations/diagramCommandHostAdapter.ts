@@ -12,6 +12,7 @@ import { LLMProviderConfig, NotemdSettings, ProgressReporter } from '../types';
 import { resolveSourceVisualReferences, scanSourceVisualReferences } from '../diagram/sourceVisuals';
 import { buildFallbackMermaidSvg } from '../diagram/sourceVisualArtifactBuilder';
 import { renderMermaidArtifactSvg } from '../rendering/preview/mermaidPreview';
+import { DRAWNIX_SOURCE_VISUAL_METADATA_VERSION } from '../diagram/adapters/drawnix/drawnixExporter';
 
 export interface DiagramCommandHostAdapter {
     saveMermaidSummary: (file: TFile, mermaidContent: string, reporter: ProgressReporter) => Promise<string>;
@@ -870,17 +871,27 @@ function parseDrawnixSourceVisualPreviewMetadata(content: string): DrawnixSource
         if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
             return [];
         }
-        const metadata = (parsed as Record<string, unknown>).metadata;
+        const exportedData = parsed as Record<string, unknown>;
+        if (exportedData.type !== 'drawnix'
+            || (exportedData.version !== 1 && exportedData.version !== '1')) {
+            return [];
+        }
+        const metadata = exportedData.metadata;
         const notemd = metadata && typeof metadata === 'object' && !Array.isArray(metadata)
             ? (metadata as Record<string, unknown>).notemd
             : undefined;
         const sourceVisuals = notemd && typeof notemd === 'object' && !Array.isArray(notemd)
             ? (notemd as Record<string, unknown>).sourceVisuals
             : undefined;
-        if (!Array.isArray(sourceVisuals)) {
+        const metadataVersion = notemd && typeof notemd === 'object' && !Array.isArray(notemd)
+            ? (notemd as Record<string, unknown>).version
+            : undefined;
+        if ((metadataVersion !== DRAWNIX_SOURCE_VISUAL_METADATA_VERSION && metadataVersion !== '1')
+            || !Array.isArray(sourceVisuals)) {
             return [];
         }
 
+        const ids = new Set<string>();
         return sourceVisuals.flatMap((visual): DrawnixSourceVisualPreviewMetadata[] => {
             if (!visual || typeof visual !== 'object' || Array.isArray(visual)) {
                 return [];
@@ -900,13 +911,21 @@ function parseDrawnixSourceVisualPreviewMetadata(content: string): DrawnixSource
             const title = typeof candidate.title === 'string' ? candidate.title : undefined;
             const lineStart = typeof candidate.lineStart === 'number' ? candidate.lineStart : undefined;
             const lineEnd = typeof candidate.lineEnd === 'number' ? candidate.lineEnd : undefined;
-            return id && kind && (
+            const validLineRange = (lineStart === undefined || Number.isInteger(lineStart))
+                && (lineEnd === undefined || Number.isInteger(lineEnd));
+            if (!id || ids.has(id) || !kind || !validLineRange) {
+                return [];
+            }
+            const hasPreviewPayload = (
                 companionPaths.length > 0
                 || embeddedSvg
                 || (kind === 'mermaid' && Boolean(sourceContent?.trim()))
-            )
-                ? [{ id, kind, companionPaths, embeddedSvg, sourceContent, title, lineStart, lineEnd }]
-                : [];
+            );
+            if (!hasPreviewPayload) {
+                return [];
+            }
+            ids.add(id);
+            return [{ id, kind, companionPaths, embeddedSvg, sourceContent, title, lineStart, lineEnd }];
         });
     } catch {
         return [];

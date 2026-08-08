@@ -37,6 +37,7 @@
 
 ## 工程规划文档
 
+- [图形平台稳健性与设置真值推进方案](./brainstorms/2026-08-08-diagram-platform-robustness-and-settings-integrity-plan.zh-CN.md)
 - [Drawnix 知识导图质量与交付方案](./brainstorms/2026-07-22-drawnix-knowledge-map-quality-and-delivery-plan.zh-CN.md)
 - [图形参考项目集成与 Figure 生成扩展方案](./brainstorms/2026-07-04-diagram-reference-integration-and-figure-generation-plan.zh-CN.md)
 - [circuitikz Figure Generation Roadmap](./maintainer/circuitikz-figure-generation-roadmap.zh-CN.md)

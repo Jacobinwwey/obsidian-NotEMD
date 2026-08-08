@@ -61,6 +61,19 @@ export interface DiagramEdge {
     relation?: string;
 }
 
+export type DiagramSourceCoverageDiagnosticKind =
+    | 'edge-remapped'
+    | 'edge-dropped'
+    | 'node-merged'
+    | 'node-compressed';
+
+export interface DiagramSourceCoverageDiagnostic {
+    kind: DiagramSourceCoverageDiagnosticKind;
+    message: string;
+    sourceIds?: string[];
+    targetId?: string;
+}
+
 export interface DiagramSection {
     id: string;
     label: string;
@@ -98,6 +111,8 @@ export interface DiagramSpec {
     sourceLanguage?: string;
     outputLanguage?: string;
     evidenceRefs?: string[];
+    /** Deterministic diagnostics added after LLM generation by Drawnix source coverage. */
+    sourceCoverageDiagnostics?: DiagramSourceCoverageDiagnostic[];
 }
 
 export interface DiagramIntentResult {

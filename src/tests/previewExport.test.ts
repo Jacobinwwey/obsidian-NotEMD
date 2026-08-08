@@ -12,6 +12,7 @@ import {
     buildDiagramPreviewPngExportPath,
     renderPreviewArtifactSvg,
     saveDiagramPreviewPdf,
+    saveDiagramPreviewPdfToFolder,
     saveDiagramPreviewPanelPdf,
     saveDiagramPreviewPanelPdfToFolder,
     saveDiagramPreviewPanelPng,
@@ -19,8 +20,10 @@ import {
     saveDiagramPreviewPanelSvg,
     saveDiagramPreviewPanelSvgToFolder,
     saveDiagramPreviewPng,
+    saveDiagramPreviewPngToFolder,
     saveDiagramSourceArtifact,
     saveDiagramPreviewSvg,
+    saveDiagramPreviewSvgToFolder,
     supportsPreviewSvgExport
 } from '../rendering/preview/previewExport';
 import { mockApp } from './__mocks__/app';
@@ -284,6 +287,22 @@ describe('diagram preview export helpers', () => {
         expect(mockApp.vault.create).toHaveBeenCalledWith('Notes/Topic_diagram.json', '{"mark":"bar"}');
     });
 
+    test('saves a single preview svg into a selected vault folder', async () => {
+        const outputPath = await saveDiagramPreviewSvgToFolder(mockApp, 'Notes/Topic.md', 'Exports', {
+            target: 'html',
+            content: '<!DOCTYPE html><svg><text>Selected folder</text></svg>',
+            mimeType: 'text/html',
+            sourceIntent: 'flowchart',
+            previewSvg: {
+                content: '<svg><text>Selected folder</text></svg>',
+                mimeType: 'image/svg+xml'
+            }
+        });
+
+        expect(outputPath).toBe('Exports/Topic_preview.svg');
+        expect(mockApp.vault.create).toHaveBeenCalledWith(outputPath, expect.stringContaining('Selected folder'));
+    });
+
     test('saves editable html/svg source artifacts as html documents', async () => {
         const outputPath = await saveDiagramSourceArtifact(mockApp, 'Notes/Runtime.md', {
             target: 'editable-html-svg',
@@ -384,6 +403,47 @@ describe('diagram preview export helpers', () => {
         expect(mockApp.vault.createBinary).toHaveBeenCalledWith('Notes/Topic_preview.png', expect.any(ArrayBuffer));
     });
 
+    test('saves a single preview png into a selected vault folder', async () => {
+        const outputPath = await saveDiagramPreviewPngToFolder(mockApp, 'Notes/Topic.md', 'Exports', {
+            target: 'mermaid',
+            content: '```mermaid\nflowchart TD\nA --> B\n```',
+            mimeType: 'text/vnd.mermaid',
+            sourceIntent: 'flowchart'
+        }, {
+            mermaid: {
+                initialize: jest.fn(),
+                parse: jest.fn(),
+                render: jest.fn().mockResolvedValue({ svg: '<svg width="40" height="20"></svg>' })
+            },
+            pngRaster: {
+                createBlob: (parts, options) => new Blob(parts, options),
+                createImage: () => {
+                    const image = {
+                        onload: null as null | (() => void),
+                        onerror: null as null | ((event?: unknown) => void),
+                        set src(_value: string) {
+                            this.onload?.();
+                        }
+                    };
+                    return image;
+                },
+                createCanvas: () => ({
+                    width: 80,
+                    height: 40,
+                    getContext: () => ({ scale: jest.fn(), drawImage: jest.fn() }),
+                    toBlob: (callback: (blob: Blob | null) => void) => callback(new Blob(['png'], { type: 'image/png' }))
+                }),
+                createObjectURL: () => 'blob:png-folder',
+                revokeObjectURL: jest.fn(),
+                blobToArrayBuffer: async () => new ArrayBuffer(12),
+                getScale: () => 2
+            }
+        });
+
+        expect(outputPath).toBe('Exports/Topic_preview.png');
+        expect(mockApp.vault.createBinary).toHaveBeenCalledWith(outputPath, expect.any(ArrayBuffer));
+    });
+
     test('saves a pdf preview artifact beside the source file through the SVG vector pipeline', async () => {
         const createDocument = jest.fn(() => ({
             output: jest.fn(() => new TextEncoder().encode('%PDF-1.4\n/vector-content\n').buffer)
@@ -418,6 +478,28 @@ describe('diagram preview export helpers', () => {
             { x: 0, y: 0, width: 300, height: 150 }
         );
         expect(mockApp.vault.createBinary).toHaveBeenCalledWith('Notes/Topic_preview.pdf', expect.any(ArrayBuffer));
+    });
+
+    test('saves a single preview pdf into a selected vault folder', async () => {
+        const outputPath = await saveDiagramPreviewPdfToFolder(mockApp, 'Notes/Topic.md', 'Exports', {
+            target: 'html',
+            content: '<!DOCTYPE html><svg width="400" height="200"></svg>',
+            mimeType: 'text/html',
+            sourceIntent: 'flowchart',
+            previewSvg: {
+                content: '<svg width="400" height="200"></svg>',
+                mimeType: 'image/svg+xml'
+            }
+        }, {
+            svgPdf: {
+                parseSvg: jest.fn(() => ({ tagName: 'svg' })),
+                createDocument: jest.fn(() => ({ output: jest.fn(() => new ArrayBuffer(16)) })),
+                renderSvg: jest.fn()
+            }
+        });
+
+        expect(outputPath).toBe('Exports/Topic_preview.pdf');
+        expect(mockApp.vault.createBinary).toHaveBeenCalledWith(outputPath, expect.any(ArrayBuffer));
     });
 
     test('renders PDF Mermaid panels with the same layout configuration as SVG export', async () => {

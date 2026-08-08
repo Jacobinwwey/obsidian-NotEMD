@@ -30,6 +30,9 @@ jest.mock('../rendering/preview/previewExport', () => {
         saveDiagramPreviewSvg: jest.fn().mockResolvedValue('Notes/Topic_preview.svg'),
         saveDiagramPreviewPng: jest.fn().mockResolvedValue('Notes/Topic_preview.png'),
         saveDiagramPreviewPdf: jest.fn().mockResolvedValue('Notes/Topic_preview.pdf'),
+        saveDiagramPreviewSvgToFolder: jest.fn().mockResolvedValue('Notes/Topic_preview.svg'),
+        saveDiagramPreviewPngToFolder: jest.fn().mockResolvedValue('Notes/Topic_preview.png'),
+        saveDiagramPreviewPdfToFolder: jest.fn().mockResolvedValue('Notes/Topic_preview.pdf'),
         saveDiagramPreviewPanelSvg: jest.fn().mockResolvedValue('Notes/Topic_preview_mermaid-1.svg'),
         saveDiagramPreviewPanelSvgToFolder: jest.fn(),
         saveDiagramPreviewPanelPng: jest.fn().mockResolvedValue('Notes/Topic_preview_mermaid-1.png'),
@@ -262,6 +265,7 @@ describe('diagram preview modal', () => {
     beforeEach(() => {
         jest.clearAllMocks();
         clearDiagramPreviewHistory();
+        (exportFolderModal.selectDiagramPreviewExportFolder as jest.Mock).mockResolvedValue('Notes');
         Object.defineProperty(globalThis, 'navigator', {
             configurable: true,
             value: {
@@ -286,9 +290,16 @@ describe('diagram preview modal', () => {
 
         await clickExportMenuItem(modal, 0);
 
-        expect(previewExport.saveDiagramPreviewSvg).toHaveBeenCalledWith(
+        expect(exportFolderModal.selectDiagramPreviewExportFolder).toHaveBeenCalledWith(
             mockApp,
             'Notes/Topic.md',
+            'en',
+            'SVG'
+        );
+        expect(previewExport.saveDiagramPreviewSvgToFolder).toHaveBeenCalledWith(
+            mockApp,
+            'Notes/Topic.md',
+            'Notes',
             expect.objectContaining({ target: 'mermaid' }),
             expect.objectContaining({
                 theme: 'dark',
@@ -296,7 +307,7 @@ describe('diagram preview modal', () => {
                 vegaLiteDepsLoader: expect.any(Function)
             })
         );
-        const exportDeps = (previewExport.saveDiagramPreviewSvg as jest.Mock).mock.calls[0][3];
+        const exportDeps = (previewExport.saveDiagramPreviewSvgToFolder as jest.Mock).mock.calls[0][4];
         await expect(exportDeps.vegaLiteDepsLoader()).resolves.toBe(bundledVegaLiteDeps);
         expect(bundledPreviewDeps.getBundledVegaLitePreviewDeps).toHaveBeenCalled();
         expect(Notice).toHaveBeenCalledWith('Diagram preview exported to Notes/Topic_preview.svg');
@@ -317,9 +328,10 @@ describe('diagram preview modal', () => {
 
         await clickExportMenuItem(modal, 1);
 
-        expect(previewExport.saveDiagramPreviewPng).toHaveBeenCalledWith(
+        expect(previewExport.saveDiagramPreviewPngToFolder).toHaveBeenCalledWith(
             mockApp,
             'Notes/Topic.md',
+            'Notes',
             expect.objectContaining({ target: 'mermaid' }),
             expect.objectContaining({ theme: 'dark' })
         );
@@ -337,9 +349,10 @@ describe('diagram preview modal', () => {
 
         await clickExportMenuItem(modal, 2);
 
-        expect(previewExport.saveDiagramPreviewPdf).toHaveBeenCalledWith(
+        expect(previewExport.saveDiagramPreviewPdfToFolder).toHaveBeenCalledWith(
             mockApp,
             'Notes/Topic.md',
+            'Notes',
             expect.objectContaining({ target: 'mermaid' }),
             expect.objectContaining({ theme: 'dark', ppi: 450 })
         );
@@ -356,9 +369,10 @@ describe('diagram preview modal', () => {
 
         await clickExportMenuItem(modal, 2);
 
-        expect(previewExport.saveDiagramPreviewPdf).toHaveBeenCalledWith(
+        expect(previewExport.saveDiagramPreviewPdfToFolder).toHaveBeenCalledWith(
             mockApp,
             'Notes/Topic.md',
+            'Notes',
             expect.objectContaining({ target: 'mermaid' }),
             expect.objectContaining({ ppi: 600 })
         );

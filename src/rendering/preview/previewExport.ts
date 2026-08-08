@@ -212,6 +212,29 @@ export function buildDiagramPreviewPdfExportPath(sourcePath: string): string {
     return dir ? `${dir}/${normalizedBase}.pdf` : `${normalizedBase}.pdf`;
 }
 
+function getSourceFolderPath(sourcePath: string): string {
+    const normalizedPath = sourcePath.trim().replace(/\\/g, '/').replace(/\/+$/, '');
+    const lastSlashIndex = normalizedPath.lastIndexOf('/');
+    return lastSlashIndex >= 0 ? normalizedPath.slice(0, lastSlashIndex) : '';
+}
+
+function buildDiagramPreviewExportPathInFolder(
+    sourcePath: string,
+    folderPath: string,
+    extension: 'svg' | 'png' | 'pdf'
+): string {
+    const trimmedPath = sourcePath.trim().replace(/\/+$/, '');
+    const lastSlashIndex = trimmedPath.lastIndexOf('/');
+    const fileName = lastSlashIndex >= 0 ? trimmedPath.slice(lastSlashIndex + 1) : trimmedPath;
+    const withoutExtension = fileName.replace(/\.[^./]+$/, '');
+    const normalizedBase = withoutExtension.endsWith('_preview')
+        ? withoutExtension
+        : `${withoutExtension}_preview`;
+    const normalizedFolder = normalizeVaultFolderPath(folderPath);
+    const outputName = `${normalizedBase}.${extension}`;
+    return normalizedFolder ? `${normalizedFolder}/${outputName}` : outputName;
+}
+
 function normalizeVaultFolderPath(folderPath: string): string {
     const trimmed = folderPath.trim().replace(/\\/g, '/');
     if (trimmed.startsWith('//') || /^[a-zA-Z]:/.test(trimmed)) {
@@ -299,7 +322,17 @@ export async function saveDiagramPreviewSvg(
     artifact: RenderArtifact,
     deps: PreviewSvgRenderDeps = {}
 ): Promise<string> {
-    const outputPath = buildDiagramPreviewExportPath(sourcePath);
+    return saveDiagramPreviewSvgToFolder(app, sourcePath, getSourceFolderPath(sourcePath), artifact, deps);
+}
+
+export async function saveDiagramPreviewSvgToFolder(
+    app: App,
+    sourcePath: string,
+    folderPath: string,
+    artifact: RenderArtifact,
+    deps: PreviewSvgRenderDeps = {}
+): Promise<string> {
+    const outputPath = buildDiagramPreviewExportPathInFolder(sourcePath, folderPath, 'svg');
     const svg = await renderPreviewArtifactSvg(artifact, deps);
     const existingFile = app.vault.getAbstractFileByPath(outputPath);
 
@@ -318,7 +351,17 @@ export async function saveDiagramPreviewPng(
     artifact: RenderArtifact,
     deps: PreviewPngExportDeps = {}
 ): Promise<string> {
-    const outputPath = buildDiagramPreviewPngExportPath(sourcePath);
+    return saveDiagramPreviewPngToFolder(app, sourcePath, getSourceFolderPath(sourcePath), artifact, deps);
+}
+
+export async function saveDiagramPreviewPngToFolder(
+    app: App,
+    sourcePath: string,
+    folderPath: string,
+    artifact: RenderArtifact,
+    deps: PreviewPngExportDeps = {}
+): Promise<string> {
+    const outputPath = buildDiagramPreviewExportPathInFolder(sourcePath, folderPath, 'png');
     const svg = await renderPreviewArtifactSvgForRasterExport(artifact, deps);
     const png = await rasterizeSvgToPngArrayBuffer(svg, deps.pngRaster, {
         ppi: resolvePreviewExportPpi(deps.ppi)
@@ -340,7 +383,17 @@ export async function saveDiagramPreviewPdf(
     artifact: RenderArtifact,
     deps: PreviewPdfExportDeps = {}
 ): Promise<string> {
-    const outputPath = buildDiagramPreviewPdfExportPath(sourcePath);
+    return saveDiagramPreviewPdfToFolder(app, sourcePath, getSourceFolderPath(sourcePath), artifact, deps);
+}
+
+export async function saveDiagramPreviewPdfToFolder(
+    app: App,
+    sourcePath: string,
+    folderPath: string,
+    artifact: RenderArtifact,
+    deps: PreviewPdfExportDeps = {}
+): Promise<string> {
+    const outputPath = buildDiagramPreviewExportPathInFolder(sourcePath, folderPath, 'pdf');
     const svg = await renderPreviewArtifactSvg(artifact, deps);
     const pdf = await buildPdfFromSvg(svg, deps.svgPdf);
     const existingFile = app.vault.getAbstractFileByPath(outputPath);

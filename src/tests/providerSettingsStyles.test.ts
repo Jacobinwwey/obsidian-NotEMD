@@ -52,6 +52,9 @@ describe('provider settings styles', () => {
         expect(styles).toContain('.notemd-diagram-history-actions');
         expect(styles).toContain('.notemd-settings-result-count');
         expect(styles).toContain('.notemd-settings-empty-state');
+        expect(styles).toContain('.notemd-settings-search-results');
+        expect(styles).toContain('.notemd-settings-search-result[aria-selected="true"]');
+        expect(styles).toContain('.notemd-setting-search-target');
         expect(styles).toContain('@media (max-width: 720px)');
     });
 

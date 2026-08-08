@@ -543,6 +543,73 @@ describe('diagram command host adapter', () => {
         expect(diagramHost.openPreview).toHaveBeenCalledTimes(1);
     });
 
+    test('preview wrapper ignores unsupported Drawnix source-visual metadata versions', async () => {
+        const { host, diagramHost, reporter } = createDiagramHost();
+        const file = { name: 'Architecture_diagram.drawnix', path: 'Notes/Architecture_diagram.drawnix' };
+        host.readFile.mockResolvedValue(JSON.stringify({
+            type: 'drawnix',
+            version: 1,
+            source: 'web',
+            elements: [],
+            metadata: {
+                notemd: {
+                    version: 2,
+                    sourceVisuals: [{
+                        id: 'future-visual',
+                        kind: 'mermaid',
+                        companionPaths: [],
+                        embeddedSvg: '<svg><text>Future schema</text></svg>'
+                    }]
+                }
+            }
+        }));
+        (diagramHost as any).getFileByPath.mockImplementation((path: string) => ({ path }));
+
+        const result = await runPreviewDiagramCommandWithHost(host as any, file as any, reporter as any);
+
+        expect(result).toMatchObject({ kind: 'success', artifact: { target: 'drawnix' } });
+        expect((result as any).artifact.previewPanels).toBeUndefined();
+        expect(diagramHost.openPreview).toHaveBeenCalledTimes(1);
+    });
+
+    test('preview wrapper de-duplicates repeated source-visual ids deterministically', async () => {
+        const { host, diagramHost, reporter } = createDiagramHost();
+        const file = { name: 'Architecture_diagram.drawnix', path: 'Notes/Architecture_diagram.drawnix' };
+        host.readFile.mockResolvedValue(JSON.stringify({
+            type: 'drawnix',
+            version: 1,
+            source: 'web',
+            elements: [],
+            metadata: {
+                notemd: {
+                    version: 1,
+                    sourceVisuals: [
+                        {
+                            id: 'duplicate-visual',
+                            kind: 'mermaid',
+                            companionPaths: [],
+                            embeddedSvg: '<svg><text>First</text></svg>'
+                        },
+                        {
+                            id: 'duplicate-visual',
+                            kind: 'mermaid',
+                            companionPaths: [],
+                            sourceContent: 'flowchart TD\nA --> B'
+                        }
+                    ]
+                }
+            }
+        }));
+        (diagramHost as any).getFileByPath.mockImplementation((path: string) => ({ path }));
+
+        const result = await runPreviewDiagramCommandWithHost(host as any, file as any, reporter as any);
+
+        expect((result as any).artifact.previewPanels.map((panel: { id: string }) => panel.id))
+            .toEqual(['duplicate-visual']);
+        expect((result as any).artifact.previewPanels[0].artifact.previewSvg.content)
+            .toContain('First');
+    });
+
     test('preview wrapper rebuilds an older Mermaid visual when its companion file is missing', async () => {
         const { host, diagramHost, reporter } = createDiagramHost();
         const file = { name: 'Architecture_diagram.drawnix', path: 'Notes/Architecture_diagram.drawnix' };

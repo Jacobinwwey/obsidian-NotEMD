@@ -2,12 +2,12 @@ import { App, Menu, Modal, Notice } from 'obsidian';
 import { formatI18n, getI18nStrings } from '../i18n';
 import {
     renderPreviewArtifactSvg,
-    saveDiagramPreviewPdf,
+    saveDiagramPreviewPdfToFolder,
     saveDiagramPreviewPanelSvgToFolder,
     saveDiagramPreviewPanelPngToFolder,
     saveDiagramPreviewPanelPdfToFolder,
-    saveDiagramPreviewPng,
-    saveDiagramPreviewSvg,
+    saveDiagramPreviewPngToFolder,
+    saveDiagramPreviewSvgToFolder,
     saveDiagramSourceArtifact,
     supportsPreviewSvgExport
 } from '../rendering/preview/previewExport';
@@ -212,10 +212,19 @@ export class DiagramPreviewModal extends Modal {
             await this.exportPreviewPanelsAsSeparateSvgFiles(panels, copy);
             return;
         }
+        const sourcePath = this.session.payload.sourcePath;
+        if (!sourcePath) {
+            return;
+        }
+        const folderPath = await selectDiagramPreviewExportFolder(this.app, sourcePath, this.uiLocale, 'SVG');
+        if (folderPath === null) {
+            return;
+        }
         try {
-            const outputPath = await saveDiagramPreviewSvg(
+            const outputPath = await saveDiagramPreviewSvgToFolder(
                 this.app,
-                this.session.payload.sourcePath as string,
+                sourcePath,
+                folderPath,
                 this.session.payload.artifact,
                 this.createBundledPreviewRenderDeps()
             );
@@ -288,10 +297,19 @@ export class DiagramPreviewModal extends Modal {
             await this.exportPreviewPanelsAsSeparatePngFiles(panels, copy);
             return;
         }
+        const sourcePath = this.session.payload.sourcePath;
+        if (!sourcePath) {
+            return;
+        }
+        const folderPath = await selectDiagramPreviewExportFolder(this.app, sourcePath, this.uiLocale, 'PNG');
+        if (folderPath === null) {
+            return;
+        }
         try {
-            const outputPath = await saveDiagramPreviewPng(
+            const outputPath = await saveDiagramPreviewPngToFolder(
                 this.app,
-                this.session.payload.sourcePath as string,
+                sourcePath,
+                folderPath,
                 this.session.payload.artifact,
                 { ...this.createBundledPreviewRenderDeps(), ppi: this.exportPpi }
             );
@@ -311,10 +329,19 @@ export class DiagramPreviewModal extends Modal {
             await this.exportPreviewPanelsAsSeparatePdfFiles(panels, copy);
             return;
         }
+        const sourcePath = this.session.payload.sourcePath;
+        if (!sourcePath) {
+            return;
+        }
+        const folderPath = await selectDiagramPreviewExportFolder(this.app, sourcePath, this.uiLocale, 'PDF');
+        if (folderPath === null) {
+            return;
+        }
         try {
-            const outputPath = await saveDiagramPreviewPdf(
+            const outputPath = await saveDiagramPreviewPdfToFolder(
                 this.app,
-                this.session.payload.sourcePath as string,
+                sourcePath,
+                folderPath,
                 this.session.payload.artifact,
                 { ...this.createBundledPreviewRenderDeps(), ppi: this.exportPpi }
             );

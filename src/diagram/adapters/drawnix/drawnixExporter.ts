@@ -6,6 +6,9 @@ import {
 } from './drawnixMindMapProjection';
 import type { SourceVisualKind, SourceVisualStatus } from '../../sourceVisuals';
 
+export const DRAWNIX_EXPORT_VERSION = 1 as const;
+export const DRAWNIX_SOURCE_VISUAL_METADATA_VERSION = 1 as const;
+
 export interface DrawnixSourceVisualAttachment {
     id: string;
     kind: SourceVisualKind;
@@ -24,7 +27,7 @@ export interface DrawnixSourceVisualAttachment {
 
 export interface DrawnixMindMapMetadata {
     notemd: {
-        version: 1;
+        version: typeof DRAWNIX_SOURCE_VISUAL_METADATA_VERSION;
         sourceVisuals: DrawnixSourceVisualAttachment[];
     };
 }
@@ -53,14 +56,14 @@ export function exportDrawnixMindMapProjection(
     const metadata = sourceVisuals.length > 0
         ? {
             notemd: {
-                version: 1 as const,
+                version: DRAWNIX_SOURCE_VISUAL_METADATA_VERSION,
                 sourceVisuals: sourceVisuals.map(visual => ({ ...visual, companionPaths: [...visual.companionPaths] }))
             }
         }
         : undefined;
     return {
         type: 'drawnix',
-        version: 1,
+        version: DRAWNIX_EXPORT_VERSION,
         source: 'web',
         elements: [
             ...projection.roots,
@@ -81,6 +84,46 @@ export function stringifyDrawnixMindMapExportedData(data: DrawnixMindMapExported
 
 function isRecord(value: unknown): value is Record<string, unknown> {
     return Boolean(value) && typeof value === 'object' && !Array.isArray(value);
+}
+
+function isSourceVisualAttachment(value: unknown): value is DrawnixSourceVisualAttachment {
+    if (!isRecord(value)
+        || typeof value.id !== 'string'
+        || !value.id.trim()
+        || (value.kind !== 'mermaid' && value.kind !== 'image')
+        || (value.status !== 'resolved' && value.status !== 'unresolved')
+        || typeof value.sourceHash !== 'string'
+        || !Array.isArray(value.companionPaths)
+        || !value.companionPaths.every(path => typeof path === 'string' && path.trim().length > 0)) {
+        return false;
+    }
+
+    return (value.embeddedSvg === undefined || typeof value.embeddedSvg === 'string')
+        && (value.sourceContent === undefined || typeof value.sourceContent === 'string')
+        && (value.title === undefined || typeof value.title === 'string')
+        && (value.lineStart === undefined || typeof value.lineStart === 'number' && Number.isInteger(value.lineStart))
+        && (value.lineEnd === undefined || typeof value.lineEnd === 'number' && Number.isInteger(value.lineEnd));
+}
+
+export function isDrawnixMindMapMetadata(value: unknown): value is DrawnixMindMapMetadata {
+    if (!isRecord(value)) {
+        return false;
+    }
+    const notemd = value.notemd;
+    if (!isRecord(notemd)
+        || notemd.version !== DRAWNIX_SOURCE_VISUAL_METADATA_VERSION
+        || !Array.isArray(notemd.sourceVisuals)) {
+        return false;
+    }
+
+    const ids = new Set<string>();
+    return notemd.sourceVisuals.every(visual => {
+        if (!isSourceVisualAttachment(visual) || ids.has(visual.id)) {
+            return false;
+        }
+        ids.add(visual.id);
+        return true;
+    });
 }
 
 function isMindMapPoint(value: unknown): boolean {
@@ -177,6 +220,9 @@ export function validateDrawnixMindMapExportedData(data: unknown): string[] {
     }
     if (data.source !== 'web') {
         errors.push('drawnix export data source must be "web"');
+    }
+    if (data.metadata !== undefined && !isDrawnixMindMapMetadata(data.metadata)) {
+        errors.push('drawnix export metadata must use the supported notemd source-visual schema version');
     }
     if (!isRecord(data.viewport)) {
         errors.push('drawnix export data viewport must be an object');

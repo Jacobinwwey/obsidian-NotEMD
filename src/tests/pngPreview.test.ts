@@ -132,6 +132,8 @@ describe('png preview rasterizer', () => {
         expect(resolvePreviewExportPpi(600)).toBe(600);
         expect(resolvePreviewExportPpi(601)).toBe(600);
         expect(resolvePreviewExportPpi(450)).toBe(450);
+        expect(resolvePreviewExportPpi('450')).toBe(450);
+        expect(resolvePreviewExportPpi('450ppi')).toBe(300);
         expect(resolvePreviewExportPpi(1200)).toBe(600);
         expect(resolvePreviewExportPpi(Number.NaN)).toBe(300);
     });

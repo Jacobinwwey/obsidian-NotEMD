@@ -2,6 +2,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { buildDrawnixMindMapProjection } from '../diagram/adapters/drawnix/drawnixMindMapProjection';
 import {
+    isDrawnixMindMapMetadata,
     exportDrawnixMindMapProjection,
     stringifyDrawnixMindMapExportedData,
     validateDrawnixMindMapExportedData
@@ -134,5 +135,44 @@ describe('drawnix exporter', () => {
             })
         ]);
         expect(validateDrawnixMindMapExportedData(data)).toEqual([]);
+        expect(isDrawnixMindMapMetadata(data.metadata)).toBe(true);
+    });
+
+    test('rejects unsupported or duplicate source-visual metadata at the schema boundary', () => {
+        const projection = buildDrawnixMindMapProjection(createDrawnixSpec());
+        const data = exportDrawnixMindMapProjection(projection, [{
+            id: 'source-visual-inline',
+            kind: 'mermaid',
+            status: 'resolved',
+            sourceHash: 'inline001',
+            companionPaths: [],
+            embeddedSvg: '<svg><text>Inline Mermaid</text></svg>',
+            sourceContent: 'flowchart TD\nA --> B'
+        }]);
+
+        const unsupportedVersion = {
+            ...data,
+            metadata: {
+                notemd: {
+                    version: 2,
+                    sourceVisuals: data.metadata!.notemd.sourceVisuals
+                }
+            }
+        };
+        expect(isDrawnixMindMapMetadata(unsupportedVersion.metadata)).toBe(false);
+        expect(validateDrawnixMindMapExportedData(unsupportedVersion)).toContain(
+            'drawnix export metadata must use the supported notemd source-visual schema version'
+        );
+
+        const duplicateMetadata = {
+            notemd: {
+                version: 1 as const,
+                sourceVisuals: [
+                    ...data.metadata!.notemd.sourceVisuals,
+                    ...data.metadata!.notemd.sourceVisuals
+                ]
+            }
+        };
+        expect(isDrawnixMindMapMetadata(duplicateMetadata)).toBe(false);
     });
 });

@@ -1,4 +1,4 @@
-import { searchSettingCatalog, SettingCatalogEntry } from './settingSearch';
+import { searchSettingCatalog, SettingCatalogEntry, SettingSearchMatch } from './settingSearch';
 
 export interface SettingsNavigationState {
     query: string;
@@ -7,6 +7,7 @@ export interface SettingsNavigationState {
 }
 
 export interface SettingsNavigationResult {
+    matches: readonly SettingSearchMatch[];
     visibleIds: ReadonlySet<string>;
     visibleCount: number;
     totalCount: number;
@@ -20,6 +21,7 @@ export function resolveSettingsNavigation(
     const matches = searchSettingCatalog([...catalog], state.query)
         .filter(entry => !state.favoritesOnly || state.favoriteIds.has(entry.id));
     return {
+        matches,
         visibleIds: new Set(matches.map(entry => entry.id)),
         visibleCount: matches.length,
         totalCount: catalog.length,

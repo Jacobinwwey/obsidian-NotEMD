@@ -38,6 +38,10 @@ export interface SvgDimensions {
 export const DEFAULT_PREVIEW_EXPORT_PPI = 300;
 export const MIN_PREVIEW_EXPORT_PPI = 72;
 export const MAX_PREVIEW_EXPORT_PPI = 600;
+/**
+ * Legacy convenience presets. `resolvePreviewExportPpi` accepts every integer
+ * value in the inclusive 72-600 range; this list is not a validation allowlist.
+ */
 export const SUPPORTED_PREVIEW_EXPORT_PPI = [100, 300, 600] as const;
 export type SupportedPreviewExportPpi = typeof SUPPORTED_PREVIEW_EXPORT_PPI[number];
 const CSS_PIXELS_PER_INCH = 96;
@@ -66,7 +70,7 @@ export function resolvePreviewExportPpi(value?: number | string | null): number 
         return DEFAULT_PREVIEW_EXPORT_PPI;
     }
 
-    const parsed = typeof value === 'number' ? value : Number.parseInt(value, 10);
+    const parsed = typeof value === 'number' ? value : Number(value);
     if (!Number.isFinite(parsed)) {
         return DEFAULT_PREVIEW_EXPORT_PPI;
     }

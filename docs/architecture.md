@@ -1,6 +1,6 @@
 # Notemd Architecture Overview
 
-> Updated: 2026-07-10
+> Updated: 2026-08-08
 
 ## System Architecture
 
@@ -216,6 +216,8 @@ The managed-runtime boundary is ownership-based rather than name-based. Download
 
 Drawnix source visuals follow the same compatibility boundary. The default **Also export complete Mermaid visuals** setting is off: sanitized Mermaid SVG/source and resolved binary previews are embedded in `.drawnix` metadata, so a generation does not create an `.assets` folder. Enabling the setting writes the complete Mermaid source, SVG, and manifest companions for external handoff. Preview loading checks embedded data first, then legacy companion paths, then rebuilds a Mermaid visual from retained source text; this keeps old artifacts useful even when users clean up their companion folder.
 
+The embedded `metadata.notemd` source-visual manifest uses schema version 1. New readers accept numeric v1 and the legacy string `"1"`; unknown versions are left untouched and do not get guessed into preview panels. Visual IDs are unique within a manifest, and duplicate entries are ignored at the host boundary.
+
 ## Module Map
 
 | Module | Responsibility |
@@ -279,6 +281,12 @@ The gap is smaller than before:
 - The next real gap is therefore no longer the public command entrypoints themselves: typed contracts already exist for `diagram.preview` and `provider.connection.test`, the substantive save/artifact execution path now lives in `src/operations/diagramCommandExecution.ts`, and `diagram.generate` now returns explicit follow-through details (`kind`, `outputPath`, `previewOpened`, `autoFixAttempted`, `artifactTarget`) alongside the backward-compatible top-level `outputPath` / `previewOpened` fields.
 - The maintainer-local semantic verification layer is now no longer just prose: `npm run verify:diagram-semantics` generates a secret-free Markdown checklist template with repo gates, vault-aware CLI checks, and Mermaid / JSON Canvas / Vega-Lite evidence sections without relying on tracked vault paths or live secrets.
 - The ordered convergence path is now explicit: keep `diagram.generate` as the host-neutral core, treat the newly landed typed follow-through as the command-completion layer beneath it, then move to packaging/semantic-verification convergence work and only after that reopen stronger public CLI claims or broader architectural reshaping.
+
+## Implemented Hardening Architecture
+
+The delivered hardening phase keeps the same host-neutral pipeline and makes three boundaries explicit: `DiagramSpec` for semantics and provenance, a target-owned placed projection for geometry/layers/collision diagnostics, and `RenderArtifact` for preview panels, source-visual metadata, optional companions, and export. The document-root presentation policy is source-backed and does not invalidate forest-shaped semantic input. The detailed bilingual delivery record is [Diagram Platform Robustness And Settings Integrity Plan](./brainstorms/2026-08-08-diagram-platform-robustness-and-settings-integrity-plan.md).
+
+The delivered phases cover semantic structure integrity, geometry/layer collision auditing, source-visual rehydration, unified image export, settings discovery/runtime verification, and documentation closure. Full Drawnix host embedding, Mermaid round-tripping as the native path, and PDF-specific re-layout remain rejected.
 
 ## Key Design Decisions
 

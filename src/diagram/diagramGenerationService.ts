@@ -7,7 +7,6 @@ import { DrawioRenderer } from '../rendering/renderers/drawioRenderer';
 import { DrawnixRenderer } from '../rendering/renderers/drawnixRenderer';
 import { CircuitikzRenderer } from '../rendering/renderers/circuitikzRenderer';
 import { RendererRegistry } from '../rendering/rendererRegistry';
-import { RenderArtifact } from '../rendering/types';
 import { RendererService } from '../rendering/rendererService';
 import { NotemdSettings } from '../types';
 import { buildDiagramPlan } from './planner';
@@ -317,6 +316,10 @@ function mergeSpecDefaults(
     plan: DiagramPlan,
     requiredIntent?: DiagramIntent
 ): DiagramSpec {
+    // Source coverage diagnostics are renderer-owned and must never be
+    // accepted from an LLM response as if they were provenance evidence.
+    const llmSpec = { ...spec };
+    delete llmSpec.sourceCoverageDiagnostics;
     const resolvedIntent = requiredIntent === 'drawnixMindmap'
         ? 'drawnixMindmap'
         : resolveLegacyCompatibleIntent(spec, plan);
@@ -336,7 +339,7 @@ function mergeSpecDefaults(
         }));
 
     return {
-        ...spec,
+        ...llmSpec,
         intent: resolvedIntent,
         title: spec.title?.trim() || 'Generated Diagram',
         nodes: normalizedNodes,

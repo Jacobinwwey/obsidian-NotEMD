@@ -700,6 +700,12 @@ describe('Drawnix mind-map renderer', () => {
         });
         expect(nativeRect.y + nativeRect.height <= DRAWNIX_MIND_MAP_HEADER_SAFE_HEIGHT
             || nativeRect.y >= DRAWNIX_MIND_MAP_HEADER_SAFE_HEIGHT).toBe(true);
+        expect(nativeRect).toEqual({
+            x: layout.x,
+            y: layout.y,
+            width: layout.width,
+            height: layout.height
+        });
     });
 
     test('reserves the title and summary band from relation routes and labels', async () => {

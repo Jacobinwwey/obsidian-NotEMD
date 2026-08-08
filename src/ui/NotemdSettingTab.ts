@@ -52,7 +52,7 @@ import { UI_LOCALE_AUTO } from '../i18n/languageContext';
 import { SUPPORTED_UI_LOCALES } from '../i18n/uiLocales';
 import { formatI18n, getI18nStrings } from '../i18n';
 import { createLocalizedSettingMetadataResolver, retainKnownSettingIds } from './settings/settingCatalog';
-import { SettingCatalogEntry } from './settings/settingSearch';
+import { SettingCatalogEntry, SettingSearchMatch } from './settings/settingSearch';
 import { resolveSettingsNavigation } from './settings/SettingsNavigation';
 import { runProviderConnectionTestWithHost } from '../operations/providerConnectionTestCommandHostAdapter';
 import { getFolderTaskFileSelectionProfiles, getFolderTaskRegexValidationError } from '../folderTaskFileSelector';
@@ -82,16 +82,26 @@ type ProviderPanelState = {
     discoveryRequestNonce: number;
 };
 
+type SettingDeclarationOptions = {
+    id?: string;
+    categoryId?: string;
+    categoryLabel?: string;
+    aliases?: string[];
+    elementId?: string;
+};
 
 export class NotemdSettingTab extends PluginSettingTab {
     plugin: NotemdPlugin;
     private providerPanelState = new Map<string, ProviderPanelState>();
     private readonly settingDeclarationCopy = new Map<HTMLElement, { name: string; description: string }>();
+    private readonly settingDeclarationOptions = new Map<HTMLElement, SettingDeclarationOptions>();
+    private settingsDiscoveryCleanup?: () => void;
 
-    private createCatalogSetting(containerEl: HTMLElement): Setting {
+    private createCatalogSetting(containerEl: HTMLElement, options: SettingDeclarationOptions = {}): Setting {
         const setting = new Setting(containerEl);
         const copy = { name: '', description: '' };
         this.settingDeclarationCopy.set(setting.settingEl, copy);
+        this.settingDeclarationOptions.set(setting.settingEl, options);
         const setName = setting.setName.bind(setting);
         const setDesc = setting.setDesc.bind(setting);
         setting.setName = (name) => {
@@ -108,33 +118,44 @@ export class NotemdSettingTab extends PluginSettingTab {
     }
 
     private enhanceSettingsDiscovery(containerEl: HTMLElement): void {
+        this.settingsDiscoveryCleanup?.();
+        this.settingsDiscoveryCleanup = undefined;
         if (typeof containerEl.querySelectorAll !== 'function' || typeof containerEl.prepend !== 'function') {
             return;
         }
         const settingItems = Array.from(containerEl.querySelectorAll<HTMLElement>('.setting-item'));
+        const copy = getI18nStrings({ uiLocale: this.plugin.settings.uiLocale }).settingsDiscovery;
         const resolveSettingMetadata = createLocalizedSettingMetadataResolver(
             getI18nStrings({ uiLocale: this.plugin.settings.uiLocale }) as unknown as Record<string, unknown>,
             getI18nStrings({ uiLocale: 'en' }) as unknown as Record<string, unknown>
         );
         const duplicateCounts = new Map<string, number>();
         let currentCategoryId = 'settings.general';
+        let currentCategoryLabel = copy.allCategories;
         const catalog = settingItems.map((item): SettingCatalogEntry => {
             const declaredCopy = this.settingDeclarationCopy.get(item);
+            const declaration = this.settingDeclarationOptions.get(item) ?? {};
             const name = declaredCopy?.name.trim() ?? '';
             const description = declaredCopy?.description.trim() ?? '';
             const metadata = resolveSettingMetadata(name, description);
-            const baseId = metadata.id;
+            const baseId = declaration.id ?? metadata.id;
             const occurrence = duplicateCounts.get(baseId) ?? 0;
             duplicateCounts.set(baseId, occurrence + 1);
-            const id = occurrence === 0 ? baseId : `${baseId}.${occurrence + 1}`;
-            if (item.matches('.setting-item-heading')) currentCategoryId = id;
+            const id = declaration.id ?? (occurrence === 0 ? baseId : `${baseId}.${occurrence + 1}`);
+            if (item.matches('.setting-item-heading')) {
+                currentCategoryId = declaration.categoryId ?? id;
+                currentCategoryLabel = declaration.categoryLabel ?? (name || currentCategoryId);
+            }
+            const elementId = declaration.elementId
+                ?? `notemd-setting-${id.replace(/[^a-zA-Z0-9_-]+/g, '-')}`;
             return {
                 id,
-                categoryId: currentCategoryId,
+                categoryId: declaration.categoryId ?? currentCategoryId,
+                categoryLabel: declaration.categoryLabel ?? currentCategoryLabel,
                 name,
                 description,
-                aliases: metadata.aliases,
-                advanced: Boolean(item.closest('.notemd-provider-advanced-settings'))
+                aliases: [...new Set([...metadata.aliases, ...(declaration.aliases ?? [])])],
+                elementId
             };
         });
         const retainedFavoriteIds = retainKnownSettingIds(this.plugin.settings.favoriteSettingIds ?? [], catalog.map(entry => entry.id));
@@ -143,7 +164,6 @@ export class NotemdSettingTab extends PluginSettingTab {
             this.plugin.settings.favoriteSettingIds = retainedFavoriteIds;
             void this.plugin.saveSettings();
         }
-        const copy = getI18nStrings({ uiLocale: this.plugin.settings.uiLocale }).settingsDiscovery;
         const header = containerEl.createDiv({ cls: 'notemd-settings-discovery' });
         containerEl.prepend(header);
         const search = header.createEl('input', { type: 'search', placeholder: copy.searchPlaceholder, cls: 'notemd-settings-search' });
@@ -154,44 +174,111 @@ export class NotemdSettingTab extends PluginSettingTab {
         const navigation = header.createEl('select', { cls: 'notemd-settings-category-navigation' });
         navigation.setAttribute('aria-label', copy.categoryNavigationLabel);
         navigation.createEl('option', { text: copy.allCategories, value: '' });
-        const categoryOptions = new Map<string, HTMLOptionElement>();
         const categoryHeadings = new Map<string, HTMLElement>();
         const resultCount = header.createDiv({ cls: 'notemd-settings-result-count' });
         resultCount.setAttribute('aria-live', 'polite');
-        const emptyState = header.createDiv({ cls: 'notemd-settings-empty-state', text: copy.noResults });
-        emptyState.hidden = true;
-        Array.from(containerEl.querySelectorAll<HTMLElement>('h2, .setting-item-heading')).forEach((heading, index) => {
+        const resultPanel = header.createDiv({ cls: 'notemd-settings-search-results' });
+        resultPanel.id = 'notemd-settings-search-results';
+        resultPanel.setAttribute('role', 'listbox');
+        resultPanel.hidden = true;
+        const resultContent = resultPanel.createDiv({ cls: 'notemd-settings-search-results-content' });
+        search.setAttribute('aria-controls', resultPanel.id);
+        search.setAttribute('aria-expanded', 'false');
+        Array.from(containerEl.querySelectorAll<HTMLElement>('.setting-item-heading')).forEach((heading, index) => {
             const label = heading.textContent?.trim();
             if (!label) return;
-            heading.id = `notemd-settings-category-${index}`;
             const settingIndex = settingItems.indexOf(heading);
-            if (settingIndex < 0) return;
-            const categoryId = catalog[settingIndex].id;
-            const option = navigation.createEl('option', { text: label, value: categoryId });
-            categoryOptions.set(categoryId, option);
+            const headingEntry = settingIndex >= 0 ? catalog[settingIndex] : undefined;
+            heading.id = headingEntry?.elementId ?? `notemd-settings-category-${index}`;
+            const categoryId = headingEntry?.categoryId ?? heading.id;
+            navigation.createEl('option', { text: label, value: categoryId });
             categoryHeadings.set(categoryId, heading);
         });
         navigation.onchange = () => {
             categoryHeadings.get(navigation.value)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
         };
+
+        let activeResultIndex = -1;
+        let renderedMatches: readonly SettingSearchMatch[] = [];
+        const closeSearchResults = () => {
+            activeResultIndex = -1;
+            resultPanel.hidden = true;
+            search.setAttribute('aria-expanded', 'false');
+            search.removeAttribute('aria-activedescendant');
+        };
+        const updateActiveResult = () => {
+            const options = Array.from(resultContent.querySelectorAll<HTMLElement>('[role="option"]'));
+            options.forEach((option, index) => option.setAttribute('aria-selected', String(index === activeResultIndex)));
+            const activeOption = activeResultIndex >= 0 ? options[activeResultIndex] : undefined;
+            if (activeOption) {
+                search.setAttribute('aria-activedescendant', activeOption.id);
+                activeOption.scrollIntoView({ block: 'nearest' });
+            } else {
+                search.removeAttribute('aria-activedescendant');
+            }
+        };
+        const focusMatch = (match: SettingSearchMatch) => {
+            const target = containerEl.ownerDocument?.getElementById(match.elementId);
+            if (!target) return;
+            target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            target.classList.add('notemd-setting-search-target');
+            window.setTimeout(() => target.classList.remove('notemd-setting-search-target'), 1400);
+            target.querySelector<HTMLElement>('input, select, textarea, button:not(.notemd-setting-favorite-button)')?.focus({ preventScroll: true });
+            closeSearchResults();
+        };
+        const renderSearchResults = (matches: readonly SettingSearchMatch[]) => {
+            renderedMatches = matches;
+            resultContent.empty();
+            const query = search.value.trim();
+            if (!query) {
+                closeSearchResults();
+                return;
+            }
+            resultPanel.hidden = false;
+            search.setAttribute('aria-expanded', 'true');
+            if (matches.length === 0) {
+                resultContent.createDiv({ cls: 'notemd-settings-empty-state', text: copy.noResults });
+                activeResultIndex = -1;
+                updateActiveResult();
+                return;
+            }
+            activeResultIndex = 0;
+            matches.forEach((match, index) => {
+                const option = resultContent.createDiv({ cls: 'notemd-settings-search-result' });
+                option.id = `${match.elementId}-result`;
+                option.setAttribute('role', 'option');
+                option.dataset.settingId = match.id;
+                option.setAttribute('aria-selected', String(index === activeResultIndex));
+                option.createDiv({ cls: 'notemd-settings-search-result-name', text: match.name });
+                option.createDiv({ cls: 'notemd-settings-search-result-description', text: match.description });
+                option.createDiv({ cls: 'notemd-settings-search-result-category', text: match.categoryLabel });
+                option.addEventListener('pointerdown', event => {
+                    event.preventDefault();
+                    focusMatch(match);
+                });
+                option.addEventListener('mouseenter', () => {
+                    activeResultIndex = index;
+                    updateActiveResult();
+                });
+            });
+            updateActiveResult();
+        };
         const applyFilter = () => {
             const navigationState = resolveSettingsNavigation(catalog, { query: search.value, favoritesOnly, favoriteIds: favorites });
             settingItems.forEach((item, index) => {
-                const settingId = catalog[index].id;
-                const hidden = !navigationState.visibleIds.has(settingId);
+                const entry = catalog[index];
+                const hidden = item.matches('.setting-item-heading')
+                    ? !navigationState.visibleCategoryIds.has(entry.categoryId)
+                    : !navigationState.visibleIds.has(entry.id);
                 item.toggleAttribute('hidden', hidden);
             });
-            categoryOptions.forEach((option, categoryId) => {
-                const visible = navigationState.visibleCategoryIds.has(categoryId);
-                option.hidden = !visible;
-                option.disabled = !visible;
-            });
-            if (navigation.value && !navigationState.visibleCategoryIds.has(navigation.value)) navigation.value = '';
             resultCount.setText(formatI18n(copy.resultCount, { visible: navigationState.visibleCount, total: navigationState.totalCount }));
-            emptyState.hidden = navigationState.visibleCount !== 0;
+            renderSearchResults(navigationState.matches);
         };
         settingItems.forEach((item, index) => {
-            const settingId = catalog[index].id;
+            const setting = catalog[index];
+            const settingId = setting.id;
+            item.id = setting.elementId;
             item.dataset.notemdSettingId = settingId;
             const star = item.createEl('button', { text: favorites.has(settingId) ? '★' : '☆', cls: 'notemd-setting-favorite-button' });
             star.type = 'button';
@@ -206,12 +293,39 @@ export class NotemdSettingTab extends PluginSettingTab {
             };
         });
         search.addEventListener('input', applyFilter);
+        search.addEventListener('keydown', event => {
+            if (event.key === 'Escape') {
+                event.preventDefault();
+                closeSearchResults();
+                return;
+            }
+            if (resultPanel.hidden || renderedMatches.length === 0) return;
+            if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+                event.preventDefault();
+                const delta = event.key === 'ArrowDown' ? 1 : -1;
+                activeResultIndex = (activeResultIndex + delta + renderedMatches.length) % renderedMatches.length;
+                updateActiveResult();
+            } else if (event.key === 'Enter' && activeResultIndex >= 0) {
+                event.preventDefault();
+                focusMatch(renderedMatches[activeResultIndex]);
+            }
+        });
+        search.addEventListener('blur', () => {
+            window.setTimeout(() => {
+                if (!header.contains(containerEl.ownerDocument?.activeElement)) closeSearchResults();
+            }, 0);
+        });
         favoritesButton.onclick = () => {
             favoritesOnly = !favoritesOnly;
             favoritesButton.toggleClass('is-active', favoritesOnly);
             favoritesButton.setAttribute('aria-pressed', String(favoritesOnly));
             applyFilter();
         };
+        const outsidePointer = (event: Event) => {
+            if (!header.contains(event.target as Node)) closeSearchResults();
+        };
+        containerEl.ownerDocument?.addEventListener('pointerdown', outsidePointer, true);
+        this.settingsDiscoveryCleanup = () => containerEl.ownerDocument?.removeEventListener('pointerdown', outsidePointer, true);
         applyFilter();
     }
 
@@ -1723,6 +1837,9 @@ export class NotemdSettingTab extends PluginSettingTab {
         const { containerEl } = this;
         containerEl.empty();
         this.settingDeclarationCopy.clear();
+        this.settingDeclarationOptions.clear();
+        this.settingsDiscoveryCleanup?.();
+        this.settingsDiscoveryCleanup = undefined;
         const i18n = getI18nStrings({ uiLocale: this.plugin.settings.uiLocale });
         const providerI18n = i18n.settings.providerConfig;
         const multiModelI18n = i18n.settings.multiModel;
@@ -2457,9 +2574,13 @@ export class NotemdSettingTab extends PluginSettingTab {
 
         const experimentalDiagramI18n = i18n.settings.developer.experimentalDiagramPipeline;
 
-        this.createCatalogSetting(containerEl).setName(experimentalDiagramI18n.heading).setHeading();
+        this.createCatalogSetting(containerEl, {
+            id: 'settings.experimentalDiagramPipeline',
+            categoryId: 'settings.experimentalDiagramPipeline',
+            categoryLabel: experimentalDiagramI18n.heading
+        }).setName(experimentalDiagramI18n.heading).setHeading();
 
-        this.createCatalogSetting(containerEl)
+        this.createCatalogSetting(containerEl, { id: 'settings.experimentalDiagramPipeline.enable' })
             .setName(experimentalDiagramI18n.enableName)
             .setDesc(experimentalDiagramI18n.enableDesc)
             .addToggle(toggle => toggle
@@ -2470,7 +2591,7 @@ export class NotemdSettingTab extends PluginSettingTab {
                     this.display();
                 }));
 
-        this.createCatalogSetting(containerEl)
+        this.createCatalogSetting(containerEl, { id: 'settings.experimentalDiagramPipeline.compatibility' })
             .setName(experimentalDiagramI18n.compatibilityName)
             .setDesc(experimentalDiagramI18n.compatibilityDesc)
             .addDropdown(dropdown => {
@@ -2484,7 +2605,7 @@ export class NotemdSettingTab extends PluginSettingTab {
                     });
             });
 
-        this.createCatalogSetting(containerEl)
+        this.createCatalogSetting(containerEl, { id: 'settings.experimentalDiagramPipeline.intent' })
             .setName(experimentalDiagramI18n.intentName)
             .setDesc(experimentalDiagramI18n.intentDesc)
             .addDropdown(dropdown => {
@@ -2509,7 +2630,7 @@ export class NotemdSettingTab extends PluginSettingTab {
                     });
             });
 
-        this.createCatalogSetting(containerEl)
+        this.createCatalogSetting(containerEl, { id: 'settings.experimentalDiagramPipeline.renderTarget' })
             .setName(experimentalDiagramI18n.renderTargetName)
             .setDesc(experimentalDiagramI18n.renderTargetDesc)
             .addDropdown(dropdown => {
@@ -2534,11 +2655,17 @@ export class NotemdSettingTab extends PluginSettingTab {
                     });
             });
 
-        this.createCatalogSetting(containerEl)
+        this.createCatalogSetting(containerEl, {
+            id: 'settings.experimentalDiagramPipeline.previewExport',
+            categoryId: 'settings.experimentalDiagramPipeline.previewExport',
+            categoryLabel: experimentalDiagramI18n.previewExportHeading
+        }).setName(experimentalDiagramI18n.previewExportHeading).setHeading();
+
+        this.createCatalogSetting(containerEl, { id: 'settings.experimentalDiagramPipeline.exportFormats' })
             .setName(experimentalDiagramI18n.exportFormatsName)
             .setDesc(experimentalDiagramI18n.exportFormatsDesc);
 
-        this.createCatalogSetting(containerEl)
+        this.createCatalogSetting(containerEl, { id: 'settings.experimentalDiagramPipeline.diagramPreviewExportPpi' })
             .setName(experimentalDiagramI18n.exportPpiName)
             .setDesc(experimentalDiagramI18n.exportPpiDesc)
             .addText(text => {
@@ -2556,7 +2683,7 @@ export class NotemdSettingTab extends PluginSettingTab {
                 text.inputEl.step = '1';
             });
 
-        this.createCatalogSetting(containerEl)
+        this.createCatalogSetting(containerEl, { id: 'settings.experimentalDiagramPipeline.drawnixCompanions' })
             .setName(experimentalDiagramI18n.drawnixExportMermaidCompanionsName)
             .setDesc(experimentalDiagramI18n.drawnixExportMermaidCompanionsDesc)
             .addToggle(toggle => toggle
@@ -2566,7 +2693,13 @@ export class NotemdSettingTab extends PluginSettingTab {
                     await this.plugin.saveSettings();
                 }));
 
-        this.createCatalogSetting(containerEl)
+        this.createCatalogSetting(containerEl, {
+            id: 'settings.experimentalDiagramPipeline.circuitikz',
+            categoryId: 'settings.experimentalDiagramPipeline.circuitikz',
+            categoryLabel: experimentalDiagramI18n.circuitikzHeading
+        }).setName(experimentalDiagramI18n.circuitikzHeading).setHeading();
+
+        this.createCatalogSetting(containerEl, { id: 'settings.experimentalDiagramPipeline.nativeEnvironment' })
             .setName(experimentalDiagramI18n.nativeEnvironmentName)
             .setDesc(experimentalDiagramI18n.nativeEnvironmentDesc)
             .addButton(button => button

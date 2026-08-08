@@ -12,6 +12,11 @@ export interface DrawnixCrossRootRoute {
     warning?: string;
 }
 
+export interface DrawnixRelationLabelSize {
+    width: number;
+    height: number;
+}
+
 /**
  * A non-node rectangle that a relation route must not cross.
  *
@@ -37,6 +42,12 @@ export interface DrawnixCrossRootRouterInput {
     regions: readonly DrawnixRootRegion[];
     canvasWidth: number;
     canvasHeight: number;
+    /**
+     * The native arrow text is centered on the route. Supplying its measured
+     * box lets lane selection reserve the same geometry that SVG/Drawnix will
+     * render instead of discovering an overlap after routing.
+     */
+    labelSize?: DrawnixRelationLabelSize;
 }
 
 const ROUTE_CLEARANCE = 28;
@@ -139,12 +150,14 @@ function deduplicate(values: number[]): number[] {
     return Array.from(new Set(values.filter(Number.isFinite).map(value => Math.round(value * 100) / 100))).sort((a, b) => a - b);
 }
 
-function clampRouteX(value: number, canvasWidth: number): number {
-    return Math.max(ROUTE_CLEARANCE, Math.min(canvasWidth - ROUTE_CLEARANCE, value));
+function clampRouteX(value: number, canvasWidth: number, labelHalfWidth = 0): number {
+    const inset = ROUTE_CLEARANCE + labelHalfWidth;
+    return Math.max(inset, Math.min(canvasWidth - inset, value));
 }
 
-function clampRouteY(value: number, canvasHeight: number): number {
-    return Math.max(ROUTE_CLEARANCE, Math.min(canvasHeight - ROUTE_CLEARANCE, value));
+function clampRouteY(value: number, canvasHeight: number, labelHalfHeight = 0): number {
+    const inset = ROUTE_CLEARANCE + labelHalfHeight;
+    return Math.max(inset, Math.min(canvasHeight - inset, value));
 }
 
 function simplify(points: DrawnixPoint[]): DrawnixPoint[] {
@@ -181,12 +194,14 @@ function buildLocalLaneRoute(
     start: DrawnixPoint,
     end: DrawnixPoint,
     relationIndex: number,
-    canvasWidth: number
+    canvasWidth: number,
+    labelSize?: DrawnixRelationLabelSize
 ): DrawnixPoint[] {
+    const labelHalfWidth = (labelSize?.width ?? 0) / 2;
     const sourceIsLeft = start[0] <= end[0];
     const laneX = sourceIsLeft
-        ? clampRouteX(Math.max(start[0], end[0]) + 42 + relationIndex * 18, canvasWidth)
-        : clampRouteX(Math.min(start[0], end[0]) - 42 - relationIndex * 18, canvasWidth);
+        ? clampRouteX(Math.max(start[0], end[0]) + 42 + relationIndex * 18, canvasWidth, labelHalfWidth)
+        : clampRouteX(Math.min(start[0], end[0]) - 42 - relationIndex * 18, canvasWidth, labelHalfWidth);
     return simplify([start, [laneX, start[1]], [laneX, end[1]], end]);
 }
 
@@ -197,16 +212,19 @@ function buildBoundedOuterLaneRoute(
     target: DrawnixMindMapPlacedNode,
     obstacles: readonly RouteRect[],
     canvasWidth: number,
-    canvasHeight: number
+    canvasHeight: number,
+    labelSize?: DrawnixRelationLabelSize
 ): DrawnixPoint[] | null {
     if (obstacles.length === 0) {
         return null;
     }
 
-    const left = Math.max(ROUTE_CLEARANCE, Math.min(...obstacles.map(rect => rect.x)) - ROUTE_CLEARANCE);
-    const right = Math.min(canvasWidth - ROUTE_CLEARANCE, Math.max(...obstacles.map(rect => rect.x + rect.width)) + ROUTE_CLEARANCE);
-    const top = Math.max(ROUTE_CLEARANCE, Math.min(...obstacles.map(rect => rect.y)) - ROUTE_CLEARANCE);
-    const bottom = Math.min(canvasHeight - ROUTE_CLEARANCE, Math.max(...obstacles.map(rect => rect.y + rect.height)) + ROUTE_CLEARANCE);
+    const labelHalfWidth = (labelSize?.width ?? 0) / 2;
+    const labelHalfHeight = (labelSize?.height ?? 0) / 2;
+    const left = clampRouteX(Math.min(...obstacles.map(rect => rect.x)) - ROUTE_CLEARANCE, canvasWidth, labelHalfWidth);
+    const right = clampRouteX(Math.max(...obstacles.map(rect => rect.x + rect.width)) + ROUTE_CLEARANCE, canvasWidth, labelHalfWidth);
+    const top = clampRouteY(Math.min(...obstacles.map(rect => rect.y)) - ROUTE_CLEARANCE, canvasHeight, labelHalfHeight);
+    const bottom = clampRouteY(Math.max(...obstacles.map(rect => rect.y + rect.height)) + ROUTE_CLEARANCE, canvasHeight, labelHalfHeight);
     const sourceIsLeft = center(source)[0] < center(target)[0];
     const sourceLane = sourceIsLeft ? right : left;
     const targetLane = sourceIsLeft ? left : right;
@@ -226,38 +244,48 @@ function buildNodeAwareRoute(
     nodes: readonly DrawnixMindMapPlacedNode[],
     extraObstacles: readonly RouteRect[],
     canvasWidth: number,
-    canvasHeight: number
+    canvasHeight: number,
+    labelSize?: DrawnixRelationLabelSize
 ): DrawnixPoint[] | null {
     const nodeObstacles = buildNodeObstacles(nodes, source.id, target.id);
     const obstacles = [...nodeObstacles, ...extraObstacles];
+    const labelHalfWidth = (labelSize?.width ?? 0) / 2;
+    const labelHalfHeight = (labelSize?.height ?? 0) / 2;
     const sourceIsLeft = center(source)[0] < center(target)[0];
     const laneCandidates = sourceIsLeft
         ? [
-            clampRouteX(target.x - ROUTE_CLEARANCE - relationIndex * 18, canvasWidth),
-            clampRouteX(source.x + source.width + ROUTE_CLEARANCE + relationIndex * 18, canvasWidth)
+            clampRouteX(target.x - ROUTE_CLEARANCE - relationIndex * 18, canvasWidth, labelHalfWidth),
+            clampRouteX(source.x + source.width + ROUTE_CLEARANCE + relationIndex * 18, canvasWidth, labelHalfWidth)
         ]
         : [
-            clampRouteX(target.x + target.width + ROUTE_CLEARANCE + relationIndex * 18, canvasWidth),
-            clampRouteX(source.x - ROUTE_CLEARANCE - relationIndex * 18, canvasWidth)
+            clampRouteX(target.x + target.width + ROUTE_CLEARANCE + relationIndex * 18, canvasWidth, labelHalfWidth),
+            clampRouteX(source.x - ROUTE_CLEARANCE - relationIndex * 18, canvasWidth, labelHalfWidth)
         ];
-
-    for (const laneX of laneCandidates) {
-        const points = simplify([start, [laneX, start[1]], [laneX, end[1]], end]);
-        if (points.length > 2 && routeSegmentsAreClear(points, obstacles)) {
-            return points;
-        }
-    }
 
     const obstacleTop = Math.min(...obstacles.map(rect => rect.y));
     const obstacleBottom = Math.max(...obstacles.map(rect => rect.y + rect.height));
-    const topLane = Math.max(ROUTE_CLEARANCE, obstacleTop - OUTER_ROUTE_MARGIN);
-    const bottomLane = Math.min(canvasHeight - ROUTE_CLEARANCE, obstacleBottom + OUTER_ROUTE_MARGIN);
+    const topLane = Math.max(ROUTE_CLEARANCE + labelHalfHeight, obstacleTop - OUTER_ROUTE_MARGIN - labelHalfHeight);
+    const bottomLane = Math.min(canvasHeight - ROUTE_CLEARANCE - labelHalfHeight, obstacleBottom + OUTER_ROUTE_MARGIN + labelHalfHeight);
     const laneCandidatesY = [
-        clampRouteY(topLane + relationIndex * 18, canvasHeight),
-        clampRouteY(bottomLane - relationIndex * 18, canvasHeight)
+        clampRouteY(topLane + relationIndex * 18, canvasHeight, labelHalfHeight),
+        clampRouteY(bottomLane - relationIndex * 18, canvasHeight, labelHalfHeight)
     ];
-    for (const laneY of laneCandidatesY) {
-        const points = simplify([start, [start[0], laneY], [end[0], laneY], end]);
+
+    // A native text box is centered on the route. Prefer a long horizontal
+    // corridor when a label is present so short endpoint segments cannot trap
+    // the box against the source or target node.
+    const laneRoutes = [
+        ...(labelSize
+            ? laneCandidatesY.map(laneY => simplify([start, [start[0], laneY], [end[0], laneY], end]))
+            : []),
+        ...(labelSize
+            ? []
+            : laneCandidates.map(laneX => simplify([start, [laneX, start[1]], [laneX, end[1]], end]))),
+        ...(labelSize
+            ? laneCandidates.map(laneX => simplify([start, [laneX, start[1]], [laneX, end[1]], end]))
+            : laneCandidatesY.map(laneY => simplify([start, [start[0], laneY], [end[0], laneY], end])))
+    ];
+    for (const points of laneRoutes) {
         if (points.length > 2 && routeSegmentsAreClear(points, obstacles)) {
             return points;
         }
@@ -270,7 +298,8 @@ function buildNodeAwareRoute(
         target,
         obstacles,
         canvasWidth,
-        canvasHeight
+        canvasHeight,
+        labelSize
     );
     if (boundedOuterRoute) {
         return boundedOuterRoute;
@@ -279,8 +308,8 @@ function buildNodeAwareRoute(
     // A final bounded lane keeps the result deterministic when the supplied canvas
     // is smaller than the node extents. The caller still validates the route.
     const boundedLaneX = sourceIsLeft
-        ? Math.min(canvasWidth - ROUTE_CLEARANCE, Math.max(start[0], end[0]) + ROUTE_CLEARANCE)
-        : Math.max(ROUTE_CLEARANCE, Math.min(start[0], end[0]) - ROUTE_CLEARANCE);
+        ? clampRouteX(Math.max(start[0], end[0]) + ROUTE_CLEARANCE, canvasWidth, labelHalfWidth)
+        : clampRouteX(Math.min(start[0], end[0]) - ROUTE_CLEARANCE, canvasWidth, labelHalfWidth);
     const boundedPoints = simplify([start, [boundedLaneX, start[1]], [boundedLaneX, end[1]], end]);
     return routeSegmentsAreClear(boundedPoints, obstacles) ? boundedPoints : null;
 }
@@ -290,21 +319,32 @@ function buildParallelLaneRoute(
     end: DrawnixPoint,
     relationIndex: number,
     obstacles: readonly RouteRect[],
-    canvasHeight: number
+    canvasHeight: number,
+    labelSize?: DrawnixRelationLabelSize
 ): DrawnixPoint[] | null {
     if (relationIndex <= 0) {
         return null;
     }
 
-    const laneSpacing = ROUTE_CLEARANCE + relationIndex * 18;
-    const offsets = [
-        laneSpacing,
-        -laneSpacing,
-        laneSpacing * 2,
-        -laneSpacing * 2
-    ];
-    for (const offset of offsets) {
-        const laneY = Math.max(ROUTE_CLEARANCE, Math.min(canvasHeight - ROUTE_CLEARANCE, start[1] + offset));
+    // Repeated relations are laid out against the obstacle envelope, not the
+    // source center. Node-aware routing often selects the first clear bottom
+    // lane below that envelope; using the same base for later relations keeps
+    // their native text boxes separated even when labels are multi-line.
+    const obstacleTop = Math.min(start[1], end[1], ...obstacles.map(rect => rect.y));
+    const obstacleBottom = Math.max(start[1], end[1], ...obstacles.map(rect => rect.y + rect.height));
+    const labelHeight = labelSize?.height ?? 0;
+    const labelHalfHeight = labelHeight / 2;
+    const labelGap = labelHeight > 0 ? labelHeight + 24 : 96;
+    const laneStep = Math.max(OUTER_ROUTE_MARGIN, labelGap + ROUTE_CLEARANCE);
+    const bottomBase = obstacleBottom + OUTER_ROUTE_MARGIN;
+    const topBase = obstacleTop - OUTER_ROUTE_MARGIN;
+    const offsets = Array.from({ length: 8 }, (_, index) => index + relationIndex)
+        .flatMap(multiplier => [
+            bottomBase + multiplier * laneStep,
+            topBase - multiplier * laneStep
+        ]);
+    for (const candidateY of offsets) {
+        const laneY = clampRouteY(candidateY, canvasHeight, labelHalfHeight);
         const points = simplify([start, [start[0], laneY], [end[0], laneY], end]);
         if (points.length > 2 && points.slice(1).every((point, index) => segmentClear(points[index], point, obstacles))) {
             return points;
@@ -318,29 +358,32 @@ function buildGridRoute(
     end: DrawnixPoint,
     obstacles: readonly RouteRect[],
     canvasWidth: number,
-    canvasHeight: number
+    canvasHeight: number,
+    labelSize?: DrawnixRelationLabelSize
 ): DrawnixPoint[] | null {
     // Keep fallback routes inside the exported canvas. A negative perimeter
     // coordinate is clipped by SVG/Drawnix and appears as a false dashed frame
     // along the page edge, which can obscure the title or summary.
-    const outerLeft = ROUTE_CLEARANCE;
-    const outerRight = Math.max(ROUTE_CLEARANCE, canvasWidth - ROUTE_CLEARANCE);
-    const outerTop = ROUTE_CLEARANCE;
-    const outerBottom = Math.max(ROUTE_CLEARANCE, canvasHeight - ROUTE_CLEARANCE);
+    const labelHalfWidth = (labelSize?.width ?? 0) / 2;
+    const labelHalfHeight = (labelSize?.height ?? 0) / 2;
+    const outerLeft = ROUTE_CLEARANCE + labelHalfWidth;
+    const outerRight = Math.max(outerLeft, canvasWidth - ROUTE_CLEARANCE - labelHalfWidth);
+    const outerTop = ROUTE_CLEARANCE + labelHalfHeight;
+    const outerBottom = Math.max(outerTop, canvasHeight - ROUTE_CLEARANCE - labelHalfHeight);
     const xs = deduplicate([
         start[0],
         end[0],
         outerLeft,
         outerRight,
         ...obstacles.flatMap(rect => [rect.x - ROUTE_CLEARANCE, rect.x + rect.width + ROUTE_CLEARANCE])
-    ]).filter(x => x >= ROUTE_CLEARANCE && x <= canvasWidth - ROUTE_CLEARANCE);
+    ]).filter(x => x >= outerLeft && x <= outerRight);
     const ys = deduplicate([
         start[1],
         end[1],
         outerTop,
         outerBottom,
         ...obstacles.flatMap(rect => [rect.y - ROUTE_CLEARANCE, rect.y + rect.height + ROUTE_CLEARANCE])
-    ]).filter(y => y >= ROUTE_CLEARANCE && y <= canvasHeight - ROUTE_CLEARANCE);
+    ]).filter(y => y >= outerTop && y <= outerBottom);
 
     const points: DrawnixPoint[] = [];
     const nodeByCoordinate = new Map<string, number>();
@@ -438,12 +481,15 @@ function buildOuterLaneRoute(
     end: DrawnixPoint,
     obstacles: readonly RouteRect[],
     canvasWidth: number,
-    canvasHeight: number
+    canvasHeight: number,
+    labelSize?: DrawnixRelationLabelSize
 ): DrawnixPoint[] | null {
-    const left = ROUTE_CLEARANCE;
-    const right = Math.max(ROUTE_CLEARANCE, canvasWidth - ROUTE_CLEARANCE);
-    const top = ROUTE_CLEARANCE;
-    const bottom = Math.max(ROUTE_CLEARANCE, canvasHeight - ROUTE_CLEARANCE);
+    const labelHalfWidth = (labelSize?.width ?? 0) / 2;
+    const labelHalfHeight = (labelSize?.height ?? 0) / 2;
+    const left = ROUTE_CLEARANCE + labelHalfWidth;
+    const right = Math.max(left, canvasWidth - ROUTE_CLEARANCE - labelHalfWidth);
+    const top = ROUTE_CLEARANCE + labelHalfHeight;
+    const bottom = Math.max(top, canvasHeight - ROUTE_CLEARANCE - labelHalfHeight);
     const candidates: DrawnixPoint[][] = [
         [start, [left, start[1]], [left, top], [right, top], [right, end[1]], end],
         [start, [right, start[1]], [right, top], [left, top], [left, end[1]], end],
@@ -466,6 +512,27 @@ export function routeDrawnixCrossRootRelation(input: DrawnixCrossRootRouterInput
         ...protectedObstacles
     ];
 
+    // Duplicate same-root relations must receive distinct lanes before the
+    // general node-aware shortcut runs. Otherwise both arrows can share one
+    // polyline and their native text rectangles become indistinguishable.
+    if (source.rootId === target.rootId && input.nodes && input.nodes.length > 0 && input.relationIndex > 0) {
+        const parallelObstacles = [
+            ...buildNodeObstacles(input.nodes, source.id, target.id),
+            ...protectedObstacles
+        ];
+        const parallelLaneRoute = buildParallelLaneRoute(
+            start,
+            end,
+            input.relationIndex,
+            parallelObstacles,
+            input.canvasHeight,
+            input.labelSize
+        );
+        if (parallelLaneRoute) {
+            return { points: parallelLaneRoute, strategy: 'local-lane' };
+        }
+    }
+
     if (input.nodes && input.nodes.length > 0) {
         const nodeAwareRoute = buildNodeAwareRoute(
             start,
@@ -476,7 +543,8 @@ export function routeDrawnixCrossRootRelation(input: DrawnixCrossRootRouterInput
             input.nodes,
             source.rootId === target.rootId ? protectedObstacles : unrelatedObstacles,
             input.canvasWidth,
-            input.canvasHeight
+            input.canvasHeight,
+            input.labelSize
         );
         if (nodeAwareRoute) {
             return {
@@ -497,7 +565,8 @@ export function routeDrawnixCrossRootRelation(input: DrawnixCrossRootRouterInput
                 end,
                 nodeObstacles,
                 input.canvasWidth,
-                input.canvasHeight
+                input.canvasHeight,
+                input.labelSize
             );
             if (gridRoute) {
                 return {
@@ -513,7 +582,7 @@ export function routeDrawnixCrossRootRelation(input: DrawnixCrossRootRouterInput
             );
         }
         return {
-            points: buildLocalLaneRoute(start, end, input.relationIndex, input.canvasWidth),
+            points: buildLocalLaneRoute(start, end, input.relationIndex, input.canvasWidth, input.labelSize),
             strategy: 'local-lane'
         };
     }
@@ -523,18 +592,33 @@ export function routeDrawnixCrossRootRelation(input: DrawnixCrossRootRouterInput
         end,
         input.relationIndex,
         unrelatedObstacles,
-        input.canvasHeight
+        input.canvasHeight,
+        input.labelSize
     );
     if (parallelLaneRoute) {
         return { points: parallelLaneRoute, strategy: 'grid' };
     }
 
-    const gridRoute = buildGridRoute(start, end, unrelatedObstacles, input.canvasWidth, input.canvasHeight);
+    const gridRoute = buildGridRoute(
+        start,
+        end,
+        unrelatedObstacles,
+        input.canvasWidth,
+        input.canvasHeight,
+        input.labelSize
+    );
     if (gridRoute) {
         return { points: gridRoute, strategy: 'grid' };
     }
 
-    const outerRoute = buildOuterLaneRoute(start, end, unrelatedObstacles, input.canvasWidth, input.canvasHeight);
+    const outerRoute = buildOuterLaneRoute(
+        start,
+        end,
+        unrelatedObstacles,
+        input.canvasWidth,
+        input.canvasHeight,
+        input.labelSize
+    );
     if (outerRoute) {
         return {
             points: outerRoute,

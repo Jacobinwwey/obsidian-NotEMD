@@ -1,6 +1,6 @@
 # Notemd 系统架构总览
 
-> 更新：2026-07-10
+> 更新：2026-08-08
 
 ## 系统架构
 
@@ -216,6 +216,8 @@ Circuitikz 支持仍然是受约束的。前端设置无需开启 Developer mode
 
 Drawnix 源图形遵循同一条兼容性边界。默认关闭 **同时完整输出 Mermaid 图**：安全清理后的 Mermaid SVG/源代码与已解析的二进制预览会内嵌在 `.drawnix` metadata 中，因此生成不会创建 `.assets` 文件夹。开启设置后，才会写出用于外部交接的完整 Mermaid 源码、SVG 与 manifest companion。预览加载顺序是内嵌数据、旧 companion 路径，最后从 metadata 中保留的源文本重建 Mermaid 图；即使用户清理了旧 companion 目录，旧 artifact 仍然可用。
 
+内嵌的 `metadata.notemd` source-visual manifest 使用 schema version 1。新读取器接受数字 v1 和旧的字符串 `"1"`；未知版本会保持不变，不会被猜测成预览面板。一个 manifest 内的 visual ID 必须唯一，重复项会在 host 边界被忽略。
+
 ## 模块地图
 
 | 模块 | 职责 |
@@ -279,6 +281,12 @@ Drawnix 源图形遵循同一条兼容性边界。默认关闭 **同时完整输
 - 当前真正剩余的缺口因此已经不是公共 command entrypoint 本身：`diagram.preview` 与 `provider.connection.test` 现已具备 typed contract，save/artifact 的实质执行路径也已进入 `src/operations/diagramCommandExecution.ts`，而 `diagram.generate` 现在也会返回显式的 follow-through 细节（`kind`、`outputPath`、`previewOpened`、`autoFixAttempted`、`artifactTarget`），同时继续保留向后兼容的顶层 `outputPath` / `previewOpened` 字段。
 - 维护者本地语义核验层现在也不再只是文字说明：`npm run verify:diagram-semantics` 已能生成无 secrets 的 Markdown 检查模板，其中包含仓库硬门、vault 感知的 CLI 检查命令，以及 Mermaid / JSON Canvas / Vega-Lite 的证据区块，不依赖仓库中跟踪的 vault 路径或 live 凭据。
 - 下一阶段顺序已经明确：先把 `diagram.generate` 保持为宿主无关 core，把这批已落地的 typed follow-through 视作其下的 command-completion 层，再做 packaging / semantic verification 的后续收敛，最后才重开更强 public CLI 声明或更大规模的结构重排。
+
+## 已实现的加固架构
+
+已交付的加固阶段保留宿主无关管线，并明确三条边界：`DiagramSpec` 负责语义与 provenance；目标专属的 placed projection 负责几何、层级和碰撞诊断；`RenderArtifact` 负责预览面板、源图形 metadata、可选 companion 和导出。document root 是源文档展示策略，不会否定 forest 形态的语义输入。详细的双语交付记录见[图形平台稳健性与设置真值推进方案](./brainstorms/2026-08-08-diagram-platform-robustness-and-settings-integrity-plan.zh-CN.md)。
+
+已交付阶段覆盖：语义结构真值、几何/层级碰撞审计、源图形 rehydrate、统一图片导出、设置发现与运行时验证、文档收口。完整 Drawnix 宿主嵌入、Mermaid round-trip 作为原生路径，以及 PDF 专用重新布局仍然拒绝。
 
 ## 关键设计决策
 
