@@ -30,6 +30,7 @@ export interface DiagramGenerationOptions {
     llmInvoker: (systemPrompt: string, sourceMarkdown: string) => Promise<string>;
     rendererService?: RendererService;
     sourceVisuals?: readonly ResolvedSourceVisual[];
+    drawnixExportMermaidCompanions?: boolean;
 }
 
 export type DiagramOperationOutputMode = 'artifact' | 'mermaid';
@@ -45,13 +46,14 @@ export interface DiagramOperationInput {
     outputMode: DiagramOperationOutputMode;
     targetLanguage?: string;
     sourceVisuals?: readonly ResolvedSourceVisual[];
+    drawnixExportMermaidCompanions?: boolean;
 }
 
 export interface BuildDiagramOperationInputParams {
     sourcePath?: string;
     sourceMarkdown: string;
     executionMode: DiagramOperationExecutionMode;
-    settings: Pick<NotemdSettings, 'preferredDiagramIntent' | 'preferredDiagramRenderTarget' | 'experimentalDiagramCompatibilityMode' | 'summarizeToMermaidLanguage'>;
+    settings: Pick<NotemdSettings, 'preferredDiagramIntent' | 'preferredDiagramRenderTarget' | 'experimentalDiagramCompatibilityMode' | 'summarizeToMermaidLanguage' | 'drawnixExportMermaidCompanions'>;
     targetLanguage?: string;
     requestedIntentOverride?: DiagramIntent;
     requestedRenderTargetOverride?: RenderTarget;
@@ -110,7 +112,8 @@ export function buildDiagramOperationInput(params: BuildDiagramOperationInputPar
         outputMode: params.executionMode === 'save-mermaid' ? 'mermaid' : 'artifact',
         targetLanguage: params.targetLanguageOverride
             ?? params.targetLanguage
-            ?? params.settings.summarizeToMermaidLanguage
+            ?? params.settings.summarizeToMermaidLanguage,
+        drawnixExportMermaidCompanions: params.settings.drawnixExportMermaidCompanions
     };
 }
 
@@ -138,7 +141,8 @@ async function renderWithFallbackTraversal(
     rendererService: RendererService,
     spec: DiagramSpec,
     targets: Array<DiagramPlan['renderTarget']>,
-    sourceVisuals?: readonly ResolvedSourceVisual[]
+    sourceVisuals?: readonly ResolvedSourceVisual[],
+    drawnixExportMermaidCompanions?: boolean
 ): Promise<Awaited<ReturnType<RendererService['render']>>> {
     const failures: string[] = [];
 
@@ -150,7 +154,8 @@ async function renderWithFallbackTraversal(
             return await rendererService.render(targetSpec, {
                 target,
                 sourceVisuals,
-                sourceVisualManifestHash: hashResolvedSourceVisualManifest(sourceVisuals)
+                sourceVisualManifestHash: hashResolvedSourceVisualManifest(sourceVisuals),
+                drawnixExportMermaidCompanions
             });
         } catch (error) {
             failures.push(`${target}: ${normalizeErrorMessage(error)}`);
@@ -504,7 +509,13 @@ export async function generateDiagramArtifact(
         }
     }
     try {
-        artifact = await renderWithFallbackTraversal(rendererService, spec, targets, options.sourceVisuals);
+        artifact = await renderWithFallbackTraversal(
+            rendererService,
+            spec,
+            targets,
+            options.sourceVisuals,
+            options.drawnixExportMermaidCompanions
+        );
     } catch (renderError: unknown) {
         const errorMsg = renderError instanceof Error ? renderError.message : String(renderError);
         // If Mermaid parse failed, retry once with the LLM asking for valid Mermaid syntax
@@ -525,7 +536,13 @@ export async function generateDiagramArtifact(
             assertPlanCompatibility(retrySpec, plan, options);
 
             try {
-                artifact = await renderWithFallbackTraversal(rendererService, retrySpec, targets, options.sourceVisuals);
+                artifact = await renderWithFallbackTraversal(
+                    rendererService,
+                    retrySpec,
+                    targets,
+                    options.sourceVisuals,
+                    options.drawnixExportMermaidCompanions
+                );
             } catch (retryError: unknown) {
                 const retryMsg = retryError instanceof Error ? retryError.message : String(retryError);
                 const rawMermaid = spec.nodes?.length

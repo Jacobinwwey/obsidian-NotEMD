@@ -38,7 +38,7 @@ DiagramSpec(intent: "drawnixMindmap")
 
 原生箭头现在使用与 Plait 兼容的契约：`shape: "straight"` 保留显式正交折线路径，`source`/`target` 携带原生 marker，`texts[]` 保存 paragraph 以及路径上的归一化 `position`，`strokeColor`/`strokeWidth`/`strokeStyle`/`opacity` 保存视觉样式。旧版读取器仍可使用兼容性 metadata 中的 `text` 与 `style`。由于上游连接解析器要求几何元素拥有 `points`，而原生 `mind_child` 并不拥有该字段，因此不会输出 `boundId`；这样可以避免宿主导入异常，同时保留明确的关系路径。
 
-当源笔记包含 Mermaid fence 或 Obsidian 图片嵌入时，原生 JSON 还会携带可选的 `metadata.notemd.sourceVisuals` 索引。这里有意使用 metadata，而不是新增未经验证的 Drawnix 原生图片 element：每项记录 source hash、解析状态、源路径和 companion 名称。已解析的 Mermaid 图会把安全 SVG 与源文本内联，因此不会再生成独立 `.drawnix.assets` 目录；无法安全内联的外部二进制或未解析图形才保留 scoped companion。这样既保持已验证子集的原生 element 流兼容，又能从 `.drawnix` 文件本身发现源视觉信息。
+当源笔记包含 Mermaid fence 或 Obsidian 图片嵌入时，原生 JSON 还会携带可选的 `metadata.notemd.sourceVisuals` 索引。这里有意使用 metadata，而不是新增未经验证的 Drawnix 原生图片 element：每项记录 source hash、解析状态、源路径和 companion 名称。默认情况下，已解析 Mermaid 图会把安全 SVG 与源文本内联，已解析二进制图片使用 data-backed SVG 预览，因此不会生成独立 `.drawnix.assets` 目录。开启 **同时完整输出 Mermaid 图** 后，才会为外部交接写出 Mermaid 源码、SVG 与 manifest companion。带 companion 路径的旧 artifact 仍可读取；预览先使用内嵌数据，再尝试 companion，旧 companion 缺失时最后从 metadata 中保留的源文本重建 Mermaid 图。这样既保持已验证子集的原生 element 流兼容，又能从 `.drawnix` 文件本身发现源视觉信息。
 
 ## 自动化证据
 

@@ -2557,6 +2557,16 @@ export class NotemdSettingTab extends PluginSettingTab {
             });
 
         this.createCatalogSetting(containerEl)
+            .setName(experimentalDiagramI18n.drawnixExportMermaidCompanionsName)
+            .setDesc(experimentalDiagramI18n.drawnixExportMermaidCompanionsDesc)
+            .addToggle(toggle => toggle
+                .setValue(this.plugin.settings.drawnixExportMermaidCompanions)
+                .onChange(async (value) => {
+                    this.plugin.settings.drawnixExportMermaidCompanions = value;
+                    await this.plugin.saveSettings();
+                }));
+
+        this.createCatalogSetting(containerEl)
             .setName(experimentalDiagramI18n.nativeEnvironmentName)
             .setDesc(experimentalDiagramI18n.nativeEnvironmentDesc)
             .addButton(button => button

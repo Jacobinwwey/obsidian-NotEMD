@@ -29,6 +29,60 @@ describe('source visual artifact companions', () => {
         }));
     });
 
+    test('suppresses every companion when Drawnix asset output is disabled', async () => {
+        const result = await buildSourceVisualCompanions([
+            {
+                id: 'source-visual-mermaid',
+                kind: 'mermaid',
+                sourceHash: 'inline001',
+                lineStart: 1,
+                lineEnd: 3,
+                language: 'mermaid',
+                definition: 'flowchart TD\\nA --> B',
+                status: 'resolved',
+                content: 'flowchart TD\\nA --> B'
+            },
+            {
+                id: 'source-visual-image',
+                kind: 'image',
+                sourceHash: 'image001',
+                lineStart: 5,
+                lineEnd: 5,
+                targetPath: 'diagram.png',
+                status: 'resolved',
+                content: new ArrayBuffer(4),
+                mimeType: 'image/png'
+            },
+            {
+                id: 'source-visual-unresolved',
+                kind: 'image',
+                sourceHash: 'missing001',
+                lineStart: 7,
+                lineEnd: 7,
+                targetPath: 'missing.png',
+                status: 'unresolved',
+                diagnostic: 'missing image'
+            }
+        ], {
+            inlineMermaidVisuals: true,
+            emitSourceVisualCompanions: false
+        });
+
+        expect(result.companions).toEqual([]);
+        expect(result.manifest).toEqual(expect.arrayContaining([
+            expect.objectContaining({ id: 'source-visual-mermaid', companionPaths: [] }),
+            expect.objectContaining({ id: 'source-visual-image', companionPaths: [] }),
+            expect.objectContaining({ id: 'source-visual-unresolved', companionPaths: [] })
+        ]));
+        expect(result.previewVisuals).toEqual(expect.arrayContaining([
+            expect.objectContaining({
+                id: 'source-visual-image',
+                kind: 'image',
+                svg: expect.stringContaining('data:image/png;base64')
+            })
+        ]));
+    });
+
     test('emits Mermaid source and sanitized SVG companions plus a manifest', async () => {
         const visuals: ResolvedSourceVisual[] = [{
             id: 'source-visual-1',

@@ -32,6 +32,11 @@ export interface SourceVisualCompanionBuildOptions {
      * this opt-in avoids changing the companion contract for other renderers.
      */
     inlineMermaidVisuals?: boolean;
+    /**
+     * Persist source visuals as sibling companion files. Drawnix disables this
+     * by default because its metadata already embeds Mermaid previews.
+     */
+    emitSourceVisualCompanions?: boolean;
 }
 
 function escapeHtml(value: string): string {
@@ -50,11 +55,32 @@ function sanitizeSvg(svg: string): string {
         .replace(/\s+(?:href|xlink:href|src)\s*=\s*(?:"(?:(?:https?:|javascript:|data:text\/html|data:application\/javascript)[^"]*)"|'(?:(?:https?:|javascript:|data:text\/html|data:application\/javascript)[^']*)')/gi, '');
 }
 
-function buildFallbackMermaidSvg(definition: string): string {
+export function buildFallbackMermaidSvg(definition: string): string {
     const lines = definition.split('\n').slice(0, 80);
     const lineHeight = 18;
     const height = Math.max(96, lines.length * lineHeight + 48);
     return `<svg xmlns="http://www.w3.org/2000/svg" width="960" height="${height}" viewBox="0 0 960 ${height}" role="img"><rect width="960" height="${height}" fill="#ffffff"/><text x="24" y="32" font-family="Segoe UI, Arial, sans-serif" font-size="16" font-weight="700" fill="#172033">Mermaid source visual</text>${lines.map((line, index) => `<text x="24" y="${56 + index * lineHeight}" font-family="Consolas, monospace" font-size="13" fill="#334155">${escapeHtml(line)}</text>`).join('')}</svg>`;
+}
+
+function arrayBufferToBase64(content: ArrayBuffer): string {
+    const bytes = new Uint8Array(content);
+    let binary = '';
+    const chunkSize = 0x8000;
+    for (let offset = 0; offset < bytes.length; offset += chunkSize) {
+        binary += String.fromCharCode(...bytes.subarray(offset, offset + chunkSize));
+    }
+    if (typeof btoa !== 'function') {
+        throw new Error('Binary source visual preview encoding is unavailable in this host.');
+    }
+    return btoa(binary);
+}
+
+function buildImagePreviewSvg(content: ArrayBuffer, mimeType: string): string {
+    const safeMimeType = /^[a-z0-9.+-]+\/[a-z0-9.+-]+$/i.test(mimeType)
+        ? mimeType
+        : 'application/octet-stream';
+    const dataUri = `data:${safeMimeType};base64,${arrayBufferToBase64(content)}`;
+    return `<svg xmlns="http://www.w3.org/2000/svg" width="960" height="540" viewBox="0 0 960 540" role="img"><rect width="960" height="540" fill="#ffffff"/><image href="${dataUri}" x="0" y="0" width="960" height="540" preserveAspectRatio="xMidYMid meet"/></svg>`;
 }
 
 async function defaultMermaidSvgRenderer(definition: string): Promise<string> {
@@ -94,6 +120,7 @@ export async function buildSourceVisualCompanions(
     const diagnostics: RenderArtifactDiagnostic[] = [];
     const renderMermaidSvg = options.renderMermaidSvg ?? defaultMermaidSvgRenderer;
     const inlineMermaidVisuals = options.inlineMermaidVisuals === true;
+    const emitSourceVisualCompanions = options.emitSourceVisualCompanions !== false;
 
     for (const visual of visuals ?? []) {
         const companionPaths: string[] = [];
@@ -114,7 +141,7 @@ export async function buildSourceVisualCompanions(
             }
             const sanitizedSvg = sanitizeSvg(svg);
             const previewSvg = sanitizeSvgForExport(sanitizedSvg);
-            if (!inlineMermaidVisuals) {
+            if (emitSourceVisualCompanions && !inlineMermaidVisuals) {
                 companions.push({
                     path: sourcePath,
                     content: `\`\`\`mermaid\n${visual.content.trim()}\n\`\`\`\n`,
@@ -141,14 +168,34 @@ export async function buildSourceVisualCompanions(
             });
         } else if (visual.status === 'resolved' && visual.kind === 'image' && visual.content instanceof ArrayBuffer) {
             const imagePath = companionName(visual, `.${visual.vaultPath?.split('.').pop()?.toLowerCase() || 'bin'}`);
-            companions.push({
-                path: imagePath,
-                content: visual.content,
-                mimeType: visual.mimeType ?? 'application/octet-stream',
-                binary: true,
-                sourceVisualId: visual.id
-            });
-            companionPaths.push(imagePath);
+            if (emitSourceVisualCompanions) {
+                companions.push({
+                    path: imagePath,
+                    content: visual.content,
+                    mimeType: visual.mimeType ?? 'application/octet-stream',
+                    binary: true,
+                    sourceVisualId: visual.id
+                });
+                companionPaths.push(imagePath);
+            }
+            try {
+                previewVisuals.push({
+                    id: visual.id,
+                    kind: visual.kind,
+                    title: sourceVisualPreviewTitle(visual, previewVisuals.length + 1),
+                    sourcePath: visual.vaultPath ?? visual.targetPath,
+                    lineStart: visual.lineStart,
+                    lineEnd: visual.lineEnd,
+                    svg: sanitizeSvgForExport(buildImagePreviewSvg(visual.content, visual.mimeType ?? 'application/octet-stream'))
+                });
+            } catch (error: unknown) {
+                diagnostics.push({
+                    severity: 'warning',
+                    kind: 'source-visual-image-preview',
+                    message: `Source visual ${visual.id} could not be embedded for preview.`,
+                    advice: error instanceof Error ? error.message : String(error)
+                });
+            }
         } else {
             diagnostics.push({
                 severity: 'warning',
@@ -169,7 +216,7 @@ export async function buildSourceVisualCompanions(
         });
     }
 
-    if (manifest.length > 0 && (!inlineMermaidVisuals || companions.length > 0)) {
+    if (manifest.length > 0 && emitSourceVisualCompanions && (!inlineMermaidVisuals || companions.length > 0)) {
         companions.push(buildManifestCompanion(manifest));
     }
 

@@ -543,6 +543,52 @@ describe('diagram command host adapter', () => {
         expect(diagramHost.openPreview).toHaveBeenCalledTimes(1);
     });
 
+    test('preview wrapper rebuilds an older Mermaid visual when its companion file is missing', async () => {
+        const { host, diagramHost, reporter } = createDiagramHost();
+        const file = { name: 'Architecture_diagram.drawnix', path: 'Notes/Architecture_diagram.drawnix' };
+        host.readFile.mockResolvedValue(JSON.stringify({
+            type: 'drawnix',
+            version: 1,
+            source: 'web',
+            elements: [],
+            metadata: {
+                notemd: {
+                    version: 1,
+                    sourceVisuals: [{
+                        id: 'source-visual-legacy',
+                        kind: 'mermaid',
+                        status: 'resolved',
+                        sourceHash: 'legacy001',
+                        companionPaths: ['Notes/Architecture_diagram.drawnix.assets/source-visual-legacy.svg'],
+                        sourceContent: 'flowchart TD\nA --> B'
+                    }]
+                }
+            }
+        }));
+        diagramHost.getFileByPath.mockImplementation((path: string) => ({ path }));
+        (diagramHost as any).readFile = jest.fn().mockResolvedValue('');
+
+        const result = await runPreviewDiagramCommandWithHost(host as any, file as any, reporter as any);
+
+        expect(result).toMatchObject({
+            kind: 'success',
+            artifact: expect.objectContaining({
+                previewPanels: expect.arrayContaining([
+                    expect.objectContaining({
+                        id: 'source-visual-legacy',
+                        artifact: expect.objectContaining({
+                            target: 'mermaid',
+                            previewSvg: expect.objectContaining({
+                                content: expect.stringContaining('<svg')
+                            })
+                        })
+                    })
+                ])
+            })
+        });
+        expect(diagramHost.openPreview).toHaveBeenCalledTimes(1);
+    });
+
     test('preview artifact execution attaches in-memory Drawnix Mermaid and image panels', async () => {
         const { diagramHost, reporter } = createDiagramHost();
         const imageBytes = new Uint8Array([1, 2, 3, 4]).buffer;

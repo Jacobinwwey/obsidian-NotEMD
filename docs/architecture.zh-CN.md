@@ -207,12 +207,14 @@ flowchart LR
 |---|---|---|
 | `editable-html-svg` | 带语义 inline SVG 的自包含 HTML | 不依赖外部编辑器 runtime |
 | `drawio` | `.drawio` XML 加 SVG/MD review companion | 插件内不嵌入 diagrams.net runtime |
-| `drawnix` | `.drawnix` JSON 子集内联 Mermaid 源图形；仅主预览或未内联/未解析媒体使用 SVG/媒体 companion | 插件内不嵌入 Drawnix 或 Plait runtime；重新生成时只清理有 manifest 证据且归插件所有的 Mermaid companion 目录，节点感知路由、稀疏网格兜底和分层标签框共同避免标签进入节点矩形；显式 Drawnix 失败不会伪装成 Mermaid payload |
+| `drawnix` | `.drawnix` JSON 子集默认内联 Mermaid/源图形；开启完整 Mermaid 输出后才写入可选 `.assets` companion | 插件内不嵌入 Drawnix 或 Plait runtime；旧 companion 目录仍可读取，缺失的旧 Mermaid SVG 可以从 metadata 源文本重建，重新生成时只清理有 manifest 证据且归插件所有的目录；节点感知路由、稀疏网格兜底和分层标签框共同避免标签进入节点矩形 |
 | `circuitikz` | 经过验证的 `.tex` 源文件加 SVG/MD review companion | 预览/导出零依赖；桌面端可选本机编译器或托管 Tectonic |
 
 Circuitikz 支持仍然是受约束的。前端设置无需开启 Developer mode 就会显示 `Circuit (Circuitikz)` 首选图表类型与 `Circuitikz + SVG preview` 首选渲染目标，但 renderer 只接受经过验证的 `DiagramSpec(intent: "circuit", circuitSpec)`。它会写出确定性的 circuitikz TeX 和可审阅的 SVG companion。桌面用户随后可以复用自定义/系统编译器，或在 Vault 外显式安装固定版本 Tectonic 0.16.9，用于编译诊断、原生 PDF 证据与受保护的修复验收；移动端与常规预览/导出不会加载桌面进程代码。
 
 托管运行时边界按所有权而不是目录名称判断。下载资产经过主机白名单、体积上限和 checksum 校验，解压拒绝链接与路径穿越，在 staging 中通过 smoke 后才在文件系统锁内激活。已有路径必须在规范化 `realpath` 解析后仍位于配置的运行时根目录内。删除只接受有效 Notemd pointer 或安装目录内所有权证据；过期锁恢复会先把已声明的死亡 owner 锁原子隔离，再复核 owner 与 claim token 后删除。
+
+Drawnix 源图形遵循同一条兼容性边界。默认关闭 **同时完整输出 Mermaid 图**：安全清理后的 Mermaid SVG/源代码与已解析的二进制预览会内嵌在 `.drawnix` metadata 中，因此生成不会创建 `.assets` 文件夹。开启设置后，才会写出用于外部交接的完整 Mermaid 源码、SVG 与 manifest companion。预览加载顺序是内嵌数据、旧 companion 路径，最后从 metadata 中保留的源文本重建 Mermaid 图；即使用户清理了旧 companion 目录，旧 artifact 仍然可用。
 
 ## 模块地图
 

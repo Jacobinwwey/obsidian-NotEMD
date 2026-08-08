@@ -312,6 +312,49 @@ describe('saveDiagramArtifactFile', () => {
         expect(mockApp.vault.delete).toHaveBeenCalledWith(staleFolder, true);
     });
 
+    test('keeps default inline Drawnix visuals self-contained without creating an asset scope', async () => {
+        const reporter = createReporter();
+        const inlineContent = JSON.stringify({
+            type: 'drawnix',
+            version: 1,
+            source: 'web',
+            elements: [],
+            metadata: {
+                notemd: {
+                    version: 1,
+                    sourceVisuals: [{
+                        id: 'source-visual-inline',
+                        kind: 'mermaid',
+                        status: 'resolved',
+                        sourceHash: 'inline001',
+                        companionPaths: [],
+                        embeddedSvg: '<svg><text>Inline Mermaid</text></svg>',
+                        sourceContent: 'flowchart TD\nA --> B'
+                    }]
+                }
+            }
+        });
+
+        const path = await saveDiagramArtifactFile(mockApp, mockSettings, originalFile, {
+            target: 'drawnix',
+            content: inlineContent,
+            mimeType: 'application/vnd.drawnix+json',
+            sourceIntent: 'drawnixMindmap',
+            previewSvg: { content: '<svg><text>Map</text></svg>', mimeType: 'image/svg+xml' }
+        }, reporter);
+
+        expect(path).toBe('Notes/Source_diagram.drawnix.md');
+        expect(mockApp.vault.createFolder).not.toHaveBeenCalledWith('Notes/Source_diagram.drawnix.assets');
+        expect(mockApp.vault.create).toHaveBeenCalledWith(
+            'Notes/Source_diagram.drawnix',
+            expect.stringContaining('"embeddedSvg": "<svg><text>Inline Mermaid</text></svg>"')
+        );
+        expect(mockApp.vault.create).toHaveBeenCalledWith(
+            'Notes/Source_diagram.drawnix.md',
+            expect.stringContaining('![[Source_diagram.drawnix.svg]]')
+        );
+    });
+
     test('preserves companion scope when it contains non-Notemd files', async () => {
         const reporter = createReporter();
         const folder = Object.assign(new (TFolder as any)(), {

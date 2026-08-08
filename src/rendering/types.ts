@@ -71,6 +71,8 @@ export interface RenderOptions {
     theme?: RenderWebviewTheme;
     sourceVisuals?: readonly ResolvedSourceVisual[];
     sourceVisualManifestHash?: string;
+    /** Opt-in Drawnix source/SVG Mermaid companions under the artifact .assets scope. */
+    drawnixExportMermaidCompanions?: boolean;
 }
 
 export interface DiagramRenderer {

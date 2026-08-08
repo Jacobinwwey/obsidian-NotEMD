@@ -44,4 +44,22 @@ describe('render cache', () => {
         expect(cache.get(spec, { target: 'mermaid', sourceVisualManifestHash: 'visuals-a' })).toBe(artifact);
         expect(cache.get(spec, { target: 'mermaid', sourceVisualManifestHash: 'visuals-b' })).toBeNull();
     });
+
+    test('separates Drawnix cache entries by Mermaid companion preference', () => {
+        const cache = new RenderCache();
+
+        cache.set(spec, {
+            target: 'drawnix',
+            drawnixExportMermaidCompanions: false
+        }, artifact);
+
+        expect(cache.get(spec, {
+            target: 'drawnix',
+            drawnixExportMermaidCompanions: false
+        })).toBe(artifact);
+        expect(cache.get(spec, {
+            target: 'drawnix',
+            drawnixExportMermaidCompanions: true
+        })).toBeNull();
+    });
 });

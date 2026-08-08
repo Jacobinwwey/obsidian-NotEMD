@@ -11,6 +11,7 @@ This document summarizes the major functional and architectural changes implemen
 - Fixed multi-panel diagram previews so every Mermaid fence and Drawnix source visual remains visible in source order.
 - Added per-panel SVG, PNG, and PDF export menus. Single-panel top-level export remains the primary export; multi-panel top-level image actions use the selected folder and deterministic `_preview_<panel-id>` names.
 - Made Drawnix image companions exportable by wrapping their binary data in a data-backed SVG, and kept the same behavior for immediate previews and history reopen.
+- Made Drawnix source visuals self-contained by default: Mermaid/source metadata and resolved image previews no longer create an `.assets` folder; the **Also export complete Mermaid visuals** setting remains an explicit opt-in for Mermaid source, SVG, and manifest companions, with legacy companion and source-text rebuild compatibility.
 - Fixed preview PDF/PNG raster exports by using a Canvas-safe SVG boundary, including Mermaid `htmlLabels: false`, foreignObject-to-text conversion, and external-resource filtering.
 - Added a multi-panel image folder picker for SVG, PNG, and PDF with source-folder and custom Vault-relative choices; panels export sequentially with a completion summary and per-panel failure isolation.
 - Fixed multi-panel PDF/PNG black geometry by preserving each panel's styles, definitions, and viewBox inside a nested SVG canvas before rasterization.
@@ -22,6 +23,7 @@ This document summarizes the major functional and architectural changes implemen
 - 修复多 panel 图形预览，按源文件顺序保留每个 Mermaid 代码块和 Drawnix 源图形。
 - 新增每个 panel 的 SVG、PNG、PDF 独立导出菜单。单图时顶部导出仍表示主图；多图时顶部图片操作使用选定文件夹，并以稳定的 `_preview_<panel-id>` 命名逐图写出。
 - 将 Drawnix 图片 companion 的二进制内容包装为带 data URI 的 SVG，使其可导出，并让即时预览与历史重开保持一致。
+- 让 Drawnix 源图形默认自包含：Mermaid/source metadata 与已解析图片预览不再创建 `.assets` 文件夹；**同时完整输出 Mermaid 图** 设置仍是 Mermaid 源码、SVG 与 manifest companion 的显式开关，同时保留旧 companion 与源文本重建兼容。
 - 修复预览 PDF/PNG 光栅导出，通过 Canvas 安全的 SVG 边界处理 Mermaid `htmlLabels: false`、foreignObject 转 SVG 文本和外部资源过滤。
 - 新增多图 SVG、PNG、PDF 导出文件夹选择器，支持原文件夹或自定义 Vault 相对路径；按顺序逐图导出，汇总完成情况并隔离单图失败。
 - 修复多 panel PDF/PNG 光栅导出的黑色图形，在光栅化前将每个 panel 的样式、defs 和 viewBox 保留在嵌套 SVG 画布中。

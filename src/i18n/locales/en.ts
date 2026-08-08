@@ -160,6 +160,8 @@ export const STRINGS_EN = {
                 exportFormatsDesc: 'Source file, SVG, PNG, and PDF are available from diagram preview.',
                 exportPpiName: 'Diagram image export PPI',
                 exportPpiDesc: 'Resolution for diagram PNG preview exports. Enter any integer from 72 to 600 ppi (default 300; common presets 100/300/600). SVG and vector PDF exports keep their geometry and ignore this value.',
+                drawnixExportMermaidCompanionsName: 'Also export complete Mermaid visuals',
+                drawnixExportMermaidCompanionsDesc: 'Off by default: Mermaid SVG and source stay embedded in the Drawnix file, so no .assets folder is created. Turn on to also write Mermaid source, SVG, and manifest companions under the Drawnix .assets folder.',
                 nativeEnvironmentName: 'CircuitikZ native compile environment',
                 nativeEnvironmentDesc: 'Optional desktop enhancement for compile diagnostics and native PDF. SVG, PNG, and preview PDF exports continue to work without LaTeX.',
                 nativeEnvironmentButton: 'Manage environment',

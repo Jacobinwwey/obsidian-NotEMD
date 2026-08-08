@@ -59,6 +59,23 @@ describe('diagram operation input helpers', () => {
         expect(input.outputMode).toBe('artifact');
     });
 
+    test('carries the explicit Drawnix Mermaid companion preference into artifact operations', () => {
+        const input = buildDiagramOperationInput({
+            sourcePath: 'Notes/Topic.md',
+            sourceMarkdown: '# Topic',
+            executionMode: 'save-artifact',
+            settings: {
+                ...mockSettings,
+                preferredDiagramIntent: 'drawnixMindmap',
+                preferredDiagramRenderTarget: 'drawnix',
+                experimentalDiagramCompatibilityMode: 'best-fit',
+                drawnixExportMermaidCompanions: true
+            }
+        });
+
+        expect(input.drawnixExportMermaidCompanions).toBe(true);
+    });
+
     test('forces legacy-mermaid compatibility for mermaid output mode', () => {
         const compatibilityMode = resolveDiagramOperationCompatibilityMode('save-mermaid', 'best-fit');
         expect(compatibilityMode).toBe('legacy-mermaid');

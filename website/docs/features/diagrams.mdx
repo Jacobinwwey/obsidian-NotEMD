@@ -56,7 +56,9 @@ SVG and PDF are produced from vector geometry; PDF uses the same SVG layout and 
 
 ## Drawnix previews with embedded Mermaid
 
-When a Drawnix artifact contains Mermaid visuals, Notemd sanitizes the rendered SVG and keeps the Mermaid source alongside it in the `.drawnix` metadata. The preview can therefore show the Mermaid image inside the Drawnix knowledge map without requiring the Drawnix or Plait runtime. Mermaid-only visuals that are safely embedded do not create a separate `.assets` directory; external binary media or unresolved visuals keep a companion file so no data is lost.
+When a Drawnix artifact contains Mermaid visuals, Notemd sanitizes the rendered SVG and keeps the Mermaid source alongside it in the `.drawnix` metadata. The preview can therefore show the Mermaid image inside the Drawnix knowledge map without requiring the Drawnix or Plait runtime. The default path is self-contained and does not create a separate `.assets` directory. Enable **Also export complete Mermaid visuals** when you need Mermaid source, SVG, and manifest companions for handoff or external editing. Existing artifacts with `.assets` remain supported, and a missing legacy Mermaid SVG can be rebuilt from source text retained in metadata.
+
+Resolved image embeds also receive a data-backed SVG preview when possible, so removing an old companion folder does not make a saved Drawnix preview disappear. Preview loading uses embedded data first, then legacy companion files, then the source-text rebuild fallback.
 
 The preview is intentionally a single scrollable surface: the main Drawnix canvas appears first, followed by each embedded Mermaid panel in source order. Closing and reopening a saved history entry reconstructs the same panel list, dimensions, and export actions.
 

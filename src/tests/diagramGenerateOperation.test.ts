@@ -101,6 +101,42 @@ describe('diagram generate operation', () => {
         expect(generateDiagramArtifactImpl).toHaveBeenCalledWith('# Topic', expect.objectContaining({ sourceVisuals }));
     });
 
+    test('forwards the Drawnix Mermaid companion preference to structured generation', async () => {
+        const reporter = createReporter();
+        const generateDiagramArtifactImpl = jest.fn().mockResolvedValue({
+            plan: { intent: 'drawnixMindmap' },
+            spec: { intent: 'drawnixMindmap', title: 'Topic', nodes: [] },
+            artifact: {
+                target: 'drawnix',
+                content: '{}',
+                mimeType: 'application/vnd.drawnix+json',
+                sourceIntent: 'drawnixMindmap'
+            }
+        });
+
+        await runDiagramGenerateOperation({
+            input: {
+                sourcePath: 'Notes/Topic.md',
+                sourceMarkdown: '# Topic',
+                requestedIntent: 'drawnixMindmap',
+                requestedRenderTarget: 'drawnix',
+                drawnixExportMermaidCompanions: true,
+                compatibilityMode: 'best-fit',
+                outputMode: 'artifact'
+            },
+            settings: mockSettings,
+            provider: mockSettings.providers[0],
+            modelName: mockSettings.providers[0].model,
+            reporter,
+            getLegacyMermaidPrompt: () => 'legacy prompt',
+            generateDiagramArtifactImpl
+        });
+
+        expect(generateDiagramArtifactImpl).toHaveBeenCalledWith('# Topic', expect.objectContaining({
+            drawnixExportMermaidCompanions: true
+        }));
+    });
+
     test('passes a circuit-focused prompt to the provider for circuitikz artifact output', async () => {
         const reporter = createReporter();
         const circuitSpec = resolveCircuitTemplateFromMarkdown('Draw a CMOS inverter.');

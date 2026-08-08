@@ -10,6 +10,8 @@ import { DiagramOperationInput, DiagramOperationExecutionMode, buildDiagramOpera
 import { isSupportedInputFileForTask } from '../inputFileSupport';
 import { LLMProviderConfig, NotemdSettings, ProgressReporter } from '../types';
 import { resolveSourceVisualReferences, scanSourceVisualReferences } from '../diagram/sourceVisuals';
+import { buildFallbackMermaidSvg } from '../diagram/sourceVisualArtifactBuilder';
+import { renderMermaidArtifactSvg } from '../rendering/preview/mermaidPreview';
 
 export interface DiagramCommandHostAdapter {
     saveMermaidSummary: (file: TFile, mermaidContent: string, reporter: ProgressReporter) => Promise<string>;
@@ -898,7 +900,11 @@ function parseDrawnixSourceVisualPreviewMetadata(content: string): DrawnixSource
             const title = typeof candidate.title === 'string' ? candidate.title : undefined;
             const lineStart = typeof candidate.lineStart === 'number' ? candidate.lineStart : undefined;
             const lineEnd = typeof candidate.lineEnd === 'number' ? candidate.lineEnd : undefined;
-            return id && kind && (companionPaths.length > 0 || embeddedSvg)
+            return id && kind && (
+                companionPaths.length > 0
+                || embeddedSvg
+                || (kind === 'mermaid' && Boolean(sourceContent?.trim()))
+            )
                 ? [{ id, kind, companionPaths, embeddedSvg, sourceContent, title, lineStart, lineEnd }]
                 : [];
         });
@@ -931,6 +937,32 @@ function buildDrawnixImagePreviewArtifact(content: ArrayBuffer, mimeType: string
         sourceIntent: 'flowchart',
         previewSvg: {
             content: previewSvg,
+            mimeType: 'image/svg+xml'
+        }
+    };
+}
+
+async function buildMermaidSourcePreviewArtifact(sourceContent: string): Promise<RenderArtifact> {
+    const content = `\`\`\`mermaid\n${sourceContent.trim()}\n\`\`\``;
+    let svg: string;
+    try {
+        svg = await renderMermaidArtifactSvg({
+            target: 'mermaid',
+            content,
+            mimeType: 'text/vnd.mermaid',
+            sourceIntent: inferMermaidPreviewIntent(sourceContent)
+        });
+    } catch {
+        svg = buildFallbackMermaidSvg(sourceContent);
+    }
+
+    return {
+        target: 'mermaid',
+        content,
+        mimeType: 'text/vnd.mermaid',
+        sourceIntent: inferMermaidPreviewIntent(sourceContent),
+        previewSvg: {
+            content: sanitizeSvgForExport(svg),
             mimeType: 'image/svg+xml'
         }
     };
@@ -1024,6 +1056,13 @@ async function buildDrawnixSourceVisualPreviewPanels(params: {
                     // Keep the source visual in metadata when the host cannot encode binary data.
                 }
             }
+        }
+
+        if (visual.kind === 'mermaid' && visual.sourceContent?.trim()) {
+            panels.push({
+                id: visual.id,
+                artifact: await buildMermaidSourcePreviewArtifact(visual.sourceContent)
+            });
         }
     }
 

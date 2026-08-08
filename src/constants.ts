@@ -200,6 +200,7 @@ export const DEFAULT_SETTINGS: NotemdSettings = {
     experimentalDiagramCompatibilityMode: 'legacy-mermaid',
     preferredDiagramRenderTarget: undefined,
     diagramPreviewExportPpi: DEFAULT_PREVIEW_EXPORT_PPI,
+    drawnixExportMermaidCompanions: false,
     circuitikzCompilerPreference: 'auto',
     circuitikzCustomCompilerKind: 'pdflatex',
     circuitikzCustomCompilerPath: '',

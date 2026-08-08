@@ -23,7 +23,8 @@ export class RenderCache {
             spec,
             target: options.target ?? null,
             theme: options.theme ?? 'system',
-            sourceVisualManifestHash: options.sourceVisualManifestHash ?? null
+            sourceVisualManifestHash: options.sourceVisualManifestHash ?? null,
+            drawnixExportMermaidCompanions: options.drawnixExportMermaidCompanions ?? false
         });
     }
 

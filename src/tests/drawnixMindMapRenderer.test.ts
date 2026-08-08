@@ -181,6 +181,57 @@ describe('Drawnix mind-map renderer', () => {
         ]);
     });
 
+    test('does not create an asset companion scope for non-Mermaid visuals by default', async () => {
+        const artifact = await new DrawnixRenderer().render(createKnowledgeMapSpec(), {
+            sourceVisuals: [{
+                id: 'source-visual-image',
+                kind: 'image',
+                sourceHash: 'image001',
+                lineStart: 4,
+                lineEnd: 4,
+                targetPath: 'diagram.png',
+                status: 'resolved',
+                content: new ArrayBuffer(4),
+                mimeType: 'image/png'
+            }]
+        });
+
+        expect(artifact.companions).toEqual([]);
+        expect(artifact.sourceVisualManifest?.[0]).toMatchObject({ id: 'source-visual-image', companionPaths: [] });
+        expect(JSON.parse(artifact.content).metadata.notemd.sourceVisuals[0]).toMatchObject({
+            id: 'source-visual-image',
+            companionPaths: [],
+            embeddedSvg: expect.stringContaining('data:image/png;base64')
+        });
+    });
+
+    test('emits complete Mermaid companions only when Drawnix asset output is enabled', async () => {
+        const artifact = await new DrawnixRenderer().render(createKnowledgeMapSpec(), {
+            drawnixExportMermaidCompanions: true,
+            sourceVisuals: [{
+                id: 'source-visual-1',
+                kind: 'mermaid',
+                sourceHash: 'abc12345',
+                lineStart: 1,
+                lineEnd: 3,
+                language: 'mermaid',
+                definition: 'flowchart TD\\nA --> B',
+                status: 'resolved',
+                content: 'flowchart TD\\nA --> B'
+            }]
+        });
+
+        expect(artifact.companions?.map(companion => companion.path)).toEqual([
+            'source-visual-source-visual-1.mermaid.md',
+            'source-visual-source-visual-1.svg',
+            'source-visual-manifest.json'
+        ]);
+        expect(artifact.sourceVisualManifest?.[0].companionPaths).toEqual([
+            'source-visual-source-visual-1.mermaid.md',
+            'source-visual-source-visual-1.svg'
+        ]);
+    });
+
     test('embeds resolved Mermaid visuals in the Drawnix mind-map preview', async () => {
         const artifact = await new DrawnixRenderer().render(createKnowledgeMapSpec(), {
             sourceVisuals: [{

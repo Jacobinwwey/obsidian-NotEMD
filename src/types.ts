@@ -216,6 +216,7 @@ export interface NotemdSettings {
     preferredDiagramIntent?: string;
     preferredDiagramRenderTarget?: RenderTarget;
     diagramPreviewExportPpi: number;
+    drawnixExportMermaidCompanions: boolean;
     circuitikzCompilerPreference: 'auto' | 'managed' | 'system' | 'custom';
     circuitikzCustomCompilerKind: 'tectonic' | 'pdflatex';
     circuitikzCustomCompilerPath: string;

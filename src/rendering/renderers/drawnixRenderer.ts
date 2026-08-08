@@ -37,8 +37,10 @@ export class DrawnixRenderer implements DiagramRenderer {
         assertValidDiagramSpec(spec);
 
         const projection = buildDrawnixMindMapProjection(spec);
+        const emitMermaidCompanions = options.drawnixExportMermaidCompanions === true;
         const sourceVisualCompanions = await buildSourceVisualCompanions(options.sourceVisuals, {
-            inlineMermaidVisuals: true
+            inlineMermaidVisuals: !emitMermaidCompanions,
+            emitSourceVisualCompanions: emitMermaidCompanions
         });
         const embeddedVisualsById = new Map(
             sourceVisualCompanions.previewVisuals.map(visual => [visual.id, visual] as const)
