@@ -375,6 +375,52 @@ describe('Drawnix mind-map renderer', () => {
         expect(artifact.previewPanels?.[2].artifact).toMatchObject({ target: 'mermaid', sourceIntent: 'sequence' });
     });
 
+    test('keeps inline Mermaid preview panels when complete Mermaid companion output is disabled', async () => {
+        const artifact = await new DrawnixRenderer().render(createKnowledgeMapSpec(), {
+            drawnixExportMermaidCompanions: false,
+            sourceVisuals: [
+                {
+                    id: 'visual-inline-1',
+                    kind: 'mermaid',
+                    sourceHash: 'inline-hash-1',
+                    lineStart: 1,
+                    lineEnd: 3,
+                    status: 'resolved',
+                    content: 'flowchart TD\nA --> B'
+                },
+                {
+                    id: 'visual-inline-2',
+                    kind: 'mermaid',
+                    sourceHash: 'inline-hash-2',
+                    lineStart: 5,
+                    lineEnd: 7,
+                    status: 'resolved',
+                    content: 'sequenceDiagram\nAlice->>Bob: Hello'
+                }
+            ]
+        });
+
+        expect(artifact.companions).toEqual([]);
+        expect(artifact.previewPanels?.map(panel => panel.id)).toEqual([
+            'drawnix-primary',
+            'visual-inline-1',
+            'visual-inline-2'
+        ]);
+        expect(artifact.previewSvg?.content).toContain(
+            'data-drawnix-mindmap-source-visual-id="visual-inline-1"'
+        );
+        expect(artifact.previewSvg?.content).toContain(
+            'data-drawnix-mindmap-source-visual-id="visual-inline-2"'
+        );
+        expect(artifact.previewPanels?.slice(1).every(panel =>
+            Boolean(panel.artifact.previewSvg?.content.trim())
+        )).toBe(true);
+        expect(JSON.parse(artifact.content).metadata.notemd.sourceVisuals).toEqual([
+            expect.objectContaining({ id: 'visual-inline-1', companionPaths: [] }),
+            expect.objectContaining({ id: 'visual-inline-2', companionPaths: [] })
+        ]);
+    });
+
     test('namespaces only real SVG ids and rewrites whitespace-tolerant references', () => {
         const projection = buildDrawnixMindMapProjection(createKnowledgeMapSpec());
         const previewSvg = renderDrawnixMindMapSvg(projection, [{
