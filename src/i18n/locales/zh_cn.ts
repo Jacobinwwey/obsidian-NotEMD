@@ -1090,6 +1090,7 @@ export const STRINGS_ZH_CN: DeepPartial<NotemdEnglishStrings> = {
         collapseSearch: '收起设置搜索栏', expandSearch: '展开设置搜索栏',
         categoryNavigationLabel: '跳转到设置分类', allCategories: '全部设置分类',
         addFavorite: '收藏此设置', removeFavorite: '取消收藏此设置',
+        favoritesPanelLabel: '收藏设置', favoritesEmpty: '当前还没有收藏设置。',
         resultCount: '显示 {visible} / {total} 项设置', noResults: '没有设置符合当前搜索和筛选条件。'
     },
     slideExport: {

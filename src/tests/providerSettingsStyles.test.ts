@@ -53,6 +53,10 @@ describe('provider settings styles', () => {
         expect(styles).toContain('.notemd-settings-result-count');
         expect(styles).toContain('.notemd-settings-empty-state');
         expect(styles).toContain('.notemd-settings-search-results');
+        expect(styles).toContain('.notemd-settings-favorites-panel');
+        expect(styles).toContain('.notemd-settings-favorites-content');
+        expect(styles).toContain('.notemd-settings-favorite-result');
+        expect(styles).toContain('.notemd-settings-favorite-remove');
         expect(styles).toContain('.notemd-settings-search-result[aria-selected="true"]');
         expect(styles).toContain('.notemd-settings-discovery-toggle');
         expect(styles).toContain('.notemd-settings-discovery-controls');

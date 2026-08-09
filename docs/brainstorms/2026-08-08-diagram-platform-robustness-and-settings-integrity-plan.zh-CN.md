@@ -196,6 +196,7 @@ interface SettingSearchMatch extends SettingCatalogEntry {
 - ArrowUp/ArrowDown 移动当前结果并更新 `aria-activedescendant`；Escape、失焦、外部点击和成功跳转都会关闭面板；
 - 空 query 完全隐藏面板；非空 query 无匹配时显示明确的空状态，而不是把分类选择器过滤成结果列表；
 - 分类 `<select>` 继续只负责粗粒度分类导航，不拥有搜索结果语义。
+- 收藏控件保留原有“仅显示收藏”过滤兼容性，同时提供独立的 `role="list"` 收藏设置列表；每项具有稳定设置 ID、直接跳转、可访问的取消收藏操作和明确空状态。
 
 这个边界避免浏览器/Electron 的 `<select>` 实现细节变成设置搜索 API，也使结果列表不依赖隐藏原生 option 即可测试。
 
@@ -232,7 +233,7 @@ UI 回归契约必须覆盖默认展开、`aria-controls` 关联、收起/展开
 
 `src/tests/settingCatalog.test.ts` 必须覆盖纯目录和匹配契约：搜索 `Mermaid` 时排除稳定 API 噪声；名称命中和说明命中均有效；跨字段拼接不能制造误命中；带权结果具有稳定排序并完整返回 `matchedFields`；重复 ID 失败；locale 文案或分类标签变化时显式 stable ID 保持不变。原有 locale alias 和 favorite 保留测试继续保留。
 
-设置 UI 测试必须覆盖查询后的可见性、listbox 语义、键盘选择、直接滚动/聚焦/高亮导航，以及 Escape、失焦、外部点击、成功选择和空 query 的关闭行为。测试应断言具体 `elementId`，不能只断言可见文本。Obsidian CLI smoke 路径必须重载插件、打开设置页、查询 `Mermaid`，确认结果包含 `同时完整输出 Mermaid 图`，并确认不包含 `稳定 API 调用`。
+设置 UI 测试必须覆盖查询后的可见性、listbox 语义、键盘选择、直接滚动/聚焦/高亮导航、收藏列表渲染/取消/空状态，以及 Escape、失焦、外部点击、成功选择和空 query 的关闭行为。测试应断言具体 `elementId`，不能只断言可见文本。Obsidian CLI smoke 路径必须重载插件、打开设置页、查询 `Mermaid`，确认结果包含 `同时完整输出 Mermaid 图`，并确认不包含 `稳定 API 调用`，同时验证已收藏设置出现在独立列表中。
 
 ### PPI 与 companion 设置
 
@@ -336,6 +337,7 @@ npm run verify:vault-bundle -- --vault E:\\1Knowledge
 - 用显式 `SettingCatalogEntry` 声明和稳定 `elementId` 锚点替代按路径/DOM 抓取的搜索条目；为旧的本地化 ID 保留仅用于迁移的 resolver。
 - 实现基于用户可见字段的 `SettingSearchMatch` 评分、同字段同词的有界英文模糊 fallback、`matchedFields`、确定性平局排序，并删除 `categoryId` 搜索。
 - 构建独立的 listbox 结果面板，实现直接滚动/聚焦/高亮、键盘选择、收起、Escape、失焦、外部点击、空 query 和无结果状态；分类选择器只承担粗粒度导航。
+- 提供独立的收藏设置面板：使用 stable ID，支持直接导航、键盘激活、可访问的取消收藏操作、通过 `favoriteSettingIds` 持久化以及本地化空状态，同时保持原有“仅显示收藏”过滤行为兼容。
 - 让整个设置发现工具栏支持显式按钮收起/展开；收起时保留 query，展开时恢复结果。
 - 在 `src/tests/settingCatalog.test.ts` 增加纯匹配与 stable ID 回归，并增加结果面板 DOM 与 Obsidian CLI 契约测试。
 - 将结果卡片几何改为显式且响应式布局；增加命名 grid area 的 CSS 回归测试和运行时几何断言，防止长说明把设置名称挤塌。
@@ -344,7 +346,7 @@ npm run verify:vault-bundle -- --vault E:\\1Knowledge
 
 **门禁**
 
-新鲜重载后能看到 `图形图片导出 PPI` 且值为 300，并能看到 companion toggle；搜索 `Mermaid` 时返回预期 Mermaid 设置且不返回 `稳定 API 调用`；listbox 导航能解析声明的 `elementId`；CLI capability probe 与可见 settings DOM 一致。
+新鲜重载后能看到 `图形图片导出 PPI` 且值为 300，并能看到 companion toggle；搜索 `Mermaid` 时返回预期 Mermaid 设置且不返回 `稳定 API 调用`；listbox 导航能解析声明的 `elementId`；收藏按钮能打开支持直接跳转/取消收藏且具有本地化空状态的独立列表；CLI capability probe 与可见 settings DOM 一致。
 
 ### Phase 6：文档与发布收口（已完成）
 
@@ -368,7 +370,7 @@ npm run verify:vault-bundle -- --vault E:\\1Knowledge
 
 - TypeScript 检查：通过（`tsc -noEmit -skipLibCheck`）。
 - 生产 bundle：通过（`npm run build`）。
-- Jest：243 个 suite 通过，2149 个测试通过，1 个跳过（总计 2150）；设置行为 suite 已包含 listbox/键盘导航回归测试，Vault verifier 也覆盖缺失/版本/hash fail-closed 分支。
+- Jest：243 个 suite 通过，2151 个测试通过，1 个跳过（总计 2152）；设置行为 suite 已包含 listbox/键盘导航与收藏面板回归测试，Vault verifier 也覆盖缺失/版本/hash fail-closed 分支。
 - UI/render 审计：`audit:i18n-ui` 与 `audit:render-host` 通过。
 - 文档站：VitePress 构建通过。
 - 官方 `obsidian help`：可用。`obsidian-cli help`：不可用，因为系统未安装可选的 `obsidian-cli` 可执行文件。
@@ -391,7 +393,7 @@ npm run verify:vault-bundle -- --vault E:\\1Knowledge
 | 序列化 | Drawnix fixture 契约、显式 layer 顺序、metadata schema 版本和 backward reader |
 | 预览 | 实时生成与 rehydrate 后的 panel ID 顺序一致且 SVG 非空 |
 | 导出 | 目录选择、单图/全图路径、SVG-to-PDF 几何一致、PPI metadata 和部分失败报告 |
-| 设置 | 显式目录字段、跨 locale stable ID、用户可见字段带权搜索、同字段有界模糊 fallback、命中字段证据、确定性排序、listbox 语义、直接导航、收起/Escape/失焦/外部点击、无结果状态、PPI 范围/默认值和 companion 默认值 |
+| 设置 | 显式目录字段、跨 locale stable ID、用户可见字段带权搜索、同字段有界模糊 fallback、命中字段证据、确定性排序、listbox 语义、直接导航、收起/Escape/失焦/外部点击、无结果状态、收藏列表/导航/取消/空状态、PPI 范围/默认值和 companion 默认值 |
 | 宿主 | 官方 `obsidian` CLI 重载/状态/eval、loaded setting DOM、capability probe、零错误缓冲 |
 | 仓库 | `npm run build`、`npm test -- --runInBand`、`npm run audit:i18n-ui`、`npm run audit:render-host`、`git diff --check` |
 
@@ -425,6 +427,13 @@ npm run verify:vault-bundle -- --vault E:\\1Knowledge
 - 通过官方 `obsidian eval` 在 disable/enable 重载后确认：默认 `aria-expanded="true"`，`aria-controls="notemd-settings-discovery-controls"` 正确关联，工具栏控件可见。输入 `Mermaid` 后得到 13 个结果，且排除无关的“稳定 API 调用”。
 - 同一 live DOM 探针确认：收起时 `aria-expanded="false"`，受控区域 `hidden=true`，工具栏带 `.is-collapsed`，结果面板关闭，query 不变；展开后控件、query 和 13 个结果全部恢复。
 - `obsidian dev:errors` 返回 `No errors captured`；当前 Windows 桌面会话仍不可用 `obsidian-cli` 和 `dev:screenshot`。
+
+## 实测补充（2026-08-09，收藏设置面板）
+
+- 当前仓库构建产物已部署到 `E:\\1Knowledge\\.obsidian\\plugins\\notemd`，并通过 `npm run verify:vault-bundle -- --vault E:\\1Knowledge --version 1.9.5`：`main.js` SHA-256 为 `5265e00ec2f543676aa0ba28b61e9e0ddea88c28257b23a1ea52c7bebe82e2d0`，`styles.css` SHA-256 为 `69731a9ead34b285ee8e882ab797f4f7aefab775a51e527601e3aab9ec7a7fb8`，`manifest.json` SHA-256 为 `fc88f5d7d90561ae73c324413ef58b937086e1901c7c7faf45686b12320a02a`；manifest 版本为 `1.9.5`。
+- 通过官方 `obsidian` eval disable/enable 重载后，设置页点击星标可持久化 `favoriteSettingIds=["settings.settingsReset.heading"]`。点击“★ 收藏”后，`#notemd-settings-favorites-panel` 以 `role="list"` 显示，`aria-expanded="true"`，包含 1 个 `role="listitem"` 和对应 stable ID。
+- 激活收藏项后面板关闭，原设置项获得 `notemd-setting-search-target` 高亮。重新打开面板并点击列表内取消收藏后，持久化收藏被清空，面板保持打开并显示本地化空状态“当前还没有收藏设置。”。
+- `obsidian dev:errors` 返回 `No errors captured`。当前会话仍不可用可选 `obsidian-cli`、`dev:dom` 和 `dev:screenshot`；以上断言均通过官方 `obsidian eval` 执行。
 
 ## 完成标准
 

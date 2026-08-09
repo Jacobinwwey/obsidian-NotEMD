@@ -180,6 +180,9 @@ export class NotemdSettingTab extends PluginSettingTab {
         search.setAttribute('aria-label', copy.searchLabel);
         const favoritesButton = discoveryControls.createEl('button', { text: copy.favorites, cls: 'notemd-settings-favorites-filter' });
         favoritesButton.type = 'button';
+        favoritesButton.setAttribute('aria-controls', 'notemd-settings-favorites-panel');
+        favoritesButton.setAttribute('aria-expanded', 'false');
+        favoritesButton.setAttribute('aria-pressed', 'false');
         let favoritesOnly = false;
         const navigation = discoveryControls.createEl('select', { cls: 'notemd-settings-category-navigation' });
         navigation.setAttribute('aria-label', copy.categoryNavigationLabel);
@@ -192,6 +195,12 @@ export class NotemdSettingTab extends PluginSettingTab {
         resultPanel.setAttribute('role', 'listbox');
         resultPanel.hidden = true;
         const resultContent = resultPanel.createDiv({ cls: 'notemd-settings-search-results-content' });
+        const favoritesPanel = discoveryControls.createDiv({ cls: 'notemd-settings-favorites-panel' });
+        favoritesPanel.id = 'notemd-settings-favorites-panel';
+        favoritesPanel.setAttribute('role', 'list');
+        favoritesPanel.setAttribute('aria-label', copy.favoritesPanelLabel);
+        favoritesPanel.hidden = true;
+        const favoritesContent = favoritesPanel.createDiv({ cls: 'notemd-settings-favorites-content' });
         search.setAttribute('aria-controls', resultPanel.id);
         search.setAttribute('aria-expanded', 'false');
         Array.from(containerEl.querySelectorAll<HTMLElement>('.setting-item-heading')).forEach((heading, index) => {
@@ -216,6 +225,10 @@ export class NotemdSettingTab extends PluginSettingTab {
             search.setAttribute('aria-expanded', 'false');
             search.removeAttribute('aria-activedescendant');
         };
+        const closeFavoritesPanel = () => {
+            favoritesPanel.hidden = true;
+            favoritesButton.setAttribute('aria-expanded', 'false');
+        };
         const updateActiveResult = () => {
             const options = Array.from(resultContent.querySelectorAll<HTMLElement>('[role="option"]'));
             options.forEach((option, index) => option.setAttribute('aria-selected', String(index === activeResultIndex)));
@@ -227,7 +240,7 @@ export class NotemdSettingTab extends PluginSettingTab {
                 search.removeAttribute('aria-activedescendant');
             }
         };
-        const focusMatch = (match: SettingSearchMatch) => {
+        const focusMatch = (match: Pick<SettingCatalogEntry, 'elementId'>) => {
             const target = containerEl.ownerDocument?.getElementById(match.elementId);
             if (!target) return;
             target.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -235,6 +248,57 @@ export class NotemdSettingTab extends PluginSettingTab {
             window.setTimeout(() => target.classList.remove('notemd-setting-search-target'), 1400);
             target.querySelector<HTMLElement>('input, select, textarea, button:not(.notemd-setting-favorite-button)')?.focus({ preventScroll: true });
             closeSearchResults();
+            closeFavoritesPanel();
+        };
+        const syncFavoriteButton = (settingId: string) => {
+            const item = settingItems.find(candidate => candidate.dataset.notemdSettingId === settingId);
+            const star = item?.querySelector<HTMLElement>('.notemd-setting-favorite-button');
+            if (!star) return;
+            const isFavorite = favorites.has(settingId);
+            star.textContent = isFavorite ? '★' : '☆';
+            star.setAttribute('aria-label', isFavorite ? copy.removeFavorite : copy.addFavorite);
+        };
+        const renderFavoritesPanel = () => {
+            favoritesContent.empty();
+            favoritesPanel.hidden = false;
+            favoritesButton.setAttribute('aria-expanded', 'true');
+            const favoriteEntries = catalog.filter(entry => favorites.has(entry.id));
+            if (favoriteEntries.length === 0) {
+                favoritesContent.createDiv({ cls: 'notemd-settings-empty-state', text: copy.favoritesEmpty });
+                return;
+            }
+            favoriteEntries.forEach(entry => {
+                const option = favoritesContent.createDiv({ cls: 'notemd-settings-search-result notemd-settings-favorite-result' });
+                option.id = `${entry.elementId}-favorite`;
+                option.setAttribute('role', 'listitem');
+                option.tabIndex = 0;
+                option.dataset.settingId = entry.id;
+                option.setAttribute('aria-label', entry.name);
+                option.createDiv({ cls: 'notemd-settings-search-result-name', text: entry.name });
+                option.createDiv({ cls: 'notemd-settings-search-result-description', text: entry.description });
+                option.createDiv({ cls: 'notemd-settings-search-result-category', text: entry.categoryLabel });
+                const removeButton = option.createEl('button', { cls: 'notemd-settings-favorite-remove' });
+                removeButton.type = 'button';
+                removeButton.setAttribute('aria-label', copy.removeFavorite);
+                removeButton.setAttribute('title', copy.removeFavorite);
+                setIcon(removeButton, 'x');
+                option.addEventListener('pointerdown', event => {
+                    if ((event.target as HTMLElement).closest('button')) return;
+                    event.preventDefault();
+                    focusMatch(entry);
+                });
+                option.addEventListener('keydown', event => {
+                    if (event.key !== 'Enter' && event.key !== ' ') return;
+                    event.preventDefault();
+                    focusMatch(entry);
+                });
+                removeButton.addEventListener('pointerdown', event => event.stopPropagation());
+                removeButton.onclick = async (event) => {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    await removeFavorite(entry.id);
+                };
+            });
         };
         const renderSearchResults = (matches: readonly SettingSearchMatch[]) => {
             renderedMatches = matches;
@@ -292,6 +356,7 @@ export class NotemdSettingTab extends PluginSettingTab {
                 header.addClass('is-collapsed');
                 discoveryControls.hidden = true;
                 closeSearchResults();
+                closeFavoritesPanel();
             } else {
                 header.removeClass('is-collapsed');
                 discoveryControls.hidden = false;
@@ -304,6 +369,26 @@ export class NotemdSettingTab extends PluginSettingTab {
             setIcon(discoveryToggle, collapsed ? 'chevron-down' : 'chevron-up');
         };
         discoveryToggle.onclick = () => setDiscoveryCollapsed(!discoveryCollapsed);
+        const persistFavoriteIds = async () => {
+            this.plugin.settings.favoriteSettingIds = [...favorites];
+            await this.plugin.saveSettings();
+        };
+        const addFavorite = async (settingId: string) => {
+            if (favorites.has(settingId)) return;
+            favorites.add(settingId);
+            await persistFavoriteIds();
+            syncFavoriteButton(settingId);
+            applyFilter();
+            if (!favoritesPanel.hidden) renderFavoritesPanel();
+        };
+        const removeFavorite = async (settingId: string) => {
+            if (!favorites.has(settingId)) return;
+            favorites.delete(settingId);
+            await persistFavoriteIds();
+            syncFavoriteButton(settingId);
+            applyFilter();
+            if (!favoritesPanel.hidden) renderFavoritesPanel();
+        };
         settingItems.forEach((item, index) => {
             const setting = catalog[index];
             const settingId = setting.id;
@@ -313,12 +398,11 @@ export class NotemdSettingTab extends PluginSettingTab {
             star.type = 'button';
             star.setAttribute('aria-label', favorites.has(settingId) ? copy.removeFavorite : copy.addFavorite);
             star.onclick = async () => {
-                favorites.has(settingId) ? favorites.delete(settingId) : favorites.add(settingId);
-                this.plugin.settings.favoriteSettingIds = [...favorites];
-                await this.plugin.saveSettings();
-                star.textContent = favorites.has(settingId) ? '★' : '☆';
-                star.setAttribute('aria-label', favorites.has(settingId) ? copy.removeFavorite : copy.addFavorite);
-                applyFilter();
+                if (favorites.has(settingId)) {
+                    await removeFavorite(settingId);
+                } else {
+                    await addFavorite(settingId);
+                }
             };
         });
         search.addEventListener('input', applyFilter);
@@ -341,7 +425,10 @@ export class NotemdSettingTab extends PluginSettingTab {
         });
         search.addEventListener('blur', () => {
             window.setTimeout(() => {
-                if (!header.contains(containerEl.ownerDocument?.activeElement)) closeSearchResults();
+                if (!header.contains(containerEl.ownerDocument?.activeElement)) {
+                    closeSearchResults();
+                    closeFavoritesPanel();
+                }
             }, 0);
         });
         favoritesButton.onclick = () => {
@@ -349,9 +436,17 @@ export class NotemdSettingTab extends PluginSettingTab {
             favoritesButton.toggleClass('is-active', favoritesOnly);
             favoritesButton.setAttribute('aria-pressed', String(favoritesOnly));
             applyFilter();
+            if (favoritesOnly) {
+                renderFavoritesPanel();
+            } else {
+                closeFavoritesPanel();
+            }
         };
         const outsidePointer = (event: Event) => {
-            if (!header.contains(event.target as Node)) closeSearchResults();
+            if (!header.contains(event.target as Node)) {
+                closeSearchResults();
+                closeFavoritesPanel();
+            }
         };
         containerEl.ownerDocument?.addEventListener('pointerdown', outsidePointer, true);
         this.settingsDiscoveryCleanup = () => containerEl.ownerDocument?.removeEventListener('pointerdown', outsidePointer, true);

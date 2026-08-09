@@ -2644,8 +2644,14 @@
 .notemd-settings-empty-state { grid-column: 1 / -1; padding: 0.65rem 0.75rem; border: 1px dashed var(--notemd-border); border-radius: 10px; color: var(--text-muted); background: var(--notemd-surface-alt); }
 .notemd-settings-search-results { grid-column: 1 / -1; min-width: 0; max-height: min(42vh, 360px); overflow-y: auto; overscroll-behavior: contain; border: 1px solid var(--notemd-border); border-radius: 8px; background: var(--notemd-surface-alt); }
 .notemd-settings-search-results-content { display: flex; flex-direction: column; gap: 0.35rem; padding: 0.4rem; }
+.notemd-settings-favorites-panel { grid-column: 1 / -1; min-width: 0; max-height: min(42vh, 360px); overflow-y: auto; overscroll-behavior: contain; border: 1px solid var(--notemd-border); border-radius: 8px; background: var(--notemd-surface-alt); }
+.notemd-settings-favorites-content { display: flex; flex-direction: column; gap: 0.35rem; padding: 0.4rem; }
 .notemd-settings-search-result { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 14rem); grid-template-areas: "name category" "description category"; gap: 0.12rem 0.7rem; min-width: 0; min-height: 44px; box-sizing: border-box; padding: 0.55rem 0.65rem; border: 1px solid transparent; border-radius: 6px; cursor: pointer; }
 .notemd-settings-search-result:hover, .notemd-settings-search-result[aria-selected="true"] { border-color: var(--interactive-accent); background: color-mix(in srgb, var(--interactive-accent) 10%, var(--background-primary) 90%); }
+.notemd-settings-favorite-result { position: relative; padding-inline-end: 3.25rem; }
+.notemd-settings-favorite-remove { position: absolute; inset-block-start: 50%; inset-inline-end: 0.45rem; display: inline-flex; align-items: center; justify-content: center; width: 36px; min-width: 36px; height: 36px; min-height: 36px; padding: 0; border: 0; color: var(--text-muted); background: transparent; transform: translateY(-50%); }
+.notemd-settings-favorite-remove:hover { color: var(--text-error); background: var(--background-modifier-hover); }
+.notemd-settings-favorite-remove svg { width: 16px; height: 16px; }
 .notemd-settings-search-result-name { grid-area: name; min-width: 0; color: var(--text-normal); font-weight: 600; line-height: 1.35; overflow-wrap: anywhere; }
 .notemd-settings-search-result-description { grid-area: description; min-width: 0; color: var(--text-muted); font-size: 12px; line-height: 1.4; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .notemd-settings-search-result-category { grid-area: category; align-self: start; max-width: 14rem; color: var(--text-faint); font-size: 11px; line-height: 1.35; text-align: right; overflow-wrap: anywhere; }

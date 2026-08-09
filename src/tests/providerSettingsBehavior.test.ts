@@ -2339,4 +2339,44 @@ describe('provider settings behavior', () => {
             delete (globalThis as any).window;
         }
     });
+
+    test('opens a navigable favorites settings list and supports removal from the list', async () => {
+        const plugin = createPlugin();
+        plugin.settings.enableDeveloperMode = false;
+
+        const tab = new NotemdSettingTab(mockApp as any, plugin as any) as any;
+        tab.display();
+
+        const root = tab.containerEl as MockElement;
+        const favoritesButton = root.querySelector?.('.notemd-settings-favorites-filter') as MockElement | null;
+        const favoritesPanel = root.querySelector?.('#notemd-settings-favorites-panel') as MockElement | null;
+        const firstSetting = (root.querySelectorAll?.('.setting-item') ?? [])[0] as MockElement | undefined;
+        const firstStar = firstSetting?.querySelector?.('.notemd-setting-favorite-button') as MockElement | null;
+
+        expect(favoritesButton).toBeDefined();
+        expect(favoritesButton?.getAttribute?.('aria-controls')).toBe('notemd-settings-favorites-panel');
+        expect(favoritesPanel?.getAttribute?.('role')).toBe('list');
+        expect(favoritesPanel?.hidden).toBe(true);
+        expect(firstStar).toBeDefined();
+
+        await (firstStar as any).onclick?.();
+        expect(plugin.settings.favoriteSettingIds).toHaveLength(1);
+
+        (favoritesButton as any).toggleClass = jest.fn();
+        (favoritesButton as any).onclick?.();
+        expect(favoritesButton?.getAttribute?.('aria-expanded')).toBe('true');
+        expect(favoritesButton?.getAttribute?.('aria-pressed')).toBe('true');
+        expect(favoritesPanel?.hidden).toBe(false);
+        const favoriteEntry = favoritesPanel?.querySelector?.('.notemd-settings-favorite-result') as MockElement | null;
+        expect(favoriteEntry).toBeDefined();
+        expect(favoriteEntry?.getAttribute?.('role')).toBe('listitem');
+        expect(favoriteEntry?.dataset.settingId).toBe(plugin.settings.favoriteSettingIds[0]);
+
+        const removeButton = favoriteEntry?.querySelector?.('.notemd-settings-favorite-remove') as MockElement | null;
+        expect(removeButton).toBeDefined();
+        await (removeButton as any).onclick?.({ preventDefault: jest.fn(), stopPropagation: jest.fn() });
+        expect(plugin.settings.favoriteSettingIds).toEqual([]);
+        expect(favoritesPanel?.hidden).toBe(false);
+        expect(favoritesPanel?.querySelector?.('.notemd-settings-empty-state')?.textContent?.trim()).toBeTruthy();
+    });
 });

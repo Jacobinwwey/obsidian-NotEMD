@@ -264,7 +264,7 @@ That's it! Explore the settings to unlock more features like web research, trans
 <!-- notemd-settings-discovery-guide -->
 ### Finding And Reusing Settings
 
-Notemd has a broad settings surface because providers, note workflows, diagrams, batch processing, slides, and developer diagnostics have different controls. The settings page now provides a fuzzy search field, large category navigation, and per-setting favorites. Favorites are stored for the current Vault and remain available after restarting Obsidian.
+Notemd has a broad settings surface because providers, note workflows, diagrams, batch processing, slides, and developer diagnostics have different controls. The settings page now provides a fuzzy search field, large category navigation, and per-setting favorites. Click **★ Favorites** to open a dedicated, navigable favorite-settings list; each entry can jump to its setting or be removed directly. Favorites are stored for the current Vault and remain available after restarting Obsidian.
 
 Important newer settings include:
 

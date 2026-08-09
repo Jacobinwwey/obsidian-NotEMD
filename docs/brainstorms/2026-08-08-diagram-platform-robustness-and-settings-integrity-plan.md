@@ -196,6 +196,7 @@ The settings tab owns a dedicated result panel, independent of the category sele
 - ArrowUp/ArrowDown moves the active result and updates `aria-activedescendant`; Escape, blur, outside click, and successful navigation close the panel;
 - an empty query hides the panel completely; a non-empty query with no matches shows an explicit empty state rather than a filtered category selector;
 - the category `<select>` continues to perform only coarse category navigation and never owns search result semantics.
+- the favorites control preserves the existing favorites-only filtering behavior while exposing an independent `role="list"` panel; each favorite entry has a stable setting ID, direct navigation, an accessible remove action, and an explicit empty state.
 
 This boundary prevents a browser/Electron-specific `<select>` implementation detail from becoming the settings search API. It also makes the result list testable without relying on hidden native options.
 
@@ -232,7 +233,7 @@ This keeps the declared catalog/search architecture independent from browser-spe
 
 `src/tests/settingCatalog.test.ts` must cover the pure catalog and matcher contract: `Mermaid` excludes stable-API noise; exact name and description matches both work; cross-field concatenation cannot create a false positive; weighted results have stable ordering and complete `matchedFields`; duplicate IDs fail; and an explicit stable ID remains unchanged when locale copy or category labels change. The same file should retain locale-alias and favorite-retention coverage.
 
-The settings UI test surface must cover query visibility, listbox semantics, keyboard selection, direct scroll/focus/highlight navigation, and closing on Escape, blur, outside click, successful selection, and empty query. These tests must assert the concrete `elementId`, not only visible text. The Obsidian CLI smoke path must reload the plugin, open the settings tab, query `Mermaid`, assert that the result list contains `同时完整输出 Mermaid 图`, and assert that it does not contain `稳定 API 调用`.
+The settings UI test surface must cover query visibility, listbox semantics, keyboard selection, direct scroll/focus/highlight navigation, favorites-panel rendering/removal/empty state, and closing on Escape, blur, outside click, successful selection, and empty query. These tests must assert the concrete `elementId`, not only visible text. The Obsidian CLI smoke path must reload the plugin, open the settings tab, query `Mermaid`, assert that the result list contains `同时完整输出 Mermaid 图`, assert that it does not contain `稳定 API 调用`, and verify that a favorited setting appears in the dedicated list.
 
 ### PPI And Companion Settings
 
@@ -336,6 +337,7 @@ For every panel, exported SVG and PDF have the same viewBox, text line count, an
 - Replace path-derived/DOM-scraped search entries with explicit `SettingCatalogEntry` declarations and stable `elementId` anchors. Keep a migration-only resolver for legacy localized IDs.
 - Implement `SettingSearchMatch` scoring with visible-field token matching, bounded same-field English fuzzy fallback, `matchedFields`, deterministic ties, and no `categoryId` search.
 - Build the dedicated listbox result panel with direct scroll/focus/highlight navigation, keyboard selection, collapse, Escape, blur, outside-click, empty-query, and no-result states. Keep the category selector as coarse navigation only.
+- Expose an independent favorites settings panel with stable IDs, direct navigation, keyboard activation, an accessible remove action, persistence through `favoriteSettingIds`, and a localized empty state. Keep the existing favorites-only filter behavior compatible.
 - Make the whole discovery toolbar collapsible with an explicit button and controlled region; preserve the query while collapsed and restore results on expansion.
 - Add pure matcher and stable-ID regression cases in `src/tests/settingCatalog.test.ts`, plus UI/DOM and Obsidian CLI checks for the result panel contract.
 - Make result-card geometry explicit and responsive; add a CSS regression test for named grid areas and a runtime geometry assertion so long descriptions cannot collapse the setting name.
@@ -344,7 +346,7 @@ For every panel, exported SVG and PDF have the same viewBox, text line count, an
 
 **Gate**
 
-A fresh reload exposes `图形图片导出 PPI` at 300 and the companion toggle; a `Mermaid` query returns the expected Mermaid-related settings without `稳定 API 调用`; listbox navigation resolves the declared `elementId`; and the CLI capability probe and visible settings DOM agree.
+A fresh reload exposes `图形图片导出 PPI` at 300 and the companion toggle; a `Mermaid` query returns the expected Mermaid-related settings without `稳定 API 调用`; listbox navigation resolves the declared `elementId`; the favorites button opens an independent list that supports direct navigation/removal and a localized empty state; and the CLI capability probe and visible settings DOM agree.
 
 ### Phase 6: Documentation And Release Closure (Complete)
 
@@ -368,7 +370,7 @@ Documentation does not claim a full Drawnix editor, universal graph support, or 
 
 - TypeScript check: passed (`tsc -noEmit -skipLibCheck`).
 - Production bundle: passed (`npm run build`).
-- Jest: 243 suites passed, 2149 tests passed, 1 skipped (2150 total); the settings behavior suite includes the interactive listbox/navigation regression coverage and the Vault verifier has fail-closed missing/version/hash cases.
+- Jest: 243 suites passed, 2151 tests passed, 1 skipped (2152 total); the settings behavior suite includes the interactive listbox/navigation and favorite-panel regression coverage, and the Vault verifier has fail-closed missing/version/hash cases.
 - UI/render audits: `audit:i18n-ui` and `audit:render-host` passed.
 - Documentation site: VitePress build passed.
 - Official `obsidian help`: available. `obsidian-cli help`: unavailable because the optional `obsidian-cli` executable is not installed.
@@ -391,7 +393,7 @@ Documentation does not claim a full Drawnix editor, universal graph support, or 
 | Serialization | Drawnix fixture contract, explicit layer order, metadata schema version, and backward reader tests |
 | Preview | live-generated panels and rehydrated panels have identical ordered IDs and non-empty SVGs |
 | Export | folder selection, single/all panel paths, exact SVG-to-PDF geometry, PPI metadata, and partial failure reporting |
-| Settings | explicit catalog fields, stable IDs across locales, visible-field weighted search, bounded same-field fuzzy fallback, matched-field evidence, deterministic ordering, listbox semantics, direct navigation, collapse/Escape/blur/outside-click, no-result state, PPI range/default, and companion default |
+| Settings | explicit catalog fields, stable IDs across locales, visible-field weighted search, bounded same-field fuzzy fallback, matched-field evidence, deterministic ordering, listbox semantics, direct navigation, collapse/Escape/blur/outside-click, no-result state, favorites list/navigation/removal/empty state, PPI range/default, and companion default |
 | Host | official `obsidian` CLI reload/status/eval, loaded setting DOM, capability probes, and zero captured errors |
 | Repository | `npm run build`, `npm test -- --runInBand`, `npm run audit:i18n-ui`, `npm run audit:render-host`, and `git diff --check` |
 
@@ -424,6 +426,13 @@ Documentation does not claim a full Drawnix editor, universal graph support, or 
 - The same live DOM probe confirmed collapse sets `aria-expanded="false"`, `hidden=true` on the controlled region, `.is-collapsed` on the toolbar, and `hidden=true` on the result panel without changing the query. Expansion restores the controls, query, and all 13 results.
 - The live geometry probe confirmed a collapsed zero-height `position: sticky` header in the settings content column, with an absolutely positioned `44x44px` interactive top-right button and a transparent/no-pointer-event shell. The first setting moved up by the former discovery-row height (`145.958px`), proving the collapsed toolbar no longer reserves a full row or escapes toward the window controls.
 - `obsidian dev:errors` returned `No errors captured`; `obsidian-cli` and `dev:screenshot` remain unavailable in this Windows desktop session.
+
+## Verification Addendum (2026-08-09, favorite settings panel)
+
+- The current repository build was deployed to `E:\\1Knowledge\\.obsidian\\plugins\\notemd` and passed `npm run verify:vault-bundle -- --vault E:\\1Knowledge --version 1.9.5`: `main.js` SHA-256 `5265e00ec2f543676aa0ba28b61e9e0ddea88c28257b23a1ea52c7bebe82e2d0`, `styles.css` SHA-256 `69731a9ead34b285ee8e882ab797f4f7aefab775a51e527601e3aab9ec7a7fb8`, and `manifest.json` SHA-256 `fc88f5d7d90561ae73c324413ef58b937086e1901c7c7faf45686b12320a02a`; manifest version is `1.9.5`.
+- After the official `obsidian` eval disable/enable reload, the live setting tab accepted a star click and persisted `favoriteSettingIds=["settings.settingsReset.heading"]`. Clicking `★ Favorites` exposed `#notemd-settings-favorites-panel` with `role="list"`, `aria-expanded="true"`, one `role="listitem"`, and the stable setting ID.
+- Activating that favorite entry closed the panel and applied `notemd-setting-search-target` to the original setting. Reopening the panel and using its remove button cleared the persisted favorite while keeping the panel open; the panel then rendered the localized empty state `当前还没有收藏设置。`.
+- `obsidian dev:errors` returned `No errors captured`. The optional `obsidian-cli` executable, `dev:dom`, and `dev:screenshot` remain unavailable; the assertions above were executed through the official `obsidian eval` surface.
 
 ## Definition Of Done
 

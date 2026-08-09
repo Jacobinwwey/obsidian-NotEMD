@@ -1107,6 +1107,7 @@ export const STRINGS_EN = {
         collapseSearch: 'Collapse settings search', expandSearch: 'Expand settings search',
         categoryNavigationLabel: 'Jump to settings section', allCategories: 'All settings sections',
         addFavorite: 'Add setting to favorites', removeFavorite: 'Remove setting from favorites',
+        favoritesPanelLabel: 'Favorite settings', favoritesEmpty: 'No settings are currently favorited.',
         resultCount: '{visible} of {total} settings', noResults: 'No settings match the current search and filters.'
     },
     slideExport: {
