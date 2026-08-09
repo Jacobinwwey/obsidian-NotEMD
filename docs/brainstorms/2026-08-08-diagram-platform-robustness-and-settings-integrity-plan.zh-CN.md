@@ -207,6 +207,7 @@ interface SettingSearchMatch extends SettingCatalogEntry {
 
 - 桌面端使用命名 grid area（`name category` / `description category`），并限制分类列宽度；
 - 名称与说明各自声明所属 area 和 `min-width: 0`，长的本地化文案不能再改变 grid 的 intrinsic sizing；
+- 每个可点击结果卡片都具有稳定的 `min-height: 44px` 命中区域，包括说明为空的仅名称结果；
 - 移动端 breakpoint 切换为单列（`name` / `description` / `category`），分类改为左对齐；
 - `providerSettingsStyles.test.ts` 断言命名 area 与元素归属，Obsidian CLI 探针在查询 `Mermaid` 后必须验证名称矩形宽度非零。
 
@@ -356,10 +357,12 @@ npm run verify:vault-bundle -- --vault E:\\1Knowledge
 - 文档站：VitePress 构建通过。
 - 官方 `obsidian help`：可用。`obsidian-cli help`：不可用，因为系统未安装可选的 `obsidian-cli` 可执行文件。
 - 官方 `plugin:reload` 在本桌面会话返回非零结果。已通过官方 CLI `eval` 关闭并重新启用 `notemd`，等待插件重新初始化完成重载。
-- `npm run verify:vault-bundle -- --vault E:\\1Knowledge` 在部署到 `E:\\1Knowledge\\.obsidian\\plugins\\notemd` 后通过：`main.js` SHA-256 为 `b1adec85e50a22c2831ef73abd3b24b0fc3f4f9aeb32ee4f7ec964afee639041`，`styles.css` SHA-256 为 `afb869fba020bf1e21e2060e424589759c0e9fc56a3a733e3c146309bb7aea7e`，`manifest.json` SHA-256 为 `fc88f5d7d90561ae73c324413efc58b937086e1901c7c7faf45686b12320a02a`，三者均一致；manifest 版本为 `1.9.5`。
+- `npm run verify:vault-bundle -- --vault E:\\1Knowledge` 在部署到 `E:\\1Knowledge\\.obsidian\\plugins\\notemd` 后通过：`main.js` SHA-256 为 `b1adec85e50a22c2831ef73abd3b24b0fc3f4f9aeb32ee4f7ec964afee639041`，`styles.css` SHA-256 为 `048539f23789aff959b8328e849fe7ab319706b6c4c61904db1b78aee1c59753`，`manifest.json` SHA-256 为 `fc88f5d7d90561ae73c324413efc58b937086e1901c7c7faf45686b12320a02a`，三者均一致；manifest 版本为 `1.9.5`。
 - 通过 eval disable/enable 重载后的 loaded settings DOM 探针：PPI 控件存在且值为 `300`；companion 控件存在且为 `false`；搜索结果容器为 `role=listbox`；查询 `Mermaid` 返回 13 个用户可见字段命中，排除 `稳定 API 调用`；所有结果和两个控件的稳定 element ID 均可解析。
-- 同一个 CLI 探针报告 `grid-template-columns: 422.667px 210px`、命名 area 为 `"name category" "description category"`，第一张结果卡片为 `664x39.875px`，每个结果的名称矩形均非零（`422.667x20.25px`）；这证明长说明不会再把名称列挤塌或逐字竖排。
+- 同一个 CLI 探针报告 `grid-template-columns: 422.667px 210px`、命名 area 为 `"name category" "description category"`、`min-height: 44px`，第一张结果卡片为 `664x44px`，每个结果的名称矩形宽度均为非零（`422.667px`）。受限的 360px 面板同时显示 6 项，全部 13 项仍可滚动访问；Escape 与空查询会收起面板，点击结果会关闭面板并高亮目标设置。
 - `obsidian dev:errors` 报告 `No errors captured`。本会话的 `dev:dom` 与可选 `obsidian-cli` wrapper 不可用，因此通过官方 `eval` 直接对 `app.setting.contentEl` 执行等价 DOM 断言。
+- 本次 Windows 桌面会话的官方 `dev:screenshot` 仍不可用；以上运行时几何和交互探针是这次 CSS 缺陷的权威回归证据。
+- 新鲜 `frontend-law-auditor` strict 审计：`100.00/100`，fast gate 失败为 0，原则失败为 0，未知检查为 0（门槛 `85`）。
 - architecture note CLI smoke：`architecture.zh-CN.md` 存在，图形/预览命令已注册并可执行。现有 history 同时包含 Mermaid 与 Drawnix preview 条目；命令探针期间没有捕获新错误。
 
 ## 验证矩阵

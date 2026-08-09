@@ -66,6 +66,7 @@ describe('provider settings styles', () => {
         const categoryRule = readRule(styles, '.notemd-settings-search-result-category');
 
         expect(resultRule).toMatch(/grid-template-areas:\s*['"]name category['"]\s*['"]description category['"]/);
+        expect(resultRule).toMatch(/min-height:\s*44px\s*;/);
         expect(nameRule).toMatch(/grid-area:\s*name\s*;/);
         expect(descriptionRule).toMatch(/grid-area:\s*description\s*;/);
         expect(categoryRule).toMatch(/grid-area:\s*category\s*;/);

@@ -207,6 +207,7 @@ The robust contract is now explicit:
 
 - the desktop card uses named grid areas (`name category` / `description category`) and bounded category width;
 - name and description own their areas and set `min-width: 0`, so long localized copy cannot change the grid's intrinsic sizing;
+- every clickable result card has a stable `min-height: 44px` target, including a name-only result whose description is empty;
 - the mobile breakpoint switches to one column (`name` / `description` / `category`) and left-aligns the category;
 - `providerSettingsStyles.test.ts` asserts the named areas and ownership selectors, and the Obsidian CLI probe must verify a non-zero name rectangle after a `Mermaid` query.
 
@@ -356,10 +357,12 @@ Documentation does not claim a full Drawnix editor, universal graph support, or 
 - Documentation site: VitePress build passed.
 - Official `obsidian help`: available. `obsidian-cli help`: unavailable because the optional `obsidian-cli` executable is not installed.
 - The official `plugin:reload` command returned a non-zero result in this desktop session. Reload was completed through the official CLI `eval` surface by disabling and enabling `notemd`, then waiting for the plugin to reinitialize.
-- `npm run verify:vault-bundle -- --vault E:\\1Knowledge` passed after deployment to `E:\\1Knowledge\\.obsidian\\plugins\\notemd`: `main.js` SHA-256 `b1adec85e50a22c2831ef73abd3b24b0fc3f4f9aeb32ee4f7ec964afee639041`, `styles.css` SHA-256 `afb869fba020bf1e21e2060e424589759c0e9fc56a3a733e3c146309bb7aea7e`, and `manifest.json` SHA-256 `fc88f5d7d90561ae73c324413efc58b937086e1901c7c7faf45686b12320a02a` all match; manifest version is `1.9.5`.
+- `npm run verify:vault-bundle -- --vault E:\\1Knowledge` passed after deployment to `E:\\1Knowledge\\.obsidian\\plugins\\notemd`: `main.js` SHA-256 `b1adec85e50a22c2831ef73abd3b24b0fc3f4f9aeb32ee4f7ec964afee639041`, `styles.css` SHA-256 `048539f23789aff959b8328e849fe7ab319706b6c4c61904db1b78aee1c59753`, and `manifest.json` SHA-256 `fc88f5d7d90561ae73c324413ef58b937086e1901c7c7faf45686b12320a02a` all match; manifest version is `1.9.5`.
 - Loaded setting-tab probes after the eval disable/enable reload: PPI control exists with value `300`; companion control exists and is `false`; search result container has `role=listbox`; query `Mermaid` returns 13 visible-field matches and excludes `稳定 API 调用`; stable element IDs resolve for every result and both controls.
-- The same CLI probe reports `grid-template-columns: 422.667px 210px`, named areas `"name category" "description category"`, a first-card size of `664x39.875px`, and a non-zero name rectangle (`422.667x20.25px`) for every result; this is the regression evidence that long descriptions no longer collapse or vertically wrap setting names.
+- The same CLI probe reports `grid-template-columns: 422.667px 210px`, named areas `"name category" "description category"`, `min-height: 44px`, a first-card size of `664x44px`, and a non-zero name rectangle (`422.667px` wide) for every result. Six rows are visible in the bounded 360px panel; all 13 matches remain reachable by scrolling. Escape and empty-query probes hide the panel, and pointer selection closes it while applying the target highlight.
 - `obsidian dev:errors` reports `No errors captured`. `dev:dom` and the optional `obsidian-cli` wrapper are unavailable in this session, so equivalent DOM assertions were executed through official `eval` against `app.setting.contentEl`.
+- The official `dev:screenshot` command remains unavailable in this Windows desktop session; the runtime geometry and interaction probes above are the authoritative regression evidence for this CSS defect.
+- Fresh `frontend-law-auditor` strict audit: `100.00/100`, zero fast-gate failures, zero principle failures, zero unknown checks (threshold `85`).
 - Architecture note CLI smoke: `architecture.zh-CN.md` is present and the diagram/preview commands are registered and executable. Existing history contains both Mermaid and Drawnix preview entries; no new error was captured during the command probe.
 
 ## Verification Matrix
