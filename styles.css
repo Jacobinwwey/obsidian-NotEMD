@@ -2633,8 +2633,8 @@
 .notemd-settings-discovery-toggle { grid-column: 1; grid-row: 1; align-self: start; min-width: 44px; min-height: 44px; padding: 0.45rem; border: 1px solid var(--notemd-border); border-radius: 8px; background: var(--background-secondary); color: var(--text-normal); cursor: pointer; }
 .notemd-settings-discovery-toggle svg { width: 18px; height: 18px; }
 .notemd-settings-discovery-controls { grid-column: 2; min-width: 0; display: grid; grid-template-columns: minmax(14rem, 1fr) auto; gap: 0.6rem; }
-.notemd-settings-discovery.is-collapsed { position: fixed; inset-block-start: calc(0.75rem + env(safe-area-inset-top, 0px)); inset-inline-end: calc(0.75rem + env(safe-area-inset-right, 0px)); z-index: 20; display: block; width: 44px; height: 44px; margin: 0; padding: 0; border: 0; background: transparent; pointer-events: none; }
-.notemd-settings-discovery.is-collapsed .notemd-settings-discovery-toggle { display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; margin: 0; pointer-events: auto; box-shadow: 0 3px 12px color-mix(in srgb, var(--background-modifier-box-shadow) 70%, transparent); }
+.notemd-settings-discovery.is-collapsed { position: sticky; top: 0; z-index: 20; display: block; width: 100%; height: 0; margin: 0; padding: 0; border: 0; background: transparent; pointer-events: none; }
+.notemd-settings-discovery.is-collapsed .notemd-settings-discovery-toggle { position: absolute; inset-block-start: 0.75rem; inset-inline-end: 0.75rem; display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; margin: 0; pointer-events: auto; box-shadow: 0 3px 12px color-mix(in srgb, var(--background-modifier-box-shadow) 70%, transparent); }
 .notemd-settings-discovery.is-collapsed .notemd-settings-discovery-controls { display: none; }
 .notemd-settings-discovery-toggle:hover { border-color: var(--interactive-accent); background: color-mix(in srgb, var(--interactive-accent) 10%, var(--background-secondary) 90%); }
 .notemd-settings-search { min-width: 0; width: 100%; }

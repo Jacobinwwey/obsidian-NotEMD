@@ -59,10 +59,11 @@ describe('provider settings styles', () => {
         expect(styles).toContain('.notemd-settings-discovery.is-collapsed .notemd-settings-discovery-controls');
         const collapsedRule = readRule(styles, '.notemd-settings-discovery.is-collapsed');
         const collapsedToggleRule = readRule(styles, '.notemd-settings-discovery.is-collapsed .notemd-settings-discovery-toggle');
-        expect(collapsedRule).toMatch(/position:\s*fixed\s*;/);
-        expect(collapsedRule).toMatch(/width:\s*44px\s*;/);
-        expect(collapsedRule).toMatch(/height:\s*44px\s*;/);
+        expect(collapsedRule).toMatch(/position:\s*sticky\s*;/);
+        expect(collapsedRule).toMatch(/width:\s*100%\s*;/);
+        expect(collapsedRule).toMatch(/height:\s*0\s*;/);
         expect(collapsedRule).toMatch(/pointer-events:\s*none\s*;/);
+        expect(collapsedToggleRule).toMatch(/position:\s*absolute\s*;/);
         expect(collapsedToggleRule).toMatch(/pointer-events:\s*auto\s*;/);
         expect(styles).toContain('.notemd-setting-search-target');
         expect(styles).toContain('@media (max-width: 720px)');
