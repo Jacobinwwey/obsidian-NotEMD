@@ -209,7 +209,8 @@ interface SettingSearchMatch extends SettingCatalogEntry {
 - 收起时设置受控区域的 `hidden` 状态，为工具栏添加 `.is-collapsed` 状态，并关闭结果面板，但不清空当前 query；
 - 展开时恢复受控区域并重新应用原有 query/过滤状态，用户不会丢失正在输入的搜索；
 - 图标与无障碍标签随状态切换（`chevron-up`/收起、`chevron-down`/展开），按钮保持键盘可操作且命中区域至少 44px；
-- CSS 同时依赖语义 `hidden` 属性和收起视觉状态隐藏受控区域，并在桌面和移动宽度下保持稳定的工具栏几何。
+- 收起态工具栏从正常文档流移除，使用右上角固定的 44x44px 锚点；header 外壳透明且 `pointer-events: none`，只有收起/展开按钮保留 pointer events；
+- CSS 同时依赖语义 `hidden` 属性和收起视觉状态隐藏受控区域，并在桌面和移动宽度下保持稳定的工具栏几何，同时包含窄屏/移动端 safe-area inset。
 
 UI 回归契约必须覆盖默认展开、`aria-controls` 关联、收起/展开状态转换、结果面板关闭、query 保留和匹配结果恢复。加载后的 Obsidian CLI 探针必须在真实 disable/enable 重载后执行同样的转换；仅验证源码不足以证明用户确实可以收回工具栏占用的空间。
 
@@ -417,6 +418,8 @@ npm run verify:vault-bundle -- --vault E:\\1Knowledge
 - **拼接全文后做模糊搜索**：拒绝。它会在字段边界制造误命中，并把内部 category/实现标识泄漏到用户搜索结果。
 
 ## 实测补充（2026-08-09，可收起工具栏）
+
+- live geometry 探针确认：收起态 header 为 `position: fixed`、尺寸 `44x44px`，外壳透明且不接收 pointer events，交互按钮为 `44x44px` 并锚定右上角；首个设置项相较展开态上移原发现行高度 `145.958px`，证明收起后不再占据整行。
 
 - 最新部署包校验通过：`main.js` SHA-256 为 `63a0b94fb1950bf07f0f28dc7ac00ce2363a7488bb55116ce5568ea914e6d82e`，`styles.css` SHA-256 为 `cd952e88f02106cc1eb3766cdf14d8f6e19e5d2875be50683324957fc753d5a6`，`manifest.json` SHA-256 为 `fc88f5d7d90561ae73c324413efc58b937086e1901c7c7faf45686b12320a02a`；Vault verifier 通过，manifest 版本为 `1.9.5`。
 - 通过官方 `obsidian eval` 在 disable/enable 重载后确认：默认 `aria-expanded="true"`，`aria-controls="notemd-settings-discovery-controls"` 正确关联，工具栏控件可见。输入 `Mermaid` 后得到 13 个结果，且排除无关的“稳定 API 调用”。

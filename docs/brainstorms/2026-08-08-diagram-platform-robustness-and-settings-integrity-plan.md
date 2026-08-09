@@ -209,7 +209,8 @@ The search bar is a toolbar, not a permanently occupying panel. Its collapse beh
 - collapsing sets the controlled element's `hidden` state, applies `.is-collapsed` to the toolbar, and closes the result listbox without clearing the current query;
 - expanding restores the controls and re-applies the existing query/filter state, so a partially composed search is not lost;
 - the icon and accessible label change with the state (`chevron-up`/collapse versus `chevron-down`/expand), and the control remains keyboard-operable with a minimum 44px hit target;
-- CSS hides the controlled region through both the semantic `hidden` attribute and the collapsed visual state while preserving stable desktop and mobile geometry.
+- in the collapsed state the toolbar is removed from normal document flow with a fixed 44x44px top-right anchor; the header is transparent and `pointer-events: none`, while only the toggle keeps pointer events;
+- CSS hides the controlled region through both the semantic `hidden` attribute and the collapsed visual state while preserving stable desktop and mobile geometry. Safe-area insets are included for narrow/mobile hosts.
 
 The UI regression contract must assert default-expanded state, `aria-controls` wiring, collapse/expand transitions, result-panel closure, query preservation, and restored matches. A loaded Obsidian CLI probe must exercise the same transitions after a real disable/enable reload; source-only assertions are insufficient evidence that users can reclaim the toolbar space.
 
@@ -421,6 +422,7 @@ Documentation does not claim a full Drawnix editor, universal graph support, or 
 - Latest deployed bundle verification: `main.js` SHA-256 `63a0b94fb1950bf07f0f28dc7ac00ce2363a7488bb55116ce5568ea914e6d82e`, `styles.css` SHA-256 `cd952e88f02106cc1eb3766cdf14d8f6e19e5d2875be50683324957fc753d5a6`, and `manifest.json` SHA-256 `fc88f5d7d90561ae73c324413efc58b937086e1901c7c7faf45686b12320a02a`; Vault verifier passed with manifest `1.9.5`.
 - Official `obsidian` eval after disable/enable reload confirmed default `aria-expanded="true"`, `aria-controls="notemd-settings-discovery-controls"`, and visible controls. After a `Mermaid` query it rendered 13 result options and excluded the unrelated stable-API entry.
 - The same live DOM probe confirmed collapse sets `aria-expanded="false"`, `hidden=true` on the controlled region, `.is-collapsed` on the toolbar, and `hidden=true` on the result panel without changing the query. Expansion restores the controls, query, and all 13 results.
+- The live geometry probe confirmed a collapsed `position: fixed` header with `44x44px` bounds, a transparent/no-pointer-event shell, and a `44x44px` interactive top-right button. The first setting moved up by the former discovery-row height (`145.958px`), proving the collapsed toolbar no longer reserves a full row.
 - `obsidian dev:errors` returned `No errors captured`; `obsidian-cli` and `dev:screenshot` remain unavailable in this Windows desktop session.
 
 ## Definition Of Done
