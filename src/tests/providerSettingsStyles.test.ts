@@ -54,6 +54,9 @@ describe('provider settings styles', () => {
         expect(styles).toContain('.notemd-settings-empty-state');
         expect(styles).toContain('.notemd-settings-search-results');
         expect(styles).toContain('.notemd-settings-search-result[aria-selected="true"]');
+        expect(styles).toContain('.notemd-settings-discovery-toggle');
+        expect(styles).toContain('.notemd-settings-discovery-controls');
+        expect(styles).toContain('.notemd-settings-discovery.is-collapsed .notemd-settings-discovery-controls');
         expect(styles).toContain('.notemd-setting-search-target');
         expect(styles).toContain('@media (max-width: 720px)');
     });
@@ -86,7 +89,7 @@ describe('provider settings styles', () => {
     test('settings categories use one progressive selector instead of parallel heading buttons', () => {
         const source = fs.readFileSync(settingTabPath, 'utf8');
 
-        expect(source).toContain("header.createEl('select', { cls: 'notemd-settings-category-navigation' })");
+        expect(source).toContain("discoveryControls.createEl('select', { cls: 'notemd-settings-category-navigation' })");
         expect(source).not.toContain("navigation.createEl('button', { text: label })");
     });
 });

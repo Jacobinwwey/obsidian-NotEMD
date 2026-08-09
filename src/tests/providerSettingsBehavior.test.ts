@@ -2242,10 +2242,28 @@ describe('provider settings behavior', () => {
             const root = tab.containerEl as MockElement;
             const search = root.querySelector?.('input.notemd-settings-search');
             const panel = root.querySelector?.('#notemd-settings-search-results');
+            const discoveryToggle = root.querySelector?.('.notemd-settings-discovery-toggle') as MockElement | null;
+            const discoveryControls = root.querySelector?.('#notemd-settings-discovery-controls') as MockElement | null;
+            const discoveryHeader = root.querySelector?.('.notemd-settings-discovery') as MockElement | null;
             expect(search).toBeDefined();
             expect(panel?.getAttribute?.('role')).toBe('listbox');
             expect(panel?.hidden).toBe(true);
             expect(search?.getAttribute?.('aria-expanded')).toBe('false');
+            expect(discoveryToggle).toBeDefined();
+            expect(discoveryControls).toBeDefined();
+            expect(discoveryToggle?.getAttribute?.('aria-expanded')).toBe('true');
+            expect(discoveryControls?.hidden).not.toBe(true);
+
+            (discoveryToggle as any).onclick?.();
+            expect(discoveryToggle?.getAttribute?.('aria-expanded')).toBe('false');
+            expect(discoveryControls?.hidden).toBe(true);
+            expect(discoveryHeader?.cls).toContain('is-collapsed');
+            expect(panel?.hidden).toBe(true);
+
+            (discoveryToggle as any).onclick?.();
+            expect(discoveryToggle?.getAttribute?.('aria-expanded')).toBe('true');
+            expect(discoveryControls?.hidden).toBe(false);
+            expect(discoveryHeader?.cls).not.toContain('is-collapsed');
 
             search!.value = 'Mermaid';
             search!.dispatch('input');
@@ -2256,6 +2274,17 @@ describe('provider settings behavior', () => {
             expect(options.some(option => option.textContent?.includes('稳定 API 调用'))).toBe(false);
             expect(panel?.hidden).toBe(false);
             expect(search?.getAttribute?.('aria-expanded')).toBe('true');
+
+            (discoveryToggle as any).onclick?.();
+            expect(discoveryToggle?.getAttribute?.('aria-expanded')).toBe('false');
+            expect(discoveryControls?.hidden).toBe(true);
+            expect(panel?.hidden).toBe(true);
+            expect(search?.value).toBe('Mermaid');
+
+            (discoveryToggle as any).onclick?.();
+            expect(discoveryToggle?.getAttribute?.('aria-expanded')).toBe('true');
+            expect(discoveryControls?.hidden).toBe(false);
+            expect(panel?.hidden).toBe(false);
 
             const selectedOption = options[Math.min(1, options.length - 1)];
             const selectedSettingId = selectedOption.dataset.settingId;

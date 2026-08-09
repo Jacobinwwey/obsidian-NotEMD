@@ -199,6 +199,20 @@ interface SettingSearchMatch extends SettingCatalogEntry {
 
 这个边界避免浏览器/Electron 的 `<select>` 实现细节变成设置搜索 API，也使结果列表不依赖隐藏原生 option 即可测试。
 
+#### 可收起设置发现工具栏契约（2026-08-09）
+
+搜索栏是一个工具栏，而不是永久占用空间的结果面板。收起行为必须显式定义，并保持向前兼容：
+
+- 首次渲染默认展开，保留既有设置入口和使用习惯；
+- 由一个 `type="button"` 的图标按钮拥有收起状态。按钮具有稳定 ID、`aria-controls`、`aria-expanded`、本地化 `aria-label` 和一致的 tooltip；
+- 搜索输入、收藏过滤、分类导航、结果计数和 listbox 统一放在 `#notemd-settings-discovery-controls` 下；
+- 收起时设置受控区域的 `hidden` 状态，为工具栏添加 `.is-collapsed` 状态，并关闭结果面板，但不清空当前 query；
+- 展开时恢复受控区域并重新应用原有 query/过滤状态，用户不会丢失正在输入的搜索；
+- 图标与无障碍标签随状态切换（`chevron-up`/收起、`chevron-down`/展开），按钮保持键盘可操作且命中区域至少 44px；
+- CSS 同时依赖语义 `hidden` 属性和收起视觉状态隐藏受控区域，并在桌面和移动宽度下保持稳定的工具栏几何。
+
+UI 回归契约必须覆盖默认展开、`aria-controls` 关联、收起/展开状态转换、结果面板关闭、query 保留和匹配结果恢复。加载后的 Obsidian CLI 探针必须在真实 disable/enable 重载后执行同样的转换；仅验证源码不足以证明用户确实可以收回工具栏占用的空间。
+
 #### 搜索结果布局回归加固（2026-08-09）
 
 结果卡片的布局属于交互契约，而不是偶然的样式细节。此前的隐式两列 grid 会把不换行的长说明放进 `auto` 列；在 Chromium/Electron 中该列会占用整行的 intrinsic width，使名称列塌缩为 0，最终出现截图中的“名称每行一个字”和误导性的超大高亮区域。
@@ -321,6 +335,7 @@ npm run verify:vault-bundle -- --vault E:\\1Knowledge
 - 用显式 `SettingCatalogEntry` 声明和稳定 `elementId` 锚点替代按路径/DOM 抓取的搜索条目；为旧的本地化 ID 保留仅用于迁移的 resolver。
 - 实现基于用户可见字段的 `SettingSearchMatch` 评分、同字段同词的有界英文模糊 fallback、`matchedFields`、确定性平局排序，并删除 `categoryId` 搜索。
 - 构建独立的 listbox 结果面板，实现直接滚动/聚焦/高亮、键盘选择、收起、Escape、失焦、外部点击、空 query 和无结果状态；分类选择器只承担粗粒度导航。
+- 让整个设置发现工具栏支持显式按钮收起/展开；收起时保留 query，展开时恢复结果。
 - 在 `src/tests/settingCatalog.test.ts` 增加纯匹配与 stable ID 回归，并增加结果面板 DOM 与 Obsidian CLI 契约测试。
 - 将结果卡片几何改为显式且响应式布局；增加命名 grid area 的 CSS 回归测试和运行时几何断言，防止长说明把设置名称挤塌。
 - 增加部署验证脚本或维护者命令，比较源码构建产物与 Vault bundle hash。
@@ -400,6 +415,13 @@ npm run verify:vault-bundle -- --vault E:\\1Knowledge
 - **PDF 专用重新布局**：拒绝。这正是 SVG/PDF 文本差异的直接来源；PDF 必须消费已布局 SVG。
 - **把过滤后的原生 `<select>` 当搜索 UI**：拒绝。隐藏/禁用 option 无法在 Electron 中提供设置级结果语义、键盘状态和稳定直接导航。
 - **拼接全文后做模糊搜索**：拒绝。它会在字段边界制造误命中，并把内部 category/实现标识泄漏到用户搜索结果。
+
+## 实测补充（2026-08-09，可收起工具栏）
+
+- 最新部署包校验通过：`main.js` SHA-256 为 `63a0b94fb1950bf07f0f28dc7ac00ce2363a7488bb55116ce5568ea914e6d82e`，`styles.css` SHA-256 为 `cd952e88f02106cc1eb3766cdf14d8f6e19e5d2875be50683324957fc753d5a6`，`manifest.json` SHA-256 为 `fc88f5d7d90561ae73c324413efc58b937086e1901c7c7faf45686b12320a02a`；Vault verifier 通过，manifest 版本为 `1.9.5`。
+- 通过官方 `obsidian eval` 在 disable/enable 重载后确认：默认 `aria-expanded="true"`，`aria-controls="notemd-settings-discovery-controls"` 正确关联，工具栏控件可见。输入 `Mermaid` 后得到 13 个结果，且排除无关的“稳定 API 调用”。
+- 同一 live DOM 探针确认：收起时 `aria-expanded="false"`，受控区域 `hidden=true`，工具栏带 `.is-collapsed`，结果面板关闭，query 不变；展开后控件、query 和 13 个结果全部恢复。
+- `obsidian dev:errors` 返回 `No errors captured`；当前 Windows 桌面会话仍不可用 `obsidian-cli` 和 `dev:screenshot`。
 
 ## 完成标准
 

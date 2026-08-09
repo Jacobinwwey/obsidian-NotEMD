@@ -199,6 +199,20 @@ The settings tab owns a dedicated result panel, independent of the category sele
 
 This boundary prevents a browser/Electron-specific `<select>` implementation detail from becoming the settings search API. It also makes the result list testable without relying on hidden native options.
 
+#### Collapsible Discovery Toolbar Contract (2026-08-09)
+
+The search bar is a toolbar, not a permanently occupying panel. Its collapse behavior is explicit and backward-compatible:
+
+- the toolbar is expanded on first render so existing settings workflows keep their current entry point;
+- an icon-only `type="button"` with a stable ID, `aria-controls`, `aria-expanded`, localized `aria-label`, and a matching tooltip owns the collapse state;
+- the search input, favorites filter, category navigator, result count, and listbox are grouped under `#notemd-settings-discovery-controls`;
+- collapsing sets the controlled element's `hidden` state, applies `.is-collapsed` to the toolbar, and closes the result listbox without clearing the current query;
+- expanding restores the controls and re-applies the existing query/filter state, so a partially composed search is not lost;
+- the icon and accessible label change with the state (`chevron-up`/collapse versus `chevron-down`/expand), and the control remains keyboard-operable with a minimum 44px hit target;
+- CSS hides the controlled region through both the semantic `hidden` attribute and the collapsed visual state while preserving stable desktop and mobile geometry.
+
+The UI regression contract must assert default-expanded state, `aria-controls` wiring, collapse/expand transitions, result-panel closure, query preservation, and restored matches. A loaded Obsidian CLI probe must exercise the same transitions after a real disable/enable reload; source-only assertions are insufficient evidence that users can reclaim the toolbar space.
+
 #### Search Result Layout Regression Hardening (2026-08-09)
 
 The result card layout is part of the interaction contract, not incidental styling. The previous implicit two-column grid placed the long, non-wrapping description in the `auto` column. In Chromium/Electron that column consumed the row's intrinsic width, collapsed the name column to zero, and produced the observed one-character-per-line setting name plus a misleading oversized focus region.
@@ -321,6 +335,7 @@ For every panel, exported SVG and PDF have the same viewBox, text line count, an
 - Replace path-derived/DOM-scraped search entries with explicit `SettingCatalogEntry` declarations and stable `elementId` anchors. Keep a migration-only resolver for legacy localized IDs.
 - Implement `SettingSearchMatch` scoring with visible-field token matching, bounded same-field English fuzzy fallback, `matchedFields`, deterministic ties, and no `categoryId` search.
 - Build the dedicated listbox result panel with direct scroll/focus/highlight navigation, keyboard selection, collapse, Escape, blur, outside-click, empty-query, and no-result states. Keep the category selector as coarse navigation only.
+- Make the whole discovery toolbar collapsible with an explicit button and controlled region; preserve the query while collapsed and restore results on expansion.
 - Add pure matcher and stable-ID regression cases in `src/tests/settingCatalog.test.ts`, plus UI/DOM and Obsidian CLI checks for the result panel contract.
 - Make result-card geometry explicit and responsive; add a CSS regression test for named grid areas and a runtime geometry assertion so long descriptions cannot collapse the setting name.
 - Add a deployment verification script or documented maintainer command that compares source build and Vault bundle hashes.
@@ -400,6 +415,13 @@ Documentation does not claim a full Drawnix editor, universal graph support, or 
 - **PDF-specific re-layout** is rejected: it is the direct cause of SVG/PDF text divergence. PDF must consume the already laid-out SVG.
 - **Filtered native `<select>` as search UI** is rejected: hidden/disabled options do not expose setting-level result semantics, keyboard state, or stable direct navigation in Electron.
 - **Concatenated full-text fuzzy search** is rejected: it creates false positives across field boundaries and leaks internal category/implementation identifiers into user-facing discovery.
+
+## Verification Addendum (2026-08-09, collapsible toolbar)
+
+- Latest deployed bundle verification: `main.js` SHA-256 `63a0b94fb1950bf07f0f28dc7ac00ce2363a7488bb55116ce5568ea914e6d82e`, `styles.css` SHA-256 `cd952e88f02106cc1eb3766cdf14d8f6e19e5d2875be50683324957fc753d5a6`, and `manifest.json` SHA-256 `fc88f5d7d90561ae73c324413efc58b937086e1901c7c7faf45686b12320a02a`; Vault verifier passed with manifest `1.9.5`.
+- Official `obsidian` eval after disable/enable reload confirmed default `aria-expanded="true"`, `aria-controls="notemd-settings-discovery-controls"`, and visible controls. After a `Mermaid` query it rendered 13 result options and excluded the unrelated stable-API entry.
+- The same live DOM probe confirmed collapse sets `aria-expanded="false"`, `hidden=true` on the controlled region, `.is-collapsed` on the toolbar, and `hidden=true` on the result panel without changing the query. Expansion restores the controls, query, and all 13 results.
+- `obsidian dev:errors` returned `No errors captured`; `obsidian-cli` and `dev:screenshot` remain unavailable in this Windows desktop session.
 
 ## Definition Of Done
 

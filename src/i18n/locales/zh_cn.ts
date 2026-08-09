@@ -1087,6 +1087,7 @@ export const STRINGS_ZH_CN: DeepPartial<NotemdEnglishStrings> = {
     },
     settingsDiscovery: {
         searchPlaceholder: '搜索设置…', searchLabel: '搜索设置', favorites: '★ 收藏',
+        collapseSearch: '收起设置搜索栏', expandSearch: '展开设置搜索栏',
         categoryNavigationLabel: '跳转到设置分类', allCategories: '全部设置分类',
         addFavorite: '收藏此设置', removeFavorite: '取消收藏此设置',
         resultCount: '显示 {visible} / {total} 项设置', noResults: '没有设置符合当前搜索和筛选条件。'

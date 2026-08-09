@@ -1,4 +1,4 @@
-import { App, ButtonComponent, PluginSettingTab, Setting, Notice, TextAreaComponent } from 'obsidian';
+import { App, ButtonComponent, PluginSettingTab, Setting, Notice, setIcon, TextAreaComponent } from 'obsidian';
 import NotemdPlugin from '../main'; // Import the plugin class itself
 import {
     FolderTaskFileSelectionProfile,
@@ -166,18 +166,28 @@ export class NotemdSettingTab extends PluginSettingTab {
         }
         const header = containerEl.createDiv({ cls: 'notemd-settings-discovery' });
         containerEl.prepend(header);
-        const search = header.createEl('input', { type: 'search', placeholder: copy.searchPlaceholder, cls: 'notemd-settings-search' });
+        const discoveryToggle = header.createEl('button', { cls: 'notemd-settings-discovery-toggle' });
+        discoveryToggle.type = 'button';
+        discoveryToggle.id = 'notemd-settings-discovery-toggle';
+        discoveryToggle.setAttribute('aria-controls', 'notemd-settings-discovery-controls');
+        discoveryToggle.setAttribute('aria-expanded', 'true');
+        discoveryToggle.setAttribute('aria-label', copy.collapseSearch);
+        discoveryToggle.setAttribute('title', copy.collapseSearch);
+        setIcon(discoveryToggle, 'chevron-up');
+        const discoveryControls = header.createDiv({ cls: 'notemd-settings-discovery-controls' });
+        discoveryControls.id = 'notemd-settings-discovery-controls';
+        const search = discoveryControls.createEl('input', { type: 'search', placeholder: copy.searchPlaceholder, cls: 'notemd-settings-search' });
         search.setAttribute('aria-label', copy.searchLabel);
-        const favoritesButton = header.createEl('button', { text: copy.favorites, cls: 'notemd-settings-favorites-filter' });
+        const favoritesButton = discoveryControls.createEl('button', { text: copy.favorites, cls: 'notemd-settings-favorites-filter' });
         favoritesButton.type = 'button';
         let favoritesOnly = false;
-        const navigation = header.createEl('select', { cls: 'notemd-settings-category-navigation' });
+        const navigation = discoveryControls.createEl('select', { cls: 'notemd-settings-category-navigation' });
         navigation.setAttribute('aria-label', copy.categoryNavigationLabel);
         navigation.createEl('option', { text: copy.allCategories, value: '' });
         const categoryHeadings = new Map<string, HTMLElement>();
-        const resultCount = header.createDiv({ cls: 'notemd-settings-result-count' });
+        const resultCount = discoveryControls.createDiv({ cls: 'notemd-settings-result-count' });
         resultCount.setAttribute('aria-live', 'polite');
-        const resultPanel = header.createDiv({ cls: 'notemd-settings-search-results' });
+        const resultPanel = discoveryControls.createDiv({ cls: 'notemd-settings-search-results' });
         resultPanel.id = 'notemd-settings-search-results';
         resultPanel.setAttribute('role', 'listbox');
         resultPanel.hidden = true;
@@ -275,6 +285,25 @@ export class NotemdSettingTab extends PluginSettingTab {
             resultCount.setText(formatI18n(copy.resultCount, { visible: navigationState.visibleCount, total: navigationState.totalCount }));
             renderSearchResults(navigationState.matches);
         };
+        let discoveryCollapsed = false;
+        const setDiscoveryCollapsed = (collapsed: boolean) => {
+            discoveryCollapsed = collapsed;
+            if (collapsed) {
+                header.addClass('is-collapsed');
+                discoveryControls.hidden = true;
+                closeSearchResults();
+            } else {
+                header.removeClass('is-collapsed');
+                discoveryControls.hidden = false;
+                applyFilter();
+            }
+            const label = collapsed ? copy.expandSearch : copy.collapseSearch;
+            discoveryToggle.setAttribute('aria-expanded', String(!collapsed));
+            discoveryToggle.setAttribute('aria-label', label);
+            discoveryToggle.setAttribute('title', label);
+            setIcon(discoveryToggle, collapsed ? 'chevron-down' : 'chevron-up');
+        };
+        discoveryToggle.onclick = () => setDiscoveryCollapsed(!discoveryCollapsed);
         settingItems.forEach((item, index) => {
             const setting = catalog[index];
             const settingId = setting.id;

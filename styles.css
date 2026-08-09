@@ -2629,7 +2629,13 @@
 .notemd-recheck-btn {
     margin-top: 1em;
 }
-.notemd-settings-discovery { position: sticky; top: 0; z-index: 5; display: grid; grid-template-columns: minmax(14rem, 1fr) auto; gap: 0.6rem; padding: 0.75rem 0; background: var(--background-primary); border-bottom: 1px solid var(--background-modifier-border); }
+.notemd-settings-discovery { position: sticky; top: 0; z-index: 5; display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 0.6rem; padding: 0.75rem 0; background: var(--background-primary); border-bottom: 1px solid var(--background-modifier-border); }
+.notemd-settings-discovery-toggle { grid-column: 1; grid-row: 1; align-self: start; min-width: 44px; min-height: 44px; padding: 0.45rem; border: 1px solid var(--notemd-border); border-radius: 8px; background: var(--background-secondary); color: var(--text-normal); cursor: pointer; }
+.notemd-settings-discovery-toggle svg { width: 18px; height: 18px; }
+.notemd-settings-discovery-controls { grid-column: 2; min-width: 0; display: grid; grid-template-columns: minmax(14rem, 1fr) auto; gap: 0.6rem; }
+.notemd-settings-discovery.is-collapsed { grid-template-columns: auto; }
+.notemd-settings-discovery.is-collapsed .notemd-settings-discovery-controls { display: none; }
+.notemd-settings-discovery-toggle:hover { border-color: var(--interactive-accent); background: color-mix(in srgb, var(--interactive-accent) 10%, var(--background-secondary) 90%); }
 .notemd-settings-search { min-width: 0; width: 100%; }
 .notemd-settings-category-navigation { grid-column: 1 / -1; min-width: 0; width: 100%; }
 .notemd-settings-search, .notemd-settings-category-navigation, .notemd-settings-favorites-filter { min-height: 44px; }
@@ -2662,7 +2668,9 @@
 .notemd-diagram-history-actions button { min-height: 44px; }
 .notemd-diagram-history-pager { display: flex; align-items: center; justify-content: center; gap: 0.75rem; margin-top: 0.9rem; }
 @media (max-width: 720px) {
-    .notemd-settings-discovery { grid-template-columns: 1fr; }
+    .notemd-settings-discovery { grid-template-columns: auto minmax(0, 1fr); }
+    .notemd-settings-discovery-controls { grid-template-columns: minmax(0, 1fr); }
+    .notemd-settings-discovery.is-collapsed { grid-template-columns: auto; }
     .notemd-settings-search-result { grid-template-columns: minmax(0, 1fr); grid-template-areas: "name" "description" "category"; }
     .notemd-settings-search-result-category { max-width: none; text-align: left; }
     .notemd-diagram-history-toolbar { align-items: stretch; }

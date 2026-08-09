@@ -1104,6 +1104,7 @@ export const STRINGS_EN = {
     },
     settingsDiscovery: {
         searchPlaceholder: 'Search settings…', searchLabel: 'Search settings', favorites: '★ Favorites',
+        collapseSearch: 'Collapse settings search', expandSearch: 'Expand settings search',
         categoryNavigationLabel: 'Jump to settings section', allCategories: 'All settings sections',
         addFavorite: 'Add setting to favorites', removeFavorite: 'Remove setting from favorites',
         resultCount: '{visible} of {total} settings', noResults: 'No settings match the current search and filters.'
