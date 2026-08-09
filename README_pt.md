@@ -705,7 +705,7 @@ Licença MIT - Veja o arquivo [LICENSE](LICENSE) para mais detalhes.
 ---
 
 
-*Notemd v1.9.5 - Melhore seu grafo de conhecimento no Obsidian com IA.*
+*Notemd v1.9.6 - Melhore seu grafo de conhecimento no Obsidian com IA.*
 
 
 
@@ -716,7 +716,7 @@ Esta crônica trimestral preserva o estilo visual original do [repo-saga](https:
 
 ![Notemd Development Chronicle](./docs/repo-saga/notemd-development-history.pt.svg)
 
-_Atualizado pela última vez para a tag de release `1.9.5` em 2026-08-06. Data do commit mais recente: 2026-08-06._
+_Atualizado pela última vez para a tag de release `1.9.6` em 2026-08-09. Data do commit mais recente: 2026-08-09._
 <!-- repo-chronicle:end -->
 
 
@@ -733,13 +733,14 @@ _Atualizado pela última vez para a tag de release `1.9.5` em 2026-08-06. Data d
 <!-- notemd-settings-discovery-guide -->
 ## Descoberta de configurações, histórico de diagramas, CircuitikZ e pastas em lote seguras
 
-A página de configurações do Notemd oferece busca por semelhança, navegação por grandes categorias e favoritos por configuração, armazenados para o Vault atual.
+A página de configurações Notemd oferece busca por semelhança que leva em conta os campos, navegação por grandes categorias, uma barra de ferramentas de descoberta recolhível e favoritos por configuração armazenados para o atual Vault. Clique em **★ Favorites** para abrir uma lista dedicada; cada entrada leva diretamente à sua configuração e pode ser removida sem sair da página de configurações.
 
-- O histórico de diagramas é armazenado no escopo do Vault, ordenado do mais recente para o mais antigo, sendo possível pesquisá‑lo e visualizá‑lo em páginas de 20 itens cada. A remoção de um registro do histórico não exclui os arquivos gerados.
-- A exportação da pré‑visualização do diagrama permite controlar a nitidez dos arquivos PNG e PDF por meio do PPI. O SVG permanece em formato vetorial.
-- O tipo de diagrama preferido e o formato de origem preferido são opções separadas.
-- Os usuários de desktop podem abrir o ambiente de compilação nativo opcional CircuitikZ para reutilizar o Tectonic/pdflatex do sistema, selecionar um compilador personalizado ou instalar explicitamente a versão gerenciada do Tectonic. As exportações de pré‑visualização, SVG, PNG e PDF não exigem LaTeX.
-- A seleção avançada de arquivos em lote permite usar perfis de seleção salvos e visualizar regras.
-- Uma pasta de destino em lote ausente pode ser criada após confirmação, com a opção de lembrar a criação automática para pastas ausentes futuras.
-- Uma pasta existente e não vazia requer uma confirmação antes de processar todo o lote, nunca uma confirmação por arquivo gerado.
+- O histórico de diagramas é armazenado no escopo Vault, ordenado do mais recente para o mais antigo, sendo pesquisável e paginado em grupos de 20. A remoção de um registro de histórico não exclui os arquivos gerados.
+- A exportação da prévia do diagrama via PPI tem como padrão 300 e aceita valores entre 72 e 600. Ela controla apenas a rasterização PNG; SVG e PDF permanecem em formato vetorial.
+- A exportação completa das visualizações Mermaid, opcionalmente, grava também o código-fonte Mermaid, SVG e arquivos de manifesto associados; mesmo quando desativada, a Mermaid continua disponível nas prévias do Drawnix.
+- O tipo de diagrama preferido e o formato de fonte preferido são opções separadas.
+- Os usuários de desktop podem abrir o ambiente de compilação nativo CircuitikZ, opcional, para reutilizar o Tectonic/pdflatex do sistema, selecionar um compilador personalizado ou instalar explicitamente a versão gerenciada e fixada do Tectonic. As prévias, SVG, PNG e as exportações de prévia PDF não exigem LaTeX.
+- A seleção avançada de arquivos em lote permite o uso de perfis de seleção salvos e visualizações de regras.
+- Uma pasta-alvo de lote ausente pode ser criada após confirmação, com a opção de lembrar a criação automática para pastas faltantes futuras.
+- Uma pasta existente e não vazia requer uma confirmação antes de todo o lote, nunca uma confirmação por arquivo gerado.
 - O modo desenvolvedor exibe diagnósticos do provedor e controles avançados de solução de problemas.

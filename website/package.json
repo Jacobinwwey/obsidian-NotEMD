@@ -9,6 +9,7 @@
     "audit:build": "node scripts/audit-build.cjs",
     "swizzle": "docusaurus swizzle",
     "deploy": "docusaurus deploy",
+    "translate-settings-favorites": "node scripts/translate-settings-favorites-guide.cjs",
     "clear": "docusaurus clear",
     "serve": "docusaurus serve",
     "write-translations": "docusaurus write-translations",

@@ -696,7 +696,7 @@ MIT licenc - a részletekért lásd a [LICENSE](LICENSE) fájlt.
 ---
 
 
-*Notemd v1.9.5 - Fejlessze az Obsidian tudásgráfját mesterséges intelligenciával.*
+*Notemd v1.9.6 - Fejlessze az Obsidian tudásgráfját mesterséges intelligenciával.*
 
 
 <!-- repo-chronicle:start -->
@@ -706,7 +706,7 @@ Ez a negyedéves krónika megőrzi a [repo-saga](https://github.com/teee32/repo-
 
 ![Notemd Development Chronicle](./docs/repo-saga/notemd-development-history.hu.svg)
 
-_Utoljára a(z) `1.9.5` kiadási címkéhez frissítve: 2026-08-06. A legutóbbi commit dátuma: 2026-08-06._
+_Utoljára a(z) `1.9.6` kiadási címkéhez frissítve: 2026-08-09. A legutóbbi commit dátuma: 2026-08-09._
 <!-- repo-chronicle:end -->
 
 
@@ -721,15 +721,16 @@ _Utoljára a(z) `1.9.5` kiadási címkéhez frissítve: 2026-08-06. A legutóbbi
 </a>
 
 <!-- notemd-settings-discovery-guide -->
-## Beállítások megtalálása, diagramok története, CircuitikZ és biztonságos batch mappák
+## Beállítások megtalálása, diagramok története, CircuitikZ és biztonságos partnélküli mappák
 
-A Notemd beállítások oldala biztosítja a zöldeléses keresést, nagy kategóriák navigációját, illetve az aktuális Vault számára tárolt, egyes beállításokhoz tartozó előnépsorolásokat.
+A Notemd beállítások oldala biztonsági szempontból fontos adatokat tartalmazó korlátozott keresést, nagy kategória-közelítést, összeomlható megtalálási eszköztáblát, valamint a jelenlegi Vault számára tárolt preferált beállításokat nyújt. Kattintsz **★ Favorites**-ra, hogy egy speciális listát nyitj; minden elem az illető beállításba vezet, és lehetővé teszi a törölést a beállítások oldaláról kivétel nélkül.
 
-- A diagramok története a Vault szintén tárolódik, újabbakból kezdve sorrendben, és 20-es csoportokban kereshető és oldalazható. Egy történelmi leírás törlése nem törli az előkészített fájlokat.
-- A diagramok előnézetének exportálása során a PPI értékek felelősek a PNG és PDF fájlok minőségeért. Az SVG fájlok viszont vektortípusú maradnak.
-- A preferált diagramtípus és a preferált forrásformátum külön kiegészítő választásokként állnak rendelkezésre.
-- A aszterális felhasználók lehetőségük van nyitni a választólagos CircuitikZ helyi kompilációs környezetét, hogy használhassák újra a rendszerben lévő Tectonic/pdflatex programot, válasszhatják egy személyre szabott kompilátorot, vagy kifejezetten telepíthetik a beállított Tectonic futtatási környezetét. Az előnézetek, SVG, PNG fájlok, valamint az előnézet PDF-ek exportálásához LaTeX nélkül is lehet.
-- A fejlett batch fájl választása lehetősége lehetővé teszi a mentett választási profillumok és szabályok előnézetét.
-- Ha egy batch mappája nincs, ezt az bizonyítás után hozható létre, és lehetőség van arra, hogy a jövőben is automatikusan hozzanak létre ilyen hiányzó mappákat.
-- Ha már létezik egy nem türelt mappa, az összes batch fájlhoz előtt egy bizonyítás szükséges, soha nem egy bizonyítás az egyes előkészített fájlokhoz.
-- A fejlesztő módban láthatók a fornalmazó diagnostikai információk és a fejlett hibajavítási eszközök.
+- A diagramok története Vault kereteben tárolódik, újabbakból kezdve sorrendben, és 20-es csoportokban kereshető és oldaltávolításra alkalmas. Egy történelmi leírás törölése nem törli a létrehozott fájlokat.
+- A diagramok előnézetének exportálása esetén PPI alapértelmezett értéke 300, de lehetőség van 72–600 között is használni. Ez csak PNG rasterizációját kontrollál; SVG és PDF továbbra is vektortípusú maradnak.
+- Kéreményelésre lehetővé teszi a teljes Mermaid visuális elemek exportálását, amely kiegészítően írja le a Mermaid forráskódot, SVG-t és a manifest-fájlokat; ha ez nem használható, a Mermaid továbbra is elérhető a Drawnix előnézetekben.
+- A preferált diagramtípus és a preferált forráskódformátum külön választásokként állnak rendelkezésre.
+- Aszintális használók lehetőségük van nyitni a CircuitikZ natív kompilációs környezetét, hogy újrahasználhassák a rendszeri Tectonic/pdflatex-t, választhassák egy személyre szabott kompilátort, vagy kifejezetten telepíthessék a beállított Tectonic futtatóprogramot. Az előnézetek, SVG, PNG és PDF exportálásai nem igényelnek LaTeX-t.
+- A fejlett partnélküli fájl választása lehetőséget ad a mentett választási profillerek és szabályok előnézetére.
+- Ha egy partnélküli célmappa nincs, ezt az bizonyítás után hozható létre, és lehetőség van jövőbeni hiányzó mappák automatikus létrehozását emlékeztetni.
+- Egy már létező, nem türeltés nélküli mappa esetén egy bizonyítás szükséges a teljes partnélküli fájlhalmaznak, soha nem egy bizonyítás az egyes létrehozott fájlokhoz.
+- A fejlesztő módban láthatóak a fornincs-diagnozisok és a fejlett hibajavítási eszközök.

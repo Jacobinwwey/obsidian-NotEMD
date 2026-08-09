@@ -699,7 +699,7 @@ MIT License - szczegóły znajdują się w pliku [LICENSE](LICENSE).
 ---
 
 
-*Notemd v1.9.5 - Rozwijaj swój graf wiedzy w Obsidianie dzięki AI.*
+*Notemd v1.9.6 - Rozwijaj swój graf wiedzy w Obsidianie dzięki AI.*
 
 
 <!-- repo-chronicle:start -->
@@ -709,7 +709,7 @@ Ta kwartalna kronika zachowuje oryginalny styl wizualny [repo-saga](https://gith
 
 ![Notemd Development Chronicle](./docs/repo-saga/notemd-development-history.pl.svg)
 
-_Ostatnio odświeżono dla tagu wydania `1.9.5`: 2026-08-06. Data ostatniego commita: 2026-08-06._
+_Ostatnio odświeżono dla tagu wydania `1.9.6`: 2026-08-09. Data ostatniego commita: 2026-08-09._
 <!-- repo-chronicle:end -->
 
 
@@ -724,15 +724,16 @@ _Ostatnio odświeżono dla tagu wydania `1.9.5`: 2026-08-06. Data ostatniego com
 </a>
 
 <!-- notemd-settings-discovery-guide -->
-## Odkrywanie ustawień, historia diagramów, CircuitikZ oraz bezpieczne foldery grupowe
+## Odkrywanie ustawień, historia diagramów, CircuitikZ oraz bezpieczne foldery partii
 
-Strona ustawień Notemd oferuje wyszukiwanie nieprecyzyjne, nawigację po dużych kategoriach oraz ulubione ustawienia przechowywane dla aktualnego Vault.
+Strona ustawień Notemd oferuje wyszukiwanie rozmyte z uwzględnieniem pola, nawigację po dużych kategoriach, składaną paskę narzędzi do odkrywania oraz ulubione elementy dla poszczególnych ustawień przechowywane dla bieżącego Vault. Kliknij **★ Favorites**, aby otworzyć dedykowaną listę; każda pozycja przenosi użytkownika bezpośrednio do odpowiedniej ustawienia i można ją usunąć bez opuszczania strony ustawień.
 
-- Historia diagramów jest przechowywana na poziomie Vault, uszeregowana od najnowszych do najstarszych, dostępna do wyszukiwania i paginowana w grupach po 20 elementów. Usunięcie wpisu z historii nie usuwa utworzonych plików.
-- Eksport wersji wstępnej diagramu umożliwia kontrolę rozdzielczości plików PNG i PDF za pomocą parametru PPI. Pliki SVG pozostają wektorowe.
-- Wybrany typ diagramu oraz preferowany format źródłowy to oddzielne opcje do wyboru.
-- Użytkownicy komputerów stacjonarnych mogą otworzyć opcjonalne, natywne środowisko kompilacji CircuitikZ, aby ponownie wykorzystać systemowe narzędzia Tectonic/pdflatex, wybrać własnego kompilatora lub wyraźnie zainstalować zarządzany runtime Tectonic. Eksport wersji wstępnej, plików SVG, PNG oraz PDF nie wymaga użycia LaTeXa.
-- Zaawansowana funkcja wyboru plików grupowych umożliwia przechowywanie profili wybranych plików oraz przeglądanie reguł.
-- Brakujący folder docelowy dla plików grupowych można utworzyć po potwierdzeniu, z opcją zapamiętania tej automatycznej akcji na przyszłość w przypadku kolejnych brakujących folderów.
-- Istniejący, niepusty folder wymaga jednego potwierdzenia przed przetworzeniem całej grupy plików, a nie jednego potwierdzenia dla każdego utworzonego pliku.
-- Tryb programisty ujawnia informacje diagnostyczne dostawcy oraz zaawansowane narzędzia do rozwiązywania problemów.
+- Historia diagramów jest przechowywana w zakresie Vault, uporządkowana od najnowszych na początku, dostępna do wyszukiwania i paginowania w grupach po 20 elementów. Usunięcie wpisu z historii nie usuwa utworzonych plików.
+- Eksport wstępnego przeglądu diagramu PPI domyślnie używa rozdzielczości 300, ale przyjmuje wartości od 72 do 600. Kontroluje on jedynie rasterizację PNG; SVG i PDF pozostają wektorowe.
+- Eksportując również pełne obrazy Mermaid, opcjonalnie zapisywane są źródło Mermaid, SVG oraz pliki manifestu; Mermaid nadal jest dostępny w przeglądach Drawnix nawet po jego wyłączeniu.
+- Preferowany typ diagramu i preferowany format źródłowy to oddzielne opcje do wyboru.
+- Użytkownicy komputerów stacjonarnych mogą otworzyć opcjonalne środowisko kompilacji natywnej CircuitikZ, aby ponownie używać systemowych narzędzi Tectonic/pdflatex, wybrać własnego kompilatora lub wyraźnie zainstalować wskazany zarządzany silnik Tectonic. Przeglądanie, SVG, PNG oraz eksporty przeglądów PDF nie wymagają użycia LaTeXa.
+- Zaawansowana selekcja plików partii umożliwia korzystanie z zapisanych profili wyboru oraz wstępnych prezentacji reguł.
+- Brakujący folder docelowy partii można utworzyć po potwierdzeniu, przy czym istnieje opcja zapamiętania tej automatycznej akcji dla przyszłych brakujących folderów.
+- Istniejący, niepusty folder wymaga jednego potwierdzenia przed przetworzeniem całej partii, a nie jednego potwierdzenia na każdy utworzony plik.
+- Tryb deweloperski ujawnia informacje diagnostyczne dostawcy oraz zaawansowane narzędzia do rozwiązywania problemów.

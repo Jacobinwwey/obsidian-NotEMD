@@ -705,7 +705,7 @@ Licencia MIT - Ver el archivo [LICENSE](LICENSE) para más detalles.
 ---
 
 
-*Notemd v1.9.5 - Mejora tu grafo de conocimiento en Obsidian con IA.*
+*Notemd v1.9.6 - Mejora tu grafo de conocimiento en Obsidian con IA.*
 
 
 
@@ -716,7 +716,7 @@ Esta crónica trimestral conserva el estilo visual original de [repo-saga](https
 
 ![Notemd Development Chronicle](./docs/repo-saga/notemd-development-history.es.svg)
 
-_Actualizado por última vez para la etiqueta de lanzamiento `1.9.5` el 2026-08-06. Fecha del commit más reciente: 2026-08-06._
+_Actualizado por última vez para la etiqueta de lanzamiento `1.9.6` el 2026-08-09. Fecha del commit más reciente: 2026-08-09._
 <!-- repo-chronicle:end -->
 
 
@@ -731,15 +731,16 @@ _Actualizado por última vez para la etiqueta de lanzamiento `1.9.5` el 2026-08-
 </a>
 
 <!-- notemd-settings-discovery-guide -->
-## Descubrimiento de configuraciones, historial de diagramas, CircuitikZ y carpetas de procesamiento por lotes seguras
+## Descubrimiento de configuraciones, historial de diagramas, CircuitikZ y carpetas seguras para lotes
 
-La página de configuraciones de Notemd ofrece búsqueda difusa, navegación por grandes categorías y favoritos por configuración almacenados para el Vault actual.
+La página de configuración Notemd ofrece búsqueda difusa sensible a los campos, navegación por categorías extensas, una barra de herramientas de descubrimiento plegable y favoritos por configuración almacenados para el actual Vault. Haga clic en **★ Favorites** para abrir una lista dedicada; cada entrada lleva directamente a su configuración y se puede eliminar sin salir de la página de configuraciones.
 
-- El historial de diagramas se almacena a nivel del Vault, ordenado de más reciente a más antiguo, y es posible buscarlo y visualizarlo en páginas de 20 elementos cada una. Eliminar un registro del historial no elimina los archivos generados.
-- Los controles de PPI para la exportación de vistas previas de diagramas regulan la claridad de los archivos PNG y PDF. El formato SVG sigue siendo vectorial.
+- El historial de diagramas se almacena en el ámbito Vault, ordenado del más reciente al más antiguo, es buscable y se muestra paginado en grupos de 20. Eliminar un registro del historial no elimina los archivos generados.
+- La exportación de vista previa de diagramas PPI tiene como valor predeterminado 300 y acepta valores entre 72 y 600. Solo controla la rasterización PNG; SVG y PDF siguen siendo basados en vectores.
+- La exportación completa de elementos visuales Mermaid también permite, opcionalmente, escribir el código fuente Mermaid, SVG y los archivos de manifestación asociados; Mermaid sigue estando disponible en las vistas previas de Drawnix incluso cuando está desactivado.
 - El tipo de diagrama preferido y el formato de origen preferido son opciones independientes.
-- Los usuarios de escritorio pueden abrir el entorno de compilación nativo opcional CircuitikZ para reutilizar Tectonic/pdflatex del sistema, seleccionar un compilador personalizado o instalar explícitamente la versión gestionada de Tectonic. Las exportaciones de vista previa, SVG, PNG y PDF no requieren LaTeX.
-- La selección avanzada de archivos por lotes permite utilizar perfiles de selección guardados y vistas previas de reglas.
-- Se puede crear una carpeta de destino para el procesamiento por lotes que falte tras confirmar, con la opción de recordar esta creación automática para futuras carpetas faltantes.
-- Para una carpeta existente y no vacía se necesita una confirmación antes de procesar todo el lote, nunca una confirmación por cada archivo generado.
+- Los usuarios de escritorio pueden abrir el entorno de compilación nativo CircuitikZ, opcional, para reutilizar Tectonic/pdflatex del sistema, seleccionar un compilador personalizado o instalar explícitamente la versión gestionada de Tectonic. Las vistas previas, SVG, PNG y las exportaciones de vista previa PDF no requieren LaTeX.
+- La selección avanzada de archivos de lote permite usar perfiles de selección guardados y previsualizar reglas.
+- Se puede crear una carpeta de destino de lote que falte tras confirmar, con la opción de recordar esta creación automática para futuras carpetas faltantes.
+- Una carpeta existente y no vacía requiere una confirmación antes de procesar todo el lote, nunca una confirmación por cada archivo generado.
 - El modo desarrollador muestra diagnósticos del proveedor y controles avanzados para solución de problemas.

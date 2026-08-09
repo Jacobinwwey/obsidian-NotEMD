@@ -699,7 +699,7 @@ MIT-licentie - Zie het bestand [LICENSE](LICENSE) voor details.
 ---
 
 
-*Notemd v1.9.5 - Verrijk je Obsidian-kennisgrafiek met AI.*
+*Notemd v1.9.6 - Verrijk je Obsidian-kennisgrafiek met AI.*
 
 
 
@@ -710,7 +710,7 @@ Deze kwartaalchroniek behoudt de oorspronkelijke visuele stijl van [repo-saga](h
 
 ![Notemd Development Chronicle](./docs/repo-saga/notemd-development-history.nl.svg)
 
-_Laatst vernieuwd voor releasetag `1.9.5` op 2026-08-06. Datum van de laatste commit: 2026-08-06._
+_Laatst vernieuwd voor releasetag `1.9.6` op 2026-08-09. Datum van de laatste commit: 2026-08-09._
 <!-- repo-chronicle:end -->
 
 
@@ -727,13 +727,14 @@ _Laatst vernieuwd voor releasetag `1.9.5` op 2026-08-06. Datum van de laatste co
 <!-- notemd-settings-discovery-guide -->
 ## Ontdekking van instellingen, diagramgeschiedenis, CircuitikZ en veilige batchmappen
 
-De instellingenpagina van Notemd biedt een vage zoekfunctie, navigatie door grote categorieën en favorieten per instelling die worden opgeslagen voor de huidige Vault.
+De instellingenspagina voor Notemd biedt een op velden gebaseerde vage zoekfunctie, navigatie door grote categorieën, een op te vouwen ontdekkingstoolbar, en favorieten per instelling die worden opgeslagen voor de huidige Vault. Klik op **★ Favorites** om een speciale lijst te openen; elke entry leidt direct naar de bijbehorende instelling en kan worden verwijderd zonder de instellingenspagina te verlaten.
 
-- De diagramgeschiedenis wordt opgeslagen op niveau van de Vault, gerangschikt van nieuwste naar oudste, zoekbaar en pagineerbaar in groepen van 20. Het verwijderen van een historische record verwijdert de gegenereerde bestanden niet.
-- De export van diagramvoorbeelden met PPI-beheer zorgt voor een goede kwaliteit van PNG- en PDF-bestanden. SVG blijft vectorgebaseerd.
-- De gewenste diagramtype en de gewenste bronformat zijn aparte keuzemogelijkheden.
-- Desktopgebruikers kunnen het optionele, native CircuitikZ-compilatieomgeving openen om het systeem Tectonic/pdflatex opnieuw te gebruiken, een aangepaste compiler te kiezen of expliciet de gemanageerde Tectonic-runtime te installeren. Voorbeelden, SVG-, PNG- en PDF-exporten vereisen geen LaTeX.
-- Geavanceerde selectiemogelijkheden voor batchbestanden stellen het opslaan van selectieprofielen en het bekijken van regels mogelijk.
+- De diagramgeschiedenis wordt opgeslagen binnen het bereik van Vault, gerangschikt van nieuwste naar oudste, zoekbaar en pagineerbaar in groepen van 20. Het verwijderen van een geschiedenisrecord verwijdert de gegenereerde bestanden niet.
+- De export van diagramvoorbeelden via PPI heeft standaard een resolutie van 300 en accepteert waarden tussen 72 en 600. Het beheerst alleen de rasterisatie van PNG; SVG en PDF blijven vectorgebaseerd.
+- Bij de export van volledige Mermaid-visualisaties kan optioneel ook de broncode van Mermaid, SVG en bijbehorende manifestbestanden worden opgeslagen; zelfs wanneer Mermaid is uitgeschakeld, blijft het beschikbaar in Drawnix-voorbeelden.
+- De voorkeursdiagramtype en de voorkeursbronformaat zijn aparte keuzemogelijkheden.
+- Desktopgebruikers kunnen het optionele native compileeromgeving van CircuitikZ openen om het systeem Tectonic/pdflatex opnieuw te gebruiken, een aangepaste compiler te kiezen of expliciet de geselecteerde Tectonic-runtime te installeren. Voorbeelden, SVG, PNG en exporten van PDF vereisen geen LaTeX.
+- Geavanceerde selectiemogelijkheden voor batchbestanden stellen het gebruik van opgeslagen selectieprofielen en regelvoorbeelden mogelijk.
 - Een ontbrekende batchdoelmap kan na bevestiging worden aangemaakt, met de optie om automatische aanmaak voor toekomstige ontbrekende mappen te onthouden.
-- Voor een reeds bestaande, niet-lege map is één bevestiging nodig voordat de hele batch wordt verwerkt; er is nooit één bevestiging per gegenereerd bestand nodig.
-- In ontwikkelaarsmodus worden diagnostische informatie van de provider en geavanceerde oplossingsmogelijkheden weergegeven.
+- Voor een bestaande, niet-lege map is één bevestiging nodig voordat de hele batch wordt verwerkt; er is nooit één bevestiging per gegenereerd bestand vereist.
+- In ontwikkelaarstand worden diagnostische informatie van de provider en geavanceerde oplossingsmogelijkheden weergegeven.

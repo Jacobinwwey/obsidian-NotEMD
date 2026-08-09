@@ -29,7 +29,7 @@ If\ you\ love\ using\ Notemd\,\ please\ consider\ \[\�\�\�\ Give\ a\ Star\
 
 Wenn du Notemd gerne nutzt, erwäge bitte [⭐ einen Stern auf GitHub zu geben](https://github.com/Jacobinwwey/obsidian-NotEMD) oder [☕️ mir einen Kaffee zu kaufen](https://ko-fi.com/jacobinwwey).
 
-**Version:** 1.9.5
+**Version:** 1.9.6
 
 <img width="1853" height="1080" alt="show" src="https://github.com/user-attachments/assets/b9f9292b-a9d8-48a3-9acf-1b6f00413966" />
 <img width="1853" height="1080" alt="multi-langu" src="https://github.com/user-attachments/assets/d9a0a4fb-1c00-425a-ac1d-0134a013a381" />
@@ -707,7 +707,7 @@ MIT-Lizenz - Siehe Datei [LICENSE](LICENSE) für Details.
 ---
 
 
-*Notemd v1.9.5 - Verbessern Sie Ihren Obsidian-Wissensgraphen mit KI.*
+*Notemd v1.9.6 - Verbessern Sie Ihren Obsidian-Wissensgraphen mit KI.*
 
 
 
@@ -718,7 +718,7 @@ Diese quartalsweise Chronik behält den ursprünglichen visuellen Stil von [repo
 
 ![Notemd Development Chronicle](./docs/repo-saga/notemd-development-history.de.svg)
 
-_Zuletzt für das Release-Tag `1.9.5` am 2026-08-06 aktualisiert. Datum des letzten Commits: 2026-08-06._
+_Zuletzt für das Release-Tag `1.9.6` am 2026-08-09 aktualisiert. Datum des letzten Commits: 2026-08-09._
 <!-- repo-chronicle:end -->
 
 
@@ -733,15 +733,16 @@ _Zuletzt für das Release-Tag `1.9.5` am 2026-08-06 aktualisiert. Datum des letz
 </a>
 
 <!-- notemd-settings-discovery-guide -->
-## Entdeckung von Einstellungen, Diagrammhistorie, CircuitikZ sowie sichere Batch-Ordner
+## Ermittlung von Einstellungen, Diagrammhistorie, CircuitikZ sowie sichere Batch-Ordnner
 
-Die Einstellungsseite von Notemd bietet eine ungenaue Suche, eine Navigation durch umfangreiche Kategorien sowie Favoriten pro Einstellung, die für den aktuellen Vault gespeichert werden.
+Die Einstellungsseite von Notemd bietet eine feingranulare Suche unter Berücksichtigung der Felder, eine Navigation durch große Kategorien, eine einziehbare Entdeckungswerkzeugleiste sowie Favoriten pro Einstellung, die für den aktuellen Vault gespeichert werden. Klicken Sie auf **★ Favorites**, um eine spezielle Liste zu öffnen; jeder Eintrag führt direkt zur entsprechenden Einstellung und kann ohne Verlassen der Einstellungsseite entfernt werden.
 
-- Die Diagrammhistorie wird im Scope des Vaults gespeichert, chronologisch nach dem Neuesten geordnet, suchbar und in Gruppen zu 20 Einträgen paginiert. Das Löschen eines Historie-Eintrags löscht die generierten Dateien nicht.
-- Die Exportfunktion zur Vorschau von Diagrammen ermöglicht es über die Einstellung PPI die Klarheit von PNG- und PDF-Dateien zu steuern. SVG bleibt weiterhin vektorbasiert.
-- Der bevorzugte Diagrammtyp sowie das bevorzugte Quellformat werden als getrennte Auswahlmöglichkeiten angeboten.
-- Desktop-Nutzer können die optional verfügbare, native Compile-Umgebung von CircuitikZ öffnen, um das System‑Tectonic/pdflatex erneut zu nutzen, einen eigenen Compiler auszuwählen oder explizit die festgelegte, verwaltete Tectonic‑Laufzeitumgebung zu installieren. Für Vorschauen, SVG-, PNG- sowie PDF-Exporte ist LaTeX nicht erforderlich.
-- Die erweiterte Auswahl von Batch-Dateien ermöglicht das Verwenden gespeicherter Auswahlprofile sowie die Anzeige von Regelvorschauen.
-- Ein fehlender Batch-Zielordner kann nach Bestätigung erstellt werden; es besteht außerdem die Option, künftig automatisch solche fehlenden Ordner zu erstellen.
-- Für einen bereits vorhandenen, nicht leeren Ordner ist nur eine einzige Bestätigung für den gesamten Batch erforderlich – niemals eine Bestätigung pro generierter Datei.
-- Im Entwicklermodus werden Diagnoseinformationen des Anbieters sowie erweiterte Hilfsmittel zur Fehlerbehebung angezeigt.
+- Die Diagrammhistorie wird im Scope von Vault gespeichert, sortiert nach dem Neuesten zuerst, ist suchbar und in Gruppen à 20 Einträgen paginiert. Das Löschen eines Historie-Eintrags löscht nicht die generierten Dateien.
+- Die Exportfunktion für Diagrammvorschauen von PPI verwendet standardmäßig eine Auflösung von 300 und unterstützt Werte zwischen 72 und 600. Sie steuert ausschließlich die Rasterisierung durch PNG; SVG und PDF bleiben vektorbasiert.
+- Der Export vollständiger VISUALISIERUNGEN von Mermaid schreibt optional auch den Quellcode von Mermaid, SVG sowie die zugehörigen Manifeste; selbst wenn Mermaid deaktiviert ist, bleibt es in Drawnix-Vorschauen verfügbar.
+- Der bevorzugte Diagrammtyp und das bevorzugte Quellformat werden getrennt ausgewählt.
+- Desktop-Nutzer können die optionale native Kompilierumgebung von CircuitikZ öffnen, um das System-Tectonic/pdflatex wiederverwenden zu können, einen eigenen Compiler auszuwählen oder explizit den festgelegten verwalteten Tectonic-Runtime zu installieren. Für Vorschauen, SVG, PNG sowie Exporte von PDF ist LaTeX nicht erforderlich.
+- Die erweiterte Auswahl von Batch-Dateien ermöglicht das Verwenden gespeicherter Auswahlprofile und die Anzeige von Regelvorschauen.
+- Ein fehlender Zielordner für Batch-Operationen kann nach Bestätigung erstellt werden, wobei die Option besteht, künftig automatisch solche fehlenden Ordnner zu erstellen.
+- Für einen vorhandenen, nicht leeren Ordner ist nur eine Bestätigung vor der gesamten Batch-Verarbeitung erforderlich – niemals eine Bestätigung pro generierter Datei.
+- Im Entwicklertoolsmodus werden Diagnosedaten des Anbieters sowie fortgeschrittene Fehlerbehebungsoptionen angezeigt.

@@ -706,7 +706,7 @@ Licenza MIT - Vedi il file [LICENSE](LICENSE) per i dettagli.
 ---
 
 
-*Notemd v1.9.5 - Migliora il tuo grafo di conoscenza su Obsidian con l'IA.*
+*Notemd v1.9.6 - Migliora il tuo grafo di conoscenza su Obsidian con l'IA.*
 
 
 
@@ -717,7 +717,7 @@ Questa cronaca trimestrale mantiene lo stile visivo originale di [repo-saga](htt
 
 ![Notemd Development Chronicle](./docs/repo-saga/notemd-development-history.it.svg)
 
-_Aggiornato l'ultima volta per il tag di rilascio `1.9.5` il 2026-08-06. Data dell'ultimo commit: 2026-08-06._
+_Aggiornato l'ultima volta per il tag di rilascio `1.9.6` il 2026-08-09. Data dell'ultimo commit: 2026-08-09._
 <!-- repo-chronicle:end -->
 
 
@@ -732,15 +732,16 @@ _Aggiornato l'ultima volta per il tag di rilascio `1.9.5` il 2026-08-06. Data de
 </a>
 
 <!-- notemd-settings-discovery-guide -->
-## Scoperta delle impostazioni, cronologia dei diagrammi, CircuitikZ e cartelle di lotti sicure
+## Scoperta delle impostazioni, storia dei diagrammi, CircuitikZ e cartelle di lotti sicure
 
-La pagina delle impostazioni di Notemd offre una ricerca sfocata, una navigazione tra le vaste categorie e la possibilità di salvare i preferiti per ciascuna impostazione all’interno del Vault corrente.
+La pagina delle impostazioni Notemd offre una ricerca sfocata consapevole dei campi, una navigazione tra categorie numerose, una barra degli strumenti per la scoperta riducibile e preferiti per ciascuna impostazione memorizzati per il corrente Vault. Clicca su **★ Favorites** per aprire un elenco dedicato; ogni voce porta direttamente all’impostazione corrispondente ed è possibile rimuoverla senza lasciare la pagina delle impostazioni.
 
-- La cronologia dei diagrammi viene memorizzata a livello di Vault, ordinata dal più recente al più vecchio; è possibile effettuare ricerche e visualizzarla paginata in gruppi da 20 elementi. La rimozione di un record dalla cronologia non elimina i file generati.
-- L’esportazione della anteprima del diagramma consente di controllare la qualità delle immagini PNG e PDF in base al PPI; l’SVG, invece, rimane basato su vettori.
-- Il tipo di diagramma preferito e il formato di origine preferito sono opzioni distinte.
-- Gli utenti desktop possono aprire l’ambiente di compilazione nativo CircuitikZ (opzionale) per riutilizzare Tectonic/pdflatex del sistema, selezionare un compilatore personalizzato o installare esplicitamente l’ambiente runtime Tectonic gestito. Le anteprime, le esportazioni in SVG, PNG e PDF non richiedono LaTeX.
-- La funzione avanzata di selezione dei file di lotto permette di utilizzare profili di selezione salvati e di visualizzare anteprime delle regole.
-- È possibile creare una cartella di destinazione per i lotti assente, previa conferma; inoltre, è disponibile l’opzione per memorizzare questa creazione automatica per eventuali cartelle assenti future.
-- Per una cartella esistente e non vuota è necessaria una sola conferma per l’intero lotto, mai una conferma per ogni singolo file generato.
+- La storia dei diagrammi viene memorizzata nell’ambito di Vault, ordinata dal più recente al più vecchio, cercabile e paginata in gruppi da 20 elementi. La rimozione di un record storico non elimina i file generati.
+- L’esportazione della anteprima del diagramma con PPI predefinisce una risoluzione di 300 e accetta valori compresi tra 72 e 600. Questo parametro controlla soltanto la rasterizzazione tramite PNG; SVG e PDF rimangono in formato vettoriale.
+- L’esportazione completa delle visualizzazioni Mermaid consente, opzionalmente, di salvare anche il codice sorgente di Mermaid, SVG e i file di manifestazione; Mermaid rimane comunque disponibile nelle anteprime di Drawnix anche quando è disattivato.
+- Il tipo di diagramma preferito e il formato di origine preferito sono opzioni separate.
+- Gli utenti desktop possono aprire l’ambiente di compilazione nativo CircuitikZ, opzionale, per riutilizzare Tectonic/pdflatex del sistema, selezionare un compilatore personalizzato o installare esplicitamente l’ambiente runtime Tectonic gestito. Le anteprime, SVG, PNG e le esportazioni di anteprima con PDF non richiedono LaTeX.
+- La selezione avanzata dei file di lotto permette di utilizzare profili di selezione salvati e anteprime delle regole.
+- Una cartella di destinazione del lotto assente può essere creata dopo conferma, con l’opzione di memorizzare la creazione automatica per eventuali cartelle mancanti future.
+- Per una cartella esistente e non vuota è necessaria una sola conferma prima dell’esecuzione dell’intero lotto, mai una conferma per ogni file generato.
 - Il modalità sviluppatore mostra informazioni diagnostiche sul provider e strumenti avanzati per la risoluzione dei problemi.

@@ -27,7 +27,7 @@ Notemd 通過與各種大型語言模型 (LLM) 集成來增強您的 Obsidian �
 
 如果您喜歡使用 Notemd，請考慮 [⭐ 給 GitHub 加星](https://github.com/Jacobinwwey/obsidian-NotEMD) 或 [☕️ 請喝杯咖啡](https://ko-fi.com/jacobinwwey)。
 
-**版本:** 1.9.5
+**版本:** 1.9.6
 
 ![GitHub Release](https://img.shields.io/github/v/release/Jacobinwwey/obsidian-NotEMD?label=Version&link=https%3A%2F%2Fgithub.com%2FJacobinwwey%2Fobsidian-NotEMD%2Freleases%2Flatest) ![GitHub Downloads](https://img.shields.io/github/downloads/Jacobinwwey/obsidian-NotEMD/total?logo=Obsidian&label=Downloads&labelColor=%237C3AED&color=%235b5b5b&link=https%3A%2F%2Fgithub.com%2FJacobinwwey%2Fobsidian-NotEMD%2Freleases%2Flatest)
 
@@ -773,7 +773,7 @@ MIT 授權條款 - 詳情請見 [LICENSE](LICENSE)。
 ---
 
 
-*Notemd v1.9.5 - 用 AI 提升你的 Obsidian 知識圖譜。*
+*Notemd v1.9.6 - 用 AI 提升你的 Obsidian 知識圖譜。*
 
 
 <!-- repo-chronicle:start -->
@@ -783,7 +783,7 @@ MIT 授權條款 - 詳情請見 [LICENSE](LICENSE)。
 
 ![Notemd Development Chronicle](./docs/repo-saga/notemd-development-history.zh_Hant.svg)
 
-_最近一次已針對發佈 tag `1.9.5` 於 2026-08-06 刷新。 最新提交日期：2026-08-06。_
+_最近一次已針對發佈 tag `1.9.6` 於 2026-08-09 刷新。 最新提交日期：2026-08-09。_
 <!-- repo-chronicle:end -->
 
 
@@ -798,15 +798,16 @@ _最近一次已針對發佈 tag `1.9.5` 於 2026-08-06 刷新。 最新提交�
 </a>
 
 <!-- notemd-settings-discovery-guide -->
-## 設定探索、圖表歷史記錄、CircuitikZ 與安全的批次資料夾
+## 設定探索、圖表歷史記錄、CircuitikZ 以及安全批次資料夾
 
-Notemd 的設定頁面提供模糊搜尋功能、大型分類導航，以及為當前 Vault 儲存的每個設定的收藏項目。
+Notemd 的設定頁面提供針對欄位優化的模糊搜尋功能、大型類別導航、可收起的探索工具列，以及為當前的 Vault 儲存的每個設定的收藏項目。點擊 **★ Favorites** 可以開啟專用的清單；每個條目都會直接跳轉到對應的設定頁面，且可在不離開設定頁面的情況下移除。
 
-- 圖表歷史記錄會儲存在 Vault 級別，以最新順序排列，可進行搜尋，並以 20 個為一組進行分頁顯示。移除某條歷史記錄並不會刪除已生成的檔案。
-- 圖表預覽的匯出 PPI 設定可控制 PNG 與 PDF 的清晰度，而 SVG 則仍維持向量格式。
-- 首選圖表類型與首選來源格式是兩個獨立的選項。
-- 桌面端使用者可以開啟選用的 CircuitikZ 本機編譯環境，以重複使用系統中的 Tectonic/pdflatex，或選擇自訂的編譯器，亦或是明確安裝已固定的受管理 Tectonic 執行環境。預覽、SVG、PNG 以及預覽 PDF 的匯出功能均不需要 LaTeX。
+- 圖表歷史記錄儲存在 Vault 的範圍內，依最新順序排列，可進行搜尋並以 20 個為一組分頁顯示。移除某個歷史紀錄並不會刪除已生成的檔案。
+- 圖表預覽的匯出格式 PPI 預設為 300，且可接受 72–600 的值。它僅控制 PNG 的光柵化處理；SVG 與 PDF 仍保持向量格式。
+- 另外，若選擇匯出完整的 Mermaid 圖形，還可以同時寫入 Mermaid 的原始碼、SVG 與相關的清單檔案；即便停用 Mermaid，它仍可在 Drawnix 預覽中查看。
+- 所偏好的圖表類型與所偏好的原始格式是兩個獨立的選項。
+- 桌面端使用者可以開啟可選的 CircuitikZ 本機編譯環境，以便重複使用系統中的 Tectonic/pdflatex、選擇自訂編譯器，或明確安裝已固定的管理型 Tectonic 執行環境。預覽、SVG、PNG 以及預覽 PDF 的匯出功能均不需要 LaTeX。
 - 進階的批次檔案選擇功能可讓使用者使用已儲存的選項設定檔與規則預覽。
-- 若缺少批次處理的目標資料夾，可在確認後建立，並可選擇將未來出現的類似資料夾自動建立的功能。
-- 若是已存在的非空資料夾，則需要對整個批次操作進行一次確認，而非對每個生成的檔案都單獨確認。
+- 若缺少批次處理目標資料夾，可在確認後建立該資料夾，並可選擇將此自動建立的功能記住，以便日後再遇到缺失的資料夾時自動處理。
+- 若是已存在的非空資料夾，則需要對整個批次操作進行一次確認，而非為每個生成的檔案分別確認。
 - 開發者模式可顯示供應商的診斷資訊以及進階的故障排除控制項。

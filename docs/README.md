@@ -23,6 +23,7 @@ This directory contains repository-level documentation for maintainers and contr
 - [circuitikz UI, Export, And Docs Sync Plan](./maintainer/circuitikz-ui-export-and-docs-sync-2026-07-10.md)
 - [Chapter Split + TOC Extraction](./chapter-split-toc.md)
 - [Release Workflow](./maintainer/release-workflow.md)
+- [Release Notes 1.9.6](./releases/1.9.6.md)
 - [Release Notes 1.9.5](./releases/1.9.5.md)
 - [Release Notes 1.8.2](./releases/1.8.2.md)
 

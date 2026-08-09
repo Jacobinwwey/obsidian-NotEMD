@@ -706,7 +706,7 @@ Licence MIT - Voir le fichier [LICENSE](LICENSE) pour plus de détails.
 ---
 
 
-*Notemd v1.9.5 - Améliorez votre graphe de connaissances Obsidian avec l'IA.*
+*Notemd v1.9.6 - Améliorez votre graphe de connaissances Obsidian avec l'IA.*
 
 
 
@@ -717,7 +717,7 @@ Cette chronique trimestrielle conserve le style visuel original de [repo-saga](h
 
 ![Notemd Development Chronicle](./docs/repo-saga/notemd-development-history.fr.svg)
 
-_Dernière actualisation pour le tag de publication `1.9.5` le 2026-08-06. Date du dernier commit : 2026-08-06._
+_Dernière actualisation pour le tag de publication `1.9.6` le 2026-08-09. Date du dernier commit : 2026-08-09._
 <!-- repo-chronicle:end -->
 
 
@@ -732,15 +732,16 @@ _Dernière actualisation pour le tag de publication `1.9.5` le 2026-08-06. Date 
 </a>
 
 <!-- notemd-settings-discovery-guide -->
-## Découverte des paramètres, historique des diagrammes, CircuitikZ et dossiers de lot sécurisés
+## Découverte des paramètres, historique des diagrammes, CircuitikZ et dossiers de lots sécurisés
 
-La page des paramètres de Notemd propose une recherche floue, une navigation par grandes catégories, ainsi que des favoris par paramètre stockés pour le Vault actuel.
+La page des paramètres Notemd propose une recherche floue sensible aux champs, une navigation par grandes catégories, une barre d’outils de découverte rétractable, ainsi que des favoris par paramètre stockés pour le Vault actuel. Cliquez sur **★ Favorites** pour ouvrir une liste dédiée ; chaque entrée redirige vers son paramètre correspondant et peut être supprimée sans quitter la page des paramètres.
 
-- L’historique des diagrammes est conservé au niveau du Vault, classé du plus récent au plus ancien, et peut être recherché et paginé par groupes de 20 éléments. La suppression d’un enregistrement de l’historique ne supprime pas les fichiers générés.
-- Les paramètres de résolution PPI pour l’exportation en aperçu du diagramme contrôlent la qualité des fichiers PNG et PDF. L’format SVG reste vectoriel.
-- Le type de diagramme préféré et le format source préféré sont deux choix distincts.
-- Les utilisateurs de bureau peuvent ouvrir l’environnement de compilation natif CircuitikZ (optionnel) afin de réutiliser Tectonic/pdflatex du système, de sélectionner un compilateur personnalisé, ou d’installer explicitement le runtime Tectonic géré. Les exports en aperçu, SVG, PNG et PDF n’exigent pas LaTeX.
-- La sélection avancée des fichiers de lot permet d’utiliser des profils de sélection enregistrés ainsi que des aperçus de règles.
+- L’historique des diagrammes est stocké au niveau de Vault, classé du plus récent au plus ancien, et peut être recherché ainsi que paginé par groupes de 20. La suppression d’un enregistrement d’historique ne supprime pas les fichiers générés.
+- L’exportation en aperçu de diagramme PPI est définie par défaut sur 300 et accepte des valeurs comprises entre 72 et 600. Elle contrôle uniquement la rasterisation PNG ; SVG et PDF restent basés sur le vecteur.
+- L’exportation complète des visuels Mermaid permet, si souhaité, d’écrire également le code source Mermaid, SVG ainsi que les fichiers de manifeste associés ; Mermaid reste disponible dans les aperçus Drawnix même lorsqu’il est désactivé.
+- Le type de diagramme préféré et le format de source préféré sont des choix distincts.
+- Les utilisateurs desktop peuvent ouvrir l’environnement de compilation natif CircuitikZ (optionnel) afin de réutiliser Tectonic/pdflatex du système, de sélectionner un compilateur personnalisé ou d’installer explicitement le runtime Tectonic géré. Les aperçus, SVG, PNG ainsi que les exports d’aperçu PDF ne nécessitent pas LaTeX.
+- La sélection avancée des fichiers de lot permet d’utiliser des profils de sélection enregistrés et des prévisualisations de règles.
 - Un dossier cible de lot manquant peut être créé après confirmation, avec la possibilité de mémoriser cette création automatique pour les dossiers manquants ultérieurs.
-- Un dossier existant et non vide nécessite une seule confirmation pour l’ensemble du lot, et jamais une confirmation par fichier généré.
-- Le mode développeur affiche des diagnostics sur le fournisseur ainsi que des outils avancés pour la résolution des problèmes.
+- Un dossier existant non vide nécessite une seule confirmation pour l’ensemble du lot, jamais une confirmation par fichier généré.
+- Le mode développeur affiche des diagnostics fournisseurs ainsi que des outils avancés de dépannage.

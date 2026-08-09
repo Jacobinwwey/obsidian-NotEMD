@@ -699,7 +699,7 @@ Lesen MIT - lihat fail [LICENSE](LICENSE) untuk butiran.
 ---
 
 
-*Notemd v1.9.5 - Perkayakan graf pengetahuan Obsidian anda dengan AI.*
+*Notemd v1.9.6 - Perkayakan graf pengetahuan Obsidian anda dengan AI.*
 
 
 
@@ -710,7 +710,7 @@ Kronik suku tahunan ini mengekalkan gaya visual asal [repo-saga](https://github.
 
 ![Notemd Development Chronicle](./docs/repo-saga/notemd-development-history.ms.svg)
 
-_Kali terakhir disegarkan untuk tag keluaran `1.9.5` pada 2026-08-06. Tarikh commit terkini: 2026-08-06._
+_Kali terakhir disegarkan untuk tag keluaran `1.9.6` pada 2026-08-09. Tarikh commit terkini: 2026-08-09._
 <!-- repo-chronicle:end -->
 
 
@@ -727,13 +727,14 @@ _Kali terakhir disegarkan untuk tag keluaran `1.9.5` pada 2026-08-06. Tarikh com
 <!-- notemd-settings-discovery-guide -->
 ## Penemuan tetapan, sejarah diagram, CircuitikZ, dan folder kumpulan yang selamat
 
-Halaman tetapan Notemd menyediakan ciri carian kabur, navigasi kategori yang luas, serta senarai kegemaran untuk setiap tetapan yang disimpan untuk Vault semasa.
+Halaman tetapan Notemd menyediakan carian kabur yang mengambil kira medan tertentu, navigasi kategori yang luas, alat toolbar penemuan yang boleh dikembangkan, serta senarai kegemaran untuk setiap tetapan yang disimpan untuk Vault semasa. Klik **★ Favorites** untuk membuka senarai khusus; setiap entri akan beralih terus ke tetapannya dan boleh dipadam tanpa meninggalkan halaman tetapan.
 
-- Sejarah diagram disimpan pada skop Vault, dikelaskan mengikut urutan terbaru dahulu, boleh dicari dan dipaparkan secara berhalaman dalam kumpulan 20. Memadam rekod sejarah tidak akan memadamkan fail yang telah dijana.
-- Eksport pratonton diagram menggunakan PPI mengawal ketajaman fail PNG dan PDF. SVG pula kekal berbentuk vektor.
+- Sejarah diagram disimpan dalam skop Vault, dikelaskan mengikut urutan terbaru dahulu, boleh dicari dan dipaparkan secara berhalaman dalam kumpulan 20. Memadam rekod sejarah tidak akan memusnahkan fail yang telah dijana.
+- Eksport pratonton diagram PPI menggunakan resolusi lalai 300 dan menerima nilai antara 72 hingga 600. Ia hanya mengawal proses rasterisasi PNG; SVG dan PDF tetap berbentuk vektor.
+- Eksport visual lengkap Mermaid secara pilihan juga akan menulis sumber Mermaid, SVG, serta fail manifest yang berkaitan; Mermaid masih boleh dilihat dalam pratonton Drawnix walaupun ia dimatikan.
 - Jenis diagram kegemaran dan format sumber kegemaran merupakan pilihan yang berasingan.
-- Pengguna desktop boleh membuka persekitaran kompilasi asli CircuitikZ yang tersedia secara pilihan untuk menggunakan semula alat Tectonic/pdflatex sistem, memilih kompiler khusus, atau memasang runtime Tectonic yang diuruskan secara eksplisit. Pratonton, SVG, PNG, dan eksport PDF pratonton tidak memerlukan LaTeX.
+- Pengguna desktop boleh membuka persekitaran kompilasi asli CircuitikZ secara pilihan untuk menggunakan Tectonic/pdflatex sistem, memilih kompiler khusus, atau memasang runtime Tectonic yang diuruskan secara eksplisit. Pratonton, SVG, PNG, dan eksport pratonton PDF tidak memerlukan LaTeX.
 - Pemilihan fail kumpulan lanjutan membolehkan pengguna menggunakan profil pemilihan yang telah disimpan serta melihat pratonton peraturan.
-- Folder sasaran kumpulan yang hilang boleh dibuat selepas pengesahan, dengan pilihan untuk menyimpan pengesahan automatik bagi folder yang hilang pada masa akan datang.
-- Folder yang sudah wujud dan tidak kosong memerlukan satu pengesahan sebelum keseluruhan kumpulan diproses, bukan satu pengesahan untuk setiap fail yang dijana.
+- Folder sasaran kumpulan yang hilang boleh dibuat selepas pengesahan, dengan pilihan untuk menyimpan penghasilannya secara automatik bagi folder yang hilang pada masa akan datang.
+- Folder yang sudah wujud dan tidak kosong memerlukan satu pengesahan sahaja sebelum keseluruhan kumpulan diproses, bukan satu pengesahan untuk setiap fail yang dijana.
 - Mod pembangun memaparkan maklumat diagnostik penyedia serta alat penyelesaian masalah lanjutan.

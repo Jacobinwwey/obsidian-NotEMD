@@ -40,7 +40,7 @@ Notemd 是一个**开源 Obsidian 插件**，集成 30+ 种大型语言模型 (L
 
 如果您喜欢使用 Notemd，请考虑 [⭐ 给 GitHub 加星](https://github.com/Jacobinwwey/obsidian-NotEMD) 或 [☕️ 请喝杯咖啡](https://ko-fi.com/jacobinwwey)。
 
-**版本:** 1.9.5
+**版本:** 1.9.6
 
 ![GitHub Release](https://img.shields.io/github/v/release/Jacobinwwey/obsidian-NotEMD?label=Version&link=https%3A%2F%2Fgithub.com%2Jacobinwwey%2Fobsidian-NotEMD%2Freleases%2Flatest) ![GitHub Downloads](https://img.shields.io/github/downloads/Jacobinwwey/obsidian-NotEMD/total?logo=Obsidian&label=Downloads&labelColor=%237C3AED&color=%235b5b5b&link=https%3A%2F%2Fgithub.com%2Jacobinwwey%2Fobsidian-NotEMD%2Freleases%2Flatest)
 
@@ -255,12 +255,13 @@ Notemd 是一个**开源 Obsidian 插件**，集成 30+ 种大型语言模型 (L
 <!-- notemd-settings-discovery-guide -->
 ### 查找并复用设置
 
-Notemd 的设置较多，是因为模型提供商、笔记工作流、图表、批处理、幻灯片和开发者诊断分别需要不同控制项。设置页现在提供模糊搜索、大类导览和单项收藏。点击 **★ 收藏** 会打开可导航的收藏设置列表；每项都可以跳转到对应设置或直接取消收藏。收藏按当前 Vault 保存，重启 Obsidian 后仍然可用。
+Notemd 的设置较多，是因为模型提供商、笔记工作流、图表、批处理、幻灯片和开发者诊断分别需要不同控制项。设置页现在提供字段感知搜索、大类导览、可收起的查找工具栏和单项收藏。点击 **★ 收藏** 会打开可导航的收藏设置列表；每项都可以跳转到对应设置或直接取消收藏。收藏按当前 Vault 保存，重启 Obsidian 后仍然可用。
 
 较新的重要设置包括：
 
 - **图形历史保留上限**：限制 Vault 历史索引数量；清理索引不会删除已生成文件。
-- **图形预览导出 PPI**：控制 PNG 的栅格分辨率；SVG 和 PDF 预览均基于矢量几何生成，质量不受此设置影响。
+- **图形预览导出 PPI**：默认值为 300，支持 72-600；仅控制 PNG 的栅格分辨率，SVG 和 PDF 预览均基于矢量几何生成，质量不受此设置影响。
+- **同时完整输出 Mermaid 图**：可选写出 Mermaid 源码、SVG 与 manifest companion；即使关闭该设置，Drawnix 预览仍然可以显示 Mermaid。
 - **首选图表类型 / 生成格式**：把图表语义与 Mermaid、Draw.io、Drawnix、CircuitikZ 等可编辑源格式分开。
 - **CircuitikZ 原生编译环境（可选）**：检查已有 `tectonic` 或 `pdflatex`，也可在用户明确确认后安装固定版本的托管 Tectonic。未安装 LaTeX 时，SVG、PNG 和预览 PDF 导出仍然可用。
 - **高级批处理文件选择**：启用可保存的文件夹/文件选择配置和规则预览。
@@ -891,7 +892,7 @@ MIT许可证 - 详情请见[LICENSE](LICENSE)。
 
 ---
 
-*Notemd v1.9.5 - 用AI提升你的Obsidian知识图谱。*
+*Notemd v1.9.6 - 用AI提升你的Obsidian知识图谱。*
 
 <!-- repo-chronicle:start -->
 ## 发展编年史
@@ -900,7 +901,7 @@ MIT许可证 - 详情请见[LICENSE](LICENSE)。
 
 ![Notemd Development Chronicle](./docs/repo-saga/notemd-development-history.zh.svg)
 
-_最近一次已针对发布 tag `1.9.5` 于 2026-08-06 刷新。 最新提交日期：2026-08-06。_
+_最近一次已针对发布 tag `1.9.6` 于 2026-08-09 刷新。 最新提交日期：2026-08-09。_
 <!-- repo-chronicle:end -->
 
 

@@ -700,7 +700,7 @@ Giấy phép MIT. Xem file [LICENSE](LICENSE) để biết chi tiết.
 ---
 
 
-*Notemd v1.9.5 - Nâng cấp knowledge graph Obsidian của bạn bằng AI.*
+*Notemd v1.9.6 - Nâng cấp knowledge graph Obsidian của bạn bằng AI.*
 
 
 
@@ -711,7 +711,7 @@ Biên niên sử theo quý này giữ nguyên phong cách hình ảnh gốc củ
 
 ![Notemd Development Chronicle](./docs/repo-saga/notemd-development-history.vi.svg)
 
-_Lần làm mới gần nhất cho thẻ phát hành `1.9.5` vào 2026-08-06. Ngày commit mới nhất: 2026-08-06._
+_Lần làm mới gần nhất cho thẻ phát hành `1.9.6` vào 2026-08-09. Ngày commit mới nhất: 2026-08-09._
 <!-- repo-chronicle:end -->
 
 
@@ -728,13 +728,14 @@ _Lần làm mới gần nhất cho thẻ phát hành `1.9.5` vào 2026-08-06. Ng
 <!-- notemd-settings-discovery-guide -->
 ## Khám phá cài đặt, lịch sử sơ đồ, CircuitikZ và các thư mục xử lý theo nhóm an toàn
 
-Trang cài đặt của Notemd cung cấp chức năng tìm kiếm mơ hồ, hệ thống điều hướng theo các danh mục lớn, cùng tính năng lưu các mục yêu thích cho từng cài đặt trong Vault hiện tại.
+Trang cài đặt Notemd cung cấp chức năng tìm kiếm mờ dựa trên từng trường, hệ thống điều hướng theo danh mục lớn, thanh công cụ khám phá có thể gập lại, và danh sách yêu thích riêng cho từng cài đặt được lưu dành cho Vault hiện tại. Nhấp vào **★ Favorites** để mở một danh sách chuyên dụng; mỗi mục sẽ chuyển trực tiếp đến cài đặt tương ứng và có thể được xóa mà không cần rời khỏi trang cài đặt.
 
-- Lịch sử sơ đồ được lưu ở cấp độ Vault, được sắp xếp theo thứ tự mới nhất trước, có thể tìm kiếm và hiển thị theo từng nhóm 20 mục. Việc xóa một bản ghi lịch sử không làm xóa các tập tin đã được tạo ra.
-- Tùy chọn PPI khi xuất bản trước sơ đồ giúp kiểm soát độ rõ nét của các tập tin PNG và PDF. Còn định dạng SVG vẫn giữ nguyên tính chất vector.
+- Lịch sử sơ đồ được lưu ở phạm vi Vault, được sắp xếp theo thứ tự từ mới nhất đến cũ nhất, có thể tìm kiếm và hiển thị theo trang với mỗi trang chứa 20 mục. Việc xóa một bản ghi lịch sử không làm xóa các tập tin đã được tạo ra.
+- Tùy chọn xuất bản xem trước sơ đồ PPI mặc định ở độ phân giải 300 và chấp nhận các giá trị từ 72 đến 600. Tùy chọn này chỉ điều khiển việc raster hóa của PNG; SVG và PDF vẫn duy trì dạng vector.
+- Ngoài ra, việc xuất toàn bộ nội dung hình ảnh Mermaid có thể chọn lựa việc ghi lại mã nguồn của Mermaid, SVG và các tập tin mô tả đi kèm; ngay cả khi tính năng này bị vô hiệu hóa, Mermaid vẫn có thể được xem trước trong Drawnix.
 - Loại sơ đồ ưu tiên và định dạng nguồn ưu tiên là hai tùy chọn riêng biệt.
-- Người dùng máy tính để bàn có thể mở môi trường biên dịch gốc CircuitikZ (nếu có) để tái sử dụng các công cụ Tectonic/pdflatex của hệ thống, chọn công cụ biên dịch tùy chỉnh, hoặc cài đặt trực tiếp phiên bản Tectonic runtime được quản lý. Các chức năng xem trước, xuất SVG, PNG và PDF không yêu cầu sử dụng LaTeX.
-- Tính năng chọn tập tin xử lý theo nhóm nâng cao cho phép lưu các thiết lập chọn lọc đã tạo và xem trước các quy tắc áp dụng.
-- Nếu thư mục đích dành cho việc xử lý theo nhóm chưa tồn tại, người dùng có thể tạo nó sau khi xác nhận; đồng thời có tùy chọn để hệ thống tự động tạo thư mục đó mỗi khi gặp trường hợp tương tự trong tương lai.
-- Đối với các thư mục đã tồn tại và không trống, chỉ cần xác nhận một lần cho toàn bộ nhóm tập tin, chứ không phải xác nhận riêng cho từng tập tin được tạo ra.
-- Chế độ nhà phát triển giúp hiển thị thông tin chẩn đoán từ nhà cung cấp và các công cụ khắc phục sự cố nâng cao.
+- Người dùng máy tính để bàn có thể mở môi trường biên dịch gốc CircuitikZ (nếu có) để tái sử dụng các công cụ Tectonic/pdflatex của hệ thống, chọn trình biên dịch tùy chỉnh, hoặc cài đặt phiên bản Tectonic được quản lý một cách cố định. Các chức năng xem trước, SVG, PNG và việc xuất bản xem trước PDF không yêu cầu sử dụng LaTeX.
+- Tính năng chọn tập tin xử lý theo nhóm nâng cao cho phép sử dụng các thiết lập lựa chọn đã lưu và xem trước các quy tắc liên quan.
+- Nếu thư mục đích của nhóm xử lý bị thiếu, người dùng có thể tạo thư mục đó sau khi xác nhận, với tùy chọn để hệ thống tự động tạo thư mục khi gặp trường hợp tương tự trong tương lai.
+- Đối với các thư mục đã tồn tại và không rỗng, chỉ cần xác nhận một lần cho toàn bộ nhóm xử lý, chứ không phải xác nhận riêng cho từng tập tin được tạo ra.
+- Chế độ nhà phát triển hiển thị thông tin chẩn đoán từ nhà cung cấp và các công cụ khắc phục sự cố nâng cao.

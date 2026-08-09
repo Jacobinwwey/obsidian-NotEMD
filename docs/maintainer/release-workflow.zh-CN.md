@@ -71,6 +71,8 @@ Release tag 必须使用纯数字 `x.x.x` 格式，不能加 `v` 前缀；Obsidi
 
 公开图表手册的源文件是 `website/docs/features/diagrams.mdx`，通过 `website/scripts/translate-diagrams-user-guide.cjs` 生成各语言版本。检入的流程使用 LM Studio 的 OpenAI-compatible API 地址 `http://100.80.17.113:301/v1/chat/completions` 和模型 `hy-mt2-7b`；这个地址是 API 端点而不是网站 URL，仓库中不得写入任何凭据。
 
+设置/收藏章节的源文件是 `website/docs/getting-started/configuration.mdx`，通过 `website/scripts/translate-settings-favorites-guide.cjs` 生成各语言版本；根目录 README 的设置说明则通过 `scripts/translate-readme-settings-guide.cjs` 生成。两个脚本都会保留结构化 token，并拒绝超过 8 个 locale 的批次或估算上下文达到 30,000 token 及以上的请求。
+
 按语言组串行执行，每次最多八个 locale。这样可以让每个请求稳定低于模型 32k 上下文窗口（脚本会拒绝过大的语言组，并校验 frontmatter、标题层级、产品术语以及维护者内容边界）：
 
 ```bash
@@ -79,6 +81,17 @@ node website/scripts/translate-diagrams-user-guide.cjs --write --locales it,pt,p
 node website/scripts/translate-diagrams-user-guide.cjs --write --locales nl,sv,fi,da,no,pl,tr,he
 node website/scripts/translate-diagrams-user-guide.cjs --write --locales th,el,cs,hu,ro,uk,vi,id
 node website/scripts/translate-diagrams-user-guide.cjs --write --locales ms
+
+node website/scripts/translate-settings-favorites-guide.cjs --write --locales zh-CN,zh-Hant,zh-TW,ja,fr,de,es,ko
+node website/scripts/translate-settings-favorites-guide.cjs --write --locales it,pt,pt-BR,ru,ar,fa,hi,bn
+node website/scripts/translate-settings-favorites-guide.cjs --write --locales nl,sv,fi,da,no,pl,tr,he
+node website/scripts/translate-settings-favorites-guide.cjs --write --locales th,el,cs,hu,ro,uk,vi,id
+node website/scripts/translate-settings-favorites-guide.cjs --write --locales ms
+
+node scripts/translate-readme-settings-guide.cjs --write --locales=ar,bn,cs,da,de,el,es,fi
+node scripts/translate-readme-settings-guide.cjs --write --locales=fr,he,hi,hu,id,it,ja,ko
+node scripts/translate-readme-settings-guide.cjs --write --locales=ms,nl,no,pl,pt,ro,ru,sv
+node scripts/translate-readme-settings-guide.cjs --write --locales=th,tr,uk,vi,zh_Hant
 ```
 
 提交前再使用 `--normalize-existing` 执行语言组（去掉 `--write` 可只读试跑）进行不联网的结构校验，然后构建并审计网站。不要替换成普通网页翻译器：该手册包含 MDX、Mermaid、文件扩展名与导出术语，结构必须保持稳定。

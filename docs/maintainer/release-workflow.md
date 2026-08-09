@@ -71,6 +71,8 @@ Release tags must use numeric `x.x.x` format. Do not add a `v` prefix: Obsidian 
 
 The public diagrams guide is localized from `website/docs/features/diagrams.mdx` through `website/scripts/translate-diagrams-user-guide.cjs`. The checked-in workflow uses the LM Studio OpenAI-compatible endpoint `http://100.80.17.113:301/v1/chat/completions` with model `hy-mt2-7b`; the address is an API endpoint, not a website URL, and no credential belongs in the repository.
 
+The settings/favorites section is localized from `website/docs/getting-started/configuration.mdx` through `website/scripts/translate-settings-favorites-guide.cjs`. Root README settings guidance is localized through `scripts/translate-readme-settings-guide.cjs`. Both scripts preserve structural tokens and reject a locale batch larger than eight or an estimated request context at/above 30,000 tokens.
+
 Run locale groups sequentially, with no more than eight locales per invocation. This keeps each request well below the model's 32k context window (the script rejects larger locale groups and validates frontmatter, heading levels, product tokens, and maintainer-content boundaries):
 
 ```bash
@@ -79,6 +81,17 @@ node website/scripts/translate-diagrams-user-guide.cjs --write --locales it,pt,p
 node website/scripts/translate-diagrams-user-guide.cjs --write --locales nl,sv,fi,da,no,pl,tr,he
 node website/scripts/translate-diagrams-user-guide.cjs --write --locales th,el,cs,hu,ro,uk,vi,id
 node website/scripts/translate-diagrams-user-guide.cjs --write --locales ms
+
+node website/scripts/translate-settings-favorites-guide.cjs --write --locales zh-CN,zh-Hant,zh-TW,ja,fr,de,es,ko
+node website/scripts/translate-settings-favorites-guide.cjs --write --locales it,pt,pt-BR,ru,ar,fa,hi,bn
+node website/scripts/translate-settings-favorites-guide.cjs --write --locales nl,sv,fi,da,no,pl,tr,he
+node website/scripts/translate-settings-favorites-guide.cjs --write --locales th,el,cs,hu,ro,uk,vi,id
+node website/scripts/translate-settings-favorites-guide.cjs --write --locales ms
+
+node scripts/translate-readme-settings-guide.cjs --write --locales=ar,bn,cs,da,de,el,es,fi
+node scripts/translate-readme-settings-guide.cjs --write --locales=fr,he,hi,hu,id,it,ja,ko
+node scripts/translate-readme-settings-guide.cjs --write --locales=ms,nl,no,pl,pt,ro,ru,sv
+node scripts/translate-readme-settings-guide.cjs --write --locales=th,tr,uk,vi,zh_Hant
 ```
 
 Before committing, run the locale groups again with `--normalize-existing` (and without `--write` for a dry run) for a validation-only pass, then build and audit the site. Do not substitute a generic web translator: the guide contains MDX, Mermaid, file extensions, and export tokens that must remain structurally stable.

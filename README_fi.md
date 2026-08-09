@@ -699,7 +699,7 @@ MIT License - Katso lisätiedot tiedostosta [LICENSE](LICENSE).
 ---
 
 
-*Notemd v1.9.5 - Paranna Obsidian-tietograafiasi tekoälyn avulla.*
+*Notemd v1.9.6 - Paranna Obsidian-tietograafiasi tekoälyn avulla.*
 
 
 <!-- repo-chronicle:start -->
@@ -709,7 +709,7 @@ Tämä neljännesvuosittainen kronikka säilyttää [repo-saga](https://github.c
 
 ![Notemd Development Chronicle](./docs/repo-saga/notemd-development-history.fi.svg)
 
-_Päivitetty viimeksi julkaisutägille `1.9.5` 2026-08-06. Viimeisimmän commitin päivämäärä: 2026-08-06._
+_Päivitetty viimeksi julkaisutägille `1.9.6` 2026-08-09. Viimeisimmän commitin päivämäärä: 2026-08-09._
 <!-- repo-chronicle:end -->
 
 
@@ -724,15 +724,16 @@ _Päivitetty viimeksi julkaisutägille `1.9.5` 2026-08-06. Viimeisimmän commiti
 </a>
 
 <!-- notemd-settings-discovery-guide -->
-## Asetusten avastaminen, diagrammien historia, CircuitikZ ja turvalliset paketitaskujen kaustat
+## Asetusten avastaminen, diagrammin historia, CircuitikZ ja turvalliset paketitiedot
 
-Notemd:n asetusten sivu tarjoaa hämävyysotsintaa, laajaa kategorian navigointia sekä aktiivisen Vaultin asetuksille suunnattuja lemmikkäitä.
+Notemd -asetuksensivu tarjoaa alueita tunnistavaa hämävyysotsintaa, laajoja kategorian navigointia, kokonaan suljettavaa avastus-työkalupalkkaa sekä aktiivisen Vault -tilin mukaisia lemmikuksia. Paina **★ Favorites**, jotta avautuu erillinen lista; jokainen kirje suuntautuu suoraan vastaavalle asetukseen ja sen on mahdollista poistaa ilman että pitää lähtää asetuksensivulta.
 
-- Diagrammien historia tallennetaan Vaultin tasolla, jossa se on järjestetty uusimmista alhaammin. Se on hakettavaa ja näytetään 20:stä ryhmistä. Historian kirjan kustannuksella genereerit tiedostot ei poisteta.
-- Diagrammin esikatselun eksportointi PPI-määrittelyllä kontrolloi PNG- ja PDF-tiedostojen selkeyttä. SVG-järjestelmät jäävät vektoripohiseiksi.
-- Ehdotuun diagrammityypille ja ehdotuun lähteenvormatteluun tehdään erilliset valinnat.
-- Tietokonekayttajat voivat avata valintaista CircuitikZ:n omat kompilaatiopimistot, jotta voivat käyttää järjestelmän Tectonic/pdflatex-tuotteita, valita omat kompilaattorit tai asentaa suoraan hallitsevan Tectonic-järjestelmän. Esikatselut, SVG-, PNG- ja PDF-esikatselut eksportoidaan ilman LaTeXia.
-- Edistyneet paketitaskujen tiedostojen valintavaihtoehto mahdollistaa salattujen valintaprofiilien ja sääntöjen esikatselun.
-- Puuttuv paketitaskujen sihtokausta voi luoda vahvistuksen jälkeen, ja on mahdollisuus muistaa automaattisen luomisen tuleviin puutteviin kaustoihin.
-- Olemassa oleva, tyhjä ei ole – täysin kausta vaatii yhtä vahvistusta koko paketitaskun suhteen, ei yhtä vahvistusta jokaisen genereerituun tiedostoon.
-- Kehittäjärežiimi paljastaa tarjoajien diagnostiikan sekä edistyneet vianohjelmistovaihtoehtoja.
+- Diagrammin historia tallennetaan Vault -sävelissä, järjestetty uusimmista alhaampaan; se on hakettavaa ja sijoitettava 20:stä ryhmistä. Historiallisen kirjeen poistaminen ei poista luotuja failia.
+- Diagrammin etukatsausluoden PPI -arvo on vaihtoehtoisesti 300, mutta se hyväksyy myös arvon 72–600. Se hallitsee vain PNG -rasterointia; SVG ja PDF jäävät vektoripohiseiksi.
+- Täydellisten Mermaid -visuaalien eksportoinnin aikana voidaan valita mahdollisuus kirjoittaa myös Mermaid -lähteet, SVG ja manifestit; Mermaid on edelleen käytettävissä Drawnix -etukatsauksissa, joka on poistetaan.
+- Ehdotuksiin mukainen diagrammityyppi ja ehdotuksiin mukainen lähteenvormattelu ovat erilliset valintat.
+- Tietokonekäyttäjät voivat avata valintaista CircuitikZ -natiivisen kompiloimisympäristön, jotta voivat käyttää sistemin Tectonic/pdflatex -sovelluksia, valita omakustannuselisen kompilaatorin tai asentaa suoraan hallitsevan Tectonic -järjestelmän. Etukatsaus, SVG, PNG sekä PDF -etukatsausluodot eivät vaadi LaTeXia.
+- Edistynyt paketityyppien valinta mahdollistaa salvestettujen valintaprofiilien ja sääntöjen etukatsauksien käyttöä.
+- Puuttuvan paketitiedon siirtokytkälän kanssa on mahdollista luoda se vahvistuksen jälkeen, ja on mahdollisuus muistaa automaattisen luomisen tuleviin puutteville tiedostoille.
+- Olemassa oleva, tyhjä ei ole – olemassa oleva mittänyt tiedostotiedosto vaatii yhtä vahvistusta koko paketin suhteen, eikä yhtä vahvistusta jokaisen luotunnan failin suhteen.
+- Kehittäjymode paljastaa tarjoajan diagnostiikan sekä edistyneitä ongelmanratkaisutiloja.

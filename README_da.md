@@ -29,7 +29,7 @@ If\ you\ love\ using\ Notemd\,\ please\ consider\ \[\�\�\�\ Give\ a\ Star\
 
 Hvis du elsker at bruge Notemd, overvej venligst at [⭐ give en stjerne på GitHub](https://github.com/Jacobinwwey/obsidian-NotEMD) eller [☕️ købe en kaffe til mig](https://ko-fi.com/jacobinwwey).
 
-**Version:** 1.9.5
+**Version:** 1.9.6
 
 <img width="1853" height="1080" alt="show" src="https://github.com/user-attachments/assets/b9f9292b-a9d8-48a3-9acf-1b6f00413966" />
 <img width="1853" height="1080" alt="multi-langu" src="https://github.com/user-attachments/assets/d9a0a4fb-1c00-425a-ac1d-0134a013a381" />
@@ -701,7 +701,7 @@ MIT License - Se filen [LICENSE](LICENSE) for detaljer.
 ---
 
 
-*Notemd v1.9.5 - Forbedr din Obsidian-vidensgraf med AI.*
+*Notemd v1.9.6 - Forbedr din Obsidian-vidensgraf med AI.*
 
 
 <!-- repo-chronicle:start -->
@@ -711,7 +711,7 @@ Denne kvartalsvise krønike bevarer den oprindelige visuelle stil fra [repo-saga
 
 ![Notemd Development Chronicle](./docs/repo-saga/notemd-development-history.da.svg)
 
-_Senest opdateret for udgivelsestagget `1.9.5` den 2026-08-06. Seneste commit-dato: 2026-08-06._
+_Senest opdateret for udgivelsestagget `1.9.6` den 2026-08-09. Seneste commit-dato: 2026-08-09._
 <!-- repo-chronicle:end -->
 
 
@@ -728,13 +728,14 @@ _Senest opdateret for udgivelsestagget `1.9.5` den 2026-08-06. Seneste commit-da
 <!-- notemd-settings-discovery-guide -->
 ## Opdagelse af indstillinger, diagramhistorik, CircuitikZ og sikre batch-mapper
 
-Notemds indstillingsside tilbyder uskydigt søgning, navigation gennem store kategorier samt favoriter for hver indstilling, som gemmes for den aktuelle Vault.
+Indstillingssiden Notemd tilbyder uskydigt søgning med overbevisning for de relevante felter, navigation gennem store kategorier, en foldbar oppdagelsesverktøjslinje samt favoriter per indstilling, som gemmes for den aktuelle Vault. Klik på **★ Favorites** for at åbne en speciel liste; hver post springer til sin indstilling og kan fjerne sig uden at leave indstillingssiden.
 
-- Diagramhistorik gemmes på Vault-niveau, sorteret fra nyeste til ældste, og er søgbart samt pagineret i grupper af 20. At fjerne en historikshode sletter ikke de genererede filer.
-- Export af diagrampreview-stillinger kontrollerer klarheden i PNG- og PDF-filer. SVG forbliver vektorbaseret.
-- Favorittypen for diagram og favoritformatet for kildefiler er to separate valgmuligheder.
-- Desktop-brugere kan åbne det valgfrie CircuitikZ-native kompileringsmiljø for at bruge systemets Tectonic/pdflatex igen, vælge en egen kompilator eller installere eksplisit den pinnete, managede Tectonic-runtime. Preview-, SVG-, PNG- og PDF-preview-exporter kræver ikke LaTeX.
-- Avanceret valg af batch-filer muliggør at bruge gemte valgprofiler og regelpreviewer.
-- En fejlende batch-målmappe kan skrives til efter bekræftelse, med mulighed for at huske den automatiske oprettelse for fremtidige fejlende mapper.
+- Diagramhistorik gemmes i rammen Vault, sorteret fra nyeste til ældste, søgbar og pagineret i grupper af 20. At fjerne en historiepost sletter ikke de genererede filer.
+- Ekspor af diagrampreviewer via PPI standardiseres til 300, men accepterer værdier fra 72 til 600. Det kontrollerer kun rasteriseringen af PNG; SVG og PDF forbliver vektorbaseret.
+- Ved valg kan også hele Mermaid-visueler eksporteres, hvilket muligvis skriver med sig Mermaid-kilden, SVG samt manifestfiler; Mermaid forbliver tilgængeligt i Drawnix-previewer, selv hvis det er deaktiveret.
+- Favoritdiagramtyp og favoritskabelonsformat er to separate valgmuligheder.
+- Desktop-brugere kan åbne den valgfrie CircuitikZ-native kompileringsmiljø for at bruge systemets Tectonic/pdflatex, vælge en egen kompilator eller installere eksplisit den fastsatte, managed Tectonic-runtime. Previewer, SVG, PNG samt previewer af PDF kræver ikke LaTeX.
+- Avanceret valg af batch-filer muliggør brug af gemte selektionsprofiler og regel-previewer.
+- En fejlende batch-målmappe kan skrives til efter bekræftelse, med mulighed for at huske den automatische oprettelse for fremtidige fejlende mapper.
 - En eksisterende, ikke tom mappe kræver én bekræftelse før hele batchen, aldrig en bekræftelse per genereret fil.
-- Udviklermode viser udbyderens diagnostik og avancerede løsningsmuligheder for problemer.
+- Udviklermodus viser udbydere-diagnostik og avancerede fejlfindingstilstande.

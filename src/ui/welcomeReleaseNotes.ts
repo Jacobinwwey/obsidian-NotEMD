@@ -11,6 +11,14 @@ const WELCOME_RELEASE_NOTE_LIMIT = 2;
 
 const ENTRIES_EN: WelcomeReleaseNoteEntry[] = [
     {
+        version: '1.9.6',
+        highlights: [
+            'Diagram workflows now retain their explicit source/render/export boundaries; settings discovery ranks visible names, descriptions, aliases, and categories, then jumps to a stable setting anchor.',
+            'The discovery toolbar preserves its query when collapsed into a floating top-right control, and ★ Favorites opens a dedicated navigable list with Vault persistence and stale-ID cleanup.',
+            'Documentation and translation tooling now enforce the 1.9.6 PPI, Mermaid companion, and bounded LM Studio batch contracts.'
+        ]
+    },
+    {
         version: '1.9.5',
         highlights: [
             'Diagram workflows now distinguish source formats, render targets, and export targets; Drawnix previews show the complete board plus every embedded Mermaid visual in source order inside one vertically scrollable surface.',
@@ -78,6 +86,14 @@ const ENTRIES_EN: WelcomeReleaseNoteEntry[] = [
 
 const ENTRIES_ZH_CN: WelcomeReleaseNoteEntry[] = [
     {
+        version: '1.9.6',
+        highlights: [
+            '图表工作流现在明确区分源格式、渲染目标与导出目标；设置查找会按可见名称、描述、别名和类别排序，并跳转到带稳定锚点的目标设置。',
+            '查找工具栏收起为右上角悬浮控件后仍会保留搜索条件；点击 ★ Favorites 会打开按 Vault 持久化、可导航且能清理失效 ID 的独立收藏设置单。',
+            '文档与翻译工具现在统一执行 1.9.6 的 PPI、Mermaid companion 和 LM Studio 有界小批次契约。'
+        ]
+    },
+    {
         version: '1.9.5',
         highlights: [
             '图表工作流现在明确区分源格式、渲染目标与导出目标；Drawnix 预览现在会按源文件顺序显示完整画布及所有嵌入的 Mermaid 图，并放在同一个支持纵向滚动的预览面板中。',
@@ -144,6 +160,14 @@ const ENTRIES_ZH_CN: WelcomeReleaseNoteEntry[] = [
 ];
 
 const ENTRIES_ZH_TW: WelcomeReleaseNoteEntry[] = [
+    {
+        version: '1.9.6',
+        highlights: [
+            '圖表工作流程現在明確區分來源格式、渲染目標與匯出目標；設定探索會依可見名稱、描述、別名與類別排序，並跳轉到具有穩定錨點的目標設定。',
+            '探索工具列收起為右上角浮動控制後仍會保留搜尋條件；點擊 ★ Favorites 會開啟按 Vault 持久化、可導覽且能清理失效 ID 的獨立收藏設定清單。',
+            '文件與翻譯工具現在統一執行 1.9.6 的 PPI、Mermaid companion 與 LM Studio 有界小批次契約。'
+        ]
+    },
     {
         version: '1.9.5',
         highlights: [

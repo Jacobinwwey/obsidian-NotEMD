@@ -699,7 +699,7 @@ MIT Lisansı - Ayrıntılar için [LICENSE](LICENSE) dosyasına bakın.
 ---
 
 
-*Notemd v1.9.5 - Obsidian bilgi grafiğinizi yapay zeka ile geliştirin.*
+*Notemd v1.9.6 - Obsidian bilgi grafiğinizi yapay zeka ile geliştirin.*
 
 
 <!-- repo-chronicle:start -->
@@ -709,7 +709,7 @@ Bu üç aylık kronik, [repo-saga](https://github.com/teee32/repo-saga) özgün 
 
 ![Notemd Development Chronicle](./docs/repo-saga/notemd-development-history.tr.svg)
 
-_`1.9.5` sürüm etiketi için son yenileme tarihi: 2026-08-06. En son commit tarihi: 2026-08-06._
+_`1.9.6` sürüm etiketi için son yenileme tarihi: 2026-08-09. En son commit tarihi: 2026-08-09._
 <!-- repo-chronicle:end -->
 
 
@@ -724,15 +724,16 @@ _`1.9.5` sürüm etiketi için son yenileme tarihi: 2026-08-06. En son commit ta
 </a>
 
 <!-- notemd-settings-discovery-guide -->
-## Ayarların keşfi, diyagram geçmişi, CircuitikZ ve güvenli toplu işleme klasörleri
+## Ayar keşfi, diyagram geçmişi, CircuitikZ ve güvenli toplu işleme klasörleri
 
-Notemd ayarlar sayfası, bulanık arama özelliği, geniş kategori navigasyonu ve mevcut Vault için her bir ayara ait favorileri saklar.
+Notemd ayar sayfası, alan bilgisine dayalı bulanık arama, geniş kategori navigasyonu, katlanabilir bir keşif araç çubuğu ve mevcut Vault için saklanan ayara özel favoriler sunar. Özel bir liste açmak için **★ Favorites**’e tıklayın; her giriş doğrudan ilgili ayarda açılır ve ayar sayfasından ayrılmadan kaldırılabilir.
 
-- Diyagram geçmişi Vault düzeyinde saklanır; en yeni olanlardan başlayarak sıralanır, aranabilir ve 20’şerli gruplar halinde sayfalandırılır. Bir geçmiş kaydının silinmesi, oluşturulan dosyaların silinmesine neden olmaz.
-- Diyagram önizleme dışa aktarımında PPI ayarı, PNG ve PDF dosyalarının netliğini kontrol eder. SVG ise vektör tabanlı kalır.
-- Tercih edilen diyagram türü ile tercih edilen kaynak formatı ayrı ayrı seçeneklerdir.
-- Masaüstü kullanıcıları, sistemdeki Tectonic/pdflatex’i yeniden kullanmak, özel bir derleyici seçmek veya sabitlenmiş yönetilen Tectonic çalışma zamanını açıkça yüklemek amacıyla isteğe bağlı CircuitikZ yerel derleme ortamını açabilirler. Önizleme, SVG, PNG ve önizleme PDF dışa aktarımları için LaTeX gerekmez.
+- Diyagram geçmişi, en yeni önce gelmek üzere Vault kapsamında saklanır, 20’li gruplar halinde aranabilir ve sayfalara bölünebilir. Bir geçmiş kaydının silinmesi oluşturulan dosyaları silemez.
+- Diyagram önizleme dışa aktarımı PPI varsayılan olarak 300 değerinde olup 72–600 aralığını kabul eder. Bu ayar yalnızca PNG’in tarama işlemini kontrol eder; SVG ve PDF vektör tabanlı kalır.
+- Ayrıca, tam Mermaid görsellerinin dışa aktarılması isteğe bağlı olarak Mermaid kaynağını, SVG’yı ve manifest dosyalarını da yazdırır; Mermaid devre dışı bırakıldığında bile Drawnix önizlemelerinde kullanılabilir.
+- Tercih edilen diyagram türü ile tercih edilen kaynak formatı ayrı seçeneklerdir.
+- Masaüstü kullanıcıları, sistemdeki Tectonic/pdflatex’i yeniden kullanmak, özel bir derleyici seçmek veya sabitlenmiş yönetilen Tectonic çalışma zamanını açıkça yüklemek için isteğe bağlı CircuitikZ yerel derleme ortamını açabilirler. Önizleme, SVG, PNG ve PDF önizleme dışa aktarımları için LaTeX gerekmez.
 - Gelişmiş toplu dosya seçimi özelliği, kaydedilmiş seçim profillerini ve kural önizlemelerini mümkün kılar.
-- Eksik olan toplu işleme hedef klasörü, onay alındıktan sonra oluşturulabilir; gelecekteki eksik klasörler için otomatik oluşturma özelliği de seçilebilir.
-- Mevcut ve boş olmayan bir klasör için tüm toplu işlem için tek bir onay yeterlidir; her oluşturulan dosya için ayrı ayrı onay gerekmez.
-- Geliştirici modu, sağlayıcı teşhis bilgilerini ve gelişmiş sorun giderme araçlarını gösterir.
+- Eksik bir toplu işleme hedef klasörü, onaydan sonra oluşturulabilir ve gelecekteki eksik klasörler için otomatik oluşturma özelliği hatırlanabilir.
+- Mevcut ve boş olmayan bir klasör için tüm toplu işlem başlamadan önce tek bir onay gerekir; her oluşturulan dosya için ayrı ayrı onay alınmaz.
+- Geliştirici modu, sağlayıcı teşhis bilgilerini ve gelişmiş sorun giderme kontrollerini gösterir.

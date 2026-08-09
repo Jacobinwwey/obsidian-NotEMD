@@ -708,7 +708,7 @@ MIT License. Lihat file [LICENSE](LICENSE) untuk detailnya.
 ---
 
 
-*Notemd v1.9.5 - Tingkatkan knowledge graph Obsidian Anda dengan AI.*
+*Notemd v1.9.6 - Tingkatkan knowledge graph Obsidian Anda dengan AI.*
 
 
 <!-- repo-chronicle:start -->
@@ -718,7 +718,7 @@ Kronik triwulanan ini mempertahankan gaya visual asli [repo-saga](https://github
 
 ![Notemd Development Chronicle](./docs/repo-saga/notemd-development-history.id.svg)
 
-_Terakhir diperbarui untuk tag rilis `1.9.5` pada 2026-08-06. Tanggal commit terbaru: 2026-08-06._
+_Terakhir diperbarui untuk tag rilis `1.9.6` pada 2026-08-09. Tanggal commit terbaru: 2026-08-09._
 <!-- repo-chronicle:end -->
 
 
@@ -735,13 +735,14 @@ _Terakhir diperbarui untuk tag rilis `1.9.5` pada 2026-08-06. Tanggal commit ter
 <!-- notemd-settings-discovery-guide -->
 ## Penemuan pengaturan, riwayat diagram, CircuitikZ, dan folder batch yang aman
 
-Halaman pengaturan Notemd menyediakan fitur pencarian kasar, navigasi kategori yang luas, serta daftar favorit untuk setiap pengaturan yang disimpan untuk Vault saat ini.
+Halaman pengaturan Notemd menyediakan fitur pencarian kabur berbasis bidang, navigasi kategori yang luas, toolbar penemuan yang dapat dikolaps, serta daftar favorit per-pengaturan yang disimpan untuk Vault saat ini. Klik **★ Favorites** untuk membuka daftar khusus; setiap entri akan langsung menuju pengaturannya masing-masing dan dapat dihapus tanpa harus meninggalkan halaman pengaturan.
 
-- Riwayat diagram disimpan pada skala Vault, diurutkan dari yang terbaru ke yang paling lama, dapat dicari, dan ditampilkan dalam kelompok berisi 20 entri. Menghapus catatan riwayat tidak akan menghapus file yang telah dihasilkan.
-- Ekspor pratinjau diagram dengan kontrol PPI mempengaruhi kualitas gambar dalam format PNG dan PDF. SVG tetap berbentuk vektor.
+- Riwayat diagram disimpan dalam skop Vault, dikelompokkan berdasarkan urutan terbaru ke lama, dapat dicari, dan dipaginasi dalam kelompok 20 entri. Menghapus catatan riwayat tidak akan menghapus file yang telah dihasilkan.
+- Ekspor pratinjau diagram dengan PPI memiliki resolusi default 300 dan menerima nilai antara 72 hingga 600. Fitur ini hanya mengontrol proses rasterisasi PNG; SVG dan PDF tetap berbentuk vektor.
+- Ekspor visual lengkap menggunakan Mermaid secara opsional juga menulis sumber kode Mermaid, SVG, serta file manifest pendampingnya; Mermaid tetap dapat dilihat dalam pratinjau Drawnix meskipun fiturnya dinonaktifkan.
 - Jenis diagram favorit dan format sumber favorit merupakan pilihan yang terpisah.
-- Pengguna desktop dapat membuka lingkungan kompilasi bawaan CircuitikZ yang opsional untuk memanfaatkan Tectonic/pdflatex sistem yang sudah ada, memilih kompiler khusus, atau secara eksplisit menginstal runtime Tectonic yang terkelola. Ekspor pratinjau, SVG, PNG, dan PDF pratinjau tidak memerlukan LaTeX.
-- Fitur pemilihan file batch tingkat lanjut memungkinkan penggunaan profil pemilihan yang telah disimpan serta pratinjau aturan.
-- Jika folder tujuan batch tidak ada, folder tersebut dapat dibuat setelah mendapat konfirmasi, dengan opsi untuk mengingat pembuatan otomatisnya untuk folder yang hilang di masa depan.
-- Untuk folder yang sudah ada dan tidak kosong, diperlukan satu konfirmasi saja untuk seluruh file dalam batch, bukan satu konfirmasi per file yang dihasilkan.
+- Pengguna desktop dapat membuka lingkungan kompilasi bawaan CircuitikZ jika diinginkan, untuk memanfaatkan Tectonic/pdflatex yang sudah ada di sistem, memilih kompiler khusus, atau secara eksplisit menginstal runtime Tectonic yang telah ditentukan. Pratinjau, SVG, PNG, dan ekspor pratinjau PDF tidak memerlukan LaTeX.
+- Fitur pemilihan file batch tingkat lanjut memungkinkan penggunaan profil pilihan yang telah disimpan serta pratinjau aturan.
+- Folder target batch yang hilang dapat dibuat setelah mendapat konfirmasi, dengan opsi untuk mengingat pembuatan otomatisnya bagi folder yang hilang di masa depan.
+- Untuk folder yang sudah ada dan tidak kosong, diperlukan satu konfirmasi saja sebelum seluruh file dalam batch diproses, bukan satu konfirmasi per file yang dihasilkan.
 - Mode pengembang menampilkan informasi diagnosis dari penyedia layanan serta kontrol pemecahan masalah tingkat lanjut.

@@ -699,7 +699,7 @@ Licence MIT. Podrobnosti naleznete v souboru [LICENSE](LICENSE).
 ---
 
 
-*Notemd v1.9.5 - Vylepšete svůj graf znalostí v Obsidianu pomocí AI.*
+*Notemd v1.9.6 - Vylepšete svůj graf znalostí v Obsidianu pomocí AI.*
 
 
 
@@ -710,7 +710,7 @@ Tato čtvrtletní kronika zachovává původní vizuální styl [repo-saga](http
 
 ![Notemd Development Chronicle](./docs/repo-saga/notemd-development-history.cs.svg)
 
-_Naposledy obnoveno pro tag vydání `1.9.5` dne 2026-08-06. Datum posledního commitu: 2026-08-06._
+_Naposledy obnoveno pro tag vydání `1.9.6` dne 2026-08-09. Datum posledního commitu: 2026-08-09._
 <!-- repo-chronicle:end -->
 
 
@@ -727,13 +727,14 @@ _Naposledy obnoveno pro tag vydání `1.9.5` dne 2026-08-06. Datum posledního c
 <!-- notemd-settings-discovery-guide -->
 ## Objevování nastavení, historie diagramů, CircuitikZ a bezpečné složky pro hromadnou práci
 
-Stránka s nastaveními Notemd nabízí fuzzy vyhledávání, navigaci v rozsáhlých kategoriích a možnost uložit si oblíbená nastavení pro aktuální Vault.
+Stránka s nastaveními Notemd nabízí fuzzy vyhledávání s ohledem na konkrétní pole, navigaci v rozsáhlých kategoriích, sklopný nástrojový panel pro objevování a oblíbené položky pro jednotlivá nastavení uložené pro aktuální Vault. Kliknutím na **★ Favorites** se otevře speciální seznam; každý záznam přesune uživatele přímo k danému nastavení a lze ho odstranit, aniž by bylo nutné opustit stránku s nastaveními.
 
-- Historie diagramů je ukládána na úrovni Vault, seřazena od nejnovějších k nejstarším, umožňuje vyhledávání a je rozdělena do skupin po 20 položkách. Odstranění záznamu z historie neodstraní vytvořené soubory.
-- Export náhledu diagramu pomocí PPI ovlivňuje kvalitu obrázků ve formátech PNG a PDF. SVG zůstává vektorovým formátem.
-- Preferovaný typ diagramu a preferovaný zdrojový formát jsou volby oddělené od sebe.
-- Uživatelé na desktopu mohou otevřít volitelné nativní prostředí kompilace CircuitikZ, aby znovu využili systémové nástroje Tectonic/pdflatex, vybrali si vlastní kompilátor nebo explicitně nainstalovali spravovaný běh Tectonic. Pro výstupy ve formátech náhledu, SVG, PNG a PDF není potřeba LaTeX.
-- Pokročilá volba souborů pro hromadnou práci umožňuje použití uložených profilů výběru a náhled pravidel.
-- Chybějící cílovou složku pro hromadnou práci lze vytvořit po potvrzení, přičemž existuje možnost zapamatovat si automatické vytváření takových složek i v budoucnu.
-- Pro již existující neprázdnou složku je vyžadováno jedno potvrzení před zpracováním celé skupiny souborů, nikoli jedno potvrzení pro každý vytvořený soubor.
+- Historie diagramů je uložena v rámci rozsahu Vault, seřazena nejnovějšími prvními, vyhledatelná a stránkovatelná ve skupinách po 20 položkách. Odstranění záznamu z historie neodstraňuje vytvořené soubory.
+- Export náhledu diagramu PPI má jako výchozí hodnotu 300 a přijímá hodnoty od 72 do 600. Ovlivňuje pouze rasterizaci PNG; SVG a PDF zůstávají vektorové.
+- Při exportu kompletních vizuálů Mermaid lze volitelně uložit také zdrojový kód Mermaid, SVG a doplňkové soubory manifestu; i když je Mermaid vypnut, zůstává dostupný v náhledech Drawnix.
+- Preferovaný typ diagramu a preferovaný formát zdroje jsou samostatné volby.
+- Uživatelé na desktopu mohou otevřít volitelné nativní prostředí kompilace CircuitikZ, aby znovu využili systémové nástroje Tectonic/pdflatex, vybrali si vlastní kompilátor nebo explicitně nainstalovali spravovaný provozní prostředí Tectonic. Náhledy, SVG, PNG a exporty náhledů PDF nevyžadují LaTeX.
+- Pokročilé možnosti výběru souborů pro hromadnou práci umožňují použití uložených profilů výběru a náhledy pravidel.
+- Chybějící cílovou složku pro hromadnou práci lze po potvrzení vytvořit, přičemž existuje možnost zapamatovat si automatické vytváření pro budoucí chybějící složky.
+- Pro již existující neprázdnou složku je vyžadována jedna potvrzení před zpracováním celé skupiny souborů, nikoli jedna potvrzení pro každý vytvořený soubor.
 - Režim vývojáře odhaluje diagnostické informace poskytovatele a pokročilé nástroje na řešení problémů.

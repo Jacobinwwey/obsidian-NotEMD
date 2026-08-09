@@ -40,7 +40,7 @@ Unlike chat-based AI tools where insights disappear after the session, Notemd wr
 
 If you love using Notemd, please consider [⭐ Give a Star on GitHub](https://github.com/Jacobinwwey/obsidian-NotEMD) or [☕️ Buy Me a Coffee](https://ko-fi.com/jacobinwwey).
 
-**Version:** 1.9.5
+**Version:** 1.9.6
 
 <img width="1853" height="1080" alt="show" src="https://github.com/user-attachments/assets/b9f9292b-a9d8-48a3-9acf-1b6f00413966" />
 <img width="1853" height="1080" alt="multi-langu" src="https://github.com/user-attachments/assets/d9a0a4fb-1c00-425a-ac1d-0134a013a381" />
@@ -264,12 +264,13 @@ That's it! Explore the settings to unlock more features like web research, trans
 <!-- notemd-settings-discovery-guide -->
 ### Finding And Reusing Settings
 
-Notemd has a broad settings surface because providers, note workflows, diagrams, batch processing, slides, and developer diagnostics have different controls. The settings page now provides a fuzzy search field, large category navigation, and per-setting favorites. Click **★ Favorites** to open a dedicated, navigable favorite-settings list; each entry can jump to its setting or be removed directly. Favorites are stored for the current Vault and remain available after restarting Obsidian.
+Notemd has a broad settings surface because providers, note workflows, diagrams, batch processing, slides, and developer diagnostics have different controls. The settings page now provides field-aware search, large category navigation, a collapsible discovery toolbar, and per-setting favorites. Click **★ Favorites** to open a dedicated, navigable favorite-settings list; each entry can jump to its setting or be removed directly. Favorites are stored for the current Vault and remain available after restarting Obsidian.
 
 Important newer settings include:
 
 - **Diagram history retention limit**: limits the Vault history index; pruning never deletes generated files.
-- **Diagram preview export PPI**: controls PNG raster resolution. SVG and PDF previews are generated from vector geometry, so their quality is independent of this setting.
+- **Diagram preview export PPI**: defaults to 300 and accepts 72-600; it controls PNG raster resolution only. SVG and PDF previews are generated from vector geometry, so their quality is independent of this setting.
+- **Also export complete Mermaid visuals**: optionally writes Mermaid source/SVG/manifest companions; Mermaid remains available in Drawnix previews even when this setting is disabled.
 - **Preferred diagram type / source format**: separates diagram meaning from Mermaid, Draw.io, Drawnix, CircuitikZ, and other editable source formats.
 - **CircuitikZ native compile environment (optional)**: checks an existing `tectonic` or `pdflatex` installation, or installs a pinned managed Tectonic runtime after explicit confirmation. SVG, PNG, and preview PDF export continue to work without LaTeX.
 - **Advanced batch file selection**: enables saved folder/file-selection profiles and rule previews.
@@ -834,7 +835,7 @@ MIT License - See [LICENSE](LICENSE) file for details.
 
 ---
 
-*Notemd v1.9.5 - Enhance your Obsidian knowledge graph with AI.*
+*Notemd v1.9.6 - Enhance your Obsidian knowledge graph with AI.*
 
 
 <!-- repo-chronicle:start -->
@@ -844,7 +845,7 @@ Quarterly chronicle rendered in the original [repo-saga](https://github.com/teee
 
 ![Notemd Development Chronicle](./docs/repo-saga/notemd-development-history.en.svg)
 
-_Last refreshed for release tag `1.9.5` on 2026-08-06. Latest commit date: 2026-08-06._
+_Last refreshed for release tag `1.9.6` on 2026-08-09. Latest commit date: 2026-08-09._
 <!-- repo-chronicle:end -->
 
 

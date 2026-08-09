@@ -29,7 +29,7 @@ If\ you\ love\ using\ Notemd\,\ please\ consider\ \[\�\�\�\ Give\ a\ Star\
 
 Om du älskar att använda Notemd, överväg att [⭐ ge en stjärna på GitHub](https://github.com/Jacobinwwey/obsidian-NotEMD) eller [☕️ köp en kaffe till mig](https://ko-fi.com/jacobinwwey).
 
-**Version:** 1.9.5
+**Version:** 1.9.6
 
 <img width="1853" height="1080" alt="show" src="https://github.com/user-attachments/assets/b9f9292b-a9d8-48a3-9acf-1b6f00413966" />
 <img width="1853" height="1080" alt="multi-langu" src="https://github.com/user-attachments/assets/d9a0a4fb-1c00-425a-ac1d-0134a013a381" />
@@ -701,7 +701,7 @@ MIT License - Se filen [LICENSE](LICENSE) för detaljer.
 ---
 
 
-*Notemd v1.9.5 - Förbättra din Obsidian-kunskapsgraf med AI.*
+*Notemd v1.9.6 - Förbättra din Obsidian-kunskapsgraf med AI.*
 
 
 <!-- repo-chronicle:start -->
@@ -711,7 +711,7 @@ Den här kvartalskronikan behåller den ursprungliga visuella stilen från [repo
 
 ![Notemd Development Chronicle](./docs/repo-saga/notemd-development-history.sv.svg)
 
-_Senast uppdaterad för release-taggen `1.9.5` den 2026-08-06. Datum för senaste commit: 2026-08-06._
+_Senast uppdaterad för release-taggen `1.9.6` den 2026-08-09. Datum för senaste commit: 2026-08-09._
 <!-- repo-chronicle:end -->
 
 
@@ -728,13 +728,14 @@ _Senast uppdaterad för release-taggen `1.9.5` den 2026-08-06. Datum för senast
 <!-- notemd-settings-discovery-guide -->
 ## Upptäckt av inställningar, diagramhistorik, CircuitikZ och säkra batchmappar
 
-Notemds inställningsseite erbjuder suddjupssökning, navigering i stora kategorier samt favoriter för varje inställning som lagras för den aktuella Vaulten.
+Notemd-inställningssidan erbjuder suddjupssökning som känner till fält, navigering i stora kategorier, en sammanfattningsbar upptäcktsverktygsrad samt favoriter per inställning som lagras för den aktuella Vault. Klicka på **★ Favorites** för att öppna en specifik listå; varje post leder till dess inställning och kan tas bort utan att lämna inställningssidan.
 
-- Diagramhistoriken lagras på Vault-nivå, sorterad från nyaste till äldsta, och kan sökas samt pagineras i grupper på 20 stycken. Att ta bort en historikpost tar inte bort de genererade filerna.
-- Export av diagramförhandsvisningar med PPI-kontroller styr klarheten i PNG- och PDF-filer. SVG förblir vektorbaserat.
-- Föredragna diagramtyp och föredragna källformat är separata valmöjligheter.
-- Desktop-användare kan öppna det valfria CircuitikZ-nativa kompileringsmiljön för att återanvända systemets Tectonic/pdflatex, välja en anpassad kompilator eller explicit installera den fixade, hanterade Tectonic-körningen. Förhandsvisningar, SVG-, PNG- och PDF-exporter kräver inget LaTeX.
-- Avancerad val av batchfiler möjliggör sparade valprofiler och förhandsvisningar av regler.
+- Diagramhistoriken lagras i Vault-scope, ordnad nyaste först, sökbart och paginerad i grupper på 20. Att ta bort en historikpost tar inte bort de genererade filerna.
+- Export av diagramförhandsvisning med PPI standardiseras till 300 och accepterar värden mellan 72 och 600. Det styr endast rasteriseringen av PNG; SVG och PDF förblir vektorbaserade.
+- Export av kompletta Mermaid-visuella kan valfritt skriva ut Mermaid-källkoden, SVG samt manifestfiler; Mermaid förblir tillgängligt i Drawnix-förhandsvisningar även när det är inaktiverat.
+- Föredragna diagramtyp och föredragna källformat är separata val.
+- Desktop-användare kan öppna det valfria CircuitikZ-nativa kompileringsmiljön för att återanvända systemets Tectonic/pdflatex, välja en anpassad kompilerare eller explicit installera den fixade, hanterade Tectonic-körmiljön. Förhandsvisning, SVG, PNG samt export av förhandsvisning med PDF kräver inget LaTeX.
+- Avancerad val av batchfiler möjliggör sparade valprofiler och regelförhandsvisningar.
 - En saknad batchmålsmapp kan skapas efter bekräftelse, med möjlighet att komma ihåg den automatiska skapandet för framtida saknade mappar.
-- En redan existerande, icke-tom mapp kräver en bekräftelse för hela batchen, aldrig en bekräftelse per genererad fil.
-- Utvecklarmönstret visar leverantördiagnostik och avancerade felsökningstillgängligheter.
+- En existerande, icke-toämten mapp kräver en bekräftning för hela batchen, aldrig en bekräftning per genererad fil.
+- Utvecklarmodet visar leverantördiagnostik och avancerade felsökningskontroller.

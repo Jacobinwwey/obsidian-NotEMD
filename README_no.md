@@ -699,7 +699,7 @@ MIT License - Se filen [LICENSE](LICENSE) for detaljer.
 ---
 
 
-*Notemd v1.9.5 - Forbedre Obsidian-kunnskapsgrafen din med AI.*
+*Notemd v1.9.6 - Forbedre Obsidian-kunnskapsgrafen din med AI.*
 
 
 <!-- repo-chronicle:start -->
@@ -709,7 +709,7 @@ Denne kvartalsvise krøniken bevarer den opprinnelige visuelle stilen fra [repo-
 
 ![Notemd Development Chronicle](./docs/repo-saga/notemd-development-history.no.svg)
 
-_Sist oppdatert for utgivelsestaggen `1.9.5` 2026-08-06. Dato for siste commit: 2026-08-06._
+_Sist oppdatert for utgivelsestaggen `1.9.6` 2026-08-09. Dato for siste commit: 2026-08-09._
 <!-- repo-chronicle:end -->
 
 
@@ -724,15 +724,16 @@ _Sist oppdatert for utgivelsestaggen `1.9.5` 2026-08-06. Dato for siste commit: 
 </a>
 
 <!-- notemd-settings-discovery-guide -->
-## Oppdagelse av innstillinger, diagramhistorikk, CircuitikZ og sikre batch-mapper
+## Oppdagelse av innstillinger, diagramhistorikk, CircuitikZ og sikre batch-mappeler
 
-Notemds innstillingsside tilbyr uskyttet søk, navigasjon gjennom store kategorier, samt favoritter for hver enkelt innstilling som lagres for den aktuelle Vaulten.
+Notemd-innstillings siden tilbyr sukkulent søk basert på felt, navigasjon gjennom store kategorier, en foldbar oppdagelsesverktøylinje, samt favoriter per innstilling som lagres for den aktuelle Vault. Klikk **★ Favorites** for å åpne en spesialliste; hvert element fører direkte til den tilhørende innstillingen og kan fjernes uten å leave innstillings siden.
 
-- Diagramhistorikk lagres på Vault-nivå, ordnet fra nyeste først, og er søkelig samt paginerbar i grupper på 20 elementer. Når en historikkepost fjernes, fjernes ikke de genererte filene.
-- Ekspor av diagramforhandsvisning gjennom PPI-styring kontrollerer klarheten i PNG- og PDF-filer. SVG-forfilene forblir vektorbaserte.
+- Diagramhistorikk lagres i Vault-området, ordnet fra nyeste først, søkelig og pagineret i grupper på 20. At en historikkspost fjernes sletter ikke de genererte filene.
+- Ekspor av diagramforhandsvisning gjennom PPI standardiseres til 300, men kan være mellom 72 og 600. Det styrer kun PNG-rasteriseringen; SVG og PDF forblir vektorbaseret.
+- Ekspor av hele Mermaid-visuellene kan valgfritt skrive ut Mermaid-kilden, SVG samt tilhørende manifestfiler; Mermaid er fortsatt tilgjengelig i Drawnix-forhandsvisninger når det er deaktiveret.
 - Favorett diagramtyp og favorett kildemålformat er to separate valgmuligheter.
-- Skjermarbeidsbrukere kan åpne det valgfrie CircuitikZ-native kompileringsmiljøet for å bruke systemets Tectonic/pdflatex på nytt, velge en egen kompilerer, eller installere eksplisitt den pinnede, styrte Tectonic-kjernen. Forhandsvisninger, SVG-, PNG- og PDF-ekspor krever ikke LaTeX.
-- Avansert valg av batch-filer muliggjør å bruke lagrede valgprofiler og forutsyn av regler.
-- En manglende batch-målmappe kan erstattes etter bekreftelse, med muligheten til å huske automatiske opprettelser for fremtidige manglende mapper.
-- En eksisterende, ikke tom mappe krever én bekreftelse før hele batchen, aldri én bekreftelse per generert fil.
+- Skrivebordsbrukere kan åpne den valgfrie CircuitikZ-native kompilemiljøet for å bruke systemets Tectonic/pdflatex, velge en egen kompiler eller installere eksplisitt den pinnede, administrerte Tectonic-kjernen. Forhandsvisning, SVG, PNG samt ekspor av PDF-forhandsvisninger krever ikke LaTeX.
+- Avansert valg av batch-filer muliggjør lagret seleksjonsprofiler og forutsyn av regler.
+- En manglende batch-målmappe kan erstattes etter bekreftelse, med mulighet til å huske automatisk opprettelse for fremtidige manglende mapper.
+- En eksisterende, ikke tom mappe krever én bekreftelse før hele batchen, aldri en bekreftelse per generert fil.
 - Utviklermodus viser diagnostikk fra leverandøren og avanserte kontroller for feilforskning.

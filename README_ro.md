@@ -696,7 +696,7 @@ Licență MIT - vezi fișierul [LICENSE](LICENSE) pentru detalii.
 ---
 
 
-*Notemd v1.9.5 - Îmbunătățește-ți graful de cunoștințe din Obsidian cu AI.*
+*Notemd v1.9.6 - Îmbunătățește-ți graful de cunoștințe din Obsidian cu AI.*
 
 
 <!-- repo-chronicle:start -->
@@ -706,7 +706,7 @@ Această cronică trimestrială păstrează stilul vizual original al [repo-saga
 
 ![Notemd Development Chronicle](./docs/repo-saga/notemd-development-history.ro.svg)
 
-_Actualizat ultima dată pentru tagul de release `1.9.5` la 2026-08-06. Data ultimului commit: 2026-08-06._
+_Actualizat ultima dată pentru tagul de release `1.9.6` la 2026-08-09. Data ultimului commit: 2026-08-09._
 <!-- repo-chronicle:end -->
 
 
@@ -721,15 +721,16 @@ _Actualizat ultima dată pentru tagul de release `1.9.5` la 2026-08-06. Data ult
 </a>
 
 <!-- notemd-settings-discovery-guide -->
-## Descoperirea setărilor, istoricul diagramelor, CircuitikZ și folderele sigure pentru batch-uri
+## Descoperirea setărilor, istoricul diagramelor, CircuitikZ și folderele sigure pentru loturi
 
-Pagina de setări a Notemd oferă o căutare fuzzy, navigare prin categorii extinse și preferințe pentru fiecare setare, stocate pentru Vault-ul curent.
+Pagina de setări Notemd oferă o căutare fuzzy care ține cont de câmpurile specifice, navigare în categorii extinse, o bară de instrumente de descoperire retractabilă, precum și preferate pentru fiecare setare, stocate pentru actualul Vault. Faceți clic pe **★ Favorites** pentru a deschide o listă dedicată; fiecare intrare duce direct la setarea respectivă și poate fi ștersă fără a părăsi pagina de setări.
 
-- istoricul diagramelor este stocat la nivelul Vault-ului, ordonat din cel mai recent înainte, fiind posibilă căutarea și paginarea în grupuri de 20. Ștergerea unei înregistrări din istoric nu șterge fișierele generate.
-- Exportul vizualizării preliminare a diagramelor permite controlul clarității fișierelor PNG și PDF prin parametrul PPI. SVG rămâne bazat pe vectori.
-- Tipul de diagramă preferat și formatul sursă preferat sunt alegeri separate.
-- Utilizatorii desktop pot deschide mediul de compilare nativ CircuitikZ, opțional, pentru a reutiliza sistemul Tectonic/pdflatex, a selecta un compilator personalizat sau a instala în mod explicit runtime-ul Tectonic gestionat. Vizualizările preliminare, fișierele SVG, PNG și exporturile PDF nu necesită LaTeX.
-- Selectarea avansată a fișierelor batch permite utilizarea profilurilor de selecție salvate și a vizualizărilor preliminare a regulilor.
-- O foldere țintă pentru batch lipsă poate fi creată după confirmare, cu opțiunea de a memora crearea automată pentru folderele lipsă viitoare.
-- O foldere existentă și necăptușită necesită o singură confirmare pentru întreaga batch, nu o confirmare pentru fiecare fișier generat.
-- Modul dezvoltator dezvăluie diagnosticele furnizorului și controale avansate de rezolvare a problemelor.
+- Istoricul diagramelor este stocat la nivelul Vault, ordonat din cel mai recent înainte, fiind căutabil și paginat în grupuri de 20. Ștergerea unei înregistrări din istoric nu ștearde fișierele generate.
+- Exportul vizualizării preliminare a diagramelor prin PPI are ca valoare implicită 300 și accepte valori între 72 și 600. Acesta controlează doar rasterizarea PNG; SVG și PDF rămân bazate pe vector.
+- Exportul complet al vizualizărilor Mermaid poate scrie, opțional, sursa Mermaid, SVG și fișierele de manifest; Mermaid rămâne disponibil în vizualizările Drawnix chiar dacă este dezactivat.
+- Tipul preferat de diagramă și formatul preferat de sursă sunt alegeri separate.
+- Utilizatorii desktop pot deschide mediul de compilare nativ CircuitikZ, opțional, pentru a reutiliza Tectonic/pdflatex din sistem, a selecta un compiler personal sau a instala explicit runtime-ul Tectonic gestionat. Vizualizările preliminare, SVG, PNG și exporturile preliminare PDF nu necesită LaTeX.
+- Selectarea avansată a fișierelor de lot permite utilizarea profilurilor de selecție salvate și a vizualizărilor regulelor.
+- O foldere țintă pentru loturi lipsită poate fi creată după confirmare, cu opțiunea de a memora crearea automată pentru folderele lipsite viitoare.
+- O folderă existentă și necăptușită necesită o singură confirmare pentru întregul lot, nu o confirmare pentru fiecare fișier generat.
+- Modul de dezvoltator dezvăluie diagnosticele furnizorului și controale avansate de rezolvare a problemelor.

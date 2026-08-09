@@ -4,6 +4,26 @@ This document summarizes the major functional and architectural changes implemen
 
 ---
 
+## 1.9.6 - 2026-08-09
+
+### English
+
+- Added field-aware settings search with stable result anchors, visible-field ranking, direct navigation, and a collapsible discovery toolbar that becomes a floating top-right control when closed.
+- Added a dedicated navigable **★ Favorites** panel with per-Vault persistence, stale-ID cleanup, setting descriptions/categories, and behavior independent from the favorites-only filter.
+- Hardened the settings layout so search result targets keep a stable size and the collapsed control stays attached to the settings content column near the close controls.
+- Synchronized the bilingual maintainer manuals, root README settings sections, and every published GitHub Pages locale for the 300 PPI default, 72-600 PPI range, and Mermaid companion behavior.
+- Added LM Studio translation guardrails for small locale batches, sub-30,000-token request budgets, protected technical tokens, structural validation, and retry-on-omission behavior.
+
+### 中文
+
+- 新增字段感知的设置搜索，具备稳定结果锚点、可见字段排序、直接跳转，以及收起后变为右上角悬浮控件的查找工具栏。
+- 新增可导航的 **★ Favorites** 收藏设置单，支持按 Vault 持久化、失效 ID 清理、显示设置描述/类别，并与“仅显示收藏项”筛选相互独立。
+- 加固设置页布局，保证搜索结果目标保持稳定尺寸，并让收起控件锚定在关闭控件附近的设置内容列中。
+- 同步双语维护者手册、根 README 设置章节和所有已发布 GitHub Pages 语言路由，记录 300 PPI 默认值、72-600 PPI 范围与 Mermaid companion 行为。
+- 为 LM Studio 翻译工具增加小批次、低于 30,000 token 请求预算、技术 token 保护、结构校验和省略重试门禁。
+
+---
+
 ## 1.9.5 - 2026-08-06
 
 ### English
