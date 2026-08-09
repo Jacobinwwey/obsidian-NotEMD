@@ -15,7 +15,7 @@ The current implementation is useful, but its guarantees are spread across `Diag
 
 ## Implementation Status
 
-The first hardening slice is now implemented and under verification:
+The first hardening slice is implemented; its latest repository, Vault, and host verification is recorded below:
 
 - Settings discovery uses an explicit catalog shape, stable IDs, field-aware scoring, and an independent listbox result panel with direct navigation.
 - SVG, PNG, and PDF preview exports share the folder-selection boundary for single-panel and multi-panel flows; the default remains the source folder and custom paths are Vault-relative.
@@ -23,6 +23,7 @@ The first hardening slice is now implemented and under verification:
 - Drawnix relation label dimensions are supplied to the route planner before lane selection. Repeated relations use obstacle-envelope lanes with label clearance, and the native normalized text position is copied back into the shared label rectangle consumed by SVG and JSON. Native position candidates are derived from segment capacity, so short horizontal lanes remain addressable even when long detours dominate the normalized path length.
 - Drawnix source-visual metadata now has an explicit v1 guard at the exporter/host boundary. Numeric v1 and legacy string `"1"` readers are accepted; unknown versions and duplicate visual IDs are ignored or rejected deterministically.
 - Relation-label layout fails closed when no collision-free native position exists; it does not silently emit an artifact whose SVG and native text geometry disagree. The routing boundary reserves label-safe canvas insets without over-inflating every node obstacle, preserving sparse-grid routes for dense forests.
+- The build-to-Vault boundary now has a fail-closed verifier (`scripts/verify-vault-bundle.js`) that compares SHA-256 hashes for `main.js`, `styles.css`, and `manifest.json`, and validates the deployed manifest version before a reload is treated as evidence.
 
 Phases 0-6 are implemented and have fresh repository, loaded-Vault, and documentation evidence. The release tag `1.9.5` already exists; this plan records the hardening closure for the current mainline commit and does not create a second release.
 
@@ -222,6 +223,14 @@ The release/development verification path must record:
 
 This is a verification boundary, not a new public CLI API. Official `obsidian` CLI remains the preferred host evidence surface; a failing optional wrapper must be reported rather than silently substituted.
 
+Maintainers can verify a deployed Vault bundle with:
+
+```bash
+npm run verify:vault-bundle -- --vault E:\\1Knowledge
+```
+
+The command fails closed on missing files, invalid manifests, version drift, or any hash mismatch. `--plugin-dir`, `--project-root`, and `--version` are available for CI and non-default layouts.
+
 ## Delivery Phases
 
 ### Phase 0: Freeze Evidence And Contracts
@@ -324,18 +333,18 @@ Documentation does not claim a full Drawnix editor, universal graph support, or 
 - Repository build, full Jest, UI/render audits, and `git diff --check` pass.
 - The loaded Vault bundle matches the repository bundle hash and the official Obsidian capability probes pass after an eval-based disable/enable reload.
 
-## Verification Record (2026-08-08)
+## Verification Record (2026-08-09)
 
 - TypeScript check: passed (`tsc -noEmit -skipLibCheck`).
 - Production bundle: passed (`npm run build`).
-- Jest: 242 suites passed, 2141 tests passed, 1 skipped.
+- Jest: 243 suites passed, 2149 tests passed, 1 skipped (2150 total); the settings behavior suite includes the interactive listbox/navigation regression coverage and the Vault verifier has fail-closed missing/version/hash cases.
 - UI/render audits: `audit:i18n-ui` and `audit:render-host` passed.
 - Documentation site: VitePress build passed.
 - Official `obsidian help`: available. `obsidian-cli help`: unavailable because the optional `obsidian-cli` executable is not installed.
 - The official `plugin:reload` command returned a non-zero result in this desktop session. Reload was completed through the official CLI `eval` surface by disabling and enabling `notemd`, then waiting for the plugin to reinitialize.
-- Build-to-Vault hashes for `main.js` and `styles.css` match after deployment to `E:\\1Knowledge\\.obsidian\\plugins\\notemd` (`main.js` SHA-256 `b1adec85e50a22c2831ef73abd3b24b0fc3f4f9aeb32ee4f7ec964afee639041`).
+- `npm run verify:vault-bundle -- --vault E:\\1Knowledge` passed after deployment to `E:\\1Knowledge\\.obsidian\\plugins\\notemd`: `main.js` SHA-256 `b1adec85e50a22c2831ef73abd3b24b0fc3f4f9aeb32ee4f7ec964afee639041`, `styles.css` SHA-256 `2d7527ddfacdef8935b646e0205eccca26adcb8ec591602be6a7ce2d71f33f77`, and `manifest.json` SHA-256 `fc88f5d7d90561ae73c324413efc58b937086e1901c7c7faf45686b12320a02a` all match; manifest version is `1.9.5`.
 - Loaded setting-tab probes after reload: PPI control exists with value `300`; companion control exists and is `false`; search result container has `role=listbox`; query `Mermaid` returns 13 visible-field matches and excludes `稳定 API 调用`; stable element IDs resolve for both controls.
-- `obsidian dev:errors` reported no captured errors. `dev:dom` was not usable in this session, so equivalent DOM assertions were executed through official `eval` against `app.setting.contentEl`.
+- `obsidian dev:errors` returned non-zero with empty output, which is the current CLI behavior for an empty error buffer; no captured error payload was returned. `dev:dom` was not usable in this session, so equivalent DOM assertions were executed through official `eval` against `app.setting.contentEl`.
 - Architecture note CLI smoke: `architecture.zh-CN.md` is present and the diagram/preview commands are registered and executable. Existing history contains both Mermaid and Drawnix preview entries; no new error was captured during the command probe.
 
 ## Verification Matrix

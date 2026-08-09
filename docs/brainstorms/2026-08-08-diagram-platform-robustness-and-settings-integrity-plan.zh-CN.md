@@ -15,7 +15,7 @@ status: complete
 
 ## 实现状态
 
-第一阶段加固已经实现，正在执行验证：
+第一阶段加固已经实现；最新仓库、Vault 与宿主验证记录如下：
 
 - 设置发现使用显式目录结构、稳定 ID、字段感知评分，以及支持直接导航的独立 listbox 结果面板。
 - SVG、PNG、PDF 预览导出在单图和多图流程中共用目录选择边界；默认仍为源文件夹，自定义路径必须是 Vault-relative 路径。
@@ -23,6 +23,7 @@ status: complete
 - Drawnix 关系标签尺寸在路由选 lane 前传入路由器。重复关系依据障碍包络和标签间距分配 lane，原生归一化文本位置再回写到 SVG 与 JSON 共用的最终标签矩形。原生位置候选依据 segment 可容纳空间生成，即使长绕行线段主导 normalized path length，短水平 lane 仍可被准确寻址。
 - Drawnix source-visual metadata 在 exporter/host 边界增加了显式 v1 guard。读取器接受数字 v1 和旧的字符串 `"1"`，未知版本与重复 visual ID 会被确定性地忽略或拒绝。
 - 找不到无碰撞的原生位置时 fail closed，不静默生成 SVG 与原生文本几何不一致的 artifact。路由边界按标签安全 inset 预留画布，但不再把所有节点障碍过度膨胀，从而保留稠密 forest 的稀疏网格合法路径。
+- 构建产物到 Vault 的边界现在有 fail-closed 校验器（`scripts/verify-vault-bundle.js`）：逐项比较 `main.js`、`styles.css`、`manifest.json` 的 SHA-256，并在把重载视为证据前校验部署 manifest 版本。
 
 Phase 0-6 已实现，并取得新鲜仓库、已加载 Vault 与文档证据。发布 tag `1.9.5` 已存在；本方案记录当前 mainline commit 的加固收口，不重复创建第二个发布。
 
@@ -222,6 +223,14 @@ interface SettingSearchMatch extends SettingCatalogEntry {
 
 这是一条验证边界，不是新的 public CLI API。官方 `obsidian` CLI 仍是首选宿主证据面；可选 wrapper 失败时必须暴露失败，不能静默替代。
 
+维护者可以使用以下命令校验已部署的 Vault bundle：
+
+```bash
+npm run verify:vault-bundle -- --vault E:\\1Knowledge
+```
+
+文件缺失、manifest 非法、版本漂移或任意 hash 不一致时命令都会 fail closed。CI 或非默认布局可使用 `--plugin-dir`、`--project-root` 与 `--version`。
+
 ## 推进阶段
 
 ### Phase 0：冻结证据与契约
@@ -324,18 +333,18 @@ interface SettingSearchMatch extends SettingCatalogEntry {
 - 仓库构建、全量 Jest、UI/render 审计和 `git diff --check` 通过。
 - loaded Vault bundle 与仓库 bundle hash 一致；通过官方 Obsidian CLI 的 eval disable/enable 重载后，能力探针全部通过。
 
-## 验证记录（2026-08-08）
+## 验证记录（2026-08-09）
 
 - TypeScript 检查：通过（`tsc -noEmit -skipLibCheck`）。
 - 生产 bundle：通过（`npm run build`）。
-- Jest：242 个 suite 通过，2141 个测试通过，1 个跳过。
+- Jest：243 个 suite 通过，2149 个测试通过，1 个跳过（总计 2150）；设置行为 suite 已包含 listbox/键盘导航回归测试，Vault verifier 也覆盖缺失/版本/hash fail-closed 分支。
 - UI/render 审计：`audit:i18n-ui` 与 `audit:render-host` 通过。
 - 文档站：VitePress 构建通过。
 - 官方 `obsidian help`：可用。`obsidian-cli help`：不可用，因为系统未安装可选的 `obsidian-cli` 可执行文件。
 - 官方 `plugin:reload` 在本桌面会话返回非零结果。已通过官方 CLI `eval` 关闭并重新启用 `notemd`，等待插件重新初始化完成重载。
-- 部署到 `E:\\1Knowledge\\.obsidian\\plugins\\notemd` 后，`main.js` 与 `styles.css` 的构建/Vault hash 已一致（`main.js` SHA-256 为 `b1adec85e50a22c2831ef73abd3b24b0fc3f4f9aeb32ee4f7ec964afee639041`）。
+- `npm run verify:vault-bundle -- --vault E:\\1Knowledge` 在部署到 `E:\\1Knowledge\\.obsidian\\plugins\\notemd` 后通过：`main.js` SHA-256 为 `b1adec85e50a22c2831ef73abd3b24b0fc3f4f9aeb32ee4f7ec964afee639041`，`styles.css` SHA-256 为 `2d7527ddfacdef8935b646e0205eccca26adcb8ec591602be6a7ce2d71f33f77`，`manifest.json` SHA-256 为 `fc88f5d7d90561ae73c324413efc58b937086e1901c7c7faf45686b12320a02a`，三者均一致；manifest 版本为 `1.9.5`。
 - 重载后的 loaded settings DOM 探针：PPI 控件存在且值为 `300`；companion 控件存在且为 `false`；搜索结果容器为 `role=listbox`；查询 `Mermaid` 返回 13 个用户可见字段命中，排除 `稳定 API 调用`；两个控件的稳定 element ID 均可解析。
-- `obsidian dev:errors` 没有捕获错误。本会话的 `dev:dom` 不可用，因此通过官方 `eval` 直接对 `app.setting.contentEl` 执行等价 DOM 断言。
+- `obsidian dev:errors` 返回非零且无输出，这是当前 CLI 对空错误缓冲的行为；没有返回任何 captured error payload。本会话的 `dev:dom` 不可用，因此通过官方 `eval` 直接对 `app.setting.contentEl` 执行等价 DOM 断言。
 - architecture note CLI smoke：`architecture.zh-CN.md` 存在，图形/预览命令已注册并可执行。现有 history 同时包含 Mermaid 与 Drawnix preview 条目；命令探针期间没有捕获新错误。
 
 ## 验证矩阵

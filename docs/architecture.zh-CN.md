@@ -280,6 +280,7 @@ Drawnix 源图形遵循同一条兼容性边界。默认关闭 **同时完整输
 - 最新一层细化是：`diagram.generate` 应被理解为“宿主无关 generation contract”，而不是对当前 active-file 命令的另一种命名。它在 operation-level 上的 `safe` / `read-only` 元数据描述的是显式的 `sourceMarkdown -> DiagramGenerationResult` core；映射过去的 command binding 仍然要如实保留 `requires-active-file` / `write-file` 语义。
 - 当前真正剩余的缺口因此已经不是公共 command entrypoint 本身：`diagram.preview` 与 `provider.connection.test` 现已具备 typed contract，save/artifact 的实质执行路径也已进入 `src/operations/diagramCommandExecution.ts`，而 `diagram.generate` 现在也会返回显式的 follow-through 细节（`kind`、`outputPath`、`previewOpened`、`autoFixAttempted`、`artifactTarget`），同时继续保留向后兼容的顶层 `outputPath` / `previewOpened` 字段。
 - 维护者本地语义核验层现在也不再只是文字说明：`npm run verify:diagram-semantics` 已能生成无 secrets 的 Markdown 检查模板，其中包含仓库硬门、vault 感知的 CLI 检查命令，以及 Mermaid / JSON Canvas / Vega-Lite 的证据区块，不依赖仓库中跟踪的 vault 路径或 live 凭据。
+- 构建产物到 Vault 的边界现在可执行：`npm run verify:vault-bundle -- --vault <vault-path>` 会在 `main.js`、`styles.css` 或 `manifest.json` 缺失、SHA-256 不一致或 manifest 版本漂移时 fail closed。
 - 下一阶段顺序已经明确：先把 `diagram.generate` 保持为宿主无关 core，把这批已落地的 typed follow-through 视作其下的 command-completion 层，再做 packaging / semantic verification 的后续收敛，最后才重开更强 public CLI 声明或更大规模的结构重排。
 
 ## 已实现的加固架构
@@ -301,7 +302,8 @@ Drawnix 源图形遵循同一条兼容性边界。默认关闭 **同时完整输
 ## 验证
 
 - `npm run build` — TypeScript 编译 + esbuild 打包
-- `npm test -- --runInBand` — 完整 Jest 矩阵当前为 137 套件、871 项测试；若在 `/.worktrees/` checkout 中验证，请改用 `npx jest --runInBand --config /tmp/notemd-worktree-jest.cjs`，因为仓库默认 Jest ignore 规则会排除 worktree 路径
+- `npm test -- --runInBand` — 完整 Jest 矩阵当前为 243 个 suite、2150 个测试（2149 通过、1 个跳过）；若在 `/.worktrees/` checkout 中验证，请改用 `npx jest --runInBand --config /tmp/notemd-worktree-jest.cjs`，因为仓库默认 Jest ignore 规则会排除 worktree 路径
 - `npm run audit:i18n-ui` — 无硬编码 UI 字符串
 - `npm run audit:render-host` — 渲染宿主自包含于 main.js
+- `npm run verify:vault-bundle -- --vault <vault-path>` — 源码/Vault bundle hash 与 manifest 版本一致
 - `git diff --check` — 空白符卫生

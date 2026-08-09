@@ -280,6 +280,7 @@ The gap is smaller than before:
 - The latest refinement is that `diagram.generate` should be read as the host-neutral generation contract, not as a synonym for the shipped active-file commands. Its operation-level `safe` / `read-only` metadata describes the explicit `sourceMarkdown -> DiagramGenerationResult` core, while the mapped command bindings still truthfully carry `requires-active-file` / `write-file` semantics.
 - The next real gap is therefore no longer the public command entrypoints themselves: typed contracts already exist for `diagram.preview` and `provider.connection.test`, the substantive save/artifact execution path now lives in `src/operations/diagramCommandExecution.ts`, and `diagram.generate` now returns explicit follow-through details (`kind`, `outputPath`, `previewOpened`, `autoFixAttempted`, `artifactTarget`) alongside the backward-compatible top-level `outputPath` / `previewOpened` fields.
 - The maintainer-local semantic verification layer is now no longer just prose: `npm run verify:diagram-semantics` generates a secret-free Markdown checklist template with repo gates, vault-aware CLI checks, and Mermaid / JSON Canvas / Vega-Lite evidence sections without relying on tracked vault paths or live secrets.
+- The build-to-Vault boundary is now executable: `npm run verify:vault-bundle -- --vault <vault-path>` fails closed when `main.js`, `styles.css`, or `manifest.json` is missing, differs by SHA-256, or carries a different manifest version.
 - The ordered convergence path is now explicit: keep `diagram.generate` as the host-neutral core, treat the newly landed typed follow-through as the command-completion layer beneath it, then move to packaging/semantic-verification convergence work and only after that reopen stronger public CLI claims or broader architectural reshaping.
 
 ## Implemented Hardening Architecture
@@ -301,7 +302,8 @@ The delivered phases cover semantic structure integrity, geometry/layer collisio
 ## Verification
 
 - `npm run build` — TypeScript compilation + esbuild bundle
-- `npm test -- --runInBand` — the full Jest matrix currently covers 137 suites and 871 tests; in a `/.worktrees/` checkout use `npx jest --runInBand --config /tmp/notemd-worktree-jest.cjs` because the repo Jest ignore pattern excludes worktree paths
+- `npm test -- --runInBand` — the full Jest matrix currently covers 243 suites and 2150 tests (2149 passed, 1 skipped); in a `/.worktrees/` checkout use `npx jest --runInBand --config /tmp/notemd-worktree-jest.cjs` because the repo Jest ignore pattern excludes worktree paths
 - `npm run audit:i18n-ui` — No hardcoded UI strings
 - `npm run audit:render-host` — Render host self-contained in main.js
+- `npm run verify:vault-bundle -- --vault <vault-path>` — Source/Vault bundle hashes and manifest version agree
 - `git diff --check` — Whitespace hygiene

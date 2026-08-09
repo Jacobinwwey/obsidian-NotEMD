@@ -17,6 +17,8 @@ This document summarizes the major functional and architectural changes implemen
 - Fixed multi-panel PDF/PNG black geometry by preserving each panel's styles, definitions, and viewBox inside a nested SVG canvas before rasterization.
 - Replaced preview PDF JPEG embedding with direct SVG-to-PDF conversion through `svg2pdf.js`; PDF exports now preserve vector paths, text, markers, and definitions instead of a single raster image. PPI remains a PNG-only setting.
 - Hardened Drawnix relation rendering with node-obstacle routing, a sparse orthogonal-grid fallback for dense same-root graphs, deterministic wrapped label boxes, and a final label layer above nodes; explicit Drawnix requests now fail closed instead of silently returning Mermaid text.
+- Added an explicit settings catalog/listbox search contract with stable element IDs, field-aware Mermaid matching, direct navigation, and deterministic collapse behavior; loaded runtime verification covers the 300 PPI default and disabled Mermaid companions.
+- Added a fail-closed `verify:vault-bundle` maintainer command that compares the built and deployed `main.js`, `styles.css`, and `manifest.json` hashes and validates the manifest version before reload evidence is accepted.
 
 ### 中文
 
@@ -29,6 +31,8 @@ This document summarizes the major functional and architectural changes implemen
 - 修复多 panel PDF/PNG 光栅导出的黑色图形，在光栅化前将每个 panel 的样式、defs 和 viewBox 保留在嵌套 SVG 画布中。
 - 将预览 PDF 从嵌入 JPEG 改为通过 `svg2pdf.js` 直接转换 SVG；PDF 导出现在保留路径、文本、marker 和 defs 等矢量内容，不再退化为单张栅格图。PPI 仅用于 PNG。
 - 加固 Drawnix 关系渲染：使用节点障碍物路由、密集同 root 图的稀疏正交网格兜底、确定性换行标签框和置于节点之上的最终标签层；显式 Drawnix 请求现在会 fail closed，不会静默返回 Mermaid 文本。
+- 新增显式设置目录/listbox 搜索契约，具备稳定 element ID、按字段感知的 Mermaid 匹配、直接导航和确定性收起行为；loaded runtime 验证覆盖 300 PPI 默认值与关闭的 Mermaid companion。
+- 新增 fail-closed 的 `verify:vault-bundle` 维护者命令，在接受重载证据前比较构建与部署的 `main.js`、`styles.css`、`manifest.json` hash 并校验 manifest 版本。
 
 ---
 

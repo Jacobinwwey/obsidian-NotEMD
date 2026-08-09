@@ -19,9 +19,18 @@ type MockElement = {
     onchange?: (() => unknown | Promise<unknown>) | null;
     children: MockElement[];
     parent: MockElement | null;
-    listeners: Record<string, Array<() => void>>;
+    listeners: Record<string, Array<(event?: unknown) => void>>;
     attributes: Record<string, string>;
     style: Record<string, string>;
+    dataset: Record<string, string>;
+    ownerDocument: MockDocument;
+    id?: string;
+    hidden?: boolean;
+    textContent: string;
+    classList: {
+        add: (cls: string) => void;
+        remove: (cls: string) => void;
+    };
     empty: jest.Mock;
     addClass: jest.Mock;
     removeClass: jest.Mock;
@@ -30,8 +39,28 @@ type MockElement = {
     setAttr: jest.Mock;
     setText: jest.Mock;
     addEventListener: jest.Mock;
-    querySelector?: jest.Mock;
-    dispatch: (eventName: string) => void;
+    removeEventListener: jest.Mock;
+    querySelector: jest.Mock;
+    querySelectorAll: jest.Mock;
+    prepend: jest.Mock;
+    setAttribute: jest.Mock;
+    getAttribute: jest.Mock;
+    removeAttribute: jest.Mock;
+    toggleAttribute: jest.Mock;
+    scrollIntoView: jest.Mock;
+    focus: jest.Mock;
+    matches: (selector: string) => boolean;
+    contains: (node: unknown) => boolean;
+    dispatch: (eventName: string, event?: unknown) => void;
+};
+
+type MockDocument = {
+    roots: MockElement[];
+    activeElement: MockElement | null;
+    getElementById: jest.Mock;
+    addEventListener: jest.Mock;
+    removeEventListener: jest.Mock;
+    dispatchEvent: (eventName: string, event?: unknown) => void;
 };
 
 type MockTextControl = {
@@ -168,10 +197,19 @@ class MockSetting {
         return this;
     }
 
+    private appendNativeControl(tag: string, type?: string): void {
+        const nativeControl = createMockElement(tag, {
+            parent: this.controlEl,
+            type
+        });
+        this.controlEl.children.push(nativeControl);
+    }
+
     addText(callback: (control: MockTextControl) => void): this {
         const control = createMockTextControl();
         this.controls.push(control);
         callback(control);
+        this.appendNativeControl('input', 'text');
         return this;
     }
 
@@ -179,6 +217,7 @@ class MockSetting {
         const control = createMockTextAreaControl();
         this.controls.push(control);
         callback(control);
+        this.appendNativeControl('textarea');
         return this;
     }
 
@@ -186,6 +225,7 @@ class MockSetting {
         const control = createMockButtonControl();
         this.controls.push(control);
         callback(control);
+        this.appendNativeControl('button');
         return this;
     }
 
@@ -193,6 +233,7 @@ class MockSetting {
         const control = createMockSliderControl();
         this.controls.push(control);
         callback(control);
+        this.appendNativeControl('input', 'range');
         return this;
     }
 
@@ -200,6 +241,7 @@ class MockSetting {
         const control = createMockToggleControl();
         this.controls.push(control);
         callback(control);
+        this.appendNativeControl('input', 'checkbox');
         return this;
     }
 
@@ -207,25 +249,129 @@ class MockSetting {
         const control = createMockDropdownControl();
         this.controls.push(control);
         callback(control);
+        this.appendNativeControl('select');
         return this;
     }
 }
 
+function createMockDocument(): MockDocument {
+    const document = {
+        roots: [] as MockElement[],
+        activeElement: null as MockElement | null,
+        getElementById: jest.fn(),
+        addEventListener: jest.fn(),
+        removeEventListener: jest.fn(),
+        dispatchEvent: (eventName: string, event?: unknown) => {
+            for (const listener of document.addEventListener.mock.calls
+                .filter(([name]) => name === eventName)
+                .map(([, listener]) => listener as (event?: unknown) => void)) {
+                listener(event);
+            }
+        }
+    } as MockDocument;
+
+    document.getElementById.mockImplementation((id: string) => {
+        const visit = (element: MockElement): MockElement | null => {
+            if (element.id === id) {
+                return element;
+            }
+            for (const child of element.children) {
+                const match = visit(child);
+                if (match) {
+                    return match;
+                }
+            }
+            return null;
+        };
+        for (const root of document.roots) {
+            const match = visit(root);
+            if (match) {
+                return match;
+            }
+        }
+        return null;
+    });
+
+    return document;
+}
+
+function descendantElements(root: MockElement): MockElement[] {
+    return root.children.flatMap(child => [child, ...descendantElements(child)]);
+}
+
+function matchesSimpleSelector(element: MockElement, rawSelector: string): boolean {
+    const selector = rawSelector.trim();
+    const notMatch = selector.match(/^(.*):not\((.*)\)$/);
+    if (notMatch) {
+        return matchesSimpleSelector(element, notMatch[1]) && !matchesSimpleSelector(element, notMatch[2]);
+    }
+
+    const idMatch = selector.match(/#([a-zA-Z0-9_-]+)/);
+    if (idMatch && element.id !== idMatch[1]) {
+        return false;
+    }
+    const classMatches = [...selector.matchAll(/\.([a-zA-Z0-9_-]+)/g)].map(match => match[1]);
+    if (classMatches.some(cls => !element.cls.split(/\s+/).includes(cls))) {
+        return false;
+    }
+    const tagMatch = selector.match(/^([a-zA-Z][a-zA-Z0-9-]*)/);
+    if (tagMatch && element.tag !== tagMatch[1]) {
+        return false;
+    }
+    const attributeMatches = [...selector.matchAll(/\[([^=\]]+)(?:=["']?([^\]"']+)["']?)?\]/g)];
+    for (const [, name, expected] of attributeMatches) {
+        const actual = element.getAttribute?.(name);
+        if (actual === undefined || (expected !== undefined && actual !== expected)) {
+            return false;
+        }
+    }
+    return true;
+}
+
+function queryMockElements(root: MockElement, selector: string): MockElement[] {
+    const queryParts = selector.split(',').map(part => part.trim()).filter(Boolean);
+    const matches = new Set<MockElement>();
+    for (const queryPart of queryParts) {
+        const tokens = queryPart.split(/\s+/).filter(Boolean);
+        let candidates = [root];
+        for (const token of tokens) {
+            candidates = candidates.flatMap(candidate => descendantElements(candidate)
+                .filter(element => matchesSimpleSelector(element, token)));
+        }
+        candidates.forEach(element => matches.add(element));
+    }
+    return [...matches];
+}
+
 function createMockElement(
     tag = 'div',
-    options: { text?: string; cls?: string; parent?: MockElement | null } = {}
+    options: {
+        text?: string;
+        cls?: string;
+        parent?: MockElement | null;
+        document?: MockDocument;
+        attr?: Record<string, string>;
+        type?: string;
+        placeholder?: string;
+        value?: string;
+    } = {}
 ): MockElement {
+    const ownerDocument = options.document ?? options.parent?.ownerDocument ?? createMockDocument();
     const element = {
         tag,
         text: options.text ?? '',
         cls: options.cls ?? '',
         open: false,
-        value: '',
+        value: options.value ?? '',
+        type: options.type,
+        placeholder: options.placeholder,
         options: [],
         onchange: null,
         children: [] as MockElement[],
         parent: options.parent ?? null,
-        listeners: {} as Record<string, Array<() => void>>,
+        ownerDocument,
+        dataset: {} as Record<string, string>,
+        listeners: {} as Record<string, Array<(event?: unknown) => void>>,
         attributes: {} as Record<string, string>,
         style: {} as Record<string, string>,
         empty: jest.fn(),
@@ -233,16 +379,48 @@ function createMockElement(
         removeClass: jest.fn(),
         createEl: jest.fn(),
         createDiv: jest.fn(),
+        prepend: jest.fn(),
         setAttr: jest.fn(),
         setText: jest.fn(),
         addEventListener: jest.fn(),
+        removeEventListener: jest.fn(),
         querySelector: jest.fn(),
-        dispatch: (eventName: string) => {
+        querySelectorAll: jest.fn(),
+        setAttribute: jest.fn(),
+        getAttribute: jest.fn(),
+        removeAttribute: jest.fn(),
+        toggleAttribute: jest.fn(),
+        scrollIntoView: jest.fn(),
+        focus: jest.fn(),
+        matches: (selector: string) => matchesSimpleSelector(element as MockElement, selector),
+        contains: (node: unknown) => {
+            if (node === element) {
+                return true;
+            }
+            return element.children.some(child => child.contains?.(node));
+        },
+        dispatch: (eventName: string, event?: unknown) => {
             for (const listener of element.listeners[eventName] ?? []) {
-                listener();
+                listener(event);
             }
         }
-    } as MockElement;
+    } as unknown as MockElement;
+
+    Object.defineProperty(element, 'textContent', {
+        configurable: true,
+        get: () => [element.text, ...element.children.map(child => child.textContent ?? '')].join(''),
+        set: (text: string) => {
+            element.text = text;
+        }
+    });
+    element.classList = {
+        add: (cls: string) => element.addClass(cls),
+        remove: (cls: string) => element.removeClass(cls)
+    };
+
+    if (!options.parent) {
+        ownerDocument.roots.push(element);
+    }
 
     element.empty.mockImplementation(() => {
         element.children = [];
@@ -261,22 +439,69 @@ function createMockElement(
     });
 
     element.setAttr.mockImplementation((name: string, value: string) => {
-        element.attributes[name] = value;
+        element.setAttribute?.(name, value);
     });
 
     element.setText.mockImplementation((text: string) => {
         element.text = text;
     });
 
-    element.addEventListener.mockImplementation((eventName: string, listener: () => void) => {
+    element.addEventListener.mockImplementation((eventName: string, listener: (event?: unknown) => void) => {
         if (!element.listeners[eventName]) {
             element.listeners[eventName] = [];
         }
         element.listeners[eventName].push(listener);
     });
 
-    element.createEl.mockImplementation((childTag: string, childOptions: { text?: string; cls?: string } = {}) => {
-        const child = createMockElement(childTag, { ...childOptions, parent: element });
+    element.removeEventListener?.mockImplementation((eventName: string, listener: (event?: unknown) => void) => {
+        element.listeners[eventName] = (element.listeners[eventName] ?? []).filter(candidate => candidate !== listener);
+    });
+
+    element.setAttribute.mockImplementation((name: string, value: string) => {
+        element.attributes[name] = String(value);
+        if (name.startsWith('data-')) {
+            const key = name.slice(5).replace(/-([a-z])/g, (_, character: string) => character.toUpperCase());
+            element.dataset[key] = String(value);
+        }
+    });
+    element.getAttribute.mockImplementation((name: string) => element.attributes[name]);
+    element.removeAttribute.mockImplementation((name: string) => {
+        delete element.attributes[name];
+        if (name === 'aria-activedescendant') {
+            delete element.attributes[name];
+        }
+    });
+    element.toggleAttribute.mockImplementation((name: string, force?: boolean) => {
+        const enabled = force ?? !Object.prototype.hasOwnProperty.call(element.attributes, name);
+        if (enabled) {
+            element.attributes[name] = '';
+        } else {
+            delete element.attributes[name];
+        }
+        if (name === 'hidden') {
+            element.hidden = enabled;
+        }
+    });
+    element.querySelectorAll.mockImplementation((selector: string) => queryMockElements(element, selector));
+    element.querySelector.mockImplementation((selector: string) => queryMockElements(element, selector)[0] ?? null);
+    element.prepend.mockImplementation((child: MockElement) => {
+        element.children = element.children.filter(candidate => candidate !== child);
+        element.children.unshift(child);
+    });
+    element.scrollIntoView.mockImplementation(() => undefined);
+    element.focus.mockImplementation(() => {
+        ownerDocument.activeElement = element;
+    });
+
+    element.createEl.mockImplementation((childTag: string, childOptions: Record<string, unknown> = {}) => {
+        const child = createMockElement(childTag, {
+            text: typeof childOptions.text === 'string' ? childOptions.text : undefined,
+            cls: typeof childOptions.cls === 'string' ? childOptions.cls : undefined,
+            attr: childOptions.attr as Record<string, string> | undefined,
+            type: typeof childOptions.type === 'string' ? childOptions.type : undefined,
+            placeholder: typeof childOptions.placeholder === 'string' ? childOptions.placeholder : undefined,
+            parent: element
+        });
         if (childTag === 'select') {
             (child as any).add = jest.fn().mockImplementation((option: any) => {
                 child.options?.push(option);
@@ -286,11 +511,24 @@ function createMockElement(
         return child;
     });
 
-    element.createDiv.mockImplementation((childOptions: { cls?: string } = {}) => {
-        const child = createMockElement('div', { ...childOptions, parent: element });
+    element.createDiv.mockImplementation((childOptions: Record<string, unknown> = {}) => {
+        const child = createMockElement('div', {
+            text: typeof childOptions.text === 'string' ? childOptions.text : undefined,
+            cls: typeof childOptions.cls === 'string' ? childOptions.cls : undefined,
+            attr: childOptions.attr as Record<string, string> | undefined,
+            parent: element
+        });
         element.children.push(child);
         return child;
     });
+
+    Object.entries(options.attr ?? {}).forEach(([name, value]) => element.setAttribute?.(name, value));
+    if (options.type) {
+        element.setAttribute?.('type', options.type);
+    }
+    if (options.placeholder) {
+        element.setAttribute?.('placeholder', options.placeholder);
+    }
 
     return element;
 }
@@ -1985,5 +2223,91 @@ describe('provider settings behavior', () => {
 
         expect(plugin.settings.maxTokens).toBe(12000);
         expect(plugin.settings.chunkWordCount).toBe(1234);
+    });
+
+    test('provides an interactive field-aware settings result panel with stable navigation', () => {
+        jest.useFakeTimers();
+        (globalThis as any).window = {
+            setTimeout
+        };
+
+        try {
+            const plugin = createPlugin();
+            plugin.settings.uiLocale = 'zh-CN';
+            plugin.settings.enableDeveloperMode = false;
+
+            const tab = new NotemdSettingTab(mockApp as any, plugin as any) as any;
+            tab.display();
+
+            const root = tab.containerEl as MockElement;
+            const search = root.querySelector?.('input.notemd-settings-search');
+            const panel = root.querySelector?.('#notemd-settings-search-results');
+            expect(search).toBeDefined();
+            expect(panel?.getAttribute?.('role')).toBe('listbox');
+            expect(panel?.hidden).toBe(true);
+            expect(search?.getAttribute?.('aria-expanded')).toBe('false');
+
+            search!.value = 'Mermaid';
+            search!.dispatch('input');
+
+            const options = (panel?.querySelectorAll?.('[role="option"]') ?? []) as MockElement[];
+            expect(options.length).toBeGreaterThan(0);
+            expect(options.some(option => option.textContent?.includes('同时完整输出 Mermaid 图'))).toBe(true);
+            expect(options.some(option => option.textContent?.includes('稳定 API 调用'))).toBe(false);
+            expect(panel?.hidden).toBe(false);
+            expect(search?.getAttribute?.('aria-expanded')).toBe('true');
+
+            const selectedOption = options[Math.min(1, options.length - 1)];
+            const selectedSettingId = selectedOption.dataset.settingId;
+            const settingItems = root.querySelectorAll('.setting-item') as MockElement[];
+            const selectedSetting = settingItems
+                .find(item => item.dataset.notemdSettingId === selectedSettingId);
+            expect(selectedSetting).toBeDefined();
+            expect(selectedSetting?.id).toBe(
+                `notemd-setting-${selectedSettingId.replace(/[^a-zA-Z0-9_-]+/g, '-')}`
+            );
+
+            const arrowEvent = { key: 'ArrowDown', preventDefault: jest.fn() };
+            search!.dispatch('keydown', arrowEvent);
+            expect(arrowEvent.preventDefault).toHaveBeenCalled();
+            expect(search?.getAttribute?.('aria-activedescendant')).toBe(selectedOption.id);
+
+            const enterEvent = { key: 'Enter', preventDefault: jest.fn() };
+            search!.dispatch('keydown', enterEvent);
+            expect(enterEvent.preventDefault).toHaveBeenCalled();
+            expect(panel?.hidden).toBe(true);
+            expect(search?.getAttribute?.('aria-expanded')).toBe('false');
+            expect(selectedSetting?.scrollIntoView).toHaveBeenCalled();
+            expect(selectedSetting?.classList && selectedSetting.cls).toContain('notemd-setting-search-target');
+            expect(root.ownerDocument?.activeElement?.tag).toBe('input');
+            jest.runOnlyPendingTimers();
+            expect(selectedSetting?.cls).not.toContain('notemd-setting-search-target');
+
+            search!.value = 'Mermaid';
+            search!.dispatch('input');
+            const escapeEvent = { key: 'Escape', preventDefault: jest.fn() };
+            search!.dispatch('keydown', escapeEvent);
+            expect(escapeEvent.preventDefault).toHaveBeenCalled();
+            expect(panel?.hidden).toBe(true);
+
+            search!.value = 'query-that-does-not-exist';
+            search!.dispatch('input');
+            expect(panel?.hidden).toBe(false);
+            expect(panel?.querySelector?.('.notemd-settings-empty-state')?.textContent?.trim()).toBeTruthy();
+
+            search!.value = '';
+            search!.dispatch('input');
+            expect(panel?.hidden).toBe(true);
+            expect(search?.getAttribute?.('aria-expanded')).toBe('false');
+
+            search!.value = 'Mermaid';
+            search!.dispatch('input');
+            root.ownerDocument?.dispatchEvent('pointerdown', { target: root });
+            expect(panel?.hidden).toBe(true);
+        } finally {
+            jest.runOnlyPendingTimers();
+            jest.useRealTimers();
+            delete (globalThis as any).window;
+        }
     });
 });

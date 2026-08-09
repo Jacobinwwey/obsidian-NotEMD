@@ -881,6 +881,7 @@ Notemd 由独立维护。感谢为项目的设计决策提供启发，或为其�
 - [CLI 能力矩阵（简体中文）](./docs/maintainer/notemd-cli-capability-matrix.zh-CN.md)
 - 仓库内维护者 CLI 帮助：`npm run cli:help`
 - 仓库内维护者调用示例：`npm run cli:invoke -- --vault docs --operation content.split-note-by-chapters --input-json '{"sourcePath":"index.zh-CN.md","splitHeadingLevel":"h2"}' --pretty`
+- 已部署 Vault bundle 校验：`npm run verify:vault-bundle -- --vault <vault-path>`（文件缺失、hash 漂移或 manifest 版本漂移时 fail closed）
 - 对 `--vault docs` 而言，JSON 里的路径都必须是 vault-relative；应使用 `index.zh-CN.md`、`maintainer`，不要写成 `docs/index.zh-CN.md` 或 `docs/maintainer`。
 - 当前 public-safe export 命令刻意收敛为：脱敏 provider 导出、capability manifest 导出、invocation contract 导出、public-surface 导出。
 
