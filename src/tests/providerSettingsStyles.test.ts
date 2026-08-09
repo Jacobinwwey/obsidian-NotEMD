@@ -58,6 +58,19 @@ describe('provider settings styles', () => {
         expect(styles).toContain('@media (max-width: 720px)');
     });
 
+    test('search result copy uses explicit grid areas so long descriptions cannot collapse names', () => {
+        const styles = fs.readFileSync(stylesPath, 'utf8');
+        const resultRule = readRule(styles, '.notemd-settings-search-result');
+        const nameRule = readRule(styles, '.notemd-settings-search-result-name');
+        const descriptionRule = readRule(styles, '.notemd-settings-search-result-description');
+        const categoryRule = readRule(styles, '.notemd-settings-search-result-category');
+
+        expect(resultRule).toMatch(/grid-template-areas:\s*['"]name category['"]\s*['"]description category['"]/);
+        expect(nameRule).toMatch(/grid-area:\s*name\s*;/);
+        expect(descriptionRule).toMatch(/grid-area:\s*description\s*;/);
+        expect(categoryRule).toMatch(/grid-area:\s*category\s*;/);
+    });
+
     test('diagram history drawer constrains the grid item and contains its scroll region', () => {
         const styles = fs.readFileSync(stylesPath, 'utf8');
         const drawerRule = readRule(styles, '.notemd-diagram-history-drawer');

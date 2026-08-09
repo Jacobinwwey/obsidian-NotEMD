@@ -199,6 +199,19 @@ interface SettingSearchMatch extends SettingCatalogEntry {
 
 这个边界避免浏览器/Electron 的 `<select>` 实现细节变成设置搜索 API，也使结果列表不依赖隐藏原生 option 即可测试。
 
+#### 搜索结果布局回归加固（2026-08-09）
+
+结果卡片的布局属于交互契约，而不是偶然的样式细节。此前的隐式两列 grid 会把不换行的长说明放进 `auto` 列；在 Chromium/Electron 中该列会占用整行的 intrinsic width，使名称列塌缩为 0，最终出现截图中的“名称每行一个字”和误导性的超大高亮区域。
+
+现在采用显式且可验证的布局契约：
+
+- 桌面端使用命名 grid area（`name category` / `description category`），并限制分类列宽度；
+- 名称与说明各自声明所属 area 和 `min-width: 0`，长的本地化文案不能再改变 grid 的 intrinsic sizing；
+- 移动端 breakpoint 切换为单列（`name` / `description` / `category`），分类改为左对齐；
+- `providerSettingsStyles.test.ts` 断言命名 area 与元素归属，Obsidian CLI 探针在查询 `Mermaid` 后必须验证名称矩形宽度非零。
+
+这样显式目录/搜索架构不会依赖浏览器的隐式布局，也不会因为视觉回归破坏设置级直接导航。
+
 #### 设置搜索测试契约
 
 `src/tests/settingCatalog.test.ts` 必须覆盖纯目录和匹配契约：搜索 `Mermaid` 时排除稳定 API 噪声；名称命中和说明命中均有效；跨字段拼接不能制造误命中；带权结果具有稳定排序并完整返回 `matchedFields`；重复 ID 失败；locale 文案或分类标签变化时显式 stable ID 保持不变。原有 locale alias 和 favorite 保留测试继续保留。
@@ -308,6 +321,7 @@ npm run verify:vault-bundle -- --vault E:\\1Knowledge
 - 实现基于用户可见字段的 `SettingSearchMatch` 评分、同字段同词的有界英文模糊 fallback、`matchedFields`、确定性平局排序，并删除 `categoryId` 搜索。
 - 构建独立的 listbox 结果面板，实现直接滚动/聚焦/高亮、键盘选择、收起、Escape、失焦、外部点击、空 query 和无结果状态；分类选择器只承担粗粒度导航。
 - 在 `src/tests/settingCatalog.test.ts` 增加纯匹配与 stable ID 回归，并增加结果面板 DOM 与 Obsidian CLI 契约测试。
+- 将结果卡片几何改为显式且响应式布局；增加命名 grid area 的 CSS 回归测试和运行时几何断言，防止长说明把设置名称挤塌。
 - 增加部署验证脚本或维护者命令，比较源码构建产物与 Vault bundle hash。
 - 通过已加载的 Obsidian setting tab 实测 PPI 与 companion 控件。
 
@@ -342,9 +356,10 @@ npm run verify:vault-bundle -- --vault E:\\1Knowledge
 - 文档站：VitePress 构建通过。
 - 官方 `obsidian help`：可用。`obsidian-cli help`：不可用，因为系统未安装可选的 `obsidian-cli` 可执行文件。
 - 官方 `plugin:reload` 在本桌面会话返回非零结果。已通过官方 CLI `eval` 关闭并重新启用 `notemd`，等待插件重新初始化完成重载。
-- `npm run verify:vault-bundle -- --vault E:\\1Knowledge` 在部署到 `E:\\1Knowledge\\.obsidian\\plugins\\notemd` 后通过：`main.js` SHA-256 为 `b1adec85e50a22c2831ef73abd3b24b0fc3f4f9aeb32ee4f7ec964afee639041`，`styles.css` SHA-256 为 `2d7527ddfacdef8935b646e0205eccca26adcb8ec591602be6a7ce2d71f33f77`，`manifest.json` SHA-256 为 `fc88f5d7d90561ae73c324413efc58b937086e1901c7c7faf45686b12320a02a`，三者均一致；manifest 版本为 `1.9.5`。
-- 重载后的 loaded settings DOM 探针：PPI 控件存在且值为 `300`；companion 控件存在且为 `false`；搜索结果容器为 `role=listbox`；查询 `Mermaid` 返回 13 个用户可见字段命中，排除 `稳定 API 调用`；两个控件的稳定 element ID 均可解析。
-- `obsidian dev:errors` 返回非零且无输出，这是当前 CLI 对空错误缓冲的行为；没有返回任何 captured error payload。本会话的 `dev:dom` 不可用，因此通过官方 `eval` 直接对 `app.setting.contentEl` 执行等价 DOM 断言。
+- `npm run verify:vault-bundle -- --vault E:\\1Knowledge` 在部署到 `E:\\1Knowledge\\.obsidian\\plugins\\notemd` 后通过：`main.js` SHA-256 为 `b1adec85e50a22c2831ef73abd3b24b0fc3f4f9aeb32ee4f7ec964afee639041`，`styles.css` SHA-256 为 `afb869fba020bf1e21e2060e424589759c0e9fc56a3a733e3c146309bb7aea7e`，`manifest.json` SHA-256 为 `fc88f5d7d90561ae73c324413efc58b937086e1901c7c7faf45686b12320a02a`，三者均一致；manifest 版本为 `1.9.5`。
+- 通过 eval disable/enable 重载后的 loaded settings DOM 探针：PPI 控件存在且值为 `300`；companion 控件存在且为 `false`；搜索结果容器为 `role=listbox`；查询 `Mermaid` 返回 13 个用户可见字段命中，排除 `稳定 API 调用`；所有结果和两个控件的稳定 element ID 均可解析。
+- 同一个 CLI 探针报告 `grid-template-columns: 422.667px 210px`、命名 area 为 `"name category" "description category"`，第一张结果卡片为 `664x39.875px`，每个结果的名称矩形均非零（`422.667x20.25px`）；这证明长说明不会再把名称列挤塌或逐字竖排。
+- `obsidian dev:errors` 报告 `No errors captured`。本会话的 `dev:dom` 与可选 `obsidian-cli` wrapper 不可用，因此通过官方 `eval` 直接对 `app.setting.contentEl` 执行等价 DOM 断言。
 - architecture note CLI smoke：`architecture.zh-CN.md` 存在，图形/预览命令已注册并可执行。现有 history 同时包含 Mermaid 与 Drawnix preview 条目；命令探针期间没有捕获新错误。
 
 ## 验证矩阵

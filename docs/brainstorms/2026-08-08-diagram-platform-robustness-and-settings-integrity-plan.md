@@ -199,6 +199,19 @@ The settings tab owns a dedicated result panel, independent of the category sele
 
 This boundary prevents a browser/Electron-specific `<select>` implementation detail from becoming the settings search API. It also makes the result list testable without relying on hidden native options.
 
+#### Search Result Layout Regression Hardening (2026-08-09)
+
+The result card layout is part of the interaction contract, not incidental styling. The previous implicit two-column grid placed the long, non-wrapping description in the `auto` column. In Chromium/Electron that column consumed the row's intrinsic width, collapsed the name column to zero, and produced the observed one-character-per-line setting name plus a misleading oversized focus region.
+
+The robust contract is now explicit:
+
+- the desktop card uses named grid areas (`name category` / `description category`) and bounded category width;
+- name and description own their areas and set `min-width: 0`, so long localized copy cannot change the grid's intrinsic sizing;
+- the mobile breakpoint switches to one column (`name` / `description` / `category`) and left-aligns the category;
+- `providerSettingsStyles.test.ts` asserts the named areas and ownership selectors, and the Obsidian CLI probe must verify a non-zero name rectangle after a `Mermaid` query.
+
+This keeps the declared catalog/search architecture independent from browser-specific implicit placement and prevents a visual regression from invalidating direct setting navigation.
+
 #### Settings Search Test Contract
 
 `src/tests/settingCatalog.test.ts` must cover the pure catalog and matcher contract: `Mermaid` excludes stable-API noise; exact name and description matches both work; cross-field concatenation cannot create a false positive; weighted results have stable ordering and complete `matchedFields`; duplicate IDs fail; and an explicit stable ID remains unchanged when locale copy or category labels change. The same file should retain locale-alias and favorite-retention coverage.
@@ -308,6 +321,7 @@ For every panel, exported SVG and PDF have the same viewBox, text line count, an
 - Implement `SettingSearchMatch` scoring with visible-field token matching, bounded same-field English fuzzy fallback, `matchedFields`, deterministic ties, and no `categoryId` search.
 - Build the dedicated listbox result panel with direct scroll/focus/highlight navigation, keyboard selection, collapse, Escape, blur, outside-click, empty-query, and no-result states. Keep the category selector as coarse navigation only.
 - Add pure matcher and stable-ID regression cases in `src/tests/settingCatalog.test.ts`, plus UI/DOM and Obsidian CLI checks for the result panel contract.
+- Make result-card geometry explicit and responsive; add a CSS regression test for named grid areas and a runtime geometry assertion so long descriptions cannot collapse the setting name.
 - Add a deployment verification script or documented maintainer command that compares source build and Vault bundle hashes.
 - Exercise PPI and companion controls through the loaded Obsidian setting tab.
 
@@ -342,9 +356,10 @@ Documentation does not claim a full Drawnix editor, universal graph support, or 
 - Documentation site: VitePress build passed.
 - Official `obsidian help`: available. `obsidian-cli help`: unavailable because the optional `obsidian-cli` executable is not installed.
 - The official `plugin:reload` command returned a non-zero result in this desktop session. Reload was completed through the official CLI `eval` surface by disabling and enabling `notemd`, then waiting for the plugin to reinitialize.
-- `npm run verify:vault-bundle -- --vault E:\\1Knowledge` passed after deployment to `E:\\1Knowledge\\.obsidian\\plugins\\notemd`: `main.js` SHA-256 `b1adec85e50a22c2831ef73abd3b24b0fc3f4f9aeb32ee4f7ec964afee639041`, `styles.css` SHA-256 `2d7527ddfacdef8935b646e0205eccca26adcb8ec591602be6a7ce2d71f33f77`, and `manifest.json` SHA-256 `fc88f5d7d90561ae73c324413efc58b937086e1901c7c7faf45686b12320a02a` all match; manifest version is `1.9.5`.
-- Loaded setting-tab probes after reload: PPI control exists with value `300`; companion control exists and is `false`; search result container has `role=listbox`; query `Mermaid` returns 13 visible-field matches and excludes `稳定 API 调用`; stable element IDs resolve for both controls.
-- `obsidian dev:errors` returned non-zero with empty output, which is the current CLI behavior for an empty error buffer; no captured error payload was returned. `dev:dom` was not usable in this session, so equivalent DOM assertions were executed through official `eval` against `app.setting.contentEl`.
+- `npm run verify:vault-bundle -- --vault E:\\1Knowledge` passed after deployment to `E:\\1Knowledge\\.obsidian\\plugins\\notemd`: `main.js` SHA-256 `b1adec85e50a22c2831ef73abd3b24b0fc3f4f9aeb32ee4f7ec964afee639041`, `styles.css` SHA-256 `afb869fba020bf1e21e2060e424589759c0e9fc56a3a733e3c146309bb7aea7e`, and `manifest.json` SHA-256 `fc88f5d7d90561ae73c324413efc58b937086e1901c7c7faf45686b12320a02a` all match; manifest version is `1.9.5`.
+- Loaded setting-tab probes after the eval disable/enable reload: PPI control exists with value `300`; companion control exists and is `false`; search result container has `role=listbox`; query `Mermaid` returns 13 visible-field matches and excludes `稳定 API 调用`; stable element IDs resolve for every result and both controls.
+- The same CLI probe reports `grid-template-columns: 422.667px 210px`, named areas `"name category" "description category"`, a first-card size of `664x39.875px`, and a non-zero name rectangle (`422.667x20.25px`) for every result; this is the regression evidence that long descriptions no longer collapse or vertically wrap setting names.
+- `obsidian dev:errors` reports `No errors captured`. `dev:dom` and the optional `obsidian-cli` wrapper are unavailable in this session, so equivalent DOM assertions were executed through official `eval` against `app.setting.contentEl`.
 - Architecture note CLI smoke: `architecture.zh-CN.md` is present and the diagram/preview commands are registered and executable. Existing history contains both Mermaid and Drawnix preview entries; no new error was captured during the command probe.
 
 ## Verification Matrix
