@@ -1,70 +1,70 @@
 {
   "theme.colorToggle.ariaLabel": {
-    "message": "Switch between dark and light mode",
+    "message": "Переключити між темним та світлим режимом",
     "description": "The ARIA label for the color mode toggle"
   },
   "theme.common.editThisPage": {
-    "message": "Edit this page",
+    "message": "Редагувати цю сторінку",
     "description": "The link label to edit the current page"
   },
   "theme.common.lastUpdatedAt": {
-    "message": "Last updated on"
+    "message": "Останнє оновлення:"
   },
   "theme.docs.breadcrumbs.navAriaLabel": {
-    "message": "Breadcrumbs",
+    "message": "Шлях до сторінки",
     "description": "The ARIA label for the breadcrumbs"
   },
   "theme.docs.paginator.navAriaLabel": {
-    "message": "Docs sidebar",
+    "message": "Бічна панель документації",
     "description": "The ARIA label for the docs pagination"
   },
   "theme.docs.paginator.next": {
-    "message": "Next page",
+    "message": "Наступна сторінка",
     "description": "The label used to navigate to the next doc"
   },
   "theme.docs.paginator.previous": {
-    "message": "Previous page",
+    "message": "Попередня сторінка",
     "description": "The label used to navigate to the previous doc"
   },
   "theme.docs.sidebar.closeSidebarButtonAriaLabel": {
-    "message": "Close",
+    "message": "Закрити",
     "description": "The ARIA label for close button of mobile sidebar"
   },
   "theme.docs.sidebar.collapseButtonTitle": {
-    "message": "Collapse sidebar",
+    "message": "Згорнути бічну панель",
     "description": "The title attribute for collapse button of doc sidebar"
   },
   "theme.docs.sidebar.expandButtonTitle": {
-    "message": "Expand sidebar",
+    "message": "Розгорнути бічну панель",
     "description": "The ARIA label and title attribute for expand button of doc sidebar"
   },
   "theme.NotFound.p1": {
-    "message": "We could not find the page you were looking for.",
+    "message": "Ми не змогли знайти сторінку, яку ви шукаєте.",
     "description": "The first paragraph of the 404 page"
   },
   "theme.NotFound.title": {
-    "message": "Page not found",
+    "message": "Сторінка не знайдена",
     "description": "The title of the 404 page"
   },
   "theme.SearchBar.label": {
-    "message": "Search"
+    "message": "Пошук"
   },
   "theme.SearchBar.noResultsText": {
-    "message": "No results found"
+    "message": "Результатів не знайдено"
   },
   "theme.SearchBar.seeAll": {
-    "message": "See all results"
+    "message": "Переглянути всі результати"
   },
   "theme.TOCCollapsible.toggleButtonLabel": {
-    "message": "On this page",
+    "message": "На цій сторінці",
     "description": "The label used by the button on the collapsible TOC component"
   },
   "theme.navbar.mobileLanguageDropdown.label": {
-    "message": "Language",
+    "message": "Мова",
     "description": "The label for the mobile language switcher dropdown"
   },
   "theme.BackToTopButton.buttonAriaLabel": {
-    "message": "Back to top",
+    "message": "Повернутися нагору",
     "description": "The ARIA label for the back to top button"
   },
   "theme.IconExternalLink.ariaLabel": {
@@ -72,35 +72,35 @@
     "description": "The ARIA label for the external link icon"
   },
   "theme.NavBar.navAriaLabel": {
-    "message": "Main navigation",
+    "message": "Основне навігаційне меню",
     "description": "The ARIA label for the main navigation"
   },
   "theme.CodeBlock.copy": {
-    "message": "Copy",
+    "message": "Копіювати",
     "description": "The copy button label on code blocks"
   },
   "theme.CodeBlock.copied": {
-    "message": "Copied",
+    "message": "Копіювання завершено",
     "description": "The copied button label on code blocks"
   },
   "theme.CodeBlock.copyButtonAriaLabel": {
-    "message": "Copy code to clipboard",
+    "message": "Копіювати код у буфер обміну",
     "description": "The ARIA label for copy code blocks button"
   },
   "theme.docs.breadcrumbs.home": {
-    "message": "Docs",
+    "message": "Документація",
     "description": "The ARIA label for the home page in the breadcrumbs"
   },
   "theme.docs.sidebar.navAriaLabel": {
-    "message": "Docs sidebar",
+    "message": "Бічна панель документації",
     "description": "The ARIA label for the sidebar navigation"
   },
   "theme.docs.sidebar.toggleSidebarButtonAriaLabel": {
-    "message": "Expand sidebar",
+    "message": "Розгорнути бічну панель",
     "description": "The ARIA label for hamburger menu button of mobile navigation"
   },
   "theme.common.skipToMainContent": {
-    "message": "Skip to main content",
+    "message": "Перейти до основного контенту",
     "description": "The skip to content label used for accessibility"
   }
 }

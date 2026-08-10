@@ -4,11 +4,11 @@
     "description": "The title in the navbar"
   },
   "logo.alt": {
-    "message": "Notemd logo",
+    "message": "Notemd লোগো",
     "description": "The alt text of navbar logo"
   },
   "item.label.Docs": {
-    "message": "Docs",
+    "message": "ডকুমেন্টস",
     "description": "Navbar item with label Docs"
   },
   "item.label.FAQ": {

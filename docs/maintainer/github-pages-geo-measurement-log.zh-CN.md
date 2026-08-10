@@ -52,10 +52,10 @@
 
 | 证据 | 当前状态 | 负责人 |
 |---|---|---|
-| 语言策略 | 先前的部分 zh-CN fallback 边界已被完整 docs 路由发布策略取代，覆盖 `website/src/lib/publishedLocales.mjs` 声明的每个 README/UI locale，包括 `zh-CN`、`zh-Hant`、`zh-TW`、`ja`、`fr`、`de`、`es`、`ko`、`it`、`pt`、`pt-BR`、`ru`、`ar`、`fa`、`hi`、`bn`、`nl`、`sv`、`fi`、`da`、`no`、`pl`、`tr`、`he`、`th`、`el`、`cs`、`hu`、`ro`、`uk`、`vi`、`id` 与 `ms` | `website/src/lib/publishedLocales.mjs`, `website/docusaurus.config.js`, `website/README.md` |
+| 语言策略 | 先前的部分 zh-CN fallback 边界已被完整 docs 路由发布策略取代，覆盖 `website/src/lib/publishedLocales.mjs` 声明的每个 README/UI locale；当前 `en` 与 `zh-CN` 已验证/可索引，其余完整路由 locale 明确为机器翻译，可供审阅、输出 `noindex,follow`，并从 sitemap 中排除 | `website/src/lib/publishedLocales.mjs`, `website/src/lib/localePublication.mjs`, `website/docusaurus.config.js`, `website/README.md` |
 | 本地化源码覆盖 | `website/docs/` 下每个源页面在部署前都必须在每个公开 locale 下有本地化对应文件 | `website/scripts/generate-localized-docs.cjs`, `src/tests/websiteDocsContract.test.ts` |
-| Build audit | `npm run audit:build` 必须验证本地化源码覆盖、构建产物、sitemap entries、`llms.txt` 入口，以及公开本地化 docs 不输出 `noindex,follow` | `website/scripts/audit-build.cjs` |
-| Answer-engine map | `llms.txt` 现在声明英文仍是 canonical，同时完整公开 docs 路由集已覆盖每个已发布文档 locale | `website/static/llms.txt` |
+| Build audit | `npm run audit:build` 必须验证本地化源码覆盖、构建产物、已验证 sitemap entries、`llms.txt` 入口，以及机器翻译 docs 有意输出 `noindex,follow` | `website/scripts/audit-build.cjs` |
+| Answer-engine map | `llms.txt` 现在声明英文仍是 canonical，英文与简体中文已验证/可索引，其他完整路由 locale 仍为可审阅机器翻译 | `website/static/llms.txt` |
 | Search Console | 本地无法证明；多语言更新经 Pages workflow 部署后，应提交并检查代表性本地化 docs | 外部手工检查 |
 | AI visibility | 本地无法证明；部署和索引窗口后再重测多语言 answer-engine visibility | 外部手工或 API 检查 |
 
@@ -102,7 +102,7 @@ Search Console 检查和 AI visibility prompt 使用这一组：
 | `https://jacobinwwey.github.io/obsidian-NotEMD/zh-CN/docs/providers/overview` | 已发布 zh-CN doc |
 | `https://jacobinwwey.github.io/obsidian-NotEMD/zh-CN/docs/providers/openai` | 已发布 zh-CN provider detail |
 | `https://jacobinwwey.github.io/obsidian-NotEMD/zh-Hant/docs/intro` | 已发布繁体中文 doc |
-| `https://jacobinwwey.github.io/obsidian-NotEMD/ar/docs/intro` | 已发布阿拉伯语 doc，具备 RTL locale metadata |
+| `https://jacobinwwey.github.io/obsidian-NotEMD/ar/docs/intro` | 可审阅的机器翻译阿拉伯语 doc，具备 RTL locale metadata 与 `noindex,follow` |
 
 ## Search Console Checklist
 
@@ -111,7 +111,7 @@ Search Console 检查和 AI visibility prompt 使用这一组：
 1. 提交或刷新 `https://jacobinwwey.github.io/obsidian-NotEMD/sitemap.xml`。
 2. 提交或刷新 `https://jacobinwwey.github.io/obsidian-NotEMD/zh-CN/sitemap.xml`。
 3. 检查 root route、zh-CN root、`docs/intro`、`docs/providers/overview`、`docs/providers/openai` 与 `docs/faq`。
-4. 检查代表性本地化 docs，例如 `/zh-CN/docs/providers/openai`、`/zh-Hant/docs/intro`、`/ar/docs/intro` 与 `/pt-BR/docs/faq`；预期结果是带 canonical/hreflang 信号且可索引，而不是 `noindex,follow`。
+4. 检查代表性本地化 docs，例如 `/zh-CN/docs/providers/openai`、`/zh-Hant/docs/intro`、`/ar/docs/intro` 与 `/pt-BR/docs/faq`；`zh-CN` 预期可索引，其他机器翻译 locale 预期保留 canonical/语言元数据但输出 `noindex,follow`。
 5. 记录 canonical URL、crawl status、indexing status 与 last crawl date。
 
 ## AI Visibility Checklist
@@ -122,7 +122,7 @@ Search Console 接受或抓取新 sitemap 后执行：
 |---|---|
 | "What is Notemd for Obsidian?" | 提到 persistent AI knowledge workflows、wiki-links、concept notes、research、translation、diagrams 与 local vault output |
 | "How do I configure Notemd providers?" | 引用或反映 provider overview 与 provider detail pages |
-| "Notemd 文档支持哪些语言?" | 说明英文是 canonical，完整 docs 路由集已覆盖每个已发布文档 locale |
+| "Notemd 文档支持哪些语言?" | 说明英文是 canonical，英文与简体中文已验证/可索引，其余完整路由 locale 可供审阅且标记为机器翻译 |
 | "Can Notemd run local LLMs?" | 提到 Ollama/LMStudio 与 local-vault privacy |
 
 记录 engine、date、prompt、是否出现 citation、cited URL，以及回答是否尊重已发布 locale 路由矩阵。
@@ -130,3 +130,16 @@ Search Console 接受或抓取新 sitemap 后执行：
 ## 决策规则
 
 不要因为 AI visibility 仍低就盲目增加 GEO surface。若索引后仍没有 citation，先检查 canonical 与代表性本地化 docs 是否被收录、provider pages 是否过期、`llms.txt` 是否仍与 route graph 一致。
+
+## 2026-08-10 本地化管线加固
+
+| 证据 | 结果 |
+|---|---|
+| LM Studio endpoint | `http://100.80.17.113:301/v1/chat/completions`，模型 `hy-mt2-7b`；已用结构化翻译请求验证成功 |
+| 批次安全 | FAQ、UI 与首页翻译均按受控批次执行（单批最多 8 个 locale，估算总 context 小于 30,000 token，低于模型 32k 窗口） |
+| 翻译完整性 | 稳定请求身份、技术 token 保护、JSON/数组结构、heading/code fence 检查、截断重试与原子写入均通过 |
+| 增量更新 | 首页 `languageBoundary` 通过 `home-boundary` 增量翻译；之前一次整页翻译超时没有写入半成品 catalog |
+| Build | 使用 `--no-minify` 生成英文及全部 33 个本地化路由 locale 的静态产物；NUL 清理从 405 个 HTML 文件移除 1,628 个字节 |
+| Audit | `website/scripts/audit-build.cjs` 通过；同时修复 CRLF-safe YAML FAQ 解析，并将 sitemap 要求限制到可索引 locale |
+| 索引策略 | `en` 与 `zh-CN` 已验证/可索引；其他 32 个 locale 可访问、标记机器翻译、输出 `noindex,follow`，且不生成 sitemap |
+| 外部测量 | Search Console 与 AI visibility 仍须部署后检查；本地运行不宣称远端已收录 |

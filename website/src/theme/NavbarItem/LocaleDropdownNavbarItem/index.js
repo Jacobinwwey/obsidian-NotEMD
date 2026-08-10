@@ -10,6 +10,7 @@ import {
   shouldExposeZhCnLanguageSignal,
   zhCnRootSitePath,
 } from '../../../lib/languageRoutePolicy';
+import {localePublicationLabel} from '../../../lib/localePublication.mjs';
 import styles from './styles.module.css';
 
 function useLocaleDropdownUrls() {
@@ -67,7 +68,7 @@ function useLocaleDropdownUrls() {
       return `${targetUrlForLocale(locale)}${finalSearch}${hash}`;
     },
     getLabel: (locale) => {
-      return getLocaleConfig(locale).label;
+      return `${getLocaleConfig(locale).label}${localePublicationLabel(locale)}`;
     },
     getLang: (locale) => {
       return getLocaleConfig(locale).htmlLang;

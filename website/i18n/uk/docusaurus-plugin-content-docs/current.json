@@ -1,22 +1,22 @@
 {
   "version.label": {
-    "message": "Next",
+    "message": "Наступний",
     "description": "The label for version current"
   },
   "sidebar.tutorialSidebar.category.Getting Started": {
-    "message": "Getting Started",
+    "message": "Початок використання",
     "description": "The label for category 'Getting Started' in sidebar 'tutorialSidebar'"
   },
   "sidebar.tutorialSidebar.category.Core Features": {
-    "message": "Core Features",
+    "message": "Основні функції",
     "description": "The label for category 'Core Features' in sidebar 'tutorialSidebar'"
   },
   "sidebar.tutorialSidebar.category.LLM Providers": {
-    "message": "LLM Providers",
+    "message": "Провайдери LLM",
     "description": "The label for category 'LLM Providers' in sidebar 'tutorialSidebar'"
   },
   "sidebar.tutorialSidebar.category.Advanced": {
-    "message": "Advanced",
+    "message": "Розширені функції",
     "description": "The label for category 'Advanced' in sidebar 'tutorialSidebar'"
   }
 }

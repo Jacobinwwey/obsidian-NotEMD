@@ -39,7 +39,8 @@ Answer-engine source map: https://jacobinwwey.github.io/obsidian-NotEMD/llms.txt
 ## Language Scope
 
 - English remains the canonical source surface.
-- The public docs route set is available in English, Simplified Chinese, Traditional Chinese, Traditional Chinese for Taiwan, Japanese, French, German, Spanish, Korean, Italian, Portuguese, Brazilian Portuguese, Russian, Arabic, Persian, Hindi, Bengali, Dutch, Swedish, Finnish, Danish, Norwegian, Polish, Turkish, Hebrew, Thai, Greek, Czech, Hungarian, Romanian, Ukrainian, Vietnamese, Indonesian, Malay.
+- The verified public docs route set is available in English and Simplified Chinese.
+- Other locale routes remain available for review and are marked machine-translated.
 - Localized documentation entrypoints:
   - https://jacobinwwey.github.io/obsidian-NotEMD/zh-CN/
   - https://jacobinwwey.github.io/obsidian-NotEMD/zh-CN/docs/intro

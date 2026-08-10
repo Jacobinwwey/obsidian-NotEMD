@@ -1,22 +1,22 @@
 {
   "version.label": {
-    "message": "Next",
+    "message": "بعدی",
     "description": "The label for version current"
   },
   "sidebar.tutorialSidebar.category.Getting Started": {
-    "message": "Getting Started",
+    "message": "شروع کار",
     "description": "The label for category 'Getting Started' in sidebar 'tutorialSidebar'"
   },
   "sidebar.tutorialSidebar.category.Core Features": {
-    "message": "Core Features",
+    "message": "ویژگی‌های اصلی",
     "description": "The label for category 'Core Features' in sidebar 'tutorialSidebar'"
   },
   "sidebar.tutorialSidebar.category.LLM Providers": {
-    "message": "LLM Providers",
+    "message": "ارائه‌دهندگان LLM",
     "description": "The label for category 'LLM Providers' in sidebar 'tutorialSidebar'"
   },
   "sidebar.tutorialSidebar.category.Advanced": {
-    "message": "Advanced",
+    "message": "پیشرفته",
     "description": "The label for category 'Advanced' in sidebar 'tutorialSidebar'"
   }
 }

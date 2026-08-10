@@ -6,13 +6,13 @@
 
 ## 当前契约
 
-文档站现在发布一个 canonical 源语言面，并为 `website/src/lib/publishedLocales.mjs` 中声明的每个 README/UI locale 发布完整本地化文档路由集：
+文档站现在明确区分“路由可访问性”和“可发布质量声明”。它发布一个 canonical 源语言面，并为 `website/src/lib/publishedLocales.mjs` 中声明的每个 README/UI locale 提供完整本地化文档路由，但只有通过验证的 locale 可被索引：
 
 1. 英文仍是完整 canonical 文档面，路径为 `https://jacobinwwey.github.io/obsidian-NotEMD/docs/...`。
-2. 当前公开本地化 docs 矩阵为 `zh-CN`、`zh-Hant`、`zh-TW`、`ja`、`fr`、`de`、`es`、`ko`、`it`、`pt`、`pt-BR`、`ru`、`ar`、`fa`、`hi`、`bn`、`nl`、`sv`、`fi`、`da`、`no`、`pl`、`tr`、`he`、`th`、`el`、`cs`、`hu`、`ro`、`uk`、`vi`、`id` 与 `ms`；每个 locale 都必须暴露与 `website/docs` 完全相同的 docs 路由集。
+2. 当前路由完整的本地化 docs 矩阵为 `zh-CN`、`zh-Hant`、`zh-TW`、`ja`、`fr`、`de`、`es`、`ko`、`it`、`pt`、`pt-BR`、`ru`、`ar`、`fa`、`hi`、`bn`、`nl`、`sv`、`fi`、`da`、`no`、`pl`、`tr`、`he`、`th`、`el`、`cs`、`hu`、`ro`、`uk`、`vi`、`id` 与 `ms`；每个 locale 都必须暴露与 `website/docs` 完全相同的 docs 路由集。
 3. 只有当 `website/docs/` 下每个源页面都在 `website/i18n/<locale>/docusaurus-plugin-content-docs/current/` 下有本地化对应文件时，才能把该 locale 加入 `publishedLocales.mjs`。
-4. 先前的部分 zh-CN fallback 策略对公开 docs 已经退役。构建后的本地化 docs 不应依赖英文 fallback 页面，也不应输出 `noindex,follow`。
-5. `llms.txt`、sitemap 输出、hreflang metadata、首页语言边界与 build-audit 预期必须描述同一套完整多语言路由契约。
+4. `en` 与 `zh-CN` 当前属于已验证/可索引 locale；其他完整路由 locale 明确属于机器翻译，仍可供审阅，输出 `noindex,follow`，并有意不生成 sitemap。
+5. `llms.txt`、sitemap 输出、hreflang metadata、首页语言边界与 build-audit 预期必须描述同一套“已验证 vs 机器翻译”契约。
 6. 任何公开 GEO / product-positioning 变更，都必须在同一次变更中同步 GitHub Pages 首页可见内容、首页 JSON-LD、`llms.txt` 与 build-audit 预期。只更新 maintainer notes 不算完成。
 
 ## 已落地门禁
@@ -31,12 +31,12 @@ npm run audit:build
 2. root 页面具有预期的 `lang`、canonical URL，以及适用的 WebPage JSON-LD URL；
 3. 每个英文源文档在 `publishedLocales.mjs` 声明的每个公开 locale 中都有本地化源文档；
 4. `publishedLanguageScopeData.mjs` 为 zh-CN 兼容门禁声明完整 docs 路由集；
-5. 每个支持 locale 的本地化 docs 都能构建，并且不输出 `noindex,follow`；
-6. sitemap 输出包含 canonical 英文 docs 和每个本地化 docs 路由；
-7. `llms.txt` 记录当前多语言路由集与本地化入口；
+5. 每个路由 locale 的本地化 docs 都能构建；已验证 locale 不输出 `noindex,follow`，机器翻译 locale 必须输出它；
+6. sitemap 输出只包含 canonical 英文与已验证 zh-CN docs；机器翻译 locale 有意不生成 sitemap；
+7. `llms.txt` 记录完整多语言路由矩阵以及“已验证 vs 机器翻译”边界；
 8. provider docs 必须包含 setup、endpoint/auth、model discovery、troubleshooting 与 use-case sections；
 9. `GEO_ROADMAP.md` 与 measurement logs 必须提到基线证据、首页同步证据、Search Console、AI visibility 与 sitemap 证据；
-10. 首页必须暴露 source-backed product facts、answer-engine source map、`llms.txt` link、当前 release version 与完整多语言 docs 边界。
+10. 首页必须暴露 source-backed product facts、answer-engine source map、`llms.txt` link、当前 release version 与“已验证 vs 机器翻译”的语言边界。
 
 GitHub Pages workflow 会在上传 Pages artifact 前运行这个审计：
 
@@ -75,6 +75,16 @@ website/src/lib/languageRoutePolicy.js
 ```text
 website/scripts/generate-localized-docs.cjs
 ```
+
+站点 chrome、FAQ 元数据、首页文案以及单字段首页边界翻译由以下受控管线生成：
+
+```text
+website/scripts/translate-site-core.cjs
+website/src/lib/siteLocaleCatalog.cjs
+website/src/lib/homeCopyCatalog.mjs
+```
+
+LM Studio 管线默认使用 OpenAI 兼容端点 `http://100.80.17.113:301/v1/chat/completions` 与模型 `hy-mt2-7b`。单批最多 8 个 locale，估算总 context 保持在 30,000 token 以下，为 32k 模型窗口留出余量；请求身份、技术 token、结构校验、重试和原子写入都是强制约束。单个首页字段变化使用 `home-boundary` 增量模式。
 
 当前公开的本地化 docs 路由集就是 `website/docs/` 下的完整集合，包括：
 
@@ -122,23 +132,23 @@ website/scripts/generate-localized-docs.cjs
 1. 更新 `website/docs/...` 下的英文源页面。
 2. 运行或更新 `website/scripts/generate-localized-docs.cjs`，确保每个支持 locale 都得到对应页面。
 3. 先 review `zh-CN` 的可见标题、章节标题和正文漂移。`Notemd`、`LLM`、`Provider`、CLI flags、配置键、文件扩展名和代码标识符是 runtime contract，可按需要保留英文。
-4. 对每个公开 locale 运行完整的 heading/frontmatter/placeholder 审计，然后人工抽查 zh-CN 以及代表性的非拉丁和 RTL locale（`ar`、`fa`、`he`），确认没有可见英文标题残留或方向敏感布局问题。
+4. 对每个路由 locale 运行完整的 heading/frontmatter/placeholder 审计，然后人工抽查 zh-CN 以及代表性的非拉丁和 RTL locale（`ar`、`fa`、`he`），确认没有可见英文标题残留、机器翻译污染或方向敏感布局问题。
 5. 如果 docs 路由集变化，同步更新 `website/src/lib/publishedLanguageScopeData.mjs`。
 6. 如果页面影响公开 AI retrieval map，同步更新 `website/static/llms.txt`。
 7. 如果页面改变首页 source map 或可见语言边界，同步更新 `website/src/pages/index.js`。
-8. 执行 `npm --prefix website run build && npm --prefix website run audit:build`。
+8. 执行 `npm --prefix website run build && npm --prefix website run audit:build`；只有该门禁和人工 review 都通过后，才能把机器翻译 locale 提升到 `indexablePublishedLocaleCodes`。
 9. 部署后在 `docs/maintainer/github-pages-geo-measurement-log.zh-CN.md` 中记录 Search Console 与 AI visibility 观察。
 
 ## 为什么这样做
 
 先前的部分 zh-CN 模型，比让 Docusaurus 在中文 URL 下发布英文 fallback 内容更安全；但当公开需求变成完整多语言 docs 后，它已经不是正确抽象。继续把 fallback fencing 当作主策略，会隐藏真实本地化页面，让 sitemap 真值复杂化，也会让 locale 扩展看起来始终未完成。
 
-更严格的完整路由模型有维护成本：每次 docs 变化都要同步所有本地化源树和 build proof。收益是 sitemap、robots、alternates、UI navigation 与 AI retrieval 会讲同一个事实。
+更严格的完整路由模型有维护成本：每次 docs 变化都要同步所有本地化源树和 build proof。把路由可访问性与可索引性分开后，这个成本更诚实：用户可以审阅机器翻译，但搜索引擎不会把它们误当作质量已批准的内容，sitemap、robots、alternates、UI navigation 与 AI retrieval 也会讲同一个事实。
 
 ## 当前最佳方向
 
 1. 英文继续保持 canonical 且完整。
-2. 每次部署前，保持所有公开 locale 的 docs 路由集完整。
-3. 使用 `generate-localized-docs.cjs` 保证可重复生成，但必须优先 review 可见 zh-CN 文本，并抽查代表性的 RTL/非拉丁输出，因为机器式泛化标题比明确本地化标题更差。
+2. 每次部署前保持所有路由 locale 的 docs 路由集完整，但只向搜索引擎声明已验证 locale。
+3. 使用 `generate-localized-docs.cjs` 与受控 LM Studio 管线保证可重复生成，然后 review 可见 zh-CN 文本并抽查代表性的 RTL/非拉丁输出，再考虑提升索引状态。
 4. Search Console 与 AI visibility 是部署后的 measurement，不是本地 build proof。
 5. 不要给 Docusaurus theme components 增加新的泛化 wrapper。现有 theme overrides 可以接受，只是因为它们承接了具体 policy：alternates、locale switching、sidebar filtering 与 paginator filtering。

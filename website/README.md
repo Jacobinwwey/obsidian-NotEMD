@@ -6,7 +6,7 @@ This directory contains the Docusaurus-based documentation site for Notemd.
 
 - **Docusaurus 3.10.1** with GitHub Pages deployment
 - **Automatic JSON-LD injection** via swizzled `DocItem/Layout`
-- **Published locales**: English (`en`) plus full docs routes for Simplified Chinese (`zh-CN`), Traditional Chinese (`zh-Hant`), Traditional Chinese for Taiwan (`zh-TW`), Japanese (`ja`), French (`fr`), German (`de`), Spanish (`es`), Korean (`ko`), Italian (`it`), Portuguese (`pt`), Brazilian Portuguese (`pt-BR`), Russian (`ru`), Arabic (`ar`), Persian (`fa`), Hindi (`hi`), Bengali (`bn`), Dutch (`nl`), Swedish (`sv`), Finnish (`fi`), Danish (`da`), Norwegian (`no`), Polish (`pl`), Turkish (`tr`), Hebrew (`he`), Thai (`th`), Greek (`el`), Czech (`cs`), Hungarian (`hu`), Romanian (`ro`), Ukrainian (`uk`), Vietnamese (`vi`), Indonesian (`id`), and Malay (`ms`)
+- **Published route locales**: English (`en`) plus full docs routes for Simplified Chinese (`zh-CN`), Traditional Chinese (`zh-Hant`), Traditional Chinese for Taiwan (`zh-TW`), Japanese (`ja`), French (`fr`), German (`de`), Spanish (`es`), Korean (`ko`), Italian (`it`), Portuguese (`pt`), Brazilian Portuguese (`pt-BR`), Russian (`ru`), Arabic (`ar`), Persian (`fa`), Hindi (`hi`), Bengali (`bn`), Dutch (`nl`), Swedish (`sv`), Finnish (`fi`), Danish (`da`), Norwegian (`no`), Polish (`pl`), Turkish (`tr`), Hebrew (`he`), Thai (`th`), Greek (`el`), Czech (`cs`), Hungarian (`hu`), Romanian (`ro`), Ukrainian (`uk`), Vietnamese (`vi`), Indonesian (`id`), and Malay (`ms`). Only English and Simplified Chinese are currently verified/indexable; the other route-complete locales remain available for review and emit `noindex,follow`.
 - **AI-readable structure**: TLDR components, FAQPage Schema, TechArticle Schema, citations, concept metadata, and `llms.txt`
 
 ## Local Development
@@ -31,13 +31,13 @@ The build generates static content into `build`. The audit checks the public con
 - root and localized root pages exist;
 - canonical and JSON-LD URLs match GitHub Pages routes;
 - homepage GEO text, `llms.txt` link, release version, and multilingual route boundary are present on localized homepages;
-- every published localized docs locale mirrors the English source MDX route set;
+- every published localized docs locale mirrors the English source MDX route set, while publication quality is tracked separately from route availability;
 - the legacy route inventory in `publishedLanguageScopeData.mjs` stays aligned with the source docs consumed by older GEO gates;
-- published localized docs are indexable and expose correct alternates;
+- verified localized docs (`en`, `zh-CN`) are indexable and expose correct alternates; machine-translated locales are reachable but deliberately `noindex,follow` and excluded from sitemap generation;
 - the old unpublished zh-CN fallback path is retired because the docs route set is now localized end-to-end;
 - English docs expose locale alternates for the full published docs route set;
 - Provider docs contain setup, endpoint/auth, model discovery, troubleshooting, and use-case sections;
-- `llms.txt` states the real multilingual route boundary;
+- `llms.txt`, homepage copy, hreflang, and sitemap state the same verified-vs-machine-translated boundary;
 - GEO measurement docs mention Search Console, AI visibility, and sitemap evidence.
 
 ## Deployment
@@ -105,7 +105,19 @@ These overrides are intentionally policy-bearing. Do not replace them with a gen
 - `website/scripts/audit-build.cjs`: blocks Pages deployment when build output violates the language/GEO contract
 - Checks real generated HTML, homepage GEO copy, current release version, sitemaps, `llms.txt`, provider docs, source scope, and measurement evidence
 
-### 8. FAQ with FAQPage Schema
+### 8. Controlled Translation Pipeline
+
+`website/scripts/translate-site-core.cjs` is the supported batch translator for site chrome, FAQ metadata, homepage copy, and small homepage boundary updates. It calls the OpenAI-compatible LM Studio endpoint (default `http://100.80.17.113:301/v1/chat/completions` with model `hy-mt2-7b`) and enforces:
+
+- at most eight locales per batch (use smaller batches for large payloads);
+- a conservative summed request budget below 30,000 estimated tokens, leaving headroom under the model's 32k context;
+- stable request identity (`locale`, source path, source hash, mode), protected technical tokens, exact JSON keys/array lengths, Markdown heading/code-fence shape, and atomic writes;
+- retries for timeouts, truncation, transient HTTP failures, malformed JSON, and missing protected content;
+- incremental `home-boundary` mode when one homepage field changes, avoiding a full-page retranslation while preserving atomicity.
+
+Generated catalogs are `src/lib/siteLocaleCatalog.cjs` and `src/lib/homeCopyCatalog.mjs`. Publication status is owned by `src/lib/localePublication.mjs` and `src/lib/publishedLocales.mjs`; the audit must pass before a machine-translated locale can be promoted to the verified/indexable set.
+
+### 9. FAQ with FAQPage Schema
 
 - `docs/faq.mdx`: English FAQ
 - `i18n/<locale>/docusaurus-plugin-content-docs/current/faq.mdx`: localized FAQ for every published documentation locale
@@ -121,7 +133,8 @@ website/
 │   ├── llms.txt               # AI crawler / answer-engine entry point
 │   └── img/
 ├── scripts/
-│   └── audit-build.cjs        # Built-output Pages language/GEO gate
+│   ├── audit-build.cjs        # Built-output Pages language/GEO gate
+│   └── translate-site-core.cjs # Bounded LM Studio localization pipeline
 ├── docs/                      # English docs
 │   ├── intro.mdx
 │   ├── faq.mdx
@@ -137,7 +150,10 @@ website/
 │   │   ├── languageRoutePolicy.js
 │   │   ├── publishedLanguageScope.js
 │   │   ├── publishedLanguageScopeData.mjs
-│   │   └── publishedLocales.mjs
+│   │   ├── publishedLocales.mjs
+│   │   ├── localePublication.mjs
+│   │   ├── siteLocaleCatalog.cjs
+│   │   └── homeCopyCatalog.mjs
 │   ├── components/
 │   │   └── TLDR/
 │   ├── theme/
@@ -175,15 +191,16 @@ citations:
 2. Run or update `node scripts/generate-localized-docs.cjs`.
 3. Translate content in `i18n/<locale>/docusaurus-plugin-content-docs/current/`.
 4. Translate navbar, footer, and docs sidebar messages under `i18n/<locale>/`.
-5. Build and audit the site before publishing the locale.
+5. Use `node scripts/translate-site-core.cjs --mode faq|ui|home --write --locales=<...>` for bounded LM Studio translation; use `--mode home-boundary` for a single homepage field change.
+6. Build and audit the site before publishing or promoting the locale.
 
 ## Language Publishing Policy
 
-Do not add a locale to `i18n.locales` just because a translation folder exists. The supported policy is now full docs-route publication: every source page under `website/docs/` must have a localized counterpart before the locale appears in the public language dropdown.
+Do not add a locale to `i18n.locales` just because a translation folder exists. Route availability and publication quality are separate contracts: every source page under `website/docs/` must have a localized counterpart before the locale appears in the public language dropdown, but only locales that pass the content/metadata gates may be indexable.
 
-Current policy: English remains the canonical source surface, and every README/UI locale declared in `src/lib/publishedLocales.mjs` exposes the complete docs route set: Simplified Chinese (`zh-CN`), Traditional Chinese (`zh-Hant`), Traditional Chinese for Taiwan (`zh-TW`), Japanese (`ja`), French (`fr`), German (`de`), Spanish (`es`), Korean (`ko`), Italian (`it`), Portuguese (`pt`), Brazilian Portuguese (`pt-BR`), Russian (`ru`), Arabic (`ar`), Persian (`fa`), Hindi (`hi`), Bengali (`bn`), Dutch (`nl`), Swedish (`sv`), Finnish (`fi`), Danish (`da`), Norwegian (`no`), Polish (`pl`), Turkish (`tr`), Hebrew (`he`), Thai (`th`), Greek (`el`), Czech (`cs`), Hungarian (`hu`), Romanian (`ro`), Ukrainian (`uk`), Vietnamese (`vi`), Indonesian (`id`), and Malay (`ms`). Provider names, CLI commands, configuration keys, file extensions, and package names intentionally remain stable across languages so users can match documentation to the plugin UI, CLI output, and logs.
+Current policy: English remains canonical. Every README/UI locale declared in `src/lib/publishedLocales.mjs` exposes the complete docs route set, while `src/lib/publishedLocales.mjs:indexablePublishedLocaleCodes` currently contains only `en` and `zh-CN`. Other locales are reachable for review, labeled `[MT]`, emit `noindex,follow`, and are excluded from sitemap generation until they pass the same gates. Provider names, CLI commands, configuration keys, file extensions, and package names intentionally remain stable across languages so users can match documentation to the plugin UI, CLI output, and logs.
 
-`website/src/lib/publishedLanguageScopeData.mjs` still exists because older GEO gates and zh-CN theme overrides consume it, but it now declares the full docs route set rather than a partial-publishing allowlist. `website/src/lib/publishedLocales.mjs` owns the public language matrix used by Docusaurus, the docs generator, and the build audit. When adding or removing docs pages or locales, update the matching source file and rerun:
+`website/src/lib/publishedLanguageScopeData.mjs` still exists because older GEO gates and zh-CN theme overrides consume it, but it now declares the full docs route set rather than a partial-publishing allowlist. `website/src/lib/publishedLocales.mjs` owns route availability, while `website/src/lib/localePublication.mjs` owns the verified/indexable quality claim used by metadata and the build audit. When adding or removing docs pages or locales, update the matching source file and rerun:
 
 ```bash
 npm run build

@@ -18,27 +18,27 @@ import TLDR from '@site/src/components/TLDR';
 # Diagrammer
 
 <TLDR>
-Vælg **hvilken type diagram du behøver**, og vælg derefter dess **editerbare kildeformat**. Se forud på det fulde resultat i Obsidian, herunder en Drawnix-board samt de indbyggede Mermaid-visueler, og eksportér hver panel som SVG, PNG eller PDF.
+Vælg **hvilken type diagram du behøver**, og vælg derefter dess **redigerbare kildeformat**. Se forud på det fulde resultat i Obsidian, herunder en Drawnix-board med embedte Mermaid-visueler, og eksportér hver panel som SVG, PNG eller PDF.
 </TLDR>
 
-## Forstå de tre valmuligheder
+## Forstå de tre valgmuligheder
 
 | Valg | Hvad det styrer | Eksempler |
 |---|---|---|
 | Diagramtyp | Hva diagrammet betyder | Flødediagram, sekvensdiagram, kretsdiagram, datagrafik |
-| Kildeformat | Det editerbare eller genbrugelige fil, som Notemd skaber | Mermaid, JSON Canvas, Draw.io, Drawnix, CircuitikZ |
+| Kildeformat | Det redigerbare eller brugbare fil, som Notemd skaber | Mermaid, JSON Canvas, Draw.io, Drawnix, CircuitikZ |
 | Exportformat | Bilden eller dokumentet, der bruges til deling | SVG, PNG, PDF |
 
-Draw.io og Drawnix er **kildeformerater**, ikke diagramtyper. CircuitikZ er et kildeformat designet til kretsdiagrammer. Samme forudvisning kan eksporteres til flere visuelle formerater, så at valg af CircuitikZ begrænser dig ikke til SVG.
+Draw.io og Drawnix er **kildeformerater**, ikke diagramtyper. CircuitikZ er et kildeformat designet til kretsdiagrammer. Samme forudvisning kan eksporteres til flere visuelle formatter, så at valg af CircuitikZ begrænser dig ikke til SVG.
 
 ## Vælg et kildeformat
 
 | Format | Bedst til | Kildefil |
 |---|---|---|
-| Mermaid | Diagrammer, der gemmes direkte i Markdown | Mermaid-kodeblok |
+| Mermaid | Diagrammer, der behandles direkte i Markdown | Mermaid-kodeblok |
 | JSON Canvas | Obsidian-skræmmeworkflows | `.canvas` |
-| Draw.io | Editering senere i diagrams.net eller kompatible værktøjer | `.drawio` |
-| Drawnix | Handskrevet eller whiteboard-stil editering | `.drawnix` |
+| Draw.io | Redigering senere i diagrams.net eller kompatible værktøjer | `.drawio` |
+| Drawnix | Handskrevet eller whiteboard-stil redigering | `.drawnix` |
 | CircuitikZ | Strukturerede elektriske og transistorkretsler | `.tex` |
 
 Læmme **Favoritkildeformat** på **Auto**, hvis du ikke har brug for en specifik editor. Notemd vælger et kompatibelt format til den valgte diagramtyp.
@@ -47,48 +47,52 @@ Læmme **Favoritkildeformat** på **Auto**, hvis du ikke har brug for en specifi
 
 1. Åbne noten eller vælge teksten, du vil visualisere.
 2. Vælg **Generer diagram** fra Notemd-sidenbordet eller kommandopanelen.
-3. Vælg en **diagramtyp**, eller lade det være på **Auto-detect**.
-4. Vælg et **kildeformat**, eller lade det være på **Auto**. Vælg **Drawnix**, hvis du ønsker en kunstmap med editerbare node og indbyggede Mermaid-visueler.
-5. Gå gjennem forudvisningen. Et multi-panel-resultat beholder Drawnix-boardet samt hver Mermaid-panel i kildenes rækkefølge indenfor én vertikalt skrullebar forudvisningshülle; Mermaid-panele bruger deres renderede højde istedet for at klippes af.
-6. Vælg en panels **Export SVG**, **Export PNG** eller **Export PDF**-handling for en visuel, eller brug en overordnet billedexport for alle panele. For flere panele vælger du kildemappen eller en custom-mapp relateret til Vault; Notemd skriver én deterministisk fil per panel og fortsætter efter en individuel fejl.
-7. Brug **Søj kildefil**, hvis du også behøver den editerbare artefakt.
+3. Vælg en **diagramtyp**, eller lade det på **Auto-detect**.
+4. Vælg et **kildeformat**, eller lade det på **Auto**. Vælg **Drawnix**, hvis du ønsker en knowledge-map med redigerbare node og embedte Mermaid-visueler.
+5. Gå gjennem forudvisningen. Et multi-panel-resultat beholder Drawnix-boardet samt alle Mermaid-panele i kilderejsefølge indenfor én vertikalt skrullebar forudvisningshülle; Mermaid-panele bruger deres renderede højde istedet for at klippes af.
+6. Vælg en panels **Export SVG**, **Export PNG** eller **Export PDF**-handling for én visuel, eller brug en overordnet billedexport for alle panele. For flere panele vælg kildemappen eller en custom Vault-relateret mappe; Notemd skriver en deterministisk fil per panel og fortsætter efter en individuel fejl.
+7. Brug **Søj kildefil**, hvis du også behøver den redigerbare artefakt.
 
-Export-menuen tilbyder **Export SVG**, **Export PNG** og **Export PDF**-handlinger for den aktuelle visuelle forudvisning. Hvert paneloverskrift viser samme handlinger for en enkelt Mermaid eller Drawnix-visuel, så et stort forudskyn behøver ikke eksporteres som én ugenæst billede.
+Export-menuen tilbyder **Export SVG**, **Export PNG** og **Export PDF**-handlinger for den aktuelle visuelle forudvisning. Hvert paneloverskrift viser samme handlinger for en enkelt Mermaid eller Drawnix-visuel, så et stort forudvisningsobjekt behøver ikke eksporteres som én ugenæst billede.
 
 Vælg **Historik** i forudvisningen for at åbne Vault-historiekassetten uden at fjerne diagrammet. Du kan søge og filtrere afsluttede diagrammer, åbne en forudvisning igen eller åbne gemte artefakter. Diagramhistorik er også tilgængelig direkte fra kommandopanelen og Notemd-sidenbordet, selv når ingen noter er aktive.
 
 SVG og PDF genereres fra vektorgeometri; PDF bruger samme SVG-layout og tekstmæssig information i stedet for at rasterisere hele forudvisningen. Billedexportens PPI i Notemd-indstillinger kontrollerer kun PNG-rasteriseringen (72–600 PPI, 300 som standard).
 
-## Drawnix-forudvisninger med indbyggede Mermaid
+## Drawnix-forudvisninger med embedte Mermaid
 
-Når en Drawnix-artefakt indeholder Mermaid-visueler, saniterer Notemd den renderede SVG og gemmer Mermaid-kilden sammen med den i metadata-filen `.drawnix`. Forudvisningen kan derfor vise Mermaid-billedet indenfor Drawnix-kunstmappen uden at kræve Drawnix eller Plait-runtime. Visueler, der kun er Mermaid og sikret embedt, skaber ikke en separat `.assets`-mapp; eksterne binære medier eller uopgeløste visueler beholder en tilhørende fil, så ingen data tabes.
+Når en Drawnix-artefakt indeholder Mermaid-visueler, saniterer Notemd den renderede SVG og gemmer Mermaid-kilden sammen med den i metadata-filen `.drawnix`. Forudvisningen kan derfor vise Mermaid-billedet indenfor Drawnix-knowledge-mappen uden at kræve Drawnix eller Plait-runtime. Den standardmæssige path er self-contained og skaber ikke en separat `.assets`-mappe. Aktiver **Eksportér også fulde Mermaid-visueler**, hvis du behøver Mermaid-kilden, SVG og manifest-filer til overførsel eller ekstern redigering. Existente artefakter med `.assets` bliver fortsat støttet, og en fejlt Mermaid SVG kan rekonstrueres fra kildeteksten, der gemmes i metadata.
 
-Forudvisningen er med vilje en enkelt skrullebar overflade: den hovede Drawnix-skræmmen vises først, følget af hver indbyggede Mermaid-panel i kildenes rækkefølge. At lukke og åbne en gemt historiekpost rekonstruerer samme panelliste, dimensioner og eksporthandlinger.
+Opklarede billedembedninger modtager også en data-støttet SVG-forudvisning, hvor det er muligt, så at fjerne en gammel komplementær mappe ikke fører til, at en gemt Drawnix-forudvisning forsvinder. Forudvisningslæsningen bruger først embedte data, derefter gamle komplementære filer, og som siste fallback kildetekstrekonstruktionen.
+
+Forudvisningen er med vilje en enkelt skrullebar overflade: den hovede Drawnix-skræmmen vises først, følget af hver embedt Mermaid-panel i kilderejsefølge. At lukke og åbne en gemt historiekpost rekonstruerer samme panelliste, dimensioner og exporthandlinger.
+
+Forklaringer til Drawnix-relasjoner er lagt ud som førsteklasse visuelle elementer. Rendereren ruter stregepiger rundt om placerede node-rectangler og reserverer en målt titel/opsummary-overflade som en beskyttet region. Lange opsummeringer og relasjonslabeler wrapes til målte linjer, skoven flytter under den resulterende overfladeshøjde, og en ugenæst label-box maleres efter node-lagen. Overfladen renderes sidst med en ugenæst bakgrund, så at et yderligere rute ikke kan skjule tekst som `以 Notemd 插件为对象的知识地图，覆盖系统架构、LLM 调用管道、图表渲染平台、模块地图、CLI 边界现实、关键设计决策与验证。` eller en relasjonsforklaring som `RendererRegistry feeds Vault files, preview modal, and export`. Den nativte `.drawnix`-piger bruger Plait-kompatible `shape`, `texts[]`, marker og stroke-felter, mens det beholder legater metadata for ældre brugere. Hvis en forespurgt Drawnix-map ikke kan finde en kollisionsfri rute eller label-position, mislykkes genereringen med en formatfejl i stedet for at tyst gemme en Mermaid-fallback under en `.drawnix`-operation.
 
 ## Kretsdiagrammer
 
-Vælg **Kretsdiagram** med **CircuitikZ-kildefil** for understøttede krets-anmodninger. Notemd genererer først en struktureret kretsbeskrivelse og skriver derefter CircuitikZ-kilden. Dette er mere tillidsværd end at bede modellen om at skrive uafgrænset LaTeX.
+Vælg **Kretsdiagram** med **CircuitikZ-kildefil** for understøttede kretsprøser. Notemd genererer først en struktureret kretsbeskrivelse og skriver derefter CircuitikZ-kilden. Dette er mere pålideligt end at bede modellen om at skrive uafgrænset LaTeX.
 
-Den nuværende CircuitikZ-støtte er med vilje begrænset. Vanlige NMOS-amplificatører med offentlig kilde og understøttede CMOS-byggeblokker fungerer bedst. Kontroller altid forudvisningen og kilden før du bruger et genereret krets i teknisk eller publikationsarbejde.
+Nuvarlig CircuitikZ-støtte er med vilje begrænset. Vanlige NMOS-amplificatører med offentlig kildemateriale og understøttede CMOS-byggeelementer fungerer bedst. Kontroller altid forudvisningen og kilden før du bruger et genereret krets i teknisk eller publikationsarbejde.
 
-SVG-forudvisningen er en overvejsingshjælp, der genereres af Notemd. Den er ikke bevis på, at en lokal LaTeX- eller TikZJax-installation har kompilert `.tex`-filen med succes.
+SVG-forudvisningen er en gennemsigtighedskomplement, der genereres af Notemd. Den er ikke bevis på, at en lokal LaTeX- eller TikZJax-installation har kompilert `.tex`-filen med succes.
 
-**Valgfri nativ kompilering.** Du har ikke brug for LaTeX til forudvisningen i pluginet eller til eksport af SVG, PNG og PDF-forudskyn. På desktop kan du åbne **CircuitikZ nativ kompilemiljø** fra diagramindstillingerne eller kommandopanelen, hvis du behøver kompilationsdiagnostik eller en nativ LaTeX PDF. Notemd kan genbruge et systemmæssigt `tectonic` eller `pdflatex`, bruge en custom-exekutable eller installere den pinnedede managed Tectonic-runtime efter at du eksplisit har valgt **Installér**. Miljøpanelen viser progression og fejl inline og giver dig mulighed for at fjerne den managede runtime senere.
+**Valgfri nativ kompilering.** Du har ikke brug for LaTeX til forudvisningen i pluginet eller til eksport af SVG, PNG og preview-PDF. På desktop kan du åbne **CircuitikZ nativ kompilemiljø** fra diagramindstillingerne eller kommandopanelen, hvis du behøver kompilationsdiagnostik eller en nativ LaTeX PDF. Notemd kan bruge et systemstillet `tectonic` eller `pdflatex`, en custom eksekutable, eller installere den pinned managed Tectonic-runtime efter at du eksplisit har valgt **Install**. Miljøpanelen viser progression og fejl inline og giver dig mulighed for at fjerne den managed runtime senere.
 
 ## Problemløsning
 
 ### Resultatet er den forkerte diagramtyp
 
-Vælg diagramtypen eksplisit istedet for at bruge Auto-detect. For en krets, vælg **Kretsdiagram** og brug kommandoen **Generer diagram**, ikke den gamle kommandoen **Sammanfatt til Mermaid-diagram**.
+Vælg diagramtypen eksplisit istedet for at bruge Auto-detect. For en krets, vælg **Kretsdiagram** og brug kommandoen **Generer diagram**, ikke den legaterede kommandoen **Summarise as Mermaid diagram**.
 
 ### Et kildeformat er ugyldigt
 
-Set kildeformatet tilbake til **Auto**, eller vælg et format, der er designet til den relevante diagramtyp. CircuitikZ er til kretsdiagrammer; Draw.io og Drawnix er æmnet til understøttede strukturerede diagrammer.
+Sett kildeformatet tilbake til **Auto**, eller vælg et format, der er designet til den relevante diagramtyp. CircuitikZ er til kretsdiagrammer; Draw.io og Drawnix er æmnet til understøttede strukturerede diagrammer.
 
 ### Export-menuen fejler
 
-SVG, PNG og PDF kræver en visuel forudvisning. Hvis kun kildetekst er tilgængelig, gem den kildefil og åbne den i det tilsvarende eksterne værktøj.
+SVG, PNG og PDF kræver en visuel forudvisning. Hvis kun kildetekst er tilgængelig, gem den kildefil og åbne den i det relevante eksterne værktøj.
 
 ### En CircuitikZ-fil kompilerer ikke udenfor
 
-Åbne **CircuitikZ nativ kompilemiljø** og køre miljøkontrollen. Reparer den managede runtime eller overhold, at din custom/system-kompilator kan hente `circuitikz`-pakken. Notemd indeholder ikke en fuld TeX-distribution i pluginfilen.
+Åbne **CircuitikZ nativ kompilemiljø** og køre miljøkontrollen. Reparer den managed runtime eller verificer, at din custom/system-kompilator kan hente `circuitikz`-pakken. Notemd indeholder ikke en fuld TeX-distribution i pluginfilen.

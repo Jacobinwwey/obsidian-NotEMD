@@ -15,80 +15,88 @@ citations:
 
 import TLDR from '@site/src/components/TLDR';
 
-# Diagramas
+# Διαγράμματα
 
 <TLDR>
-Elige **qué tipo de diagrama necesitas**, luego selecciona su **formato de origen editable**. Previsualiza el resultado completo en Obsidian, incluyendo un tablero Drawnix y sus elementos visuales Mermaid incrustados, y exporta cada panel como SVG, PNG o PDF.
+Επιλέξτε **ποιο είδος διαγράμματος χρειάζεστε**, στη συνέχεια επιλέξτε το **μορφότυπο πηγής που μπορεί να τροποποιηθεί**. Δείτε προβολή του ολικού αποτελέσματος στο Obsidian, συμπεριλαμβανομένου ενός πάνελ Drawnix και των ενσωματωμένων οπτικών στοιχείων Mermaid, και εξαγάγετε κάθε πάνελ ως SVG, PNG ή PDF.
 </TLDR>
 
-## Comprender las tres opciones
+## Κατανόηση των τριών επιλογών
 
-| Opción | Qué controla | Ejemplos |
+| Επιλογή | Τι ελέγχει | Παραδείγματα |
 |---|---|---|
-| Tipo de diagrama | El significado del diagrama | Diagrama de flujo, diagrama de secuencia, diagrama eléctrico, gráfico de datos |
-| Formato de origen | El archivo editable o reutilizable que crea Notemd | Mermaid, JSON Canvas, Draw.io, Drawnix, CircuitikZ |
-| Formato de exportación | La imagen o documento utilizado para compartir | SVG, PNG, PDF |
+| Τύπος διάγραμματος | Τι σημαίνει το διάγραμμα | Διάγραμμα ροής, διάγραμμα αλληλουχίας, διάγραμμα κυκλώματος, γραφή δεδομένων |
+| Φόρματο πηγής | Το επεξεργασίμο ή επαναχρησιμοποιήσιμο αρχείο που δημιουργεί το Notemd | Mermaid, JSON Canvas, Draw.io, Drawnix, CircuitikZ |
+| Φόρματο εξάγωσης | Η εικόνα ή το έγγραφο που χρησιμοποιείται για κοινοποίηση | SVG, PNG, PDF |
 
-Draw.io y Drawnix son **formatos de origen**, no tipos de diagrama. CircuitikZ es un formato de origen diseñado específicamente para diagramas eléctricos. La misma previsualización puede exportarse a varios formatos visuales, por lo que seleccionar CircuitikZ no te limita únicamente al formato SVG.
+Τα Draw.io και Drawnix είναι **φόρματα πηγής**, όχι τύποι διαγράμματος. Το CircuitikZ είναι ένα φόρματο πηγής που έχει σχεδιαστεί για διαγράμματα κυκλώματος. Η ίδια προβολή μπορεί να εξαχθεί σε διάφορα οπτικά φόρματα, οπότε η επιλογή του CircuitikZ δεν σας περιορίζει μόνο στο SVG.
 
-## Elegir un formato de origen
+## Επιλογή μορφάτου πηγής
 
-| Formato | Mejor para | Archivo de origen |
+| Μορφάτο | Αντιμετωπίζει καλύτερα | Αρχείο πηγής |
 |---|---|---|
-| Mermaid | Diagramas que se mantienen directamente en Markdown | Bloque de código Mermaid |
-| JSON Canvas | Flujos de trabajo nativos en el canvas de Obsidian | `.canvas` |
-| Draw.io | Edición posterior en diagrams.net o herramientas compatibles | `.drawio` |
-| Drawnix | Edición al estilo de dibujo a mano o pizarra | `.drawnix` |
-| CircuitikZ | Circuitos eléctricos y de transistores estructurados | `.tex` |
+| Mermaid | Διαγράμματα που διατηρούνται απευθείας στο Markdown | Βλόκος κώδικα Mermaid |
+| JSON Canvas | Εγχειρίσματα canvas natιβά του Obsidian | `.canvas` |
+| Draw.io | Επεξεργασία αργότερα στο diagrams.net ή συμβατές εργαλεία | `.drawio` |
+| Drawnix | Επεξεργασία χειρογραφημένων διαγράμματον ή σε στυλ ταβλάς | `.drawnix` |
+| CircuitikZ | Δομημένα ηλεκτρικά και τρανζίστορ κύκλωματα | `.tex` |
 
-Deja **Formato de origen preferido** en **Automático** si no necesitas un editor específico. Notemd elegirá un formato compatible según el tipo de diagrama seleccionado.
+Αφήστε την επιλογή **Preferred source format** στην τιμή **Auto** αν δεν χρειάζεστε συγκεκριμένο εδιτόριο. Το Notemd επιλέγει ένα συμβατό μορφάτο για τον επιλεγμένο τύπο διαγράμματος.
 
-## Generar y exportar un diagrama
+## Δημιουργία και εξάγωση διαγράμματος
 
-1. Abre la nota o selecciona el texto que deseas visualizar.
-2. Elige **Generar diagrama** desde la barra lateral de Notemd o el panel de comandos.
-3. Selecciona un **tipo de diagrama**, o déjalo en **Detectar automáticamente**.
-4. Elige un **formato de origen**, o déjalo en **Automático**. Elige **Drawnix** cuando quieras un mapa de conocimiento con nodos editables e imágenes Mermaid incrustadas.
-5. Revisa la previsualización. Un resultado multi-panel mantiene el tablero Drawnix y cada panel Mermaid en el orden original dentro de una sola ventana verticalmente desplegable; los paneles Mermaid utilizan su altura renderizada en lugar de ser recortados.
-6. Elige la acción **Exportar SVG**, **Exportar PNG** o **Exportar PDF** para un solo formato visual, o utiliza una exportación de imagen a nivel superior para todos los paneles. Para varios paneles, elige la carpeta de origen o una carpeta personalizada relativa al Vault; Notemd genera un archivo único y determinista por panel y continúa trabajando incluso si ocurre un error en uno específico.
-7. Usa **Guardar archivo de origen** cuando también necesites el archivo editable.
+1. Ανοίξτε τη σημειώση ή επιλέξτε το κείμενο που θέλετε να οπτικοποιήσετε.
+2. Επιλέξτε **Δημιουργία διαγράμματος** από το πλαισίο στην πλευρά ή το πάνελ εντολών του Notemd.
+3. Επιλέξτε έναν **τύπο διαγράμματος** ή αφήστε το σε **Αυτόματη ανίχνευση**.
+4. Επιλέξτε ένα **μορφότυπο πηγής** ή αφήστε το σε **Αυτόματο**. Επιλέξτε **Drawnix** όταν θέλετε μία χάρτα γνώσης με εδιτέλλες κόμβους και ενσωματωμένα οπτικά στοιχεία Mermaid.
+5. Εξετάστε την προεπισκόπηση. Ένα αποτέλεσμα με πολλά πάνελ διατηρεί το πλαίσιο Drawnix και κάθε πάνελ Mermaid στην αρχική τους σειρά μέσα σε ένα περιβλήμα υπερυψωμένης προεπισκόπησης· τα πάνελ Mermaid χρησιμοποιούν το ύψος που έχουν αποδοθεί, αντί να κόπονται.
+6. Επιλέξτε την ενέργεια **Εξάγωση SVG**, **Εξάγωση PNG** ή **Εξάγωση PDF** για ένα συγκεκριμένο οπτικό στοιχείο, ή χρησιμοποιήστε εξάγωση εικόνας σε ανώτατο επίπεδο για όλα τα πάνελ. Για πολλά πάνελ, επιλέξτε τον φάκελο πηγής ή έναν προσαρμοσμένο φάκελο σχετικό με το Vault· το Notemd γράφει ένα καθοριστικό αρχείο για κάθε πάνελ και συνεχίζει τη δουλειά ακόμη και σε περίπτωση αποτυχίας ενός συγκεκριμένου.
+7. Χρησιμοποιήστε **Αποθήκευση αρχείου πηγής** όταν χρειάζεστε επίσης το εδιτέλλες αρχείο.
 
-El menú de exportación ofrece las acciones **Exportar SVG**, **Exportar PNG** y **Exportar PDF** para la previsualización visual actual. Cada encabezado de panel muestra las mismas acciones para un único elemento visual Mermaid o Drawnix, por lo que no es necesario exportar una previsualización grande como una sola imagen opaca.
+Το μενού **Εξάγωση** παρέχει τις ενέργειες **Εξάγωση SVG**, **Εξάγωση PNG** και **Εξάγωση PDF** για την τρέχουσα προεπισκόπηση οπτικών στοιχείων. Κάθε επικεφαλίδα πάνελ παρουσιάζει τις ίδιες ενέργειες για ένα μόνο οπτικό στοιχείο Mermaid ή Drawnix, οπότε μία μεγάλη προεπισκόπηση δεν χρειάζεται να εξαχθεί ως μία αδιαφανής εικόνα.
 
-Elige **Historial** en la previsualización para abrir el panel de historial del Vault sin ocultar el diagrama. Puedes buscar y filtrar diagramas ya completados, volver a abrir una previsualización o abrir archivos guardados. El historial de diagramas también está disponible directamente desde el panel de comandos y la barra lateral de Notemd, incluso cuando no hay ninguna nota activa.
+Επιλέξτε **Ιστορία** στην προεπισκόπηση για να ανοίξετε το πανέλ ιστορίας του Vault χωρίς να κρύβεται το διάγραμμα.Μπορείτε να αναζητήσετε και να φιλτράρετε ολοκληρωμένα διαγράμματα, να επαναφορτώσετε μία προεπισκόπηση ή να ανοίξετε αποθηκευμένα αρχεία. Η ιστορία των διαγράμματος είναι επίσης διαθέσιμη απευθείας από το πάνελ εντολών και το πλαισίο στην πλευρά του Notemd, ακόμη και όταν δεν υπάρχει ενεργή σημειώση.
 
-SVG y PDF se generan a partir de geometría vectorial; PDF utiliza la misma maquetación SVG y métricas de texto en lugar de rasterizar toda la previsualización. La resolución PPI para la exportación de imagen en la configuración de Notemd solo controla la rasterización de PNG (de 72 a 600 PPI, con 300 como valor predeterminado).
+Τα SVG και PDF δημιουργούνται από βεκτόρια γεωμετρία· το PDF χρησιμοποιεί την ίδια διάταξη SVG και τα μέτρα κειμένου, αντί να ραστερίζει ολόκληρη την προεπισκόπηση. Το PPI για εξάγωση εικόνας στις ρυθμίσεις του Notemd ελέγχει μόνο τη ραστερίζηση PNG (72-600 PPI, 300 ως προεπιλογή).
 
-## Previsualizaciones Drawnix con elementos Mermaid incrustados
+## Προεπισκόπησης Drawnix με ενσωματωμένα Mermaid
 
-Cuando un archivo Drawnix contiene elementos visuales Mermaid, Notemd sanitiza el SVG renderizado y mantiene el código fuente Mermaid junto a él en los metadatos del archivo `.drawnix`. Por lo tanto, la previsualización puede mostrar la imagen Mermaid dentro del mapa de conocimiento Drawnix sin necesidad del entorno runtime Drawnix o Plait. Los elementos visuales que son Mermaid únicamente y están incrustados de forma segura no generan un directorio `.assets` separado; los medios binarios externos o los elementos visuales no resueltos conservan un archivo complementario para evitar la pérdida de datos.
+Όταν ένα artifact του Drawnix περιλαμβάνει οπτικά στοιχεία Mermaid, το Notemd καθαρίζει το αποτελέσματι SVG και διατηρεί το πηγαίο κώδικα Mermaid δίπλα του στα metadata `.drawnix`. Συνεπώς, η προεπισκόπηση μπορεί να εμφανίσει την εικόνα Mermaid μέσα στον χάρτη γνώσεων Drawnix χωρίς να απαιτείται η λειτουργία του Drawnix ή του Plait. Η προεπιλεγμένη διαδρομή είναι αυτόνομη και δεν δημιουργεί ξεχωριστό φάκελο `.assets`. Ενεργοποιήστε την επιλογή **Εξαγάγεται επίσης ολόκληρο το οπτικό σύμβολο Mermaid** όταν χρειάζεστε το πηγαίο κώδικα Mermaid, το SVG και τα σχετικά manifest για μεταφορά ή εξωτερική επεξεργασία. Τα υπάρχοντα artifacts με φάκελο `.assets` παραμένουν συνδεδεμένα, και ένας απουσιώνοντας παλιός SVG Mermaid μπορεί να ανακατασκευαστεί από το κείμενο πηγής που διατηρείται στα metadata.
 
-La previsualización está diseñada intencionalmente como una sola superficie desplegable: primero aparece el canvas principal de Drawnix, seguido por cada panel Mermaid incrustado en el orden original. Cerrar y volver a abrir una entrada del historial guardada reconstruye la misma lista de paneles, dimensiones y acciones de exportación.
+Οι επιλυμένες ενσωμάτωσεις εικόνων λαμβάνουν επίσης μία προεπισκόπηση SVG βασισμένη σε δεδομένα όταν είναι δυνατό, οπότε η αφαίρεση ενός παλιού φάκελου συνοδείας δεν προκαλεί την εξαφάνιση μίας αποθηκευμένης προεπισκόπησης Drawnix. Η φόρτωση της προεπισκόπησης χρησιμοποιεί αρχικά τα ενσωματωμένα δεδομένα, στη συνέχεια τα παλιά αρχεία συνοδείας και τέλος την επιλογή ανακατασκευής από το κείμενο πηγής.
 
-## Diagramas eléctricos
+Η προεπισκόπηση είναι σκόπιμα μία μόνη, κινητή επιφάνεια: πρώτα εμφανίζεται το κύριο canvas του Drawnix, ακολουθούμενο από κάθε ενσωματωμένο πάνελ Mermaid με τη σειρά πηγής του. Η κλείση και ξαναφορά μίας αποθηκευμένης εντροπής ιστορικών δεδομένων ανακατασκευάζει την ίδια λίστα πανελών, τις διαστάσεις και τις ενέργειες εξαγωγής.
 
-Elige **Diagrama eléctrico** con **Archivo de origen CircuitikZ** para solicitudes de diagramas eléctricos compatibles. Notemd primero genera una descripción estructurada del circuito y luego escribe el código fuente en formato CircuitikZ. Este método es más fiable que pedir al modelo que genere código LaTeX sin restricciones.
+Οι εξηγήσεις σχέσεων Drawnix παρουσιάζονται ως οπτικά στοιχεία πρώτης κλάσης. Ο μεταγλωττιστής διοδηγεί τις κόκκινες βέλες γύρω από τα διαμέρισματα των κόμβων και διατηρεί ένα μετρημένο επάγγελμα/σύνοψη ως προστατευμένη περιοχή. Οι μακρές σύνοψεις και τα επίθεματα σχέσεων περικλείονται σε μετρημένες γραμμές, η “δάσος” διακινείται κάτω από το ύψος του επαγγέλματος που προκύπτει, και μία αδιαφανή κουτία επιθέματος ζωγραφίζεται μετά τη στρώση των κόμβων. Το επάγγελμα αποδίδεται τελευταίο με αδιαφανή φόντο, ώστε μία εξωτερική διαδρομή να μην καλύπτει κείμενα όπως `以 Notemd 插件为对象的知识地图，覆盖系统架构、LLM 调用管道、图表渲染平台、模块地图、CLI 边界现实、关键设计决策与验证。` ή εξηγήσεις σχέσεων όπως `RendererRegistry feeds Vault files, preview modal, and export`. Η φυσική βέλα `.drawnix` χρησιμοποιεί τα συμβατά με το Plait `shape`, `texts[]`, markers και stroke fields, διατηρώντας παράλληλα τα παλιά metadata για παλαιότερους χρήστες. Αν μία αιτούμενη κάρτα Drawnix δεν μπορεί να βρει μία διαδρομή χωρίς συγκρούσεις ή θέση επίθεματος, η γένεση αποτυγχάνει με σφάλμα μορφής αντί να αποθηκεύσει αθόρυβα ένα fallback Mermaid μέσα σε μία επιχείρηση `.drawnix`.
 
-La compatibilidad actual con CircuitikZ está intencionalmente limitada. Los amplificadores NMOS de código abierto y los componentes CMOS soportados funcionan mejor. Siempre revisa la previsualización y el código fuente antes de utilizar un circuito generado en trabajos técnicos o de publicación.
+## Διαγράμματα κυκλωμάτων
 
-La previsualización en SVG es una ayuda para la revisión generada por Notemd. No constituye prueba de que una instalación local de LaTeX o TikZJax haya compilado con éxito el archivo `.tex`.
+Επιλέξτε **Διάγραμμα κυκλώματος** με αρχείο πηγής **CircuitikZ** για τις υποστηριζόμενες αιτήσεις κυκλωμάτων. Το Notemd παράγει πρώτα μία δομημένη περιγραφή του κυκλώματος και στη συνέχεια γράφει το αρχείο πηγής CircuitikZ. Αυτό είναι πιο αξιόπιστο από το να ζητείτε από το μοντέλο να γράψει άχρημο LaTeX.
 
-**Compilación nativa opcional.** No necesitas LaTeX para la previsualización dentro del complemento ni para las exportaciones en SVG, PNG o PDF de previsualización. En equipos de escritorio, abre **Entorno de compilación nativo CircuitikZ** desde la configuración del diagrama o el panel de comandos cuando necesites diagnósticos de compilación o un PDF en LaTeX nativo. Notemd puede reutilizar `tectonic` o `pdflatex` del sistema, utilizar un ejecutable personalizado o instalar el entorno Tectonic gestionado después de seleccionar explícitamente **Instalar**. El panel del entorno muestra el progreso y los errores directamente en la interfaz, y te permite eliminar posteriormente el entorno gestionado.
+Η τρέχουσα υποστήριξη του CircuitikZ είναι σκόπιμα περιορισμένη. Οι φορτηγοί NMOS με κοινά αρχεία πηγής και τα υποστηριζόμενα ελέμεντα σύνθεσης CMOS λειτουργούν καλύτερα. Πάντα ελέγξτε την προβολή και το αρχείο πηγής πριν χρησιμοποιήσετε ένα παραγόμενο διάγραμμα σε τεχνικές ή εκδοτικές εργασίες.
 
-## Solución de problemas
+Η προβολή SVG είναι ένα συνοδευτικό εργαλείο ανάλυσης που παράγεται από το Notemd. Δεν αποτελεί απόδειξη ότι μία τοπική εγκατάσταση LaTeX ή TikZJax μεταγλώττισε με επιτυχία το αρχείο `.tex`.
 
-### El resultado es del tipo de diagrama incorrecto
+**Επιλεκτική νativή μεταγλώττιση.** Δεν χρειάζεται LaTeX για την προβολή εντός του προσθέτου ή την εξαγωγή SVG, PNG και PDF προβολής. Στο desktop, ανοίξτε το **περιβάλλον νativής μεταγλώττισης CircuitikZ** από τις ρυθμίσεις του διαγράμματος ή από το παλέτο εντολών όταν χρειάζεστε διαγνώσεις μεταγλώττισης ή ένα PDF σε νativή μορφή LaTeX. Το Notemd μπορεί να αναχρησιμοποιήσει το συστηματικό `tectonic` ή `pdflatex`, να χρησιμοποιήσει ένα προσαρμοσμένο εκτελέσιμο, ή να εγκαταστήσει το διαχειρίζομενο runtime Tectonic μετά από ρητή επιλογή **Install**. Το πάνελ του περιβάλλοντος δείχνει την πρόοδο και τα σφάλματα αμέσως και σας επιτρέπει να αφαιρέσετε το διαχειρίζομενο runtime αργότερα.
 
-Elige explícitamente el tipo de diagrama en lugar de utilizar la opción Detectar automáticamente. Para un circuito, elige **Diagrama eléctrico** y utiliza el comando **Generar diagrama**, en lugar del comando obsoleto **Resumir como diagrama Mermaid**.
+## Αντιμετώπιση προβλημάτων
 
-### Un formato de origen no es adecuado
+### Το αποτέλεσμα είναι τύπος διάγραμματος που δεν ισχύει
 
-Vuelve a establecer el formato de origen en **Automático**, o elige un formato diseñado específicamente para ese tipo de diagrama. CircuitikZ está destinado a diagramas eléctricos; Draw.io y Drawnix están pensados para diagramas estructurados compatibles.
+Επιλέξτε ρητά τον τύπο διάγραμματος αντί να χρησιμοποιήσετε τη λειτουργία “Αυτόματη ανίχνευση”. Για ένα κύκλωμα, επιλέξτε **Circuit diagram** και χρησιμοποιήστε την εντολή **Generate diagram**, και όχι την παλιά εντολή **Summarise as Mermaid diagram**.
 
-### El menú de exportación no aparece
+Στόχος γλώσσα: Ελληνικά (el)
+Μέρος 9/11:
+### Ένας τύπος πηγής είναι ακατάλληλος
 
-SVG, PNG y PDF requieren una previsualización visual. Si solo tienes texto de origen disponible, guarda el archivo de origen y ábrelo en la herramienta externa correspondiente.
+Επιστρέψτε τον τύπο πηγής στην επιλογή **Auto**, ή επιλέξτε έναν τύπο που προορίζεται για αυτό τον τύπο διάγραμματος. Το CircuitikZ χρησιμοποιείται για διάγραμματα κυκλωμάτων· τα Draw.io και Drawnix προορίζονται για τα υποστηριζόμενα δομημένα διάγραμματα.
 
-### Un archivo CircuitikZ no se compila desde fuera
+### Το μενού Εξαγωγής λείπει
 
-Abre **Entorno de compilación nativo CircuitikZ** y ejecuta la verificación del entorno. Repara el entorno gestionado o verifica que tu compilador personalizado/sistema pueda obtener el paquete `circuitikz`. Notemd no incluye una distribución completa de TeX dentro del archivo del complemento.
+Η μενού εξαγωγής λείπει.
+
+Τα αρχεία SVG, PNG και PDF απαιτούν οπτική προβολή. Αν υπάρχει μόνο το πηγαίο κείμενο, συντηρήστε το αρχείο πηγής και ανοίξτε το στο αντίστοιχο εξωτερικό εργαλείο.
+
+### Ένα αρχείο CircuitikZ δεν μπορεί να κατασκευαστεί εξωτερικά
+
+Ανοίξτε το **γενέτικο περιβάλλον κατασκευής CircuitikZ** και εκτελέστε έλεγχο του περιβάλλοντος. Διορθώστε το διαχειρίζομενο runtime ή επαληθεύστε ότι ο προσαρμοσμένος/συστηματικός σας μεταγλωττιστής μπορεί να αποκτήσει το πακέτο `circuitikz`. Το Notemd δεν περιλαμβάνει ολόκληρη διανομή TeX μέσα στο αρχείο plugin.

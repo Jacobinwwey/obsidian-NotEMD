@@ -1,22 +1,22 @@
 {
   "version.label": {
-    "message": "Next",
+    "message": "अगला",
     "description": "The label for version current"
   },
   "sidebar.tutorialSidebar.category.Getting Started": {
-    "message": "Getting Started",
+    "message": "शुरुआत करें",
     "description": "The label for category 'Getting Started' in sidebar 'tutorialSidebar'"
   },
   "sidebar.tutorialSidebar.category.Core Features": {
-    "message": "Core Features",
+    "message": "मुख्य सुविधाएँ",
     "description": "The label for category 'Core Features' in sidebar 'tutorialSidebar'"
   },
   "sidebar.tutorialSidebar.category.LLM Providers": {
-    "message": "LLM Providers",
+    "message": "एलएलएम प्रदाता",
     "description": "The label for category 'LLM Providers' in sidebar 'tutorialSidebar'"
   },
   "sidebar.tutorialSidebar.category.Advanced": {
-    "message": "Advanced",
+    "message": "उन्नत",
     "description": "The label for category 'Advanced' in sidebar 'tutorialSidebar'"
   }
 }

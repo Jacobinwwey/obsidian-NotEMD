@@ -15,80 +15,88 @@ citations:
 
 import TLDR from '@site/src/components/TLDR';
 
-# Diagramlar
+# Diagram
 
 <TLDR>
-İhtiyacınız olan **diagram türünü** seçin, ardından onun **düzenlenebilir kaynak formatını** belirleyin. Obsidian içinde tamamlanmış sonucu önizleyin; bu görünüm bir Drawnix tahtası ve bunun içine yerleştirilmiş Mermaid görsellerini de kapsar. Ayrıca her bir paneli SVG, PNG veya PDF olarak dışa aktarabilirsiniz.
+Pilih **jenis diagram yang diperlukan**, kemudian pilih **format sumber yang boleh diedit** untuknya. Tonton pratonton hasil lengkap dalam Obsidian, termasuk papan Drawnix serta visualisasi Mermaid yang terbenam di dalamnya, dan eksport setiap panel sebagai SVG, PNG, atau PDF.
 </TLDR>
 
-## Üç seçeneği anlama
+## Fahami tiga pilihan yang ada
 
-| Seçenek | Neyi kontrol eder | Örnekler |
+| Pilihan | Apa yang dikawalnya | Contoh |
 |---|---|---|
-| Diagram türü | Diagramın ne anlama geldiğini | Akış şeması, sıralama diyagramı, devre diyagramı, veri grafiği |
-| Kaynak formatı | Notemd tarafından oluşturulan düzenlenebilir veya yeniden kullanılabilir dosya | Mermaid, JSON Canvas, Draw.io, Drawnix, CircuitikZ |
-| Dışa aktarım formatı | Paylaşım için kullanılacak görüntü veya belge | SVG, PNG, PDF |
+| Jenis diagram | Makna diagram tersebut | Alur kerja, diagram urutan, diagram litar, carta data |
+| Format sumber | Fail yang boleh diedit atau digunakan semula yang dihasilkan oleh Notemd | Mermaid, JSON Canvas, Draw.io, Drawnix, CircuitikZ |
+| Format eksport | Imej atau dokumen yang digunakan untuk dikongsi | SVG, PNG, PDF |
 
-Draw.io ve Drawnix **diagram türleri** değil, **kaynak formatlarıdır**. CircuitikZ ise devre diyagramları için tasarlanmış bir kaynak formatıdır. Aynı önizleme birden fazla görsel formata dönüştürülebildiğinden, CircuitikZ seçimi sizi yalnızca SVG kullanmaya zorlamaz.
+Draw.io dan Drawnix merupakan **format sumber**, bukannya jenis diagram. CircuitikZ ialah format sumber yang direka khusus untuk diagram litar. Pratonton yang sama boleh dieksport ke dalam beberapa format visual, jadi pemilihan CircuitikZ tidak akan membataskan anda hanya kepada SVG sahaja.
 
-## Bir kaynak formatı seçin
+## Pilih format sumber
 
-| Format | En uygun olduğu durumlar | Kaynak dosyası |
+| Format | Sesuai untuk | Fail sumber |
 |---|---|---|
-| Mermaid | Markdown içinde doğrudan tutulan diagramlar | Mermaid kod bloğu |
-| JSON Canvas | Obsidian’ın yerel canvas iş akışları | `.canvas` |
-| Draw.io | Daha sonra diagrams.net veya uyumlu araçlarda düzenleme | `.drawio` |
-| Drawnix | El ile çizim veya tahtaya benzer düzenlemeler | `.drawnix` |
-| CircuitikZ | Yapılandırılmış elektrik ve transistör devreleri | `.tex` |
+| Mermaid | Diagram yang disimpan terus dalam Markdown | Blok kod Mermaid |
+| JSON Canvas | Aliran kerja canvas asli Obsidian | `.canvas` |
+| Draw.io | Mengedit kemudian di diagrams.net atau alat serasi | `.drawio` |
+| Drawnix | Pengeditan gaya lukisan tangan atau papan putih | `.drawnix` |
+| CircuitikZ | Litar elektrik dan transistor yang terstruktur | `.tex` |
 
-Belirli bir editöre ihtiyacınız yoksa **Tercih edilen kaynak formatı** ayarını **Otomatik** olarak bırakın. Notemd, seçilen diagram türüne uygun bir format seçer.
+Biarkan **Format sumber keutamaan** pada **Auto** jika anda tidak memerlukan editor tertentu. Notemd akan memilih format yang serasi untuk jenis diagram yang dipilih.
 
-## Bir diagram oluşturun ve dışa aktarın
+## Jana dan eksport diagram
 
-1. Görmek istediğiniz notuyu açın veya metni seçin.
-2. Notemd kenar çubuğundan veya komut paletinden **Diagram oluştur** seçeneğini belirleyin.
-3. Bir **diagram türü** seçin veya bunu **Otomatik algılama** olarak bırakın.
-4. Bir **kaynak formatı** seçin veya bunu **Otomatik** olarak bırakın. Düzenlenebilir düğümler ve içine yerleştirilmiş Mermaid görselleri içeren bir bilgi haritası istiyorsanız **Drawnix** seçeneğini kullanın.
-5. Önizlemeyi inceleyin. Çok panelli sonuçlarda Drawnix tahtası ve her bir Mermaid paneli, kaynak sırasına göre tek bir dikey olarak kaydırılabilir önizleme alanında yer alır; Mermaid panelleri kırpılmadan renderlenmiş yüksekliklerini kullanır.
-6. Tek bir görsel için her bir panelin **SVG dışa aktar**, **PNG dışa aktar** veya **PDF dışa aktar** seçeneklerinden birini belirleyin, ya da tüm paneller için üst düzey bir görüntü dışa aktarımı yapın. Birden fazla panel varsa kaynak klasörünü veya Vault’a göre özel bir klasör seçin; Notemd her panel için tekil ve tahmin edilebilir bir dosya oluşturur ve herhangi bir hata durumunda işlemine devam eder.
-7. Düzenlenebilir dosyaya da ihtiyacınız varsa **Kaynak dosyasını kaydet** seçeneğini kullanın.
+1. Buka nota tersebut atau pilih teks yang ingin dipaparkan secara visual.
+2. Pilih **Generate diagram** daripada sidebar Notemd atau panel arahan.
+3. Pilih jenis **diagram**, atau biarkannya pada tetapan **Auto-detect**.
+4. Pilih format **sumber**, atau biarkannya pada tetapan **Auto**. Pilih **Drawnix** jika anda ingin peta pengetahuan dengan nod yang boleh diedit serta visualisasi Mermaid yang terbenam.
+5. Semak pratontonnya. Hasil berbilang panel akan mengekalkan papan Drawnix dan setiap panel Mermaid mengikut susunan asal dalam satu shell pratonton yang boleh digulung secara menegak; panel Mermaid akan menggunakan ketinggian yang telah diproses tanpa dipotong.
+6. Pilih tindakan **Export SVG**, **Export PNG**, atau **Export PDF** untuk setiap visual, atau gunakan eksport imej peringkat atasan untuk semua panel. Untuk beberapa panel, pilih folder sumber atau folder khusus yang berkaitan dengan Vault; Notemd akan menulis satu fail yang tetap untuk setiap panel dan meneruskan proses walaupun berlaku kegagalan pada salah satu daripadanya.
+7. Gunakan **Save source file** jika anda juga memerlukan fail sumber yang boleh diedit.
 
-Dışa aktarım menüsü, mevcut görsel önizlemesi için **SVG dışa aktar**, **PNG dışa aktar** ve **PDF dışa aktar** seçeneklerini sunar. Her bir panel başlığı da tek bir Mermaid veya Drawnix görseli için aynı işlemleri sağlar; bu sayede büyük önizlemeler tek bir opak görüntü olarak dışa aktarılmak zorunda kalmaz.
+Menu Eksport menyediakan tindakan **Export SVG**, **Export PNG**, dan **Export PDF** untuk pratonton visual semasa. Setiap tajuk panel menawarkan tindakan yang sama untuk satu visual Mermaid atau Drawnix, jadi pratonton yang besar tidak perlu dieksport sebagai satu imej yang tidak telus.
 
-Önizlemede **Geçmiş** seçeneğini belirleyerek diagramı gizlemeden Vault geçmişi çekmecesini açın. Tamamlanmış diagramları arayabilir, filtreleyebilir, bir önizlemeyi yeniden açabilir veya kaydedilen dosyaları görüntüleyebilirsiniz. Diagram geçmişi, herhangi bir not aktif olmasa bile doğrudan komut paletinden ve Notemd kenar çubuğundan da erişilebilir.
+Pilih **History** dalam pratonton untuk membuka penarik sejarah Vault tanpa menyembunyikan diagram. Anda boleh mencari dan menapis diagram yang telah siap, membuka semula pratonton, atau membuka fail yang telah disimpan. Sejarah diagram juga tersedia secara langsung daripada panel arahan dan sidebar Notemd, walaupun tiada nota yang sedang aktif.
 
-SVG ve PDF, vektör geometrisinden üretilir; PDF ise tüm önizlemeyi rasterleştirmek yerine aynı SVG düzenini ve metin ölçümlerini kullanır. Notemd ayarlarındaki görüntü dışa aktarım PPI değeri yalnızca PNG’nin rasterleştirilmesini kontrol eder (72–600 PPI, varsayılan 300).
+SVG dan PDF dihasilkan daripada geometri vektor; PDF menggunakan susunan SVG dan metrik teks yang sama dan bukannya merasterkan keseluruhan pratonton. Nilai PPI untuk eksport imej dalam tetapan Notemd hanya mengawal proses merasterkan PNG sahaja (72-600 PPI, 300 sebagai nilai lalai).
 
-## Drawnix önizlemeleri ve içine yerleştirilmiş Mermaid görselleri
+## Pratonton Drawnix dengan visual Mermaid yang terbenam
 
-Bir Drawnix dosyasında Mermaid görselleri bulunduğunda, Notemd renderlenmiş SVG’yi temizler ve Mermaid kaynağını `.drawnix` meta verileri içinde saklar. Böylece önizleme, Drawnix bilgi haritasının içinde Mermaid görüntülerini gösterebilir; bunun için Drawnix veya Plait çalışma zamanına gerek kalmaz. Güvenli bir şekilde yerleştirilen yalnızca Mermaid içeren görseller ayrı bir `.assets` dizini oluşturmaz; harici ikili medya veya çözülemeyen görseller ise veri kaybını önlemek amacıyla eşlik eden bir dosya tutar.
+Apabila sebuah artefak Drawnix mengandungi visual Mermaid, Notemd akan menyucikan SVG yang dihasilkan dan menyimpan sumber Mermaid bersamanya dalam metadata `.drawnix`. Oleh itu, pratonton boleh memaparkan imej Mermaid di dalam peta pengetahuan Drawnix tanpa memerlukan runtime Drawnix atau Plait. Laluan lalai adalah bersepadu dan tidak mencipta direktori `.assets` yang berasingan. Aktifkan opsyen **Juga eksport visual Mermaid yang lengkap** apabila anda memerlukan sumber Mermaid, SVG, serta fail manifest untuk diserahkan atau diedit di luar. Artefak sedia ada yang mempunyai direktori `.assets` masih disokong, dan SVG Mermaid lama yang hilang boleh dibina semula daripada teks sumber yang disimpan dalam metadata.
 
-Önizleme kasıtlı olarak tek bir kaydırılabilir alan şeklindedir: Önce ana Drawnix canvas’ı görünür, ardından kaynak sırasına göre her bir içe yerleştirilmiş Mermaid paneli gelir. Kaydedilen bir geçmiş girişini kapatıp yeniden açmak, aynı panel listesini, boyutları ve dışa aktarım seçeneklerini yeniden oluşturur.
+Imej yang telah diselesaikan juga akan menerima pratonton SVG yang disokong oleh data apabila memungkinkan; oleh itu, pemadaman folder sokongan lama tidak akan menyebabkan pratonton Drawnix yang disimpan hilang. Proses memuatkan pratonton menggunakan data terbenam terlebih dahulu, diikuti dengan fail sokongan lama, dan akhirnya kaedah gantian pembinaan semula daripada teks sumber.
 
-## Devre diyagramları
+Pratonton ini direka secara sengaja sebagai satu permukaan yang boleh digulung: kanvas utama Drawnix akan dipaparkan terlebih dahulu, diikuti oleh setiap panel Mermaid yang terbenam mengikut urutan asal. Menutup dan membuka semula entri sejarah yang disimpan akan membina semula senarai panel, dimensi, serta tindakan eksport yang sama.
 
-Desteklenen devre istekleri için **Devre diyagramı** seçeneğini ve **CircuitikZ kaynak dosyasını** kullanın. Notemd önce yapılandırılmış bir devre açıklaması oluşturur, ardından CircuitikZ kaynağını yazar. Bu yöntem, modelden sınırsız LaTeX yazdırmasını istemekten daha güvenilirdir.
+Penjelasan hubungan dalam Drawnix disusun sebagai unsur visual peringkat pertama. Alat pemproses akan melukis anak panah putus-putus di sekeliling segi empat nod yang diletakkan, dan menetapkan ruang tajuk/ringkasan tertentu sebagai kawasan yang dilindungi. Ringkasan yang panjang serta label hubungan akan dipadatkan mengikut garis yang telah ditetapkan; bahagian “hutan” graf akan berada di bawah ketinggian tajuk yang terhasil, dan kotak label yang tidak telus akan dilukis selepas lapisan nod. Tajuk akan diproses paling akhir dengan latar belakang yang tidak telus, supaya anak panah luaran tidak dapat menutupi teks seperti `以 Notemd 插件为对象的知识地图，覆盖系统架构、LLM 调用管道、图表渲染平台、模块地图、CLI 边界现实、关键设计决策与验证。` atau penjelasan hubungan seperti `RendererRegistry feeds Vault files, preview modal, and export`. Anak panah format asli `.drawnix` menggunakan atribut `shape`, `texts[]`, penanda, dan medan garisan yang serasi dengan Plait, sambil mengekalkan metadata lama untuk pengguna yang lebih lama. Jika peta Drawnix yang diminta tidak dapat mencari laluan atau kedudukan label yang bebas daripada pertindihan, proses penjanaan akan gagal kerana ralat format, dan bukannya menyimpan versi gantian Mermaid secara senyap di bawah operasi `.drawnix`.
 
-Mevcut CircuitikZ desteği kasıtlı olarak sınırlıdır. Ortak kaynaklı NMOS amplifikatörler ve desteklenen CMOS yapı blokları en iyi sonuçları verir. Teknik veya yayın çalışmalarında oluşturulan devreleri kullanmadan önce her zaman önizlemeyi ve kaynağı inceleyin.
+## Rajah litar
 
-SVG önizlemesi, Notemd tarafından üretilen bir gözden geçirme aracıdır. Bu dosya, yerel LaTeX veya TikZJax kurulumunuzun `.tex` dosyasını başarıyla derlediğinin kanıtı değildir.
+Pilih **Circuit diagram** bersama fail sumber **CircuitikZ** untuk permintaan litar yang disokong. Notemd akan menjana penerangan litar yang terstruktur terlebih dahulu, kemudian menulis kod sumber CircuitikZ. Cara ini lebih boleh dipercayai berbanding meminta model untuk menulis LaTeX tanpa sekatan.
 
-**İsteğe bağlı yerel derleme.** Eklenti içindeki önizleme için ya da SVG, PNG ve önizleme PDF dışa aktarımı için LaTeX’a ihtiyacınız yoktur. Masaüstünde, derleme hakkında bilgi almak veya yerel LaTeX PDF’si elde etmek istediğinizde diagram ayarlarından veya komut paletinden **CircuitikZ yerel derleme ortamı**nı açın. Notemd, sistemdeki `tectonic` veya `pdflatex` araçlarını yeniden kullanabilir, özel bir çalıştırılabilir dosya kullanabilir veya **Yükle** seçeneğini belirledikten sonra sabitlenmiş yönetilen Tectonic çalışma zamanını kurabilir. Ortam paneli ilerlemeyi ve hataları doğrudan gösterir ve daha sonra yönetilen çalışma zamanını kaldırmanıza olanak tanır.
+Sokongan untuk CircuitikZ pada masa kini sengaja dibataskan. Penguat NMOS yang menggunakan sumber umum serta blok binaan CMOS yang disokong memberikan prestasi terbaik. Sentiasa periksa pratonton dan kod sumber sebelum menggunakan litar yang dijana dalam kerja teknikal atau penerbitan.
 
-## Sorun giderme
+Pratonton SVG merupakan alat bantu semakan yang dijana oleh Notemd. Ia bukan bukti bahawa pemasangan LaTeX atau TikZJax tempatan telah berjaya mengkompilasi fail `.tex`.
 
-### Sonuç yanlış bir diagram türünde çıkıyor
+**Kompilasi secara natif (pilihan).** Anda tidak memerlukan LaTeX untuk pratonton dalam plugin, eksport SVG, PNG, mahupun PDF pratonton. Di desktop, buka **CircuitikZ native compile environment** daripada tetapan rajah atau panel arahan apabila anda memerlukan maklumat diagnostik kompilasi atau fail PDF LaTeX secara natif. Notemd boleh menggunakan `tectonic` atau `pdflatex` sistem, melaksanakan program eksekutif khusus, atau memasang versi Tectonic yang diurus setelah anda memilih **Install** secara eksplisit. Panel persekitaran akan menunjukkan kemajuan dan ralat secara langsung, serta membolehkan anda membuang versi runtime yang diurus tersebut pada bila-bila masa.
 
-Otomatik algılama yerine diagram türünü açıkça seçin. Bir devre için **Devre diyagramı** seçeneğini belirleyin ve eski **Mermaid diyagramına özetle** komutu yerine **Diagram oluştur** komutunu kullanın.
+## Penyelesaian Masalah
 
-### Bir kaynak formatı uygun değil
+### Hasilnya ialah jenis diagram yang salah
 
-Kaynak formatını tekrar **Otomatik** olarak ayarlayın veya o diagram türü için uygun bir format seçin. CircuitikZ yalnızca devre diyagramları için tasarlanmıştır; Draw.io ve Drawnix ise desteklenen yapılandırılmış diagramlar için uygundur.
+Pilih jenis diagram secara eksplisit daripada menggunakan fungsi Auto-detect. Untuk litar elektrik, pilih **Circuit diagram** dan gunakan arahan **Generate diagram**, bukannya arahan lama **Summarise as Mermaid diagram**.
 
-### Dışa aktarım menüsü gözükmüyor
+Bahasa sasaran: Malay (ms)
+Blok 9/11:
+### Format sumber tidak sesuai
 
-SVG, PNG ve PDF için bir görsel önizlemeye ihtiyaç vardır. Yalnızca kaynak metni mevcutsa, kaynak dosyasını kaydedin ve uygun harici aracı kullanarak açın.
+Kembalikan format sumber kepada **Auto**, atau pilih format yang sesuai untuk jenis diagram tersebut. CircuitikZ digunakan untuk diagram litar; Draw.io dan Drawnix pula direka khusus untuk diagram berstruktur yang disokong.
 
-### CircuitikZ dosyası dışarıdan derlenemiyor
+Bahasa sasaran: Bahasa Melayu (ms)
+Blok 10/11:
+### Menu Eksport tiada
 
-**CircuitikZ yerel derleme ortamı**nı açın ve ortam kontrolünü çalıştırın. Yönetilen çalışma zamanını onarın veya özel/sistem derleyicinizin `circuitikz` paketini alabildiğinden emin olun. Notemd, eklenti dosyasının içine tam bir TeX dağıtımı eklememektedir.
+SVG, PNG, dan PDF memerlukan pratonton visual. Jika hanya teks sumber yang tersedia, simpan fail sumber tersebut dan buka ia dalam alat luaran yang sesuai.
+
+### Fail CircuitikZ tidak boleh dikompil secara luaran
+
+Buka **persekitaran kompil asli CircuitikZ** dan jalankan pemeriksaan persekitaran tersebut. Perbaiki runtime yang digunakan atau sahkan bahawa kompiler khusus/sistem anda mampu mendapatkan pakej `circuitikz`. Notemd tidak menyertakan pengedaran TeX yang lengkap di dalam fail pluginnya.

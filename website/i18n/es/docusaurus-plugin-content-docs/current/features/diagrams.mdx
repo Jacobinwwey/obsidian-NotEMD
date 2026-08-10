@@ -31,50 +31,54 @@ Draw.io y Drawnix son **formatos de origen**, no tipos de diagrama. CircuitikZ e
 | Formato | Mejor para | Archivo de origen |
 |---|---|---|
 | Mermaid | Diagramas que se mantienen directamente en Markdown | Bloque de código Mermaid |
-| JSON Canvas | Flujos de trabajo nativos en el canvas de Obsidian | `.canvas` |
-| Draw.io | Edición posterior en diagrams.net o herramientas compatibles | `.drawio` |
+| JSON Canvas | Flujos de trabajo nativos de Obsidian basados en canvas | `.canvas` |
+| Draw.io | Edición posterior en diagrams.net u otras herramientas compatibles | `.drawio` |
 | Drawnix | Edición al estilo de dibujo a mano o pizarra | `.drawnix` |
 | CircuitikZ | Circuitos eléctricos y de transistores estructurados | `.tex` |
 
-Deja **Formato de origen preferido** en **Automático** si no necesitas un editor específico. Notemd elegirá el formato compatible según el tipo de diagrama seleccionado.
+Deja **Formato de origen preferido** en **Automático** si no necesitas un editor específico. Notemd elegirá un formato compatible según el tipo de diagrama seleccionado.
 
 ## Generar y exportar un diagrama
 
 1. Abre la nota o selecciona el texto que deseas visualizar.
 2. Elige **Generar diagrama** desde la barra lateral de Notemd o el panel de comandos.
 3. Selecciona un **tipo de diagrama**, o déjalo en **Detectar automáticamente**.
-4. Elige un **formato de origen**, o déjalo en **Automático**. Elige **Drawnix** cuando quieras un mapa de conocimiento con nodos editables e imágenes Mermaid incrustadas.
-5. Revisa la previsualización. Un resultado multi-panel mantiene el tablero Drawnix y cada panel Mermaid en el orden original dentro de una sola ventana verticalmente desplegable; los paneles Mermaid utilizan su altura renderizada en lugar de ser recortados.
-6. Elige la acción **Exportar SVG**, **Exportar PNG** o **Exportar PDF** para un solo formato visual, o utiliza una exportación de imagen a nivel superior para todos los paneles. Para varios paneles, elige la carpeta de origen o una carpeta personalizada relativa al Vault; Notemd genera un archivo único y determinista por panel y continúa procesando incluso si ocurre un error en uno específico.
+4. Elige un **formato de origen**, o déjalo en **Automático**. Elige **Drawnix** cuando quieras un mapa de conocimiento con nodos editables y elementos visuales Mermaid incrustados.
+5. Revisa la previsualización. Un resultado multi-panel mantiene el tablero Drawnix y cada panel Mermaid en el orden original dentro de una sola ventana de previsualización verticalmente desplegable; los paneles Mermaid utilizan su altura renderizada en lugar de ser recortados.
+6. Elige la acción **Exportar SVG**, **Exportar PNG** o **Exportar PDF** para cada panel individual, o utiliza una exportación de imagen a nivel superior para todos los paneles. Para varios paneles, elige la carpeta de origen o una carpeta personalizada relativa al Vault; Notemd genera un archivo único y determinista por panel y continúa procesando incluso si ocurre un error en uno específico.
 7. Usa **Guardar archivo de origen** cuando también necesites el archivo editable.
 
-El menú de exportación ofrece las acciones **Exportar SVG**, **Exportar PNG** y **Exportar PDF** para la previsualización visual actual. Cada encabezado de panel muestra las mismas opciones para un único elemento visual Mermaid o Drawnix, por lo que no es necesario exportar una previsualización grande como una sola imagen opaca.
+El menú de exportación ofrece las opciones **Exportar SVG**, **Exportar PNG** y **Exportar PDF** para la previsualización visual actual. Cada encabezado de panel muestra las mismas acciones para un elemento Mermaid o Drawnix individual, por lo que no es necesario exportar una previsualización grande como una sola imagen opaca.
 
 Elige **Historial** en la previsualización para abrir el panel de historial del Vault sin ocultar el diagrama. Puedes buscar y filtrar diagramas ya completados, volver a abrir una previsualización o acceder a archivos guardados. El historial de diagramas también está disponible directamente desde el panel de comandos y la barra lateral de Notemd, incluso cuando no hay ninguna nota activa.
 
-SVG y PDF se generan a partir de geometría vectorial; PDF utiliza la misma maquetación SVG y métricas de texto en lugar de rasterizar toda la previsualización. La resolución PPI para la exportación de imágenes en la configuración de Notemd solo controla la rasterización de PNG (de 72 a 600 PPI, con 300 como valor predeterminado).
+SVG y PDF se generan a partir de geometría vectorial; PDF utiliza la misma maquetación SVG y métricas de texto en lugar de rasterizar toda la previsualización. El valor PPI para la exportación de imagen en la configuración de Notemd solo controla la rasterización de PNG (de 72 a 600 PPI, con un valor predeterminado de 300).
 
 ## Previsualizaciones Drawnix con elementos Mermaid incrustados
 
-Cuando un archivo Drawnix contiene elementos visuales Mermaid, Notemd sanitiza el SVG renderizado y mantiene el código fuente Mermaid junto a él en los metadatos del archivo `.drawnix`. Por lo tanto, la previsualización puede mostrar la imagen Mermaid dentro del mapa de conocimiento Drawnix sin necesidad del entorno runtime Drawnix o Plait. Los elementos visuales exclusivamente Mermaid que se incrustan de forma segura no generan un directorio `.assets` separado; los medios binarios externos o los elementos visuales no resueltos conservan un archivo complementario para evitar la pérdida de datos.
+Cuando un archivo Drawnix contiene elementos visuales Mermaid, Notemd sanitiza el SVG renderizado y mantiene el código fuente Mermaid junto a él en los metadatos del archivo `.drawnix`. Por lo tanto, la previsualización puede mostrar la imagen Mermaid dentro del mapa de conocimiento Drawnix sin necesidad del entorno runtime Drawnix o Plait. La ruta por defecto es autónoma y no crea una carpeta separada `.assets`. Activa la opción **También exportar elementos visuales Mermaid completos** cuando necesites el código fuente Mermaid, el SVG y los metadatos asociados para su transferencia o edición externa. Los archivos existentes con la extensión `.assets` siguen siendo compatibles, y un SVG Mermaid antiguo que falte puede reconstruirse a partir del texto de origen conservado en los metadatos.
+
+Las incrustaciones de imagen ya resueltas también reciben una previsualización SVG basada en datos cuando es posible, por lo que eliminar una carpeta de acompañamiento antigua no hace que desaparezca una previsualización Drawnix guardada. La carga de la previsualización utiliza primero los datos incrustados, luego los archivos de acompañamiento antiguos, y finalmente como solución alternativa la reconstrucción a partir del texto de origen.
 
 La previsualización está diseñada intencionalmente como una sola superficie desplegable: primero aparece el canvas principal de Drawnix, seguido por cada panel Mermaid incrustado en el orden original. Cerrar y volver a abrir una entrada del historial guardada reconstruye la misma lista de paneles, dimensiones y acciones de exportación.
 
+Las explicaciones de las relaciones en los diagramas Drawnix se presentan como elementos visuales de primer nivel. El renderizador dirige las flechas discontinuas alrededor de los rectángulos de los nodos colocados y reserva una zona protegida para el encabezado/título respetando sus dimensiones. Los títulos y etiquetas largas se ajustan a líneas calculadas, el resto del contenido del diagrama se coloca debajo de la altura del encabezado resultante, y después de la capa de nodos se dibuja un cuadro opaco para la etiqueta. El encabezado se renderiza por último con un fondo opaco, de modo que una ruta externa no pueda ocultar texto como `以 Notemd 插件为对象的知识地图，覆盖系统架构、LLM 调用管道、图表渲染平台、模块地图、CLI 边界现实、关键设计决策与验证。` o una explicación de relación como `RendererRegistry feeds Vault files, preview modal, and export`. La flecha nativa `.drawnix` utiliza los campos `shape`, `texts[]`, marcadores y trazos compatibles con Plait, manteniendo al mismo tiempo los metadatos antiguos para usuarios que trabajan con versiones más antiguas. Si un mapa Drawnix solicitado no puede encontrar una ruta o posición de etiqueta sin colisiones, la generación fallará con un error de formato en lugar de guardar silenciosamente una versión alternativa Mermaid bajo una operación `.drawnix`.
+
 ## Diagramas eléctricos
 
-Para solicitudes de diagramas eléctricos compatibles, elige **Diagrama eléctrico** con **Archivo de origen CircuitikZ**. Notemd primero genera una descripción estructurada del circuito y luego escribe el código fuente en formato CircuitikZ. Este método es más fiable que solicitar al modelo que genere código LaTeX sin restricciones.
+Para solicitudes de diagramas eléctricos compatibles, elige **Diagrama eléctrico** con **Archivo de origen CircuitikZ**. Notemd genera primero una descripción estructurada del circuito y luego escribe el código fuente en formato CircuitikZ. Este método es más fiable que pedir al modelo que genere código LaTeX sin restricciones.
 
 La compatibilidad actual con CircuitikZ está intencionalmente limitada. Funcionan mejor los amplificadores NMOS de código abierto y los componentes CMOS soportados. Siempre revisa la previsualización y el código fuente antes de utilizar un circuito generado en trabajos técnicos o de publicación.
 
-La previsualización en SVG es una ayuda para la revisión generada por Notemd. No constituye prueba de que una instalación local de LaTeX o TikZJax haya compilado con éxito el archivo `.tex`.
+La previsualización SVG es una herramienta auxiliar generada por Notemd. No constituye prueba de que una instalación local de LaTeX o TikZJax haya compilado con éxito el archivo `.tex`.
 
-**Compilación nativa opcional.** No necesitas LaTeX para la previsualización dentro del complemento ni para las exportaciones en SVG, PNG o PDF de previsualización. En equipos de escritorio, abre **Entorno de compilación nativo CircuitikZ** desde la configuración del diagrama o el panel de comandos cuando necesites diagnósticos de compilación o un PDF en LaTeX nativo. Notemd puede reutilizar los programas `tectonic` o `pdflatex` del sistema, utilizar un ejecutable personalizado o instalar el entorno Tectonic gestionado después de elegir explícitamente **Instalar**. El panel del entorno muestra el progreso y los errores en tiempo real y te permite eliminar posteriormente el entorno gestionado.
+**Compilación nativa opcional.** No necesitas LaTeX para la previsualización dentro del plugin ni para las exportaciones en formatos SVG, PNG o PDF de previsualización. En equipos de escritorio, abre **Entorno de compilación nativo CircuitikZ** desde la configuración del diagrama o el panel de comandos cuando necesites diagnósticos de compilación o un PDF LaTeX nativo. Notemd puede reutilizar los programas `tectonic` o `pdflatex` del sistema, utilizar un ejecutable personalizado o instalar el entorno Tectonic gestionado después de seleccionar explícitamente la opción **Instalar**. El panel del entorno muestra el progreso y los errores en tiempo real y te permite eliminar posteriormente el entorno gestionado.
 
 ## Solución de problemas
 
 ### El resultado es del tipo de diagrama incorrecto
 
-Elige explícitamente el tipo de diagrama en lugar de utilizar la opción Detectar automáticamente. Para un circuito, elige **Diagrama eléctrico** y utiliza el comando **Generar diagrama**, en lugar del comando obsoleto **Resumir como diagrama Mermaid**.
+Elige explícitamente el tipo de diagrama en lugar de utilizar la opción Detectar automáticamente. Para un diagrama eléctrico, elige **Diagrama eléctrico** y utiliza el comando **Generar diagrama**, en lugar del comando obsoleto **Resumir como diagrama Mermaid**.
 
 ### Un formato de origen no es adecuado
 
@@ -82,8 +86,8 @@ Vuelve a establecer el formato de origen en **Automático**, o elige un formato 
 
 ### El menú de exportación no aparece
 
-SVG, PNG y PDF requieren una previsualización visual. Si solo tienes texto de origen disponible, guarda el archivo de origen y ábrelo en la herramienta externa correspondiente.
+SVG, PNG y PDF requieren una previsualización visual. Si solo tienes texto de origen, guarda el archivo de origen y ábrelo en la herramienta externa correspondiente.
 
 ### Un archivo CircuitikZ no se compila desde fuera
 
-Abre **Entorno de compilación nativo CircuitikZ** y ejecuta la comprobación del entorno. Repara el entorno gestionado o verifica que tu compilador personalizado/sistema pueda obtener el paquete `circuitikz`. Notemd no incluye una distribución completa de TeX dentro del archivo del complemento.
+Abre **Entorno de compilación nativo CircuitikZ** y ejecuta la comprobación del entorno. Repara el entorno gestionado o verifica que tu compilador personalizado/sistema pueda obtener el paquete `circuitikz`. Notemd no incluye una distribución completa de TeX dentro del archivo del plugin.

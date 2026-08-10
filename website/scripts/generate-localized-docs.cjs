@@ -5,6 +5,7 @@ const {pathToFileURL} = require('url');
 const root = path.join(__dirname, '..');
 const docsRoot = path.join(root, 'docs');
 const i18nRoot = path.join(root, 'i18n');
+const generatedLocaleCatalog = require('../src/lib/siteLocaleCatalog.cjs');
 
 const locales = {
   'zh-CN': {
@@ -747,7 +748,11 @@ function writeJson(filePath, value) {
 }
 
 function writeTranslationJson(locale) {
-  const ui = locales[locale] || defaultUiChrome;
+  const ui = {
+    ...defaultUiChrome,
+    ...(generatedLocaleCatalog[locale]?.ui || {}),
+    ...(locales[locale] || {}),
+  };
   writeJson(path.join(i18nRoot, locale, 'docusaurus-plugin-content-docs', 'current.json'), {
     'version.label': {
       message: ui.next,
@@ -823,7 +828,7 @@ const defaultCodeJsonValues = {
 };
 
 function codeJsonFor(locale) {
-  const values = ({
+  const manualValues = ({
     'zh-Hant': {
       edit: '編輯此頁',
       lastUpdated: '最後更新於',
@@ -974,8 +979,17 @@ function codeJsonFor(locale) {
       expand: '사이드바 펼치기',
       collapse: '사이드바 접기',
     },
-  })[locale] || defaultCodeJsonValues;
-  const ui = locales[locale] || defaultUiChrome;
+  })[locale] || {};
+  const values = {
+    ...defaultCodeJsonValues,
+    ...(generatedLocaleCatalog[locale]?.code || {}),
+    ...manualValues,
+  };
+  const ui = {
+    ...defaultUiChrome,
+    ...(generatedLocaleCatalog[locale]?.ui || {}),
+    ...(locales[locale] || {}),
+  };
 
   return {
     'theme.colorToggle.ariaLabel': {message: values.colorToggle, description: 'The ARIA label for the color mode toggle'},

@@ -4,6 +4,7 @@ import Head from '@docusaurus/Head';
 import Layout from '@theme/Layout';
 import useDocusaurusContext from '@docusaurus/useDocusaurusContext';
 import useBaseUrl from '@docusaurus/useBaseUrl';
+import {homeCopyOverrides} from '../lib/homeCopyCatalog.mjs';
 import styles from './index.module.css';
 
 const copyByLocale = {
@@ -26,7 +27,7 @@ const copyByLocale = {
     retrievalHeading: 'Answer-engine source map',
     retrievalLead:
       'The public site now exposes the same canonical routes that llms.txt, sitemap, hreflang metadata, and JSON-LD describe. Use these pages as the source of truth for AI search and citation workflows.',
-    languageBoundary: 'Language boundary: English and all published documentation locales now expose the full docs route set.',
+    languageBoundary: 'Language boundary: English and Simplified Chinese are verified indexable docs surfaces; all other locale routes remain available for review and are marked machine-translated.',
     retrievalLinks: [
       {
         title: 'llms.txt retrieval map',
@@ -82,7 +83,7 @@ const copyByLocale = {
     retrievalHeading: 'Answer engine 来源地图',
     retrievalLead:
       '项目网页现在公开展示与 llms.txt、sitemap、hreflang metadata 和 JSON-LD 一致的 canonical routes。AI search 与引用场景应以这些页面为真值来源。',
-    languageBoundary: '语言边界：英文与 README / UI locale 发布矩阵声明的全部文档语言均暴露完整 docs 路由集。',
+    languageBoundary: '语言边界：英文与简体中文是已验证、可索引的文档表面；其他语言路由仍可供审阅，并明确标记为机器翻译。',
     retrievalLinks: [
       {
         title: 'llms.txt 检索地图',
@@ -124,7 +125,7 @@ const copyByLocale = {
 export default function Home() {
   const {siteConfig, i18n} = useDocusaurusContext();
   const logoSrc = useBaseUrl('img/logo.svg');
-  const copy = copyByLocale[i18n.currentLocale] || copyByLocale.en;
+  const copy = homeCopyOverrides[i18n.currentLocale] || copyByLocale[i18n.currentLocale] || copyByLocale.en;
   const pageUrl = new URL(siteConfig.baseUrl, siteConfig.url).toString();
   const canonicalBasePath = siteConfig.customFields?.canonicalBasePath || siteConfig.baseUrl;
   const llmsHref = `${canonicalBasePath}llms.txt`;

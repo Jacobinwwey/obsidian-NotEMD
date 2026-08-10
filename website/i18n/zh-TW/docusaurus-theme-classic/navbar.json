@@ -4,15 +4,15 @@
     "description": "The title in the navbar"
   },
   "logo.alt": {
-    "message": "Notemd logo",
+    "message": "Notemd標誌圖",
     "description": "The alt text of navbar logo"
   },
   "item.label.Docs": {
-    "message": "Docs",
+    "message": "文件說明",
     "description": "Navbar item with label Docs"
   },
   "item.label.FAQ": {
-    "message": "FAQ",
+    "message": "常見問題",
     "description": "Navbar item with label FAQ"
   },
   "item.label.GitHub": {

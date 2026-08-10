@@ -39,6 +39,14 @@ export const publishedDocumentationLocales = publishedLocales.filter(({locale}) 
 export const publishedLocaleCodes = publishedLocales.map(({locale}) => locale);
 export const publishedDocumentationLocaleCodes = publishedDocumentationLocales.map(({locale}) => locale);
 export const publishedDocumentationLanguageNames = publishedDocumentationLocales.map(({englishName}) => englishName);
+// Keep route generation backwards-compatible while making indexability an
+// explicit quality claim. Long-tail locales remain reachable for review but
+// are not advertised to crawlers until their translation gate passes.
+export const indexablePublishedLocaleCodes = Object.freeze(new Set(['en', 'zh-CN']));
+
+export function isIndexablePublishedLocale(locale) {
+  return indexablePublishedLocaleCodes.has(locale);
+}
 
 export function publishedLocaleConfigMap() {
   return Object.fromEntries(
@@ -50,5 +58,8 @@ export function publishedLocaleConfigMap() {
 }
 
 export function publishedLanguageScopeSentence() {
-  return `The public docs route set is available in English, ${publishedDocumentationLanguageNames.join(', ')}.`;
+  const indexableNames = publishedLocales
+    .filter(({locale}) => indexablePublishedLocaleCodes.has(locale))
+    .map(({englishName}) => englishName);
+  return `The verified public docs route set is available in ${indexableNames.join(' and ')}. Other locale routes remain available for review and are marked machine-translated.`;
 }

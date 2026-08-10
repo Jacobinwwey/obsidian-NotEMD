@@ -15,80 +15,84 @@ citations:
 
 import TLDR from '@site/src/components/TLDR';
 
-# Diagrams
+# Діаграми
 
 <TLDR>
-Choose **which type of diagram you need**, then select its **editable source format**. Preview the final output in Obsidian, which includes a Drawnix board alongside any embedded Mermaid visuals, and export each individual panel as SVG, PNG, or PDF.
+Виберіть **тип діаграми**, яка вам потрібна, а потім — її **редаговуваний формат вихідних даних**. Перегляньте готовий результат у Obsidian, включаючи дошку Drawnix та вбудовані візуалізації Mermaid, а також експортуйте кожен елемент як SVG, PNG чи PDF.
 </TLDR>
 
-## Understand the three options
+## Зрозуміти три варіанти вибору
 
-| Option | What it controls | Examples |
+| Варіант | Що він контролює | Приклади |
 |---|---|---|
-| Diagram type | The meaning of the diagram | Flowchart, sequence diagram, circuit diagram, data chart |
-| Source format | The editable or reusable file created by Notemd | Mermaid, JSON Canvas, Draw.io, Drawnix, CircuitikZ |
-| Export format | The image or document format used for sharing | SVG, PNG, PDF |
+| Тип діаграми | Що означає діаграма | Діаграма потоків, послідовна діаграма, схема електронних ланцюгів, графік даних |
+| Формат вихідних даних | Редаговуваний або повторно використовуваний файл, який створює Notemd | Mermaid, JSON Canvas, Draw.io, Drawnix, CircuitikZ |
+| Формат експорту | Зображення чи документ, які використовуються для обміну | SVG, PNG, PDF |
 
-Draw.io and Drawnix are **source formats**, not diagram types. CircuitikZ is a source format specifically designed for creating circuit diagrams. Since the same preview can be exported in several different visual formats, selecting CircuitikZ does not restrict you to exporting only as SVG.
+Draw.io та Drawnix є **форматами вихідних даних**, а не типами діаграм. CircuitikZ — це формат вихідних даних, призначений для схем електронних ланцюгів. Одну й ту саму попередню версію можна експортувати у кілька візуальних форматів, тому вибір CircuitikZ не обмежує вас лише SVG.
 
-## Choose a source format
+## Виберіть формат вихідних даних
 
-| Format | Best for | Source file |
+| Формат | Для чого підходить | Файл вихідних даних |
 |---|---|---|
-| Mermaid | Diagrams that should remain directly inside Markdown files | Mermaid code block |
-| JSON Canvas | Workflow diagrams created using Obsidian’s native canvas feature | `.canvas` |
-| Draw.io | Editing diagrams later in diagrams.net or compatible software | `.drawio` |
-| Drawnix | Hand‑drawn or whiteboard‑style diagram creation | `.drawnix` |
-| CircuitikZ | Structured electrical and transistor circuit designs | `.tex` |
+| Mermaid | Діаграми, які зберігаються безпосередньо у Markdown | Блок коду Mermaid |
+| JSON Canvas | Робота з нативними інструментами Obsidian canvas | `.canvas` |
+| Draw.io | Редагування пізніше у diagrams.net або сумісних програмах | `.drawio` |
+| Drawnix | Редагування вручну або у стилі дошки для записів | `.drawnix` |
+| CircuitikZ | Структуровані електричні та транзисторні схеми | `.tex` |
 
-Leave **Preferred source format** set to **Auto** if you don’t require a specific editor. Notemd will automatically select a compatible format based on the chosen diagram type.
+Якщо вам не потрібен певний редактор, залиште поле **Preferred source format** у значенні **Auto**. Notemd сам обере сумісний формат для обраного типу діаграми.
 
-## Generate and export a diagram
+## Створення та експорт діаграми
 
-1. Open the note or select the text you want to turn into a visual.
-2. Choose **Generate diagram** from the Notemd sidebar or command palette.
-3. Select a **diagram type**, or leave it set to **Auto‑detect**.
-4. Pick a **source format**, or keep it on **Auto**. Choose **Drawnix** if you want a knowledge map with editable nodes and embedded Mermaid visuals.
-5. Review the preview. For multi‑panel results, the Drawnix board together with every Mermaid panel appear in their original order inside one vertically scrollable preview window; Mermaid panels retain their rendered height rather than being truncated.
-6. Select **Export SVG**, **Export PNG**, or **Export PDF** for each individual visual, or use a top‑level export option to generate images for all panels at once. For multiple panels, specify the source folder or a custom folder relative to your Vault; Notemd creates one deterministic file per panel and continues processing even if one export fails.
-7. Use **Save source file** if you also need the editable version of the diagram.
+1. Відкрийте нотатку або виберіть текст, який потрібно візуалізувати.
+2. У бічній панелі Notemd або палітрі команд оберіть опцію **Створити діаграму**.
+3. Виберіть тип **діаграми**, або залиште його на значенні **Автоматичне виявлення**.
+4. Виберіть **формат вихідних даних**, або залиште його на значенні **Авто**. Оберіть **Drawnix**, якщо потрібна карта знань із редаговуваними вузлами та вбудованими візуалізаціями Mermaid.
+5. Перегляньте попередній перегляд. Результат у кількох панелях зберігає дошку Drawnix та кожну панель Mermaid у початковому порядку всередині одного вертикально прокручуваного вікна перегляду; панелі Mermaid використовують свою розмірність після обробки, а не обрізаються.
+6. Для кожної візуалізації оберіть дію **Експортувати SVG**, **Експортувати PNG** чи **Експортувати PDF**, або використайте експорт зображення на верхньому рівні для всіх панелей. Для кількох панелей виберіть джерельну папку або власну папку відносно Vault; Notemd створює по одному файлу на кожну панель та продовжує роботу навіть у разі окремих помилок.
+7. Використайте опцію **Зберегти вихідний файл**, якщо вам також потрібен редаговуваний артефакт.
 
-The Export menu provides **Export SVG**, **Export PNG**, and **Export PDF** options for the current visual preview. Each panel header also offers these same actions for individual Mermaid or Drawnix visuals, so you don’t have to export a large preview as a single opaque image.
+Меню «Експорт» пропонує дії **Експортувати SVG**, **Експортувати PNG** та **Експортувати PDF** для поточного візуального перегляду. Кожен заголовок панелі містить такі ж дії для окремої візуалізації Mermaid чи Drawnix, тому не обов’язково експортувати великий перегляд як одне непрозоре зображення.
 
-To view the Vault history without hiding the diagram, select **History** in the preview area. You can search for and filter previously created diagrams, reopen existing previews, or access saved artifacts. Diagram history is also accessible directly from the command palette and Notemd sidebar, even when no note is currently open.
+У перегляді оберіть **Історія**, щоб відкрити вікно історії Vault, не приховуючи діаграму. Ви можете шукати та фільтрувати завершені діаграми, знову відкрити перегляд або відкрити збережені артефакти. Історія діаграм також доступна безпосередньо з палітри команд та бічної панелі Notemd, навіть коли жодна нотатка не активна.
 
-SVG and PDF files are generated using vector geometry; PDFs use the same SVG layout and text metrics rather than rasterising the entire preview. The PPI setting for image export in Notemd settings only controls PNG rasterisation (ranging from 72 to 600 PPI, with 300 PPI as the default).
+SVG та PDF створюються на основі векторної геометрії; PDF використовує ту саму структуру SVG та параметри тексту, замість того щоб растеризувати всю діаграму. Параметр PPI для експорту зображення у налаштуваннях Notemd контролює лише растеризацію PNG (72–600 PPI, за замовчуванням 300).
 
-## Drawnix previews with embedded Mermaid
+## Попередні перегляди Drawnix із вбудованими елементами Mermaid
 
-When a Drawnix file contains Mermaid visuals, Notemd sanitises the resulting SVG and stores the original Mermaid source code alongside it in the `.drawnix` metadata. This allows the preview to display the Mermaid image directly inside the Drawnix knowledge map without needing the Drawnix or Plait runtime. Mermaid visuals that are safely embedded do not create a separate `.assets` directory; external binary media or unresolved visuals are kept with their accompanying files to ensure no data is lost.
+Коли артефакт Drawnix містить візуалізації у форматі Mermaid, Notemd очищує генероване SVG та зберігає вихідний код Mermaid разом із ним у метаданих `.drawnix`. Таким чином попередній перегляд може відображати зображення Mermaid всередині карти знань Drawnix без необхідності використання середовища виконання Drawnix чи Plait. Типовий шлях є самодостатнім та не створює окремого каталогу `.assets`. Увімкніть опцію **Also export complete Mermaid visuals**, якщо вам потрібні вихідний код Mermaid, файл SVG та супровідні маніфести для передачі чи зовнішньої редагування. Існуючі артефакти з каталогом `.assets` залишаються підтримуваними, а відсутнє SVG у форматі Mermaid можна перебудувати на основі текстового коду, що зберігається в метаданах.
 
-The preview is intentionally designed as a single scrollable area: the main Drawnix canvas appears first, followed by each embedded Mermaid panel in their original order. Closing and reopening a saved history entry restores the exact same list of panels, dimensions, and export options.
+Елементи зображень, які вже були оброблені, також отримують перегляд SVG із підтримкою даних, коли це можливо; тому видалення старого супровідного каталогу не призводить до зникнення збереженого перегляду Drawnix. Під час завантаження перегляду спочатку використовуються вбудовані дані, потім старі супровідні файли, а якщо це неможливо — метод перебудови на основі текстового коду.
 
-## Circuit diagrams
+Перегляд навмисно реалізований як єдиний поверх для прокручування: спочатку відображається основна площадка Drawnix, а потім кожен вбудований панель Mermaid у порядку їх появи. Закриття та повторне відкриття збереженої запису історії відновлює той самий список панелей, розміри та дії експорту.
 
-For circuit‑related requests, select **Circuit diagram** together with a **CircuitikZ source file**. Notemd first generates a structured description of the circuit before writing the CircuitikZ source code. This approach is more reliable than asking the model to generate unrestricted LaTeX code.
+Пояснення взаємозв’язків у Drawnix представлені як повноцінні візуальні елементи. Механізм відображення прокладає пунктирні стрілки навколо прямокутників вузлів та виділяє захищену зону у вигляді заголовка з назвою чи коротким описом. Довгі описи та позначки взаємозв’язків розгортаються по окремих рядках, «ліс» елементів розташовується нижче висоти цього заголовка, а після шару вузлів наноситься непрозора рамка з позначкою. Заголовок відображається останнім із непрозорим фоном, тому зовнішні маршрути не можуть закрити текст на кшталт `以 Notemd 插件为对象的知识地图，覆盖系统架构、LLM 调用管道、图表渲染平台、模块地图、CLI 边界现实、关键设计决策与验证。` чи пояснення взаємозв’язку на кшталт `RendererRegistry feeds Vault files, preview modal, and export`. Вбудована стрілка у форматі `.drawnix` використовує параметри `shape`, `texts[]`, маркери та поля для ліній, сумісні з Plait, при цьому зберігаючи старі метадані для користувачів старішої версії. Якщо запитаний мапа Drawnix не може знайти маршрут чи положення позначки без зіткнень, процес генерації завершується з помилкою формату, замість того щоб тихо зберегти альтернативний варіант у форматі Mermaid у файлі `.drawnix`.
 
-Current CircuitikZ support is intentionally limited. Common NMOS amplifier designs and certain supported CMOS building blocks work best. Always examine both the preview and the source file before using a generated circuit in technical documents or publications.
+## Схеми електричних колій
 
-The SVG preview provided by Notemd is meant as a review aid only; it does not guarantee that a local LaTeX or TikZJax installation successfully compiled the underlying `.tex` file.
+Для обробки запитів на створення схем використовуйте опцію **Схема електричного кола** з вихідним файлом у форматі **CircuitikZ**. Notemd спочатку генерує структурований опис схеми, а потім записує вихідний код у форматі CircuitikZ. Цей підхід є надійнішим, ніж просити модель створювати LaTeX без жодних обмежень.
 
-**Optional native compilation.** You do not need LaTeX to view the diagram within the plugin, nor to export SVG, PNG, or PDF versions. On desktop devices, open **CircuitikZ native compile environment** from the diagram settings or command palette if you require compilation diagnostics or a native LaTeX PDF output. Notemd can reuse the system’s `tectonic` or `pdflatex` tools, use a custom executable, or install the managed Tectonic runtime after you explicitly select **Install**. The environment panel displays progress and errors inline and allows you to remove the managed runtime at any time.
+Підтримка формату CircuitikZ навмисно залишається обмеженою. Найкраще працюють ампліфікатори типу NMOS із загальнодоступним кодом та підтримувані блоки CMOS. Перед використанням генерованої схеми у технічних чи видавничих роботах завжди перевіряйте її попередній перегляд та вихідний код.
 
-## Troubleshooting
+Попередній перегляд у форматі SVG — це інструмент для перевірки, створений Notemd. Він не є доказом того, що локальна установка LaTeX чи TikZJax успішно скомпілювала файл `.tex`.
 
-### The result is the wrong diagram type
+**Необов’язкова компіляція безpoсередньо в програмі.** Для попереднього перегляду всередині додатка, експорту у форматах SVG, PNG та PDF не потрібен LaTeX. На настільних ПК ви можете відкрити **Середовище компіляції CircuitikZ** через налаштування схеми або палітру команд, якщо потрібні діагностика процесу компіляції чи PDF у форматі LaTeX. Notemd може використовувати системні інструменти `tectonic` або `pdflatex`, власний виконуваний файл чи встановити керовану версію середовища Tectonic після того, як ви явно оберете опцію **Встановити**. Панель середовища відображає прогрес та помилки безпосередньо у інтерфейсі та дозволяє пізніше видалити кероване середовище.
 
-Manually select the desired diagram type instead of relying on Auto‑detect. For circuit diagrams, choose **Circuit diagram** and use the **Generate diagram** command rather than the older **Summarise as Mermaid diagram** option.
+## Усунення проблем
 
-### A source format is unsuitable
+### Результат — неправильний тип діаграми
 
-Reset the source format to **Auto**, or pick a format that matches the type of diagram you are creating. CircuitikZ is intended for circuit diagrams only; Draw.io and Drawnix are designed for specific structured diagram types.
+Виберіть тип діаграми вручну замість використання опції «Автодетекція». Для схеми оберіть **Circuit diagram** та скористайтеся командою **Generate diagram**, а не застарілою командою **Summarise as Mermaid diagram**.
 
-### The Export menu is missing
+### Формат вихідних даних є непридатним
 
-SVG, PNG, and PDF exports require a visual preview. If only source text is available, save the source file and open it in the appropriate external tool.
+Поверніть формат вихідних даних у режим **Auto**, або оберіть формат, призначений для цього типу діаграми. CircuitikZ призначений для схем електричних мереж; Draw.io та Drawnix — для підтримуваних структурованих діаграм.
 
-### A CircuitikZ file does not compile externally
+### Меню експорту відсутнє
 
-Open **CircuitikZ native compile environment** and run the environment check. Fix any issues with the managed runtime or confirm that your custom/system compiler can retrieve the `circuitikz` package. Notemd does not include a full TeX distribution within its plugin files.
+Для форматів SVG, PNG та PDF необхідна візуальна попередня перегляд. Якщо є лише вихідний текст, збережіть файл та відкрийте його у відповідному зовнішньому інструменті.
+
+### Файл CircuitikZ не компілюється ззовні
+
+Відкрийте **нативне середовище компіляції CircuitikZ** та запустіть перевірку стану середовища. Виправте проблеми з керованим часом виконання або переконайтеся, що ваш власний/системний компілятор може отримати пакет `circuitikz`. У файлі плагіна Notemd не містить повноцінного розподілу TeX.

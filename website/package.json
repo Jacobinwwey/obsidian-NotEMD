@@ -10,6 +10,7 @@
     "swizzle": "docusaurus swizzle",
     "deploy": "docusaurus deploy",
     "translate-settings-favorites": "node scripts/translate-settings-favorites-guide.cjs",
+    "translate:site-core": "node scripts/translate-site-core.cjs",
     "clear": "docusaurus clear",
     "serve": "docusaurus serve",
     "write-translations": "docusaurus write-translations",
@@ -28,7 +29,8 @@
   "devDependencies": {
     "@docusaurus/module-type-aliases": "^3.10.1",
     "@docusaurus/tsconfig": "^3.10.1",
-    "@docusaurus/types": "^3.10.1"
+    "@docusaurus/types": "^3.10.1",
+    "js-yaml": "^4.1.0"
   },
   "browserslist": {
     "production": [

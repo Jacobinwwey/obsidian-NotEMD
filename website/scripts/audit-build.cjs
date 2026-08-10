@@ -1,6 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const {pathToFileURL} = require('url');
+const yaml = require('js-yaml');
 
 const websiteRoot = path.resolve(__dirname, '..');
 const buildRoot = path.join(websiteRoot, 'build');
@@ -15,6 +16,8 @@ const expectedSoftwareVersion = '1.9.6';
 const providerSourceRoot = path.join(websiteRoot, 'docs', 'providers');
 let supportedLocalizedLocales = [];
 let publishedLanguageScopeText = '';
+let localePublicationByCode = new Map();
+const criticalLocalizedSourceDocs = new Set(['features/diagrams.mdx', 'faq.mdx']);
 const localizedFillerMarkers = [
   '这一部分解释产品行为',
   '這一部分說明產品行為',
@@ -186,6 +189,70 @@ function markdownHeadings(content) {
   return headings;
 }
 
+const localeScriptRequirements = {
+  'zh-CN': /[\u4e00-\u9fff]/,
+  'zh-Hant': /[\u4e00-\u9fff]/,
+  'zh-TW': /[\u4e00-\u9fff]/,
+  ja: /[\u3040-\u30ff]/,
+  ko: /[\uac00-\ud7af]/,
+  ar: /[\u0600-\u06ff]/,
+  fa: /[\u0600-\u06ff]/,
+  he: /[\u0590-\u05ff]/,
+  th: /[\u0e00-\u0e7f]/,
+  hi: /[\u0900-\u097f]/,
+  bn: /[\u0980-\u09ff]/,
+  ru: /[\u0400-\u04ff]/,
+  uk: /[\u0400-\u04ff]/,
+  el: /[\u0370-\u03ff]/,
+};
+
+function auditLocalizedLanguageSignal(locale, sourceContent, localizedContent, context) {
+  if (locale === 'en') return;
+  const sourceH1 = markdownHeadings(sourceContent).find((heading) => heading.level === 1)?.text;
+  const localizedH1 = markdownHeadings(localizedContent).find((heading) => heading.level === 1)?.text;
+  if (!localizedH1) fail(`${context} has no level-one heading`);
+  if (sourceH1 && localizedH1 === sourceH1) fail(`${context} retained the English H1 "${sourceH1}"`);
+  const requiredScript = localeScriptRequirements[locale];
+  if (requiredScript && !requiredScript.test(localizedH1)) fail(`${context} H1 does not contain the expected ${locale} script`);
+  if (locale !== 'ko' && locale !== 'ja' && !/^zh/.test(locale) && /[\uac00-\ud7af]/.test(localizedH1)) {
+    fail(`${context} H1 contains Hangul from another locale`);
+  }
+  if (locale !== 'ko' && locale !== 'ja' && !/^zh/.test(locale) && /[\u4e00-\u9fff]/.test(localizedH1)) {
+    fail(`${context} H1 contains CJK text from another locale`);
+  }
+}
+
+function parseFaqItems(content) {
+  const frontmatter = content.match(/^---\r?\n([\s\S]*?)\r?\n---(?:\r?\n|$)/)?.[1];
+  if (!frontmatter) {
+    return [];
+  }
+
+  const parsed = yaml.load(frontmatter);
+  if (!parsed || !Array.isArray(parsed.faqItems)) {
+    return [];
+  }
+
+  return parsed.faqItems.map((item) => ({
+    question: String(item?.question ?? '').trim(),
+    answer: String(item?.answer ?? '').trim(),
+  }));
+}
+
+function auditLocalizedFaqMetadata() {
+  const englishFaq = parseFaqItems(readSourceFile(path.join(websiteRoot, 'docs', 'faq.mdx')));
+  for (const {locale} of supportedLocalizedLocales) {
+    const content = readSourceFile(path.join(localizedDocsSourceRoot(locale), 'faq.mdx'));
+    const localizedFaq = parseFaqItems(content);
+    if (localizedFaq.length !== englishFaq.length) {
+      fail(`${locale} FAQ item count changed: expected ${englishFaq.length}, got ${localizedFaq.length}`);
+    }
+    if (locale !== 'en' && localizedFaq.some((item, index) => item.question === englishFaq[index].question || item.answer === englishFaq[index].answer)) {
+      fail(`${locale} FAQ frontmatter still contains English question/answer text`);
+    }
+  }
+}
+
 function auditLocalizedSourceTextIntegrity() {
   for (const {locale} of supportedLocalizedLocales) {
     const localeRoot = localizedDocsSourceRoot(locale);
@@ -209,6 +276,9 @@ function auditLocalizedSourceTextIntegrity() {
       const localizedHeadings = markdownHeadings(localizedContent).map((heading) => heading.level);
       if (JSON.stringify(localizedHeadings) !== JSON.stringify(englishHeadings)) {
         fail(`${context} heading structure does not mirror the English source`);
+      }
+      if (criticalLocalizedSourceDocs.has(sourceDoc)) {
+        auditLocalizedLanguageSignal(locale, englishContent, localizedContent, context);
       }
     }
   }
@@ -295,7 +365,7 @@ function auditHomepageRoutes(languageScope) {
   assertContains(englishHome, `${basePath}llms.txt`, 'English homepage GEO source map link');
   assertContains(
     englishHome,
-    'English and all published documentation locales now expose the full docs route set.',
+    'English and Simplified Chinese are verified indexable docs surfaces; all other locale routes remain available for review and are marked machine-translated.',
     'English homepage language boundary',
   );
 
@@ -306,7 +376,8 @@ function auditHomepageRoutes(languageScope) {
   assertContains(zhHome, '可索引的产品事实', 'zh-CN homepage GEO surface');
   assertContains(zhHome, 'Answer engine 来源地图', 'zh-CN homepage GEO surface');
   assertContains(zhHome, `${basePath}llms.txt`, 'zh-CN homepage GEO source map link');
-  assertContains(zhHome, '均暴露完整 docs 路由集。', 'zh-CN homepage language boundary');
+  assertContains(zhHome, '语言边界：英文与简体中文是已验证、可索引的文档表面；', 'zh-CN homepage language boundary');
+  assertContains(zhHome, '明确标记为机器翻译。', 'zh-CN homepage language boundary');
   assertContains(zhHome, `href="${zhBasePath}docs/faq"`, 'zh-CN homepage');
 
   for (const docPath of languageScope.zhCnHomepageDocPaths) {
@@ -320,6 +391,11 @@ function auditHomepageRoutes(languageScope) {
     const localizedHome = readBuildFile(path.join(locale, 'index.html'));
     assertContains(localizedHome, `<html lang="${htmlLang}"`, `${locale} homepage`);
     assertContains(localizedHome, `rel="canonical" href="${siteRoot}${locale}/"`, `${locale} homepage`);
+    if (localePublicationByCode.get(locale)?.indexable) {
+      assertNotContains(localizedHome, 'content="noindex,follow"', `${locale} homepage`);
+    } else {
+      assertContains(localizedHome, 'content="noindex,follow"', `${locale} homepage`);
+    }
   }
 }
 
@@ -328,6 +404,9 @@ async function loadPublishedLocales() {
   const locales = await import(moduleUrl);
   supportedLocalizedLocales = locales.publishedDocumentationLocales || [];
   publishedLanguageScopeText = locales.publishedLanguageScopeSentence();
+  const publicationModuleUrl = pathToFileURL(path.join(websiteRoot, 'src', 'lib', 'localePublication.mjs')).href;
+  const publication = await import(publicationModuleUrl);
+  localePublicationByCode = new Map(Object.entries(publication.localePublicationMap || {}));
   if (!supportedLocalizedLocales.length || !publishedLanguageScopeText) {
     fail('Published locale metadata must define documentation locales and language scope text');
   }
@@ -424,6 +503,12 @@ function auditSitemaps(languageScope) {
   }
 
   for (const {locale} of supportedLocalizedLocales) {
+    // Docusaurus intentionally skips sitemap generation for machine-
+    // translated locales marked noindex. Requiring those files would turn
+    // the publication policy into a false build failure.
+    if (!localePublicationByCode.get(locale)?.indexable) {
+      continue;
+    }
     const localeSitemap = readBuildFile(path.join(locale, 'sitemap.xml'));
     assertContains(localeSitemap, `${siteRoot}${locale}/`, `${locale} sitemap`);
     for (const docPath of languageScope.publishedZhCnDocPaths) {
@@ -448,7 +533,9 @@ function auditAiRetrievalMap(languageScope) {
   for (const {locale} of supportedLocalizedLocales) {
     assertContains(llmsText, `${siteRoot}${locale}/docs/intro`, 'llms.txt');
   }
-  assertContains(llmsText, publishedLanguageScopeText, 'llms.txt');
+  for (const scopeSentence of publishedLanguageScopeText.split(/\.\s+/).filter(Boolean)) {
+    assertContains(llmsText, scopeSentence, 'llms.txt');
+  }
 }
 
 function auditLocalizedDocBuildCoverage(languageScope) {
@@ -468,7 +555,11 @@ function auditLocalizedDocBuildCoverage(languageScope) {
     for (const docPath of publishedDocPaths) {
       const html = readBuildFile(routePathToBuildIndex(docPath, locale));
       assertContains(html, `<html lang="${htmlLang}"`, `${locale} doc ${docPath}`);
-      assertNotContains(html, 'content="noindex,follow"', `${locale} doc ${docPath}`);
+      if (localePublicationByCode.get(locale)?.indexable) {
+        assertNotContains(html, 'content="noindex,follow"', `${locale} doc ${docPath}`);
+      } else {
+        assertContains(html, 'content="noindex,follow"', `${locale} doc ${docPath}`);
+      }
       assertContains(html, htmlHrefForSitePath(localizedDocSitePath(locale, docPath)), `${locale} doc ${docPath}`);
     }
   }
@@ -654,7 +745,9 @@ function auditRequiredFiles() {
   for (const {locale} of supportedLocalizedLocales) {
     requiredFiles.push(path.join(locale, 'index.html'));
     requiredFiles.push(path.join(locale, 'docs', 'intro', 'index.html'));
-    requiredFiles.push(path.join(locale, 'sitemap.xml'));
+    if (localePublicationByCode.get(locale)?.indexable) {
+      requiredFiles.push(path.join(locale, 'sitemap.xml'));
+    }
   }
 
   for (const relativePath of requiredFiles) {
@@ -695,6 +788,7 @@ async function main() {
   auditPublishedScopeSourceFiles(languageScope);
   auditLocalizedSourceCoverage(languageScope);
   auditLocalizedSourceTextIntegrity();
+  auditLocalizedFaqMetadata();
   auditHomepageRoutes(languageScope);
   auditZhCnDocFallbacks(languageScope);
   auditLanguageAlternates(languageScope);

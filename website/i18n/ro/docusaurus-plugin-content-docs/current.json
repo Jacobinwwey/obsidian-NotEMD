@@ -1,22 +1,22 @@
 {
   "version.label": {
-    "message": "Next",
+    "message": "Următor",
     "description": "The label for version current"
   },
   "sidebar.tutorialSidebar.category.Getting Started": {
-    "message": "Getting Started",
+    "message": "Introducere",
     "description": "The label for category 'Getting Started' in sidebar 'tutorialSidebar'"
   },
   "sidebar.tutorialSidebar.category.Core Features": {
-    "message": "Core Features",
+    "message": "Funcționalități principale",
     "description": "The label for category 'Core Features' in sidebar 'tutorialSidebar'"
   },
   "sidebar.tutorialSidebar.category.LLM Providers": {
-    "message": "LLM Providers",
+    "message": "Furnizori LLM",
     "description": "The label for category 'LLM Providers' in sidebar 'tutorialSidebar'"
   },
   "sidebar.tutorialSidebar.category.Advanced": {
-    "message": "Advanced",
+    "message": "Avansat",
     "description": "The label for category 'Advanced' in sidebar 'tutorialSidebar'"
   }
 }

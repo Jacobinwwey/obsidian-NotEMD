@@ -208,11 +208,9 @@ describe('website documentation contract', () => {
             'ms',
         ]);
         expect(publishedLocaleContract.languageScopeSentence)
-            .toContain('Traditional Chinese for Taiwan');
+            .toContain('verified public docs route set is available in English and Simplified Chinese');
         expect(publishedLocaleContract.languageScopeSentence)
-            .toContain('Brazilian Portuguese');
-        expect(publishedLocaleContract.languageScopeSentence)
-            .toContain('Malay');
+            .toContain('marked machine-translated');
     });
 
     test('all published documentation locales mirror the English docs route set', () => {

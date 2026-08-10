@@ -15,80 +15,84 @@ citations:
 
 import TLDR from '@site/src/components/TLDR';
 
-# 다이어그램
+# Sơ đồ
 
 <TLDR>
-원하는 **다이어그램 유형**을 선택한 뒤, 해당 형식의 **편집 가능한 소스 포맷**을 골라주세요. Obsidian 내에서 Drawnix 보드와 그 안에 포함된 Mermaid 시각 자료를 포함한 전체 결과물을 미리 볼 수 있으며, 각 패널을 SVG, PNG 또는 PDF 형태로 내보낼 수 있습니다.
+Hãy chọn **loại sơ đồ mà bạn cần**, sau đó chọn **định dạng nguồn có thể chỉnh sửa** tương ứng. Xem trước kết quả hoàn chỉnh trong Obsidian, bao gồm bảng điều khiển Drawnix cùng các hình ảnh Mermaid được nhúng bên trong, rồi xuất từng khung hình ra dạng SVG, PNG hoặc PDF.
 </TLDR>
 
-## 세 가지 선택 옵션 이해하기
+## Tìm hiểu ba lựa chọn
 
-| 선택 항목 | 제어하는 내용 | 예시 |
+| Lựa chọn | Điều kiểm soát | Ví dụ |
 |---|---|---|
-| 다이어그램 유형 | 다이어그램의 의미 | 흐름도, 시퀀스 다이어그램, 회로도, 데이터 차트 |
-| 소스 포맷 | Notemd가 생성하는 편집 가능하거나 재사용 가능한 파일 | Mermaid, JSON Canvas, Draw.io, Drawnix, CircuitikZ |
-| 내보내기 포맷 | 공유에 사용되는 이미지 또는 문서 형식 | SVG, PNG, PDF |
+| Loại sơ đồ | Ý nghĩa của sơ đồ | Sơ đồ luồng, sơ đồ trình tự, sơ đồ mạch điện, biểu đồ dữ liệu |
+| Định dạng nguồn | Tệp tin có thể chỉnh sửa hoặc tái sử dụng mà Notemd tạo ra | Mermaid, JSON Canvas, Draw.io, Drawnix, CircuitikZ |
+| Định dạng xuất | Hình ảnh hoặc tài liệu dùng để chia sẻ | SVG, PNG, PDF |
 
-Draw.io와 Drawnix는 다이어그램 유형이 아닌 **소스 포맷**입니다. CircuitikZ는 회로도를 위해 설계된 소스 포맷입니다. 동일한 미리 보기 결과물을 여러 시각적 형식으로 내보낼 수 있으므로 CircuitikZ를 선택하더라도 SVG에만 국한되지 않습니다.
+Draw.io và Drawnix là **định dạng nguồn**, không phải loại sơ đồ. CircuitikZ là một định dạng nguồn được thiết kế riêng cho các sơ đồ mạch điện. Cùng một bản xem trước có thể được xuất ra nhiều định dạng hình ảnh khác nhau, vì vậy việc chọn CircuitikZ không hạn chế bạn chỉ sử dụng SVG.
 
-## 소스 포맷 선택하기
+## Chọn định dạng nguồn
 
-| 포맷 | 가장 적합한 용도 | 소스 파일 |
+| Định dạng | Phù hợp nhất cho | Tệp nguồn |
 |---|---|---|
-| Mermaid | Markdown 내에 직접 저장되는 다이어그램 | Mermaid 코드 블록 |
-| JSON Canvas | Obsidian 기본 캔버스 기반 작업 흐름 | `.canvas` |
-| Draw.io | diagrams.net이나 호환 가능한 도구에서 후속 편집 | `.drawio` |
-| Drawnix | 손으로 그리거나 화이트보드 스타일로 편집하는 경우 | `.drawnix` |
-| CircuitikZ | 구조화된 전기 회로 및 트랜지스터 회로 | `.tex` |
+| Mermaid | Các sơ đồ được giữ nguyên trực tiếp trong Markdown | Khối mã Mermaid |
+| JSON Canvas | Công việc với bảng canvas tích hợp sẵn trong Obsidian | `.canvas` |
+| Draw.io | Chỉnh sửa sau trên diagram.net hoặc các công cụ tương thích | `.drawio` |
+| Drawnix | Chỉnh sửa theo phong cách vẽ tay hoặc bảng trắng | `.drawnix` |
+| CircuitikZ | Các mạch điện và transistor có cấu trúc rõ ràng | `.tex` |
 
-특정 편집기가 필요하지 않다면 **Preferred source format**을 **Auto** 상태로 두세요. Notemd는 선택한 다이어그램 유형에 맞는 호환 가능한 포맷을 자동으로 선택합니다.
+Nếu bạn không yêu cầu sử dụng công cụ biên tập cụ thể nào, hãy để **Định dạng nguồn ưu tiên** ở chế độ **Tự động**. Notemd sẽ tự chọn một định dạng phù hợp với loại sơ đồ đã chọn.
 
-## 다이어그램 생성 및 내보내기
+## Tạo và xuất sơ đồ
 
-1. 노트를 열거나 시각화하고자 하는 텍스트를 선택하세요.
-2. Notemd 사이드바나 커맨드 팔레트에서 **Generate diagram**을 클릭하세요.
-3. **다이어그램 유형**을 선택하거나 **Auto-detect** 상태로 두세요.
-4. **소스 포맷**을 선택하거나 **Auto** 상태로 둡니다. 편집 가능한 노드와 내장된 Mermaid 시각 자료가 포함된 지식 맵을 원할 경우 **Drawnix**를 선택하세요.
-5. 미리 보기를 확인하세요. 다중 패널 결과물의 경우 Drawnix 보드와 각 Mermaid 패널이 소스 순서대로 하나의 수직 스크롤 가능한 미리 보기 창 안에 표시되며, Mermaid 패널은 잘림 없이 실제 렌더링된 높이를 그대로 유지합니다.
-6. 하나의 시각 자료에 대해 각 패널별로 **Export SVG**, **Export PNG**, **Export PDF** 작업을 선택하거나, 모든 패널에 대해 상위 수준의 이미지 내보내기를 사용할 수 있습니다. 여러 패널인 경우 소스 폴더나 Vault 기준의 맞춤형 폴더를 지정하세요. Notemd는 각 패널마다 일관된 파일명으로 저장하며, 특정 패널 처리에 실패해도 계속해서 나머지 작업을 진행합니다.
-7. 편집 가능한 원본 파일도 함께 필요할 경우 **Save source file**을 사용하세요.
+1. Mở ghi chú hoặc chọn đoạn văn bản bạn muốn biến thành sơ đồ.
+2. Chọn tùy chọn **Tạo sơ đồ** từ thanh bên Notemd hoặc bảng điều khiển lệnh.
+3. Chọn một **loại sơ đồ**, hoặc để nó ở chế độ **Nhận diện tự động**.
+4. Chọn một **định dạng nguồn**, hoặc để nó ở chế độ **Tự động**. Hãy chọn **Drawnix** nếu bạn muốn tạo bản đồ kiến thức với các nút có thể chỉnh sửa và hình ảnh Mermaid được nhúng bên trong.
+5. Xem xét bản xem trước. Kết quả gồm nhiều khung hình sẽ giữ nguyên bảng điều khiển Drawnix cùng từng khung Mermaid theo thứ tự nguồn trong một vỏ xem trước có thể cuộn dọc; các khung Mermaid sẽ được hiển thị ở chiều cao đã được tính toán chính xác thay vì bị cắt đi.
+6. Chọn tùy chọn **Xuất SVG**, **Xuất PNG** hoặc **Xuất PDF** cho từng khung hình riêng lẻ, hoặc sử dụng tùy chọn xuất hình ảnh cấp cao để xuất toàn bộ các khung. Đối với nhiều khung, hãy chọn thư mục nguồn hoặc một thư mục tương đối trong Vault; Notemd sẽ tạo ra một tệp duy nhất cho từng khung và tiếp tục xử lý ngay cả khi có lỗi xảy ra ở một khung nào đó.
+7. Sử dụng tùy chọn **Lưu tệp nguồn** nếu bạn cũng cần tệp có thể chỉnh sửa.
 
-내보내기 메뉴에서는 현재 미리 보이는 시각 자료에 대해 **Export SVG**, **Export PNG**, **Export PDF** 작업을 제공합니다. 각 패널 헤더에서도 단일 Mermaid나 Drawnix 시각 자료에 대한 동일한 내보내기 기능이 제공되므로, 큰 미리 보기 결과물을 하나의 불투명한 이미지로 내보낼 필요가 없습니다.
+Menu Xuất cung cấp các lựa chọn **Xuất SVG**, **Xuất PNG** và **Xuất PDF** dành cho bản xem trước hình ảnh hiện tại. Mỗi tiêu đề khung đều hiển thị các tùy chọn tương tự cho một hình ảnh Mermaid hoặc Drawnix riêng lẻ, vì vậy không cần thiết phải xuất toàn bộ bản xem trước lớn dưới dạng một hình ảnh đen kín.
 
-미리 보기 화면에서 **History**를 선택하면 다이어그램을 숨기지 않고 Vault 기록 창을 열 수 있습니다. 완료된 다이어그램을 검색하거나 필터링하고, 미리 보기를 다시 열거나 저장된 파일을 열 수도 있습니다. 노트가 활성화되어 있지 않아도 커맨드 팔레트와 Notemd 사이드바에서 바로 다이어그램 기록에 접근할 수 있습니다.
+Trong bản xem trước, hãy chọn **Lịch sử** để mở ngăn lưu trữ lịch sử của Vault mà không làm mất đi sơ đồ. Bạn có thể tìm kiếm và lọc các sơ đồ đã tạo xong, mở lại bản xem trước hoặc mở các tệp đã lưu. Lịch sử sơ đồ cũng có sẵn ngay từ bảng điều khiển lệnh và thanh bên Notemd, ngay cả khi không có ghi chú nào đang được mở.
 
-SVG와 PDF는 벡터 기하학을 기반으로 생성됩니다. PDF의 경우 전체 미리 보기를 래스터화하는 대신 동일한 SVG 레이아웃과 텍스트 측정값을 사용합니다. Notemd 설정에 있는 이미지 내보내기 PPI는 PNG의 래스터화 수준만 제어하며(72~600 PPI, 기본값 300), SVG와 PDF는 영향을 받지 않습니다.
+SVG và PDF được tạo ra từ hình học vector; PDF sử dụng cùng cấu trúc SVG và các thông số văn bản thay vì hiển thị toàn bộ bản xem trước dưới dạng raster. Giá trị PPI khi xuất hình ảnh trong cài đặt Notemd chỉ kiểm soát việc raster hóa PNG (từ 72–600 PPI, mức mặc định là 300).
 
-## Mermaid가 내장된 Drawnix 미리 보기
+## Bản xem trước Drawnix với hình ảnh Mermaid được nhúng
 
-Drawnix 파일에 Mermaid 시각 자료가 포함된 경우, Notemd는 렌더링된 SVG를 정제한 뒤 해당 Mermaid 소스 코드를 `.drawnix` 메타데이터 안에 함께 저장합니다. 따라서 Drawnix 지식 맵 내에서도 Mermaid 이미지가 표시되며, Drawnix나 Plait 런타임이 반드시 필요하지 않습니다. 안전하게 내장된 순수 Mermaid 시각 자료의 경우 별도의 `.assets` 디렉터리가 생성되지 않으며, 외부 바이너리 미디어나 해결되지 않은 시각 자료는 데이터 손실을 방지하기 위해 동반 파일이 함께 저장됩니다.
+Khi một tệp Drawnix chứa các hình ảnh Mermaid, Notemd sẽ xử lý lại SVG đã được hiển thị và giữ nguyên mã nguồn Mermaid bên cạnh nó trong phần metadata `.drawnix`. Nhờ đó, bản xem trước có thể hiển thị hình ảnh Mermaid bên trong bản đồ kiến thức Drawnix mà không cần phải sử dụng môi trường chạy Drawnix hoặc Plait. Đường dẫn mặc định là tự chứa đầy đủ thông tin và không tạo ra thư mục `.assets` riêng biệt. Hãy bật tùy chọn **Xuất thêm toàn bộ hình ảnh Mermaid** nếu bạn cần mã nguồn Mermaid, SVG cùng các tệp manifest đi kèm để chuyển giao hoặc chỉnh sửa bên ngoài. Các tệp hiện có đã chứa thư mục `.assets` vẫn được hỗ trợ, và nếu thiếu SVG Mermaid cũ thì vẫn có thể tái tạo lại từ văn bản nguồn được lưu trong metadata.
 
-미리 보기 화면은 의도적으로 단일 스크롤 가능한 영역으로 구성되어 있습니다. 먼저 주요 Drawnix 캔버스가 표시된 뒤, 소스 순서대로 각 내장된 Mermaid 패널이 차례로 나타납니다. 저장된 기록 항목을 닫았다가 다시 열면 동일한 패널 목록, 크기 및 내보내기 옵션이 그대로 복원됩니다.
+Các liên kết hình ảnh đã được xử lý xong cũng sẽ nhận được bản xem trước SVG dựa trên dữ liệu khi có thể, vì vậy việc xóa thư mục phụ cũ không làm biến mất bản xem trước Drawnix đã lưu. Quá trình tải bản xem trước sẽ ưu tiên sử dụng dữ liệu được nhúng trước, sau đó mới dùng các tệp phụ cũ, và cuối cùng mới sử dụng phương án tái tạo từ văn bản nguồn nếu cần.
 
-## 회로도
+Bản xem trước được thiết kế thành một bề mặt duy nhất có thể cuộn: trước tiên là bảng canvas chính của Drawnix, sau đó là từng khung Mermaid được nhúng theo thứ tự nguồn. Việc đóng và mở lại một mục lịch sử đã lưu sẽ tái tạo lại danh sách các khung, kích thước cũng như các tùy chọn xuất giống hệt ban đầu.
 
-지원되는 회로 관련 요청의 경우 **Circuit diagram**을 선택하고 **CircuitikZ source file**을 사용하세요. Notemd는 먼저 구조화된 회로 설명을 생성한 뒤 CircuitikZ 소스 코드를 작성합니다. 이 방식은 모델에게 제한 없이 LaTeX 코드를 작성하도록 요청하는 것보다 훨씬 안정적입니다.
+Các giải thích về mối quan hệ trong sơ đồ Drawnix được trình bày dưới dạng các yếu tố hình ảnh có vai trò quan trọng. Bộ xử lý sẽ vẽ các mũi tên chấm chấm xung quanh các hình chữ nhật biểu diễn nút và dành ra một khu vực bảo vệ để hiển thị tiêu đề hoặc tóm tắt. Các phần tóm tắt dài và nhãn mối quan hệ sẽ được gấp vào các dòng có kích thước đã được tính toán trước, phần nội dung chính sẽ nằm dưới chiều cao của tiêu đề, và một khung nhãn trong suốt sẽ được vẽ sau lớp nút. Tiêu đề sẽ được hiển thị cuối cùng với nền trong suốt, giúp ngăn chặn các đường mũi tên bên ngoài che khuất các văn bản như `以 Notemd 插件为对象的知识地图，覆盖系统架构、LLM 调用管道、图表渲染平台、模块地图、CLI 边界现实、关键设计决策与验证。` hoặc giải thích mối quan hệ như `RendererRegistry feeds Vault files, preview modal, and export`. Mũi tên gốc trong `.drawnix` sử dụng các thuộc tính `shape`, `texts[]`, markers và stroke phù hợp với Plait, đồng thời vẫn giữ nguyên metadata cũ để hỗ trợ những người dùng cũ. Nếu bản đồ Drawnix được yêu cầu không tìm thấy lộ trình hoặc vị trí nhãn không bị chèn chéo, quá trình tạo sẽ thất bại do lỗi định dạng thay vì lặng lẽ tạo ra phiên bản Mermaid dự phòng dưới dạng tệp `.drawnix`.
 
-현재의 CircuitikZ 지원 기능은 의도적으로 제한된 수준입니다. 일반적인 소스 구조를 가진 NMOS 증폭기와 지원되는 CMOS 구성 요소들이 가장 잘 작동합니다. 기술 문서나 출판물에 생성된 회로도를 사용하기 전에 반드시 미리 보기와 소스 코드를 꼼꼼히 확인해야 합니다.
+## Sơ đồ mạch điện
 
-SVG 형태의 미리 보기는 Notemd가 자동으로 생성하는 검토용 보조 파일일 뿐입니다. 이는 로컬에 설치된 LaTeX나 TikZJax 환경에서 `.tex` 파일이 정상적으로 컴파일되었다는 증거가 아닙니다.
+Đối với các yêu cầu sơ đồ mạch điện được hỗ trợ, hãy chọn **Sơ đồ mạch điện** kèm theo tệp nguồn **CircuitikZ**. Notemd sẽ tạo ra mô tả mạch có cấu trúc rõ ràng trước, sau đó mới viết mã nguồn CircuitikZ. Cách làm này đáng tin cậy hơn so với yêu cầu mô hình tự viết mã LaTeX không bị giới hạn.
 
-**선택 사항인 네이티브 컴파일 기능.** 플러그인 내 미리 보기나 SVG, PNG, 미리 보기용 PDF를 생성할 때 LaTeX가 반드시 필요한 것은 아닙니다. 데스크톱 환경에서는 컴파일 진단 정보나 네이티브 LaTeX PDF를 원할 경우 다이어그램 설정이나 커맨드 팔레트를 통해 **CircuitikZ native compile environment**을 열 수 있습니다. Notemd는 시스템에 설치된 `tectonic` 또는 `pdflatex`를 재사용하거나, 사용자가 지정한 실행 파일을 이용할 수도 있으며, **Install** 옵션을 선택하면 고정된 관리형 Tectonic 런타임을 자동으로 설치합니다. 환경 설정 패널에서는 진행 상황과 오류가 실시간으로 표시되며, 필요에 따라 나중에 관리형 런타임을 제거할 수도 있습니다.
+Khả năng hỗ trợ CircuitikZ hiện tại được thiết kế sao cho có phạm vi hạn chế. Các bộ khuếch đại NMOS có mã nguồn phổ biến và các thành phần CMOS được hỗ trợ sẽ hoạt động tốt nhất. Luôn kiểm tra kỹ bản xem trước và mã nguồn trước khi sử dụng sơ đồ đã tạo trong công việc kỹ thuật hoặc xuất bản.
 
-## 문제 해결
+Bản xem trước dạng SVG là tài liệu hỗ trợ để xem lại, được Notemd tạo ra. Nó không phải là bằng chứng cho thấy máy tính đã cài đặt LaTeX hoặc TikZJax thành công và biên dịch tệp `.tex` một cách ổn định.
 
-### 결과물의 다이어그램 유형이 잘못된 경우
+**Tùy chọn biên dịch gốc (tự động).** Bạn không cần phải sử dụng LaTeX để xem trước trong plugin hoặc xuất SVG, PNG và PDF. Trên máy tính để bàn, hãy mở **Môi trường biên dịch gốc CircuitikZ** từ cài đặt sơ đồ hoặc bảng điều khiển lệnh nếu bạn cần xem thông tin chẩn đoán biên dịch hoặc tạo PDF LaTeX gốc. Notemd có thể tái sử dụng chương trình `tectonic` hoặc `pdflatex` của hệ thống, sử dụng tệp thực thi tùy chỉnh, hoặc cài đặt môi trường Tectonic được quản lý sau khi bạn chọn **Cài đặt** một cách rõ ràng. Bảng thông tin môi trường sẽ hiển thị tiến trình và lỗi ngay trên màn hình, đồng thời cho phép bạn xóa môi trường quản lý này sau này.
 
-자동 감지 기능 대신 명시적으로 원하는 다이어그램 유형을 선택하세요. 회로도의 경우 **Circuit diagram**을 선택하고, 구식인 **Summarise as Mermaid diagram** 명령 대신 **Generate diagram** 명령을 사용해야 합니다.
+## Khắc phục sự cố
 
-### 소스 포맷이 적합하지 않은 경우
+### Kết quả tạo ra loại sơ đồ sai
 
-소스 포맷을 다시 **Auto** 상태로 설정하거나, 해당 다이어그램 유형에 맞는 포맷을 선택하세요. CircuitikZ는 회로도용으로만 사용되며, Draw.io와 Drawnix는 지원되는 구조화된 다이어그램용으로 설계되었습니다.
+Hãy chọn loại sơ đồ một cách rõ ràng thay vì để ở chế độ Nhận diện tự động. Đối với sơ đồ mạch điện, hãy chọn **Sơ đồ mạch điện** và sử dụng lệnh **Tạo sơ đồ**, thay vì lệnh cũ **Tóm tắt thành sơ đồ Mermaid**.
 
-### 내보내기 메뉴가 표시되지 않는 경우
+### Định dạng nguồn không phù hợp
 
-SVG, PNG, PDF를 생성하려면 미리 보이는 시각 자료가 반드시 필요합니다. 소스 텍스트만 있는 경우에는 소스 파일을 저장한 뒤 해당 파일을 적절한 외부 도구에서 열어야 합니다.
+Hãy đặt lại định dạng nguồn về chế độ **Tự động**, hoặc chọn một định dạng phù hợp với loại sơ đồ đó. CircuitikZ chỉ dành cho sơ đồ mạch điện; Draw.io và Drawnix được thiết kế cho các sơ đồ có cấu trúc được hỗ trợ.
 
-### CircuitikZ 파일이 외부에서 컴파일되지 않는 경우
+### Menu Xuất không xuất hiện
 
-**CircuitikZ native compile environment**을 열고 환경 검사를 실행해 보세요. 관리형 런타임을 수정하거나, 사용자가 지정한/시스템에 설치된 컴파일러가 `circuitikz` 패키지를 정상적으로 가져올 수 있는지 확인해야 합니다. Notemd는 플러그인 파일 내부에 완전한 TeX 배포판을 포함하고 있지 않습니다.
+SVG, PNG và PDF đều yêu cầu phải có bản xem trước hình ảnh. Nếu chỉ có văn bản nguồn, hãy lưu tệp nguồn rồi mở nó trong công cụ bên ngoài tương ứng.
+
+### Tệp CircuitikZ không thể biên dịch bên ngoài
+
+Hãy mở **Môi trường biên dịch gốc CircuitikZ** và chạy kiểm tra môi trường. Sửa lỗi trong môi trường quản lý hoặc kiểm tra xem máy tính của bạn có thể tải được gói `circuitikz` hay không. Notemd không bao gồm toàn bộ bộ phân phối TeX trong tệp plugin của mình.

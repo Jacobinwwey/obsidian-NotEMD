@@ -1,6 +1,6 @@
 .tldr {
   background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-  border-left: 4px solid #0066cc;
+  border-inline-start: 4px solid #0066cc;
   border-radius: 8px;
   padding: 16px 20px;
   margin: 24px 0;
@@ -9,7 +9,7 @@
 
 [data-theme='dark'] .tldr {
   background: linear-gradient(135deg, #1c1e21 0%, #2d3238 100%);
-  border-left-color: #4dabf7;
+  border-inline-start-color: #4dabf7;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 

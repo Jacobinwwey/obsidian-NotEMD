@@ -154,8 +154,8 @@
 }
 
 .languageBoundary {
-  border-left: 4px solid var(--ifm-color-primary);
-  padding-left: 0.85rem;
+  border-inline-start: 4px solid var(--ifm-color-primary);
+  padding-inline-start: 0.85rem;
   font-weight: 600;
 }
 

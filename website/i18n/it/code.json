@@ -1,70 +1,70 @@
 {
   "theme.colorToggle.ariaLabel": {
-    "message": "Switch between dark and light mode",
+    "message": "Switch tra modalità scura e chiara",
     "description": "The ARIA label for the color mode toggle"
   },
   "theme.common.editThisPage": {
-    "message": "Edit this page",
+    "message": "Modifica questa pagina",
     "description": "The link label to edit the current page"
   },
   "theme.common.lastUpdatedAt": {
-    "message": "Last updated on"
+    "message": "Ultima modifica il"
   },
   "theme.docs.breadcrumbs.navAriaLabel": {
-    "message": "Breadcrumbs",
+    "message": "Traccia del percorso",
     "description": "The ARIA label for the breadcrumbs"
   },
   "theme.docs.paginator.navAriaLabel": {
-    "message": "Docs sidebar",
+    "message": "Barretta laterale della documentazione",
     "description": "The ARIA label for the docs pagination"
   },
   "theme.docs.paginator.next": {
-    "message": "Next page",
+    "message": "Pagina successiva",
     "description": "The label used to navigate to the next doc"
   },
   "theme.docs.paginator.previous": {
-    "message": "Previous page",
+    "message": "Pagina precedente",
     "description": "The label used to navigate to the previous doc"
   },
   "theme.docs.sidebar.closeSidebarButtonAriaLabel": {
-    "message": "Close",
+    "message": "Chiudi",
     "description": "The ARIA label for close button of mobile sidebar"
   },
   "theme.docs.sidebar.collapseButtonTitle": {
-    "message": "Collapse sidebar",
+    "message": "Contrai la barra laterale",
     "description": "The title attribute for collapse button of doc sidebar"
   },
   "theme.docs.sidebar.expandButtonTitle": {
-    "message": "Expand sidebar",
+    "message": "Espandi la barra laterale",
     "description": "The ARIA label and title attribute for expand button of doc sidebar"
   },
   "theme.NotFound.p1": {
-    "message": "We could not find the page you were looking for.",
+    "message": "Non siamo riusciti a trovare la pagina che stavi cercando.",
     "description": "The first paragraph of the 404 page"
   },
   "theme.NotFound.title": {
-    "message": "Page not found",
+    "message": "Pagina non trovata",
     "description": "The title of the 404 page"
   },
   "theme.SearchBar.label": {
-    "message": "Search"
+    "message": "Cerca"
   },
   "theme.SearchBar.noResultsText": {
-    "message": "No results found"
+    "message": "Nessun risultato trovato"
   },
   "theme.SearchBar.seeAll": {
-    "message": "See all results"
+    "message": "Vedere tutti i risultati"
   },
   "theme.TOCCollapsible.toggleButtonLabel": {
-    "message": "On this page",
+    "message": "In questa pagina",
     "description": "The label used by the button on the collapsible TOC component"
   },
   "theme.navbar.mobileLanguageDropdown.label": {
-    "message": "Language",
+    "message": "Lingua",
     "description": "The label for the mobile language switcher dropdown"
   },
   "theme.BackToTopButton.buttonAriaLabel": {
-    "message": "Back to top",
+    "message": "Torna in cima",
     "description": "The ARIA label for the back to top button"
   },
   "theme.IconExternalLink.ariaLabel": {
@@ -72,35 +72,35 @@
     "description": "The ARIA label for the external link icon"
   },
   "theme.NavBar.navAriaLabel": {
-    "message": "Main navigation",
+    "message": "Navigazione principale",
     "description": "The ARIA label for the main navigation"
   },
   "theme.CodeBlock.copy": {
-    "message": "Copy",
+    "message": "Copia",
     "description": "The copy button label on code blocks"
   },
   "theme.CodeBlock.copied": {
-    "message": "Copied",
+    "message": "Copiato",
     "description": "The copied button label on code blocks"
   },
   "theme.CodeBlock.copyButtonAriaLabel": {
-    "message": "Copy code to clipboard",
+    "message": "Copia il codice nella clipboard",
     "description": "The ARIA label for copy code blocks button"
   },
   "theme.docs.breadcrumbs.home": {
-    "message": "Docs",
+    "message": "Documentazione",
     "description": "The ARIA label for the home page in the breadcrumbs"
   },
   "theme.docs.sidebar.navAriaLabel": {
-    "message": "Docs sidebar",
+    "message": "Barretta laterale della documentazione",
     "description": "The ARIA label for the sidebar navigation"
   },
   "theme.docs.sidebar.toggleSidebarButtonAriaLabel": {
-    "message": "Expand sidebar",
+    "message": "Espandi la barra laterale",
     "description": "The ARIA label for hamburger menu button of mobile navigation"
   },
   "theme.common.skipToMainContent": {
-    "message": "Skip to main content",
+    "message": "Salta al contenuto principale",
     "description": "The skip to content label used for accessibility"
   }
 }

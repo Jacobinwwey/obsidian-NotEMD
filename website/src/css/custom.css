@@ -67,9 +67,9 @@ article li {
   margin-bottom: 0.5rem;
 }
 
-/* Readability: Code blocks with left accent border */
+/* Readability: Code blocks with an inline-start accent border */
 pre {
-  border-left: 4px solid var(--ifm-color-primary);
+  border-inline-start: 4px solid var(--ifm-color-primary);
   border-radius: 8px;
   margin: 1.5rem 0;
 }
@@ -89,7 +89,7 @@ thead {
 
 th, td {
   padding: 12px;
-  text-align: left;
+  text-align: start;
   border: 1px solid var(--ifm-table-border-color);
 }
 
@@ -101,9 +101,9 @@ tbody tr:nth-child(even) {
   background: rgba(255, 255, 255, 0.05);
 }
 
-/* Readability: Blockquotes with left accent */
+/* Readability: Blockquotes with an inline-start accent */
 blockquote {
-  border-left: 4px solid var(--ifm-color-primary);
+  border-inline-start: 4px solid var(--ifm-color-primary);
   background: rgba(0, 102, 204, 0.05);
   padding: 1rem 1.5rem;
   margin: 1.5rem 0;

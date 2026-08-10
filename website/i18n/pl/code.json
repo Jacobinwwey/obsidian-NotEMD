@@ -1,70 +1,70 @@
 {
   "theme.colorToggle.ariaLabel": {
-    "message": "Switch between dark and light mode",
+    "message": "Przełączanie między trybem ciemnym a jasnym",
     "description": "The ARIA label for the color mode toggle"
   },
   "theme.common.editThisPage": {
-    "message": "Edit this page",
+    "message": "Edytuj tę stronę",
     "description": "The link label to edit the current page"
   },
   "theme.common.lastUpdatedAt": {
-    "message": "Last updated on"
+    "message": "Ostatnia aktualizacja:"
   },
   "theme.docs.breadcrumbs.navAriaLabel": {
-    "message": "Breadcrumbs",
+    "message": "Ścieżka nawigacyjna",
     "description": "The ARIA label for the breadcrumbs"
   },
   "theme.docs.paginator.navAriaLabel": {
-    "message": "Docs sidebar",
+    "message": "Boczna pasek z dokumentacją",
     "description": "The ARIA label for the docs pagination"
   },
   "theme.docs.paginator.next": {
-    "message": "Next page",
+    "message": "Następna strona",
     "description": "The label used to navigate to the next doc"
   },
   "theme.docs.paginator.previous": {
-    "message": "Previous page",
+    "message": "Poprzednia strona",
     "description": "The label used to navigate to the previous doc"
   },
   "theme.docs.sidebar.closeSidebarButtonAriaLabel": {
-    "message": "Close",
+    "message": "Zamknij",
     "description": "The ARIA label for close button of mobile sidebar"
   },
   "theme.docs.sidebar.collapseButtonTitle": {
-    "message": "Collapse sidebar",
+    "message": "Zwinąć bocznik",
     "description": "The title attribute for collapse button of doc sidebar"
   },
   "theme.docs.sidebar.expandButtonTitle": {
-    "message": "Expand sidebar",
+    "message": "Rozwiń bocznik",
     "description": "The ARIA label and title attribute for expand button of doc sidebar"
   },
   "theme.NotFound.p1": {
-    "message": "We could not find the page you were looking for.",
+    "message": "Nie udało nam się znaleźć strony, której szukałeś.",
     "description": "The first paragraph of the 404 page"
   },
   "theme.NotFound.title": {
-    "message": "Page not found",
+    "message": "Strona nie została znaleziona",
     "description": "The title of the 404 page"
   },
   "theme.SearchBar.label": {
-    "message": "Search"
+    "message": "Wyszukiwanie"
   },
   "theme.SearchBar.noResultsText": {
-    "message": "No results found"
+    "message": "Nie znaleziono żadnych wyników"
   },
   "theme.SearchBar.seeAll": {
-    "message": "See all results"
+    "message": "Zobacz wszystkie wyniki"
   },
   "theme.TOCCollapsible.toggleButtonLabel": {
-    "message": "On this page",
+    "message": "Na tej stronie",
     "description": "The label used by the button on the collapsible TOC component"
   },
   "theme.navbar.mobileLanguageDropdown.label": {
-    "message": "Language",
+    "message": "Język",
     "description": "The label for the mobile language switcher dropdown"
   },
   "theme.BackToTopButton.buttonAriaLabel": {
-    "message": "Back to top",
+    "message": "Wróć na górę",
     "description": "The ARIA label for the back to top button"
   },
   "theme.IconExternalLink.ariaLabel": {
@@ -72,35 +72,35 @@
     "description": "The ARIA label for the external link icon"
   },
   "theme.NavBar.navAriaLabel": {
-    "message": "Main navigation",
+    "message": "Główna nawigacja",
     "description": "The ARIA label for the main navigation"
   },
   "theme.CodeBlock.copy": {
-    "message": "Copy",
+    "message": "Kopiuj",
     "description": "The copy button label on code blocks"
   },
   "theme.CodeBlock.copied": {
-    "message": "Copied",
+    "message": "Zkopiowano",
     "description": "The copied button label on code blocks"
   },
   "theme.CodeBlock.copyButtonAriaLabel": {
-    "message": "Copy code to clipboard",
+    "message": "Kopiuj kod do schowka",
     "description": "The ARIA label for copy code blocks button"
   },
   "theme.docs.breadcrumbs.home": {
-    "message": "Docs",
+    "message": "Dokumentacja",
     "description": "The ARIA label for the home page in the breadcrumbs"
   },
   "theme.docs.sidebar.navAriaLabel": {
-    "message": "Docs sidebar",
+    "message": "Boczna pasek z dokumentacją",
     "description": "The ARIA label for the sidebar navigation"
   },
   "theme.docs.sidebar.toggleSidebarButtonAriaLabel": {
-    "message": "Expand sidebar",
+    "message": "Rozwiń bocznik",
     "description": "The ARIA label for hamburger menu button of mobile navigation"
   },
   "theme.common.skipToMainContent": {
-    "message": "Skip to main content",
+    "message": "Przejdź do głównej treści",
     "description": "The skip to content label used for accessibility"
   }
 }

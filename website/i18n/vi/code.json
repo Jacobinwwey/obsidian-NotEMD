@@ -1,70 +1,70 @@
 {
   "theme.colorToggle.ariaLabel": {
-    "message": "Switch between dark and light mode",
+    "message": "Chuyển đổi giữa chế độ tối và sáng",
     "description": "The ARIA label for the color mode toggle"
   },
   "theme.common.editThisPage": {
-    "message": "Edit this page",
+    "message": "Chỉnh sửa trang này",
     "description": "The link label to edit the current page"
   },
   "theme.common.lastUpdatedAt": {
-    "message": "Last updated on"
+    "message": "Được cập nhật lần cuối vào"
   },
   "theme.docs.breadcrumbs.navAriaLabel": {
-    "message": "Breadcrumbs",
+    "message": "Dấu mốc đường dẫn",
     "description": "The ARIA label for the breadcrumbs"
   },
   "theme.docs.paginator.navAriaLabel": {
-    "message": "Docs sidebar",
+    "message": "Bên cạnh tài liệu",
     "description": "The ARIA label for the docs pagination"
   },
   "theme.docs.paginator.next": {
-    "message": "Next page",
+    "message": "Trang tiếp theo",
     "description": "The label used to navigate to the next doc"
   },
   "theme.docs.paginator.previous": {
-    "message": "Previous page",
+    "message": "Trang trước",
     "description": "The label used to navigate to the previous doc"
   },
   "theme.docs.sidebar.closeSidebarButtonAriaLabel": {
-    "message": "Close",
+    "message": "Đóng",
     "description": "The ARIA label for close button of mobile sidebar"
   },
   "theme.docs.sidebar.collapseButtonTitle": {
-    "message": "Collapse sidebar",
+    "message": "Thu gọn bên cạnh",
     "description": "The title attribute for collapse button of doc sidebar"
   },
   "theme.docs.sidebar.expandButtonTitle": {
-    "message": "Expand sidebar",
+    "message": "Mở rộng bên cạnh",
     "description": "The ARIA label and title attribute for expand button of doc sidebar"
   },
   "theme.NotFound.p1": {
-    "message": "We could not find the page you were looking for.",
+    "message": "Chúng tôi không thể tìm thấy trang mà bạn đang tìm kiếm.",
     "description": "The first paragraph of the 404 page"
   },
   "theme.NotFound.title": {
-    "message": "Page not found",
+    "message": "Trang không tìm thấy",
     "description": "The title of the 404 page"
   },
   "theme.SearchBar.label": {
-    "message": "Search"
+    "message": "Tìm kiếm"
   },
   "theme.SearchBar.noResultsText": {
-    "message": "No results found"
+    "message": "Không tìm thấy kết quả nào"
   },
   "theme.SearchBar.seeAll": {
-    "message": "See all results"
+    "message": "Xem tất cả kết quả"
   },
   "theme.TOCCollapsible.toggleButtonLabel": {
-    "message": "On this page",
+    "message": "Trên trang này",
     "description": "The label used by the button on the collapsible TOC component"
   },
   "theme.navbar.mobileLanguageDropdown.label": {
-    "message": "Language",
+    "message": "Ngôn ngữ",
     "description": "The label for the mobile language switcher dropdown"
   },
   "theme.BackToTopButton.buttonAriaLabel": {
-    "message": "Back to top",
+    "message": "Quay lại đầu trang",
     "description": "The ARIA label for the back to top button"
   },
   "theme.IconExternalLink.ariaLabel": {
@@ -72,35 +72,35 @@
     "description": "The ARIA label for the external link icon"
   },
   "theme.NavBar.navAriaLabel": {
-    "message": "Main navigation",
+    "message": "Điều hướng chính",
     "description": "The ARIA label for the main navigation"
   },
   "theme.CodeBlock.copy": {
-    "message": "Copy",
+    "message": "Sao chép",
     "description": "The copy button label on code blocks"
   },
   "theme.CodeBlock.copied": {
-    "message": "Copied",
+    "message": "Đã sao chép",
     "description": "The copied button label on code blocks"
   },
   "theme.CodeBlock.copyButtonAriaLabel": {
-    "message": "Copy code to clipboard",
+    "message": "Sao chép mã vào bảng sao chép",
     "description": "The ARIA label for copy code blocks button"
   },
   "theme.docs.breadcrumbs.home": {
-    "message": "Docs",
+    "message": "Tài liệu",
     "description": "The ARIA label for the home page in the breadcrumbs"
   },
   "theme.docs.sidebar.navAriaLabel": {
-    "message": "Docs sidebar",
+    "message": "Bên cạnh tài liệu",
     "description": "The ARIA label for the sidebar navigation"
   },
   "theme.docs.sidebar.toggleSidebarButtonAriaLabel": {
-    "message": "Expand sidebar",
+    "message": "Mở rộng bên cạnh",
     "description": "The ARIA label for hamburger menu button of mobile navigation"
   },
   "theme.common.skipToMainContent": {
-    "message": "Skip to main content",
+    "message": "Bỏ qua để đến nội dung chính",
     "description": "The skip to content label used for accessibility"
   }
 }

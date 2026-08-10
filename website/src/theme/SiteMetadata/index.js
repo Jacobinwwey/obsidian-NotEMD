@@ -13,6 +13,7 @@ import SearchMetadata from '@theme/SearchMetadata';
 import {
   shouldExposeZhCnLanguageSignal,
 } from '../../lib/languageRoutePolicy';
+import {isIndexableLocale} from '../../lib/localePublication.mjs';
 
 function AlternateLangHeaders() {
   const {
@@ -29,7 +30,7 @@ function AlternateLangHeaders() {
       return false;
     }
 
-    return locale !== 'zh-CN' || shouldExposeZhCnLanguageSignal(pathname, siteConfig.baseUrl);
+    return isIndexableLocale(locale) && (locale !== 'zh-CN' || shouldExposeZhCnLanguageSignal(pathname, siteConfig.baseUrl));
   };
   const exposedLocaleConfigs = Object.entries(localeConfigs).filter(([locale]) => shouldExposeLocale(locale));
 
@@ -111,6 +112,7 @@ export default function SiteMetadata() {
     <>
       <Head>
         <meta name="twitter:card" content="summary_large_image" />
+        {!isIndexableLocale(currentLocale) ? <meta name="robots" content="noindex,follow" /> : null}
         <body />
       </Head>
 
