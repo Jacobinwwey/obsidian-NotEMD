@@ -144,8 +144,8 @@ Drawnix knowledge-map rules:
 - Organize H2/module/section concepts as first-level children of that document root, H3 concepts beneath their section, and concise details beneath those branches.
 - Never emit standalone top-level leaves or multiple independent roots. If a concept does not fit a section, place it under a first-level "Additional concepts" branch.
 - Use node.children for ownership and taxonomy. Do not duplicate parent-child relationships in edges.
-- Keep the document-root hierarchy depth at or below 3.
-- Use edges only for cross-branch runtime relationships. Emit at most 4 edges.
+- Keep the hierarchy as deep as the source requires. Keep detail in leaves and do not flatten a meaningful taxonomy to meet an arbitrary depth budget.
+- Use edges only for cross-branch runtime relationships. Prefer a small, high-signal set, but preserve every material relationship needed to explain the source. The renderer allocates adaptive relation lanes, so do not omit a material edge solely to meet a numeric quota.
 - Create concise labels. Put implementation detail in leaf nodes, not the root.
 - For architecture notes, group the tree by subsystem first and place request/data flow in cross-branch relationships.
 - Cover the source note rather than returning a tiny abstract summary: represent each major source section as a root or first-level branch when it contains distinct content.

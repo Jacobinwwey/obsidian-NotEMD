@@ -3,8 +3,9 @@ import type {
     DrawnixPoint,
     DrawnixRootRegion
 } from './drawnixMindMapProjection';
+import type { DrawnixRelationLane } from './drawnixRelationLaneLayout';
 
-export type DrawnixCrossRootRouteStrategy = 'grid' | 'local-lane' | 'outer-lane';
+export type DrawnixCrossRootRouteStrategy = 'grid' | 'local-lane' | 'outer-lane' | 'reserved-lane';
 
 export interface DrawnixCrossRootRoute {
     points: DrawnixPoint[];
@@ -50,6 +51,21 @@ export interface DrawnixCrossRootRouterInput {
     labelSize?: DrawnixRelationLabelSize;
 }
 
+export interface DrawnixReservedRelationLaneRouterInput {
+    source: DrawnixMindMapPlacedNode;
+    target: DrawnixMindMapPlacedNode;
+    nodes: readonly DrawnixMindMapPlacedNode[];
+    lane: DrawnixRelationLane;
+    canvasWidth: number;
+    canvasHeight: number;
+    /** Header bounds and labels allocated to other relation lanes. */
+    additionalObstacles?: readonly DrawnixCrossRootRouteObstacle[];
+}
+
+export interface DrawnixReservedRelationLaneRoute extends DrawnixCrossRootRoute {
+    nativeTextPosition: number;
+}
+
 const ROUTE_CLEARANCE = 28;
 const OUTER_ROUTE_MARGIN = 64;
 const BEND_PENALTY = 160;
@@ -80,6 +96,32 @@ function relationEndpoint(
             ? [target.x, target.y + target.height / 2]
             : [target.x + target.width, target.y + target.height / 2]
     };
+}
+
+function alternateHorizontalEndpoints(
+    source: DrawnixMindMapPlacedNode,
+    target: DrawnixMindMapPlacedNode,
+    primary: { start: DrawnixPoint; end: DrawnixPoint }
+): Array<{ start: DrawnixPoint; end: DrawnixPoint }> {
+    const sourceCenterY = source.y + source.height / 2;
+    const targetCenterY = target.y + target.height / 2;
+    const candidates = [
+        { start: [source.x + source.width, sourceCenterY] as DrawnixPoint, end: [target.x, targetCenterY] as DrawnixPoint },
+        { start: [source.x, sourceCenterY] as DrawnixPoint, end: [target.x + target.width, targetCenterY] as DrawnixPoint },
+        { start: [source.x + source.width, sourceCenterY] as DrawnixPoint, end: [target.x + target.width, targetCenterY] as DrawnixPoint },
+        { start: [source.x, sourceCenterY] as DrawnixPoint, end: [target.x, targetCenterY] as DrawnixPoint }
+    ];
+    const primaryKey = `${primary.start.join(':')}-${primary.end.join(':')}`;
+    const seen = new Set<string>([primaryKey]);
+
+    return candidates.filter(candidate => {
+        const key = `${candidate.start.join(':')}-${candidate.end.join(':')}`;
+        if (seen.has(key)) {
+            return false;
+        }
+        seen.add(key);
+        return true;
+    });
 }
 
 function inflate(region: DrawnixRootRegion): RouteRect {
@@ -476,6 +518,218 @@ function buildGridRoute(
     return null;
 }
 
+function endpointsTowardTrack(
+    node: DrawnixMindMapPlacedNode,
+    trackX: number
+): DrawnixPoint[] {
+    const centerY = node.y + node.height / 2;
+    const left: DrawnixPoint = [node.x, centerY];
+    const right: DrawnixPoint = [node.x + node.width, centerY];
+    return trackX < node.x + node.width / 2 ? [left, right] : [right, left];
+}
+
+function routeLength(points: readonly DrawnixPoint[]): number {
+    return points.slice(1).reduce(
+        (total, point, index) => total + Math.abs(point[0] - points[index][0]) + Math.abs(point[1] - points[index][1]),
+        0
+    );
+}
+
+function reservedLaneLabelPosition(
+    points: readonly DrawnixPoint[],
+    lane: DrawnixRelationLane
+): number | null {
+    const totalLength = routeLength(points);
+    if (totalLength <= 0) {
+        return null;
+    }
+
+    let distanceBefore = 0;
+    for (let index = 1; index < points.length; index += 1) {
+        const start = points[index - 1];
+        const end = points[index];
+        const segmentLength = Math.abs(end[0] - start[0]) + Math.abs(end[1] - start[1]);
+        const spansLane = start[1] === lane.y
+            && end[1] === lane.y
+            && Math.min(start[0], end[0]) <= lane.leftTrackX
+            && Math.max(start[0], end[0]) >= lane.rightTrackX;
+        if (spansLane) {
+            const distanceToLabel = Math.abs(lane.labelCenterX - start[0]);
+            return Math.max(0, Math.min(1, (distanceBefore + distanceToLabel) / totalLength));
+        }
+        distanceBefore += segmentLength;
+    }
+
+    return null;
+}
+
+function findClearEndpointLaneLeg(
+    endpoint: DrawnixPoint,
+    node: DrawnixMindMapPlacedNode,
+    trackX: number,
+    laneY: number,
+    obstacles: readonly RouteRect[],
+    canvasWidth: number,
+    canvasHeight: number
+): DrawnixPoint[] | null {
+    const endpointUsesLeftPort = Math.abs(endpoint[0] - node.x)
+        <= Math.abs(endpoint[0] - (node.x + node.width));
+    const outwardEscapeX = endpointUsesLeftPort
+        ? node.x - ROUTE_CLEARANCE
+        : node.x + node.width + ROUTE_CLEARANCE;
+    const escapeColumns = [
+        endpoint[0],
+        clampRouteX(outwardEscapeX, canvasWidth)
+    ].filter((value, index, values) => values.indexOf(value) === index);
+    const candidateYs = deduplicate([
+        endpoint[1],
+        laneY,
+        ...obstacles.flatMap(obstacle => [
+            obstacle.y - ROUTE_CLEARANCE,
+            obstacle.y + obstacle.height + ROUTE_CLEARANCE
+        ])
+    ])
+        .map(y => clampRouteY(y, canvasHeight))
+        .sort((left, right) => {
+            const leftCost = Math.abs(left - endpoint[1]) + Math.abs(left - laneY);
+            const rightCost = Math.abs(right - endpoint[1]) + Math.abs(right - laneY);
+            return leftCost - rightCost || left - right;
+        });
+
+    for (const escapeX of escapeColumns) {
+        for (const escapeY of candidateYs) {
+            const points = simplify([
+                endpoint,
+                [escapeX, endpoint[1]],
+                [escapeX, escapeY],
+                [trackX, escapeY],
+                [trackX, laneY]
+            ]);
+            if (routeSegmentsAreClear(points, obstacles)) {
+                return points;
+            }
+        }
+    }
+
+    return null;
+}
+
+/**
+ * Connects a relation to a lane reserved by the projection. The allocator
+ * keeps same-side lanes in exterior gutters and cross-forest lanes below the
+ * forest, so routing only needs to find clear ingress paths from the node
+ * boundaries.
+ */
+export function routeDrawnixRelationThroughReservedLane(
+    input: DrawnixReservedRelationLaneRouterInput
+): DrawnixReservedRelationLaneRoute {
+    const { source, target, lane } = input;
+    const obstacles = [
+        ...buildNodeObstacles(input.nodes, source.id, target.id),
+        ...(input.additionalObstacles ?? [])
+    ];
+    const laneDirections = [
+        { sourceTrackX: lane.leftTrackX, targetTrackX: lane.rightTrackX },
+        { sourceTrackX: lane.rightTrackX, targetTrackX: lane.leftTrackX }
+    ];
+    const candidates: Array<{ points: DrawnixPoint[]; nativeTextPosition: number }> = [];
+
+    for (const direction of laneDirections) {
+        const sourceLanePoint: DrawnixPoint = [direction.sourceTrackX, lane.y];
+        const targetLanePoint: DrawnixPoint = [direction.targetTrackX, lane.y];
+        for (const start of endpointsTowardTrack(source, direction.sourceTrackX)) {
+            const sourceLaneLeg = findClearEndpointLaneLeg(
+                start,
+                source,
+                direction.sourceTrackX,
+                lane.y,
+                obstacles,
+                input.canvasWidth,
+                input.canvasHeight
+            );
+            if (!sourceLaneLeg) {
+                continue;
+            }
+
+            for (const end of endpointsTowardTrack(target, direction.targetTrackX)) {
+                const targetLaneLeg = findClearEndpointLaneLeg(
+                    end,
+                    target,
+                    direction.targetTrackX,
+                    lane.y,
+                    obstacles,
+                    input.canvasWidth,
+                    input.canvasHeight
+                );
+                if (targetLaneLeg) {
+                    const points = simplify([
+                        ...sourceLaneLeg,
+                        targetLanePoint,
+                        ...targetLaneLeg.slice().reverse().slice(1)
+                    ]);
+                    if (routeSegmentsAreClear(points, obstacles)) {
+                        const nativeTextPosition = reservedLaneLabelPosition(points, lane);
+                        if (nativeTextPosition !== null) {
+                            candidates.push({ points, nativeTextPosition });
+                        }
+                    }
+                }
+
+                const sourceGridLeg = buildGridRoute(
+                    start,
+                    sourceLanePoint,
+                    obstacles,
+                    input.canvasWidth,
+                    input.canvasHeight
+                );
+                const targetGridLeg = buildGridRoute(
+                    targetLanePoint,
+                    end,
+                    obstacles,
+                    input.canvasWidth,
+                    input.canvasHeight
+                );
+                if (!sourceGridLeg || !targetGridLeg) {
+                    continue;
+                }
+
+                const gridPoints = simplify([
+                    ...sourceGridLeg,
+                    targetLanePoint,
+                    ...targetGridLeg.slice(1)
+                ]);
+                if (!routeSegmentsAreClear(gridPoints, obstacles)) {
+                    continue;
+                }
+
+                const nativeTextPosition = reservedLaneLabelPosition(gridPoints, lane);
+                if (nativeTextPosition !== null) {
+                    candidates.push({ points: gridPoints, nativeTextPosition });
+                }
+            }
+        }
+    }
+
+    candidates.sort((left, right) => {
+        const lengthDelta = routeLength(left.points) - routeLength(right.points);
+        return lengthDelta || left.points.length - right.points.length;
+    });
+    const selected = candidates[0];
+    if (!selected) {
+        throw new Error(
+            `Reserved Drawnix relation lane "${lane.relationId}" (${source.id} -> ${target.id}) `
+            + `could not find obstacle-free ingress paths at tracks ${lane.leftTrackX}/${lane.rightTrackX}, `
+            + `row ${lane.y}, with ${obstacles.length} obstacles.`
+        );
+    }
+
+    return {
+        points: selected.points,
+        nativeTextPosition: selected.nativeTextPosition,
+        strategy: 'reserved-lane'
+    };
+}
+
 function buildOuterLaneRoute(
     start: DrawnixPoint,
     end: DrawnixPoint,
@@ -574,6 +828,44 @@ export function routeDrawnixCrossRootRelation(input: DrawnixCrossRootRouterInput
                     strategy: 'grid',
                     warning: 'Same-root relation used the sparse obstacle grid because no local lane was available.'
                 };
+            }
+
+            for (const endpoints of alternateHorizontalEndpoints(source, target, { start, end })) {
+                const alternateNodeAwareRoute = buildNodeAwareRoute(
+                    endpoints.start,
+                    endpoints.end,
+                    source,
+                    target,
+                    input.relationIndex,
+                    input.nodes,
+                    protectedObstacles,
+                    input.canvasWidth,
+                    input.canvasHeight,
+                    input.labelSize
+                );
+                if (alternateNodeAwareRoute) {
+                    return {
+                        points: alternateNodeAwareRoute,
+                        strategy: 'local-lane',
+                        warning: 'Same-root relation used alternate node ports to avoid branch-internal obstacles.'
+                    };
+                }
+
+                const alternateGridRoute = buildGridRoute(
+                    endpoints.start,
+                    endpoints.end,
+                    nodeObstacles,
+                    input.canvasWidth,
+                    input.canvasHeight,
+                    input.labelSize
+                );
+                if (alternateGridRoute) {
+                    return {
+                        points: alternateGridRoute,
+                        strategy: 'grid',
+                        warning: 'Same-root relation used alternate node ports and the sparse obstacle grid.'
+                    };
+                }
             }
 
             throw new Error(

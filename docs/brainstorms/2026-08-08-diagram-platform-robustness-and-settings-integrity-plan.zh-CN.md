@@ -19,7 +19,7 @@ status: complete
 
 - 设置发现使用显式目录结构、稳定 ID、字段感知评分，以及支持直接导航的独立 listbox 结果面板。
 - SVG、PNG、PDF 预览导出在单图和多图流程中共用目录选择边界；默认仍为源文件夹，自定义路径必须是 Vault-relative 路径。
-- Drawnix source coverage 现在记录确定性的节点合并、深度压缩、edge remap 与 edge drop 诊断；LLM 返回的诊断会在 enrichment 前清除，只有 renderer 自己产生的诊断会进入 artifact。
+- Drawnix source coverage 保留深层源结构和未匹配的模型分支，并记录确定性的节点合并、edge remap 与 edge drop 诊断；LLM 返回的诊断会在 enrichment 前清除，只有 renderer 自己产生的诊断会进入 artifact。
 - Drawnix 关系标签尺寸在路由选 lane 前传入路由器。重复关系依据障碍包络和标签间距分配 lane，原生归一化文本位置再回写到 SVG 与 JSON 共用的最终标签矩形。原生位置候选依据 segment 可容纳空间生成，即使长绕行线段主导 normalized path length，短水平 lane 仍可被准确寻址。
 - Drawnix source-visual metadata 在 exporter/host 边界增加了显式 v1 guard。读取器接受数字 v1 和旧的字符串 `"1"`，未知版本与重复 visual ID 会被确定性地忽略或拒绝。
 - 找不到无碰撞的原生位置时 fail closed，不静默生成 SVG 与原生文本几何不一致的 artifact。路由边界按标签安全 inset 预留画布，但不再把所有节点障碍过度膨胀，从而保留稠密 forest 的稀疏网格合法路径。
@@ -281,7 +281,7 @@ npm run verify:vault-bundle -- --vault E:\\1Knowledge
 
 - 分离 forest validator 与源文档 document-root 展示策略。
 - 用 stable identity 和 provenance/remap 诊断取代仅按 label 合并。
-- 在深度预算内保留所有有意义模型分支，或给出确定性压缩诊断。
+- 不设置数值深度预算，保留所有有意义模型分支。只有已落位投影无法满足安全不变量时，才给出确定性的几何诊断。
 - 显式 Drawnix 请求保持严格；best-fit 推断只在带结构化原因时 fallback。
 
 **门禁**
@@ -387,7 +387,7 @@ npm run verify:vault-bundle -- --vault E:\\1Knowledge
 
 | 层级 | 必须证据 |
 |---|---|
-| 语义 | forest 合法性、root 展示、stable ID、深度压缩和 edge remap 诊断测试 |
+| 语义 | forest 合法性、root 展示、stable ID、深层 source/model 结构保留和 edge remap 诊断测试 |
 | 投影 | 确定性坐标、有限边界、分支顺序、每节点一次布局、无节点重叠 |
 | 路由 | 线段/障碍校验、root 区域策略、关系标签矩形、原生标签位置和 fallback 诊断 |
 | 序列化 | Drawnix fixture 契约、显式 layer 顺序、metadata schema 版本和 backward reader |

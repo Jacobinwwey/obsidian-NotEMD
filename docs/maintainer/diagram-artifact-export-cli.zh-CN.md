@@ -41,7 +41,7 @@ PNG 输出还会写入或替换 `pHYs` 物理像素密度 chunk，因此所选 P
 |---|---|---|---|
 | `editable-html-svg` | 自包含 `.html`，包含 inline SVG | `DiagramSpec -> SemanticFigureModel -> EditableHtmlSvgRenderer` | `collectEditableSvgAnnotationGaps()` 必须为空 |
 | `drawio` | 未压缩 diagrams.net `mxfile` XML，可通过 `--preview-svg-output`、`--preview-png-output` 与 `--preview-pdf-output` 同步写出 companion | `DiagramSpec -> SemanticFigureModel -> exportSemanticFigureModelToDrawioXml()` 加 `renderSemanticFigureSvg()` | visible label mismatch 必须为空 |
-| `drawnix` | 原生 `.drawnix` 知识导图 forest，可通过 `--preview-svg-output`、`--preview-png-output` 与 `--preview-pdf-output` 同步写出 companion | `DiagramSpec(intent: "drawnixMindmap") -> DrawnixMindMapProjection -> DrawnixRenderer` 加 `notemd-drawnix-mindmap-svg@1.0.0` | 原生 roots、层级与关系校验错误必须为空 |
+| `drawnix` | 原生 `.drawnix` 知识导图 forest，可通过 `--preview-svg-output`、`--preview-png-output` 与 `--preview-pdf-output` 同步写出 companion | `DiagramSpec(intent: "drawnixMindmap") -> 两阶段 DrawnixMindMapProjection -> DrawnixRenderer` 加 `notemd-drawnix-mindmap-svg@1.0.0` | 原生 roots、层级、关系通道和标签几何都必须通过校验 |
 | `circuitikz` | 受约束 `.tex` circuitikz 源文件，可同步写出 SVG/PNG/PDF 预览 companion | `DiagramSpec(intent: "circuit") -> CircuitSpec -> CircuitikzRenderer -> exportCircuitSpecToCircuitikz()` 加 `renderCircuitSpecPreviewSvg()` | 写出 TeX 或 companion 前必须通过 `CircuitSpec` 校验 |
 | `svg` | Obsidian 可直接查看的 `.svg`；当 `intent` 为 `circuit` 时来自电路预览 companion | `DiagramSpec -> SemanticFigureModel -> renderSemanticFigureSvg()` 或 `CircuitSpec -> renderCircuitSpecPreviewSvg()` | 必须保留 semantic node/edge annotations，或保留已验证电路预览元数据 |
 | `png` | 从同一个 standalone SVG 或电路预览 SVG 渲染出的 `.png` 视觉证据 | `DiagramSpec -> SemanticFigureModel -> renderSemanticFigureSvg() -> Playwright screenshot`，或 `CircuitSpec -> renderCircuitSpecPreviewSvg() -> Playwright screenshot` | 输出尺寸按 SVG CSS 尺寸与所选 PPI 对齐，并写入匹配所选密度的 `pHYs` 元数据 |
@@ -75,6 +75,18 @@ Markdown wrapper 使用 `![[Topic_diagram.drawio.svg]]` 嵌入 SVG，并链接�
 
 临时 bundle 位于操作系统 temp 目录，导出后会删除。no Obsidian runtime is required。
 
+## 本地 Drawnix 视觉核验
+
+artifact CLI 与 Obsidian CLI 的职责不同。artifact CLI 导出已校验的 `DiagramSpec`；Obsidian CLI 只能触发已安装插件的命令，不能为尚未部署的源码 checkout 提供认证。演示产物应保持本地。
+
+当前架构演示图使用从 `docs/architecture.zh-CN.md` 整理出的本地规格，输出到被忽略的 `.cache/drawnix-architecture-demo/`：
+
+```bash
+node scripts/export-diagram-artifact.js --input .cache/drawnix-architecture-demo/architecture.drawnix.spec.json --target drawnix --output .cache/drawnix-architecture-demo/notemd-architecture.drawnix --preview-svg-output .cache/drawnix-architecture-demo/notemd-architecture.svg --preview-png-output .cache/drawnix-architecture-demo/notemd-architecture.png --ppi 144
+```
+
+把 PNG 或 SVG 用作发版证据前应先目检。同侧关系应留在对应分支的外侧 gutter，跨 forest 关系可以使用底部通道。`.cache` 中的输入和输出不是仓库交付物。
+
 ## 支持证据
 
 规范回归测试：
@@ -89,7 +101,7 @@ npm test -- --runInBand src/tests/diagramArtifactExportCli.test.ts --runTestsByP
 - 节点 id 在空白归一化后仍保持唯一。
 - `drawio` XML 保留可见节点与边 label。
 - `drawnix` JSON 包含一个或多个 `mindmap` roots、嵌套 `mind_child` elements 和通过校验的 `arrow-line` 跨关系。
-- Drawnix projection 的布局是确定性的；较大的 forest 会打包到有宽度上限的多行中，最大深度为 3，最多 4 条跨分支关系，并生成专用 SVG companion。
+- Drawnix projection 的布局是确定性的；较大的 forest 会打包到有宽度上限的多行中，层级深度和重要跨分支关系不受固定数值配额限制，节点落位后会分配同侧 gutter 与跨 forest 底部通道，并生成专用 SVG companion。
 - `drawio`、`drawnix` 与 `circuitikz` 可以写出用于 Obsidian 预览验证的 SVG companion 文件。
 - `circuitikz` 只有在 `DiagramSpec.circuitSpec` 通过校验后才会写出受约束 TeX，并可从同一份电路 payload 导出 SVG/PNG/PDF 预览 companion。
 - `svg` 可以直接输出同一个 annotated semantic figure sheet；当 `intent: "circuit"` 时，则输出已验证的电路预览 companion。

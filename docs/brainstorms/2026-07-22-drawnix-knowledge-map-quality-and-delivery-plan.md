@@ -9,7 +9,7 @@ status: implemented
 
 ## Decision
 
-The implemented Drawnix route is a bounded native knowledge-map projection. It preserves hierarchy and uses the upstream mind-map element model without embedding the Drawnix application shell, toolbars, persistence layer, or browser file APIs in the Obsidian bundle.
+The implemented Drawnix route is a native knowledge-map projection with geometry-derived capacity. It preserves hierarchy and uses the upstream mind-map element model without embedding the Drawnix application shell, toolbars, persistence layer, or browser file APIs in the Obsidian bundle.
 
 Standard Mermaid `mindmap` remains unchanged. Drawnix is a separate `drawnixMindmap` intent with its own prompt profile, validation, exporter, SVG companion, and fallback mapping that copies the spec rather than flattening it.
 
@@ -22,7 +22,30 @@ DiagramSpec(intent: "drawnixMindmap")
   -> DrawnixMindMapSvgRenderer (notemd-drawnix-mindmap-svg@1.0.0)
 ```
 
-The delivered contract is one or more top-level roots, nested `node.children` forests, `mindmap`/`mind_child` elements, maximum depth 3 per tree, and at most 4 cross-branch relationships represented by `arrow-line`. Large forests are packed into deterministic bounded-width rows so an unbounded root count cannot create a single-line canvas. The CLI routes Drawnix before constructing the generic `SemanticFigureModel`; other targets keep their existing path. Full Drawnix host embedding and a Plait preview remain deferred.
+The delivered contract is one or more top-level roots, nested `node.children` forests, `mindmap`/`mind_child` elements, and `arrow-line` cross-branch relationships. It has no fixed depth or relation-count quota. The projection sizes relation lanes from measured label boxes, expands the canvas for those lanes, and rejects only invalid semantics or geometry that cannot remain inside the canvas without entering protected regions. Large forests are packed into deterministic bounded-width rows so an unbounded root count cannot create a single-line canvas. The CLI routes Drawnix before constructing the generic `SemanticFigureModel`; other targets keep their existing path. Full Drawnix host embedding and a Plait preview remain deferred.
+
+## Current Routing And Source-Coverage Update (2026-08-14)
+
+The initial Drawnix policy used a numeric depth budget and a small relation quota. Those rules rejected valid architecture maps and are gone. The current pipeline separates semantic validation, forest placement, lane allocation, and route ingress:
+
+```text
+semantic validation
+  -> forest layout
+  -> preliminary gutter reservation from measured labels
+  -> placed-node relation lane allocation
+  -> endpoint ingress routing
+  -> shared native/SVG label geometry validation
+```
+
+The preliminary pass centers the forest inside enough horizontal space for the widest relation label. After nodes have coordinates, the allocator resolves each endpoint relative to its root. A same-side relation receives a pair of tracks in that side's exterior gutter and a deterministic row near its two endpoints. A cross-forest relation receives the existing lower lane. This avoids sending a same-side dependency through the whole diagram merely because a wider sibling branch blocks the first local column.
+
+The router still treats nodes, the header band, other label rectangles, and canvas bounds as hard obstacles. Native Drawnix text and the SVG label use the same allocated rectangle; a mismatch fails the projection. The implementation does not trade those invariants for route availability.
+
+Source coverage follows the same semantic policy. Markdown heading chains and unmatched model branches retain their full hierarchy and IDs. Diagnostics describe actual node merges or dropped invalid, duplicate, or hierarchy-ownership edges; they are not a depth-compression path. The regression fixture includes a sixth-level source heading and a model branch beyond the former cap, then verifies that its cross relation keeps the original endpoint IDs.
+
+The regression surface is layered. The lane unit tests verify dynamic relation allocation, exterior corridor selection, and explicit failure when the supplied canvas cannot hold the geometry. The routing fixture covers a multi-branch architecture map, deterministic output, node/header/canvas safety, and local same-side routes. Renderer tests cover native/SVG geometry and header wrapping. Source-coverage tests verify deep hierarchy preservation and valid relation endpoints. The tests do not encode a maximum depth, maximum relation count, a required fallback strategy, or a historical canvas width.
+
+The remaining work is operational: add a representative performance benchmark for large forests with many cross relations, and retain real upstream import evidence for release candidates. A performance regression must be fixed with layout or routing work, not with a new semantic quota.
 
 ## Original Audit (Historical)
 
@@ -82,7 +105,7 @@ The projection builder owns hierarchy and visual roles. The layout owns coordina
 
 - Accept only `intent: "drawnixMindmap"` in `DrawnixRenderer`.
 - Preserve `DiagramNode.children` as the primary tree. Do not recreate parent-child relations as ordinary edges.
-- Support a bounded set of cross-branch relationships after tree placement. Cross relationships are annotations, not the primary structure.
+- Support cross-branch relationships after tree placement whenever independent lanes and safe endpoint ingress can be allocated. Cross relationships are annotations, not the primary structure.
 - Keep output deterministic for the same `DiagramSpec`.
 - Generate a stand-alone SVG companion from the placed mind-map projection.
 - Open imported `.drawnix` files manually in the pinned upstream Drawnix baseline as a maintainer verification step.
@@ -101,16 +124,16 @@ The Drawnix profile belongs in `diagramSpecPrompt.ts` and activates only for the
 ```text
 Target: editable Drawnix knowledge map.
 Required intent: drawnixMindmap.
-Create one or more top-level root nodes and 3-6 first-level branches per tree. Keep independent subsystems as separate roots instead of inventing a container node.
-Each branch has 2-5 children; maximum hierarchy depth is 3.
+Create one or more top-level root nodes. Keep independent subsystems as separate roots instead of inventing a container node.
+Keep the hierarchy as deep as the source requires. Do not flatten a meaningful taxonomy to meet an arbitrary depth budget.
 Use node.children for ownership and taxonomy.
 Do not duplicate parent-child relationships in edges.
-Use edges only for cross-branch runtime dependencies; emit at most 4.
+Use edges only for cross-branch runtime dependencies. Preserve every material relationship needed to explain the source; the renderer allocates adaptive relation lanes.
 Use concise labels. Keep operational detail in leaves, not in the root.
 For architecture notes, organize the tree by subsystem first. Treat request/data flow as cross-branch relationships.
 ```
 
-The parser and validator must enforce the parts that can be checked mechanically: at least one root, bounded depth per tree, unique ids, valid child references, and a cross-relation limit. The renderer must reject an invalid mind-map projection and fall back to the ordinary requested target; it must never silently flatten the forest into the existing grid.
+The parser and validator enforce the parts that can be checked mechanically: at least one root, unique ids, valid child references, valid relation endpoints, and no edge that duplicates hierarchy ownership. The renderer rejects an invalid or unsafe mind-map projection; an explicitly requested Drawnix target must never flatten into the shared grid or silently become Mermaid.
 
 ## Delivery Sequence
 
@@ -120,7 +143,7 @@ Inspect the pinned `ref/drawnix` baseline to obtain a minimal mind-map fixture c
 
 ### Stage 1: Mind-map projection and export (completed)
 
-Add the projection, deterministic branch layout, bounded relationship routing, exporter, SVG companion renderer, and target-specific prompt profile. Narrow `DrawnixRenderer.supports()` to the delivered `mindmap` contract. Preserve other render targets and the default best-fit behavior.
+Add the projection, deterministic branch layout, adaptive relation-lane routing, exporter, SVG companion renderer, and target-specific prompt profile. Narrow `DrawnixRenderer.supports()` to the delivered `mindmap` contract. Preserve other render targets and the default best-fit behavior.
 
 ### Stage 2: Product exposure and CLI verification (completed)
 
@@ -139,10 +162,10 @@ Stage 4 decision: deferred. The repository does not provide verified heavy-runti
 | Layer | Required evidence |
 |---|---|
 | Projection | Tree is retained, branch order is stable, all nodes receive one placement, no rectangle overlap |
-| Layout | Root/branch separation, bounded label width, cross-edge count and routing assertions |
+| Layout | Root/branch separation, bounded label width, lane allocation, and obstacle-safe routing assertions |
 | Export | JSON matches the pinned mind-map fixture contract; no generic rectangle-grid marker remains |
 | SVG companion | Uses the same node ids and coordinates as the export; snapshot includes the architecture-note fixture |
-| Prompt/parser | Target profile requests a valid tree; malformed tree or excess cross-relations fails before rendering |
+| Prompt/parser | Target profile requests a valid tree; malformed hierarchy, duplicate ownership edge, or unsafe geometry fails before rendering |
 | Integration | Existing command route produces `.drawnix` plus SVG companion from `docs/architecture.zh-CN.md` |
 | Consumer check | Pinned upstream Drawnix opens the artifact, with a saved screenshot or import log recorded as maintainer-local evidence |
 
@@ -154,7 +177,7 @@ Run targeted Jest tests during implementation, then `npm run build`, `npm test -
 - `theme: "default"` is not a `PlaitTheme` object. Stage 0 must establish an imported theme fixture before the exporter claims theme parity.
 - LLMs often produce flat graphs. The prompt improves inputs, but deterministic projection validation is the real guardrail.
 - Labels need multilingual width handling. Branch layout must measure/wrap text deterministically rather than use the current fixed card dimensions.
-- Cross-branch edges can destroy a mind map. Cap them and preserve the hierarchy as the primary reading order.
+- Cross-branch edges can destroy a mind map when they share geometry. Preserve hierarchy as the primary reading order, give each relation an independent lane, and reject only when no safe geometry exists.
 - Do not make a generic `layoutMode` switch that hides two unrelated algorithms. Keep mind-map and future architecture-canvas projections as separate owners.
 - Do not add a Plait dependency merely to import types. It would couple the bundle to a runtime the initial path does not execute.
 

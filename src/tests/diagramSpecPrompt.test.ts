@@ -109,7 +109,8 @@ describe('diagram spec prompt builder', () => {
         expect(prompt).toMatch(/Supported intent:\s*drawnixMindmap/i);
         expect(prompt).toMatch(/Target: editable Drawnix knowledge map/i);
         expect(prompt).toMatch(/Use node\.children for ownership and taxonomy/i);
-        expect(prompt).toMatch(/at most 4/i);
+        expect(prompt).toMatch(/adaptive relation lanes/i);
+        expect(prompt).not.toMatch(/at most 4/i);
         expect(prompt).not.toMatch(/Drawnix JSON/i);
     });
 });

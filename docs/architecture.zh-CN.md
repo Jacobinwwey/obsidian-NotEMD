@@ -1,6 +1,6 @@
 # Notemd 系统架构总览
 
-> 更新：2026-08-08
+> 更新：2026-08-14
 
 ## 系统架构
 
@@ -190,6 +190,7 @@ flowchart LR
 | 意图 | 渲染目标 | 渲染器 | 预览 | 导出 |
 |---|---|---|---|---|
 | `mindmap` | mermaid | MermaidRenderer | 弹窗/iframe | SVG、PNG |
+| `drawnixMindmap` | drawnix | DrawnixRenderer | 专用 SVG companion | `.drawnix`、SVG、PNG、PDF |
 | `flowchart` | mermaid | MermaidRenderer | 弹窗/iframe | SVG、PNG |
 | `sequence` | mermaid | MermaidRenderer | 弹窗/iframe | SVG、PNG |
 | `classDiagram` | mermaid | MermaidRenderer | 弹窗/iframe | SVG、PNG |
@@ -199,6 +200,8 @@ flowchart LR
 | `dataChart` | vega-lite | VegaLiteRenderer | 弹窗/iframe（沙盒） | 源文件、SVG、PNG、PDF |
 | `circuit` | circuitikz | CircuitikzRenderer | SVG companion 或 source-only 预览 | `.tex`、SVG、PNG、PDF |
 
+`drawnixMindmap` 是唯一的原生 Drawnix 图表意图。它把 `DiagramSpec.nodes` 投影为可编辑的知识导图 forest，并输出同几何的 SVG companion。关系布局分两次计算：第一步按已测量标签宽度预留水平 gutter；节点落位后，第二步按端点相对 root 的方位分类。同侧关系在外侧 gutter 中分配位于两个端点之间的行，跨 forest 关系进入底部通道。router 只处理避障端点接入，通道位置由分配器负责。该路径不设固定层级深度或关系数量配额；只有语义无效，或无法在不进入受保护区域且不越出画布的前提下完成几何布局时才拒绝。source coverage 也遵循这一规则：Markdown 标题链与未匹配的模型分支保留原有层级和 ID。只有实际发生语义合并时才会重映射关系边；无效、重复或重复层级所有权的关系边才会被丢弃。标准 `mindmap` 仍由 MermaidRenderer 处理，生成与回退语义不变。
+
 ### 显式渲染目标
 
 对 `Generate diagram` 与 `Preview diagram` 而言，规格优先 pipeline 可以在意图推断之外显式指定渲染目标。标准的 `Summarise as Mermaid diagram` 命令仍保持 Mermaid 兼容输出。
@@ -207,7 +210,7 @@ flowchart LR
 |---|---|---|
 | `editable-html-svg` | 带语义 inline SVG 的自包含 HTML | 不依赖外部编辑器 runtime |
 | `drawio` | `.drawio` XML 加 SVG/MD review companion | 插件内不嵌入 diagrams.net runtime |
-| `drawnix` | `.drawnix` JSON 子集默认内联 Mermaid/源图形；开启完整 Mermaid 输出后才写入可选 `.assets` companion | 插件内不嵌入 Drawnix 或 Plait runtime；旧 companion 目录仍可读取，缺失的旧 Mermaid SVG 可以从 metadata 源文本重建，重新生成时只清理有 manifest 证据且归插件所有的目录；节点感知路由、稀疏网格兜底和分层标签框共同避免标签进入节点矩形 |
+| `drawnix` | `.drawnix` JSON 子集默认内联 Mermaid/源图形；开启完整 Mermaid 输出后才写入可选 `.assets` companion | 插件内不嵌入 Drawnix 或 Plait runtime；旧 companion 目录仍可读取，缺失的旧 Mermaid SVG 可以从 metadata 源文本重建，重新生成时只清理有 manifest 证据且归插件所有的目录；两阶段关系分配器把同侧连接留在外侧 gutter，把跨 forest 连接放入底部通道，并让原生 Drawnix 与 SVG 共用标签几何 |
 | `circuitikz` | 经过验证的 `.tex` 源文件加 SVG/MD review companion | 预览/导出零依赖；桌面端可选本机编译器或托管 Tectonic |
 
 Circuitikz 支持仍然是受约束的。前端设置无需开启 Developer mode 就会显示 `Circuit (Circuitikz)` 首选图表类型与 `Circuitikz + SVG preview` 首选渲染目标，但 renderer 只接受经过验证的 `DiagramSpec(intent: "circuit", circuitSpec)`。它会写出确定性的 circuitikz TeX 和可审阅的 SVG companion。桌面用户随后可以复用自定义/系统编译器，或在 Vault 外显式安装固定版本 Tectonic 0.16.9，用于编译诊断、原生 PDF 证据与受保护的修复验收；移动端与常规预览/导出不会加载桌面进程代码。

@@ -1,10 +1,15 @@
 import { DiagramEdge, DiagramNode, DiagramSpec } from '../../types';
-import { routeDrawnixCrossRootRelation } from './drawnixCrossRootRouter';
+import { routeDrawnixRelationThroughReservedLane } from './drawnixCrossRootRouter';
 import type {
     DrawnixCrossRootRouteObstacle,
     DrawnixCrossRootRouteStrategy,
     DrawnixRelationLabelSize
 } from './drawnixCrossRootRouter';
+import {
+    assignDrawnixRelationLaneGeometry,
+    reserveDrawnixRelationLaneSpace
+} from './drawnixRelationLaneLayout';
+import type { DrawnixRelationLane } from './drawnixRelationLaneLayout';
 
 export type DrawnixPoint = [number, number];
 
@@ -154,8 +159,6 @@ interface MindMapTreeNode {
     y: number;
 }
 
-const MAX_MIND_MAP_DEPTH = 3;
-const MAX_CROSS_RELATIONS = 4;
 const ROOT_HORIZONTAL_GAP = 132;
 const CHILD_HORIZONTAL_GAP = 92;
 const SIBLING_VERTICAL_GAP = 30;
@@ -178,7 +181,6 @@ const RELATION_LABEL_VERTICAL_PADDING = 8;
 const RELATION_LABEL_LINE_HEIGHT = 16;
 const RELATION_LABEL_NODE_CLEARANCE = 10;
 const RELATION_LABEL_GAP = 12;
-const RELATION_LABEL_SEARCH_STEP = 12;
 
 /**
  * The title and summary are page-level annotations, not mind-map nodes. The
@@ -361,7 +363,7 @@ function collectMindMapValidationErrors(spec: DiagramSpec): string[] {
     const ids = new Set<string>();
     const parentChildPairs = new Set<string>();
     const activeReferences = new Set<DiagramNode>();
-    const visit = (node: DiagramNode, depth: number, parentId?: string): void => {
+    const visit = (node: DiagramNode, parentId?: string): void => {
         if (activeReferences.has(node)) {
             errors.push('Drawnix mind-map node hierarchy contains a cycle.');
             return;
@@ -380,20 +382,12 @@ function collectMindMapValidationErrors(spec: DiagramSpec): string[] {
             }
         }
 
-        if (depth > MAX_MIND_MAP_DEPTH) {
-            errors.push(`Drawnix mind-map exceeds the maximum depth of ${MAX_MIND_MAP_DEPTH}.`);
-        }
-
-        (node.children ?? []).forEach(child => visit(child, depth + 1, id));
+        (node.children ?? []).forEach(child => visit(child, id));
         activeReferences.delete(node);
     };
-    spec.nodes.forEach(root => visit(root, 0));
+    spec.nodes.forEach(root => visit(root));
 
     const edges = spec.edges ?? [];
-    if (edges.length > MAX_CROSS_RELATIONS) {
-        errors.push(`Drawnix mind-map supports at most ${MAX_CROSS_RELATIONS} cross-branch relationships.`);
-    }
-
     edges.forEach((edge, index) => {
         const sourceId = edge.from?.trim();
         const targetId = edge.to?.trim();
@@ -539,15 +533,20 @@ function toDrawnixMindElement(node: MindMapTreeNode, isRoot: boolean, rightNodeC
     return element;
 }
 
+function crossRelationId(index: number, sourceId: string, targetId: string): string {
+    return `cross-${index + 1}-${sourceId}-to-${targetId}`;
+}
+
 function createCrossRelations(
     edges: DiagramEdge[],
     placedNodes: DrawnixMindMapPlacedNode[],
-    rootRegions: readonly DrawnixRootRegion[],
+    relationLanes: readonly DrawnixRelationLane[],
     canvasWidth: number,
     canvasHeight: number,
     protectedObstacles: readonly DrawnixCrossRootRouteObstacle[]
 ): DrawnixMindMapCrossRelation[] {
     const nodeById = new Map(placedNodes.map(node => [node.id, node]));
+    const laneByRelationId = new Map(relationLanes.map(lane => [lane.relationId, lane]));
     return edges.map((edge, index) => {
         const sourceId = edge.from.trim();
         const targetId = edge.to.trim();
@@ -557,30 +556,50 @@ function createCrossRelations(
             throw new Error(`Drawnix mind-map relationship ${index + 1} references an unknown node.`);
         }
 
+        const id = crossRelationId(index, sourceId, targetId);
+        const lane = laneByRelationId.get(id);
+        if (!lane) {
+            throw new Error(`Drawnix mind-map relationship ${index + 1} has no reserved relation lane.`);
+        }
         const label = normalizedText(edge.label, normalizedText(edge.relation, '')) || undefined;
-        const labelSize = label ? relationLabelMetrics(label) : undefined;
-        const route = routeDrawnixCrossRootRelation({
+        const labelMetrics = label ? relationLabelMetrics(label) : undefined;
+        const labelLayout = labelMetrics && lane.labelBounds
+            ? {
+                ...lane.labelBounds,
+                lines: labelMetrics.lines,
+                lineHeight: RELATION_LABEL_LINE_HEIGHT
+            }
+            : undefined;
+        if (labelMetrics && !labelLayout) {
+            throw new Error(`Drawnix relation label "${id}" has no reserved label geometry.`);
+        }
+        const route = routeDrawnixRelationThroughReservedLane({
             source,
             target,
             nodes: placedNodes,
-            relationIndex: index,
-            regions: rootRegions,
+            lane,
             canvasWidth,
             canvasHeight,
-            additionalObstacles: protectedObstacles,
-            labelSize
+            additionalObstacles: [
+                ...protectedObstacles,
+                ...relationLanes
+                    .filter(otherLane => otherLane.relationId !== id)
+                    .flatMap(otherLane => otherLane.labelBounds ? [otherLane.labelBounds] : [])
+            ]
         });
 
         return {
-            id: `cross-${index + 1}-${sourceId}-to-${targetId}`,
+            id,
             sourceId,
             targetId,
             sourceRootId: source.rootId,
             targetRootId: target.rootId,
             label,
+            labelLayout,
             points: route.points,
             routeStrategy: route.strategy,
-            routeWarning: route.warning
+            routeWarning: route.warning,
+            nativeTextPosition: route.nativeTextPosition
         };
     });
 }
@@ -610,14 +629,6 @@ function relationLabelMetrics(label: string): RelationLabelMetrics {
     return { lines, width, height };
 }
 
-interface RelationRouteSegment {
-    start: DrawnixPoint;
-    end: DrawnixPoint;
-    index: number;
-    length: number;
-    horizontal: boolean;
-}
-
 function inflateLabelObstacle(
     node: DrawnixMindMapPlacedNode,
     clearance: number
@@ -635,43 +646,6 @@ function rectanglesOverlap(left: RelationLabelRect, right: RelationLabelRect): b
         && left.x + left.width > right.x
         && left.y < right.y + right.height
         && left.y + left.height > right.y;
-}
-
-function relationRouteSegments(points: DrawnixPoint[]): RelationRouteSegment[] {
-    return points.slice(1).map((end, index) => {
-        const start = points[index];
-        return {
-            start,
-            end,
-            index,
-            length: Math.abs(end[0] - start[0]) + Math.abs(end[1] - start[1]),
-            horizontal: start[1] === end[1]
-        };
-    }).filter(segment => segment.length > 0);
-}
-
-function relationLabelRectForSegment(
-    segment: RelationRouteSegment,
-    width: number,
-    height: number,
-    offset: number
-): RelationLabelRect {
-    const centerX = (segment.start[0] + segment.end[0]) / 2;
-    const centerY = (segment.start[1] + segment.end[1]) / 2;
-    if (segment.horizontal) {
-        return {
-            x: centerX - width / 2,
-            y: centerY + offset - height / 2,
-            width,
-            height
-        };
-    }
-    return {
-        x: centerX + offset - width / 2,
-        y: centerY - height / 2,
-        width,
-        height
-    };
 }
 
 function isLabelRectAvailable(
@@ -700,113 +674,6 @@ function isLabelRectAvailable(
         width: label.width + RELATION_LABEL_GAP * 2,
         height: label.height + RELATION_LABEL_GAP * 2
     }));
-}
-
-function findFallbackRelationLabelRect(
-    width: number,
-    height: number,
-    relation: DrawnixMindMapCrossRelation,
-    nodes: readonly DrawnixMindMapPlacedNode[],
-    occupiedLabels: readonly RelationLabelRect[],
-    protectedObstacles: readonly RelationLabelRect[],
-    canvasWidth: number,
-    canvasHeight: number
-): RelationLabelRect | null {
-    const midpoint = relation.points[Math.floor(relation.points.length / 2)] ?? [canvasWidth / 2, canvasHeight / 2];
-    const candidates: RelationLabelRect[] = [];
-    for (let y = 0; y <= Math.max(0, canvasHeight - height); y += RELATION_LABEL_SEARCH_STEP) {
-        for (let x = 0; x <= Math.max(0, canvasWidth - width); x += RELATION_LABEL_SEARCH_STEP) {
-            candidates.push({ x, y, width, height });
-        }
-    }
-    candidates.sort((left, right) => {
-        const leftDistance = Math.hypot(left.x + left.width / 2 - midpoint[0], left.y + left.height / 2 - midpoint[1]);
-        const rightDistance = Math.hypot(right.x + right.width / 2 - midpoint[0], right.y + right.height / 2 - midpoint[1]);
-        return leftDistance - rightDistance || left.y - right.y || left.x - right.x;
-    });
-    return candidates.find(candidate => isLabelRectAvailable(
-        candidate,
-        nodes,
-        occupiedLabels,
-        protectedObstacles,
-        canvasWidth,
-        canvasHeight
-    )) ?? null;
-}
-
-function layoutCrossRelationLabels(
-    relations: DrawnixMindMapCrossRelation[],
-    nodes: readonly DrawnixMindMapPlacedNode[],
-    canvasWidth: number,
-    canvasHeight: number,
-    protectedObstacles: readonly RelationLabelRect[]
-): void {
-    const occupiedLabels: RelationLabelRect[] = [];
-    relations.forEach(relation => {
-        if (!relation.label) {
-            return;
-        }
-
-        const metrics = relationLabelMetrics(relation.label);
-        const { lines, width, height } = metrics;
-        const segments = relationRouteSegments(relation.points).sort((left, right) => {
-            const orientationDelta = Number(right.horizontal) - Number(left.horizontal);
-            return orientationDelta || right.length - left.length || left.index - right.index;
-        });
-        const offsetsForSegment = (segment: RelationRouteSegment): number[] => {
-            const distance = segment.horizontal ? height / 2 + 10 : width / 2 + 10;
-            return [
-                -distance,
-                distance,
-                0,
-                -distance * 1.75,
-                distance * 1.75
-            ];
-        };
-
-        let selected: RelationLabelRect | undefined;
-        for (const segment of segments) {
-            for (const offset of offsetsForSegment(segment)) {
-                const candidate = relationLabelRectForSegment(segment, width, height, offset);
-                if (isLabelRectAvailable(
-                    candidate,
-                    nodes,
-                    occupiedLabels,
-                    protectedObstacles,
-                    canvasWidth,
-                    canvasHeight
-                )) {
-                    selected = candidate;
-                    break;
-                }
-            }
-            if (selected) {
-                break;
-            }
-        }
-        const rect = selected ?? findFallbackRelationLabelRect(
-            width,
-            height,
-            relation,
-            nodes,
-            occupiedLabels,
-            protectedObstacles,
-            canvasWidth,
-            canvasHeight
-        );
-        if (!rect) {
-            throw new Error(
-                `Drawnix relation label "${relation.id}" could not find a collision-free position `
-                + 'inside the generated canvas.'
-            );
-        }
-        relation.labelLayout = {
-            ...rect,
-            lines,
-            lineHeight: RELATION_LABEL_LINE_HEIGHT
-        };
-        occupiedLabels.push(rect);
-    });
 }
 
 function pointOnPolyline(points: readonly DrawnixPoint[], position: number): DrawnixPoint {
@@ -862,129 +729,49 @@ function nativeRelationLabelRect(
     };
 }
 
-function nativeRelationLabelPositionCandidates(
-    relation: DrawnixMindMapCrossRelation,
-    preferredPosition: number
-): number[] {
-    const layout = relation.labelLayout;
-    const segments = relationRouteSegments(relation.points);
-    const totalLength = segments.reduce((total, segment) => total + segment.length, 0);
-    if (!layout || totalLength <= 0) {
-        return [preferredPosition];
-    }
-
-    const candidates = new Set<number>([preferredPosition]);
-    let distanceBefore = 0;
-    segments.forEach(segment => {
-        const labelAxisSize = segment.horizontal ? layout.width : layout.height;
-        const availableLength = segment.length - labelAxisSize;
-        if (availableLength >= 0) {
-            const start = (distanceBefore + labelAxisSize / 2) / totalLength;
-            const end = (distanceBefore + segment.length - labelAxisSize / 2) / totalLength;
-            candidates.add(clampArrowTextPosition(start));
-            candidates.add(clampArrowTextPosition(end));
-            candidates.add(clampArrowTextPosition((start + end) / 2));
-        } else {
-            candidates.add(clampArrowTextPosition((distanceBefore + segment.length / 2) / totalLength));
-        }
-        distanceBefore += segment.length;
-    });
-
-    return Array.from(candidates)
-        .sort((left, right) => Math.abs(left - preferredPosition) - Math.abs(right - preferredPosition) || left - right);
-}
-
-function layoutNativeRelationLabelPositions(
+function assertNativeRelationLabelLayouts(
     relations: DrawnixMindMapCrossRelation[],
     nodes: readonly DrawnixMindMapPlacedNode[],
     canvasWidth: number,
     canvasHeight: number,
     protectedObstacles: readonly RelationLabelRect[]
 ): void {
-    // Native Drawnix arrow text is positioned on the polyline by a normalized
-    // position, so an independently placed SVG label is not a valid source of
-    // truth. Select the native position first, then copy that exact rectangle
-    // back into the shared projection used by SVG and JSON serialization.
     const occupiedLabels: RelationLabelRect[] = [];
     relations.forEach(relation => {
         if (!relation.label || !relation.labelLayout) {
             return;
         }
 
-        const preferredPosition = arrowTextPosition(relation);
-        const candidates = nativeRelationLabelPositionCandidates(relation, preferredPosition);
-        const selectedPosition = candidates.find(candidate => {
-            const rect = nativeRelationLabelRect(relation, candidate);
-            return rect && isLabelRectAvailable(
-                rect,
-                nodes,
-                occupiedLabels,
-                protectedObstacles,
-                canvasWidth,
-                canvasHeight
-            );
-        });
-
-        if (selectedPosition === undefined) {
+        const selectedPosition = relation.nativeTextPosition;
+        const selectedRect = selectedPosition === undefined
+            ? null
+            : nativeRelationLabelRect(relation, selectedPosition);
+        if (!selectedRect || !isLabelRectAvailable(
+            selectedRect,
+            nodes,
+            occupiedLabels,
+            protectedObstacles,
+            canvasWidth,
+            canvasHeight
+        )) {
             throw new Error(
                 `Drawnix relation label "${relation.id}" could not find a collision-free native position `
                 + 'matching the SVG geometry.'
             );
         }
-
-        const selectedRect = nativeRelationLabelRect(relation, selectedPosition);
-        if (!selectedRect) {
-            throw new Error(`Drawnix relation label "${relation.id}" produced an invalid native geometry.`);
+        const expected = relation.labelLayout;
+        const geometryMatches = Math.abs(expected.x - selectedRect.x) < 0.001
+            && Math.abs(expected.y - selectedRect.y) < 0.001
+            && Math.abs(expected.width - selectedRect.width) < 0.001
+            && Math.abs(expected.height - selectedRect.height) < 0.001;
+        if (!geometryMatches) {
+            throw new Error(
+                `Drawnix relation label "${relation.id}" diverged from its reserved native lane geometry.`
+            );
         }
-        relation.nativeTextPosition = selectedPosition;
         relation.labelLayout = { ...relation.labelLayout, ...selectedRect };
         occupiedLabels.push(selectedRect);
     });
-}
-
-function clampArrowTextPosition(value: number): number {
-    return Math.max(0.05, Math.min(0.95, value));
-}
-
-function arrowTextPosition(relation: DrawnixMindMapCrossRelation): number {
-    const points = relation.points;
-    const layout = relation.labelLayout;
-    if (points.length < 2 || !layout) {
-        return 0.5;
-    }
-
-    const targetX = layout.x + layout.width / 2;
-    const targetY = layout.y + layout.height / 2;
-    const lengths = points.slice(1).map((point, index) => {
-        const start = points[index];
-        return Math.abs(point[0] - start[0]) + Math.abs(point[1] - start[1]);
-    });
-    const totalLength = lengths.reduce((total, length) => total + length, 0);
-    if (totalLength <= 0) {
-        return 0.5;
-    }
-
-    let distanceBefore = 0;
-    let bestDistance = Number.POSITIVE_INFINITY;
-    let bestDistanceAlongPath = totalLength / 2;
-    points.slice(1).forEach((end, index) => {
-        const start = points[index];
-        const length = lengths[index];
-        if (length <= 0) {
-            return;
-        }
-        const horizontal = start[1] === end[1];
-        const projected = horizontal
-            ? [Math.max(Math.min(targetX, Math.max(start[0], end[0])), Math.min(start[0], end[0])), start[1]] as DrawnixPoint
-            : [start[0], Math.max(Math.min(targetY, Math.max(start[1], end[1])), Math.min(start[1], end[1]))] as DrawnixPoint;
-        const candidateDistance = Math.hypot(projected[0] - targetX, projected[1] - targetY);
-        if (candidateDistance < bestDistance) {
-            bestDistance = candidateDistance;
-            bestDistanceAlongPath = distanceBefore + Math.abs(projected[0] - start[0]) + Math.abs(projected[1] - start[1]);
-        }
-        distanceBefore += length;
-    });
-    return clampArrowTextPosition(bestDistanceAlongPath / totalLength);
 }
 
 interface RootLayout {
@@ -1131,7 +918,23 @@ export function buildDrawnixMindMapProjection(spec: DiagramSpec): DrawnixMindMap
 
     const rootLayouts = spec.nodes.map(buildRootLayout);
     const packedForest = packRootLayouts(rootLayouts);
-    const header = buildHeaderLayout(spec.summary, packedForest.width);
+    const relationLaneRequests = (spec.edges ?? []).map((edge, index) => {
+        const sourceId = edge.from.trim();
+        const targetId = edge.to.trim();
+        const label = normalizedText(edge.label, normalizedText(edge.relation, '')) || undefined;
+        const metrics = label ? relationLabelMetrics(label) : undefined;
+        return {
+            relationId: crossRelationId(index, sourceId, targetId),
+            sourceId,
+            targetId,
+            labelSize: metrics ? { width: metrics.width, height: metrics.height } : undefined
+        };
+    });
+    const relationLaneSpace = reserveDrawnixRelationLaneSpace({
+        forestWidth: packedForest.width,
+        relations: relationLaneRequests
+    });
+    const header = buildHeaderLayout(spec.summary, relationLaneSpace.width);
     const headerOffsetY = Math.max(0, header.safeHeight - TOP_MARGIN);
     const roots: DrawnixMindMapElement[] = [];
     const treeNodes: MindMapTreeNode[] = [];
@@ -1140,7 +943,7 @@ export function buildDrawnixMindMapProjection(spec: DiagramSpec): DrawnixMindMap
 
     let offsetY = headerOffsetY;
     packedForest.rows.forEach((row, rowIndex) => {
-        let offsetX = 0;
+        let offsetX = relationLaneSpace.forestOffsetX;
         row.layouts.forEach((layout, columnIndex) => {
             shiftRootLayout(layout, offsetX, offsetY);
             roots.push(toDrawnixMindElement(layout.root, true, layout.rightNodeCount));
@@ -1165,38 +968,31 @@ export function buildDrawnixMindMapProjection(spec: DiagramSpec): DrawnixMindMap
     });
 
     const placedNodes = treeNodes.map(toPlacedNode);
-    const relationLabelReserve = (spec.edges ?? [])
-        .map(edge => normalizedText(edge.label, normalizedText(edge.relation, '')))
-        .filter(label => label.length > 0)
-        .map(label => relationLabelMetrics(label).height + RELATION_LABEL_GAP + RELATION_LABEL_NODE_CLEARANCE * 2)
-        .reduce((total, reserve) => total + reserve, 0);
-    const canvasHeight = packedForest.height + headerOffsetY + relationLabelReserve;
+    const resolvedRelationLaneLayout = assignDrawnixRelationLaneGeometry({
+        canvasWidth: relationLaneSpace.width,
+        reservations: relationLaneSpace.reservations,
+        relations: relationLaneRequests,
+        nodes: placedNodes
+    });
     const protectedObstacles: DrawnixCrossRootRouteObstacle[] = [{
         x: 0,
         y: 0,
-        width: packedForest.width,
+        width: relationLaneSpace.width,
         height: header.safeHeight
     }];
     const crossRelations = createCrossRelations(
         spec.edges ?? [],
         placedNodes,
-        rootRegions,
-        packedForest.width,
-        canvasHeight,
+        resolvedRelationLaneLayout.lanes,
+        relationLaneSpace.width,
+        resolvedRelationLaneLayout.height,
         protectedObstacles
     );
-    layoutCrossRelationLabels(
+    assertNativeRelationLabelLayouts(
         crossRelations,
         placedNodes,
-        packedForest.width,
-        canvasHeight,
-        protectedObstacles
-    );
-    layoutNativeRelationLabelPositions(
-        crossRelations,
-        placedNodes,
-        packedForest.width,
-        canvasHeight,
+        relationLaneSpace.width,
+        resolvedRelationLaneLayout.height,
         protectedObstacles
     );
 
@@ -1210,8 +1006,8 @@ export function buildDrawnixMindMapProjection(spec: DiagramSpec): DrawnixMindMap
         hierarchyBranches,
         crossRelations,
         rootRegions,
-        width: packedForest.width,
-        height: canvasHeight
+        width: relationLaneSpace.width,
+        height: resolvedRelationLaneLayout.height
     };
 }
 
@@ -1231,7 +1027,7 @@ export function createDrawnixMindMapArrowElements(
             points: relation.points,
             source: { id: relation.sourceId, marker: 'none' },
             target: { id: relation.targetId, marker: 'arrow' },
-            texts: [{ text: paragraph, position: relation.nativeTextPosition ?? arrowTextPosition(relation) }],
+            texts: [{ text: paragraph, position: relation.nativeTextPosition ?? 0.5 }],
             strokeColor: '#64748b',
             strokeWidth: 1.6,
             strokeStyle: 'dashed',

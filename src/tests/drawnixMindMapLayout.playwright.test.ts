@@ -112,7 +112,10 @@ describe('Drawnix mind-map browser layout', () => {
         const spec: DiagramSpec = {
             intent: 'drawnixMindmap',
             title: 'Notemd Architecture',
-            summary: '以 Notemd 插件为对象的知识地图，覆盖系统架构、LLM 调用管道、图表渲染平台、模块地图、CLI 边界现实、关键设计决策与验证。',
+            summary: Array.from(
+                { length: 4 },
+                (_, index) => `Section ${index + 1}: Notemd architecture covers interface routing, LLM providers, diagram artifacts, CLI operations, export paths, and verification constraints.`
+            ).join(' '),
             nodes: [{
                 id: 'root',
                 label: 'Root',

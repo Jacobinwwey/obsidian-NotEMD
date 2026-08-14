@@ -19,7 +19,7 @@ The first hardening slice is implemented; its latest repository, Vault, and host
 
 - Settings discovery uses an explicit catalog shape, stable IDs, field-aware scoring, and an independent listbox result panel with direct navigation.
 - SVG, PNG, and PDF preview exports share the folder-selection boundary for single-panel and multi-panel flows; the default remains the source folder and custom paths are Vault-relative.
-- Drawnix source coverage now records deterministic node merge, depth compression, edge remap, and edge drop diagnostics; LLM-supplied diagnostics are cleared before enrichment and only renderer-owned diagnostics reach the artifact.
+- Drawnix source coverage preserves deep source and unmatched model branches. It records deterministic node merge, edge remap, and edge drop diagnostics; LLM-supplied diagnostics are cleared before enrichment and only renderer-owned diagnostics reach the artifact.
 - Drawnix relation label dimensions are supplied to the route planner before lane selection. Repeated relations use obstacle-envelope lanes with label clearance, and the native normalized text position is copied back into the shared label rectangle consumed by SVG and JSON. Native position candidates are derived from segment capacity, so short horizontal lanes remain addressable even when long detours dominate the normalized path length.
 - Drawnix source-visual metadata now has an explicit v1 guard at the exporter/host boundary. Numeric v1 and legacy string `"1"` readers are accepted; unknown versions and duplicate visual IDs are ignored or rejected deterministically.
 - Relation-label layout fails closed when no collision-free native position exists; it does not silently emit an artifact whose SVG and native text geometry disagree. The routing boundary reserves label-safe canvas insets without over-inflating every node obstacle, preserving sparse-grid routes for dense forests.
@@ -281,7 +281,7 @@ Existing artifacts remain readable; no renderer or standard Mermaid behavior cha
 
 - Separate forest validation from source-backed document-root presentation.
 - Replace label-only merge decisions with stable identity plus explicit provenance/remap diagnostics.
-- Preserve all meaningful model branches within the depth budget or surface a deterministic compression diagnostic.
+- Preserve all meaningful model branches without a numeric depth budget. Surface a deterministic geometry diagnostic only when a placed projection cannot satisfy its safety invariants.
 - Keep explicit Drawnix requests strict; best-fit inference may fall back only with a structured reason.
 
 **Gate**
@@ -387,7 +387,7 @@ Documentation does not claim a full Drawnix editor, universal graph support, or 
 
 | Layer | Required evidence |
 |---|---|
-| Semantic | parser/normalizer tests for forest validity, rooted presentation, stable IDs, depth compression, and edge remap diagnostics |
+| Semantic | parser/normalizer tests for forest validity, rooted presentation, stable IDs, deep source/model preservation, and edge remap diagnostics |
 | Projection | deterministic coordinates, finite bounds, branch order, one placement per node, and no node overlap |
 | Routing | segment/obstacle checks, root-region policy, relation-label rectangles, native label positions, and fallback diagnostics |
 | Serialization | Drawnix fixture contract, explicit layer order, metadata schema version, and backward reader tests |

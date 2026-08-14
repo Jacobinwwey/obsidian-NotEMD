@@ -1,7 +1,6 @@
 import { DiagramNode, DiagramSourceCoverageDiagnostic, DiagramSpec } from '../../types';
 
 const MAX_SOURCE_LABEL_LENGTH = 160;
-const DRAWNIX_SOURCE_MAX_DEPTH = 3;
 
 interface SourceNodeFactory {
     create(label: string, prefix: string): DiagramNode;
@@ -83,6 +82,11 @@ function cloneNode(node: DiagramNode): DiagramNode {
     };
 }
 
+function mapClonedSubtreeIds(node: DiagramNode, idRemap: Map<string, string>): void {
+    idRemap.set(node.id, node.id);
+    node.children?.forEach(child => mapClonedSubtreeIds(child, idRemap));
+}
+
 function appendChildByLabel(parent: DiagramNode, child: DiagramNode): DiagramNode {
     const targetLabel = comparisonLabel(child.label);
     const existing = (parent.children ?? []).find(candidate => comparisonLabel(candidate.label) === targetLabel);
@@ -144,12 +148,6 @@ function parseHeading(line: string): { level: number; label: string } | null {
     };
 }
 
-function coverageHeadingLevel(level: number): number {
-    // The synthetic document root consumes one Drawnix level, so H4+ must
-    // share the final detail branch instead of creating an unrenderable depth.
-    return Math.min(level, 4);
-}
-
 function isTableRow(line: string): boolean {
     return /^\s*\|.*\|\s*$/.test(line) && !/^\s*\|?\s*:?-{2,}:?\s*(?:\|\s*:?-{2,}:?\s*)+\|?\s*$/.test(line);
 }
@@ -168,7 +166,6 @@ function detailText(line: string): string | null {
 
 function ensureDetailsContainer(
     owner: DiagramNode,
-    ownerDepth: number,
     factory: SourceNodeFactory
 ): DiagramNode {
     const existing = (owner.children ?? []).find(child => comparisonLabel(child.label) === comparisonLabel('Source details'));
@@ -176,25 +173,17 @@ function ensureDetailsContainer(
         return existing;
     }
     const container = factory.create('Source details', 'details');
-    if (ownerDepth >= DRAWNIX_SOURCE_MAX_DEPTH - 1) {
-        return owner;
-    }
     owner.children = [...(owner.children ?? []), container];
     return container;
 }
 
 function appendSourceDetail(
     owner: DiagramNode,
-    ownerDepth: number,
     value: string,
     factory: SourceNodeFactory
 ): void {
     const detail = factory.create(value, 'detail');
-    if (ownerDepth < DRAWNIX_SOURCE_MAX_DEPTH - 1) {
-        appendChildByLabel(ensureDetailsContainer(owner, ownerDepth, factory), detail);
-        return;
-    }
-    appendChildByLabel(owner, detail);
+    appendChildByLabel(ensureDetailsContainer(owner, factory), detail);
 }
 
 function extractMermaidLabels(line: string): Array<{ id: string; label: string }> {
@@ -267,9 +256,8 @@ function parseMermaidBlock(
         });
     });
 
-    // Preserve the individual Mermaid labels as siblings so the source visual
-    // stays within Drawnix's native depth budget after it is attached to a
-    // section (document -> section -> Mermaid block -> labels).
+    // Preserve Mermaid labels as siblings so a source visual remains readable
+    // when attached to a section (document -> section -> Mermaid block -> labels).
     return root;
 }
 
@@ -341,7 +329,7 @@ function buildSourceCoverageNodes(sourceMarkdown: string, factory: SourceNodeFac
             if (heading.level === 1) {
                 return;
             }
-            const normalizedLevel = coverageHeadingLevel(heading.level);
+            const normalizedLevel = heading.level;
             if (normalizedLevel === 2 || !currentRoot) {
                 const root = factory.create(heading.label, 'section');
                 const canonicalRoot = appendCoverageRoot(roots, root);
@@ -366,7 +354,7 @@ function buildSourceCoverageNodes(sourceMarkdown: string, factory: SourceNodeFac
         if (!currentRoot) {
             const value = detailText(line);
             if (value) {
-                appendSourceDetail(ensureUnscopedRoot(), 1, value, factory);
+                appendSourceDetail(ensureUnscopedRoot(), value, factory);
             }
             return;
         }
@@ -376,18 +364,7 @@ function buildSourceCoverageNodes(sourceMarkdown: string, factory: SourceNodeFac
         }
         const ownerFrame = headings[headings.length - 1];
         const owner = ownerFrame?.node ?? currentRoot;
-        const ownerDepth = Math.max(1, headings.length);
-        if (ownerDepth >= DRAWNIX_SOURCE_MAX_DEPTH) {
-            const parent = headings[headings.length - 2]?.node ?? currentRoot;
-            appendSourceDetail(
-                parent,
-                DRAWNIX_SOURCE_MAX_DEPTH - 1,
-                `${owner.label}: ${value}`,
-                factory
-            );
-        } else {
-            appendSourceDetail(owner, ownerDepth, value, factory);
-        }
+        appendSourceDetail(owner, value, factory);
     });
 
     if (mermaidLines) {
@@ -468,9 +445,7 @@ function deduplicateAndRemapEdges(
 function mergeModelNodeIntoTarget(
     model: DiagramNode,
     target: DiagramNode,
-    targetDepth: number,
     idRemap: Map<string, string>,
-    factory: SourceNodeFactory,
     diagnostics: DiagramSourceCoverageDiagnostic[]
 ): void {
     idRemap.set(model.id, target.id);
@@ -487,75 +462,30 @@ function mergeModelNodeIntoTarget(
             comparisonLabel(candidate.label) === comparisonLabel(child.label)
         ));
         if (directMatch) {
-            mergeModelNodeIntoTarget(child, directMatch, targetDepth + 1, idRemap, factory, diagnostics);
-            return;
-        }
-
-        if (targetDepth >= DRAWNIX_SOURCE_MAX_DEPTH) {
-            // Preserve the endpoint identity for an over-deep model edge while
-            // keeping the native hierarchy valid; the label remains visible on
-            // the nearest legal leaf.
-            idRemap.set(child.id, target.id);
-            diagnostics.push({
-                kind: 'node-compressed',
-                sourceIds: [child.id],
-                targetId: target.id,
-                message: `Remapped over-depth model node "${child.id}" to bounded Drawnix node "${target.id}".`
-            });
+            mergeModelNodeIntoTarget(child, directMatch, idRemap, diagnostics);
             return;
         }
 
         const cloned = cloneNode(child);
-        const normalizeChildren = (node: DiagramNode, depth: number): void => {
-            if (depth >= DRAWNIX_SOURCE_MAX_DEPTH) {
-                const descendants = flattenNodes(node.children ?? []);
-                if (descendants.length > 0) {
-                    node.label = boundedLabel(
-                        `${node.label} (${descendants.map(descendant => descendant.label).join('; ')})`,
-                        node.label
-                    );
-                    descendants.forEach(descendant => idRemap.set(descendant.id, node.id));
-                    diagnostics.push({
-                        kind: 'node-compressed',
-                        sourceIds: [node.id, ...descendants.map(descendant => descendant.id)],
-                        targetId: node.id,
-                        message: `Compressed descendants of model node "${node.id}" into its bounded Drawnix label.`
-                    });
-                }
-                node.children = [];
-                return;
-            }
-            node.children?.forEach(descendant => normalizeChildren(descendant, depth + 1));
-        };
-        normalizeChildren(cloned, targetDepth + 1);
         target.children = [...(target.children ?? []), cloned];
-        const remapClonedIds = (node: DiagramNode): void => {
-            idRemap.set(node.id, node.id);
-            node.children?.forEach(remapClonedIds);
-        };
-        remapClonedIds(cloned);
+        mapClonedSubtreeIds(cloned, idRemap);
     });
-}
-
-function flattenNodes(nodes: readonly DiagramNode[]): DiagramNode[] {
-    return nodes.flatMap(node => [node, ...flattenNodes(node.children ?? [])]);
 }
 
 function findDirectChildByLabel(parent: DiagramNode, label: string): DiagramNode | undefined {
     return (parent.children ?? []).find(child => comparisonLabel(child.label) === comparisonLabel(label));
 }
 
-function findNodeWithDepth(
+function findNodeByLabel(
     nodes: readonly DiagramNode[],
-    label: string,
-    depth: number
-): { node: DiagramNode; depth: number } | undefined {
+    label: string
+): DiagramNode | undefined {
     const targetLabel = comparisonLabel(label);
     for (const node of nodes) {
         if (comparisonLabel(node.label) === targetLabel) {
-            return { node, depth };
+            return node;
         }
-        const nested = findNodeWithDepth(node.children ?? [], label, depth + 1);
+        const nested = findNodeByLabel(node.children ?? [], label);
         if (nested) {
             return nested;
         }
@@ -592,46 +522,18 @@ function cloneModelForest(nodes: readonly DiagramNode[]): DiagramNode[] {
 function appendUnmatchedModelRoot(
     parent: DiagramNode,
     model: DiagramNode,
-    factory: SourceNodeFactory,
     idRemap: Map<string, string>,
-    parentDepth: number,
     diagnostics: DiagramSourceCoverageDiagnostic[]
 ): void {
     const existing = findDirectChildByLabel(parent, model.label);
     if (existing) {
-        mergeModelNodeIntoTarget(model, existing, parentDepth + 1, idRemap, factory, diagnostics);
+        mergeModelNodeIntoTarget(model, existing, idRemap, diagnostics);
         return;
     }
 
     const cloned = cloneNode(model);
-    const normalizeChildren = (node: DiagramNode, depth: number): void => {
-        if (depth >= DRAWNIX_SOURCE_MAX_DEPTH) {
-            const descendants = flattenNodes(node.children ?? []);
-            if (descendants.length > 0) {
-                node.label = boundedLabel(
-                    `${node.label} (${descendants.map(descendant => descendant.label).join('; ')})`,
-                    node.label
-                );
-                descendants.forEach(descendant => idRemap.set(descendant.id, node.id));
-                diagnostics.push({
-                    kind: 'node-compressed',
-                    sourceIds: [node.id, ...descendants.map(descendant => descendant.id)],
-                    targetId: node.id,
-                    message: `Compressed descendants of unmatched model node "${node.id}" into its bounded Drawnix label.`
-                });
-            }
-            node.children = [];
-            return;
-        }
-        node.children?.forEach(descendant => normalizeChildren(descendant, depth + 1));
-    };
-    normalizeChildren(cloned, parentDepth + 1);
     parent.children = [...(parent.children ?? []), cloned];
-    const remapClonedIds = (node: DiagramNode): void => {
-        idRemap.set(node.id, node.id);
-        node.children?.forEach(remapClonedIds);
-    };
-    remapClonedIds(cloned);
+    mapClonedSubtreeIds(cloned, idRemap);
 }
 
 /**
@@ -660,19 +562,17 @@ export function mergeDrawnixSourceCoverage(
     const modelRoots = cloneModelForest(spec.nodes ?? []);
     modelRoots.forEach(modelRoot => {
         const documentMatch = comparisonLabel(modelRoot.label) === comparisonLabel(documentRoot.label)
-            ? { node: documentRoot, depth: 0 }
-            : findNodeWithDepth(documentRoot.children ?? [], modelRoot.label, 1);
+            ? documentRoot
+            : findNodeByLabel(documentRoot.children ?? [], modelRoot.label);
         if (documentMatch) {
-            mergeModelNodeIntoTarget(modelRoot, documentMatch.node, documentMatch.depth, idRemap, factory, diagnostics);
+            mergeModelNodeIntoTarget(modelRoot, documentMatch, idRemap, diagnostics);
             return;
         }
         const additional = ensureAdditionalConcepts(documentRoot, factory);
         appendUnmatchedModelRoot(
             additional,
             modelRoot,
-            factory,
             idRemap,
-            1,
             diagnostics
         );
     });

@@ -755,7 +755,10 @@ describe('Drawnix mind-map renderer', () => {
     });
 
     test('wraps long summaries and moves the knowledge map below the full header', async () => {
-        const summary = '以 Notemd 插件为对象的知识地图，覆盖系统架构、LLM 调用管道、图表渲染平台、模块地图、CLI 边界现实、关键设计决策与验证。';
+        const summary = Array.from(
+            { length: 4 },
+            (_, index) => `第 ${index + 1} 部分覆盖 Notemd 的系统架构、LLM 调用管道、图表渲染平台、模块边界、CLI 执行路径、设计决策与验证结果。`
+        ).join(' ');
         const spec: DiagramSpec = {
             intent: 'drawnixMindmap',
             title: 'Notemd Architecture',
@@ -832,8 +835,8 @@ describe('Drawnix mind-map renderer', () => {
         expect(overlaps).toBe(false);
     });
 
-    test('rejects hierarchy depth beyond the native Drawnix contract', async () => {
-        const invalidSpec: DiagramSpec = {
+    test('retains deep taxonomies when their placed geometry remains valid', async () => {
+        const deepSpec: DiagramSpec = {
             ...createKnowledgeMapSpec(),
             nodes: [
                 {
@@ -863,7 +866,13 @@ describe('Drawnix mind-map renderer', () => {
             edges: []
         };
 
-        await expect(new DrawnixRenderer().render(invalidSpec)).rejects.toThrow(/maximum depth of 3/i);
+        const artifact = await new DrawnixRenderer().render(deepSpec);
+        const exported = JSON.parse(artifact.content) as {
+            elements: Array<{ type: string; children?: unknown[] }>;
+        };
+
+        expect(exported.elements.find(element => element.type === 'mindmap')?.children).toBeDefined();
+        expect(artifact.previewSvg?.content).toContain('data-drawnix-mindmap-node-id="depth-4"');
     });
 
     test('rejects cross relations that duplicate hierarchy ownership', async () => {
@@ -875,8 +884,8 @@ describe('Drawnix mind-map renderer', () => {
         await expect(new DrawnixRenderer().render(invalidSpec)).rejects.toThrow(/duplicates a parent-child relationship/i);
     });
 
-    test('rejects more than four cross-branch relations', async () => {
-        const invalidSpec: DiagramSpec = {
+    test('lays out more than four labelled cross-branch relations in separate safe lanes', async () => {
+        const complexSpec: DiagramSpec = {
             ...createKnowledgeMapSpec(),
             nodes: [
                 {
@@ -891,14 +900,39 @@ describe('Drawnix mind-map renderer', () => {
                 }
             ],
             edges: [
-                { from: 'a', to: 'b' },
-                { from: 'a', to: 'c' },
-                { from: 'a', to: 'd' },
-                { from: 'b', to: 'c' },
-                { from: 'b', to: 'd' }
+                { from: 'a', to: 'b', label: 'first dependency' },
+                { from: 'a', to: 'c', label: 'second dependency' },
+                { from: 'a', to: 'd', label: 'third dependency' },
+                { from: 'b', to: 'c', label: 'fourth dependency' },
+                { from: 'b', to: 'd', label: 'fifth dependency' }
             ]
         };
 
-        await expect(new DrawnixRenderer().render(invalidSpec)).rejects.toThrow(/at most 4 cross-branch relationships/i);
+        const projection = buildDrawnixMindMapProjection(complexSpec);
+        const artifact = await new DrawnixRenderer().render(complexSpec);
+        const labels = projection.crossRelations.map(relation => relation.labelLayout!);
+
+        expect(projection.crossRelations).toHaveLength(5);
+        labels.forEach(label => {
+            expect(label.x).toBeGreaterThanOrEqual(0);
+            expect(label.y).toBeGreaterThanOrEqual(0);
+            expect(label.x + label.width).toBeLessThanOrEqual(projection.width);
+            expect(label.y + label.height).toBeLessThanOrEqual(projection.height);
+            projection.nodes.forEach(node => {
+                const overlaps = label.x < node.x + node.width
+                    && label.x + label.width > node.x
+                    && label.y < node.y + node.height
+                    && label.y + label.height > node.y;
+                expect(overlaps).toBe(false);
+            });
+        });
+        labels.forEach((label, index) => labels.slice(index + 1).forEach(other => {
+            const overlaps = label.x < other.x + other.width
+                && label.x + label.width > other.x
+                && label.y < other.y + other.height
+                && label.y + label.height > other.y;
+            expect(overlaps).toBe(false);
+        }));
+        expect(artifact.previewSvg?.content).toContain('data-drawnix-mindmap-relation-label');
     });
 });

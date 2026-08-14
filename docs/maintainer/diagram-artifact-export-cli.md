@@ -41,7 +41,7 @@ PNG output also writes or replaces the `pHYs` physical pixel density chunk, so t
 |---|---|---|---|
 | `editable-html-svg` | self-contained `.html` with inline SVG | `DiagramSpec -> SemanticFigureModel -> EditableHtmlSvgRenderer` | annotation gaps from `collectEditableSvgAnnotationGaps()` must be empty |
 | `drawio` | uncompressed diagrams.net `mxfile` XML, optionally with `--preview-svg-output`, `--preview-png-output`, and `--preview-pdf-output` companions | `DiagramSpec -> SemanticFigureModel -> exportSemanticFigureModelToDrawioXml()` plus `renderSemanticFigureSvg()` | visible label mismatches must be empty |
-| `drawnix` | native `.drawnix` knowledge-map forest, optionally with `--preview-svg-output`, `--preview-png-output`, and `--preview-pdf-output` companions | `DiagramSpec(intent: "drawnixMindmap") -> DrawnixMindMapProjection -> DrawnixRenderer` plus `notemd-drawnix-mindmap-svg@1.0.0` | native roots, hierarchy, and relation validation errors must be empty |
+| `drawnix` | native `.drawnix` knowledge-map forest, optionally with `--preview-svg-output`, `--preview-png-output`, and `--preview-pdf-output` companions | `DiagramSpec(intent: "drawnixMindmap") -> two-pass DrawnixMindMapProjection -> DrawnixRenderer` plus `notemd-drawnix-mindmap-svg@1.0.0` | native roots, hierarchy, relation lanes, and label geometry must validate |
 | `circuitikz` | constrained `.tex` circuitikz source, optionally with SVG/PNG/PDF preview companions | `DiagramSpec(intent: "circuit") -> CircuitSpec -> CircuitikzRenderer -> exportCircuitSpecToCircuitikz()` plus `renderCircuitSpecPreviewSvg()` | `CircuitSpec` validation must pass before TeX or companion output is written |
 | `svg` | Obsidian-viewable `.svg` generated from the same semantic model, or from a circuit preview companion when `intent` is `circuit` | `DiagramSpec -> SemanticFigureModel -> renderSemanticFigureSvg()` or `CircuitSpec -> renderCircuitSpecPreviewSvg()` | semantic node/edge annotations or validated circuit preview metadata must be present |
 | `png` | `.png` visual evidence rendered from the same standalone SVG or circuit preview SVG | `DiagramSpec -> SemanticFigureModel -> renderSemanticFigureSvg() -> Playwright screenshot`, or `CircuitSpec -> renderCircuitSpecPreviewSvg() -> Playwright screenshot` | output dimensions follow SVG CSS size at the selected PPI, with `pHYs` metadata aligned to the selected density |
@@ -75,6 +75,18 @@ This CLI is deliberately artifact-first:
 
 The temporary bundle is created under the operating system temp directory and removed after the export. In short: no Obsidian runtime is required.
 
+## Local Drawnix Visual Check
+
+The artifact CLI and the Obsidian CLI have different responsibilities. The artifact CLI exports a checked `DiagramSpec`; the Obsidian CLI can only trigger an installed plugin command and should not be treated as proof for an undeployed source checkout. Keep generated demo material local.
+
+The current architecture demo uses a local-only spec derived from `docs/architecture.zh-CN.md` and writes ignored files under `.cache/drawnix-architecture-demo/`:
+
+```bash
+node scripts/export-diagram-artifact.js --input .cache/drawnix-architecture-demo/architecture.drawnix.spec.json --target drawnix --output .cache/drawnix-architecture-demo/notemd-architecture.drawnix --preview-svg-output .cache/drawnix-architecture-demo/notemd-architecture.svg --preview-png-output .cache/drawnix-architecture-demo/notemd-architecture.png --ppi 144
+```
+
+Inspect the PNG or SVG before using it as release evidence. Same-side relations should remain in their branch-side gutter; cross-forest relations may use lower lanes. The `.cache` inputs and outputs are not repository deliverables.
+
 ## Supported Evidence
 
 The canonical regression test is:
@@ -89,7 +101,7 @@ The test writes a single `DiagramSpec` and verifies:
 - normalized node IDs stay unique after whitespace normalization.
 - `drawio` XML preserves visible node and edge labels.
 - `drawnix` JSON contains one or more `mindmap` roots, nested `mind_child` elements, and validated `arrow-line` cross relations.
-- Drawnix projection layout is deterministic, packs large forests into bounded-width rows, is bounded to maximum depth 3 and at most 4 cross-branch relationships, and emits the dedicated SVG companion.
+- Drawnix projection layout is deterministic, packs large forests into bounded-width rows, accepts source-required hierarchy depth and material cross-branch relationships without a fixed numeric quota, allocates same-side gutter and cross-forest lower lanes after placement, and emits the dedicated SVG companion.
 - `drawio`, `drawnix`, and `circuitikz` can produce SVG companion files for Obsidian preview validation.
 - `circuitikz` emits constrained TeX only after `DiagramSpec.circuitSpec` validates, and can export SVG/PNG/PDF preview companions from the same circuit payload.
 - `svg` emits the same annotated semantic figure sheet directly, or a validated circuit preview companion for `intent: "circuit"`.

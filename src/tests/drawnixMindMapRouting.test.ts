@@ -23,7 +23,33 @@ function intersectsInterior(
     return false;
 }
 
-describe('Drawnix cross-root routing', () => {
+function assertProjectionRouteGeometry(
+    projection: ReturnType<typeof buildDrawnixMindMapProjection>
+): void {
+    const header = {
+        x: 0,
+        y: 0,
+        width: projection.width,
+        height: projection.header.safeHeight
+    };
+
+    projection.crossRelations.forEach(relation => {
+        relation.points.forEach(([x, y]) => {
+            expect(x).toBeGreaterThanOrEqual(0);
+            expect(x).toBeLessThanOrEqual(projection.width);
+            expect(y).toBeGreaterThanOrEqual(0);
+            expect(y).toBeLessThanOrEqual(projection.height);
+        });
+        relation.points.slice(1).forEach((point, index) => {
+            expect(intersectsInterior(relation.points[index], point, header)).toBe(false);
+            projection.nodes.forEach(node => {
+                expect(intersectsInterior(relation.points[index], point, node)).toBe(false);
+            });
+        });
+    });
+}
+
+describe('Drawnix relation routing', () => {
     test('routes around unrelated roots instead of crossing their rectangles', () => {
         const spec: DiagramSpec = {
             intent: 'drawnixMindmap',
@@ -135,7 +161,7 @@ describe('Drawnix cross-root routing', () => {
         });
     });
 
-    test('uses the sparse grid fallback for dense same-root branches without entering any node', () => {
+    test('routes dense same-root branches through their allocated relation lane without entering nodes', () => {
         const children = Array.from({ length: 30 }, (_, branchIndex) => ({
             id: `branch-${branchIndex}`,
             label: `Branch ${branchIndex}`,
@@ -164,17 +190,105 @@ describe('Drawnix cross-root routing', () => {
         const source = projection.nodes.find(node => node.id === relation.sourceId);
         const target = projection.nodes.find(node => node.id === relation.targetId);
 
-        expect(relation.routeStrategy).toBe('grid');
         expect(source).toBeDefined();
         expect(target).toBeDefined();
+        expect(Math.max(...relation.points.map(([, y]) => y))).toBeGreaterThan(
+            Math.max(...projection.nodes.map(node => node.y + node.height))
+        );
         relation.points.slice(1).forEach((point, index) => {
             projection.nodes.forEach(node => {
-                if (node.id === source?.id || node.id === target?.id) {
-                    return;
-                }
                 expect(intersectsInterior(relation.points[index], point, node)).toBe(false);
             });
         });
+    });
+
+    test('routes every relation in a multi-branch architecture fixture with local, obstacle-free geometry', () => {
+        const spec: DiagramSpec = {
+            intent: 'drawnixMindmap',
+            title: 'Notemd architecture',
+            summary: 'Architecture modules and operational dependencies.',
+            nodes: [{
+                id: 'notemd',
+                label: 'Notemd system architecture',
+                children: [
+                    {
+                        id: 'interface',
+                        label: 'Obsidian interface',
+                        children: [
+                            { id: 'command-palette', label: 'Command palette' },
+                            { id: 'sidebar', label: 'Sidebar' },
+                            { id: 'settings', label: 'Settings' }
+                        ]
+                    },
+                    {
+                        id: 'plugin',
+                        label: 'Plugin orchestration',
+                        children: [
+                            { id: 'main', label: 'Command registration' },
+                            { id: 'operations', label: 'Host adapters' },
+                            { id: 'batch', label: 'Batch processing' }
+                        ]
+                    },
+                    {
+                        id: 'llm',
+                        label: 'LLM pipeline',
+                        children: [
+                            { id: 'providers', label: 'Provider registry' },
+                            { id: 'token', label: 'Token and cache' },
+                            { id: 'transport', label: 'Transport runtimes' }
+                        ]
+                    },
+                    {
+                        id: 'diagram',
+                        label: 'Diagram platform',
+                        children: [
+                            { id: 'spec', label: 'DiagramSpec' },
+                            { id: 'renderers', label: 'RendererRegistry' },
+                            { id: 'drawnix', label: 'Drawnix knowledge map' }
+                        ]
+                    },
+                    {
+                        id: 'output',
+                        label: 'Output and preview',
+                        children: [
+                            { id: 'vault', label: 'Vault files' },
+                            { id: 'preview', label: 'Preview modal' },
+                            { id: 'export', label: 'Artifact export' }
+                        ]
+                    }
+                ]
+            }],
+            edges: [
+                { from: 'command-palette', to: 'main', label: 'triggers' },
+                { from: 'operations', to: 'providers', label: 'invokes' },
+                { from: 'transport', to: 'spec', label: 'generates' },
+                { from: 'renderers', to: 'export', label: 'exports' },
+                { from: 'sidebar', to: 'operations', label: 'opens' },
+                { from: 'settings', to: 'token', label: 'configures' },
+                { from: 'providers', to: 'renderers', label: 'supplies' },
+                { from: 'vault', to: 'command-palette', label: 'surfaces' }
+            ]
+        };
+
+        const expectedRelationCount = spec.edges?.length ?? 0;
+        const projection = buildDrawnixMindMapProjection(spec);
+        const repeatedProjection = buildDrawnixMindMapProjection(spec);
+        const sameSideRelation = projection.crossRelations.find(
+            relation => relation.id === 'cross-1-command-palette-to-main'
+        );
+
+        expect(projection.crossRelations).toHaveLength(expectedRelationCount);
+        expect(repeatedProjection.crossRelations).toEqual(projection.crossRelations);
+        expect(projection.nodes).toEqual(expect.arrayContaining([
+            expect.objectContaining({ id: 'notemd' })
+        ]));
+        expect(sameSideRelation).toMatchObject({
+            sourceId: 'command-palette',
+            targetId: 'main',
+            label: 'triggers'
+        });
+        expect(sameSideRelation?.labelLayout).toBeDefined();
+        assertProjectionRouteGeometry(projection);
     });
 
     test('fails closed instead of returning a direct route when no obstacle-free route exists', () => {

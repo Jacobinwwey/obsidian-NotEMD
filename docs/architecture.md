@@ -1,6 +1,6 @@
 # Notemd Architecture Overview
 
-> Updated: 2026-08-08
+> Updated: 2026-08-14
 
 ## System Architecture
 
@@ -190,6 +190,7 @@ flowchart LR
 | Intent | Render Target | Renderer | Preview | Export |
 |---|---|---|---|---|
 | `mindmap` | mermaid | MermaidRenderer | modal/iframe | SVG, PNG |
+| `drawnixMindmap` | drawnix | DrawnixRenderer | dedicated SVG companion | `.drawnix`, SVG, PNG, PDF |
 | `flowchart` | mermaid | MermaidRenderer | modal/iframe | SVG, PNG |
 | `sequence` | mermaid | MermaidRenderer | modal/iframe | SVG, PNG |
 | `classDiagram` | mermaid | MermaidRenderer | modal/iframe | SVG, PNG |
@@ -199,6 +200,8 @@ flowchart LR
 | `dataChart` | vega-lite | VegaLiteRenderer | modal/iframe (sandboxed) | source, SVG, PNG, PDF |
 | `circuit` | circuitikz | CircuitikzRenderer | SVG companion or source-only preview | `.tex`, SVG, PNG, PDF |
 
+`drawnixMindmap` is the only native Drawnix diagram intent. It projects `DiagramSpec.nodes` into an editable knowledge-map forest and emits a matching SVG companion. Relation layout has two geometry passes: the first reserves horizontal gutter space from measured label widths; after node placement, the second classifies endpoints relative to their roots. Same-side relations use a compact exterior gutter with a row scheduled between their endpoints. Cross-forest relations use the lower lanes. The router owns obstacle-safe ingress only, while the allocator owns lane placement. There is no fixed hierarchy-depth or relation-count quota; rejection is limited to invalid semantics or geometry that cannot fit without crossing a protected region or the canvas boundary. Source coverage follows the same rule: Markdown headings and unmatched model branches retain their hierarchy and IDs. It remaps edges only after an actual semantic merge and drops only invalid, duplicate, or hierarchy-ownership edges. Standard `mindmap` remains a Mermaid intent and continues through `MermaidRenderer`.
+
 ### Explicit Render Targets
 
 The spec-first pipeline can also force a render target independently from the inferred intent for `Generate diagram` and `Preview diagram`. The standard `Summarise as Mermaid diagram` command remains Mermaid-compatible.
@@ -207,7 +210,7 @@ The spec-first pipeline can also force a render target independently from the in
 |---|---|---|
 | `editable-html-svg` | Self-contained HTML with semantic inline SVG | no external editor runtime |
 | `drawio` | `.drawio` XML plus SVG/MD review companions | no diagrams.net runtime in the plugin |
-| `drawnix` | `.drawnix` JSON subset with inline Mermaid/source visuals by default; optional `.assets` companions when complete Mermaid export is enabled | no Drawnix or Plait runtime in the plugin; legacy companion scopes remain readable, missing legacy Mermaid SVGs can be rebuilt from metadata source text, and regeneration removes only manifest-backed plugin-owned scopes; node-aware relation routing, sparse-grid fallback, and layered label boxes keep labels out of node rectangles |
+| `drawnix` | `.drawnix` JSON subset with inline Mermaid/source visuals by default; optional `.assets` companions when complete Mermaid export is enabled | no Drawnix or Plait runtime in the plugin; legacy companion scopes remain readable, missing legacy Mermaid SVGs can be rebuilt from metadata source text, and regeneration removes only manifest-backed plugin-owned scopes; a two-pass relation allocator keeps same-side links in exterior gutters, sends cross-forest links through lower lanes, and shares label geometry between native Drawnix and SVG |
 | `circuitikz` | validated `.tex` source plus SVG/MD review companions | dependency-free preview/export; optional desktop compiler or managed Tectonic |
 
 Circuitikz support is intentionally constrained. The front-end settings expose `Circuit (Circuitikz)` as a preferred diagram type and `Circuitikz + SVG preview` as a preferred render target without requiring Developer mode, but the renderer accepts only a validated `DiagramSpec(intent: "circuit", circuitSpec)`. It writes deterministic circuitikz TeX and a reviewable SVG companion. Desktop users may then reuse a custom/system compiler or explicitly install pinned Tectonic 0.16.9 outside the Vault for compile diagnostics, native PDF evidence, and guarded repair acceptance; mobile and ordinary preview/export do not load desktop process code.

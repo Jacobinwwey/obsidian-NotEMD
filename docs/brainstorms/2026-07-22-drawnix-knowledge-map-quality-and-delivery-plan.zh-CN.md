@@ -18,7 +18,30 @@ DiagramSpec(intent: "drawnixMindmap")
   -> DrawnixMindMapSvgRenderer (notemd-drawnix-mindmap-svg@1.0.0)
 ```
 
-契约包含一个或多个顶层 root、`node.children` forest、`mindmap`/`mind_child` 元素、每棵树 maximum depth 3，以及最多 4 条用 `arrow-line` 表示的跨分支关系。较大的 forest 会按确定性规则打包到有宽度上限的多行中，避免 root 数量增长后画布变成单行长带。CLI 会在构建通用 `SemanticFigureModel` 前进入 Drawnix 分支；完整 Drawnix 宿主和 Plait preview 继续延期。
+契约包含一个或多个顶层 root、`node.children` forest、`mindmap`/`mind_child` 元素，以及用 `arrow-line` 表示的跨分支关系。不设固定的层级深度或关系数量配额。关系通道按标签尺寸和安全画布空间计算；只有语义无效，或无法在不进入受保护区域且不裁剪画布的前提下完成路由时，投影才会拒绝。较大的 forest 会按确定性规则打包到有宽度上限的多行中，避免 root 数量增长后画布变成单行长带。CLI 会在构建通用 `SemanticFigureModel` 前进入 Drawnix 分支；完整 Drawnix 宿主和 Plait preview 继续延期。
+
+## 路由与源覆盖更新（2026-08-14）
+
+早期 Drawnix 策略的数值深度预算和少量关系配额会拒绝本身有效的架构导图，现已移除。当前链路把语义校验、forest 排版、通道分配和端点接入分开：
+
+```text
+语义校验
+  -> forest 布局
+  -> 按已测量标签预留 gutter
+  -> 节点落位后的关系通道分配
+  -> 端点接入路由
+  -> 原生 Drawnix/SVG 标签共享几何校验
+```
+
+预分配阶段会把 forest 放在可容纳最长关系标签的水平空间中。节点获得坐标后，分配器按端点相对 root 的方位决定通道：同侧关系在该侧的外部 gutter 内使用两条轨道，并在两个端点附近安排确定性行；跨 forest 关系继续使用底部通道。这样当更宽的同级分支挡住第一条局部列时，同侧依赖不会被迫横跨整张图。
+
+router 仍把节点、页眉保护带、其他标签矩形和画布边界当作硬障碍物。原生 Drawnix 文字与 SVG 标签共用同一矩形，几何不一致即拒绝投影。实现不会用放松这些不变量来换取可达路径。
+
+源覆盖遵循同一语义原则。Markdown 标题链和未匹配的模型分支保留完整层级和 ID。诊断只描述实际节点合并，或无效、重复、重复层级所有权关系边的丢弃，不再承担深度压缩职责。回归夹具包含六级源标题和超过原阈值的模型分支，并检查其跨关系仍保留原始端点 ID。
+
+回归测试按层分工。通道单测验证动态关系分配、外侧走廊选择，以及给定画布无法容纳几何时的明确失败。路由夹具覆盖多分支架构图、确定性输出、节点/页眉/画布安全，以及同侧关系的局部路径。renderer 测试覆盖原生/SVG 几何和页眉换行。源覆盖测试验证深层结构保留和关系端点有效性。测试不再编码最大深度、最大关系数、必须使用的兜底策略或历史画布宽度。
+
+后续工作是运行层面的：为包含大量跨关系的大型 forest 增加代表性性能基准，并在发版候选中保留真实上游导入证据。性能回归应通过布局或路由优化解决，不能重新引入语义配额。
 
 ## 原始审计（历史）
 
@@ -84,9 +107,9 @@ DiagramSpec
 
 ### 首批交付范围
 
-- `DrawnixRenderer` 只接受 `intent: "mindmap"`。
+- `DrawnixRenderer` 只接受 `intent: "drawnixMindmap"`。
 - `DiagramNode.children` 保留为主树，不把父子关系重新编码为普通 edges。
-- 树布局完成后，支持少量跨分支关系。它们是注释，不是主结构。
+- 树布局完成后，只要能分配独立通道并安全接入端点，就支持跨分支关系。它们是注释，不是主结构。
 - 相同 `DiagramSpec` 必须生成确定性输出。
 - 从已布局的思维导图投影生成独立 SVG companion。
 - 使用固定上游 Drawnix 基线手工打开 `.drawnix`，作为维护者验证。
@@ -105,16 +128,16 @@ Drawnix profile 位于 `diagramSpecPrompt.ts`，只在 Drawnix 思维导图路�
 ```text
 Target: editable Drawnix knowledge map.
 Required intent: drawnixMindmap.
-Create one or more top-level root nodes and 3-6 first-level branches per tree. Keep independent subsystems as separate roots instead of inventing a container node.
-Each branch has 2-5 children; maximum hierarchy depth is 3.
+Create one or more top-level root nodes. Keep independent subsystems as separate roots instead of inventing a container node.
+Keep the hierarchy as deep as the source requires. Do not flatten a meaningful taxonomy to meet an arbitrary depth budget.
 Use node.children for ownership and taxonomy.
 Do not duplicate parent-child relationships in edges.
-Use edges only for cross-branch runtime dependencies; emit at most 4.
+Use edges only for cross-branch runtime dependencies. Preserve every material relationship needed to explain the source; the renderer allocates adaptive relation lanes.
 Use concise labels. Keep operational detail in leaves, not in the root.
 For architecture notes, organize the tree by subsystem first. Treat request/data flow as cross-branch relationships.
 ```
 
-parser 与 validator 必须承担能机械验证的部分：至少一个 root、每棵树的受限深度、唯一 id、合法子节点引用和跨关系数量。无效的思维导图投影需要拒绝并回退到原请求目标，不能静默拍平为旧网格。
+parser 与 validator 只承担可机械验证的部分：至少一个 root、唯一 id、合法子节点引用、合法关系端点，以及不重复层级所有权的关系。无效或无法安全布线的投影必须拒绝；显式请求 Drawnix 时，不能静默拍平为旧网格或改为 Mermaid。
 
 ## 交付顺序
 
@@ -124,7 +147,7 @@ parser 与 validator 必须承担能机械验证的部分：至少一个 root、
 
 ### 阶段 1：思维导图投影与导出（已完成）
 
-实现投影、确定性分支布局、受限关系路由、exporter、SVG companion renderer 和目标专用 prompt profile。将 `DrawnixRenderer.supports()` 收窄到已交付的 `mindmap` 契约。保留其它 render target 与默认 best-fit 行为。
+实现投影、确定性分支布局、自适应关系通道路由、exporter、SVG companion renderer 和目标专用 prompt profile。将 `DrawnixRenderer.supports()` 收窄到已交付的 `drawnixMindmap` 契约。保留其它 render target 与默认 best-fit 行为。
 
 ### 阶段 2：产品暴露与 CLI 验证
 
@@ -143,10 +166,10 @@ Stage 4 decision: deferred。仓库还没有通过验证的重型 runtime bundle
 | 层级 | 必需证据 |
 |---|---|
 | 投影 | 保留树、分支顺序稳定、每个节点只布局一次、矩形不重叠 |
-| 布局 | root/branch 间距、标签宽度上限、跨边数量与路由断言 |
+| 布局 | root/branch 间距、标签宽度上限、通道分配与避障路由断言 |
 | 导出 | JSON 符合固定思维导图 fixture 契约；不再出现通用矩形网格标记 |
 | SVG companion | 使用与导出相同的 node id 与坐标；包含 architecture note fixture snapshot |
-| Prompt/parser | 目标 profile 请求合法树；畸形树或超量跨关系在渲染前失败 |
+| Prompt/parser | 目标 profile 请求合法树；畸形层级、重复所有权关系或不安全几何在渲染前失败 |
 | 集成 | 既有 command 路线从 `docs/architecture.zh-CN.md` 生成 `.drawnix` 和 SVG companion |
 | 消费端检查 | 固定上游 Drawnix 可打开产物，保存 screenshot 或 import log 作为 maintainer-local evidence |
 
@@ -158,7 +181,7 @@ Stage 4 decision: deferred。仓库还没有通过验证的重型 runtime bundle
 - `theme: "default"` 不是 `PlaitTheme` object。阶段 0 必须先固定已导入 theme fixture，exporter 才能宣称主题对齐。
 - LLM 常输出扁平图。提示词改善输入，确定性投影校验才是实际 guardrail。
 - 多语言标签需要宽度处理。分支布局应确定性测量/换行，不能再用固定卡片尺寸。
-- 跨分支边会破坏思维导图可读性。必须限量，层级优先于关系边。
+- 跨分支边共享几何时会破坏可读性。层级仍优先于关系边；每条关系分配独立通道，只有不存在安全几何时才拒绝。
 - 不要引入把两种无关算法藏起来的通用 `layoutMode`。思维导图和未来架构画布应由独立 owner 实现。
 - 不要只为了导入类型就添加 Plait 依赖。初始路径不会执行该 runtime，依赖会扩大 bundle 耦合。
 

@@ -1,4 +1,5 @@
 import { DiagramSpec } from '../diagram/types';
+import { buildDrawnixMindMapProjection } from '../diagram/adapters/drawnix/drawnixMindMapProjection';
 import { mergeDrawnixSourceCoverage } from '../diagram/adapters/drawnix/drawnixSourceCoverage';
 import { generateDiagramArtifact } from '../diagram/diagramGenerationService';
 
@@ -83,13 +84,6 @@ describe('Drawnix source coverage', () => {
             expect(edge.from).not.toBe(edge.to);
         });
 
-        const visit = (nodes: DiagramSpec['nodes'], depth: number): void => {
-            nodes.forEach(node => {
-                expect(depth).toBeLessThanOrEqual(3);
-                visit(node.children ?? [], depth + 1);
-            });
-        };
-        visit(enriched.nodes, 0);
     });
 
     test('supplements a sparse model response with the source document tree and Mermaid labels', () => {
@@ -141,18 +135,36 @@ describe('Drawnix source coverage', () => {
         expect(nodes.length).toBeGreaterThan(sparseSpec.nodes.length + 4);
     });
 
-    test('keeps the source-derived forest deterministic, unique, and within native depth', () => {
+    test('keeps deep source and model branches without remapping their edge endpoints', () => {
         const spec: DiagramSpec = {
             intent: 'drawnixMindmap',
             title: 'Architecture',
-            nodes: [{ id: 'existing', label: 'Existing' }]
+            nodes: [
+                {
+                    id: 'model-root',
+                    label: 'Model branch',
+                    children: [{
+                        id: 'model-level-1',
+                        label: 'Model level 1',
+                        children: [{
+                            id: 'model-level-2',
+                            label: 'Model level 2',
+                            children: [{ id: 'model-leaf', label: 'Model leaf' }]
+                        }]
+                    }]
+                },
+                { id: 'model-target', label: 'External target' }
+            ],
+            edges: [{ from: 'model-leaf', to: 'model-target', label: 'depends on' }]
         };
         const sourceMarkdown = [
             '# Architecture',
             '## First section',
             '### Nested section',
-            '#### Detail',
-            '- A detail',
+            '#### Detail level',
+            '##### Fifth level',
+            '###### Sixth level',
+            '- Source leaf',
             '## Second section',
             '```text',
             '## Not a section',
@@ -163,16 +175,41 @@ describe('Drawnix source coverage', () => {
         const second = mergeDrawnixSourceCoverage(spec, sourceMarkdown);
         const nodes = flattenNodes(first.nodes);
         const ids = nodes.map(node => node.id);
+        const projection = buildDrawnixMindMapProjection(first);
+        const root = first.nodes[0];
+        const firstSection = root.children?.find(node => node.label === 'First section');
+        const nestedSection = firstSection?.children?.find(node => node.label === 'Nested section');
+        const detailLevel = nestedSection?.children?.find(node => node.label === 'Detail level');
+        const fifthLevel = detailLevel?.children?.find(node => node.label === 'Fifth level');
+        const sixthLevel = fifthLevel?.children?.find(node => node.label === 'Sixth level');
 
         expect(second).toEqual(first);
         expect(new Set(ids).size).toBe(ids.length);
-        const walk = (current: DiagramSpec['nodes'], depth: number): void => {
-            current.forEach(node => {
-                expect(depth).toBeLessThanOrEqual(3);
-                walk(node.children ?? [], depth + 1);
-            });
-        };
-        walk(first.nodes, 0);
+        expect(sixthLevel?.children?.[0]).toMatchObject({
+            label: 'Source details',
+            children: [expect.objectContaining({ label: 'Source leaf' })]
+        });
+        expect(nodes.map(node => node.id)).toEqual(expect.arrayContaining([
+            'model-root',
+            'model-level-1',
+            'model-level-2',
+            'model-leaf',
+            'model-target'
+        ]));
+        expect(first.edges).toEqual([{
+            from: 'model-leaf',
+            to: 'model-target',
+            label: 'depends on'
+        }]);
+        expect((first.sourceCoverageDiagnostics ?? [])
+            .some(diagnostic => diagnostic.kind === 'node-compressed')).toBe(false);
+        expect(projection.nodes.map(node => node.id)).toEqual(expect.arrayContaining([
+            'model-level-2',
+            'model-leaf'
+        ]));
+        expect(projection.crossRelations).toEqual([
+            expect.objectContaining({ sourceId: 'model-leaf', targetId: 'model-target' })
+        ]);
         expect(nodes.some(node => node.label === 'Not a section')).toBe(false);
     });
 
@@ -330,7 +367,7 @@ describe('Drawnix source coverage', () => {
         }]);
     });
 
-    test('collapses unmatched model branches and drops placeholder leaves from the document root', () => {
+    test('keeps unmatched model branches while dropping placeholder leaves from the document root', () => {
         const enriched = mergeDrawnixSourceCoverage({
             intent: 'drawnixMindmap',
             title: 'Document',

@@ -24,8 +24,8 @@ DiagramSpec(intent: "drawnixMindmap")
 - root 元素：每个顶层节点对应一个 `type: "mindmap"`
 - 后代元素：`type: "mind_child"`
 - 跨分支关系：`type: "arrow-line"`
-- maximum depth 3
-- at most 4 cross-branch relationships
+- 不设固定的层级深度或关系数量配额
+- 两阶段关系通道先预留水平 gutter，再在 forest 已知后安排同侧与跨 forest 关系
 - 坐标和标签换行是确定性的
 - 较大的 forest 会按确定性规则分行，并限制单行画布宽度
 - SVG renderer 版本：`notemd-drawnix-mindmap-svg@1.0.0`
@@ -34,7 +34,9 @@ DiagramSpec(intent: "drawnixMindmap")
 
 ### 关系标签层级与路由
 
-跨分支和同 root 关系都会把已放置的节点矩形作为路由障碍物。连接线从源节点和目标节点的边界侧离开；当直接通道会进入其他节点时，使用有界的正交 lane。所有 local、grid 和 outer 兜底路由都必须留在导出画布的安全内缩范围内；如果只能生成负坐标的 perimeter 路径，必须拒绝该路由，而不能让 SVG/Drawnix 裁剪后形成贴边的假虚线框。随后，系统测量并换行每条带标签的关系，为它生成避开所有节点及此前关系标签的确定性标签框。标题/摘要页眉使用与节点标签相同的确定性宽度估算；长摘要会拆成显式多行，整个 forest 会下移到计算出的 `safeHeight` 之后，路由和原生箭头文字也使用完全相同的高度作为障碍物。SVG companion 按“连接线、节点、关系标签、页眉”的顺序绘制，页眉最后再绘制并带不透明白色背景，作为最终的图形/背景保护。原生 Drawnix 流也复用同一组路由点和标签契约，避免可编辑导出与 SVG 在层级或几何上分叉。
+跨分支和同 root 关系都会把已放置的节点矩形作为路由障碍物。通道分配分为两步。节点落位前，投影按最长已测量关系标签预留水平 gutter 宽度。节点落位后，分配器按端点相对 root 的方位分类：同侧关系在该侧外部 gutter 中使用两条轨道，并在端点附近安排确定性行；跨 forest 关系使用底部通道。router 只负责通过这些轨道完成端点接入。当无关的更宽同级分支挡住第一条分支局部列时，这条设计避免同侧关系绕行整张画布。
+
+节点、标题/摘要页眉、其他标签矩形和画布内缩范围仍是硬障碍物。如果这些约束没有留下可用几何，关系必须拒绝；分配器不会通过恢复层级或关系数量配额来回避该情况。每条带标签关系会在分配前测量并换行，原生 Drawnix 文字框与 SVG 标签使用同一矩形。标题/摘要页眉继续使用与节点相同的确定性宽度估算；长摘要会拆成显式多行，forest 下移到 `safeHeight` 之后。SVG companion 按“连接线、节点、关系标签、页眉”的顺序绘制，最后的页眉带不透明白色背景。
 
 原生箭头现在使用与 Plait 兼容的契约：`shape: "straight"` 保留显式正交折线路径，`source`/`target` 携带原生 marker，`texts[]` 保存 paragraph 以及路径上的归一化 `position`，`strokeColor`/`strokeWidth`/`strokeStyle`/`opacity` 保存视觉样式。旧版读取器仍可使用兼容性 metadata 中的 `text` 与 `style`。由于上游连接解析器要求几何元素拥有 `points`，而原生 `mind_child` 并不拥有该字段，因此不会输出 `boundId`；这样可以避免宿主导入异常，同时保留明确的关系路径。
 
@@ -45,13 +47,14 @@ DiagramSpec(intent: "drawnixMindmap")
 定向回归命令：
 
 ```bash
-npm test -- --runInBand src/tests/drawnixExporter.test.ts src/tests/drawnixMindMapRenderer.test.ts src/tests/drawnixExportDocsContract.test.ts --runTestsByPath
+npm test -- --runInBand src/tests/drawnixExporter.test.ts src/tests/drawnixRelationLaneLayout.test.ts src/tests/drawnixMindMapRenderer.test.ts src/tests/drawnixMindMapRouting.test.ts src/tests/drawnixExportDocsContract.test.ts --runTestsByPath
 ```
 
 测试覆盖：
 
 - `DrawnixExportedData` envelope 与 `mindmap`/`mind_child` 层级
-- 确定性布局、节点矩形分离、深度限制和关系数量限制
+- 确定性布局、深层分类保留，以及没有数量门槛的动态关系通道分配
+- 同侧外部 gutter、跨 forest 底部通道，以及不会进入任何节点或裁剪画布的稠密端点接入
 - 原生箭头文字位置规划，保证 Plait 文字框避开节点和受保护的页眉区域
 - 稳定的 `.drawnix` JSON 序列化与 `arrow-line` 校验
 - 专用 SVG companion 使用相同的 node id 和投影坐标
