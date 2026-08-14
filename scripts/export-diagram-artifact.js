@@ -412,17 +412,20 @@ function buildExporterBundle(repoRoot) {
         const renderer = new DrawnixRenderer();
         const artifact = await renderer.render(spec);
         const data = JSON.parse(artifact.content);
-        const countMindMapNodes = (element) => 1 + element.children.reduce(
+        const countMindMapNodes = (element) => 1 + (Array.isArray(element.children) ? element.children : []).reduce(
           (count, child) => count + countMindMapNodes(child),
           0
         );
+        const rootElements = data.elements.filter((element) => element.type === 'mindmap');
+        const relationElements = data.elements.filter((element) => element.type === 'arrow-line');
         return {
           content: artifact.content,
           previewSvgContent: artifact.previewSvg?.content,
           summary: {
             mimeType: artifact.mimeType,
-            nodeCount: countMindMapNodes(data.elements[0]),
-            edgeCount: data.elements.length - 1,
+            rootCount: rootElements.length,
+            nodeCount: rootElements.reduce((count, root) => count + countMindMapNodes(root), 0),
+            edgeCount: relationElements.length,
             validationErrorCount: 0
           }
         };

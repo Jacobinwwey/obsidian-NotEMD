@@ -97,6 +97,29 @@ function createDrawnixMindMapSpec(): DiagramSpec {
     };
 }
 
+function createDrawnixForestSpec(): DiagramSpec {
+    return {
+        intent: 'drawnixMindmap',
+        title: 'CLI Drawnix Forest',
+        nodes: [
+            {
+                id: 'interface-root',
+                label: 'Interface',
+                children: [{ id: 'command-palette', label: 'Command palette' }]
+            },
+            {
+                id: 'runtime-root',
+                label: 'Runtime',
+                children: [
+                    { id: 'provider-registry', label: 'Provider registry' },
+                    { id: 'transport', label: 'Transport' }
+                ]
+            }
+        ],
+        edges: [{ from: 'command-palette', to: 'transport', label: 'invokes' }]
+    };
+}
+
 describe('diagram artifact export CLI', () => {
     const repoRoot = path.join(__dirname, '..', '..');
     const packageJsonPath = path.join(repoRoot, 'package.json');
@@ -111,6 +134,8 @@ describe('diagram artifact export CLI', () => {
         const cli = require(scriptPath);
 
         expect(packageJson.scripts['diagram:export-artifact']).toBe('node scripts/export-diagram-artifact.js');
+        expect(packageJson.scripts['benchmark:drawnix-knowledge-map'])
+            .toBe('node scripts/benchmark-drawnix-knowledge-map.js');
         expect(cli.SUPPORTED_TARGETS).toEqual(expect.arrayContaining(['circuitikz', 'svg', 'png', 'pdf']));
         expect(cli.normalizePpi(undefined)).toBe(300);
         expect(cli.normalizePpi('450')).toBe(450);
@@ -149,6 +174,8 @@ describe('diagram artifact export CLI', () => {
             expect(runbook).toContain('drawnixMindmap');
             expect(runbook).toContain('DrawnixMindMapProjection');
             expect(runbook).toContain('notemd-drawnix-mindmap-svg@1.0.0');
+            expect(runbook).toContain('rootCount');
+            expect(runbook).toContain('benchmark:drawnix-knowledge-map');
             expect(runbook).toContain('circuitikz');
             expect(runbook).toContain('svg');
             expect(runbook).toContain('png');
@@ -338,6 +365,36 @@ describe('diagram artifact export CLI', () => {
                 data: { source: 'DrawnixMindMapProjection' }
             });
             expect(fs.readFileSync(svgPath, 'utf8')).toContain('notemd-drawnix-mindmap-svg@1.0.0');
+        } finally {
+            fs.rmSync(tempRoot, { recursive: true, force: true });
+        }
+    }, 30000);
+
+    test('counts every root and only cross-relation arrows in a Drawnix forest summary', () => {
+        const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'notemd-drawnix-forest-cli-'));
+        const specPath = path.join(tempRoot, 'drawnix-forest.json');
+        const drawnixPath = path.join(tempRoot, 'knowledge-forest.drawnix');
+        fs.writeFileSync(specPath, JSON.stringify(createDrawnixForestSpec(), null, 2), 'utf8');
+
+        try {
+            const stdout = execFileSync(process.execPath, [
+                scriptPath,
+                '--input', specPath,
+                '--target', 'drawnix',
+                '--output', drawnixPath
+            ], {
+                cwd: repoRoot,
+                encoding: 'utf8'
+            });
+
+            const result = JSON.parse(stdout);
+            expect(result).toEqual(expect.objectContaining({
+                target: 'drawnix',
+                outputPath: drawnixPath,
+                rootCount: 2,
+                nodeCount: 5,
+                edgeCount: 1
+            }));
         } finally {
             fs.rmSync(tempRoot, { recursive: true, force: true });
         }

@@ -45,7 +45,7 @@ Source coverage follows the same semantic policy. Markdown heading chains and un
 
 The regression surface is layered. The lane unit tests verify dynamic relation allocation, exterior corridor selection, and explicit failure when the supplied canvas cannot hold the geometry. The routing fixture covers a multi-branch architecture map, deterministic output, node/header/canvas safety, and local same-side routes. Renderer tests cover native/SVG geometry and header wrapping. Source-coverage tests verify deep hierarchy preservation and valid relation endpoints. The tests do not encode a maximum depth, maximum relation count, a required fallback strategy, or a historical canvas width.
 
-The remaining work is operational: add a representative performance benchmark for large forests with many cross relations, and retain real upstream import evidence for release candidates. A performance regression must be fixed with layout or routing work, not with a new semantic quota.
+The operational baseline now includes `npm run benchmark:drawnix-knowledge-map`: a fixed 8-root, 136-node, 32-relation forest exported through the same artifact CLI. It records structural counts, artifact sizes, and cold end-to-end time without imposing a machine-dependent duration quota. Release candidates must retain real upstream import evidence against the pinned Drawnix baseline. A performance regression must be fixed with layout or routing work, not with a new semantic quota.
 
 ## Original Audit (Historical)
 

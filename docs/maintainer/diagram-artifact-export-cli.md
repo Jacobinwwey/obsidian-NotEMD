@@ -35,6 +35,10 @@ On npm 11, especially on Windows, npm may rewrite long options after `npm run ..
 
 PNG output also writes or replaces the `pHYs` physical pixel density chunk, so the selected PPI is visible to image viewers and layout tools instead of only being reflected in pixel dimensions.
 
+## Output Summary
+
+Each successful invocation prints one JSON summary. For `drawnix`, `rootCount`, `nodeCount`, and `edgeCount` describe the native forest: `nodeCount` traverses every top-level `mindmap` root, while `edgeCount` counts only `arrow-line` cross-relations. This keeps a multi-root knowledge map from being reported as a single tree or from treating additional roots as relationships.
+
 ## Targets
 
 | Target | Output | Source model | Verification in CLI |
@@ -86,6 +90,12 @@ node scripts/export-diagram-artifact.js --input .cache/drawnix-architecture-demo
 ```
 
 Inspect the PNG or SVG before using it as release evidence. Same-side relations should remain in their branch-side gutter; cross-forest relations may use lower lanes. The `.cache` inputs and outputs are not repository deliverables.
+
+## Drawnix Scale Benchmark
+
+Run `npm run benchmark:drawnix-knowledge-map` to export a representative forest with 8 roots, 136 nodes, and 32 labelled cross-relations. It writes the spec, `.drawnix` artifact, and SVG companion to the ignored `.cache/drawnix-knowledge-map-benchmark/` directory, then reports structural counts, artifact sizes, and cold end-to-end export time.
+
+The benchmark has no runtime pass/fail threshold. Its elapsed time includes the temporary exporter bundle and varies by machine; use it to compare a routing or layout change on the same host. Structural counts and zero validation errors are the regression contract.
 
 ## Supported Evidence
 

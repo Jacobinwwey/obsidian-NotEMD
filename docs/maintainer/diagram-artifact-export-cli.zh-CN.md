@@ -35,6 +35,10 @@ npm run diagram:export-artifact -- --input spec.json --target drawio --output fi
 
 PNG 输出还会写入或替换 `pHYs` 物理像素密度 chunk，因此所选 PPI 不只体现在像素尺寸上，也能被图片查看器和排版工具读取。
 
+## 输出摘要
+
+每次成功导出都会输出一条 JSON 摘要。对于 `drawnix`，`rootCount`、`nodeCount` 与 `edgeCount` 描述原生 forest：`nodeCount` 会遍历全部顶层 `mindmap` root，`edgeCount` 只统计 `arrow-line` 跨关系。多根知识图不会再被当成单棵树，额外 root 也不会被误计为关系。
+
 ## Targets
 
 | Target | 输出 | Source model | CLI 内验证 |
@@ -86,6 +90,12 @@ node scripts/export-diagram-artifact.js --input .cache/drawnix-architecture-demo
 ```
 
 把 PNG 或 SVG 用作发版证据前应先目检。同侧关系应留在对应分支的外侧 gutter，跨 forest 关系可以使用底部通道。`.cache` 中的输入和输出不是仓库交付物。
+
+## Drawnix 规模基准
+
+运行 `npm run benchmark:drawnix-knowledge-map` 会导出一份代表性 forest：8 个 root、136 个节点和 32 条带标签的跨关系。脚本会把规格、`.drawnix` artifact 与 SVG companion 写入被忽略的 `.cache/drawnix-knowledge-map-benchmark/`，随后输出结构计数、artifact 大小和端到端冷导出耗时。
+
+该基准不设置运行时间的通过/失败阈值。耗时包含临时 exporter bundle，并会随机器变化；它用于在同一主机上比较路由或布局改动。结构计数与零校验错误才是回归契约。
 
 ## 支持证据
 
