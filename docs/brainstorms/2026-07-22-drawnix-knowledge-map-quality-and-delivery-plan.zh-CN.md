@@ -43,6 +43,16 @@ router 仍把节点、页眉保护带、其他标签矩形和画布边界当作�
 
 运行层面的基线现已包含 `npm run benchmark:drawnix-knowledge-map`：它通过同一条 artifact CLI 导出固定的 8 个 root、136 个节点、32 条关系的 forest，记录结构计数、artifact 大小和端到端冷导出耗时，但不设置与机器绑定的时长配额。发版候选仍须保留针对固定 Drawnix 基线的真实上游导入证据。性能回归应通过布局或路由优化解决，不能重新引入语义配额。
 
+## 复核补充（2026-08-14）
+
+本方案的独立 `drawnixMindmap` intent、专用投影、无语义配额和 Mermaid 隔离仍成立。新基准验证了 8 root、136 节点、32 关系可以保留 topology；它同时暴露了展示层缺口：完整 forest 直接输出为一张 SVG 时，源顺序 root packing 与底部跨 root 通道会形成过宽画布。
+
+后续工作不应重开完整 Drawnix host，也不能用深度、节点或关系限制修复视觉效果。应建立独立的 presentation planner：board projection 保留完整 `.drawnix` 语义，静态交付生成 overview 与 detail slices，并以 fidelity ledger 记录每个摘要或聚类。document root 必须从 source coverage 的必经步骤变为可选展示策略；这能释放已有 multi-root projection 的能力。
+
+另一个文档表述需要收紧。Notemd SVG 使用本地 placed projection，而导出的 native MindElement 只给 root 写 `points`，子节点由上游 `withMind` 布局。因此“SVG 与 native 同几何”只能作为待验证的 consumer contract，不能由序列化结构直接推出。官方 Drawnix file-open 会执行 `fitViewport`，所以固定 `viewport.zoom = 1` 不是当前宽画布问题的主因。
+
+完整分析、分阶段方案和 `diagram-design` 对照见[Drawnix 演示交付架构复核](./2026-08-14-drawnix-presentation-architecture-review.zh-CN.md)。
+
 ## 原始审计（历史）
 
 ## 决策

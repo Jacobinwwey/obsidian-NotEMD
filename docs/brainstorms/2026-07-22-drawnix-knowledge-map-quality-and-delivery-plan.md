@@ -47,6 +47,16 @@ The regression surface is layered. The lane unit tests verify dynamic relation a
 
 The operational baseline now includes `npm run benchmark:drawnix-knowledge-map`: a fixed 8-root, 136-node, 32-relation forest exported through the same artifact CLI. It records structural counts, artifact sizes, and cold end-to-end time without imposing a machine-dependent duration quota. Release candidates must retain real upstream import evidence against the pinned Drawnix baseline. A performance regression must be fixed with layout or routing work, not with a new semantic quota.
 
+## Review Addendum (2026-08-14)
+
+The independent `drawnixMindmap` intent, dedicated projection, no-semantic-quota policy, and Mermaid isolation remain valid. The new benchmark verifies that eight roots, 136 nodes, and 32 relations retain topology. It also exposes a presentation gap: emitting the complete forest as one SVG combines source-order root packing with lower cross-root lanes and produces an excessively wide canvas.
+
+The follow-up must not reopen the full Drawnix host or repair the image by limiting depth, nodes, or relations. It needs a separate presentation planner: the board projection retains complete `.drawnix` semantics while static delivery emits overview and detail slices with a fidelity ledger for each summary or cluster. A document root must move from mandatory source coverage to an optional presentation policy so the existing multi-root projection can be used.
+
+One documentation claim also needs tightening. The Notemd SVG uses a local placed projection, while exported native MindElements give points only to roots and let upstream `withMind` place children. "Same native/SVG geometry" is therefore a consumer contract to verify, not a conclusion from the serialization shape. The official Drawnix file-open route calls `fitViewport`, so a fixed `viewport.zoom = 1` is not the main cause of the broad canvas.
+
+See [Drawnix Presentation Architecture Review](./2026-08-14-drawnix-presentation-architecture-review.md) for the full comparison, phases, and `diagram-design` assessment.
+
 ## Original Audit (Historical)
 
 | Surface | Current code | Consequence | Required correction |
