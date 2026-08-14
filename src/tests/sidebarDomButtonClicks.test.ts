@@ -68,6 +68,7 @@ class FakeElement {
     dataset: Record<string, string> = {};
     attributes: Record<string, string> = {};
     style: Record<string, string> = {};
+    listeners: Record<string, Array<() => void>> = {};
     value = '';
     type = '';
     checked = false;
@@ -133,6 +134,14 @@ class FakeElement {
 
     setAttribute(name: string, value: string) {
         this.setAttr(name, value);
+    }
+
+    addEventListener(name: string, listener: () => void) {
+        this.listeners[name] = [...(this.listeners[name] ?? []), listener];
+    }
+
+    dispatch(name: string) {
+        this.listeners[name]?.forEach(listener => listener());
     }
 
     setAttrs(_attrs: Record<string, string>) {
@@ -346,6 +355,25 @@ describe('NotemdSidebarView DOM button wiring', () => {
         expect(button).not.toBeNull();
         await button!.onclick?.();
     }
+
+    test('switches Drawnix delivery from the sidebar selector', async () => {
+        (plugin.settings as any).preferredDiagramIntent = 'drawnixMindmap';
+        (plugin.settings as any).preferredDiagramRenderTarget = 'drawnix';
+
+        await sidebar.onOpen();
+
+        const selector = contentContainer.findByClass('notemd-drawnix-delivery-control');
+        expect(selector).not.toBeNull();
+        const presentationButton = selector?.children.find(button => (
+            button.attributes['data-drawnix-knowledge-map-delivery'] === 'presentation'
+        ));
+
+        presentationButton?.dispatch('click');
+        await Promise.resolve();
+
+        expect((plugin.settings as any).drawnixKnowledgeMapDelivery).toBe('presentation');
+        expect(plugin.saveSettings).toHaveBeenCalledTimes(1);
+    });
 
     test('renders action buttons and clicking each triggers mapped command', async () => {
         await sidebar.onOpen();

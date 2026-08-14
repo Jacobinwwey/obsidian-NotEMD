@@ -143,7 +143,8 @@ describe('maintainer CLI bridge', () => {
                 requestedIntent: 'erDiagram',
                 requestedRenderTarget: 'circuitikz',
                 compatibilityMode: 'legacy-mermaid',
-                targetLanguage: 'en'
+                targetLanguage: 'en',
+                drawnixKnowledgeMapDelivery: 'presentation'
             }
         });
         expect(host.generateDiagramForPathCommand).toHaveBeenCalledWith(
@@ -155,7 +156,8 @@ describe('maintainer CLI bridge', () => {
                     requestedIntent: 'erDiagram',
                     requestedRenderTarget: 'circuitikz',
                     compatibilityMode: 'legacy-mermaid',
-                    targetLanguage: 'en'
+                    targetLanguage: 'en',
+                    drawnixKnowledgeMapDelivery: 'presentation'
                 }
             }
         );
@@ -208,6 +210,16 @@ describe('maintainer CLI bridge', () => {
 
             expect(host[methodName]).toHaveBeenCalledTimes(1);
         }
+    });
+
+    test('documents Drawnix presentation delivery as an executable diagram CLI override', async () => {
+        const help = OPERATION_HELP as MaintainerOperationHelp;
+        const diagramHelp = help['diagram.generate'];
+
+        expect(diagramHelp.optional).toContain('drawnixKnowledgeMapDelivery');
+        expect(diagramHelp.additionalExamples?.some(example => (
+            example.includes('"drawnixKnowledgeMapDelivery":"presentation"')
+        ))).toBe(true);
     });
 
     test('local knowledge inspect additional examples stay executable and preserve task-scoped payloads', async () => {
@@ -331,6 +343,18 @@ describe('maintainer CLI bridge', () => {
                 splitHeadingLevel: 'h9'
             }
         })).rejects.toThrow('expects "splitHeadingLevel" to be one of');
+    });
+
+    test('rejects unknown Drawnix delivery overrides', async () => {
+        const host = createMaintainerCliHost();
+
+        await expect(invokeMaintainerCliOperation(host as any, {
+            operationId: 'diagram.generate',
+            input: {
+                sourcePath: 'docs/index.zh-CN.md',
+                drawnixKnowledgeMapDelivery: 'single-canvas'
+            }
+        })).rejects.toThrow('expects "drawnixKnowledgeMapDelivery" to be one of');
     });
 
     test('rejects invalid local knowledge inspect task scope', async () => {

@@ -370,6 +370,76 @@ describe('diagram artifact export CLI', () => {
         }
     }, 30000);
 
+    test('exports a replay-linked Drawnix presentation bundle while retaining the full-board SVG companion', () => {
+        const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'notemd-drawnix-presentation-cli-'));
+        const specPath = path.join(tempRoot, 'drawnix-presentation.json');
+        const drawnixPath = path.join(tempRoot, 'knowledge-map.drawnix');
+        const legacySvgPath = `${drawnixPath}.svg`;
+        const presentationPath = path.join(tempRoot, 'knowledge-map.presentation');
+        const manifestPath = path.join(presentationPath, 'manifest.json');
+        fs.writeFileSync(specPath, JSON.stringify(createDrawnixMindMapSpec(), null, 2), 'utf8');
+
+        try {
+            const stdout = execFileSync(process.execPath, [
+                scriptPath,
+                '--input', specPath,
+                '--target', 'drawnix',
+                '--output', drawnixPath,
+                '--drawnix-delivery', 'presentation'
+            ], {
+                cwd: repoRoot,
+                encoding: 'utf8'
+            });
+
+            const result = JSON.parse(stdout);
+            const drawnix = JSON.parse(fs.readFileSync(drawnixPath, 'utf8'));
+            const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
+
+            expect(result).toEqual(expect.objectContaining({
+                target: 'drawnix',
+                outputPath: drawnixPath,
+                drawnixDelivery: 'presentation',
+                presentationOutputPath: presentationPath,
+                previewSvgOutputPath: legacySvgPath
+            }));
+            expect(fs.readFileSync(legacySvgPath, 'utf8')).toContain('notemd-drawnix-mindmap-svg@1.0.0');
+            expect(fs.readFileSync(path.join(presentationPath, 'overview.svg'), 'utf8'))
+                .toContain('notemd-drawnix-knowledge-map-presentation-svg@1.0.0');
+            expect(manifest).toEqual(expect.objectContaining({
+                version: 1,
+                catalogTypeId: 'drawnix-knowledge-map',
+                sourceArtifactPath: drawnixPath,
+                overview: { sliceId: 'overview', path: 'overview.svg' }
+            }));
+            expect(drawnix.metadata.notemd.knowledgeMap.deliveryManifestPaths).toEqual([manifestPath]);
+        } finally {
+            fs.rmSync(tempRoot, { recursive: true, force: true });
+        }
+    }, 30000);
+
+    test('does not leave a presentation directory behind when the Drawnix board path cannot be written', async () => {
+        const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'notemd-drawnix-presentation-cli-rollback-'));
+        const specPath = path.join(tempRoot, 'drawnix-presentation.json');
+        const drawnixPath = path.join(tempRoot, 'knowledge-map.drawnix');
+        const presentationPath = path.join(tempRoot, 'knowledge-map.presentation');
+        const cli = require(scriptPath);
+        fs.writeFileSync(specPath, JSON.stringify(createDrawnixMindMapSpec(), null, 2), 'utf8');
+        fs.mkdirSync(drawnixPath);
+
+        try {
+            await expect(cli.run({
+                input: specPath,
+                target: 'drawnix',
+                output: drawnixPath,
+                drawnixDelivery: 'presentation'
+            })).rejects.toThrow();
+
+            expect(fs.existsSync(presentationPath)).toBe(false);
+        } finally {
+            fs.rmSync(tempRoot, { recursive: true, force: true });
+        }
+    }, 30000);
+
     test('counts every root and only cross-relation arrows in a Drawnix forest summary', () => {
         const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'notemd-drawnix-forest-cli-'));
         const specPath = path.join(tempRoot, 'drawnix-forest.json');

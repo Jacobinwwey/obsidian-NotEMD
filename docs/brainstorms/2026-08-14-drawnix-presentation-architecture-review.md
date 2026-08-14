@@ -1,7 +1,7 @@
 ---
 date: 2026-08-14
 topic: drawnix-presentation-architecture-review
-status: proposed
+status: implemented
 related:
   - 2026-07-22-drawnix-knowledge-map-quality-and-delivery-plan.md
   - 2026-08-08-diagram-platform-robustness-and-settings-integrity-plan.md
@@ -16,6 +16,19 @@ related:
 The present issue is not semantic capacity. The fixed benchmark exports eight roots, 136 nodes, and 32 relations with zero validation errors. The failure appears when that complete knowledge graph is presented as one static SVG: roots are packed in source order, cross-root relations move into lower lanes, the canvas becomes very wide, and the visual reading order degrades.
 
 Do not trade node, depth, or relation caps for a cleaner screenshot. The editable `.drawnix` board must retain full semantics. Static delivery should derive an overview and focused slices from the same semantic graph. These are separate product boundaries, not a `layoutMode` parameter.
+
+## Implemented Delivery Selection
+
+The implementation includes a user-facing one-click selection between **Full board** and **Presentation**. The selection dispatches separate host operations rather than changing behavior inside a shared projection function.
+
+- Full board preserves the current `.drawnix` and full-spread SVG contract. It is the default for legacy settings and artifacts.
+- Presentation writes the same compatible board plus overview/detail static slices and a fidelity ledger.
+- New artifacts persist a validated semantic replay record. The alternate delivery can then be rebuilt without another LLM call.
+- Older artifacts without that record stay readable as full boards. Presentation requires regeneration; no lossy reconstruction is attempted.
+
+The setting stores `drawnixKnowledgeMapDelivery`; an absent or invalid persisted value resolves to Full board. The preview control replays only a validated `metadata.notemd.knowledgeMap.semanticSpec`, so toggling replaces the in-memory preview session without an LLM request, settings mutation, or artifact write. Presentation saves the compatible board plus a manifest-linked overview/detail SVG bundle. The Plait consumer proof runs through pinned public ESM packages in a test-only harness.
+
+The complete catalog, compatibility, persistence, and example-gallery design is in [Diagram Type Catalog And Drawnix Delivery Design](../plans/2026-08-14-diagram-type-catalog-and-drawnix-delivery-design.en.md).
 
 ## Evidence
 

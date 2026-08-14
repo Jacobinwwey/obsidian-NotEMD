@@ -1,7 +1,7 @@
 ---
 date: 2026-08-14
 topic: drawnix-presentation-architecture-review
-status: proposed
+status: implemented
 related:
   - 2026-07-22-drawnix-knowledge-map-quality-and-delivery-plan.zh-CN.md
   - 2026-08-08-diagram-platform-robustness-and-settings-integrity-plan.zh-CN.md
@@ -16,6 +16,19 @@ related:
 现有问题也不在语义容量。固定基准已经导出 8 个 root、136 个节点和 32 条关系，验证错误为 0。问题发生在把完整知识图谱直接作为单张静态 SVG 演示时：root 按源顺序分行，跨 root 关系被拉进底部通道，画布变得极宽，文字与关系的阅读顺序被削弱。
 
 下一步不能用节点数、深度或关系数上限来换取干净截图。完整 `.drawnix` 画布必须保留语义；静态交付应从同一语义图导出概览和聚焦切片。这是两个产品边界，不是一个 `layoutMode` 参数。
+
+## 已实现的交付选择
+
+当前实现包含面向用户的一键选择：**全量画布** 与 **演示交付**。选择器分派独立的 host operation，不会改变共享投影函数的行为。
+
+- 全量画布保留当前 `.drawnix` 与全铺展 SVG 契约，是 legacy setting 和 legacy artifact 的默认路径。
+- 演示交付写出同一份兼容画布、overview/detail 静态切片和 fidelity ledger。
+- 新 artifact 持久化经过验证的语义 replay record，用户可在不再次调用 LLM 的前提下重建另一种交付。
+- 缺少该记录的旧 artifact 继续可读为全量画布；请求演示交付时必须重新生成，不执行有损重建。
+
+设置项持久化 `drawnixKnowledgeMapDelivery`；缺失或非法的值均解析为全量画布。预览控件只重放经过验证的 `metadata.notemd.knowledgeMap.semanticSpec`，因此切换只替换内存中的预览会话，不调用 LLM、不修改设置，也不写入 artifact。保存演示交付时会写出兼容 board 和由 manifest 关联的 overview/detail SVG bundle。Plait consumer 证据通过锁定版本的公开 ESM 包在 test-only harness 中运行。
+
+目录、兼容性、持久化与示例图库的完整设计见[图表类型目录与 Drawnix 交付设计](../plans/2026-08-14-diagram-type-catalog-and-drawnix-delivery-design.zh-CN.md)。
 
 ## 证据
 

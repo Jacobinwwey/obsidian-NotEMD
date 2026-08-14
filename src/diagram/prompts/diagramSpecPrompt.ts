@@ -1,5 +1,6 @@
 import { SUPPORTED_VEGA_LITE_CHART_TYPES, SupportedVegaLiteChartType } from '../adapters/vega/schema';
 import { DiagramIntent, RenderTarget } from '../types';
+import { buildDrawnixKnowledgeMapPromptRules } from './drawnixKnowledgeMapPrompt';
 
 export interface DiagramSpecPromptOptions {
     preferredIntent?: DiagramIntent;
@@ -8,14 +9,6 @@ export interface DiagramSpecPromptOptions {
     preferredRenderTarget?: RenderTarget;
     sourcePath?: string;
     targetLanguage?: string;
-}
-
-function sourceDocumentLabel(sourcePath: string | undefined): string | undefined {
-    const basename = sourcePath?.split(/[\\/]/).pop()?.trim();
-    if (!basename) {
-        return undefined;
-    }
-    return basename.replace(/\.[^.]+$/, '') || basename;
 }
 
 export function buildDiagramSpecPrompt(options: DiagramSpecPromptOptions = {}): string {
@@ -136,22 +129,10 @@ For a common-source NMOS request, use this exact topology contract inside circui
 The deterministic renderer, not the model, emits the complete LaTeX document with the circuitikz package, document environment, voltage convention, explicit VDD/RD/M1/vin/vout/GND anchors, and terminated draw paths.`
         : '';
     const drawnixMindMapTargetLine = isDrawnixMindMapRequest
-        ? `Target: editable Drawnix knowledge map.
-
-Drawnix knowledge-map rules:
-- Set intent: drawnixMindmap.
-- Return exactly one top-level document root. Use the source document filename as the root label${sourceDocumentLabel(options.sourcePath) ? ` (recommended: "${sourceDocumentLabel(options.sourcePath)}")` : ''}.
-- Organize H2/module/section concepts as first-level children of that document root, H3 concepts beneath their section, and concise details beneath those branches.
-- Never emit standalone top-level leaves or multiple independent roots. If a concept does not fit a section, place it under a first-level "Additional concepts" branch.
-- Use node.children for ownership and taxonomy. Do not duplicate parent-child relationships in edges.
-- Keep the hierarchy as deep as the source requires. Keep detail in leaves and do not flatten a meaningful taxonomy to meet an arbitrary depth budget.
-- Use edges only for cross-branch runtime relationships. Prefer a small, high-signal set, but preserve every material relationship needed to explain the source. The renderer allocates adaptive relation lanes, so do not omit a material edge solely to meet a numeric quota.
-- Create concise labels. Put implementation detail in leaf nodes, not the root.
-- For architecture notes, group the tree by subsystem first and place request/data flow in cross-branch relationships.
-- Cover the source note rather than returning a tiny abstract summary: represent each major source section as a root or first-level branch when it contains distinct content.
-- Preserve named components, participants, modules, and target formats from Mermaid blocks as leaf nodes or branch labels. Do not discard source sections merely because exact Mermaid syntax is preserved in companions.
-- When a source section contains multiple listed or diagrammed items, include the items as separate children. The deterministic renderer adds a source-coverage safety net, but the model should still return a complete semantic tree.
-- Return DiagramSpec fields only. The renderer owns board serialization and layout.`
+        ? buildDrawnixKnowledgeMapPromptRules({
+            sourcePath: options.sourcePath,
+            targetLanguage: options.targetLanguage
+        })
         : '';
     const supportedIntentsSection = isCircuitikzRequest
         ? 'Supported intent: circuit'

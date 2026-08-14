@@ -109,8 +109,39 @@ describe('diagram spec prompt builder', () => {
         expect(prompt).toMatch(/Supported intent:\s*drawnixMindmap/i);
         expect(prompt).toMatch(/Target: editable Drawnix knowledge map/i);
         expect(prompt).toMatch(/Use node\.children for ownership and taxonomy/i);
-        expect(prompt).toMatch(/adaptive relation lanes/i);
+        expect(prompt).toMatch(/material cross-branch relationships/i);
         expect(prompt).not.toMatch(/at most 4/i);
         expect(prompt).not.toMatch(/Drawnix JSON/i);
+    });
+
+    test('allows Drawnix source coverage to preserve independent roots without leaking its rules into Mermaid mind maps', () => {
+        const drawnixPrompt = buildDiagramSpecPrompt({
+            requiredIntent: 'drawnixMindmap',
+            preferredRenderTarget: 'drawnix'
+        });
+        const mermaidMindmapPrompt = buildDiagramSpecPrompt({
+            requiredIntent: 'mindmap',
+            preferredRenderTarget: 'mermaid'
+        });
+
+        expect(drawnixPrompt).toMatch(/multiple independent roots/i);
+        expect(drawnixPrompt).not.toMatch(/exactly one top-level document root/i);
+        expect(mermaidMindmapPrompt).not.toMatch(/Drawnix knowledge-map rules/i);
+    });
+
+    test('uses a concrete semantic example without leaking Drawnix serialization or presentation policy', () => {
+        const prompt = buildDiagramSpecPrompt({
+            requiredIntent: 'drawnixMindmap',
+            preferredRenderTarget: 'drawnix'
+        });
+
+        expect(prompt).toMatch(/Semantic example/i);
+        expect(prompt).toContain('Identity and access');
+        expect(prompt).toContain('Authentication');
+        expect(prompt).toContain('Observability');
+        expect(prompt).toContain('monitors');
+        const semanticExample = prompt.match(/Semantic example:[^\n]*/i)?.[0] ?? '';
+        expect(semanticExample).not.toMatch(/x:\s*\d+/i);
+        expect(semanticExample).not.toMatch(/fillColor|strokeColor|viewport/i);
     });
 });

@@ -74,7 +74,7 @@ import {
 } from './localKnowledgeBase';
 import { ProgressModal } from './ui/ProgressModal';
 import { ErrorModal } from './ui/ErrorModal';
-import { DiagramPreviewModal } from './ui/DiagramPreviewModal';
+import { DiagramPreviewModal, type DrawnixAlternateDelivery } from './ui/DiagramPreviewModal';
 import { WelcomeModal } from './ui/WelcomeModal';
 import { NotemdSettingTab } from './ui/NotemdSettingTab';
 import { showConceptNotePathWarningModal, showDeletionConfirmationModal } from './ui/modals'; // Import the modal function
@@ -84,7 +84,16 @@ import { getSystemPrompt } from './promptUtils';
 import { formatI18n, getI18nStrings } from './i18n';
 import { resolveTaskLanguageCode } from './i18n/taskLanguagePolicy';
 import { getSidebarActionLabel, SidebarActionId } from './workflowButtons';
-import { DiagramOperationInput } from './diagram/diagramGenerationService';
+import {
+    createDefaultDiagramRendererService,
+    type DiagramOperationInput
+} from './diagram/diagramGenerationService';
+import {
+    getExecutableDiagramExamples,
+    renderExecutableDiagramExample
+} from './diagram/examples/diagramExampleCatalog';
+import type { DiagramCatalogTypeId, DrawnixKnowledgeMapDelivery } from './diagram/types';
+import { readDrawnixKnowledgeMapReplayRecord } from './diagram/adapters/drawnix/drawnixExporter';
 import { RenderArtifact } from './rendering/types';
 import { IframeRenderHost } from './rendering/host/iframeRenderHost';
 import { getRenderTargetDisplayName } from './rendering/targetLabel';
@@ -292,6 +301,83 @@ export default class NotemdPlugin extends Plugin {
         }).open();
     }
 
+    /** Opens an ephemeral catalog preview; examples never enter the artifact save flow. */
+    public async openDiagramExamplePreview(typeId: DiagramCatalogTypeId): Promise<void> {
+        const example = getExecutableDiagramExamples().find(candidate => candidate.typeId === typeId);
+        if (!example) {
+            throw new Error(`No executable diagram example is registered for type "${typeId}".`);
+        }
+
+        const artifact = await renderExecutableDiagramExample(
+            example,
+            createDefaultDiagramRendererService()
+        );
+        const session = new IframeRenderHost().createSession(artifact, {
+            previewTitle: example.title
+        });
+        new DiagramPreviewModal(this.app, session, this.settings.uiLocale, {
+            exportPpi: this.settings.diagramPreviewExportPpi,
+            drawnixAlternateDelivery: this.createDrawnixAlternateDelivery(artifact)
+        }).open();
+    }
+
+    private createDrawnixAlternateDelivery(
+        artifact: RenderArtifact,
+        previewContext: { sourcePath?: string; artifactSaved?: boolean } = {}
+    ): DrawnixAlternateDelivery | undefined {
+        if (artifact.target !== 'drawnix') {
+            return undefined;
+        }
+
+        let replay = null;
+        try {
+            replay = readDrawnixKnowledgeMapReplayRecord(JSON.parse(artifact.content));
+        } catch {
+            if (artifact.sourceIntent !== 'drawnixMindmap') {
+                return undefined;
+            }
+        }
+        if (!replay && artifact.sourceIntent !== 'drawnixMindmap') {
+            return undefined;
+        }
+
+        const experimentalDiagramI18n = this.getUiStrings().settings.developer.experimentalDiagramPipeline;
+        const alternateDelivery: DrawnixKnowledgeMapDelivery = artifact.drawnixKnowledgeMapPresentation
+            ? 'full-board'
+            : 'presentation';
+        const label = alternateDelivery === 'presentation'
+            ? experimentalDiagramI18n.drawnixKnowledgeMapDeliveryPresentation
+            : experimentalDiagramI18n.drawnixKnowledgeMapDeliveryFullBoard;
+
+        if (!replay) {
+            return {
+                label,
+                unavailableReason: this.getUiStrings().previewModal.drawnixDeliveryReplayRequired
+            };
+        }
+
+        return {
+            label,
+            loadSession: async () => {
+                const alternateArtifact = await createDefaultDiagramRendererService().render(
+                    replay.semanticSpec,
+                    {
+                        target: 'drawnix',
+                        drawnixKnowledgeMapDelivery: alternateDelivery
+                    }
+                );
+                const targetLabel = getRenderTargetDisplayName(alternateArtifact.target);
+                return new IframeRenderHost().createSession(alternateArtifact, {
+                    sourcePath: previewContext.sourcePath,
+                    artifactSaved: previewContext.artifactSaved,
+                    previewTitle: formatI18n(this.getUiStrings().previewModal.title, {
+                        target: `${targetLabel} ${label}`
+                    })
+                });
+            }
+        };
+    }
+
     private openDiagramPreviewModal(artifact: RenderArtifact, sourcePath: string, artifactSaved = false, existingHistoryEntryId?: string) {
         const i18n = this.getUiStrings();
         const targetLabel = getRenderTargetDisplayName(artifact.target);
@@ -312,7 +398,8 @@ export default class NotemdPlugin extends Plugin {
         new DiagramPreviewModal(this.app, session, this.settings.uiLocale, {
             exportPpi: this.settings.diagramPreviewExportPpi,
             historyEntryId,
-            historyStore
+            historyStore,
+            drawnixAlternateDelivery: this.createDrawnixAlternateDelivery(artifact, { sourcePath, artifactSaved })
         }).open();
     }
 

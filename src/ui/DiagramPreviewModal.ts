@@ -42,12 +42,26 @@ import {
 } from '../rendering/webview/bundledPreviewDeps';
 import { selectDiagramPreviewExportFolder } from './DiagramPreviewExportFolderModal';
 
+export interface DrawnixAlternateDelivery {
+    label: string;
+    unavailableReason?: string;
+    loadSession?: () => Promise<RenderPreviewSession>;
+}
+
+export interface DiagramPreviewModalOptions {
+    exportPpi?: number;
+    historyEntryId?: string;
+    historyStore?: DiagramHistoryStore;
+    drawnixAlternateDelivery?: DrawnixAlternateDelivery;
+}
+
 export class DiagramPreviewModal extends Modal {
     private session: RenderPreviewSession;
     private currentHistoryEntryId: string | null = null;
     private readonly exportPpi: number;
     private readonly historyStore?: DiagramHistoryStore;
     private readonly historyEntryId?: string;
+    private readonly drawnixAlternateDelivery?: DrawnixAlternateDelivery;
     private historyDrawer: DiagramHistoryDrawer | null = null;
     private readonly iframeResizeObservers = new Map<HTMLIFrameElement, ResizeObserver>();
 
@@ -55,25 +69,20 @@ export class DiagramPreviewModal extends Modal {
         app: App,
         session: RenderPreviewSession,
         private readonly uiLocale = 'auto',
-        options: { exportPpi?: number; historyEntryId?: string; historyStore?: DiagramHistoryStore } = {}
+        options: DiagramPreviewModalOptions = {}
     ) {
         super(app);
         this.session = session;
         this.exportPpi = resolvePreviewExportPpi(options.exportPpi);
         this.historyStore = options.historyStore;
         this.historyEntryId = options.historyEntryId;
+        this.drawnixAlternateDelivery = options.drawnixAlternateDelivery;
     }
 
     onOpen() {
         this.modalEl.addClass('notemd-diagram-preview-shell');
         this.currentHistoryEntryId = rememberDiagramPreviewSession(this.session).id;
-        if (this.historyStore) {
-            this.historyDrawer = new DiagramHistoryDrawer(this.contentEl, {
-                app: this.app,
-                store: this.historyStore,
-                uiLocale: this.uiLocale
-            });
-        }
+        this.resetHistoryDrawer();
         this.renderModal();
     }
 
@@ -117,6 +126,7 @@ export class DiagramPreviewModal extends Modal {
             });
             exportMenuButton.onclick = (event: MouseEvent) => this.showExportMenu(event);
         }
+        this.renderDrawnixAlternateDeliveryAction(actions, i18n);
         const copyButton = actions.createEl('button', {
             text: i18n.previewModal.copySource
         });
@@ -180,6 +190,65 @@ export class DiagramPreviewModal extends Modal {
 
         const previewContainer = stage.createDiv({ cls: 'notemd-diagram-preview-body' });
         void this.renderPreview(previewContainer);
+    }
+
+    private resetHistoryDrawer(): void {
+        this.historyDrawer?.destroy();
+        this.historyDrawer = this.historyStore
+            ? new DiagramHistoryDrawer(this.contentEl, {
+                app: this.app,
+                store: this.historyStore,
+                uiLocale: this.uiLocale
+            })
+            : null;
+    }
+
+    private renderDrawnixAlternateDeliveryAction(
+        actions: HTMLElement,
+        i18n: ReturnType<typeof getI18nStrings>
+    ): void {
+        const alternateDelivery = this.drawnixAlternateDelivery;
+        if (!alternateDelivery) {
+            return;
+        }
+
+        const alternateDeliveryButton = actions.createEl('button', {
+            text: alternateDelivery.label,
+            attr: alternateDelivery.unavailableReason
+                ? { title: alternateDelivery.unavailableReason }
+                : undefined
+        });
+        alternateDeliveryButton.disabled = !alternateDelivery.loadSession;
+
+        if (alternateDelivery.unavailableReason) {
+            actions.createEl('span', {
+                text: alternateDelivery.unavailableReason,
+                cls: 'notemd-diagram-preview-delivery-unavailable'
+            });
+        }
+        if (!alternateDelivery.loadSession) {
+            return;
+        }
+
+        alternateDeliveryButton.onclick = async () => {
+            alternateDeliveryButton.disabled = true;
+            try {
+                const nextSession = await alternateDelivery.loadSession?.();
+                if (!nextSession) {
+                    return;
+                }
+
+                this.session = nextSession;
+                this.currentHistoryEntryId = rememberDiagramPreviewSession(nextSession).id;
+                this.resetHistoryDrawer();
+                this.renderModal();
+            } catch (error) {
+                const message = error instanceof Error ? error.message : String(error);
+                new Notice(formatI18n(i18n.previewModal.drawnixDeliverySwitchFailedNotice, { message }));
+                console.error('Failed to switch Drawnix knowledge-map delivery:', error);
+                alternateDeliveryButton.disabled = false;
+            }
+        };
     }
 
     private disconnectIframeResizeObservers(): void {

@@ -123,7 +123,11 @@ const DIAGRAM_GENERATE_INPUT_SCHEMA: OperationSchema = {
             type: 'string',
             enum: ['artifact', 'mermaid']
         },
-        targetLanguage: { type: 'string' }
+        targetLanguage: { type: 'string' },
+        drawnixKnowledgeMapDelivery: {
+            type: 'string',
+            enum: ['full-board', 'presentation']
+        }
     }
 };
 

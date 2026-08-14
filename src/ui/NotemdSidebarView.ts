@@ -7,8 +7,14 @@ import { FFMPEG_INSTALL_HINTS, type EnvironmentReport, type ProbeResult } from '
 import type { DiagramIntent, RenderTarget } from '../diagram/types';
 import {
     applyDiagramIntentPreference,
-    applyDiagramRenderTargetPreference
+    applyDiagramRenderTargetPreference,
+    resolveDrawnixKnowledgeMapDelivery
 } from '../diagram/diagramPreferenceCompatibility';
+import {
+    renderDrawnixKnowledgeMapDeliverySelector,
+    shouldShowDrawnixKnowledgeMapDeliverySelector
+} from './diagramDeliverySelector';
+import { getExecutableDiagramIntentOptions } from './diagramCatalogLabels';
 import { NOTEMD_SLIDEV_FORK_RELEASE_URL, NOTEMD_SLIDEV_INSTALL_COMMAND } from '../slideExport/slidevDistribution';
 import {
     ActionCategory,
@@ -1707,16 +1713,21 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
         row.createEl('label', { text: i18n.settings.developer.experimentalDiagramPipeline.intentName, cls: 'notemd-inline-label' });
         const selector = row.createEl('select', { cls: 'notemd-language-select' });
 
+        const diagramI18n = i18n.settings.developer.experimentalDiagramPipeline;
         const intents = [
-            { value: 'auto', label: i18n.settings.developer.experimentalDiagramPipeline.intentAuto },
-            { value: 'flowchart', label: i18n.settings.developer.experimentalDiagramPipeline.intentFlowchart },
-            { value: 'sequence', label: i18n.settings.developer.experimentalDiagramPipeline.intentSequence },
-            { value: 'classDiagram', label: i18n.settings.developer.experimentalDiagramPipeline.intentClassDiagram },
-            { value: 'erDiagram', label: i18n.settings.developer.experimentalDiagramPipeline.intentErDiagram },
-            { value: 'stateDiagram', label: i18n.settings.developer.experimentalDiagramPipeline.intentStateDiagram },
-            { value: 'drawnixMindmap', label: i18n.settings.developer.experimentalDiagramPipeline.renderTargetDrawnix },
-            { value: 'circuit', label: i18n.settings.developer.experimentalDiagramPipeline.intentCircuit },
-            { value: 'dataChart', label: i18n.settings.developer.experimentalDiagramPipeline.intentDataChart },
+            { value: 'auto', label: diagramI18n.intentAuto },
+            ...getExecutableDiagramIntentOptions({
+                intentMindmap: diagramI18n.intentMindmap,
+                intentDrawnixKnowledgeMap: diagramI18n.intentDrawnixKnowledgeMap,
+                intentFlowchart: diagramI18n.intentFlowchart,
+                intentSequence: diagramI18n.intentSequence,
+                intentClassDiagram: diagramI18n.intentClassDiagram,
+                intentErDiagram: diagramI18n.intentErDiagram,
+                intentStateDiagram: diagramI18n.intentStateDiagram,
+                intentCanvasMap: diagramI18n.intentCanvasMap,
+                intentCircuit: diagramI18n.intentCircuit,
+                intentDataChart: diagramI18n.intentDataChart
+            })
         ];
 
         intents.forEach(item => {
@@ -1763,6 +1774,29 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
             selector.value = this.plugin.settings.preferredDiagramIntent || 'auto';
             await this.plugin.saveSettings();
         };
+
+        if (shouldShowDrawnixKnowledgeMapDeliverySelector(
+            this.plugin.settings.preferredDiagramIntent,
+            this.plugin.settings.preferredDiagramRenderTarget
+        )) {
+            const deliveryRow = parent.createDiv({ cls: 'notemd-inline-control notemd-drawnix-delivery-row' });
+            deliveryRow.createEl('label', {
+                text: i18n.settings.developer.experimentalDiagramPipeline.drawnixKnowledgeMapDeliveryName,
+                cls: 'notemd-inline-label'
+            });
+            renderDrawnixKnowledgeMapDeliverySelector({
+                parent: deliveryRow,
+                selectedDelivery: resolveDrawnixKnowledgeMapDelivery(this.plugin.settings),
+                copy: {
+                    fullBoard: i18n.settings.developer.experimentalDiagramPipeline.drawnixKnowledgeMapDeliveryFullBoard,
+                    presentation: i18n.settings.developer.experimentalDiagramPipeline.drawnixKnowledgeMapDeliveryPresentation
+                },
+                onSelect: async delivery => {
+                    this.plugin.settings.drawnixKnowledgeMapDelivery = delivery;
+                    await this.plugin.saveSettings();
+                }
+            });
+        }
 
         parent.createEl('p', {
             text: i18n.settings.developer.experimentalDiagramPipeline.exportFormatsDesc,

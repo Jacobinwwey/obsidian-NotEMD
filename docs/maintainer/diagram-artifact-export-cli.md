@@ -17,6 +17,7 @@ Recommended direct entrypoint:
 node scripts/export-diagram-artifact.js --input spec.json --target editable-html-svg --output figure.html
 node scripts/export-diagram-artifact.js --input spec.json --target drawio --output figure.drawio --preview-svg-output figure.drawio.svg --preview-png-output figure.drawio.png --preview-pdf-output figure.drawio.pdf --ppi 300
 node scripts/export-diagram-artifact.js --input spec.json --target drawnix --output figure.drawnix --preview-svg-output figure.drawnix.svg --preview-png-output figure.drawnix.png --preview-pdf-output figure.drawnix.pdf --ppi 300
+node scripts/export-diagram-artifact.js --input knowledge-map.json --target drawnix --output architecture.drawnix --drawnix-delivery presentation
 node scripts/export-diagram-artifact.js --input circuit-spec.json --target circuitikz --output circuit.tex --preview-svg-output circuit.svg --preview-png-output circuit.png --preview-pdf-output circuit.pdf --ppi 300
 node scripts/export-diagram-artifact.js --input spec.json --target svg --output figure.svg
 node scripts/export-diagram-artifact.js --input spec.json --target png --output figure.png --ppi 300
@@ -35,6 +36,21 @@ On npm 11, especially on Windows, npm may rewrite long options after `npm run ..
 
 PNG output also writes or replaces the `pHYs` physical pixel density chunk, so the selected PPI is visible to image viewers and layout tools instead of only being reflected in pixel dimensions.
 
+## Drawnix Delivery
+
+`--drawnix-delivery` applies only to `--target drawnix`. It accepts `full-board` (the default) and `presentation`. The command still writes the same compatible `.drawnix` board in both cases. Presentation additionally writes a sibling bundle named after the output path without its `.drawnix` suffix:
+
+```text
+architecture.drawnix
+architecture.drawnix.svg
+architecture.presentation/
+  manifest.json
+  overview.svg
+  detail-01-<root>.svg
+```
+
+`architecture.drawnix.svg` remains the full-board companion for compatibility. Use `architecture.presentation/overview.svg` and the detail panels for a slide or documentation delivery. The board metadata records the absolute manifest path only after the bundle is committed, so a failed board write cannot leave a referenced partial bundle behind.
+
 ## Output Summary
 
 Each successful invocation prints one JSON summary. For `drawnix`, `rootCount`, `nodeCount`, and `edgeCount` describe the native forest: `nodeCount` traverses every top-level `mindmap` root, while `edgeCount` counts only `arrow-line` cross-relations. This keeps a multi-root knowledge map from being reported as a single tree or from treating additional roots as relationships.
@@ -45,7 +61,7 @@ Each successful invocation prints one JSON summary. For `drawnix`, `rootCount`, 
 |---|---|---|---|
 | `editable-html-svg` | self-contained `.html` with inline SVG | `DiagramSpec -> SemanticFigureModel -> EditableHtmlSvgRenderer` | annotation gaps from `collectEditableSvgAnnotationGaps()` must be empty |
 | `drawio` | uncompressed diagrams.net `mxfile` XML, optionally with `--preview-svg-output`, `--preview-png-output`, and `--preview-pdf-output` companions | `DiagramSpec -> SemanticFigureModel -> exportSemanticFigureModelToDrawioXml()` plus `renderSemanticFigureSvg()` | visible label mismatches must be empty |
-| `drawnix` | native `.drawnix` knowledge-map forest, optionally with `--preview-svg-output`, `--preview-png-output`, and `--preview-pdf-output` companions | `DiagramSpec(intent: "drawnixMindmap") -> two-pass DrawnixMindMapProjection -> DrawnixRenderer` plus `notemd-drawnix-mindmap-svg@1.0.0` | native roots, hierarchy, relation lanes, and label geometry must validate |
+| `drawnix` | native `.drawnix` knowledge-map forest; `presentation` also writes overview/detail SVG panels and a manifest | `DiagramSpec(intent: "drawnixMindmap") -> DrawnixRenderer -> DrawnixMindMapProjection -> notemd-drawnix-mindmap-svg@1.0.0` for the compatible full board, plus `buildDrawnixKnowledgeMapPresentation()` for the optional presentation bundle | native roots, hierarchy, relation lanes, presentation fidelity ledger, and label geometry must validate |
 | `circuitikz` | constrained `.tex` circuitikz source, optionally with SVG/PNG/PDF preview companions | `DiagramSpec(intent: "circuit") -> CircuitSpec -> CircuitikzRenderer -> exportCircuitSpecToCircuitikz()` plus `renderCircuitSpecPreviewSvg()` | `CircuitSpec` validation must pass before TeX or companion output is written |
 | `svg` | Obsidian-viewable `.svg` generated from the same semantic model, or from a circuit preview companion when `intent` is `circuit` | `DiagramSpec -> SemanticFigureModel -> renderSemanticFigureSvg()` or `CircuitSpec -> renderCircuitSpecPreviewSvg()` | semantic node/edge annotations or validated circuit preview metadata must be present |
 | `png` | `.png` visual evidence rendered from the same standalone SVG or circuit preview SVG | `DiagramSpec -> SemanticFigureModel -> renderSemanticFigureSvg() -> Playwright screenshot`, or `CircuitSpec -> renderCircuitSpecPreviewSvg() -> Playwright screenshot` | output dimensions follow SVG CSS size at the selected PPI, with `pHYs` metadata aligned to the selected density |
@@ -86,10 +102,10 @@ The artifact CLI and the Obsidian CLI have different responsibilities. The artif
 The current architecture demo uses a local-only spec derived from `docs/architecture.zh-CN.md` and writes ignored files under `.cache/drawnix-architecture-demo/`:
 
 ```bash
-node scripts/export-diagram-artifact.js --input .cache/drawnix-architecture-demo/architecture.drawnix.spec.json --target drawnix --output .cache/drawnix-architecture-demo/notemd-architecture.drawnix --preview-svg-output .cache/drawnix-architecture-demo/notemd-architecture.svg --preview-png-output .cache/drawnix-architecture-demo/notemd-architecture.png --ppi 144
+node scripts/export-diagram-artifact.js --input .cache/drawnix-architecture-demo/architecture.drawnix.spec.json --target drawnix --output .cache/drawnix-architecture-demo/notemd-architecture.drawnix --drawnix-delivery presentation
 ```
 
-Inspect the PNG or SVG before using it as release evidence. Same-side relations should remain in their branch-side gutter; cross-forest relations may use lower lanes. The `.cache` inputs and outputs are not repository deliverables.
+Inspect `notemd-architecture.presentation/overview.svg` and its detail panels before using them as release evidence. `notemd-architecture.drawnix.svg` remains the full-board companion. Same-side relations should remain in their branch-side gutter; cross-forest relations may use lower lanes. The `.cache` inputs and outputs are not repository deliverables.
 
 ## Drawnix Scale Benchmark
 
@@ -112,6 +128,7 @@ The test writes a single `DiagramSpec` and verifies:
 - `drawio` XML preserves visible node and edge labels.
 - `drawnix` JSON contains one or more `mindmap` roots, nested `mind_child` elements, and validated `arrow-line` cross relations.
 - Drawnix projection layout is deterministic, packs large forests into bounded-width rows, accepts source-required hierarchy depth and material cross-branch relationships without a fixed numeric quota, allocates same-side gutter and cross-forest lower lanes after placement, and emits the dedicated SVG companion.
+- `--drawnix-delivery presentation` preserves that board, writes a manifest-linked overview/detail bundle, and keeps the full-board SVG companion for existing consumers.
 - `drawio`, `drawnix`, and `circuitikz` can produce SVG companion files for Obsidian preview validation.
 - `circuitikz` emits constrained TeX only after `DiagramSpec.circuitSpec` validates, and can export SVG/PNG/PDF preview companions from the same circuit payload.
 - `svg` emits the same annotated semantic figure sheet directly, or a validated circuit preview companion for `intent: "circuit"`.

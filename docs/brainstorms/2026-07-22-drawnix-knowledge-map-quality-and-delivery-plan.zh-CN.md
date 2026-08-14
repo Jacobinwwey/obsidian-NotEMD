@@ -53,6 +53,14 @@ router 仍把节点、页眉保护带、其他标签矩形和画布边界当作�
 
 完整分析、分阶段方案和 `diagram-design` 对照见[Drawnix 演示交付架构复核](./2026-08-14-drawnix-presentation-architecture-review.zh-CN.md)。
 
+## 已实现的交付增量（2026-08-14）
+
+当前实现以全量画布路径作为兼容基线，并新增独立的演示交付。用户可以一次选择 **全量画布** 或 **演示交付**。host 分派独立操作，现有 board projection 不会变成承担多种布局语义的函数。
+
+既有设置和既有 artifact 的默认值继续是全量画布。新的 Drawnix artifact 会携带经过验证的语义 replay record，因此可在不再次调用 LLM 的情况下生成另一种交付。旧 artifact 保持可读；没有演示集时界面要求重新生成。目录只暴露可执行图表类型；尚无 Notemd renderer 的 `diagram-design` 布局保持 reference-only。
+
+已批准的架构与实施顺序见[图表类型目录与 Drawnix 交付设计](../plans/2026-08-14-diagram-type-catalog-and-drawnix-delivery-design.zh-CN.md)。
+
 ## 原始审计（历史）
 
 ## 决策

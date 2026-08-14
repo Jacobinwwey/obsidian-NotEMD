@@ -12,8 +12,15 @@ import { DEFAULT_SETTINGS } from '../constants';
 import type { DiagramIntent, RenderTarget } from '../diagram/types';
 import {
     applyDiagramIntentPreference,
-    applyDiagramRenderTargetPreference
+    applyDiagramRenderTargetPreference,
+    resolveDrawnixKnowledgeMapDelivery
 } from '../diagram/diagramPreferenceCompatibility';
+import {
+    renderDrawnixKnowledgeMapDeliverySelector,
+    shouldShowDrawnixKnowledgeMapDeliverySelector
+} from './diagramDeliverySelector';
+import { getExecutableDiagramIntentOptions } from './diagramCatalogLabels';
+import { renderDiagramExampleGallery } from './diagramExampleGallery';
 import {
     DEFAULT_PREVIEW_EXPORT_PPI,
     MAX_PREVIEW_EXPORT_PPI,
@@ -2734,14 +2741,18 @@ export class NotemdSettingTab extends PluginSettingTab {
             .setDesc(experimentalDiagramI18n.intentDesc)
             .addDropdown(dropdown => {
                 dropdown.addOption('auto', experimentalDiagramI18n.intentAuto);
-                dropdown.addOption('flowchart', experimentalDiagramI18n.intentFlowchart);
-                dropdown.addOption('sequence', experimentalDiagramI18n.intentSequence);
-                dropdown.addOption('classDiagram', experimentalDiagramI18n.intentClassDiagram);
-                dropdown.addOption('erDiagram', experimentalDiagramI18n.intentErDiagram);
-                dropdown.addOption('stateDiagram', experimentalDiagramI18n.intentStateDiagram);
-                dropdown.addOption('drawnixMindmap', experimentalDiagramI18n.renderTargetDrawnix);
-                dropdown.addOption('circuit', experimentalDiagramI18n.intentCircuit);
-                dropdown.addOption('dataChart', experimentalDiagramI18n.intentDataChart);
+                getExecutableDiagramIntentOptions({
+                    intentMindmap: experimentalDiagramI18n.intentMindmap,
+                    intentDrawnixKnowledgeMap: experimentalDiagramI18n.intentDrawnixKnowledgeMap,
+                    intentFlowchart: experimentalDiagramI18n.intentFlowchart,
+                    intentSequence: experimentalDiagramI18n.intentSequence,
+                    intentClassDiagram: experimentalDiagramI18n.intentClassDiagram,
+                    intentErDiagram: experimentalDiagramI18n.intentErDiagram,
+                    intentStateDiagram: experimentalDiagramI18n.intentStateDiagram,
+                    intentCanvasMap: experimentalDiagramI18n.intentCanvasMap,
+                    intentCircuit: experimentalDiagramI18n.intentCircuit,
+                    intentDataChart: experimentalDiagramI18n.intentDataChart
+                }).forEach(({ value, label }) => dropdown.addOption(value, label));
                 dropdown
                     .setValue(this.plugin.settings.preferredDiagramIntent || 'auto')
                     .onChange(async (value: string) => {
@@ -2778,6 +2789,59 @@ export class NotemdSettingTab extends PluginSettingTab {
                         this.display();
                     });
             });
+
+        if (shouldShowDrawnixKnowledgeMapDeliverySelector(
+            this.plugin.settings.preferredDiagramIntent,
+            this.plugin.settings.preferredDiagramRenderTarget
+        )) {
+            const deliverySetting = this.createCatalogSetting(containerEl, {
+                id: 'settings.experimentalDiagramPipeline.drawnixKnowledgeMapDelivery'
+            })
+                .setName(experimentalDiagramI18n.drawnixKnowledgeMapDeliveryName)
+                .setDesc(experimentalDiagramI18n.drawnixKnowledgeMapDeliveryDesc);
+            renderDrawnixKnowledgeMapDeliverySelector({
+                parent: deliverySetting.controlEl,
+                selectedDelivery: resolveDrawnixKnowledgeMapDelivery(this.plugin.settings),
+                copy: {
+                    fullBoard: experimentalDiagramI18n.drawnixKnowledgeMapDeliveryFullBoard,
+                    presentation: experimentalDiagramI18n.drawnixKnowledgeMapDeliveryPresentation
+                },
+                onSelect: async delivery => {
+                    this.plugin.settings.drawnixKnowledgeMapDelivery = delivery;
+                    await this.plugin.saveSettings();
+                }
+            });
+        }
+
+        const exampleSetting = this.createCatalogSetting(containerEl, {
+            id: 'settings.experimentalDiagramPipeline.examples'
+        })
+            .setName(experimentalDiagramI18n.diagramExampleGalleryName)
+            .setDesc(experimentalDiagramI18n.diagramExampleGalleryDesc);
+        renderDiagramExampleGallery({
+            parent: exampleSetting.controlEl,
+            copy: {
+                intentMindmap: experimentalDiagramI18n.intentMindmap,
+                intentDrawnixKnowledgeMap: experimentalDiagramI18n.intentDrawnixKnowledgeMap,
+                intentFlowchart: experimentalDiagramI18n.intentFlowchart,
+                intentSequence: experimentalDiagramI18n.intentSequence,
+                intentClassDiagram: experimentalDiagramI18n.intentClassDiagram,
+                intentErDiagram: experimentalDiagramI18n.intentErDiagram,
+                intentStateDiagram: experimentalDiagramI18n.intentStateDiagram,
+                intentCanvasMap: experimentalDiagramI18n.intentCanvasMap,
+                intentCircuit: experimentalDiagramI18n.intentCircuit,
+                intentDataChart: experimentalDiagramI18n.intentDataChart,
+                preview: experimentalDiagramI18n.diagramExamplePreview,
+                familyLabels: {
+                    knowledge: experimentalDiagramI18n.diagramExampleFamilyKnowledge,
+                    behavior: experimentalDiagramI18n.diagramExampleFamilyBehavior,
+                    structure: experimentalDiagramI18n.diagramExampleFamilyStructure,
+                    quantitative: experimentalDiagramI18n.diagramExampleFamilyQuantitative,
+                    engineering: experimentalDiagramI18n.diagramExampleFamilyEngineering
+                }
+            },
+            onPreview: typeId => this.plugin.openDiagramExamplePreview(typeId)
+        });
 
         this.createCatalogSetting(containerEl, {
             id: 'settings.experimentalDiagramPipeline.previewExport',

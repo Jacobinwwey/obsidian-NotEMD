@@ -318,7 +318,7 @@ Client sends work to a queue-backed worker.
         expect(JSON.parse(result.artifact.content).elements).toHaveLength(1);
     });
 
-    test('converges model roots into one document-rooted Drawnix mind map', async () => {
+    test('preserves model roots as a Drawnix forest when source coverage has no matching sections', async () => {
         const result = await generateDiagramArtifact('# Architecture', {
             compatibilityMode: 'best-fit',
             requestedRenderTarget: 'drawnix',
@@ -345,27 +345,12 @@ Client sends work to a queue-backed worker.
         const data = JSON.parse(result.artifact.content);
         expect(result.artifact.target).toBe('drawnix');
         expect(result.renderError).toBeUndefined();
-        expect(data.elements.filter((element: { type: string }) => element.type === 'mindmap')).toHaveLength(1);
-        expect(data.elements[0]).toMatchObject({
-            type: 'mindmap',
-            data: { topic: { children: [{ text: 'Architecture' }] } }
-        });
-        const additionalElement = data.elements[0].children.find((child: { data?: { topic?: { children?: Array<{ text?: string }> } } }) =>
-            child.data?.topic?.children?.[0]?.text === 'Additional concepts'
-        );
-        expect(additionalElement?.children).toEqual(expect.arrayContaining([
-            expect.objectContaining({
-                id: 'client',
-                type: 'mind_child',
-                children: [expect.objectContaining({ id: 'editor', type: 'mind_child' })]
-            }),
-            expect.objectContaining({
-                id: 'server',
-                type: 'mind_child',
-                children: [expect.objectContaining({ id: 'api', type: 'mind_child' })]
-            })
-        ]));
-        expect(data.elements[1]).toMatchObject({
+        const rootElements = data.elements.filter((element: { type: string }) => element.type === 'mindmap');
+        expect(rootElements).toHaveLength(2);
+        expect(rootElements.map((element: { data: { topic: { children: Array<{ text: string }> } } }) => (
+            element.data.topic.children[0].text
+        ))).toEqual(['Client', 'Server']);
+        expect(data.elements.find((element: { type: string }) => element.type === 'arrow-line')).toMatchObject({
             type: 'arrow-line',
             source: { id: 'editor' },
             target: { id: 'api' }
@@ -392,19 +377,11 @@ Client sends work to a queue-backed worker.
         });
 
         expect(result.artifact.target).toBe('drawnix');
-        expect(result.spec.nodes).toHaveLength(1);
-        expect(result.spec.nodes[0].label).toBe('Architecture');
-        expect(result.spec.nodes[0].children?.map(node => node.label)).toEqual(['Additional concepts']);
-        expect(result.spec.nodes[0].children?.[0].children?.map(node => node.id)).toEqual(['client', 'server']);
-        expect(result.spec.nodes[0].children?.[0].children?.[0].children?.map(node => node.id)).toEqual(['editor']);
-        const exportedRoot = JSON.parse(result.artifact.content).elements[0];
-        expect(exportedRoot).toMatchObject({ type: 'mindmap' });
-        const exportedAdditional = exportedRoot.children.find((child: { data?: { topic?: { children?: Array<{ text?: string }> } } }) =>
-            child.data?.topic?.children?.[0]?.text === 'Additional concepts'
-        );
-        expect(exportedAdditional?.children).toEqual(expect.arrayContaining([
-            expect.objectContaining({ id: 'client', children: [expect.objectContaining({ id: 'editor' })] })
-        ]));
+        expect(result.spec.nodes.map(node => node.id)).toEqual(['client', 'server']);
+        expect(result.spec.nodes[0].children?.map(node => node.id)).toEqual(['editor']);
+        const exportedRoots = JSON.parse(result.artifact.content).elements
+            .filter((element: { type: string }) => element.type === 'mindmap');
+        expect(exportedRoots.map((element: { id: string }) => element.id)).toEqual(['client', 'server']);
     });
 
     test('normalizes a generic mindmap response when the Drawnix target is explicit', async () => {
@@ -425,11 +402,8 @@ Client sends work to a queue-backed worker.
 
         expect(result.spec.intent).toBe('drawnixMindmap');
         expect(result.artifact.target).toBe('drawnix');
-        expect(result.spec.nodes).toHaveLength(1);
-        expect(result.spec.nodes[0].label).toBe('Architecture');
-        expect(result.spec.nodes[0].children?.map(node => node.label)).toEqual(['Additional concepts']);
-        expect(result.spec.nodes[0].children?.[0].children?.map(node => node.id)).toEqual(['client', 'server']);
-        expect(result.spec.nodes[0].children?.[0].children?.[0].children?.map(node => node.id)).toEqual(['editor']);
+        expect(result.spec.nodes.map(node => node.id)).toEqual(['client', 'server']);
+        expect(result.spec.nodes[0].children?.map(node => node.id)).toEqual(['editor']);
         expect(JSON.parse(result.artifact.content).elements).toEqual(
             expect.arrayContaining([
                 expect.objectContaining({ type: 'mindmap' })

@@ -1,6 +1,10 @@
 import { DiagramSpec } from '../diagram/types';
 import { buildDrawnixMindMapProjection } from '../diagram/adapters/drawnix/drawnixMindMapProjection';
-import { mergeDrawnixSourceCoverage } from '../diagram/adapters/drawnix/drawnixSourceCoverage';
+import {
+    buildDocumentRootedKnowledgeMap,
+    buildSourceCoverageForest,
+    mergeDrawnixSourceCoverage
+} from '../diagram/adapters/drawnix/drawnixSourceCoverage';
 import { generateDiagramArtifact } from '../diagram/diagramGenerationService';
 
 function flattenNodes(nodes: DiagramSpec['nodes']): DiagramSpec['nodes'] {
@@ -8,7 +12,39 @@ function flattenNodes(nodes: DiagramSpec['nodes']): DiagramSpec['nodes'] {
 }
 
 describe('Drawnix source coverage', () => {
-    test('builds one filename-rooted taxonomy and remaps merged model edges', () => {
+    test('keeps source sections and unmatched model branches as independent roots', () => {
+        const enriched = buildSourceCoverageForest({
+            intent: 'drawnixMindmap',
+            title: 'Architecture',
+            nodes: [{ id: 'model-root', label: 'Unmatched model branch' }],
+            edges: []
+        }, [
+            '# Architecture',
+            '## Interface',
+            '### Commands',
+            '## Runtime'
+        ].join('\n'), 'Notes/architecture.md');
+
+        expect(enriched.nodes.map(node => node.label)).toEqual([
+            'Interface',
+            'Runtime',
+            'Unmatched model branch'
+        ]);
+
+        const documentRooted = buildDocumentRootedKnowledgeMap(enriched, 'Architecture overview');
+        expect(documentRooted.nodes).toEqual([
+            expect.objectContaining({
+                label: 'Architecture overview',
+                children: expect.arrayContaining([
+                    expect.objectContaining({ label: 'Interface' }),
+                    expect.objectContaining({ label: 'Runtime' }),
+                    expect.objectContaining({ label: 'Unmatched model branch' })
+                ])
+            })
+        ]);
+    });
+
+    test('builds a source-rooted forest and remaps merged model edges', () => {
         const spec: DiagramSpec = {
             intent: 'drawnixMindmap',
             title: 'Architecture',
@@ -45,18 +81,23 @@ describe('Drawnix source coverage', () => {
             sourceMarkdown,
             'Notes/architecture.zh-CN.md'
         );
-        const root = enriched.nodes[0];
+        const interfaceRoot = enriched.nodes.find(node => node.label === 'Interface');
+        const renderingRoot = enriched.nodes.find(node => node.label === 'Rendering pipeline');
+        const unmatchedRoot = enriched.nodes.find(node => node.label === 'Unmatched leaf');
         const flatten = flattenNodes(enriched.nodes);
         const labels = flatten.map(node => node.label);
         const ids = new Set(flatten.map(node => node.id));
 
-        expect(enriched.nodes).toHaveLength(1);
-        expect(root.label).toBe('architecture.zh-CN');
-        expect(root.children?.map(node => node.label)).toEqual(expect.arrayContaining([
+        expect(enriched.nodes.map(node => node.label)).toEqual([
             'Interface',
             'Rendering pipeline',
-            'Additional concepts'
+            'Unmatched leaf'
+        ]);
+        expect(interfaceRoot?.children?.map(node => node.label)).toEqual(expect.arrayContaining([
+            'Commands',
+            'Mermaid flowchart 1'
         ]));
+        expect(renderingRoot).toBeDefined();
         expect(labels).toEqual(expect.arrayContaining([
             'Commands',
             'Preview and export',
@@ -65,8 +106,7 @@ describe('Drawnix source coverage', () => {
             'Export',
             'Unmatched leaf'
         ]));
-        expect(root.children?.find(node => node.label === 'Additional concepts')?.children)
-            .toEqual([expect.objectContaining({ label: 'Unmatched leaf', id: 'model-orphan' })]);
+        expect(unmatchedRoot).toEqual(expect.objectContaining({ id: 'model-orphan' }));
         expect(enriched.edges).toEqual([
             expect.objectContaining({
                 from: expect.not.stringMatching(/^model-/),
@@ -176,8 +216,7 @@ describe('Drawnix source coverage', () => {
         const nodes = flattenNodes(first.nodes);
         const ids = nodes.map(node => node.id);
         const projection = buildDrawnixMindMapProjection(first);
-        const root = first.nodes[0];
-        const firstSection = root.children?.find(node => node.label === 'First section');
+        const firstSection = first.nodes.find(node => node.label === 'First section');
         const nestedSection = firstSection?.children?.find(node => node.label === 'Nested section');
         const detailLevel = nestedSection?.children?.find(node => node.label === 'Detail level');
         const fifthLevel = detailLevel?.children?.find(node => node.label === 'Fifth level');
@@ -213,7 +252,7 @@ describe('Drawnix source coverage', () => {
         expect(nodes.some(node => node.label === 'Not a section')).toBe(false);
     });
 
-    test('builds one document root with section branches and scoped Mermaid coverage', () => {
+    test('preserves section roots and scoped Mermaid coverage without synthesizing a document root', () => {
         const spec: DiagramSpec = {
             intent: 'drawnixMindmap',
             title: 'Model summary',
@@ -246,18 +285,17 @@ describe('Drawnix source coverage', () => {
 
         const enriched = mergeDrawnixSourceCoverage(spec, sourceMarkdown, 'Knowledge/architecture.zh-CN.md');
         const roots = enriched.nodes;
-        const root = roots[0];
+        const interfaceRoot = roots.find(node => node.label === 'Interface');
+        const renderingRoot = roots.find(node => node.label === 'Rendering');
+        const unmatchedRoot = roots.find(node => node.label === 'Unmatched model concept');
         const allNodes = flattenNodes(roots);
 
-        expect(roots).toHaveLength(1);
-        expect(root.label).toBe('architecture.zh-CN');
-        expect(root.children?.map(node => node.label)).toEqual(expect.arrayContaining([
+        expect(roots.map(node => node.label)).toEqual([
             'Interface',
             'Rendering',
-            'Additional concepts'
-        ]));
-        const interfaceNode = root.children?.find(node => node.label === 'Interface');
-        expect(interfaceNode?.children?.map(node => node.label)).toContain('Commands');
+            'Unmatched model concept'
+        ]);
+        expect(interfaceRoot?.children?.map(node => node.label)).toContain('Commands');
         expect(allNodes.map(node => node.label)).toEqual(expect.arrayContaining([
             'Mermaid flowchart 1',
             'Command',
@@ -266,9 +304,9 @@ describe('Drawnix source coverage', () => {
         ]));
         const mermaidNode = allNodes.find(node => node.label === 'Mermaid flowchart 1');
         expect(mermaidNode).toBeDefined();
-        expect(interfaceNode?.children).toContain(mermaidNode);
-        const additional = root.children?.find(node => node.label === 'Additional concepts');
-        expect(additional?.children?.map(node => node.label)).toContain('Unmatched model concept');
+        expect(interfaceRoot?.children).toContain(mermaidNode);
+        expect(renderingRoot).toBeDefined();
+        expect(unmatchedRoot).toEqual(expect.objectContaining({ id: 'orphan-concept' }));
 
         expect(enriched.edges).toEqual([]);
     });
@@ -292,11 +330,10 @@ describe('Drawnix source coverage', () => {
             '```'
         ].join('\n'), 'Notes/document.md');
 
-        const root = enriched.nodes[0];
-        const sections = root.children?.filter(node => node.label === 'Shared section') ?? [];
-        const labels = flattenNodes(root.children ?? []).map(node => node.label);
+        const root = enriched.nodes.find(node => node.label === 'Shared section');
+        const labels = flattenNodes(root?.children ?? []).map(node => node.label);
 
-        expect(sections).toHaveLength(1);
+        expect(enriched.nodes.filter(node => node.label === 'Shared section')).toHaveLength(1);
         expect(labels).toEqual(expect.arrayContaining([
             'First detail',
             'Second detail',
@@ -354,9 +391,8 @@ describe('Drawnix source coverage', () => {
         ].join('\n');
 
         const enriched = mergeDrawnixSourceCoverage(spec, sourceMarkdown, 'architecture.md');
-        const root = enriched.nodes[0];
-        const api = root.children?.find(node => node.label === 'API');
-        const runtime = root.children?.find(node => node.label === 'Runtime');
+        const api = enriched.nodes.find(node => node.label === 'API');
+        const runtime = enriched.nodes.find(node => node.label === 'Runtime');
 
         expect(api?.id).not.toBe('model-api');
         expect(runtime?.id).not.toBe('model-runtime');
@@ -367,7 +403,7 @@ describe('Drawnix source coverage', () => {
         }]);
     });
 
-    test('keeps unmatched model branches while dropping placeholder leaves from the document root', () => {
+    test('keeps unmatched model branches as roots while dropping placeholder leaves', () => {
         const enriched = mergeDrawnixSourceCoverage({
             intent: 'drawnixMindmap',
             title: 'Document',
@@ -385,12 +421,11 @@ describe('Drawnix source coverage', () => {
             edges: []
         }, '# Document\n\n## Source section', 'Notes/document.md');
 
-        const root = enriched.nodes[0];
-        const additional = root.children?.find(node => node.label === 'Additional concepts');
-        const modelBranch = additional?.children?.find(node => node.label === 'Model branch');
+        const sourceRoot = enriched.nodes.find(node => node.label === 'Source section');
+        const modelBranch = enriched.nodes.find(node => node.label === 'Model branch');
 
-        expect(root.children?.map(node => node.label)).toEqual(['Source section', 'Additional concepts']);
-        expect(additional?.children?.map(node => node.label)).toEqual(['Model branch']);
+        expect(enriched.nodes.map(node => node.label)).toEqual(['Source section', 'Model branch']);
+        expect(sourceRoot).toBeDefined();
         expect(modelBranch?.children?.map(node => node.label)).toEqual(['Model child', 'Model detail']);
         expect(flattenNodes(enriched.nodes).some(node => node.label === 'Untitled 0-0')).toBe(false);
     });
@@ -472,8 +507,7 @@ describe('Drawnix source coverage', () => {
         const exportedLabels = JSON.stringify(JSON.parse(result.artifact.content));
 
         expect(result.artifact.target).toBe('drawnix');
-        expect(result.spec.nodes).toHaveLength(1);
-        expect(result.spec.nodes[0].label).toBe('architecture.zh-CN');
+        expect(result.spec.nodes.map(node => node.label)).toEqual(['Interface', 'Summary']);
         expect(labels).toEqual(expect.arrayContaining([
             'Interface',
             'Commands',

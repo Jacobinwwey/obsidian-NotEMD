@@ -6,6 +6,7 @@ const path = require('path');
 const { buildSync } = require('esbuild');
 
 const SUPPORTED_TARGETS = ['editable-html-svg', 'drawio', 'drawnix', 'circuitikz', 'svg', 'png', 'pdf'];
+const DRAWNIX_DELIVERIES = ['full-board', 'presentation'];
 const DEFAULT_EXPORT_PPI = 300;
 const MIN_EXPORT_PPI = 72;
 const MAX_EXPORT_PPI = 600;
@@ -16,7 +17,7 @@ function printUsage() {
   console.log(`Notemd diagram artifact export
 
 Usage:
-  node scripts/export-diagram-artifact.js --input <diagram-spec.json> --target <target> --output <artifact-path> [--preview-svg-output <svg-path>] [--preview-png-output <png-path>] [--preview-pdf-output <pdf-path>] [--ppi <72-600>]
+  node scripts/export-diagram-artifact.js --input <diagram-spec.json> --target <target> --output <artifact-path> [--drawnix-delivery <full-board|presentation>] [--preview-svg-output <svg-path>] [--preview-png-output <png-path>] [--preview-pdf-output <pdf-path>] [--ppi <72-600>]
   node scripts/export-diagram-artifact.js <diagram-spec.json> <target> <artifact-path> [preview-svg-path] [preview-png-path] [preview-pdf-path] [ppi]
 
 Targets:
@@ -31,6 +32,7 @@ Targets:
 Example:
   node scripts/export-diagram-artifact.js --input spec.json --target drawio --output figure.drawio
   node scripts/export-diagram-artifact.js --input spec.json --target drawio --output figure.drawio --preview-svg-output figure.drawio.svg
+  node scripts/export-diagram-artifact.js --input knowledge-map.json --target drawnix --output architecture.drawnix --drawnix-delivery presentation
   node scripts/export-diagram-artifact.js --input circuit-spec.json --target circuitikz --output circuit.tex --preview-svg-output circuit.svg --preview-png-output circuit.png --preview-pdf-output circuit.pdf
   node scripts/export-diagram-artifact.js --input spec.json --target png --output figure.png --ppi 300
   node scripts/export-diagram-artifact.js --input spec.json --target pdf --output figure.pdf --ppi 300
@@ -52,6 +54,9 @@ function parseArgs(argv) {
         break;
       case '--output':
         args.output = argv[++index];
+        break;
+      case '--drawnix-delivery':
+        args.drawnixDelivery = argv[++index];
         break;
       case '--preview-svg-output':
         args.previewSvgOutput = argv[++index];
@@ -235,6 +240,16 @@ function normalizeTarget(target) {
   return target;
 }
 
+function normalizeDrawnixDelivery(value) {
+  if (value === undefined || value === null || value === '') {
+    return 'full-board';
+  }
+  if (typeof value !== 'string' || !DRAWNIX_DELIVERIES.includes(value)) {
+    throw new Error(`Unsupported Drawnix delivery "${value}". Supported values: ${DRAWNIX_DELIVERIES.join(', ')}`);
+  }
+  return value;
+}
+
 function assertRequiredArgs(args) {
   if (!args.input) {
     throw new Error('Missing required --input.');
@@ -376,7 +391,7 @@ function buildExporterBundle(repoRoot) {
     import { EditableHtmlSvgRenderer, collectEditableSvgAnnotationGaps, renderSemanticFigureSvg } from './src/rendering/renderers/editableHtmlSvgRenderer';
     import { CircuitikzRenderer, renderCircuitSpecPreviewSvg } from './src/rendering/renderers/circuitikzRenderer';
 
-    export async function exportDiagramArtifact(spec, target) {
+    export async function exportDiagramArtifact(spec, target, options = {}) {
       if (target === 'circuitikz') {
         const renderer = new CircuitikzRenderer();
         const artifact = await renderer.render(spec);
@@ -410,7 +425,8 @@ function buildExporterBundle(repoRoot) {
 
       if (target === 'drawnix') {
         const renderer = new DrawnixRenderer();
-        const artifact = await renderer.render(spec);
+        const drawnixDelivery = options.drawnixDelivery === 'presentation' ? 'presentation' : 'full-board';
+        const artifact = await renderer.render(spec, { drawnixKnowledgeMapDelivery: drawnixDelivery });
         const data = JSON.parse(artifact.content);
         const countMindMapNodes = (element) => 1 + (Array.isArray(element.children) ? element.children : []).reduce(
           (count, child) => count + countMindMapNodes(child),
@@ -421,12 +437,14 @@ function buildExporterBundle(repoRoot) {
         return {
           content: artifact.content,
           previewSvgContent: artifact.previewSvg?.content,
+          drawnixKnowledgeMapPresentation: artifact.drawnixKnowledgeMapPresentation,
           summary: {
             mimeType: artifact.mimeType,
             rootCount: rootElements.length,
             nodeCount: rootElements.reduce((count, root) => count + countMindMapNodes(root), 0),
             edgeCount: relationElements.length,
-            validationErrorCount: 0
+            validationErrorCount: 0,
+            drawnixDelivery
           }
         };
       }
@@ -508,28 +526,160 @@ function buildExporterBundle(repoRoot) {
   };
 }
 
+function buildDrawnixPresentationOutputPath(outputPath) {
+  if (path.extname(outputPath).toLowerCase() !== '.drawnix') {
+    throw new Error('Drawnix presentation delivery requires a .drawnix --output path.');
+  }
+  return `${outputPath.slice(0, -'.drawnix'.length)}.presentation`;
+}
+
+function assertDrawnixPresentationPanelFileName(fileName) {
+  if (
+    typeof fileName !== 'string'
+    || !fileName.endsWith('.svg')
+    || fileName.includes('/')
+    || fileName.includes('\\')
+    || path.basename(fileName) !== fileName
+  ) {
+    throw new Error(`Invalid Drawnix presentation panel file name: ${String(fileName)}`);
+  }
+}
+
+function buildDrawnixPresentationManifestContent(presentation, outputPath) {
+  return `${JSON.stringify({
+    version: presentation.version,
+    catalogTypeId: presentation.catalogTypeId,
+    sourceArtifactPath: outputPath,
+    semanticSpecHash: presentation.semanticSpecHash,
+    overview: {
+      sliceId: presentation.overview.sliceId,
+      path: presentation.overview.fileName
+    },
+    details: presentation.details.map((detail) => ({
+      sliceId: detail.sliceId,
+      path: detail.fileName
+    })),
+    fidelityLedger: presentation.fidelityLedger
+  }, null, 2)}\n`;
+}
+
+function addDrawnixPresentationManifestReference(content, manifestPath) {
+  const exported = JSON.parse(content);
+  const knowledgeMap = exported?.metadata?.notemd?.knowledgeMap;
+  if (!knowledgeMap || knowledgeMap.version !== 1 || knowledgeMap.catalogTypeId !== 'drawnix-knowledge-map') {
+    throw new Error('Drawnix presentation delivery requires a valid knowledge-map replay record.');
+  }
+
+  knowledgeMap.deliveryManifestPaths = [manifestPath];
+  return `${JSON.stringify(exported, null, 2)}\n`;
+}
+
+function stageDrawnixPresentationBundle(presentation, outputPath) {
+  if (!presentation || presentation.version !== 1 || presentation.catalogTypeId !== 'drawnix-knowledge-map') {
+    throw new Error('Drawnix presentation delivery returned an invalid bundle.');
+  }
+
+  const presentationOutputPath = buildDrawnixPresentationOutputPath(outputPath);
+  const stagingPath = path.join(
+    path.dirname(presentationOutputPath),
+    `.${path.basename(presentationOutputPath)}.staging-${process.pid}-${Date.now()}-${Math.random().toString(16).slice(2)}`
+  );
+  const panels = [presentation.overview, ...presentation.details];
+  const panelFileNames = new Set();
+  for (const panel of panels) {
+    assertDrawnixPresentationPanelFileName(panel.fileName);
+    if (!panel.sliceId || !String(panel.content || '').trim() || panelFileNames.has(panel.fileName)) {
+      throw new Error('Drawnix presentation delivery returned incomplete or duplicate panels.');
+    }
+    panelFileNames.add(panel.fileName);
+  }
+
+  fs.mkdirSync(stagingPath, { recursive: true });
+  for (const panel of panels) {
+    fs.writeFileSync(path.join(stagingPath, panel.fileName), panel.content, 'utf8');
+  }
+  const manifestPath = path.join(presentationOutputPath, 'manifest.json');
+  fs.writeFileSync(
+    path.join(stagingPath, 'manifest.json'),
+    buildDrawnixPresentationManifestContent(presentation, outputPath),
+    'utf8'
+  );
+
+  return {
+    presentationOutputPath,
+    manifestPath,
+    stagingPath,
+    managedFileNames: [...panelFileNames, 'manifest.json']
+  };
+}
+
+function commitStagedDrawnixPresentationBundle(staged) {
+  if (!fs.existsSync(staged.presentationOutputPath)) {
+    fs.renameSync(staged.stagingPath, staged.presentationOutputPath);
+    return;
+  }
+
+  if (!fs.statSync(staged.presentationOutputPath).isDirectory()) {
+    throw new Error(`Drawnix presentation path "${staged.presentationOutputPath}" exists but is not a directory.`);
+  }
+  for (const fileName of staged.managedFileNames) {
+    fs.copyFileSync(
+      path.join(staged.stagingPath, fileName),
+      path.join(staged.presentationOutputPath, fileName)
+    );
+  }
+  fs.rmSync(staged.stagingPath, { recursive: true, force: true });
+}
+
+function cleanupStagedDrawnixPresentationBundle(staged) {
+  if (staged) {
+    fs.rmSync(staged.stagingPath, { recursive: true, force: true });
+  }
+}
+
 async function run(args, repoRoot = path.resolve(__dirname, '..')) {
   assertRequiredArgs(args);
   const target = normalizeTarget(args.target);
   assertSupportedTarget(target);
 
+  if (args.drawnixDelivery !== undefined && target !== 'drawnix') {
+    throw new Error('--drawnix-delivery is only supported with --target drawnix.');
+  }
+
   const inputPath = path.resolve(args.input);
   const outputPath = path.resolve(args.output);
-  const previewSvgOutputPath = args.previewSvgOutput ? path.resolve(args.previewSvgOutput) : undefined;
+  const drawnixDelivery = target === 'drawnix' ? normalizeDrawnixDelivery(args.drawnixDelivery) : undefined;
+  const previewSvgOutputPath = args.previewSvgOutput
+    ? path.resolve(args.previewSvgOutput)
+    : drawnixDelivery === 'presentation'
+      ? `${outputPath}.svg`
+      : undefined;
   const previewPngOutputPath = args.previewPngOutput ? path.resolve(args.previewPngOutput) : undefined;
   const previewPdfOutputPath = args.previewPdfOutput ? path.resolve(args.previewPdfOutput) : undefined;
   const ppi = normalizePpi(args.ppi);
   const spec = loadDiagramSpec(inputPath);
   const bundle = buildExporterBundle(repoRoot);
+  let stagedPresentation;
 
   try {
     const { exportDiagramArtifact } = require(bundle.outfile);
-    const artifact = await exportDiagramArtifact(spec, target);
+    const artifact = await exportDiagramArtifact(spec, target, { drawnixDelivery });
+    stagedPresentation = artifact.drawnixKnowledgeMapPresentation
+      ? stageDrawnixPresentationBundle(artifact.drawnixKnowledgeMapPresentation, outputPath)
+      : undefined;
     ensureOutputDirectory(outputPath);
     if (target === 'png' || target === 'pdf') {
       await renderSvgToImageFile(artifact.content, outputPath, target, ppi);
     } else {
       fs.writeFileSync(outputPath, artifact.content, 'utf8');
+    }
+    if (stagedPresentation) {
+      commitStagedDrawnixPresentationBundle(stagedPresentation);
+      fs.writeFileSync(
+        outputPath,
+        addDrawnixPresentationManifestReference(artifact.content, stagedPresentation.manifestPath),
+        'utf8'
+      );
     }
 
     if (previewSvgOutputPath) {
@@ -564,10 +714,13 @@ async function run(args, repoRoot = path.resolve(__dirname, '..')) {
       ...(previewSvgOutputPath ? { previewSvgOutputPath } : {}),
       ...(previewPngOutputPath ? { previewPngOutputPath } : {}),
       ...(previewPdfOutputPath ? { previewPdfOutputPath } : {}),
+      ...(drawnixDelivery ? { drawnixDelivery } : {}),
+      ...(stagedPresentation ? { presentationOutputPath: stagedPresentation.presentationOutputPath } : {}),
       ...(target === 'png' || target === 'pdf' || previewPngOutputPath || previewPdfOutputPath ? { ppi } : {}),
       ...artifact.summary
     };
   } finally {
+    cleanupStagedDrawnixPresentationBundle(stagedPresentation);
     bundle.cleanup();
   }
 }
@@ -595,10 +748,17 @@ if (require.main === module) {
 
 module.exports = {
   SUPPORTED_TARGETS,
+  DRAWNIX_DELIVERIES,
   applyPngPhysicalPixelDensityBuffer,
+  addDrawnixPresentationManifestReference,
+  buildDrawnixPresentationOutputPath,
+  cleanupStagedDrawnixPresentationBundle,
+  commitStagedDrawnixPresentationBundle,
   normalizePpi,
+  normalizeDrawnixDelivery,
   normalizeTarget,
   pngPixelsPerMeterFromPpi,
   parseArgs,
-  run
+  run,
+  stageDrawnixPresentationBundle
 };

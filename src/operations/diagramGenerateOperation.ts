@@ -102,6 +102,7 @@ export async function runDiagramGenerateOperation(
             targetLanguage: input.targetLanguage,
             sourceVisuals: input.sourceVisuals,
             drawnixExportMermaidCompanions: input.drawnixExportMermaidCompanions,
+            drawnixKnowledgeMapDelivery: input.drawnixKnowledgeMapDelivery,
             llmInvoker: (systemPrompt, sourceMarkdown) =>
                 llmCall(provider, systemPrompt, sourceMarkdown, settings, reporter, modelName)
         });

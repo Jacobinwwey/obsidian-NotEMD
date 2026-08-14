@@ -1,6 +1,7 @@
 import { Notice } from 'obsidian';
 import { NotemdSettingTab } from '../ui/NotemdSettingTab';
 import { DEFAULT_SETTINGS } from '../constants';
+import { EXECUTABLE_DIAGRAM_TYPES } from '../diagram/diagramTypeCatalog';
 import { mockApp } from './__mocks__/app';
 
 jest.mock('../providerModelDiscovery', () => ({
@@ -820,6 +821,7 @@ function createPlugin(overrides: Partial<any> = {}) {
         settings,
         saveSettings: jest.fn().mockResolvedValue(undefined),
         openCircuitikzEnvironment: jest.fn(),
+        openDiagramExamplePreview: jest.fn().mockResolvedValue(undefined),
         refreshLocalizedUi: jest.fn().mockResolvedValue(undefined),
         resetSettings: jest.fn().mockResolvedValue(undefined),
         ...overrides
@@ -860,6 +862,7 @@ describe('provider settings behavior', () => {
         const targetDropdown = targetSetting?.controls.find(control => control.kind === 'dropdown') as MockDropdownControl | undefined;
 
         expect(intentDropdown?.options.circuit).toBe('Circuit diagram');
+        expect(intentDropdown?.options.drawnixMindmap).toBe('Drawnix knowledge map');
         expect(targetDropdown?.options.drawio).toBe('Draw.io source file');
         expect(targetDropdown?.options.drawnix).toBe('Drawnix source file');
         expect(targetDropdown?.options.circuitikz).toBe('CircuitikZ source file');
@@ -870,6 +873,54 @@ describe('provider settings behavior', () => {
         expect(plugin.settings.preferredDiagramIntent).toBe('circuit');
         expect(plugin.settings.preferredDiagramRenderTarget).toBe('circuitikz');
         expect(plugin.saveSettings).toHaveBeenCalledTimes(2);
+    });
+
+    test('groups executable diagram examples and previews them through the plugin renderer path', async () => {
+        const plugin = createPlugin();
+        plugin.settings.enableDeveloperMode = false;
+        const tab = new NotemdSettingTab(mockApp as any, plugin as any) as any;
+        tab.display();
+
+        const gallery = findElementByClass(tab.containerEl, 'notemd-diagram-example-gallery');
+        expect(gallery).toBeDefined();
+        const previewButtons = flattenElements(gallery!).filter(element => (
+            Boolean(element.getAttribute('data-notemd-diagram-example-type'))
+        ));
+        expect(previewButtons.map(button => button.getAttribute('data-notemd-diagram-example-type')).sort()).toEqual(
+            EXECUTABLE_DIAGRAM_TYPES.map(type => type.id).sort()
+        );
+
+        const drawnixPreview = previewButtons.find(button => (
+            button.getAttribute('data-notemd-diagram-example-type') === 'drawnix-knowledge-map'
+        ));
+        drawnixPreview?.dispatch('click');
+        await Promise.resolve();
+
+        expect(plugin.openDiagramExamplePreview).toHaveBeenCalledWith('drawnix-knowledge-map');
+    });
+
+    test('persists Drawnix presentation delivery from the one-click diagram setting', async () => {
+        const plugin = createPlugin();
+        plugin.settings.enableDeveloperMode = false;
+        plugin.settings.preferredDiagramIntent = 'drawnixMindmap';
+        plugin.settings.preferredDiagramRenderTarget = 'drawnix';
+
+        const tab = new NotemdSettingTab(mockApp as any, plugin as any) as any;
+        tab.display();
+
+        const control = findElementByClass(tab.containerEl, 'notemd-drawnix-delivery-control');
+        expect(control).toBeDefined();
+        const buttons = flattenElements(control!).filter(element => element.tag === 'button');
+        expect(buttons.map(button => button.getAttribute('data-drawnix-knowledge-map-delivery'))).toEqual([
+            'full-board',
+            'presentation'
+        ]);
+
+        buttons[1].dispatch('click');
+        await Promise.resolve();
+
+        expect(plugin.settings.drawnixKnowledgeMapDelivery).toBe('presentation');
+        expect(plugin.saveSettings).toHaveBeenCalledTimes(1);
     });
 
     test('exposes searchable CircuitikZ environment management and compiler preferences', async () => {

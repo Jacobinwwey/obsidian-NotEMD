@@ -2,6 +2,8 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { buildDrawnixMindMapProjection } from '../diagram/adapters/drawnix/drawnixMindMapProjection';
 import {
+    createDrawnixKnowledgeMapReplayRecord,
+    readDrawnixKnowledgeMapReplayRecord,
     isDrawnixMindMapMetadata,
     exportDrawnixMindMapProjection,
     stringifyDrawnixMindMapExportedData,
@@ -109,6 +111,47 @@ describe('drawnix exporter', () => {
         expect(JSON.parse(artifact.content)).toMatchObject({ type: 'drawnix' });
         expect(artifact.previewSvg?.content).toContain('<svg');
         expect(artifact.previewSvg?.content).toContain('notemd-drawnix-mindmap-svg@1.0.0');
+    });
+
+    test('embeds a replay record that can rebuild a Drawnix knowledge map without source Markdown', async () => {
+        const spec = createDrawnixSpec();
+        const artifact = await new DrawnixRenderer().render(spec);
+        const exported = JSON.parse(artifact.content) as unknown;
+        const replay = readDrawnixKnowledgeMapReplayRecord(exported);
+
+        expect(replay).toMatchObject({
+            version: 1,
+            catalogTypeId: 'drawnix-knowledge-map',
+            semanticSpec: {
+                intent: 'drawnixMindmap',
+                title: spec.title,
+                nodes: spec.nodes,
+                edges: spec.edges
+            },
+            semanticSpecHash: expect.stringMatching(/^fnv1a32:[0-9a-f]{8}$/),
+            deliveryManifestPaths: []
+        });
+        expect(readDrawnixKnowledgeMapReplayRecord({
+            type: 'drawnix',
+            version: 1,
+            source: 'web',
+            elements: [],
+            viewport: { zoom: 1, offsetX: 0, offsetY: 0 }
+        })).toBeNull();
+    });
+
+    test('fails closed for future replay schemas while retaining the legacy board contract', () => {
+        const projection = buildDrawnixMindMapProjection(createDrawnixSpec());
+        const replay = createDrawnixKnowledgeMapReplayRecord(createDrawnixSpec());
+        const exported = exportDrawnixMindMapProjection(projection, [], replay);
+        const futureReplayExport = JSON.parse(JSON.stringify(exported)) as typeof exported;
+        futureReplayExport.metadata!.notemd.knowledgeMap = {
+            ...replay,
+            version: 2 as never
+        };
+
+        expect(readDrawnixKnowledgeMapReplayRecord(futureReplayExport)).toBeNull();
+        expect(validateDrawnixMindMapExportedData(futureReplayExport)).toEqual([]);
     });
 
     test('serializes inline Mermaid metadata without companion paths', () => {

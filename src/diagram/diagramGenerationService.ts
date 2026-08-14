@@ -13,11 +13,19 @@ import { buildDiagramPlan } from './planner';
 import { buildDiagramSpecPrompt } from './prompts/diagramSpecPrompt';
 import { assertValidDiagramSpec } from './spec';
 import { isSupportedRenderTarget } from './types';
-import type { DiagramIntent, DiagramNode, DiagramPlan, DiagramSpec, RenderTarget } from './types';
+import type {
+    DiagramIntent,
+    DiagramNode,
+    DiagramPlan,
+    DiagramSpec,
+    DrawnixKnowledgeMapDelivery,
+    RenderTarget
+} from './types';
+import { resolveDrawnixKnowledgeMapDelivery } from './diagramPreferenceCompatibility';
 import { parseDiagramSpecResponse } from './diagramSpecResponseParser';
 import { resolveCircuitTemplateFromMarkdown } from './adapters/circuitikz/circuitTemplateCatalog';
 import { validateDrawnixMindMapSpec } from './adapters/drawnix/drawnixMindMapProjection';
-import { mergeDrawnixSourceCoverage } from './adapters/drawnix/drawnixSourceCoverage';
+import { buildSourceCoverageForest } from './adapters/drawnix/drawnixSourceCoverage';
 import { hashResolvedSourceVisualManifest, ResolvedSourceVisual } from './sourceVisuals';
 
 export interface DiagramGenerationOptions {
@@ -30,6 +38,7 @@ export interface DiagramGenerationOptions {
     rendererService?: RendererService;
     sourceVisuals?: readonly ResolvedSourceVisual[];
     drawnixExportMermaidCompanions?: boolean;
+    drawnixKnowledgeMapDelivery?: DrawnixKnowledgeMapDelivery;
 }
 
 export type DiagramOperationOutputMode = 'artifact' | 'mermaid';
@@ -46,18 +55,20 @@ export interface DiagramOperationInput {
     targetLanguage?: string;
     sourceVisuals?: readonly ResolvedSourceVisual[];
     drawnixExportMermaidCompanions?: boolean;
+    drawnixKnowledgeMapDelivery?: DrawnixKnowledgeMapDelivery;
 }
 
 export interface BuildDiagramOperationInputParams {
     sourcePath?: string;
     sourceMarkdown: string;
     executionMode: DiagramOperationExecutionMode;
-    settings: Pick<NotemdSettings, 'preferredDiagramIntent' | 'preferredDiagramRenderTarget' | 'experimentalDiagramCompatibilityMode' | 'summarizeToMermaidLanguage' | 'drawnixExportMermaidCompanions'>;
+    settings: Pick<NotemdSettings, 'preferredDiagramIntent' | 'preferredDiagramRenderTarget' | 'experimentalDiagramCompatibilityMode' | 'summarizeToMermaidLanguage' | 'drawnixExportMermaidCompanions' | 'drawnixKnowledgeMapDelivery'>;
     targetLanguage?: string;
     requestedIntentOverride?: DiagramIntent;
     requestedRenderTargetOverride?: RenderTarget;
     compatibilityModeOverride?: 'best-fit' | 'legacy-mermaid';
     targetLanguageOverride?: string;
+    drawnixKnowledgeMapDeliveryOverride?: DrawnixKnowledgeMapDelivery;
 }
 
 export function resolveDiagramOperationCompatibilityMode(
@@ -112,7 +123,10 @@ export function buildDiagramOperationInput(params: BuildDiagramOperationInputPar
         targetLanguage: params.targetLanguageOverride
             ?? params.targetLanguage
             ?? params.settings.summarizeToMermaidLanguage,
-        drawnixExportMermaidCompanions: params.settings.drawnixExportMermaidCompanions
+        drawnixExportMermaidCompanions: params.settings.drawnixExportMermaidCompanions,
+        drawnixKnowledgeMapDelivery: requestedIntent === 'drawnixMindmap'
+            ? params.drawnixKnowledgeMapDeliveryOverride ?? resolveDrawnixKnowledgeMapDelivery(params.settings)
+            : undefined
     };
 }
 
@@ -141,7 +155,8 @@ async function renderWithFallbackTraversal(
     spec: DiagramSpec,
     targets: Array<DiagramPlan['renderTarget']>,
     sourceVisuals?: readonly ResolvedSourceVisual[],
-    drawnixExportMermaidCompanions?: boolean
+    drawnixExportMermaidCompanions?: boolean,
+    drawnixKnowledgeMapDelivery?: DrawnixKnowledgeMapDelivery
 ): Promise<Awaited<ReturnType<RendererService['render']>>> {
     const failures: string[] = [];
 
@@ -154,7 +169,8 @@ async function renderWithFallbackTraversal(
                 target,
                 sourceVisuals,
                 sourceVisualManifestHash: hashResolvedSourceVisualManifest(sourceVisuals),
-                drawnixExportMermaidCompanions
+                drawnixExportMermaidCompanions,
+                drawnixKnowledgeMapDelivery
             });
         } catch (error) {
             failures.push(`${target}: ${normalizeErrorMessage(error)}`);
@@ -164,7 +180,7 @@ async function renderWithFallbackTraversal(
     throw new Error(`Diagram rendering failed across targets: ${failures.join(' | ')}`);
 }
 
-function createDefaultRendererService(): RendererService {
+export function createDefaultDiagramRendererService(): RendererService {
     return new RendererService(new RendererRegistry([
         new MermaidRenderer(),
         new JsonCanvasRenderer(),
@@ -362,7 +378,7 @@ function enrichDrawnixSourceCoverage(
     sourcePath?: string
 ): DiagramSpec {
     return spec.intent === 'drawnixMindmap'
-        ? mergeDrawnixSourceCoverage(spec, sourceMarkdown, sourcePath)
+        ? buildSourceCoverageForest(spec, sourceMarkdown, sourcePath)
         : spec;
 }
 
@@ -487,7 +503,7 @@ export async function generateDiagramArtifact(
 
     assertPlanCompatibility(spec, plan, options);
 
-    const rendererService = options.rendererService ?? createDefaultRendererService();
+    const rendererService = options.rendererService ?? createDefaultDiagramRendererService();
     let targets = [plan.renderTarget, ...plan.fallbackTargets]
         .filter((target, index, allTargets) => allTargets.indexOf(target) === index)
         // When user explicitly chose an intent, don't fall back to HTML — let retry handle failures
@@ -517,7 +533,8 @@ export async function generateDiagramArtifact(
             spec,
             targets,
             options.sourceVisuals,
-            options.drawnixExportMermaidCompanions
+            options.drawnixExportMermaidCompanions,
+            options.drawnixKnowledgeMapDelivery
         );
     } catch (renderError: unknown) {
         const errorMsg = renderError instanceof Error ? renderError.message : String(renderError);
@@ -544,7 +561,8 @@ export async function generateDiagramArtifact(
                     retrySpec,
                     targets,
                     options.sourceVisuals,
-                    options.drawnixExportMermaidCompanions
+                    options.drawnixExportMermaidCompanions,
+                    options.drawnixKnowledgeMapDelivery
                 );
             } catch (retryError: unknown) {
                 const retryMsg = retryError instanceof Error ? retryError.message : String(retryError);

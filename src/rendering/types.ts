@@ -1,4 +1,6 @@
 import { DiagramIntent, DiagramSpec, RenderTarget } from '../diagram/types';
+import type { DrawnixKnowledgeMapDelivery } from '../diagram/types';
+import type { DrawnixKnowledgeMapFidelityLedger } from '../diagram/adapters/drawnix/drawnixKnowledgeMapPresentationTypes';
 import type { ResolvedSourceVisual } from '../diagram/sourceVisuals';
 import { RenderWebviewTheme } from './theme';
 
@@ -33,6 +35,7 @@ export interface RenderArtifact {
      * renderable block without pretending that the source is one diagram.
      */
     previewPanels?: RenderArtifactPreviewPanel[];
+    drawnixKnowledgeMapPresentation?: DrawnixKnowledgeMapPresentationArtifact;
 }
 
 export interface RenderArtifactCompanion {
@@ -66,6 +69,25 @@ export interface RenderArtifactPreviewSvg {
     diagnostics?: RenderArtifactDiagnostic[];
 }
 
+export interface DrawnixKnowledgeMapPresentationPanelArtifact {
+    sliceId: string;
+    fileName: string;
+    content: string;
+}
+
+/**
+ * A static, manifest-owned delivery that accompanies the editable Drawnix
+ * board. Its files are persisted in a sibling `.presentation` directory.
+ */
+export interface DrawnixKnowledgeMapPresentationArtifact {
+    version: 1;
+    catalogTypeId: 'drawnix-knowledge-map';
+    semanticSpecHash: string;
+    overview: DrawnixKnowledgeMapPresentationPanelArtifact;
+    details: DrawnixKnowledgeMapPresentationPanelArtifact[];
+    fidelityLedger: DrawnixKnowledgeMapFidelityLedger;
+}
+
 export interface RenderOptions {
     target?: RenderTarget;
     theme?: RenderWebviewTheme;
@@ -73,6 +95,8 @@ export interface RenderOptions {
     sourceVisualManifestHash?: string;
     /** Opt-in Drawnix source/SVG Mermaid companions under the artifact .assets scope. */
     drawnixExportMermaidCompanions?: boolean;
+    /** Host-level selection that routes Drawnix rendering to a dedicated delivery operation. */
+    drawnixKnowledgeMapDelivery?: DrawnixKnowledgeMapDelivery;
 }
 
 export interface DiagramRenderer {

@@ -200,7 +200,24 @@ flowchart LR
 | `dataChart` | vega-lite | VegaLiteRenderer | 弹窗/iframe（沙盒） | 源文件、SVG、PNG、PDF |
 | `circuit` | circuitikz | CircuitikzRenderer | SVG companion 或 source-only 预览 | `.tex`、SVG、PNG、PDF |
 
-`drawnixMindmap` 是唯一的原生 Drawnix 图表意图。它把 `DiagramSpec.nodes` 投影为可编辑的知识导图 forest，并由 Notemd 的已布局投影生成 SVG companion。关系布局分两次计算：第一步按已测量标签宽度预留水平 gutter；节点落位后，第二步按端点相对 root 的方位分类。同侧关系在外侧 gutter 中分配位于两个端点之间的行，跨 forest 关系进入底部通道。router 只处理避障端点接入，通道位置由分配器负责。该路径不设固定层级深度或关系数量配额；只有语义无效，或无法在不进入受保护区域且不越出画布的前提下完成几何布局时才拒绝。source coverage 也遵循这一规则：Markdown 标题链与未匹配的模型分支保留原有层级和 ID。只有实际发生语义合并时才会重映射关系边；无效、重复或重复层级所有权的关系边才会被丢弃。当前 native board 由上游 `withMind` 决定子节点落位，因此 SVG 与 native 的完整像素几何必须通过真实 consumer test 验证，不能只从导出 JSON 推断。标准 `mindmap` 仍由 MermaidRenderer 处理，生成与回退语义不变。详见[Drawnix 演示交付架构复核](./brainstorms/2026-08-14-drawnix-presentation-architecture-review.zh-CN.md)。
+`drawnixMindmap` 是唯一的原生 Drawnix 图表意图。它把 `DiagramSpec.nodes` 投影为可编辑的知识导图 forest，并由 Notemd 的已布局投影生成 SVG companion。关系布局分两次计算：第一步按已测量标签宽度预留水平 gutter；节点落位后，第二步按端点相对 root 的方位分类。同侧关系在外侧 gutter 中分配位于两个端点之间的行，跨 forest 关系进入底部通道。router 只处理避障端点接入，通道位置由分配器负责。该路径不设固定层级深度或关系数量配额；只有语义无效，或无法在不进入受保护区域且不越出画布的前提下完成几何布局时才拒绝。source coverage 也遵循这一规则：Markdown 标题链与未匹配的模型分支保留原有层级和 ID。只有实际发生语义合并时才会重映射关系边；无效、重复或重复层级所有权的关系边才会被丢弃。当前 native board 由上游 `withMind` 决定子节点落位，因此 SVG 与 native 的完整像素几何必须通过真实 consumer test 验证，不能只从导出 JSON 推断。标准 `mindmap` 仍由 MermaidRenderer 处理，生成与回退语义不变。
+
+### 已实现的类型目录与 Drawnix 交付架构
+
+`DiagramTypeCatalog` 已位于现有 intent 与 target 绑定之上。它负责面向用户的类型名称、语义模式、prompt profile、renderer binding、visual-role 词表和 Notemd 自有 example fixture。`ref/diagram-design` 中尚无端到端 Notemd 链路的布局仅保留在文档与路线图中，不进入选择器。
+
+`drawnixMindmap` 继续作为持久化兼容 ID，在目录中展示为 **Drawnix 知识导图**。它拥有两条独立交付操作：
+
+| 交付选择 | 操作 | 兼容行为 |
+|---|---|---|
+| 全量画布 | `DrawnixRenderer.render()` -> `renderDrawnixKnowledgeMapBoardArtifact()` -> `buildDrawnixMindMapProjection()` | 保持现有 `.drawnix` 与 `<source>_diagram.drawnix.svg` artifact 契约。 |
+| 演示交付 | `DrawnixRenderer.render()` -> `renderDrawnixKnowledgeMapPresentationArtifact()` -> `buildDrawnixKnowledgeMapPresentation()` -> `renderDrawnixKnowledgeMapPresentationSvg()` | 输出 overview、密集 cluster 的 detail slice、超宽子层级的有界 continuation slice 与 fidelity ledger，同时保留完整可编辑画布。 |
+
+选择只发生在 host 路由层，不引入 `layoutMode` 参数。设置页仅在选中 Drawnix 知识导图时显示两个交付选项，并持久化 `drawnixKnowledgeMapDelivery`；缺失或非法的持久化值一律解析为全量画布。`preferredDiagramRenderTarget` 保留原有 artifact-format 含义，不参与交付选择。
+
+新生成的 Drawnix board 会持久化 `metadata.notemd.knowledgeMap`，其中包含经验证的语义 replay spec 与 hash。预览工具栏可据此重建另一种交付，不发起 LLM 请求、不修改设置，也不写入文件。该切换仅替换内存中的预览会话。缺少 replay record 的 legacy `.drawnix` 仍按全量画布读取，并提示需要重新生成；不会尝试有损重建。Mermaid `mindmap` 不进入该路由，行为保持不变。
+
+presentation planner 将尺寸、受众、语言和最小可读字号视作明确的 delivery contract。它使用图论驱动的 root cluster 和适配宽高比的打包；能够放入目标视区的 overview root grid 会在视区中居中。detail slice 只路由与其原始层级直接相接的关系，并将远端端点放入受目标宽度约束的 context band。子层级无法放入时，父 slice 会保留带虚线边框的 continuation anchor，并在后续有界 detail slice 中递归展开该子层级。它不会对有效 Drawnix 图施加层级深度、节点数或关系数量上限。每项摘要或聚类都进入 fidelity ledger。保存演示交付时，会通过现有事务化文件路径写入兼容 board、`<source>_diagram.presentation/manifest.json`、`overview.svg` 与确定性的 detail SVG。公开 Plait consumer harness 使用锁定版本的 test-only ESM 检查；Drawnix、Plait 与 React 都不会进入插件 bundle。完整设计见[图表类型目录与 Drawnix 交付设计](./plans/2026-08-14-diagram-type-catalog-and-drawnix-delivery-design.zh-CN.md)与[Drawnix 演示交付架构复核](./brainstorms/2026-08-14-drawnix-presentation-architecture-review.zh-CN.md)。
 
 ### 显式渲染目标
 
@@ -210,7 +227,7 @@ flowchart LR
 |---|---|---|
 | `editable-html-svg` | 带语义 inline SVG 的自包含 HTML | 不依赖外部编辑器 runtime |
 | `drawio` | `.drawio` XML 加 SVG/MD review companion | 插件内不嵌入 diagrams.net runtime |
-| `drawnix` | `.drawnix` JSON 子集默认内联 Mermaid/源图形；开启完整 Mermaid 输出后才写入可选 `.assets` companion | 插件内不嵌入 Drawnix 或 Plait runtime；旧 companion 目录仍可读取，缺失的旧 Mermaid SVG 可以从 metadata 源文本重建，重新生成时只清理有 manifest 证据且归插件所有的目录；两阶段关系分配器把同侧连接留在外侧 gutter，把跨 forest 连接放入底部通道。关系标签计算可供 native metadata 与 SVG 复用；完整 native/SVG 几何一致性属于 consumer-test 门禁，不是序列化假设。 |
+| `drawnix` | `.drawnix` JSON 子集默认内联 Mermaid/源图形；开启完整 Mermaid 输出后才写入可选 `.assets` companion | 全量画布仍是兼容的默认 payload。演示交付只会在它旁边增加带 replay 链接的 SVG bundle，不会重解释该 target，也不会在运行时打包 Drawnix/Plait。旧 companion 目录仍可读取，缺失的旧 Mermaid SVG 可以从 metadata 源文本重建，重新生成时只清理有 manifest 证据且归插件所有的目录。 |
 | `circuitikz` | 经过验证的 `.tex` 源文件加 SVG/MD review companion | 预览/导出零依赖；桌面端可选本机编译器或托管 Tectonic |
 
 Circuitikz 支持仍然是受约束的。前端设置无需开启 Developer mode 就会显示 `Circuit (Circuitikz)` 首选图表类型与 `Circuitikz + SVG preview` 首选渲染目标，但 renderer 只接受经过验证的 `DiagramSpec(intent: "circuit", circuitSpec)`。它会写出确定性的 circuitikz TeX 和可审阅的 SVG companion。桌面用户随后可以复用自定义/系统编译器，或在 Vault 外显式安装固定版本 Tectonic 0.16.9，用于编译诊断、原生 PDF 证据与受保护的修复验收；移动端与常规预览/导出不会加载桌面进程代码。

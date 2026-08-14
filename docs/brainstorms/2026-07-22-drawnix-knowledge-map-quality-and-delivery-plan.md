@@ -57,6 +57,14 @@ One documentation claim also needs tightening. The Notemd SVG uses a local place
 
 See [Drawnix Presentation Architecture Review](./2026-08-14-drawnix-presentation-architecture-review.md) for the full comparison, phases, and `diagram-design` assessment.
 
+## Implemented Delivery Increment (2026-08-14)
+
+The implementation retains the full-board route as the compatibility baseline and adds a separate presentation delivery. Users choose **Full board** or **Presentation** in one action. The host dispatches independent operations; the existing board projection is not turned into a multi-purpose layout function.
+
+The default for existing settings and existing artifacts remains Full board. New Drawnix artifacts carry a validated semantic replay record, allowing the alternate delivery to be generated without another LLM call. Legacy artifacts remain readable and request regeneration when a presentation set is unavailable. The catalog exposes only executable diagram types; `diagram-design` layouts without a Notemd renderer remain reference-only.
+
+The approved architecture and implementation sequence are recorded in [Diagram Type Catalog And Drawnix Delivery Design](../plans/2026-08-14-diagram-type-catalog-and-drawnix-delivery-design.en.md).
+
 ## Original Audit (Historical)
 
 | Surface | Current code | Consequence | Required correction |
