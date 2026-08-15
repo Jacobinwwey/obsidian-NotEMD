@@ -72,7 +72,22 @@ Cloudy 与 Drawnix 的参考项目分析已记录在 `docs/brainstorms/2026-07-0
 
 详细的当前 main 对照与 MDX 发布决策记录在 `docs/maintainer/circuitikz-ui-export-and-docs-sync-2026-07-10.zh-CN.md`。
 
+## 2026-08-15 Mermaid 规范化合并方案
+
+全仓库 code-slop 审计发现一处有用户可见行为影响的发散与若干收敛项。合并方案记录在 `docs/plans/2026-08-15-mermaid-normalization-consolidation.zh-CN.md`（英文：`...en.md`）。
+
+关键更正与发现：
+
+- 渲染与预览路径对 Mermaid 的规范化不一致：`validator.normalizeMermaidDefinition`（`src/diagram/adapters/mermaid/validator.ts:29-39`）缺少 `mermaidDefinitionShared.normalizeMermaidDefinition`（`src/rendering/preview/mermaidDefinitionShared.ts:92-101`）具备的 ER 修复。同一 `erDiagram` 输入因路径不同渲染结果不同——这是本路线图双栈风险的具体实例。
+- `runCircuitikzCompile` 不是死代码（先前审计只 grep 了 `src/`）：CLI 在 `scripts/export-circuitikz.js:151,171` 调用它。`runCircuitikzRepairLoop` 仍未接线，但文档定位为 opt-in Phase E 边界；CLI 自行实现 repair-brief/acceptance。
+- Task 3（Mermaid adapter V2 + `mermaidProcessor.ts` 降责）是唯一未完成的收敛项；本方案执行它：在 `diagram/adapters/mermaid/normalize.ts` 建立单一中性 `normalizeMermaidDiagram` 管线，legacy 链字节稳定并阶段化注册，类型门控 legacy 修复（同时修复 `mermaidProcessor.ts:195` 无条件剥 `(){}` 破坏 `erDiagram` 块的问题），统一 fence 格式，`mermaid.initialize` 模块级一次。
+- Drawnix 几何重复（投影 vs 呈现）与死路由引擎是本方案之后的下一个收敛切片。
+
+下一步：按方案执行 Phase 0-3 并带门禁。`mermaidFix*` 回归面（约 25 个文件）必须保持全绿；唯一允许的输出变化是 `erDiagram` 渲染产物获得 ER 修复。
+
 ---
+
+
 
 **目标：** 将 Notemd 从“LLM 直接生成 Mermaid 文本并事后修补”的单一路径，升级为“图形意图识别 + 中间规格 + 专门渲染 + 多格式输出”的可扩展图形平台，在 Obsidian 内稳定支持更多图像与图表类型。
 

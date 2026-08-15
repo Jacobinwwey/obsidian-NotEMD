@@ -72,7 +72,22 @@ The important correction is front-end visibility: the settings page should expos
 
 The detailed current-main comparison and MDX publishing decision are recorded in `docs/maintainer/circuitikz-ui-export-and-docs-sync-2026-07-10.md`.
 
+## 2026-08-15 Mermaid Normalization Consolidation Plan
+
+A full-repo code-slop audit found one user-visible behavior divergence and several convergence items. The consolidation plan is recorded in `docs/plans/2026-08-15-mermaid-normalization-consolidation.en.md` (Chinese: `...zh-CN.md`).
+
+Key corrections and findings:
+
+- The render and preview paths normalize Mermaid differently: `validator.normalizeMermaidDefinition` (`src/diagram/adapters/mermaid/validator.ts:29-39`) lacks the ER repairs that `mermaidDefinitionShared.normalizeMermaidDefinition` (`src/rendering/preview/mermaidDefinitionShared.ts:92-101`) applies. The same `erDiagram` input renders differently depending on path — the concrete instance of this roadmap's dual-stack risk.
+- `runCircuitikzCompile` is NOT dead code (the earlier audit grepped `src/` only): the CLI calls it (`scripts/export-circuitikz.js:151,171`). `runCircuitikzRepairLoop` remains unwired but is documented as an opt-in Phase E boundary; the CLI implements repair-brief/acceptance itself.
+- Task 3 (Mermaid adapter V2 + `mermaidProcessor.ts` responsibility reduction) is the only unfinished convergence task; this plan executes it: one neutral `normalizeMermaidDiagram` pipeline in `diagram/adapters/mermaid/normalize.ts`, byte-stable legacy chain as a stage registry, family-gated legacy repair (also fixes the unconditional `(){}` stripping that corrupts `erDiagram` blocks in note processing at `mermaidProcessor.ts:195`), a single fence format, and module-level `mermaid.initialize`.
+- Drawnix geometry duplication (projection vs presentation) and the dead cross-root router engine are the next convergence slice after this plan.
+
+Next: Phases 0-3 with gates as specified in the plan. The `mermaidFix*` regression surface (~25 files) must stay green; the only allowed output change is `erDiagram` render artifacts gaining the ER repairs.
+
 ---
+
+
 
 **Goal:** Evolve Notemd from a single Mermaid-text generation path into an extensible diagram platform built around intent detection, structured specs, specialized renderers, and multi-format output inside Obsidian.
 

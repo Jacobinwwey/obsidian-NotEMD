@@ -40,6 +40,7 @@ This directory contains repository-level documentation for maintainers and contr
 
 ## Engineering Planning Docs
 
+- [Mermaid Normalization Consolidation Plan](./plans/2026-08-15-mermaid-normalization-consolidation.en.md)
 - [Diagram Platform Robustness And Settings Integrity Plan](./brainstorms/2026-08-08-diagram-platform-robustness-and-settings-integrity-plan.md)
 - [Drawnix Knowledge-Map Quality And Delivery Plan](./brainstorms/2026-07-22-drawnix-knowledge-map-quality-and-delivery-plan.md)
 - [Diagram Reference Integration And Figure Generation Plan](./brainstorms/2026-07-04-diagram-reference-integration-and-figure-generation-plan.md)
