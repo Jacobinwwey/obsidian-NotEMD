@@ -1,6 +1,6 @@
 # Notemd 系统架构总览
 
-> 更新：2026-08-15
+> 更新：2026-08-16
 
 ## 系统架构
 
@@ -202,6 +202,14 @@ flowchart LR
 
 `drawnixMindmap` 是唯一的原生 Drawnix 图表意图。它把 `DiagramSpec.nodes` 投影为可编辑的知识导图 forest，并由 Notemd 的已布局投影生成 SVG companion。关系布局分两次计算：第一步按已测量标签宽度预留水平 gutter；节点落位后，第二步按端点相对 root 的方位分类。同侧关系在外侧 gutter 中分配位于两个端点之间的行，跨 forest 关系进入底部通道。router 只处理避障端点接入，通道位置由分配器负责。预留通道会先尝试确定性的水平接入；若所有水平端口组合都无法抵达预留行，grid retry 才加入节点顶部和底部端口，标签仍落在原定通道中。这样不会因为分支封住两侧端口而拒绝一张仍有外部出口的复杂树，也不引入节点数、层级深度或关系数量配额。source coverage 也遵循这一规则：Markdown 标题链与未匹配的模型分支保留原有层级和 ID。只有实际发生语义合并时才会重映射关系边；无效、重复或重复层级所有权的关系边才会被丢弃。当前 native board 由上游 `withMind` 决定子节点落位，因此 SVG 与 native 的完整像素几何必须通过真实 consumer test 验证，不能只从导出 JSON 推断。标准 `mindmap` 仍由 MermaidRenderer 处理，生成与回退语义不变。
 
+### 能力目录契约（2026-08-16）
+
+图形平台保持三条独立轴：语义类型、渲染目标和导出格式。当前可执行真值是类型目录加 example fixture；向前计划将增加唯一 target descriptor 和带版本的生成式 capability manifest。`SVG`、`PNG`、`PDF` 是导出格式，不是 render target。
+
+当前已交付 10 个语义类型、8 个渲染目标和 3 个导出格式。设置页 gallery 已有每类一个生产 renderer fixture，但生成流缩略图和静态 docs gallery 尚未实现。`ref/diagram-design` 的参考布局在具备 renderer、fixture、预览、持久化映射、文档行和自动化门禁之前，保持 `reference-only/planned`。
+
+后续顺序是先解决正确性基础，再做目录/契约生成，最后接入确定性预览资产和选择器。这是必要的先后关系：当前重试产物身份、target 映射、local-only 设置持久化、cache 隔离和 operation schema 漂移都是边界缺陷。见[当前进度审计](./brainstorms/2026-08-16-mainline-diagram-architecture-progress-and-next-direction.zh-CN.md)、[图形能力目录](./maintainer/diagram-capability-catalog.zh-CN.md)和[向前架构计划](./superpowers/plans/2026-08-16-diagram-capability-catalog-and-forward-architecture.zh-CN.md)。
+
 ### 可执行类型目录与原生 Drawnix 树
 
 `DiagramTypeCatalog` 负责面向用户的类型名称、语义模式、prompt profile、renderer binding、visual-role 词表和可执行示例。`ref/diagram-design` 中还没有完整 Notemd 链路的参考布局仍只留在文档与路线图中，不进入选择器。
@@ -326,8 +334,8 @@ Drawnix 源图形遵循同一条兼容性边界。默认关闭 **同时完整输
 3. **Cline 对齐令牌解析**：未知模型由 API 提供商自行决定。已知模型使用元数据表。
 4. **operation-core 与 command-binding 分层**：registry 中的 operation 元数据可以描述可复用的宿主无关 core，而当前出货命令本身仍保留 active-file、write-file 或 preview-bound 的真实产品语义。`diagram.generate` 是当前最明确的证明案例。
 5. **Iframe 宿主预览**：Vega-Lite 和 HTML 在沙盒 iframe 中渲染。Mermaid 内联渲染。
-6. **本地存储提供商配置**：API 密钥可设备本地保留，工作流设置可同步。
-7. **响应缓存**：5 分钟 TTL 内相同 LLM 调用返回缓存结果。
+6. **Local-only 设置是边界要求，而非已验证保证**：`src/main.ts` 当前双写是 P0 缺陷，单次清洗后写入属于 active 计划。
+7. **响应缓存是临时决策**：当前五分钟缓存没有包含 endpoint、transport、运行参数和配置版本，且没有容量上限；在它被视为稳定架构决策前必须替换。
 
 ## 验证
 

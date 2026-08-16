@@ -6,7 +6,10 @@ This directory contains repository-level documentation for maintainers and contr
 
 ## Current Truth And Layout
 
-- [Mainline Progress Audit And Next-Level Direction](./brainstorms/2026-05-28-mainline-progress-audit-and-next-level-direction.md)
+- [Architecture Overview](./architecture.md)
+- [Mainline Diagram Architecture Progress Audit](./brainstorms/2026-08-16-mainline-diagram-architecture-progress-and-next-direction.md)
+- [Diagram Capability Catalog](./maintainer/diagram-capability-catalog.md)
+- [Mainline Progress Audit And Next-Level Direction (historical)](./brainstorms/2026-05-28-mainline-progress-audit-and-next-level-direction.md)
 - [Mainline CI, GEO, CLI, And Slidev Closeout Plan](./brainstorms/2026-07-02-mainline-ci-geo-cli-slidev-closeout-plan.md)
 - [Repository Documentation Layout](./maintainer/repository-document-layout.md)
 - [Documentation Archive](./archive/README.md)
@@ -19,6 +22,7 @@ This directory contains repository-level documentation for maintainers and contr
 - [Diagram Artifact Export CLI](./maintainer/diagram-artifact-export-cli.md)
 - [Draw.io Export Visual Regression](./maintainer/drawio-export-visual-regression.md)
 - [Drawnix Export Spike](./maintainer/drawnix-export-spike.md)
+- [Diagram Capability Catalog](./maintainer/diagram-capability-catalog.md)
 - [circuitikz Figure Generation Roadmap](./maintainer/circuitikz-figure-generation-roadmap.md)
 - [circuitikz UI, Export, And Docs Sync Plan](./maintainer/circuitikz-ui-export-and-docs-sync-2026-07-10.md)
 - [Chapter Split + TOC Extraction](./chapter-split-toc.md)
@@ -40,6 +44,7 @@ This directory contains repository-level documentation for maintainers and contr
 
 ## Engineering Planning Docs
 
+- [Diagram Capability Catalog And Forward Architecture Plan](./superpowers/plans/2026-08-16-diagram-capability-catalog-and-forward-architecture.en.md)
 - [Mermaid Normalization Consolidation Plan](./plans/2026-08-15-mermaid-normalization-consolidation.en.md)
 - [Diagram Platform Robustness And Settings Integrity Plan](./brainstorms/2026-08-08-diagram-platform-robustness-and-settings-integrity-plan.md)
 - [Drawnix Knowledge-Map Quality And Delivery Plan](./brainstorms/2026-07-22-drawnix-knowledge-map-quality-and-delivery-plan.md)

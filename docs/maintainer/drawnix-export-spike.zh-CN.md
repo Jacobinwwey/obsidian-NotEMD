@@ -15,13 +15,15 @@ DiagramSpec(intent: "drawnixMindmap")
   -> DrawnixMindMapProjection
   -> DrawnixMindMapExporter (.drawnix)
   -> DrawnixMindMapSvgRenderer (SVG companion)
+
+当前交付契约已收敛为一个文件名根文档树：源文件名是唯一 `mindmap` 根，标题层级和模型未匹配分支挂在其下。旧的多根、delivery selector、replay metadata 和 presentation bundle 设计均已被 2026-08-14 implementation record supersede，不得作为当前行为依据。
 ```
 
-本次契约支持一个或多个顶层 root。每个顶层节点导出为 `mindmap`，其 `node.children` 保持为 `mind_child`；不同 root 之间的关系仍使用受限的 `arrow-line`。这样架构笔记可以保留相互独立的子系统，而不必人为添加容器节点或拍平层级。
+当前契约只支持一个文件名根文档树。源文件名导出为唯一的 `mindmap` 文档根，其 `node.children` 保持为 `mind_child`；跨分支关系仍使用受限的 `arrow-line`。旧的多根表述属于历史设计。
 
-投影保留一个或多个顶层 root，并把 `node.children` 作为 Drawnix forest：
+当前投影保留一个文件名根，并把 `node.children` 作为 Drawnix 原生树：
 
-- root 元素：每个顶层节点对应一个 `type: "mindmap"`
+- root 元素：源文件名对应唯一的 `type: "mindmap"` 文档根
 - 后代元素：`type: "mind_child"`
 - 跨分支关系：`type: "arrow-line"`
 - 不设固定的层级深度或关系数量配额
@@ -30,7 +32,7 @@ DiagramSpec(intent: "drawnixMindmap")
 - 较大的 forest 会按确定性规则分行，并限制单行画布宽度
 - SVG renderer 版本：`notemd-drawnix-mindmap-svg@1.0.0`
 
-导出器写入 `type: "drawnix"`、`version: 1`、`source: "web"`、固定 viewport、一个或多个嵌套元素树和通过校验的跨关系箭头。生产路径不依赖 `SemanticFigureModel`，并保持 no Plait dependency。标准 Mermaid `mindmap` 仍走原有 Mermaid 路径；best-fit 推断可以把复制的 spec 映射为 Mermaid，但用户显式选择 Drawnix 时会 fail closed，不会在 Drawnix 操作下返回 Mermaid payload，也不会拍平原始 forest。
+导出器写入 `type: "drawnix"`、`version: 1`、`source: "web"`、固定 viewport、一个文件名根嵌套元素树和通过校验的跨关系箭头。生产路径不依赖 `SemanticFigureModel`，并保持 no Plait dependency。标准 Mermaid `mindmap` 仍走原有 Mermaid 路径；best-fit 推断可以把复制的 spec 映射为 Mermaid，但用户显式选择 Drawnix 时会 fail closed，不会在 Drawnix 操作下返回 Mermaid payload，也不会拍平原始树。
 
 ### 关系标签层级与路由
 

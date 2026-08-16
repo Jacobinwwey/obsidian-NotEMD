@@ -1,3 +1,15 @@
+---
+date: 2026-08-15
+last_updated: 2026-08-16
+topic: mermaid-normalization-consolidation
+status: active
+canonical_for:
+  - mermaid-normalization
+supersedes: []
+superseded_by: null
+implementation_record: null
+---
+
 # Mermaid Normalization Consolidation Plan (2026-08-15)
 
 ## 1. Status And Scope
@@ -28,7 +40,7 @@ Same input normalizes differently on render vs preview for `erDiagram` (brace-le
 - The 30-step `deepDebugMermaid` chain (`mermaidProcessor.ts:356-498`) is flowchart-biased: `fixMermaidNotes` rewrites `note right of` (valid sequence syntax), `fixMermaidPipes`/`fixMisplacedPipes` touch `|` (ER cardinality syntax).
 - `mermaid.initialize` is called per invocation in `validator.ts:47` and `checkMermaidErrors` (`mermaidProcessor.ts:48`); `mermaid.initialize` resets global config, so repeated calls can clobber other consumers.
 - Dead exports in `legacyFixerUtils.ts`: `rewriteLegacyTrailingDoubleDashArrow` (`:412`), four unimported `parse*` exports, byte-identical `stripWrappingDoubleQuotes`/`stripWrappedQuotedLabel` (`:36-42`/`:44-50`).
-- Drawnix geometry duplication (audit, outside this plan's scope but tracked here): `drawnixMindMapProjection.ts` vs `drawnixKnowledgeMapPresentation.ts` reimplement `estimateCharacterWidth`/wrapLabel/subtree-height/placement; `routeDrawnixCrossRootRelation` (`drawnixCrossRootRouter.ts:823`, ~250 lines) has no production caller; `mergeDrawnixSourceCoverage` (`drawnixSourceCoverage.ts:575-582`) is a deprecated tests-only alias.
+- Drawnix geometry duplication (audit, outside this plan's scope but tracked here): the current one-root native projection still has duplicated measurement/layout helpers; `routeDrawnixCrossRootRelation` (`drawnixCrossRootRouter.ts:823`, ~250 lines) has no production caller; `mergeDrawnixSourceCoverage` (`drawnixSourceCoverage.ts:575-582`) is a deprecated tests-only alias. The deleted presentation module and presentation delivery bundle are not part of the current contract.
 
 ## 3. Problem Analysis: Four Contract Conflicts
 
@@ -116,11 +128,11 @@ Challenge: first-line family detection is fragile (BOM, leading blank lines, \%\
 
 Roadmap "Recommended Next Batch" (convergence, not new targets) is still the correct direction; Task 3 is the only unfinished convergence item and this plan executes it.
 
-### vs Drawnix Knowledge-Map Quality And Delivery Plan (2026-07-22) + Presentation Review (2026-08-14)
+### vs Drawnix Knowledge-Map Quality And Delivery Plan (2026-07-22) + Implementation Record (2026-08-14)
 
-Implemented: projection, reserved-lane routing with grid fallback (verified live: `routeDrawnixRelationThroughReservedLane` -> `findGridReservedLaneRoute`, `drawnixCrossRootRouter.ts:627-635`), source coverage, presentation delivery increment (2026-08-14). Documented behavior in `architecture.md:203` is accurate.
+Implemented: projection, reserved-lane routing with grid fallback (verified live: `routeDrawnixRelationThroughReservedLane` -> `findGridReservedLaneRoute`, `drawnixCrossRootRouter.ts:627-635`), source coverage, and the single-root implementation record (2026-08-14). Documented behavior in `architecture.md:203` is accurate.
 
-Gaps (audit): projection vs presentation geometry duplication (two layout engines for one "same placed projection" contract, robustness plan 2026-08-08 Projection And Geometry Plane); dead `routeDrawnixCrossRootRelation` engine (~250 lines); deprecated `mergeDrawnixSourceCoverage` alias. These are the next Drawnix convergence slice after this plan.
+Gaps (audit): duplicated measurement/layout helpers within the current projection path; dead `routeDrawnixCrossRootRelation` engine (~250 lines); deprecated `mergeDrawnixSourceCoverage` alias. These are the next Drawnix convergence slice after this plan.
 
 ### vs circuitikz Figure Generation Roadmap
 
@@ -128,12 +140,12 @@ Phases A-F: A documented; B/C constrained prototype done (circuitSpec + exporter
 
 ### vs Diagram Platform Robustness And Settings Integrity Plan (2026-08-08)
 
-Phases 0-6 implemented (1.9.5). The semantic/geometry/delivery contracts are documented; the geometry contract is partially violated by the Drawnix projection/presentation duplication (same finding as above). No other contract violations found in the audit.
+Phases 0-6 implemented (1.9.5). The semantic/geometry/delivery contracts are documented; the current projection still has helper duplication, but there is no second presentation delivery contract. No other contract violations found in the audit.
 
 ## 10. Follow-up Direction
 
 1. Execute this plan (Mermaid normalization consolidation) — the only user-visible behavior divergence.
-2. Drawnix convergence slice: single shared layout module for projection/presentation; delete dead router engine and deprecated alias.
+2. Drawnix convergence slice: extract one shared measurement/layout module for the native projection; delete the dead router engine and deprecated alias.
 3. circuitikz: template parameterization; decide `runCircuitikzRepairLoop` fate; sync docs with the decision.
 4. Repo-wide helper convergence (escapeHtml x10, error-message ternary x94, FNV-1a x5, isRecord x6, slugify x3, enum guards x4, indexOf-dedupe x7) as the closing sweep of the convergence batch, with the roadmap's support-matrix discipline.
 5. Keep the roadmap's rule: convergence before new targets.

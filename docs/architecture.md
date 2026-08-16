@@ -1,6 +1,6 @@
 # Notemd Architecture Overview
 
-> Updated: 2026-08-15
+> Updated: 2026-08-16
 
 ## System Architecture
 
@@ -202,6 +202,14 @@ flowchart LR
 
 `drawnixMindmap` is the only native Drawnix diagram intent. It projects `DiagramSpec.nodes` into an editable knowledge-map forest and generates an SVG companion from Notemd's placed projection. Relation layout has two geometry passes: the first reserves horizontal gutter space from measured label widths; after node placement, the second classifies endpoints relative to their roots. Same-side relations use a compact exterior gutter with a row scheduled between their endpoints. Cross-forest relations use the lower lanes. The router owns obstacle-safe ingress only, while the allocator owns lane placement. Reserved-lane routing tries deterministic horizontal ingress first. If no horizontal pair can reach the reserved row, the grid retry adds top and bottom node ports while keeping the label on its allocated lane. This avoids rejecting a valid dense tree because a branch seals both side ports, without imposing a node, depth, or relation quota. Source coverage follows the same rule: Markdown headings and unmatched model branches retain their hierarchy and IDs. It remaps edges only after an actual semantic merge and drops only invalid, duplicate, or hierarchy-ownership edges. The upstream `withMind` runtime places native child nodes, so full SVG/native pixel parity needs a real consumer test and cannot be inferred from the exported JSON alone. Standard `mindmap` remains a Mermaid intent and continues through `MermaidRenderer`.
 
+### Capability Catalog Contract (2026-08-16)
+
+The diagram platform has three independent axes: semantic type, render target, and export format. The executable source of truth is the type catalog plus example fixtures; the forward plan adds a target descriptor and a generated versioned capability manifest. `SVG`, `PNG`, and `PDF` are export formats, never render targets.
+
+Current shipped scope is ten semantic types, eight render targets, and three export formats. The settings gallery already executes one production-renderer-backed fixture per type, but generation-flow thumbnails and a static docs gallery are not implemented. Reference layouts from `ref/diagram-design` remain `reference-only/planned` until a renderer, fixture, preview, persistence mapping, docs row, and automated gate exist.
+
+The next implementation order is correctness foundation first, then catalog/contract generation, then deterministic preview assets and selector integration. This ordering is intentional: the current retry artifact identity, target mapping, local-only settings persistence, cache isolation, and operation-schema drift are boundary defects that would multiply as the selector grows. See [the current progress audit](./brainstorms/2026-08-16-mainline-diagram-architecture-progress-and-next-direction.md), [the capability catalog](./maintainer/diagram-capability-catalog.md), and [the forward architecture plan](./superpowers/plans/2026-08-16-diagram-capability-catalog-and-forward-architecture.en.md).
+
 ### Executable Type Catalog And Native Drawnix Tree
 
 `DiagramTypeCatalog` owns the user-facing type name, semantic pattern, prompt profile, renderer binding, visual-role vocabulary, and an executable example fixture. Reference-only layouts from `ref/diagram-design` remain outside the selector until they have a complete Notemd path.
@@ -326,8 +334,8 @@ The delivered phases cover semantic structure integrity, geometry/layer collisio
 3. **Cline-aligned token resolution**: Unknown models defer to API provider. Known models use metadata table.
 4. **Operation-core vs command-binding split**: Registry operation metadata can describe a host-neutral reusable core even when the shipped commands remain active-file, write-file, or preview-bound surfaces. `diagram.generate` is the current proof case.
 5. **Iframe-host preview**: Vega-Lite and HTML rendered in sandboxed iframe. Mermaid rendered inline.
-6. **LocalOnly provider storage**: API keys can be device-local while workflow settings sync.
-7. **Response caching**: Identical LLM calls within 5-minute TTL return cached results.
+6. **Local-only settings are a boundary requirement, not a verified guarantee**: the current double-write path in `src/main.ts` is a P0 defect; the single-sanitized-write fix is part of the active plan.
+7. **Response caching is provisional**: the current five-minute cache does not yet fingerprint endpoint, transport, runtime parameters, or configuration revision and is unbounded; it must be replaced before this is treated as a stable architectural decision.
 
 ## Verification
 

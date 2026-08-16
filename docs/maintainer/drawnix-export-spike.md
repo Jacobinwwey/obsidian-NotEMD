@@ -17,9 +17,9 @@ DiagramSpec(intent: "drawnixMindmap")
   -> DrawnixMindMapSvgRenderer (SVG companion)
 ```
 
-The projection preserves one or more top-level roots and `node.children` ownership as a Drawnix forest:
+The projection preserves one filename-rooted document tree and `node.children` ownership as a Drawnix native tree:
 
-- root elements: each top-level node becomes `type: "mindmap"`
+- root element: the source filename becomes the single `type: "mindmap"` document root
 - descendants: `type: "mind_child"`
 - cross-branch relations: `type: "arrow-line"`
 - no fixed depth or relation-count quota
@@ -28,7 +28,7 @@ The projection preserves one or more top-level roots and `node.children` ownersh
 - large forests are packed into deterministic rows with a bounded row width
 - preview renderer version: `notemd-drawnix-mindmap-svg@1.0.0`
 
-The exporter writes `type: "drawnix"`, `version: 1`, `source: "web"`, a fixed viewport, one or more nested element trees, and any validated cross-relation arrows. It has no `SemanticFigureModel` dependency and no Plait dependency. The standard Mermaid `mindmap` intent remains a separate Mermaid path; best-fit inference may map a copied spec to Mermaid, while an explicitly requested Drawnix target fails closed instead of returning a Mermaid payload under a Drawnix operation.
+The exporter writes `type: "drawnix"`, `version: 1`, `source: "web"`, a fixed viewport, one filename-rooted nested element tree, and any validated cross-relation arrows. It has no `SemanticFigureModel` dependency and no Plait dependency. The standard Mermaid `mindmap` intent remains a separate Mermaid path; best-fit inference may map a copied spec to Mermaid, while an explicitly requested Drawnix target fails closed instead of returning a Mermaid payload under a Drawnix operation.
 
 ### Relation Label Layering And Routing
 

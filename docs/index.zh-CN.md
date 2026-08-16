@@ -13,6 +13,8 @@
 
 ## 规划文档
 
+- [图形能力目录与向前兼容架构（英文）](./superpowers/plans/2026-08-16-diagram-capability-catalog-and-forward-architecture.en.md)
+- [图形能力目录与向前兼容架构（中文）](./superpowers/plans/2026-08-16-diagram-capability-catalog-and-forward-architecture.zh-CN.md)
 - [AGENTS 与 Provider 扩展（英文）](./superpowers/plans/2026-03-26-agents-and-provider-expansion.en.md)
 - [AGENTS 与 Provider 扩展（中文）](./superpowers/plans/2026-03-26-agents-and-provider-expansion.zh-CN.md)
 - [中国区 Provider 第二轮扩展（英文）](./superpowers/plans/2026-03-26-china-provider-expansion-round2.en.md)
@@ -24,6 +26,12 @@
 
 ## 支撑文档
 
+- [架构总览（英文）](./architecture.md)
+- [架构总览（中文）](./architecture.zh-CN.md)
+- [Mainline 图形架构进度审计（英文）](./brainstorms/2026-08-16-mainline-diagram-architecture-progress-and-next-direction.md)
+- [Mainline 图形架构进度审计（中文）](./brainstorms/2026-08-16-mainline-diagram-architecture-progress-and-next-direction.zh-CN.md)
+- [图形能力目录（英文）](./maintainer/diagram-capability-catalog.md)
+- [图形能力目录（中文）](./maintainer/diagram-capability-catalog.zh-CN.md)
 - [图形参考项目集成与 Figure 生成扩展方案（英文）](./brainstorms/2026-07-04-diagram-reference-integration-and-figure-generation-plan.md)
 - [图形参考项目集成与 Figure 生成扩展方案（中文）](./brainstorms/2026-07-04-diagram-reference-integration-and-figure-generation-plan.zh-CN.md)
 - [图表平台 Phase 2 需求（英文）](./brainstorms/2026-04-14-diagram-platform-phase-2-requirements.md)

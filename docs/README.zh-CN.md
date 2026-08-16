@@ -6,7 +6,10 @@
 
 ## 当前真值与布局入口
 
-- [Mainline Progress Audit And Next-Level Direction](./brainstorms/2026-05-28-mainline-progress-audit-and-next-level-direction.zh-CN.md)
+- [架构总览](./architecture.zh-CN.md)
+- [Mainline 图形架构进度审计](./brainstorms/2026-08-16-mainline-diagram-architecture-progress-and-next-direction.zh-CN.md)
+- [图形能力目录](./maintainer/diagram-capability-catalog.zh-CN.md)
+- [Mainline Progress Audit And Next-Level Direction（历史）](./brainstorms/2026-05-28-mainline-progress-audit-and-next-level-direction.zh-CN.md)
 - [Mainline CI, GEO, CLI, And Slidev Closeout Plan](./brainstorms/2026-07-02-mainline-ci-geo-cli-slidev-closeout-plan.zh-CN.md)
 - [仓库文档布局规则](./maintainer/repository-document-layout.zh-CN.md)
 - [文档归档区](./archive/README.zh-CN.md)
@@ -19,6 +22,7 @@
 - [Diagram Artifact Export CLI](./maintainer/diagram-artifact-export-cli.zh-CN.md)
 - [draw.io 导出视觉回归 Runbook](./maintainer/drawio-export-visual-regression.zh-CN.md)
 - [Drawnix 导出 Spike](./maintainer/drawnix-export-spike.zh-CN.md)
+- [图形能力目录](./maintainer/diagram-capability-catalog.zh-CN.md)
 - [circuitikz Figure Generation Roadmap](./maintainer/circuitikz-figure-generation-roadmap.zh-CN.md)
 - [circuitikz UI、导出与文档同步方案](./maintainer/circuitikz-ui-export-and-docs-sync-2026-07-10.zh-CN.md)
 - [章节拆分 + TOC 提取](./chapter-split-toc.zh-CN.md)
@@ -38,6 +42,7 @@
 
 ## 工程规划文档
 
+- [图形能力目录与向前兼容架构计划](./superpowers/plans/2026-08-16-diagram-capability-catalog-and-forward-architecture.zh-CN.md)
 - [Mermaid 规范化合并方案](./plans/2026-08-15-mermaid-normalization-consolidation.zh-CN.md)
 - [图形平台稳健性与设置真值推进方案](./brainstorms/2026-08-08-diagram-platform-robustness-and-settings-integrity-plan.zh-CN.md)
 - [Drawnix 知识导图质量与交付方案](./brainstorms/2026-07-22-drawnix-knowledge-map-quality-and-delivery-plan.zh-CN.md)

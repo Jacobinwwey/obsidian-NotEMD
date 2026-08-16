@@ -1,9 +1,12 @@
 ---
 topic: drawnix-routing-visuals-dpi
 status: implemented
+superseded_by: ../brainstorms/2026-08-08-diagram-platform-robustness-and-settings-integrity-plan.en.md
 ---
 
 # Drawnix Routing, Source Visuals, And DPI
+
+> Historical implementation record. The later contract is inline source-visual data by default; `.assets` companions are opt-in when complete Mermaid visuals are explicitly requested.
 
 ## Scope
 
@@ -25,7 +28,7 @@ Drawnix knowledge maps may contain several top-level roots. Cross-root relations
 
 - Cross-root routing is now fail-closed. The router never emits a direct segment after obstacle routing fails; it throws an explicit fallback error so the generation service can select a non-Drawnix target instead of producing a misleading relation that crosses an unrelated root.
 - Parallel relations with identical endpoints receive deterministic offset lanes before grid routing. This keeps labels and arrow strokes legible without changing the semantic edge contract.
-- Source visuals have a two-layer persistence contract. The native `.drawnix` JSON contains only a namespaced `metadata.notemd.sourceVisuals` index with hashes, resolution state, source paths, and relative companion names. Mermaid source, sanitized SVG, and binary image bytes remain in the scoped `.assets` directory. The Obsidian wrapper embeds those companions for review. No base64 payload or unverified Drawnix image element is injected into the native element stream.
+- Source visuals use the current two-layer persistence contract. The native `.drawnix` JSON embeds sanitized Mermaid SVG/source and resolved binary previews by default in namespaced `metadata.notemd.sourceVisuals`; the complete Mermaid companion set under `.assets` is opt-in for external handoff. No unverified Drawnix image element is injected into the native element stream.
 - An explicit `drawnix` render target is a hard boundary: input construction normalizes it to `drawnixMindmap` and promotes legacy Mermaid compatibility to `best-fit`; the prompt still requires that intent, while the parsed spec is normalized and checked again before an intent-mismatch retry. Therefore a DeepSeek response that says generic `mindmap` cannot silently fall back to Mermaid or discard the Drawnix tree.
 - Artifact saving is transactional for both newly created and already existing files. Text and binary files are snapshotted before overwrite and restored when a later companion, artifact, or wrapper write fails.
 

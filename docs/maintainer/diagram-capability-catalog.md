@@ -1,0 +1,63 @@
+---
+date: 2026-08-16
+last_updated: 2026-08-16
+status: current-contract
+canonical_for: diagram-capability-catalog
+---
+
+# Diagram Capability Catalog
+
+This document is the human-readable view of the current executable catalog. The runtime source of truth is `src/diagram/diagramTypeCatalog.ts` plus `src/diagram/examples/diagramExampleCatalog.ts`; this file must be regenerated or reconciled when those definitions change.
+
+## Shipped Semantic Types
+
+| Type ID | User intent | Render target | Example fixture | Preview status | Export |
+|---|---|---|---|---|---|
+| `mermaid-mindmap` | Concept hierarchy | Mermaid | `mermaid-mindmap-basics` | Settings preview action | SVG, PNG |
+| `drawnix-knowledge-map` | Editable filename-rooted knowledge tree with material cross-branch relations | Drawnix | `drawnix-knowledge-map-architecture` | SVG companion / Drawnix artifact | `.drawnix`, SVG, PNG, PDF |
+| `flowchart` | Control flow and decisions | Mermaid | `flowchart-release` | Settings preview action | SVG, PNG |
+| `sequence` | Ordered participant interactions | Mermaid | `sequence-request` | Settings preview action | SVG, PNG |
+| `state` | Lifecycle states and transitions | Mermaid | `state-lifecycle` | Settings preview action | SVG, PNG |
+| `class` | Type ownership and associations | Mermaid | `class-domain` | Settings preview action | SVG, PNG |
+| `entity-relationship` | Entities, fields, and cardinality | Mermaid | `entity-relationship-schema` | Settings preview action | SVG, PNG |
+| `canvas-map` | Spatially grouped concepts | JSON Canvas | `canvas-map-domains` | Iframe / Canvas artifact | source, SVG, PNG, PDF |
+| `data-chart` | Measured comparison over an axis | Vega-Lite | `data-chart-trend` | Sandboxed iframe | source, SVG, PNG, PDF |
+| `circuit` | Electrical components and nets | Circuitikz | `circuit-cmos-inverter` | SVG companion / source | `.tex`, SVG, PNG, PDF* |
+
+`*` Circuitikz PDF/PNG claims require the pinned native compiler gate. Editable HTML/SVG currently has a self-contained HTML preview but no production `previewSvg`; its SVG/PNG/PDF export claim is therefore **open** until Phase 0 adds the explicit companion SVG.
+
+## Render Targets
+
+| Target | Artifact boundary | Preview | Export formats | External gate |
+|---|---|---|---|---|
+| `mermaid` | fenced Mermaid source | iframe | SVG, PNG | none |
+| `json-canvas` | JSON Canvas | iframe | source, SVG, PNG, PDF | none |
+| `vega-lite` | Vega-Lite JSON | sandboxed iframe | source, SVG, PNG, PDF | none |
+| `html` | generic HTML fallback | iframe | source | none |
+| `editable-html-svg` | self-contained HTML with semantic inline SVG | iframe | HTML now; SVG/PNG/PDF after Phase 0 | none |
+| `drawio` | Draw.io XML plus review companions | SVG companion | source, SVG, PNG, PDF | diagrams.net open/import |
+| `drawnix` | one filename-rooted `.drawnix` tree plus SVG companion | SVG companion | `.drawnix`, SVG, PNG, PDF | Drawnix open/import |
+| `circuitikz` | validated `.tex` plus review companion | SVG companion/source | `.tex`, SVG, PNG, PDF | native TeX compile |
+
+## Reference-Only / Planned Types
+
+The following names come from `ref/diagram-design` and are not currently selectable in Notemd: architecture, IT current-state, timeline, swimlane, quadrant, radar/spider, loop/flywheel, nested, tree, org chart, layer stack, Venn, pyramid/funnel, bar, line, Gantt, scatter, high-level, process, medallion, data flow, DP integration, and DP security matrix. They require the candidate admission checklist in the forward architecture plan.
+
+## Preview and Gallery Contract
+
+The current settings gallery is executable and uses the production renderer, but has no static thumbnails. The planned generated gallery will produce:
+
+- `docs/assets/diagrams/<fixture-id>.svg`
+- `docs/assets/diagrams/<fixture-id>.png`
+- a versioned capability manifest
+- bilingual matrix rows linked to the same fixture IDs
+
+The generator must use the production fixture catalog, fail on missing previews or stale assets, and keep filenames stable. It must not duplicate fixture data in documentation scripts.
+
+## Consumer Gates
+
+Unit tests prove the Notemd artifact contract. They do not prove external interoperability:
+
+- open Draw.io XML in diagrams.net;
+- open/import Drawnix JSON in a real Drawnix consumer;
+- compile Circuitikz TeX with the pinned compiler.

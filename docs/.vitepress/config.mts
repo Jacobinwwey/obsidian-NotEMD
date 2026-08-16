@@ -21,7 +21,7 @@ export default {
             { text: 'Home', link: '/' },
             { text: 'Docs Hub', link: '/README' },
             { text: '文档中心', link: '/README.zh-CN' },
-            { text: 'Plans', link: '/superpowers/plans/2026-04-14-diagram-rendering-platform-roadmap' },
+            { text: 'Plans', link: '/superpowers/plans/2026-08-16-diagram-capability-catalog-and-forward-architecture.en' },
             { text: 'Releases', link: '/releases/1.9.6' }
         ],
         sidebar: [
@@ -62,6 +62,8 @@ export default {
                 text: 'Maintainer',
                 collapsed: false,
                 items: [
+                    { text: 'Diagram Capability Catalog (EN)', link: '/maintainer/diagram-capability-catalog' },
+                    { text: 'Diagram Capability Catalog (zh-CN)', link: '/maintainer/diagram-capability-catalog.zh-CN' },
                     { text: 'Release Workflow (EN)', link: '/maintainer/release-workflow' },
                     { text: 'Release Workflow (zh-CN)', link: '/maintainer/release-workflow.zh-CN' }
                 ]
@@ -79,6 +81,14 @@ export default {
                 collapsed: false,
                 items: [
                     {
+                        text: 'Mainline Diagram Architecture Progress (EN)',
+                        link: '/brainstorms/2026-08-16-mainline-diagram-architecture-progress-and-next-direction'
+                    },
+                    {
+                        text: 'Mainline Diagram Architecture Progress (zh-CN)',
+                        link: '/brainstorms/2026-08-16-mainline-diagram-architecture-progress-and-next-direction.zh-CN'
+                    },
+                    {
                         text: 'Diagram Platform Phase 2 Requirements (EN)',
                         link: '/brainstorms/2026-04-14-diagram-platform-phase-2-requirements'
                     },
@@ -92,6 +102,22 @@ export default {
                 text: 'Plans',
                 collapsed: false,
                 items: [
+                    {
+                        text: 'Diagram Capability Catalog And Forward Architecture (EN)',
+                        link: '/superpowers/plans/2026-08-16-diagram-capability-catalog-and-forward-architecture.en'
+                    },
+                    {
+                        text: 'Diagram Capability Catalog And Forward Architecture (zh-CN)',
+                        link: '/superpowers/plans/2026-08-16-diagram-capability-catalog-and-forward-architecture.zh-CN'
+                    },
+                    {
+                        text: 'Mermaid Normalization Consolidation (EN)',
+                        link: '/plans/2026-08-15-mermaid-normalization-consolidation.en'
+                    },
+                    {
+                        text: 'Mermaid Normalization Consolidation (zh-CN)',
+                        link: '/plans/2026-08-15-mermaid-normalization-consolidation.zh-CN'
+                    },
                     {
                         text: 'AGENTS And Provider Expansion (EN)',
                         link: '/superpowers/plans/2026-03-26-agents-and-provider-expansion'

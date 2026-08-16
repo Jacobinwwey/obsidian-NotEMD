@@ -13,6 +13,8 @@ Repository docs preview for `obsidian-NotEMD`.
 
 ## Planning Docs
 
+- [Diagram Capability Catalog And Forward Architecture (EN)](./superpowers/plans/2026-08-16-diagram-capability-catalog-and-forward-architecture.en.md)
+- [Diagram Capability Catalog And Forward Architecture (zh-CN)](./superpowers/plans/2026-08-16-diagram-capability-catalog-and-forward-architecture.zh-CN.md)
 - [AGENTS And Provider Expansion (EN)](./superpowers/plans/2026-03-26-agents-and-provider-expansion.en.md)
 - [AGENTS And Provider Expansion (zh-CN)](./superpowers/plans/2026-03-26-agents-and-provider-expansion.zh-CN.md)
 - [China Provider Expansion Round 2 (EN)](./superpowers/plans/2026-03-26-china-provider-expansion-round2.en.md)
@@ -24,6 +26,12 @@ Repository docs preview for `obsidian-NotEMD`.
 
 ## Supporting Docs
 
+- [Architecture Overview (EN)](./architecture.md)
+- [Architecture Overview (zh-CN)](./architecture.zh-CN.md)
+- [Mainline Diagram Architecture Progress Audit (EN)](./brainstorms/2026-08-16-mainline-diagram-architecture-progress-and-next-direction.md)
+- [Mainline Diagram Architecture Progress Audit (zh-CN)](./brainstorms/2026-08-16-mainline-diagram-architecture-progress-and-next-direction.zh-CN.md)
+- [Diagram Capability Catalog (EN)](./maintainer/diagram-capability-catalog.md)
+- [Diagram Capability Catalog (zh-CN)](./maintainer/diagram-capability-catalog.zh-CN.md)
 - [Diagram Reference Integration And Figure Generation Plan (EN)](./brainstorms/2026-07-04-diagram-reference-integration-and-figure-generation-plan.md)
 - [Diagram Reference Integration And Figure Generation Plan (zh-CN)](./brainstorms/2026-07-04-diagram-reference-integration-and-figure-generation-plan.zh-CN.md)
 - [Diagram Platform Phase 2 Requirements (EN)](./brainstorms/2026-04-14-diagram-platform-phase-2-requirements.md)

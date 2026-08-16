@@ -3,9 +3,12 @@ date: 2026-07-22
 version: 1.9.4
 topic: drawnix-knowledge-map-quality-and-delivery
 status: implemented
+superseded_by: ../plans/2026-08-14-diagram-type-catalog-and-drawnix-delivery-implementation.en.md
 ---
 
 # Drawnix Knowledge-Map Quality And Delivery Plan
+
+> Historical note: the base projection remains implemented, but the 2026-08-14 full-board/presentation and replay addendum below is superseded. Current behavior is the single filename-rooted native Drawnix tree documented in the implementation record.
 
 ## Decision
 
@@ -22,7 +25,7 @@ DiagramSpec(intent: "drawnixMindmap")
   -> DrawnixMindMapSvgRenderer (notemd-drawnix-mindmap-svg@1.0.0)
 ```
 
-The delivered contract is one or more top-level roots, nested `node.children` forests, `mindmap`/`mind_child` elements, and `arrow-line` cross-branch relationships. It has no fixed depth or relation-count quota. The projection sizes relation lanes from measured label boxes, expands the canvas for those lanes, and rejects only invalid semantics or geometry that cannot remain inside the canvas without entering protected regions. Large forests are packed into deterministic bounded-width rows so an unbounded root count cannot create a single-line canvas. The CLI routes Drawnix before constructing the generic `SemanticFigureModel`; other targets keep their existing path. Full Drawnix host embedding and a Plait preview remain deferred.
+The current delivered contract is one filename-rooted native tree, nested `node.children` ownership, `mindmap`/`mind_child` elements, and `arrow-line` cross-branch relationships. It has no fixed depth or relation-count quota. The projection sizes relation lanes from measured label boxes, expands the canvas for those lanes, and rejects only invalid semantics or geometry that cannot remain inside the canvas without entering protected regions. The CLI routes Drawnix before constructing the generic `SemanticFigureModel`; other targets keep their existing path. Full Drawnix host embedding and a Plait preview remain deferred.
 
 ## Current Routing And Source-Coverage Update (2026-08-14)
 
@@ -47,7 +50,7 @@ The regression surface is layered. The lane unit tests verify dynamic relation a
 
 The operational baseline now includes `npm run benchmark:drawnix-knowledge-map`: a fixed 8-root, 136-node, 32-relation forest exported through the same artifact CLI. It records structural counts, artifact sizes, and cold end-to-end time without imposing a machine-dependent duration quota. Release candidates must retain real upstream import evidence against the pinned Drawnix baseline. A performance regression must be fixed with layout or routing work, not with a new semantic quota.
 
-## Review Addendum (2026-08-14)
+## Review Addendum (2026-08-14, superseded)
 
 The independent `drawnixMindmap` intent, dedicated projection, no-semantic-quota policy, and Mermaid isolation remain valid. The new benchmark verifies that eight roots, 136 nodes, and 32 relations retain topology. It also exposes a presentation gap: emitting the complete forest as one SVG combines source-order root packing with lower cross-root lanes and produces an excessively wide canvas.
 
@@ -57,11 +60,11 @@ One documentation claim also needs tightening. The Notemd SVG uses a local place
 
 See [Drawnix Presentation Architecture Review](./2026-08-14-drawnix-presentation-architecture-review.md) for the full comparison, phases, and `diagram-design` assessment.
 
-## Implemented Delivery Increment (2026-08-14)
+## Superseded Delivery Increment (2026-08-14)
 
-The implementation retains the full-board route as the compatibility baseline and adds a separate presentation delivery. Users choose **Full board** or **Presentation** in one action. The host dispatches independent operations; the existing board projection is not turned into a multi-purpose layout function.
+The former design retained a full-board route and added a separate presentation delivery. This section is retained as historical context only; the selector, replay record, and presentation bundle were removed before the current implementation record.
 
-The default for existing settings and existing artifacts remains Full board. New Drawnix artifacts carry a validated semantic replay record, allowing the alternate delivery to be generated without another LLM call. Legacy artifacts remain readable and request regeneration when a presentation set is unavailable. The catalog exposes only executable diagram types; `diagram-design` layouts without a Notemd renderer remain reference-only.
+The former design's default for existing settings and artifacts was Full board, with a validated semantic replay record for alternate delivery. This is historical only: current artifacts do not carry that replay metadata, and the catalog exposes only executable diagram types; `diagram-design` layouts without a Notemd renderer remain reference-only.
 
 The approved architecture and implementation sequence are recorded in [Diagram Type Catalog And Drawnix Delivery Design](../plans/2026-08-14-diagram-type-catalog-and-drawnix-delivery-design.en.md).
 

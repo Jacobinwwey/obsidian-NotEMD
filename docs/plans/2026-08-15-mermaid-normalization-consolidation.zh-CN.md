@@ -1,3 +1,15 @@
+---
+date: 2026-08-15
+last_updated: 2026-08-16
+topic: mermaid-normalization-consolidation
+status: active
+canonical_for:
+  - mermaid-normalization
+supersedes: []
+superseded_by: null
+implementation_record: null
+---
+
 # Mermaid 规范化合并方案（2026-08-15）
 
 ## 1. 状态与范围
@@ -28,7 +40,7 @@
 - 30 步 `deepDebugMermaid` 链（`mermaidProcessor.ts:356-498`）是 flowchart 偏置的：`fixMermaidNotes` 改写 `note right of`（合法 sequence 语法）、`fixMermaidPipes`/`fixMisplacedPipes` 触碰 `|`（ER 基数语法）。
 - `mermaid.initialize` 在 `validator.ts:47` 与 `checkMermaidErrors`（`mermaidProcessor.ts:48`）各调一次；`mermaid.initialize` 是全局配置重置，重复调用会冲掉其他消费者。
 - `legacyFixerUtils.ts` 死导出：`rewriteLegacyTrailingDoubleDashArrow`（`:412`）、4 个不被 import 的 `parse*`、字节相同的 `stripWrappingDoubleQuotes`/`stripWrappedQuotedLabel`（`:36-42`/`:44-50`）。
-- Drawnix 几何重复（审计发现，超出本方案范围但在此登记）：`drawnixMindMapProjection.ts` 与 `drawnixKnowledgeMapPresentation.ts` 各自实现 `estimateCharacterWidth`/wrapLabel/子树高度/放置；`routeDrawnixCrossRootRelation`（`drawnixCrossRootRouter.ts:823`，约 250 行）无生产调用；`mergeDrawnixSourceCoverage`（`drawnixSourceCoverage.ts:575-582`）是已废弃的 tests-only 别名。
+- Drawnix 几何重复（审计发现，超出本方案范围但在此登记）：当前单根原生投影内部仍有重复的测量/布局 helper；`routeDrawnixCrossRootRelation`（`drawnixCrossRootRouter.ts:823`，约 250 行）无生产调用；`mergeDrawnixSourceCoverage`（`drawnixSourceCoverage.ts:575-582`）是已废弃的 tests-only 别名。已删除的 presentation 模块和 presentation 交付 bundle 不属于当前契约。
 
 ## 3. 问题分析：四个契约冲突
 
@@ -116,11 +128,11 @@ normalizeMermaidDiagram(input, opts?) -> { content, family }
 
 路线图 "Recommended Next Batch"（收敛批而非新目标）仍是正确方向；Task 3 是唯一未完成的收敛项，本方案执行它。
 
-### vs Drawnix 知识导图质量与交付方案（2026-07-22）+ 呈现架构评审（2026-08-14）
+### vs Drawnix 知识导图质量与交付方案（2026-07-22）+ 实施记录（2026-08-14）
 
-已实现：投影、带 grid 回退的保留车道路由（已验证存活：`routeDrawnixRelationThroughReservedLane` -> `findGridReservedLaneRoute`，`drawnixCrossRootRouter.ts:627-635`）、source coverage、2026-08-14 呈现交付增量。`architecture.md:203` 描述的行为准确。
+已实现：投影、带 grid 回退的保留车道路由（已验证存活：`routeDrawnixRelationThroughReservedLane` -> `findGridReservedLaneRoute`，`drawnixCrossRootRouter.ts:627-635`）、source coverage，以及 2026-08-14 单根实施记录。`architecture.md:203` 描述的行为准确。
 
-缺口（审计）：投影 vs 呈现的几何重复（一套"同一 placed projection"契约下有两套布局引擎，对应稳健性方案 2026-08-08 的 Projection And Geometry Plane）；死的 `routeDrawnixCrossRootRelation` 引擎（约 250 行）；废弃别名 `mergeDrawnixSourceCoverage`。这些是本方案之后的 Drawnix 收敛切片。
+缺口（审计）：当前投影路径内部的测量/布局 helper 重复；死的 `routeDrawnixCrossRootRelation` 引擎（约 250 行）；废弃别名 `mergeDrawnixSourceCoverage`。这些是本方案之后的 Drawnix 收敛切片。
 
 ### vs circuitikz Figure Generation Roadmap
 
@@ -128,12 +140,12 @@ Phase A-F：A 已文档化；B/C 受约束原型完成（circuitSpec + exporter 
 
 ### vs 图形平台稳健性与设置真值推进方案（2026-08-08）
 
-Phase 0-6 已实现（1.9.5）。语义/几何/交付契约已文档化；几何契约被 Drawnix 投影/呈现重复部分违反（同上）。审计未发现其他契约违反。
+Phase 0-6 已实现（1.9.5）。语义/几何/交付契约已文档化；当前投影仍存在 helper 重复，但不存在第二套 presentation 交付契约。审计未发现其他契约违反。
 
 ## 10. 后续推进方向
 
 1. 执行本方案（Mermaid 规范化合并）——唯一有用户可见行为发散的项。
-2. Drawnix 收敛切片：投影/呈现共享单一布局模块；删除死路由引擎与废弃别名。
+2. Drawnix 收敛切片：为原生投影抽取单一共享测量/布局模块；删除死路由引擎与废弃别名。
 3. circuitikz：模板参数化；决策 `runCircuitikzRepairLoop` 去留；同步文档。
 4. 仓库级 helper 收敛（escapeHtml x10、错误三元 x94、FNV-1a x5、isRecord x6、slugify x3、枚举守卫 x4、indexOf 去重 x7）作为收敛批收尾，遵守路线图的 support-matrix 纪律。
 5. 坚持路线图规则：先收敛，再上新目标。

@@ -3,9 +3,12 @@ date: 2026-07-22
 version: 1.9.4
 topic: drawnix-knowledge-map-quality-and-delivery
 status: implemented
+superseded_by: ../plans/2026-08-14-diagram-type-catalog-and-drawnix-delivery-implementation.zh-CN.md
 ---
 
 # Drawnix 知识导图质量与交付方案
+
+> 历史说明：基础投影仍已实现，但下方 2026-08-14 的 full-board/presentation 与 replay 增量已经被后续 implementation record 覆盖。当前行为是单一文件名根原生 Drawnix 树。
 
 ## 当前实现
 
@@ -43,7 +46,7 @@ router 仍把节点、页眉保护带、其他标签矩形和画布边界当作�
 
 运行层面的基线现已包含 `npm run benchmark:drawnix-knowledge-map`：它通过同一条 artifact CLI 导出固定的 8 个 root、136 个节点、32 条关系的 forest，记录结构计数、artifact 大小和端到端冷导出耗时，但不设置与机器绑定的时长配额。发版候选仍须保留针对固定 Drawnix 基线的真实上游导入证据。性能回归应通过布局或路由优化解决，不能重新引入语义配额。
 
-## 复核补充（2026-08-14）
+## 复核补充（2026-08-14，已 supersede）
 
 本方案的独立 `drawnixMindmap` intent、专用投影、无语义配额和 Mermaid 隔离仍成立。新基准验证了 8 root、136 节点、32 关系可以保留 topology；它同时暴露了展示层缺口：完整 forest 直接输出为一张 SVG 时，源顺序 root packing 与底部跨 root 通道会形成过宽画布。
 
@@ -53,11 +56,11 @@ router 仍把节点、页眉保护带、其他标签矩形和画布边界当作�
 
 完整分析、分阶段方案和 `diagram-design` 对照见[Drawnix 演示交付架构复核](./2026-08-14-drawnix-presentation-architecture-review.zh-CN.md)。
 
-## 已实现的交付增量（2026-08-14）
+## 已 supersede 的交付增量（2026-08-14）
 
-当前实现以全量画布路径作为兼容基线，并新增独立的演示交付。用户可以一次选择 **全量画布** 或 **演示交付**。host 分派独立操作，现有 board projection 不会变成承担多种布局语义的函数。
+旧设计曾以全量画布路径作为兼容基线，并新增独立的演示交付；本节仅保留历史背景。当前没有全量画布/演示选择器，现有 board projection 也不携带 presentation 语义。
 
-既有设置和既有 artifact 的默认值继续是全量画布。新的 Drawnix artifact 会携带经过验证的语义 replay record，因此可在不再次调用 LLM 的情况下生成另一种交付。旧 artifact 保持可读；没有演示集时界面要求重新生成。目录只暴露可执行图表类型；尚无 Notemd renderer 的 `diagram-design` 布局保持 reference-only。
+旧设计的默认值曾是全量画布，并依赖语义 replay record 生成另一种交付；这不代表当前产物契约。当前 artifact 不携带该 replay metadata，目录只暴露可执行图表类型；尚无 Notemd renderer 的 `diagram-design` 布局保持 reference-only。
 
 已批准的架构与实施顺序见[图表类型目录与 Drawnix 交付设计](../plans/2026-08-14-diagram-type-catalog-and-drawnix-delivery-design.zh-CN.md)。
 

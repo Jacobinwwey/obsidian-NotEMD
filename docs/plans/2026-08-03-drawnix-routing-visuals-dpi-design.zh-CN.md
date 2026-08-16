@@ -1,7 +1,10 @@
 ---
 topic: drawnix-routing-visuals-dpi
 status: implemented
+superseded_by: ../brainstorms/2026-08-08-diagram-platform-robustness-and-settings-integrity-plan.zh-CN.md
 ---
+
+> 历史实施记录：后续契约是默认 inline source-visual 数据；只有显式请求完整 Mermaid 视觉交付时才写入 `.assets` companion。
 
 # Drawnix 根间路由、源视觉保真与 DPI
 
@@ -25,7 +28,7 @@ Drawnix 知识图可以包含多个顶层 root。当一个无关 root 位于跨 
 
 - 跨 root 路由现在采用 fail-closed 策略。障碍路由失败后不再输出直线；路由器抛出明确的回退错误，由生成服务选择非 Drawnix 目标，避免生成一条穿过无关 root、却看起来像成功的关系线。
 - 端点完全相同的并行关系会在网格路由前分配确定性的偏移车道，保证标签和箭头笔画可读，同时不改变语义边契约。
-- 源视觉采用双层持久化契约。原生 `.drawnix` JSON 只保存命名空间 `metadata.notemd.sourceVisuals` 索引，包括 hash、解析状态、源路径和相对 companion 名称；Mermaid 源码、安全 SVG 与图片二进制继续保存在 scoped `.assets` 目录。Obsidian wrapper 负责嵌入这些 companion 供审阅。不向原生元素流注入 base64 或未经验证的 Drawnix 图片元素。
+- 源视觉采用当前双层持久化契约。原生 `.drawnix` JSON 默认在命名空间 `metadata.notemd.sourceVisuals` 中内联安全 Mermaid SVG/source 与已解析的二进制预览；完整 Mermaid companion 集合只在显式外部交付时写入 `.assets`。不向原生元素流注入未经验证的 Drawnix 图片元素。
 - 显式 `drawnix` 渲染目标是强约束边界：输入构建器会把它归一化为 `drawnixMindmap` 并在 legacy Mermaid 兼容模式下自动提升到 `best-fit`；prompt 仍要求模型返回该 intent，但解析后的 spec 会在 intent mismatch 重试之前再次归一化并校验。这样即使 DeepSeek 返回通用 `mindmap`，也不会静默退回 Mermaid 或丢失 Drawnix 树状结构。
 - artifact 保存对新建文件和已有文件都具备事务语义。文本与二进制文件在覆盖前建立快照；后续 companion、artifact 或 wrapper 写入失败时恢复原内容。
 
