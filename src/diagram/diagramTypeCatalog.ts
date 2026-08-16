@@ -30,9 +30,9 @@ export const EXECUTABLE_DIAGRAM_TYPES: readonly ExecutableDiagramTypeDefinition[
         id: 'drawnix-knowledge-map',
         intent: 'drawnixMindmap',
         family: 'knowledge',
-        semanticPattern: 'Multi-root knowledge graph with material cross-relations',
+        semanticPattern: 'Filename-rooted knowledge tree with material cross-branch relationships',
         promptProfileId: 'drawnix-knowledge-map',
-        rendererOperationId: 'drawnix-knowledge-map-board',
+        rendererOperationId: 'drawnix-knowledge-map-tree',
         rendererTarget: 'drawnix',
         visualRoles: ['root', 'domain', 'subsystem', 'component', 'evidence', 'external', 'cross-relation'],
         exampleFixtureId: 'drawnix-knowledge-map-architecture'

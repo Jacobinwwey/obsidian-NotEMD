@@ -76,35 +76,7 @@ describe('diagram operation input helpers', () => {
         expect(input.drawnixExportMermaidCompanions).toBe(true);
     });
 
-    test('defaults legacy Drawnix settings to full-board delivery while preserving a presentation preference', () => {
-        const legacyInput = buildDiagramOperationInput({
-            sourceMarkdown: '# Topic',
-            executionMode: 'save-artifact',
-            settings: {
-                ...mockSettings,
-                preferredDiagramIntent: 'drawnixMindmap',
-                preferredDiagramRenderTarget: 'drawnix',
-                experimentalDiagramCompatibilityMode: 'best-fit',
-                drawnixKnowledgeMapDelivery: undefined
-            }
-        });
-        const presentationInput = buildDiagramOperationInput({
-            sourceMarkdown: '# Topic',
-            executionMode: 'save-artifact',
-            settings: {
-                ...mockSettings,
-                preferredDiagramIntent: 'drawnixMindmap',
-                preferredDiagramRenderTarget: 'drawnix',
-                experimentalDiagramCompatibilityMode: 'best-fit',
-                drawnixKnowledgeMapDelivery: 'presentation'
-            }
-        });
-
-        expect(legacyInput.drawnixKnowledgeMapDelivery).toBe('full-board');
-        expect(presentationInput.drawnixKnowledgeMapDelivery).toBe('presentation');
-    });
-
-    test('applies a maintainer Drawnix delivery override ahead of the saved preference', () => {
+    test('ignores obsolete Drawnix delivery preferences at the settings boundary', () => {
         const input = buildDiagramOperationInput({
             sourceMarkdown: '# Topic',
             executionMode: 'save-artifact',
@@ -113,12 +85,11 @@ describe('diagram operation input helpers', () => {
                 preferredDiagramIntent: 'drawnixMindmap',
                 preferredDiagramRenderTarget: 'drawnix',
                 experimentalDiagramCompatibilityMode: 'best-fit',
-                drawnixKnowledgeMapDelivery: 'full-board'
-            },
-            drawnixKnowledgeMapDeliveryOverride: 'presentation'
+                drawnixKnowledgeMapDelivery: 'presentation'
+            } as any
         });
 
-        expect(input.drawnixKnowledgeMapDelivery).toBe('presentation');
+        expect(input).not.toHaveProperty('drawnixKnowledgeMapDelivery');
     });
 
     test('forces legacy-mermaid compatibility for mermaid output mode', () => {

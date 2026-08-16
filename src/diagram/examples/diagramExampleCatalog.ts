@@ -4,7 +4,7 @@ import {
     getExecutableDiagramType
 } from '../diagramTypeCatalog';
 import type { DiagramCatalogTypeId, DiagramIntent } from '../types';
-import type { RenderArtifact } from '../../rendering/types';
+import type { RenderArtifact, RenderOptions } from '../../rendering/types';
 import { DRAWNIX_KNOWLEDGE_MAP_ARCHITECTURE_EXAMPLE } from './drawnixKnowledgeMapExamples';
 
 export interface DiagramExampleDefinition {
@@ -17,7 +17,7 @@ export interface DiagramExampleDefinition {
 }
 
 export interface DiagramExampleArtifactRenderer {
-    render(spec: DiagramSpec, options: { target: RenderTarget }): Promise<RenderArtifact>;
+    render(spec: DiagramSpec, options: RenderOptions): Promise<RenderArtifact>;
 }
 
 const CMOS_INVERTER_EXAMPLE: DiagramSpec = {

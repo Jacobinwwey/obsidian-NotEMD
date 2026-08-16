@@ -12,13 +12,8 @@ import { DEFAULT_SETTINGS } from '../constants';
 import type { DiagramIntent, RenderTarget } from '../diagram/types';
 import {
     applyDiagramIntentPreference,
-    applyDiagramRenderTargetPreference,
-    resolveDrawnixKnowledgeMapDelivery
+    applyDiagramRenderTargetPreference
 } from '../diagram/diagramPreferenceCompatibility';
-import {
-    renderDrawnixKnowledgeMapDeliverySelector,
-    shouldShowDrawnixKnowledgeMapDeliverySelector
-} from './diagramDeliverySelector';
 import { getExecutableDiagramIntentOptions } from './diagramCatalogLabels';
 import { renderDiagramExampleGallery } from './diagramExampleGallery';
 import {
@@ -2789,29 +2784,6 @@ export class NotemdSettingTab extends PluginSettingTab {
                         this.display();
                     });
             });
-
-        if (shouldShowDrawnixKnowledgeMapDeliverySelector(
-            this.plugin.settings.preferredDiagramIntent,
-            this.plugin.settings.preferredDiagramRenderTarget
-        )) {
-            const deliverySetting = this.createCatalogSetting(containerEl, {
-                id: 'settings.experimentalDiagramPipeline.drawnixKnowledgeMapDelivery'
-            })
-                .setName(experimentalDiagramI18n.drawnixKnowledgeMapDeliveryName)
-                .setDesc(experimentalDiagramI18n.drawnixKnowledgeMapDeliveryDesc);
-            renderDrawnixKnowledgeMapDeliverySelector({
-                parent: deliverySetting.controlEl,
-                selectedDelivery: resolveDrawnixKnowledgeMapDelivery(this.plugin.settings),
-                copy: {
-                    fullBoard: experimentalDiagramI18n.drawnixKnowledgeMapDeliveryFullBoard,
-                    presentation: experimentalDiagramI18n.drawnixKnowledgeMapDeliveryPresentation
-                },
-                onSelect: async delivery => {
-                    this.plugin.settings.drawnixKnowledgeMapDelivery = delivery;
-                    await this.plugin.saveSettings();
-                }
-            });
-        }
 
         const exampleSetting = this.createCatalogSetting(containerEl, {
             id: 'settings.experimentalDiagramPipeline.examples'

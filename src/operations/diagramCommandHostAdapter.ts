@@ -1,7 +1,7 @@
 import { TFile } from 'obsidian';
 import { formatI18n } from '../i18n';
 import { DiagramGenerationResult } from '../diagram/diagramGenerationService';
-import { DiagramIntent, DrawnixKnowledgeMapDelivery, isSupportedDiagramIntent, RenderTarget } from '../diagram/types';
+import { DiagramIntent, isSupportedDiagramIntent, RenderTarget } from '../diagram/types';
 import { LocalKnowledgeRetrievalSummary } from '../localKnowledgeBase';
 import { RenderArtifact, RenderArtifactCompanion, RenderArtifactPreviewPanel } from '../rendering/types';
 import { ensureSemanticFigureSvgStandaloneStyles } from '../rendering/renderers/editableHtmlSvgRenderer';
@@ -34,7 +34,6 @@ export interface DiagramCommandInputOverrides {
     requestedRenderTarget?: RenderTarget;
     compatibilityMode?: 'best-fit' | 'legacy-mermaid';
     targetLanguage?: string;
-    drawnixKnowledgeMapDelivery?: DrawnixKnowledgeMapDelivery;
 }
 
 export interface DiagramCommandOptions {
@@ -1360,8 +1359,7 @@ export async function runGenerateDiagramCommandWithHost(
             requestedIntentOverride: options.inputOverrides?.requestedIntent,
             requestedRenderTargetOverride: options.inputOverrides?.requestedRenderTarget,
             compatibilityModeOverride: options.inputOverrides?.compatibilityMode,
-            targetLanguageOverride: options.inputOverrides?.targetLanguage,
-            drawnixKnowledgeMapDeliveryOverride: options.inputOverrides?.drawnixKnowledgeMapDelivery
+            targetLanguageOverride: options.inputOverrides?.targetLanguage
         });
         const sourceVisualReferences = scanSourceVisualReferences(fileContent);
         if (sourceVisualReferences.length > 0) {

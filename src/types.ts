@@ -1,4 +1,4 @@
-import type { DrawnixKnowledgeMapDelivery, RenderTarget } from './diagram/types';
+import type { RenderTarget } from './diagram/types';
 import type { DiagramHistoryEntry } from './diagram/history/diagramHistoryRepository';
 
 // Configuration for a single LLM Provider
@@ -215,8 +215,6 @@ export interface NotemdSettings {
     experimentalDiagramCompatibilityMode: 'legacy-mermaid' | 'best-fit';
     preferredDiagramIntent?: string;
     preferredDiagramRenderTarget?: RenderTarget;
-    /** Missing persisted values select the compatible full-board Drawnix delivery. */
-    drawnixKnowledgeMapDelivery?: DrawnixKnowledgeMapDelivery;
     diagramPreviewExportPpi: number;
     drawnixExportMermaidCompanions: boolean;
     circuitikzCompilerPreference: 'auto' | 'managed' | 'system' | 'custom';

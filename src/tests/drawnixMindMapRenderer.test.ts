@@ -1,11 +1,12 @@
 import { DiagramSpec } from '../diagram/types';
 import {
     buildDrawnixMindMapProjection,
-    DRAWNIX_MIND_MAP_FOREST_ROW_MAX_WIDTH,
     DRAWNIX_MIND_MAP_HEADER_SAFE_HEIGHT
 } from '../diagram/adapters/drawnix/drawnixMindMapProjection';
 import { DrawnixRenderer } from '../rendering/renderers/drawnixRenderer';
 import { renderDrawnixMindMapSvg } from '../rendering/renderers/drawnixMindMapSvgRenderer';
+import * as drawnixCrossRootRouter from '../diagram/adapters/drawnix/drawnixCrossRootRouter';
+import { DRAWNIX_ARCHITECTURE_DOCUMENT_TREE_FIXTURE } from './fixtures/drawnixArchitectureDocumentTreeFixture';
 
 function createKnowledgeMapSpec(): DiagramSpec {
     return {
@@ -136,6 +137,18 @@ describe('Drawnix mind-map renderer', () => {
             data: { source: 'DrawnixMindMapProjection' }
         });
         expect(JSON.stringify(data)).not.toContain('SemanticFigureModel');
+    });
+
+    test('uses the native tree artifact when a stale delivery option reaches the renderer', async () => {
+        const artifact = await new DrawnixRenderer().render(createKnowledgeMapSpec(), {
+            drawnixKnowledgeMapDelivery: 'presentation'
+        } as any);
+        const data = JSON.parse(artifact.content);
+
+        expect(data.elements).toHaveLength(2);
+        expect(data.elements[0]).toMatchObject({ id: 'notemd', type: 'mindmap' });
+        expect(data.metadata?.notemd?.knowledgeMap).toBeUndefined();
+        expect(artifact.previewSvg?.content).toContain('notemd-drawnix-mindmap-svg@1.0.0');
     });
 
     test('renders its SVG companion from the mind-map layout rather than the generic figure grid', async () => {
@@ -485,7 +498,7 @@ describe('Drawnix mind-map renderer', () => {
         });
     });
 
-    test('wraps large forests into deterministic rows instead of creating an unbounded canvas width', () => {
+    test('wraps large forests into deterministic rows while retaining every root', () => {
         const forestSpec: DiagramSpec = {
             ...createKnowledgeMapSpec(),
             nodes: Array.from({ length: 24 }, (_, index) => ({
@@ -498,7 +511,6 @@ describe('Drawnix mind-map renderer', () => {
         const projection = buildDrawnixMindMapProjection(forestSpec);
 
         expect(projection.roots).toHaveLength(24);
-        expect(projection.width).toBeLessThanOrEqual(DRAWNIX_MIND_MAP_FOREST_ROW_MAX_WIDTH);
         expect(projection.height).toBeGreaterThan(projection.nodes[0].height + 180);
         projection.nodes.forEach((node, index) => {
             projection.nodes.slice(index + 1).forEach(other => {
@@ -509,6 +521,19 @@ describe('Drawnix mind-map renderer', () => {
                 expect(overlaps).toBe(false);
             });
         });
+    });
+
+    test('routes the relationship-rich architecture stress fixture without losing relations', () => {
+        const routeSpy = jest.spyOn(drawnixCrossRootRouter, 'routeDrawnixRelationThroughReservedLane');
+        const projection = buildDrawnixMindMapProjection(DRAWNIX_ARCHITECTURE_DOCUMENT_TREE_FIXTURE);
+
+        expect(projection.roots).toHaveLength(1);
+        expect(projection.nodes).toHaveLength(31);
+        expect(projection.crossRelations).toHaveLength(DRAWNIX_ARCHITECTURE_DOCUMENT_TREE_FIXTURE.edges?.length ?? 0);
+        expect(projection.root.data.topic.children[0].text).toBe('architecture.zh-CN');
+        expect(projection.crossRelations.every(relation => relation.points.length >= 2)).toBe(true);
+        expect(routeSpy).toHaveBeenCalledTimes(DRAWNIX_ARCHITECTURE_DOCUMENT_TREE_FIXTURE.edges?.length ?? 0);
+        routeSpy.mockRestore();
     });
 
     test('produces deterministic layout without overlapping node rectangles', () => {

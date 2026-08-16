@@ -156,8 +156,7 @@ describe('maintainer CLI bridge', () => {
                     requestedIntent: 'erDiagram',
                     requestedRenderTarget: 'circuitikz',
                     compatibilityMode: 'legacy-mermaid',
-                    targetLanguage: 'en',
-                    drawnixKnowledgeMapDelivery: 'presentation'
+                    targetLanguage: 'en'
                 }
             }
         );
@@ -212,14 +211,41 @@ describe('maintainer CLI bridge', () => {
         }
     });
 
-    test('documents Drawnix presentation delivery as an executable diagram CLI override', async () => {
+    test('keeps the Drawnix CLI contract focused on the native tree artifact', async () => {
         const help = OPERATION_HELP as MaintainerOperationHelp;
         const diagramHelp = help['diagram.generate'];
 
-        expect(diagramHelp.optional).toContain('drawnixKnowledgeMapDelivery');
+        expect(diagramHelp.optional).not.toContain('drawnixKnowledgeMapDelivery');
         expect(diagramHelp.additionalExamples?.some(example => (
-            example.includes('"drawnixKnowledgeMapDelivery":"presentation"')
+            example.includes('"requestedIntent":"drawnixMindmap"')
         ))).toBe(true);
+        expect(diagramHelp.additionalExamples?.some(example => (
+            example.includes('drawnixKnowledgeMapDelivery')
+        ))).toBe(false);
+    });
+
+    test('ignores a persisted Drawnix delivery override without changing the generation input', async () => {
+        const host = createMaintainerCliHost();
+
+        await invokeMaintainerCliOperation(host as any, {
+            operationId: 'diagram.generate',
+            input: {
+                sourcePath: 'docs/architecture.zh-CN.md',
+                requestedIntent: 'drawnixMindmap',
+                requestedRenderTarget: 'drawnix',
+                drawnixKnowledgeMapDelivery: 'document-tree'
+            }
+        });
+
+        expect(host.generateDiagramForPathCommand).toHaveBeenCalledWith(
+            'docs/architecture.zh-CN.md',
+            undefined,
+            expect.objectContaining({
+                inputOverrides: expect.not.objectContaining({
+                    drawnixKnowledgeMapDelivery: expect.anything()
+                })
+            })
+        );
     });
 
     test('local knowledge inspect additional examples stay executable and preserve task-scoped payloads', async () => {
@@ -345,7 +371,7 @@ describe('maintainer CLI bridge', () => {
         })).rejects.toThrow('expects "splitHeadingLevel" to be one of');
     });
 
-    test('rejects unknown Drawnix delivery overrides', async () => {
+    test('ignores obsolete Drawnix delivery values instead of rejecting old automation payloads', async () => {
         const host = createMaintainerCliHost();
 
         await expect(invokeMaintainerCliOperation(host as any, {
@@ -354,7 +380,7 @@ describe('maintainer CLI bridge', () => {
                 sourcePath: 'docs/index.zh-CN.md',
                 drawnixKnowledgeMapDelivery: 'single-canvas'
             }
-        })).rejects.toThrow('expects "drawnixKnowledgeMapDelivery" to be one of');
+        })).resolves.toEqual(expect.anything());
     });
 
     test('rejects invalid local knowledge inspect task scope', async () => {

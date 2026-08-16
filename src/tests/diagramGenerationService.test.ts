@@ -5,6 +5,19 @@ import { HtmlRenderer } from '../rendering/renderers/htmlRenderer';
 import { DiagramRenderer } from '../rendering/types';
 import { DiagramSpec } from '../diagram/types';
 
+function findDiagramNodeById(nodes: DiagramSpec['nodes'], id: string): DiagramSpec['nodes'][number] | undefined {
+    for (const node of nodes) {
+        if (node.id === id) {
+            return node;
+        }
+        const child = findDiagramNodeById(node.children ?? [], id);
+        if (child) {
+            return child;
+        }
+    }
+    return undefined;
+}
+
 function createCircuitDiagramSpec(): DiagramSpec {
     return {
         intent: 'circuit',
@@ -318,7 +331,7 @@ Client sends work to a queue-backed worker.
         expect(JSON.parse(result.artifact.content).elements).toHaveLength(1);
     });
 
-    test('preserves model roots as a Drawnix forest when source coverage has no matching sections', async () => {
+    test('places unmatched model branches under one filename-rooted Drawnix tree when source coverage has no matching sections', async () => {
         const result = await generateDiagramArtifact('# Architecture', {
             compatibilityMode: 'best-fit',
             requestedRenderTarget: 'drawnix',
@@ -346,10 +359,19 @@ Client sends work to a queue-backed worker.
         expect(result.artifact.target).toBe('drawnix');
         expect(result.renderError).toBeUndefined();
         const rootElements = data.elements.filter((element: { type: string }) => element.type === 'mindmap');
-        expect(rootElements).toHaveLength(2);
-        expect(rootElements.map((element: { data: { topic: { children: Array<{ text: string }> } } }) => (
-            element.data.topic.children[0].text
-        ))).toEqual(['Client', 'Server']);
+        expect(rootElements).toHaveLength(1);
+        expect(rootElements[0].data.topic.children[0].text).toBe('Architecture');
+        expect(rootElements[0].children).toEqual(expect.arrayContaining([
+            expect.objectContaining({
+                data: expect.objectContaining({
+                    topic: expect.objectContaining({ children: [expect.objectContaining({ text: 'Additional concepts' })] })
+                }),
+                children: expect.arrayContaining([
+                    expect.objectContaining({ id: 'client' }),
+                    expect.objectContaining({ id: 'server' })
+                ])
+            })
+        ]));
         expect(data.elements.find((element: { type: string }) => element.type === 'arrow-line')).toMatchObject({
             type: 'arrow-line',
             source: { id: 'editor' },
@@ -377,11 +399,13 @@ Client sends work to a queue-backed worker.
         });
 
         expect(result.artifact.target).toBe('drawnix');
-        expect(result.spec.nodes.map(node => node.id)).toEqual(['client', 'server']);
-        expect(result.spec.nodes[0].children?.map(node => node.id)).toEqual(['editor']);
+        expect(result.spec.nodes).toHaveLength(1);
+        expect(result.spec.nodes[0].id).toMatch(/^source-document-/);
+        expect(findDiagramNodeById(result.spec.nodes, 'client')?.children?.map(node => node.id)).toEqual(['editor']);
+        expect(findDiagramNodeById(result.spec.nodes, 'server')).toBeDefined();
         const exportedRoots = JSON.parse(result.artifact.content).elements
             .filter((element: { type: string }) => element.type === 'mindmap');
-        expect(exportedRoots.map((element: { id: string }) => element.id)).toEqual(['client', 'server']);
+        expect(exportedRoots.map((element: { id: string }) => element.id)).toEqual([result.spec.nodes[0].id]);
     });
 
     test('normalizes a generic mindmap response when the Drawnix target is explicit', async () => {
@@ -402,8 +426,10 @@ Client sends work to a queue-backed worker.
 
         expect(result.spec.intent).toBe('drawnixMindmap');
         expect(result.artifact.target).toBe('drawnix');
-        expect(result.spec.nodes.map(node => node.id)).toEqual(['client', 'server']);
-        expect(result.spec.nodes[0].children?.map(node => node.id)).toEqual(['editor']);
+        expect(result.spec.nodes).toHaveLength(1);
+        expect(result.spec.nodes[0].id).toMatch(/^source-document-/);
+        expect(findDiagramNodeById(result.spec.nodes, 'client')?.children?.map(node => node.id)).toEqual(['editor']);
+        expect(findDiagramNodeById(result.spec.nodes, 'server')).toBeDefined();
         expect(JSON.parse(result.artifact.content).elements).toEqual(
             expect.arrayContaining([
                 expect.objectContaining({ type: 'mindmap' })

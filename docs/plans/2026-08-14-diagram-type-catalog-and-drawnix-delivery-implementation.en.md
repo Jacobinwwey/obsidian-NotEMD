@@ -1,433 +1,49 @@
-# Diagram Type Catalog And Drawnix Delivery Implementation Plan
-
-> **For agentic workers:** REQUIRED SUB-SKILL: Use `superpowers:executing-plans` for inline task-by-task implementation. Steps use checkbox (`- [ ]`) syntax for tracking.
-
-**Goal:** Add an executable diagram type catalog and let Drawnix Knowledge Map users switch in one action between the compatibility full-board delivery and a separate presentation delivery.
-
-**Architecture:** Keep `DiagramSpec` as the semantic boundary. The catalog resolves a type to a dedicated prompt and renderer operation. Full-board and presentation delivery use separate projections and artifacts; the UI chooses one operation. New Drawnix metadata stores a validated semantic replay record so the alternate delivery can be rebuilt without another LLM call.
+# Diagram Type Catalog And Drawnix Implementation Record
 
-**Tech Stack:** TypeScript, Jest, Obsidian plugin APIs, existing Drawnix JSON subset, SVG, Playwright consumer tests, VitePress documentation.
+> Updated: 2026-08-15
+> Status: Superseded delivery design; native filename-rooted tree is shipped.
 
-## Global Constraints
+## Decision
 
-- Preserve the existing Mermaid `mindmap` command, renderer, prompt, cache, fallback, and repair behavior.
-- Preserve valid Drawnix hierarchy, stable IDs, relation endpoints, source-visual metadata, and no-semantic-quota policy.
-- Do not add Drawnix, Plait, or React runtime dependencies to the production plugin bundle; consumer integration is test-only.
-- Do not add a `full`/`presentation` flag to a shared layout function. Expose separate operations and result types.
-- Legacy settings without the new preference select full board. Legacy `.drawnix` artifacts remain readable.
-- Do not advertise reference-only visual types in settings or the example gallery.
-- Keep documentation paired in English and Chinese under `docs/`.
+The former `document-tree` / `full-board` / `presentation` matrix has been removed. It introduced a second semantic and persistence plane: the board could only be saved after replay metadata passed a separate validation path. That path failed in the real `E:\1Knowledge` run before any artifact was written.
 
----
+Drawnix now has one contract. `DiagramSpec` stays the semantic boundary, source coverage creates a single document root, the native projection owns geometry, and `DrawnixRenderer` writes one board plus its SVG companion. There is no replay record, delivery selector, preview conversion, or presentation bundle.
 
-## Implementation Status (2026-08-14)
+## Current Contract
 
-The task steps below preserve the original execution sequence. Their unchecked boxes are not a completion signal; the task headings and this record are the current source of truth.
+- `drawnixMindmap` remains the persisted intent and `drawnix-knowledge-map` remains the catalog ID.
+- The root label is the source filename without its extension. For `architecture.zh-CN.md`, the native root is `architecture.zh-CN`.
+- Markdown headings become nested branches. Model branches that do not match source structure are placed under `Additional concepts`; they are not discarded.
+- The renderer exports `.drawnix`, `<source>_diagram.drawnix.svg`, and the Markdown wrapper used by Obsidian preview.
+- Cross-branch relationships are native `arrow-line` elements. Layout reserves exterior corridors from measured label geometry, tries direct horizontal ingress first, then uses obstacle-aware grid routing. When every horizontal pair is sealed, the grid retry adds top and bottom ports while retaining the native label on its reserved lane. The grid retains exact finite endpoint coordinates; it does not quantize a subpixel node boundary out of the route graph.
+- The allocator has no depth, node-count, or relation-count quota. Tests assert geometric invariants instead of prescribing one route shape.
+- Mermaid `mindmap` remains on `MermaidRenderer`; its prompt, fallback, repair, cache, and command behavior are unchanged.
 
-| Task | State | Delivered boundary |
-|---|---|---|
-| 1. Executable type catalog | Implemented | Catalog-owned intent, renderer, example, and compatibility resolver; missing or invalid delivery settings resolve to `full-board`. |
-| 2. Semantic input split | Implemented | Drawnix owns a dedicated prompt and multi-root source-coverage policy; Mermaid `mindmap` stays isolated. |
-| 3. Independent projections | Implemented | Full board and presentation use different projection operations; presentation centers fitting overview grids, scopes detail relation context, and recursively turns an over-wide child hierarchy into bounded continuation slices with a fidelity ledger. |
-| 4. Replay and persistence | Implemented | Namespaced replay metadata and transactional presentation bundles preserve legacy `.drawnix` readability. |
-| 5. One-click selection | Implemented | Settings choose the next delivery; preview can replay the alternate delivery in memory without an LLM call or file write. |
-| 6. Consumer and regression gates | Implemented and verified | Pinned test-only Plait ESM consumer harness, CLI coverage, visual invariants, and legacy/Mermaid isolation tests are present. |
+## Compatibility
 
-### Verification Record (2026-08-14)
+`loadSettings()` removes the obsolete persisted `drawnixKnowledgeMapDelivery` field and persists the sanitized record on the first legacy load. The artifact CLI still accepts `--drawnix-delivery` so existing scripts do not fail argument parsing, but the value is ignored. New output never carries `metadata.notemd.knowledgeMap`.
 
-- `npm run build`: PASS.
-- `npm test -- --runInBand`: PASS, 251 suites; 2,201 tests passed and 1 was skipped. Provider transport retry fixtures emit expected warning/error logs.
-- `npm run docs:build`: PASS.
-- `git diff --check`: PASS.
-- The presentation planner regression suite covers a single deep hierarchy: it emits bounded continuation slices, keeps every node in the ledger, and renders continuation anchors with a dashed border.
-- The local architecture demonstration regenerated a presentation bundle from the fixture derived from `docs/architecture.zh-CN.md`: 6 roots, 25 nodes, 10 relations, and 0 validation errors.
-- `obsidian help`: PASS; the installed Obsidian CLI exposed its command surface.
-- `obsidian-cli help`: unavailable on this workstation (`CommandNotFoundException`). This is an environment gap, not CLI validation evidence.
+This is intentionally a behavior change for users who relied on the withdrawn full-board or presentation artifacts. Keeping the switch would preserve the failure-prone second contract and make the default ambiguous. Existing `.drawnix` files remain ordinary Drawnix data; they are not rewritten or reconstructed.
 
----
+## Root Cause And Resolution
 
-### Task 1: Establish The Executable Type Catalog [Implemented]
+The failing vault log reported `Drawnix knowledge-map replay record failed validation before export`. The failure was in the retired replay validator, before a filesystem write. It was not caused by the `E:\1Knowledge` path, vault permissions, or an Obsidian renderer limitation.
 
-**Files:**
-- Create: `src/diagram/diagramTypeCatalog.ts`
-- Modify: `src/diagram/types.ts`
-- Modify: `src/types.ts`
-- Modify: `src/constants.ts`
-- Modify: `src/diagram/diagramPreferenceCompatibility.ts`
-- Test: `src/tests/diagramTypeCatalog.test.ts`
-- Test: `src/tests/diagramOperationInput.test.ts`
+The replacement removes that validator from the generation path. Subsequent real-vault runs exposed two independent reserved-lane issues. The fallback grid rounded coordinates while looking up its source and lane terminals, so an otherwise valid fractional boundary could be treated as absent. A later 387-obstacle run then showed that horizontal node ports can both be sealed even when an exterior route remains available. The grid keeps exact finite coordinates and retries through top and bottom ports only after horizontal ingress fails. The regression suite covers subpixel routing, a 331-node same-side parent relation, a 383-node tree with 35 same-side relations, and the minimized vertical-port ingress case. Source coverage and native export remain the only Drawnix-specific stages after `DiagramSpec` validation. This returns the visual structure to the requested complex tree rooted by the document filename without introducing a depth, node, or relation quota.
 
-**Interfaces:**
+The apparent `E:\1Knowledge` write failure had a separate configuration cause: the persisted custom Mermaid output directory still pointed to a prior runtime test folder. Diagram artifacts intentionally share that legacy destination setting. Resetting it restored source-sibling `.drawnix`, SVG, and wrapper output; no vault permission or frontend-path defect was involved.
 
-```ts
-export type DiagramCatalogTypeId =
-    | 'mermaid-mindmap'
-    | 'drawnix-knowledge-map'
-    | 'flowchart'
-    | 'sequence'
-    | 'state'
-    | 'class'
-    | 'entity-relationship'
-    | 'canvas-map'
-    | 'data-chart'
-    | 'circuit';
+The final real-vault reproduction exposed a separate liveness fault. A stalled provider request left the diagram command's `isBusy` guard set after the bridge client timed out; client process termination does not cancel the plugin's in-flight promise. `runDiagramGenerateOperation()` now owns a five-minute, reporter-backed abort controller and forwards its signal to every diagram LLM call, including structured retries and the legacy Mermaid fallback. It clears the controller in `finally` and suppresses fallback after cancellation. This is an external-provider deadline, not a topology limit.
 
-export type DrawnixKnowledgeMapDelivery = 'full-board' | 'presentation';
+## Verification
 
-export interface ExecutableDiagramTypeDefinition {
-    id: DiagramCatalogTypeId;
-    intent: DiagramIntent;
-    family: 'knowledge' | 'behavior' | 'structure' | 'quantitative' | 'engineering';
-    promptProfileId: string;
-    rendererOperationId: string;
-    exampleFixtureId: string;
-}
+- `src/tests/drawnixSourceCoverage.test.ts` covers filename roots, heading coverage, unmatched branches, and edge remapping.
+- `src/tests/drawnixMindMapRenderer.test.ts`, `src/tests/drawnixRelationLaneLayout.test.ts`, and `src/tests/drawnixMindMapRouting.test.ts` cover native hierarchy, labels, deterministic routing, exterior corridors, and complex cross-branch relations.
+- `src/tests/diagramGenerateOperation.test.ts` covers deadline cancellation and reporter-controller release for stalled diagram calls.
+- `src/tests/diagramExampleCatalog.test.ts` requires the shipped Drawnix catalog example to have one `architecture.zh-CN` root and no obsolete metadata.
+- `src/tests/diagramArtifactExportCli.test.ts` checks the offline artifact CLI, including the compatibility no-op for legacy delivery input.
+- A fresh build, full Jest run, Vault bundle verification, plugin reload, and `diagram.generate` invocation against `docs/architecture.zh-CN.md` are required before release. The final 2026-08-15 `E:\1Knowledge` run produced one `architecture.zh-CN` root with 332 native tree nodes and 9 `arrow-line` relations, plus the Drawnix SVG companion and Markdown wrapper. Model topology is intentionally data-dependent; the invariant is a single filename root with all accepted relations retained.
 
-export function getExecutableDiagramType(id: DiagramCatalogTypeId): ExecutableDiagramTypeDefinition;
-export function findDiagramTypeByIntent(intent: DiagramIntent): ExecutableDiagramTypeDefinition;
-export function resolveDrawnixKnowledgeMapDelivery(settings: Pick<NotemdSettings, 'drawnixKnowledgeMapDelivery'>): DrawnixKnowledgeMapDelivery;
-```
+## Follow-up Boundary
 
-- [ ] **Step 1: Write failing catalog and compatibility tests**
-
-```ts
-expect(findDiagramTypeByIntent('drawnixMindmap').id).toBe('drawnix-knowledge-map');
-expect(resolveDrawnixKnowledgeMapDelivery({})).toBe('full-board');
-expect(EXECUTABLE_DIAGRAM_TYPES.every(type => type.exampleFixtureId)).toBe(true);
-```
-
-- [ ] **Step 2: Run targeted tests and verify the missing catalog/default failures**
-
-Run: `rtk npx jest src/tests/diagramTypeCatalog.test.ts src/tests/diagramOperationInput.test.ts --runInBand`
-
-Expected: failure because the catalog and `drawnixKnowledgeMapDelivery` do not exist.
-
-- [ ] **Step 3: Implement the registry and settings default**
-
-Add the setting as optional persisted data, resolve absent/invalid values to `full-board`, and keep `applyDiagramIntentPreference()` backward-compatible. Do not use `preferredDiagramRenderTarget` to select presentation; it remains a legacy artifact-format preference.
-
-- [ ] **Step 4: Re-run targeted tests**
-
-Run: `rtk npx jest src/tests/diagramTypeCatalog.test.ts src/tests/diagramOperationInput.test.ts --runInBand`
-
-Expected: PASS.
-
-- [ ] **Step 5: Commit the catalog contract**
-
-Run: `rtk git add src/diagram/diagramTypeCatalog.ts src/diagram/types.ts src/types.ts src/constants.ts src/diagram/diagramPreferenceCompatibility.ts src/tests/diagramTypeCatalog.test.ts src/tests/diagramOperationInput.test.ts && rtk git commit -m "feat(diagram): add executable type catalog"`
-
-### Task 2: Split Drawnix Semantic Input From Presentation Policy [Implemented]
-
-**Files:**
-- Create: `src/diagram/prompts/drawnixKnowledgeMapPrompt.ts`
-- Modify: `src/diagram/prompts/diagramSpecPrompt.ts`
-- Modify: `src/diagram/diagramGenerationService.ts`
-- Modify: `src/diagram/adapters/drawnix/drawnixSourceCoverage.ts`
-- Test: `src/tests/diagramSpecPrompt.test.ts`
-- Test: `src/tests/drawnixSourceCoverage.test.ts`
-- Test: `src/tests/diagramGenerationService.test.ts`
-
-**Interfaces:**
-
-```ts
-export function buildDrawnixKnowledgeMapPromptRules(options: {
-    sourcePath?: string;
-    targetLanguage?: string;
-}): string;
-
-export function buildSourceCoverageForest(spec: DiagramSpec, sourceMarkdown: string, sourcePath?: string): DiagramSpec;
-
-export function buildDocumentRootedKnowledgeMap(spec: DiagramSpec, sourceLabel: string): DiagramSpec;
-```
-
-- [ ] **Step 1: Write failing multi-root and Mermaid-isolation tests**
-
-```ts
-expect(buildDiagramSpecPrompt({ requiredIntent: 'drawnixMindmap' }))
-    .toContain('multiple independent roots');
-expect(buildDiagramSpecPrompt({ requiredIntent: 'drawnixMindmap' }))
-    .not.toContain('exactly one top-level document root');
-expect(buildDiagramSpecPrompt({ preferredIntent: 'mindmap' }))
-    .not.toContain('Drawnix knowledge-map rules');
-```
-
-- [ ] **Step 2: Run targeted tests and observe the one-root prompt failure**
-
-Run: `rtk npx jest src/tests/diagramSpecPrompt.test.ts src/tests/drawnixSourceCoverage.test.ts --runInBand`
-
-Expected: failure on the old forced root contract.
-
-- [ ] **Step 3: Move root synthesis behind the explicit overview operation**
-
-Keep source coverage responsible for hierarchy completion and ID preservation. The Drawnix prompt requests root scopes, role-bearing nodes, concise labels, and material cross-branch relations. It must not mention Drawnix JSON, color, coordinate, or presentation layout decisions.
-
-- [ ] **Step 4: Re-run target tests and a generation-service regression**
-
-Run: `rtk npx jest src/tests/diagramSpecPrompt.test.ts src/tests/drawnixSourceCoverage.test.ts src/tests/diagramGenerationService.test.ts --runInBand`
-
-Expected: PASS; Mermaid `mindmap` assertions still pass.
-
-- [ ] **Step 5: Commit the semantic-boundary split**
-
-Run: `rtk git add src/diagram/prompts src/diagram/diagramGenerationService.ts src/diagram/adapters/drawnix/drawnixSourceCoverage.ts src/tests/diagramSpecPrompt.test.ts src/tests/drawnixSourceCoverage.test.ts src/tests/diagramGenerationService.test.ts && rtk git commit -m "feat(drawnix): separate source coverage from overview policy"`
-
-### Task 3: Create Independent Board And Presentation Projections [Implemented]
-
-**Files:**
-- Modify: `src/diagram/adapters/drawnix/drawnixMindMapProjection.ts`
-- Create: `src/diagram/adapters/drawnix/drawnixKnowledgeMapPresentation.ts`
-- Create: `src/diagram/adapters/drawnix/drawnixKnowledgeMapPresentationTypes.ts`
-- Create: `src/rendering/renderers/drawnixKnowledgeMapPresentationSvgRenderer.ts`
-- Test: `src/tests/drawnixMindMapRenderer.test.ts`
-- Test: `src/tests/drawnixKnowledgeMapPresentation.test.ts`
-- Test: `src/tests/drawnixMindMapLayout.playwright.test.ts`
-
-**Interfaces:**
-
-```ts
-export function buildDrawnixKnowledgeMapBoardProjection(spec: DiagramSpec): DrawnixMindMapProjection;
-
-export interface DrawnixKnowledgeMapPresentation {
-    overview: DrawnixKnowledgeMapPresentationSlice;
-    details: DrawnixKnowledgeMapPresentationSlice[];
-    ledger: DrawnixKnowledgeMapFidelityLedger;
-}
-
-export function buildDrawnixKnowledgeMapPresentation(
-    spec: DiagramSpec,
-    contract: DrawnixKnowledgeMapPresentationContract
-): DrawnixKnowledgeMapPresentation;
-
-export function renderDrawnixKnowledgeMapPresentationSvg(
-    slice: DrawnixKnowledgeMapPresentationSlice
-): string;
-```
-
-- [ ] **Step 1: Add failing semantic-preservation and ledger-coverage fixtures**
-
-```ts
-const presentation = buildDrawnixKnowledgeMapPresentation(complexForestSpec, desktopPresentationContract);
-expect(presentation.ledger.nodeLocations).toHaveLength(allNodeIds.size);
-expect(presentation.ledger.relationLocations).toHaveLength(allRelationIds.size);
-expect(presentation.overview.nodes.every(node => node.id)).toBe(true);
-```
-
-- [ ] **Step 2: Run target tests and verify the missing planner failure**
-
-Run: `rtk npx jest src/tests/drawnixKnowledgeMapPresentation.test.ts src/tests/drawnixMindMapRenderer.test.ts --runInBand`
-
-Expected: failure because no presentation planner exists.
-
-- [ ] **Step 3: Implement graph-aware presentation planning**
-
-Keep the existing board geometry as the full-board operation. Build a root-cluster graph for presentation using cross-root relation count, direction, and label importance. Use deterministic candidate ordering and aspect-ratio-aware packing. Split only when the requested viewport cannot satisfy type-size and clearance constraints. Record every collapse, summary, and slice location in the ledger.
-
-- [ ] **Step 4: Implement stable role treatment and SVG rendering**
-
-Use node roles such as `root`, `domain`, `subsystem`, `component`, `evidence`, `external`, and `cross-relation`. Remove branch-index business color semantics from the presentation path. Preserve long-label wrapping and CJK measurement coverage.
-
-- [ ] **Step 5: Run planner, full-board, and browser geometry tests**
-
-Run: `rtk npx jest src/tests/drawnixKnowledgeMapPresentation.test.ts src/tests/drawnixMindMapRenderer.test.ts src/tests/drawnixMindMapLayout.playwright.test.ts --runInBand`
-
-Expected: PASS; full-board topology and no-quota tests remain intact.
-
-- [ ] **Step 6: Commit the separate projections**
-
-Run: `rtk git add src/diagram/adapters/drawnix src/rendering/renderers/drawnixKnowledgeMapPresentationSvgRenderer.ts src/tests/drawnixMindMapRenderer.test.ts src/tests/drawnixKnowledgeMapPresentation.test.ts src/tests/drawnixMindMapLayout.playwright.test.ts && rtk git commit -m "feat(drawnix): add presentation delivery projection"`
-
-### Task 4: Persist Replay Data And Save Presentation Artifacts Safely [Implemented]
-
-**Files:**
-- Modify: `src/diagram/adapters/drawnix/drawnixExporter.ts`
-- Modify: `src/rendering/renderers/drawnixRenderer.ts`
-- Create: `src/rendering/renderers/drawnixKnowledgeMapPresentationRenderer.ts`
-- Modify: `src/rendering/types.ts`
-- Modify: `src/operations/diagramCommandExecution.ts`
-- Modify: `src/operations/diagramCommandHostAdapter.ts`
-- Test: `src/tests/drawnixExporter.test.ts`
-- Test: `src/tests/saveDiagramArtifactFile.test.ts`
-- Test: `src/tests/diagramCommandHostAdapter.test.ts`
-
-**Interfaces:**
-
-```ts
-export interface DrawnixKnowledgeMapReplayRecord {
-    version: 1;
-    catalogTypeId: 'drawnix-knowledge-map';
-    semanticSpec: PersistedDrawnixKnowledgeMapSpec;
-    semanticSpecHash: string;
-    deliveryManifestPaths: string[];
-}
-
-export function readDrawnixKnowledgeMapReplayRecord(data: unknown): DrawnixKnowledgeMapReplayRecord | null;
-export function renderDrawnixKnowledgeMapPresentationArtifact(spec: DiagramSpec): Promise<RenderArtifact>;
-```
-
-- [ ] **Step 1: Write failing metadata and transactional-save tests**
-
-```ts
-expect(exported.metadata?.notemd.knowledgeMap?.version).toBe(1);
-expect(readDrawnixKnowledgeMapReplayRecord(legacyExport)).toBeNull();
-expect(savedPaths).toEqual([
-    'Architecture_diagram.drawnix',
-    'Architecture_diagram.presentation/manifest.json',
-    'Architecture_diagram.presentation/overview.svg'
-]);
-```
-
-- [ ] **Step 2: Run target tests and verify that replay data is absent**
-
-Run: `rtk npx jest src/tests/drawnixExporter.test.ts src/tests/saveDiagramArtifactFile.test.ts --runInBand`
-
-Expected: failure on the missing replay record and presentation paths.
-
-- [ ] **Step 3: Add namespaced replay metadata without changing source-visual v1 semantics**
-
-Validate a canonical, bounded `DiagramSpec` subset at the exporter boundary. Hash the canonical JSON. Keep unknown namespaced metadata untouched. Do not store raw source Markdown or credential-bearing settings.
-
-- [ ] **Step 4: Add a dedicated presentation artifact bundle**
-
-The presentation renderer writes the compatible full board plus `manifest.json`, `overview.svg`, and deterministic detail panels below `<source>_diagram.presentation/`. Associate every created path with the manifest. Reuse existing transactional write/rollback behavior across the entire bundle.
-
-- [ ] **Step 5: Re-run persistence and host-adapter tests**
-
-Run: `rtk npx jest src/tests/drawnixExporter.test.ts src/tests/saveDiagramArtifactFile.test.ts src/tests/diagramCommandHostAdapter.test.ts --runInBand`
-
-Expected: PASS; legacy exports still validate and load.
-
-- [ ] **Step 6: Commit artifact persistence**
-
-Run: `rtk git add src/diagram/adapters/drawnix/drawnixExporter.ts src/rendering src/operations/diagramCommandExecution.ts src/operations/diagramCommandHostAdapter.ts src/tests/drawnixExporter.test.ts src/tests/saveDiagramArtifactFile.test.ts src/tests/diagramCommandHostAdapter.test.ts && rtk git commit -m "feat(drawnix): persist replayable presentation artifacts"`
-
-### Task 5: Add One-Click Selection And Executable Example Gallery [Implemented]
-
-**Files:**
-- Modify: `src/ui/NotemdSettingTab.ts`
-- Modify: `src/ui/NotemdSidebarView.ts`
-- Modify: `src/i18n/locales/experimentalDiagramPipeline.ts`
-- Modify: `src/i18n/locales/en.ts`
-- Modify: `src/i18n/locales/zh_cn.ts`
-- Create: `src/diagram/examples/diagramExampleCatalog.ts`
-- Create: `src/diagram/examples/drawnixKnowledgeMapExamples.ts`
-- Test: `src/tests/providerSettingsBehavior.test.ts`
-- Test: `src/tests/diagramExampleCatalog.test.ts`
-- Test: `src/tests/diagramCommandHostAdapter.test.ts`
-
-**Interfaces:**
-
-```ts
-export interface DiagramExampleDefinition {
-    typeId: DiagramCatalogTypeId;
-    fixtureId: string;
-    title: string;
-    selectionRationale: string;
-    sourceIntent: DiagramIntent;
-}
-
-export function getExecutableDiagramExamples(): readonly DiagramExampleDefinition[];
-```
-
-- [ ] **Step 1: Write failing UI preference and gallery-completeness tests**
-
-```ts
-expect(settings.drawnixKnowledgeMapDelivery).toBe('presentation');
-expect(getExecutableDiagramExamples().map(example => example.typeId))
-    .toContain('drawnix-knowledge-map');
-expect(getExecutableDiagramExamples().some(example => example.typeId === 'timeline')).toBe(false);
-```
-
-- [ ] **Step 2: Run target tests and verify the selector/gallery failure**
-
-Run: `rtk npx jest src/tests/providerSettingsBehavior.test.ts src/tests/diagramExampleCatalog.test.ts --runInBand`
-
-Expected: failure because no delivery selector or executable-only gallery exists.
-
-- [ ] **Step 3: Add the two-choice delivery control and commands**
-
-Render a compact segmented control for Full board and Presentation only when Drawnix Knowledge Map is selected. Persist the host routing preference. Give the preview toolbar explicit alternate-delivery actions. A missing replay record produces a regeneration notice and does not trigger an LLM call or overwrite files.
-
-- [ ] **Step 4: Add generated examples and localized selection copy**
-
-Every catalog entry receives its own selection rationale and fixture. Render thumbnails through the real renderer path. Add English, Simplified Chinese, and Traditional Chinese strings directly; retain the existing extension fallback for the remaining locales.
-
-- [ ] **Step 5: Re-run UI and command tests**
-
-Run: `rtk npx jest src/tests/providerSettingsBehavior.test.ts src/tests/diagramExampleCatalog.test.ts src/tests/diagramCommandHostAdapter.test.ts --runInBand`
-
-Expected: PASS.
-
-- [ ] **Step 6: Commit the user-facing catalog**
-
-Run: `rtk git add src/ui src/i18n src/diagram/examples src/tests/providerSettingsBehavior.test.ts src/tests/diagramExampleCatalog.test.ts src/tests/diagramCommandHostAdapter.test.ts && rtk git commit -m "feat(diagram): add Drawnix delivery selection and examples"`
-
-### Task 6: Add Consumer Evidence And Regression Gates [Implemented and verified]
-
-**Files:**
-- Modify: `package.json`
-- Create: `src/tests/drawnixConsumerImport.test.tsx`
-- Create: `src/tests/drawnixKnowledgeMapPresentationVisual.test.ts`
-- Modify: `src/tests/drawnixMindMapLayout.playwright.test.ts`
-- Modify: `src/tests/diagramArtifactExportCli.test.ts`
-- Modify: `src/tests/drawnixExportDocsContract.test.ts`
-
-- [ ] **Step 1: Add failing consumer and visual-invariant tests**
-
-```ts
-expect(consumerNodeIds).toEqual(expect.arrayContaining(expectedNodeIds));
-expect(consumerRelationEndpoints).toEqual(expectedRelationEndpoints);
-expect(visualReport.clippedLabels).toEqual([]);
-expect(visualReport.nodeLabelIntersections).toEqual([]);
-expect(visualReport.missingLedgerEntities).toEqual([]);
-```
-
-- [ ] **Step 2: Run targeted consumer tests and confirm the missing integration failure**
-
-Run: `rtk npx jest src/tests/drawnixConsumerImport.test.tsx src/tests/drawnixKnowledgeMapPresentationVisual.test.ts --runInBand`
-
-Expected: failure until the test-only consumer harness and report are present.
-
-- [ ] **Step 3: Pin a test-only Drawnix/Plait consumer and implement geometry reports**
-
-Mount a read-only fixture. Assert hierarchy, IDs, relation endpoints, relation text, and visible bounds. Keep consumer rectangles as consumer evidence; do not compare them to Notemd's static coordinates. SVG tests must account for transforms, CJK labels, and actual text bounds rather than raw string lengths.
-
-- [ ] **Step 4: Add Mermaid isolation and legacy-artifact tests**
-
-Assert that Drawnix changes do not alter `mindmap` prompt contents, Mermaid target selection, or fallback traversal. Assert that legacy metadata loads, resolves to full board, and returns a clear regeneration requirement for presentation.
-
-- [ ] **Step 5: Run the full verification set**
-
-Run: `rtk npm run build`
-
-Run: `rtk npm test -- --runInBand`
-
-Run: `rtk npm run docs:build`
-
-Run: `rtk git diff --check`
-
-Expected: all checks pass; no test restores a depth, node-count, or relation-count rejection quota.
-
-- [ ] **Step 6: Commit verification and documentation updates**
-
-Run: `rtk git add package.json package-lock.json src/tests docs && rtk git commit -m "test(drawnix): verify presentation and compatibility contracts"`
-
-## Coverage Review
-
-| Requirement | Plan task |
-|---|---|
-| Executable-only type classification and examples | Tasks 1 and 5 |
-| Independent Drawnix prompt, projection, and rendering | Tasks 2 and 3 |
-| One-click full-board/presentation switch | Task 5 |
-| Forward compatibility for settings and artifacts | Tasks 1 and 4 |
-| No semantic quotas for complex graphs | Tasks 3 and 6 |
-| Mermaid mind-map stability | Tasks 2 and 6 |
-| Real consumer import evidence | Task 6 |
-| Bilingual documentation | Task 6 |
-
-## Plan Review
-
-- No task depends on a UI-only representation of a future type.
-- Board and presentation have separate owners, result types, persistence semantics, and tests.
-- The replay record is additive and namespaced; it does not reinterpret legacy data.
-- The plan does not use reference-project budgets as validation limits.
-- Every runtime task begins with a failing focused test and ends with a meaningful verification cycle.
+The remaining integration proof is a real Drawnix consumer opening the native JSON, not another layout mode. Keep that check outside the production bundle. Any future delivery feature must identify a distinct user contract and must not recreate replay metadata as a prerequisite for writing the primary artifact.

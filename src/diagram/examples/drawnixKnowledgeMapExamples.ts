@@ -1,47 +1,78 @@
 import type { DiagramSpec } from '../types';
 
-/** The first-class Drawnix fixture exercises a multi-root architecture map. */
+/** The catalog sample follows the same filename-rooted contract as generated Drawnix maps. */
 export const DRAWNIX_KNOWLEDGE_MAP_ARCHITECTURE_EXAMPLE: DiagramSpec = {
     intent: 'drawnixMindmap',
-    title: 'Notemd Diagram Delivery',
-    summary: 'Type selection, semantic generation, and owned artifact delivery.',
-    nodes: [
-        {
-            id: 'interaction',
-            label: 'Interaction',
-            kind: 'root',
-            children: [
-                { id: 'settings', label: 'Settings', kind: 'component' },
-                { id: 'cli', label: 'Maintainer CLI', kind: 'external' }
-            ]
-        },
-        {
-            id: 'generation',
-            label: 'Semantic generation',
-            kind: 'root',
-            children: [
-                { id: 'catalog', label: 'Diagram type catalog', kind: 'domain' },
-                { id: 'spec', label: 'DiagramSpec', kind: 'subsystem' },
-                { id: 'prompt', label: 'Drawnix prompt', kind: 'component' }
-            ]
-        },
-        {
-            id: 'delivery',
-            label: 'Delivery',
-            kind: 'root',
-            children: [
-                { id: 'board', label: 'Editable full board', kind: 'component' },
-                { id: 'presentation', label: 'Presentation bundle', kind: 'component' },
-                { id: 'manifest', label: 'Replay manifest', kind: 'evidence' }
-            ]
-        }
-    ],
+    title: 'architecture.zh-CN',
+    summary: 'A native Drawnix tree with cross-branch relationships for an architecture note.',
+    nodes: [{
+        id: 'architecture-zh-cn',
+        label: 'architecture.zh-CN',
+        kind: 'document',
+        children: [
+            {
+                id: 'ui-entrypoints',
+                label: 'Obsidian UI',
+                kind: 'subsystem',
+                children: [
+                    { id: 'command-palette', label: 'Command palette', kind: 'component' },
+                    { id: 'sidebar', label: 'Notemd sidebar', kind: 'component' },
+                    { id: 'settings', label: 'Settings tab', kind: 'component' }
+                ]
+            },
+            {
+                id: 'plugin-orchestration',
+                label: 'Plugin orchestration',
+                kind: 'subsystem',
+                children: [
+                    { id: 'settings-store', label: 'Settings store', kind: 'component' },
+                    { id: 'command-dispatch', label: 'Command dispatch', kind: 'component' },
+                    { id: 'diagram-operation', label: 'Diagram operation', kind: 'component' }
+                ]
+            },
+            {
+                id: 'diagram-platform',
+                label: 'Diagram platform',
+                kind: 'subsystem',
+                children: [
+                    { id: 'source-coverage', label: 'Source coverage', kind: 'subsystem' },
+                    { id: 'diagram-spec', label: 'DiagramSpec', kind: 'subsystem' },
+                    { id: 'drawnix-renderer', label: 'DrawnixRenderer', kind: 'component' }
+                ]
+            },
+            {
+                id: 'artifact-output',
+                label: 'Artifact output',
+                kind: 'subsystem',
+                children: [
+                    { id: 'drawnix-file', label: '.drawnix source', kind: 'evidence' },
+                    { id: 'svg-companion', label: 'SVG companion', kind: 'evidence' },
+                    { id: 'markdown-wrapper', label: 'Markdown wrapper', kind: 'evidence' }
+                ]
+            },
+            {
+                id: 'cli-boundary',
+                label: 'CLI boundary',
+                kind: 'subsystem',
+                children: [
+                    { id: 'obsidian-cli', label: 'Obsidian CLI', kind: 'external' },
+                    { id: 'maintainer-bridge', label: 'Maintainer bridge', kind: 'component' }
+                ]
+            }
+        ]
+    }],
     edges: [
-        { from: 'settings', to: 'catalog', label: 'selects' },
-        { from: 'cli', to: 'spec', label: 'supplies' },
-        { from: 'catalog', to: 'prompt', label: 'selects' },
-        { from: 'spec', to: 'board', label: 'projects to' },
-        { from: 'spec', to: 'presentation', label: 'plans' },
-        { from: 'presentation', to: 'manifest', label: 'records' }
+        { from: 'command-palette', to: 'command-dispatch', label: 'starts' },
+        { from: 'sidebar', to: 'command-dispatch', label: 'starts' },
+        { from: 'settings', to: 'settings-store', label: 'updates' },
+        { from: 'command-dispatch', to: 'diagram-operation', label: 'routes' },
+        { from: 'diagram-operation', to: 'source-coverage', label: 'covers source' },
+        { from: 'source-coverage', to: 'diagram-spec', label: 'builds' },
+        { from: 'diagram-spec', to: 'drawnix-renderer', label: 'renders' },
+        { from: 'drawnix-renderer', to: 'drawnix-file', label: 'writes' },
+        { from: 'drawnix-renderer', to: 'svg-companion', label: 'previews' },
+        { from: 'drawnix-file', to: 'markdown-wrapper', label: 'links' },
+        { from: 'obsidian-cli', to: 'maintainer-bridge', label: 'executes' },
+        { from: 'maintainer-bridge', to: 'diagram-operation', label: 'invokes' }
     ]
 };

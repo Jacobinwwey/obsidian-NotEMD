@@ -252,11 +252,6 @@ function buildDiagramCommandOptions(input: Record<string, unknown>): DiagramComm
     ] as const);
     const compatibilityMode = optionalEnum(input, 'compatibilityMode', ['best-fit', 'legacy-mermaid'] as const);
     const targetLanguage = optionalString(input, 'targetLanguage');
-    const drawnixKnowledgeMapDelivery = optionalEnum(
-        input,
-        'drawnixKnowledgeMapDelivery',
-        ['full-board', 'presentation'] as const
-    );
 
     if (requestedIntent) {
         inputOverrides.requestedIntent = requestedIntent as DiagramCommandInputOverrides['requestedIntent'];
@@ -270,10 +265,6 @@ function buildDiagramCommandOptions(input: Record<string, unknown>): DiagramComm
     if (targetLanguage) {
         inputOverrides.targetLanguage = targetLanguage;
     }
-    if (drawnixKnowledgeMapDelivery) {
-        inputOverrides.drawnixKnowledgeMapDelivery = drawnixKnowledgeMapDelivery;
-    }
-
     return {
         executionMode,
         inputOverrides: Object.keys(inputOverrides).length > 0 ? inputOverrides : undefined

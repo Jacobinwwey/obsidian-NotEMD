@@ -1,13 +1,16 @@
 ---
 date: 2026-08-14
 topic: drawnix-presentation-architecture-review
-status: implemented
+status: superseded
+superseded_by: ../plans/2026-08-14-diagram-type-catalog-and-drawnix-delivery-implementation.zh-CN.md
 related:
   - 2026-07-22-drawnix-knowledge-map-quality-and-delivery-plan.zh-CN.md
   - 2026-08-08-diagram-platform-robustness-and-settings-integrity-plan.zh-CN.md
 ---
 
 # Drawnix 演示交付架构复核
+
+> 状态（2026-08-15）：已废弃。replay 前置校验阻断了一次真实 Vault 导出后，这个方案被移除，没有保留为可切换模式。当前产品路径是一张可编辑的文件名根节点 Drawnix 树及其单个 SVG companion。当前行为以[实施记录](../plans/2026-08-14-diagram-type-catalog-and-drawnix-delivery-implementation.zh-CN.md)为准；本文只保留被否决的分析。
 
 ## 结论
 

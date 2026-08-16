@@ -4,13 +4,10 @@ import {
     DrawnixMindMapElement,
     DrawnixMindMapProjection
 } from './drawnixMindMapProjection';
-import { validateDiagramSpec } from '../../spec';
-import type { DiagramEdge, DiagramNode, DiagramSpec } from '../../types';
 import type { SourceVisualKind, SourceVisualStatus } from '../../sourceVisuals';
 
 export const DRAWNIX_EXPORT_VERSION = 1 as const;
 export const DRAWNIX_SOURCE_VISUAL_METADATA_VERSION = 1 as const;
-export const DRAWNIX_KNOWLEDGE_MAP_REPLAY_VERSION = 1 as const;
 
 export interface DrawnixSourceVisualAttachment {
     id: string;
@@ -32,32 +29,7 @@ export interface DrawnixMindMapMetadata {
     notemd: {
         version: typeof DRAWNIX_SOURCE_VISUAL_METADATA_VERSION;
         sourceVisuals: DrawnixSourceVisualAttachment[];
-        knowledgeMap?: DrawnixKnowledgeMapReplayRecord;
     };
-}
-
-/**
- * Replay retains only semantic map data. Pixel geometry, source Markdown,
- * source-coverage diagnostics, and user settings stay outside the export.
- */
-export interface PersistedDrawnixKnowledgeMapSpec {
-    intent: 'drawnixMindmap';
-    title: string;
-    summary?: string;
-    nodes: DiagramNode[];
-    edges?: DiagramEdge[];
-    sourceLanguage?: string;
-    outputLanguage?: string;
-    evidenceRefs?: string[];
-}
-
-export interface DrawnixKnowledgeMapReplayRecord {
-    version: typeof DRAWNIX_KNOWLEDGE_MAP_REPLAY_VERSION;
-    catalogTypeId: 'drawnix-knowledge-map';
-    semanticSpec: PersistedDrawnixKnowledgeMapSpec;
-    semanticSpecHash: string;
-    /** Absolute vault-relative paths written by the persistence boundary. */
-    deliveryManifestPaths: string[];
 }
 
 export interface DrawnixMindMapExportedData {
@@ -77,96 +49,15 @@ export interface DrawnixMindMapExportedData {
     metadata?: DrawnixMindMapMetadata;
 }
 
-function cloneReplayNode(node: DiagramNode): DiagramNode {
-    return {
-        id: node.id,
-        label: node.label,
-        ...(node.kind ? { kind: node.kind } : {}),
-        ...(node.children?.length ? { children: node.children.map(cloneReplayNode) } : {})
-    };
-}
-
-function cloneReplayEdge(edge: DiagramEdge): DiagramEdge {
-    return {
-        from: edge.from,
-        to: edge.to,
-        ...(edge.label?.trim() ? { label: edge.label } : {}),
-        ...(edge.relation?.trim() ? { relation: edge.relation } : {})
-    };
-}
-
-function buildPersistedDrawnixKnowledgeMapSpec(spec: DiagramSpec): PersistedDrawnixKnowledgeMapSpec {
-    if (spec.intent !== 'drawnixMindmap') {
-        throw new Error('Drawnix knowledge-map replay records require the drawnixMindmap intent.');
-    }
-
-    return {
-        intent: 'drawnixMindmap',
-        title: spec.title,
-        ...(spec.summary?.trim() ? { summary: spec.summary } : {}),
-        nodes: spec.nodes.map(cloneReplayNode),
-        ...(spec.edges?.length ? { edges: spec.edges.map(cloneReplayEdge) } : {}),
-        ...(spec.sourceLanguage?.trim() ? { sourceLanguage: spec.sourceLanguage } : {}),
-        ...(spec.outputLanguage?.trim() ? { outputLanguage: spec.outputLanguage } : {}),
-        ...(spec.evidenceRefs?.length ? { evidenceRefs: [...spec.evidenceRefs] } : {})
-    };
-}
-
-function hashReplaySemanticSpec(spec: PersistedDrawnixKnowledgeMapSpec): string {
-    const source = JSON.stringify(spec);
-    let hash = 2166136261;
-    for (const character of source) {
-        hash ^= character.codePointAt(0) ?? 0;
-        hash = Math.imul(hash, 16777619);
-    }
-    return `fnv1a32:${(hash >>> 0).toString(16).padStart(8, '0')}`;
-}
-
-function cloneReplayRecord(record: DrawnixKnowledgeMapReplayRecord): DrawnixKnowledgeMapReplayRecord {
-    return {
-        version: record.version,
-        catalogTypeId: record.catalogTypeId,
-        semanticSpec: buildPersistedDrawnixKnowledgeMapSpec(record.semanticSpec),
-        semanticSpecHash: record.semanticSpecHash,
-        deliveryManifestPaths: [...record.deliveryManifestPaths]
-    };
-}
-
-/** Creates the additive replay payload used to switch delivery without an LLM call. */
-export function createDrawnixKnowledgeMapReplayRecord(
-    spec: DiagramSpec,
-    deliveryManifestPaths: readonly string[] = []
-): DrawnixKnowledgeMapReplayRecord {
-    const semanticSpec = buildPersistedDrawnixKnowledgeMapSpec(spec);
-    const validation = validateDiagramSpec(semanticSpec);
-    if (!validation.valid) {
-        throw new Error(`Cannot persist invalid Drawnix knowledge-map replay data: ${validation.errors.join(' ')}`);
-    }
-
-    return {
-        version: DRAWNIX_KNOWLEDGE_MAP_REPLAY_VERSION,
-        catalogTypeId: 'drawnix-knowledge-map',
-        semanticSpec,
-        semanticSpecHash: hashReplaySemanticSpec(semanticSpec),
-        deliveryManifestPaths: [...deliveryManifestPaths]
-    };
-}
-
 export function exportDrawnixMindMapProjection(
     projection: DrawnixMindMapProjection,
-    sourceVisuals: readonly DrawnixSourceVisualAttachment[] = [],
-    knowledgeMapReplay?: DrawnixKnowledgeMapReplayRecord
+    sourceVisuals: readonly DrawnixSourceVisualAttachment[] = []
 ): DrawnixMindMapExportedData {
-    if (knowledgeMapReplay && !isDrawnixKnowledgeMapReplayRecord(knowledgeMapReplay)) {
-        throw new Error('Drawnix knowledge-map replay record failed validation before export.');
-    }
-
-    const metadata = sourceVisuals.length > 0 || knowledgeMapReplay
+    const metadata = sourceVisuals.length > 0
         ? {
             notemd: {
                 version: DRAWNIX_SOURCE_VISUAL_METADATA_VERSION,
-                sourceVisuals: sourceVisuals.map(visual => ({ ...visual, companionPaths: [...visual.companionPaths] })),
-                ...(knowledgeMapReplay ? { knowledgeMap: cloneReplayRecord(knowledgeMapReplay) } : {})
+                sourceVisuals: sourceVisuals.map(visual => ({ ...visual, companionPaths: [...visual.companionPaths] }))
             }
         }
         : undefined;
@@ -193,82 +84,6 @@ export function stringifyDrawnixMindMapExportedData(data: DrawnixMindMapExported
 
 function isRecord(value: unknown): value is Record<string, unknown> {
     return Boolean(value) && typeof value === 'object' && !Array.isArray(value);
-}
-
-function isReplayNode(value: unknown): value is DiagramNode {
-    if (!isRecord(value)
-        || typeof value.id !== 'string'
-        || !value.id.trim()
-        || typeof value.label !== 'string'
-        || !value.label.trim()
-        || (value.kind !== undefined && typeof value.kind !== 'string')) {
-        return false;
-    }
-    return value.children === undefined
-        || Array.isArray(value.children) && value.children.every(isReplayNode);
-}
-
-function isReplayEdge(value: unknown): value is DiagramEdge {
-    return isRecord(value)
-        && typeof value.from === 'string'
-        && value.from.trim().length > 0
-        && typeof value.to === 'string'
-        && value.to.trim().length > 0
-        && (value.label === undefined || typeof value.label === 'string')
-        && (value.relation === undefined || typeof value.relation === 'string');
-}
-
-function isPersistedDrawnixKnowledgeMapSpec(value: unknown): value is PersistedDrawnixKnowledgeMapSpec {
-    if (!isRecord(value)
-        || value.intent !== 'drawnixMindmap'
-        || typeof value.title !== 'string'
-        || !value.title.trim()
-        || (value.summary !== undefined && typeof value.summary !== 'string')
-        || !Array.isArray(value.nodes)
-        || !value.nodes.every(isReplayNode)
-        || (value.edges !== undefined && (!Array.isArray(value.edges) || !value.edges.every(isReplayEdge)))
-        || (value.sourceLanguage !== undefined && typeof value.sourceLanguage !== 'string')
-        || (value.outputLanguage !== undefined && typeof value.outputLanguage !== 'string')
-        || (value.evidenceRefs !== undefined
-            && (!Array.isArray(value.evidenceRefs) || !value.evidenceRefs.every(reference => typeof reference === 'string')))) {
-        return false;
-    }
-
-    const persistedSpec = value as unknown as PersistedDrawnixKnowledgeMapSpec;
-    return validateDiagramSpec(persistedSpec).valid;
-}
-
-export function isDrawnixKnowledgeMapReplayRecord(value: unknown): value is DrawnixKnowledgeMapReplayRecord {
-    if (!isRecord(value)
-        || value.version !== DRAWNIX_KNOWLEDGE_MAP_REPLAY_VERSION
-        || value.catalogTypeId !== 'drawnix-knowledge-map'
-        || !isPersistedDrawnixKnowledgeMapSpec(value.semanticSpec)
-        || typeof value.semanticSpecHash !== 'string'
-        || !/^fnv1a32:[0-9a-f]{8}$/u.test(value.semanticSpecHash)
-        || !Array.isArray(value.deliveryManifestPaths)
-        || !value.deliveryManifestPaths.every(path => typeof path === 'string' && path.trim().length > 0)) {
-        return false;
-    }
-
-    return value.semanticSpecHash === hashReplaySemanticSpec(value.semanticSpec);
-}
-
-/**
- * Returns null for legacy files and unknown future replay schemas. Callers
- * can still open the Drawnix board; alternate delivery then requires regen.
- */
-export function readDrawnixKnowledgeMapReplayRecord(data: unknown): DrawnixKnowledgeMapReplayRecord | null {
-    if (!isRecord(data)
-        || data.type !== 'drawnix'
-        || !isRecord(data.metadata)
-        || !isRecord(data.metadata.notemd)) {
-        return null;
-    }
-
-    const replay = data.metadata.notemd.knowledgeMap;
-    return isDrawnixKnowledgeMapReplayRecord(replay)
-        ? cloneReplayRecord(replay)
-        : null;
 }
 
 function isSourceVisualAttachment(value: unknown): value is DrawnixSourceVisualAttachment {

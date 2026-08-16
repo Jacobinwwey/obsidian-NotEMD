@@ -189,7 +189,7 @@ function segmentClear(start: DrawnixPoint, end: DrawnixPoint, obstacles: readonl
 }
 
 function deduplicate(values: number[]): number[] {
-    return Array.from(new Set(values.filter(Number.isFinite).map(value => Math.round(value * 100) / 100))).sort((a, b) => a - b);
+    return Array.from(new Set(values.filter(Number.isFinite))).sort((a, b) => a - b);
 }
 
 function clampRouteX(value: number, canvasWidth: number, labelHalfWidth = 0): number {
@@ -528,6 +528,24 @@ function endpointsTowardTrack(
     return trackX < node.x + node.width / 2 ? [left, right] : [right, left];
 }
 
+function endpointsForReservedLaneGrid(
+    node: DrawnixMindMapPlacedNode,
+    trackX: number,
+    laneY: number
+): DrawnixPoint[] {
+    // Dense trees can seal both side ports while leaving a valid exterior egress above or below the node.
+    const centerX = node.x + node.width / 2;
+    const centerY = node.y + node.height / 2;
+    const top: DrawnixPoint = [centerX, node.y];
+    const bottom: DrawnixPoint = [centerX, node.y + node.height];
+    const verticalPorts = laneY < centerY ? [top, bottom] : [bottom, top];
+    const candidates = [...endpointsTowardTrack(node, trackX), ...verticalPorts];
+
+    return candidates.filter((point, index) => (
+        candidates.findIndex(candidate => candidate[0] === point[0] && candidate[1] === point[1]) === index
+    ));
+}
+
 function routeLength(points: readonly DrawnixPoint[]): number {
     return points.slice(1).reduce(
         (total, point, index) => total + Math.abs(point[0] - points[index][0]) + Math.abs(point[1] - points[index][1]),
@@ -615,14 +633,13 @@ function findClearEndpointLaneLeg(
 }
 
 /**
- * Connects a relation to a lane reserved by the projection. The allocator
- * keeps same-side lanes in exterior gutters and cross-forest lanes below the
- * forest, so routing only needs to find clear ingress paths from the node
- * boundaries.
+ * Finds the shortest route that can enter a projection-reserved lane without
+ * invoking the grid router. Most relations use this inexpensive path; the
+ * caller owns the more expensive fallback when obstacles block every ingress.
  */
-export function routeDrawnixRelationThroughReservedLane(
+export function findDrawnixDirectReservedLaneRoute(
     input: DrawnixReservedRelationLaneRouterInput
-): DrawnixReservedRelationLaneRoute {
+): DrawnixReservedRelationLaneRoute | null {
     const { source, target, lane } = input;
     const obstacles = [
         ...buildNodeObstacles(input.nodes, source.id, target.id),
@@ -674,37 +691,87 @@ export function routeDrawnixRelationThroughReservedLane(
                         }
                     }
                 }
+            }
+        }
+    }
 
-                const sourceGridLeg = buildGridRoute(
-                    start,
-                    sourceLanePoint,
-                    obstacles,
-                    input.canvasWidth,
-                    input.canvasHeight
-                );
-                const targetGridLeg = buildGridRoute(
-                    targetLanePoint,
-                    end,
-                    obstacles,
-                    input.canvasWidth,
-                    input.canvasHeight
-                );
-                if (!sourceGridLeg || !targetGridLeg) {
-                    continue;
-                }
+    candidates.sort((left, right) => {
+        const lengthDelta = routeLength(left.points) - routeLength(right.points);
+        return lengthDelta || left.points.length - right.points.length;
+    });
+    const selected = candidates[0];
+    if (!selected) {
+        return null;
+    }
 
-                const gridPoints = simplify([
+    return {
+        points: selected.points,
+        nativeTextPosition: selected.nativeTextPosition,
+        strategy: 'reserved-lane'
+    };
+}
+
+/**
+ * Connects a relation to a lane reserved by the projection. The allocator
+ * keeps same-side lanes in exterior gutters and cross-forest lanes below the
+ * forest, so routing only needs to find clear ingress paths from the node
+ * boundaries.
+ */
+export function routeDrawnixRelationThroughReservedLane(
+    input: DrawnixReservedRelationLaneRouterInput
+): DrawnixReservedRelationLaneRoute {
+    const directRoute = findDrawnixDirectReservedLaneRoute(input);
+    if (directRoute) {
+        return directRoute;
+    }
+
+    const { source, target, lane } = input;
+    const obstacles = [
+        ...buildNodeObstacles(input.nodes, source.id, target.id),
+        ...(input.additionalObstacles ?? [])
+    ];
+    const laneDirections = [
+        { sourceTrackX: lane.leftTrackX, targetTrackX: lane.rightTrackX },
+        { sourceTrackX: lane.rightTrackX, targetTrackX: lane.leftTrackX }
+    ];
+    const candidates: Array<{ points: DrawnixPoint[]; nativeTextPosition: number }> = [];
+
+    for (const direction of laneDirections) {
+        const sourceLanePoint: DrawnixPoint = [direction.sourceTrackX, lane.y];
+        const targetLanePoint: DrawnixPoint = [direction.targetTrackX, lane.y];
+        const sourceGridLegs = endpointsForReservedLaneGrid(source, direction.sourceTrackX, lane.y)
+            .map(start => buildGridRoute(
+                start,
+                sourceLanePoint,
+                obstacles,
+                input.canvasWidth,
+                input.canvasHeight
+            ))
+            .filter((points): points is DrawnixPoint[] => points !== null);
+        const targetGridLegs = endpointsForReservedLaneGrid(target, direction.targetTrackX, lane.y)
+            .map(end => buildGridRoute(
+                targetLanePoint,
+                end,
+                obstacles,
+                input.canvasWidth,
+                input.canvasHeight
+            ))
+            .filter((points): points is DrawnixPoint[] => points !== null);
+
+        for (const sourceGridLeg of sourceGridLegs) {
+            for (const targetGridLeg of targetGridLegs) {
+                const points = simplify([
                     ...sourceGridLeg,
                     targetLanePoint,
                     ...targetGridLeg.slice(1)
                 ]);
-                if (!routeSegmentsAreClear(gridPoints, obstacles)) {
+                if (!routeSegmentsAreClear(points, obstacles)) {
                     continue;
                 }
 
-                const nativeTextPosition = reservedLaneLabelPosition(gridPoints, lane);
+                const nativeTextPosition = reservedLaneLabelPosition(points, lane);
                 if (nativeTextPosition !== null) {
-                    candidates.push({ points: gridPoints, nativeTextPosition });
+                    candidates.push({ points, nativeTextPosition });
                 }
             }
         }

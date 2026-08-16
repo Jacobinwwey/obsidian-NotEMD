@@ -16,18 +16,6 @@ export const SUPPORTED_DIAGRAM_INTENTS = [
 
 export type DiagramIntent = typeof SUPPORTED_DIAGRAM_INTENTS[number];
 
-export const DRAWNIX_KNOWLEDGE_MAP_DELIVERIES = [
-    'full-board',
-    'presentation'
-] as const;
-
-export type DrawnixKnowledgeMapDelivery = typeof DRAWNIX_KNOWLEDGE_MAP_DELIVERIES[number];
-
-export function isDrawnixKnowledgeMapDelivery(value: unknown): value is DrawnixKnowledgeMapDelivery {
-    return typeof value === 'string'
-        && (DRAWNIX_KNOWLEDGE_MAP_DELIVERIES as readonly string[]).includes(value);
-}
-
 export const DIAGRAM_CATALOG_TYPE_IDS = [
     'mermaid-mindmap',
     'drawnix-knowledge-map',

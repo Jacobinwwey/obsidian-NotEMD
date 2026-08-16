@@ -1,26 +1,10 @@
 import { NotemdSettings } from '../types';
-import {
-    DiagramIntent,
-    DrawnixKnowledgeMapDelivery,
-    isDrawnixKnowledgeMapDelivery,
-    RenderTarget
-} from './types';
+import { DiagramIntent, RenderTarget } from './types';
 
 type DiagramPreferenceSettings = Pick<
     NotemdSettings,
-    | 'preferredDiagramIntent'
-    | 'preferredDiagramRenderTarget'
-    | 'experimentalDiagramCompatibilityMode'
-    | 'drawnixKnowledgeMapDelivery'
+    'preferredDiagramIntent' | 'preferredDiagramRenderTarget' | 'experimentalDiagramCompatibilityMode'
 >;
-
-export function resolveDrawnixKnowledgeMapDelivery(
-    settings: Pick<NotemdSettings, 'drawnixKnowledgeMapDelivery'>
-): DrawnixKnowledgeMapDelivery {
-    return isDrawnixKnowledgeMapDelivery(settings.drawnixKnowledgeMapDelivery)
-        ? settings.drawnixKnowledgeMapDelivery
-        : 'full-board';
-}
 
 export function applyDiagramIntentPreference(
     settings: DiagramPreferenceSettings,

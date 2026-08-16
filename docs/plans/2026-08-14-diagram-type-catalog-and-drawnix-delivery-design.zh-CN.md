@@ -1,7 +1,8 @@
 ---
 date: 2026-08-14
 topic: diagram-type-catalog-and-drawnix-delivery
-status: approved
+status: superseded
+superseded_by: 2026-08-14-diagram-type-catalog-and-drawnix-delivery-implementation.zh-CN.md
 scope: architecture-and-documentation
 related:
   - ../brainstorms/2026-08-14-drawnix-presentation-architecture-review.zh-CN.md
@@ -10,6 +11,8 @@ related:
 ---
 
 # 图表类型目录与 Drawnix 交付设计
+
+> 状态（2026-08-15）：已废弃。full-board/presentation 分流把 replay 校验放在主 artifact 写入之前，并在真实 Vault 运行中失败。当前契约是[实施记录](./2026-08-14-diagram-type-catalog-and-drawnix-delivery-implementation.zh-CN.md)中的文件名根节点原生 Drawnix 树。本文只保留为被否决的设计记录；后续不得恢复选择器、replay metadata 或 panel bundle。
 
 ## 决策
 

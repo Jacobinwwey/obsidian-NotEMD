@@ -1,6 +1,6 @@
 # Notemd Architecture Overview
 
-> Updated: 2026-08-14
+> Updated: 2026-08-15
 
 ## System Architecture
 
@@ -200,24 +200,32 @@ flowchart LR
 | `dataChart` | vega-lite | VegaLiteRenderer | modal/iframe (sandboxed) | source, SVG, PNG, PDF |
 | `circuit` | circuitikz | CircuitikzRenderer | SVG companion or source-only preview | `.tex`, SVG, PNG, PDF |
 
-`drawnixMindmap` is the only native Drawnix diagram intent. It projects `DiagramSpec.nodes` into an editable knowledge-map forest and generates an SVG companion from Notemd's placed projection. Relation layout has two geometry passes: the first reserves horizontal gutter space from measured label widths; after node placement, the second classifies endpoints relative to their roots. Same-side relations use a compact exterior gutter with a row scheduled between their endpoints. Cross-forest relations use the lower lanes. The router owns obstacle-safe ingress only, while the allocator owns lane placement. There is no fixed hierarchy-depth or relation-count quota; rejection is limited to invalid semantics or geometry that cannot fit without crossing a protected region or the canvas boundary. Source coverage follows the same rule: Markdown headings and unmatched model branches retain their hierarchy and IDs. It remaps edges only after an actual semantic merge and drops only invalid, duplicate, or hierarchy-ownership edges. The upstream `withMind` runtime places native child nodes, so full SVG/native pixel parity needs a real consumer test and cannot be inferred from the exported JSON alone. Standard `mindmap` remains a Mermaid intent and continues through `MermaidRenderer`.
+`drawnixMindmap` is the only native Drawnix diagram intent. It projects `DiagramSpec.nodes` into an editable knowledge-map forest and generates an SVG companion from Notemd's placed projection. Relation layout has two geometry passes: the first reserves horizontal gutter space from measured label widths; after node placement, the second classifies endpoints relative to their roots. Same-side relations use a compact exterior gutter with a row scheduled between their endpoints. Cross-forest relations use the lower lanes. The router owns obstacle-safe ingress only, while the allocator owns lane placement. Reserved-lane routing tries deterministic horizontal ingress first. If no horizontal pair can reach the reserved row, the grid retry adds top and bottom node ports while keeping the label on its allocated lane. This avoids rejecting a valid dense tree because a branch seals both side ports, without imposing a node, depth, or relation quota. Source coverage follows the same rule: Markdown headings and unmatched model branches retain their hierarchy and IDs. It remaps edges only after an actual semantic merge and drops only invalid, duplicate, or hierarchy-ownership edges. The upstream `withMind` runtime places native child nodes, so full SVG/native pixel parity needs a real consumer test and cannot be inferred from the exported JSON alone. Standard `mindmap` remains a Mermaid intent and continues through `MermaidRenderer`.
 
-### Implemented Type Catalog And Drawnix Delivery Architecture
+### Executable Type Catalog And Native Drawnix Tree
 
-`DiagramTypeCatalog` now sits above the shipped intent and target bindings. It owns the user-facing type name, semantic pattern, prompt profile, renderer binding, visual-role vocabulary, and Notemd-owned example fixture. Reference-only layouts from `ref/diagram-design` remain documentation and roadmap material until an end-to-end Notemd path exists; they do not appear in the selector.
+`DiagramTypeCatalog` owns the user-facing type name, semantic pattern, prompt profile, renderer binding, visual-role vocabulary, and an executable example fixture. Reference-only layouts from `ref/diagram-design` remain outside the selector until they have a complete Notemd path.
 
-`drawnixMindmap` remains the persisted compatibility ID and is shown as **Drawnix Knowledge Map**. It has two separate delivery operations:
+`drawnixMindmap` remains the persisted compatibility ID and is shown as **Drawnix Knowledge Map**. It has one native output contract:
 
-| Delivery choice | Operation | Compatibility behavior |
-|---|---|---|
-| Full board | `DrawnixRenderer.render()` -> `renderDrawnixKnowledgeMapBoardArtifact()` -> `buildDrawnixMindMapProjection()` | Preserves the existing `.drawnix` and `<source>_diagram.drawnix.svg` artifact contract. |
-| Presentation | `DrawnixRenderer.render()` -> `renderDrawnixKnowledgeMapPresentationArtifact()` -> `buildDrawnixKnowledgeMapPresentation()` -> `renderDrawnixKnowledgeMapPresentationSvg()` | Emits an overview, dense-cluster detail slices, bounded continuation slices for over-wide child hierarchies, and a fidelity ledger while preserving the complete editable board. |
+```text
+DiagramSpec
+  -> mergeDrawnixSourceCoverage(source Markdown, source path)
+  -> one filename-rooted tree
+  -> buildDrawnixMindMapProjection()
+  -> DrawnixRenderer
+  -> .drawnix + SVG companion + Markdown wrapper
+```
 
-The choice is a host-level route, not a `layoutMode` argument. The settings surface exposes a two-choice control only for Drawnix Knowledge Map and persists `drawnixKnowledgeMapDelivery`; absent or invalid persisted values resolve to Full board. `preferredDiagramRenderTarget` keeps its older artifact-format meaning and does not select the delivery.
+The document root is the source filename without its extension. Heading structure remains nested below it; unmatched model branches move to `Additional concepts` rather than being deleted. Cross-branch relationships remain native `arrow-line` elements. The two-pass allocator reserves exterior corridors from measured label geometry. It first attempts deterministic direct ingress, then grid routing. The grid retries from top and bottom ports only when all horizontal ingress pairs are blocked, so the reserved label geometry remains stable while a dense tree can still escape through an exterior corridor. Grid coordinates retain exact finite endpoint values: quantizing terminal coordinates can make a valid subpixel node boundary disappear from the route graph. There is no fixed depth, node, or relation limit.
 
-New Drawnix boards persist `metadata.notemd.knowledgeMap`, including a validated semantic replay spec and its hash. The preview toolbar can rebuild the alternate delivery from that record without an LLM request, a settings mutation, or a file write. The switch is an in-memory preview operation. A legacy `.drawnix` without the replay record remains readable as a Full board and shows a regeneration requirement instead of attempting a lossy reconstruction. Mermaid `mindmap` is outside this route and stays unchanged.
+The former delivery matrix and replay metadata are intentionally gone. They duplicated semantic state and caused a real vault run to fail before writing its artifact. `loadSettings()` removes the obsolete `drawnixKnowledgeMapDelivery` field and persists the sanitized record on its first legacy load. The offline CLI still accepts `--drawnix-delivery` as a no-op for script compatibility. New boards do not carry `metadata.notemd.knowledgeMap`.
 
-The presentation planner treats size, audience, language, and minimum readable type as an explicit delivery contract. It uses graph-aware root clustering and aspect-ratio-aware packing. A fitting overview root grid is centered in its delivery viewport. Detail slices route only the relationships incident to their original hierarchy, then pack remote endpoints into a width-bounded context band. When a child hierarchy cannot fit, its parent slice keeps a dashed continuation anchor and the child is expanded recursively in later bounded detail slices. It never limits valid Drawnix node depth, node count, or relation count. Every summary or cluster enters the fidelity ledger. Saving a presentation writes the compatible board plus `<source>_diagram.presentation/manifest.json`, `overview.svg`, and deterministic detail SVGs through the existing transactional file path. The public Plait consumer harness is a pinned, test-only ESM check; no Drawnix, Plait, or React code enters the plugin bundle. Full details are in [Diagram Type Catalog And Drawnix Delivery Design](./plans/2026-08-14-diagram-type-catalog-and-drawnix-delivery-design.en.md) and [Drawnix Presentation Architecture Review](./brainstorms/2026-08-14-drawnix-presentation-architecture-review.md).
+Standard `mindmap` remains a Mermaid intent and continues through `MermaidRenderer`. Drawnix routing, source coverage, and native export do not change its prompt, fallback, repair, or cache behavior. The catalog's Drawnix example uses the same one-root `architecture.zh-CN` structure as the generated architecture demonstration.
+
+### Diagram Request Liveness
+
+An external CLI timeout only ends the client process; it does not cancel an in-flight Obsidian `eval` promise. `runDiagramGenerateOperation()` therefore owns a five-minute LLM deadline. Its controller is registered on the existing progress reporter, passed through structured generation, legacy Mermaid fallback, and provider retries, then cleared in `finally`. A timeout or user cancellation releases the command busy state instead of leaving the UI locked. This deadline bounds provider availability only; it does not cap source size, tree depth, node count, relation count, or Mermaid behavior.
 
 ### Explicit Render Targets
 
@@ -227,7 +235,7 @@ The spec-first pipeline can also force a render target independently from the in
 |---|---|---|
 | `editable-html-svg` | Self-contained HTML with semantic inline SVG | no external editor runtime |
 | `drawio` | `.drawio` XML plus SVG/MD review companions | no diagrams.net runtime in the plugin |
-| `drawnix` | `.drawnix` JSON subset with inline Mermaid/source visuals by default; optional `.assets` companions when complete Mermaid export is enabled | Full board remains the compatible default payload. Presentation adds a replay-linked SVG bundle beside that payload; it does not reinterpret the target or bundle Drawnix/Plait at runtime. Legacy companion scopes remain readable, missing legacy Mermaid SVGs can be rebuilt from metadata source text, and regeneration removes only manifest-backed plugin-owned scopes. |
+| `drawnix` | `.drawnix` JSON with inline Mermaid/source visuals by default; optional `.assets` companions when complete Mermaid export is enabled | One filename-rooted native tree is generated for each source note. No Drawnix, Plait, or React runtime is bundled. Legacy source-visual companions remain readable, and missing legacy Mermaid SVGs can be rebuilt from retained metadata source text. |
 | `circuitikz` | validated `.tex` source plus SVG/MD review companions | dependency-free preview/export; optional desktop compiler or managed Tectonic |
 
 Circuitikz support is intentionally constrained. The front-end settings expose `Circuit (Circuitikz)` as a preferred diagram type and `Circuitikz + SVG preview` as a preferred render target without requiring Developer mode, but the renderer accepts only a validated `DiagramSpec(intent: "circuit", circuitSpec)`. It writes deterministic circuitikz TeX and a reviewable SVG companion. Desktop users may then reuse a custom/system compiler or explicitly install pinned Tectonic 0.16.9 outside the Vault for compile diagnostics, native PDF evidence, and guarded repair acceptance; mobile and ordinary preview/export do not load desktop process code.
@@ -264,6 +272,8 @@ Current host evidence matters:
 - the optional `obsidian-cli` wrapper may expose desktop/debug entrypoints such as `native`, but it is not installed on the current Windows Study host; the stale npm package with the same name is not a safe substitute because it predates the official CLI and shadows the `obsidian` executable
 - the official `obsidian` CLI supports `commands`, `command id=<command-id>`, and `eval`; it can list/execute plugin-registered commands and invoke the maintainer bridge directly
 - `scripts/invoke-maintainer-cli-operation.js` prefers `obsidian-cli native eval` when a compatible wrapper exists, then falls back to official `obsidian eval` only when the wrapper command is unavailable; a present-but-failing wrapper is surfaced rather than masked
+- `diagram.generate` ignores obsolete `drawnixKnowledgeMapDelivery` input. Its source-path command path supplies the filename used by Drawnix source coverage
+- diagram artifacts use the existing custom Mermaid output-directory setting when it is enabled. A stale test path can therefore make a successful run appear to have written nothing beside its source note; disable the setting to restore source-sibling artifacts
 - however, this is still only a **command trigger surface**, not a mature plugin integration protocol with typed arguments, result contracts, capability metadata, or stable automation semantics
 
 That means Notemd's future CLI story still cannot stop at "reuse sidebar buttons from the terminal". The real extraction targets are lower-level capabilities that already have partial independent shape:
@@ -305,7 +315,7 @@ The gap is smaller than before:
 
 ## Implemented Hardening Architecture
 
-The delivered hardening phase keeps the same host-neutral pipeline and makes three boundaries explicit: `DiagramSpec` for semantics and provenance, a target-owned placed projection for geometry/layers/collision diagnostics, and `RenderArtifact` for preview panels, source-visual metadata, optional companions, and export. The document-root presentation policy is source-backed and does not invalidate forest-shaped semantic input. The detailed bilingual delivery record is [Diagram Platform Robustness And Settings Integrity Plan](./brainstorms/2026-08-08-diagram-platform-robustness-and-settings-integrity-plan.md).
+The delivered hardening phase keeps the same host-neutral pipeline and makes three boundaries explicit: `DiagramSpec` for semantics and provenance, a target-owned placed projection for geometry/layers/collision diagnostics, and `RenderArtifact` for preview panels, source-visual metadata, optional companions, and export. The filename-rooted tree policy is source-backed and does not invalidate semantic input. The detailed bilingual delivery record is [Diagram Platform Robustness And Settings Integrity Plan](./brainstorms/2026-08-08-diagram-platform-robustness-and-settings-integrity-plan.md).
 
 The delivered phases cover semantic structure integrity, geometry/layer collision auditing, source-visual rehydration, unified image export, settings discovery/runtime verification, and documentation closure. Full Drawnix host embedding, Mermaid round-tripping as the native path, and PDF-specific re-layout remain rejected.
 
@@ -322,7 +332,7 @@ The delivered phases cover semantic structure integrity, geometry/layer collisio
 ## Verification
 
 - `npm run build` — TypeScript compilation + esbuild bundle
-- `npm test -- --runInBand` — the full Jest matrix currently covers 243 suites and 2150 tests (2149 passed, 1 skipped); in a `/.worktrees/` checkout use `npx jest --runInBand --config /tmp/notemd-worktree-jest.cjs` because the repo Jest ignore pattern excludes worktree paths
+- `npm test -- --runInBand` — full Jest verification; in a `/.worktrees/` checkout use `npx jest --runInBand --config /tmp/notemd-worktree-jest.cjs` because the repo Jest ignore pattern excludes worktree paths
 - `npm run audit:i18n-ui` — No hardcoded UI strings
 - `npm run audit:render-host` — Render host self-contained in main.js
 - `npm run verify:vault-bundle -- --vault <vault-path>` — Source/Vault bundle hashes and manifest version agree

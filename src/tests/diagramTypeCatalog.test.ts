@@ -3,14 +3,14 @@ import {
     findDiagramTypeByIntent,
     getExecutableDiagramType
 } from '../diagram/diagramTypeCatalog';
-import { resolveDrawnixKnowledgeMapDelivery } from '../diagram/diagramPreferenceCompatibility';
 
 describe('executable diagram type catalog', () => {
     test('binds the persisted Drawnix intent to its user-facing type', () => {
         expect(findDiagramTypeByIntent('drawnixMindmap')).toMatchObject({
             id: 'drawnix-knowledge-map',
+            semanticPattern: 'Filename-rooted knowledge tree with material cross-branch relationships',
             promptProfileId: 'drawnix-knowledge-map',
-            rendererOperationId: 'drawnix-knowledge-map-board'
+            rendererOperationId: 'drawnix-knowledge-map-tree'
         });
     });
 
@@ -28,9 +28,11 @@ describe('executable diagram type catalog', () => {
         expect(() => getExecutableDiagramType('timeline' as never)).toThrow(/unsupported diagram catalog type/i);
     });
 
-    test('keeps full-board delivery for legacy and malformed settings', () => {
-        expect(resolveDrawnixKnowledgeMapDelivery({})).toBe('full-board');
-        expect(resolveDrawnixKnowledgeMapDelivery({ drawnixKnowledgeMapDelivery: 'presentation' })).toBe('presentation');
-        expect(resolveDrawnixKnowledgeMapDelivery({ drawnixKnowledgeMapDelivery: 'unexpected' as never })).toBe('full-board');
+    test('describes Drawnix as one native tree renderer rather than a delivery selector', () => {
+        const drawnix = findDiagramTypeByIntent('drawnixMindmap');
+
+        expect(drawnix.rendererTarget).toBe('drawnix');
+        expect(drawnix.visualRoles).toEqual(expect.arrayContaining(['root', 'cross-relation']));
+        expect(drawnix.semanticPattern).not.toMatch(/multi-root|presentation|full-board/i);
     });
 });

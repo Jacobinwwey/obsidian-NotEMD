@@ -74,7 +74,7 @@ import {
 } from './localKnowledgeBase';
 import { ProgressModal } from './ui/ProgressModal';
 import { ErrorModal } from './ui/ErrorModal';
-import { DiagramPreviewModal, type DrawnixAlternateDelivery } from './ui/DiagramPreviewModal';
+import { DiagramPreviewModal } from './ui/DiagramPreviewModal';
 import { WelcomeModal } from './ui/WelcomeModal';
 import { NotemdSettingTab } from './ui/NotemdSettingTab';
 import { showConceptNotePathWarningModal, showDeletionConfirmationModal } from './ui/modals'; // Import the modal function
@@ -92,8 +92,7 @@ import {
     getExecutableDiagramExamples,
     renderExecutableDiagramExample
 } from './diagram/examples/diagramExampleCatalog';
-import type { DiagramCatalogTypeId, DrawnixKnowledgeMapDelivery } from './diagram/types';
-import { readDrawnixKnowledgeMapReplayRecord } from './diagram/adapters/drawnix/drawnixExporter';
+import type { DiagramCatalogTypeId } from './diagram/types';
 import { RenderArtifact } from './rendering/types';
 import { IframeRenderHost } from './rendering/host/iframeRenderHost';
 import { getRenderTargetDisplayName } from './rendering/targetLabel';
@@ -316,66 +315,8 @@ export default class NotemdPlugin extends Plugin {
             previewTitle: example.title
         });
         new DiagramPreviewModal(this.app, session, this.settings.uiLocale, {
-            exportPpi: this.settings.diagramPreviewExportPpi,
-            drawnixAlternateDelivery: this.createDrawnixAlternateDelivery(artifact)
+            exportPpi: this.settings.diagramPreviewExportPpi
         }).open();
-    }
-
-    private createDrawnixAlternateDelivery(
-        artifact: RenderArtifact,
-        previewContext: { sourcePath?: string; artifactSaved?: boolean } = {}
-    ): DrawnixAlternateDelivery | undefined {
-        if (artifact.target !== 'drawnix') {
-            return undefined;
-        }
-
-        let replay = null;
-        try {
-            replay = readDrawnixKnowledgeMapReplayRecord(JSON.parse(artifact.content));
-        } catch {
-            if (artifact.sourceIntent !== 'drawnixMindmap') {
-                return undefined;
-            }
-        }
-        if (!replay && artifact.sourceIntent !== 'drawnixMindmap') {
-            return undefined;
-        }
-
-        const experimentalDiagramI18n = this.getUiStrings().settings.developer.experimentalDiagramPipeline;
-        const alternateDelivery: DrawnixKnowledgeMapDelivery = artifact.drawnixKnowledgeMapPresentation
-            ? 'full-board'
-            : 'presentation';
-        const label = alternateDelivery === 'presentation'
-            ? experimentalDiagramI18n.drawnixKnowledgeMapDeliveryPresentation
-            : experimentalDiagramI18n.drawnixKnowledgeMapDeliveryFullBoard;
-
-        if (!replay) {
-            return {
-                label,
-                unavailableReason: this.getUiStrings().previewModal.drawnixDeliveryReplayRequired
-            };
-        }
-
-        return {
-            label,
-            loadSession: async () => {
-                const alternateArtifact = await createDefaultDiagramRendererService().render(
-                    replay.semanticSpec,
-                    {
-                        target: 'drawnix',
-                        drawnixKnowledgeMapDelivery: alternateDelivery
-                    }
-                );
-                const targetLabel = getRenderTargetDisplayName(alternateArtifact.target);
-                return new IframeRenderHost().createSession(alternateArtifact, {
-                    sourcePath: previewContext.sourcePath,
-                    artifactSaved: previewContext.artifactSaved,
-                    previewTitle: formatI18n(this.getUiStrings().previewModal.title, {
-                        target: `${targetLabel} ${label}`
-                    })
-                });
-            }
-        };
     }
 
     private openDiagramPreviewModal(artifact: RenderArtifact, sourcePath: string, artifactSaved = false, existingHistoryEntryId?: string) {
@@ -398,8 +339,7 @@ export default class NotemdPlugin extends Plugin {
         new DiagramPreviewModal(this.app, session, this.settings.uiLocale, {
             exportPpi: this.settings.diagramPreviewExportPpi,
             historyEntryId,
-            historyStore,
-            drawnixAlternateDelivery: this.createDrawnixAlternateDelivery(artifact, { sourcePath, artifactSaved })
+            historyStore
         }).open();
     }
 
@@ -1418,7 +1358,12 @@ export default class NotemdPlugin extends Plugin {
     }
 
     async loadSettings() {
-        const savedData = await this.loadData() || {};
+        const loadedSettings = await this.loadData() || {};
+        const hasObsoleteDrawnixDelivery = Object.prototype.hasOwnProperty.call(
+            loadedSettings,
+            'drawnixKnowledgeMapDelivery'
+        );
+        const { drawnixKnowledgeMapDelivery: _obsoleteDrawnixDelivery, ...savedData } = loadedSettings;
         const savedProviders = canonicalizeProviderConfigs(savedData.providers || []);
         const defaultProviders = DEFAULT_SETTINGS.providers;
         const mergedProviders: LLMProviderConfig[] = [];
@@ -1512,6 +1457,9 @@ export default class NotemdPlugin extends Plugin {
         });
 
         this.settings.availableLanguages = mergedLanguages;
+        if (hasObsoleteDrawnixDelivery) {
+            await this.saveSettings();
+        }
     }
 
     async saveSettings() {

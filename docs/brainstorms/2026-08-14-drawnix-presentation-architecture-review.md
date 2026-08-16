@@ -1,13 +1,16 @@
 ---
 date: 2026-08-14
 topic: drawnix-presentation-architecture-review
-status: implemented
+status: superseded
+superseded_by: ../plans/2026-08-14-diagram-type-catalog-and-drawnix-delivery-implementation.en.md
 related:
   - 2026-07-22-drawnix-knowledge-map-quality-and-delivery-plan.md
   - 2026-08-08-diagram-platform-robustness-and-settings-integrity-plan.md
 ---
 
 # Drawnix Presentation Architecture Review
+
+> Status (2026-08-15): Superseded. The proposal was removed rather than retained as a selectable design after its replay prerequisite prevented a real Vault export. The active product path is one editable filename-rooted Drawnix tree with one SVG companion. Use the [implementation record](../plans/2026-08-14-diagram-type-catalog-and-drawnix-delivery-implementation.en.md) for current behavior; this note preserves the rejected analysis only.
 
 ## Decision
 

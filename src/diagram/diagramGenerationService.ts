@@ -13,19 +13,11 @@ import { buildDiagramPlan } from './planner';
 import { buildDiagramSpecPrompt } from './prompts/diagramSpecPrompt';
 import { assertValidDiagramSpec } from './spec';
 import { isSupportedRenderTarget } from './types';
-import type {
-    DiagramIntent,
-    DiagramNode,
-    DiagramPlan,
-    DiagramSpec,
-    DrawnixKnowledgeMapDelivery,
-    RenderTarget
-} from './types';
-import { resolveDrawnixKnowledgeMapDelivery } from './diagramPreferenceCompatibility';
+import type { DiagramIntent, DiagramNode, DiagramPlan, DiagramSpec, RenderTarget } from './types';
 import { parseDiagramSpecResponse } from './diagramSpecResponseParser';
 import { resolveCircuitTemplateFromMarkdown } from './adapters/circuitikz/circuitTemplateCatalog';
 import { validateDrawnixMindMapSpec } from './adapters/drawnix/drawnixMindMapProjection';
-import { buildSourceCoverageForest } from './adapters/drawnix/drawnixSourceCoverage';
+import { mergeDrawnixSourceCoverage } from './adapters/drawnix/drawnixSourceCoverage';
 import { hashResolvedSourceVisualManifest, ResolvedSourceVisual } from './sourceVisuals';
 
 export interface DiagramGenerationOptions {
@@ -38,7 +30,6 @@ export interface DiagramGenerationOptions {
     rendererService?: RendererService;
     sourceVisuals?: readonly ResolvedSourceVisual[];
     drawnixExportMermaidCompanions?: boolean;
-    drawnixKnowledgeMapDelivery?: DrawnixKnowledgeMapDelivery;
 }
 
 export type DiagramOperationOutputMode = 'artifact' | 'mermaid';
@@ -55,20 +46,18 @@ export interface DiagramOperationInput {
     targetLanguage?: string;
     sourceVisuals?: readonly ResolvedSourceVisual[];
     drawnixExportMermaidCompanions?: boolean;
-    drawnixKnowledgeMapDelivery?: DrawnixKnowledgeMapDelivery;
 }
 
 export interface BuildDiagramOperationInputParams {
     sourcePath?: string;
     sourceMarkdown: string;
     executionMode: DiagramOperationExecutionMode;
-    settings: Pick<NotemdSettings, 'preferredDiagramIntent' | 'preferredDiagramRenderTarget' | 'experimentalDiagramCompatibilityMode' | 'summarizeToMermaidLanguage' | 'drawnixExportMermaidCompanions' | 'drawnixKnowledgeMapDelivery'>;
+    settings: Pick<NotemdSettings, 'preferredDiagramIntent' | 'preferredDiagramRenderTarget' | 'experimentalDiagramCompatibilityMode' | 'summarizeToMermaidLanguage' | 'drawnixExportMermaidCompanions'>;
     targetLanguage?: string;
     requestedIntentOverride?: DiagramIntent;
     requestedRenderTargetOverride?: RenderTarget;
     compatibilityModeOverride?: 'best-fit' | 'legacy-mermaid';
     targetLanguageOverride?: string;
-    drawnixKnowledgeMapDeliveryOverride?: DrawnixKnowledgeMapDelivery;
 }
 
 export function resolveDiagramOperationCompatibilityMode(
@@ -123,10 +112,7 @@ export function buildDiagramOperationInput(params: BuildDiagramOperationInputPar
         targetLanguage: params.targetLanguageOverride
             ?? params.targetLanguage
             ?? params.settings.summarizeToMermaidLanguage,
-        drawnixExportMermaidCompanions: params.settings.drawnixExportMermaidCompanions,
-        drawnixKnowledgeMapDelivery: requestedIntent === 'drawnixMindmap'
-            ? params.drawnixKnowledgeMapDeliveryOverride ?? resolveDrawnixKnowledgeMapDelivery(params.settings)
-            : undefined
+        drawnixExportMermaidCompanions: params.settings.drawnixExportMermaidCompanions
     };
 }
 
@@ -155,8 +141,7 @@ async function renderWithFallbackTraversal(
     spec: DiagramSpec,
     targets: Array<DiagramPlan['renderTarget']>,
     sourceVisuals?: readonly ResolvedSourceVisual[],
-    drawnixExportMermaidCompanions?: boolean,
-    drawnixKnowledgeMapDelivery?: DrawnixKnowledgeMapDelivery
+    drawnixExportMermaidCompanions?: boolean
 ): Promise<Awaited<ReturnType<RendererService['render']>>> {
     const failures: string[] = [];
 
@@ -169,8 +154,7 @@ async function renderWithFallbackTraversal(
                 target,
                 sourceVisuals,
                 sourceVisualManifestHash: hashResolvedSourceVisualManifest(sourceVisuals),
-                drawnixExportMermaidCompanions,
-                drawnixKnowledgeMapDelivery
+                drawnixExportMermaidCompanions
             });
         } catch (error) {
             failures.push(`${target}: ${normalizeErrorMessage(error)}`);
@@ -378,7 +362,7 @@ function enrichDrawnixSourceCoverage(
     sourcePath?: string
 ): DiagramSpec {
     return spec.intent === 'drawnixMindmap'
-        ? buildSourceCoverageForest(spec, sourceMarkdown, sourcePath)
+        ? mergeDrawnixSourceCoverage(spec, sourceMarkdown, sourcePath)
         : spec;
 }
 
@@ -533,8 +517,7 @@ export async function generateDiagramArtifact(
             spec,
             targets,
             options.sourceVisuals,
-            options.drawnixExportMermaidCompanions,
-            options.drawnixKnowledgeMapDelivery
+            options.drawnixExportMermaidCompanions
         );
     } catch (renderError: unknown) {
         const errorMsg = renderError instanceof Error ? renderError.message : String(renderError);
@@ -561,8 +544,7 @@ export async function generateDiagramArtifact(
                     retrySpec,
                     targets,
                     options.sourceVisuals,
-                    options.drawnixExportMermaidCompanions,
-                    options.drawnixKnowledgeMapDelivery
+                    options.drawnixExportMermaidCompanions
                 );
             } catch (retryError: unknown) {
                 const retryMsg = retryError instanceof Error ? retryError.message : String(retryError);

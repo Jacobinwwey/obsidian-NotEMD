@@ -1,5 +1,8 @@
 import { mockSettings } from './__mocks__/settings';
-import { runDiagramGenerateOperation } from '../operations/diagramGenerateOperation';
+import {
+    DIAGRAM_LLM_REQUEST_TIMEOUT_MS,
+    runDiagramGenerateOperation
+} from '../operations/diagramGenerateOperation';
 import { ProgressReporter } from '../types';
 import { resolveCircuitTemplateFromMarkdown } from '../diagram/adapters/circuitikz/circuitTemplateCatalog';
 
@@ -185,6 +188,64 @@ describe('diagram generate operation', () => {
         expect(result.artifact.content).toContain('\\begin{circuitikz}');
     });
 
+    test('aborts a stalled diagram request at the deadline and releases the reporter controller', async () => {
+        jest.useFakeTimers();
+        try {
+            const reporter = createReporter();
+            reporter.abortController = null;
+            const callLLMImpl = jest.fn((
+                _provider,
+                _prompt,
+                _content,
+                _settings,
+                _reporter,
+                _modelName,
+                signal?: AbortSignal
+            ) => new Promise<string>((_resolve, reject) => {
+                if (!signal) {
+                    reject(new Error('Diagram operation did not provide an abort signal.'));
+                    return;
+                }
+                signal.addEventListener('abort', () => {
+                    const abortError = new Error('request aborted');
+                    abortError.name = 'AbortError';
+                    reject(abortError);
+                }, { once: true });
+            }));
+
+            const operation = runDiagramGenerateOperation({
+                input: {
+                    sourcePath: 'Notes/Architecture.md',
+                    sourceMarkdown: '# Architecture',
+                    requestedIntent: 'drawnixMindmap',
+                    requestedRenderTarget: 'drawnix',
+                    compatibilityMode: 'best-fit',
+                    outputMode: 'artifact'
+                },
+                settings: mockSettings,
+                provider: mockSettings.providers[0],
+                modelName: mockSettings.providers[0].model,
+                reporter,
+                getLegacyMermaidPrompt: () => 'legacy prompt',
+                callLLMImpl
+            });
+
+            await Promise.resolve();
+            await Promise.resolve();
+
+            const activeController = reporter.abortController as AbortController | null;
+            expect(activeController).not.toBeNull();
+            expect(activeController!.signal).toBe(callLLMImpl.mock.calls[0][6]);
+
+            jest.advanceTimersByTime(DIAGRAM_LLM_REQUEST_TIMEOUT_MS);
+
+            await expect(operation).rejects.toThrow('Diagram generation timed out');
+            expect(reporter.abortController).toBeNull();
+        } finally {
+            jest.useRealTimers();
+        }
+    });
+
     test('falls back to legacy mermaid path when mermaid output fails structured generation', async () => {
         const reporter = createReporter();
         const callLLMImpl = jest.fn().mockResolvedValue('graph TD\nA-->B');
@@ -217,7 +278,8 @@ describe('diagram generate operation', () => {
             '# Topic',
             settings,
             reporter,
-            mockSettings.providers[0].model
+            mockSettings.providers[0].model,
+            expect.objectContaining({ aborted: false })
         );
         expect(result.artifact.content).toBe('graph TD\nA-->B');
         expect((reporter.log as jest.Mock).mock.calls.flat().join('\n')).toContain('Falling back to legacy Mermaid');

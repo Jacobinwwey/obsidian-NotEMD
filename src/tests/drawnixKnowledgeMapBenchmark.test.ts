@@ -7,7 +7,7 @@ describe('Drawnix knowledge-map benchmark', () => {
     const repoRoot = path.join(__dirname, '..', '..');
     const benchmarkPath = path.join(repoRoot, 'scripts', 'benchmark-drawnix-knowledge-map.js');
 
-    test('exports a representative multi-root forest without a semantic capacity quota', () => {
+    test('exports a representative filename-rooted tree without a semantic capacity quota', () => {
         const outputDirectory = fs.mkdtempSync(path.join(os.tmpdir(), 'notemd-drawnix-benchmark-'));
 
         try {
@@ -21,8 +21,8 @@ describe('Drawnix knowledge-map benchmark', () => {
             const result = JSON.parse(stdout);
 
             expect(result).toEqual(expect.objectContaining({
-                rootCount: 8,
-                nodeCount: 136,
+                rootCount: 1,
+                nodeCount: 137,
                 edgeCount: 32,
                 validationErrorCount: 0
             }));

@@ -112,6 +112,31 @@ function appendCoverageRoot(nodes: DiagramNode[], root: DiagramNode): DiagramNod
     return root;
 }
 
+function basenameWithoutExtension(sourcePath: string): string {
+    const basename = sourcePath.trim().split(/[\\/]/u).pop() ?? '';
+    return basename.replace(/\.[^.]+$/u, '').trim();
+}
+
+function firstDocumentHeading(sourceMarkdown: string): string | undefined {
+    for (const line of sourceMarkdown.split(/\r?\n/u)) {
+        const heading = parseHeading(line);
+        if (heading?.level === 1) {
+            return heading.label;
+        }
+    }
+    return undefined;
+}
+
+function deriveDocumentLabel(spec: DiagramSpec, sourceMarkdown: string, sourcePath?: string): string {
+    return boundedLabel(
+        basenameWithoutExtension(sourcePath ?? '')
+            || firstDocumentHeading(sourceMarkdown)
+            || spec.title
+            || 'Generated diagram',
+        'Generated diagram'
+    );
+}
+
 function parseHeading(line: string): { level: number; label: string } | null {
     const match = line.match(/^\s*(#{1,6})\s+(.+?)\s*#*\s*$/);
     if (!match) {
@@ -468,6 +493,16 @@ function findNodeByLabel(
     return undefined;
 }
 
+function ensureAdditionalConcepts(parent: DiagramNode, factory: SourceNodeFactory): DiagramNode {
+    const existing = findDirectChildByLabel(parent, 'Additional concepts');
+    if (existing) {
+        return existing;
+    }
+    const additional = factory.create('Additional concepts', 'additional');
+    parent.children = [...(parent.children ?? []), additional];
+    return additional;
+}
+
 function isPlaceholderModelNode(node: DiagramNode): boolean {
     return /^untitled(?:\s+\d+(?:-\d+)*)?$/iu.test(normalizeLabel(node.label));
 }
@@ -485,28 +520,28 @@ function cloneModelForest(nodes: readonly DiagramNode[]): DiagramNode[] {
 }
 
 function appendUnmatchedModelRoot(
-    roots: DiagramNode[],
+    parent: DiagramNode,
     model: DiagramNode,
     idRemap: Map<string, string>,
     diagnostics: DiagramSourceCoverageDiagnostic[]
 ): void {
-    const existing = roots.find(root => comparisonLabel(root.label) === comparisonLabel(model.label));
+    const existing = findDirectChildByLabel(parent, model.label);
     if (existing) {
         mergeModelNodeIntoTarget(model, existing, idRemap, diagnostics);
         return;
     }
 
     const cloned = cloneNode(model);
-    roots.push(cloned);
+    parent.children = [...(parent.children ?? []), cloned];
     mapClonedSubtreeIds(cloned, idRemap);
 }
 
 /**
- * Adds source-derived taxonomy without rewriting a valid semantic forest into
- * a document-rooted tree. The board consumes this forest directly; consumers
- * that need a document overview can explicitly request a separate projection.
+ * Adds deterministic source-derived taxonomy to a model-generated Drawnix map.
+ * The exact source visuals remain companions; this layer makes the native tree
+ * useful even when the LLM returns only a small summary of a long note.
  */
-export function buildSourceCoverageForest(
+export function mergeDrawnixSourceCoverage(
     spec: DiagramSpec,
     sourceMarkdown: string,
     sourcePath?: string
@@ -519,64 +554,34 @@ export function buildSourceCoverageForest(
     collectNodeIds(spec.nodes ?? [], reservedIds);
     const factory = createSourceNodeFactory(reservedIds);
     const coverage = buildSourceCoverageNodes(sourceMarkdown, factory);
-    const mergedRoots = coverage.roots;
+    const documentRoot = factory.create(deriveDocumentLabel(spec, sourceMarkdown, sourcePath), 'document');
+    coverage.roots.forEach(root => appendChildByLabel(documentRoot, root));
 
     const idRemap = new Map<string, string>();
     const diagnostics: DiagramSourceCoverageDiagnostic[] = [];
     const modelRoots = cloneModelForest(spec.nodes ?? []);
     modelRoots.forEach(modelRoot => {
-        const sourceMatch = findNodeByLabel(mergedRoots, modelRoot.label);
-        if (sourceMatch) {
-            mergeModelNodeIntoTarget(modelRoot, sourceMatch, idRemap, diagnostics);
+        const documentMatch = comparisonLabel(modelRoot.label) === comparisonLabel(documentRoot.label)
+            ? documentRoot
+            : findNodeByLabel(documentRoot.children ?? [], modelRoot.label);
+        if (documentMatch) {
+            mergeModelNodeIntoTarget(modelRoot, documentMatch, idRemap, diagnostics);
             return;
         }
+        const additional = ensureAdditionalConcepts(documentRoot, factory);
         appendUnmatchedModelRoot(
-            mergedRoots,
+            additional,
             modelRoot,
             idRemap,
             diagnostics
         );
     });
 
+    const mergedNodes = [documentRoot];
     return {
         ...spec,
-        nodes: mergedRoots,
-        edges: deduplicateAndRemapEdges(spec.edges ?? [], idRemap, mergedRoots, diagnostics),
+        nodes: mergedNodes,
+        edges: deduplicateAndRemapEdges(spec.edges ?? [], idRemap, mergedNodes, diagnostics),
         ...(diagnostics.length > 0 ? { sourceCoverageDiagnostics: diagnostics } : {})
     };
-}
-
-/**
- * An explicit overview policy for static delivery. Board generation must use
- * buildSourceCoverageForest() so an editable Drawnix artifact retains its
- * independent semantic roots.
- */
-export function buildDocumentRootedKnowledgeMap(
-    spec: DiagramSpec,
-    sourceLabel: string
-): DiagramSpec {
-    if (spec.intent !== 'drawnixMindmap') {
-        return spec;
-    }
-
-    const reservedIds = new Set<string>();
-    collectNodeIds(spec.nodes ?? [], reservedIds);
-    const factory = createSourceNodeFactory(reservedIds);
-    const root = factory.create(boundedLabel(sourceLabel, spec.title || 'Generated diagram'), 'document');
-    root.kind = 'root';
-    root.children = (spec.nodes ?? []).map(cloneNode);
-
-    return {
-        ...spec,
-        nodes: [root]
-    };
-}
-
-/** @deprecated Use buildSourceCoverageForest() for new Drawnix generation. */
-export function mergeDrawnixSourceCoverage(
-    spec: DiagramSpec,
-    sourceMarkdown: string,
-    sourcePath?: string
-): DiagramSpec {
-    return buildSourceCoverageForest(spec, sourceMarkdown, sourcePath);
 }

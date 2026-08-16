@@ -899,7 +899,7 @@ describe('provider settings behavior', () => {
         expect(plugin.openDiagramExamplePreview).toHaveBeenCalledWith('drawnix-knowledge-map');
     });
 
-    test('persists Drawnix presentation delivery from the one-click diagram setting', async () => {
+    test('does not render the retired Drawnix delivery selector', async () => {
         const plugin = createPlugin();
         plugin.settings.enableDeveloperMode = false;
         plugin.settings.preferredDiagramIntent = 'drawnixMindmap';
@@ -909,18 +909,8 @@ describe('provider settings behavior', () => {
         tab.display();
 
         const control = findElementByClass(tab.containerEl, 'notemd-drawnix-delivery-control');
-        expect(control).toBeDefined();
-        const buttons = flattenElements(control!).filter(element => element.tag === 'button');
-        expect(buttons.map(button => button.getAttribute('data-drawnix-knowledge-map-delivery'))).toEqual([
-            'full-board',
-            'presentation'
-        ]);
-
-        buttons[1].dispatch('click');
-        await Promise.resolve();
-
-        expect(plugin.settings.drawnixKnowledgeMapDelivery).toBe('presentation');
-        expect(plugin.saveSettings).toHaveBeenCalledTimes(1);
+        expect(control).toBeUndefined();
+        expect(plugin.saveSettings).not.toHaveBeenCalled();
     });
 
     test('exposes searchable CircuitikZ environment management and compiler preferences', async () => {

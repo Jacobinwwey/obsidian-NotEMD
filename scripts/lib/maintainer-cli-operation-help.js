@@ -20,11 +20,11 @@ const OPERATION_HELP = {
   'diagram.generate': {
     summary: 'Generate a saved diagram artifact or Mermaid output.',
     required: ['sourcePath'],
-    optional: ['executionMode', 'requestedIntent', 'requestedRenderTarget', 'compatibilityMode', 'targetLanguage', 'drawnixKnowledgeMapDelivery'],
+    optional: ['executionMode', 'requestedIntent', 'requestedRenderTarget', 'compatibilityMode', 'targetLanguage'],
     exampleInput: '{"sourcePath":"index.zh-CN.md","executionMode":"save-artifact","requestedIntent":"erDiagram","targetLanguage":"en"}',
     additionalExamples: [
       '{"sourcePath":"circuits/common-source.md","executionMode":"save-artifact","requestedIntent":"circuit","requestedRenderTarget":"circuitikz","compatibilityMode":"best-fit","targetLanguage":"en"}',
-      '{"sourcePath":"docs/architecture.zh-CN.md","executionMode":"save-artifact","requestedIntent":"drawnixMindmap","requestedRenderTarget":"drawnix","drawnixKnowledgeMapDelivery":"presentation","targetLanguage":"zh-CN"}'
+      '{"sourcePath":"docs/architecture.zh-CN.md","executionMode":"save-artifact","requestedIntent":"drawnixMindmap","requestedRenderTarget":"drawnix","targetLanguage":"zh-CN"}'
     ]
   },
   'local-knowledge.inspect': {

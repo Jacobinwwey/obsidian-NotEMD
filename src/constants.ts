@@ -199,7 +199,6 @@ export const DEFAULT_SETTINGS: NotemdSettings = {
     enableExperimentalDiagramPipeline: false,
     experimentalDiagramCompatibilityMode: 'legacy-mermaid',
     preferredDiagramRenderTarget: undefined,
-    drawnixKnowledgeMapDelivery: 'full-board',
     diagramPreviewExportPpi: DEFAULT_PREVIEW_EXPORT_PPI,
     drawnixExportMermaidCompanions: false,
     circuitikzCompilerPreference: 'auto',

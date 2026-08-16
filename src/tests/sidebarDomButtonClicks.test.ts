@@ -356,23 +356,15 @@ describe('NotemdSidebarView DOM button wiring', () => {
         await button!.onclick?.();
     }
 
-    test('switches Drawnix delivery from the sidebar selector', async () => {
+    test('does not render the retired Drawnix delivery selector in the sidebar', async () => {
         (plugin.settings as any).preferredDiagramIntent = 'drawnixMindmap';
         (plugin.settings as any).preferredDiagramRenderTarget = 'drawnix';
 
         await sidebar.onOpen();
 
         const selector = contentContainer.findByClass('notemd-drawnix-delivery-control');
-        expect(selector).not.toBeNull();
-        const presentationButton = selector?.children.find(button => (
-            button.attributes['data-drawnix-knowledge-map-delivery'] === 'presentation'
-        ));
-
-        presentationButton?.dispatch('click');
-        await Promise.resolve();
-
-        expect((plugin.settings as any).drawnixKnowledgeMapDelivery).toBe('presentation');
-        expect(plugin.saveSettings).toHaveBeenCalledTimes(1);
+        expect(selector).toBeNull();
+        expect(plugin.saveSettings).not.toHaveBeenCalled();
     });
 
     test('renders action buttons and clicking each triggers mapped command', async () => {

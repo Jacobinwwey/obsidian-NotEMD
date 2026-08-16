@@ -67,4 +67,25 @@ describe('executable diagram example catalog', () => {
         expect(artifact.target).toBe('drawnix');
         expect(artifact.content.trim()).not.toBe('');
     });
+
+    test('uses a filename-rooted Drawnix example without obsolete delivery metadata', async () => {
+        const rendererService = createExampleRendererService();
+        const example = getExecutableDiagramExamples().find(candidate => (
+            candidate.typeId === 'drawnix-knowledge-map'
+        ));
+
+        const artifact = await renderExecutableDiagramExample(example!, rendererService);
+        const data = JSON.parse(artifact.content) as {
+            elements: Array<{
+                type: string;
+                data?: { topic?: { children?: Array<{ text?: string }> } };
+            }>;
+            metadata?: { notemd?: { knowledgeMap?: unknown } };
+        };
+        const roots = data.elements.filter(element => element.type === 'mindmap');
+
+        expect(roots).toHaveLength(1);
+        expect(roots[0].data?.topic?.children?.[0]?.text).toBe('architecture.zh-CN');
+        expect(data.metadata?.notemd?.knowledgeMap).toBeUndefined();
+    });
 });

@@ -4,8 +4,8 @@ const { execFileSync } = require('child_process');
 const fs = require('fs');
 const path = require('path');
 
-const ROOT_COUNT = 8;
-const BRANCHES_PER_ROOT = 4;
+const SUBSYSTEM_COUNT = 8;
+const BRANCHES_PER_SUBSYSTEM = 4;
 const LEAVES_PER_BRANCH = 3;
 const repoRoot = path.resolve(__dirname, '..');
 const artifactCliPath = path.join(repoRoot, 'scripts', 'export-diagram-artifact.js');
@@ -36,24 +36,24 @@ function parseArgs(argv) {
   return result;
 }
 
-function leafId(rootIndex, branchIndex, leafIndex) {
-  return `root-${rootIndex}-branch-${branchIndex}-leaf-${leafIndex}`;
+function leafId(subsystemIndex, branchIndex, leafIndex) {
+  return `subsystem-${subsystemIndex}-branch-${branchIndex}-leaf-${leafIndex}`;
 }
 
-function createRoot(rootIndex) {
+function createSubsystem(subsystemIndex) {
   return {
-    id: `root-${rootIndex}`,
-    label: `Subsystem ${rootIndex}`,
-    children: Array.from({ length: BRANCHES_PER_ROOT }, (_, branchOffset) => {
+    id: `subsystem-${subsystemIndex}`,
+    label: `Subsystem ${subsystemIndex}`,
+    children: Array.from({ length: BRANCHES_PER_SUBSYSTEM }, (_, branchOffset) => {
       const branchIndex = branchOffset + 1;
       return {
-        id: `root-${rootIndex}-branch-${branchIndex}`,
-        label: `Module ${rootIndex}.${branchIndex}`,
+        id: `subsystem-${subsystemIndex}-branch-${branchIndex}`,
+        label: `Module ${subsystemIndex}.${branchIndex}`,
         children: Array.from({ length: LEAVES_PER_BRANCH }, (_, leafOffset) => {
           const leafIndex = leafOffset + 1;
           return {
-            id: leafId(rootIndex, branchIndex, leafIndex),
-            label: `Capability ${rootIndex}.${branchIndex}.${leafIndex}`
+            id: leafId(subsystemIndex, branchIndex, leafIndex),
+            label: `Capability ${subsystemIndex}.${branchIndex}.${leafIndex}`
           };
         })
       };
@@ -63,13 +63,13 @@ function createRoot(rootIndex) {
 
 function createCrossRelations() {
   const relations = [];
-  for (let rootIndex = 1; rootIndex <= ROOT_COUNT; rootIndex += 1) {
-    const targetRootIndex = rootIndex === ROOT_COUNT ? 1 : rootIndex + 1;
-    for (let branchIndex = 1; branchIndex <= BRANCHES_PER_ROOT; branchIndex += 1) {
+  for (let subsystemIndex = 1; subsystemIndex <= SUBSYSTEM_COUNT; subsystemIndex += 1) {
+    const targetSubsystemIndex = subsystemIndex === SUBSYSTEM_COUNT ? 1 : subsystemIndex + 1;
+    for (let branchIndex = 1; branchIndex <= BRANCHES_PER_SUBSYSTEM; branchIndex += 1) {
       relations.push({
-        from: leafId(rootIndex, branchIndex, 1),
-        to: leafId(targetRootIndex, branchIndex, LEAVES_PER_BRANCH),
-        label: `feeds subsystem ${targetRootIndex}`
+        from: leafId(subsystemIndex, branchIndex, 1),
+        to: leafId(targetSubsystemIndex, branchIndex, LEAVES_PER_BRANCH),
+        label: `feeds subsystem ${targetSubsystemIndex}`
       });
     }
   }
@@ -79,22 +79,31 @@ function createCrossRelations() {
 function createBenchmarkSpec() {
   return {
     intent: 'drawnixMindmap',
-    title: 'Drawnix knowledge-map benchmark',
-    summary: 'Representative multi-root forest with cross-subsystem relationships.',
-    nodes: Array.from({ length: ROOT_COUNT }, (_, rootOffset) => createRoot(rootOffset + 1)),
+    title: 'architecture.zh-CN',
+    summary: 'Representative filename-rooted tree with cross-subsystem relationships.',
+    nodes: [{
+      id: 'architecture-zh-cn',
+      label: 'architecture.zh-CN',
+      children: Array.from(
+        { length: SUBSYSTEM_COUNT },
+        (_, subsystemOffset) => createSubsystem(subsystemOffset + 1)
+      )
+    }],
     edges: createCrossRelations()
   };
 }
 
 function expectedNodeCount() {
-  return ROOT_COUNT * (1 + BRANCHES_PER_ROOT + BRANCHES_PER_ROOT * LEAVES_PER_BRANCH);
+  return 1 + SUBSYSTEM_COUNT * (
+    1 + BRANCHES_PER_SUBSYSTEM + BRANCHES_PER_SUBSYSTEM * LEAVES_PER_BRANCH
+  );
 }
 
 function assertBenchmarkSummary(summary) {
   const expected = {
-    rootCount: ROOT_COUNT,
+    rootCount: 1,
     nodeCount: expectedNodeCount(),
-    edgeCount: ROOT_COUNT * BRANCHES_PER_ROOT,
+    edgeCount: SUBSYSTEM_COUNT * BRANCHES_PER_SUBSYSTEM,
     validationErrorCount: 0
   };
   for (const [key, value] of Object.entries(expected)) {

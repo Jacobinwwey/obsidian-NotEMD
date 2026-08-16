@@ -127,10 +127,6 @@ export const STRINGS_ZH_CN: DeepPartial<NotemdEnglishStrings> = {
             runDiagnostic: '运行诊断',
             runStability: '运行稳定性测试',
             experimentalDiagramPipeline: {
-                drawnixKnowledgeMapDeliveryName: 'Drawnix 交付方式',
-                drawnixKnowledgeMapDeliveryDesc: '选择 Drawnix 知识导图的输出。全量画布保留可编辑画布和现有 SVG；演示交付会额外写入概览与细节 SVG。',
-                drawnixKnowledgeMapDeliveryFullBoard: '全量画布',
-                drawnixKnowledgeMapDeliveryPresentation: '演示交付',
                 diagramExampleGalleryName: '图表示例',
                 diagramExampleGalleryDesc: '在基于笔记生成前，使用实际渲染链路预览各图表类型的示例。',
                 diagramExamplePreview: '预览示例',
@@ -1032,8 +1028,6 @@ export const STRINGS_ZH_CN: DeepPartial<NotemdEnglishStrings> = {
         exportFolderCreateFailed: '无法准备导出文件夹：{message}',
         exportFolderBatchSuccessNotice: '已将 {success}/{total} 个 {format} 文件导出到 {path}',
         exportFolderBatchPartialNotice: '已导出 {success}/{total} 个 {format} 文件。失败：{failures}。',
-        drawnixDeliveryReplayRequired: '请重新生成此 Drawnix 知识导图后再切换交付方式。',
-        drawnixDeliverySwitchFailedNotice: '无法切换 Drawnix 交付方式：{message}'
     },
     circuitikzEnvironment: {
         title: 'CircuitikZ 原生编译环境',

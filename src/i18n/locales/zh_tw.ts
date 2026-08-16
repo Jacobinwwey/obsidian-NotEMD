@@ -125,10 +125,6 @@ export const STRINGS_ZH_TW: DeepPartial<NotemdEnglishStrings> = {
             runDiagnostic: '執行診斷',
             runStability: '執行穩定性測試',
             experimentalDiagramPipeline: {
-                drawnixKnowledgeMapDeliveryName: 'Drawnix 交付方式',
-                drawnixKnowledgeMapDeliveryDesc: '選擇 Drawnix 知識導圖的輸出。全量畫布保留可編輯畫布與既有 SVG；簡報交付會額外寫入概覽與細節 SVG。',
-                drawnixKnowledgeMapDeliveryFullBoard: '全量畫布',
-                drawnixKnowledgeMapDeliveryPresentation: '簡報交付',
                 diagramExampleGalleryName: '圖表範例',
                 diagramExampleGalleryDesc: '在根據筆記產生前，透過實際渲染鏈路預覽各圖表類型的範例。',
                 diagramExamplePreview: '預覽範例',
@@ -978,7 +974,5 @@ export const STRINGS_ZH_TW: DeepPartial<NotemdEnglishStrings> = {
             info: '資訊'
         },
         diagnosticAdvice: '建議：{advice}',
-        drawnixDeliveryReplayRequired: '請重新產生此 Drawnix 知識導圖後再切換交付方式。',
-        drawnixDeliverySwitchFailedNotice: '無法切換 Drawnix 交付方式：{message}'
     }
 };

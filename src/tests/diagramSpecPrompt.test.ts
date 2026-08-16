@@ -114,18 +114,20 @@ describe('diagram spec prompt builder', () => {
         expect(prompt).not.toMatch(/Drawnix JSON/i);
     });
 
-    test('allows Drawnix source coverage to preserve independent roots without leaking its rules into Mermaid mind maps', () => {
+    test('requires one filename-rooted Drawnix tree without leaking its rules into Mermaid mind maps', () => {
         const drawnixPrompt = buildDiagramSpecPrompt({
             requiredIntent: 'drawnixMindmap',
-            preferredRenderTarget: 'drawnix'
+            preferredRenderTarget: 'drawnix',
+            sourcePath: 'docs/architecture.zh-CN.md'
         });
         const mermaidMindmapPrompt = buildDiagramSpecPrompt({
             requiredIntent: 'mindmap',
             preferredRenderTarget: 'mermaid'
         });
 
-        expect(drawnixPrompt).toMatch(/multiple independent roots/i);
-        expect(drawnixPrompt).not.toMatch(/exactly one top-level document root/i);
+        expect(drawnixPrompt).toMatch(/exactly one top-level document root/i);
+        expect(drawnixPrompt).toContain('architecture.zh-CN');
+        expect(drawnixPrompt).not.toMatch(/multiple independent roots/i);
         expect(mermaidMindmapPrompt).not.toMatch(/Drawnix knowledge-map rules/i);
     });
 

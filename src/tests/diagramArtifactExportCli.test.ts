@@ -121,6 +121,12 @@ function createDrawnixForestSpec(): DiagramSpec {
 }
 
 describe('diagram artifact export CLI', () => {
+    test('accepts a retired Drawnix delivery value as a no-op for existing automation', () => {
+        const cli = require(scriptPath);
+
+        expect(cli.normalizeDrawnixDelivery('document-tree')).toBeUndefined();
+    });
+
     const repoRoot = path.join(__dirname, '..', '..');
     const packageJsonPath = path.join(repoRoot, 'package.json');
     const scriptPath = path.join(repoRoot, 'scripts', 'export-diagram-artifact.js');
@@ -333,6 +339,7 @@ describe('diagram artifact export CLI', () => {
                 target: 'drawnix',
                 outputPath: drawnixPath,
                 previewSvgOutputPath: svgPath,
+                rootCount: 1,
                 nodeCount: 4,
                 edgeCount: 1
             }));
@@ -353,11 +360,14 @@ describe('diagram artifact export CLI', () => {
                     expect.objectContaining({
                         id: 'diagram',
                         type: 'mind_child',
-                        children: [expect.objectContaining({ id: 'drawnix', type: 'mind_child' })]
+                        children: [
+                            expect.objectContaining({ id: 'drawnix', type: 'mind_child' })
+                        ]
                     }),
                     expect.objectContaining({ id: 'cli', type: 'mind_child' })
                 ]
             });
+            expect(rootElements[0].data.topic.children[0].text).toBe('Notemd');
             expect(relationElements[0]).toMatchObject({
                 type: 'arrow-line',
                 source: { id: 'diagram' },
@@ -370,13 +380,11 @@ describe('diagram artifact export CLI', () => {
         }
     }, 30000);
 
-    test('exports a replay-linked Drawnix presentation bundle while retaining the full-board SVG companion', () => {
-        const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'notemd-drawnix-presentation-cli-'));
-        const specPath = path.join(tempRoot, 'drawnix-presentation.json');
+    test('ignores an obsolete Drawnix delivery flag and exports the native tree plus SVG companion', () => {
+        const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'notemd-drawnix-native-tree-cli-'));
+        const specPath = path.join(tempRoot, 'drawnix-native-tree.json');
         const drawnixPath = path.join(tempRoot, 'knowledge-map.drawnix');
-        const legacySvgPath = `${drawnixPath}.svg`;
-        const presentationPath = path.join(tempRoot, 'knowledge-map.presentation');
-        const manifestPath = path.join(presentationPath, 'manifest.json');
+        const previewSvgPath = `${drawnixPath}.svg`;
         fs.writeFileSync(specPath, JSON.stringify(createDrawnixMindMapSpec(), null, 2), 'utf8');
 
         try {
@@ -385,7 +393,8 @@ describe('diagram artifact export CLI', () => {
                 '--input', specPath,
                 '--target', 'drawnix',
                 '--output', drawnixPath,
-                '--drawnix-delivery', 'presentation'
+                '--drawnix-delivery', 'presentation',
+                '--preview-svg-output', previewSvgPath
             ], {
                 cwd: repoRoot,
                 encoding: 'utf8'
@@ -393,54 +402,23 @@ describe('diagram artifact export CLI', () => {
 
             const result = JSON.parse(stdout);
             const drawnix = JSON.parse(fs.readFileSync(drawnixPath, 'utf8'));
-            const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
 
             expect(result).toEqual(expect.objectContaining({
                 target: 'drawnix',
                 outputPath: drawnixPath,
-                drawnixDelivery: 'presentation',
-                presentationOutputPath: presentationPath,
-                previewSvgOutputPath: legacySvgPath
+                previewSvgOutputPath: previewSvgPath,
+                rootCount: 1,
+                edgeCount: 1
             }));
-            expect(fs.readFileSync(legacySvgPath, 'utf8')).toContain('notemd-drawnix-mindmap-svg@1.0.0');
-            expect(fs.readFileSync(path.join(presentationPath, 'overview.svg'), 'utf8'))
-                .toContain('notemd-drawnix-knowledge-map-presentation-svg@1.0.0');
-            expect(manifest).toEqual(expect.objectContaining({
-                version: 1,
-                catalogTypeId: 'drawnix-knowledge-map',
-                sourceArtifactPath: drawnixPath,
-                overview: { sliceId: 'overview', path: 'overview.svg' }
-            }));
-            expect(drawnix.metadata.notemd.knowledgeMap.deliveryManifestPaths).toEqual([manifestPath]);
+            expect(result).not.toHaveProperty('drawnixDelivery');
+            expect(fs.readFileSync(previewSvgPath, 'utf8')).toContain('notemd-drawnix-mindmap-svg@1.0.0');
+            expect(drawnix.metadata?.notemd?.knowledgeMap).toBeUndefined();
         } finally {
             fs.rmSync(tempRoot, { recursive: true, force: true });
         }
     }, 30000);
 
-    test('does not leave a presentation directory behind when the Drawnix board path cannot be written', async () => {
-        const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'notemd-drawnix-presentation-cli-rollback-'));
-        const specPath = path.join(tempRoot, 'drawnix-presentation.json');
-        const drawnixPath = path.join(tempRoot, 'knowledge-map.drawnix');
-        const presentationPath = path.join(tempRoot, 'knowledge-map.presentation');
-        const cli = require(scriptPath);
-        fs.writeFileSync(specPath, JSON.stringify(createDrawnixMindMapSpec(), null, 2), 'utf8');
-        fs.mkdirSync(drawnixPath);
-
-        try {
-            await expect(cli.run({
-                input: specPath,
-                target: 'drawnix',
-                output: drawnixPath,
-                drawnixDelivery: 'presentation'
-            })).rejects.toThrow();
-
-            expect(fs.existsSync(presentationPath)).toBe(false);
-        } finally {
-            fs.rmSync(tempRoot, { recursive: true, force: true });
-        }
-    }, 30000);
-
-    test('counts every root and only cross-relation arrows in a Drawnix forest summary', () => {
+    test('counts every direct-spec root and cross-relation arrow when an obsolete delivery flag is supplied', () => {
         const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'notemd-drawnix-forest-cli-'));
         const specPath = path.join(tempRoot, 'drawnix-forest.json');
         const drawnixPath = path.join(tempRoot, 'knowledge-forest.drawnix');
@@ -451,7 +429,8 @@ describe('diagram artifact export CLI', () => {
                 scriptPath,
                 '--input', specPath,
                 '--target', 'drawnix',
-                '--output', drawnixPath
+                '--output', drawnixPath,
+                '--drawnix-delivery', 'full-board'
             ], {
                 cwd: repoRoot,
                 encoding: 'utf8'
@@ -465,6 +444,7 @@ describe('diagram artifact export CLI', () => {
                 nodeCount: 5,
                 edgeCount: 1
             }));
+            expect(result).not.toHaveProperty('drawnixDelivery');
         } finally {
             fs.rmSync(tempRoot, { recursive: true, force: true });
         }

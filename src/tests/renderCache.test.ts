@@ -62,4 +62,15 @@ describe('render cache', () => {
             drawnixExportMermaidCompanions: true
         })).toBeNull();
     });
+
+    test('ignores an obsolete Drawnix delivery input instead of fragmenting the native-tree cache', () => {
+        const cache = new RenderCache();
+
+        cache.set(spec, {
+            target: 'drawnix',
+            drawnixKnowledgeMapDelivery: 'presentation'
+        } as any, artifact);
+
+        expect(cache.get(spec, { target: 'drawnix' })).toBe(artifact);
+    });
 });

@@ -7,6 +7,57 @@ import { DiagramIntent } from '../diagram/types';
 import { callLLM } from '../llmUtils';
 import { LLMProviderConfig, NotemdSettings, ProgressReporter } from '../types';
 
+// This bounds provider availability, not diagram complexity or artifact size.
+export const DIAGRAM_LLM_REQUEST_TIMEOUT_MS = 5 * 60 * 1000;
+
+class DiagramLlmRequestDeadline {
+    private readonly controller = new AbortController();
+    private readonly timer: ReturnType<typeof setTimeout>;
+    private timedOut = false;
+
+    constructor(private readonly reporter: ProgressReporter) {
+        this.reporter.abortController = this.controller;
+        this.timer = setTimeout(() => {
+            this.timedOut = true;
+            this.reporter.log('Diagram generation request reached its deadline and was cancelled.');
+            this.controller.abort();
+        }, DIAGRAM_LLM_REQUEST_TIMEOUT_MS);
+    }
+
+    async invoke<T>(request: (signal: AbortSignal) => Promise<T>): Promise<T> {
+        try {
+            const result = await request(this.controller.signal);
+            if (this.timedOut) {
+                throw this.createTimeoutError();
+            }
+            return result;
+        } catch (error: unknown) {
+            if (this.timedOut) {
+                throw this.createTimeoutError();
+            }
+            throw error;
+        }
+    }
+
+    wasCancelled(): boolean {
+        return this.controller.signal.aborted;
+    }
+
+    dispose(): void {
+        clearTimeout(this.timer);
+        if (this.reporter.abortController === this.controller) {
+            this.reporter.abortController = null;
+        }
+    }
+
+    private createTimeoutError(): Error {
+        return new Error(
+            `Diagram generation timed out after ${DIAGRAM_LLM_REQUEST_TIMEOUT_MS / 60_000} minutes. `
+            + 'The request was cancelled so Notemd is ready for another task.'
+        );
+    }
+}
+
 export interface RunDiagramGenerateOperationParams {
     input: DiagramOperationInput;
     settings: NotemdSettings;
@@ -74,54 +125,52 @@ export async function runDiagramGenerateOperation(
     const llmCall = params.callLLMImpl ?? callLLM;
     const runStructuredGeneration = params.generateDiagramArtifactImpl ?? generateDiagramArtifact;
     const sourceMarkdownForGeneration = buildSourceMarkdownForDiagramGeneration(input);
-
-    if (input.outputMode === 'mermaid' && !settings.enableExperimentalDiagramPipeline) {
-        const mermaidContent = await llmCall(
-            provider,
-            params.getLegacyMermaidPrompt(),
-            sourceMarkdownForGeneration,
-            settings,
-            reporter,
-            modelName
-        );
-        return buildLegacyMermaidResult(input, mermaidContent, 'legacy mermaid compatibility path');
-    }
-
-    reporter.log(`Generating diagram operation in ${input.outputMode} mode.`);
+    const requestDeadline = new DiagramLlmRequestDeadline(reporter);
+    const invokeDiagramLlm = (systemPrompt: string, sourceMarkdown: string) => requestDeadline.invoke(
+        signal => llmCall(provider, systemPrompt, sourceMarkdown, settings, reporter, modelName, signal)
+    );
 
     try {
-        if (input.outputMode === 'mermaid' && settings.experimentalDiagramCompatibilityMode !== input.compatibilityMode) {
-            reporter.log('Mermaid command pins experimental compatibility mode to legacy-mermaid to guarantee Mermaid output.');
+        if (input.outputMode === 'mermaid' && !settings.enableExperimentalDiagramPipeline) {
+            const mermaidContent = await invokeDiagramLlm(
+                params.getLegacyMermaidPrompt(),
+                sourceMarkdownForGeneration
+            );
+            return buildLegacyMermaidResult(input, mermaidContent, 'legacy mermaid compatibility path');
         }
 
-        return await runStructuredGeneration(sourceMarkdownForGeneration, {
-            sourcePath: input.sourcePath,
-            requestedIntent: input.requestedIntent,
-            requestedRenderTarget: input.requestedRenderTarget,
-            compatibilityMode: input.compatibilityMode,
-            targetLanguage: input.targetLanguage,
-            sourceVisuals: input.sourceVisuals,
-            drawnixExportMermaidCompanions: input.drawnixExportMermaidCompanions,
-            drawnixKnowledgeMapDelivery: input.drawnixKnowledgeMapDelivery,
-            llmInvoker: (systemPrompt, sourceMarkdown) =>
-                llmCall(provider, systemPrompt, sourceMarkdown, settings, reporter, modelName)
-        });
-    } catch (error: unknown) {
-        if (input.outputMode !== 'mermaid') {
-            throw error;
-        }
+        reporter.log(`Generating diagram operation in ${input.outputMode} mode.`);
 
-        const message = error instanceof Error ? error.message : String(error);
-        reporter.log(`Experimental diagram pipeline failed: ${message}`);
-        reporter.log('Falling back to legacy Mermaid prompt and fixer pipeline.');
-        const mermaidContent = await llmCall(
-            provider,
-            params.getLegacyMermaidPrompt(),
-            sourceMarkdownForGeneration,
-            settings,
-            reporter,
-            modelName
-        );
-        return buildLegacyMermaidResult(input, mermaidContent, 'legacy mermaid fallback path');
+        try {
+            if (input.outputMode === 'mermaid' && settings.experimentalDiagramCompatibilityMode !== input.compatibilityMode) {
+                reporter.log('Mermaid command pins experimental compatibility mode to legacy-mermaid to guarantee Mermaid output.');
+            }
+
+            return await runStructuredGeneration(sourceMarkdownForGeneration, {
+                sourcePath: input.sourcePath,
+                requestedIntent: input.requestedIntent,
+                requestedRenderTarget: input.requestedRenderTarget,
+                compatibilityMode: input.compatibilityMode,
+                targetLanguage: input.targetLanguage,
+                sourceVisuals: input.sourceVisuals,
+                drawnixExportMermaidCompanions: input.drawnixExportMermaidCompanions,
+                llmInvoker: invokeDiagramLlm
+            });
+        } catch (error: unknown) {
+            if (input.outputMode !== 'mermaid' || requestDeadline.wasCancelled()) {
+                throw error;
+            }
+
+            const message = error instanceof Error ? error.message : String(error);
+            reporter.log(`Experimental diagram pipeline failed: ${message}`);
+            reporter.log('Falling back to legacy Mermaid prompt and fixer pipeline.');
+            const mermaidContent = await invokeDiagramLlm(
+                params.getLegacyMermaidPrompt(),
+                sourceMarkdownForGeneration
+            );
+            return buildLegacyMermaidResult(input, mermaidContent, 'legacy mermaid fallback path');
+        }
+    } finally {
+        requestDeadline.dispose();
     }
 }

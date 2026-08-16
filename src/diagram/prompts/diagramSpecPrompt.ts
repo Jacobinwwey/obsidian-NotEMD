@@ -129,10 +129,7 @@ For a common-source NMOS request, use this exact topology contract inside circui
 The deterministic renderer, not the model, emits the complete LaTeX document with the circuitikz package, document environment, voltage convention, explicit VDD/RD/M1/vin/vout/GND anchors, and terminated draw paths.`
         : '';
     const drawnixMindMapTargetLine = isDrawnixMindMapRequest
-        ? buildDrawnixKnowledgeMapPromptRules({
-            sourcePath: options.sourcePath,
-            targetLanguage: options.targetLanguage
-        })
+        ? buildDrawnixKnowledgeMapPromptRules({ sourcePath: options.sourcePath })
         : '';
     const supportedIntentsSection = isCircuitikzRequest
         ? 'Supported intent: circuit'

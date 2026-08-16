@@ -1,140 +1,87 @@
 ---
-date: 2026-07-05
+date: 2026-08-15
 topic: diagram-artifact-export-cli
 ---
 
-# Diagram Artifact Export CLI
+# 图表 Artifact Export CLI
 
 ## 契约
 
-`scripts/export-diagram-artifact.js` 是图形扩展工作的离线 CLI 边界，覆盖 Cloudy 风格技术图参考与 Drawnix 参考 spike 产生的 artifact 导出需求。
+`scripts/export-diagram-artifact.js` 在不依赖 Obsidian runtime 的情况下导出已校验的 `DiagramSpec`。它是 `no Obsidian runtime` 边界，不加载 Drawnix、Plait 或 diagrams.net Desktop。source 与 SVG target 使用 TypeScript 导出；PNG 和 PDF 使用 Playwright Chromium 将同一份 standalone SVG 栅格化。输入支持带或不带 BOM 的 UTF-8。
 
-它读取已验证结构的 `DiagramSpec` JSON 文件，并写出一个 artifact；不需要 Obsidian、`obsidian-cli`、diagrams.net Desktop、Drawnix 或 Plait。SVG 与 source targets 是纯 TypeScript 导出；PNG 与 PDF targets 使用 Playwright Chromium 把同一个 standalone SVG 渲染成固定尺寸的视觉证据。输入文件可以是带 BOM 或不带 BOM 的 UTF-8，这样 Windows PowerShell 生成的 JSON 不需要额外归一化也能直接使用。
-
-推荐直接入口：
+Windows 环境建议直接调用入口，参数行为更可预期：
 
 ```bash
 node scripts/export-diagram-artifact.js --input spec.json --target editable-html-svg --output figure.html
 node scripts/export-diagram-artifact.js --input spec.json --target drawio --output figure.drawio --preview-svg-output figure.drawio.svg --preview-png-output figure.drawio.png --preview-pdf-output figure.drawio.pdf --ppi 300
-node scripts/export-diagram-artifact.js --input spec.json --target drawnix --output figure.drawnix --preview-svg-output figure.drawnix.svg --preview-png-output figure.drawnix.png --preview-pdf-output figure.drawnix.pdf --ppi 300
-node scripts/export-diagram-artifact.js --input knowledge-map.json --target drawnix --output architecture.drawnix --drawnix-delivery presentation
+node scripts/export-diagram-artifact.js --input rooted-drawnix-spec.json --target drawnix --output architecture.drawnix --preview-svg-output architecture.drawnix.svg --preview-png-output architecture.drawnix.png --preview-pdf-output architecture.drawnix.pdf --ppi 300
 node scripts/export-diagram-artifact.js --input circuit-spec.json --target circuitikz --output circuit.tex --preview-svg-output circuit.svg --preview-png-output circuit.png --preview-pdf-output circuit.pdf --ppi 300
 node scripts/export-diagram-artifact.js --input spec.json --target svg --output figure.svg
 node scripts/export-diagram-artifact.js --input spec.json --target png --output figure.png --ppi 300
 node scripts/export-diagram-artifact.js --input spec.json --target pdf --output figure.pdf --ppi 300
 ```
 
-为了兼容既有自动化，package script 仍然可用：
+仍可使用 package wrapper：
 
 ```bash
 npm run diagram:export-artifact -- --input spec.json --target drawio --output figure.drawio
 ```
 
-在 npm 11，尤其是 Windows 上，npm 可能会把 `npm run ... --` 后面的长选项重写为按顺序排列的位置参数，并打印 warning。该 CLI 因此同时接受显式 flag 形态以及这个位置参数 fallback：`input target output previewSvg previewPng previewPdf ppi`。维护者 smoke 脚本如果需要无 warning 输出，应优先使用直接 `node` 入口。
+`--ppi` 默认值为 `300`，最大值会夹到 `600`。PNG 会写入 `pHYs` 密度 chunk。Windows 上的 npm 11 可能在 `npm run ... --` 之后重排长参数；需要无 warning 输出时使用直接 `node` 命令。
 
-`--ppi` 控制 PNG/PDF 输出的栅格密度。默认值是 `300`；超过 `600` 的值会被夹到 `600`。SVG 保持矢量尺寸，不受该值影响。
+## Drawnix 路径
 
-PNG 输出还会写入或替换 `pHYs` 物理像素密度 chunk，因此所选 PPI 不只体现在像素尺寸上，也能被图片查看器和排版工具读取。
-
-## Drawnix 交付方式
-
-`--drawnix-delivery` 只适用于 `--target drawnix`，接受 `full-board`（默认）和 `presentation`。两种方式都会写出同一份兼容 `.drawnix` board。`presentation` 会额外写入一个与输出文件同级、去掉 `.drawnix` 后缀命名的 bundle：
+离线 CLI 接受已经带根节点的 `DiagramSpec(intent: "drawnixMindmap")`，并直接调用 `DrawnixRenderer`：
 
 ```text
-architecture.drawnix
-architecture.drawnix.svg
-architecture.presentation/
-  manifest.json
-  overview.svg
-  detail-01-<root>.svg
+DiagramSpec -> DrawnixMindMapProjection -> 原生 .drawnix
+                                      -> notemd-drawnix-mindmap-svg@1.0.0 SVG
 ```
 
-`architecture.drawnix.svg` 仍是用于兼容性的全量画布 companion。用于幻灯片或文档时，应使用 `architecture.presentation/overview.svg` 与 detail panel。只有 bundle 成功提交后，board metadata 才会记录绝对 manifest path，因此 board 写入失败不会留下被引用的半成品 bundle。
+JSON 摘要中的 `rootCount`、`nodeCount` 与 `edgeCount` 对应实际写出的原生 board。离线 CLI 不解析 Markdown，也不执行 source coverage。要走正常的文件名根节点生成链路，应通过 maintainer bridge 调用已安装的插件：
 
-## 输出摘要
+```bash
+node scripts/invoke-maintainer-cli-operation.js --vault 1Knowledge --operation diagram.generate --input-json '{"sourcePath":"architecture.zh-CN.md","executionMode":"save-artifact","requestedIntent":"drawnixMindmap","requestedRenderTarget":"drawnix","targetLanguage":"zh-CN"}' --pretty
+```
 
-每次成功导出都会输出一条 JSON 摘要。对于 `drawnix`，`rootCount`、`nodeCount` 与 `edgeCount` 描述原生 forest：`nodeCount` 会遍历全部顶层 `mindmap` root，`edgeCount` 只统计 `arrow-line` 跨关系。多根知识图不会再被当成单棵树，额外 root 也不会被误计为关系。
+该路径会把源路径传给 `mergeDrawnixSourceCoverage()`，生成 `architecture.zh-CN` 根节点，保留标题分支，并将未匹配的模型分支放入 `Additional concepts`。
+
+已废弃的 `--drawnix-delivery` 与 `--source-label` 仍可被旧脚本解析，但不会选择布局或修改输出。新 artifact 不包含 replay metadata 或 presentation bundle。
 
 ## Targets
 
-| Target | 输出 | Source model | CLI 内验证 |
+| Target | 输出 | Source model | CLI 校验 |
 |---|---|---|---|
-| `editable-html-svg` | 自包含 `.html`，包含 inline SVG | `DiagramSpec -> SemanticFigureModel -> EditableHtmlSvgRenderer` | `collectEditableSvgAnnotationGaps()` 必须为空 |
-| `drawio` | 未压缩 diagrams.net `mxfile` XML，可通过 `--preview-svg-output`、`--preview-png-output` 与 `--preview-pdf-output` 同步写出 companion | `DiagramSpec -> SemanticFigureModel -> exportSemanticFigureModelToDrawioXml()` 加 `renderSemanticFigureSvg()` | visible label mismatch 必须为空 |
-| `drawnix` | 原生 `.drawnix` 知识导图 forest；`presentation` 还会写出 overview/detail SVG panel 与 manifest | 兼容全量画布走 `DiagramSpec(intent: "drawnixMindmap") -> DrawnixRenderer -> DrawnixMindMapProjection -> notemd-drawnix-mindmap-svg@1.0.0`；演示 bundle 可选 `buildDrawnixKnowledgeMapPresentation()` | 原生 roots、层级、关系通道、presentation fidelity ledger 和标签几何都必须通过校验 |
-| `circuitikz` | 受约束 `.tex` circuitikz 源文件，可同步写出 SVG/PNG/PDF 预览 companion | `DiagramSpec(intent: "circuit") -> CircuitSpec -> CircuitikzRenderer -> exportCircuitSpecToCircuitikz()` 加 `renderCircuitSpecPreviewSvg()` | 写出 TeX 或 companion 前必须通过 `CircuitSpec` 校验 |
-| `svg` | Obsidian 可直接查看的 `.svg`；当 `intent` 为 `circuit` 时来自电路预览 companion | `DiagramSpec -> SemanticFigureModel -> renderSemanticFigureSvg()` 或 `CircuitSpec -> renderCircuitSpecPreviewSvg()` | 必须保留 semantic node/edge annotations，或保留已验证电路预览元数据 |
-| `png` | 从同一个 standalone SVG 或电路预览 SVG 渲染出的 `.png` 视觉证据 | `DiagramSpec -> SemanticFigureModel -> renderSemanticFigureSvg() -> Playwright screenshot`，或 `CircuitSpec -> renderCircuitSpecPreviewSvg() -> Playwright screenshot` | 输出尺寸按 SVG CSS 尺寸与所选 PPI 对齐，并写入匹配所选密度的 `pHYs` 元数据 |
-| `pdf` | 从同一个 standalone SVG 或电路预览 SVG 渲染出的单页 `.pdf` 视觉证据 | `DiagramSpec -> SemanticFigureModel -> renderSemanticFigureSvg() -> Playwright PDF`，或 `CircuitSpec -> renderCircuitSpecPreviewSvg() -> Playwright PDF` | 页面尺寸按 SVG CSS 尺寸对齐；`--ppi` 控制栅格 companion |
+| `editable-html-svg` | 带 inline editable SVG 的自包含 HTML | `DiagramSpec -> SemanticFigureModel` | annotation gap 必须为空 |
+| `drawio` | 未压缩 diagrams.net XML，可附带 SVG/PNG/PDF companion | `DiagramSpec -> SemanticFigureModel` | 可见 label 必须一致 |
+| `drawnix` | 原生 `.drawnix`，可附带 SVG/PNG/PDF companion | `DiagramSpec(intent: "drawnixMindmap") -> DrawnixMindMapProjection` | 原生层级、`arrow-line` endpoint、标签边界与 source-visual metadata 必须通过校验 |
+| `circuitikz` | 受约束 `.tex`，可附带 SVG/PNG/PDF companion | `DiagramSpec.circuitSpec` | 写入前必须通过电路规格校验 |
+| `svg`、`png`、`pdf` | 来自 semantic model 或电路预览的审阅 artifact | `SemanticFigureModel` 或 circuit preview | 输出尺寸与 metadata 必须匹配 target |
 
-离线 CLI 只接受已验证的 `DiagramSpec`，有意不拥有 Vault 边界，因此不会解析源笔记中的 Mermaid fence 或图片嵌入。源视觉保真通过 Obsidian command host 验证：原生 `.drawnix` metadata 索引指向 scoped `.assets` companion，生成的 Markdown wrapper 则嵌入 Mermaid 源码、安全 SVG 和图片二进制。
+Drawnix 路径有意绕过 `SemanticFigureModel`。它保留嵌套 `mindmap` 与 `mind_child`，跨分支关系使用原生 `arrow-line`。
 
-## Obsidian 预览 companion 契约
+## Obsidian 预览 Companion
 
-Draw.io、Drawnix 与 circuitikz source files 是有用的交换格式，但 Obsidian 默认不会把 `.drawio`、`.drawnix` 或 raw `.tex` 渲染成图形。因此插件保存路径在 renderer 能提供 SVG 时，会把 SVG 当作可审查的 companion artifact：
+Obsidian 默认不会把 `.drawio`、`.drawnix` 或 raw `.tex` 渲染成图形。插件保存路径会写出可审阅的 SVG companion 与 Markdown wrapper：
 
 ```text
-Topic_diagram.drawio
-Topic_diagram.drawio.svg
-Topic_diagram.drawio.md
+Topic_diagram.drawnix
+Topic_diagram.drawnix.svg
+Topic_diagram.drawnix.md
 ```
 
-Markdown wrapper 使用 `![[Topic_diagram.drawio.svg]]` 嵌入 SVG，并链接回 source artifact。Preview diagram 命令在当前 source note 没有 inline diagram fence 时，也会查找这些已生成的 wrapper/source/SVG 路径，因此维护者可以直接验证本地已生成 artifact，而不必重新生成。
+wrapper 会嵌入 SVG 并链接 source artifact。Preview diagram 命令可直接重新打开这些本地 artifact，不必再次生成。
 
-对于 circuitikz，SVG companion 是从同一份已验证 `CircuitSpec` 派生出的语义预览，不是 LaTeX/TikZJax 编译结果。它的作用是让 Obsidian 即使无法默认渲染 raw `.tex`，也能查看并导出可审查的 SVG/PNG/PDF 证据。真实 LaTeX/TikZJax 编译证据仍属于 `scripts/export-circuitikz.js` 与 circuitikz smoke runner 的职责边界。
+插件保存路径会沿用既有的 Mermaid 自定义输出目录。该设置开启时，图表 artifact 也会写到那里。若维护者需要让 `.drawnix`、SVG 和 wrapper 紧邻源笔记，应关闭该设置；遗留测试目录否则会看起来像源文件旁的写入失败。
 
-## 为什么放在这个边界
+## 基准与证据
 
-这个 CLI 刻意采用 artifact-first：
+`npm run benchmark:drawnix-knowledge-map` 会在被忽略的 `.cache/drawnix-knowledge-map-benchmark/` 下写入文件。fixture 使用一个 `architecture.zh-CN` 根节点、8 个 subsystem 分支、137 个节点和 32 条带 label 的跨分支关系。它是回归负载，不是运行时预算；结构计数与零校验错误才是契约。
 
-- 它证明 figure exporters 能在 Obsidian UI 之外工作。
-- 它避免把 Drawnix、Plait、diagrams.net Desktop 依赖带进插件 runtime。
-- `drawnixMindmap` 直接进入原生 Drawnix projection；只有其他通用目标才构建 `SemanticFigureModel`，两条路径没有共享前置模型。
-- 它通过临时 `esbuild` bundle 复用同一套 TypeScript exporter，而不是维护重复 JS 逻辑。
-- 它给 CI 与维护者一个明确命令，可以从同一个 `DiagramSpec` 生成所有 Cloudy 风格与 Drawnix relevant artifact。
-
-临时 bundle 位于操作系统 temp 目录，导出后会删除。no Obsidian runtime is required。
-
-## 本地 Drawnix 视觉核验
-
-artifact CLI 与 Obsidian CLI 的职责不同。artifact CLI 导出已校验的 `DiagramSpec`；Obsidian CLI 只能触发已安装插件的命令，不能为尚未部署的源码 checkout 提供认证。演示产物应保持本地。
-
-当前架构演示图使用从 `docs/architecture.zh-CN.md` 整理出的本地规格，输出到被忽略的 `.cache/drawnix-architecture-demo/`：
+修改该路径后运行：
 
 ```bash
-node scripts/export-diagram-artifact.js --input .cache/drawnix-architecture-demo/architecture.drawnix.spec.json --target drawnix --output .cache/drawnix-architecture-demo/notemd-architecture.drawnix --drawnix-delivery presentation
+npm test -- --runInBand src/tests/diagramArtifactExportCli.test.ts src/tests/drawnixKnowledgeMapBenchmark.test.ts src/tests/drawnixMindMapRenderer.test.ts src/tests/drawnixMindMapRouting.test.ts
 ```
 
-把 `notemd-architecture.presentation/overview.svg` 与其中的 detail panel 用作发版证据前应先目检。`notemd-architecture.drawnix.svg` 仍是全量画布 companion。同侧关系应留在对应分支的外侧 gutter，跨 forest 关系可以使用底部通道。`.cache` 中的输入和输出不是仓库交付物。
-
-## Drawnix 规模基准
-
-运行 `npm run benchmark:drawnix-knowledge-map` 会导出一份代表性 forest：8 个 root、136 个节点和 32 条带标签的跨关系。脚本会把规格、`.drawnix` artifact 与 SVG companion 写入被忽略的 `.cache/drawnix-knowledge-map-benchmark/`，随后输出结构计数、artifact 大小和端到端冷导出耗时。
-
-该基准不设置运行时间的通过/失败阈值。耗时包含临时 exporter bundle，并会随机器变化；它用于在同一主机上比较路由或布局改动。结构计数与零校验错误才是回归契约。
-
-## 支持证据
-
-规范回归测试：
-
-```bash
-npm test -- --runInBand src/tests/diagramArtifactExportCli.test.ts --runTestsByPath
-```
-
-测试会写入一份 `DiagramSpec`，并验证：
-
-- `editable-html-svg` 包含语义化 `data-drawio-*` 注解。
-- 节点 id 在空白归一化后仍保持唯一。
-- `drawio` XML 保留可见节点与边 label。
-- `drawnix` JSON 包含一个或多个 `mindmap` roots、嵌套 `mind_child` elements 和通过校验的 `arrow-line` 跨关系。
-- Drawnix projection 的布局是确定性的；较大的 forest 会打包到有宽度上限的多行中，层级深度和重要跨分支关系不受固定数值配额限制，节点落位后会分配同侧 gutter 与跨 forest 底部通道，并生成专用 SVG companion。
-- `--drawnix-delivery presentation` 会保留该 board，写出由 manifest 关联的 overview/detail bundle，同时保留全量画布 SVG companion 供既有消费者使用。
-- `drawio`、`drawnix` 与 `circuitikz` 可以写出用于 Obsidian 预览验证的 SVG companion 文件。
-- `circuitikz` 只有在 `DiagramSpec.circuitSpec` 通过校验后才会写出受约束 TeX，并可从同一份电路 payload 导出 SVG/PNG/PDF 预览 companion。
-- `svg` 可以直接输出同一个 annotated semantic figure sheet；当 `intent: "circuit"` 时，则输出已验证的电路预览 companion。
-- `png` 与 `pdf` 属于公开 CLI target，支持 `--ppi`，默认值为 `300`，并会把过大的 PPI 值夹到 `600`。
-- 不支持的 target 会在写输出前失败。
-
-## 非目标
-
-这个 CLI 不运行完整 Drawnix Web App import，也不自动化 diagrams.net Desktop。这两者属于独立的本地视觉/import runbook。CLI 证明 deterministic artifact generation 与结构验证；它不证明每个编辑器 UI 行为。标准 Mermaid `mindmap` 仍走独立路径，Drawnix 路由不会改写它。
+artifact CLI 证明 deterministic export。用真实 Drawnix consumer 打开 `.drawnix` 文件属于另一份本地证据。标准 Mermaid `mindmap` target 保持独立。

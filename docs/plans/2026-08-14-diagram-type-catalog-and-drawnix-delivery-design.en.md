@@ -1,7 +1,8 @@
 ---
 date: 2026-08-14
 topic: diagram-type-catalog-and-drawnix-delivery
-status: approved
+status: superseded
+superseded_by: 2026-08-14-diagram-type-catalog-and-drawnix-delivery-implementation.en.md
 scope: architecture-and-documentation
 related:
   - ../brainstorms/2026-08-14-drawnix-presentation-architecture-review.md
@@ -10,6 +11,8 @@ related:
 ---
 
 # Diagram Type Catalog And Drawnix Delivery Design
+
+> Status (2026-08-15): Superseded. The full-board/presentation split inserted replay validation before the primary artifact write and failed during a real Vault run. The active contract is the filename-rooted native Drawnix tree in the [implementation record](./2026-08-14-diagram-type-catalog-and-drawnix-delivery-implementation.en.md). Keep this document only as the rejected-design record; do not restore its selector, replay metadata, or panel bundle.
 
 ## Decision
 

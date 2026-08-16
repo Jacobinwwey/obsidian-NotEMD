@@ -276,15 +276,8 @@ describe('diagram preview modal', () => {
         });
     });
 
-    test('switches a Drawnix preview through the supplied replay action without recreating the modal', async () => {
-        const nextSession = createSession({
-            target: 'drawnix',
-            content: '{"type":"drawnix"}',
-            mimeType: 'application/json',
-            sourceIntent: 'drawnixMindmap'
-        });
-        nextSession.payload.previewTitle = 'Presentation delivery';
-        const loadSession = jest.fn().mockResolvedValue(nextSession);
+    test('ignores a retired Drawnix delivery action supplied by stale preview options', async () => {
+        const loadReplacement = jest.fn();
         const modal = mountModal(new DiagramPreviewModal(
             mockApp,
             createSession({
@@ -297,36 +290,7 @@ describe('diagram preview modal', () => {
             {
                 drawnixAlternateDelivery: {
                     label: 'Presentation delivery',
-                    loadSession
-                }
-            } as any
-        ) as any);
-
-        modal.onOpen();
-        const switchButton = collectButtons(modal.contentEl).find(button => button.text === 'Presentation delivery');
-        expect(switchButton).toBeDefined();
-
-        await switchButton?.onclick?.();
-        await flushPromises();
-
-        expect(loadSession).toHaveBeenCalledTimes(1);
-        expect(collectText(modal.contentEl)).toContain('Presentation delivery');
-    });
-
-    test('explains why a legacy Drawnix artifact cannot switch deliveries', async () => {
-        const modal = mountModal(new DiagramPreviewModal(
-            mockApp,
-            createSession({
-                target: 'drawnix',
-                content: '{"type":"drawnix"}',
-                mimeType: 'application/json',
-                sourceIntent: 'drawnixMindmap'
-            }),
-            'en',
-            {
-                drawnixAlternateDelivery: {
-                    label: 'Presentation delivery',
-                    unavailableReason: 'Regenerate this knowledge map to switch delivery.'
+                    loadReplacement
                 }
             } as any
         ) as any);
@@ -334,8 +298,8 @@ describe('diagram preview modal', () => {
         modal.onOpen();
 
         const switchButton = collectButtons(modal.contentEl).find(button => button.text === 'Presentation delivery');
-        expect(switchButton?.disabled).toBe(true);
-        expect(collectText(modal.contentEl)).toContain('Regenerate this knowledge map to switch delivery.');
+        expect(switchButton).toBeUndefined();
+        expect(loadReplacement).not.toHaveBeenCalled();
     });
 
     test('shows export button for preview-capable artifacts and saves svg on click', async () => {

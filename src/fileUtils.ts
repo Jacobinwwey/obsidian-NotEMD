@@ -8,8 +8,7 @@ import { refineMermaidBlocks, cleanupLatexDelimiters, deepDebugMermaid, applyDee
 import { _performResearch } from './searchUtils'; // Assuming this will be moved or imported correctly later
 import { formatI18n, getI18nStrings } from './i18n';
 import { resolveTaskLanguageName, shouldApplyAutoTranslation } from './i18n/taskLanguagePolicy';
-import { DrawnixKnowledgeMapPresentationArtifact, RenderArtifact } from './rendering/types';
-import { readDrawnixKnowledgeMapReplayRecord } from './diagram/adapters/drawnix/drawnixExporter';
+import { RenderArtifact } from './rendering/types';
 import { selectFolderTaskFiles } from './folderTaskFileSelector';
 import { readSupportedInputFile } from './inputFileSupport';
 import {
@@ -217,173 +216,6 @@ function normalizeDiagramCompanionRelativePath(relativePath: string): string {
         throw new Error(`Invalid diagram companion path "${relativePath}".`);
     }
     return normalized;
-}
-
-function buildDrawnixKnowledgeMapPresentationFolderPath(outputPath: string): string {
-    if (!outputPath.endsWith('.drawnix')) {
-        throw new Error('Drawnix knowledge-map presentation requires a .drawnix source artifact path.');
-    }
-    return `${outputPath.slice(0, -'.drawnix'.length)}.presentation`;
-}
-
-function assertValidDrawnixKnowledgeMapPresentationBundle(
-    bundle: DrawnixKnowledgeMapPresentationArtifact
-): void {
-    if (bundle.version !== 1 || bundle.catalogTypeId !== 'drawnix-knowledge-map') {
-        throw new Error('Drawnix knowledge-map presentation bundle uses an unsupported schema.');
-    }
-    if (!/^fnv1a32:[0-9a-f]{8}$/u.test(bundle.semanticSpecHash)) {
-        throw new Error('Drawnix knowledge-map presentation bundle has an invalid semantic replay hash.');
-    }
-
-    const panelFileNames = new Set<string>();
-    const assertPanel = (panel: { sliceId: string; fileName: string; content: string }, label: string): void => {
-        const normalizedFileName = normalizeDiagramCompanionRelativePath(panel.fileName);
-        if (normalizedFileName !== panel.fileName || panel.fileName.includes('/') || panel.fileName.includes('\\')) {
-            throw new Error(`Drawnix knowledge-map ${label} must use a leaf SVG file name.`);
-        }
-        if (!panel.sliceId.trim() || !panel.fileName.endsWith('.svg') || !panel.content.trim()) {
-            throw new Error(`Drawnix knowledge-map ${label} is incomplete.`);
-        }
-        if (panelFileNames.has(panel.fileName)) {
-            throw new Error(`Drawnix knowledge-map presentation file name is duplicated: "${panel.fileName}".`);
-        }
-        panelFileNames.add(panel.fileName);
-    };
-
-    assertPanel(bundle.overview, 'overview');
-    bundle.details.forEach((detail, index) => assertPanel(detail, `detail ${index + 1}`));
-}
-
-function rewriteDrawnixKnowledgeMapManifestPaths(
-    content: string,
-    manifestPaths: readonly string[]
-): string {
-    try {
-        const parsed = JSON.parse(content) as unknown;
-        const replay = readDrawnixKnowledgeMapReplayRecord(parsed);
-        if (!replay || !isObjectRecord(parsed)) {
-            return content;
-        }
-        const metadata = parsed.metadata as Record<string, unknown>;
-        const notemd = metadata.notemd as Record<string, unknown>;
-        notemd.knowledgeMap = {
-            ...replay,
-            deliveryManifestPaths: [...manifestPaths]
-        };
-        return `${JSON.stringify(parsed, null, 2)}\n`;
-    } catch {
-        return content;
-    }
-}
-
-function buildDrawnixKnowledgeMapPresentationManifestContent(params: {
-    bundle: DrawnixKnowledgeMapPresentationArtifact;
-    outputPath: string;
-}): string {
-    return `${JSON.stringify({
-        version: params.bundle.version,
-        catalogTypeId: params.bundle.catalogTypeId,
-        sourceArtifactPath: params.outputPath,
-        semanticSpecHash: params.bundle.semanticSpecHash,
-        overview: {
-            sliceId: params.bundle.overview.sliceId,
-            path: params.bundle.overview.fileName
-        },
-        details: params.bundle.details.map(detail => ({
-            sliceId: detail.sliceId,
-            path: detail.fileName
-        })),
-        fidelityLedger: params.bundle.fidelityLedger
-    }, null, 2)}\n`;
-}
-
-function readOwnedDrawnixKnowledgeMapPresentationPanelPaths(params: {
-    content: string;
-    outputPath: string;
-    presentationFolder: string;
-}): string[] {
-    try {
-        const manifest = JSON.parse(params.content) as unknown;
-        if (!isObjectRecord(manifest)
-            || manifest.version !== 1
-            || manifest.catalogTypeId !== 'drawnix-knowledge-map'
-            || manifest.sourceArtifactPath !== params.outputPath
-            || typeof manifest.semanticSpecHash !== 'string'
-            || !/^fnv1a32:[0-9a-f]{8}$/u.test(manifest.semanticSpecHash)
-            || !isObjectRecord(manifest.overview)
-            || !Array.isArray(manifest.details)
-            || !isObjectRecord(manifest.fidelityLedger)) {
-            return [];
-        }
-
-        const panelPaths = [manifest.overview, ...manifest.details].map(panel => {
-            if (!isObjectRecord(panel) || typeof panel.path !== 'string' || !panel.path.endsWith('.svg')) {
-                throw new Error('invalid presentation panel');
-            }
-            const leafPath = normalizeDiagramCompanionRelativePath(panel.path);
-            if (leafPath !== panel.path || leafPath.includes('/')) {
-                throw new Error('nested presentation panel');
-            }
-            return `${params.presentationFolder}/${leafPath}`;
-        });
-
-        return new Set(panelPaths).size === panelPaths.length ? panelPaths : [];
-    } catch {
-        return [];
-    }
-}
-
-async function loadOwnedDrawnixKnowledgeMapPresentationPanelPaths(params: {
-    app: App;
-    manifestPath: string | undefined;
-    outputPath: string;
-    presentationFolder: string | undefined;
-}): Promise<string[]> {
-    if (!params.manifestPath || !params.presentationFolder) {
-        return [];
-    }
-
-    const manifestFile = params.app.vault.getAbstractFileByPath(params.manifestPath);
-    if (!(manifestFile instanceof TFile)) {
-        return [];
-    }
-
-    try {
-        return readOwnedDrawnixKnowledgeMapPresentationPanelPaths({
-            content: await params.app.vault.read(manifestFile),
-            outputPath: params.outputPath,
-            presentationFolder: params.presentationFolder
-        });
-    } catch {
-        return [];
-    }
-}
-
-async function removeStaleDrawnixKnowledgeMapPresentationPanels(params: {
-    app: App;
-    priorPanelPaths: readonly string[];
-    currentPanelPaths: ReadonlySet<string>;
-    progressReporter: ProgressReporter;
-}): Promise<void> {
-    for (const path of params.priorPanelPaths) {
-        if (params.currentPanelPaths.has(path)) {
-            continue;
-        }
-
-        const stalePanel = params.app.vault.getAbstractFileByPath(path);
-        if (!(stalePanel instanceof TFile)) {
-            continue;
-        }
-
-        try {
-            await params.app.vault.delete(stalePanel);
-            params.progressReporter.log(`Removed stale Drawnix presentation panel: ${path}`);
-        } catch (error) {
-            const message = error instanceof Error ? error.message : String(error);
-            params.progressReporter.log(`Could not remove stale Drawnix presentation panel ${path}: ${message}`);
-        }
-    }
 }
 
 function rewriteSourceVisualManifestCompanionPaths(
@@ -2142,31 +1974,6 @@ export async function saveDiagramArtifactFile(
     const companionScopeFolder = artifact.target === 'drawnix' && (artifact.companions?.length ?? 0) > 0
         ? `${outputPath}.assets`
         : undefined;
-    const presentationBundle = artifact.drawnixKnowledgeMapPresentation;
-    if (presentationBundle && artifact.target !== 'drawnix') {
-        throw new Error('Drawnix knowledge-map presentation bundles require a Drawnix source artifact.');
-    }
-    if (presentationBundle) {
-        assertValidDrawnixKnowledgeMapPresentationBundle(presentationBundle);
-    }
-    const presentationFolder = presentationBundle
-        ? buildDrawnixKnowledgeMapPresentationFolderPath(outputPath)
-        : undefined;
-    const presentationManifestPath = presentationFolder
-        ? `${presentationFolder}/manifest.json`
-        : undefined;
-    const priorPresentationPanelPaths = await loadOwnedDrawnixKnowledgeMapPresentationPanelPaths({
-        app,
-        manifestPath: presentationManifestPath,
-        outputPath,
-        presentationFolder
-    });
-    const currentPresentationPanelPaths = new Set(
-        presentationBundle && presentationFolder
-            ? [presentationBundle.overview, ...presentationBundle.details]
-                .map(panel => `${presentationFolder}/${panel.fileName}`)
-            : []
-    );
     const companionDirectory = outputPath.includes('/') ? outputPath.slice(0, outputPath.lastIndexOf('/') + 1) : '';
     const companionPathMap = new Map<string, string>();
     for (const companion of artifact.companions ?? []) {
@@ -2199,9 +2006,6 @@ export async function saveDiagramArtifactFile(
     }
     if (artifact.target === 'drawnix') {
         finalContent = rewriteDrawnixArtifactCompanionPaths(finalContent, companionPathMap);
-        if (presentationManifestPath) {
-            finalContent = rewriteDrawnixKnowledgeMapManifestPaths(finalContent, [presentationManifestPath]);
-        }
     }
     const staleInlineDrawnixCompanionScope = artifact.target === 'drawnix'
         && (artifact.companions?.length ?? 0) === 0
@@ -2210,7 +2014,6 @@ export async function saveDiagramArtifactFile(
         : undefined;
 
     const companionPaths: string[] = [];
-    const presentationPreviewPaths: string[] = [];
     const writtenCompanionPaths = new Set<string>();
     try {
         if (companionScopeFolder) {
@@ -2222,32 +2025,6 @@ export async function saveDiagramArtifactFile(
             } else if (!(existingCompanionScope instanceof TFolder)) {
                 throw new Error(`Diagram companion path '${companionScopeFolder}' exists but is not a folder.`);
             }
-        }
-
-        if (presentationFolder && presentationBundle && presentationManifestPath) {
-            const existingPresentationFolder = app.vault.getAbstractFileByPath(presentationFolder);
-            if (!existingPresentationFolder) {
-                await app.vault.createFolder(presentationFolder);
-                createdPaths.push(presentationFolder);
-                progressReporter.log(`Created Drawnix presentation folder: ${presentationFolder}`);
-            } else if (!(existingPresentationFolder instanceof TFolder)) {
-                throw new Error(`Drawnix presentation path '${presentationFolder}' exists but is not a folder.`);
-            }
-
-            const presentationPanels = [presentationBundle.overview, ...presentationBundle.details];
-            for (const panel of presentationPanels) {
-                const panelPath = `${presentationFolder}/${panel.fileName}`;
-                await writeTextArtifact(panelPath, panel.content, 'Drawnix presentation SVG');
-                presentationPreviewPaths.push(panelPath);
-            }
-            await writeTextArtifact(
-                presentationManifestPath,
-                buildDrawnixKnowledgeMapPresentationManifestContent({
-                    bundle: presentationBundle,
-                    outputPath
-                }),
-                'Drawnix presentation manifest'
-            );
         }
 
         if (artifact.previewSvg?.content?.trim()) {
@@ -2280,17 +2057,10 @@ export async function saveDiagramArtifactFile(
         await writeTextArtifact(outputPath, finalContent, 'diagram artifact file');
 
         let savedPath = outputPath;
-        if (artifact.previewSvg?.content?.trim() || companionPaths.length > 0 || presentationPreviewPaths.length > 0) {
+        if (artifact.previewSvg?.content?.trim() || companionPaths.length > 0) {
             const wrapperPath = buildDiagramObsidianPreviewWrapperPath(outputPath);
             const svgPath = artifact.previewSvg?.content?.trim()
                 ? buildDiagramSvgCompanionPath(outputPath)
-                : undefined;
-            const previewArtifactPaths = presentationPreviewPaths.length > 0
-                ? [
-                    ...presentationPreviewPaths,
-                    ...(svgPath ? [svgPath] : []),
-                    ...companionPaths.filter(path => path !== svgPath)
-                ]
                 : undefined;
             await writeTextArtifact(
                 wrapperPath,
@@ -2299,7 +2069,6 @@ export async function saveDiagramArtifactFile(
                     sourceArtifactPath: outputPath,
                     svgArtifactPath: svgPath,
                     companionArtifactPaths: companionPaths.filter(path => path !== svgPath),
-                    previewArtifactPaths,
                     target: artifact.target
                 }),
                 'diagram Obsidian preview wrapper'
@@ -2310,12 +2079,6 @@ export async function saveDiagramArtifactFile(
         if (staleInlineDrawnixCompanionScope) {
             await removeStaleInlineDrawnixCompanionScope(app, staleInlineDrawnixCompanionScope, progressReporter);
         }
-        await removeStaleDrawnixKnowledgeMapPresentationPanels({
-            app,
-            priorPanelPaths: priorPresentationPanelPaths,
-            currentPanelPaths: currentPresentationPanelPaths,
-            progressReporter
-        });
         return savedPath;
     } catch (error: unknown) {
         for (const snapshot of Array.from(modifiedSnapshots.values()).reverse()) {

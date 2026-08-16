@@ -126,14 +126,7 @@ describe('operations registry', () => {
         if (!definition) {
             throw new Error('Expected the diagram.generate operation definition.');
         }
-        expect(definition.inputSchema).toEqual(expect.objectContaining({
-            properties: expect.objectContaining({
-                drawnixKnowledgeMapDelivery: {
-                    type: 'string',
-                    enum: ['full-board', 'presentation']
-                }
-            })
-        }));
+        expect(definition.inputSchema?.properties).not.toHaveProperty('drawnixKnowledgeMapDelivery');
     });
 
     test('returns typed metadata for diagram preview', () => {

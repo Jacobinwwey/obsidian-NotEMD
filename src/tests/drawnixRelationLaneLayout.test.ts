@@ -64,6 +64,75 @@ describe('Drawnix relation lane layout', () => {
             .toBeLessThanOrEqual(lane.rightTrackX);
     });
 
+    test('keeps relations that share an exterior corridor on distinct deterministic rows', () => {
+        const relations = [
+            { relationId: 'left-first', sourceId: 'a-source', targetId: 'b-target', labelSize: { width: 96, height: 32 } },
+            { relationId: 'right', sourceId: 'c-source', targetId: 'd-target', labelSize: { width: 96, height: 32 } },
+            { relationId: 'left-second', sourceId: 'a-second-source', targetId: 'b-second-target', labelSize: { width: 96, height: 32 } }
+        ];
+        const reservationLayout = reserveDrawnixRelationLaneSpace({
+            forestWidth: 2300,
+            relations
+        });
+        const nodes = [
+            { id: 'a-root', rootId: 'a-root', x: 160, y: 120, width: 180, height: 68 },
+            { id: 'a-source', rootId: 'a-root', x: 380, y: 120, width: 136, height: 56 },
+            { id: 'a-second-source', rootId: 'a-root', x: 380, y: 224, width: 136, height: 56 },
+            { id: 'b-root', rootId: 'b-root', x: 740, y: 120, width: 180, height: 68 },
+            { id: 'b-target', rootId: 'b-root', x: 980, y: 120, width: 136, height: 56 },
+            { id: 'b-second-target', rootId: 'b-root', x: 980, y: 224, width: 136, height: 56 },
+            { id: 'c-root', rootId: 'c-root', x: 1300, y: 120, width: 180, height: 68 },
+            { id: 'c-source', rootId: 'c-root', x: 1520, y: 120, width: 136, height: 56 },
+            { id: 'd-root', rootId: 'd-root', x: 1860, y: 120, width: 180, height: 68 },
+            { id: 'd-target', rootId: 'd-root', x: 2100, y: 120, width: 136, height: 56 }
+        ];
+
+        const lanes = assignDrawnixRelationLaneGeometry({
+            canvasWidth: reservationLayout.width,
+            reservations: reservationLayout.reservations,
+            relations,
+            nodes
+        }).lanes;
+        const byId = new Map(lanes.map(lane => [lane.relationId, lane]));
+
+        expect(byId.get('left-first')?.y).not.toBe(byId.get('right')?.y);
+        expect(byId.get('left-first')?.y).not.toBe(byId.get('left-second')?.y);
+    });
+
+    test('keeps inter-root tracks in one exterior corridor outside the complete router obstacle envelope', () => {
+        const relations = [{
+            relationId: 'inter-root',
+            sourceId: 'left-leaf',
+            targetId: 'right-root',
+            labelSize: { width: 96, height: 32 }
+        }];
+        const reservationLayout = reserveDrawnixRelationLaneSpace({
+            forestWidth: 1280,
+            relations
+        });
+        const lane = assignDrawnixRelationLaneGeometry({
+            canvasWidth: reservationLayout.width,
+            reservations: reservationLayout.reservations,
+            relations,
+            nodes: [
+                { id: 'left-root', rootId: 'left-root', x: 120, y: 120, width: 180, height: 68 },
+                { id: 'left-leaf', rootId: 'left-root', x: 364, y: 120, width: 136, height: 56 },
+                { id: 'right-root', rootId: 'right-root', x: 800, y: 120, width: 180, height: 68 },
+                { id: 'right-leaf', rootId: 'right-root', x: 1044, y: 120, width: 136, height: 56 }
+            ]
+        }).lanes[0];
+
+        const forestLeft = 120;
+        const forestRight = 1180;
+
+        const usesWestExteriorCorridor = lane.rightTrackX < forestLeft;
+        const usesEastExteriorCorridor = lane.leftTrackX > forestRight;
+
+        expect(usesWestExteriorCorridor || usesEastExteriorCorridor).toBe(true);
+        expect(lane.leftTrackX).toBeGreaterThanOrEqual(44);
+        expect(lane.rightTrackX).toBeLessThanOrEqual(reservationLayout.width - 44);
+    });
+
     test('rejects relation geometry that cannot fit within the supplied canvas', () => {
         const nodes = [
             { id: 'source', rootId: 'root', x: 20, y: 120, width: 48, height: 56 },

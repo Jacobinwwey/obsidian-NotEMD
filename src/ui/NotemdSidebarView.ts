@@ -7,13 +7,8 @@ import { FFMPEG_INSTALL_HINTS, type EnvironmentReport, type ProbeResult } from '
 import type { DiagramIntent, RenderTarget } from '../diagram/types';
 import {
     applyDiagramIntentPreference,
-    applyDiagramRenderTargetPreference,
-    resolveDrawnixKnowledgeMapDelivery
+    applyDiagramRenderTargetPreference
 } from '../diagram/diagramPreferenceCompatibility';
-import {
-    renderDrawnixKnowledgeMapDeliverySelector,
-    shouldShowDrawnixKnowledgeMapDeliverySelector
-} from './diagramDeliverySelector';
 import { getExecutableDiagramIntentOptions } from './diagramCatalogLabels';
 import { NOTEMD_SLIDEV_FORK_RELEASE_URL, NOTEMD_SLIDEV_INSTALL_COMMAND } from '../slideExport/slidevDistribution';
 import {
@@ -1774,29 +1769,6 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
             selector.value = this.plugin.settings.preferredDiagramIntent || 'auto';
             await this.plugin.saveSettings();
         };
-
-        if (shouldShowDrawnixKnowledgeMapDeliverySelector(
-            this.plugin.settings.preferredDiagramIntent,
-            this.plugin.settings.preferredDiagramRenderTarget
-        )) {
-            const deliveryRow = parent.createDiv({ cls: 'notemd-inline-control notemd-drawnix-delivery-row' });
-            deliveryRow.createEl('label', {
-                text: i18n.settings.developer.experimentalDiagramPipeline.drawnixKnowledgeMapDeliveryName,
-                cls: 'notemd-inline-label'
-            });
-            renderDrawnixKnowledgeMapDeliverySelector({
-                parent: deliveryRow,
-                selectedDelivery: resolveDrawnixKnowledgeMapDelivery(this.plugin.settings),
-                copy: {
-                    fullBoard: i18n.settings.developer.experimentalDiagramPipeline.drawnixKnowledgeMapDeliveryFullBoard,
-                    presentation: i18n.settings.developer.experimentalDiagramPipeline.drawnixKnowledgeMapDeliveryPresentation
-                },
-                onSelect: async delivery => {
-                    this.plugin.settings.drawnixKnowledgeMapDelivery = delivery;
-                    await this.plugin.saveSettings();
-                }
-            });
-        }
 
         parent.createEl('p', {
             text: i18n.settings.developer.experimentalDiagramPipeline.exportFormatsDesc,
