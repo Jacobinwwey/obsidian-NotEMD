@@ -46,7 +46,7 @@ The reference repository `ref/diagram-design` should influence selection UX and 
 - `npm run diagram:gallery:check`: passed; 10 entries, no stale assets.
 - `npm run docs:build`: passed; VitePress client/server build and page rendering completed.
 - `npm run build`: passed after constraining the root TypeScript include to `src/**/*.ts`; the browser gallery entry remains an esbuild-owned script input.
-- `npm test -- --runInBand`: passed; 255 suites, 2,226 passed, 1 skipped. The Phase 2 focused set also passed: 3 suites, 18 tests.
+- `npm test -- --runInBand`: passed; 255 suites, 2,228 passed, 1 skipped. The Phase 2 focused set also passed: 3 suites, 18 tests.
 - `npm run lint`: remains blocked by the repository baseline (231 errors, 1,329 warnings); the new gallery entry and contract/cache/catalog files have no lint errors, while existing touched legacy files still report baseline findings.
 - `git diff --check`: passed; only Git's LF-to-CRLF normalization warnings remain on Windows.
 

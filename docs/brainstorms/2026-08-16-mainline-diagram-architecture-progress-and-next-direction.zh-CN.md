@@ -46,7 +46,7 @@ superseded_by: null
 - `npm run diagram:gallery:check`：通过；10 个条目，无过期生成物。
 - `npm run docs:build`：通过；VitePress client/server 构建和页面渲染均完成。
 - `npm run build`：通过；根 TypeScript include 已收窄到 `src/**/*.ts`，browser gallery entry 继续由 esbuild 独立打包。
-- `npm test -- --runInBand`：通过；255 个 suite、2,226 个通过、1 个 skipped。Phase 2 定向集合也通过：3 个 suite、18 个测试。
+- `npm test -- --runInBand`：通过；255 个 suite、2,228 个通过、1 个 skipped。Phase 2 定向集合也通过：3 个 suite、18 个测试。
 - `npm run lint`：仍被仓库既有基线阻断（231 errors、1,329 warnings）；新增 gallery entry 与 contract/cache/catalog 文件无 lint error，仍被报告的是已存在的 legacy 文件基线问题。
 - `git diff --check`：通过；Windows 下只剩 Git 的 LF-to-CRLF 规范化警告。
 
