@@ -145,7 +145,3 @@ export function getWebviewPresentation(target: RenderArtifactTarget): WebviewPre
         renderMarkup: renderSourceOnlyArtifactMarkup
     };
 }
-
-export function shouldUseWebviewPresentation(payload: RenderWebviewPayload, presentation: WebviewPresentation): boolean {
-    return presentation.matches(payload);
-}
