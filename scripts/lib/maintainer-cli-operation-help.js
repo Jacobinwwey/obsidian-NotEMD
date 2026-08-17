@@ -67,6 +67,29 @@ const OPERATION_HELP = {
   }
 };
 
+const { inputSchemas } = require('../../src/operations/maintainerCliContractMetadata.json');
+
+function schemaPropertyKeys(schema) {
+  return schema && schema.properties && typeof schema.properties === 'object'
+    ? Object.keys(schema.properties)
+    : [];
+}
+
+function deriveOperationDetails(operationId, details) {
+  const schema = inputSchemas[operationId] || {};
+  const required = Array.isArray(schema.required) ? schema.required.filter((value) => typeof value === 'string') : [];
+  const optional = schemaPropertyKeys(schema).filter((key) => !required.includes(key));
+  return {
+    ...details,
+    required,
+    optional
+  };
+}
+
+Object.keys(OPERATION_HELP).forEach((operationId) => {
+  OPERATION_HELP[operationId] = deriveOperationDetails(operationId, OPERATION_HELP[operationId]);
+});
+
 module.exports = {
   OPERATION_HELP
 };

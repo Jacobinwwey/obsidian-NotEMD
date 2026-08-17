@@ -1,0 +1,71 @@
+{
+  "inputSchemas": {
+    "content.batch-generate-from-titles": {
+      "type": "object",
+      "required": ["folderPath"],
+      "properties": {
+        "folderPath": { "type": "string" },
+        "fileSelectionProfileId": { "type": "string" },
+        "fileSelectionProfileName": { "type": "string" },
+        "includeSubfoldersMode": { "type": "string", "enum": ["legacy", "include", "exclude"] },
+        "fileFilterMode": { "type": "string", "enum": ["none", "contains", "regex", "glob"] },
+        "fileFilterPattern": { "type": "string" },
+        "fileFilterTarget": { "type": "string", "enum": ["relativePath", "basename"] },
+        "fileFilterCaseSensitive": { "type": "boolean" },
+        "fileFilterInvert": { "type": "boolean" }
+      }
+    },
+    "content.split-note-by-chapters": {
+      "type": "object",
+      "required": ["sourcePath"],
+      "properties": {
+        "sourcePath": { "type": "string" },
+        "splitHeadingLevel": { "type": "string", "enum": ["auto", "h1", "h2", "h3", "h4", "h5", "h6"] }
+      }
+    },
+    "research.summarize-topic": {
+      "type": "object",
+      "required": ["sourcePath"],
+      "properties": {
+        "sourcePath": { "type": "string" },
+        "topic": { "type": "string" }
+      }
+    },
+    "diagram.generate": {
+      "type": "object",
+      "required": ["sourcePath"],
+      "properties": {
+        "sourcePath": { "type": "string" },
+        "executionMode": { "type": "string", "enum": ["save-artifact", "save-mermaid"] },
+        "requestedIntent": { "type": "string" },
+        "requestedRenderTarget": {
+          "type": "string",
+          "enum": ["mermaid", "json-canvas", "vega-lite", "html", "editable-html-svg", "drawio", "drawnix", "circuitikz"]
+        },
+        "compatibilityMode": { "type": "string", "enum": ["best-fit", "legacy-mermaid"] },
+        "targetLanguage": { "type": "string" }
+      }
+    },
+    "local-knowledge.inspect": {
+      "type": "object",
+      "required": ["taskScope"],
+      "properties": {
+        "taskScope": {
+          "type": "string",
+          "enum": ["generateTitle", "batchGenerateFromTitles", "researchSummarize", "diagramGeneration"]
+        },
+        "sourcePath": { "type": "string" },
+        "currentFilePath": { "type": "string" },
+        "query": { "type": "string" },
+        "knowledgePaths": { "type": "array", "items": { "type": "string" } },
+        "topK": { "type": "number" },
+        "slidingWindowSize": { "type": "number" },
+        "maxSnippetChars": { "type": "number" }
+      }
+    },
+    "provider.profile.export-redacted": { "type": "object", "properties": {} },
+    "cli.capability-manifest.export": { "type": "object", "properties": {} },
+    "cli.invocation-contract.export": { "type": "object", "properties": {} },
+    "cli.public-surface.export": { "type": "object", "properties": {} }
+  }
+}

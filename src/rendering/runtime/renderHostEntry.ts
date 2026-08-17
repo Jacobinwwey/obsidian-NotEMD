@@ -1,5 +1,5 @@
 import { DiagramIntent } from '../../diagram/types';
-import { normalizeMermaidDefinition } from '../preview/mermaidDefinitionShared';
+import { normalizeMermaidDefinition } from '../../diagram/adapters/mermaid/normalize';
 import { MermaidPreviewDeps, renderNormalizedMermaidDefinitionSvgWithDeps } from '../preview/mermaidPreviewShared';
 import { RenderWebviewTheme } from '../theme';
 import { VegaLitePreviewDeps, renderVegaLiteSpecSvgWithDeps } from '../preview/vegaLitePreviewShared';

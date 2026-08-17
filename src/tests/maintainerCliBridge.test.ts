@@ -9,13 +9,50 @@ type MaintainerOperationHelp = Record<string, {
     additionalExamples?: string[];
 }>;
 
+function createChapterSplitResult() {
+    return {
+        sourcePath: 'Docs/Topic.md',
+        requestedSplitHeadingLevel: 'auto',
+        chapterNotePaths: [],
+        managedArtifactPaths: ['Docs/Topic_toc.md'],
+        outputFolderPath: 'Docs/Topic',
+        tocPath: 'Docs/Topic_toc.md',
+        manifestPath: 'Docs/Topic_manifest.json',
+        splitLevel: null,
+        chapters: [],
+        tocMetadata: {
+            sourcePath: 'Docs/Topic.md',
+            sourceBasename: 'Topic',
+            requestedSplitHeadingLevel: 'auto',
+            resolvedSplitHeadingLevel: null,
+            chapterCount: 0,
+            managedArtifactCount: 1,
+            outputFolderPath: 'Docs/Topic',
+            tocPath: 'Docs/Topic_toc.md',
+            manifestPath: 'Docs/Topic_manifest.json',
+            chapterTitles: [],
+            chapterNotePaths: []
+        },
+        tocMarkdown: '# Topic\n',
+        chapterCount: 0,
+        removedStaleFileCount: 0,
+        removedStalePaths: []
+    };
+}
+
+function createDiagramSuccessResult() {
+    return {
+        kind: 'success',
+        executionMode: 'save-artifact',
+        sourcePath: 'Docs/Topic.md',
+        actionLabel: 'Generate diagram'
+    };
+}
+
 function createMaintainerCliHost() {
     return {
         batchGenerateContentForTitlesCommand: jest.fn().mockResolvedValue({ generatedCount: 3 }),
-        splitNoteByChaptersForPathCommand: jest.fn().mockResolvedValue({
-            tocPath: 'Docs/Topic_toc.md',
-            managedArtifactPaths: ['Docs/Topic_toc.md']
-        }),
+        splitNoteByChaptersForPathCommand: jest.fn().mockResolvedValue(createChapterSplitResult()),
         researchAndSummarizeForPathCommand: jest.fn().mockResolvedValue({
             sourcePath: 'Docs/Topic.md',
             outputPath: 'Docs/Topic.md',
@@ -40,7 +77,7 @@ function createMaintainerCliHost() {
             },
             appended: true
         }),
-        generateDiagramForPathCommand: jest.fn().mockResolvedValue({ kind: 'success', outputPath: 'Docs/Topic_diagram.md' }),
+        generateDiagramForPathCommand: jest.fn().mockResolvedValue(createDiagramSuccessResult()),
         inspectLocalKnowledgeCommand: jest.fn().mockResolvedValue({
             taskScope: 'diagramGeneration',
             query: 'Architecture'
@@ -56,10 +93,7 @@ describe('maintainer CLI bridge', () => {
     test('dispatches bounded content operations with parsed input fields', async () => {
         const host = {
             batchGenerateContentForTitlesCommand: jest.fn().mockResolvedValue({ generatedCount: 3 }),
-            splitNoteByChaptersForPathCommand: jest.fn().mockResolvedValue({
-                tocPath: 'Docs/Topic_toc.md',
-                managedArtifactPaths: ['Docs/Topic_toc.md']
-            }),
+            splitNoteByChaptersForPathCommand: jest.fn().mockResolvedValue(createChapterSplitResult()),
             researchAndSummarizeForPathCommand: jest.fn().mockResolvedValue({
                 sourcePath: 'Docs/Topic.md',
                 outputPath: 'Docs/Topic.md',
@@ -84,7 +118,7 @@ describe('maintainer CLI bridge', () => {
                 },
                 appended: true
             }),
-            generateDiagramForPathCommand: jest.fn().mockResolvedValue({ kind: 'success', outputPath: 'Docs/Topic_diagram.md' }),
+            generateDiagramForPathCommand: jest.fn().mockResolvedValue(createDiagramSuccessResult()),
             inspectLocalKnowledgeCommand: jest.fn().mockResolvedValue({
                 taskScope: 'diagramGeneration',
                 query: 'Architecture'

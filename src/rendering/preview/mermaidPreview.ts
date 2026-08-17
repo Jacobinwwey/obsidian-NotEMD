@@ -1,4 +1,4 @@
-import { normalizeMermaidDefinition } from './mermaidDefinitionShared';
+import { normalizeMermaidDefinition } from '../../diagram/adapters/mermaid/normalize';
 import { RenderArtifact } from '../types';
 import { RenderWebviewTheme } from '../theme';
 import { loadDefaultBundledMermaidPreviewDeps } from './mermaidRuntime';

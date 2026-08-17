@@ -19,7 +19,7 @@ import {
 import { ChapterSplitResult } from './chapterSplit';
 import { ResearchSummarizeResult } from './searchUtils';
 import { CHAPTER_SPLIT_HEADING_LEVEL_VALUES, ChapterSplitHeadingLevelSetting, ProgressReporter } from './types';
-import { assertMaintainerCliInput } from './operations/contractSchemas';
+import { assertMaintainerCliInput, assertOperationResult } from './operations/contractSchemas';
 
 export type MaintainerCliOperationId =
     | 'content.batch-generate-from-titles'
@@ -187,6 +187,12 @@ function optionalEnum<T extends string>(
     return value as T;
 }
 
+async function awaitValidatedOperationResult<T>(operationId: string, pendingResult: Promise<T>): Promise<T> {
+    const result = await pendingResult;
+    assertOperationResult(operationId, result);
+    return result;
+}
+
 function buildFileSelectionOverride(input: Record<string, unknown>): FolderTaskFileSelectionOverride | undefined {
     const profileId = optionalString(input, 'fileSelectionProfileId');
     const profileName = optionalString(input, 'fileSelectionProfileName');
@@ -313,54 +319,54 @@ export async function invokeMaintainerCliOperation(
     switch (request.operationId) {
         case 'content.batch-generate-from-titles':
             assertMaintainerCliInput(request.operationId, request.input);
-            return host.batchGenerateContentForTitlesCommand(
+            return awaitValidatedOperationResult(request.operationId, host.batchGenerateContentForTitlesCommand(
                 reporter,
                 requireString(input, 'folderPath'),
                 buildFileSelectionOverride(input)
-            );
+            ));
         case 'content.split-note-by-chapters':
             assertMaintainerCliInput(request.operationId, request.input);
-            return host.splitNoteByChaptersForPathCommand(
+            return awaitValidatedOperationResult(request.operationId, host.splitNoteByChaptersForPathCommand(
                 requireString(input, 'sourcePath'),
                 reporter,
                 buildChapterSplitOptions(input)
-            );
+            ));
         case 'research.summarize-topic':
             assertMaintainerCliInput(request.operationId, request.input);
-            return host.researchAndSummarizeForPathCommand(
+            return awaitValidatedOperationResult(request.operationId, host.researchAndSummarizeForPathCommand(
                 requireString(input, 'sourcePath'),
                 optionalString(input, 'topic'),
                 reporter
-            );
+            ));
         case 'diagram.generate':
             assertMaintainerCliInput(request.operationId, request.input);
-            return host.generateDiagramForPathCommand(
+            return awaitValidatedOperationResult(request.operationId, host.generateDiagramForPathCommand(
                 requireString(input, 'sourcePath'),
                 reporter,
                 buildDiagramCommandOptions(input)
-            );
+            ));
         case 'local-knowledge.inspect':
             assertMaintainerCliInput(request.operationId, request.input);
-            return host.inspectLocalKnowledgeCommand(
+            return awaitValidatedOperationResult(request.operationId, host.inspectLocalKnowledgeCommand(
                 buildLocalKnowledgeInspectRequest(input),
                 reporter
-            );
+            ));
         case 'provider.profile.export-redacted':
             assertNoInput(request.input);
             assertMaintainerCliInput(request.operationId, request.input);
-            return host.exportRedactedProviderProfilesCommand();
+            return awaitValidatedOperationResult(request.operationId, host.exportRedactedProviderProfilesCommand());
         case 'cli.capability-manifest.export':
             assertNoInput(request.input);
             assertMaintainerCliInput(request.operationId, request.input);
-            return host.exportCliCapabilityManifestCommand();
+            return awaitValidatedOperationResult(request.operationId, host.exportCliCapabilityManifestCommand());
         case 'cli.invocation-contract.export':
             assertNoInput(request.input);
             assertMaintainerCliInput(request.operationId, request.input);
-            return host.exportCliInvocationContractCommand();
+            return awaitValidatedOperationResult(request.operationId, host.exportCliInvocationContractCommand());
         case 'cli.public-surface.export':
             assertNoInput(request.input);
             assertMaintainerCliInput(request.operationId, request.input);
-            return host.exportCliPublicSurfaceCommand();
+            return awaitValidatedOperationResult(request.operationId, host.exportCliPublicSurfaceCommand());
         default: {
             const exhaustiveCheck: never = request.operationId;
             throw new Error(`Unsupported maintainer CLI operation: ${exhaustiveCheck}`);

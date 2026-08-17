@@ -1,5 +1,12 @@
-import { CHAPTER_SPLIT_HEADING_LEVEL_VALUES } from '../types';
 import type { OperationSchema } from './types';
+import { getOperationDefinition } from './registry';
+
+// The maintainer bridge also runs in the Node-backed CLI helper. Keep its input
+// contract in JSON so the TypeScript validator and the Node help surface cannot
+// silently drift in required/optional field names.
+const maintainerCliContractMetadata = require('./maintainerCliContractMetadata.json') as {
+    inputSchemas: Record<string, OperationSchema>;
+};
 
 export interface ContractValidationIssue {
     path: string;
@@ -174,78 +181,68 @@ export function assertContractValue(value: unknown, schema: OperationSchema): vo
     }
 }
 
-const MAINTAINER_CLI_INPUT_SCHEMAS: Record<string, OperationSchema> = {
-    'content.batch-generate-from-titles': {
-        type: 'object',
-        required: ['folderPath'],
-        properties: {
-            folderPath: { type: 'string' },
-            fileSelectionProfileId: { type: 'string' },
-            fileSelectionProfileName: { type: 'string' },
-            includeSubfoldersMode: { type: 'string', enum: ['legacy', 'include', 'exclude'] },
-            fileFilterMode: { type: 'string', enum: ['none', 'contains', 'regex', 'glob'] },
-            fileFilterPattern: { type: 'string' },
-            fileFilterTarget: { type: 'string', enum: ['relativePath', 'basename'] },
-            fileFilterCaseSensitive: { type: 'boolean' },
-            fileFilterInvert: { type: 'boolean' }
-        }
-    },
-    'content.split-note-by-chapters': {
-        type: 'object',
-        required: ['sourcePath'],
-        properties: {
-            sourcePath: { type: 'string' },
-            splitHeadingLevel: { type: 'string', enum: [...CHAPTER_SPLIT_HEADING_LEVEL_VALUES] }
-        }
-    },
-    'research.summarize-topic': {
-        type: 'object',
-        required: ['sourcePath'],
-        properties: {
-            sourcePath: { type: 'string' },
-            topic: { type: 'string' }
-        }
-    },
-    'diagram.generate': {
-        type: 'object',
-        required: ['sourcePath'],
-        properties: {
-            sourcePath: { type: 'string' },
-            executionMode: { type: 'string', enum: ['save-artifact', 'save-mermaid'] },
-            requestedIntent: { type: 'string' },
-            requestedRenderTarget: {
-                type: 'string',
-                enum: ['mermaid', 'json-canvas', 'vega-lite', 'html', 'editable-html-svg', 'drawio', 'drawnix', 'circuitikz']
-            },
-            compatibilityMode: { type: 'string', enum: ['best-fit', 'legacy-mermaid'] },
-            targetLanguage: { type: 'string' }
-        }
-    },
-    'local-knowledge.inspect': {
-        type: 'object',
-        required: ['taskScope'],
-        properties: {
-            taskScope: {
-                type: 'string',
-                enum: ['generateTitle', 'batchGenerateFromTitles', 'researchSummarize', 'diagramGeneration']
-            },
-            sourcePath: { type: 'string' },
-            currentFilePath: { type: 'string' },
-            query: { type: 'string' },
-            knowledgePaths: { type: 'array', items: { type: 'string' } },
-            topK: { type: 'number' },
-            slidingWindowSize: { type: 'number' },
-            maxSnippetChars: { type: 'number' }
-        }
-    },
-    'provider.profile.export-redacted': { type: 'object', properties: {} },
-    'cli.capability-manifest.export': { type: 'object', properties: {} },
-    'cli.invocation-contract.export': { type: 'object', properties: {} },
-    'cli.public-surface.export': { type: 'object', properties: {} }
+const MAINTAINER_CLI_INPUT_SCHEMAS = maintainerCliContractMetadata.inputSchemas;
+
+const LOCAL_KNOWLEDGE_INSPECT_RESULT_SCHEMA: OperationSchema = {
+    type: 'object',
+    properties: {
+        taskScope: {
+            type: 'string',
+            enum: ['generateTitle', 'batchGenerateFromTitles', 'researchSummarize', 'diagramGeneration']
+        },
+        globalEnabled: { type: 'boolean' },
+        taskEnabled: { type: 'boolean' },
+        effectivePathSource: { type: 'string', enum: ['override', 'task-specific', 'default'] },
+        effectiveConfiguredPaths: { type: 'array', items: { type: 'string' } },
+        sourcePath: { anyOf: [{ type: 'string' }, { type: 'null' }] },
+        query: { type: 'string' },
+        queryDerivation: { type: 'string', enum: ['explicit', 'basename', 'diagram-source'] },
+        queryDiagnostics: { type: 'object' },
+        currentFilePath: { anyOf: [{ type: 'string' }, { type: 'null' }] },
+        retrievalOptions: { type: 'object' },
+        retrieverBuildStatus: {
+            type: 'string',
+            enum: ['disabled', 'no-paths', 'no-candidate-files', 'no-retrievable-sections', 'ready']
+        },
+        retrieverCreated: { type: 'boolean' },
+        candidateFilePaths: { type: 'array', items: { type: 'string' } },
+        context: { anyOf: [{ type: 'string' }, { type: 'null' }] },
+        contextBlocks: { type: 'array' },
+        retrieval: { type: 'object' }
+    }
+};
+
+const MAINTAINER_CLI_RESULT_SCHEMAS: Record<string, OperationSchema> = {
+    'local-knowledge.inspect': LOCAL_KNOWLEDGE_INSPECT_RESULT_SCHEMA
 };
 
 export function getMaintainerCliInputSchema(operationId: string): OperationSchema | undefined {
     return MAINTAINER_CLI_INPUT_SCHEMAS[operationId];
+}
+
+export function getOperationResultSchema(operationId: string): OperationSchema | undefined {
+    return getOperationDefinition(operationId)?.resultSchema || MAINTAINER_CLI_RESULT_SCHEMAS[operationId];
+}
+
+/**
+ * Validate a host result at the operation boundary. `null` is an intentional
+ * cancellation/no-result value for UI-backed commands; all non-null values
+ * must satisfy the registry schema while unknown fields remain forward-safe.
+ */
+export function assertOperationResult(operationId: string, value: unknown): void {
+    if (value == null) {
+        return;
+    }
+
+    const schema = getOperationResultSchema(operationId);
+    if (!schema) {
+        throw new Error(`No operation result schema is registered for operation "${operationId}".`);
+    }
+
+    const issues = validateContractValue(value, schema);
+    if (issues.length > 0) {
+        throw new Error(`Operation "${operationId}" returned an invalid result: ${issues.map(issue => `${issue.path} ${issue.message}`).join('; ')}`);
+    }
 }
 
 /** Validate the host-adapter input, while intentionally allowing unknown legacy fields. */

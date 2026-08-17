@@ -1,13 +1,13 @@
 ---
 date: 2026-08-15
-last_updated: 2026-08-16
+last_updated: 2026-08-17
 topic: mermaid-normalization-consolidation
 status: active
 canonical_for:
   - mermaid-normalization
 supersedes: []
 superseded_by: null
-implementation_record: null
+implementation_record: src/tests/mermaidNormalizationConvergence.test.ts
 ---
 
 # Mermaid 规范化合并方案（2026-08-15）
@@ -20,13 +20,15 @@ implementation_record: null
 
 ## 2. 审计发现与更正
 
-### 2.1 存在三套规范化面（严重度 4）
+### 2.1 历史审计基线（记录于 2026-08-15）
+
+本小节记录实施前的状态。diagram-level 发散已于 2026-08-17 关闭；剩余开放项见第 11 节。
 
 - `validator.normalizeMermaidDefinition` — `src/diagram/adapters/mermaid/validator.ts:29-39` — 渲染路径，经 `validateMermaidDefinition`（`:41-56`）进入 `src/rendering/renderers/mermaidRenderer.ts:55`。缺少 ER 修复。
 - `mermaidDefinitionShared.normalizeMermaidDefinition` — `src/rendering/preview/mermaidDefinitionShared.ts:92-101` — 预览路径，经 `mermaidPreview.ts:22,36` 与 `renderHostEntry.ts:119`。包含 `repairBraceLessErEntityBlocks` + `repairTruncatedErRelationCardinality`（`:84-87`）。
 - `mermaidProcessor.refineMermaidBlocks` — `src/mermaidProcessor.ts:67-279` — markdown 级修复，笔记路径调用点 `fileUtils.ts:1006,1328,1671`、`searchUtils.ts:372`。
 
-同一输入在渲染与预览路径对 `erDiagram`（无括号实体、截断基数）产生不同规范化结果。这是唯一有用户可见行为影响的发散点。
+在 Phase 0 之前，同一输入在渲染与预览路径对 `erDiagram`（无括号实体、截断基数）产生不同规范化结果。该用户可见发散现已由 `mermaidNormalizationConvergence.test.ts` 与 canonical normalize 模块覆盖。
 
 ### 2.2 对先前 code-slop 审计的更正
 
@@ -35,8 +37,8 @@ implementation_record: null
 
 ### 2.3 影响设计的关键事实
 
-- fence 格式四处发散：`checkMermaidErrors` 正则（`mermaidProcessor.ts:42`，要求尾部 \n）、`MERMAID_FENCE_REGEX`（`validator.ts:4`，^$ 锚定）、`refineMermaidBlocks` 块正则（`:253`，只认反引号，漏 `~~~` 块）、`diagramGenerationService.ts:580` 的手工 fence。
-- `refineMermaidBlocks` 无条件剥掉 mermaid 块内所有行的 `(){}`（`mermaidProcessor.ts:195`）——生产笔记路径上已经在破坏 `erDiagram` 实体块。
+- 历史上 fence 所有权分散在 `checkMermaidErrors`、`validator`、`refineMermaidBlocks` 与手工 fallback fence。当前 canonical diagram normalize 已同时接受反引号和波浪线 fence；单一 fence 所有权及 fallback 路径仍属于 Phase 3。
+- `refineMermaidBlocks` 历史上会无条件剥除 Mermaid 块内行的 `(){}`。当前路径已保留 ER 语法花括号；legacy deep-debug 链仍需按 family 限制。
 - 30 步 `deepDebugMermaid` 链（`mermaidProcessor.ts:356-498`）是 flowchart 偏置的：`fixMermaidNotes` 改写 `note right of`（合法 sequence 语法）、`fixMermaidPipes`/`fixMisplacedPipes` 触碰 `|`（ER 基数语法）。
 - `mermaid.initialize` 在 `validator.ts:47` 与 `checkMermaidErrors`（`mermaidProcessor.ts:48`）各调一次；`mermaid.initialize` 是全局配置重置，重复调用会冲掉其他消费者。
 - `legacyFixerUtils.ts` 死导出：`rewriteLegacyTrailingDoubleDashArrow`（`:412`）、4 个不被 import 的 `parse*`、字节相同的 `stripWrappingDoubleQuotes`/`stripWrappedQuotedLabel`（`:36-42`/`:44-50`）。
@@ -119,14 +121,14 @@ normalizeMermaidDiagram(input, opts?) -> { content, family }
 | 0. 构建/打包基座 | render-host 冒烟门、单 main.js + inline srcdoc | 门存在（`audit:render-host`）；单入口执行中 | candidate-only 守卫仍在 production esbuild 路径之外（2026-06-09 状态未变） |
 | 1. 领域模型 + 意图路由 | DiagramSpec + DiagramPlan | 完成（`architecture.md:188-203`） | 无 |
 | 2. spec-first 生成 | DiagramSpecPrompt 取代裸 mermaid 文本 | 完成 | 命令表面收口未完成 |
-| 3. Mermaid adapter V2 + mermaidProcessor 拆分 | 单一 adapter、legacy-fixer 日落 | 未完成：normalize 发散（2.1），mermaidProcessor 仍 1339 行并 import 29 个 legacyFixerUtils 函数 | **本方案** |
+| 3. Mermaid adapter V2 + mermaidProcessor 拆分 | 单一 adapter、legacy-fixer 日落 | diagram-level normalize 已收敛；legacy fixer 分阶段/type gating 与 Mermaid 配置生命周期仍未完成 | **本方案 Phase 2-3** |
 | 4. 渲染平台骨架 | registry/host/cache/preview | 完成（8 个渲染器） | 无 |
 | 5. JSON Canvas | 首个非 Mermaid 目标 | 完成 | 无 |
 | 6. Vega-Lite | 沙箱 iframe 预览 | 完成 | 无 |
 | 7. 主题/导出/发布硬化 | SVG/PNG/PDF + 发布纪律 | 完成（1.8.x-1.9.x） | 无 |
 | 8. 延后高级引擎 | 暂缓 | 暂缓（正确） | 无 |
 
-路线图 "Recommended Next Batch"（收敛批而非新目标）仍是正确方向；Task 3 是唯一未完成的收敛项，本方案执行它。
+路线图 "Recommended Next Batch"（收敛批而非新目标）仍是正确方向；本方案现在跟踪 Task 3 剩余的 Phase 2-3 工作，而不是已关闭的 diagram-level 发散。
 
 ### vs Drawnix 知识导图质量与交付方案（2026-07-22）+ 实施记录（2026-08-14）
 
@@ -144,8 +146,19 @@ Phase 0-6 已实现（1.9.5）。语义/几何/交付契约已文档化；当前
 
 ## 10. 后续推进方向
 
-1. 执行本方案（Mermaid 规范化合并）——唯一有用户可见行为发散的项。
+1. 完成剩余 Phase 2-3：为 legacy 链建立分阶段/type gating，统一 fence 所有权，并将 Mermaid 初始化收敛到模块级生命周期。
 2. Drawnix 收敛切片：为原生投影抽取单一共享测量/布局模块；删除死路由引擎与废弃别名。
 3. circuitikz：模板参数化；决策 `runCircuitikzRepairLoop` 去留；同步文档。
 4. 仓库级 helper 收敛（escapeHtml x10、错误三元 x94、FNV-1a x5、isRecord x6、slugify x3、枚举守卫 x4、indexOf 去重 x7）作为收敛批收尾，遵守路线图的 support-matrix 纪律。
 5. 坚持路线图规则：先收敛，再上新目标。
+
+## 11. 实现更新（2026-08-17）
+
+Phase 0 与 Phase 1 的 diagram 级部分已经落地。
+
+- `src/diagram/adapters/mermaid/normalize.ts` 成为无运行时依赖的 canonical 边界，统一处理 BOM/CRLF、反引号与波浪线 fence、Mermaid family 检测、行尾清洗和现有 ER 修复。
+- `validator.ts`、`mermaidPreview.ts`、`renderHostEntry.ts` 共同消费这一实现。`mermaidDefinitionShared.ts` 仅保留兼容 re-export。
+- `refineMermaidBlocks` 识别两种 fence，并不再删除 ER 语法花括号；legacy deep-debug 顺序保持不变。
+- `src/tests/mermaidNormalizationConvergence.test.ts` 证明渲染验证与预览接收完全相同的 ER 内容，覆盖无括号实体和截断基数修复。
+
+剩余缺口已收窄：Phase 2 需要把 30 步 legacy 链变成可门控的 stage registry，Phase 3 需要收敛 fence 所有权与 Mermaid 初始化。外部 consumer 证据记录完成前，不接纳新的 Mermaid layout 或 target。

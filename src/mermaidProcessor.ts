@@ -1,4 +1,5 @@
 import mermaid from 'mermaid';
+import { normalizeMermaidDiagram } from './diagram/adapters/mermaid/normalize';
 import {
     attachDirectionalNoteToConnection,
     buildLegacyConnectedNoteLines,
@@ -39,7 +40,7 @@ import {
  * @returns A promise that resolves to the number of errors found.
  */
 export async function checkMermaidErrors(content: string): Promise<number> {
-    const mermaidBlockRegex = /^(?:[ \t]*)(?:```|~~~)\s*mermaid\b[^\n]*\n([\s\S]*?)\n(?:[ \t]*)(?:```|~~~)/gim;
+    const mermaidBlockRegex = /^[ \t]*(```|~~~)\s*mermaid\b[^\r\n]*\r?\n([\s\S]*?)\r?\n[ \t]*\1/gim;
     let match;
     let errorCount = 0;
     
@@ -50,7 +51,7 @@ export async function checkMermaidErrors(content: string): Promise<number> {
     // Check closed blocks
     while ((match = mermaidBlockRegex.exec(content)) !== null) {
         try {
-            await mermaid.parse(match[1]);
+            await mermaid.parse(match[2]);
         } catch (error) {
             errorCount++;
         }
@@ -75,7 +76,7 @@ export async function refineMermaidBlocks(content: string): Promise<string> {
 		const stripped = line.trim();
 
 		// Regex to detect ```(mermaid) or ``` mermaid with optional space/parentheses
-		const mermaidStartRegex = /^```\s*\(?\s*mermaid\s*\)?/;
+		const mermaidStartRegex = /^(?:```|~~~)\s*\(?\s*mermaid\s*\)?/;
 
 
 		if (mermaidStartRegex.test(stripped)) {
@@ -191,8 +192,12 @@ export async function refineMermaidBlocks(content: string): Promise<string> {
                 });
 			}
 
-			// Remove parentheses and curly braces from the line content within the mermaid block
-			let lineWithoutBrackets = line.replace(/[(){}]/g, ''); // Updated regex
+			// Parentheses and braces are legacy flowchart repair targets. ER entities
+			// use both as grammar, so preserve them once the family is known.
+			const currentFamily = normalizeMermaidDiagram(currentBlockLines.slice(1).join('\n')).family;
+			let lineWithoutBrackets = currentFamily === 'erDiagram'
+				? line
+				: line.replace(/[(){}]/g, '');
 
 			// Fix [" at the end of the line
 			if (lineWithoutBrackets.endsWith('\["')) {
@@ -203,7 +208,9 @@ export async function refineMermaidBlocks(content: string): Promise<string> {
 			if (lineWithoutBrackets.includes('-->')) { // Check the modified line for arrows
 				lastArrowIndexInBlock = currentBlockLines.length - 1; // Index within currentBlockLines
 			}
-			if (stripped === '```') {
+			if (/^(?:```|~~~)$/.test(stripped)) {
+				lineWithoutBrackets = '```';
+				currentBlockLines[currentBlockLines.length - 1] = lineWithoutBrackets;
 				// Found the intended closing tag, finalize this block
 				resultLines.push(...currentBlockLines);
 				inMermaid = false;
@@ -250,7 +257,7 @@ export async function refineMermaidBlocks(content: string): Promise<string> {
     // Regex to find mermaid blocks and apply fixes ONLY inside them
     // Matches ```mermaid followed by content and ending with ```
     // We use [\s\S]*? for non-greedy multiline match
-    const mermaidBlockRegex = /(```\s*mermaid\n)([\s\S]*?)(\n```)/gi;
+    const mermaidBlockRegex = /((?:```|~~~)\s*mermaid[^\r\n]*\r?\n)([\s\S]*?)(\r?\n(?:```|~~~))/gi;
 
     result = result.replace(mermaidBlockRegex, (match, startTag, blockContent, endTag) => {
         let processedBlock = blockContent;
@@ -285,7 +292,7 @@ export async function refineMermaidBlocks(content: string): Promise<string> {
  * @returns The processed content with Mermaid blocks debugged.
  */
 export function applyDeepDebugToMermaidBlocks(content: string): string {
-    const mermaidBlockRegex = /(```\s*mermaid\n)([\s\S]*?)(\n```)/gi;
+    const mermaidBlockRegex = /((?:```|~~~)\s*mermaid[^\r\n]*\r?\n)([\s\S]*?)(\r?\n(?:```|~~~))/gi;
 
     return content.replace(mermaidBlockRegex, (match, startTag, blockContent, endTag) => {
         const processedBlock = deepDebugMermaid(blockContent);

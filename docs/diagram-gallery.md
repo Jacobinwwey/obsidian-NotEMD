@@ -23,7 +23,7 @@ This page is the user-facing inventory of the diagram types that Notemd can exec
 | `class` | Type relationships and ownership | `mermaid` | `mermaid`, `editable-html-svg`, `drawio`, `html` |
 | `entity-relationship` | Entity cardinality and attributes | `mermaid` | `mermaid`, `editable-html-svg`, `drawio`, `html` |
 | `canvas-map` | Spatially grouped concepts | `json-canvas` | `json-canvas` |
-| `data-chart` | Measured comparison over a shared axis | `vega-lite` | `vega-lite`, `mermaid`, `html` |
+| `data-chart` | Measured comparison over a shared axis | `vega-lite` | `vega-lite`, `html` |
 | `circuit` | Electrical components and nets | `circuitikz` | `circuitikz` |
 
 ## Preview Examples

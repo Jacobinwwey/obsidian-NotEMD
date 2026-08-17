@@ -24,7 +24,7 @@ canonical_for: diagram-capability-catalog
 | `data-chart` | 共享坐标轴上的度量比较 | Vega-Lite | `data-chart-trend` | sandbox iframe | source、SVG、PNG、PDF |
 | `circuit` | 电气元件与网络 | Circuitikz | `circuit-cmos-inverter` | SVG companion / source | `.tex`、SVG、PNG、PDF* |
 
-`*` Circuitikz 的 PDF/PNG 必须经过固定原生编译器门禁。Editable HTML/SVG 当前支持自包含 HTML 预览，但生产产物没有 `previewSvg`；因此 SVG/PNG/PDF 导出声明在 Phase 0 增加显式 companion SVG 前属于 **开放项**。
+`*` Circuitikz 的 PDF/PNG 必须经过固定原生编译器门禁。Editable HTML/SVG 现在会返回生产 `previewSvg`；其 HTML/SVG/PNG/PDF 导出由 target descriptor 与 gallery 门禁覆盖。
 
 ## 渲染目标
 
@@ -34,7 +34,7 @@ canonical_for: diagram-capability-catalog
 | `json-canvas` | JSON Canvas | iframe | source、SVG、PNG、PDF | 无 |
 | `vega-lite` | Vega-Lite JSON | sandbox iframe | source、SVG、PNG、PDF | 无 |
 | `html` | 通用 HTML fallback | iframe | source | 无 |
-| `editable-html-svg` | 自包含 HTML + 语义 inline SVG | iframe | 当前 HTML；Phase 0 后 SVG/PNG/PDF | 无 |
+| `editable-html-svg` | 自包含 HTML + 语义 inline SVG | SVG companion | HTML、SVG、PNG、PDF | 无 |
 | `drawio` | Draw.io XML + review companion | SVG companion | source、SVG、PNG、PDF | diagrams.net 打开/导入 |
 | `drawnix` | 一个文件名根 `.drawnix` 树 + SVG companion | SVG companion | `.drawnix`、SVG、PNG、PDF | Drawnix 打开/导入 |
 | `circuitikz` | 已校验 `.tex` + review companion | SVG companion/source | `.tex`、SVG、PNG、PDF | 原生 TeX 编译 |
@@ -45,7 +45,7 @@ canonical_for: diagram-capability-catalog
 
 ## 预览与 gallery 契约
 
-当前设置页 gallery 可执行并使用生产 renderer，但还没有静态缩略图。计划中的生成式 gallery 将产出：
+当前设置页 gallery 与文档生成式 gallery 均可执行并使用生产 renderer。生成式 gallery 将产出：
 
 - `docs/assets/diagrams/<fixture-id>.svg`
 - `docs/assets/diagrams/<fixture-id>.png`

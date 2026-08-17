@@ -132,7 +132,7 @@ export const EXECUTABLE_DIAGRAM_TYPES: readonly ExecutableDiagramTypeDefinition[
         rendererOperationId: 'vega-lite-chart',
         rendererTarget: 'vega-lite',
         defaultTarget: 'vega-lite',
-        compatibleTargets: ['vega-lite', 'mermaid', 'html'],
+        compatibleTargets: ['vega-lite', 'html'],
         visualRoles: ['series', 'measure', 'comparison'],
         exampleFixtureId: 'data-chart-trend'
     },

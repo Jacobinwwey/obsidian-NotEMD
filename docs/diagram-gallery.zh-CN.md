@@ -23,7 +23,7 @@
 | `class` | 类型关系与所有权 | `mermaid` | `mermaid`、`editable-html-svg`、`drawio`、`html` |
 | `entity-relationship` | 实体基数与属性 | `mermaid` | `mermaid`、`editable-html-svg`、`drawio`、`html` |
 | `canvas-map` | 空间分组概念 | `json-canvas` | `json-canvas` |
-| `data-chart` | 共享坐标轴上的度量比较 | `vega-lite` | `vega-lite`、`mermaid`、`html` |
+| `data-chart` | 共享坐标轴上的度量比较 | `vega-lite` | `vega-lite`、`html` |
 | `circuit` | 电气元件与网络 | `circuitikz` | `circuitikz` |
 
 ## 预览示例

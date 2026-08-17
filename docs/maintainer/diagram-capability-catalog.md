@@ -24,7 +24,7 @@ This document is the human-readable view of the current executable catalog. The 
 | `data-chart` | Measured comparison over an axis | Vega-Lite | `data-chart-trend` | Sandboxed iframe | source, SVG, PNG, PDF |
 | `circuit` | Electrical components and nets | Circuitikz | `circuit-cmos-inverter` | SVG companion / source | `.tex`, SVG, PNG, PDF* |
 
-`*` Circuitikz PDF/PNG claims require the pinned native compiler gate. Editable HTML/SVG currently has a self-contained HTML preview but no production `previewSvg`; its SVG/PNG/PDF export claim is therefore **open** until Phase 0 adds the explicit companion SVG.
+`*` Circuitikz PDF/PNG claims require the pinned native compiler gate. Editable HTML/SVG now returns a production `previewSvg`; its HTML/SVG/PNG/PDF exports are covered by the target descriptor and gallery gate.
 
 ## Render Targets
 
@@ -34,7 +34,7 @@ This document is the human-readable view of the current executable catalog. The 
 | `json-canvas` | JSON Canvas | iframe | source, SVG, PNG, PDF | none |
 | `vega-lite` | Vega-Lite JSON | sandboxed iframe | source, SVG, PNG, PDF | none |
 | `html` | generic HTML fallback | iframe | source | none |
-| `editable-html-svg` | self-contained HTML with semantic inline SVG | iframe | HTML now; SVG/PNG/PDF after Phase 0 | none |
+| `editable-html-svg` | self-contained HTML with semantic inline SVG | SVG companion | HTML, SVG, PNG, PDF | none |
 | `drawio` | Draw.io XML plus review companions | SVG companion | source, SVG, PNG, PDF | diagrams.net open/import |
 | `drawnix` | one filename-rooted `.drawnix` tree plus SVG companion | SVG companion | `.drawnix`, SVG, PNG, PDF | Drawnix open/import |
 | `circuitikz` | validated `.tex` plus review companion | SVG companion/source | `.tex`, SVG, PNG, PDF | native TeX compile |
@@ -45,7 +45,7 @@ The following names come from `ref/diagram-design` and are not currently selecta
 
 ## Preview and Gallery Contract
 
-The current settings gallery is executable and uses the production renderer, but has no static thumbnails. The planned generated gallery will produce:
+The settings gallery and generated docs gallery are executable and use the production renderer. The generated gallery produces:
 
 - `docs/assets/diagrams/<fixture-id>.svg`
 - `docs/assets/diagrams/<fixture-id>.png`

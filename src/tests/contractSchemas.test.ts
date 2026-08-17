@@ -1,6 +1,7 @@
 import {
     assertOperationSchema,
     assertMaintainerCliInput,
+    assertOperationResult,
     validateContractValue
 } from '../operations/contractSchemas';
 import { buildCliInvocationContract } from '../cliContracts';
@@ -56,5 +57,25 @@ describe('operation contract schemas', () => {
             sourcePath: 'docs/index.md',
             drawnixKnowledgeMapDelivery: 'legacy-value'
         })).not.toThrow();
+    });
+
+    test('validates runtime operation results at the registry boundary', () => {
+        expect(() => assertOperationResult('diagram.generate', {
+            kind: 'success',
+            executionMode: 'save-artifact',
+            sourcePath: 'docs/index.md',
+            actionLabel: 'Generate diagram',
+            previewOpened: 'yes'
+        })).toThrow('$.previewOpened must be a boolean');
+
+        expect(() => assertOperationResult('diagram.generate', {
+            kind: 'success',
+            executionMode: 'save-artifact',
+            sourcePath: 'docs/index.md',
+            actionLabel: 'Generate diagram',
+            futureResultField: { version: 2 }
+        })).not.toThrow();
+
+        expect(() => assertOperationResult('diagram.generate', null)).not.toThrow();
     });
 });

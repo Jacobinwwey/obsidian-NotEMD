@@ -4,6 +4,7 @@ import {
     getDiagramCapabilityManifest
 } from '../diagram/diagramCapabilityManifest';
 import { getRenderTargetDescriptor } from '../rendering/renderTargetCatalog';
+import { MermaidRenderer } from '../rendering/renderers/mermaidRenderer';
 
 describe('diagram capability manifest', () => {
     test('is versioned and covers every shipped type from the executable catalog', () => {
@@ -28,6 +29,18 @@ describe('diagram capability manifest', () => {
                 EXECUTABLE_DIAGRAM_TYPES.find(candidate => candidate.id === type.id)?.exampleFixtureId
             );
         }
+    });
+
+    test('does not advertise Mermaid for data charts without a Mermaid renderer contract', () => {
+        const dataChart = EXECUTABLE_DIAGRAM_TYPES.find(type => type.intent === 'dataChart');
+
+        expect(dataChart?.compatibleTargets).not.toContain('mermaid');
+        expect(new MermaidRenderer().supports({
+            intent: 'dataChart',
+            title: 'Revenue trend',
+            nodes: [],
+            dataSeries: []
+        })).toBe(false);
     });
 
     test('keeps diagram-design layouts reference-only and out of the runtime selector', () => {
