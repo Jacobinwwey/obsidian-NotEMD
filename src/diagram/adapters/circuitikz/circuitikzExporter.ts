@@ -30,6 +30,44 @@ function normalizeLabel(value: string | undefined, fallback: string): string {
     return trimmed || fallback;
 }
 
+function componentLabel(spec: CircuitSpec, id: string, fallback: string): string {
+    return normalizeLabel(
+        spec.components.find(component => component.id === id)?.label,
+        fallback
+    );
+}
+
+interface CircuitikzDocumentOptions {
+    lineWidth?: string;
+    font?: string;
+}
+
+/**
+ * Keeps the standalone document contract in one place. Template renderers
+ * should own only topology and geometry; preamble changes must apply to every
+ * golden family or be an explicit option with a stable snapshot.
+ */
+function renderCircuitikzDocument(
+    spec: CircuitSpec,
+    drawing: string,
+    options: CircuitikzDocumentOptions = {}
+): string {
+    const circuitOptions = [
+        spec.style.voltageConvention,
+        options.lineWidth,
+        options.font
+    ].filter(Boolean).join(', ');
+
+    const normalizedDrawing = drawing.startsWith('\n') ? drawing.slice(1) : drawing;
+    return `\\documentclass[border=8pt]{standalone}
+\\usepackage{circuitikz}
+\\begin{document}
+\\begin{circuitikz}[${circuitOptions}]
+${normalizedDrawing}\\end{circuitikz}
+\\end{document}
+`;
+}
+
 function normalizeIdentifier(value: string): string {
     return value.trim();
 }
@@ -471,10 +509,8 @@ export function assertValidCircuitSpec(spec: CircuitSpec): CircuitSpec {
 }
 
 function renderCommonSourceTemplate(spec: CircuitSpec): string {
-    const m1 = spec.components.find(component => component.id === 'M1');
-    const rd = spec.components.find(component => component.id === 'RD');
-    const m1Label = normalizeLabel(m1?.label, '$M_1$');
-    const rdLabel = normalizeLabel(rd?.label, '$R_D$');
+    const m1Label = componentLabel(spec, 'M1', '$M_1$');
+    const rdLabel = componentLabel(spec, 'RD', '$R_D$');
     const inputSide = layoutSide(spec.layoutHints?.inputSide, 'left');
     const outputSide = layoutSide(spec.layoutHints?.outputSide, 'right');
     const inputRoute = inputSide === 'left'
@@ -485,10 +521,7 @@ function renderCommonSourceTemplate(spec: CircuitSpec): string {
   to [short, -o] (${extendedPortX(inputSide)},1.4)
   node[${inputSide}]{$v_{in}$};`;
 
-    return `\\documentclass[border=8pt]{standalone}
-\\usepackage{circuitikz}
-\\begin{document}
-\\begin{circuitikz}[${spec.style.voltageConvention}, line width=0.5pt, font=\\small]
+    return renderCircuitikzDocument(spec, `
 \\draw
   (3,5) node[vcc]{$V_{DD}$}
   to [R, l=${rdLabel}] (3,3);
@@ -502,16 +535,12 @@ function renderCommonSourceTemplate(spec: CircuitSpec): string {
   node[ground]{};
 \\draw
 ${inputRoute}
-\\end{circuitikz}
-\\end{document}
-`;
+`, { lineWidth: 'line width=0.5pt', font: 'font=\\small' });
 }
 
 function renderCmosInverterTemplate(spec: CircuitSpec): string {
-    const mp = spec.components.find(component => component.id === 'MP');
-    const mn = spec.components.find(component => component.id === 'MN');
-    const mpLabel = normalizeLabel(mp?.label, '$M_P$');
-    const mnLabel = normalizeLabel(mn?.label, '$M_N$');
+    const mpLabel = componentLabel(spec, 'MP', '$M_P$');
+    const mnLabel = componentLabel(spec, 'MN', '$M_N$');
     const inputSide = layoutSide(spec.layoutHints?.inputSide, 'left');
     const outputSide = layoutSide(spec.layoutHints?.outputSide, 'right');
     const inputRoute = inputSide === 'left'
@@ -527,10 +556,7 @@ function renderCmosInverterTemplate(spec: CircuitSpec): string {
   to [short, -o] (${extendedPortX(inputSide)},1.2)
   node[${inputSide}]{$v_{in}$};`;
 
-    return `\\documentclass[border=8pt]{standalone}
-\\usepackage{circuitikz}
-\\begin{document}
-\\begin{circuitikz}[${spec.style.voltageConvention}]
+    return renderCircuitikzDocument(spec, `
 \\draw
   (3,5) node[vcc]{$V_{DD}$}
   to [short] (3,4.4)
@@ -544,20 +570,14 @@ function renderCmosInverterTemplate(spec: CircuitSpec): string {
 ${inputRoute}
 \\draw
   (3,2.75) to [short, *-o] (${commonPortX(outputSide)},2.75) node[${outputSide}]{$v_{out}$};
-\\end{circuitikz}
-\\end{document}
-`;
+`);
 }
 
 function renderCmosBufferTemplate(spec: CircuitSpec): string {
-    const mp1 = spec.components.find(component => component.id === 'MP1');
-    const mn1 = spec.components.find(component => component.id === 'MN1');
-    const mp2 = spec.components.find(component => component.id === 'MP2');
-    const mn2 = spec.components.find(component => component.id === 'MN2');
-    const mp1Label = normalizeLabel(mp1?.label, '$M_{P1}$');
-    const mn1Label = normalizeLabel(mn1?.label, '$M_{N1}$');
-    const mp2Label = normalizeLabel(mp2?.label, '$M_{P2}$');
-    const mn2Label = normalizeLabel(mn2?.label, '$M_{N2}$');
+    const mp1Label = componentLabel(spec, 'MP1', '$M_{P1}$');
+    const mn1Label = componentLabel(spec, 'MN1', '$M_{N1}$');
+    const mp2Label = componentLabel(spec, 'MP2', '$M_{P2}$');
+    const mn2Label = componentLabel(spec, 'MN2', '$M_{N2}$');
     const inputSide = layoutSide(spec.layoutHints?.inputSide, 'left');
     const outputSide = layoutSide(spec.layoutHints?.outputSide, 'right');
     const outputPortX = outputSide === 'right' ? '7.2' : commonPortX(outputSide);
@@ -574,10 +594,7 @@ function renderCmosBufferTemplate(spec: CircuitSpec): string {
   to [short, -o] (7.2,1.2)
   node[right]{$v_{in}$};`;
 
-    return `\\documentclass[border=8pt]{standalone}
-\\usepackage{circuitikz}
-\\begin{document}
-\\begin{circuitikz}[${spec.style.voltageConvention}]
+    return renderCircuitikzDocument(spec, `
 \\draw
   (3,5) node[vcc]{$V_{DD}$}
   to [short] (3,4.4)
@@ -607,25 +624,18 @@ function renderCmosBufferTemplate(spec: CircuitSpec): string {
 ${inputRoute}
 \\draw
   (5.4,2.75) to [short, *-o] (${outputPortX},2.75) node[${outputSide}]{$v_{out}$};
-\\end{circuitikz}
-\\end{document}
-`;
+`);
 }
 
 function renderCmosTransmissionGateTemplate(spec: CircuitSpec): string {
-    const mp = spec.components.find(component => component.id === 'MP');
-    const mn = spec.components.find(component => component.id === 'MN');
-    const mpLabel = normalizeLabel(mp?.label, '$M_P$');
-    const mnLabel = normalizeLabel(mn?.label, '$M_N$');
+    const mpLabel = componentLabel(spec, 'MP', '$M_P$');
+    const mnLabel = componentLabel(spec, 'MN', '$M_N$');
     const inputSide = layoutSide(spec.layoutHints?.inputSide, 'left');
     const outputSide = layoutSide(spec.layoutHints?.outputSide, 'right');
     const inputPortX = inputSide === 'left' ? '0.8' : '5.2';
     const outputPortX = outputSide === 'right' ? '5.2' : '0.8';
 
-    return `\\documentclass[border=8pt]{standalone}
-\\usepackage{circuitikz}
-\\begin{document}
-\\begin{circuitikz}[${spec.style.voltageConvention}]
+    return renderCircuitikzDocument(spec, `
 \\draw
   (${inputPortX},3.1) to [short, o-] (2.2,3.1)
   node[${inputSide}]{$v_{in}$}
@@ -646,20 +656,14 @@ function renderCmosTransmissionGateTemplate(spec: CircuitSpec): string {
   (MN.G) to [short] (3.0,1.6)
   to [short, -o] (3.0,1.1)
   node[below]{$\\phi$};
-\\end{circuitikz}
-\\end{document}
-`;
+`);
 }
 
 function renderCmosNand2Template(spec: CircuitSpec): string {
-    const mpa = spec.components.find(component => component.id === 'MPA');
-    const mpb = spec.components.find(component => component.id === 'MPB');
-    const mna = spec.components.find(component => component.id === 'MNA');
-    const mnb = spec.components.find(component => component.id === 'MNB');
-    const mpaLabel = normalizeLabel(mpa?.label, '$M_{PA}$');
-    const mpbLabel = normalizeLabel(mpb?.label, '$M_{PB}$');
-    const mnaLabel = normalizeLabel(mna?.label, '$M_{NA}$');
-    const mnbLabel = normalizeLabel(mnb?.label, '$M_{NB}$');
+    const mpaLabel = componentLabel(spec, 'MPA', '$M_{PA}$');
+    const mpbLabel = componentLabel(spec, 'MPB', '$M_{PB}$');
+    const mnaLabel = componentLabel(spec, 'MNA', '$M_{NA}$');
+    const mnbLabel = componentLabel(spec, 'MNB', '$M_{NB}$');
     const inputSide = layoutSide(spec.layoutHints?.inputSide, 'left');
     const outputSide = layoutSide(spec.layoutHints?.outputSide, 'right');
     const inputRoute = inputSide === 'left'
@@ -685,10 +689,7 @@ function renderCmosNand2Template(spec: CircuitSpec): string {
   to [short, -o] (${dualInputPortX(inputSide)},1.85)
   node[right]{$v_B$};`;
 
-    return `\\documentclass[border=8pt]{standalone}
-\\usepackage{circuitikz}
-\\begin{document}
-\\begin{circuitikz}[${spec.style.voltageConvention}]
+    return renderCircuitikzDocument(spec, `
 \\draw
   (3,5) node[vcc]{$V_{DD}$}
   to [short] (3,4.8)
@@ -710,20 +711,14 @@ function renderCmosNand2Template(spec: CircuitSpec): string {
   node[ground]{};
 \\draw
 ${inputRoute}
-\\end{circuitikz}
-\\end{document}
-`;
+`);
 }
 
 function renderCmosNor2Template(spec: CircuitSpec): string {
-    const mpa = spec.components.find(component => component.id === 'MPA');
-    const mpb = spec.components.find(component => component.id === 'MPB');
-    const mna = spec.components.find(component => component.id === 'MNA');
-    const mnb = spec.components.find(component => component.id === 'MNB');
-    const mpaLabel = normalizeLabel(mpa?.label, '$M_{PA}$');
-    const mpbLabel = normalizeLabel(mpb?.label, '$M_{PB}$');
-    const mnaLabel = normalizeLabel(mna?.label, '$M_{NA}$');
-    const mnbLabel = normalizeLabel(mnb?.label, '$M_{NB}$');
+    const mpaLabel = componentLabel(spec, 'MPA', '$M_{PA}$');
+    const mpbLabel = componentLabel(spec, 'MPB', '$M_{PB}$');
+    const mnaLabel = componentLabel(spec, 'MNA', '$M_{NA}$');
+    const mnbLabel = componentLabel(spec, 'MNB', '$M_{NB}$');
     const inputSide = layoutSide(spec.layoutHints?.inputSide, 'left');
     const outputSide = layoutSide(spec.layoutHints?.outputSide, 'right');
     const inputRoute = inputSide === 'left'
@@ -749,10 +744,7 @@ function renderCmosNor2Template(spec: CircuitSpec): string {
   to [short, -o] (${dualInputPortX(inputSide)},1.95)
   node[right]{$v_B$};`;
 
-    return `\\documentclass[border=8pt]{standalone}
-\\usepackage{circuitikz}
-\\begin{document}
-\\begin{circuitikz}[${spec.style.voltageConvention}]
+    return renderCircuitikzDocument(spec, `
 \\draw
   (3,5) node[vcc]{$V_{DD}$}
   to [short] (3,4.8)
@@ -773,9 +765,7 @@ function renderCmosNor2Template(spec: CircuitSpec): string {
   (3,0.7) node[ground]{};
 \\draw
 ${inputRoute}
-\\end{circuitikz}
-\\end{document}
-`;
+`);
 }
 
 export function exportCircuitSpecToCircuitikz(spec: CircuitSpec): string {

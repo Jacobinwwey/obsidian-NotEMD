@@ -42,7 +42,7 @@ implementation_record: src/tests/mermaidNormalizationConvergence.test.ts
 - 历史审计将 `deepDebugMermaid` 链称为“30 步”（`mermaidProcessor.ts:356-498`），但可执行 registry 现在固化为 35 个稳定 stage ID。它仍有 flowchart 偏置：`fixMermaidNotes` 改写 `note right of`（合法 sequence 语法），`fixMermaidPipes`/`fixMisplacedPipes` 触碰 `|`（ER 基数语法）。
 - `ensureMermaidInitialized` 现在负责插件验证初始化：按函数身份调用一次 `mermaid.initialize`；预览 webview 保留独立的主题专属 `deps.initialize()` 生命周期。
 - `legacyFixerUtils.ts` 死导出：`rewriteLegacyTrailingDoubleDashArrow`（`:412`）、4 个不被 import 的 `parse*`、字节相同的 `stripWrappingDoubleQuotes`/`stripWrappedQuotedLabel`（`:36-42`/`:44-50`）。
-- Drawnix 几何重复（审计发现，超出本方案范围但在此登记）：当前单根原生投影内部仍有重复的测量/布局 helper；`routeDrawnixCrossRootRelation`（`drawnixCrossRootRouter.ts`，约 250 行）无生产调用；`enrichDrawnixSourceCoverage` 是 canonical 生产操作，`mergeDrawnixSourceCoverage` 仅保留为废弃兼容别名。已删除的 presentation 模块和 presentation 交付 bundle 不属于当前契约。
+- Drawnix 几何重复（审计发现，超出本方案范围但在此登记）：当前单根原生投影内部仍有重复的测量/布局 helper；共享的矩形/折线 primitive 已集中到 `drawnixGeometry.ts`。canonical `drawnixRelationRouter.ts` 中的 `routeDrawnixCrossRootRelation` 无生产调用，并明确仅用于兼容；旧 `drawnixCrossRootRouter.ts` 路径是弃用 re-export。`enrichDrawnixSourceCoverage` 是 canonical 生产操作，`mergeDrawnixSourceCoverage` 仅保留为废弃兼容别名。已删除的 presentation 模块和 presentation 交付 bundle 不属于当前契约。
 
 ## 3. 问题分析：四个契约冲突
 
@@ -132,9 +132,9 @@ normalizeMermaidDiagram(input, opts?) -> { content, family }
 
 ### vs Drawnix 知识导图质量与交付方案（2026-07-22）+ 实施记录（2026-08-14）
 
-已实现：投影、带 grid 回退的保留车道路由（已验证存活：`routeDrawnixRelationThroughReservedLane` -> `findGridReservedLaneRoute`，`drawnixCrossRootRouter.ts:627-635`）、source coverage，以及 2026-08-14 单根实施记录。`architecture.md:203` 描述的行为准确。
+已实现：投影、带内部 grid 回退的保留车道路由（已验证存活：`drawnixMindMapProjection.ts` 调用 `drawnixRelationRouter.ts` 中的 `routeDrawnixRelationThroughReservedLane()`）、source coverage，以及 2026-08-14 单根实施记录。`architecture.md:203` 描述的行为准确。
 
-缺口（审计）：当前投影路径内部的测量/布局 helper 重复；死的 `routeDrawnixCrossRootRelation` 引擎（约 250 行）；废弃别名 `mergeDrawnixSourceCoverage`。这些是本方案之后的 Drawnix 收敛切片。
+缺口（审计）：当前投影路径内部仍有测量/布局 helper 重复；仅用于兼容的 `routeDrawnixCrossRootRelation` 引擎；废弃别名 `mergeDrawnixSourceCoverage`。矩形/折线共享 geometry 已经集中。这些是本方案之后的 Drawnix 收敛切片。
 
 ### vs circuitikz Figure Generation Roadmap
 
@@ -147,8 +147,8 @@ Phase 0-6 已实现（1.9.5）。语义/几何/交付契约已文档化；当前
 ## 10. 后续推进方向
 
 1. 在工具可用时记录真实外部 consumer 证据；不要把 fixture 或 serializer 证据升级成互操作性声明。
-2. Drawnix 收敛切片：为原生投影抽取单一共享测量/布局模块；删除死路由引擎与废弃别名。
-3. circuitikz：模板参数化；决策 `runCircuitikzRepairLoop` 去留；同步文档。
+2. Drawnix 收敛切片：先证明并抽取原生投影中剩余的共享测量/布局逻辑；只有完成调用点与迁移证据后，才删除仅用于兼容的路由引擎和废弃别名。
+3. circuitikz：共享 document/label 模板 plumbing 已参数化；决定 `runCircuitikzRepairLoop` 去留，并同步文档。
 4. 仓库级 helper 收敛（escapeHtml x10、错误三元 x94、FNV-1a x5、isRecord x6、slugify x3、枚举守卫 x4、indexOf 去重 x7）作为收敛批收尾，遵守路线图的 support-matrix 纪律。
 5. 坚持路线图规则：先收敛，再上新目标。
 
@@ -164,3 +164,9 @@ Phase 0 至 Phase 3 现在均已落地。Phase 0 与 Phase 1 的 diagram 级实�
 - `ensureMermaidInitialized()` 防止插件验证 runtime 重复重置全局配置；预览 webview 按设计保留独立主题初始化。
 
 剩余缺口已收窄为外部 consumer 证据、Drawnix 几何收敛和 Circuitikz 模板收敛。真实 consumer 证据记录完成前，不接纳新的 Mermaid layout 或 target。
+
+### Drawnix 与 Circuitikz 收敛（2026-08-17）
+
+Drawnix 生产边界现在有 canonical relation-router 模块和仅用于兼容的旧路径。`drawnixGeometry.ts` 统一负责矩形膨胀、严格重叠语义和按路径长度插值，避免 SVG projection 与 relation routing 在这些 primitive 上分叉。旧 cross-root router 只为源码兼容和定向测试保留；生产路由以 reserved-lane 为首选，并由 projection 负责原生标签定位。
+
+Circuitikz exporter 现在让六个 golden renderer 共享一个 standalone-document wrapper 和一个 component-label lookup helper。这是保持精确输出契约的结构重构：拓扑、voltage convention、layout hints 和 golden fixture 均不变。repair loop 继续作为 maintainer-only acceptance 边界。

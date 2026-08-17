@@ -49,6 +49,9 @@ implementation_record: src/tests/mermaidNormalizationConvergence.test.ts
 9. 扩大 Mermaid family registry，覆盖当前 Mermaid 11 已发布声明（`architecture-beta`、`block-beta`、C4、journey、kanban、packet、pie、quadrant、radar、requirement、sankey、timeline、treemap、xychart 与 ZenUML）。这些 family 现在会在进入 legacy flowchart 修复链前 fail closed；真正未知的 header 仍保留为明确的向前兼容逃生口。
 10. 让语义目录成为 planner 默认目标与显式 target 准入的唯一事实源。best-fit 现在会在 LLM 生成前拒绝没有 renderer contract 的 intent/target 组合（例如 `dataChart -> mermaid`）；legacy Mermaid 模式仍保留为显式兼容逃生口。新增 fixture 驱动的 contract 测试，逐一验证目录声明的 target 与生产 renderer 的 `supports()` 一致。
 11. 将生产 Drawnix source-coverage 操作更名为 `enrichDrawnixSourceCoverage()`。旧 `mergeDrawnixSourceCoverage()` 仅作为带弃用标记的兼容别名保留，供 maintainer 脚本和旧测试使用；生成路径已经切换到 canonical 名称。
+12. 将生产 Drawnix 路由模块更名为 `drawnixRelationRouter.ts`。旧 `drawnixCrossRootRouter.ts` 路径保留为带弃用标记的 re-export 以维持源码兼容；projection 已改为依赖 canonical 模块，拓扑和坐标契约没有变化。
+13. 抽取 `drawnixGeometry.ts` 作为共享几何边界，统一矩形膨胀、严格内部重叠判断和正交折线插值。router 与 projection 现在消费同一组 primitive；边缘相切语义和按路径长度测量的标签定位由定向测试覆盖。
+14. 让六个 Circuitikz golden renderer 共享 standalone document wrapper 与 component-label lookup helper。现有 voltage convention、拓扑、layout hints 和精确 golden 输出保持不变；本次只去除重复的 preamble/label plumbing，不新增渲染模式。
 
 ## 与 `diagram-design` 的对比
 
@@ -83,8 +86,8 @@ implementation_record: src/tests/mermaidNormalizationConvergence.test.ts
 1. **Mermaid Phase 2：已完成。** legacy 链已成为 35 个有序 stage，具备稳定 ID、已知 family fail-closed 门控和幂等覆盖。family registry 已覆盖当前 Mermaid 11 声明，同时保留 `unknown` 以兼容未来语法；在把 unknown family 视为 flowchart-safe 之前仍必须补 parser-backed 准入证据。
 2. **Mermaid Phase 3：已完成。** 共享 scanner、canonical fence 格式和插件验证 runtime 初始化已收敛；预览 webview 的主题初始化继续作为独立 runtime 契约。
 3. **Consumer 证据：** 在工具可用时执行 Draw.io/Drawnix/Circuitikz 真实门禁；不可用时记录 blocker，不声称兼容。
-4. **Drawnix 收敛：** 生产 source-coverage 名称已 canonical，旧别名仅用于兼容。下一步抽取共享 measurement/layout primitive；dead cross-root router 必须在调用点证明和替代路由契约完成后才可删除。
-5. **Circuitikz 收敛：** `runCircuitikzRepairLoop()` 保持 maintainer-only acceptance SDK 边界；正常生成继续保持确定性，不调用 LLM repair loop。下一步参数化重复模板；只有出现明确 repair 命令时才增加真实 CLI/desktop 调用者。
+4. **Drawnix 收敛：** 生产 source-coverage 与 relation-router 名称已经 canonical，旧 source-coverage export 和旧 router 模块仅用于兼容。矩形/折线共享 primitive 已集中；只有在确认存在真实重复时才继续抽取 measurement/layout helper，并在调用点证明与替代路由契约完成后删除旧 cross-root 实现。
+5. **Circuitikz 收敛：** 六个 golden renderer 已共享 standalone-document 与 component-label helper，同时保持确定性输出。`runCircuitikzRepairLoop()` 继续作为 maintainer-only acceptance SDK 边界；正常生成不调用 LLM repair loop。只有在明确需要 repair 命令时，才决定接入真实 CLI/desktop caller。
 6. **参考候选准入：** timeline、swimlane、quadrant 等候选必须先满足完整证据清单；radar 在真实 Vega-Lite adapter 出现前保持阻塞。
 
 ## 验收门禁
@@ -100,4 +103,4 @@ implementation_record: src/tests/mermaidNormalizationConvergence.test.ts
 
 ## 验证快照
 
-本轮新鲜验证：257 个 Jest suite 通过，2,252 tests passed、1 skipped；TypeScript/esbuild build 通过；VitePress 1.6.4 docs build 通过；gallery check 通过（10 条目）；render-host audit 通过；Circuitikz smoke 仍通过（6/6 PDF，0 error/0 warning）；改动 TypeScript 文件的定向 ESLint 通过；`git diff --check` 通过。已知仓库 lint 基线仍为 231 errors、1,329 warnings；完整 lint 仍因既有债务非零退出。
+本轮新鲜验证：258 个 Jest suite 通过，2,260 tests passed、1 skipped；TypeScript/esbuild build 通过；VitePress 1.6.4 docs build 通过；gallery check 通过（10 条目）；render-host audit 通过；Circuitikz smoke 使用 TeX Live 2023 `pdflatex` 通过（6/6 PDF，0 error/0 warning）；Drawnix/Circuitikz 定向 suite 通过（71/71 tests）；改动文件定向 ESLint 通过（0 error、23 个既有 warning）；`git diff --check` 通过。全仓 lint 当前仍非零（230 errors、1,330 warnings），这些问题均不在本轮改动文件的 error 集合中，作为既有债务继续跟踪。

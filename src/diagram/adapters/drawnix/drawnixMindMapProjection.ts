@@ -1,15 +1,21 @@
 import { DiagramEdge, DiagramNode, DiagramSpec } from '../../types';
-import { routeDrawnixRelationThroughReservedLane } from './drawnixCrossRootRouter';
+import { routeDrawnixRelationThroughReservedLane } from './drawnixRelationRouter';
 import type {
     DrawnixCrossRootRouteObstacle,
     DrawnixCrossRootRouteStrategy,
     DrawnixRelationLabelSize
-} from './drawnixCrossRootRouter';
+} from './drawnixRelationRouter';
 import {
     assignDrawnixRelationLaneGeometry,
     reserveDrawnixRelationLaneSpace
 } from './drawnixRelationLaneLayout';
 import type { DrawnixRelationLane } from './drawnixRelationLaneLayout';
+import {
+    drawnixRectanglesOverlap,
+    inflateDrawnixRect,
+    pointOnDrawnixPolyline
+} from './drawnixGeometry';
+import type { DrawnixRect } from './drawnixGeometry';
 
 export type DrawnixPoint = [number, number];
 
@@ -604,13 +610,6 @@ function createCrossRelations(
     });
 }
 
-interface RelationLabelRect {
-    x: number;
-    y: number;
-    width: number;
-    height: number;
-}
-
 interface RelationLabelMetrics extends DrawnixRelationLabelSize {
     lines: string[];
 }
@@ -632,27 +631,15 @@ function relationLabelMetrics(label: string): RelationLabelMetrics {
 function inflateLabelObstacle(
     node: DrawnixMindMapPlacedNode,
     clearance: number
-): RelationLabelRect {
-    return {
-        x: node.x - clearance,
-        y: node.y - clearance,
-        width: node.width + clearance * 2,
-        height: node.height + clearance * 2
-    };
-}
-
-function rectanglesOverlap(left: RelationLabelRect, right: RelationLabelRect): boolean {
-    return left.x < right.x + right.width
-        && left.x + left.width > right.x
-        && left.y < right.y + right.height
-        && left.y + left.height > right.y;
+): DrawnixRect {
+    return inflateDrawnixRect(node, clearance);
 }
 
 function isLabelRectAvailable(
-    rect: RelationLabelRect,
+    rect: DrawnixRect,
     nodes: readonly DrawnixMindMapPlacedNode[],
-    occupiedLabels: readonly RelationLabelRect[],
-    protectedObstacles: readonly RelationLabelRect[],
+    occupiedLabels: readonly DrawnixRect[],
+    protectedObstacles: readonly DrawnixRect[],
     canvasWidth: number,
     canvasHeight: number
 ): boolean {
@@ -660,15 +647,15 @@ function isLabelRectAvailable(
         return false;
     }
 
-    if (nodes.some(node => rectanglesOverlap(rect, inflateLabelObstacle(node, RELATION_LABEL_NODE_CLEARANCE)))) {
+    if (nodes.some(node => drawnixRectanglesOverlap(rect, inflateLabelObstacle(node, RELATION_LABEL_NODE_CLEARANCE)))) {
         return false;
     }
 
-    if (protectedObstacles.some(obstacle => rectanglesOverlap(rect, obstacle))) {
+    if (protectedObstacles.some(obstacle => drawnixRectanglesOverlap(rect, obstacle))) {
         return false;
     }
 
-    return occupiedLabels.every(label => !rectanglesOverlap(rect, {
+    return occupiedLabels.every(label => !drawnixRectanglesOverlap(rect, {
         x: label.x - RELATION_LABEL_GAP,
         y: label.y - RELATION_LABEL_GAP,
         width: label.width + RELATION_LABEL_GAP * 2,
@@ -676,51 +663,15 @@ function isLabelRectAvailable(
     }));
 }
 
-function pointOnPolyline(points: readonly DrawnixPoint[], position: number): DrawnixPoint {
-    if (points.length === 0) {
-        return [0, 0];
-    }
-    if (points.length === 1) {
-        return points[0];
-    }
-
-    const lengths = points.slice(1).map((point, index) => {
-        const start = points[index];
-        return Math.abs(point[0] - start[0]) + Math.abs(point[1] - start[1]);
-    });
-    const totalLength = lengths.reduce((total, length) => total + length, 0);
-    if (totalLength <= 0) {
-        return points[0];
-    }
-
-    let remaining = totalLength * Math.max(0, Math.min(1, position));
-    for (const [index, length] of lengths.entries()) {
-        if (remaining <= length || index === lengths.length - 1) {
-            const start = points[index];
-            const end = points[index + 1];
-            if (length <= 0) {
-                return start;
-            }
-            const ratio = Math.max(0, Math.min(1, remaining / length));
-            return [
-                start[0] + (end[0] - start[0]) * ratio,
-                start[1] + (end[1] - start[1]) * ratio
-            ];
-        }
-        remaining -= length;
-    }
-    return points[points.length - 1];
-}
-
 function nativeRelationLabelRect(
     relation: DrawnixMindMapCrossRelation,
     position: number
-): RelationLabelRect | null {
+): DrawnixRect | null {
     const layout = relation.labelLayout;
     if (!layout) {
         return null;
     }
-    const center = pointOnPolyline(relation.points, position);
+    const center = pointOnDrawnixPolyline(relation.points, position);
     return {
         x: center[0] - layout.width / 2,
         y: center[1] - layout.height / 2,
@@ -734,9 +685,9 @@ function assertNativeRelationLabelLayouts(
     nodes: readonly DrawnixMindMapPlacedNode[],
     canvasWidth: number,
     canvasHeight: number,
-    protectedObstacles: readonly RelationLabelRect[]
+    protectedObstacles: readonly DrawnixRect[]
 ): void {
-    const occupiedLabels: RelationLabelRect[] = [];
+    const occupiedLabels: DrawnixRect[] = [];
     relations.forEach(relation => {
         if (!relation.label || !relation.labelLayout) {
             return;

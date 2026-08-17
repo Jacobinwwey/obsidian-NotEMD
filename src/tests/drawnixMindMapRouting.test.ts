@@ -4,7 +4,8 @@ import {
     findDrawnixDirectReservedLaneRoute,
     routeDrawnixCrossRootRelation,
     routeDrawnixRelationThroughReservedLane
-} from '../diagram/adapters/drawnix/drawnixCrossRootRouter';
+} from '../diagram/adapters/drawnix/drawnixRelationRouter';
+import * as legacyDrawnixRouter from '../diagram/adapters/drawnix/drawnixCrossRootRouter';
 import { DrawnixRenderer } from '../rendering/renderers/drawnixRenderer';
 import { DRAWNIX_ARCHITECTURE_DOCUMENT_TREE_FIXTURE } from './fixtures/drawnixArchitectureDocumentTreeFixture';
 
@@ -165,6 +166,13 @@ function createDenseSameSideRelationSpec(): DiagramSpec {
 }
 
 describe('Drawnix relation routing', () => {
+    test('keeps the legacy router module as an exact compatibility alias', () => {
+        expect(legacyDrawnixRouter.routeDrawnixRelationThroughReservedLane)
+            .toBe(routeDrawnixRelationThroughReservedLane);
+        expect(legacyDrawnixRouter.routeDrawnixCrossRootRelation)
+            .toBe(routeDrawnixCrossRootRelation);
+    });
+
     test('finds a direct reserved-lane route before grid fallback is considered', () => {
         const source = {
             id: 'source',

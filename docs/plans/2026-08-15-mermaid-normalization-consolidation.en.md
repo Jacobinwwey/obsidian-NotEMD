@@ -42,7 +42,7 @@ Before Phase 0, the same input normalized differently on render vs preview for `
 - The historical audit called the `deepDebugMermaid` chain “30-step” (`mermaidProcessor.ts:356-498`), but the executable registry now records 35 stable stage IDs. It remains flowchart-biased: `fixMermaidNotes` rewrites `note right of` (valid sequence syntax), while `fixMermaidPipes`/`fixMisplacedPipes` touch `|` (ER cardinality syntax).
 - `ensureMermaidInitialized` now owns plugin validation initialization. It calls `mermaid.initialize` once per function identity; preview webviews retain a separate theme-specific `deps.initialize()` lifecycle.
 - Dead exports in `legacyFixerUtils.ts`: `rewriteLegacyTrailingDoubleDashArrow` (`:412`), four unimported `parse*` exports, byte-identical `stripWrappingDoubleQuotes`/`stripWrappedQuotedLabel` (`:36-42`/`:44-50`).
-- Drawnix geometry duplication (audit, outside this plan's scope but tracked here): the current one-root native projection still has duplicated measurement/layout helpers; `routeDrawnixCrossRootRelation` (`drawnixCrossRootRouter.ts`, ~250 lines) has no production caller; `enrichDrawnixSourceCoverage` is the canonical production operation and `mergeDrawnixSourceCoverage` remains a deprecated compatibility alias. The deleted presentation module and presentation delivery bundle are not part of the current contract.
+- Drawnix geometry duplication (audit, outside this plan's scope but tracked here): the current one-root native projection still has duplicated measurement/layout helpers; shared rectangle/polyline primitives now live in `drawnixGeometry.ts`. `routeDrawnixCrossRootRelation` in canonical `drawnixRelationRouter.ts` has no production caller and is explicitly compatibility-only; the old `drawnixCrossRootRouter.ts` path is a deprecated re-export. `enrichDrawnixSourceCoverage` is the canonical production operation and `mergeDrawnixSourceCoverage` remains a deprecated compatibility alias. The deleted presentation module and presentation delivery bundle are not part of the current contract.
 
 ## 3. Problem Analysis: Four Contract Conflicts
 
@@ -132,9 +132,9 @@ Roadmap "Recommended Next Batch" (convergence, not new targets) is still the cor
 
 ### vs Drawnix Knowledge-Map Quality And Delivery Plan (2026-07-22) + Implementation Record (2026-08-14)
 
-Implemented: projection, reserved-lane routing with grid fallback (verified live: `routeDrawnixRelationThroughReservedLane` -> `findGridReservedLaneRoute`, `drawnixCrossRootRouter.ts:627-635`), source coverage, and the single-root implementation record (2026-08-14). Documented behavior in `architecture.md:203` is accurate.
+Implemented: projection, reserved-lane routing with an internal grid fallback (verified live: `drawnixMindMapProjection.ts` calls `routeDrawnixRelationThroughReservedLane()` from `drawnixRelationRouter.ts`), source coverage, and the single-root implementation record (2026-08-14). Documented behavior in `architecture.md:203` is accurate.
 
-Gaps (audit): duplicated measurement/layout helpers within the current projection path; dead `routeDrawnixCrossRootRelation` engine (~250 lines); deprecated `mergeDrawnixSourceCoverage` alias. These are the next Drawnix convergence slice after this plan.
+Gaps (audit): remaining measurement/layout helper duplication within the current projection path; compatibility-only `routeDrawnixCrossRootRelation` engine; deprecated `mergeDrawnixSourceCoverage` alias. Shared rectangle/polyline geometry is already centralized. These are the next Drawnix convergence slice after this plan.
 
 ### vs circuitikz Figure Generation Roadmap
 
@@ -147,8 +147,8 @@ Phases 0-6 implemented (1.9.5). The semantic/geometry/delivery contracts are doc
 ## 10. Follow-up Direction
 
 1. Record real external consumer evidence where tooling exists; do not convert fixture or serializer evidence into an interoperability claim.
-2. Drawnix convergence slice: extract one shared measurement/layout module for the native projection; delete the dead router engine and deprecated alias.
-3. circuitikz: template parameterization; decide `runCircuitikzRepairLoop` fate; sync docs with the decision.
+2. Drawnix convergence slice: prove and extract any remaining shared measurement/layout logic for the native projection; delete the compatibility-only router engine and deprecated alias only after call-site and migration evidence.
+3. circuitikz: shared document/label template plumbing is now parameterized; decide `runCircuitikzRepairLoop` fate and sync docs with that decision.
 4. Repo-wide helper convergence (escapeHtml x10, error-message ternary x94, FNV-1a x5, isRecord x6, slugify x3, enum guards x4, indexOf-dedupe x7) as the closing sweep of the convergence batch, with the roadmap's support-matrix discipline.
 5. Keep the roadmap's rule: convergence before new targets.
 
@@ -164,3 +164,9 @@ Phases 0 through 3 are now landed. Phase 0 and the diagram-level portion of Phas
 - `ensureMermaidInitialized()` protects the plugin validation runtime from repeated global-config resets. Preview webviews retain separate theme-specific initialization by design.
 
 The remaining gap is intentionally narrower than the original audit: external consumer evidence, Drawnix geometry convergence, and Circuitikz template convergence. No new Mermaid layout or target is admitted until real consumer evidence is recorded.
+
+### Drawnix and Circuitikz convergence (2026-08-17)
+
+The Drawnix production boundary now has a canonical relation-router module and a compatibility-only old path. `drawnixGeometry.ts` owns rectangle inflation, strict overlap semantics, and path-length interpolation so SVG projection and relation routing cannot drift on those primitives. The legacy cross-root router remains exported only for source compatibility and focused tests; production routing is reserved-lane-first and owns native label placement.
+
+The Circuitikz exporter now shares one standalone-document wrapper and one component-label lookup helper across all six golden renderers. This is a structural refactor with an exact-output contract: topology, voltage conventions, layout hints, and golden fixtures remain unchanged. The repair loop remains a maintainer-only acceptance boundary.

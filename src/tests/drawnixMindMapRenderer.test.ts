@@ -5,7 +5,7 @@ import {
 } from '../diagram/adapters/drawnix/drawnixMindMapProjection';
 import { DrawnixRenderer } from '../rendering/renderers/drawnixRenderer';
 import { renderDrawnixMindMapSvg } from '../rendering/renderers/drawnixMindMapSvgRenderer';
-import * as drawnixCrossRootRouter from '../diagram/adapters/drawnix/drawnixCrossRootRouter';
+import * as drawnixRelationRouter from '../diagram/adapters/drawnix/drawnixRelationRouter';
 import { DRAWNIX_ARCHITECTURE_DOCUMENT_TREE_FIXTURE } from './fixtures/drawnixArchitectureDocumentTreeFixture';
 
 function createKnowledgeMapSpec(): DiagramSpec {
@@ -524,7 +524,7 @@ describe('Drawnix mind-map renderer', () => {
     });
 
     test('routes the relationship-rich architecture stress fixture without losing relations', () => {
-        const routeSpy = jest.spyOn(drawnixCrossRootRouter, 'routeDrawnixRelationThroughReservedLane');
+        const routeSpy = jest.spyOn(drawnixRelationRouter, 'routeDrawnixRelationThroughReservedLane');
         const projection = buildDrawnixMindMapProjection(DRAWNIX_ARCHITECTURE_DOCUMENT_TREE_FIXTURE);
 
         expect(projection.roots).toHaveLength(1);
