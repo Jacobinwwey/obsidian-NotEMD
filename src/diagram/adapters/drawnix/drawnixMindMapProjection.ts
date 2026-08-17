@@ -16,6 +16,7 @@ import {
     pointOnDrawnixPolyline
 } from './drawnixGeometry';
 import type { DrawnixRect } from './drawnixGeometry';
+import { measureDrawnixText, wrapDrawnixText } from './drawnixTextLayout';
 
 export type DrawnixPoint = [number, number];
 
@@ -205,85 +206,10 @@ function normalizedText(value: string | undefined, fallback: string): string {
     return value?.trim() || fallback;
 }
 
-function estimateCharacterWidth(character: string): number {
-    if (/\s/.test(character)) {
-        return 4;
-    }
-    if ((character.codePointAt(0) ?? 0) > 0x7f) {
-        return 15;
-    }
-    if (/[MW@%]/.test(character)) {
-        return 14;
-    }
-    if (/[mw#&]/.test(character)) {
-        return 12;
-    }
-    if (/[A-Z0-9]/.test(character)) {
-        return 11;
-    }
-    return 8;
-}
-
-function visualLength(value: string): number {
-    return Array.from(value).reduce((total, character) => total + estimateCharacterWidth(character), 0);
-}
-
-function splitLabel(label: string, maxLineWidth: number): string[] {
-    const trimmed = label.trim();
-    if (!trimmed) {
-        return ['Untitled'];
-    }
-
-    const words = trimmed.split(/\s+/);
-    const lines: string[] = [];
-    let line = '';
-
-    const flushLine = (): void => {
-        if (line) {
-            lines.push(line);
-            line = '';
-        }
-    };
-
-    const appendLongWord = (word: string): void => {
-        let chunk = '';
-        for (const character of Array.from(word)) {
-            const candidate = chunk + character;
-            if (chunk && visualLength(candidate) > maxLineWidth) {
-                lines.push(chunk);
-                chunk = character;
-            } else {
-                chunk = candidate;
-            }
-        }
-        line = chunk;
-    };
-
-    for (const word of words) {
-        const candidate = line ? `${line} ${word}` : word;
-        if (visualLength(candidate) <= maxLineWidth) {
-            line = candidate;
-            continue;
-        }
-
-        flushLine();
-        if (visualLength(word) <= maxLineWidth) {
-            line = word;
-            continue;
-        }
-
-        appendLongWord(word);
-    }
-
-    flushLine();
-
-    return lines;
-}
-
 function buildHeaderLayout(summary: string | undefined, canvasWidth: number): DrawnixMindMapHeaderLayout {
     const normalizedSummary = summary?.trim();
     const summaryLines = normalizedSummary
-        ? splitLabel(
+        ? wrapDrawnixText(
             normalizedSummary,
             Math.max(
                 DRAWNIX_MIND_MAP_HEADER_MIN_TEXT_WIDTH,
@@ -318,8 +244,8 @@ function buildTreeNode(
 ): MindMapTreeNode {
     const label = normalizedText(source.label, source.id || 'Untitled');
     const isRoot = depth === 0;
-    const textLines = splitLabel(label, MAX_TEXT_LINE_WIDTH);
-    const largestLineWidth = Math.max(...textLines.map(visualLength));
+    const textLines = wrapDrawnixText(label, MAX_TEXT_LINE_WIDTH);
+    const largestLineWidth = Math.max(...textLines.map(measureDrawnixText));
     const minWidth = isRoot ? ROOT_MIN_WIDTH : NODE_MIN_WIDTH;
     const minHeight = isRoot ? ROOT_MIN_HEIGHT : NODE_MIN_HEIGHT;
     const lineHeight = isRoot ? ROOT_LINE_HEIGHT : LINE_HEIGHT;
@@ -615,8 +541,8 @@ interface RelationLabelMetrics extends DrawnixRelationLabelSize {
 }
 
 function relationLabelMetrics(label: string): RelationLabelMetrics {
-    const lines = splitLabel(label, RELATION_LABEL_MAX_TEXT_WIDTH);
-    const largestLineWidth = Math.max(...lines.map(visualLength));
+    const lines = wrapDrawnixText(label, RELATION_LABEL_MAX_TEXT_WIDTH);
+    const largestLineWidth = Math.max(...lines.map(measureDrawnixText));
     const width = Math.max(
         96,
         Math.min(

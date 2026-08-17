@@ -40,6 +40,8 @@ DiagramSpec(intent: "drawnixMindmap")
 
 节点、标题/摘要页眉、其他标签矩形和画布内缩范围仍是硬障碍物。如果这些约束没有留下可用几何，关系必须拒绝；分配器不会通过恢复层级或关系数量配额来回避该情况。每条带标签关系会在分配前测量并换行，原生 Drawnix 文字框与 SVG 标签使用同一矩形。标题/摘要页眉继续使用与节点相同的确定性宽度估算；长摘要会拆成显式多行，forest 下移到 `safeHeight` 之后。SVG companion 按“连接线、节点、关系标签、页眉”的顺序绘制，最后的页眉带不透明白色背景。
 
+共享的估算与换行实现位于 `src/diagram/adapters/drawnix/drawnixTextLayout.ts`。header、节点和关系标签都消费该模块，不再各自维护度量逻辑，因此未来调整字体策略只需修改一个契约并更新一组定向测试。
+
 原生箭头现在使用与 Plait 兼容的契约：`shape: "straight"` 保留显式正交折线路径，`source`/`target` 携带原生 marker，`texts[]` 保存 paragraph 以及路径上的归一化 `position`，`strokeColor`/`strokeWidth`/`strokeStyle`/`opacity` 保存视觉样式。旧版读取器仍可使用兼容性 metadata 中的 `text` 与 `style`。由于上游连接解析器要求几何元素拥有 `points`，而原生 `mind_child` 并不拥有该字段，因此不会输出 `boundId`；这样可以避免宿主导入异常，同时保留明确的关系路径。
 
 当源笔记包含 Mermaid fence 或 Obsidian 图片嵌入时，原生 JSON 还会携带可选的 `metadata.notemd.sourceVisuals` 索引。这里有意使用 metadata，而不是新增未经验证的 Drawnix 原生图片 element：每项记录 source hash、解析状态、源路径和 companion 名称。默认情况下，已解析 Mermaid 图会把安全 SVG 与源文本内联，已解析二进制图片使用 data-backed SVG 预览，因此不会生成独立 `.drawnix.assets` 目录。开启 **同时完整输出 Mermaid 图** 后，才会为外部交接写出 Mermaid 源码、SVG 与 manifest companion。带 companion 路径的旧 artifact 仍可读取；预览先使用内嵌数据，再尝试 companion，旧 companion 缺失时最后从 metadata 中保留的源文本重建 Mermaid 图。这样既保持已验证子集的原生 element 流兼容，又能从 `.drawnix` 文件本身发现源视觉信息。
@@ -60,6 +62,7 @@ npm test -- --runInBand src/tests/drawnixExporter.test.ts src/tests/drawnixRelat
 - 原生箭头文字位置规划，保证 Plait 文字框避开节点和受保护的页眉区域
 - 稳定的 `.drawnix` JSON 序列化与 `arrow-line` 校验
 - 专用 SVG companion 使用相同的 node id 和投影坐标
+- ASCII、宽字符、纯空白标签和不含空格的长单词的确定性文本度量与换行
 - 源码不引入 `SemanticFigureModel`、`@drawnix/*`、`@plait/*` 或 `@plait-board/*`
 
 ## manual open/import 边界

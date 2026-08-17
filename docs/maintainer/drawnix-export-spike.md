@@ -36,6 +36,8 @@ Cross-branch and same-root relations use placed node rectangles as routing obsta
 
 Nodes, the title/summary header, other label rectangles, and the canvas inset remain hard obstacles. A relation is rejected when those constraints leave no geometry; the allocator does not restore a depth or relation-count quota to avoid that case. Every labelled relation is measured and wrapped before allocation, and its native Drawnix text rectangle uses the same bounds as the SVG label. The header uses the same deterministic text-width estimator as nodes; long summaries create explicit lines and move the forest below `safeHeight`. The SVG companion renders paths first, nodes second, relation labels third, and the opaque header last.
 
+The shared estimator and wrapper live in `src/diagram/adapters/drawnix/drawnixTextLayout.ts`. Header, node, and relation-label callers consume that module rather than maintaining local measurement logic, so a future font policy can change one contract and invalidate one focused test surface.
+
 Native arrow lines use the Plait-compatible contract: `shape: "straight"` preserves the supplied orthogonal polyline, `source`/`target` carry native markers, `texts[]` stores a paragraph plus a normalized `position` on the path, and `strokeColor`/`strokeWidth`/`strokeStyle`/`opacity` carry the visual style. The legacy `text` and `style` fields remain as compatibility metadata for older readers. No `boundId` is emitted for `mind_child` nodes because the upstream connector resolver expects a geometry `points` array that native mind children do not own; this keeps host import fail-safe while preserving the explicit route.
 
 When the source note contains Mermaid fences or Obsidian image embeds, the native JSON also carries an optional `metadata.notemd.sourceVisuals` index. This is intentionally metadata rather than a new native Drawnix image element: each entry records the source hash, resolution status, source path, and companion names. By default, resolved Mermaid visuals are embedded as sanitized SVG plus source text and resolved binary images use a data-backed SVG preview, so generation does not create a separate `.drawnix.assets` tree. The **Also export complete Mermaid visuals** setting opts in to Mermaid source, SVG, and manifest companions for external handoff. Legacy artifacts with companion paths remain readable; preview resolution checks embedded data first, then companion files, then rebuilds a Mermaid visual from retained source text when an old companion is missing. This keeps the native element stream compatible with the pinned subset while making source visuals discoverable from the `.drawnix` file itself.
@@ -56,6 +58,7 @@ The tests verify:
 - native arrow text positions that keep the Plait text rectangle outside nodes and the protected header band
 - stable `.drawnix` JSON serialization and `arrow-line` validation
 - the dedicated SVG companion uses the same node ids and projection geometry
+- deterministic text measurement and wrapping for ASCII, wide characters, whitespace-only labels, and long unbroken words
 - source-level absence of `SemanticFigureModel`, `@drawnix/*`, `@plait/*`, and `@plait-board/*` imports
 
 ## Manual open/import Boundary

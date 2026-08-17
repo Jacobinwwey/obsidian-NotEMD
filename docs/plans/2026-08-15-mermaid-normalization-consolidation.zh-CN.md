@@ -42,7 +42,7 @@ implementation_record: src/tests/mermaidNormalizationConvergence.test.ts
 - 历史审计将 `deepDebugMermaid` 链称为“30 步”（`mermaidProcessor.ts:356-498`），但可执行 registry 现在固化为 35 个稳定 stage ID。它仍有 flowchart 偏置：`fixMermaidNotes` 改写 `note right of`（合法 sequence 语法），`fixMermaidPipes`/`fixMisplacedPipes` 触碰 `|`（ER 基数语法）。
 - `ensureMermaidInitialized` 现在负责插件验证初始化：按函数身份调用一次 `mermaid.initialize`；预览 webview 保留独立的主题专属 `deps.initialize()` 生命周期。
 - `legacyFixerUtils.ts` 死导出：`rewriteLegacyTrailingDoubleDashArrow`（`:412`）、4 个不被 import 的 `parse*`、字节相同的 `stripWrappingDoubleQuotes`/`stripWrappedQuotedLabel`（`:36-42`/`:44-50`）。
-- Drawnix 几何重复（审计发现，超出本方案范围但在此登记）：当前单根原生投影内部仍有重复的测量/布局 helper；共享的矩形/折线 primitive 已集中到 `drawnixGeometry.ts`。canonical `drawnixRelationRouter.ts` 中的 `routeDrawnixCrossRootRelation` 无生产调用，并明确仅用于兼容；旧 `drawnixCrossRootRouter.ts` 路径是弃用 re-export。`enrichDrawnixSourceCoverage` 是 canonical 生产操作，`mergeDrawnixSourceCoverage` 仅保留为废弃兼容别名。已删除的 presentation 模块和 presentation 交付 bundle 不属于当前契约。
+- Drawnix 几何重复（审计发现，超出本方案范围但在此登记）：当前单根原生投影内部仍有剩余的测量/布局 helper，但共享的矩形/折线 primitive 已集中到 `drawnixGeometry.ts`，确定性文本度量/换行已集中到 `drawnixTextLayout.ts`。canonical `drawnixRelationRouter.ts` 中的 `routeDrawnixCrossRootRelation` 无生产调用，并明确仅用于兼容；旧 `drawnixCrossRootRouter.ts` 路径是弃用 re-export。`enrichDrawnixSourceCoverage` 是 canonical 生产操作，`mergeDrawnixSourceCoverage` 仅保留为废弃兼容别名。已删除的 presentation 模块和 presentation 交付 bundle 不属于当前契约。
 
 ## 3. 问题分析：四个契约冲突
 
@@ -147,7 +147,7 @@ Phase 0-6 已实现（1.9.5）。语义/几何/交付契约已文档化；当前
 ## 10. 后续推进方向
 
 1. 在工具可用时记录真实外部 consumer 证据；不要把 fixture 或 serializer 证据升级成互操作性声明。
-2. Drawnix 收敛切片：先证明并抽取原生投影中剩余的共享测量/布局逻辑；只有完成调用点与迁移证据后，才删除仅用于兼容的路由引擎和废弃别名。
+2. Drawnix 收敛切片：先证明并抽取原生投影中剩余的共享测量/布局逻辑；矩形/折线和文本度量/换行契约已经集中。只有完成调用点与迁移证据后，才删除仅用于兼容的路由引擎和废弃别名。
 3. circuitikz：共享 document/label 模板 plumbing 已参数化；决定 `runCircuitikzRepairLoop` 去留，并同步文档。
 4. 仓库级 helper 收敛（escapeHtml x10、错误三元 x94、FNV-1a x5、isRecord x6、slugify x3、枚举守卫 x4、indexOf 去重 x7）作为收敛批收尾，遵守路线图的 support-matrix 纪律。
 5. 坚持路线图规则：先收敛，再上新目标。

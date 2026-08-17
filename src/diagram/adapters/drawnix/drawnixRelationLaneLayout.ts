@@ -232,7 +232,6 @@ export function assignDrawnixRelationLaneGeometry(
             throw new Error(`Drawnix relation lane "${reservation.relationId}" has no placed endpoints.`);
         }
 
-        const labelWidth = relation.labelSize?.width ?? 0;
         const trackSpan = relationTrackSpan(relation.labelSize);
         const westInnerTrackX = forestLeft - NODE_TRACK_CLEARANCE;
         const westOuterTrackX = westInnerTrackX - trackSpan;
