@@ -85,7 +85,22 @@ Key corrections and findings:
 - Task 3 remains the active convergence task, but its diagram-level normalize slice is now landed: `normalizeMermaidDiagram` is canonical and render/preview convergence is tested. Remaining work is byte-stable legacy-chain staging/type gating, single-owner fencing, and module-level `mermaid.initialize` lifecycle.
 - Drawnix geometry duplication (projection vs presentation) and the dead cross-root router engine are the next convergence slice after this plan.
 
-Current: Phase 0 and diagram-level Phase 1 are complete. Next are Phase 2 legacy-chain staging/type gating and Phase 3 fence/config lifecycle convergence. The `mermaidFix*` regression surface (~25 files) must stay green; the only allowed output change remains `erDiagram` render artifacts gaining the ER repairs.
+Snapshot as of 2026-08-15: Phase 0 and diagram-level Phase 1 were complete, while Phase 2 legacy-chain staging/type gating and Phase 3 fence/config lifecycle convergence were still pending. This historical snapshot is superseded by the current-main closure below.
+
+## 2026-08-18 Current-Main Closure
+
+The Mermaid convergence work is now complete through Phase 3. `normalizeMermaidDiagram` is the runtime-free canonical boundary; the legacy repair chain is a 35-stage ordered registry with family gating and idempotency coverage; shared scanners and canonical fence helpers own block boundaries; and `ensureMermaidInitialized()` protects plugin-side validation runtime state. Preview webviews intentionally keep their own theme-specific initialization because they are separate runtimes.
+
+The catalog has also admitted `timeline`, `swimlane`, and `quadrant` through the bounded evidence gate. They are Mermaid-only (`compatibleTargets: ['mermaid']`), so this admission does not imply editable HTML/SVG, Draw.io, or Drawnix support. Target adapter and webview presentation dispatch now use keyed registries with explicit source-only fallback for targets without an embedded runtime.
+
+The live agenda is boundary hardening, not unbounded layout expansion:
+
+- prove Draw.io and Drawnix interoperability with real consumers when those tools are available;
+- finish the remaining Drawnix measurement/layout convergence only where call-site duplication is demonstrated;
+- decide whether `runCircuitikzRepairLoop()` remains a maintainer-only acceptance boundary or receives a real caller;
+- keep Task 0's heavier-runtime packaging isolation separate from the already enforced single-entry `main.js` + inline `srcdoc` contract.
+
+The `mermaidFix*` regression surface remains a release gate. No new diagram type or target should enter mainline without schema, renderer, persistence, gallery, and consumer evidence.
 
 ---
 

@@ -90,7 +90,7 @@ normalizeMermaidDiagram(input, opts?) -> { content, family }
 | C. 双份 + 互指注释 | 零 | 否决：已经分化过一次（ER 修复） |
 | D. 渲染路径直接 import shared | 最小 diff | 否决：normalize 会留在 rendering/preview，diagram 层向上依赖 |
 
-质疑点：ER 修复是猜测性重写，目前只在预览跑，`mermaid.parse` 从未验证过其输出。合并后应解析修复结果，失败则回退未修复内容（fail-closed 到今天的渲染行为）。
+历史质疑（已关闭）：ER 修复曾是只在预览路径执行的猜测性重写，因此渲染路径从未验证其输出。当前 canonical normalizer 会让修复结果经过 `mermaid.parse`；解析失败则回退到未修复内容，保持 fail-closed 边界。
 
 质疑点：首行 family 检测脆弱（BOM、前导空行、\%\%{init} 头）。Stage 2 在 Stage 1 之后运行并跳过注释；未知 family 落入安全集（不跑 legacy 链）。
 
@@ -102,7 +102,7 @@ normalizeMermaidDiagram(input, opts?) -> { content, family }
 4. **`getValidNodeIDs` 上下文**（`mermaidProcessor.ts:1158`）：必须留在需要它的 stage 内，不提升为全局。
 5. **测试面即行为契约**：约 25 个 `mermaidFix*`/`deepDebug*`/`mermaidProcessor.test.ts` 文件迁移后必须原样通过。测试失败意味着迁移破坏了行为，不是测试该改。
 6. **历史 fallback fence 坑点（已关闭）**：早期 `diagramGenerationService` 错误回退路径曾用 `spec.intent` 作为首行手工拼接 fence。必须继续以 canonical `fenceMermaidDefinition` 为边界，并用回归测试保护合法 fallback 体。
-7. **`~~~` fence**：统一正则必须吸收 `~~~`，否则修复链静默跳过这些块（`mermaidProcessor.ts:253` 现有 bug）。
+7. **`~~~` fence（已关闭）**：共享 scanner 现在吸收 `~~~`；必须保留回归覆盖，防止未来修复链改动再次静默跳过波浪线 fence。
 
 ## 8. 阶段与门禁
 

@@ -90,7 +90,7 @@ Dependency direction: normalize lives in `diagram/adapters/mermaid/`; `rendering
 | C. Two copies + cross-comment | zero | Rejected: already diverged once (ER repairs) |
 | D. Render path imports shared directly | minimal diff | Rejected: normalize would live in rendering/preview; diagram layer would depend upward |
 
-Challenge: ER repairs are a guessing rewrite; they currently run only in preview, so mermaid.parse has never validated their output. On merge, run `mermaid.parse` on the repaired output and fall back to the un-repaired content on failure (fail-closed to today's render behavior).
+Historical challenge (closed): ER repairs were guessing rewrites that originally ran only in preview, so the render path never validated their output. The landed canonical normalizer now sends the repaired content through `mermaid.parse` and falls back to the unrepaired content on parse failure, preserving a fail-closed boundary.
 
 Challenge: first-line family detection is fragile (BOM, leading blank lines, \%\%{init} headers). Stage 2 runs after Stage 1 and skips comments; unknown family defaults to the safe set (no legacy chain).
 
@@ -102,7 +102,7 @@ Challenge: first-line family detection is fragile (BOM, leading blank lines, \%\
 4. **getValidNodeIDs context** (`mermaidProcessor.ts:1158`): must stay inside the stage that needs it, not globalized.
 5. **Test surface is the behavior contract**: ~25 `mermaidFix*`/`deepDebug*`/`mermaidProcessor.test.ts` files must pass unchanged after migration. A failing test means the migration broke behavior, not that the test should change.
 6. **Historical fallback-fence hazard (closed)**: an earlier `diagramGenerationService` error fallback hand-built a fenced block with `spec.intent` as the first line. Keep the canonical `fenceMermaidDefinition` boundary and a valid fallback body covered by regression tests.
-7. **`~~~` fences**: the unified fence regex must absorb `~~~` or the fix chain silently skips those blocks (current bug at `mermaidProcessor.ts:253`).
+7. **`~~~` fences (closed)**: the unified scanner now absorbs `~~~`; keep this regression covered so future repair-chain edits cannot silently skip wave-fenced blocks.
 
 ## 8. Phases And Verification Gates
 

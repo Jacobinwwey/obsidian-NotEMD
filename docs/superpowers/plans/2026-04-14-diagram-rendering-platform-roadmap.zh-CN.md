@@ -85,7 +85,22 @@ Cloudy 与 Drawnix 的参考项目分析已记录在 `docs/brainstorms/2026-07-0
 - 任务 3 仍是当前收敛任务，但 diagram-level normalize 切片已经落地：`normalizeMermaidDiagram` 已成为 canonical，且渲染/预览收敛已有测试。剩余工作是 legacy 链字节稳定的分阶段/type gating、单一 fence 所有权，以及 `mermaid.initialize` 的模块级生命周期。
 - Drawnix 几何重复（投影 vs 呈现）与死路由引擎是本方案之后的下一个收敛切片。
 
-当前：Phase 0 与 diagram-level Phase 1 已完成。下一步是 Phase 2 legacy 链分阶段/type gating 与 Phase 3 fence/配置生命周期收敛。`mermaidFix*` 回归面（约 25 个文件）必须保持全绿；唯一允许的输出变化仍是 `erDiagram` 渲染产物获得 ER 修复。
+截至 2026-08-15 的快照：Phase 0 与 diagram-level Phase 1 已完成，Phase 2 legacy 链分阶段/type gating 与 Phase 3 fence/配置生命周期收敛当时仍待实施。以下当前 main 收口记录已经覆盖这一历史快照。
+
+## 2026-08-18 当前 main 收口
+
+Mermaid 收敛现在已完成至 Phase 3。`normalizeMermaidDiagram` 是无运行时依赖的 canonical 边界；legacy 修复链是保持顺序的 35-stage registry，带 family 门控与幂等测试；共享 scanner 与 canonical fence helper 负责块边界；`ensureMermaidInitialized()` 保护插件验证 runtime 的配置状态。预览 webview 有意保留主题专属初始化，因为它们属于独立 runtime。
+
+目录也已通过受限证据门禁接纳 `timeline`、`swimlane`、`quadrant`。三者严格为 Mermaid-only（`compatibleTargets: ['mermaid']`），不代表 editable HTML/SVG、Draw.io 或 Drawnix 支持。target adapter 与 webview presentation dispatch 现在采用 keyed registry；没有内嵌 runtime 的目标显式走 source-only fallback。
+
+当前议程是边界硬化，而不是无界扩展布局类型：
+
+- 在工具可用时，用真实 consumer 证明 Draw.io 与 Drawnix 互操作；
+- 只有确认调用点存在重复后，才继续收敛 Drawnix 的 measurement/layout helper；
+- 决定 `runCircuitikzRepairLoop()` 继续作为 maintainer-only acceptance 边界，还是接入真实调用方；
+- 将打包任务 0 的 heavier-runtime packaging isolation 与已经强制的单入口 `main.js` + inline `srcdoc` 契约分开跟踪。
+
+`mermaidFix*` 回归面仍是发布门禁。任何新图形类型或 target 进入主线前，必须同时具备 schema、renderer、持久化、gallery 与 consumer 证据。
 
 ---
 
