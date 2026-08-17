@@ -70,6 +70,7 @@ implementation_record: src/tests/mermaidNormalizationConvergence.test.ts
 
 - **Mermaid legacy 链：** `mermaidProcessor.ts` 仍是大型且偏 flowchart 的修复面，但现在已固化为 35 个稳定 stage、family 门控和幂等测试。已知 Mermaid 11 family registry 现在会对非 flowchart 声明 fail closed；只有真正未知的 header 保留兼容逃生口。这是受控债务，不应因此把更多 diagram family 接入该链。
 - **Mermaid 全局状态：** 插件验证侧已按 `initialize` 函数身份收敛为模块级初始化。预览 webview 有意保留主题专属初始化，因为它们属于独立 runtime；合并两个生命周期会引入主题回归。
+- **Target dispatch 分裂：** `renderTargetCatalog.ts` 负责 artifact 元数据与能力策略，但 `previewExport.ts` 和 `renderHostEntry.ts` 仍通过 target `switch` 承担运行时 dispatch。应将其视为明确的 Open/Closed 债务：新增 target 前，必须先让 target adapter registry 接管 preview/export/host 行为；仅增加 metadata 不足以完成扩展。
 - **外部互操作：** Draw.io、Drawnix、Circuitikz 必须使用真实 consumer 证据，不能用 mock 或 serializer snapshot 冒充。工具缺失必须显式记录。
 - **向前兼容：** 未知契约字段有意放行；必填字段和已知字段类型在边界严格校验，不能为了“兼容”而整体放松。
 - **缓存：** response cache 只是优化，不能成为 artifact 身份或正确性的权威来源。
