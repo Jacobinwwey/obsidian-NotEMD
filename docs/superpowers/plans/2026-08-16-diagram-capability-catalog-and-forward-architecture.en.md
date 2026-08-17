@@ -1,6 +1,6 @@
 ---
 date: 2026-08-16
-last_updated: 2026-08-17
+last_updated: 2026-08-18
 topic: diagram-capability-catalog-and-forward-architecture
 status: active
 canonical_for:
@@ -32,11 +32,11 @@ Historical boundary findings and current disposition:
 - Settings persistence double-write: resolved; `src/main.ts` persists the sanitized syncable record once, with a regression gate for local-only credentials.
 - Retry/artifact authority: resolved; the retried spec and rendered artifact now travel together through the generation result contract.
 - Editable HTML/SVG preview: resolved; the renderer exposes `previewSvg`, and export tests cover the advertised formats.
-- Repeated target switches: partially resolved; target metadata and preview/export/render-host dispatch now use authoritative descriptors and keyed adapters. Target-specific webview presentation markup remains an explicit contract.
+- Repeated target switches: resolved for the current surface; target metadata, preview/export, render-host dispatch, and webview presentation now use authoritative descriptors and keyed contracts. A new target still needs an explicit presentation mode or a deliberate source-only fallback.
 - LLM cache identity and bounds: resolved; the cache uses a versioned credential-free fingerprint with endpoint/runtime fields plus TTL/LRU limits.
 - Operation schema drift: narrowed; runtime admission and result validation are executable, while `OperationSchema` remains a structural TypeScript record for compatibility and human-facing metadata.
 
-These were boundary defects rather than cosmetic cleanup. The remaining open items are consumer evidence, presentation-contract extraction, Drawnix geometry convergence, and the Circuitikz repair-loop decision; adding new visual types before those gates close would still increase compatibility debt.
+These were boundary defects rather than cosmetic cleanup. The remaining open items are consumer evidence, Drawnix geometry convergence, and the Circuitikz repair-loop decision; adding new visual types still requires the same bounded admission evidence and must not widen target claims.
 
 ## Target Contracts
 
@@ -159,7 +159,7 @@ Generate the support matrix from the manifest. Separate “shipped”, “partia
 
 ### Phase 5: Candidate admission from `diagram-design`
 
-Reference-only candidates include timeline, swimlane, quadrant, radar, loop, nested, tree, org chart, layer stack, Venn, pyramid/funnel, Gantt, scatter, high-level, process, medallion, data flow, DP integration, and DP security matrix. They are not runtime types today.
+Reference-only candidates now include radar, loop, nested, tree, org chart, layer stack, Venn, pyramid/funnel, Gantt, scatter, high-level, process, medallion, data flow, DP integration, and DP security matrix. Timeline, swimlane, and quadrant have passed admission as Mermaid-only runtime types; this does not imply editable HTML/SVG, Draw.io, or Drawnix interoperability.
 
 A candidate can enter the shipped catalog only when it has:
 
@@ -171,7 +171,7 @@ A candidate can enter the shipped catalog only when it has:
 - automated rendering/export tests;
 - real consumer evidence when the target depends on an external application.
 
-Prefer implementing `timeline`, `swimlane`, and `quadrant` as new semantic/target slices only after the convergence work is complete. Radar is explicitly blocked until Vega-Lite support is added; a label-only alias would be misleading.
+Keep radar explicitly blocked until a real Vega-Lite adapter exists; a label-only alias would be misleading. Future candidates must repeat the same schema, fixture, persistence, docs, and consumer gates.
 
 ### Phase 6: Convergence and release gates
 
@@ -188,12 +188,12 @@ External gates remain separate from unit tests:
 | Phase | Status | Evidence / remaining boundary |
 |---|---|---|
 | 0. Correctness foundation | Complete | Sanitized settings persistence, authoritative retry artifacts, editable SVG preview, target descriptors, and bounded cache are covered by focused tests. |
-| 1. Three-axis catalog | Complete | Ten semantic types, eight targets, compatibility admission, fixture coverage, and stable IDs are executable. |
+| 1. Three-axis catalog | Complete | Thirteen semantic types, eight targets, compatibility admission, fixture coverage, and stable IDs are executable. |
 | 2. Runtime contracts | Mostly complete | Input and result validation are runtime-enforced; structural `OperationSchema` and human-facing help metadata remain intentionally separate. |
 | 3. Deterministic preview gallery | Complete | Production fixtures generate the settings thumbnails and bilingual SVG/PNG docs gallery; `diagram:gallery:check` is the freshness gate. |
 | 4. Bilingual discovery | Complete for shipped scope | Support matrices link shipped examples; reference layouts remain explicitly planned. |
-| 5. Candidate admission | Gated | Timeline, swimlane, and quadrant are candidates only; each still needs a bounded semantic schema, renderer evidence, persistence behavior, and tests. |
-| 6. Convergence and release | In progress | Target adapters, Mermaid normalization, and Circuitikz template convergence are landed; external Draw.io/Drawnix evidence and remaining presentation/geometry gates are open. |
+| 5. Candidate admission | Partially shipped | Timeline, swimlane, and quadrant have bounded schemas, Mermaid adapters, persistence-compatible spec fields, fixtures, gallery assets, and focused tests. Radar and the remaining reference layouts stay gated. |
+| 6. Convergence and release | In progress | Target adapters, webview presentation registry, Mermaid normalization, and Circuitikz template convergence are landed; external Draw.io/Drawnix evidence and geometry gates remain open. |
 
 This status table is the current decision record. The phase descriptions above remain the design rationale and acceptance criteria; they should not be read as proof that every listed task is still outstanding.
 

@@ -15,17 +15,21 @@ describe('executable diagram type catalog', () => {
     });
 
     test('contains only complete, example-backed type definitions', () => {
-        expect(EXECUTABLE_DIAGRAM_TYPES).toHaveLength(10);
+        expect(EXECUTABLE_DIAGRAM_TYPES).toHaveLength(13);
         expect(EXECUTABLE_DIAGRAM_TYPES.every(type => Boolean(type.exampleFixtureId))).toBe(true);
         expect(EXECUTABLE_DIAGRAM_TYPES.every(type => Boolean((type as any).semanticPattern))).toBe(true);
         expect(EXECUTABLE_DIAGRAM_TYPES.every(type => Array.isArray((type as any).visualRoles)
             && (type as any).visualRoles.length > 0)).toBe(true);
-        expect(EXECUTABLE_DIAGRAM_TYPES.map(type => type.id)).not.toContain('timeline');
+        expect(EXECUTABLE_DIAGRAM_TYPES.map(type => type.id)).toEqual(expect.arrayContaining([
+            'timeline',
+            'swimlane',
+            'quadrant'
+        ]));
     });
 
     test('resolves known catalog entries and rejects unknown identifiers', () => {
         expect(getExecutableDiagramType('circuit')).toMatchObject({ intent: 'circuit' });
-        expect(() => getExecutableDiagramType('timeline' as never)).toThrow(/unsupported diagram catalog type/i);
+        expect(() => getExecutableDiagramType('radar' as never)).toThrow(/unsupported diagram catalog type/i);
     });
 
     test('describes Drawnix as one native tree renderer rather than a delivery selector', () => {

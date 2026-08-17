@@ -1,6 +1,6 @@
 ---
 date: 2026-08-16
-last_updated: 2026-08-17
+last_updated: 2026-08-18
 topic: mainline-diagram-architecture-progress-and-next-direction
 status: active
 canonical_for:
@@ -25,11 +25,11 @@ implementation_record: src/tests/mermaidNormalizationConvergence.test.ts
 
 | 领域 | 当前状态 | 证据 |
 |---|---|---|
-| 语义域 | 10 个可执行语义图形类型 | `src/diagram/diagramTypeCatalog.ts`、`src/diagram/examples/diagramExampleCatalog.ts` |
+| 语义域 | 13 个可执行语义图形类型 | `src/diagram/diagramTypeCatalog.ts`、`src/diagram/examples/diagramExampleCatalog.ts` |
 | 渲染目标 | 8 个 registry target；target 身份与导出格式分离 | `src/rendering/rendererRegistry.ts`、`src/rendering/renderTargetCatalog.ts` |
 | 导出格式 | target 按能力提供 SVG/PNG/PDF；editable HTML/SVG 携带 `previewSvg` | target catalog 与 renderer 集成测试 |
 | 可发现性 | 设置页显示确定性缩略图，并提供“使用此类型”动作 | `docs/assets/diagrams/manifest.json`、`diagramExamplePreview.test.ts` |
-| 静态 gallery | 10 组生产 fixture 生成的 SVG/PNG；过期资源会让检查失败 | `scripts/generate-diagram-gallery.js`、`npm run diagram:gallery:check` |
+| 静态 gallery | 13 组生产 fixture 生成的 SVG/PNG；过期资源会让检查失败 | `scripts/generate-diagram-gallery.js`、`npm run diagram:gallery:check` |
 | Drawnix | 文件名根原生树、`.drawnix`、SVG companion、Markdown wrapper | Drawnix implementation record 与导出测试 |
 | Circuitikz | 受限原生模板与 CLI 编译路径；真实 TeX consumer 仍是独立门禁 | `src/diagram/adapters/circuitikz`、`scripts/export-circuitikz.js` |
 | Operation 契约 | schema 形状准入、maintainer 输入校验、运行时结果校验、help/schema 字段派生均已可执行 | `src/operations/contractSchemas.ts`、`src/operations/maintainerCliContractMetadata.json`、bridge 测试 |
@@ -54,24 +54,26 @@ implementation_record: src/tests/mermaidNormalizationConvergence.test.ts
 14. 让六个 Circuitikz golden renderer 共享 standalone document wrapper 与 component-label lookup helper。现有 voltage convention、拓扑、layout hints 和精确 golden 输出保持不变；本次只去除重复的 preamble/label plumbing，不新增渲染模式。
 15. 抽取 `drawnixTextLayout.ts` 作为 Drawnix header、节点和关系标签共用的确定性宽度估算与换行契约。projection 不再持有第二份算法；定向测试锁定 ASCII、宽字符、空白和长单词行为。
 16. 增加通用 `TargetAdapterRegistry` 以及 preview、render-host adapter registry。preview/export 与 bundled render-host dispatch 不再按 target 使用 switch；未知 JSON payload target 会在 registry 边界 fail-closed。target 专属 webview markup 仍作为独立 presentation-layer 契约处理。
+17. 通过受限 payload schema、确定性的 Mermaid adapter、planner/intent 路由、fixture、gallery 资产和双语能力行，将 `timeline`、`swimlane`、`quadrant` 纳入候选准入。三者当前有意只兼容 Mermaid，直到建立 editable 或外部 consumer 契约。
+18. 增加 keyed webview presentation registry。Mermaid/Vega-Lite host shell、HTML document passthrough 与 source-only fallback 现在由同一 target 契约解析；未知 target fail-closed，MIME 不匹配时退回 source-only markup。
 
 ## 与 `diagram-design` 的对比
 
 | 轴 | 参考项目 | Notemd 当前真值 | 工程决策 |
 |---|---|---|---|
 | 语义选择 | pattern 页面映射到 visual layout | `DiagramIntent` 路由到 typed catalog | 保留 intent-first |
-| 视觉 taxonomy | 27 种布局语法 | 10 个可执行语义类型 | 只通过证据门禁增量准入 |
+| 视觉 taxonomy | 27 种布局语法 | 13 个可执行语义类型 | 只通过证据门禁增量准入 |
 | 产物/导出 | 自包含 HTML/SVG/PNG 示例 | 8 个 target，导出能力独立声明 | target 与 export 正交 |
 | 预览 | 示例 HTML 资产 | 设置页和 docs 使用生产 renderer fixture 缩略图 | 两者使用同一 fixture |
 | 治理 | type references 与 complexity budget | versioned capability/target manifest 加测试 | manifest 与测试共同构成契约 |
 
-参考 taxonomy 还包含 architecture、current-state、timeline、swimlane、quadrant、radar、loop、nested、tree、org chart、layers、Venn、pyramid、bar、line、Gantt、scatter、medallion、process、data flow 以及 security/integration matrix。除非实现、预览、导出和 consumer 门禁证据齐全，这些都只能标为 `reference-only/planned`。OAuth sequence、动画、imports、vertical orientation 等是 workflow 或变体，不应伪装成新的语义类型。
+参考 taxonomy 仍提供 architecture、current-state、radar、loop、nested、tree、org chart、layers、Venn、pyramid、bar、line、Gantt、scatter、medallion、process、data flow 以及 security/integration matrix 候选。Timeline、swimlane、quadrant 已通过受限 Mermaid-only 准入门禁，但这不代表 editable HTML/SVG、Draw.io 或 Drawnix 支持。OAuth sequence、动画、imports、vertical orientation 等是 workflow 或变体，不应伪装成新的语义类型。
 
 ## 风险与权衡
 
 - **Mermaid legacy 链：** `mermaidProcessor.ts` 仍是大型且偏 flowchart 的修复面，但现在已固化为 35 个稳定 stage、family 门控和幂等测试。已知 Mermaid 11 family registry 现在会对非 flowchart 声明 fail closed；只有真正未知的 header 保留兼容逃生口。这是受控债务，不应因此把更多 diagram family 接入该链。
 - **Mermaid 全局状态：** 插件验证侧已按 `initialize` 函数身份收敛为模块级初始化。预览 webview 有意保留主题专属初始化，因为它们属于独立 runtime；合并两个生命周期会引入主题回归。
-- **Target adapter 边界：** preview/export 与 render-host dispatch 已通过带重复注册检查的 keyed target adapter 收敛。`renderFrame.ts` 与 `webview/page.ts` 仍包含 target 专属 presentation markup；新增 target 必须补齐该 markup 契约，或明确使用通用 source view。
+- **Target adapter 边界：** preview/export、render-host dispatch 与 webview markup 都已通过 keyed target contract 收敛；`presentationRegistry.ts` 统一处理 host shell、HTML passthrough 与 source-only fallback。新增 target 仍必须明确 presentation mode，或有意使用 source-only。
 - **外部互操作：** Draw.io、Drawnix、Circuitikz 必须使用真实 consumer 证据，不能用 mock 或 serializer snapshot 冒充。工具缺失必须显式记录。
 - **向前兼容：** 未知契约字段有意放行；必填字段和已知字段类型在边界严格校验，不能为了“兼容”而整体放松。
 - **缓存：** response cache 只是优化，不能成为 artifact 身份或正确性的权威来源。
@@ -88,11 +90,11 @@ implementation_record: src/tests/mermaidNormalizationConvergence.test.ts
 
 1. **Mermaid Phase 2：已完成。** legacy 链已成为 35 个有序 stage，具备稳定 ID、已知 family fail-closed 门控和幂等覆盖。family registry 已覆盖当前 Mermaid 11 声明，同时保留 `unknown` 以兼容未来语法；在把 unknown family 视为 flowchart-safe 之前仍必须补 parser-backed 准入证据。
 2. **Mermaid Phase 3：已完成。** 共享 scanner、canonical fence 格式和插件验证 runtime 初始化已收敛；预览 webview 的主题初始化继续作为独立 runtime 契约。
-3. **Target adapter dispatch：preview/export 与 render-host 已完成收敛。** target 专属 webview markup 继续显式维护；扩展 target 集合前必须先补 adapter-backed markup 契约。
+3. **Target adapter dispatch：已完成。** preview/export、render-host 与 webview presentation 都使用 keyed target contract；没有内嵌 runtime 的 target 必须显式走 source-only。
 4. **Consumer 证据：** 在工具可用时执行 Draw.io/Drawnix/Circuitikz 真实门禁；不可用时记录 blocker，不声称兼容。
 5. **Drawnix 收敛：** 生产 source-coverage 与 relation-router 名称已经 canonical，旧 source-coverage export 和旧 router 模块仅用于兼容。矩形/折线以及文本度量/换行共享 primitive 已集中；只有在确认存在真实重复时才继续抽取 measurement/layout helper，并在调用点证明与替代路由契约完成后删除旧 cross-root 实现。
 6. **Circuitikz 收敛：** 六个 golden renderer 已共享 standalone-document 与 component-label helper，同时保持确定性输出。`runCircuitikzRepairLoop()` 继续作为 maintainer-only acceptance SDK 边界；正常生成不调用 LLM repair loop。只有在明确需要 repair 命令时，才决定接入真实 CLI/desktop caller。
-7. **参考候选准入：** timeline、swimlane、quadrant 等候选必须先满足完整证据清单；radar 在真实 Vega-Lite adapter 出现前保持阻塞。
+7. **参考候选准入：** timeline、swimlane、quadrant 已以 Mermaid-only 类型交付，并具备确定性 fixture 与 parser-backed gallery 证据。Radar 在真实 Vega-Lite adapter 出现前继续阻塞；其余参考布局仍受门禁控制。
 
 ## 验收门禁
 
@@ -108,4 +110,4 @@ implementation_record: src/tests/mermaidNormalizationConvergence.test.ts
 
 ## 验证快照
 
-本轮新鲜验证：260 个 Jest suite 通过，2,267 tests passed、1 skipped；TypeScript/esbuild build 通过；VitePress 1.6.4 docs build 通过；gallery check 通过（10 条目）；render-host audit 通过；Circuitikz smoke 使用 TeX Live 2023 `pdflatex` 通过（6/6 PDF，0 error/0 warning）；Drawnix 文本布局、target adapter 与 Circuitikz 定向 suite 分别通过（58/58、36/36、71/71 tests）；改动文件定向 ESLint 通过（0 error、23 个既有 warning）；`git diff --check` 通过。全仓 lint 当前仍非零（229 errors、1,330 warnings），这些问题均不在本轮改动文件的 error 集合中，作为既有债务继续跟踪。
+本轮新鲜验证：261 个 Jest suite 通过（2,280 tests passed、1 skipped）；TypeScript/esbuild build 通过；VitePress docs build 通过；生产 gallery check 通过并生成 13 组 SVG/PNG；render-host audit 通过；semantic verification helper 与 webview presentation focused suites 通过；Circuitikz smoke 使用 TeX Live 2023 `pdflatex` 通过（6/6 PDF，0 error/0 warning）；新增 adapter/registry 文件 ESLint 通过；`git diff --check` 通过。当前工作区没有 Draw.io/Drawnix 可执行工具，因此不作外部互操作声明。全仓 lint 仍有新 adapter/registry 文件之外的既有错误，继续作为独立债务跟踪。

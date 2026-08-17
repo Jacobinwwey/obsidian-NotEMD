@@ -159,4 +159,20 @@ Top ranked issues this week:
         expect(result.renderTarget).toBe('mermaid');
         expect(result.legacyCompatibilityMode).toBe(true);
     });
+
+    test('routes admitted Mermaid candidates without a target alias', () => {
+        const timeline = buildDiagramPlan('# Roadmap\n2026 Q1 milestone', {
+            compatibilityMode: 'best-fit',
+            requestedIntent: 'timeline'
+        });
+        const quadrant = buildDiagramPlan('# Priority 2x2', {
+            compatibilityMode: 'best-fit',
+            requestedIntent: 'quadrant'
+        });
+
+        expect(timeline.renderTarget).toBe('mermaid');
+        expect(timeline.mermaidDiagramType).toBe('timeline');
+        expect(quadrant.renderTarget).toBe('mermaid');
+        expect(quadrant.mermaidDiagramType).toBe('quadrantChart');
+    });
 });

@@ -217,6 +217,43 @@ function normalizeSpec(candidate: any): DiagramSpec {
         sections: Array.isArray(payload.sections) ? payload.sections : [],
         callouts: Array.isArray(payload.callouts) ? payload.callouts : [],
         dataSeries: normalizeDataSeries(payload.dataSeries, title),
+        timelineEvents: Array.isArray(payload.timelineEvents)
+            ? payload.timelineEvents.map((event: any) => ({
+                id: event?.id,
+                date: event?.date,
+                label: event?.label,
+                details: Array.isArray(event?.details) ? event.details : undefined
+            }))
+            : undefined,
+        swimlaneLanes: Array.isArray(payload.swimlaneLanes)
+            ? payload.swimlaneLanes.map((lane: any) => ({
+                id: lane?.id,
+                label: lane?.label,
+                steps: Array.isArray(lane?.steps)
+                    ? lane.steps.map((step: any) => ({
+                        id: step?.id,
+                        label: step?.label,
+                        nextStepId: step?.nextStepId ?? step?.next
+                    }))
+                    : []
+            }))
+            : undefined,
+        quadrant: payload.quadrant && typeof payload.quadrant === 'object'
+            ? {
+                xAxisLabel: payload.quadrant.xAxisLabel,
+                yAxisLabel: payload.quadrant.yAxisLabel,
+                quadrantLabels: payload.quadrant.quadrantLabels,
+                items: Array.isArray(payload.quadrant.items)
+                    ? payload.quadrant.items.map((item: any) => ({
+                        id: item?.id,
+                        label: item?.label,
+                        x: item?.x,
+                        y: item?.y,
+                        detail: item?.detail
+                    }))
+                    : []
+            }
+            : undefined,
         circuitSpec: payload.circuitSpec && typeof payload.circuitSpec === 'object' ? payload.circuitSpec : undefined,
         layoutHints: payload.layoutHints && typeof payload.layoutHints === 'object' ? payload.layoutHints : undefined,
         sourceLanguage: typeof payload.sourceLanguage === 'string' ? payload.sourceLanguage : undefined,

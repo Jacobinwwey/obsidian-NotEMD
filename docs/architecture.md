@@ -148,7 +148,7 @@ flowchart LR
     end
 
     subgraph Target["Output Targets"]
-        MERMAID["Mermaid<br/>(flowchart, sequence, class, ER, state, mindmap)"]
+        MERMAID["Mermaid<br/>(flowchart, sequence, class, ER, state, mindmap, timeline, swimlane, quadrant)"]
         CANVAS["JSON Canvas<br/>(canvasMap)"]
         VEGA["Vega-Lite<br/>(dataChart)"]
         HTML["HTML Fallback"]
@@ -196,6 +196,9 @@ flowchart LR
 | `classDiagram` | mermaid | MermaidRenderer | modal/iframe | source `.md`, SVG, PNG, PDF |
 | `erDiagram` | mermaid | MermaidRenderer | modal/iframe | source `.md`, SVG, PNG, PDF |
 | `stateDiagram` | mermaid | MermaidRenderer | modal/iframe | source `.md`, SVG, PNG, PDF |
+| `timeline` | mermaid | MermaidRenderer | modal/iframe | source `.md`, SVG, PNG, PDF |
+| `swimlane` | mermaid | MermaidRenderer | modal/iframe | source `.md`, SVG, PNG, PDF |
+| `quadrant` | mermaid | MermaidRenderer | modal/iframe | source `.md`, SVG, PNG, PDF |
 | `canvasMap` | json-canvas | JsonCanvasRenderer | modal/iframe | source `.canvas`, SVG, PNG, PDF |
 | `dataChart` | vega-lite | VegaLiteRenderer | modal/iframe (sandboxed) | source `.json` / Vault `.md`, SVG, PNG, PDF |
 | `circuit` | circuitikz | CircuitikzRenderer | SVG companion or source-only preview | `.tex`, SVG, PNG, PDF |
@@ -206,7 +209,7 @@ flowchart LR
 
 The diagram platform has three independent axes: semantic type, render target, and export format. The executable source of truth is the type catalog, production example fixtures, target descriptor, and versioned capability manifest. The target descriptor owns artifact mechanics; the manifest joins semantic types to compatible targets and fixture evidence. `SVG`, `PNG`, and `PDF` are export formats, never render targets.
 
-Current shipped scope is ten semantic types, eight render targets, and three export formats. The settings gallery and the generation selector now execute one production-renderer-backed fixture per type, while `scripts/generate-diagram-gallery.js` produces deterministic SVG/PNG assets and a hashed manifest for the bilingual docs gallery. Reference layouts from `ref/diagram-design` remain `reference-only/planned` until a renderer, fixture, preview, persistence mapping, docs row, and automated gate exist.
+Current shipped scope is thirteen semantic types, eight render targets, and three export formats. Timeline, swimlane, and quadrant are intentionally Mermaid-only until an editable or external consumer contract exists. The settings gallery and the generation selector execute one production-renderer-backed fixture per type, while `scripts/generate-diagram-gallery.js` produces deterministic SVG/PNG assets and a hashed manifest for the bilingual docs gallery. Remaining reference layouts from `ref/diagram-design` stay `reference-only/planned` until a renderer, fixture, preview, persistence mapping, docs row, and automated gate exist.
 
 The delivered ordering was correctness foundation, catalog/contract generation, deterministic preview assets, then selector/docs integration. Mermaid normalization, legacy repair staging, family gating, fence ownership, and validation-runtime initialization are now converged. Remaining work is deliberately narrower: external consumer evidence, Drawnix geometry convergence, and Circuitikz template convergence. See [the current progress audit](./brainstorms/2026-08-16-mainline-diagram-architecture-progress-and-next-direction.md), [the capability catalog](./maintainer/diagram-capability-catalog.md), [the gallery](./diagram-gallery.md), and [the forward architecture plan](./superpowers/plans/2026-08-16-diagram-capability-catalog-and-forward-architecture.en.md).
 
@@ -220,7 +223,7 @@ The delivered ordering was correctness foundation, catalog/contract generation, 
 
 `src/rendering/renderTargetCatalog.ts` is the single target descriptor. Each target owns its renderer ID, MIME type, raw-source extension, Vault extension, preview kind, export formats, consumer gate, and fallback policy. Preview/export path construction and persistence query this descriptor; preview/export and bundled render-host dispatch resolve keyed target adapters so unsupported target/intent combinations fail closed. The Vega-Lite exception is explicit: its preview modal consumes raw `.json`, while Vault generation wraps the same source in `.md`.
 
-Runtime target dispatch now uses `src/rendering/targetAdapterRegistry.ts` as the keyed registry primitive. `src/rendering/preview/previewTargetAdapterRegistry.ts` owns SVG preview/raster operations, while `src/rendering/runtime/renderHostTargetAdapterRegistry.ts` owns bundled render-host operations and error surfaces. Duplicate target registrations fail during module construction, and untrusted render-host payload targets fail closed. Webview markup remains a separate presentation contract in `renderFrame.ts` and `webview/page.ts`; it is not treated as renderer capability metadata.
+Runtime target dispatch now uses `src/rendering/targetAdapterRegistry.ts` as the keyed registry primitive. `src/rendering/preview/previewTargetAdapterRegistry.ts` owns SVG preview/raster operations, `src/rendering/runtime/renderHostTargetAdapterRegistry.ts` owns bundled render-host operations and error surfaces, and `src/rendering/webview/presentationRegistry.ts` owns host-shell/document/source-only presentation. Duplicate target registrations fail during module construction, and untrusted render-host or webview payload targets fail closed. Presentation mode remains distinct from renderer capability metadata.
 
 The capability manifest is a separate three-axis projection: `src/diagram/diagramCapabilityManifest.ts` joins semantic type, default/compatible targets, and fixture ownership, while the target descriptor owns artifact mechanics. `scripts/diagram-gallery-browser-entry.ts` imports the executable fixture catalog and production renderers; `scripts/generate-diagram-gallery.js` renders accessible SVG, rasterizes PNG at a fixed card size, writes `docs/assets/diagrams/manifest.json`, and fails closed on stale or invalid assets. This keeps selector previews, docs previews, and runtime fixtures on one evidence path.
 

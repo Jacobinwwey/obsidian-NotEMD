@@ -1,6 +1,6 @@
 ---
 date: 2026-08-16
-last_updated: 2026-08-17
+last_updated: 2026-08-18
 topic: diagram-capability-catalog-and-forward-architecture
 status: active
 canonical_for:
@@ -32,11 +32,11 @@ Notemd 应暴露一个由可执行运行时定义派生的能力目录。目录�
 - 设置双写：已解决；`src/main.ts` 现在只持久化经过清洗的 syncable record，并有回归门禁保证 local-only 凭据不落盘。
 - 重试与 artifact 真值：已解决；重试后的 spec 与渲染产物通过同一 generation result contract 传递。
 - Editable HTML/SVG 预览：已解决；renderer 提供 `previewSvg`，导出测试覆盖 README 宣称的格式。
-- 重复 target switch：部分解决；target metadata 与 preview/export/render-host dispatch 已收敛到权威 descriptor 和 keyed adapter。target 专属 webview presentation markup 仍是显式契约。
+- 重复 target switch：当前 surface 已收敛；target metadata、preview/export、render-host dispatch 与 webview presentation 都使用权威 descriptor 和 keyed contract。新增 target 仍必须声明 presentation mode，或明确走 source-only。
 - LLM cache 身份与边界：已解决；cache 使用带 endpoint/runtime 字段的版本化、无凭据指纹，并有 TTL/LRU 上限。
 - Operation schema 漂移：已收窄；运行时准入与结果校验已经可执行，`OperationSchema` 仍保留为结构化 TypeScript record 以兼容人工 metadata。
 
-这些问题是边界契约问题而非表面清理。当前剩余开放项是 consumer 证据、presentation 契约抽取、Drawnix 几何收敛和 Circuitikz repair loop 去留；在这些门禁关闭前继续增加视觉类型仍会扩大兼容性债务。
+这些问题是边界契约问题而非表面清理。当前剩余开放项是 consumer 证据、Drawnix 几何收敛和 Circuitikz repair loop 去留；新增视觉类型仍必须通过受限准入证据，不能扩大 target 声明。
 
 ## 目标契约
 
@@ -120,7 +120,7 @@ interface DiagramCapabilityManifest {
 
 1. 给每种类型加入 `defaultTarget` 与 `compatibleTargets`，在 planner 边界拒绝不兼容组合。
 2. 为当前 8 个 target 建立 descriptor：`mermaid`、`json-canvas`、`vega-lite`、`html`、`editable-html-svg`、`drawio`、`drawnix`、`circuitikz`。
-3. 保留 10 个已发布语义类型：Mermaid mindmap、Drawnix knowledge map、flowchart、sequence、state、class、entity-relationship、canvas map、data chart、circuit。
+3. 保留原有 10 个已发布语义类型，并将 `timeline`、`swimlane`、`quadrant` 作为 Mermaid-only 类型纳入，拥有稳定 ID、受限 payload、fixture 和 gallery 证据。
 4. 要求每个已发布类型拥有 fixture 和生产渲染器预览。
 
 **门禁：** 目录不变量、兼容矩阵、fixture 覆盖率和稳定 ID 测试。
@@ -159,7 +159,7 @@ Phase 2 的剩余工作被刻意收窄为两项：在运行时边界校验 opera
 
 ### Phase 5：从 `diagram-design` 引入候选
 
-参考候选包括 timeline、swimlane、quadrant、radar、loop、nested、tree、org chart、layer stack、Venn、pyramid/funnel、Gantt、scatter、high-level、process、medallion、data flow、DP integration 和 DP security matrix。它们当前不是运行时类型。
+参考候选现在包括 radar、loop、nested、tree、org chart、layer stack、Venn、pyramid/funnel、Gantt、scatter、high-level、process、medallion、data flow、DP integration 和 DP security matrix。Timeline、swimlane、quadrant 已通过 Mermaid-only 运行时准入；这不等同于 editable HTML/SVG、Draw.io 或 Drawnix 互操作。
 
 候选只有满足以下条件才能进入 shipped catalog：
 
@@ -171,7 +171,7 @@ Phase 2 的剩余工作被刻意收窄为两项：在运行时边界校验 opera
 - 有自动化渲染/导出测试；
 - target 依赖外部应用时，有真实 consumer 证据。
 
-收敛工作完成后，优先考虑 `timeline`、`swimlane`、`quadrant`；Radar 在 Vega-Lite 增加支持前保持阻塞，不能用只改标签的别名冒充实现。
+Radar 在真实 Vega-Lite adapter 出现前保持阻塞，不能用只改标签的别名冒充实现；未来候选必须重复同样的 schema、fixture、持久化、文档和 consumer 门禁。
 
 ### Phase 6：收敛与发布门禁
 
@@ -188,12 +188,12 @@ preview/export 与 render-host 的 target dispatch 已通过 keyed adapter 收�
 | 阶段 | 状态 | 证据 / 剩余边界 |
 |---|---|---|
 | 0. 正确性基础 | 完成 | 设置清洗持久化、重试 artifact 真值、editable SVG 预览、target descriptor 和有界 cache 均有定向测试。 |
-| 1. 三轴目录 | 完成 | 10 个语义类型、8 个 target、兼容性准入、fixture 覆盖和稳定 ID 均已可执行。 |
+| 1. 三轴目录 | 完成 | 13 个语义类型、8 个 target、兼容性准入、fixture 覆盖和稳定 ID 均已可执行。 |
 | 2. 运行时契约 | 基本完成 | 输入与结果校验已在运行时强制执行；结构化 `OperationSchema` 与人工可读 help metadata 仍有意分离。 |
 | 3. 确定性预览 gallery | 完成 | 生产 fixture 同时生成设置页缩略图与双语 SVG/PNG 文档 gallery；`diagram:gallery:check` 是新鲜度门禁。 |
 | 4. 双语发现入口 | 已发布范围完成 | 支持矩阵已链接已发布示例；参考布局仍明确标为计划中。 |
-| 5. 候选准入 | 有门禁 | timeline、swimlane、quadrant 仍只是候选；每类都还需要受限语义 schema、renderer 证据、持久化行为和测试。 |
-| 6. 收敛与发布 | 进行中 | target adapter、Mermaid 规范化和 Circuitikz 模板收敛已落地；Draw.io/Drawnix 外部证据及 presentation/geometry 剩余门禁仍开放。 |
+| 5. 候选准入 | 部分交付 | timeline、swimlane、quadrant 已有受限 schema、Mermaid adapter、与旧 spec 兼容的字段、fixture、gallery 资产和定向测试；Radar 与其余参考布局继续受门禁控制。 |
+| 6. 收敛与发布 | 进行中 | target adapter、webview presentation registry、Mermaid 规范化和 Circuitikz 模板收敛已落地；Draw.io/Drawnix 外部证据与几何门禁仍开放。 |
 
 该表是当前决策记录。上面的阶段描述保留设计理由与验收条件，不应再被理解为所有列出的任务都尚未实施。
 

@@ -84,6 +84,34 @@ Draw a circuitikz schematic with a PMOS pull-up, NMOS pull-down, VDD, GND, vin, 
         expect(result.reasons.join(' ')).toMatch(/circuit|cmos|mos/i);
     });
 
+    test('infers timeline intent for dated roadmap notes', () => {
+        const result = inferDiagramIntent(`# Delivery roadmap
+
+2026 Q1: discovery milestone
+2026 Q2: preview milestone
+`);
+
+        expect(result.intent).toBe('timeline');
+    });
+
+    test('infers swimlane intent for cross-functional ownership notes', () => {
+        const result = inferDiagramIntent(`# Release handoff
+
+This cross-functional swimlane assigns the draft to Authoring, the build to Engineering, and the verification handoff to QA.
+`);
+
+        expect(result.intent).toBe('swimlane');
+    });
+
+    test('infers quadrant intent for two-axis prioritization notes', () => {
+        const result = inferDiagramIntent(`# Priority matrix
+
+Use a 2x2 effort versus impact quadrant for the backlog.
+`);
+
+        expect(result.intent).toBe('quadrant');
+    });
+
     test('falls back to mindmap for general hierarchical notes', () => {
         const markdown = `# Distributed Systems
 

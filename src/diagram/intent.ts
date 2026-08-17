@@ -46,6 +46,45 @@ export function inferDiagramIntent(markdown: string): DiagramIntentResult {
         return scoreResult('circuit', 0.86, circuitReasons);
     }
 
+    const timelineKeywords = countMatches(normalized, [
+        /\btimeline\b/g,
+        /\broadmap\b/g,
+        /\bmilestone(s)?\b/g,
+        /\bphase(s)?\b/g,
+        /\bchronology\b/g
+    ]);
+    const datedEntries = countMatches(normalized, [
+        /\b20\d{2}\b/g,
+        /\bq[1-4]\b/g,
+        /\b(?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\b/g
+    ]);
+    if (timelineKeywords > 0 && (datedEntries > 0 || timelineKeywords >= 2)) {
+        return scoreResult('timeline', 0.84, ['timeline or roadmap vocabulary detected']);
+    }
+
+    const swimlaneKeywords = countMatches(normalized, [
+        /\bswimlane\b/g,
+        /\bcross-functional\b/g,
+        /\bresponsibilit(?:y|ies)\b/g,
+        /\bowner\b/g,
+        /\bhandoff\b/g,
+        /\bactor(s)?\b/g
+    ]);
+    if (swimlaneKeywords >= 2 || /\bswimlane\b/.test(normalized)) {
+        return scoreResult('swimlane', 0.83, ['lane ownership or cross-functional handoff vocabulary detected']);
+    }
+
+    const quadrantKeywords = countMatches(normalized, [
+        /\bquadrant\b/g,
+        /\b2x2\b/g,
+        /\bpriority matrix\b/g,
+        /\beffort\s+(?:vs\.?|versus)\s+impact\b/g,
+        /\brisk\s+(?:vs\.?|versus)\s+value\b/g
+    ]);
+    if (quadrantKeywords > 0) {
+        return scoreResult('quadrant', 0.84, ['two-axis prioritization vocabulary detected']);
+    }
+
     const chartReasons: string[] = [];
     const hasMarkdownTable = /\|.+\|/.test(normalized) && /\|\s*-+\s*\|/.test(normalized);
     const numericCells = (normalized.match(/\|\s*\d+(?:\.\d+)?\s*\|/g) ?? []).length;

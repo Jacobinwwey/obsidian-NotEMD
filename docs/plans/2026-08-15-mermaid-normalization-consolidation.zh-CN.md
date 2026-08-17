@@ -1,6 +1,6 @@
 ---
 date: 2026-08-15
-last_updated: 2026-08-17
+last_updated: 2026-08-18
 topic: mermaid-normalization-consolidation
 status: active
 canonical_for:
@@ -16,7 +16,7 @@ implementation_record: src/tests/mermaidNormalizationConvergence.test.ts
 
 本方案合并当前互相不一致、且与路线图文档不一致的 Mermaid 规范化/修复面。它是路线图"双栈风险"控制与 Task 3 日落边界（`docs/superpowers/plans/2026-04-14-diagram-rendering-platform-roadmap.zh-CN.md`）的实现切片。
 
-范围：渲染、预览、笔记修复三条路径共享的 diagram 级 Mermaid 规范化，以及 legacy 链的明确所有权边界。不在范围内：新增图表类型、改动已经冻结的 legacy 修复顺序、打包/宿主工作。
+范围：渲染、预览、笔记修复三条路径共享的 diagram 级 Mermaid 规范化，以及 legacy 链的明确所有权边界。原始收敛切片不新增图表类型；第 11 节记录的后续目录准入是在这些门禁关闭后，只增加受限 Mermaid adapter。
 
 ## 2. 审计发现与更正
 
@@ -163,10 +163,14 @@ Phase 0 至 Phase 3 现在均已落地。Phase 0 与 Phase 1 的 diagram 级实�
 - `extractMermaidBlocks`/`mapMermaidBlocks` 现在由验证和修复路径共享；`fenceMermaidDefinition` 是唯一 canonical 输出边界。
 - `ensureMermaidInitialized()` 防止插件验证 runtime 重复重置全局配置；预览 webview 按设计保留独立主题初始化。
 
-剩余缺口已收窄为外部 consumer 证据、Drawnix 几何收敛和 Circuitikz 模板收敛。真实 consumer 证据记录完成前，不接纳新的 Mermaid layout 或 target。
+剩余缺口已收窄为外部 consumer 证据、Drawnix 几何收敛和 Circuitikz 模板收敛。没有同等的 schema、renderer、持久化、gallery 与 consumer 证据门禁前，不接纳新的无界 Mermaid layout 或 target；2026-08-18 记录的窄范围 Mermaid-only 候选准入是已明确记录的例外。
 
 ### Drawnix 与 Circuitikz 收敛（2026-08-17）
 
 Drawnix 生产边界现在有 canonical relation-router 模块和仅用于兼容的旧路径。`drawnixGeometry.ts` 统一负责矩形膨胀、严格重叠语义和按路径长度插值，避免 SVG projection 与 relation routing 在这些 primitive 上分叉。旧 cross-root router 只为源码兼容和定向测试保留；生产路由以 reserved-lane 为首选，并由 projection 负责原生标签定位。
 
 Circuitikz exporter 现在让六个 golden renderer 共享一个 standalone-document wrapper 和一个 component-label lookup helper。这是保持精确输出契约的结构重构：拓扑、voltage convention、layout hints 和 golden fixture 均不变。repair loop 继续作为 maintainer-only acceptance 边界。
+
+### 收敛后的候选准入（2026-08-18）
+
+收敛门禁现在足以支持一次窄范围目录扩展。`timeline`、`swimlane`、`quadrant` 各自拥有 typed payload 字段、parser-backed Mermaid adapter、intent/planner 路由、与旧 spec 兼容的读取、确定性 fixture、双语 gallery 行和定向测试。三者的 `compatibleTargets` 有意严格为 `['mermaid']`；不宣称 editable HTML/SVG、Draw.io 或 Drawnix 支持。webview presentation registry 也已把 Mermaid/Vega-Lite host shell、HTML document passthrough 与 source-only fallback 收敛到一个 keyed contract。

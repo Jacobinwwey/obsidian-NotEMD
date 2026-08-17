@@ -130,7 +130,10 @@ const MERMAID_COMPATIBLE_INTENTS = new Set<DiagramIntent>([
     'sequence',
     'classDiagram',
     'erDiagram',
-    'stateDiagram'
+    'stateDiagram',
+    'timeline',
+    'swimlane',
+    'quadrant'
 ]);
 
 function normalizeErrorMessage(error: unknown): string {

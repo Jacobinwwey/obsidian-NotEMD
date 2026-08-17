@@ -1,6 +1,6 @@
 ---
 date: 2026-08-15
-last_updated: 2026-08-17
+last_updated: 2026-08-18
 topic: mermaid-normalization-consolidation
 status: active
 canonical_for:
@@ -16,7 +16,7 @@ implementation_record: src/tests/mermaidNormalizationConvergence.test.ts
 
 This plan consolidates the Mermaid normalization/fix surfaces that currently disagree with each other and with the documented roadmap. It is the implementation slice for the roadmap's "dual stack" risk control and Task 3 sunset boundary (`docs/superpowers/plans/2026-04-14-diagram-rendering-platform-roadmap.en.md`).
 
-Scope: diagram-level Mermaid normalization shared by render, preview, and note-repair paths, plus the legacy chain's explicit ownership boundaries. Out of scope: adding new diagram types, changing the frozen legacy fix order, packaging/host work.
+Scope: diagram-level Mermaid normalization shared by render, preview, and note-repair paths, plus the legacy chain's explicit ownership boundaries. The original convergence slice did not add new diagram types; the follow-up catalog admission recorded in Section 11 adds only bounded Mermaid adapters after these gates closed.
 
 ## 2. Audit Findings And Corrections
 
@@ -163,10 +163,14 @@ Phases 0 through 3 are now landed. Phase 0 and the diagram-level portion of Phas
 - `extractMermaidBlocks`/`mapMermaidBlocks` are now shared by validation and repair paths; `fenceMermaidDefinition` is the canonical output boundary.
 - `ensureMermaidInitialized()` protects the plugin validation runtime from repeated global-config resets. Preview webviews retain separate theme-specific initialization by design.
 
-The remaining gap is intentionally narrower than the original audit: external consumer evidence, Drawnix geometry convergence, and Circuitikz template convergence. No new Mermaid layout or target is admitted until real consumer evidence is recorded.
+The remaining gap is intentionally narrower than the original audit: external consumer evidence, Drawnix geometry convergence, and Circuitikz template convergence. No new unbounded Mermaid layout or target is admitted without the same schema, renderer, persistence, gallery, and consumer evidence gates; the narrow Mermaid-only candidate admission in the 2026-08-18 update is the explicit exception already recorded below.
 
 ### Drawnix and Circuitikz convergence (2026-08-17)
 
 The Drawnix production boundary now has a canonical relation-router module and a compatibility-only old path. `drawnixGeometry.ts` owns rectangle inflation, strict overlap semantics, and path-length interpolation so SVG projection and relation routing cannot drift on those primitives. The legacy cross-root router remains exported only for source compatibility and focused tests; production routing is reserved-lane-first and owns native label placement.
 
 The Circuitikz exporter now shares one standalone-document wrapper and one component-label lookup helper across all six golden renderers. This is a structural refactor with an exact-output contract: topology, voltage conventions, layout hints, and golden fixtures remain unchanged. The repair loop remains a maintainer-only acceptance boundary.
+
+### Candidate admission after convergence (2026-08-18)
+
+The convergence gates are now sufficient for a narrow catalog expansion. `timeline`, `swimlane`, and `quadrant` each have typed payload fields, parser-backed Mermaid adapters, intent/planner routing, persistence-compatible spec reads, deterministic fixtures, bilingual gallery rows, and focused tests. Their `compatibleTargets` set is deliberately `['mermaid']`; no editable HTML/SVG, Draw.io, or Drawnix claim is made. The webview presentation registry also now keeps Mermaid/Vega-Lite host shells, HTML document passthrough, and source-only fallback behind one keyed contract.

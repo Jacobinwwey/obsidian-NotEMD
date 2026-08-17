@@ -619,13 +619,15 @@ function resolveRenderHostRuntimeConsumptionFacts({
     mainPath = path.resolve(__dirname, '..', 'src', 'main.ts'),
     previewModalPath = path.resolve(__dirname, '..', 'src', 'ui', 'DiagramPreviewModal.ts'),
     pagePath = path.resolve(__dirname, '..', 'src', 'rendering', 'webview', 'page.ts'),
-    renderFramePath = path.resolve(__dirname, '..', 'src', 'rendering', 'webview', 'renderFrame.ts')
+    renderFramePath = path.resolve(__dirname, '..', 'src', 'rendering', 'webview', 'renderFrame.ts'),
+    presentationRegistryPath = path.resolve(__dirname, '..', 'src', 'rendering', 'webview', 'presentationRegistry.ts')
 } = {}) {
     try {
         const mainSource = fs.readFileSync(mainPath, 'utf8');
         const previewModalSource = fs.readFileSync(previewModalPath, 'utf8');
         const pageSource = fs.readFileSync(pagePath, 'utf8');
         const renderFrameSource = fs.readFileSync(renderFramePath, 'utf8');
+        const presentationRegistrySource = fs.readFileSync(presentationRegistryPath, 'utf8');
 
         const mainCreatesIframeRenderHostSession = mainSource.includes('new IframeRenderHost().createSession(');
         const openPreviewDelegatesThroughModal = mainSource.includes('this.openDiagramPreviewModal(artifact, sourcePath, artifactSaved)');
@@ -633,17 +635,19 @@ function resolveRenderHostRuntimeConsumptionFacts({
             && previewModalSource.includes('createSession(artifact')
             && previewModalSource.includes('.htmlSrcdoc');
         const pageUsesRenderArtifactMarkup = pageSource.includes('renderArtifactMarkup(payload)');
-        const pageTreatsBridgeTargetsAsInlinePreviewable = pageSource.includes("payload.artifact.target === 'vega-lite' || payload.artifact.target === 'mermaid'")
-            && pageSource.includes('ensureRenderHostBridge();');
-        const renderFrameSupportsMermaid = renderFrameSource.includes("payload.artifact.target === 'mermaid'")
-            && renderFrameSource.includes('notemd-mermaid-mount')
-            && renderFrameSource.includes('buildMermaidRenderBootstrap');
-        const renderFrameSupportsVegaLite = renderFrameSource.includes("payload.artifact.target === 'vega-lite'")
-            && renderFrameSource.includes('notemd-vega-lite-mount')
-            && renderFrameSource.includes('buildVegaLiteRenderBootstrap');
+        const pageTreatsBridgeTargetsAsInlinePreviewable = pageSource.includes('presentation.requiresBridge')
+            && pageSource.includes('ensureRenderHostBridge();')
+            && presentationRegistrySource.includes("'mermaid'")
+            && presentationRegistrySource.includes("'vega-lite'");
+        const renderFrameSupportsMermaid = renderFrameSource.includes('getWebviewPresentation(payload.artifact.target)')
+            && presentationRegistrySource.includes('notemd-mermaid-mount')
+            && presentationRegistrySource.includes('buildMermaidRenderBootstrap');
+        const renderFrameSupportsVegaLite = renderFrameSource.includes('getWebviewPresentation(payload.artifact.target)')
+            && presentationRegistrySource.includes('notemd-vega-lite-mount')
+            && presentationRegistrySource.includes('buildVegaLiteRenderBootstrap');
 
         return {
-            sourcePaths: [mainPath, previewModalPath, pagePath, renderFramePath],
+            sourcePaths: [mainPath, previewModalPath, pagePath, renderFramePath, presentationRegistryPath],
             mainCreatesIframeRenderHostSession,
             openPreviewDelegatesThroughModal,
             previewModalUsesIframeSrcdoc,
@@ -655,7 +659,7 @@ function resolveRenderHostRuntimeConsumptionFacts({
         };
     } catch {
         return {
-            sourcePaths: [mainPath, previewModalPath, pagePath, renderFramePath],
+            sourcePaths: [mainPath, previewModalPath, pagePath, renderFramePath, presentationRegistryPath],
             mainCreatesIframeRenderHostSession: false,
             openPreviewDelegatesThroughModal: false,
             previewModalUsesIframeSrcdoc: false,

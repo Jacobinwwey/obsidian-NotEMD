@@ -267,4 +267,53 @@ describe('diagram spec validation', () => {
         expect(result.valid).toBe(false);
         expect(result.errors.join(' ')).toMatch(/CircuitSpec/i);
     });
+
+    test('validates timeline payloads independently from generic nodes', () => {
+        const valid: DiagramSpec = {
+            intent: 'timeline',
+            title: 'Roadmap',
+            nodes: [],
+            timelineEvents: [{ id: 'launch', date: '2026 Q3', label: 'Launch', details: ['Public release'] }]
+        };
+        expect(validateDiagramSpec(valid).valid).toBe(true);
+
+        const invalid = {
+            ...valid,
+            timelineEvents: [{ id: 'launch', date: '', label: 'Launch' }]
+        } as DiagramSpec;
+        expect(validateDiagramSpec(invalid).errors.join(' ')).toMatch(/date/i);
+    });
+
+    test('rejects swimlane handoffs that escape their lane', () => {
+        const result = validateDiagramSpec({
+            intent: 'swimlane',
+            title: 'Handoff',
+            nodes: [],
+            swimlaneLanes: [{
+                id: 'authoring',
+                label: 'Authoring',
+                steps: [{ id: 'draft', label: 'Draft', nextStepId: 'publish' }]
+            }]
+        });
+
+        expect(result.valid).toBe(false);
+        expect(result.errors.join(' ')).toMatch(/outside its lane/i);
+    });
+
+    test('enforces bounded quadrant coordinates and axis labels', () => {
+        const result = validateDiagramSpec({
+            intent: 'quadrant',
+            title: 'Priorities',
+            nodes: [],
+            quadrant: {
+                xAxisLabel: ['Low effort', 'High effort'],
+                yAxisLabel: ['Low impact', 'High impact'],
+                quadrantLabels: ['Invest', 'Quick wins', 'Defer', 'Evaluate'],
+                items: [{ id: 'invalid', label: 'Invalid', x: 1.2, y: 0.5 }]
+            }
+        });
+
+        expect(result.valid).toBe(false);
+        expect(result.errors.join(' ')).toMatch(/from 0 to 1/i);
+    });
 });

@@ -5,6 +5,9 @@ import { renderFlowchartMermaid } from '../../diagram/adapters/mermaid/flowchart
 import { renderMindmapMermaid } from '../../diagram/adapters/mermaid/mindmapAdapter';
 import { renderSequenceMermaid } from '../../diagram/adapters/mermaid/sequenceAdapter';
 import { renderStateMermaid } from '../../diagram/adapters/mermaid/stateAdapter';
+import { renderSwimlaneMermaid } from '../../diagram/adapters/mermaid/swimlaneAdapter';
+import { renderTimelineMermaid } from '../../diagram/adapters/mermaid/timelineAdapter';
+import { renderQuadrantMermaid } from '../../diagram/adapters/mermaid/quadrantAdapter';
 import { validateMermaidDefinition } from '../../diagram/adapters/mermaid/validator';
 import { DiagramRenderer, RenderArtifact } from '../types';
 
@@ -18,7 +21,10 @@ export class MermaidRenderer implements DiagramRenderer {
             || spec.intent === 'sequence'
             || spec.intent === 'classDiagram'
             || spec.intent === 'erDiagram'
-            || spec.intent === 'stateDiagram';
+            || spec.intent === 'stateDiagram'
+            || spec.intent === 'timeline'
+            || spec.intent === 'swimlane'
+            || spec.intent === 'quadrant';
     }
 
     async render(spec: DiagramSpec): Promise<RenderArtifact> {
@@ -44,6 +50,18 @@ export class MermaidRenderer implements DiagramRenderer {
 
         if (spec.intent === 'stateDiagram') {
             return this.buildArtifact(spec, renderStateMermaid(spec));
+        }
+
+        if (spec.intent === 'timeline') {
+            return this.buildArtifact(spec, renderTimelineMermaid(spec));
+        }
+
+        if (spec.intent === 'swimlane') {
+            return this.buildArtifact(spec, renderSwimlaneMermaid(spec));
+        }
+
+        if (spec.intent === 'quadrant') {
+            return this.buildArtifact(spec, renderQuadrantMermaid(spec));
         }
 
         throw new Error(`MermaidRenderer does not support diagram intent "${spec.intent}".`);

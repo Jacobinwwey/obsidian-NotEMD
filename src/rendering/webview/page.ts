@@ -1,6 +1,7 @@
 import { RenderWebviewPayload } from './contract';
 import { renderArtifactMarkup } from './renderFrame';
 import { ensureRenderHostBridge } from './bootstrap';
+import { getWebviewPresentation } from './presentationRegistry';
 
 function buildHtmlPreviewThemeShim(payload: RenderWebviewPayload): string {
     const colorScheme = payload.resolvedTheme === 'dark' ? 'dark' : 'light';
@@ -85,10 +86,9 @@ ${themedHtml}
 }
 
 export function buildRenderWebviewHtml(payload: RenderWebviewPayload): string {
-    if (
-        (payload.artifact.target === 'html' || payload.artifact.target === 'editable-html-svg')
-        && payload.artifact.mimeType === 'text/html'
-    ) {
+    const presentation = getWebviewPresentation(payload.artifact.target);
+
+    if (presentation.mode === 'html-document' && presentation.matches(payload)) {
         const trimmed = payload.artifact.content.trim();
         if (/^<!DOCTYPE html>/i.test(trimmed)) {
             return injectHtmlPreviewThemeShim(trimmed, payload);
@@ -106,7 +106,7 @@ ${payload.artifact.content}
 </html>`, payload);
     }
 
-    if (payload.artifact.target === 'vega-lite' || payload.artifact.target === 'mermaid') {
+    if (presentation.requiresBridge && presentation.matches(payload)) {
         ensureRenderHostBridge();
     }
 

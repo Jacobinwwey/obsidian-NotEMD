@@ -11,7 +11,10 @@ export const SUPPORTED_DIAGRAM_INTENTS = [
     'stateDiagram',
     'canvasMap',
     'circuit',
-    'dataChart'
+    'dataChart',
+    'timeline',
+    'swimlane',
+    'quadrant'
 ] as const;
 
 export type DiagramIntent = typeof SUPPORTED_DIAGRAM_INTENTS[number];
@@ -26,7 +29,10 @@ export const DIAGRAM_CATALOG_TYPE_IDS = [
     'entity-relationship',
     'canvas-map',
     'data-chart',
-    'circuit'
+    'circuit',
+    'timeline',
+    'swimlane',
+    'quadrant'
 ] as const;
 
 export type DiagramCatalogTypeId = typeof DIAGRAM_CATALOG_TYPE_IDS[number];
@@ -60,7 +66,9 @@ export type MermaidDiagramType =
     | 'sequenceDiagram'
     | 'classDiagram'
     | 'erDiagram'
-    | 'stateDiagram-v2';
+    | 'stateDiagram-v2'
+    | 'timeline'
+    | 'quadrantChart';
 
 export interface DiagramNode {
     id: string;
@@ -112,6 +120,40 @@ export interface DiagramDataSeries {
     points: DiagramDataPoint[];
 }
 
+export interface DiagramTimelineEvent {
+    id: string;
+    date: string | number;
+    label: string;
+    details?: string[];
+}
+
+export interface DiagramSwimlaneStep {
+    id: string;
+    label: string;
+    nextStepId?: string;
+}
+
+export interface DiagramSwimlaneLane {
+    id: string;
+    label: string;
+    steps: DiagramSwimlaneStep[];
+}
+
+export interface DiagramQuadrantItem {
+    id: string;
+    label: string;
+    x: number;
+    y: number;
+    detail?: string;
+}
+
+export interface DiagramQuadrantSpec {
+    xAxisLabel: [string, string];
+    yAxisLabel: [string, string];
+    quadrantLabels: [string, string, string, string];
+    items: DiagramQuadrantItem[];
+}
+
 export interface DiagramSpec {
     intent: DiagramIntent;
     title: string;
@@ -121,6 +163,9 @@ export interface DiagramSpec {
     sections?: DiagramSection[];
     callouts?: DiagramCallout[];
     dataSeries?: DiagramDataSeries[];
+    timelineEvents?: DiagramTimelineEvent[];
+    swimlaneLanes?: DiagramSwimlaneLane[];
+    quadrant?: DiagramQuadrantSpec;
     circuitSpec?: CircuitSpec;
     layoutHints?: Record<string, string | number | boolean>;
     sourceLanguage?: string;

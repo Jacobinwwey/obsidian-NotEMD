@@ -5,6 +5,7 @@ import {
 import { getExecutableDiagramType } from '../src/diagram/diagramTypeCatalog';
 import { createDefaultDiagramRendererService } from '../src/diagram/diagramGenerationService';
 import type { RenderArtifact } from '../src/rendering/types';
+import { EditableHtmlSvgRenderer } from '../src/rendering/renderers/editableHtmlSvgRenderer';
 import { renderJsonCanvasArtifactSvg } from '../src/rendering/preview/canvasPreview';
 import { renderMermaidArtifactSvg } from '../src/rendering/preview/mermaidPreview';
 import { renderVegaLiteArtifactSvg } from '../src/rendering/preview/vegaLitePreview';
@@ -93,11 +94,12 @@ function makeSvgAccessible(svg: string, fixtureId: string, title: string, descri
 
 async function renderGallery(): Promise<RenderedDiagramGalleryEntry[]> {
     const renderer = createDefaultDiagramRendererService();
+    const editableSvgRenderer = new EditableHtmlSvgRenderer();
     const entries: RenderedDiagramGalleryEntry[] = [];
     for (const example of getExecutableDiagramExamples()) {
         const type = getExecutableDiagramType(example.typeId);
         const artifact = await renderExecutableDiagramExample(example, renderer);
-        const previewArtifact = artifact.target === 'mermaid'
+        const previewArtifact = artifact.target === 'mermaid' && editableSvgRenderer.supports(example.spec)
             ? await renderer.render(example.spec, { target: 'editable-html-svg' })
             : artifact;
         const svg = makeSvgAccessible(

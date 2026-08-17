@@ -144,7 +144,10 @@ The deterministic renderer, not the model, emits the complete LaTeX document wit
 - stateDiagram
 - canvasMap
 - circuit
-- dataChart`;
+- dataChart
+- timeline
+- swimlane
+- quadrant`;
 
     const targetLanguageLine = options.targetLanguage
         ? `Write all human-readable labels in ${options.targetLanguage}.`
@@ -166,6 +169,10 @@ ${preferredIntentLine}
 ${preferredChartTypeLine}
 ${circuitikzTargetLine}
 ${drawnixMindMapTargetLine}
+Mermaid candidate intent contracts:
+- For timeline, set intent to timeline and provide timelineEvents[]. Each event requires id, date (string or number), label, and optional details[] strings. Do not encode timeline events only as generic nodes.
+- For swimlane, set intent to swimlane and provide swimlaneLanes[]. Each lane requires id, label, and a non-empty steps[] list. Each step requires id and label; nextStepId may reference another step in the same lane.
+- For quadrant, set intent to quadrant and provide quadrant with xAxisLabel [low, high], yAxisLabel [low, high], exactly four quadrantLabels, and quadrant items containing id, label, and x/y numbers in the inclusive 0..1 range.
 ${targetLanguageLine}
 
 Required DiagramSpec fields:
@@ -192,6 +199,7 @@ Validation rules:
 - Even single-series charts must include both series id and series label.
 - For dataChart intent, set layoutHints.chartType to one of: ${supportedChartTypes}.
 - Use scatter for paired numeric x/y observations, pie for part-to-whole categorical shares, and table when ranked/tabular rows communicate better than axes.
+- For timeline, swimlane, and quadrant intents, use only the dedicated payload described above and keep identifiers stable and unique.
 
 Return a single valid DiagramSpec JSON object.`;
 }

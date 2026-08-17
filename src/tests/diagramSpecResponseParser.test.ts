@@ -106,6 +106,30 @@ describe('diagram spec response parser', () => {
         expect(spec.circuitSpec?.goldenReferenceId).toBe('cmos-inverter-v1');
     });
 
+    test('round-trips specialized timeline, swimlane, and quadrant payloads', () => {
+        const spec = parseDiagramSpecResponse(JSON.stringify({
+            intent: 'swimlane',
+            title: 'Release handoff',
+            nodes: [],
+            timelineEvents: [{ id: 'release', date: '2026 Q3', label: 'Release' }],
+            swimlaneLanes: [{
+                id: 'delivery',
+                label: 'Delivery',
+                steps: [{ id: 'build', label: 'Build', next: 'publish' }, { id: 'publish', label: 'Publish' }]
+            }],
+            quadrant: {
+                xAxisLabel: ['Low effort', 'High effort'],
+                yAxisLabel: ['Low impact', 'High impact'],
+                quadrantLabels: ['Invest', 'Quick wins', 'Defer', 'Evaluate'],
+                items: [{ id: 'adapter', label: 'Adapter', x: 0.8, y: 0.7, detail: 'high leverage' }]
+            }
+        }));
+
+        expect(spec.timelineEvents?.[0]).toMatchObject({ id: 'release', date: '2026 Q3' });
+        expect(spec.swimlaneLanes?.[0].steps[0].nextStepId).toBe('publish');
+        expect(spec.quadrant?.items[0]).toMatchObject({ id: 'adapter', x: 0.8, y: 0.7 });
+    });
+
     test('throws when no valid json object can be extracted', () => {
         expect(() => parseDiagramSpecResponse('not valid json')).toThrow(/Unable to parse DiagramSpec/i);
     });

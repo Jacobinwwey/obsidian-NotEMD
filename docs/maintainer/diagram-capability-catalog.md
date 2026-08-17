@@ -1,6 +1,6 @@
 ---
 date: 2026-08-16
-last_updated: 2026-08-16
+last_updated: 2026-08-18
 status: current-contract
 canonical_for: diagram-capability-catalog
 ---
@@ -24,6 +24,9 @@ The target descriptor is the runtime authority for artifact mechanics. Its `expo
 | `entity-relationship` | Entities, fields, and cardinality | Mermaid | `entity-relationship-schema` | Settings preview action | source `.md`, SVG, PNG, PDF |
 | `canvas-map` | Spatially grouped concepts | JSON Canvas | `canvas-map-domains` | Iframe / Canvas artifact | source `.canvas`, SVG, PNG, PDF |
 | `data-chart` | Measured comparison over an axis | Vega-Lite | `data-chart-trend` | Sandboxed iframe | source `.json` / Vault `.md`, SVG, PNG, PDF |
+| `timeline` | Ordered milestones over time | Mermaid | `timeline-roadmap` | Mermaid iframe | source `.md`, SVG, PNG, PDF |
+| `swimlane` | Cross-functional responsibility flow | Mermaid | `swimlane-release` | Mermaid iframe | source `.md`, SVG, PNG, PDF |
+| `quadrant` | Two-axis prioritization matrix | Mermaid | `quadrant-priorities` | Mermaid iframe | source `.md`, SVG, PNG, PDF |
 | `circuit` | Electrical components and nets | Circuitikz | `circuit-cmos-inverter` | SVG companion / source | `.tex`, SVG, PNG, PDF* |
 
 `*` Circuitikz PDF/PNG claims require the pinned native compiler gate. Source artifacts and image exports are separate capabilities; editable HTML/SVG uses a self-contained HTML source artifact plus the descriptor's SVG/PNG/PDF image exports.
@@ -43,7 +46,7 @@ The target descriptor is the runtime authority for artifact mechanics. Its `expo
 
 ## Reference-Only / Planned Types
 
-The following names come from `ref/diagram-design` and are not currently selectable in Notemd: architecture, IT current-state, timeline, swimlane, quadrant, radar/spider, loop/flywheel, nested, tree, org chart, layer stack, Venn, pyramid/funnel, bar, line, Gantt, scatter, high-level, process, medallion, data flow, DP integration, and DP security matrix. They require the candidate admission checklist in the forward architecture plan.
+The following names come from `ref/diagram-design` and are not currently selectable in Notemd: architecture, IT current-state, radar/spider, loop/flywheel, nested, tree, org chart, layer stack, Venn, pyramid/funnel, bar, line, Gantt, scatter, high-level, process, medallion, data flow, DP integration, and DP security matrix. Timeline, swimlane, and quadrant have crossed the candidate gate as Mermaid-only types; they are not advertised as editable HTML/SVG, Draw.io, or Drawnix targets.
 
 ## Preview and Gallery Contract
 

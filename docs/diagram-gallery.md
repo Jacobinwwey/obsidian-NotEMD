@@ -24,6 +24,9 @@ This page is the user-facing inventory of the diagram types that Notemd can exec
 | `entity-relationship` | Entity cardinality and attributes | `mermaid` | `mermaid`, `editable-html-svg`, `drawio`, `html` |
 | `canvas-map` | Spatially grouped concepts | `json-canvas` | `json-canvas` |
 | `data-chart` | Measured comparison over a shared axis | `vega-lite` | `vega-lite`, `html` |
+| `timeline` | Ordered milestones over time | `mermaid` | `mermaid` |
+| `swimlane` | Cross-functional responsibility flow | `mermaid` | `mermaid` |
+| `quadrant` | Two-axis prioritization matrix | `mermaid` | `mermaid` |
 | `circuit` | Electrical components and nets | `circuitikz` | `circuitikz` |
 
 ## Preview Examples
@@ -64,14 +67,26 @@ This page is the user-facing inventory of the diagram types that Notemd can exec
 
 ![Rendering trend](./assets/diagrams/data-chart-trend.png)
 
+### Timeline
+
+![Delivery roadmap](./assets/diagrams/timeline-roadmap.png)
+
+### Swimlane
+
+![Release handoff](./assets/diagrams/swimlane-release.png)
+
+### Quadrant
+
+![Priority matrix](./assets/diagrams/quadrant-priorities.png)
+
 ### Circuitikz circuit
 
 ![CMOS inverter](./assets/diagrams/circuit-cmos-inverter.png)
 
 ## Reference-Only Layouts
 
-The following 27 IDs are imported from `ref/diagram-design` for comparison and future admission discussions. They are intentionally namespaced as `diagram-design:*`, carry reference revision `09df49d8d1a1c7fb2efdfcdc7a2a0713534350a6`, and do not appear in the runtime type selector:
+The following 24 IDs are imported from `ref/diagram-design` for comparison and future admission discussions. They are intentionally namespaced as `diagram-design:*`, carry reference revision `09df49d8d1a1c7fb2efdfcdc7a2a0713534350a6`, and do not appear in the runtime type selector:
 
-`architecture`, `it-current-state`, `flowchart`, `sequence`, `state-machine`, `er-data-model`, `timeline`, `swimlane`, `quadrant`, `radar`, `loop`, `nested`, `tree`, `org-chart`, `layer-stack`, `venn`, `pyramid-funnel`, `bar-chart`, `line-chart`, `gantt`, `scatter-plot`, `high-level`, `process`, `medallion`, `data-flow`, `dp-integration`, `dp-security-matrix`.
+`architecture`, `it-current-state`, `flowchart`, `sequence`, `state-machine`, `er-data-model`, `radar`, `loop`, `nested`, `tree`, `org-chart`, `layer-stack`, `venn`, `pyramid-funnel`, `bar-chart`, `line-chart`, `gantt`, `scatter-plot`, `high-level`, `process`, `medallion`, `data-flow`, `dp-integration`, `dp-security-matrix`.
 
 Promoting one of these layouts requires a semantic input contract, a production renderer, a fixture, a target/export matrix, accessibility checks, and deterministic gallery output. A visual resemblance to the reference is not sufficient evidence of support.

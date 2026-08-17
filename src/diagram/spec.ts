@@ -118,6 +118,160 @@ function validateNonChartLayoutHints(spec: DiagramSpec, errors: string[]): void 
     }
 }
 
+function validateTimelinePayload(spec: DiagramSpec, errors: string[]): void {
+    const events = spec.timelineEvents;
+    if (!Array.isArray(events) || events.length === 0) {
+        errors.push('Diagram intent "timeline" requires at least one timeline event.');
+        return;
+    }
+
+    const ids = new Set<string>();
+    events.forEach((event, index) => {
+        const eventId = typeof event?.id === 'string' ? event.id.trim() : '';
+        if (!eventId) {
+            errors.push(`Timeline event ${index + 1} is missing an id.`);
+        } else if (ids.has(eventId)) {
+            errors.push(`Timeline event id "${eventId}" is duplicated.`);
+        } else {
+            ids.add(eventId);
+        }
+
+        const dateIsValid = (typeof event?.date === 'string' && event.date.trim().length > 0)
+            || (typeof event?.date === 'number' && Number.isFinite(event.date));
+        if (!dateIsValid) {
+            errors.push(`Timeline event "${eventId || index + 1}" requires a string or numeric date.`);
+        }
+        if (typeof event?.label !== 'string' || !event.label.trim()) {
+            errors.push(`Timeline event "${eventId || index + 1}" is missing a label.`);
+        }
+        if (event?.details !== undefined && (!Array.isArray(event.details)
+            || event.details.some(detail => typeof detail !== 'string' || !detail.trim()))) {
+            errors.push(`Timeline event "${eventId || index + 1}" contains an invalid details list.`);
+        }
+    });
+}
+
+function validateSwimlanePayload(spec: DiagramSpec, errors: string[]): void {
+    const lanes = spec.swimlaneLanes;
+    if (!Array.isArray(lanes) || lanes.length === 0) {
+        errors.push('Diagram intent "swimlane" requires at least one swimlane.');
+        return;
+    }
+
+    const laneIds = new Set<string>();
+    const stepIds = new Set<string>();
+    const stepsByLane = new Map<string, Set<string>>();
+    lanes.forEach((lane, laneIndex) => {
+        const laneId = typeof lane?.id === 'string' ? lane.id.trim() : '';
+        if (!laneId) {
+            errors.push(`Swimlane ${laneIndex + 1} is missing an id.`);
+        } else if (laneIds.has(laneId)) {
+            errors.push(`Swimlane id "${laneId}" is duplicated.`);
+        } else {
+            laneIds.add(laneId);
+        }
+        if (typeof lane?.label !== 'string' || !lane.label.trim()) {
+            errors.push(`Swimlane "${laneId || laneIndex + 1}" is missing a label.`);
+        }
+        if (!Array.isArray(lane?.steps) || lane.steps.length === 0) {
+            errors.push(`Swimlane "${laneId || laneIndex + 1}" requires at least one step.`);
+            return;
+        }
+
+        const laneStepIds = new Set<string>();
+        stepsByLane.set(laneId, laneStepIds);
+        lane.steps.forEach((step, stepIndex) => {
+            const stepId = typeof step?.id === 'string' ? step.id.trim() : '';
+            if (!stepId) {
+                errors.push(`Swimlane "${laneId || laneIndex + 1}" step ${stepIndex + 1} is missing an id.`);
+            } else {
+                if (stepIds.has(stepId)) {
+                    errors.push(`Swimlane step id "${stepId}" is duplicated.`);
+                }
+                if (!laneStepIds.has(stepId)) {
+                    laneStepIds.add(stepId);
+                    stepIds.add(stepId);
+                }
+            }
+            if (typeof step?.label !== 'string' || !step.label.trim()) {
+                errors.push(`Swimlane step "${stepId || stepIndex + 1}" is missing a label.`);
+            }
+        });
+    });
+
+    lanes.forEach(lane => {
+        const laneId = typeof lane?.id === 'string' ? lane.id.trim() : '';
+        const laneStepIds = stepsByLane.get(laneId) ?? new Set<string>();
+        lane?.steps?.forEach(step => {
+            const nextStepId = typeof step?.nextStepId === 'string' ? step.nextStepId.trim() : '';
+            if (nextStepId && !laneStepIds.has(nextStepId)) {
+                errors.push(`Swimlane step "${step.id || 'unknown'}" points to a step outside its lane.`);
+            }
+        });
+    });
+}
+
+function validateQuadrantPayload(spec: DiagramSpec, errors: string[]): void {
+    const quadrant = spec.quadrant;
+    if (!quadrant) {
+        errors.push('Diagram intent "quadrant" requires a quadrant payload.');
+        return;
+    }
+    if (!Array.isArray(quadrant.xAxisLabel) || quadrant.xAxisLabel.length !== 2
+        || quadrant.xAxisLabel.some(label => typeof label !== 'string' || !label.trim())) {
+        errors.push('Quadrant payload requires two non-empty xAxisLabel values.');
+    }
+    if (!Array.isArray(quadrant.yAxisLabel) || quadrant.yAxisLabel.length !== 2
+        || quadrant.yAxisLabel.some(label => typeof label !== 'string' || !label.trim())) {
+        errors.push('Quadrant payload requires two non-empty yAxisLabel values.');
+    }
+    if (!Array.isArray(quadrant.quadrantLabels) || quadrant.quadrantLabels.length !== 4
+        || quadrant.quadrantLabels.some(label => typeof label !== 'string' || !label.trim())) {
+        errors.push('Quadrant payload requires exactly four non-empty quadrantLabels.');
+    }
+    if (!Array.isArray(quadrant.items) || quadrant.items.length === 0) {
+        errors.push('Quadrant payload requires at least one item.');
+        return;
+    }
+
+    const ids = new Set<string>();
+    quadrant.items.forEach((item, index) => {
+        const itemId = typeof item?.id === 'string' ? item.id.trim() : '';
+        if (!itemId) {
+            errors.push(`Quadrant item ${index + 1} is missing an id.`);
+        } else if (ids.has(itemId)) {
+            errors.push(`Quadrant item id "${itemId}" is duplicated.`);
+        } else {
+            ids.add(itemId);
+        }
+        if (typeof item?.label !== 'string' || !item.label.trim()) {
+            errors.push(`Quadrant item "${itemId || index + 1}" is missing a label.`);
+        }
+        if (typeof item?.x !== 'number' || !Number.isFinite(item.x) || item.x < 0 || item.x > 1) {
+            errors.push(`Quadrant item "${itemId || index + 1}" x must be a finite number from 0 to 1.`);
+        }
+        if (typeof item?.y !== 'number' || !Number.isFinite(item.y) || item.y < 0 || item.y > 1) {
+            errors.push(`Quadrant item "${itemId || index + 1}" y must be a finite number from 0 to 1.`);
+        }
+    });
+}
+
+function validateSpecializedPayload(spec: DiagramSpec, errors: string[]): void {
+    switch (spec.intent) {
+        case 'timeline':
+            validateTimelinePayload(spec, errors);
+            break;
+        case 'swimlane':
+            validateSwimlanePayload(spec, errors);
+            break;
+        case 'quadrant':
+            validateQuadrantPayload(spec, errors);
+            break;
+        default:
+            break;
+    }
+}
+
 function validateCircuitPayload(spec: DiagramSpec, errors: string[]): void {
     if (spec.circuitSpec && spec.intent !== 'circuit') {
         errors.push('DiagramSpec.circuitSpec is only valid when intent is "circuit".');
@@ -151,7 +305,12 @@ export function validateDiagramSpec(spec: DiagramSpec): DiagramSpecValidationRes
     const nodeIds = new Set<string>();
     collectNodeIds(spec.nodes ?? [], nodeIds, errors);
 
-    if (spec.intent !== 'dataChart' && spec.intent !== 'circuit' && nodeIds.size === 0) {
+    const usesSpecializedPayload = spec.intent === 'dataChart'
+        || spec.intent === 'circuit'
+        || spec.intent === 'timeline'
+        || spec.intent === 'swimlane'
+        || spec.intent === 'quadrant';
+    if (!usesSpecializedPayload && nodeIds.size === 0) {
         errors.push(`Diagram intent "${spec.intent}" requires at least one node.`);
     }
 
@@ -172,6 +331,7 @@ export function validateDiagramSpec(spec: DiagramSpec): DiagramSpecValidationRes
     }
 
     validateCircuitPayload(spec, errors);
+    validateSpecializedPayload(spec, errors);
 
     return {
         valid: errors.length === 0,

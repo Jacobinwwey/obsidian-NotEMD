@@ -1,6 +1,6 @@
 ---
 date: 2026-08-16
-last_updated: 2026-08-16
+last_updated: 2026-08-18
 status: current-contract
 canonical_for: diagram-capability-catalog
 ---
@@ -24,6 +24,9 @@ target descriptor 是 artifact 机制的运行时权威。其 `exportFormats` �
 | `entity-relationship` | 实体、字段和基数 | Mermaid | `entity-relationship-schema` | 设置页预览动作 | source `.md`、SVG、PNG、PDF |
 | `canvas-map` | 空间分组概念 | JSON Canvas | `canvas-map-domains` | iframe / Canvas 产物 | source `.canvas`、SVG、PNG、PDF |
 | `data-chart` | 共享坐标轴上的度量比较 | Vega-Lite | `data-chart-trend` | sandbox iframe | source `.json` / Vault `.md`、SVG、PNG、PDF |
+| `timeline` | 按时间排序的里程碑 | Mermaid | `timeline-roadmap` | Mermaid iframe | source `.md`、SVG、PNG、PDF |
+| `swimlane` | 跨团队职责流转 | Mermaid | `swimlane-release` | Mermaid iframe | source `.md`、SVG、PNG、PDF |
+| `quadrant` | 双轴优先级矩阵 | Mermaid | `quadrant-priorities` | Mermaid iframe | source `.md`、SVG、PNG、PDF |
 | `circuit` | 电气元件与网络 | Circuitikz | `circuit-cmos-inverter` | SVG companion / source | `.tex`、SVG、PNG、PDF* |
 
 `*` Circuitikz 的 PDF/PNG 必须经过固定原生编译器门禁。源 artifact 与图片导出是独立能力；editable HTML/SVG 使用自包含 HTML 源 artifact，以及 descriptor 声明的 SVG/PNG/PDF 图片导出。
@@ -43,7 +46,7 @@ target descriptor 是 artifact 机制的运行时权威。其 `exportFormats` �
 
 ## 参考/计划类型
 
-以下名称来自 `ref/diagram-design`，当前不可在 Notemd 选择：architecture、IT current-state、timeline、swimlane、quadrant、radar/spider、loop/flywheel、nested、tree、org chart、layer stack、Venn、pyramid/funnel、bar、line、Gantt、scatter、high-level、process、medallion、data flow、DP integration 和 DP security matrix。它们必须经过向前架构计划中的候选准入清单。
+以下名称来自 `ref/diagram-design`，当前不可在 Notemd 选择：architecture、IT current-state、radar/spider、loop/flywheel、nested、tree、org chart、layer stack、Venn、pyramid/funnel、bar、line、Gantt、scatter、high-level、process、medallion、data flow、DP integration 和 DP security matrix。Timeline、swimlane、quadrant 已通过候选准入，当前严格是 Mermaid-only 类型，不宣称 editable HTML/SVG、Draw.io 或 Drawnix target。
 
 ## 预览与 gallery 契约
 

@@ -31,7 +31,11 @@ describe('executable diagram example catalog', () => {
         );
         expect(examples.every(example => example.fixtureId.trim().length > 0)).toBe(true);
         expect(examples.every(example => example.selectionRationale.trim().length > 0)).toBe(true);
-        expect(examples.some(example => example.typeId === ('timeline' as never))).toBe(false);
+        expect(examples.map(example => example.typeId)).toEqual(expect.arrayContaining([
+            'timeline',
+            'swimlane',
+            'quadrant'
+        ]));
     });
 
     test('renders every catalog fixture through its production renderer binding', async () => {

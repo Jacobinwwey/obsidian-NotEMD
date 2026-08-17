@@ -211,6 +211,75 @@ const EXECUTABLE_DIAGRAM_EXAMPLES: readonly DiagramExampleDefinition[] = [
         }
     },
     {
+        typeId: 'timeline',
+        fixtureId: 'timeline-roadmap',
+        title: 'Delivery roadmap',
+        selectionRationale: 'Use for dated milestones where sequence and timing are the primary meaning.',
+        sourceIntent: 'timeline',
+        spec: {
+            intent: 'timeline',
+            title: 'Delivery roadmap',
+            nodes: [],
+            timelineEvents: [
+                { id: 'discovery', date: '2024 Q1', label: 'Discovery', details: ['Define the contract'] },
+                { id: 'preview', date: '2024 Q2', label: 'Preview', details: ['Ship deterministic examples'] },
+                { id: 'release', date: '2024 Q3', label: 'Release' }
+            ]
+        }
+    },
+    {
+        typeId: 'swimlane',
+        fixtureId: 'swimlane-release',
+        title: 'Release handoff',
+        selectionRationale: 'Use when multiple owners hand work to one another across a process.',
+        sourceIntent: 'swimlane',
+        spec: {
+            intent: 'swimlane',
+            title: 'Release handoff',
+            nodes: [],
+            swimlaneLanes: [
+                {
+                    id: 'authoring',
+                    label: 'Authoring',
+                    steps: [
+                        { id: 'draft', label: 'Draft spec', nextStepId: 'review' },
+                        { id: 'review', label: 'Review contract' }
+                    ]
+                },
+                {
+                    id: 'delivery',
+                    label: 'Delivery',
+                    steps: [
+                        { id: 'build', label: 'Build artifact', nextStepId: 'publish' },
+                        { id: 'publish', label: 'Publish release' }
+                    ]
+                }
+            ]
+        }
+    },
+    {
+        typeId: 'quadrant',
+        fixtureId: 'quadrant-priorities',
+        title: 'Priority matrix',
+        selectionRationale: 'Use for bounded two-axis prioritization with comparable item positions.',
+        sourceIntent: 'quadrant',
+        spec: {
+            intent: 'quadrant',
+            title: 'Priority matrix',
+            nodes: [],
+            quadrant: {
+                xAxisLabel: ['Low effort', 'High effort'],
+                yAxisLabel: ['Low impact', 'High impact'],
+                quadrantLabels: ['Invest', 'Quick wins', 'Defer', 'Evaluate'],
+                items: [
+                    { id: 'adapter', label: 'Adapter registry', x: 0.78, y: 0.84, detail: 'high leverage' },
+                    { id: 'docs', label: 'Docs gallery', x: 0.32, y: 0.68 },
+                    { id: 'cleanup', label: 'Cleanup pass', x: 0.24, y: 0.28 }
+                ]
+            }
+        }
+    },
+    {
         typeId: 'circuit',
         fixtureId: 'circuit-cmos-inverter',
         title: 'CMOS inverter',

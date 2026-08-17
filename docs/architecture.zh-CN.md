@@ -148,7 +148,7 @@ flowchart LR
     end
 
     subgraph Target["输出目标"]
-        MERMAID["Mermaid<br/>（流程图、时序、类、ER、状态、思维导图）"]
+        MERMAID["Mermaid<br/>（流程图、时序、类、ER、状态、思维导图、timeline、swimlane、quadrant）"]
         CANVAS["JSON Canvas<br/>（画布图）"]
         VEGA["Vega-Lite<br/>（数据图表）"]
         HTML["HTML 回退"]
@@ -196,6 +196,9 @@ flowchart LR
 | `classDiagram` | mermaid | MermaidRenderer | 弹窗/iframe | source `.md`、SVG、PNG、PDF |
 | `erDiagram` | mermaid | MermaidRenderer | 弹窗/iframe | source `.md`、SVG、PNG、PDF |
 | `stateDiagram` | mermaid | MermaidRenderer | 弹窗/iframe | source `.md`、SVG、PNG、PDF |
+| `timeline` | mermaid | MermaidRenderer | 弹窗/iframe | source `.md`、SVG、PNG、PDF |
+| `swimlane` | mermaid | MermaidRenderer | 弹窗/iframe | source `.md`、SVG、PNG、PDF |
+| `quadrant` | mermaid | MermaidRenderer | 弹窗/iframe | source `.md`、SVG、PNG、PDF |
 | `canvasMap` | json-canvas | JsonCanvasRenderer | 弹窗/iframe | source `.canvas`、SVG、PNG、PDF |
 | `dataChart` | vega-lite | VegaLiteRenderer | 弹窗/iframe（沙盒） | source `.json` / Vault `.md`、SVG、PNG、PDF |
 | `circuit` | circuitikz | CircuitikzRenderer | SVG companion 或 source-only 预览 | `.tex`、SVG、PNG、PDF |
@@ -206,7 +209,7 @@ flowchart LR
 
 图形平台保持三条独立轴：语义类型、渲染目标和导出格式。当前可执行真值是类型目录、生产 example fixture、target descriptor 和带版本的 capability manifest。target descriptor 负责 artifact 机制；manifest 把语义类型、兼容 target 与 fixture 证据组合起来。`SVG`、`PNG`、`PDF` 是导出格式，不是 render target。
 
-当前已交付 10 个语义类型、8 个渲染目标和 3 个导出格式。设置页 gallery 与生成选择器都执行每类一个生产 renderer fixture；`scripts/generate-diagram-gallery.js` 生成确定性的 SVG/PNG 资产和带哈希 manifest，并供双语文档 gallery 使用。`ref/diagram-design` 的参考布局在具备 renderer、fixture、预览、持久化映射、文档行和自动化门禁之前，保持 `reference-only/planned`。
+当前已交付 13 个语义类型、8 个渲染目标和 3 个导出格式。Timeline、swimlane、quadrant 在建立 editable 或外部 consumer 契约前，严格只兼容 Mermaid。设置页 gallery 与生成选择器都执行每类一个生产 renderer fixture；`scripts/generate-diagram-gallery.js` 生成确定性的 SVG/PNG 资产和带哈希 manifest，并供双语文档 gallery 使用。`ref/diagram-design` 的其余参考布局在具备 renderer、fixture、预览、持久化映射、文档行和自动化门禁之前，保持 `reference-only/planned`。
 
 已交付顺序是先解决正确性基础，再做目录/契约生成，随后接入确定性预览资产、选择器和文档。Mermaid 规范化、legacy 修复阶段化、family 门控、fence 所有权和验证 runtime 初始化现已收敛。剩余工作已收窄为真实外部 consumer 证据、Drawnix 几何收敛和 Circuitikz 模板收敛。见[当前进度审计](./brainstorms/2026-08-16-mainline-diagram-architecture-progress-and-next-direction.zh-CN.md)、[图形能力目录](./maintainer/diagram-capability-catalog.zh-CN.md)、[图形 Gallery](./diagram-gallery.zh-CN.md)和[向前架构计划](./superpowers/plans/2026-08-16-diagram-capability-catalog-and-forward-architecture.zh-CN.md)。
 
@@ -270,7 +273,7 @@ Drawnix 源图形遵循同一条兼容性边界。默认关闭 **同时完整输
 
 ### Target Adapter Dispatch
 
-运行时 target dispatch 现在使用 `src/rendering/targetAdapterRegistry.ts` 作为 keyed registry primitive。`src/rendering/preview/previewTargetAdapterRegistry.ts` 负责 SVG preview/raster 操作，`src/rendering/runtime/renderHostTargetAdapterRegistry.ts` 负责 bundled render-host 操作与错误节点。重复 target 注册会在模块构造时失败；不可信 render-host payload target 会 fail-closed。webview markup 仍是 `renderFrame.ts` 与 `webview/page.ts` 中独立的 presentation 契约，不把它误认为 renderer capability metadata。
+运行时 target dispatch 现在使用 `src/rendering/targetAdapterRegistry.ts` 作为 keyed registry primitive。`src/rendering/preview/previewTargetAdapterRegistry.ts` 负责 SVG preview/raster，`src/rendering/runtime/renderHostTargetAdapterRegistry.ts` 负责 bundled render-host 与错误节点，`src/rendering/webview/presentationRegistry.ts` 负责 host-shell/document/source-only presentation。重复 target 注册会在模块构造时失败；不可信 render-host 或 webview payload target 会 fail-closed。Presentation mode 仍与 renderer capability metadata 分离。
 
 ## 模块地图
 

@@ -79,9 +79,18 @@ describe('diagram capability manifest', () => {
     test('keeps diagram-design layouts reference-only and out of the runtime selector', () => {
         const manifest = getDiagramCapabilityManifest();
 
-        expect(manifest.referenceOnlyLayouts).toHaveLength(27);
+        expect(manifest.referenceOnlyLayouts).toHaveLength(24);
         expect(manifest.referenceOnlyLayouts.every(layout => layout.lifecycle === 'reference-only')).toBe(true);
-        expect(manifest.referenceOnlyLayouts.some(layout => layout.id === 'diagram-design:timeline')).toBe(true);
-        expect(EXECUTABLE_DIAGRAM_TYPES.map(type => type.id)).not.toContain('timeline');
+        expect(manifest.referenceOnlyLayouts.some(layout => layout.id === 'diagram-design:radar')).toBe(true);
+        expect(EXECUTABLE_DIAGRAM_TYPES.map(type => type.id)).toEqual(expect.arrayContaining([
+            'timeline',
+            'swimlane',
+            'quadrant'
+        ]));
+        expect(manifest.shippedTypes
+            .filter(type => ['timeline', 'swimlane', 'quadrant'].includes(type.id))
+            .every(type => type.defaultTarget === 'mermaid'
+                && type.compatibleTargets.length === 1
+                && type.compatibleTargets[0] === 'mermaid')).toBe(true);
     });
 });

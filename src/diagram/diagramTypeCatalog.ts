@@ -137,6 +137,45 @@ export const EXECUTABLE_DIAGRAM_TYPES: readonly ExecutableDiagramTypeDefinition[
         exampleFixtureId: 'data-chart-trend'
     },
     {
+        id: 'timeline',
+        intent: 'timeline',
+        family: 'behavior',
+        semanticPattern: 'Ordered milestones over time',
+        promptProfileId: 'timeline',
+        rendererOperationId: 'mermaid-timeline',
+        rendererTarget: 'mermaid',
+        defaultTarget: 'mermaid',
+        compatibleTargets: ['mermaid'],
+        visualRoles: ['date', 'event', 'detail'],
+        exampleFixtureId: 'timeline-roadmap'
+    },
+    {
+        id: 'swimlane',
+        intent: 'swimlane',
+        family: 'behavior',
+        semanticPattern: 'Cross-functional responsibility flow',
+        promptProfileId: 'swimlane',
+        rendererOperationId: 'mermaid-swimlane',
+        rendererTarget: 'mermaid',
+        defaultTarget: 'mermaid',
+        compatibleTargets: ['mermaid'],
+        visualRoles: ['lane', 'step', 'handoff'],
+        exampleFixtureId: 'swimlane-release'
+    },
+    {
+        id: 'quadrant',
+        intent: 'quadrant',
+        family: 'quantitative',
+        semanticPattern: 'Two-axis prioritization matrix',
+        promptProfileId: 'quadrant',
+        rendererOperationId: 'mermaid-quadrant',
+        rendererTarget: 'mermaid',
+        defaultTarget: 'mermaid',
+        compatibleTargets: ['mermaid'],
+        visualRoles: ['axis', 'quadrant', 'item'],
+        exampleFixtureId: 'quadrant-priorities'
+    },
+    {
         id: 'circuit',
         intent: 'circuit',
         family: 'engineering',

@@ -92,6 +92,36 @@
       "svgSha256": "d287b1542683a8348eeb19f2ef2cee6dc24254684c3af23498635c8062f65e6d"
     },
     {
+      "typeId": "timeline",
+      "fixtureId": "timeline-roadmap",
+      "title": "Delivery roadmap",
+      "target": "mermaid",
+      "previewTarget": "mermaid",
+      "svgPath": "./timeline-roadmap.svg",
+      "pngPath": "./timeline-roadmap.png",
+      "svgSha256": "6a414d75c696eae178e998e724aa576a0f66fd8801e78dbc2051132e70a4e98b"
+    },
+    {
+      "typeId": "swimlane",
+      "fixtureId": "swimlane-release",
+      "title": "Release handoff",
+      "target": "mermaid",
+      "previewTarget": "mermaid",
+      "svgPath": "./swimlane-release.svg",
+      "pngPath": "./swimlane-release.png",
+      "svgSha256": "37d8a40fb143e6a734a90bb5974ca2d2aed7ac57e95195dac0d6c031aad39201"
+    },
+    {
+      "typeId": "quadrant",
+      "fixtureId": "quadrant-priorities",
+      "title": "Priority matrix",
+      "target": "mermaid",
+      "previewTarget": "mermaid",
+      "svgPath": "./quadrant-priorities.svg",
+      "pngPath": "./quadrant-priorities.png",
+      "svgSha256": "13175399d1a2b9448c90419c815cd2375976c9cdc1fc9b31e18f6ee72f738348"
+    },
+    {
       "typeId": "circuit",
       "fixtureId": "circuit-cmos-inverter",
       "title": "CMOS inverter",

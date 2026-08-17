@@ -2747,7 +2747,10 @@ export class NotemdSettingTab extends PluginSettingTab {
                     intentStateDiagram: experimentalDiagramI18n.intentStateDiagram,
                     intentCanvasMap: experimentalDiagramI18n.intentCanvasMap,
                     intentCircuit: experimentalDiagramI18n.intentCircuit,
-                    intentDataChart: experimentalDiagramI18n.intentDataChart
+                    intentDataChart: experimentalDiagramI18n.intentDataChart,
+                    intentTimeline: experimentalDiagramI18n.intentTimeline,
+                    intentSwimlane: experimentalDiagramI18n.intentSwimlane,
+                    intentQuadrant: experimentalDiagramI18n.intentQuadrant
                 }).forEach(({ value, label }) => dropdown.addOption(value, label));
                 dropdown
                     .setValue(this.plugin.settings.preferredDiagramIntent || 'auto')
@@ -2804,6 +2807,9 @@ export class NotemdSettingTab extends PluginSettingTab {
                 intentCanvasMap: experimentalDiagramI18n.intentCanvasMap,
                 intentCircuit: experimentalDiagramI18n.intentCircuit,
                 intentDataChart: experimentalDiagramI18n.intentDataChart,
+                intentTimeline: experimentalDiagramI18n.intentTimeline,
+                intentSwimlane: experimentalDiagramI18n.intentSwimlane,
+                intentQuadrant: experimentalDiagramI18n.intentQuadrant,
                 preview: experimentalDiagramI18n.diagramExamplePreview,
                 useType: experimentalDiagramI18n.diagramExampleUseType,
                 thumbnailLoading: experimentalDiagramI18n.diagramExampleThumbnailLoading,

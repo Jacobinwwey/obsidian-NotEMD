@@ -38,4 +38,54 @@ describe('mermaid renderer', () => {
 
         await expect(renderer.render(spec)).rejects.toThrow(/Generated Mermaid diagram failed validation/i);
     });
+
+    test('renders timeline events through the Mermaid timeline contract', async () => {
+        const artifact = await new MermaidRenderer().render({
+            intent: 'timeline',
+            title: 'Roadmap',
+            nodes: [],
+            timelineEvents: [
+                { id: 'research', date: '2026 Q1', label: 'Research', details: ['Define scope'] },
+                { id: 'release', date: '2026 Q2', label: 'Release' }
+            ]
+        });
+
+        expect(artifact.content).toContain('timeline');
+        expect(artifact.content).toContain('2026 Q1 : Research');
+        expect(mermaid.parse).toHaveBeenCalledWith(expect.stringContaining('timeline'));
+    });
+
+    test('renders swimlane steps as bounded Mermaid subgraphs', async () => {
+        const artifact = await new MermaidRenderer().render({
+            intent: 'swimlane',
+            title: 'Release handoff',
+            nodes: [],
+            swimlaneLanes: [{
+                id: 'authoring',
+                label: 'Authoring',
+                steps: [{ id: 'draft', label: 'Draft' }, { id: 'review', label: 'Review' }]
+            }]
+        });
+
+        expect(artifact.content).toContain('flowchart LR');
+        expect(artifact.content).toContain('subgraph authoring');
+        expect(artifact.content).toContain('draft -->|Authoring| review');
+    });
+
+    test('renders quadrant items with stable coordinates', async () => {
+        const artifact = await new MermaidRenderer().render({
+            intent: 'quadrant',
+            title: 'Priorities',
+            nodes: [],
+            quadrant: {
+                xAxisLabel: ['Low effort', 'High effort'],
+                yAxisLabel: ['Low impact', 'High impact'],
+                quadrantLabels: ['Invest', 'Quick wins', 'Defer', 'Evaluate'],
+                items: [{ id: 'adapter', label: 'Adapter registry', x: 0.8, y: 0.7 }]
+            }
+        });
+
+        expect(artifact.content).toContain('quadrantChart');
+        expect(artifact.content).toContain('"Adapter registry": [0.8, 0.7]');
+    });
 });

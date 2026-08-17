@@ -34,6 +34,9 @@ export const EXPERIMENTAL_DIAGRAM_PIPELINE_LOCALE_EXTENSIONS: Record<string, Dee
                     compatibilityLegacy: 'Mermaid-kompatibel',
                     compatibilityBestFit: 'Beste Passung',
                     intentCircuit: 'Schaltung (Circuitikz)',
+                    intentTimeline: 'Zeitachse',
+                    intentSwimlane: 'Swimlane-Ablauf',
+                    intentQuadrant: 'Prioritätsquadrant',
                     renderTargetCircuitikz: 'Circuitikz + SVG-Vorschau'
                 }
             }
@@ -53,6 +56,9 @@ export const EXPERIMENTAL_DIAGRAM_PIPELINE_LOCALE_EXTENSIONS: Record<string, Dee
                     compatibilityLegacy: 'Compatible con Mermaid',
                     compatibilityBestFit: 'Mejor ajuste',
                     intentCircuit: 'Circuito (Circuitikz)',
+                    intentTimeline: 'Línea de tiempo',
+                    intentSwimlane: 'Flujo por carriles',
+                    intentQuadrant: 'Cuadrante de prioridades',
                     renderTargetCircuitikz: 'Circuitikz + vista previa SVG'
                 }
             }
@@ -89,6 +95,9 @@ export const EXPERIMENTAL_DIAGRAM_PIPELINE_LOCALE_EXTENSIONS: Record<string, Dee
                     compatibilityLegacy: 'Compatible Mermaid',
                     compatibilityBestFit: 'Meilleur ajustement',
                     intentCircuit: 'Circuit (Circuitikz)',
+                    intentTimeline: 'Timeline',
+                    intentSwimlane: 'Swimlane flow',
+                    intentQuadrant: 'Priority quadrant',
                     renderTargetCircuitikz: 'Circuitikz + aperçu SVG'
                 }
             }
@@ -142,6 +151,9 @@ export const EXPERIMENTAL_DIAGRAM_PIPELINE_LOCALE_EXTENSIONS: Record<string, Dee
                     compatibilityLegacy: 'Mermaid 互換',
                     compatibilityBestFit: '最適一致',
                     intentCircuit: '回路 (Circuitikz)',
+                    intentTimeline: 'タイムライン',
+                    intentSwimlane: 'スイムレーン フロー',
+                    intentQuadrant: '優先度クアドラント',
                     renderTargetCircuitikz: 'Circuitikz + SVG プレビュー'
                 }
             }
@@ -161,6 +173,9 @@ export const EXPERIMENTAL_DIAGRAM_PIPELINE_LOCALE_EXTENSIONS: Record<string, Dee
                     compatibilityLegacy: 'Mermaid 호환',
                     compatibilityBestFit: '최적 적합',
                     intentCircuit: '회로 (Circuitikz)',
+                    intentTimeline: '타임라인',
+                    intentSwimlane: '스윔레인 흐름',
+                    intentQuadrant: '우선순위 사분면',
                     renderTargetCircuitikz: 'Circuitikz + SVG 미리보기'
                 }
             }

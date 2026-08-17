@@ -49,6 +49,12 @@ function resolveMermaidDiagramType(intent: DiagramIntent): MermaidDiagramType | 
             return 'erDiagram';
         case 'stateDiagram':
             return 'stateDiagram-v2';
+        case 'timeline':
+            return 'timeline';
+        case 'quadrant':
+            return 'quadrantChart';
+        case 'swimlane':
+            return 'flowchart';
         default:
             return null;
     }
