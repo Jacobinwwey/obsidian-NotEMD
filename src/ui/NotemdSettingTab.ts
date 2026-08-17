@@ -16,6 +16,7 @@ import {
 } from '../diagram/diagramPreferenceCompatibility';
 import { getExecutableDiagramIntentOptions } from './diagramCatalogLabels';
 import { renderDiagramExampleGallery } from './diagramExampleGallery';
+import { getExecutableDiagramType } from '../diagram/diagramTypeCatalog';
 import {
     DEFAULT_PREVIEW_EXPORT_PPI,
     MAX_PREVIEW_EXPORT_PPI,
@@ -2804,6 +2805,9 @@ export class NotemdSettingTab extends PluginSettingTab {
                 intentCircuit: experimentalDiagramI18n.intentCircuit,
                 intentDataChart: experimentalDiagramI18n.intentDataChart,
                 preview: experimentalDiagramI18n.diagramExamplePreview,
+                useType: experimentalDiagramI18n.diagramExampleUseType,
+                thumbnailLoading: experimentalDiagramI18n.diagramExampleThumbnailLoading,
+                thumbnailUnavailable: experimentalDiagramI18n.diagramExampleThumbnailUnavailable,
                 familyLabels: {
                     knowledge: experimentalDiagramI18n.diagramExampleFamilyKnowledge,
                     behavior: experimentalDiagramI18n.diagramExampleFamilyBehavior,
@@ -2812,7 +2816,15 @@ export class NotemdSettingTab extends PluginSettingTab {
                     engineering: experimentalDiagramI18n.diagramExampleFamilyEngineering
                 }
             },
-            onPreview: typeId => this.plugin.openDiagramExamplePreview(typeId)
+            onPreview: typeId => this.plugin.openDiagramExamplePreview(typeId),
+            onUseType: async typeId => {
+                const type = getExecutableDiagramType(typeId);
+                applyDiagramIntentPreference(this.plugin.settings, type.intent);
+                applyDiagramRenderTargetPreference(this.plugin.settings, type.defaultTarget);
+                await this.plugin.saveSettings();
+                this.display();
+            },
+            renderThumbnail: example => this.plugin.renderDiagramExampleThumbnail(example.typeId)
         });
 
         this.createCatalogSetting(containerEl, {

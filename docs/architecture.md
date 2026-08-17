@@ -206,9 +206,15 @@ flowchart LR
 
 The diagram platform has three independent axes: semantic type, render target, and export format. The executable source of truth is the type catalog plus example fixtures; the forward plan adds a target descriptor and a generated versioned capability manifest. `SVG`, `PNG`, and `PDF` are export formats, never render targets.
 
-Current shipped scope is ten semantic types, eight render targets, and three export formats. The settings gallery already executes one production-renderer-backed fixture per type, but generation-flow thumbnails and a static docs gallery are not implemented. Reference layouts from `ref/diagram-design` remain `reference-only/planned` until a renderer, fixture, preview, persistence mapping, docs row, and automated gate exist.
+Current shipped scope is ten semantic types, eight render targets, and three export formats. The settings gallery and the generation selector now execute one production-renderer-backed fixture per type, while `scripts/generate-diagram-gallery.js` produces deterministic SVG/PNG assets and a hashed manifest for the bilingual docs gallery. Reference layouts from `ref/diagram-design` remain `reference-only/planned` until a renderer, fixture, preview, persistence mapping, docs row, and automated gate exist.
 
-The next implementation order is correctness foundation first, then catalog/contract generation, then deterministic preview assets and selector integration. This ordering is intentional: the current retry artifact identity, target mapping, local-only settings persistence, cache isolation, and operation-schema drift are boundary defects that would multiply as the selector grows. See [the current progress audit](./brainstorms/2026-08-16-mainline-diagram-architecture-progress-and-next-direction.md), [the capability catalog](./maintainer/diagram-capability-catalog.md), and [the forward architecture plan](./superpowers/plans/2026-08-16-diagram-capability-catalog-and-forward-architecture.en.md).
+The delivered ordering was correctness foundation, catalog/contract generation, deterministic preview assets, then selector/docs integration. Remaining work is deliberately narrower: Mermaid normalization convergence, executable operation-schema admission checks, and consumer-level evidence for optional external compilers. See [the current progress audit](./brainstorms/2026-08-16-mainline-diagram-architecture-progress-and-next-direction.md), [the capability catalog](./maintainer/diagram-capability-catalog.md), [the gallery](./diagram-gallery.md), and [the forward architecture plan](./superpowers/plans/2026-08-16-diagram-capability-catalog-and-forward-architecture.en.md).
+
+### Target Descriptor And Gallery Pipeline
+
+`src/rendering/renderTargetCatalog.ts` is the single target descriptor. Each target owns its renderer ID, MIME type, raw-source extension, Vault extension, preview kind, export formats, consumer gate, and fallback policy. Consumers such as preview export and file persistence query this descriptor instead of maintaining independent target switches. The Vega-Lite exception is explicit: its preview modal consumes raw `.json`, while Vault generation wraps the same source in `.md`.
+
+The capability manifest is a separate three-axis projection: `src/diagram/diagramCapabilityManifest.ts` joins semantic type, default/compatible targets, and fixture ownership, while the target descriptor owns artifact mechanics. `scripts/diagram-gallery-browser-entry.ts` imports the executable fixture catalog and production renderers; `scripts/generate-diagram-gallery.js` renders accessible SVG, rasterizes PNG at a fixed card size, writes `docs/assets/diagrams/manifest.json`, and fails closed on stale or invalid assets. This keeps selector previews, docs previews, and runtime fixtures on one evidence path.
 
 ### Executable Type Catalog And Native Drawnix Tree
 
@@ -282,7 +288,7 @@ Current host evidence matters:
 - `scripts/invoke-maintainer-cli-operation.js` prefers `obsidian-cli native eval` when a compatible wrapper exists, then falls back to official `obsidian eval` only when the wrapper command is unavailable; a present-but-failing wrapper is surfaced rather than masked
 - `diagram.generate` ignores obsolete `drawnixKnowledgeMapDelivery` input. Its source-path command path supplies the filename used by Drawnix source coverage
 - diagram artifacts use the existing custom Mermaid output-directory setting when it is enabled. A stale test path can therefore make a successful run appear to have written nothing beside its source note; disable the setting to restore source-sibling artifacts
-- however, this is still only a **command trigger surface**, not a mature plugin integration protocol with typed arguments, result contracts, capability metadata, or stable automation semantics
+- however, this is still only a **command trigger surface**, not a mature plugin integration protocol with stable versioning, admission validation, or backwards-compatible automation semantics
 
 That means Notemd's future CLI story still cannot stop at "reuse sidebar buttons from the terminal". The real extraction targets are lower-level capabilities that already have partial independent shape:
 
@@ -292,7 +298,7 @@ That means Notemd's future CLI story still cannot stop at "reuse sidebar buttons
 - `src/batchProgressStore.ts`
 - config/profile semantics such as `LLMProviderConfig.localOnly`
 
-The architectural gap is that `src/main.ts` still owns too much orchestration, UI lifecycle, and Obsidian runtime coupling. Until a host-neutral operation layer exists, plugin command IDs can be triggered from the official CLI, but they still remain product surfaces rather than stable engineering APIs.
+The architectural gap is that `src/main.ts` still owns too much orchestration, UI lifecycle, and Obsidian runtime coupling. The operation layer now extracts the highest-value paths, but until every public operation has a versioned executable contract and host adapter, plugin command IDs remain product surfaces rather than stable engineering APIs.
 
 The gap is smaller than before:
 
@@ -334,8 +340,8 @@ The delivered phases cover semantic structure integrity, geometry/layer collisio
 3. **Cline-aligned token resolution**: Unknown models defer to API provider. Known models use metadata table.
 4. **Operation-core vs command-binding split**: Registry operation metadata can describe a host-neutral reusable core even when the shipped commands remain active-file, write-file, or preview-bound surfaces. `diagram.generate` is the current proof case.
 5. **Iframe-host preview**: Vega-Lite and HTML rendered in sandboxed iframe. Mermaid rendered inline.
-6. **Local-only settings are a boundary requirement, not a verified guarantee**: the current double-write path in `src/main.ts` is a P0 defect; the single-sanitized-write fix is part of the active plan.
-7. **Response caching is provisional**: the current five-minute cache does not yet fingerprint endpoint, transport, runtime parameters, or configuration revision and is unbounded; it must be replaced before this is treated as a stable architectural decision.
+6. **Local-only settings are a boundary guarantee**: `src/main.ts` sanitizes once and persists the sanitized record once, so local-only provider credentials do not re-enter the serialized settings object.
+7. **Response caching is bounded and credential-free**: `src/llmResponseCache.ts` uses a versioned SHA-256 fingerprint over provider, transport, endpoint, model, runtime parameters, and prompt/content hashes, with a five-minute TTL and 128-entry LRU cap. It remains an optimization, never an authority for correctness.
 
 ## Verification
 
@@ -343,5 +349,8 @@ The delivered phases cover semantic structure integrity, geometry/layer collisio
 - `npm test -- --runInBand` — full Jest verification; in a `/.worktrees/` checkout use `npx jest --runInBand --config /tmp/notemd-worktree-jest.cjs` because the repo Jest ignore pattern excludes worktree paths
 - `npm run audit:i18n-ui` — No hardcoded UI strings
 - `npm run audit:render-host` — Render host self-contained in main.js
+- `npm run diagram:gallery:check` — Production fixture SVG/PNG assets, accessibility metadata, manifest hashes, and responsive layout are current
+- `npm run docs:build` — Bilingual docs and VitePress discovery links build successfully
+- `npm run lint` — Static quality gate
 - `npm run verify:vault-bundle -- --vault <vault-path>` — Source/Vault bundle hashes and manifest version agree
 - `git diff --check` — Whitespace hygiene

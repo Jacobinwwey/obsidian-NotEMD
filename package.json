@@ -16,6 +16,8 @@
 		"cli:help": "node scripts/invoke-maintainer-cli-operation.js --help",
 		"cli:invoke": "node scripts/invoke-maintainer-cli-operation.js",
 		"diagram:export-artifact": "node scripts/export-diagram-artifact.js",
+		"diagram:gallery": "node scripts/generate-diagram-gallery.js",
+		"diagram:gallery:check": "node scripts/generate-diagram-gallery.js --check",
 		"benchmark:drawnix-knowledge-map": "node scripts/benchmark-drawnix-knowledge-map.js",
 		"diagram:export-circuitikz": "node scripts/export-circuitikz.js",
 		"diagram:smoke-circuitikz": "node scripts/run-circuitikz-smoke-fixtures.js",

@@ -17,6 +17,9 @@ import {
 
 export interface DiagramExampleGalleryCopy extends DiagramCatalogLabelCopy {
     preview: string;
+    useType?: string;
+    thumbnailLoading?: string;
+    thumbnailUnavailable?: string;
     familyLabels: DiagramCatalogFamilyLabelCopy;
 }
 
@@ -24,6 +27,8 @@ export function renderDiagramExampleGallery(params: {
     parent: HTMLElement;
     copy: DiagramExampleGalleryCopy;
     onPreview: (typeId: DiagramCatalogTypeId) => Promise<void>;
+    onUseType?: (typeId: DiagramCatalogTypeId) => void | Promise<void>;
+    renderThumbnail?: (example: DiagramExampleDefinition) => Promise<string | undefined>;
 }): HTMLElement {
     const gallery = params.parent.createDiv({ cls: 'notemd-diagram-example-gallery' });
     gallery.setAttr('role', 'list');
@@ -53,6 +58,37 @@ export function renderDiagramExampleGallery(params: {
             const label = getLocalizedDiagramIntentLabel(type.intent, params.copy);
             const row = group.createDiv({ cls: 'notemd-diagram-example-row' });
             row.setAttr('role', 'listitem');
+            const thumbnail = row.createDiv({ cls: 'notemd-diagram-example-thumbnail' });
+            thumbnail.setAttr('role', 'img');
+            thumbnail.setAttr('aria-label', label);
+            thumbnail.setAttr('aria-busy', params.renderThumbnail ? 'true' : 'false');
+            thumbnail.createEl('span', {
+                text: params.copy.thumbnailLoading ?? 'Loading preview',
+                cls: 'notemd-diagram-example-thumbnail-placeholder'
+            });
+            if (params.renderThumbnail) {
+                void params.renderThumbnail(example).then(svg => {
+                    if (!svg?.trim()) {
+                        thumbnail.setAttr('aria-busy', 'false');
+                        return;
+                    }
+                    thumbnail.innerHTML = svg;
+                    thumbnail.setAttr('aria-busy', 'false');
+                    const renderedSvg = thumbnail.querySelector('svg');
+                    if (renderedSvg) {
+                        renderedSvg.setAttribute('role', 'img');
+                        renderedSvg.setAttribute('aria-label', label);
+                    }
+                }).catch(error => {
+                    console.error(`Could not render diagram thumbnail "${example.typeId}":`, error);
+                    thumbnail.empty();
+                    thumbnail.createEl('span', {
+                        text: params.copy.thumbnailUnavailable ?? 'Preview unavailable',
+                        cls: 'notemd-diagram-example-thumbnail-placeholder'
+                    });
+                    thumbnail.setAttr('aria-busy', 'false');
+                });
+            }
             row.createEl('span', { text: label, cls: 'notemd-diagram-example-label' });
             const preview = row.createEl('button', { cls: 'clickable-icon notemd-diagram-example-preview' });
             preview.setAttr('type', 'button');
@@ -65,6 +101,17 @@ export function renderDiagramExampleGallery(params: {
                     console.error(`Could not render diagram example "${example.typeId}":`, error);
                 });
             });
+            if (params.onUseType) {
+                const use = row.createEl('button', { cls: 'clickable-icon notemd-diagram-example-use' });
+                use.setAttr('type', 'button');
+                use.setAttr('data-notemd-diagram-example-use', example.typeId);
+                use.setAttr('aria-label', `${params.copy.useType ?? 'Use diagram type'}: ${label}`);
+                use.setAttr('title', params.copy.useType ?? 'Use diagram type');
+                setIcon(use, 'check');
+                use.addEventListener('click', () => {
+                    void params.onUseType?.(example.typeId);
+                });
+            }
         });
     }
 

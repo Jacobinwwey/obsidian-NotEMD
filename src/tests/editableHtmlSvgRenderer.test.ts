@@ -59,6 +59,10 @@ describe('editable html/svg renderer', () => {
         expect(artifact.target).toBe('editable-html-svg');
         expect(artifact.mimeType).toBe('text/html');
         expect(artifact.sourceIntent).toBe('flowchart');
+        expect(artifact.previewSvg).toMatchObject({
+            mimeType: 'image/svg+xml'
+        });
+        expect(artifact.previewSvg?.content).toContain('<svg');
         expect(artifact.content).toContain('<!DOCTYPE html>');
         expect(artifact.content).toContain('<svg');
         expect(artifact.content).toContain(NOTEMD_EDITABLE_SVG_RENDERER_VERSION);

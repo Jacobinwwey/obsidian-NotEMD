@@ -9,6 +9,7 @@ import { _performResearch } from './searchUtils'; // Assuming this will be moved
 import { formatI18n, getI18nStrings } from './i18n';
 import { resolveTaskLanguageName, shouldApplyAutoTranslation } from './i18n/taskLanguagePolicy';
 import { RenderArtifact } from './rendering/types';
+import { getRenderTargetDescriptor } from './rendering/renderTargetCatalog';
 import { selectFolderTaskFiles } from './folderTaskFileSelector';
 import { readSupportedInputFile } from './inputFileSupport';
 import {
@@ -1894,39 +1895,18 @@ export async function saveDiagramArtifactFile(
         throw new Error(errorMsg);
     }
 
-    let suffix = '_diagram';
-    let extension = '.txt';
-    switch (artifact.target) {
-        case 'mermaid':
-            suffix = settings.useCustomSummarizeToMermaidSuffix && settings.summarizeToMermaidCustomSuffix
-                ? settings.summarizeToMermaidCustomSuffix
-                : DEFAULT_SETTINGS.summarizeToMermaidCustomSuffix;
-            if (suffix.toLowerCase().endsWith('.md')) {
-                suffix = suffix.substring(0, suffix.length - 3);
-            }
-            extension = '.md';
-            break;
-        case 'json-canvas':
-            extension = '.canvas';
-            break;
-        case 'vega-lite':
-            extension = '.md';
-            break;
-        case 'html':
-            extension = '.html';
-            break;
-        case 'circuitikz':
-            extension = '.tex';
-            break;
-        case 'drawio':
-            extension = '.drawio';
-            break;
-        case 'drawnix':
-            extension = '.drawnix';
-            break;
-    }
+    const descriptor = getRenderTargetDescriptor(artifact.target);
+    const suffix = artifact.target === 'mermaid'
+        ? settings.useCustomSummarizeToMermaidSuffix && settings.summarizeToMermaidCustomSuffix
+            ? settings.summarizeToMermaidCustomSuffix
+            : DEFAULT_SETTINGS.summarizeToMermaidCustomSuffix
+        : '_diagram';
+    const normalizedSuffix = artifact.target === 'mermaid' && suffix.toLowerCase().endsWith('.md')
+        ? suffix.substring(0, suffix.length - 3)
+        : suffix;
+    const extension = descriptor.vaultExtension;
 
-    const outputFileName = `${originalFile.basename}${suffix}${extension}`;
+    const outputFileName = `${originalFile.basename}${normalizedSuffix}${extension}`;
     const outputPath = `${saveDir}${outputFileName}`;
     progressReporter.log(`Saving diagram artifact to: ${outputPath}`);
 

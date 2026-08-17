@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-48 -48 336 526" role="img" aria-label="JSON Canvas preview" aria-labelledby="notemd-gallery-canvas-map-domains-title notemd-gallery-canvas-map-domains-desc"><title id="notemd-gallery-canvas-map-domains-title">Diagram domains</title><desc id="notemd-gallery-canvas-map-domains-desc">Use for a spatial overview of related domains.</desc>
+<defs>
+    <marker id="notemd-canvas-arrow" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">
+        <path d="M0,0 L12,6 L0,12 z" fill="#0f766e"/>
+    </marker>
+    <style>
+        .notemd-canvas-surface { fill: #f8fafc; }
+        .notemd-canvas-node rect { fill: #ffffff; stroke: #0f766e; stroke-width: 2; }
+        .notemd-canvas-node-text,
+        .notemd-canvas-edge-label,
+        .notemd-canvas-empty {
+            fill: #0f172a;
+            font-family: "IBM Plex Sans", "Segoe UI", sans-serif;
+            font-size: 15px;
+        }
+        .notemd-canvas-edge line {
+            stroke: #0f766e;
+            stroke-width: 2.25;
+        }
+        .notemd-canvas-edge-label {
+            paint-order: stroke;
+            stroke: #f8fafc;
+            stroke-width: 6;
+            stroke-linejoin: round;
+        }
+    </style>
+</defs>
+<rect class="notemd-canvas-surface" x="-48" y="-48" width="336" height="526" rx="24" ry="24"/>
+<g class="notemd-canvas-edge" data-edge-id="edge-1">
+    <line x1="220" y1="45" x2="0" y2="215" marker-end="url(#notemd-canvas-arrow)"/>
+
+</g>
+<g class="notemd-canvas-edge" data-edge-id="edge-2">
+    <line x1="220" y1="215" x2="0" y2="385" marker-end="url(#notemd-canvas-arrow)"/>
+
+</g>
+<g class="notemd-canvas-node" data-node-id="authoring">
+    <rect x="0" y="0" width="220" height="90" rx="18" ry="18"/>
+    <text class="notemd-canvas-node-text" x="110" y="45" text-anchor="middle">
+<tspan x="110" y="45">Authoring</tspan>
+</text>
+</g>
+<g class="notemd-canvas-node" data-node-id="rendering">
+    <rect x="0" y="170" width="220" height="90" rx="18" ry="18"/>
+    <text class="notemd-canvas-node-text" x="110" y="215" text-anchor="middle">
+<tspan x="110" y="215">Rendering</tspan>
+</text>
+</g>
+<g class="notemd-canvas-node" data-node-id="delivery">
+    <rect x="0" y="340" width="220" height="90" rx="18" ry="18"/>
+    <text class="notemd-canvas-node-text" x="110" y="385" text-anchor="middle">
+<tspan x="110" y="385">Delivery</tspan>
+</text>
+</g>
+
+</svg>

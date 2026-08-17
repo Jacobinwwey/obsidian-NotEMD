@@ -7,8 +7,10 @@
 ## 当前真值与布局入口
 
 - [架构总览](./architecture.zh-CN.md)
+- [图形 Gallery](./diagram-gallery.zh-CN.md)
 - [Mainline 图形架构进度审计](./brainstorms/2026-08-16-mainline-diagram-architecture-progress-and-next-direction.zh-CN.md)
 - [图形能力目录](./maintainer/diagram-capability-catalog.zh-CN.md)
+- [图形 Gallery](./diagram-gallery.zh-CN.md)
 - [Mainline Progress Audit And Next-Level Direction（历史）](./brainstorms/2026-05-28-mainline-progress-audit-and-next-level-direction.zh-CN.md)
 - [Mainline CI, GEO, CLI, And Slidev Closeout Plan](./brainstorms/2026-07-02-mainline-ci-geo-cli-slidev-closeout-plan.zh-CN.md)
 - [仓库文档布局规则](./maintainer/repository-document-layout.zh-CN.md)

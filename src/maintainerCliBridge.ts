@@ -19,6 +19,7 @@ import {
 import { ChapterSplitResult } from './chapterSplit';
 import { ResearchSummarizeResult } from './searchUtils';
 import { CHAPTER_SPLIT_HEADING_LEVEL_VALUES, ChapterSplitHeadingLevelSetting, ProgressReporter } from './types';
+import { assertMaintainerCliInput } from './operations/contractSchemas';
 
 export type MaintainerCliOperationId =
     | 'content.batch-generate-from-titles'
@@ -311,45 +312,54 @@ export async function invokeMaintainerCliOperation(
 
     switch (request.operationId) {
         case 'content.batch-generate-from-titles':
+            assertMaintainerCliInput(request.operationId, request.input);
             return host.batchGenerateContentForTitlesCommand(
                 reporter,
                 requireString(input, 'folderPath'),
                 buildFileSelectionOverride(input)
             );
         case 'content.split-note-by-chapters':
+            assertMaintainerCliInput(request.operationId, request.input);
             return host.splitNoteByChaptersForPathCommand(
                 requireString(input, 'sourcePath'),
                 reporter,
                 buildChapterSplitOptions(input)
             );
         case 'research.summarize-topic':
+            assertMaintainerCliInput(request.operationId, request.input);
             return host.researchAndSummarizeForPathCommand(
                 requireString(input, 'sourcePath'),
                 optionalString(input, 'topic'),
                 reporter
             );
         case 'diagram.generate':
+            assertMaintainerCliInput(request.operationId, request.input);
             return host.generateDiagramForPathCommand(
                 requireString(input, 'sourcePath'),
                 reporter,
                 buildDiagramCommandOptions(input)
             );
         case 'local-knowledge.inspect':
+            assertMaintainerCliInput(request.operationId, request.input);
             return host.inspectLocalKnowledgeCommand(
                 buildLocalKnowledgeInspectRequest(input),
                 reporter
             );
         case 'provider.profile.export-redacted':
             assertNoInput(request.input);
+            assertMaintainerCliInput(request.operationId, request.input);
             return host.exportRedactedProviderProfilesCommand();
         case 'cli.capability-manifest.export':
             assertNoInput(request.input);
+            assertMaintainerCliInput(request.operationId, request.input);
             return host.exportCliCapabilityManifestCommand();
         case 'cli.invocation-contract.export':
             assertNoInput(request.input);
+            assertMaintainerCliInput(request.operationId, request.input);
             return host.exportCliInvocationContractCommand();
         case 'cli.public-surface.export':
             assertNoInput(request.input);
+            assertMaintainerCliInput(request.operationId, request.input);
             return host.exportCliPublicSurfaceCommand();
         default: {
             const exhaustiveCheck: never = request.operationId;

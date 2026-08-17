@@ -466,6 +466,7 @@ function buildExporterBundle(repoRoot) {
         }
         return {
           content: artifact.content,
+          previewSvgContent: artifact.previewSvg?.content,
           summary: {
             mimeType: artifact.mimeType,
             nodeCount: model.nodes.length,

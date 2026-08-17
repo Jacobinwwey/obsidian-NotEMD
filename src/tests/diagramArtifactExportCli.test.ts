@@ -256,6 +256,9 @@ describe('diagram artifact export CLI', () => {
         const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'notemd-diagram-artifact-cli-'));
         const specPath = path.join(tempRoot, 'spec.json');
         const htmlPath = path.join(tempRoot, 'figure.html');
+        const htmlSvgPath = path.join(tempRoot, 'figure.html.svg');
+        const htmlPngPath = path.join(tempRoot, 'figure.html.png');
+        const htmlPdfPath = path.join(tempRoot, 'figure.html.pdf');
         const drawioPath = path.join(tempRoot, 'figure.drawio');
         const drawioSvgPath = path.join(tempRoot, 'figure.drawio.svg');
         const svgPath = path.join(tempRoot, 'figure.svg');
@@ -273,7 +276,13 @@ describe('diagram artifact export CLI', () => {
                     '--target', target,
                     '--output', outputPath
                 ];
-                if (target === 'drawio') {
+                if (target === 'editable-html-svg') {
+                    args.push(
+                        '--preview-svg-output', htmlSvgPath,
+                        '--preview-png-output', htmlPngPath,
+                        '--preview-pdf-output', htmlPdfPath
+                    );
+                } else if (target === 'drawio') {
                     args.push('--preview-svg-output', drawioSvgPath);
                 }
                 const stdout = execFileSync(process.execPath, args, {
@@ -297,6 +306,9 @@ describe('diagram artifact export CLI', () => {
             expect(html).toContain('data-drawio-id="client-app-2"');
             expect(html).toContain('data-drawio-source="client-app"');
             expect(html).toContain('data-drawio-target="client-app-2"');
+            expect(fs.readFileSync(htmlSvgPath, 'utf8')).toContain('<svg');
+            expect(fs.statSync(htmlPngPath).size).toBeGreaterThan(0);
+            expect(fs.readFileSync(htmlPdfPath).subarray(0, 5).toString('ascii')).toBe('%PDF-');
 
             const drawio = fs.readFileSync(drawioPath, 'utf8');
             expect(drawio).toContain('<mxfile');

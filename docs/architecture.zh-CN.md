@@ -206,9 +206,15 @@ flowchart LR
 
 图形平台保持三条独立轴：语义类型、渲染目标和导出格式。当前可执行真值是类型目录加 example fixture；向前计划将增加唯一 target descriptor 和带版本的生成式 capability manifest。`SVG`、`PNG`、`PDF` 是导出格式，不是 render target。
 
-当前已交付 10 个语义类型、8 个渲染目标和 3 个导出格式。设置页 gallery 已有每类一个生产 renderer fixture，但生成流缩略图和静态 docs gallery 尚未实现。`ref/diagram-design` 的参考布局在具备 renderer、fixture、预览、持久化映射、文档行和自动化门禁之前，保持 `reference-only/planned`。
+当前已交付 10 个语义类型、8 个渲染目标和 3 个导出格式。设置页 gallery 与生成选择器都执行每类一个生产 renderer fixture；`scripts/generate-diagram-gallery.js` 生成确定性的 SVG/PNG 资产和带哈希 manifest，并供双语文档 gallery 使用。`ref/diagram-design` 的参考布局在具备 renderer、fixture、预览、持久化映射、文档行和自动化门禁之前，保持 `reference-only/planned`。
 
-后续顺序是先解决正确性基础，再做目录/契约生成，最后接入确定性预览资产和选择器。这是必要的先后关系：当前重试产物身份、target 映射、local-only 设置持久化、cache 隔离和 operation schema 漂移都是边界缺陷。见[当前进度审计](./brainstorms/2026-08-16-mainline-diagram-architecture-progress-and-next-direction.zh-CN.md)、[图形能力目录](./maintainer/diagram-capability-catalog.zh-CN.md)和[向前架构计划](./superpowers/plans/2026-08-16-diagram-capability-catalog-and-forward-architecture.zh-CN.md)。
+已交付顺序是先解决正确性基础，再做目录/契约生成，随后接入确定性预览资产、选择器和文档。剩余工作已收窄为 Mermaid 规范化收敛、可执行 operation schema 准入检查，以及可选外部编译器的 consumer-level 证据。见[当前进度审计](./brainstorms/2026-08-16-mainline-diagram-architecture-progress-and-next-direction.zh-CN.md)、[图形能力目录](./maintainer/diagram-capability-catalog.zh-CN.md)、[图形 Gallery](./diagram-gallery.zh-CN.md)和[向前架构计划](./superpowers/plans/2026-08-16-diagram-capability-catalog-and-forward-architecture.zh-CN.md)。
+
+### Target Descriptor 与 Gallery 生成链路
+
+`src/rendering/renderTargetCatalog.ts` 是 target 的单一描述器。每个 target 在此声明 renderer ID、MIME、原始 source 扩展名、Vault 扩展名、预览类型、导出格式、consumer gate 和 fallback policy。预览导出与文件落盘通过描述器查询，不再各自维护 target switch。Vega-Lite 的契约差异被显式保留：预览弹窗消费原始 `.json`，Vault 生成则把同一 source 包装为 `.md`。
+
+能力 manifest 是独立的三轴投影：`src/diagram/diagramCapabilityManifest.ts` 组合语义类型、默认/兼容 target 与 fixture 所有权；target descriptor 负责 artifact 机制。`scripts/diagram-gallery-browser-entry.ts` 导入可执行 fixture 目录和生产 renderer；`scripts/generate-diagram-gallery.js` 生成带无障碍元数据的 SVG，在固定卡片尺寸下生成 PNG，写入 `docs/assets/diagrams/manifest.json`，并对过期或无效资产 fail closed。这样设置页、文档和 runtime fixture 共享同一条证据链。
 
 ### 可执行类型目录与原生 Drawnix 树
 
@@ -282,7 +288,7 @@ Drawnix 源图形遵循同一条兼容性边界。默认关闭 **同时完整输
 - `scripts/invoke-maintainer-cli-operation.js` 在兼容包装器存在时优先使用 `obsidian-cli native eval`，只在命令不存在时回退到官方 `obsidian eval`；如果包装器已存在但执行失败，则原样暴露失败，不会静默掩盖
 - `diagram.generate` 会忽略废弃的 `drawnixKnowledgeMapDelivery` 输入；按源文件路径调用时，Drawnix source coverage 会使用该文件名作为根标签
 - 若启用了既有的 Mermaid 自定义输出目录，图表 artifact 也会写入该目录。遗留的测试路径会让成功生成看起来没有写在源笔记旁；关闭该设置后会恢复同目录输出
-- 但这仍然只是**命令触发表面**，不是成熟的插件集成协议：它还缺少类型化参数、返回结果契约、能力元数据和稳定自动化语义
+- 但这仍然只是**命令触发表面**，不是成熟的插件集成协议：它仍缺少稳定版本化、准入校验和向后兼容的自动化语义
 
 因此，Notemd 的未来 CLI 路线仍不能停留在“把 sidebar 按钮搬到终端”。真正值得抽取的是已经开始具备独立形态的低层能力：
 
@@ -292,7 +298,7 @@ Drawnix 源图形遵循同一条兼容性边界。默认关闭 **同时完整输
 - `src/batchProgressStore.ts`
 - `LLMProviderConfig.localOnly` 这类 config/profile 语义
 
-当前架构缺口在于：`src/main.ts` 仍持有过多 orchestration、UI 生命周期和 Obsidian runtime 耦合。在形成宿主无关 operation 层之前，插件 command IDs 虽然已经可以被官方 CLI 触发，但它们仍然只是产品表面，不应被当成稳定工程 API。
+当前架构缺口在于：`src/main.ts` 仍持有过多 orchestration、UI 生命周期和 Obsidian runtime 耦合。operation 层已经抽离最高价值路径，但在每个公共 operation 都具备版本化可执行契约与 host adapter 之前，插件 command IDs 仍只是产品表面，不应被当成稳定工程 API。
 
 不过这个缺口已经比之前更小了：
 
@@ -334,8 +340,8 @@ Drawnix 源图形遵循同一条兼容性边界。默认关闭 **同时完整输
 3. **Cline 对齐令牌解析**：未知模型由 API 提供商自行决定。已知模型使用元数据表。
 4. **operation-core 与 command-binding 分层**：registry 中的 operation 元数据可以描述可复用的宿主无关 core，而当前出货命令本身仍保留 active-file、write-file 或 preview-bound 的真实产品语义。`diagram.generate` 是当前最明确的证明案例。
 5. **Iframe 宿主预览**：Vega-Lite 和 HTML 在沙盒 iframe 中渲染。Mermaid 内联渲染。
-6. **Local-only 设置是边界要求，而非已验证保证**：`src/main.ts` 当前双写是 P0 缺陷，单次清洗后写入属于 active 计划。
-7. **响应缓存是临时决策**：当前五分钟缓存没有包含 endpoint、transport、运行参数和配置版本，且没有容量上限；在它被视为稳定架构决策前必须替换。
+6. **Local-only 设置是已验证的边界保证**：`src/main.ts` 只清洗一次并只写入一次，local-only provider credential 不会再次进入序列化 settings。
+7. **响应缓存有上限且不含凭证**：`src/llmResponseCache.ts` 对 provider、transport、endpoint、model、运行参数和 prompt/content hash 生成版本化 SHA-256 指纹，TTL 为 5 分钟，LRU 上限为 128 条。它仍只是优化层，不能成为正确性的权威来源。
 
 ## 验证
 
@@ -343,5 +349,8 @@ Drawnix 源图形遵循同一条兼容性边界。默认关闭 **同时完整输
 - `npm test -- --runInBand` — 完整 Jest 验证；若在 `/.worktrees/` checkout 中验证，请改用 `npx jest --runInBand --config /tmp/notemd-worktree-jest.cjs`，因为仓库默认 Jest ignore 规则会排除 worktree 路径
 - `npm run audit:i18n-ui` — 无硬编码 UI 字符串
 - `npm run audit:render-host` — 渲染宿主自包含于 main.js
+- `npm run diagram:gallery:check` — 生产 fixture 的 SVG/PNG、无障碍元数据、manifest 哈希和响应式布局均为最新
+- `npm run docs:build` — 双语文档与 VitePress 发现入口构建成功
+- `npm run lint` — 静态质量门禁
 - `npm run verify:vault-bundle -- --vault <vault-path>` — 源码/Vault bundle hash 与 manifest 版本一致
 - `git diff --check` — 空白符卫生

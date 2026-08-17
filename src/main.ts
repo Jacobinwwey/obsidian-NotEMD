@@ -98,6 +98,11 @@ import { IframeRenderHost } from './rendering/host/iframeRenderHost';
 import { getRenderTargetDisplayName } from './rendering/targetLabel';
 import { supportsDiagramPreviewModal } from './ui/diagramPreview';
 import { resolvePreviewExportPpi } from './rendering/preview/pngPreview';
+import { renderPreviewArtifactSvg } from './rendering/preview/previewExport';
+import {
+    getBundledMermaidPreviewDeps,
+    getBundledVegaLitePreviewDeps
+} from './rendering/webview/bundledPreviewDeps';
 import {
     createCompleteResetSettings,
     createPartialResetSettings
@@ -300,12 +305,30 @@ export default class NotemdPlugin extends Plugin {
         }).open();
     }
 
-    /** Opens an ephemeral catalog preview; examples never enter the artifact save flow. */
-    public async openDiagramExamplePreview(typeId: DiagramCatalogTypeId): Promise<void> {
+    private resolveExecutableDiagramExample(typeId: DiagramCatalogTypeId) {
         const example = getExecutableDiagramExamples().find(candidate => candidate.typeId === typeId);
         if (!example) {
             throw new Error(`No executable diagram example is registered for type "${typeId}".`);
         }
+        return example;
+    }
+
+    public async renderDiagramExampleThumbnail(typeId: DiagramCatalogTypeId): Promise<string> {
+        const example = this.resolveExecutableDiagramExample(typeId);
+        const artifact = await renderExecutableDiagramExample(
+            example,
+            createDefaultDiagramRendererService()
+        );
+        return renderPreviewArtifactSvg(artifact, {
+            mermaid: getBundledMermaidPreviewDeps(),
+            vegaLiteDepsLoader: async () => getBundledVegaLitePreviewDeps(),
+            theme: 'light'
+        });
+    }
+
+    /** Opens an ephemeral catalog preview; examples never enter the artifact save flow. */
+    public async openDiagramExamplePreview(typeId: DiagramCatalogTypeId): Promise<void> {
+        const example = this.resolveExecutableDiagramExample(typeId);
 
         const artifact = await renderExecutableDiagramExample(
             example,
@@ -1479,7 +1502,6 @@ export default class NotemdPlugin extends Plugin {
         // Save only syncable providers to data.json
         const syncSettings = { ...this.settings, providers: syncProviders };
         await this.saveData(syncSettings);
-        await this.saveData(this.settings);
     }
 
     async resetSettings(mode: 'complete' | 'partial'): Promise<void> {

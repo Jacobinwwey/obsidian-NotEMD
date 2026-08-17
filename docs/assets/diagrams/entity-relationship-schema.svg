@@ -1,0 +1,90 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1048" height="464" viewBox="0 0 1048 464" role="img" aria-labelledby="notemd-gallery-entity-relationship-schema-title notemd-gallery-entity-relationship-schema-desc" data-notemd-renderer="notemd-editable-html-svg@0.1.0">
+        <title id="notemd-gallery-entity-relationship-schema-title">Artifact schema</title>
+        <desc id="notemd-gallery-entity-relationship-schema-desc">Use when entity attributes and cardinality carry the explanation.</desc>
+        <style>.notemd-editable-svg-canvas {
+    fill: var(--notemd-editable-svg-panel, #ffffff);
+}
+.notemd-editable-svg-title {
+    fill: var(--notemd-editable-svg-text, #111827);
+    font-size: 26px;
+    font-weight: 700;
+}
+.notemd-editable-svg-summary {
+    fill: var(--notemd-editable-svg-muted, #475569);
+    font-size: 14px;
+}
+.notemd-editable-svg-node rect {
+    fill: var(--notemd-editable-svg-node-fill, #eff6ff);
+    stroke: var(--notemd-editable-svg-border, #cbd5e1);
+    stroke-width: 1.5;
+}
+.notemd-editable-svg-node-label {
+    fill: var(--notemd-editable-svg-text, #111827);
+    font-size: 15px;
+    font-weight: 650;
+}
+.notemd-editable-svg-node-role {
+    fill: var(--notemd-editable-svg-accent, #2563eb);
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+.notemd-editable-svg-edge path,
+.notemd-editable-svg-edge-arrowhead {
+    fill: none;
+    stroke: var(--notemd-editable-svg-edge, #334155);
+    stroke-width: 1.8;
+}
+.notemd-editable-svg-edge.is-async path {
+    stroke-dasharray: 8 6;
+}
+.notemd-editable-svg-edge-label {
+    fill: var(--notemd-editable-svg-muted, #475569);
+    paint-order: stroke;
+    stroke: var(--notemd-editable-svg-panel, #ffffff);
+    stroke-width: 4px;
+    font-size: 12px;
+    font-weight: 600;
+}
+marker path {
+    fill: var(--notemd-editable-svg-edge, #334155);
+}</style>
+        <defs>
+            <marker id="notemd-editable-svg-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+                <path data-drawio-ignore="marker-shape" d="M 0 0 L 10 5 L 0 10 z" fill="#334155"/>
+            </marker>
+        </defs>
+        <rect data-drawio-ignore="canvas-background" class="notemd-editable-svg-canvas" x="0" y="0" width="1048" height="464" rx="18" fill="#ffffff"/>
+        <text data-drawio-ignore="document-title" x="72" y="48" class="notemd-editable-svg-title" fill="#111827">Artifact schema</text>
+
+        <g id="edge-1-artifact-to-panel" class="notemd-editable-svg-edge" data-drawio-type="edge" data-drawio-id="edge-1-artifact-to-panel" data-drawio-source="artifact" data-drawio-target="panel">
+        <path data-drawio-ignore="part-of-parent-edge" d="M 312 168 C 524 168, 524 168, 736 168" fill="none" stroke="#334155" stroke-width="1.8"/>
+    </g>
+        <g id="artifact" class="notemd-editable-svg-node" data-drawio-type="node" data-drawio-role="process" data-drawio-id="artifact">
+        <rect data-drawio-ignore="part-of-parent-node" x="72" y="116" width="240" height="104" rx="14" fill="#eff6ff" stroke="#cbd5e1" stroke-width="1.5"/>
+        <text data-drawio-ignore="part-of-parent-node" x="192" y="164" text-anchor="middle" class="notemd-editable-svg-node-label">
+        <tspan x="192" dy="0">Artifact</tspan>
+    </text>
+        <text data-drawio-ignore="part-of-parent-node" x="192" y="202" text-anchor="middle" class="notemd-editable-svg-node-role" fill="#2563eb">process</text>
+    </g><g id="artifact-id" class="notemd-editable-svg-node" data-drawio-type="node" data-drawio-role="uuid" data-drawio-id="artifact-id">
+        <rect data-drawio-ignore="part-of-parent-node" x="404" y="116" width="240" height="104" rx="14" fill="#eff6ff" stroke="#cbd5e1" stroke-width="1.5"/>
+        <text data-drawio-ignore="part-of-parent-node" x="524" y="164" text-anchor="middle" class="notemd-editable-svg-node-label">
+        <tspan x="524" dy="0">id</tspan>
+    </text>
+        <text data-drawio-ignore="part-of-parent-node" x="524" y="202" text-anchor="middle" class="notemd-editable-svg-node-role" fill="#2563eb">uuid</text>
+    </g><g id="panel" class="notemd-editable-svg-node" data-drawio-type="node" data-drawio-role="process" data-drawio-id="panel">
+        <rect data-drawio-ignore="part-of-parent-node" x="736" y="116" width="240" height="104" rx="14" fill="#eff6ff" stroke="#cbd5e1" stroke-width="1.5"/>
+        <text data-drawio-ignore="part-of-parent-node" x="856" y="164" text-anchor="middle" class="notemd-editable-svg-node-label">
+        <tspan x="856" dy="0">Panel</tspan>
+    </text>
+        <text data-drawio-ignore="part-of-parent-node" x="856" y="202" text-anchor="middle" class="notemd-editable-svg-node-role" fill="#2563eb">process</text>
+    </g><g id="panel-id" class="notemd-editable-svg-node" data-drawio-type="node" data-drawio-role="uuid" data-drawio-id="panel-id">
+        <rect data-drawio-ignore="part-of-parent-node" x="72" y="296" width="240" height="104" rx="14" fill="#eff6ff" stroke="#cbd5e1" stroke-width="1.5"/>
+        <text data-drawio-ignore="part-of-parent-node" x="192" y="344" text-anchor="middle" class="notemd-editable-svg-node-label">
+        <tspan x="192" dy="0">id</tspan>
+    </text>
+        <text data-drawio-ignore="part-of-parent-node" x="192" y="382" text-anchor="middle" class="notemd-editable-svg-node-role" fill="#2563eb">uuid</text>
+    </g>
+        <path data-drawio-ignore="edge-arrowhead" class="notemd-editable-svg-edge-arrowhead" d="M 718.000 168.000 L 736 168" fill="none" stroke="#334155" stroke-width="1.8" marker-end="url(#notemd-editable-svg-arrow)"/>
+        <text data-drawio-ignore="part-of-parent-edge" x="524" y="158" text-anchor="middle" class="notemd-editable-svg-edge-label" fill="#475569" stroke="#ffffff" stroke-width="4" paint-order="stroke">contains</text>
+    </svg>

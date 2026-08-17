@@ -27,6 +27,8 @@ describe('vega-lite adapter', () => {
         expect(parsed.data.values).toHaveLength(2);
         expect(parsed.encoding.x.field).toBe('x');
         expect(parsed.encoding.y.field).toBe('y');
+        expect(parsed.width).toBe(640);
+        expect(parsed.height).toBe(360);
     });
 
     test('supports multi-series charts with color encoding', () => {

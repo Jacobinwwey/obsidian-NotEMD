@@ -7,8 +7,10 @@ This directory contains repository-level documentation for maintainers and contr
 ## Current Truth And Layout
 
 - [Architecture Overview](./architecture.md)
+- [Diagram Gallery](./diagram-gallery.md)
 - [Mainline Diagram Architecture Progress Audit](./brainstorms/2026-08-16-mainline-diagram-architecture-progress-and-next-direction.md)
 - [Diagram Capability Catalog](./maintainer/diagram-capability-catalog.md)
+- [Diagram Gallery](./diagram-gallery.md)
 - [Mainline Progress Audit And Next-Level Direction (historical)](./brainstorms/2026-05-28-mainline-progress-audit-and-next-level-direction.md)
 - [Mainline CI, GEO, CLI, And Slidev Closeout Plan](./brainstorms/2026-07-02-mainline-ci-geo-cli-slidev-closeout-plan.md)
 - [Repository Documentation Layout](./maintainer/repository-document-layout.md)

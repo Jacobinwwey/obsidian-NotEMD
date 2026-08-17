@@ -6,6 +6,8 @@
 
 - [文档中心（英文）](./README.md)
 - [文档中心（中文）](./README.zh-CN.md)
+- [图形 Gallery（英文）](./diagram-gallery.md)
+- [图形 Gallery（中文）](./diagram-gallery.zh-CN.md)
 - [章节拆分 + TOC（英文）](./chapter-split-toc.md)
 - [章节拆分 + TOC（中文）](./chapter-split-toc.zh-CN.md)
 - [1.8.2 发布说明（英文）](./releases/1.8.2.md)
@@ -28,6 +30,8 @@
 
 - [架构总览（英文）](./architecture.md)
 - [架构总览（中文）](./architecture.zh-CN.md)
+- [图形 Gallery（英文）](./diagram-gallery.md)
+- [图形 Gallery（中文）](./diagram-gallery.zh-CN.md)
 - [Mainline 图形架构进度审计（英文）](./brainstorms/2026-08-16-mainline-diagram-architecture-progress-and-next-direction.md)
 - [Mainline 图形架构进度审计（中文）](./brainstorms/2026-08-16-mainline-diagram-architecture-progress-and-next-direction.zh-CN.md)
 - [图形能力目录（英文）](./maintainer/diagram-capability-catalog.md)

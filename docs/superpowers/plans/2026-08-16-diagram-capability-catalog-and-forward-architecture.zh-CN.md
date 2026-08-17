@@ -1,6 +1,6 @@
 ---
 date: 2026-08-16
-last_updated: 2026-08-16
+last_updated: 2026-08-17
 topic: diagram-capability-catalog-and-forward-architecture
 status: active
 canonical_for:
@@ -129,7 +129,9 @@ interface DiagramCapabilityManifest {
 
 **文件：** `src/operations/registry.ts`、新增 `src/operations/contractSchemas.ts`、新增 `src/operations/capabilityManifest.ts`、`scripts/invoke-maintainer-cli-operation.js`、`scripts/export-diagram-artifact.js`。
 
-将 `Record<string, unknown>` 替换为可执行 validator。CLI help、capability 导出、invocation contract 和操作测试均从同一 schema 派生。`diagram.generate` 的 host-neutral 核心统一以 `sourceMarkdown` 为输入；`sourcePath` 只作为 host adapter 的显式输入，不能静默视为同一契约。只有在存在实现和安全元数据时，才增加缺失的 `local-knowledge.inspect` operation。
+第一层契约硬化已经交付：`src/operations/contractSchemas.ts` 对 JSON-compatible schema 形状做准入，`src/cliContracts.ts` 在导出前拒绝非法 registry schema，`src/maintainerCliBridge.ts` 在宿主边界校验输入，同时为向前兼容保留未知旧字段。`diagram.generate` 的 host-neutral 核心继续以 `sourceMarkdown` 为输入；`sourcePath` 仍是显式 host adapter 输入，不能静默变成同一契约。`local-knowledge.inspect` 仍保持 maintainer 宿主操作，只有在存在宿主无关实现和安全元数据后才进入公共 registry。
+
+Phase 2 的剩余工作被刻意收窄为两项：在运行时边界校验 operation 结果值；仅在不抹平人工可读示例和兼容性说明的前提下，从同一 schema 派生 maintainer help 元数据。`OperationSchema` 暂时仍是结构化 TypeScript Record；可执行准入/校验层才是运行时权威。
 
 **门禁：** 非法参数必须在 provider 调用前失败；registry、CLI 和生成 manifest 的名称与 required fields 必须一致。
 

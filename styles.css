@@ -1591,10 +1591,38 @@
 }
 
 .notemd-diagram-example-row {
-    display: flex;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto auto;
     align-items: center;
     gap: 0.35em;
     min-width: 0;
+}
+
+.notemd-diagram-example-thumbnail {
+    grid-column: 1 / -1;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    min-height: 72px;
+    overflow: hidden;
+    border: 1px solid var(--background-modifier-border);
+    border-radius: 4px;
+    background: var(--background-secondary);
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.notemd-diagram-example-thumbnail > svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+.notemd-diagram-example-thumbnail-placeholder {
+    padding: 0.35em;
+    font-size: 10px;
+    text-align: center;
 }
 
 .notemd-diagram-example-label {
@@ -1607,7 +1635,12 @@
 }
 
 .notemd-diagram-example-preview {
-    flex: 0 0 28px;
+    width: 28px;
+    height: 28px;
+    padding: 0;
+}
+
+.notemd-diagram-example-use {
     width: 28px;
     height: 28px;
     padding: 0;

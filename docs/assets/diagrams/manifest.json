@@ -1,0 +1,105 @@
+{
+  "schemaVersion": 1,
+  "entries": [
+    {
+      "typeId": "mermaid-mindmap",
+      "fixtureId": "mermaid-mindmap-basics",
+      "title": "Research themes",
+      "target": "mermaid",
+      "previewTarget": "editable-html-svg",
+      "svgPath": "./mermaid-mindmap-basics.svg",
+      "pngPath": "./mermaid-mindmap-basics.png",
+      "svgSha256": "91ed6329bc881d7b8785004e0875eb5e6683a26a44e77cf6cc769d99cd523b7e"
+    },
+    {
+      "typeId": "drawnix-knowledge-map",
+      "fixtureId": "drawnix-knowledge-map-architecture",
+      "title": "Diagram delivery architecture",
+      "target": "drawnix",
+      "previewTarget": "drawnix",
+      "svgPath": "./drawnix-knowledge-map-architecture.svg",
+      "pngPath": "./drawnix-knowledge-map-architecture.png",
+      "svgSha256": "320f9bc415ea7caf09dc826ec9779f7167beab0ecea57fc4d950fd9435c3e976"
+    },
+    {
+      "typeId": "flowchart",
+      "fixtureId": "flowchart-release",
+      "title": "Release decision",
+      "target": "mermaid",
+      "previewTarget": "editable-html-svg",
+      "svgPath": "./flowchart-release.svg",
+      "pngPath": "./flowchart-release.png",
+      "svgSha256": "b77ff004c461505e9519bd218bc5cf9c411daaec5b4d0664209c5cd643dd1d3a"
+    },
+    {
+      "typeId": "sequence",
+      "fixtureId": "sequence-request",
+      "title": "Artifact request",
+      "target": "mermaid",
+      "previewTarget": "editable-html-svg",
+      "svgPath": "./sequence-request.svg",
+      "pngPath": "./sequence-request.png",
+      "svgSha256": "ea7f85eff721f24c5eef518898d73b1ce950559534631ac725642832e2aec6a1"
+    },
+    {
+      "typeId": "state",
+      "fixtureId": "state-lifecycle",
+      "title": "Artifact lifecycle",
+      "target": "mermaid",
+      "previewTarget": "editable-html-svg",
+      "svgPath": "./state-lifecycle.svg",
+      "pngPath": "./state-lifecycle.png",
+      "svgSha256": "0317bf8f78611e4f05dd66d0ce0d637a8f2c2c60ec2b740b9ba0a92eaeb12735"
+    },
+    {
+      "typeId": "class",
+      "fixtureId": "class-domain",
+      "title": "Diagram domain",
+      "target": "mermaid",
+      "previewTarget": "editable-html-svg",
+      "svgPath": "./class-domain.svg",
+      "pngPath": "./class-domain.png",
+      "svgSha256": "40d0d73ef369f8f35caea8893da3afbdc4d87cc694bb1b622ae458d201431096"
+    },
+    {
+      "typeId": "entity-relationship",
+      "fixtureId": "entity-relationship-schema",
+      "title": "Artifact schema",
+      "target": "mermaid",
+      "previewTarget": "editable-html-svg",
+      "svgPath": "./entity-relationship-schema.svg",
+      "pngPath": "./entity-relationship-schema.png",
+      "svgSha256": "9e41bcbb0030177b1f17fcd6e8b4fd5e424b93838846b61b542bc1fc6adf6b88"
+    },
+    {
+      "typeId": "canvas-map",
+      "fixtureId": "canvas-map-domains",
+      "title": "Diagram domains",
+      "target": "json-canvas",
+      "previewTarget": "json-canvas",
+      "svgPath": "./canvas-map-domains.svg",
+      "pngPath": "./canvas-map-domains.png",
+      "svgSha256": "251b6cd7543eb8ad7be34c1b8a6ad4e7aa30c03c02003ec1d18f6ec17bb9b99c"
+    },
+    {
+      "typeId": "data-chart",
+      "fixtureId": "data-chart-trend",
+      "title": "Rendering trend",
+      "target": "vega-lite",
+      "previewTarget": "vega-lite",
+      "svgPath": "./data-chart-trend.svg",
+      "pngPath": "./data-chart-trend.png",
+      "svgSha256": "d287b1542683a8348eeb19f2ef2cee6dc24254684c3af23498635c8062f65e6d"
+    },
+    {
+      "typeId": "circuit",
+      "fixtureId": "circuit-cmos-inverter",
+      "title": "CMOS inverter",
+      "target": "circuitikz",
+      "previewTarget": "circuitikz",
+      "svgPath": "./circuit-cmos-inverter.svg",
+      "pngPath": "./circuit-cmos-inverter.png",
+      "svgSha256": "be9bb85a03a9dd440043bfb7b357834b7c133695936e1e6dd0d815657f9a6e17"
+    }
+  ]
+}

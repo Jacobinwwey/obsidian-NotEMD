@@ -11,6 +11,7 @@ import { buildOpenAICompatibleProviderHeaders } from './providerRequestHeaders';
 import { DEFAULT_SETTINGS } from './constants';
 import { cancellableDelay } from './utils';
 import { ErrorModal } from './ui/ErrorModal'; // Import ErrorModal
+import { LlmResponseCache, buildLlmResponseCacheKey } from './llmResponseCache';
 
 function providerRequiresApiKey(provider: LLMProviderConfig): boolean {
     return getLLMProviderDefinition(provider.name)?.apiKeyMode === 'required';
@@ -3177,31 +3178,12 @@ export function callOpenAICompatibleApi(provider: LLMProviderConfig, modelName: 
 }
 
 
-// ── LLM Response Cache ──
-const llmResponseCache = new Map<string, { response: string; timestamp: number }>();
-const LLM_CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
-
-function buildCacheKey(provider: LLMProviderConfig, modelName: string, prompt: string, content: string): string {
-    const parts = [provider.name, modelName, String(provider.temperature ?? 0), prompt, content];
-    return parts.join('\x00');
-}
-
-function getCachedResponse(key: string): string | undefined {
-    const entry = llmResponseCache.get(key);
-    if (!entry) return undefined;
-    if (Date.now() - entry.timestamp > LLM_CACHE_TTL_MS) {
-        llmResponseCache.delete(key);
-        return undefined;
-    }
-    return entry.response;
-}
+// A bounded cache prevents repeated identical requests from consuming quota
+// while keeping endpoint/model/generation settings isolated in the key.
+const llmResponseCache = new LlmResponseCache();
 
 export function clearLlmResponseCache(): void {
     llmResponseCache.clear();
-}
-
-function setCachedResponse(key: string, response: string): void {
-    llmResponseCache.set(key, { response, timestamp: Date.now() });
 }
 
 
@@ -3217,8 +3199,8 @@ export async function callLLM(
     const modelToUse = modelName || provider.model;
 
     // Check cache for repeated identical calls
-    const cacheKey = buildCacheKey(provider, modelToUse, prompt, content);
-    const cached = getCachedResponse(cacheKey);
+    const cacheKey = buildLlmResponseCacheKey(provider, modelToUse, prompt, content, settings);
+    const cached = llmResponseCache.get(cacheKey);
     if (cached) {
         return cached;
     }
@@ -3247,6 +3229,6 @@ export async function callLLM(
     }
 
     // Cache successful result
-    setCachedResponse(cacheKey, result);
+    llmResponseCache.set(cacheKey, result);
     return result;
 }

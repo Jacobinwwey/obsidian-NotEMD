@@ -21,6 +21,8 @@ export default {
             { text: 'Home', link: '/' },
             { text: 'Docs Hub', link: '/README' },
             { text: '文档中心', link: '/README.zh-CN' },
+            { text: 'Diagram Gallery', link: '/diagram-gallery' },
+            { text: '图形 Gallery', link: '/diagram-gallery.zh-CN' },
             { text: 'Plans', link: '/superpowers/plans/2026-08-16-diagram-capability-catalog-and-forward-architecture.en' },
             { text: 'Releases', link: '/releases/1.9.6' }
         ],
@@ -31,7 +33,9 @@ export default {
                 items: [
                     { text: 'Local Home', link: '/' },
                     { text: 'Docs Hub (EN)', link: '/README' },
-                    { text: 'Docs Hub (zh-CN)', link: '/README.zh-CN' }
+                    { text: 'Docs Hub (zh-CN)', link: '/README.zh-CN' },
+                    { text: 'Diagram Gallery (EN)', link: '/diagram-gallery' },
+                    { text: 'Diagram Gallery (zh-CN)', link: '/diagram-gallery.zh-CN' }
                 ]
             },
             {
@@ -64,6 +68,8 @@ export default {
                 items: [
                     { text: 'Diagram Capability Catalog (EN)', link: '/maintainer/diagram-capability-catalog' },
                     { text: 'Diagram Capability Catalog (zh-CN)', link: '/maintainer/diagram-capability-catalog.zh-CN' },
+                    { text: 'Diagram Gallery (EN)', link: '/diagram-gallery' },
+                    { text: 'Diagram Gallery (zh-CN)', link: '/diagram-gallery.zh-CN' },
                     { text: 'Release Workflow (EN)', link: '/maintainer/release-workflow' },
                     { text: 'Release Workflow (zh-CN)', link: '/maintainer/release-workflow.zh-CN' }
                 ]

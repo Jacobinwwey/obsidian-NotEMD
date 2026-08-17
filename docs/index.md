@@ -6,6 +6,8 @@ Repository docs preview for `obsidian-NotEMD`.
 
 - [Docs Hub (EN)](./README.md)
 - [Docs Hub (zh-CN)](./README.zh-CN.md)
+- [Diagram Gallery (EN)](./diagram-gallery.md)
+- [Diagram Gallery (zh-CN)](./diagram-gallery.zh-CN.md)
 - [Chapter Split + TOC (EN)](./chapter-split-toc.md)
 - [Chapter Split + TOC (zh-CN)](./chapter-split-toc.zh-CN.md)
 - [Release Notes 1.8.2 (EN)](./releases/1.8.2.md)
@@ -28,6 +30,8 @@ Repository docs preview for `obsidian-NotEMD`.
 
 - [Architecture Overview (EN)](./architecture.md)
 - [Architecture Overview (zh-CN)](./architecture.zh-CN.md)
+- [Diagram Gallery (EN)](./diagram-gallery.md)
+- [Diagram Gallery (zh-CN)](./diagram-gallery.zh-CN.md)
 - [Mainline Diagram Architecture Progress Audit (EN)](./brainstorms/2026-08-16-mainline-diagram-architecture-progress-and-next-direction.md)
 - [Mainline Diagram Architecture Progress Audit (zh-CN)](./brainstorms/2026-08-16-mainline-diagram-architecture-progress-and-next-direction.zh-CN.md)
 - [Diagram Capability Catalog (EN)](./maintainer/diagram-capability-catalog.md)

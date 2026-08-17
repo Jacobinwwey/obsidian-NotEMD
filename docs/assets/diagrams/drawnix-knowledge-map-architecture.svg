@@ -1,0 +1,191 @@
+<svg xmlns="http://www.w3.org/2000/svg" font-family="NotoSansSC" width="1945" height="1234" viewBox="0 0 1945 1234" role="img" aria-labelledby="notemd-gallery-drawnix-knowledge-map-architecture-title notemd-gallery-drawnix-knowledge-map-architecture-desc" data-notemd-renderer="notemd-drawnix-mindmap-svg@1.0.0">
+        <title id="notemd-gallery-drawnix-knowledge-map-architecture-title">Diagram delivery architecture</title>
+        <desc id="notemd-gallery-drawnix-knowledge-map-architecture-desc">Use when hierarchy and material cross-branch relations must remain editable.</desc>
+        <style>
+            .notemd-drawnix-mindmap-label { font-family: "NotoSansSC", "Segoe UI", Arial, sans-serif; font-size: 14px; font-weight: 400; }
+            .notemd-drawnix-mindmap-relation-label { font-family: "NotoSansSC", "Segoe UI", Arial, sans-serif; font-size: 12px; fill: #475569; paint-order: stroke; stroke: #ffffff; stroke-width: 4px; }
+            .notemd-drawnix-source-visual-heading { font-family: "NotoSansSC", "Segoe UI", Arial, sans-serif; font-size: 19px; font-weight: 700; fill: #172033; }
+            .notemd-drawnix-source-visual-title { font-family: "NotoSansSC", "Segoe UI", Arial, sans-serif; font-size: 15px; font-weight: 700; fill: #172033; }
+            .notemd-drawnix-source-visual-meta { font-family: "NotoSansSC", "Segoe UI", Arial, sans-serif; font-size: 11px; fill: #64748b; }
+            .notemd-drawnix-source-visual-unavailable { font-family: "NotoSansSC", "Segoe UI", Arial, sans-serif; font-size: 13px; fill: #b45309; }
+        </style>
+        <defs>
+            <marker id="notemd-drawnix-mindmap-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+                <path d="M 0 0 L 10 5 L 0 10 z" fill="#64748b"/>
+            </marker>
+            <clipPath id="notemd-drawnix-mindmap-content-clip">
+                <rect x="0" y="108" width="1945" height="1126"/>
+            </clipPath>
+        </defs>
+        <rect x="0" y="0" width="1945" height="1234" fill="#ffffff"/>
+        <path data-drawnix-mindmap-parent="ui-entrypoints" data-drawnix-mindmap-child="command-palette" d="M 1311 232 C 1357 232, 1357 146, 1403 146" fill="none" stroke="#2563eb" stroke-width="2.2" stroke-linecap="round"/><path data-drawnix-mindmap-parent="ui-entrypoints" data-drawnix-mindmap-child="sidebar" d="M 1311 232 C 1357 232, 1357 232, 1403 232" fill="none" stroke="#2563eb" stroke-width="2.2" stroke-linecap="round"/><path data-drawnix-mindmap-parent="ui-entrypoints" data-drawnix-mindmap-child="settings" d="M 1311 232 C 1357 232, 1357 318, 1403 318" fill="none" stroke="#2563eb" stroke-width="2.2" stroke-linecap="round"/><path data-drawnix-mindmap-parent="architecture-zh-cn" data-drawnix-mindmap-child="ui-entrypoints" d="M 1043 490 C 1109 490, 1109 232, 1175 232" fill="none" stroke="#2563eb" stroke-width="2.2" stroke-linecap="round"/><path data-drawnix-mindmap-parent="plugin-orchestration" data-drawnix-mindmap-child="settings-store" d="M 1366 490 C 1412 490, 1412 404, 1458 404" fill="none" stroke="#0f766e" stroke-width="2.2" stroke-linecap="round"/><path data-drawnix-mindmap-parent="plugin-orchestration" data-drawnix-mindmap-child="command-dispatch" d="M 1366 490 C 1412 490, 1412 490, 1458 490" fill="none" stroke="#0f766e" stroke-width="2.2" stroke-linecap="round"/><path data-drawnix-mindmap-parent="plugin-orchestration" data-drawnix-mindmap-child="diagram-operation" d="M 1366 490 C 1412 490, 1412 576, 1458 576" fill="none" stroke="#0f766e" stroke-width="2.2" stroke-linecap="round"/><path data-drawnix-mindmap-parent="architecture-zh-cn" data-drawnix-mindmap-child="plugin-orchestration" d="M 1043 490 C 1109 490, 1109 490, 1175 490" fill="none" stroke="#0f766e" stroke-width="2.2" stroke-linecap="round"/><path data-drawnix-mindmap-parent="diagram-platform" data-drawnix-mindmap-child="source-coverage" d="M 1342 748 C 1388 748, 1388 662, 1434 662" fill="none" stroke="#b45309" stroke-width="2.2" stroke-linecap="round"/><path data-drawnix-mindmap-parent="diagram-platform" data-drawnix-mindmap-child="diagram-spec" d="M 1342 748 C 1388 748, 1388 748, 1434 748" fill="none" stroke="#b45309" stroke-width="2.2" stroke-linecap="round"/><path data-drawnix-mindmap-parent="diagram-platform" data-drawnix-mindmap-child="drawnix-renderer" d="M 1342 748 C 1388 748, 1388 834, 1434 834" fill="none" stroke="#b45309" stroke-width="2.2" stroke-linecap="round"/><path data-drawnix-mindmap-parent="architecture-zh-cn" data-drawnix-mindmap-child="diagram-platform" d="M 1043 490 C 1109 490, 1109 748, 1175 748" fill="none" stroke="#b45309" stroke-width="2.2" stroke-linecap="round"/><path data-drawnix-mindmap-parent="artifact-output" data-drawnix-mindmap-child="drawnix-file" d="M 578 404 C 532 404, 532 318, 486 318" fill="none" stroke="#7c3aed" stroke-width="2.2" stroke-linecap="round"/><path data-drawnix-mindmap-parent="artifact-output" data-drawnix-mindmap-child="svg-companion" d="M 578 404 C 532 404, 532 404, 486 404" fill="none" stroke="#7c3aed" stroke-width="2.2" stroke-linecap="round"/><path data-drawnix-mindmap-parent="artifact-output" data-drawnix-mindmap-child="markdown-wrapper" d="M 578 404 C 532 404, 532 490, 486 490" fill="none" stroke="#7c3aed" stroke-width="2.2" stroke-linecap="round"/><path data-drawnix-mindmap-parent="architecture-zh-cn" data-drawnix-mindmap-child="artifact-output" d="M 861 490 C 795 490, 795 404, 729 404" fill="none" stroke="#7c3aed" stroke-width="2.2" stroke-linecap="round"/><path data-drawnix-mindmap-parent="cli-boundary" data-drawnix-mindmap-child="obsidian-cli" d="M 593 619 C 547 619, 547 576, 501 576" fill="none" stroke="#be123c" stroke-width="2.2" stroke-linecap="round"/><path data-drawnix-mindmap-parent="cli-boundary" data-drawnix-mindmap-child="maintainer-bridge" d="M 593 619 C 547 619, 547 662, 501 662" fill="none" stroke="#be123c" stroke-width="2.2" stroke-linecap="round"/><path data-drawnix-mindmap-parent="architecture-zh-cn" data-drawnix-mindmap-child="cli-boundary" d="M 861 490 C 795 490, 795 619, 729 619" fill="none" stroke="#be123c" stroke-width="2.2" stroke-linecap="round"/>
+        <g data-drawnix-mindmap-relation-id="cross-1-command-palette-to-command-dispatch" data-drawnix-mindmap-source="command-palette" data-drawnix-mindmap-target="command-dispatch" data-drawnix-mindmap-source-root="architecture-zh-cn" data-drawnix-mindmap-target-root="architecture-zh-cn" data-drawnix-mindmap-route-strategy="reserved-lane" data-drawnix-mindmap-relation-layer="path" clip-path="url(#notemd-drawnix-mindmap-content-clip)">
+        <path d="M 1562 146 L 1657 146 L 1657 318 L 1801 318 L 1801 466 L 1625 466 L 1625 490" fill="none" stroke="#64748b" stroke-width="1.6" stroke-dasharray="6 5" marker-end="url(#notemd-drawnix-mindmap-arrow)"/>
+    </g><g data-drawnix-mindmap-relation-id="cross-2-sidebar-to-command-dispatch" data-drawnix-mindmap-source="sidebar" data-drawnix-mindmap-target="command-dispatch" data-drawnix-mindmap-source-root="architecture-zh-cn" data-drawnix-mindmap-target-root="architecture-zh-cn" data-drawnix-mindmap-route-strategy="reserved-lane" data-drawnix-mindmap-relation-layer="path" clip-path="url(#notemd-drawnix-mindmap-content-clip)">
+        <path d="M 1550 232 L 1657 232 L 1657 414 L 1801 414 L 1801 466 L 1625 466 L 1625 490" fill="none" stroke="#64748b" stroke-width="1.6" stroke-dasharray="6 5" marker-end="url(#notemd-drawnix-mindmap-arrow)"/>
+    </g><g data-drawnix-mindmap-relation-id="cross-3-settings-to-settings-store" data-drawnix-mindmap-source="settings" data-drawnix-mindmap-target="settings-store" data-drawnix-mindmap-source-root="architecture-zh-cn" data-drawnix-mindmap-target-root="architecture-zh-cn" data-drawnix-mindmap-route-strategy="reserved-lane" data-drawnix-mindmap-relation-layer="path" clip-path="url(#notemd-drawnix-mindmap-content-clip)">
+        <path d="M 1539 318 L 1539 348 L 1801 348 L 1801 510 L 1657 510 L 1657 404 L 1601 404" fill="none" stroke="#64748b" stroke-width="1.6" stroke-dasharray="6 5" marker-end="url(#notemd-drawnix-mindmap-arrow)"/>
+    </g><g data-drawnix-mindmap-relation-id="cross-4-command-dispatch-to-diagram-operation" data-drawnix-mindmap-source="command-dispatch" data-drawnix-mindmap-target="diagram-operation" data-drawnix-mindmap-source-root="architecture-zh-cn" data-drawnix-mindmap-target-root="architecture-zh-cn" data-drawnix-mindmap-route-strategy="reserved-lane" data-drawnix-mindmap-relation-layer="path" clip-path="url(#notemd-drawnix-mindmap-content-clip)">
+        <path d="M 1625 490 L 1657 490 L 1657 606 L 1801 606 L 1801 576 L 1629 576" fill="none" stroke="#64748b" stroke-width="1.6" stroke-dasharray="6 5" marker-end="url(#notemd-drawnix-mindmap-arrow)"/>
+    </g><g data-drawnix-mindmap-relation-id="cross-5-diagram-operation-to-source-coverage" data-drawnix-mindmap-source="diagram-operation" data-drawnix-mindmap-target="source-coverage" data-drawnix-mindmap-source-root="architecture-zh-cn" data-drawnix-mindmap-target-root="architecture-zh-cn" data-drawnix-mindmap-route-strategy="reserved-lane" data-drawnix-mindmap-relation-layer="path" clip-path="url(#notemd-drawnix-mindmap-content-clip)">
+        <path d="M 1629 576 L 1657 576 L 1657 702 L 1829 702 L 1829 662 L 1585 662" fill="none" stroke="#64748b" stroke-width="1.6" stroke-dasharray="6 5" marker-end="url(#notemd-drawnix-mindmap-arrow)"/>
+    </g><g data-drawnix-mindmap-relation-id="cross-6-source-coverage-to-diagram-spec" data-drawnix-mindmap-source="source-coverage" data-drawnix-mindmap-target="diagram-spec" data-drawnix-mindmap-source-root="architecture-zh-cn" data-drawnix-mindmap-target-root="architecture-zh-cn" data-drawnix-mindmap-route-strategy="reserved-lane" data-drawnix-mindmap-relation-layer="path" clip-path="url(#notemd-drawnix-mindmap-content-clip)">
+        <path d="M 1585 662 L 1657 662 L 1657 798 L 1801 798 L 1801 748 L 1570 748" fill="none" stroke="#64748b" stroke-width="1.6" stroke-dasharray="6 5" marker-end="url(#notemd-drawnix-mindmap-arrow)"/>
+    </g><g data-drawnix-mindmap-relation-id="cross-7-diagram-spec-to-drawnix-renderer" data-drawnix-mindmap-source="diagram-spec" data-drawnix-mindmap-target="drawnix-renderer" data-drawnix-mindmap-source-root="architecture-zh-cn" data-drawnix-mindmap-target-root="architecture-zh-cn" data-drawnix-mindmap-route-strategy="reserved-lane" data-drawnix-mindmap-relation-layer="path" clip-path="url(#notemd-drawnix-mindmap-content-clip)">
+        <path d="M 1570 748 L 1657 748 L 1657 894 L 1801 894 L 1801 834 L 1596 834" fill="none" stroke="#64748b" stroke-width="1.6" stroke-dasharray="6 5" marker-end="url(#notemd-drawnix-mindmap-arrow)"/>
+    </g><g data-drawnix-mindmap-relation-id="cross-8-drawnix-renderer-to-drawnix-file" data-drawnix-mindmap-source="drawnix-renderer" data-drawnix-mindmap-target="drawnix-file" data-drawnix-mindmap-source-root="architecture-zh-cn" data-drawnix-mindmap-target-root="architecture-zh-cn" data-drawnix-mindmap-route-strategy="reserved-lane" data-drawnix-mindmap-relation-layer="path" clip-path="url(#notemd-drawnix-mindmap-content-clip)">
+        <path d="M 1596 834 L 1657 834 L 1657 936 L 288 936 L 288 318 L 334 318" fill="none" stroke="#64748b" stroke-width="1.6" stroke-dasharray="6 5" marker-end="url(#notemd-drawnix-mindmap-arrow)"/>
+    </g><g data-drawnix-mindmap-relation-id="cross-9-drawnix-renderer-to-svg-companion" data-drawnix-mindmap-source="drawnix-renderer" data-drawnix-mindmap-target="svg-companion" data-drawnix-mindmap-source-root="architecture-zh-cn" data-drawnix-mindmap-target-root="architecture-zh-cn" data-drawnix-mindmap-route-strategy="reserved-lane" data-drawnix-mindmap-relation-layer="path" clip-path="url(#notemd-drawnix-mindmap-content-clip)">
+        <path d="M 1596 834 L 1657 834 L 1657 1032 L 288 1032 L 288 404 L 341 404" fill="none" stroke="#64748b" stroke-width="1.6" stroke-dasharray="6 5" marker-end="url(#notemd-drawnix-mindmap-arrow)"/>
+    </g><g data-drawnix-mindmap-relation-id="cross-10-drawnix-file-to-markdown-wrapper" data-drawnix-mindmap-source="drawnix-file" data-drawnix-mindmap-target="markdown-wrapper" data-drawnix-mindmap-source-root="architecture-zh-cn" data-drawnix-mindmap-target-root="architecture-zh-cn" data-drawnix-mindmap-route-strategy="reserved-lane" data-drawnix-mindmap-relation-layer="path" clip-path="url(#notemd-drawnix-mindmap-content-clip)">
+        <path d="M 334 318 L 144 318 L 144 404 L 288 404 L 288 466 L 316 466 L 316 490" fill="none" stroke="#64748b" stroke-width="1.6" stroke-dasharray="6 5" marker-end="url(#notemd-drawnix-mindmap-arrow)"/>
+    </g><g data-drawnix-mindmap-relation-id="cross-11-obsidian-cli-to-maintainer-bridge" data-drawnix-mindmap-source="obsidian-cli" data-drawnix-mindmap-target="maintainer-bridge" data-drawnix-mindmap-source-root="architecture-zh-cn" data-drawnix-mindmap-target-root="architecture-zh-cn" data-drawnix-mindmap-route-strategy="reserved-lane" data-drawnix-mindmap-relation-layer="path" clip-path="url(#notemd-drawnix-mindmap-content-clip)">
+        <path d="M 365 576 L 144 576 L 144 619 L 331 619 L 331 662" fill="none" stroke="#64748b" stroke-width="1.6" stroke-dasharray="6 5" marker-end="url(#notemd-drawnix-mindmap-arrow)"/>
+    </g><g data-drawnix-mindmap-relation-id="cross-12-maintainer-bridge-to-diagram-operation" data-drawnix-mindmap-source="maintainer-bridge" data-drawnix-mindmap-target="diagram-operation" data-drawnix-mindmap-source-root="architecture-zh-cn" data-drawnix-mindmap-target-root="architecture-zh-cn" data-drawnix-mindmap-route-strategy="reserved-lane" data-drawnix-mindmap-relation-layer="path" clip-path="url(#notemd-drawnix-mindmap-content-clip)">
+        <path d="M 331 662 L 288 662 L 288 1128 L 1657 1128 L 1657 576 L 1629 576" fill="none" stroke="#64748b" stroke-width="1.6" stroke-dasharray="6 5" marker-end="url(#notemd-drawnix-mindmap-arrow)"/>
+    </g>
+        <g data-drawnix-mindmap-node-id="architecture-zh-cn" data-drawnix-mindmap-depth="0" data-drawnix-mindmap-branch="-1">
+        <rect x="861" y="456" width="182" height="68" rx="18" fill="#0f172a" stroke="#0f172a" stroke-width="0"/>
+        <text x="952" y="496" text-anchor="middle" class="notemd-drawnix-mindmap-label" fill="#ffffff">
+        <tspan x="952" dy="0">architecture.zh-CN</tspan>
+    </text>
+    </g><g data-drawnix-mindmap-node-id="ui-entrypoints" data-drawnix-mindmap-depth="1" data-drawnix-mindmap-branch="0">
+        <rect x="1175" y="204" width="136" height="56" rx="12" fill="#ffffff" stroke="#2563eb" stroke-width="2"/>
+        <text x="1243" y="238" text-anchor="middle" class="notemd-drawnix-mindmap-label" fill="#172033">
+        <tspan x="1243" dy="0">Obsidian UI</tspan>
+    </text>
+    </g><g data-drawnix-mindmap-node-id="command-palette" data-drawnix-mindmap-depth="2" data-drawnix-mindmap-branch="0">
+        <rect x="1403" y="118" width="159" height="56" rx="12" fill="#f8fafc" stroke="#2563eb" stroke-width="1.4"/>
+        <text x="1482.5" y="152" text-anchor="middle" class="notemd-drawnix-mindmap-label" fill="#172033">
+        <tspan x="1482.5" dy="0">Command palette</tspan>
+    </text>
+    </g><g data-drawnix-mindmap-node-id="sidebar" data-drawnix-mindmap-depth="2" data-drawnix-mindmap-branch="0">
+        <rect x="1403" y="204" width="147" height="56" rx="12" fill="#f8fafc" stroke="#2563eb" stroke-width="1.4"/>
+        <text x="1476.5" y="238" text-anchor="middle" class="notemd-drawnix-mindmap-label" fill="#172033">
+        <tspan x="1476.5" dy="0">Notemd sidebar</tspan>
+    </text>
+    </g><g data-drawnix-mindmap-node-id="settings" data-drawnix-mindmap-depth="2" data-drawnix-mindmap-branch="0">
+        <rect x="1403" y="290" width="136" height="56" rx="12" fill="#f8fafc" stroke="#2563eb" stroke-width="1.4"/>
+        <text x="1471" y="324" text-anchor="middle" class="notemd-drawnix-mindmap-label" fill="#172033">
+        <tspan x="1471" dy="0">Settings tab</tspan>
+    </text>
+    </g><g data-drawnix-mindmap-node-id="plugin-orchestration" data-drawnix-mindmap-depth="1" data-drawnix-mindmap-branch="1">
+        <rect x="1175" y="462" width="191" height="56" rx="12" fill="#ffffff" stroke="#0f766e" stroke-width="2"/>
+        <text x="1270.5" y="496" text-anchor="middle" class="notemd-drawnix-mindmap-label" fill="#172033">
+        <tspan x="1270.5" dy="0">Plugin orchestration</tspan>
+    </text>
+    </g><g data-drawnix-mindmap-node-id="settings-store" data-drawnix-mindmap-depth="2" data-drawnix-mindmap-branch="1">
+        <rect x="1458" y="376" width="143" height="56" rx="12" fill="#f8fafc" stroke="#0f766e" stroke-width="1.4"/>
+        <text x="1529.5" y="410" text-anchor="middle" class="notemd-drawnix-mindmap-label" fill="#172033">
+        <tspan x="1529.5" dy="0">Settings store</tspan>
+    </text>
+    </g><g data-drawnix-mindmap-node-id="command-dispatch" data-drawnix-mindmap-depth="2" data-drawnix-mindmap-branch="1">
+        <rect x="1458" y="462" width="167" height="56" rx="12" fill="#f8fafc" stroke="#0f766e" stroke-width="1.4"/>
+        <text x="1541.5" y="496" text-anchor="middle" class="notemd-drawnix-mindmap-label" fill="#172033">
+        <tspan x="1541.5" dy="0">Command dispatch</tspan>
+    </text>
+    </g><g data-drawnix-mindmap-node-id="diagram-operation" data-drawnix-mindmap-depth="2" data-drawnix-mindmap-branch="1">
+        <rect x="1458" y="548" width="171" height="56" rx="12" fill="#f8fafc" stroke="#0f766e" stroke-width="1.4"/>
+        <text x="1543.5" y="582" text-anchor="middle" class="notemd-drawnix-mindmap-label" fill="#172033">
+        <tspan x="1543.5" dy="0">Diagram operation</tspan>
+    </text>
+    </g><g data-drawnix-mindmap-node-id="diagram-platform" data-drawnix-mindmap-depth="1" data-drawnix-mindmap-branch="2">
+        <rect x="1175" y="720" width="167" height="56" rx="12" fill="#ffffff" stroke="#b45309" stroke-width="2"/>
+        <text x="1258.5" y="754" text-anchor="middle" class="notemd-drawnix-mindmap-label" fill="#172033">
+        <tspan x="1258.5" dy="0">Diagram platform</tspan>
+    </text>
+    </g><g data-drawnix-mindmap-node-id="source-coverage" data-drawnix-mindmap-depth="2" data-drawnix-mindmap-branch="2">
+        <rect x="1434" y="634" width="151" height="56" rx="12" fill="#f8fafc" stroke="#b45309" stroke-width="1.4"/>
+        <text x="1509.5" y="668" text-anchor="middle" class="notemd-drawnix-mindmap-label" fill="#172033">
+        <tspan x="1509.5" dy="0">Source coverage</tspan>
+    </text>
+    </g><g data-drawnix-mindmap-node-id="diagram-spec" data-drawnix-mindmap-depth="2" data-drawnix-mindmap-branch="2">
+        <rect x="1434" y="720" width="136" height="56" rx="12" fill="#f8fafc" stroke="#b45309" stroke-width="1.4"/>
+        <text x="1502" y="754" text-anchor="middle" class="notemd-drawnix-mindmap-label" fill="#172033">
+        <tspan x="1502" dy="0">DiagramSpec</tspan>
+    </text>
+    </g><g data-drawnix-mindmap-node-id="drawnix-renderer" data-drawnix-mindmap-depth="2" data-drawnix-mindmap-branch="2">
+        <rect x="1434" y="806" width="162" height="56" rx="12" fill="#f8fafc" stroke="#b45309" stroke-width="1.4"/>
+        <text x="1515" y="840" text-anchor="middle" class="notemd-drawnix-mindmap-label" fill="#172033">
+        <tspan x="1515" dy="0">DrawnixRenderer</tspan>
+    </text>
+    </g><g data-drawnix-mindmap-node-id="artifact-output" data-drawnix-mindmap-depth="1" data-drawnix-mindmap-branch="3">
+        <rect x="578" y="376" width="151" height="56" rx="12" fill="#ffffff" stroke="#7c3aed" stroke-width="2"/>
+        <text x="653.5" y="410" text-anchor="middle" class="notemd-drawnix-mindmap-label" fill="#172033">
+        <tspan x="653.5" dy="0">Artifact output</tspan>
+    </text>
+    </g><g data-drawnix-mindmap-node-id="drawnix-file" data-drawnix-mindmap-depth="2" data-drawnix-mindmap-branch="3">
+        <rect x="334" y="290" width="152" height="56" rx="12" fill="#f8fafc" stroke="#7c3aed" stroke-width="1.4"/>
+        <text x="410" y="324" text-anchor="middle" class="notemd-drawnix-mindmap-label" fill="#172033">
+        <tspan x="410" dy="0">.drawnix source</tspan>
+    </text>
+    </g><g data-drawnix-mindmap-node-id="svg-companion" data-drawnix-mindmap-depth="2" data-drawnix-mindmap-branch="3">
+        <rect x="341" y="376" width="145" height="56" rx="12" fill="#f8fafc" stroke="#7c3aed" stroke-width="1.4"/>
+        <text x="413.5" y="410" text-anchor="middle" class="notemd-drawnix-mindmap-label" fill="#172033">
+        <tspan x="413.5" dy="0">SVG companion</tspan>
+    </text>
+    </g><g data-drawnix-mindmap-node-id="markdown-wrapper" data-drawnix-mindmap-depth="2" data-drawnix-mindmap-branch="3">
+        <rect x="316" y="462" width="170" height="56" rx="12" fill="#f8fafc" stroke="#7c3aed" stroke-width="1.4"/>
+        <text x="401" y="496" text-anchor="middle" class="notemd-drawnix-mindmap-label" fill="#172033">
+        <tspan x="401" dy="0">Markdown wrapper</tspan>
+    </text>
+    </g><g data-drawnix-mindmap-node-id="cli-boundary" data-drawnix-mindmap-depth="1" data-drawnix-mindmap-branch="4">
+        <rect x="593" y="591" width="136" height="56" rx="12" fill="#ffffff" stroke="#be123c" stroke-width="2"/>
+        <text x="661" y="625" text-anchor="middle" class="notemd-drawnix-mindmap-label" fill="#172033">
+        <tspan x="661" dy="0">CLI boundary</tspan>
+    </text>
+    </g><g data-drawnix-mindmap-node-id="obsidian-cli" data-drawnix-mindmap-depth="2" data-drawnix-mindmap-branch="4">
+        <rect x="365" y="548" width="136" height="56" rx="12" fill="#f8fafc" stroke="#be123c" stroke-width="1.4"/>
+        <text x="433" y="582" text-anchor="middle" class="notemd-drawnix-mindmap-label" fill="#172033">
+        <tspan x="433" dy="0">Obsidian CLI</tspan>
+    </text>
+    </g><g data-drawnix-mindmap-node-id="maintainer-bridge" data-drawnix-mindmap-depth="2" data-drawnix-mindmap-branch="4">
+        <rect x="331" y="634" width="170" height="56" rx="12" fill="#f8fafc" stroke="#be123c" stroke-width="1.4"/>
+        <text x="416" y="668" text-anchor="middle" class="notemd-drawnix-mindmap-label" fill="#172033">
+        <tspan x="416" dy="0">Maintainer bridge</tspan>
+    </text>
+    </g>
+        <g data-drawnix-mindmap-relation-id="cross-1-command-palette-to-command-dispatch" data-drawnix-mindmap-source="command-palette" data-drawnix-mindmap-target="command-dispatch" data-drawnix-mindmap-source-root="architecture-zh-cn" data-drawnix-mindmap-target-root="architecture-zh-cn" data-drawnix-mindmap-route-strategy="reserved-lane" data-drawnix-mindmap-relation-layer="label" clip-path="url(#notemd-drawnix-mindmap-content-clip)">
+        <rect data-drawnix-mindmap-relation-label-background="true" x="1681" y="302" width="96" height="32" rx="6" fill="#ffffff" fill-opacity="0.97" stroke="#cbd5e1" stroke-width="0.8"/>
+        <text data-drawnix-mindmap-relation-label="true" x="1729" y="322" text-anchor="middle" class="notemd-drawnix-mindmap-relation-label"><tspan x="1729" dy="0">starts</tspan></text>
+    </g><g data-drawnix-mindmap-relation-id="cross-2-sidebar-to-command-dispatch" data-drawnix-mindmap-source="sidebar" data-drawnix-mindmap-target="command-dispatch" data-drawnix-mindmap-source-root="architecture-zh-cn" data-drawnix-mindmap-target-root="architecture-zh-cn" data-drawnix-mindmap-route-strategy="reserved-lane" data-drawnix-mindmap-relation-layer="label" clip-path="url(#notemd-drawnix-mindmap-content-clip)">
+        <rect data-drawnix-mindmap-relation-label-background="true" x="1681" y="398" width="96" height="32" rx="6" fill="#ffffff" fill-opacity="0.97" stroke="#cbd5e1" stroke-width="0.8"/>
+        <text data-drawnix-mindmap-relation-label="true" x="1729" y="418" text-anchor="middle" class="notemd-drawnix-mindmap-relation-label"><tspan x="1729" dy="0">starts</tspan></text>
+    </g><g data-drawnix-mindmap-relation-id="cross-3-settings-to-settings-store" data-drawnix-mindmap-source="settings" data-drawnix-mindmap-target="settings-store" data-drawnix-mindmap-source-root="architecture-zh-cn" data-drawnix-mindmap-target-root="architecture-zh-cn" data-drawnix-mindmap-route-strategy="reserved-lane" data-drawnix-mindmap-relation-layer="label" clip-path="url(#notemd-drawnix-mindmap-content-clip)">
+        <rect data-drawnix-mindmap-relation-label-background="true" x="1681" y="494" width="96" height="32" rx="6" fill="#ffffff" fill-opacity="0.97" stroke="#cbd5e1" stroke-width="0.8"/>
+        <text data-drawnix-mindmap-relation-label="true" x="1729" y="514" text-anchor="middle" class="notemd-drawnix-mindmap-relation-label"><tspan x="1729" dy="0">updates</tspan></text>
+    </g><g data-drawnix-mindmap-relation-id="cross-4-command-dispatch-to-diagram-operation" data-drawnix-mindmap-source="command-dispatch" data-drawnix-mindmap-target="diagram-operation" data-drawnix-mindmap-source-root="architecture-zh-cn" data-drawnix-mindmap-target-root="architecture-zh-cn" data-drawnix-mindmap-route-strategy="reserved-lane" data-drawnix-mindmap-relation-layer="label" clip-path="url(#notemd-drawnix-mindmap-content-clip)">
+        <rect data-drawnix-mindmap-relation-label-background="true" x="1681" y="590" width="96" height="32" rx="6" fill="#ffffff" fill-opacity="0.97" stroke="#cbd5e1" stroke-width="0.8"/>
+        <text data-drawnix-mindmap-relation-label="true" x="1729" y="610" text-anchor="middle" class="notemd-drawnix-mindmap-relation-label"><tspan x="1729" dy="0">routes</tspan></text>
+    </g><g data-drawnix-mindmap-relation-id="cross-5-diagram-operation-to-source-coverage" data-drawnix-mindmap-source="diagram-operation" data-drawnix-mindmap-target="source-coverage" data-drawnix-mindmap-source-root="architecture-zh-cn" data-drawnix-mindmap-target-root="architecture-zh-cn" data-drawnix-mindmap-route-strategy="reserved-lane" data-drawnix-mindmap-relation-layer="label" clip-path="url(#notemd-drawnix-mindmap-content-clip)">
+        <rect data-drawnix-mindmap-relation-label-background="true" x="1681" y="686" width="124" height="32" rx="6" fill="#ffffff" fill-opacity="0.97" stroke="#cbd5e1" stroke-width="0.8"/>
+        <text data-drawnix-mindmap-relation-label="true" x="1743" y="706" text-anchor="middle" class="notemd-drawnix-mindmap-relation-label"><tspan x="1743" dy="0">covers source</tspan></text>
+    </g><g data-drawnix-mindmap-relation-id="cross-6-source-coverage-to-diagram-spec" data-drawnix-mindmap-source="source-coverage" data-drawnix-mindmap-target="diagram-spec" data-drawnix-mindmap-source-root="architecture-zh-cn" data-drawnix-mindmap-target-root="architecture-zh-cn" data-drawnix-mindmap-route-strategy="reserved-lane" data-drawnix-mindmap-relation-layer="label" clip-path="url(#notemd-drawnix-mindmap-content-clip)">
+        <rect data-drawnix-mindmap-relation-label-background="true" x="1681" y="782" width="96" height="32" rx="6" fill="#ffffff" fill-opacity="0.97" stroke="#cbd5e1" stroke-width="0.8"/>
+        <text data-drawnix-mindmap-relation-label="true" x="1729" y="802" text-anchor="middle" class="notemd-drawnix-mindmap-relation-label"><tspan x="1729" dy="0">builds</tspan></text>
+    </g><g data-drawnix-mindmap-relation-id="cross-7-diagram-spec-to-drawnix-renderer" data-drawnix-mindmap-source="diagram-spec" data-drawnix-mindmap-target="drawnix-renderer" data-drawnix-mindmap-source-root="architecture-zh-cn" data-drawnix-mindmap-target-root="architecture-zh-cn" data-drawnix-mindmap-route-strategy="reserved-lane" data-drawnix-mindmap-relation-layer="label" clip-path="url(#notemd-drawnix-mindmap-content-clip)">
+        <rect data-drawnix-mindmap-relation-label-background="true" x="1681" y="878" width="96" height="32" rx="6" fill="#ffffff" fill-opacity="0.97" stroke="#cbd5e1" stroke-width="0.8"/>
+        <text data-drawnix-mindmap-relation-label="true" x="1729" y="898" text-anchor="middle" class="notemd-drawnix-mindmap-relation-label"><tspan x="1729" dy="0">renders</tspan></text>
+    </g><g data-drawnix-mindmap-relation-id="cross-8-drawnix-renderer-to-drawnix-file" data-drawnix-mindmap-source="drawnix-renderer" data-drawnix-mindmap-target="drawnix-file" data-drawnix-mindmap-source-root="architecture-zh-cn" data-drawnix-mindmap-target-root="architecture-zh-cn" data-drawnix-mindmap-route-strategy="reserved-lane" data-drawnix-mindmap-relation-layer="label" clip-path="url(#notemd-drawnix-mindmap-content-clip)">
+        <rect data-drawnix-mindmap-relation-label-background="true" x="924.5" y="920" width="96" height="32" rx="6" fill="#ffffff" fill-opacity="0.97" stroke="#cbd5e1" stroke-width="0.8"/>
+        <text data-drawnix-mindmap-relation-label="true" x="972.5" y="940" text-anchor="middle" class="notemd-drawnix-mindmap-relation-label"><tspan x="972.5" dy="0">writes</tspan></text>
+    </g><g data-drawnix-mindmap-relation-id="cross-9-drawnix-renderer-to-svg-companion" data-drawnix-mindmap-source="drawnix-renderer" data-drawnix-mindmap-target="svg-companion" data-drawnix-mindmap-source-root="architecture-zh-cn" data-drawnix-mindmap-target-root="architecture-zh-cn" data-drawnix-mindmap-route-strategy="reserved-lane" data-drawnix-mindmap-relation-layer="label" clip-path="url(#notemd-drawnix-mindmap-content-clip)">
+        <rect data-drawnix-mindmap-relation-label-background="true" x="924.5" y="1016" width="96" height="32" rx="6" fill="#ffffff" fill-opacity="0.97" stroke="#cbd5e1" stroke-width="0.8"/>
+        <text data-drawnix-mindmap-relation-label="true" x="972.5" y="1036" text-anchor="middle" class="notemd-drawnix-mindmap-relation-label"><tspan x="972.5" dy="0">previews</tspan></text>
+    </g><g data-drawnix-mindmap-relation-id="cross-10-drawnix-file-to-markdown-wrapper" data-drawnix-mindmap-source="drawnix-file" data-drawnix-mindmap-target="markdown-wrapper" data-drawnix-mindmap-source-root="architecture-zh-cn" data-drawnix-mindmap-target-root="architecture-zh-cn" data-drawnix-mindmap-route-strategy="reserved-lane" data-drawnix-mindmap-relation-layer="label" clip-path="url(#notemd-drawnix-mindmap-content-clip)">
+        <rect data-drawnix-mindmap-relation-label-background="true" x="168" y="388" width="96" height="32" rx="6" fill="#ffffff" fill-opacity="0.97" stroke="#cbd5e1" stroke-width="0.8"/>
+        <text data-drawnix-mindmap-relation-label="true" x="216" y="408" text-anchor="middle" class="notemd-drawnix-mindmap-relation-label"><tspan x="216" dy="0">links</tspan></text>
+    </g><g data-drawnix-mindmap-relation-id="cross-11-obsidian-cli-to-maintainer-bridge" data-drawnix-mindmap-source="obsidian-cli" data-drawnix-mindmap-target="maintainer-bridge" data-drawnix-mindmap-source-root="architecture-zh-cn" data-drawnix-mindmap-target-root="architecture-zh-cn" data-drawnix-mindmap-route-strategy="reserved-lane" data-drawnix-mindmap-relation-layer="label" clip-path="url(#notemd-drawnix-mindmap-content-clip)">
+        <rect data-drawnix-mindmap-relation-label-background="true" x="168" y="603" width="96" height="32" rx="6" fill="#ffffff" fill-opacity="0.97" stroke="#cbd5e1" stroke-width="0.8"/>
+        <text data-drawnix-mindmap-relation-label="true" x="216" y="623" text-anchor="middle" class="notemd-drawnix-mindmap-relation-label"><tspan x="216" dy="0">executes</tspan></text>
+    </g><g data-drawnix-mindmap-relation-id="cross-12-maintainer-bridge-to-diagram-operation" data-drawnix-mindmap-source="maintainer-bridge" data-drawnix-mindmap-target="diagram-operation" data-drawnix-mindmap-source-root="architecture-zh-cn" data-drawnix-mindmap-target-root="architecture-zh-cn" data-drawnix-mindmap-route-strategy="reserved-lane" data-drawnix-mindmap-relation-layer="label" clip-path="url(#notemd-drawnix-mindmap-content-clip)">
+        <rect data-drawnix-mindmap-relation-label-background="true" x="924.5" y="1112" width="96" height="32" rx="6" fill="#ffffff" fill-opacity="0.97" stroke="#cbd5e1" stroke-width="0.8"/>
+        <text data-drawnix-mindmap-relation-label="true" x="972.5" y="1132" text-anchor="middle" class="notemd-drawnix-mindmap-relation-label"><tspan x="972.5" dy="0">invokes</tspan></text>
+    </g>
+
+        <g data-drawnix-mindmap-layer="header">
+        <rect data-drawnix-mindmap-header-safe-height="108" x="48" y="16" width="1849" height="92" fill="#ffffff" fill-opacity="0.98"/>
+        <text x="72" y="44" fill="#172033" font-family="NotoSansSC" font-size="24" font-weight="700">architecture.zh-CN</text>
+        <text x="72" y="72" fill="#64748b" font-family="NotoSansSC" font-size="14"><tspan data-drawnix-mindmap-summary-line="true" x="72" dy="0">A native Drawnix tree with cross-branch relationships for an architecture note.</tspan></text>
+    </g>
+    </svg>

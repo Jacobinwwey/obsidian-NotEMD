@@ -1,4 +1,4 @@
-import type { DiagramSpec, RenderTarget } from '../types';
+import type { DiagramSpec } from '../types';
 import {
     EXECUTABLE_DIAGRAM_TYPES,
     getExecutableDiagramType

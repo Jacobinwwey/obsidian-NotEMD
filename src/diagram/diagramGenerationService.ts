@@ -519,8 +519,8 @@ export async function generateDiagramArtifact(
             options.sourceVisuals,
             options.drawnixExportMermaidCompanions
         );
-    } catch (renderError: unknown) {
-        const errorMsg = renderError instanceof Error ? renderError.message : String(renderError);
+    } catch (initialRenderFailure: unknown) {
+        const errorMsg = normalizeErrorMessage(initialRenderFailure);
         // If Mermaid parse failed, retry once with the LLM asking for valid Mermaid syntax
         if (errorMsg.includes('Mermaid diagram failed validation') || errorMsg.includes('Parse error')) {
             const retryPrompt = buildGenerationPrompt(plan, {
@@ -546,21 +546,15 @@ export async function generateDiagramArtifact(
                     options.sourceVisuals,
                     options.drawnixExportMermaidCompanions
                 );
+                spec = retrySpec;
             } catch (retryError: unknown) {
-                const retryMsg = retryError instanceof Error ? retryError.message : String(retryError);
-                const rawMermaid = spec.nodes?.length
-                    ? `\`\`\`mermaid\\n${spec.intent}\\n${spec.nodes.map((n: any) => `    ${n.id}[${n.label || n.id}]`).join('\\n')}\\n\`\`\``
-                    : `// ${retryMsg}`;
-                artifact = {
-                    target: plan.renderTarget as any,
-                    content: rawMermaid,
-                    mimeType: 'text/vnd.mermaid' as const,
-                    sourceIntent: spec.intent
-                };
-                renderError = `Mermaid rendering failed after retry: ${retryMsg}. The diagram may need manual fixing.`;
+                const retryMsg = normalizeErrorMessage(retryError);
+                throw new Error(
+                    `Mermaid rendering failed after retry: ${retryMsg}. Initial rendering failure: ${errorMsg}`
+                );
             }
         } else {
-            throw renderError;
+            throw initialRenderFailure;
         }
     }
 

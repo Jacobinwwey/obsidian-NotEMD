@@ -1,0 +1,64 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="720" height="580" viewBox="0 0 720 580" role="img" aria-labelledby="notemd-gallery-circuit-cmos-inverter-title notemd-gallery-circuit-cmos-inverter-desc" data-notemd-renderer="notemd-circuitikz-preview-svg@0.2.0">
+        <title id="notemd-gallery-circuit-cmos-inverter-title">CMOS inverter</title>
+        <desc id="notemd-gallery-circuit-cmos-inverter-desc">Use for electrical topology expressed through supported circuit templates.</desc>
+        <style>
+            .notemd-circuit-canvas { fill: #ffffff; }
+            .notemd-circuit-stage { fill: none; stroke: #1f2937; stroke-width: 1.2; stroke-linecap: round; stroke-linejoin: round; }
+            .notemd-circuit-stage text { stroke: none; }
+            .notemd-circuit-component rect { fill: #ffffff; stroke: #1f2937; stroke-width: 1.2; }
+            .notemd-circuit-pmos rect { fill: #fff7ed; }
+            .notemd-circuit-nmos rect { fill: #eff6ff; }
+            .notemd-circuit-mos-bubble { fill: #ffffff; stroke: #1f2937; stroke-width: 1.2; }
+            .notemd-circuit-port { fill: #ffffff; stroke: #1f2937; stroke-width: 1.2; }
+            .notemd-circuit-junction { fill: #111827; stroke: none; }
+            .notemd-circuit-label { fill: #111827; font-family: "Segoe UI", Arial, sans-serif; font-size: 15px; font-weight: 350; }
+            .notemd-circuit-net-label { fill: #334155; font-family: "Segoe UI", Arial, sans-serif; font-size: 13px; font-weight: 350; }
+            .notemd-circuit-title { fill: #111827; font-family: "Segoe UI", Arial, sans-serif; font-size: 22px; font-weight: 500; }
+        </style>
+        <rect class="notemd-circuit-canvas" x="0" y="0" width="720" height="580" fill="#ffffff"/>
+        <g class="notemd-circuit-metadata">
+        <text x="40" y="42" class="notemd-circuit-title">CMOS Inverter</text>
+    </g>
+        <g class="notemd-circuit-stage">
+
+        <g class="notemd-circuit-vdd">
+        <line x1="360" y1="72" x2="360" y2="90"/>
+        <text x="360" y="64" text-anchor="middle" class="notemd-circuit-label">VDD</text>
+    </g>
+        <g id="MP" class="notemd-circuit-component notemd-circuit-mos notemd-circuit-pmos" data-component-id="MP">
+        <rect x="338" y="138" width="44" height="80" rx="6"/>
+        <line x1="360" y1="116" x2="360" y2="138"/>
+        <line x1="360" y1="218" x2="360" y2="240"/>
+        <line x1="312" y1="178" x2="338" y2="178"/>
+        <circle cx="334" cy="178" r="5" class="notemd-circuit-mos-bubble"/>
+        <text x="394" y="183" class="notemd-circuit-label">MP</text>
+    </g>
+        <line x1="360" y1="90" x2="360" y2="116"/>
+        <line x1="360" y1="240" x2="360" y2="270"/>
+        <g id="MN" class="notemd-circuit-component notemd-circuit-mos notemd-circuit-nmos" data-component-id="MN">
+        <rect x="338" y="292" width="44" height="80" rx="6"/>
+        <line x1="360" y1="270" x2="360" y2="292"/>
+        <line x1="360" y1="372" x2="360" y2="394"/>
+        <line x1="312" y1="332" x2="338" y2="332"/>
+
+        <text x="394" y="337" class="notemd-circuit-label">MN</text>
+    </g>
+        <g class="notemd-circuit-ground">
+        <line x1="360" y1="410" x2="360" y2="428"/>
+        <line x1="342" y1="428" x2="378" y2="428"/>
+        <line x1="348" y1="436" x2="372" y2="436"/>
+        <line x1="354" y1="444" x2="366" y2="444"/>
+    </g>
+        <polyline points="106,255 206,255 206,178 312,178"/>
+        <polyline points="206,255 206,332 312,332"/>
+        <circle cx="106" cy="255" r="4" class="notemd-circuit-port"/>
+        <text x="94" y="259" text-anchor="end" class="notemd-circuit-label">vin</text>
+
+        <polyline points="360,255 604,255"/>
+        <circle cx="360" cy="255" r="4" class="notemd-circuit-junction"/>
+        <circle cx="604" cy="255" r="4" class="notemd-circuit-port"/>
+        <text x="616" y="259" text-anchor="start" class="notemd-circuit-label">vout</text>
+
+
+        </g>
+    </svg>

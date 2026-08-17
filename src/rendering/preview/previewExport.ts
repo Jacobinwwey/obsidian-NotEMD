@@ -1,5 +1,6 @@
 import { App, TFile } from 'obsidian';
 import { RenderArtifact } from '../types';
+import { getRenderTargetDescriptor } from '../renderTargetCatalog';
 import { RenderWebviewTheme } from '../theme';
 import { ensureSemanticFigureSvgStandaloneStyles } from '../renderers/editableHtmlSvgRenderer';
 import { renderJsonCanvasArtifactSvg } from './canvasPreview';
@@ -38,32 +39,16 @@ interface ArtifactPathSpec {
 }
 
 function getArtifactPathSpec(artifact: RenderArtifact): ArtifactPathSpec {
-    switch (artifact.target) {
-        case 'mermaid':
-            return { suffix: '_summ', extension: '.md' };
-        case 'json-canvas':
-            return { suffix: '_diagram', extension: '.canvas' };
-        case 'vega-lite':
-            return { suffix: '_diagram', extension: '.json' };
-        case 'html':
-        case 'editable-html-svg':
-            return { suffix: '_diagram', extension: '.html' };
-        case 'circuitikz':
-            return { suffix: '_diagram', extension: '.tex' };
-        case 'drawio':
-            return { suffix: '_diagram', extension: '.drawio' };
-        case 'drawnix':
-            return { suffix: '_diagram', extension: '.drawnix' };
-        default:
-            return { suffix: '_diagram', extension: '.txt' };
-    }
+    const descriptor = getRenderTargetDescriptor(artifact.target);
+    return {
+        suffix: artifact.target === 'mermaid' ? '_summ' : '_diagram',
+        extension: descriptor.sourceExtension
+    };
 }
 
 export function supportsPreviewSvgExport(artifact: RenderArtifact): boolean {
     return Boolean(artifact.previewSvg?.content?.trim())
-        || artifact.target === 'mermaid'
-        || artifact.target === 'json-canvas'
-        || artifact.target === 'vega-lite';
+        || getRenderTargetDescriptor(artifact.target).exportFormats.length > 0;
 }
 
 interface PreviewSvgCanvas {

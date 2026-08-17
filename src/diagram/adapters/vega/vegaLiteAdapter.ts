@@ -11,6 +11,8 @@ type VegaLiteValue = {
 type VegaLiteSpec = {
     $schema: string;
     description: string;
+    width: number;
+    height: number;
     data: {
         values: VegaLiteValue[];
     };
@@ -18,6 +20,9 @@ type VegaLiteSpec = {
     encoding: Record<string, any>;
     config?: Record<string, unknown>;
 };
+
+const DEFAULT_VEGA_LITE_WIDTH = 640;
+const DEFAULT_VEGA_LITE_HEIGHT = 360;
 
 function normalizeChartType(spec: DiagramSpec): SupportedVegaLiteChartType {
     const chartType = spec.layoutHints?.chartType;
@@ -122,6 +127,8 @@ export function renderVegaLiteSpec(spec: DiagramSpec): string {
     const vegaLiteSpec: VegaLiteSpec = {
         $schema: 'https://vega.github.io/schema/vega-lite/v5.json',
         description: spec.summary || spec.title,
+        width: DEFAULT_VEGA_LITE_WIDTH,
+        height: DEFAULT_VEGA_LITE_HEIGHT,
         data: { values },
         mark: chartType === 'scatter'
             ? 'point'

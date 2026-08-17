@@ -11,6 +11,7 @@
 
 📚 Read docs in more languages: [Language Hub](./docs/i18n/README.md)  
 📖 Browse repository docs: [Docs Hub](./docs/README.md)  
+🖼️ Inspect shipped diagram types and production previews: [Diagram Gallery](./docs/diagram-gallery.md)
 ❓ **New:** [Frequently Asked Questions (FAQ)](./docs/faq.md)
 
 ```
@@ -172,6 +173,7 @@ That's it! Explore the settings to unlock more features like web research, trans
 <img width="596" height="239" alt="SUMM" src="https://github.com/user-attachments/assets/08f44a41-9ec0-472c-91ee-19c8477ec639" />
 
 - **Experimental Diagram Pipeline**:
+    - The [Diagram Gallery](./docs/diagram-gallery.md) lists the ten executable semantic types, their default/compatible render targets, and production SVG/PNG previews. Reference-only layouts from `diagram-design` are labeled explicitly and are not runtime support.
     - A spec-first diagram path can route note content into Mermaid, Obsidian JSON Canvas, Vega-Lite, HTML, editable HTML/SVG, Draw.io, Drawnix, or constrained circuitikz instead of forcing every case through Mermaid text generation.
     - Current Mermaid adapter coverage in the spec-first path includes `mindmap`, `flowchart`, `sequenceDiagram`, `classDiagram`, `erDiagram`, and `stateDiagram-v2`.
     - Current Vega-Lite adapter coverage in the spec-first path includes cartesian `bar`, `line`, `area`, and `point` charts, plus controlled `scatter`, `pie`, and `table` layout hints that map onto safe built-in Vega-Lite templates.

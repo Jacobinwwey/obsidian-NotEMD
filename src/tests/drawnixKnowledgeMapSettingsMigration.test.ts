@@ -14,6 +14,37 @@ function createManifest() {
 }
 
 describe('Drawnix knowledge-map delivery settings migration', () => {
+    test('persists one sanitized settings record without local-only provider credentials', async () => {
+        const plugin = new NotemdPlugin(mockApp, createManifest() as any);
+        const localProvider = {
+            name: 'Local provider',
+            apiKey: 'local-secret',
+            model: 'local-model',
+            localOnly: true
+        };
+        const syncProvider = {
+            name: 'Cloud provider',
+            apiKey: 'cloud-secret',
+            model: 'cloud-model',
+            localOnly: false
+        };
+        plugin.settings = {
+            ...plugin.settings,
+            providers: [localProvider, syncProvider]
+        } as any;
+        plugin.saveData = jest.fn().mockResolvedValue(undefined);
+
+        await plugin.saveSettings();
+
+        expect(plugin.saveData).toHaveBeenCalledTimes(1);
+        expect(plugin.saveData).toHaveBeenCalledWith(expect.objectContaining({
+            providers: [syncProvider]
+        }));
+        expect(plugin.saveData).not.toHaveBeenCalledWith(expect.objectContaining({
+            providers: expect.arrayContaining([localProvider])
+        }));
+    });
+
     test('removes obsolete delivery selection from a persisted settings record', async () => {
         const plugin = new NotemdPlugin(mockApp, createManifest() as any);
         plugin.saveData = jest.fn().mockResolvedValue(undefined);

@@ -10,6 +10,10 @@ export interface ExecutableDiagramTypeDefinition {
     promptProfileId: string;
     rendererOperationId: string;
     rendererTarget: RenderTarget;
+    /** Default target selected by the planner for this semantic type. */
+    defaultTarget: RenderTarget;
+    /** Targets with a renderer contract for this semantic type. */
+    compatibleTargets: readonly RenderTarget[];
     visualRoles: readonly string[];
     exampleFixtureId: string;
 }
@@ -23,6 +27,8 @@ export const EXECUTABLE_DIAGRAM_TYPES: readonly ExecutableDiagramTypeDefinition[
         promptProfileId: 'mermaid-mindmap',
         rendererOperationId: 'mermaid-mindmap',
         rendererTarget: 'mermaid',
+        defaultTarget: 'mermaid',
+        compatibleTargets: ['mermaid', 'editable-html-svg', 'drawio', 'html'],
         visualRoles: ['root', 'topic', 'detail'],
         exampleFixtureId: 'mermaid-mindmap-basics'
     },
@@ -34,6 +40,8 @@ export const EXECUTABLE_DIAGRAM_TYPES: readonly ExecutableDiagramTypeDefinition[
         promptProfileId: 'drawnix-knowledge-map',
         rendererOperationId: 'drawnix-knowledge-map-tree',
         rendererTarget: 'drawnix',
+        defaultTarget: 'drawnix',
+        compatibleTargets: ['drawnix'],
         visualRoles: ['root', 'domain', 'subsystem', 'component', 'evidence', 'external', 'cross-relation'],
         exampleFixtureId: 'drawnix-knowledge-map-architecture'
     },
@@ -45,6 +53,8 @@ export const EXECUTABLE_DIAGRAM_TYPES: readonly ExecutableDiagramTypeDefinition[
         promptProfileId: 'flowchart',
         rendererOperationId: 'mermaid-flowchart',
         rendererTarget: 'mermaid',
+        defaultTarget: 'mermaid',
+        compatibleTargets: ['mermaid', 'editable-html-svg', 'drawio', 'html'],
         visualRoles: ['start', 'step', 'decision', 'outcome'],
         exampleFixtureId: 'flowchart-release'
     },
@@ -56,6 +66,8 @@ export const EXECUTABLE_DIAGRAM_TYPES: readonly ExecutableDiagramTypeDefinition[
         promptProfileId: 'sequence',
         rendererOperationId: 'mermaid-sequence',
         rendererTarget: 'mermaid',
+        defaultTarget: 'mermaid',
+        compatibleTargets: ['mermaid', 'editable-html-svg', 'drawio', 'html'],
         visualRoles: ['participant', 'request', 'response'],
         exampleFixtureId: 'sequence-request'
     },
@@ -67,6 +79,8 @@ export const EXECUTABLE_DIAGRAM_TYPES: readonly ExecutableDiagramTypeDefinition[
         promptProfileId: 'state',
         rendererOperationId: 'mermaid-state',
         rendererTarget: 'mermaid',
+        defaultTarget: 'mermaid',
+        compatibleTargets: ['mermaid', 'editable-html-svg', 'drawio', 'html'],
         visualRoles: ['initial', 'state', 'transition', 'terminal'],
         exampleFixtureId: 'state-lifecycle'
     },
@@ -78,6 +92,8 @@ export const EXECUTABLE_DIAGRAM_TYPES: readonly ExecutableDiagramTypeDefinition[
         promptProfileId: 'class',
         rendererOperationId: 'mermaid-class',
         rendererTarget: 'mermaid',
+        defaultTarget: 'mermaid',
+        compatibleTargets: ['mermaid', 'editable-html-svg', 'drawio', 'html'],
         visualRoles: ['type', 'member', 'association'],
         exampleFixtureId: 'class-domain'
     },
@@ -89,6 +105,8 @@ export const EXECUTABLE_DIAGRAM_TYPES: readonly ExecutableDiagramTypeDefinition[
         promptProfileId: 'entity-relationship',
         rendererOperationId: 'mermaid-er',
         rendererTarget: 'mermaid',
+        defaultTarget: 'mermaid',
+        compatibleTargets: ['mermaid', 'editable-html-svg', 'drawio', 'html'],
         visualRoles: ['entity', 'attribute', 'relationship'],
         exampleFixtureId: 'entity-relationship-schema'
     },
@@ -100,6 +118,8 @@ export const EXECUTABLE_DIAGRAM_TYPES: readonly ExecutableDiagramTypeDefinition[
         promptProfileId: 'canvas-map',
         rendererOperationId: 'json-canvas-map',
         rendererTarget: 'json-canvas',
+        defaultTarget: 'json-canvas',
+        compatibleTargets: ['json-canvas'],
         visualRoles: ['domain', 'concept', 'connection'],
         exampleFixtureId: 'canvas-map-domains'
     },
@@ -111,6 +131,8 @@ export const EXECUTABLE_DIAGRAM_TYPES: readonly ExecutableDiagramTypeDefinition[
         promptProfileId: 'data-chart',
         rendererOperationId: 'vega-lite-chart',
         rendererTarget: 'vega-lite',
+        defaultTarget: 'vega-lite',
+        compatibleTargets: ['vega-lite', 'mermaid', 'html'],
         visualRoles: ['series', 'measure', 'comparison'],
         exampleFixtureId: 'data-chart-trend'
     },
@@ -122,6 +144,8 @@ export const EXECUTABLE_DIAGRAM_TYPES: readonly ExecutableDiagramTypeDefinition[
         promptProfileId: 'circuit',
         rendererOperationId: 'circuitikz-circuit',
         rendererTarget: 'circuitikz',
+        defaultTarget: 'circuitikz',
+        compatibleTargets: ['circuitikz'],
         visualRoles: ['component', 'net', 'port'],
         exampleFixtureId: 'circuit-cmos-inverter'
     }
@@ -129,6 +153,23 @@ export const EXECUTABLE_DIAGRAM_TYPES: readonly ExecutableDiagramTypeDefinition[
 
 const DIAGRAM_TYPE_BY_ID = new Map(EXECUTABLE_DIAGRAM_TYPES.map(type => [type.id, type]));
 const DIAGRAM_TYPE_BY_INTENT = new Map(EXECUTABLE_DIAGRAM_TYPES.map(type => [type.intent, type]));
+
+function assertExecutableDiagramTypeCatalog(): void {
+    if (DIAGRAM_TYPE_BY_ID.size !== EXECUTABLE_DIAGRAM_TYPES.length
+        || DIAGRAM_TYPE_BY_INTENT.size !== EXECUTABLE_DIAGRAM_TYPES.length) {
+        throw new Error('Executable diagram types must use unique ids and intents.');
+    }
+    for (const type of EXECUTABLE_DIAGRAM_TYPES) {
+        if (type.defaultTarget !== type.rendererTarget || !type.compatibleTargets.includes(type.defaultTarget)) {
+            throw new Error(`Diagram type "${type.id}" has an invalid default render target contract.`);
+        }
+        if (new Set(type.compatibleTargets).size !== type.compatibleTargets.length) {
+            throw new Error(`Diagram type "${type.id}" lists a compatible target more than once.`);
+        }
+    }
+}
+
+assertExecutableDiagramTypeCatalog();
 
 export function getExecutableDiagramType(id: DiagramCatalogTypeId): ExecutableDiagramTypeDefinition {
     const type = DIAGRAM_TYPE_BY_ID.get(id);

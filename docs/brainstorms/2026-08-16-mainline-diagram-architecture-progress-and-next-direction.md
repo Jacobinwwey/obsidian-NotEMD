@@ -1,6 +1,6 @@
 ---
 date: 2026-08-16
-last_updated: 2026-08-16
+last_updated: 2026-08-17
 topic: mainline-diagram-architecture-progress-and-next-direction
 status: active
 canonical_for:
@@ -16,7 +16,7 @@ This is the current progress record for the diagram platform. It supersedes the 
 
 ## Executive Assessment
 
-The platform has crossed the most important architectural threshold: generation is spec-first, renderers are registry-backed, and examples are executable. The remaining work is convergence and truthfulness, not a broad “add more diagram types” push.
+The platform has crossed the most important architectural threshold: generation is spec-first, renderers are registry-backed, examples are executable, and the selector/docs gallery are sourced from production renderers. The remaining work is contract convergence, Mermaid normalization, and external-consumer evidence, not a broad “add more diagram types” push.
 
 The reference repository `ref/diagram-design` should influence selection UX and documentation discipline, not be treated as a feature checklist. It defines 27 visual layouts; Notemd currently ships ten semantic types across eight render targets and three export formats.
 
@@ -24,22 +24,31 @@ The reference repository `ref/diagram-design` should influence selection UX and 
 
 | Area | Status | Evidence / gap |
 |---|---|---|
-| `DiagramSpec` / spec-first domain | Delivered | `src/diagram/types.ts`, planner and parser; retry identity defect remains open |
+| `DiagramSpec` / spec-first domain | Delivered | `src/diagram/types.ts`, planner/parser, authoritative retry artifact; `diagramGenerationFallbacks.test.ts` |
 | Ten-type executable catalog | Delivered | `src/diagram/diagramTypeCatalog.ts` |
-| Executable examples | Delivered in settings | `src/diagram/examples/diagramExampleCatalog.ts`, preview action in settings |
-| Generation-flow discoverability | Partial | No inline thumbnails or “use this type” flow |
-| Static docs gallery | Not implemented | No generated preview assets or manifest |
+| Executable examples | Delivered | `src/diagram/examples/diagramExampleCatalog.ts`, production renderer preview in settings |
+| Generation-flow discoverability | Delivered | Inline renderer-backed thumbnails and “use this type” action; `diagramExamplePreview.test.ts`, provider settings coverage |
+| Static docs gallery | Delivered | `scripts/generate-diagram-gallery.js`, ten SVG/PNG pairs, `docs/assets/diagrams/manifest.json`, responsive smoke and freshness check |
 | Eight-renderer registry | Delivered | `RendererRegistry` and target-specific renderers |
-| Single target descriptor | Not implemented | MIME, extension, preview, export switches still duplicated |
-| Export pipeline | Mostly delivered | Editable HTML/SVG production artifact lacks `previewSvg` despite README claim |
+| Single target descriptor | Delivered | `src/rendering/renderTargetCatalog.ts`; preview/file persistence consume it; matrix tests |
+| Export pipeline | Delivered for shipped targets | Editable HTML/SVG now carries `previewSvg`; CLI and preview exports use production renderer output; external consumer gates remain explicit |
 | Drawnix one-root contract | Delivered | Filename-rooted native tree, `.drawnix` + SVG companion + Markdown wrapper |
 | Circuitikz constrained templates | Delivered | Native source/templates; real compiler gate remains external |
 | Mermaid normalization | Active plan, unimplemented | Render and preview still use divergent normalization surfaces |
-| Operation executable contracts | Partial / drifting | Registry metadata is not runtime validation; CLI and registry fields differ |
-| Settings schema and secrets | Partial; P0 open | Consecutive save writes can defeat local-only isolation |
-| LLM gateway and cache | Partial; P0/P1 open | Cache fingerprint incomplete and unbounded |
-| PR CI / lint gate | Incomplete | Build/Jest gates exist; lint baseline remains noisy and needs ratchet |
-| Documentation discovery | Stale | Current architecture and active plans are not the top-level VitePress path |
+| Operation executable contracts | Partial / converging | `src/operations/contractSchemas.ts` validates schema shape at contract export and maintainer inputs at the host boundary; result-value enforcement and schema-derived help metadata remain |
+| Settings schema and secrets | Delivered for current persistence boundary | `saveSettings()` performs one sanitized write; local-only credential regression tests cover the invariant; migration policy remains a separate concern |
+| LLM gateway and cache | Delivered as bounded optimization | Versioned credential-free fingerprint, five-minute TTL, 128-entry LRU; explicit invalidation on profile revision is future hardening |
+| PR CI / lint gate | Pending final release run | Gallery/docs/build/Jest/lint gates are wired; current turn must record fresh outputs |
+| Documentation discovery | Delivered | README, docs hubs, indexes, VitePress nav/sidebar, and bilingual gallery are linked |
+
+## Verification Snapshot (2026-08-17)
+
+- `npm run diagram:gallery:check`: passed; 10 entries, no stale assets.
+- `npm run docs:build`: passed; VitePress client/server build and page rendering completed.
+- `npm run build`: passed after constraining the root TypeScript include to `src/**/*.ts`; the browser gallery entry remains an esbuild-owned script input.
+- `npm test -- --runInBand`: passed; 255 suites, 2,226 passed, 1 skipped. The Phase 2 focused set also passed: 3 suites, 18 tests.
+- `npm run lint`: remains blocked by the repository baseline (231 errors, 1,329 warnings); the new gallery entry and contract/cache/catalog files have no lint errors, while existing touched legacy files still report baseline findings.
+- `git diff --check`: passed; only Git's LF-to-CRLF normalization warnings remain on Windows.
 
 ## Three-Axis Comparison With `diagram-design`
 
@@ -59,19 +68,20 @@ The reference taxonomy contains architecture, IT current-state, timeline, swimla
 2. **Target mapping drift:** `editable-html-svg` has HTML content but no explicit SVG companion, and save extension logic is not centralized.
 3. **Credential persistence drift:** settings are saved twice, allowing a sanitized local-only view to be overwritten by the full settings object.
 4. **Cache isolation drift:** provider endpoint and runtime parameters are absent from the cache key, so semantically different requests can collide.
-5. **Contract drift:** registry schemas are descriptive records rather than executable validators; CLI help and runtime behavior can diverge.
+5. **Contract drift:** registry schemas and maintainer CLI help can still diverge in fields and result semantics; the schema admission and input boundary are now executable, but result-value enforcement is not yet universal.
 
-These are P0/P1 because they cross persistence, compatibility, or security boundaries. They should be resolved before type expansion.
+Items 1–4 are now resolved in the working tree and covered by focused regression tests. Item 5 is reduced but remains P1: schema shape admission and maintainer input validation are delivered and unknown legacy fields remain forward-compatible, while result validation and help/schema derivation still need convergence.
 
 ## Ordered Next Direction
 
-1. Correct settings persistence, retry artifact identity, Editable preview/export, target descriptors, and cache policy.
-2. Formalize the three-axis catalog and stable IDs.
-3. Derive executable operation contracts and a versioned capability manifest.
-4. Generate deterministic SVG/PNG previews and integrate thumbnails into the generation selector.
-5. Generate bilingual README/docs matrices and update discovery navigation.
-6. Execute Mermaid normalization convergence; then remove Drawnix layout duplication and resolve the Circuitikz repair-loop boundary.
-7. Admit reference candidates only after the full evidence checklist is satisfied.
+1. Completed correctness foundation: settings persistence, retry artifact identity, Editable preview/export, target descriptors, cache policy, and Vega chart sizing.
+2. Completed the three-axis catalog and stable IDs, including a versioned manifest with `shipped` and `reference-only` lifecycles.
+3. Completed deterministic SVG/PNG previews, generation-selector thumbnails, and direct type selection.
+4. Completed bilingual gallery/docs discovery and explicit comparison with the pinned `diagram-design` revision.
+5. Delivered the first contract-hardening slice: shared schema shape validation, registry export admission, maintainer input validation, and forward-compatible unknown-field handling; keep `diagram.generate`'s sourcePath host adapter distinct from its sourceMarkdown core contract.
+6. Add runtime result-value validation and derive maintainer help metadata from the same schema only where the richer metadata can be represented without weakening human-facing examples.
+7. Execute Mermaid normalization convergence; then remove Drawnix layout duplication and resolve the Circuitikz repair-loop boundary.
+8. Admit reference candidates only after the full evidence checklist is satisfied.
 
 ## Superseded Documentation Corrections
 
@@ -83,4 +93,4 @@ These are P0/P1 because they cross persistence, compatibility, or security bound
 
 ## Acceptance Criteria
 
-This audit is current only while the status table links to executable evidence and distinguishes shipped behavior from planned work. When Phase 0 begins, update this document section by section: change only the relevant row, add the test/build evidence, and keep the English and Chinese files synchronized.
+This audit is current only while the status table links to executable evidence and distinguishes shipped behavior from planned work. Each implementation increment must update the relevant rows, add fresh test/build evidence, and keep the English and Chinese files synchronized. Schema admission and maintainer input validation are delivered; universal result-value validation, help/schema derivation, and Mermaid normalization remain intentionally open.

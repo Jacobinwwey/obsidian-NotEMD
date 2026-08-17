@@ -1,0 +1,88 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1048" height="464" viewBox="0 0 1048 464" role="img" aria-labelledby="notemd-gallery-mermaid-mindmap-basics-title notemd-gallery-mermaid-mindmap-basics-desc" data-notemd-renderer="notemd-editable-html-svg@0.1.0">
+        <title id="notemd-gallery-mermaid-mindmap-basics-title">Research themes</title>
+        <desc id="notemd-gallery-mermaid-mindmap-basics-desc">Use for a single topic hierarchy that readers inspect as a tree.</desc>
+        <style>.notemd-editable-svg-canvas {
+    fill: var(--notemd-editable-svg-panel, #ffffff);
+}
+.notemd-editable-svg-title {
+    fill: var(--notemd-editable-svg-text, #111827);
+    font-size: 26px;
+    font-weight: 700;
+}
+.notemd-editable-svg-summary {
+    fill: var(--notemd-editable-svg-muted, #475569);
+    font-size: 14px;
+}
+.notemd-editable-svg-node rect {
+    fill: var(--notemd-editable-svg-node-fill, #eff6ff);
+    stroke: var(--notemd-editable-svg-border, #cbd5e1);
+    stroke-width: 1.5;
+}
+.notemd-editable-svg-node-label {
+    fill: var(--notemd-editable-svg-text, #111827);
+    font-size: 15px;
+    font-weight: 650;
+}
+.notemd-editable-svg-node-role {
+    fill: var(--notemd-editable-svg-accent, #2563eb);
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+.notemd-editable-svg-edge path,
+.notemd-editable-svg-edge-arrowhead {
+    fill: none;
+    stroke: var(--notemd-editable-svg-edge, #334155);
+    stroke-width: 1.8;
+}
+.notemd-editable-svg-edge.is-async path {
+    stroke-dasharray: 8 6;
+}
+.notemd-editable-svg-edge-label {
+    fill: var(--notemd-editable-svg-muted, #475569);
+    paint-order: stroke;
+    stroke: var(--notemd-editable-svg-panel, #ffffff);
+    stroke-width: 4px;
+    font-size: 12px;
+    font-weight: 600;
+}
+marker path {
+    fill: var(--notemd-editable-svg-edge, #334155);
+}</style>
+        <defs>
+            <marker id="notemd-editable-svg-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+                <path data-drawio-ignore="marker-shape" d="M 0 0 L 10 5 L 0 10 z" fill="#334155"/>
+            </marker>
+        </defs>
+        <rect data-drawio-ignore="canvas-background" class="notemd-editable-svg-canvas" x="0" y="0" width="1048" height="464" rx="18" fill="#ffffff"/>
+        <text data-drawio-ignore="document-title" x="72" y="48" class="notemd-editable-svg-title" fill="#111827">Research themes</text>
+
+
+        <g id="research" class="notemd-editable-svg-node" data-drawio-type="node" data-drawio-role="process" data-drawio-id="research">
+        <rect data-drawio-ignore="part-of-parent-node" x="72" y="116" width="240" height="104" rx="14" fill="#eff6ff" stroke="#cbd5e1" stroke-width="1.5"/>
+        <text data-drawio-ignore="part-of-parent-node" x="192" y="164" text-anchor="middle" class="notemd-editable-svg-node-label">
+        <tspan x="192" dy="0">Research</tspan>
+    </text>
+        <text data-drawio-ignore="part-of-parent-node" x="192" y="202" text-anchor="middle" class="notemd-editable-svg-node-role" fill="#2563eb">process</text>
+    </g><g id="methods" class="notemd-editable-svg-node" data-drawio-type="node" data-drawio-role="process" data-drawio-id="methods">
+        <rect data-drawio-ignore="part-of-parent-node" x="404" y="116" width="240" height="104" rx="14" fill="#eff6ff" stroke="#cbd5e1" stroke-width="1.5"/>
+        <text data-drawio-ignore="part-of-parent-node" x="524" y="164" text-anchor="middle" class="notemd-editable-svg-node-label">
+        <tspan x="524" dy="0">Methods</tspan>
+    </text>
+        <text data-drawio-ignore="part-of-parent-node" x="524" y="202" text-anchor="middle" class="notemd-editable-svg-node-role" fill="#2563eb">process</text>
+    </g><g id="evaluation" class="notemd-editable-svg-node" data-drawio-type="node" data-drawio-role="process" data-drawio-id="evaluation">
+        <rect data-drawio-ignore="part-of-parent-node" x="736" y="116" width="240" height="104" rx="14" fill="#eff6ff" stroke="#cbd5e1" stroke-width="1.5"/>
+        <text data-drawio-ignore="part-of-parent-node" x="856" y="164" text-anchor="middle" class="notemd-editable-svg-node-label">
+        <tspan x="856" dy="0">Evaluation</tspan>
+    </text>
+        <text data-drawio-ignore="part-of-parent-node" x="856" y="202" text-anchor="middle" class="notemd-editable-svg-node-role" fill="#2563eb">process</text>
+    </g><g id="evidence" class="notemd-editable-svg-node" data-drawio-type="node" data-drawio-role="process" data-drawio-id="evidence">
+        <rect data-drawio-ignore="part-of-parent-node" x="72" y="296" width="240" height="104" rx="14" fill="#eff6ff" stroke="#cbd5e1" stroke-width="1.5"/>
+        <text data-drawio-ignore="part-of-parent-node" x="192" y="344" text-anchor="middle" class="notemd-editable-svg-node-label">
+        <tspan x="192" dy="0">Evidence</tspan>
+    </text>
+        <text data-drawio-ignore="part-of-parent-node" x="192" y="382" text-anchor="middle" class="notemd-editable-svg-node-role" fill="#2563eb">process</text>
+    </g>
+
+
+    </svg>

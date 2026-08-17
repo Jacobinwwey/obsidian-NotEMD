@@ -822,6 +822,7 @@ function createPlugin(overrides: Partial<any> = {}) {
         saveSettings: jest.fn().mockResolvedValue(undefined),
         openCircuitikzEnvironment: jest.fn(),
         openDiagramExamplePreview: jest.fn().mockResolvedValue(undefined),
+        renderDiagramExampleThumbnail: jest.fn().mockResolvedValue('<svg role="img"><title>Example</title></svg>'),
         refreshLocalizedUi: jest.fn().mockResolvedValue(undefined),
         resetSettings: jest.fn().mockResolvedValue(undefined),
         ...overrides
@@ -889,6 +890,15 @@ describe('provider settings behavior', () => {
         expect(previewButtons.map(button => button.getAttribute('data-notemd-diagram-example-type')).sort()).toEqual(
             EXECUTABLE_DIAGRAM_TYPES.map(type => type.id).sort()
         );
+        const thumbnails = flattenElements(gallery!).filter(element => (
+            element.cls.split(' ').includes('notemd-diagram-example-thumbnail')
+        ));
+        expect(thumbnails).toHaveLength(EXECUTABLE_DIAGRAM_TYPES.length);
+        expect(thumbnails.every(thumbnail => thumbnail.getAttribute('role') === 'img')).toBe(true);
+        const useButtons = flattenElements(gallery!).filter(element => (
+            Boolean(element.getAttribute('data-notemd-diagram-example-use'))
+        ));
+        expect(useButtons).toHaveLength(EXECUTABLE_DIAGRAM_TYPES.length);
 
         const drawnixPreview = previewButtons.find(button => (
             button.getAttribute('data-notemd-diagram-example-type') === 'drawnix-knowledge-map'

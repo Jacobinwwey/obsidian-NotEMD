@@ -501,7 +501,11 @@ export class EditableHtmlSvgRenderer implements DiagramRenderer {
             target: this.target,
             content: renderSemanticFigureHtmlDocument(model),
             mimeType: 'text/html',
-            sourceIntent: spec.intent
+            sourceIntent: spec.intent,
+            previewSvg: {
+                content: renderSemanticFigureSvg(model),
+                mimeType: 'image/svg+xml'
+            }
         };
     }
 }

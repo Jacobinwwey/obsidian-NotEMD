@@ -1,6 +1,6 @@
 ---
 date: 2026-08-16
-last_updated: 2026-08-16
+last_updated: 2026-08-17
 topic: diagram-capability-catalog-and-forward-architecture
 status: active
 canonical_for:
@@ -129,7 +129,9 @@ interface DiagramCapabilityManifest {
 
 **Files:** `src/operations/registry.ts`, `src/operations/contractSchemas.ts` (new), `src/operations/capabilityManifest.ts` (new), `scripts/invoke-maintainer-cli-operation.js`, `scripts/export-diagram-artifact.js`.
 
-Replace `Record<string, unknown>` schemas with executable validators. Derive CLI help, capability export, invocation contracts, and operation tests from the same schema. Align `diagram.generate` around `sourceMarkdown` for the host-neutral core; keep `sourcePath` as an explicit host adapter input rather than silently treating it as the same contract. Add the missing `local-knowledge.inspect` operation only if its implementation and safety metadata exist.
+The first contract-hardening slice is delivered: `src/operations/contractSchemas.ts` admits JSON-compatible schema shape, `src/cliContracts.ts` rejects malformed registry schemas before export, and `src/maintainerCliBridge.ts` validates host-bound inputs while ignoring unknown legacy fields for forward compatibility. Keep `diagram.generate` aligned around `sourceMarkdown` for the host-neutral core; `sourcePath` remains an explicit host adapter input rather than silently becoming the same contract. `local-knowledge.inspect` remains a maintainer host operation, not a public registry operation, until a host-neutral implementation and safety metadata exist.
+
+The remaining Phase 2 work is deliberately narrower: validate operation result values at the runtime boundary and derive maintainer help metadata from the same schema only where that does not erase human-facing examples or compatibility notes. `OperationSchema` remains a structural TypeScript record for now; the executable admission/validation layer is the runtime authority.
 
 **Gate:** invalid arguments fail before provider calls; registry, CLI, and generated manifest agree byte-for-byte on names and required fields.
 
