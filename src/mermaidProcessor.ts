@@ -1,5 +1,14 @@
 import mermaid from 'mermaid';
-import { normalizeMermaidDiagram } from './diagram/adapters/mermaid/normalize';
+import {
+    closeMermaidFence,
+    detectMermaidFamily,
+    extractMermaidBlocks,
+    mapMermaidBlocks,
+    MermaidDiagramFamily,
+    normalizeMermaidDiagram,
+    openMermaidFence
+} from './diagram/adapters/mermaid/normalize';
+import { ensureMermaidInitialized } from './diagram/adapters/mermaid/runtime';
 import {
     attachDirectionalNoteToConnection,
     buildLegacyConnectedNoteLines,
@@ -40,18 +49,17 @@ import {
  * @returns A promise that resolves to the number of errors found.
  */
 export async function checkMermaidErrors(content: string): Promise<number> {
-    const mermaidBlockRegex = /^[ \t]*(```|~~~)\s*mermaid\b[^\r\n]*\r?\n([\s\S]*?)\r?\n[ \t]*\1/gim;
-    let match;
-    let errorCount = 0;
-    
-    // Initialize mermaid if needed (though usually handled by the app/plugin load)
-    // We use a safe configuration
-    mermaid.initialize({ startOnLoad: false, suppressErrorRendering: true });
+    const blocks = extractMermaidBlocks(content);
+    if (blocks.length === 0) {
+        return 0;
+    }
 
-    // Check closed blocks
-    while ((match = mermaidBlockRegex.exec(content)) !== null) {
+    let errorCount = 0;
+    ensureMermaidInitialized();
+
+    for (const block of blocks) {
         try {
-            await mermaid.parse(match[2]);
+            await mermaid.parse(normalizeMermaidDiagram(block.content).content);
         } catch (error) {
             errorCount++;
         }
@@ -81,21 +89,21 @@ export async function refineMermaidBlocks(content: string): Promise<string> {
 
 		if (mermaidStartRegex.test(stripped)) {
 			// Normalize the starting line
-			line = line.replace(mermaidStartRegex, '```mermaid');
+			line = line.replace(mermaidStartRegex, openMermaidFence());
 
 			// If already in a block, finish the previous one before starting new
 			if (inMermaid) {
 				if (lastArrowIndexInBlock !== -1) {
 					// Ensure the line after the last arrow isn't already the closer
-					if (currentBlockLines[lastArrowIndexInBlock + 1]?.trim() !== '```') {
-						currentBlockLines.splice(lastArrowIndexInBlock + 1, 0, '```');
+					if (currentBlockLines[lastArrowIndexInBlock + 1]?.trim() !== closeMermaidFence()) {
+						currentBlockLines.splice(lastArrowIndexInBlock + 1, 0, closeMermaidFence());
 					}
 				} else if (currentBlockLines.length > 0) {
                     // Block started but no arrows, ensure it's closed if not already
-                     if (currentBlockLines[0].trim().startsWith('```mermaid') && currentBlockLines[currentBlockLines.length - 1].trim() !== '```') {
+                     if (currentBlockLines[0].trim().startsWith(openMermaidFence()) && currentBlockLines[currentBlockLines.length - 1].trim() !== closeMermaidFence()) {
                          // Check if the line after start isn't the closer
-                         if (currentBlockLines.length === 1 || currentBlockLines[1]?.trim() !== '```') {
-                            currentBlockLines.splice(1, 0, '```'); // Close after the opening line
+                         if (currentBlockLines.length === 1 || currentBlockLines[1]?.trim() !== closeMermaidFence()) {
+                            currentBlockLines.splice(1, 0, closeMermaidFence()); // Close after the opening line
                          }
                      }
                 }
@@ -209,7 +217,7 @@ export async function refineMermaidBlocks(content: string): Promise<string> {
 				lastArrowIndexInBlock = currentBlockLines.length - 1; // Index within currentBlockLines
 			}
 			if (/^(?:```|~~~)$/.test(stripped)) {
-				lineWithoutBrackets = '```';
+				lineWithoutBrackets = closeMermaidFence();
 				currentBlockLines[currentBlockLines.length - 1] = lineWithoutBrackets;
 				// Found the intended closing tag, finalize this block
 				resultLines.push(...currentBlockLines);
@@ -228,22 +236,22 @@ export async function refineMermaidBlocks(content: string): Promise<string> {
 		if (lastArrowIndexInBlock !== -1) {
 			// Ensure the line after the last arrow isn't already the closer
             // Check if the index exists before accessing trim()
-			if (lastArrowIndexInBlock + 1 >= currentBlockLines.length || currentBlockLines[lastArrowIndexInBlock + 1]?.trim() !== '```') {
-				currentBlockLines.splice(lastArrowIndexInBlock + 1, 0, '```');
+			if (lastArrowIndexInBlock + 1 >= currentBlockLines.length || currentBlockLines[lastArrowIndexInBlock + 1]?.trim() !== closeMermaidFence()) {
+				currentBlockLines.splice(lastArrowIndexInBlock + 1, 0, closeMermaidFence());
 			}
 		} else if (currentBlockLines.length > 0) {
             // Block started but no arrows, ensure it's closed if not already
-            if (currentBlockLines[0].trim().startsWith('```mermaid') && currentBlockLines[currentBlockLines.length - 1].trim() !== '```') {
+            if (currentBlockLines[0].trim().startsWith(openMermaidFence()) && currentBlockLines[currentBlockLines.length - 1].trim() !== closeMermaidFence()) {
                  // Check if the line after start isn't the closer
-                 if (currentBlockLines.length === 1 || currentBlockLines[1]?.trim() !== '```') {
-                    currentBlockLines.splice(1, 0, '```'); // Close after the opening line
-                 } else if (currentBlockLines[currentBlockLines.length -1].trim() !== '```') {
+                 if (currentBlockLines.length === 1 || currentBlockLines[1]?.trim() !== closeMermaidFence()) {
+                    currentBlockLines.splice(1, 0, closeMermaidFence()); // Close after the opening line
+                 } else if (currentBlockLines[currentBlockLines.length -1].trim() !== closeMermaidFence()) {
                      // If it wasn't closed after line 1, add closer at the end
-                     currentBlockLines.push('```');
+                     currentBlockLines.push(closeMermaidFence());
                  }
-            } else if (currentBlockLines[currentBlockLines.length -1].trim() !== '```') {
+            } else if (currentBlockLines[currentBlockLines.length -1].trim() !== closeMermaidFence()) {
                  // Failsafe if somehow the last line isn't a closer
-                 currentBlockLines.push('```');
+                 currentBlockLines.push(closeMermaidFence());
             }
         }
 		resultLines.push(...currentBlockLines);
@@ -254,13 +262,8 @@ export async function refineMermaidBlocks(content: string): Promise<string> {
 	// Check for remaining errors to decide if we need deep debug
 	const errorCount = await checkMermaidErrors(result);
 
-    // Regex to find mermaid blocks and apply fixes ONLY inside them
-    // Matches ```mermaid followed by content and ending with ```
-    // We use [\s\S]*? for non-greedy multiline match
-    const mermaidBlockRegex = /((?:```|~~~)\s*mermaid[^\r\n]*\r?\n)([\s\S]*?)(\r?\n(?:```|~~~))/gi;
-
-    result = result.replace(mermaidBlockRegex, (match, startTag, blockContent, endTag) => {
-        let processedBlock = blockContent;
+    result = mapMermaidBlocks(result, (block) => {
+        let processedBlock = block.content;
 
         // Apply scoped replacements inside mermaid blocks
         
@@ -276,10 +279,13 @@ export async function refineMermaidBlocks(content: string): Promise<string> {
         // Apply deep debug fixes if errors were found in the file
         // (Optimally we would check this block specifically, but this preserves original logic trigger)
         if (errorCount > 0) {
-            processedBlock = deepDebugMermaid(processedBlock);
+            const family = normalizeMermaidDiagram(
+                `${block.openingLine}\n${block.content}\n${block.closingLine}`
+            ).family;
+            processedBlock = repairLegacyMermaidContent(processedBlock, family);
         }
 
-        return `${startTag}${processedBlock}${endTag}`;
+        return processedBlock;
     });
 
 	return result;
@@ -292,11 +298,11 @@ export async function refineMermaidBlocks(content: string): Promise<string> {
  * @returns The processed content with Mermaid blocks debugged.
  */
 export function applyDeepDebugToMermaidBlocks(content: string): string {
-    const mermaidBlockRegex = /((?:```|~~~)\s*mermaid[^\r\n]*\r?\n)([\s\S]*?)(\r?\n(?:```|~~~))/gi;
-
-    return content.replace(mermaidBlockRegex, (match, startTag, blockContent, endTag) => {
-        const processedBlock = deepDebugMermaid(blockContent);
-        return `${startTag}${processedBlock}${endTag}`;
+    return mapMermaidBlocks(content, (block) => {
+        const family = normalizeMermaidDiagram(
+            `${block.openingLine}\n${block.content}\n${block.closingLine}`
+        ).family;
+        return repairLegacyMermaidContent(block.content, family);
     });
 }
 
@@ -341,36 +347,72 @@ export function cleanupLatexDelimiters(content: string): string {
 	return processed;
 }
 
-/**
- * Deep debug function for Mermaid syntax.
- * Applies all available fixes in a specific order.
- * 0. Fix Smart Quotes (curly quotes to straight quotes, slashed notes).
- * 1. Fix Mermaid Pipes (handle `|`).
- * 2. Fix Mermaid Notes.
- * 3. Fix Malformed Arrows.
- * 4. Merge Double Labels.
- * 5. Fix Missing Brackets.
- * 6. Fix Inline Subgraphs.
- * 7. Fix Mermaid Comments.
- * 8. Fix Unquoted Node Labels.
- * 9. Fix Intermediate Nodes.
- * 10. Fix Doubled IDs.
- * 11. Fix Excessive Brackets (including ]]] -> ]).
- * 12. Fix Semicolon Positioning.
- * 13. Fix Unquoted Labels with Semicolons.
- * 14. Enhanced Note and Semicolon Cleanup.
- */
-export function deepDebugMermaid(content: string): string {
-    // --- SAFEGUARD: Protect Table Lines ---
-    // User requirement: Ensure no modification to lines containing ':-- :'
-    // Also protecting standard markdown table separators to prevent corruption
+export interface MermaidLegacyRepairStage {
+    readonly id: string;
+    readonly run: (content: string) => string;
+}
+
+const LEGACY_REPAIR_FAMILIES = new Set<MermaidDiagramFamily>(['flowchart', 'unknown']);
+
+const MERMAID_LEGACY_REPAIR_STAGES: readonly MermaidLegacyRepairStage[] = [
+    { id: 'smart-quotes', run: fixSmartQuotes },
+    { id: 'pipes', run: fixMermaidPipes },
+    { id: 'notes', run: fixMermaidNotes },
+    { id: 'notes-to-nodes', run: fixNotesToNodes },
+    { id: 'malformed-arrows', run: fixMalformedArrows },
+    { id: 'invalid-arrows', run: fixInvalidArrows },
+    { id: 'double-labels', run: mergeDoubleLabels },
+    { id: 'missing-brackets', run: fixMissingBrackets },
+    { id: 'inline-subgraphs', run: fixInlineSubgraphs },
+    { id: 'comments', run: fixMermaidComments },
+    { id: 'double-slash-comments', run: fixDoubleSlashComments },
+    { id: 'unquoted-node-labels', run: fixUnquotedNodeLabels },
+    { id: 'intermediate-nodes', run: fixIntermediateNodes },
+    { id: 'doubled-ids', run: fixDoubledID },
+    { id: 'excessive-brackets', run: fixExcessiveBrackets },
+    { id: 'semicolon-positioning', run: fixSemicolonPositioning },
+    { id: 'concatenated-labels', run: fixConcatenatedLabels },
+    { id: 'unquoted-labels-with-semicolons', run: fixUnquotedLabelsWithSemicolons },
+    { id: 'enhanced-note-and-semicolon-cleanup', run: enhancedNoteAndSemicolonCleanup },
+    { id: 'reverse-arrows', run: fixReverseArrows },
+    { id: 'subgraph-direction', run: fixSubgraphDirection },
+    { id: 'duplicate-labels', run: fixDuplicateLabels },
+    { id: 'nested-quotes', run: fixNestedMermaidQuotes },
+    { id: 'quoted-labels-after-semicolon', run: fixQuotedLabelsAfterSemicolon },
+    { id: 'double-dash-to-arrow', run: fixDoubleDashToArrow },
+    { id: 'targeted-notes', run: fixTargetedNotes },
+    { id: 'double-arrow-labels', run: fixDoubleArrowLabels },
+    { id: 'unquoted-edge-labels', run: fixUnquotedEdgeLabels },
+    { id: 'shape-mismatch', run: fixShapeMismatch },
+    { id: 'placeholder-artifacts', run: fixPlaceholderArtifacts },
+    { id: 'cleanup-empty-pipe-quotes', run: content => content.replace(/\|""\|"/g, '') },
+    { id: 'cleanup-empty-brackets', run: content => content.replace(/\[""\]/g, '') },
+    { id: 'misplaced-pipes', run: fixMisplacedPipes },
+    { id: 'cleanup-empty-array-label', run: content => content.replace(/\"\[\]\"/g, '') },
+    { id: 'blank-arrows', run: fixBlankArrows }
+];
+
+export function listMermaidLegacyRepairStages(): readonly string[] {
+    return MERMAID_LEGACY_REPAIR_STAGES.map(stage => stage.id);
+}
+
+function canApplyLegacyRepair(family: MermaidDiagramFamily): boolean {
+    return LEGACY_REPAIR_FAMILIES.has(family);
+}
+
+function runLegacyRepairStages(content: string): string {
+    return MERMAID_LEGACY_REPAIR_STAGES.reduce((current, stage) => stage.run(current), content);
+}
+
+function repairLegacyMermaidContent(content: string, family = detectMermaidFamily(content)): string {
+    if (!canApplyLegacyRepair(family)) {
+        return content;
+    }
+
     const tableLinePlaceholderPrefix = '___PROTECTED_TABLE_LINE_';
     const protectedTableLines: string[] = [];
-    
-    // Regex for table separator line: starts with |, contains dashes/colons/pipes, ends with | (roughly)
     const tableSeparatorRegex = /^\s*\|(?:[\s\t]*:?[\s\t]*-+[\s\t]*:?[\s\t]*\|)+[\s\t]*$/;
-
-    let processed = content.split('\n').map(line => {
+    const protectedContent = content.split('\n').map(line => {
         if (line.includes(':-- :') || tableSeparatorRegex.test(line)) {
             const placeholder = `${tableLinePlaceholderPrefix}${protectedTableLines.length}___`;
             protectedTableLines.push(line);
@@ -379,129 +421,20 @@ export function deepDebugMermaid(content: string): string {
         return line;
     }).join('\n');
 
-    // 0. Fix Smart Quotes FIRST - handles “” -> "" and Note["/“text”/"] -> Note["/text/"]
-    processed = fixSmartQuotes(processed);
-
-    // 1. Fix Mermaid Pipes (handle `|`) - Requested to be first
-    processed = fixMermaidPipes(processed);
-
-    // 2. Fix Mermaid Notes (move "note right of" to edge labels)
-    processed = fixMermaidNotes(processed);
-
-    // 2.5. Fix Notes to Nodes (note right of A : Text -> NoteA["Note: Text"] A -.- NoteA)
-    processed = fixNotesToNodes(processed);
-
-    // 3. Fix Malformed Arrows (handle `-->"` and `"-- `)
-    processed = fixMalformedArrows(processed);
-
-    // 3.5 Fix Invalid Arrows (handle `--|>` -> `-->`)
-    processed = fixInvalidArrows(processed);
-
-    // 4. Merge Double Labels
-    processed = mergeDoubleLabels(processed);
-
-    // 5. Fix Missing Brackets (existing logic)
-    processed = fixMissingBrackets(processed);
-
-    // 6. Fix Inline Subgraphs (convert subgraph "Label" end; to edge label)
-    processed = fixInlineSubgraphs(processed);
-
-    // 7. Fix Mermaid Comments (Move % comments to label)
-    processed = fixMermaidComments(processed);
-
-    // 17. Fix Double Slash Comments (// -> -- "..." -->) - Apply before general label fixes
-    processed = fixDoubleSlashComments(processed);
-
-    // 8. Fix Unquoted Node Labels (Quote labels with special chars)
-    processed = fixUnquotedNodeLabels(processed);
-
-    // 9. Fix Intermediate Nodes (NodeA -- NodeB[...] --> NodeC)
-    processed = fixIntermediateNodes(processed);
-
-    // 10. Fix Doubled IDs (SplitSplit Sample -> Split[Split Sample])
-    processed = fixDoubledID(processed);
-
-    // 11. Fix Excessive Brackets (including ]]] -> ]).
-    processed = fixExcessiveBrackets(processed);
-
-    // 12. Fix Semicolon Positioning (Move "] before ;)
-    processed = fixSemicolonPositioning(processed);
-
-    // 12.5. Fix Concatenated Labels (SubdivideSubdivide... -> Subdivide["Subdivide..."])
-    processed = fixConcatenatedLabels(processed);
-
-    // 13. Fix Unquoted Labels Ending with Semicolons
-    processed = fixUnquotedLabelsWithSemicolons(processed);
-
-    // 14. Enhanced Note and Semicolon Cleanup.
-    processed = enhancedNoteAndSemicolonCleanup(processed);
-
-    // 15. Fix Reverse Arrows (<--)
-    processed = fixReverseArrows(processed);
-
-    // 16. Fix Subgraph Direction (Direction -> direction)
-    processed = fixSubgraphDirection(processed);
-
-    // 18. Fix Duplicate Labels (["..."]["..."] -> ["..."])
-    processed = fixDuplicateLabels(processed);
-
-    // 19. Fix Nested Mermaid Quotes (["...["..."]...."] -> ["...[...]..."])
-    processed = fixNestedMermaidQuotes(processed);
-
-    // 20. Fix Quoted Labels After Semicolon (A --> B; "Label" -> A -- "Label" --> B;)
-    processed = fixQuotedLabelsAfterSemicolon(processed);
-
-    // 21. Fix Double Dash To Arrow (... -- ...; -> ... --> ...;)
-    processed = fixDoubleDashToArrow(processed);
-
-    // 22. Fix Targeted Notes (note Node "Content" -> NoteNode["Content"] \n Node -.- NoteNode)
-    processed = fixTargetedNotes(processed);
-
-    // 23. Fix Double Arrow Labels (Node -- L1 -- L2 --> Node)
-    processed = fixDoubleArrowLabels(processed);
-
-    // 24. Fix Unquoted Edge Labels (Node -- Unquoted --> Node)
-    processed = fixUnquotedEdgeLabels(processed);
-
-    // 26. Fix Shape Mismatch ([/["...["/] -> ["..."])
-    processed = fixShapeMismatch(processed);
-
-    // 27. Cleanup Placeholder Artifacts
-    processed = fixPlaceholderArtifacts(processed);
-
-    // 28. Cleanup `|\"\"|\"`
-    processed = processed.replace(/\|""\|"/g, '');
-
-    // 29. Cleanup `\[""\]`
-    processed = processed.replace(/\[""\]/g, '');
-
-    // 29 Fix Misplaced Pipes (>|"..."| ...)
-    processed = fixMisplacedPipes(processed);
-
-    // 30 Fix Misplaced Pipes (>|"..."| ...)
-    processed = processed.replace(/\"\[\]\"/g, '');
-
-    // 31 Fix Misplaced Pipes (>|"..."| ...)
-    processed = fixBlankArrows(processed);
-
-    
-    // --- RESTORE: Table Lines ---
-    if (protectedTableLines.length > 0) {
-        // We need to restore them. Since we operate on the whole string, we can replace the placeholders.
-        // However, some functions might have shifted things around? 
-        // Most functions are line-preserving or map lines.
-        // But `fixMermaidNotes` removes lines. `fixTargetedNotes` adds lines.
-        // The placeholders should persist as lines.
-        
-        // We iterate through the protected lines and replace their corresponding placeholder
-        protectedTableLines.forEach((originalLine, index) => {
-             const placeholder = `${tableLinePlaceholderPrefix}${index}___`;
-             // Use split/join to replace all occurrences (though strictly should be one)
-             processed = processed.split(placeholder).join(originalLine);
-        });
-    }
-
+    let processed = runLegacyRepairStages(protectedContent);
+    protectedTableLines.forEach((originalLine, index) => {
+        const placeholder = `${tableLinePlaceholderPrefix}${index}___`;
+        processed = processed.split(placeholder).join(originalLine);
+    });
     return processed;
+}
+
+/**
+ * Applies the ordered legacy repair registry to a flowchart-safe definition.
+ * Non-flowchart families are returned unchanged by the registry boundary.
+ */
+export function deepDebugMermaid(content: string): string {
+    return repairLegacyMermaidContent(content);
 }
 
 /**

@@ -1,5 +1,6 @@
 import { assertValidDiagramSpec } from '../../spec';
 import { DiagramNode, DiagramSpec, DiagramIntent } from '../../types';
+import { fenceMermaidDefinition } from './normalize';
 
 const INDENT = '    ';
 
@@ -29,7 +30,7 @@ export function assertMermaidSpecIntent(spec: DiagramSpec, allowedIntents: Diagr
 }
 
 export function mermaidFence(lines: string[]): string {
-    return `\`\`\`mermaid\n${lines.join('\n')}\n\`\`\`\n\n\n`;
+    return `${fenceMermaidDefinition(lines.join('\n'))}\n\n\n`;
 }
 
 export function indent(level: number): string {

@@ -33,7 +33,7 @@ implementation_record: src/tests/mermaidNormalizationConvergence.test.ts
 | Drawnix | 文件名根原生树、`.drawnix`、SVG companion、Markdown wrapper | Drawnix implementation record 与导出测试 |
 | Circuitikz | 受限原生模板与 CLI 编译路径；真实 TeX consumer 仍是独立门禁 | `src/diagram/adapters/circuitikz`、`scripts/export-circuitikz.js` |
 | Operation 契约 | schema 形状准入、maintainer 输入校验、运行时结果校验、help/schema 字段派生均已可执行 | `src/operations/contractSchemas.ts`、`src/operations/maintainerCliContractMetadata.json`、bridge 测试 |
-| Mermaid | diagram 级 normalize 已收敛；legacy 修复链分阶段与全局配置生命周期仍开放 | `src/diagram/adapters/mermaid/normalize.ts`、`src/mermaidProcessor.ts` |
+| Mermaid | diagram 级 normalize、35 个 stage 的 legacy registry、family 门控、共享 scanner、canonical fence 所有权和验证 runtime 初始化均已收敛 | `src/diagram/adapters/mermaid/normalize.ts`、`src/mermaidProcessor.ts`、`src/diagram/adapters/mermaid/runtime.ts` |
 | Public CLI 边界 | `local-knowledge.inspect` 仍是 maintainer-only，不是 public CLI 扩张 | `src/maintainerCliBridge.ts`、capability/public-surface 测试 |
 
 ## 本轮实现增量（2026-08-17）
@@ -42,7 +42,10 @@ implementation_record: src/tests/mermaidNormalizationConvergence.test.ts
 2. 增加 `assertOperationResult()`。maintainer bridge 返回的非 null 结果会按 registry schema 校验；未知字段继续放行以保持向前兼容，`null` 保留原有取消/无结果语义。
 3. 将 Mermaid normalize 移入无运行时依赖的 diagram 层模块，统一处理 BOM/CRLF、带 fence/无 fence、反引号/波浪线 fence、family 检测、ER 实体与基数修复、行尾空白。
 4. 保留 `mermaidDefinitionShared.ts` 作为兼容 re-export，preview/render-host 改为直接依赖中性模块。
-5. 加固 markdown 修复扫描器：识别两种 fence 并保护 ER 花括号；legacy deep-debug 顺序保持不变。
+5. 加固 markdown 修复扫描器：识别两种 fence 并保护 ER 花括号。
+6. 将 legacy 修复链暴露为 35 个稳定 stage ID，执行顺序不变。带 flowchart 偏置的 stage 仅对 `flowchart`/`unknown` 执行；sequence 与 ER 内容 fail closed，并增加整链幂等回归契约。
+7. 增加共享 `extractMermaidBlocks`/`mapMermaidBlocks` scanner，以及 `openMermaidFence`/`closeMermaidFence`/`fenceMermaidDefinition`，收回验证、修复和 renderer 路径中的重复 fence 输出所有权。
+8. 增加 `ensureMermaidInitialized()` 管理插件验证 runtime：按 `mermaid.initialize` 函数身份一次化；预览 webview 保留独立的主题专属 `deps.initialize()` 生命周期。
 
 ## 与 `diagram-design` 的对比
 
@@ -58,8 +61,8 @@ implementation_record: src/tests/mermaidNormalizationConvergence.test.ts
 
 ## 风险与权衡
 
-- **Mermaid legacy 链：** `mermaidProcessor.ts` 仍是大型且偏 flowchart 的修复面。只有在所有现有 fixer 测试保持字节稳定时分阶段才有收益，因此不把它隐式塞进 normalize。
-- **Mermaid 全局状态：** `mermaid.initialize()` 仍由多个 runtime 路径调用。模块级初始化是目标，但必须先有 config ownership 测试，否则可能引入主题/配置回归。
+- **Mermaid legacy 链：** `mermaidProcessor.ts` 仍是大型且偏 flowchart 的修复面，但现在已固化为 35 个稳定 stage、family 门控和幂等测试。这是受控债务，不应因此把更多 diagram family 接入该链。
+- **Mermaid 全局状态：** 插件验证侧已按 `initialize` 函数身份收敛为模块级初始化。预览 webview 有意保留主题专属初始化，因为它们属于独立 runtime；合并两个生命周期会引入主题回归。
 - **外部互操作：** Draw.io、Drawnix、Circuitikz 必须使用真实 consumer 证据，不能用 mock 或 serializer snapshot 冒充。工具缺失必须显式记录。
 - **向前兼容：** 未知契约字段有意放行；必填字段和已知字段类型在边界严格校验，不能为了“兼容”而整体放松。
 - **缓存：** response cache 只是优化，不能成为 artifact 身份或正确性的权威来源。
@@ -74,8 +77,8 @@ implementation_record: src/tests/mermaidNormalizationConvergence.test.ts
 
 ## 向前推进计划
 
-1. **Mermaid Phase 2：** 将现有 30 步 fixer 链暴露为有序 stage registry，对非 flowchart family 做门控，只删除有调用证据的死导出。
-2. **Mermaid Phase 3：** 收敛 fence 所有权，替换剩余手工 fallback fence，并在模块级初始化前加入配置所有权测试。
+1. **Mermaid Phase 2：已完成。** legacy 链已成为 35 个有序 stage，具备稳定 ID、flowchart/unknown family 门控和幂等覆盖。没有 parser 证据，不扩大安全 family 集合。
+2. **Mermaid Phase 3：已完成。** 共享 scanner、canonical fence 格式和插件验证 runtime 初始化已收敛；预览 webview 的主题初始化继续作为独立 runtime 契约。
 3. **Consumer 证据：** 在工具可用时执行 Draw.io/Drawnix/Circuitikz 真实门禁；不可用时记录 blocker，不声称兼容。
 4. **Drawnix 收敛：** 抽取共享 measurement/layout primitive；确认无调用点后再删除 dead cross-root router 和废弃 coverage alias。
 5. **Circuitikz 收敛：** 参数化重复模板，决定未接线 repair-loop 是接入还是删除，并同步路线图。
@@ -94,4 +97,4 @@ implementation_record: src/tests/mermaidNormalizationConvergence.test.ts
 
 ## 验证快照
 
-本轮新鲜证据：全量 Jest 通过（256 suites、2,232 tests passed、1 skipped）；TypeScript/esbuild build 通过；VitePress docs build 通过；gallery check 通过（10 条目）；render-host audit 通过；Circuitikz smoke 通过（6/6 PDF，0 error/0 warning）；`git diff --check` 通过。已知仓库 lint 基线仍为 231 errors、1,329 warnings；完整 lint 仍因既有债务非零退出，但新增 contract/catalog/gallery 文件在该基线内没有新增 error。
+本轮新鲜证据：全量 Jest 通过（257 suites、2,236 tests passed、1 skipped）；TypeScript/esbuild build 通过；VitePress docs build 通过；gallery check 通过（10 条目）；render-host audit 通过；Circuitikz smoke 通过（6/6 PDF，0 error/0 warning）；`git diff --check` 通过。已知仓库 lint 基线仍为 231 errors、1,329 warnings；完整 lint 仍因既有债务非零退出，但新增 contract/catalog/gallery 文件在该基线内没有新增 error。

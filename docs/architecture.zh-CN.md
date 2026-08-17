@@ -208,7 +208,13 @@ flowchart LR
 
 当前已交付 10 个语义类型、8 个渲染目标和 3 个导出格式。设置页 gallery 与生成选择器都执行每类一个生产 renderer fixture；`scripts/generate-diagram-gallery.js` 生成确定性的 SVG/PNG 资产和带哈希 manifest，并供双语文档 gallery 使用。`ref/diagram-design` 的参考布局在具备 renderer、fixture、预览、持久化映射、文档行和自动化门禁之前，保持 `reference-only/planned`。
 
-已交付顺序是先解决正确性基础，再做目录/契约生成，随后接入确定性预览资产、选择器和文档。剩余工作已收窄为 Mermaid 规范化收敛、可执行 operation schema 准入检查，以及可选外部编译器的 consumer-level 证据。见[当前进度审计](./brainstorms/2026-08-16-mainline-diagram-architecture-progress-and-next-direction.zh-CN.md)、[图形能力目录](./maintainer/diagram-capability-catalog.zh-CN.md)、[图形 Gallery](./diagram-gallery.zh-CN.md)和[向前架构计划](./superpowers/plans/2026-08-16-diagram-capability-catalog-and-forward-architecture.zh-CN.md)。
+已交付顺序是先解决正确性基础，再做目录/契约生成，随后接入确定性预览资产、选择器和文档。Mermaid 规范化、legacy 修复阶段化、family 门控、fence 所有权和验证 runtime 初始化现已收敛。剩余工作已收窄为真实外部 consumer 证据、Drawnix 几何收敛和 Circuitikz 模板收敛。见[当前进度审计](./brainstorms/2026-08-16-mainline-diagram-architecture-progress-and-next-direction.zh-CN.md)、[图形能力目录](./maintainer/diagram-capability-catalog.zh-CN.md)、[图形 Gallery](./diagram-gallery.zh-CN.md)和[向前架构计划](./superpowers/plans/2026-08-16-diagram-capability-catalog-and-forward-architecture.zh-CN.md)。
+
+### Mermaid 规范化与修复所有权
+
+`src/diagram/adapters/mermaid/normalize.ts` 是无运行时依赖的 canonical 边界。`extractMermaidBlocks` 与 `mapMermaidBlocks` 负责反引号和波浪线两种标记的 markdown fence 扫描；`fenceMermaidDefinition` 负责 canonical 输出格式。`src/mermaidProcessor.ts` 仍拥有 markdown 修复，但 legacy 链已固化为保持顺序的 35-stage registry，并有幂等性测试与 fail-closed family 门控（仅 `flowchart`/`unknown` 执行）。已知的非 flowchart family 不再进入带 flowchart 偏置的重写；`unknown` 为保持向后兼容仍是明确的逃生口，在接纳新 family 前应以 parser-backed 分类关闭该风险。
+
+`src/diagram/adapters/mermaid/runtime.ts` 负责验证 runtime 初始化：以 `initialize` 函数身份为键，每个 runtime 只用 `startOnLoad: false` 与 `suppressErrorRendering: true` 调用一次 `mermaid.initialize`。Mermaid 预览 webview 的主题专属 `deps.initialize()` 属于独立 webview runtime，必须与插件验证配置区分；这样既避免全局配置重复重置，也保留预览主题所有权。
 
 ### Target Descriptor 与 Gallery 生成链路
 

@@ -33,7 +33,7 @@ The correct next move is convergence. Adding more visual types before closing co
 | Drawnix | Filename-rooted native tree, `.drawnix` plus SVG companion and Markdown wrapper | Drawnix implementation record and export tests |
 | Circuitikz | Constrained native templates and CLI compiler path; real TeX consumer remains a separate gate | `src/diagram/adapters/circuitikz`, `scripts/export-circuitikz.js` |
 | Operation contracts | Schema shape admission, maintainer input validation, runtime result validation, and help/schema field derivation are now executable | `src/operations/contractSchemas.ts`, `src/operations/maintainerCliContractMetadata.json`, bridge tests |
-| Mermaid | Diagram-level normalization is converged; legacy repair-chain staging and global config lifecycle remain open | `src/diagram/adapters/mermaid/normalize.ts`, `src/mermaidProcessor.ts` |
+| Mermaid | Diagram-level normalization, 35-stage legacy registry, family gating, shared scanner, canonical fence ownership, and validation-runtime initialization are converged | `src/diagram/adapters/mermaid/normalize.ts`, `src/mermaidProcessor.ts`, `src/diagram/adapters/mermaid/runtime.ts` |
 | Public CLI boundary | `local-knowledge.inspect` remains maintainer-only; it is not a public CLI expansion | `src/maintainerCliBridge.ts`, capability/public-surface tests |
 
 ## Implementation Delta (2026-08-17)
@@ -42,7 +42,10 @@ The correct next move is convergence. Adding more visual types before closing co
 2. Added `assertOperationResult()`. Non-null maintainer bridge results are validated against the registry schema; unknown fields remain allowed for forward compatibility, while `null` keeps its existing cancellation/no-result meaning.
 3. Moved Mermaid normalization into a runtime-free diagram-layer module. It handles BOM/CRLF, fenced and unfenced input, backtick and tilde fences, family detection, ER entity/cardinality repairs, and trailing whitespace.
 4. Kept `mermaidDefinitionShared.ts` as a compatibility re-export and changed preview/render-host consumers to import the neutral module directly.
-5. Hardened the markdown repair scanner to recognize both fence styles and preserve ER braces. The legacy deep-debug order was deliberately left untouched.
+5. Hardened the markdown repair scanner to recognize both fence styles and preserve ER braces.
+6. Exposed the legacy repair chain as 35 stable stage IDs without changing execution order. Flowchart-biased stages are gated to `flowchart`/`unknown`; sequence and ER content fail closed, and the whole chain has an idempotency regression contract.
+7. Added the shared `extractMermaidBlocks`/`mapMermaidBlocks` scanner plus `openMermaidFence`/`closeMermaidFence`/`fenceMermaidDefinition`, removing duplicate fence output ownership from validation, repair, and renderer paths.
+8. Added `ensureMermaidInitialized()` for the plugin validation runtime. It initializes once per `mermaid.initialize` function identity; preview webviews keep their separate theme-specific `deps.initialize()` lifecycle.
 
 ## Comparison With `diagram-design`
 
@@ -58,8 +61,8 @@ The reference taxonomy includes architecture, current-state, timeline, swimlane,
 
 ## Risk Register And Tradeoffs
 
-- **Mermaid legacy chain:** `mermaidProcessor.ts` is still a large flowchart-biased repair surface. Staging it now would reduce risk only if every existing fixer test remains byte-stable; therefore it is a separate migration, not hidden inside normalization.
-- **Mermaid global state:** `mermaid.initialize()` is still invoked by separate runtime paths. Module-level initialization is desirable, but changing it without a config ownership test could cause theme/config regressions.
+- **Mermaid legacy chain:** `mermaidProcessor.ts` remains a large flowchart-biased repair surface, but the order is now explicit as 35 stable stages with a family gate and idempotency coverage. This is controlled debt, not a reason to route more diagram families through the chain.
+- **Mermaid global state:** plugin-side validation initialization is now module-scoped per `initialize` function identity. Preview webviews intentionally retain theme-specific initialization because they own separate runtimes; collapsing those lifecycles would create theme regressions.
 - **External interoperability:** Draw.io, Drawnix, and Circuitikz consumer evidence must be real-consumer evidence, not mocks or serializer snapshots. Missing tools remain explicit blockers.
 - **Forward compatibility:** Unknown contract fields are accepted intentionally. Required fields and known field types are strict at the boundary; loosening them would make downstream failures harder to localize.
 - **Cache:** The response cache remains an optimization. It must never become an authority for artifact identity or correctness.
@@ -74,8 +77,8 @@ The reference taxonomy includes architecture, current-state, timeline, swimlane,
 
 ## Forward Plan
 
-1. **Mermaid Phase 2:** expose the existing 30-step fixer chain as an ordered stage registry, gate non-flowchart families, and remove only proven dead exports.
-2. **Mermaid Phase 3:** centralize fence ownership, replace the remaining hand-built fallback fence, and add a config-ownership test before module-level initialization.
+1. **Mermaid Phase 2: completed.** The legacy chain is a 35-stage ordered registry with stable IDs, flowchart/unknown family gating, and idempotency coverage. Do not broaden the safe family set without parser evidence.
+2. **Mermaid Phase 3: completed.** Shared scanning, canonical fence formatting, and plugin validation-runtime initialization are converged. Keep preview webview theme initialization as a separate runtime contract.
 3. **Consumer evidence:** run real Draw.io/Drawnix/Circuitikz gates where tooling exists; record unavailable tools rather than claiming interoperability.
 4. **Drawnix convergence:** extract shared measurement/layout primitives, then delete the dead cross-root router and deprecated coverage alias only after call-site proof.
 5. **Circuitikz convergence:** parameterize repeated templates and decide whether the unwired repair-loop boundary is wired or removed; sync the roadmap either way.
@@ -94,4 +97,4 @@ The reference taxonomy includes architecture, current-state, timeline, swimlane,
 
 ## Verification Snapshot
 
-Fresh verification for this increment: full Jest passed (256 suites, 2,232 tests passed, 1 skipped); TypeScript/esbuild build passed; VitePress docs build passed; gallery check passed (10 entries); render-host audit passed; Circuitikz smoke passed (6/6 PDFs, 0 errors/0 warnings); `git diff --check` passed. The known repository lint baseline remains 231 errors and 1,329 warnings; the full lint command still exits non-zero on that pre-existing debt, while the new contract/catalog/gallery files remain clean within the baseline.
+Fresh verification for this increment: full Jest passed (257 suites, 2,236 tests passed, 1 skipped); TypeScript/esbuild build passed; VitePress docs build passed; gallery check passed (10 entries); render-host audit passed; Circuitikz smoke passed (6/6 PDFs, 0 errors/0 warnings); `git diff --check` passed. The known repository lint baseline remains 231 errors and 1,329 warnings; the full lint command still exits non-zero on that pre-existing debt, while the new contract/catalog/gallery files remain clean within the baseline.

@@ -16,7 +16,7 @@ implementation_record: src/tests/mermaidNormalizationConvergence.test.ts
 
 This plan consolidates the Mermaid normalization/fix surfaces that currently disagree with each other and with the documented roadmap. It is the implementation slice for the roadmap's "dual stack" risk control and Task 3 sunset boundary (`docs/superpowers/plans/2026-04-14-diagram-rendering-platform-roadmap.en.md`).
 
-Scope: diagram-level Mermaid normalization shared by render, preview, and note-repair paths. Out of scope: adding new diagram types, changing the legacy fix chain order, packaging/host work.
+Scope: diagram-level Mermaid normalization shared by render, preview, and note-repair paths, plus the legacy chain's explicit ownership boundaries. Out of scope: adding new diagram types, changing the frozen legacy fix order, packaging/host work.
 
 ## 2. Audit Findings And Corrections
 
@@ -37,10 +37,10 @@ Before Phase 0, the same input normalized differently on render vs preview for `
 
 ### 2.3 Supporting findings that shape the design
 
-- Fence ownership historically diverged across `checkMermaidErrors`, `validator`, `refineMermaidBlocks`, and a hand-built fallback fence. The canonical diagram normalizer now accepts both backtick and tilde fences; single-owner fencing and the fallback path remain Phase 3 work.
-- `refineMermaidBlocks` historically stripped `(){}` from every Mermaid block line. The current path preserves ER grammar braces; the legacy deep-debug chain still requires family gating.
-- The 30-step `deepDebugMermaid` chain (`mermaidProcessor.ts:356-498`) is flowchart-biased: `fixMermaidNotes` rewrites `note right of` (valid sequence syntax), `fixMermaidPipes`/`fixMisplacedPipes` touch `|` (ER cardinality syntax).
-- `mermaid.initialize` is called per invocation in `validator.ts:47` and `checkMermaidErrors` (`mermaidProcessor.ts:48`); `mermaid.initialize` resets global config, so repeated calls can clobber other consumers.
+- Fence ownership historically diverged across `checkMermaidErrors`, `validator`, `refineMermaidBlocks`, and a hand-built fallback fence. `extractMermaidBlocks`/`mapMermaidBlocks` now provide the shared scanner, while `fenceMermaidDefinition` owns canonical output for both backtick and tilde input.
+- `refineMermaidBlocks` historically stripped `(){}` from every Mermaid block line. The current path preserves ER grammar braces and the legacy deep-debug chain is gated to `flowchart`/`unknown` families.
+- The historical audit called the `deepDebugMermaid` chain “30-step” (`mermaidProcessor.ts:356-498`), but the executable registry now records 35 stable stage IDs. It remains flowchart-biased: `fixMermaidNotes` rewrites `note right of` (valid sequence syntax), while `fixMermaidPipes`/`fixMisplacedPipes` touch `|` (ER cardinality syntax).
+- `ensureMermaidInitialized` now owns plugin validation initialization. It calls `mermaid.initialize` once per function identity; preview webviews retain a separate theme-specific `deps.initialize()` lifecycle.
 - Dead exports in `legacyFixerUtils.ts`: `rewriteLegacyTrailingDoubleDashArrow` (`:412`), four unimported `parse*` exports, byte-identical `stripWrappingDoubleQuotes`/`stripWrappedQuotedLabel` (`:36-42`/`:44-50`).
 - Drawnix geometry duplication (audit, outside this plan's scope but tracked here): the current one-root native projection still has duplicated measurement/layout helpers; `routeDrawnixCrossRootRelation` (`drawnixCrossRootRouter.ts:823`, ~250 lines) has no production caller; `mergeDrawnixSourceCoverage` (`drawnixSourceCoverage.ts:575-582`) is a deprecated tests-only alias. The deleted presentation module and presentation delivery bundle are not part of the current contract.
 
@@ -76,10 +76,10 @@ Dependency direction: normalize lives in `diagram/adapters/mermaid/`; `rendering
 
 ## 5. Integration Strategy
 
-- Keep the 30-step `deepDebugMermaid` chain byte-identical; migrate its host and expose stages as an ordered registry (`{id, run}`) — the accounting unit for the roadmap sunset boundary.
-- 29 legacy fixers stay in `legacyFixerUtils.ts` as stage implementations; delete dead exports listed in 2.3.
-- Type gating at Stage 3: skip the whole legacy chain for families outside the safe set (notably `erDiagram`, `stateDiagram-v2`); Stage 4/5 still run. This also fixes the `:195` `(){}` stripping bug.
-- The only intended behavior change: render path gains the ER repairs, matching preview. Guard with a Phase 0 divergence fixture.
+- Keep the frozen legacy execution order and expose it as an ordered registry (`{id, run}`); the registry is the accounting unit for the roadmap sunset boundary and currently contains 35 IDs.
+- Stage implementations remain in `mermaidProcessor.ts`/`legacyFixerUtils.ts`; no dead export is removed without call-site proof.
+- Type gating skips the whole legacy chain for families outside the safe set (`flowchart`/`unknown`); normalization and ER repairs still run. This also fixes the historical `(){}` stripping bug.
+- The only intended semantic behavior change remains the render path receiving the ER repairs that preview already had. The Phase 0 divergence fixture and the stage-registry regression tests protect that boundary.
 
 ## 6. Tradeoffs And Rejected Alternatives
 
@@ -108,8 +108,8 @@ Challenge: first-line family detection is fragile (BOM, leading blank lines, \%\
 
 - **Phase 0 — divergence fixture (test first)**: erDiagram brace-less entity + truncated cardinality fixture asserting render output == preview output. Red today; defines the only intended behavior change.
 - **Phase 1 — neutral normalize module**: port normalize + ER repairs from shared (with mermaid.parse fallback); validator re-exports. Gate: `mermaidSanitization`/`mermaidValidator`/`mermaidErAdapter` suites green.
-- **Phase 2 — legacy chain staging**: deepDebug 30 steps -> stage array, byte-identical; type gating; clean legacyFixerUtils dead exports. Gate: all ~25 mermaidFix suites + `mermaidProcessor.test.ts` green.
-- **Phase 3 — fence and config convergence**: single `fenceMermaid`; kill `:580` hand-built fence; `ensureMermaidInitialized()` module-level once. Gate: render/preview/export integration (`renderExportFlow`, `diagramPreviewModal`).
+- **Phase 2 — legacy chain staging (complete)**: frozen execution order is represented by a 35-ID stage registry; family gating and whole-chain idempotency are covered. Gate: focused legacy suites and build are green; dead exports remain pending call-site proof.
+- **Phase 3 — fence and config convergence (complete)**: shared scanner and canonical fence helpers own markdown block boundaries; `ensureMermaidInitialized()` initializes the plugin validation runtime once per `initialize` identity. Preview webview theme initialization remains intentionally separate.
 - **Final gates**: `npm run build`; `npm test -- --runInBand`; `npm run audit:render-host`; snapshot diff allowed only for erDiagram artifacts.
 
 ## 9. Progress Comparison With Prior Plans
@@ -121,14 +121,14 @@ Challenge: first-line family detection is fragile (BOM, leading blank lines, \%\
 | 0. Build/packaging substrate | render-host smoke gate, single main.js + inline srcdoc | gate exists (`audit:render-host`); single-entry enforced | candidate-only guard remains outside production esbuild path (2026-06-09 status unchanged) |
 | 1. Diagram domain model + intent router | DiagramSpec + DiagramPlan | done (`architecture.md:188-203`) | none |
 | 2. Spec-first generation | DiagramSpecPrompt replaces raw mermaid text | done | command-surface convergence remains |
-| 3. Mermaid adapter V2 + mermaidProcessor decomposition | single adapter, legacy-fixer sunset | diagram-level normalize converged; legacy-fixer staging/type gating and Mermaid config lifecycle remain | **this plan, Phase 2-3** |
+| 3. Mermaid adapter V2 + mermaidProcessor decomposition | single adapter, legacy-fixer sunset | diagram-level normalize, 35-stage registry/type gating, shared scanner/fence ownership, and validation config lifecycle converged | external consumer evidence and eventual legacy-fixer deletion remain |
 | 4. Rendering platform skeleton | registry/host/cache/preview | done (8 renderers) | none |
 | 5. JSON Canvas | first non-Mermaid target | done | none |
 | 6. Vega-Lite | done (sandboxed iframe preview) | done | none |
 | 7. Theme/export/release hardening | SVG/PNG/PDF + release discipline | done (1.8.x-1.9.x) | none |
 | 8. Deferred advanced engines | hold | held (correct) | none |
 
-Roadmap "Recommended Next Batch" (convergence, not new targets) is still the correct direction; this plan now tracks the remaining Task 3 Phase 2-3 work rather than the already-closed diagram-level divergence.
+Roadmap "Recommended Next Batch" (convergence, not new targets) is still the correct direction; this plan now records the completed Task 3 Phase 2-3 work and tracks the remaining consumer-evidence and renderer-convergence gates rather than reopening diagram-level divergence.
 
 ### vs Drawnix Knowledge-Map Quality And Delivery Plan (2026-07-22) + Implementation Record (2026-08-14)
 
@@ -146,7 +146,7 @@ Phases 0-6 implemented (1.9.5). The semantic/geometry/delivery contracts are doc
 
 ## 10. Follow-up Direction
 
-1. Complete the remaining Phase 2-3 work: stage/type-gate the legacy chain, centralize fence ownership, and make Mermaid initialization module-scoped.
+1. Record real external consumer evidence where tooling exists; do not convert fixture or serializer evidence into an interoperability claim.
 2. Drawnix convergence slice: extract one shared measurement/layout module for the native projection; delete the dead router engine and deprecated alias.
 3. circuitikz: template parameterization; decide `runCircuitikzRepairLoop` fate; sync docs with the decision.
 4. Repo-wide helper convergence (escapeHtml x10, error-message ternary x94, FNV-1a x5, isRecord x6, slugify x3, enum guards x4, indexOf-dedupe x7) as the closing sweep of the convergence batch, with the roadmap's support-matrix discipline.
@@ -154,11 +154,13 @@ Phases 0-6 implemented (1.9.5). The semantic/geometry/delivery contracts are doc
 
 ## 11. Implementation Update (2026-08-17)
 
-Phase 0 and the diagram-level portion of Phase 1 are now landed.
+Phase 0 and the diagram-level portion of Phase 1 are now landed. Phase 2 and Phase 3 are also complete.
 
 - `src/diagram/adapters/mermaid/normalize.ts` is the runtime-free canonical boundary. It normalizes BOM/CRLF, extracts both backtick and tilde fences, detects the Mermaid family, sanitizes line endings, and applies the existing ER repairs.
 - `validator.ts`, `mermaidPreview.ts`, and `renderHostEntry.ts` consume the same implementation. `mermaidDefinitionShared.ts` is retained only as a compatibility re-export.
-- `refineMermaidBlocks` recognizes both fence styles and no longer removes ER grammar braces. Its legacy deep-debug order is unchanged.
+- `refineMermaidBlocks` recognizes both fence styles and no longer removes ER grammar braces. Its legacy chain is represented by 35 stable stages, gated to `flowchart`/`unknown`, and covered by an idempotency invariant.
 - `src/tests/mermaidNormalizationConvergence.test.ts` proves that render validation and preview receive byte-identical ER content, including brace-less entities and truncated cardinality repair.
+- `extractMermaidBlocks`/`mapMermaidBlocks` are now shared by validation and repair paths; `fenceMermaidDefinition` is the canonical output boundary.
+- `ensureMermaidInitialized()` protects the plugin validation runtime from repeated global-config resets. Preview webviews retain separate theme-specific initialization by design.
 
-The remaining gap is intentionally narrower than the original audit: Phase 2 must stage and gate the 30-step legacy chain, and Phase 3 must converge fence ownership and Mermaid initialization. No new Mermaid layout or target is admitted until those gates and the external consumer evidence are recorded.
+The remaining gap is intentionally narrower than the original audit: external consumer evidence, Drawnix geometry convergence, and Circuitikz template convergence. No new Mermaid layout or target is admitted until real consumer evidence is recorded.

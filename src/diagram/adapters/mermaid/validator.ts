@@ -1,6 +1,7 @@
 import mermaid from 'mermaid';
 import { mermaidFence } from './base';
 import { normalizeMermaidDefinition } from './normalize';
+import { ensureMermaidInitialized } from './runtime';
 
 export { normalizeMermaidDefinition } from './normalize';
 
@@ -18,7 +19,7 @@ export async function validateMermaidDefinition(content: string): Promise<string
         throw new Error('Generated Mermaid diagram failed validation: empty definition');
     }
 
-    mermaid.initialize({ startOnLoad: false, suppressErrorRendering: true });
+    ensureMermaidInitialized();
 
     try {
         await mermaid.parse(definition);
