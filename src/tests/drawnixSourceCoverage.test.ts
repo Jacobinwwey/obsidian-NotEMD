@@ -1,6 +1,9 @@
 import { DiagramSpec } from '../diagram/types';
 import { buildDrawnixMindMapProjection } from '../diagram/adapters/drawnix/drawnixMindMapProjection';
-import { mergeDrawnixSourceCoverage } from '../diagram/adapters/drawnix/drawnixSourceCoverage';
+import {
+    enrichDrawnixSourceCoverage,
+    mergeDrawnixSourceCoverage
+} from '../diagram/adapters/drawnix/drawnixSourceCoverage';
 import { generateDiagramArtifact } from '../diagram/diagramGenerationService';
 
 function flattenNodes(nodes: DiagramSpec['nodes']): DiagramSpec['nodes'] {
@@ -12,6 +15,18 @@ function findNode(nodes: DiagramSpec['nodes'], label: string): DiagramSpec['node
 }
 
 describe('Drawnix source coverage', () => {
+    test('exposes a canonical enrichment operation while preserving the legacy alias', () => {
+        const spec: DiagramSpec = {
+            intent: 'drawnixMindmap',
+            title: 'Architecture',
+            nodes: [{ id: 'root', label: 'Architecture' }]
+        };
+
+        expect(mergeDrawnixSourceCoverage(spec, '# Architecture')).toEqual(
+            enrichDrawnixSourceCoverage(spec, '# Architecture')
+        );
+    });
+
     test('builds one filename-rooted tree and places unmatched model branches under Additional concepts', () => {
         const enriched = mergeDrawnixSourceCoverage({
             intent: 'drawnixMindmap',

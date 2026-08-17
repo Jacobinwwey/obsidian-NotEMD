@@ -9,35 +9,37 @@ canonical_for: diagram-capability-catalog
 
 This document is the human-readable view of the current executable catalog. The runtime source of truth is `src/diagram/diagramTypeCatalog.ts` plus `src/diagram/examples/diagramExampleCatalog.ts`; this file must be regenerated or reconciled when those definitions change.
 
+The target descriptor is the runtime authority for artifact mechanics. Its `exportFormats` field contains only image exports (`SVG`, `PNG`, `PDF`); the source artifact is described separately by `sourceExtension` and `vaultExtension`. The tables below keep those axes explicit so a source file is not mistaken for an image export.
+
 ## Shipped Semantic Types
 
 | Type ID | User intent | Render target | Example fixture | Preview status | Export |
 |---|---|---|---|---|---|
-| `mermaid-mindmap` | Concept hierarchy | Mermaid | `mermaid-mindmap-basics` | Settings preview action | SVG, PNG |
+| `mermaid-mindmap` | Concept hierarchy | Mermaid | `mermaid-mindmap-basics` | Settings preview action | source `.md`, SVG, PNG, PDF |
 | `drawnix-knowledge-map` | Editable filename-rooted knowledge tree with material cross-branch relations | Drawnix | `drawnix-knowledge-map-architecture` | SVG companion / Drawnix artifact | `.drawnix`, SVG, PNG, PDF |
-| `flowchart` | Control flow and decisions | Mermaid | `flowchart-release` | Settings preview action | SVG, PNG |
-| `sequence` | Ordered participant interactions | Mermaid | `sequence-request` | Settings preview action | SVG, PNG |
-| `state` | Lifecycle states and transitions | Mermaid | `state-lifecycle` | Settings preview action | SVG, PNG |
-| `class` | Type ownership and associations | Mermaid | `class-domain` | Settings preview action | SVG, PNG |
-| `entity-relationship` | Entities, fields, and cardinality | Mermaid | `entity-relationship-schema` | Settings preview action | SVG, PNG |
-| `canvas-map` | Spatially grouped concepts | JSON Canvas | `canvas-map-domains` | Iframe / Canvas artifact | source, SVG, PNG, PDF |
-| `data-chart` | Measured comparison over an axis | Vega-Lite | `data-chart-trend` | Sandboxed iframe | source, SVG, PNG, PDF |
+| `flowchart` | Control flow and decisions | Mermaid | `flowchart-release` | Settings preview action | source `.md`, SVG, PNG, PDF |
+| `sequence` | Ordered participant interactions | Mermaid | `sequence-request` | Settings preview action | source `.md`, SVG, PNG, PDF |
+| `state` | Lifecycle states and transitions | Mermaid | `state-lifecycle` | Settings preview action | source `.md`, SVG, PNG, PDF |
+| `class` | Type ownership and associations | Mermaid | `class-domain` | Settings preview action | source `.md`, SVG, PNG, PDF |
+| `entity-relationship` | Entities, fields, and cardinality | Mermaid | `entity-relationship-schema` | Settings preview action | source `.md`, SVG, PNG, PDF |
+| `canvas-map` | Spatially grouped concepts | JSON Canvas | `canvas-map-domains` | Iframe / Canvas artifact | source `.canvas`, SVG, PNG, PDF |
+| `data-chart` | Measured comparison over an axis | Vega-Lite | `data-chart-trend` | Sandboxed iframe | source `.json` / Vault `.md`, SVG, PNG, PDF |
 | `circuit` | Electrical components and nets | Circuitikz | `circuit-cmos-inverter` | SVG companion / source | `.tex`, SVG, PNG, PDF* |
 
-`*` Circuitikz PDF/PNG claims require the pinned native compiler gate. Editable HTML/SVG now returns a production `previewSvg`; its HTML/SVG/PNG/PDF exports are covered by the target descriptor and gallery gate.
+`*` Circuitikz PDF/PNG claims require the pinned native compiler gate. Source artifacts and image exports are separate capabilities; editable HTML/SVG uses a self-contained HTML source artifact plus the descriptor's SVG/PNG/PDF image exports.
 
 ## Render Targets
 
 | Target | Artifact boundary | Preview | Export formats | External gate |
 |---|---|---|---|---|
-| `mermaid` | fenced Mermaid source | iframe | SVG, PNG | none |
-| `json-canvas` | JSON Canvas | iframe | source, SVG, PNG, PDF | none |
-| `vega-lite` | Vega-Lite JSON | sandboxed iframe | source, SVG, PNG, PDF | none |
+| `mermaid` | fenced Mermaid source (`.md`) | iframe | SVG, PNG, PDF | none |
+| `json-canvas` | JSON Canvas (`.canvas`) | iframe | SVG, PNG, PDF | none |
+| `vega-lite` | Vega-Lite JSON (`.json`, Vault `.md`) | sandboxed iframe | SVG, PNG, PDF | none |
 | `html` | generic HTML fallback | iframe | source | none |
-| `editable-html-svg` | self-contained HTML with semantic inline SVG | SVG companion | HTML, SVG, PNG, PDF | none |
-| `drawio` | Draw.io XML plus review companions | SVG companion | source, SVG, PNG, PDF | diagrams.net open/import |
-| `drawnix` | one filename-rooted `.drawnix` tree plus SVG companion | SVG companion | `.drawnix`, SVG, PNG, PDF | Drawnix open/import |
-| `circuitikz` | validated `.tex` plus review companion | SVG companion/source | `.tex`, SVG, PNG, PDF | native TeX compile |
+| `editable-html-svg` | self-contained HTML with semantic inline SVG (`.html`) | SVG companion | SVG, PNG, PDF | none |
+| `drawio` | Draw.io XML (`.drawio`) plus review companions | SVG companion | SVG, PNG, PDF | diagrams.net open/import |
+| `drawnix` | one filename-rooted `.drawnix` tree plus SVG companion | SVG companion | SVG, PNG, PDF | Drawnix open/import |
+| `circuitikz` | validated `.tex` plus review companion | SVG companion/source | SVG, PNG, PDF | native TeX compile |
 
 ## Reference-Only / Planned Types
 

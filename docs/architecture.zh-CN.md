@@ -189,22 +189,22 @@ flowchart LR
 
 | 意图 | 渲染目标 | 渲染器 | 预览 | 导出 |
 |---|---|---|---|---|
-| `mindmap` | mermaid | MermaidRenderer | 弹窗/iframe | SVG、PNG |
+| `mindmap` | mermaid | MermaidRenderer | 弹窗/iframe | source `.md`、SVG、PNG、PDF |
 | `drawnixMindmap` | drawnix | DrawnixRenderer | 专用 SVG companion | `.drawnix`、SVG、PNG、PDF |
-| `flowchart` | mermaid | MermaidRenderer | 弹窗/iframe | SVG、PNG |
-| `sequence` | mermaid | MermaidRenderer | 弹窗/iframe | SVG、PNG |
-| `classDiagram` | mermaid | MermaidRenderer | 弹窗/iframe | SVG、PNG |
-| `erDiagram` | mermaid | MermaidRenderer | 弹窗/iframe | SVG、PNG |
-| `stateDiagram` | mermaid | MermaidRenderer | 弹窗/iframe | SVG、PNG |
-| `canvasMap` | json-canvas | JsonCanvasRenderer | 弹窗/iframe | 源文件、SVG、PNG、PDF |
-| `dataChart` | vega-lite | VegaLiteRenderer | 弹窗/iframe（沙盒） | 源文件、SVG、PNG、PDF |
+| `flowchart` | mermaid | MermaidRenderer | 弹窗/iframe | source `.md`、SVG、PNG、PDF |
+| `sequence` | mermaid | MermaidRenderer | 弹窗/iframe | source `.md`、SVG、PNG、PDF |
+| `classDiagram` | mermaid | MermaidRenderer | 弹窗/iframe | source `.md`、SVG、PNG、PDF |
+| `erDiagram` | mermaid | MermaidRenderer | 弹窗/iframe | source `.md`、SVG、PNG、PDF |
+| `stateDiagram` | mermaid | MermaidRenderer | 弹窗/iframe | source `.md`、SVG、PNG、PDF |
+| `canvasMap` | json-canvas | JsonCanvasRenderer | 弹窗/iframe | source `.canvas`、SVG、PNG、PDF |
+| `dataChart` | vega-lite | VegaLiteRenderer | 弹窗/iframe（沙盒） | source `.json` / Vault `.md`、SVG、PNG、PDF |
 | `circuit` | circuitikz | CircuitikzRenderer | SVG companion 或 source-only 预览 | `.tex`、SVG、PNG、PDF |
 
 `drawnixMindmap` 是唯一的原生 Drawnix 图表意图。它把 `DiagramSpec.nodes` 投影为可编辑的知识导图 forest，并由 Notemd 的已布局投影生成 SVG companion。关系布局分两次计算：第一步按已测量标签宽度预留水平 gutter；节点落位后，第二步按端点相对 root 的方位分类。同侧关系在外侧 gutter 中分配位于两个端点之间的行，跨 forest 关系进入底部通道。router 只处理避障端点接入，通道位置由分配器负责。预留通道会先尝试确定性的水平接入；若所有水平端口组合都无法抵达预留行，grid retry 才加入节点顶部和底部端口，标签仍落在原定通道中。这样不会因为分支封住两侧端口而拒绝一张仍有外部出口的复杂树，也不引入节点数、层级深度或关系数量配额。source coverage 也遵循这一规则：Markdown 标题链与未匹配的模型分支保留原有层级和 ID。只有实际发生语义合并时才会重映射关系边；无效、重复或重复层级所有权的关系边才会被丢弃。当前 native board 由上游 `withMind` 决定子节点落位，因此 SVG 与 native 的完整像素几何必须通过真实 consumer test 验证，不能只从导出 JSON 推断。标准 `mindmap` 仍由 MermaidRenderer 处理，生成与回退语义不变。
 
 ### 能力目录契约（2026-08-16）
 
-图形平台保持三条独立轴：语义类型、渲染目标和导出格式。当前可执行真值是类型目录加 example fixture；向前计划将增加唯一 target descriptor 和带版本的生成式 capability manifest。`SVG`、`PNG`、`PDF` 是导出格式，不是 render target。
+图形平台保持三条独立轴：语义类型、渲染目标和导出格式。当前可执行真值是类型目录、生产 example fixture、target descriptor 和带版本的 capability manifest。target descriptor 负责 artifact 机制；manifest 把语义类型、兼容 target 与 fixture 证据组合起来。`SVG`、`PNG`、`PDF` 是导出格式，不是 render target。
 
 当前已交付 10 个语义类型、8 个渲染目标和 3 个导出格式。设置页 gallery 与生成选择器都执行每类一个生产 renderer fixture；`scripts/generate-diagram-gallery.js` 生成确定性的 SVG/PNG 资产和带哈希 manifest，并供双语文档 gallery 使用。`ref/diagram-design` 的参考布局在具备 renderer、fixture、预览、持久化映射、文档行和自动化门禁之前，保持 `reference-only/planned`。
 
@@ -218,7 +218,7 @@ flowchart LR
 
 ### Target Descriptor 与 Gallery 生成链路
 
-`src/rendering/renderTargetCatalog.ts` 是 target 的单一描述器。每个 target 在此声明 renderer ID、MIME、原始 source 扩展名、Vault 扩展名、预览类型、导出格式、consumer gate 和 fallback policy。预览导出与文件落盘通过描述器查询，不再各自维护 target switch。Vega-Lite 的契约差异被显式保留：预览弹窗消费原始 `.json`，Vault 生成则把同一 source 包装为 `.md`。
+`src/rendering/renderTargetCatalog.ts` 是 target 的单一描述器。每个 target 在此声明 renderer ID、MIME、原始 source 扩展名、Vault 扩展名、预览类型、导出格式、consumer gate 和 fallback policy。预览导出与文件落盘通过描述器查询；renderer dispatch 仍在渲染边界保留显式 switch，确保不兼容的 target/intent fail closed。Vega-Lite 的契约差异被显式保留：预览弹窗消费原始 `.json`，Vault 生成则把同一 source 包装为 `.md`。
 
 能力 manifest 是独立的三轴投影：`src/diagram/diagramCapabilityManifest.ts` 组合语义类型、默认/兼容 target 与 fixture 所有权；target descriptor 负责 artifact 机制。`scripts/diagram-gallery-browser-entry.ts` 导入可执行 fixture 目录和生产 renderer；`scripts/generate-diagram-gallery.js` 生成带无障碍元数据的 SVG，在固定卡片尺寸下生成 PNG，写入 `docs/assets/diagrams/manifest.json`，并对过期或无效资产 fail closed。这样设置页、文档和 runtime fixture 共享同一条证据链。
 
@@ -230,12 +230,14 @@ flowchart LR
 
 ```text
 DiagramSpec
-  -> mergeDrawnixSourceCoverage(源 Markdown, 源路径)
+  -> enrichDrawnixSourceCoverage(源 Markdown, 源路径)
   -> 唯一的文件名根节点树
   -> buildDrawnixMindMapProjection()
   -> DrawnixRenderer
   -> .drawnix + SVG companion + Markdown wrapper
 ```
+
+`mergeDrawnixSourceCoverage()` 仅作为旧 maintainer 脚本和测试的废弃兼容别名保留；生产生成路径使用 `enrichDrawnixSourceCoverage()`。
 
 文档根节点使用去掉扩展名后的源文件名。标题结构保留为嵌套分支；模型生成但未匹配到源结构的分支会进入 `Additional concepts`，不会被删除。跨分支关系保留为原生 `arrow-line`。两阶段分配器根据实测标签尺寸预留外侧通道，先尝试确定性的直接接入，再进入 grid route。只有所有水平接入组合都被阻断时，grid 才会从顶部和底部端口重试，因此标签的预留几何不变，同时复杂分支仍可沿外侧通道离开。grid 坐标会保留有限端点的精确值；量化端点坐标会让合法的亚像素节点边界在路由图中消失。没有固定的层级、节点或关系数量限制。
 

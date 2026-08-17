@@ -42,7 +42,7 @@ implementation_record: src/tests/mermaidNormalizationConvergence.test.ts
 - 历史审计将 `deepDebugMermaid` 链称为“30 步”（`mermaidProcessor.ts:356-498`），但可执行 registry 现在固化为 35 个稳定 stage ID。它仍有 flowchart 偏置：`fixMermaidNotes` 改写 `note right of`（合法 sequence 语法），`fixMermaidPipes`/`fixMisplacedPipes` 触碰 `|`（ER 基数语法）。
 - `ensureMermaidInitialized` 现在负责插件验证初始化：按函数身份调用一次 `mermaid.initialize`；预览 webview 保留独立的主题专属 `deps.initialize()` 生命周期。
 - `legacyFixerUtils.ts` 死导出：`rewriteLegacyTrailingDoubleDashArrow`（`:412`）、4 个不被 import 的 `parse*`、字节相同的 `stripWrappingDoubleQuotes`/`stripWrappedQuotedLabel`（`:36-42`/`:44-50`）。
-- Drawnix 几何重复（审计发现，超出本方案范围但在此登记）：当前单根原生投影内部仍有重复的测量/布局 helper；`routeDrawnixCrossRootRelation`（`drawnixCrossRootRouter.ts:823`，约 250 行）无生产调用；`mergeDrawnixSourceCoverage`（`drawnixSourceCoverage.ts:575-582`）是已废弃的 tests-only 别名。已删除的 presentation 模块和 presentation 交付 bundle 不属于当前契约。
+- Drawnix 几何重复（审计发现，超出本方案范围但在此登记）：当前单根原生投影内部仍有重复的测量/布局 helper；`routeDrawnixCrossRootRelation`（`drawnixCrossRootRouter.ts`，约 250 行）无生产调用；`enrichDrawnixSourceCoverage` 是 canonical 生产操作，`mergeDrawnixSourceCoverage` 仅保留为废弃兼容别名。已删除的 presentation 模块和 presentation 交付 bundle 不属于当前契约。
 
 ## 3. 问题分析：四个契约冲突
 
@@ -101,13 +101,13 @@ normalizeMermaidDiagram(input, opts?) -> { content, family }
 3. **mermaid.parse 成本**：`checkMermaidErrors` 对每个块都 parse；保留 errorCount 门控；绝不在预览热路径引入 parse。
 4. **`getValidNodeIDs` 上下文**（`mermaidProcessor.ts:1158`）：必须留在需要它的 stage 内，不提升为全局。
 5. **测试面即行为契约**：约 25 个 `mermaidFix*`/`deepDebug*`/`mermaidProcessor.test.ts` 文件迁移后必须原样通过。测试失败意味着迁移破坏了行为，不是测试该改。
-6. **`diagramGenerationService:580` 手工 fence**（fenced mermaid + `spec.intent` 当首行）在错误回退路径产出非法图；改用 `fenceMermaid` + 合法 fallback 体。
+6. **历史 fallback fence 坑点（已关闭）**：早期 `diagramGenerationService` 错误回退路径曾用 `spec.intent` 作为首行手工拼接 fence。必须继续以 canonical `fenceMermaidDefinition` 为边界，并用回归测试保护合法 fallback 体。
 7. **`~~~` fence**：统一正则必须吸收 `~~~`，否则修复链静默跳过这些块（`mermaidProcessor.ts:253` 现有 bug）。
 
 ## 8. 阶段与门禁
 
-- **Phase 0 — 分歧夹具（测试先行）**：erDiagram 无括号实体 + 截断基数夹具，断言渲染输出 == 预览输出。今天必红；定义唯一的有意行为变更。
-- **Phase 1 — 中性 normalize 模块**：从 shared 移植 normalize + ER 修复（带 mermaid.parse 回退）；validator 改 re-export。门禁：`mermaidSanitization`/`mermaidValidator`/`mermaidErAdapter` 套件全绿。
+- **Phase 0 — 分歧夹具（已完成）**：erDiagram 无括号实体 + 截断基数夹具现在断言渲染输出 == 预览输出，并记录唯一有意的语义变更。
+- **Phase 1 — 中性 normalize 模块（已完成）**：normalize + ER 修复已移入 diagram 层；validator、preview 与 render-host 共享实现。门禁：`mermaidSanitization`/`mermaidValidator`/`mermaidErAdapter` 套件已通过。
 - **Phase 2 — legacy 链阶段化（完成）**：冻结的执行顺序已由 35 个 ID 的 stage registry 表达；family 门控与整链幂等性已有覆盖。聚焦 legacy 套件和 build 已通过；死导出仍需调用点证据后再清理。
 - **Phase 3 — fence 与配置收敛（完成）**：共享 scanner 和 canonical fence helper 负责 markdown 块边界；`ensureMermaidInitialized()` 按 `initialize` 函数身份一次化插件验证 runtime。预览 webview 的主题初始化有意保持独立。
 - **最终门禁**：`npm run build`；`npm test -- --runInBand`；`npm run audit:render-host`；快照 diff 仅允许 erDiagram 产物变化。
@@ -154,7 +154,7 @@ Phase 0-6 已实现（1.9.5）。语义/几何/交付契约已文档化；当前
 
 ## 11. 实现更新（2026-08-17）
 
-Phase 0 与 Phase 1 的 diagram 级部分已经落地，Phase 2 与 Phase 3 也已完成。
+Phase 0 至 Phase 3 现在均已落地。Phase 0 与 Phase 1 的 diagram 级实现关闭了渲染/预览发散；Phase 2 与 Phase 3 完成了 legacy 链、fence 和验证 runtime 的收敛。
 
 - `src/diagram/adapters/mermaid/normalize.ts` 成为无运行时依赖的 canonical 边界，统一处理 BOM/CRLF、反引号与波浪线 fence、Mermaid family 检测、行尾清洗和现有 ER 修复。
 - `validator.ts`、`mermaidPreview.ts`、`renderHostEntry.ts` 共同消费这一实现。`mermaidDefinitionShared.ts` 仅保留兼容 re-export。

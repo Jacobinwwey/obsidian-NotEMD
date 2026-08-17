@@ -10,6 +10,7 @@ import { RendererRegistry } from '../rendering/rendererRegistry';
 import { RendererService } from '../rendering/rendererService';
 import { NotemdSettings } from '../types';
 import { buildDiagramPlan } from './planner';
+import { findDiagramTypeByIntent } from './diagramTypeCatalog';
 import { buildDiagramSpecPrompt } from './prompts/diagramSpecPrompt';
 import { assertValidDiagramSpec } from './spec';
 import { isSupportedRenderTarget } from './types';
@@ -17,7 +18,7 @@ import type { DiagramIntent, DiagramNode, DiagramPlan, DiagramSpec, RenderTarget
 import { parseDiagramSpecResponse } from './diagramSpecResponseParser';
 import { resolveCircuitTemplateFromMarkdown } from './adapters/circuitikz/circuitTemplateCatalog';
 import { validateDrawnixMindMapSpec } from './adapters/drawnix/drawnixMindMapProjection';
-import { mergeDrawnixSourceCoverage } from './adapters/drawnix/drawnixSourceCoverage';
+import { enrichDrawnixSourceCoverage } from './adapters/drawnix/drawnixSourceCoverage';
 import { hashResolvedSourceVisualManifest, ResolvedSourceVisual } from './sourceVisuals';
 
 export interface DiagramGenerationOptions {
@@ -178,18 +179,7 @@ export function createDefaultDiagramRendererService(): RendererService {
 }
 
 function resolveRenderTargetForIntent(intent: DiagramIntent): DiagramPlan['renderTarget'] {
-    switch (intent) {
-        case 'drawnixMindmap':
-            return 'drawnix';
-        case 'canvasMap':
-            return 'json-canvas';
-        case 'dataChart':
-            return 'vega-lite';
-        case 'circuit':
-            return 'circuitikz';
-        default:
-            return 'mermaid';
-    }
+    return findDiagramTypeByIntent(intent).defaultTarget;
 }
 
 function normalizeDrawnixGenerationOptions(options: DiagramGenerationOptions): DiagramGenerationOptions {
@@ -356,13 +346,13 @@ function mergeSpecDefaults(
     };
 }
 
-function enrichDrawnixSourceCoverage(
+function applyDrawnixSourceCoverage(
     spec: DiagramSpec,
     sourceMarkdown: string,
     sourcePath?: string
 ): DiagramSpec {
     return spec.intent === 'drawnixMindmap'
-        ? mergeDrawnixSourceCoverage(spec, sourceMarkdown, sourcePath)
+        ? enrichDrawnixSourceCoverage(spec, sourceMarkdown, sourcePath)
         : spec;
 }
 
@@ -436,7 +426,7 @@ export async function generateDiagramArtifact(
     let spec: DiagramSpec;
     try {
         const parsedSpec = parseDiagramSpecResponse(rawResponse);
-        spec = enrichDrawnixSourceCoverage(
+        spec = applyDrawnixSourceCoverage(
             mergeSpecDefaults(parsedSpec, plan, options.requestedIntent),
             markdown,
             options.sourcePath
@@ -459,7 +449,7 @@ export async function generateDiagramArtifact(
         rawResponse = await options.llmInvoker(retryPrompt, markdown);
         try {
             const parsedSpec = parseDiagramSpecResponse(rawResponse);
-            spec = enrichDrawnixSourceCoverage(
+            spec = applyDrawnixSourceCoverage(
                 mergeSpecDefaults(parsedSpec, plan, options.requestedIntent),
                 markdown,
                 options.sourcePath
@@ -530,7 +520,7 @@ export async function generateDiagramArtifact(
 
             const retryResponse = await options.llmInvoker(retryPrompt, markdown);
             const retryParsedSpec = parseDiagramSpecResponse(retryResponse);
-            const retrySpec = enrichDrawnixSourceCoverage(
+            const retrySpec = applyDrawnixSourceCoverage(
                 mergeSpecDefaults(retryParsedSpec, plan, options.requestedIntent),
                 markdown,
                 options.sourcePath

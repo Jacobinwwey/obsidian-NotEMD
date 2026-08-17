@@ -42,7 +42,7 @@ Before Phase 0, the same input normalized differently on render vs preview for `
 - The historical audit called the `deepDebugMermaid` chain “30-step” (`mermaidProcessor.ts:356-498`), but the executable registry now records 35 stable stage IDs. It remains flowchart-biased: `fixMermaidNotes` rewrites `note right of` (valid sequence syntax), while `fixMermaidPipes`/`fixMisplacedPipes` touch `|` (ER cardinality syntax).
 - `ensureMermaidInitialized` now owns plugin validation initialization. It calls `mermaid.initialize` once per function identity; preview webviews retain a separate theme-specific `deps.initialize()` lifecycle.
 - Dead exports in `legacyFixerUtils.ts`: `rewriteLegacyTrailingDoubleDashArrow` (`:412`), four unimported `parse*` exports, byte-identical `stripWrappingDoubleQuotes`/`stripWrappedQuotedLabel` (`:36-42`/`:44-50`).
-- Drawnix geometry duplication (audit, outside this plan's scope but tracked here): the current one-root native projection still has duplicated measurement/layout helpers; `routeDrawnixCrossRootRelation` (`drawnixCrossRootRouter.ts:823`, ~250 lines) has no production caller; `mergeDrawnixSourceCoverage` (`drawnixSourceCoverage.ts:575-582`) is a deprecated tests-only alias. The deleted presentation module and presentation delivery bundle are not part of the current contract.
+- Drawnix geometry duplication (audit, outside this plan's scope but tracked here): the current one-root native projection still has duplicated measurement/layout helpers; `routeDrawnixCrossRootRelation` (`drawnixCrossRootRouter.ts`, ~250 lines) has no production caller; `enrichDrawnixSourceCoverage` is the canonical production operation and `mergeDrawnixSourceCoverage` remains a deprecated compatibility alias. The deleted presentation module and presentation delivery bundle are not part of the current contract.
 
 ## 3. Problem Analysis: Four Contract Conflicts
 
@@ -101,13 +101,13 @@ Challenge: first-line family detection is fragile (BOM, leading blank lines, \%\
 3. **mermaid.parse cost**: `checkMermaidErrors` parses every block; keep the errorCount gate; never introduce parse into the preview hot path.
 4. **getValidNodeIDs context** (`mermaidProcessor.ts:1158`): must stay inside the stage that needs it, not globalized.
 5. **Test surface is the behavior contract**: ~25 `mermaidFix*`/`deepDebug*`/`mermaidProcessor.test.ts` files must pass unchanged after migration. A failing test means the migration broke behavior, not that the test should change.
-6. **`diagramGenerationService:580` hand-built fence** (fenced mermaid + spec.intent as first line) emits an invalid diagram on the error-fallback path; replace with `fenceMermaid` + a valid fallback body.
+6. **Historical fallback-fence hazard (closed)**: an earlier `diagramGenerationService` error fallback hand-built a fenced block with `spec.intent` as the first line. Keep the canonical `fenceMermaidDefinition` boundary and a valid fallback body covered by regression tests.
 7. **`~~~` fences**: the unified fence regex must absorb `~~~` or the fix chain silently skips those blocks (current bug at `mermaidProcessor.ts:253`).
 
 ## 8. Phases And Verification Gates
 
-- **Phase 0 — divergence fixture (test first)**: erDiagram brace-less entity + truncated cardinality fixture asserting render output == preview output. Red today; defines the only intended behavior change.
-- **Phase 1 — neutral normalize module**: port normalize + ER repairs from shared (with mermaid.parse fallback); validator re-exports. Gate: `mermaidSanitization`/`mermaidValidator`/`mermaidErAdapter` suites green.
+- **Phase 0 — divergence fixture (complete)**: the erDiagram brace-less entity + truncated cardinality fixture now asserts render output == preview output and records the only intended semantic behavior change.
+- **Phase 1 — neutral normalize module (complete)**: normalize + ER repairs moved to the diagram layer; validator, preview, and render-host consumers share it. Gate: `mermaidSanitization`/`mermaidValidator`/`mermaidErAdapter` suites are green.
 - **Phase 2 — legacy chain staging (complete)**: frozen execution order is represented by a 35-ID stage registry; family gating and whole-chain idempotency are covered. Gate: focused legacy suites and build are green; dead exports remain pending call-site proof.
 - **Phase 3 — fence and config convergence (complete)**: shared scanner and canonical fence helpers own markdown block boundaries; `ensureMermaidInitialized()` initializes the plugin validation runtime once per `initialize` identity. Preview webview theme initialization remains intentionally separate.
 - **Final gates**: `npm run build`; `npm test -- --runInBand`; `npm run audit:render-host`; snapshot diff allowed only for erDiagram artifacts.
@@ -154,7 +154,7 @@ Phases 0-6 implemented (1.9.5). The semantic/geometry/delivery contracts are doc
 
 ## 11. Implementation Update (2026-08-17)
 
-Phase 0 and the diagram-level portion of Phase 1 are now landed. Phase 2 and Phase 3 are also complete.
+Phases 0 through 3 are now landed. Phase 0 and the diagram-level portion of Phase 1 closed the render/preview divergence; Phase 2 and Phase 3 completed legacy-chain, fence, and validation-runtime convergence.
 
 - `src/diagram/adapters/mermaid/normalize.ts` is the runtime-free canonical boundary. It normalizes BOM/CRLF, extracts both backtick and tilde fences, detects the Mermaid family, sanitizes line endings, and applies the existing ER repairs.
 - `validator.ts`, `mermaidPreview.ts`, and `renderHostEntry.ts` consume the same implementation. `mermaidDefinitionShared.ts` is retained only as a compatibility re-export.

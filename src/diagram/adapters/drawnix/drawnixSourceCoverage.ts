@@ -541,7 +541,7 @@ function appendUnmatchedModelRoot(
  * The exact source visuals remain companions; this layer makes the native tree
  * useful even when the LLM returns only a small summary of a long note.
  */
-export function mergeDrawnixSourceCoverage(
+export function enrichDrawnixSourceCoverage(
     spec: DiagramSpec,
     sourceMarkdown: string,
     sourcePath?: string
@@ -584,4 +584,16 @@ export function mergeDrawnixSourceCoverage(
         edges: deduplicateAndRemapEdges(spec.edges ?? [], idRemap, mergedNodes, diagnostics),
         ...(diagnostics.length > 0 ? { sourceCoverageDiagnostics: diagnostics } : {})
     };
+}
+
+/**
+ * @deprecated Use enrichDrawnixSourceCoverage. Kept as a compatibility alias
+ * for maintainer scripts and older tests that imported the pre-convergence name.
+ */
+export function mergeDrawnixSourceCoverage(
+    spec: DiagramSpec,
+    sourceMarkdown: string,
+    sourcePath?: string
+): DiagramSpec {
+    return enrichDrawnixSourceCoverage(spec, sourceMarkdown, sourcePath);
 }

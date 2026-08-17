@@ -44,7 +44,7 @@ JSON 摘要中的 `rootCount`、`nodeCount` 与 `edgeCount` 对应实际写出�
 node scripts/invoke-maintainer-cli-operation.js --vault 1Knowledge --operation diagram.generate --input-json '{"sourcePath":"architecture.zh-CN.md","executionMode":"save-artifact","requestedIntent":"drawnixMindmap","requestedRenderTarget":"drawnix","targetLanguage":"zh-CN"}' --pretty
 ```
 
-该路径会把源路径传给 `mergeDrawnixSourceCoverage()`，生成 `architecture.zh-CN` 根节点，保留标题分支，并将未匹配的模型分支放入 `Additional concepts`。
+该路径会把源路径传给 `enrichDrawnixSourceCoverage()`，生成 `architecture.zh-CN` 根节点，保留标题分支，并将未匹配的模型分支放入 `Additional concepts`。旧的 `mergeDrawnixSourceCoverage()` 名称仅作为废弃兼容别名保留。
 
 已废弃的 `--drawnix-delivery` 与 `--source-label` 仍可被旧脚本解析，但不会选择布局或修改输出。新 artifact 不包含 replay metadata 或 presentation bundle。
 

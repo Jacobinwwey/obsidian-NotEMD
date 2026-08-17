@@ -47,6 +47,8 @@ The correct next move is convergence. Adding more visual types before closing co
 7. Added the shared `extractMermaidBlocks`/`mapMermaidBlocks` scanner plus `openMermaidFence`/`closeMermaidFence`/`fenceMermaidDefinition`, removing duplicate fence output ownership from validation, repair, and renderer paths.
 8. Added `ensureMermaidInitialized()` for the plugin validation runtime. It initializes once per `mermaid.initialize` function identity; preview webviews keep their separate theme-specific `deps.initialize()` lifecycle.
 9. Expanded the Mermaid family registry to cover the currently shipped Mermaid 11 declarations (`architecture-beta`, `block-beta`, C4, journey, kanban, packet, pie, quadrant, radar, requirement, sankey, timeline, treemap, xychart, and ZenUML). These families now fail closed before the legacy flowchart repair chain; genuinely unknown headers remain the explicit compatibility escape hatch.
+10. Made the semantic catalog authoritative for planner defaults and explicit target admission. Best-fit planning now rejects an intent/target pair that has no declared renderer contract (for example, `dataChart -> mermaid`) before LLM generation; legacy Mermaid mode remains an explicit compatibility escape hatch. A fixture-backed contract test now checks every advertised target against its production renderer's `supports()` implementation.
+11. Renamed the production Drawnix source-coverage operation to `enrichDrawnixSourceCoverage()`. The old `mergeDrawnixSourceCoverage()` export remains as a deprecated compatibility alias for maintainer scripts and older tests, while the generation path uses the canonical name.
 
 ## Comparison With `diagram-design`
 
@@ -81,8 +83,8 @@ The reference taxonomy includes architecture, current-state, timeline, swimlane,
 1. **Mermaid Phase 2: completed.** The legacy chain is a 35-stage ordered registry with stable IDs, known-family fail-closed gating, and idempotency coverage. The family registry covers current Mermaid 11 declarations while preserving `unknown` for forward-compatible syntax; parser-backed admission remains required before treating an unknown family as flowchart-safe.
 2. **Mermaid Phase 3: completed.** Shared scanning, canonical fence formatting, and plugin validation-runtime initialization are converged. Keep preview webview theme initialization as a separate runtime contract.
 3. **Consumer evidence:** run real Draw.io/Drawnix/Circuitikz gates where tooling exists; record unavailable tools rather than claiming interoperability.
-4. **Drawnix convergence:** extract shared measurement/layout primitives, then delete the dead cross-root router and deprecated coverage alias only after call-site proof.
-5. **Circuitikz convergence:** parameterize repeated templates and decide whether the unwired repair-loop boundary is wired or removed; sync the roadmap either way.
+4. **Drawnix convergence:** the production source-coverage name is now canonical and the old alias is compatibility-only. Extract shared measurement/layout primitives next; delete the dead cross-root router only after call-site proof and a replacement route contract.
+5. **Circuitikz convergence:** keep `runCircuitikzRepairLoop()` as a maintainer-only acceptance SDK boundary; normal generation remains deterministic and does not invoke an LLM repair loop. Parameterize repeated templates next, then add a real CLI/desktop caller only if an explicit repair command needs it.
 6. **Reference admission:** candidate layouts such as timeline, swimlane, and quadrant are preferred only after the complete evidence checklist passes. Radar remains blocked until a real Vega-Lite adapter exists.
 
 ## Acceptance Gates

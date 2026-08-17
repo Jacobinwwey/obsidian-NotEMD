@@ -5,6 +5,15 @@ import {
 } from '../diagram/diagramCapabilityManifest';
 import { getRenderTargetDescriptor } from '../rendering/renderTargetCatalog';
 import { MermaidRenderer } from '../rendering/renderers/mermaidRenderer';
+import { getExecutableDiagramExamples } from '../diagram/examples/diagramExampleCatalog';
+import { JsonCanvasRenderer } from '../rendering/renderers/jsonCanvasRenderer';
+import { VegaLiteRenderer } from '../rendering/renderers/vegaLiteRenderer';
+import { HtmlRenderer } from '../rendering/renderers/htmlRenderer';
+import { EditableHtmlSvgRenderer } from '../rendering/renderers/editableHtmlSvgRenderer';
+import { DrawioRenderer } from '../rendering/renderers/drawioRenderer';
+import { DrawnixRenderer } from '../rendering/renderers/drawnixRenderer';
+import { CircuitikzRenderer } from '../rendering/renderers/circuitikzRenderer';
+import type { DiagramRenderer } from '../rendering/types';
 
 describe('diagram capability manifest', () => {
     test('is versioned and covers every shipped type from the executable catalog', () => {
@@ -41,6 +50,30 @@ describe('diagram capability manifest', () => {
             nodes: [],
             dataSeries: []
         })).toBe(false);
+    });
+
+    test('proves every advertised target against its production fixture renderer contract', () => {
+        const renderers = new Map<string, DiagramRenderer>([
+            ['mermaid', new MermaidRenderer()],
+            ['json-canvas', new JsonCanvasRenderer()],
+            ['vega-lite', new VegaLiteRenderer()],
+            ['html', new HtmlRenderer()],
+            ['editable-html-svg', new EditableHtmlSvgRenderer()],
+            ['drawio', new DrawioRenderer()],
+            ['drawnix', new DrawnixRenderer()],
+            ['circuitikz', new CircuitikzRenderer()]
+        ]);
+        const examples = getExecutableDiagramExamples();
+
+        for (const type of EXECUTABLE_DIAGRAM_TYPES) {
+            const example = examples.find(candidate => candidate.typeId === type.id);
+            expect(example).toBeDefined();
+            for (const target of type.compatibleTargets) {
+                const renderer = renderers.get(target);
+                expect(renderer).toBeDefined();
+                expect(renderer?.supports(example!.spec)).toBe(true);
+            }
+        }
     });
 
     test('keeps diagram-design layouts reference-only and out of the runtime selector', () => {

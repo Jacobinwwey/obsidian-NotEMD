@@ -189,22 +189,22 @@ flowchart LR
 
 | Intent | Render Target | Renderer | Preview | Export |
 |---|---|---|---|---|
-| `mindmap` | mermaid | MermaidRenderer | modal/iframe | SVG, PNG |
+| `mindmap` | mermaid | MermaidRenderer | modal/iframe | source `.md`, SVG, PNG, PDF |
 | `drawnixMindmap` | drawnix | DrawnixRenderer | dedicated SVG companion | `.drawnix`, SVG, PNG, PDF |
-| `flowchart` | mermaid | MermaidRenderer | modal/iframe | SVG, PNG |
-| `sequence` | mermaid | MermaidRenderer | modal/iframe | SVG, PNG |
-| `classDiagram` | mermaid | MermaidRenderer | modal/iframe | SVG, PNG |
-| `erDiagram` | mermaid | MermaidRenderer | modal/iframe | SVG, PNG |
-| `stateDiagram` | mermaid | MermaidRenderer | modal/iframe | SVG, PNG |
-| `canvasMap` | json-canvas | JsonCanvasRenderer | modal/iframe | source, SVG, PNG, PDF |
-| `dataChart` | vega-lite | VegaLiteRenderer | modal/iframe (sandboxed) | source, SVG, PNG, PDF |
+| `flowchart` | mermaid | MermaidRenderer | modal/iframe | source `.md`, SVG, PNG, PDF |
+| `sequence` | mermaid | MermaidRenderer | modal/iframe | source `.md`, SVG, PNG, PDF |
+| `classDiagram` | mermaid | MermaidRenderer | modal/iframe | source `.md`, SVG, PNG, PDF |
+| `erDiagram` | mermaid | MermaidRenderer | modal/iframe | source `.md`, SVG, PNG, PDF |
+| `stateDiagram` | mermaid | MermaidRenderer | modal/iframe | source `.md`, SVG, PNG, PDF |
+| `canvasMap` | json-canvas | JsonCanvasRenderer | modal/iframe | source `.canvas`, SVG, PNG, PDF |
+| `dataChart` | vega-lite | VegaLiteRenderer | modal/iframe (sandboxed) | source `.json` / Vault `.md`, SVG, PNG, PDF |
 | `circuit` | circuitikz | CircuitikzRenderer | SVG companion or source-only preview | `.tex`, SVG, PNG, PDF |
 
 `drawnixMindmap` is the only native Drawnix diagram intent. It projects `DiagramSpec.nodes` into an editable knowledge-map forest and generates an SVG companion from Notemd's placed projection. Relation layout has two geometry passes: the first reserves horizontal gutter space from measured label widths; after node placement, the second classifies endpoints relative to their roots. Same-side relations use a compact exterior gutter with a row scheduled between their endpoints. Cross-forest relations use the lower lanes. The router owns obstacle-safe ingress only, while the allocator owns lane placement. Reserved-lane routing tries deterministic horizontal ingress first. If no horizontal pair can reach the reserved row, the grid retry adds top and bottom node ports while keeping the label on its allocated lane. This avoids rejecting a valid dense tree because a branch seals both side ports, without imposing a node, depth, or relation quota. Source coverage follows the same rule: Markdown headings and unmatched model branches retain their hierarchy and IDs. It remaps edges only after an actual semantic merge and drops only invalid, duplicate, or hierarchy-ownership edges. The upstream `withMind` runtime places native child nodes, so full SVG/native pixel parity needs a real consumer test and cannot be inferred from the exported JSON alone. Standard `mindmap` remains a Mermaid intent and continues through `MermaidRenderer`.
 
 ### Capability Catalog Contract (2026-08-16)
 
-The diagram platform has three independent axes: semantic type, render target, and export format. The executable source of truth is the type catalog plus example fixtures; the forward plan adds a target descriptor and a generated versioned capability manifest. `SVG`, `PNG`, and `PDF` are export formats, never render targets.
+The diagram platform has three independent axes: semantic type, render target, and export format. The executable source of truth is the type catalog, production example fixtures, target descriptor, and versioned capability manifest. The target descriptor owns artifact mechanics; the manifest joins semantic types to compatible targets and fixture evidence. `SVG`, `PNG`, and `PDF` are export formats, never render targets.
 
 Current shipped scope is ten semantic types, eight render targets, and three export formats. The settings gallery and the generation selector now execute one production-renderer-backed fixture per type, while `scripts/generate-diagram-gallery.js` produces deterministic SVG/PNG assets and a hashed manifest for the bilingual docs gallery. Reference layouts from `ref/diagram-design` remain `reference-only/planned` until a renderer, fixture, preview, persistence mapping, docs row, and automated gate exist.
 
@@ -230,12 +230,14 @@ The capability manifest is a separate three-axis projection: `src/diagram/diagra
 
 ```text
 DiagramSpec
-  -> mergeDrawnixSourceCoverage(source Markdown, source path)
+  -> enrichDrawnixSourceCoverage(source Markdown, source path)
   -> one filename-rooted tree
   -> buildDrawnixMindMapProjection()
   -> DrawnixRenderer
   -> .drawnix + SVG companion + Markdown wrapper
 ```
+
+`mergeDrawnixSourceCoverage()` remains only as a deprecated compatibility alias for older maintainer scripts and tests; production generation uses `enrichDrawnixSourceCoverage()`.
 
 The document root is the source filename without its extension. Heading structure remains nested below it; unmatched model branches move to `Additional concepts` rather than being deleted. Cross-branch relationships remain native `arrow-line` elements. The two-pass allocator reserves exterior corridors from measured label geometry. It first attempts deterministic direct ingress, then grid routing. The grid retries from top and bottom ports only when all horizontal ingress pairs are blocked, so the reserved label geometry remains stable while a dense tree can still escape through an exterior corridor. Grid coordinates retain exact finite endpoint values: quantizing terminal coordinates can make a valid subpixel node boundary disappear from the route graph. There is no fixed depth, node, or relation limit.
 

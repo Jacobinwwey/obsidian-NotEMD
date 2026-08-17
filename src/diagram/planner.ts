@@ -7,21 +7,31 @@ import type {
     RenderTarget
 } from './types';
 import type { SupportedVegaLiteChartType } from './adapters/vega/schema';
+import { findDiagramTypeByIntent } from './diagramTypeCatalog';
 import { inferDiagramIntent } from './intent';
 
 function resolvePreferredRenderTarget(intent: DiagramIntent): RenderTarget {
-    switch (intent) {
-        case 'drawnixMindmap':
-            return 'drawnix';
-        case 'canvasMap':
-            return 'json-canvas';
-        case 'circuit':
-            return 'circuitikz';
-        case 'dataChart':
-            return 'vega-lite';
-        default:
-            return 'mermaid';
+    return findDiagramTypeByIntent(intent).defaultTarget;
+}
+
+function resolveRequestedRenderTarget(
+    intent: DiagramIntent,
+    requestedTarget: RenderTarget | undefined,
+    defaultTarget: RenderTarget
+): RenderTarget {
+    if (!requestedTarget) {
+        return defaultTarget;
     }
+
+    const definition = findDiagramTypeByIntent(intent);
+    if (definition.compatibleTargets.includes(requestedTarget)) {
+        return requestedTarget;
+    }
+
+    throw new Error(
+        `Render target "${requestedTarget}" is not compatible with diagram intent "${intent}". `
+        + `Supported targets: ${definition.compatibleTargets.join(', ')}.`
+    );
 }
 
 function resolveMermaidDiagramType(intent: DiagramIntent): MermaidDiagramType | null {
@@ -127,7 +137,7 @@ export function buildDiagramPlan(markdown: string, options: DiagramPlanOptions =
     const preferredChartType = inferPreferredChartType(markdown, inferred.intent);
     const preferredTarget = compatibilityMode === 'legacy-mermaid'
         ? 'mermaid'
-        : options.requestedRenderTarget ?? defaultTarget;
+        : resolveRequestedRenderTarget(inferred.intent, options.requestedRenderTarget, defaultTarget);
     const fallbackTargets = resolveFallbackTargets(
         compatibilityMode,
         preferredTarget,

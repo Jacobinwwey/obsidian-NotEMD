@@ -47,6 +47,8 @@ implementation_record: src/tests/mermaidNormalizationConvergence.test.ts
 7. 增加共享 `extractMermaidBlocks`/`mapMermaidBlocks` scanner，以及 `openMermaidFence`/`closeMermaidFence`/`fenceMermaidDefinition`，收回验证、修复和 renderer 路径中的重复 fence 输出所有权。
 8. 增加 `ensureMermaidInitialized()` 管理插件验证 runtime：按 `mermaid.initialize` 函数身份一次化；预览 webview 保留独立的主题专属 `deps.initialize()` 生命周期。
 9. 扩大 Mermaid family registry，覆盖当前 Mermaid 11 已发布声明（`architecture-beta`、`block-beta`、C4、journey、kanban、packet、pie、quadrant、radar、requirement、sankey、timeline、treemap、xychart 与 ZenUML）。这些 family 现在会在进入 legacy flowchart 修复链前 fail closed；真正未知的 header 仍保留为明确的向前兼容逃生口。
+10. 让语义目录成为 planner 默认目标与显式 target 准入的唯一事实源。best-fit 现在会在 LLM 生成前拒绝没有 renderer contract 的 intent/target 组合（例如 `dataChart -> mermaid`）；legacy Mermaid 模式仍保留为显式兼容逃生口。新增 fixture 驱动的 contract 测试，逐一验证目录声明的 target 与生产 renderer 的 `supports()` 一致。
+11. 将生产 Drawnix source-coverage 操作更名为 `enrichDrawnixSourceCoverage()`。旧 `mergeDrawnixSourceCoverage()` 仅作为带弃用标记的兼容别名保留，供 maintainer 脚本和旧测试使用；生成路径已经切换到 canonical 名称。
 
 ## 与 `diagram-design` 的对比
 
@@ -81,8 +83,8 @@ implementation_record: src/tests/mermaidNormalizationConvergence.test.ts
 1. **Mermaid Phase 2：已完成。** legacy 链已成为 35 个有序 stage，具备稳定 ID、已知 family fail-closed 门控和幂等覆盖。family registry 已覆盖当前 Mermaid 11 声明，同时保留 `unknown` 以兼容未来语法；在把 unknown family 视为 flowchart-safe 之前仍必须补 parser-backed 准入证据。
 2. **Mermaid Phase 3：已完成。** 共享 scanner、canonical fence 格式和插件验证 runtime 初始化已收敛；预览 webview 的主题初始化继续作为独立 runtime 契约。
 3. **Consumer 证据：** 在工具可用时执行 Draw.io/Drawnix/Circuitikz 真实门禁；不可用时记录 blocker，不声称兼容。
-4. **Drawnix 收敛：** 抽取共享 measurement/layout primitive；确认无调用点后再删除 dead cross-root router 和废弃 coverage alias。
-5. **Circuitikz 收敛：** 参数化重复模板，决定未接线 repair-loop 是接入还是删除，并同步路线图。
+4. **Drawnix 收敛：** 生产 source-coverage 名称已 canonical，旧别名仅用于兼容。下一步抽取共享 measurement/layout primitive；dead cross-root router 必须在调用点证明和替代路由契约完成后才可删除。
+5. **Circuitikz 收敛：** `runCircuitikzRepairLoop()` 保持 maintainer-only acceptance SDK 边界；正常生成继续保持确定性，不调用 LLM repair loop。下一步参数化重复模板；只有出现明确 repair 命令时才增加真实 CLI/desktop 调用者。
 6. **参考候选准入：** timeline、swimlane、quadrant 等候选必须先满足完整证据清单；radar 在真实 Vega-Lite adapter 出现前保持阻塞。
 
 ## 验收门禁

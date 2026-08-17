@@ -53,7 +53,7 @@ Drawnix 仍然是目标专用 exporter。插件不嵌入 Drawnix 应用、Plait 
 
 | 领域 | 当前代码证据 | 失败方式 | 必须增加的防线 |
 |---|---|---|---|
-| 结构 | `mergeDrawnixSourceCoverage()` 创建 synthetic document root，按规范化标签合并，深度限制为 3，并将未匹配模型 root 放入 `Additional concepts` | 有意义的模型分支可能被压缩或移动，且没有 provenance；标签相同不等于身份相同 | 保留稳定 ID 与显式 source/model 映射。压缩必须产生诊断，不能静默丢结构。forest 校验与 document-root 展示策略分离。 |
+| 结构 | `enrichDrawnixSourceCoverage()` 创建 synthetic document root，保留深层源结构和未匹配模型分支，并将未匹配模型 root 放入 `Additional concepts`；没有固定深度上限 | 有意义的模型分支必须保留 provenance；标签相同不等于身份相同 | 保留稳定 ID 与显式 source/model 映射。合并/remap/drop 必须产生诊断，不能静默丢结构。forest 校验与 document-root 展示策略分离。 |
 | 跨 root 路由 | `drawnixCrossRootRouter.ts` 会避开无关 root 区域，并提供有界 fallback | SVG 中几何合法的线，在原生 Drawnix 读取时仍可能被重排或遮挡；route warning 不是完整质量结果 | 将线段、膨胀后的节点障碍、root 区域穿越和原生标签矩形作为一个 post-layout 不变量校验。无法满足时 fail closed。 |
 | 层级 | `drawnixMindMapSvgRenderer.ts` 按路径、节点、标签、源面板、header 绘制；exporter 则先序列化 root 再序列化 arrow-line | SVG paint order 与上游 Drawnix z-order 不是同一契约；arrow text 可能被原生节点遮挡，即使 SVG 看起来正常 | 引入显式 layer manifest 与跨格式碰撞审计。关系标签必须是已布局的一等几何，不只存在于 `arrow-line.texts`。 |
 | 源图形 | Mermaid 预览默认内嵌，但 `previewPanels` 是临时数据，旧 companion 加载在 host adapter 中完成 | 重新打开旧 `.drawnix` 时，如果 metadata、companion 路径或 runtime 有差异，面板可能丢失 | 为 source-visual metadata 版本化。读取顺序为内嵌、旧 companion、源文本重建。始终产生可见面板或诊断。 |

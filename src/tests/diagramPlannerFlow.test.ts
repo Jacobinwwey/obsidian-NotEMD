@@ -138,4 +138,25 @@ Top ranked issues this week:
         expect(result.renderTarget).toBe('vega-lite');
         expect(result.preferredChartType).toBe('table');
     });
+
+    test('rejects an explicit target that has no renderer contract for the intent', () => {
+        expect(() => buildDiagramPlan('# Revenue', {
+            compatibilityMode: 'best-fit',
+            requestedIntent: 'dataChart',
+            requestedRenderTarget: 'mermaid'
+        })).toThrow(
+            'Render target "mermaid" is not compatible with diagram intent "dataChart". Supported targets: vega-lite, html.'
+        );
+    });
+
+    test('keeps legacy Mermaid mode as the explicit compatibility escape hatch', () => {
+        const result = buildDiagramPlan('# Revenue', {
+            compatibilityMode: 'legacy-mermaid',
+            requestedIntent: 'dataChart',
+            requestedRenderTarget: 'mermaid'
+        });
+
+        expect(result.renderTarget).toBe('mermaid');
+        expect(result.legacyCompatibilityMode).toBe(true);
+    });
 });

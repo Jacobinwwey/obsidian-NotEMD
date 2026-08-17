@@ -44,7 +44,7 @@ DiagramSpec -> DrawnixMindMapProjection -> native .drawnix
 node scripts/invoke-maintainer-cli-operation.js --vault 1Knowledge --operation diagram.generate --input-json '{"sourcePath":"architecture.zh-CN.md","executionMode":"save-artifact","requestedIntent":"drawnixMindmap","requestedRenderTarget":"drawnix","targetLanguage":"zh-CN"}' --pretty
 ```
 
-That route supplies the source path to `mergeDrawnixSourceCoverage()`. It creates the `architecture.zh-CN` root, preserves headings as branches, and places unmatched model branches under `Additional concepts`.
+That route supplies the source path to `enrichDrawnixSourceCoverage()`. It creates the `architecture.zh-CN` root, preserves headings as branches, and places unmatched model branches under `Additional concepts`. The former `mergeDrawnixSourceCoverage()` name remains a deprecated compatibility alias only.
 
 The retired `--drawnix-delivery` and `--source-label` options remain parse-compatible for older scripts. They do not select layouts or mutate output. New artifacts never contain replay metadata or presentation bundles.
 
