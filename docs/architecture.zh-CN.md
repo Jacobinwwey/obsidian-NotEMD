@@ -341,7 +341,7 @@ Drawnix 源图形遵循同一条兼容性边界。默认关闭 **同时完整输
 4. **operation-core 与 command-binding 分层**：registry 中的 operation 元数据可以描述可复用的宿主无关 core，而当前出货命令本身仍保留 active-file、write-file 或 preview-bound 的真实产品语义。`diagram.generate` 是当前最明确的证明案例。
 5. **Iframe 宿主预览**：Vega-Lite 和 HTML 在沙盒 iframe 中渲染。Mermaid 内联渲染。
 6. **Local-only 设置是已验证的边界保证**：`src/main.ts` 只清洗一次并只写入一次，local-only provider credential 不会再次进入序列化 settings。
-7. **响应缓存有上限且不含凭证**：`src/llmResponseCache.ts` 对 provider、transport、endpoint、model、运行参数和 prompt/content hash 生成版本化 SHA-256 指纹，TTL 为 5 分钟，LRU 上限为 128 条。它仍只是优化层，不能成为正确性的权威来源。
+7. **响应缓存有上限、不含凭证且跨运行时**：`src/llmResponseCache.ts` 对 provider、transport、endpoint、model、运行参数和 prompt/content hash 生成版本化的双通道非加密 fingerprint，TTL 为 5 分钟，LRU 上限为 128 条；共享的移动端/web 路径不再依赖 Node-only 模块。它仍只是优化层，不能成为正确性的权威来源。
 
 ## 验证
 

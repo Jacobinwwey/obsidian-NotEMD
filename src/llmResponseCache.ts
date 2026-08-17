@@ -1,13 +1,34 @@
-import { createHash } from 'crypto';
 import type { LLMProviderConfig, NotemdSettings } from './types';
 import { getLLMProviderDefinition } from './llmProviders';
 
 export const LLM_RESPONSE_CACHE_TTL_MS = 5 * 60 * 1000;
 export const LLM_RESPONSE_CACHE_MAX_ENTRIES = 128;
-const LLM_RESPONSE_CACHE_KEY_VERSION = 2;
+const LLM_RESPONSE_CACHE_KEY_VERSION = 3;
 
 function hashText(value: string): string {
-    return createHash('sha256').update(value, 'utf8').digest('hex');
+    // This is a portable, non-cryptographic fingerprint. The cache is an
+    // optimization boundary, not an integrity or authentication boundary.
+    let first = 0x811c9dc5;
+    let second = 0x9e3779b9;
+    for (let index = 0; index < value.length; index += 1) {
+        const codePoint = value.charCodeAt(index);
+        first = Math.imul(first ^ codePoint, 0x01000193);
+        second = Math.imul(second ^ (codePoint + index), 0x85ebca6b);
+    }
+
+    first ^= first >>> 16;
+    first = Math.imul(first, 0x85ebca6b);
+    first ^= first >>> 13;
+    first = Math.imul(first, 0xc2b2ae35);
+    first ^= first >>> 16;
+
+    second ^= second >>> 16;
+    second = Math.imul(second, 0x27d4eb2d);
+    second ^= second >>> 15;
+    second = Math.imul(second, 0x165667b1);
+    second ^= second >>> 16;
+
+    return `${value.length.toString(16)}-${(first >>> 0).toString(16).padStart(8, '0')}-${(second >>> 0).toString(16).padStart(8, '0')}`;
 }
 
 function normalizeEndpoint(value: string): string {

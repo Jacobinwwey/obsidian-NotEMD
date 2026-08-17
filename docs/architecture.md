@@ -341,7 +341,7 @@ The delivered phases cover semantic structure integrity, geometry/layer collisio
 4. **Operation-core vs command-binding split**: Registry operation metadata can describe a host-neutral reusable core even when the shipped commands remain active-file, write-file, or preview-bound surfaces. `diagram.generate` is the current proof case.
 5. **Iframe-host preview**: Vega-Lite and HTML rendered in sandboxed iframe. Mermaid rendered inline.
 6. **Local-only settings are a boundary guarantee**: `src/main.ts` sanitizes once and persists the sanitized record once, so local-only provider credentials do not re-enter the serialized settings object.
-7. **Response caching is bounded and credential-free**: `src/llmResponseCache.ts` uses a versioned SHA-256 fingerprint over provider, transport, endpoint, model, runtime parameters, and prompt/content hashes, with a five-minute TTL and 128-entry LRU cap. It remains an optimization, never an authority for correctness.
+7. **Response caching is bounded, credential-free, and runtime-portable**: `src/llmResponseCache.ts` uses a versioned, non-cryptographic dual-lane fingerprint over provider, transport, endpoint, model, runtime parameters, and prompt/content hashes, with a five-minute TTL and 128-entry LRU cap. It avoids a Node-only dependency on the shared mobile/web path. The cache remains an optimization, never an authority for correctness.
 
 ## Verification
 
