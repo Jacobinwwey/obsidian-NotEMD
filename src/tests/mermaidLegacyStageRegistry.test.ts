@@ -67,6 +67,26 @@ describe('Mermaid legacy repair contracts', () => {
         const er = 'erDiagram\nUSER {\n string id\n}';
         expect(deepDebugMermaid(sequence)).toBe(sequence);
         expect(deepDebugMermaid(er)).toBe(er);
+
+        [
+            'architecture-beta\nservice api',
+            'block-beta\n  a',
+            'C4Context\n  System(api, "API")',
+            'journey\n  title Release\n  deploy: 5: Team',
+            'kanban\n  Todo',
+            'packet-beta\n  0-7: "Header"',
+            'pie title Budget\n  "Infra" : 40',
+            'quadrantChart\n  x-axis Low --> High',
+            'radar-beta\n  axis A, B',
+            'requirementDiagram\n  requirement req {\n    id: 1\n  }',
+            'sankey-beta\nA,B,10',
+            'timeline\n  title Release\n  2026: Launch',
+            'treemap\n  root',
+            'xychart-beta\n  line [1, 2]',
+            'zenUML\n  Alice->Bob: Hello'
+        ].forEach(definition => {
+            expect(deepDebugMermaid(definition)).toBe(definition);
+        });
     });
 
     test('extracts fenced blocks with both marker styles without crossing blocks', () => {

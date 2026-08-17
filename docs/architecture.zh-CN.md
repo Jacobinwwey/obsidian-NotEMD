@@ -212,7 +212,7 @@ flowchart LR
 
 ### Mermaid 规范化与修复所有权
 
-`src/diagram/adapters/mermaid/normalize.ts` 是无运行时依赖的 canonical 边界。`extractMermaidBlocks` 与 `mapMermaidBlocks` 负责反引号和波浪线两种标记的 markdown fence 扫描；`fenceMermaidDefinition` 负责 canonical 输出格式。`src/mermaidProcessor.ts` 仍拥有 markdown 修复，但 legacy 链已固化为保持顺序的 35-stage registry，并有幂等性测试与 fail-closed family 门控（仅 `flowchart`/`unknown` 执行）。已知的非 flowchart family 不再进入带 flowchart 偏置的重写；`unknown` 为保持向后兼容仍是明确的逃生口，在接纳新 family 前应以 parser-backed 分类关闭该风险。
+`src/diagram/adapters/mermaid/normalize.ts` 是无运行时依赖的 canonical 边界。`extractMermaidBlocks` 与 `mapMermaidBlocks` 负责反引号和波浪线两种标记的 markdown fence 扫描；`fenceMermaidDefinition` 负责 canonical 输出格式。`src/mermaidProcessor.ts` 仍拥有 markdown 修复，但 legacy 链已固化为保持顺序的 35-stage registry，并有幂等性测试与 fail-closed family 门控。normalizer 已识别当前 Mermaid 11 声明（architecture、block、C4、journey、kanban、packet、pie、quadrant、radar、requirement、sankey、timeline、treemap、xychart、ZenUML，以及已有的 class/ER/flowchart/gantt/gitGraph/mindmap/sequence/state family）；已知非 flowchart family 会被修复链拒绝，`unknown` 仍是兼容逃生口。在把未知 family 视为 flowchart-safe 之前仍必须补 parser-backed 分类。
 
 `src/diagram/adapters/mermaid/runtime.ts` 负责验证 runtime 初始化：以 `initialize` 函数身份为键，每个 runtime 只用 `startOnLoad: false` 与 `suppressErrorRendering: true` 调用一次 `mermaid.initialize`。Mermaid 预览 webview 的主题专属 `deps.initialize()` 属于独立 webview runtime，必须与插件验证配置区分；这样既避免全局配置重复重置，也保留预览主题所有权。
 

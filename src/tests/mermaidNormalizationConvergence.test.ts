@@ -23,6 +23,32 @@ describe('Mermaid normalization convergence', () => {
         expect(normalized.content).not.toContain('\uFEFF');
     });
 
+    test.each([
+        ['architecture-beta', 'architecture'],
+        ['block-beta', 'block'],
+        ['C4Context', 'c4'],
+        ['journey', 'journey'],
+        ['kanban', 'kanban'],
+        ['packet-beta', 'packet'],
+        ['pie title Budget', 'pie'],
+        ['quadrantChart', 'quadrantChart'],
+        ['radar-beta', 'radar'],
+        ['requirementDiagram', 'requirement'],
+        ['sankey-beta', 'sankey'],
+        ['timeline', 'timeline'],
+        ['treemap', 'treemap'],
+        ['xychart-beta', 'xyChart'],
+        ['zenUML', 'zenUML']
+    ] as const)('classifies known Mermaid 11 family %s before legacy repair', (header, family) => {
+        expect(normalizeMermaidDiagram(`${header}\nA --> B`).family).toBe(family);
+    });
+
+    test('keeps genuinely unknown headers as a forward-compatible escape hatch', () => {
+        expect(normalizeMermaidDiagram('future-beta\nA --> B').family).toBe('unknown');
+        expect(normalizeMermaidDiagram('graphical-beta\nA --> B').family).toBe('unknown');
+        expect(normalizeMermaidDiagram('piechart\nA --> B').family).toBe('unknown');
+    });
+
     test('uses the same ER normalization for render validation and preview', async () => {
         const source = '```mermaid\nerDiagram\n    USER\n        string id\n    ORDER\n        string id\n    USER ||--o ORDER : owns\n```';
 

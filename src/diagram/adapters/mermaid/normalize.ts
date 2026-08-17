@@ -1,12 +1,27 @@
 export type MermaidDiagramFamily =
+    | 'architecture'
+    | 'block'
+    | 'c4'
     | 'classDiagram'
     | 'erDiagram'
     | 'flowchart'
     | 'gantt'
     | 'gitGraph'
+    | 'journey'
+    | 'kanban'
     | 'mindmap'
+    | 'packet'
+    | 'pie'
+    | 'quadrantChart'
+    | 'radar'
+    | 'requirement'
+    | 'sankey'
     | 'sequenceDiagram'
     | 'stateDiagram'
+    | 'timeline'
+    | 'treemap'
+    | 'xyChart'
+    | 'zenUML'
     | 'unknown';
 
 export interface NormalizedMermaidDiagram {
@@ -229,6 +244,50 @@ function sanitizeMermaidContent(definition: string): string {
     return sanitized.trim();
 }
 
+const MERMAID_FAMILY_PREFIXES: readonly (readonly [string, MermaidDiagramFamily])[] = [
+    ['architecture-beta', 'architecture'],
+    ['block-beta', 'block'],
+    ['c4component', 'c4'],
+    ['c4container', 'c4'],
+    ['c4context', 'c4'],
+    ['c4deployment', 'c4'],
+    ['c4dynamic', 'c4'],
+    ['classdiagram', 'classDiagram'],
+    ['erdiagram', 'erDiagram'],
+    ['flowchart', 'flowchart'],
+    ['graph', 'flowchart'],
+    ['gantt', 'gantt'],
+    ['gitgraph', 'gitGraph'],
+    ['journey', 'journey'],
+    ['kanban', 'kanban'],
+    ['mindmap', 'mindmap'],
+    ['packet-beta', 'packet'],
+    ['pie', 'pie'],
+    ['quadrantchart', 'quadrantChart'],
+    ['radar-beta', 'radar'],
+    ['requirementdiagram', 'requirement'],
+    ['sankey-beta', 'sankey'],
+    ['sequencediagram', 'sequenceDiagram'],
+    ['statediagram', 'stateDiagram'],
+    ['timeline', 'timeline'],
+    ['treemap', 'treemap'],
+    ['xychart-beta', 'xyChart'],
+    ['zenuml', 'zenUML']
+];
+
+function hasMermaidFamilyPrefix(header: string, prefix: string): boolean {
+    if (!header.startsWith(prefix)) {
+        return false;
+    }
+
+    if (header === prefix) {
+        return true;
+    }
+
+    const suffix = header.slice(prefix.length);
+    return suffix.startsWith(' ') || suffix.startsWith('\t') || suffix.startsWith('-');
+}
+
 export function detectMermaidFamily(definition: string): MermaidDiagramFamily {
     const firstMeaningfulLine = definition
         .split('\n')
@@ -239,14 +298,10 @@ export function detectMermaidFamily(definition: string): MermaidDiagramFamily {
             && !line.startsWith('---'))
         ?.toLowerCase() || '';
 
-    if (firstMeaningfulLine.startsWith('erdiagram')) return 'erDiagram';
-    if (firstMeaningfulLine.startsWith('classdiagram')) return 'classDiagram';
-    if (firstMeaningfulLine.startsWith('sequencediagram')) return 'sequenceDiagram';
-    if (firstMeaningfulLine.startsWith('statediagram')) return 'stateDiagram';
-    if (firstMeaningfulLine.startsWith('mindmap')) return 'mindmap';
-    if (firstMeaningfulLine.startsWith('flowchart') || firstMeaningfulLine.startsWith('graph')) return 'flowchart';
-    if (firstMeaningfulLine.startsWith('gantt')) return 'gantt';
-    if (firstMeaningfulLine.startsWith('gitgraph')) return 'gitGraph';
+    const family = MERMAID_FAMILY_PREFIXES.find(([prefix]) => hasMermaidFamilyPrefix(firstMeaningfulLine, prefix));
+    if (family) {
+        return family[1];
+    }
     return 'unknown';
 }
 

@@ -46,6 +46,7 @@ The correct next move is convergence. Adding more visual types before closing co
 6. Exposed the legacy repair chain as 35 stable stage IDs without changing execution order. Flowchart-biased stages are gated to `flowchart`/`unknown`; sequence and ER content fail closed, and the whole chain has an idempotency regression contract.
 7. Added the shared `extractMermaidBlocks`/`mapMermaidBlocks` scanner plus `openMermaidFence`/`closeMermaidFence`/`fenceMermaidDefinition`, removing duplicate fence output ownership from validation, repair, and renderer paths.
 8. Added `ensureMermaidInitialized()` for the plugin validation runtime. It initializes once per `mermaid.initialize` function identity; preview webviews keep their separate theme-specific `deps.initialize()` lifecycle.
+9. Expanded the Mermaid family registry to cover the currently shipped Mermaid 11 declarations (`architecture-beta`, `block-beta`, C4, journey, kanban, packet, pie, quadrant, radar, requirement, sankey, timeline, treemap, xychart, and ZenUML). These families now fail closed before the legacy flowchart repair chain; genuinely unknown headers remain the explicit compatibility escape hatch.
 
 ## Comparison With `diagram-design`
 
@@ -61,7 +62,7 @@ The reference taxonomy includes architecture, current-state, timeline, swimlane,
 
 ## Risk Register And Tradeoffs
 
-- **Mermaid legacy chain:** `mermaidProcessor.ts` remains a large flowchart-biased repair surface, but the order is now explicit as 35 stable stages with a family gate and idempotency coverage. This is controlled debt, not a reason to route more diagram families through the chain.
+- **Mermaid legacy chain:** `mermaidProcessor.ts` remains a large flowchart-biased repair surface, but the order is now explicit as 35 stable stages with a family gate and idempotency coverage. The known Mermaid 11 family registry now fails closed for non-flowchart declarations; only genuinely unknown headers retain the compatibility escape hatch. This is controlled debt, not a reason to route more diagram families through the chain.
 - **Mermaid global state:** plugin-side validation initialization is now module-scoped per `initialize` function identity. Preview webviews intentionally retain theme-specific initialization because they own separate runtimes; collapsing those lifecycles would create theme regressions.
 - **External interoperability:** Draw.io, Drawnix, and Circuitikz consumer evidence must be real-consumer evidence, not mocks or serializer snapshots. Missing tools remain explicit blockers.
 - **Forward compatibility:** Unknown contract fields are accepted intentionally. Required fields and known field types are strict at the boundary; loosening them would make downstream failures harder to localize.
@@ -77,7 +78,7 @@ The reference taxonomy includes architecture, current-state, timeline, swimlane,
 
 ## Forward Plan
 
-1. **Mermaid Phase 2: completed.** The legacy chain is a 35-stage ordered registry with stable IDs, flowchart/unknown family gating, and idempotency coverage. Do not broaden the safe family set without parser evidence.
+1. **Mermaid Phase 2: completed.** The legacy chain is a 35-stage ordered registry with stable IDs, known-family fail-closed gating, and idempotency coverage. The family registry covers current Mermaid 11 declarations while preserving `unknown` for forward-compatible syntax; parser-backed admission remains required before treating an unknown family as flowchart-safe.
 2. **Mermaid Phase 3: completed.** Shared scanning, canonical fence formatting, and plugin validation-runtime initialization are converged. Keep preview webview theme initialization as a separate runtime contract.
 3. **Consumer evidence:** run real Draw.io/Drawnix/Circuitikz gates where tooling exists; record unavailable tools rather than claiming interoperability.
 4. **Drawnix convergence:** extract shared measurement/layout primitives, then delete the dead cross-root router and deprecated coverage alias only after call-site proof.
@@ -97,4 +98,4 @@ The reference taxonomy includes architecture, current-state, timeline, swimlane,
 
 ## Verification Snapshot
 
-Fresh verification for this increment: full Jest passed (257 suites, 2,236 tests passed, 1 skipped); TypeScript/esbuild build passed; VitePress docs build passed; gallery check passed (10 entries); render-host audit passed; Circuitikz smoke passed (6/6 PDFs, 0 errors/0 warnings); `git diff --check` passed. The known repository lint baseline remains 231 errors and 1,329 warnings; the full lint command still exits non-zero on that pre-existing debt, while the new contract/catalog/gallery files remain clean within the baseline.
+Fresh verification for this increment: 257 Jest suites passed, 2,252 tests passed, 1 skipped; TypeScript/esbuild build passed; VitePress 1.6.4 docs build passed; gallery check passed (10 entries); render-host audit passed; Circuitikz smoke remains passed (6/6 PDFs, 0 errors/0 warnings); targeted ESLint for the changed TypeScript files passed; and `git diff --check` passed. The known repository lint baseline remains 231 errors and 1,329 warnings; the full lint command still exits non-zero on that pre-existing debt.
