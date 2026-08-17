@@ -53,6 +53,7 @@ implementation_record: src/tests/mermaidNormalizationConvergence.test.ts
 13. 抽取 `drawnixGeometry.ts` 作为共享几何边界，统一矩形膨胀、严格内部重叠判断和正交折线插值。router 与 projection 现在消费同一组 primitive；边缘相切语义和按路径长度测量的标签定位由定向测试覆盖。
 14. 让六个 Circuitikz golden renderer 共享 standalone document wrapper 与 component-label lookup helper。现有 voltage convention、拓扑、layout hints 和精确 golden 输出保持不变；本次只去除重复的 preamble/label plumbing，不新增渲染模式。
 15. 抽取 `drawnixTextLayout.ts` 作为 Drawnix header、节点和关系标签共用的确定性宽度估算与换行契约。projection 不再持有第二份算法；定向测试锁定 ASCII、宽字符、空白和长单词行为。
+16. 增加通用 `TargetAdapterRegistry` 以及 preview、render-host adapter registry。preview/export 与 bundled render-host dispatch 不再按 target 使用 switch；未知 JSON payload target 会在 registry 边界 fail-closed。target 专属 webview markup 仍作为独立 presentation-layer 契约处理。
 
 ## 与 `diagram-design` 的对比
 
@@ -70,7 +71,7 @@ implementation_record: src/tests/mermaidNormalizationConvergence.test.ts
 
 - **Mermaid legacy 链：** `mermaidProcessor.ts` 仍是大型且偏 flowchart 的修复面，但现在已固化为 35 个稳定 stage、family 门控和幂等测试。已知 Mermaid 11 family registry 现在会对非 flowchart 声明 fail closed；只有真正未知的 header 保留兼容逃生口。这是受控债务，不应因此把更多 diagram family 接入该链。
 - **Mermaid 全局状态：** 插件验证侧已按 `initialize` 函数身份收敛为模块级初始化。预览 webview 有意保留主题专属初始化，因为它们属于独立 runtime；合并两个生命周期会引入主题回归。
-- **Target dispatch 分裂：** `renderTargetCatalog.ts` 负责 artifact 元数据与能力策略，但 `previewExport.ts` 和 `renderHostEntry.ts` 仍通过 target `switch` 承担运行时 dispatch。应将其视为明确的 Open/Closed 债务：新增 target 前，必须先让 target adapter registry 接管 preview/export/host 行为；仅增加 metadata 不足以完成扩展。
+- **Target adapter 边界：** preview/export 与 render-host dispatch 已通过带重复注册检查的 keyed target adapter 收敛。`renderFrame.ts` 与 `webview/page.ts` 仍包含 target 专属 presentation markup；新增 target 必须补齐该 markup 契约，或明确使用通用 source view。
 - **外部互操作：** Draw.io、Drawnix、Circuitikz 必须使用真实 consumer 证据，不能用 mock 或 serializer snapshot 冒充。工具缺失必须显式记录。
 - **向前兼容：** 未知契约字段有意放行；必填字段和已知字段类型在边界严格校验，不能为了“兼容”而整体放松。
 - **缓存：** response cache 只是优化，不能成为 artifact 身份或正确性的权威来源。
@@ -87,10 +88,11 @@ implementation_record: src/tests/mermaidNormalizationConvergence.test.ts
 
 1. **Mermaid Phase 2：已完成。** legacy 链已成为 35 个有序 stage，具备稳定 ID、已知 family fail-closed 门控和幂等覆盖。family registry 已覆盖当前 Mermaid 11 声明，同时保留 `unknown` 以兼容未来语法；在把 unknown family 视为 flowchart-safe 之前仍必须补 parser-backed 准入证据。
 2. **Mermaid Phase 3：已完成。** 共享 scanner、canonical fence 格式和插件验证 runtime 初始化已收敛；预览 webview 的主题初始化继续作为独立 runtime 契约。
-3. **Consumer 证据：** 在工具可用时执行 Draw.io/Drawnix/Circuitikz 真实门禁；不可用时记录 blocker，不声称兼容。
-4. **Drawnix 收敛：** 生产 source-coverage 与 relation-router 名称已经 canonical，旧 source-coverage export 和旧 router 模块仅用于兼容。矩形/折线以及文本度量/换行共享 primitive 已集中；只有在确认存在真实重复时才继续抽取 measurement/layout helper，并在调用点证明与替代路由契约完成后删除旧 cross-root 实现。
-5. **Circuitikz 收敛：** 六个 golden renderer 已共享 standalone-document 与 component-label helper，同时保持确定性输出。`runCircuitikzRepairLoop()` 继续作为 maintainer-only acceptance SDK 边界；正常生成不调用 LLM repair loop。只有在明确需要 repair 命令时，才决定接入真实 CLI/desktop caller。
-6. **参考候选准入：** timeline、swimlane、quadrant 等候选必须先满足完整证据清单；radar 在真实 Vega-Lite adapter 出现前保持阻塞。
+3. **Target adapter dispatch：preview/export 与 render-host 已完成收敛。** target 专属 webview markup 继续显式维护；扩展 target 集合前必须先补 adapter-backed markup 契约。
+4. **Consumer 证据：** 在工具可用时执行 Draw.io/Drawnix/Circuitikz 真实门禁；不可用时记录 blocker，不声称兼容。
+5. **Drawnix 收敛：** 生产 source-coverage 与 relation-router 名称已经 canonical，旧 source-coverage export 和旧 router 模块仅用于兼容。矩形/折线以及文本度量/换行共享 primitive 已集中；只有在确认存在真实重复时才继续抽取 measurement/layout helper，并在调用点证明与替代路由契约完成后删除旧 cross-root 实现。
+6. **Circuitikz 收敛：** 六个 golden renderer 已共享 standalone-document 与 component-label helper，同时保持确定性输出。`runCircuitikzRepairLoop()` 继续作为 maintainer-only acceptance SDK 边界；正常生成不调用 LLM repair loop。只有在明确需要 repair 命令时，才决定接入真实 CLI/desktop caller。
+7. **参考候选准入：** timeline、swimlane、quadrant 等候选必须先满足完整证据清单；radar 在真实 Vega-Lite adapter 出现前保持阻塞。
 
 ## 验收门禁
 
@@ -99,10 +101,11 @@ implementation_record: src/tests/mermaidNormalizationConvergence.test.ts
 - `npm run build`
 - `npm test -- --runInBand`
 - `npm run audit:render-host`
+- `src/tests/renderTargetAdapterRegistry.test.ts`
 - `npm run lint`（当前被仓库基线阻断；不能误标为本功能失败）
 - `git diff --check`
 - 外部 consumer 记录必须包含工具/版本/输入/输出，不能由 unit mock 替代。
 
 ## 验证快照
 
-本轮新鲜验证：259 个 Jest suite 通过，2,263 tests passed、1 skipped；TypeScript/esbuild build 通过；VitePress 1.6.4 docs build 通过；gallery check 通过（10 条目）；render-host audit 通过；Circuitikz smoke 使用 TeX Live 2023 `pdflatex` 通过（6/6 PDF，0 error/0 warning）；Drawnix 文本布局与 Circuitikz 定向 suite 分别通过（58/58、71/71 tests）；改动文件定向 ESLint 通过（0 error、23 个既有 warning）；`git diff --check` 通过。全仓 lint 当前仍非零（229 errors、1,330 warnings），这些问题均不在本轮改动文件的 error 集合中，作为既有债务继续跟踪。
+本轮新鲜验证：260 个 Jest suite 通过，2,267 tests passed、1 skipped；TypeScript/esbuild build 通过；VitePress 1.6.4 docs build 通过；gallery check 通过（10 条目）；render-host audit 通过；Circuitikz smoke 使用 TeX Live 2023 `pdflatex` 通过（6/6 PDF，0 error/0 warning）；Drawnix 文本布局、target adapter 与 Circuitikz 定向 suite 分别通过（58/58、36/36、71/71 tests）；改动文件定向 ESLint 通过（0 error、23 个既有 warning）；`git diff --check` 通过。全仓 lint 当前仍非零（229 errors、1,330 warnings），这些问题均不在本轮改动文件的 error 集合中，作为既有债务继续跟踪。

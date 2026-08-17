@@ -1,6 +1,6 @@
 # Notemd 系统架构总览
 
-> 更新：2026-08-16
+> 更新：2026-08-17
 
 ## 系统架构
 
@@ -218,7 +218,7 @@ flowchart LR
 
 ### Target Descriptor 与 Gallery 生成链路
 
-`src/rendering/renderTargetCatalog.ts` 是 target 的单一描述器。每个 target 在此声明 renderer ID、MIME、原始 source 扩展名、Vault 扩展名、预览类型、导出格式、consumer gate 和 fallback policy。预览导出与文件落盘通过描述器查询；renderer dispatch 仍在渲染边界保留显式 switch，确保不兼容的 target/intent fail closed。Vega-Lite 的契约差异被显式保留：预览弹窗消费原始 `.json`，Vault 生成则把同一 source 包装为 `.md`。
+`src/rendering/renderTargetCatalog.ts` 是 target 的单一描述器。每个 target 在此声明 renderer ID、MIME、原始 source 扩展名、Vault 扩展名、预览类型、导出格式、consumer gate 和 fallback policy。预览导出与文件落盘通过描述器查询；preview/export 与 bundled render-host dispatch 通过 keyed target adapter 解析，确保不兼容的 target/intent fail closed。Vega-Lite 的契约差异被显式保留：预览弹窗消费原始 `.json`，Vault 生成则把同一 source 包装为 `.md`。
 
 能力 manifest 是独立的三轴投影：`src/diagram/diagramCapabilityManifest.ts` 组合语义类型、默认/兼容 target 与 fixture 所有权；target descriptor 负责 artifact 机制。`scripts/diagram-gallery-browser-entry.ts` 导入可执行 fixture 目录和生产 renderer；`scripts/generate-diagram-gallery.js` 生成带无障碍元数据的 SVG，在固定卡片尺寸下生成 PNG，写入 `docs/assets/diagrams/manifest.json`，并对过期或无效资产 fail closed。这样设置页、文档和 runtime fixture 共享同一条证据链。
 
@@ -267,6 +267,10 @@ Circuitikz 支持仍然是受约束的。前端设置无需开启 Developer mode
 Drawnix 源图形遵循同一条兼容性边界。默认关闭 **同时完整输出 Mermaid 图**：安全清理后的 Mermaid SVG/源代码与已解析的二进制预览会内嵌在 `.drawnix` metadata 中，因此生成不会创建 `.assets` 文件夹。开启设置后，才会写出用于外部交接的完整 Mermaid 源码、SVG 与 manifest companion。预览加载顺序是内嵌数据、旧 companion 路径，最后从 metadata 中保留的源文本重建 Mermaid 图；即使用户清理了旧 companion 目录，旧 artifact 仍然可用。
 
 内嵌的 `metadata.notemd` source-visual manifest 使用 schema version 1。新读取器接受数字 v1 和旧的字符串 `"1"`；未知版本会保持不变，不会被猜测成预览面板。一个 manifest 内的 visual ID 必须唯一，重复项会在 host 边界被忽略。
+
+### Target Adapter Dispatch
+
+运行时 target dispatch 现在使用 `src/rendering/targetAdapterRegistry.ts` 作为 keyed registry primitive。`src/rendering/preview/previewTargetAdapterRegistry.ts` 负责 SVG preview/raster 操作，`src/rendering/runtime/renderHostTargetAdapterRegistry.ts` 负责 bundled render-host 操作与错误节点。重复 target 注册会在模块构造时失败；不可信 render-host payload target 会 fail-closed。webview markup 仍是 `renderFrame.ts` 与 `webview/page.ts` 中独立的 presentation 契约，不把它误认为 renderer capability metadata。
 
 ## 模块地图
 

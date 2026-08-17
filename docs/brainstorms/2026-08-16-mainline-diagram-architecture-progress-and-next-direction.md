@@ -53,6 +53,7 @@ The correct next move is convergence. Adding more visual types before closing co
 13. Extracted `drawnixGeometry.ts` as the shared geometry boundary for rectangle inflation, strict-interior overlap checks, and orthogonal polyline interpolation. Router and projection code now consume the same primitives; edge-touching behavior and measured path-length label placement are covered by focused tests.
 14. Parameterized the six Circuitikz golden renderers through one standalone-document wrapper and one component-label lookup helper. Existing voltage conventions, topology, layout hints, and exact golden output remain unchanged; the refactor removes repeated preamble/label plumbing without adding a new rendering mode.
 15. Extracted `drawnixTextLayout.ts` as the deterministic width estimator and wrapping contract shared by Drawnix headers, nodes, and relation labels. The projection no longer owns a second copy of that algorithm, and focused tests lock ASCII, wide-character, whitespace, and long-word behavior.
+16. Added the generic `TargetAdapterRegistry` plus preview and render-host adapter registries. Preview/export and bundled render-host dispatch no longer switch on target; unknown JSON payload targets fail closed at the registry boundary. Target-specific webview markup remains a separate presentation-layer contract.
 
 ## Comparison With `diagram-design`
 
@@ -70,7 +71,7 @@ The reference taxonomy includes architecture, current-state, timeline, swimlane,
 
 - **Mermaid legacy chain:** `mermaidProcessor.ts` remains a large flowchart-biased repair surface, but the order is now explicit as 35 stable stages with a family gate and idempotency coverage. The known Mermaid 11 family registry now fails closed for non-flowchart declarations; only genuinely unknown headers retain the compatibility escape hatch. This is controlled debt, not a reason to route more diagram families through the chain.
 - **Mermaid global state:** plugin-side validation initialization is now module-scoped per `initialize` function identity. Preview webviews intentionally retain theme-specific initialization because they own separate runtimes; collapsing those lifecycles would create theme regressions.
-- **Target dispatch split:** `renderTargetCatalog.ts` is authoritative for artifact metadata and capability policy, but `previewExport.ts` and `renderHostEntry.ts` still switch on target for runtime dispatch. Treat this as an explicit Open/Closed debt: a future target adapter registry must own preview/export/host behavior before adding more targets; metadata-only additions are not sufficient.
+- **Target adapter boundary:** preview/export and render-host dispatch now resolve through keyed target adapters with duplicate-registration checks. `renderFrame.ts` and `webview/page.ts` still contain target-specific presentation markup; adding a new target must include that markup contract or deliberately use the generic source view.
 - **External interoperability:** Draw.io, Drawnix, and Circuitikz consumer evidence must be real-consumer evidence, not mocks or serializer snapshots. Missing tools remain explicit blockers.
 - **Forward compatibility:** Unknown contract fields are accepted intentionally. Required fields and known field types are strict at the boundary; loosening them would make downstream failures harder to localize.
 - **Cache:** The response cache remains an optimization. It must never become an authority for artifact identity or correctness.
@@ -87,10 +88,11 @@ The reference taxonomy includes architecture, current-state, timeline, swimlane,
 
 1. **Mermaid Phase 2: completed.** The legacy chain is a 35-stage ordered registry with stable IDs, known-family fail-closed gating, and idempotency coverage. The family registry covers current Mermaid 11 declarations while preserving `unknown` for forward-compatible syntax; parser-backed admission remains required before treating an unknown family as flowchart-safe.
 2. **Mermaid Phase 3: completed.** Shared scanning, canonical fence formatting, and plugin validation-runtime initialization are converged. Keep preview webview theme initialization as a separate runtime contract.
-3. **Consumer evidence:** run real Draw.io/Drawnix/Circuitikz gates where tooling exists; record unavailable tools rather than claiming interoperability.
-4. **Drawnix convergence:** the production source-coverage and relation-router names are canonical; the old source-coverage export and router module are compatibility-only. Shared rectangle/polyline and text measurement/wrapping primitives are now centralized. Extract further measurement/layout helpers only where duplication is demonstrated, then remove the legacy cross-root implementation after call-site proof and a replacement route contract.
-5. **Circuitikz convergence:** the six golden renderers now share the standalone-document and component-label helpers while preserving deterministic output. Keep `runCircuitikzRepairLoop()` as a maintainer-only acceptance SDK boundary; normal generation remains deterministic and does not invoke an LLM repair loop. Decide whether to wire a real CLI/desktop caller only when an explicit repair command requires it.
-6. **Reference admission:** candidate layouts such as timeline, swimlane, and quadrant are preferred only after the complete evidence checklist passes. Radar remains blocked until a real Vega-Lite adapter exists.
+3. **Target adapter dispatch: completed for preview/export and render-host.** Keep target-specific webview markup explicit and add an adapter-backed markup contract before expanding the target set.
+4. **Consumer evidence:** run real Draw.io/Drawnix/Circuitikz gates where tooling exists; record unavailable tools rather than claiming interoperability.
+5. **Drawnix convergence:** the production source-coverage and relation-router names are canonical; the old source-coverage export and router module are compatibility-only. Shared rectangle/polyline and text measurement/wrapping primitives are now centralized. Extract further measurement/layout helpers only where duplication is demonstrated, then remove the legacy cross-root implementation after call-site proof and a replacement route contract.
+6. **Circuitikz convergence:** the six golden renderers now share the standalone-document and component-label helpers while preserving deterministic output. Keep `runCircuitikzRepairLoop()` as a maintainer-only acceptance SDK boundary; normal generation remains deterministic and does not invoke an LLM repair loop. Decide whether to wire a real CLI/desktop caller only when an explicit repair command requires it.
+7. **Reference admission:** candidate layouts such as timeline, swimlane, and quadrant are preferred only after the complete evidence checklist passes. Radar remains blocked until a real Vega-Lite adapter exists.
 
 ## Acceptance Gates
 
@@ -99,10 +101,11 @@ The reference taxonomy includes architecture, current-state, timeline, swimlane,
 - `npm run build`
 - `npm test -- --runInBand`
 - `npm run audit:render-host`
+- `src/tests/renderTargetAdapterRegistry.test.ts`
 - `npm run lint` (currently repository-baseline blocked; do not relabel this as a feature failure)
 - `git diff --check`
 - External consumer records must identify tool/version/input/output and must not be replaced by unit mocks.
 
 ## Verification Snapshot
 
-Fresh verification for this increment: 259 Jest suites passed, 2,263 tests passed, 1 skipped; TypeScript/esbuild build passed; VitePress 1.6.4 docs build passed; gallery check passed (10 entries); render-host audit passed; Circuitikz smoke passed with TeX Live 2023 `pdflatex` (6/6 PDFs, 0 errors/0 warnings); focused Drawnix text-layout and Circuitikz suites passed (58/58 and 71/71 tests); targeted ESLint passed with 0 errors and 23 existing warnings; and `git diff --check` passed. The full repository lint remains non-zero at 229 errors and 1,330 warnings, all outside the changed-file error set and tracked as pre-existing debt.
+Fresh verification for this increment: 260 Jest suites passed, 2,267 tests passed, 1 skipped; TypeScript/esbuild build passed; VitePress 1.6.4 docs build passed; gallery check passed (10 entries); render-host audit passed; Circuitikz smoke passed with TeX Live 2023 `pdflatex` (6/6 PDFs, 0 errors/0 warnings); focused Drawnix text-layout, target-adapter, and Circuitikz suites passed (58/58, 36/36, and 71/71 tests); targeted ESLint passed with 0 errors and 23 existing warnings; and `git diff --check` passed. The full repository lint remains non-zero at 229 errors and 1,330 warnings, all outside the changed-file error set and tracked as pre-existing debt.

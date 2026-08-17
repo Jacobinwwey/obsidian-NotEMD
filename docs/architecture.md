@@ -1,6 +1,6 @@
 # Notemd Architecture Overview
 
-> Updated: 2026-08-16
+> Updated: 2026-08-17
 
 ## System Architecture
 
@@ -218,7 +218,9 @@ The delivered ordering was correctness foundation, catalog/contract generation, 
 
 ### Target Descriptor And Gallery Pipeline
 
-`src/rendering/renderTargetCatalog.ts` is the single target descriptor. Each target owns its renderer ID, MIME type, raw-source extension, Vault extension, preview kind, export formats, consumer gate, and fallback policy. Preview/export path construction and persistence query this descriptor; renderer dispatch remains an explicit switch at the rendering boundary so unsupported target/intent combinations fail closed. The Vega-Lite exception is explicit: its preview modal consumes raw `.json`, while Vault generation wraps the same source in `.md`.
+`src/rendering/renderTargetCatalog.ts` is the single target descriptor. Each target owns its renderer ID, MIME type, raw-source extension, Vault extension, preview kind, export formats, consumer gate, and fallback policy. Preview/export path construction and persistence query this descriptor; preview/export and bundled render-host dispatch resolve keyed target adapters so unsupported target/intent combinations fail closed. The Vega-Lite exception is explicit: its preview modal consumes raw `.json`, while Vault generation wraps the same source in `.md`.
+
+Runtime target dispatch now uses `src/rendering/targetAdapterRegistry.ts` as the keyed registry primitive. `src/rendering/preview/previewTargetAdapterRegistry.ts` owns SVG preview/raster operations, while `src/rendering/runtime/renderHostTargetAdapterRegistry.ts` owns bundled render-host operations and error surfaces. Duplicate target registrations fail during module construction, and untrusted render-host payload targets fail closed. Webview markup remains a separate presentation contract in `renderFrame.ts` and `webview/page.ts`; it is not treated as renderer capability metadata.
 
 The capability manifest is a separate three-axis projection: `src/diagram/diagramCapabilityManifest.ts` joins semantic type, default/compatible targets, and fixture ownership, while the target descriptor owns artifact mechanics. `scripts/diagram-gallery-browser-entry.ts` imports the executable fixture catalog and production renderers; `scripts/generate-diagram-gallery.js` renders accessible SVG, rasterizes PNG at a fixed card size, writes `docs/assets/diagrams/manifest.json`, and fails closed on stale or invalid assets. This keeps selector previews, docs previews, and runtime fixtures on one evidence path.
 

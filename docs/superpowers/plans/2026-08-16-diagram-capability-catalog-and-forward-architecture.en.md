@@ -8,7 +8,7 @@ canonical_for:
   - diagram-rendering-forward-architecture
 supersedes: []
 superseded_by: null
-implementation_record: null
+implementation_record: docs/brainstorms/2026-08-16-mainline-diagram-architecture-progress-and-next-direction.md
 ---
 
 # Diagram Capability Catalog And Forward Architecture
@@ -25,18 +25,18 @@ These axes must not be collapsed into a single enum. The reference project in `r
 
 ## Current Baseline And Risks
 
-The current domain already has an executable ten-type catalog in `src/diagram/diagramTypeCatalog.ts` and one fixture per type in `src/diagram/examples/diagramExampleCatalog.ts`. The settings gallery can render those fixtures through the production renderer, but it only exposes a preview action and does not provide thumbnails in the generation workflow or a generated documentation gallery.
+The current domain has an executable ten-type catalog in `src/diagram/diagramTypeCatalog.ts` and one fixture per type in `src/diagram/examples/diagramExampleCatalog.ts`. The bullets below are the historical baseline captured before the convergence batch; they are not a list of unresolved current defects. Current status is tracked in the implementation record referenced above.
 
-The following defects must be resolved before expanding the selector:
+Historical boundary findings and current disposition:
 
-- `src/main.ts` writes sanitized and full settings in two consecutive `saveData` calls. The second write can re-persist provider credentials that were intended to remain device-local.
-- `src/diagram/diagramGenerationService.ts` can return the pre-retry `spec` or a target that no longer matches the retried artifact.
-- `editable-html-svg` returns HTML without `previewSvg`, while the README promises SVG/PNG/PDF export for it. This causes the preview and CLI export paths to fail closed.
-- Target-to-MIME, extension, preview, and export decisions are repeated in separate switches. `editable-html-svg` currently falls back to `.txt` in one save path and `.html` in another.
-- The LLM cache key omits endpoint, transport, sampling/reasoning settings, configuration revision, and tenant identity; the global `Map` is unbounded.
-- `OperationSchema = Record<string, unknown>` is documentation, not validation. Registry requirements and maintainer CLI arguments currently drift.
+- Settings persistence double-write: resolved; `src/main.ts` persists the sanitized syncable record once, with a regression gate for local-only credentials.
+- Retry/artifact authority: resolved; the retried spec and rendered artifact now travel together through the generation result contract.
+- Editable HTML/SVG preview: resolved; the renderer exposes `previewSvg`, and export tests cover the advertised formats.
+- Repeated target switches: partially resolved; target metadata and preview/export/render-host dispatch now use authoritative descriptors and keyed adapters. Target-specific webview presentation markup remains an explicit contract.
+- LLM cache identity and bounds: resolved; the cache uses a versioned credential-free fingerprint with endpoint/runtime fields plus TTL/LRU limits.
+- Operation schema drift: narrowed; runtime admission and result validation are executable, while `OperationSchema` remains a structural TypeScript record for compatibility and human-facing metadata.
 
-These are boundary defects, not cosmetic cleanup. Adding more visual types before fixing them increases the number of invalid combinations and makes backward compatibility harder.
+These were boundary defects rather than cosmetic cleanup. The remaining open items are consumer evidence, presentation-contract extraction, Drawnix geometry convergence, and the Circuitikz repair-loop decision; adding new visual types before those gates close would still increase compatibility debt.
 
 ## Target Contracts
 
@@ -175,13 +175,27 @@ Prefer implementing `timeline`, `swimlane`, and `quadrant` as new semantic/targe
 
 ### Phase 6: Convergence and release gates
 
-Execute the active Mermaid normalization plan after Phase 0 and catalog contracts. Then remove Drawnix geometry duplication, decide the fate of the unwired Circuitikz repair loop, and ratchet CI around `npm run build`, Jest, render-host audit, generated-gallery freshness, and `git diff --check`.
+Target dispatch convergence is now landed for preview/export and render-host through keyed adapters with duplicate-registration and unknown-payload fail-closed tests. Execute the active Mermaid normalization plan after Phase 0 and catalog contracts. Then remove Drawnix geometry duplication, decide the fate of the unwired Circuitikz repair loop, and ratchet CI around `npm run build`, Jest, render-host audit, generated-gallery freshness, and `git diff --check`.
 
 External gates remain separate from unit tests:
 
 - Draw.io: open the generated XML in diagrams.net.
 - Drawnix: open/import the real `.drawnix` file and inspect the filename-rooted tree.
 - Circuitikz: compile native TeX with the pinned toolchain.
+
+## Current Implementation Status (2026-08-17)
+
+| Phase | Status | Evidence / remaining boundary |
+|---|---|---|
+| 0. Correctness foundation | Complete | Sanitized settings persistence, authoritative retry artifacts, editable SVG preview, target descriptors, and bounded cache are covered by focused tests. |
+| 1. Three-axis catalog | Complete | Ten semantic types, eight targets, compatibility admission, fixture coverage, and stable IDs are executable. |
+| 2. Runtime contracts | Mostly complete | Input and result validation are runtime-enforced; structural `OperationSchema` and human-facing help metadata remain intentionally separate. |
+| 3. Deterministic preview gallery | Complete | Production fixtures generate the settings thumbnails and bilingual SVG/PNG docs gallery; `diagram:gallery:check` is the freshness gate. |
+| 4. Bilingual discovery | Complete for shipped scope | Support matrices link shipped examples; reference layouts remain explicitly planned. |
+| 5. Candidate admission | Gated | Timeline, swimlane, and quadrant are candidates only; each still needs a bounded semantic schema, renderer evidence, persistence behavior, and tests. |
+| 6. Convergence and release | In progress | Target adapters, Mermaid normalization, and Circuitikz template convergence are landed; external Draw.io/Drawnix evidence and remaining presentation/geometry gates are open. |
+
+This status table is the current decision record. The phase descriptions above remain the design rationale and acceptance criteria; they should not be read as proof that every listed task is still outstanding.
 
 ## Tradeoffs And Rejected Alternatives
 

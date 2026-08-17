@@ -1,27 +1,20 @@
 import { App, TFile } from 'obsidian';
 import { RenderArtifact } from '../types';
 import { getRenderTargetDescriptor } from '../renderTargetCatalog';
-import { RenderWebviewTheme } from '../theme';
 import { ensureSemanticFigureSvgStandaloneStyles } from '../renderers/editableHtmlSvgRenderer';
-import { renderJsonCanvasArtifactSvg } from './canvasPreview';
 import {
-    renderMermaidArtifactSvg,
-    renderMermaidArtifactSvgForRasterExport,
-    MermaidPreviewDeps
-} from './mermaidPreview';
+    getPreviewTargetAdapter,
+    PreviewTargetAdapter,
+    PreviewTargetAdapterContext
+} from './previewTargetAdapterRegistry';
 import { buildPdfFromSvg, SvgPdfExportDeps } from './pdfPreview';
 import {
     PreviewPngRasterDeps,
     rasterizeSvgToPngArrayBuffer,
     resolvePreviewExportPpi
 } from './pngPreview';
-import { renderVegaLiteArtifactSvg, VegaLitePreviewDeps } from './vegaLitePreview';
 
-export interface PreviewSvgRenderDeps {
-    mermaid?: MermaidPreviewDeps;
-    vegaLiteDepsLoader?: () => Promise<VegaLitePreviewDeps>;
-    theme?: RenderWebviewTheme;
-}
+export type PreviewSvgRenderDeps = PreviewTargetAdapterContext;
 
 export interface PreviewPngExportDeps extends PreviewSvgRenderDeps {
     pngRaster?: PreviewPngRasterDeps;
@@ -111,16 +104,10 @@ function composePreviewSvgCanvases(canvases: readonly PreviewSvgCanvas[]): strin
     return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" role="img">${nestedSvgs}</svg>`;
 }
 
-type MermaidSvgRenderer = (
-    artifact: RenderArtifact,
-    deps?: MermaidPreviewDeps,
-    theme?: RenderWebviewTheme
-) => Promise<string>;
-
 async function renderPreviewArtifactSvgWithRenderer(
     artifact: RenderArtifact,
     deps: PreviewSvgRenderDeps,
-    mermaidRenderer: MermaidSvgRenderer
+    renderTarget: (adapter: PreviewTargetAdapter, artifact: RenderArtifact, deps: PreviewSvgRenderDeps) => Promise<string>
 ): Promise<string> {
     if (artifact.previewSvg?.content?.trim()) {
         return ensureSemanticFigureSvgStandaloneStyles(artifact.previewSvg.content);
@@ -129,36 +116,40 @@ async function renderPreviewArtifactSvgWithRenderer(
     if (artifact.previewPanels && artifact.previewPanels.length > 0) {
         const panelSvgs: PreviewSvgCanvas[] = [];
         for (const panel of artifact.previewPanels) {
-            const svg = await renderPreviewArtifactSvgWithRenderer(panel.artifact, deps, mermaidRenderer);
+            const svg = await renderPreviewArtifactSvgWithRenderer(panel.artifact, deps, renderTarget);
             panelSvgs.push(parsePreviewSvgCanvas(svg));
         }
         return ensureSemanticFigureSvgStandaloneStyles(composePreviewSvgCanvases(panelSvgs));
     }
 
-    switch (artifact.target) {
-        case 'mermaid':
-            return mermaidRenderer(artifact, deps.mermaid, deps.theme);
-        case 'json-canvas':
-            return renderJsonCanvasArtifactSvg(artifact, deps.theme);
-        case 'vega-lite':
-            return renderVegaLiteArtifactSvg(artifact, deps.vegaLiteDepsLoader, deps.theme);
-        default:
-            throw new Error(`Preview SVG export is not supported for target "${artifact.target}".`);
+    const adapter = getPreviewTargetAdapter(artifact.target);
+    if (!adapter) {
+        throw new Error(`Preview SVG export is not supported for target "${artifact.target}".`);
     }
+
+    return renderTarget(adapter, artifact, deps);
 }
 
 export async function renderPreviewArtifactSvg(
     artifact: RenderArtifact,
     deps: PreviewSvgRenderDeps = {}
 ): Promise<string> {
-    return renderPreviewArtifactSvgWithRenderer(artifact, deps, renderMermaidArtifactSvg);
+    return renderPreviewArtifactSvgWithRenderer(
+        artifact,
+        deps,
+        (adapter, currentArtifact, context) => adapter.renderSvg(currentArtifact, context)
+    );
 }
 
 export async function renderPreviewArtifactSvgForRasterExport(
     artifact: RenderArtifact,
     deps: PreviewSvgRenderDeps = {}
 ): Promise<string> {
-    return renderPreviewArtifactSvgWithRenderer(artifact, deps, renderMermaidArtifactSvgForRasterExport);
+    return renderPreviewArtifactSvgWithRenderer(
+        artifact,
+        deps,
+        (adapter, currentArtifact, context) => adapter.renderSvgForRasterExport(currentArtifact, context)
+    );
 }
 
 export function buildDiagramPreviewExportPath(sourcePath: string): string {

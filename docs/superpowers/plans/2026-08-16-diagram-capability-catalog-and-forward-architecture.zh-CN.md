@@ -8,7 +8,7 @@ canonical_for:
   - diagram-rendering-forward-architecture
 supersedes: []
 superseded_by: null
-implementation_record: null
+implementation_record: docs/brainstorms/2026-08-16-mainline-diagram-architecture-progress-and-next-direction.zh-CN.md
 ---
 
 # 图形能力目录与向前兼容架构推进计划
@@ -25,18 +25,18 @@ Notemd 应暴露一个由可执行运行时定义派生的能力目录。目录�
 
 ## 当前基线与风险
 
-当前代码已经有 `src/diagram/diagramTypeCatalog.ts` 中的 10 类可执行目录，以及 `src/diagram/examples/diagramExampleCatalog.ts` 中每类一个 fixture。设置页 gallery 可以通过生产渲染器执行预览，但当前只有预览按钮，没有在生成流程中的缩略图，也没有生成式文档 gallery。
+当前代码已经有 `src/diagram/diagramTypeCatalog.ts` 中的 10 类可执行目录，以及 `src/diagram/examples/diagramExampleCatalog.ts` 中每类一个 fixture。下面的条目是收敛批之前记录的历史基线，不代表当前仍未解决的问题；当前状态以顶部 implementation record 指向的进度审计为准。
 
-在扩展选择器之前必须先解决这些边界缺陷：
+历史边界问题与当前处置：
 
-- `src/main.ts` 连续两次 `saveData`。第二次写入可能把本应只保存在设备上的 provider 密钥重新写入 `data.json`。
-- `src/diagram/diagramGenerationService.ts` 重试后可能仍返回旧 `spec`，或出现 target 与产物不一致。
-- `editable-html-svg` 返回 HTML 却没有 `previewSvg`，而 README 承诺它支持 SVG/PNG/PDF 导出，导致预览和 CLI 导出 fail-closed。
-- target 到 MIME、扩展名、预览和导出的决策分散在多个 switch 中；某些保存路径会把 `editable-html-svg` 回退为 `.txt`，另一路径却使用 `.html`。
-- LLM cache key 缺少 endpoint、transport、采样/推理参数、配置版本和租户身份；全局 `Map` 也没有容量上限。
-- `OperationSchema = Record<string, unknown>` 只是文档，不是运行时校验；registry 要求与 maintainer CLI 参数已经漂移。
+- 设置双写：已解决；`src/main.ts` 现在只持久化经过清洗的 syncable record，并有回归门禁保证 local-only 凭据不落盘。
+- 重试与 artifact 真值：已解决；重试后的 spec 与渲染产物通过同一 generation result contract 传递。
+- Editable HTML/SVG 预览：已解决；renderer 提供 `previewSvg`，导出测试覆盖 README 宣称的格式。
+- 重复 target switch：部分解决；target metadata 与 preview/export/render-host dispatch 已收敛到权威 descriptor 和 keyed adapter。target 专属 webview presentation markup 仍是显式契约。
+- LLM cache 身份与边界：已解决；cache 使用带 endpoint/runtime 字段的版本化、无凭据指纹，并有 TTL/LRU 上限。
+- Operation schema 漂移：已收窄；运行时准入与结果校验已经可执行，`OperationSchema` 仍保留为结构化 TypeScript record 以兼容人工 metadata。
 
-这些是边界契约问题，不是表面清理。若先添加更多视觉类型，会把非法组合数量和兼容迁移成本一起放大。
+这些问题是边界契约问题而非表面清理。当前剩余开放项是 consumer 证据、presentation 契约抽取、Drawnix 几何收敛和 Circuitikz repair loop 去留；在这些门禁关闭前继续增加视觉类型仍会扩大兼容性债务。
 
 ## 目标契约
 
@@ -175,13 +175,27 @@ Phase 2 的剩余工作被刻意收窄为两项：在运行时边界校验 opera
 
 ### Phase 6：收敛与发布门禁
 
-完成 Phase 0 和目录契约后，再执行 active Mermaid normalization 计划。随后消除 Drawnix 几何重复，实现或删除未接入的 Circuitikz repair loop，并将 CI 门禁收紧为 build、Jest、render-host audit、gallery freshness 和 `git diff --check`。
+preview/export 与 render-host 的 target dispatch 已通过 keyed adapter 收敛，并由重复注册与未知 payload fail-closed 测试保护。完成 Phase 0 和目录契约后，再执行 active Mermaid normalization 计划。随后消除 Drawnix 几何重复，实现或删除未接入的 Circuitikz repair loop，并将 CI 门禁收紧为 build、Jest、render-host audit、gallery freshness 和 `git diff --check`。
 
 外部门禁必须独立存在：
 
 - Draw.io：在 diagrams.net 打开生成 XML。
 - Drawnix：打开/导入真实 `.drawnix`，检查文件名根节点树。
 - Circuitikz：用固定工具链编译原生 TeX。
+
+## 当前实现状态（2026-08-17）
+
+| 阶段 | 状态 | 证据 / 剩余边界 |
+|---|---|---|
+| 0. 正确性基础 | 完成 | 设置清洗持久化、重试 artifact 真值、editable SVG 预览、target descriptor 和有界 cache 均有定向测试。 |
+| 1. 三轴目录 | 完成 | 10 个语义类型、8 个 target、兼容性准入、fixture 覆盖和稳定 ID 均已可执行。 |
+| 2. 运行时契约 | 基本完成 | 输入与结果校验已在运行时强制执行；结构化 `OperationSchema` 与人工可读 help metadata 仍有意分离。 |
+| 3. 确定性预览 gallery | 完成 | 生产 fixture 同时生成设置页缩略图与双语 SVG/PNG 文档 gallery；`diagram:gallery:check` 是新鲜度门禁。 |
+| 4. 双语发现入口 | 已发布范围完成 | 支持矩阵已链接已发布示例；参考布局仍明确标为计划中。 |
+| 5. 候选准入 | 有门禁 | timeline、swimlane、quadrant 仍只是候选；每类都还需要受限语义 schema、renderer 证据、持久化行为和测试。 |
+| 6. 收敛与发布 | 进行中 | target adapter、Mermaid 规范化和 Circuitikz 模板收敛已落地；Draw.io/Drawnix 外部证据及 presentation/geometry 剩余门禁仍开放。 |
+
+该表是当前决策记录。上面的阶段描述保留设计理由与验收条件，不应再被理解为所有列出的任务都尚未实施。
 
 ## 权衡与明确拒绝
 
