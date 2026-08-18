@@ -73,6 +73,9 @@ export function assertOperationSchema(schema: OperationSchema, path = '$'): void
         if (declaredType !== 'object') {
             throw new Error(`Invalid operation schema at ${path}: required is only valid for object schemas.`);
         }
+        if (required.length > 0 && !isRecord(schema.properties)) {
+            throw new Error(`Invalid operation schema at ${path}: required fields need object properties.`);
+        }
     }
 
     if (schema.enum !== undefined) {

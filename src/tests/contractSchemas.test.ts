@@ -37,6 +37,11 @@ describe('operation contract schemas', () => {
             required: ['sourcePath'],
             properties: {}
         })).toThrow('required field "sourcePath" must be declared in properties');
+
+        expect(() => assertOperationSchema({
+            type: 'object',
+            required: ['sourcePath']
+        })).toThrow('required fields need object properties');
     });
 
     test('rejects duplicate required fields instead of silently normalizing them', () => {
