@@ -134,21 +134,21 @@ Roadmap "Recommended Next Batch" (convergence, not new targets) is still the cor
 
 Implemented: projection, reserved-lane routing with an internal grid fallback (verified live: `drawnixMindMapProjection.ts` calls `routeDrawnixRelationThroughReservedLane()` from `drawnixRelationRouter.ts`), source coverage, and the single-root implementation record (2026-08-14). Documented behavior in `architecture.md:203` is accurate.
 
-Gaps (audit): remaining measurement/layout helper duplication within the current projection path; compatibility-only `routeDrawnixCrossRootRelation` engine; deprecated `mergeDrawnixSourceCoverage` alias. Shared rectangle/polyline geometry is already centralized. These are the next Drawnix convergence slice after this plan.
+Gaps (audit, updated 2026-08-18): relation-label measurement/layout duplication in the current projection path is closed by `drawnixRelationLabelLayout.ts`; projection and lane reservation now consume one wrapping/size contract. The compatibility-only `routeDrawnixCrossRootRelation` engine and deprecated `mergeDrawnixSourceCoverage` alias remain intentionally source-compatible until downstream migration evidence exists. Shared rectangle/polyline and text geometry are centralized. Real Drawnix application interoperability remains an external evidence gate.
 
 ### vs circuitikz Figure Generation Roadmap
 
-Phases A-F: A documented; B/C constrained prototype done (circuitSpec + exporter + golden templates); D render feedback wired via `runCircuitikzCompile` (CLI, corrected); E repair loop unwired (opt-in boundary with no entry; CLI implements acceptance itself); F managed desktop environment done. Gaps: 6x template/validation near-copies (`circuitikzExporter.ts:205-778`), byte-identical `extendedPortX`/`dualInputPortX` (`:45-50`), hard-coded `(7.2,1.2) node[right]` in the buffer template, and a decision on `runCircuitikzRepairLoop` (wire or delete, then fix the doc claim).
+Phases A-F: A documented; B/C constrained prototype done (circuitSpec + exporter + golden templates); D render feedback wired via `runCircuitikzCompile` (CLI, corrected); E is an explicit one-attempt maintainer-only acceptance boundary; F managed desktop environment done. The byte-identical `dualInputPortX` helper and hard-coded buffer port literals are closed: NAND/NOR use `extendedPortX`, while `bufferPortX` names the wider right gutter and drives both buffer ports. The remaining template-specific validation/render code is intentionally explicit because each golden family has different topology and diagnostics; collapsing it into a generic mode switch would weaken reviewability and golden-output ownership.
 
 ### vs Diagram Platform Robustness And Settings Integrity Plan (2026-08-08)
 
-Phases 0-6 implemented (1.9.5). The semantic/geometry/delivery contracts are documented; the current projection still has helper duplication, but there is no second presentation delivery contract. No other contract violations found in the audit.
+Phases 0-6 implemented (1.9.5). The semantic/geometry/delivery contracts are documented; Drawnix relation-label measurement is now centralized, and there is no second presentation delivery contract. No other contract violations found in the audit.
 
 ## 10. Follow-up Direction
 
 1. Record real external consumer evidence where tooling exists; do not convert fixture or serializer evidence into an interoperability claim.
-2. Drawnix convergence slice: prove and extract any remaining shared measurement/layout logic for the native projection; rectangle/polyline and text measurement/wrapping contracts are already centralized. Delete the compatibility-only router engine and deprecated alias only after call-site and migration evidence.
-3. circuitikz: shared document/label template plumbing is now parameterized; decide `runCircuitikzRepairLoop` fate and sync docs with that decision.
+2. Drawnix convergence slice: relation-label measurement is now centralized in `drawnixRelationLabelLayout.ts`; keep the old router engine and source-coverage alias only as compatibility shims until call-site and migration evidence supports removal. Do not infer real Drawnix application interoperability from the Plait public-API gate.
+3. circuitikz: shared document/label template plumbing and port-coordinate helpers are parameterized; keep `runCircuitikzRepairLoop` as a maintainer-only acceptance SDK. A future caller must be an explicit repair command with persisted acceptance evidence, not a silent normal-generation fallback.
 4. Repo-wide helper convergence (escapeHtml x10, error-message ternary x94, FNV-1a x5, isRecord x6, slugify x3, enum guards x4, indexOf-dedupe x7) as the closing sweep of the convergence batch, with the roadmap's support-matrix discipline.
 5. Keep the roadmap's rule: convergence before new targets.
 
@@ -170,6 +170,10 @@ The remaining gap is intentionally narrower than the original audit: external co
 The Drawnix production boundary now has a canonical relation-router module and a compatibility-only old path. `drawnixGeometry.ts` owns rectangle inflation, strict overlap semantics, and path-length interpolation so SVG projection and relation routing cannot drift on those primitives. The legacy cross-root router remains exported only for source compatibility and focused tests; production routing is reserved-lane-first and owns native label placement.
 
 The Circuitikz exporter now shares one standalone-document wrapper and one component-label lookup helper across all six golden renderers. This is a structural refactor with an exact-output contract: topology, voltage conventions, layout hints, and golden fixtures remain unchanged. The repair loop remains a maintainer-only acceptance boundary.
+
+### Convergence follow-through (2026-08-18)
+
+The Drawnix projection now imports `measureDrawnixRelationLabel()` from `drawnixRelationLabelLayout.ts` for both lane reservation and native label metadata. This closes the last proven measurement duplication without merging the projection's collision policy into the router. The Circuitikz exporter uses one extended-port helper for common/dual-input families and a named buffer-port helper for its intentionally wider right gutter. These are source-level convergence changes; deterministic golden output and topology validation remain unchanged.
 
 ### Candidate admission after convergence (2026-08-18)
 

@@ -193,3 +193,4 @@ SVG geometry smoke 也覆盖 leading-dot decimals 与 explicit plus signs 的 SV
 common-source golden template 现在拆分为独立且正确终止的绘制路径，采用更轻的 `0.5pt` 线宽和较小正文字号，并移除冗余源极标签；在不改变电气拓扑的前提下消除早期的路径拥挤与标签遮挡。
 
 Phase D 现在提供可操作的编译与产物诊断，包括 SVG 几何/遮挡以及 PNG 非空、裁剪和密度检查。Phase E 已具备有次数上限、拓扑保持的执行闭环，但启用仍是显式且依赖注入的：Notemd 不会捆绑 LaTeX，不会自动安装或发现渲染器，也不会在缺少新鲜编译与 render-smoke 证据时采用候选。path-only glyph OCR、精确像素级遮挡、完整 SVG path 覆盖和浏览器级文字布局仍是后续证据增强项。
+端口坐标的收敛现在是显式的：NAND/NOR 双输入 family 复用 `extendedPortX`，`bufferPortX` 负责 buffer 输入与输出端口有意更宽的右侧 gutter。六个 golden renderer 仍保持分开，因为各自拓扑相关的布局与诊断比通用 mode switch 更容易审查。

@@ -29,7 +29,7 @@ The correct next move is convergence. Adding more visual types before closing co
 | Render targets | 8 registered targets; target identity is separate from export format | `src/rendering/rendererRegistry.ts`, `src/rendering/renderTargetCatalog.ts` |
 | Export formats | SVG/PNG/PDF where the target supports them; editable HTML/SVG carries `previewSvg` | target catalog and renderer integration tests |
 | Discoverability | Settings selector shows deterministic thumbnails and a direct “use this type” action | `docs/assets/diagrams/manifest.json`, `diagramExamplePreview.test.ts` |
-| Static gallery | 14 SVG/PNG pairs generated from production fixtures; stale assets fail the check | `scripts/generate-diagram-gallery.js`, `npm run diagram:gallery:check` |
+| Static gallery | 15 SVG/PNG pairs generated from production fixtures; stale assets fail the check | `scripts/generate-diagram-gallery.js`, `npm run diagram:gallery:check` |
 | Drawnix | Filename-rooted native tree, `.drawnix` plus SVG companion and Markdown wrapper | Drawnix implementation record, export tests, and `npm run diagram:consumer:drawnix` |
 | Circuitikz | Constrained native templates and CLI compiler path; six golden fixtures compile under TeX Live 2023 | `src/diagram/adapters/circuitikz`, `scripts/export-circuitikz.js`, smoke report |
 | Operation contracts | Schema shape admission, maintainer input validation, runtime result validation, and help/schema field derivation are now executable | `src/operations/contractSchemas.ts`, `src/operations/maintainerCliContractMetadata.json`, bridge tests |
@@ -67,7 +67,7 @@ The correct next move is convergence. Adding more visual types before closing co
 | Axis | Reference project | Notemd current truth | Engineering decision |
 |---|---|---|---|
 | Semantic selection | Pattern pages map to visual layouts | `DiagramIntent` routes to a typed catalog | Preserve intent-first routing |
-| Visual taxonomy | 27 layout grammars | 14 executable semantic types | Admit candidates only through evidence gates |
+| Visual taxonomy | 27 layout grammars | 15 executable semantic types | Admit candidates only through evidence gates |
 | Artifact/export | Self-contained HTML/SVG/PNG examples | 8 targets and independently declared export capabilities | Keep target and export orthogonal |
 | Preview | Example HTML assets | Production renderer fixture thumbnails in settings and docs | Generate both from the same fixture |
 | Governance | Type references and complexity budgets | Versioned capability/target manifests plus tests | Treat manifests and tests as the contract |
@@ -82,7 +82,7 @@ The reference taxonomy still supplies architecture, current-state, loop, nested,
 | One executable source for operation contracts | Registry schemas are validated by a registry-independent runtime and exported into CLI contracts | Maintainer host metadata is intentionally separate from host-neutral schemas; a generated pure-data catalog is still a future migration |
 | Reference layouts must have real semantics, not aliases | Timeline, swimlane, quadrant, and radar have bounded payloads, adapters, fixtures, previews, and tests | Remaining reference layouts stay gated until they have equivalent renderer and consumer evidence |
 | External interoperability must be proven by a consumer | Plait public-API consumer and pinned Circuitikz compiler gates pass | Draw.io and a real Drawnix application are unavailable, so application-level compatibility is not claimed |
-| Documentation must expose support and previews | Manifest-driven bilingual gallery contains 14 production SVG/PNG pairs, including radar | New types must keep the gallery freshness gate and bilingual row in the same change |
+| Documentation must expose support and previews | Manifest-driven bilingual gallery contains 15 production SVG/PNG pairs, including radar and org chart | New types must keep the gallery freshness gate and bilingual row in the same change |
 
 ## Risk Register And Tradeoffs
 
@@ -108,8 +108,14 @@ The reference taxonomy still supplies architecture, current-state, loop, nested,
 2. **Mermaid Phase 3: completed.** Shared scanning, canonical fence formatting, and plugin validation-runtime initialization are converged. Keep preview webview theme initialization as a separate runtime contract.
 3. **Target adapter dispatch: completed.** Preview/export, render-host, and webview presentation now use keyed target contracts; keep the source-only fallback explicit for targets without an embedded runtime.
 4. **Consumer evidence:** run real Draw.io/Drawnix/Circuitikz gates where tooling exists; record unavailable tools rather than claiming interoperability.
-5. **Drawnix convergence:** the production source-coverage and relation-router names are canonical; the old source-coverage export and router module are compatibility-only. Shared rectangle/polyline and text measurement/wrapping primitives are centralized, and the standalone Plait consumer gate proves the production fixture crosses the public consumer boundary. Real Drawnix desktop/app import remains a separate external gate.
-6. **Circuitikz convergence:** the six golden renderers share the standalone-document and component-label helpers while preserving deterministic output. Keep `runCircuitikzRepairLoop()` as a maintainer-only acceptance SDK boundary; normal generation remains deterministic and does not invoke an LLM repair loop. Wire a real CLI/desktop caller only as a separately authorized repair command with fresh compile/render evidence.
+5. **Drawnix convergence:** the production source-coverage and relation-router names are canonical; the old source-coverage export and router module are compatibility-only. Shared rectangle/polyline, text measurement/wrapping, and relation-label measurement primitives are centralized, and the standalone Plait consumer gate proves the production fixture crosses the public consumer boundary. Real Drawnix desktop/app import remains a separate external gate.
+6. **Circuitikz convergence:** the six golden renderers share the standalone-document and component-label helpers, and common/dual/buffer port coordinates are explicit layout helpers while preserving deterministic output. Keep `runCircuitikzRepairLoop()` as a maintainer-only acceptance SDK boundary; normal generation remains deterministic and does not invoke an LLM repair loop. Wire a real CLI/desktop caller only as a separately authorized repair command with fresh compile/render evidence.
+
+### Convergence follow-through (2026-08-18)
+
+- `drawnixRelationLabelLayout.ts` is now the canonical relation-label measurement boundary. Projection and lane reservation both consume the same deterministic wrapping, width, height, and line-height contract; the SVG/native geometry remains byte-stable and has focused regression coverage.
+- Circuitikz no longer carries a byte-identical `dualInputPortX()` helper. NAND/NOR inputs use the shared extended-port rule, while the buffer's intentionally wider right gutter is named `bufferPortX()` and drives both input and output placement. This removes hidden coordinate coupling without pretending the six golden templates share one topology.
+- `runCircuitikzRepairLoop()` is explicitly retained as a maintainer-only, one-attempt acceptance SDK. No normal generation path invokes it; adoption still requires topology equality plus fresh compile/render evidence and an explicit caller.
 7. **Reference admission:** timeline, swimlane, quadrant, and org chart are shipped as bounded Mermaid types with deterministic fixtures and parser-backed gallery evidence; Radar is shipped as a bounded Vega-Lite type. All other reference layouts remain gated.
 8. **Operation contract convergence:** keep the registry-independent schema runtime and registry admission as the fail-closed boundary. Only migrate declarations into generated JSON when the generator can preserve host/core contract separation, human examples, and stable unknown-field behavior.
 

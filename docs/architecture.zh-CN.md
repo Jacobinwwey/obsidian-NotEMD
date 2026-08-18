@@ -241,6 +241,8 @@ DiagramSpec
   -> .drawnix + SVG companion + Markdown wrapper
 ```
 
+关系标签的换行与宽高现在统一由 `drawnixRelationLabelLayout.ts` 提供；lane reservation 与 native label metadata 不会在换行或行高上静默分叉。碰撞策略仍由 projection 持有，因为它依赖受保护的 header 与已占用标签状态；router 只负责避障接入。
+
 `mergeDrawnixSourceCoverage()` 仅作为旧 maintainer 脚本和测试的废弃兼容别名保留；生产生成路径使用 `enrichDrawnixSourceCoverage()`。
 
 文档根节点使用去掉扩展名后的源文件名。标题结构保留为嵌套分支；模型生成但未匹配到源结构的分支会进入 `Additional concepts`，不会被删除。跨分支关系保留为原生 `arrow-line`。两阶段分配器根据实测标签尺寸预留外侧通道，先尝试确定性的直接接入，再进入 grid route。只有所有水平接入组合都被阻断时，grid 才会从顶部和底部端口重试，因此标签的预留几何不变，同时复杂分支仍可沿外侧通道离开。grid 坐标会保留有限端点的精确值；量化端点坐标会让合法的亚像素节点边界在路由图中消失。没有固定的层级、节点或关系数量限制。

@@ -2,8 +2,7 @@ import { DiagramEdge, DiagramNode, DiagramSpec } from '../../types';
 import { routeDrawnixRelationThroughReservedLane } from './drawnixRelationRouter';
 import type {
     DrawnixCrossRootRouteObstacle,
-    DrawnixCrossRootRouteStrategy,
-    DrawnixRelationLabelSize
+    DrawnixCrossRootRouteStrategy
 } from './drawnixRelationRouter';
 import {
     assignDrawnixRelationLaneGeometry,
@@ -17,6 +16,9 @@ import {
 } from './drawnixGeometry';
 import type { DrawnixPoint, DrawnixRect } from './drawnixGeometry';
 import { measureDrawnixText, wrapDrawnixText } from './drawnixTextLayout';
+import {
+    measureDrawnixRelationLabel
+} from './drawnixRelationLabelLayout';
 
 // Keep the historical projection export stable while geometry owns the primitive.
 export type { DrawnixPoint } from './drawnixGeometry';
@@ -183,10 +185,6 @@ const ROOT_LINE_HEIGHT = 22;
 const NODE_MIN_HEIGHT = 56;
 const ROOT_MIN_HEIGHT = 68;
 const MAX_TEXT_LINE_WIDTH = MAX_NODE_WIDTH - NODE_HORIZONTAL_PADDING;
-const RELATION_LABEL_MAX_TEXT_WIDTH = 264;
-const RELATION_LABEL_HORIZONTAL_PADDING = 12;
-const RELATION_LABEL_VERTICAL_PADDING = 8;
-const RELATION_LABEL_LINE_HEIGHT = 16;
 const RELATION_LABEL_NODE_CLEARANCE = 10;
 const RELATION_LABEL_GAP = 12;
 
@@ -495,12 +493,12 @@ function createCrossRelations(
             throw new Error(`Drawnix mind-map relationship ${index + 1} has no reserved relation lane.`);
         }
         const label = normalizedText(edge.label, normalizedText(edge.relation, '')) || undefined;
-        const labelMetrics = label ? relationLabelMetrics(label) : undefined;
+        const labelMetrics = label ? measureDrawnixRelationLabel(label) : undefined;
         const labelLayout = labelMetrics && lane.labelBounds
             ? {
                 ...lane.labelBounds,
                 lines: labelMetrics.lines,
-                lineHeight: RELATION_LABEL_LINE_HEIGHT
+                lineHeight: labelMetrics.lineHeight
             }
             : undefined;
         if (labelMetrics && !labelLayout) {
@@ -535,24 +533,6 @@ function createCrossRelations(
             nativeTextPosition: route.nativeTextPosition
         };
     });
-}
-
-interface RelationLabelMetrics extends DrawnixRelationLabelSize {
-    lines: string[];
-}
-
-function relationLabelMetrics(label: string): RelationLabelMetrics {
-    const lines = wrapDrawnixText(label, RELATION_LABEL_MAX_TEXT_WIDTH);
-    const largestLineWidth = Math.max(...lines.map(measureDrawnixText));
-    const width = Math.max(
-        96,
-        Math.min(
-            RELATION_LABEL_MAX_TEXT_WIDTH + RELATION_LABEL_HORIZONTAL_PADDING * 2,
-            largestLineWidth + RELATION_LABEL_HORIZONTAL_PADDING * 2
-        )
-    );
-    const height = lines.length * RELATION_LABEL_LINE_HEIGHT + RELATION_LABEL_VERTICAL_PADDING * 2;
-    return { lines, width, height };
 }
 
 function inflateLabelObstacle(
@@ -800,7 +780,7 @@ export function buildDrawnixMindMapProjection(spec: DiagramSpec): DrawnixMindMap
         const sourceId = edge.from.trim();
         const targetId = edge.to.trim();
         const label = normalizedText(edge.label, normalizedText(edge.relation, '')) || undefined;
-        const metrics = label ? relationLabelMetrics(label) : undefined;
+        const metrics = label ? measureDrawnixRelationLabel(label) : undefined;
         return {
             relationId: crossRelationId(index, sourceId, targetId),
             sourceId,

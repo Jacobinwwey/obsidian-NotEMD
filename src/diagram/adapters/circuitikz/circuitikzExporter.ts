@@ -84,8 +84,9 @@ function extendedPortX(side: 'left' | 'right'): string {
     return side === 'left' ? '0.8' : '5.2';
 }
 
-function dualInputPortX(side: 'left' | 'right'): string {
-    return side === 'left' ? '0.8' : '5.2';
+/** Buffer stages use a wider right-side gutter for the long input leg. */
+function bufferPortX(side: 'left' | 'right'): string {
+    return side === 'left' ? '0.8' : '7.2';
 }
 
 function requiredNetsForCircuitKind(circuitKind: string): string[] {
@@ -580,19 +581,20 @@ function renderCmosBufferTemplate(spec: CircuitSpec): string {
     const mn2Label = componentLabel(spec, 'MN2', '$M_{N2}$');
     const inputSide = layoutSide(spec.layoutHints?.inputSide, 'left');
     const outputSide = layoutSide(spec.layoutHints?.outputSide, 'right');
-    const outputPortX = outputSide === 'right' ? '7.2' : commonPortX(outputSide);
+    const inputPortX = bufferPortX(inputSide);
+    const outputPortX = bufferPortX(outputSide);
     const inputRoute = inputSide === 'left'
         ? `  (MP1.G) to [short] (1.5,3.5)
   (MN1.G) to [short] (1.5,2.0)
   (1.5,3.5) to [short] (1.5,2.0)
-  to [short, -o] (0.8,2.75)
+  to [short, -o] (${inputPortX},2.75)
   node[left]{$v_{in}$};`
         : `  (MP1.G) to [short] (1.5,3.5)
   (MN1.G) to [short] (1.5,2.0)
   (1.5,3.5) to [short] (1.5,2.0)
   (1.5,2.75) to [short] (1.5,1.2)
-  to [short, -o] (7.2,1.2)
-  node[right]{$v_{in}$};`;
+  to [short, -o] (${inputPortX},1.2)
+  node[${inputSide}]{$v_{in}$};`;
 
     return renderCircuitikzDocument(spec, `
 \\draw
@@ -670,23 +672,23 @@ function renderCmosNand2Template(spec: CircuitSpec): string {
         ? `  (MPA.G) to [short] (1.7,4.2)
   (MNA.G) to [short] (1.7,2.7)
   (1.7,4.2) to [short] (1.7,2.7)
-  to [short, -o] (${dualInputPortX(inputSide)},3.45)
+  to [short, -o] (${extendedPortX(inputSide)},3.45)
   node[left]{$v_A$}
   (MPB.G) to [short] (1.3,4.2)
   (MNB.G) to [short] (1.3,1.8)
   (1.3,4.2) to [short] (1.3,1.8)
-  to [short, -o] (${dualInputPortX(inputSide)},2.7)
+  to [short, -o] (${extendedPortX(inputSide)},2.7)
   node[left]{$v_B$};`
         : `  (MPA.G) to [short] (4.1,4.2)
   (MNA.G) to [short] (4.1,2.7)
   (4.1,4.2) to [short] (4.1,2.7)
   to [short] (4.5,2.7)
-  to [short, -o] (${dualInputPortX(inputSide)},4.15)
+  to [short, -o] (${extendedPortX(inputSide)},4.15)
   node[right]{$v_A$}
   (MPB.G) to [short] (4.5,4.2)
   (MNB.G) to [short] (4.5,1.8)
   (4.5,4.2) to [short] (4.5,1.8)
-  to [short, -o] (${dualInputPortX(inputSide)},1.85)
+  to [short, -o] (${extendedPortX(inputSide)},1.85)
   node[right]{$v_B$};`;
 
     return renderCircuitikzDocument(spec, `
@@ -725,23 +727,23 @@ function renderCmosNor2Template(spec: CircuitSpec): string {
         ? `  (MPA.G) to [short] (1.7,4.35)
   (MNA.G) to [short] (1.7,1.95)
   (1.7,4.35) to [short] (1.7,1.95)
-  to [short, -o] (${dualInputPortX(inputSide)},4.35)
+  to [short, -o] (${extendedPortX(inputSide)},4.35)
   node[left]{$v_A$}
   (MPB.G) to [short] (1.3,3.35)
   (MNB.G) to [short] (1.3,1.45)
   (1.3,3.35) to [short] (1.3,1.45)
-  to [short, -o] (${dualInputPortX(inputSide)},1.95)
+  to [short, -o] (${extendedPortX(inputSide)},1.95)
   node[left]{$v_B$};`
         : `  (MPA.G) to [short] (4.1,4.35)
   (MNA.G) to [short] (4.1,1.95)
   (4.1,4.35) to [short] (4.1,1.95)
   to [short] (4.5,1.95)
-  to [short, -o] (${dualInputPortX(inputSide)},4.35)
+  to [short, -o] (${extendedPortX(inputSide)},4.35)
   node[right]{$v_A$}
   (MPB.G) to [short] (4.5,3.35)
   (MNB.G) to [short] (4.5,1.45)
   (4.5,3.35) to [short] (4.5,1.45)
-  to [short, -o] (${dualInputPortX(inputSide)},1.95)
+  to [short, -o] (${extendedPortX(inputSide)},1.95)
   node[right]{$v_B$};`;
 
     return renderCircuitikzDocument(spec, `

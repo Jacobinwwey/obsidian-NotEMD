@@ -29,7 +29,7 @@ implementation_record: src/tests/mermaidNormalizationConvergence.test.ts
 | 渲染目标 | 8 个 registry target；target 身份与导出格式分离 | `src/rendering/rendererRegistry.ts`、`src/rendering/renderTargetCatalog.ts` |
 | 导出格式 | target 按能力提供 SVG/PNG/PDF；editable HTML/SVG 携带 `previewSvg` | target catalog 与 renderer 集成测试 |
 | 可发现性 | 设置页显示确定性缩略图，并提供“使用此类型”动作 | `docs/assets/diagrams/manifest.json`、`diagramExamplePreview.test.ts` |
-| 静态 gallery | 14 组生产 fixture 生成的 SVG/PNG；过期资源会让检查失败 | `scripts/generate-diagram-gallery.js`、`npm run diagram:gallery:check` |
+| 静态 gallery | 15 组生产 fixture 生成的 SVG/PNG；过期资源会让检查失败 | `scripts/generate-diagram-gallery.js`、`npm run diagram:gallery:check` |
 | Drawnix | 文件名根原生树、`.drawnix`、SVG companion、Markdown wrapper | Drawnix implementation record、导出测试与 `npm run diagram:consumer:drawnix` |
 | Circuitikz | 受限原生模板与 CLI 编译路径；6 个 golden fixture 已在 TeX Live 2023 下编译 | `src/diagram/adapters/circuitikz`、`scripts/export-circuitikz.js`、smoke report |
 | Operation 契约 | schema 形状准入、maintainer 输入校验、运行时结果校验、help/schema 字段派生均已可执行 | `src/operations/contractSchemas.ts`、`src/operations/maintainerCliContractMetadata.json`、bridge 测试 |
@@ -82,7 +82,7 @@ implementation_record: src/tests/mermaidNormalizationConvergence.test.ts
 | Operation 契约应有可执行事实源 | registry schema 已由与 registry 无关的 runtime 校验，并导出 CLI contract | maintainer 宿主 metadata 有意区别于 host-neutral schema；可生成纯数据目录仍是后续迁移 |
 | 参考布局必须是真语义而非别名 | timeline、swimlane、quadrant 已具备受限 payload、adapter、fixture、预览与测试 | Radar 仍需真实 Vega-Lite adapter，其余参考布局保持计划中 |
 | 外部互操作必须由 consumer 证明 | Plait 公开 API consumer 与固定 Circuitikz compiler gate 已通过 | Draw.io 与真实 Drawnix 应用不可用，因此不宣称应用级兼容 |
-| 文档必须暴露支持类型与预览 | manifest 驱动的双语 gallery 已有 14 组生产 SVG/PNG，包含 radar | 新类型必须在同一变更中保持 gallery freshness 与双语支持行 |
+| 文档必须暴露支持类型与预览 | manifest 驱动的双语 gallery 已有 15 组生产 SVG/PNG，包含 radar 与 org chart | 新类型必须在同一变更中保持 gallery freshness 与双语支持行 |
 
 ## 风险与权衡
 
@@ -108,8 +108,14 @@ implementation_record: src/tests/mermaidNormalizationConvergence.test.ts
 2. **Mermaid Phase 3：已完成。** 共享 scanner、canonical fence 格式和插件验证 runtime 初始化已收敛；预览 webview 的主题初始化继续作为独立 runtime 契约。
 3. **Target adapter dispatch：已完成。** preview/export、render-host 与 webview presentation 都使用 keyed target contract；没有内嵌 runtime 的 target 必须显式走 source-only。
 4. **Consumer 证据：** 在工具可用时执行 Draw.io/Drawnix/Circuitikz 真实门禁；不可用时记录 blocker，不声称兼容。
-5. **Drawnix 收敛：** 生产 source-coverage 与 relation-router 名称已经 canonical，旧 source-coverage export 和旧 router 模块仅用于兼容。矩形/折线以及文本度量/换行共享 primitive 已集中，独立 Plait consumer gate 已证明生产 fixture 可以跨越公开 consumer 边界。真实 Drawnix 桌面/应用导入仍是单独的外部门禁。
-6. **Circuitikz 收敛：** 六个 golden renderer 已共享 standalone-document 与 component-label helper，同时保持确定性输出。`runCircuitikzRepairLoop()` 明确保留为 maintainer-only acceptance SDK；正常生成不调用 LLM repair loop。只有在明确授权的 repair 命令且具备新鲜 compile/render evidence 时，才接入 CLI/desktop caller。
+5. **Drawnix 收敛：** 生产 source-coverage 与 relation-router 名称已经 canonical，旧 source-coverage export 和旧 router 模块仅用于兼容。矩形/折线、文本度量/换行以及关系标签度量 primitive 已集中，独立 Plait consumer gate 已证明生产 fixture 可以跨越公开 consumer 边界。真实 Drawnix 桌面/应用导入仍是单独的外部门禁。
+6. **Circuitikz 收敛：** 六个 golden renderer 已共享 standalone-document 与 component-label helper；common/dual/buffer 端口坐标也已由显式布局 helper 管理，同时保持确定性输出。`runCircuitikzRepairLoop()` 明确保留为 maintainer-only acceptance SDK；正常生成不调用 LLM repair loop。只有在明确授权的 repair 命令且具备新鲜 compile/render evidence 时，才接入 CLI/desktop caller。
+
+### 收敛跟进（2026-08-18）
+
+- `drawnixRelationLabelLayout.ts` 现在是关系标签度量的 canonical 边界。projection 与 lane reservation 共用确定性的换行、宽度、高度和行高契约；SVG/native 几何保持字节稳定，并由聚焦回归测试锁定。
+- Circuitikz 已移除字节相同的 `dualInputPortX()` helper。NAND/NOR 输入统一使用 extended-port 规则；buffer 有意保留更宽的右侧 gutter，并由 `bufferPortX()` 同时驱动输入与输出位置，避免隐藏坐标耦合，但不假设六个 golden template 拥有同一拓扑。
+- `runCircuitikzRepairLoop()` 明确保留为 maintainer-only、单次尝试的 acceptance SDK。普通生成路径不会调用它；采纳候选仍要求拓扑相等、新鲜 compile/render evidence 和显式 caller。
 7. **参考候选准入：** timeline、swimlane、quadrant、org chart 已以受限 Mermaid 类型交付，并具备确定性 fixture 与 parser-backed gallery 证据；Radar 已通过真实 Vega-Lite adapter 的浏览器渲染门禁并进入 shipped catalog，其余参考布局仍受同等证据门禁控制。
 8. **Operation 契约收敛：** 继续把与 registry 无关的 schema runtime 与 registry admission 作为 fail-closed 边界。只有当生成器能保留 host/core 契约分离、人工示例和未知字段行为时，才把声明迁移到生成式 JSON。
 

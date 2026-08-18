@@ -138,7 +138,7 @@ normalizeMermaidDiagram(input, opts?) -> { content, family }
 
 ### vs circuitikz Figure Generation Roadmap
 
-Phase A-F：A 已文档化；B/C 受约束原型完成（circuitSpec + exporter + 黄金模板）；D render feedback 经 `runCircuitikzCompile` 接线（CLI，已更正）；E 修复环未接线（opt-in 边界无入口，CLI 自行实现 acceptance）；F 受管桌面环境完成。缺口：6x 模板/校验近重复（`circuitikzExporter.ts:205-778`）、字节相同的 `extendedPortX`/`dualInputPortX`（`:45-50`）、buffer 模板硬编码 `(7.2,1.2) node[right]`，以及 `runCircuitikzRepairLoop` 的去留决策（接线或删除，然后修文档声明）。
+Phase A-F：A 已文档化；B/C 受约束原型完成（circuitSpec + exporter + 黄金模板）；D render feedback 经 `runCircuitikzCompile` 接线（CLI，已更正）；E 已明确为单次尝试的 maintainer-only acceptance 边界；F 受管桌面环境完成。字节相同的 `dualInputPortX` helper 与 buffer 端口字面量已收敛：NAND/NOR 使用 `extendedPortX`，buffer 使用 `bufferPortX` 命名更宽的右侧 gutter 并驱动两个 buffer 端口。剩余模板级校验/渲染代码保持显式，因为每个 golden family 的拓扑和诊断不同；将其压成通用 mode switch 会降低审查性并削弱 golden 输出所有权。
 
 ### vs 图形平台稳健性与设置真值推进方案（2026-08-08）
 
@@ -174,3 +174,6 @@ Circuitikz exporter 现在让六个 golden renderer 共享一个 standalone-docu
 ### 收敛后的候选准入（2026-08-18）
 
 收敛门禁现在足以支持一次窄范围目录扩展。`timeline`、`swimlane`、`quadrant` 各自拥有 typed payload 字段、parser-backed Mermaid adapter、intent/planner 路由、与旧 spec 兼容的读取、确定性 fixture、双语 gallery 行和定向测试。三者的 `compatibleTargets` 有意严格为 `['mermaid']`；不宣称 editable HTML/SVG、Draw.io 或 Drawnix 支持。`org-chart` 也已作为受限责任归属 intent 准入，具备单根/环路/深度/直接汇报数校验、Mermaid adapter、HTML 语义表格 fallback 与确定性 gallery 证据。webview presentation registry 也已把 Mermaid/Vega-Lite host shell、HTML document passthrough 与 source-only fallback 收敛到一个 keyed contract。
+### 收敛跟进（2026-08-18）
+
+`drawnixRelationLabelLayout.ts` 现在统一负责 lane reservation 与 native label metadata 的关系标签测量。`dualInputPortX` 已由共享的 `extendedPortX` 规则取代；`bufferPortX` 为有意更宽的 buffer gutter 提供命名边界。以上源码收敛保持确定性 golden 输出与拓扑校验不变。`runCircuitikzRepairLoop` 继续作为 maintainer-only acceptance 边界，不会成为普通生成的 fallback。
