@@ -352,9 +352,10 @@ The delivered phases cover semantic structure integrity, geometry/layer collisio
 2. **Transport-driven dispatch**: OpenAI-compatible providers share one runtime. No per-provider code paths.
 3. **Cline-aligned token resolution**: Unknown models defer to API provider. Known models use metadata table.
 4. **Operation-core vs command-binding split**: Registry operation metadata can describe a host-neutral reusable core even when the shipped commands remain active-file, write-file, or preview-bound surfaces. `diagram.generate` is the current proof case.
-5. **Iframe-host preview**: Vega-Lite and HTML rendered in sandboxed iframe. Mermaid rendered inline.
-6. **Local-only settings are a boundary guarantee**: `src/main.ts` sanitizes once and persists the sanitized record once, so local-only provider credentials do not re-enter the serialized settings object.
-7. **Response caching is bounded, credential-free, and runtime-portable**: `src/llmResponseCache.ts` uses a versioned, non-cryptographic dual-lane fingerprint over provider, transport, endpoint, model, runtime parameters, and prompt/content hashes, with a five-minute TTL and 128-entry LRU cap. It avoids a Node-only dependency on the shared mobile/web path. The cache remains an optimization, never an authority for correctness.
+5. **Fail-closed contract admission**: `src/operations/schemaRuntime.ts` owns JSON-compatible schema/value validation, while `src/operations/operationContractRegistry.ts` rejects incomplete schemas and duplicate operation/command identities before capability or invocation contracts are exported. Unknown payload fields remain forward-compatible; operation capability metadata and command-binding context are not collapsed.
+6. **Iframe-host preview**: Vega-Lite and HTML rendered in sandboxed iframe. Mermaid rendered inline.
+7. **Local-only settings are a boundary guarantee**: `src/main.ts` sanitizes once and persists the sanitized record once, so local-only provider credentials do not re-enter the serialized settings object.
+8. **Response caching is bounded, credential-free, and runtime-portable**: `src/llmResponseCache.ts` uses a versioned, non-cryptographic dual-lane fingerprint over provider, transport, endpoint, model, runtime parameters, and prompt/content hashes, with a five-minute TTL and 128-entry LRU cap. It avoids a Node-only dependency on the shared mobile/web path. The cache remains an optimization, never an authority for correctness.
 
 ## Verification
 
