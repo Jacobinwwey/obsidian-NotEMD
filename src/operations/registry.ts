@@ -6,6 +6,7 @@ import {
 } from '../workflowButtons';
 import { CHAPTER_SPLIT_HEADING_LEVEL_VALUES } from '../types';
 import { OperationCommandBinding, OperationDefinition, OperationSchema } from './types';
+import { assertOperationRegistry } from './operationContractRegistry';
 
 const COMMAND_TRIGGER_SURFACES = ['command-palette', 'hotkey', 'official-cli-command'] as const;
 
@@ -1246,6 +1247,8 @@ const OPERATION_DEFINITIONS: OperationDefinition[] = [
 ];
 
 const OPERATION_DEFINITION_MAP = new Map(OPERATION_DEFINITIONS.map(definition => [definition.id, definition]));
+
+assertOperationRegistry(OPERATION_DEFINITIONS);
 
 export function listOperationDefinitions(): OperationDefinition[] {
     return [...OPERATION_DEFINITIONS];

@@ -58,6 +58,7 @@ The correct next move is convergence. Adding more visual types before closing co
 18. Added the keyed webview presentation registry. Mermaid and Vega-Lite host shells, HTML document passthrough, and source-only fallbacks now resolve through one target contract; unknown targets fail closed and MIME mismatches fall back to source-only markup.
 19. Added `npm run diagram:consumer:drawnix`. Without an input path it bundles the production Drawnix architecture fixture, validates the native envelope, and feeds the temporary `.drawnix` artifact to `scripts/test-drawnix-plait-consumer.mjs`, which uses the public `@plait/core`, `@plait/draw`, and `@plait/mind` APIs. The gate passed with one filename-rooted root, 20 recognized nodes, and 12 native relations; it is consumer-contract evidence, not a claim that a Drawnix desktop application is installed.
 20. Moved the shared Drawnix polyline-length primitive into `drawnixGeometry.ts` and kept `DrawnixPoint` source-compatible through the projection re-export. Router label placement and candidate ordering now use one length definition, with a focused 30-unit multi-segment regression.
+21. Split the JSON-compatible schema/value validator into `schemaRuntime.ts` and added `operationContractRegistry.ts`. The registry now fails closed during module admission on malformed required/property relationships, duplicate enum/required entries, duplicate operation or command IDs, missing input/result schemas, and malformed trigger surfaces. Unknown operation payload fields remain accepted; operation-level capability metadata and command-binding context remain separate by design.
 
 ## Comparison With `diagram-design`
 
@@ -68,8 +69,18 @@ The correct next move is convergence. Adding more visual types before closing co
 | Artifact/export | Self-contained HTML/SVG/PNG examples | 8 targets and independently declared export capabilities | Keep target and export orthogonal |
 | Preview | Example HTML assets | Production renderer fixture thumbnails in settings and docs | Generate both from the same fixture |
 | Governance | Type references and complexity budgets | Versioned capability/target manifests plus tests | Treat manifests and tests as the contract |
+| Contract boundary | Human-readable command examples sit beside pattern docs | Pure schema runtime plus registry admission; host/core schemas stay explicit | Fail closed on malformed contracts without collapsing UI and CLI context |
 
 The reference taxonomy still supplies architecture, current-state, radar, loop, nested, tree, org chart, layers, Venn, pyramid, bar, line, Gantt, scatter, medallion, process, data flow, and security/integration matrix candidates. Timeline, swimlane, and quadrant have now passed the bounded Mermaid-only admission gate; they are not evidence of editable HTML/SVG, Draw.io, or Drawnix support. Gallery variants such as OAuth sequence, animation, imports, and vertical orientation are workflows or variants, not new semantic types.
+
+## Gap Against Earlier Plans
+
+| Earlier requirement | Current evidence | Remaining boundary |
+|---|---|---|
+| One executable source for operation contracts | Registry schemas are validated by a registry-independent runtime and exported into CLI contracts | Maintainer host metadata is intentionally separate from host-neutral schemas; a generated pure-data catalog is still a future migration |
+| Reference layouts must have real semantics, not aliases | Timeline, swimlane, and quadrant have bounded payloads, adapters, fixtures, previews, and tests | Radar still needs a real Vega-Lite adapter; the other reference layouts remain planned |
+| External interoperability must be proven by a consumer | Plait public-API consumer and pinned Circuitikz compiler gates pass | Draw.io and a real Drawnix application are unavailable, so application-level compatibility is not claimed |
+| Documentation must expose support and previews | Manifest-driven bilingual gallery contains 13 production SVG/PNG pairs | New types must keep the gallery freshness gate and bilingual row in the same change |
 
 ## Risk Register And Tradeoffs
 
@@ -78,6 +89,7 @@ The reference taxonomy still supplies architecture, current-state, radar, loop, 
 - **Target adapter boundary:** preview/export and render-host dispatch resolve through keyed target adapters, and webview markup now resolves through `presentationRegistry.ts` with duplicate target behavior avoided by construction. Adding a new target still requires an explicit presentation mode or deliberate source-only fallback.
 - **External interoperability:** Draw.io, Drawnix, and Circuitikz consumer evidence must be real-consumer evidence, not mocks or serializer snapshots. Missing tools remain explicit blockers.
 - **Forward compatibility:** Unknown contract fields are accepted intentionally. Required fields and known field types are strict at the boundary; loosening them would make downstream failures harder to localize.
+- **Contract runtime boundary:** Schema validation is now pure and reusable, while operation declarations remain in the TypeScript registry for local context. Do not force command binding context to equal operation capability metadata; they describe different invocation surfaces.
 - **Cache:** The response cache remains an optimization. It must never become an authority for artifact identity or correctness.
 
 ## External Consumer Gate Status
@@ -97,6 +109,7 @@ The reference taxonomy still supplies architecture, current-state, radar, loop, 
 5. **Drawnix convergence:** the production source-coverage and relation-router names are canonical; the old source-coverage export and router module are compatibility-only. Shared rectangle/polyline and text measurement/wrapping primitives are centralized, and the standalone Plait consumer gate proves the production fixture crosses the public consumer boundary. Real Drawnix desktop/app import remains a separate external gate.
 6. **Circuitikz convergence:** the six golden renderers share the standalone-document and component-label helpers while preserving deterministic output. Keep `runCircuitikzRepairLoop()` as a maintainer-only acceptance SDK boundary; normal generation remains deterministic and does not invoke an LLM repair loop. Wire a real CLI/desktop caller only as a separately authorized repair command with fresh compile/render evidence.
 7. **Reference admission:** timeline, swimlane, and quadrant are shipped as Mermaid-only types with deterministic fixtures and parser-backed gallery evidence. Radar remains blocked until a real Vega-Lite adapter exists; all other reference layouts remain gated.
+8. **Operation contract convergence:** keep the registry-independent schema runtime and registry admission as the fail-closed boundary. Only migrate declarations into generated JSON when the generator can preserve host/core contract separation, human examples, and stable unknown-field behavior.
 
 ## Acceptance Gates
 
@@ -107,10 +120,11 @@ The reference taxonomy still supplies architecture, current-state, radar, loop, 
 - `npm run audit:render-host`
 - `npm run diagram:consumer:drawnix`
 - `src/tests/renderTargetAdapterRegistry.test.ts`
+- `src/tests/contractSchemas.test.ts`
 - `npm run lint` (currently repository-baseline blocked; do not relabel this as a feature failure)
 - `git diff --check`
 - External consumer records must identify tool/version/input/output and must not be replaced by unit mocks. The Plait gate is a checked-in public-API consumer contract; real Drawnix application import remains a separate manual/CI record.
 
 ## Verification Snapshot
 
-Fresh verification for this increment: 261 Jest suites passed (2,281 tests passed, 1 skipped); TypeScript/esbuild build passed; VitePress docs build passed; production gallery check passed with 13 SVG/PNG pairs; render-host audit and i18n audit passed; the standalone Drawnix Plait consumer gate passed with 20 nodes, 1 root, and 12 relations; semantic verification helper passed; and Circuitikz smoke passed with TeX Live 2023 `pdflatex` (6/6 PDFs, 0 errors/0 warnings). `git diff --check` passed. Draw.io and a real Drawnix desktop application are unavailable in this workspace, so no application-level interoperability claim is made. Full repository lint remains a separate baseline debt track.
+Fresh verification for this increment: 261 Jest suites passed (2,284 tests passed, 1 skipped); TypeScript/esbuild build passed; VitePress docs build passed; production gallery check passed with 13 SVG/PNG pairs; render-host audit and i18n audit passed; the standalone Drawnix Plait consumer gate passed with 20 nodes, 1 root, and 12 relations; semantic verification helper passed; and Circuitikz smoke passed with TeX Live 2023 `pdflatex` (6/6 PDFs, 0 errors/0 warnings). `git diff --check` passed. Draw.io and a real Drawnix desktop application are unavailable in this workspace, so no application-level interoperability claim is made. Full repository lint remains a separate baseline debt track.

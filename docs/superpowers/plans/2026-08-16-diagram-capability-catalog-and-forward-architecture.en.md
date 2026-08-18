@@ -127,11 +127,11 @@ interface DiagramCapabilityManifest {
 
 ### Phase 2: Runtime contracts and manifest
 
-**Files:** `src/operations/registry.ts`, `src/operations/contractSchemas.ts` (new), `src/operations/capabilityManifest.ts` (new), `scripts/invoke-maintainer-cli-operation.js`, `scripts/export-diagram-artifact.js`.
+**Files:** `src/operations/registry.ts`, `src/operations/schemaRuntime.ts`, `src/operations/operationContractRegistry.ts`, `src/operations/contractSchemas.ts`, `src/operations/capabilityManifest.ts`, `scripts/invoke-maintainer-cli-operation.js`, `scripts/export-diagram-artifact.js`.
 
-The first contract-hardening slice is delivered: `src/operations/contractSchemas.ts` admits JSON-compatible schema shape, `src/cliContracts.ts` rejects malformed registry schemas before export, and `src/maintainerCliBridge.ts` validates host-bound inputs while ignoring unknown legacy fields for forward compatibility. Keep `diagram.generate` aligned around `sourceMarkdown` for the host-neutral core; `sourcePath` remains an explicit host adapter input rather than silently becoming the same contract. `local-knowledge.inspect` remains a maintainer host operation, not a public registry operation, until a host-neutral implementation and safety metadata exist.
+The first contract-hardening slice is delivered: `src/operations/schemaRuntime.ts` owns JSON-compatible schema shape/value checks, `src/operations/operationContractRegistry.ts` admits the registry at module load, `src/cliContracts.ts` rejects malformed registry schemas before export, and `src/maintainerCliBridge.ts` validates host-bound inputs while ignoring unknown legacy fields for forward compatibility. Keep `diagram.generate` aligned around `sourceMarkdown` for the host-neutral core; `sourcePath` remains an explicit host adapter input rather than silently becoming the same contract. `local-knowledge.inspect` remains a maintainer host operation, not a public registry operation, until a host-neutral implementation and safety metadata exist.
 
-The remaining Phase 2 work is deliberately narrower: validate operation result values at the runtime boundary and derive maintainer help metadata from the same schema only where that does not erase human-facing examples or compatibility notes. `OperationSchema` remains a structural TypeScript record for now; the executable admission/validation layer is the runtime authority.
+The remaining Phase 2 work is deliberately narrower: derive maintainer help metadata from the same schema only where that does not erase human-facing examples or compatibility notes, and decide whether the registry's TypeScript declarations should later move to a generated pure-data catalog. `OperationSchema` remains a structural TypeScript record for compatibility; the executable admission/validation layer is the runtime authority. Operation-level automation metadata and command-binding metadata intentionally remain separate because a host-neutral CLI operation and an Obsidian UI trigger can have different context requirements.
 
 **Gate:** invalid arguments fail before provider calls; registry, CLI, and generated manifest agree byte-for-byte on names and required fields.
 
@@ -189,7 +189,7 @@ External gates remain separate from unit tests:
 |---|---|---|
 | 0. Correctness foundation | Complete | Sanitized settings persistence, authoritative retry artifacts, editable SVG preview, target descriptors, and bounded cache are covered by focused tests. |
 | 1. Three-axis catalog | Complete | Thirteen semantic types, eight targets, compatibility admission, fixture coverage, and stable IDs are executable. |
-| 2. Runtime contracts | Mostly complete | Input and result validation are runtime-enforced; structural `OperationSchema` and human-facing help metadata remain intentionally separate. |
+| 2. Runtime contracts | Mostly complete | Input/result validation is owned by a registry-independent runtime; registry admission now fails closed on malformed schemas and duplicate IDs/bindings. Structural `OperationSchema`, host input metadata, and human-facing help remain intentionally separate. |
 | 3. Deterministic preview gallery | Complete | Production fixtures generate the settings thumbnails and bilingual SVG/PNG docs gallery; `diagram:gallery:check` is the freshness gate. |
 | 4. Bilingual discovery | Complete for shipped scope | Support matrices link shipped examples; reference layouts remain explicitly planned. |
 | 5. Candidate admission | Partially shipped | Timeline, swimlane, and quadrant have bounded schemas, Mermaid adapters, persistence-compatible spec fields, fixtures, gallery assets, and focused tests. Radar and the remaining reference layouts stay gated. |
@@ -205,6 +205,7 @@ This status table is the current decision record. The phase descriptions above r
 - **Parse SVG out of HTML at export time:** rejected. It is fragile and changes the artifact boundary. Return an explicit companion SVG from the renderer instead.
 - **Expand the LLM prompt to “choose any layout”:** rejected. Semantic intent and target compatibility belong to typed planning, not unconstrained prompt text.
 - **Treat all external consumer checks as CI-only:** rejected. Real Draw.io/Drawnix/TeX consumers are compatibility evidence that mocks cannot provide.
+- **Contract source boundary:** schema shape/value validation is now pure and registry-independent, while operation declarations remain adjacent to their command metadata. Moving every declaration into JSON would improve Node reuse but would also remove type-local context and make host/core contract differences easier to hide; defer that migration until a generator can preserve both.
 
 ## Definition Of Done
 

@@ -127,11 +127,11 @@ interface DiagramCapabilityManifest {
 
 ### Phase 2：运行时契约与 manifest
 
-**文件：** `src/operations/registry.ts`、新增 `src/operations/contractSchemas.ts`、新增 `src/operations/capabilityManifest.ts`、`scripts/invoke-maintainer-cli-operation.js`、`scripts/export-diagram-artifact.js`。
+**文件：** `src/operations/registry.ts`、`src/operations/schemaRuntime.ts`、`src/operations/operationContractRegistry.ts`、`src/operations/contractSchemas.ts`、`src/operations/capabilityManifest.ts`、`scripts/invoke-maintainer-cli-operation.js`、`scripts/export-diagram-artifact.js`。
 
-第一层契约硬化已经交付：`src/operations/contractSchemas.ts` 对 JSON-compatible schema 形状做准入，`src/cliContracts.ts` 在导出前拒绝非法 registry schema，`src/maintainerCliBridge.ts` 在宿主边界校验输入，同时为向前兼容保留未知旧字段。`diagram.generate` 的 host-neutral 核心继续以 `sourceMarkdown` 为输入；`sourcePath` 仍是显式 host adapter 输入，不能静默变成同一契约。`local-knowledge.inspect` 仍保持 maintainer 宿主操作，只有在存在宿主无关实现和安全元数据后才进入公共 registry。
+第一层契约硬化已经交付：`src/operations/schemaRuntime.ts` 负责与 registry 无关的 JSON-compatible schema 形状/值校验，`src/operations/operationContractRegistry.ts` 在模块加载边界准入 registry，`src/cliContracts.ts` 在导出前拒绝非法 registry schema，`src/maintainerCliBridge.ts` 在宿主边界校验输入，同时为向前兼容保留未知旧字段。`diagram.generate` 的 host-neutral 核心继续以 `sourceMarkdown` 为输入；`sourcePath` 仍是显式 host adapter 输入，不能静默变成同一契约。`local-knowledge.inspect` 仍保持 maintainer 宿主操作，只有在存在宿主无关实现和安全元数据后才进入公共 registry。
 
-Phase 2 的剩余工作被刻意收窄为两项：在运行时边界校验 operation 结果值；仅在不抹平人工可读示例和兼容性说明的前提下，从同一 schema 派生 maintainer help 元数据。`OperationSchema` 暂时仍是结构化 TypeScript Record；可执行准入/校验层才是运行时权威。
+Phase 2 的剩余工作被刻意收窄：仅在不抹平人工可读示例和兼容性说明的前提下，从同一 schema 派生 maintainer help 元数据，并决定后续是否把 registry 的 TypeScript 声明迁移为可生成的纯数据目录。为保持兼容，`OperationSchema` 暂时仍是结构化 TypeScript Record；可执行准入/校验层才是运行时权威。Operation 级 automation metadata 与 command binding 级 metadata 有意保持分离，因为宿主无关 CLI 操作与 Obsidian UI 触发入口可能有不同的上下文约束。
 
 **门禁：** 非法参数必须在 provider 调用前失败；registry、CLI 和生成 manifest 的名称与 required fields 必须一致。
 
@@ -189,7 +189,7 @@ preview/export 与 render-host 的 target dispatch 已通过 keyed adapter 收�
 |---|---|---|
 | 0. 正确性基础 | 完成 | 设置清洗持久化、重试 artifact 真值、editable SVG 预览、target descriptor 和有界 cache 均有定向测试。 |
 | 1. 三轴目录 | 完成 | 13 个语义类型、8 个 target、兼容性准入、fixture 覆盖和稳定 ID 均已可执行。 |
-| 2. 运行时契约 | 基本完成 | 输入与结果校验已在运行时强制执行；结构化 `OperationSchema` 与人工可读 help metadata 仍有意分离。 |
+| 2. 运行时契约 | 基本完成 | 输入/结果校验由与 registry 无关的 runtime 负责；registry 现在会在加载时对非法 schema、重复 ID/绑定 fail-closed。结构化 `OperationSchema`、宿主输入 metadata 与人工可读 help 仍有意分离。 |
 | 3. 确定性预览 gallery | 完成 | 生产 fixture 同时生成设置页缩略图与双语 SVG/PNG 文档 gallery；`diagram:gallery:check` 是新鲜度门禁。 |
 | 4. 双语发现入口 | 已发布范围完成 | 支持矩阵已链接已发布示例；参考布局仍明确标为计划中。 |
 | 5. 候选准入 | 部分交付 | timeline、swimlane、quadrant 已有受限 schema、Mermaid adapter、与旧 spec 兼容的字段、fixture、gallery 资产和定向测试；Radar 与其余参考布局继续受门禁控制。 |
@@ -205,6 +205,7 @@ preview/export 与 render-host 的 target dispatch 已通过 keyed adapter 收�
 - **导出时从 HTML 字符串解析 SVG：** 拒绝。脆弱且改变 artifact 边界；应由 renderer 显式返回 companion SVG。
 - **把“任意布局选择”交给 LLM prompt：** 拒绝。语义和 target 兼容性必须由 typed planning 约束。
 - **把外部 consumer 检查全部当作 CI mock：** 拒绝。真实 Draw.io/Drawnix/TeX 才能提供互操作证据。
+- **契约事实源边界：** schema 形状/值校验已经纯化且与 registry 解耦，operation 声明仍与 command metadata 放在同一 TypeScript registry 旁。全部迁移到 JSON 会利于 Node 复用，但会丢失类型附近的上下文，也更容易隐藏 host/core 契约差异；在具备能保留两者的生成器之前暂缓迁移。
 
 ## 完成定义
 

@@ -4,6 +4,7 @@ import {
     assertOperationResult,
     validateContractValue
 } from '../operations/contractSchemas';
+import { assertOperationRegistry } from '../operations/operationContractRegistry';
 import { buildCliInvocationContract } from '../cliContracts';
 
 describe('operation contract schemas', () => {
@@ -28,6 +29,61 @@ describe('operation contract schemas', () => {
         expect(issues).toEqual([
             { path: '$.topK', message: 'must be a finite number' }
         ]);
+    });
+
+    test('rejects required fields that are not declared in object properties', () => {
+        expect(() => assertOperationSchema({
+            type: 'object',
+            required: ['sourcePath'],
+            properties: {}
+        })).toThrow('required field "sourcePath" must be declared in properties');
+    });
+
+    test('rejects duplicate required fields instead of silently normalizing them', () => {
+        expect(() => assertOperationSchema({
+            type: 'object',
+            required: ['sourcePath', 'sourcePath'],
+            properties: { sourcePath: { type: 'string' } }
+        })).toThrow('required fields must be unique');
+    });
+
+    test('rejects malformed operation registries before they can be exported', () => {
+        expect(() => assertOperationRegistry([
+            {
+                version: 1,
+                id: 'duplicate.operation',
+                automationLevel: 'safe',
+                requiredContext: 'none',
+                sideEffectClass: 'read-only',
+                commandBindings: [{
+                    commandId: 'same-command',
+                    automationLevel: 'safe',
+                    requiredContext: 'none',
+                    sideEffectClass: 'read-only',
+                    surfaces: ['official-cli-command'],
+                    mappingKind: 'exact'
+                }],
+                inputSchema: { type: 'object', properties: {} },
+                resultSchema: { type: 'object', properties: {} }
+            },
+            {
+                version: 1,
+                id: 'duplicate.operation',
+                automationLevel: 'safe',
+                requiredContext: 'none',
+                sideEffectClass: 'read-only',
+                commandBindings: [{
+                    commandId: 'same-command',
+                    automationLevel: 'safe',
+                    requiredContext: 'none',
+                    sideEffectClass: 'read-only',
+                    surfaces: ['official-cli-command'],
+                    mappingKind: 'exact'
+                }],
+                inputSchema: { type: 'object', properties: {} },
+                resultSchema: { type: 'object', properties: {} }
+            }
+        ])).toThrow('duplicate operation id');
     });
 
     test('validates all registry schemas before exporting the invocation contract', () => {
