@@ -131,6 +131,7 @@ const MERMAID_COMPATIBLE_INTENTS = new Set<DiagramIntent>([
     'classDiagram',
     'erDiagram',
     'stateDiagram',
+    'orgChart',
     'timeline',
     'swimlane',
     'quadrant'
@@ -344,6 +345,7 @@ function mergeSpecDefaults(
         callouts: spec.callouts ?? [],
         dataSeries: spec.dataSeries ?? [],
         radarSpec: resolvedIntent === 'radar' ? spec.radarSpec : undefined,
+        orgChartSpec: resolvedIntent === 'orgChart' ? spec.orgChartSpec : undefined,
         circuitSpec: resolvedIntent === 'circuit' ? spec.circuitSpec : undefined,
         layoutHints: Object.keys(normalizedLayoutHints).length > 0 ? normalizedLayoutHints : undefined,
         evidenceRefs: spec.evidenceRefs ?? []

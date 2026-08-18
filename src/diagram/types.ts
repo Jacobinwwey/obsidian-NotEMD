@@ -13,6 +13,7 @@ export const SUPPORTED_DIAGRAM_INTENTS = [
     'circuit',
     'dataChart',
     'radar',
+    'orgChart',
     'timeline',
     'swimlane',
     'quadrant'
@@ -31,6 +32,7 @@ export const DIAGRAM_CATALOG_TYPE_IDS = [
     'canvas-map',
     'data-chart',
     'radar-chart',
+    'org-chart',
     'circuit',
     'timeline',
     'swimlane',
@@ -149,6 +151,21 @@ export interface DiagramRadarSpec {
     series: DiagramRadarSeries[];
 }
 
+export type DiagramOrgChartStatus = 'active' | 'planned' | 'gap';
+
+export interface DiagramOrgChartPerson {
+    id: string;
+    label: string;
+    role?: string;
+    scope?: string[];
+    reportsTo?: string;
+    status?: DiagramOrgChartStatus;
+}
+
+export interface DiagramOrgChartSpec {
+    nodes: DiagramOrgChartPerson[];
+}
+
 export interface DiagramTimelineEvent {
     id: string;
     date: string | number;
@@ -193,6 +210,7 @@ export interface DiagramSpec {
     callouts?: DiagramCallout[];
     dataSeries?: DiagramDataSeries[];
     radarSpec?: DiagramRadarSpec;
+    orgChartSpec?: DiagramOrgChartSpec;
     timelineEvents?: DiagramTimelineEvent[];
     swimlaneLanes?: DiagramSwimlaneLane[];
     quadrant?: DiagramQuadrantSpec;

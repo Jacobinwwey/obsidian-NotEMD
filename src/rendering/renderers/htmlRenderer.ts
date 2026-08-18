@@ -1,5 +1,5 @@
 import { assertValidDiagramSpec } from '../../diagram/spec';
-import { DiagramEdge, DiagramNode, DiagramRadarSpec, DiagramSpec } from '../../diagram/types';
+import { DiagramEdge, DiagramNode, DiagramOrgChartSpec, DiagramRadarSpec, DiagramSpec } from '../../diagram/types';
 import { DiagramRenderer, RenderArtifact } from '../types';
 
 interface HtmlRendererLabels {
@@ -14,6 +14,11 @@ interface HtmlRendererLabels {
     sourceLanguage: string;
     outputLanguage: string;
     noStructuralNodes: string;
+    orgOwner?: string;
+    orgRole?: string;
+    orgScope?: string;
+    orgReportsTo?: string;
+    orgStatus?: string;
 }
 
 const DEFAULT_LABELS: HtmlRendererLabels = {
@@ -27,7 +32,12 @@ const DEFAULT_LABELS: HtmlRendererLabels = {
     series: 'Series',
     sourceLanguage: 'Source language',
     outputLanguage: 'Output language',
-    noStructuralNodes: 'No structural nodes were generated for this diagram.'
+    noStructuralNodes: 'No structural nodes were generated for this diagram.',
+    orgOwner: 'Owner',
+    orgRole: 'Role',
+    orgScope: 'Scope',
+    orgReportsTo: 'Reports to',
+    orgStatus: 'Status'
 };
 
 const LABELS_BY_LOCALE: Record<string, HtmlRendererLabels> = {
@@ -434,6 +444,42 @@ function renderDataSeries(spec: DiagramSpec, labels: HtmlRendererLabels): string
     </section>`;
 }
 
+function renderOrgChartSpec(orgChartSpec: DiagramOrgChartSpec, labels: HtmlRendererLabels): string {
+    if (!orgChartSpec.nodes.length) {
+        return `<p class="notemd-html-renderer-empty">${escapeHtml(labels.noStructuralNodes)}</p>`;
+    }
+
+    const ownerLabel = labels.orgOwner ?? DEFAULT_LABELS.orgOwner!;
+    const roleLabel = labels.orgRole ?? DEFAULT_LABELS.orgRole!;
+    const scopeLabel = labels.orgScope ?? DEFAULT_LABELS.orgScope!;
+    const reportsToLabel = labels.orgReportsTo ?? DEFAULT_LABELS.orgReportsTo!;
+    const statusLabel = labels.orgStatus ?? DEFAULT_LABELS.orgStatus!;
+
+    return `<table>
+        <thead>
+            <tr>
+                <th>${escapeHtml(ownerLabel)}</th>
+                <th>${escapeHtml(roleLabel)}</th>
+                <th>${escapeHtml(scopeLabel)}</th>
+                <th>${escapeHtml(reportsToLabel)}</th>
+                <th>${escapeHtml(statusLabel)}</th>
+            </tr>
+        </thead>
+        <tbody>
+            ${orgChartSpec.nodes.map(node => {
+                const parent = orgChartSpec.nodes.find(candidate => candidate.id === node.reportsTo);
+                return `<tr>
+                    <td>${escapeHtml(node.label)}</td>
+                    <td>${escapeHtml(node.role ?? '')}</td>
+                    <td>${escapeHtml(node.scope?.join(', ') ?? '')}</td>
+                    <td>${escapeHtml(parent?.label ?? '')}</td>
+                    <td>${escapeHtml(node.status ?? 'active')}</td>
+                </tr>`;
+            }).join('')}
+        </tbody>
+    </table>`;
+}
+
 function renderRadarSpec(spec: DiagramSpec, labels: HtmlRendererLabels): string {
     const radarSpec: DiagramRadarSpec | undefined = spec.radarSpec;
     if (!radarSpec?.axes?.length || !radarSpec.series?.length) {
@@ -657,7 +703,7 @@ function renderHtmlDocument(spec: DiagramSpec): string {
 
         <section class="notemd-html-renderer-section">
             <h2>${escapeHtml(labels.structure)}</h2>
-            ${renderNodeTree(spec.nodes, labels)}
+            ${spec.orgChartSpec ? renderOrgChartSpec(spec.orgChartSpec, labels) : renderNodeTree(spec.nodes, labels)}
         </section>
 
         ${renderEdges(spec.edges ?? [], nodeLabels, labels)}

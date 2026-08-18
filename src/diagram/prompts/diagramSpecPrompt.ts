@@ -21,6 +21,8 @@ export function buildDiagramSpecPrompt(options: DiagramSpecPromptOptions = {}): 
         || options.preferredRenderTarget === 'drawnix';
     const isRadarRequest = options.preferredIntent === 'radar'
         || options.requiredIntent === 'radar';
+    const isOrgChartRequest = options.preferredIntent === 'orgChart'
+        || options.requiredIntent === 'orgChart';
     const preferredIntentLine = options.requiredIntent
         ? `REQUIRED diagram intent: ${options.requiredIntent}. You MUST use this exact intent. Do not choose any other intent under any circumstances.`
         : options.preferredIntent
@@ -139,6 +141,8 @@ The deterministic renderer, not the model, emits the complete LaTeX document wit
         ? 'Supported intent: drawnixMindmap'
         : isRadarRequest
         ? 'Supported intent: radar'
+        : isOrgChartRequest
+        ? 'Supported intent: orgChart'
         : `Supported intents:
 - mindmap
 - flowchart
@@ -150,6 +154,7 @@ The deterministic renderer, not the model, emits the complete LaTeX document wit
 - circuit
 - dataChart
 - radar
+- orgChart
 - timeline
 - swimlane
 - quadrant`;
@@ -195,6 +200,7 @@ Required DiagramSpec fields:
 - outputLanguage
 - evidenceRefs
 - radarSpec when intent is radar
+- orgChartSpec when intent is orgChart
 
 Validation rules:
 - Use stable node ids.
@@ -208,6 +214,7 @@ Validation rules:
 - Use scatter for paired numeric x/y observations, pie for part-to-whole categorical shares, and table when ranked/tabular rows communicate better than axes.
 - For timeline, swimlane, and quadrant intents, use only the dedicated payload described above and keep identifiers stable and unique.
 - For radar intent, keep axis order stable and use exactly one point per axis so all series share the same scale.
+- For orgChart intent, set nodes to an empty array and provide orgChartSpec.nodes. Each owner requires id and label; reportsTo must reference an existing owner. Keep the payload to no more than 12 owners, one root, no more than four tiers, and no more than five direct reports per owner. Optional role, scope (up to four short strings), and status (active, planned, or gap) are rendered as ownership metadata. Do not encode org-chart ownership only as generic edges.
 
 Return a single valid DiagramSpec JSON object.`;
 }

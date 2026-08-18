@@ -91,7 +91,7 @@ Snapshot as of 2026-08-15: Phase 0 and diagram-level Phase 1 were complete, whil
 
 The Mermaid convergence work is now complete through Phase 3. `normalizeMermaidDiagram` is the runtime-free canonical boundary; the legacy repair chain is a 35-stage ordered registry with family gating and idempotency coverage; shared scanners and canonical fence helpers own block boundaries; and `ensureMermaidInitialized()` protects plugin-side validation runtime state. Preview webviews intentionally keep their own theme-specific initialization because they are separate runtimes.
 
-The catalog has also admitted `timeline`, `swimlane`, and `quadrant` through the bounded evidence gate. They are Mermaid-only (`compatibleTargets: ['mermaid']`), so this admission does not imply editable HTML/SVG, Draw.io, or Drawnix support. Target adapter and webview presentation dispatch now use keyed registries with explicit source-only fallback for targets without an embedded runtime.
+The catalog has also admitted `timeline`, `swimlane`, `quadrant`, and `org-chart` through the bounded evidence gate. Timeline, swimlane, and quadrant are Mermaid-only (`compatibleTargets: ['mermaid']`); org-chart is a bounded Mermaid ownership adapter with an HTML semantic-table fallback. None of these admissions imply editable HTML/SVG, Draw.io, or Drawnix support. Radar remains a separate Vega-Lite profile type with an HTML table fallback. Target adapter and webview presentation dispatch now use keyed registries with explicit source-only fallback for targets without an embedded runtime.
 
 The live agenda is boundary hardening, not unbounded layout expansion:
 

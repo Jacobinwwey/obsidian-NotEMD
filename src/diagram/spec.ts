@@ -4,6 +4,7 @@ import { isSupportedVegaLiteChartType, SUPPORTED_VEGA_LITE_CHART_TYPES } from '.
 import {
     DiagramDataSeries,
     DiagramNode,
+    DiagramOrgChartSpec,
     DiagramRadarSpec,
     DiagramSpec,
     isSupportedDiagramIntent,
@@ -209,6 +210,110 @@ function validateRadarPayload(radarSpec: DiagramRadarSpec | undefined, errors: s
     });
 }
 
+const ORG_CHART_MAX_NODES = 12;
+const ORG_CHART_MAX_DEPTH = 4;
+const ORG_CHART_MAX_DIRECT_REPORTS = 5;
+
+function validateOrgChartPayload(orgChartSpec: DiagramOrgChartSpec | undefined, errors: string[]): void {
+    if (!orgChartSpec || !Array.isArray(orgChartSpec.nodes)
+        || orgChartSpec.nodes.length === 0 || orgChartSpec.nodes.length > ORG_CHART_MAX_NODES) {
+        errors.push(`Org chart payload requires between 1 and ${ORG_CHART_MAX_NODES} owners.`);
+        return;
+    }
+
+    const nodesById = new Map<string, DiagramOrgChartSpec['nodes'][number]>();
+    const parentById = new Map<string, string>();
+    const childrenById = new Map<string, number>();
+
+    orgChartSpec.nodes.forEach((node, index) => {
+        const nodeId = typeof node?.id === 'string' ? node.id.trim() : '';
+        if (!nodeId) {
+            errors.push(`Org chart owner ${index + 1} is missing an id.`);
+        } else if (nodesById.has(nodeId)) {
+            errors.push(`Org chart owner id "${nodeId}" is duplicated.`);
+        } else {
+            nodesById.set(nodeId, node);
+        }
+
+        if (typeof node?.label !== 'string' || !node.label.trim()) {
+            errors.push(`Org chart owner "${nodeId || index + 1}" is missing a label.`);
+        }
+
+        if (node?.role !== undefined && (typeof node.role !== 'string' || !node.role.trim())) {
+            errors.push(`Org chart owner "${nodeId || index + 1}" has an invalid role.`);
+        }
+
+        if (node?.scope !== undefined && (!Array.isArray(node.scope)
+            || node.scope.length > 4
+            || node.scope.some(scope => typeof scope !== 'string' || !scope.trim()))) {
+            errors.push(`Org chart owner "${nodeId || index + 1}" has an invalid scope list.`);
+        }
+
+        if (node?.status !== undefined && !['active', 'planned', 'gap'].includes(node.status)) {
+            errors.push(`Org chart owner "${nodeId || index + 1}" has an unsupported status.`);
+        }
+
+        const reportsTo = typeof node?.reportsTo === 'string' ? node.reportsTo.trim() : '';
+        if (reportsTo) {
+            if (reportsTo === nodeId) {
+                errors.push(`Org chart owner "${nodeId || index + 1}" cannot report to itself.`);
+            }
+            parentById.set(nodeId, reportsTo);
+            childrenById.set(reportsTo, (childrenById.get(reportsTo) ?? 0) + 1);
+        }
+    });
+
+    parentById.forEach((parentId, nodeId) => {
+        if (!nodesById.has(parentId)) {
+            errors.push(`Org chart owner "${nodeId}" references unknown manager "${parentId}".`);
+        }
+    });
+
+    const roots = orgChartSpec.nodes.filter(node => {
+        const nodeId = typeof node?.id === 'string' ? node.id.trim() : '';
+        return nodeId.length > 0 && !parentById.has(nodeId);
+    });
+    if (roots.length !== 1) {
+        errors.push(`Org chart requires exactly one root owner; found ${roots.length}.`);
+    }
+
+    childrenById.forEach((count, parentId) => {
+        if (count > ORG_CHART_MAX_DIRECT_REPORTS) {
+            errors.push(`Org chart owner "${parentId}" exceeds the ${ORG_CHART_MAX_DIRECT_REPORTS}-direct-report limit.`);
+        }
+    });
+
+    const visitState = new Map<string, 'visiting' | 'visited'>();
+    const visit = (nodeId: string, depth: number): void => {
+        const state = visitState.get(nodeId);
+        if (state === 'visiting') {
+            errors.push(`Org chart contains a reporting cycle involving "${nodeId}".`);
+            return;
+        }
+        if (state === 'visited') {
+            return;
+        }
+        visitState.set(nodeId, 'visiting');
+        if (depth > ORG_CHART_MAX_DEPTH) {
+            errors.push(`Org chart exceeds the maximum depth of ${ORG_CHART_MAX_DEPTH} tiers.`);
+        }
+        const children = orgChartSpec.nodes.filter(node => node.reportsTo?.trim() === nodeId);
+        children.forEach(child => {
+            const childId = typeof child.id === 'string' ? child.id.trim() : '';
+            if (childId) {
+                visit(childId, depth + 1);
+            }
+        });
+        visitState.set(nodeId, 'visited');
+    };
+
+    nodesById.forEach((_node, nodeId) => {
+        if (!visitState.has(nodeId)) {
+            visit(nodeId, 1);
+        }
+    });
+}
+
 function validateTimelinePayload(spec: DiagramSpec, errors: string[]): void {
     const events = spec.timelineEvents;
     if (!Array.isArray(events) || events.length === 0) {
@@ -352,6 +457,9 @@ function validateSpecializedPayload(spec: DiagramSpec, errors: string[]): void {
         case 'radar':
             validateRadarPayload(spec.radarSpec, errors);
             break;
+        case 'orgChart':
+            validateOrgChartPayload(spec.orgChartSpec, errors);
+            break;
         case 'timeline':
             validateTimelinePayload(spec, errors);
             break;
@@ -393,6 +501,12 @@ function validateRadarOwnership(spec: DiagramSpec, errors: string[]): void {
     }
 }
 
+function validateOrgChartOwnership(spec: DiagramSpec, errors: string[]): void {
+    if (spec.orgChartSpec && spec.intent !== 'orgChart') {
+        errors.push('DiagramSpec.orgChartSpec is only valid when intent is "orgChart".');
+    }
+}
+
 export function validateDiagramSpec(spec: DiagramSpec): DiagramSpecValidationResult {
     const errors: string[] = [];
 
@@ -407,6 +521,7 @@ export function validateDiagramSpec(spec: DiagramSpec): DiagramSpecValidationRes
 
     const usesSpecializedPayload = spec.intent === 'dataChart'
         || spec.intent === 'radar'
+        || spec.intent === 'orgChart'
         || spec.intent === 'circuit'
         || spec.intent === 'timeline'
         || spec.intent === 'swimlane'
@@ -433,6 +548,7 @@ export function validateDiagramSpec(spec: DiagramSpec): DiagramSpecValidationRes
 
     validateCircuitPayload(spec, errors);
     validateRadarOwnership(spec, errors);
+    validateOrgChartOwnership(spec, errors);
     validateSpecializedPayload(spec, errors);
 
     return {

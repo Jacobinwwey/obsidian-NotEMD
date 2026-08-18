@@ -159,6 +159,7 @@ export const STRINGS_ZH_TW: DeepPartial<NotemdEnglishStrings> = {
                 intentCircuit: '電路圖 (Circuitikz)',
                 intentDataChart: '資料圖表 (Vega-Lite)',
                 intentRadar: '雷達圖（Vega-Lite）',
+                intentOrgChart: '組織架構圖（責任歸屬）',
                 intentTimeline: '時間線',
                 intentSwimlane: '泳道流程圖',
                 intentQuadrant: '優先級四象限',

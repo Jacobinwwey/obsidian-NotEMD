@@ -1723,6 +1723,7 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
                 intentCircuit: diagramI18n.intentCircuit,
                 intentDataChart: diagramI18n.intentDataChart,
                 intentRadar: diagramI18n.intentRadar,
+                intentOrgChart: diagramI18n.intentOrgChart,
                 intentTimeline: diagramI18n.intentTimeline,
                 intentSwimlane: diagramI18n.intentSwimlane,
                 intentQuadrant: diagramI18n.intentQuadrant

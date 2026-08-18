@@ -88,4 +88,25 @@ describe('mermaid renderer', () => {
         expect(artifact.content).toContain('quadrantChart');
         expect(artifact.content).toContain('"Adapter registry": [0.8, 0.7]');
     });
+
+    test('renders org chart ownership as a deterministic flowchart', async () => {
+        const artifact = await new MermaidRenderer().render({
+            intent: 'orgChart',
+            title: 'Support ownership',
+            nodes: [],
+            orgChartSpec: {
+                nodes: [
+                    { id: 'director', label: 'Support Director', role: 'Front door' },
+                    { id: 'platform', label: 'Platform Team', reportsTo: 'director', scope: ['runtime', 'reliability'] },
+                    { id: 'incident', label: 'Incident Response', reportsTo: 'director', status: 'planned' }
+                ]
+            }
+        });
+
+        expect(artifact.content).toContain('flowchart TD');
+        expect(artifact.content).toContain('director["Support Director<br/>Front door"]');
+        expect(artifact.content).toContain('director --> platform');
+        expect(artifact.content).toContain('style incident stroke-dasharray: 5 5');
+        expect(mermaid.parse).toHaveBeenCalledWith(expect.stringContaining('flowchart TD'));
+    });
 });

@@ -39,7 +39,6 @@ const REFERENCE_ONLY_LAYOUTS: readonly ReferenceOnlyDiagramLayout[] = [
     ['loop', 'Loop / flywheel', 'type-loop.md'],
     ['nested', 'Nested', 'type-nested.md'],
     ['tree', 'Tree', 'type-tree.md'],
-    ['org-chart', 'Org chart', 'type-org-chart.md'],
     ['layer-stack', 'Layer stack', 'type-layers.md'],
     ['venn', 'Venn', 'type-venn.md'],
     ['pyramid-funnel', 'Pyramid / funnel', 'type-pyramid.md'],

@@ -369,4 +369,46 @@ describe('diagram spec validation', () => {
         expect(result.valid).toBe(false);
         expect(result.errors.join(' ')).toMatch(/exactly one point per axis|duplicated axis/i);
     });
+
+    test('accepts a bounded org chart with one root and reports-to edges', () => {
+        const result = validateDiagramSpec({
+            intent: 'orgChart',
+            title: 'Support ownership',
+            nodes: [],
+            orgChartSpec: {
+                nodes: [
+                    { id: 'director', label: 'Support Director', role: 'Front door' },
+                    { id: 'platform', label: 'Platform Team', reportsTo: 'director', scope: ['runtime', 'reliability'] },
+                    { id: 'incident', label: 'Incident Response', reportsTo: 'director', status: 'planned' }
+                ]
+            }
+        });
+
+        expect(result.valid).toBe(true);
+        expect(result.errors).toHaveLength(0);
+    });
+
+    test('rejects org charts with cycles, multiple roots, or too many direct reports', () => {
+        const result = validateDiagramSpec({
+            intent: 'orgChart',
+            title: 'Invalid ownership',
+            nodes: [],
+            orgChartSpec: {
+                nodes: [
+                    { id: 'a', label: 'A', reportsTo: 'b' },
+                    { id: 'b', label: 'B', reportsTo: 'a' },
+                    { id: 'c', label: 'C' },
+                    { id: 'd', label: 'D', reportsTo: 'c' },
+                    { id: 'e', label: 'E', reportsTo: 'c' },
+                    { id: 'f', label: 'F', reportsTo: 'c' },
+                    { id: 'g', label: 'G', reportsTo: 'c' },
+                    { id: 'h', label: 'H', reportsTo: 'c' },
+                    { id: 'i', label: 'I', reportsTo: 'c' }
+                ]
+            }
+        });
+
+        expect(result.valid).toBe(false);
+        expect(result.errors.join(' ')).toMatch(/root|cycle|direct reports/i);
+    });
 });

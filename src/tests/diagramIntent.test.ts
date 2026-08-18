@@ -122,6 +122,17 @@ Render a radar chart comparing reliability, latency, and cost across the current
         expect(result.reasons.join(' ')).toMatch(/radar|profile/i);
     });
 
+    test('infers org-chart intent for explicit ownership hierarchies', () => {
+        const result = inferDiagramIntent(`# Support org chart
+
+The support director owns the platform team and the incident response team.
+Each team has a direct owner and a reporting structure with escalation paths.
+`);
+
+        expect(result.intent).toBe('orgChart');
+        expect(result.reasons.join(' ')).toMatch(/org|report|ownership/i);
+    });
+
     test('falls back to mindmap for general hierarchical notes', () => {
         const markdown = `# Distributed Systems
 

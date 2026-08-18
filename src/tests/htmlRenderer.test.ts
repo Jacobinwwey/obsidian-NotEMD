@@ -88,6 +88,27 @@ describe('html renderer', () => {
         expect(artifact.content).toContain('8');
     });
 
+    test('renders org chart ownership as an accessible semantic table fallback', async () => {
+        const renderer = new HtmlRenderer();
+        const artifact = await renderer.render({
+            intent: 'orgChart',
+            title: 'Support ownership',
+            nodes: [],
+            orgChartSpec: {
+                nodes: [
+                    { id: 'director', label: 'Support Director', role: 'Front door' },
+                    { id: 'platform', label: 'Platform Team', reportsTo: 'director', scope: ['runtime'], status: 'active' }
+                ]
+            }
+        });
+
+        expect(artifact.target).toBe('html');
+        expect(artifact.content).toContain('<th>Owner</th>');
+        expect(artifact.content).toContain('Support Director');
+        expect(artifact.content).toContain('Platform Team');
+        expect(artifact.content).toContain('Front door');
+    });
+
     test('localizes fallback headings using output language', async () => {
         const renderer = new HtmlRenderer();
         const spec: DiagramSpec = {

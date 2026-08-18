@@ -16,6 +16,7 @@ export interface DiagramCatalogLabelCopy {
     intentCircuit: string;
     intentDataChart: string;
     intentRadar: string;
+    intentOrgChart: string;
     intentTimeline: string;
     intentSwimlane: string;
     intentQuadrant: string;
@@ -45,6 +46,7 @@ export function getLocalizedDiagramIntentLabel(
         case 'circuit': return copy.intentCircuit;
         case 'dataChart': return copy.intentDataChart;
         case 'radar': return copy.intentRadar;
+        case 'orgChart': return copy.intentOrgChart;
         case 'timeline': return copy.intentTimeline;
         case 'swimlane': return copy.intentSwimlane;
         case 'quadrant': return copy.intentQuadrant;

@@ -187,4 +187,16 @@ Top ranked issues this week:
         expect(result.mermaidDiagramType).toBeNull();
         expect(result.fallbackTargets).toEqual(['html']);
     });
+
+    test('routes org charts through the dedicated Mermaid flowchart adapter', () => {
+        const result = buildDiagramPlan('# Support org chart', {
+            compatibilityMode: 'best-fit',
+            requestedIntent: 'orgChart'
+        });
+
+        expect(result.intent).toBe('orgChart');
+        expect(result.renderTarget).toBe('mermaid');
+        expect(result.mermaidDiagramType).toBe('flowchart');
+        expect(result.fallbackTargets).toEqual(['html']);
+    });
 });

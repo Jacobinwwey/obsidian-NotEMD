@@ -96,6 +96,20 @@ export function inferDiagramIntent(markdown: string): DiagramIntentResult {
         return scoreResult('radar', 0.86, ['multi-axis radar or capability profile vocabulary detected']);
     }
 
+    const orgChartKeywords = countMatches(normalized, [
+        /\borg(?:anizational)?\s+chart\b/g,
+        /\breporting\s+structure\b/g,
+        /\bdirect\s+reports?\b/g,
+        /\baccountable\s+owner\b/g,
+        /\bownership\s+hierarchy\b/g,
+        /\bmanager\s+of\b/g,
+        /\breports?\s+to\b/g,
+        /\bescalation\s+path(s)?\b/g
+    ]);
+    if (orgChartKeywords > 0) {
+        return scoreResult('orgChart', 0.85, ['organizational ownership and reporting vocabulary detected']);
+    }
+
     const chartReasons: string[] = [];
     const hasMarkdownTable = /\|.+\|/.test(normalized) && /\|\s*-+\s*\|/.test(normalized);
     const numericCells = (normalized.match(/\|\s*\d+(?:\.\d+)?\s*\|/g) ?? []).length;

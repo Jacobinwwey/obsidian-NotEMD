@@ -173,4 +173,4 @@ Circuitikz exporter 现在让六个 golden renderer 共享一个 standalone-docu
 
 ### 收敛后的候选准入（2026-08-18）
 
-收敛门禁现在足以支持一次窄范围目录扩展。`timeline`、`swimlane`、`quadrant` 各自拥有 typed payload 字段、parser-backed Mermaid adapter、intent/planner 路由、与旧 spec 兼容的读取、确定性 fixture、双语 gallery 行和定向测试。三者的 `compatibleTargets` 有意严格为 `['mermaid']`；不宣称 editable HTML/SVG、Draw.io 或 Drawnix 支持。webview presentation registry 也已把 Mermaid/Vega-Lite host shell、HTML document passthrough 与 source-only fallback 收敛到一个 keyed contract。
+收敛门禁现在足以支持一次窄范围目录扩展。`timeline`、`swimlane`、`quadrant` 各自拥有 typed payload 字段、parser-backed Mermaid adapter、intent/planner 路由、与旧 spec 兼容的读取、确定性 fixture、双语 gallery 行和定向测试。三者的 `compatibleTargets` 有意严格为 `['mermaid']`；不宣称 editable HTML/SVG、Draw.io 或 Drawnix 支持。`org-chart` 也已作为受限责任归属 intent 准入，具备单根/环路/深度/直接汇报数校验、Mermaid adapter、HTML 语义表格 fallback 与确定性 gallery 证据。webview presentation registry 也已把 Mermaid/Vega-Lite host shell、HTML document passthrough 与 source-only fallback 收敛到一个 keyed contract。

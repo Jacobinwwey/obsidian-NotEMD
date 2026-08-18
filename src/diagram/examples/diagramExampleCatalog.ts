@@ -257,6 +257,44 @@ const EXECUTABLE_DIAGRAM_EXAMPLES: readonly DiagramExampleDefinition[] = [
         }
     },
     {
+        typeId: 'org-chart',
+        fixtureId: 'org-chart-support-ownership',
+        title: 'Support ownership',
+        selectionRationale: 'Use when the reader needs accountable owners, reporting paths, and visible coverage gaps.',
+        sourceIntent: 'orgChart',
+        spec: {
+            intent: 'orgChart',
+            title: 'Support ownership',
+            summary: 'A bounded ownership hierarchy with one front door and two accountable teams.',
+            nodes: [],
+            orgChartSpec: {
+                nodes: [
+                    {
+                        id: 'director',
+                        label: 'Support Director',
+                        role: 'Front door',
+                        scope: ['triage', 'escalation']
+                    },
+                    {
+                        id: 'platform',
+                        label: 'Platform Team',
+                        role: 'Runtime owner',
+                        scope: ['reliability', 'deployments'],
+                        reportsTo: 'director'
+                    },
+                    {
+                        id: 'incident',
+                        label: 'Incident Response',
+                        role: 'Escalation owner',
+                        scope: ['incidents', 'postmortems'],
+                        reportsTo: 'director',
+                        status: 'planned'
+                    }
+                ]
+            }
+        }
+    },
+    {
         typeId: 'timeline',
         fixtureId: 'timeline-roadmap',
         title: 'Delivery roadmap',

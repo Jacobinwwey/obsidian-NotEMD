@@ -8,6 +8,7 @@ import { renderStateMermaid } from '../../diagram/adapters/mermaid/stateAdapter'
 import { renderSwimlaneMermaid } from '../../diagram/adapters/mermaid/swimlaneAdapter';
 import { renderTimelineMermaid } from '../../diagram/adapters/mermaid/timelineAdapter';
 import { renderQuadrantMermaid } from '../../diagram/adapters/mermaid/quadrantAdapter';
+import { renderOrgChartMermaid } from '../../diagram/adapters/mermaid/orgChartAdapter';
 import { validateMermaidDefinition } from '../../diagram/adapters/mermaid/validator';
 import { DiagramRenderer, RenderArtifact } from '../types';
 
@@ -24,7 +25,8 @@ export class MermaidRenderer implements DiagramRenderer {
             || spec.intent === 'stateDiagram'
             || spec.intent === 'timeline'
             || spec.intent === 'swimlane'
-            || spec.intent === 'quadrant';
+            || spec.intent === 'quadrant'
+            || spec.intent === 'orgChart';
     }
 
     async render(spec: DiagramSpec): Promise<RenderArtifact> {
@@ -62,6 +64,10 @@ export class MermaidRenderer implements DiagramRenderer {
 
         if (spec.intent === 'quadrant') {
             return this.buildArtifact(spec, renderQuadrantMermaid(spec));
+        }
+
+        if (spec.intent === 'orgChart') {
+            return this.buildArtifact(spec, renderOrgChartMermaid(spec));
         }
 
         throw new Error(`MermaidRenderer does not support diagram intent "${spec.intent}".`);

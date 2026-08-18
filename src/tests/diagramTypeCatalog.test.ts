@@ -15,7 +15,7 @@ describe('executable diagram type catalog', () => {
     });
 
     test('contains only complete, example-backed type definitions', () => {
-        expect(EXECUTABLE_DIAGRAM_TYPES).toHaveLength(14);
+        expect(EXECUTABLE_DIAGRAM_TYPES).toHaveLength(15);
         expect(EXECUTABLE_DIAGRAM_TYPES.every(type => Boolean(type.exampleFixtureId))).toBe(true);
         expect(EXECUTABLE_DIAGRAM_TYPES.every(type => Boolean((type as any).semanticPattern))).toBe(true);
         expect(EXECUTABLE_DIAGRAM_TYPES.every(type => Array.isArray((type as any).visualRoles)
@@ -24,13 +24,15 @@ describe('executable diagram type catalog', () => {
             'timeline',
             'swimlane',
             'quadrant',
-            'radar-chart'
+            'radar-chart',
+            'org-chart'
         ]));
     });
 
     test('resolves known catalog entries and rejects unknown identifiers', () => {
         expect(getExecutableDiagramType('circuit')).toMatchObject({ intent: 'circuit' });
         expect(getExecutableDiagramType('radar-chart')).toMatchObject({ intent: 'radar' });
+        expect(getExecutableDiagramType('org-chart')).toMatchObject({ intent: 'orgChart' });
     });
 
     test('describes Drawnix as one native tree renderer rather than a delivery selector', () => {

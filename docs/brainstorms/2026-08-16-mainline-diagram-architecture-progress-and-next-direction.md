@@ -25,7 +25,7 @@ The correct next move is convergence. Adding more visual types before closing co
 
 | Area | Current state | Evidence |
 |---|---|---|
-| Semantic domain | 14 executable semantic diagram types | `src/diagram/diagramTypeCatalog.ts`, `src/diagram/examples/diagramExampleCatalog.ts` |
+| Semantic domain | 15 executable semantic diagram types | `src/diagram/diagramTypeCatalog.ts`, `src/diagram/examples/diagramExampleCatalog.ts` |
 | Render targets | 8 registered targets; target identity is separate from export format | `src/rendering/rendererRegistry.ts`, `src/rendering/renderTargetCatalog.ts` |
 | Export formats | SVG/PNG/PDF where the target supports them; editable HTML/SVG carries `previewSvg` | target catalog and renderer integration tests |
 | Discoverability | Settings selector shows deterministic thumbnails and a direct “use this type” action | `docs/assets/diagrams/manifest.json`, `diagramExamplePreview.test.ts` |
@@ -110,7 +110,7 @@ The reference taxonomy still supplies architecture, current-state, loop, nested,
 4. **Consumer evidence:** run real Draw.io/Drawnix/Circuitikz gates where tooling exists; record unavailable tools rather than claiming interoperability.
 5. **Drawnix convergence:** the production source-coverage and relation-router names are canonical; the old source-coverage export and router module are compatibility-only. Shared rectangle/polyline and text measurement/wrapping primitives are centralized, and the standalone Plait consumer gate proves the production fixture crosses the public consumer boundary. Real Drawnix desktop/app import remains a separate external gate.
 6. **Circuitikz convergence:** the six golden renderers share the standalone-document and component-label helpers while preserving deterministic output. Keep `runCircuitikzRepairLoop()` as a maintainer-only acceptance SDK boundary; normal generation remains deterministic and does not invoke an LLM repair loop. Wire a real CLI/desktop caller only as a separately authorized repair command with fresh compile/render evidence.
-7. **Reference admission:** timeline, swimlane, and quadrant are shipped as Mermaid-only types with deterministic fixtures and parser-backed gallery evidence. Radar remains blocked until a real Vega-Lite adapter exists; all other reference layouts remain gated.
+7. **Reference admission:** timeline, swimlane, quadrant, and org chart are shipped as bounded Mermaid types with deterministic fixtures and parser-backed gallery evidence; Radar is shipped as a bounded Vega-Lite type. All other reference layouts remain gated.
 8. **Operation contract convergence:** keep the registry-independent schema runtime and registry admission as the fail-closed boundary. Only migrate declarations into generated JSON when the generator can preserve host/core contract separation, human examples, and stable unknown-field behavior.
 
 ## Acceptance Gates
@@ -129,4 +129,4 @@ The reference taxonomy still supplies architecture, current-state, loop, nested,
 
 ## Verification Snapshot
 
-Fresh verification for this increment: 261 Jest suites passed (2,294 tests passed, 1 skipped); TypeScript/esbuild build passed; VitePress docs build passed; production gallery check passed with 14 SVG/PNG pairs; render-host audit and i18n audit passed; the standalone Drawnix Plait consumer gate passed with 20 nodes, 1 root, and 12 relations; semantic verification helper passed; and Circuitikz smoke passed with TeX Live 2023 `pdflatex` (6/6 PDFs, 0 errors/0 warnings). `git diff --check` passed. Draw.io and a real Drawnix desktop application are unavailable in this workspace, so no application-level interoperability claim is made. Full repository lint remains a separate baseline debt track.
+Fresh verification for this increment: 262 Jest suites passed (2,303 tests passed, 1 skipped); TypeScript/esbuild build passed; VitePress docs build passed; production gallery check passed with 15 SVG/PNG pairs; render-host audit and i18n audit passed; the standalone Drawnix Plait consumer gate passed with 20 nodes, 1 root, and 12 relations; semantic verification checklist generation passed (the command emits a review template, not automatic environment check results); and Circuitikz smoke passed with TeX Live 2023 `pdflatex` (6/6 PDFs, 0 errors/0 warnings). `git diff --check` passed. Draw.io and a real Drawnix desktop application are unavailable in this workspace, so no application-level interoperability claim is made. Full repository lint remains a separate baseline debt track.

@@ -53,6 +53,8 @@ function resolveMermaidDiagramType(intent: DiagramIntent): MermaidDiagramType | 
             return 'timeline';
         case 'quadrant':
             return 'quadrantChart';
+        case 'orgChart':
+            return 'flowchart';
         case 'swimlane':
             return 'flowchart';
         default:

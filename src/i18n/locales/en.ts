@@ -147,6 +147,7 @@ export const STRINGS_EN = {
                 intentCircuit: 'Circuit diagram',
                 intentDataChart: 'Data chart (Vega-Lite)',
                 intentRadar: 'Radar profile (Vega-Lite)',
+                intentOrgChart: 'Org chart (ownership)',
                 intentTimeline: 'Timeline',
                 intentSwimlane: 'Swimlane flow',
                 intentQuadrant: 'Priority quadrant',

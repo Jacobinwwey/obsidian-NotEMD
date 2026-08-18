@@ -25,6 +25,7 @@
 | `canvas-map` | 空间分组概念 | `json-canvas` | `json-canvas` |
 | `data-chart` | 共享坐标轴上的度量比较 | `vega-lite` | `vega-lite`、`html` |
 | `radar-chart` | 多轴能力画像比较 | `vega-lite` | `vega-lite`、`html` |
+| `org-chart` | 责任归属层级与汇报路径 | `mermaid` | `mermaid`、`html` |
 | `timeline` | 按时间排序的里程碑 | `mermaid` | `mermaid` |
 | `swimlane` | 跨团队职责流转 | `mermaid` | `mermaid` |
 | `quadrant` | 双轴优先级矩阵 | `mermaid` | `mermaid` |
@@ -72,6 +73,10 @@
 
 ![能力画像](./assets/diagrams/radar-capability-profile.png)
 
+### 组织架构图
+
+![支持责任归属](./assets/diagrams/org-chart-support-ownership.png)
+
 ### Timeline
 
 ![交付路线图](./assets/diagrams/timeline-roadmap.png)
@@ -90,8 +95,8 @@
 
 ## 仅参考布局
 
-以下 23 个 ID 来自 `ref/diagram-design`，用于对比和未来准入讨论。它们统一使用 `diagram-design:*` 命名空间，固定参考 revision `09df49d8d1a1c7fb2efdfcdc7a2a0713534350a6`，不会进入运行时类型选择器：
+以下 22 个 ID 来自 `ref/diagram-design`，用于对比和未来准入讨论。它们统一使用 `diagram-design:*` 命名空间，固定参考 revision `09df49d8d1a1c7fb2efdfcdc7a2a0713534350a6`，不会进入运行时类型选择器：
 
-`architecture`、`it-current-state`、`flowchart`、`sequence`、`state-machine`、`er-data-model`、`loop`、`nested`、`tree`、`org-chart`、`layer-stack`、`venn`、`pyramid-funnel`、`bar-chart`、`line-chart`、`gantt`、`scatter-plot`、`high-level`、`process`、`medallion`、`data-flow`、`dp-integration`、`dp-security-matrix`。
+`architecture`、`it-current-state`、`flowchart`、`sequence`、`state-machine`、`er-data-model`、`loop`、`nested`、`tree`、`layer-stack`、`venn`、`pyramid-funnel`、`bar-chart`、`line-chart`、`gantt`、`scatter-plot`、`high-level`、`process`、`medallion`、`data-flow`、`dp-integration`、`dp-security-matrix`。
 
 将某个布局升级为交付能力，必须同时具备语义输入契约、生产 renderer、fixture、target/export 矩阵、无障碍检查和确定性的 gallery 输出。仅仅“看起来像参考项目”不能证明已经支持。

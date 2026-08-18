@@ -91,7 +91,7 @@ Cloudy 与 Drawnix 的参考项目分析已记录在 `docs/brainstorms/2026-07-0
 
 Mermaid 收敛现在已完成至 Phase 3。`normalizeMermaidDiagram` 是无运行时依赖的 canonical 边界；legacy 修复链是保持顺序的 35-stage registry，带 family 门控与幂等测试；共享 scanner 与 canonical fence helper 负责块边界；`ensureMermaidInitialized()` 保护插件验证 runtime 的配置状态。预览 webview 有意保留主题专属初始化，因为它们属于独立 runtime。
 
-目录也已通过受限证据门禁接纳 `timeline`、`swimlane`、`quadrant`。三者严格为 Mermaid-only（`compatibleTargets: ['mermaid']`），不代表 editable HTML/SVG、Draw.io 或 Drawnix 支持。target adapter 与 webview presentation dispatch 现在采用 keyed registry；没有内嵌 runtime 的目标显式走 source-only fallback。
+目录也已通过受限证据门禁接纳 `timeline`、`swimlane`、`quadrant` 与 `org-chart`。Timeline、swimlane、quadrant 严格为 Mermaid-only（`compatibleTargets: ['mermaid']`）；org-chart 是受限 Mermaid 责任归属 adapter，并提供 HTML 语义表格 fallback。任何一项都不代表具备 editable HTML/SVG、Draw.io 或 Drawnix 支持。Radar 仍是独立的 Vega-Lite 能力画像类型，并提供 HTML 表格 fallback。target adapter 与 webview presentation dispatch 现在采用 keyed registry；没有内嵌 runtime 的目标显式走 source-only fallback。
 
 当前议程是边界硬化，而不是无界扩展布局类型：
 

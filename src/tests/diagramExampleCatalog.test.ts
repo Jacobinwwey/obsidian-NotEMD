@@ -35,7 +35,8 @@ describe('executable diagram example catalog', () => {
             'timeline',
             'swimlane',
             'quadrant',
-            'radar-chart'
+            'radar-chart',
+            'org-chart'
         ]));
     });
 

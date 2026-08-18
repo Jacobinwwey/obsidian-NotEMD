@@ -161,6 +161,7 @@ export const STRINGS_ZH_CN: DeepPartial<NotemdEnglishStrings> = {
                 intentCircuit: '电路图',
                 intentDataChart: '数据图表 (Vega-Lite)',
                 intentRadar: '雷达图（Vega-Lite）',
+                intentOrgChart: '组织架构图（责任归属）',
                 intentTimeline: '时间线',
                 intentSwimlane: '泳道流程图',
                 intentQuadrant: '优先级四象限',

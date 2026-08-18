@@ -150,6 +150,19 @@ export const EXECUTABLE_DIAGRAM_TYPES: readonly ExecutableDiagramTypeDefinition[
         exampleFixtureId: 'radar-capability-profile'
     },
     {
+        id: 'org-chart',
+        intent: 'orgChart',
+        family: 'structure',
+        semanticPattern: 'Ownership hierarchy with accountable reporting paths',
+        promptProfileId: 'org-chart',
+        rendererOperationId: 'mermaid-org-chart',
+        rendererTarget: 'mermaid',
+        defaultTarget: 'mermaid',
+        compatibleTargets: ['mermaid', 'html'],
+        visualRoles: ['root-owner', 'team', 'accountable-owner', 'scope', 'coverage-gap'],
+        exampleFixtureId: 'org-chart-support-ownership'
+    },
+    {
         id: 'timeline',
         intent: 'timeline',
         family: 'behavior',

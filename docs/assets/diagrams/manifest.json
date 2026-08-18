@@ -102,6 +102,16 @@
       "svgSha256": "1f277ba4675e008b3799b840fe06bd5c0a53534cf940cb4e7f54c712984fa430"
     },
     {
+      "typeId": "org-chart",
+      "fixtureId": "org-chart-support-ownership",
+      "title": "Support ownership",
+      "target": "mermaid",
+      "previewTarget": "mermaid",
+      "svgPath": "./org-chart-support-ownership.svg",
+      "pngPath": "./org-chart-support-ownership.png",
+      "svgSha256": "91870e71999f0a6a856806d5d1de3b9c210f68d6d8cb621cf071791442470d01"
+    },
+    {
       "typeId": "timeline",
       "fixtureId": "timeline-roadmap",
       "title": "Delivery roadmap",
@@ -119,7 +129,7 @@
       "previewTarget": "mermaid",
       "svgPath": "./swimlane-release.svg",
       "pngPath": "./swimlane-release.png",
-      "svgSha256": "37d8a40fb143e6a734a90bb5974ca2d2aed7ac57e95195dac0d6c031aad39201"
+      "svgSha256": "4db261db1ea5fd347355bd02ed95e04c9df450fcb62130a773afd6259880a8bd"
     },
     {
       "typeId": "quadrant",

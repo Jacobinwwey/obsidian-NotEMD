@@ -25,6 +25,7 @@ target descriptor 是 artifact 机制的运行时权威。其 `exportFormats` �
 | `canvas-map` | 空间分组概念 | JSON Canvas | `canvas-map-domains` | iframe / Canvas 产物 | source `.canvas`、SVG、PNG、PDF |
 | `data-chart` | 共享坐标轴上的度量比较 | Vega-Lite | `data-chart-trend` | sandbox iframe | source `.json` / Vault `.md`、SVG、PNG、PDF |
 | `radar-chart` | 多轴能力画像比较 | Vega-Lite | `radar-capability-profile` | sandbox iframe | source `.json` / Vault `.md`、SVG、PNG、PDF；HTML 表格 fallback |
+| `org-chart` | 责任归属层级与汇报路径 | Mermaid | `org-chart-support-ownership` | Mermaid iframe | source `.md`；HTML 语义表格 fallback |
 | `timeline` | 按时间排序的里程碑 | Mermaid | `timeline-roadmap` | Mermaid iframe | source `.md`、SVG、PNG、PDF |
 | `swimlane` | 跨团队职责流转 | Mermaid | `swimlane-release` | Mermaid iframe | source `.md`、SVG、PNG、PDF |
 | `quadrant` | 双轴优先级矩阵 | Mermaid | `quadrant-priorities` | Mermaid iframe | source `.md`、SVG、PNG、PDF |
@@ -47,7 +48,7 @@ target descriptor 是 artifact 机制的运行时权威。其 `exportFormats` �
 
 ## 参考/计划类型
 
-以下名称来自 `ref/diagram-design`，当前不可在 Notemd 选择：architecture、IT current-state、loop/flywheel、nested、tree、org chart、layer stack、Venn、pyramid/funnel、bar、line、Gantt、scatter、high-level、process、medallion、data flow、DP integration 和 DP security matrix。Radar/spider 已通过候选准入，成为独立的 Vega-Lite 类型，并提供确定性的 HTML 表格 fallback。Timeline、swimlane、quadrant 仍严格是 Mermaid-only 类型，不宣称 editable HTML/SVG、Draw.io 或 Drawnix target。
+以下名称来自 `ref/diagram-design`，当前不可在 Notemd 选择：architecture、IT current-state、loop/flywheel、nested、tree、layer stack、Venn、pyramid/funnel、bar、line、Gantt、scatter、high-level、process、medallion、data flow、DP integration 和 DP security matrix。Radar/spider 与 org chart 已通过候选准入，成为独立的受限类型；Radar 使用 Vega-Lite renderer 与确定性的 HTML 表格 fallback，org chart 使用 Mermaid ownership adapter 与 HTML 语义表格 fallback。Timeline、swimlane、quadrant 仍严格是 Mermaid-only 类型，不宣称 editable HTML/SVG、Draw.io 或 Drawnix target。
 
 ## 预览与 gallery 契约
 

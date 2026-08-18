@@ -1,4 +1,4 @@
-import { DiagramSpec } from './types';
+import { DiagramOrgChartStatus, DiagramSpec } from './types';
 
 function stripCodeFence(raw: string): string {
     const trimmed = raw.trim();
@@ -288,6 +288,61 @@ function normalizeRadarSpec(rawRadarSpec: unknown): DiagramSpec['radarSpec'] {
     return { axes, series };
 }
 
+function normalizeOrgChartSpec(rawOrgChartSpec: unknown): DiagramSpec['orgChartSpec'] {
+    if (!rawOrgChartSpec || typeof rawOrgChartSpec !== 'object' || Array.isArray(rawOrgChartSpec)) {
+        return undefined;
+    }
+
+    const payload = rawOrgChartSpec as Record<string, unknown>;
+    const rawNodes = Array.isArray(payload.nodes)
+        ? payload.nodes
+        : Array.isArray(payload.people)
+            ? payload.people
+            : [];
+
+    const nodes = rawNodes.map((rawNode: unknown, index) => {
+        const record = rawNode && typeof rawNode === 'object'
+            ? rawNode as Record<string, unknown>
+            : {};
+        const explicitLabel = readTrimmedString(record.label)
+            ?? readTrimmedString(record.name);
+        const title = readTrimmedString(record.title);
+        const label = explicitLabel
+            ?? title
+            ?? `Owner ${index + 1}`;
+        const id = readTrimmedString(record.id)
+            ?? readTrimmedString(record.key)
+            ?? slugify(label)
+            ?? `owner-${index + 1}`;
+        const rawScope = record.scope ?? record.ownership ?? record.responsibilities;
+        const scope = Array.isArray(rawScope)
+            ? rawScope.filter((value): value is string => typeof value === 'string')
+                .map(value => value.trim())
+                .filter(Boolean)
+            : typeof rawScope === 'string'
+                ? rawScope.split(/[,;|]/).map(value => value.trim()).filter(Boolean)
+                : undefined;
+        const status = readTrimmedString(record.status);
+
+        return {
+            id,
+            label,
+            role: readTrimmedString(record.role)
+                ?? readTrimmedString(record.position)
+                ?? (explicitLabel && title && title !== explicitLabel ? title : undefined),
+            scope,
+            reportsTo: readTrimmedString(record.reportsTo)
+                ?? readTrimmedString(record.parentId)
+                ?? readTrimmedString(record.parent)
+                ?? readTrimmedString(record.managerId)
+                ?? readTrimmedString(record.manager),
+            status: status as DiagramOrgChartStatus | undefined
+        };
+    });
+
+    return { nodes };
+}
+
 function normalizeSpec(candidate: any): DiagramSpec {
     const payload = candidate?.diagramSpec ?? candidate;
     const title = typeof payload.title === 'string' ? payload.title : '';
@@ -307,6 +362,7 @@ function normalizeSpec(candidate: any): DiagramSpec {
         callouts: Array.isArray(payload.callouts) ? payload.callouts : [],
         dataSeries: normalizeDataSeries(payload.dataSeries, title),
         radarSpec: normalizeRadarSpec(payload.radarSpec),
+        orgChartSpec: normalizeOrgChartSpec(payload.orgChartSpec),
         timelineEvents: Array.isArray(payload.timelineEvents)
             ? payload.timelineEvents.map((event: any) => ({
                 id: event?.id,

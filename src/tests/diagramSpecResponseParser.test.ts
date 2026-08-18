@@ -163,6 +163,42 @@ describe('diagram spec response parser', () => {
         ]);
     });
 
+    test('normalizes org chart ownership fields into a dedicated payload', () => {
+        const spec = parseDiagramSpecResponse(JSON.stringify({
+            intent: 'orgChart',
+            title: 'Support ownership',
+            nodes: [],
+            orgChartSpec: {
+                people: [
+                    { id: 'director', name: 'Support Director', title: 'Front door' },
+                    { id: 'platform', name: 'Platform Team', managerId: 'director', scope: 'runtime, reliability' }
+                ]
+            }
+        }));
+
+        expect(spec.intent).toBe('orgChart');
+        expect(spec.orgChartSpec?.nodes).toEqual([
+            { id: 'director', label: 'Support Director', role: 'Front door', scope: undefined, reportsTo: undefined, status: undefined },
+            { id: 'platform', label: 'Platform Team', role: undefined, scope: ['runtime', 'reliability'], reportsTo: 'director', status: undefined }
+        ]);
+    });
+
+    test('does not duplicate title-only owners into both label and role', () => {
+        const spec = parseDiagramSpecResponse(JSON.stringify({
+            intent: 'orgChart',
+            title: 'Leadership',
+            nodes: [],
+            orgChartSpec: {
+                people: [{ title: 'Chief Technology Officer' }]
+            }
+        }));
+
+        expect(spec.orgChartSpec?.nodes[0]).toMatchObject({
+            label: 'Chief Technology Officer',
+            role: undefined
+        });
+    });
+
     test('throws when no valid json object can be extracted', () => {
         expect(() => parseDiagramSpecResponse('not valid json')).toThrow(/Unable to parse DiagramSpec/i);
     });
