@@ -52,6 +52,14 @@ describe('diagram spec prompt builder', () => {
         expect(prompt).toMatch(/choose a non-dataChart intent/i);
     });
 
+    test('documents the independent radar payload contract', () => {
+        const prompt = buildDiagramSpecPrompt({ requiredIntent: 'radar' });
+
+        expect(prompt).toMatch(/radarSpec/i);
+        expect(prompt).toMatch(/exactly one point per axis/i);
+        expect(prompt).toMatch(/Supported intent[s]?:[\s\S]*radar/i);
+    });
+
     test('requires constrained CircuitSpec output for circuitikz render target', () => {
         const prompt = buildDiagramSpecPrompt({
             preferredIntent: 'circuit',

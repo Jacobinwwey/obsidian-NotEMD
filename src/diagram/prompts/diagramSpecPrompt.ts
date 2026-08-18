@@ -19,6 +19,8 @@ export function buildDiagramSpecPrompt(options: DiagramSpecPromptOptions = {}): 
     const isDrawnixMindMapRequest = options.preferredIntent === 'drawnixMindmap'
         || options.requiredIntent === 'drawnixMindmap'
         || options.preferredRenderTarget === 'drawnix';
+    const isRadarRequest = options.preferredIntent === 'radar'
+        || options.requiredIntent === 'radar';
     const preferredIntentLine = options.requiredIntent
         ? `REQUIRED diagram intent: ${options.requiredIntent}. You MUST use this exact intent. Do not choose any other intent under any circumstances.`
         : options.preferredIntent
@@ -135,6 +137,8 @@ The deterministic renderer, not the model, emits the complete LaTeX document wit
         ? 'Supported intent: circuit'
         : isDrawnixMindMapRequest
         ? 'Supported intent: drawnixMindmap'
+        : isRadarRequest
+        ? 'Supported intent: radar'
         : `Supported intents:
 - mindmap
 - flowchart
@@ -145,6 +149,7 @@ The deterministic renderer, not the model, emits the complete LaTeX document wit
 - canvasMap
 - circuit
 - dataChart
+- radar
 - timeline
 - swimlane
 - quadrant`;
@@ -173,6 +178,7 @@ Mermaid candidate intent contracts:
 - For timeline, set intent to timeline and provide timelineEvents[]. Each event requires id, date (string or number), label, and optional details[] strings. Do not encode timeline events only as generic nodes.
 - For swimlane, set intent to swimlane and provide swimlaneLanes[]. Each lane requires id, label, and a non-empty steps[] list. Each step requires id and label; nextStepId may reference another step in the same lane.
 - For quadrant, set intent to quadrant and provide quadrant with xAxisLabel [low, high], yAxisLabel [low, high], exactly four quadrantLabels, and quadrant items containing id, label, and x/y numbers in the inclusive 0..1 range.
+- For radar, set intent to radar and provide radarSpec. radarSpec.axes must contain 3 to 12 unique axes with id, label, and an optional positive max. radarSpec.series must contain 1 to 8 series; each series requires id, label, and exactly one point per axis. Each point requires axisId and a finite non-negative value. Do not use layoutHints.chartType for radar.
 ${targetLanguageLine}
 
 Required DiagramSpec fields:
@@ -188,6 +194,7 @@ Required DiagramSpec fields:
 - sourceLanguage
 - outputLanguage
 - evidenceRefs
+- radarSpec when intent is radar
 
 Validation rules:
 - Use stable node ids.
@@ -200,6 +207,7 @@ Validation rules:
 - For dataChart intent, set layoutHints.chartType to one of: ${supportedChartTypes}.
 - Use scatter for paired numeric x/y observations, pie for part-to-whole categorical shares, and table when ranked/tabular rows communicate better than axes.
 - For timeline, swimlane, and quadrant intents, use only the dedicated payload described above and keep identifiers stable and unique.
+- For radar intent, keep axis order stable and use exactly one point per axis so all series share the same scale.
 
 Return a single valid DiagramSpec JSON object.`;
 }

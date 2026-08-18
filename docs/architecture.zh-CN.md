@@ -150,7 +150,7 @@ flowchart LR
     subgraph Target["输出目标"]
         MERMAID["Mermaid<br/>（流程图、时序、类、ER、状态、思维导图、timeline、swimlane、quadrant）"]
         CANVAS["JSON Canvas<br/>（画布图）"]
-        VEGA["Vega-Lite<br/>（数据图表）"]
+        VEGA["Vega-Lite<br/>（数据图表、雷达图）"]
         HTML["HTML 回退"]
         FIGURE["可编辑 HTML/SVG"]
         BOARD["Draw.io / Drawnix"]
@@ -201,6 +201,7 @@ flowchart LR
 | `quadrant` | mermaid | MermaidRenderer | 弹窗/iframe | source `.md`、SVG、PNG、PDF |
 | `canvasMap` | json-canvas | JsonCanvasRenderer | 弹窗/iframe | source `.canvas`、SVG、PNG、PDF |
 | `dataChart` | vega-lite | VegaLiteRenderer | 弹窗/iframe（沙盒） | source `.json` / Vault `.md`、SVG、PNG、PDF |
+| `radar` | vega-lite | VegaLiteRenderer | 弹窗/iframe（沙盒） | source `.json` / Vault `.md`、SVG、PNG、PDF；HTML 表格 fallback |
 | `circuit` | circuitikz | CircuitikzRenderer | SVG companion 或 source-only 预览 | `.tex`、SVG、PNG、PDF |
 
 `drawnixMindmap` 是唯一的原生 Drawnix 图表意图。它把 `DiagramSpec.nodes` 投影为可编辑的知识导图 forest，并由 Notemd 的已布局投影生成 SVG companion。关系布局分两次计算：第一步按已测量标签宽度预留水平 gutter；节点落位后，第二步按端点相对 root 的方位分类。同侧关系在外侧 gutter 中分配位于两个端点之间的行，跨 forest 关系进入底部通道。router 只处理避障端点接入，通道位置由分配器负责。预留通道会先尝试确定性的水平接入；若所有水平端口组合都无法抵达预留行，grid retry 才加入节点顶部和底部端口，标签仍落在原定通道中。这样不会因为分支封住两侧端口而拒绝一张仍有外部出口的复杂树，也不引入节点数、层级深度或关系数量配额。source coverage 也遵循这一规则：Markdown 标题链与未匹配的模型分支保留原有层级和 ID。只有实际发生语义合并时才会重映射关系边；无效、重复或重复层级所有权的关系边才会被丢弃。当前 native board 由上游 `withMind` 决定子节点落位，因此 SVG 与 native 的完整像素几何必须通过真实 consumer test 验证，不能只从导出 JSON 推断。标准 `mindmap` 仍由 MermaidRenderer 处理，生成与回退语义不变。
@@ -209,7 +210,7 @@ flowchart LR
 
 图形平台保持三条独立轴：语义类型、渲染目标和导出格式。当前可执行真值是类型目录、生产 example fixture、target descriptor 和带版本的 capability manifest。target descriptor 负责 artifact 机制；manifest 把语义类型、兼容 target 与 fixture 证据组合起来。`SVG`、`PNG`、`PDF` 是导出格式，不是 render target。
 
-当前已交付 13 个语义类型、8 个渲染目标和 3 个导出格式。Timeline、swimlane、quadrant 在建立 editable 或外部 consumer 契约前，严格只兼容 Mermaid。设置页 gallery 与生成选择器都执行每类一个生产 renderer fixture；`scripts/generate-diagram-gallery.js` 生成确定性的 SVG/PNG 资产和带哈希 manifest，并供双语文档 gallery 使用。`ref/diagram-design` 的其余参考布局在具备 renderer、fixture、预览、持久化映射、文档行和自动化门禁之前，保持 `reference-only/planned`。
+当前已交付 14 个语义类型、8 个渲染目标和 3 个导出格式。Radar 使用独立的 Vega-Lite intent 与受限 `radarSpec`，不伪装成 `dataChart` 的 chartType 别名。Timeline、swimlane、quadrant 在建立 editable 或外部 consumer 契约前，严格只兼容 Mermaid。设置页 gallery 与生成选择器都执行每类一个生产 renderer fixture；`scripts/generate-diagram-gallery.js` 生成确定性的 SVG/PNG 资产和带哈希 manifest，并供双语文档 gallery 使用。`ref/diagram-design` 的其余参考布局在具备 renderer、fixture、预览、持久化映射、文档行和自动化门禁之前，保持 `reference-only/planned`。
 
 已交付顺序是先解决正确性基础，再做目录/契约生成，随后接入确定性预览资产、选择器和文档。Mermaid 规范化、legacy 修复阶段化、family 门控、fence 所有权、验证 runtime 初始化、共享 Drawnix 几何和 Circuitikz 模板收敛现已落地。剩余工作已收窄为真实 Draw.io/Drawnix 应用证据，以及未来若产品范围确实需要时再授权一个明确的 Circuitikz repair 命令。独立 Plait consumer gate 可通过 `npm run diagram:consumer:drawnix` 执行。见[当前进度审计](./brainstorms/2026-08-16-mainline-diagram-architecture-progress-and-next-direction.zh-CN.md)、[图形能力目录](./maintainer/diagram-capability-catalog.zh-CN.md)、[图形 Gallery](./diagram-gallery.zh-CN.md)和[向前架构计划](./superpowers/plans/2026-08-16-diagram-capability-catalog-and-forward-architecture.zh-CN.md)。
 

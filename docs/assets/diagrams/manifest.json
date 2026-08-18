@@ -92,6 +92,16 @@
       "svgSha256": "d287b1542683a8348eeb19f2ef2cee6dc24254684c3af23498635c8062f65e6d"
     },
     {
+      "typeId": "radar-chart",
+      "fixtureId": "radar-capability-profile",
+      "title": "Capability profile",
+      "target": "vega-lite",
+      "previewTarget": "vega-lite",
+      "svgPath": "./radar-capability-profile.svg",
+      "pngPath": "./radar-capability-profile.png",
+      "svgSha256": "1f277ba4675e008b3799b840fe06bd5c0a53534cf940cb4e7f54c712984fa430"
+    },
+    {
       "typeId": "timeline",
       "fixtureId": "timeline-roadmap",
       "title": "Delivery roadmap",

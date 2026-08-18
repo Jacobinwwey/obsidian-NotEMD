@@ -1,5 +1,5 @@
 import { assertValidDiagramSpec } from '../../diagram/spec';
-import { DiagramEdge, DiagramNode, DiagramSpec } from '../../diagram/types';
+import { DiagramEdge, DiagramNode, DiagramRadarSpec, DiagramSpec } from '../../diagram/types';
 import { DiagramRenderer, RenderArtifact } from '../types';
 
 interface HtmlRendererLabels {
@@ -434,6 +434,36 @@ function renderDataSeries(spec: DiagramSpec, labels: HtmlRendererLabels): string
     </section>`;
 }
 
+function renderRadarSpec(spec: DiagramSpec, labels: HtmlRendererLabels): string {
+    const radarSpec: DiagramRadarSpec | undefined = spec.radarSpec;
+    if (!radarSpec?.axes?.length || !radarSpec.series?.length) {
+        return '';
+    }
+
+    const axisLabels = new Map(radarSpec.axes.map(axis => [axis.id, axis.label]));
+    return `<section class="notemd-html-renderer-section">
+        <h2>${escapeHtml(labels.data)}</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>${escapeHtml(labels.x)}</th>
+                    <th>${escapeHtml(labels.y)}</th>
+                    <th>${escapeHtml(labels.series)}</th>
+                </tr>
+            </thead>
+            <tbody>
+                ${radarSpec.series.flatMap(series => series.points.map(point => `
+                    <tr>
+                        <td>${escapeHtml(axisLabels.get(point.axisId) ?? point.axisId)}</td>
+                        <td>${escapeHtml(String(point.value))}</td>
+                        <td>${escapeHtml(series.label)}</td>
+                    </tr>
+                `)).join('')}
+            </tbody>
+        </table>
+    </section>`;
+}
+
 function collectNodeLabels(nodes: DiagramNode[], labels: Map<string, string> = new Map<string, string>()): Map<string, string> {
     for (const node of nodes) {
         labels.set(node.id, node.label);
@@ -632,6 +662,7 @@ function renderHtmlDocument(spec: DiagramSpec): string {
 
         ${renderEdges(spec.edges ?? [], nodeLabels, labels)}
         ${renderDataSeries(spec, labels)}
+        ${renderRadarSpec(spec, labels)}
         ${renderCallouts(spec, labels)}
         ${renderEvidenceRefs(spec, labels)}
     </main>

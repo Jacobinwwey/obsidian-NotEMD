@@ -24,6 +24,7 @@ The target descriptor is the runtime authority for artifact mechanics. Its `expo
 | `entity-relationship` | Entities, fields, and cardinality | Mermaid | `entity-relationship-schema` | Settings preview action | source `.md`, SVG, PNG, PDF |
 | `canvas-map` | Spatially grouped concepts | JSON Canvas | `canvas-map-domains` | Iframe / Canvas artifact | source `.canvas`, SVG, PNG, PDF |
 | `data-chart` | Measured comparison over an axis | Vega-Lite | `data-chart-trend` | Sandboxed iframe | source `.json` / Vault `.md`, SVG, PNG, PDF |
+| `radar-chart` | Multi-axis profile comparison | Vega-Lite | `radar-capability-profile` | Sandboxed iframe | source `.json` / Vault `.md`, SVG, PNG, PDF; HTML table fallback |
 | `timeline` | Ordered milestones over time | Mermaid | `timeline-roadmap` | Mermaid iframe | source `.md`, SVG, PNG, PDF |
 | `swimlane` | Cross-functional responsibility flow | Mermaid | `swimlane-release` | Mermaid iframe | source `.md`, SVG, PNG, PDF |
 | `quadrant` | Two-axis prioritization matrix | Mermaid | `quadrant-priorities` | Mermaid iframe | source `.md`, SVG, PNG, PDF |
@@ -46,7 +47,7 @@ The target descriptor is the runtime authority for artifact mechanics. Its `expo
 
 ## Reference-Only / Planned Types
 
-The following names come from `ref/diagram-design` and are not currently selectable in Notemd: architecture, IT current-state, radar/spider, loop/flywheel, nested, tree, org chart, layer stack, Venn, pyramid/funnel, bar, line, Gantt, scatter, high-level, process, medallion, data flow, DP integration, and DP security matrix. Timeline, swimlane, and quadrant have crossed the candidate gate as Mermaid-only types; they are not advertised as editable HTML/SVG, Draw.io, or Drawnix targets.
+The following names come from `ref/diagram-design` and are not currently selectable in Notemd: architecture, IT current-state, loop/flywheel, nested, tree, org chart, layer stack, Venn, pyramid/funnel, bar, line, Gantt, scatter, high-level, process, medallion, data flow, DP integration, and DP security matrix. Radar/spider has crossed the candidate gate as a dedicated Vega-Lite type with a deterministic HTML table fallback. Timeline, swimlane, and quadrant remain Mermaid-only; they are not advertised as editable HTML/SVG, Draw.io, or Drawnix targets.
 
 ## Preview and Gallery Contract
 

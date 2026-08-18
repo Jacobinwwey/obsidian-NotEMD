@@ -211,6 +211,52 @@ const EXECUTABLE_DIAGRAM_EXAMPLES: readonly DiagramExampleDefinition[] = [
         }
     },
     {
+        typeId: 'radar-chart',
+        fixtureId: 'radar-capability-profile',
+        title: 'Capability profile',
+        selectionRationale: 'Use when several comparable dimensions form a bounded multi-axis profile.',
+        sourceIntent: 'radar',
+        spec: {
+            intent: 'radar',
+            title: 'Capability profile',
+            summary: 'Current and target capability scores across five dimensions.',
+            nodes: [],
+            radarSpec: {
+                axes: [
+                    { id: 'reliability', label: 'Reliability', max: 10 },
+                    { id: 'latency', label: 'Latency', max: 10 },
+                    { id: 'operability', label: 'Operability', max: 10 },
+                    { id: 'cost', label: 'Cost', max: 10 },
+                    { id: 'coverage', label: 'Coverage', max: 10 }
+                ],
+                series: [
+                    {
+                        id: 'current',
+                        label: 'Current',
+                        points: [
+                            { axisId: 'reliability', value: 7 },
+                            { axisId: 'latency', value: 5 },
+                            { axisId: 'operability', value: 6 },
+                            { axisId: 'cost', value: 8 },
+                            { axisId: 'coverage', value: 6 }
+                        ]
+                    },
+                    {
+                        id: 'target',
+                        label: 'Target',
+                        points: [
+                            { axisId: 'reliability', value: 9 },
+                            { axisId: 'latency', value: 8 },
+                            { axisId: 'operability', value: 9 },
+                            { axisId: 'cost', value: 7 },
+                            { axisId: 'coverage', value: 9 }
+                        ]
+                    }
+                ]
+            }
+        }
+    },
+    {
         typeId: 'timeline',
         fixtureId: 'timeline-roadmap',
         title: 'Delivery roadmap',

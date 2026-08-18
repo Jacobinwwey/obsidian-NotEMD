@@ -112,6 +112,16 @@ Use a 2x2 effort versus impact quadrant for the backlog.
         expect(result.intent).toBe('quadrant');
     });
 
+    test('infers radar intent for explicit multi-axis profile notes', () => {
+        const result = inferDiagramIntent(`# Capability profile
+
+Render a radar chart comparing reliability, latency, and cost across the current and target profiles.
+`);
+
+        expect(result.intent).toBe('radar');
+        expect(result.reasons.join(' ')).toMatch(/radar|profile/i);
+    });
+
     test('falls back to mindmap for general hierarchical notes', () => {
         const markdown = `# Distributed Systems
 

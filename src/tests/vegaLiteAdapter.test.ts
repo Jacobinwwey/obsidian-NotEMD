@@ -135,4 +135,38 @@ describe('vega-lite adapter', () => {
         expect(parsed.encoding.text.field).toBe('y');
         expect(parsed.config.axis).toBeUndefined();
     });
+
+    test('renders radar intent as a layered polar profile instead of a chart-type alias', () => {
+        const spec: DiagramSpec = {
+            intent: 'radar',
+            title: 'Engineering profile',
+            nodes: [],
+            radarSpec: {
+                axes: [
+                    { id: 'reliability', label: 'Reliability', max: 10 },
+                    { id: 'latency', label: 'Latency', max: 10 },
+                    { id: 'cost', label: 'Cost', max: 10 }
+                ],
+                series: [{
+                    id: 'current',
+                    label: 'Current',
+                    points: [
+                        { axisId: 'reliability', value: 8 },
+                        { axisId: 'latency', value: 6 },
+                        { axisId: 'cost', value: 7 }
+                    ]
+                }]
+            }
+        };
+
+        const parsed = JSON.parse(renderVegaLiteSpec(spec));
+
+        expect(parsed.layer).toEqual(expect.arrayContaining([
+            expect.objectContaining({ mark: expect.objectContaining({ type: 'line' }) }),
+            expect.objectContaining({ mark: expect.objectContaining({ type: 'text' }) })
+        ]));
+        expect(parsed.layer.filter((layer: any) => layer.mark?.type === 'line')).toHaveLength(3);
+        expect(parsed.layer.some((layer: any) => layer.data?.values?.some((row: any) => row.series === 'Current'))).toBe(true);
+        expect(parsed.layer.some((layer: any) => layer.data?.values?.some((row: any) => row.label === 'Reliability'))).toBe(true);
+    });
 });

@@ -7,7 +7,7 @@ export class VegaLiteRenderer implements DiagramRenderer {
     readonly target = 'vega-lite' as const;
 
     supports(spec: DiagramSpec): boolean {
-        return spec.intent === 'dataChart';
+        return spec.intent === 'dataChart' || spec.intent === 'radar';
     }
 
     async render(spec: DiagramSpec): Promise<RenderArtifact> {

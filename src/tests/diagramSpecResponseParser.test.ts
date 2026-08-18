@@ -130,6 +130,39 @@ describe('diagram spec response parser', () => {
         expect(spec.quadrant?.items[0]).toMatchObject({ id: 'adapter', x: 0.8, y: 0.7 });
     });
 
+    test('normalizes radar axes and series points without collapsing them into dataSeries', () => {
+        const spec = parseDiagramSpecResponse(JSON.stringify({
+            intent: 'radar',
+            title: 'Capability profile',
+            nodes: [],
+            radarSpec: {
+                axes: [
+                    { id: 'reliability', label: 'Reliability', max: '10' },
+                    { id: 'latency', label: 'Latency' },
+                    { id: 'cost', label: 'Cost' }
+                ],
+                series: [{
+                    name: 'Current',
+                    values: {
+                        reliability: '8',
+                        latency: 6,
+                        cost: 7
+                    }
+                }]
+            }
+        }));
+
+        expect(spec.intent).toBe('radar');
+        expect(spec.dataSeries).toEqual([]);
+        expect(spec.radarSpec?.axes[0]).toMatchObject({ id: 'reliability', label: 'Reliability', max: 10 });
+        expect(spec.radarSpec?.series[0]).toMatchObject({ id: 'current', label: 'Current' });
+        expect(spec.radarSpec?.series[0].points).toEqual([
+            { axisId: 'reliability', value: 8 },
+            { axisId: 'latency', value: 6 },
+            { axisId: 'cost', value: 7 }
+        ]);
+    });
+
     test('throws when no valid json object can be extracted', () => {
         expect(() => parseDiagramSpecResponse('not valid json')).toThrow(/Unable to parse DiagramSpec/i);
     });

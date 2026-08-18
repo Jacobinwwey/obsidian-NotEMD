@@ -34,7 +34,8 @@ describe('executable diagram example catalog', () => {
         expect(examples.map(example => example.typeId)).toEqual(expect.arrayContaining([
             'timeline',
             'swimlane',
-            'quadrant'
+            'quadrant',
+            'radar-chart'
         ]));
     });
 

@@ -1,7 +1,14 @@
 import { ValidationError } from '../types';
 import { validateCircuitSpec } from './adapters/circuitikz/circuitikzExporter';
 import { isSupportedVegaLiteChartType, SUPPORTED_VEGA_LITE_CHART_TYPES } from './adapters/vega/schema';
-import { DiagramDataSeries, DiagramNode, DiagramSpec, isSupportedDiagramIntent, SUPPORTED_DIAGRAM_INTENTS } from './types';
+import {
+    DiagramDataSeries,
+    DiagramNode,
+    DiagramRadarSpec,
+    DiagramSpec,
+    isSupportedDiagramIntent,
+    SUPPORTED_DIAGRAM_INTENTS
+} from './types';
 
 export interface DiagramSpecValidationResult {
     valid: boolean;
@@ -116,6 +123,90 @@ function validateNonChartLayoutHints(spec: DiagramSpec, errors: string[]): void 
     if (spec.layoutHints?.chartType !== undefined) {
         errors.push(`Diagram spec uses layoutHints.chartType but intent "${spec.intent}" is not "dataChart".`);
     }
+}
+
+function validateRadarPayload(radarSpec: DiagramRadarSpec | undefined, errors: string[]): void {
+    if (!radarSpec) {
+        errors.push('Diagram intent "radar" requires a radarSpec payload.');
+        return;
+    }
+
+    const axes = radarSpec.axes;
+    if (!Array.isArray(axes) || axes.length < 3 || axes.length > 12) {
+        errors.push('Radar payload requires between 3 and 12 axes.');
+        return;
+    }
+
+    const axisIds = new Set<string>();
+    axes.forEach((axis, index) => {
+        const axisId = typeof axis?.id === 'string' ? axis.id.trim() : '';
+        if (!axisId) {
+            errors.push(`Radar axis ${index + 1} is missing an id.`);
+        } else if (axisIds.has(axisId)) {
+            errors.push(`Radar axis id "${axisId}" is duplicated.`);
+        } else {
+            axisIds.add(axisId);
+        }
+
+        if (typeof axis?.label !== 'string' || !axis.label.trim()) {
+            errors.push(`Radar axis "${axisId || index + 1}" is missing a label.`);
+        }
+
+        if (axis?.max !== undefined
+            && (typeof axis.max !== 'number' || !Number.isFinite(axis.max) || axis.max <= 0)) {
+            errors.push(`Radar axis "${axisId || index + 1}" max must be a finite number greater than 0.`);
+        }
+    });
+
+    if (!Array.isArray(radarSpec.series) || radarSpec.series.length === 0 || radarSpec.series.length > 8) {
+        errors.push('Radar payload requires between 1 and 8 series.');
+        return;
+    }
+
+    const seriesIds = new Set<string>();
+    radarSpec.series.forEach((series, seriesIndex) => {
+        const seriesId = typeof series?.id === 'string' ? series.id.trim() : '';
+        if (!seriesId) {
+            errors.push(`Radar series ${seriesIndex + 1} is missing an id.`);
+        } else if (seriesIds.has(seriesId)) {
+            errors.push(`Radar series id "${seriesId}" is duplicated.`);
+        } else {
+            seriesIds.add(seriesId);
+        }
+
+        if (typeof series?.label !== 'string' || !series.label.trim()) {
+            errors.push(`Radar series "${seriesId || seriesIndex + 1}" is missing a label.`);
+        }
+
+        if (!Array.isArray(series?.points) || series.points.length !== axes.length) {
+            errors.push(`Radar series "${seriesId || seriesIndex + 1}" requires exactly one point per axis.`);
+            return;
+        }
+
+        const pointAxisIds = new Set<string>();
+        series.points.forEach((point, pointIndex) => {
+            const axisId = typeof point?.axisId === 'string' ? point.axisId.trim() : '';
+            if (!axisId) {
+                errors.push(`Radar series "${seriesId || seriesIndex + 1}" point ${pointIndex + 1} is missing axisId.`);
+            } else if (!axisIds.has(axisId)) {
+                errors.push(`Radar series "${seriesId || seriesIndex + 1}" references unknown axis "${axisId}".`);
+            } else if (pointAxisIds.has(axisId)) {
+                errors.push(`Radar series "${seriesId || seriesIndex + 1}" axis "${axisId}" is duplicated.`);
+            } else {
+                pointAxisIds.add(axisId);
+            }
+
+            if (typeof point?.value !== 'number' || !Number.isFinite(point.value) || point.value < 0) {
+                errors.push(`Radar series "${seriesId || seriesIndex + 1}" point ${pointIndex + 1} value must be a finite non-negative number.`);
+                return;
+            }
+
+            const axis = axes.find(candidate => candidate.id?.trim() === axisId);
+            if (axis?.max !== undefined && point.value > axis.max) {
+                errors.push(`Radar series "${seriesId || seriesIndex + 1}" point ${pointIndex + 1} exceeds axis "${axisId}" max.`);
+            }
+        });
+    });
 }
 
 function validateTimelinePayload(spec: DiagramSpec, errors: string[]): void {
@@ -258,6 +349,9 @@ function validateQuadrantPayload(spec: DiagramSpec, errors: string[]): void {
 
 function validateSpecializedPayload(spec: DiagramSpec, errors: string[]): void {
     switch (spec.intent) {
+        case 'radar':
+            validateRadarPayload(spec.radarSpec, errors);
+            break;
         case 'timeline':
             validateTimelinePayload(spec, errors);
             break;
@@ -293,6 +387,12 @@ function validateCircuitPayload(spec: DiagramSpec, errors: string[]): void {
     }
 }
 
+function validateRadarOwnership(spec: DiagramSpec, errors: string[]): void {
+    if (spec.radarSpec && spec.intent !== 'radar') {
+        errors.push('DiagramSpec.radarSpec is only valid when intent is "radar".');
+    }
+}
+
 export function validateDiagramSpec(spec: DiagramSpec): DiagramSpecValidationResult {
     const errors: string[] = [];
 
@@ -306,6 +406,7 @@ export function validateDiagramSpec(spec: DiagramSpec): DiagramSpecValidationRes
     collectNodeIds(spec.nodes ?? [], nodeIds, errors);
 
     const usesSpecializedPayload = spec.intent === 'dataChart'
+        || spec.intent === 'radar'
         || spec.intent === 'circuit'
         || spec.intent === 'timeline'
         || spec.intent === 'swimlane'
@@ -331,6 +432,7 @@ export function validateDiagramSpec(spec: DiagramSpec): DiagramSpecValidationRes
     }
 
     validateCircuitPayload(spec, errors);
+    validateRadarOwnership(spec, errors);
     validateSpecializedPayload(spec, errors);
 
     return {

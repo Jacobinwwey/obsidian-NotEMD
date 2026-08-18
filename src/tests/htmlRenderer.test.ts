@@ -58,6 +58,36 @@ describe('html renderer', () => {
         expect(artifact.content).toContain('19');
     });
 
+    test('preserves radar axes and series in the explicit html fallback table', async () => {
+        const renderer = new HtmlRenderer();
+        const artifact = await renderer.render({
+            intent: 'radar',
+            title: 'Capability profile',
+            nodes: [],
+            radarSpec: {
+                axes: [
+                    { id: 'reliability', label: 'Reliability' },
+                    { id: 'latency', label: 'Latency' },
+                    { id: 'cost', label: 'Cost' }
+                ],
+                series: [{
+                    id: 'current',
+                    label: 'Current',
+                    points: [
+                        { axisId: 'reliability', value: 8 },
+                        { axisId: 'latency', value: 6 },
+                        { axisId: 'cost', value: 7 }
+                    ]
+                }]
+            }
+        });
+
+        expect(artifact.target).toBe('html');
+        expect(artifact.content).toContain('Reliability');
+        expect(artifact.content).toContain('Current');
+        expect(artifact.content).toContain('8');
+    });
+
     test('localizes fallback headings using output language', async () => {
         const renderer = new HtmlRenderer();
         const spec: DiagramSpec = {

@@ -199,6 +199,95 @@ function normalizeDataSeries(rawDataSeries: unknown, title: string): DiagramSpec
     });
 }
 
+function normalizeRadarSpec(rawRadarSpec: unknown): DiagramSpec['radarSpec'] {
+    if (!rawRadarSpec || typeof rawRadarSpec !== 'object' || Array.isArray(rawRadarSpec)) {
+        return undefined;
+    }
+
+    const payload = rawRadarSpec as Record<string, unknown>;
+    const rawAxes = Array.isArray(payload.axes) ? payload.axes : [];
+    const axes = rawAxes.map((axis: unknown, index) => {
+        if (typeof axis === 'string') {
+            const label = axis.trim();
+            return {
+                id: slugify(label) || `axis-${index + 1}`,
+                label
+            };
+        }
+
+        const record = axis && typeof axis === 'object'
+            ? axis as Record<string, unknown>
+            : {};
+        const label = readTrimmedString(record.label)
+            ?? readTrimmedString(record.name)
+            ?? readTrimmedString(record.title)
+            ?? `Axis ${index + 1}`;
+        const id = readTrimmedString(record.id)
+            ?? readTrimmedString(record.key)
+            ?? slugify(label)
+            ?? `axis-${index + 1}`;
+        const max = readNumericValue(record.max ?? record.maximum ?? record.limit);
+
+        return max === undefined ? { id, label } : { id, label, max };
+    });
+
+    const axisIds = axes.map(axis => axis.id);
+    const normalizeRadarPoints = (rawPoints: unknown): Array<{ axisId: string; value: number }> => {
+        let entries: unknown[] = [];
+        if (Array.isArray(rawPoints)) {
+            entries = rawPoints;
+        } else if (rawPoints && typeof rawPoints === 'object') {
+            entries = Object.entries(rawPoints as Record<string, unknown>).map(([axisId, value]) => ({
+                axisId,
+                value
+            }));
+        }
+
+        return entries.map((point: unknown) => {
+            const record = point && typeof point === 'object'
+                ? point as Record<string, unknown>
+                : {};
+            const axisCandidate = record.axisId
+                ?? record.axis
+                ?? record.dimension
+                ?? record.label
+                ?? record.name
+                ?? record.id;
+            const axisId = typeof axisCandidate === 'string'
+                ? axisCandidate.trim()
+                : typeof axisCandidate === 'number'
+                    ? axisIds[axisCandidate] ?? ''
+                    : '';
+            const value = readNumericValue(record.value ?? record.score ?? record.amount ?? record.y);
+            return value === undefined ? null : { axisId, value };
+        }).filter((point): point is { axisId: string; value: number } => point !== null);
+    };
+
+    const seriesEntries = normalizeSeriesEntries(payload.series ?? payload.data);
+    const series = seriesEntries.map((entry, index) => {
+        const label = readTrimmedString(entry?.label)
+            ?? readTrimmedString(entry?.name)
+            ?? readTrimmedString(entry?.title)
+            ?? `Series ${index + 1}`;
+        const id = readTrimmedString(entry?.id)
+            ?? readTrimmedString(entry?.key)
+            ?? slugify(label)
+            ?? `series-${index + 1}`;
+        const rawPoints = entry?.points
+            ?? entry?.values
+            ?? entry?.data
+            ?? entry?.items
+            ?? [];
+        return {
+            id,
+            label,
+            points: normalizeRadarPoints(rawPoints)
+        };
+    });
+
+    return { axes, series };
+}
+
 function normalizeSpec(candidate: any): DiagramSpec {
     const payload = candidate?.diagramSpec ?? candidate;
     const title = typeof payload.title === 'string' ? payload.title : '';
@@ -217,6 +306,7 @@ function normalizeSpec(candidate: any): DiagramSpec {
         sections: Array.isArray(payload.sections) ? payload.sections : [],
         callouts: Array.isArray(payload.callouts) ? payload.callouts : [],
         dataSeries: normalizeDataSeries(payload.dataSeries, title),
+        radarSpec: normalizeRadarSpec(payload.radarSpec),
         timelineEvents: Array.isArray(payload.timelineEvents)
             ? payload.timelineEvents.map((event: any) => ({
                 id: event?.id,

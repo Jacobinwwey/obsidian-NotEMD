@@ -137,6 +137,19 @@ export const EXECUTABLE_DIAGRAM_TYPES: readonly ExecutableDiagramTypeDefinition[
         exampleFixtureId: 'data-chart-trend'
     },
     {
+        id: 'radar-chart',
+        intent: 'radar',
+        family: 'quantitative',
+        semanticPattern: 'Multi-axis profile comparison',
+        promptProfileId: 'radar-chart',
+        rendererOperationId: 'vega-lite-radar',
+        rendererTarget: 'vega-lite',
+        defaultTarget: 'vega-lite',
+        compatibleTargets: ['vega-lite', 'html'],
+        visualRoles: ['axis', 'profile', 'value'],
+        exampleFixtureId: 'radar-capability-profile'
+    },
+    {
         id: 'timeline',
         intent: 'timeline',
         family: 'behavior',

@@ -175,4 +175,16 @@ Top ranked issues this week:
         expect(quadrant.renderTarget).toBe('mermaid');
         expect(quadrant.mermaidDiagramType).toBe('quadrantChart');
     });
+
+    test('routes radar through the real Vega-Lite target', () => {
+        const result = buildDiagramPlan('# Capability radar', {
+            compatibilityMode: 'best-fit',
+            requestedIntent: 'radar'
+        });
+
+        expect(result.intent).toBe('radar');
+        expect(result.renderTarget).toBe('vega-lite');
+        expect(result.mermaidDiagramType).toBeNull();
+        expect(result.fallbackTargets).toEqual(['html']);
+    });
 });

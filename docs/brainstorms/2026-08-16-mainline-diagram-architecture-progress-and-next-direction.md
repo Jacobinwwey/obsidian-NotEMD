@@ -25,11 +25,11 @@ The correct next move is convergence. Adding more visual types before closing co
 
 | Area | Current state | Evidence |
 |---|---|---|
-| Semantic domain | 13 executable semantic diagram types | `src/diagram/diagramTypeCatalog.ts`, `src/diagram/examples/diagramExampleCatalog.ts` |
+| Semantic domain | 14 executable semantic diagram types | `src/diagram/diagramTypeCatalog.ts`, `src/diagram/examples/diagramExampleCatalog.ts` |
 | Render targets | 8 registered targets; target identity is separate from export format | `src/rendering/rendererRegistry.ts`, `src/rendering/renderTargetCatalog.ts` |
 | Export formats | SVG/PNG/PDF where the target supports them; editable HTML/SVG carries `previewSvg` | target catalog and renderer integration tests |
 | Discoverability | Settings selector shows deterministic thumbnails and a direct “use this type” action | `docs/assets/diagrams/manifest.json`, `diagramExamplePreview.test.ts` |
-| Static gallery | 13 SVG/PNG pairs generated from production fixtures; stale assets fail the check | `scripts/generate-diagram-gallery.js`, `npm run diagram:gallery:check` |
+| Static gallery | 14 SVG/PNG pairs generated from production fixtures; stale assets fail the check | `scripts/generate-diagram-gallery.js`, `npm run diagram:gallery:check` |
 | Drawnix | Filename-rooted native tree, `.drawnix` plus SVG companion and Markdown wrapper | Drawnix implementation record, export tests, and `npm run diagram:consumer:drawnix` |
 | Circuitikz | Constrained native templates and CLI compiler path; six golden fixtures compile under TeX Live 2023 | `src/diagram/adapters/circuitikz`, `scripts/export-circuitikz.js`, smoke report |
 | Operation contracts | Schema shape admission, maintainer input validation, runtime result validation, and help/schema field derivation are now executable | `src/operations/contractSchemas.ts`, `src/operations/maintainerCliContractMetadata.json`, bridge tests |
@@ -60,27 +60,29 @@ The correct next move is convergence. Adding more visual types before closing co
 20. Moved the shared Drawnix polyline-length primitive into `drawnixGeometry.ts` and kept `DrawnixPoint` source-compatible through the projection re-export. Router label placement and candidate ordering now use one length definition, with a focused 30-unit multi-segment regression.
 21. Split the JSON-compatible schema/value validator into `schemaRuntime.ts` and added `operationContractRegistry.ts`. The registry now fails closed during module admission on malformed required/property relationships, duplicate enum/required entries, duplicate operation or command IDs, missing input/result schemas, and malformed trigger surfaces. Unknown operation payload fields remain accepted; operation-level capability metadata and command-binding context remain separate by design.
 
+22. Admitted `radar-chart` as the first non-Mermaid Phase 5 candidate after a real Vega-Lite browser render. `radarSpec` enforces bounded axes and complete per-series axis coverage; the adapter computes deterministic polar coordinates and emits grid, axis, closed profile-line, point, and label layers. The same production fixture now feeds settings, docs SVG/PNG, and the explicit HTML table fallback. `dataChart` `chartType: radar` remains rejected.
+
 ## Comparison With `diagram-design`
 
 | Axis | Reference project | Notemd current truth | Engineering decision |
 |---|---|---|---|
 | Semantic selection | Pattern pages map to visual layouts | `DiagramIntent` routes to a typed catalog | Preserve intent-first routing |
-| Visual taxonomy | 27 layout grammars | 13 executable semantic types | Admit candidates only through evidence gates |
+| Visual taxonomy | 27 layout grammars | 14 executable semantic types | Admit candidates only through evidence gates |
 | Artifact/export | Self-contained HTML/SVG/PNG examples | 8 targets and independently declared export capabilities | Keep target and export orthogonal |
 | Preview | Example HTML assets | Production renderer fixture thumbnails in settings and docs | Generate both from the same fixture |
 | Governance | Type references and complexity budgets | Versioned capability/target manifests plus tests | Treat manifests and tests as the contract |
 | Contract boundary | Human-readable command examples sit beside pattern docs | Pure schema runtime plus registry admission; host/core schemas stay explicit | Fail closed on malformed contracts without collapsing UI and CLI context |
 
-The reference taxonomy still supplies architecture, current-state, radar, loop, nested, tree, org chart, layers, Venn, pyramid, bar, line, Gantt, scatter, medallion, process, data flow, and security/integration matrix candidates. Timeline, swimlane, and quadrant have now passed the bounded Mermaid-only admission gate; they are not evidence of editable HTML/SVG, Draw.io, or Drawnix support. Gallery variants such as OAuth sequence, animation, imports, and vertical orientation are workflows or variants, not new semantic types.
+The reference taxonomy still supplies architecture, current-state, loop, nested, tree, org chart, layers, Venn, pyramid, bar, line, Gantt, scatter, medallion, process, data flow, and security/integration matrix candidates. Radar has crossed the bounded Vega-Lite admission gate; timeline, swimlane, and quadrant remain Mermaid-only and are not evidence of editable HTML/SVG, Draw.io, or Drawnix support. Gallery variants such as OAuth sequence, animation, imports, and vertical orientation are workflows or variants, not new semantic types.
 
 ## Gap Against Earlier Plans
 
 | Earlier requirement | Current evidence | Remaining boundary |
 |---|---|---|
 | One executable source for operation contracts | Registry schemas are validated by a registry-independent runtime and exported into CLI contracts | Maintainer host metadata is intentionally separate from host-neutral schemas; a generated pure-data catalog is still a future migration |
-| Reference layouts must have real semantics, not aliases | Timeline, swimlane, and quadrant have bounded payloads, adapters, fixtures, previews, and tests | Radar still needs a real Vega-Lite adapter; the other reference layouts remain planned |
+| Reference layouts must have real semantics, not aliases | Timeline, swimlane, quadrant, and radar have bounded payloads, adapters, fixtures, previews, and tests | Remaining reference layouts stay gated until they have equivalent renderer and consumer evidence |
 | External interoperability must be proven by a consumer | Plait public-API consumer and pinned Circuitikz compiler gates pass | Draw.io and a real Drawnix application are unavailable, so application-level compatibility is not claimed |
-| Documentation must expose support and previews | Manifest-driven bilingual gallery contains 13 production SVG/PNG pairs | New types must keep the gallery freshness gate and bilingual row in the same change |
+| Documentation must expose support and previews | Manifest-driven bilingual gallery contains 14 production SVG/PNG pairs, including radar | New types must keep the gallery freshness gate and bilingual row in the same change |
 
 ## Risk Register And Tradeoffs
 
@@ -127,4 +129,4 @@ The reference taxonomy still supplies architecture, current-state, radar, loop, 
 
 ## Verification Snapshot
 
-Fresh verification for this increment: 261 Jest suites passed (2,284 tests passed, 1 skipped); TypeScript/esbuild build passed; VitePress docs build passed; production gallery check passed with 13 SVG/PNG pairs; render-host audit and i18n audit passed; the standalone Drawnix Plait consumer gate passed with 20 nodes, 1 root, and 12 relations; semantic verification helper passed; and Circuitikz smoke passed with TeX Live 2023 `pdflatex` (6/6 PDFs, 0 errors/0 warnings). `git diff --check` passed. Draw.io and a real Drawnix desktop application are unavailable in this workspace, so no application-level interoperability claim is made. Full repository lint remains a separate baseline debt track.
+Fresh verification for this increment: 261 Jest suites passed (2,294 tests passed, 1 skipped); TypeScript/esbuild build passed; VitePress docs build passed; production gallery check passed with 14 SVG/PNG pairs; render-host audit and i18n audit passed; the standalone Drawnix Plait consumer gate passed with 20 nodes, 1 root, and 12 relations; semantic verification helper passed; and Circuitikz smoke passed with TeX Live 2023 `pdflatex` (6/6 PDFs, 0 errors/0 warnings). `git diff --check` passed. Draw.io and a real Drawnix desktop application are unavailable in this workspace, so no application-level interoperability claim is made. Full repository lint remains a separate baseline debt track.

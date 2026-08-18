@@ -85,6 +85,17 @@ export function inferDiagramIntent(markdown: string): DiagramIntentResult {
         return scoreResult('quadrant', 0.84, ['two-axis prioritization vocabulary detected']);
     }
 
+    const radarKeywords = countMatches(normalized, [
+        /\bradar\s+(?:chart|plot|graph)\b/g,
+        /\bspider\s+(?:chart|plot|graph)\b/g,
+        /\bpolar\s+profile\b/g,
+        /\bcapability\s+profile\b/g,
+        /\bskills?\s+profile\b/g
+    ]);
+    if (radarKeywords > 0) {
+        return scoreResult('radar', 0.86, ['multi-axis radar or capability profile vocabulary detected']);
+    }
+
     const chartReasons: string[] = [];
     const hasMarkdownTable = /\|.+\|/.test(normalized) && /\|\s*-+\s*\|/.test(normalized);
     const numericCells = (normalized.match(/\|\s*\d+(?:\.\d+)?\s*\|/g) ?? []).length;

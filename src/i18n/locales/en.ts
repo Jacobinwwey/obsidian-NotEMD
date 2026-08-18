@@ -146,6 +146,7 @@ export const STRINGS_EN = {
                 intentCanvasMap: 'Canvas / concept map',
                 intentCircuit: 'Circuit diagram',
                 intentDataChart: 'Data chart (Vega-Lite)',
+                intentRadar: 'Radar profile (Vega-Lite)',
                 intentTimeline: 'Timeline',
                 intentSwimlane: 'Swimlane flow',
                 intentQuadrant: 'Priority quadrant',

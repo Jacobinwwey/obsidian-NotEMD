@@ -159,7 +159,7 @@ Generate the support matrix from the manifest. Separate “shipped”, “partia
 
 ### Phase 5: Candidate admission from `diagram-design`
 
-Reference-only candidates now include radar, loop, nested, tree, org chart, layer stack, Venn, pyramid/funnel, Gantt, scatter, high-level, process, medallion, data flow, DP integration, and DP security matrix. Timeline, swimlane, and quadrant have passed admission as Mermaid-only runtime types; this does not imply editable HTML/SVG, Draw.io, or Drawnix interoperability.
+Remaining reference-only candidates now include loop, nested, tree, org chart, layer stack, Venn, pyramid/funnel, Gantt, scatter, high-level, process, medallion, data flow, DP integration, and DP security matrix. Timeline, swimlane, and quadrant remain Mermaid-only runtime types; radar has now passed admission as a dedicated Vega-Lite profile type with an explicit HTML table fallback. This does not imply editable HTML/SVG, Draw.io, or Drawnix interoperability for the Mermaid-only candidates.
 
 A candidate can enter the shipped catalog only when it has:
 
@@ -171,7 +171,11 @@ A candidate can enter the shipped catalog only when it has:
 - automated rendering/export tests;
 - real consumer evidence when the target depends on an external application.
 
-Keep radar explicitly blocked until a real Vega-Lite adapter exists; a label-only alias would be misleading. Future candidates must repeat the same schema, fixture, persistence, docs, and consumer gates.
+Radar is admitted only through a dedicated `radarSpec` with bounded axes/series, deterministic Cartesian projection into a layered Vega-Lite document, a stable fixture, HTML fallback, bilingual gallery rows, and focused parser/renderer/generation tests. A `dataChart` `chartType: radar` alias remains invalid. Future candidates must repeat the same schema, fixture, persistence, docs, and consumer gates.
+
+#### Phase 5 update (2026-08-18)
+
+The radar candidate is now shipped as `radar-chart` / `intent: radar`. `radarSpec` preserves axis identity and per-axis scale limits; parser normalization accepts object-shaped series values without weakening the validator. The Vega-Lite adapter computes bounded Cartesian coordinates in code and emits grid, axis, closed profile-line, point, and label layers. Browser gallery generation produced `radar-capability-profile.svg` and `.png` from the production renderer. Explicit radar requests override a global legacy-Mermaid preference because there is no lossless Mermaid mapping; the HTML target is a tabular semantic fallback, not a claimed polar renderer.
 
 ### Phase 6: Convergence and release gates
 
@@ -188,11 +192,11 @@ External gates remain separate from unit tests:
 | Phase | Status | Evidence / remaining boundary |
 |---|---|---|
 | 0. Correctness foundation | Complete | Sanitized settings persistence, authoritative retry artifacts, editable SVG preview, target descriptors, and bounded cache are covered by focused tests. |
-| 1. Three-axis catalog | Complete | Thirteen semantic types, eight targets, compatibility admission, fixture coverage, and stable IDs are executable. |
+| 1. Three-axis catalog | Complete | Fourteen semantic types, eight targets, compatibility admission, fixture coverage, and stable IDs are executable. |
 | 2. Runtime contracts | Mostly complete | Input/result validation is owned by a registry-independent runtime; registry admission now fails closed on malformed schemas and duplicate IDs/bindings. Structural `OperationSchema`, host input metadata, and human-facing help remain intentionally separate. |
 | 3. Deterministic preview gallery | Complete | Production fixtures generate the settings thumbnails and bilingual SVG/PNG docs gallery; `diagram:gallery:check` is the freshness gate. |
 | 4. Bilingual discovery | Complete for shipped scope | Support matrices link shipped examples; reference layouts remain explicitly planned. |
-| 5. Candidate admission | Partially shipped | Timeline, swimlane, and quadrant have bounded schemas, Mermaid adapters, persistence-compatible spec fields, fixtures, gallery assets, and focused tests. Radar and the remaining reference layouts stay gated. |
+| 5. Candidate admission | Partially shipped | Timeline, swimlane, and quadrant remain bounded Mermaid-only types. Radar now has a dedicated schema, Vega-Lite adapter, HTML fallback, persistence-compatible spec field, fixture, gallery assets, and focused tests; the remaining reference layouts stay gated. |
 | 6. Convergence and release | Converged with external promotion blocked | Target adapters, webview presentation registry, Mermaid normalization, shared Drawnix geometry, and Circuitikz template convergence are landed. The standalone Plait consumer gate passes against the production fixture; Draw.io and a real Drawnix application remain unavailable in this workspace. |
 
 This status table is the current decision record. The phase descriptions above remain the design rationale and acceptance criteria; they should not be read as proof that every listed task is still outstanding.
@@ -206,6 +210,7 @@ This status table is the current decision record. The phase descriptions above r
 - **Expand the LLM prompt to “choose any layout”:** rejected. Semantic intent and target compatibility belong to typed planning, not unconstrained prompt text.
 - **Treat all external consumer checks as CI-only:** rejected. Real Draw.io/Drawnix/TeX consumers are compatibility evidence that mocks cannot provide.
 - **Contract source boundary:** schema shape/value validation is now pure and registry-independent, while operation declarations remain adjacent to their command metadata. Moving every declaration into JSON would improve Node reuse but would also remove type-local context and make host/core contract differences easier to hide; defer that migration until a generator can preserve both.
+- **Radar representation:** a dedicated intent and `radarSpec` preserve axis identity and scale invariants. Reusing `dataSeries` plus a `chartType` alias would make incomplete axis coverage indistinguishable from a Cartesian chart. Vega-Lite `area` marks were rejected after browser rendering showed Cartesian baseline spikes; closed lines and points are the robust adapter boundary.
 
 ## Definition Of Done
 

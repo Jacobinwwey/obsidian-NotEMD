@@ -12,6 +12,7 @@ export const SUPPORTED_DIAGRAM_INTENTS = [
     'canvasMap',
     'circuit',
     'dataChart',
+    'radar',
     'timeline',
     'swimlane',
     'quadrant'
@@ -29,6 +30,7 @@ export const DIAGRAM_CATALOG_TYPE_IDS = [
     'entity-relationship',
     'canvas-map',
     'data-chart',
+    'radar-chart',
     'circuit',
     'timeline',
     'swimlane',
@@ -120,6 +122,33 @@ export interface DiagramDataSeries {
     points: DiagramDataPoint[];
 }
 
+/**
+ * A radar axis owns its scale so every series is compared against the same
+ * declared maximum. The maximum remains optional for older/generated payloads;
+ * the adapter derives a deterministic maximum from observed values when absent.
+ */
+export interface DiagramRadarAxis {
+    id: string;
+    label: string;
+    max?: number;
+}
+
+export interface DiagramRadarPoint {
+    axisId: string;
+    value: number;
+}
+
+export interface DiagramRadarSeries {
+    id: string;
+    label: string;
+    points: DiagramRadarPoint[];
+}
+
+export interface DiagramRadarSpec {
+    axes: DiagramRadarAxis[];
+    series: DiagramRadarSeries[];
+}
+
 export interface DiagramTimelineEvent {
     id: string;
     date: string | number;
@@ -163,6 +192,7 @@ export interface DiagramSpec {
     sections?: DiagramSection[];
     callouts?: DiagramCallout[];
     dataSeries?: DiagramDataSeries[];
+    radarSpec?: DiagramRadarSpec;
     timelineEvents?: DiagramTimelineEvent[];
     swimlaneLanes?: DiagramSwimlaneLane[];
     quadrant?: DiagramQuadrantSpec;

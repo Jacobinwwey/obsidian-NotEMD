@@ -316,4 +316,57 @@ describe('diagram spec validation', () => {
         expect(result.valid).toBe(false);
         expect(result.errors.join(' ')).toMatch(/from 0 to 1/i);
     });
+
+    test('accepts a bounded radar payload with complete axis coverage', () => {
+        const result = validateDiagramSpec({
+            intent: 'radar',
+            title: 'Engineering profile',
+            nodes: [],
+            radarSpec: {
+                axes: [
+                    { id: 'reliability', label: 'Reliability', max: 10 },
+                    { id: 'latency', label: 'Latency', max: 10 },
+                    { id: 'cost', label: 'Cost', max: 10 }
+                ],
+                series: [{
+                    id: 'current',
+                    label: 'Current',
+                    points: [
+                        { axisId: 'reliability', value: 8 },
+                        { axisId: 'latency', value: 6 },
+                        { axisId: 'cost', value: 7 }
+                    ]
+                }]
+            }
+        });
+
+        expect(result.valid).toBe(true);
+        expect(result.errors).toHaveLength(0);
+    });
+
+    test('rejects radar series with missing or duplicate axis coverage', () => {
+        const result = validateDiagramSpec({
+            intent: 'radar',
+            title: 'Incomplete profile',
+            nodes: [],
+            radarSpec: {
+                axes: [
+                    { id: 'a', label: 'A' },
+                    { id: 'b', label: 'B' },
+                    { id: 'c', label: 'C' }
+                ],
+                series: [{
+                    id: 'current',
+                    label: 'Current',
+                    points: [
+                        { axisId: 'a', value: 1 },
+                        { axisId: 'a', value: 2 }
+                    ]
+                }]
+            }
+        });
+
+        expect(result.valid).toBe(false);
+        expect(result.errors.join(' ')).toMatch(/exactly one point per axis|duplicated axis/i);
+    });
 });

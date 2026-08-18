@@ -343,6 +343,7 @@ function mergeSpecDefaults(
         sections: spec.sections ?? [],
         callouts: spec.callouts ?? [],
         dataSeries: spec.dataSeries ?? [],
+        radarSpec: resolvedIntent === 'radar' ? spec.radarSpec : undefined,
         circuitSpec: resolvedIntent === 'circuit' ? spec.circuitSpec : undefined,
         layoutHints: Object.keys(normalizedLayoutHints).length > 0 ? normalizedLayoutHints : undefined,
         evidenceRefs: spec.evidenceRefs ?? []

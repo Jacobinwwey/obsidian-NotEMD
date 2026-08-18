@@ -159,7 +159,7 @@ Phase 2 的剩余工作被刻意收窄：仅在不抹平人工可读示例和兼
 
 ### Phase 5：从 `diagram-design` 引入候选
 
-参考候选现在包括 radar、loop、nested、tree、org chart、layer stack、Venn、pyramid/funnel、Gantt、scatter、high-level、process、medallion、data flow、DP integration 和 DP security matrix。Timeline、swimlane、quadrant 已通过 Mermaid-only 运行时准入；这不等同于 editable HTML/SVG、Draw.io 或 Drawnix 互操作。
+剩余参考候选包括 loop、nested、tree、org chart、layer stack、Venn、pyramid/funnel、Gantt、scatter、high-level、process、medallion、data flow、DP integration 和 DP security matrix。Timeline、swimlane、quadrant 仍是 Mermaid-only 运行时类型；Radar 已作为独立 Vega-Lite 能力画像类型并提供明确的 HTML 表格 fallback 通过准入。这不等同于 Mermaid-only 类型具备 editable HTML/SVG、Draw.io 或 Drawnix 互操作。
 
 候选只有满足以下条件才能进入 shipped catalog：
 
@@ -171,7 +171,11 @@ Phase 2 的剩余工作被刻意收窄：仅在不抹平人工可读示例和兼
 - 有自动化渲染/导出测试；
 - target 依赖外部应用时，有真实 consumer 证据。
 
-Radar 在真实 Vega-Lite adapter 出现前保持阻塞，不能用只改标签的别名冒充实现；未来候选必须重复同样的 schema、fixture、持久化、文档和 consumer 门禁。
+Radar 只通过独立的 `radarSpec`、有界轴/系列、确定性坐标投影、稳定 fixture、HTML fallback、双语 gallery 行和解析/渲染/生成测试交付；`dataChart` 的 `chartType: radar` 仍然非法。未来候选必须重复同样的 schema、fixture、持久化、文档和 consumer 门禁。
+
+#### Phase 5 更新（2026-08-18）
+
+Radar 候选现在以 `radar-chart` / `intent: radar` 正式交付。`radarSpec` 保留轴身份与每轴 scale 上限；解析器可以接收对象形式的 series values，但不会放宽校验器边界。Vega-Lite adapter 在代码中计算有界笛卡尔坐标，输出网格、轴线、闭合 profile 折线、点和标签 layers。浏览器 gallery 已使用生产 renderer 生成 `radar-capability-profile.svg` 与 `.png`。显式 radar 请求会覆盖全局 legacy-Mermaid 偏好，因为不存在无损 Mermaid 映射；HTML target 只是表格化语义 fallback，不宣称是极坐标 renderer。
 
 ### Phase 6：收敛与发布门禁
 
@@ -188,11 +192,11 @@ preview/export 与 render-host 的 target dispatch 已通过 keyed adapter 收�
 | 阶段 | 状态 | 证据 / 剩余边界 |
 |---|---|---|
 | 0. 正确性基础 | 完成 | 设置清洗持久化、重试 artifact 真值、editable SVG 预览、target descriptor 和有界 cache 均有定向测试。 |
-| 1. 三轴目录 | 完成 | 13 个语义类型、8 个 target、兼容性准入、fixture 覆盖和稳定 ID 均已可执行。 |
+| 1. 三轴目录 | 完成 | 14 个语义类型、8 个 target、兼容性准入、fixture 覆盖和稳定 ID 均已可执行。 |
 | 2. 运行时契约 | 基本完成 | 输入/结果校验由与 registry 无关的 runtime 负责；registry 现在会在加载时对非法 schema、重复 ID/绑定 fail-closed。结构化 `OperationSchema`、宿主输入 metadata 与人工可读 help 仍有意分离。 |
 | 3. 确定性预览 gallery | 完成 | 生产 fixture 同时生成设置页缩略图与双语 SVG/PNG 文档 gallery；`diagram:gallery:check` 是新鲜度门禁。 |
 | 4. 双语发现入口 | 已发布范围完成 | 支持矩阵已链接已发布示例；参考布局仍明确标为计划中。 |
-| 5. 候选准入 | 部分交付 | timeline、swimlane、quadrant 已有受限 schema、Mermaid adapter、与旧 spec 兼容的字段、fixture、gallery 资产和定向测试；Radar 与其余参考布局继续受门禁控制。 |
+| 5. 候选准入 | 部分交付 | timeline、swimlane、quadrant 仍是受限 Mermaid-only 类型；Radar 已有独立 schema、Vega-Lite adapter、HTML fallback、与旧 spec 兼容的字段、fixture、gallery 资产和定向测试；其余参考布局继续受门禁控制。 |
 | 6. 收敛与发布 | 代码已收敛，外部发布证据阻塞 | target adapter、webview presentation registry、Mermaid 规范化、共享 Drawnix 几何和 Circuitikz 模板收敛已落地。独立 Plait consumer gate 已用生产 fixture 通过；当前工作区仍没有 Draw.io 或真实 Drawnix 应用，因此不宣称外部互操作。 |
 
 该表是当前决策记录。上面的阶段描述保留设计理由与验收条件，不应再被理解为所有列出的任务都尚未实施。

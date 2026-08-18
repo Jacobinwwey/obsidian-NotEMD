@@ -25,11 +25,11 @@ implementation_record: src/tests/mermaidNormalizationConvergence.test.ts
 
 | 领域 | 当前状态 | 证据 |
 |---|---|---|
-| 语义域 | 13 个可执行语义图形类型 | `src/diagram/diagramTypeCatalog.ts`、`src/diagram/examples/diagramExampleCatalog.ts` |
+| 语义域 | 14 个可执行语义图形类型 | `src/diagram/diagramTypeCatalog.ts`、`src/diagram/examples/diagramExampleCatalog.ts` |
 | 渲染目标 | 8 个 registry target；target 身份与导出格式分离 | `src/rendering/rendererRegistry.ts`、`src/rendering/renderTargetCatalog.ts` |
 | 导出格式 | target 按能力提供 SVG/PNG/PDF；editable HTML/SVG 携带 `previewSvg` | target catalog 与 renderer 集成测试 |
 | 可发现性 | 设置页显示确定性缩略图，并提供“使用此类型”动作 | `docs/assets/diagrams/manifest.json`、`diagramExamplePreview.test.ts` |
-| 静态 gallery | 13 组生产 fixture 生成的 SVG/PNG；过期资源会让检查失败 | `scripts/generate-diagram-gallery.js`、`npm run diagram:gallery:check` |
+| 静态 gallery | 14 组生产 fixture 生成的 SVG/PNG；过期资源会让检查失败 | `scripts/generate-diagram-gallery.js`、`npm run diagram:gallery:check` |
 | Drawnix | 文件名根原生树、`.drawnix`、SVG companion、Markdown wrapper | Drawnix implementation record、导出测试与 `npm run diagram:consumer:drawnix` |
 | Circuitikz | 受限原生模板与 CLI 编译路径；6 个 golden fixture 已在 TeX Live 2023 下编译 | `src/diagram/adapters/circuitikz`、`scripts/export-circuitikz.js`、smoke report |
 | Operation 契约 | schema 形状准入、maintainer 输入校验、运行时结果校验、help/schema 字段派生均已可执行 | `src/operations/contractSchemas.ts`、`src/operations/maintainerCliContractMetadata.json`、bridge 测试 |
@@ -60,18 +60,20 @@ implementation_record: src/tests/mermaidNormalizationConvergence.test.ts
 20. 将共享 Drawnix 折线长度 primitive 移入 `drawnixGeometry.ts`，并通过 projection re-export 保持旧 `DrawnixPoint` 导入路径兼容。router 的标签定位和候选排序现在使用同一长度定义，新增多段折线 30 单位的定向回归。
 21. 将 JSON-compatible schema/value validator 拆到 `schemaRuntime.ts`，并增加 `operationContractRegistry.ts`。registry 在模块准入时对 required/property 关系、重复 enum/required、重复 operation/command ID、缺失 input/result schema 和错误触发面 fail-closed。未知 operation payload 字段继续放行；operation 级能力 metadata 与 command binding 级上下文有意保持分离。
 
+22. 在真实 Vega-Lite 浏览器渲染证据通过后，将 `radar-chart` 作为 Phase 5 首个非 Mermaid 候选交付。`radarSpec` 约束轴数量与每个 series 的完整轴覆盖；adapter 确定性计算极坐标并输出网格、轴线、闭合 profile 折线、点和标签 layers。同一生产 fixture 同时供设置页、文档 SVG/PNG 与明确的 HTML 表格 fallback 使用；`dataChart` 的 `chartType: radar` 继续被拒绝。
+
 ## 与 `diagram-design` 的对比
 
 | 轴 | 参考项目 | Notemd 当前真值 | 工程决策 |
 |---|---|---|---|
 | 语义选择 | pattern 页面映射到 visual layout | `DiagramIntent` 路由到 typed catalog | 保留 intent-first |
-| 视觉 taxonomy | 27 种布局语法 | 13 个可执行语义类型 | 只通过证据门禁增量准入 |
+| 视觉 taxonomy | 27 种布局语法 | 14 个可执行语义类型 | 只通过证据门禁增量准入 |
 | 产物/导出 | 自包含 HTML/SVG/PNG 示例 | 8 个 target，导出能力独立声明 | target 与 export 正交 |
 | 预览 | 示例 HTML 资产 | 设置页和 docs 使用生产 renderer fixture 缩略图 | 两者使用同一 fixture |
 | 治理 | type references 与 complexity budget | versioned capability/target manifest 加测试 | manifest 与测试共同构成契约 |
 | 契约边界 | pattern 文档旁附带人工可读命令示例 | 纯 schema runtime 加 registry admission；host/core schema 保持显式 | 对非法契约 fail-closed，但不合并 UI 与 CLI 上下文 |
 
-参考 taxonomy 仍提供 architecture、current-state、radar、loop、nested、tree、org chart、layers、Venn、pyramid、bar、line、Gantt、scatter、medallion、process、data flow 以及 security/integration matrix 候选。Timeline、swimlane、quadrant 已通过受限 Mermaid-only 准入门禁，但这不代表 editable HTML/SVG、Draw.io 或 Drawnix 支持。OAuth sequence、动画、imports、vertical orientation 等是 workflow 或变体，不应伪装成新的语义类型。
+参考 taxonomy 仍提供 architecture、current-state、loop、nested、tree、org chart、layers、Venn、pyramid、bar、line、Gantt、scatter、medallion、process、data flow 以及 security/integration matrix 候选。Radar 已通过受限 Vega-Lite 准入门禁；Timeline、swimlane、quadrant 仍是 Mermaid-only，不能据此宣称 editable HTML/SVG、Draw.io 或 Drawnix 支持。OAuth sequence、动画、imports、vertical orientation 等是 workflow 或变体，不应伪装成新的语义类型。
 
 ## 与既有方案的差距
 
@@ -80,7 +82,7 @@ implementation_record: src/tests/mermaidNormalizationConvergence.test.ts
 | Operation 契约应有可执行事实源 | registry schema 已由与 registry 无关的 runtime 校验，并导出 CLI contract | maintainer 宿主 metadata 有意区别于 host-neutral schema；可生成纯数据目录仍是后续迁移 |
 | 参考布局必须是真语义而非别名 | timeline、swimlane、quadrant 已具备受限 payload、adapter、fixture、预览与测试 | Radar 仍需真实 Vega-Lite adapter，其余参考布局保持计划中 |
 | 外部互操作必须由 consumer 证明 | Plait 公开 API consumer 与固定 Circuitikz compiler gate 已通过 | Draw.io 与真实 Drawnix 应用不可用，因此不宣称应用级兼容 |
-| 文档必须暴露支持类型与预览 | manifest 驱动的双语 gallery 已有 13 组生产 SVG/PNG | 新类型必须在同一变更中保持 gallery freshness 与双语支持行 |
+| 文档必须暴露支持类型与预览 | manifest 驱动的双语 gallery 已有 14 组生产 SVG/PNG，包含 radar | 新类型必须在同一变更中保持 gallery freshness 与双语支持行 |
 
 ## 风险与权衡
 
@@ -108,7 +110,7 @@ implementation_record: src/tests/mermaidNormalizationConvergence.test.ts
 4. **Consumer 证据：** 在工具可用时执行 Draw.io/Drawnix/Circuitikz 真实门禁；不可用时记录 blocker，不声称兼容。
 5. **Drawnix 收敛：** 生产 source-coverage 与 relation-router 名称已经 canonical，旧 source-coverage export 和旧 router 模块仅用于兼容。矩形/折线以及文本度量/换行共享 primitive 已集中，独立 Plait consumer gate 已证明生产 fixture 可以跨越公开 consumer 边界。真实 Drawnix 桌面/应用导入仍是单独的外部门禁。
 6. **Circuitikz 收敛：** 六个 golden renderer 已共享 standalone-document 与 component-label helper，同时保持确定性输出。`runCircuitikzRepairLoop()` 明确保留为 maintainer-only acceptance SDK；正常生成不调用 LLM repair loop。只有在明确授权的 repair 命令且具备新鲜 compile/render evidence 时，才接入 CLI/desktop caller。
-7. **参考候选准入：** timeline、swimlane、quadrant 已以 Mermaid-only 类型交付，并具备确定性 fixture 与 parser-backed gallery 证据。Radar 在真实 Vega-Lite adapter 出现前继续阻塞；其余参考布局仍受门禁控制。
+7. **参考候选准入：** timeline、swimlane、quadrant 已以 Mermaid-only 类型交付，并具备确定性 fixture 与 parser-backed gallery 证据；Radar 已通过真实 Vega-Lite adapter 的浏览器渲染门禁并进入 shipped catalog，其余参考布局仍受同等证据门禁控制。
 8. **Operation 契约收敛：** 继续把与 registry 无关的 schema runtime 与 registry admission 作为 fail-closed 边界。只有当生成器能保留 host/core 契约分离、人工示例和未知字段行为时，才把声明迁移到生成式 JSON。
 
 ## 验收门禁
@@ -127,4 +129,4 @@ implementation_record: src/tests/mermaidNormalizationConvergence.test.ts
 
 ## 验证快照
 
-本轮新鲜验证：261 个 Jest suite 通过（2,284 tests passed、1 skipped）；TypeScript/esbuild build 通过；VitePress docs build 通过；生产 gallery check 通过并生成 13 组 SVG/PNG；render-host audit 与 i18n audit 通过；独立 Drawnix Plait consumer gate 通过（20 个节点、1 个根、12 条关系）；semantic verification helper 通过；Circuitikz smoke 使用 TeX Live 2023 `pdflatex` 通过（6/6 PDF，0 error/0 warning）。`git diff --check` 通过。当前工作区没有 Draw.io 或真实 Drawnix 桌面应用，因此不作应用级互操作声明。全仓 lint 仍作为独立基线债务跟踪。
+本轮新鲜验证：261 个 Jest suite 通过（2,294 tests passed、1 skipped）；TypeScript/esbuild build 通过；VitePress docs build 通过；生产 gallery check 通过并生成 14 组 SVG/PNG；render-host audit 与 i18n audit 通过；独立 Drawnix Plait consumer gate 通过（20 个节点、1 个根、12 条关系）；semantic verification helper 通过；Circuitikz smoke 使用 TeX Live 2023 `pdflatex` 通过（6/6 PDF，0 error/0 warning）。`git diff --check` 通过。当前工作区没有 Draw.io 或真实 Drawnix 桌面应用，因此不作应用级互操作声明。全仓 lint 仍作为独立基线债务跟踪。

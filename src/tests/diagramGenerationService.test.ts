@@ -571,6 +571,40 @@ Draw a circuitikz schematic with PMOS pull-up, NMOS pull-down, VDD, GND, vin, an
         })).rejects.toThrow(/unsupported diagram intent/i);
     });
 
+    test('keeps an explicit radar request native even when legacy Mermaid is configured', async () => {
+        const result = await generateDiagramArtifact('# Capability profile', {
+            compatibilityMode: 'legacy-mermaid',
+            requestedIntent: 'radar',
+            targetLanguage: 'en',
+            llmInvoker: async () => JSON.stringify({
+                intent: 'radar',
+                title: 'Capability profile',
+                nodes: [],
+                radarSpec: {
+                    axes: [
+                        { id: 'reliability', label: 'Reliability', max: 10 },
+                        { id: 'latency', label: 'Latency', max: 10 },
+                        { id: 'cost', label: 'Cost', max: 10 }
+                    ],
+                    series: [{
+                        id: 'current',
+                        label: 'Current',
+                        points: [
+                            { axisId: 'reliability', value: 8 },
+                            { axisId: 'latency', value: 6 },
+                            { axisId: 'cost', value: 7 }
+                        ]
+                    }]
+                }
+            })
+        });
+
+        expect(result.plan.renderTarget).toBe('vega-lite');
+        expect(result.spec.intent).toBe('radar');
+        expect(result.artifact.target).toBe('vega-lite');
+        expect(JSON.parse(result.artifact.content).layer).toBeDefined();
+    });
+
     test('injects planner chart defaults when the LLM omits chartType', async () => {
         const result = await generateDiagramArtifact(`# Weekly Signups
 

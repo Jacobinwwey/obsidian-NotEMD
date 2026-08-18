@@ -36,7 +36,6 @@ const REFERENCE_ONLY_LAYOUTS: readonly ReferenceOnlyDiagramLayout[] = [
     ['sequence', 'Sequence', 'type-sequence.md'],
     ['state-machine', 'State machine', 'type-state.md'],
     ['er-data-model', 'ER / data model', 'type-er.md'],
-    ['radar', 'Radar / Spider', 'type-radar.md'],
     ['loop', 'Loop / flywheel', 'type-loop.md'],
     ['nested', 'Nested', 'type-nested.md'],
     ['tree', 'Tree', 'type-tree.md'],

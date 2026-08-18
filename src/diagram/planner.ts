@@ -136,7 +136,13 @@ function buildIntentResult(markdown: string, requestedIntent?: DiagramIntent): D
 }
 
 export function buildDiagramPlan(markdown: string, options: DiagramPlanOptions = {}): DiagramPlan {
-    const compatibilityMode = options.compatibilityMode ?? 'best-fit';
+    // Radar has no lossless Mermaid representation. An explicit radar request
+    // therefore opts into its native Vega-Lite target even when the global
+    // compatibility preference is still set to legacy Mermaid.
+    const compatibilityMode = options.compatibilityMode === 'legacy-mermaid'
+        && options.requestedIntent === 'radar'
+        ? 'best-fit'
+        : options.compatibilityMode ?? 'best-fit';
     const inferred = buildIntentResult(markdown, options.requestedIntent);
     const defaultTarget = resolvePreferredRenderTarget(inferred.intent);
     const preferredMermaidType = resolveMermaidDiagramType(inferred.intent);

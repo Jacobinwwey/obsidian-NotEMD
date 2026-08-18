@@ -2748,6 +2748,7 @@ export class NotemdSettingTab extends PluginSettingTab {
                     intentCanvasMap: experimentalDiagramI18n.intentCanvasMap,
                     intentCircuit: experimentalDiagramI18n.intentCircuit,
                     intentDataChart: experimentalDiagramI18n.intentDataChart,
+                    intentRadar: experimentalDiagramI18n.intentRadar,
                     intentTimeline: experimentalDiagramI18n.intentTimeline,
                     intentSwimlane: experimentalDiagramI18n.intentSwimlane,
                     intentQuadrant: experimentalDiagramI18n.intentQuadrant
@@ -2807,6 +2808,7 @@ export class NotemdSettingTab extends PluginSettingTab {
                 intentCanvasMap: experimentalDiagramI18n.intentCanvasMap,
                 intentCircuit: experimentalDiagramI18n.intentCircuit,
                 intentDataChart: experimentalDiagramI18n.intentDataChart,
+                intentRadar: experimentalDiagramI18n.intentRadar,
                 intentTimeline: experimentalDiagramI18n.intentTimeline,
                 intentSwimlane: experimentalDiagramI18n.intentSwimlane,
                 intentQuadrant: experimentalDiagramI18n.intentQuadrant,
