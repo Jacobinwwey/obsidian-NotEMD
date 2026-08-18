@@ -81,4 +81,28 @@ describe('Drawnix Plait consumer contract', () => {
             text: ['selects delivery']
         }]);
     });
+
+    test('runs the standalone gate against the production architecture fixture', () => {
+        const gatePath = path.join(__dirname, '..', '..', 'scripts', 'run-drawnix-consumer-gate.mjs');
+        const gateReport = JSON.parse(execFileSync(process.execPath, [gatePath], {
+            cwd: path.join(__dirname, '..', '..'),
+            encoding: 'utf8'
+        })) as {
+            status: string;
+            consumer: string;
+            generatedProductionFixture: boolean;
+            nodeCount: number;
+            rootCount: number;
+            relationCount: number;
+        };
+
+        expect(gateReport).toEqual(expect.objectContaining({
+            status: 'passed',
+            consumer: 'plait-public-api',
+            generatedProductionFixture: true,
+            rootCount: 1
+        }));
+        expect(gateReport.nodeCount).toBeGreaterThan(1);
+        expect(gateReport.relationCount).toBeGreaterThan(0);
+    });
 });

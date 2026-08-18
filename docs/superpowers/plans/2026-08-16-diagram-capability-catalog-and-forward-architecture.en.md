@@ -175,7 +175,7 @@ Keep radar explicitly blocked until a real Vega-Lite adapter exists; a label-onl
 
 ### Phase 6: Convergence and release gates
 
-Target dispatch convergence is now landed for preview/export and render-host through keyed adapters with duplicate-registration and unknown-payload fail-closed tests. Execute the active Mermaid normalization plan after Phase 0 and catalog contracts. Then remove Drawnix geometry duplication, decide the fate of the unwired Circuitikz repair loop, and ratchet CI around `npm run build`, Jest, render-host audit, generated-gallery freshness, and `git diff --check`.
+Target dispatch convergence is landed for preview/export and render-host through keyed adapters with duplicate-registration and unknown-payload fail-closed tests. Mermaid normalization and the shared Drawnix geometry boundary are also landed. The Circuitikz repair loop is explicitly retained as a maintainer-only acceptance SDK; the normal generation path remains deterministic and does not invoke an LLM repair pass. Ratchet CI around `npm run build`, Jest, the standalone Drawnix consumer gate, render-host audit, generated-gallery freshness, and `git diff --check`.
 
 External gates remain separate from unit tests:
 
@@ -183,7 +183,7 @@ External gates remain separate from unit tests:
 - Drawnix: open/import the real `.drawnix` file and inspect the filename-rooted tree.
 - Circuitikz: compile native TeX with the pinned toolchain.
 
-## Current Implementation Status (2026-08-17)
+## Current Implementation Status (2026-08-18)
 
 | Phase | Status | Evidence / remaining boundary |
 |---|---|---|
@@ -193,7 +193,7 @@ External gates remain separate from unit tests:
 | 3. Deterministic preview gallery | Complete | Production fixtures generate the settings thumbnails and bilingual SVG/PNG docs gallery; `diagram:gallery:check` is the freshness gate. |
 | 4. Bilingual discovery | Complete for shipped scope | Support matrices link shipped examples; reference layouts remain explicitly planned. |
 | 5. Candidate admission | Partially shipped | Timeline, swimlane, and quadrant have bounded schemas, Mermaid adapters, persistence-compatible spec fields, fixtures, gallery assets, and focused tests. Radar and the remaining reference layouts stay gated. |
-| 6. Convergence and release | In progress | Target adapters, webview presentation registry, Mermaid normalization, and Circuitikz template convergence are landed; external Draw.io/Drawnix evidence and geometry gates remain open. |
+| 6. Convergence and release | Converged with external promotion blocked | Target adapters, webview presentation registry, Mermaid normalization, shared Drawnix geometry, and Circuitikz template convergence are landed. The standalone Plait consumer gate passes against the production fixture; Draw.io and a real Drawnix application remain unavailable in this workspace. |
 
 This status table is the current decision record. The phase descriptions above remain the design rationale and acceptance criteria; they should not be read as proof that every listed task is still outstanding.
 

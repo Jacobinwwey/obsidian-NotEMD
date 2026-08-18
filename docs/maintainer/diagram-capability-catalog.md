@@ -64,5 +64,5 @@ The generator must use the production fixture catalog, fail on missing previews 
 Unit tests prove the Notemd artifact contract. They do not prove external interoperability:
 
 - open Draw.io XML in diagrams.net;
-- open/import Drawnix JSON in a real Drawnix consumer;
+- run `npm run diagram:consumer:drawnix` to consume the production fixture through the public Plait APIs, then open/import the same `.drawnix` JSON in a real Drawnix application when one is available;
 - compile Circuitikz TeX with the pinned compiler.

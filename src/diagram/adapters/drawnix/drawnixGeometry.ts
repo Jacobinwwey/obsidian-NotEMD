@@ -1,4 +1,4 @@
-import type { DrawnixPoint } from './drawnixMindMapProjection';
+export type DrawnixPoint = [number, number];
 
 export interface DrawnixRect {
     x: number;
@@ -23,6 +23,14 @@ export function drawnixRectanglesOverlap(left: DrawnixRect, right: DrawnixRect):
         && left.y + left.height > right.y;
 }
 
+/** Returns the Manhattan length used by orthogonal Drawnix routes. */
+export function drawnixPolylineLength(points: readonly DrawnixPoint[]): number {
+    return points.slice(1).reduce(
+        (total, point, index) => total + Math.abs(point[0] - points[index][0]) + Math.abs(point[1] - points[index][1]),
+        0
+    );
+}
+
 export function pointOnDrawnixPolyline(points: readonly DrawnixPoint[], position: number): DrawnixPoint {
     if (points.length === 0) {
         return [0, 0];
@@ -35,7 +43,7 @@ export function pointOnDrawnixPolyline(points: readonly DrawnixPoint[], position
         const start = points[index];
         return Math.abs(point[0] - start[0]) + Math.abs(point[1] - start[1]);
     });
-    const totalLength = lengths.reduce((total, length) => total + length, 0);
+    const totalLength = drawnixPolylineLength(points);
     if (totalLength <= 0) {
         return points[0];
     }

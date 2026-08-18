@@ -64,5 +64,5 @@ target descriptor 是 artifact 机制的运行时权威。其 `exportFormats` �
 单元测试只能证明 Notemd 产物契约，不能证明外部互操作：
 
 - 在 diagrams.net 打开 Draw.io XML；
-- 在真实 Drawnix consumer 中打开/导入 JSON；
+- 运行 `npm run diagram:consumer:drawnix`，通过公开 Plait API 消费生产 fixture；在环境具备真实 Drawnix 应用时，再打开/导入同一个 `.drawnix` JSON；
 - 用固定编译器编译 Circuitikz TeX。

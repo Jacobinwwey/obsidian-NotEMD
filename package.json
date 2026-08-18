@@ -19,6 +19,7 @@
 		"diagram:gallery": "node scripts/generate-diagram-gallery.js",
 		"diagram:gallery:check": "node scripts/generate-diagram-gallery.js --check",
 		"benchmark:drawnix-knowledge-map": "node scripts/benchmark-drawnix-knowledge-map.js",
+		"diagram:consumer:drawnix": "node scripts/run-drawnix-consumer-gate.mjs",
 		"diagram:export-circuitikz": "node scripts/export-circuitikz.js",
 		"diagram:smoke-circuitikz": "node scripts/run-circuitikz-smoke-fixtures.js",
 		"chronicle:sync-repo-saga": "node scripts/repo-saga/update-quarterly-saga.mjs --sync-only",

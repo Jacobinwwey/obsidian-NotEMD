@@ -175,7 +175,7 @@ Radar 在真实 Vega-Lite adapter 出现前保持阻塞，不能用只改标签�
 
 ### Phase 6：收敛与发布门禁
 
-preview/export 与 render-host 的 target dispatch 已通过 keyed adapter 收敛，并由重复注册与未知 payload fail-closed 测试保护。完成 Phase 0 和目录契约后，再执行 active Mermaid normalization 计划。随后消除 Drawnix 几何重复，实现或删除未接入的 Circuitikz repair loop，并将 CI 门禁收紧为 build、Jest、render-host audit、gallery freshness 和 `git diff --check`。
+preview/export 与 render-host 的 target dispatch 已通过 keyed adapter 收敛，并由重复注册与未知 payload fail-closed 测试保护。Mermaid 规范化和共享 Drawnix 几何边界也已落地。Circuitikz repair loop 明确保留为 maintainer-only acceptance SDK；正常生成链保持确定性，不调用 LLM repair pass。CI 门禁收紧为 `npm run build`、Jest、独立 Drawnix consumer gate、render-host audit、gallery freshness 和 `git diff --check`。
 
 外部门禁必须独立存在：
 
@@ -183,7 +183,7 @@ preview/export 与 render-host 的 target dispatch 已通过 keyed adapter 收�
 - Drawnix：打开/导入真实 `.drawnix`，检查文件名根节点树。
 - Circuitikz：用固定工具链编译原生 TeX。
 
-## 当前实现状态（2026-08-17）
+## 当前实现状态（2026-08-18）
 
 | 阶段 | 状态 | 证据 / 剩余边界 |
 |---|---|---|
@@ -193,7 +193,7 @@ preview/export 与 render-host 的 target dispatch 已通过 keyed adapter 收�
 | 3. 确定性预览 gallery | 完成 | 生产 fixture 同时生成设置页缩略图与双语 SVG/PNG 文档 gallery；`diagram:gallery:check` 是新鲜度门禁。 |
 | 4. 双语发现入口 | 已发布范围完成 | 支持矩阵已链接已发布示例；参考布局仍明确标为计划中。 |
 | 5. 候选准入 | 部分交付 | timeline、swimlane、quadrant 已有受限 schema、Mermaid adapter、与旧 spec 兼容的字段、fixture、gallery 资产和定向测试；Radar 与其余参考布局继续受门禁控制。 |
-| 6. 收敛与发布 | 进行中 | target adapter、webview presentation registry、Mermaid 规范化和 Circuitikz 模板收敛已落地；Draw.io/Drawnix 外部证据与几何门禁仍开放。 |
+| 6. 收敛与发布 | 代码已收敛，外部发布证据阻塞 | target adapter、webview presentation registry、Mermaid 规范化、共享 Drawnix 几何和 Circuitikz 模板收敛已落地。独立 Plait consumer gate 已用生产 fixture 通过；当前工作区仍没有 Draw.io 或真实 Drawnix 应用，因此不宣称外部互操作。 |
 
 该表是当前决策记录。上面的阶段描述保留设计理由与验收条件，不应再被理解为所有列出的任务都尚未实施。
 

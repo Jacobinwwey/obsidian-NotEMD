@@ -30,8 +30,8 @@ implementation_record: src/tests/mermaidNormalizationConvergence.test.ts
 | 导出格式 | target 按能力提供 SVG/PNG/PDF；editable HTML/SVG 携带 `previewSvg` | target catalog 与 renderer 集成测试 |
 | 可发现性 | 设置页显示确定性缩略图，并提供“使用此类型”动作 | `docs/assets/diagrams/manifest.json`、`diagramExamplePreview.test.ts` |
 | 静态 gallery | 13 组生产 fixture 生成的 SVG/PNG；过期资源会让检查失败 | `scripts/generate-diagram-gallery.js`、`npm run diagram:gallery:check` |
-| Drawnix | 文件名根原生树、`.drawnix`、SVG companion、Markdown wrapper | Drawnix implementation record 与导出测试 |
-| Circuitikz | 受限原生模板与 CLI 编译路径；真实 TeX consumer 仍是独立门禁 | `src/diagram/adapters/circuitikz`、`scripts/export-circuitikz.js` |
+| Drawnix | 文件名根原生树、`.drawnix`、SVG companion、Markdown wrapper | Drawnix implementation record、导出测试与 `npm run diagram:consumer:drawnix` |
+| Circuitikz | 受限原生模板与 CLI 编译路径；6 个 golden fixture 已在 TeX Live 2023 下编译 | `src/diagram/adapters/circuitikz`、`scripts/export-circuitikz.js`、smoke report |
 | Operation 契约 | schema 形状准入、maintainer 输入校验、运行时结果校验、help/schema 字段派生均已可执行 | `src/operations/contractSchemas.ts`、`src/operations/maintainerCliContractMetadata.json`、bridge 测试 |
 | Mermaid | diagram 级 normalize、35 个 stage 的 legacy registry、family 门控、共享 scanner、canonical fence 所有权和验证 runtime 初始化均已收敛 | `src/diagram/adapters/mermaid/normalize.ts`、`src/mermaidProcessor.ts`、`src/diagram/adapters/mermaid/runtime.ts` |
 | Public CLI 边界 | `local-knowledge.inspect` 仍是 maintainer-only，不是 public CLI 扩张 | `src/maintainerCliBridge.ts`、capability/public-surface 测试 |
@@ -56,6 +56,8 @@ implementation_record: src/tests/mermaidNormalizationConvergence.test.ts
 16. 增加通用 `TargetAdapterRegistry` 以及 preview、render-host adapter registry。preview/export 与 bundled render-host dispatch 不再按 target 使用 switch；未知 JSON payload target 会在 registry 边界 fail-closed。target 专属 webview markup 仍作为独立 presentation-layer 契约处理。
 17. 通过受限 payload schema、确定性的 Mermaid adapter、planner/intent 路由、fixture、gallery 资产和双语能力行，将 `timeline`、`swimlane`、`quadrant` 纳入候选准入。三者当前有意只兼容 Mermaid，直到建立 editable 或外部 consumer 契约。
 18. 增加 keyed webview presentation registry。Mermaid/Vega-Lite host shell、HTML document passthrough 与 source-only fallback 现在由同一 target 契约解析；未知 target fail-closed，MIME 不匹配时退回 source-only markup。
+19. 增加 `npm run diagram:consumer:drawnix`。不传入路径时，它会 bundle 生产 Drawnix 架构 fixture，校验 native envelope，再把临时 `.drawnix` 交给 `scripts/test-drawnix-plait-consumer.mjs`，由公开的 `@plait/core`、`@plait/draw` 与 `@plait/mind` API 消费。该 gate 已通过：一个文件名根、20 个识别节点和 12 条原生关系；这是 consumer 契约证据，不代表工作区安装了 Drawnix 桌面应用。
+20. 将共享 Drawnix 折线长度 primitive 移入 `drawnixGeometry.ts`，并通过 projection re-export 保持旧 `DrawnixPoint` 导入路径兼容。router 的标签定位和候选排序现在使用同一长度定义，新增多段折线 30 单位的定向回归。
 
 ## 与 `diagram-design` 的对比
 
@@ -83,7 +85,7 @@ implementation_record: src/tests/mermaidNormalizationConvergence.test.ts
 | Consumer | 当前证据 | 状态 |
 |---|---|---|
 | Draw.io | 工作区未发现 diagrams.net/Draw.io 可执行程序 | 未宣称互操作；需补 manual/CI gate |
-| Drawnix | 有原生树 fixture 与 serializer 测试；无独立 Drawnix 应用门禁 | 未宣称互操作；仅 fixture 证据 |
+| Drawnix | `npm run diagram:consumer:drawnix` 生成生产架构 fixture，并通过公开 `@plait/*` API 消费；当前没有独立 Drawnix 应用 | Plait consumer 契约已通过；不宣称真实应用互操作 |
 | Circuitikz | `pdflatex` 已编译全部 6 个 golden fixture；每个都生成非空 PDF，0 error、0 warning | 本地 consumer gate 通过；CI 仍需记录工具/版本 |
 
 ## 向前推进计划
@@ -92,8 +94,8 @@ implementation_record: src/tests/mermaidNormalizationConvergence.test.ts
 2. **Mermaid Phase 3：已完成。** 共享 scanner、canonical fence 格式和插件验证 runtime 初始化已收敛；预览 webview 的主题初始化继续作为独立 runtime 契约。
 3. **Target adapter dispatch：已完成。** preview/export、render-host 与 webview presentation 都使用 keyed target contract；没有内嵌 runtime 的 target 必须显式走 source-only。
 4. **Consumer 证据：** 在工具可用时执行 Draw.io/Drawnix/Circuitikz 真实门禁；不可用时记录 blocker，不声称兼容。
-5. **Drawnix 收敛：** 生产 source-coverage 与 relation-router 名称已经 canonical，旧 source-coverage export 和旧 router 模块仅用于兼容。矩形/折线以及文本度量/换行共享 primitive 已集中；只有在确认存在真实重复时才继续抽取 measurement/layout helper，并在调用点证明与替代路由契约完成后删除旧 cross-root 实现。
-6. **Circuitikz 收敛：** 六个 golden renderer 已共享 standalone-document 与 component-label helper，同时保持确定性输出。`runCircuitikzRepairLoop()` 继续作为 maintainer-only acceptance SDK 边界；正常生成不调用 LLM repair loop。只有在明确需要 repair 命令时，才决定接入真实 CLI/desktop caller。
+5. **Drawnix 收敛：** 生产 source-coverage 与 relation-router 名称已经 canonical，旧 source-coverage export 和旧 router 模块仅用于兼容。矩形/折线以及文本度量/换行共享 primitive 已集中，独立 Plait consumer gate 已证明生产 fixture 可以跨越公开 consumer 边界。真实 Drawnix 桌面/应用导入仍是单独的外部门禁。
+6. **Circuitikz 收敛：** 六个 golden renderer 已共享 standalone-document 与 component-label helper，同时保持确定性输出。`runCircuitikzRepairLoop()` 明确保留为 maintainer-only acceptance SDK；正常生成不调用 LLM repair loop。只有在明确授权的 repair 命令且具备新鲜 compile/render evidence 时，才接入 CLI/desktop caller。
 7. **参考候选准入：** timeline、swimlane、quadrant 已以 Mermaid-only 类型交付，并具备确定性 fixture 与 parser-backed gallery 证据。Radar 在真实 Vega-Lite adapter 出现前继续阻塞；其余参考布局仍受门禁控制。
 
 ## 验收门禁
@@ -103,11 +105,12 @@ implementation_record: src/tests/mermaidNormalizationConvergence.test.ts
 - `npm run build`
 - `npm test -- --runInBand`
 - `npm run audit:render-host`
+- `npm run diagram:consumer:drawnix`
 - `src/tests/renderTargetAdapterRegistry.test.ts`
 - `npm run lint`（当前被仓库基线阻断；不能误标为本功能失败）
 - `git diff --check`
-- 外部 consumer 记录必须包含工具/版本/输入/输出，不能由 unit mock 替代。
+- 外部 consumer 记录必须包含工具/版本/输入/输出，不能由 unit mock 替代。Plait gate 是仓库内的公开 API consumer 契约；真实 Drawnix 应用导入仍需单独的手工/CI 记录。
 
 ## 验证快照
 
-本轮新鲜验证：261 个 Jest suite 通过（2,280 tests passed、1 skipped）；TypeScript/esbuild build 通过；VitePress docs build 通过；生产 gallery check 通过并生成 13 组 SVG/PNG；render-host audit 通过；semantic verification helper 与 webview presentation focused suites 通过；Circuitikz smoke 使用 TeX Live 2023 `pdflatex` 通过（6/6 PDF，0 error/0 warning）；新增 adapter/registry 文件 ESLint 通过；`git diff --check` 通过。当前工作区没有 Draw.io/Drawnix 可执行工具，因此不作外部互操作声明。全仓 lint 仍有新 adapter/registry 文件之外的既有错误，继续作为独立债务跟踪。
+本轮新鲜验证：261 个 Jest suite 通过（2,281 tests passed、1 skipped）；TypeScript/esbuild build 通过；VitePress docs build 通过；生产 gallery check 通过并生成 13 组 SVG/PNG；render-host audit 与 i18n audit 通过；独立 Drawnix Plait consumer gate 通过（20 个节点、1 个根、12 条关系）；semantic verification helper 通过；Circuitikz smoke 使用 TeX Live 2023 `pdflatex` 通过（6/6 PDF，0 error/0 warning）。`git diff --check` 通过。当前工作区没有 Draw.io 或真实 Drawnix 桌面应用，因此不作应用级互操作声明。全仓 lint 仍作为独立基线债务跟踪。

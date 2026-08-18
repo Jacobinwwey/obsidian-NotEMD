@@ -163,7 +163,7 @@ Phase A 已经文档化。Phase B/C 现在有了受约束的仓库内原型：
 - `src/ui/CircuitikzEnvironmentModal.ts` 提供探测、安装/修复、取消、删除、能力摘要、进度与有限日志状态。桌面执行模块采用延迟加载；移动端继续保留零依赖预览和 SVG/PNG/预览 PDF 导出。
 - 图形历史右侧抽屉现在显式建立 Grid 最小尺寸不变量 `min-height: 0`，由 body 负责 `overflow: auto` 并阻止 overscroll 传递，因此长历史可以完整滚动，不会带动底层预览。
 
-Phase D 现在提供可操作的编译和产物诊断，包括 SVG 几何/遮挡与 PNG 非空、裁剪、密度检查。Phase E 已具备有次数上限且保持拓扑的执行闭环，并继续拒绝缺少新鲜 compile/render-smoke 证据的候选。Phase F 新增可选桌面环境发现与用户主动触发的托管安装，同时保持常规预览/导出零依赖。Notemd 仍不会把 TeX Live、MiKTeX、TinyTeX 或 Tectonic 压缩包嵌入 `main.js`。path-only glyph OCR、精确像素级遮挡、完整 SVG path 覆盖和浏览器级文字布局仍是后续证据增强项。
+Phase D 现在提供可操作的编译和产物诊断，包括 SVG 几何/遮挡与 PNG 非空、裁剪、密度检查。Phase E 已具备有次数上限且保持拓扑的执行闭环，并继续拒绝缺少新鲜 compile/render-smoke 证据的候选。该 loop 明确是 maintainer-only acceptance SDK：生产生成路径不会调用它，UI 也不能静默把被拒绝的 candidate 变成已保存 artifact。未来 repair 命令必须注入 model caller 与 compiler，持久化 acceptance report，并要求用户显式确认后才能采用。Phase F 新增可选桌面环境发现与用户主动触发的托管安装，同时保持常规预览/导出零依赖。Notemd 仍不会把 TeX Live、MiKTeX、TinyTeX 或 Tectonic 压缩包嵌入 `main.js`。path-only glyph OCR、精确像素级遮挡、完整 SVG path 覆盖和浏览器级文字布局仍是后续证据增强项。
 
 SVG geometry smoke 也覆盖 leading-dot decimals 与 explicit plus signs 的 SVG number grammar。这是一个很小但关键的 renderer-compatibility gate，因为 dvisvgm 可能输出紧凑小数，bounds checks 中必须保留其小数语义。
 

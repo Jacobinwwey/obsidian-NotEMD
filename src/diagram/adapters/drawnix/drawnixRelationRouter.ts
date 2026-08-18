@@ -1,11 +1,10 @@
 import type {
     DrawnixMindMapPlacedNode,
-    DrawnixPoint,
     DrawnixRootRegion
 } from './drawnixMindMapProjection';
 import type { DrawnixRelationLane } from './drawnixRelationLaneLayout';
-import { inflateDrawnixRect } from './drawnixGeometry';
-import type { DrawnixRect } from './drawnixGeometry';
+import { drawnixPolylineLength, inflateDrawnixRect } from './drawnixGeometry';
+import type { DrawnixPoint, DrawnixRect } from './drawnixGeometry';
 
 export type DrawnixCrossRootRouteStrategy = 'grid' | 'local-lane' | 'outer-lane' | 'reserved-lane';
 
@@ -538,18 +537,11 @@ function endpointsForReservedLaneGrid(
     ));
 }
 
-function routeLength(points: readonly DrawnixPoint[]): number {
-    return points.slice(1).reduce(
-        (total, point, index) => total + Math.abs(point[0] - points[index][0]) + Math.abs(point[1] - points[index][1]),
-        0
-    );
-}
-
 function reservedLaneLabelPosition(
     points: readonly DrawnixPoint[],
     lane: DrawnixRelationLane
 ): number | null {
-    const totalLength = routeLength(points);
+    const totalLength = drawnixPolylineLength(points);
     if (totalLength <= 0) {
         return null;
     }
@@ -687,7 +679,7 @@ export function findDrawnixDirectReservedLaneRoute(
     }
 
     candidates.sort((left, right) => {
-        const lengthDelta = routeLength(left.points) - routeLength(right.points);
+        const lengthDelta = drawnixPolylineLength(left.points) - drawnixPolylineLength(right.points);
         return lengthDelta || left.points.length - right.points.length;
     });
     const selected = candidates[0];
@@ -769,7 +761,7 @@ export function routeDrawnixRelationThroughReservedLane(
     }
 
     candidates.sort((left, right) => {
-        const lengthDelta = routeLength(left.points) - routeLength(right.points);
+        const lengthDelta = drawnixPolylineLength(left.points) - drawnixPolylineLength(right.points);
         return lengthDelta || left.points.length - right.points.length;
     });
     const selected = candidates[0];

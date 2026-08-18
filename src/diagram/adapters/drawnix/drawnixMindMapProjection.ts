@@ -15,10 +15,11 @@ import {
     inflateDrawnixRect,
     pointOnDrawnixPolyline
 } from './drawnixGeometry';
-import type { DrawnixRect } from './drawnixGeometry';
+import type { DrawnixPoint, DrawnixRect } from './drawnixGeometry';
 import { measureDrawnixText, wrapDrawnixText } from './drawnixTextLayout';
 
-export type DrawnixPoint = [number, number];
+// Keep the historical projection export stable while geometry owns the primitive.
+export type { DrawnixPoint } from './drawnixGeometry';
 
 export interface DrawnixMindMapTopic {
     type: 'paragraph';

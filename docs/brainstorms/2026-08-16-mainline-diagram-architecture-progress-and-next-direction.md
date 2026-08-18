@@ -30,8 +30,8 @@ The correct next move is convergence. Adding more visual types before closing co
 | Export formats | SVG/PNG/PDF where the target supports them; editable HTML/SVG carries `previewSvg` | target catalog and renderer integration tests |
 | Discoverability | Settings selector shows deterministic thumbnails and a direct “use this type” action | `docs/assets/diagrams/manifest.json`, `diagramExamplePreview.test.ts` |
 | Static gallery | 13 SVG/PNG pairs generated from production fixtures; stale assets fail the check | `scripts/generate-diagram-gallery.js`, `npm run diagram:gallery:check` |
-| Drawnix | Filename-rooted native tree, `.drawnix` plus SVG companion and Markdown wrapper | Drawnix implementation record and export tests |
-| Circuitikz | Constrained native templates and CLI compiler path; real TeX consumer remains a separate gate | `src/diagram/adapters/circuitikz`, `scripts/export-circuitikz.js` |
+| Drawnix | Filename-rooted native tree, `.drawnix` plus SVG companion and Markdown wrapper | Drawnix implementation record, export tests, and `npm run diagram:consumer:drawnix` |
+| Circuitikz | Constrained native templates and CLI compiler path; six golden fixtures compile under TeX Live 2023 | `src/diagram/adapters/circuitikz`, `scripts/export-circuitikz.js`, smoke report |
 | Operation contracts | Schema shape admission, maintainer input validation, runtime result validation, and help/schema field derivation are now executable | `src/operations/contractSchemas.ts`, `src/operations/maintainerCliContractMetadata.json`, bridge tests |
 | Mermaid | Diagram-level normalization, 35-stage legacy registry, family gating, shared scanner, canonical fence ownership, and validation-runtime initialization are converged | `src/diagram/adapters/mermaid/normalize.ts`, `src/mermaidProcessor.ts`, `src/diagram/adapters/mermaid/runtime.ts` |
 | Public CLI boundary | `local-knowledge.inspect` remains maintainer-only; it is not a public CLI expansion | `src/maintainerCliBridge.ts`, capability/public-surface tests |
@@ -56,6 +56,8 @@ The correct next move is convergence. Adding more visual types before closing co
 16. Added the generic `TargetAdapterRegistry` plus preview and render-host adapter registries. Preview/export and bundled render-host dispatch no longer switch on target; unknown JSON payload targets fail closed at the registry boundary. Target-specific webview markup remains a separate presentation-layer contract.
 17. Admitted `timeline`, `swimlane`, and `quadrant` through bounded payload schemas, deterministic Mermaid adapters, planner/intent routing, fixtures, gallery assets, and bilingual capability rows. Their compatible target set is intentionally Mermaid-only until an editable or external consumer contract exists.
 18. Added the keyed webview presentation registry. Mermaid and Vega-Lite host shells, HTML document passthrough, and source-only fallbacks now resolve through one target contract; unknown targets fail closed and MIME mismatches fall back to source-only markup.
+19. Added `npm run diagram:consumer:drawnix`. Without an input path it bundles the production Drawnix architecture fixture, validates the native envelope, and feeds the temporary `.drawnix` artifact to `scripts/test-drawnix-plait-consumer.mjs`, which uses the public `@plait/core`, `@plait/draw`, and `@plait/mind` APIs. The gate passed with one filename-rooted root, 20 recognized nodes, and 12 native relations; it is consumer-contract evidence, not a claim that a Drawnix desktop application is installed.
+20. Moved the shared Drawnix polyline-length primitive into `drawnixGeometry.ts` and kept `DrawnixPoint` source-compatible through the projection re-export. Router label placement and candidate ordering now use one length definition, with a focused 30-unit multi-segment regression.
 
 ## Comparison With `diagram-design`
 
@@ -83,7 +85,7 @@ The reference taxonomy still supplies architecture, current-state, radar, loop, 
 | Consumer | Current evidence | Status |
 |---|---|---|
 | Draw.io | No diagrams.net/Draw.io executable is available in this workspace | Not claimed; add a manual or CI gate before promotion |
-| Drawnix | Native tree fixtures and serializer tests exist; no independent Drawnix application gate is available here | Not claimed; fixture evidence only |
+| Drawnix | `npm run diagram:consumer:drawnix` builds the production architecture fixture and consumes it through the public `@plait/*` APIs; no independent Drawnix application is available here | Plait consumer contract passed; real application interoperability not claimed |
 | Circuitikz | `pdflatex` compiled all 6 golden fixtures; each produced a non-empty PDF with 0 errors and 0 warnings | Passed local consumer gate; keep tool/version in CI evidence |
 
 ## Forward Plan
@@ -92,8 +94,8 @@ The reference taxonomy still supplies architecture, current-state, radar, loop, 
 2. **Mermaid Phase 3: completed.** Shared scanning, canonical fence formatting, and plugin validation-runtime initialization are converged. Keep preview webview theme initialization as a separate runtime contract.
 3. **Target adapter dispatch: completed.** Preview/export, render-host, and webview presentation now use keyed target contracts; keep the source-only fallback explicit for targets without an embedded runtime.
 4. **Consumer evidence:** run real Draw.io/Drawnix/Circuitikz gates where tooling exists; record unavailable tools rather than claiming interoperability.
-5. **Drawnix convergence:** the production source-coverage and relation-router names are canonical; the old source-coverage export and router module are compatibility-only. Shared rectangle/polyline and text measurement/wrapping primitives are now centralized. Extract further measurement/layout helpers only where duplication is demonstrated, then remove the legacy cross-root implementation after call-site proof and a replacement route contract.
-6. **Circuitikz convergence:** the six golden renderers now share the standalone-document and component-label helpers while preserving deterministic output. Keep `runCircuitikzRepairLoop()` as a maintainer-only acceptance SDK boundary; normal generation remains deterministic and does not invoke an LLM repair loop. Decide whether to wire a real CLI/desktop caller only when an explicit repair command requires it.
+5. **Drawnix convergence:** the production source-coverage and relation-router names are canonical; the old source-coverage export and router module are compatibility-only. Shared rectangle/polyline and text measurement/wrapping primitives are centralized, and the standalone Plait consumer gate proves the production fixture crosses the public consumer boundary. Real Drawnix desktop/app import remains a separate external gate.
+6. **Circuitikz convergence:** the six golden renderers share the standalone-document and component-label helpers while preserving deterministic output. Keep `runCircuitikzRepairLoop()` as a maintainer-only acceptance SDK boundary; normal generation remains deterministic and does not invoke an LLM repair loop. Wire a real CLI/desktop caller only as a separately authorized repair command with fresh compile/render evidence.
 7. **Reference admission:** timeline, swimlane, and quadrant are shipped as Mermaid-only types with deterministic fixtures and parser-backed gallery evidence. Radar remains blocked until a real Vega-Lite adapter exists; all other reference layouts remain gated.
 
 ## Acceptance Gates
@@ -103,11 +105,12 @@ The reference taxonomy still supplies architecture, current-state, radar, loop, 
 - `npm run build`
 - `npm test -- --runInBand`
 - `npm run audit:render-host`
+- `npm run diagram:consumer:drawnix`
 - `src/tests/renderTargetAdapterRegistry.test.ts`
 - `npm run lint` (currently repository-baseline blocked; do not relabel this as a feature failure)
 - `git diff --check`
-- External consumer records must identify tool/version/input/output and must not be replaced by unit mocks.
+- External consumer records must identify tool/version/input/output and must not be replaced by unit mocks. The Plait gate is a checked-in public-API consumer contract; real Drawnix application import remains a separate manual/CI record.
 
 ## Verification Snapshot
 
-Fresh verification for this increment: 261 Jest suites passed (2,280 tests passed, 1 skipped); TypeScript/esbuild build passed; VitePress docs build passed; production gallery check passed with 13 SVG/PNG pairs; render-host audit passed; semantic verification helper and focused webview presentation suites passed; Circuitikz smoke passed with TeX Live 2023 `pdflatex` (6/6 PDFs, 0 errors/0 warnings); new adapter/registry files pass ESLint; and `git diff --check` passed. Draw.io/Drawnix executables are unavailable in this workspace, so no external interoperability claim is made. Full repository lint still contains pre-existing errors outside the new adapter/registry files and remains a separate debt track.
+Fresh verification for this increment: 261 Jest suites passed (2,281 tests passed, 1 skipped); TypeScript/esbuild build passed; VitePress docs build passed; production gallery check passed with 13 SVG/PNG pairs; render-host audit and i18n audit passed; the standalone Drawnix Plait consumer gate passed with 20 nodes, 1 root, and 12 relations; semantic verification helper passed; and Circuitikz smoke passed with TeX Live 2023 `pdflatex` (6/6 PDFs, 0 errors/0 warnings). `git diff --check` passed. Draw.io and a real Drawnix desktop application are unavailable in this workspace, so no application-level interoperability claim is made. Full repository lint remains a separate baseline debt track.

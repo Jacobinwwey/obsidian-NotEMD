@@ -1,5 +1,6 @@
 import {
     drawnixRectanglesOverlap,
+    drawnixPolylineLength,
     inflateDrawnixRect,
     pointOnDrawnixPolyline
 } from '../diagram/adapters/drawnix/drawnixGeometry';
@@ -30,6 +31,7 @@ describe('Drawnix geometry primitives', () => {
     test('places native relation labels by measured orthogonal path length', () => {
         const points: [number, number][] = [[0, 0], [10, 0], [10, 20]];
 
+        expect(drawnixPolylineLength(points)).toBe(30);
         expect(pointOnDrawnixPolyline(points, 0)).toEqual([0, 0]);
         expect(pointOnDrawnixPolyline(points, 0.25)).toEqual([7.5, 0]);
         expect(pointOnDrawnixPolyline(points, 0.75)).toEqual([10, 12.5]);
