@@ -66,6 +66,8 @@ implementation_record: src/tests/mermaidNormalizationConvergence.test.ts
 
 24. 完成选择驱动预览的发布验证切片。`npm.cmd run build`、定向 Jest（57 个测试）、全量 Jest（263 suites，2307 passed，1 skipped）、`npm.cmd run docs:build`、`npm.cmd run diagram:gallery:check` 和 `npm.cmd run audit:i18n-ui` 全部通过。已通过 CLI/eval 插件生命周期重载现有 `1Knowledge` Obsidian 进程并部署最新 bundle；运行时证据显示 1 个预览面板、0 个旧 gallery 节点、0 张参考图、16 个选择器选项、生产 SVG ready、选择器高度 44px、画布比例 16:9。frontend-law-auditor strict gate 得分 91.32/100，无失败项；p95 交互时延和移动端截图仍明确记录为证据缺口。
 
+25. 关闭发布复核发现的 Settings 选择器同步缺口。切换图形类型后，现在会局部同步可见的生成 target 下拉框，不再整页重绘，从而保持渐进披露；行为由 `providerSettingsBehavior.test.ts` 覆盖。最终全量 Jest 仍为 263 suites，2307 passed，1 skipped。
+
 ## 与 `diagram-design` 的对比
 
 | 轴 | 参考项目 | Notemd 当前真值 | 工程决策 |

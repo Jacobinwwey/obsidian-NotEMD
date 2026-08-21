@@ -2734,6 +2734,8 @@ export class NotemdSettingTab extends PluginSettingTab {
                     });
             });
 
+        let renderTargetDropdown: { setValue(value: string): unknown } | null = null;
+
         this.createCatalogSetting(containerEl, { id: 'settings.experimentalDiagramPipeline.intent' })
             .setName(experimentalDiagramI18n.intentName)
             .setDesc(experimentalDiagramI18n.intentDesc)
@@ -2764,6 +2766,9 @@ export class NotemdSettingTab extends PluginSettingTab {
                             value === 'auto' ? undefined : value as DiagramIntent
                         );
                         await this.plugin.saveSettings();
+                        renderTargetDropdown?.setValue(
+                            this.plugin.settings.preferredDiagramRenderTarget || 'auto'
+                        );
                         this.diagramTypePreviewController?.setSelectedType(resolveDiagramPreviewTypeId(value));
                     });
             });
@@ -2772,6 +2777,7 @@ export class NotemdSettingTab extends PluginSettingTab {
             .setName(experimentalDiagramI18n.renderTargetName)
             .setDesc(experimentalDiagramI18n.renderTargetDesc)
             .addDropdown(dropdown => {
+                renderTargetDropdown = dropdown;
                 dropdown.addOption('auto', experimentalDiagramI18n.renderTargetAuto);
                 dropdown.addOption('mermaid', experimentalDiagramI18n.renderTargetMermaid);
                 dropdown.addOption('json-canvas', experimentalDiagramI18n.renderTargetJsonCanvas);

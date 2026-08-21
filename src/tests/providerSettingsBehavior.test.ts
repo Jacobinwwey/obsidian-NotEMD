@@ -966,17 +966,21 @@ describe('provider settings behavior', () => {
 
         const intentSetting = findSettingByName(tab.containerEl, 'Preferred diagram type');
         const intentDropdown = intentSetting?.controls.find(control => control.kind === 'dropdown') as MockDropdownControl | undefined;
+        const targetSetting = findSettingByName(tab.containerEl, 'Preferred source format');
+        const targetDropdown = targetSetting?.controls.find(control => control.kind === 'dropdown') as MockDropdownControl | undefined;
 
         await intentDropdown?.onChangeHandler?.('circuit');
 
         expect(plugin.settings.preferredDiagramIntent).toBe('circuit');
         expect(plugin.settings.preferredDiagramRenderTarget).toBe('circuitikz');
         expect(plugin.settings.experimentalDiagramCompatibilityMode).toBe('best-fit');
+        expect(targetDropdown?.value).toBe('circuitikz');
 
         await intentDropdown?.onChangeHandler?.('flowchart');
 
         expect(plugin.settings.preferredDiagramIntent).toBe('flowchart');
         expect(plugin.settings.preferredDiagramRenderTarget).toBeUndefined();
+        expect(targetDropdown?.value).toBe('auto');
     });
 
     test('keeps advanced settings collapsed after the user closes them and reopens the settings tab', () => {

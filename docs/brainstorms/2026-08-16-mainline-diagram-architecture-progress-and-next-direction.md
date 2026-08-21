@@ -66,6 +66,8 @@ The correct next move is convergence. Adding more visual types before closing co
 
 24. Completed the release verification slice for the selection-driven preview. `npm.cmd run build`, targeted Jest (57 tests), full Jest (263 suites, 2307 passed, 1 skipped), `npm.cmd run docs:build`, `npm.cmd run diagram:gallery:check`, and `npm.cmd run audit:i18n-ui` all pass. The existing `1Knowledge` Obsidian process was reloaded through the CLI/eval plugin lifecycle after deployment; runtime evidence showed one preview panel, zero legacy gallery nodes, zero reference images, 16 selector options, a ready production SVG, a 44px selector target, and a 16:9 canvas. Frontend-law-auditor strict gate scored 91.32/100 with no failures; p95 timing and mobile screenshot evidence remain explicit data gaps.
 
+25. Closed the Settings selector synchronization gap found during release review. Intent changes now update the visible render-target dropdown locally, preserving progressive disclosure without re-rendering the whole settings page; the behavior is covered by `providerSettingsBehavior.test.ts`. The final full Jest run remains 263 suites, 2307 passed, 1 skipped.
+
 ## Comparison With `diagram-design`
 
 | Axis | Reference project | Notemd current truth | Engineering decision |
