@@ -177,7 +177,22 @@ The deterministic renderer, not the model, emits the complete LaTeX document wit
 - orgChart
 - timeline
 - swimlane
-- quadrant`;
+- quadrant
+- architecture
+- currentState
+- integrationTopology
+- dataFlow
+- accessMatrix
+- gantt
+- layerStack
+- setOverlap
+- rankedFunnel
+- loop
+- nested
+- tree
+- process
+- medallion
+- highLevel`;
 
     const targetLanguageLine = options.targetLanguage
         ? `Write all human-readable labels in ${options.targetLanguage}.`
@@ -237,6 +252,13 @@ Validation rules:
 - For timeline, swimlane, and quadrant intents, use only the dedicated payload described above and keep identifiers stable and unique.
 - For radar intent, keep axis order stable and use exactly one point per axis so all series share the same scale.
 - For orgChart intent, set nodes to an empty array and provide orgChartSpec.nodes. Each owner requires id and label; reportsTo must reference an existing owner. Keep the payload to no more than 12 owners, one root, no more than four tiers, and no more than five direct reports per owner. Optional role, scope (up to four short strings), and status (active, planned, or gap) are rendered as ownership metadata. Do not encode org-chart ownership only as generic edges.
+- For architecture, currentState, integrationTopology, and highLevel intents, set nodes and edges to empty arrays and provide a canonical payload with kind "topology". Use zones, bounded nodes, and edges by stable node id; never emit coordinates or SVG paths.
+- For dataFlow and process intents, provide a canonical payload with kind "lane-grid". Use lanes, steps, explicit cells, and edge coordinates; omitted cells remain empty and must not be represented by placeholder nodes.
+- For accessMatrix intent, provide a canonical payload with kind "access-matrix". Use 2-6 roles, 2-14 components, and cell levels only from full, rw, read, none.
+- For gantt intent, provide a canonical payload with kind "schedule". Every task requires start and end values; do not invent dates or dependency edges.
+- For layerStack and medallion intents, provide a canonical payload with kind "ordered-stack" and 4-6 layers.
+- For setOverlap, rankedFunnel, loop, nested, and tree intents, provide the corresponding canonical payload kind and stay within its declared bounded count; do not output renderer-specific geometry.
+- For explicit bar-chart, line-chart, and scatter-plot profiles, set intent to dataChart and provide a quantitative payload whose chartType matches the profile.
 
 Return a single valid DiagramSpec JSON object.`;
 }

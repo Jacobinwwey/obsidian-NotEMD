@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1120" height="350" viewBox="0 0 1120 350" role="img" aria-labelledby="notemd-gallery-gantt-release-plan-title notemd-gallery-gantt-release-plan-desc" data-notemd-renderer="notemd-reference-layouts@1.0.0">
+        <title id="notemd-gallery-gantt-release-plan-title">Release plan</title>
+        <desc id="notemd-gallery-gantt-release-plan-desc">Use for task overlap and milestones on a bounded delivery timeline.</desc>
+        <style>
+        .ref-canvas { fill: #f8fafc; }
+        .ref-title { fill: #172033; font: 700 26px "Segoe UI", Arial, sans-serif; }
+        .ref-summary { fill: #64748b; font: 13px "Segoe UI", Arial, sans-serif; }
+        .ref-zone { fill: #ffffff; stroke: #cbd5e1; stroke-width: 1; }
+        .ref-zone-label { fill: #64748b; font: 700 10px "Segoe UI", Arial, sans-serif; letter-spacing: 1.5px; }
+        .ref-node { fill: #ffffff; stroke: #cbd5e1; stroke-width: 1.2; }
+        .ref-node.focal { fill: #fff7ed; stroke: #c2410c; stroke-width: 1.8; }
+        .ref-node.external { stroke-dasharray: 5 4; }
+        .ref-node-label { fill: #172033; font: 600 13px "Segoe UI", Arial, sans-serif; }
+        .ref-node-sub { fill: #64748b; font: 10px Consolas, monospace; }
+        .ref-edge { fill: none; stroke: #64748b; stroke-width: 1.5; }
+        .ref-edge.accent { stroke: #c2410c; stroke-width: 2; marker-end: url(#notemd-reference-arrow-accent); }
+        .ref-edge.link { stroke: #1d4ed8; marker-end: url(#notemd-reference-arrow-link); }
+        .ref-edge.trigger { stroke-dasharray: 5 4; }
+        .ref-edge.dashed { stroke-dasharray: 5 4; }
+        .ref-edge-label { fill: #64748b; font: 10px Consolas, monospace; paint-order: stroke; stroke: #f8fafc; stroke-width: 5px; }
+        .ref-axis { stroke: #cbd5e1; stroke-width: 1; }
+        .ref-axis-label { fill: #64748b; font: 10px Consolas, monospace; }
+        .ref-chip { fill: #e2e8f0; stroke: #cbd5e1; stroke-width: .7; }
+        .ref-chip-text { fill: #172033; font: 700 8px Consolas, monospace; }
+        .ref-focal-fill { fill: #fff7ed; stroke: #c2410c; stroke-width: 1.8; }
+        .ref-caption { fill: #64748b; font: 10px Consolas, monospace; letter-spacing: .8px; }
+    </style>
+        <defs>
+        <marker id="notemd-reference-arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0 L8 4 L0 8 Z" fill="#64748b"/></marker>
+        <marker id="notemd-reference-arrow-accent" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0 L8 4 L0 8 Z" fill="#c2410c"/></marker>
+        <marker id="notemd-reference-arrow-link" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0 L8 4 L0 8 Z" fill="#1d4ed8"/></marker>
+    </defs>
+        <rect class="ref-canvas" x="0" y="0" width="1120" height="350"/>
+        <text class="ref-title" x="40" y="42">Release plan</text>
+        <text class="ref-summary" x="40" y="66">A schedule with parallel work and one release gate.</text>
+        <g><line class="ref-axis" x1="260" y1="84" x2="260" y2="280"/><text class="ref-axis-label" x="260" y="76" text-anchor="middle">W1</text></g><g><line class="ref-axis" x1="396.66666666666663" y1="84" x2="396.66666666666663" y2="280"/><text class="ref-axis-label" x="396.66666666666663" y="76" text-anchor="middle">W2</text></g><g><line class="ref-axis" x1="533.3333333333333" y1="84" x2="533.3333333333333" y2="280"/><text class="ref-axis-label" x="533.3333333333333" y="76" text-anchor="middle">W3</text></g><g><line class="ref-axis" x1="670" y1="84" x2="670" y2="280"/><text class="ref-axis-label" x="670" y="76" text-anchor="middle">W4</text></g><g><line class="ref-axis" x1="806.6666666666666" y1="84" x2="806.6666666666666" y2="280"/><text class="ref-axis-label" x="806.6666666666666" y="76" text-anchor="middle">W5</text></g><g><line class="ref-axis" x1="943.3333333333333" y1="84" x2="943.3333333333333" y2="280"/><text class="ref-axis-label" x="943.3333333333333" y="76" text-anchor="middle">W6</text></g><g><line class="ref-axis" x1="1080" y1="84" x2="1080" y2="280"/><text class="ref-axis-label" x="1080" y="76" text-anchor="middle">W7</text></g><g id="reference-task-contract"><text class="ref-node-label" x="18" y="134">Canonical contract</text><rect class="ref-chip" x="260" y="117" width="291.33333333333326" height="28" rx="5"/><text class="ref-node-sub" x="268" y="135">foundation</text></g><g id="reference-task-renderer"><text class="ref-node-label" x="18" y="176">Native renderer</text><rect class="ref-focal-fill" x="396.66666666666663" y="159" width="428" height="28" rx="5"/><text class="ref-node-sub" x="404.66666666666663" y="177">foundation</text></g><g id="reference-task-preview"><text class="ref-node-label" x="18" y="218">Preview and gallery</text><rect class="ref-chip" x="670" y="201" width="291.33333333333326" height="28" rx="5"/><text class="ref-node-sub" x="678" y="219">delivery</text></g><g id="reference-task-release"><text class="ref-node-label" x="18" y="260">Release gate</text><rect class="ref-chip" x="943.3333333333333" y="243" width="154.66666666666674" height="28" rx="5"/><text class="ref-node-sub" x="951.3333333333333" y="261">delivery</text></g><g id="reference-milestone-gate"><path class="ref-edge accent" d="M 806.6666666666666 94 V 288"/><text class="ref-edge-label" x="811.6666666666666" y="306" text-anchor="start">consumer gate</text></g>
+    </svg>

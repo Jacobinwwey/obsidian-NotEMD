@@ -150,6 +150,186 @@
       "svgPath": "./circuit-cmos-inverter.svg",
       "pngPath": "./circuit-cmos-inverter.png",
       "svgSha256": "be9bb85a03a9dd440043bfb7b357834b7c133695936e1e6dd0d815657f9a6e17"
+    },
+    {
+      "typeId": "bar-chart",
+      "fixtureId": "bar-chart-adoption",
+      "title": "Feature adoption",
+      "target": "vega-lite",
+      "previewTarget": "vega-lite",
+      "svgPath": "./bar-chart-adoption.svg",
+      "pngPath": "./bar-chart-adoption.png",
+      "svgSha256": "0d9a55ebb250c0e0a214b336404137e9137385e468c059bfad9f418778c75480"
+    },
+    {
+      "typeId": "line-chart",
+      "fixtureId": "line-chart-render-time",
+      "title": "Render time trend",
+      "target": "vega-lite",
+      "previewTarget": "vega-lite",
+      "svgPath": "./line-chart-render-time.svg",
+      "pngPath": "./line-chart-render-time.png",
+      "svgSha256": "65e3caddd19e029bad6ad1da9fc23024951eba17c3e58d3555b8cb79328114f9"
+    },
+    {
+      "typeId": "scatter-plot",
+      "fixtureId": "scatter-plot-quality",
+      "title": "Quality and latency",
+      "target": "vega-lite",
+      "previewTarget": "vega-lite",
+      "svgPath": "./scatter-plot-quality.svg",
+      "pngPath": "./scatter-plot-quality.png",
+      "svgSha256": "f3324c47183891ef093cc9e32f039e73b04e1d004d5a8c3b0cfbcf26e53f5d90"
+    },
+    {
+      "typeId": "architecture",
+      "fixtureId": "architecture-platform",
+      "title": "Platform architecture",
+      "target": "editable-html-svg",
+      "previewTarget": "editable-html-svg",
+      "svgPath": "./architecture-platform.svg",
+      "pngPath": "./architecture-platform.png",
+      "svgSha256": "700afc527b75e9b0ce1ae0202b494a5918be3b24f5997586eef86462fdadb3a8"
+    },
+    {
+      "typeId": "current-state",
+      "fixtureId": "current-state-legacy-pipeline",
+      "title": "Legacy current state",
+      "target": "editable-html-svg",
+      "previewTarget": "editable-html-svg",
+      "svgPath": "./current-state-legacy-pipeline.svg",
+      "pngPath": "./current-state-legacy-pipeline.png",
+      "svgSha256": "6d74a6d4a6e5106baa1208633df2b3a92f0f386d4186d9d044709ec96e63414f"
+    },
+    {
+      "typeId": "integration-topology",
+      "fixtureId": "integration-topology-platform",
+      "title": "Integration topology",
+      "target": "editable-html-svg",
+      "previewTarget": "editable-html-svg",
+      "svgPath": "./integration-topology-platform.svg",
+      "pngPath": "./integration-topology-platform.png",
+      "svgSha256": "c02ff47617a6d8a196de828d07c73a179d28b1b4fb6fc977a7c4968208463b2e"
+    },
+    {
+      "typeId": "data-flow",
+      "fixtureId": "data-flow-platform",
+      "title": "Role-scoped data flow",
+      "target": "editable-html-svg",
+      "previewTarget": "editable-html-svg",
+      "svgPath": "./data-flow-platform.svg",
+      "pngPath": "./data-flow-platform.png",
+      "svgSha256": "b7d93b45de8a4b4e9c71c5f26e82189434d59a3f551c71928bf2a4fc651c2233"
+    },
+    {
+      "typeId": "access-matrix",
+      "fixtureId": "access-matrix-platform",
+      "title": "Platform access matrix",
+      "target": "editable-html-svg",
+      "previewTarget": "editable-html-svg",
+      "svgPath": "./access-matrix-platform.svg",
+      "pngPath": "./access-matrix-platform.png",
+      "svgSha256": "310c74dd7030b9260d104a49c9bc6c85cb1e6686447eaf5738054c31161e9dc1"
+    },
+    {
+      "typeId": "gantt",
+      "fixtureId": "gantt-release-plan",
+      "title": "Release plan",
+      "target": "editable-html-svg",
+      "previewTarget": "editable-html-svg",
+      "svgPath": "./gantt-release-plan.svg",
+      "pngPath": "./gantt-release-plan.png",
+      "svgSha256": "29e5cbdde482af8c62e0f80f561e9b08a3bcad08b8d4df4440ea2c5a407fa396"
+    },
+    {
+      "typeId": "layer-stack",
+      "fixtureId": "layer-stack-platform",
+      "title": "Platform layers",
+      "target": "editable-html-svg",
+      "previewTarget": "editable-html-svg",
+      "svgPath": "./layer-stack-platform.svg",
+      "pngPath": "./layer-stack-platform.png",
+      "svgSha256": "cec5622c5c8a688ccbbef06677ccfac348b2af1951543493aaef474f5ac16d38"
+    },
+    {
+      "typeId": "venn",
+      "fixtureId": "venn-platform",
+      "title": "Platform fit",
+      "target": "editable-html-svg",
+      "previewTarget": "editable-html-svg",
+      "svgPath": "./venn-platform.svg",
+      "pngPath": "./venn-platform.png",
+      "svgSha256": "e55970beccc336e71ffadea1c9f77c13e723fa4ed4c8086c9fc182617cb2dcdc"
+    },
+    {
+      "typeId": "ranked-funnel",
+      "fixtureId": "ranked-funnel-release",
+      "title": "Release funnel",
+      "target": "editable-html-svg",
+      "previewTarget": "editable-html-svg",
+      "svgPath": "./ranked-funnel-release.svg",
+      "pngPath": "./ranked-funnel-release.png",
+      "svgSha256": "39acf7c99daff75691cac46961525f06601ffcfc94496a3fbaaad3e1ec708c4c"
+    },
+    {
+      "typeId": "loop",
+      "fixtureId": "loop-operating-model",
+      "title": "Operating loop",
+      "target": "editable-html-svg",
+      "previewTarget": "editable-html-svg",
+      "svgPath": "./loop-operating-model.svg",
+      "pngPath": "./loop-operating-model.png",
+      "svgSha256": "3dae69d5a5fea2ebcf891040270385c9248a6c43cb6caefab236841a925ab285"
+    },
+    {
+      "typeId": "nested",
+      "fixtureId": "nested-scope",
+      "title": "Scope cascade",
+      "target": "editable-html-svg",
+      "previewTarget": "editable-html-svg",
+      "svgPath": "./nested-scope.svg",
+      "pngPath": "./nested-scope.png",
+      "svgSha256": "8238ed4a69b50bfb02de9e74e4327ee9ee9cdeee07ce6e57442dd7eec1264ee6"
+    },
+    {
+      "typeId": "tree",
+      "fixtureId": "tree-ownership",
+      "title": "Ownership tree",
+      "target": "editable-html-svg",
+      "previewTarget": "editable-html-svg",
+      "svgPath": "./tree-ownership.svg",
+      "pngPath": "./tree-ownership.png",
+      "svgSha256": "37333cda98c6798eb4f2c7e03a0d9cd437b9fce2e8d3b0320e1e982621362455"
+    },
+    {
+      "typeId": "process",
+      "fixtureId": "process-release",
+      "title": "Release process",
+      "target": "editable-html-svg",
+      "previewTarget": "editable-html-svg",
+      "svgPath": "./process-release.svg",
+      "pngPath": "./process-release.png",
+      "svgSha256": "52f77225561a95bc933abc0950ca7b74926b30c2e22f656f2a1138a4417717a9"
+    },
+    {
+      "typeId": "medallion",
+      "fixtureId": "medallion-data-quality",
+      "title": "Data quality tiers",
+      "target": "editable-html-svg",
+      "previewTarget": "editable-html-svg",
+      "svgPath": "./medallion-data-quality.svg",
+      "pngPath": "./medallion-data-quality.png",
+      "svgSha256": "106e3b9dcc212df5ba97009d23bbe1c9cf327d420ccca0a7fd9d9a6b32bd848b"
+    },
+    {
+      "typeId": "high-level",
+      "fixtureId": "high-level-platform",
+      "title": "High-level platform",
+      "target": "editable-html-svg",
+      "previewTarget": "editable-html-svg",
+      "svgPath": "./high-level-platform.svg",
+      "pngPath": "./high-level-platform.png",
+      "svgSha256": "23118a600299e09309817468d792d0b1cc58df273139e65d4d06fc18d7e1e354"
     }
   ]
 }

@@ -33,9 +33,13 @@ implementation_plan: docs/superpowers/plans/2026-08-21-diagram-reference-expansi
 
 ## 当前基线
 
-仓库当前有 15 个可执行目录类型，使用 Mermaid、Vega-Lite、Drawnix、JSON Canvas、HTML、editable HTML/SVG、Draw.io 与 Circuitikz target，并通过 `RendererRegistry`/`RendererService` 统一派发。每个已发布类型拥有生产 fixture，设置页/工作台预览与静态 gallery 均使用这些 fixture。
+在设计开始时，仓库有 15 个可执行目录类型，使用 Mermaid、Vega-Lite、Drawnix、JSON Canvas、HTML、editable HTML/SVG、Draw.io 与 Circuitikz target，并通过 `RendererRegistry`/`RendererService` 统一派发。每个已发布类型拥有生产 fixture，设置页/工作台预览与静态 gallery 均使用这些 fixture。
 
-参考仓库仍有 22 个 reference-only 候选布局。这是有意的：只有同时具备语义契约、解析/校验、renderer、fixture、preview、文档和自动化门禁，参考布局才能成为已支持能力。
+设计时参考仓库有 22 个 reference-only 候选布局。实现后只剩 5 个精确语法保持 reference-only；其余批准候选已通过同样的语义契约、解析/校验、renderer、fixture、preview、文档和自动化门禁。
+
+### 交付状态
+
+Batch 0、Batch 1A、Batch 1B、Batch 2、Batch 3A 和 Batch 3B 已完成。目录现在包含 33 个可执行行：原有 15 个、3 个显式定量 variant，以及 15 个参考衍生的 native/定量行。剩余 reference-only ID 为 `diagram-design:flowchart`、`diagram-design:sequence`、`diagram-design:state-machine`、`diagram-design:er-data-model`、`diagram-design:pyramid-funnel`。本增补记录实现状态；在没有真实 consumer 证据前，仍不放宽 Draw.io、Drawnix 或 Circuitikz 互操作声明。
 
 当前结构性缺口：
 
@@ -135,6 +139,8 @@ interface DiagramPresentation {
 | `layer-stack` | ordered-stack | editable HTML/SVG | HTML |
 | `venn` | set-overlap | editable HTML/SVG | HTML |
 | `ranked-funnel` | ranked-segments | editable HTML/SVG | HTML |
+| `loop` | cycle | editable HTML/SVG | HTML |
+| `nested`、`tree`、`process`、`medallion`、`high-level` | 有界 native payload family | editable HTML/SVG | HTML |
 
 现有 `data-chart` ID 继续可读，作为 auto/legacy variant。旧 `layoutHints.chartType` 只在 parser 中作为 alias 映射到 `payload.chartType`；新 selector 使用稳定的显式 ID。
 

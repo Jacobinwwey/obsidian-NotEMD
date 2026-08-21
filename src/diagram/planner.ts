@@ -137,17 +137,41 @@ function buildIntentResult(markdown: string, requestedIntent?: DiagramIntent): D
     };
 }
 
+const NATIVE_ONLY_LEGACY_OVERRIDE_INTENTS = new Set<DiagramIntent>([
+    'drawnixMindmap',
+    'canvasMap',
+    'circuit',
+    'radar',
+    'architecture',
+    'currentState',
+    'integrationTopology',
+    'dataFlow',
+    'accessMatrix',
+    'gantt',
+    'layerStack',
+    'setOverlap',
+    'rankedFunnel',
+    'loop',
+    'nested',
+    'tree',
+    'process',
+    'medallion',
+    'highLevel'
+]);
+
 export function buildDiagramPlan(markdown: string, options: DiagramPlanOptions = {}): DiagramPlan {
-    // Radar has no lossless Mermaid representation. An explicit radar request
-    // therefore opts into its native Vega-Lite target even when the global
-    // compatibility preference is still set to legacy Mermaid.
-    const compatibilityMode = options.compatibilityMode === 'legacy-mermaid'
-        && options.requestedIntent === 'radar'
-        ? 'best-fit'
-        : options.compatibilityMode ?? 'best-fit';
     const inferred = buildIntentResult(markdown, options.requestedIntent);
     const defaultTarget = resolvePreferredRenderTarget(inferred.intent);
     const preferredMermaidType = resolveMermaidDiagramType(inferred.intent);
+    // Native-only intents must not be forced through a Mermaid mindmap when
+    // the global preference remains legacy-mermaid. Existing dataChart keeps
+    // its historical Mermaid escape hatch; only explicitly native-only
+    // intents strengthen the compatibility contract.
+    const compatibilityMode = options.compatibilityMode === 'legacy-mermaid'
+        && options.requestedIntent
+        && NATIVE_ONLY_LEGACY_OVERRIDE_INTENTS.has(options.requestedIntent)
+        ? 'best-fit'
+        : options.compatibilityMode ?? 'best-fit';
     const preferredChartType = inferPreferredChartType(markdown, inferred.intent);
     const preferredTarget = compatibilityMode === 'legacy-mermaid'
         ? 'mermaid'

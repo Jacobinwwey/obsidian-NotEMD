@@ -169,6 +169,21 @@ function getLocalizedTypeLabel(intent: string, copy: DiagramCatalogLabelCopy): s
         case 'timeline': return copy.intentTimeline;
         case 'swimlane': return copy.intentSwimlane;
         case 'quadrant': return copy.intentQuadrant;
+        case 'architecture': return copy.intentArchitecture ?? 'Architecture';
+        case 'currentState': return copy.intentCurrentState ?? 'Current state';
+        case 'integrationTopology': return copy.intentIntegrationTopology ?? 'Integration topology';
+        case 'dataFlow': return copy.intentDataFlow ?? 'Data flow';
+        case 'accessMatrix': return copy.intentAccessMatrix ?? 'Access matrix';
+        case 'gantt': return copy.intentGantt ?? 'Gantt';
+        case 'layerStack': return copy.intentLayerStack ?? 'Layer stack';
+        case 'setOverlap': return copy.intentSetOverlap ?? 'Venn overlap';
+        case 'rankedFunnel': return copy.intentRankedFunnel ?? 'Pyramid / funnel';
+        case 'loop': return copy.intentLoop ?? 'Loop';
+        case 'nested': return copy.intentNested ?? 'Nested scope';
+        case 'tree': return copy.intentTree ?? 'Tree';
+        case 'process': return copy.intentProcess ?? 'Process';
+        case 'medallion': return copy.intentMedallion ?? 'Medallion';
+        case 'highLevel': return copy.intentHighLevel ?? 'High-level overview';
         default: return intent;
     }
 }

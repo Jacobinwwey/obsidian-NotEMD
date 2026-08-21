@@ -83,7 +83,7 @@ describe('diagram capability manifest', () => {
     test('keeps diagram-design layouts reference-only and out of the runtime selector', () => {
         const manifest = getDiagramCapabilityManifest();
 
-        expect(manifest.referenceOnlyLayouts).toHaveLength(22);
+        expect(manifest.referenceOnlyLayouts).toHaveLength(5);
         expect(manifest.referenceOnlyLayouts.every(layout => layout.lifecycle === 'reference-only')).toBe(true);
         expect(manifest.referenceOnlyLayouts.some(layout => layout.id === 'diagram-design:radar')).toBe(false);
         expect(EXECUTABLE_DIAGRAM_TYPES.map(type => type.id)).toEqual(expect.arrayContaining([

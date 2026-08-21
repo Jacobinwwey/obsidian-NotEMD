@@ -25,11 +25,11 @@ implementation_record: src/tests/mermaidNormalizationConvergence.test.ts
 
 | 领域 | 当前状态 | 证据 |
 |---|---|---|
-| 语义域 | 15 个可执行语义图形类型 | `src/diagram/diagramTypeCatalog.ts`、`src/diagram/examples/diagramExampleCatalog.ts` |
+| 语义域 | 33 个可执行语义图形类型（15 个原有行、3 个显式定量 variant，以及 15 个参考衍生的 native/定量行） | `src/diagram/diagramTypeCatalog.ts`、`src/diagram/examples/diagramExampleCatalog.ts` |
 | 渲染目标 | 8 个 registry target；target 身份与导出格式分离 | `src/rendering/rendererRegistry.ts`、`src/rendering/renderTargetCatalog.ts` |
 | 导出格式 | target 按能力提供 SVG/PNG/PDF；editable HTML/SVG 携带 `previewSvg` | target catalog 与 renderer 集成测试 |
 | 可发现性 | 设置页和工作台只列可执行类型；选择后显示一个生产 renderer 动态预览面板；仅参考 taxonomy 不进入 UI | `src/ui/diagramTypePreviewPanel.ts`、`diagramCapabilityManifest.test.ts`、`diagramExamplePreview.test.ts` |
-| 静态 gallery | 15 组生产 fixture 生成的 SVG/PNG；过期资源会让检查失败 | `scripts/generate-diagram-gallery.js`、`npm run diagram:gallery:check` |
+| 静态 gallery | 33 组生产 fixture 生成的 SVG/PNG；过期资源会让检查失败 | `scripts/generate-diagram-gallery.js`、`npm run diagram:gallery:check` |
 | Drawnix | 文件名根原生树、`.drawnix`、SVG companion、Markdown wrapper | Drawnix implementation record、导出测试与 `npm run diagram:consumer:drawnix` |
 | Circuitikz | 受限原生模板与 CLI 编译路径；6 个 golden fixture 已在 TeX Live 2023 下编译 | `src/diagram/adapters/circuitikz`、`scripts/export-circuitikz.js`、smoke report |
 | Operation 契约 | schema 形状准入、maintainer 输入校验、运行时结果校验、help/schema 字段派生均已可执行 | `src/operations/contractSchemas.ts`、`src/operations/maintainerCliContractMetadata.json`、bridge 测试 |
@@ -73,22 +73,22 @@ implementation_record: src/tests/mermaidNormalizationConvergence.test.ts
 | 轴 | 参考项目 | Notemd 当前真值 | 工程决策 |
 |---|---|---|---|
 | 语义选择 | pattern 页面映射到 visual layout | `DiagramIntent` 路由到 typed catalog | 保留 intent-first |
-| 视觉 taxonomy | 27 种布局语法 | 15 个可执行语义类型 | 只通过证据门禁增量准入 |
+| 视觉 taxonomy | 27 种布局语法 | 33 个可执行语义类型；5 个精确参考语法仍在路线图中 | 只通过证据门禁增量准入 |
 | 产物/导出 | 自包含 HTML/SVG/PNG 示例 | 8 个 target，导出能力独立声明 | target 与 export 正交 |
 | 预览 | 示例 HTML 资产 | 设置页/工作台使用选择驱动的生产 fixture 动态预览；reference taxonomy 留在 UI 之外 | 明确区分生产证据与参考证据 |
 | 治理 | type references 与 complexity budget | versioned capability/target manifest 加测试 | manifest 与测试共同构成契约 |
 | 契约边界 | pattern 文档旁附带人工可读命令示例 | 纯 schema runtime 加 registry admission；host/core schema 保持显式 | 对非法契约 fail-closed，但不合并 UI 与 CLI 上下文 |
 
-参考 taxonomy 仍提供 architecture、current-state、loop、nested、tree、layers、Venn、pyramid、bar、line、Gantt、scatter、medallion、process、data flow 以及 security/integration matrix 候选。Radar 已通过受限 Vega-Lite 准入门禁；org chart 已以独立的责任归属 payload、Mermaid adapter 与 HTML 语义 fallback 交付。Timeline、swimlane、quadrant 仍是 Mermaid-only，不能据此宣称 editable HTML/SVG、Draw.io 或 Drawnix 支持。OAuth sequence、动画、imports、vertical orientation 等是 workflow 或变体，不应伪装成新的语义类型。
+参考 taxonomy 曾提供 architecture、current-state、loop、nested、tree、layers、Venn、pyramid、bar、line、Gantt、scatter、medallion、process、data flow 以及 security/integration matrix 候选；其中已批准候选现在都具备 shipped payload、fixture 与生产预览。另有 5 个精确语法保持 reference-only；Mermaid-only 的 timeline、swimlane、quadrant 也不能据此宣称 editable HTML/SVG、Draw.io 或 Drawnix 支持。OAuth sequence、动画、imports、vertical orientation 等是 workflow 或变体，不应伪装成新的语义类型。
 
 ## 与既有方案的差距
 
 | 既有要求 | 当前证据 | 尚未闭合的边界 |
 |---|---|---|
 | Operation 契约应有可执行事实源 | registry schema 已由与 registry 无关的 runtime 校验，并导出 CLI contract | maintainer 宿主 metadata 有意区别于 host-neutral schema；可生成纯数据目录仍是后续迁移 |
-| 参考布局必须是真语义而非别名 | timeline、swimlane、quadrant 已具备受限 payload、adapter、fixture、预览与测试 | Radar 仍需真实 Vega-Lite adapter，其余参考布局保持计划中 |
+| 参考布局必须是真语义而非别名 | 已批准的 18 个扩展行都具备有界 payload、adapter、fixture、预览与测试 | 5 个精确参考语法仍需独立布局契约与证据后才能准入 |
 | 外部互操作必须由 consumer 证明 | Plait 公开 API consumer 与固定 Circuitikz compiler gate 已通过 | Draw.io 与真实 Drawnix 应用不可用，因此不宣称应用级兼容 |
-| 文档必须暴露支持类型与预览 | 双语文档保留 15 组生产 SVG/PNG；runtime manifest 暴露可执行能力与仅参考路线图元数据，UI 只渲染用户选择的生产预览 | 新类型或参考资产变更必须同时通过资产可用性、UI 状态、文档对齐与 gallery freshness 门禁 |
+| 文档必须暴露支持类型与预览 | 双语文档暴露 33 组生产 SVG/PNG；runtime manifest 暴露可执行能力与 5 个仅参考路线图行，UI 只渲染用户选择的生产预览 | 新类型或参考资产变更必须同时通过资产可用性、UI 状态、文档对齐与 gallery freshness 门禁 |
 
 ## 风险与权衡
 
@@ -122,7 +122,7 @@ implementation_record: src/tests/mermaidNormalizationConvergence.test.ts
 - `drawnixRelationLabelLayout.ts` 现在是关系标签度量的 canonical 边界。projection 与 lane reservation 共用确定性的换行、宽度、高度和行高契约；SVG/native 几何保持字节稳定，并由聚焦回归测试锁定。
 - Circuitikz 已移除字节相同的 `dualInputPortX()` helper。NAND/NOR 输入统一使用 extended-port 规则；buffer 有意保留更宽的右侧 gutter，并由 `bufferPortX()` 同时驱动输入与输出位置，避免隐藏坐标耦合，但不假设六个 golden template 拥有同一拓扑。
 - `runCircuitikzRepairLoop()` 明确保留为 maintainer-only、单次尝试的 acceptance SDK。普通生成路径不会调用它；采纳候选仍要求拓扑相等、新鲜 compile/render evidence 和显式 caller。
-7. **参考候选准入：** timeline、swimlane、quadrant、org chart 已以受限 Mermaid 类型交付，并具备确定性 fixture 与 parser-backed gallery 证据；Radar 已通过真实 Vega-Lite adapter 的浏览器渲染门禁并进入 shipped catalog，其余参考布局仍受同等证据门禁控制。
+7. **参考候选准入：** 已批准的 18 个扩展行全部完成交付并置于有界 payload 与确定性 adapter 之后：三个 Mermaid-only family（`timeline`、`swimlane`、`quadrant`）、一个有界 Vega-Lite family（`radar`）、三个定量 variant，以及十四个 native editable HTML/SVG 布局。另有五个精确参考语法仍保持 reference-only，因为尚未宣称其布局契约。
 8. **Operation 契约收敛：** 继续把与 registry 无关的 schema runtime 与 registry admission 作为 fail-closed 边界。只有当生成器能保留 host/core 契约分离、人工示例和未知字段行为时，才把声明迁移到生成式 JSON。
 
 ## 验收门禁
@@ -141,7 +141,7 @@ implementation_record: src/tests/mermaidNormalizationConvergence.test.ts
 
 ## 验证快照
 
-本轮新鲜验证：262 个 Jest suite 通过（2,303 tests passed、1 skipped）；TypeScript/esbuild build 通过；VitePress docs build 通过；生产 gallery check 通过并生成 15 组 SVG/PNG；render-host audit 与 i18n audit 通过；独立 Drawnix Plait consumer gate 通过（20 个节点、1 个根、12 条关系）；semantic verification checklist 生成通过（该命令生成待核验模板，不自动代表环境检查已完成）；Circuitikz smoke 使用 TeX Live 2023 `pdflatex` 通过（6/6 PDF，0 error/0 warning）。`git diff --check` 通过。当前工作区没有 Draw.io 或真实 Drawnix 桌面应用，因此不作应用级互操作声明。全仓 lint 仍作为独立基线债务跟踪。
+最终变更后验证：265 个 Jest suite 通过（2,339 个测试通过、1 个 skipped）；TypeScript/esbuild build 通过；VitePress docs build 通过；gallery 生成/检查通过并得到 33 组 SVG/PNG；render-host audit、i18n audit、Drawnix public-API consumer gate 和 `git diff --check` 通过。全仓 lint 仍是独立基线债务（229 个 error / 1,361 个 warning，包含既有 unused/legacy 代码问题）。当前工作区没有 Draw.io 或真实 Drawnix 桌面应用，因此不作应用级互操作声明。
 
 ## 参考布局扩展决策记录（2026-08-21）
 
@@ -156,7 +156,7 @@ implementation_record: src/tests/mermaidNormalizationConvergence.test.ts
 | Prompt 路由 | `diagramSpecPrompt.ts` 中按类型条件拼接 | 由目录元数据选择版本化纯数据 prompt profile |
 | 几何 | 现有 Mermaid/Vega/Drawnix/Circuitikz adapter | 有限 native SVG payload-family adapter；模型不输出坐标 |
 | Chart variant | `layoutHints.chartType` 加一个 `data-chart` 行 | `quantitative.chartType` 加显式 bar/line/scatter ID；旧 data-chart 继续可读 |
-| Preview | 15 个 shipped 类型使用生产 fixture preview | 新类型只有通过同一 renderer、fixture、gallery、无障碍门禁后才能进入 selector |
+| Preview | 33 个 shipped 类型使用生产 fixture preview | 新类型只有通过同一 renderer、fixture、gallery、无障碍门禁后才能进入 selector |
 | 参考 checkout | 开发期 taxonomy 与质量证据 | 继续排除在 runtime 之外；截图和原始 HTML 永不成为产品资产 |
 
 ### 已批准批次顺序
@@ -193,4 +193,36 @@ Batch 0 已作为兼容基础实现；本批不增加 selector 行，也不把�
 - profile catalog 现在拥有 prompt profile ID、版本、payload family、hard limits、语义规则、target 规则和非法输出规则。现有 Circuitikz/Drawnix 专用 prompt 契约保持不变。
 - capability manifest 行暴露 payload/layout 所有权元数据；manifest schema 仍采用 additive 方式，reference-only 行仍排除在 selector 之外。
 
-本增量证据：catalog/payload/parser/prompt 聚焦测试通过（30 个测试），`npm.cmd run build` 通过，既有 15 类型生产 gallery 与 renderer 契约保持不变。Batch 1A 尚未开始；architecture/current-state/integration-topology 仍为 reference-only，必须先交付 native SVG fixture 及 preview/gallery 门禁。
+本增量证据：catalog/payload/parser/prompt 聚焦测试通过（30 个测试），`npm.cmd run build` 通过；Batch 0 边界上既有 15 类型生产 gallery 与 renderer 契约保持不变。随后 Batch 1A 至 3B 均通过 native fixture 与 preview/gallery 门禁，完整交付记录如下。
+
+## 参考扩展完整交付（2026-08-21）
+
+分阶段实现已经在 runtime 与生产证据链中完成。目录现在包含 33 个可执行 ID：原有 15 个、3 个显式定量 variant，以及 15 个参考项目衍生布局能力。仍有 5 个精确参考语法保留在路线图中（`flowchart`、`sequence`、`state-machine`、`er-data-model`、`pyramid-funnel`），因为它们的参考布局契约不能简单等同于已有语义类型。
+
+### 已交付 payload family
+
+| Family | 已交付 ID | Target | 证据 |
+|---|---|---|---|
+| `topology` | `architecture`、`current-state`、`integration-topology`、`high-level` | editable HTML/SVG + HTML | 确定性 zone、有界节点、正交路由、生产 fixture |
+| `lane-grid` | `data-flow`、`process` | editable HTML/SVG + HTML | lane/step 有界、显式 cell、空 cell 不占位、focal handoff |
+| `access-matrix` | `access-matrix` | editable HTML/SVG + HTML | 封闭权限级别、有界 role/component 网格、focal cell 校验 |
+| `quantitative` | `bar-chart`、`line-chart`、`scatter-plot` | Vega-Lite + HTML | canonical chart payload、legacy projection、浏览器 gallery 渲染 |
+| `schedule` | `gantt` | editable HTML/SVG + HTML | 确定性 task 时间轴与 milestone；v1 不生成依赖箭头 |
+| `ordered-stack` | `layer-stack`、`medallion` | editable HTML/SVG + HTML | 4-6 层有界 stack 与 focal layer |
+| `set-overlap` | `venn` | editable HTML/SVG + HTML | 2-3 个集合与显式交集归属 |
+| `ranked-segments` | `ranked-funnel` | editable HTML/SVG + HTML | 有界 pyramid/funnel segment 与 focal segment |
+| `cycle` | `loop` | editable HTML/SVG + HTML | 5-8 个 station、一个 hub、循环返回路径 |
+| `nested` / `tree` | `nested`、`tree` | editable HTML/SVG + HTML | 有界 containment level 与单 root 层级 |
+
+### Runtime 与兼容性变化
+
+- `diagramSpecResponseParser` 保留 canonical payload 与 presentation dial；`normalizeDiagramSpecPayload` 把定量 payload 投影回 legacy `dataSeries/layoutHints` 字段，既有 Vega-Lite 调用方继续有效。
+- `validateCanonicalDiagramPayload` 在边界执行 family 预算和交叉引用不变量；renderer 不猜测缺失节点、日期、权限或几何。
+- prompt profile registry 现在覆盖全部 33 个目录行。新 profile 只要求语义 payload，禁止模型输出坐标、SVG、CSS 和编造数字。
+- `EditableHtmlSvgRenderer` 统一承担 topology、lane-grid、matrix、schedule、stack、overlap、ranked、cycle、nested、tree 的确定性 family adapter；生产 preview 与 gallery 共用同一 artifact 路径。
+- intent inference 能识别显式参考布局词汇；显式 native-only 请求会覆盖全局 legacy-Mermaid 偏好，不再误路由到 mindmap。
+- capability manifest 现在有 33 个 shipped 行和 5 个 reference-only 行。新类型不暗示 Draw.io、Drawnix 或 Circuitikz 兼容性。
+
+### 证据快照
+
+`npm.cmd run diagram:gallery` 已生成 33 组 SVG/PNG；已目视检查 topology、lane-grid、matrix、schedule、cycle、nested、tree 和 ranked 布局截图。native-layout 聚焦测试覆盖确定性 SVG、无障碍元数据、畸形 payload 拒绝、非法引用、schedule 顺序和预算拒绝。最终全量回归、文档、gallery、i18n、consumer、render-host 与 diff-check 门禁均已在提交前通过。

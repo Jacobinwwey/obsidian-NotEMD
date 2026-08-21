@@ -18,7 +18,7 @@ describe('executable diagram type catalog', () => {
     });
 
     test('contains only complete, example-backed type definitions', () => {
-        expect(EXECUTABLE_DIAGRAM_TYPES).toHaveLength(15);
+        expect(EXECUTABLE_DIAGRAM_TYPES).toHaveLength(33);
         expect(EXECUTABLE_DIAGRAM_TYPES.every(type => Boolean(type.exampleFixtureId))).toBe(true);
         expect(EXECUTABLE_DIAGRAM_TYPES.every(type => Boolean((type as any).semanticPattern))).toBe(true);
         expect(EXECUTABLE_DIAGRAM_TYPES.every(type => Array.isArray((type as any).visualRoles)
@@ -47,10 +47,10 @@ describe('executable diagram type catalog', () => {
     });
 
     test('supports explicit variant lookup without weakening the legacy default lookup', () => {
-        expect(findDiagramType('dataChart')).toMatchObject({ id: 'data-chart', variant: 'auto' });
+        expect(findDiagramType('dataChart', 'auto')).toMatchObject({ id: 'data-chart', variant: 'auto' });
         expect(findDefaultDiagramType('dataChart')).toMatchObject({ id: 'data-chart' });
-        expect(() => findDiagramType('dataChart', 'line')).toThrow(/No executable diagram catalog type/i);
-        expect(findDiagramTypeByIntent('dataChart')).toMatchObject({ id: 'data-chart', variant: 'auto' });
+        expect(findDiagramType('dataChart', 'line')).toMatchObject({ id: 'line-chart', variant: 'line' });
+        expect(() => findDiagramTypeByIntent('dataChart')).toThrow(/AMBIGUOUS_DIAGRAM_INTENT/i);
     });
 
     test('describes Drawnix as one native tree renderer rather than a delivery selector', () => {

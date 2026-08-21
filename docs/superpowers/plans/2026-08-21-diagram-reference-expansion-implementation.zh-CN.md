@@ -2,15 +2,29 @@
 
 > **面向 agent worker：** REQUIRED SUB-SKILL：使用 `superpowers:subagent-driven-development`（推荐）或 `superpowers:executing-plans`，按任务逐项实施。步骤使用 checkbox（`- [ ]`）跟踪。
 
-**目标：** 在不破坏现有 15 个类型、Mermaid legacy 文件、target 兼容性和生产 preview 证据链的前提下，加入受 `diagram-design` 启发的布局能力。
+**目标：** 在不破坏原有 15 个类型、Mermaid legacy 文件、target 兼容性和生产 preview 证据链的前提下，加入受 `diagram-design` 启发的布局能力。本次实现已交付 33 个可执行目录行，并保留上述兼容保证。
 
 **架构：** 引入 variant-aware catalog、版本化 canonical payload 边界、有限 payload family 和 profile 驱动 prompt。native editable SVG adapter 负责几何，Vega-Lite 负责定量图，HTML 是可访问 fallback；reference-only 布局只有在所有证据门禁通过后才进入 runtime。
 
 **技术栈：** TypeScript 5.9、Jest 29、esbuild、Mermaid 11、Vega-Lite 6、Playwright gallery 生成、VitePress 文档、Obsidian plugin runtime。
 
+## 执行状态（2026-08-21）
+
+Batch 0 至 Batch 3B 的 runtime 工作已在本次交付中实现。下方详细任务清单仍是设计分解；完成状态和提交粒度以本表为准。
+
+| 阶段 | 状态 | 证据 |
+|---|---|---|
+| Batch 0 基础 | 完成 | variant-aware catalog、schema-v2 payload 边界、prompt profile、manifest 元数据 |
+| Batch 1A topology | 完成 | topology payload/renderer、3 个 fixture、SVG/PNG gallery 输出 |
+| Batch 1B data-flow 与 access matrix | 完成 | lane-grid 与 access-matrix validator/renderer、2 个 fixture |
+| Batch 2 定量与 schedule | 完成 | bar/line/scatter variant、定量 projection、Gantt renderer |
+| Batch 3A 结构布局 | 完成 | ordered-stack、set-overlap、ranked-segments、cycle renderer |
+| Batch 3B 结构布局 | 完成 | nested、tree、process、medallion、high-level renderer |
+| 最终验证与主线交付 | 完成 | 265 个 Jest suite、2,339 passed / 1 skipped；build/docs/gallery/render-host/i18n/consumer/diff 门禁通过；lint 仍是基线债务 |
+
 ## 全局约束
 
-- 保留现有 15 个可执行类型、legacy Mermaid 输出、Drawnix/Circuitikz 行为和旧 JSON 输入。
+- 保留原有 15 个可执行类型、legacy Mermaid 输出、Drawnix/Circuitikz 行为和旧 JSON 输入，同时通过 additive 契约增加 18 个新行。
 - `ref/diagram-design` 仅作开发期参考，不打包其截图、HTML、CDN 字体或 runtime API。
 - 使用 `apply_patch` 编辑，仓库命令统一加 `rtk` 前缀。
 - 语义 intent、目录 ID、layout profile、render target 和导出格式必须分轴。
@@ -81,7 +95,7 @@
 
 - [ ] **步骤 1：写失败测试**，断言每个 executable catalog 行拥有 profile，profile 声明 required fields/hard limits，prompt 含 source delimiter 且不要求输出 renderer 语法。
 - [ ] **步骤 2：运行聚焦测试**：`rtk npm.cmd test -- --runInBand src/tests/diagramPrompt.test.ts src/tests/diagramPlanner.test.ts`；预期 profile 查询失败。
-- [ ] **步骤 3：创建纯数据 profile catalog**，覆盖现有 15 类型及路线图 payload family；每个 profile 声明 version、payloadKind、字段、限制、语义规则、target 规则和非法示例。
+- [ ] **步骤 3：创建纯数据 profile catalog**，覆盖全部 33 个目录行及 payload family；每个 profile 声明 version、payloadKind、字段、限制、语义规则、target 规则和非法示例。
 - [ ] **步骤 4：重构 `buildDiagramSpecPrompt()`**，组合通用契约、选定 profile、target/presentation 规则，并保留 Circuitikz/Drawnix 安全约束。
 - [ ] **步骤 5：增加 source-note delimiter 与反编造规则**，不改变现有语言行为。
 - [ ] **步骤 6：运行聚焦测试并检查生成 prompt** 的 Mermaid/Drawnix/Circuitikz 回归文本，再执行 `rtk npm.cmd run build`。

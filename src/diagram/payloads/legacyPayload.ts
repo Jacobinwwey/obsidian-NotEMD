@@ -5,13 +5,9 @@ export const DIAGRAM_SPEC_SCHEMA_VERSION = 2 as const;
 
 function resolveChartType(spec: DiagramSpec): QuantitativeDiagramPayload['chartType'] {
     const chartType = spec.layoutHints?.chartType;
-    return chartType === 'line'
-        || chartType === 'scatter'
-        || chartType === 'pie'
-        || chartType === 'table'
-        || chartType === 'bar'
-        ? chartType
-        : 'bar';
+    // Preserve an explicitly supplied invalid value so the validation boundary
+    // can reject it instead of silently changing the user's requested chart.
+    return chartType === undefined ? 'bar' : chartType as QuantitativeDiagramPayload['chartType'];
 }
 
 function buildLegacyPayload(spec: DiagramSpec): DiagramPayload {
@@ -51,12 +47,29 @@ export function normalizeDiagramSpecPayload(spec: DiagramSpec): DiagramSpec {
     }
 
     if (spec.schemaVersion === DIAGRAM_SPEC_SCHEMA_VERSION && spec.payload) {
+        if (spec.payload.kind === 'quantitative') {
+            return {
+                ...spec,
+                dataSeries: spec.dataSeries?.length ? spec.dataSeries : spec.payload.series,
+                layoutHints: {
+                    ...(spec.layoutHints ?? {}),
+                    chartType: spec.payload.chartType
+                }
+            };
+        }
         return spec;
     }
 
+    const payload = spec.payload ?? buildLegacyPayload(spec);
     return {
         ...spec,
         schemaVersion: DIAGRAM_SPEC_SCHEMA_VERSION,
-        payload: spec.payload ?? buildLegacyPayload(spec)
+        payload,
+        dataSeries: payload.kind === 'quantitative' && !spec.dataSeries?.length
+            ? payload.series
+            : spec.dataSeries,
+        layoutHints: payload.kind === 'quantitative'
+            ? { ...(spec.layoutHints ?? {}), chartType: payload.chartType }
+            : spec.layoutHints
     };
 }

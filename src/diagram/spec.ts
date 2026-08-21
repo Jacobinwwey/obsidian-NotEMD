@@ -10,6 +10,7 @@ import {
     isSupportedDiagramIntent,
     SUPPORTED_DIAGRAM_INTENTS
 } from './types';
+import { validateCanonicalDiagramPayload } from './payloads/validators';
 
 export interface DiagramSpecValidationResult {
     valid: boolean;
@@ -140,6 +141,10 @@ function validateCanonicalPayloadBoundary(spec: DiagramSpec, errors: string[]): 
         if (!Array.isArray(spec.payload.series)) {
             errors.push('Quantitative canonical payload requires a series array.');
         }
+    }
+
+    for (const error of validateCanonicalDiagramPayload(spec)) {
+        errors.push(`Canonical payload: ${error}`);
     }
 }
 
@@ -543,7 +548,22 @@ export function validateDiagramSpec(spec: DiagramSpec): DiagramSpecValidationRes
         || spec.intent === 'circuit'
         || spec.intent === 'timeline'
         || spec.intent === 'swimlane'
-        || spec.intent === 'quadrant';
+        || spec.intent === 'quadrant'
+        || spec.intent === 'architecture'
+        || spec.intent === 'currentState'
+        || spec.intent === 'integrationTopology'
+        || spec.intent === 'dataFlow'
+        || spec.intent === 'accessMatrix'
+        || spec.intent === 'gantt'
+        || spec.intent === 'layerStack'
+        || spec.intent === 'setOverlap'
+        || spec.intent === 'rankedFunnel'
+        || spec.intent === 'loop'
+        || spec.intent === 'nested'
+        || spec.intent === 'tree'
+        || spec.intent === 'process'
+        || spec.intent === 'medallion'
+        || spec.intent === 'highLevel';
     if (!usesSpecializedPayload && nodeIds.size === 0) {
         errors.push(`Diagram intent "${spec.intent}" requires at least one node.`);
     }

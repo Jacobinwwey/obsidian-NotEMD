@@ -25,12 +25,30 @@ This page is the user-facing inventory of the diagram types that Notemd can exec
 | `entity-relationship` | Entity cardinality and attributes | `mermaid` | `mermaid`, `editable-html-svg`, `drawio`, `html` |
 | `canvas-map` | Spatially grouped concepts | `json-canvas` | `json-canvas` |
 | `data-chart` | Measured comparison over a shared axis | `vega-lite` | `vega-lite`, `html` |
+| `bar-chart` | Discrete category comparison | `vega-lite` | `vega-lite`, `html` |
+| `line-chart` | Continuous trend over an ordered axis | `vega-lite` | `vega-lite`, `html` |
+| `scatter-plot` | Correlation and paired-value distribution | `vega-lite` | `vega-lite`, `html` |
 | `radar-chart` | Multi-axis profile comparison | `vega-lite` | `vega-lite`, `html` |
 | `org-chart` | Accountable ownership hierarchy and reporting paths | `mermaid` | `mermaid`, `html` |
 | `timeline` | Ordered milestones over time | `mermaid` | `mermaid` |
 | `swimlane` | Cross-functional responsibility flow | `mermaid` | `mermaid` |
 | `quadrant` | Two-axis prioritization matrix | `mermaid` | `mermaid` |
 | `circuit` | Electrical components and nets | `circuitikz` | `circuitikz` |
+| `architecture` | Bounded system topology | `editable-html-svg` | `editable-html-svg`, `html` |
+| `current-state` | Legacy IT landscape and handoffs | `editable-html-svg` | `editable-html-svg`, `html` |
+| `integration-topology` | Source/platform/consumer integration surfaces | `editable-html-svg` | `editable-html-svg`, `html` |
+| `data-flow` | Role-scoped typed data pipeline | `editable-html-svg` | `editable-html-svg`, `html` |
+| `access-matrix` | Role-to-component permission contract | `editable-html-svg` | `editable-html-svg`, `html` |
+| `gantt` | Tasks and milestones on a schedule | `editable-html-svg` | `editable-html-svg`, `html` |
+| `layer-stack` | Ordered abstraction layers | `editable-html-svg` | `editable-html-svg`, `html` |
+| `venn` | Explicit set overlap | `editable-html-svg` | `editable-html-svg`, `html` |
+| `ranked-funnel` | Ranked hierarchy or conversion funnel | `editable-html-svg` | `editable-html-svg`, `html` |
+| `loop` | Reinforcing cycle with shared state | `editable-html-svg` | `editable-html-svg`, `html` |
+| `nested` | Containment and scope boundaries | `editable-html-svg` | `editable-html-svg`, `html` |
+| `tree` | Parent-to-child hierarchy | `editable-html-svg` | `editable-html-svg`, `html` |
+| `process` | Multi-actor staged process | `editable-html-svg` | `editable-html-svg`, `html` |
+| `medallion` | Data quality promotion tiers | `editable-html-svg` | `editable-html-svg`, `html` |
+| `high-level` | End-to-end platform overview | `editable-html-svg` | `editable-html-svg`, `html` |
 
 ## Preview Examples
 
@@ -70,6 +88,18 @@ This page is the user-facing inventory of the diagram types that Notemd can exec
 
 ![Rendering trend](./assets/diagrams/data-chart-trend.png)
 
+### Bar chart
+
+![Feature adoption](./assets/diagrams/bar-chart-adoption.png)
+
+### Line chart
+
+![Render time trend](./assets/diagrams/line-chart-render-time.png)
+
+### Scatter plot
+
+![Quality and latency](./assets/diagrams/scatter-plot-quality.png)
+
 ### Vega-Lite radar profile
 
 ![Capability profile](./assets/diagrams/radar-capability-profile.png)
@@ -94,10 +124,70 @@ This page is the user-facing inventory of the diagram types that Notemd can exec
 
 ![CMOS inverter](./assets/diagrams/circuit-cmos-inverter.png)
 
+### Architecture
+
+![Platform architecture](./assets/diagrams/architecture-platform.png)
+
+### Current state
+
+![Legacy current state](./assets/diagrams/current-state-legacy-pipeline.png)
+
+### Integration topology
+
+![Integration topology](./assets/diagrams/integration-topology-platform.png)
+
+### Data flow
+
+![Role-scoped data flow](./assets/diagrams/data-flow-platform.png)
+
+### Access matrix
+
+![Platform access matrix](./assets/diagrams/access-matrix-platform.png)
+
+### Gantt
+
+![Release plan](./assets/diagrams/gantt-release-plan.png)
+
+### Layer stack
+
+![Platform layers](./assets/diagrams/layer-stack-platform.png)
+
+### Venn overlap
+
+![Platform fit](./assets/diagrams/venn-platform.png)
+
+### Ranked funnel
+
+![Release funnel](./assets/diagrams/ranked-funnel-release.png)
+
+### Loop
+
+![Operating loop](./assets/diagrams/loop-operating-model.png)
+
+### Nested scope
+
+![Scope cascade](./assets/diagrams/nested-scope.png)
+
+### Tree
+
+![Ownership tree](./assets/diagrams/tree-ownership.png)
+
+### Process
+
+![Release process](./assets/diagrams/process-release.png)
+
+### Medallion
+
+![Data quality tiers](./assets/diagrams/medallion-data-quality.png)
+
+### High-level overview
+
+![High-level platform](./assets/diagrams/high-level-platform.png)
+
 ## Reference-Only Layouts
 
-The following 22 IDs are imported from `ref/diagram-design` for development-time taxonomy comparison and future admission discussions. They are intentionally namespaced as `diagram-design:*`, carry reference revision `09df49d8d1a1c7fb2efdfcdc7a2a0713534350a6`, and do not appear in the runtime intent selector or plugin UI. The checkout is never bundled and its original screenshots are never displayed:
+The following 5 IDs remain imported from `ref/diagram-design` for development-time taxonomy comparison and future admission discussions. They are intentionally namespaced as `diagram-design:*`, carry reference revision `09df49d8d1a1c7fb2efdfcdc7a2a0713534350a6`, and do not appear in the runtime intent selector or plugin UI. The checkout is never bundled and its original screenshots are never displayed:
 
-`architecture`, `it-current-state`, `flowchart`, `sequence`, `state-machine`, `er-data-model`, `loop`, `nested`, `tree`, `layer-stack`, `venn`, `pyramid-funnel`, `bar-chart`, `line-chart`, `gantt`, `scatter-plot`, `high-level`, `process`, `medallion`, `data-flow`, `dp-integration`, `dp-security-matrix`.
+`flowchart`, `sequence`, `state-machine`, `er-data-model`, `pyramid-funnel`.
 
 Promoting one of these layouts requires a semantic input contract, a production renderer, a fixture, a target/export matrix, accessibility checks, and deterministic gallery output. A visual resemblance to the reference is not sufficient evidence of support.

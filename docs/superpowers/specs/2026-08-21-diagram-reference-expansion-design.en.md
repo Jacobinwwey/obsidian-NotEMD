@@ -33,9 +33,13 @@ source note
 
 ## Current Baseline
 
-The repository currently ships 15 executable catalog types. They use Mermaid, Vega-Lite, Drawnix, JSON Canvas, HTML, editable HTML/SVG, Draw.io, and Circuitikz targets through `RendererRegistry` and `RendererService`. Every shipped type owns a production fixture, and Settings/Workbench preview and the static gallery use those fixtures.
+At design time, the repository shipped 15 executable catalog types. They use Mermaid, Vega-Lite, Drawnix, JSON Canvas, HTML, editable HTML/SVG, Draw.io, and Circuitikz targets through `RendererRegistry` and `RendererService`. Every shipped type owned a production fixture, and Settings/Workbench preview and the static gallery used those fixtures.
 
-The reference-only manifest still contains 22 layout candidates. This is intentional: a reference layout is not a shipped capability until it has a semantic contract, parser/validator, renderer, fixture, preview, documentation, and automated gates.
+The design-time reference-only manifest contained 22 layout candidates. After implementation, five exact grammars remain reference-only; the other approved candidates crossed the same semantic-contract, parser/validator, renderer, fixture, preview, documentation, and automated-gate boundary.
+
+### Delivery status
+
+Batch 0, Batch 1A, Batch 1B, Batch 2, Batch 3A, and Batch 3B are complete. The catalog now contains 33 executable rows: the original 15, three explicit quantitative variants, and 15 reference-derived native/quantitative rows. The remaining reference-only IDs are `diagram-design:flowchart`, `diagram-design:sequence`, `diagram-design:state-machine`, `diagram-design:er-data-model`, and `diagram-design:pyramid-funnel`. This addendum records implementation status; it does not relax the design's requirement for real consumer evidence before claiming Draw.io, Drawnix, or Circuitikz interoperability.
 
 Current structural gaps:
 
@@ -135,6 +139,8 @@ Defaults remain `doc-inline`, `balanced`, and `mixed`. `format` is an export dia
 | `layer-stack` | ordered-stack | editable HTML/SVG | HTML |
 | `venn` | set-overlap | editable HTML/SVG | HTML |
 | `ranked-funnel` | ranked-segments | editable HTML/SVG | HTML |
+| `loop` | cycle | editable HTML/SVG | HTML |
+| `nested`, `tree`, `process`, `medallion`, `high-level` | bounded native payload families | editable HTML/SVG | HTML |
 
 The existing `data-chart` ID remains readable as an auto/legacy variant. Its old `layoutHints.chartType` is a parser alias into `payload.chartType`; new selector rows use stable explicit IDs.
 

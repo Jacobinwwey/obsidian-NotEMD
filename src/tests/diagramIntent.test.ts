@@ -133,6 +133,26 @@ Each team has a direct owner and a reporting structure with escalation paths.
         expect(result.reasons.join(' ')).toMatch(/org|report|ownership/i);
     });
 
+    test.each([
+        ['architecture', 'Show an architecture diagram with trust boundaries and service topology.'],
+        ['currentState', 'Document the legacy IT current-state before the platform migration.'],
+        ['integrationTopology', 'Map the integration topology from source systems to consumers.'],
+        ['dataFlow', 'Render a typed data flow diagram across role-scoped pipeline stages.'],
+        ['accessMatrix', 'Create an RBAC permission matrix for who can access what.'],
+        ['gantt', 'Create a Gantt task schedule for the release.'],
+        ['layerStack', 'Show the platform as an abstraction layer stack.'],
+        ['setOverlap', 'Use a Venn set overlap for the three capabilities.'],
+        ['rankedFunnel', 'Show the conversion funnel from idea to release.'],
+        ['loop', 'Show the reinforcing operating loop and shared state.'],
+        ['nested', 'Show nested scope boundaries from organization to artifact.'],
+        ['tree', 'Show the parent-to-child tree hierarchy.'],
+        ['process', 'Create a staged handoff process diagram.'],
+        ['medallion', 'Show medallion data-quality tiers.'],
+        ['highLevel', 'Create a high-level platform overview.']
+    ] as const)('infers explicit reference layout intent %s', (intent, markdown) => {
+        expect(inferDiagramIntent(markdown).intent).toBe(intent);
+    });
+
     test('falls back to mindmap for general hierarchical notes', () => {
         const markdown = `# Distributed Systems
 

@@ -32,6 +32,25 @@
 | `quadrant` | 双轴优先级矩阵 | `mermaid` | `mermaid` |
 | `circuit` | 电气元件与网络 | `circuitikz` | `circuitikz` |
 
+| `bar-chart` | 离散类别数值比较 | `vega-lite` | `vega-lite`、`html` |
+| `line-chart` | 有序轴上的连续趋势 | `vega-lite` | `vega-lite`、`html` |
+| `scatter-plot` | 相关性与成对数值分布 | `vega-lite` | `vega-lite`、`html` |
+| `architecture` | 有界系统拓扑 | `editable-html-svg` | `editable-html-svg`、`html` |
+| `current-state` | 旧 IT 景观与手工交接 | `editable-html-svg` | `editable-html-svg`、`html` |
+| `integration-topology` | 源系统/平台/消费者集成面 | `editable-html-svg` | `editable-html-svg`、`html` |
+| `data-flow` | 按角色分区的带类型数据管线 | `editable-html-svg` | `editable-html-svg`、`html` |
+| `access-matrix` | 角色到组件的权限契约 | `editable-html-svg` | `editable-html-svg`、`html` |
+| `gantt` | 任务与里程碑计划 | `editable-html-svg` | `editable-html-svg`、`html` |
+| `layer-stack` | 有序抽象分层 | `editable-html-svg` | `editable-html-svg`、`html` |
+| `venn` | 显式集合重叠 | `editable-html-svg` | `editable-html-svg`、`html` |
+| `ranked-funnel` | 排名层级或转化漏斗 | `editable-html-svg` | `editable-html-svg`、`html` |
+| `loop` | 带共享状态的强化闭环 | `editable-html-svg` | `editable-html-svg`、`html` |
+| `nested` | 包含关系与范围边界 | `editable-html-svg` | `editable-html-svg`、`html` |
+| `tree` | 父子层级关系 | `editable-html-svg` | `editable-html-svg`、`html` |
+| `process` | 多角色分阶段流程 | `editable-html-svg` | `editable-html-svg`、`html` |
+| `medallion` | 数据质量晋级分层 | `editable-html-svg` | `editable-html-svg`、`html` |
+| `high-level` | 端到端平台概览 | `editable-html-svg` | `editable-html-svg`、`html` |
+
 ## 预览示例
 
 ### Mermaid mindmap
@@ -94,10 +113,82 @@
 
 ![CMOS 反相器](./assets/diagrams/circuit-cmos-inverter.png)
 
+### Bar 图
+
+![功能采用率](./assets/diagrams/bar-chart-adoption.png)
+
+### Line 图
+
+![渲染时间趋势](./assets/diagrams/line-chart-render-time.png)
+
+### Scatter 图
+
+![质量与延迟](./assets/diagrams/scatter-plot-quality.png)
+
+### 系统架构
+
+![平台架构](./assets/diagrams/architecture-platform.png)
+
+### 当前状态
+
+![旧系统当前状态](./assets/diagrams/current-state-legacy-pipeline.png)
+
+### 集成拓扑
+
+![集成拓扑](./assets/diagrams/integration-topology-platform.png)
+
+### 数据流
+
+![按角色分区的数据流](./assets/diagrams/data-flow-platform.png)
+
+### 访问矩阵
+
+![平台访问矩阵](./assets/diagrams/access-matrix-platform.png)
+
+### 甘特计划
+
+![发布计划](./assets/diagrams/gantt-release-plan.png)
+
+### 分层栈
+
+![平台分层](./assets/diagrams/layer-stack-platform.png)
+
+### 集合重叠
+
+![平台适配度](./assets/diagrams/venn-platform.png)
+
+### 排名漏斗
+
+![发布漏斗](./assets/diagrams/ranked-funnel-release.png)
+
+### 运行闭环
+
+![运行闭环](./assets/diagrams/loop-operating-model.png)
+
+### 嵌套范围
+
+![范围级联](./assets/diagrams/nested-scope.png)
+
+### 树形层级
+
+![责任树](./assets/diagrams/tree-ownership.png)
+
+### 流程
+
+![发布流程](./assets/diagrams/process-release.png)
+
+### 数据质量分层
+
+![数据质量层](./assets/diagrams/medallion-data-quality.png)
+
+### 高层概览
+
+![高层平台](./assets/diagrams/high-level-platform.png)
+
 ## 仅参考布局
 
-以下 22 个 ID 来自 `ref/diagram-design`，仅用于开发期 taxonomy 对比和未来准入讨论。它们统一使用 `diagram-design:*` 命名空间，固定参考 revision `09df49d8d1a1c7fb2efdfcdc7a2a0713534350a6`，不会进入运行时 intent 选择器或插件 UI；参考仓库不会打包，原始截图也不会显示：
+以下 5 个 ID 仍来自 `ref/diagram-design`，仅用于开发期 taxonomy 对比和未来准入讨论。它们统一使用 `diagram-design:*` 命名空间，固定参考 revision `09df49d8d1a1c7fb2efdfcdc7a2a0713534350a6`，不会进入运行时 intent 选择器或插件 UI；参考仓库不会打包，原始截图也不会显示：
 
-`architecture`、`it-current-state`、`flowchart`、`sequence`、`state-machine`、`er-data-model`、`loop`、`nested`、`tree`、`layer-stack`、`venn`、`pyramid-funnel`、`bar-chart`、`line-chart`、`gantt`、`scatter-plot`、`high-level`、`process`、`medallion`、`data-flow`、`dp-integration`、`dp-security-matrix`。
+`flowchart`、`sequence`、`state-machine`、`er-data-model`、`pyramid-funnel`。
 
 将某个布局升级为交付能力，必须同时具备语义输入契约、生产 renderer、fixture、target/export 矩阵、无障碍检查和确定性的 gallery 输出。仅仅“看起来像参考项目”不能证明已经支持。

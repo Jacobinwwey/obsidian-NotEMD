@@ -1,6 +1,6 @@
 import type { SupportedVegaLiteChartType } from './adapters/vega/schema';
 import type { CircuitSpec } from './adapters/circuitikz/circuitSpec';
-import type { DiagramPayload, DiagramPayloadKind } from './payloads/types';
+import type { DiagramPayload } from './payloads/types';
 
 export type { DiagramPayload, DiagramPayloadKind } from './payloads/types';
 
@@ -26,7 +26,22 @@ export const SUPPORTED_DIAGRAM_INTENTS = [
     'orgChart',
     'timeline',
     'swimlane',
-    'quadrant'
+    'quadrant',
+    'architecture',
+    'currentState',
+    'integrationTopology',
+    'dataFlow',
+    'accessMatrix',
+    'gantt',
+    'layerStack',
+    'setOverlap',
+    'rankedFunnel',
+    'loop',
+    'nested',
+    'tree',
+    'process',
+    'medallion',
+    'highLevel'
 ] as const;
 
 export type DiagramIntent = typeof SUPPORTED_DIAGRAM_INTENTS[number];
@@ -46,7 +61,25 @@ export const DIAGRAM_CATALOG_TYPE_IDS = [
     'circuit',
     'timeline',
     'swimlane',
-    'quadrant'
+    'quadrant',
+    'bar-chart',
+    'line-chart',
+    'scatter-plot',
+    'architecture',
+    'current-state',
+    'integration-topology',
+    'data-flow',
+    'access-matrix',
+    'gantt',
+    'layer-stack',
+    'venn',
+    'ranked-funnel',
+    'loop',
+    'nested',
+    'tree',
+    'process',
+    'medallion',
+    'high-level'
 ] as const;
 
 export type DiagramCatalogTypeId = typeof DIAGRAM_CATALOG_TYPE_IDS[number];

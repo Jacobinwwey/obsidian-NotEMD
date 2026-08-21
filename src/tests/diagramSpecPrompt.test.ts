@@ -60,6 +60,18 @@ describe('diagram spec prompt builder', () => {
         expect(prompt).toMatch(/Supported intent[s]?:[\s\S]*radar/i);
     });
 
+    test('describes canonical topology payload rules for native reference layouts', () => {
+        const prompt = buildDiagramSpecPrompt({
+            requiredIntent: 'architecture',
+            preferredRenderTarget: 'editable-html-svg'
+        });
+
+        expect(prompt).toMatch(/Payload family:\s*topology/i);
+        expect(prompt).toMatch(/canonical payload with kind "topology"/i);
+        expect(prompt).toMatch(/never emit coordinates/i);
+        expect(prompt).toMatch(/REQUIRED diagram intent:\s*architecture/i);
+    });
+
     test('requires constrained CircuitSpec output for circuitikz render target', () => {
         const prompt = buildDiagramSpecPrompt({
             preferredIntent: 'circuit',

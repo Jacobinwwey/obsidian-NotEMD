@@ -33,28 +33,11 @@ export interface DiagramCapabilityManifest {
 }
 
 const REFERENCE_ONLY_LAYOUTS: readonly ReferenceOnlyDiagramLayout[] = [
-    ['architecture', 'Architecture'],
-    ['it-current-state', 'IT current-state'],
     ['flowchart', 'Flowchart'],
     ['sequence', 'Sequence'],
     ['state-machine', 'State machine'],
     ['er-data-model', 'ER / data model'],
-    ['loop', 'Loop / flywheel'],
-    ['nested', 'Nested'],
-    ['tree', 'Tree'],
-    ['layer-stack', 'Layer stack'],
-    ['venn', 'Venn'],
-    ['pyramid-funnel', 'Pyramid / funnel'],
-    ['bar-chart', 'Bar chart'],
-    ['line-chart', 'Line chart'],
-    ['gantt', 'Gantt'],
-    ['scatter-plot', 'Scatter plot'],
-    ['high-level', 'High-Level'],
-    ['process', 'Process'],
-    ['medallion', 'Medallion'],
-    ['data-flow', 'Data flow'],
-    ['dp-integration', 'DP integration'],
-    ['dp-security-matrix', 'DP security matrix']
+    ['pyramid-funnel', 'Pyramid / funnel']
 ].map(([id, label]) => ({
     id: 'diagram-design:' + id,
     lifecycle: 'reference-only' as const,

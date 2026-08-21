@@ -25,11 +25,11 @@ The correct next move is convergence. Adding more visual types before closing co
 
 | Area | Current state | Evidence |
 |---|---|---|
-| Semantic domain | 15 executable semantic diagram types | `src/diagram/diagramTypeCatalog.ts`, `src/diagram/examples/diagramExampleCatalog.ts` |
+| Semantic domain | 33 executable semantic diagram types (15 original rows, 3 explicit quantitative variants, and 15 reference-derived native/quantitative rows) | `src/diagram/diagramTypeCatalog.ts`, `src/diagram/examples/diagramExampleCatalog.ts` |
 | Render targets | 8 registered targets; target identity is separate from export format | `src/rendering/rendererRegistry.ts`, `src/rendering/renderTargetCatalog.ts` |
 | Export formats | SVG/PNG/PDF where the target supports them; editable HTML/SVG carries `previewSvg` | target catalog and renderer integration tests |
 | Discoverability | Settings and workbench selectors expose executable types; selection opens one production-renderer preview panel; reference-only taxonomy stays outside UI | `src/ui/diagramTypePreviewPanel.ts`, `diagramCapabilityManifest.test.ts`, `diagramExamplePreview.test.ts` |
-| Static gallery | 15 SVG/PNG pairs generated from production fixtures; stale assets fail the check | `scripts/generate-diagram-gallery.js`, `npm run diagram:gallery:check` |
+| Static gallery | 33 SVG/PNG pairs generated from production fixtures; stale assets fail the check | `scripts/generate-diagram-gallery.js`, `npm run diagram:gallery:check` |
 | Drawnix | Filename-rooted native tree, `.drawnix` plus SVG companion and Markdown wrapper | Drawnix implementation record, export tests, and `npm run diagram:consumer:drawnix` |
 | Circuitikz | Constrained native templates and CLI compiler path; six golden fixtures compile under TeX Live 2023 | `src/diagram/adapters/circuitikz`, `scripts/export-circuitikz.js`, smoke report |
 | Operation contracts | Schema shape admission, maintainer input validation, runtime result validation, and help/schema field derivation are now executable | `src/operations/contractSchemas.ts`, `src/operations/maintainerCliContractMetadata.json`, bridge tests |
@@ -73,22 +73,22 @@ The correct next move is convergence. Adding more visual types before closing co
 | Axis | Reference project | Notemd current truth | Engineering decision |
 |---|---|---|---|
 | Semantic selection | Pattern pages map to visual layouts | `DiagramIntent` routes to a typed catalog | Preserve intent-first routing |
-| Visual taxonomy | 27 layout grammars | 15 executable semantic types | Admit candidates only through evidence gates |
+| Visual taxonomy | 27 layout grammars | 33 executable semantic types; 5 exact reference grammars remain roadmap-only | Admit candidates only through evidence gates |
 | Artifact/export | Self-contained HTML/SVG/PNG examples | 8 targets and independently declared export capabilities | Keep target and export orthogonal |
 | Preview | Example HTML assets | Selection-driven production fixture preview panel; reference taxonomy remains outside settings/workbench | Keep production and reference evidence visibly distinct |
 | Governance | Type references and complexity budgets | Versioned capability/target manifests plus tests | Treat manifests and tests as the contract |
 | Contract boundary | Human-readable command examples sit beside pattern docs | Pure schema runtime plus registry admission; host/core schemas stay explicit | Fail closed on malformed contracts without collapsing UI and CLI context |
 
-The reference taxonomy still supplies architecture, current-state, loop, nested, tree, org chart, layers, Venn, pyramid, bar, line, Gantt, scatter, medallion, process, data flow, and security/integration matrix candidates. Radar has crossed the bounded Vega-Lite admission gate; timeline, swimlane, and quadrant remain Mermaid-only and are not evidence of editable HTML/SVG, Draw.io, or Drawnix support. Gallery variants such as OAuth sequence, animation, imports, and vertical orientation are workflows or variants, not new semantic types.
+The reference taxonomy supplied architecture, current-state, loop, nested, tree, org chart, layers, Venn, pyramid, bar, line, Gantt, scatter, medallion, process, data flow, and security/integration matrix candidates. Those approved candidates now have shipped payloads, fixtures, and production previews. Five exact grammars remain reference-only; Mermaid-only timeline, swimlane, and quadrant are intentionally not evidence of editable HTML/SVG, Draw.io, or Drawnix support. Gallery variants such as OAuth sequence, animation, imports, and vertical orientation are workflows or variants, not new semantic types.
 
 ## Gap Against Earlier Plans
 
 | Earlier requirement | Current evidence | Remaining boundary |
 |---|---|---|
 | One executable source for operation contracts | Registry schemas are validated by a registry-independent runtime and exported into CLI contracts | Maintainer host metadata is intentionally separate from host-neutral schemas; a generated pure-data catalog is still a future migration |
-| Reference layouts must have real semantics, not aliases | Timeline, swimlane, quadrant, and radar have bounded payloads, adapters, fixtures, previews, and tests | Remaining reference layouts stay gated until they have equivalent renderer and consumer evidence |
+| Reference layouts must have real semantics, not aliases | All 18 approved expansion rows have bounded payloads, adapters, fixtures, previews, and tests | Five exact reference grammars remain gated until their distinct layout contract and evidence exist |
 | External interoperability must be proven by a consumer | Plait public-API consumer and pinned Circuitikz compiler gates pass | Draw.io and a real Drawnix application are unavailable, so application-level compatibility is not claimed |
-| Documentation must expose support and previews | Bilingual docs retain 15 production SVG/PNG pairs; the runtime manifest exposes executable capabilities and reference-only roadmap metadata, while the UI renders only the selected production preview | New types and reference-asset changes must keep asset availability, UI status, docs parity, and gallery freshness gates in the same change |
+| Documentation must expose support and previews | Bilingual docs expose 33 production SVG/PNG pairs; the runtime manifest exposes executable capabilities and five reference-only roadmap rows, while the UI renders only the selected production preview | New types and reference-asset changes must keep asset availability, UI status, docs parity, and gallery freshness gates in the same change |
 
 ## Risk Register And Tradeoffs
 
@@ -122,7 +122,7 @@ The reference taxonomy still supplies architecture, current-state, loop, nested,
 - `drawnixRelationLabelLayout.ts` is now the canonical relation-label measurement boundary. Projection and lane reservation both consume the same deterministic wrapping, width, height, and line-height contract; the SVG/native geometry remains byte-stable and has focused regression coverage.
 - Circuitikz no longer carries a byte-identical `dualInputPortX()` helper. NAND/NOR inputs use the shared extended-port rule, while the buffer's intentionally wider right gutter is named `bufferPortX()` and drives both input and output placement. This removes hidden coordinate coupling without pretending the six golden templates share one topology.
 - `runCircuitikzRepairLoop()` is explicitly retained as a maintainer-only, one-attempt acceptance SDK. No normal generation path invokes it; adoption still requires topology equality plus fresh compile/render evidence and an explicit caller.
-7. **Reference admission:** timeline, swimlane, quadrant, and org chart are shipped as bounded Mermaid types with deterministic fixtures and parser-backed gallery evidence; Radar is shipped as a bounded Vega-Lite type. All other reference layouts remain gated.
+7. **Reference admission:** all 18 approved expansion rows are now shipped behind bounded payloads and deterministic adapters: three Mermaid-only families (`timeline`, `swimlane`, `quadrant`), one bounded Vega-Lite family (`radar`), three quantitative variants, and fourteen native editable HTML/SVG layouts. Five exact reference grammars remain reference-only because their layout contract is not yet claimed.
 8. **Operation contract convergence:** keep the registry-independent schema runtime and registry admission as the fail-closed boundary. Only migrate declarations into generated JSON when the generator can preserve host/core contract separation, human examples, and stable unknown-field behavior.
 
 ## Acceptance Gates
@@ -141,7 +141,7 @@ The reference taxonomy still supplies architecture, current-state, loop, nested,
 
 ## Verification Snapshot
 
-Fresh verification for this increment: 262 Jest suites passed (2,303 tests passed, 1 skipped); TypeScript/esbuild build passed; VitePress docs build passed; production gallery check passed with 15 SVG/PNG pairs; render-host audit and i18n audit passed; the standalone Drawnix Plait consumer gate passed with 20 nodes, 1 root, and 12 relations; semantic verification checklist generation passed (the command emits a review template, not automatic environment check results); and Circuitikz smoke passed with TeX Live 2023 `pdflatex` (6/6 PDFs, 0 errors/0 warnings). `git diff --check` passed. Draw.io and a real Drawnix desktop application are unavailable in this workspace, so no application-level interoperability claim is made. Full repository lint remains a separate baseline debt track.
+Final post-change verification: 265 Jest suites passed (2,339 tests passed, 1 skipped); TypeScript/esbuild build passed; VitePress docs build passed; gallery generation/check passed with 33 SVG/PNG pairs; render-host audit, i18n audit, Drawnix public-API consumer gate, and `git diff --check` passed. Full repository lint remains a separate baseline debt track (229 errors / 1,361 warnings, including one pre-existing class of unused/legacy code findings). Draw.io and a real Drawnix desktop application are unavailable in this workspace, so no application-level interoperability claim is made.
 
 ## Reference Expansion Decision Record (2026-08-21)
 
@@ -156,7 +156,7 @@ The next expansion was reviewed and approved as a staged route: engineering/data
 | Prompt routing | Type-specific conditionals in `diagramSpecPrompt.ts` | Versioned pure-data prompt profiles selected by catalog metadata |
 | Geometry | Existing Mermaid/Vega/Drawnix/Circuitikz adapters | Finite native SVG payload-family adapters; model never emits coordinates |
 | Chart variants | `layoutHints.chartType` plus one `data-chart` row | `quantitative.chartType` with explicit bar/line/scatter IDs; old data-chart remains readable |
-| Preview | Production fixture preview for 15 shipped types | New types enter selector only after the same renderer, fixture, gallery, and accessibility gates |
+| Preview | Production fixture preview for 33 shipped types | New types enter selector only after the same renderer, fixture, gallery, and accessibility gates |
 | Reference checkout | Development-only taxonomy and quality evidence | Remains outside runtime; screenshots and original HTML are never product assets |
 
 ### Approved batch order
@@ -193,4 +193,36 @@ Batch 0 is now implemented as a compatibility foundation; it does not add select
 - A profile catalog now owns prompt profile IDs, versions, payload family, hard limits, semantic rules, target rules, and invalid-output rules. Existing circuitikz and Drawnix specialized prompt contracts remain intact.
 - Capability manifest rows expose the new payload/layout ownership metadata; the manifest schema remains additive and reference-only rows remain outside the selector.
 
-Evidence for this increment: focused catalog/payload/parser/prompt tests passed (30 tests), `npm.cmd run build` passed, and the pre-existing 15-type production gallery and renderer contracts remain unchanged. Batch 1A is not started; architecture/current-state/integration-topology remain reference-only until native SVG fixtures and preview/gallery gates are delivered.
+Evidence for this increment: focused catalog/payload/parser/prompt tests passed (30 tests), `npm.cmd run build` passed, and the pre-existing 15-type production gallery and renderer contracts remained unchanged at the Batch 0 boundary. Batches 1A through 3B subsequently passed their native fixture and preview/gallery gates; the complete delivery record is below.
+
+## Full Reference Expansion Delivery (2026-08-21)
+
+The staged implementation is now complete in the runtime and production evidence chain. The catalog contains 33 executable IDs: the original 15, three explicit quantitative variants, and 15 reference-derived layout capabilities. Five exact reference grammars remain roadmap-only (`flowchart`, `sequence`, `state-machine`, `er-data-model`, and `pyramid-funnel`) because their reference layout contracts are not identical to an already shipped semantic type.
+
+### Delivered payload families
+
+| Family | Shipped IDs | Target | Evidence |
+|---|---|---|---|
+| `topology` | `architecture`, `current-state`, `integration-topology`, `high-level` | editable HTML/SVG + HTML | deterministic zones, bounded nodes, orthogonal routes, production fixtures |
+| `lane-grid` | `data-flow`, `process` | editable HTML/SVG + HTML | bounded lanes/steps, explicit cells, empty-cell omission, focal handoff |
+| `access-matrix` | `access-matrix` | editable HTML/SVG + HTML | closed permission levels, bounded role/component grid, focal-cell validation |
+| `quantitative` | `bar-chart`, `line-chart`, `scatter-plot` | Vega-Lite + HTML | canonical chart payload, legacy projection, browser gallery rendering |
+| `schedule` | `gantt` | editable HTML/SVG + HTML | deterministic task timeline and milestone marker; v1 has no dependency arrows |
+| `ordered-stack` | `layer-stack`, `medallion` | editable HTML/SVG + HTML | bounded four-to-six layer stack and focal layer |
+| `set-overlap` | `venn` | editable HTML/SVG + HTML | two-to-three sets and explicit intersection membership |
+| `ranked-segments` | `ranked-funnel` | editable HTML/SVG + HTML | bounded pyramid/funnel segments and focal segment |
+| `cycle` | `loop` | editable HTML/SVG + HTML | five-to-eight stations, one hub, circular return path |
+| `nested` / `tree` | `nested`, `tree` | editable HTML/SVG + HTML | bounded containment levels and one-root hierarchy |
+
+### Runtime and compatibility changes
+
+- `diagramSpecResponseParser` preserves canonical payloads and presentation dials; `normalizeDiagramSpecPayload` projects quantitative payloads back to the legacy `dataSeries/layoutHints` fields so existing Vega-Lite callers remain valid.
+- `validateCanonicalDiagramPayload` enforces family budgets and cross-reference invariants at the boundary. Renderers do not guess missing nodes, dates, permissions, or geometry.
+- The prompt profile registry now covers all 33 catalog rows. New profiles request semantic payloads only; they prohibit model-generated coordinates, SVG, CSS, and fabricated numbers.
+- `EditableHtmlSvgRenderer` owns one deterministic family adapter for topology, lane-grid, matrix, schedule, stack, overlap, ranked, cycle, nested, and tree layouts. Production preview and gallery use the same artifact path.
+- Intent inference recognizes explicit reference-layout vocabulary, while explicit native-only requests override the global legacy-Mermaid preference instead of being misrouted to a mindmap.
+- The capability manifest now has 33 shipped rows and only five reference-only rows. No Draw.io, Drawnix, or Circuitikz compatibility is implied for the new types.
+
+### Evidence snapshot
+
+`npm.cmd run diagram:gallery` generated 33 SVG/PNG pairs; gallery screenshots were visually inspected for topology, lane-grid, matrix, schedule, cycle, nested, tree, and ranked layouts. Focused native-layout tests cover deterministic SVG, accessibility metadata, malformed payload rejection, invalid references, schedule ordering, and budget rejection. The final full regression, docs, gallery, i18n, consumer, render-host, and diff-check gates all passed before commit.

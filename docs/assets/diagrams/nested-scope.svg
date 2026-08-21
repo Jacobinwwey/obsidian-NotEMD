@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="920" height="640" viewBox="0 0 920 640" role="img" aria-labelledby="notemd-gallery-nested-scope-title notemd-gallery-nested-scope-desc" data-notemd-renderer="notemd-reference-layouts@1.0.0">
+        <title id="notemd-gallery-nested-scope-title">Scope cascade</title>
+        <desc id="notemd-gallery-nested-scope-desc">Use for containment boundaries such as policy, workspace, and artifact scope.</desc>
+        <style>
+        .ref-canvas { fill: #f8fafc; }
+        .ref-title { fill: #172033; font: 700 26px "Segoe UI", Arial, sans-serif; }
+        .ref-summary { fill: #64748b; font: 13px "Segoe UI", Arial, sans-serif; }
+        .ref-zone { fill: #ffffff; stroke: #cbd5e1; stroke-width: 1; }
+        .ref-zone-label { fill: #64748b; font: 700 10px "Segoe UI", Arial, sans-serif; letter-spacing: 1.5px; }
+        .ref-node { fill: #ffffff; stroke: #cbd5e1; stroke-width: 1.2; }
+        .ref-node.focal { fill: #fff7ed; stroke: #c2410c; stroke-width: 1.8; }
+        .ref-node.external { stroke-dasharray: 5 4; }
+        .ref-node-label { fill: #172033; font: 600 13px "Segoe UI", Arial, sans-serif; }
+        .ref-node-sub { fill: #64748b; font: 10px Consolas, monospace; }
+        .ref-edge { fill: none; stroke: #64748b; stroke-width: 1.5; }
+        .ref-edge.accent { stroke: #c2410c; stroke-width: 2; marker-end: url(#notemd-reference-arrow-accent); }
+        .ref-edge.link { stroke: #1d4ed8; marker-end: url(#notemd-reference-arrow-link); }
+        .ref-edge.trigger { stroke-dasharray: 5 4; }
+        .ref-edge.dashed { stroke-dasharray: 5 4; }
+        .ref-edge-label { fill: #64748b; font: 10px Consolas, monospace; paint-order: stroke; stroke: #f8fafc; stroke-width: 5px; }
+        .ref-axis { stroke: #cbd5e1; stroke-width: 1; }
+        .ref-axis-label { fill: #64748b; font: 10px Consolas, monospace; }
+        .ref-chip { fill: #e2e8f0; stroke: #cbd5e1; stroke-width: .7; }
+        .ref-chip-text { fill: #172033; font: 700 8px Consolas, monospace; }
+        .ref-focal-fill { fill: #fff7ed; stroke: #c2410c; stroke-width: 1.8; }
+        .ref-caption { fill: #64748b; font: 10px Consolas, monospace; letter-spacing: .8px; }
+    </style>
+        <defs>
+        <marker id="notemd-reference-arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0 L8 4 L0 8 Z" fill="#64748b"/></marker>
+        <marker id="notemd-reference-arrow-accent" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0 L8 4 L0 8 Z" fill="#c2410c"/></marker>
+        <marker id="notemd-reference-arrow-link" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0 L8 4 L0 8 Z" fill="#1d4ed8"/></marker>
+    </defs>
+        <rect class="ref-canvas" x="0" y="0" width="920" height="640"/>
+        <text class="ref-title" x="40" y="42">Scope cascade</text>
+        <text class="ref-summary" x="40" y="66">Containment narrows from global policy to one artifact.</text>
+        <g id="reference-nested-org"><rect class="ref-node" x="50" y="98" width="820" height="490" rx="8" fill-opacity="0.09"/><rect x="64" y="105" width="150" height="18" fill="#f8fafc"/><text class="ref-caption" x="72" y="118">ORGANIZATION</text><text class="ref-node-sub" x="72" y="140">global policy</text></g><g id="reference-nested-workspace"><rect class="ref-node" x="92" y="140" width="736" height="406" rx="8" fill-opacity="0.078"/><rect x="106" y="147" width="150" height="18" fill="#f8fafc"/><text class="ref-caption" x="114" y="160">WORKSPACE</text><text class="ref-node-sub" x="114" y="182">team defaults</text></g><g id="reference-nested-project"><rect class="ref-focal-fill" x="134" y="182" width="652" height="322" rx="8" fill-opacity="0.066"/><rect x="148" y="189" width="150" height="18" fill="#f8fafc"/><text class="ref-caption" x="156" y="202">PROJECT</text><text class="ref-node-sub" x="156" y="224">local contract</text></g><g id="reference-nested-artifact"><rect class="ref-node" x="176" y="224" width="568" height="238" rx="8" fill-opacity="0.05399999999999999"/><rect x="190" y="231" width="150" height="18" fill="#f8fafc"/><text class="ref-caption" x="198" y="244">ARTIFACT</text><text class="ref-node-sub" x="198" y="266">single output</text></g>
+    </svg>

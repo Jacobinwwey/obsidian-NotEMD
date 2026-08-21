@@ -20,6 +20,21 @@ export interface DiagramCatalogLabelCopy {
     intentTimeline: string;
     intentSwimlane: string;
     intentQuadrant: string;
+    intentArchitecture?: string;
+    intentCurrentState?: string;
+    intentIntegrationTopology?: string;
+    intentDataFlow?: string;
+    intentAccessMatrix?: string;
+    intentGantt?: string;
+    intentLayerStack?: string;
+    intentSetOverlap?: string;
+    intentRankedFunnel?: string;
+    intentLoop?: string;
+    intentNested?: string;
+    intentTree?: string;
+    intentProcess?: string;
+    intentMedallion?: string;
+    intentHighLevel?: string;
 }
 
 export interface DiagramCatalogFamilyLabelCopy {
@@ -50,6 +65,21 @@ export function getLocalizedDiagramIntentLabel(
         case 'timeline': return copy.intentTimeline;
         case 'swimlane': return copy.intentSwimlane;
         case 'quadrant': return copy.intentQuadrant;
+        case 'architecture': return copy.intentArchitecture ?? 'Architecture';
+        case 'currentState': return copy.intentCurrentState ?? 'Current state';
+        case 'integrationTopology': return copy.intentIntegrationTopology ?? 'Integration topology';
+        case 'dataFlow': return copy.intentDataFlow ?? 'Data flow';
+        case 'accessMatrix': return copy.intentAccessMatrix ?? 'Access matrix';
+        case 'gantt': return copy.intentGantt ?? 'Gantt';
+        case 'layerStack': return copy.intentLayerStack ?? 'Layer stack';
+        case 'setOverlap': return copy.intentSetOverlap ?? 'Venn overlap';
+        case 'rankedFunnel': return copy.intentRankedFunnel ?? 'Pyramid / funnel';
+        case 'loop': return copy.intentLoop ?? 'Loop';
+        case 'nested': return copy.intentNested ?? 'Nested scope';
+        case 'tree': return copy.intentTree ?? 'Tree';
+        case 'process': return copy.intentProcess ?? 'Process';
+        case 'medallion': return copy.intentMedallion ?? 'Medallion';
+        case 'highLevel': return copy.intentHighLevel ?? 'High-level overview';
     }
 }
 
@@ -57,10 +87,17 @@ export function getExecutableDiagramIntentOptions(copy: DiagramCatalogLabelCopy)
     value: DiagramIntent;
     label: string;
 }> {
-    return EXECUTABLE_DIAGRAM_TYPES.map(type => ({
-        value: type.intent,
-        label: getLocalizedDiagramIntentLabel(type.intent, copy)
-    }));
+    const seen = new Set<DiagramIntent>();
+    return EXECUTABLE_DIAGRAM_TYPES
+        .filter(type => {
+            if (seen.has(type.intent)) return false;
+            seen.add(type.intent);
+            return true;
+        })
+        .map(type => ({
+            value: type.intent,
+            label: getLocalizedDiagramIntentLabel(type.intent, copy)
+        }));
 }
 
 export function getLocalizedDiagramFamilyLabel(

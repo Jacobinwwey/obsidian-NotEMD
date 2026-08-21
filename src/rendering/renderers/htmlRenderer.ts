@@ -510,6 +510,52 @@ function renderRadarSpec(spec: DiagramSpec, labels: HtmlRendererLabels): string 
     </section>`;
 }
 
+function renderCanonicalPayload(spec: DiagramSpec, labels: HtmlRendererLabels): string {
+    const payload = spec.payload;
+    if (!payload || payload.kind === 'legacy' || payload.kind === 'quantitative') {
+        return '';
+    }
+
+    const details: string[] = [];
+    switch (payload.kind) {
+        case 'topology':
+            details.push(`Zones: ${payload.zones.length}`, `Components: ${payload.nodes.length}`, `Connections: ${payload.edges.length}`);
+            break;
+        case 'lane-grid':
+            details.push(`Lanes: ${payload.lanes.length}`, `Steps: ${payload.steps.length}`, `Active cells: ${payload.cells.length}`);
+            break;
+        case 'access-matrix':
+            details.push(`Roles: ${payload.roles.length}`, `Components: ${payload.components.length}`, `Explicit permissions: ${payload.cells.length}`);
+            break;
+        case 'schedule':
+            details.push(`Phases: ${payload.phases.length}`, `Tasks: ${payload.tasks.length}`, `Milestones: ${payload.milestones?.length ?? 0}`);
+            break;
+        case 'ordered-stack':
+            details.push(`Layers: ${payload.layers.length}`, `Direction: ${payload.direction ?? 'down'}`);
+            break;
+        case 'set-overlap':
+            details.push(`Sets: ${payload.sets.length}`, `Intersections: ${payload.intersections.length}`);
+            break;
+        case 'ranked-segments':
+            details.push(`Orientation: ${payload.orientation}`, `Segments: ${payload.segments.length}`);
+            break;
+        case 'cycle':
+            details.push(`Stations: ${payload.stations.length}`, `Shared hub: ${payload.hub.label}`);
+            break;
+        case 'nested':
+            details.push(`Containment levels: ${payload.levels.length}`);
+            break;
+        case 'tree':
+            details.push(`Nodes: ${payload.nodes.length}`, `Root: ${payload.nodes.find(node => !node.parentId)?.label ?? ''}`);
+            break;
+        default:
+            break;
+    }
+
+    if (details.length === 0) return '';
+    return `<section class="notemd-html-renderer-section"><h2>${escapeHtml(labels.data)}</h2><ul class="notemd-html-renderer-list">${details.map(detail => `<li>${escapeHtml(detail)}</li>`).join('')}</ul></section>`;
+}
+
 function collectNodeLabels(nodes: DiagramNode[], labels: Map<string, string> = new Map<string, string>()): Map<string, string> {
     for (const node of nodes) {
         labels.set(node.id, node.label);
@@ -709,6 +755,7 @@ function renderHtmlDocument(spec: DiagramSpec): string {
         ${renderEdges(spec.edges ?? [], nodeLabels, labels)}
         ${renderDataSeries(spec, labels)}
         ${renderRadarSpec(spec, labels)}
+        ${renderCanonicalPayload(spec, labels)}
         ${renderCallouts(spec, labels)}
         ${renderEvidenceRefs(spec, labels)}
     </main>

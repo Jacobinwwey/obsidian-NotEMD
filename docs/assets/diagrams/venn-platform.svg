@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="920" height="620" viewBox="0 0 920 620" role="img" aria-labelledby="notemd-gallery-venn-platform-title notemd-gallery-venn-platform-desc" data-notemd-renderer="notemd-reference-layouts@1.0.0">
+        <title id="notemd-gallery-venn-platform-title">Platform fit</title>
+        <desc id="notemd-gallery-venn-platform-desc">Use when the explanation depends on overlap between two or three explicit sets.</desc>
+        <style>
+        .ref-canvas { fill: #f8fafc; }
+        .ref-title { fill: #172033; font: 700 26px "Segoe UI", Arial, sans-serif; }
+        .ref-summary { fill: #64748b; font: 13px "Segoe UI", Arial, sans-serif; }
+        .ref-zone { fill: #ffffff; stroke: #cbd5e1; stroke-width: 1; }
+        .ref-zone-label { fill: #64748b; font: 700 10px "Segoe UI", Arial, sans-serif; letter-spacing: 1.5px; }
+        .ref-node { fill: #ffffff; stroke: #cbd5e1; stroke-width: 1.2; }
+        .ref-node.focal { fill: #fff7ed; stroke: #c2410c; stroke-width: 1.8; }
+        .ref-node.external { stroke-dasharray: 5 4; }
+        .ref-node-label { fill: #172033; font: 600 13px "Segoe UI", Arial, sans-serif; }
+        .ref-node-sub { fill: #64748b; font: 10px Consolas, monospace; }
+        .ref-edge { fill: none; stroke: #64748b; stroke-width: 1.5; }
+        .ref-edge.accent { stroke: #c2410c; stroke-width: 2; marker-end: url(#notemd-reference-arrow-accent); }
+        .ref-edge.link { stroke: #1d4ed8; marker-end: url(#notemd-reference-arrow-link); }
+        .ref-edge.trigger { stroke-dasharray: 5 4; }
+        .ref-edge.dashed { stroke-dasharray: 5 4; }
+        .ref-edge-label { fill: #64748b; font: 10px Consolas, monospace; paint-order: stroke; stroke: #f8fafc; stroke-width: 5px; }
+        .ref-axis { stroke: #cbd5e1; stroke-width: 1; }
+        .ref-axis-label { fill: #64748b; font: 10px Consolas, monospace; }
+        .ref-chip { fill: #e2e8f0; stroke: #cbd5e1; stroke-width: .7; }
+        .ref-chip-text { fill: #172033; font: 700 8px Consolas, monospace; }
+        .ref-focal-fill { fill: #fff7ed; stroke: #c2410c; stroke-width: 1.8; }
+        .ref-caption { fill: #64748b; font: 10px Consolas, monospace; letter-spacing: .8px; }
+    </style>
+        <defs>
+        <marker id="notemd-reference-arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0 L8 4 L0 8 Z" fill="#64748b"/></marker>
+        <marker id="notemd-reference-arrow-accent" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0 L8 4 L0 8 Z" fill="#c2410c"/></marker>
+        <marker id="notemd-reference-arrow-link" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0 L8 4 L0 8 Z" fill="#1d4ed8"/></marker>
+    </defs>
+        <rect class="ref-canvas" x="0" y="0" width="920" height="620"/>
+        <text class="ref-title" x="40" y="42">Platform fit</text>
+        <text class="ref-summary" x="40" y="66">The useful center is where reliability, editability, and discoverability overlap.</text>
+        <g id="reference-set-reliable"><circle cx="460" cy="330" r="180" fill="#dbeafe" fill-opacity=".55" stroke="#64748b" stroke-width="1.4"/><text class="ref-node-label" x="460" y="134" text-anchor="middle">Reliable</text></g><g id="reference-set-editable"><circle cx="585.5736835487436" cy="330" r="180" fill="#dcfce7" fill-opacity=".55" stroke="#64748b" stroke-width="1.4"/><text class="ref-node-label" x="585.5736835487436" y="134" text-anchor="middle">Editable</text></g><g id="reference-set-discoverable"><circle cx="334.4263164512564" cy="330" r="180" fill="#fef3c7" fill-opacity=".55" stroke="#64748b" stroke-width="1.4"/><text class="ref-node-label" x="334.4263164512564" y="134" text-anchor="middle">Discoverable</text></g><g id="reference-intersection-core"><text class="ref-node-label" x="460" y="322" text-anchor="middle" fill="#c2410c">Production capability</text></g><g id="reference-intersection-re"><text class="ref-caption" x="522.7868417743719" y="340" text-anchor="middle" fill="#172033">Evidence</text></g>
+    </svg>

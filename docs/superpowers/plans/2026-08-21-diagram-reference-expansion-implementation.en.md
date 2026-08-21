@@ -2,15 +2,29 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Add diagram-design-inspired layout capabilities without breaking the 15 shipped types, Mermaid legacy files, target compatibility, or production preview evidence.
+**Goal:** Add diagram-design-inspired layout capabilities without breaking the original 15 shipped types, Mermaid legacy files, target compatibility, or production preview evidence. The implementation now delivers 33 executable catalog rows while retaining those compatibility guarantees.
 
 **Architecture:** Introduce variant-aware catalog lookup, a versioned canonical payload boundary, finite payload families, and profile-driven prompts. Native editable SVG adapters own geometry; Vega-Lite owns quantitative charts; HTML is the accessible fallback; reference layouts remain outside runtime until all evidence gates pass.
 
 **Tech Stack:** TypeScript 5.9, Jest 29, esbuild, Mermaid 11, Vega-Lite 6, Playwright gallery generation, VitePress documentation, Obsidian plugin runtime.
 
+## Execution Status (2026-08-21)
+
+The runtime work for Batch 0 through Batch 3B is implemented in the current delivery. The detailed task checklists below remain the design decomposition; this status table is authoritative for completion and commit granularity.
+
+| Phase | Status | Evidence |
+|---|---|---|
+| Batch 0 foundation | Complete | variant-aware catalog, schema-v2 payload boundary, prompt profiles, manifest metadata |
+| Batch 1A topology | Complete | topology payload/renderer, 3 fixtures, SVG/PNG gallery output |
+| Batch 1B data-flow and access matrix | Complete | lane-grid and access-matrix validators/renderers, 2 fixtures |
+| Batch 2 quantitative and schedule | Complete | bar/line/scatter variants, quantitative projection, Gantt renderer |
+| Batch 3A structural | Complete | ordered-stack, set-overlap, ranked-segments, cycle renderers |
+| Batch 3B structural | Complete | nested, tree, process, medallion, high-level renderers |
+| Final verification and mainline delivery | Complete | 265 Jest suites, 2,339 passed / 1 skipped; build/docs/gallery/render-host/i18n/consumer/diff gates passed; lint remains baseline debt |
+
 ## Global Constraints
 
-- Preserve the existing 15 executable types, legacy Mermaid output, Drawnix/Circuitikz behavior, and old JSON inputs.
+- Preserve the original 15 executable types, legacy Mermaid output, Drawnix/Circuitikz behavior, and old JSON inputs while adding the 18 new rows through additive contracts.
 - Keep `ref/diagram-design` development-only; never bundle its screenshots, HTML assets, CDN fonts, or runtime APIs.
 - Use `apply_patch` for edits and prefix repository commands with `rtk`.
 - Keep semantic intent, catalog ID, layout profile, render target, and export format as separate axes.
@@ -81,7 +95,7 @@
 
 - [ ] **Step 1: Write failing tests** asserting every executable catalog row has one profile, profiles declare required fields and hard limits, and prompts contain source delimiters plus no renderer syntax request.
 - [ ] **Step 2: Run focused tests** with `rtk npm.cmd test -- --runInBand src/tests/diagramPrompt.test.ts src/tests/diagramPlanner.test.ts`; expect profile lookup failures.
-- [ ] **Step 3: Create the pure-data profile catalog** for current 15 types and the planned payload families; each profile must declare `version`, `payloadKind`, required fields, limits, semantic rules, target rules, and invalid examples.
+- [ ] **Step 3: Create the pure-data profile catalog** for all 33 catalog rows and the payload families; each profile must declare `version`, `payloadKind`, required fields, limits, semantic rules, target rules, and invalid examples.
 - [ ] **Step 4: Refactor `buildDiagramSpecPrompt()`** to compose common contract + selected profile + target/presentation rules, retaining exact circuitikz and Drawnix safety constraints.
 - [ ] **Step 5: Add source-note delimiters and explicit anti-invention rules** without changing existing language behavior.
 - [ ] **Step 6: Run focused tests and inspect generated prompts** for Mermaid/Drawnix/Circuitikz regression strings; then run `rtk npm.cmd run build`.

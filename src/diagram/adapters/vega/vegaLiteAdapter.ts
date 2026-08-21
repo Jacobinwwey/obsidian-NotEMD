@@ -41,6 +41,9 @@ const RADAR_DOMAIN_RADIUS = 1.25;
 const RADAR_GRID_LEVELS = [0.25, 0.5, 0.75, 1] as const;
 
 function normalizeChartType(spec: DiagramSpec): SupportedVegaLiteChartType {
+    if (spec.payload?.kind === 'quantitative' && isSupportedVegaLiteChartType(spec.payload.chartType)) {
+        return spec.payload.chartType;
+    }
     const chartType = spec.layoutHints?.chartType;
     if (isSupportedVegaLiteChartType(chartType)) {
         return chartType;
@@ -279,7 +282,10 @@ export function renderVegaLiteSpec(spec: DiagramSpec): string {
         return JSON.stringify(buildRadarVegaLiteSpec(spec), null, 2);
     }
 
-    const values: VegaLiteValue[] = (spec.dataSeries ?? []).flatMap(series =>
+    const dataSeries = spec.payload?.kind === 'quantitative'
+        ? spec.payload.series
+        : spec.dataSeries ?? [];
+    const values: VegaLiteValue[] = dataSeries.flatMap(series =>
         series.points.map(point => ({
             x: point.x,
             y: point.y,
@@ -287,7 +293,7 @@ export function renderVegaLiteSpec(spec: DiagramSpec): string {
         }))
     );
     const chartType = normalizeChartType(spec);
-    const includeSeriesColor = (spec.dataSeries ?? []).length > 1;
+    const includeSeriesColor = dataSeries.length > 1;
     const isTable = chartType === 'table';
 
     const encoding = chartType === 'pie'

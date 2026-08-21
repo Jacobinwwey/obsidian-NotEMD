@@ -522,7 +522,10 @@ export async function generateDiagramArtifact(
         if (errorMsg.includes('Mermaid diagram failed validation') || errorMsg.includes('Parse error')) {
             const retryPrompt = buildGenerationPrompt(plan, {
                 ...options,
-                requestedIntent: options.requestedIntent ?? spec.intent
+                // An inferred spec must remain a preference during retry. Treating
+                // it as a required intent makes variant-bearing intents such as
+                // dataChart ambiguous when no explicit catalog variant was chosen.
+                requestedIntent: options.requestedIntent
             }) + `\n\nCRITICAL: Your previous diagram spec rendered invalid Mermaid syntax. The error was: ${errorMsg}. Please regenerate the DiagramSpec with valid, well-formed content. Ensure entity names have no trailing spaces, all braces are properly closed, and the syntax follows standard Mermaid conventions.`;
 
             const retryResponse = await options.llmInvoker(retryPrompt, markdown);

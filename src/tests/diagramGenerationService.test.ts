@@ -240,6 +240,38 @@ describe('diagram generation service', () => {
         expect(result.artifact.content).toContain('data-notemd-renderer="notemd-editable-html-svg@0.1.0"');
     });
 
+    test('carries a canonical topology payload through generation into the native preview renderer', async () => {
+        const llmInvoker = jest.fn().mockResolvedValue(JSON.stringify({
+            schemaVersion: 2,
+            intent: 'architecture',
+            title: 'Platform topology',
+            summary: 'Bounded service topology.',
+            nodes: [],
+            edges: [],
+            payload: {
+                kind: 'topology',
+                zones: [{ id: 'platform', label: 'Platform' }],
+                nodes: [{ id: 'gateway', label: 'Gateway', zoneId: 'platform', focal: true }],
+                edges: []
+            }
+        }));
+
+        const result = await generateDiagramArtifact('# Platform architecture', {
+            compatibilityMode: 'best-fit',
+            requestedIntent: 'architecture',
+            requestedRenderTarget: 'editable-html-svg',
+            targetLanguage: 'en',
+            llmInvoker
+        });
+
+        expect(result.plan.renderTarget).toBe('editable-html-svg');
+        expect(result.spec.schemaVersion).toBe(2);
+        expect(result.spec.payload?.kind).toBe('topology');
+        expect(result.artifact.target).toBe('editable-html-svg');
+        expect(result.artifact.previewSvg?.content).toContain('reference-zone-platform');
+        expect(llmInvoker.mock.calls[0][0]).toMatch(/Payload family:\s*topology/i);
+    });
+
     test('honors the Draw.io render target override with an SVG companion', async () => {
         for (const requestedRenderTarget of ['drawio'] as const) {
             const result = await generateDiagramArtifact(`# Runtime Flow

@@ -34,7 +34,25 @@ const PROFILE_SEEDS: readonly [string, DiagramIntent, DiagramPayloadKind, string
     ['timeline', 'timeline', 'timeline', 'use dated events in source order'],
     ['swimlane', 'swimlane', 'swimlane', 'use explicit lanes and handoff steps; leave empty cells absent'],
     ['quadrant', 'quadrant', 'quadrant', 'use bounded x/y values in the inclusive 0..1 range'],
-    ['circuit', 'circuit', 'circuit', 'use only the constrained CircuitSpec topology contract']
+    ['circuit', 'circuit', 'circuit', 'use only the constrained CircuitSpec topology contract'],
+    ['bar-chart', 'dataChart', 'quantitative', 'emit a quantitative payload with chartType bar and one value per category'],
+    ['line-chart', 'dataChart', 'quantitative', 'emit a quantitative payload with chartType line and ordered observations'],
+    ['scatter-plot', 'dataChart', 'quantitative', 'emit a quantitative payload with chartType scatter and paired numeric observations'],
+    ['architecture', 'architecture', 'topology', 'group components into bounded zones and preserve explicit relationships'],
+    ['current-state', 'currentState', 'topology', 'show the before-state landscape and label manual or brittle handoffs'],
+    ['integration-topology', 'integrationTopology', 'topology', 'show source/platform/consumer integration surfaces and protocol labels'],
+    ['data-flow', 'dataFlow', 'lane-grid', 'use role lanes, pipeline steps, explicit payload chips, and one focal handoff'],
+    ['access-matrix', 'accessMatrix', 'access-matrix', 'use roles, components, and closed permission levels full/rw/read/none'],
+    ['gantt', 'gantt', 'schedule', 'use explicit task start/end values and do not invent dependency arrows'],
+    ['layer-stack', 'layerStack', 'ordered-stack', 'use four to six ordered abstraction layers and one focal layer'],
+    ['venn', 'setOverlap', 'set-overlap', 'use two or three named sets and explicit intersection membership'],
+    ['ranked-funnel', 'rankedFunnel', 'ranked-segments', 'use four to six ranked segments and only proportional values present in the source'],
+    ['loop', 'loop', 'cycle', 'use five to eight stations, one hub, and a true return to the first station'],
+    ['nested', 'nested', 'nested', 'use three to five containment levels with consistent scope semantics'],
+    ['tree', 'tree', 'tree', 'use exactly one root and stable parent references'],
+    ['process', 'process', 'lane-grid', 'use actor lanes and staged handoffs without data-payload assumptions'],
+    ['medallion', 'medallion', 'ordered-stack', 'use four to six quality tiers and explicit promotion semantics'],
+    ['high-level', 'highLevel', 'topology', 'show a bounded end-to-end platform overview without low-level ports']
 ];
 
 export const DIAGRAM_PROMPT_PROFILES: readonly DiagramPromptProfile[] = PROFILE_SEEDS.map(([id, intent, payloadKind, semanticRule]) => ({

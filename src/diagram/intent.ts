@@ -46,6 +46,28 @@ export function inferDiagramIntent(markdown: string): DiagramIntentResult {
         return scoreResult('circuit', 0.86, circuitReasons);
     }
 
+    const explicitLayoutSignals: Array<{ intent: DiagramIntent; pattern: RegExp; reason: string }> = [
+        { intent: 'currentState', pattern: /\b(?:current[- ]state|before the platform|legacy (?:it|landscape|pipeline))\b/, reason: 'current-state landscape vocabulary detected' },
+        { intent: 'integrationTopology', pattern: /\b(?:integration topology|source systems?.*consumers?|platform integration surfaces?)\b/, reason: 'integration topology vocabulary detected' },
+        { intent: 'accessMatrix', pattern: /\b(?:access matrix|permission matrix|rbac matrix|who can access what)\b/, reason: 'permission matrix vocabulary detected' },
+        { intent: 'dataFlow', pattern: /\b(?:data flow diagram|typed data pipeline|role-scoped data flow)\b/, reason: 'typed data-flow vocabulary detected' },
+        { intent: 'architecture', pattern: /\b(?:architecture diagram|system topology|trust boundary|infrastructure topology)\b/, reason: 'architecture topology vocabulary detected' },
+        { intent: 'gantt', pattern: /\bgantt\b|\btask schedule\b/, reason: 'schedule layout vocabulary detected' },
+        { intent: 'layerStack', pattern: /\b(?:layer stack|abstraction layers?|osi model)\b/, reason: 'ordered layer vocabulary detected' },
+        { intent: 'setOverlap', pattern: /\b(?:venn|set overlap|intersection of sets?)\b/, reason: 'set-overlap vocabulary detected' },
+        { intent: 'rankedFunnel', pattern: /\b(?:pyramid|conversion funnel|ranked funnel)\b/, reason: 'ranked-segment vocabulary detected' },
+        { intent: 'loop', pattern: /\b(?:flywheel|reinforcing loop|operating loop)\b/, reason: 'reinforcing cycle vocabulary detected' },
+        { intent: 'nested', pattern: /\bnested (?:scope|boundary|containment)\b/, reason: 'containment vocabulary detected' },
+        { intent: 'tree', pattern: /\b(?:tree hierarchy|parent[- ]to[- ]child hierarchy)\b/, reason: 'tree hierarchy vocabulary detected' },
+        { intent: 'process', pattern: /\bprocess diagram\b|\bstaged handoff process\b/, reason: 'staged process vocabulary detected' },
+        { intent: 'medallion', pattern: /\bmedallion\b/, reason: 'medallion data-tier vocabulary detected' },
+        { intent: 'highLevel', pattern: /\bhigh[- ]level (?:platform|overview)\b/, reason: 'high-level overview vocabulary detected' }
+    ];
+    const explicitLayout = explicitLayoutSignals.find(signal => signal.pattern.test(normalized));
+    if (explicitLayout) {
+        return scoreResult(explicitLayout.intent, 0.9, [explicitLayout.reason]);
+    }
+
     const timelineKeywords = countMatches(normalized, [
         /\btimeline\b/g,
         /\broadmap\b/g,

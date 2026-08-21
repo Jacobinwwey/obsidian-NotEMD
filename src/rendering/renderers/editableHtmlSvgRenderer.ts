@@ -8,6 +8,11 @@ import {
     SemanticFigureNode
 } from '../../diagram/adapters/editableSvg/semanticFigureModel';
 import { DiagramRenderer, RenderArtifact } from '../types';
+import {
+    isReferenceLayoutDiagram,
+    renderReferenceLayoutHtmlDocument,
+    renderReferenceLayoutSvg
+} from '../../diagram/adapters/editableSvg/referenceLayoutRenderer';
 
 export const NOTEMD_EDITABLE_SVG_RENDERER_VERSION = 'notemd-editable-html-svg@0.1.0';
 
@@ -490,11 +495,26 @@ export class EditableHtmlSvgRenderer implements DiagramRenderer {
     readonly target = 'editable-html-svg' as const;
 
     supports(spec: DiagramSpec): boolean {
-        return SUPPORTED_EDITABLE_FIGURE_INTENTS.has(spec.intent) && spec.nodes.length > 0;
+        return (SUPPORTED_EDITABLE_FIGURE_INTENTS.has(spec.intent) && spec.nodes.length > 0)
+            || isReferenceLayoutDiagram(spec);
     }
 
     async render(spec: DiagramSpec): Promise<RenderArtifact> {
         assertValidDiagramSpec(spec);
+
+        if (isReferenceLayoutDiagram(spec)) {
+            const previewSvg = renderReferenceLayoutSvg(spec);
+            return {
+                target: this.target,
+                content: renderReferenceLayoutHtmlDocument(spec),
+                mimeType: 'text/html',
+                sourceIntent: spec.intent,
+                previewSvg: {
+                    content: previewSvg,
+                    mimeType: 'image/svg+xml'
+                }
+            };
+        }
 
         const model = buildSemanticFigureModel(spec);
         return {

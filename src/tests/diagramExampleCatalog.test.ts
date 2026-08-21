@@ -4,6 +4,8 @@ import {
 } from '../diagram/examples/diagramExampleCatalog';
 import { EXECUTABLE_DIAGRAM_TYPES } from '../diagram/diagramTypeCatalog';
 import { CircuitikzRenderer } from '../rendering/renderers/circuitikzRenderer';
+import { EditableHtmlSvgRenderer } from '../rendering/renderers/editableHtmlSvgRenderer';
+import { HtmlRenderer } from '../rendering/renderers/htmlRenderer';
 import { DrawnixRenderer } from '../rendering/renderers/drawnixRenderer';
 import { JsonCanvasRenderer } from '../rendering/renderers/jsonCanvasRenderer';
 import { MermaidRenderer } from '../rendering/renderers/mermaidRenderer';
@@ -17,6 +19,8 @@ function createExampleRendererService(): RendererService {
         new MermaidRenderer(),
         new JsonCanvasRenderer(),
         new VegaLiteRenderer(),
+        new EditableHtmlSvgRenderer(),
+        new HtmlRenderer(),
         new DrawnixRenderer(),
         new CircuitikzRenderer()
     ]));
