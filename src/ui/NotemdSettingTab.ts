@@ -15,7 +15,8 @@ import {
     applyDiagramRenderTargetPreference
 } from '../diagram/diagramPreferenceCompatibility';
 import { getExecutableDiagramIntentOptions } from './diagramCatalogLabels';
-import { renderDiagramExampleGallery } from './diagramExampleGallery';
+import { renderDiagramCapabilityGallery } from './diagramCapabilityGallery';
+import { getDiagramReferenceAsset } from './diagramReferenceAssets';
 import { getExecutableDiagramType } from '../diagram/diagramTypeCatalog';
 import {
     DEFAULT_PREVIEW_EXPORT_PPI,
@@ -2796,8 +2797,9 @@ export class NotemdSettingTab extends PluginSettingTab {
         })
             .setName(experimentalDiagramI18n.diagramExampleGalleryName)
             .setDesc(experimentalDiagramI18n.diagramExampleGalleryDesc);
-        renderDiagramExampleGallery({
+        renderDiagramCapabilityGallery({
             parent: exampleSetting.controlEl,
+            locale: this.plugin.settings.uiLocale,
             copy: {
                 intentMindmap: experimentalDiagramI18n.intentMindmap,
                 intentDrawnixKnowledgeMap: experimentalDiagramI18n.intentDrawnixKnowledgeMap,
@@ -2814,10 +2816,20 @@ export class NotemdSettingTab extends PluginSettingTab {
                 intentTimeline: experimentalDiagramI18n.intentTimeline,
                 intentSwimlane: experimentalDiagramI18n.intentSwimlane,
                 intentQuadrant: experimentalDiagramI18n.intentQuadrant,
+                shippedSection: experimentalDiagramI18n.diagramCapabilityShippedSection,
+                referenceOnlySection: experimentalDiagramI18n.diagramCapabilityReferenceOnlySection,
+                shippedStatus: experimentalDiagramI18n.diagramCapabilityShippedStatus,
+                referenceOnlyStatus: experimentalDiagramI18n.diagramCapabilityReferenceOnlyStatus,
                 preview: experimentalDiagramI18n.diagramExamplePreview,
+                referencePreview: experimentalDiagramI18n.diagramReferencePreview,
                 useType: experimentalDiagramI18n.diagramExampleUseType,
+                openReference: experimentalDiagramI18n.diagramReferenceOpen,
                 thumbnailLoading: experimentalDiagramI18n.diagramExampleThumbnailLoading,
                 thumbnailUnavailable: experimentalDiagramI18n.diagramExampleThumbnailUnavailable,
+                referenceUnavailable: experimentalDiagramI18n.diagramReferenceUnavailable,
+                targetPrefix: experimentalDiagramI18n.diagramCapabilityTargetPrefix,
+                formatsPrefix: experimentalDiagramI18n.diagramCapabilityFormatsPrefix,
+                sourcePrefix: experimentalDiagramI18n.diagramCapabilitySourcePrefix,
                 familyLabels: {
                     knowledge: experimentalDiagramI18n.diagramExampleFamilyKnowledge,
                     behavior: experimentalDiagramI18n.diagramExampleFamilyBehavior,
@@ -2827,6 +2839,7 @@ export class NotemdSettingTab extends PluginSettingTab {
                 }
             },
             onPreview: typeId => this.plugin.openDiagramExamplePreview(typeId),
+            onPreviewReference: referenceId => this.plugin.openDiagramReferencePreview(referenceId),
             onUseType: async typeId => {
                 const type = getExecutableDiagramType(typeId);
                 applyDiagramIntentPreference(this.plugin.settings, type.intent);
@@ -2834,7 +2847,8 @@ export class NotemdSettingTab extends PluginSettingTab {
                 await this.plugin.saveSettings();
                 this.display();
             },
-            renderThumbnail: example => this.plugin.renderDiagramExampleThumbnail(example.typeId)
+            renderThumbnail: example => this.plugin.renderDiagramExampleThumbnail(example.typeId),
+            resolveReferenceAsset: getDiagramReferenceAsset
         });
 
         this.createCatalogSetting(containerEl, {

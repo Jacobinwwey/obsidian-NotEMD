@@ -1,6 +1,6 @@
 ---
 date: 2026-08-16
-last_updated: 2026-08-18
+last_updated: 2026-08-21
 status: current-contract
 canonical_for: diagram-capability-catalog
 ---
@@ -52,7 +52,7 @@ target descriptor 是 artifact 机制的运行时权威。其 `exportFormats` �
 
 ## 预览与 gallery 契约
 
-当前设置页 gallery 与文档生成式 gallery 均可执行并使用生产 renderer。生成式 gallery 将产出：
+设置页和生成工作台都消费 `src/ui/diagramCapabilityGallery.ts`。已交付行使用生产 renderer fixture；有对应映射的已交付行还会显示内置参考截图；仅参考行只提供参考图预览动作。文档生成式 gallery 仍由生产 renderer 驱动，并将产出：
 
 - `docs/assets/diagrams/<fixture-id>.svg`
 - `docs/assets/diagrams/<fixture-id>.png`
@@ -60,6 +60,8 @@ target descriptor 是 artifact 机制的运行时权威。其 `exportFormats` �
 - 链接到同一 fixture ID 的双语矩阵行
 
 生成器必须复用生产 fixture 目录，对缺失预览或过期资产失败，保持文件名稳定；禁止在文档脚本中复制 fixture 数据。
+
+runtime capability manifest 同时携带全部 27 类固定版本的 `diagram-design` reference-preview 描述。截图以离线 PNG data URL 内置，属于解释性证据而不是生成契约。仅参考行绝不能加入 `DiagramIntent`、planner 或“使用此图表类型”动作。
 
 ## Consumer 门禁
 

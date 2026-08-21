@@ -14,6 +14,7 @@ import { DrawioRenderer } from '../rendering/renderers/drawioRenderer';
 import { DrawnixRenderer } from '../rendering/renderers/drawnixRenderer';
 import { CircuitikzRenderer } from '../rendering/renderers/circuitikzRenderer';
 import type { DiagramRenderer } from '../rendering/types';
+import { getDiagramReferenceAsset } from '../ui/diagramReferenceAssets';
 
 describe('diagram capability manifest', () => {
     test('is versioned and covers every shipped type from the executable catalog', () => {
@@ -94,5 +95,28 @@ describe('diagram capability manifest', () => {
             .every(type => type.defaultTarget === 'mermaid'
                 && type.compatibleTargets.length === 1
                 && type.compatibleTargets[0] === 'mermaid')).toBe(true);
+    });
+
+    test('ships an offline preview asset for every reference taxonomy entry', () => {
+        const manifest = getDiagramCapabilityManifest();
+
+        expect(manifest.referencePreviews).toHaveLength(27);
+        expect(manifest.referenceOnlyLayouts).toHaveLength(22);
+        for (const preview of manifest.referencePreviews) {
+            expect(preview.screenshotPath).toContain('ref/diagram-design/docs/screenshots/');
+            expect(preview.referencePath).toContain('ref/diagram-design/skills/diagram-design/references/');
+            expect(getDiagramReferenceAsset(preview.previewAssetId)).toMatch(/^data:image\/png;base64,/);
+        }
+        expect(manifest.shippedTypes
+            .filter(type => type.referencePreviewId)
+            .map(type => type.referencePreviewId))
+            .toEqual(expect.arrayContaining([
+                'diagram-design:flowchart',
+                'diagram-design:sequence',
+                'diagram-design:state-machine',
+                'diagram-design:er-data-model',
+                'diagram-design:radar',
+                'diagram-design:org-chart'
+            ]));
     });
 });

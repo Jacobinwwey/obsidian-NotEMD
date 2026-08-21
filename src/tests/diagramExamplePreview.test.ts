@@ -61,4 +61,31 @@ describe('diagram example preview', () => {
         expect((plugin as any).saveSettings).not.toHaveBeenCalled();
         expect((plugin as any).generateDiagramCommand).not.toHaveBeenCalled();
     });
+
+    test('opens a bundled reference screenshot without entering generation flow', async () => {
+        const plugin = Object.create(NotemdPlugin.prototype) as NotemdPlugin;
+        (plugin as any).app = {};
+        (plugin as any).settings = { uiLocale: 'en', diagramPreviewExportPpi: 300 };
+        (plugin as any).saveSettings = jest.fn();
+        (plugin as any).generateDiagramCommand = jest.fn();
+
+        await plugin.openDiagramReferencePreview('diagram-design:architecture');
+
+        expect(mockCreateSession).toHaveBeenCalledWith(
+            expect.objectContaining({
+                target: 'html',
+                content: expect.stringContaining('data:image/png;base64,TEST_REFERENCE_IMAGE')
+            }),
+            { previewTitle: 'Architecture reference preview' }
+        );
+        expect(DiagramPreviewModal).toHaveBeenCalledWith(
+            expect.anything(),
+            expect.anything(),
+            'en',
+            expect.anything()
+        );
+        expect(mockModalOpen).toHaveBeenCalledTimes(1);
+        expect((plugin as any).saveSettings).not.toHaveBeenCalled();
+        expect((plugin as any).generateDiagramCommand).not.toHaveBeenCalled();
+    });
 });

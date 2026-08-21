@@ -12,6 +12,7 @@
     "isolatedModules": true,
     "strictNullChecks": true,
     "allowSyntheticDefaultImports": true,
+    "resolveJsonModule": true,
     "rootDir": "./src",
     "outDir": "./dist",
     "lib": [

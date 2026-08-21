@@ -1,6 +1,6 @@
 ---
 date: 2026-08-16
-last_updated: 2026-08-18
+last_updated: 2026-08-21
 topic: diagram-capability-catalog-and-forward-architecture
 status: active
 canonical_for:
@@ -147,7 +147,7 @@ Use the existing executable fixtures and production renderers. The generator sho
 4. Emit the versioned capability manifest and remove stale generated assets.
 5. Fail if a shipped type has no preview, if a filename changes unexpectedly, or if the generated manifest differs from the checked-in catalog.
 
-The in-app gallery should gain an inline thumbnail, target/export badges, and a direct “use this type” action in the generation selector. Keep the existing eye-button preview as a keyboard-accessible fallback.
+The in-app gallery should gain an inline thumbnail, target/export badges, and a direct “use this type” action in the generation selector. Keep the existing eye-button preview as a keyboard-accessible fallback. This is now implemented by `src/ui/diagramCapabilityGallery.ts`, shared by Settings and the Notemd Workbench. Shipped rows use production thumbnails; all 27 reference layouts have pinned offline screenshots; reference-only rows expose preview only and cannot mutate generation preferences.
 
 **Gate:** Playwright/browser smoke test at desktop and narrow widths; no network requests from generated previews; all SVGs have `role="img"`, `<title>`, `<desc>`, and stable IDs.
 
@@ -155,7 +155,7 @@ The in-app gallery should gain an inline thumbnail, target/export badges, and a 
 
 **Files:** `README.md`, `README_zh.md`, `docs/README*`, `docs/index*`, `docs/.vitepress/config.mts`, `docs/maintainer/diagram-capability-catalog.*`.
 
-Generate the support matrix from the manifest. Separate “shipped”, “partial”, and “reference-only/planned” rows. Link every shipped type to its preview image and fixture ID. Do not claim Draw.io, Drawnix, or Circuitikz external interoperability without the corresponding consumer gate.
+Generate the support matrix from the manifest. Separate “shipped”, “partial”, and “reference-only/planned” rows. Link every shipped type to its preview image and fixture ID. The runtime manifest now also carries all 27 pinned reference-preview descriptors and the build verifies that bundled screenshots match the reference checkout. Do not claim Draw.io, Drawnix, or Circuitikz external interoperability without the corresponding consumer gate.
 
 ### Phase 5: Candidate admission from `diagram-design`
 
@@ -196,8 +196,8 @@ External gates remain separate from unit tests:
 | 0. Correctness foundation | Complete | Sanitized settings persistence, authoritative retry artifacts, editable SVG preview, target descriptors, and bounded cache are covered by focused tests. |
 | 1. Three-axis catalog | Complete | Fifteen semantic types, eight targets, compatibility admission, fixture coverage, and stable IDs are executable. |
 | 2. Runtime contracts | Mostly complete | Input/result validation is owned by a registry-independent runtime; registry admission now fails closed on malformed schemas and duplicate IDs/bindings. Structural `OperationSchema`, host input metadata, and human-facing help remain intentionally separate. |
-| 3. Deterministic preview gallery | Complete | Production fixtures generate the settings thumbnails and bilingual SVG/PNG docs gallery; `diagram:gallery:check` is the freshness gate. |
-| 4. Bilingual discovery | Complete for shipped scope | Support matrices link shipped examples; reference layouts remain explicitly planned. |
+| 3. Deterministic preview gallery | Complete | Production fixtures generate Settings/workbench thumbnails and bilingual SVG/PNG docs gallery; the capability gallery also renders 27 pinned offline reference screenshots; `diagram:gallery:check` and `verify:diagram-reference-assets` are freshness gates. |
+| 4. Bilingual discovery | Complete for shipped and reference-preview scope | Support matrices link shipped examples; reference layouts remain explicitly planned for generation but are visible with status and screenshots in the type picker. |
 | 5. Candidate admission | Partially shipped | Timeline, swimlane, quadrant, and org chart are bounded Mermaid-only types. Radar and org chart each have dedicated schemas, adapters, semantic HTML fallbacks, persistence-compatible spec fields, fixtures, gallery assets, and focused tests; the remaining reference layouts stay gated. |
 | 6. Convergence and release | Converged with external promotion blocked | Target adapters, webview presentation registry, Mermaid normalization, shared Drawnix geometry, and Circuitikz template convergence are landed. The standalone Plait consumer gate passes against the production fixture; Draw.io and a real Drawnix application remain unavailable in this workspace. |
 

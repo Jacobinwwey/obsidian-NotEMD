@@ -1646,6 +1646,155 @@
     padding: 0;
 }
 
+.notemd-diagram-capability-gallery {
+    display: flex;
+    flex-direction: column;
+    gap: 0.7em;
+    width: 100%;
+    min-width: 0;
+}
+
+.notemd-diagram-capability-section-title {
+    margin: 0.7em 0 0;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.notemd-diagram-capability-family {
+    min-width: 0;
+    padding-left: 0.55em;
+    border-left: 2px solid var(--background-modifier-border);
+}
+
+.notemd-diagram-capability-family-label {
+    display: block;
+    margin-bottom: 0.35em;
+    color: var(--text-muted);
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.notemd-diagram-capability-family-list,
+.notemd-diagram-capability-reference-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.55em;
+}
+
+.notemd-diagram-capability-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1.8fr) minmax(118px, 1fr) auto;
+    align-items: stretch;
+    gap: 0.55em;
+    min-width: 0;
+    padding: 0.45em;
+    border: 1px solid var(--background-modifier-border);
+    border-radius: 4px;
+    background: var(--background-secondary);
+}
+
+.notemd-diagram-capability-visuals {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.35em;
+    min-width: 0;
+}
+
+.notemd-diagram-capability-visual {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2em;
+    min-width: 0;
+}
+
+.notemd-diagram-capability-visual-label {
+    color: var(--text-muted);
+    font-size: 10px;
+    font-weight: 600;
+}
+
+.notemd-diagram-capability-thumbnail {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    min-height: 58px;
+    overflow: hidden;
+    border: 1px solid var(--background-modifier-border);
+    border-radius: 3px;
+    background: var(--background-primary);
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.notemd-diagram-capability-thumbnail > svg,
+.notemd-diagram-capability-reference-image {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+.notemd-diagram-capability-reference-image {
+    object-fit: cover;
+}
+
+.notemd-diagram-capability-thumbnail-placeholder,
+.notemd-diagram-capability-reference-placeholder {
+    padding: 0.3em;
+    font-size: 10px;
+    text-align: center;
+}
+
+.notemd-diagram-capability-details {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 0.25em;
+    min-width: 0;
+}
+
+.notemd-diagram-capability-label {
+    font-size: 12px;
+    font-weight: 600;
+    overflow-wrap: anywhere;
+}
+
+.notemd-diagram-capability-meta {
+    color: var(--text-muted);
+    font-size: 10px;
+    overflow-wrap: anywhere;
+}
+
+.notemd-diagram-capability-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.15em;
+    align-self: center;
+}
+
+.notemd-diagram-capability-preview,
+.notemd-diagram-capability-reference-preview,
+.notemd-diagram-capability-use {
+    width: 28px;
+    height: 28px;
+    padding: 0;
+}
+
+.notemd-diagram-capability-row.is-reference-only {
+    grid-template-columns: minmax(118px, 0.8fr) minmax(0, 1fr) auto;
+}
+
+@media (max-width: 520px) {
+    .notemd-diagram-capability-row,
+    .notemd-diagram-capability-row.is-reference-only {
+        grid-template-columns: 1fr;
+    }
+
+    .notemd-diagram-capability-actions {
+        justify-content: flex-end;
+    }
+}
+
 .notemd-slide-export-format-control {
     align-items: center;
     justify-content: space-between;

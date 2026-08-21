@@ -210,7 +210,7 @@ flowchart LR
 
 图形平台保持三条独立轴：语义类型、渲染目标和导出格式。当前可执行真值是类型目录、生产 example fixture、target descriptor 和带版本的 capability manifest。target descriptor 负责 artifact 机制；manifest 把语义类型、兼容 target 与 fixture 证据组合起来。`SVG`、`PNG`、`PDF` 是导出格式，不是 render target。
 
-当前已交付 15 个语义类型、8 个渲染目标和 3 个导出格式。Radar 使用独立的 Vega-Lite intent 与受限 `radarSpec`，org chart 使用独立的受限责任归属 payload，并提供 Mermaid 与 HTML target；二者都不伪装成 `dataChart` 的 chartType 别名。Timeline、swimlane、quadrant 已作为 Mermaid-only 类型交付；不对它们宣称 editable HTML/SVG、Draw.io、Drawnix 或外部 consumer 能力。设置页 gallery 与生成选择器都执行每类一个生产 renderer fixture；`scripts/generate-diagram-gallery.js` 生成确定性的 SVG/PNG 资产和带哈希 manifest，并供双语文档 gallery 使用。`ref/diagram-design` 的其余参考布局在具备 renderer、fixture、预览、持久化映射、文档行和自动化门禁之前，保持 `reference-only/planned`。
+当前已交付 15 个语义类型、8 个渲染目标和 3 个导出格式。Radar 使用独立的 Vega-Lite intent 与受限 `radarSpec`，org chart 使用独立的受限责任归属 payload，并提供 Mermaid 与 HTML target；二者都不伪装成 `dataChart` 的 chartType 别名。Timeline、swimlane、quadrant 已作为 Mermaid-only 类型交付；不对它们宣称 editable HTML/SVG、Draw.io、Drawnix 或外部 consumer 能力。设置页和生成工作台现在共享一套 capability gallery：已交付类型显示生产 renderer fixture，有对应映射的类型同时显示固定版本的 `diagram-design` 参考截图，仅参考布局显示静态预览但不会进入生成选择器。`scripts/generate-diagram-gallery.js` 继续生成确定性的 SVG/PNG 资产和带哈希 manifest，并供双语文档 gallery 使用。`ref/diagram-design` 的其余参考布局在具备 renderer、fixture、预览、持久化映射、文档行和自动化门禁之前，保持 `reference-only/planned`。
 
 已交付顺序是先解决正确性基础，再做目录/契约生成，随后接入确定性预览资产、选择器和文档。Mermaid 规范化、legacy 修复阶段化、family 门控、fence 所有权、验证 runtime 初始化、共享 Drawnix 几何和 Circuitikz 模板收敛现已落地。剩余工作已收窄为真实 Draw.io/Drawnix 应用证据，以及未来若产品范围确实需要时再授权一个明确的 Circuitikz repair 命令。独立 Plait consumer gate 可通过 `npm run diagram:consumer:drawnix` 执行。见[当前进度审计](./brainstorms/2026-08-16-mainline-diagram-architecture-progress-and-next-direction.zh-CN.md)、[图形能力目录](./maintainer/diagram-capability-catalog.zh-CN.md)、[图形 Gallery](./diagram-gallery.zh-CN.md)和[向前架构计划](./superpowers/plans/2026-08-16-diagram-capability-catalog-and-forward-architecture.zh-CN.md)。
 
@@ -224,7 +224,7 @@ flowchart LR
 
 `src/rendering/renderTargetCatalog.ts` 是 target 的单一描述器。每个 target 在此声明 renderer ID、MIME、原始 source 扩展名、Vault 扩展名、预览类型、导出格式、consumer gate 和 fallback policy。预览导出与文件落盘通过描述器查询；preview/export 与 bundled render-host dispatch 通过 keyed target adapter 解析，确保不兼容的 target/intent fail closed。Vega-Lite 的契约差异被显式保留：预览弹窗消费原始 `.json`，Vault 生成则把同一 source 包装为 `.md`。
 
-能力 manifest 是独立的三轴投影：`src/diagram/diagramCapabilityManifest.ts` 组合语义类型、默认/兼容 target 与 fixture 所有权；target descriptor 负责 artifact 机制。`scripts/diagram-gallery-browser-entry.ts` 导入可执行 fixture 目录和生产 renderer；`scripts/generate-diagram-gallery.js` 生成带无障碍元数据的 SVG，在固定卡片尺寸下生成 PNG，写入 `docs/assets/diagrams/manifest.json`，并对过期或无效资产 fail closed。这样设置页、文档和 runtime fixture 共享同一条证据链。
+能力 manifest 是独立的三轴投影：`src/diagram/diagramCapabilityManifest.ts` 组合语义类型、默认/兼容 target、fixture 所有权和固定版本的参考预览描述；target descriptor 负责 artifact 机制。`src/ui/diagramCapabilityGallery.ts` 是设置页和生成工作台共同消费的 read model，reference-only 条目明确只可预览。`scripts/diagram-gallery-browser-entry.ts` 导入可执行 fixture 目录和生产 renderer；`scripts/generate-diagram-gallery.js` 生成带无障碍元数据的 SVG，在固定卡片尺寸下生成 PNG，写入 `docs/assets/diagrams/manifest.json`，并对过期或无效资产 fail closed。这样选择器预览、参考预览、文档和 runtime fixture 共享同一条证据链，同时不会把参考截图变成生成契约。
 
 ### 可执行类型目录与原生 Drawnix 树
 

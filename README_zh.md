@@ -172,7 +172,7 @@ Notemd 是一个**开源 Obsidian 插件**，集成 30+ 种大型语言模型 (L
 <img width="596" height="239" alt="SUMM" src="https://github.com/user-attachments/assets/803d444f-e477-428a-9ce6-4aac8075062a" />
 
 - **实验性图表流水线**:
-    - [图形 Gallery](./docs/diagram-gallery.zh-CN.md) 列出 10 个可执行语义类型、默认/兼容 render target 以及生产 SVG/PNG 预览；来自 `diagram-design` 的仅参考布局会明确标记，不会冒充运行时支持。
+    - [图形 Gallery](./docs/diagram-gallery.zh-CN.md) 列出可执行语义类型、默认/兼容 render target 以及生产 SVG/PNG 预览。设置页和 Notemd 工作台还会显示全部 27 类 `diagram-design` visual type 的内置参考截图，同时把仅参考布局排除在生成选择器和“使用此图表类型”动作之外。
     - 规范优先的图表路径可以把笔记内容路由到 Mermaid、Obsidian JSON Canvas、Vega-Lite、HTML、可编辑 HTML/SVG、Draw.io、Drawnix 或受约束 circuitikz，而不是把所有场景都压回 Mermaid 文本生成。
     - `mindmap`、`flowchart`、`sequenceDiagram`、`classDiagram`、`erDiagram` 与 `stateDiagram-v2` 仍由 Mermaid adapter 覆盖；`dataChart` 使用受控 Vega-Lite 模板；`circuit` 使用 `circuitikz` render target。
     - 预览弹窗可把可渲染输出或 SVG companion 导出为 `.svg`、`.png` 与 `.pdf`；光栅导出接受 72 到 600 之间的任意整数 DPI（默认 300；100/300/600 为常用预设），超出范围的配置会被安全夹紧。

@@ -1,6 +1,6 @@
 ---
 date: 2026-08-16
-last_updated: 2026-08-18
+last_updated: 2026-08-21
 status: current-contract
 canonical_for: diagram-capability-catalog
 ---
@@ -52,7 +52,7 @@ The following names come from `ref/diagram-design` and are not currently selecta
 
 ## Preview and Gallery Contract
 
-The settings gallery and generated docs gallery are executable and use the production renderer. The generated gallery produces:
+The settings gallery and generation workbench consume `src/ui/diagramCapabilityGallery.ts`. Shipped rows use production renderer fixtures; mapped shipped rows additionally show a bundled reference screenshot, while reference-only rows expose only a reference preview action. The generated docs gallery remains production-renderer-backed and produces:
 
 - `docs/assets/diagrams/<fixture-id>.svg`
 - `docs/assets/diagrams/<fixture-id>.png`
@@ -60,6 +60,8 @@ The settings gallery and generated docs gallery are executable and use the produ
 - bilingual matrix rows linked to the same fixture IDs
 
 The generator must use the production fixture catalog, fail on missing previews or stale assets, and keep filenames stable. It must not duplicate fixture data in documentation scripts.
+
+The runtime capability manifest also carries all 27 pinned `diagram-design` reference-preview descriptors. Their screenshots are bundled as offline PNG data URLs and are explanatory evidence, not generation contracts. A reference-only row must never be added to `DiagramIntent`, the planner, or the `Use this diagram type` action.
 
 ## Consumer Gates
 

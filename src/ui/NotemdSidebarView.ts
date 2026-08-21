@@ -10,6 +10,9 @@ import {
     applyDiagramRenderTargetPreference
 } from '../diagram/diagramPreferenceCompatibility';
 import { getExecutableDiagramIntentOptions } from './diagramCatalogLabels';
+import { getExecutableDiagramType } from '../diagram/diagramTypeCatalog';
+import { renderDiagramCapabilityGallery } from './diagramCapabilityGallery';
+import { getDiagramReferenceAsset } from './diagramReferenceAssets';
 import { NOTEMD_SLIDEV_FORK_RELEASE_URL, NOTEMD_SLIDEV_INSTALL_COMMAND } from '../slideExport/slidevDistribution';
 import {
     ActionCategory,
@@ -133,6 +136,8 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
     private slideExportOutlineActionsEl: HTMLElement | null = null;
     private slideExportControlsSectionEl: (HTMLElement & { open?: boolean }) | null = null;
     private slideExportEnvironmentPanelEl: HTMLElement | null = null;
+    private diagramIntentSelector: HTMLSelectElement | null = null;
+    private diagramRenderTargetSelector: HTMLSelectElement | null = null;
     private apiLivenessPhase: ApiLivenessVisualPhase = 'idle';
     private apiLivenessTimer: ReturnType<typeof setTimeout> | null = null;
     private apiLivenessRequests = new Map<string, ApiActivityRequestRecord>();
@@ -1707,6 +1712,7 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
         const row = parent.createDiv({ cls: 'notemd-inline-control' });
         row.createEl('label', { text: i18n.settings.developer.experimentalDiagramPipeline.intentName, cls: 'notemd-inline-label' });
         const selector = row.createEl('select', { cls: 'notemd-language-select' });
+        this.diagramIntentSelector = selector;
 
         const diagramI18n = i18n.settings.developer.experimentalDiagramPipeline;
         const intents = [
@@ -1748,6 +1754,7 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
             cls: 'notemd-inline-label'
         });
         const targetSelector = targetRow.createEl('select', { cls: 'notemd-language-select' });
+        this.diagramRenderTargetSelector = targetSelector;
 
         const renderTargets = [
             { value: 'auto', label: i18n.settings.developer.experimentalDiagramPipeline.renderTargetAuto },
@@ -1778,6 +1785,73 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
         parent.createEl('p', {
             text: i18n.settings.developer.experimentalDiagramPipeline.exportFormatsDesc,
             cls: 'notemd-control-hint'
+        });
+    }
+
+    private buildDiagramCapabilityGallery(parent: HTMLElement): void {
+        const diagramI18n = this.getStrings().settings.developer.experimentalDiagramPipeline;
+        const renderThumbnail = typeof this.plugin.renderDiagramExampleThumbnail === 'function'
+            ? (example: Parameters<NotemdPlugin['renderDiagramExampleThumbnail']>[0]) => this.plugin.renderDiagramExampleThumbnail(example)
+            : undefined;
+        renderDiagramCapabilityGallery({
+            parent,
+            locale: this.getResolvedUiLocale(),
+            copy: {
+                intentMindmap: diagramI18n.intentMindmap,
+                intentDrawnixKnowledgeMap: diagramI18n.intentDrawnixKnowledgeMap,
+                intentFlowchart: diagramI18n.intentFlowchart,
+                intentSequence: diagramI18n.intentSequence,
+                intentClassDiagram: diagramI18n.intentClassDiagram,
+                intentErDiagram: diagramI18n.intentErDiagram,
+                intentStateDiagram: diagramI18n.intentStateDiagram,
+                intentCanvasMap: diagramI18n.intentCanvasMap,
+                intentCircuit: diagramI18n.intentCircuit,
+                intentDataChart: diagramI18n.intentDataChart,
+                intentRadar: diagramI18n.intentRadar,
+                intentOrgChart: diagramI18n.intentOrgChart,
+                intentTimeline: diagramI18n.intentTimeline,
+                intentSwimlane: diagramI18n.intentSwimlane,
+                intentQuadrant: diagramI18n.intentQuadrant,
+                shippedSection: diagramI18n.diagramCapabilityShippedSection,
+                referenceOnlySection: diagramI18n.diagramCapabilityReferenceOnlySection,
+                shippedStatus: diagramI18n.diagramCapabilityShippedStatus,
+                referenceOnlyStatus: diagramI18n.diagramCapabilityReferenceOnlyStatus,
+                preview: diagramI18n.diagramExamplePreview,
+                referencePreview: diagramI18n.diagramReferencePreview,
+                useType: diagramI18n.diagramExampleUseType,
+                openReference: diagramI18n.diagramReferenceOpen,
+                thumbnailLoading: diagramI18n.diagramExampleThumbnailLoading,
+                thumbnailUnavailable: diagramI18n.diagramExampleThumbnailUnavailable,
+                referenceUnavailable: diagramI18n.diagramReferenceUnavailable,
+                targetPrefix: diagramI18n.diagramCapabilityTargetPrefix,
+                formatsPrefix: diagramI18n.diagramCapabilityFormatsPrefix,
+                sourcePrefix: diagramI18n.diagramCapabilitySourcePrefix,
+                familyLabels: {
+                    knowledge: diagramI18n.diagramExampleFamilyKnowledge,
+                    behavior: diagramI18n.diagramExampleFamilyBehavior,
+                    structure: diagramI18n.diagramExampleFamilyStructure,
+                    quantitative: diagramI18n.diagramExampleFamilyQuantitative,
+                    engineering: diagramI18n.diagramExampleFamilyEngineering
+                }
+            },
+            onPreview: typeId => this.plugin.openDiagramExamplePreview(typeId),
+            onPreviewReference: referenceId => this.plugin.openDiagramReferencePreview(referenceId),
+            onUseType: async typeId => {
+                const type = getExecutableDiagramType(typeId);
+                applyDiagramIntentPreference(this.plugin.settings, type.intent);
+                applyDiagramRenderTargetPreference(this.plugin.settings, type.defaultTarget);
+                if (this.diagramIntentSelector) {
+                    this.diagramIntentSelector.value = type.intent;
+                }
+                if (this.diagramRenderTargetSelector) {
+                    this.diagramRenderTargetSelector.value = type.defaultTarget;
+                }
+                await this.plugin.saveSettings();
+            },
+            renderThumbnail: renderThumbnail
+                ? example => renderThumbnail(example.typeId)
+                : undefined,
+            resolveReferenceAsset: getDiagramReferenceAsset
         });
     }
 
@@ -1858,6 +1932,7 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
             if (category === 'generation') {
                 this.createDiagramHistoryButton(body);
                 this.buildDiagramIntentSelector(body);
+                this.buildDiagramCapabilityGallery(body);
             }
 
             if (category === 'translation') {
@@ -1977,6 +2052,8 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
         this.slideExportOutlineActionsEl = null;
         this.slideExportControlsSectionEl = null;
         this.slideExportEnvironmentPanelEl = null;
+        this.diagramIntentSelector = null;
+        this.diagramRenderTargetSelector = null;
         this.expandedApiActivityRequestIds.clear();
         this.actionButtons.clear();
         this.workflowButtons = [];
