@@ -126,6 +126,23 @@ function validateNonChartLayoutHints(spec: DiagramSpec, errors: string[]): void 
     }
 }
 
+function validateCanonicalPayloadBoundary(spec: DiagramSpec, errors: string[]): void {
+    if (spec.schemaVersion !== undefined && spec.schemaVersion !== 1 && spec.schemaVersion !== 2) {
+        errors.push(`DiagramSpec uses unsupported schema version "${String(spec.schemaVersion)}".`);
+    }
+    if (spec.schemaVersion === 2 && !spec.payload) {
+        errors.push('DiagramSpec schema version 2 requires a canonical payload.');
+    }
+    if (spec.payload?.kind === 'quantitative') {
+        if (spec.intent !== 'dataChart') {
+            errors.push('Quantitative canonical payloads are only valid for intent "dataChart".');
+        }
+        if (!Array.isArray(spec.payload.series)) {
+            errors.push('Quantitative canonical payload requires a series array.');
+        }
+    }
+}
+
 function validateRadarPayload(radarSpec: DiagramRadarSpec | undefined, errors: string[]): void {
     if (!radarSpec) {
         errors.push('Diagram intent "radar" requires a radarSpec payload.');
@@ -511,6 +528,7 @@ export function validateDiagramSpec(spec: DiagramSpec): DiagramSpecValidationRes
     const errors: string[] = [];
 
     validateDiagramIntent(spec, errors);
+    validateCanonicalPayloadBoundary(spec, errors);
 
     if (!spec.title?.trim()) {
         errors.push('Diagram spec title is required.');

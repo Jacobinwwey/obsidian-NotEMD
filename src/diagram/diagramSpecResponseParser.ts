@@ -1,4 +1,5 @@
 import { DiagramOrgChartStatus, DiagramSpec } from './types';
+import type { DiagramPayload, DiagramPresentation } from './types';
 
 function stripCodeFence(raw: string): string {
     const trimmed = raw.trim();
@@ -343,11 +344,30 @@ function normalizeOrgChartSpec(rawOrgChartSpec: unknown): DiagramSpec['orgChartS
     return { nodes };
 }
 
+function normalizePresentation(rawPresentation: unknown): DiagramPresentation | undefined {
+    if (!rawPresentation || typeof rawPresentation !== 'object' || Array.isArray(rawPresentation)) {
+        return undefined;
+    }
+
+    const value = rawPresentation as Record<string, unknown>;
+    const format = value.format;
+    const size = value.size;
+    const detail = value.detail;
+    const audience = value.audience;
+    return {
+        format: format === 'html' || format === 'svg' || format === 'png' || format === 'html+png' ? format : undefined,
+        size: size === 'doc-inline' || size === 'doc-wide' || size === 'slide-16x9' || size === 'social-og' || size === 'fit' ? size : undefined,
+        detail: detail === 'simplified' || detail === 'balanced' || detail === 'faithful' ? detail : undefined,
+        audience: audience === 'technical' || audience === 'mixed' || audience === 'executive' ? audience : undefined
+    };
+}
+
 function normalizeSpec(candidate: any): DiagramSpec {
     const payload = candidate?.diagramSpec ?? candidate;
     const title = typeof payload.title === 'string' ? payload.title : '';
 
     return {
+        schemaVersion: typeof payload.schemaVersion === 'number' ? payload.schemaVersion : undefined,
         intent: payload.intent,
         title,
         summary: typeof payload.summary === 'string' ? payload.summary : undefined,
@@ -404,7 +424,14 @@ function normalizeSpec(candidate: any): DiagramSpec {
         layoutHints: payload.layoutHints && typeof payload.layoutHints === 'object' ? payload.layoutHints : undefined,
         sourceLanguage: typeof payload.sourceLanguage === 'string' ? payload.sourceLanguage : undefined,
         outputLanguage: typeof payload.outputLanguage === 'string' ? payload.outputLanguage : undefined,
-        evidenceRefs: Array.isArray(payload.evidenceRefs) ? payload.evidenceRefs : []
+        evidenceRefs: Array.isArray(payload.evidenceRefs) ? payload.evidenceRefs : [],
+        payload: payload.payload && typeof payload.payload === 'object'
+            ? payload.payload as DiagramPayload
+            : undefined,
+        presentation: normalizePresentation(payload.presentation),
+        extensions: payload.extensions && typeof payload.extensions === 'object' && !Array.isArray(payload.extensions)
+            ? payload.extensions as Record<string, unknown>
+            : undefined
     };
 }
 

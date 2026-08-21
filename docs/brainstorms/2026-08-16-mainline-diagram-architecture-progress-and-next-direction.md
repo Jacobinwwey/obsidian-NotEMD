@@ -142,3 +142,55 @@ The reference taxonomy still supplies architecture, current-state, loop, nested,
 ## Verification Snapshot
 
 Fresh verification for this increment: 262 Jest suites passed (2,303 tests passed, 1 skipped); TypeScript/esbuild build passed; VitePress docs build passed; production gallery check passed with 15 SVG/PNG pairs; render-host audit and i18n audit passed; the standalone Drawnix Plait consumer gate passed with 20 nodes, 1 root, and 12 relations; semantic verification checklist generation passed (the command emits a review template, not automatic environment check results); and Circuitikz smoke passed with TeX Live 2023 `pdflatex` (6/6 PDFs, 0 errors/0 warnings). `git diff --check` passed. Draw.io and a real Drawnix desktop application are unavailable in this workspace, so no application-level interoperability claim is made. Full repository lint remains a separate baseline debt track.
+
+## Reference Expansion Decision Record (2026-08-21)
+
+The next expansion was reviewed and approved as a staged route: engineering/data-platform layouts first, quantitative layouts second, and structural expression layouts third. This is a design decision and roadmap entry; it is not evidence that the reference-only layouts are already shipped.
+
+### Current code truth versus the approved design
+
+| Boundary | Current code | Approved forward change |
+|---|---|---|
+| Catalog identity | One intent maps to one catalog row | Stable catalog IDs may share an intent through an explicit variant; ambiguous legacy lookup fails closed |
+| Spec shape | Wide `DiagramSpec` with optional specialized fields | Versioned canonical `payload` union with a legacy read projection |
+| Prompt routing | Type-specific conditionals in `diagramSpecPrompt.ts` | Versioned pure-data prompt profiles selected by catalog metadata |
+| Geometry | Existing Mermaid/Vega/Drawnix/Circuitikz adapters | Finite native SVG payload-family adapters; model never emits coordinates |
+| Chart variants | `layoutHints.chartType` plus one `data-chart` row | `quantitative.chartType` with explicit bar/line/scatter IDs; old data-chart remains readable |
+| Preview | Production fixture preview for 15 shipped types | New types enter selector only after the same renderer, fixture, gallery, and accessibility gates |
+| Reference checkout | Development-only taxonomy and quality evidence | Remains outside runtime; screenshots and original HTML are never product assets |
+
+### Approved batch order
+
+1. Batch 0: variant-aware catalog, canonical schema boundary, prompt profiles, presentation defaults, and renderer admission; no new selector rows.
+2. Batch 1A: `architecture`, `current-state`, `integration-topology`.
+3. Batch 1B: `data-flow`, `access-matrix`.
+4. Batch 2: `bar-chart`, `line-chart`, `scatter-plot`, `gantt`.
+5. Batch 3A: `layer-stack`, `venn`, `ranked-funnel`, `loop`.
+6. Batch 3B: `nested`, `tree`, `process`, `medallion`, `high-level`.
+
+Every batch must update this file and its Chinese counterpart before the next batch starts. The detailed bilingual design and implementation documents are:
+
+- `docs/superpowers/specs/2026-08-21-diagram-reference-expansion-design.en.md`
+- `docs/superpowers/specs/2026-08-21-diagram-reference-expansion-design.zh-CN.md`
+- `docs/superpowers/plans/2026-08-21-diagram-reference-expansion-implementation.en.md`
+- `docs/superpowers/plans/2026-08-21-diagram-reference-expansion-implementation.zh-CN.md`
+
+### Non-claims and gates
+
+The roadmap does not add Mermaid compatibility merely because a layout can be approximated as a flowchart. Matrix, Venn, Gantt, and topology types require native deterministic renderers; Draw.io, Drawnix, and Circuitikz compatibility remains unavailable until a real consumer gate exists. A selector row is admitted only when its payload, prompt profile, validator, renderer, production fixture, preview SVG, gallery SVG/PNG, bilingual docs row, and regression tests pass together.
+
+### Worktree state
+
+At the start of this decision record, `main` matched `origin/main` and `git status --porcelain=v1 -b` reported only `## main...origin/main`. Future batch commits must preserve `.trellis/`, never reset unrelated work, and finish with the same clean status after build, full Jest, docs, gallery, i18n, render-host, and `git diff --check` gates.
+
+## Batch 0 Progress (2026-08-21)
+
+Batch 0 is now implemented as a compatibility foundation; it does not add selector rows or claim new reference layouts as shipped.
+
+- Catalog definitions now carry `payloadKind` and `layoutProfileId`, and lookup supports explicit variants while the legacy default lookup remains available.
+- `DiagramSpec` accepts `schemaVersion`, canonical `payload`, `presentation`, and namespaced `extensions` without removing the legacy fields consumed by existing renderers.
+- The generation merge boundary normalizes legacy v1 specs to schema v2 metadata with a `legacy` or `quantitative` payload. Unknown schema versions fail closed.
+- A profile catalog now owns prompt profile IDs, versions, payload family, hard limits, semantic rules, target rules, and invalid-output rules. Existing circuitikz and Drawnix specialized prompt contracts remain intact.
+- Capability manifest rows expose the new payload/layout ownership metadata; the manifest schema remains additive and reference-only rows remain outside the selector.
+
+Evidence for this increment: focused catalog/payload/parser/prompt tests passed (30 tests), `npm.cmd run build` passed, and the pre-existing 15-type production gallery and renderer contracts remain unchanged. Batch 1A is not started; architecture/current-state/integration-topology remain reference-only until native SVG fixtures and preview/gallery gates are delivered.

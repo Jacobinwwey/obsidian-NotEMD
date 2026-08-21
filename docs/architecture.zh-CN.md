@@ -230,6 +230,8 @@ flowchart LR
 
 `DiagramTypeCatalog` 负责面向用户的类型名称、语义模式、prompt profile、renderer binding、visual-role 词表和可执行示例。`ref/diagram-design` 中还没有完整 Notemd 链路的参考布局仍只留在文档与路线图中，不进入选择器。
 
+向前兼容的扩展边界已经明确：目录行携带稳定的可选 variant、payload family 和 layout profile；`DiagramSpec` 接受 schema-v2 canonical payload 元数据，同时保留 legacy projection。`src/diagram/payloads/legacyPayload.ts` 负责 v1 到 v2 的边界归一化，`src/diagram/prompts/diagramPromptProfileCatalog.ts` 负责版本化 profile 规则。Batch 0 不增加新的 selector 行；后续 topology、data-flow、matrix、chart、schedule 和结构类型必须先通过 native renderer、fixture、preview、gallery 与双语文档证据门禁。
+
 `drawnixMindmap` 继续作为持久化兼容 ID，在目录中展示为 **Drawnix 知识导图**。它只有一条原生输出契约：
 
 ```text

@@ -1,5 +1,15 @@
 import type { SupportedVegaLiteChartType } from './adapters/vega/schema';
 import type { CircuitSpec } from './adapters/circuitikz/circuitSpec';
+import type { DiagramPayload, DiagramPayloadKind } from './payloads/types';
+
+export type { DiagramPayload, DiagramPayloadKind } from './payloads/types';
+
+export interface DiagramPresentation {
+    format?: 'html' | 'svg' | 'png' | 'html+png';
+    size?: 'doc-inline' | 'doc-wide' | 'slide-16x9' | 'social-og' | 'fit';
+    detail?: 'simplified' | 'balanced' | 'faithful';
+    audience?: 'technical' | 'mixed' | 'executive';
+}
 
 export const SUPPORTED_DIAGRAM_INTENTS = [
     'mindmap',
@@ -201,6 +211,8 @@ export interface DiagramQuadrantSpec {
 }
 
 export interface DiagramSpec {
+    /** v1 is the legacy projection; v2 adds the canonical payload boundary. */
+    schemaVersion?: number;
     intent: DiagramIntent;
     title: string;
     summary?: string;
@@ -219,6 +231,9 @@ export interface DiagramSpec {
     sourceLanguage?: string;
     outputLanguage?: string;
     evidenceRefs?: string[];
+    payload?: DiagramPayload;
+    presentation?: DiagramPresentation;
+    extensions?: Record<string, unknown>;
     /** Deterministic diagnostics added after LLM generation by Drawnix source coverage. */
     sourceCoverageDiagnostics?: DiagramSourceCoverageDiagnostic[];
 }

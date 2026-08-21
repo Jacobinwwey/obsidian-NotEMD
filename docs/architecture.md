@@ -233,6 +233,8 @@ The capability manifest is a separate three-axis projection: `src/diagram/diagra
 
 `DiagramTypeCatalog` owns the user-facing type name, semantic pattern, prompt profile, renderer binding, visual-role vocabulary, and an executable example fixture. Reference-only layouts from `ref/diagram-design` remain outside the selector until they have a complete Notemd path.
 
+The forward-compatible expansion boundary is now explicit: catalog rows carry a stable optional variant, a payload family, and a layout profile; `DiagramSpec` accepts schema-v2 canonical payload metadata while preserving the legacy projection. `src/diagram/payloads/legacyPayload.ts` performs the v1-to-v2 boundary normalization, and `src/diagram/prompts/diagramPromptProfileCatalog.ts` owns versioned profile rules. Batch 0 adds no new selector rows; the next topology, data-flow, matrix, chart, schedule, and structural types remain gated by native renderer, fixture, preview, gallery, and bilingual-doc evidence.
+
 `drawnixMindmap` remains the persisted compatibility ID and is shown as **Drawnix Knowledge Map**. It has one native output contract:
 
 ```text

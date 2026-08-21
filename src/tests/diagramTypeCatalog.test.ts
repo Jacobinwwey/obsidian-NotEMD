@@ -1,8 +1,11 @@
 import {
     EXECUTABLE_DIAGRAM_TYPES,
+    findDefaultDiagramType,
+    findDiagramType,
     findDiagramTypeByIntent,
     getExecutableDiagramType
 } from '../diagram/diagramTypeCatalog';
+import { getDiagramPromptProfile } from '../diagram/prompts/diagramPromptProfileCatalog';
 
 describe('executable diagram type catalog', () => {
     test('binds the persisted Drawnix intent to its user-facing type', () => {
@@ -33,6 +36,20 @@ describe('executable diagram type catalog', () => {
         expect(getExecutableDiagramType('circuit')).toMatchObject({ intent: 'circuit' });
         expect(getExecutableDiagramType('radar-chart')).toMatchObject({ intent: 'radar' });
         expect(getExecutableDiagramType('org-chart')).toMatchObject({ intent: 'orgChart' });
+    });
+
+    test('has explicit payload and layout ownership for every executable type', () => {
+        for (const type of EXECUTABLE_DIAGRAM_TYPES) {
+            expect(type.payloadKind).toBeTruthy();
+            expect(type.layoutProfileId).toBeTruthy();
+            expect(getDiagramPromptProfile(type.promptProfileId).payloadKind).toBe(type.payloadKind);
+        }
+    });
+
+    test('supports explicit variant lookup without weakening the legacy default lookup', () => {
+        expect(findDiagramType('dataChart')).toMatchObject({ id: 'data-chart', variant: 'auto' });
+        expect(findDefaultDiagramType('dataChart')).toMatchObject({ id: 'data-chart' });
+        expect(() => findDiagramType('dataChart', 'line')).toThrow(/No executable diagram catalog type/i);
     });
 
     test('describes Drawnix as one native tree renderer rather than a delivery selector', () => {

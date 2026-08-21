@@ -1,4 +1,6 @@
 import type { DiagramCatalogTypeId, DiagramIntent, RenderTarget } from './types';
+import type { DiagramPayloadKind } from './payloads/types';
+import { getDiagramPromptProfile } from './prompts/diagramPromptProfileCatalog';
 
 export type DiagramTypeFamily = 'knowledge' | 'behavior' | 'structure' | 'quantitative' | 'engineering';
 
@@ -8,6 +10,9 @@ export interface ExecutableDiagramTypeDefinition {
     family: DiagramTypeFamily;
     semanticPattern: string;
     promptProfileId: string;
+    variant?: string;
+    payloadKind: DiagramPayloadKind;
+    layoutProfileId: string;
     rendererOperationId: string;
     rendererTarget: RenderTarget;
     /** Default target selected by the planner for this semantic type. */
@@ -25,6 +30,8 @@ export const EXECUTABLE_DIAGRAM_TYPES: readonly ExecutableDiagramTypeDefinition[
         family: 'knowledge',
         semanticPattern: 'Concept hierarchy',
         promptProfileId: 'mermaid-mindmap',
+        payloadKind: 'legacy',
+        layoutProfileId: 'mermaid-mindmap',
         rendererOperationId: 'mermaid-mindmap',
         rendererTarget: 'mermaid',
         defaultTarget: 'mermaid',
@@ -38,6 +45,8 @@ export const EXECUTABLE_DIAGRAM_TYPES: readonly ExecutableDiagramTypeDefinition[
         family: 'knowledge',
         semanticPattern: 'Filename-rooted knowledge tree with material cross-branch relationships',
         promptProfileId: 'drawnix-knowledge-map',
+        payloadKind: 'drawnix-knowledge-map',
+        layoutProfileId: 'drawnix-knowledge-map',
         rendererOperationId: 'drawnix-knowledge-map-tree',
         rendererTarget: 'drawnix',
         defaultTarget: 'drawnix',
@@ -51,6 +60,8 @@ export const EXECUTABLE_DIAGRAM_TYPES: readonly ExecutableDiagramTypeDefinition[
         family: 'behavior',
         semanticPattern: 'Control flow and decision path',
         promptProfileId: 'flowchart',
+        payloadKind: 'legacy',
+        layoutProfileId: 'mermaid-flowchart',
         rendererOperationId: 'mermaid-flowchart',
         rendererTarget: 'mermaid',
         defaultTarget: 'mermaid',
@@ -64,6 +75,8 @@ export const EXECUTABLE_DIAGRAM_TYPES: readonly ExecutableDiagramTypeDefinition[
         family: 'behavior',
         semanticPattern: 'Ordered participant interaction',
         promptProfileId: 'sequence',
+        payloadKind: 'legacy',
+        layoutProfileId: 'mermaid-sequence',
         rendererOperationId: 'mermaid-sequence',
         rendererTarget: 'mermaid',
         defaultTarget: 'mermaid',
@@ -77,6 +90,8 @@ export const EXECUTABLE_DIAGRAM_TYPES: readonly ExecutableDiagramTypeDefinition[
         family: 'behavior',
         semanticPattern: 'State transition lifecycle',
         promptProfileId: 'state',
+        payloadKind: 'legacy',
+        layoutProfileId: 'mermaid-state',
         rendererOperationId: 'mermaid-state',
         rendererTarget: 'mermaid',
         defaultTarget: 'mermaid',
@@ -90,6 +105,8 @@ export const EXECUTABLE_DIAGRAM_TYPES: readonly ExecutableDiagramTypeDefinition[
         family: 'structure',
         semanticPattern: 'Type relationship and ownership',
         promptProfileId: 'class',
+        payloadKind: 'legacy',
+        layoutProfileId: 'mermaid-class',
         rendererOperationId: 'mermaid-class',
         rendererTarget: 'mermaid',
         defaultTarget: 'mermaid',
@@ -103,6 +120,8 @@ export const EXECUTABLE_DIAGRAM_TYPES: readonly ExecutableDiagramTypeDefinition[
         family: 'structure',
         semanticPattern: 'Entity cardinality and attributes',
         promptProfileId: 'entity-relationship',
+        payloadKind: 'legacy',
+        layoutProfileId: 'mermaid-er',
         rendererOperationId: 'mermaid-er',
         rendererTarget: 'mermaid',
         defaultTarget: 'mermaid',
@@ -116,6 +135,8 @@ export const EXECUTABLE_DIAGRAM_TYPES: readonly ExecutableDiagramTypeDefinition[
         family: 'structure',
         semanticPattern: 'Spatially grouped concepts',
         promptProfileId: 'canvas-map',
+        payloadKind: 'canvas-map',
+        layoutProfileId: 'json-canvas-map',
         rendererOperationId: 'json-canvas-map',
         rendererTarget: 'json-canvas',
         defaultTarget: 'json-canvas',
@@ -129,6 +150,9 @@ export const EXECUTABLE_DIAGRAM_TYPES: readonly ExecutableDiagramTypeDefinition[
         family: 'quantitative',
         semanticPattern: 'Measured comparison over a shared axis',
         promptProfileId: 'data-chart',
+        variant: 'auto',
+        payloadKind: 'quantitative',
+        layoutProfileId: 'vega-lite-quantitative',
         rendererOperationId: 'vega-lite-chart',
         rendererTarget: 'vega-lite',
         defaultTarget: 'vega-lite',
@@ -142,6 +166,8 @@ export const EXECUTABLE_DIAGRAM_TYPES: readonly ExecutableDiagramTypeDefinition[
         family: 'quantitative',
         semanticPattern: 'Multi-axis profile comparison',
         promptProfileId: 'radar-chart',
+        payloadKind: 'radar',
+        layoutProfileId: 'vega-lite-radar',
         rendererOperationId: 'vega-lite-radar',
         rendererTarget: 'vega-lite',
         defaultTarget: 'vega-lite',
@@ -155,6 +181,8 @@ export const EXECUTABLE_DIAGRAM_TYPES: readonly ExecutableDiagramTypeDefinition[
         family: 'structure',
         semanticPattern: 'Ownership hierarchy with accountable reporting paths',
         promptProfileId: 'org-chart',
+        payloadKind: 'org-chart',
+        layoutProfileId: 'mermaid-org-chart',
         rendererOperationId: 'mermaid-org-chart',
         rendererTarget: 'mermaid',
         defaultTarget: 'mermaid',
@@ -168,6 +196,8 @@ export const EXECUTABLE_DIAGRAM_TYPES: readonly ExecutableDiagramTypeDefinition[
         family: 'behavior',
         semanticPattern: 'Ordered milestones over time',
         promptProfileId: 'timeline',
+        payloadKind: 'timeline',
+        layoutProfileId: 'mermaid-timeline',
         rendererOperationId: 'mermaid-timeline',
         rendererTarget: 'mermaid',
         defaultTarget: 'mermaid',
@@ -181,6 +211,8 @@ export const EXECUTABLE_DIAGRAM_TYPES: readonly ExecutableDiagramTypeDefinition[
         family: 'behavior',
         semanticPattern: 'Cross-functional responsibility flow',
         promptProfileId: 'swimlane',
+        payloadKind: 'swimlane',
+        layoutProfileId: 'mermaid-swimlane',
         rendererOperationId: 'mermaid-swimlane',
         rendererTarget: 'mermaid',
         defaultTarget: 'mermaid',
@@ -194,6 +226,8 @@ export const EXECUTABLE_DIAGRAM_TYPES: readonly ExecutableDiagramTypeDefinition[
         family: 'quantitative',
         semanticPattern: 'Two-axis prioritization matrix',
         promptProfileId: 'quadrant',
+        payloadKind: 'quadrant',
+        layoutProfileId: 'mermaid-quadrant',
         rendererOperationId: 'mermaid-quadrant',
         rendererTarget: 'mermaid',
         defaultTarget: 'mermaid',
@@ -207,6 +241,8 @@ export const EXECUTABLE_DIAGRAM_TYPES: readonly ExecutableDiagramTypeDefinition[
         family: 'engineering',
         semanticPattern: 'Electrical components and nets',
         promptProfileId: 'circuit',
+        payloadKind: 'circuit',
+        layoutProfileId: 'circuitikz',
         rendererOperationId: 'circuitikz-circuit',
         rendererTarget: 'circuitikz',
         defaultTarget: 'circuitikz',
@@ -217,12 +253,17 @@ export const EXECUTABLE_DIAGRAM_TYPES: readonly ExecutableDiagramTypeDefinition[
 ] as const;
 
 const DIAGRAM_TYPE_BY_ID = new Map(EXECUTABLE_DIAGRAM_TYPES.map(type => [type.id, type]));
-const DIAGRAM_TYPE_BY_INTENT = new Map(EXECUTABLE_DIAGRAM_TYPES.map(type => [type.intent, type]));
+const DIAGRAM_TYPES_BY_INTENT = new Map<DiagramIntent, ExecutableDiagramTypeDefinition[]>();
+for (const type of EXECUTABLE_DIAGRAM_TYPES) {
+    const entries = DIAGRAM_TYPES_BY_INTENT.get(type.intent) ?? [];
+    entries.push(type);
+    DIAGRAM_TYPES_BY_INTENT.set(type.intent, entries);
+}
 
 function assertExecutableDiagramTypeCatalog(): void {
     if (DIAGRAM_TYPE_BY_ID.size !== EXECUTABLE_DIAGRAM_TYPES.length
-        || DIAGRAM_TYPE_BY_INTENT.size !== EXECUTABLE_DIAGRAM_TYPES.length) {
-        throw new Error('Executable diagram types must use unique ids and intents.');
+        || new Set(EXECUTABLE_DIAGRAM_TYPES.map(type => type.layoutProfileId)).size !== EXECUTABLE_DIAGRAM_TYPES.length) {
+        throw new Error('Executable diagram types must use unique ids and layout profiles.');
     }
     for (const type of EXECUTABLE_DIAGRAM_TYPES) {
         if (type.defaultTarget !== type.rendererTarget || !type.compatibleTargets.includes(type.defaultTarget)) {
@@ -230,6 +271,12 @@ function assertExecutableDiagramTypeCatalog(): void {
         }
         if (new Set(type.compatibleTargets).size !== type.compatibleTargets.length) {
             throw new Error(`Diagram type "${type.id}" lists a compatible target more than once.`);
+        }
+        if (!type.promptProfileId || !type.payloadKind || !type.layoutProfileId) {
+            throw new Error(`Diagram type "${type.id}" is missing a profile, payload kind, or layout profile.`);
+        }
+        if (getDiagramPromptProfile(type.promptProfileId).payloadKind !== type.payloadKind) {
+            throw new Error(`Diagram type "${type.id}" does not agree with its prompt profile payload family.`);
         }
     }
 }
@@ -244,10 +291,29 @@ export function getExecutableDiagramType(id: DiagramCatalogTypeId): ExecutableDi
     return type;
 }
 
-export function findDiagramTypeByIntent(intent: DiagramIntent): ExecutableDiagramTypeDefinition {
-    const type = DIAGRAM_TYPE_BY_INTENT.get(intent);
-    if (!type) {
+export function findDiagramType(intent: DiagramIntent, variant?: string): ExecutableDiagramTypeDefinition {
+    const candidates = DIAGRAM_TYPES_BY_INTENT.get(intent) ?? [];
+    const matches = variant === undefined
+        ? candidates
+        : candidates.filter(type => type.variant === variant);
+    if (matches.length === 0) {
         throw new Error(`No executable diagram catalog type is registered for intent "${intent}".`);
     }
-    return type;
+    if (matches.length > 1) {
+        throw new Error(`AMBIGUOUS_DIAGRAM_INTENT: intent "${intent}" requires an explicit variant.`);
+    }
+    return matches[0];
+}
+
+export function findDefaultDiagramType(intent: DiagramIntent): ExecutableDiagramTypeDefinition {
+    const candidates = DIAGRAM_TYPES_BY_INTENT.get(intent) ?? [];
+    const defaultType = candidates.find(type => type.variant === undefined || type.variant === 'auto');
+    if (!defaultType) {
+        throw new Error(`No default executable diagram catalog type is registered for intent "${intent}".`);
+    }
+    return defaultType;
+}
+
+export function findDiagramTypeByIntent(intent: DiagramIntent): ExecutableDiagramTypeDefinition {
+    return findDefaultDiagramType(intent);
 }

@@ -142,3 +142,55 @@ implementation_record: src/tests/mermaidNormalizationConvergence.test.ts
 ## 验证快照
 
 本轮新鲜验证：262 个 Jest suite 通过（2,303 tests passed、1 skipped）；TypeScript/esbuild build 通过；VitePress docs build 通过；生产 gallery check 通过并生成 15 组 SVG/PNG；render-host audit 与 i18n audit 通过；独立 Drawnix Plait consumer gate 通过（20 个节点、1 个根、12 条关系）；semantic verification checklist 生成通过（该命令生成待核验模板，不自动代表环境检查已完成）；Circuitikz smoke 使用 TeX Live 2023 `pdflatex` 通过（6/6 PDF，0 error/0 warning）。`git diff --check` 通过。当前工作区没有 Draw.io 或真实 Drawnix 桌面应用，因此不作应用级互操作声明。全仓 lint 仍作为独立基线债务跟踪。
+
+## 参考布局扩展决策记录（2026-08-21）
+
+本轮已确认分批路线：先工程/数据平台布局，再定量布局，最后结构表达布局。这是已批准的设计与路线图，不代表 reference-only 布局已经交付。
+
+### 当前代码真值与批准设计对照
+
+| 边界 | 当前代码 | 已批准的向前变化 |
+|---|---|---|
+| 目录身份 | 一个 intent 对应一个目录行 | 稳定目录 ID 可以通过显式 variant 共享 intent；旧歧义查询 fail closed |
+| Spec 形态 | 带许多可选专用字段的宽 `DiagramSpec` | 版本化 canonical `payload` 联合，并保留 legacy 读取投影 |
+| Prompt 路由 | `diagramSpecPrompt.ts` 中按类型条件拼接 | 由目录元数据选择版本化纯数据 prompt profile |
+| 几何 | 现有 Mermaid/Vega/Drawnix/Circuitikz adapter | 有限 native SVG payload-family adapter；模型不输出坐标 |
+| Chart variant | `layoutHints.chartType` 加一个 `data-chart` 行 | `quantitative.chartType` 加显式 bar/line/scatter ID；旧 data-chart 继续可读 |
+| Preview | 15 个 shipped 类型使用生产 fixture preview | 新类型只有通过同一 renderer、fixture、gallery、无障碍门禁后才能进入 selector |
+| 参考 checkout | 开发期 taxonomy 与质量证据 | 继续排除在 runtime 之外；截图和原始 HTML 永不成为产品资产 |
+
+### 已批准批次顺序
+
+1. Batch 0：variant-aware catalog、canonical schema 边界、prompt profile、presentation 默认值、renderer admission；不增加 selector 行。
+2. Batch 1A：`architecture`、`current-state`、`integration-topology`。
+3. Batch 1B：`data-flow`、`access-matrix`。
+4. Batch 2：`bar-chart`、`line-chart`、`scatter-plot`、`gantt`。
+5. Batch 3A：`layer-stack`、`venn`、`ranked-funnel`、`loop`。
+6. Batch 3B：`nested`、`tree`、`process`、`medallion`、`high-level`。
+
+每个 batch 开始前必须更新本文件及其英文对应文件。详细双语设计和实施文档如下：
+
+- `docs/superpowers/specs/2026-08-21-diagram-reference-expansion-design.en.md`
+- `docs/superpowers/specs/2026-08-21-diagram-reference-expansion-design.zh-CN.md`
+- `docs/superpowers/plans/2026-08-21-diagram-reference-expansion-implementation.en.md`
+- `docs/superpowers/plans/2026-08-21-diagram-reference-expansion-implementation.zh-CN.md`
+
+### 不宣称的能力与门禁
+
+不能因为某种布局可以近似成 flowchart，就自动增加 Mermaid 兼容声明。矩阵、Venn、Gantt、topology 必须有 native 确定性 renderer；Draw.io、Drawnix、Circuitikz 兼容仍需真实 consumer gate。selector 行只有在 payload、prompt profile、validator、renderer、生产 fixture、preview SVG、gallery SVG/PNG、双语文档行和回归测试全部通过后才能准入。
+
+### 工作区状态
+
+本决策记录开始时，`main` 与 `origin/main` 一致，`git status --porcelain=v1 -b` 仅报告 `## main...origin/main`。后续每个 batch 提交都必须保留 `.trellis/`、不 reset 无关修改，并在 build、全量 Jest、docs、gallery、i18n、render-host 与 `git diff --check` 门禁后恢复相同 clean 状态。
+
+## Batch 0 进度（2026-08-21）
+
+Batch 0 已作为兼容基础实现；本批不增加 selector 行，也不把新的 reference 布局宣称为 shipped。
+
+- 目录定义现在携带 `payloadKind` 与 `layoutProfileId`；查询支持显式 variant，legacy 默认查询继续可用。
+- `DiagramSpec` 接受 `schemaVersion`、canonical `payload`、`presentation` 和命名空间 `extensions`，不删除现有 renderer 使用的 legacy 字段。
+- generation merge 边界把 legacy v1 spec 归一化为 schema v2 元数据，生成 `legacy` 或 `quantitative` payload；未知 schema version fail closed。
+- profile catalog 现在拥有 prompt profile ID、版本、payload family、hard limits、语义规则、target 规则和非法输出规则。现有 Circuitikz/Drawnix 专用 prompt 契约保持不变。
+- capability manifest 行暴露 payload/layout 所有权元数据；manifest schema 仍采用 additive 方式，reference-only 行仍排除在 selector 之外。
+
+本增量证据：catalog/payload/parser/prompt 聚焦测试通过（30 个测试），`npm.cmd run build` 通过，既有 15 类型生产 gallery 与 renderer 契约保持不变。Batch 1A 尚未开始；architecture/current-state/integration-topology 仍为 reference-only，必须先交付 native SVG fixture 及 preview/gallery 门禁。

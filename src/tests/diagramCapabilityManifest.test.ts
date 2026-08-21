@@ -33,6 +33,8 @@ describe('diagram capability manifest', () => {
         const manifest = getDiagramCapabilityManifest();
 
         for (const type of manifest.shippedTypes) {
+            expect(type.payloadKind).toBe(EXECUTABLE_DIAGRAM_TYPES.find(candidate => candidate.id === type.id)?.payloadKind);
+            expect(type.layoutProfileId).toBe(EXECUTABLE_DIAGRAM_TYPES.find(candidate => candidate.id === type.id)?.layoutProfileId);
             expect(type.compatibleTargets).toContain(type.defaultTarget);
             expect(type.compatibleTargets.map(target => getRenderTargetDescriptor(target).target))
                 .toEqual(type.compatibleTargets);

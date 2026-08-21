@@ -20,6 +20,7 @@ import { resolveCircuitTemplateFromMarkdown } from './adapters/circuitikz/circui
 import { validateDrawnixMindMapSpec } from './adapters/drawnix/drawnixMindMapProjection';
 import { enrichDrawnixSourceCoverage } from './adapters/drawnix/drawnixSourceCoverage';
 import { hashResolvedSourceVisualManifest, ResolvedSourceVisual } from './sourceVisuals';
+import { normalizeDiagramSpecPayload } from './payloads/legacyPayload';
 
 export interface DiagramGenerationOptions {
     compatibilityMode: 'best-fit' | 'legacy-mermaid';
@@ -332,7 +333,7 @@ function mergeSpecDefaults(
             label: node.label?.trim() || node.id || 'Untitled'
         }));
 
-    return {
+    return normalizeDiagramSpecPayload({
         ...llmSpec,
         intent: resolvedIntent,
         title: spec.title?.trim() || 'Generated Diagram',
@@ -349,7 +350,7 @@ function mergeSpecDefaults(
         circuitSpec: resolvedIntent === 'circuit' ? spec.circuitSpec : undefined,
         layoutHints: Object.keys(normalizedLayoutHints).length > 0 ? normalizedLayoutHints : undefined,
         evidenceRefs: spec.evidenceRefs ?? []
-    };
+    });
 }
 
 function applyDrawnixSourceCoverage(
@@ -401,7 +402,7 @@ function resolveConstrainedCircuitFallback(
         return null;
     }
 
-    return {
+    return normalizeDiagramSpecPayload({
         intent: 'circuit',
         title: circuitSpec.title,
         summary: `Constrained ${circuitSpec.circuitKind} golden-template fallback.`,
@@ -412,7 +413,7 @@ function resolveConstrainedCircuitFallback(
         dataSeries: [],
         circuitSpec,
         evidenceRefs: []
-    };
+    });
 }
 
 export async function generateDiagramArtifact(

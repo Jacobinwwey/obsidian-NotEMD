@@ -1,6 +1,7 @@
 import type { DiagramCatalogTypeId, DiagramIntent, RenderTarget } from './types';
 import { EXECUTABLE_DIAGRAM_TYPES } from './diagramTypeCatalog';
 import type { DiagramTypeFamily } from './diagramTypeCatalog';
+import type { DiagramPayloadKind } from './payloads/types';
 
 export const DIAGRAM_CAPABILITY_MANIFEST_SCHEMA_VERSION = 1 as const;
 export const DIAGRAM_DESIGN_REFERENCE_REVISION = '09df49d8d1a1c7fb2efdfcdc7a2a0713534350a6' as const;
@@ -9,6 +10,9 @@ export interface ShippedDiagramCapability {
     id: DiagramCatalogTypeId;
     lifecycle: 'shipped';
     intent: DiagramIntent;
+    variant?: string;
+    payloadKind: DiagramPayloadKind;
+    layoutProfileId: string;
     family: DiagramTypeFamily;
     defaultTarget: RenderTarget;
     compatibleTargets: readonly RenderTarget[];
@@ -62,6 +66,9 @@ const SHIPPED_TYPES: readonly ShippedDiagramCapability[] = EXECUTABLE_DIAGRAM_TY
     id: type.id,
     lifecycle: 'shipped' as const,
     intent: type.intent,
+    variant: type.variant,
+    payloadKind: type.payloadKind,
+    layoutProfileId: type.layoutProfileId,
     family: type.family,
     defaultTarget: type.defaultTarget,
     compatibleTargets: [...type.compatibleTargets],
