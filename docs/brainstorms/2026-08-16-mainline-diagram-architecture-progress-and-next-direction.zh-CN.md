@@ -122,7 +122,7 @@ implementation_record: src/tests/mermaidNormalizationConvergence.test.ts
 - `drawnixRelationLabelLayout.ts` 现在是关系标签度量的 canonical 边界。projection 与 lane reservation 共用确定性的换行、宽度、高度和行高契约；SVG/native 几何保持字节稳定，并由聚焦回归测试锁定。
 - Circuitikz 已移除字节相同的 `dualInputPortX()` helper。NAND/NOR 输入统一使用 extended-port 规则；buffer 有意保留更宽的右侧 gutter，并由 `bufferPortX()` 同时驱动输入与输出位置，避免隐藏坐标耦合，但不假设六个 golden template 拥有同一拓扑。
 - `runCircuitikzRepairLoop()` 明确保留为 maintainer-only、单次尝试的 acceptance SDK。普通生成路径不会调用它；采纳候选仍要求拓扑相等、新鲜 compile/render evidence 和显式 caller。
-7. **参考候选准入：** 已批准的 18 个扩展行全部完成交付并置于有界 payload 与确定性 adapter 之后：三个 Mermaid-only family（`timeline`、`swimlane`、`quadrant`）、一个有界 Vega-Lite family（`radar`）、三个定量 variant，以及十四个 native editable HTML/SVG 布局。另有五个精确参考语法仍保持 reference-only，因为尚未宣称其布局契约。
+7. **参考候选准入：** 新增的 18 个扩展行全部完成交付并置于有界 payload 与确定性 adapter 之后：三个定量 variant，以及十五个 native editable HTML/SVG 布局。此前已交付的 Mermaid-only family（`timeline`、`swimlane`、`quadrant`）和有界 Vega-Lite `radar` 保持不变。另有五个精确参考语法仍保持 reference-only，因为尚未宣称其布局契约。
 8. **Operation 契约收敛：** 继续把与 registry 无关的 schema runtime 与 registry admission 作为 fail-closed 边界。只有当生成器能保留 host/core 契约分离、人工示例和未知字段行为时，才把声明迁移到生成式 JSON。
 
 ## 验收门禁
