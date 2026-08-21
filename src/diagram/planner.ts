@@ -7,11 +7,11 @@ import type {
     RenderTarget
 } from './types';
 import type { SupportedVegaLiteChartType } from './adapters/vega/schema';
-import { findDiagramTypeByIntent } from './diagramTypeCatalog';
+import { findDefaultDiagramType } from './diagramTypeCatalog';
 import { inferDiagramIntent } from './intent';
 
 function resolvePreferredRenderTarget(intent: DiagramIntent): RenderTarget {
-    return findDiagramTypeByIntent(intent).defaultTarget;
+    return findDefaultDiagramType(intent).defaultTarget;
 }
 
 function resolveRequestedRenderTarget(
@@ -23,7 +23,7 @@ function resolveRequestedRenderTarget(
         return defaultTarget;
     }
 
-    const definition = findDiagramTypeByIntent(intent);
+    const definition = findDefaultDiagramType(intent);
     if (definition.compatibleTargets.includes(requestedTarget)) {
         return requestedTarget;
     }

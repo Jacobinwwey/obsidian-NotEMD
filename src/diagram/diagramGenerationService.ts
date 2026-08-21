@@ -10,7 +10,7 @@ import { RendererRegistry } from '../rendering/rendererRegistry';
 import { RendererService } from '../rendering/rendererService';
 import { NotemdSettings } from '../types';
 import { buildDiagramPlan } from './planner';
-import { findDiagramTypeByIntent } from './diagramTypeCatalog';
+import { findDefaultDiagramType } from './diagramTypeCatalog';
 import { buildDiagramSpecPrompt } from './prompts/diagramSpecPrompt';
 import { assertValidDiagramSpec } from './spec';
 import { isSupportedRenderTarget } from './types';
@@ -184,7 +184,7 @@ export function createDefaultDiagramRendererService(): RendererService {
 }
 
 function resolveRenderTargetForIntent(intent: DiagramIntent): DiagramPlan['renderTarget'] {
-    return findDiagramTypeByIntent(intent).defaultTarget;
+    return findDefaultDiagramType(intent).defaultTarget;
 }
 
 function normalizeDrawnixGenerationOptions(options: DiagramGenerationOptions): DiagramGenerationOptions {

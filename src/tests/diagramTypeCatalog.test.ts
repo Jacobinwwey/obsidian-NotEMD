@@ -50,6 +50,7 @@ describe('executable diagram type catalog', () => {
         expect(findDiagramType('dataChart')).toMatchObject({ id: 'data-chart', variant: 'auto' });
         expect(findDefaultDiagramType('dataChart')).toMatchObject({ id: 'data-chart' });
         expect(() => findDiagramType('dataChart', 'line')).toThrow(/No executable diagram catalog type/i);
+        expect(findDiagramTypeByIntent('dataChart')).toMatchObject({ id: 'data-chart', variant: 'auto' });
     });
 
     test('describes Drawnix as one native tree renderer rather than a delivery selector', () => {

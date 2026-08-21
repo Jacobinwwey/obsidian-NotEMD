@@ -315,5 +315,5 @@ export function findDefaultDiagramType(intent: DiagramIntent): ExecutableDiagram
 }
 
 export function findDiagramTypeByIntent(intent: DiagramIntent): ExecutableDiagramTypeDefinition {
-    return findDefaultDiagramType(intent);
+    return findDiagramType(intent);
 }
