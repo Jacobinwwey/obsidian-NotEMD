@@ -92,8 +92,6 @@ import {
     getExecutableDiagramExamples,
     renderExecutableDiagramExample
 } from './diagram/examples/diagramExampleCatalog';
-import { getDiagramReferencePreview } from './diagram/diagramCapabilityManifest';
-import { getDiagramReferenceAsset } from './ui/diagramReferenceAssets';
 import type { DiagramCatalogTypeId } from './diagram/types';
 import { RenderArtifact } from './rendering/types';
 import { IframeRenderHost } from './rendering/host/iframeRenderHost';
@@ -192,40 +190,6 @@ interface DiagramLocalKnowledgeContextResult {
     operationInput: DiagramOperationInput;
     localKnowledgeContextUsed: boolean;
     localKnowledgeRetrieval: LocalKnowledgeRetrievalSummary;
-}
-
-function buildReferenceDiagramPreviewArtifact(
-    referenceLabel: string,
-    assetDataUrl: string
-): RenderArtifact {
-    const content = `<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; img-src data:;" />
-    <title>${referenceLabel} reference preview</title>
-    <style>
-        body { margin: 0; padding: 20px; background: Canvas; color: CanvasText; }
-        figure { margin: 0; }
-        img { display: block; width: 100%; height: auto; max-height: 80vh; object-fit: contain; margin: 0 auto; }
-        figcaption { margin-top: 12px; font: 12px/1.4 sans-serif; opacity: .72; text-align: center; }
-    </style>
-</head>
-<body>
-    <figure>
-        <img src="${assetDataUrl}" alt="${referenceLabel} reference preview" />
-        <figcaption>${referenceLabel} reference preview</figcaption>
-    </figure>
-</body>
-</html>`;
-
-    return {
-        target: 'html',
-        content,
-        mimeType: 'text/html',
-        sourceIntent: 'flowchart'
-    };
 }
 
 export default class NotemdPlugin extends Plugin {
@@ -360,29 +324,6 @@ export default class NotemdPlugin extends Plugin {
             vegaLiteDepsLoader: async () => getBundledVegaLitePreviewDeps(),
             theme: 'light'
         });
-    }
-
-    /** Opens a bundled reference screenshot without entering the generation or save flow. */
-    public async openDiagramReferencePreview(referenceId: string): Promise<void> {
-        const reference = getDiagramReferencePreview(referenceId);
-        if (!reference) {
-            throw new Error(`No diagram reference preview is registered for "${referenceId}".`);
-        }
-        const assetDataUrl = getDiagramReferenceAsset(reference.previewAssetId);
-        if (!assetDataUrl) {
-            throw new Error(`The bundled diagram reference asset is unavailable for "${referenceId}".`);
-        }
-
-        const referenceLabel = this.settings.uiLocale?.toLowerCase().startsWith('zh')
-            ? reference.labelZh
-            : reference.label;
-        const artifact = buildReferenceDiagramPreviewArtifact(referenceLabel, assetDataUrl);
-        const session = new IframeRenderHost().createSession(artifact, {
-            previewTitle: `${referenceLabel} reference preview`
-        });
-        new DiagramPreviewModal(this.app, session, this.settings.uiLocale, {
-            exportPpi: this.settings.diagramPreviewExportPpi
-        }).open();
     }
 
     /** Opens an ephemeral catalog preview; examples never enter the artifact save flow. */

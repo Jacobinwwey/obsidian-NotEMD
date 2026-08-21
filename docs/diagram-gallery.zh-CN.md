@@ -2,7 +2,7 @@
 
 语言：[English](./diagram-gallery.md) | **简体中文**
 
-本页是 Notemd 当前可执行图形类型的用户侧清单。页面使用与设置页和工作台 capability gallery 相同的可执行 fixture；提交的 [gallery manifest](./assets/diagrams/manifest.json) 记录每张图片的生产 target、预览 target 与 SVG 哈希。
+本页是 Notemd 当前可执行图形类型的用户侧清单。页面使用与设置页和工作台类型选择器相同的可执行 fixture；提交的 [gallery manifest](./assets/diagrams/manifest.json) 记录每张图片的生产 target、预览 target 与 SVG 哈希。
 
 ## 范围与契约
 
@@ -10,7 +10,7 @@
 - **默认 target** 是 planner 的正常渲染目标；**兼容 target** 是明确存在的 renderer 契约，不表示所有 target 具有相同的布局语义。
 - 预览图来自生产 renderer，由 `npm run diagram:gallery` 生成；发布文档前或 CI 中运行 `npm run diagram:gallery:check`。
 - [cathrynlavery/diagram-design](https://github.com/cathrynlavery/diagram-design) 只作为 taxonomy 与文档治理参考。其布局单独列出，不应被宣传为 Notemd 已交付功能。
-- 工作台和设置页的类型选择区还会显示固定版本、内置的 27 类 `diagram-design` visual type 参考截图。这些截图只用于解释选型；仅参考条目不会改变生成 intent，也不会触发生成请求。
+- 工作台和设置页的类型选择器只列出 Notemd 可执行类型。用户选择某一类型后，单个预览面板通过 Notemd 生产 renderer 动态生成对应预览；不会加载或打包 `diagram-design` 原始截图。
 
 ## 已交付类型
 
@@ -96,7 +96,7 @@
 
 ## 仅参考布局
 
-以下 22 个 ID 来自 `ref/diagram-design`，用于对比和未来准入讨论。它们统一使用 `diagram-design:*` 命名空间，固定参考 revision `09df49d8d1a1c7fb2efdfcdc7a2a0713534350a6`，不会进入运行时 intent 选择器；工作台的参考 gallery 会显示其内置截图，并提供“打开参考图”，但不会提供“使用此图表类型”：
+以下 22 个 ID 来自 `ref/diagram-design`，仅用于开发期 taxonomy 对比和未来准入讨论。它们统一使用 `diagram-design:*` 命名空间，固定参考 revision `09df49d8d1a1c7fb2efdfcdc7a2a0713534350a6`，不会进入运行时 intent 选择器或插件 UI；参考仓库不会打包，原始截图也不会显示：
 
 `architecture`、`it-current-state`、`flowchart`、`sequence`、`state-machine`、`er-data-model`、`loop`、`nested`、`tree`、`layer-stack`、`venn`、`pyramid-funnel`、`bar-chart`、`line-chart`、`gantt`、`scatter-plot`、`high-level`、`process`、`medallion`、`data-flow`、`dp-integration`、`dp-security-matrix`。
 

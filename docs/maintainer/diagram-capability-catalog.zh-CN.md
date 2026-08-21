@@ -52,7 +52,7 @@ target descriptor 是 artifact 机制的运行时权威。其 `exportFormats` �
 
 ## 预览与 gallery 契约
 
-设置页和生成工作台都消费 `src/ui/diagramCapabilityGallery.ts`。已交付行使用生产 renderer fixture；有对应映射的已交付行还会显示内置参考截图；仅参考行只提供参考图预览动作。文档生成式 gallery 仍由生产 renderer 驱动，并将产出：
+设置页和生成工作台使用 `src/ui/diagramTypePreviewPanel.ts`。类型选择器只暴露可执行目录条目；用户选择某一类型后，单个固定尺寸面板通过 `renderDiagramExampleThumbnail()` 渲染该 fixture。文档生成式 gallery 仍由生产 renderer 驱动，并将产出：
 
 - `docs/assets/diagrams/<fixture-id>.svg`
 - `docs/assets/diagrams/<fixture-id>.png`
@@ -61,7 +61,7 @@ target descriptor 是 artifact 机制的运行时权威。其 `exportFormats` �
 
 生成器必须复用生产 fixture 目录，对缺失预览或过期资产失败，保持文件名稳定；禁止在文档脚本中复制 fixture 数据。
 
-runtime capability manifest 同时携带全部 27 类固定版本的 `diagram-design` reference-preview 描述。截图以离线 PNG data URL 内置，属于解释性证据而不是生成契约。仅参考行绝不能加入 `DiagramIntent`、planner 或“使用此图表类型”动作。
+`ref/diagram-design` 仅作为开发期 taxonomy 与质量对比参考。22 个仅参考布局仍保留在 `referenceOnlyLayouts` 中用于路线图统计，但不会打包截图、data URL、选择器条目或预览 API。升级为交付能力必须同时具备 typed input contract、生产 renderer、fixture、target/export 矩阵、无障碍证据、文档行和自动化门禁。
 
 ## Consumer 门禁
 

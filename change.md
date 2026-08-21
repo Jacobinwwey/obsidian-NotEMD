@@ -13,7 +13,7 @@ This document summarizes the major functional and architectural changes implemen
 - Hardened the settings layout so search result targets keep a stable size and the collapsed control stays attached to the settings content column near the close controls.
 - Synchronized the bilingual maintainer manuals, root README settings sections, and every published GitHub Pages locale for the 300 PPI default, 72-600 PPI range, and Mermaid companion behavior.
 - Added LM Studio translation guardrails for small locale batches, sub-30,000-token request budgets, protected technical tokens, structural validation, and retry-on-omission behavior.
-- Added a shared capability gallery to Settings and the Notemd Workbench. Shipped types retain production-renderer thumbnails; all 27 pinned `diagram-design` layouts now have bundled offline reference screenshots, while reference-only rows cannot enter the generation selector or `Use this diagram type` flow.
+- Replaced the flattened capability gallery with one selection-driven preview panel shared by Settings and the Notemd Workbench. Selecting an executable type invokes the production renderer; `ref/diagram-design` remains development-only and no reference screenshot is bundled or displayed.
 
 ### 中文
 
@@ -22,7 +22,7 @@ This document summarizes the major functional and architectural changes implemen
 - 加固设置页布局，保证搜索结果目标保持稳定尺寸，并让收起控件锚定在关闭控件附近的设置内容列中。
 - 同步双语维护者手册、根 README 设置章节和所有已发布 GitHub Pages 语言路由，记录 300 PPI 默认值、72-600 PPI 范围与 Mermaid companion 行为。
 - 为 LM Studio 翻译工具增加小批次、低于 30,000 token 请求预算、技术 token 保护、结构校验和省略重试门禁。
-- 为设置页和 Notemd 工作台增加共享 capability gallery。已交付类型保留生产 renderer 缩略图；全部 27 个固定版本的 `diagram-design` 布局现在都有内置离线参考截图，而仅参考行不会进入生成选择器或“使用此图表类型”流程。
+- 将设置页和 Notemd 工作台的平铺 capability gallery 改为选择驱动的单个预览面板。选择可执行类型后调用生产 renderer；`ref/diagram-design` 仅用于开发期参考，不打包或显示任何原始参考截图。
 
 ---
 

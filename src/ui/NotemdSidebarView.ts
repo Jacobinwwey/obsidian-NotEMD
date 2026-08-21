@@ -10,9 +10,11 @@ import {
     applyDiagramRenderTargetPreference
 } from '../diagram/diagramPreferenceCompatibility';
 import { getExecutableDiagramIntentOptions } from './diagramCatalogLabels';
-import { getExecutableDiagramType } from '../diagram/diagramTypeCatalog';
-import { renderDiagramCapabilityGallery } from './diagramCapabilityGallery';
-import { getDiagramReferenceAsset } from './diagramReferenceAssets';
+import {
+    renderDiagramTypePreviewPanel,
+    resolveDiagramPreviewTypeId,
+    type DiagramTypePreviewPanelController
+} from './diagramTypePreviewPanel';
 import { NOTEMD_SLIDEV_FORK_RELEASE_URL, NOTEMD_SLIDEV_INSTALL_COMMAND } from '../slideExport/slidevDistribution';
 import {
     ActionCategory,
@@ -138,6 +140,7 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
     private slideExportEnvironmentPanelEl: HTMLElement | null = null;
     private diagramIntentSelector: HTMLSelectElement | null = null;
     private diagramRenderTargetSelector: HTMLSelectElement | null = null;
+    private diagramTypePreviewController: DiagramTypePreviewPanelController | null = null;
     private apiLivenessPhase: ApiLivenessVisualPhase = 'idle';
     private apiLivenessTimer: ReturnType<typeof setTimeout> | null = null;
     private apiLivenessRequests = new Map<string, ApiActivityRequestRecord>();
@@ -1745,6 +1748,7 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
             const newValue = selector.value === 'auto' ? undefined : selector.value;
             applyDiagramIntentPreference(this.plugin.settings, newValue as DiagramIntent | undefined);
             targetSelector.value = this.plugin.settings.preferredDiagramRenderTarget || 'auto';
+            this.diagramTypePreviewController?.setSelectedType(resolveDiagramPreviewTypeId(selector.value));
             await this.plugin.saveSettings();
         };
 
@@ -1786,16 +1790,13 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
             text: i18n.settings.developer.experimentalDiagramPipeline.exportFormatsDesc,
             cls: 'notemd-control-hint'
         });
-    }
 
-    private buildDiagramCapabilityGallery(parent: HTMLElement): void {
-        const diagramI18n = this.getStrings().settings.developer.experimentalDiagramPipeline;
         const renderThumbnail = typeof this.plugin.renderDiagramExampleThumbnail === 'function'
-            ? (example: Parameters<NotemdPlugin['renderDiagramExampleThumbnail']>[0]) => this.plugin.renderDiagramExampleThumbnail(example)
-            : undefined;
-        renderDiagramCapabilityGallery({
+            ? (typeId: Parameters<NotemdPlugin['renderDiagramExampleThumbnail']>[0]) => this.plugin.renderDiagramExampleThumbnail(typeId)
+            : async () => undefined;
+        this.diagramTypePreviewController?.destroy();
+        this.diagramTypePreviewController = renderDiagramTypePreviewPanel({
             parent,
-            locale: this.getResolvedUiLocale(),
             copy: {
                 intentMindmap: diagramI18n.intentMindmap,
                 intentDrawnixKnowledgeMap: diagramI18n.intentDrawnixKnowledgeMap,
@@ -1812,47 +1813,17 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
                 intentTimeline: diagramI18n.intentTimeline,
                 intentSwimlane: diagramI18n.intentSwimlane,
                 intentQuadrant: diagramI18n.intentQuadrant,
-                shippedSection: diagramI18n.diagramCapabilityShippedSection,
-                referenceOnlySection: diagramI18n.diagramCapabilityReferenceOnlySection,
-                shippedStatus: diagramI18n.diagramCapabilityShippedStatus,
-                referenceOnlyStatus: diagramI18n.diagramCapabilityReferenceOnlyStatus,
-                preview: diagramI18n.diagramExamplePreview,
-                referencePreview: diagramI18n.diagramReferencePreview,
-                useType: diagramI18n.diagramExampleUseType,
-                openReference: diagramI18n.diagramReferenceOpen,
-                thumbnailLoading: diagramI18n.diagramExampleThumbnailLoading,
-                thumbnailUnavailable: diagramI18n.diagramExampleThumbnailUnavailable,
-                referenceUnavailable: diagramI18n.diagramReferenceUnavailable,
+                title: diagramI18n.diagramTypePreviewTitle,
+                empty: diagramI18n.diagramTypePreviewEmpty,
+                loading: diagramI18n.diagramTypePreviewLoading,
+                unavailable: diagramI18n.diagramTypePreviewUnavailable,
+                failed: diagramI18n.diagramTypePreviewFailed,
                 targetPrefix: diagramI18n.diagramCapabilityTargetPrefix,
-                formatsPrefix: diagramI18n.diagramCapabilityFormatsPrefix,
-                sourcePrefix: diagramI18n.diagramCapabilitySourcePrefix,
-                familyLabels: {
-                    knowledge: diagramI18n.diagramExampleFamilyKnowledge,
-                    behavior: diagramI18n.diagramExampleFamilyBehavior,
-                    structure: diagramI18n.diagramExampleFamilyStructure,
-                    quantitative: diagramI18n.diagramExampleFamilyQuantitative,
-                    engineering: diagramI18n.diagramExampleFamilyEngineering
-                }
+                formatsPrefix: diagramI18n.diagramCapabilityFormatsPrefix
             },
-            onPreview: typeId => this.plugin.openDiagramExamplePreview(typeId),
-            onPreviewReference: referenceId => this.plugin.openDiagramReferencePreview(referenceId),
-            onUseType: async typeId => {
-                const type = getExecutableDiagramType(typeId);
-                applyDiagramIntentPreference(this.plugin.settings, type.intent);
-                applyDiagramRenderTargetPreference(this.plugin.settings, type.defaultTarget);
-                if (this.diagramIntentSelector) {
-                    this.diagramIntentSelector.value = type.intent;
-                }
-                if (this.diagramRenderTargetSelector) {
-                    this.diagramRenderTargetSelector.value = type.defaultTarget;
-                }
-                await this.plugin.saveSettings();
-            },
-            renderThumbnail: renderThumbnail
-                ? example => renderThumbnail(example.typeId)
-                : undefined,
-            resolveReferenceAsset: getDiagramReferenceAsset
+            renderThumbnail
         });
+        this.diagramTypePreviewController.setSelectedType(resolveDiagramPreviewTypeId(selector.value));
     }
 
     async onOpen() {
@@ -1932,7 +1903,6 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
             if (category === 'generation') {
                 this.createDiagramHistoryButton(body);
                 this.buildDiagramIntentSelector(body);
-                this.buildDiagramCapabilityGallery(body);
             }
 
             if (category === 'translation') {
@@ -2054,6 +2024,8 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
         this.slideExportEnvironmentPanelEl = null;
         this.diagramIntentSelector = null;
         this.diagramRenderTargetSelector = null;
+        this.diagramTypePreviewController?.destroy();
+        this.diagramTypePreviewController = null;
         this.expandedApiActivityRequestIds.clear();
         this.actionButtons.clear();
         this.workflowButtons = [];

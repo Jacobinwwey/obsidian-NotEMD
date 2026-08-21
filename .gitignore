@@ -62,6 +62,10 @@ docs/*_preview.png
 docs/*_diagram_preview.svg
 docs/*_diagram_preview.png
 
+# Development-only diagram-design screenshot copies are never package inputs.
+src/assets/diagramReference/
+src/diagram/diagramReferenceCatalog.json
+
 # local Slidev test export artifacts
 docs/export/*
 !docs/export/README.md

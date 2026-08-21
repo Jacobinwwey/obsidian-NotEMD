@@ -1,13 +1,6 @@
 import * as fs from 'fs';
 import * as path from 'path';
 
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const referenceCatalog = require('../diagram/diagramReferenceCatalog.json') as Array<{
-    id: string;
-    previewAssetId: string;
-    screenshotFileName: string;
-}>;
-
 const repoRoot = path.resolve(__dirname, '..', '..');
 // The gallery runtime is a CommonJS script outside the plugin TypeScript root.
 // Keep it as a test-only host boundary so production tsc does not absorb scripts/.
@@ -64,13 +57,6 @@ describe('diagram gallery generator', () => {
         expect(entrySource).not.toMatch(/const\s+fixtures\s*=/i);
         expect(packageJson.scripts['diagram:gallery']).toBe('node scripts/generate-diagram-gallery.js');
         expect(packageJson.scripts['diagram:gallery:check']).toBe('node scripts/generate-diagram-gallery.js --check');
-        expect(packageJson.scripts['verify:diagram-reference-assets']).toBe('node scripts/verify-diagram-reference-assets.js');
     });
 
-    test('keeps the reference catalog complete and uniquely addressable', () => {
-        expect(referenceCatalog).toHaveLength(27);
-        expect(new Set(referenceCatalog.map(entry => entry.id)).size).toBe(27);
-        expect(new Set(referenceCatalog.map(entry => entry.previewAssetId)).size).toBe(27);
-        expect(referenceCatalog.every(entry => entry.screenshotFileName.endsWith('.png'))).toBe(true);
-    });
 });

@@ -52,7 +52,7 @@ The following names come from `ref/diagram-design` and are not currently selecta
 
 ## Preview and Gallery Contract
 
-The settings gallery and generation workbench consume `src/ui/diagramCapabilityGallery.ts`. Shipped rows use production renderer fixtures; mapped shipped rows additionally show a bundled reference screenshot, while reference-only rows expose only a reference preview action. The generated docs gallery remains production-renderer-backed and produces:
+The Settings page and generation workbench use `src/ui/diagramTypePreviewPanel.ts`. The type selector exposes only executable catalog entries; after selection, one fixed-size panel renders the chosen fixture through `renderDiagramExampleThumbnail()`. The generated docs gallery remains production-renderer-backed and produces:
 
 - `docs/assets/diagrams/<fixture-id>.svg`
 - `docs/assets/diagrams/<fixture-id>.png`
@@ -61,7 +61,7 @@ The settings gallery and generation workbench consume `src/ui/diagramCapabilityG
 
 The generator must use the production fixture catalog, fail on missing previews or stale assets, and keep filenames stable. It must not duplicate fixture data in documentation scripts.
 
-The runtime capability manifest also carries all 27 pinned `diagram-design` reference-preview descriptors. Their screenshots are bundled as offline PNG data URLs and are explanatory evidence, not generation contracts. A reference-only row must never be added to `DiagramIntent`, the planner, or the `Use this diagram type` action.
+`ref/diagram-design` remains a development-only taxonomy and quality reference. Its 22 reference-only layouts stay in `referenceOnlyLayouts` for roadmap accounting, but no screenshot, data URL, selector row, or preview API is shipped. Promotion requires a typed input contract, production renderer, fixture, target/export matrix, accessibility evidence, docs row, and automated gate.
 
 ## Consumer Gates
 

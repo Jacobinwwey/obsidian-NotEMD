@@ -2,7 +2,7 @@
 
 Language: **English** | [简体中文](./diagram-gallery.zh-CN.md)
 
-This page is the user-facing inventory of the diagram types that Notemd can execute today. It is generated from the same executable fixtures used by the settings and workbench capability galleries. The committed [gallery manifest](./assets/diagrams/manifest.json) records the production target, preview target, and SVG hash for every image.
+This page is the user-facing inventory of the diagram types that Notemd can execute today. It is generated from the the same executable fixtures used by the Settings and Workbench type selectors. The committed [gallery manifest](./assets/diagrams/manifest.json) records the production target, preview target, and SVG hash for every image.
 
 ## Scope And Contract
 
@@ -10,7 +10,7 @@ This page is the user-facing inventory of the diagram types that Notemd can exec
 - **Default target** is the planner's normal render target. **Compatible targets** are explicit renderer contracts, not a promise that every target has identical layout semantics.
 - Preview images are production renderer output, generated with `npm run diagram:gallery`. Run `npm run diagram:gallery:check` in CI or before publishing docs.
 - The reference repository [cathrynlavery/diagram-design](https://github.com/cathrynlavery/diagram-design) is used as a taxonomy and documentation reference. Its layouts are listed separately below and are not shipped Notemd features.
-- The workbench and settings type pickers also show pinned, bundled reference screenshots for the 27 `diagram-design` visual types. Those screenshots are explanatory assets only; a reference-only row cannot change the generation intent or start a generation request.
+- The workbench and settings type pickers list only executable Notemd types. After a user selects one type, a single preview panel renders that type through Notemd's production renderer; no `diagram-design` screenshot is loaded or bundled.
 
 ## Shipped Types
 
@@ -96,7 +96,7 @@ This page is the user-facing inventory of the diagram types that Notemd can exec
 
 ## Reference-Only Layouts
 
-The following 22 IDs are imported from `ref/diagram-design` for comparison and future admission discussions. They are intentionally namespaced as `diagram-design:*`, carry reference revision `09df49d8d1a1c7fb2efdfcdc7a2a0713534350a6`, and do not appear in the runtime intent selector. They do appear in the workbench's reference gallery with a bundled screenshot and an `Open reference preview` action; they do not expose `Use this diagram type`:
+The following 22 IDs are imported from `ref/diagram-design` for development-time taxonomy comparison and future admission discussions. They are intentionally namespaced as `diagram-design:*`, carry reference revision `09df49d8d1a1c7fb2efdfcdc7a2a0713534350a6`, and do not appear in the runtime intent selector or plugin UI. The checkout is never bundled and its original screenshots are never displayed:
 
 `architecture`, `it-current-state`, `flowchart`, `sequence`, `state-machine`, `er-data-model`, `loop`, `nested`, `tree`, `layer-stack`, `venn`, `pyramid-funnel`, `bar-chart`, `line-chart`, `gantt`, `scatter-plot`, `high-level`, `process`, `medallion`, `data-flow`, `dp-integration`, `dp-security-matrix`.
 

@@ -15,9 +15,7 @@ import {
     applyDiagramRenderTargetPreference
 } from '../diagram/diagramPreferenceCompatibility';
 import { getExecutableDiagramIntentOptions } from './diagramCatalogLabels';
-import { renderDiagramCapabilityGallery } from './diagramCapabilityGallery';
-import { getDiagramReferenceAsset } from './diagramReferenceAssets';
-import { getExecutableDiagramType } from '../diagram/diagramTypeCatalog';
+import { renderDiagramTypePreviewPanel, resolveDiagramPreviewTypeId, type DiagramTypePreviewPanelController } from './diagramTypePreviewPanel';
 import {
     DEFAULT_PREVIEW_EXPORT_PPI,
     MAX_PREVIEW_EXPORT_PPI,
@@ -100,6 +98,7 @@ export class NotemdSettingTab extends PluginSettingTab {
     private readonly settingDeclarationCopy = new Map<HTMLElement, { name: string; description: string }>();
     private readonly settingDeclarationOptions = new Map<HTMLElement, SettingDeclarationOptions>();
     private settingsDiscoveryCleanup?: () => void;
+    private diagramTypePreviewController: DiagramTypePreviewPanelController | null = null;
 
     private createCatalogSetting(containerEl: HTMLElement, options: SettingDeclarationOptions = {}): Setting {
         const setting = new Setting(containerEl);
@@ -1963,6 +1962,8 @@ export class NotemdSettingTab extends PluginSettingTab {
 
     display(): void {
         const { containerEl } = this;
+        this.diagramTypePreviewController?.destroy();
+        this.diagramTypePreviewController = null;
         containerEl.empty();
         this.settingDeclarationCopy.clear();
         this.settingDeclarationOptions.clear();
@@ -2763,7 +2764,7 @@ export class NotemdSettingTab extends PluginSettingTab {
                             value === 'auto' ? undefined : value as DiagramIntent
                         );
                         await this.plugin.saveSettings();
-                        this.display();
+                        this.diagramTypePreviewController?.setSelectedType(resolveDiagramPreviewTypeId(value));
                     });
             });
 
@@ -2788,7 +2789,6 @@ export class NotemdSettingTab extends PluginSettingTab {
                             value === 'auto' ? undefined : value as RenderTarget
                         );
                         await this.plugin.saveSettings();
-                        this.display();
                     });
             });
 
@@ -2797,9 +2797,8 @@ export class NotemdSettingTab extends PluginSettingTab {
         })
             .setName(experimentalDiagramI18n.diagramExampleGalleryName)
             .setDesc(experimentalDiagramI18n.diagramExampleGalleryDesc);
-        renderDiagramCapabilityGallery({
+        this.diagramTypePreviewController = renderDiagramTypePreviewPanel({
             parent: exampleSetting.controlEl,
-            locale: this.plugin.settings.uiLocale,
             copy: {
                 intentMindmap: experimentalDiagramI18n.intentMindmap,
                 intentDrawnixKnowledgeMap: experimentalDiagramI18n.intentDrawnixKnowledgeMap,
@@ -2816,40 +2815,19 @@ export class NotemdSettingTab extends PluginSettingTab {
                 intentTimeline: experimentalDiagramI18n.intentTimeline,
                 intentSwimlane: experimentalDiagramI18n.intentSwimlane,
                 intentQuadrant: experimentalDiagramI18n.intentQuadrant,
-                shippedSection: experimentalDiagramI18n.diagramCapabilityShippedSection,
-                referenceOnlySection: experimentalDiagramI18n.diagramCapabilityReferenceOnlySection,
-                shippedStatus: experimentalDiagramI18n.diagramCapabilityShippedStatus,
-                referenceOnlyStatus: experimentalDiagramI18n.diagramCapabilityReferenceOnlyStatus,
-                preview: experimentalDiagramI18n.diagramExamplePreview,
-                referencePreview: experimentalDiagramI18n.diagramReferencePreview,
-                useType: experimentalDiagramI18n.diagramExampleUseType,
-                openReference: experimentalDiagramI18n.diagramReferenceOpen,
-                thumbnailLoading: experimentalDiagramI18n.diagramExampleThumbnailLoading,
-                thumbnailUnavailable: experimentalDiagramI18n.diagramExampleThumbnailUnavailable,
-                referenceUnavailable: experimentalDiagramI18n.diagramReferenceUnavailable,
+                title: experimentalDiagramI18n.diagramTypePreviewTitle,
+                empty: experimentalDiagramI18n.diagramTypePreviewEmpty,
+                loading: experimentalDiagramI18n.diagramTypePreviewLoading,
+                unavailable: experimentalDiagramI18n.diagramTypePreviewUnavailable,
+                failed: experimentalDiagramI18n.diagramTypePreviewFailed,
                 targetPrefix: experimentalDiagramI18n.diagramCapabilityTargetPrefix,
-                formatsPrefix: experimentalDiagramI18n.diagramCapabilityFormatsPrefix,
-                sourcePrefix: experimentalDiagramI18n.diagramCapabilitySourcePrefix,
-                familyLabels: {
-                    knowledge: experimentalDiagramI18n.diagramExampleFamilyKnowledge,
-                    behavior: experimentalDiagramI18n.diagramExampleFamilyBehavior,
-                    structure: experimentalDiagramI18n.diagramExampleFamilyStructure,
-                    quantitative: experimentalDiagramI18n.diagramExampleFamilyQuantitative,
-                    engineering: experimentalDiagramI18n.diagramExampleFamilyEngineering
-                }
+                formatsPrefix: experimentalDiagramI18n.diagramCapabilityFormatsPrefix
             },
-            onPreview: typeId => this.plugin.openDiagramExamplePreview(typeId),
-            onPreviewReference: referenceId => this.plugin.openDiagramReferencePreview(referenceId),
-            onUseType: async typeId => {
-                const type = getExecutableDiagramType(typeId);
-                applyDiagramIntentPreference(this.plugin.settings, type.intent);
-                applyDiagramRenderTargetPreference(this.plugin.settings, type.defaultTarget);
-                await this.plugin.saveSettings();
-                this.display();
-            },
-            renderThumbnail: example => this.plugin.renderDiagramExampleThumbnail(example.typeId),
-            resolveReferenceAsset: getDiagramReferenceAsset
+            renderThumbnail: typeId => this.plugin.renderDiagramExampleThumbnail(typeId)
         });
+        this.diagramTypePreviewController.setSelectedType(
+            resolveDiagramPreviewTypeId(this.plugin.settings.preferredDiagramIntent || 'auto')
+        );
 
         this.createCatalogSetting(containerEl, {
             id: 'settings.experimentalDiagramPipeline.previewExport',

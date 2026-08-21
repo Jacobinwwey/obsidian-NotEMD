@@ -137,7 +137,7 @@ Phase 2 的剩余工作被刻意收窄：仅在不抹平人工可读示例和兼
 
 ### Phase 3：确定性预览 gallery
 
-**文件：** `src/ui/diagramExampleGallery.ts`、新增 `scripts/generate-diagram-gallery.js`、新增 `scripts/lib/diagram-gallery-runtime.js`、`docs/assets/diagrams/`（生成物）、`docs/maintainer/diagram-capability-catalog.*`。
+**文件：** `src/ui/diagramTypePreviewPanel.ts`、新增 `scripts/generate-diagram-gallery.js`、新增 `scripts/lib/diagram-gallery-runtime.js`、`docs/assets/diagrams/`（生成物）、`docs/maintainer/diagram-capability-catalog.*`。
 
 复用现有 executable fixture 和生产渲染器。生成器应：
 
@@ -147,7 +147,7 @@ Phase 2 的剩余工作被刻意收窄：仅在不抹平人工可读示例和兼
 4. 生成带版本的 capability manifest，并删除过期生成物。
 5. 若已发布类型缺预览、文件名意外变化或生成 manifest 与受控目录不一致，则失败。
 
-应用内 gallery 应增加 inline 缩略图、target/export badges 和“使用此类型”动作；原有 eye-button 作为键盘可访问的回退入口保留。现已由 `src/ui/diagramCapabilityGallery.ts` 实现，并由设置页和 Notemd 工作台共享。已交付行使用生产缩略图；全部 27 个参考布局都有固定版本的离线截图；仅参考行只可预览，不能修改生成偏好。
+应用内选择器由设置页和 Notemd 工作台共享一个选择驱动的预览面板。用户选择可执行类型后，调用 `renderDiagramExampleThumbnail()`，在固定尺寸面板中显示生产 SVG、加载、不可用或错误状态。`ref/diagram-design` 仅是开发期 taxonomy；任何原始截图都不会打包或显示。
 
 **门禁：** Playwright 在桌面和窄屏下 smoke；生成预览不得发出网络请求；每个 SVG 必须有 `role="img"`、`<title>`、`<desc>` 和稳定 ID。
 
@@ -155,7 +155,7 @@ Phase 2 的剩余工作被刻意收窄：仅在不抹平人工可读示例和兼
 
 **文件：** `README.md`、`README_zh.md`、`docs/README*`、`docs/index*`、`docs/.vitepress/config.mts`、`docs/maintainer/diagram-capability-catalog.*`。
 
-从 manifest 生成支持矩阵。明确区分“已发布”“部分支持”和“参考/计划中”。每个已发布类型链接到预览图与 fixture ID。runtime manifest 现在还携带全部 27 个固定版本的参考预览描述，并由构建门禁确认内置截图与 reference checkout 一致。没有对应外部 consumer gate 时，不要宣称 Draw.io、Drawnix 或 Circuitikz 的互操作已完成。
+从 manifest 生成支持矩阵。明确区分“已发布”“部分支持”和“参考/计划中”。每个已发布类型链接到预览图与 fixture ID。runtime manifest 只携带可执行能力与仅参考路线图元数据；构建只校验生产 fixture 覆盖，不读取 reference checkout。没有对应外部 consumer gate 时，不要宣称 Draw.io、Drawnix 或 Circuitikz 的互操作已完成。
 
 ### Phase 5：从 `diagram-design` 引入候选
 
@@ -196,8 +196,8 @@ preview/export 与 render-host 的 target dispatch 已通过 keyed adapter 收�
 | 0. 正确性基础 | 完成 | 设置清洗持久化、重试 artifact 真值、editable SVG 预览、target descriptor 和有界 cache 均有定向测试。 |
 | 1. 三轴目录 | 完成 | 15 个语义类型、8 个 target、兼容性准入、fixture 覆盖和稳定 ID 均已可执行。 |
 | 2. 运行时契约 | 基本完成 | 输入/结果校验由与 registry 无关的 runtime 负责；registry 现在会在加载时对非法 schema、重复 ID/绑定 fail-closed。结构化 `OperationSchema`、宿主输入 metadata 与人工可读 help 仍有意分离。 |
-| 3. 确定性预览 gallery | 完成 | 生产 fixture 同时生成设置页/工作台缩略图与双语 SVG/PNG 文档 gallery；capability gallery 还渲染 27 个固定版本的离线参考截图；`diagram:gallery:check` 与 `verify:diagram-reference-assets` 是新鲜度门禁。 |
-| 4. 双语发现入口 | 已发布与参考预览范围完成 | 支持矩阵已链接已发布示例；参考布局仍计划用于生成，但会在类型选择区以状态和截图可见。 |
+| 3. 确定性预览 gallery | 完成 | 生产 fixture 生成选择驱动的设置页/工作台单面板预览与双语 SVG/PNG 文档 gallery；`diagram:gallery:check` 是新鲜度门禁，参考截图不属于运行时资产。 |
+| 4. 双语发现入口 | 已发布范围完成 | 支持矩阵链接已发布示例；参考布局仅保留为开发期路线图，不在类型选择区显示。 |
 | 5. 候选准入 | 部分交付 | timeline、swimlane、quadrant 与 org chart 是受限 Mermaid-only 类型；Radar 与 org chart 都已有独立 schema、adapter、语义 HTML fallback、与旧 spec 兼容的字段、fixture、gallery 资产和定向测试；其余参考布局继续受门禁控制。 |
 | 6. 收敛与发布 | 代码已收敛，外部发布证据阻塞 | target adapter、webview presentation registry、Mermaid 规范化、共享 Drawnix 几何和 Circuitikz 模板收敛已落地。独立 Plait consumer gate 已用生产 fixture 通过；当前工作区仍没有 Draw.io 或真实 Drawnix 应用，因此不宣称外部互操作。 |
 

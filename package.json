@@ -18,7 +18,6 @@
 		"diagram:export-artifact": "node scripts/export-diagram-artifact.js",
 		"diagram:gallery": "node scripts/generate-diagram-gallery.js",
 		"diagram:gallery:check": "node scripts/generate-diagram-gallery.js --check",
-		"verify:diagram-reference-assets": "node scripts/verify-diagram-reference-assets.js",
 		"benchmark:drawnix-knowledge-map": "node scripts/benchmark-drawnix-knowledge-map.js",
 		"diagram:consumer:drawnix": "node scripts/run-drawnix-consumer-gate.mjs",
 		"diagram:export-circuitikz": "node scripts/export-circuitikz.js",

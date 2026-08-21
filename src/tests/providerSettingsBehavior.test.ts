@@ -1,7 +1,6 @@
 import { Notice } from 'obsidian';
 import { NotemdSettingTab } from '../ui/NotemdSettingTab';
 import { DEFAULT_SETTINGS } from '../constants';
-import { EXECUTABLE_DIAGRAM_TYPES } from '../diagram/diagramTypeCatalog';
 import { mockApp } from './__mocks__/app';
 
 jest.mock('../providerModelDiscovery', () => ({
@@ -28,6 +27,8 @@ type MockElement = {
     id?: string;
     hidden?: boolean;
     textContent: string;
+    innerHTML?: string;
+    remove?: jest.Mock;
     classList: {
         add: (cls: string) => void;
         remove: (cls: string) => void;
@@ -361,6 +362,7 @@ function createMockElement(
     const element = {
         tag,
         text: options.text ?? '',
+        innerHTML: '',
         cls: options.cls ?? '',
         open: false,
         value: options.value ?? '',
@@ -393,6 +395,7 @@ function createMockElement(
         toggleAttribute: jest.fn(),
         scrollIntoView: jest.fn(),
         focus: jest.fn(),
+        remove: jest.fn(),
         matches: (selector: string) => matchesSimpleSelector(element as MockElement, selector),
         contains: (node: unknown) => {
             if (node === element) {
@@ -876,37 +879,28 @@ describe('provider settings behavior', () => {
         expect(plugin.saveSettings).toHaveBeenCalledTimes(2);
     });
 
-    test('groups executable diagram examples and previews them through the plugin renderer path', async () => {
+    test('renders one selected production preview without a reference-image column', async () => {
         const plugin = createPlugin();
         plugin.settings.enableDeveloperMode = false;
+        plugin.settings.preferredDiagramIntent = 'flowchart';
         const tab = new NotemdSettingTab(mockApp as any, plugin as any) as any;
         tab.display();
 
-        const gallery = findElementByClass(tab.containerEl, 'notemd-diagram-example-gallery');
-        expect(gallery).toBeDefined();
-        const previewButtons = flattenElements(gallery!).filter(element => (
-            Boolean(element.getAttribute('data-notemd-diagram-example-type'))
-        ));
-        expect(previewButtons.map(button => button.getAttribute('data-notemd-diagram-example-type')).sort()).toEqual(
-            EXECUTABLE_DIAGRAM_TYPES.map(type => type.id).sort()
-        );
-        const thumbnails = flattenElements(gallery!).filter(element => (
-            element.cls.split(' ').includes('notemd-diagram-example-thumbnail')
-        ));
-        expect(thumbnails).toHaveLength(EXECUTABLE_DIAGRAM_TYPES.length);
-        expect(thumbnails.every(thumbnail => thumbnail.getAttribute('role') === 'img')).toBe(true);
-        const useButtons = flattenElements(gallery!).filter(element => (
-            Boolean(element.getAttribute('data-notemd-diagram-example-use'))
-        ));
-        expect(useButtons).toHaveLength(EXECUTABLE_DIAGRAM_TYPES.length);
+        const panel = findElementByClass(tab.containerEl, 'notemd-diagram-type-preview-panel');
+        expect(panel).toBeDefined();
+        expect(findElementByClass(tab.containerEl, 'notemd-diagram-capability-gallery')).toBeUndefined();
+        expect(flattenElements(tab.containerEl).filter(element => element.tag === 'img')).toHaveLength(0);
+        expect(flattenElements(panel!).filter(element => element.cls.includes('notemd-diagram-type-preview-canvas'))).toHaveLength(1);
 
-        const drawnixPreview = previewButtons.find(button => (
-            button.getAttribute('data-notemd-diagram-example-type') === 'drawnix-knowledge-map'
-        ));
-        drawnixPreview?.dispatch('click');
+        const intentSetting = findSettingByName(tab.containerEl, 'Preferred diagram type');
+        const intentDropdown = intentSetting?.controls.find(control => control.kind === 'dropdown') as MockDropdownControl | undefined;
+        await intentDropdown?.onChangeHandler?.('sequence');
+        await Promise.resolve();
         await Promise.resolve();
 
-        expect(plugin.openDiagramExamplePreview).toHaveBeenCalledWith('drawnix-knowledge-map');
+        expect(plugin.renderDiagramExampleThumbnail).toHaveBeenCalledWith('sequence');
+        const canvas = findElementByClass(panel!, 'notemd-diagram-type-preview-canvas');
+        expect(canvas?.getAttribute('data-preview-state')).toBe('ready');
     });
 
     test('does not render the retired Drawnix delivery selector', async () => {

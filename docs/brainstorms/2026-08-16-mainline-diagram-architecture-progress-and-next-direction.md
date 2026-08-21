@@ -28,7 +28,7 @@ The correct next move is convergence. Adding more visual types before closing co
 | Semantic domain | 15 executable semantic diagram types | `src/diagram/diagramTypeCatalog.ts`, `src/diagram/examples/diagramExampleCatalog.ts` |
 | Render targets | 8 registered targets; target identity is separate from export format | `src/rendering/rendererRegistry.ts`, `src/rendering/renderTargetCatalog.ts` |
 | Export formats | SVG/PNG/PDF where the target supports them; editable HTML/SVG carries `previewSvg` | target catalog and renderer integration tests |
-| Discoverability | Settings and workbench selectors share a capability gallery; shipped rows show production thumbnails, mapped rows show pinned reference screenshots, and reference-only rows are preview-only | `src/ui/diagramCapabilityGallery.ts`, `diagramCapabilityManifest.test.ts`, `diagramExamplePreview.test.ts` |
+| Discoverability | Settings and workbench selectors expose executable types; selection opens one production-renderer preview panel; reference-only taxonomy stays outside UI | `src/ui/diagramTypePreviewPanel.ts`, `diagramCapabilityManifest.test.ts`, `diagramExamplePreview.test.ts` |
 | Static gallery | 15 SVG/PNG pairs generated from production fixtures; stale assets fail the check | `scripts/generate-diagram-gallery.js`, `npm run diagram:gallery:check` |
 | Drawnix | Filename-rooted native tree, `.drawnix` plus SVG companion and Markdown wrapper | Drawnix implementation record, export tests, and `npm run diagram:consumer:drawnix` |
 | Circuitikz | Constrained native templates and CLI compiler path; six golden fixtures compile under TeX Live 2023 | `src/diagram/adapters/circuitikz`, `scripts/export-circuitikz.js`, smoke report |
@@ -62,7 +62,9 @@ The correct next move is convergence. Adding more visual types before closing co
 
 22. Admitted `radar-chart` as the first non-Mermaid Phase 5 candidate after a real Vega-Lite browser render. `radarSpec` enforces bounded axes and complete per-series axis coverage; the adapter computes deterministic polar coordinates and emits grid, axis, closed profile-line, point, and label layers. The same production fixture now feeds settings, docs SVG/PNG, and the explicit HTML table fallback. `dataChart` `chartType: radar` remains rejected.
 
-23. Added a versioned reference-preview projection for all 27 `diagram-design` visual types. Settings and the generation workbench now share `diagramCapabilityGallery.ts`: executable rows retain production renderer previews and `Use type`, while reference-only rows show bundled offline screenshots and an explicit reference-preview action without entering the intent selector. PNG assets are loaded as build-time data URLs, so the feature remains available offline and does not depend on a vault-relative path.
+23. Replaced the flattened reference gallery with a shared selection-driven `diagramTypePreviewPanel.ts`. Settings and the generation workbench expose executable types only; after a user selects one, the panel calls `renderDiagramExampleThumbnail()` and renders the production SVG. The `ref/diagram-design` checkout remains development-only taxonomy/quality evidence; no original screenshot, data URL, selector row, or reference-preview API enters the plugin runtime.
+
+24. Completed the release verification slice for the selection-driven preview. `npm.cmd run build`, targeted Jest (57 tests), full Jest (263 suites, 2307 passed, 1 skipped), `npm.cmd run docs:build`, `npm.cmd run diagram:gallery:check`, and `npm.cmd run audit:i18n-ui` all pass. The existing `1Knowledge` Obsidian process was reloaded through the CLI/eval plugin lifecycle after deployment; runtime evidence showed one preview panel, zero legacy gallery nodes, zero reference images, 16 selector options, a ready production SVG, a 44px selector target, and a 16:9 canvas. Frontend-law-auditor strict gate scored 91.32/100 with no failures; p95 timing and mobile screenshot evidence remain explicit data gaps.
 
 ## Comparison With `diagram-design`
 
@@ -71,7 +73,7 @@ The correct next move is convergence. Adding more visual types before closing co
 | Semantic selection | Pattern pages map to visual layouts | `DiagramIntent` routes to a typed catalog | Preserve intent-first routing |
 | Visual taxonomy | 27 layout grammars | 15 executable semantic types | Admit candidates only through evidence gates |
 | Artifact/export | Self-contained HTML/SVG/PNG examples | 8 targets and independently declared export capabilities | Keep target and export orthogonal |
-| Preview | Example HTML assets | Production fixture thumbnails plus bundled reference screenshots in settings/workbench; reference rows remain non-executable | Keep production and reference evidence visibly distinct |
+| Preview | Example HTML assets | Selection-driven production fixture preview panel; reference taxonomy remains outside settings/workbench | Keep production and reference evidence visibly distinct |
 | Governance | Type references and complexity budgets | Versioned capability/target manifests plus tests | Treat manifests and tests as the contract |
 | Contract boundary | Human-readable command examples sit beside pattern docs | Pure schema runtime plus registry admission; host/core schemas stay explicit | Fail closed on malformed contracts without collapsing UI and CLI context |
 
@@ -84,7 +86,7 @@ The reference taxonomy still supplies architecture, current-state, loop, nested,
 | One executable source for operation contracts | Registry schemas are validated by a registry-independent runtime and exported into CLI contracts | Maintainer host metadata is intentionally separate from host-neutral schemas; a generated pure-data catalog is still a future migration |
 | Reference layouts must have real semantics, not aliases | Timeline, swimlane, quadrant, and radar have bounded payloads, adapters, fixtures, previews, and tests | Remaining reference layouts stay gated until they have equivalent renderer and consumer evidence |
 | External interoperability must be proven by a consumer | Plait public-API consumer and pinned Circuitikz compiler gates pass | Draw.io and a real Drawnix application are unavailable, so application-level compatibility is not claimed |
-| Documentation must expose support and previews | Bilingual docs retain 15 production SVG/PNG pairs; the runtime manifest and capability gallery expose all 27 pinned reference screenshots | New types and reference-asset changes must keep asset availability, UI status, docs parity, and gallery freshness gates in the same change |
+| Documentation must expose support and previews | Bilingual docs retain 15 production SVG/PNG pairs; the runtime manifest exposes executable capabilities and reference-only roadmap metadata, while the UI renders only the selected production preview | New types and reference-asset changes must keep asset availability, UI status, docs parity, and gallery freshness gates in the same change |
 
 ## Risk Register And Tradeoffs
 

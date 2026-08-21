@@ -28,7 +28,7 @@ implementation_record: src/tests/mermaidNormalizationConvergence.test.ts
 | 语义域 | 15 个可执行语义图形类型 | `src/diagram/diagramTypeCatalog.ts`、`src/diagram/examples/diagramExampleCatalog.ts` |
 | 渲染目标 | 8 个 registry target；target 身份与导出格式分离 | `src/rendering/rendererRegistry.ts`、`src/rendering/renderTargetCatalog.ts` |
 | 导出格式 | target 按能力提供 SVG/PNG/PDF；editable HTML/SVG 携带 `previewSvg` | target catalog 与 renderer 集成测试 |
-| 可发现性 | 设置页和工作台共享 capability gallery；已交付行显示生产缩略图，有映射的类型显示固定版本参考图，仅参考行只提供预览 | `src/ui/diagramCapabilityGallery.ts`、`diagramCapabilityManifest.test.ts`、`diagramExamplePreview.test.ts` |
+| 可发现性 | 设置页和工作台只列可执行类型；选择后显示一个生产 renderer 动态预览面板；仅参考 taxonomy 不进入 UI | `src/ui/diagramTypePreviewPanel.ts`、`diagramCapabilityManifest.test.ts`、`diagramExamplePreview.test.ts` |
 | 静态 gallery | 15 组生产 fixture 生成的 SVG/PNG；过期资源会让检查失败 | `scripts/generate-diagram-gallery.js`、`npm run diagram:gallery:check` |
 | Drawnix | 文件名根原生树、`.drawnix`、SVG companion、Markdown wrapper | Drawnix implementation record、导出测试与 `npm run diagram:consumer:drawnix` |
 | Circuitikz | 受限原生模板与 CLI 编译路径；6 个 golden fixture 已在 TeX Live 2023 下编译 | `src/diagram/adapters/circuitikz`、`scripts/export-circuitikz.js`、smoke report |
@@ -62,7 +62,9 @@ implementation_record: src/tests/mermaidNormalizationConvergence.test.ts
 
 22. 在真实 Vega-Lite 浏览器渲染证据通过后，将 `radar-chart` 作为 Phase 5 首个非 Mermaid 候选交付。`radarSpec` 约束轴数量与每个 series 的完整轴覆盖；adapter 确定性计算极坐标并输出网格、轴线、闭合 profile 折线、点和标签 layers。同一生产 fixture 同时供设置页、文档 SVG/PNG 与明确的 HTML 表格 fallback 使用；`dataChart` 的 `chartType: radar` 继续被拒绝。
 
-23. 为全部 27 个 `diagram-design` visual type 增加带版本的 reference-preview 投影。设置页和生成工作台现在共享 `diagramCapabilityGallery.ts`：可执行行保留生产 renderer 预览与“使用此类型”，仅参考行显示内置离线截图，并提供明确的参考图预览动作，但不会进入 intent 选择器。PNG 以构建期 data URL 加载，离线使用不依赖 Vault 相对路径。
+23. 将平铺 reference gallery 改为共享的选择驱动 `diagramTypePreviewPanel.ts`。设置页和生成工作台只暴露可执行类型；用户选择后，面板调用 `renderDiagramExampleThumbnail()` 并显示生产 SVG。`ref/diagram-design` 仅保留开发期 taxonomy/质量证据，不再有原始截图、data URL、选择器条目或 reference-preview API 进入运行时。
+
+24. 完成选择驱动预览的发布验证切片。`npm.cmd run build`、定向 Jest（57 个测试）、全量 Jest（263 suites，2307 passed，1 skipped）、`npm.cmd run docs:build`、`npm.cmd run diagram:gallery:check` 和 `npm.cmd run audit:i18n-ui` 全部通过。已通过 CLI/eval 插件生命周期重载现有 `1Knowledge` Obsidian 进程并部署最新 bundle；运行时证据显示 1 个预览面板、0 个旧 gallery 节点、0 张参考图、16 个选择器选项、生产 SVG ready、选择器高度 44px、画布比例 16:9。frontend-law-auditor strict gate 得分 91.32/100，无失败项；p95 交互时延和移动端截图仍明确记录为证据缺口。
 
 ## 与 `diagram-design` 的对比
 
@@ -71,7 +73,7 @@ implementation_record: src/tests/mermaidNormalizationConvergence.test.ts
 | 语义选择 | pattern 页面映射到 visual layout | `DiagramIntent` 路由到 typed catalog | 保留 intent-first |
 | 视觉 taxonomy | 27 种布局语法 | 15 个可执行语义类型 | 只通过证据门禁增量准入 |
 | 产物/导出 | 自包含 HTML/SVG/PNG 示例 | 8 个 target，导出能力独立声明 | target 与 export 正交 |
-| 预览 | 示例 HTML 资产 | 设置页/工作台使用生产 fixture 缩略图，并内置参考截图；仅参考行保持不可执行 | 明确区分生产证据与参考证据 |
+| 预览 | 示例 HTML 资产 | 设置页/工作台使用选择驱动的生产 fixture 动态预览；reference taxonomy 留在 UI 之外 | 明确区分生产证据与参考证据 |
 | 治理 | type references 与 complexity budget | versioned capability/target manifest 加测试 | manifest 与测试共同构成契约 |
 | 契约边界 | pattern 文档旁附带人工可读命令示例 | 纯 schema runtime 加 registry admission；host/core schema 保持显式 | 对非法契约 fail-closed，但不合并 UI 与 CLI 上下文 |
 
@@ -84,7 +86,7 @@ implementation_record: src/tests/mermaidNormalizationConvergence.test.ts
 | Operation 契约应有可执行事实源 | registry schema 已由与 registry 无关的 runtime 校验，并导出 CLI contract | maintainer 宿主 metadata 有意区别于 host-neutral schema；可生成纯数据目录仍是后续迁移 |
 | 参考布局必须是真语义而非别名 | timeline、swimlane、quadrant 已具备受限 payload、adapter、fixture、预览与测试 | Radar 仍需真实 Vega-Lite adapter，其余参考布局保持计划中 |
 | 外部互操作必须由 consumer 证明 | Plait 公开 API consumer 与固定 Circuitikz compiler gate 已通过 | Draw.io 与真实 Drawnix 应用不可用，因此不宣称应用级兼容 |
-| 文档必须暴露支持类型与预览 | 双语文档保留 15 组生产 SVG/PNG；runtime manifest 与 capability gallery 暴露 27 类固定版本参考截图 | 新类型或参考资产变更必须同时通过资产可用性、UI 状态、文档对齐与 gallery freshness 门禁 |
+| 文档必须暴露支持类型与预览 | 双语文档保留 15 组生产 SVG/PNG；runtime manifest 暴露可执行能力与仅参考路线图元数据，UI 只渲染用户选择的生产预览 | 新类型或参考资产变更必须同时通过资产可用性、UI 状态、文档对齐与 gallery freshness 门禁 |
 
 ## 风险与权衡
 
