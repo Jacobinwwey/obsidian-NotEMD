@@ -280,6 +280,7 @@ export interface DiagramIntentResult {
 export interface DiagramPlanOptions {
     compatibilityMode?: 'best-fit' | 'legacy-mermaid';
     requestedIntent?: DiagramIntent;
+    requestedVariant?: string;
     requestedRenderTarget?: RenderTarget;
 }
 
@@ -289,6 +290,8 @@ export interface DiagramPlan {
     reasons: string[];
     renderTarget: RenderTarget;
     fallbackTargets: RenderTarget[];
+    catalogTypeId?: DiagramCatalogTypeId;
+    variant?: string;
     preferredChartType?: SupportedVegaLiteChartType;
     mermaidDiagramType: MermaidDiagramType | null;
     legacyCompatibilityMode: boolean;

@@ -7,23 +7,22 @@ import type {
     RenderTarget
 } from './types';
 import type { SupportedVegaLiteChartType } from './adapters/vega/schema';
-import { findDefaultDiagramType } from './diagramTypeCatalog';
+import { findDefaultDiagramType, findDiagramType } from './diagramTypeCatalog';
 import { inferDiagramIntent } from './intent';
-
-function resolvePreferredRenderTarget(intent: DiagramIntent): RenderTarget {
-    return findDefaultDiagramType(intent).defaultTarget;
-}
 
 function resolveRequestedRenderTarget(
     intent: DiagramIntent,
     requestedTarget: RenderTarget | undefined,
-    defaultTarget: RenderTarget
+    defaultTarget: RenderTarget,
+    variant?: string
 ): RenderTarget {
     if (!requestedTarget) {
         return defaultTarget;
     }
 
-    const definition = findDefaultDiagramType(intent);
+    const definition = variant === undefined
+        ? findDefaultDiagramType(intent)
+        : findDiagramType(intent, variant);
     if (definition.compatibleTargets.includes(requestedTarget)) {
         return requestedTarget;
     }
@@ -137,6 +136,12 @@ function buildIntentResult(markdown: string, requestedIntent?: DiagramIntent): D
     };
 }
 
+function resolveChartVariant(variant: string | undefined): SupportedVegaLiteChartType | undefined {
+    return variant === 'bar' || variant === 'line' || variant === 'scatter'
+        ? variant
+        : undefined;
+}
+
 const NATIVE_ONLY_LEGACY_OVERRIDE_INTENTS = new Set<DiagramIntent>([
     'drawnixMindmap',
     'canvasMap',
@@ -161,7 +166,10 @@ const NATIVE_ONLY_LEGACY_OVERRIDE_INTENTS = new Set<DiagramIntent>([
 
 export function buildDiagramPlan(markdown: string, options: DiagramPlanOptions = {}): DiagramPlan {
     const inferred = buildIntentResult(markdown, options.requestedIntent);
-    const defaultTarget = resolvePreferredRenderTarget(inferred.intent);
+    const selectedType = options.requestedVariant === undefined
+        ? findDefaultDiagramType(inferred.intent)
+        : findDiagramType(inferred.intent, options.requestedVariant);
+    const defaultTarget = selectedType.defaultTarget;
     const preferredMermaidType = resolveMermaidDiagramType(inferred.intent);
     // Native-only intents must not be forced through a Mermaid mindmap when
     // the global preference remains legacy-mermaid. Existing dataChart keeps
@@ -169,13 +177,20 @@ export function buildDiagramPlan(markdown: string, options: DiagramPlanOptions =
     // intents strengthen the compatibility contract.
     const compatibilityMode = options.compatibilityMode === 'legacy-mermaid'
         && options.requestedIntent
-        && NATIVE_ONLY_LEGACY_OVERRIDE_INTENTS.has(options.requestedIntent)
+        && (NATIVE_ONLY_LEGACY_OVERRIDE_INTENTS.has(options.requestedIntent)
+            || options.requestedVariant !== undefined)
         ? 'best-fit'
         : options.compatibilityMode ?? 'best-fit';
-    const preferredChartType = inferPreferredChartType(markdown, inferred.intent);
+    const preferredChartType = resolveChartVariant(options.requestedVariant)
+        ?? inferPreferredChartType(markdown, inferred.intent);
     const preferredTarget = compatibilityMode === 'legacy-mermaid'
         ? 'mermaid'
-        : resolveRequestedRenderTarget(inferred.intent, options.requestedRenderTarget, defaultTarget);
+        : resolveRequestedRenderTarget(
+            inferred.intent,
+            options.requestedRenderTarget,
+            defaultTarget,
+            options.requestedVariant
+        );
     const fallbackTargets = resolveFallbackTargets(
         compatibilityMode,
         preferredTarget,
@@ -192,7 +207,9 @@ export function buildDiagramPlan(markdown: string, options: DiagramPlanOptions =
             fallbackTargets,
             preferredChartType,
             mermaidDiagramType: preferredMermaidType ?? 'mindmap',
-            legacyCompatibilityMode: true
+            legacyCompatibilityMode: true,
+            catalogTypeId: selectedType.id,
+            variant: selectedType.variant
         };
     }
 
@@ -204,6 +221,8 @@ export function buildDiagramPlan(markdown: string, options: DiagramPlanOptions =
         fallbackTargets,
         preferredChartType,
         mermaidDiagramType: preferredMermaidType,
-        legacyCompatibilityMode: false
+        legacyCompatibilityMode: false,
+        catalogTypeId: selectedType.id,
+        variant: selectedType.variant
     };
 }

@@ -38,6 +38,10 @@
         "sourcePath": { "type": "string" },
         "executionMode": { "type": "string", "enum": ["save-artifact", "save-mermaid"] },
         "requestedIntent": { "type": "string" },
+        "requestedTypeId": {
+          "type": "string",
+          "enum": ["mermaid-mindmap", "drawnix-knowledge-map", "flowchart", "sequence", "state", "class", "entity-relationship", "canvas-map", "data-chart", "radar-chart", "org-chart", "circuit", "timeline", "swimlane", "quadrant", "bar-chart", "line-chart", "scatter-plot", "architecture", "current-state", "integration-topology", "data-flow", "access-matrix", "gantt", "layer-stack", "venn", "ranked-funnel", "loop", "nested", "tree", "process", "medallion", "high-level"]
+        },
         "requestedRenderTarget": {
           "type": "string",
           "enum": ["mermaid", "json-canvas", "vega-lite", "html", "editable-html-svg", "drawio", "drawnix", "circuitikz"]

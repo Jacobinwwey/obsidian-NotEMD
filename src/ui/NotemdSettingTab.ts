@@ -9,12 +9,15 @@ import {
     TaskKey
 } from '../types';
 import { DEFAULT_SETTINGS } from '../constants';
-import type { DiagramIntent, RenderTarget } from '../diagram/types';
+import type { RenderTarget } from '../diagram/types';
 import {
-    applyDiagramIntentPreference,
-    applyDiagramRenderTargetPreference
+    applyDiagramTypePreference,
+    applyDiagramRenderTargetPreference,
+    getDiagramTypeSelectionValue,
+    resolveDiagramTypeId,
+    resolvePreferredDiagramTypeId
 } from '../diagram/diagramPreferenceCompatibility';
-import { getExecutableDiagramIntentOptions } from './diagramCatalogLabels';
+import { getExecutableDiagramTypeOptions } from './diagramCatalogLabels';
 import { renderDiagramTypePreviewPanel, resolveDiagramPreviewTypeId, type DiagramTypePreviewPanelController } from './diagramTypePreviewPanel';
 import {
     DEFAULT_PREVIEW_EXPORT_PPI,
@@ -2734,14 +2737,16 @@ export class NotemdSettingTab extends PluginSettingTab {
                     });
             });
 
+        let diagramTypeDropdown: { setValue(value: string): unknown } | null = null;
         let renderTargetDropdown: { setValue(value: string): unknown } | null = null;
 
         this.createCatalogSetting(containerEl, { id: 'settings.experimentalDiagramPipeline.intent' })
             .setName(experimentalDiagramI18n.intentName)
             .setDesc(experimentalDiagramI18n.intentDesc)
             .addDropdown(dropdown => {
+                diagramTypeDropdown = dropdown;
                 dropdown.addOption('auto', experimentalDiagramI18n.intentAuto);
-                getExecutableDiagramIntentOptions({
+                getExecutableDiagramTypeOptions({
                     intentMindmap: experimentalDiagramI18n.intentMindmap,
                     intentDrawnixKnowledgeMap: experimentalDiagramI18n.intentDrawnixKnowledgeMap,
                     intentFlowchart: experimentalDiagramI18n.intentFlowchart,
@@ -2752,6 +2757,9 @@ export class NotemdSettingTab extends PluginSettingTab {
                     intentCanvasMap: experimentalDiagramI18n.intentCanvasMap,
                     intentCircuit: experimentalDiagramI18n.intentCircuit,
                     intentDataChart: experimentalDiagramI18n.intentDataChart,
+                    intentBarChart: experimentalDiagramI18n.intentBarChart,
+                    intentLineChart: experimentalDiagramI18n.intentLineChart,
+                    intentScatterPlot: experimentalDiagramI18n.intentScatterPlot,
                     intentRadar: experimentalDiagramI18n.intentRadar,
                     intentOrgChart: experimentalDiagramI18n.intentOrgChart,
                     intentTimeline: experimentalDiagramI18n.intentTimeline,
@@ -2774,17 +2782,22 @@ export class NotemdSettingTab extends PluginSettingTab {
                     intentHighLevel: experimentalDiagramI18n.intentHighLevel
                 }).forEach(({ value, label }) => dropdown.addOption(value, label));
                 dropdown
-                    .setValue(this.plugin.settings.preferredDiagramIntent || 'auto')
+                    .setValue(getDiagramTypeSelectionValue(resolvePreferredDiagramTypeId(this.plugin.settings)))
                     .onChange(async (value: string) => {
-                        applyDiagramIntentPreference(
+                        applyDiagramTypePreference(
                             this.plugin.settings,
-                            value === 'auto' ? undefined : value as DiagramIntent
+                            resolveDiagramTypeId(value)
                         );
                         await this.plugin.saveSettings();
                         renderTargetDropdown?.setValue(
                             this.plugin.settings.preferredDiagramRenderTarget || 'auto'
                         );
-                        this.diagramTypePreviewController?.setSelectedType(resolveDiagramPreviewTypeId(value));
+                        diagramTypeDropdown?.setValue(
+                            getDiagramTypeSelectionValue(resolvePreferredDiagramTypeId(this.plugin.settings))
+                        );
+                        this.diagramTypePreviewController?.setSelectedType(
+                            resolveDiagramPreviewTypeId(getDiagramTypeSelectionValue(resolvePreferredDiagramTypeId(this.plugin.settings)))
+                        );
                     });
             });
 
@@ -2809,6 +2822,12 @@ export class NotemdSettingTab extends PluginSettingTab {
                             this.plugin.settings,
                             value === 'auto' ? undefined : value as RenderTarget
                         );
+                        diagramTypeDropdown?.setValue(
+                            getDiagramTypeSelectionValue(resolvePreferredDiagramTypeId(this.plugin.settings))
+                        );
+                        this.diagramTypePreviewController?.setSelectedType(
+                            resolveDiagramPreviewTypeId(getDiagramTypeSelectionValue(resolvePreferredDiagramTypeId(this.plugin.settings)))
+                        );
                         await this.plugin.saveSettings();
                     });
             });
@@ -2831,6 +2850,9 @@ export class NotemdSettingTab extends PluginSettingTab {
                 intentCanvasMap: experimentalDiagramI18n.intentCanvasMap,
                 intentCircuit: experimentalDiagramI18n.intentCircuit,
                 intentDataChart: experimentalDiagramI18n.intentDataChart,
+                intentBarChart: experimentalDiagramI18n.intentBarChart,
+                intentLineChart: experimentalDiagramI18n.intentLineChart,
+                intentScatterPlot: experimentalDiagramI18n.intentScatterPlot,
                 intentRadar: experimentalDiagramI18n.intentRadar,
                 intentOrgChart: experimentalDiagramI18n.intentOrgChart,
                 intentTimeline: experimentalDiagramI18n.intentTimeline,
@@ -2862,7 +2884,7 @@ export class NotemdSettingTab extends PluginSettingTab {
             renderThumbnail: typeId => this.plugin.renderDiagramExampleThumbnail(typeId)
         });
         this.diagramTypePreviewController.setSelectedType(
-            resolveDiagramPreviewTypeId(this.plugin.settings.preferredDiagramIntent || 'auto')
+            resolveDiagramPreviewTypeId(resolvePreferredDiagramTypeId(this.plugin.settings) || 'auto')
         );
 
         this.createCatalogSetting(containerEl, {

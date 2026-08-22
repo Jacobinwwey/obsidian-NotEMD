@@ -272,6 +272,40 @@ describe('diagram generation service', () => {
         expect(llmInvoker.mock.calls[0][0]).toMatch(/Payload family:\s*topology/i);
     });
 
+    test('carries an explicit quantitative variant through prompt, planning, and rendering', async () => {
+        const llmInvoker = jest.fn().mockResolvedValue(JSON.stringify({
+            schemaVersion: 2,
+            intent: 'dataChart',
+            title: 'Feature adoption',
+            nodes: [],
+            edges: [],
+            payload: {
+                kind: 'quantitative',
+                chartType: 'bar',
+                series: [{
+                    id: 'adoption',
+                    label: 'Adoption',
+                    points: [{ x: 'Search', y: 42 }, { x: 'Export', y: 27 }]
+                }]
+            }
+        }));
+
+        const result = await generateDiagramArtifact('# Feature adoption', {
+            compatibilityMode: 'best-fit',
+            requestedIntent: 'dataChart',
+            requestedVariant: 'bar',
+            requestedRenderTarget: 'vega-lite',
+            targetLanguage: 'en',
+            llmInvoker
+        });
+
+        expect(result.plan.catalogTypeId).toBe('bar-chart');
+        expect(result.plan.variant).toBe('bar');
+        expect(result.spec.payload).toMatchObject({ kind: 'quantitative', chartType: 'bar' });
+        expect(result.artifact.target).toBe('vega-lite');
+        expect(llmInvoker.mock.calls[0][0]).toMatch(/Prompt profile bar-chart v1/i);
+    });
+
     test('honors the Draw.io render target override with an SVG companion', async () => {
         for (const requestedRenderTarget of ['drawio'] as const) {
             const result = await generateDiagramArtifact(`# Runtime Flow

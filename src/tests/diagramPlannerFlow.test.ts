@@ -188,6 +188,18 @@ Top ranked issues this week:
         expect(result.fallbackTargets).toEqual(['html']);
     });
 
+    test('honors an explicit quantitative catalog variant', () => {
+        const result = buildDiagramPlan('# Adoption', {
+            compatibilityMode: 'best-fit',
+            requestedIntent: 'dataChart',
+            requestedVariant: 'bar'
+        });
+
+        expect(result.variant).toBe('bar');
+        expect(result.catalogTypeId).toBe('bar-chart');
+        expect(result.preferredChartType).toBe('bar');
+    });
+
     test('routes org charts through the dedicated Mermaid flowchart adapter', () => {
         const result = buildDiagramPlan('# Support org chart', {
             compatibilityMode: 'best-fit',

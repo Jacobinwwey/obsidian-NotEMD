@@ -1,6 +1,6 @@
 ---
 date: 2026-08-16
-last_updated: 2026-08-21
+last_updated: 2026-08-22
 topic: mainline-diagram-architecture-progress-and-next-direction
 status: active
 canonical_for:
@@ -226,3 +226,15 @@ The staged implementation is now complete in the runtime and production evidence
 ### Evidence snapshot
 
 `npm.cmd run diagram:gallery` generated 33 SVG/PNG pairs; gallery screenshots were visually inspected for topology, lane-grid, matrix, schedule, cycle, nested, tree, and ranked layouts. Focused native-layout tests cover deterministic SVG, accessibility metadata, malformed payload rejection, invalid references, schedule ordering, and budget rejection. The final full regression, docs, gallery, i18n, consumer, render-host, and diff-check gates all passed before commit.
+
+## Variant Discoverability Follow-up (2026-08-22)
+
+The completion audit found a compatibility gap in the first delivery: the catalog contained 33 IDs, but Settings and Workbench deduplicated rows by semantic intent, so `bar-chart`, `line-chart`, and `scatter-plot` could not be selected independently. This is now closed.
+
+- All 33 catalog IDs are exposed through the shared selector and production preview panel.
+- `preferredDiagramTypeId` is the stable persisted selector identity; old `preferredDiagramIntent` values remain readable and resolve to their default catalog row.
+- Explicit quantitative variants carry `requestedVariant` through operation input, planner, prompt profile, generation, and Vega-Lite rendering. They force `best-fit`/Vega-Lite instead of silently falling through the legacy Mermaid path.
+- Maintainer `diagram.generate` accepts `requestedTypeId`; operation registry and generated help metadata include the new field.
+- Incompatible persisted target/type combinations are cleared to Auto at the settings boundary; stale catalog IDs fall back to the legacy semantic preference.
+
+Final evidence after this follow-up: 266 Jest suites passed (2,349 tests passed, 1 skipped); build passed; gallery check passed with 33 entries; VitePress docs, render-host audit, i18n audit, Drawnix public-API consumer gate, and `git diff --check` passed. Repository lint remains baseline debt and is not reclassified as a feature failure.

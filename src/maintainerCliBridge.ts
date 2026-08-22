@@ -254,6 +254,7 @@ function buildDiagramCommandOptions(input: Record<string, unknown>): DiagramComm
     ) || 'save-artifact';
     const inputOverrides: DiagramCommandInputOverrides = {};
     const requestedIntent = optionalString(input, 'requestedIntent');
+    const requestedTypeId = optionalString(input, 'requestedTypeId');
     const requestedRenderTarget = optionalEnum(input, 'requestedRenderTarget', [
         'mermaid', 'json-canvas', 'vega-lite', 'html', 'editable-html-svg', 'drawio', 'drawnix', 'circuitikz'
     ] as const);
@@ -262,6 +263,9 @@ function buildDiagramCommandOptions(input: Record<string, unknown>): DiagramComm
 
     if (requestedIntent) {
         inputOverrides.requestedIntent = requestedIntent as DiagramCommandInputOverrides['requestedIntent'];
+    }
+    if (requestedTypeId) {
+        inputOverrides.requestedTypeId = requestedTypeId as DiagramCommandInputOverrides['requestedTypeId'];
     }
     if (requestedRenderTarget) {
         inputOverrides.requestedRenderTarget = requestedRenderTarget;

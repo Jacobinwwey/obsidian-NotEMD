@@ -1,4 +1,4 @@
-import type { RenderTarget } from './diagram/types';
+import type { DiagramCatalogTypeId, RenderTarget } from './diagram/types';
 import type { DiagramHistoryEntry } from './diagram/history/diagramHistoryRepository';
 
 // Configuration for a single LLM Provider
@@ -214,6 +214,8 @@ export interface NotemdSettings {
     enableExperimentalDiagramPipeline: boolean;
     experimentalDiagramCompatibilityMode: 'legacy-mermaid' | 'best-fit';
     preferredDiagramIntent?: string;
+    /** Stable catalog selection; preferredDiagramIntent remains the legacy semantic projection. */
+    preferredDiagramTypeId?: DiagramCatalogTypeId;
     preferredDiagramRenderTarget?: RenderTarget;
     diagramPreviewExportPpi: number;
     drawnixExportMermaidCompanions: boolean;

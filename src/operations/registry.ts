@@ -5,6 +5,7 @@ import {
     SidebarActionId
 } from '../workflowButtons';
 import { CHAPTER_SPLIT_HEADING_LEVEL_VALUES } from '../types';
+import { DIAGRAM_CATALOG_TYPE_IDS } from '../diagram/types';
 import { OperationCommandBinding, OperationDefinition, OperationSchema } from './types';
 import { assertOperationRegistry } from './operationContractRegistry';
 
@@ -112,6 +113,7 @@ const DIAGRAM_GENERATE_INPUT_SCHEMA: OperationSchema = {
         sourcePath: { type: 'string' },
         sourceMarkdown: { type: 'string' },
         requestedIntent: { type: 'string' },
+        requestedTypeId: { type: 'string', enum: [...DIAGRAM_CATALOG_TYPE_IDS] },
         requestedRenderTarget: {
             type: 'string',
             enum: ['mermaid', 'json-canvas', 'vega-lite', 'html', 'editable-html-svg', 'drawio', 'drawnix', 'circuitikz']

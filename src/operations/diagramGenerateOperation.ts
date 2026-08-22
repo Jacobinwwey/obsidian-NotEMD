@@ -149,6 +149,7 @@ export async function runDiagramGenerateOperation(
             return await runStructuredGeneration(sourceMarkdownForGeneration, {
                 sourcePath: input.sourcePath,
                 requestedIntent: input.requestedIntent,
+                requestedVariant: input.requestedVariant,
                 requestedRenderTarget: input.requestedRenderTarget,
                 compatibilityMode: input.compatibilityMode,
                 targetLanguage: input.targetLanguage,

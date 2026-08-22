@@ -198,6 +198,7 @@ export const DEFAULT_SETTINGS: NotemdSettings = {
     mermaidErrorFolderPath: 'MermaidErrors',
     enableExperimentalDiagramPipeline: false,
     experimentalDiagramCompatibilityMode: 'legacy-mermaid',
+    preferredDiagramTypeId: undefined,
     preferredDiagramRenderTarget: undefined,
     diagramPreviewExportPpi: DEFAULT_PREVIEW_EXPORT_PPI,
     drawnixExportMermaidCompanions: false,

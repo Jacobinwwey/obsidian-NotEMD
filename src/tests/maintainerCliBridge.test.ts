@@ -258,6 +258,27 @@ describe('maintainer CLI bridge', () => {
         ))).toBe(false);
     });
 
+    test('accepts a stable catalog type id for variant-aware diagram generation', async () => {
+        const host = createMaintainerCliHost();
+
+        await invokeMaintainerCliOperation(host as any, {
+            operationId: 'diagram.generate',
+            input: {
+                sourcePath: 'docs/metrics.md',
+                requestedTypeId: 'bar-chart',
+                requestedRenderTarget: 'vega-lite'
+            }
+        });
+
+        expect(host.generateDiagramForPathCommand).toHaveBeenCalledWith(
+            'docs/metrics.md',
+            undefined,
+            expect.objectContaining({
+                inputOverrides: expect.objectContaining({ requestedTypeId: 'bar-chart' })
+            })
+        );
+    });
+
     test('ignores a persisted Drawnix delivery override without changing the generation input', async () => {
         const host = createMaintainerCliHost();
 

@@ -31,6 +31,7 @@ export type DiagramCommandExecutionMode = DiagramOperationExecutionMode;
 
 export interface DiagramCommandInputOverrides {
     requestedIntent?: DiagramIntent;
+    requestedTypeId?: import('../diagram/types').DiagramCatalogTypeId;
     requestedRenderTarget?: RenderTarget;
     compatibilityMode?: 'best-fit' | 'legacy-mermaid';
     targetLanguage?: string;
@@ -1357,6 +1358,7 @@ export async function runGenerateDiagramCommandWithHost(
             settings: host.getSettings(),
             targetLanguage: host.getTaskLanguageCode('summarizeToMermaid'),
             requestedIntentOverride: options.inputOverrides?.requestedIntent,
+            requestedTypeIdOverride: options.inputOverrides?.requestedTypeId,
             requestedRenderTargetOverride: options.inputOverrides?.requestedRenderTarget,
             compatibilityModeOverride: options.inputOverrides?.compatibilityMode,
             targetLanguageOverride: options.inputOverrides?.targetLanguage

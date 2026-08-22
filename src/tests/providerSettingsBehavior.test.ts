@@ -867,6 +867,9 @@ describe('provider settings behavior', () => {
 
         expect(intentDropdown?.options.circuit).toBe('Circuit diagram');
         expect(intentDropdown?.options.drawnixMindmap).toBe('Drawnix knowledge map');
+        expect(intentDropdown?.options['bar-chart']).toBe('Bar chart (Vega-Lite)');
+        expect(intentDropdown?.options['line-chart']).toBe('Line chart (Vega-Lite)');
+        expect(intentDropdown?.options['scatter-plot']).toBe('Scatter plot (Vega-Lite)');
         expect(targetDropdown?.options.drawio).toBe('Draw.io source file');
         expect(targetDropdown?.options.drawnix).toBe('Drawnix source file');
         expect(targetDropdown?.options.circuitikz).toBe('CircuitikZ source file');
@@ -877,6 +880,27 @@ describe('provider settings behavior', () => {
         expect(plugin.settings.preferredDiagramIntent).toBe('circuit');
         expect(plugin.settings.preferredDiagramRenderTarget).toBe('circuitikz');
         expect(plugin.saveSettings).toHaveBeenCalledTimes(2);
+    });
+
+    test('selecting a quantitative variant persists its catalog identity and preview', async () => {
+        const plugin = createPlugin();
+        plugin.settings.enableDeveloperMode = false;
+        plugin.settings.enableExperimentalDiagramPipeline = true;
+        plugin.settings.experimentalDiagramCompatibilityMode = 'best-fit';
+
+        const tab = new NotemdSettingTab(mockApp as any, plugin as any) as any;
+        tab.display();
+
+        const intentSetting = findSettingByName(tab.containerEl, 'Preferred diagram type');
+        const intentDropdown = intentSetting?.controls.find(control => control.kind === 'dropdown') as MockDropdownControl | undefined;
+        await intentDropdown?.onChangeHandler?.('bar-chart');
+        await Promise.resolve();
+        await Promise.resolve();
+
+        expect(plugin.settings.preferredDiagramTypeId).toBe('bar-chart');
+        expect(plugin.settings.preferredDiagramIntent).toBe('dataChart');
+        expect(plugin.settings.preferredDiagramRenderTarget).toBe('vega-lite');
+        expect(plugin.renderDiagramExampleThumbnail).toHaveBeenCalledWith('bar-chart');
     });
 
     test('renders one selected production preview without a reference-image column', async () => {

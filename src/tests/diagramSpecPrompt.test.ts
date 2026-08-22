@@ -28,6 +28,16 @@ describe('diagram spec prompt builder', () => {
         expect(prompt).toMatch(/Preferred chart template: line/i);
     });
 
+    test('selects the explicit catalog variant profile for quantitative prompts', () => {
+        const prompt = buildDiagramSpecPrompt({
+            requiredIntent: 'dataChart',
+            preferredVariant: 'bar'
+        });
+
+        expect(prompt).toMatch(/Prompt profile bar-chart v1/i);
+        expect(prompt).toMatch(/chartType bar/i);
+    });
+
     test('documents the controlled data chart templates for layout hints', () => {
         const prompt = buildDiagramSpecPrompt();
 

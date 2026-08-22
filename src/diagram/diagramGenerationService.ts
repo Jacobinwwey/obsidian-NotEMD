@@ -10,11 +10,22 @@ import { RendererRegistry } from '../rendering/rendererRegistry';
 import { RendererService } from '../rendering/rendererService';
 import { NotemdSettings } from '../types';
 import { buildDiagramPlan } from './planner';
-import { findDefaultDiagramType } from './diagramTypeCatalog';
+import {
+    findDefaultDiagramType,
+    getExecutableDiagramType
+} from './diagramTypeCatalog';
+import { resolvePreferredDiagramTypeId } from './diagramPreferenceCompatibility';
 import { buildDiagramSpecPrompt } from './prompts/diagramSpecPrompt';
 import { assertValidDiagramSpec } from './spec';
 import { isSupportedRenderTarget } from './types';
-import type { DiagramIntent, DiagramNode, DiagramPlan, DiagramSpec, RenderTarget } from './types';
+import type {
+    DiagramCatalogTypeId,
+    DiagramIntent,
+    DiagramNode,
+    DiagramPlan,
+    DiagramSpec,
+    RenderTarget
+} from './types';
 import { parseDiagramSpecResponse } from './diagramSpecResponseParser';
 import { resolveCircuitTemplateFromMarkdown } from './adapters/circuitikz/circuitTemplateCatalog';
 import { validateDrawnixMindMapSpec } from './adapters/drawnix/drawnixMindMapProjection';
@@ -27,6 +38,7 @@ export interface DiagramGenerationOptions {
     sourcePath?: string;
     targetLanguage?: string;
     requestedIntent?: DiagramIntent;
+    requestedVariant?: string;
     requestedRenderTarget?: RenderTarget;
     llmInvoker: (systemPrompt: string, sourceMarkdown: string) => Promise<string>;
     rendererService?: RendererService;
@@ -42,6 +54,7 @@ export interface DiagramOperationInput {
     sourceMarkdown: string;
     localKnowledgeContext?: string;
     requestedIntent?: DiagramIntent;
+    requestedVariant?: string;
     requestedRenderTarget?: RenderTarget;
     compatibilityMode: 'best-fit' | 'legacy-mermaid';
     outputMode: DiagramOperationOutputMode;
@@ -54,9 +67,10 @@ export interface BuildDiagramOperationInputParams {
     sourcePath?: string;
     sourceMarkdown: string;
     executionMode: DiagramOperationExecutionMode;
-    settings: Pick<NotemdSettings, 'preferredDiagramIntent' | 'preferredDiagramRenderTarget' | 'experimentalDiagramCompatibilityMode' | 'summarizeToMermaidLanguage' | 'drawnixExportMermaidCompanions'>;
+    settings: Pick<NotemdSettings, 'preferredDiagramIntent' | 'preferredDiagramTypeId' | 'preferredDiagramRenderTarget' | 'experimentalDiagramCompatibilityMode' | 'summarizeToMermaidLanguage' | 'drawnixExportMermaidCompanions'>;
     targetLanguage?: string;
     requestedIntentOverride?: DiagramIntent;
+    requestedTypeIdOverride?: DiagramCatalogTypeId;
     requestedRenderTargetOverride?: RenderTarget;
     compatibilityModeOverride?: 'best-fit' | 'legacy-mermaid';
     targetLanguageOverride?: string;
@@ -84,8 +98,27 @@ export function buildDiagramOperationInput(params: BuildDiagramOperationInputPar
     const requestedRenderTarget = params.executionMode === 'save-mermaid' || !isSupportedRenderTarget(configuredRenderTarget)
         ? undefined
         : configuredRenderTarget;
+    const configuredTypeId = params.requestedTypeIdOverride
+        ?? resolvePreferredDiagramTypeId(params.settings);
+    const configuredType = configuredTypeId
+        ? getExecutableDiagramType(configuredTypeId)
+        : undefined;
+    if (params.requestedTypeIdOverride
+        && params.requestedIntentOverride
+        && configuredType
+        && configuredType.intent !== params.requestedIntentOverride) {
+        throw new Error(
+            `Requested diagram type "${configuredType.id}" conflicts with intent "${params.requestedIntentOverride}".`
+        );
+    }
     const configuredIntent = params.requestedIntentOverride
+        ?? configuredType?.intent
         ?? params.settings.preferredDiagramIntent as DiagramIntent | undefined;
+    const configuredVariant = params.requestedTypeIdOverride
+        ? configuredType?.variant
+        : params.requestedIntentOverride
+        ? undefined
+        : configuredType?.variant;
 
     if (requestedRenderTarget === 'circuitikz' && configuredIntent && configuredIntent !== 'circuit') {
         throw new Error('CircuitikZ source format requires the circuit diagram type.');
@@ -99,11 +132,15 @@ export function buildDiagramOperationInput(params: BuildDiagramOperationInputPar
         : requestedRenderTarget === 'drawnix'
         ? 'drawnixMindmap'
         : configuredIntent;
+    const requestedVariant = requestedRenderTarget === 'circuitikz' || requestedRenderTarget === 'drawnix'
+        ? undefined
+        : configuredVariant;
 
     return {
         sourcePath: params.sourcePath,
         sourceMarkdown: params.sourceMarkdown,
         requestedIntent,
+        requestedVariant,
         requestedRenderTarget,
         compatibilityMode: resolveDiagramOperationCompatibilityMode(
             params.executionMode,
@@ -210,11 +247,12 @@ function resolvePromptPreferredIntent(plan: DiagramPlan, requestedIntent?: Diagr
 
 function buildGenerationPrompt(
     plan: DiagramPlan,
-    options: Pick<DiagramGenerationOptions, 'requestedIntent' | 'targetLanguage' | 'sourcePath'>
+    options: Pick<DiagramGenerationOptions, 'requestedIntent' | 'requestedVariant' | 'targetLanguage' | 'sourcePath'>
 ): string {
     return buildDiagramSpecPrompt({
         preferredIntent: resolvePromptPreferredIntent(plan, options.requestedIntent),
         requiredIntent: options.requestedIntent,
+        preferredVariant: options.requestedVariant,
         preferredChartType: plan.preferredChartType,
         preferredRenderTarget: plan.renderTarget,
         sourcePath: options.sourcePath,
@@ -424,6 +462,7 @@ export async function generateDiagramArtifact(
     const plan = buildDiagramPlan(markdown, {
         compatibilityMode: options.compatibilityMode,
         requestedIntent: options.requestedIntent,
+        requestedVariant: options.requestedVariant,
         requestedRenderTarget: options.requestedRenderTarget
     });
 

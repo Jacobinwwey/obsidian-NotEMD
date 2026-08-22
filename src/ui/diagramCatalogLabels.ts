@@ -1,8 +1,9 @@
 import {
     EXECUTABLE_DIAGRAM_TYPES,
+    type ExecutableDiagramTypeDefinition,
     type DiagramTypeFamily
 } from '../diagram/diagramTypeCatalog';
-import type { DiagramIntent } from '../diagram/types';
+import type { DiagramCatalogTypeId, DiagramIntent } from '../diagram/types';
 
 export interface DiagramCatalogLabelCopy {
     intentMindmap: string;
@@ -15,6 +16,9 @@ export interface DiagramCatalogLabelCopy {
     intentCanvasMap: string;
     intentCircuit: string;
     intentDataChart: string;
+    intentBarChart?: string;
+    intentLineChart?: string;
+    intentScatterPlot?: string;
     intentRadar: string;
     intentOrgChart: string;
     intentTimeline: string;
@@ -98,6 +102,30 @@ export function getExecutableDiagramIntentOptions(copy: DiagramCatalogLabelCopy)
             value: type.intent,
             label: getLocalizedDiagramIntentLabel(type.intent, copy)
         }));
+}
+
+export function getLocalizedDiagramTypeLabel(
+    type: ExecutableDiagramTypeDefinition,
+    copy: DiagramCatalogLabelCopy
+): string {
+    switch (type.id) {
+        case 'bar-chart': return copy.intentBarChart ?? `${copy.intentDataChart}: Bar`;
+        case 'line-chart': return copy.intentLineChart ?? `${copy.intentDataChart}: Line`;
+        case 'scatter-plot': return copy.intentScatterPlot ?? `${copy.intentDataChart}: Scatter`;
+        default: return getLocalizedDiagramIntentLabel(type.intent, copy);
+    }
+}
+
+export function getExecutableDiagramTypeOptions(copy: DiagramCatalogLabelCopy): Array<{
+    value: DiagramCatalogTypeId | DiagramIntent;
+    label: string;
+}> {
+    return EXECUTABLE_DIAGRAM_TYPES.map(type => ({
+        // Preserve the legacy semantic value for non-variant rows. Explicit
+        // variants need their stable catalog ID to remain independently selectable.
+        value: type.variant && type.variant !== 'auto' ? type.id : type.intent,
+        label: getLocalizedDiagramTypeLabel(type, copy)
+    }));
 }
 
 export function getLocalizedDiagramFamilyLabel(

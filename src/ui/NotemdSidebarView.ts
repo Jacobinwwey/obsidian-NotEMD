@@ -4,12 +4,15 @@ import { ApiLivenessEvent, ApiLivenessPhase, NotemdSettings, ProgressReporter } 
 import { NOTEMD_SIDEBAR_ICON, NOTEMD_SIDEBAR_VIEW_TYPE } from '../constants';
 import { findDuplicates } from '../fileUtils';
 import { FFMPEG_INSTALL_HINTS, type EnvironmentReport, type ProbeResult } from '../slideExport/types';
-import type { DiagramIntent, RenderTarget } from '../diagram/types';
+import type { RenderTarget } from '../diagram/types';
 import {
-    applyDiagramIntentPreference,
-    applyDiagramRenderTargetPreference
+    applyDiagramTypePreference,
+    applyDiagramRenderTargetPreference,
+    getDiagramTypeSelectionValue,
+    resolveDiagramTypeId,
+    resolvePreferredDiagramTypeId
 } from '../diagram/diagramPreferenceCompatibility';
-import { getExecutableDiagramIntentOptions } from './diagramCatalogLabels';
+import { getExecutableDiagramTypeOptions } from './diagramCatalogLabels';
 import {
     renderDiagramTypePreviewPanel,
     resolveDiagramPreviewTypeId,
@@ -1720,7 +1723,7 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
         const diagramI18n = i18n.settings.developer.experimentalDiagramPipeline;
         const intents = [
             { value: 'auto', label: diagramI18n.intentAuto },
-            ...getExecutableDiagramIntentOptions({
+            ...getExecutableDiagramTypeOptions({
                 intentMindmap: diagramI18n.intentMindmap,
                 intentDrawnixKnowledgeMap: diagramI18n.intentDrawnixKnowledgeMap,
                 intentFlowchart: diagramI18n.intentFlowchart,
@@ -1731,6 +1734,9 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
                 intentCanvasMap: diagramI18n.intentCanvasMap,
                 intentCircuit: diagramI18n.intentCircuit,
                 intentDataChart: diagramI18n.intentDataChart,
+                intentBarChart: diagramI18n.intentBarChart,
+                intentLineChart: diagramI18n.intentLineChart,
+                intentScatterPlot: diagramI18n.intentScatterPlot,
                 intentRadar: diagramI18n.intentRadar,
                 intentOrgChart: diagramI18n.intentOrgChart,
                 intentTimeline: diagramI18n.intentTimeline,
@@ -1758,10 +1764,10 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
             selector.add(new Option(item.label, item.value));
         });
 
-        selector.value = this.plugin.settings.preferredDiagramIntent || 'auto';
+        selector.value = getDiagramTypeSelectionValue(resolvePreferredDiagramTypeId(this.plugin.settings));
         selector.onchange = async () => {
             const newValue = selector.value === 'auto' ? undefined : selector.value;
-            applyDiagramIntentPreference(this.plugin.settings, newValue as DiagramIntent | undefined);
+            applyDiagramTypePreference(this.plugin.settings, resolveDiagramTypeId(newValue));
             targetSelector.value = this.plugin.settings.preferredDiagramRenderTarget || 'auto';
             this.diagramTypePreviewController?.setSelectedType(resolveDiagramPreviewTypeId(selector.value));
             await this.plugin.saveSettings();
@@ -1797,7 +1803,8 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
                 this.plugin.settings,
                 targetSelector.value === 'auto' ? undefined : targetSelector.value as RenderTarget
             );
-            selector.value = this.plugin.settings.preferredDiagramIntent || 'auto';
+            selector.value = getDiagramTypeSelectionValue(resolvePreferredDiagramTypeId(this.plugin.settings));
+            this.diagramTypePreviewController?.setSelectedType(resolveDiagramPreviewTypeId(selector.value));
             await this.plugin.saveSettings();
         };
 
@@ -1823,6 +1830,9 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
                 intentCanvasMap: diagramI18n.intentCanvasMap,
                 intentCircuit: diagramI18n.intentCircuit,
                 intentDataChart: diagramI18n.intentDataChart,
+                intentBarChart: diagramI18n.intentBarChart,
+                intentLineChart: diagramI18n.intentLineChart,
+                intentScatterPlot: diagramI18n.intentScatterPlot,
                 intentRadar: diagramI18n.intentRadar,
                 intentOrgChart: diagramI18n.intentOrgChart,
                 intentTimeline: diagramI18n.intentTimeline,

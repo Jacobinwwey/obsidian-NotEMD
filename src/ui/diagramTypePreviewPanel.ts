@@ -1,9 +1,10 @@
 import { getExecutableDiagramExamples } from '../diagram/examples/diagramExampleCatalog';
 import {
     getExecutableDiagramType,
+    findDefaultDiagramType,
     type ExecutableDiagramTypeDefinition
 } from '../diagram/diagramTypeCatalog';
-import type { DiagramCatalogTypeId } from '../diagram/types';
+import type { DiagramCatalogTypeId, DiagramIntent } from '../diagram/types';
 import { getRenderTargetDisplayName } from '../rendering/targetLabel';
 import { getRenderTargetDescriptor } from '../rendering/renderTargetCatalog';
 import type { DiagramCatalogLabelCopy } from './diagramCatalogLabels';
@@ -33,8 +34,20 @@ function getTypeIdForIntent(intent: string | undefined): DiagramCatalogTypeId | 
     if (!intent || intent === 'auto') {
         return undefined;
     }
-    const example = getExecutableDiagramExamples().find(candidate => candidate.sourceIntent === intent);
-    return example?.typeId;
+
+    try {
+        const type = getExecutableDiagramType(intent as DiagramCatalogTypeId);
+        return type.id;
+    } catch {
+        // Legacy settings stored semantic intents rather than catalog IDs.
+    }
+
+    try {
+        return findDefaultDiagramType(intent as DiagramIntent).id;
+    } catch {
+        const example = getExecutableDiagramExamples().find(candidate => candidate.sourceIntent === intent);
+        return example?.typeId;
+    }
 }
 
 function setText(parent: HTMLElement, text: string, className: string): void {
@@ -101,7 +114,7 @@ export function renderDiagramTypePreviewPanel(
                 return;
             }
 
-            const label = getLocalizedTypeLabel(type.intent, params.copy);
+            const label = getLocalizedTypeLabel(type, params.copy);
             const descriptor = getRenderTargetDescriptor(type.defaultTarget);
             heading.setText(`${params.copy.title}: ${label}`);
             meta.empty();
@@ -152,8 +165,15 @@ export function renderDiagramTypePreviewPanel(
     return controller;
 }
 
-function getLocalizedTypeLabel(intent: string, copy: DiagramCatalogLabelCopy): string {
-    switch (intent) {
+function getLocalizedTypeLabel(type: ExecutableDiagramTypeDefinition, copy: DiagramCatalogLabelCopy): string {
+    switch (type.id) {
+        case 'bar-chart': return copy.intentBarChart ?? `${copy.intentDataChart}: Bar`;
+        case 'line-chart': return copy.intentLineChart ?? `${copy.intentDataChart}: Line`;
+        case 'scatter-plot': return copy.intentScatterPlot ?? `${copy.intentDataChart}: Scatter`;
+        default: break;
+    }
+
+    switch (type.intent) {
         case 'mindmap': return copy.intentMindmap;
         case 'drawnixMindmap': return copy.intentDrawnixKnowledgeMap;
         case 'flowchart': return copy.intentFlowchart;
@@ -184,6 +204,6 @@ function getLocalizedTypeLabel(intent: string, copy: DiagramCatalogLabelCopy): s
         case 'process': return copy.intentProcess ?? 'Process';
         case 'medallion': return copy.intentMedallion ?? 'Medallion';
         case 'highLevel': return copy.intentHighLevel ?? 'High-level overview';
-        default: return intent;
+        default: return type.id;
     }
 }

@@ -5,7 +5,8 @@ import {
 } from '../diagram/diagramGenerationService';
 import {
     applyDiagramIntentPreference,
-    applyDiagramRenderTargetPreference
+    applyDiagramRenderTargetPreference,
+    resolvePreferredDiagramTypeId
 } from '../diagram/diagramPreferenceCompatibility';
 
 describe('diagram operation input helpers', () => {
@@ -57,6 +58,59 @@ describe('diagram operation input helpers', () => {
         expect(input.requestedRenderTarget).toBe('editable-html-svg');
         expect(input.compatibilityMode).toBe('best-fit');
         expect(input.outputMode).toBe('artifact');
+    });
+
+    test('persists a selected catalog variant through operation planning', () => {
+        const input = buildDiagramOperationInput({
+            sourcePath: 'Notes/Topic.md',
+            sourceMarkdown: '# Topic',
+            executionMode: 'save-artifact',
+            settings: {
+                ...mockSettings,
+                preferredDiagramTypeId: 'bar-chart',
+                preferredDiagramIntent: 'dataChart',
+                preferredDiagramRenderTarget: 'vega-lite',
+                experimentalDiagramCompatibilityMode: 'best-fit'
+            }
+        });
+
+        expect(input.requestedIntent).toBe('dataChart');
+        expect(input.requestedVariant).toBe('bar');
+        expect(input.requestedRenderTarget).toBe('vega-lite');
+    });
+
+    test('falls back from a stale catalog id to the legacy semantic preference', () => {
+        expect(resolvePreferredDiagramTypeId({
+            preferredDiagramTypeId: 'removed-type' as any,
+            preferredDiagramIntent: 'flowchart'
+        })).toBe('flowchart');
+    });
+
+    test('clears an incompatible persisted target/type pair before planning', () => {
+        const settings = {
+            ...mockSettings,
+            preferredDiagramTypeId: 'bar-chart' as const,
+            preferredDiagramIntent: 'dataChart',
+            preferredDiagramRenderTarget: 'mermaid' as const
+        };
+
+        applyDiagramIntentPreference(settings, 'dataChart');
+
+        expect(settings.preferredDiagramTypeId).toBe('data-chart');
+        expect(settings.preferredDiagramRenderTarget).toBeUndefined();
+    });
+
+    test('rejects conflicting explicit catalog type and intent overrides', () => {
+        expect(() => buildDiagramOperationInput({
+            sourceMarkdown: '# Metrics',
+            executionMode: 'save-artifact',
+            settings: {
+                ...mockSettings,
+                experimentalDiagramCompatibilityMode: 'best-fit'
+            },
+            requestedTypeIdOverride: 'bar-chart',
+            requestedIntentOverride: 'flowchart'
+        })).toThrow(/conflicts with intent/i);
     });
 
     test('carries the explicit Drawnix Mermaid companion preference into artifact operations', () => {

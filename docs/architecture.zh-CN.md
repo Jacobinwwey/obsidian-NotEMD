@@ -1,6 +1,6 @@
 # Notemd 系统架构总览
 
-> 更新：2026-08-21
+> 更新：2026-08-22
 
 ## 系统架构
 
@@ -210,7 +210,7 @@ flowchart LR
 
 图形平台保持三条独立轴：语义类型、渲染目标和导出格式。当前可执行真值是类型目录、生产 example fixture、target descriptor 和带版本的 capability manifest。target descriptor 负责 artifact 机制；manifest 把语义类型、兼容 target 与 fixture 证据组合起来。`SVG`、`PNG`、`PDF` 是导出格式，不是 render target。
 
-当前已交付 33 个可执行目录类型、8 个渲染目标和 3 个导出格式。Radar 以及显式的 bar/line/scatter variant 使用 Vega-Lite；topology、lane-grid、access-matrix、schedule、ordered-stack、set-overlap、ranked-segments、cycle、nested 和 tree payload family 使用确定性的 editable HTML/SVG target，并提供 HTML fallback。Mermaid-only 的 timeline、swimlane、quadrant 行为保持不变。设置页和生成工作台共享同一可执行类型选择器与单个动态预览面板；用户选择后，面板调用生产 renderer fixture，插件 UI 不存在参考图列，也不会加载固定版本参考截图。`scripts/generate-diagram-gallery.js` 现在为 33 个类型生成确定性的 SVG/PNG 资产和带哈希 manifest，供双语文档 gallery 使用。仍有 5 个参考语法仅保留在路线图中，因为尚未宣称其精确布局契约。
+当前已交付 33 个可执行目录类型、8 个渲染目标和 3 个导出格式。Radar 以及显式的 bar/line/scatter variant 使用 Vega-Lite；topology、lane-grid、access-matrix、schedule、ordered-stack、set-overlap、ranked-segments、cycle、nested 和 tree payload family 使用确定性的 editable HTML/SVG target，并提供 HTML fallback。Mermaid-only 的 timeline、swimlane、quadrant 行为保持不变。设置页和生成工作台现在暴露全部 catalog ID，包括独立的定量 variant，并共享单个动态预览面板。稳定的 `preferredDiagramTypeId` 设置会向旧 semantic intent 投影，以保持向后兼容；显式 variant 会贯穿 operation planning 并强制其声明的 native target。用户选择后，面板调用生产 renderer fixture，插件 UI 不存在参考图列，也不会加载固定版本参考截图。`scripts/generate-diagram-gallery.js` 现在为 33 个类型生成确定性的 SVG/PNG 资产和带哈希 manifest，供双语文档 gallery 使用。仍有 5 个参考语法仅保留在路线图中，因为尚未宣称其精确布局契约。
 
 已交付顺序是先解决正确性基础，再做目录/契约生成，随后接入确定性预览资产、选择器和文档。Mermaid 规范化、legacy 修复阶段化、family 门控、fence 所有权、验证 runtime 初始化、共享 Drawnix 几何和 Circuitikz 模板收敛现已落地。剩余工作已收窄为真实 Draw.io/Drawnix 应用证据，以及未来若产品范围确实需要时再授权一个明确的 Circuitikz repair 命令。独立 Plait consumer gate 可通过 `npm run diagram:consumer:drawnix` 执行。见[当前进度审计](./brainstorms/2026-08-16-mainline-diagram-architecture-progress-and-next-direction.zh-CN.md)、[图形能力目录](./maintainer/diagram-capability-catalog.zh-CN.md)、[图形 Gallery](./diagram-gallery.zh-CN.md)和[向前架构计划](./superpowers/plans/2026-08-16-diagram-capability-catalog-and-forward-architecture.zh-CN.md)。
 
@@ -230,7 +230,7 @@ flowchart LR
 
 `DiagramTypeCatalog` 负责面向用户的类型名称、语义模式、prompt profile、renderer binding、visual-role 词表和可执行示例。`ref/diagram-design` 中还没有完整 Notemd 链路的参考布局仍只留在文档与路线图中，不进入选择器。
 
-向前兼容的扩展边界已经明确：目录行携带稳定的可选 variant、payload family 和 layout profile；`DiagramSpec` 接受 schema-v2 canonical payload 元数据，同时保留 legacy projection。`src/diagram/payloads/legacyPayload.ts` 负责 v1 到 v2 的边界归一化，`src/diagram/prompts/diagramPromptProfileCatalog.ts` 负责版本化 profile 规则。Batch 0 不增加新的 selector 行；后续 topology、data-flow、matrix、chart、schedule 和结构类型必须先通过 native renderer、fixture、preview、gallery 与双语文档证据门禁。
+向前兼容的扩展边界已经明确：目录行携带稳定的可选 variant、payload family 和 layout profile；`DiagramSpec` 接受 schema-v2 canonical payload 元数据，同时保留 legacy projection。`src/diagram/payloads/legacyPayload.ts` 负责 v1 到 v2 的边界归一化，`src/diagram/prompts/diagramPromptProfileCatalog.ts` 负责版本化 profile 规则。Batch 0 在其边界有意不增加 selector 行；分阶段 renderer 证据完成后，全部 33 个 catalog ID 已进入类型选择器与生产预览。显式 variant 以 catalog ID 持久化，旧 semantic settings 仍可读取。
 
 `drawnixMindmap` 继续作为持久化兼容 ID，在目录中展示为 **Drawnix 知识导图**。它只有一条原生输出契约：
 

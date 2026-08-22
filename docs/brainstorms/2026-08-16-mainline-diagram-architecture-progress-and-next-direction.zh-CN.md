@@ -1,6 +1,6 @@
 ---
 date: 2026-08-16
-last_updated: 2026-08-21
+last_updated: 2026-08-22
 topic: mainline-diagram-architecture-progress-and-next-direction
 status: active
 canonical_for:
@@ -226,3 +226,15 @@ Batch 0 已作为兼容基础实现；本批不增加 selector 行，也不把�
 ### 证据快照
 
 `npm.cmd run diagram:gallery` 已生成 33 组 SVG/PNG；已目视检查 topology、lane-grid、matrix、schedule、cycle、nested、tree 和 ranked 布局截图。native-layout 聚焦测试覆盖确定性 SVG、无障碍元数据、畸形 payload 拒绝、非法引用、schedule 顺序和预算拒绝。最终全量回归、文档、gallery、i18n、consumer、render-host 与 diff-check 门禁均已在提交前通过。
+
+## Variant 可发现性跟进（2026-08-22）
+
+完成度审计发现首轮交付存在兼容性缺口：目录虽然有 33 个 ID，但 Settings 与 Workbench 按 semantic intent 去重，导致 `bar-chart`、`line-chart`、`scatter-plot` 无法独立选择。该缺口现已关闭。
+
+- 共享选择器与生产预览现在暴露全部 33 个 catalog ID。
+- `preferredDiagramTypeId` 是稳定的持久化 selector 身份；旧 `preferredDiagramIntent` 仍可读取，并解析到对应默认目录行。
+- 显式定量 variant 通过 operation input、planner、prompt profile、generation 传递 `requestedVariant`，最终进入 Vega-Lite；不会静默落入 legacy Mermaid。
+- maintainer `diagram.generate` 接受 `requestedTypeId`；operation registry 与生成的 help metadata 已包含该字段。
+- 不兼容的持久化 target/type 组合在 settings 边界清为 Auto；过期 catalog ID 回退到旧 semantic preference。
+
+本跟进后的最终证据：266 个 Jest suite 通过（2,349 个测试通过、1 个 skipped）；build 通过；gallery check 通过并得到 33 条记录；VitePress docs、render-host audit、i18n audit、Drawnix public-API consumer gate 和 `git diff --check` 通过。全仓 lint 仍是基线债务，不重新归类为本功能失败。
