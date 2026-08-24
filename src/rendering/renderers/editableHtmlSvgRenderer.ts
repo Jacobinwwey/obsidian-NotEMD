@@ -1,5 +1,6 @@
 import { assertValidDiagramSpec } from '../../diagram/spec';
 import { DiagramSpec } from '../../diagram/types';
+import { LAYOUT_SAFETY_VERSION, wrapMeasuredText } from '../../diagram/layout/layoutSafety';
 import {
     buildSemanticFigureModel,
     isAsyncSemanticFigureEdge,
@@ -91,42 +92,22 @@ function escapeAttribute(value: string): string {
 }
 
 function renderMultilineSvgText(value: string, x: number, y: number, lineHeight: number, maxCharsPerLine: number): string {
-    const words = value.trim().split(/\s+/);
-    const lines: string[] = [];
-    let currentLine = '';
+    const block = wrapMeasuredText(value, Math.max(8, maxCharsPerLine * 7), 3);
 
-    for (const word of words) {
-        const candidate = currentLine ? `${currentLine} ${word}` : word;
-        if (candidate.length > maxCharsPerLine && currentLine) {
-            lines.push(currentLine);
-            currentLine = word;
-        } else {
-            currentLine = candidate;
-        }
-    }
-
-    if (currentLine) {
-        lines.push(currentLine);
-    }
-
-    const visibleLines = lines.slice(0, 3);
-    const truncatedLines = lines.length > visibleLines.length
-        ? [...visibleLines.slice(0, 2), `${visibleLines[2].slice(0, Math.max(0, maxCharsPerLine - 1))}...`]
-        : visibleLines;
-
-    return `<text data-drawio-ignore="part-of-parent-node" x="${x}" y="${y}" text-anchor="middle" class="notemd-editable-svg-node-label">
-        ${truncatedLines.map((line, index) => `<tspan x="${x}" dy="${index === 0 ? 0 : lineHeight}">${escapeHtml(line)}</tspan>`).join('')}
+    return `<text data-drawio-ignore="part-of-parent-node" data-layout-safety="${LAYOUT_SAFETY_VERSION}" x="${x}" y="${y}" text-anchor="middle" class="notemd-editable-svg-node-label">
+        ${block.lines.map((line, index) => `<tspan x="${x}" dy="${index === 0 ? 0 : lineHeight}">${escapeHtml(line)}</tspan>`).join('')}
     </text>`;
 }
 
 function renderNode(node: SemanticFigureNode): string {
     const centerX = node.x + node.width / 2;
-    const labelY = node.y + 48;
+    const labelY = node.y + 38;
+    const roleY = node.y + node.height - 18;
 
     return `<g id="${escapeAttribute(node.id)}" class="notemd-editable-svg-node" data-drawio-type="node" data-drawio-role="${escapeAttribute(node.role)}" data-drawio-id="${escapeAttribute(node.id)}">
         <rect data-drawio-ignore="part-of-parent-node" x="${node.x}" y="${node.y}" width="${node.width}" height="${node.height}" rx="14" fill="#eff6ff" stroke="#cbd5e1" stroke-width="1.5" />
         ${renderMultilineSvgText(node.label, centerX, labelY, 18, 24)}
-        <text data-drawio-ignore="part-of-parent-node" x="${centerX}" y="${node.y + node.height - 18}" text-anchor="middle" class="notemd-editable-svg-node-role" fill="#2563eb">${escapeHtml(node.role)}</text>
+        <text data-drawio-ignore="part-of-parent-node" data-layout-safety="${LAYOUT_SAFETY_VERSION}" x="${centerX}" y="${roleY}" text-anchor="middle" class="notemd-editable-svg-node-role" fill="#2563eb">${escapeHtml(node.role)}</text>
     </g>`;
 }
 
@@ -263,7 +244,7 @@ export function ensureSemanticFigureSvgStandaloneStyles(svg: string): string {
         return svg;
     }
 
-    let normalized = ensureSvgRootDimensions(svg);
+    const normalized = ensureSvgRootDimensions(svg);
     if (/<style\b/i.test(normalized)) {
         return normalized;
     }
@@ -509,9 +490,11 @@ export class EditableHtmlSvgRenderer implements DiagramRenderer {
                 content: renderReferenceLayoutHtmlDocument(spec),
                 mimeType: 'text/html',
                 sourceIntent: spec.intent,
+                layoutSafetyVersion: LAYOUT_SAFETY_VERSION,
                 previewSvg: {
                     content: previewSvg,
-                    mimeType: 'image/svg+xml'
+                    mimeType: 'image/svg+xml',
+                    layoutSafetyVersion: LAYOUT_SAFETY_VERSION
                 }
             };
         }
@@ -522,9 +505,11 @@ export class EditableHtmlSvgRenderer implements DiagramRenderer {
             content: renderSemanticFigureHtmlDocument(model),
             mimeType: 'text/html',
             sourceIntent: spec.intent,
+            layoutSafetyVersion: LAYOUT_SAFETY_VERSION,
             previewSvg: {
                 content: renderSemanticFigureSvg(model),
-                mimeType: 'image/svg+xml'
+                mimeType: 'image/svg+xml',
+                layoutSafetyVersion: LAYOUT_SAFETY_VERSION
             }
         };
     }

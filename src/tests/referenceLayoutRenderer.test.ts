@@ -95,7 +95,7 @@ describe('diagram-design-inspired production layouts', () => {
     test('keeps reference layout geometry target-specific', () => {
         const example = getExecutableDiagramExamples().find(candidate => candidate.typeId === 'loop')!;
         const svg = renderReferenceLayoutSvg(example.spec);
-        expect(svg).toContain('data-notemd-renderer="notemd-reference-layouts@1.0.0"');
+        expect(svg).toContain('data-notemd-renderer="notemd-reference-layouts@1.1.0"');
         expect(svg).toContain('marker-end="url(#notemd-reference-arrow)"');
         expect(svg).not.toContain('https://');
     });

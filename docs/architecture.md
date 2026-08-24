@@ -361,6 +361,12 @@ The delivered phases cover semantic structure integrity, geometry/layer collisio
 7. **Local-only settings are a boundary guarantee**: `src/main.ts` sanitizes once and persists the sanitized record once, so local-only provider credentials do not re-enter the serialized settings object.
 8. **Response caching is bounded, credential-free, and runtime-portable**: `src/llmResponseCache.ts` uses a versioned, non-cryptographic dual-lane fingerprint over provider, transport, endpoint, model, runtime parameters, and prompt/content hashes, with a five-minute TTL and 128-entry LRU cap. It avoids a Node-only dependency on the shared mobile/web path. The cache remains an optimization, never an authority for correctness.
 
+### Layout Safety Contract (2026-08-23)
+
+Canonical payload validation proves structure, not readable geometry. Native editable SVG output therefore passes a shared deterministic contract in `src/diagram/layout/layoutSafety.ts` and `src/diagram/layout/layoutDiagnostics.ts` before it is cached or published. The contract measures wide glyphs conservatively, wraps no-space identifiers, bounds line count, expands geometry from measured text, and reports core overflow as an error while treating optional detail elision as a warning. `RenderArtifact.layoutSafetyVersion` makes the contract version observable without breaking older persisted artifacts.
+
+The browser gallery gate then validates emitted native SVG with `getBBox()`: text must remain inside the viewBox, node text inside its node, nodes must not overlap, and edge labels must not intersect nodes. This gate is intentionally scoped to SVG artifacts carrying the native layout marker. Mermaid and Vega-Lite retain their own runtime validators because their layout engines own final geometry. Prompt profiles expose numeric density budgets without exposing coordinates, so generation, validation, rendering, and preview share one forward-compatible safety boundary.
+
 ## Verification
 
 - `npm run build` — TypeScript compilation + esbuild bundle

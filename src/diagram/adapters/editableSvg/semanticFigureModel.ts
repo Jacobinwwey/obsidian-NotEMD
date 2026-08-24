@@ -1,4 +1,5 @@
 import { DiagramCallout, DiagramEdge, DiagramNode, DiagramSpec } from '../../types';
+import { measureTextWidth, wrapMeasuredText } from '../../layout/layoutSafety';
 
 export interface SemanticFigureNode {
     id: string;
@@ -36,7 +37,7 @@ export interface SemanticFigureModel {
 }
 
 const NODE_WIDTH = 240;
-const NODE_HEIGHT = 104;
+const NODE_MIN_HEIGHT = 104;
 const HORIZONTAL_GAP = 92;
 const VERTICAL_GAP = 76;
 const PADDING_X = 72;
@@ -110,23 +111,38 @@ function createFigureNodeProjection(spec: DiagramSpec): FigureNodeProjection {
     const columnCount = Math.max(1, Math.min(3, sourceNodes.length));
     const usedIds = new Set<string>();
     const semanticIdBySourceId = new Map<string, string>();
-
-    const nodes = sourceNodes.map((node, index) => {
+    const normalized = sourceNodes.map((node, index) => {
         const sourceId = normalizeLabel(node.id, `node-${index + 1}`);
         const id = reserveUniqueIdentifier(normalizeIdentifier(sourceId, `node-${index + 1}`), usedIds);
+        semanticIdBySourceId.set(sourceId, id);
+        const label = normalizeLabel(node.label, id);
+        const role = inferNodeRole(node);
+        const labelLines = wrapMeasuredText(label, NODE_WIDTH - 28, 3).lines.length;
+        const roleWidth = measureTextWidth(role);
+        const height = Math.max(NODE_MIN_HEIGHT, 52 + labelLines * 18 + 22 + (roleWidth > NODE_WIDTH - 28 ? 16 : 0));
+        return { id, label, role, height };
+    });
+    const rowHeights: number[] = [];
+    normalized.forEach((node, index) => {
+        const row = Math.floor(index / columnCount);
+        rowHeights[row] = Math.max(rowHeights[row] ?? NODE_MIN_HEIGHT, node.height);
+    });
+    const rowY: number[] = [];
+    rowHeights.forEach((height, index) => {
+        rowY[index] = HEADER_HEIGHT + rowHeights.slice(0, index).reduce((total, value) => total + value + VERTICAL_GAP, 0);
+    });
+
+    const nodes = normalized.map((node, index) => {
         const column = index % columnCount;
         const row = Math.floor(index / columnCount);
-
-        semanticIdBySourceId.set(sourceId, id);
-
         return {
-            id,
-            label: normalizeLabel(node.label, id),
-            role: inferNodeRole(node),
+            id: node.id,
+            label: node.label,
+            role: node.role,
             x: PADDING_X + column * (NODE_WIDTH + HORIZONTAL_GAP),
-            y: HEADER_HEIGHT + row * (NODE_HEIGHT + VERTICAL_GAP),
+            y: rowY[row],
             width: NODE_WIDTH,
-            height: NODE_HEIGHT
+            height: node.height
         };
     });
 
@@ -185,6 +201,7 @@ function createFigureEdges(
     semanticIdBySourceId: Map<string, string>
 ): SemanticFigureEdge[] {
     const nodeById = new Map(nodes.map(node => [node.id, node]));
+    const occupied = nodes.map(node => ({ x: node.x, y: node.y, width: node.width, height: node.height }));
 
     return edges
         .map((edge, index): SemanticFigureEdge | null => {
@@ -198,19 +215,46 @@ function createFigureEdges(
             }
 
             const { startX, startY, endX, endY } = resolveEdgeConnectionPoints(source, target);
+            const label = edge.label?.trim() || undefined;
+            const relation = edge.relation?.trim() || undefined;
+            const labelText = label || relation;
+            let labelX = (startX + endX) / 2;
+            let labelY = (startY + endY) / 2 - 10;
+            if (labelText) {
+                const labelWidth = Math.min(190, measureTextWidth(labelText) + 12);
+                const candidates = [
+                    { x: labelX, y: labelY },
+                    { x: labelX, y: labelY - 24 },
+                    { x: labelX, y: labelY + 24 },
+                    { x: (startX + endX) / 2, y: Math.min(startY, endY) - 18 },
+                    { x: (startX + endX) / 2, y: Math.max(startY, endY) + 24 }
+                ];
+                const candidate = candidates.find(position => {
+                    const rect = { x: position.x - labelWidth / 2, y: position.y - 14, width: labelWidth, height: 18 };
+                    return !occupied.some(box => box.x < rect.x + rect.width + 4
+                        && box.x + box.width + 4 > rect.x
+                        && box.y < rect.y + rect.height + 4
+                        && box.y + box.height + 4 > rect.y);
+                });
+                if (candidate) {
+                    labelX = candidate.x;
+                    labelY = candidate.y;
+                }
+                occupied.push({ x: labelX - labelWidth / 2, y: labelY - 14, width: labelWidth, height: 18 });
+            }
 
             return {
                 id: `edge-${index + 1}-${sourceId}-to-${targetId}`,
                 sourceId,
                 targetId,
-                label: edge.label?.trim() || undefined,
-                relation: edge.relation?.trim() || undefined,
+                label,
+                relation,
                 startX,
                 startY,
                 endX,
                 endY,
-                labelX: (startX + endX) / 2,
-                labelY: (startY + endY) / 2 - 10
+                labelX,
+                labelY
             };
         })
         .filter((edge): edge is SemanticFigureEdge => edge !== null);
@@ -218,13 +262,12 @@ function createFigureEdges(
 
 export function buildSemanticFigureModel(spec: DiagramSpec): SemanticFigureModel {
     const { nodes, semanticIdBySourceId } = createFigureNodeProjection(spec);
-    const rowCount = Math.max(1, Math.ceil(nodes.length / Math.max(1, Math.min(3, nodes.length))));
     const columnCount = Math.max(1, Math.min(3, nodes.length));
     const width = Math.max(
         MIN_WIDTH,
         PADDING_X * 2 + columnCount * NODE_WIDTH + Math.max(0, columnCount - 1) * HORIZONTAL_GAP
     );
-    const graphHeight = HEADER_HEIGHT + rowCount * NODE_HEIGHT + Math.max(0, rowCount - 1) * VERTICAL_GAP;
+    const graphHeight = Math.max(HEADER_HEIGHT, ...nodes.map(node => node.y + node.height));
     const calloutHeight = spec.callouts?.length ? CALLOUT_HEIGHT + spec.callouts.length * 34 : 0;
 
     return {

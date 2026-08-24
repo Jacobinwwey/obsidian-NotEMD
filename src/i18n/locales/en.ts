@@ -1074,6 +1074,8 @@ export const STRINGS_EN = {
             info: 'info'
         },
         diagnosticAdvice: 'Advice: {advice}',
+        previewLoadTimeout: 'Preview did not become ready. Reopen the preview after checking the artifact diagnostics.',
+        previewLoadFailed: 'Preview failed to load. The source artifact remains available below.',
         deleteArtifactsTitle: 'Delete generated diagram artifacts?',
         deleteArtifactsMessage: 'Move {count} generated file(s) to the Vault trash? The source note will not be deleted.',
         deleteArtifactsCancel: 'Cancel',

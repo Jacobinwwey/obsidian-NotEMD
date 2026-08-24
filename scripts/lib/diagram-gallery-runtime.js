@@ -111,6 +111,76 @@ async function assertResponsiveGalleryLayout(page, entries) {
   }
 }
 
+async function assertSvgGeometry(page, fixtureId) {
+  const report = await page.evaluate(() => {
+    const svg = document.querySelector('.diagram-visual svg');
+    if (!svg) return { missing: true };
+    // Vega/Mermaid own their browser layout and do not expose the deterministic
+    // geometry contract. Their runtime validators remain the source of truth;
+    // this gate applies only to native SVG artifacts carrying the marker.
+    if (!svg.getAttribute('data-layout-safety')) return { skipped: true };
+    const viewBox = (svg.getAttribute('viewBox') || '').trim().split(/[ ,]+/).map(Number);
+    const canvas = viewBox.length === 4
+      ? { x: viewBox[0], y: viewBox[1], width: viewBox[2], height: viewBox[3] }
+      : { x: 0, y: 0, width: Number(svg.getAttribute('width')) || 0, height: Number(svg.getAttribute('height')) || 0 };
+    const safeBox = element => {
+      try {
+        const box = element.getBBox();
+        return Number.isFinite(box.x) && Number.isFinite(box.y) && Number.isFinite(box.width) && Number.isFinite(box.height)
+          ? box
+          : null;
+      } catch {
+        return null;
+      }
+    };
+    const intersects = (first, second, padding = 0) => first.x - padding < second.x + second.width
+      && first.x + first.width + padding > second.x
+      && first.y - padding < second.y + second.height
+      && first.y + first.height + padding > second.y;
+    const textOutOfBounds = Array.from(svg.querySelectorAll('text')).flatMap(text => {
+      const box = safeBox(text);
+      if (!box || box.width === 0 || box.height === 0) return [];
+      return box.x < canvas.x - 2 || box.y < canvas.y - 2
+        || box.x + box.width > canvas.x + canvas.width + 2
+        || box.y + box.height > canvas.y + canvas.height + 2
+        ? [text.textContent || 'text']
+        : [];
+    });
+    const nodeRects = Array.from(svg.querySelectorAll('g[data-drawio-type="node"]')).flatMap(group => {
+      const rect = group.querySelector('rect');
+      const box = rect ? safeBox(rect) : null;
+      return box ? [{ group, box }] : [];
+    });
+    const nodeTextOutOfBounds = nodeRects.flatMap(({ group, box }) => Array.from(group.querySelectorAll('text')).flatMap(text => {
+      const textBox = safeBox(text);
+      return textBox && (textBox.x < box.x - 2 || textBox.y < box.y - 2
+        || textBox.x + textBox.width > box.x + box.width + 2
+        || textBox.y + textBox.height > box.y + box.height + 2)
+        ? [group.id || 'node']
+        : [];
+    }));
+    const nodeOverlaps = nodeRects.flatMap((first, index) => nodeRects.slice(index + 1)
+      .filter(second => intersects(first.box, second.box, 1))
+      .map(second => `${first.group.id || index}:${second.group.id || index + 1}`));
+    const edgeLabelNodeOverlaps = Array.from(svg.querySelectorAll('g[data-drawio-type="edge"]')).flatMap(edge => {
+      const labels = Array.from(edge.querySelectorAll('text')).flatMap(text => {
+        const box = safeBox(text);
+        return box ? [box] : [];
+      });
+      return labels.flatMap(labelBox => nodeRects.filter(node => intersects(labelBox, node.box, 2)).map(node => `${edge.id || 'edge'}:${node.group.id || 'node'}`));
+    });
+    const coreTruncations = Array.from(svg.querySelectorAll('[data-layout-truncated="true"]'))
+      .filter(element => !element.classList.contains('ref-node-sub'))
+      .map(element => element.textContent || 'text');
+    return { missing: false, textOutOfBounds, nodeTextOutOfBounds, nodeOverlaps, edgeLabelNodeOverlaps, coreTruncations };
+  });
+  if (report.skipped) return;
+  if (report.missing || report.textOutOfBounds.length || report.nodeTextOutOfBounds.length
+    || report.nodeOverlaps.length || report.edgeLabelNodeOverlaps.length || report.coreTruncations.length) {
+    throw new Error(`Diagram fixture "${fixtureId}" failed SVG geometry gate: ${JSON.stringify(report)}`);
+  }
+}
+
 async function renderGalleryAssets(repoRoot, cacheRoot) {
   const { chromium } = require('playwright');
   const bundlePath = await buildGalleryBrowserBundle(repoRoot, cacheRoot);
@@ -135,6 +205,7 @@ async function renderGalleryAssets(repoRoot, cacheRoot) {
       assertFixtureId(entry.fixtureId);
       await page.setViewportSize({ width: 960, height: 540 });
       await page.setContent(buildGalleryDocument([entry], true), { waitUntil: 'load' });
+      await assertSvgGeometry(page, entry.fixtureId);
       const png = await page.locator('.diagram-card').screenshot({ type: 'png', animations: 'disabled' });
       rendered.push({ ...entry, png });
     }

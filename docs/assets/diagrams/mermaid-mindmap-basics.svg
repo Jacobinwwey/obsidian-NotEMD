@@ -60,28 +60,28 @@ marker path {
 
         <g id="research" class="notemd-editable-svg-node" data-drawio-type="node" data-drawio-role="process" data-drawio-id="research">
         <rect data-drawio-ignore="part-of-parent-node" x="72" y="116" width="240" height="104" rx="14" fill="#eff6ff" stroke="#cbd5e1" stroke-width="1.5"/>
-        <text data-drawio-ignore="part-of-parent-node" x="192" y="164" text-anchor="middle" class="notemd-editable-svg-node-label">
+        <text data-drawio-ignore="part-of-parent-node" data-layout-safety="notemd-layout-safety@1.0.0" x="192" y="154" text-anchor="middle" class="notemd-editable-svg-node-label">
         <tspan x="192" dy="0">Research</tspan>
     </text>
-        <text data-drawio-ignore="part-of-parent-node" x="192" y="202" text-anchor="middle" class="notemd-editable-svg-node-role" fill="#2563eb">process</text>
+        <text data-drawio-ignore="part-of-parent-node" data-layout-safety="notemd-layout-safety@1.0.0" x="192" y="202" text-anchor="middle" class="notemd-editable-svg-node-role" fill="#2563eb">process</text>
     </g><g id="methods" class="notemd-editable-svg-node" data-drawio-type="node" data-drawio-role="process" data-drawio-id="methods">
         <rect data-drawio-ignore="part-of-parent-node" x="404" y="116" width="240" height="104" rx="14" fill="#eff6ff" stroke="#cbd5e1" stroke-width="1.5"/>
-        <text data-drawio-ignore="part-of-parent-node" x="524" y="164" text-anchor="middle" class="notemd-editable-svg-node-label">
+        <text data-drawio-ignore="part-of-parent-node" data-layout-safety="notemd-layout-safety@1.0.0" x="524" y="154" text-anchor="middle" class="notemd-editable-svg-node-label">
         <tspan x="524" dy="0">Methods</tspan>
     </text>
-        <text data-drawio-ignore="part-of-parent-node" x="524" y="202" text-anchor="middle" class="notemd-editable-svg-node-role" fill="#2563eb">process</text>
+        <text data-drawio-ignore="part-of-parent-node" data-layout-safety="notemd-layout-safety@1.0.0" x="524" y="202" text-anchor="middle" class="notemd-editable-svg-node-role" fill="#2563eb">process</text>
     </g><g id="evaluation" class="notemd-editable-svg-node" data-drawio-type="node" data-drawio-role="process" data-drawio-id="evaluation">
         <rect data-drawio-ignore="part-of-parent-node" x="736" y="116" width="240" height="104" rx="14" fill="#eff6ff" stroke="#cbd5e1" stroke-width="1.5"/>
-        <text data-drawio-ignore="part-of-parent-node" x="856" y="164" text-anchor="middle" class="notemd-editable-svg-node-label">
+        <text data-drawio-ignore="part-of-parent-node" data-layout-safety="notemd-layout-safety@1.0.0" x="856" y="154" text-anchor="middle" class="notemd-editable-svg-node-label">
         <tspan x="856" dy="0">Evaluation</tspan>
     </text>
-        <text data-drawio-ignore="part-of-parent-node" x="856" y="202" text-anchor="middle" class="notemd-editable-svg-node-role" fill="#2563eb">process</text>
+        <text data-drawio-ignore="part-of-parent-node" data-layout-safety="notemd-layout-safety@1.0.0" x="856" y="202" text-anchor="middle" class="notemd-editable-svg-node-role" fill="#2563eb">process</text>
     </g><g id="evidence" class="notemd-editable-svg-node" data-drawio-type="node" data-drawio-role="process" data-drawio-id="evidence">
         <rect data-drawio-ignore="part-of-parent-node" x="72" y="296" width="240" height="104" rx="14" fill="#eff6ff" stroke="#cbd5e1" stroke-width="1.5"/>
-        <text data-drawio-ignore="part-of-parent-node" x="192" y="344" text-anchor="middle" class="notemd-editable-svg-node-label">
+        <text data-drawio-ignore="part-of-parent-node" data-layout-safety="notemd-layout-safety@1.0.0" x="192" y="334" text-anchor="middle" class="notemd-editable-svg-node-label">
         <tspan x="192" dy="0">Evidence</tspan>
     </text>
-        <text data-drawio-ignore="part-of-parent-node" x="192" y="382" text-anchor="middle" class="notemd-editable-svg-node-role" fill="#2563eb">process</text>
+        <text data-drawio-ignore="part-of-parent-node" data-layout-safety="notemd-layout-safety@1.0.0" x="192" y="382" text-anchor="middle" class="notemd-editable-svg-node-role" fill="#2563eb">process</text>
     </g>
 
 

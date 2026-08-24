@@ -9,7 +9,7 @@
       "previewTarget": "editable-html-svg",
       "svgPath": "./mermaid-mindmap-basics.svg",
       "pngPath": "./mermaid-mindmap-basics.png",
-      "svgSha256": "91ed6329bc881d7b8785004e0875eb5e6683a26a44e77cf6cc769d99cd523b7e"
+      "svgSha256": "80b8508a2aeec098c54be17db137122ece5215d91b79f207f054665340ec6d1b"
     },
     {
       "typeId": "drawnix-knowledge-map",
@@ -29,7 +29,7 @@
       "previewTarget": "editable-html-svg",
       "svgPath": "./flowchart-release.svg",
       "pngPath": "./flowchart-release.png",
-      "svgSha256": "b77ff004c461505e9519bd218bc5cf9c411daaec5b4d0664209c5cd643dd1d3a"
+      "svgSha256": "eae429d5ee514e83254a438800cabdd7677e23305ff617eb68f09f47566962c4"
     },
     {
       "typeId": "sequence",
@@ -39,7 +39,7 @@
       "previewTarget": "editable-html-svg",
       "svgPath": "./sequence-request.svg",
       "pngPath": "./sequence-request.png",
-      "svgSha256": "ea7f85eff721f24c5eef518898d73b1ce950559534631ac725642832e2aec6a1"
+      "svgSha256": "94902db1e500745a2aa8a37d82e6bc4beb0e8c30b30687becc3304fda188890e"
     },
     {
       "typeId": "state",
@@ -49,7 +49,7 @@
       "previewTarget": "editable-html-svg",
       "svgPath": "./state-lifecycle.svg",
       "pngPath": "./state-lifecycle.png",
-      "svgSha256": "0317bf8f78611e4f05dd66d0ce0d637a8f2c2c60ec2b740b9ba0a92eaeb12735"
+      "svgSha256": "eaf96095ecc6866de17ab203884ec0517e683039bb5851ed24062bd72bd8c745"
     },
     {
       "typeId": "class",
@@ -59,7 +59,7 @@
       "previewTarget": "editable-html-svg",
       "svgPath": "./class-domain.svg",
       "pngPath": "./class-domain.png",
-      "svgSha256": "40d0d73ef369f8f35caea8893da3afbdc4d87cc694bb1b622ae458d201431096"
+      "svgSha256": "0e216d49fa95d150d64e52c17baff922d77f0d8f66a1158b13ba1a9500957130"
     },
     {
       "typeId": "entity-relationship",
@@ -69,7 +69,7 @@
       "previewTarget": "editable-html-svg",
       "svgPath": "./entity-relationship-schema.svg",
       "pngPath": "./entity-relationship-schema.png",
-      "svgSha256": "9e41bcbb0030177b1f17fcd6e8b4fd5e424b93838846b61b542bc1fc6adf6b88"
+      "svgSha256": "2b3536b711b5d023ffa9e0d0f6aa45baec1c6349b3ba48565ccd04b45ce2e87f"
     },
     {
       "typeId": "canvas-map",
@@ -189,7 +189,7 @@
       "previewTarget": "editable-html-svg",
       "svgPath": "./architecture-platform.svg",
       "pngPath": "./architecture-platform.png",
-      "svgSha256": "700afc527b75e9b0ce1ae0202b494a5918be3b24f5997586eef86462fdadb3a8"
+      "svgSha256": "be3425d4f76b5390a57a2e7dc4f9d9799d031c92164f65dfd09171857a4472f4"
     },
     {
       "typeId": "current-state",
@@ -199,7 +199,7 @@
       "previewTarget": "editable-html-svg",
       "svgPath": "./current-state-legacy-pipeline.svg",
       "pngPath": "./current-state-legacy-pipeline.png",
-      "svgSha256": "6d74a6d4a6e5106baa1208633df2b3a92f0f386d4186d9d044709ec96e63414f"
+      "svgSha256": "a8264cb5e2a9b5615b90da494016c17305f2ecc4696187f6c530ea7cc024758d"
     },
     {
       "typeId": "integration-topology",
@@ -209,7 +209,7 @@
       "previewTarget": "editable-html-svg",
       "svgPath": "./integration-topology-platform.svg",
       "pngPath": "./integration-topology-platform.png",
-      "svgSha256": "c02ff47617a6d8a196de828d07c73a179d28b1b4fb6fc977a7c4968208463b2e"
+      "svgSha256": "5af54e92181ba3bb248cb4410000f22d432f87f13691d0f3c5f064f4cf175312"
     },
     {
       "typeId": "data-flow",
@@ -219,7 +219,7 @@
       "previewTarget": "editable-html-svg",
       "svgPath": "./data-flow-platform.svg",
       "pngPath": "./data-flow-platform.png",
-      "svgSha256": "b7d93b45de8a4b4e9c71c5f26e82189434d59a3f551c71928bf2a4fc651c2233"
+      "svgSha256": "c5fbcb5e153784e0d331c1adec7c44e8d13d4b8a3c0fe49a4991fdb28c4fae93"
     },
     {
       "typeId": "access-matrix",
@@ -229,7 +229,7 @@
       "previewTarget": "editable-html-svg",
       "svgPath": "./access-matrix-platform.svg",
       "pngPath": "./access-matrix-platform.png",
-      "svgSha256": "310c74dd7030b9260d104a49c9bc6c85cb1e6686447eaf5738054c31161e9dc1"
+      "svgSha256": "9a900072e67b484c116a35440ef0be4ebfe7a803ee73b56bdfdb69411417de16"
     },
     {
       "typeId": "gantt",
@@ -239,7 +239,7 @@
       "previewTarget": "editable-html-svg",
       "svgPath": "./gantt-release-plan.svg",
       "pngPath": "./gantt-release-plan.png",
-      "svgSha256": "29e5cbdde482af8c62e0f80f561e9b08a3bcad08b8d4df4440ea2c5a407fa396"
+      "svgSha256": "e7f21b163604c5bccc7d2401c1fd34f5f416f3422d54e79bb50c7cfd8be9e995"
     },
     {
       "typeId": "layer-stack",
@@ -249,7 +249,7 @@
       "previewTarget": "editable-html-svg",
       "svgPath": "./layer-stack-platform.svg",
       "pngPath": "./layer-stack-platform.png",
-      "svgSha256": "cec5622c5c8a688ccbbef06677ccfac348b2af1951543493aaef474f5ac16d38"
+      "svgSha256": "fe733f3d909658d5062bf826a9796a0f45d8ed6913fa36dcd6daa4ab57cf01d8"
     },
     {
       "typeId": "venn",
@@ -259,7 +259,7 @@
       "previewTarget": "editable-html-svg",
       "svgPath": "./venn-platform.svg",
       "pngPath": "./venn-platform.png",
-      "svgSha256": "e55970beccc336e71ffadea1c9f77c13e723fa4ed4c8086c9fc182617cb2dcdc"
+      "svgSha256": "08b526bce3038f621b48fe217492c5dcee9f98cfeb84d46e18018544e0f8375e"
     },
     {
       "typeId": "ranked-funnel",
@@ -269,7 +269,7 @@
       "previewTarget": "editable-html-svg",
       "svgPath": "./ranked-funnel-release.svg",
       "pngPath": "./ranked-funnel-release.png",
-      "svgSha256": "39acf7c99daff75691cac46961525f06601ffcfc94496a3fbaaad3e1ec708c4c"
+      "svgSha256": "ecefe9f638b29bc63e0f27e1930b6fb3ea69932fdc1049a06c8e24c7998f8a38"
     },
     {
       "typeId": "loop",
@@ -279,7 +279,7 @@
       "previewTarget": "editable-html-svg",
       "svgPath": "./loop-operating-model.svg",
       "pngPath": "./loop-operating-model.png",
-      "svgSha256": "3dae69d5a5fea2ebcf891040270385c9248a6c43cb6caefab236841a925ab285"
+      "svgSha256": "d734697f1e550738d9b4ef169ea9487bc07ef06fd33f047beccd340f7f00cba4"
     },
     {
       "typeId": "nested",
@@ -289,7 +289,7 @@
       "previewTarget": "editable-html-svg",
       "svgPath": "./nested-scope.svg",
       "pngPath": "./nested-scope.png",
-      "svgSha256": "8238ed4a69b50bfb02de9e74e4327ee9ee9cdeee07ce6e57442dd7eec1264ee6"
+      "svgSha256": "94bad79cb9eb8b835efa15c8f2740396146aa2121154343b863efce6c00eb131"
     },
     {
       "typeId": "tree",
@@ -299,7 +299,7 @@
       "previewTarget": "editable-html-svg",
       "svgPath": "./tree-ownership.svg",
       "pngPath": "./tree-ownership.png",
-      "svgSha256": "37333cda98c6798eb4f2c7e03a0d9cd437b9fce2e8d3b0320e1e982621362455"
+      "svgSha256": "a6a7965a888ffedcd7db6a93684fd7fd503d1807944f2e28223617af64cb2e36"
     },
     {
       "typeId": "process",
@@ -309,7 +309,7 @@
       "previewTarget": "editable-html-svg",
       "svgPath": "./process-release.svg",
       "pngPath": "./process-release.png",
-      "svgSha256": "52f77225561a95bc933abc0950ca7b74926b30c2e22f656f2a1138a4417717a9"
+      "svgSha256": "44db226ba73d5487222ca891875822be098dc6cb7333c2f96eba8ba42acd5832"
     },
     {
       "typeId": "medallion",
@@ -319,7 +319,7 @@
       "previewTarget": "editable-html-svg",
       "svgPath": "./medallion-data-quality.svg",
       "pngPath": "./medallion-data-quality.png",
-      "svgSha256": "106e3b9dcc212df5ba97009d23bbe1c9cf327d420ccca0a7fd9d9a6b32bd848b"
+      "svgSha256": "bc1727cda804c7241bcd050e7d2a230f5a0bfdf170fd5a5343e68225037a3ec7"
     },
     {
       "typeId": "high-level",
@@ -329,7 +329,7 @@
       "previewTarget": "editable-html-svg",
       "svgPath": "./high-level-platform.svg",
       "pngPath": "./high-level-platform.png",
-      "svgSha256": "23118a600299e09309817468d792d0b1cc58df273139e65d4d06fc18d7e1e354"
+      "svgSha256": "757799693df53f19f019f9573c2d6efc2add0a5f5e3c808290b8205c374662f0"
     }
   ]
 }

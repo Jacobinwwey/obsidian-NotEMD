@@ -5,6 +5,8 @@ import { PreviewCapableRenderHost, RenderHost, RenderPreviewSession } from './ho
 import { RendererRegistry } from './rendererRegistry';
 import { RenderArtifact, RenderOptions } from './types';
 import { RenderWebviewPayloadOptions } from './webview/contract';
+import { diagnoseDiagramLayout } from '../diagram/layout/layoutDiagnostics';
+import { LAYOUT_SAFETY_VERSION } from '../diagram/layout/layoutSafety';
 
 function isPreviewCapableHost(host: RenderHost): host is PreviewCapableRenderHost {
     return typeof (host as PreviewCapableRenderHost).createSession === 'function';
@@ -42,8 +44,34 @@ export class RendererService {
 
         const renderPromise = this.host.render(renderer, spec, options)
             .then((artifact) => {
-                this.cache.set(spec, options, artifact);
-                return artifact;
+                // Mermaid/Vega/Drawnix own their final geometry. Apply the
+                // measured-text contract only to the native reference SVG
+                // renderer; otherwise a generic budget would reject valid
+                // legacy artifacts before their own runtime validator runs.
+                const layoutDiagnostics = artifact.target === 'editable-html-svg'
+                    ? diagnoseDiagramLayout(spec)
+                    : [];
+                const layoutErrors = layoutDiagnostics.filter(diagnostic => diagnostic.severity === 'error');
+                if (layoutErrors.length > 0) {
+                    throw new Error(`Diagram layout safety gate rejected the artifact: ${layoutErrors.map(diagnostic => diagnostic.message).join(' ')}`);
+                }
+                const diagnostics = [...(artifact.diagnostics ?? []), ...layoutDiagnostics];
+                const safeArtifact: RenderArtifact = {
+                    ...artifact,
+                    layoutSafetyVersion: artifact.layoutSafetyVersion ?? LAYOUT_SAFETY_VERSION,
+                    diagnostics: diagnostics.length > 0 ? diagnostics : undefined,
+                    previewSvg: artifact.previewSvg
+                        ? {
+                            ...artifact.previewSvg,
+                            layoutSafetyVersion: artifact.previewSvg.layoutSafetyVersion ?? LAYOUT_SAFETY_VERSION,
+                            diagnostics: diagnostics.length > 0
+                                ? [...(artifact.previewSvg.diagnostics ?? []), ...layoutDiagnostics]
+                                : artifact.previewSvg.diagnostics
+                        }
+                        : undefined
+                };
+                this.cache.set(spec, options, safeArtifact);
+                return safeArtifact;
             })
             .finally(() => {
                 this.inFlightRenders.delete(cacheKey);

@@ -44,6 +44,7 @@ export function buildDiagramSpecPrompt(options: DiagramSpecPromptOptions = {}): 
 - Payload family: ${promptProfile.payloadKind}.
 - Required semantic fields: ${promptProfile.requiredFields.join(', ')}.
 - Hard limits: ${promptProfile.hardLimits.join(' ')}
+- Deterministic density budget: ${JSON.stringify(promptProfile.densityBudget)}. Keep core labels inside this budget; optional subtitles/details may be omitted when needed, but never omit a declared node, edge, role, or relationship silently.
 - Semantic rules: ${promptProfile.semanticRules.join(' ')}
 - Target rules: ${promptProfile.targetRules.join(' ')}
 - Invalid outputs: ${promptProfile.invalidExamples.join(' ')}`

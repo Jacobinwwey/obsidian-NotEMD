@@ -1050,6 +1050,8 @@ export const STRINGS_ZH_CN: DeepPartial<NotemdEnglishStrings> = {
             info: '信息'
         },
         diagnosticAdvice: '建议：{advice}',
+        previewLoadTimeout: '预览未能就绪。请检查产物诊断后重新打开预览。',
+        previewLoadFailed: '预览加载失败，源产物仍可在下方查看。',
         exportFolderTitle: '将每张图分别导出为 {format} 文件',
         exportFolderDescription: '选择 Vault 文件夹。每个预览 panel 都会写入独立的 {format} 文件。',
         exportFolderDefaultOption: '原文件夹（{path}）',

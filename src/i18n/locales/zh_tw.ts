@@ -1007,5 +1007,7 @@ export const STRINGS_ZH_TW: DeepPartial<NotemdEnglishStrings> = {
             info: '資訊'
         },
         diagnosticAdvice: '建議：{advice}',
+        previewLoadTimeout: '預覽未能就緒。請檢查產物診斷後重新開啟預覽。',
+        previewLoadFailed: '預覽載入失敗，來源產物仍可在下方查看。',
     }
 };

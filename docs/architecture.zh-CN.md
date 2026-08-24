@@ -364,9 +364,16 @@ Drawnix 源图形遵循同一条兼容性边界。默认关闭 **同时完整输
 7. **Local-only 设置是已验证的边界保证**：`src/main.ts` 只清洗一次并只写入一次，local-only provider credential 不会再次进入序列化 settings。
 8. **响应缓存有上限、不含凭证且跨运行时**：`src/llmResponseCache.ts` 对 provider、transport、endpoint、model、运行参数和 prompt/content hash 生成版本化的双通道非加密 fingerprint，TTL 为 5 分钟，LRU 上限为 128 条；共享的移动端/web 路径不再依赖 Node-only 模块。它仍只是优化层，不能成为正确性的权威来源。
 
+### 布局安全契约（2026-08-23）
+
+Canonical payload 校验只能证明结构正确，不能证明几何可读。因此 native editable SVG 在缓存或发布前必须通过 `src/diagram/layout/layoutSafety.ts` 与 `src/diagram/layout/layoutDiagnostics.ts` 的共享确定性契约。该契约会保守测量宽字符、拆分无空格标识符、限制行数、依据实测文本扩展几何，并将核心文本溢出作为 error、可选细节省略作为 warning。`RenderArtifact.layoutSafetyVersion` 以 additive 方式暴露契约版本，不破坏旧 artifact。
+
+随后由 gallery 浏览器门禁使用 `getBBox()` 检查实际 native SVG：文本必须位于 viewBox 内，节点文字必须位于节点内，节点不得互相重叠，边标签不得与节点相交。该门禁只作用于带 native layout marker 的 SVG；Mermaid 与 Vega-Lite 继续使用各自 runtime validator，因为最终几何由它们的布局引擎负责。prompt profile 暴露数值密度预算但不暴露坐标，使生成、校验、渲染和预览共享同一个向前兼容的安全边界。
+
 ## 验证
 
 - `npm run build` — TypeScript 编译 + esbuild 打包
+
 - `npm test -- --runInBand` — 完整 Jest 验证；若在 `/.worktrees/` checkout 中验证，请改用 `npx jest --runInBand --config /tmp/notemd-worktree-jest.cjs`，因为仓库默认 Jest ignore 规则会排除 worktree 路径
 - `npm run audit:i18n-ui` — 无硬编码 UI 字符串
 - `npm run audit:render-host` — 渲染宿主自包含于 main.js

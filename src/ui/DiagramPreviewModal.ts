@@ -771,10 +771,36 @@ export class DiagramPreviewModal extends Modal {
 
     private renderIframePreview(container: HTMLElement, artifact: RenderArtifact): void {
         container.empty();
+        const copy = getI18nStrings({ uiLocale: this.uiLocale }).previewModal;
         const iframe = container.createEl('iframe', { cls: 'notemd-diagram-preview-frame' });
+        iframe.setAttribute('title', this.session.payload.previewTitle ?? getRenderTargetDisplayName(artifact.target));
         iframe.setAttribute('sandbox', this.getIframeSandboxPolicy(artifact));
         iframe.setAttribute('referrerpolicy', 'no-referrer');
-        iframe.onload = () => this.resizeIframePreview(iframe);
+        let settled = false;
+        const timeout = typeof window !== 'undefined'
+            ? window.setTimeout(() => {
+                if (settled) return;
+                settled = true;
+                iframe.addClass('is-load-failed');
+                container.createEl('p', {
+                    text: copy.previewLoadTimeout,
+                    cls: 'notemd-diagram-preview-error'
+                });
+            }, 8000)
+            : undefined;
+        iframe.onload = () => {
+            settled = true;
+            if (timeout !== undefined) globalThis.clearTimeout(timeout);
+            this.resizeIframePreview(iframe);
+        };
+        iframe.onerror = () => {
+            settled = true;
+            if (timeout !== undefined) globalThis.clearTimeout(timeout);
+            container.createEl('p', {
+                text: copy.previewLoadFailed,
+                cls: 'notemd-diagram-preview-error'
+            });
+        };
         iframe.srcdoc = new IframeRenderHost().createSession(artifact, {
             theme: this.session.payload.theme,
             sourcePath: this.session.payload.sourcePath,

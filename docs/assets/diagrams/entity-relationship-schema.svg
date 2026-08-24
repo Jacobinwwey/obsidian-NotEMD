@@ -62,28 +62,28 @@ marker path {
     </g>
         <g id="artifact" class="notemd-editable-svg-node" data-drawio-type="node" data-drawio-role="process" data-drawio-id="artifact">
         <rect data-drawio-ignore="part-of-parent-node" x="72" y="116" width="240" height="104" rx="14" fill="#eff6ff" stroke="#cbd5e1" stroke-width="1.5"/>
-        <text data-drawio-ignore="part-of-parent-node" x="192" y="164" text-anchor="middle" class="notemd-editable-svg-node-label">
+        <text data-drawio-ignore="part-of-parent-node" data-layout-safety="notemd-layout-safety@1.0.0" x="192" y="154" text-anchor="middle" class="notemd-editable-svg-node-label">
         <tspan x="192" dy="0">Artifact</tspan>
     </text>
-        <text data-drawio-ignore="part-of-parent-node" x="192" y="202" text-anchor="middle" class="notemd-editable-svg-node-role" fill="#2563eb">process</text>
+        <text data-drawio-ignore="part-of-parent-node" data-layout-safety="notemd-layout-safety@1.0.0" x="192" y="202" text-anchor="middle" class="notemd-editable-svg-node-role" fill="#2563eb">process</text>
     </g><g id="artifact-id" class="notemd-editable-svg-node" data-drawio-type="node" data-drawio-role="uuid" data-drawio-id="artifact-id">
         <rect data-drawio-ignore="part-of-parent-node" x="404" y="116" width="240" height="104" rx="14" fill="#eff6ff" stroke="#cbd5e1" stroke-width="1.5"/>
-        <text data-drawio-ignore="part-of-parent-node" x="524" y="164" text-anchor="middle" class="notemd-editable-svg-node-label">
+        <text data-drawio-ignore="part-of-parent-node" data-layout-safety="notemd-layout-safety@1.0.0" x="524" y="154" text-anchor="middle" class="notemd-editable-svg-node-label">
         <tspan x="524" dy="0">id</tspan>
     </text>
-        <text data-drawio-ignore="part-of-parent-node" x="524" y="202" text-anchor="middle" class="notemd-editable-svg-node-role" fill="#2563eb">uuid</text>
+        <text data-drawio-ignore="part-of-parent-node" data-layout-safety="notemd-layout-safety@1.0.0" x="524" y="202" text-anchor="middle" class="notemd-editable-svg-node-role" fill="#2563eb">uuid</text>
     </g><g id="panel" class="notemd-editable-svg-node" data-drawio-type="node" data-drawio-role="process" data-drawio-id="panel">
         <rect data-drawio-ignore="part-of-parent-node" x="736" y="116" width="240" height="104" rx="14" fill="#eff6ff" stroke="#cbd5e1" stroke-width="1.5"/>
-        <text data-drawio-ignore="part-of-parent-node" x="856" y="164" text-anchor="middle" class="notemd-editable-svg-node-label">
+        <text data-drawio-ignore="part-of-parent-node" data-layout-safety="notemd-layout-safety@1.0.0" x="856" y="154" text-anchor="middle" class="notemd-editable-svg-node-label">
         <tspan x="856" dy="0">Panel</tspan>
     </text>
-        <text data-drawio-ignore="part-of-parent-node" x="856" y="202" text-anchor="middle" class="notemd-editable-svg-node-role" fill="#2563eb">process</text>
+        <text data-drawio-ignore="part-of-parent-node" data-layout-safety="notemd-layout-safety@1.0.0" x="856" y="202" text-anchor="middle" class="notemd-editable-svg-node-role" fill="#2563eb">process</text>
     </g><g id="panel-id" class="notemd-editable-svg-node" data-drawio-type="node" data-drawio-role="uuid" data-drawio-id="panel-id">
         <rect data-drawio-ignore="part-of-parent-node" x="72" y="296" width="240" height="104" rx="14" fill="#eff6ff" stroke="#cbd5e1" stroke-width="1.5"/>
-        <text data-drawio-ignore="part-of-parent-node" x="192" y="344" text-anchor="middle" class="notemd-editable-svg-node-label">
+        <text data-drawio-ignore="part-of-parent-node" data-layout-safety="notemd-layout-safety@1.0.0" x="192" y="334" text-anchor="middle" class="notemd-editable-svg-node-label">
         <tspan x="192" dy="0">id</tspan>
     </text>
-        <text data-drawio-ignore="part-of-parent-node" x="192" y="382" text-anchor="middle" class="notemd-editable-svg-node-role" fill="#2563eb">uuid</text>
+        <text data-drawio-ignore="part-of-parent-node" data-layout-safety="notemd-layout-safety@1.0.0" x="192" y="382" text-anchor="middle" class="notemd-editable-svg-node-role" fill="#2563eb">uuid</text>
     </g>
         <path data-drawio-ignore="edge-arrowhead" class="notemd-editable-svg-edge-arrowhead" d="M 718.000 168.000 L 736 168" fill="none" stroke="#334155" stroke-width="1.8" marker-end="url(#notemd-editable-svg-arrow)"/>
         <text data-drawio-ignore="part-of-parent-edge" x="524" y="158" text-anchor="middle" class="notemd-editable-svg-edge-label" fill="#475569" stroke="#ffffff" stroke-width="4" paint-order="stroke">contains</text>

@@ -82,6 +82,13 @@ describe('diagram spec prompt builder', () => {
         expect(prompt).toMatch(/REQUIRED diagram intent:\s*architecture/i);
     });
 
+    test('exposes numeric density budgets to the generation prompt without exposing coordinates', () => {
+        const prompt = buildDiagramSpecPrompt({ preferredIntent: 'architecture' });
+        expect(prompt).toContain('Deterministic density budget');
+        expect(prompt).toContain('maxLabelWidth');
+        expect(prompt).not.toMatch(/x:\s*\d+|y:\s*\d+/i);
+    });
+
     test('requires constrained CircuitSpec output for circuitikz render target', () => {
         const prompt = buildDiagramSpecPrompt({
             preferredIntent: 'circuit',

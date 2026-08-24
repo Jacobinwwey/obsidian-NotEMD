@@ -1568,6 +1568,14 @@
     min-width: 64px;
 }
 
+.notemd-diagram-preview-error {
+    margin: 12px 0 0;
+    padding: 10px 12px;
+    border: 1px solid var(--background-modifier-border);
+    color: var(--text-muted);
+    white-space: normal;
+}
+
 .notemd-diagram-type-preview-panel {
     display: flex;
     flex-direction: column;

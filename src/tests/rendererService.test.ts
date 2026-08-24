@@ -81,6 +81,22 @@ describe('renderer service', () => {
         expect(stateDiagram.content).toContain('stateDiagram-v2');
     });
 
+    test('does not apply native SVG text budgets to Mermaid compatibility artifacts', async () => {
+        const registry = new RendererRegistry([new MermaidRenderer()]);
+        const service = new RendererService(registry);
+        const longLabel = 'A'.repeat(400);
+
+        await expect(service.render({
+            intent: 'flowchart',
+            title: 'Compatibility flow',
+            nodes: [
+                { id: 'source', label: longLabel },
+                { id: 'target', label: 'Target' }
+            ],
+            edges: [{ from: 'source', to: 'target', label: 'legacy relation' }]
+        })).resolves.toMatchObject({ target: 'mermaid' });
+    });
+
     test('delegates rendering through the configured host', async () => {
         const registry = new RendererRegistry([new MermaidRenderer()]);
         const host: RenderHost = {

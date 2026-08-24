@@ -12,6 +12,20 @@ export interface DiagramPromptProfile {
     semanticRules: readonly string[];
     targetRules: readonly string[];
     invalidExamples: readonly string[];
+    densityBudget: DiagramDensityBudget;
+}
+
+/** Numeric generation budget shared by prompt, validator, and deterministic renderer. */
+export interface DiagramDensityBudget {
+    maxNodes?: number;
+    maxEdges?: number;
+    maxZones?: number;
+    maxRows?: number;
+    maxColumns?: number;
+    maxLabelWidth?: number;
+    maxSummaryWidth?: number;
+    maxLabelLines?: number;
+    allowOptionalDetailElision: boolean;
 }
 
 const PROFILE_LIMITS = [
@@ -64,8 +78,36 @@ export const DIAGRAM_PROMPT_PROFILES: readonly DiagramPromptProfile[] = PROFILE_
     hardLimits: PROFILE_LIMITS,
     semanticRules: [semanticRule],
     targetRules: ['The renderer owns geometry, styles, coordinates, and serialization.'],
-    invalidExamples: ['Do not emit renderer syntax, arbitrary coordinates, fabricated numeric data, or undeclared relationships.']
+    invalidExamples: ['Do not emit renderer syntax, arbitrary coordinates, fabricated numeric data, or undeclared relationships.'],
+    densityBudget: densityBudgetForPayload(payloadKind)
 }));
+
+function densityBudgetForPayload(payloadKind: DiagramPayloadKind): DiagramDensityBudget {
+    switch (payloadKind) {
+        case 'topology':
+            return { maxNodes: 24, maxEdges: 40, maxZones: 6, maxLabelWidth: 240, maxLabelLines: 2, allowOptionalDetailElision: true };
+        case 'lane-grid':
+            return { maxNodes: 24, maxEdges: 24, maxRows: 4, maxColumns: 6, maxLabelWidth: 112, maxLabelLines: 2, allowOptionalDetailElision: true };
+        case 'access-matrix':
+            return { maxRows: 14, maxColumns: 6, maxLabelWidth: 128, maxLabelLines: 2, allowOptionalDetailElision: true };
+        case 'schedule':
+            return { maxNodes: 12, maxLabelWidth: 220, maxLabelLines: 2, allowOptionalDetailElision: true };
+        case 'ordered-stack':
+            return { maxNodes: 6, maxLabelWidth: 560, maxLabelLines: 2, allowOptionalDetailElision: true };
+        case 'set-overlap':
+            return { maxNodes: 3, maxLabelWidth: 150, maxLabelLines: 2, allowOptionalDetailElision: true };
+        case 'ranked-segments':
+            return { maxNodes: 6, maxLabelWidth: 360, maxLabelLines: 1, allowOptionalDetailElision: true };
+        case 'cycle':
+            return { maxNodes: 8, maxLabelWidth: 118, maxLabelLines: 2, allowOptionalDetailElision: true };
+        case 'nested':
+            return { maxNodes: 5, maxLabelWidth: 220, maxLabelLines: 1, allowOptionalDetailElision: true };
+        case 'tree':
+            return { maxNodes: 32, maxLabelWidth: 140, maxLabelLines: 2, allowOptionalDetailElision: true };
+        default:
+            return { maxNodes: 24, maxEdges: 40, maxLabelWidth: 210, maxLabelLines: 3, allowOptionalDetailElision: true };
+    }
+}
 
 const PROFILE_BY_ID = new Map(DIAGRAM_PROMPT_PROFILES.map(profile => [profile.id, profile]));
 

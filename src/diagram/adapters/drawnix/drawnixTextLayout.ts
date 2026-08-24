@@ -1,31 +1,7 @@
-/**
- * Deterministic text geometry used by the native projection. This is an
- * intentionally conservative estimator, not a browser font measurement: the
- * same inputs must produce identical node, header, and relation geometry in
- * SVG and Drawnix serialization paths.
- */
-export function measureDrawnixText(value: string): number {
-    return Array.from(value).reduce((total, character) => total + measureDrawnixCharacter(character), 0);
-}
+import { measureTextWidth } from '../../layout/layoutSafety';
 
-function measureDrawnixCharacter(character: string): number {
-    if (/\s/.test(character)) {
-        return 4;
-    }
-    if ((character.codePointAt(0) ?? 0) > 0x7f) {
-        return 15;
-    }
-    if (/[MW@%]/.test(character)) {
-        return 14;
-    }
-    if (/[mw#&]/.test(character)) {
-        return 12;
-    }
-    if (/[A-Z0-9]/.test(character)) {
-        return 11;
-    }
-    return 8;
-}
+/** Shared deterministic estimator retained under the legacy Drawnix export. */
+export const measureDrawnixText = measureTextWidth;
 
 export function wrapDrawnixText(value: string, maxLineWidth: number): string[] {
     const trimmed = value.trim();

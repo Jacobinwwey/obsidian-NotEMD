@@ -10,6 +10,7 @@ export interface RenderArtifactPreviewPanelArtifact {
     mimeType: string;
     sourceIntent: DiagramIntent;
     diagnostics?: RenderArtifactDiagnostic[];
+    layoutSafetyVersion?: string;
     previewSvg?: RenderArtifactPreviewSvg;
 }
 
@@ -25,6 +26,8 @@ export interface RenderArtifact {
     mimeType: string;
     sourceIntent: DiagramIntent;
     diagnostics?: RenderArtifactDiagnostic[];
+    /** Version of the deterministic geometry contract used by the renderer. */
+    layoutSafetyVersion?: string;
     previewSvg?: RenderArtifactPreviewSvg;
     companions?: RenderArtifactCompanion[];
     sourceVisualManifest?: RenderArtifactSourceVisualManifestEntry[];
@@ -64,6 +67,7 @@ export interface RenderArtifactPreviewSvg {
     content: string;
     mimeType: 'image/svg+xml';
     diagnostics?: RenderArtifactDiagnostic[];
+    layoutSafetyVersion?: string;
 }
 
 export interface RenderOptions {

@@ -1,6 +1,6 @@
 ---
 date: 2026-08-16
-last_updated: 2026-08-22
+last_updated: 2026-08-23
 topic: mainline-diagram-architecture-progress-and-next-direction
 status: active
 canonical_for:
@@ -238,3 +238,8 @@ Batch 0 已作为兼容基础实现；本批不增加 selector 行，也不把�
 - 不兼容的持久化 target/type 组合在 settings 边界清为 Auto；过期 catalog ID 回退到旧 semantic preference。
 
 本跟进后的最终证据：266 个 Jest suite 通过（2,349 个测试通过、1 个 skipped）；build 通过；gallery check 通过并得到 33 条记录；VitePress docs、render-host audit、i18n audit、Drawnix public-API consumer gate 和 `git diff --check` 通过。全仓 lint 仍是基线债务，不重新归类为本功能失败。
+## Layout Safety Closure (2026-08-23) / 布局安全闭环（2026-08-23）
+
+English: The visual audit showed that canonical payload validity alone did not prove readable output. The shared `src/diagram/layout/layoutSafety.ts` contract now provides conservative glyph measurement, no-space token wrapping, bounded line counts, overlap primitives, and a version marker. `layoutDiagnostics.ts` rejects core labels that would be truncated and reports optional detail elision as warnings. Native editable SVG families now derive node, row, matrix, lane, schedule, stack, overlap, cycle, nested, and tree geometry from measured text; topology edge labels search deterministic clearance candidates. `RenderArtifact` carries additive `layoutSafetyVersion` metadata, `RendererService` applies the gate before caching, prompt profiles expose numeric density budgets without exposing coordinates, and preview iframes expose title/error/timeout states. The gallery browser gate uses `getBBox()` for native SVG to reject out-of-viewBox text, node text outside its node, node overlap, edge-label/node collision, and core truncation. All 33 production fixtures regenerate and pass `diagram:gallery:check`; six representative PNGs were visually inspected. This is renderer/headless evidence, not a claim of manual acceptance for every Obsidian theme.
+
+中文：视觉审计证明，仅有 canonical payload 合法并不能证明输出可读。共享的 `src/diagram/layout/layoutSafety.ts` 现在提供保守字符测量、无空格 token 换行、行数上限、碰撞原语和版本标记；`layoutDiagnostics.ts` 会拒绝必须截断的核心标签，并把可选细节省略记录为 warning。native editable SVG family 现在依据实测文本推导节点、行、矩阵、lane、schedule、stack、overlap、cycle、nested 和 tree 几何；topology 边标签通过确定性候选位置避障。`RenderArtifact` 以 additive 方式携带 `layoutSafetyVersion`，`RendererService` 在缓存前执行门禁，prompt profile 暴露数值密度预算但不暴露坐标，preview iframe 提供 title、错误和超时状态。gallery 浏览器门禁使用 `getBBox()` 拒绝 viewBox 外文本、节点外文本、节点重叠、边标签与节点碰撞以及核心文本截断。33 个生产 fixture 均可重建并通过 `diagram:gallery:check`，另抽检 6 张 PNG。以上是 renderer/headless 证据，不等同于所有 Obsidian 主题的人工验收。

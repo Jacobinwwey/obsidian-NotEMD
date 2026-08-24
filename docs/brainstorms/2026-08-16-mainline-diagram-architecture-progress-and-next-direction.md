@@ -1,6 +1,6 @@
 ---
 date: 2026-08-16
-last_updated: 2026-08-22
+last_updated: 2026-08-23
 topic: mainline-diagram-architecture-progress-and-next-direction
 status: active
 canonical_for:
@@ -238,3 +238,17 @@ The completion audit found a compatibility gap in the first delivery: the catalo
 - Incompatible persisted target/type combinations are cleared to Auto at the settings boundary; stale catalog IDs fall back to the legacy semantic preference.
 
 Final evidence after this follow-up: 266 Jest suites passed (2,349 tests passed, 1 skipped); build passed; gallery check passed with 33 entries; VitePress docs, render-host audit, i18n audit, Drawnix public-API consumer gate, and `git diff --check` passed. Repository lint remains baseline debt and is not reclassified as a feature failure.
+
+## Layout Safety Closure (2026-08-23)
+
+The visual audit found that a valid canonical payload was not sufficient evidence of a readable figure. Reference SVGs still used character-count wrapping, fixed node heights, midpoint edge labels, and fixed canvas sizes; these allowed labels to overlap, become occluded by nodes, or lose their referent in dense diagrams. This increment closes that architecture gap.
+
+- Added `src/diagram/layout/layoutSafety.ts` as the shared deterministic geometry contract. It measures wide glyphs conservatively, splits no-space identifiers, bounds line count, detects padded rectangle overlap, and exposes a versioned `LAYOUT_SAFETY_VERSION`.
+- Added `src/diagram/layout/layoutDiagnostics.ts`. Core labels that would require truncation are errors; optional subtitles/details are warnings. The generation path therefore fails closed before persisting an unreadable artifact instead of silently clipping text.
+- Updated the editable semantic SVG model and all native reference families to consume measured text geometry. Node/row heights expand from actual line count; topology edge labels search deterministic clearance candidates; matrix headers/rows, lane cells, schedule bars, stacks, overlap, cycle, nested, and tree labels have explicit vertical budgets.
+- `RenderArtifact` now carries additive `layoutSafetyVersion` metadata. `RendererService` attaches layout diagnostics and rejects core overflow while preserving legacy artifacts without the field.
+- Prompt profiles now expose numeric density budgets (`maxLabelWidth`, line limits, family caps) without exposing renderer coordinates. This aligns the LLM contract with the renderer contract and keeps optional detail elision explicit.
+- Preview iframes now have a title, load error handling, and an eight-second readiness timeout with localized feedback. A blank iframe is no longer treated as a successful preview.
+- `scripts/lib/diagram-gallery-runtime.js` now runs a browser `getBBox()` gate for native SVG: text must stay inside the viewBox, node text must stay inside its node, nodes may not overlap, edge labels may not intersect nodes, and core truncation is rejected. Vega/Mermaid remain covered by their own runtime validators because they do not carry the native geometry marker.
+
+Evidence for this closure: production gallery regeneration and `diagram:gallery:check` pass for all 33 executable fixtures; native layout and preview focused tests pass; six representative PNGs were visually inspected after the gate caught and fixed access-matrix header collision and topology edge-label clearance regressions. This is renderer/headless evidence, not a claim of manual acceptance for every Obsidian host theme.
