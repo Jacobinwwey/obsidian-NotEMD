@@ -273,3 +273,21 @@ JSON Canvas 之前被视为 runtime-owned preview，因此跳过 native 几何�
 - `RendererService` 现在在缓存写入以及 command host 落盘之前校验插件拥有的 JSON Canvas 内容；预览阶段不再是唯一的第一道防线。
 
 生成链路证据：超预算的 `canvasMap` 节点现在会在 `RendererService.render()` 阶段失败，无法进入 `saveArtifact`；回归测试已在该边界断言拒绝行为。
+
+## Runtime SVG 安全契约（2026-08-26）
+
+剩余缺口是 Mermaid/Vega 运行时生成的 SVG：语法与 runtime parse 成功，并不保证返回 SVG 有可用 viewport 或 drawable 内容。新增共享 `svgSafety.ts` 契约，校验最终 runtime SVG markup，要求正的 viewBox 或 intrinsic 尺寸，拒绝空输出，并写入版本化 runtime ownership marker。gallery 对 runtime-owned 文本使用浏览器坐标边界检查，不套用 native node 假设。
+
+- Mermaid 与 Vega-Lite 的预览和栅格导出路径现在对 malformed、无尺寸或空 SVG fail-closed。
+- 运行时输出仍不执行 native 节点/边碰撞启发式，因为内部布局由 Mermaid/Vega 所有；但必须通过最终 viewport/文本 sanity 检查。
+- 该契约在 runtime 渲染完成、预览/导出消费者接收之前执行，非法输出不会被静默缓存为成功预览。
+## 共享文本所有权与矩阵单元留白（2026-08-26）
+
+下一轮审计发现另一类 native 布局风险：family renderer 即使通过文本预算，仍可能把副标签固定在与换行后的主标签或标题/summary 相交的 baseline 上。现在由共享 renderer 几何边界负责该约束，不再依赖单个 fixture 文案长度。
+
+- native family 的 body 起点通过 `documentBodyTop()` 根据已测量的文档 summary 推导。topology、lane-grid、access-matrix、schedule、stack、ranked、nested、tree 不再假设 summary 只有一行或位于固定高度。
+- access-matrix 的 component hint 与 cell qualifier 锚定在单元底边，主权限值保留独立的两行预算。长标签不会覆盖 qualifier，也不会让颜色权限指代失清。
+- gallery 仍是全部 33 个 fixture 的发布门禁；生产 renderer 与 gallery 共用同一确定性 SVG，单独修改 fixture 文案不能掩盖未来生成 payload 的长标签风险。
+- Frontend Law Auditor 证据运行报告 0 个 fast-gate 失败、0 个 principle 失败；仍有 12 个 UX 指标明确为 unknown，因为 CLI 证据无法测量宿主热区、交互时延或真实任务完成率。unknown 不视为可用性证明。
+
+本增量验证：native preview/layout 聚焦测试通过（15 个测试），TypeScript/esbuild build 通过，33 条 gallery 生成/check 通过，并在几何修改后重新生成访问矩阵 PNG。

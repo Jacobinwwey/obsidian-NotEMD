@@ -119,7 +119,7 @@ describe('diagram type preview panel', () => {
             if (typeId === 'flowchart') {
                 return new Promise<string>(resolve => { resolveFirst = resolve; });
             }
-            return Promise.resolve('<svg><title>Sequence</title></svg>');
+            return Promise.resolve('<svg viewBox="0 0 100 60"><rect width="100" height="60" fill="none" /><title>Sequence</title></svg>');
         });
         const controller = renderDiagramTypePreviewPanel({ parent: root as unknown as HTMLElement, copy, renderThumbnail });
         const panel = root.children[0];
@@ -131,8 +131,8 @@ describe('diagram type preview panel', () => {
         await Promise.resolve();
         await Promise.resolve();
         expect(canvas.attrs.get('data-preview-state')).toBe('ready');
-        expect(canvas.innerHTML).toContain('<svg>');
-        resolveFirst?.('<svg><title>stale</title></svg>');
+        expect(canvas.innerHTML).toContain('<svg viewBox="0 0 100 60">');
+        resolveFirst?.('<svg viewBox="0 0 100 60"><rect width="100" height="60" fill="none" /><title>stale</title></svg>');
         await Promise.resolve();
         expect(canvas.innerHTML).not.toContain('stale');
         expect(canvas.attrs.get('aria-busy')).toBe('false');
@@ -170,7 +170,7 @@ describe('diagram type preview panel', () => {
         const controller = renderDiagramTypePreviewPanel({
             parent: root as unknown as HTMLElement,
             copy,
-            renderThumbnail: jest.fn().mockResolvedValue('<svg viewBox="0 0 880 532"><title>Matrix</title></svg>')
+            renderThumbnail: jest.fn().mockResolvedValue('<svg viewBox="0 0 880 532"><rect width="880" height="532" fill="none" /><title>Matrix</title></svg>')
         });
 
         controller.setSelectedType('access-matrix');

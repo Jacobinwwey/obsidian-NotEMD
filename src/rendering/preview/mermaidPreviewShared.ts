@@ -1,4 +1,5 @@
 import { RenderWebviewTheme, resolveRenderTheme } from '../theme';
+import { assertSvgSafetyContract } from './svgSafety';
 
 export interface MermaidPreviewDeps {
     initialize(config: Record<string, unknown>): void;
@@ -56,7 +57,7 @@ export async function renderNormalizedMermaidDefinitionSvgWithDeps(
         throw new Error('Mermaid preview runtime did not return SVG markup.');
     }
 
-    return result.svg;
+    return assertSvgSafetyContract(result.svg, 'Mermaid');
 }
 
 export async function renderNormalizedMermaidDefinitionSvgForRasterExportWithDeps(
@@ -71,7 +72,7 @@ export async function renderNormalizedMermaidDefinitionSvgForRasterExportWithDep
         throw new Error('Mermaid preview runtime did not return SVG markup.');
     }
 
-    return result.svg;
+    return assertSvgSafetyContract(result.svg, 'Mermaid raster');
 }
 
 export async function validateNormalizedMermaidDefinitionWithDeps(

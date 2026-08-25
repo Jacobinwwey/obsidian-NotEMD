@@ -144,10 +144,10 @@ describe('diagram preview export helpers', () => {
             mermaid: {
                 initialize,
                 parse: jest.fn(),
-                render: jest.fn().mockResolvedValue({ svg: '<svg><path /></svg>' })
+                render: jest.fn().mockResolvedValue({ svg: '<svg viewBox="0 0 100 100"><path d="M0 0L100 100" /></svg>' })
             },
             theme: 'dark'
-        })).resolves.toContain('<svg>');
+        })).resolves.toContain('<svg viewBox="0 0 100 100"');
         expect(initialize).toHaveBeenCalledWith(expect.objectContaining({ theme: 'dark' }));
     });
 
@@ -369,7 +369,7 @@ describe('diagram preview export helpers', () => {
             mermaid: {
                 initialize: jest.fn(),
                 parse: jest.fn(),
-                render: jest.fn().mockResolvedValue({ svg: '<svg width="40" height="20"></svg>' })
+                render: jest.fn().mockResolvedValue({ svg: '<svg width="40" height="20"><rect width="40" height="20" /></svg>' })
             },
             pngRaster: {
                 createBlob: (parts, options) => new Blob(parts, options),
@@ -413,7 +413,7 @@ describe('diagram preview export helpers', () => {
             mermaid: {
                 initialize: jest.fn(),
                 parse: jest.fn(),
-                render: jest.fn().mockResolvedValue({ svg: '<svg width="40" height="20"></svg>' })
+                render: jest.fn().mockResolvedValue({ svg: '<svg width="40" height="20"><rect width="40" height="20" /></svg>' })
             },
             pngRaster: {
                 createBlob: (parts, options) => new Blob(parts, options),
@@ -460,7 +460,7 @@ describe('diagram preview export helpers', () => {
             mermaid: {
                 initialize: jest.fn(),
                 parse: jest.fn(),
-                render: jest.fn().mockResolvedValue({ svg: '<svg viewBox="0 0 400 200"></svg>' })
+                render: jest.fn().mockResolvedValue({ svg: '<svg viewBox="0 0 400 200"><rect width="400" height="200" /></svg>' })
             },
             svgPdf: {
                 parseSvg,

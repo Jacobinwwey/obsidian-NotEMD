@@ -154,6 +154,23 @@ function svgRoot(spec: DiagramSpec, width: number, height: number, body: string)
     </svg>`;
 }
 
+/**
+ * Reserve a stable gap below the document title/summary before a family lays
+ * out its first drawable. Summary text is allowed to wrap; fixed family tops
+ * must therefore be derived from the same measured contract or a long prompt
+ * summary can be painted underneath the first row/header.
+ */
+function documentBodyTop(spec: DiagramSpec, width: number, minimumTop: number): number {
+    const summaryLines = documentSummaryLineCount(spec, width);
+    const summaryBottom = summaryLines > 0 ? 66 + summaryLines * 14 : 58;
+    return Math.max(minimumTop, summaryBottom + 18);
+}
+
+function documentSummaryLineCount(spec: DiagramSpec, width: number): number {
+    const maxWidth = Math.max(24, Math.floor((width - 80) / 7)) * 7;
+    return spec.summary?.trim() ? wrapMeasuredText(spec.summary, maxWidth, 2).lines.length : 0;
+}
+
 function nodeClass(node: { focal?: boolean; external?: boolean }): string {
     return ['ref-node', node.focal ? 'focal' : '', node.external ? 'external' : ''].filter(Boolean).join(' ');
 }
@@ -188,7 +205,7 @@ function topologySvg(spec: DiagramSpec, payload: DiagramTopologyPayload): string
     const margin = 40;
     const gap = 20;
     const zoneWidth = (width - margin * 2 - gap * Math.max(0, payload.zones.length - 1)) / Math.max(1, payload.zones.length);
-    const zoneTop = 100;
+    const zoneTop = documentBodyTop(spec, width, 100);
     const columnsByZone = new Map<string, number>();
     const rowsByZone = new Map<string, number>();
     const nodeHeightsByZone = new Map<string, number[]>();
@@ -284,9 +301,9 @@ function topologySvg(spec: DiagramSpec, payload: DiagramTopologyPayload): string
 function laneGridSvg(spec: DiagramSpec, payload: DiagramLaneGridPayload): string {
     const labelWidth = 150;
     const stepWidth = 142;
-    const headerHeight = 132;
     const laneHeight = 132;
     const width = labelWidth + payload.steps.length * stepWidth + 40;
+    const headerHeight = documentBodyTop(spec, width, 132);
     const height = headerHeight + payload.lanes.length * laneHeight + 46;
     const cellMap = new Map<string, { x: number; y: number; width: number; height: number }>();
     payload.lanes.forEach((lane, laneIndex) => payload.steps.forEach((step, stepIndex) => {
@@ -333,20 +350,44 @@ function accessMatrixSvg(spec: DiagramSpec, payload: DiagramAccessMatrixPayload)
     // row origin put the header background at y=50, which occluded the
     // summary rendered at y=66 even though every individual text box fit its
     // own local budget.
-    const headerHeight = 140;
     const rowHeight = 76;
     const width = left + payload.roles.length * roleWidth + 30;
+    // The header rectangle begins 62px before the first matrix row. If the
+    // summary wraps to a second line, advance the full header (not only the
+    // row origin) so the dark header cannot cover the trailing summary text.
+    const headerHeight = 140 + Math.max(0, documentSummaryLineCount(spec, width) - 1) * 18;
     const height = headerHeight + payload.components.length * rowHeight + 40;
     const colors: Record<string, string> = { full: '#dcfce7', rw: '#dbeafe', read: '#fef3c7', none: '#f1f5f9' };
     const headers = payload.roles.map((role, index) => `<g id="reference-role-${escapeXml(role.id)}"><rect x="${left + index * roleWidth}" y="${headerHeight - 62}" width="${roleWidth - 8}" height="54" rx="4" fill="${COLORS.ink}" />${textBlock(role.label, left + index * roleWidth + (roleWidth - 8) / 2, headerHeight - 42, 19, 'ref-header-label', 'middle', 2, 12)}${role.code ? `<text x="${left + index * roleWidth + (roleWidth - 8) / 2}" y="${headerHeight - 10}" text-anchor="middle" fill="${COLORS.soft}" font-size="8" font-family="Consolas, monospace">${escapeXml(role.code)}</text>` : ''}</g>`).join('');
-    const rows = payload.components.map((component, row) => `<g id="reference-component-${escapeXml(component.id)}"><rect x="16" y="${headerHeight + row * rowHeight}" width="${left - 30}" height="${rowHeight - 4}" fill="${row % 2 ? COLORS.paper : COLORS.panel}" stroke="${COLORS.rule}" />${textBlock(component.label, 28, headerHeight + row * rowHeight + 18, 28, 'ref-node-label', 'start', 2, 14)}${component.hint ? textBlock(component.hint, left - 26, headerHeight + row * rowHeight + 58, 22, 'ref-node-sub', 'end', 1, 12) : ''}</g>`).join('');
+    const rows = payload.components.map((component, row) => {
+        const y = headerHeight + row * rowHeight;
+        const labelWidth = left - 54;
+        const hasHint = Boolean(component.hint?.trim());
+        const hintY = y + rowHeight - 16;
+        const labelY = y + 18;
+        // Keep the hint anchored to the lower edge and reserve enough room for
+        // a two-line component label. This prevents a long label from painting
+        // over the hint while retaining the fixed matrix rhythm.
+        const label = textBlock(component.label, 28, labelY, Math.floor(labelWidth / 7), 'ref-node-label', 'start', 2, 14);
+        const hint = hasHint ? textBlock(component.hint, left - 26, hintY, 22, 'ref-node-sub', 'end', 1, 12) : '';
+        return `<g id="reference-component-${escapeXml(component.id)}"><rect x="16" y="${y}" width="${left - 30}" height="${rowHeight - 4}" fill="${row % 2 ? COLORS.paper : COLORS.panel}" stroke="${COLORS.rule}" />${label}${hint}</g>`;
+    }).join('');
     const cells = payload.components.flatMap((_, row) => payload.roles.map((_, col) => {
         const cell = payload.cells.find(candidate => candidate.row === row && candidate.col === col);
         const value = cell?.value ?? payload.noneLabel ?? 'No access';
         const level = cell?.level ?? 'none';
         const x = left + col * roleWidth;
         const y = headerHeight + row * rowHeight;
-        return `<g id="reference-access-cell-${row}-${col}"><rect x="${x}" y="${y}" width="${roleWidth - 8}" height="${rowHeight - 4}" rx="3" fill="${cell?.focal ? COLORS.accentFill : colors[level]}" stroke="${cell?.focal ? COLORS.accent : COLORS.rule}" stroke-width="${cell?.focal ? 1.8 : 1}" />${textBlock(value, x + (roleWidth - 8) / 2, y + 18, 16, 'ref-node-label', 'middle', 2, 13)}${cell?.sub ? textBlock(cell.sub, x + (roleWidth - 8) / 2, y + 46, 16, 'ref-node-sub', 'middle', 2, 12) : ''}</g>`;
+        const cellWidth = roleWidth - 8;
+        const centerX = x + cellWidth / 2;
+        const valueY = y + 18;
+        const subY = y + rowHeight - 16;
+        const valueText = textBlock(value, centerX, valueY, Math.floor((cellWidth - 16) / 7), 'ref-node-label', 'middle', 2, 13);
+        const subText = cell?.sub ? textBlock(cell.sub, centerX, subY, Math.floor((cellWidth - 16) / 7), 'ref-node-sub', 'middle', 1, 12) : '';
+        // A cell has one primary value and one optional qualifier. Anchor the
+        // qualifier to the bottom edge so a wrapped primary value cannot cover
+        // it or make the color-coded permission ambiguous.
+        return `<g id="reference-access-cell-${row}-${col}"><rect x="${x}" y="${y}" width="${cellWidth}" height="${rowHeight - 4}" rx="3" fill="${cell?.focal ? COLORS.accentFill : colors[level]}" stroke="${cell?.focal ? COLORS.accent : COLORS.rule}" stroke-width="${cell?.focal ? 1.8 : 1}" />${valueText}${subText}</g>`;
     })).join('');
     return svgRoot(spec, width, height, `${headers}${rows}${cells}`);
 }
@@ -365,7 +406,7 @@ function dateKeys(payload: DiagramSchedulePayload): string[] {
 function scheduleSvg(spec: DiagramSpec, payload: DiagramSchedulePayload): string {
     const width = 1120;
     const left = 260;
-    const top = 112;
+    const top = documentBodyTop(spec, width, 112);
     const rowHeight = 58;
     const keys = dateKeys(payload);
     const timelineWidth = width - left - 40;
@@ -386,7 +427,7 @@ function scheduleSvg(spec: DiagramSpec, payload: DiagramSchedulePayload): string
 function orderedStackSvg(spec: DiagramSpec, payload: DiagramOrderedStackPayload): string {
     const width = 920;
     const layerHeight = 82;
-    const top = 110;
+    const top = documentBodyTop(spec, width, 110);
     const height = top + payload.layers.length * layerHeight + 50;
     const layers = payload.layers.map((layer, index) => {
         const y = top + index * layerHeight;
@@ -415,11 +456,12 @@ function setOverlapSvg(spec: DiagramSpec, payload: DiagramSetOverlapPayload): st
 
 function rankedSegmentsSvg(spec: DiagramSpec, payload: DiagramRankedSegmentsPayload): string {
     const width = 920;
-    const height = 110 + payload.segments.length * 70;
+    const top = documentBodyTop(spec, width, 96);
+    const height = top + payload.segments.length * 70 + 14;
     const center = width / 2;
     const maxWidth = 700;
     const segments = payload.segments.map((segment, index) => {
-        const y = 96 + index * 66;
+        const y = top + index * 66;
         const ratio = payload.orientation === 'pyramid' ? (payload.segments.length - index) / payload.segments.length : (index + 1) / payload.segments.length;
         const currentWidth = maxWidth * (0.38 + ratio * 0.62);
         const nextRatio = payload.orientation === 'pyramid' ? (payload.segments.length - index - 1) / payload.segments.length : (index + 2) / payload.segments.length;
@@ -427,7 +469,7 @@ function rankedSegmentsSvg(spec: DiagramSpec, payload: DiagramRankedSegmentsPayl
         const points = `${center - currentWidth / 2},${y} ${center + currentWidth / 2},${y} ${center + nextWidth / 2},${y + 58} ${center - nextWidth / 2},${y + 58}`;
         return `<g id="reference-segment-${escapeXml(segment.id)}"><polygon class="${segment.focal ? 'ref-focal-fill' : 'ref-node'}" points="${points}" />${textBlock(segment.label, center, y + 24, Math.max(16, Math.floor(currentWidth / 7)), 'ref-node-label', 'middle', 1, 14)}${textBlock(segment.sub ?? (segment.value === undefined ? undefined : String(segment.value)), center, y + 44, Math.max(16, Math.floor(currentWidth / 7)), 'ref-node-sub', 'middle', 1, 13)}</g>`;
     }).join('');
-    return svgRoot(spec, width, height, `<text class="ref-caption" x="${center}" y="82" text-anchor="middle">${payload.orientation === 'pyramid' ? 'FOUNDATION → FOCAL APEX' : 'AUDIENCE → CONVERSION'}</text>${segments}`);
+    return svgRoot(spec, width, height, `<text class="ref-caption" x="${center}" y="${top - 14}" text-anchor="middle">${payload.orientation === 'pyramid' ? 'FOUNDATION → FOCAL APEX' : 'AUDIENCE → CONVERSION'}</text>${segments}`);
 }
 
 function cycleSvg(spec: DiagramSpec, payload: DiagramCyclePayload): string {
@@ -455,10 +497,11 @@ function cycleSvg(spec: DiagramSpec, payload: DiagramCyclePayload): string {
 function nestedSvg(spec: DiagramSpec, payload: DiagramNestedPayload): string {
     const width = 920;
     const height = 640;
+    const top = documentBodyTop(spec, width, 98);
     const levels = payload.levels.map((level, index) => {
         const inset = index * 42;
         const x = 50 + inset;
-        const y = 98 + inset;
+        const y = top + inset;
         const w = width - 100 - inset * 2;
         const h = height - 150 - inset * 2;
         const tagWidth = Math.min(260, Math.max(150, measureTextWidth(level.label) + 34));
@@ -470,6 +513,7 @@ function nestedSvg(spec: DiagramSpec, payload: DiagramNestedPayload): string {
 function treeSvg(spec: DiagramSpec, payload: DiagramTreePayload): string {
     const width = 1040;
     const height = 680;
+    const top = documentBodyTop(spec, width, 100);
     const nodeWidth = 170;
     const nodeHeight = 76;
     const levels = new Map<string, number>();
@@ -491,7 +535,7 @@ function treeSvg(spec: DiagramSpec, payload: DiagramTreePayload): string {
     const positions = new Map<string, { x: number; y: number }>();
     for (const [depth, nodes] of byDepth) {
         const gap = (width - 80 - nodes.length * nodeWidth) / Math.max(1, nodes.length + 1);
-        nodes.forEach((node, index) => positions.set(node.id, { x: 40 + gap * (index + 1) + nodeWidth * index, y: 100 + depth * 130 }));
+        nodes.forEach((node, index) => positions.set(node.id, { x: 40 + gap * (index + 1) + nodeWidth * index, y: top + depth * 130 }));
     }
     const edges = payload.nodes.filter(node => node.parentId).map((node, index) => {
         const from = positions.get(node.parentId!);

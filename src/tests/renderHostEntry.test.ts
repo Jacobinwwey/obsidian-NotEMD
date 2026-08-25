@@ -6,7 +6,7 @@ jest.mock('vega', () => ({
     parse: jest.fn(() => ({ runtime: true })),
     View: class {
         toSVG(): Promise<string> {
-            return Promise.resolve('<svg><rect /></svg>');
+            return Promise.resolve('<svg viewBox="0 0 100 100"><rect /></svg>');
         }
 
         finalize(): void {}

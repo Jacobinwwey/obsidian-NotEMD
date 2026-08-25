@@ -24,7 +24,7 @@ describe('render export flow', () => {
         const compile = jest.fn().mockReturnValue({ spec: { marks: [] } });
         const parse = jest.fn().mockReturnValue({ runtime: true });
         const finalize = jest.fn();
-        const toSVG = jest.fn().mockResolvedValue('<svg><rect /></svg>');
+        const toSVG = jest.fn().mockResolvedValue('<svg viewBox="0 0 100 100"><rect /></svg>');
         const createView = jest.fn().mockReturnValue({ toSVG, finalize });
 
         await renderPreviewArtifactSvg({

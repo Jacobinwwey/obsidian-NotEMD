@@ -167,6 +167,29 @@ async function assertSvgGeometry(page, fixtureId) {
         ? [text.textContent || 'text']
         : [];
     });
+    // Runtime-generated Mermaid/Vega SVGs have no stable node contract. Keep
+    // their final viewport/text sanity checks, but do not apply native
+    // renderer assumptions such as drawio node groups or edge labels.
+    if (svg.getAttribute('data-layout-safety-owner') === 'runtime') {
+      const drawableCount = svg.querySelectorAll('g,path,rect,circle,ellipse,polygon,text,image,foreignObject').length;
+      const rootRect = svg.getBoundingClientRect();
+      const runtimeTextOutOfBounds = Array.from(svg.querySelectorAll('text')).flatMap(text => {
+        const rect = text.getBoundingClientRect();
+        return rect.width === 0 || rect.height === 0
+          || rect.left < rootRect.left - 2
+          || rect.top < rootRect.top - 2
+          || rect.right > rootRect.right + 2
+          || rect.bottom > rootRect.bottom + 2
+          ? [text.textContent || 'text']
+          : [];
+      });
+      return {
+        missing: false,
+        runtimeOwned: true,
+        textOutOfBounds: runtimeTextOutOfBounds,
+        drawableCount
+      };
+    }
     const nodeRects = Array.from(svg.querySelectorAll('g[data-drawio-type="node"], g.notemd-canvas-node')).flatMap(group => {
       const rect = group.querySelector('rect');
       const box = rect ? safeBox(rect) : null;
@@ -239,6 +262,12 @@ async function assertSvgGeometry(page, fixtureId) {
     return { missing: false, textOutOfBounds, nodeTextOutOfBounds, nodeOverlaps, edgeLabelNodeOverlaps, coreTruncations, contrastFailures, rootTextShapeOverlaps, rootTextTextOverlaps };
   });
   if (report.skipped) return;
+  if (report.runtimeOwned) {
+    if (report.drawableCount === 0 || report.textOutOfBounds.length) {
+      throw new Error(`Diagram fixture "${fixtureId}" failed runtime SVG sanity gate: ${JSON.stringify(report)}`);
+    }
+    return;
+  }
   if (report.missing || report.textOutOfBounds.length || report.nodeTextOutOfBounds.length
     || report.nodeOverlaps.length || report.edgeLabelNodeOverlaps.length || report.coreTruncations.length
     || report.contrastFailures.length || report.rootTextShapeOverlaps.length || report.rootTextTextOverlaps.length) {

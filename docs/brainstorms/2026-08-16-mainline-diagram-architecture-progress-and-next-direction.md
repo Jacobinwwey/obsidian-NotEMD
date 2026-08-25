@@ -147,8 +147,6 @@ Final post-change verification: 265 Jest suites passed (2,339 tests passed, 1 sk
 
 The next expansion was reviewed and approved as a staged route: engineering/data-platform layouts first, quantitative layouts second, and structural expression layouts third. This is a design decision and roadmap entry; it is not evidence that the reference-only layouts are already shipped.
 
-### Current code truth versus the approved design
-
 | Boundary | Current code | Approved forward change |
 |---|---|---|
 | Catalog identity | One intent maps to one catalog row | Stable catalog IDs may share an intent through an explicit variant; ambiguous legacy lookup fails closed |
@@ -285,3 +283,22 @@ JSON Canvas was previously treated as a runtime-owned preview and therefore skip
 - `RendererService` now validates plugin-owned JSON Canvas content before cache insertion and before the command host can persist it; preview-only validation is no longer the first line of defense.
 
 Generation-chain evidence: an oversized `canvasMap` node now fails in `RendererService.render()` before `saveArtifact` is reachable; the regression test asserts the rejection at that boundary.
+
+## Runtime SVG Safety Contract (2026-08-26)
+
+The remaining gap was runtime-generated Mermaid/Vega SVG: syntax/runtime parsing could succeed while the returned SVG had no usable viewport or no drawable output. A shared `svgSafety.ts` contract now validates final runtime SVG markup, requires a positive viewBox or intrinsic size, rejects empty output, and adds a versioned runtime ownership marker. The gallery uses browser-space bounds for runtime-owned text instead of applying native node assumptions.
+
+- Mermaid and Vega-Lite preview and raster-export paths now fail closed on malformed, dimensionless, or empty SVG.
+- Runtime output remains exempt from native node/edge collision heuristics because Mermaid/Vega own their internal layout; it is still subject to final viewport/text sanity checks.
+- This contract runs after runtime rendering and before preview/export consumers receive the SVG, so invalid output cannot be silently cached as a successful preview.
+
+## Shared Text Ownership and Matrix Cell Clearance (2026-08-26)
+
+The next audit pass found a second native-layout risk: a family renderer could pass a measured label budget yet place a secondary label at a fixed baseline that overlaps a wrapped primary label or the title/summary block. Geometry is now owned by the shared renderer boundary instead of individual fixture wording.
+
+- Native family body origins derive from the measured document summary block through `documentBodyTop()`. Topology, lane-grid, access-matrix, schedule, stack, ranked, nested, and tree layouts no longer assume a one-line summary at a fixed height.
+- Access-matrix component hints and cell qualifiers are anchored to the lower cell edge while primary permission values retain an independent two-line budget. Long labels cannot cover qualifiers or make the color-coded permission ambiguous.
+- The gallery remains the release gate for all 33 fixtures; production renderer and gallery consume the same deterministic SVG, so a fixture-only text edit cannot mask a future generated payload with longer labels.
+- Frontend Law Auditor evidence reports zero fast-gate failures and zero principle failures; twelve UX metrics remain explicitly unknown because CLI evidence cannot measure host hit targets, interaction timing, or real task completion. Unknown is not treated as usability proof.
+
+Verification: focused native preview/layout tests passed (15 tests), TypeScript/esbuild build passed, gallery generation/check passed for 33 entries, and the access-matrix PNG was regenerated after the geometry change.

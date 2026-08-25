@@ -55,7 +55,7 @@ describe('Mermaid normalization convergence', () => {
         await validateMermaidDefinition(source);
         const validatedDefinition = (mermaid.parse as jest.Mock).mock.calls[0][0];
 
-        const render = jest.fn().mockResolvedValue({ svg: '<svg />' });
+        const render = jest.fn().mockResolvedValue({ svg: '<svg viewBox="0 0 100 100"><rect /></svg>' });
         await renderMermaidArtifactSvg({
             target: 'mermaid',
             content: source,

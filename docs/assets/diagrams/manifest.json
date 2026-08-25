@@ -89,7 +89,7 @@
       "previewTarget": "vega-lite",
       "svgPath": "./data-chart-trend.svg",
       "pngPath": "./data-chart-trend.png",
-      "svgSha256": "d287b1542683a8348eeb19f2ef2cee6dc24254684c3af23498635c8062f65e6d"
+      "svgSha256": "1fd96b8361150845b9a9d80489c4d82752a91941cb83ecca945b139a147ac3e0"
     },
     {
       "typeId": "radar-chart",
@@ -99,7 +99,7 @@
       "previewTarget": "vega-lite",
       "svgPath": "./radar-capability-profile.svg",
       "pngPath": "./radar-capability-profile.png",
-      "svgSha256": "1f277ba4675e008b3799b840fe06bd5c0a53534cf940cb4e7f54c712984fa430"
+      "svgSha256": "4c5f0b8a8c34b886c2306b6f940d80d4c4011c32f7a918217dae2b27fafafdf4"
     },
     {
       "typeId": "org-chart",
@@ -109,7 +109,7 @@
       "previewTarget": "mermaid",
       "svgPath": "./org-chart-support-ownership.svg",
       "pngPath": "./org-chart-support-ownership.png",
-      "svgSha256": "91870e71999f0a6a856806d5d1de3b9c210f68d6d8cb621cf071791442470d01"
+      "svgSha256": "7c195be5e854ceb1f8ca5fedbda106c3d9f586baef18bc177052e92b4526050b"
     },
     {
       "typeId": "timeline",
@@ -119,7 +119,7 @@
       "previewTarget": "mermaid",
       "svgPath": "./timeline-roadmap.svg",
       "pngPath": "./timeline-roadmap.png",
-      "svgSha256": "6a414d75c696eae178e998e724aa576a0f66fd8801e78dbc2051132e70a4e98b"
+      "svgSha256": "05de7b36a7559ef01b53f632ca265c7cc114b48565d928898606f60ef7c15caa"
     },
     {
       "typeId": "swimlane",
@@ -129,7 +129,7 @@
       "previewTarget": "mermaid",
       "svgPath": "./swimlane-release.svg",
       "pngPath": "./swimlane-release.png",
-      "svgSha256": "4db261db1ea5fd347355bd02ed95e04c9df450fcb62130a773afd6259880a8bd"
+      "svgSha256": "8c4c435fc060222994d1a150d1d8cccf9a74379e0c09c041ddaa7fe2f8d4caa5"
     },
     {
       "typeId": "quadrant",
@@ -139,7 +139,7 @@
       "previewTarget": "mermaid",
       "svgPath": "./quadrant-priorities.svg",
       "pngPath": "./quadrant-priorities.png",
-      "svgSha256": "13175399d1a2b9448c90419c815cd2375976c9cdc1fc9b31e18f6ee72f738348"
+      "svgSha256": "1786b6f74747d66f603a740745a54f40457179013b0bc1b3f56edfef75cf1c5b"
     },
     {
       "typeId": "circuit",
@@ -159,7 +159,7 @@
       "previewTarget": "vega-lite",
       "svgPath": "./bar-chart-adoption.svg",
       "pngPath": "./bar-chart-adoption.png",
-      "svgSha256": "0d9a55ebb250c0e0a214b336404137e9137385e468c059bfad9f418778c75480"
+      "svgSha256": "7ec8cd79f455ac87736a3437268ab1d22bf2d7e0c29cb0d1316af62e72d5a26d"
     },
     {
       "typeId": "line-chart",
@@ -169,7 +169,7 @@
       "previewTarget": "vega-lite",
       "svgPath": "./line-chart-render-time.svg",
       "pngPath": "./line-chart-render-time.png",
-      "svgSha256": "65e3caddd19e029bad6ad1da9fc23024951eba17c3e58d3555b8cb79328114f9"
+      "svgSha256": "c6c56e95ab9957e8e3b4ed68971aa1d05c179eaf2cce4d37fdbea3d2f2348b62"
     },
     {
       "typeId": "scatter-plot",
@@ -179,7 +179,7 @@
       "previewTarget": "vega-lite",
       "svgPath": "./scatter-plot-quality.svg",
       "pngPath": "./scatter-plot-quality.png",
-      "svgSha256": "f3324c47183891ef093cc9e32f039e73b04e1d004d5a8c3b0cfbcf26e53f5d90"
+      "svgSha256": "95e0cbb3c58ed494a2ee9e29153cf87f85970190da51753bb30b0e68423e02df"
     },
     {
       "typeId": "architecture",
@@ -229,7 +229,7 @@
       "previewTarget": "editable-html-svg",
       "svgPath": "./access-matrix-platform.svg",
       "pngPath": "./access-matrix-platform.png",
-      "svgSha256": "31623ba013ef2427f9dcc75e1319f2017c789d02659b43b018d3da87a7a054b0"
+      "svgSha256": "ca9a41543b80296ba83385062f7948715653def6528b90fba6abdafe4b7eb24d"
     },
     {
       "typeId": "gantt",
@@ -269,7 +269,7 @@
       "previewTarget": "editable-html-svg",
       "svgPath": "./ranked-funnel-release.svg",
       "pngPath": "./ranked-funnel-release.png",
-      "svgSha256": "0ffb715bbc6d76e3820af2dc8f29116ba3bae2e3bbb81cf824392aeff47535b2"
+      "svgSha256": "4b8cd0164834f2d9053c398f31c84bb9abfe68c7d58e6d7c281a7a1943a20822"
     },
     {
       "typeId": "loop",

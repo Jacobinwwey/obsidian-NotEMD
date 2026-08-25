@@ -5,6 +5,6 @@ export default {
         return true;
     }),
     render: jest.fn(async (_id: string, source: string) => ({
-        svg: `<svg data-source="${source.replace(/"/g, '&quot;')}"></svg>`
+        svg: `<svg viewBox="0 0 100 100" data-source="${source.replace(/"/g, '&quot;')}"><rect width="100" height="100" fill="none" /></svg>`
     }))
 };

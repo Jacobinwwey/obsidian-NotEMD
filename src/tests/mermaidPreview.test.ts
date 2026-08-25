@@ -7,7 +7,7 @@ describe('mermaid preview renderer', () => {
     test('renders mermaid artifacts into svg markup using injected deps', async () => {
         const initialize = jest.fn();
         const parse = jest.fn();
-        const render = jest.fn().mockResolvedValue({ svg: '<svg><g /></svg>' });
+        const render = jest.fn().mockResolvedValue({ svg: '<svg viewBox="0 0 100 100"><g /></svg>' });
 
         const svg = await renderMermaidArtifactSvg({
             target: 'mermaid',
@@ -21,13 +21,14 @@ describe('mermaid preview renderer', () => {
             theme: 'dark'
         }));
         expect(render).toHaveBeenCalledWith(expect.any(String), 'flowchart TD\nA --> B');
-        expect(svg).toContain('<svg>');
+        expect(svg).toContain('<svg viewBox="0 0 100 100"');
+        expect(svg).toContain('data-layout-safety="notemd-layout-safety@1.0.0"');
     });
 
     test('uses default mermaid theme for light previews', async () => {
         const initialize = jest.fn();
         const parse = jest.fn();
-        const render = jest.fn().mockResolvedValue({ svg: '<svg><g /></svg>' });
+        const render = jest.fn().mockResolvedValue({ svg: '<svg viewBox="0 0 100 100"><g /></svg>' });
 
         await renderMermaidArtifactSvg({
             target: 'mermaid',
@@ -44,7 +45,7 @@ describe('mermaid preview renderer', () => {
     test('uses canvas-safe Mermaid labels for raster exports', async () => {
         const initialize = jest.fn();
         const parse = jest.fn();
-        const render = jest.fn().mockResolvedValue({ svg: '<svg><text>Label</text></svg>' });
+        const render = jest.fn().mockResolvedValue({ svg: '<svg viewBox="0 0 100 100"><text x="50" y="50">Label</text></svg>' });
 
         await renderMermaidArtifactSvgForRasterExport({
             target: 'mermaid',

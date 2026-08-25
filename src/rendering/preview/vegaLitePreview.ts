@@ -1,6 +1,7 @@
 import { RenderArtifact } from '../types';
 import { RenderWebviewTheme, resolveRenderTheme } from '../theme';
 import { defaultPackagePreviewModuleLoader } from './packageModuleLoader';
+import { assertSvgSafetyContract } from './svgSafety';
 
 export interface VegaLitePreviewView {
     toSVG(): Promise<string>;
@@ -125,7 +126,7 @@ export async function renderVegaLiteArtifactSvg(
     const view = deps.createView(runtime);
 
     try {
-        return await view.toSVG();
+        return assertSvgSafetyContract(await view.toSVG(), 'Vega-Lite');
     } finally {
         view.finalize?.();
     }

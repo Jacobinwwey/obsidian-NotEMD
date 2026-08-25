@@ -5,7 +5,7 @@ describe('vega-lite preview renderer', () => {
         const compile = jest.fn().mockReturnValue({ spec: { marks: [] } });
         const parse = jest.fn().mockReturnValue({ runtime: true });
         const finalize = jest.fn();
-        const toSVG = jest.fn().mockResolvedValue('<svg><rect /></svg>');
+        const toSVG = jest.fn().mockResolvedValue('<svg viewBox="0 0 100 100"><rect /></svg>');
         const createView = jest.fn().mockReturnValue({ toSVG, finalize });
 
         const svg = await renderVegaLiteArtifactSvg({
@@ -24,7 +24,8 @@ describe('vega-lite preview renderer', () => {
         expect(createView).toHaveBeenCalledWith({ runtime: true });
         expect(toSVG).toHaveBeenCalledTimes(1);
         expect(finalize).toHaveBeenCalledTimes(1);
-        expect(svg).toContain('<svg>');
+        expect(svg).toContain('<svg viewBox="0 0 100 100"');
+        expect(svg).toContain('data-layout-safety="notemd-layout-safety@1.0.0"');
     });
 
     test('rejects non-vega-lite artifacts', async () => {
