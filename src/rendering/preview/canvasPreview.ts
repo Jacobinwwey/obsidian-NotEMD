@@ -198,6 +198,11 @@ function getCanvasNodeTextPlacement(node: CanvasNode): CanvasTextPlacement {
     };
 }
 
+/** Validate the plugin-owned Canvas artifact before it reaches persistence. */
+export function validateJsonCanvasArtifactContent(content: string): void {
+    parseJsonCanvasArtifactContent(content);
+}
+
 function renderNodeText(node: CanvasNode): string {
     const placement = getCanvasNodeTextPlacement(node);
 

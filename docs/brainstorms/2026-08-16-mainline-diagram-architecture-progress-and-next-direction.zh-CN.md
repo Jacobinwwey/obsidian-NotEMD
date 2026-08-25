@@ -270,3 +270,6 @@ JSON Canvas 之前被视为 runtime-owned preview，因此跳过 native 几何�
 - JSON Canvas SVG 现在携带 `data-layout-safety`、可编辑 node/edge 标注以及确定性边标签候选位置。
 - gallery `getBBox()` 现在包含 JSON Canvas 节点与边，不再跳过；Mermaid/Vega 由于布局由外部浏览器 runtime 生成，仍由各自 runtime validator 负责。
 - 回归覆盖长节点标签、长边标签、无效 payload 与共享 marker 传递。
+- `RendererService` 现在在缓存写入以及 command host 落盘之前校验插件拥有的 JSON Canvas 内容；预览阶段不再是唯一的第一道防线。
+
+生成链路证据：超预算的 `canvasMap` 节点现在会在 `RendererService.render()` 阶段失败，无法进入 `saveArtifact`；回归测试已在该边界断言拒绝行为。

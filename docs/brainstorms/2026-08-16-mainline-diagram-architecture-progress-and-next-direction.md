@@ -282,3 +282,6 @@ JSON Canvas was previously treated as a runtime-owned preview and therefore skip
 - JSON Canvas SVG now carries `data-layout-safety`, drawio-compatible node/edge annotations, and deterministic edge-label candidate placement.
 - Gallery `getBBox()` checks now include JSON Canvas nodes and edges instead of skipping them. Mermaid/Vega remain runtime-owned because their layout is produced by external browser runtimes, not by this adapter.
 - Regression coverage includes long node labels, long edge labels, invalid payloads, and shared marker propagation.
+- `RendererService` now validates plugin-owned JSON Canvas content before cache insertion and before the command host can persist it; preview-only validation is no longer the first line of defense.
+
+Generation-chain evidence: an oversized `canvasMap` node now fails in `RendererService.render()` before `saveArtifact` is reachable; the regression test asserts the rejection at that boundary.

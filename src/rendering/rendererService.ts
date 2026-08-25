@@ -7,6 +7,7 @@ import { RenderArtifact, RenderOptions } from './types';
 import { RenderWebviewPayloadOptions } from './webview/contract';
 import { diagnoseDiagramLayout } from '../diagram/layout/layoutDiagnostics';
 import { LAYOUT_SAFETY_VERSION } from '../diagram/layout/layoutSafety';
+import { validateJsonCanvasArtifactContent } from './preview/canvasPreview';
 
 function isPreviewCapableHost(host: RenderHost): host is PreviewCapableRenderHost {
     return typeof (host as PreviewCapableRenderHost).createSession === 'function';
@@ -44,10 +45,11 @@ export class RendererService {
 
         const renderPromise = this.host.render(renderer, spec, options)
             .then((artifact) => {
-                // Mermaid/Vega/Drawnix own their final geometry. Apply the
-                // measured-text contract only to the native reference SVG
-                // renderer; otherwise a generic budget would reject valid
-                // legacy artifacts before their own runtime validator runs.
+                // The plugin owns deterministic geometry for editable SVG and
+                // JSON Canvas previews. Enforce their budgets before caching or
+                // persisting the artifact. Mermaid/Vega/Drawnix retain their
+                // runtime/consumer-specific validators because this service
+                // does not own their final layout engine.
                 const layoutDiagnostics = artifact.target === 'editable-html-svg'
                     ? diagnoseDiagramLayout(spec)
                     : [];
@@ -56,6 +58,14 @@ export class RendererService {
                     throw new Error(`Diagram layout safety gate rejected the artifact: ${layoutErrors.map(diagnostic => diagnostic.message).join(' ')}`);
                 }
                 const diagnostics = [...(artifact.diagnostics ?? []), ...layoutDiagnostics];
+                if (artifact.target === 'json-canvas') {
+                    try {
+                        validateJsonCanvasArtifactContent(artifact.content);
+                    } catch (error: unknown) {
+                        const message = error instanceof Error ? error.message : String(error);
+                        throw new Error(`Diagram layout safety gate rejected the JSON Canvas artifact: ${message}`);
+                    }
+                }
                 const safeArtifact: RenderArtifact = {
                     ...artifact,
                     layoutSafetyVersion: artifact.layoutSafetyVersion ?? LAYOUT_SAFETY_VERSION,

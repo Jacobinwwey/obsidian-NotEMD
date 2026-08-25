@@ -97,6 +97,19 @@ describe('renderer service', () => {
         })).resolves.toMatchObject({ target: 'mermaid' });
     });
 
+    test('rejects an oversized JSON Canvas label before the artifact can be cached or saved', async () => {
+        const { JsonCanvasRenderer } = await import('../rendering/renderers/jsonCanvasRenderer');
+        const registry = new RendererRegistry([new JsonCanvasRenderer()]);
+        const service = new RendererService(registry);
+
+        await expect(service.render({
+            intent: 'canvasMap',
+            title: 'Canvas',
+            nodes: [{ id: 'root', label: 'X'.repeat(500) }],
+            edges: []
+        })).rejects.toThrow(/JSON Canvas artifact.*preview text budget/i);
+    });
+
     test('delegates rendering through the configured host', async () => {
         const registry = new RendererRegistry([new MermaidRenderer()]);
         const host: RenderHost = {
