@@ -1,5 +1,11 @@
 import { RenderArtifact } from '../types';
 import { RenderWebviewTheme, resolveRenderTheme } from '../theme';
+import {
+    LAYOUT_SAFETY_VERSION,
+    boxesOverlap,
+    measureTextWidth,
+    wrapMeasuredText
+} from '../../diagram/layout/layoutSafety';
 
 type CanvasSide = 'right' | 'left' | 'top' | 'bottom';
 
@@ -11,6 +17,14 @@ interface CanvasNode {
     y: number;
     width: number;
     height: number;
+}
+
+interface CanvasTextPlacement {
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+    lines: string[];
 }
 
 interface CanvasEdge {
@@ -35,6 +49,10 @@ interface Point {
 
 const PREVIEW_PADDING = 48;
 const PREVIEW_MIN_SIZE = 240;
+const CANVAS_TEXT_LINE_HEIGHT = 18;
+const CANVAS_MAX_TEXT_LINES = 6;
+const CANVAS_MAX_EDGE_LABEL_WIDTH = 220;
+const CANVAS_MAX_EDGE_LABEL_LINES = 2;
 
 interface CanvasPreviewPalette {
     surface: string;
@@ -66,14 +84,22 @@ function normalizeNodes(nodes: unknown[]): CanvasNode[] {
                 ? item.id.trim()
                 : `Node ${index + 1}`;
 
+        const width = Math.max(140, coerceNumber(item.width, 220));
+        const requestedHeight = Math.max(72, coerceNumber(item.height, 90));
+        const textBlock = wrapMeasuredText(text, Math.max(48, width - 32), CANVAS_MAX_TEXT_LINES);
+        if (textBlock.truncated) {
+            throw new Error(`JSON Canvas node "${text}" exceeds the preview text budget.`);
+        }
+        const height = Math.max(requestedHeight, textBlock.lines.length * CANVAS_TEXT_LINE_HEIGHT + 32);
+
         return {
             id: typeof item.id === 'string' && item.id.trim() ? item.id.trim() : `node-${index + 1}`,
             type: typeof item.type === 'string' ? item.type : 'text',
             text,
             x: coerceNumber(item.x, index * 280),
             y: coerceNumber(item.y, index * 140),
-            width: Math.max(140, coerceNumber(item.width, 220)),
-            height: Math.max(72, coerceNumber(item.height, 90))
+            width,
+            height
         };
     });
 }
@@ -81,6 +107,10 @@ function normalizeNodes(nodes: unknown[]): CanvasNode[] {
 function normalizeEdges(edges: unknown[]): CanvasEdge[] {
     return edges.map((edge, index) => {
         const item = (edge && typeof edge === 'object') ? edge as Record<string, unknown> : {};
+        const label = typeof item.label === 'string' ? item.label.trim() : undefined;
+        if (label && wrapMeasuredText(label, CANVAS_MAX_EDGE_LABEL_WIDTH, CANVAS_MAX_EDGE_LABEL_LINES).truncated) {
+            throw new Error(`JSON Canvas edge label "${label}" exceeds the preview text budget.`);
+        }
         return {
             id: typeof item.id === 'string' ? item.id : `edge-${index + 1}`,
             fromNode: typeof item.fromNode === 'string' ? item.fromNode : '',
@@ -92,7 +122,7 @@ function normalizeEdges(edges: unknown[]): CanvasEdge[] {
                 ? item.toSide
                 : 'left',
             toEnd: typeof item.toEnd === 'string' ? item.toEnd : 'arrow',
-            label: typeof item.label === 'string' ? item.label.trim() : undefined
+            label
         };
     });
 }
@@ -156,24 +186,62 @@ function buildCanvasBounds(nodes: CanvasNode[]) {
     };
 }
 
-function renderNodeText(node: CanvasNode): string {
-    const lines = (node.text || node.id).split(/\r?\n/).filter(Boolean);
-    const lineHeight = 18;
-    const startY = node.y + node.height / 2 - ((Math.max(lines.length, 1) - 1) * lineHeight) / 2;
+function getCanvasNodeTextPlacement(node: CanvasNode): CanvasTextPlacement {
+    const block = wrapMeasuredText(node.text || node.id, Math.max(48, node.width - 32), CANVAS_MAX_TEXT_LINES);
+    const startY = node.y + node.height / 2 - ((Math.max(block.lines.length, 1) - 1) * CANVAS_TEXT_LINE_HEIGHT) / 2;
+    return {
+        x: node.x + node.width / 2,
+        y: startY,
+        width: Math.min(node.width - 32, Math.max(...block.lines.map(measureTextWidth), 0)),
+        height: Math.max(1, block.lines.length) * CANVAS_TEXT_LINE_HEIGHT,
+        lines: block.lines
+    };
+}
 
-    return `<text class="notemd-canvas-node-text" x="${node.x + node.width / 2}" y="${startY}" text-anchor="middle">
-${lines.map((line, index) => `<tspan x="${node.x + node.width / 2}" y="${startY + index * lineHeight}">${escapeXml(line)}</tspan>`).join('')}
+function renderNodeText(node: CanvasNode): string {
+    const placement = getCanvasNodeTextPlacement(node);
+
+    return `<text class="notemd-canvas-node-text" data-layout-safety="${LAYOUT_SAFETY_VERSION}" x="${placement.x}" y="${placement.y}" text-anchor="middle">
+${placement.lines.map((line, index) => `<tspan x="${placement.x}" y="${placement.y + index * CANVAS_TEXT_LINE_HEIGHT}">${escapeXml(line)}</tspan>`).join('')}
 </text>`;
 }
 
 function renderCanvasNode(node: CanvasNode): string {
-    return `<g class="notemd-canvas-node" data-node-id="${escapeXml(node.id)}">
+    return `<g class="notemd-canvas-node" data-drawio-type="node" data-drawio-id="${escapeXml(node.id)}" data-node-id="${escapeXml(node.id)}">
     <rect x="${node.x}" y="${node.y}" width="${node.width}" height="${node.height}" rx="18" ry="18" />
     ${renderNodeText(node)}
 </g>`;
 }
 
-function renderCanvasEdge(edge: CanvasEdge, nodeIndex: Map<string, CanvasNode>): string {
+function resolveCanvasEdgeLabelPlacement(
+    labelBlock: ReturnType<typeof wrapMeasuredText>,
+    start: Point,
+    end: Point,
+    occupied: CanvasNode[]
+): { x: number; y: number } {
+    const width = Math.max(24, Math.min(CANVAS_MAX_EDGE_LABEL_WIDTH, labelBlock.width + 12));
+    const height = Math.max(1, labelBlock.lines.length) * CANVAS_TEXT_LINE_HEIGHT;
+    const centerX = (start.x + end.x) / 2;
+    const centerY = (start.y + end.y) / 2 - 10;
+    const candidates = [
+        { x: centerX, y: centerY },
+        { x: centerX, y: centerY - 24 },
+        { x: centerX, y: centerY + 24 },
+        { x: centerX + 28, y: centerY - 24 },
+        { x: centerX - 28, y: centerY - 24 },
+        { x: centerX + 28, y: centerY + 24 },
+        { x: centerX - 28, y: centerY + 24 }
+    ];
+    for (const candidate of candidates) {
+        const labelBox = { x: candidate.x - width / 2, y: candidate.y - height, width, height };
+        if (!occupied.some(node => boxesOverlap(labelBox, node, 4))) {
+            return candidate;
+        }
+    }
+    return { x: centerX, y: centerY - 24 };
+}
+
+function renderCanvasEdge(edge: CanvasEdge, nodeIndex: Map<string, CanvasNode>, occupied: CanvasNode[]): string {
     const fromNode = nodeIndex.get(edge.fromNode);
     const toNode = nodeIndex.get(edge.toNode);
     if (!fromNode || !toNode) {
@@ -182,13 +250,15 @@ function renderCanvasEdge(edge: CanvasEdge, nodeIndex: Map<string, CanvasNode>):
 
     const start = getNodeAnchor(fromNode, edge.fromSide ?? 'right');
     const end = getNodeAnchor(toNode, edge.toSide ?? 'left');
-    const labelX = (start.x + end.x) / 2;
-    const labelY = (start.y + end.y) / 2 - 10;
+    const labelBlock = edge.label
+        ? wrapMeasuredText(edge.label, CANVAS_MAX_EDGE_LABEL_WIDTH, CANVAS_MAX_EDGE_LABEL_LINES)
+        : undefined;
+    const labelPlacement = labelBlock ? resolveCanvasEdgeLabelPlacement(labelBlock, start, end, occupied) : undefined;
     const markerEnd = edge.toEnd === 'arrow' ? ' marker-end="url(#notemd-canvas-arrow)"' : '';
 
-    return `<g class="notemd-canvas-edge" data-edge-id="${escapeXml(edge.id || `${edge.fromNode}-${edge.toNode}`)}">
+    return `<g class="notemd-canvas-edge" data-drawio-type="edge" data-drawio-id="${escapeXml(edge.id || `${edge.fromNode}-${edge.toNode}`)}" data-edge-id="${escapeXml(edge.id || `${edge.fromNode}-${edge.toNode}`)}">
     <line x1="${start.x}" y1="${start.y}" x2="${end.x}" y2="${end.y}"${markerEnd} />
-    ${edge.label ? `<text class="notemd-canvas-edge-label" x="${labelX}" y="${labelY}" text-anchor="middle">${escapeXml(edge.label)}</text>` : ''}
+    ${edge.label && labelBlock && labelPlacement ? `<text class="notemd-canvas-edge-label" data-layout-safety="${LAYOUT_SAFETY_VERSION}" x="${labelPlacement.x}" y="${labelPlacement.y}" text-anchor="middle">${labelBlock.lines.map((line, index) => `<tspan x="${labelPlacement.x}" y="${labelPlacement.y - (labelBlock.lines.length - 1 - index) * CANVAS_TEXT_LINE_HEIGHT}">${escapeXml(line)}</tspan>`).join('')}</text>` : ''}
 </g>`;
 }
 
@@ -227,13 +297,13 @@ export async function renderJsonCanvasArtifactSvg(
     const viewBoxHeight = bounds.height + PREVIEW_PADDING * 2;
     const nodeIndex = new Map(document.nodes.map(node => [node.id, node]));
 
-    const edgeMarkup = document.edges.map(edge => renderCanvasEdge(edge, nodeIndex)).join('\n');
+    const edgeMarkup = document.edges.map(edge => renderCanvasEdge(edge, nodeIndex, document.nodes)).join('\n');
     const nodeMarkup = document.nodes.map(renderCanvasNode).join('\n');
     const emptyMarkup = document.nodes.length === 0
         ? `<text class="notemd-canvas-empty" x="${viewBoxX + viewBoxWidth / 2}" y="${viewBoxY + viewBoxHeight / 2}" text-anchor="middle">No canvas nodes available</text>`
         : '';
 
-    return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${viewBoxX} ${viewBoxY} ${viewBoxWidth} ${viewBoxHeight}" role="img" aria-label="JSON Canvas preview">
+    return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${viewBoxX} ${viewBoxY} ${viewBoxWidth} ${viewBoxHeight}" role="img" aria-label="JSON Canvas preview" data-layout-safety="${LAYOUT_SAFETY_VERSION}">
 <defs>
     <marker id="notemd-canvas-arrow" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">
         <path d="M0,0 L12,6 L0,12 z" fill="${palette.stroke}" />

@@ -49,4 +49,47 @@ describe('json canvas preview renderer', () => {
             sourceIntent: 'canvasMap'
         })).rejects.toThrow(/Invalid JSON Canvas artifact JSON/i);
     });
+
+    test('wraps long node labels and carries the shared geometry marker', async () => {
+        const svg = await renderJsonCanvasArtifactSvg({
+            target: 'json-canvas',
+            content: JSON.stringify({
+                nodes: [{ id: 'long', text: 'A long label that must wrap inside the canvas node', x: 0, y: 0, width: 180, height: 72 }],
+                edges: []
+            }),
+            mimeType: 'application/json',
+            sourceIntent: 'canvasMap'
+        });
+
+        expect(svg).toContain('data-layout-safety="notemd-layout-safety@1.0.0"');
+        expect(svg).toContain('<tspan');
+        expect(svg).toContain('data-drawio-type="node"');
+    });
+
+    test('fails closed when a core canvas label exceeds the readable text budget', async () => {
+        await expect(renderJsonCanvasArtifactSvg({
+            target: 'json-canvas',
+            content: JSON.stringify({
+                nodes: [{ id: 'long', text: 'X'.repeat(500), x: 0, y: 0, width: 140, height: 72 }],
+                edges: []
+            }),
+            mimeType: 'application/json',
+            sourceIntent: 'canvasMap'
+        })).rejects.toThrow(/exceeds the preview text budget/i);
+    });
+
+    test('fails closed when an edge label cannot fit two readable lines', async () => {
+        await expect(renderJsonCanvasArtifactSvg({
+            target: 'json-canvas',
+            content: JSON.stringify({
+                nodes: [
+                    { id: 'a', text: 'A', x: 0, y: 0, width: 180, height: 72 },
+                    { id: 'b', text: 'B', x: 320, y: 0, width: 180, height: 72 }
+                ],
+                edges: [{ fromNode: 'a', toNode: 'b', label: 'Y'.repeat(500) }]
+            }),
+            mimeType: 'application/json',
+            sourceIntent: 'canvasMap'
+        })).rejects.toThrow(/edge label.*exceeds the preview text budget/i);
+    });
 });

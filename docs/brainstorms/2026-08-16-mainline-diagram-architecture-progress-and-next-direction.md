@@ -273,3 +273,12 @@ The follow-up audit found a subtle failure mode not covered by per-node `getBBox
 - Real Vault recheck after CLI reload: `viewBox=0 0 880 532`, `data-preview-min-readable-width=704`, SVG height `532px`, `scrollWidth=645px`, host client width `410px`, no captured Obsidian errors or error-level console output.
 
 This closes the known native reference occlusion class. Runtime-owned Mermaid/Vega geometry remains intentionally delegated to their parsers/runtime validators; any future renderer family must register equivalent root-layer and host-scale checks before catalog promotion.
+
+## JSON Canvas Preview Safety Promotion (2026-08-26)
+
+JSON Canvas was previously treated as a runtime-owned preview and therefore skipped by the native geometry gate. That boundary was too broad: the plugin owns the SVG adapter it emits, including node text and edge labels. Long JSON Canvas labels could therefore remain syntactically valid while becoming unreadable or colliding with nodes.
+
+- `canvasPreview.ts` now consumes the shared measured-text contract, wraps node labels, expands node height, wraps edge labels to two lines, and rejects core labels that exceed bounded budgets.
+- JSON Canvas SVG now carries `data-layout-safety`, drawio-compatible node/edge annotations, and deterministic edge-label candidate placement.
+- Gallery `getBBox()` checks now include JSON Canvas nodes and edges instead of skipping them. Mermaid/Vega remain runtime-owned because their layout is produced by external browser runtimes, not by this adapter.
+- Regression coverage includes long node labels, long edge labels, invalid payloads, and shared marker propagation.

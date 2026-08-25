@@ -79,7 +79,7 @@
       "previewTarget": "json-canvas",
       "svgPath": "./canvas-map-domains.svg",
       "pngPath": "./canvas-map-domains.png",
-      "svgSha256": "251b6cd7543eb8ad7be34c1b8a6ad4e7aa30c03c02003ec1d18f6ec17bb9b99c"
+      "svgSha256": "05b9b70dc0edeb859eb71c75a52e47cac25f4180bc8f684ad5a5060a3e990558"
     },
     {
       "typeId": "data-chart",

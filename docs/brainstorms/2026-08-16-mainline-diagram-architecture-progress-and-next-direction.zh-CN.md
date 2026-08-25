@@ -262,3 +262,11 @@ Obsidian Vault 审计发现，之前的 SVG 几何门禁无法发现宿主层回
 - CLI 热重载后的实机复核：`viewBox=0 0 880 532`、`data-preview-min-readable-width=704`、SVG 高度 `532px`、`scrollWidth=645px`、宿主 client width `410px`，无 Obsidian error 或 error-level console 输出。
 
 这关闭了已知的 native reference 遮挡类别。Mermaid/Vega 几何继续由各自 parser/runtime validator 负责；任何新 renderer family 在进入 catalog 前都必须注册等价的根层门禁与宿主缩放检查。
+## JSON Canvas 预览安全提升（2026-08-26）
+
+JSON Canvas 之前被视为 runtime-owned preview，因此跳过 native 几何门禁。这个边界过宽：插件拥有自己输出的 SVG adapter，包括节点文本和边标签。长 JSON Canvas 标签可能语法合法，但在预览中不可读或与节点碰撞。
+
+- `canvasPreview.ts` 现在使用共享测量文本契约，对节点标签换行、动态增加节点高度、边标签最多两行，并对超出预算的核心标签 fail-closed。
+- JSON Canvas SVG 现在携带 `data-layout-safety`、可编辑 node/edge 标注以及确定性边标签候选位置。
+- gallery `getBBox()` 现在包含 JSON Canvas 节点与边，不再跳过；Mermaid/Vega 由于布局由外部浏览器 runtime 生成，仍由各自 runtime validator 负责。
+- 回归覆盖长节点标签、长边标签、无效 payload 与共享 marker 传递。

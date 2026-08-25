@@ -167,7 +167,7 @@ async function assertSvgGeometry(page, fixtureId) {
         ? [text.textContent || 'text']
         : [];
     });
-    const nodeRects = Array.from(svg.querySelectorAll('g[data-drawio-type="node"]')).flatMap(group => {
+    const nodeRects = Array.from(svg.querySelectorAll('g[data-drawio-type="node"], g.notemd-canvas-node')).flatMap(group => {
       const rect = group.querySelector('rect');
       const box = rect ? safeBox(rect) : null;
       return box ? [{ group, box }] : [];
@@ -183,7 +183,7 @@ async function assertSvgGeometry(page, fixtureId) {
     const nodeOverlaps = nodeRects.flatMap((first, index) => nodeRects.slice(index + 1)
       .filter(second => intersects(first.box, second.box, 1))
       .map(second => `${first.group.id || index}:${second.group.id || index + 1}`));
-    const edgeLabelNodeOverlaps = Array.from(svg.querySelectorAll('g[data-drawio-type="edge"]')).flatMap(edge => {
+    const edgeLabelNodeOverlaps = Array.from(svg.querySelectorAll('g[data-drawio-type="edge"], g.notemd-canvas-edge')).flatMap(edge => {
       const labels = Array.from(edge.querySelectorAll('text')).flatMap(text => {
         const box = safeBox(text);
         return box ? [box] : [];
