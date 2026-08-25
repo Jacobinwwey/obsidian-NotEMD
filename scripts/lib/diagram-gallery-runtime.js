@@ -136,7 +136,28 @@ async function assertSvgGeometry(page, fixtureId) {
     const intersects = (first, second, padding = 0) => first.x - padding < second.x + second.width
       && first.x + first.width + padding > second.x
       && first.y - padding < second.y + second.height
-      && first.y + first.height + padding > second.y;
+        && first.y + first.height + padding > second.y;
+    const parseRgb = value => {
+      const match = String(value || '').match(/rgba?\(([^)]+)\)/i);
+      if (!match) return null;
+      const channels = match[1].split(',').map(channel => Number.parseFloat(channel.trim()));
+      return channels.length >= 3 && channels.slice(0, 3).every(Number.isFinite)
+        ? channels.slice(0, 3).map(channel => channel / 255)
+        : null;
+    };
+    const luminance = rgb => {
+      const linear = rgb.map(channel => channel <= 0.03928 ? channel / 12.92 : ((channel + 0.055) / 1.055) ** 2.4);
+      return 0.2126 * linear[0] + 0.7152 * linear[1] + 0.0722 * linear[2];
+    };
+    const contrastRatio = (foreground, background) => {
+      const foregroundRgb = parseRgb(foreground);
+      const backgroundRgb = parseRgb(background);
+      if (!foregroundRgb || !backgroundRgb) return null;
+      const foregroundLuminance = luminance(foregroundRgb);
+      const backgroundLuminance = luminance(backgroundRgb);
+      return (Math.max(foregroundLuminance, backgroundLuminance) + 0.05)
+        / (Math.min(foregroundLuminance, backgroundLuminance) + 0.05);
+    };
     const textOutOfBounds = Array.from(svg.querySelectorAll('text')).flatMap(text => {
       const box = safeBox(text);
       if (!box || box.width === 0 || box.height === 0) return [];
@@ -170,13 +191,33 @@ async function assertSvgGeometry(page, fixtureId) {
       return labels.flatMap(labelBox => nodeRects.filter(node => intersects(labelBox, node.box, 2)).map(node => `${edge.id || 'edge'}:${node.group.id || 'node'}`));
     });
     const coreTruncations = Array.from(svg.querySelectorAll('[data-layout-truncated="true"]'))
-      .filter(element => !element.classList.contains('ref-node-sub'))
+      .filter(element => !element.classList.contains('ref-node-sub') && !element.classList.contains('ref-hub-sub'))
       .map(element => element.textContent || 'text');
-    return { missing: false, textOutOfBounds, nodeTextOutOfBounds, nodeOverlaps, edgeLabelNodeOverlaps, coreTruncations };
+    const contrastFailures = Array.from(svg.querySelectorAll('g')).flatMap(group => {
+      const shapes = Array.from(group.children)
+        .filter(element => /^(rect|circle|ellipse|polygon)$/i.test(element.tagName))
+        .map(element => ({ element, box: safeBox(element) }))
+        .filter(item => item.box && item.box.width > 0 && item.box.height > 0);
+      if (shapes.length === 0) return [];
+      return Array.from(group.querySelectorAll(':scope > text')).flatMap(text => {
+        const textBox = safeBox(text);
+        if (!textBox) return [];
+        const shape = shapes
+          .filter(candidate => intersects(textBox, candidate.box))
+          .sort((first, second) => (first.box.width * first.box.height) - (second.box.width * second.box.height))[0];
+        if (!shape) return [];
+        const ratio = contrastRatio(getComputedStyle(text).fill, getComputedStyle(shape.element).fill);
+        return ratio !== null && ratio < 4.5
+          ? [`${group.id || 'group'}:${(text.textContent || 'text').trim()}:${ratio.toFixed(2)}`]
+          : [];
+      });
+    });
+    return { missing: false, textOutOfBounds, nodeTextOutOfBounds, nodeOverlaps, edgeLabelNodeOverlaps, coreTruncations, contrastFailures };
   });
   if (report.skipped) return;
   if (report.missing || report.textOutOfBounds.length || report.nodeTextOutOfBounds.length
-    || report.nodeOverlaps.length || report.edgeLabelNodeOverlaps.length || report.coreTruncations.length) {
+    || report.nodeOverlaps.length || report.edgeLabelNodeOverlaps.length || report.coreTruncations.length
+    || report.contrastFailures.length) {
     throw new Error(`Diagram fixture "${fixtureId}" failed SVG geometry gate: ${JSON.stringify(report)}`);
   }
 }

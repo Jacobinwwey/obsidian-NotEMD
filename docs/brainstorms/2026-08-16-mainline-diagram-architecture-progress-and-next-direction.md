@@ -1,6 +1,6 @@
 ---
 date: 2026-08-16
-last_updated: 2026-08-23
+last_updated: 2026-08-25
 topic: mainline-diagram-architecture-progress-and-next-direction
 status: active
 canonical_for:
@@ -252,3 +252,14 @@ The visual audit found that a valid canonical payload was not sufficient evidenc
 - `scripts/lib/diagram-gallery-runtime.js` now runs a browser `getBBox()` gate for native SVG: text must stay inside the viewBox, node text must stay inside its node, nodes may not overlap, edge labels may not intersect nodes, and core truncation is rejected. Vega/Mermaid remain covered by their own runtime validators because they do not carry the native geometry marker.
 
 Evidence for this closure: production gallery regeneration and `diagram:gallery:check` pass for all 33 executable fixtures; native layout and preview focused tests pass; six representative PNGs were visually inspected after the gate caught and fixed access-matrix header collision and topology edge-label clearance regressions. This is renderer/headless evidence, not a claim of manual acceptance for every Obsidian host theme.
+
+## Host Preview Aspect-Ratio and Contrast Closure (2026-08-25)
+
+The Obsidian Vault audit exposed a host-level regression that the prior SVG geometry gate could not see: the settings thumbnail CSS forced every native SVG into a 16:9 box with `overflow:hidden`. The access matrix source canvas is 880x532 (1.65:1), so the host compressed its vertical geometry to 421.875x236.719 CSS pixels even though the source SVG was collision-free. This was a presentation-layer failure, not a canonical payload failure.
+
+- Native type previews now preserve the SVG `viewBox` aspect ratio, expose `data-preview-aspect-ratio`, and enforce a measured minimum readable width (`data-preview-min-readable-width`) inside an intrinsic-height, horizontally scrollable region instead of stretching/cropping all families into one thumbnail ratio.
+- The shared reference palette now uses `#475569` for muted text; focal and soft fills therefore retain AA contrast for secondary labels. Dark cycle hubs use dedicated light-on-dark label classes instead of inheriting dark node text.
+- The production gallery browser gate now checks text-vs-shape contrast for native SVG fixtures in addition to bounds, node overlap, edge-label clearance, and truncation. Core labels fail closed; optional detail may be explicitly truncated and styled as secondary.
+- Real Vault evidence: `E:\1Knowledge` was hot-reloaded via `obsidian vault="1Knowledge" plugin:reload id=notemd`; the Vault and workspace bundle hashes matched, and the access-matrix preview reported `880/532`, intrinsic SVG size `880×532`, minimum readable width `704px`, host viewport `410px`, `scrollWidth=645px`, and `overflow:auto`.
+
+Remaining acceptance boundary: this proves the shipped light-theme host path and deterministic gallery path. Mermaid/Vega remain owned by their runtime validators; arbitrary user CSS themes still require the same contrast/bounds gate before release.

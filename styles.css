@@ -1608,9 +1608,9 @@
     align-items: center;
     justify-content: center;
     width: 100%;
-    aspect-ratio: 16 / 9;
     min-height: 112px;
-    overflow: hidden;
+    max-height: min(62vh, 520px);
+    overflow: auto;
     border: 1px solid var(--background-modifier-border);
     border-radius: 4px;
     background: var(--background-secondary);
@@ -1620,8 +1620,22 @@
 .notemd-diagram-type-preview-canvas > svg {
     display: block;
     width: 100%;
-    height: 100%;
-    max-width: 100%;
+    height: auto;
+    max-width: none;
+    min-width: 100%;
+    flex: 0 0 auto;
+    object-fit: contain;
+    object-position: center;
+}
+
+.notemd-diagram-type-preview-canvas > svg[data-preview-min-readable-width] {
+    width: auto;
+    min-width: var(--notemd-preview-min-readable-width, 520px);
+    max-width: none;
+}
+
+.notemd-diagram-type-preview-canvas > svg.notemd-diagram-type-preview-svg {
+    aspect-ratio: auto;
 }
 
 .notemd-diagram-type-preview-empty,

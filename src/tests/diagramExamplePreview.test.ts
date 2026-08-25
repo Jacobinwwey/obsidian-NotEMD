@@ -88,7 +88,14 @@ class PreviewElement {
     remove(): void { if (this.parent) this.parent.children = this.parent.children.filter(child => child !== this); }
     querySelector(selector: string): PreviewElement | null {
         if (selector === 'svg') {
-            return this.children.find(child => child.tag === 'svg') ?? null;
+            return this.children.find(child => child.tag === 'svg') ?? (this.innerHTML.includes('<svg')
+                ? {
+                    viewBox: { baseVal: { width: 880, height: 532 } },
+                    classList: { add: jest.fn() },
+                    style: {},
+                    setAttribute: jest.fn()
+                } as unknown as PreviewElement
+                : null);
         }
         return null;
     }
@@ -155,5 +162,24 @@ describe('diagram type preview panel', () => {
         await Promise.resolve();
         await Promise.resolve();
         expect(root.children[1].children[2].attrs.get('data-preview-state')).toBe('error');
+    });
+
+    test('marks native previews for intrinsic aspect-ratio sizing', async () => {
+        const { renderDiagramTypePreviewPanel } = await import('../ui/diagramTypePreviewPanel');
+        const root = new PreviewElement();
+        const controller = renderDiagramTypePreviewPanel({
+            parent: root as unknown as HTMLElement,
+            copy,
+            renderThumbnail: jest.fn().mockResolvedValue('<svg viewBox="0 0 880 532"><title>Matrix</title></svg>')
+        });
+
+        controller.setSelectedType('access-matrix');
+        await Promise.resolve();
+        await Promise.resolve();
+
+        const canvas = root.children[0].children[2];
+        expect(canvas.innerHTML).toContain('viewBox="0 0 880 532"');
+        expect(canvas.attrs.get('data-preview-aspect-ratio')).toBe('880/532');
+        controller.destroy();
     });
 });

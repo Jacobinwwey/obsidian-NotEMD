@@ -189,7 +189,7 @@
       "previewTarget": "editable-html-svg",
       "svgPath": "./architecture-platform.svg",
       "pngPath": "./architecture-platform.png",
-      "svgSha256": "be3425d4f76b5390a57a2e7dc4f9d9799d031c92164f65dfd09171857a4472f4"
+      "svgSha256": "a2c0286b1d6262b4565451bd022f32443631ea5fc63ad18006b0d80d2202ea5c"
     },
     {
       "typeId": "current-state",
@@ -199,7 +199,7 @@
       "previewTarget": "editable-html-svg",
       "svgPath": "./current-state-legacy-pipeline.svg",
       "pngPath": "./current-state-legacy-pipeline.png",
-      "svgSha256": "a8264cb5e2a9b5615b90da494016c17305f2ecc4696187f6c530ea7cc024758d"
+      "svgSha256": "fdcd19cc5de61e1860275c407af831efc426d24d7e242f0c4bef7b219f31fdc4"
     },
     {
       "typeId": "integration-topology",
@@ -209,7 +209,7 @@
       "previewTarget": "editable-html-svg",
       "svgPath": "./integration-topology-platform.svg",
       "pngPath": "./integration-topology-platform.png",
-      "svgSha256": "5af54e92181ba3bb248cb4410000f22d432f87f13691d0f3c5f064f4cf175312"
+      "svgSha256": "e792684bca7a8b982575dca8957fef263ba41978c5004555d43127aec2ab1549"
     },
     {
       "typeId": "data-flow",
@@ -219,7 +219,7 @@
       "previewTarget": "editable-html-svg",
       "svgPath": "./data-flow-platform.svg",
       "pngPath": "./data-flow-platform.png",
-      "svgSha256": "c5fbcb5e153784e0d331c1adec7c44e8d13d4b8a3c0fe49a4991fdb28c4fae93"
+      "svgSha256": "65a3dfc87b059ad41cc237289d23e8c8d658d66316aaf2c254c8891ec2b48f3c"
     },
     {
       "typeId": "access-matrix",
@@ -229,7 +229,7 @@
       "previewTarget": "editable-html-svg",
       "svgPath": "./access-matrix-platform.svg",
       "pngPath": "./access-matrix-platform.png",
-      "svgSha256": "9a900072e67b484c116a35440ef0be4ebfe7a803ee73b56bdfdb69411417de16"
+      "svgSha256": "d1e12b0479f500a9d64431ab33c5e081c4c26a27f82f3684d1e37c27cb92a752"
     },
     {
       "typeId": "gantt",
@@ -239,7 +239,7 @@
       "previewTarget": "editable-html-svg",
       "svgPath": "./gantt-release-plan.svg",
       "pngPath": "./gantt-release-plan.png",
-      "svgSha256": "e7f21b163604c5bccc7d2401c1fd34f5f416f3422d54e79bb50c7cfd8be9e995"
+      "svgSha256": "04bf0e173396c0b5d8ab84859637bca94be4d665ad14bf85af82cdbc57c4e143"
     },
     {
       "typeId": "layer-stack",
@@ -249,7 +249,7 @@
       "previewTarget": "editable-html-svg",
       "svgPath": "./layer-stack-platform.svg",
       "pngPath": "./layer-stack-platform.png",
-      "svgSha256": "fe733f3d909658d5062bf826a9796a0f45d8ed6913fa36dcd6daa4ab57cf01d8"
+      "svgSha256": "9dbacad7cb5b40924317e25c589b7065d20c2c4be4b6f6d266d21b8ec0a28bde"
     },
     {
       "typeId": "venn",
@@ -259,7 +259,7 @@
       "previewTarget": "editable-html-svg",
       "svgPath": "./venn-platform.svg",
       "pngPath": "./venn-platform.png",
-      "svgSha256": "08b526bce3038f621b48fe217492c5dcee9f98cfeb84d46e18018544e0f8375e"
+      "svgSha256": "c1f1075c4653968d80f5afb4dd551a3447551a53b0b073f57f67cc9353c56cd6"
     },
     {
       "typeId": "ranked-funnel",
@@ -269,7 +269,7 @@
       "previewTarget": "editable-html-svg",
       "svgPath": "./ranked-funnel-release.svg",
       "pngPath": "./ranked-funnel-release.png",
-      "svgSha256": "ecefe9f638b29bc63e0f27e1930b6fb3ea69932fdc1049a06c8e24c7998f8a38"
+      "svgSha256": "0ffb715bbc6d76e3820af2dc8f29116ba3bae2e3bbb81cf824392aeff47535b2"
     },
     {
       "typeId": "loop",
@@ -279,7 +279,7 @@
       "previewTarget": "editable-html-svg",
       "svgPath": "./loop-operating-model.svg",
       "pngPath": "./loop-operating-model.png",
-      "svgSha256": "d734697f1e550738d9b4ef169ea9487bc07ef06fd33f047beccd340f7f00cba4"
+      "svgSha256": "c438f42f9966e3a05626afe8f247cccd62f2de36b04f960f9de9e9d64ead334f"
     },
     {
       "typeId": "nested",
@@ -289,7 +289,7 @@
       "previewTarget": "editable-html-svg",
       "svgPath": "./nested-scope.svg",
       "pngPath": "./nested-scope.png",
-      "svgSha256": "94bad79cb9eb8b835efa15c8f2740396146aa2121154343b863efce6c00eb131"
+      "svgSha256": "92a25836ade8a6096ffafb0775078b5e3ac0af055973ca72b627d5a98f5f9535"
     },
     {
       "typeId": "tree",
@@ -299,7 +299,7 @@
       "previewTarget": "editable-html-svg",
       "svgPath": "./tree-ownership.svg",
       "pngPath": "./tree-ownership.png",
-      "svgSha256": "a6a7965a888ffedcd7db6a93684fd7fd503d1807944f2e28223617af64cb2e36"
+      "svgSha256": "5043f5686b71b528603a0a04e7291be5170363bfd1addc8d15c61b501fb73316"
     },
     {
       "typeId": "process",
@@ -309,7 +309,7 @@
       "previewTarget": "editable-html-svg",
       "svgPath": "./process-release.svg",
       "pngPath": "./process-release.png",
-      "svgSha256": "44db226ba73d5487222ca891875822be098dc6cb7333c2f96eba8ba42acd5832"
+      "svgSha256": "b878b9d9f68787e0de6af2fcccb6e89d4572248ea64219a7f1574a373d9cc94b"
     },
     {
       "typeId": "medallion",
@@ -319,7 +319,7 @@
       "previewTarget": "editable-html-svg",
       "svgPath": "./medallion-data-quality.svg",
       "pngPath": "./medallion-data-quality.png",
-      "svgSha256": "bc1727cda804c7241bcd050e7d2a230f5a0bfdf170fd5a5343e68225037a3ec7"
+      "svgSha256": "28aeef6b9d2137ad75acdf47c9d423ac442cc60fa4239cfd9c05fd94ee49d07d"
     },
     {
       "typeId": "high-level",
@@ -329,7 +329,7 @@
       "previewTarget": "editable-html-svg",
       "svgPath": "./high-level-platform.svg",
       "pngPath": "./high-level-platform.png",
-      "svgSha256": "757799693df53f19f019f9573c2d6efc2add0a5f5e3c808290b8205c374662f0"
+      "svgSha256": "3c947bfba4ccb94f8a302487d20d0f6b714c75ba455cd434a49f1122bc96f21b"
     }
   ]
 }

@@ -1,6 +1,6 @@
 ---
 date: 2026-08-16
-last_updated: 2026-08-23
+last_updated: 2026-08-25
 topic: mainline-diagram-architecture-progress-and-next-direction
 status: active
 canonical_for:
@@ -243,3 +243,13 @@ Batch 0 已作为兼容基础实现；本批不增加 selector 行，也不把�
 English: The visual audit showed that canonical payload validity alone did not prove readable output. The shared `src/diagram/layout/layoutSafety.ts` contract now provides conservative glyph measurement, no-space token wrapping, bounded line counts, overlap primitives, and a version marker. `layoutDiagnostics.ts` rejects core labels that would be truncated and reports optional detail elision as warnings. Native editable SVG families now derive node, row, matrix, lane, schedule, stack, overlap, cycle, nested, and tree geometry from measured text; topology edge labels search deterministic clearance candidates. `RenderArtifact` carries additive `layoutSafetyVersion` metadata, `RendererService` applies the gate before caching, prompt profiles expose numeric density budgets without exposing coordinates, and preview iframes expose title/error/timeout states. The gallery browser gate uses `getBBox()` for native SVG to reject out-of-viewBox text, node text outside its node, node overlap, edge-label/node collision, and core truncation. All 33 production fixtures regenerate and pass `diagram:gallery:check`; six representative PNGs were visually inspected. This is renderer/headless evidence, not a claim of manual acceptance for every Obsidian theme.
 
 中文：视觉审计证明，仅有 canonical payload 合法并不能证明输出可读。共享的 `src/diagram/layout/layoutSafety.ts` 现在提供保守字符测量、无空格 token 换行、行数上限、碰撞原语和版本标记；`layoutDiagnostics.ts` 会拒绝必须截断的核心标签，并把可选细节省略记录为 warning。native editable SVG family 现在依据实测文本推导节点、行、矩阵、lane、schedule、stack、overlap、cycle、nested 和 tree 几何；topology 边标签通过确定性候选位置避障。`RenderArtifact` 以 additive 方式携带 `layoutSafetyVersion`，`RendererService` 在缓存前执行门禁，prompt profile 暴露数值密度预算但不暴露坐标，preview iframe 提供 title、错误和超时状态。gallery 浏览器门禁使用 `getBBox()` 拒绝 viewBox 外文本、节点外文本、节点重叠、边标签与节点碰撞以及核心文本截断。33 个生产 fixture 均可重建并通过 `diagram:gallery:check`，另抽检 6 张 PNG。以上是 renderer/headless 证据，不等同于所有 Obsidian 主题的人工验收。
+## 宿主预览纵横比与对比度闭环（2026-08-25）
+
+Obsidian Vault 审计发现，之前的 SVG 几何门禁无法发现宿主层回退：设置页缩略图 CSS 把所有 native SVG 强制塞入 16:9 且 `overflow:hidden`。访问矩阵源画布是 880×532（1.65:1），因此宿主把无碰撞的源 SVG 压缩成 421.875×236.719 CSS 像素；这是展示层故障，不是 canonical payload 故障。
+
+- native 类型预览现在保留 SVG `viewBox` 比例，写入 `data-preview-aspect-ratio`，并强制写入实测最小可读宽度（`data-preview-min-readable-width`），使用 intrinsic-height 且可水平滚动的区域，不再把所有 family 拉伸/裁切到单一缩略图比例。
+- 共享 reference 调色板将 muted 文本改为 `#475569`；在 focal/soft 浅色块上副标题达到 AA 对比度。深色 cycle hub 使用专用浅色文字类，避免继承深色节点文字。
+- 生产 gallery 浏览器门禁除边界、节点重叠、边标签避障、截断外，新增 native SVG 文本与图形背景的对比度检查；核心标签 fail-closed，可选细节只能显式截断并保持次要层级。
+- 实机证据：已通过 `obsidian vault="1Knowledge" plugin:reload id=notemd` 热重载 `E:\1Knowledge`；Vault 与工作区 bundle hash 一致，访问矩阵实际报告 `880/532`、intrinsic SVG 尺寸 `880×532`、最小可读宽度 `704px`、宿主视口 `410px`、`scrollWidth=645px`、`overflow:auto`。
+
+剩余验收边界：以上证明的是已发布 light-theme 宿主路径与确定性 gallery 路径；Mermaid/Vega 继续由各自 runtime validator 负责，任意用户 CSS 主题仍需同一对比度/边界门禁后才能发布。

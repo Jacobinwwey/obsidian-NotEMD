@@ -144,6 +144,19 @@ export function renderDiagramTypePreviewPanel(
                 if (renderedSvg) {
                     renderedSvg.setAttribute('role', 'img');
                     renderedSvg.setAttribute('aria-label', label);
+                    // A fixed 16:9 thumbnail is an interaction surface, not the
+                    // source artifact. Preserve the source aspect ratio and let
+                    // the host scroll when a dense matrix cannot remain legible
+                    // at thumbnail scale. Stretching a 880x532 matrix into a
+                    // 16:9 box was the root of the reported text-obscuring UX.
+                    renderedSvg.classList.add('notemd-diagram-type-preview-svg');
+                    const viewBox = renderedSvg.viewBox?.baseVal;
+                    if (viewBox && viewBox.width > 0 && viewBox.height > 0) {
+                        canvas.setAttribute('data-preview-aspect-ratio', `${viewBox.width}/${viewBox.height}`);
+                        const minimumReadableWidth = Math.max(520, Math.ceil(viewBox.width * 0.8));
+                        renderedSvg.style.minWidth = `${minimumReadableWidth}px`;
+                        renderedSvg.setAttribute('data-preview-min-readable-width', String(minimumReadableWidth));
+                    }
                 }
             }).catch(error => {
                 if (destroyed || currentVersion !== requestVersion) {

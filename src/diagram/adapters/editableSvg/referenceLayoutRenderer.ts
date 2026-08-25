@@ -24,7 +24,10 @@ const COLORS = {
     paper: '#f8fafc',
     panel: '#ffffff',
     ink: '#172033',
-    muted: '#64748b',
+    // Keep secondary labels above the WCAG AA normal-text threshold on both
+    // paper and the light focal/soft fills. A lighter slate looked elegant in
+    // isolation but dropped below 4.5:1 once labels were placed on cards.
+    muted: '#475569',
     rule: '#cbd5e1',
     soft: '#e2e8f0',
     accent: '#c2410c',
@@ -119,6 +122,8 @@ function commonStyles(): string {
         .ref-node-label { fill: ${COLORS.ink}; font: 600 13px "Segoe UI", Arial, sans-serif; }
         .ref-header-label { fill: ${COLORS.panel}; font: 600 11px "Segoe UI", Arial, sans-serif; }
         .ref-node-sub { fill: ${COLORS.muted}; font: 10px Consolas, monospace; }
+        .ref-hub-label { fill: ${COLORS.paper}; font: 600 13px "Segoe UI", Arial, sans-serif; }
+        .ref-hub-sub { fill: ${COLORS.soft}; font: 10px Consolas, monospace; }
         .ref-edge { fill: none; stroke: ${COLORS.muted}; stroke-width: 1.5; }
         .ref-edge.accent { stroke: ${COLORS.accent}; stroke-width: 2; marker-end: url(#notemd-reference-arrow-accent); }
         .ref-edge.link { stroke: ${COLORS.link}; marker-end: url(#notemd-reference-arrow-link); }
@@ -439,7 +444,7 @@ function cycleSvg(spec: DiagramSpec, payload: DiagramCyclePayload): string {
         return `<path class="ref-edge" d="${path}" marker-end="url(#notemd-reference-arrow)" />${position.station.spokeLabel ? `<text class="ref-edge-label" x="${cx + (position.x - cx) * .55}" y="${cy + (position.y - cy) * .55}" text-anchor="middle">${escapeXml(position.station.spokeLabel)}</text>` : ''}`;
     }).join('');
     const stations = positions.map(({ station, x, y }) => `<g id="reference-station-${escapeXml(station.id)}"><rect class="${station.focal ? 'ref-focal-fill' : 'ref-node'}" x="${x - stationWidth / 2}" y="${y - stationHeight / 2}" width="${stationWidth}" height="${stationHeight}" rx="6" />${textBlock(station.label, x, y - 18, 16, 'ref-node-label', 'middle', 2, 14)}${textBlock(station.sub, x, y + 20, 16, 'ref-node-sub', 'middle', 1, 13)}</g>`).join('');
-    const hub = `<g id="reference-cycle-hub"><rect x="${cx - 100}" y="${cy - 48}" width="200" height="96" rx="8" fill="${COLORS.ink}" />${textBlock(payload.hub.label, cx, cy - 18, 22, 'ref-node-label', 'middle', 2, 14)}${textBlock(payload.hub.sub, cx, cy + 28, 22, 'ref-node-sub', 'middle', 1, 13)}</g>`;
+    const hub = `<g id="reference-cycle-hub"><rect x="${cx - 100}" y="${cy - 48}" width="200" height="96" rx="8" fill="${COLORS.ink}" />${textBlock(payload.hub.label, cx, cy - 18, 22, 'ref-hub-label', 'middle', 2, 14)}${textBlock(payload.hub.sub, cx, cy + 28, 22, 'ref-hub-sub', 'middle', 1, 13)}</g>`;
     return svgRoot(spec, width, height, `${arcs}${stations}${hub}`);
 }
 

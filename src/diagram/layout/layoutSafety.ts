@@ -36,7 +36,7 @@ export function measureTextWidth(value: string): number {
 
 export function textExceedsWidth(value: string | undefined, maxWidth: number): boolean {
     const trimmed = value?.trim();
-    return Boolean(trimmed) && measureTextWidth(trimmed) > Math.max(8, maxWidth);
+    return trimmed ? measureTextWidth(trimmed) > Math.max(8, maxWidth) : false;
 }
 
 function measureCharacter(character: string): number {
