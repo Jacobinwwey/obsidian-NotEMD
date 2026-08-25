@@ -1,6 +1,6 @@
 ---
 date: 2026-08-16
-last_updated: 2026-08-25
+last_updated: 2026-08-26
 topic: mainline-diagram-architecture-progress-and-next-direction
 status: active
 canonical_for:
@@ -253,3 +253,12 @@ Obsidian Vault 审计发现，之前的 SVG 几何门禁无法发现宿主层回
 - 实机证据：已通过 `obsidian vault="1Knowledge" plugin:reload id=notemd` 热重载 `E:\1Knowledge`；Vault 与工作区 bundle hash 一致，访问矩阵实际报告 `880/532`、intrinsic SVG 尺寸 `880×532`、最小可读宽度 `704px`、宿主视口 `410px`、`scrollWidth=645px`、`overflow:auto`。
 
 剩余验收边界：以上证明的是已发布 light-theme 宿主路径与确定性 gallery 路径；Mermaid/Vega 继续由各自 runtime validator 负责，任意用户 CSS 主题仍需同一对比度/边界门禁后才能发布。
+## 根层遮挡闭环（2026-08-26）
+
+后续审计发现一个单节点 `getBBox()` 无法覆盖的隐蔽问题：访问矩阵 role header 自身几何合法，但背景从 `y=50` 开始，而文档 summary baseline 为 `y=66`，导致 summary 在绘制顺序上被 header 遮挡。这是 z-order/owner 问题，不是换行问题。
+
+- 访问矩阵 header 现在从 `y=78` 开始，位于标题/summary 块之后；focused renderer test 已锁定该不变量。
+- gallery 验证新增根级文字/图形与根级文字/文字相交检查，同时保留节点内边界、节点重叠、边标签避障、截断和对比度检查。
+- CLI 热重载后的实机复核：`viewBox=0 0 880 532`、`data-preview-min-readable-width=704`、SVG 高度 `532px`、`scrollWidth=645px`、宿主 client width `410px`，无 Obsidian error 或 error-level console 输出。
+
+这关闭了已知的 native reference 遮挡类别。Mermaid/Vega 几何继续由各自 parser/runtime validator 负责；任何新 renderer family 在进入 catalog 前都必须注册等价的根层门禁与宿主缩放检查。

@@ -99,4 +99,11 @@ describe('diagram-design-inspired production layouts', () => {
         expect(svg).toContain('marker-end="url(#notemd-reference-arrow)"');
         expect(svg).not.toContain('https://');
     });
+
+    test('keeps access-matrix headers below the document summary', async () => {
+        const example = getExecutableDiagramExamples().find(candidate => candidate.typeId === 'access-matrix')!;
+        const svg = renderReferenceLayoutSvg(example.spec);
+        expect(svg).toMatch(/<text x="40" y="66"[^>]*class="ref-summary"/);
+        expect(svg).toMatch(/id="reference-role-[^"]+"><rect x="250" y="78"/);
+    });
 });

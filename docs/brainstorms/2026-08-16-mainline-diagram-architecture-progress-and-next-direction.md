@@ -1,6 +1,6 @@
 ---
 date: 2026-08-16
-last_updated: 2026-08-25
+last_updated: 2026-08-26
 topic: mainline-diagram-architecture-progress-and-next-direction
 status: active
 canonical_for:
@@ -263,3 +263,13 @@ The Obsidian Vault audit exposed a host-level regression that the prior SVG geom
 - Real Vault evidence: `E:\1Knowledge` was hot-reloaded via `obsidian vault="1Knowledge" plugin:reload id=notemd`; the Vault and workspace bundle hashes matched, and the access-matrix preview reported `880/532`, intrinsic SVG size `880×532`, minimum readable width `704px`, host viewport `410px`, `scrollWidth=645px`, and `overflow:auto`.
 
 Remaining acceptance boundary: this proves the shipped light-theme host path and deterministic gallery path. Mermaid/Vega remain owned by their runtime validators; arbitrary user CSS themes still require the same contrast/bounds gate before release.
+
+## Root-Layer Occlusion Closure (2026-08-26)
+
+The follow-up audit found a subtle failure mode not covered by per-node `getBBox()` checks: access-matrix role headers were locally valid, but their background rectangle started at `y=50` while the document summary baseline was `y=66`. The summary was therefore painted underneath the header. This is a z-order/ownership defect, not a text-wrap defect.
+
+- Access-matrix header origin is now `y=78`, below the title/summary block; a focused renderer test locks this invariant.
+- Gallery validation now rejects root-level text/shape and root-level text/text intersections, in addition to node-local bounds, node overlap, edge-label clearance, truncation, and contrast.
+- Real Vault recheck after CLI reload: `viewBox=0 0 880 532`, `data-preview-min-readable-width=704`, SVG height `532px`, `scrollWidth=645px`, host client width `410px`, no captured Obsidian errors or error-level console output.
+
+This closes the known native reference occlusion class. Runtime-owned Mermaid/Vega geometry remains intentionally delegated to their parsers/runtime validators; any future renderer family must register equivalent root-layer and host-scale checks before catalog promotion.

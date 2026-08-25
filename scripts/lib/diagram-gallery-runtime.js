@@ -212,12 +212,36 @@ async function assertSvgGeometry(page, fixtureId) {
           : [];
       });
     });
-    return { missing: false, textOutOfBounds, nodeTextOutOfBounds, nodeOverlaps, edgeLabelNodeOverlaps, coreTruncations, contrastFailures };
+    const rootTextShapeOverlaps = Array.from(svg.children)
+      .filter(element => element.tagName.toLowerCase() === 'text')
+      .flatMap(text => {
+        const textBox = safeBox(text);
+        if (!textBox) return [];
+        return Array.from(svg.querySelectorAll('rect,circle,ellipse,polygon'))
+          .filter(shape => !shape.classList.contains('ref-canvas'))
+          .map(shape => ({ shape, box: safeBox(shape) }))
+          .filter(candidate => candidate.box && intersects(textBox, candidate.box))
+          .map(candidate => `${(text.textContent || 'text').trim()}:${candidate.shape.tagName.toLowerCase()}`);
+      });
+    const rootTextTextOverlaps = Array.from(svg.children)
+      .filter(element => element.tagName.toLowerCase() === 'text')
+      .flatMap((text, index, roots) => {
+        const firstBox = safeBox(text);
+        if (!firstBox) return [];
+        return roots.slice(index + 1)
+          .filter(other => other.tagName.toLowerCase() === 'text')
+          .filter(other => {
+            const secondBox = safeBox(other);
+            return secondBox && intersects(firstBox, secondBox, 0.5);
+          })
+          .map(other => `${(text.textContent || 'text').trim()}:${(other.textContent || 'text').trim()}`);
+      });
+    return { missing: false, textOutOfBounds, nodeTextOutOfBounds, nodeOverlaps, edgeLabelNodeOverlaps, coreTruncations, contrastFailures, rootTextShapeOverlaps, rootTextTextOverlaps };
   });
   if (report.skipped) return;
   if (report.missing || report.textOutOfBounds.length || report.nodeTextOutOfBounds.length
     || report.nodeOverlaps.length || report.edgeLabelNodeOverlaps.length || report.coreTruncations.length
-    || report.contrastFailures.length) {
+    || report.contrastFailures.length || report.rootTextShapeOverlaps.length || report.rootTextTextOverlaps.length) {
     throw new Error(`Diagram fixture "${fixtureId}" failed SVG geometry gate: ${JSON.stringify(report)}`);
   }
 }

@@ -329,7 +329,11 @@ function laneGridSvg(spec: DiagramSpec, payload: DiagramLaneGridPayload): string
 function accessMatrixSvg(spec: DiagramSpec, payload: DiagramAccessMatrixPayload): string {
     const left = 250;
     const roleWidth = 150;
-    const headerHeight = 112;
+    // Keep the role header below the document summary. The previous 112px
+    // row origin put the header background at y=50, which occluded the
+    // summary rendered at y=66 even though every individual text box fit its
+    // own local budget.
+    const headerHeight = 140;
     const rowHeight = 76;
     const width = left + payload.roles.length * roleWidth + 30;
     const height = headerHeight + payload.components.length * rowHeight + 40;

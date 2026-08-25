@@ -229,7 +229,7 @@
       "previewTarget": "editable-html-svg",
       "svgPath": "./access-matrix-platform.svg",
       "pngPath": "./access-matrix-platform.png",
-      "svgSha256": "d1e12b0479f500a9d64431ab33c5e081c4c26a27f82f3684d1e37c27cb92a752"
+      "svgSha256": "31623ba013ef2427f9dcc75e1319f2017c789d02659b43b018d3da87a7a054b0"
     },
     {
       "typeId": "gantt",
