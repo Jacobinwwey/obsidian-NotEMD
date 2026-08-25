@@ -38,4 +38,22 @@ describe('diagram layout diagnostics', () => {
         ]));
         expect(diagnoseDiagramLayout(spec).some(diagnostic => diagnostic.severity === 'error')).toBe(false);
     });
+
+    test('applies text budgets to legacy Mermaid-family payloads before runtime rendering', () => {
+        const spec: DiagramSpec = {
+            intent: 'quadrant',
+            title: 'Priorities',
+            nodes: [],
+            quadrant: {
+                xAxisLabel: ['Low effort', 'High effort'],
+                yAxisLabel: ['Low impact', 'High impact'],
+                quadrantLabels: ['Invest', 'Quick wins', 'Defer', 'Evaluate'],
+                items: [{ id: 'item', label: 'A'.repeat(240), x: 0.5, y: 0.5 }]
+            }
+        };
+
+        expect(diagnoseDiagramLayout(spec)).toEqual(expect.arrayContaining([
+            expect.objectContaining({ severity: 'error', kind: 'layout-text-overflow' })
+        ]));
+    });
 });

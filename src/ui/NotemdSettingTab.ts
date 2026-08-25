@@ -2878,6 +2878,7 @@ export class NotemdSettingTab extends PluginSettingTab {
                 loading: experimentalDiagramI18n.diagramTypePreviewLoading,
                 unavailable: experimentalDiagramI18n.diagramTypePreviewUnavailable,
                 failed: experimentalDiagramI18n.diagramTypePreviewFailed,
+                previewOverflowHint: experimentalDiagramI18n.diagramTypePreviewOverflowHint,
                 targetPrefix: experimentalDiagramI18n.diagramCapabilityTargetPrefix,
                 formatsPrefix: experimentalDiagramI18n.diagramCapabilityFormatsPrefix
             },

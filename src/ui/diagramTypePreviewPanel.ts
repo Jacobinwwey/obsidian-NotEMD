@@ -7,6 +7,7 @@ import {
 import type { DiagramCatalogTypeId, DiagramIntent } from '../diagram/types';
 import { getRenderTargetDisplayName } from '../rendering/targetLabel';
 import { getRenderTargetDescriptor } from '../rendering/renderTargetCatalog';
+import { assertSvgPresentationSafety } from '../rendering/preview/svgSafety';
 import type { DiagramCatalogLabelCopy } from './diagramCatalogLabels';
 
 export interface DiagramTypePreviewPanelCopy extends DiagramCatalogLabelCopy {
@@ -17,6 +18,7 @@ export interface DiagramTypePreviewPanelCopy extends DiagramCatalogLabelCopy {
     failed: string;
     targetPrefix: string;
     formatsPrefix: string;
+    previewOverflowHint?: string;
 }
 
 export interface DiagramTypePreviewPanelController {
@@ -139,6 +141,7 @@ export function renderDiagramTypePreviewPanel(
                     return;
                 }
                 canvas.innerHTML = svg;
+                assertSvgPresentationSafety(canvas, `Diagram type "${typeId}"`);
                 setPreviewState('ready', false);
                 const renderedSvg = canvas.querySelector('svg');
                 if (renderedSvg) {
@@ -156,6 +159,13 @@ export function renderDiagramTypePreviewPanel(
                         const minimumReadableWidth = Math.max(520, Math.ceil(viewBox.width * 0.8));
                         renderedSvg.style.minWidth = `${minimumReadableWidth}px`;
                         renderedSvg.setAttribute('data-preview-min-readable-width', String(minimumReadableWidth));
+                        if (minimumReadableWidth > canvas.clientWidth) {
+                            const hint = canvas.createEl('p', {
+                                text: params.copy.previewOverflowHint ?? 'Wider preview: scroll horizontally to inspect labels.',
+                                cls: 'notemd-diagram-type-preview-overflow-hint'
+                            });
+                            hint.setAttr('role', 'status');
+                        }
                     }
                 }
             }).catch(error => {

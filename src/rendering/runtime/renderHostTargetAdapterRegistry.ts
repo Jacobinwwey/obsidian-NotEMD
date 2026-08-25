@@ -15,6 +15,7 @@ import { getBundledMermaidPreviewDeps, getBundledVegaLitePreviewDeps } from '../
 import { TargetAdapterRegistry } from '../targetAdapterRegistry';
 import type { TargetAdapter } from '../targetAdapterRegistry';
 import { RenderWebviewTheme } from '../theme';
+import { assertSvgPresentationSafety } from '../preview/svgSafety';
 
 export interface RenderHostTargetAdapter extends TargetAdapter {
     errorElementId: string;
@@ -38,6 +39,7 @@ async function renderVegaLitePayload(payload: RenderWebviewPayload, doc: Documen
     );
 
     mount.innerHTML = svg;
+    assertSvgPresentationSafety(mount, 'Vega-Lite');
     mount.hidden = false;
     if (fallback instanceof HTMLDetailsElement) {
         fallback.open = false;
@@ -64,6 +66,7 @@ async function renderMermaidPayload(payload: RenderWebviewPayload, doc: Document
     );
 
     mount.innerHTML = svg;
+    assertSvgPresentationSafety(mount, 'Mermaid');
     mount.hidden = false;
     if (fallback instanceof HTMLDetailsElement) {
         fallback.open = false;

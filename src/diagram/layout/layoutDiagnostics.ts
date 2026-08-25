@@ -97,6 +97,58 @@ function accessMatrixBudgets(payload: DiagramAccessMatrixPayload): TextBudget[] 
     ];
 }
 
+function radarBudgets(spec: DiagramSpec): TextBudget[] {
+    const radar = spec.radarSpec;
+    if (!radar) return [];
+    return [
+        ...radar.axes.map((axis, index) => textBudget(`radarSpec.axes[${index}].label`, axis.label, 132, 2, true)),
+        ...radar.series.flatMap((series, seriesIndex) => [
+            textBudget(`radarSpec.series[${seriesIndex}].label`, series.label, 132, 2, true)
+        ])
+    ];
+}
+
+function orgChartBudgets(spec: DiagramSpec): TextBudget[] {
+    const orgChart = spec.orgChartSpec;
+    if (!orgChart) return [];
+    return orgChart.nodes.flatMap((node, index) => [
+        textBudget(`orgChartSpec.nodes[${index}].label`, node.label, 180, 2, true),
+        textBudget(`orgChartSpec.nodes[${index}].role`, node.role, 180, 1),
+        ...(node.scope ?? []).map((scope, scopeIndex) => textBudget(`orgChartSpec.nodes[${index}].scope[${scopeIndex}]`, scope, 180, 1))
+    ]);
+}
+
+function timelineBudgets(spec: DiagramSpec): TextBudget[] {
+    return (spec.timelineEvents ?? []).flatMap((event, index) => [
+        textBudget(`timelineEvents[${index}].date`, String(event.date), 120, 1, true),
+        textBudget(`timelineEvents[${index}].label`, event.label, 180, 2, true),
+        ...(event.details ?? []).map((detail, detailIndex) => textBudget(`timelineEvents[${index}].details[${detailIndex}]`, detail, 180, 1))
+    ]);
+}
+
+function swimlaneBudgets(spec: DiagramSpec): TextBudget[] {
+    return (spec.swimlaneLanes ?? []).flatMap((lane, laneIndex) => [
+        textBudget(`swimlaneLanes[${laneIndex}].label`, lane.label, 160, 2, true),
+        ...lane.steps.flatMap((step, stepIndex) => [
+            textBudget(`swimlaneLanes[${laneIndex}].steps[${stepIndex}].label`, step.label, 180, 2, true)
+        ])
+    ]);
+}
+
+function quadrantBudgets(spec: DiagramSpec): TextBudget[] {
+    const quadrant = spec.quadrant;
+    if (!quadrant) return [];
+    return [
+        ...quadrant.xAxisLabel.map((label, index) => textBudget(`quadrant.xAxisLabel[${index}]`, label, 150, 2, true)),
+        ...quadrant.yAxisLabel.map((label, index) => textBudget(`quadrant.yAxisLabel[${index}]`, label, 150, 2, true)),
+        ...quadrant.quadrantLabels.map((label, index) => textBudget(`quadrant.quadrantLabels[${index}]`, label, 160, 2, true)),
+        ...quadrant.items.flatMap((item, index) => [
+            textBudget(`quadrant.items[${index}].label`, item.label, 180, 2, true),
+            textBudget(`quadrant.items[${index}].detail`, item.detail, 180, 1)
+        ])
+    ];
+}
+
 function scheduleBudgets(payload: DiagramSchedulePayload): TextBudget[] {
     return [
         ...payload.tasks.flatMap((task, index) => [
@@ -186,6 +238,11 @@ export function diagnoseDiagramLayout(spec: DiagramSpec): LayoutSafetyDiagnostic
             textBudget(`edges[${edgeIndex}].label`, edge.label ?? edge.relation, 180, 1, true)
         ));
     }
+    if (spec.intent === 'radar') budgets.push(...radarBudgets(spec));
+    if (spec.intent === 'orgChart') budgets.push(...orgChartBudgets(spec));
+    if (spec.intent === 'timeline') budgets.push(...timelineBudgets(spec));
+    if (spec.intent === 'swimlane') budgets.push(...swimlaneBudgets(spec));
+    if (spec.intent === 'quadrant') budgets.push(...quadrantBudgets(spec));
     const diagnostics = textDiagnostics(budgets);
     const payloadSize = payload
         ? Object.values(payload).reduce((count, value) => count + (Array.isArray(value) ? value.length : 0), 0)

@@ -11,6 +11,82 @@ export interface SvgSafetyResult {
     diagnostics: SvgSafetyDiagnostic[];
 }
 
+export interface SvgPresentationDiagnostic {
+    kind: 'svg-text-overlap' | 'svg-text-occluded';
+    message: string;
+}
+
+interface PresentationRect {
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+}
+
+function presentationRect(element: Element): PresentationRect | null {
+    const candidate = element as Element & { getBoundingClientRect?: () => DOMRect };
+    if (typeof candidate.getBoundingClientRect !== 'function') return null;
+    const rect = candidate.getBoundingClientRect();
+    if (![rect.x, rect.y, rect.width, rect.height].every(Number.isFinite)
+        || rect.width <= 0 || rect.height <= 0) return null;
+    return rect;
+}
+
+function presentationRectsOverlap(first: PresentationRect, second: PresentationRect, padding = 0): boolean {
+    return first.x - padding < second.x + second.width
+        && first.x + first.width + padding > second.x
+        && first.y - padding < second.y + second.height
+        && first.y + first.height + padding > second.y;
+}
+
+/**
+ * Browser-side final presentation check shared by preview consumers. Runtime
+ * validators can prove that markup exists, but only a mounted SVG can expose
+ * text boxes that collide after fonts, CSS, and browser scaling are applied.
+ */
+export function collectSvgPresentationDiagnostics(root: ParentNode): SvgPresentationDiagnostic[] {
+    const svg = root.querySelector?.('svg');
+    if (!svg) return [];
+    const textNodes = Array.from(svg.querySelectorAll?.('text') ?? [])
+        .map(element => ({ element, rect: presentationRect(element), text: (element.textContent ?? '').trim() }))
+        .filter(item => item.rect && item.text && !item.element.closest('title,desc,defs')) as Array<{ element: Element; rect: PresentationRect; text: string }>;
+    const diagnostics: SvgPresentationDiagnostic[] = [];
+    for (let index = 0; index < textNodes.length; index += 1) {
+        for (const other of textNodes.slice(index + 1)) {
+            if (presentationRectsOverlap(textNodes[index].rect, other.rect, 0.5)) {
+                diagnostics.push({
+                    kind: 'svg-text-overlap',
+                    message: `Mounted SVG labels overlap: "${textNodes[index].text}" / "${other.text}".`
+                });
+            }
+        }
+    }
+    const shapes = Array.from(svg.querySelectorAll?.('rect,circle,ellipse,polygon,image') ?? [])
+        .map(element => ({ element, rect: presentationRect(element) }))
+        .filter(item => item.rect && !item.element.classList.contains('ref-canvas') && !item.element.classList.contains('notemd-canvas-surface')) as Array<{ element: Element; rect: PresentationRect }>;
+    for (const text of textNodes) {
+        for (const shape of shapes) {
+            if (text.element.contains(shape.element) || shape.element.contains(text.element)) continue;
+            const relation = text.element.compareDocumentPosition?.(shape.element) ?? 0;
+            const shapePaintedAfterText = (relation & 4) !== 0;
+            if (shapePaintedAfterText && presentationRectsOverlap(text.rect, shape.rect, 1)) {
+                diagnostics.push({
+                    kind: 'svg-text-occluded',
+                    message: `Mounted SVG shape may occlude label "${text.text}".`
+                });
+            }
+        }
+    }
+    return diagnostics;
+}
+
+export function assertSvgPresentationSafety(root: ParentNode, source: string): void {
+    const diagnostics = collectSvgPresentationDiagnostics(root);
+    if (diagnostics.length > 0) {
+        throw new Error(`${source} mounted SVG failed presentation safety: ${diagnostics.map(diagnostic => diagnostic.message).join(' ')}`);
+    }
+}
+
 function hasPositiveViewport(svg: string): boolean {
     const root = svg.match(/<svg\b([^>]*)>/i)?.[1] ?? '';
     const viewBox = root.match(/\bviewBox\s*=\s*["']\s*[-+0-9.eE]+[\s,]+[-+0-9.eE]+[\s,]+([-+0-9.eE]+)[\s,]+([-+0-9.eE]+)\s*["']/i);

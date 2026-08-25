@@ -17,6 +17,16 @@ export interface PreviewTargetAdapterContext {
     theme?: RenderWebviewTheme;
 }
 
+function assertPreviewSvgLayoutSafety(svg: string, target: RenderArtifactTarget): string {
+    if (!svg.trim()) {
+        throw new Error(`Preview target "${target}" returned an empty SVG.`);
+    }
+    if (!/<svg\b[\s\S]*<\/svg>/i.test(svg)) {
+        throw new Error(`Preview target "${target}" returned malformed SVG.`);
+    }
+    return svg;
+}
+
 export interface PreviewTargetAdapter extends TargetAdapter {
     renderSvg(artifact: RenderArtifact, context: PreviewTargetAdapterContext): Promise<string>;
     renderSvgForRasterExport(artifact: RenderArtifact, context: PreviewTargetAdapterContext): Promise<string>;
@@ -25,18 +35,18 @@ export interface PreviewTargetAdapter extends TargetAdapter {
 const PREVIEW_TARGET_ADAPTERS = new TargetAdapterRegistry<PreviewTargetAdapter>([
     {
         target: 'mermaid',
-        renderSvg: (artifact, context) => renderMermaidArtifactSvg(artifact, context.mermaid, context.theme),
-        renderSvgForRasterExport: (artifact, context) => renderMermaidArtifactSvgForRasterExport(artifact, context.mermaid, context.theme)
+        renderSvg: async (artifact, context) => assertPreviewSvgLayoutSafety(await renderMermaidArtifactSvg(artifact, context.mermaid, context.theme), artifact.target),
+        renderSvgForRasterExport: async (artifact, context) => assertPreviewSvgLayoutSafety(await renderMermaidArtifactSvgForRasterExport(artifact, context.mermaid, context.theme), artifact.target)
     },
     {
         target: 'json-canvas',
-        renderSvg: (artifact, context) => renderJsonCanvasArtifactSvg(artifact, context.theme),
-        renderSvgForRasterExport: (artifact, context) => renderJsonCanvasArtifactSvg(artifact, context.theme)
+        renderSvg: async (artifact, context) => assertPreviewSvgLayoutSafety(await renderJsonCanvasArtifactSvg(artifact, context.theme), artifact.target),
+        renderSvgForRasterExport: async (artifact, context) => assertPreviewSvgLayoutSafety(await renderJsonCanvasArtifactSvg(artifact, context.theme), artifact.target)
     },
     {
         target: 'vega-lite',
-        renderSvg: (artifact, context) => renderVegaLiteArtifactSvg(artifact, context.vegaLiteDepsLoader, context.theme),
-        renderSvgForRasterExport: (artifact, context) => renderVegaLiteArtifactSvg(artifact, context.vegaLiteDepsLoader, context.theme)
+        renderSvg: async (artifact, context) => assertPreviewSvgLayoutSafety(await renderVegaLiteArtifactSvg(artifact, context.vegaLiteDepsLoader, context.theme), artifact.target),
+        renderSvgForRasterExport: async (artifact, context) => assertPreviewSvgLayoutSafety(await renderVegaLiteArtifactSvg(artifact, context.vegaLiteDepsLoader, context.theme), artifact.target)
     }
 ]);
 

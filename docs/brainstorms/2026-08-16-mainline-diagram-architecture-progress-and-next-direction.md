@@ -302,3 +302,15 @@ The next audit pass found a second native-layout risk: a family renderer could p
 - Frontend Law Auditor evidence reports zero fast-gate failures and zero principle failures; twelve UX metrics remain explicitly unknown because CLI evidence cannot measure host hit targets, interaction timing, or real task completion. Unknown is not treated as usability proof.
 
 Verification: focused native preview/layout tests passed (15 tests), TypeScript/esbuild build passed, gallery generation/check passed for 33 entries, and the access-matrix PNG was regenerated after the geometry change.
+
+## Cross-Family Geometry Gate and Runtime Presentation Closure (2026-08-26)
+
+The previous gate proved the shipped fixtures, but its native heuristics were still biased toward `data-drawio-type=node/edge`; lane-grid, Venn, cycle, schedule, and legacy Mermaid-family text could bypass the same collision contract. This phase closes that escape hatch.
+
+- Gallery native checks now inspect every visible SVG text pair, not only node/edge groups. The gate caught and forced fixes for topology zone/edge labels and Gantt summary/axis labels before regenerating the 33 assets.
+- Topology zone headers, lane-grid headers, schedule axes, nested/tree canvas heights, Venn intersection labels, cycle spoke labels, and stack secondary labels now reserve measured space or deterministic clearance candidates.
+- Legacy radar/org/timeline/swimlane/quadrant payloads now participate in `layoutDiagnostics`; their generation path fails closed on core label overflow instead of relying on Mermaid to repair presentation after persistence.
+- Runtime Mermaid/Vega render-host mounts now run a browser-side mounted SVG presentation check for visible text/text overlap and later-shape occlusion. The same check is used by the selector preview panel before it marks a preview `ready`.
+- Wide previews expose a localized horizontal-scroll hint, so the user receives explicit feedback when the minimum readable width exceeds the host viewport.
+
+Focused evidence: native renderer/diagnostic, preview, render-host, adapter-registry, and SVG-safety tests pass; gallery generation/check remains 33/33. Full regression and Vault reload are the next release gates.

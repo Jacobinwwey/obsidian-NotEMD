@@ -29,6 +29,23 @@ describe('render target adapter registries', () => {
         }
     });
 
+    test('rejects malformed adapter output before preview/export consumers receive it', async () => {
+        const adapter = getPreviewTargetAdapter('mermaid')!;
+        const malformed = {
+            target: 'mermaid' as const,
+            content: 'graph TD\nA-->B',
+            mimeType: 'text/vnd.mermaid',
+            sourceIntent: 'flowchart' as const
+        };
+        const mermaid = {
+            initialize: jest.fn(),
+            parse: jest.fn(),
+            render: jest.fn().mockResolvedValue({ svg: '<div>not svg</div>' })
+        };
+
+        await expect(adapter.renderSvg(malformed, { mermaid })).rejects.toThrow(/malformed SVG/i);
+    });
+
     test('advertises host adapters with explicit error surfaces', () => {
         expect(listRenderHostTargetAdapters().map(adapter => adapter.target)).toEqual([
             'mermaid',

@@ -173,21 +173,40 @@ async function assertSvgGeometry(page, fixtureId) {
     if (svg.getAttribute('data-layout-safety-owner') === 'runtime') {
       const drawableCount = svg.querySelectorAll('g,path,rect,circle,ellipse,polygon,text,image,foreignObject').length;
       const rootRect = svg.getBoundingClientRect();
-      const runtimeTextOutOfBounds = Array.from(svg.querySelectorAll('text')).flatMap(text => {
+      const runtimeTexts = Array.from(svg.querySelectorAll('text')).flatMap((text, index) => {
         const rect = text.getBoundingClientRect();
-        return rect.width === 0 || rect.height === 0
-          || rect.left < rootRect.left - 2
-          || rect.top < rootRect.top - 2
-          || rect.right > rootRect.right + 2
-          || rect.bottom > rootRect.bottom + 2
-          ? [text.textContent || 'text']
-          : [];
+        return rect.width === 0 || rect.height === 0 ? [] : [{ text, index, rect, content: text.textContent || 'text' }];
       });
+      const runtimeTextOutOfBounds = runtimeTexts.flatMap(item => item.rect.left < rootRect.left - 2
+        || item.rect.top < rootRect.top - 2
+        || item.rect.right > rootRect.right + 2
+        || item.rect.bottom > rootRect.bottom + 2
+        ? [item.content]
+        : []);
+      const runtimeTextTextOverlaps = runtimeTexts.flatMap((first, index) => runtimeTexts.slice(index + 1)
+        .filter(second => first.text !== second.text && intersects(
+          { x: first.rect.left, y: first.rect.top, width: first.rect.width, height: first.rect.height },
+          { x: second.rect.left, y: second.rect.top, width: second.rect.width, height: second.rect.height },
+          0.5
+        ))
+        .map(second => `${first.content.trim()}:${second.content.trim()}`));
+      const runtimeTextAfterShape = runtimeTexts.flatMap(textItem => Array.from(svg.querySelectorAll('rect,circle,ellipse,polygon,image'))
+        .map((shape, shapeIndex) => ({ shape, shapeIndex, rect: shape.getBoundingClientRect() }))
+        .filter(shapeItem => shapeItem.rect.width > 2 && shapeItem.rect.height > 2)
+        .filter(shapeItem => shapeItem.shape.compareDocumentPosition(textItem.text) & Node.DOCUMENT_POSITION_PRECEDING)
+        .filter(shapeItem => intersects(
+          { x: textItem.rect.left, y: textItem.rect.top, width: textItem.rect.width, height: textItem.rect.height },
+          { x: shapeItem.rect.left, y: shapeItem.rect.top, width: shapeItem.rect.width, height: shapeItem.rect.height },
+          1
+        ))
+        .map(shapeItem => `${textItem.content.trim()}:${shapeItem.shape.tagName.toLowerCase()}`));
       return {
         missing: false,
         runtimeOwned: true,
         textOutOfBounds: runtimeTextOutOfBounds,
-        drawableCount
+        drawableCount,
+        textTextOverlaps: runtimeTextTextOverlaps,
+        textAfterShape: runtimeTextAfterShape
       };
     }
     const nodeRects = Array.from(svg.querySelectorAll('g[data-drawio-type="node"], g.notemd-canvas-node')).flatMap(group => {
@@ -259,18 +278,34 @@ async function assertSvgGeometry(page, fixtureId) {
           })
           .map(other => `${(text.textContent || 'text').trim()}:${(other.textContent || 'text').trim()}`);
       });
-    return { missing: false, textOutOfBounds, nodeTextOutOfBounds, nodeOverlaps, edgeLabelNodeOverlaps, coreTruncations, contrastFailures, rootTextShapeOverlaps, rootTextTextOverlaps };
+    const nativeTextTextOverlaps = Array.from(svg.querySelectorAll('text')).flatMap((text, index, texts) => {
+      const firstBox = safeBox(text);
+      if (!firstBox || firstBox.width === 0 || firstBox.height === 0) return [];
+      return texts.slice(index + 1).flatMap(other => {
+        const secondBox = safeBox(other);
+        if (!secondBox || secondBox.width === 0 || secondBox.height === 0) return [];
+        // Text that is part of the same semantic marker (for example a glyph
+        // in an SVG definition) is not a diagram label relationship. All
+        // visible native labels otherwise need independent clearance.
+        if (text.closest('defs') || other.closest('defs')) return [];
+        return intersects(firstBox, secondBox, 0.5)
+          ? [`${(text.textContent || 'text').trim()}:${(other.textContent || 'text').trim()}`]
+          : [];
+      });
+    });
+    return { missing: false, textOutOfBounds, nodeTextOutOfBounds, nodeOverlaps, edgeLabelNodeOverlaps, coreTruncations, contrastFailures, rootTextShapeOverlaps, rootTextTextOverlaps, nativeTextTextOverlaps };
   });
   if (report.skipped) return;
   if (report.runtimeOwned) {
-    if (report.drawableCount === 0 || report.textOutOfBounds.length) {
+    if (report.drawableCount === 0 || report.textOutOfBounds.length || report.textTextOverlaps.length || report.textAfterShape.length) {
       throw new Error(`Diagram fixture "${fixtureId}" failed runtime SVG sanity gate: ${JSON.stringify(report)}`);
     }
     return;
   }
   if (report.missing || report.textOutOfBounds.length || report.nodeTextOutOfBounds.length
     || report.nodeOverlaps.length || report.edgeLabelNodeOverlaps.length || report.coreTruncations.length
-    || report.contrastFailures.length || report.rootTextShapeOverlaps.length || report.rootTextTextOverlaps.length) {
+    || report.contrastFailures.length || report.rootTextShapeOverlaps.length || report.rootTextTextOverlaps.length
+    || report.nativeTextTextOverlaps.length) {
     throw new Error(`Diagram fixture "${fixtureId}" failed SVG geometry gate: ${JSON.stringify(report)}`);
   }
 }

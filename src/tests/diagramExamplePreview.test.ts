@@ -69,8 +69,10 @@ class PreviewElement {
     attrs = new Map<string, string>();
     text = '';
     innerHTML = '';
+    clientWidth = 320;
     parent: PreviewElement | null = null;
     constructor(public tag = 'div') {}
+    cls = '';
     createDiv(options?: { cls?: string }): PreviewElement {
         return this.createEl('div', options);
     }
@@ -78,6 +80,7 @@ class PreviewElement {
         const child = new PreviewElement(tag);
         child.parent = this;
         child.text = options?.text ?? '';
+        child.cls = options?.cls ?? '';
         this.children.push(child);
         return child;
     }
@@ -108,7 +111,7 @@ describe('diagram type preview panel', () => {
         intentStateDiagram: 'State diagram', intentCanvasMap: 'Canvas map', intentCircuit: 'Circuit',
         intentDataChart: 'Data chart', intentRadar: 'Radar', intentOrgChart: 'Org chart', intentTimeline: 'Timeline',
         intentSwimlane: 'Swimlane', intentQuadrant: 'Quadrant', title: 'Preview', empty: 'Choose a type',
-        loading: 'Loading', unavailable: 'Unavailable', failed: 'Failed', targetPrefix: 'Target', formatsPrefix: 'Formats'
+        loading: 'Loading', unavailable: 'Unavailable', failed: 'Failed', previewOverflowHint: 'Scroll', targetPrefix: 'Target', formatsPrefix: 'Formats'
     };
 
     test('progressively discloses one production-rendered preview and ignores stale requests', async () => {
@@ -180,6 +183,24 @@ describe('diagram type preview panel', () => {
         const canvas = root.children[0].children[2];
         expect(canvas.innerHTML).toContain('viewBox="0 0 880 532"');
         expect(canvas.attrs.get('data-preview-aspect-ratio')).toBe('880/532');
+        controller.destroy();
+    });
+
+    test('surfaces the horizontal-scroll hint when a preview exceeds the host width', async () => {
+        const { renderDiagramTypePreviewPanel } = await import('../ui/diagramTypePreviewPanel');
+        const root = new PreviewElement();
+        const controller = renderDiagramTypePreviewPanel({
+            parent: root as unknown as HTMLElement,
+            copy,
+            renderThumbnail: jest.fn().mockResolvedValue('<svg viewBox="0 0 880 532"><rect width="880" height="532" /></svg>')
+        });
+
+        controller.setSelectedType('access-matrix');
+        await Promise.resolve();
+        await Promise.resolve();
+
+        const canvas = root.children[0].children[2];
+        expect(canvas.children.some(child => child.cls.includes('notemd-diagram-type-preview-overflow-hint'))).toBe(true);
         controller.destroy();
     });
 });

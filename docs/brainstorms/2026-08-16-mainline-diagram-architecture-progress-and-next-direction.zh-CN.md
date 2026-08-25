@@ -291,3 +291,15 @@ JSON Canvas 之前被视为 runtime-owned preview，因此跳过 native 几何�
 - Frontend Law Auditor 证据运行报告 0 个 fast-gate 失败、0 个 principle 失败；仍有 12 个 UX 指标明确为 unknown，因为 CLI 证据无法测量宿主热区、交互时延或真实任务完成率。unknown 不视为可用性证明。
 
 本增量验证：native preview/layout 聚焦测试通过（15 个测试），TypeScript/esbuild build 通过，33 条 gallery 生成/check 通过，并在几何修改后重新生成访问矩阵 PNG。
+
+## 跨 family 几何门禁与运行时展示闭环（2026-08-26）
+
+上一阶段证明了已提交 fixture，但 native 启发式仍偏向 `data-drawio-type=node/edge`；lane-grid、Venn、cycle、schedule 和 legacy Mermaid family 的文本可能绕过同一碰撞契约。本阶段关闭该逃逸路径。
+
+- gallery native 检查现在覆盖所有可见 SVG 文本对，不再只检查 node/edge group。门禁先捕获并迫使修复 topology zone/edge 标签与 Gantt summary/axis 标签，再重新生成 33 条资产。
+- topology zone header、lane-grid header、schedule axis、nested/tree 画布高度、Venn intersection、cycle spoke label 和 stack 副标签现在都通过测量留白或确定性候选位置布局。
+- legacy radar/org/timeline/swimlane/quadrant payload 现在进入 `layoutDiagnostics`；核心标签超预算会在生成阶段 fail-closed，不再把展示正确性寄托给 Mermaid 在落盘后的修复。
+- runtime Mermaid/Vega render-host mount 现在在浏览器挂载后检查可见文本/文本重叠与后绘制形状遮挡；selector preview panel 在标记 `ready` 前复用同一检查。
+- 宽图预览显示本地化横向滚动提示，当最小可读宽度超过宿主 viewport 时给用户明确反馈。
+
+聚焦证据：native renderer/diagnostic、preview、render-host、adapter registry 与 SVG safety 测试通过；gallery generation/check 仍为 33/33。全量回归与 Vault 热重载是下一道发布门禁。
