@@ -18,7 +18,7 @@
   "providerId": "DeepSeek",
   "model": "deepseek-v4-flash",
   "generatedAt": "2026-08-30T12:02:24.017Z",
-  "artifactSha256": "ee101a6a81360cd05bec209471798ff66491d758b7591d3628ea5f7ac2b3124a",
+  "artifactSha256": "b5ed4b332784544384926e67c2004211318571f328f736378946a01d48a37f0a",
   "svgSha256": "9436edc0b0c1715f64289fadc8fd281912ac5eebb3850a9fe6b0add95405571a",
   "pngSha256": "2087979fdbfe218a03d65894b33020fd994a4b295ef0c561fa92e4b3a9b41787",
   "visualSource": "operation-preview",

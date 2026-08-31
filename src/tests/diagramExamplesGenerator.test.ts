@@ -95,6 +95,8 @@ describe('diagram examples generator orchestration', () => {
         expect(writes.has('docs/diagram-examples/flowchart/input.md')).toBe(true);
         expect(writes.has('docs/diagram-examples/flowchart/input.zh-CN.md')).toBe(true);
         expect(writes.has('docs/diagram-examples/flowchart/artifact.md')).toBe(true);
+        expect(writes.has('docs/diagram-examples/flowchart/artifact.zh-CN.md')).toBe(true);
+        expect(writes.get('docs/diagram-examples/flowchart/artifact.zh-CN.md')).toContain('# 发布决策');
         expect(writes.has('docs/diagram-examples/flowchart/result.svg')).toBe(true);
         expect(writes.has('docs/diagram-examples/flowchart/result.png')).toBe(true);
         expect(deleted).toContain(plan.inputPath);

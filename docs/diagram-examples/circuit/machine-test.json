@@ -19,7 +19,7 @@
   "model": "deepseek-v4-flash",
   "generatedAt": "2026-08-29T09:29:36.444Z",
   "artifactSha256": "8607136c8120823ce42b3a2f9eacba75b146b771f4a4126ea2ceb27255e3c22f",
-  "svgSha256": "7f21f92529b0c65c398201fc3364474c95316fc3db533f9310b1d93436a46b58",
+  "svgSha256": "e0c4ec6a59b1ad7c99ef84ca87c7885cc888d8173466b5deadbab201223604c9",
   "pngSha256": "0308da7fe4ccb591286ecb08ffdcf16c21ff4b71154590257a46bb8412077bc1",
   "visualSource": "vault-companion",
   "cleanupCompleted": true,

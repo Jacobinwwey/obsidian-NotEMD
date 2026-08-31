@@ -65,6 +65,38 @@ function asText(value) {
   return asBuffer(value).toString('utf8');
 }
 
+function renderChineseArtifactMarkdown(content, plan) {
+  if (plan?.targetExtension !== '.md') return null;
+
+  const title = String(plan.titleZh || plan.title || plan.typeId || 'Diagram example').trim();
+  const previewNote = '> 使用 Notemd 的“预览图表”命令查看此图表。';
+  const source = asText(content).replace(/\r\n/g, '\n').trimEnd();
+  const lines = source.split('\n');
+  const headingIndex = lines.findIndex(line => /^#\s+/.test(line));
+  let previewNoteFound = false;
+
+  if (headingIndex >= 0) {
+    lines[headingIndex] = `# ${title}`;
+  } else {
+    lines.unshift(`# ${title}`, '', previewNote, '');
+    previewNoteFound = true;
+  }
+
+  const localizedLines = lines.map(line => {
+    if (line.trim() === '> Preview this chart using the "Preview diagram" command in Notemd.') {
+      previewNoteFound = true;
+      return previewNote;
+    }
+    return line;
+  });
+
+  if (headingIndex >= 0 && !previewNoteFound) {
+    localizedLines.splice(headingIndex + 1, 0, '', previewNote);
+  }
+
+  return `${localizedLines.join('\n').replace(/\n+$/, '')}\n`;
+}
+
 function sha256(value) {
   return crypto.createHash('sha256').update(asBuffer(value)).digest('hex');
 }
@@ -317,6 +349,10 @@ async function runSingleExample(plan, dependencies) {
     artifactPath = `${plan.directory}/artifact${plan.targetExtension}`;
     const artifactBytes = asBuffer(saved.artifactContent);
     await dependencies.writeOutputFile(artifactPath, artifactBytes);
+    const artifactChinese = renderChineseArtifactMarkdown(artifactBytes, plan);
+    if (artifactChinese !== null) {
+      await dependencies.writeOutputFile(`${plan.directory}/artifact.zh-CN.md`, artifactChinese);
+    }
     artifactSha256 = sha256(artifactBytes);
 
     let svgContent = null;
@@ -821,6 +857,7 @@ module.exports = {
   checkCommittedExamples,
   createProductionDependencies,
   parseWrapperSourceArtifact,
+  renderChineseArtifactMarkdown,
   runExampleBatch,
   runSingleExample,
   sha256
