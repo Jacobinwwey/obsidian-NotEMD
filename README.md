@@ -847,7 +847,7 @@ Quarterly chronicle rendered in the original [repo-saga](https://github.com/teee
 
 ![Notemd Development Chronicle](./docs/repo-saga/notemd-development-history.en.svg)
 
-_Last refreshed for release tag `1.9.7` on 2026-08-30. Latest commit date: 2026-08-30._
+_Last refreshed for release tag `1.9.7` on 2026-08-31. Latest commit date: 2026-08-31._
 <!-- repo-chronicle:end -->
 
 
