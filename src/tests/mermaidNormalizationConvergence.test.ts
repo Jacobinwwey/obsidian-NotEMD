@@ -1,6 +1,6 @@
 import mermaid from 'mermaid';
 import { normalizeMermaidDefinition, validateMermaidDefinition } from '../diagram/adapters/mermaid/validator';
-import { normalizeMermaidDiagram } from '../diagram/adapters/mermaid/normalize';
+import { normalizeMermaidDiagram, repairQuadrantPointLabels } from '../diagram/adapters/mermaid/normalize';
 import { renderMermaidArtifactSvg } from '../rendering/preview/mermaidPreview';
 
 jest.mock('mermaid');
@@ -47,6 +47,12 @@ describe('Mermaid normalization convergence', () => {
         expect(normalizeMermaidDiagram('future-beta\nA --> B').family).toBe('unknown');
         expect(normalizeMermaidDiagram('graphical-beta\nA --> B').family).toBe('unknown');
         expect(normalizeMermaidDiagram('piechart\nA --> B').family).toBe('unknown');
+    });
+
+    test('repairs provider-copied quadrant coordinate brackets', () => {
+        const source = 'quadrantChart\n    "Docs gallery[": [0.32, 0.68]';
+        expect(repairQuadrantPointLabels(source)).toContain('"Docs gallery": [0.32, 0.68]');
+        expect(normalizeMermaidDiagram(source).content).toContain('"Docs gallery": [0.32, 0.68]');
     });
 
     test('uses the same ER normalization for render validation and preview', async () => {

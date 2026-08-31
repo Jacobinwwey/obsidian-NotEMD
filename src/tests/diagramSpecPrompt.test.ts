@@ -82,6 +82,26 @@ describe('diagram spec prompt builder', () => {
         expect(prompt).toMatch(/REQUIRED diagram intent:\s*architecture/i);
     });
 
+    test('shows the exact canonical payload shape for bounded native types', () => {
+        const matrixPrompt = buildDiagramSpecPrompt({
+            requiredIntent: 'accessMatrix',
+            preferredRenderTarget: 'editable-html-svg'
+        });
+        const funnelPrompt = buildDiagramSpecPrompt({
+            requiredIntent: 'rankedFunnel',
+            preferredRenderTarget: 'editable-html-svg'
+        });
+        const treePrompt = buildDiagramSpecPrompt({
+            requiredIntent: 'tree',
+            preferredRenderTarget: 'editable-html-svg'
+        });
+
+        expect(matrixPrompt).toMatch(/Canonical payload shape[\s\S]*"kind":\s*"access-matrix"[\s\S]*"roles"[\s\S]*"components"[\s\S]*"cells"/i);
+        expect(matrixPrompt).toMatch(/cells.*row.*col.*value.*level/i);
+        expect(funnelPrompt).toMatch(/Canonical payload shape[\s\S]*"kind":\s*"ranked-segments"[\s\S]*"segments"/i);
+        expect(treePrompt).toMatch(/Canonical payload shape[\s\S]*"kind":\s*"tree"[\s\S]*"nodes"[\s\S]*"parentId"/i);
+    });
+
     test('exposes numeric density budgets to the generation prompt without exposing coordinates', () => {
         const prompt = buildDiagramSpecPrompt({ preferredIntent: 'architecture' });
         expect(prompt).toContain('Deterministic density budget');

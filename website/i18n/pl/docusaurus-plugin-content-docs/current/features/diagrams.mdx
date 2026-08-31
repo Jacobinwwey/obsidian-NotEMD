@@ -59,6 +59,14 @@ W prezentacji wybierz opcję **History**, aby otworzyć okno z historią Vault b
 
 SVG i PDF są generowane na podstawie geometrii wektorowej; PDF wykorzystuje tę samą strukturę SVG oraz metryki tekstu, zamiast rasterizować całą prezentację. Parametr PPI w ustawieniach Notemd kontroluje jedynie rasteryzację plików PNG (od 72 do 600 PPI, domyślnie 300).
 
+## Czytelne podglądy gęstych diagramów
+
+Edytowalne diagramy lane-grid HTML/SVG mierzą i zawijają podsumowanie przed umieszczeniem tytułu i nagłówka lane. Nagłówek jest przenoszony pod chroniony obszar podsumowania, a komórki są rysowane przed łącznikami i etykietami krawędzi. Krawędzie między lane korzystają z ortogonalnych tras siatki uwzględniających kolizje oraz rezerwują miejsce na etykiety lane i zajęte komórki, więc długie opisy nie zasłaniają tekstu i nie wymagają przesuwania w poziomie.
+
+Diagramy kwadrantowe Mermaid przechodzą normalizację właściwą dla family. Dla `quadrantChart` pomijane są tylko naprawy cudzysłowów i kształtów przeznaczone dla flowchart, a zamierzone nawiasy kwadratowe w tytułach, osiach i nazwach kwadrantów pozostają widoczne. Otwierający nawias skopiowany przez providera jest usuwany tylko wtedy, gdy jest niedopasowanym ostatnim znakiem etykiety punktu.
+
+Repozytorium zawiera zestaw nauki i dowodów z prawdziwego Vault dla każdego wykonywalnego typu diagramu. Zobacz [`docs/diagram-examples/`](https://github.com/Jacobinwwey/obsidian-NotEMD/tree/main/docs/diagram-examples), aby znaleźć dwujęzyczne notatki wejściowe, wygenerowane wyniki SVG/PNG i manifest statusu czytelny maszynowo. Wpisy `passed` oznaczają uruchomienie przez załadowany plugin bundle, a nie statyczny screenshot fixture.
+
 ## Prezentacje Drawnix z wpleconymi obrazami Mermaid
 
 Gdy plik Drawnix zawiera obrazy Mermaid, Notemd oczyszcza wygenerowany plik SVG i przechowuje oryginalny kod Mermaid razem z nim w metadanych pliku `.drawnix`. Dzięki temu prezentacja może pokazywać obraz Mermaid wewnątrz mapy wiedzy Drawnix bez konieczności uruchamiania środowiska Drawnix lub Plait. Obrazy Mermaid, które są bezpiecznie wplecione, nie tworzą oddzielnego katalogu `.assets`; zewnętrzne pliki binarne lub obrazy nierozwiązane mają towarzyszący im plik, dzięki czemu żadne dane nie giną.

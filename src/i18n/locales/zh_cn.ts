@@ -138,7 +138,6 @@ export const STRINGS_ZH_CN: DeepPartial<NotemdEnglishStrings> = {
                 diagramTypePreviewLoading: '正在渲染所选类型…',
                 diagramTypePreviewUnavailable: '此类型暂时没有可渲染的预览。',
                 diagramTypePreviewFailed: '所选预览渲染失败。',
-                diagramTypePreviewOverflowHint: '预览较宽：水平滚动以检查完整标签。',
                 diagramExampleFamilyKnowledge: '知识',
                 diagramExampleFamilyBehavior: '行为',
                 diagramExampleFamilyStructure: '结构',

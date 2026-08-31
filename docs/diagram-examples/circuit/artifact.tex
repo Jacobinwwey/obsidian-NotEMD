@@ -1,0 +1,23 @@
+\documentclass[border=8pt]{standalone}
+\usepackage{circuitikz}
+\begin{document}
+\begin{circuitikz}[american voltages]
+\draw
+  (3,5) node[vcc]{$V_{DD}$}
+  to [short] (3,4.4)
+  node[pmos, anchor=S] (MP) {$M_P$}
+  (MP.D) to [short] (3,2.75)
+  to [short] (3,2.6)
+  node[nmos, anchor=D] (MN) {$M_N$}
+  (MN.S) to [short] (3,0.8)
+  node[ground]{};
+\draw
+  (MP.G) to [short] (1.5,3.5)
+  (MN.G) to [short] (1.5,2.0)
+  (1.5,3.5) to [short] (1.5,2.0)
+  to [short, -o] (0.8,2.75)
+  node[left]{$v_{in}$};
+\draw
+  (3,2.75) to [short, *-o] (5,2.75) node[right]{$v_{out}$};
+\end{circuitikz}
+\end{document}

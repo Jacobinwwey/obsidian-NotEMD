@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "typeId": "architecture",
+  "fixtureId": "architecture-platform",
+  "title": "Platform architecture",
+  "requested": {
+    "typeId": "architecture",
+    "renderTarget": "editable-html-svg",
+    "compatibilityMode": "best-fit",
+    "targetLanguage": "en"
+  },
+  "status": "passed",
+  "sourceNotePath": "notemd-real-diagram-examples/run-1787995422796-fc969a/architecture.md",
+  "outputPath": "notemd-real-diagram-examples/run-1787995422796-fc969a/architecture_diagram.html.md",
+  "artifactPath": "docs/diagram-examples/architecture/artifact.html",
+  "svgPath": "docs/diagram-examples/architecture/result.svg",
+  "pngPath": "docs/diagram-examples/architecture/result.png",
+  "providerId": "DeepSeek",
+  "model": "deepseek-v4-flash",
+  "generatedAt": "2026-08-29T09:30:28.485Z",
+  "artifactSha256": "a1f03b93c4310459defa5e5a43deaf8df9e8ae844e878ec9e5c1ea143288c5a7",
+  "svgSha256": "330f7d213ece4a09925976ae626e826ca74420a6b6ca19a76e205f23f04b929d",
+  "pngSha256": "d3abf507cb104a350c122e8c0059b3e626e2b7a16dbed7f6f138a57f83d4c8b8",
+  "visualSource": "vault-companion",
+  "cleanupCompleted": true,
+  "diagnostic": null
+}

@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "typeId": "bar-chart",
+  "fixtureId": "bar-chart-adoption",
+  "title": "Feature adoption",
+  "requested": {
+    "typeId": "bar-chart",
+    "renderTarget": "vega-lite",
+    "compatibilityMode": "best-fit",
+    "targetLanguage": "en"
+  },
+  "status": "passed",
+  "sourceNotePath": "notemd-real-diagram-examples/run-1787995422796-fc969a/bar-chart.md",
+  "outputPath": "notemd-real-diagram-examples/run-1787995422796-fc969a/bar-chart_diagram.md",
+  "artifactPath": "docs/diagram-examples/bar-chart/artifact.md",
+  "svgPath": "docs/diagram-examples/bar-chart/result.svg",
+  "pngPath": "docs/diagram-examples/bar-chart/result.png",
+  "providerId": "DeepSeek",
+  "model": "deepseek-v4-flash",
+  "generatedAt": "2026-08-29T09:29:46.944Z",
+  "artifactSha256": "c25fd48ab9c8e59e7b9c5ccbc39eee01d7f3759b20ee692fcbc7e39c91427615",
+  "svgSha256": "5af18adc07836d6c499d4af594f3b0a32592e44aa2a7f136aad5c357ab5035b7",
+  "pngSha256": "f1fd105530bf2a1afd83901681801cc79350b510d7c732c30cd113eb8d1c2749",
+  "visualSource": "operation-preview",
+  "cleanupCompleted": true,
+  "diagnostic": null
+}

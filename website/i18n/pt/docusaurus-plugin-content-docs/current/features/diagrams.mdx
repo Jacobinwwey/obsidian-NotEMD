@@ -59,6 +59,14 @@ Escolha **Histórico** na visualização preliminar para abrir o painel de hist�
 
 SVG e PDF são gerados a partir de geometria vetorial; o PDF utiliza a mesma disposição SVG e métricas de texto em vez de rasterizar toda a visualização preliminar. A resolução PPI da exportação de imagem nas configurações do Notemd controla apenas a rasterização PNG (72–600 PPI, 300 por padrão).
 
+## Pré-visualizações legíveis para diagramas densos
+
+Os diagramas lane-grid HTML/SVG editáveis medem e quebram o resumo antes de posicionar o título e o cabeçalho da lane. O cabeçalho é movido para baixo da região protegida do resumo, e as células são desenhadas antes dos conectores e rótulos de aresta. As arestas entre lanes usam rotas ortogonais de grade conscientes de colisões e reservam as áreas dos rótulos de lane e das células ocupadas; descrições longas não escondem texto nem exigem deslocamento horizontal.
+
+Os diagramas de quadrantes do Mermaid recebem normalização específica da family. Em `quadrantChart`, são ignoradas apenas as correções de aspas e formas exclusivas de flowchart; colchetes intencionais em títulos, eixos e nomes de quadrantes continuam visíveis. Um colchete inicial copiado pelo provider só é removido quando é o caractere final sem correspondência de um rótulo de ponto.
+
+O repositório mantém um conjunto de aprendizagem e evidências de um Vault real para cada tipo de diagrama executável. Consulte [`docs/diagram-examples/`](https://github.com/Jacobinwwey/obsidian-NotEMD/tree/main/docs/diagram-examples) para notas de entrada bilíngues, resultados SVG/PNG gerados e o manifest de estado legível por máquina. Entradas `passed` representam uma execução pelo plugin bundle carregado, não um screenshot fixture estático.
+
 ## Visualizações Drawnix com Mermaid embutido
 
 Quando um artefato Drawnix contém visualizações Mermaid, o Notemd sanitiza o SVG renderizado e mantém a fonte Mermaid ao lado dela nos metadados do arquivo `.drawnix`. Assim, a visualização preliminar pode exibir a imagem Mermaid dentro do mapa de conhecimento Drawnix sem necessidade do ambiente runtime Drawnix ou Plait. Visualizações Mermaid isoladas que são incorporadas com segurança não criam um diretório separado `.assets`; mídias binárias externas ou visualizações não resolvidas mantêm um arquivo complementar para evitar perda de dados.

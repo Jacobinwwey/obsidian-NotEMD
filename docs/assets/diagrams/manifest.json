@@ -59,7 +59,7 @@
       "previewTarget": "editable-html-svg",
       "svgPath": "./class-domain.svg",
       "pngPath": "./class-domain.png",
-      "svgSha256": "0e216d49fa95d150d64e52c17baff922d77f0d8f66a1158b13ba1a9500957130"
+      "svgSha256": "9276bbc6203453c03c98f65204c8b01c84d632f42e345db00a36114bd280acf0"
     },
     {
       "typeId": "entity-relationship",
@@ -69,7 +69,7 @@
       "previewTarget": "editable-html-svg",
       "svgPath": "./entity-relationship-schema.svg",
       "pngPath": "./entity-relationship-schema.png",
-      "svgSha256": "2b3536b711b5d023ffa9e0d0f6aa45baec1c6349b3ba48565ccd04b45ce2e87f"
+      "svgSha256": "a87c2a2f5a39bc22fcd91b5be13aa4040ef8e1399eb43d9756e6efe5b079bfbe"
     },
     {
       "typeId": "canvas-map",
@@ -209,7 +209,7 @@
       "previewTarget": "editable-html-svg",
       "svgPath": "./integration-topology-platform.svg",
       "pngPath": "./integration-topology-platform.png",
-      "svgSha256": "d2b5915ec7431a9c25ef4950765a3cb351abb87956ac3e70dd91a7ed0db31c0d"
+      "svgSha256": "0a3e89f42dc33551c4d72887611ba33fd677fad1f462126e626a784e6a9b4650"
     },
     {
       "typeId": "data-flow",
@@ -219,7 +219,7 @@
       "previewTarget": "editable-html-svg",
       "svgPath": "./data-flow-platform.svg",
       "pngPath": "./data-flow-platform.png",
-      "svgSha256": "1938f85191229bd1d2b4f431fd1cdba3b3e6513b0dc7e4aacf615bd53ba268f5"
+      "svgSha256": "15a05df246e039a74490c37d02a0d1bbf6d82fc620acac2b15fdaa11361fceb1"
     },
     {
       "typeId": "access-matrix",
@@ -289,7 +289,7 @@
       "previewTarget": "editable-html-svg",
       "svgPath": "./nested-scope.svg",
       "pngPath": "./nested-scope.png",
-      "svgSha256": "92a25836ade8a6096ffafb0775078b5e3ac0af055973ca72b627d5a98f5f9535"
+      "svgSha256": "cf22cbccd0ab394fd17f0e8da3968a82fa9e02364af48cb0c96daea426197571"
     },
     {
       "typeId": "tree",
@@ -309,7 +309,7 @@
       "previewTarget": "editable-html-svg",
       "svgPath": "./process-release.svg",
       "pngPath": "./process-release.png",
-      "svgSha256": "a42728786bd8dd0913fbc8f26d4ad6312e37fb93332ddebcd7930b4572254f57"
+      "svgSha256": "3dfb3e812327c70c5757221a67d3135a7dbd2a09b1e2451f641e84cb60363719"
     },
     {
       "typeId": "medallion",

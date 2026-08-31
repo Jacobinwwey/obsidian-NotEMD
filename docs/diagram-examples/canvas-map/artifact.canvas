@@ -1,0 +1,51 @@
+{
+  "nodes": [
+    {
+      "id": "authoring",
+      "type": "text",
+      "text": "Authoring",
+      "x": 0,
+      "y": 0,
+      "width": 220,
+      "height": 90
+    },
+    {
+      "id": "rendering",
+      "type": "text",
+      "text": "Rendering",
+      "x": 0,
+      "y": 170,
+      "width": 220,
+      "height": 90
+    },
+    {
+      "id": "delivery",
+      "type": "text",
+      "text": "Delivery",
+      "x": 0,
+      "y": 340,
+      "width": 220,
+      "height": 90
+    }
+  ],
+  "edges": [
+    {
+      "id": "edge-1",
+      "fromNode": "authoring",
+      "fromSide": "right",
+      "toNode": "rendering",
+      "toSide": "left",
+      "toEnd": "arrow",
+      "label": "authoring -> rendering"
+    },
+    {
+      "id": "edge-2",
+      "fromNode": "rendering",
+      "fromSide": "right",
+      "toNode": "delivery",
+      "toSide": "left",
+      "toEnd": "arrow",
+      "label": "rendering -> delivery"
+    }
+  ]
+}

@@ -54,6 +54,7 @@ describe('diagram gallery generator', () => {
 
         expect(entrySource).toContain('getExecutableDiagramExamples');
         expect(entrySource).toContain('renderExecutableDiagramExample');
+        expect(entrySource).toContain('collectSvgPresentationDiagnostics');
         expect(entrySource).not.toMatch(/const\s+fixtures\s*=/i);
         expect(packageJson.scripts['diagram:gallery']).toBe('node scripts/generate-diagram-gallery.js');
         expect(packageJson.scripts['diagram:gallery:check']).toBe('node scripts/generate-diagram-gallery.js --check');

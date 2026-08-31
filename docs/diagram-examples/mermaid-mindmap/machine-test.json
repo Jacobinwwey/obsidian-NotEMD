@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "typeId": "mermaid-mindmap",
+  "fixtureId": "mermaid-mindmap-basics",
+  "title": "Research themes",
+  "requested": {
+    "typeId": "mermaid-mindmap",
+    "renderTarget": "mermaid",
+    "compatibilityMode": "best-fit",
+    "targetLanguage": "en"
+  },
+  "status": "passed",
+  "sourceNotePath": "notemd-real-diagram-examples/run-1788091203374-babaf1/mermaid-mindmap.md",
+  "outputPath": "notemd-real-diagram-examples/run-1788091203374-babaf1/mermaid-mindmap_summ.md",
+  "artifactPath": "docs/diagram-examples/mermaid-mindmap/artifact.md",
+  "svgPath": "docs/diagram-examples/mermaid-mindmap/result.svg",
+  "pngPath": "docs/diagram-examples/mermaid-mindmap/result.png",
+  "providerId": "DeepSeek",
+  "model": "deepseek-v4-flash",
+  "generatedAt": "2026-08-30T12:00:07.067Z",
+  "artifactSha256": "91f9f55ba5bc70072e2ed697eb35bb3f131446df43bc7d6abcb206c85b1a901b",
+  "svgSha256": "379945c08606a730caa27a14df6a8e7334827d7ca2a905c9c89e4fe5d8734d40",
+  "pngSha256": "c60fc349f42b68a28fefb8f78dac002ed81f090551239accb285db9b0fd9e8dc",
+  "visualSource": "operation-preview",
+  "cleanupCompleted": true,
+  "diagnostic": null
+}

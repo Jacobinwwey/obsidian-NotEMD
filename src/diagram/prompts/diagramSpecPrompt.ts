@@ -14,6 +14,27 @@ export interface DiagramSpecPromptOptions {
     preferredVariant?: string;
 }
 
+function buildCanonicalPayloadShapeSection(
+    payloadKind: ReturnType<typeof getDiagramPromptProfile>['payloadKind']
+): string {
+    switch (payloadKind) {
+        case 'topology':
+            return `Canonical payload shape (required): { "nodes": [], "edges": [], "payload": { "kind": "topology", "zones": [{ "id": "zone", "label": "..." }], "nodes": [{ "id": "node", "label": "...", "zoneId": "zone" }], "edges": [{ "from": "node", "to": "node" }] } }. Keep topology facts inside payload; do not flatten them into generic nodes/edges.`;
+        case 'lane-grid':
+            return `Canonical payload shape (required): { "nodes": [], "edges": [], "payload": { "kind": "lane-grid", "lanes": [{ "id": "owner", "label": "..." }], "steps": [{ "id": "stage", "label": "..." }], "cells": [{ "laneId": "owner", "stepId": "stage", "title": "...", "sub": "..." }], "edges": [{ "from": { "laneId": "owner", "stepId": "stage" }, "to": { "laneId": "owner", "stepId": "stage" } }] } }. Every declared cell needs laneId, stepId, and title.`;
+        case 'access-matrix':
+            return `Canonical payload shape (required): { "nodes": [], "edges": [], "payload": { "kind": "access-matrix", "roles": [{ "id": "role", "label": "..." }], "components": [{ "id": "component", "label": "..." }], "cells": [{ "row": 0, "col": 0, "value": "...", "level": "read" }] } }. Keep row/col zero-based; every role/component intersection needs value and one level from full, rw, read, none.`;
+        case 'schedule':
+            return `Canonical payload shape (required): { "nodes": [], "edges": [], "payload": { "kind": "schedule", "phases": [{ "id": "phase", "label": "..." }], "tasks": [{ "id": "task", "label": "...", "phaseId": "phase", "start": "W1", "end": "W2" }], "milestones": [{ "id": "gate", "label": "...", "date": "W2" }] } }. Every task must include source-backed start and end values.`;
+        case 'ranked-segments':
+            return `Canonical payload shape (required): { "nodes": [], "edges": [], "payload": { "kind": "ranked-segments", "orientation": "funnel", "segments": [{ "id": "stage", "label": "...", "sub": "...", "focal": true }] } }. Keep four to six ordered segments and do not replace them with a different payload kind.`;
+        case 'tree':
+            return `Canonical payload shape (required): { "nodes": [], "edges": [], "payload": { "kind": "tree", "nodes": [{ "id": "root", "label": "..." }, { "id": "child", "label": "...", "parentId": "root" }] } }. Use exactly one root; every non-root node must carry a valid parentId.`;
+        default:
+            return '';
+    }
+}
+
 export function buildDiagramSpecPrompt(options: DiagramSpecPromptOptions = {}): string {
     const supportedChartTypes = SUPPORTED_VEGA_LITE_CHART_TYPES.join(', ');
     const isCircuitikzRequest = options.preferredIntent === 'circuit'
@@ -48,6 +69,9 @@ export function buildDiagramSpecPrompt(options: DiagramSpecPromptOptions = {}): 
 - Semantic rules: ${promptProfile.semanticRules.join(' ')}
 - Target rules: ${promptProfile.targetRules.join(' ')}
 - Invalid outputs: ${promptProfile.invalidExamples.join(' ')}`
+        : '';
+    const canonicalPayloadShapeSection = promptProfile
+        ? buildCanonicalPayloadShapeSection(promptProfile.payloadKind)
         : '';
     const preferredChartTypeLine = options.preferredIntent === 'dataChart' && options.preferredChartType
         ? `Preferred chart template: ${options.preferredChartType}. Use it when the extracted data supports it.`
@@ -215,6 +239,7 @@ ${supportedIntentsSection}
 ${preferredIntentLine}
 ${preferredChartTypeLine}
 ${promptProfileSection}
+${canonicalPayloadShapeSection}
 ${circuitikzTargetLine}
 ${drawnixMindMapTargetLine}
 Mermaid candidate intent contracts:

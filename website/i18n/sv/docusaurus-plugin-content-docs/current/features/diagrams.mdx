@@ -59,6 +59,14 @@ Välj **History** i previsualiseringen för att öppna Vault-historiekorgen utan
 
 SVG och PDF skapas från vektorgeometri; PDF använder samma SVG-läge och textmätningar istället för att rasterisera hela previsualiseringen. Bildexportens PPI i Notemds inställningar styr endast PNG-rasteriseringen (72–600 PPI, 300 som standard).
 
+## Läsbara förhandsvisningar för täta diagram
+
+Redigerbara HTML/SVG lane-grid-diagram mäter och radbryter sammanfattningen innan titel och lane-rubrik placeras. Rubriken flyttas under det skyddade sammanfattningsområdet och celler ritas före anslutningar och kantetiketter. Kanter mellan lanes använder kollisionsmedvetna ortogonala rutnätsrutter som reserverar lane-etiketter och upptagna celler, så långa beskrivningar döljer inte text och kräver inte horisontell panorering.
+
+Mermaid-kvadrantdiagram får en familjespecifik normalisering. För `quadrantChart` hoppas endast flowchart-specifika citat- och formreparationer över; avsiktliga hakparenteser i titlar, axlar och kvadrantnamn finns kvar. En inledande hakparentes som providern kopierat tas bara bort när den är det omatchade sista tecknet i en punktetikett.
+
+Arkivet innehåller en real-Vault-baserad uppsättning för lärande och bevis för varje körbar diagramtyp. Se [`docs/diagram-examples/`](https://github.com/Jacobinwwey/obsidian-NotEMD/tree/main/docs/diagram-examples) för tvåspråkiga indataanteckningar, genererade SVG/PNG-resultat och ett maskinläsbart statusmanifest. `passed`-poster är körningar genom det laddade plugin bundle, inte statiska screenshot-fixtures.
+
 ## Drawnix-previsualiseringar med inbyggda Mermaid
 
 När en Drawnix-artefakt innehåller Mermaid-visualiseringar saniterar Notemd den renderade SVG:n och behåller Mermaid-källkoden tillsammans med den i metadata-filen `.drawnix`. Previsualiseringen kan därför visa Mermaid-bilden inuti Drawnix-kunskapskartan utan att kräva Drawnix eller Plait-runtimen. Endast Mermaid-visualiseringar som säkert är inbäddade skapar inte en separat `.assets`-mapp; extern binär media eller olösta visualiseringar behåller en tillhörande fil så att inga data tappas bort.

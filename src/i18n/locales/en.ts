@@ -198,7 +198,6 @@ export const STRINGS_EN = {
                 diagramTypePreviewLoading: 'Rendering the selected type…',
                 diagramTypePreviewUnavailable: 'This type has no renderable preview yet.',
                 diagramTypePreviewFailed: 'The selected preview could not be rendered.',
-                diagramTypePreviewOverflowHint: 'Wider preview: scroll horizontally to inspect labels.',
                 diagramExampleFamilyKnowledge: 'Knowledge',
                 diagramExampleFamilyBehavior: 'Behavior',
                 diagramExampleFamilyStructure: 'Structure',

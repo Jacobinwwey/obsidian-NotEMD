@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="920" height="640" viewBox="0 0 920 640" role="img" aria-labelledby="notemd-reference-title notemd-reference-desc" data-notemd-renderer="notemd-reference-layouts@1.1.0" data-layout-safety="notemd-layout-safety@1.0.0">
+        <title id="notemd-reference-title">Scope cascade</title>
+        <desc id="notemd-reference-desc">Nested scope levels from organization to artifact, with workspace and project as intermediate containers.</desc>
+        <style>
+        .ref-canvas { fill: #f8fafc; }
+        .ref-title { fill: #172033; font: 700 26px "Segoe UI", Arial, sans-serif; }
+        .ref-summary { fill: #475569; font: 13px "Segoe UI", Arial, sans-serif; }
+        .ref-zone { fill: #ffffff; stroke: #cbd5e1; stroke-width: 1; }
+        .ref-zone-label { fill: #475569; font: 700 10px "Segoe UI", Arial, sans-serif; letter-spacing: 1.5px; }
+        .ref-node { fill: #ffffff; stroke: #cbd5e1; stroke-width: 1.2; }
+        .ref-node.focal { fill: #fff7ed; stroke: #c2410c; stroke-width: 1.8; }
+        .ref-node.external { stroke-dasharray: 5 4; }
+        .ref-node-label { fill: #172033; font: 600 13px "Segoe UI", Arial, sans-serif; }
+        .ref-header-label { fill: #ffffff; font: 600 11px "Segoe UI", Arial, sans-serif; }
+        .ref-node-sub { fill: #475569; font: 10px Consolas, monospace; }
+        .ref-hub-label { fill: #f8fafc; font: 600 13px "Segoe UI", Arial, sans-serif; }
+        .ref-hub-sub { fill: #e2e8f0; font: 10px Consolas, monospace; }
+        .ref-edge { fill: none; stroke: #475569; stroke-width: 1.5; }
+        .ref-edge.accent { stroke: #c2410c; stroke-width: 2; marker-end: url(#notemd-reference-arrow-accent); }
+        .ref-edge.link { stroke: #1d4ed8; marker-end: url(#notemd-reference-arrow-link); }
+        .ref-edge.trigger { stroke-dasharray: 5 4; }
+        .ref-edge.dashed { stroke-dasharray: 5 4; }
+        .ref-edge-label { fill: #475569; font: 10px Consolas, monospace; paint-order: stroke; stroke: #f8fafc; stroke-width: 5px; }
+        .ref-axis { stroke: #cbd5e1; stroke-width: 1; }
+        .ref-axis-label { fill: #475569; font: 10px Consolas, monospace; }
+        .ref-chip { fill: #e2e8f0; stroke: #cbd5e1; stroke-width: .7; }
+        .ref-chip-text { fill: #172033; font: 700 8px Consolas, monospace; }
+        .ref-focal-fill { fill: #fff7ed; stroke: #c2410c; stroke-width: 1.8; }
+        .ref-caption { fill: #475569; font: 10px Consolas, monospace; letter-spacing: .8px; }
+    </style>
+        <defs>
+        <marker id="notemd-reference-arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0 L8 4 L0 8 Z" fill="#475569" /></marker>
+        <marker id="notemd-reference-arrow-accent" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0 L8 4 L0 8 Z" fill="#c2410c" /></marker>
+        <marker id="notemd-reference-arrow-link" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0 L8 4 L0 8 Z" fill="#1d4ed8" /></marker>
+    </defs>
+        <rect class="ref-canvas" x="0" y="0" width="920" height="640" />
+        <text x="40" y="42" text-anchor="start" class="ref-title" data-layout-safety="notemd-layout-safety@1.0.0"><tspan x="40" dy="0">Scope cascade</tspan></text>
+        <text x="40" y="66" text-anchor="start" class="ref-summary" data-layout-safety="notemd-layout-safety@1.0.0"><tspan x="40" dy="0">Nested scope levels from organization to artifact, with workspace and project as intermediate containers.</tspan></text>
+        <rect data-nested-scope-surface="org" class="ref-node" x="50" y="98" width="820" height="490" rx="8" fill-opacity="0.09" /><rect data-nested-scope-surface="workspace" class="ref-node" x="106" y="154" width="708" height="378" rx="8" fill-opacity="0.078" /><rect data-nested-scope-surface="project" class="ref-focal-fill" x="162" y="210" width="596" height="266" rx="8" fill-opacity="0.066" /><rect data-nested-scope-surface="artifact" class="ref-node" x="218" y="266" width="484" height="154" rx="8" fill-opacity="0.05399999999999999" /><rect data-nested-tag-surface="org" x="64" y="105" width="150" height="22" fill="#f8fafc" /><rect data-nested-tag-surface="workspace" x="120" y="161" width="150" height="22" fill="#f8fafc" /><rect data-nested-tag-surface="project" x="176" y="217" width="150" height="22" fill="#f8fafc" /><rect data-nested-tag-surface="artifact" x="232" y="273" width="150" height="22" fill="#f8fafc" /><g id="reference-nested-org"><text x="72" y="119" text-anchor="start" class="ref-caption" data-layout-safety="notemd-layout-safety@1.0.0"><tspan x="72" dy="0">ORGANIZATION</tspan></text><text x="72" y="141" text-anchor="start" class="ref-node-sub" data-layout-safety="notemd-layout-safety@1.0.0"><tspan x="72" dy="0">global policy</tspan></text></g><g id="reference-nested-workspace"><text x="128" y="175" text-anchor="start" class="ref-caption" data-layout-safety="notemd-layout-safety@1.0.0"><tspan x="128" dy="0">WORKSPACE</tspan></text><text x="128" y="197" text-anchor="start" class="ref-node-sub" data-layout-safety="notemd-layout-safety@1.0.0"><tspan x="128" dy="0">team defaults</tspan></text></g><g id="reference-nested-project"><text x="184" y="231" text-anchor="start" class="ref-caption" data-layout-safety="notemd-layout-safety@1.0.0"><tspan x="184" dy="0">PROJECT</tspan></text><text x="184" y="253" text-anchor="start" class="ref-node-sub" data-layout-safety="notemd-layout-safety@1.0.0"><tspan x="184" dy="0">local contract</tspan></text></g><g id="reference-nested-artifact"><text x="240" y="287" text-anchor="start" class="ref-caption" data-layout-safety="notemd-layout-safety@1.0.0"><tspan x="240" dy="0">ARTIFACT</tspan></text><text x="240" y="309" text-anchor="start" class="ref-node-sub" data-layout-safety="notemd-layout-safety@1.0.0"><tspan x="240" dy="0">single output</tspan></text></g>
+    </svg>

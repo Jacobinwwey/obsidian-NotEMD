@@ -192,6 +192,10 @@ async function assertSvgGeometry(page, fixtureId) {
         .map(second => `${first.content.trim()}:${second.content.trim()}`));
       const runtimeTextAfterShape = runtimeTexts.flatMap(textItem => Array.from(svg.querySelectorAll('rect,circle,ellipse,polygon,image'))
         .map((shape, shapeIndex) => ({ shape, shapeIndex, rect: shape.getBoundingClientRect() }))
+        .filter(shapeItem => !shapeItem.shape.classList.contains('ref-canvas')
+          && !shapeItem.shape.classList.contains('notemd-canvas-surface')
+          && !shapeItem.shape.hasAttribute('data-nested-scope-surface')
+          && !shapeItem.shape.hasAttribute('data-nested-tag-surface'))
         .filter(shapeItem => shapeItem.rect.width > 2 && shapeItem.rect.height > 2)
         .filter(shapeItem => shapeItem.shape.compareDocumentPosition(textItem.text) & Node.DOCUMENT_POSITION_PRECEDING)
         .filter(shapeItem => intersects(
@@ -260,7 +264,10 @@ async function assertSvgGeometry(page, fixtureId) {
         const textBox = safeBox(text);
         if (!textBox) return [];
         return Array.from(svg.querySelectorAll('rect,circle,ellipse,polygon'))
-          .filter(shape => !shape.classList.contains('ref-canvas'))
+          .filter(shape => !shape.classList.contains('ref-canvas')
+            && !shape.classList.contains('notemd-canvas-surface')
+            && !shape.hasAttribute('data-nested-scope-surface')
+            && !shape.hasAttribute('data-nested-tag-surface'))
           .map(shape => ({ shape, box: safeBox(shape) }))
           .filter(candidate => candidate.box && intersects(textBox, candidate.box))
           .map(candidate => `${(text.textContent || 'text').trim()}:${candidate.shape.tagName.toLowerCase()}`);
@@ -302,7 +309,7 @@ async function assertSvgGeometry(page, fixtureId) {
     }
     return;
   }
-  if (report.missing || report.textOutOfBounds.length || report.nodeTextOutOfBounds.length
+    if (report.missing || report.textOutOfBounds.length || report.nodeTextOutOfBounds.length
     || report.nodeOverlaps.length || report.edgeLabelNodeOverlaps.length || report.coreTruncations.length
     || report.contrastFailures.length || report.rootTextShapeOverlaps.length || report.rootTextTextOverlaps.length
     || report.nativeTextTextOverlaps.length) {

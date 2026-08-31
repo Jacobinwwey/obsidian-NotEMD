@@ -59,6 +59,14 @@ Alegeți **Istoricul** în previsualizare pentru a deschide fereastra de istoric
 
 SVG și PDF sunt generate din geometrie vectorială; PDF folosește aceeași structură SVG și măsurători de text, în loc de a rasteriza întreaga previsualizare. Parametrul PPI pentru exportarea imagini din setările Notemd controlează doar rasterizarea PNG (72-600 PPI, 300 ca valoare implicită).
 
+## Previzualizări lizibile pentru diagrame dense
+
+Diagramele lane-grid HTML/SVG editabile măsoară și împart rezumatul pe rânduri înainte de a plasa titlul și antetul lane. Antetul este mutat sub regiunea protejată a rezumatului, iar celulele sunt desenate înaintea conectorilor și etichetelor muchiilor. Muchiile dintre lane folosesc trasee ortogonale pe grilă, conștiente de coliziuni, care rezervă etichetele lane și celulele ocupate; descrierile lungi nu ascund textul și nu necesită deplasare orizontală.
+
+Diagramele cadranelor Mermaid primesc normalizare specifică family. Pentru `quadrantChart` sunt omise doar reparațiile de ghilimele și forme dedicate flowchart, iar parantezele pătrate intenționate din titluri, axe și numele cadranelor rămân vizibile. O paranteză de deschidere copiată de provider este eliminată doar când este ultimul caracter nepotrivit al unei etichete de punct.
+
+Repository-ul păstrează un set de învățare și dovezi dintr-un Vault real pentru fiecare tip de diagramă executabil. Vezi [`docs/diagram-examples/`](https://github.com/Jacobinwwey/obsidian-NotEMD/tree/main/docs/diagram-examples) pentru note de intrare bilingve, rezultate SVG/PNG generate și manifestul de stare lizibil automat. Intrările `passed` sunt rulări prin plugin bundle încărcat, nu screenshot fixtures statice.
+
 ## Previsualizări Drawnix cu vizuale Mermaid integrate
 
 Când un fișier Drawnix conține vizuale Mermaid, Notemd sanitizează SVG-ul renderizat și păstrează sursa Mermaid alături de ea în metadatele `.drawnix`. Astfel, previsualizarea poate afișa imaginea Mermaid în cadrul hărții Drawnix fără a necesita runtime-ul Drawnix sau Plait. Vizualele doar Mermaid care sunt integrate în mod sigur nu creează un directoriu separat `.assets`; media binară externă sau vizualele nerezolvate păstrează un fișier complementar, astfel încât nu se pierd date.

@@ -29,6 +29,7 @@
 - [circuitikz UI、导出与文档同步方案](./maintainer/circuitikz-ui-export-and-docs-sync-2026-07-10.zh-CN.md)
 - [章节拆分 + TOC 提取](./chapter-split-toc.zh-CN.md)
 - [发布流程](./maintainer/release-workflow.zh-CN.md)
+- [1.9.7 发布说明](./releases/1.9.7.zh-CN.md)
 - [1.9.6 发布说明](./releases/1.9.6.zh-CN.md)
 - [1.9.5 发布说明](./releases/1.9.5.zh-CN.md)
 - [1.8.2 发布说明](./releases/1.8.2.zh-CN.md)

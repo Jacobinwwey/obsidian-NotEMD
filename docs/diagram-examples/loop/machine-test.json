@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "typeId": "loop",
+  "fixtureId": "loop-operating-model",
+  "title": "Operating loop",
+  "requested": {
+    "typeId": "loop",
+    "renderTarget": "editable-html-svg",
+    "compatibilityMode": "best-fit",
+    "targetLanguage": "en"
+  },
+  "status": "passed",
+  "sourceNotePath": "notemd-real-diagram-examples/run-1787995422796-fc969a/loop.md",
+  "outputPath": "notemd-real-diagram-examples/run-1787995422796-fc969a/loop_diagram.html.md",
+  "artifactPath": "docs/diagram-examples/loop/artifact.html",
+  "svgPath": "docs/diagram-examples/loop/result.svg",
+  "pngPath": "docs/diagram-examples/loop/result.png",
+  "providerId": "DeepSeek",
+  "model": "deepseek-v4-flash",
+  "generatedAt": "2026-08-29T09:38:38.575Z",
+  "artifactSha256": "811bf5163dfe1f237dda441ad5a089b14a3e8906eb5b222c5883f063d17d8123",
+  "svgSha256": "305b65422a9d3e09fa73f6d648717a6e3f93101a73776d0e5aab360dfd0dc5be",
+  "pngSha256": "e0f50117f43123962b437e1d9a6d4037881f9d07bcf990d68103369f7dfac3f7",
+  "visualSource": "vault-companion",
+  "cleanupCompleted": true,
+  "diagnostic": null
+}

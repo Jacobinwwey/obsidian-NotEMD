@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "typeId": "medallion",
+  "fixtureId": "medallion-data-quality",
+  "title": "Data quality tiers",
+  "requested": {
+    "typeId": "medallion",
+    "renderTarget": "editable-html-svg",
+    "compatibilityMode": "best-fit",
+    "targetLanguage": "en"
+  },
+  "status": "passed",
+  "sourceNotePath": "notemd-real-diagram-examples/run-1787995422796-fc969a/medallion.md",
+  "outputPath": "notemd-real-diagram-examples/run-1787995422796-fc969a/medallion_diagram.html.md",
+  "artifactPath": "docs/diagram-examples/medallion/artifact.html",
+  "svgPath": "docs/diagram-examples/medallion/result.svg",
+  "pngPath": "docs/diagram-examples/medallion/result.png",
+  "providerId": "DeepSeek",
+  "model": "deepseek-v4-flash",
+  "generatedAt": "2026-08-29T09:42:08.435Z",
+  "artifactSha256": "82dba575fbc028df96bbc65bac3b73fc8fe04867fe27749c2b94afe9f9c1071a",
+  "svgSha256": "22cb7cddeae63db6ab0fe17ee1db823640d9304aabacbc2ae5058b1244a4d7cd",
+  "pngSha256": "f65d74966be9a8bd891d741aa88c280cb797f14d7cae7f8a88547da396eaa46f",
+  "visualSource": "vault-companion",
+  "cleanupCompleted": true,
+  "diagnostic": null
+}

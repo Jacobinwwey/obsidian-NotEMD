@@ -59,6 +59,14 @@ Export মেনুতে বর্তমান ভিজ্যুয়াল �
 
 SVG ও PDF ভেক্টর জিওমেট্রি থেকে তৈরি হয়; PDF-এ SVG-এর লেআউট ও টেক্সট মেট্রিক্স ব্যবহৃত হয়, পুরো প্রিভিউকে রাস্টারাইজ করা হয় না। Notemd-এর সেটিংসে থাকা ইমেজ এক্সপোর্ট PPI শুধুমাত্র PNG-এর রাস্টারাইজেশনকে নিয়ন্ত্রণ করে (72-600 PPI, ডিফল্ট 300)।
 
+## ঘন ডায়াগ্রামের জন্য পাঠযোগ্য প্রিভিউ
+
+সম্পাদনাযোগ্য HTML/SVG lane-grid ডায়াগ্রাম শিরোনাম ও lane header বসানোর আগে summary মেপে wrap করে। header-টি সুরক্ষিত summary অঞ্চলের নিচে যায় এবং connector ও edge label-এর আগে cell আঁকা হয়। cross-lane edge-এ collision-aware orthogonal grid route ব্যবহার করে lane label ও দখল করা cell-এর জন্য জায়গা রাখা হয়, তাই দীর্ঘ বর্ণনা লেখা ঢাকে না বা ডায়াগ্রাম বুঝতে ব্যবহারকারীকে পাশে সরাতে হয় না।
+
+Mermaid quadrant chart-এ family-নির্দিষ্ট normalization ধাপ চলে। `quadrantChart`-এর ক্ষেত্রে শুধু flowchart-এর quote ও shape repair বাদ দেওয়া হয়; title, axis এবং quadrant name-এ ইচ্ছাকৃত bracket দৃশ্যমান থাকে। provider কোনো point label-এর শেষে অসামঞ্জস্যপূর্ণ opening bracket কপি করলেই কেবল সেটি সরানো হয়।
+
+রিপোজিটরিতে প্রতিটি executable diagram type-এর জন্য real-Vault শেখার ও evidence সেট রাখা আছে। bilingual input note, তৈরি SVG/PNG ফল এবং machine-readable status manifest-এর জন্য [`docs/diagram-examples/`](https://github.com/Jacobinwwey/obsidian-NotEMD/tree/main/docs/diagram-examples) দেখুন। `passed` entry মানে loaded plugin bundle দিয়ে বাস্তব run, static screenshot fixture নয়।
+
 ## Drawnix প্রিভিউতে অন্তর্ভুক্ত Mermaid
 
 যখন কোনো Drawnix আর্টিফ্যাক্টে Mermaid ভিজ্যুয়াল থাকে, Notemd রেন্ডার হওয়া SVG-কে স্যানিটাইজ করে এবং Mermaid সোর্সটিকে `.drawnix` মেটাডেটার মধ্যে সংরক্ষণ করে। ফলে Drawnix নলেজ ম্যাপের ভিতরে Mermaid ইমেজটি দেখানো সম্ভব হয়, Drawnix বা Plait রানটাইমের প্রয়োজন হয় না। ডিফল্ট পথটি স্ব-সম্পূর্ণ, আলাদা `.assets` ডিরেক্টরি তৈরি হয় না। যদি আপনার Mermaid সোর্স, SVG এবং ম্যানিফেস্ট কম্পানিয়নগুলো হস্তান্তর বা বাহ্যিক সম্পাদনার জন্য দরকার হয়, তাহলে **Also export complete Mermaid visuals** সক্রিয় করুন। `.assets` থাকা বিদ্যমান আর্টিফ্যাক্টগুলো এখনও সমর্থিত, এবং মেটাডেটায় সংরক্ষিত সোর্স টেক্সট থেকে অনুপস্থিত লেগাসি Mermaid SVG পুনর্নির্মাণ করা যায়।

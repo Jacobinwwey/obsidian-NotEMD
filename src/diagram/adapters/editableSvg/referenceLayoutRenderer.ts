@@ -20,6 +20,16 @@ import {
 
 export const REFERENCE_LAYOUT_RENDERER_VERSION = 'notemd-reference-layouts@1.1.0';
 
+const NESTED_LEVEL_INSET = 56;
+const NESTED_TAG_HEIGHT = 22;
+const NESTED_TAG_GAP = 8;
+const LANE_GRID_HEADER_MINIMUM = 132;
+const LANE_GRID_SUMMARY_CLEARANCE = 62;
+const LANE_GRID_ROUTE_CLEARANCE = 12;
+// Footer chips carry both a primary label and a secondary baseline. Keep the
+// background deep enough for both text runs and their font descent.
+const TOPOLOGY_FOOTER_CHIP_HEIGHT = 64;
+
 const COLORS = {
     paper: '#f8fafc',
     panel: '#ffffff',
@@ -161,14 +171,17 @@ function svgRoot(spec: DiagramSpec, width: number, height: number, body: string)
  * summary can be painted underneath the first row/header.
  */
 function documentBodyTop(spec: DiagramSpec, width: number, minimumTop: number): number {
-    const summaryLines = documentSummaryLineCount(spec, width);
-    const summaryBottom = summaryLines > 0 ? 66 + summaryLines * 14 : 58;
-    return Math.max(minimumTop, summaryBottom + 18);
+    return Math.max(minimumTop, documentSummaryBottom(spec, width) + 18);
 }
 
 function documentSummaryLineCount(spec: DiagramSpec, width: number): number {
     const maxWidth = Math.max(24, Math.floor((width - 80) / 7)) * 7;
     return spec.summary?.trim() ? wrapMeasuredText(spec.summary, maxWidth, 2).lines.length : 0;
+}
+
+function documentSummaryBottom(spec: DiagramSpec, width: number): number {
+    const summaryLines = documentSummaryLineCount(spec, width);
+    return summaryLines > 0 ? 66 + summaryLines * 14 : 58;
 }
 
 function nodeClass(node: { focal?: boolean; external?: boolean }): string {
@@ -241,7 +254,7 @@ function topologySvg(spec: DiagramSpec, payload: DiagramTopologyPayload): string
         return headerHeight + rowHeights.reduce((total, value) => total + value, 0) + Math.max(0, rowHeights.length - 1) * 20 + 20;
     });
     const zoneHeight = Math.max(payload.footer?.length ? 450 : 500, ...zoneContentHeights);
-    const footerHeight = payload.footer?.length ? 86 : 0;
+    const footerHeight = payload.footer?.length ? TOPOLOGY_FOOTER_CHIP_HEIGHT + 22 : 0;
     const height = zoneTop + zoneHeight + footerHeight + 40;
     const zoneMap = new Map(payload.zones.map((zone, index) => [zone.id, {
         ...zone,
@@ -336,9 +349,128 @@ function topologySvg(spec: DiagramSpec, payload: DiagramTopologyPayload): string
         const x = margin + index * ((width - margin * 2) / Math.max(1, payload.footer!.length));
         const labelX = x + 12;
         const labelY = zoneTop + zoneHeight + 51;
-        return `<g id="reference-footer-${escapeXml(item.id)}"><rect class="ref-chip" x="${x}" y="${zoneTop + zoneHeight + 30}" width="${footerWidth}" height="48" rx="5" />${textBlock(item.label, labelX, labelY, Math.floor((footerWidth - 24) / 7), 'ref-node-label', 'start', 2, 14)}${textBlock(item.sub, labelX, labelY + 30, Math.floor((footerWidth - 24) / 7), 'ref-node-sub', 'start', 1, 12)}</g>`;
+        return `<g id="reference-footer-${escapeXml(item.id)}"><rect class="ref-chip" x="${x}" y="${zoneTop + zoneHeight + 30}" width="${footerWidth}" height="${TOPOLOGY_FOOTER_CHIP_HEIGHT}" rx="5" />${textBlock(item.label, labelX, labelY, Math.floor((footerWidth - 24) / 7), 'ref-node-label', 'start', 2, 14)}${textBlock(item.sub, labelX, labelY + 30, Math.floor((footerWidth - 24) / 7), 'ref-node-sub', 'start', 1, 12)}</g>`;
     }).join('');
     return svgRoot(spec, width, height, `${zones}${edges}${nodes}${footer}`);
+}
+
+interface LaneGridCellBox extends LayoutRectLike {
+    laneId: string;
+    stepId: string;
+}
+
+interface LaneGridRoutePoint {
+    x: number;
+    y: number;
+}
+
+function laneGridOrthogonalPath(points: readonly LaneGridRoutePoint[]): string {
+    if (points.length === 0) return '';
+    const commands = [`M ${points[0].x} ${points[0].y}`];
+    for (let index = 1; index < points.length; index += 1) {
+        const previous = points[index - 1];
+        const current = points[index];
+        if (current.x === previous.x) {
+            commands.push(`V ${current.y}`);
+        } else if (current.y === previous.y) {
+            commands.push(`H ${current.x}`);
+        } else {
+            commands.push(`L ${current.x} ${current.y}`);
+        }
+    }
+    return commands.join(' ');
+}
+
+function hasSameLaneCellBetween(
+    cells: readonly LaneGridCellBox[],
+    laneId: string,
+    startX: number,
+    endX: number
+): boolean {
+    const low = Math.min(startX, endX);
+    const high = Math.max(startX, endX);
+    return cells.some(cell => cell.laneId === laneId
+        && cell.x < high - 1
+        && cell.x + cell.width > low + 1);
+}
+
+function canUseLaneGridPerimeter(
+    cells: readonly LaneGridCellBox[],
+    from: LaneGridCellBox,
+    to: LaneGridCellBox,
+    side: 'left' | 'right'
+): boolean {
+    const sourceBoundary = side === 'left' ? from.x : from.x + from.width;
+    const targetBoundary = side === 'left' ? to.x : to.x + to.width;
+    const hasCellOnSide = (laneId: string, boundary: number): boolean => cells.some(cell => {
+        if (cell.laneId !== laneId) return false;
+        return side === 'left'
+            ? cell.x + cell.width < boundary - 1
+            : cell.x > boundary + 1;
+    });
+    return !hasCellOnSide(from.laneId, sourceBoundary) && !hasCellOnSide(to.laneId, targetBoundary);
+}
+
+function laneGridEdgePath(
+    from: LaneGridCellBox,
+    to: LaneGridCellBox,
+    cells: readonly LaneGridCellBox[],
+    labelWidth: number,
+    width: number,
+    headerHeight: number
+): string {
+    const fromCenterY = from.y + from.height / 2;
+    const toCenterY = to.y + to.height / 2;
+    const sameColumn = from.x === to.x;
+    const forward = to.x > from.x;
+    const localChannel = sameColumn
+        ? from.x + from.width + LANE_GRID_ROUTE_CLEARANCE
+        : forward
+        ? from.x + from.width + LANE_GRID_ROUTE_CLEARANCE
+        : to.x + to.width + LANE_GRID_ROUTE_CLEARANCE;
+    const localStart = sameColumn || forward ? from.x + from.width : from.x;
+    const localEnd = sameColumn ? to.x + to.width : forward ? to.x : to.x + to.width;
+    const localHorizontalClear = sameColumn || !hasSameLaneCellBetween(
+        cells,
+        forward ? to.laneId : from.laneId,
+        localChannel,
+        forward ? localEnd : localStart
+    );
+
+    if ((sameColumn || localHorizontalClear) && localChannel >= 0 && localChannel <= width) {
+        return laneGridOrthogonalPath([
+            { x: localStart, y: fromCenterY },
+            { x: localChannel, y: fromCenterY },
+            { x: localChannel, y: toCenterY },
+            { x: localEnd, y: toCenterY }
+        ]);
+    }
+
+    const canUseLeft = canUseLaneGridPerimeter(cells, from, to, 'left');
+    const canUseRight = canUseLaneGridPerimeter(cells, from, to, 'right');
+    if (canUseLeft || canUseRight) {
+        const side = canUseLeft ? 'left' : 'right';
+        const perimeterX = side === 'left' ? labelWidth - LANE_GRID_ROUTE_CLEARANCE : width - LANE_GRID_ROUTE_CLEARANCE;
+        return laneGridOrthogonalPath([
+            { x: side === 'left' ? from.x : from.x + from.width, y: fromCenterY },
+            { x: perimeterX, y: fromCenterY },
+            { x: perimeterX, y: toCenterY },
+            { x: side === 'left' ? to.x : to.x + to.width, y: toCenterY }
+        ]);
+    }
+
+    // If both horizontal perimeters are occupied, travel through the reserved
+    // band above the first lane and approach the target on its top boundary.
+    // This keeps the route outside every cell even when a lane is fully filled.
+    const topRouteY = headerHeight + 8;
+    const outerX = width - LANE_GRID_ROUTE_CLEARANCE;
+    return laneGridOrthogonalPath([
+        { x: from.x + from.width / 2, y: from.y },
+        { x: from.x + from.width / 2, y: topRouteY },
+        { x: outerX, y: topRouteY },
+        { x: outerX, y: to.y },
+        { x: to.x + to.width / 2, y: to.y }
+    ]);
 }
 
 function laneGridSvg(spec: DiagramSpec, payload: DiagramLaneGridPayload): string {
@@ -346,15 +478,23 @@ function laneGridSvg(spec: DiagramSpec, payload: DiagramLaneGridPayload): string
     const stepWidth = 142;
     const laneHeight = 132;
     const width = labelWidth + payload.steps.length * stepWidth + 40;
-    const headerHeight = documentBodyTop(spec, width, 132);
+    // The step chip is painted 54px above the lane origin. Reserve the full
+    // summary-to-chip distance, not only the first drawable row, so a wrapped
+    // document summary cannot sit underneath that control.
+    const headerHeight = Math.max(
+        LANE_GRID_HEADER_MINIMUM,
+        documentSummaryBottom(spec, width) + LANE_GRID_SUMMARY_CLEARANCE
+    );
     const height = headerHeight + payload.lanes.length * laneHeight + 46;
-    const cellMap = new Map<string, { x: number; y: number; width: number; height: number }>();
+    const cellMap = new Map<string, LaneGridCellBox>();
     payload.lanes.forEach((lane, laneIndex) => payload.steps.forEach((step, stepIndex) => {
         cellMap.set(`${lane.id}:${step.id}`, {
             x: labelWidth + stepIndex * stepWidth + 12,
             y: headerHeight + laneIndex * laneHeight + 14,
             width: stepWidth - 24,
-            height: 96
+            height: 96,
+            laneId: lane.id,
+            stepId: step.id
         });
     }));
     const header = payload.steps.map((step, index) => {
@@ -367,18 +507,48 @@ function laneGridSvg(spec: DiagramSpec, payload: DiagramLaneGridPayload): string
         const y = headerHeight + index * laneHeight;
         return `<g id="reference-lane-${escapeXml(lane.id)}"><rect class="ref-zone" x="0" y="${y}" width="${width}" height="${laneHeight}" rx="0" />${textBlock(lane.label.toUpperCase(), 18, y + 38, Math.floor((labelWidth - 30) / 7), 'ref-zone-label', 'start', 2, 14)}${textBlock(lane.sub, 18, y + 70, Math.floor((labelWidth - 30) / 7), 'ref-node-sub', 'start', 2, 14)}</g>`;
     }).join('');
-    const edges = payload.edges.map((edge, index) => {
+    const occupiedCellBoxes = payload.cells
+        .map(cell => cellMap.get(`${cell.laneId}:${cell.stepId}`))
+        .filter((box): box is LaneGridCellBox => Boolean(box));
+    const occupiedEdgeLabels: LayoutRectLike[] = [...occupiedCellBoxes];
+    payload.lanes.forEach((lane, index) => {
+        const y = headerHeight + index * laneHeight;
+        occupiedEdgeLabels.push({ x: 0, y: y + 16, width: labelWidth - 12, height: 74 });
+    });
+    const edgeLabelPlacements = new Map<number, LabelPlacement>();
+    payload.edges.forEach((edge, index) => {
         const from = cellMap.get(`${edge.from.laneId}:${edge.from.stepId}`);
         const to = cellMap.get(`${edge.to.laneId}:${edge.to.stepId}`);
-        if (!from || !to) return '';
+        if (!from || !to || !edge.label) return;
         const sx = from.x + from.width;
         const sy = from.y + from.height / 2;
         const tx = to.x;
         const ty = to.y + to.height / 2;
         const mx = Math.round((sx + tx) / 2);
+        edgeLabelPlacements.set(index, placeEdgeLabel(
+            edge.label,
+            mx,
+            Math.min(sy, ty) - 10,
+            Math.max(80, Math.abs(tx - sx) - 16),
+            occupiedEdgeLabels
+        ));
+    });
+    const edgePaths = payload.edges.map((edge, index) => {
+        const from = cellMap.get(`${edge.from.laneId}:${edge.from.stepId}`);
+        const to = cellMap.get(`${edge.to.laneId}:${edge.to.stepId}`);
+        if (!from || !to) return '';
+        const route = laneGridEdgePath(from, to, occupiedCellBoxes, labelWidth, width, headerHeight);
         const style = edge.style === 'accent' ? 'accent' : edge.style === 'link' ? 'link' : edge.style === 'trigger' ? 'trigger' : '';
         const marker = style === 'accent' ? 'url(#notemd-reference-arrow-accent)' : style === 'link' ? 'url(#notemd-reference-arrow-link)' : 'url(#notemd-reference-arrow)';
-        return `<g id="reference-lane-edge-${index}"><path class="ref-edge ${style}${edge.dashed ? ' dashed' : ''}" marker-end="url(#${marker.slice(5, -1)})" d="M ${sx} ${sy} H ${mx - 8} Q ${mx} ${sy} ${mx} ${sy + (ty >= sy ? 8 : -8)} V ${ty - (ty >= sy ? 8 : -8)} Q ${mx} ${ty} ${mx + 8} ${ty} H ${tx}" />${edge.label ? `<text class="ref-edge-label" x="${mx}" y="${Math.min(sy, ty) - 9}" text-anchor="middle">${escapeXml(edge.label)}</text>` : ''}</g>`;
+        return `<path id="reference-lane-edge-path-${index}" class="ref-edge ${style}${edge.dashed ? ' dashed' : ''}" data-drawio-type="edge" data-drawio-source="${escapeXml(edge.from.laneId)}:${escapeXml(edge.from.stepId)}" data-drawio-target="${escapeXml(edge.to.laneId)}:${escapeXml(edge.to.stepId)}" marker-end="${marker}" d="${route}" />`;
+    }).join('');
+    const edgeLabels = payload.edges.map((edge, index) => {
+        const from = cellMap.get(`${edge.from.laneId}:${edge.from.stepId}`);
+        const to = cellMap.get(`${edge.to.laneId}:${edge.to.stepId}`);
+        if (!from || !to || !edge.label) return '';
+        const placement = edgeLabelPlacements.get(index);
+        if (!placement) return '';
+        return `<g id="reference-lane-edge-${index}" data-drawio-type="edge" data-drawio-source="${escapeXml(edge.from.laneId)}:${escapeXml(edge.from.stepId)}" data-drawio-target="${escapeXml(edge.to.laneId)}:${escapeXml(edge.to.stepId)}"><text class="ref-edge-label" x="${placement.x}" y="${placement.y}" text-anchor="middle">${escapeXml(wrapMeasuredText(edge.label, placement.width, 1).lines[0])}</text></g>`;
     }).join('');
     const cells = payload.cells.map(cell => {
         const box = cellMap.get(`${cell.laneId}:${cell.stepId}`);
@@ -391,7 +561,13 @@ function laneGridSvg(spec: DiagramSpec, payload: DiagramLaneGridPayload): string
         const toolY = subY + subLines * 13 + 4;
         return `<g id="reference-cell-${escapeXml(cell.laneId)}-${escapeXml(cell.stepId)}"><rect class="${nodeClass({ focal: cell.focal })}" x="${box.x}" y="${box.y}" width="${box.width}" height="${box.height}" rx="5" />${textBlock(cell.title, cx, box.y + 22, 16, 'ref-node-label', 'middle', 2, 15)}${textBlock(cell.sub, cx, subY, 16, 'ref-node-sub', 'middle', 1, 13)}${textBlock(cell.tool, cx, toolY, 16, 'ref-node-sub', 'middle', 1, 13)}${chips}</g>`;
     }).join('');
-    return svgRoot(spec, width, height, `${header}${lanes}${edges}${cells}`);
+    // Cell backgrounds must be painted before connectors and their labels.
+    // The previous order emitted edge labels first, then painted a target
+    // cell over them. That made a valid cross-lane label (for example
+    // `anon table`) unreadable in the mounted preview and correctly triggered
+    // the runtime presentation gate. Keep the z-order owned by this family:
+    // canvas/header -> lane/cell surfaces -> connectors -> connector labels.
+    return svgRoot(spec, width, height, `${header}${lanes}${cells}${edgePaths}${edgeLabels}`);
 }
 
 function accessMatrixSvg(spec: DiagramSpec, payload: DiagramAccessMatrixPayload): string {
@@ -566,19 +742,40 @@ function cycleSvg(spec: DiagramSpec, payload: DiagramCyclePayload): string {
 
 function nestedSvg(spec: DiagramSpec, payload: DiagramNestedPayload): string {
     const width = 920;
-    const maxInset = Math.max(0, payload.levels.length - 1) * 42;
+    const maxInset = Math.max(0, payload.levels.length - 1) * NESTED_LEVEL_INSET;
     const height = Math.max(640, documentBodyTop(spec, width, 98) + maxInset + 150);
     const top = documentBodyTop(spec, width, 98);
-    const levels = payload.levels.map((level, index) => {
-        const inset = index * 42;
+    const surfaces = payload.levels.map((level, index) => {
+        const inset = index * NESTED_LEVEL_INSET;
         const x = 50 + inset;
         const y = top + inset;
         const w = width - 100 - inset * 2;
         const h = height - 150 - inset * 2;
-        const tagWidth = Math.min(260, Math.max(150, measureTextWidth(level.label) + 34));
-        return `<g id="reference-nested-${escapeXml(level.id)}"><rect class="${level.focal ? 'ref-focal-fill' : 'ref-node'}" x="${x}" y="${y}" width="${w}" height="${h}" rx="8" fill-opacity="${Math.max(.02, .09 - index * .012)}" /><rect x="${x + 14}" y="${y + 7}" width="${Math.min(tagWidth, w - 28)}" height="22" fill="${COLORS.paper}" />${textBlock(level.label.toUpperCase(), x + 22, y + 23, Math.max(10, Math.floor((Math.min(tagWidth, w - 28) - 16) / 7)), 'ref-caption', 'start', 1, 13)}${level.sub ? textBlock(level.sub, x + 22, y + 45, 26, 'ref-node-sub', 'start', 1, 12) : ''}</g>`;
+        return `<rect data-nested-scope-surface="${escapeXml(level.id)}" class="${level.focal ? 'ref-focal-fill' : 'ref-node'}" x="${x}" y="${y}" width="${w}" height="${h}" rx="8" fill-opacity="${Math.max(.02, .09 - index * .012)}" />`;
     }).join('');
-    return svgRoot(spec, width, height, levels);
+    const tagSurfaces = payload.levels.map((level, index) => {
+        const inset = index * NESTED_LEVEL_INSET;
+        const x = 50 + inset;
+        const y = top + inset;
+        const w = width - 100 - inset * 2;
+        const tagWidth = Math.min(260, Math.max(150, measureTextWidth(level.label) + 34), w - 28);
+        return `<rect data-nested-tag-surface="${escapeXml(level.id)}" x="${x + 14}" y="${y + 7}" width="${tagWidth}" height="${NESTED_TAG_HEIGHT}" fill="${COLORS.paper}" />`;
+    }).join('');
+    const labels = payload.levels.map((level, index) => {
+        const inset = index * NESTED_LEVEL_INSET;
+        const x = 50 + inset;
+        const y = top + inset;
+        const w = width - 100 - inset * 2;
+        const tagWidth = Math.min(260, Math.max(150, measureTextWidth(level.label) + 34), w - 28);
+        const labelY = y + 7 + NESTED_TAG_HEIGHT - NESTED_TAG_GAP;
+        const subY = y + 7 + NESTED_TAG_HEIGHT + 14;
+        return `<g id="reference-nested-${escapeXml(level.id)}">${textBlock(level.label.toUpperCase(), x + 22, labelY, Math.max(10, Math.floor((tagWidth - 16) / 7)), 'ref-caption', 'start', 1, 13)}${level.sub ? textBlock(level.sub, x + 22, subY, 26, 'ref-node-sub', 'start', 1, 12) : ''}</g>`;
+    }).join('');
+    // Nested surfaces are intentionally translucent, but their later DOM
+    // order must not become a label occlusion mechanism. Paint every surface
+    // first and every tag/text block second so an inner scope cannot cover an
+    // outer scope's identifier.
+    return svgRoot(spec, width, height, `${surfaces}${tagSurfaces}${labels}`);
 }
 
 function treeSvg(spec: DiagramSpec, payload: DiagramTreePayload): string {

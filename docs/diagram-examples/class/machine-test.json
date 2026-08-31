@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "typeId": "class",
+  "fixtureId": "class-domain",
+  "title": "Diagram domain",
+  "requested": {
+    "typeId": "class",
+    "renderTarget": "mermaid",
+    "compatibilityMode": "best-fit",
+    "targetLanguage": "en"
+  },
+  "status": "passed",
+  "sourceNotePath": "notemd-real-diagram-examples/run-1788091203374-babaf1/class.md",
+  "outputPath": "notemd-real-diagram-examples/run-1788091203374-babaf1/class_summ.md",
+  "artifactPath": "docs/diagram-examples/class/artifact.md",
+  "svgPath": "docs/diagram-examples/class/result.svg",
+  "pngPath": "docs/diagram-examples/class/result.png",
+  "providerId": "DeepSeek",
+  "model": "deepseek-v4-flash",
+  "generatedAt": "2026-08-30T12:02:51.935Z",
+  "artifactSha256": "67f40af62515a968123ed9bca7d1a5933af739f51e2ed43895eba1d8e8773a87",
+  "svgSha256": "c9cd5f6bebadb9b6299c117cff305e15df8fb9199754ffe68323af5fc120bfbf",
+  "pngSha256": "aff602d1baca183da755cba17291bf2d8cdeb608105838ba1c9b198bcf488e44",
+  "visualSource": "operation-preview",
+  "cleanupCompleted": true,
+  "diagnostic": null
+}

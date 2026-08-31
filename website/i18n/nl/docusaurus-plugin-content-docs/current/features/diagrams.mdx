@@ -59,6 +59,14 @@ Kies **History** in de voorlopige weergave om het Vault-history-scherm te openen
 
 SVG en PDF worden gegenereerd uit vectorgeometrie; PDF maakt gebruik van dezelfde SVG-indeling en tekstmetrieken in plaats van het hele voorlopige resultaat te rasteriseren. De PPI-instelling voor afbeeldingsexport in de Notemd-instellingen bepaalt alleen de rasterisatie van PNG (72-600 PPI, standaard 300).
 
+## Leesbare voorvertoningen voor dichte diagrammen
+
+Bewerkbare HTML/SVG lane-grid-diagrammen meten en laten de samenvatting teruglopen voordat de titel en lane-kop worden geplaatst. De kop wordt onder het beschermde samenvattingsgebied gezet en cellen worden vóór verbindingslijnen en randlabels getekend. Randen tussen lanes gebruiken botsingsbewuste orthogonale rasterroutes en reserveren ruimte voor lane-labels en bezette cellen, zodat lange beschrijvingen geen tekst bedekken en horizontaal pannen niet nodig is.
+
+Mermaid-kwadrantdiagrammen krijgen normalisatie die bij hun family hoort. Voor `quadrantChart` worden alleen flowchart-specifieke aanhalingsteken- en vormreparaties overgeslagen; bedoelde vierkante haken in titels, assen en kwadrantnamen blijven zichtbaar. Een door de provider gekopieerde openingshaak wordt alleen verwijderd als die het niet-overeenkomende laatste teken van een puntlabel is.
+
+De repository bevat voor elk uitvoerbaar diagramtype een leer- en bewijzenset uit een echte Vault. Bekijk [`docs/diagram-examples/`](https://github.com/Jacobinwwey/obsidian-NotEMD/tree/main/docs/diagram-examples) voor tweetalige invoernotities, gegenereerde SVG/PNG-resultaten en het machineleesbare statusmanifest. `passed`-items zijn runs via de geladen plugin bundle, geen statische screenshot-fixtures.
+
 ## Drawnix-voorlopige weergaven met ingebouwde Mermaid
 
 Wanneer een Drawnix-bestand Mermaid-visualisaties bevat, zuivert Notemd de renderde SVG en bewaart de Mermaid-broncode samen daarmee in de metadata van het `.drawnix`-bestand. Hierdoor kan de voorlopige weergave de Mermaid-afbeelding binnen het Drawnix-kenniskaartwezen tonen, zonder dat er een Drawnix- of Plait-runtime nodig is. Mermaid-visualisaties die veilig zijn geïntegreerd, zorgen niet voor een aparte `.assets`-map; externe binair media of onopgeloste visualisaties hebben wel een bijbehorend bestand zodat geen gegevens verloren gaan.

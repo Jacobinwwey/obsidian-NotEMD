@@ -20,7 +20,7 @@ Batch 0 至 Batch 3B 的 runtime 工作已在本次交付中实现。下方详�
 | Batch 2 定量与 schedule | 完成 | bar/line/scatter variant、定量 projection、Gantt renderer |
 | Batch 3A 结构布局 | 完成 | ordered-stack、set-overlap、ranked-segments、cycle renderer |
 | Batch 3B 结构布局 | 完成 | nested、tree、process、medallion、high-level renderer |
-| 最终验证与主线交付 | 完成 | 265 个 Jest suite、2,339 passed / 1 skipped；build/docs/gallery/render-host/i18n/consumer/diff 门禁通过；lint 仍是基线债务 |
+| 最终验证与主线交付 | 进行中 | 270 个 Jest suite、2,375 passed / 1 skipped；build/gallery/docs/render-host/i18n 门禁通过；Vault bundle reload/CLI 证据待完成；lint 仍是基线债务 |
 
 ### 计划后可发现性加固（2026-08-22）
 

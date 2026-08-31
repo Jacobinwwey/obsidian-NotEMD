@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "typeId": "scatter-plot",
+  "fixtureId": "scatter-plot-quality",
+  "title": "Quality and latency",
+  "requested": {
+    "typeId": "scatter-plot",
+    "renderTarget": "vega-lite",
+    "compatibilityMode": "best-fit",
+    "targetLanguage": "en"
+  },
+  "status": "passed",
+  "sourceNotePath": "notemd-real-diagram-examples/run-1787995422796-fc969a/scatter-plot.md",
+  "outputPath": "notemd-real-diagram-examples/run-1787995422796-fc969a/scatter-plot_diagram.md",
+  "artifactPath": "docs/diagram-examples/scatter-plot/artifact.md",
+  "svgPath": "docs/diagram-examples/scatter-plot/result.svg",
+  "pngPath": "docs/diagram-examples/scatter-plot/result.png",
+  "providerId": "DeepSeek",
+  "model": "deepseek-v4-flash",
+  "generatedAt": "2026-08-29T09:30:04.483Z",
+  "artifactSha256": "5b0cb56092be212ad049acd57c24ec9eb41d51d77d03157d5b73f86a6180efde",
+  "svgSha256": "afb8e0264d012a81e6d959703c5f47beb06d7335a6fe2ce641a837288b6be7a3",
+  "pngSha256": "ad9cded461a084cf865990a97e64a3363270ced4ad8b31073cac1ad466daa5c1",
+  "visualSource": "operation-preview",
+  "cleanupCompleted": true,
+  "diagnostic": null
+}

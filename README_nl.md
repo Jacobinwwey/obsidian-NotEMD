@@ -699,7 +699,7 @@ MIT-licentie - Zie het bestand [LICENSE](LICENSE) voor details.
 ---
 
 
-*Notemd v1.9.6 - Verrijk je Obsidian-kennisgrafiek met AI.*
+*Notemd v1.9.7 - Verrijk je Obsidian-kennisgrafiek met AI.*
 
 
 
@@ -710,17 +710,17 @@ Deze kwartaalchroniek behoudt de oorspronkelijke visuele stijl van [repo-saga](h
 
 ![Notemd Development Chronicle](./docs/repo-saga/notemd-development-history.nl.svg)
 
-_Laatst vernieuwd voor releasetag `1.9.6` op 2026-08-09. Datum van de laatste commit: 2026-08-09._
+_Laatst vernieuwd voor releasetag `1.9.7` op 2026-08-30. Datum van de laatste commit: 2026-08-30._
 <!-- repo-chronicle:end -->
 
 
 ## Star History
 
-<a href="https://www.star-history.com/?repos=Jacobinwwey%2Fobsidian-NotEMD&type=date&legend=top-left">
+<a href="https://star-history.dera.page/#Jacobinwwey/obsidian-NotEMD">
  <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=Jacobinwwey/obsidian-NotEMD&type=date&theme=dark&legend=top-left&sealed_token=Y32J_ehSQhPEtMK06bJeXYXBkFZbjjUR6tkogZgP92_f34InJDA7n9xcMmttFtW0o52nbKnU24nByb7DCiBnOrP2MOwevXU-so8BYLISzUsdeSUQRIOYg_lFXml_9MakEXjFEQStXFh7fUnsSXyIEq55QSTYNcbDOGF0k66bWhT1IyrZLnG26lJ-Mvbg" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=Jacobinwwey/obsidian-NotEMD&type=date&legend=top-left&sealed_token=Y32J_ehSQhPEtMK06bJeXYXBkFZbjjUR6tkogZgP92_f34InJDA7n9xcMmttFtW0o52nbKnU24nByb7DCiBnOrP2MOwevXU-so8BYLISzUsdeSUQRIOYg_lFXml_9MakEXjFEQStXFh7fUnsSXyIEq55QSTYNcbDOGF0k66bWhT1IyrZLnG26lJ-Mvbg" />
-   <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=Jacobinwwey/obsidian-NotEMD&type=date&legend=top-left&sealed_token=Y32J_ehSQhPEtMK06bJeXYXBkFZbjjUR6tkogZgP92_f34InJDA7n9xcMmttFtW0o52nbKnU24nByb7DCiBnOrP2MOwevXU-so8BYLISzUsdeSUQRIOYg_lFXml_9MakEXjFEQStXFh7fUnsSXyIEq55QSTYNcbDOGF0k66bWhT1IyrZLnG26lJ-Mvbg" />
+   <source media="(prefers-color-scheme: dark)" srcset="https://star-history.dera.page/svg?repos=Jacobinwwey/obsidian-NotEMD&theme=dark" />
+   <source media="(prefers-color-scheme: light)" srcset="https://star-history.dera.page/svg?repos=Jacobinwwey/obsidian-NotEMD" />
+   <img alt="Star History Chart" src="https://star-history.dera.page/svg?repos=Jacobinwwey/obsidian-NotEMD" />
  </picture>
 </a>
 

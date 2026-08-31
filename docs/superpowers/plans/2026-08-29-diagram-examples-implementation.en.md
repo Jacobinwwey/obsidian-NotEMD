@@ -288,7 +288,7 @@ Run: `rtk npm.cmd run docs:build`
 
 Run: `rtk npm.cmd run diagram:gallery:check`
 
-Run: `rtk npm.cmd run verify:vault-bundle`
+Run: `rtk npm.cmd run verify:vault-bundle -- --vault E:\\1Knowledge`
 
 Run: `rtk git diff --check`
 
@@ -302,4 +302,3 @@ Inspect the manifest count, all 33 directories, representative Mermaid/Vega-Lite
 rtk git add docs/diagram-examples
 rtk git commit -m "docs(diagrams): capture real-vault diagram examples"
 ```
-

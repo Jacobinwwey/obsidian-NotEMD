@@ -59,6 +59,14 @@ A előnyelésben válassza a **History** opciót, hogy nyitja meg a Vault tört�
 
 Az SVG és PDF formátumok vektorgeometriával készülnek; a PDF azonos SVG layoutot és szövegmetrikákat használ, így nem kerül az összes előnyelés rasterizálására. A Notemd beállításainak PPI értéke csak a PNG rasterizálást kontrollálja (72–600 PPI, 300 a helyettesérték).
 
+## Olvasható előnézetek sűrű diagramokhoz
+
+A szerkeszthető HTML/SVG lane-grid diagramok előbb megmérik és sortörik az összefoglalót, majd elhelyezik a címet és a lane fejlécét. A fejléc a védett összefoglaló-régió alá kerül, a cellák pedig a csatlakozók és élcímkék előtt rajzolódnak ki. A lane-ek közötti élek ütközésérzékeny, ortogonális rácsútvonalakat használnak, és helyet foglalnak a lane-címkéknek és a foglalt celláknak, így a hosszú leírások nem takarják el a szöveget, és nem kell vízszintesen pásztázni.
+
+A Mermaid quadrant diagramok family-specifikus normalizálási lépést kapnak. A `quadrantChart` esetén kimaradnak a kizárólag flowcharthoz tartozó idézőjel- és alakzatjavítások, miközben a címekben, tengelyeken és kvadránsnevekben szándékos zárójelek megmaradnak. A provider által bemásolt nyitó zárójel csak akkor törlődik, ha egy pontcímke nem illeszkedő záró karaktere.
+
+A repository minden futtatható diagramtípushoz valódi Vaultból származó tanulási és bizonyítékkészletet tart fenn. Kétnyelvű bemeneti jegyzetekért, generált SVG/PNG eredményekért és géppel olvasható állapot-manifestért lásd: [`docs/diagram-examples/`](https://github.com/Jacobinwwey/obsidian-NotEMD/tree/main/docs/diagram-examples). A `passed` bejegyzések a betöltött plugin bundle futását jelzik, nem statikus screenshot-fixture-t.
+
 ## Drawnix előnyelésekben benne található Mermaid visuálaik
 
 Ha egy Drawnix forrásfájlban Mermaid visuálaik vannak, Notemd szanitálja az elrendezett SVG-t és tárolja a Mermaid forráskódot is a `.drawnix` metadata-ban. Ezért az előnyelésben lehet megjeleníteni a Mermaid image-t a Drawnix tudományos térképben, anélkül hogy szükség lenne a Drawnix vagy Plait futtatási környezetére. A biztonságosan benne található Mermaid visuálaik nem hozzanak létre külön `.assets` mappát; az externális bináris média vagy nem részletes visuálaiknak van egy társfája, így semmilyen adat nem hullik el.

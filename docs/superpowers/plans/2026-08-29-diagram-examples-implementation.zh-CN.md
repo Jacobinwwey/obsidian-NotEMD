@@ -1,6 +1,6 @@
 # 图表示例与实机 Vault 证据实现计划
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **面向代理工作者：** 建议使用 `superpowers:subagent-driven-development` 或 `superpowers:executing-plans`，按任务执行本计划。步骤使用复选框（`- [ ]`）跟踪。
 
 **目标：** 建立由 catalog 驱动的双语学习目录，在运行中的 `E:\1Knowledge` Vault 中通过 provider 实测全部 33 个可执行图表类型，并保存真实 Artifact 与视觉证据。
 
@@ -22,7 +22,7 @@
 
 ---
 
-### Task 1：建立纯证据运行时契约
+### 任务 1：建立纯证据运行时契约
 
 **文件：**
 - 创建：`scripts/lib/diagram-examples-runtime.js`
@@ -57,7 +57,7 @@ rtk git add scripts/lib/diagram-examples-runtime.js src/tests/diagramExamplesRun
 rtk git commit -m "feat(diagrams): add real-vault evidence runtime contract"
 ```
 
-### Task 2：增加 catalog 提取与双语输入生成
+### 任务 2：增加 catalog 提取与双语输入生成
 
 **文件：**
 - 创建：`scripts/diagram-examples-catalog-entry.ts`
@@ -65,7 +65,7 @@ rtk git commit -m "feat(diagrams): add real-vault evidence runtime contract"
 - 测试：`src/tests/diagramExamplesCatalog.test.ts`
 
 **接口：**
-- 消费：`getExecutableDiagramExamples()`、`getExecutableDiagramType()` 和 Task 1 输入渲染。
+- 消费：`getExecutableDiagramExamples()`、`getExecutableDiagramType()` 和第 1 项的输入渲染。
 - 产出：`loadExecutableDiagramExampleSummaries(repoRoot)`、稳定的中英文源笔记内容，以及不含手工 ID 列表的 33 个 catalog 摘要。
 
 - [ ] **步骤 1：写失败测试**，断言 bundle catalog 返回 33 个唯一行、fixture ID 与运行时 type ID 一致、target 与 descriptor 一致，中英文输入拥有相同的类型/target 和语义事实 token。
@@ -97,7 +97,7 @@ rtk git add scripts/diagram-examples-catalog-entry.ts scripts/lib/diagram-exampl
 rtk git commit -m "feat(diagrams): derive bilingual example inputs from catalog"
 ```
 
-### Task 3：实现真实 Vault 生成器与清理
+### 任务 3：实现真实 Vault 生成器与清理
 
 **文件：**
 - 创建：`scripts/generate-diagram-examples.js`
@@ -105,7 +105,7 @@ rtk git commit -m "feat(diagrams): derive bilingual example inputs from catalog"
 - 测试：`src/tests/diagramExamplesGenerator.test.ts`
 
 **接口：**
-- 消费：Task 1 运行时函数、Task 2 catalog 摘要、`scripts/invoke-maintainer-cli-operation.js` 约定和 Obsidian CLI。
+- 消费：第 1 项运行时函数、第 2 项 catalog 摘要、`scripts/invoke-maintainer-cli-operation.js` 约定和 Obsidian CLI。
 - 产出：`npm run diagram:examples`、`npm run diagram:examples:check` 以及完整的 `docs/diagram-examples/manifest.json`。
 
 - [ ] **步骤 1：写失败编排测试**，注入 `createVaultFile`、`invokeDiagramGenerate`、`readVaultFile`、`copyFile` 和 `deleteVaultFile`。覆盖成功输出发现、target 不匹配、provider 错误、超时、旧输出拒绝和 `finally` 清理。
@@ -148,7 +148,7 @@ rtk git add scripts/generate-diagram-examples.js scripts/lib/diagram-examples-ru
 rtk git commit -m "feat(diagrams): add real-vault examples generator"
 ```
 
-### Task 4：增加双语 README 与导航
+### 任务 4：增加双语 README 与导航
 
 **文件：**
 - 创建：`docs/diagram-examples/README.md`
@@ -159,7 +159,7 @@ rtk git commit -m "feat(diagrams): add real-vault examples generator"
 - 测试：`src/tests/diagramExamplesDocs.test.ts`
 
 **接口：**
-- 消费：Task 3 manifest 路径和状态词汇。
+- 消费：第 3 项 manifest 路径和状态词汇。
 - 产出：用户可发现的双语学习入口及全部 33 个示例链接。
 
 - [ ] **步骤 1：写失败 docs contract tests**，检查两个 README、manifest 链接、全部 catalog ID 链接、语言路径约定，以及两套 VitePress nav/sidebar 和 index 入口。
@@ -193,14 +193,14 @@ rtk git add docs/diagram-examples docs/.vitepress/config.mts docs/index.md docs/
 rtk git commit -m "docs(diagrams): add bilingual real-vault examples guide"
 ```
 
-### Task 5：生成证据集并执行全部门禁
+### 任务 5：生成证据集并执行全部门禁
 
 **文件：**
 - 创建/修改生成文件：`docs/diagram-examples/manifest.json`、`docs/diagram-examples/<type-id>/*`
 - 测试：现有 focused 与完整测试套件
 
 **接口：**
-- 消费：运行中的 `E:\\1Knowledge` Vault、已启用的 `notemd` bundle、已配置 provider，以及 Task 1-4。
+- 消费：运行中的 `E:\\1Knowledge` Vault、已启用的 `notemd` bundle、已配置 provider，以及前 4 项的实现结果。
 - 产出：33 个真实 Vault 尝试记录、复制的结果 Artifact，以及通过的 evidence check。
 
 - [ ] **步骤 1：只读确认 Vault 和 provider。**
@@ -237,7 +237,7 @@ rtk git commit -m "docs(diagrams): add bilingual real-vault examples guide"
 
 运行：`rtk npm.cmd run diagram:gallery:check`
 
-运行：`rtk npm.cmd run verify:vault-bundle`
+运行：`rtk npm.cmd run verify:vault-bundle -- --vault E:\\1Knowledge`
 
 运行：`rtk git diff --check`
 
@@ -251,4 +251,3 @@ rtk git commit -m "docs(diagrams): add bilingual real-vault examples guide"
 rtk git add docs/diagram-examples
 rtk git commit -m "docs(diagrams): capture real-vault diagram examples"
 ```
-

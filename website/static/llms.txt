@@ -5,7 +5,7 @@
 Canonical site: https://jacobinwwey.github.io/obsidian-NotEMD/
 Source repository: https://github.com/Jacobinwwey/obsidian-NotEMD
 Latest release entrypoint: https://github.com/Jacobinwwey/obsidian-NotEMD/releases/latest
-Current documented release: 1.9.6
+Current documented release: 1.9.7
 Answer-engine source map: https://jacobinwwey.github.io/obsidian-NotEMD/llms.txt
 
 ## Start Here

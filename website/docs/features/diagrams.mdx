@@ -54,6 +54,14 @@ Choose **History** in the preview to open the Vault history drawer without hidin
 
 SVG and PDF are produced from vector geometry; PDF uses the same SVG layout and text metrics instead of rasterizing the whole preview. The image export PPI in Notemd settings controls PNG rasterization only (72-600 PPI, 300 by default).
 
+## Readable previews for dense diagrams
+
+Editable HTML/SVG lane-grid diagrams measure and wrap the summary before placing the title and lane header. The header is moved below that protected summary region, and cells are painted before connectors and edge labels. Cross-lane edges use collision-aware orthogonal grid routes that reserve lane labels and occupied cells, so long descriptions do not hide text or force a user to pan sideways to understand the diagram.
+
+Mermaid quadrant charts receive a family-specific normalization pass. Flowchart-only quote and shape repairs are skipped for `quadrantChart`, and a provider-copied opening bracket is removed only when it is the unmatched trailing character of a point label. Intentional brackets in titles, axes, and quadrant names remain visible.
+
+The repository keeps a real-Vault learning and evidence set for every executable diagram type. See [`docs/diagram-examples/`](https://github.com/Jacobinwwey/obsidian-NotEMD/tree/main/docs/diagram-examples) for bilingual input notes, generated SVG/PNG results, and the machine-readable status manifest. `passed` entries represent a run through the loaded plugin bundle, not a static screenshot fixture.
+
 ## Drawnix previews with embedded Mermaid
 
 When a Drawnix artifact contains Mermaid visuals, Notemd sanitizes the rendered SVG and keeps the Mermaid source alongside it in the `.drawnix` metadata. The preview can therefore show the Mermaid image inside the Drawnix knowledge map without requiring the Drawnix or Plait runtime. The default path is self-contained and does not create a separate `.assets` directory. Enable **Also export complete Mermaid visuals** when you need Mermaid source, SVG, and manifest companions for handoff or external editing. Existing artifacts with `.assets` remain supported, and a missing legacy Mermaid SVG can be rebuilt from source text retained in metadata.

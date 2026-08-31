@@ -1610,8 +1610,7 @@
     justify-content: center;
     width: 100%;
     min-height: 112px;
-    max-height: min(62vh, 520px);
-    overflow: auto;
+    overflow: hidden;
     border: 1px solid var(--background-modifier-border);
     border-radius: 4px;
     background: var(--background-secondary);
@@ -1622,32 +1621,15 @@
     display: block;
     width: 100%;
     height: auto;
-    max-width: none;
-    min-width: 100%;
-    flex: 0 0 auto;
+    max-width: 100%;
+    min-width: 0;
+    flex: 0 1 auto;
     object-fit: contain;
     object-position: center;
 }
 
-.notemd-diagram-type-preview-canvas > svg[data-preview-min-readable-width] {
-    width: auto;
-    min-width: var(--notemd-preview-min-readable-width, 520px);
-    max-width: none;
-}
-
 .notemd-diagram-type-preview-canvas > svg.notemd-diagram-type-preview-svg {
     aspect-ratio: auto;
-}
-
-.notemd-diagram-type-preview-overflow-hint {
-    align-self: flex-end;
-    flex: 0 0 auto;
-    margin: 0;
-    padding: 0 0.75em 0.55em;
-    color: var(--text-muted);
-    font-size: 10px;
-    line-height: 1.3;
-    white-space: nowrap;
 }
 
 .notemd-diagram-type-preview-empty,

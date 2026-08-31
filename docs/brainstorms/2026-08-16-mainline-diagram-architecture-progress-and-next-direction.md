@@ -105,8 +105,13 @@ The reference taxonomy supplied architecture, current-state, loop, nested, tree,
 | Consumer | Current evidence | Status |
 |---|---|---|
 | Draw.io | No diagrams.net/Draw.io executable is available in this workspace | Not claimed; add a manual or CI gate before promotion |
+
 | Drawnix | `npm run diagram:consumer:drawnix` builds the production architecture fixture and consumes it through the public `@plait/*` APIs; no independent Drawnix application is available here | Plait consumer contract passed; real application interoperability not claimed |
 | Circuitikz | `pdflatex` compiled all 6 golden fixtures; each produced a non-empty PDF with 0 errors and 0 warnings | Passed local consumer gate; keep tool/version in CI evidence |
+
+## Thumbnail Fit Follow-up (2026-08-29)
+
+User review found that the host-level minimum readable width made the selected-type preview require horizontal scrolling, which is the wrong interaction for a confirmation thumbnail. The preview now keeps the source SVG `viewBox` ratio while constraining the root SVG to the panel width (`width: 100%`, `max-width: 100%`, `min-width: 0`, intrinsic height). The overflow container and scroll hint were removed so every diagram is shown as a complete proportional thumbnail without an extra navigation step.
 
 ## Forward Plan
 
@@ -314,3 +319,21 @@ The previous gate proved the shipped fixtures, but its native heuristics were st
 - Wide previews expose a localized horizontal-scroll hint, so the user receives explicit feedback when the minimum readable width exceeds the host viewport.
 
 Focused evidence: native renderer/diagnostic, preview, render-host, adapter-registry, and SVG-safety tests pass; gallery generation/check remains 33/33. Full regression and Vault reload are the next release gates.
+
+## Native Z-Order Regression Closure (2026-08-26)
+
+The first real Vault reload after the presentation gate exposed two renderer-owned failures that fixture-only `getBBox()` checks could not classify: `data-flow` painted lane-grid cells after connector labels, so `anon table` was covered by the destination cell; `nested` painted inner translucent scope surfaces after outer labels, so `local contract` was covered by a later surface. Both previews correctly entered `error` under the mounted presentation gate. This is evidence that the gate is detecting real UX defects, not merely rejecting malformed markup.
+
+- Lane-grid now paints lane/cell surfaces before edges and edge labels. Connector labels therefore remain the top presentation layer while retaining deterministic routing.
+- Nested now emits all scope surfaces first and all tag/text groups second. Translucency remains unchanged, but DOM order can no longer hide an outer identifier.
+- Renderer regression tests lock both ordering invariants; gallery SVG/PNG and manifest were regenerated for the affected fixtures.
+
+Post-fix evidence before this continuation: `data-flow` was `ready` in the reloaded `1Knowledge` Vault; access-matrix was `ready` with zero mounted text/text intersections and its horizontal-scroll hint. The remaining work then expanded the evidence boundary instead of weakening the gate: nested surfaces/tags are now semantic exclusions, lane-grid edge labels use occupied-cell placement, and the editable semantic figure route now moves ER labels away from child nodes. The gallery now mounts every one of the 33 production fixtures through the same presentation diagnostics used by the plugin. Current repository evidence is `270` Jest suites, `2,375 passed / 1 skipped`, a successful production build, gallery generation/check at `33/33`, and passing docs/render-host/i18n gates. The Vault bundle verifier is intentionally red until the newly built `main.js`/`styles.css`/`manifest.json` are copied to `E:\1Knowledge\.obsidian\plugins\notemd`; Vault CLI reload and post-copy checks remain before release. No commit or push should be made until those checks complete.
+
+## Presentation Gate Convergence (2026-08-26)
+
+The prior split between native gallery checks and mounted runtime checks is closed. `scripts/diagram-gallery-browser-entry.ts` now mounts each production SVG and calls `collectSvgPresentationDiagnostics()` before the asset is accepted. The gallery caught real defects in sequence: ER `contains` versus child `id`, lane-grid `anon table` versus adjacent cells, and nested scope labels versus later-painted surfaces. Each was fixed at its owner boundary and covered by deterministic or Chromium-backed tests. Selector preview safety now runs after final sizing/class application; render-host safety exposes the mount before measurement and rolls back unsafe markup. This is intentionally fail-closed: test fixtures must model measurable SVG geometry rather than forcing production code to accept invisible or malformed previews.
+
+## Topology Footer Label Fit Closure (2026-08-29)
+
+The integration-topology preview exposed a renderer-owned geometry mismatch: the footer chip was 48px high, while its secondary label baseline plus font descent extended below the chip. The host scaled the SVG correctly; the background simply ended too early. The topology renderer now derives a 64px footer chip height from one named constant, and a Chromium regression asserts that every footer text bounding box remains inside its chip. The integration-topology SVG/PNG and gallery manifest were regenerated, and the deployed `1Knowledge` preview reports `ready` with the footer labels inside the background.

@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "typeId": "sequence",
+  "fixtureId": "sequence-request",
+  "title": "Artifact request",
+  "requested": {
+    "typeId": "sequence",
+    "renderTarget": "mermaid",
+    "compatibilityMode": "best-fit",
+    "targetLanguage": "en"
+  },
+  "status": "passed",
+  "sourceNotePath": "notemd-real-diagram-examples/run-1788091203374-babaf1/sequence.md",
+  "outputPath": "notemd-real-diagram-examples/run-1788091203374-babaf1/sequence_summ.md",
+  "artifactPath": "docs/diagram-examples/sequence/artifact.md",
+  "svgPath": "docs/diagram-examples/sequence/result.svg",
+  "pngPath": "docs/diagram-examples/sequence/result.png",
+  "providerId": "DeepSeek",
+  "model": "deepseek-v4-flash",
+  "generatedAt": "2026-08-30T12:02:24.017Z",
+  "artifactSha256": "ee101a6a81360cd05bec209471798ff66491d758b7591d3628ea5f7ac2b3124a",
+  "svgSha256": "9436edc0b0c1715f64289fadc8fd281912ac5eebb3850a9fe6b0add95405571a",
+  "pngSha256": "2087979fdbfe218a03d65894b33020fd994a4b295ef0c561fa92e4b3a9b41787",
+  "visualSource": "operation-preview",
+  "cleanupCompleted": true,
+  "diagnostic": null
+}

@@ -59,6 +59,14 @@ V náhledu zvolte **Historie**, abyste otevřeli zásuvku s historií Vaultu bez
 
 SVG a PDF vznikají na základě vektorové geometrie; PDF využívá stejnou strukturu SVG a metriky textu místo rasterizace celého náhledu. Hodnota PPI pro export obrázku v nastaveních Notemd ovlivňuje pouze rasterizaci PNG (72–600 PPI, výchozí hodnota 300).
 
+## Čitelné náhledy hustých diagramů
+
+Upravitelná HTML/SVG lane-grid schémata nejprve změří a zalomí souhrn a teprve potom umístí titul a záhlaví pruhu. Záhlaví se přesune pod chráněnou oblast souhrnu a buňky se vykreslí před konektory a popisky hran. Hrany mezi pruhy používají kolizně uvědomělé ortogonální mřížkové trasy, které rezervují popisky pruhů i obsazené buňky, takže dlouhé popisy nezakrývají text a nevyžadují vodorovné posouvání.
+
+Mermaid quadrant chart prochází normalizací podle rodiny. Pro `quadrantChart` se přeskočí opravy uvozovek a tvarů určené jen pro flowchart; záměrné závorky v titulcích, osách a názvech kvadrantů zůstávají. Úvodní závorka zkopírovaná providerem se odstraní pouze tehdy, když je neshodným koncovým znakem popisku bodu.
+
+Repozitář uchovává sadu výukových a evidenčních běhů v reálném Vaultu pro každý spustitelný typ diagramu. Bilingvní vstupní poznámky, výsledky SVG/PNG a strojově čitelný manifest najdete v [`docs/diagram-examples/`](https://github.com/Jacobinwwey/obsidian-NotEMD/tree/main/docs/diagram-examples). Položky `passed` představují běh přes načtený plugin bundle, nikoli statický screenshot fixture.
+
 ## Náhledy Drawnix s vloženými vizuály typu Mermaid
 
 Pokud obsahuje artefakt typu Drawnix vizuály typu Mermaid, Notemd očistí vygenerovaný SVG a uchová zdrojový kód Mermaid spolu s ním v metadatach souboru `.drawnix`. Díky tomu může náhled zobrazit obrázek typu Mermaid uvnitř znalostní mapy Drawnix bez potřeby běhu prostředí Drawnix nebo Plait. Výchozí cesta je samostatná a nevytváří samostatnou složku `.assets`. Zvolte možnost **Také exportovat kompletní vizuály typu Mermaid**, pokud potřebujete zdrojový kód Mermaid, SVG a manifest pro předání nebo externí úpravy. Stávající artefakty s složkou `.assets` zůstávají podporovány a chybějící starší SVG typu Mermaid lze znovu vytvořit na základě textu uloženého v metadatach.

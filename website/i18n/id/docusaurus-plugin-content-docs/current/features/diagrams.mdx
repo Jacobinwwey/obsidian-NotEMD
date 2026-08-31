@@ -59,6 +59,14 @@ Pilih opsi **History** di pratinjau untuk membuka drawer sejarah Vault tanpa men
 
 SVG dan PDF dihasilkan dari geometri vektor; PDF menggunakan tata letak SVG dan metrik teks yang sama alih-alih merasterisasi seluruh pratinjau. Pengaturan PPI untuk ekspor gambar di Notemd hanya mengontrol proses rasterisasi PNG (72–600 PPI, dengan nilai default 300).
 
+## Pratinjau yang mudah dibaca untuk diagram padat
+
+Diagram lane-grid HTML/SVG yang dapat diedit mengukur dan membungkus ringkasan sebelum menempatkan judul dan header lane. Header dipindahkan ke bawah area ringkasan yang dilindungi, dan sel digambar sebelum konektor serta label tepi. Tepi lintas-lane memakai rute grid ortogonal yang sadar tabrakan serta mencadangkan ruang untuk label lane dan sel yang terisi, sehingga deskripsi panjang tidak menutupi teks dan pengguna tidak perlu menggeser secara horizontal.
+
+Diagram kuadran Mermaid menjalani normalisasi khusus family. Untuk `quadrantChart`, perbaikan kutipan dan bentuk khusus flowchart dilewati; tanda kurung yang memang dimaksudkan pada judul, sumbu, dan nama kuadran tetap terlihat. Kurung buka yang disalin provider hanya dihapus jika menjadi karakter terakhir yang tidak berpasangan pada label titik.
+
+Repositori menyimpan kumpulan pembelajaran dan bukti dari Vault nyata untuk setiap jenis diagram yang dapat dieksekusi. Lihat [`docs/diagram-examples/`](https://github.com/Jacobinwwey/obsidian-NotEMD/tree/main/docs/diagram-examples) untuk catatan input dwibahasa, hasil SVG/PNG, dan manifest status yang dapat dibaca mesin. Entri `passed` adalah proses melalui plugin bundle yang dimuat, bukan screenshot fixture statis.
+
 ## Pratinjau Drawnix dengan visual Mermaid yang terintegrasi
 
 Ketika suatu artefak Drawnix berisi visualisasi Mermaid, Notemd akan menyaring SVG yang dihasilkan dan menyimpan kode sumber Mermaid tersebut bersamanya dalam metadata `.drawnix`. Dengan demikian, pratinjau dapat menampilkan gambar Mermaid di dalam peta pengetahuan Drawnix tanpa memerlukan runtime Drawnix atau Plait. Rute defaultnya bersifat terpadu dan tidak membuat direktori `.assets` yang terpisah. Aktifkan opsi **Juga ekspor visualisasi Mermaid yang lengkap** bila Anda membutuhkan kode sumber Mermaid, SVG, serta berkas manifest untuk diserahkan atau diedit di luar aplikasi. Artefak yang sudah ada dengan direktori `.assets` tetap didukung, dan SVG Mermaid versi lama yang hilang dapat dibuat kembali dari teks sumber yang tersimpan dalam metadata.

@@ -20,7 +20,7 @@ The runtime work for Batch 0 through Batch 3B is implemented in the current deli
 | Batch 2 quantitative and schedule | Complete | bar/line/scatter variants, quantitative projection, Gantt renderer |
 | Batch 3A structural | Complete | ordered-stack, set-overlap, ranked-segments, cycle renderers |
 | Batch 3B structural | Complete | nested, tree, process, medallion, high-level renderers |
-| Final verification and mainline delivery | Complete | 265 Jest suites, 2,339 passed / 1 skipped; build/docs/gallery/render-host/i18n/consumer/diff gates passed; lint remains baseline debt |
+| Final verification and mainline delivery | In progress | 270 Jest suites, 2,375 passed / 1 skipped; build/gallery/docs/render-host/i18n gates pass; Vault bundle reload/CLI evidence pending; lint remains baseline debt |
 
 ### Post-plan discoverability hardening (2026-08-22)
 

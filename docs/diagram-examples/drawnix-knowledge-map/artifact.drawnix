@@ -1,0 +1,1442 @@
+{
+  "type": "drawnix",
+  "version": 1,
+  "source": "web",
+  "elements": [
+    {
+      "id": "source-document-572e00f0",
+      "type": "mindmap",
+      "children": [
+        {
+          "id": "source-section-2fe43fcf",
+          "type": "mind_child",
+          "children": [
+            {
+              "id": "source-details-a025870e",
+              "type": "mind_child",
+              "children": [
+                {
+                  "id": "source-detail-75e65d25",
+                  "type": "mind_child",
+                  "children": [],
+                  "data": {
+                    "topic": {
+                      "type": "paragraph",
+                      "children": [
+                        {
+                          "text": "spec.nodes[1]:\n{\"id\":\"architecture-zh-cn\",\"labe\nl\":\"architecture.zh-CN\",\"kind\":\n\"document\",\"children\":[{\"id\":\"ui\n-entrypoints\",\"label\":\"Obsidian\nUI\",\"kind\":\"subsy…"
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "id": "source-detail-f6f1b4f8",
+                  "type": "mind_child",
+                  "children": [],
+                  "data": {
+                    "topic": {
+                      "type": "paragraph",
+                      "children": [
+                        {
+                          "text": "spec.edges[1]:\n{\"from\":\"command-palette\",\"to\":\n\"command-dispatch\",\"label\":\"sta\nrts\"}"
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "id": "source-detail-5c98ca14",
+                  "type": "mind_child",
+                  "children": [],
+                  "data": {
+                    "topic": {
+                      "type": "paragraph",
+                      "children": [
+                        {
+                          "text": "spec.edges[2]:\n{\"from\":\"sidebar\",\"to\":\"command\n-dispatch\",\"label\":\"starts\"}"
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "id": "source-detail-b8d42e14",
+                  "type": "mind_child",
+                  "children": [],
+                  "data": {
+                    "topic": {
+                      "type": "paragraph",
+                      "children": [
+                        {
+                          "text": "spec.edges[3]:\n{\"from\":\"settings\",\"to\":\"setting\ns-store\",\"label\":\"updates\"}"
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "id": "source-detail-66ce11d4",
+                  "type": "mind_child",
+                  "children": [],
+                  "data": {
+                    "topic": {
+                      "type": "paragraph",
+                      "children": [
+                        {
+                          "text": "spec.edges[4]:\n{\"from\":\"command-dispatch\",\"to\"\n:\"diagram-operation\",\"label\":\"ro\nutes\"}"
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "id": "source-detail-9667dd42",
+                  "type": "mind_child",
+                  "children": [],
+                  "data": {
+                    "topic": {
+                      "type": "paragraph",
+                      "children": [
+                        {
+                          "text": "spec.edges[5]:\n{\"from\":\"diagram-operation\",\"to\n\":\"source-coverage\",\"label\":\"cov\ners source\"}"
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "id": "source-detail-f363d1e5",
+                  "type": "mind_child",
+                  "children": [],
+                  "data": {
+                    "topic": {
+                      "type": "paragraph",
+                      "children": [
+                        {
+                          "text": "spec.edges[6]:\n{\"from\":\"source-coverage\",\"to\":\"\ndiagram-spec\",\"label\":\"builds\"}"
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "id": "source-detail-436f5087",
+                  "type": "mind_child",
+                  "children": [],
+                  "data": {
+                    "topic": {
+                      "type": "paragraph",
+                      "children": [
+                        {
+                          "text": "spec.edges[7]:\n{\"from\":\"diagram-spec\",\"to\":\"dr\nawnix-renderer\",\"label\":\"renders\n\"}"
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "id": "source-detail-555b2190",
+                  "type": "mind_child",
+                  "children": [],
+                  "data": {
+                    "topic": {
+                      "type": "paragraph",
+                      "children": [
+                        {
+                          "text": "spec.edges[8]:\n{\"from\":\"drawnix-renderer\",\"to\"\n:\"drawnix-file\",\"label\":\"writes\n\"}"
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "id": "source-detail-d789f23d",
+                  "type": "mind_child",
+                  "children": [],
+                  "data": {
+                    "topic": {
+                      "type": "paragraph",
+                      "children": [
+                        {
+                          "text": "spec.edges[9]:\n{\"from\":\"drawnix-renderer\",\"to\"\n:\"svg-companion\",\"label\":\"previe\nws\"}"
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "id": "source-detail-4b860c68",
+                  "type": "mind_child",
+                  "children": [],
+                  "data": {
+                    "topic": {
+                      "type": "paragraph",
+                      "children": [
+                        {
+                          "text": "spec.edges[10]:\n{\"from\":\"drawnix-file\",\"to\":\"ma\nrkdown-wrapper\",\"label\":\"links\"\n}"
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "id": "source-detail-706fa0f5",
+                  "type": "mind_child",
+                  "children": [],
+                  "data": {
+                    "topic": {
+                      "type": "paragraph",
+                      "children": [
+                        {
+                          "text": "spec.edges[11]:\n{\"from\":\"obsidian-cli\",\"to\":\"ma\nintainer-bridge\",\"label\":\"execut\nes\"}"
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "id": "source-detail-3cbfa448",
+                  "type": "mind_child",
+                  "children": [],
+                  "data": {
+                    "topic": {
+                      "type": "paragraph",
+                      "children": [
+                        {
+                          "text": "spec.edges[12]:\n{\"from\":\"maintainer-bridge\",\"to\n\":\"diagram-operation\",\"label\":\"i\nnvokes\"}"
+                        }
+                      ]
+                    }
+                  }
+                }
+              ],
+              "data": {
+                "topic": {
+                  "type": "paragraph",
+                  "children": [
+                    {
+                      "text": "Source details"
+                    }
+                  ]
+                }
+              }
+            }
+          ],
+          "data": {
+            "topic": {
+              "type": "paragraph",
+              "children": [
+                {
+                  "text": "Source facts"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "id": "source-section-fdeb6df5",
+          "type": "mind_child",
+          "children": [
+            {
+              "id": "source-details-a025870e-2",
+              "type": "mind_child",
+              "children": [
+                {
+                  "id": "source-detail-86d9c551",
+                  "type": "mind_child",
+                  "children": [],
+                  "data": {
+                    "topic": {
+                      "type": "paragraph",
+                      "children": [
+                        {
+                          "text": "Confirm that the\ndrawnix-knowledge-map output\npreserves the source facts and\nrelationships."
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "id": "source-detail-9fad9372",
+                  "type": "mind_child",
+                  "children": [],
+                  "data": {
+                    "topic": {
+                      "type": "paragraph",
+                      "children": [
+                        {
+                          "text": "Check that the visual structure\nmatches the declared drawnix\nrender target."
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "id": "source-detail-8e51b829",
+                  "type": "mind_child",
+                  "children": [],
+                  "data": {
+                    "topic": {
+                      "type": "paragraph",
+                      "children": [
+                        {
+                          "text": "Inspect this evidence first:\nspec.nodes[1]:\n{\"id\":\"architecture-zh-cn\",\"labe\nl\":\"architecture.zh-CN\",\"kind\":\n\"document\",\"children\":[{\"id\":\"ui\n-entrypoints\",\"label…"
+                        }
+                      ]
+                    }
+                  }
+                }
+              ],
+              "data": {
+                "topic": {
+                  "type": "paragraph",
+                  "children": [
+                    {
+                      "text": "Source details"
+                    }
+                  ]
+                }
+              }
+            }
+          ],
+          "data": {
+            "topic": {
+              "type": "paragraph",
+              "children": [
+                {
+                  "text": "Reading cues"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "id": "source-additional-7baa9121",
+          "type": "mind_child",
+          "children": [
+            {
+              "id": "architecture-zh-cn",
+              "type": "mind_child",
+              "children": [
+                {
+                  "id": "ui-entrypoints",
+                  "type": "mind_child",
+                  "children": [
+                    {
+                      "id": "command-palette",
+                      "type": "mind_child",
+                      "children": [],
+                      "data": {
+                        "topic": {
+                          "type": "paragraph",
+                          "children": [
+                            {
+                              "text": "Command palette"
+                            }
+                          ]
+                        }
+                      }
+                    },
+                    {
+                      "id": "sidebar",
+                      "type": "mind_child",
+                      "children": [],
+                      "data": {
+                        "topic": {
+                          "type": "paragraph",
+                          "children": [
+                            {
+                              "text": "Sidebar"
+                            }
+                          ]
+                        }
+                      }
+                    },
+                    {
+                      "id": "settings",
+                      "type": "mind_child",
+                      "children": [],
+                      "data": {
+                        "topic": {
+                          "type": "paragraph",
+                          "children": [
+                            {
+                              "text": "Settings"
+                            }
+                          ]
+                        }
+                      }
+                    }
+                  ],
+                  "data": {
+                    "topic": {
+                      "type": "paragraph",
+                      "children": [
+                        {
+                          "text": "Obsidian UI"
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "id": "command-dispatch",
+                  "type": "mind_child",
+                  "children": [],
+                  "data": {
+                    "topic": {
+                      "type": "paragraph",
+                      "children": [
+                        {
+                          "text": "Command dispatch"
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "id": "settings-store",
+                  "type": "mind_child",
+                  "children": [],
+                  "data": {
+                    "topic": {
+                      "type": "paragraph",
+                      "children": [
+                        {
+                          "text": "Settings store"
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "id": "diagram-operation",
+                  "type": "mind_child",
+                  "children": [],
+                  "data": {
+                    "topic": {
+                      "type": "paragraph",
+                      "children": [
+                        {
+                          "text": "Diagram operation"
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "id": "source-coverage",
+                  "type": "mind_child",
+                  "children": [],
+                  "data": {
+                    "topic": {
+                      "type": "paragraph",
+                      "children": [
+                        {
+                          "text": "Source coverage"
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "id": "diagram-spec",
+                  "type": "mind_child",
+                  "children": [],
+                  "data": {
+                    "topic": {
+                      "type": "paragraph",
+                      "children": [
+                        {
+                          "text": "Diagram spec"
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "id": "drawnix-renderer",
+                  "type": "mind_child",
+                  "children": [],
+                  "data": {
+                    "topic": {
+                      "type": "paragraph",
+                      "children": [
+                        {
+                          "text": "Drawnix renderer"
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "id": "drawnix-file",
+                  "type": "mind_child",
+                  "children": [],
+                  "data": {
+                    "topic": {
+                      "type": "paragraph",
+                      "children": [
+                        {
+                          "text": "Drawnix file"
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "id": "svg-companion",
+                  "type": "mind_child",
+                  "children": [],
+                  "data": {
+                    "topic": {
+                      "type": "paragraph",
+                      "children": [
+                        {
+                          "text": "SVG companion"
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "id": "markdown-wrapper",
+                  "type": "mind_child",
+                  "children": [],
+                  "data": {
+                    "topic": {
+                      "type": "paragraph",
+                      "children": [
+                        {
+                          "text": "Markdown wrapper"
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "id": "obsidian-cli",
+                  "type": "mind_child",
+                  "children": [],
+                  "data": {
+                    "topic": {
+                      "type": "paragraph",
+                      "children": [
+                        {
+                          "text": "Obsidian CLI"
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "id": "maintainer-bridge",
+                  "type": "mind_child",
+                  "children": [],
+                  "data": {
+                    "topic": {
+                      "type": "paragraph",
+                      "children": [
+                        {
+                          "text": "Maintainer bridge"
+                        }
+                      ]
+                    }
+                  }
+                }
+              ],
+              "data": {
+                "topic": {
+                  "type": "paragraph",
+                  "children": [
+                    {
+                      "text": "architecture.zh-CN"
+                    }
+                  ]
+                }
+              }
+            }
+          ],
+          "data": {
+            "topic": {
+              "type": "paragraph",
+              "children": [
+                {
+                  "text": "Additional concepts"
+                }
+              ]
+            }
+          }
+        }
+      ],
+      "data": {
+        "topic": {
+          "type": "paragraph",
+          "children": [
+            {
+              "text": "drawnix-knowledge-map"
+            }
+          ]
+        }
+      },
+      "layout": "standard",
+      "rightNodeCount": 2,
+      "points": [
+        [
+          1490,
+          1127
+        ]
+      ]
+    },
+    {
+      "id": "cross-1-command-palette-to-command-dispatch",
+      "type": "arrow-line",
+      "shape": "straight",
+      "points": [
+        [
+          316,
+          568
+        ],
+        [
+          144,
+          568
+        ],
+        [
+          144,
+          697
+        ],
+        [
+          288,
+          697
+        ],
+        [
+          288,
+          824
+        ],
+        [
+          536,
+          824
+        ],
+        [
+          536,
+          826
+        ]
+      ],
+      "source": {
+        "id": "command-palette",
+        "marker": "none"
+      },
+      "target": {
+        "id": "command-dispatch",
+        "marker": "arrow"
+      },
+      "texts": [
+        {
+          "text": {
+            "type": "paragraph",
+            "children": [
+              {
+                "text": "starts"
+              }
+            ]
+          },
+          "position": 0.4537712895377129
+        }
+      ],
+      "strokeColor": "#64748b",
+      "strokeWidth": 1.6,
+      "strokeStyle": "dashed",
+      "opacity": 1,
+      "text": {
+        "children": [
+          {
+            "text": "starts"
+          }
+        ]
+      },
+      "style": {
+        "stroke": "#64748b",
+        "dashed": true
+      },
+      "data": {
+        "source": "DrawnixMindMapProjection"
+      }
+    },
+    {
+      "id": "cross-2-sidebar-to-command-dispatch",
+      "type": "arrow-line",
+      "shape": "straight",
+      "points": [
+        [
+          339,
+          654
+        ],
+        [
+          144,
+          654
+        ],
+        [
+          144,
+          793
+        ],
+        [
+          288,
+          793
+        ],
+        [
+          288,
+          824
+        ],
+        [
+          536,
+          824
+        ],
+        [
+          536,
+          826
+        ]
+      ],
+      "source": {
+        "id": "sidebar",
+        "marker": "none"
+      },
+      "target": {
+        "id": "command-dispatch",
+        "marker": "arrow"
+      },
+      "texts": [
+        {
+          "text": {
+            "type": "paragraph",
+            "children": [
+              {
+                "text": "starts"
+              }
+            ]
+          },
+          "position": 0.5349143610013175
+        }
+      ],
+      "strokeColor": "#64748b",
+      "strokeWidth": 1.6,
+      "strokeStyle": "dashed",
+      "opacity": 1,
+      "text": {
+        "children": [
+          {
+            "text": "starts"
+          }
+        ]
+      },
+      "style": {
+        "stroke": "#64748b",
+        "dashed": true
+      },
+      "data": {
+        "source": "DrawnixMindMapProjection"
+      }
+    },
+    {
+      "id": "cross-3-settings-to-settings-store",
+      "type": "arrow-line",
+      "shape": "straight",
+      "points": [
+        [
+          339,
+          740
+        ],
+        [
+          144,
+          740
+        ],
+        [
+          144,
+          889
+        ],
+        [
+          560,
+          889
+        ],
+        [
+          560,
+          912
+        ]
+      ],
+      "source": {
+        "id": "settings",
+        "marker": "none"
+      },
+      "target": {
+        "id": "settings-store",
+        "marker": "arrow"
+      },
+      "texts": [
+        {
+          "text": {
+            "type": "paragraph",
+            "children": [
+              {
+                "text": "updates"
+              }
+            ]
+          },
+          "position": 0.5312899106002554
+        }
+      ],
+      "strokeColor": "#64748b",
+      "strokeWidth": 1.6,
+      "strokeStyle": "dashed",
+      "opacity": 1,
+      "text": {
+        "children": [
+          {
+            "text": "updates"
+          }
+        ]
+      },
+      "style": {
+        "stroke": "#64748b",
+        "dashed": true
+      },
+      "data": {
+        "source": "DrawnixMindMapProjection"
+      }
+    },
+    {
+      "id": "cross-4-command-dispatch-to-diagram-operation",
+      "type": "arrow-line",
+      "shape": "straight",
+      "points": [
+        [
+          536,
+          826
+        ],
+        [
+          144,
+          826
+        ],
+        [
+          144,
+          985
+        ],
+        [
+          532,
+          985
+        ],
+        [
+          532,
+          998
+        ]
+      ],
+      "source": {
+        "id": "command-dispatch",
+        "marker": "none"
+      },
+      "target": {
+        "id": "diagram-operation",
+        "marker": "arrow"
+      },
+      "texts": [
+        {
+          "text": {
+            "type": "paragraph",
+            "children": [
+              {
+                "text": "routes"
+              }
+            ]
+          },
+          "position": 0.6544117647058824
+        }
+      ],
+      "strokeColor": "#64748b",
+      "strokeWidth": 1.6,
+      "strokeStyle": "dashed",
+      "opacity": 1,
+      "text": {
+        "children": [
+          {
+            "text": "routes"
+          }
+        ]
+      },
+      "style": {
+        "stroke": "#64748b",
+        "dashed": true
+      },
+      "data": {
+        "source": "DrawnixMindMapProjection"
+      }
+    },
+    {
+      "id": "cross-5-diagram-operation-to-source-coverage",
+      "type": "arrow-line",
+      "shape": "straight",
+      "points": [
+        [
+          532,
+          998
+        ],
+        [
+          532,
+          1009.5
+        ],
+        [
+          116,
+          1009.5
+        ],
+        [
+          116,
+          1081
+        ],
+        [
+          552,
+          1081
+        ],
+        [
+          552,
+          1084
+        ]
+      ],
+      "source": {
+        "id": "diagram-operation",
+        "marker": "none"
+      },
+      "target": {
+        "id": "source-coverage",
+        "marker": "arrow"
+      },
+      "texts": [
+        {
+          "text": {
+            "type": "paragraph",
+            "children": [
+              {
+                "text": "covers source"
+              }
+            ]
+          },
+          "position": 0.6236673773987207
+        }
+      ],
+      "strokeColor": "#64748b",
+      "strokeWidth": 1.6,
+      "strokeStyle": "dashed",
+      "opacity": 1,
+      "text": {
+        "children": [
+          {
+            "text": "covers source"
+          }
+        ]
+      },
+      "style": {
+        "stroke": "#64748b",
+        "dashed": true
+      },
+      "data": {
+        "source": "DrawnixMindMapProjection"
+      }
+    },
+    {
+      "id": "cross-6-source-coverage-to-diagram-spec",
+      "type": "arrow-line",
+      "shape": "straight",
+      "points": [
+        [
+          552,
+          1084
+        ],
+        [
+          288,
+          1084
+        ],
+        [
+          288,
+          1177
+        ],
+        [
+          144,
+          1177
+        ],
+        [
+          144,
+          1170
+        ],
+        [
+          567,
+          1170
+        ]
+      ],
+      "source": {
+        "id": "source-coverage",
+        "marker": "none"
+      },
+      "target": {
+        "id": "diagram-spec",
+        "marker": "arrow"
+      },
+      "texts": [
+        {
+          "text": {
+            "type": "paragraph",
+            "children": [
+              {
+                "text": "builds"
+              }
+            ]
+          },
+          "position": 0.4607948442534909
+        }
+      ],
+      "strokeColor": "#64748b",
+      "strokeWidth": 1.6,
+      "strokeStyle": "dashed",
+      "opacity": 1,
+      "text": {
+        "children": [
+          {
+            "text": "builds"
+          }
+        ]
+      },
+      "style": {
+        "stroke": "#64748b",
+        "dashed": true
+      },
+      "data": {
+        "source": "DrawnixMindMapProjection"
+      }
+    },
+    {
+      "id": "cross-7-diagram-spec-to-drawnix-renderer",
+      "type": "arrow-line",
+      "shape": "straight",
+      "points": [
+        [
+          567,
+          1170
+        ],
+        [
+          288,
+          1170
+        ],
+        [
+          288,
+          1273
+        ],
+        [
+          144,
+          1273
+        ],
+        [
+          144,
+          1256
+        ],
+        [
+          540,
+          1256
+        ]
+      ],
+      "source": {
+        "id": "diagram-spec",
+        "marker": "none"
+      },
+      "target": {
+        "id": "drawnix-renderer",
+        "marker": "arrow"
+      },
+      "texts": [
+        {
+          "text": {
+            "type": "paragraph",
+            "children": [
+              {
+                "text": "renders"
+              }
+            ]
+          },
+          "position": 0.483493077742279
+        }
+      ],
+      "strokeColor": "#64748b",
+      "strokeWidth": 1.6,
+      "strokeStyle": "dashed",
+      "opacity": 1,
+      "text": {
+        "children": [
+          {
+            "text": "renders"
+          }
+        ]
+      },
+      "style": {
+        "stroke": "#64748b",
+        "dashed": true
+      },
+      "data": {
+        "source": "DrawnixMindMapProjection"
+      }
+    },
+    {
+      "id": "cross-8-drawnix-renderer-to-drawnix-file",
+      "type": "arrow-line",
+      "shape": "straight",
+      "points": [
+        [
+          540,
+          1256
+        ],
+        [
+          144,
+          1256
+        ],
+        [
+          144,
+          1369
+        ],
+        [
+          288,
+          1369
+        ],
+        [
+          288,
+          1342
+        ],
+        [
+          567,
+          1342
+        ]
+      ],
+      "source": {
+        "id": "drawnix-renderer",
+        "marker": "none"
+      },
+      "target": {
+        "id": "drawnix-file",
+        "marker": "arrow"
+      },
+      "texts": [
+        {
+          "text": {
+            "type": "paragraph",
+            "children": [
+              {
+                "text": "writes"
+              }
+            ]
+          },
+          "position": 0.6058394160583942
+        }
+      ],
+      "strokeColor": "#64748b",
+      "strokeWidth": 1.6,
+      "strokeStyle": "dashed",
+      "opacity": 1,
+      "text": {
+        "children": [
+          {
+            "text": "writes"
+          }
+        ]
+      },
+      "style": {
+        "stroke": "#64748b",
+        "dashed": true
+      },
+      "data": {
+        "source": "DrawnixMindMapProjection"
+      }
+    },
+    {
+      "id": "cross-9-drawnix-renderer-to-svg-companion",
+      "type": "arrow-line",
+      "shape": "straight",
+      "points": [
+        [
+          540,
+          1256
+        ],
+        [
+          144,
+          1256
+        ],
+        [
+          144,
+          1561
+        ],
+        [
+          288,
+          1561
+        ],
+        [
+          288,
+          1428
+        ],
+        [
+          558,
+          1428
+        ]
+      ],
+      "source": {
+        "id": "drawnix-renderer",
+        "marker": "none"
+      },
+      "target": {
+        "id": "svg-companion",
+        "marker": "arrow"
+      },
+      "texts": [
+        {
+          "text": {
+            "type": "paragraph",
+            "children": [
+              {
+                "text": "previews"
+              }
+            ]
+          },
+          "position": 0.6193910256410257
+        }
+      ],
+      "strokeColor": "#64748b",
+      "strokeWidth": 1.6,
+      "strokeStyle": "dashed",
+      "opacity": 1,
+      "text": {
+        "children": [
+          {
+            "text": "previews"
+          }
+        ]
+      },
+      "style": {
+        "stroke": "#64748b",
+        "dashed": true
+      },
+      "data": {
+        "source": "DrawnixMindMapProjection"
+      }
+    },
+    {
+      "id": "cross-10-drawnix-file-to-markdown-wrapper",
+      "type": "arrow-line",
+      "shape": "straight",
+      "points": [
+        [
+          567,
+          1342
+        ],
+        [
+          144,
+          1342
+        ],
+        [
+          144,
+          1657
+        ],
+        [
+          288,
+          1657
+        ],
+        [
+          288,
+          1514
+        ],
+        [
+          533,
+          1514
+        ]
+      ],
+      "source": {
+        "id": "drawnix-file",
+        "marker": "none"
+      },
+      "target": {
+        "id": "markdown-wrapper",
+        "marker": "arrow"
+      },
+      "texts": [
+        {
+          "text": {
+            "type": "paragraph",
+            "children": [
+              {
+                "text": "links"
+              }
+            ]
+          },
+          "position": 0.6377952755905512
+        }
+      ],
+      "strokeColor": "#64748b",
+      "strokeWidth": 1.6,
+      "strokeStyle": "dashed",
+      "opacity": 1,
+      "text": {
+        "children": [
+          {
+            "text": "links"
+          }
+        ]
+      },
+      "style": {
+        "stroke": "#64748b",
+        "dashed": true
+      },
+      "data": {
+        "source": "DrawnixMindMapProjection"
+      }
+    },
+    {
+      "id": "cross-11-obsidian-cli-to-maintainer-bridge",
+      "type": "arrow-line",
+      "shape": "straight",
+      "points": [
+        [
+          567,
+          1600
+        ],
+        [
+          144,
+          1600
+        ],
+        [
+          144,
+          1753
+        ],
+        [
+          288,
+          1753
+        ],
+        [
+          288,
+          1686
+        ],
+        [
+          533,
+          1686
+        ]
+      ],
+      "source": {
+        "id": "obsidian-cli",
+        "marker": "none"
+      },
+      "target": {
+        "id": "maintainer-bridge",
+        "marker": "arrow"
+      },
+      "texts": [
+        {
+          "text": {
+            "type": "paragraph",
+            "children": [
+              {
+                "text": "executes"
+              }
+            ]
+          },
+          "position": 0.627906976744186
+        }
+      ],
+      "strokeColor": "#64748b",
+      "strokeWidth": 1.6,
+      "strokeStyle": "dashed",
+      "opacity": 1,
+      "text": {
+        "children": [
+          {
+            "text": "executes"
+          }
+        ]
+      },
+      "style": {
+        "stroke": "#64748b",
+        "dashed": true
+      },
+      "data": {
+        "source": "DrawnixMindMapProjection"
+      }
+    },
+    {
+      "id": "cross-12-maintainer-bridge-to-diagram-operation",
+      "type": "arrow-line",
+      "shape": "straight",
+      "points": [
+        [
+          533,
+          1686
+        ],
+        [
+          533,
+          1579
+        ],
+        [
+          144,
+          1579
+        ],
+        [
+          144,
+          1465
+        ],
+        [
+          288,
+          1465
+        ],
+        [
+          288,
+          998
+        ],
+        [
+          532,
+          998
+        ]
+      ],
+      "source": {
+        "id": "maintainer-bridge",
+        "marker": "none"
+      },
+      "target": {
+        "id": "diagram-operation",
+        "marker": "arrow"
+      },
+      "texts": [
+        {
+          "text": {
+            "type": "paragraph",
+            "children": [
+              {
+                "text": "invokes"
+              }
+            ]
+          },
+          "position": 0.46552901023890786
+        }
+      ],
+      "strokeColor": "#64748b",
+      "strokeWidth": 1.6,
+      "strokeStyle": "dashed",
+      "opacity": 1,
+      "text": {
+        "children": [
+          {
+            "text": "invokes"
+          }
+        ]
+      },
+      "style": {
+        "stroke": "#64748b",
+        "dashed": true
+      },
+      "data": {
+        "source": "DrawnixMindMapProjection"
+      }
+    }
+  ],
+  "viewport": {
+    "zoom": 1,
+    "offsetX": 0,
+    "offsetY": 0
+  }
+}

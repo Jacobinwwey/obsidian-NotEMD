@@ -1,6 +1,6 @@
 {
 	"name": "notemd",
-	"version": "1.9.6",
+	"version": "1.9.7",
 	"description": "Enhances notes using LLMs: 1) Processes text to add [[wiki-links]] and create concept notes. 2) Performs web research (Tavily/DuckDuckGo) and summarizes topics. 3) Generates content from note titles. 4) Translates notes/selections. Supports multiple LLM providers and customizable output.",
 	"main": "main.js",
 	"scripts": {
@@ -18,6 +18,8 @@
 		"diagram:export-artifact": "node scripts/export-diagram-artifact.js",
 		"diagram:gallery": "node scripts/generate-diagram-gallery.js",
 		"diagram:gallery:check": "node scripts/generate-diagram-gallery.js --check",
+		"diagram:examples": "node scripts/generate-diagram-examples.js",
+		"diagram:examples:check": "node scripts/generate-diagram-examples.js --check",
 		"benchmark:drawnix-knowledge-map": "node scripts/benchmark-drawnix-knowledge-map.js",
 		"diagram:consumer:drawnix": "node scripts/run-drawnix-consumer-gate.mjs",
 		"diagram:export-circuitikz": "node scripts/export-circuitikz.js",

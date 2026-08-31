@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="920" height="406" viewBox="0 0 920 406" role="img" aria-labelledby="notemd-reference-title notemd-reference-desc" data-notemd-renderer="notemd-reference-layouts@1.1.0" data-layout-safety="notemd-layout-safety@1.0.0">
+        <title id="notemd-reference-title">Release funnel</title>
+        <desc id="notemd-reference-desc">Ranked funnel with four bounded segments, oriented as a funnel, from Ideas (captured) through Specs (approved) and Builds (verified) to Releases (published, focal).</desc>
+        <style>
+        .ref-canvas { fill: #f8fafc; }
+        .ref-title { fill: #172033; font: 700 26px "Segoe UI", Arial, sans-serif; }
+        .ref-summary { fill: #475569; font: 13px "Segoe UI", Arial, sans-serif; }
+        .ref-zone { fill: #ffffff; stroke: #cbd5e1; stroke-width: 1; }
+        .ref-zone-label { fill: #475569; font: 700 10px "Segoe UI", Arial, sans-serif; letter-spacing: 1.5px; }
+        .ref-node { fill: #ffffff; stroke: #cbd5e1; stroke-width: 1.2; }
+        .ref-node.focal { fill: #fff7ed; stroke: #c2410c; stroke-width: 1.8; }
+        .ref-node.external { stroke-dasharray: 5 4; }
+        .ref-node-label { fill: #172033; font: 600 13px "Segoe UI", Arial, sans-serif; }
+        .ref-header-label { fill: #ffffff; font: 600 11px "Segoe UI", Arial, sans-serif; }
+        .ref-node-sub { fill: #475569; font: 10px Consolas, monospace; }
+        .ref-hub-label { fill: #f8fafc; font: 600 13px "Segoe UI", Arial, sans-serif; }
+        .ref-hub-sub { fill: #e2e8f0; font: 10px Consolas, monospace; }
+        .ref-edge { fill: none; stroke: #475569; stroke-width: 1.5; }
+        .ref-edge.accent { stroke: #c2410c; stroke-width: 2; marker-end: url(#notemd-reference-arrow-accent); }
+        .ref-edge.link { stroke: #1d4ed8; marker-end: url(#notemd-reference-arrow-link); }
+        .ref-edge.trigger { stroke-dasharray: 5 4; }
+        .ref-edge.dashed { stroke-dasharray: 5 4; }
+        .ref-edge-label { fill: #475569; font: 10px Consolas, monospace; paint-order: stroke; stroke: #f8fafc; stroke-width: 5px; }
+        .ref-axis { stroke: #cbd5e1; stroke-width: 1; }
+        .ref-axis-label { fill: #475569; font: 10px Consolas, monospace; }
+        .ref-chip { fill: #e2e8f0; stroke: #cbd5e1; stroke-width: .7; }
+        .ref-chip-text { fill: #172033; font: 700 8px Consolas, monospace; }
+        .ref-focal-fill { fill: #fff7ed; stroke: #c2410c; stroke-width: 1.8; }
+        .ref-caption { fill: #475569; font: 10px Consolas, monospace; letter-spacing: .8px; }
+    </style>
+        <defs>
+        <marker id="notemd-reference-arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0 L8 4 L0 8 Z" fill="#475569" /></marker>
+        <marker id="notemd-reference-arrow-accent" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0 L8 4 L0 8 Z" fill="#c2410c" /></marker>
+        <marker id="notemd-reference-arrow-link" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0 L8 4 L0 8 Z" fill="#1d4ed8" /></marker>
+    </defs>
+        <rect class="ref-canvas" x="0" y="0" width="920" height="406" />
+        <text x="40" y="42" text-anchor="start" class="ref-title" data-layout-safety="notemd-layout-safety@1.0.0"><tspan x="40" dy="0">Release funnel</tspan></text>
+        <text x="40" y="66" text-anchor="start" class="ref-summary" data-layout-safety="notemd-layout-safety@1.0.0"><tspan x="40" dy="0">Ranked funnel with four bounded segments, oriented as a funnel, from Ideas (captured) through Specs</tspan><tspan x="40" dy="14">(approved) and Builds (verified) to Releases (published, focal).</tspan></text>
+        <text class="ref-caption" x="460" y="98" text-anchor="middle">AUDIENCE → CONVERSION</text><g id="reference-segment-ideas"><polygon class="ref-node" points="272.75,112 647.25,112 701.5,170 218.50000000000003,170" /><text x="460" y="136" text-anchor="middle" class="ref-node-label" data-layout-safety="notemd-layout-safety@1.0.0"><tspan x="460" dy="0">Ideas</tspan></text><text x="460" y="156" text-anchor="middle" class="ref-node-sub" data-layout-safety="notemd-layout-safety@1.0.0"><tspan x="460" dy="0">captured</tspan></text></g><g id="reference-segment-specs"><polygon class="ref-node" points="218.50000000000003,178 701.5,178 755.75,236 164.25,236" /><text x="460" y="202" text-anchor="middle" class="ref-node-label" data-layout-safety="notemd-layout-safety@1.0.0"><tspan x="460" dy="0">Specs</tspan></text><text x="460" y="222" text-anchor="middle" class="ref-node-sub" data-layout-safety="notemd-layout-safety@1.0.0"><tspan x="460" dy="0">approved</tspan></text></g><g id="reference-segment-builds"><polygon class="ref-node" points="164.25,244 755.75,244 810,302 110,302" /><text x="460" y="268" text-anchor="middle" class="ref-node-label" data-layout-safety="notemd-layout-safety@1.0.0"><tspan x="460" dy="0">Builds</tspan></text><text x="460" y="288" text-anchor="middle" class="ref-node-sub" data-layout-safety="notemd-layout-safety@1.0.0"><tspan x="460" dy="0">verified</tspan></text></g><g id="reference-segment-releases"><polygon class="ref-focal-fill" points="110,310 810,310 810,368 110,368" /><text x="460" y="334" text-anchor="middle" class="ref-node-label" data-layout-safety="notemd-layout-safety@1.0.0"><tspan x="460" dy="0">Releases</tspan></text><text x="460" y="354" text-anchor="middle" class="ref-node-sub" data-layout-safety="notemd-layout-safety@1.0.0"><tspan x="460" dy="0">published</tspan></text></g>
+    </svg>

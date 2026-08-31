@@ -105,16 +105,32 @@ describe('repo-saga chronicle coverage', () => {
         }
     });
 
-    test('keeps the official responsive Star History curve embed', () => {
+    test('keeps the responsive star-history.dera.page curve embed', () => {
         const source = fs.readFileSync(path.join(repoRoot, 'README.md'), 'utf8');
 
         expect(source).toContain('## Star History');
-        expect(source).toContain('https://www.star-history.com/?repos=Jacobinwwey%2Fobsidian-NotEMD&type=date&legend=top-left');
+        expect(source).toContain('https://star-history.dera.page/#Jacobinwwey/obsidian-NotEMD');
         expect(source).toContain('<picture>');
         expect(source).toContain('media="(prefers-color-scheme: dark)"');
         expect(source).toContain('media="(prefers-color-scheme: light)"');
-        expect(source).toContain('theme=dark&legend=top-left&sealed_token=');
+        expect(source).toContain('https://star-history.dera.page/svg?repos=Jacobinwwey/obsidian-NotEMD&theme=dark');
+        expect(source).not.toContain('api.star-history.com');
+        expect(source).not.toContain('sealed_token=');
         expect(source).toContain('<img alt="Star History Chart"');
+    });
+
+    test('keeps every localized README on the token-free Star History host', () => {
+        const readmeFiles = fs.readdirSync(repoRoot)
+            .filter(fileName => /^README.*\.md$/i.test(fileName));
+
+        expect(readmeFiles.length).toBeGreaterThan(1);
+        for (const fileName of readmeFiles) {
+            const source = fs.readFileSync(path.join(repoRoot, fileName), 'utf8');
+            expect(source).toContain('https://star-history.dera.page/#Jacobinwwey/obsidian-NotEMD');
+            expect(source).toContain('https://star-history.dera.page/svg?repos=Jacobinwwey/obsidian-NotEMD');
+            expect(source).not.toContain('api.star-history.com');
+            expect(source).not.toContain('sealed_token=');
+        }
     });
 
     test('sync script stays aligned with the upstream locale overlay and quarter granularity', () => {

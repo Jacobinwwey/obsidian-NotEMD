@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "typeId": "nested",
+  "fixtureId": "nested-scope",
+  "title": "Scope cascade",
+  "requested": {
+    "typeId": "nested",
+    "renderTarget": "editable-html-svg",
+    "compatibilityMode": "best-fit",
+    "targetLanguage": "en"
+  },
+  "status": "passed",
+  "sourceNotePath": "notemd-real-diagram-examples/run-1787995422796-fc969a/nested.md",
+  "outputPath": "notemd-real-diagram-examples/run-1787995422796-fc969a/nested_diagram.html.md",
+  "artifactPath": "docs/diagram-examples/nested/artifact.html",
+  "svgPath": "docs/diagram-examples/nested/result.svg",
+  "pngPath": "docs/diagram-examples/nested/result.png",
+  "providerId": "DeepSeek",
+  "model": "deepseek-v4-flash",
+  "generatedAt": "2026-08-29T09:39:27.226Z",
+  "artifactSha256": "8010d76a0db7df6433020d01fb8e40928ed9ac1a2fe0b643ce913d3e543e17d1",
+  "svgSha256": "6b8be807c7f24075ddff7055bc158e497df3392a1fda852b1c2348867e90e92f",
+  "pngSha256": "f1076d707651a523553397b539562625b44119a32602ed0f98bbb86eef6e1e62",
+  "visualSource": "vault-companion",
+  "cleanupCompleted": true,
+  "diagnostic": null
+}

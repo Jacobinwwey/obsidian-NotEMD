@@ -37,10 +37,31 @@ describe('Mermaid Processor Tests', () => {
         expect(result).toBe(content);
     });
 
-     test('should handle mermaid block with no arrows', async () => {
+    test('should handle mermaid block with no arrows', async () => {
         const content = "```mermaid\ngraph TD;\nA[Test];\n```";
         const result = await refineMermaidBlocks(content);
         expect(result).toBe(content);
+    });
+
+    test('should preserve quadrant point labels during legacy Mermaid repair', async () => {
+        const content = [
+            '```mermaid',
+            'quadrantChart',
+            '    title Priority matrix',
+            '    x-axis Low --> High',
+            '    y-axis Low --> High',
+            '    quadrant-1 Invest',
+            '    quadrant-2 Quick wins',
+            '    quadrant-3 Defer',
+            '    quadrant-4 Evaluate',
+            '    "Docs gallery[": [0.32, 0.68]',
+            '```'
+        ].join('\n');
+
+        const result = await refineMermaidBlocks(content);
+
+        expect(result).toContain('"Docs gallery": [0.32, 0.68]');
+        expect(result).not.toContain('Docs gallery[');
     });
 
     test('should handle unclosed mermaid block with no arrows', async () => {

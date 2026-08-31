@@ -96,7 +96,9 @@ class PreviewElement {
                     viewBox: { baseVal: { width: 880, height: 532 } },
                     classList: { add: jest.fn() },
                     style: {},
-                    setAttribute: jest.fn()
+                    setAttribute: jest.fn(),
+                    getBoundingClientRect: () => ({ x: 0, y: 0, width: 880, height: 532 }),
+                    querySelectorAll: () => []
                 } as unknown as PreviewElement
                 : null);
         }
@@ -111,8 +113,15 @@ describe('diagram type preview panel', () => {
         intentStateDiagram: 'State diagram', intentCanvasMap: 'Canvas map', intentCircuit: 'Circuit',
         intentDataChart: 'Data chart', intentRadar: 'Radar', intentOrgChart: 'Org chart', intentTimeline: 'Timeline',
         intentSwimlane: 'Swimlane', intentQuadrant: 'Quadrant', title: 'Preview', empty: 'Choose a type',
-        loading: 'Loading', unavailable: 'Unavailable', failed: 'Failed', previewOverflowHint: 'Scroll', targetPrefix: 'Target', formatsPrefix: 'Formats'
+        loading: 'Loading', unavailable: 'Unavailable', failed: 'Failed', targetPrefix: 'Target', formatsPrefix: 'Formats'
     };
+
+    beforeEach(() => {
+        jest.resetModules();
+        jest.doMock('../rendering/preview/svgSafety', () => ({
+            assertMountedSvgPresentationSafety: jest.fn()
+        }));
+    });
 
     test('progressively discloses one production-rendered preview and ignores stale requests', async () => {
         const { renderDiagramTypePreviewPanel } = await import('../ui/diagramTypePreviewPanel');
@@ -186,7 +195,7 @@ describe('diagram type preview panel', () => {
         controller.destroy();
     });
 
-    test('surfaces the horizontal-scroll hint when a preview exceeds the host width', async () => {
+    test('keeps the thumbnail self-contained when the source diagram is wider than the host', async () => {
         const { renderDiagramTypePreviewPanel } = await import('../ui/diagramTypePreviewPanel');
         const root = new PreviewElement();
         const controller = renderDiagramTypePreviewPanel({
@@ -200,7 +209,8 @@ describe('diagram type preview panel', () => {
         await Promise.resolve();
 
         const canvas = root.children[0].children[2];
-        expect(canvas.children.some(child => child.cls.includes('notemd-diagram-type-preview-overflow-hint'))).toBe(true);
+        expect(canvas.children.some(child => child.cls.includes('notemd-diagram-type-preview-overflow-hint'))).toBe(false);
+        expect(canvas.innerHTML).toContain('viewBox="0 0 880 532"');
         controller.destroy();
     });
 });

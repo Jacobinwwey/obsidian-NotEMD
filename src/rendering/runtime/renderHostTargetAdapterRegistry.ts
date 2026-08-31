@@ -15,11 +15,27 @@ import { getBundledMermaidPreviewDeps, getBundledVegaLitePreviewDeps } from '../
 import { TargetAdapterRegistry } from '../targetAdapterRegistry';
 import type { TargetAdapter } from '../targetAdapterRegistry';
 import { RenderWebviewTheme } from '../theme';
-import { assertSvgPresentationSafety } from '../preview/svgSafety';
+import { assertMountedSvgPresentationSafety } from '../preview/svgSafety';
 
 export interface RenderHostTargetAdapter extends TargetAdapter {
     errorElementId: string;
     render(payload: RenderWebviewPayload, doc: Document): Promise<void>;
+}
+
+function mountSvgWithPresentationSafety(mount: HTMLElement, svg: string, source: string): void {
+    // The render host initially keeps the mount hidden while the fallback is
+    // visible. Geometry APIs return zero for hidden subtrees, so expose the
+    // mount before measuring and roll it back if the final presentation is
+    // unsafe. An unsafe SVG must never remain visible behind the error state.
+    mount.innerHTML = svg;
+    mount.hidden = false;
+    try {
+        assertMountedSvgPresentationSafety(mount, source);
+    } catch (error) {
+        mount.innerHTML = '';
+        mount.hidden = true;
+        throw error;
+    }
 }
 
 async function renderVegaLitePayload(payload: RenderWebviewPayload, doc: Document): Promise<void> {
@@ -38,9 +54,7 @@ async function renderVegaLitePayload(payload: RenderWebviewPayload, doc: Documen
         payload.artifact.sourceIntent
     );
 
-    mount.innerHTML = svg;
-    assertSvgPresentationSafety(mount, 'Vega-Lite');
-    mount.hidden = false;
+    mountSvgWithPresentationSafety(mount, svg, 'Vega-Lite');
     if (fallback instanceof HTMLDetailsElement) {
         fallback.open = false;
     }
@@ -65,9 +79,7 @@ async function renderMermaidPayload(payload: RenderWebviewPayload, doc: Document
         payload.resolvedTheme ?? payload.theme
     );
 
-    mount.innerHTML = svg;
-    assertSvgPresentationSafety(mount, 'Mermaid');
-    mount.hidden = false;
+    mountSvgWithPresentationSafety(mount, svg, 'Mermaid');
     if (fallback instanceof HTMLDetailsElement) {
         fallback.open = false;
     }

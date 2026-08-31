@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "typeId": "high-level",
+  "fixtureId": "high-level-platform",
+  "title": "High-level platform",
+  "requested": {
+    "typeId": "high-level",
+    "renderTarget": "editable-html-svg",
+    "compatibilityMode": "best-fit",
+    "targetLanguage": "en"
+  },
+  "status": "passed",
+  "sourceNotePath": "notemd-real-diagram-examples/run-1787995422796-fc969a/high-level.md",
+  "outputPath": "notemd-real-diagram-examples/run-1787995422796-fc969a/high-level_diagram.html.md",
+  "artifactPath": "docs/diagram-examples/high-level/artifact.html",
+  "svgPath": "docs/diagram-examples/high-level/result.svg",
+  "pngPath": "docs/diagram-examples/high-level/result.png",
+  "providerId": "DeepSeek",
+  "model": "deepseek-v4-flash",
+  "generatedAt": "2026-08-29T09:43:09.254Z",
+  "artifactSha256": "646f628c5065d9df58b5eace561f31f0cb9c14e94592ff7eb7f8c89c06c7fa1d",
+  "svgSha256": "8ef210460c845af2dfa6710e10bf020def854d3dc337fffccad380d044993fa1",
+  "pngSha256": "7bc7d7f59fbb969ce1b69a97fdf561a4e2ce1e9fb08c0b9d163f9e1de13ea93f",
+  "visualSource": "vault-companion",
+  "cleanupCompleted": true,
+  "diagnostic": null
+}

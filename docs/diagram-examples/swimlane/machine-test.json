@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "typeId": "swimlane",
+  "fixtureId": "swimlane-release",
+  "title": "Release handoff",
+  "requested": {
+    "typeId": "swimlane",
+    "renderTarget": "mermaid",
+    "compatibilityMode": "best-fit",
+    "targetLanguage": "en"
+  },
+  "status": "passed",
+  "sourceNotePath": "notemd-real-diagram-examples/run-1787995422796-fc969a/swimlane.md",
+  "outputPath": "notemd-real-diagram-examples/run-1787995422796-fc969a/swimlane_summ.md",
+  "artifactPath": "docs/diagram-examples/swimlane/artifact.md",
+  "svgPath": "docs/diagram-examples/swimlane/result.svg",
+  "pngPath": "docs/diagram-examples/swimlane/result.png",
+  "providerId": "DeepSeek",
+  "model": "deepseek-v4-flash",
+  "generatedAt": "2026-08-29T09:28:23.079Z",
+  "artifactSha256": "98535aef0cc8cdfe42d65a7dd7658f76ebb278192fee15dc041bed0ef50c3bb4",
+  "svgSha256": "515cee3c5814562e767a7fd593ad8d23ad8bfaae33de5056ee623d096c69a324",
+  "pngSha256": "6eec6122df6900cc942d142a86ab68143072aa235b95fbbb14533d59ce27fa3d",
+  "visualSource": "operation-preview",
+  "cleanupCompleted": true,
+  "diagnostic": null
+}

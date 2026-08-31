@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "typeId": "radar-chart",
+  "fixtureId": "radar-capability-profile",
+  "title": "Capability profile",
+  "requested": {
+    "typeId": "radar-chart",
+    "renderTarget": "vega-lite",
+    "compatibilityMode": "best-fit",
+    "targetLanguage": "en"
+  },
+  "status": "passed",
+  "sourceNotePath": "notemd-real-diagram-examples/run-1787995422796-fc969a/radar-chart.md",
+  "outputPath": "notemd-real-diagram-examples/run-1787995422796-fc969a/radar-chart_diagram.md",
+  "artifactPath": "docs/diagram-examples/radar-chart/artifact.md",
+  "svgPath": "docs/diagram-examples/radar-chart/result.svg",
+  "pngPath": "docs/diagram-examples/radar-chart/result.png",
+  "providerId": "DeepSeek",
+  "model": "deepseek-v4-flash",
+  "generatedAt": "2026-08-29T09:27:09.723Z",
+  "artifactSha256": "a87c4c394563c4de510b2ec4b9072697e91f0b0f77b7a751e715fdad7598d91a",
+  "svgSha256": "9e9360b23669883438b28023523a7fbfc2a5d561e6a7496c210556b7ed0d3513",
+  "pngSha256": "dd140ef7f621622fd34ed6932c5f33c29e4873166eb8abcd4efa7b3251d41306",
+  "visualSource": "operation-preview",
+  "cleanupCompleted": true,
+  "diagnostic": null
+}

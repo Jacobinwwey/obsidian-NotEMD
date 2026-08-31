@@ -244,6 +244,25 @@ function sanitizeMermaidContent(definition: string): string {
     return sanitized.trim();
 }
 
+const QUADRANT_NUMBER = '[+-]?(?:\\d+(?:\\.\\d*)?|\\.\\d+)(?:[eE][+-]?\\d+)?';
+const QUADRANT_POINT_LINE = new RegExp(
+    `^(\\s*)"([^"\\r\\n]*)\\[+\\s*"\\s*:\\s*(\\[\\s*${QUADRANT_NUMBER}\\s*,\\s*${QUADRANT_NUMBER}\\s*\\])\\s*$`
+);
+
+/**
+ * Providers occasionally copy the opening bracket from the coordinate array
+ * into a quadrant label (`"Docs gallery[": [0.32, 0.68]`). The bracket is
+ * structural, not user text, and Mermaid otherwise renders it visibly. Keep
+ * this repair scoped to the quadrant point grammar so ordinary labels in
+ * other Mermaid families remain untouched.
+ */
+export function repairQuadrantPointLabels(definition: string): string {
+    return definition
+        .split('\n')
+        .map(line => line.replace(QUADRANT_POINT_LINE, '$1"$2": $3'))
+        .join('\n');
+}
+
 const MERMAID_FAMILY_PREFIXES: readonly (readonly [string, MermaidDiagramFamily])[] = [
     ['architecture-beta', 'architecture'],
     ['block-beta', 'block'],
@@ -319,6 +338,8 @@ export function normalizeMermaidDiagram(content: string): NormalizedMermaidDiagr
     if (family === 'erDiagram') {
         normalized = repairBraceLessErEntityBlocks(normalized);
         normalized = repairTruncatedErRelationCardinality(normalized).trim();
+    } else if (family === 'quadrantChart') {
+        normalized = repairQuadrantPointLabels(normalized).trim();
     }
 
     return {

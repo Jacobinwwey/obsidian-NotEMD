@@ -25,7 +25,7 @@ export const homeCopyOverrides = {
       },
       {
         "label": "الإصدار الحالي",
-        "value": "وثائق عامة للإصدار 1.9.6 وموارد الإصدار"
+        "value": "وثائق عامة للإصدار 1.9.7 وموارد الإصدار"
       }
     ],
     "retrievalHeading": "خريطة مصدر محرك الإجابات",
@@ -92,7 +92,7 @@ export const homeCopyOverrides = {
       },
       {
         "label": "Current release",
-        "value": "Version 1.9.6 public docs and release assets"
+        "value": "Version 1.9.7 public docs and release assets"
       }
     ],
     "retrievalHeading": "Answer-engine source map",
@@ -159,7 +159,7 @@ export const homeCopyOverrides = {
       },
       {
         "label": "Aktuální verze",
-        "value": "Veřejná dokumentace a soubory verze 1.9.6"
+        "value": "Veřejná dokumentace a soubory verze 1.9.7"
       }
     ],
     "retrievalHeading": "Mapa zdrojů pro engine odpovědí",
@@ -226,7 +226,7 @@ export const homeCopyOverrides = {
       },
       {
         "label": "Aktuel udgave",
-        "value": "Version 1.9.6 – offentlige dokumenter og udgivelsesfiler"
+        "value": "Version 1.9.7 – offentlige dokumenter og udgivelsesfiler"
       }
     ],
     "retrievalHeading": "Kildekort for svarmaskiner",
@@ -293,7 +293,7 @@ export const homeCopyOverrides = {
       },
       {
         "label": "Aktuelle Version",
-        "value": "Version 1.9.6 – öffentliche Dokumentation und Release‑Ressourcen"
+        "value": "Version 1.9.7 – öffentliche Dokumentation und Release‑Ressourcen"
       }
     ],
     "retrievalHeading": "Quellkarte des Antwort‑Engines",
@@ -360,7 +360,7 @@ export const homeCopyOverrides = {
       },
       {
         "label": "Τρέχουσα έκδοση",
-        "value": "Έκδοση 1.9.6 – δημόσια εγγράφηση και αντικείμενα έκδοσης"
+        "value": "Έκδοση 1.9.7 – δημόσια εγγράφηση και αντικείμενα έκδοσης"
       }
     ],
     "retrievalHeading": "Χάρτης πηγών μηχανής απαντήσεων",
@@ -427,7 +427,7 @@ export const homeCopyOverrides = {
       },
       {
         "label": "Versión actual",
-        "value": "Documentación pública y recursos de la versión 1.9.6"
+        "value": "Documentación pública y recursos de la versión 1.9.7"
       }
     ],
     "retrievalHeading": "Mapa de fuentes del motor de respuestas",
@@ -561,7 +561,7 @@ export const homeCopyOverrides = {
       },
       {
         "label": "Päivitetty versio",
-        "value": "Versio 1.9.6 – yleisillä dokumenteilla ja versiojen resurssilla"
+        "value": "Versio 1.9.7 – yleisillä dokumenteilla ja versiojen resurssilla"
       }
     ],
     "retrievalHeading": "Vastausmekanismien lähteekartta",
@@ -628,7 +628,7 @@ export const homeCopyOverrides = {
       },
       {
         "label": "Version actuelle",
-        "value": "Documentation publique et ressources de version 1.9.6"
+        "value": "Documentation publique et ressources de version 1.9.7"
       }
     ],
     "retrievalHeading": "Carte des sources du moteur de réponses",
@@ -695,7 +695,7 @@ export const homeCopyOverrides = {
       },
       {
         "label": "הגרסה הנוכחית",
-        "value": "מדריך ציבורי ונכסי גרסה 1.9.6"
+        "value": "מדריך ציבורי ונכסי גרסה 1.9.7"
       }
     ],
     "retrievalHeading": "מפת מקורות של מנועי תשובות",
@@ -762,7 +762,7 @@ export const homeCopyOverrides = {
       },
       {
         "label": "वर्तमान रिलीज़",
-        "value": "संस्करण 1.9.6 के सार्वजनिक दस्तावेज़ एवं रिलीज़ संसाधन"
+        "value": "संस्करण 1.9.7 के सार्वजनिक दस्तावेज़ एवं रिलीज़ संसाधन"
       }
     ],
     "retrievalHeading": "उत्तर-इंजन स्रोत मानचित्र",
@@ -829,7 +829,7 @@ export const homeCopyOverrides = {
       },
       {
         "label": "Jelenlegi verzió",
-        "value": "Verzió 1.9.6 – közösségi dokumentáció és verziós fájlok"
+        "value": "Verzió 1.9.7 – közösségi dokumentáció és verziós fájlok"
       }
     ],
     "retrievalHeading": "Answer-engine forráskárta",
@@ -896,7 +896,7 @@ export const homeCopyOverrides = {
       },
       {
         "label": "Rilis terkini",
-        "value": "Dokumen publik versi 1.9.6 beserta aset rilis"
+        "value": "Dokumen publik versi 1.9.7 beserta aset rilis"
       }
     ],
     "retrievalHeading": "Peta sumber mesin jawaban",
@@ -963,7 +963,7 @@ export const homeCopyOverrides = {
       },
       {
         "label": "Versione attuale",
-        "value": "Documentazione pubblica e asset di rilascio della versione 1.9.6"
+        "value": "Documentazione pubblica e asset di rilascio della versione 1.9.7"
       }
     ],
     "retrievalHeading": "Mappa delle fonti del motore di risposta",
@@ -1030,7 +1030,7 @@ export const homeCopyOverrides = {
       },
       {
         "label": "現在のリリースバージョン",
-        "value": "バージョン 1.9.6 の公式ドキュメントおよびリリースアセットが公開されています"
+        "value": "バージョン 1.9.7 の公式ドキュメントおよびリリースアセットが公開されています"
       }
     ],
     "retrievalHeading": "回答エンジンのソースマップ",
@@ -1097,7 +1097,7 @@ export const homeCopyOverrides = {
       },
       {
         "label": "현재 릴리스 버전",
-        "value": "버전 1.9.6의 공개 문서 및 릴리스 자산입니다."
+        "value": "버전 1.9.7의 공개 문서 및 릴리스 자산입니다."
       }
     ],
     "retrievalHeading": "답변 엔진 소스 맵",
@@ -1164,7 +1164,7 @@ export const homeCopyOverrides = {
       },
       {
         "label": "Versi terkini",
-        "value": "Dokumen awam versi 1.9.6 serta aset pelepasan"
+        "value": "Dokumen awam versi 1.9.7 serta aset pelepasan"
       }
     ],
     "retrievalHeading": "Peta sumber enjin jawapan",
@@ -1231,7 +1231,7 @@ export const homeCopyOverrides = {
       },
       {
         "label": "Huidige release",
-        "value": "Versie 1.9.6: openbare documentatie en release-assets"
+        "value": "Versie 1.9.7: openbare documentatie en release-assets"
       }
     ],
     "retrievalHeading": "Bronmap van de antwoordengine",
@@ -1298,7 +1298,7 @@ export const homeCopyOverrides = {
       },
       {
         "label": "Aktuell utgave",
-        "value": "Versjon 1.9.6 – offentlige dokumenter og utgivelsesressurser"
+        "value": "Versjon 1.9.7 – offentlige dokumenter og utgivelsesressurser"
       }
     ],
     "retrievalHeading": "Kildekart for svarmaskiner",
@@ -1365,7 +1365,7 @@ export const homeCopyOverrides = {
       },
       {
         "label": "Obecna wersja",
-        "value": "Dokumentacja publiczna wersji 1.9.6 oraz zasoby wydania"
+        "value": "Dokumentacja publiczna wersji 1.9.7 oraz zasoby wydania"
       }
     ],
     "retrievalHeading": "Mapa źródeł silnika odpowiedzi",
@@ -1432,7 +1432,7 @@ export const homeCopyOverrides = {
       },
       {
         "label": "Versão atual",
-        "value": "Documentação pública da versão 1.9.6 e ativos de lançamento"
+        "value": "Documentação pública da versão 1.9.7 e ativos de lançamento"
       }
     ],
     "retrievalHeading": "Mapa de fontes do mecanismo de resposta",
@@ -1499,7 +1499,7 @@ export const homeCopyOverrides = {
       },
       {
         "label": "Versão atual",
-        "value": "Documentação pública da versão 1.9.6 e ativos de lançamento"
+        "value": "Documentação pública da versão 1.9.7 e ativos de lançamento"
       }
     ],
     "retrievalHeading": "Mapa de fontes do mecanismo de resposta",
@@ -1566,7 +1566,7 @@ export const homeCopyOverrides = {
       },
       {
         "label": "Versiunea curentă",
-        "value": "Documentație publică și resurse de lansare pentru versiunea 1.9.6"
+        "value": "Documentație publică și resurse de lansare pentru versiunea 1.9.7"
       }
     ],
     "retrievalHeading": "Harta surselor motorului de răspunsuri",
@@ -1633,7 +1633,7 @@ export const homeCopyOverrides = {
       },
       {
         "label": "Текущая версия",
-        "value": "Документация и ресурсы для версии 1.9.6"
+        "value": "Документация и ресурсы для версии 1.9.7"
       }
     ],
     "retrievalHeading": "Карта источников движка ответов",
@@ -1700,7 +1700,7 @@ export const homeCopyOverrides = {
       },
       {
         "label": "Aktuell version",
-        "value": "Version 1.9.6 – offentliga dokumentationer och utgivningsresurser"
+        "value": "Version 1.9.7 – offentliga dokumentationer och utgivningsresurser"
       }
     ],
     "retrievalHeading": "Källkarta för svarsmaskiner",
@@ -1767,7 +1767,7 @@ export const homeCopyOverrides = {
       },
       {
         "label": "เวอร์ชันปัจจุบัน",
-        "value": "มีเอกสารสาธารณะและไฟล์ทรัพยากรสำหรับเวอร์ชัน 1.9.6"
+        "value": "มีเอกสารสาธารณะและไฟล์ทรัพยากรสำหรับเวอร์ชัน 1.9.7"
       }
     ],
     "retrievalHeading": "แผนที่แหล่งข้อมูลของเครื่องมือตอบคำถาม",
@@ -1834,7 +1834,7 @@ export const homeCopyOverrides = {
       },
       {
         "label": "Mevcut sürüm",
-        "value": "Sürüm 1.9.6 için genel dokümantasyon ve sürüm dosyaları"
+        "value": "Sürüm 1.9.7 için genel dokümantasyon ve sürüm dosyaları"
       }
     ],
     "retrievalHeading": "Cevap motoru kaynak haritası",
@@ -1901,7 +1901,7 @@ export const homeCopyOverrides = {
       },
       {
         "label": "Текуща версія",
-        "value": "Документація та ресурси версії 1.9.6"
+        "value": "Документація та ресурси версії 1.9.7"
       }
     ],
     "retrievalHeading": "Карта джерел двигуна відповідей",
@@ -1968,7 +1968,7 @@ export const homeCopyOverrides = {
       },
       {
         "label": "Phiên bản hiện tại",
-        "value": "Tài liệu công khai và tài nguyên phiên bản 1.9.6"
+        "value": "Tài liệu công khai và tài nguyên phiên bản 1.9.7"
       }
     ],
     "retrievalHeading": "Bản đồ nguồn của công cụ trả lời câu hỏi",
@@ -2035,7 +2035,7 @@ export const homeCopyOverrides = {
       },
       {
         "label": "目前版本",
-        "value": "版本 1.9.6 的公開文件說明與發行檔案"
+        "value": "版本 1.9.7 的公開文件說明與發行檔案"
       }
     ],
     "retrievalHeading": "答案引擎的來源地圖",
@@ -2102,7 +2102,7 @@ export const homeCopyOverrides = {
       },
       {
         "label": "目前版本",
-        "value": "版本 1.9.6 的公開文件說明與發行檔案"
+        "value": "版本 1.9.7 的公開文件說明與發行檔案"
       }
     ],
     "retrievalHeading": "答案引擎的來源地圖",

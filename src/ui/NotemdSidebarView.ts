@@ -1858,7 +1858,6 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
                 loading: diagramI18n.diagramTypePreviewLoading,
                 unavailable: diagramI18n.diagramTypePreviewUnavailable,
                 failed: diagramI18n.diagramTypePreviewFailed,
-                previewOverflowHint: diagramI18n.diagramTypePreviewOverflowHint,
                 targetPrefix: diagramI18n.diagramCapabilityTargetPrefix,
                 formatsPrefix: diagramI18n.diagramCapabilityFormatsPrefix
             },

@@ -59,6 +59,14 @@ Valitse näytön **Historia**, jotta voit avata Vaultin historian-kaustan ilman 
 
 SVG- ja PDF-tiedostot luoduttaan vektoriallugeettikäytöstä; PDF käyttää saman SVG-asennusta ja tekstimäärityksiä, eikä se rasteroi koko näyttöä. Notemdin asetuksissa oleva kuvaneksportointin PPI-rakentea koskee vain PNG:n rasteroinnista (72–600 PPI, 300 vaihtoehtoisesti).
 
+## Luettavat esikatselut tiheille kaavioille
+
+Muokattavat HTML/SVG lane-grid -kaaviot mittaavat ja rivittävät yhteenvedon ennen otsikon ja lane-otsikon sijoittamista. Otsikko siirretään suojatun yhteenvetoalueen alapuolelle, ja solmut piirretään ennen yhdistimiä ja reunatunnisteita. Lanejen väliset reunat käyttävät törmäystietoisia ortogonaalisia ruudukkoreittejä, jotka varaavat tilan lane-tunnisteille ja varatuille soluille. Pitkät kuvaukset eivät peitä tekstiä eivätkä vaadi vaakasuuntaista vieritystä.
+
+Mermaidin quadrant-kaaviot saavat family-kohtaisen normalisointivaiheen. `quadrantChart`-kaaviossa ohitetaan vain flowchartille tarkoitetut lainausmerkki- ja muotokorjaukset; otsikoiden, akselien ja kvadranttien tarkoitukselliset hakasulkeet säilyvät. Providerin kopioima aloitussulje poistetaan vain, jos se on pisteen tunnisteen epäsopiva viimeinen merkki.
+
+Repository sisältää jokaiselle suoritettavalle kaaviotyypille oikean Vaultin oppimis- ja evidenssikokoelman. Kaksikieliset syötemuistiinpanot, SVG/PNG-tulokset ja koneellisesti luettava tilamanifesti löytyvät osoitteesta [`docs/diagram-examples/`](https://github.com/Jacobinwwey/obsidian-NotEMD/tree/main/docs/diagram-examples). `passed`-merkinnät ovat ladatulla plugin bundlella tehtyjä ajoja, eivät staattisia screenshot-fixtureja.
+
 ## Drawnix-näytöt Mermaid-viestojen kanssa
 
 Kun Drawnix-artefakti sisältää Mermaid-viestot, Notemd puhastaa renderoidut SVG:t ja säilyttää Mermaid-lähteet saman tiedoston `.drawnix`-meta-tiedoissa. Tämän ansiosta näytössä voi näkyä Mermaid-kuvat Drawnix-tietoisuusmaantilan sisällä ilman tarvetta Drawnix- tai Plait-asennusta. Ainoastaan Mermaid-viestot, jotka on turvallisesti sisällyttynyt, eivät luoda erillistä `.assets`-kaustaa; ulkopuoliset binääriset mediat tai ratkaisemattomat viestot säilyttävät kanssiansa tiedoston, jotta data ei häviä.

@@ -170,7 +170,7 @@ describe('welcome modal', () => {
 
         expect(modal.titleEl.text).toBe('欢迎使用 Notemd');
         expect(releaseNotes).toHaveLength(2);
-        expect(releaseNotes[0].highlights[0]).toContain('图表工作流现在明确区分源格式');
+        expect(releaseNotes[0].highlights[0]).toContain('图表工作流现在不会让 Mermaid 象限图标签');
         expect(nodes.some(node => node.text === releaseNotes[0].highlights[0])).toBe(true);
         expect(nodes.some(node => node.text === '最近更新')).toBe(true);
     });

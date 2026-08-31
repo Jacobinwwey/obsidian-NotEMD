@@ -59,6 +59,14 @@ Trong bản xem trước, hãy chọn **Lịch sử** để mở ngăn lưu tr�
 
 SVG và PDF được tạo ra từ hình học vector; PDF sử dụng cùng cấu trúc SVG và các thông số văn bản thay vì hiển thị toàn bộ bản xem trước dưới dạng raster. Giá trị PPI khi xuất hình ảnh trong cài đặt Notemd chỉ kiểm soát việc raster hóa PNG (từ 72–600 PPI, mức mặc định là 300).
 
+## Bản xem trước dễ đọc cho sơ đồ dày đặc
+
+Sơ đồ lane-grid HTML/SVG có thể chỉnh sửa sẽ đo và xuống dòng phần tóm tắt trước khi đặt tiêu đề và header của lane. Header được chuyển xuống dưới vùng tóm tắt được bảo vệ, còn các ô được vẽ trước connector và nhãn cạnh. Các cạnh đi qua lane dùng tuyến lưới vuông góc có tính đến va chạm, dành chỗ cho nhãn lane và các ô đã chiếm dụng, vì vậy mô tả dài không che chữ và không cần kéo ngang để hiểu sơ đồ.
+
+Sơ đồ quadrant của Mermaid nhận bước chuẩn hóa theo family. Với `quadrantChart`, chỉ bỏ qua các sửa lỗi dấu ngoặc kép và hình dạng dành riêng cho flowchart; dấu ngoặc vuông được cố ý đặt trong tiêu đề, trục và tên quadrant vẫn hiển thị. Dấu ngoặc mở bị provider sao chép chỉ bị xóa khi nó là ký tự cuối không khớp của nhãn điểm.
+
+Kho lưu trữ có bộ học tập và bằng chứng từ Vault thật cho mọi loại sơ đồ có thể thực thi. Xem [`docs/diagram-examples/`](https://github.com/Jacobinwwey/obsidian-NotEMD/tree/main/docs/diagram-examples) để đọc ghi chú đầu vào song ngữ, kết quả SVG/PNG và manifest trạng thái có thể đọc bằng máy. Mục `passed` là lần chạy qua plugin bundle đã tải, không phải screenshot fixture tĩnh.
+
 ## Bản xem trước Drawnix với hình ảnh Mermaid được nhúng
 
 Khi một tệp Drawnix chứa các hình ảnh Mermaid, Notemd sẽ xử lý lại SVG đã được hiển thị và giữ nguyên mã nguồn Mermaid bên cạnh nó trong phần metadata `.drawnix`. Nhờ đó, bản xem trước có thể hiển thị hình ảnh Mermaid bên trong bản đồ kiến thức Drawnix mà không cần phải sử dụng môi trường chạy Drawnix hoặc Plait. Đường dẫn mặc định là tự chứa đầy đủ thông tin và không tạo ra thư mục `.assets` riêng biệt. Hãy bật tùy chọn **Xuất thêm toàn bộ hình ảnh Mermaid** nếu bạn cần mã nguồn Mermaid, SVG cùng các tệp manifest đi kèm để chuyển giao hoặc chỉnh sửa bên ngoài. Các tệp hiện có đã chứa thư mục `.assets` vẫn được hỗ trợ, và nếu thiếu SVG Mermaid cũ thì vẫn có thể tái tạo lại từ văn bản nguồn được lưu trong metadata.

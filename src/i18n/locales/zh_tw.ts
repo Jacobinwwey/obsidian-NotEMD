@@ -136,7 +136,6 @@ export const STRINGS_ZH_TW: DeepPartial<NotemdEnglishStrings> = {
                 diagramTypePreviewLoading: '正在渲染所選類型…',
                 diagramTypePreviewUnavailable: '此類型暫時沒有可渲染的預覽。',
                 diagramTypePreviewFailed: '所選預覽渲染失敗。',
-                diagramTypePreviewOverflowHint: '預覽較寬：水平捲動以檢查完整標籤。',
                 diagramExampleFamilyKnowledge: '知識',
                 diagramExampleFamilyBehavior: '行為',
                 diagramExampleFamilyStructure: '結構',

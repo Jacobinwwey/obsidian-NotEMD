@@ -13,6 +13,16 @@ jest.mock('vega', () => ({
     }
 }));
 
+jest.mock('../rendering/preview/svgSafety', () => ({
+    assertSvgSafetyContract: (svg: string) => svg,
+    assertMountedSvgPresentationSafety: jest.fn((root: ParentNode, source: string) => {
+        const mount = root as unknown as { hidden: boolean; innerHTML: string };
+        if (mount.hidden) {
+            throw new Error(`${source} measured while hidden`);
+        }
+    })
+}));
+
 import { bootstrapRenderHostDocument } from '../rendering/runtime/renderHostEntry';
 
 class MockDetailsElement {

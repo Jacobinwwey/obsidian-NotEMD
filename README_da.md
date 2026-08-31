@@ -29,7 +29,7 @@ If\ you\ love\ using\ Notemd\,\ please\ consider\ \[\�\�\�\ Give\ a\ Star\
 
 Hvis du elsker at bruge Notemd, overvej venligst at [⭐ give en stjerne på GitHub](https://github.com/Jacobinwwey/obsidian-NotEMD) eller [☕️ købe en kaffe til mig](https://ko-fi.com/jacobinwwey).
 
-**Version:** 1.9.6
+**Version:** 1.9.7
 
 <img width="1853" height="1080" alt="show" src="https://github.com/user-attachments/assets/b9f9292b-a9d8-48a3-9acf-1b6f00413966" />
 <img width="1853" height="1080" alt="multi-langu" src="https://github.com/user-attachments/assets/d9a0a4fb-1c00-425a-ac1d-0134a013a381" />
@@ -701,7 +701,7 @@ MIT License - Se filen [LICENSE](LICENSE) for detaljer.
 ---
 
 
-*Notemd v1.9.6 - Forbedr din Obsidian-vidensgraf med AI.*
+*Notemd v1.9.7 - Forbedr din Obsidian-vidensgraf med AI.*
 
 
 <!-- repo-chronicle:start -->
@@ -711,17 +711,17 @@ Denne kvartalsvise krønike bevarer den oprindelige visuelle stil fra [repo-saga
 
 ![Notemd Development Chronicle](./docs/repo-saga/notemd-development-history.da.svg)
 
-_Senest opdateret for udgivelsestagget `1.9.6` den 2026-08-09. Seneste commit-dato: 2026-08-09._
+_Senest opdateret for udgivelsestagget `1.9.7` den 2026-08-30. Seneste commit-dato: 2026-08-30._
 <!-- repo-chronicle:end -->
 
 
 ## Star History
 
-<a href="https://www.star-history.com/?repos=Jacobinwwey%2Fobsidian-NotEMD&type=date&legend=top-left">
+<a href="https://star-history.dera.page/#Jacobinwwey/obsidian-NotEMD">
  <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=Jacobinwwey/obsidian-NotEMD&type=date&theme=dark&legend=top-left&sealed_token=Y32J_ehSQhPEtMK06bJeXYXBkFZbjjUR6tkogZgP92_f34InJDA7n9xcMmttFtW0o52nbKnU24nByb7DCiBnOrP2MOwevXU-so8BYLISzUsdeSUQRIOYg_lFXml_9MakEXjFEQStXFh7fUnsSXyIEq55QSTYNcbDOGF0k66bWhT1IyrZLnG26lJ-Mvbg" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=Jacobinwwey/obsidian-NotEMD&type=date&legend=top-left&sealed_token=Y32J_ehSQhPEtMK06bJeXYXBkFZbjjUR6tkogZgP92_f34InJDA7n9xcMmttFtW0o52nbKnU24nByb7DCiBnOrP2MOwevXU-so8BYLISzUsdeSUQRIOYg_lFXml_9MakEXjFEQStXFh7fUnsSXyIEq55QSTYNcbDOGF0k66bWhT1IyrZLnG26lJ-Mvbg" />
-   <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=Jacobinwwey/obsidian-NotEMD&type=date&legend=top-left&sealed_token=Y32J_ehSQhPEtMK06bJeXYXBkFZbjjUR6tkogZgP92_f34InJDA7n9xcMmttFtW0o52nbKnU24nByb7DCiBnOrP2MOwevXU-so8BYLISzUsdeSUQRIOYg_lFXml_9MakEXjFEQStXFh7fUnsSXyIEq55QSTYNcbDOGF0k66bWhT1IyrZLnG26lJ-Mvbg" />
+   <source media="(prefers-color-scheme: dark)" srcset="https://star-history.dera.page/svg?repos=Jacobinwwey/obsidian-NotEMD&theme=dark" />
+   <source media="(prefers-color-scheme: light)" srcset="https://star-history.dera.page/svg?repos=Jacobinwwey/obsidian-NotEMD" />
+   <img alt="Star History Chart" src="https://star-history.dera.page/svg?repos=Jacobinwwey/obsidian-NotEMD" />
  </picture>
 </a>
 

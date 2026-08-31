@@ -4,6 +4,30 @@ This document summarizes the major functional and architectural changes implemen
 
 ---
 
+## 1.9.7 - 2026-08-30
+
+### English
+
+- Fixed Mermaid `quadrantChart` text corruption by preventing flowchart-only repair stages from touching quadrant grammar and by removing only provider-copied trailing structural brackets from point labels.
+- Fixed editable HTML/SVG lane-grid overlap: long summaries now reserve measured header space, cells are painted before connectors and labels, and cross-lane edges use collision-aware orthogonal routing.
+- Added regression coverage for quadrant normalization convergence, intentional metadata brackets, lane-grid routing, and mounted preview safety.
+- Added `docs/diagram-examples/` as the bilingual real-Vault learning/evidence set. Each catalog type has an input Markdown note, generated result artifacts, and manifest status.
+- Synchronized the repository docs, maintainer release workflow, GitHub Pages diagrams guide, homepage release facts, and `llms.txt` for 1.9.7.
+- Documentation translations are Codex-authored and checked offline; release instructions no longer require LM Studio or an external translation API.
+- Replaced the retired Star History embed with the token-free `star-history.dera.page` responsive chart in every root README locale.
+
+### 中文
+
+- 修复 Mermaid `quadrantChart` 文字污染：阻止仅适用于 flowchart 的修复阶段触碰象限语法，并只从数据点标签末尾移除 provider 误复制的结构性括号。
+- 修复 editable HTML/SVG lane-grid 的重叠问题：长摘要先按测量结果预留标题空间，先绘制单元格再绘制连接线和标签，跨 lane 的边使用碰撞感知正交路由。
+- 新增象限规范化收敛、合法元数据括号、lane-grid 路由和挂载预览安全的回归覆盖。
+- 新增 `docs/diagram-examples/` 双语真实 Vault 学习与证据目录。每个目录类型都有输入 Markdown、实测生成结果和 manifest 状态。
+- 同步仓库文档、维护者发布流程、GitHub Pages 图表指南、首页版本事实和 `llms.txt` 到 1.9.7。
+- 文档翻译由 Codex 撰写并离线校验；发布说明不再要求 LM Studio 或任何外部翻译 API。
+- 将所有根 README 语言版本中已停用的 Star History 嵌入替换为无需 token 的 `star-history.dera.page` 响应式图表。
+
+---
+
 ## 1.9.6 - 2026-08-21
 
 ### English

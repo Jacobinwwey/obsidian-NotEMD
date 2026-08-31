@@ -117,6 +117,10 @@ These overrides are intentionally policy-bearing. Do not replace them with a gen
 
 Generated catalogs are `src/lib/siteLocaleCatalog.cjs` and `src/lib/homeCopyCatalog.mjs`. Publication status is owned by `src/lib/localePublication.mjs` and `src/lib/publishedLocales.mjs`; the audit must pass before a machine-translated locale can be promoted to the verified/indexable set.
 
+#### 1.9.7 Codex execution supplement
+
+The pipeline above remains documented for compatibility. For the `1.9.7` release, Codex authors the English source, the Simplified Chinese counterpart, and any required locale updates directly in the checked-in files. Preserve frontmatter, headings, tables, code fences, commands, URLs, file extensions, and product names; compare each locale for semantic parity; then run `npm run build` and `npm run audit:build` offline. Do not run the legacy scripts' `--write` modes, configure an LM Studio endpoint, or call an external translation API for this release.
+
 ### 9. FAQ with FAQPage Schema
 
 - `docs/faq.mdx`: English FAQ
@@ -134,7 +138,7 @@ website/
 │   └── img/
 ├── scripts/
 │   ├── audit-build.cjs        # Built-output Pages language/GEO gate
-│   └── translate-site-core.cjs # Bounded LM Studio localization pipeline
+│   └── translate-site-core.cjs # Bounded localization pipeline (legacy for 1.9.7)
 ├── docs/                      # English docs
 │   ├── intro.mdx
 │   ├── faq.mdx
@@ -191,8 +195,9 @@ citations:
 2. Run or update `node scripts/generate-localized-docs.cjs`.
 3. Translate content in `i18n/<locale>/docusaurus-plugin-content-docs/current/`.
 4. Translate navbar, footer, and docs sidebar messages under `i18n/<locale>/`.
-5. Use `node scripts/translate-site-core.cjs --mode faq|ui|home --write --locales=<...>` for bounded LM Studio translation; use `--mode home-boundary` for a single homepage field change.
-6. Build and audit the site before publishing or promoting the locale.
+5. Use `node scripts/translate-site-core.cjs --mode faq|ui|home --write --locales=<...>` for the bounded translation workflow when maintaining legacy releases; use `--mode home-boundary` for a single homepage field change.
+6. For `1.9.7`, have Codex author the locale text directly and preserve all structural and technical tokens.
+7. Build and audit the site before publishing or promoting the locale.
 
 ## Language Publishing Policy
 

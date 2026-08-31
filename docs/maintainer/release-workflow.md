@@ -96,6 +96,19 @@ node scripts/translate-readme-settings-guide.cjs --write --locales=th,tr,uk,vi,z
 
 Before committing, run the locale groups again with `--normalize-existing` (and without `--write` for a dry run) for a validation-only pass, then build and audit the site. Do not substitute a generic web translator: the guide contains MDX, Mermaid, file extensions, and export tokens that must remain structurally stable.
 
+### 1.9.7 Codex translation supplement
+
+For this release, the checked-in workflow above remains documented for compatibility, but it is not the execution path. Codex authors the English source and the Simplified Chinese counterpart directly, and writes any additional locale updates while preserving frontmatter, heading levels, Markdown/MDX structure, Mermaid fences, table columns, code spans, commands, URLs, file extensions, and product names.
+
+Use the offline sequence below for the release candidate:
+
+1. Update the canonical English MDX under `website/docs/`.
+2. Write the matching Simplified Chinese MDX under `website/i18n/zh-CN/` and update any explicitly published locale that needs visible behavior parity.
+3. Review each language side by side for semantic parity; keep each language in its own complete file.
+4. Run `npm --prefix website run build` and `npm --prefix website run audit:build`, then run the repository diagram/docs tests and `git diff --check`.
+
+Do not run the legacy `translate-*.cjs` `--write` commands, configure an LM Studio endpoint, or call an external translation API while preparing `1.9.7`. The release is accepted only when the Codex-authored files pass the offline site audit.
+
 ## 5. Release Notes Contract
 
 Release notes now live in two complete checked-in files:

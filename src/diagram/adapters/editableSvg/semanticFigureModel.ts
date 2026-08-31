@@ -227,7 +227,11 @@ function createFigureEdges(
                     { x: labelX, y: labelY - 24 },
                     { x: labelX, y: labelY + 24 },
                     { x: (startX + endX) / 2, y: Math.min(startY, endY) - 18 },
-                    { x: (startX + endX) / 2, y: Math.max(startY, endY) + 24 }
+                    { x: (startX + endX) / 2, y: Math.max(startY, endY) + 24 },
+                    { x: (startX + endX) / 2, y: Math.min(startY, endY) - 42 },
+                    { x: (startX + endX) / 2, y: Math.max(startY, endY) + 48 },
+                    { x: (startX + endX) / 2, y: Math.min(startY, endY) - 66 },
+                    { x: (startX + endX) / 2, y: Math.max(startY, endY) + 72 }
                 ];
                 const candidate = candidates.find(position => {
                     const rect = { x: position.x - labelWidth / 2, y: position.y - 14, width: labelWidth, height: 18 };

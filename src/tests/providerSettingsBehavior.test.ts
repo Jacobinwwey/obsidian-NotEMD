@@ -28,6 +28,7 @@ type MockElement = {
     hidden?: boolean;
     textContent: string;
     innerHTML?: string;
+    getBoundingClientRect?: () => { x: number; y: number; width: number; height: number };
     remove?: jest.Mock;
     classList: {
         add: (cls: string) => void;
@@ -363,6 +364,7 @@ function createMockElement(
         tag,
         text: options.text ?? '',
         innerHTML: '',
+        getBoundingClientRect: () => ({ x: 0, y: 0, width: 100, height: 60 }),
         cls: options.cls ?? '',
         open: false,
         value: options.value ?? '',
@@ -487,7 +489,21 @@ function createMockElement(
         }
     });
     element.querySelectorAll.mockImplementation((selector: string) => queryMockElements(element, selector));
-    element.querySelector.mockImplementation((selector: string) => queryMockElements(element, selector)[0] ?? null);
+    element.querySelector.mockImplementation((selector: string) => {
+        const match = queryMockElements(element, selector)[0];
+        if (match) return match;
+        if (selector === 'svg' && element.innerHTML?.includes('<svg')) {
+            return {
+                viewBox: { baseVal: { width: 100, height: 60 } },
+                style: {} as Record<string, string>,
+                classList: { add: jest.fn(), contains: () => false },
+                setAttribute: jest.fn(),
+                getBoundingClientRect: () => ({ x: 0, y: 0, width: 100, height: 60 }),
+                querySelectorAll: jest.fn(() => [])
+            } as unknown as MockElement;
+        }
+        return null;
+    });
     element.prepend.mockImplementation((child: MockElement) => {
         element.children = element.children.filter(candidate => candidate !== child);
         element.children.unshift(child);
@@ -825,7 +841,7 @@ function createPlugin(overrides: Partial<any> = {}) {
         saveSettings: jest.fn().mockResolvedValue(undefined),
         openCircuitikzEnvironment: jest.fn(),
         openDiagramExamplePreview: jest.fn().mockResolvedValue(undefined),
-        renderDiagramExampleThumbnail: jest.fn().mockResolvedValue('<svg role="img"><title>Example</title></svg>'),
+        renderDiagramExampleThumbnail: jest.fn().mockResolvedValue('<svg role="img" viewBox="0 0 100 60"><rect width="100" height="60" /><text x="10" y="20">Example</text></svg>'),
         refreshLocalizedUi: jest.fn().mockResolvedValue(undefined),
         resetSettings: jest.fn().mockResolvedValue(undefined),
         ...overrides

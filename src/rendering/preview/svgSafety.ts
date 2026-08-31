@@ -23,6 +23,14 @@ interface PresentationRect {
     height: number;
 }
 
+function isPresentationSurface(element: Element): boolean {
+    return element.classList.contains('ref-canvas')
+        || element.classList.contains('notemd-canvas-surface')
+        || (typeof (element as Element & { hasAttribute?: (name: string) => boolean }).hasAttribute === 'function'
+            && ((element as Element).hasAttribute('data-nested-scope-surface')
+                || (element as Element).hasAttribute('data-nested-tag-surface')));
+}
+
 function presentationRect(element: Element): PresentationRect | null {
     const candidate = element as Element & { getBoundingClientRect?: () => DOMRect };
     if (typeof candidate.getBoundingClientRect !== 'function') return null;
@@ -30,6 +38,23 @@ function presentationRect(element: Element): PresentationRect | null {
     if (![rect.x, rect.y, rect.width, rect.height].every(Number.isFinite)
         || rect.width <= 0 || rect.height <= 0) return null;
     return rect;
+}
+
+export function assertMountedSvgPresentationSafety(root: ParentNode, source: string): void {
+    const svg = root.querySelector?.('svg');
+    if (!svg) {
+        throw new Error(`${source} mounted SVG presentation gate found no SVG element.`);
+    }
+    const rootRect = presentationRect(svg);
+    const visibleTextElements = Array.from(svg.querySelectorAll?.('text') ?? [])
+        .filter(element => !element.closest('title,desc,defs'));
+    const textNodes = visibleTextElements
+        .map(element => presentationRect(element))
+        .filter((rect): rect is PresentationRect => rect !== null);
+    if (!rootRect || (visibleTextElements.length > 0 && textNodes.length === 0)) {
+        throw new Error(`${source} mounted SVG presentation gate could not measure visible geometry.`);
+    }
+    assertSvgPresentationSafety(root, source);
 }
 
 function presentationRectsOverlap(first: PresentationRect, second: PresentationRect, padding = 0): boolean {
@@ -63,7 +88,7 @@ export function collectSvgPresentationDiagnostics(root: ParentNode): SvgPresenta
     }
     const shapes = Array.from(svg.querySelectorAll?.('rect,circle,ellipse,polygon,image') ?? [])
         .map(element => ({ element, rect: presentationRect(element) }))
-        .filter(item => item.rect && !item.element.classList.contains('ref-canvas') && !item.element.classList.contains('notemd-canvas-surface')) as Array<{ element: Element; rect: PresentationRect }>;
+        .filter(item => item.rect && !isPresentationSurface(item.element)) as Array<{ element: Element; rect: PresentationRect }>;
     for (const text of textNodes) {
         for (const shape of shapes) {
             if (text.element.contains(shape.element) || shape.element.contains(text.element)) continue;

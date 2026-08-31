@@ -89,6 +89,41 @@ describe('mermaid renderer', () => {
         expect(artifact.content).toContain('"Adapter registry": [0.8, 0.7]');
     });
 
+    test('removes an unmatched structural bracket from quadrant item labels', async () => {
+        const artifact = await new MermaidRenderer().render({
+            intent: 'quadrant',
+            title: 'Priorities',
+            nodes: [],
+            quadrant: {
+                xAxisLabel: ['Low effort', 'High effort'],
+                yAxisLabel: ['Low impact', 'High impact'],
+                quadrantLabels: ['Invest', 'Quick wins', 'Defer', 'Evaluate'],
+                items: [{ id: 'docs', label: 'Docs gallery[', x: 0.32, y: 0.68 }]
+            }
+        });
+
+        expect(artifact.content).toContain('"Docs gallery": [0.32, 0.68]');
+        expect(artifact.content).not.toContain('Docs gallery[');
+    });
+
+    test('preserves intentional brackets in quadrant metadata labels', async () => {
+        const artifact = await new MermaidRenderer().render({
+            intent: 'quadrant',
+            title: 'Priority [matrix]',
+            nodes: [],
+            quadrant: {
+                xAxisLabel: ['Low effort [', 'High effort'],
+                yAxisLabel: ['Low impact', 'High impact'],
+                quadrantLabels: ['Invest [', 'Quick wins', 'Defer', 'Evaluate'],
+                items: [{ id: 'adapter', label: 'Adapter registry', x: 0.8, y: 0.7 }]
+            }
+        });
+
+        expect(artifact.content).toContain('title Priority [matrix]');
+        expect(artifact.content).toContain('x-axis Low effort [ --> High effort');
+        expect(artifact.content).toContain('quadrant-1 Invest [');
+    });
+
     test('renders org chart ownership as a deterministic flowchart', async () => {
         const artifact = await new MermaidRenderer().render({
             intent: 'orgChart',

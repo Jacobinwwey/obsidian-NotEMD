@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "typeId": "current-state",
+  "fixtureId": "current-state-legacy-pipeline",
+  "title": "Legacy current state",
+  "requested": {
+    "typeId": "current-state",
+    "renderTarget": "editable-html-svg",
+    "compatibilityMode": "best-fit",
+    "targetLanguage": "en"
+  },
+  "status": "passed",
+  "sourceNotePath": "notemd-real-diagram-examples/run-1787995422796-fc969a/current-state.md",
+  "outputPath": "notemd-real-diagram-examples/run-1787995422796-fc969a/current-state_diagram.html.md",
+  "artifactPath": "docs/diagram-examples/current-state/artifact.html",
+  "svgPath": "docs/diagram-examples/current-state/result.svg",
+  "pngPath": "docs/diagram-examples/current-state/result.png",
+  "providerId": "DeepSeek",
+  "model": "deepseek-v4-flash",
+  "generatedAt": "2026-08-29T09:31:08.354Z",
+  "artifactSha256": "a0ad47ec9f28580fb920646027a0e470e6dc8cca26d19a9d3e9adc35b96f9290",
+  "svgSha256": "6d6aeb70b96e7cd34a647823044ada01570e6ca88d3f7b1bc03bed1d73689e07",
+  "pngSha256": "94cce8d3f4dee9ef51a35ee284fd1d784e9cdab7bdaf8fdd67a28d1c96fa1bcc",
+  "visualSource": "vault-companion",
+  "cleanupCompleted": true,
+  "diagnostic": null
+}

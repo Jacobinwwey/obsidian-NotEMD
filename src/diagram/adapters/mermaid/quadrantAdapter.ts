@@ -7,12 +7,21 @@ import {
     sanitizeMermaidText
 } from './base';
 
+function sanitizeQuadrantText(value: string): string {
+    // A provider can mistake the JSON coordinate delimiter for part of the
+    // human label (for example, `Docs gallery[`). Mermaid then renders that
+    // delimiter as visible text. Strip only unmatched opening brackets at the
+    // end of quadrant-owned labels; other Mermaid families may use brackets
+    // legitimately and must keep the shared sanitizer unchanged.
+    return sanitizeMermaidText(value).replace(/\s*\[+$/, '').trim();
+}
+
 function buildUniqueLabels(items: readonly { id: string; label: string; detail?: string }[]): Map<string, string> {
     const labels = new Map<string, string>();
     const used = new Set<string>();
     items.forEach(item => {
-        const detail = item.detail?.trim() ? ` - ${sanitizeMermaidText(item.detail)}` : '';
-        const base = sanitizeMermaidText(`${item.label}${detail}`) || sanitizeMermaidIdentifier(item.id);
+        const detail = item.detail?.trim() ? ` - ${sanitizeQuadrantText(item.detail)}` : '';
+        const base = sanitizeQuadrantText(`${item.label}${detail}`) || sanitizeMermaidIdentifier(item.id);
         let candidate = base;
         let suffix = 2;
         while (used.has(candidate)) {

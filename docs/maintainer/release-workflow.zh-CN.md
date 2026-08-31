@@ -96,6 +96,19 @@ node scripts/translate-readme-settings-guide.cjs --write --locales=th,tr,uk,vi,z
 
 提交前再使用 `--normalize-existing` 执行语言组（去掉 `--write` 可只读试跑）进行不联网的结构校验，然后构建并审计网站。不要替换成普通网页翻译器：该手册包含 MDX、Mermaid、文件扩展名与导出术语，结构必须保持稳定。
 
+### 1.9.7 Codex 翻译补充
+
+为兼容已有维护记录，上述流程继续保留，但本版本不按其中的联网翻译命令执行。英文源文件与简体中文对应文件由 Codex 直接撰写；其他需要更新的语言也由 Codex 直接完成，同时保持 frontmatter、标题层级、Markdown/MDX 结构、Mermaid fence、表格列数、代码片段、命令、URL、文件扩展名和产品名称不变。
+
+本版本候选包采用以下离线顺序：
+
+1. 更新 `website/docs/` 下的英文 canonical MDX。
+2. 在 `website/i18n/zh-CN/` 写入对应的简体中文 MDX；如果其他已发布语言需要可见行为一致，再同步更新相应 locale。
+3. 逐语言对照检查语义完整性；每种语言保留在自己的完整文件中。
+4. 执行 `npm --prefix website run build`、`npm --prefix website run audit:build`，然后运行仓库图表/文档测试和 `git diff --check`。
+
+准备 `1.9.7` 时不要运行旧版 `translate-*.cjs` 的 `--write` 命令，不要配置 LM Studio endpoint，也不要调用任何外部翻译 API。只有 Codex 翻译文件通过离线网站审计，发布才算合格。
+
 ## 5. Release Notes 契约
 
 发布说明现已拆分为两个完整文件：

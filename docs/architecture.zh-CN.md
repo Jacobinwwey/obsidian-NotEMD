@@ -218,6 +218,8 @@ flowchart LR
 
 `src/diagram/adapters/mermaid/normalize.ts` 是无运行时依赖的 canonical 边界。`extractMermaidBlocks` 与 `mapMermaidBlocks` 负责反引号和波浪线两种标记的 markdown fence 扫描；`fenceMermaidDefinition` 负责 canonical 输出格式。`src/mermaidProcessor.ts` 仍拥有 markdown 修复，但 legacy 链已固化为保持顺序的 35-stage registry，并有幂等性测试与 fail-closed family 门控。normalizer 已识别当前 Mermaid 11 声明（architecture、block、C4、journey、kanban、packet、pie、quadrant、radar、requirement、sankey、timeline、treemap、xychart、ZenUML，以及已有的 class/ER/flowchart/gantt/gitGraph/mindmap/sequence/state family）；已知非 flowchart family 会被修复链拒绝，`unknown` 仍是兼容逃生口。在把未知 family 视为 flowchart-safe 之前仍必须补 parser-backed 分类。
 
+象限图修复严格限定在自身语法范围内。provider 可能把坐标数组的左括号复制进点位标签（`"Docs gallery[": [0.32, 0.68]`）；`repairQuadrantPointLabels()` 只有在整行匹配象限点位语法时才会移除该括号。识别到 `quadrantChart` 后会跳过 flowchart 的引号/形状修复；标题、坐标轴和四象限名称仍使用通用文本清洗器，因此有意保留的标点不会被改写。
+
 `src/diagram/adapters/mermaid/runtime.ts` 负责验证 runtime 初始化：以 `initialize` 函数身份为键，每个 runtime 只用 `startOnLoad: false` 与 `suppressErrorRendering: true` 调用一次 `mermaid.initialize`。Mermaid 预览 webview 的主题专属 `deps.initialize()` 属于独立 webview runtime，必须与插件验证配置区分；这样既避免全局配置重复重置，也保留预览主题所有权。
 
 ### Target Descriptor 与 Gallery 生成链路
@@ -369,6 +371,10 @@ Drawnix 源图形遵循同一条兼容性边界。默认关闭 **同时完整输
 Canonical payload 校验只能证明结构正确，不能证明几何可读。因此 native editable SVG 在缓存或发布前必须通过 `src/diagram/layout/layoutSafety.ts` 与 `src/diagram/layout/layoutDiagnostics.ts` 的共享确定性契约。该契约会保守测量宽字符、拆分无空格标识符、限制行数、依据实测文本扩展几何，并将核心文本溢出作为 error、可选细节省略作为 warning。`RenderArtifact.layoutSafetyVersion` 以 additive 方式暴露契约版本，不破坏旧 artifact。
 
 随后由 gallery 浏览器门禁使用 `getBBox()` 检查实际 native SVG：文本必须位于 viewBox 内，节点文字必须位于节点内，节点不得互相重叠，边标签不得与节点相交。该门禁只作用于带 native layout marker 的 SVG；Mermaid 与 Vega-Lite 继续使用各自 runtime validator，因为最终几何由它们的布局引擎负责。prompt profile 暴露数值密度预算但不暴露坐标，使生成、校验、渲染和预览共享同一个向前兼容的安全边界。
+
+最终展示边界由 selector preview、bundled render host 与生产 gallery 共享。SVG 挂载后，`src/rendering/preview/svgSafety.ts` 使用浏览器几何测量可见文字，拒绝文字/文字相交，也拒绝后绘制图形覆盖文字。这必须是挂载后的门禁：序列化阶段无法观察字体回退、CSS 缩放或 DOM z-order。因此 native family renderer 必须先绘制 surface，再绘制 label/connector；lane-grid、nested 与 semantic-figure adapter 同时编码该顺序并依据占用几何避让标签。`scripts/diagram-gallery-browser-entry.ts` 会在接收 33 个生成 fixture 前运行同一套 presentation diagnostics，因此 gallery 通过代表生产 mounted 路径，而不是另一套 serializer-only 声明。门禁失败时面板保持 error，不得标记为 `ready`。
+
+lane-grid 遵循同一边界：先测量并换行摘要，再放置 lane 标题栏；标题栏保持在受保护摘要区域下方；先绘制单元格，再绘制连接线和标签；跨 lane 路由会为已占用单元格和 lane 标签区域预留空间。这样可以避免旧的固定标题高度和直线假设在真实 Vault 的密集图表中再次造成文字与背景错配。
 
 ## 验证
 

@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "typeId": "ranked-funnel",
+  "fixtureId": "ranked-funnel-release",
+  "title": "Release funnel",
+  "requested": {
+    "typeId": "ranked-funnel",
+    "renderTarget": "editable-html-svg",
+    "compatibilityMode": "best-fit",
+    "targetLanguage": "en"
+  },
+  "status": "passed",
+  "sourceNotePath": "notemd-real-diagram-examples/run-1787998039849-3f10b5/ranked-funnel.md",
+  "outputPath": "notemd-real-diagram-examples/run-1787998039849-3f10b5/ranked-funnel_diagram.html.md",
+  "artifactPath": "docs/diagram-examples/ranked-funnel/artifact.html",
+  "svgPath": "docs/diagram-examples/ranked-funnel/result.svg",
+  "pngPath": "docs/diagram-examples/ranked-funnel/result.png",
+  "providerId": "DeepSeek",
+  "model": "deepseek-v4-flash",
+  "generatedAt": "2026-08-29T10:10:12.245Z",
+  "artifactSha256": "5092f4abe8ebe551097b6bc743ac907439687319d33d72b976e8b87c1f902cd3",
+  "svgSha256": "804f8af87dd2653c827755373cbc3bf271557463baa477c898db0bed98ef1ae1",
+  "pngSha256": "3f5d99d7af3728584ae1d78710edd01e40b02e63594813b85f7c7959f48ee4e7",
+  "visualSource": "vault-companion",
+  "cleanupCompleted": true,
+  "diagnostic": null
+}

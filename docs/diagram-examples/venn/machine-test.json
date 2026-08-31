@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "typeId": "venn",
+  "fixtureId": "venn-platform",
+  "title": "Platform fit",
+  "requested": {
+    "typeId": "venn",
+    "renderTarget": "editable-html-svg",
+    "compatibilityMode": "best-fit",
+    "targetLanguage": "en"
+  },
+  "status": "passed",
+  "sourceNotePath": "notemd-real-diagram-examples/run-1787995422796-fc969a/venn.md",
+  "outputPath": "notemd-real-diagram-examples/run-1787995422796-fc969a/venn_diagram.html.md",
+  "artifactPath": "docs/diagram-examples/venn/artifact.html",
+  "svgPath": "docs/diagram-examples/venn/result.svg",
+  "pngPath": "docs/diagram-examples/venn/result.png",
+  "providerId": "DeepSeek",
+  "model": "deepseek-v4-flash",
+  "generatedAt": "2026-08-29T09:37:29.180Z",
+  "artifactSha256": "c78e65d74253ae96565bbc376717c4bc3d6738ba4c0c88a140b995bcc69b08ab",
+  "svgSha256": "030ef18a8ea714620a6041693c44223ad0de8ea8a903935ea37b46c8b450df9d",
+  "pngSha256": "7cc703ba358ec9a168162a5433a2ace393f4998937b739103654dff66ac6638b",
+  "visualSource": "vault-companion",
+  "cleanupCompleted": true,
+  "diagnostic": null
+}

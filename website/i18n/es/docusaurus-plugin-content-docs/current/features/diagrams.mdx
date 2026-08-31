@@ -54,6 +54,14 @@ Elige **Historial** en la previsualización para abrir el panel de historial del
 
 SVG y PDF se generan a partir de geometría vectorial; PDF utiliza la misma maquetación SVG y métricas de texto en lugar de rasterizar toda la previsualización. El valor PPI para la exportación de imagen en la configuración de Notemd solo controla la rasterización de PNG (de 72 a 600 PPI, con un valor predeterminado de 300).
 
+## Vistas previas legibles para diagramas densos
+
+Los diagramas lane-grid HTML/SVG editables miden y ajustan el resumen antes de colocar el título y el encabezado de lane. El encabezado se mueve debajo de la región protegida del resumen y las celdas se dibujan antes de los conectores y las etiquetas de borde. Los bordes entre lanes usan rutas ortogonales de cuadrícula conscientes de colisiones, reservando las etiquetas de lane y las celdas ocupadas; las descripciones largas no ocultan texto ni obligan a desplazar la vista horizontalmente.
+
+Los diagramas de cuadrantes de Mermaid pasan por una normalización específica de su family. Para `quadrantChart` se omiten las reparaciones de comillas y formas exclusivas de flowchart, mientras se conservan los corchetes intencionales en títulos, ejes y nombres de cuadrante. Solo se elimina un corchete inicial copiado por el provider cuando es el carácter final no coincidente de una etiqueta de punto.
+
+El repositorio mantiene un conjunto de aprendizaje y evidencia de un Vault real para cada tipo de diagrama ejecutable. Consulta [`docs/diagram-examples/`](https://github.com/Jacobinwwey/obsidian-NotEMD/tree/main/docs/diagram-examples) para obtener notas de entrada bilingües, resultados SVG/PNG generados y el manifest de estado legible por máquinas. Las entradas `passed` representan una ejecución con el plugin bundle cargado, no un screenshot fixture estático.
+
 ## Previsualizaciones Drawnix con elementos Mermaid incrustados
 
 Cuando un archivo Drawnix contiene elementos visuales Mermaid, Notemd sanitiza el SVG renderizado y mantiene el código fuente Mermaid junto a él en los metadatos del archivo `.drawnix`. Por lo tanto, la previsualización puede mostrar la imagen Mermaid dentro del mapa de conocimiento Drawnix sin necesidad del entorno runtime Drawnix o Plait. La ruta por defecto es autónoma y no crea una carpeta separada `.assets`. Activa la opción **También exportar elementos visuales Mermaid completos** cuando necesites el código fuente Mermaid, el SVG y los metadatos asociados para su transferencia o edición externa. Los archivos existentes con la extensión `.assets` siguen siendo compatibles, y un SVG Mermaid antiguo que falte puede reconstruirse a partir del texto de origen conservado en los metadatos.

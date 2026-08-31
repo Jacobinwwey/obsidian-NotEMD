@@ -6,7 +6,8 @@ import {
     mapMermaidBlocks,
     MermaidDiagramFamily,
     normalizeMermaidDiagram,
-    openMermaidFence
+    openMermaidFence,
+    repairQuadrantPointLabels
 } from './diagram/adapters/mermaid/normalize';
 import { ensureMermaidInitialized } from './diagram/adapters/mermaid/runtime';
 import {
@@ -120,8 +121,12 @@ export async function refineMermaidBlocks(content: string): Promise<string> {
 				line = `${commentMatch[1]} -- "${commentMatch[3].trim()}" --> ${commentMatch[2]};`;
 			}
 
+			// Legacy quote/shape repairs target flowchart syntax. Once the block
+			// header identifies a dedicated family, keep its grammar intact.
+			const currentFamily = normalizeMermaidDiagram(currentBlockLines.slice(1).join('\n')).family;
+
 			// Apply new quote rules BEFORE removing brackets, ONLY if 'subgraph' is NOT on the line
-			if (!line.includes('subgraph')) {
+			if (!line.includes('subgraph') && currentFamily !== 'quadrantChart') {
 				// 先保护 |" 和 "| 的情况
 				const placeholder = '___PROTECTED_QUOTE___';
 				line = line.replace(/\|"/g, `|${placeholder}`);
@@ -202,10 +207,12 @@ export async function refineMermaidBlocks(content: string): Promise<string> {
 
 			// Parentheses and braces are legacy flowchart repair targets. ER entities
 			// use both as grammar, so preserve them once the family is known.
-			const currentFamily = normalizeMermaidDiagram(currentBlockLines.slice(1).join('\n')).family;
-			let lineWithoutBrackets = currentFamily === 'erDiagram'
+			let lineWithoutBrackets = currentFamily === 'erDiagram' || currentFamily === 'quadrantChart'
 				? line
 				: line.replace(/[(){}]/g, '');
+			if (currentFamily === 'quadrantChart') {
+				lineWithoutBrackets = repairQuadrantPointLabels(lineWithoutBrackets);
+			}
 
 			// Fix [" at the end of the line
 			if (lineWithoutBrackets.endsWith('\["')) {

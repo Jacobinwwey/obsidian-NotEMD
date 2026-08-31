@@ -59,6 +59,14 @@ Vælg **Historik** i forudvisningen for at åbne Vault-historiekassetten uden at
 
 SVG og PDF genereres fra vektorgeometri; PDF bruger samme SVG-layout og tekstmæssig information i stedet for at rasterisere hele forudvisningen. Billedexportens PPI i Notemd-indstillinger kontrollerer kun PNG-rasteriseringen (72–600 PPI, 300 som standard).
 
+## Læselige forhåndsvisninger af tætte diagrammer
+
+Redigerbare HTML/SVG lane-grid-diagrammer måler og ombryder resuméet, før titel og lane-header placeres. Headeren flyttes under det beskyttede resuméområde, og celler tegnes før forbindelser og kantetiketter. Kanter på tværs af lanes bruger kollisionsbevidste ortogonale grid-ruter, der reserverer lane-etiketter og optagede celler, så lange beskrivelser ikke skjuler tekst eller kræver vandret panorering.
+
+Mermaid-kvadrantdiagrammer får en familiespecifik normaliseringsfase. Flowchart-specifikke citat- og formreparationer springes over for `quadrantChart`, mens tilsigtede parenteser i titler, akser og kvadrantnavne bevares. En åbningsparentes, som en provider har kopieret, fjernes kun, når den er det ikke-matchende sidste tegn i en punktetiket.
+
+Arkivet indeholder et real-Vault lærings- og evidenssæt for hver eksekverbar diagramtype. Se [`docs/diagram-examples/`](https://github.com/Jacobinwwey/obsidian-NotEMD/tree/main/docs/diagram-examples) for tosprogede inputnoter, genererede SVG/PNG-resultater og det maskinlæsbare statusmanifest. `passed`-poster er kørsler gennem den indlæste plugin bundle, ikke statiske screenshot-fixtures.
+
 ## Drawnix-forudvisninger med embedte Mermaid
 
 Når en Drawnix-artefakt indeholder Mermaid-visueler, saniterer Notemd den renderede SVG og gemmer Mermaid-kilden sammen med den i metadata-filen `.drawnix`. Forudvisningen kan derfor vise Mermaid-billedet indenfor Drawnix-knowledge-mappen uden at kræve Drawnix eller Plait-runtime. Den standardmæssige path er self-contained og skaber ikke en separat `.assets`-mappe. Aktiver **Eksportér også fulde Mermaid-visueler**, hvis du behøver Mermaid-kilden, SVG og manifest-filer til overførsel eller ekstern redigering. Existente artefakter med `.assets` bliver fortsat støttet, og en fejlt Mermaid SVG kan rekonstrueres fra kildeteksten, der gemmes i metadata.

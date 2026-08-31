@@ -7,7 +7,7 @@ import {
 import type { DiagramCatalogTypeId, DiagramIntent } from '../diagram/types';
 import { getRenderTargetDisplayName } from '../rendering/targetLabel';
 import { getRenderTargetDescriptor } from '../rendering/renderTargetCatalog';
-import { assertSvgPresentationSafety } from '../rendering/preview/svgSafety';
+import { assertMountedSvgPresentationSafety } from '../rendering/preview/svgSafety';
 import type { DiagramCatalogLabelCopy } from './diagramCatalogLabels';
 
 export interface DiagramTypePreviewPanelCopy extends DiagramCatalogLabelCopy {
@@ -18,7 +18,6 @@ export interface DiagramTypePreviewPanelCopy extends DiagramCatalogLabelCopy {
     failed: string;
     targetPrefix: string;
     formatsPrefix: string;
-    previewOverflowHint?: string;
 }
 
 export interface DiagramTypePreviewPanelController {
@@ -141,33 +140,22 @@ export function renderDiagramTypePreviewPanel(
                     return;
                 }
                 canvas.innerHTML = svg;
-                assertSvgPresentationSafety(canvas, `Diagram type "${typeId}"`);
-                setPreviewState('ready', false);
                 const renderedSvg = canvas.querySelector('svg');
                 if (renderedSvg) {
                     renderedSvg.setAttribute('role', 'img');
                     renderedSvg.setAttribute('aria-label', label);
                     // A fixed 16:9 thumbnail is an interaction surface, not the
                     // source artifact. Preserve the source aspect ratio and let
-                    // the host scroll when a dense matrix cannot remain legible
-                    // at thumbnail scale. Stretching a 880x532 matrix into a
-                    // 16:9 box was the root of the reported text-obscuring UX.
+                    // the container width determine the thumbnail scale so the
+                    // complete diagram stays visible without horizontal scrolling.
                     renderedSvg.classList.add('notemd-diagram-type-preview-svg');
                     const viewBox = renderedSvg.viewBox?.baseVal;
                     if (viewBox && viewBox.width > 0 && viewBox.height > 0) {
                         canvas.setAttribute('data-preview-aspect-ratio', `${viewBox.width}/${viewBox.height}`);
-                        const minimumReadableWidth = Math.max(520, Math.ceil(viewBox.width * 0.8));
-                        renderedSvg.style.minWidth = `${minimumReadableWidth}px`;
-                        renderedSvg.setAttribute('data-preview-min-readable-width', String(minimumReadableWidth));
-                        if (minimumReadableWidth > canvas.clientWidth) {
-                            const hint = canvas.createEl('p', {
-                                text: params.copy.previewOverflowHint ?? 'Wider preview: scroll horizontally to inspect labels.',
-                                cls: 'notemd-diagram-type-preview-overflow-hint'
-                            });
-                            hint.setAttr('role', 'status');
-                        }
                     }
                 }
+                assertMountedSvgPresentationSafety(canvas, `Diagram type "${typeId}"`);
+                setPreviewState('ready', false);
             }).catch(error => {
                 if (destroyed || currentVersion !== requestVersion) {
                     return;

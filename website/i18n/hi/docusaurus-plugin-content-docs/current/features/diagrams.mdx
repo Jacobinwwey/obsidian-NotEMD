@@ -59,6 +59,14 @@ Draw.io एवं Drawnix **स्रोत प्रारूप** हैं, �
 
 SVG एवं PDF वेक्टर ज्यामिति से बनते हैं; PDF में पूरे प्रीव्यू को रास्टराइज़ करने के बजाय वही SVG लेआउट एवं टेक्स्ट मेट्रिक्स ही उपयोग में आते हैं। Notemd सेटिंग्स में दिया गया इमेज निर्यात PPI केवल PNG की रास्टराइज़ेशन प्रक्रिया को ही नियंत्रित करता है (72-600 PPI, डिफ़ॉल्ट रूप से 300)।
 
+## घने डायग्राम के लिए पठनीय प्रीव्यू
+
+संपादन योग्य HTML/SVG lane-grid डायग्राम शीर्षक और lane header रखने से पहले summary को मापकर wrap करते हैं। header को सुरक्षित summary क्षेत्र के नीचे रखा जाता है और connector तथा edge label से पहले cells बनाए जाते हैं। cross-lane edges collision-aware orthogonal grid routes का उपयोग करते हैं और lane labels तथा भरे हुए cells के लिए स्थान सुरक्षित रखते हैं, इसलिए लंबे विवरण टेक्स्ट नहीं ढकते और समझने के लिए क्षैतिज पैनिंग की जरूरत नहीं पड़ती।
+
+Mermaid quadrant charts को family-विशिष्ट normalization चरण मिलता है। `quadrantChart` के लिए केवल flowchart-विशिष्ट quote और shape repairs छोड़े जाते हैं; title, axis और quadrant name में जानबूझकर रखे गए brackets दिखाई देते रहते हैं। provider द्वारा कॉपी किया गया opening bracket तभी हटता है जब वह point label का unmatched अंतिम अक्षर हो।
+
+Repository हर executable diagram type के लिए real-Vault learning और evidence set रखता है। bilingual input notes, generated SVG/PNG results और machine-readable status manifest के लिए [`docs/diagram-examples/`](https://github.com/Jacobinwwey/obsidian-NotEMD/tree/main/docs/diagram-examples) देखें। `passed` entries loaded plugin bundle के माध्यम से वास्तविक run दर्शाती हैं, static screenshot fixture नहीं।
+
 ## एम्बेडेड Mermaid के साथ Drawnix प्रीव्यू
 
 जब कोई Drawnix आर्टिफैक्ट Mermaid विजुअल्स शामिल करता है, तो Notemd रेंडर किए गए SVG को सैनिटाइज़ करता है एवं Mermaid स्रोत को `.drawnix` मेटाडेटा में उसके साथ ही संग्रहीत रखता है। इस कारण प्रीव्यू, Drawnix नॉलेज मैप के भीतर Mermaid छवियों को Drawnix या Plait रनटाइम की आवश्यकता के बिना ही दिखा सकता है। डिफ़ॉल्ट पथ स्व-निहित होता है एवं यह कोई अलग `.assets` डायरेक्टरी नहीं बनाता। यदि आपको हैंडओवर या बाहरी संपादन हेतु Mermaid स्रोत, SVG एवं मैनिफेस्ट की आवश्यकता हो, तो **Also export complete Mermaid visuals** को सक्षम करें। `.assets` वाले मौजूदा आर्टिफैक्ट्स का समर्थन जारी रहता है, एवं मेटाडेटा में संरक्षित स्रोत पाठ से लुप्त Mermaid SVG को पुनः बनाया जा सकता है।

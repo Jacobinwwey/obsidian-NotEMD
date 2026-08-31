@@ -13,6 +13,7 @@ import {
     getBundledMermaidPreviewDeps,
     getBundledVegaLitePreviewDeps
 } from '../src/rendering/webview/bundledPreviewDeps';
+import { collectSvgPresentationDiagnostics } from '../src/rendering/preview/svgSafety';
 
 export interface RenderedDiagramGalleryEntry {
     typeId: string;
@@ -92,6 +93,28 @@ function makeSvgAccessible(svg: string, fixtureId: string, title: string, descri
     return new XMLSerializer().serializeToString(root).replace(/[ \t]+(?=\r?\n|$)/g, '');
 }
 
+function assertMountedPresentationSafety(svg: string, fixtureId: string): void {
+    const mount = document.createElement('div');
+    mount.style.cssText = 'position:absolute;left:-100000px;top:0;width:960px;height:540px;overflow:hidden;';
+    mount.innerHTML = svg;
+    const renderedSvg = mount.querySelector('svg');
+    if (renderedSvg) {
+        renderedSvg.style.display = 'block';
+        renderedSvg.style.width = '100%';
+        renderedSvg.style.height = '100%';
+        renderedSvg.style.maxWidth = 'none';
+    }
+    document.body.appendChild(mount);
+    try {
+        const diagnostics = collectSvgPresentationDiagnostics(mount);
+        if (diagnostics.length > 0) {
+            throw new Error(`Diagram fixture "${fixtureId}" failed shared presentation gate: ${diagnostics.map(diagnostic => diagnostic.message).join(' ')}`);
+        }
+    } finally {
+        mount.remove();
+    }
+}
+
 async function renderGallery(): Promise<RenderedDiagramGalleryEntry[]> {
     const renderer = createDefaultDiagramRendererService();
     const editableSvgRenderer = new EditableHtmlSvgRenderer();
@@ -108,6 +131,7 @@ async function renderGallery(): Promise<RenderedDiagramGalleryEntry[]> {
             example.title,
             example.selectionRationale
         );
+        assertMountedPresentationSafety(svg, example.fixtureId);
         entries.push({
             typeId: example.typeId,
             fixtureId: example.fixtureId,

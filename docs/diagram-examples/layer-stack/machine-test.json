@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "typeId": "layer-stack",
+  "fixtureId": "layer-stack-platform",
+  "title": "Platform layers",
+  "requested": {
+    "typeId": "layer-stack",
+    "renderTarget": "editable-html-svg",
+    "compatibilityMode": "best-fit",
+    "targetLanguage": "en"
+  },
+  "status": "passed",
+  "sourceNotePath": "notemd-real-diagram-examples/run-1787995422796-fc969a/layer-stack.md",
+  "outputPath": "notemd-real-diagram-examples/run-1787995422796-fc969a/layer-stack_diagram.html.md",
+  "artifactPath": "docs/diagram-examples/layer-stack/artifact.html",
+  "svgPath": "docs/diagram-examples/layer-stack/result.svg",
+  "pngPath": "docs/diagram-examples/layer-stack/result.png",
+  "providerId": "DeepSeek",
+  "model": "deepseek-v4-flash",
+  "generatedAt": "2026-08-29T09:37:16.441Z",
+  "artifactSha256": "4348973a1d894c5ef9031e8ae88f469b24fa4cb7c81bf8dd3dd217baf9fcad4d",
+  "svgSha256": "4eb5d63cc76a191d532bd6c0c36521937d1203dfec306e29135e31eaaa352bcf",
+  "pngSha256": "b3c01810a961f22505d1972e7bd0dcdc64e477317f793f415fefb3c76e35219e",
+  "visualSource": "vault-companion",
+  "cleanupCompleted": true,
+  "diagnostic": null
+}

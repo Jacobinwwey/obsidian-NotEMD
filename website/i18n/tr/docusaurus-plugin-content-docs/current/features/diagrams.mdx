@@ -59,6 +59,14 @@ Dışa aktarım menüsü, mevcut görsel önizleme için **SVG dışa aktar**, *
 
 SVG ve PDF, vektör geometrisinden üretilir; PDF ise tüm önizlemeyi rasterleştirmek yerine aynı SVG düzenini ve metin ölçümlerini kullanır. Notemd ayarlarındaki görüntü dışa aktarım PPI değeri yalnızca PNG’nin rasterleştirilmesini kontrol eder (72–600 PPI, varsayılan 300).
 
+## Yoğun diyagramlar için okunabilir önizlemeler
+
+Düzenlenebilir HTML/SVG lane-grid diyagramları, başlık ve lane başlığı yerleştirilmeden önce özeti ölçüp satırlara böler. Başlık korunan özet alanının altına taşınır ve hücreler bağlayıcılar ile kenar etiketlerinden önce çizilir. Lane'ler arası kenarlar çakışma farkındalığı olan ortogonal ızgara yolları kullanır; lane etiketleri ve dolu hücreler için alan ayırır. Böylece uzun açıklamalar metni gizlemez ve yatay kaydırma gerekmez.
+
+Mermaid quadrant diyagramları family'e özgü normalizasyondan geçer. `quadrantChart` için yalnızca flowchart'a özel tırnak ve şekil düzeltmeleri atlanır; başlıklarda, eksenlerde ve quadrant adlarında kasıtlı köşeli parantezler korunur. Provider tarafından kopyalanan açılış parantezi, yalnızca nokta etiketinin eşleşmeyen son karakteriyse kaldırılır.
+
+Depo, çalıştırılabilir her diyagram türü için gerçek bir Vault'tan öğrenme ve kanıt kümesi tutar. İki dilli giriş notları, oluşturulan SVG/PNG sonuçları ve makine tarafından okunabilir durum manifesti için [`docs/diagram-examples/`](https://github.com/Jacobinwwey/obsidian-NotEMD/tree/main/docs/diagram-examples) adresine bakın. `passed` girdileri yüklenmiş plugin bundle üzerinden yapılan çalıştırmaları gösterir; statik screenshot fixture değildir.
+
 ## İçinde Mermaid görselleri bulunan Drawnix önizlemeleri
 
 Bir Drawnix dosyasında Mermaid görselleri yer aldığında, Notemd renderlenmiş SVG’yi temizler ve Mermaid kaynağını `.drawnix` meta verileri içinde saklar. Böylece önizleme, Drawnix bilgi haritasının içinde Mermaid görüntüsünü gösterebilir; bu işlem için Drawnix veya Plait çalışma zamanına gerek yoktur. Güvenli bir şekilde yerleştirilen yalnızca Mermaid içeren görseller ayrı bir `.assets` klasörü oluşturmaz; harici ikili medya veya çözülmemiş görseller ise veri kaybını önlemek amacıyla eşlik eden bir dosya tutar.

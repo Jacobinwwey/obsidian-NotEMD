@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "typeId": "integration-topology",
+  "fixtureId": "integration-topology-platform",
+  "title": "Integration topology",
+  "requested": {
+    "typeId": "integration-topology",
+    "renderTarget": "editable-html-svg",
+    "compatibilityMode": "best-fit",
+    "targetLanguage": "en"
+  },
+  "status": "passed",
+  "sourceNotePath": "notemd-real-diagram-examples/run-1787995422796-fc969a/integration-topology.md",
+  "outputPath": "notemd-real-diagram-examples/run-1787995422796-fc969a/integration-topology_diagram.html.md",
+  "artifactPath": "docs/diagram-examples/integration-topology/artifact.html",
+  "svgPath": "docs/diagram-examples/integration-topology/result.svg",
+  "pngPath": "docs/diagram-examples/integration-topology/result.png",
+  "providerId": "DeepSeek",
+  "model": "deepseek-v4-flash",
+  "generatedAt": "2026-08-29T09:31:57.963Z",
+  "artifactSha256": "5d56b1cae94a632123a9fa7a8e9375fc86cf338dcaa87bf7d1c3a38765eb35b8",
+  "svgSha256": "6d85cd0d3eb46ac7834db4a1d27b2109c39c37d888dd7af13ce0fd39608d6689",
+  "pngSha256": "a14f76ef4539109c75cc2603b37f6d97c9a319c252a05fc02ae388d0f90e4ffa",
+  "visualSource": "vault-companion",
+  "cleanupCompleted": true,
+  "diagnostic": null
+}

@@ -54,6 +54,14 @@ Draw.io 和 Drawnix 是**源格式**，不是图表类型。CircuitikZ 是专为
 
 SVG 和 PDF 是基于矢量几何生成的；PDF 使用与 SVG 相同的布局和文本度量标准，而非对整个预览进行光栅化处理。Notemd 设置中的图像导出 PPI 仅用于控制 PNG 的光栅化程度（范围为 72–600 PPI，默认值为 300）。
 
+## 密集图表的可读预览
+
+Editable HTML/SVG lane-grid 图会先测量并换行摘要，再放置标题和 lane 标题栏。标题会移动到受保护的摘要区域下方，单元格先于连接线和边标签绘制。跨 lane 的边使用碰撞感知正交网格路由，并为 lane 标签和已占用单元格预留空间，因此长描述不会遮住文字，也不要求用户横向拖动预览才能理解图表。
+
+Mermaid 象限图使用按 family 区分的规范化流程。对于 `quadrantChart` 会跳过只适用于 flowchart 的引号和形状修复；只有当 provider 误复制的左括号成为数据点标签末尾的不匹配字符时，才会移除它。标题、坐标轴和四象限名称中有意使用的括号会保留。
+
+仓库为每个可执行图表类型保留真实 Vault 的学习与证据目录。请查看 [`docs/diagram-examples/`](https://github.com/Jacobinwwey/obsidian-NotEMD/tree/main/docs/diagram-examples)，其中包含双语输入笔记、生成的 SVG/PNG 结果和机器可读状态 manifest。`passed` 条目代表通过已加载插件 bundle 的真实运行，而不是静态截图 fixture。
+
 ## 带有嵌入 Mermaid 的 Drawnix 预览
 
 当 Drawnix 原始文件中包含 Mermaid 可视化内容时，Notemd 会对渲染后的 SVG 进行净化处理，并将对应的 Mermaid 源代码保留在 `.drawnix` 元数据中。因此，预览界面能够在 Drawnix 知识图谱中直接显示 Mermaid 图像，而无需依赖 Drawnix 或 Plait 运行时环境。那些被安全嵌入的纯 Mermaid 可视化内容不会生成单独的 `.assets` 目录；而对于外部二进制媒体或尚未解析完成的可视化内容，则会保留配套文件，从而避免数据丢失。

@@ -23,8 +23,10 @@ export default {
             { text: '文档中心', link: '/README.zh-CN' },
             { text: 'Diagram Gallery', link: '/diagram-gallery' },
             { text: '图形 Gallery', link: '/diagram-gallery.zh-CN' },
+            { text: 'Diagram Examples (EN)', link: '/diagram-examples/README' },
+            { text: '图表示例（中文）', link: '/diagram-examples/README.zh-CN' },
             { text: 'Plans', link: '/superpowers/plans/2026-08-16-diagram-capability-catalog-and-forward-architecture.en' },
-            { text: 'Releases', link: '/releases/1.9.6' }
+            { text: 'Releases', link: '/releases/1.9.7' }
         ],
         sidebar: [
             {
@@ -35,7 +37,9 @@ export default {
                     { text: 'Docs Hub (EN)', link: '/README' },
                     { text: 'Docs Hub (zh-CN)', link: '/README.zh-CN' },
                     { text: 'Diagram Gallery (EN)', link: '/diagram-gallery' },
-                    { text: 'Diagram Gallery (zh-CN)', link: '/diagram-gallery.zh-CN' }
+                    { text: 'Diagram Gallery (zh-CN)', link: '/diagram-gallery.zh-CN' },
+                    { text: 'Diagram Examples (EN)', link: '/diagram-examples/README' },
+                    { text: 'Diagram Examples (zh-CN)', link: '/diagram-examples/README.zh-CN' }
                 ]
             },
             {
@@ -56,6 +60,8 @@ export default {
                     { text: '1.8.1 (zh-CN)', link: '/releases/1.8.1.zh-CN' },
                     { text: '1.8.2 (EN)', link: '/releases/1.8.2' },
                     { text: '1.8.2 (zh-CN)', link: '/releases/1.8.2.zh-CN' },
+                    { text: '1.9.7 (EN)', link: '/releases/1.9.7' },
+                    { text: '1.9.7 (zh-CN)', link: '/releases/1.9.7.zh-CN' },
                     { text: '1.9.6 (EN)', link: '/releases/1.9.6' },
                     { text: '1.9.6 (zh-CN)', link: '/releases/1.9.6.zh-CN' },
                     { text: '1.9.5 (EN)', link: '/releases/1.9.5' },
@@ -70,6 +76,8 @@ export default {
                     { text: 'Diagram Capability Catalog (zh-CN)', link: '/maintainer/diagram-capability-catalog.zh-CN' },
                     { text: 'Diagram Gallery (EN)', link: '/diagram-gallery' },
                     { text: 'Diagram Gallery (zh-CN)', link: '/diagram-gallery.zh-CN' },
+                    { text: 'Diagram Examples (EN)', link: '/diagram-examples/README' },
+                    { text: 'Diagram Examples (zh-CN)', link: '/diagram-examples/README.zh-CN' },
                     { text: 'Release Workflow (EN)', link: '/maintainer/release-workflow' },
                     { text: 'Release Workflow (zh-CN)', link: '/maintainer/release-workflow.zh-CN' }
                 ]

@@ -105,8 +105,13 @@ implementation_record: src/tests/mermaidNormalizationConvergence.test.ts
 | Consumer | 当前证据 | 状态 |
 |---|---|---|
 | Draw.io | 工作区未发现 diagrams.net/Draw.io 可执行程序 | 未宣称互操作；需补 manual/CI gate |
+
 | Drawnix | `npm run diagram:consumer:drawnix` 生成生产架构 fixture，并通过公开 `@plait/*` API 消费；当前没有独立 Drawnix 应用 | Plait consumer 契约已通过；不宣称真实应用互操作 |
 | Circuitikz | `pdflatex` 已编译全部 6 个 golden fixture；每个都生成非空 PDF，0 error、0 warning | 本地 consumer gate 通过；CI 仍需记录工具/版本 |
+
+## 缩略图适配跟进（2026-08-29）
+
+用户复核发现，宿主层的最小可读宽度会让所选类型预览必须水平滚动，这不适合作为确认用缩略图。现在预览继续保留源 SVG 的 `viewBox` 比例，同时把 SVG 根节点约束在面板宽度内（`width: 100%`、`max-width: 100%`、`min-width: 0`，高度按比例自适应）。已移除溢出滚动容器和滚动提示，使每种图形都能以完整的等比缩略图直接呈现，无需额外导航。
 
 ## 向前推进计划
 
@@ -303,3 +308,21 @@ JSON Canvas 之前被视为 runtime-owned preview，因此跳过 native 几何�
 - 宽图预览显示本地化横向滚动提示，当最小可读宽度超过宿主 viewport 时给用户明确反馈。
 
 聚焦证据：native renderer/diagnostic、preview、render-host、adapter registry 与 SVG safety 测试通过；gallery generation/check 仍为 33/33。全量回归与 Vault 热重载是下一道发布门禁。
+
+## Native Z-Order 回归闭环（2026-08-26）
+
+presentation gate 首次在真实 Vault 热重载中暴露了两个 fixture-only `getBBox()` 无法分类的 renderer 缺陷：`data-flow` 在 connector label 之前绘制 lane-grid cell，导致 `anon table` 被目标 cell 覆盖；`nested` 在外层标签之后绘制内层半透明 scope surface，导致 `local contract` 被后绘制 surface 覆盖。两个预览都按预期进入 `error`。这证明门禁正在捕获真实 UX 缺陷，而不是只拒绝畸形 markup。
+
+- lane-grid 现在先绘制 lane/cell surface，再绘制 edge 与 edge label；路由仍保持确定性，connector label 位于最上层。
+- nested 现在先输出所有 scope surface，再输出所有 tag/text group；透明度不变，但 DOM 顺序不能再遮蔽外层标识符。
+- renderer 回归测试锁定两个顺序不变量；受影响 fixture 的 gallery SVG/PNG 与 manifest 已重生成。
+
+本轮继续前的证据：重新加载的 `1Knowledge` Vault 中 `data-flow` 已为 `ready`；访问矩阵为 `ready`，挂载文字/文字相交为 0，并显示横向滚动提示。后续工作没有放宽门禁，而是扩大证据边界：nested surface/tag 已使用语义标记排除，lane-grid edge label 使用 cell 占用布局，editable semantic figure 路径会把 ER label 移离子节点。现在 gallery 会用插件相同的 presentation diagnostics 挂载并检查全部 33 个生产 fixture。当前仓库证据为 `270` 个 Jest suite、`2,375 passed / 1 skipped`、生产 build、gallery 生成/检查 `33/33` 以及 docs/render-host/i18n 门禁均通过。Vault bundle verifier 会在新版 `main.js`/`styles.css`/`manifest.json` 复制到 `E:\1Knowledge\.obsidian\plugins\notemd` 前刻意保持失败；随后仍需完成 Vault CLI reload 与复制后的检查。所有检查完成前不得 commit 或 push。
+
+## Presentation Gate 收敛（2026-08-26）
+
+之前 native gallery 检查与 mounted runtime 检查分裂的问题已经收敛。`scripts/diagram-gallery-browser-entry.ts` 现在会挂载每个生产 SVG，并在资产接收前调用插件共享的 `collectSvgPresentationDiagnostics()`。gallery 依次捕获了真实缺陷：ER 的 `contains` 与子节点 `id`、lane-grid 的 `anon table` 与相邻 cell、nested 标签与后绘制 scope surface 的碰撞。每个问题都在其 owner 边界修复，并由确定性测试或 Chromium 几何测试覆盖。selector preview 在最终 class/尺寸应用后才执行 safety；render-host 会先暴露 mount 再测量，unsafe markup 会回滚清空。该策略刻意 fail-closed：测试夹具必须提供可测量的 SVG 几何，不能迫使生产代码接受不可见或畸形预览。
+
+## 拓扑 footer 标签适配闭环（2026-08-29）
+
+集成拓扑预览暴露了一个 renderer 自身的几何错配：footer chip 高度固定为 48px，但副标题基线加字体下沉已经超出 chip 底部。宿主缩放 SVG 的方式是正确的，真正的问题是背景结束得太早。现在 topology renderer 使用一个具名常量推导 64px footer chip 高度，并由 Chromium 回归测试断言每个 footer 文本的 bounding box 都位于对应 chip 内。集成拓扑 SVG/PNG 与 gallery manifest 已重生成，已部署的 `1Knowledge` 预览报告 `ready`，footer 标签均在背景内。

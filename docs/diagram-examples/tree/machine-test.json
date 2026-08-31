@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "typeId": "tree",
+  "fixtureId": "tree-ownership",
+  "title": "Ownership tree",
+  "requested": {
+    "typeId": "tree",
+    "renderTarget": "editable-html-svg",
+    "compatibilityMode": "best-fit",
+    "targetLanguage": "en"
+  },
+  "status": "passed",
+  "sourceNotePath": "notemd-real-diagram-examples/run-1788002379471-bce189/tree.md",
+  "outputPath": "notemd-real-diagram-examples/run-1788002379471-bce189/tree_diagram.html.md",
+  "artifactPath": "docs/diagram-examples/tree/artifact.html",
+  "svgPath": "docs/diagram-examples/tree/result.svg",
+  "pngPath": "docs/diagram-examples/tree/result.png",
+  "providerId": "DeepSeek",
+  "model": "deepseek-v4-flash",
+  "generatedAt": "2026-08-29T11:19:42.697Z",
+  "artifactSha256": "251c1529693f7e9218bf4fb00cc4bc46e635fd91cca62c88eb3a84acf50da13c",
+  "svgSha256": "0b646f1c52aa8aa240d83e892a6a24954153042518326c3c316056d44bfdee90",
+  "pngSha256": "42c669371077c7bcdbe55963c55d34e9fc6e540a7a9273f09ad4cdefac1c742c",
+  "visualSource": "vault-companion",
+  "cleanupCompleted": true,
+  "diagnostic": null
+}

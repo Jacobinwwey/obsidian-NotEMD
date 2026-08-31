@@ -54,6 +54,14 @@ Draw.io と Drawnix は図表の種類ではなく**ソース形式**です。Ci
 
 SVG と PDF はベクタージオメトリから生成されます。PDF ではプレビュー全体をラスタライズする代わりに、同じ SVG のレイアウトとテキストメトリックが使用されます。Notemd 設定内の画像エクスポート用 PPI は PNG のラスタライズのみを制御します（72～600 PPI、デフォルトは300）。
 
+## 密度の高い図表でも読みやすいプレビュー
+
+編集可能な HTML/SVG lane-grid 図は、タイトルと lane ヘッダーを配置する前に概要を計測して折り返します。ヘッダーは保護された概要領域の下へ移動し、セルはコネクターとエッジラベルより先に描画されます。lane をまたぐエッジには衝突を考慮した直交グリッド経路を使い、lane ラベルと占有セルの領域を確保するため、長い説明が文字を隠したり、理解のために横へパンしたりする必要がありません。
+
+Mermaid の quadrant chart には family 固有の正規化処理が適用されます。`quadrantChart` では flowchart 専用の引用符・形状修復をスキップし、タイトル、軸、象限名に意図的に含めた角括弧はそのまま表示します。provider がコピーした開き角括弧は、点ラベル末尾の不一致文字である場合にだけ削除されます。
+
+リポジトリには、実際の Vault で実行した全 executable diagram type の学習・証拠セットがあります。バイリンガル入力ノート、生成済み SVG/PNG、機械可読な status manifest は [`docs/diagram-examples/`](https://github.com/Jacobinwwey/obsidian-NotEMD/tree/main/docs/diagram-examples) を参照してください。`passed` はロード済み plugin bundle を通した実行結果であり、静的な screenshot fixture ではありません。
+
 ## 埋め込まれた Mermaid を含む Drawnix プレビュー
 
 Drawnix ファイルに Mermaid 可視化コンテンツが含まれている場合、Notemd はレンダリングされた SVG をサニタイズし、Mermaid のソースを `.drawnix` メタデータ内に保持します。そのため、Drawnix や Plait のランタイムがなくても、Drawnix ナレッジマップ内に Mermaid 画像を表示できます。安全に埋め込まれた Mermaid のみの可視化コンテンツは別途 `.assets` ディレクトリを作成しませんが、外部のバイナリメディアや解決されていない可視化コンテンツについては補助ファイルが保持されるため、データが失われることはありません。

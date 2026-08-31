@@ -59,6 +59,14 @@ Pilih **History** dalam pratonton untuk membuka penarik sejarah Vault tanpa meny
 
 SVG dan PDF dihasilkan daripada geometri vektor; PDF menggunakan susunan SVG dan metrik teks yang sama dan bukannya merasterkan keseluruhan pratonton. Nilai PPI untuk eksport imej dalam tetapan Notemd hanya mengawal proses merasterkan PNG sahaja (72-600 PPI, 300 sebagai nilai lalai).
 
+## Pratonton yang mudah dibaca untuk rajah padat
+
+Rajah lane-grid HTML/SVG yang boleh diedit mengukur dan membungkus ringkasan sebelum meletakkan tajuk dan pengepala lane. Pengepala dialihkan ke bawah kawasan ringkasan yang dilindungi, dan sel dilukis sebelum penyambung serta label tepi. Tepi merentas lane menggunakan laluan grid ortogon yang sedar perlanggaran dan memperuntukkan ruang untuk label lane serta sel yang diduduki, jadi penerangan panjang tidak menutup teks atau memerlukan pan mendatar.
+
+Rajah kuadran Mermaid menerima langkah normalisasi khusus family. Untuk `quadrantChart`, pembaikan petikan dan bentuk khusus flowchart dilangkau; kurungan yang disengajakan dalam tajuk, paksi dan nama kuadran kekal kelihatan. Kurungan pembuka yang disalin provider hanya dibuang apabila ia menjadi aksara terakhir yang tidak sepadan pada label titik.
+
+Repositori mengekalkan set pembelajaran dan bukti daripada Vault sebenar untuk setiap jenis rajah boleh laku. Lihat [`docs/diagram-examples/`](https://github.com/Jacobinwwey/obsidian-NotEMD/tree/main/docs/diagram-examples) untuk nota input dwibahasa, hasil SVG/PNG yang dijana dan manifest status yang boleh dibaca mesin. Entri `passed` ialah larian melalui plugin bundle yang dimuatkan, bukan screenshot fixture statik.
+
 ## Pratonton Drawnix dengan visual Mermaid yang terbenam
 
 Apabila sebuah artefak Drawnix mengandungi visual Mermaid, Notemd akan menyucikan SVG yang dihasilkan dan menyimpan sumber Mermaid bersamanya dalam metadata `.drawnix`. Oleh itu, pratonton boleh memaparkan imej Mermaid di dalam peta pengetahuan Drawnix tanpa memerlukan runtime Drawnix atau Plait. Laluan lalai adalah bersepadu dan tidak mencipta direktori `.assets` yang berasingan. Aktifkan opsyen **Juga eksport visual Mermaid yang lengkap** apabila anda memerlukan sumber Mermaid, SVG, serta fail manifest untuk diserahkan atau diedit di luar. Artefak sedia ada yang mempunyai direktori `.assets` masih disokong, dan SVG Mermaid lama yang hilang boleh dibina semula daripada teks sumber yang disimpan dalam metadata.

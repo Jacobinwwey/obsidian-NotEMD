@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "typeId": "access-matrix",
+  "fixtureId": "access-matrix-platform",
+  "title": "Platform access matrix",
+  "requested": {
+    "typeId": "access-matrix",
+    "renderTarget": "editable-html-svg",
+    "compatibilityMode": "best-fit",
+    "targetLanguage": "en"
+  },
+  "status": "passed",
+  "sourceNotePath": "notemd-real-diagram-examples/run-1787998039849-3f10b5/access-matrix.md",
+  "outputPath": "notemd-real-diagram-examples/run-1787998039849-3f10b5/access-matrix_diagram.html.md",
+  "artifactPath": "docs/diagram-examples/access-matrix/artifact.html",
+  "svgPath": "docs/diagram-examples/access-matrix/result.svg",
+  "pngPath": "docs/diagram-examples/access-matrix/result.png",
+  "providerId": "DeepSeek",
+  "model": "deepseek-v4-flash",
+  "generatedAt": "2026-08-29T10:07:24.070Z",
+  "artifactSha256": "36864fe0126fa947421d754b1c3aa3ad09c0af36f3a2d34de09195d1ad75cba6",
+  "svgSha256": "6f3aa4cb23f43b2eb38645fa1d9a214ca0dd4951c251561e5ce976174b72463f",
+  "pngSha256": "dd79ac7c37dfa9eec1dce59cca7f4dbc6e13acc389f2a8964dba736e563e6ab2",
+  "visualSource": "vault-companion",
+  "cleanupCompleted": true,
+  "diagnostic": null
+}

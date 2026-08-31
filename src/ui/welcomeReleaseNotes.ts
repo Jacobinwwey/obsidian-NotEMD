@@ -11,6 +11,14 @@ const WELCOME_RELEASE_NOTE_LIMIT = 2;
 
 const ENTRIES_EN: WelcomeReleaseNoteEntry[] = [
     {
+        version: '1.9.7',
+        highlights: [
+            'Diagram workflows now keep Mermaid quadrant labels free of structural brackets copied from coordinate syntax; family-aware normalization preserves intentional punctuation.',
+            'Dense editable lane-grid previews now measure summary/header space and route cross-lane connectors around occupied cells and labels, preventing text/background overlap.',
+            'The release adds bilingual real-Vault diagram examples and updates the public docs and GitHub Pages evidence for the repaired preview path.'
+        ]
+    },
+    {
         version: '1.9.6',
         highlights: [
             'Diagram workflows now retain their explicit source/render/export boundaries; settings discovery ranks visible names, descriptions, aliases, and categories, then jumps to a stable setting anchor.',
@@ -86,6 +94,14 @@ const ENTRIES_EN: WelcomeReleaseNoteEntry[] = [
 
 const ENTRIES_ZH_CN: WelcomeReleaseNoteEntry[] = [
     {
+        version: '1.9.7',
+        highlights: [
+            '图表工作流现在不会让 Mermaid 象限图标签显示从坐标语法误复制的结构性括号；按 family 规范化，同时保留有意使用的标点。',
+            '密集 editable lane-grid 预览现在会测量摘要/标题空间，并让跨 lane 连接线避开已占用单元格和标签，防止文字与背景重叠。',
+            '本版本新增双语真实 Vault 图表示例，并同步公开文档与 GitHub Pages 中关于预览修复路径的证据。'
+        ]
+    },
+    {
         version: '1.9.6',
         highlights: [
             '图表工作流现在明确区分源格式、渲染目标与导出目标；设置查找会按可见名称、描述、别名和类别排序，并跳转到带稳定锚点的目标设置。',
@@ -160,6 +176,14 @@ const ENTRIES_ZH_CN: WelcomeReleaseNoteEntry[] = [
 ];
 
 const ENTRIES_ZH_TW: WelcomeReleaseNoteEntry[] = [
+    {
+        version: '1.9.7',
+        highlights: [
+            '圖表工作流程現在不會讓 Mermaid 象限圖標籤顯示從座標語法誤複製的結構性括號；依 family 進行規範化，同時保留刻意使用的標點。',
+            '密集 editable lane-grid 預覽現在會測量摘要/標題空間，並讓跨 lane 連接線避開已佔用的儲存格與標籤，防止文字與背景重疊。',
+            '本版本新增雙語真實 Vault 圖表示例，並同步公開文件與 GitHub Pages 中關於預覽修復路徑的證據。'
+        ]
+    },
     {
         version: '1.9.6',
         highlights: [

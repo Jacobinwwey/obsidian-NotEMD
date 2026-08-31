@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "typeId": "canvas-map",
+  "fixtureId": "canvas-map-domains",
+  "title": "Diagram domains",
+  "requested": {
+    "typeId": "canvas-map",
+    "renderTarget": "json-canvas",
+    "compatibilityMode": "best-fit",
+    "targetLanguage": "en"
+  },
+  "status": "passed",
+  "sourceNotePath": "notemd-real-diagram-examples/run-1787995422796-fc969a/canvas-map.md",
+  "outputPath": "notemd-real-diagram-examples/run-1787995422796-fc969a/canvas-map_diagram.canvas",
+  "artifactPath": "docs/diagram-examples/canvas-map/artifact.canvas",
+  "svgPath": "docs/diagram-examples/canvas-map/result.svg",
+  "pngPath": "docs/diagram-examples/canvas-map/result.png",
+  "providerId": "DeepSeek",
+  "model": "deepseek-v4-flash",
+  "generatedAt": "2026-08-29T09:26:52.255Z",
+  "artifactSha256": "91acef79bf9e667a09bf6cd16b15c71a3c6e70354d8605d4801a0c88df7b56b0",
+  "svgSha256": "ea7f999dceb228b49f899a84d41b1ba609b6efbf63f7b7c1b4f352c0093f9bfd",
+  "pngSha256": "b275b789991e053942508fff5a5949b3580cb852598e800a556a9416e3a9aa67",
+  "visualSource": "operation-preview",
+  "cleanupCompleted": true,
+  "diagnostic": null
+}

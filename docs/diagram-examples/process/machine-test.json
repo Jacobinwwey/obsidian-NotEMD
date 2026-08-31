@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "typeId": "process",
+  "fixtureId": "process-release",
+  "title": "Release process",
+  "requested": {
+    "typeId": "process",
+    "renderTarget": "editable-html-svg",
+    "compatibilityMode": "best-fit",
+    "targetLanguage": "en"
+  },
+  "status": "passed",
+  "sourceNotePath": "notemd-real-diagram-examples/run-1787996995744-ba418a/process.md",
+  "outputPath": "notemd-real-diagram-examples/run-1787996995744-ba418a/process_diagram.html.md",
+  "artifactPath": "docs/diagram-examples/process/artifact.html",
+  "svgPath": "docs/diagram-examples/process/result.svg",
+  "pngPath": "docs/diagram-examples/process/result.png",
+  "providerId": "DeepSeek",
+  "model": "deepseek-v4-flash",
+  "generatedAt": "2026-08-29T09:54:27.434Z",
+  "artifactSha256": "64936741f18965c84c977c5a92bea8225bdeb5895a75e409c68d7dc104bff2d9",
+  "svgSha256": "f7c62a3934f2f36f0e3f555ac838cf47131a95e0767a9200bf153ca06a4dee22",
+  "pngSha256": "9339301952fb5c12c4f37fba85eb9d30ab0b3a6a64a866cb2079b7e05a9e6990",
+  "visualSource": "vault-companion",
+  "cleanupCompleted": true,
+  "diagnostic": null
+}

@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "typeId": "org-chart",
+  "fixtureId": "org-chart-support-ownership",
+  "title": "Support ownership",
+  "requested": {
+    "typeId": "org-chart",
+    "renderTarget": "mermaid",
+    "compatibilityMode": "best-fit",
+    "targetLanguage": "en"
+  },
+  "status": "passed",
+  "sourceNotePath": "notemd-real-diagram-examples/run-1787995422796-fc969a/org-chart.md",
+  "outputPath": "notemd-real-diagram-examples/run-1787995422796-fc969a/org-chart_summ.md",
+  "artifactPath": "docs/diagram-examples/org-chart/artifact.md",
+  "svgPath": "docs/diagram-examples/org-chart/result.svg",
+  "pngPath": "docs/diagram-examples/org-chart/result.png",
+  "providerId": "DeepSeek",
+  "model": "deepseek-v4-flash",
+  "generatedAt": "2026-08-29T09:27:51.535Z",
+  "artifactSha256": "e91e031289f951ab703bd201859c209482d20347d5299be282ea6f3e7378379b",
+  "svgSha256": "e455bfe5a0e2e07c23c83fb22fcd15dea51859e3c4c42fd8d2b0f81fc60b9e08",
+  "pngSha256": "7e7c9d3d199891f604b0dd842bef3b56fe8b56d657cb082b40101fc1cd5296ca",
+  "visualSource": "operation-preview",
+  "cleanupCompleted": true,
+  "diagnostic": null
+}

@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "typeId": "entity-relationship",
+  "fixtureId": "entity-relationship-schema",
+  "title": "Artifact schema",
+  "requested": {
+    "typeId": "entity-relationship",
+    "renderTarget": "mermaid",
+    "compatibilityMode": "best-fit",
+    "targetLanguage": "en"
+  },
+  "status": "passed",
+  "sourceNotePath": "notemd-real-diagram-examples/run-1787995422796-fc969a/entity-relationship.md",
+  "outputPath": "notemd-real-diagram-examples/run-1787995422796-fc969a/entity-relationship_summ.md",
+  "artifactPath": "docs/diagram-examples/entity-relationship/artifact.md",
+  "svgPath": "docs/diagram-examples/entity-relationship/result.svg",
+  "pngPath": "docs/diagram-examples/entity-relationship/result.png",
+  "providerId": "DeepSeek",
+  "model": "deepseek-v4-flash",
+  "generatedAt": "2026-08-29T09:26:42.731Z",
+  "artifactSha256": "93d277101507cbd5746e5904b5194961669e501c92115110bf54c42e52928f89",
+  "svgSha256": "f0fad3e32bdd8cf012d78a03e0181eb6c38699f0d3a2b13831d37ad5b330d644",
+  "pngSha256": "a56b441e95fad1ad0c647ce60747aedeb50e4b1d1de9a9ceefaf03f383ab86a7",
+  "visualSource": "operation-preview",
+  "cleanupCompleted": true,
+  "diagnostic": null
+}

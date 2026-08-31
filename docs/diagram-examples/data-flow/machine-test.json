@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "typeId": "data-flow",
+  "fixtureId": "data-flow-platform",
+  "title": "Role-scoped data flow",
+  "requested": {
+    "typeId": "data-flow",
+    "renderTarget": "editable-html-svg",
+    "compatibilityMode": "best-fit",
+    "targetLanguage": "en"
+  },
+  "status": "passed",
+  "sourceNotePath": "notemd-real-diagram-examples/run-1788077353016-93cb1a/data-flow.md",
+  "outputPath": "notemd-real-diagram-examples/run-1788077353016-93cb1a/data-flow_diagram.html.md",
+  "artifactPath": "docs/diagram-examples/data-flow/artifact.html",
+  "svgPath": "docs/diagram-examples/data-flow/result.svg",
+  "pngPath": "docs/diagram-examples/data-flow/result.png",
+  "providerId": "DeepSeek",
+  "model": "deepseek-v4-flash",
+  "generatedAt": "2026-08-30T08:09:15.817Z",
+  "artifactSha256": "67f15b882983d264cc21f7ae65d4aebabcd09455af974828d1f3acad6cbf5988",
+  "svgSha256": "da6a621f1afd669e0ee6dedd880835e02401c77c07533f252e80241aab40be5e",
+  "pngSha256": "c8664f69a8fad693bb488bd2e24f8ff1d391772c971151862d0110acfbe239ca",
+  "visualSource": "vault-companion",
+  "cleanupCompleted": true,
+  "diagnostic": null
+}

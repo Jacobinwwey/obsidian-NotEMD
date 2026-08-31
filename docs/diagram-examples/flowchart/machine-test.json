@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "typeId": "flowchart",
+  "fixtureId": "flowchart-release",
+  "title": "Release decision",
+  "requested": {
+    "typeId": "flowchart",
+    "renderTarget": "mermaid",
+    "compatibilityMode": "best-fit",
+    "targetLanguage": "en"
+  },
+  "status": "passed",
+  "sourceNotePath": "notemd-real-diagram-examples/run-1788091203374-babaf1/flowchart.md",
+  "outputPath": "notemd-real-diagram-examples/run-1788091203374-babaf1/flowchart_summ.md",
+  "artifactPath": "docs/diagram-examples/flowchart/artifact.md",
+  "svgPath": "docs/diagram-examples/flowchart/result.svg",
+  "pngPath": "docs/diagram-examples/flowchart/result.png",
+  "providerId": "DeepSeek",
+  "model": "deepseek-v4-flash",
+  "generatedAt": "2026-08-30T12:02:07.364Z",
+  "artifactSha256": "5113e745b444bceedf0470f280ce4134d722eacd25e91baae4ba861242458a77",
+  "svgSha256": "2b34dfec1a0856b4e5c33be818ec5ab2b78230fd37d6ae6d155fddec5a666d99",
+  "pngSha256": "23694eebf0b2f1e0cd366d6b049dec5f0ebe6115e99b6f9965b47e25d0e0aca5",
+  "visualSource": "operation-preview",
+  "cleanupCompleted": true,
+  "diagnostic": null
+}

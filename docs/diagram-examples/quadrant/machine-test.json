@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "typeId": "quadrant",
+  "fixtureId": "quadrant-priorities",
+  "title": "Priority matrix",
+  "requested": {
+    "typeId": "quadrant",
+    "renderTarget": "mermaid",
+    "compatibilityMode": "best-fit",
+    "targetLanguage": "en"
+  },
+  "status": "passed",
+  "sourceNotePath": "notemd-real-diagram-examples/run-1788077353016-93cb1a/quadrant.md",
+  "outputPath": "notemd-real-diagram-examples/run-1788077353016-93cb1a/quadrant_summ.md",
+  "artifactPath": "docs/diagram-examples/quadrant/artifact.md",
+  "svgPath": "docs/diagram-examples/quadrant/result.svg",
+  "pngPath": "docs/diagram-examples/quadrant/result.png",
+  "providerId": "DeepSeek",
+  "model": "deepseek-v4-flash",
+  "generatedAt": "2026-08-30T08:09:51.819Z",
+  "artifactSha256": "e61047dbb8d2d3e50d26738b265b054b29f51d207bc25768d9e400462ea7e7f7",
+  "svgSha256": "baf0f22d25c02a407b360d7b380f7c820cdab154e9a4b1643767c58888ef2431",
+  "pngSha256": "a7e980aee9adde326e281658c91374bd9028674379b47bb962150bd1f227cd39",
+  "visualSource": "operation-preview",
+  "cleanupCompleted": true,
+  "diagnostic": null
+}

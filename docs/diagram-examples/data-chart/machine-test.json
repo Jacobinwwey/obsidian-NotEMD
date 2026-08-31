@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "typeId": "data-chart",
+  "fixtureId": "data-chart-trend",
+  "title": "Rendering trend",
+  "requested": {
+    "typeId": "data-chart",
+    "renderTarget": "vega-lite",
+    "compatibilityMode": "best-fit",
+    "targetLanguage": "en"
+  },
+  "status": "passed",
+  "sourceNotePath": "notemd-real-diagram-examples/run-1787995422796-fc969a/data-chart.md",
+  "outputPath": "notemd-real-diagram-examples/run-1787995422796-fc969a/data-chart_diagram.md",
+  "artifactPath": "docs/diagram-examples/data-chart/artifact.md",
+  "svgPath": "docs/diagram-examples/data-chart/result.svg",
+  "pngPath": "docs/diagram-examples/data-chart/result.png",
+  "providerId": "DeepSeek",
+  "model": "deepseek-v4-flash",
+  "generatedAt": "2026-08-29T09:27:00.917Z",
+  "artifactSha256": "40a78231d906fb63b7f485b1028ac2ee6e9b29bcaedb615d4b98e26de9d79ed0",
+  "svgSha256": "e1a8754f6f5cb57b9b5cfa3d6484cd90effa5f222f119e22d5ff5a388004c137",
+  "pngSha256": "a8038b8d98d8a1f473830a992b7949cf2063004146693121ee4729c209d3974e",
+  "visualSource": "operation-preview",
+  "cleanupCompleted": true,
+  "diagnostic": null
+}
