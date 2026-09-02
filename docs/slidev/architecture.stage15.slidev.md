@@ -151,7 +151,7 @@ User config (maxTokens, provider.maxOutputTokens)
 
 | Transport | Provider Count | Protocol |
 |---|---|---|
-| `openai-compatible` | 22 providers | OpenAI Chat Completions API |
+| `openai-compatible` | 32 providers | OpenAI Chat Completions API |
 | `anthropic` | 1 | Anthropic Messages API |
 | `google` | 1 | Google Gemini API |
 | `azure-openai` | 1 | Azure OpenAI Deployment API |
@@ -247,7 +247,7 @@ layout: section
 | Module | Responsibility |
 |---|---|
 | `src/main.ts` | Plugin entrypoint, command registration, orchestration |
-| `src/llmProviders.ts` | 26 provider definitions, metadata, KNOWN_MODEL table |
+| `src/llmProviders.ts` | 36 provider definitions, metadata, KNOWN_MODEL table |
 | `src/llmUtils.ts` | Transport dispatch, token resolution, retry, response cache |
 | `src/fileUtils.ts` | File processing, Mermaid repair, concept extraction |
 | `src/searchUtils.ts` | Web research, Tavily/DuckDuckGo integration |
@@ -263,7 +263,7 @@ layout: section
 | `src/diagram/` | Diagram domain model, adapters, renderers |
 | `src/rendering/` | Render host, preview, export, theme |
 | `src/ui/` | Settings tab, sidebar, modals, welcome screen |
-| `src/i18n/` | 22 locales, task language policy |
+| `src/i18n/` | 21 locales, task language policy |
 | `src/operations/` | Operation registry, host adapters, capability/contract export, reusable command orchestration |
 | `src/batchProgressStore.ts` | Interrupt-resume batch state persistence |
 | `src/providerDiagnostics.ts` | LLM provider connection diagnostics |

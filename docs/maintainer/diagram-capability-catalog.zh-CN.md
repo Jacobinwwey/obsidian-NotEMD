@@ -1,37 +1,57 @@
 ---
 date: 2026-08-16
-last_updated: 2026-08-21
+last_updated: 2026-09-02
 status: current-contract
 canonical_for: diagram-capability-catalog
 ---
 
 # 图形能力目录
 
-本文档是当前可执行目录的人类可读视图。运行时真值是 `src/diagram/diagramTypeCatalog.ts` 与 `src/diagram/examples/diagramExampleCatalog.ts`；定义变化时必须重新生成或核对本文档。
+本文档是当前可执行目录的人类可读视图。运行时真值来源是 `src/diagram/diagramTypeCatalog.ts`、`src/diagram/examples/diagramExampleCatalog.ts`、`src/rendering/renderTargetCatalog.ts` 和 `src/diagram/diagramCapabilityManifest.ts`。这些定义变化时，必须同步核对本文档。
 
-target descriptor 是 artifact 机制的运行时权威。其 `exportFormats` 字段只包含图片导出（`SVG`、`PNG`、`PDF`）；源 artifact 由 `sourceExtension` 与 `vaultExtension` 单独描述。下表保持这些轴分离，避免把源文件误认为图片导出。
+目录保持三个独立轴：语义类型、渲染 target 和导出格式。目录行是可执行的用户选择；渲染 target 描述 artifact 边界；`SVG`、`PNG`、`PDF` 是图片导出格式。源扩展名与 Vault 扩展名有意与图片导出分开列出。
 
 ## 已发布语义类型
 
-| 类型 ID | 用户意图 | 渲染目标 | 示例 fixture | 预览状态 | 导出 |
-|---|---|---|---|---|---|
-| `mermaid-mindmap` | 概念层级 | Mermaid | `mermaid-mindmap-basics` | 设置页预览动作 | source `.md`、SVG、PNG、PDF |
-| `drawnix-knowledge-map` | 可编辑的文件名根知识树及跨分支关系 | Drawnix | `drawnix-knowledge-map-architecture` | SVG companion / Drawnix 产物 | `.drawnix`、SVG、PNG、PDF |
-| `flowchart` | 控制流程与决策 | Mermaid | `flowchart-release` | 设置页预览动作 | source `.md`、SVG、PNG、PDF |
-| `sequence` | 有序参与者交互 | Mermaid | `sequence-request` | 设置页预览动作 | source `.md`、SVG、PNG、PDF |
-| `state` | 生命周期状态与转换 | Mermaid | `state-lifecycle` | 设置页预览动作 | source `.md`、SVG、PNG、PDF |
-| `class` | 类型所有权与关联 | Mermaid | `class-domain` | 设置页预览动作 | source `.md`、SVG、PNG、PDF |
-| `entity-relationship` | 实体、字段和基数 | Mermaid | `entity-relationship-schema` | 设置页预览动作 | source `.md`、SVG、PNG、PDF |
-| `canvas-map` | 空间分组概念 | JSON Canvas | `canvas-map-domains` | iframe / Canvas 产物 | source `.canvas`、SVG、PNG、PDF |
-| `data-chart` | 共享坐标轴上的度量比较 | Vega-Lite | `data-chart-trend` | sandbox iframe | source `.json` / Vault `.md`、SVG、PNG、PDF |
-| `radar-chart` | 多轴能力画像比较 | Vega-Lite | `radar-capability-profile` | sandbox iframe | source `.json` / Vault `.md`、SVG、PNG、PDF；HTML 表格 fallback |
-| `org-chart` | 责任归属层级与汇报路径 | Mermaid | `org-chart-support-ownership` | Mermaid iframe | source `.md`；HTML 语义表格 fallback |
-| `timeline` | 按时间排序的里程碑 | Mermaid | `timeline-roadmap` | Mermaid iframe | source `.md`、SVG、PNG、PDF |
-| `swimlane` | 跨团队职责流转 | Mermaid | `swimlane-release` | Mermaid iframe | source `.md`、SVG、PNG、PDF |
-| `quadrant` | 双轴优先级矩阵 | Mermaid | `quadrant-priorities` | Mermaid iframe | source `.md`、SVG、PNG、PDF |
-| `circuit` | 电气元件与网络 | Circuitikz | `circuit-cmos-inverter` | SVG companion / source | `.tex`、SVG、PNG、PDF* |
+下面 33 行是完整的可执行目录。`bar-chart`、`line-chart`、`scatter-plot` 等 variant 是独立且稳定的选择，但共享有界 Vega-Lite renderer。
 
-`*` Circuitikz 的 PDF/PNG 必须经过固定原生编译器门禁。源 artifact 与图片导出是独立能力；editable HTML/SVG 使用自包含 HTML 源 artifact，以及 descriptor 声明的 SVG/PNG/PDF 图片导出。
+| 类型 ID | 语义意图 | 渲染 target | 示例 fixture | 输出契约 |
+|---|---|---|---|---|
+| `mermaid-mindmap` | 概念层级 | Mermaid | `mermaid-mindmap-basics` | `.md`、SVG、PNG、PDF |
+| `drawnix-knowledge-map` | 文件名根知识树与跨分支关系 | Drawnix | `drawnix-knowledge-map-architecture` | `.drawnix`、SVG、PNG、PDF |
+| `flowchart` | 控制流程与决策路径 | Mermaid | `flowchart-release` | `.md`、SVG、PNG、PDF |
+| `sequence` | 有序参与者交互 | Mermaid | `sequence-request` | `.md`、SVG、PNG、PDF |
+| `state` | 状态转换生命周期 | Mermaid | `state-lifecycle` | `.md`、SVG、PNG、PDF |
+| `class` | 类型关系与所有权 | Mermaid | `class-domain` | `.md`、SVG、PNG、PDF |
+| `entity-relationship` | 实体基数与属性 | Mermaid | `entity-relationship-schema` | `.md`、SVG、PNG、PDF |
+| `canvas-map` | 空间分组概念 | JSON Canvas | `canvas-map-domains` | `.canvas`、SVG、PNG、PDF |
+| `data-chart` | 共享坐标轴上的度量比较 | Vega-Lite | `data-chart-trend` | `.json` / Vault `.md`、SVG、PNG、PDF |
+| `radar-chart` | 多轴画像比较 | Vega-Lite | `radar-capability-profile` | `.json` / Vault `.md`、SVG、PNG、PDF；HTML 表格 fallback |
+| `org-chart` | 带责任归属的组织层级 | Mermaid | `org-chart-support-ownership` | `.md`、SVG、PNG、PDF；HTML 表格 fallback |
+| `timeline` | 按时间排序的里程碑 | Mermaid | `timeline-roadmap` | `.md`、SVG、PNG、PDF |
+| `swimlane` | 跨团队职责流转 | Mermaid | `swimlane-release` | `.md`、SVG、PNG、PDF |
+| `quadrant` | 双轴优先级矩阵 | Mermaid | `quadrant-priorities` | `.md`、SVG、PNG、PDF |
+| `circuit` | 电气元件与网络 | Circuitikz | `circuit-cmos-inverter` | `.tex`、SVG、PNG、PDF* |
+| `bar-chart` | 离散类别比较（`variant: bar`） | Vega-Lite | `bar-chart-adoption` | `.json` / Vault `.md`、SVG、PNG、PDF |
+| `line-chart` | 有序坐标轴上的连续趋势（`variant: line`） | Vega-Lite | `line-chart-render-time` | `.json` / Vault `.md`、SVG、PNG、PDF |
+| `scatter-plot` | 成对数值之间的相关性（`variant: scatter`） | Vega-Lite | `scatter-plot-quality` | `.json` / Vault `.md`、SVG、PNG、PDF |
+| `architecture` | 按边界分组并由拓扑连接的组件 | Editable HTML/SVG | `architecture-platform` | `.html`、SVG、PNG、PDF |
+| `current-state` | 带交接与瓶颈的遗留现状 | Editable HTML/SVG | `current-state-legacy-pipeline` | `.html`、SVG、PNG、PDF |
+| `integration-topology` | 通过协议连接到平台核心的来源与消费者 | Editable HTML/SVG | `integration-topology-platform` | `.html`、SVG、PNG、PDF |
+| `data-flow` | 按角色划分、经过多个阶段的数据流 | Editable HTML/SVG | `data-flow-platform` | `.html`、SVG、PNG、PDF |
+| `access-matrix` | 角色到组件的权限矩阵 | Editable HTML/SVG | `access-matrix-platform` | `.html`、SVG、PNG、PDF |
+| `gantt` | 执行时间线上的任务与里程碑 | Editable HTML/SVG | `gantt-release-plan` | `.html`、SVG、PNG、PDF |
+| `layer-stack` | 带焦点层的有序抽象层 | Editable HTML/SVG | `layer-stack-platform` | `.html`、SVG、PNG、PDF |
+| `venn` | 两个或三个显式集合的重叠 | Editable HTML/SVG | `venn-platform` | `.html`、SVG、PNG、PDF |
+| `ranked-funnel` | 排名层级或转化流失 | Editable HTML/SVG | `ranked-funnel-release` | `.html`、SVG、PNG、PDF |
+| `loop` | 向中心 hub 写入持久状态的强化循环 | Editable HTML/SVG | `loop-operating-model` | `.html`、SVG、PNG、PDF |
+| `nested` | 通过嵌套边界表达范围与包含关系 | Editable HTML/SVG | `nested-scope` | `.html`、SVG、PNG、PDF |
+| `tree` | 父子层级关系 | Editable HTML/SVG | `tree-ownership` | `.html`、SVG、PNG、PDF |
+| `process` | 带交接的多角色分阶段流程 | Editable HTML/SVG | `process-release` | `.html`、SVG、PNG、PDF |
+| `medallion` | 数据质量层级与晋级路径 | Editable HTML/SVG | `medallion-data-quality` | `.html`、SVG、PNG、PDF |
+| `high-level` | 跨栈层的端到端平台总览 | Editable HTML/SVG | `high-level-platform` | `.html`、SVG、PNG、PDF |
+
+`*` Circuitikz 的 PDF/PNG 必须经过固定原生编译器门禁。源 artifact 与图片导出是独立能力。
 
 ## 渲染目标
 
@@ -39,34 +59,42 @@ target descriptor 是 artifact 机制的运行时权威。其 `exportFormats` �
 |---|---|---|---|---|
 | `mermaid` | Mermaid fence source（`.md`） | iframe | SVG、PNG、PDF | 无 |
 | `json-canvas` | JSON Canvas（`.canvas`） | iframe | SVG、PNG、PDF | 无 |
-| `vega-lite` | Vega-Lite JSON（`.json`，Vault 为 `.md`） | sandbox iframe | SVG、PNG、PDF | 无 |
+| `vega-lite` | Vega-Lite JSON（`.json`，Vault 为 `.md`） | sandboxed iframe | SVG、PNG、PDF | 无 |
 | `html` | 通用 HTML fallback | iframe | source | 无 |
 | `editable-html-svg` | 自包含 HTML + 语义 inline SVG（`.html`） | SVG companion | SVG、PNG、PDF | 无 |
-| `drawio` | Draw.io XML（`.drawio`）+ review companion | SVG companion | SVG、PNG、PDF | diagrams.net 打开/导入 |
-| `drawnix` | 一个文件名根 `.drawnix` 树 + SVG companion | SVG companion | SVG、PNG、PDF | Drawnix 打开/导入 |
-| `circuitikz` | 已校验 `.tex` + review companion | SVG companion/source | SVG、PNG、PDF | 原生 TeX 编译 |
+| `drawio` | Draw.io XML（`.drawio`）及 review companion | SVG companion | SVG、PNG、PDF | diagrams.net 打开/导入 |
+| `drawnix` | 文件名根 `.drawnix` 树及 SVG companion | SVG companion | SVG、PNG、PDF | Drawnix 打开/导入 |
+| `circuitikz` | 已校验 `.tex` 及 review companion | SVG companion/source | SVG、PNG、PDF | 原生 TeX 编译 |
 
-## 参考/计划类型
+## 仅参考/计划类型
 
-以下名称来自 `ref/diagram-design`，当前不可在 Notemd 选择：architecture、IT current-state、loop/flywheel、nested、tree、layer stack、Venn、pyramid/funnel、bar、line、Gantt、scatter、high-level、process、medallion、data flow、DP integration 和 DP security matrix。Radar/spider 与 org chart 已通过候选准入，成为独立的受限类型；Radar 使用 Vega-Lite renderer 与确定性的 HTML 表格 fallback，org chart 使用 Mermaid ownership adapter 与 HTML 语义表格 fallback。Timeline、swimlane、quadrant 仍严格是 Mermaid-only 类型，不宣称 editable HTML/SVG、Draw.io 或 Drawnix target。
+当前有且只有以下 5 个参考 grammar 保持在选择器和生产 gallery 之外：
 
-## 预览与 gallery 契约
+- `diagram-design:flowchart`
+- `diagram-design:sequence`
+- `diagram-design:state-machine`
+- `diagram-design:er-data-model`
+- `diagram-design:pyramid-funnel`
 
-设置页和生成工作台使用 `src/ui/diagramTypePreviewPanel.ts`。类型选择器只暴露可执行目录条目；用户选择某一类型后，单个固定尺寸面板通过 `renderDiagramExampleThumbnail()` 渲染该 fixture。文档生成式 gallery 仍由生产 renderer 驱动，并将产出：
+它们继续保留在 `referenceOnlyLayouts` 中用于路线图统计，不会发布截图、data URL、选择器行或 preview API。升级必须同时具备 typed input contract、生产 renderer、fixture、target/export 矩阵、无障碍证据、文档行和自动化门禁。可执行的 `flowchart`、`sequence`、`state` 与 `ranked-funnel` 是独立契约，不会自动把这些精确参考 grammar 视为已升级。
+
+## 预览与 Gallery 契约
+
+设置页和生成工作台使用 `src/ui/diagramTypePreviewPanel.ts`。类型选择器只暴露可执行目录条目；选择后，单个固定尺寸面板通过 `renderDiagramExampleThumbnail()` 渲染生产 fixture。文档 gallery 复用同一份生产 fixture 目录并生成：
 
 - `docs/assets/diagrams/<fixture-id>.svg`
 - `docs/assets/diagrams/<fixture-id>.png`
 - 带版本的 capability manifest
 - 链接到同一 fixture ID 的双语矩阵行
 
-生成器必须复用生产 fixture 目录，对缺失预览或过期资产失败，保持文件名稳定；禁止在文档脚本中复制 fixture 数据。
-
-`ref/diagram-design` 仅作为开发期 taxonomy 与质量对比参考。22 个仅参考布局仍保留在 `referenceOnlyLayouts` 中用于路线图统计，但不会打包截图、data URL、选择器条目或预览 API。升级为交付能力必须同时具备 typed input contract、生产 renderer、fixture、target/export 矩阵、无障碍证据、文档行和自动化门禁。
+生成器会对缺失预览或过期资产失败，并保持 fixture 文件名稳定；禁止在文档脚本中复制 fixture 数据。`docs/diagram-examples/` 是独立的真实 Vault 证据集，包含双语输入、provider/model 元数据、生成 artifact、哈希和显式的 `passed`/`failed` 状态；`passed` 只表示插件已加载并实际运行，不等于静态 fixture 证明。
 
 ## Consumer 门禁
 
 单元测试只能证明 Notemd 产物契约，不能证明外部互操作：
 
 - 在 diagrams.net 打开 Draw.io XML；
-- 运行 `npm run diagram:consumer:drawnix`，通过公开 Plait API 消费生产 fixture；在环境具备真实 Drawnix 应用时，再打开/导入同一个 `.drawnix` JSON；
+- 运行 `npm run diagram:consumer:drawnix`，通过公开 Plait API 消费生产 fixture；环境具备真实 Drawnix 应用时，再打开/导入同一个 `.drawnix` JSON；
 - 用固定编译器编译 Circuitikz TeX。
+
+当前 Plait consumer 门禁通过。Draw.io 应用导入和完整 Drawnix 应用往返仍属于外部证据，serializer 或 public API 测试不代表这些声明。

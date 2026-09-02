@@ -1,3 +1,12 @@
+---
+date: 2026-08-29
+last_updated: 2026-09-02
+topic: diagram-examples-implementation
+status: completed
+canonical_for: diagram-examples-real-vault-evidence
+superseded_by: null
+---
+
 # 图表示例与实机 Vault 证据实现计划
 
 > **面向代理工作者：** 建议使用 `superpowers:subagent-driven-development` 或 `superpowers:executing-plans`，按任务执行本计划。步骤使用复选框（`- [ ]`）跟踪。
@@ -7,6 +16,10 @@
 **架构：** 保持现有静态 fixture gallery 不变，新增纯运行时库，负责 catalog 枚举、输入渲染、路径安全、脱敏、manifest 校验与清理计划。Node 编排器创建临时 Vault 笔记，通过官方 Obsidian CLI 调用现有 maintainer `diagram.generate`，只复制经过验证的输出到 `docs/diagram-examples/<type-id>/`，并在 `finally` 中删除专属临时范围。
 
 **技术栈：** Node.js CommonJS 脚本、TypeScript/Jest 测试、现有 `src/diagram` catalog 与 fixture、官方 Obsidian CLI `create/delete/eval`、SHA-256、VitePress 导航，以及插件已有的 Playwright/导出 Artifact 路径。
+
+## 当前 main 处置（2026-09-02）
+
+真实 Vault 证据实现已完成。检入的 manifest 包含 33 个目录行，每行都有双语输入并为 `passed`；生成器/检查器、docs 契约、gallery、build、Jest、Local KB、render-host、i18n 和 Plait consumer 门禁均通过。下方历史任务清单仍保留实现分解；其中未勾选的 RED/GREEN 步骤不是待办工作。当前主机无法完成 Obsidian CLI 验证，该项保持为明确的外部边界。
 
 ## 全局约束
 

@@ -19,6 +19,8 @@
 
 ## 规划文档
 
+- [当前 Main 进度与后续推进计划（英文）](./brainstorms/2026-09-02-current-main-progress-and-forward-plan.md)
+- [当前 Main 真值收敛计划（英文）](./superpowers/plans/2026-09-02-current-main-truth-convergence.en.md)
 - [图形能力目录与向前兼容架构（英文）](./superpowers/plans/2026-08-16-diagram-capability-catalog-and-forward-architecture.en.md)
 - [图形能力目录与向前兼容架构（中文）](./superpowers/plans/2026-08-16-diagram-capability-catalog-and-forward-architecture.zh-CN.md)
 - [AGENTS 与 Provider 扩展（英文）](./superpowers/plans/2026-03-26-agents-and-provider-expansion.en.md)
@@ -32,6 +34,8 @@
 
 ## 支撑文档
 
+- [当前 Main 进度与后续推进计划（中文）](./brainstorms/2026-09-02-current-main-progress-and-forward-plan.zh-CN.md)
+- [当前 Main 真值收敛计划（中文）](./superpowers/plans/2026-09-02-current-main-truth-convergence.zh-CN.md)
 - [架构总览（英文）](./architecture.md)
 - [架构总览（中文）](./architecture.zh-CN.md)
 - [图形 Gallery（英文）](./diagram-gallery.md)

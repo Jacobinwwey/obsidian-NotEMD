@@ -1,15 +1,17 @@
 ---
 date: 2026-08-16
-last_updated: 2026-08-26
+last_updated: 2026-09-02
 topic: mainline-diagram-architecture-progress-and-next-direction
-status: active
+status: superseded
 canonical_for:
   - current-diagram-progress
   - diagram-architecture-audit
 supersedes: ./2026-05-28-mainline-progress-audit-and-next-level-direction.zh-CN.md
-superseded_by: null
+superseded_by: ./2026-09-02-current-main-progress-and-forward-plan.zh-CN.md
 implementation_record: src/tests/mermaidNormalizationConvergence.test.ts
 ---
+
+> 当前 main 状态已由[2026-09-02 当前 Main 进度与后续推进计划](./2026-09-02-current-main-progress-and-forward-plan.zh-CN.md)取代。下文历史证据与理由保持不变；其中较旧的验证快照不是当前发布证据。
 
 # 主线图形架构：当前进度审计与后续方向
 

@@ -6,6 +6,8 @@ This directory contains repository-level documentation for maintainers and contr
 
 ## Current Truth And Layout
 
+- [Current Main Progress And Forward Plan](./brainstorms/2026-09-02-current-main-progress-and-forward-plan.md)
+- [Current Main Truth Convergence Plan](./superpowers/plans/2026-09-02-current-main-truth-convergence.en.md)
 - [Architecture Overview](./architecture.md)
 - [Diagram Gallery](./diagram-gallery.md)
 - [Mainline Diagram Architecture Progress Audit](./brainstorms/2026-08-16-mainline-diagram-architecture-progress-and-next-direction.md)

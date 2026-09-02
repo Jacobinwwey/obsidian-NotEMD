@@ -62,6 +62,8 @@ Mermaid quadrant charts receive a family-specific normalization pass. Flowchart-
 
 The repository keeps a real-Vault learning and evidence set for every executable diagram type. See [`docs/diagram-examples/`](https://github.com/Jacobinwwey/obsidian-NotEMD/tree/main/docs/diagram-examples) for bilingual input notes, generated SVG/PNG results, and the machine-readable status manifest. `passed` entries represent a run through the loaded plugin bundle, not a static screenshot fixture.
 
+The current executable catalog has 33 rows, while the plugin UI has 21 locales and the published website route set has 34 locales. These are different surfaces: UI locale count is not the same as published documentation locale count. Five exact reference grammars remain outside the selector until their layout contracts have independent evidence.
+
 ## Drawnix previews with embedded Mermaid
 
 When a Drawnix artifact contains Mermaid visuals, Notemd sanitizes the rendered SVG and keeps the Mermaid source alongside it in the `.drawnix` metadata. The preview can therefore show the Mermaid image inside the Drawnix knowledge map without requiring the Drawnix or Plait runtime. The default path is self-contained and does not create a separate `.assets` directory. Enable **Also export complete Mermaid visuals** when you need Mermaid source, SVG, and manifest companions for handoff or external editing. Existing artifacts with `.assets` remain supported, and a missing legacy Mermaid SVG can be rebuilt from source text retained in metadata.

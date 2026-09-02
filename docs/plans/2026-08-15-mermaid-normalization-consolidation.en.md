@@ -1,8 +1,8 @@
 ---
 date: 2026-08-15
-last_updated: 2026-08-18
+last_updated: 2026-09-02
 topic: mermaid-normalization-consolidation
-status: active
+status: completed
 canonical_for:
   - mermaid-normalization
 supersedes: []
@@ -17,6 +17,10 @@ implementation_record: src/tests/mermaidNormalizationConvergence.test.ts
 This plan consolidates the Mermaid normalization/fix surfaces that currently disagree with each other and with the documented roadmap. It is the implementation slice for the roadmap's "dual stack" risk control and Task 3 sunset boundary (`docs/superpowers/plans/2026-04-14-diagram-rendering-platform-roadmap.en.md`).
 
 Scope: diagram-level Mermaid normalization shared by render, preview, and note-repair paths, plus the legacy chain's explicit ownership boundaries. The original convergence slice did not add new diagram types; the follow-up catalog admission recorded in Section 11 adds only bounded Mermaid adapters after these gates closed.
+
+### Current-main disposition (2026-09-02)
+
+Phases 0-3 are complete on `main`, including canonical normalization, staged legacy repair, shared fence ownership, and validation-runtime initialization. The remaining compatibility exports and maintainer-only repair SDK are deliberate boundaries: their production, test, script, and documentation consumers have been inventoried, and no deletion is justified without an external-consumer migration window. This plan is therefore complete for its implementation scope; external consumer evidence and any future compatibility removal are tracked by the current-main convergence plan.
 
 ## 2. Audit Findings And Corrections
 

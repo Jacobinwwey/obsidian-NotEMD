@@ -1,3 +1,12 @@
+---
+date: 2026-08-21
+last_updated: 2026-09-02
+topic: diagram-reference-expansion-implementation
+status: completed
+canonical_for: diagram-reference-expansion
+superseded_by: null
+---
+
 # 图形参考扩展实施计划
 
 > **面向 agent worker：** REQUIRED SUB-SKILL：使用 `superpowers:subagent-driven-development`（推荐）或 `superpowers:executing-plans`，按任务逐项实施。步骤使用 checkbox（`- [x]`）跟踪。
@@ -20,7 +29,9 @@ Batch 0 至 Batch 3B 的 runtime 工作已在本次交付中实现。下方详�
 | Batch 2 定量与 schedule | 完成 | bar/line/scatter variant、定量 projection、Gantt renderer |
 | Batch 3A 结构布局 | 完成 | ordered-stack、set-overlap、ranked-segments、cycle renderer |
 | Batch 3B 结构布局 | 完成 | nested、tree、process、medallion、high-level renderer |
-| 最终验证与主线交付 | 进行中 | 270 个 Jest suite、2,375 passed / 1 skipped；build/gallery/docs/render-host/i18n 门禁通过；Vault bundle reload/CLI 证据待完成；lint 仍是基线债务 |
+| 最终验证与主线交付 | 已完成 | 275 个 Jest suite、2,511 passed / 1 skipped；build/gallery/docs/render-host/i18n、Local KB、Drawnix Plait consumer 和真实 Vault 示例门禁通过。当前主机无法完成 Obsidian CLI 验证；lint 仍是仓库基线债务（231 个 error、1,374 个 warning）。 |
+
+截至 2026-09-02，实现与仓库验证阶段均已完成。当前主机不可用的 Obsidian CLI 以及真实 Draw.io/Drawnix 应用检查属于外部证据边界，不是未完成的 runtime 工作；它们会保持明确延期，不会被转换成互操作声明。
 
 ### 计划后可发现性加固（2026-08-22）
 

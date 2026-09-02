@@ -62,6 +62,8 @@ Mermaid 象限图使用按 family 区分的规范化流程。对于 `quadrantCha
 
 仓库为每个可执行图表类型保留真实 Vault 的学习与证据目录。请查看 [`docs/diagram-examples/`](https://github.com/Jacobinwwey/obsidian-NotEMD/tree/main/docs/diagram-examples)，其中包含双语输入笔记、生成的 SVG/PNG 结果和机器可读状态 manifest。`passed` 条目代表通过已加载插件 bundle 的真实运行，而不是静态截图 fixture。
 
+当前可执行目录有 33 行，插件 UI 有 21 种 locale，已发布网站路由集有 34 种 locale。这是不同的统计面：UI locale 数量不等于已发布文档 locale 数量。5 个精确参考 grammar 在获得独立布局证据前仍不进入选择器。
+
 ## 带有嵌入 Mermaid 的 Drawnix 预览
 
 当 Drawnix 原始文件中包含 Mermaid 可视化内容时，Notemd 会对渲染后的 SVG 进行净化处理，并将对应的 Mermaid 源代码保留在 `.drawnix` 元数据中。因此，预览界面能够在 Drawnix 知识图谱中直接显示 Mermaid 图像，而无需依赖 Drawnix 或 Plait 运行时环境。那些被安全嵌入的纯 Mermaid 可视化内容不会生成单独的 `.assets` 目录；而对于外部二进制媒体或尚未解析完成的可视化内容，则会保留配套文件，从而避免数据丢失。

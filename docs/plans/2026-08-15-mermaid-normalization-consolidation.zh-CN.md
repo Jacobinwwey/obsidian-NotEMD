@@ -1,14 +1,18 @@
 ---
 date: 2026-08-15
-last_updated: 2026-08-18
+last_updated: 2026-09-02
 topic: mermaid-normalization-consolidation
-status: active
+status: completed
 canonical_for:
   - mermaid-normalization
 supersedes: []
 superseded_by: null
 implementation_record: src/tests/mermaidNormalizationConvergence.test.ts
 ---
+
+### 当前 main 处置（2026-09-02）
+
+Phase 0-3 已在 `main` 完成，包括 canonical 规范化、分阶段 legacy 修复、共享 fence 所有权和验证 runtime 初始化。剩余兼容导出与 maintainer-only repair SDK 是有意保留的边界：已经盘点生产、测试、脚本和文档调用方；在外部 consumer 迁移窗口出现前，没有足够证据删除。因此本方案在实现范围内已完成；外部 consumer 证据和未来兼容层删除由当前 main 收敛方案跟踪。
 
 # Mermaid 规范化合并方案（2026-08-15）
 

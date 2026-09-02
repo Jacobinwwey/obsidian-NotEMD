@@ -15,7 +15,7 @@ faqItems:
   - question: "如何在 Obsidian 中安装 Notemd？"
     answer: "打开 Obsidian 的设置，进入 Community Plugins 页面，选择 Browse，搜索 Notemd，点击 Install 并启用该插件。需使用 Obsidian 0.15.0 或更高版本；也可以通过 GitHub Releases 进行手动安装。"
   - question: "Notemd 支持哪些 LLM 提供商？"
-    answer: "Notemd 支持 30 多家提供商，包括 OpenAI、Anthropic、Google、xAI、Mistral、DeepSeek、Qwen、Ollama、LM Studio、Azure OpenAI、OpenRouter，以及许多面向中国的提供商，如 Qwen、Doubao、Moonshot 和 GLM。"
+    answer: "Notemd 当前提供 36 个 provider 定义，包括 OpenAI、Anthropic、Google、xAI、Mistral、DeepSeek、Qwen、Ollama、LM Studio、Azure OpenAI、OpenRouter，以及 Doubao、Moonshot、GLM 等面向中国的 provider。"
   - question: "Notemd 能否与本地 LLM 配合使用？"
     answer: "可以。Notemd 支持 Ollama、LM Studio、vLLM、LocalAI 以及任何兼容 OpenAI 的端点，所有功能均可使用本地模型完成，包括链接生成、概念笔记创建、文本翻译、资料检索以及图表绘制。"
   - question: "Notemd 与 ChatGPT 有什么区别？"
@@ -25,11 +25,11 @@ faqItems:
   - question: "哪些搜索服务可以与 Notemd 的资料检索功能配合使用？"
     answer: "Tavily（推荐，具备 AI 优化搜索功能，需要 API 密钥）和 DuckDuckGo（实验性功能，无需 API 密钥）。检索结果会由 LLM 概括，并附带来源引用后添加到您的笔记中。"
   - question: "Notemd 是否支持中文或其他语言？"
-    answer: "其用户界面支持 21 种以上语言，任务输出的语言也可以单独配置，因此可以实现中文界面搭配英文输出，或反之的混合设置。"
+    answer: "插件 UI 支持 21 种语言，任务输出语言可以独立配置，因此可以使用中文界面搭配英文输出，或反之。"
   - question: "我可以使用 Notemd 来阅读论文或 PDF 吗？"
     answer: "可以。首先使用 MinerU 将 PDF 转换为 Markdown 格式，在 Obsidian 中打开后，运行 Notemd 的相关任务，即可添加维基链接、生成概念笔记、提取文本、检索背景资料、翻译部分内容以及创建 Mermaid 图表。"
   - question: "Notemd 能生成哪些类型的图表？"
-    answer: "Mermaid（流程图、时序图、类图、状态图、ER 图、带语法自动修正功能的甘特图）、JSON Canvas（Obsidian 原生格式）、Vega-Lite（数据图表）、HTML 备用格式，以及可直接编辑的 HTML/SVG 图形文件。此外还支持 Draw.io XML 和 Drawnix JSON 导出格式，便于进行确定性结果测试。"
+    answer: "Notemd 暴露 33 个可执行目录行，覆盖 Mermaid、JSON Canvas、Vega-Lite、editable HTML/SVG、Draw.io XML、Drawnix JSON 和受约束的 CircuitikZ artifact。5 个精确参考 grammar 仍只在路线图中保留；逐行契约见图形能力目录和真实 Vault 示例。"
   - question: "Notemd 是免费且开源的吗？"
     answer: "是的。它采用 MIT 许可证发布，没有付费版本，不会限制用户使用云端服务，也不会收集任何用户数据。其源代码托管在 GitHub 上，已有 234 多个星标，欢迎提交 Pull Request。"
   - question: "Notemd 能够完全离线运行吗？"
@@ -43,7 +43,7 @@ import TLDR from '@site/src/components/TLDR';
 # 常见问题解答
 
 <TLDR>
-**针对最常出现的 Notemd 问题的快速解答。** 内容涵盖安装（5分钟即可完成设置）、对30多种 LLM 提供商的支持、本地/云模式选项、一键式工作流、多语言 UI 支持（21种语言）、wiki链接自动化功能、研究数据整合、PDF 阅读工作流、图表生成以及开源许可。所有功能均可通过 Ollama 在离线状态下使用。
+**针对最常出现的 Notemd 问题的快速解答。** 内容涵盖安装（5分钟即可完成设置）、36 个 provider 定义、本地/云模式选项、一键式工作流、21 种语言的插件 UI、wiki 链接自动化、研究数据整合、PDF 阅读工作流、图表生成以及开源许可。所有功能均可通过 Ollama 在离线状态下使用。
 </TLDR>
 
 ---
@@ -71,7 +71,7 @@ import TLDR from '@site/src/components/TLDR';
 
 ### Notemd 支持哪些 LLM 提供商？
 
-Notemd 支持 **30 多家提供商**：
+Notemd 提供 **36 个 provider 定义**：
 
 **云服务提供商：**
 - OpenAI（GPT-4、GPT-4o、GPT-4o-mini、o1、o3）
@@ -210,7 +210,7 @@ process-current-add-links > extract-concepts-current > research-and-summarize > 
 
 ### Notemd 是否支持中文或其他语言？
 
-**UI 支持的语言：** 21种以上
+**UI 支持的语言：** 21 种
 - 英语, 中文 (简体), 中文 (繁體), 日本语, 韩国语
 - 阿拉伯语、德语、法语、西班牙语、俄语、葡萄牙语、意大利语
 - 印地语、孟加拉语、泰语、越南语、土耳其语、波兰语、捷克语等更多语言

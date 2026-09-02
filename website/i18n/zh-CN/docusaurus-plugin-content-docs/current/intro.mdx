@@ -21,7 +21,7 @@ import TLDR from '@site/src/components/TLDR';
 
 ## 什么是 Notemd？
 
-Notemd 将 **30 多种大型语言模型**（OpenAI、Anthropic、Google、DeepSeek、Qwen、Ollama 等）集成到您的 Obsidian 工作流中，从而实现知识提取、整理、翻译、研究以及图表生成的自动化处理。
+Notemd 将覆盖云端、网关和本地运行时的 **36 个 provider 定义**（包括 OpenAI、Anthropic、Google、DeepSeek、Qwen、Ollama 等）集成到您的 Obsidian 工作流中，从而实现知识提取、整理、翻译、研究以及图表生成的自动化处理。
 
 ### 关键区别：临时知识与持久知识
 
@@ -52,7 +52,7 @@ Notemd 将 **30 多种大型语言模型**（OpenAI、Anthropic、Google、DeepS
 
 ### 4. **多语言翻译**
 - 翻译选中内容或整个笔记
-- 支持21种以上的UI语言
+- 支持 21 种插件 UI 语言
 - 独立的输出语言配置
 - 批量翻译支持
 
@@ -62,7 +62,7 @@ Notemd 将 **30 多种大型语言模型**（OpenAI、Anthropic、Google、DeepS
 - **Vega-Lite**：数据图表、时间序列图、散点图
 - **HTML / 可编辑的 HTML/SVG**：带有语义标注的独立图表资源
 - **Draw.io / Drawnix 构件边界**：来自同一语义模型、面向维护者的导出路径
-- **电路图路线图**：circuitikz/TikZJax 的功能设计以黄金参考标准、受限提示、渲染反馈以及拓扑结构/布局验证为核心，而非直接使用无限制的 LLM TikZ。
+- **受约束的电路图**：CircuitikZ 生成使用类型化 `CircuitSpec`、确定性的 golden template、渲染诊断和拓扑/布局校验，而不是不受限制的 LLM TikZ。
 - **预览诊断**：渲染瑕疵可能会显示出编译/渲染过程中的错误信息，而且无需插件端的 LaTeX 运行时即可查看非内联代码源。
 - 针对 Mermaid 错误的语法自动修复
 
@@ -111,7 +111,7 @@ graph LR
     E --> F[Preview or Export]
 ```
 
-当前的实现已经支持 Mermaid、JSON Canvas、Vega-Lite、HTML 的回退机制，可编辑的 HTML/SVG，Draw.io XML 类型的工件，最基础的 Drawnix JSON 子集，预览诊断/仅源代码模式下的回退功能，以及针对常见源代码和 CMOS 反相器黄金模板的离线 `CircuitSpec -> circuitikz` 原型功能。电路图则更为复杂：虽然 circuitikz 能够准确表达电气拓扑结构，但未经约束的 LLM 输出往往会产生难以辨认的布线结果或无法渲染的 LaTeX 代码。未来的发展方向是通过对黄金参考模板、节点网格布局规则、渲染诊断功能以及截图反馈循环进行约束，来继续规范 circuitikz 的使用。
+当前实现支持 **33 个可执行图表目录行**，覆盖 Mermaid、JSON Canvas、Vega-Lite、HTML fallback、editable HTML/SVG、Draw.io XML、Drawnix JSON 和受约束的 CircuitikZ 输出。每行都有生产 fixture 与确定性预览；[`docs/diagram-examples/`](https://github.com/Jacobinwwey/obsidian-NotEMD/tree/main/docs/diagram-examples) 保存双语输入与生成结果。5 个精确参考 grammar 仍只在路线图中保留，因为尚未宣称其布局契约。电路图继续保持受约束：使用类型化 `CircuitSpec` 与 golden template 比直接生成不受限 LaTeX 更可靠；TikZJax 仍属于外部预览/编写边界，不作为内置 runtime 打包。
 
 请查看[Diagrams](./features/diagrams)中的详细内容。
 

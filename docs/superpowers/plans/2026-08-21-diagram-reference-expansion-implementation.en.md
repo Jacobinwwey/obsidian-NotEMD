@@ -1,3 +1,12 @@
+---
+date: 2026-08-21
+last_updated: 2026-09-02
+topic: diagram-reference-expansion-implementation
+status: completed
+canonical_for: diagram-reference-expansion
+superseded_by: null
+---
+
 # Diagram Reference Expansion Implementation Plan
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [x]`) syntax for tracking.
@@ -20,7 +29,9 @@ The runtime work for Batch 0 through Batch 3B is implemented in the current deli
 | Batch 2 quantitative and schedule | Complete | bar/line/scatter variants, quantitative projection, Gantt renderer |
 | Batch 3A structural | Complete | ordered-stack, set-overlap, ranked-segments, cycle renderers |
 | Batch 3B structural | Complete | nested, tree, process, medallion, high-level renderers |
-| Final verification and mainline delivery | In progress | 270 Jest suites, 2,375 passed / 1 skipped; build/gallery/docs/render-host/i18n gates pass; Vault bundle reload/CLI evidence pending; lint remains baseline debt |
+| Final verification and mainline delivery | Complete | 275 Jest suites, 2,511 passed / 1 skipped; build/gallery/docs/render-host/i18n, Local KB, Drawnix Plait consumer, and real-Vault example gates pass. Obsidian CLI validation is unavailable on this host; lint remains repository baseline debt (231 errors, 1,374 warnings). |
+
+The implementation and repository verification phases are complete as of 2026-09-02. The unavailable Obsidian CLI and real Draw.io/Drawnix application checks are external evidence boundaries, not unfinished runtime work; they remain explicitly deferred rather than converted into claims.
 
 ### Post-plan discoverability hardening (2026-08-22)
 

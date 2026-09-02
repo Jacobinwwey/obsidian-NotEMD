@@ -36,6 +36,8 @@ export default {
                     { text: 'Local Home', link: '/' },
                     { text: 'Docs Hub (EN)', link: '/README' },
                     { text: 'Docs Hub (zh-CN)', link: '/README.zh-CN' },
+                    { text: 'Current Main Progress (EN)', link: '/brainstorms/2026-09-02-current-main-progress-and-forward-plan' },
+                    { text: '当前 Main 进度 (zh-CN)', link: '/brainstorms/2026-09-02-current-main-progress-and-forward-plan.zh-CN' },
                     { text: 'Diagram Gallery (EN)', link: '/diagram-gallery' },
                     { text: 'Diagram Gallery (zh-CN)', link: '/diagram-gallery.zh-CN' },
                     { text: 'Diagram Examples (EN)', link: '/diagram-examples/README' },
@@ -123,6 +125,14 @@ export default {
                     {
                         text: 'Diagram Capability Catalog And Forward Architecture (zh-CN)',
                         link: '/superpowers/plans/2026-08-16-diagram-capability-catalog-and-forward-architecture.zh-CN'
+                    },
+                    {
+                        text: 'Current Main Truth Convergence (EN)',
+                        link: '/superpowers/plans/2026-09-02-current-main-truth-convergence.en'
+                    },
+                    {
+                        text: '当前 Main 真值收敛 (zh-CN)',
+                        link: '/superpowers/plans/2026-09-02-current-main-truth-convergence.zh-CN'
                     },
                     {
                         text: 'Mermaid Normalization Consolidation (EN)',

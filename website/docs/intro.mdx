@@ -21,7 +21,7 @@ import TLDR from '@site/src/components/TLDR';
 
 ## What is Notemd?
 
-Notemd integrates **30+ Large Language Models** (OpenAI, Anthropic, Google, DeepSeek, Qwen, Ollama, and more) into your Obsidian workflow to automate knowledge extraction, organization, translation, research, and diagram generation.
+Notemd integrates **36 provider definitions** across cloud, gateway, and local runtimes (including OpenAI, Anthropic, Google, DeepSeek, Qwen, Ollama, and more) into your Obsidian workflow to automate knowledge extraction, organization, translation, research, and diagram generation.
 
 ### Key Difference: Ephemeral vs. Persistent Knowledge
 
@@ -52,7 +52,7 @@ Notemd integrates **30+ Large Language Models** (OpenAI, Anthropic, Google, Deep
 
 ### 4. **Multilingual Translation**
 - Translate selections or entire notes
-- Supports 21+ UI languages
+- Supports 21 plugin UI languages
 - Independent output language configuration
 - Batch translation support
 
@@ -62,7 +62,7 @@ Notemd integrates **30+ Large Language Models** (OpenAI, Anthropic, Google, Deep
 - **Vega-Lite**: Data charts, time series, scatter plots
 - **HTML / Editable HTML/SVG**: Self-contained figure artifacts with semantic annotations
 - **Draw.io / Drawnix artifact boundaries**: Maintainer-facing export paths from the same semantic figure model
-- **Circuit diagrams roadmap**: circuitikz/TikZJax support is being designed around golden references, constrained prompts, render feedback, and topology/layout validation rather than raw unconstrained LLM TikZ
+- **Constrained circuit diagrams**: CircuitikZ generation uses typed `CircuitSpec` payloads, deterministic golden templates, render diagnostics, and topology/layout validation rather than unrestricted LLM TikZ
 - **Preview diagnostics**: Render artifacts can surface compile/render smoke diagnostics, and non-inline sources can be inspected without requiring a plugin-side LaTeX runtime
 - Syntax auto-fix for Mermaid errors
 
@@ -111,7 +111,7 @@ graph LR
     E --> F[Preview or Export]
 ```
 
-The current implementation already supports Mermaid, JSON Canvas, Vega-Lite, HTML fallback, editable HTML/SVG, Draw.io XML artifacts, a minimal Drawnix JSON subset, preview diagnostics/source-only fallback, and an offline `CircuitSpec -> circuitikz` prototype for common-source and CMOS inverter golden templates. Circuit diagrams are a harder class: circuitikz can express accurate electrical topology, but unconstrained LLM output often produces unreadable routing or non-rendering LaTeX. The next direction is to keep circuitikz constrained with golden-reference templates, node-grid layout rules, render diagnostics, and screenshot feedback loops.
+The current implementation supports **33 executable diagram catalog rows** across Mermaid, JSON Canvas, Vega-Lite, HTML fallback, editable HTML/SVG, Draw.io XML artifacts, Drawnix JSON, and constrained CircuitikZ output. Each row has a production fixture and deterministic preview; the real-Vault learning set under [`docs/diagram-examples/`](https://github.com/Jacobinwwey/obsidian-NotEMD/tree/main/docs/diagram-examples) records bilingual inputs and generated results. Five exact reference grammars remain roadmap-only because their layout contracts are not claimed. Circuit diagrams stay deliberately constrained: typed `CircuitSpec` plus golden templates is safer than unrestricted LaTeX generation, while TikZJax remains an external preview/authoring boundary rather than a bundled runtime.
 
 Read the details in [Diagrams](./features/diagrams).
 

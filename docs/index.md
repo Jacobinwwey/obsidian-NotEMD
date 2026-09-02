@@ -19,6 +19,8 @@ Repository docs preview for `obsidian-NotEMD`.
 
 ## Planning Docs
 
+- [Current Main Progress And Forward Plan (EN)](./brainstorms/2026-09-02-current-main-progress-and-forward-plan.md)
+- [Current Main Truth Convergence Plan (EN)](./superpowers/plans/2026-09-02-current-main-truth-convergence.en.md)
 - [Diagram Capability Catalog And Forward Architecture (EN)](./superpowers/plans/2026-08-16-diagram-capability-catalog-and-forward-architecture.en.md)
 - [Diagram Capability Catalog And Forward Architecture (zh-CN)](./superpowers/plans/2026-08-16-diagram-capability-catalog-and-forward-architecture.zh-CN.md)
 - [AGENTS And Provider Expansion (EN)](./superpowers/plans/2026-03-26-agents-and-provider-expansion.en.md)
@@ -32,6 +34,8 @@ Repository docs preview for `obsidian-NotEMD`.
 
 ## Supporting Docs
 
+- [Current Main Progress And Forward Plan (zh-CN)](./brainstorms/2026-09-02-current-main-progress-and-forward-plan.zh-CN.md)
+- [Current Main Truth Convergence Plan (zh-CN)](./superpowers/plans/2026-09-02-current-main-truth-convergence.zh-CN.md)
 - [Architecture Overview (EN)](./architecture.md)
 - [Architecture Overview (zh-CN)](./architecture.zh-CN.md)
 - [Diagram Gallery (EN)](./diagram-gallery.md)

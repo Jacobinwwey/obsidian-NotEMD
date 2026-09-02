@@ -1,15 +1,17 @@
 ---
 date: 2026-08-16
-last_updated: 2026-08-26
+last_updated: 2026-09-02
 topic: mainline-diagram-architecture-progress-and-next-direction
-status: active
+status: superseded
 canonical_for:
   - current-diagram-progress
   - diagram-architecture-audit
 supersedes: ./2026-05-28-mainline-progress-audit-and-next-level-direction.md
-superseded_by: null
+superseded_by: ./2026-09-02-current-main-progress-and-forward-plan.md
 implementation_record: src/tests/mermaidNormalizationConvergence.test.ts
 ---
+
+> Superseded for current-main status by [2026-09-02 Current Main Progress And Forward Plan](./2026-09-02-current-main-progress-and-forward-plan.md). Historical evidence and rationale remain intact below; its older verification snapshots are not current release evidence.
 
 # Mainline Diagram Architecture: Progress Audit And Next Direction
 

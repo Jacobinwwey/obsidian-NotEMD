@@ -6,6 +6,8 @@
 
 ## 当前真值与布局入口
 
+- [当前 Main 进度与后续推进计划](./brainstorms/2026-09-02-current-main-progress-and-forward-plan.zh-CN.md)
+- [当前 Main 真值收敛计划](./superpowers/plans/2026-09-02-current-main-truth-convergence.zh-CN.md)
 - [架构总览](./architecture.zh-CN.md)
 - [图形 Gallery](./diagram-gallery.zh-CN.md)
 - [Mainline 图形架构进度审计](./brainstorms/2026-08-16-mainline-diagram-architecture-progress-and-next-direction.zh-CN.md)

@@ -1,6 +1,6 @@
 # Notemd Architecture Overview
 
-> Updated: 2026-08-22
+> Updated: 2026-09-02
 
 ## System Architecture
 
@@ -118,11 +118,15 @@ User config (maxTokens, provider.maxOutputTokens)
 
 | Transport | Provider Count | Protocol |
 |---|---|---|
-| `openai-compatible` | 22 providers | OpenAI Chat Completions API |
+| `openai-compatible` | 32 providers | OpenAI Chat Completions API |
 | `anthropic` | 1 | Anthropic Messages API |
 | `google` | 1 | Google Gemini API |
 | `azure-openai` | 1 | Azure OpenAI Deployment API |
 | `ollama` | 1 | Ollama Native API |
+
+### Current Runtime Counts
+
+The executable source registries currently contain 33 diagram catalog rows, 30 semantic intents, 8 render targets, 3 image export formats, 36 provider definitions, 21 plugin UI locales, 34 published website locales, and 29 registered operation contracts. The real-Vault evidence manifest covers all 33 diagram rows with bilingual inputs and `passed` status. Five exact `diagram-design:*` grammars remain reference-only; the complete row-level contract is maintained in the [Diagram Capability Catalog](./maintainer/diagram-capability-catalog.md).
 
 ## Diagram Rendering Platform
 
@@ -185,7 +189,9 @@ flowchart LR
     MODAL --> EXPORT2
 ```
 
-### Supported Diagram Intents
+### Representative Supported Diagram Intents
+
+The table below keeps the core intent-to-renderer mapping readable. The complete 33-row executable catalog, including variants and native editable families, is maintained in the [Diagram Capability Catalog](./maintainer/diagram-capability-catalog.md).
 
 | Intent | Render Target | Renderer | Preview | Export |
 |---|---|---|---|---|
@@ -284,7 +290,7 @@ The embedded `metadata.notemd` source-visual manifest uses schema version 1. New
 | Module | Responsibility |
 |---|---|
 | `src/main.ts` | Plugin entrypoint, command registration, orchestration |
-| `src/llmProviders.ts` | 26 provider definitions, metadata, KNOWN_MODEL table |
+| `src/llmProviders.ts` | 36 provider definitions, metadata, KNOWN_MODEL table |
 | `src/llmUtils.ts` | Transport dispatch, token resolution, retry, response cache |
 | `src/fileUtils.ts` | File processing, Mermaid repair, concept extraction |
 | `src/searchUtils.ts` | Web research, Tavily/DuckDuckGo integration |
@@ -293,7 +299,7 @@ The embedded `metadata.notemd` source-visual manifest uses schema version 1. New
 | `src/diagram/` | Diagram domain model, adapters, renderers |
 | `src/rendering/` | Render host, preview, export, theme |
 | `src/ui/` | Settings tab, sidebar, modals, welcome screen |
-| `src/i18n/` | 22 locales, task language policy |
+| `src/i18n/` | 21 locales, task language policy |
 | `src/operations/` | Operation registry, host adapters, capability/contract export, reusable command orchestration |
 | `src/batchProgressStore.ts` | Interrupt-resume batch state persistence |
 | `src/providerDiagnostics.ts` | LLM provider connection diagnostics |

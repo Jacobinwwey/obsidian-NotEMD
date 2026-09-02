@@ -15,7 +15,7 @@ faqItems:
   - question: How do I install Notemd in Obsidian?
     answer: Open Obsidian Settings, go to Community Plugins, Browse, search Notemd, Install, and Enable. Requires Obsidian 0.15.0 or later. Manual installation is also available via GitHub Releases.
   - question: What LLM providers does Notemd support?
-    answer: Notemd supports 30+ providers including OpenAI, Anthropic, Google, xAI, Mistral, DeepSeek, Qwen, Ollama, LM Studio, Azure OpenAI, OpenRouter, and many China-focused providers like Qwen, Doubao, Moonshot, and GLM.
+    answer: Notemd currently ships 36 provider definitions, including OpenAI, Anthropic, Google, xAI, Mistral, DeepSeek, Qwen, Ollama, LM Studio, Azure OpenAI, OpenRouter, and China-focused providers such as Doubao, Moonshot, and GLM.
   - question: Can Notemd work with local LLMs?
     answer: Yes. Notemd works with Ollama, LM Studio, vLLM, LocalAI, and any OpenAI-compatible endpoint. All tasks work with local models including linking, concept generation, translation, research, and diagram generation.
   - question: How does Notemd differ from ChatGPT?
@@ -25,11 +25,11 @@ faqItems:
   - question: Which search services work with Notemd research?
     answer: Tavily (recommended, AI-optimized search, requires API key) and DuckDuckGo (experimental, no API key needed). Research results are summarized by LLM and appended to your note with source citations.
   - question: Does Notemd support Chinese or other languages?
-    answer: The UI supports 21+ languages. Task output language is independently configurable, allowing mixed setups like Chinese UI with English output or vice versa.
+    answer: The plugin UI supports 21 languages. Task output language is independently configurable, allowing mixed setups like Chinese UI with English output or vice versa.
   - question: Can I use Notemd for paper or PDF reading?
     answer: Yes. Convert PDF to Markdown using MinerU, open in Obsidian, then run Notemd tasks to add wiki-links, generate concept notes, extract text, research background, translate sections, and create Mermaid diagrams.
   - question: What diagram types can Notemd generate?
-    answer: Mermaid (flowchart, sequence, class, state, ER, Gantt with syntax auto-fix), JSON Canvas (Obsidian native), Vega-Lite (data charts), HTML fallback, and explicit editable HTML/SVG figure artifacts. Draw.io XML and Drawnix JSON exporter boundaries are available for deterministic artifact testing.
+    answer: Notemd exposes 33 executable catalog rows spanning Mermaid, JSON Canvas, Vega-Lite, editable HTML/SVG, Draw.io XML, Drawnix JSON, and constrained CircuitikZ artifacts. Five exact reference grammars remain roadmap-only; see the diagram capability catalog and real-Vault examples for the row-level contract.
   - question: Is Notemd free and open source?
     answer: Yes. MIT licensed, no paid tiers, no cloud lock-in, no telemetry. Source code on GitHub with 234+ stars. Pull requests welcome.
   - question: Can Notemd work 100% offline?
@@ -43,7 +43,7 @@ import TLDR from '@site/src/components/TLDR';
 # Frequently Asked Questions
 
 <TLDR>
-**Quick answers to the most common Notemd questions.** Covers installation (5 min setup), 30+ LLM providers support, local/cloud model options, one-click workflows, multilingual UI (21 languages), wiki-linking automation, research integration, PDF reading workflows, diagram generation, and open-source licensing. All features work offline with Ollama.
+**Quick answers to the most common Notemd questions.** Covers installation (5 min setup), 36 provider definitions, local/cloud model options, one-click workflows, a 21-language plugin UI, wiki-linking automation, research integration, PDF reading workflows, diagram generation, and open-source licensing. All features work offline with Ollama.
 </TLDR>
 
 ---
@@ -71,7 +71,7 @@ Open Obsidian **Settings → Community Plugins → Browse** → search **"Notemd
 
 ### What LLM providers does Notemd support?
 
-Notemd supports **30+ providers**:
+Notemd ships **36 provider definitions**:
 
 **Cloud providers:**
 - OpenAI (GPT-4, GPT-4o, GPT-4o-mini, o1, o3)
@@ -210,7 +210,7 @@ All three can be used together — they complement rather than compete.
 
 ### Does Notemd support Chinese or other languages?
 
-**UI languages:** 21+ supported
+**UI languages:** 21 supported
 - English, 中文 (简体), 中文 (繁體), 日本語, 한국어
 - Arabic, German, French, Spanish, Russian, Portuguese, Italian
 - Hindi, Bengali, Thai, Vietnamese, Turkish, Polish, Czech, and more

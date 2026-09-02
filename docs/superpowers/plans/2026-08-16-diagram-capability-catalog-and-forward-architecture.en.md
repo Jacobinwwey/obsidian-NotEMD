@@ -1,8 +1,8 @@
 ---
 date: 2026-08-16
-last_updated: 2026-08-21
+last_updated: 2026-09-02
 topic: diagram-capability-catalog-and-forward-architecture
-status: active
+status: completed
 canonical_for:
   - diagram-capability-catalog
   - diagram-rendering-forward-architecture
@@ -189,17 +189,17 @@ External gates remain separate from unit tests:
 - Drawnix: open/import the real `.drawnix` file and inspect the filename-rooted tree.
 - Circuitikz: compile native TeX with the pinned toolchain.
 
-## Current Implementation Status (2026-08-18)
+## Current Implementation Status (2026-09-02)
 
 | Phase | Status | Evidence / remaining boundary |
 |---|---|---|
 | 0. Correctness foundation | Complete | Sanitized settings persistence, authoritative retry artifacts, editable SVG preview, target descriptors, and bounded cache are covered by focused tests. |
-| 1. Three-axis catalog | Complete | Fifteen semantic types, eight targets, compatibility admission, fixture coverage, and stable IDs are executable. |
-| 2. Runtime contracts | Mostly complete | Input/result validation is owned by a registry-independent runtime; registry admission now fails closed on malformed schemas and duplicate IDs/bindings. Structural `OperationSchema`, host input metadata, and human-facing help remain intentionally separate. |
+| 1. Three-axis catalog | Complete | Thirty-three executable catalog rows, eight targets, compatibility admission, fixture coverage, and stable IDs are executable. |
+| 2. Runtime contracts | Complete at current contract depth | Input/result validation is owned by a registry-independent runtime; registry admission fails closed on malformed schemas and duplicate IDs/bindings. Structural `OperationSchema`, host input metadata, and human-facing help remain intentionally separate by design. |
 | 3. Deterministic preview gallery | Complete | Production fixtures generate the single selection-driven Settings/workbench preview and bilingual SVG/PNG docs gallery; `diagram:gallery:check` is the freshness gate. Reference screenshots are not runtime assets. |
 | 4. Bilingual discovery | Complete for shipped scope | Support matrices link shipped examples; reference layouts remain development-only roadmap entries and are not visible in the type picker. |
-| 5. Candidate admission | Partially shipped | Timeline, swimlane, quadrant, and org chart are bounded Mermaid-only types. Radar and org chart each have dedicated schemas, adapters, semantic HTML fallbacks, persistence-compatible spec fields, fixtures, gallery assets, and focused tests; the remaining reference layouts stay gated. |
-| 6. Convergence and release | Converged with external promotion blocked | Target adapters, webview presentation registry, Mermaid normalization, shared Drawnix geometry, and Circuitikz template convergence are landed. The standalone Plait consumer gate passes against the production fixture; Draw.io and a real Drawnix application remain unavailable in this workspace. |
+| 5. Candidate admission | Complete for admitted scope | Thirty-three executable rows are shipped with bounded payloads, deterministic adapters, fixtures, gallery assets, and focused tests. Five exact reference grammars remain explicitly gated because their layout contracts are not claimed. |
+| 6. Convergence and release | Complete with external evidence deferred | Target adapters, webview presentation registry, Mermaid normalization, shared Drawnix geometry, and Circuitikz template convergence are landed. The standalone Plait consumer gate passes against the production fixture; Draw.io and a real Drawnix application remain unavailable in this workspace and are not claimed. |
 
 This status table is the current decision record. The phase descriptions above remain the design rationale and acceptance criteria; they should not be read as proof that every listed task is still outstanding.
 

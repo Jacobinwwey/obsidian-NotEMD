@@ -1,6 +1,6 @@
 # Notemd 系统架构总览
 
-> 更新：2026-08-22
+> 更新：2026-09-02
 
 ## 系统架构
 
@@ -118,11 +118,15 @@ sequenceDiagram
 
 | 传输协议 | 提供商数量 | 协议 |
 |---|---|---|
-| `openai-compatible` | 22 个提供商 | OpenAI Chat Completions API |
+| `openai-compatible` | 32 个提供商 | OpenAI Chat Completions API |
 | `anthropic` | 1 个 | Anthropic Messages API |
 | `google` | 1 个 | Google Gemini API |
 | `azure-openai` | 1 个 | Azure OpenAI Deployment API |
 | `ollama` | 1 个 | Ollama Native API |
+
+### 当前运行时数量
+
+当前可执行源 registry 包含 33 个图表目录行、30 个语义 intent、8 个渲染 target、3 个图片导出格式、36 个 provider 定义、21 个插件 UI locale、34 个已发布网站 locale 和 29 个已注册 operation 契约。真实 Vault 证据 manifest 覆盖全部 33 行，且每行都有双语输入并为 `passed`。5 个精确的 `diagram-design:*` grammar 仍为仅参考；完整逐行契约维护在[图形能力目录](./maintainer/diagram-capability-catalog.zh-CN.md)。
 
 ## 图表渲染平台
 
@@ -185,7 +189,9 @@ flowchart LR
     MODAL --> EXPORT2
 ```
 
-### 支持的图表意图
+### 代表性的图表意图
+
+下表保留核心 intent 到 renderer 的可读映射。包含 variant 与 native editable family 的完整 33 行可执行目录，维护在[图形能力目录](./maintainer/diagram-capability-catalog.zh-CN.md)。
 
 | 意图 | 渲染目标 | 渲染器 | 预览 | 导出 |
 |---|---|---|---|---|
@@ -287,7 +293,7 @@ Drawnix 源图形遵循同一条兼容性边界。默认关闭 **同时完整输
 | 模块 | 职责 |
 |---|---|
 | `src/main.ts` | 插件入口、命令注册、流程编排 |
-| `src/llmProviders.ts` | 26 个提供商定义、元数据、KNOWN_MODEL 表 |
+| `src/llmProviders.ts` | 36 个提供商定义、元数据、KNOWN_MODEL 表 |
 | `src/llmUtils.ts` | 传输分发、令牌解析、重试、响应缓存 |
 | `src/fileUtils.ts` | 文件处理、Mermaid 修复、概念提取 |
 | `src/searchUtils.ts` | 网络搜索、Tavily/DuckDuckGo 集成 |
@@ -296,7 +302,7 @@ Drawnix 源图形遵循同一条兼容性边界。默认关闭 **同时完整输
 | `src/diagram/` | 图表领域模型、适配器、渲染器 |
 | `src/rendering/` | 渲染宿主、预览、导出、主题 |
 | `src/ui/` | 设置标签页、侧边栏、弹窗、欢迎页 |
-| `src/i18n/` | 22 种语言、任务语言策略 |
+| `src/i18n/` | 21 种语言、任务语言策略 |
 | `src/operations/` | operation registry、host adapter、capability/contract 导出、可复用命令编排 |
 | `src/batchProgressStore.ts` | 中断恢复批量状态持久化 |
 | `src/providerDiagnostics.ts` | LLM 提供商连接诊断 |

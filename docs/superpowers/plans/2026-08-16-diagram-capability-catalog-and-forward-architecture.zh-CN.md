@@ -1,8 +1,8 @@
 ---
 date: 2026-08-16
-last_updated: 2026-08-21
+last_updated: 2026-09-02
 topic: diagram-capability-catalog-and-forward-architecture
-status: active
+status: completed
 canonical_for:
   - diagram-capability-catalog
   - diagram-rendering-forward-architecture
@@ -189,17 +189,17 @@ preview/export 与 render-host 的 target dispatch 已通过 keyed adapter 收�
 - Drawnix：打开/导入真实 `.drawnix`，检查文件名根节点树。
 - Circuitikz：用固定工具链编译原生 TeX。
 
-## 当前实现状态（2026-08-21）
+## 当前实现状态（2026-09-02）
 
 | 阶段 | 状态 | 证据 / 剩余边界 |
 |---|---|---|
 | 0. 正确性基础 | 完成 | 设置清洗持久化、重试 artifact 真值、editable SVG 预览、target descriptor 和有界 cache 均有定向测试。 |
-| 1. 三轴目录 | 完成 | 15 个语义类型、8 个 target、兼容性准入、fixture 覆盖和稳定 ID 均已可执行。 |
-| 2. 运行时契约 | 基本完成 | 输入/结果校验由与 registry 无关的 runtime 负责；registry 现在会在加载时对非法 schema、重复 ID/绑定 fail-closed。结构化 `OperationSchema`、宿主输入 metadata 与人工可读 help 仍有意分离。 |
+| 1. 三轴目录 | 完成 | 33 个可执行目录行、8 个 target、兼容性准入、fixture 覆盖和稳定 ID 均已可执行。 |
+| 2. 运行时契约 | 当前契约深度已完成 | 输入/结果校验由与 registry 无关的 runtime 负责；registry 会在加载时对非法 schema、重复 ID/绑定 fail-closed。结构化 `OperationSchema`、宿主输入 metadata 与人工可读 help 仍按设计分离。 |
 | 3. 确定性预览 gallery | 完成 | 生产 fixture 生成选择驱动的设置页/工作台单面板预览与双语 SVG/PNG 文档 gallery；`diagram:gallery:check` 是新鲜度门禁，参考截图不属于运行时资产。 |
 | 4. 双语发现入口 | 已发布范围完成 | 支持矩阵链接已发布示例；参考布局仅保留为开发期路线图，不在类型选择区显示。 |
-| 5. 候选准入 | 部分交付 | timeline、swimlane、quadrant 与 org chart 是受限 Mermaid-only 类型；Radar 与 org chart 都已有独立 schema、adapter、语义 HTML fallback、与旧 spec 兼容的字段、fixture、gallery 资产和定向测试；其余参考布局继续受门禁控制。 |
-| 6. 收敛与发布 | 代码已收敛，外部发布证据阻塞 | target adapter、webview presentation registry、Mermaid 规范化、共享 Drawnix 几何和 Circuitikz 模板收敛已落地。独立 Plait consumer gate 已用生产 fixture 通过；当前工作区仍没有 Draw.io 或真实 Drawnix 应用，因此不宣称外部互操作。 |
+| 5. 候选准入 | 已完成已准入范围 | 33 个可执行行已带有界 payload、确定性 adapter、fixture、gallery 资产和定向测试交付。5 个精确参考 grammar 仍明确受门禁控制，因为尚未宣称其布局契约。 |
+| 6. 收敛与发布 | 已完成，外部证据延期 | target adapter、webview presentation registry、Mermaid 规范化、共享 Drawnix 几何和 Circuitikz 模板收敛已落地。独立 Plait consumer gate 已用生产 fixture 通过；当前工作区仍没有 Draw.io 或真实 Drawnix 应用，因此不宣称外部互操作。 |
 
 该表是当前决策记录。上面的阶段描述保留设计理由与验收条件，不应再被理解为所有列出的任务都尚未实施。
 

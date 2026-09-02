@@ -1,3 +1,12 @@
+---
+date: 2026-08-29
+last_updated: 2026-09-02
+topic: diagram-examples-implementation
+status: completed
+canonical_for: diagram-examples-real-vault-evidence
+superseded_by: null
+---
+
 # Diagram Examples And Real-Vault Evidence Implementation Plan
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
@@ -7,6 +16,10 @@
 **Architecture:** Keep the existing static fixture gallery untouched and add a pure runtime library for catalog enumeration, input rendering, path safety, redaction, manifest validation, and cleanup planning. A thin Node CLI orchestrator creates temporary Vault notes, invokes the existing maintainer `diagram.generate` operation through the official Obsidian CLI, copies only verified outputs into `docs/diagram-examples/<type-id>/`, and removes its temporary Vault scope in `finally`.
 
 **Tech Stack:** Node.js CommonJS scripts, TypeScript/Jest tests, existing `src/diagram` catalog and fixtures, official Obsidian CLI `create/delete/eval`, SHA-256 hashes, VitePress navigation, Playwright/export artifacts already supplied by the plugin.
+
+## Current-main disposition (2026-09-02)
+
+The real-Vault evidence implementation is complete. The checked-in manifest contains 33 catalog entries, each with bilingual inputs and `passed` status, and the generator/checker, docs contract, gallery, build, Jest, Local KB, render-host, i18n, and Plait consumer gates are green. The historical task checklists below remain the implementation decomposition; their unchecked RED/GREEN steps are not pending work. Obsidian CLI validation is unavailable on this host and remains an explicit external boundary.
 
 ## Global Constraints
 

@@ -151,7 +151,7 @@ sequenceDiagram
 
 | 传输协议 | 提供商数量 | 协议 |
 |---|---|---|
-| `openai-compatible` | 22 个提供商 | OpenAI Chat Completions API |
+| `openai-compatible` | 32 个提供商 | OpenAI Chat Completions API |
 | `anthropic` | 1 个 | Anthropic Messages API |
 | `google` | 1 个 | Google Gemini API |
 | `azure-openai` | 1 个 | Azure OpenAI Deployment API |
@@ -247,7 +247,7 @@ layout: section
 | 模块 | 职责 |
 |---|---|
 | `src/main.ts` | 插件入口、命令注册、流程编排 |
-| `src/llmProviders.ts` | 26 个提供商定义、元数据、KNOWN_MODEL 表 |
+| `src/llmProviders.ts` | 36 个提供商定义、元数据、KNOWN_MODEL 表 |
 | `src/llmUtils.ts` | 传输分发、令牌解析、重试、响应缓存 |
 | `src/fileUtils.ts` | 文件处理、Mermaid 修复、概念提取 |
 | `src/searchUtils.ts` | 网络搜索、Tavily/DuckDuckGo 集成 |
@@ -263,7 +263,7 @@ layout: section
 | `src/diagram/` | 图表领域模型、适配器、渲染器 |
 | `src/rendering/` | 渲染宿主、预览、导出、主题 |
 | `src/ui/` | 设置标签页、侧边栏、弹窗、欢迎页 |
-| `src/i18n/` | 22 种语言、任务语言策略 |
+| `src/i18n/` | 21 种语言、任务语言策略 |
 | `src/operations/` | operation registry、host adapter、capability/contract 导出、可复用命令编排 |
 | `src/batchProgressStore.ts` | 中断恢复批量状态持久化 |
 | `src/providerDiagnostics.ts` | LLM 提供商连接诊断 |
