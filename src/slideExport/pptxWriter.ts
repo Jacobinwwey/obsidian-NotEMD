@@ -10,6 +10,7 @@ import {
 	type SlidevPptxSlide,
 	type SlidevPptxSolidRectangle,
 	type SlidevPptxTable,
+	type SlidevPptxTableBorderSide,
 	type SlidevPptxTableCell,
 	type SlidevPptxTextAlign,
 	type SlidevPptxTextBox,
@@ -516,13 +517,16 @@ function tableCellOfficeBottomInset(cell: SlidevPptxTableCell): number | undefin
 		: cell.paddingBottomIn;
 }
 
-function buildVisibleTableBorder(cell: SlidevPptxTableCell): string {
-	const borderColor = cell.borderColor ? clampHexColor(cell.borderColor, '') : '';
-	const borderWidth = pointsToEmu(cell.borderWidthPt);
-	if (!borderColor || borderWidth <= 0) {
+function buildVisibleTableBorder(border: SlidevPptxTableBorderSide): string {
+	const borderColor = border.color ? clampHexColor(border.color, '') : '';
+	const borderWidth = pointsToEmu(border.widthPt);
+	if (!borderColor || borderWidth <= 0 || border.opacity <= 0) {
 		return '<a:noFill/>';
 	}
-	return `<a:solidFill><a:srgbClr val="${borderColor}"/></a:solidFill>`;
+	const color = border.opacity < 1
+		? `<a:srgbClr val="${borderColor}"><a:alpha val="${Math.round(border.opacity * 100000)}"/></a:srgbClr>`
+		: `<a:srgbClr val="${borderColor}"/>`;
+	return `<a:solidFill>${color}</a:solidFill>`;
 }
 
 function buildVisibleTableCellProperties(cell: SlidevPptxTableCell): string {
@@ -536,26 +540,21 @@ function buildVisibleTableCellProperties(cell: SlidevPptxTableCell): string {
 	const fill = cell.fillColor
 		? `<a:solidFill><a:srgbClr val="${clampHexColor(cell.fillColor, 'FFFFFF')}"/></a:solidFill>`
 		: '<a:noFill/>';
-	const borderWidth = pointsToEmu(cell.borderWidthPt);
-	const borderFill = buildVisibleTableBorder(cell);
-	const border =
-		borderWidth > 0
-			? [
-					`<a:lnL w="${borderWidth}">${borderFill}</a:lnL>`,
-					`<a:lnR w="${borderWidth}">${borderFill}</a:lnR>`,
-					`<a:lnT w="${borderWidth}">${borderFill}</a:lnT>`,
-					`<a:lnB w="${borderWidth}">${borderFill}</a:lnB>`,
-				].join('')
-			: [
-					'<a:lnL><a:noFill/></a:lnL>',
-					'<a:lnR><a:noFill/></a:lnR>',
-					'<a:lnT><a:noFill/></a:lnT>',
-					'<a:lnB><a:noFill/></a:lnB>',
-				].join('');
-	return `<a:tcPr${attributes.length > 0 ? ` ${attributes.join(' ')}` : ''}>${fill}${border}</a:tcPr>`;
+	const sides = [['L', 'left'], ['R', 'right'], ['T', 'top'], ['B', 'bottom']] as const;
+	const border = sides.map(([tag, side]) => {
+		const paint = cell.borderSides?.[side] ?? { color: cell.borderColor, widthPt: cell.borderWidthPt, opacity: 1 };
+		const width = pointsToEmu(paint.widthPt);
+		return `<a:ln${tag}${width > 0 ? ` w="${width}"` : ''}>${buildVisibleTableBorder(paint)}</a:ln${tag}>`;
+	}).join('');
+	// DrawingML requires border children before the fill group; Office otherwise
+	// ignores the explicit no-fill lines and can apply a default black outline.
+	return `<a:tcPr${attributes.length > 0 ? ` ${attributes.join(' ')}` : ''}>${border}${fill}</a:tcPr>`;
 }
 
-function buildVisibleEmptyTableCell(attributes = ''): string {
+function buildVisibleEmptyTableCell(
+	attributes = '',
+	paint?: Pick<SlidevPptxTableCell, 'fillColor' | 'borderSides'>,
+): string {
 	return [
 		`<a:tc${attributes}>`,
 		'<a:txBody>',
@@ -575,9 +574,10 @@ function buildVisibleEmptyTableCell(attributes = ''): string {
 			underline: false,
 			align: 'left',
 			verticalAlign: 'top',
-			fillColor: null,
+			fillColor: paint?.fillColor ?? null,
 			borderColor: null,
 			borderWidthPt: 0,
+			borderSides: paint?.borderSides,
 		}),
 		'</a:tc>',
 	].join('');
@@ -597,6 +597,8 @@ function buildVisibleTableXml(table: SlidevPptxTable, shapeId: number, context: 
 		colSpan: number;
 		hMerge: boolean;
 		vMerge: boolean;
+		rowOffset: number;
+		colOffset: number;
 	};
 	const cellGrid: Array<Array<TableGridEntry | null>> = Array.from({ length: totalRows }, () =>
 		Array.from({ length: maxCols }, () => null),
@@ -620,6 +622,8 @@ function buildVisibleTableXml(table: SlidevPptxTable, shapeId: number, context: 
 						colSpan,
 						hMerge: colOffset > 0,
 						vMerge: rowOffset > 0,
+						rowOffset,
+						colOffset,
 					};
 				}
 			}
@@ -638,6 +642,20 @@ function buildVisibleTableXml(table: SlidevPptxTable, shapeId: number, context: 
 					if (!gridEntry) {
 						return buildVisibleEmptyTableCell();
 					}
+					const uniformBorder = { color: gridEntry.cell.borderColor, widthPt: gridEntry.cell.borderWidthPt, opacity: 1 };
+					const fullBorders = gridEntry.cell.borderSides ?? {
+						top: uniformBorder, right: uniformBorder, bottom: uniformBorder, left: uniformBorder,
+					};
+					const noBorder = { color: null, widthPt: 0, opacity: 0 };
+					const paint = {
+						fillColor: gridEntry.cell.fillColor,
+						borderSides: {
+							top: gridEntry.rowOffset === 0 ? fullBorders.top : noBorder,
+							bottom: gridEntry.rowOffset === gridEntry.rowSpan - 1 ? fullBorders.bottom : noBorder,
+							left: gridEntry.colOffset === 0 ? fullBorders.left : noBorder,
+							right: gridEntry.colOffset === gridEntry.colSpan - 1 ? fullBorders.right : noBorder,
+						},
+					};
 					if (!gridEntry.origin) {
 						const mergeAttributes = [
 							gridEntry.hMerge ? 'hMerge="1"' : '',
@@ -645,7 +663,7 @@ function buildVisibleTableXml(table: SlidevPptxTable, shapeId: number, context: 
 						]
 							.filter(Boolean)
 							.join(' ');
-						return buildVisibleEmptyTableCell(mergeAttributes ? ` ${mergeAttributes}` : '');
+						return buildVisibleEmptyTableCell(mergeAttributes ? ` ${mergeAttributes}` : '', paint);
 					}
 					const gridSpan = gridEntry.colSpan > 1 ? ` gridSpan="${gridEntry.colSpan}"` : '';
 					const rowSpan = gridEntry.rowSpan > 1 ? ` rowSpan="${gridEntry.rowSpan}"` : '';
@@ -656,7 +674,7 @@ function buildVisibleTableXml(table: SlidevPptxTable, shapeId: number, context: 
 						'<a:lstStyle/>',
 						buildVisibleTableCellParagraphs(gridEntry.cell, context),
 						'</a:txBody>',
-						buildVisibleTableCellProperties(gridEntry.cell),
+						buildVisibleTableCellProperties({ ...gridEntry.cell, ...paint }),
 						'</a:tc>',
 					].join('');
 				})

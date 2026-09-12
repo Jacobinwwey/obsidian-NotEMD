@@ -119,11 +119,14 @@ function main() {
         process.stdout.write(`${JSON.stringify({
             status: 'passed',
             consumer: 'plait-public-api',
+            checkScope: 'mindmap-and-static-arrow-serialization',
             artifactPath,
             generatedProductionFixture: !args.input,
             nodeCount: report.nodeIds.length,
             rootCount: report.rootIds.length,
-            relationCount: report.relations.length
+            relationCount: report.relations.length,
+            nativeBoundRelationCount: report.nativeBoundRelationCount,
+            staticRelationCount: report.staticRelationCount
         }, null, 2)}\n`);
     } finally {
         if (temporaryDirectory) {

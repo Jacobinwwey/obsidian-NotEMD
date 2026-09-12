@@ -1,0 +1,35 @@
+{
+  "schemaVersion": 1,
+  "provenance": "Independently authored from the existing implementation fixtures. Queries and relevance labels were frozen before the first evaluation. Synthetic engineering notes, not private user Vault data or an external benchmark.",
+  "defaultPaths": "Knowledge\nReferences/Office.md",
+  "files": [
+    { "path": "Knowledge/Payments.md", "markdown": "# Purchase settlement\n## Repeated delivery\nAn idempotency key identifies one purchase. Persist its receipt and return that receipt for repeated requests. Deduplication and the database commit share a transaction." },
+    { "path": "Knowledge/Cancellation.md", "markdown": "# Cancellation\n## Operation lifetime\nThe caller owns an AbortSignal until every child has settled. A late response must not start persistence. Aborting a request does not undo an earlier commit." },
+    { "path": "Knowledge/原子存储.md", "markdown": "# 存储协议\n## 原子写入\n文件保存必须通过原子写入保证状态完整。失败恢复应保留之前的内容。并发更新不能覆盖其他编辑者已经提交的修改。" },
+    { "path": "Knowledge/Latency.md", "markdown": "# RPC budgets\n## Histograms\nLatency histograms retain tail observations. Report p50 and p95 rather than just the arithmetic mean. Separate server execution from queueing and transport time." },
+    { "path": "Knowledge/Infra/Cache.md", "markdown": "# Cache\nRedis eviction starts when memory exceeds the configured maxmemory ceiling. Volatile policies require TTL metadata. Measure memory pressure before increasing capacity." },
+    { "path": "Knowledge/Geography/Cache.md", "markdown": "# Cache\nA geocache is a hidden container discovered with coordinates. Log visits and replace its waterproof cover." },
+    { "path": "Knowledge/Rate limits.md", "markdown": "# Upstream capacity\nAn HTTP 429 response may carry Retry-After. Exponential backoff with jitter reduces synchronized retry storms. Do not automatically retry non-idempotent mutations." },
+    { "path": "Knowledge/Index.md", "markdown": "# Index\n- [[Payments]]\n- [[Cancellation]]\n- [[原子存储]]\n- [[Latency]]\n- [[Infra/Cache]]\n- [[Rate limits]]\nThis is navigation, not an explanation of any protocol." },
+    { "path": "Knowledge/Blank.md", "markdown": "```typescript\nconst idempotency = 'this code-only note is not evidence';\n```" },
+    { "path": "Knowledge/Navigation noise.md", "markdown": "# Start here\nUse the menu to locate documents. Tags and folder shortcuts organize the workspace. This note contains no technical answer." },
+    { "path": "Knowledge/Transport.md", "markdown": "# Congestion control\n## Packet recovery\nTCP retransmission recovers lost packets while a congestion window limits outstanding bytes. A receiver acknowledgement is evidence of delivery, not proof that the application committed a transaction. Timeout selection must account for measured round-trip variance. Repeated timeouts can reduce throughput even when the server has spare compute. Record packet loss and queue occupancy separately from service latency. A large socket buffer can hide a slow consumer temporarily, but increases retained memory and the time required to drain an overloaded connection. Backpressure should bound producer work before the transport queue grows without limit. Cancellation closes the local stream; it cannot establish whether a remote transaction committed. Application protocols therefore need stable request identities and explicit acknowledgement semantics. Keep retry policy with the operation that understands those semantics, and keep framing and partial-message handling with the transport." },
+    { "path": "References/Office.md", "markdown": "# Presentation portability\nPowerPoint substitutes missing fonts. Editable slide tables require text runs with explicit language and font metadata. A full-slide bitmap can conceal duplicate visible text." },
+    { "path": "Private/Unselected.md", "markdown": "# Lunar telescope aperture\nThis document must never be used because its folder is outside the configured knowledge scope." }
+  ],
+  "queries": [
+    { "id": "synonymous-payment", "query": "keep retries from charging a customer twice", "relevantPaths": ["Knowledge/Payments.md"], "family": "synonym" },
+    { "id": "operation-abort", "query": "cancel work while a response is still arriving", "relevantPaths": ["Knowledge/Cancellation.md"], "family": "english" },
+    { "id": "cjk-concurrency", "query": "多个编辑者并发更新不能互相覆盖", "relevantPaths": ["Knowledge/原子存储.md"], "family": "chinese-compound" },
+    { "id": "cjk-recovery", "query": "原子写入 失败恢复", "relevantPaths": ["Knowledge/原子存储.md"], "family": "chinese" },
+    { "id": "latency-statistics", "query": "RPC latency percentile histograms", "relevantPaths": ["Knowledge/Latency.md"], "family": "english" },
+    { "id": "duplicate-title", "query": "Redis eviction memory pressure", "relevantPaths": ["Knowledge/Infra/Cache.md"], "family": "duplicate-title" },
+    { "id": "backoff-numeric", "query": "backoff when upstream says 429", "relevantPaths": ["Knowledge/Rate limits.md"], "family": "abbreviation" },
+    { "id": "mixed-scope-office", "query": "font substitution in editable slide tables", "relevantPaths": ["References/Office.md"], "family": "mixed-file-folder-scope" },
+    { "id": "navigation-title", "query": "Index", "relevantPaths": [], "family": "navigation-no-answer" },
+    { "id": "scope-exclusion", "query": "lunar telescope aperture", "relevantPaths": [], "family": "out-of-scope" },
+    { "id": "current-file-exclusion", "query": "idempotency key purchase receipt", "currentFilePath": "Knowledge/Payments.md", "relevantPaths": [], "family": "current-file" },
+    { "id": "nonsense", "query": "zyxwvutsrqponmlkjihgfedcba", "relevantPaths": [], "family": "no-answer" },
+    { "id": "long-section", "query": "TCP congestion window packet retransmission", "relevantPaths": ["Knowledge/Transport.md"], "family": "long-section" }
+  ]
+}

@@ -86,6 +86,7 @@ interface RawSlideTableCell {
 	fillColor: string | null;
 	borderColor: string | null;
 	borderWidthPt: number;
+	borderSides?: SlidevPptxTableCell['borderSides'];
 	lineSpacingPt?: number;
 	charSpacingPt?: number;
 	paddingLeftIn?: number;
@@ -387,6 +388,13 @@ function normalizeTableCell(raw: RawSlideTableCell): SlidevPptxTableCell {
 	const textRightInsetIn = normalizeOptionalPositiveNumber(raw.textRightInsetIn, 0.001, 2);
 	const textTopInsetIn = normalizeOptionalPositiveNumber(raw.textTopInsetIn, 0.001, 2);
 	const textBottomInsetIn = normalizeOptionalPositiveNumber(raw.textBottomInsetIn, 0.001, 2);
+	const borderSides = raw.borderSides
+		? Object.fromEntries(Object.entries(raw.borderSides).map(([side, border]) => [side, {
+			color: border.color ? normalizeHexColor(border.color, '') || null : null,
+			widthPt: clamp(Number(border.widthPt) || 0, 0, 12),
+			opacity: clamp(Number.isFinite(border.opacity) ? border.opacity : 1, 0, 1),
+		}])) as SlidevPptxTableCell['borderSides']
+		: undefined;
 
 	const tableCell: SlidevPptxTableCell = {
 		text,
@@ -404,6 +412,7 @@ function normalizeTableCell(raw: RawSlideTableCell): SlidevPptxTableCell {
 		fillColor: raw.fillColor ? normalizeHexColor(raw.fillColor, '') || null : null,
 		borderColor: raw.borderColor ? normalizeHexColor(raw.borderColor, '') || null : null,
 		borderWidthPt: clamp(Number(raw.borderWidthPt) || 0, 0, 12),
+		...(borderSides ? { borderSides } : {}),
 		...(lineSpacingPt !== undefined ? { lineSpacingPt } : {}),
 		...(charSpacingPt !== undefined ? { charSpacingPt } : {}),
 		...(paddingLeftIn !== undefined ? { paddingLeftIn } : {}),
@@ -1468,6 +1477,20 @@ export async function extractSlidevPptxSlideFromPage(page: any, slideNumber: num
 			}
 			return best;
 		};
+		const tableBorderSidesFor = (style: CSSStyleDeclaration): NonNullable<SlidevPptxTableCell['borderSides']> => {
+			const side = (width: string, borderStyle: string, color: string) => {
+				const opacity = colorAlpha(color);
+				const visible = borderStyle !== 'none' && borderStyle !== 'hidden';
+				return { color: visible ? rgbToHex(color) || null : null,
+					widthPt: visible ? pxToPt(Number.parseFloat(width) || 0) : 0, opacity };
+			};
+			return {
+				top: side(style.borderTopWidth, style.borderTopStyle, style.borderTopColor),
+				right: side(style.borderRightWidth, style.borderRightStyle, style.borderRightColor),
+				bottom: side(style.borderBottomWidth, style.borderBottomStyle, style.borderBottomColor),
+				left: side(style.borderLeftWidth, style.borderLeftStyle, style.borderLeftColor),
+			};
+		};
 		const uniformBorderRadiusPxFor = (style: CSSStyleDeclaration): number | null => {
 			const radii = [
 				style.borderTopLeftRadius,
@@ -1938,6 +1961,30 @@ export async function extractSlidevPptxSlideFromPage(page: any, slideNumber: num
 				const fontSizePx = Number.parseFloat(cellStyle.fontSize || '16') || 16;
 				const fontWeight = Number.parseInt(cellStyle.fontWeight || '400', 10);
 				const border = strongestBorder(cellStyle);
+				const borderSides = tableBorderSidesFor(cellStyle);
+				if (tableStyle.borderCollapse === 'collapse') {
+					const lastRow = Math.min(rowElements.length - 1, placement.rowIndex + placement.rowSpan - 1);
+					const rowTop = window.getComputedStyle(rowElements[placement.rowIndex]);
+					const rowBottom = window.getComputedStyle(rowElements[lastRow]);
+					const atLeft = placement.colIndex === 0;
+					const atRight = placement.colIndex + placement.colSpan === maxCols;
+					const candidates = {
+						top: [cellStyle, rowTop, ...(placement.rowIndex === 0 ? [tableStyle] : [])],
+						bottom: [cellStyle, rowBottom, ...(lastRow === rowElements.length - 1 ? [tableStyle] : [])],
+						left: [cellStyle, ...(atLeft ? [rowTop, tableStyle] : [])],
+						right: [cellStyle, ...(atRight ? [rowTop, tableStyle] : [])],
+					};
+					for (const side of ['top', 'right', 'bottom', 'left'] as const) {
+						if (candidates[side].some(style => style.getPropertyValue(`border-${side}-style`) === 'hidden')) {
+							borderSides[side] = { color: null, widthPt: 0, opacity: 0 };
+							continue;
+						}
+						for (const style of candidates[side]) {
+							const candidate = tableBorderSidesFor(style)[side];
+							if (candidate.widthPt > borderSides[side].widthPt) borderSides[side] = candidate;
+						}
+					}
+				}
 				const cellLineSpacingPt = lineSpacingPtFor(cellStyle);
 				const cellCharSpacingPt = charSpacingPtFor(cellStyle);
 				const cellTextDecoration = `${cellStyle.textDecorationLine || ''} ${cellStyle.textDecoration || ''}`;
@@ -1959,6 +2006,7 @@ export async function extractSlidevPptxSlideFromPage(page: any, slideNumber: num
 					fillColor: rgbToHex(cellStyle.backgroundColor) || null,
 					borderColor: border.color,
 					borderWidthPt: border.widthPt,
+					borderSides,
 					...(cellLineSpacingPt ? { lineSpacingPt: cellLineSpacingPt } : {}),
 					...(cellCharSpacingPt !== undefined ? { charSpacingPt: cellCharSpacingPt } : {}),
 					...bodyInsetsFor(cellStyle),
