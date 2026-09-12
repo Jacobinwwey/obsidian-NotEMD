@@ -1,6 +1,6 @@
 ---
 date: 2026-09-02
-last_updated: 2026-09-12
+last_updated: 2026-09-13
 topic: current-main-progress-and-forward-plan
 status: current
 canonical_for:
@@ -16,13 +16,13 @@ superseded_by: null
 
 语言：[English](./2026-09-02-current-main-progress-and-forward-plan.md) | **简体中文**
 
-[计划进度登记表](../maintainer/project-plan-status.zh-CN.md) 逐项核对了已有的 19 份正式计划、32 份 brainstorming 记录及相关维护者工作线。[可靠性与证据推进计划](../plans/2026-09-12-mainline-reliability-and-evidence.zh-CN.md) 定义下一批建议实施单元。本文继续作为当前进度入口；9 月 2 日的真值收敛实施仍是已完成的历史切片。
+[计划进度登记表](../maintainer/project-plan-status.zh-CN.md) 逐项核对了已有的 19 份正式计划、32 份 brainstorming 记录及相关维护者工作线。[可靠性与证据推进计划](../plans/2026-09-12-mainline-reliability-and-evidence.zh-CN.md)与[验收记录](../maintainer/reliability-acceptance-2026-09-12.zh-CN.md)负责 9 月 12–13 日的实现和测量。本文继续作为当前进度入口；此前的真值收敛仍是已完成的历史切片。
 
 ## 总体判断
 
-本次基线为 `main@7638cec`、版本 `1.9.7`。构建和既有测试通过，但 9 月 2 日“内部覆盖已经足够完整”的判断过强。四项确定性本地探针复现了取消与持久化缺陷：取消后的队列可能不结束、并行任务取消后仍可写入、内部创建的取消信号没有到达传输层、失败保存的回滚可以覆盖另一笔并发成功的保存。这些缺陷尚未修复；本轮只修改文档。
+`main@7638cec` 的审计在既有测试全绿时仍发现四项操作生命周期缺陷。当前实现已保证取消队列结束、实时取消贯通五种传输、重叠保存不会互相回滚。新增故障调度回归和真实 Obsidian 1.13.7 取消／写冲突探针验证了修正后的行为。版本仍为 `1.9.7`，本批属于未发布主线变更，不是新 Release。
 
-下一补丁应先修复操作取消与 artifact 写入归属，并用 PR 验证保护这些变更。在测量实际成本期间保持单入口 `main.js` + 内联 `srcdoc`。打包隔离是条件性优化，不是正确性修复、检索评估或有界 CLI 契约的前置条件。现有操作的可信度优先于新增 renderer。
+Linux／Windows 验证和 lint 约束已建立，远端验收由链接的执行记录维护。保持单入口 `main.js` + 内联 `srcdoc`：桌面激活／预览／堆占用实测满足暂定预算。检索快照语义、PowerPoint 原生表格绘制、Circuitikz 连线与标签也在有界范围内得到改善。新增 renderer、通用事务／索引框架的优先级继续低于这些可测结果。
 
 ## 当前源代码数量
 
@@ -43,24 +43,16 @@ superseded_by: null
 
 ## 验证快照
 
-2026-09-12 在 Windows x64、Node `22.19.0` 上重新验证，生产代码基线为 `7638cec`。仓库命令通过 `rtk proxy npm.cmd` 执行；本机 `rtk npm` 专用入口无法解析 npm。
+[验收记录](../maintainer/reliability-acceptance-2026-09-12.zh-CN.md)与[测量 JSON](../maintainer/evidence/2026-09-12/verification.json)负责精确测试数量、bundle 哈希和 consumer 版本。本地环境为 Windows x64／Node 22.19.0，新 CI 矩阵使用 Linux／Windows Node 20。构建、全量 Jest、lint 新增诊断、i18n／render-host、gallery／examples、两套文档构建的结果及范围统一记录于该处。
 
-- `npm.cmd run build`：通过。
-- `npm.cmd test -- --runInBand`：275 个 suite 通过；2515 个测试通过；1 个 skipped。
-- VitePress 文档构建（`1.6.4`，离线）：通过。
-- `npm.cmd --prefix website run build`：34 个已发布 locale 全部通过。
-- `npm.cmd --prefix website run audit:build`：通过。
-- `npm.cmd run diagram:examples:check`：33 条历史示例通过一致性／哈希校验；本轮未重新调用 provider 或在 Vault 中生成。
-- `npm.cmd run diagram:gallery:check`：33 个 fixture 通过现有门禁。SVG 比较实际内容；PNG 当前仅检查签名／存在性，不比较像素或 PNG 哈希。
-- `npm.cmd run audit:i18n-ui`：通过。
-- `npm.cmd run audit:render-host`：通过。
-- Local KB 离线 fixture：全量 Jest 中的 9 个测试通过；项目已有评估语料。
-- `npm.cmd run diagram:consumer:drawnix -- --input docs/diagram-examples/drawnix-knowledge-map/artifact.drawnix`：Plait public-API consumer 通过，38 个节点、12 条关系、1 个根节点。输入是历史示例，不是先前的 20 节点生成 fixture。
-- ESLint：按 `npm.cmd run lint` 相同的 `eslint . --ext .ts` 范围运行，检查 512 个文件，报告 `231` 个 error、`1374` 个 warning。基线未增加，但仍没有防止新增债务的门禁。
-- 隔离故障探针：使用虚拟时钟、内存 Vault／HTTP 边界，针对生产函数确认四项异常。探针通过表示缺陷被复现，不表示已修复。
-- 生产 `main.js`：`10,056,115` 字节；gzip：`3,728,761` 字节。这是产物体积，不是启动时间或内存测量。
+- 取消覆盖派发前、重试／传输中和响应迟到后；真实桌面 HTTP 与非桌面 fetch 集成测试补充 mock。
+- Artifact 失败会保留竞争编辑、报告恢复失败，并保证 Vault 输出队列可继续使用。原子文本补偿使用 `Vault.process`，旧 host 接收恢复副本。
+- 33 条 gallery 已检查已提交 PNG 哈希和规范化 SVG 内容。33 条真实 Vault 示例继续作为归档 provider 证据，本轮没有付费生成刷新。
+- 真实 Obsidian 1.13.7：激活 p95 289.3 ms，密集 Mermaid p95 120 ms；两组各 30 次预览的堆占用为 62.92 → 66.30 → 66.58 MB。30 次移动端模拟通过；物理移动设备和 0.15.0 未验证。
+- diagrams.net、Drawnix、Tectonic／Circuitikz、PowerPoint 均有明确应用／compiler 记录。Drawnix 跨枝连线附着失败；编译结果另经 PDFium 视觉复核。
+- 原始全局 lint 债务为 231 个 error／1374 个 warning。按诊断比较的门禁阻止新增 error 和选定正确性 warning，不宣称已清空全局债务。
 
-本地 `1.9.7` tag 指向 `ef77788`；从该 tag 到本次基线，生产源码未变化。9 月 2 日的审计记录了含 `main.js`、`manifest.json`、`README.md`、`styles.css` 的远端双语 Release。本轮未重新验证远端发布资产、分支保护、真实 provider、Obsidian 应用行为、Drawnix／Draw.io 应用或 Office 渲染。发布 CI 使用 Node 20，网站 CI 使用 Node 24；本地 Node 22 的结果不替代这两类 CI 环境。
+本地 `1.9.7` tag 仍为 `ef77788`。本批不改变版本元数据或远端 Release 资产。分支保护是独立管理设置；工作流存在不代表管理员所有 push 都被强制门禁。网站 CI 的 Node 24 与本地 Node 22、插件 CI 的 Node 20 仍是不同环境。
 
 ## 计划状态矩阵
 
@@ -68,17 +60,17 @@ superseded_by: null
 |---|---|---|
 | Provider 扩展各轮 | 已交付 / 历史 | 上游 API 变化时保持 metadata、discovery、文档和测试同步。 |
 | Language Support 多阶段 | 已交付 / 历史 | 没有剩余实现阶段；保持 Codex 离线发布翻译策略。 |
-| 主线稳定化与 CI 加固 | 发布侧范围已交付 | 目前只有标签发布与网站部署工作流；插件 PR 构建／测试验证仍缺失。 |
-| CLI operation 抽取与 registry 加固 | registry／host 抽取已交付；生命周期加固部分完成 | 29 个 operation 不等于 29 个 public-safe API。扩展变更契约前先修取消；打包不是通用前置条件。 |
-| 图表渲染路线图 | 核心已交付；部分后续项有条件推进 | 测量打包成本，保留保守的 Mermaid 兼容边界；PlantUML／Graphviz／Draw.io runtime 继续延后。 |
-| Vault 历史、设置导航、批处理文件夹 | 有限功能范围已交付 | history 自带写队列；artifact 持久化不会自动获得这层保护。批量取消与 artifact 回滚需单独修复。 |
+| 主线稳定化与 CI 加固 | 发布侧与 PR／main 验证已实现 | 维护 Linux／Windows 锁定安装、两种 Chromium revision、lint 新增诊断证据，以及独立的 tag 发布。 |
+| CLI operation 抽取与 registry 加固 | registry／host 抽取和有界生命周期修复已交付 | 29 个 operation 不等于 29 个 public-safe API；变更契约升级仍需具体调用方与契约。 |
+| 图表渲染路线图 | 核心已交付；保持内联的测量完成 | 桌面预算通过，物理移动设备／最旧 host 未验证；新增引擎和打包隔离需实测理由。 |
+| Vault 历史、设置导航、批处理文件夹 | 有限范围及操作可靠性已交付 | history 与 artifact 写入各有责任方；artifact 重叠串行化限定于单个 Vault，不是跨进程／崩溃 ACID。 |
 | 图表预览/历史自适应 | modal 架构已交付 | focus-trapped 内部 drawer 是新的交互系统变更，不是未修复 bug。 |
 | Mermaid 规范化合并 | Phase 0-3 已交付 | 删除兼容导出前先盘点调用方；unknown family 继续采用 parser-backed 保守准入。 |
-| 图表能力目录与向前架构 | runtime 基础已交付，外部门禁活跃 | Draw.io 与真实 Drawnix 应用证据不可用；Plait 门禁不代表应用兼容。 |
+| 图表能力目录与向前架构 | runtime 基础及逐 target consumer 评估已交付 | diagrams.net 通过；Drawnix 节点往返通过，但跨枝箭头不附着；逐项限制支持声明。 |
 | 参考扩展 | 已完成 | 33 个可执行行、有界 payload、确定性 adapter、preview/gallery/docs 门禁全部通过。 |
 | 真实 Vault 图表示例 | 历史证据集已完成 | 相关输入／runtime 变化时有意识地刷新；哈希校验不等于重跑 provider，更不证明所有 host。 |
-| Local KB 与 Chapter Split | 有界设计已交付 | 当前是 MiniSearch 词法检索与 managed artifact；语义/vector retrieval 属于新架构线。 |
-| Slidev 可编辑 PPTX | 质量线活跃 | Office 字体替换、表格基线、段落间距和 native geometry fidelity 仍有可测缺口。 |
+| Local KB 与 Chapter Split | 有界设计及快照／评估质量线已交付 | 固定合成语料 Top-3 正例召回 7/9，宏平均精度 51.9%；未来中文／排序改动须使用新的验证划分。 |
+| Slidev 可编辑 PPTX | 有界表格绘制保真质量线已交付 | PowerPoint 16 编辑／保存／重开及既有 visible-native 门禁通过；字体、基线、raster-strict 保真仍是独立后续项。 |
 | GEO/GitHub Pages/release | 运行上已交付 | Search Console 与 AI visibility 仍需部署后的外部证据。 |
 
 旧计划保留 checkbox 与历史理由用于追溯。每份计划的处置及证据归属见[计划进度登记表](../maintainer/project-plan-status.zh-CN.md)。历史 TDD 步骤未勾选或文档任务已完成，都不能单独决定当前运行时可靠性。
@@ -89,12 +81,12 @@ superseded_by: null
 |---|---|---|
 | Mermaid | canonical normalizer、35-stage legacy registry、family gate、幂等测试、runtime SVG safety | 已交付且保守兼容 legacy 的 Mermaid 路径 |
 | Native editable SVG | 确定性 renderer、layout diagnostics、Chromium gallery gate、33 组 fixture 资产 | 在已测试 host/presentation 契约下交付 native family 预览 |
-| Drawnix | `.drawnix` serializer 与 `@plait/*` public API consumer gate | Plait public-API 兼容；不宣称真实 Drawnix 应用导入 |
-| Draw.io | exporter 与 XML 测试；本轮没有新的应用实测 | 只能声明 serializer 契约，不声明应用互操作 |
-| Circuitikz | 6 个 golden template、回归覆盖、历史本地 compiler 证据 | 有界 native compile 路径；新鲜 CI 工具／版本证据仍需补齐 |
-| Render host | `main.js` 内联 `srcdoc`、render-host audit、fail-closed runtime module resolver | 当前自包含打包；不等于独立重型 runtime 隔离 |
-| Local KB | MiniSearch、标题感知分块、离线 fixture、inspect diagnostics | 插件内词法检索；不等于 vector/RAG service 语义 |
-| Slidev/PPTX | native standalone export 与 rendered layout audit | 有界可编辑性和明确图片 fallback；不等于 Office 往返像素一致 |
+| Drawnix | `9939f452` 的真实应用、Plait 0.93.1、原生编辑／保存／重开 | 38 节点／1 根及语义关系记录保留；重排后静态箭头脱离，`drawnix-static-cross-relations` 明确报告 |
+| Draw.io | diagrams.net 31.4.5 导入／编辑／下载／重开 | 记录的 fixture 保留 3 个原生顶点、2 条边 |
+| Circuitikz | Tectonic 0.16.9／Circuitikz 1.4.6、6 个模板和 5 个方向变体、PDFium 复核 | 有界模板可读且拓扑保持；compiler 可用性／包版本仍需明确 |
+| Render host | 内联 `srcdoc`、bundle 审计、真实 Obsidian 1.13.7 耗时／堆占用对照 | 在实测桌面预算内保持内联；不推广到物理移动设备／最旧 host |
+| Local KB | 固定 13 查询语料、batch 不可变快照测试、65 次真实 Vault 重建 | 词法检索有实测且快照陈旧语义明确；不保证语义检索质量 |
+| Slidev/PPTX | PowerPoint 16 build 14332、10 页幻灯片、原生表格编辑／保存／重开 | 有界原生可编辑性与改善的表格绘制；字体仍不同于 Chromium，几何 fallback 仍是图片 |
 
 ## 兼容层盘点与 Ponytail 审计
 
@@ -110,34 +102,21 @@ superseded_by: null
 | `runCircuitikzRepairLoop()` | focused tests 和 maintainer acceptance 文档消费该 SDK | 继续 maintainer-only；绝不接入普通生成 fallback |
 | `stripWrappingDoubleQuotes()` / `stripWrappedQuotedLabel()` | `legacyFixerUtils.ts` 中字节相同的私有实现 | 作为未来小幅 shrink 候选；延后到独立的行为保持变更 |
 
-持久化设置 ID、command ID、artifact schema 仍必须有明确迁移纪律。私有 TypeScript re-export 不自动需要对外 sunset 流程。当前文档测试还锁定了旧审计措辞，后续应验证契约和引用，不应冻结工程判断。本轮不删除兼容代码。
+持久化设置 ID、command ID、artifact schema 仍必须有明确迁移纪律。私有 TypeScript re-export 不自动需要对外 sunset 流程。U4 已移除锁定旧审计结论的断言，同时保留源码数量、双语链接和目录契约验证。本批不删除兼容 API。
 
 ## 有序推进计划
 
-### 下一补丁：操作正确性与 PR 验证
+9 月实施单元及验收边界见[计划](../plans/2026-09-12-mainline-reliability-and-evidence.zh-CN.md)。下表是后续独立定界的决策，不是 U1–U8 中尚未执行的微步骤。
 
-1. 一次运行拥有统一取消生命周期：首次 timer 前取消也要结束队列；子任务读取实时取消状态；可取消传输收到实际生效的 signal；观察到取消后不再启动新的写入／移动。
-2. 在持久化责任方串行化重叠 artifact 写入。只恢复仍归属于失败操作的写入；回滚冲突／失败必须连同恢复证据上报。补偿不等于多文件崩溃原子性。
-3. 建立不依赖密钥的 PR 构建／测试工作流，以及 lint 基线约束。发布操作继续仅由 tag 触发。
+| 优先级／责任方 | 下一项具体问题 | 验收与停止条件 |
+|---|---|---|
+| Host 生命周期／render host | 开发期间反复热重载的内存残留，能否在正常启用／禁用中复现？ | 用新 Vault 对照隔离 renderer 复用／listener 归属；只修已复现的生命周期泄漏，稳定的普通预览路径不支持重写 asset loader。 |
+| 支持边界／host 验证 | 取消、恢复、预览契约是否适用于物理移动设备和最旧的目标 Obsidian 版本？ | 在受支持环境运行带 disposable-Vault 标记的 harness，记录设备／host／API 可用性；只有明确兼容性证据才调整支持元数据。 |
+| 检索责任方 | 中文分词、导航抑制或词法排序能否在精度／上下文预算内提高召回？ | 使用新的验证划分，与固定 13 查询报告比较；保留 batch 快照复用。embedding 需语义缺口及隐私／存储／安装预算支持。 |
+| 原生导出责任方 | 上游是否具备 Mind 节点附着式可编辑跨枝连线？ | 必须有真实 Drawnix 节点移动／保存／重开证据；此前用 SVG 保留连接视觉，或采用既有支持边绑定的 native target，不能把 metadata 改名为不受支持的 handle。 |
+| Office 导出责任方 | 剩余字体／基线漂移中，哪类实际影响可编辑演示？ | 固定 Office／字体集，一次修一个可测缺陷族，保留前后渲染和 fallback 归属；维持 visible-native 阈值，不宣称像素等价。 |
 
-退出门禁：四项已复现异常变为验证正确行为的回归用例；Linux／Windows 检查实际运行；原有全量测试、构建、i18n、打包门禁保持通过。这些是建议实施的修复，不是本次已完成工作。
-
-### 后续切片：证据质量与实测预算
-
-1. 将 gallery PNG 资产身份校验与视觉保真度分开；移除冻结审计结论的测试断言。
-2. 在明确的 Obsidian 版本和设备上测量启动、冷／热预览延迟与内存。manifest 允许移动端并声明 `minAppVersion: 0.15.0`；mock 不能证明整个支持范围。
-3. 只有测量支持 runtime 隔离时，才同时变更 build／loader／release／audit／host 证据；否则以明确的保持内联决定关闭调查。
-4. 目标应用可用时，逐 target 补导入／编辑／重开证据。consumer 证据缺失只限制相应能力声明。
-
-退出门禁：每份证据记录输入版本、环境、哈希、适用范围和失败状态；不对无关工作施加统一的打包前置条件。
-
-### 产品深化：优先检索质量，导出需求明确时推进 Office 保真度
-
-1. 扩展已有词法检索语料，覆盖独立留出集、多语言、低信号查询与变化中的 Vault。先测质量和上下文成本，再决定持久索引或 embedding。
-2. 对指定的 Office renderer 改善 PPTX 字体／表格／基线，同时保留明确的 Mermaid／SVG fallback。
-3. Provider 和 locale 通过共享 metadata 维护。新增 engine 必须有明确未满足用例、有界 runtime 与 consumer 契约。
-
-责任边界、替代方案、依赖、测试路径及停止条件见[实施计划](../plans/2026-09-12-mainline-reliability-and-evidence.zh-CN.md)。
+维护锁定依赖及两种浏览器 revision 的 CI。分支保护属于仓库策略，不能从 YAML 通过推断。Provider／locale 继续通过共享 registry 维护，新增 engine 需未满足用例和有界 consumer 契约。
 
 ## 风险控制
 
@@ -149,4 +128,4 @@ superseded_by: null
 
 ## 决策
 
-优先处理取消、artifact 持久化和 PR 验证。主约束是失败与取消时保护用户成果，不是缺少图表类型。优化和外部能力扩展必须有实测依据；不要让假想调用方或宽泛架构偏好成为永久阻塞项。
+9 月可靠性工作确立了操作归属并增强了验收证据。保持实测支持的内联架构，保留 consumer 能力限制，从已观察到的失败或新用户需求选择下一项变更。实现单元完成、结构检查通过、应用能力成立仍是不同结论。

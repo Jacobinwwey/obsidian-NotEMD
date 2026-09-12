@@ -21,6 +21,7 @@
 
 - [项目计划进度与工程评估（中文）](./maintainer/project-plan-status.zh-CN.md)
 - [主线可靠性与证据推进计划（中文）](./plans/2026-09-12-mainline-reliability-and-evidence.zh-CN.md)
+- [可靠性实现与验收（9 月 12–13 日）](./maintainer/reliability-acceptance-2026-09-12.zh-CN.md)
 - [当前 Main 进度与后续推进计划（英文）](./brainstorms/2026-09-02-current-main-progress-and-forward-plan.md)
 - [当前 Main 真值收敛计划（英文）](./superpowers/plans/2026-09-02-current-main-truth-convergence.en.md)
 - [图形能力目录与向前兼容架构（英文）](./superpowers/plans/2026-08-16-diagram-capability-catalog-and-forward-architecture.en.md)

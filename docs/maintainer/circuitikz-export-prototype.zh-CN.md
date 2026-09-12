@@ -5,6 +5,12 @@ topic: circuitikz-export-prototype
 
 # circuitikz 导出原型
 
+## 编译与视觉验收：9 月 13 日
+
+Tectonic 0.16.9／Circuitikz 1.4.6／PGF 3.1.9a 离线编译全部 6 个 golden template 及 5 个镜像／同侧端口变体。PDFium 复核推动了 NAND／NOR 显式栅极网络标签、正交电源总线、独立且不镜像的器件文本，以及方向正确的传输门信号／控制路径；拓扑签名保持不变。
+
+[哈希、日志与渲染总览](./reliability-acceptance-2026-09-12.zh-CN.md)记录有界验收。冷启动 TeX 包下载需单独预热，随后以 `--only-cached` 验证；Windows Fontconfig 警告仍有记录，编译成功本身不证明电气含义可读。
+
 语言: [English](./circuitikz-export-prototype.md) | **简体中文**
 
 ## 契约

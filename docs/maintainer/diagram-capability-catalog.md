@@ -1,11 +1,13 @@
 ---
 date: 2026-08-16
-last_updated: 2026-09-02
+last_updated: 2026-09-13
 status: current-contract
 canonical_for: diagram-capability-catalog
 ---
 
 # Diagram Capability Catalog
+
+The [September consumer acceptance](./reliability-acceptance-2026-09-12.md#external-consumers) qualifies target support: diagrams.net native edit/save/reopen and pinned Circuitikz visual compilation passed. Drawnix native nodes roundtrip, but fixed cross-branch arrows detach after reflow; `drawnix-static-cross-relations` reports this limitation. Use the SVG companion when connectivity must remain visually faithful. Catalog membership alone does not certify every external application's editing behavior.
 
 This document is the human-readable view of the current executable catalog. The runtime sources of truth are `src/diagram/diagramTypeCatalog.ts`, `src/diagram/examples/diagramExampleCatalog.ts`, `src/rendering/renderTargetCatalog.ts`, and `src/diagram/diagramCapabilityManifest.ts`. Reconcile this document whenever those definitions change.
 

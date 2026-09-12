@@ -1,8 +1,8 @@
 ---
 date: 2026-09-12
-last_updated: 2026-09-12
+last_updated: 2026-09-13
 type: fix
-status: proposed
+status: active
 origin: docs/maintainer/project-plan-status.zh-CN.md
 audit_commit: 7638cec
 ---
@@ -11,7 +11,22 @@ audit_commit: 7638cec
 
 语言：[English](./2026-09-12-mainline-reliability-and-evidence.en.md) | **简体中文**
 
-本计划承接[9 月 12 日评估](../maintainer/project-plan-status.zh-CN.md)和更新后的[当前主线记录](../brainstorms/2026-09-02-current-main-progress-and-forward-plan.zh-CN.md)。审计／文档工作按其记录的验证结果收尾；**本轮审计没有实施下列任何 runtime 单元**。
+本计划承接[9 月 12 日评估](../maintainer/project-plan-status.zh-CN.md)和更新后的[当前主线记录](../brainstorms/2026-09-02-current-main-progress-and-forward-plan.zh-CN.md)。现已获授权，内联执行实施。前一轮审计保留为独立完成的文档基线，运行时进度记录如下。
+
+## 执行记录
+
+| 单元 | 状态 | 证据／剩余门禁 |
+|---|---|---|
+| U1 | 已实现并验证 | 红／绿回归、真实 HTTP／fetch 中断、Obsidian 1.13.7 取消实测；保留调用方 signal 所有权。 |
+| U2 | 已实现并验证 | 重叠输出预留、受控文本补偿、恢复副本；真实 Vault 冲突／重试通过。 |
+| U3 | 已实现；远端验收中 | Linux／Windows Node 20 工作流、按诊断比较的 lint 约束通过本地检查；正／负 PR 运行是最后的集成门禁。 |
+| U4 | 已完成 | 已提交 PNG 哈希、规范化 SVG 比较、面向契约的文档断言。 |
+| U5 | 调查关闭：保持内联 | 激活 p95 289.3 ms、密集 Mermaid p95 120 ms、预热预览堆占用稳定；物理移动设备与 Obsidian 0.15.0 仍未验证。 |
+| U6 | 评估完成；逐 target 限定声明 | diagrams.net 编辑／保存／重开通过；6 个 Tectonic 模板及 5 个方向变体完成编译与视觉复核。Drawnix 原生节点往返通过，跨枝连线附着失败并明确不支持。 |
+| U7 | 有界质量线已完成 | 固定 13 查询语料、batch 内不可变快照、文件变化回归、真实 Vault 耗时；报告保留语义／中文未命中。 |
+| U8 | 有界质量线已完成 | 表格边框／透明度／合并修复，真实 PowerPoint 16 编辑／保存／重开，既有 visible-native 门禁通过；不宣称 raster-strict 保真。 |
+
+[验收记录](../maintainer/reliability-acceptance-2026-09-12.zh-CN.md) 负责版本、测量、哈希、截图和集成结果。用户要求全量执行，因此覆盖两条有界产品线：U7 测量检索并修复快照语义，U8 修复实测表格绘制缺陷；均不引入 embedding 或通用 Office 原生重建。评估完成不代表不可用设备或失败的 consumer 能力已通过支持验收。
 
 ## 目标与范围
 
@@ -49,7 +64,7 @@ flowchart TB
 
 ## U1 — 完整操作拥有取消生命周期
 
-- [ ] 实现并验证 Q1，关闭 R1、R2、R3。
+- [x] 实现并验证 Q1，关闭 R1、R2、R3。
 
 **责任方与文件：** `src/utils.ts#createConcurrentProcessor`、`src/fileUtils.ts#batchGenerateContentForTitles`、`src/llmUtils.ts#getAbortSignal` 及各 provider executor。仅当生命周期契约跨越边界时检查 `src/types.ts`、`src/ui/ProgressModal.ts`、operation／host caller。回归文件：`src/tests/parallelBatch.test.ts`、`src/tests/llmUtilsProviderSupport.test.ts`；新增聚焦排程终态的 `src/tests/concurrentProcessorCancellation.test.ts`。
 
@@ -69,7 +84,7 @@ flowchart TB
 
 ## U2 — Artifact 持久化遵守写入归属
 
-- [ ] 实现并验证 Q2，关闭 R4。
+- [x] 实现并验证 Q2，关闭 R4。
 
 **责任方与文件：** `src/fileUtils.ts#saveDiagramArtifactFile` 及其 companion 路径准备；保留完整保存操作作为边界。回归文件：`src/tests/saveDiagramArtifactFile.test.ts`、`src/tests/diagramCommandHostAdapter.test.ts`；仅在成功保存交接处核对 history 记录。
 
@@ -103,7 +118,7 @@ flowchart TB
 
 ## U4 — 让证据验证它实际声称的内容
 
-- [ ] 实现并验证 Q4，关闭 R6／R7。
+- [x] 实现并验证 Q4，关闭 R6／R7。
 
 **责任方与文件：** `scripts/generate-diagram-gallery.js`、`scripts/lib/diagram-gallery-runtime.js`、`docs/assets/diagrams/manifest.json`、`src/tests/diagramGalleryGenerator.test.ts`、`src/tests/currentMainProgressDocsContract.test.ts`、配对能力／进度文档。复用现有 schema／manifest 模式，不建立第二份能力 registry。
 
@@ -115,7 +130,7 @@ flowchart TB
 
 ## U5 — 先测 Host 成本，再决定 Runtime 隔离
 
-- [ ] 建立 Q5 的 host／性能基线，处理 R8。
+- [x] 建立 Q5 的 host／性能基线，处理 R8。
 
 **责任方与文件：** `scripts/lib/esbuild-bundle-config.js`、`src/rendering/host/iframeRenderHost.ts`、`src/rendering/webview/bundledPreviewDeps.ts`、现有 `scripts/verify-vault-bundle.js`、`manifest.json`、一份简短维护者测量记录。只在已有 build／host 接口处增加测量代码；生产 instrumentation 可选，不作为前置条件。
 
@@ -127,7 +142,7 @@ flowchart TB
 
 ## U6 — 分别验收外部 Consumer 声明
 
-- [ ] Consumer 可用时建立对应 target 的 Q4 证据。
+- [x] Consumer 可用时建立对应 target 的 Q4 证据。
 
 **责任方与文件：** `scripts/run-drawnix-consumer-gate.mjs`、`scripts/test-drawnix-plait-consumer.mjs`、`scripts/run-circuitikz-smoke-fixtures.js`、相关维护者 runbook 与能力记录。只为选定 target 增加应用 harness，不嵌入应用副本。回归路径包括 `src/tests/drawnixPlaitConsumer.test.ts`、`src/tests/drawioExporter.test.ts`、`src/tests/circuitikzSmokeFixturesCli.test.ts`。
 
@@ -137,7 +152,7 @@ flowchart TB
 
 ## U7 — 用独立语料改善检索
 
-- [ ] 正确性补丁后推进 Q5 产品质量；默认推荐的质量线。
+- [x] 正确性补丁后推进 Q5 产品质量；默认推荐的质量线。
 
 **责任方与文件：** `src/localKnowledgeBase.ts`、`src/markdownSectionUtils.ts`、`src/tests/localKnowledgeEvaluationFixture.test.ts`、`src/tests/localKnowledgeBase.test.ts`、`src/tests/localKnowledgeTaskIntegration.test.ts`、6 月 9 日配对检索文档。
 
@@ -149,7 +164,7 @@ flowchart TB
 
 ## U8 — 对明确的 Renderer 改善 Office 保真度
 
-- [ ] 真实 PPTX 使用／缺陷支持成本时，推进这条备选 Q5 质量线。
+- [x] 真实 PPTX 使用／缺陷支持成本时，推进这条备选 Q5 质量线。
 
 **责任方与文件：** `src/slideExport/pptxDomExtractor.ts`、`src/slideExport/pptxWriter.ts`、`src/slideExport/pptxFontContract.ts`、`scripts/verify-slidev-export-workflow.cjs`、`src/tests/pptxWriter.test.ts`、`src/tests/pptxVisualDiff.test.ts`、`src/tests/pptxExportReport.test.ts`、配对 PPTX 验收文档。
 

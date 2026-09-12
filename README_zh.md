@@ -43,6 +43,10 @@ Notemd 是一个**开源 Obsidian 插件**，集成 30+ 种大型语言模型 (L
 
 **版本:** 1.9.7
 
+**主线可靠性更新（尚未发布新版本）：** 取消信号已贯穿并发 LLM 任务与重试等待；图表保存失败时会保留冲突编辑并报告恢复副本。旧 Drawnix 附件目录保留供检查。本地知识批处理使用不可变读取快照，PowerPoint 表格保留各侧边线、透明度与合并单元格外边线。Circuitikz NAND／NOR 与传输门的连线更清晰，镜像布局中的标签仍保持可读。[实现与验收证据](./docs/maintainer/reliability-acceptance-2026-09-12.zh-CN.md) 列明实测环境和剩余限制。
+
+Drawnix 支持原生树节点编辑，但导出的跨分支箭头使用固定坐标，应用重排节点后可能脱离。检查连接关系时请使用 SVG 预览。取消不会撤销已经完成的写入；宿主传输无法物理中止请求时，也不能保证服务端停止生成。
+
 ![GitHub Release](https://img.shields.io/github/v/release/Jacobinwwey/obsidian-NotEMD?label=Version&link=https%3A%2F%2Fgithub.com%2Jacobinwwey%2Fobsidian-NotEMD%2Freleases%2Flatest) ![GitHub Downloads](https://img.shields.io/github/downloads/Jacobinwwey/obsidian-NotEMD/total?logo=Obsidian&label=Downloads&labelColor=%237C3AED&color=%235b5b5b&link=https%3A%2F%2Fgithub.com%2Jacobinwwey%2Fobsidian-NotEMD%2Freleases%2Flatest)
 
 <img width="1853" height="1080" alt="show" src="https://github.com/user-attachments/assets/b9f9292b-a9d8-48a3-9acf-1b6f00413966" />

@@ -6,6 +6,12 @@ canonical: true
 
 # Local KB RAG Quality And Execution Truth
 
+## September 13 execution update
+
+U7 now captures candidate paths/titles before asynchronous reads, omits moved/removed candidates and preserves an immutable retriever for the batch. Unrelated read failures propagate. A new operation rebuilds the snapshot; this is not an atomic whole-Vault snapshot.
+
+The frozen 13-file/13-query evaluation and 65 real Obsidian rebuild timings are in the [acceptance record](../maintainer/reliability-acceptance-2026-09-12.md#retrieval-quality-and-batch-semantics). Top-3 positive recall is 7/9 with 51.9% macro precision; Chinese compounds and synonyms still miss. These measured outcomes supersede earlier evaluation-only next steps below. Future ranking changes require a new validation split.
+
 ## 1. Why This Document Exists
 
 The current local knowledge-base retrieval slice is already shipped on `main`, but its clearest execution-chain and quality-evaluation framing originally lived under:

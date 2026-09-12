@@ -1,11 +1,13 @@
 ---
 date: 2026-08-16
-last_updated: 2026-09-02
+last_updated: 2026-09-13
 status: current-contract
 canonical_for: diagram-capability-catalog
 ---
 
 # 图形能力目录
+
+[9 月 consumer 验收](./reliability-acceptance-2026-09-12.zh-CN.md)限定 target 支持：diagrams.net 原生编辑／保存／重开和固定版本 Circuitikz 编译／视觉复核通过。Drawnix 原生节点往返通过，但固定跨枝箭头在重排后脱离，`drawnix-static-cross-relations` 报告该限制；需要连接视觉保真时使用 SVG companion。目录准入本身不证明所有外部应用的编辑行为。
 
 本文档是当前可执行目录的人类可读视图。运行时真值来源是 `src/diagram/diagramTypeCatalog.ts`、`src/diagram/examples/diagramExampleCatalog.ts`、`src/rendering/renderTargetCatalog.ts` 和 `src/diagram/diagramCapabilityManifest.ts`。这些定义变化时，必须同步核对本文档。
 

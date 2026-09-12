@@ -1,0 +1,32 @@
+\documentclass[border=8pt]{standalone}
+\usepackage{circuitikz}
+\begin{document}
+\begin{circuitikz}[american voltages]
+\draw
+  (3.6,6.5) node[vcc]{$V_{DD}$}
+  to [short] (3.6,5.8)
+  node[pmos, anchor=S] (MPA) {}
+  (MPA.D) to [short] (3.6,3.7)
+  node[pmos, anchor=S] (MPB) {}
+  (MPB.D) to [short] (3.6,1.6);
+\draw
+  (3.6,1.6) to [short, *-o] (7.2,1.6) node[right]{$v_{out}$};
+\draw
+  (1.4,1.1) node[nmos, anchor=D] (MNA) {}
+  (5.8,1.1) node[nmos, anchor=D] (MNB) {}
+  (3.6,1.6) -| (MNA.D)
+  (3.6,1.6) -| (MNB.D)
+  (MNA.S) to [short] (1.4,-1)
+  (MNB.S) to [short] (5.8,-1)
+  (1.4,-1) to [short] (5.8,-1)
+  (3.6,-1) node[ground]{};
+\draw (MPA.G) to [short, -o] ++(-0.65,0) node[left]{$v_A$};
+\node[right] at ([xshift=0.45cm]MPA.center) {$M_{PA}$};
+\draw (MNA.G) to [short, -o] ++(-0.65,0) node[left]{$v_A$};
+\node[right] at ([xshift=0.45cm]MNA.center) {$M_{NA}$};
+\draw (MPB.G) to [short, -o] ++(-0.65,0) node[left]{$v_B$};
+\node[right] at ([xshift=0.45cm]MPB.center) {$M_{PB}$};
+\draw (MNB.G) to [short, -o] ++(-0.65,0) node[left]{$v_B$};
+\node[right] at ([xshift=0.45cm]MNB.center) {$M_{NB}$};
+\end{circuitikz}
+\end{document}

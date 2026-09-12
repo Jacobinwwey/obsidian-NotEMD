@@ -5,6 +5,12 @@ topic: circuitikz-export-prototype
 
 # circuitikz Export Prototype
 
+## Compiler and visual acceptance, September 13
+
+Tectonic 0.16.9 / Circuitikz 1.4.6 / PGF 3.1.9a compiled all six golden templates and five mirrored/same-side orientation variants offline. PDFium review led to explicit NAND/NOR gate-net labels, orthogonal power buses, separate non-mirrored component text and correctly oriented transmission-gate signal/control paths; topology signatures remain unchanged.
+
+[Hashes, logs and rendered sheets](./reliability-acceptance-2026-09-12.md#external-consumers) record the bounded acceptance. Cold TeX package downloads required separate bootstrap before `--only-cached` verification. The Windows Fontconfig warning remains documented; compile success alone still does not prove readable electrical meaning.
+
 Language: **English** | [简体中文](./circuitikz-export-prototype.zh-CN.md)
 
 ## Contract

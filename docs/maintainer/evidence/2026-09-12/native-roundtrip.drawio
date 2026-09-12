@@ -1,0 +1,25 @@
+<mxfile host="app.diagrams.net" agent="notemd-drawio-exporter@0.1.0" version="24.7.17">
+  <diagram id="notemd-native-edit-roundtrip" name="Native edit roundtrip">
+    <mxGraphModel dx="1048" dy="284" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1048" pageHeight="284" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="client" value="Client 客户端" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="72" y="116" width="240" height="104" as="geometry" />
+        </mxCell>
+        <mxCell id="gateway" value="API Gateway" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="404" y="116" width="240" height="104" as="geometry" />
+        </mxCell>
+        <mxCell id="worker" value="Worker 后台任务" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="736" y="116" width="240" height="104" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-1-client-to-gateway" value="HTTPS request" style="endArrow=block;html=1;rounded=1;strokeColor=#64748b;" edge="1" parent="1" source="client" target="gateway">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-2-gateway-to-worker" value="queue job" style="endArrow=block;html=1;rounded=1;strokeColor=#64748b;dashed=1;" edge="1" parent="1" source="gateway" target="worker">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

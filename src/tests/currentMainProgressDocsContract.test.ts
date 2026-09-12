@@ -66,8 +66,6 @@ describe('current-main documentation contract', () => {
         ]) {
             expect(progressEnglish).toContain(marker);
         }
-        expect(progressEnglish).toContain('Compatibility Inventory And Ponytail Audit');
-        expect(progressEnglish).toContain('no production dependency that can be removed safely');
 
         for (const marker of [
             '可执行图表目录行 | 33',
@@ -82,8 +80,6 @@ describe('current-main documentation contract', () => {
         ]) {
             expect(progressChinese).toContain(marker);
         }
-        expect(progressChinese).toContain('兼容层盘点与 Ponytail 审计');
-        expect(progressChinese).toContain('没有发现可以在本次收敛切片中安全删除的生产依赖');
     });
 
     test('keeps every executable diagram backed by bilingual real-vault inputs', () => {

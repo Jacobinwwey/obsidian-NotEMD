@@ -1,8 +1,8 @@
 ---
 date: 2026-09-12
-last_updated: 2026-09-12
+last_updated: 2026-09-13
 type: fix
-status: proposed
+status: active
 origin: docs/maintainer/project-plan-status.md
 audit_commit: 7638cec
 ---
@@ -11,7 +11,22 @@ audit_commit: 7638cec
 
 Language: **English** | [简体中文](./2026-09-12-mainline-reliability-and-evidence.zh-CN.md)
 
-This plan follows the [September 12 assessment](../maintainer/project-plan-status.md) and the updated [current-main record](../brainstorms/2026-09-02-current-main-progress-and-forward-plan.md). The audit/documentation work is complete subject to its recorded verification; **none of the runtime implementation units below has been implemented by this audit**.
+This plan follows the [September 12 assessment](../maintainer/project-plan-status.md) and the updated [current-main record](../brainstorms/2026-09-02-current-main-progress-and-forward-plan.md). Implementation is authorized and runs inline. The earlier audit is a separate completed documentation baseline; runtime progress is recorded below.
+
+## Execution Record
+
+| Unit | State | Evidence / remaining gate |
+|---|---|---|
+| U1 | Implemented and verified | Red/green regressions, real HTTP/fetch abort and Obsidian 1.13.7 cancellation; caller-owned signals preserved. |
+| U2 | Implemented and verified | Overlapping output reservations, guarded text compensation and recovery copies; real Vault conflict/retry verified. |
+| U3 | Implemented; remote acceptance in progress | Linux/Windows Node 20 workflow and diagnostic-level lint ratchet pass local checks; positive/negative PR runs are the final integration gate. |
+| U4 | Complete | Committed PNG hashes, normalized SVG comparison and contract-focused docs assertions. |
+| U5 | Investigation closed: keep inline | Activation p95 289.3 ms, dense Mermaid p95 120 ms, stable warmed preview heap. Physical mobile and Obsidian 0.15.0 remain unverified. |
+| U6 | Evaluation complete; claims qualified by target | diagrams.net edit/save/reopen passed; six Tectonic templates plus five orientation variants compiled and visually reviewed. Drawnix native nodes roundtrip; attached cross-links fail and are explicitly unsupported. |
+| U7 | Bounded lane complete | Frozen 13-query corpus, immutable per-batch snapshots, changing-file regressions and real Vault timings; semantic/CJK misses retained in the report. |
+| U8 | Bounded lane complete | Table border/alpha/merge fixes, actual PowerPoint 16 edit/save/reopen and unchanged visible-native fidelity gate. Raster-strict fidelity remains unclaimed. |
+
+The [acceptance record](../maintainer/reliability-acceptance-2026-09-12.md) owns versions, measurements, hashes, screenshots and integration results. The user's full execution request included both bounded product lanes: U7 measures retrieval and fixes snapshot semantics; U8 fixes the observed table-paint defect family. Neither adds embeddings or general native Office reconstruction. Completed evaluation does not turn an unavailable device or failed consumer capability into a passing support claim.
 
 ## Objective And Scope
 
@@ -49,7 +64,7 @@ Planning estimate for one engineer familiar with the repository: U1 **2–3**, U
 
 ## U1 — Own Cancellation For The Complete Operation
 
-- [ ] Implement and verify Q1; closes R1, R2 and R3.
+- [x] Implement and verify Q1; closes R1, R2 and R3.
 
 **Owner and files:** `src/utils.ts#createConcurrentProcessor`, `src/fileUtils.ts#batchGenerateContentForTitles`, `src/llmUtils.ts#getAbortSignal` and provider executors. Check `src/types.ts`, `src/ui/ProgressModal.ts` and the operation/host caller only where the lifetime contract crosses them. Regression files: `src/tests/parallelBatch.test.ts`, `src/tests/llmUtilsProviderSupport.test.ts`; create a focused `src/tests/concurrentProcessorCancellation.test.ts` for scheduler terminal-state coverage.
 
@@ -69,7 +84,7 @@ Planning estimate for one engineer familiar with the repository: U1 **2–3**, U
 
 ## U2 — Make Artifact Persistence Respect Write Ownership
 
-- [ ] Implement and verify Q2; closes R4.
+- [x] Implement and verify Q2; closes R4.
 
 **Owner and files:** `src/fileUtils.ts#saveDiagramArtifactFile` and its companion-path preparation. Preserve the complete save operation as the boundary. Regression files: `src/tests/saveDiagramArtifactFile.test.ts` and `src/tests/diagramCommandHostAdapter.test.ts`; check history recording only at the successful save handoff.
 
@@ -103,7 +118,7 @@ The current ESLint baseline is 231 errors/1374 warnings. Compare relevant diagno
 
 ## U4 — Make Evidence Verify What It Claims
 
-- [ ] Implement and verify Q4; closes R6/R7.
+- [x] Implement and verify Q4; closes R6/R7.
 
 **Owner and files:** `scripts/generate-diagram-gallery.js`, `scripts/lib/diagram-gallery-runtime.js`, `docs/assets/diagrams/manifest.json`, `src/tests/diagramGalleryGenerator.test.ts`, `src/tests/currentMainProgressDocsContract.test.ts`, and the paired capability/progress docs. Reuse the existing schema/manifest pattern; do not invent a second capability registry.
 
@@ -115,7 +130,7 @@ The current ESLint baseline is 231 errors/1374 warnings. Compare relevant diagno
 
 ## U5 — Measure Host Cost Before Choosing Runtime Isolation
 
-- [ ] Establish Q5's host and performance baseline; addresses R8.
+- [x] Establish Q5's host and performance baseline; addresses R8.
 
 **Owner and files:** `scripts/lib/esbuild-bundle-config.js`, `src/rendering/host/iframeRenderHost.ts`, `src/rendering/webview/bundledPreviewDeps.ts`, existing `scripts/verify-vault-bundle.js`, `manifest.json`, and a compact maintainer measurement record. Add measurement code only at the existing build/host seam; production instrumentation is optional, not a prerequisite.
 
@@ -127,7 +142,7 @@ The current ESLint baseline is 231 errors/1374 warnings. Compare relevant diagno
 
 ## U6 — Admit External Consumer Claims Individually
 
-- [ ] Establish target-specific Q4 evidence where the consumer is available.
+- [x] Establish target-specific Q4 evidence where the consumer is available.
 
 **Owner and files:** `scripts/run-drawnix-consumer-gate.mjs`, `scripts/test-drawnix-plait-consumer.mjs`, `scripts/run-circuitikz-smoke-fixtures.js`, corresponding maintainer runbooks and capability records. Add an application harness only for the chosen target; no embedded copy of the application. Regression paths include `src/tests/drawnixPlaitConsumer.test.ts`, `src/tests/drawioExporter.test.ts` and `src/tests/circuitikzSmokeFixturesCli.test.ts`.
 
@@ -137,7 +152,7 @@ The current ESLint baseline is 231 errors/1374 warnings. Compare relevant diagno
 
 ## U7 — Improve Retrieval From An Independent Corpus
 
-- [ ] Pursue Q5 product quality after the correctness patch; default recommended quality lane.
+- [x] Pursue Q5 product quality after the correctness patch; default recommended quality lane.
 
 **Owner and files:** `src/localKnowledgeBase.ts`, `src/markdownSectionUtils.ts`, `src/tests/localKnowledgeEvaluationFixture.test.ts`, `src/tests/localKnowledgeBase.test.ts`, `src/tests/localKnowledgeTaskIntegration.test.ts`, and the paired June 9 retrieval documents.
 
@@ -149,7 +164,7 @@ Index construction currently enumerates Vault files and serially reads candidate
 
 ## U8 — Improve Office Fidelity Under A Named Renderer
 
-- [ ] Pursue Q5 when actual PPTX usage/defects justify this alternative quality lane.
+- [x] Pursue Q5 when actual PPTX usage/defects justify this alternative quality lane.
 
 **Owner and files:** `src/slideExport/pptxDomExtractor.ts`, `src/slideExport/pptxWriter.ts`, `src/slideExport/pptxFontContract.ts`, `scripts/verify-slidev-export-workflow.cjs`, `src/tests/pptxWriter.test.ts`, `src/tests/pptxVisualDiff.test.ts`, `src/tests/pptxExportReport.test.ts`, and paired PPTX acceptance docs.
 

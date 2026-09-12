@@ -1,0 +1,34 @@
+{
+  "circuitKind": "cmos-nor2",
+  "title": "Two Input CMOS NOR Gate",
+  "goldenReferenceId": "cmos-nor2-v1",
+  "style": {
+    "package": "circuitikz",
+    "voltageConvention": "american voltages"
+  },
+  "nets": ["VDD", "GND", "va", "vb", "vout", "pull_up_mid"],
+  "components": [
+    { "id": "MPA", "type": "pmos", "label": "$M_{PA}$", "terminals": { "S": "VDD", "G": "va", "D": "pull_up_mid" } },
+    { "id": "MPB", "type": "pmos", "label": "$M_{PB}$", "terminals": { "S": "pull_up_mid", "G": "vb", "D": "vout" } },
+    { "id": "MNA", "type": "nmos", "label": "$M_{NA}$", "terminals": { "D": "vout", "G": "va", "S": "GND" } },
+    { "id": "MNB", "type": "nmos", "label": "$M_{NB}$", "terminals": { "D": "vout", "G": "vb", "S": "GND" } }
+  ],
+  "connections": [
+    { "from": "VDD", "to": "MPA.S" },
+    { "from": "MPA.D", "to": "MPB.S" },
+    { "from": "MPB.D", "to": "vout" },
+    { "from": "MNA.D", "to": "vout" },
+    { "from": "MNB.D", "to": "vout" },
+    { "from": "MNA.S", "to": "GND" },
+    { "from": "MNB.S", "to": "GND" },
+    { "from": "va", "to": "MPA.G" },
+    { "from": "va", "to": "MNA.G" },
+    { "from": "vb", "to": "MPB.G" },
+    { "from": "vb", "to": "MNB.G" }
+  ],
+  "layoutHints": {
+    "inputSide": "left",
+    "outputSide": "right",
+    "routingStyle": "orthogonal"
+  }
+}

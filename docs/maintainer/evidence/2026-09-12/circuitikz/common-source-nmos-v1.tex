@@ -1,0 +1,20 @@
+\documentclass[border=8pt]{standalone}
+\usepackage{circuitikz}
+\begin{document}
+\begin{circuitikz}[american voltages, line width=0.5pt, font=\small]
+\draw
+  (3,5) node[vcc]{$V_{DD}$}
+  to [R, l=$R_D$] (3,3);
+\draw
+  (3,3) to [short, *-o] (5,3) node[right]{$v_{out}$};
+\draw
+  (3,3) to [short] (3,2.2)
+  node[nmos, anchor=D] (M1) {$M_1$};
+\draw
+  (M1.S) to [short] (3,0.5)
+  node[ground]{};
+\draw
+  (M1.G) to [short, -o] (0.8,2.2)
+  node[left]{$v_{in}$};
+\end{circuitikz}
+\end{document}

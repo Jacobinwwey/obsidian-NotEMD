@@ -1,5 +1,9 @@
 # Slidev 可编辑 PPTX 验收记录，2026-06-21
 
+## 最新验收：9 月 13 日
+
+[U8 PowerPoint 记录](./reliability-acceptance-2026-09-12.zh-CN.md)补充真实 PowerPoint 16.0 build 14332 原生单元格编辑／保存／重开和表格绘制修复证据；10 页、18 个可编辑文本框、2 张原生表格保留，既有 visible-native 保真门禁通过。不宣称 raster-strict／字体等价。下文 6 月结果继续作为其原始 renderer 和导出模式的历史证据。
+
 语言: [English](./slidev-editable-pptx-acceptance-2026-06-21.md) | **简体中文**
 
 本文记录首次基于真实 `docs/architecture.zh-CN.md` 的 NoteMD `HTML Slides -> 可编辑 PPTX` 验收。

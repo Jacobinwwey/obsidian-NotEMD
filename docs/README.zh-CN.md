@@ -9,6 +9,7 @@
 - [当前 Main 进度与后续推进计划](./brainstorms/2026-09-02-current-main-progress-and-forward-plan.zh-CN.md)
 - [项目计划进度与工程评估](./maintainer/project-plan-status.zh-CN.md)
 - [主线可靠性与证据推进计划](./plans/2026-09-12-mainline-reliability-and-evidence.zh-CN.md)
+- [可靠性实现与验收（9 月 12–13 日）](./maintainer/reliability-acceptance-2026-09-12.zh-CN.md)
 - [当前 Main 真值收敛计划（9 月 2 日已完成）](./superpowers/plans/2026-09-02-current-main-truth-convergence.zh-CN.md)
 - [架构总览](./architecture.zh-CN.md)
 - [图形 Gallery](./diagram-gallery.zh-CN.md)

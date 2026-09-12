@@ -9,7 +9,8 @@
       "previewTarget": "editable-html-svg",
       "svgPath": "./mermaid-mindmap-basics.svg",
       "pngPath": "./mermaid-mindmap-basics.png",
-      "svgSha256": "80b8508a2aeec098c54be17db137122ece5215d91b79f207f054665340ec6d1b"
+      "svgSha256": "80b8508a2aeec098c54be17db137122ece5215d91b79f207f054665340ec6d1b",
+      "pngSha256": "af57c5b822fd9dd9b1fbd0935968fe0fcc17b3ea97b7ff61031991c9d71fd485"
     },
     {
       "typeId": "drawnix-knowledge-map",
@@ -19,7 +20,8 @@
       "previewTarget": "drawnix",
       "svgPath": "./drawnix-knowledge-map-architecture.svg",
       "pngPath": "./drawnix-knowledge-map-architecture.png",
-      "svgSha256": "320f9bc415ea7caf09dc826ec9779f7167beab0ecea57fc4d950fd9435c3e976"
+      "svgSha256": "320f9bc415ea7caf09dc826ec9779f7167beab0ecea57fc4d950fd9435c3e976",
+      "pngSha256": "a873620e81386f6d921f76209b7dcfb81a83645fea255e6fff721bf63090116e"
     },
     {
       "typeId": "flowchart",
@@ -29,7 +31,8 @@
       "previewTarget": "editable-html-svg",
       "svgPath": "./flowchart-release.svg",
       "pngPath": "./flowchart-release.png",
-      "svgSha256": "eae429d5ee514e83254a438800cabdd7677e23305ff617eb68f09f47566962c4"
+      "svgSha256": "eae429d5ee514e83254a438800cabdd7677e23305ff617eb68f09f47566962c4",
+      "pngSha256": "1566ceef07940fe427da9a3cb9702b1253b76864fa2b237ffcc56f55d613d699"
     },
     {
       "typeId": "sequence",
@@ -39,7 +42,8 @@
       "previewTarget": "editable-html-svg",
       "svgPath": "./sequence-request.svg",
       "pngPath": "./sequence-request.png",
-      "svgSha256": "94902db1e500745a2aa8a37d82e6bc4beb0e8c30b30687becc3304fda188890e"
+      "svgSha256": "94902db1e500745a2aa8a37d82e6bc4beb0e8c30b30687becc3304fda188890e",
+      "pngSha256": "3e5f99437a1b1071495d3d49e328327225bbadabe8175da0af7d874ad1cadb18"
     },
     {
       "typeId": "state",
@@ -49,7 +53,8 @@
       "previewTarget": "editable-html-svg",
       "svgPath": "./state-lifecycle.svg",
       "pngPath": "./state-lifecycle.png",
-      "svgSha256": "eaf96095ecc6866de17ab203884ec0517e683039bb5851ed24062bd72bd8c745"
+      "svgSha256": "eaf96095ecc6866de17ab203884ec0517e683039bb5851ed24062bd72bd8c745",
+      "pngSha256": "74a75048e8b2ab37a1f410feaf899bc95d29354b6708cdd960ea46f6eee2647b"
     },
     {
       "typeId": "class",
@@ -59,7 +64,8 @@
       "previewTarget": "editable-html-svg",
       "svgPath": "./class-domain.svg",
       "pngPath": "./class-domain.png",
-      "svgSha256": "9276bbc6203453c03c98f65204c8b01c84d632f42e345db00a36114bd280acf0"
+      "svgSha256": "9276bbc6203453c03c98f65204c8b01c84d632f42e345db00a36114bd280acf0",
+      "pngSha256": "532ccbc4b367370e4c0ef7f5af792f95eacaeefc415042b1609314c0d3cf8da2"
     },
     {
       "typeId": "entity-relationship",
@@ -69,7 +75,8 @@
       "previewTarget": "editable-html-svg",
       "svgPath": "./entity-relationship-schema.svg",
       "pngPath": "./entity-relationship-schema.png",
-      "svgSha256": "a87c2a2f5a39bc22fcd91b5be13aa4040ef8e1399eb43d9756e6efe5b079bfbe"
+      "svgSha256": "a87c2a2f5a39bc22fcd91b5be13aa4040ef8e1399eb43d9756e6efe5b079bfbe",
+      "pngSha256": "3f2c73fc7c5ca1d39c024c92c4f4d5c7925a2ba6a55d572fb142fbbe88c655ca"
     },
     {
       "typeId": "canvas-map",
@@ -79,7 +86,8 @@
       "previewTarget": "json-canvas",
       "svgPath": "./canvas-map-domains.svg",
       "pngPath": "./canvas-map-domains.png",
-      "svgSha256": "05b9b70dc0edeb859eb71c75a52e47cac25f4180bc8f684ad5a5060a3e990558"
+      "svgSha256": "05b9b70dc0edeb859eb71c75a52e47cac25f4180bc8f684ad5a5060a3e990558",
+      "pngSha256": "d970fb31fe7ac21a2ad4178f5ffdd3130be0df32ec57d80549a8db6b50784982"
     },
     {
       "typeId": "data-chart",
@@ -89,7 +97,8 @@
       "previewTarget": "vega-lite",
       "svgPath": "./data-chart-trend.svg",
       "pngPath": "./data-chart-trend.png",
-      "svgSha256": "1fd96b8361150845b9a9d80489c4d82752a91941cb83ecca945b139a147ac3e0"
+      "svgSha256": "1fd96b8361150845b9a9d80489c4d82752a91941cb83ecca945b139a147ac3e0",
+      "pngSha256": "e5f1daf43e5ca9de2b62138f0941dd00d997cd945e0287998e33b81373d8ccc9"
     },
     {
       "typeId": "radar-chart",
@@ -99,7 +108,8 @@
       "previewTarget": "vega-lite",
       "svgPath": "./radar-capability-profile.svg",
       "pngPath": "./radar-capability-profile.png",
-      "svgSha256": "4c5f0b8a8c34b886c2306b6f940d80d4c4011c32f7a918217dae2b27fafafdf4"
+      "svgSha256": "4c5f0b8a8c34b886c2306b6f940d80d4c4011c32f7a918217dae2b27fafafdf4",
+      "pngSha256": "e417d8a601bd083518a4476fe5c67523baf9f4a050f51c1b99800504da47616e"
     },
     {
       "typeId": "org-chart",
@@ -109,7 +119,8 @@
       "previewTarget": "mermaid",
       "svgPath": "./org-chart-support-ownership.svg",
       "pngPath": "./org-chart-support-ownership.png",
-      "svgSha256": "7c195be5e854ceb1f8ca5fedbda106c3d9f586baef18bc177052e92b4526050b"
+      "svgSha256": "7c195be5e854ceb1f8ca5fedbda106c3d9f586baef18bc177052e92b4526050b",
+      "pngSha256": "c7cf6b4093754e30faa0281e21d92a1dcd45e6511acee27de59966d8aa01b4cd"
     },
     {
       "typeId": "timeline",
@@ -119,7 +130,8 @@
       "previewTarget": "mermaid",
       "svgPath": "./timeline-roadmap.svg",
       "pngPath": "./timeline-roadmap.png",
-      "svgSha256": "05de7b36a7559ef01b53f632ca265c7cc114b48565d928898606f60ef7c15caa"
+      "svgSha256": "05de7b36a7559ef01b53f632ca265c7cc114b48565d928898606f60ef7c15caa",
+      "pngSha256": "904f64227efeae3ea291ffb6225f907cd61e2b720522a1d546e59a09bcb21568"
     },
     {
       "typeId": "swimlane",
@@ -129,7 +141,8 @@
       "previewTarget": "mermaid",
       "svgPath": "./swimlane-release.svg",
       "pngPath": "./swimlane-release.png",
-      "svgSha256": "8c4c435fc060222994d1a150d1d8cccf9a74379e0c09c041ddaa7fe2f8d4caa5"
+      "svgSha256": "8c4c435fc060222994d1a150d1d8cccf9a74379e0c09c041ddaa7fe2f8d4caa5",
+      "pngSha256": "88fd89d4b8c79de400f900666416615801344a855ac23e0001206042f718bdb7"
     },
     {
       "typeId": "quadrant",
@@ -139,7 +152,8 @@
       "previewTarget": "mermaid",
       "svgPath": "./quadrant-priorities.svg",
       "pngPath": "./quadrant-priorities.png",
-      "svgSha256": "1786b6f74747d66f603a740745a54f40457179013b0bc1b3f56edfef75cf1c5b"
+      "svgSha256": "1786b6f74747d66f603a740745a54f40457179013b0bc1b3f56edfef75cf1c5b",
+      "pngSha256": "2af00ce09a986bb56ae486d1040a5582fc31b4a5060c3ad2151ada0997c3e794"
     },
     {
       "typeId": "circuit",
@@ -149,7 +163,8 @@
       "previewTarget": "circuitikz",
       "svgPath": "./circuit-cmos-inverter.svg",
       "pngPath": "./circuit-cmos-inverter.png",
-      "svgSha256": "be9bb85a03a9dd440043bfb7b357834b7c133695936e1e6dd0d815657f9a6e17"
+      "svgSha256": "be9bb85a03a9dd440043bfb7b357834b7c133695936e1e6dd0d815657f9a6e17",
+      "pngSha256": "eb0310009d66fc6fcde68a4f15437e649c4e06bde8a7b4161e8e743d33fc5e74"
     },
     {
       "typeId": "bar-chart",
@@ -159,7 +174,8 @@
       "previewTarget": "vega-lite",
       "svgPath": "./bar-chart-adoption.svg",
       "pngPath": "./bar-chart-adoption.png",
-      "svgSha256": "7ec8cd79f455ac87736a3437268ab1d22bf2d7e0c29cb0d1316af62e72d5a26d"
+      "svgSha256": "7ec8cd79f455ac87736a3437268ab1d22bf2d7e0c29cb0d1316af62e72d5a26d",
+      "pngSha256": "9823bd4571bec5267ba7c1f3e6e59ddedae19e8e75b71ddbc8a88cd3ef9f9704"
     },
     {
       "typeId": "line-chart",
@@ -169,7 +185,8 @@
       "previewTarget": "vega-lite",
       "svgPath": "./line-chart-render-time.svg",
       "pngPath": "./line-chart-render-time.png",
-      "svgSha256": "c6c56e95ab9957e8e3b4ed68971aa1d05c179eaf2cce4d37fdbea3d2f2348b62"
+      "svgSha256": "c6c56e95ab9957e8e3b4ed68971aa1d05c179eaf2cce4d37fdbea3d2f2348b62",
+      "pngSha256": "3c51b6ece3ff69c2799a4d34570ba8703cc965b3722d8b2872b5bfe5119c4f9b"
     },
     {
       "typeId": "scatter-plot",
@@ -179,7 +196,8 @@
       "previewTarget": "vega-lite",
       "svgPath": "./scatter-plot-quality.svg",
       "pngPath": "./scatter-plot-quality.png",
-      "svgSha256": "95e0cbb3c58ed494a2ee9e29153cf87f85970190da51753bb30b0e68423e02df"
+      "svgSha256": "95e0cbb3c58ed494a2ee9e29153cf87f85970190da51753bb30b0e68423e02df",
+      "pngSha256": "4550a02121a0b137466e0c39243874f2a0864105fe2baeb22f11f5e1e21227f5"
     },
     {
       "typeId": "architecture",
@@ -189,7 +207,8 @@
       "previewTarget": "editable-html-svg",
       "svgPath": "./architecture-platform.svg",
       "pngPath": "./architecture-platform.png",
-      "svgSha256": "aee895ceffc040613a304d9d5f566cfcea66eff9d32335ad714a4dfb73381068"
+      "svgSha256": "aee895ceffc040613a304d9d5f566cfcea66eff9d32335ad714a4dfb73381068",
+      "pngSha256": "3412864c1891e53288aee692d8eff08aa097927a0999991758f6b43934f32b02"
     },
     {
       "typeId": "current-state",
@@ -199,7 +218,8 @@
       "previewTarget": "editable-html-svg",
       "svgPath": "./current-state-legacy-pipeline.svg",
       "pngPath": "./current-state-legacy-pipeline.png",
-      "svgSha256": "6a2944f64050178f8db5249c054398611c45bb0baf576aed92246eb4783de25e"
+      "svgSha256": "6a2944f64050178f8db5249c054398611c45bb0baf576aed92246eb4783de25e",
+      "pngSha256": "a636a556691054f092efc3229cc62f9709d1a6a2bad8cbc2febe18f698ec484d"
     },
     {
       "typeId": "integration-topology",
@@ -209,7 +229,8 @@
       "previewTarget": "editable-html-svg",
       "svgPath": "./integration-topology-platform.svg",
       "pngPath": "./integration-topology-platform.png",
-      "svgSha256": "0a3e89f42dc33551c4d72887611ba33fd677fad1f462126e626a784e6a9b4650"
+      "svgSha256": "0a3e89f42dc33551c4d72887611ba33fd677fad1f462126e626a784e6a9b4650",
+      "pngSha256": "bda5e471418a77dc6cae3b31f64df2f5f0740ed85ad11ed4bf69967545d2e883"
     },
     {
       "typeId": "data-flow",
@@ -219,7 +240,8 @@
       "previewTarget": "editable-html-svg",
       "svgPath": "./data-flow-platform.svg",
       "pngPath": "./data-flow-platform.png",
-      "svgSha256": "15a05df246e039a74490c37d02a0d1bbf6d82fc620acac2b15fdaa11361fceb1"
+      "svgSha256": "15a05df246e039a74490c37d02a0d1bbf6d82fc620acac2b15fdaa11361fceb1",
+      "pngSha256": "ddf35c63ade1fd4332fd594b63e8497199a45b274a23abfb4381d7a3b5bee9a5"
     },
     {
       "typeId": "access-matrix",
@@ -229,7 +251,8 @@
       "previewTarget": "editable-html-svg",
       "svgPath": "./access-matrix-platform.svg",
       "pngPath": "./access-matrix-platform.png",
-      "svgSha256": "ca9a41543b80296ba83385062f7948715653def6528b90fba6abdafe4b7eb24d"
+      "svgSha256": "ca9a41543b80296ba83385062f7948715653def6528b90fba6abdafe4b7eb24d",
+      "pngSha256": "ec0c45d69aca5464cee89455c9f21d083e8bf43a57d44a07352e7ca3b9d0ee2a"
     },
     {
       "typeId": "gantt",
@@ -239,7 +262,8 @@
       "previewTarget": "editable-html-svg",
       "svgPath": "./gantt-release-plan.svg",
       "pngPath": "./gantt-release-plan.png",
-      "svgSha256": "99804068577caa6810bfa8e549327c60751574f07f941255facf04f786ff6da4"
+      "svgSha256": "99804068577caa6810bfa8e549327c60751574f07f941255facf04f786ff6da4",
+      "pngSha256": "6d1f37a51d460017145ab812c857d1f5fccd632bcda1c11d793679e24c96d71f"
     },
     {
       "typeId": "layer-stack",
@@ -249,7 +273,8 @@
       "previewTarget": "editable-html-svg",
       "svgPath": "./layer-stack-platform.svg",
       "pngPath": "./layer-stack-platform.png",
-      "svgSha256": "ddbabc2bf42ccc6d2de978fee59b14d3de708cabe53e2d26a63819f99062fc21"
+      "svgSha256": "ddbabc2bf42ccc6d2de978fee59b14d3de708cabe53e2d26a63819f99062fc21",
+      "pngSha256": "90f8a4efe7e6b846dc9f4a468a351f259adb94e502e20108db4c2d75830db10b"
     },
     {
       "typeId": "venn",
@@ -259,7 +284,8 @@
       "previewTarget": "editable-html-svg",
       "svgPath": "./venn-platform.svg",
       "pngPath": "./venn-platform.png",
-      "svgSha256": "8e480f0cfba12f1424a7d80d248e48c263961267e995b25a84ad0c2ec4805102"
+      "svgSha256": "8e480f0cfba12f1424a7d80d248e48c263961267e995b25a84ad0c2ec4805102",
+      "pngSha256": "37803ce79fa7f6b02942f2dd7d192bb171447984d2cc82f18f6789ace5d8b732"
     },
     {
       "typeId": "ranked-funnel",
@@ -269,7 +295,8 @@
       "previewTarget": "editable-html-svg",
       "svgPath": "./ranked-funnel-release.svg",
       "pngPath": "./ranked-funnel-release.png",
-      "svgSha256": "4b8cd0164834f2d9053c398f31c84bb9abfe68c7d58e6d7c281a7a1943a20822"
+      "svgSha256": "4b8cd0164834f2d9053c398f31c84bb9abfe68c7d58e6d7c281a7a1943a20822",
+      "pngSha256": "1eb85013df83a961caf21403e0b20e03a32817a6b73d21e9bc229573ba85bb16"
     },
     {
       "typeId": "loop",
@@ -279,7 +306,8 @@
       "previewTarget": "editable-html-svg",
       "svgPath": "./loop-operating-model.svg",
       "pngPath": "./loop-operating-model.png",
-      "svgSha256": "c438f42f9966e3a05626afe8f247cccd62f2de36b04f960f9de9e9d64ead334f"
+      "svgSha256": "c438f42f9966e3a05626afe8f247cccd62f2de36b04f960f9de9e9d64ead334f",
+      "pngSha256": "c3c17119fd777e430eaf4d0128f6b0a4aaf60f803f65b5e85e5deb4e9fde2b4b"
     },
     {
       "typeId": "nested",
@@ -289,7 +317,8 @@
       "previewTarget": "editable-html-svg",
       "svgPath": "./nested-scope.svg",
       "pngPath": "./nested-scope.png",
-      "svgSha256": "cf22cbccd0ab394fd17f0e8da3968a82fa9e02364af48cb0c96daea426197571"
+      "svgSha256": "cf22cbccd0ab394fd17f0e8da3968a82fa9e02364af48cb0c96daea426197571",
+      "pngSha256": "283b8d712af4fd431572eb408ccf2506a3fcd8b7ee0039bb6c51c8a9eb9be360"
     },
     {
       "typeId": "tree",
@@ -299,7 +328,8 @@
       "previewTarget": "editable-html-svg",
       "svgPath": "./tree-ownership.svg",
       "pngPath": "./tree-ownership.png",
-      "svgSha256": "5043f5686b71b528603a0a04e7291be5170363bfd1addc8d15c61b501fb73316"
+      "svgSha256": "5043f5686b71b528603a0a04e7291be5170363bfd1addc8d15c61b501fb73316",
+      "pngSha256": "58254e3b8c4b46027cd09bc89ae970b4c7f00a6c324f6b54440e5d525f1b3360"
     },
     {
       "typeId": "process",
@@ -309,7 +339,8 @@
       "previewTarget": "editable-html-svg",
       "svgPath": "./process-release.svg",
       "pngPath": "./process-release.png",
-      "svgSha256": "3dfb3e812327c70c5757221a67d3135a7dbd2a09b1e2451f641e84cb60363719"
+      "svgSha256": "3dfb3e812327c70c5757221a67d3135a7dbd2a09b1e2451f641e84cb60363719",
+      "pngSha256": "6a673ed8ce2d3ea2f944550abf29ba93bb63a93315a62d6548e9b2b395ce00db"
     },
     {
       "typeId": "medallion",
@@ -319,7 +350,8 @@
       "previewTarget": "editable-html-svg",
       "svgPath": "./medallion-data-quality.svg",
       "pngPath": "./medallion-data-quality.png",
-      "svgSha256": "2b407626d48d881eb30b6640d2f25a06b12312c557988f7d500c449704fa12cd"
+      "svgSha256": "2b407626d48d881eb30b6640d2f25a06b12312c557988f7d500c449704fa12cd",
+      "pngSha256": "6c2c678b61ab23b0f09bf7c5de2a40837fbb71e45e36d87e8dfb2842a381ec97"
     },
     {
       "typeId": "high-level",
@@ -329,7 +361,8 @@
       "previewTarget": "editable-html-svg",
       "svgPath": "./high-level-platform.svg",
       "pngPath": "./high-level-platform.png",
-      "svgSha256": "3c84825e0231a4aa4d8c1a734e3b62cae4181eeefc77de9edba6f2f892f8fb8b"
+      "svgSha256": "3c84825e0231a4aa4d8c1a734e3b62cae4181eeefc77de9edba6f2f892f8fb8b",
+      "pngSha256": "64739154810493895d4fb987db784e3b28bff749f80910481aa1717bfde00e04"
     }
   ]
 }

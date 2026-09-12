@@ -1,5 +1,11 @@
 # Slidev Editable PPTX Progress And Next Direction, 2026-06-21
 
+## September 13 bounded fidelity update
+
+U8 fixes native table border ordering, individual edge alpha, collapsed row separators and merged-cell outer borders. PowerPoint 16.0 build 14332 edited a native cell, saved a separate deck and reopened all ten slides. Table-slide RMSE improved from 0.192665 to 0.159463 under the existing visible-native gate; no threshold changed.
+
+The [current acceptance record](../maintainer/reliability-acceptance-2026-09-12.md#powerpoint-fidelity) owns the fixture, renders, versions and limitations. The following chronological material retains earlier decisions/evidence. Raster-strict fidelity still fails; native font shaping differs from Chromium and Mermaid/SVG geometry remains image fallback.
+
 ## Problem Statement
 
 The requested feature is not "export a `.pptx` file". A PPTX containing one screenshot per slide is easy, but it does not satisfy the editable-PPTX requirement. The useful target is an export path where PowerPoint users can edit slide text directly while still preserving the rendered Slidev visual result.

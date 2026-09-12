@@ -43,6 +43,10 @@ If you love using Notemd, please consider [⭐ Give a Star on GitHub](https://gi
 
 **Version:** 1.9.7
 
+**Mainline reliability update (not a new release):** cancellation now reaches concurrent LLM work and retry waits; failed diagram saves preserve conflicting edits and report recovery copies. Existing Drawnix companion folders are retained for inspection. Local knowledge batches use an immutable read snapshot, and PowerPoint tables preserve individual border sides, opacity and merged-cell edges. Circuitikz NAND/NOR and transmission-gate exports have clearer wiring and readable labels in mirrored layouts. [Implementation and acceptance evidence](./docs/maintainer/reliability-acceptance-2026-09-12.md) records the tested environments and remaining limits.
+
+Drawnix supports native tree editing; its exported cross-branch arrows use fixed coordinates and can detach when Drawnix rearranges nodes. Use the SVG preview to inspect connectivity. Cancellation cannot undo earlier writes or stop provider-side work when the host transport cannot physically abort it.
+
 <img width="1853" height="1080" alt="show" src="https://github.com/user-attachments/assets/b9f9292b-a9d8-48a3-9acf-1b6f00413966" />
 <img width="1853" height="1080" alt="multi-langu" src="https://github.com/user-attachments/assets/d9a0a4fb-1c00-425a-ac1d-0134a013a381" />
 <img width="1657" height="1000" alt="NEW FEATURE" src="https://github.com/user-attachments/assets/3099bf73-97d1-482b-ba97-c28b113b623e" />

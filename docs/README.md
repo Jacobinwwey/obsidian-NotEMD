@@ -9,6 +9,7 @@ This directory contains repository-level documentation for maintainers and contr
 - [Current Main Progress And Forward Plan](./brainstorms/2026-09-02-current-main-progress-and-forward-plan.md)
 - [Project Plan Status And Engineering Assessment](./maintainer/project-plan-status.md)
 - [Mainline Reliability And Evidence Implementation Plan](./plans/2026-09-12-mainline-reliability-and-evidence.en.md)
+- [Reliability Implementation And Acceptance (September 12–13)](./maintainer/reliability-acceptance-2026-09-12.md)
 - [Current Main Truth Convergence Plan (completed September 2)](./superpowers/plans/2026-09-02-current-main-truth-convergence.en.md)
 - [Architecture Overview](./architecture.md)
 - [Diagram Gallery](./diagram-gallery.md)
