@@ -37,6 +37,7 @@
 		"verify:slidev-layout-fixtures": "node scripts/verify-slidev-layout-fixtures.cjs",
 		"verify:local-kb-fixtures": "jest --runInBand src/tests/localKnowledgeEvaluationFixture.test.ts",
 		"evaluate:local-kb": "jest --runInBand src/tests/localKnowledgeHeldOut.test.ts",
+		"benchmark:local-kb": "node --expose-gc scripts/benchmark-local-knowledge.cjs",
 		"release:github": "node scripts/release/publish-github-release.js",
 		"regression:language-baseline": "bash scripts/regression/language-support-baseline.sh",
 		"regression:language-compare": "bash scripts/regression/language-support-compare.sh"

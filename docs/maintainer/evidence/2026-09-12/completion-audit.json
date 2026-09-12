@@ -1,0 +1,135 @@
+{
+  "schemaVersion": 1,
+  "recordedDate": "2026-09-13",
+  "baselineMain": "090098ffece758a027ce48f19f171e5707509aa0",
+  "localVerification": {
+    "build": "passed",
+    "suitesPassed": 282,
+    "testsPassed": 2593,
+    "testsSkipped": 1,
+    "changedTypeScriptFiles": 3,
+    "lintRegressions": 0,
+    "productionBundleUnchanged": true,
+    "productionBundleSha256": "bedb0e0d92106f490c407e8b475b596c5fcb8c43deca579b683032004c442fe7"
+  },
+  "additionalRegressions": [
+    {
+      "file": "src/tests/diagramArtifactPersistence.test.ts",
+      "name": "diagram artifact persistence ownership preserves the successful same-basename save when the first writer fails",
+      "status": "passed"
+    },
+    {
+      "file": "src/tests/diagramArtifactPersistence.test.ts",
+      "name": "diagram artifact persistence ownership preserves the successful same-basename save when the second writer fails",
+      "status": "passed"
+    },
+    {
+      "file": "src/tests/diagramArtifactPersistence.test.ts",
+      "name": "diagram artifact persistence ownership serializes distinct primary outputs that share a companion path",
+      "status": "passed"
+    },
+    {
+      "file": "src/tests/diagramCommandHostAdapter.test.ts",
+      "name": "diagram command host adapter a failed save never reaches the completed preview and history handoff",
+      "status": "passed"
+    }
+  ],
+  "costEvidence": {
+    "file": "local-knowledge-cost.json",
+    "sha256": "1c1cf38d6c08866a472eacc9f2bc7f865a8dc75c4d0f80394b443f03d3530036"
+  },
+  "qualityEvidence": {
+    "file": "local-knowledge-held-out.json",
+    "sha256": "35d4329e1d8a1c6174dd23327b2bd11c62cd8f3a703adaa650d7d23630f900a1"
+  },
+  "planEvidence": {
+    "U1": {
+      "tests": [
+        "concurrentProcessorCancellation.test.ts",
+        "parallelBatch.test.ts",
+        "llmCancellationIntegration.test.ts",
+        "llmUtilsProviderSupport.test.ts"
+      ],
+      "host": "verification.json#/obsidian/cancellation"
+    },
+    "U2": {
+      "tests": [
+        "diagramArtifactPersistence.test.ts",
+        "saveDiagramArtifactFile.test.ts",
+        "diagramCommandHostAdapter.test.ts"
+      ],
+      "host": "obsidian-persistence.json",
+      "coverage": "Both same-basename failure orders, shared companions, independent outputs, external edits, moved/replaced files, binary recovery, partial creations, recovery errors, next-save usability and completed-preview handoff."
+    },
+    "U3": {
+      "tests": [
+        "lintBaselineRatchet.test.ts"
+      ],
+      "remote": "ci-verification.json",
+      "currentWorkflowChange": "Adds cost measurement after the existing failing-test boundary; failure propagation and privileges are unchanged."
+    },
+    "U4": {
+      "tests": [
+        "diagramGalleryGenerator.test.ts",
+        "currentMainProgressDocsContract.test.ts",
+        "docsBilingualSupport.test.ts"
+      ],
+      "evidence": [
+        "../../../assets/diagrams/manifest.json",
+        "verification.json"
+      ],
+      "scope": "PNG byte identity, normalized SVG/JSON source identity, schema/catalog/bilingual coverage; native consumer and visual claims remain separate."
+    },
+    "U5": {
+      "evidence": "verification.json#/obsidian",
+      "disposition": "Measured keep-inline decision under the original U5 Exit/stop clause.",
+      "unverified": [
+        "physical mobile devices",
+        "Obsidian 0.15.0"
+      ],
+      "limitation": "The original timeboxed decision permits deferred device evidence; neither device boundary is reported as passed."
+    },
+    "U6": {
+      "evidence": "verification.json#/consumers",
+      "disposition": "Target-specific evaluation under the original U6 Tests and failure policy.",
+      "passed": [
+        "diagrams.net native edit/save/reopen",
+        "Drawnix native hierarchy edit/save/reopen",
+        "six Circuitikz templates and five orientation variants with compiler/PDFium evidence"
+      ],
+      "notPromoted": [
+        "Drawnix attached cross-branch arrows"
+      ]
+    },
+    "U7": {
+      "tests": [
+        "localKnowledgeSnapshot.test.ts",
+        "localKnowledgeHeldOut.test.ts",
+        "localKnowledgeTaskIntegration.test.ts"
+      ],
+      "evidence": [
+        "local-knowledge-cost.json",
+        "local-knowledge-held-out.json",
+        "verification.json#/retrieval/host"
+      ],
+      "scope": "Frozen independent quality evaluation, estimated context tokens, build/query distributions, read/index decomposition, collected retained/released heap and immutable batch snapshots. No ranking tuning."
+    },
+    "U8": {
+      "tests": [
+        "pptxTableBorderFidelity.test.ts",
+        "pptxWriter.test.ts",
+        "pptxVisualDiff.test.ts",
+        "pptxExportReport.test.ts"
+      ],
+      "evidence": [
+        "office-roundtrip.json",
+        "verification.json#/consumers/powerpoint"
+      ],
+      "disposition": "The selected table-paint defect family passes actual PowerPoint roundtrip and the unchanged visible-native gate.",
+      "notPromoted": [
+        "raster-strict equivalence",
+        "fully native Mermaid/SVG reconstruction"
+      ]
+    }
+  }
+}

@@ -5,6 +5,7 @@ import { createHash } from 'crypto';
 import { App, TFile } from 'obsidian';
 import { DEFAULT_SETTINGS } from '../constants';
 import { buildLocalKnowledgeBaseRetriever } from '../localKnowledgeBase';
+import { estimateTokens } from '../utils';
 
 interface Corpus {
     schemaVersion: number;
@@ -20,7 +21,7 @@ function percentiles(samples: number[]) {
 }
 
 test('evaluates the frozen held-out corpus without turning quality judgments into passing assertions', async () => {
-    const source = fs.readFileSync(path.join(__dirname, 'fixtures/local-knowledge-held-out.json'), 'utf8');
+    const source = fs.readFileSync(path.join(__dirname, 'fixtures/local-knowledge-held-out.json'), 'utf8').replace(/\r\n/g, '\n');
     const corpus = JSON.parse(source) as Corpus;
     const notes = corpus.files.map(note => ({ ...note, file: Object.assign(new TFile(), {
         path: note.path, basename: path.posix.basename(note.path, '.md'), extension: 'md'
@@ -63,12 +64,14 @@ test('evaluates the frozen held-out corpus without turning quality judgments int
                 sourcePaths: selected, sourceRecall: query.relevantPaths.length ? relevantCount / query.relevantPaths.length : null,
                 sourcePrecision: selected.length ? relevantCount / selected.length : null,
                 falsePositiveSources: selected.filter(file => !query.relevantPaths.includes(file)),
-                contextChars: details!.contextCharCount, queryMs: percentiles(times) });
+                contextChars: details!.contextCharCount, estimatedContextTokens: estimateTokens(details!.context ?? ''),
+                queryMs: percentiles(times) });
         }
     }
     const report = { schemaVersion: 1, corpusSha256: createHash('sha256').update(source).digest('hex'),
         provenance: corpus.provenance, runtime: process.version, platform: process.platform,
-        measurements: 'In-memory offline corpus, 20 builds and 20 queries per case. Read time is fixture lookup, not Vault or disk I/O. Heap delta is uncollected, not retained memory. Character count is the context-cost metric; no provider-token count is claimed.',
+        corpusHashNormalization: 'UTF-8 with LF source line endings',
+        measurements: 'In-memory offline corpus, 20 builds and 20 queries per case. Read time is fixture lookup, not Vault or disk I/O. Heap delta is uncollected, not retained memory. Tokens use the repository character-based estimate, not provider tokenization; controlled retained heap is measured by benchmark:local-kb.',
         fileCount: notes.length, queryCount: corpus.queries.length, buildMs: percentiles(buildTimes),
         meanEnumerationMs: enumerationMs / 20, meanFixtureReadMs: readMs / 20,
         meanParseAndIndexMs: (buildTimes.reduce((sum, value) => sum + value, 0) - enumerationMs - readMs) / 20,

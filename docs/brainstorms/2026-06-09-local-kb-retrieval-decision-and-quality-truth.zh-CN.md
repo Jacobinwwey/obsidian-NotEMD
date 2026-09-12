@@ -8,6 +8,8 @@ canonical: true
 
 ## 9 月 13 日决策更新
 
+[完成度测量](../maintainer/reliability-acceptance-2026-09-12.zh-CN.md)现已包含上下文 token 估算、拆分的构建／查询成本及 GC 后保留／释放堆，支持既有词法架构中的 batch 复用；不能仅凭这份小语料论证持久索引。
+
 保持本地词法检索和 batch 快照复用。U7 在不按标签调参的前提下测量固定独立语料：Top-1 召回 6/9，Top-3 召回 7/9，Top-3 同时增加精度／上下文成本。小规模热缓存语料下，真实 Obsidian inspect 重建 p50／p95 为 8.6／23.8 ms；正常 batch 查询复用 retriever。
 
 [验收记录](../maintainer/reliability-acceptance-2026-09-12.zh-CN.md)负责未命中结果、范围语义和成本拆分。embedding 与持久索引仍需新的决策，不是原设计中隐含的未完成阶段。

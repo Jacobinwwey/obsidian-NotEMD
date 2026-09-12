@@ -103,6 +103,80 @@ function artifact(content: string): RenderArtifact {
 }
 
 describe('diagram artifact persistence ownership', () => {
+    test.each(['first', 'second'])('preserves the successful same-basename save when the %s writer fails', async failedWriter => {
+        const fixture = createArtifactVault();
+        await fixture.vault.createFolder('Shared');
+        const primary = 'Shared/Topic_diagram.canvas';
+        for (const path of [primary, `${primary}.svg`, `${primary}.md`]) await fixture.vault.create(path, `old:${path}`);
+        const sources = ['ProjectA', 'ProjectB'].map(directory => Object.assign(fixture.source('Topic'), {
+            path: `${directory}/Topic.md`, parent: Object.assign(new TFolder(), { path: directory, children: [] })
+        }));
+        const settings = { ...DEFAULT_SETTINGS, useCustomSummarizeToMermaidSavePath: true, summarizeToMermaidSavePath: 'Shared' };
+        const atFirstWrapper = deferred<void>();
+        const releaseFirst = deferred<void>();
+        let wrapperAttempt = 0;
+        fixture.beforeTextWrite.mockImplementation(async path => {
+            if (path !== `${primary}.md`) return;
+            const attempt = ++wrapperAttempt;
+            if (attempt === 1) {
+                atFirstWrapper.resolve();
+                await releaseFirst.promise;
+            }
+            if ((attempt === 1 && failedWriter === 'first') || (attempt === 2 && failedWriter === 'second')) {
+                throw new Error(`${failedWriter} wrapper failed`);
+            }
+        });
+        const first = saveDiagramArtifactFile(fixture.app, settings, sources[0], artifact('first'), fixture.reporter).catch(error => error);
+        await atFirstWrapper.promise;
+        const second = saveDiagramArtifactFile(fixture.app, settings, sources[1], artifact('second'), fixture.reporter).catch(error => error);
+        await new Promise(resolve => setImmediate(resolve));
+        const bytesWhileFirstPaused = fixture.texts.get(primary);
+        releaseFirst.resolve();
+        const outcomes = await Promise.all([first, second]);
+        const successfulWriter = failedWriter === 'first' ? 'second' : 'first';
+        expect(bytesWhileFirstPaused).toBe('first');
+        expect(outcomes[failedWriter === 'first' ? 0 : 1]).toBeInstanceOf(Error);
+        expect(outcomes[failedWriter === 'first' ? 1 : 0]).toBe(`${primary}.md`);
+        expect(fixture.texts.get(primary)).toBe(successfulWriter);
+        expect(fixture.texts.get(`${primary}.svg`)).toBe(`<svg>${successfulWriter}</svg>`);
+    });
+
+    test('serializes distinct primary outputs that share a companion path', async () => {
+        const fixture = createArtifactVault();
+        const primary = fixture.seed('Source');
+        const other = fixture.seed('Other');
+        await fixture.vault.createFolder('Notes/shared');
+        await fixture.vault.create('Notes/shared/source.txt', 'old companion');
+        const atWrapper = deferred<void>();
+        const release = deferred<void>();
+        let failOnce = true;
+        fixture.beforeTextWrite.mockImplementation(async path => {
+            if (path === `${primary}.md` && failOnce) {
+                failOnce = false;
+                atWrapper.resolve();
+                await release.promise;
+                throw new Error('first wrapper failed');
+            }
+        });
+        const withCompanion = (content: string): RenderArtifact => ({ ...artifact(content),
+            companions: [{ path: 'shared/source.txt', content, mimeType: 'text/plain' }] });
+        const first = saveDiagramArtifactFile(fixture.app, DEFAULT_SETTINGS, fixture.source('Source'), withCompanion('first'), fixture.reporter)
+            .catch(error => error);
+        await atWrapper.promise;
+        const second = saveDiagramArtifactFile(fixture.app, DEFAULT_SETTINGS, fixture.source('Other'), withCompanion('second'), fixture.reporter);
+        await new Promise(resolve => setImmediate(resolve));
+        const companionWhilePaused = fixture.texts.get('Notes/shared/source.txt');
+        const otherWhilePaused = fixture.texts.get(other);
+        release.resolve();
+        expect(await first).toBeInstanceOf(Error);
+        await expect(second).resolves.toBe(`${other}.md`);
+        expect(companionWhilePaused).toBe('first');
+        expect(otherWhilePaused).toBe(`old:${other}`);
+        expect(fixture.texts.get(primary)).toBe(`old:${primary}`);
+        expect(fixture.texts.get(other)).toBe('second');
+        expect(fixture.texts.get('Notes/shared/source.txt')).toBe('second');
+    });
+
     test.each(['atomic', 'legacy'])('preserves a file moved before the %s text write starts', async host => {
         const fixture = createArtifactVault();
         const primary = fixture.seed('Source');

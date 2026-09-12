@@ -8,6 +8,8 @@ canonical: true
 
 ## September 13 execution update
 
+The completion audit additionally records [context-token estimates and collected retained/released heap](../maintainer/reliability-acceptance-2026-09-12.md#retrieval-quality-and-batch-semantics). Run `npm run benchmark:local-kb` for the fresh-process GC measurement; the ordinary Jest heap delta is not retained-memory evidence. Corpus hashes normalize checkout line endings without changing the frozen labels.
+
 U7 now captures candidate paths/titles before asynchronous reads, omits moved/removed candidates and preserves an immutable retriever for the batch. Unrelated read failures propagate. A new operation rebuilds the snapshot; this is not an atomic whole-Vault snapshot.
 
 The frozen 13-file/13-query evaluation and 65 real Obsidian rebuild timings are in the [acceptance record](../maintainer/reliability-acceptance-2026-09-12.md#retrieval-quality-and-batch-semantics). Top-3 positive recall is 7/9 with 51.9% macro precision; Chinese compounds and synonyms still miss. These measured outcomes supersede earlier evaluation-only next steps below. Future ranking changes require a new validation split.

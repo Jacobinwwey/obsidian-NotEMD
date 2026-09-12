@@ -42,6 +42,7 @@ Verification requirements:
 - `.github/workflows/verify-plugin.yml` runs build, full Jest, UI-string/render-host audits, lint regression comparison and diff hygiene on Linux and Windows with Node 20. It has read-only permissions and no release or provider credentials.
 - Run `npm run lint:regressions -- --base-ref origin/main` locally. The checker compares individual diagnostics with the merge-base, including renamed and shifted files; a smaller aggregate error count does not excuse new errors.
 - Legacy ESLint debt remains tracked. New errors and correctness warnings must pass the ratchet; do not globally autofix unrelated files.
+- `npm run benchmark:local-kb` measures frozen-corpus build/query costs and GC-controlled retained/released heap in a fresh Node process. CI retains the report; timings are observations, not universal performance thresholds. Context token estimates are distinct from provider tokenization.
 - Install browser revisions for both `playwright` and `playwright-chromium` when preparing a fresh verification environment; the lockfile currently resolves different package versions.
 - Workflow presence does not establish required branch protection. Check remote run results before integrating; configure repository protection separately when requested.
 
