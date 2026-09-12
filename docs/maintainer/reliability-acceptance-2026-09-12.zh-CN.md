@@ -42,7 +42,7 @@ Language: [English](./reliability-acceptance-2026-09-12.md) | **简体中文**
 
 ## 验证与 CI
 
-最新本地构建及全量 Jest：**282 个套件，2585 项通过，1 项跳过**；跳过项依赖 POSIX 后代进程终止行为。lint 门禁检查 24 个变化的 TypeScript 文件，**新增回归为零**。UI 字符串与渲染宿主审计、33 个 gallery 样例、33 个真实 Vault 归档样例均通过。全局 ESLint 仍有历史债务，增量门禁通过不等于全库 lint 清零。
+最新本地构建及全量 Jest：**282 个套件，2589 项通过，1 项跳过**；跳过项依赖 POSIX 后代进程终止行为。lint 门禁检查 25 个变化的 TypeScript 文件，**新增回归为零**。UI 字符串与渲染宿主审计、33 个 gallery 样例、33 个真实 Vault 归档样例均通过。全局 ESLint 仍有历史债务，增量门禁通过不等于全库 lint 清零。双语检查现包含尚未跟踪的仓库文档，新增 fixture 不再逃过提交前验证；Office fixture 已有独立中文配对。
 
 工作流在 Linux/Windows 上使用 `npm ci` 和 Node 20，并安装锁文件中 `playwright` 1.61.0 与 `playwright-chromium` 1.61.1 各自对应的浏览器版本。权限只读，不传 provider 密钥，也不发布。lint 按路径、规则、严重度、消息、列和映射后的原行号匹配，重复诊断逐条消耗，处理重命名并在工具/配置失败时关闭门禁。减少旧债不能抵消另一条新错误。分支保护属于独立管理员设置。
 

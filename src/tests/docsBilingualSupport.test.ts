@@ -2,8 +2,8 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { execFileSync } from 'child_process';
 
-function readTrackedMarkdownDocs(repoRoot: string): string[] {
-    const trackedFiles = execFileSync('git', ['ls-files'], {
+function readRepositoryMarkdownDocs(repoRoot: string): string[] {
+    const repositoryFiles = execFileSync('git', ['ls-files', '--cached', '--others', '--exclude-standard'], {
         cwd: repoRoot,
         encoding: 'utf8'
     })
@@ -11,7 +11,7 @@ function readTrackedMarkdownDocs(repoRoot: string): string[] {
         .map((line) => line.trim())
         .filter(Boolean);
 
-    return trackedFiles
+    return repositoryFiles
         .filter((relativePath) =>
             relativePath === 'README.md' ||
             relativePath === 'README_zh.md' ||
@@ -56,7 +56,7 @@ function hasPairedLanguageVariant(relativePath: string, repoRoot: string): boole
 
 describe('docs bilingual support contract', () => {
     const repoRoot = path.join(__dirname, '..', '..');
-    const markdownDocs = readTrackedMarkdownDocs(repoRoot).sort();
+    const markdownDocs = readRepositoryMarkdownDocs(repoRoot).sort();
 
     test.each(markdownDocs.map((absolutePath) => path.relative(repoRoot, absolutePath)))(
         '%s provides English and Chinese documentation coverage',

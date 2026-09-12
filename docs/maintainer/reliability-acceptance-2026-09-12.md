@@ -42,7 +42,7 @@ Real Obsidian 1.13.7, installer 1.12.7, Electron 39.8.3 / Chromium 142.0.7444.26
 
 ## Verification And CI
 
-Fresh local build and full Jest: **282 suites, 2585 passed, 1 skipped**. The skipped case requires POSIX descendant-process termination. The lint ratchet inspected 24 changed TypeScript files and found **zero regressions**. UI-string and render-host audits, 33 gallery fixtures, and 33 archived real-Vault examples passed. Full lint still has historical debt; a clean ratchet does not mean a clean global lint run.
+Fresh local build and full Jest: **282 suites, 2589 passed, 1 skipped**. The skipped case requires POSIX descendant-process termination. The lint ratchet inspected 25 changed TypeScript files and found **zero regressions**. UI-string and render-host audits, 33 gallery fixtures, and 33 archived real-Vault examples passed. Full lint still has historical debt; a clean ratchet does not mean a clean global lint run. Bilingual coverage includes untracked repository documents so new fixtures cannot evade pre-commit checks; the Office fixture has a separate Chinese counterpart.
 
 The workflow uses `npm ci`, Node 20 on Linux and Windows, and installs the browser revisions resolved by both `playwright` 1.61.0 and `playwright-chromium` 1.61.1. It has read-only repository permission, no provider secrets and no publication step. The ratchet matches path/rule/severity/message/column and mapped original line, consumes duplicate diagnostics one-to-one, handles renames and fails closed on tool/configuration failure. Removed debt cannot hide a different new error. Branch protection remains a separate administrative setting.
 
