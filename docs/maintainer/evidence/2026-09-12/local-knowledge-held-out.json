@@ -1,0 +1,547 @@
+{
+  "schemaVersion": 1,
+  "corpusSha256": "d737b72f09bc7008aff3249ceca3bfcdd0218244666fdf3f16eded8a62871e87",
+  "provenance": "Independently authored from the existing implementation fixtures. Queries and relevance labels were frozen before the first evaluation. Synthetic engineering notes, not private user Vault data or an external benchmark.",
+  "runtime": "v22.19.0",
+  "platform": "win32",
+  "corpusHashNormalization": "UTF-8 with LF source line endings",
+  "measurements": "In-memory offline corpus, 20 builds and 20 queries per case. Read time is fixture lookup, not Vault or disk I/O. Heap delta is uncollected, not retained memory. Tokens use the repository character-based estimate, not provider tokenization; controlled retained heap is measured by benchmark:local-kb.",
+  "fileCount": 13,
+  "queryCount": 13,
+  "buildMs": {
+    "p50": 0.8183999999891967,
+    "p95": 1.6471999999921536
+  },
+  "meanEnumerationMs": 0.0010849999984202442,
+  "meanFixtureReadMs": 0.003809999996155966,
+  "meanParseAndIndexMs": 1.0549250000047323,
+  "uncollectedHeapDeltaBytes": 3687928,
+  "cases": [
+    {
+      "id": "synonymous-payment",
+      "family": "synonym",
+      "topK": 1,
+      "relevantPaths": [
+        "Knowledge/Payments.md"
+      ],
+      "sourcePaths": [
+        "Knowledge/Transport.md"
+      ],
+      "sourceRecall": 0,
+      "sourcePrecision": 0,
+      "falsePositiveSources": [
+        "Knowledge/Transport.md"
+      ],
+      "contextChars": 566,
+      "estimatedContextTokens": 142,
+      "queryMs": {
+        "p50": 1.0599999999976717,
+        "p95": 1.8703999999997905
+      }
+    },
+    {
+      "id": "operation-abort",
+      "family": "english",
+      "topK": 1,
+      "relevantPaths": [
+        "Knowledge/Cancellation.md"
+      ],
+      "sourcePaths": [
+        "Knowledge/Transport.md"
+      ],
+      "sourceRecall": 0,
+      "sourcePrecision": 0,
+      "falsePositiveSources": [
+        "Knowledge/Transport.md"
+      ],
+      "contextChars": 566,
+      "estimatedContextTokens": 142,
+      "queryMs": {
+        "p50": 0.8899000000092201,
+        "p95": 1.3821000000025379
+      }
+    },
+    {
+      "id": "cjk-concurrency",
+      "family": "chinese-compound",
+      "topK": 1,
+      "relevantPaths": [
+        "Knowledge/原子存储.md"
+      ],
+      "sourcePaths": [],
+      "sourceRecall": 0,
+      "sourcePrecision": null,
+      "falsePositiveSources": [],
+      "contextChars": 0,
+      "estimatedContextTokens": 0,
+      "queryMs": {
+        "p50": 0.5992999999871245,
+        "p95": 0.6515999999974156
+      }
+    },
+    {
+      "id": "cjk-recovery",
+      "family": "chinese",
+      "topK": 1,
+      "relevantPaths": [
+        "Knowledge/原子存储.md"
+      ],
+      "sourcePaths": [
+        "Knowledge/原子存储.md"
+      ],
+      "sourceRecall": 1,
+      "sourcePrecision": 1,
+      "falsePositiveSources": [],
+      "contextChars": 136,
+      "estimatedContextTokens": 34,
+      "queryMs": {
+        "p50": 0.024999999994179234,
+        "p95": 0.03470000000379514
+      }
+    },
+    {
+      "id": "latency-statistics",
+      "family": "english",
+      "topK": 1,
+      "relevantPaths": [
+        "Knowledge/Latency.md"
+      ],
+      "sourcePaths": [
+        "Knowledge/Latency.md"
+      ],
+      "sourceRecall": 1,
+      "sourcePrecision": 1,
+      "falsePositiveSources": [],
+      "contextChars": 272,
+      "estimatedContextTokens": 68,
+      "queryMs": {
+        "p50": 0.9670999999943888,
+        "p95": 1.3037999999942258
+      }
+    },
+    {
+      "id": "duplicate-title",
+      "family": "duplicate-title",
+      "topK": 1,
+      "relevantPaths": [
+        "Knowledge/Infra/Cache.md"
+      ],
+      "sourcePaths": [
+        "Knowledge/Infra/Cache.md"
+      ],
+      "sourceRecall": 1,
+      "sourcePrecision": 1,
+      "falsePositiveSources": [],
+      "contextChars": 252,
+      "estimatedContextTokens": 63,
+      "queryMs": {
+        "p50": 0.7964999999967404,
+        "p95": 0.870199999990291
+      }
+    },
+    {
+      "id": "backoff-numeric",
+      "family": "abbreviation",
+      "topK": 1,
+      "relevantPaths": [
+        "Knowledge/Rate limits.md"
+      ],
+      "sourcePaths": [
+        "Knowledge/Rate limits.md"
+      ],
+      "sourceRecall": 1,
+      "sourcePrecision": 1,
+      "falsePositiveSources": [],
+      "contextChars": 284,
+      "estimatedContextTokens": 71,
+      "queryMs": {
+        "p50": 0.5310999999928754,
+        "p95": 0.5923999999940861
+      }
+    },
+    {
+      "id": "mixed-scope-office",
+      "family": "mixed-file-folder-scope",
+      "topK": 1,
+      "relevantPaths": [
+        "References/Office.md"
+      ],
+      "sourcePaths": [
+        "References/Office.md"
+      ],
+      "sourceRecall": 1,
+      "sourcePrecision": 1,
+      "falsePositiveSources": [],
+      "contextChars": 313,
+      "estimatedContextTokens": 79,
+      "queryMs": {
+        "p50": 0.7595999999903142,
+        "p95": 0.9253000000026077
+      }
+    },
+    {
+      "id": "navigation-title",
+      "family": "navigation-no-answer",
+      "topK": 1,
+      "relevantPaths": [],
+      "sourcePaths": [
+        "Knowledge/Index.md"
+      ],
+      "sourceRecall": null,
+      "sourcePrecision": 0,
+      "falsePositiveSources": [
+        "Knowledge/Index.md"
+      ],
+      "contextChars": 229,
+      "estimatedContextTokens": 58,
+      "queryMs": {
+        "p50": 0.016799999997601844,
+        "p95": 0.0507999999972526
+      }
+    },
+    {
+      "id": "scope-exclusion",
+      "family": "out-of-scope",
+      "topK": 1,
+      "relevantPaths": [],
+      "sourcePaths": [],
+      "sourceRecall": null,
+      "sourcePrecision": null,
+      "falsePositiveSources": [],
+      "contextChars": 0,
+      "estimatedContextTokens": 0,
+      "queryMs": {
+        "p50": 0.8078999999997905,
+        "p95": 1.07039999999688
+      }
+    },
+    {
+      "id": "current-file-exclusion",
+      "family": "current-file",
+      "topK": 1,
+      "relevantPaths": [],
+      "sourcePaths": [
+        "Knowledge/Rate limits.md"
+      ],
+      "sourceRecall": null,
+      "sourcePrecision": 0,
+      "falsePositiveSources": [
+        "Knowledge/Rate limits.md"
+      ],
+      "contextChars": 284,
+      "estimatedContextTokens": 71,
+      "queryMs": {
+        "p50": 0.8787000000011176,
+        "p95": 0.9734999999927823
+      }
+    },
+    {
+      "id": "nonsense",
+      "family": "no-answer",
+      "topK": 1,
+      "relevantPaths": [],
+      "sourcePaths": [],
+      "sourceRecall": null,
+      "sourcePrecision": null,
+      "falsePositiveSources": [],
+      "contextChars": 0,
+      "estimatedContextTokens": 0,
+      "queryMs": {
+        "p50": 1.2224999999889405,
+        "p95": 1.3386000000027707
+      }
+    },
+    {
+      "id": "long-section",
+      "family": "long-section",
+      "topK": 1,
+      "relevantPaths": [
+        "Knowledge/Transport.md"
+      ],
+      "sourcePaths": [
+        "Knowledge/Transport.md"
+      ],
+      "sourceRecall": 1,
+      "sourcePrecision": 1,
+      "falsePositiveSources": [],
+      "contextChars": 566,
+      "estimatedContextTokens": 142,
+      "queryMs": {
+        "p50": 1.1918000000005122,
+        "p95": 1.2941000000137137
+      }
+    },
+    {
+      "id": "synonymous-payment",
+      "family": "synonym",
+      "topK": 3,
+      "relevantPaths": [
+        "Knowledge/Payments.md"
+      ],
+      "sourcePaths": [
+        "Knowledge/Transport.md",
+        "Knowledge/Latency.md",
+        "Knowledge/Geography/Cache.md"
+      ],
+      "sourceRecall": 0,
+      "sourcePrecision": 0,
+      "falsePositiveSources": [
+        "Knowledge/Transport.md",
+        "Knowledge/Latency.md",
+        "Knowledge/Geography/Cache.md"
+      ],
+      "contextChars": 1037,
+      "estimatedContextTokens": 260,
+      "queryMs": {
+        "p50": 0.920799999992596,
+        "p95": 1.0636999999987893
+      }
+    },
+    {
+      "id": "operation-abort",
+      "family": "english",
+      "topK": 3,
+      "relevantPaths": [
+        "Knowledge/Cancellation.md"
+      ],
+      "sourcePaths": [
+        "Knowledge/Transport.md",
+        "Knowledge/Cancellation.md",
+        "Knowledge/Geography/Cache.md"
+      ],
+      "sourceRecall": 1,
+      "sourcePrecision": 0.3333333333333333,
+      "falsePositiveSources": [
+        "Knowledge/Transport.md",
+        "Knowledge/Geography/Cache.md"
+      ],
+      "contextChars": 1063,
+      "estimatedContextTokens": 266,
+      "queryMs": {
+        "p50": 0.8465999999898486,
+        "p95": 1.0253999999986263
+      }
+    },
+    {
+      "id": "cjk-concurrency",
+      "family": "chinese-compound",
+      "topK": 3,
+      "relevantPaths": [
+        "Knowledge/原子存储.md"
+      ],
+      "sourcePaths": [],
+      "sourceRecall": 0,
+      "sourcePrecision": null,
+      "falsePositiveSources": [],
+      "contextChars": 0,
+      "estimatedContextTokens": 0,
+      "queryMs": {
+        "p50": 0.561600000000908,
+        "p95": 0.6459000000031665
+      }
+    },
+    {
+      "id": "cjk-recovery",
+      "family": "chinese",
+      "topK": 3,
+      "relevantPaths": [
+        "Knowledge/原子存储.md"
+      ],
+      "sourcePaths": [
+        "Knowledge/原子存储.md"
+      ],
+      "sourceRecall": 1,
+      "sourcePrecision": 1,
+      "falsePositiveSources": [],
+      "contextChars": 136,
+      "estimatedContextTokens": 34,
+      "queryMs": {
+        "p50": 0.01870000000053551,
+        "p95": 0.02449999999953434
+      }
+    },
+    {
+      "id": "latency-statistics",
+      "family": "english",
+      "topK": 3,
+      "relevantPaths": [
+        "Knowledge/Latency.md"
+      ],
+      "sourcePaths": [
+        "Knowledge/Latency.md",
+        "Knowledge/Index.md"
+      ],
+      "sourceRecall": 1,
+      "sourcePrecision": 0.5,
+      "falsePositiveSources": [
+        "Knowledge/Index.md"
+      ],
+      "contextChars": 603,
+      "estimatedContextTokens": 151,
+      "queryMs": {
+        "p50": 0.8983999999909429,
+        "p95": 1.1661000000021886
+      }
+    },
+    {
+      "id": "duplicate-title",
+      "family": "duplicate-title",
+      "topK": 3,
+      "relevantPaths": [
+        "Knowledge/Infra/Cache.md"
+      ],
+      "sourcePaths": [
+        "Knowledge/Infra/Cache.md",
+        "Knowledge/Transport.md"
+      ],
+      "sourceRecall": 1,
+      "sourcePrecision": 0.5,
+      "falsePositiveSources": [
+        "Knowledge/Transport.md"
+      ],
+      "contextChars": 820,
+      "estimatedContextTokens": 205,
+      "queryMs": {
+        "p50": 0.7339999999967404,
+        "p95": 0.8276000000041677
+      }
+    },
+    {
+      "id": "backoff-numeric",
+      "family": "abbreviation",
+      "topK": 3,
+      "relevantPaths": [
+        "Knowledge/Rate limits.md"
+      ],
+      "sourcePaths": [
+        "Knowledge/Rate limits.md",
+        "Knowledge/Transport.md",
+        "Knowledge/Infra/Cache.md"
+      ],
+      "sourceRecall": 1,
+      "sourcePrecision": 0.3333333333333333,
+      "falsePositiveSources": [
+        "Knowledge/Transport.md",
+        "Knowledge/Infra/Cache.md"
+      ],
+      "contextChars": 1106,
+      "estimatedContextTokens": 277,
+      "queryMs": {
+        "p50": 0.4695999999967171,
+        "p95": 0.5579999999899883
+      }
+    },
+    {
+      "id": "mixed-scope-office",
+      "family": "mixed-file-folder-scope",
+      "topK": 3,
+      "relevantPaths": [
+        "References/Office.md"
+      ],
+      "sourcePaths": [
+        "References/Office.md"
+      ],
+      "sourceRecall": 1,
+      "sourcePrecision": 1,
+      "falsePositiveSources": [],
+      "contextChars": 313,
+      "estimatedContextTokens": 79,
+      "queryMs": {
+        "p50": 0.6934999999939464,
+        "p95": 0.7391999999963446
+      }
+    },
+    {
+      "id": "navigation-title",
+      "family": "navigation-no-answer",
+      "topK": 3,
+      "relevantPaths": [],
+      "sourcePaths": [
+        "Knowledge/Index.md"
+      ],
+      "sourceRecall": null,
+      "sourcePrecision": 0,
+      "falsePositiveSources": [
+        "Knowledge/Index.md"
+      ],
+      "contextChars": 229,
+      "estimatedContextTokens": 58,
+      "queryMs": {
+        "p50": 0.010900000008405186,
+        "p95": 0.013000000006286427
+      }
+    },
+    {
+      "id": "scope-exclusion",
+      "family": "out-of-scope",
+      "topK": 3,
+      "relevantPaths": [],
+      "sourcePaths": [],
+      "sourceRecall": null,
+      "sourcePrecision": null,
+      "falsePositiveSources": [],
+      "contextChars": 0,
+      "estimatedContextTokens": 0,
+      "queryMs": {
+        "p50": 0.7240000000019791,
+        "p95": 0.7664000000077067
+      }
+    },
+    {
+      "id": "current-file-exclusion",
+      "family": "current-file",
+      "topK": 3,
+      "relevantPaths": [],
+      "sourcePaths": [
+        "Knowledge/Rate limits.md"
+      ],
+      "sourceRecall": null,
+      "sourcePrecision": 0,
+      "falsePositiveSources": [
+        "Knowledge/Rate limits.md"
+      ],
+      "contextChars": 284,
+      "estimatedContextTokens": 71,
+      "queryMs": {
+        "p50": 0.8562999999994645,
+        "p95": 0.9340999999985797
+      }
+    },
+    {
+      "id": "nonsense",
+      "family": "no-answer",
+      "topK": 3,
+      "relevantPaths": [],
+      "sourcePaths": [],
+      "sourceRecall": null,
+      "sourcePrecision": null,
+      "falsePositiveSources": [],
+      "contextChars": 0,
+      "estimatedContextTokens": 0,
+      "queryMs": {
+        "p50": 1.1579000000056112,
+        "p95": 1.2142000000021653
+      }
+    },
+    {
+      "id": "long-section",
+      "family": "long-section",
+      "topK": 3,
+      "relevantPaths": [
+        "Knowledge/Transport.md"
+      ],
+      "sourcePaths": [
+        "Knowledge/Transport.md"
+      ],
+      "sourceRecall": 1,
+      "sourcePrecision": 1,
+      "falsePositiveSources": [],
+      "contextChars": 689,
+      "estimatedContextTokens": 173,
+      "queryMs": {
+        "p50": 1.1644999999989523,
+        "p95": 1.274600000004284
+      }
+    }
+  ]
+}

@@ -1,0 +1,921 @@
+{
+  "schemaVersion": 1,
+  "measuredAt": "2026-09-12T21:43:57.312Z",
+  "sourceRevision": "090098ffece758a027ce48f19f171e5707509aa0",
+  "sourceState": "The revision is Git HEAD at measurement time; normalized source hashes identify the measured working-tree code.",
+  "sourceHashes": {
+    "src/localKnowledgeBase.ts": "846cee335c062d3b783058e2f185312bf6a9cc2468de4d1ecd0b4a31eb6e91e9",
+    "src/markdownSectionUtils.ts": "daa0722be5b9d258fcbb3088739a44f5665e931805fe61df4884663555cdd261",
+    "src/utils.ts": "5377c5f58a27538c3a973e0f84483310dde00c345ad2b47eecb7cb780cc09e61",
+    "scripts/benchmark-local-knowledge.cjs": "0b6af0095ce288f79d9fe4d3a09edd672dc145e9e42fbebad426f8eb07df5d04"
+  },
+  "corpusSha256": "d737b72f09bc7008aff3249ceca3bfcdd0218244666fdf3f16eded8a62871e87",
+  "corpusHashNormalization": "UTF-8 with LF source line endings",
+  "corpusFiles": 13,
+  "corpusQueries": 13,
+  "indexedFileCount": 12,
+  "indexedSectionCount": 16,
+  "environment": {
+    "node": "v22.19.0",
+    "v8": "12.4.254.21-node.29",
+    "platform": "win32",
+    "architecture": "x64",
+    "osRelease": "10.0.19045",
+    "cpu": "12th Gen Intel(R) Core(TM) i5-12600K",
+    "ramBytes": 68494569472,
+    "esbuild": "0.27.0",
+    "miniSearch": "7.2.0"
+  },
+  "method": {
+    "warmupBuilds": 20,
+    "measuredBuilds": 50,
+    "warmupQueriesPerCase": 20,
+    "measuredQueriesPerCase": 50,
+    "queryOrder": "Alternating forward/reversed case order after warming both Top-K settings; a full GC precedes timed queries.",
+    "io": "In-memory corpus reads; real Vault enumeration/read timings remain a separate host measurement.",
+    "heap": "Fresh process, warmed runtime/corpus held constant, two explicit full GC calls after an event-loop turn at each baseline/live/released boundary. Five rounds each for one and 64 live retrievers.",
+    "scope": "Marginal retained V8 heap over a shared corpus/module baseline. Per-copy values from 64 copies amplify the signal; negative/noisy deltas are retained. Excludes Obsidian UI, disk cache, provider tokenization and process RSS. No leak-free or large-Vault scaling claim."
+  },
+  "build": {
+    "samples": [
+      {
+        "totalMs": 0.42200000000001125,
+        "enumerationMs": 0.0005999999999914962,
+        "fixtureReadMs": 0.0018000000000171212,
+        "parseIndexAndBookkeepingMs": 0.41960000000000264
+      },
+      {
+        "totalMs": 0.3323999999999927,
+        "enumerationMs": 0.00039999999999906777,
+        "fixtureReadMs": 0.0016000000000246928,
+        "parseIndexAndBookkeepingMs": 0.33039999999996894
+      },
+      {
+        "totalMs": 0.359800000000007,
+        "enumerationMs": 0.0002000000000066393,
+        "fixtureReadMs": 0.0016999999999995907,
+        "parseIndexAndBookkeepingMs": 0.3579000000000008
+      },
+      {
+        "totalMs": 0.4035000000000082,
+        "enumerationMs": 0.00039999999999906777,
+        "fixtureReadMs": 0.0014999999999645297,
+        "parseIndexAndBookkeepingMs": 0.4016000000000446
+      },
+      {
+        "totalMs": 0.5468000000000046,
+        "enumerationMs": 0.00039999999999906777,
+        "fixtureReadMs": 0.0018000000000171212,
+        "parseIndexAndBookkeepingMs": 0.5445999999999884
+      },
+      {
+        "totalMs": 0.39349999999998886,
+        "enumerationMs": 0.00039999999999906777,
+        "fixtureReadMs": 0.001699999999971169,
+        "parseIndexAndBookkeepingMs": 0.3914000000000186
+      },
+      {
+        "totalMs": 0.33150000000000546,
+        "enumerationMs": 0.0004000000000132786,
+        "fixtureReadMs": 0.0016000000000246928,
+        "parseIndexAndBookkeepingMs": 0.3294999999999675
+      },
+      {
+        "totalMs": 0.32869999999999777,
+        "enumerationMs": 0.0002999999999957481,
+        "fixtureReadMs": 0.0018999999999778083,
+        "parseIndexAndBookkeepingMs": 0.3265000000000242
+      },
+      {
+        "totalMs": 0.6749999999999972,
+        "enumerationMs": 0.00019999999999242846,
+        "fixtureReadMs": 0.0018000000000171212,
+        "parseIndexAndBookkeepingMs": 0.6729999999999876
+      },
+      {
+        "totalMs": 0.3961999999999932,
+        "enumerationMs": 0.0005000000000023874,
+        "fixtureReadMs": 0.002099999999970237,
+        "parseIndexAndBookkeepingMs": 0.3936000000000206
+      },
+      {
+        "totalMs": 0.3375000000000057,
+        "enumerationMs": 0.00039999999999906777,
+        "fixtureReadMs": 0.0016000000000389036,
+        "parseIndexAndBookkeepingMs": 0.3354999999999677
+      },
+      {
+        "totalMs": 0.3340000000000032,
+        "enumerationMs": 0.00030000000000995897,
+        "fixtureReadMs": 0.0016000000000246928,
+        "parseIndexAndBookkeepingMs": 0.33209999999996853
+      },
+      {
+        "totalMs": 0.5408000000000044,
+        "enumerationMs": 0.00019999999999242846,
+        "fixtureReadMs": 0.002899999999996794,
+        "parseIndexAndBookkeepingMs": 0.5377000000000152
+      },
+      {
+        "totalMs": 0.43479999999999563,
+        "enumerationMs": 0.0005999999999914962,
+        "fixtureReadMs": 0.002300000000005298,
+        "parseIndexAndBookkeepingMs": 0.43189999999999884
+      },
+      {
+        "totalMs": 0.3891999999999882,
+        "enumerationMs": 0.00039999999999906777,
+        "fixtureReadMs": 0.0017000000000138016,
+        "parseIndexAndBookkeepingMs": 0.38709999999997535
+      },
+      {
+        "totalMs": 0.5097999999999985,
+        "enumerationMs": 0.00039999999999906777,
+        "fixtureReadMs": 0.0027999999999934744,
+        "parseIndexAndBookkeepingMs": 0.5066000000000059
+      },
+      {
+        "totalMs": 0.9574000000000069,
+        "enumerationMs": 0.0002999999999957481,
+        "fixtureReadMs": 0.001599999999996271,
+        "parseIndexAndBookkeepingMs": 0.9555000000000149
+      },
+      {
+        "totalMs": 0.46640000000000725,
+        "enumerationMs": 0.001600000000010482,
+        "fixtureReadMs": 0.0018999999999920192,
+        "parseIndexAndBookkeepingMs": 0.46290000000000475
+      },
+      {
+        "totalMs": 0.4562000000000097,
+        "enumerationMs": 0.00039999999999906777,
+        "fixtureReadMs": 0.0017000000000138016,
+        "parseIndexAndBookkeepingMs": 0.45409999999999684
+      },
+      {
+        "totalMs": 0.32730000000000814,
+        "enumerationMs": 0.00039999999999906777,
+        "fixtureReadMs": 0.0018000000000171212,
+        "parseIndexAndBookkeepingMs": 0.32509999999999195
+      },
+      {
+        "totalMs": 0.537099999999981,
+        "enumerationMs": 0.00030000000000995897,
+        "fixtureReadMs": 0.0016000000000246928,
+        "parseIndexAndBookkeepingMs": 0.5351999999999464
+      },
+      {
+        "totalMs": 0.3744000000000085,
+        "enumerationMs": 0.00030000000000995897,
+        "fixtureReadMs": 0.0018999999999778083,
+        "parseIndexAndBookkeepingMs": 0.37220000000002074
+      },
+      {
+        "totalMs": 0.3217999999999961,
+        "enumerationMs": 0.0003999999999848569,
+        "fixtureReadMs": 0.0014999999999929514,
+        "parseIndexAndBookkeepingMs": 0.3199000000000183
+      },
+      {
+        "totalMs": 0.33740000000000236,
+        "enumerationMs": 0.0002000000000066393,
+        "fixtureReadMs": 0.0017999999999744887,
+        "parseIndexAndBookkeepingMs": 0.33540000000002124
+      },
+      {
+        "totalMs": 0.8334999999999866,
+        "enumerationMs": 0.0002000000000066393,
+        "fixtureReadMs": 0.001599999999996271,
+        "parseIndexAndBookkeepingMs": 0.8316999999999837
+      },
+      {
+        "totalMs": 0.34089999999997644,
+        "enumerationMs": 0.0005999999999914962,
+        "fixtureReadMs": 0.0016999999999995907,
+        "parseIndexAndBookkeepingMs": 0.33859999999998536
+      },
+      {
+        "totalMs": 0.32560000000000855,
+        "enumerationMs": 0.00029999999998153726,
+        "fixtureReadMs": 0.0017000000000280124,
+        "parseIndexAndBookkeepingMs": 0.323599999999999
+      },
+      {
+        "totalMs": 0.2950000000000159,
+        "enumerationMs": 0.0002000000000066393,
+        "fixtureReadMs": 0.0016999999999427473,
+        "parseIndexAndBookkeepingMs": 0.29310000000006653
+      },
+      {
+        "totalMs": 0.30700000000001637,
+        "enumerationMs": 0.0002000000000066393,
+        "fixtureReadMs": 0.0016999999999995907,
+        "parseIndexAndBookkeepingMs": 0.30510000000001014
+      },
+      {
+        "totalMs": 0.41020000000000323,
+        "enumerationMs": 0.0002000000000066393,
+        "fixtureReadMs": 0.003399999999942338,
+        "parseIndexAndBookkeepingMs": 0.40660000000005425
+      },
+      {
+        "totalMs": 0.383199999999988,
+        "enumerationMs": 0.0001999999999782176,
+        "fixtureReadMs": 0.0019000000000630735,
+        "parseIndexAndBookkeepingMs": 0.3810999999999467
+      },
+      {
+        "totalMs": 0.3756000000000199,
+        "enumerationMs": 0.0002000000000066393,
+        "fixtureReadMs": 0.0017000000000280124,
+        "parseIndexAndBookkeepingMs": 0.37369999999998527
+      },
+      {
+        "totalMs": 0.4536000000000229,
+        "enumerationMs": 0.0010000000000047748,
+        "fixtureReadMs": 0.004399999999947113,
+        "parseIndexAndBookkeepingMs": 0.448200000000071
+      },
+      {
+        "totalMs": 0.3988000000000227,
+        "enumerationMs": 0.00029999999998153726,
+        "fixtureReadMs": 0.0034999999999740794,
+        "parseIndexAndBookkeepingMs": 0.3950000000000671
+      },
+      {
+        "totalMs": 0.832099999999997,
+        "enumerationMs": 0.0003999999999848569,
+        "fixtureReadMs": 0.002299999999991087,
+        "parseIndexAndBookkeepingMs": 0.829400000000021
+      },
+      {
+        "totalMs": 0.3091000000000008,
+        "enumerationMs": 0.0005999999999914962,
+        "fixtureReadMs": 0.0016000000000246928,
+        "parseIndexAndBookkeepingMs": 0.30689999999998463
+      },
+      {
+        "totalMs": 0.33259999999998513,
+        "enumerationMs": 0.0001999999999782176,
+        "fixtureReadMs": 0.002699999999975944,
+        "parseIndexAndBookkeepingMs": 0.32970000000003097
+      },
+      {
+        "totalMs": 0.29410000000001446,
+        "enumerationMs": 0.0002000000000066393,
+        "fixtureReadMs": 0.001999999999981128,
+        "parseIndexAndBookkeepingMs": 0.2919000000000267
+      },
+      {
+        "totalMs": 0.33159999999998035,
+        "enumerationMs": 0.0001999999999782176,
+        "fixtureReadMs": 0.002000000000066393,
+        "parseIndexAndBookkeepingMs": 0.32939999999993574
+      },
+      {
+        "totalMs": 0.5226000000000113,
+        "enumerationMs": 0.0001999999999782176,
+        "fixtureReadMs": 0.004499999999978854,
+        "parseIndexAndBookkeepingMs": 0.5179000000000542
+      },
+      {
+        "totalMs": 0.41389999999998395,
+        "enumerationMs": 0.0007999999999981355,
+        "fixtureReadMs": 0.0019999999999527063,
+        "parseIndexAndBookkeepingMs": 0.4111000000000331
+      },
+      {
+        "totalMs": 0.40169999999997685,
+        "enumerationMs": 0.00030000000000995897,
+        "fixtureReadMs": 0.0023000000000195087,
+        "parseIndexAndBookkeepingMs": 0.3990999999999474
+      },
+      {
+        "totalMs": 0.3815000000000168,
+        "enumerationMs": 0.0002000000000066393,
+        "fixtureReadMs": 0.002600000000001046,
+        "parseIndexAndBookkeepingMs": 0.37870000000000914
+      },
+      {
+        "totalMs": 0.6070999999999742,
+        "enumerationMs": 0.0002000000000066393,
+        "fixtureReadMs": 0.0019999999999527063,
+        "parseIndexAndBookkeepingMs": 0.6049000000000149
+      },
+      {
+        "totalMs": 0.33439999999998804,
+        "enumerationMs": 0.0004000000000132786,
+        "fixtureReadMs": 0.00190000000000623,
+        "parseIndexAndBookkeepingMs": 0.33209999999996853
+      },
+      {
+        "totalMs": 0.3031000000000006,
+        "enumerationMs": 0.0002000000000066393,
+        "fixtureReadMs": 0.0014000000000464752,
+        "parseIndexAndBookkeepingMs": 0.3014999999999475
+      },
+      {
+        "totalMs": 0.2967999999999904,
+        "enumerationMs": 0.00030000000000995897,
+        "fixtureReadMs": 0.0016000000000246928,
+        "parseIndexAndBookkeepingMs": 0.29489999999995575
+      },
+      {
+        "totalMs": 0.2938999999999794,
+        "enumerationMs": 0.0002000000000066393,
+        "fixtureReadMs": 0.001599999999911006,
+        "parseIndexAndBookkeepingMs": 0.29210000000006175
+      },
+      {
+        "totalMs": 0.2886000000000024,
+        "enumerationMs": 0.0002000000000066393,
+        "fixtureReadMs": 0.0015999999999678494,
+        "parseIndexAndBookkeepingMs": 0.2868000000000279
+      },
+      {
+        "totalMs": 0.3155000000000143,
+        "enumerationMs": 0.0002000000000066393,
+        "fixtureReadMs": 0.0016999999999995907,
+        "parseIndexAndBookkeepingMs": 0.3136000000000081
+      }
+    ],
+    "totalMs": {
+      "count": 50,
+      "min": 0.2886000000000024,
+      "max": 0.9574000000000069,
+      "mean": 0.41790999999999995,
+      "p50": 0.3756000000000199,
+      "p95": 0.832099999999997,
+      "standardDeviation": 0.14433678013590184
+    },
+    "enumerationMs": {
+      "count": 50,
+      "min": 0.0001999999999782176,
+      "max": 0.001600000000010482,
+      "mean": 0.00036399999999929376,
+      "p50": 0.00030000000000995897,
+      "p95": 0.0007999999999981355,
+      "standardDeviation": 0.00024311314238504588
+    },
+    "fixtureReadMs": {
+      "count": 50,
+      "min": 0.0014000000000464752,
+      "max": 0.004499999999978854,
+      "mean": 0.002025999999997339,
+      "p50": 0.0017999999999744887,
+      "p95": 0.0034999999999740794,
+      "standardDeviation": 0.0006713598140979981
+    },
+    "parseIndexAndBookkeepingMs": {
+      "count": 50,
+      "min": 0.2868000000000279,
+      "max": 0.9555000000000149,
+      "mean": 0.41552000000000333,
+      "p50": 0.37369999999998527,
+      "p95": 0.829400000000021,
+      "standardDeviation": 0.14423120189473732
+    }
+  },
+  "queryMsByTopK": {
+    "1": {
+      "count": 650,
+      "min": 0.005899999999996908,
+      "max": 0.4046000000000163,
+      "mean": 0.05337046153846092,
+      "p50": 0.050499999999999545,
+      "p95": 0.09759999999999991,
+      "standardDeviation": 0.04212926431940979
+    },
+    "3": {
+      "count": 650,
+      "min": 0.005899999999996908,
+      "max": 0.6428000000000225,
+      "mean": 0.05418969230769182,
+      "p50": 0.05110000000001946,
+      "p95": 0.09860000000000468,
+      "standardDeviation": 0.042605415707368165
+    }
+  },
+  "queries": [
+    {
+      "id": "synonymous-payment",
+      "topK": 1,
+      "contextChars": 566,
+      "queryMs": {
+        "count": 50,
+        "min": 0.04749999999998522,
+        "max": 0.16790000000000305,
+        "mean": 0.06057400000000086,
+        "p50": 0.05649999999999977,
+        "p95": 0.08310000000000173,
+        "standardDeviation": 0.017662387267864066
+      }
+    },
+    {
+      "id": "operation-abort",
+      "topK": 1,
+      "contextChars": 566,
+      "queryMs": {
+        "count": 50,
+        "min": 0.05510000000001014,
+        "max": 0.1425000000000125,
+        "mean": 0.06878600000000006,
+        "p50": 0.0630000000000166,
+        "p95": 0.10540000000000305,
+        "standardDeviation": 0.016710056971776074
+      }
+    },
+    {
+      "id": "cjk-concurrency",
+      "topK": 1,
+      "contextChars": 0,
+      "queryMs": {
+        "count": 50,
+        "min": 0.021399999999999864,
+        "max": 0.03360000000000696,
+        "mean": 0.024569999999997663,
+        "p50": 0.02389999999999759,
+        "p95": 0.03149999999999409,
+        "standardDeviation": 0.0025513329849319974
+      }
+    },
+    {
+      "id": "cjk-recovery",
+      "topK": 1,
+      "contextChars": 136,
+      "queryMs": {
+        "count": 50,
+        "min": 0.009399999999999409,
+        "max": 0.02909999999999968,
+        "mean": 0.01351999999999805,
+        "p50": 0.012499999999988631,
+        "p95": 0.021199999999993224,
+        "standardDeviation": 0.003823663165082607
+      }
+    },
+    {
+      "id": "latency-statistics",
+      "topK": 1,
+      "contextChars": 272,
+      "queryMs": {
+        "count": 50,
+        "min": 0.04819999999998004,
+        "max": 0.3329999999999984,
+        "mean": 0.06366199999999879,
+        "p50": 0.054299999999983584,
+        "p95": 0.102800000000002,
+        "standardDeviation": 0.040695222766315195
+      }
+    },
+    {
+      "id": "duplicate-title",
+      "topK": 1,
+      "contextChars": 252,
+      "queryMs": {
+        "count": 50,
+        "min": 0.043299999999987904,
+        "max": 0.26619999999999777,
+        "mean": 0.05764799999999866,
+        "p50": 0.04850000000001842,
+        "p95": 0.07259999999999422,
+        "standardDeviation": 0.03945034975763654
+      }
+    },
+    {
+      "id": "backoff-numeric",
+      "topK": 1,
+      "contextChars": 284,
+      "queryMs": {
+        "count": 50,
+        "min": 0.03839999999999577,
+        "max": 0.102800000000002,
+        "mean": 0.04765799999999899,
+        "p50": 0.0438999999999794,
+        "p95": 0.08029999999999404,
+        "standardDeviation": 0.011503131573618418
+      }
+    },
+    {
+      "id": "mixed-scope-office",
+      "topK": 1,
+      "contextChars": 313,
+      "queryMs": {
+        "count": 50,
+        "min": 0.043300000000016325,
+        "max": 0.3072999999999979,
+        "mean": 0.06004000000000019,
+        "p50": 0.04909999999998149,
+        "p95": 0.08570000000000277,
+        "standardDeviation": 0.04066866115327545
+      }
+    },
+    {
+      "id": "navigation-title",
+      "topK": 1,
+      "contextChars": 229,
+      "queryMs": {
+        "count": 50,
+        "min": 0.005899999999996908,
+        "max": 0.3990000000000009,
+        "mean": 0.01632199999999841,
+        "p50": 0.00719999999998322,
+        "p95": 0.021700000000009823,
+        "standardDeviation": 0.05485836778468754
+      }
+    },
+    {
+      "id": "scope-exclusion",
+      "topK": 1,
+      "contextChars": 0,
+      "queryMs": {
+        "count": 50,
+        "min": 0.03580000000002315,
+        "max": 0.09759999999999991,
+        "mean": 0.044120000000001484,
+        "p50": 0.041299999999978354,
+        "p95": 0.07169999999999277,
+        "standardDeviation": 0.011360052816778958
+      }
+    },
+    {
+      "id": "current-file-exclusion",
+      "topK": 1,
+      "contextChars": 284,
+      "queryMs": {
+        "count": 50,
+        "min": 0.04970000000000141,
+        "max": 0.16989999999998417,
+        "mean": 0.0650159999999994,
+        "p50": 0.058099999999996044,
+        "p95": 0.08990000000000009,
+        "standardDeviation": 0.021234230478169247
+      }
+    },
+    {
+      "id": "nonsense",
+      "topK": 1,
+      "contextChars": 0,
+      "queryMs": {
+        "count": 50,
+        "min": 0.049000000000006594,
+        "max": 0.1209999999999809,
+        "mean": 0.05742400000000032,
+        "p50": 0.052099999999995816,
+        "p95": 0.09450000000001069,
+        "standardDeviation": 0.014242142535444924
+      }
+    },
+    {
+      "id": "long-section",
+      "topK": 1,
+      "contextChars": 566,
+      "queryMs": {
+        "count": 50,
+        "min": 0.07560000000000855,
+        "max": 0.4046000000000163,
+        "mean": 0.11447599999999909,
+        "p50": 0.0841000000000065,
+        "p95": 0.29869999999999663,
+        "standardDeviation": 0.07360477310609831
+      }
+    },
+    {
+      "id": "synonymous-payment",
+      "topK": 3,
+      "contextChars": 1037,
+      "queryMs": {
+        "count": 50,
+        "min": 0.05690000000001305,
+        "max": 0.2674000000000092,
+        "mean": 0.08007999999999868,
+        "p50": 0.06389999999998963,
+        "p95": 0.20640000000000214,
+        "standardDeviation": 0.04250064940680395
+      }
+    },
+    {
+      "id": "operation-abort",
+      "topK": 3,
+      "contextChars": 1063,
+      "queryMs": {
+        "count": 50,
+        "min": 0.061800000000005184,
+        "max": 0.20940000000001646,
+        "mean": 0.07618199999999774,
+        "p50": 0.06839999999999691,
+        "p95": 0.10829999999998563,
+        "standardDeviation": 0.023397492942621854
+      }
+    },
+    {
+      "id": "cjk-concurrency",
+      "topK": 3,
+      "contextChars": 0,
+      "queryMs": {
+        "count": 50,
+        "min": 0.022899999999992815,
+        "max": 0.04930000000001655,
+        "mean": 0.026220000000001277,
+        "p50": 0.024400000000014188,
+        "p95": 0.03710000000000946,
+        "standardDeviation": 0.005130341119264101
+      }
+    },
+    {
+      "id": "cjk-recovery",
+      "topK": 3,
+      "contextChars": 136,
+      "queryMs": {
+        "count": 50,
+        "min": 0.009900000000016007,
+        "max": 0.03520000000000323,
+        "mean": 0.014325999999997521,
+        "p50": 0.013399999999990087,
+        "p95": 0.01809999999997558,
+        "standardDeviation": 0.004045086402042796
+      }
+    },
+    {
+      "id": "latency-statistics",
+      "topK": 3,
+      "contextChars": 603,
+      "queryMs": {
+        "count": 50,
+        "min": 0.0543999999999869,
+        "max": 0.2641999999999882,
+        "mean": 0.06805800000000034,
+        "p50": 0.05889999999999418,
+        "p95": 0.11879999999999313,
+        "standardDeviation": 0.03748026728826396
+      }
+    },
+    {
+      "id": "duplicate-title",
+      "topK": 3,
+      "contextChars": 820,
+      "queryMs": {
+        "count": 50,
+        "min": 0.044699999999977535,
+        "max": 0.09860000000000468,
+        "mean": 0.05533000000000186,
+        "p50": 0.050299999999992906,
+        "p95": 0.08749999999997726,
+        "standardDeviation": 0.01250936049524375
+      }
+    },
+    {
+      "id": "backoff-numeric",
+      "topK": 3,
+      "contextChars": 1106,
+      "queryMs": {
+        "count": 50,
+        "min": 0.04240000000001487,
+        "max": 0.6428000000000225,
+        "mean": 0.060139999999999534,
+        "p50": 0.047100000000000364,
+        "p95": 0.06029999999998381,
+        "standardDeviation": 0.08333605942208056
+      }
+    },
+    {
+      "id": "mixed-scope-office",
+      "topK": 3,
+      "contextChars": 313,
+      "queryMs": {
+        "count": 50,
+        "min": 0.04570000000001073,
+        "max": 0.2593999999999994,
+        "mean": 0.05863200000000006,
+        "p50": 0.050499999999999545,
+        "p95": 0.09889999999998622,
+        "standardDeviation": 0.031778341303472776
+      }
+    },
+    {
+      "id": "navigation-title",
+      "topK": 3,
+      "contextChars": 229,
+      "queryMs": {
+        "count": 50,
+        "min": 0.005899999999996908,
+        "max": 0.026299999999991996,
+        "mean": 0.00769599999999798,
+        "p50": 0.0070999999999799,
+        "p95": 0.010600000000010823,
+        "standardDeviation": 0.0028559383746846285
+      }
+    },
+    {
+      "id": "scope-exclusion",
+      "topK": 3,
+      "contextChars": 0,
+      "queryMs": {
+        "count": 50,
+        "min": 0.037299999999987676,
+        "max": 0.24670000000000414,
+        "mean": 0.04767600000000186,
+        "p50": 0.04179999999999495,
+        "p95": 0.05760000000000787,
+        "standardDeviation": 0.030133825246723325
+      }
+    },
+    {
+      "id": "current-file-exclusion",
+      "topK": 3,
+      "contextChars": 284,
+      "queryMs": {
+        "count": 50,
+        "min": 0.05020000000001801,
+        "max": 0.11369999999999436,
+        "mean": 0.06136600000000044,
+        "p50": 0.05719999999999459,
+        "p95": 0.09190000000000964,
+        "standardDeviation": 0.012709848307514812
+      }
+    },
+    {
+      "id": "nonsense",
+      "topK": 3,
+      "contextChars": 0,
+      "queryMs": {
+        "count": 50,
+        "min": 0.044399999999996,
+        "max": 0.21250000000000568,
+        "mean": 0.053817999999999415,
+        "p50": 0.05079999999998108,
+        "p95": 0.06299999999998818,
+        "standardDeviation": 0.023203686689835665
+      }
+    },
+    {
+      "id": "long-section",
+      "topK": 3,
+      "contextChars": 689,
+      "queryMs": {
+        "count": 50,
+        "min": 0.06729999999998881,
+        "max": 0.363900000000001,
+        "mean": 0.09494199999999693,
+        "p50": 0.08150000000000546,
+        "p95": 0.20909999999997808,
+        "standardDeviation": 0.04877129110450022
+      }
+    }
+  ],
+  "retainedHeap": [
+    {
+      "copies": 1,
+      "samples": [
+        {
+          "copies": 1,
+          "baselineBytes": 5802336,
+          "liveBytes": 6007504,
+          "releasedBytes": 5802592,
+          "retainedDeltaBytes": 205168,
+          "retainedPerCopyBytes": 205168,
+          "releasedDeltaBytes": 256
+        },
+        {
+          "copies": 1,
+          "baselineBytes": 5803648,
+          "liveBytes": 6009592,
+          "releasedBytes": 5805096,
+          "retainedDeltaBytes": 205944,
+          "retainedPerCopyBytes": 205944,
+          "releasedDeltaBytes": 1448
+        },
+        {
+          "copies": 1,
+          "baselineBytes": 5805528,
+          "liveBytes": 6011088,
+          "releasedBytes": 5806176,
+          "retainedDeltaBytes": 205560,
+          "retainedPerCopyBytes": 205560,
+          "releasedDeltaBytes": 648
+        },
+        {
+          "copies": 1,
+          "baselineBytes": 5806320,
+          "liveBytes": 6012344,
+          "releasedBytes": 5807432,
+          "retainedDeltaBytes": 206024,
+          "retainedPerCopyBytes": 206024,
+          "releasedDeltaBytes": 1112
+        },
+        {
+          "copies": 1,
+          "baselineBytes": 5807576,
+          "liveBytes": 6012520,
+          "releasedBytes": 5807608,
+          "retainedDeltaBytes": 204944,
+          "retainedPerCopyBytes": 204944,
+          "releasedDeltaBytes": 32
+        }
+      ],
+      "retainedDeltaBytes": {
+        "count": 5,
+        "min": 204944,
+        "max": 206024,
+        "mean": 205528,
+        "p50": 205560,
+        "p95": 206024,
+        "standardDeviation": 422.0786656536907
+      },
+      "retainedPerCopyBytes": {
+        "count": 5,
+        "min": 204944,
+        "max": 206024,
+        "mean": 205528,
+        "p50": 205560,
+        "p95": 206024,
+        "standardDeviation": 422.0786656536907
+      },
+      "releasedDeltaBytes": {
+        "count": 5,
+        "min": 32,
+        "max": 1448,
+        "mean": 699.2,
+        "p50": 648,
+        "p95": 1448,
+        "standardDeviation": 524.463306628786
+      }
+    },
+    {
+      "copies": 64,
+      "samples": [
+        {
+          "copies": 64,
+          "baselineBytes": 5809864,
+          "liveBytes": 18798960,
+          "releasedBytes": 5907448,
+          "retainedDeltaBytes": 12989096,
+          "retainedPerCopyBytes": 202954.625,
+          "releasedDeltaBytes": 97584
+        },
+        {
+          "copies": 64,
+          "baselineBytes": 5907744,
+          "liveBytes": 18799960,
+          "releasedBytes": 5909552,
+          "retainedDeltaBytes": 12892216,
+          "retainedPerCopyBytes": 201440.875,
+          "releasedDeltaBytes": 1808
+        },
+        {
+          "copies": 64,
+          "baselineBytes": 5909920,
+          "liveBytes": 18807872,
+          "releasedBytes": 5917368,
+          "retainedDeltaBytes": 12897952,
+          "retainedPerCopyBytes": 201530.5,
+          "releasedDeltaBytes": 7448
+        },
+        {
+          "copies": 64,
+          "baselineBytes": 5917512,
+          "liveBytes": 18812096,
+          "releasedBytes": 5921560,
+          "retainedDeltaBytes": 12894584,
+          "retainedPerCopyBytes": 201477.875,
+          "releasedDeltaBytes": 4048
+        },
+        {
+          "copies": 64,
+          "baselineBytes": 5921704,
+          "liveBytes": 18812352,
+          "releasedBytes": 5921976,
+          "retainedDeltaBytes": 12890648,
+          "retainedPerCopyBytes": 201416.375,
+          "releasedDeltaBytes": 272
+        }
+      ],
+      "retainedDeltaBytes": {
+        "count": 5,
+        "min": 12890648,
+        "max": 12989096,
+        "mean": 12912899.2,
+        "p50": 12894584,
+        "p95": 12989096,
+        "standardDeviation": 38177.81641948633
+      },
+      "retainedPerCopyBytes": {
+        "count": 5,
+        "min": 201416.375,
+        "max": 202954.625,
+        "mean": 201764.05,
+        "p50": 201477.875,
+        "p95": 202954.625,
+        "standardDeviation": 596.5283815544739
+      },
+      "releasedDeltaBytes": {
+        "count": 5,
+        "min": 272,
+        "max": 97584,
+        "mean": 22232,
+        "p50": 4048,
+        "p95": 97584,
+        "standardDeviation": 37753.224476857606
+      }
+    }
+  ]
+}

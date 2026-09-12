@@ -42,7 +42,7 @@ Language: [English](./reliability-acceptance-2026-09-12.md) | **简体中文**
 
 ## 验证与 CI
 
-最新本地构建及全量 Jest：**282 个套件，2589 项通过，1 项跳过**；跳过项依赖 POSIX 后代进程终止行为。lint 门禁检查 25 个变化的 TypeScript 文件，**新增回归为零**。UI 字符串与渲染宿主审计、33 个 gallery 样例、33 个真实 Vault 归档样例均通过。全局 ESLint 仍有历史债务，增量门禁通过不等于全库 lint 清零。双语检查现包含尚未跟踪的仓库文档，新增 fixture 不再逃过提交前验证；Office fixture 已有独立中文配对。
+完成度复核的新鲜构建及全量 Jest 通过：**282 个套件，2593 项测试，1 项跳过**；跳过项依赖 POSIX 后代进程终止行为。本次三个 TypeScript 测试文件相对 `090098f` **没有新增 lint 回归**，先前 25 文件的实现比较保留在原证据中。UI 字符串与渲染宿主审计、33 个 gallery 样例、33 个真实 Vault 归档样例均通过；全局 ESLint 仍有历史债务。双语检查包含尚未跟踪的仓库文档，Office fixture 已有独立中文配对。
 
 工作流在 Linux/Windows 上使用 `npm ci` 和 Node 20，并安装锁文件中 `playwright` 1.61.0 与 `playwright-chromium` 1.61.1 各自对应的浏览器版本。权限只读，不传 provider 密钥，也不发布。lint 按路径、规则、严重度、消息、列和映射后的原行号匹配，重复诊断逐条消耗，处理重命名并在工具/配置失败时关闭门禁。减少旧债不能抵消另一条新错误。分支保护属于独立管理员设置。
 
@@ -52,6 +52,7 @@ npm test -- --runInBand
 npm run lint:regressions -- --base-ref origin/main
 npm run audit:i18n-ui
 npm run audit:render-host
+npm run benchmark:local-kb
 npm run diagram:gallery:check
 npm run diagram:examples:check
 git diff --check
@@ -62,6 +63,21 @@ git diff --check
 VitePress 1.6.4 与 34 locale 的 Docusaurus 网站构建／审计通过。配对 Markdown 本地链接有效、计划／缺陷 ID 一致；登记表覆盖全部 19 份历史正式计划和 32 份 brainstorming 记录。原生证据下载按相对 URL 发布，并验证字节一致；限定目录的 Git 属性防止 Windows／POSIX checkout 改写归档字节。
 
 [正常 PR 运行](https://github.com/Jacobinwwey/obsidian-NotEMD/actions/runs/34716224065)验证 `805bda2`：**Linux 282 个 suite／2590 项通过**，**Windows 282 个 suite／2589 项通过、1 项 POSIX 跳过**，构建、审计、lint、diff 检查全部通过。[负例 PR 运行](https://github.com/Jacobinwwey/obsidian-NotEMD/actions/runs/34716310309)在每个平台都只拒绝故意加入的 `ciGateNegative` 断言。[PR 13](https://github.com/Jacobinwwey/obsidian-NotEMD/pull/13)已关闭、未合入，远端分支已删除。独立本地 compiler／lint 探针分别拒绝 TS2322 和 `no-debugger`；[机器记录](./evidence/2026-09-12/ci-verification.json)保留 revision／job 链接、数量，以及首轮 CI 发现的双语 fixture 缺口和修正。验收没有放宽门禁。
+
+## 对照原计划的完成度复核
+
+[完成度记录](./evidence/2026-09-12/completion-audit.json)将每个单元映射到当前通过的测试文件和保留证据。补齐了两处证据缺口：U2 的同名来源／共享附件失败调度，U7 的受控保留堆与上下文 token 估算；生产行为未改变，bundle 与实测宿主使用的产物逐字节一致。
+
+| 单元 | 要求与证据 | 处置 |
+|---|---|---|
+| U1 | scheduler 终态、实时子状态、五种传输／重试取消、缓存／迟到结果，以及回环和真实 Obsidian smoke | 在声明的取消边界内通过 |
+| U2 | 不同笔记同名且共享输出目录的两种失败顺序；共享附件竞争；移动／替换文件、恢复失败、后续保存 | 状态化回归通过；失败持久化不会到达已完成预览／历史记录交接点 |
+| U3 | 真实 Linux／Windows 正／负 PR 运行、compiler／lint 拒绝、只读工作流权限 | 已验证；新增成本步骤保留原失败边界 |
+| U4 | PNG 替换拒绝、规范化 SVG 检查、双语／目录契约、归档字节哈希 | 已验证；结构、视觉和应用证据分开 |
+| U5 | 明确宿主的激活／预览／GC 预算及保持内联决定 | 满足原计划限时调查退出条件；物理移动设备／0.15.0 仍明确未验证 |
+| U6 | 原生编辑／保存／重开及固定 compiler／PDFium 记录 | 完成原计划逐 target 准入；失败的 Drawnix 附着能力不提升声明 |
+| U7 | 固定相关性标签、快照、上下文成本、构建／查询分布、真实 Vault I/O、GC 控制的保留／释放堆 | 已验证；未按留出标签调参 |
+| U8 | 原生表格绘制修复、中文／缺失字体／合并／图层 fixture、真实 PowerPoint 往返、未放宽的 visible-native 门禁 | 已选缺陷族通过；不宣称像素等价 |
 
 ## 宿主成本与打包决策
 
@@ -92,17 +108,24 @@ VitePress 1.6.4 与 34 locale 的 Docusaurus 网站构建／审计通过。配�
 
 冻结语料含 **13 个文件 / 13 条查询**，覆盖同义表达、连续中文、导航页、重名标题、长段落、混合文件/目录范围及无答案情况。语料独立于旧 fixture 编写，属于合成工程材料，不是外部标注 benchmark。未根据这些分数调整检索器。
 
-| 配置 | 正样本查询召回率 | 来源精度宏平均，弃答计 0 | 上下文字符数 p50 / p95 |
-|---|---:|---:|---:|
-| Top-1 | 6/9（66.7%） | 66.7% | 272 / 566 |
-| Top-3 | 7/9（77.8%） | 51.9% | 313 / 1106 |
+| 配置 | 正样本查询召回率 | 来源精度宏平均，弃答计 0 | 上下文字符数 p50 / p95 | 估算 token p50 / p95 |
+|---|---:|---:|---:|---:|
+| Top-1 | 6/9（66.7%） | 66.7% | 272 / 566 | 68 / 142 |
+| Top-3 | 7/9（77.8%） | 51.9% | 313 / 1106 | 79 / 277 |
+
+[完整质量报告](./evidence/2026-09-12/local-knowledge-held-out.json)使用已有 `estimateTokens()` 字符近似，不是 provider tokenizer 或计费数量。语料身份采用 UTF-8／LF 规范化 SHA-256 `d737b72f09bc7008aff3249ceca3bfcdd0218244666fdf3f16eded8a62871e87`，Windows checkout 换行不再改变身份；查询／相关性标签与排序均未改动。
 
 支付同义表达和连续中文查询漏召回；导航查询及排除当前文件后仍可能返回无关来源。Top-3 的召回提升有明确的精度和上下文成本。真实 Obsidian inspect 执行 65 次重建：总耗时 p50/p95 为 **8.6/23.8 ms**，文件读取 p95 **16.5 ms**，枚举 p95 **0.1 ms**。这是使用暖 OS 缓存的小语料。正常标题批处理复用一个 retriever，不能把 inspect 重建开销重复算到每次批查询。
 
 候选路径/标题在异步读取之前捕获。读取期间移动的文件跳过；文件消失不会丢弃其余知识，其他 I/O 错误仍传播。构建完成后，批处理保留已取得的文本，即使 Vault 随后改变；新操作重新建索引。这是逐文件读取快照，不是全 Vault 原子快照。当前优先使用窄任务范围，CJK 分词/排序优化应先建立新的验证集，再决定是否引入 embeddings。
 
+[受控成本报告](./evidence/2026-09-12/local-knowledge-cost.json)在明确的 Windows 宿主上，用独立 Node 22.19.0 进程测量生产检索核心。12 个有效文件形成 16 个 section，预热 20 次后测量 50 次构建，总 p50／p95 为 **0.376／0.832 ms**，解析／索引／管理开销 p95 为 **0.829 ms**，fixture 查找另行计时。预热两种 Top-K 后交替顺序，各执行 650 次查询：Top-1 p50／p95 **0.0505／0.0976 ms**，Top-3 **0.0511／0.0986 ms**。这是内存成本，与上面的真实 Vault 耗时分开。
+
+五轮 baseline／存活／释放测量在每个边界先让出事件循环，再调用两次完整 GC。单个存活 retriever 保留堆中位数为 **205,560 bytes**；64 个同时存活时，每个中位数为 **201,478 bytes**。释放后的堆增量中位数分别为 **648 bytes** 和 **4,048 bytes**；64 个释放后的 p95 为 **97,584 bytes**，原始报告如实保留。测量的是共享语料／模块基线之上的 V8 增量堆，不含 UI／RSS／磁盘缓存，既不证明大 Vault 扩展性，也不证明不存在任何泄漏。CI 上传测量结果，但不把依赖硬件的耗时作为通用通过阈值。
+
 ```bash
 npm run evaluate:local-kb
+npm run benchmark:local-kb
 npm test -- --runInBand src/tests/localKnowledgeSnapshot.test.ts
 ```
 

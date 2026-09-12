@@ -18,12 +18,12 @@ This plan follows the [September 12 assessment](../maintainer/project-plan-statu
 | Unit | State | Evidence / remaining gate |
 |---|---|---|
 | U1 | Implemented and verified | Red/green regressions, real HTTP/fetch abort and Obsidian 1.13.7 cancellation; caller-owned signals preserved. |
-| U2 | Implemented and verified | Overlapping output reservations, guarded text compensation and recovery copies; real Vault conflict/retry verified. |
+| U2 | Implemented and verified | Output reservations, guarded compensation, real Vault rename/conflict/retry; stateful tests cover both same-basename failure orders, shared companions and failed-save history handoff. |
 | U3 | Complete | Linux/Windows Node 20 PR checks passed; an isolated PR failed only its deliberate Jest assertion on both platforms and was closed unmerged. Compiler/lint negative probes also rejected their injected errors. [CI receipt](../maintainer/evidence/2026-09-12/ci-verification.json). |
 | U4 | Complete | Committed PNG hashes, normalized SVG comparison and contract-focused docs assertions. |
 | U5 | Investigation closed: keep inline | Activation p95 289.3 ms, dense Mermaid p95 120 ms, stable warmed preview heap. Physical mobile and Obsidian 0.15.0 remain unverified. |
 | U6 | Evaluation complete; claims qualified by target | diagrams.net edit/save/reopen passed; six Tectonic templates plus five orientation variants compiled and visually reviewed. Drawnix native nodes roundtrip; attached cross-links fail and are explicitly unsupported. |
-| U7 | Bounded lane complete | Frozen 13-query corpus, immutable per-batch snapshots, changing-file regressions and real Vault timings; semantic/CJK misses retained in the report. |
+| U7 | Bounded lane complete | Frozen 13-query corpus, snapshots, real Vault I/O, estimated context tokens and GC-controlled retained/released heap. `benchmark:local-kb` records build/query distributions; semantic/CJK misses remain visible. |
 | U8 | Bounded lane complete | Table border/alpha/merge fixes, actual PowerPoint 16 edit/save/reopen and unchanged visible-native fidelity gate. Raster-strict fidelity remains unclaimed. |
 
 The [acceptance record](../maintainer/reliability-acceptance-2026-09-12.md) owns versions, measurements, hashes, screenshots and integration results. The user's full execution request included both bounded product lanes: U7 measures retrieval and fixes snapshot semantics; U8 fixes the observed table-paint defect family. Neither adds embeddings or general native Office reconstruction. Completed evaluation does not turn an unavailable device or failed consumer capability into a passing support claim.
@@ -179,7 +179,7 @@ Index construction currently enumerates Vault files and serially reads candidate
 | Complete-operation cancellation | Fixes both resource lifetime and late mutation | Requires coherent scheduler/transport/persistence seams; a copied boolean or local UI flag is insufficient. |
 | Per-output save ownership | Prevents one plugin save undoing another without serializing all work | Does not provide cross-process/crash ACID; conflicts need explicit recovery rather than unsafe confidence. |
 | PR gate plus lint ratchet | Prevents new debt without rewriting working code | Baseline comparison must handle source movement and tool failures; do not hide defects in aggregate counts. |
-| Keep inline pending profiling | Preserves current packaging/release contract | Accepts current bundle cost until measured; isolation remains available if it solves a demonstrated bottleneck. |
+| Keep inline after profiling | Preserves current packaging/release contract | Named desktop budgets passed; re-measure other devices and investigate specific lifecycle failures before proposing isolation. |
 | Lexical quality before embeddings | Improves four task families with existing dependencies | May expose semantic misses it cannot solve; use that evidence to justify a later architecture change. |
 | Targeted Office fidelity before wider object extraction | Improves existing editable output | Requires a consuming application and font-controlled evidence; source XML tests alone are insufficient. |
 

@@ -8,6 +8,8 @@ canonical: true
 
 ## 9 月 13 日执行更新
 
+完成度复核另已补齐[上下文 token 估算、GC 后保留／释放堆](../maintainer/reliability-acceptance-2026-09-12.zh-CN.md)。运行 `npm run benchmark:local-kb` 可在独立进程重现 GC 测量；普通 Jest 堆增量不能作为保留内存证据。语料哈希规范化 checkout 换行，冻结标签未改变。
+
 U7 已在异步读取前捕获候选路径／标题，跳过已移动／删除的候选，并让 batch 复用不可变 retriever；其他读取失败继续传播。新操作重建快照，这不是全 Vault 原子快照。
 
 固定 13 文件／13 查询评估和 65 次真实 Obsidian 重建耗时见[验收记录](../maintainer/reliability-acceptance-2026-09-12.zh-CN.md)。Top-3 正例召回 7/9，宏平均精度 51.9%，连续中文与同义词仍有未命中。这些实测结果替代下文早期仅建议评估的后续步骤；未来排序变更必须使用新验证划分。

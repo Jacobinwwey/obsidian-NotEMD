@@ -48,6 +48,8 @@ jobs:
         run: npm test -- --runInBand --json --outputFile=.cache/verification/jest.json
       - name: Audit UI strings
         run: npm run audit:i18n-ui
+      - name: Measure retrieval cost and retained heap
+        run: npm run benchmark:local-kb
       - name: Audit render-host packaging
         run: npm run audit:render-host
       - name: Reject new lint debt

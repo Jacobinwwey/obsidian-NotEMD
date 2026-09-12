@@ -42,7 +42,7 @@ Real Obsidian 1.13.7, installer 1.12.7, Electron 39.8.3 / Chromium 142.0.7444.26
 
 ## Verification And CI
 
-Fresh local build and full Jest: **282 suites, 2589 passed, 1 skipped**. The skipped case requires POSIX descendant-process termination. The lint ratchet inspected 25 changed TypeScript files and found **zero regressions**. UI-string and render-host audits, 33 gallery fixtures, and 33 archived real-Vault examples passed. Full lint still has historical debt; a clean ratchet does not mean a clean global lint run. Bilingual coverage includes untracked repository documents so new fixtures cannot evade pre-commit checks; the Office fixture has a separate Chinese counterpart.
+The completion audit's fresh build and full Jest passed: **282 suites, 2593 tests, 1 skipped**. The skipped case requires POSIX descendant-process termination. Its three changed TypeScript test files add **zero lint regressions** against `090098f`; the earlier 25-file implementation comparison remains in the original evidence. UI-string and render-host audits, 33 gallery fixtures, and 33 archived real-Vault examples passed. Full lint still has historical debt. Bilingual coverage includes untracked repository documents, and the Office fixture has a separate Chinese counterpart.
 
 The workflow uses `npm ci`, Node 20 on Linux and Windows, and installs the browser revisions resolved by both `playwright` 1.61.0 and `playwright-chromium` 1.61.1. It has read-only repository permission, no provider secrets and no publication step. The ratchet matches path/rule/severity/message/column and mapped original line, consumes duplicate diagnostics one-to-one, handles renames and fails closed on tool/configuration failure. Removed debt cannot hide a different new error. Branch protection remains a separate administrative setting.
 
@@ -52,6 +52,7 @@ npm test -- --runInBand
 npm run lint:regressions -- --base-ref origin/main
 npm run audit:i18n-ui
 npm run audit:render-host
+npm run benchmark:local-kb
 npm run diagram:gallery:check
 npm run diagram:examples:check
 git diff --check
@@ -62,6 +63,21 @@ Use `rtk proxy npm.cmd` / `rtk proxy git` on this Windows workstation. The fresh
 VitePress 1.6.4 and the 34-locale Docusaurus website build/audit passed. Paired Markdown documents have valid local links and matching plan/finding IDs; the register covers all 19 historical formal plans and 32 brainstorm records. Native evidence downloads are published at their relative URLs with byte equality checked; scoped Git attributes preserve archived bytes across Windows/POSIX checkouts.
 
 The [positive PR run](https://github.com/Jacobinwwey/obsidian-NotEMD/actions/runs/34716224065) verified `805bda2` with **282 suites / 2590 tests on Linux**, and **282 suites / 2589 tests plus one POSIX skip on Windows**; build, audits, lint and diff hygiene all passed. The [negative PR run](https://github.com/Jacobinwwey/obsidian-NotEMD/actions/runs/34716310309) rejected only the deliberate `ciGateNegative` assertion on each platform. [PR 13](https://github.com/Jacobinwwey/obsidian-NotEMD/pull/13) is closed and unmerged; its remote branch was removed. Independent local compiler and lint probes rejected TS2322 and `no-debugger` respectively. The [machine receipt](./evidence/2026-09-12/ci-verification.json) retains revision/job URLs and counts, including the first CI-discovered bilingual-fixture gap and its correction. No gate was weakened to obtain acceptance.
+
+## Completion Audit Against The Original Plan
+
+The [completion audit](./evidence/2026-09-12/completion-audit.json) maps every unit to current passing test files and retained evidence. It closes two evidence gaps without changing production behavior: same-basename/shared-companion failure schedules in U2, and controlled retained heap plus context-token estimates in U7. The production bundle remains byte-identical to the real-host-tested bundle.
+
+| Unit | Requirement and evidence | Disposition |
+|---|---|---|
+| U1 | Scheduler settlement, live child state, five-transport/retry cancellation, cached/late outcomes; loopback and real Obsidian smoke | Verified within the declared cancellation boundary |
+| U2 | Both failure orders for distinct notes sharing a basename/output directory; shared companion contention; moved/replaced files, recovery failures and next-save usability | Stateful regressions pass; failed persistence never reaches the completed preview/history handoff |
+| U3 | Actual positive/negative Linux/Windows PR runs, compiler/lint rejection and read-only workflow permissions | Verified; the added cost step preserves the existing failure boundary |
+| U4 | PNG substitution rejection, normalized SVG checks, bilingual/catalog contracts and archived byte hashes | Verified; structural, visual and application evidence remain separate |
+| U5 | Named host activation/preview/GC budget and keep-inline decision | Original timeboxed exit satisfied; physical mobile/0.15.0 remain explicitly unverified |
+| U6 | Native edit/save/reopen and pinned compiler/PDFium records | Original target-specific admission completed; failed Drawnix attachment is not promoted |
+| U7 | Frozen relevance labels, snapshots, context cost, build/query distributions, real-Vault I/O and GC-controlled retained/released heap | Verified; no tuning to held-out labels |
+| U8 | Native table-paint fixes, CJK/missing-font/merge/layer fixture, actual PowerPoint roundtrip and unchanged visible-native gate | Selected defect family verified; raster equivalence remains unclaimed |
 
 ## Host Cost And Packaging Decision
 
@@ -92,17 +108,24 @@ These application checks used generated fixtures in isolated contexts. They do n
 
 The frozen corpus contains **13 files / 13 queries**, with synonyms, Chinese compounds, navigation, duplicate titles, long sections, mixed file/folder scopes and no-answer cases. It was authored independently from the earlier fixture; it is synthetic engineering material, not an externally labeled benchmark. Scores were not used to tune the retriever.
 
-| Configuration | Positive-query recall | Macro source precision, abstention=0 | Context characters p50 / p95 |
-|---|---:|---:|---:|
-| Top-1 | 6/9 (66.7%) | 66.7% | 272 / 566 |
-| Top-3 | 7/9 (77.8%) | 51.9% | 313 / 1106 |
+| Configuration | Positive-query recall | Macro source precision, abstention=0 | Context characters p50 / p95 | Estimated tokens p50 / p95 |
+|---|---:|---:|---:|---:|
+| Top-1 | 6/9 (66.7%) | 66.7% | 272 / 566 | 68 / 142 |
+| Top-3 | 7/9 (77.8%) | 51.9% | 313 / 1106 | 79 / 277 |
+
+The [full quality report](./evidence/2026-09-12/local-knowledge-held-out.json) uses the existing `estimateTokens()` character-based approximation, not a provider tokenizer or billing count. Corpus identity is normalized UTF-8/LF SHA-256 `d737b72f09bc7008aff3249ceca3bfcdd0218244666fdf3f16eded8a62871e87`; Windows checkout line endings no longer change the identity. Queries/relevance labels and ranking remain unchanged.
 
 The payment synonym and continuous Chinese query miss. Navigation and current-file-exclusion cases can still return unrelated sources. Top-3 improves recall at an explicit precision/context cost. A real Obsidian inspect run performed 65 rebuilds: total p50/p95 **8.6/23.8 ms**, file-read p95 **16.5 ms**, enumeration p95 **0.1 ms**. This small corpus uses a warm OS cache. Normal title batches reuse one retriever; these inspect timings must not be multiplied into the batch query path.
 
 Candidate paths/titles are captured before asynchronous reads. A file moved during its read is omitted; a disappeared file does not discard other knowledge; unrelated I/O errors still propagate. Once built, the batch snapshot retains acquired text even if the Vault changes. A new operation rebuilds it. This is a per-file read snapshot, not an atomic whole-Vault snapshot. Use narrow task scopes now; evaluate CJK tokenization/ranking on a new validation split before considering embeddings.
 
+The [controlled cost report](./evidence/2026-09-12/local-knowledge-cost.json) measures the production retrieval core in a fresh Node 22.19.0 process on the named Windows host. Twelve eligible files produce 16 sections. After 20 warm builds, 50 builds give total p50/p95 **0.376/0.832 ms**; parsing/indexing/bookkeeping p95 is **0.829 ms**, with fixture lookup accounted separately. After warming both Top-K cases, 650 calls each in alternating order give query p50/p95 **0.0505/0.0976 ms** (Top-1) and **0.0511/0.0986 ms** (Top-3). These are in-memory costs, distinct from the real-Vault timings above.
+
+Five baseline/live/released rounds invoke two full GCs after an event-loop turn at each boundary. One live retriever retains a median **205,560 bytes**; 64 simultaneous retrievers retain **201,478 bytes per copy** at the median. Median heap delta after releasing them is **648 bytes** and **4,048 bytes** respectively; the 64-copy release p95 is **97,584 bytes**, retained in the raw report. This measures marginal V8 heap over a shared corpus/module baseline, excluding UI/RSS/disk cache. It neither establishes large-Vault scaling nor proves absence of every leak. CI uploads this measurement without treating hardware-dependent timings as universal pass thresholds.
+
 ```bash
 npm run evaluate:local-kb
+npm run benchmark:local-kb
 npm test -- --runInBand src/tests/localKnowledgeSnapshot.test.ts
 ```
 

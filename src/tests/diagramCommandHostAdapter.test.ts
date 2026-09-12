@@ -97,6 +97,30 @@ function createDiagramHost() {
 }
 
 describe('diagram command host adapter', () => {
+    test('a failed save never reaches the completed preview and history handoff', async () => {
+        const { diagramHost, reporter } = createDiagramHost();
+        const completedPreviewPaths: string[] = [];
+        diagramHost.openPreview.mockImplementation((_artifact, sourcePath) => completedPreviewPaths.push(sourcePath));
+        const failure = new Error('Artifact persistence failed with a recovery conflict');
+        diagramHost.saveArtifact.mockRejectedValue(failure);
+        await expect(completeArtifactDiagramCommand({
+            host: diagramHost as any,
+            file: { path: 'Notes/Topic.md' } as any,
+            reporter: reporter as any,
+            result: { spec: { intent: 'canvasMap' }, artifact: {
+                target: 'json-canvas', content: '{}', mimeType: 'application/json', sourceIntent: 'canvasMap'
+            } } as any,
+            actionLabel: 'Generate diagram', executionMode: 'save-artifact', completeNotice: 'complete',
+            previewReadyNotice: 'ready', manualFixHintNotice: 'fix', autoFixAfterGenerate: false,
+            getStepStatusText: (step, total, label) => `${step}/${total} ${label}`,
+            getActionCompleteText: label => `Completed ${label}`
+        })).rejects.toBe(failure);
+        expect(completedPreviewPaths).toEqual([]);
+        expect(diagramHost.openFile).not.toHaveBeenCalled();
+        expect(diagramHost.notify).not.toHaveBeenCalledWith('complete');
+        expect(reporter.updateStatus).not.toHaveBeenCalledWith(expect.anything(), 100);
+    });
+
     test('busy generate wrapper short-circuits before reading file or running generation', async () => {
         const { host, reporter } = createDiagramHost();
         host.isBusy.mockReturnValue(true);
