@@ -1,0 +1,1942 @@
+{
+  "observedDate": "2026-09-13",
+  "measurementWindow": [
+    "2026-09-12",
+    "2026-09-13"
+  ],
+  "baselineCommit": "7638cec",
+  "releasedVersionUnchanged": "1.9.7",
+  "productionBundle": {
+    "sha256": "bedb0e0d92106f490c407e8b475b596c5fcb8c43deca579b683032004c442fe7",
+    "bytes": 10059753,
+    "gzipBytes": 3730433
+  },
+  "localVerification": {
+    "build": "passed",
+    "suitesPassed": 282,
+    "testsPassed": 2589,
+    "testsSkipped": 1,
+    "changedTypeScriptFiles": 25,
+    "lintRegressions": 0,
+    "i18n": "passed",
+    "renderHost": "passed",
+    "galleryEntries": 33,
+    "archivedExampleEntries": 33
+  },
+  "obsidian": {
+    "appVersion": "1.13.7",
+    "versions": {
+      "node": "22.22.1",
+      "acorn": "8.15.0",
+      "ada": "2.9.2",
+      "amaro": "1.1.5",
+      "ares": "1.34.6",
+      "brotli": "1.0.9",
+      "cjs_module_lexer": "2.2.0",
+      "cldr": "44.1",
+      "icu": "74.2",
+      "llhttp": "9.3.0",
+      "modules": "140",
+      "napi": "10",
+      "nbytes": "0.1.1",
+      "ncrypto": "0.0.1",
+      "nghttp2": "1.64.0",
+      "openssl": "0.0.0",
+      "simdjson": "4.2.4",
+      "simdutf": "7.3.3",
+      "sqlite": "3.51.2",
+      "tz": "2025b",
+      "undici": "6.23.0",
+      "unicode": "15.1",
+      "uv": "1.51.0",
+      "uvwasi": "0.0.23",
+      "v8": "14.2.231.22-electron.0",
+      "zlib": "1.3.1",
+      "zstd": "1.5.8",
+      "electron": "39.8.3",
+      "chrome": "142.0.7444.265"
+    },
+    "platform": "win32",
+    "arch": "x64",
+    "cpu": "12th Gen Intel(R) Core(TM) i5-12600K",
+    "ramBytes": 68494569472,
+    "vaultProcess": "function",
+    "fontFamily": "\"??\", \"??\", \"??\", ui-sans-serif, -apple-system, BlinkMacSystemFont, system-ui, \"Segoe UI\", \"Google Sans Flex\", Roboto, \"Inter Variable\", Inter, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", sans-serif",
+    "devicePixelRatio": 1.5,
+    "visibility": "visible",
+    "testedBundleSha256": "72e27c6bc2ac01ade5ebb5725db4da001f8a001128dabc3c6081933f4cd0029f",
+    "activationMs": {
+      "samples": [
+        245.70000004768372,
+        226.70000004768372,
+        256.7999999523163,
+        289.2999999523163,
+        224,
+        224.29999995231628,
+        231.5,
+        217.29999995231628
+      ],
+      "p50": 226.70000004768372,
+      "p95": 289.2999999523163,
+      "standardDeviation": 22.387831506559053
+    },
+    "cancellation": {
+      "passed": true,
+      "requests": 2,
+      "settledMs": 5,
+      "commandWallMs": 45,
+      "generatedCount": 0,
+      "movedCount": 0,
+      "activeTasks": 0,
+      "reporter": "T8",
+      "lateResponsesObservedMs": 350
+    },
+    "persistence": {
+      "passed": true,
+      "externalEditPreserved": true,
+      "recoveryPath": "host-verification-1789200716505/Artifact_diagram.canvas.notemd-recovery-mty3wss2-1",
+      "queueUsableAfterFailure": true,
+      "atomicApi": "Vault.process"
+    },
+    "previews": [
+      {
+        "name": "mermaid-small-cjk",
+        "firstUseMs": 54.799999952316284,
+        "warmMs": {
+          "samples": [
+            27.40000009536743,
+            23,
+            23.40000009536743,
+            21.800000190734863,
+            24.09999990463257,
+            22.40000009536743,
+            26.700000047683716,
+            24.59999990463257
+          ],
+          "p50": 23.40000009536743,
+          "p95": 27.40000009536743,
+          "standardDeviation": 1.8619545978890388
+        }
+      },
+      {
+        "name": "mermaid-dense-cjk",
+        "firstUseMs": 95.80000019073486,
+        "warmMs": {
+          "samples": [
+            97.29999995231628,
+            120,
+            92.10000014305115,
+            88.70000004768372,
+            89.20000004768372,
+            87.89999985694885,
+            95.5,
+            92.90000009536743
+          ],
+          "p50": 92.10000014305115,
+          "p95": 120,
+          "standardDeviation": 9.781870982198711
+        }
+      },
+      {
+        "name": "vega-small-cjk",
+        "firstUseMs": 76.40000009536743,
+        "warmMs": {
+          "samples": [
+            29.699999809265137,
+            31,
+            29.09999990463257,
+            29.299999952316284,
+            26.700000047683716,
+            25.200000047683716,
+            27.299999952316284,
+            30.300000190734863
+          ],
+          "p50": 29.09999990463257,
+          "p95": 31,
+          "standardDeviation": 1.852532040226268
+        }
+      },
+      {
+        "name": "vega-dense-cjk",
+        "firstUseMs": 38.5,
+        "warmMs": {
+          "samples": [
+            34.60000014305115,
+            41.19999980926514,
+            48.5,
+            39.60000014305115,
+            42.799999952316284,
+            49.90000009536743,
+            43.19999980926514,
+            55.200000047683716
+          ],
+          "p50": 42.799999952316284,
+          "p95": 55.200000047683716,
+          "standardDeviation": 6.093182663159001
+        }
+      },
+      {
+        "name": "drawnix-knowledge-map",
+        "firstUseMs": 35.39999985694885,
+        "warmMs": {
+          "samples": [
+            25.59999990463257,
+            32.299999952316284,
+            70.19999980926514,
+            30.5,
+            27.899999856948853,
+            22,
+            23.199999809265137,
+            21.799999952316284
+          ],
+          "p50": 25.59999990463257,
+          "p95": 70.19999980926514,
+          "standardDeviation": 15.000203088940227
+        }
+      }
+    ],
+    "heapControl": {
+      "method": "Fresh renderer, official CDP HeapProfiler.collectGarbage after each group; three catalog types per group.",
+      "freshBytes": 62918948,
+      "afterFirst30Bytes": 66300420,
+      "afterNext30Bytes": 66582112,
+      "residualPreviewModals": 0
+    },
+    "hotReloadCaution": "Repeated disable/enable in one renderer retained more than 2 GB after many probe iterations; a full Vault reload reset it. This development reload pattern is separate from the measured steady preview path.",
+    "mobileEmulation": {
+      "cycles": 30,
+      "passed": true,
+      "physicalDeviceEvidence": false
+    },
+    "oldestManifestVersion": "0.15.0",
+    "oldestManifestVersionTested": false,
+    "persistencePathRaces": {
+      "observedAt": "2026-09-12T19:12:19.535Z",
+      "appVersion": "1.13.7",
+      "passed": true,
+      "testedBundleSha256": "bedb0e0d92106f490c407e8b475b596c5fcb8c43deca579b683032004c442fe7",
+      "disposableVaultMarkerRequired": true,
+      "cases": [
+        {
+          "scenario": "atomic-write-move",
+          "rejected": true,
+          "movedFilePreserved": true,
+          "queueUsable": true
+        },
+        {
+          "scenario": "legacy-write-move",
+          "rejected": true,
+          "movedFilePreserved": true,
+          "queueUsable": true
+        },
+        {
+          "scenario": "binary-write-move",
+          "rejected": true,
+          "movedFilePreserved": true,
+          "queueUsable": true
+        },
+        {
+          "scenario": "compensation-move",
+          "rejected": true,
+          "movedFilePreserved": true,
+          "queueUsable": true
+        },
+        {
+          "scenario": "compensation-replacement",
+          "rejected": true,
+          "movedFilePreserved": true,
+          "queueUsable": true
+        }
+      ]
+    }
+  },
+  "consumers": {
+    "drawnix": {
+      "applicationCommit": "9939f452745c3f401766d378f98faa5d26bcc48a",
+      "packageVersion": "0.0.2",
+      "plaitVersion": "0.93.1",
+      "browser": "Chrome 152.0.7977.83",
+      "fileApi": "standard file input/download; File System Access disabled in the isolated browser context",
+      "nativeNodes": 38,
+      "semanticRelations": 12,
+      "roots": 1,
+      "editedLabel": "Command palette 已验证",
+      "nodeEditSaveReopen": "passed",
+      "nativeRelationAttachment": "failed",
+      "limitation": "The application reflows mind nodes but arrows retain fixed points. source.id/target.id are semantic metadata; Plait expects boundId handles and its shape binding types do not include MindElement.",
+      "inputSha256": "9933b84fe9a59043db32fa66d24fdb0faf0c08dc7a086c81ad71802037161caa",
+      "savedSha256": "dfc23a86bfbb72c75e38946b050278580a789fa87e841a57c3a6d363212b0cb2",
+      "screenshot": "drawnix-reopened.png"
+    },
+    "diagramsNet": {
+      "version": "31.4.5",
+      "browser": "Chrome 152.0.7977.83",
+      "nativeVertices": 3,
+      "nativeEdges": 2,
+      "editedLabel": "API Gateway 已验证",
+      "importEditSaveReopen": "passed",
+      "inputSha256": "cdc95508d68d6634d6aeda092558e47d37c73ffc756e5a077190229c3ef17945",
+      "savedSha256": "9236267dcb482714110775a84350aa4dec7d46ab24059d97ed4d8da5556ec8f4",
+      "screenshot": "drawio-reopened.png"
+    },
+    "circuitikz": {
+      "tectonic": "0.16.9",
+      "archiveSha256": "131a24604785a9600989a3d91225f597df52ac06f00aeffe86fd529f99ee5cdd",
+      "package": "Circuitikz 1.4.6 (2022/02/04)",
+      "pgf": "3.1.9a",
+      "latex": "2021-11-15 patch 1",
+      "offlineCompilePassed": true,
+      "fixtureCount": 6,
+      "coldCache": "Initial 30-second runner attempts timed out downloading TeX resources. A separate compiler bootstrap completed; all six acceptance compiles then passed with --only-cached.",
+      "compilerWarning": "The Windows binary emitted a Fontconfig configuration warning; bundled PDF fonts rendered successfully.",
+      "rasterizer": "PDFium via pypdfium2 5.12.1",
+      "visualReview": "Six golden templates and five orientation variants reviewed. NAND/NOR control wires use repeated named nets; untransformed text stays readable beside mirrored devices. Transmission gates use horizontal S/D paths and separate complementary controls. Topology remains unchanged.",
+      "fixtures": [
+        {
+          "name": "cmos-buffer-v1",
+          "passed": true,
+          "inputSha256": "331f20ef874aba70f1cb8cbcb17c4f8f247268bed0159ea04c736c24bf3a3e0b",
+          "texSha256": "14dd90a4d9cffbaafb5cef09153b3ac712ebda72eb586579a9910560e6ebdc43",
+          "pdfSha256": "ca79a0d0bbf4919ac9f1b5e987637b31ac9b16f7b072bdbf1cf8a23a622dced0",
+          "pngSha256": "eeba753531673d18fcf392fa1dd001d7fc9094f1f52f8f8dfff9414012120032",
+          "logSha256": "05ac25b4ba0dbbc9f81491f603589033ec6c5e8d6e8211be4d9bb55029edd9fe"
+        },
+        {
+          "name": "cmos-inverter-v1",
+          "passed": true,
+          "inputSha256": "1cf318ef243a2484ccdf715ba8d3f4a86f5b739461c9df2574196e92b367fd15",
+          "texSha256": "8607136c8120823ce42b3a2f9eacba75b146b771f4a4126ea2ceb27255e3c22f",
+          "pdfSha256": "1d893f08d60397dfb368536d695bccb90186e4fa4efffafb15222d035366d316",
+          "pngSha256": "97e34be4b23a20aa4f2bf8b8531acaf2e235150a90fe0b9c84dc9688da7a6f82",
+          "logSha256": "7dbcbffe2d1ad161567af4474bb01a6831ef72f60e4bf25839127fdbac1741e4"
+        },
+        {
+          "name": "cmos-nand2-v1",
+          "passed": true,
+          "inputSha256": "b3e0ca31c608401268e0e2c0e63e77340944dc30d080121c11a17677976b7767",
+          "texSha256": "1cf523faf9bc4e57499dfef27188cadfe0ef8dd8f4472999a5e04e7b0dbbe07f",
+          "pdfSha256": "c9edd10df7d9f4f8995d87009e8387c0651b44f4f5490802ba01d1017316e032",
+          "pngSha256": "927fabc28e9394c17c562128de511b5af651f084b108db3540897f75c4156b1d",
+          "logSha256": "35041ecac52731c667e455dfdbc1be5a543ab1cde42206540a129c52fcc0660d"
+        },
+        {
+          "name": "cmos-nor2-v1",
+          "passed": true,
+          "inputSha256": "4cf6d51cfddd80423be82dbe098734758cc8ed8c1495d0ec5b613737da14c343",
+          "texSha256": "3e8da612cfc0b21f87470420fe1b3b098f2d51434e07151ad706de020ee07be6",
+          "pdfSha256": "5dbea2f06e2599f9034c7683200c4645f94525ade7db479ad1eead7c8330c1a9",
+          "pngSha256": "28373911bdca70cd4846b3a8dccc75179a9690f9a26215e20c988766f8d00578",
+          "logSha256": "270e50bc47c3b0415a1a99558a4f0eb28163fb3fa267eebb6bd8ba6d0e5427ec"
+        },
+        {
+          "name": "cmos-transmission-gate-v1",
+          "passed": true,
+          "inputSha256": "ac97c03b0bf7317a76996be42944acf6fd61128357073e67feb62c86466e539a",
+          "texSha256": "71b3cfa7763534aaa0d98512bfadeb0b90816d15c6ab4b17e148ca9e07bcf792",
+          "pdfSha256": "1078a1f826130a317e2fcd87ceae2cb92790c6bd859d988bed37ae0c7cbfc326",
+          "pngSha256": "1a43a3922057b263477670bdd98c941a0772e8e9c65e6ae4985e77a3e1260748",
+          "logSha256": "75b26c9cdc3dd03e1e4431de092099e68e2264b6b9620ea3c474af880eff2570"
+        },
+        {
+          "name": "common-source-nmos-v1",
+          "passed": true,
+          "inputSha256": "70f5e2e555b584c878143f5c669bd96da77dd41f5dbb36209dcb4c4e961b932e",
+          "texSha256": "8b7b04e8061f256c713aef184b79ca0e0f77d9f08eabbc155c0fb43cb7c16b40",
+          "pdfSha256": "2f5777a9362c095d72d893d60217e43820c98b94c427136ace99d33ca724768e",
+          "pngSha256": "ba66d514ed25172b2c85ef24f485ff1c27eeb7c7b8fc961ec3a77a3227dc2374",
+          "logSha256": "a1a24d1b302efbd115fa11461b7925aa2557052aafd9e9b39b0f25861873d396"
+        }
+      ],
+      "orientationVariants": [
+        {
+          "name": "cmos-nand2-v1-right-left",
+          "passed": true,
+          "topologyPreserved": true,
+          "inputSha256": "ab79f4df8c35e1d33cf40f9ec20a224a128b865b8f7f74ef8f7e4674a4ebb13f",
+          "texSha256": "0030735908cadc1be11e7eea2182df86cea9b098946989f7804ba0e1dbaeaaf3",
+          "pdfSha256": "8c2568cb2124e4acd6c293d18fa6dfb55c340e579364bf50ebbe96f1f98b07e5",
+          "pngSha256": "3331750041074e5cfd822c76eb59b8ccf3aa125cb4b137a61201faa87cd1cf2b",
+          "logSha256": "5b98b93f6c289f6f4345c5b88a3e82a3d61d62f2979201f56cfc34c020ad072d"
+        },
+        {
+          "name": "cmos-nor2-v1-right-left",
+          "passed": true,
+          "topologyPreserved": true,
+          "inputSha256": "45ebbeace5dbbb95c2ea1c3181e022314448db1e0f4e323c17dbe45d67bc1222",
+          "texSha256": "214889689aff8ffab9a13f8836943d7faa77ca61c9e7ca3fd9cb95d2337eaf64",
+          "pdfSha256": "a989f1686e6a4147f0b984442a1211ad17f3ea355c26fae497ab8809966da26b",
+          "pngSha256": "0d6825b8bf5c7970f2b1ecd81b3e4732d3fa1e65ee3aebfed2b0db8683595a16",
+          "logSha256": "920c3a42c4a3abfaccf29d577816512edb8bd66696e122da41dc40fe1eecd094"
+        },
+        {
+          "name": "cmos-transmission-gate-v1-right-left",
+          "passed": true,
+          "topologyPreserved": true,
+          "inputSha256": "8242da976eefa67da33be423d97847745ef43797915aa05078767206255a0cd7",
+          "texSha256": "f38d5335d31f792fddb536887a47ab95fdeae91384a7243942f847cb127079ba",
+          "pdfSha256": "37cdf63922afe80b02972889b6500ab1d3aaf2da344aef10fe36ec385995f5b7",
+          "pngSha256": "bfe45ca95281d74f2b51a5f5e1aaa4d1d763fb0d8c8c97c159c8e53dd4093fd5",
+          "logSha256": "60e0e0a0a27dced7bce3ff68d97ef1588aa4657c0a44adf969cf96d0aeec459f"
+        },
+        {
+          "name": "cmos-transmission-gate-v1-right-right",
+          "passed": true,
+          "topologyPreserved": true,
+          "inputSha256": "689669b24de2537b5852ec6004635a7d330ae9a27ca7145e391004af334ea8ed",
+          "texSha256": "9fbfc70f1410850d4522151076b7bc0b51a5e89956e88310cf2ea14f79b635c8",
+          "pdfSha256": "ee2d76e0f833bb446c249fae06bfc9178fa339eb3ef7034e8be8b9e9986701f7",
+          "pngSha256": "803552c8a990c9c3907468307fe4efe582b67465bab3e6387aca79153c89ab79",
+          "logSha256": "bc7464719edc1f8ce0d4c31a6356865ca069c15615a320bce734cff800c89f5f"
+        },
+        {
+          "name": "cmos-transmission-gate-v1-left-left",
+          "passed": true,
+          "topologyPreserved": true,
+          "inputSha256": "2701f4b3522a662167b85c1b2bf4e23fdeefab765b6bc36c8a415a369cf24cc4",
+          "texSha256": "dff4edd89bffe94f32e41435a1763307fbb0b69ef31de26e00c8fb2751ef2872",
+          "pdfSha256": "bb7563503671a3f4f4735060fe34f74b59cec5de026026bd968fb0a76060c132",
+          "pngSha256": "3b59210680c5143a6107e974e75035ac3015c03bcb98400bfeeb2221ed5bd39c",
+          "logSha256": "fe2819ffaf8687cb67b195bc774b550264665db8e7c722791e137dc8c0f08c65"
+        }
+      ]
+    },
+    "powerpoint": {
+      "passed": true,
+      "application": "Microsoft PowerPoint",
+      "version": "16.0",
+      "build": "14332",
+      "sourceSha256": "3d05485272743d172f1ecb6ed51e85b5d0ad8c2cbe0da1ea2035b16c287e3e94",
+      "roundtripSha256": "83fc1171c8f09aed580524e186d86503d58d4c1ad625010e9dfcc97d29162d1c",
+      "slideCount": 10,
+      "nativeTableCount": 2,
+      "editedCellCount": 1,
+      "reopenedMatchingCellCount": 1,
+      "cjkTableCellCountBefore": 6,
+      "cjkTableCellCountAfter": 6,
+      "pngCount": 10,
+      "workflowPassed": true,
+      "reference": "Same rendered HTML consumed by the visible native export",
+      "visibleNativeGate": {
+        "passed": true,
+        "failures": [],
+        "thresholds": {
+          "maxRmse": 0.25,
+          "meanRmse": 0.145,
+          "maxScaleRatioDelta": null,
+          "maxDifferenceBoundingBoxAreaRatio": null
+        }
+      },
+      "exploratoryRasterThreshold": {
+        "maxRmse": 0.12,
+        "meanRmse": 0.08,
+        "passed": false
+      },
+      "before": [
+        {
+          "slide": 1,
+          "rmse": 0.165596
+        },
+        {
+          "slide": 2,
+          "rmse": 0.101428
+        },
+        {
+          "slide": 3,
+          "rmse": 0.145045
+        },
+        {
+          "slide": 4,
+          "rmse": 0.10449
+        },
+        {
+          "slide": 5,
+          "rmse": 0.192665
+        },
+        {
+          "slide": 6,
+          "rmse": 0.0906794
+        },
+        {
+          "slide": 7,
+          "rmse": 0.0517177
+        },
+        {
+          "slide": 8,
+          "rmse": 0.113958
+        },
+        {
+          "slide": 9,
+          "rmse": 0.0971335
+        },
+        {
+          "slide": 10,
+          "rmse": 0.0123318
+        }
+      ],
+      "after": [
+        {
+          "slide": 1,
+          "rmse": 0.165596
+        },
+        {
+          "slide": 2,
+          "rmse": 0.101428
+        },
+        {
+          "slide": 3,
+          "rmse": 0.145045
+        },
+        {
+          "slide": 4,
+          "rmse": 0.10449
+        },
+        {
+          "slide": 5,
+          "rmse": 0.159463
+        },
+        {
+          "slide": 6,
+          "rmse": 0.0906794
+        },
+        {
+          "slide": 7,
+          "rmse": 0.0517177
+        },
+        {
+          "slide": 8,
+          "rmse": 0.113958
+        },
+        {
+          "slide": 9,
+          "rmse": 0.0971335
+        },
+        {
+          "slide": 10,
+          "rmse": 0.0123318
+        }
+      ],
+      "limitation": "Native font shaping and line metrics remain different from Chromium. Mermaid/SVG geometry remains image fallback; no pixel-identical or fully native reconstruction claim."
+    }
+  },
+  "retrieval": {
+    "corpusSha256": "d737b72f09bc7008aff3249ceca3bfcdd0218244666fdf3f16eded8a62871e87",
+    "provenance": "Independently authored from the existing implementation fixtures. Queries and relevance labels were frozen before the first evaluation. Synthetic engineering notes, not private user Vault data or an external benchmark.",
+    "files": 13,
+    "queries": 13,
+    "quality": [
+      {
+        "topK": 1,
+        "positiveQueries": 9,
+        "macroRecall": 0.6666666666666666,
+        "macroPrecisionWithAbstentionAsZero": 0.6666666666666666,
+        "noAnswerFalsePositiveQueries": [
+          "navigation-title",
+          "current-file-exclusion"
+        ],
+        "contextChars": {
+          "p50": 272,
+          "p95": 566
+        },
+        "cases": [
+          {
+            "id": "synonymous-payment",
+            "family": "synonym",
+            "topK": 1,
+            "relevantPaths": [
+              "Knowledge/Payments.md"
+            ],
+            "sourcePaths": [
+              "Knowledge/Transport.md"
+            ],
+            "sourceRecall": 0,
+            "sourcePrecision": 0,
+            "falsePositiveSources": [
+              "Knowledge/Transport.md"
+            ],
+            "contextChars": 566,
+            "queryMs": {
+              "p50": 0.9956000000092899,
+              "p95": 1.7862000000022817
+            }
+          },
+          {
+            "id": "operation-abort",
+            "family": "english",
+            "topK": 1,
+            "relevantPaths": [
+              "Knowledge/Cancellation.md"
+            ],
+            "sourcePaths": [
+              "Knowledge/Transport.md"
+            ],
+            "sourceRecall": 0,
+            "sourcePrecision": 0,
+            "falsePositiveSources": [
+              "Knowledge/Transport.md"
+            ],
+            "contextChars": 566,
+            "queryMs": {
+              "p50": 0.8853000000090105,
+              "p95": 1.319499999997788
+            }
+          },
+          {
+            "id": "cjk-concurrency",
+            "family": "chinese-compound",
+            "topK": 1,
+            "relevantPaths": [
+              "Knowledge/原子存储.md"
+            ],
+            "sourcePaths": [],
+            "sourceRecall": 0,
+            "sourcePrecision": null,
+            "falsePositiveSources": [],
+            "contextChars": 0,
+            "queryMs": {
+              "p50": 0.5703000000066822,
+              "p95": 0.6885000000038417
+            }
+          },
+          {
+            "id": "cjk-recovery",
+            "family": "chinese",
+            "topK": 1,
+            "relevantPaths": [
+              "Knowledge/原子存储.md"
+            ],
+            "sourcePaths": [
+              "Knowledge/原子存储.md"
+            ],
+            "sourceRecall": 1,
+            "sourcePrecision": 1,
+            "falsePositiveSources": [],
+            "contextChars": 136,
+            "queryMs": {
+              "p50": 0.025599999993573874,
+              "p95": 0.036600000006728806
+            }
+          },
+          {
+            "id": "latency-statistics",
+            "family": "english",
+            "topK": 1,
+            "relevantPaths": [
+              "Knowledge/Latency.md"
+            ],
+            "sourcePaths": [
+              "Knowledge/Latency.md"
+            ],
+            "sourceRecall": 1,
+            "sourcePrecision": 1,
+            "falsePositiveSources": [],
+            "contextChars": 272,
+            "queryMs": {
+              "p50": 0.938800000003539,
+              "p95": 1.1046000000060303
+            }
+          },
+          {
+            "id": "duplicate-title",
+            "family": "duplicate-title",
+            "topK": 1,
+            "relevantPaths": [
+              "Knowledge/Infra/Cache.md"
+            ],
+            "sourcePaths": [
+              "Knowledge/Infra/Cache.md"
+            ],
+            "sourceRecall": 1,
+            "sourcePrecision": 1,
+            "falsePositiveSources": [],
+            "contextChars": 252,
+            "queryMs": {
+              "p50": 0.7603999999992084,
+              "p95": 0.823099999994156
+            }
+          },
+          {
+            "id": "backoff-numeric",
+            "family": "abbreviation",
+            "topK": 1,
+            "relevantPaths": [
+              "Knowledge/Rate limits.md"
+            ],
+            "sourcePaths": [
+              "Knowledge/Rate limits.md"
+            ],
+            "sourceRecall": 1,
+            "sourcePrecision": 1,
+            "falsePositiveSources": [],
+            "contextChars": 284,
+            "queryMs": {
+              "p50": 0.4995000000053551,
+              "p95": 0.5604000000021188
+            }
+          },
+          {
+            "id": "mixed-scope-office",
+            "family": "mixed-file-folder-scope",
+            "topK": 1,
+            "relevantPaths": [
+              "References/Office.md"
+            ],
+            "sourcePaths": [
+              "References/Office.md"
+            ],
+            "sourceRecall": 1,
+            "sourcePrecision": 1,
+            "falsePositiveSources": [],
+            "contextChars": 313,
+            "queryMs": {
+              "p50": 0.7562999999936437,
+              "p95": 0.8168000000005122
+            }
+          },
+          {
+            "id": "navigation-title",
+            "family": "navigation-no-answer",
+            "topK": 1,
+            "relevantPaths": [],
+            "sourcePaths": [
+              "Knowledge/Index.md"
+            ],
+            "sourceRecall": null,
+            "sourcePrecision": 0,
+            "falsePositiveSources": [
+              "Knowledge/Index.md"
+            ],
+            "contextChars": 229,
+            "queryMs": {
+              "p50": 0.01620000001275912,
+              "p95": 0.0635000000038417
+            }
+          },
+          {
+            "id": "scope-exclusion",
+            "family": "out-of-scope",
+            "topK": 1,
+            "relevantPaths": [],
+            "sourcePaths": [],
+            "sourceRecall": null,
+            "sourcePrecision": null,
+            "falsePositiveSources": [],
+            "contextChars": 0,
+            "queryMs": {
+              "p50": 0.7854999999981374,
+              "p95": 0.9195999999938067
+            }
+          },
+          {
+            "id": "current-file-exclusion",
+            "family": "current-file",
+            "topK": 1,
+            "relevantPaths": [],
+            "sourcePaths": [
+              "Knowledge/Rate limits.md"
+            ],
+            "sourceRecall": null,
+            "sourcePrecision": 0,
+            "falsePositiveSources": [
+              "Knowledge/Rate limits.md"
+            ],
+            "contextChars": 284,
+            "queryMs": {
+              "p50": 0.9447999999974854,
+              "p95": 1.0627999999996973
+            }
+          },
+          {
+            "id": "nonsense",
+            "family": "no-answer",
+            "topK": 1,
+            "relevantPaths": [],
+            "sourcePaths": [],
+            "sourceRecall": null,
+            "sourcePrecision": null,
+            "falsePositiveSources": [],
+            "contextChars": 0,
+            "queryMs": {
+              "p50": 1.2786999999952968,
+              "p95": 1.3938000000052853
+            }
+          },
+          {
+            "id": "long-section",
+            "family": "long-section",
+            "topK": 1,
+            "relevantPaths": [
+              "Knowledge/Transport.md"
+            ],
+            "sourcePaths": [
+              "Knowledge/Transport.md"
+            ],
+            "sourceRecall": 1,
+            "sourcePrecision": 1,
+            "falsePositiveSources": [],
+            "contextChars": 566,
+            "queryMs": {
+              "p50": 1.3917999999976018,
+              "p95": 2.005199999999604
+            }
+          }
+        ]
+      },
+      {
+        "topK": 3,
+        "positiveQueries": 9,
+        "macroRecall": 0.7777777777777778,
+        "macroPrecisionWithAbstentionAsZero": 0.5185185185185185,
+        "noAnswerFalsePositiveQueries": [
+          "navigation-title",
+          "current-file-exclusion"
+        ],
+        "contextChars": {
+          "p50": 313,
+          "p95": 1106
+        },
+        "cases": [
+          {
+            "id": "synonymous-payment",
+            "family": "synonym",
+            "topK": 3,
+            "relevantPaths": [
+              "Knowledge/Payments.md"
+            ],
+            "sourcePaths": [
+              "Knowledge/Transport.md",
+              "Knowledge/Latency.md",
+              "Knowledge/Geography/Cache.md"
+            ],
+            "sourceRecall": 0,
+            "sourcePrecision": 0,
+            "falsePositiveSources": [
+              "Knowledge/Transport.md",
+              "Knowledge/Latency.md",
+              "Knowledge/Geography/Cache.md"
+            ],
+            "contextChars": 1037,
+            "queryMs": {
+              "p50": 0.9900999999954365,
+              "p95": 1.5705000000016298
+            }
+          },
+          {
+            "id": "operation-abort",
+            "family": "english",
+            "topK": 3,
+            "relevantPaths": [
+              "Knowledge/Cancellation.md"
+            ],
+            "sourcePaths": [
+              "Knowledge/Transport.md",
+              "Knowledge/Cancellation.md",
+              "Knowledge/Geography/Cache.md"
+            ],
+            "sourceRecall": 1,
+            "sourcePrecision": 0.3333333333333333,
+            "falsePositiveSources": [
+              "Knowledge/Transport.md",
+              "Knowledge/Geography/Cache.md"
+            ],
+            "contextChars": 1063,
+            "queryMs": {
+              "p50": 0.9937999999965541,
+              "p95": 1.2814000000071246
+            }
+          },
+          {
+            "id": "cjk-concurrency",
+            "family": "chinese-compound",
+            "topK": 3,
+            "relevantPaths": [
+              "Knowledge/原子存储.md"
+            ],
+            "sourcePaths": [],
+            "sourceRecall": 0,
+            "sourcePrecision": null,
+            "falsePositiveSources": [],
+            "contextChars": 0,
+            "queryMs": {
+              "p50": 0.5632999999943422,
+              "p95": 0.665900000007241
+            }
+          },
+          {
+            "id": "cjk-recovery",
+            "family": "chinese",
+            "topK": 3,
+            "relevantPaths": [
+              "Knowledge/原子存储.md"
+            ],
+            "sourcePaths": [
+              "Knowledge/原子存储.md"
+            ],
+            "sourceRecall": 1,
+            "sourcePrecision": 1,
+            "falsePositiveSources": [],
+            "contextChars": 136,
+            "queryMs": {
+              "p50": 0.036999999996623956,
+              "p95": 0.04520000000775326
+            }
+          },
+          {
+            "id": "latency-statistics",
+            "family": "english",
+            "topK": 3,
+            "relevantPaths": [
+              "Knowledge/Latency.md"
+            ],
+            "sourcePaths": [
+              "Knowledge/Latency.md",
+              "Knowledge/Index.md"
+            ],
+            "sourceRecall": 1,
+            "sourcePrecision": 0.5,
+            "falsePositiveSources": [
+              "Knowledge/Index.md"
+            ],
+            "contextChars": 603,
+            "queryMs": {
+              "p50": 1.0060999999986961,
+              "p95": 1.5874999999941792
+            }
+          },
+          {
+            "id": "duplicate-title",
+            "family": "duplicate-title",
+            "topK": 3,
+            "relevantPaths": [
+              "Knowledge/Infra/Cache.md"
+            ],
+            "sourcePaths": [
+              "Knowledge/Infra/Cache.md",
+              "Knowledge/Transport.md"
+            ],
+            "sourceRecall": 1,
+            "sourcePrecision": 0.5,
+            "falsePositiveSources": [
+              "Knowledge/Transport.md"
+            ],
+            "contextChars": 820,
+            "queryMs": {
+              "p50": 0.78519999999844,
+              "p95": 1.0313000000023749
+            }
+          },
+          {
+            "id": "backoff-numeric",
+            "family": "abbreviation",
+            "topK": 3,
+            "relevantPaths": [
+              "Knowledge/Rate limits.md"
+            ],
+            "sourcePaths": [
+              "Knowledge/Rate limits.md",
+              "Knowledge/Transport.md",
+              "Knowledge/Infra/Cache.md"
+            ],
+            "sourceRecall": 1,
+            "sourcePrecision": 0.3333333333333333,
+            "falsePositiveSources": [
+              "Knowledge/Transport.md",
+              "Knowledge/Infra/Cache.md"
+            ],
+            "contextChars": 1106,
+            "queryMs": {
+              "p50": 0.5510999999969499,
+              "p95": 0.7122999999992317
+            }
+          },
+          {
+            "id": "mixed-scope-office",
+            "family": "mixed-file-folder-scope",
+            "topK": 3,
+            "relevantPaths": [
+              "References/Office.md"
+            ],
+            "sourcePaths": [
+              "References/Office.md"
+            ],
+            "sourceRecall": 1,
+            "sourcePrecision": 1,
+            "falsePositiveSources": [],
+            "contextChars": 313,
+            "queryMs": {
+              "p50": 0.8395000000018626,
+              "p95": 1.258399999991525
+            }
+          },
+          {
+            "id": "navigation-title",
+            "family": "navigation-no-answer",
+            "topK": 3,
+            "relevantPaths": [],
+            "sourcePaths": [
+              "Knowledge/Index.md"
+            ],
+            "sourceRecall": null,
+            "sourcePrecision": 0,
+            "falsePositiveSources": [
+              "Knowledge/Index.md"
+            ],
+            "contextChars": 229,
+            "queryMs": {
+              "p50": 0.012699999992037192,
+              "p95": 0.05770000000484288
+            }
+          },
+          {
+            "id": "scope-exclusion",
+            "family": "out-of-scope",
+            "topK": 3,
+            "relevantPaths": [],
+            "sourcePaths": [],
+            "sourceRecall": null,
+            "sourcePrecision": null,
+            "falsePositiveSources": [],
+            "contextChars": 0,
+            "queryMs": {
+              "p50": 0.8931000000011409,
+              "p95": 1.070899999991525
+            }
+          },
+          {
+            "id": "current-file-exclusion",
+            "family": "current-file",
+            "topK": 3,
+            "relevantPaths": [],
+            "sourcePaths": [
+              "Knowledge/Rate limits.md"
+            ],
+            "sourceRecall": null,
+            "sourcePrecision": 0,
+            "falsePositiveSources": [
+              "Knowledge/Rate limits.md"
+            ],
+            "contextChars": 284,
+            "queryMs": {
+              "p50": 0.8911000000080094,
+              "p95": 0.9311999999918044
+            }
+          },
+          {
+            "id": "nonsense",
+            "family": "no-answer",
+            "topK": 3,
+            "relevantPaths": [],
+            "sourcePaths": [],
+            "sourceRecall": null,
+            "sourcePrecision": null,
+            "falsePositiveSources": [],
+            "contextChars": 0,
+            "queryMs": {
+              "p50": 1.2712000000028638,
+              "p95": 1.3862999999983003
+            }
+          },
+          {
+            "id": "long-section",
+            "family": "long-section",
+            "topK": 3,
+            "relevantPaths": [
+              "Knowledge/Transport.md"
+            ],
+            "sourcePaths": [
+              "Knowledge/Transport.md"
+            ],
+            "sourceRecall": 1,
+            "sourcePrecision": 1,
+            "falsePositiveSources": [],
+            "contextChars": 689,
+            "queryMs": {
+              "p50": 1.2752000000036787,
+              "p95": 1.455100000006496
+            }
+          }
+        ]
+      }
+    ],
+    "offlineBuildMs": {
+      "p50": 0.8344000000070082,
+      "p95": 3.32050000000163
+    },
+    "host": {
+      "host": "Obsidian 1.13.7 / Windows x64",
+      "corpusSha256": "d737b72f09bc7008aff3249ceca3bfcdd0218244666fdf3f16eded8a62871e87",
+      "repetitions": 5,
+      "topK": 3,
+      "method": "Real Vault.read and getFiles timings around the shipped local-knowledge inspect command. Each inspect rebuilds; normal title batches reuse one retriever. Five repeats exercise a warm OS file cache.",
+      "cases": [
+        {
+          "id": "synonymous-payment",
+          "repetition": 0,
+          "totalMs": 24.5,
+          "readMs": 8.299999952316284,
+          "enumerationMs": 0,
+          "indexBuildMs": 14,
+          "queryMs": 5,
+          "contextChars": 1133,
+          "sourcePaths": [
+            "Knowledge/Transport.md",
+            "Knowledge/Latency.md",
+            "Knowledge/Geography/Cache.md"
+          ]
+        },
+        {
+          "id": "operation-abort",
+          "repetition": 0,
+          "totalMs": 23.799999952316284,
+          "readMs": 17.200000286102295,
+          "enumerationMs": 0,
+          "indexBuildMs": 20,
+          "queryMs": 3,
+          "contextChars": 1159,
+          "sourcePaths": [
+            "Knowledge/Transport.md",
+            "Knowledge/Cancellation.md",
+            "Knowledge/Geography/Cache.md"
+          ]
+        },
+        {
+          "id": "cjk-concurrency",
+          "repetition": 0,
+          "totalMs": 10,
+          "readMs": 5.5,
+          "enumerationMs": 0,
+          "indexBuildMs": 9,
+          "queryMs": 0,
+          "contextChars": 0,
+          "sourcePaths": []
+        },
+        {
+          "id": "cjk-recovery",
+          "repetition": 0,
+          "totalMs": 9.200000047683716,
+          "readMs": 5.599999904632568,
+          "enumerationMs": 0,
+          "indexBuildMs": 8,
+          "queryMs": 0,
+          "contextChars": 168,
+          "sourcePaths": [
+            "Knowledge/原子存储.md"
+          ]
+        },
+        {
+          "id": "latency-statistics",
+          "repetition": 0,
+          "totalMs": 12.200000047683716,
+          "readMs": 8.100000381469727,
+          "enumerationMs": 0,
+          "indexBuildMs": 11,
+          "queryMs": 0,
+          "contextChars": 699,
+          "sourcePaths": [
+            "Knowledge/Latency.md",
+            "Knowledge/Index.md"
+          ]
+        },
+        {
+          "id": "duplicate-title",
+          "repetition": 0,
+          "totalMs": 8.299999952316284,
+          "readMs": 5.200000286102295,
+          "enumerationMs": 0,
+          "indexBuildMs": 7,
+          "queryMs": 0,
+          "contextChars": 884,
+          "sourcePaths": [
+            "Knowledge/Infra/Cache.md",
+            "Knowledge/Transport.md"
+          ]
+        },
+        {
+          "id": "backoff-numeric",
+          "repetition": 0,
+          "totalMs": 7.799999952316284,
+          "readMs": 5.5,
+          "enumerationMs": 0,
+          "indexBuildMs": 7,
+          "queryMs": 0,
+          "contextChars": 1202,
+          "sourcePaths": [
+            "Knowledge/Rate limits.md",
+            "Knowledge/Transport.md",
+            "Knowledge/Infra/Cache.md"
+          ]
+        },
+        {
+          "id": "mixed-scope-office",
+          "repetition": 0,
+          "totalMs": 8.299999952316284,
+          "readMs": 4.999999523162842,
+          "enumerationMs": 0,
+          "indexBuildMs": 7,
+          "queryMs": 1,
+          "contextChars": 345,
+          "sourcePaths": [
+            "References/Office.md"
+          ]
+        },
+        {
+          "id": "navigation-title",
+          "repetition": 0,
+          "totalMs": 8.400000095367432,
+          "readMs": 5.700000047683716,
+          "enumerationMs": 0,
+          "indexBuildMs": 7,
+          "queryMs": 0,
+          "contextChars": 261,
+          "sourcePaths": [
+            "Knowledge/Index.md"
+          ]
+        },
+        {
+          "id": "scope-exclusion",
+          "repetition": 0,
+          "totalMs": 8.599999904632568,
+          "readMs": 5.499999761581421,
+          "enumerationMs": 0,
+          "indexBuildMs": 6,
+          "queryMs": 1,
+          "contextChars": 0,
+          "sourcePaths": []
+        },
+        {
+          "id": "current-file-exclusion",
+          "repetition": 0,
+          "totalMs": 9.100000143051147,
+          "readMs": 5.099999666213989,
+          "enumerationMs": 0,
+          "indexBuildMs": 6,
+          "queryMs": 1,
+          "contextChars": 316,
+          "sourcePaths": [
+            "Knowledge/Rate limits.md"
+          ]
+        },
+        {
+          "id": "nonsense",
+          "repetition": 0,
+          "totalMs": 10.899999856948853,
+          "readMs": 7.900000333786011,
+          "enumerationMs": 0,
+          "indexBuildMs": 9,
+          "queryMs": 1,
+          "contextChars": 0,
+          "sourcePaths": []
+        },
+        {
+          "id": "long-section",
+          "repetition": 0,
+          "totalMs": 8,
+          "readMs": 5.3999998569488525,
+          "enumerationMs": 0,
+          "indexBuildMs": 6,
+          "queryMs": 1,
+          "contextChars": 753,
+          "sourcePaths": [
+            "Knowledge/Transport.md"
+          ]
+        },
+        {
+          "id": "synonymous-payment",
+          "repetition": 1,
+          "totalMs": 9.600000143051147,
+          "readMs": 5.499999761581421,
+          "enumerationMs": 0,
+          "indexBuildMs": 8,
+          "queryMs": 0,
+          "contextChars": 1133,
+          "sourcePaths": [
+            "Knowledge/Transport.md",
+            "Knowledge/Latency.md",
+            "Knowledge/Geography/Cache.md"
+          ]
+        },
+        {
+          "id": "operation-abort",
+          "repetition": 1,
+          "totalMs": 8.799999952316284,
+          "readMs": 5.400000095367432,
+          "enumerationMs": 0.09999990463256836,
+          "indexBuildMs": 7,
+          "queryMs": 0,
+          "contextChars": 1159,
+          "sourcePaths": [
+            "Knowledge/Transport.md",
+            "Knowledge/Cancellation.md",
+            "Knowledge/Geography/Cache.md"
+          ]
+        },
+        {
+          "id": "cjk-concurrency",
+          "repetition": 1,
+          "totalMs": 59.799999952316284,
+          "readMs": 30.299999713897705,
+          "enumerationMs": 0.09999990463256836,
+          "indexBuildMs": 34,
+          "queryMs": 0,
+          "contextChars": 0,
+          "sourcePaths": []
+        },
+        {
+          "id": "cjk-recovery",
+          "repetition": 1,
+          "totalMs": 9.599999904632568,
+          "readMs": 7.199999570846558,
+          "enumerationMs": 0.10000014305114746,
+          "indexBuildMs": 8,
+          "queryMs": 1,
+          "contextChars": 168,
+          "sourcePaths": [
+            "Knowledge/原子存储.md"
+          ]
+        },
+        {
+          "id": "latency-statistics",
+          "repetition": 1,
+          "totalMs": 22.200000047683716,
+          "readMs": 16.499999284744263,
+          "enumerationMs": 0.10000014305114746,
+          "indexBuildMs": 18,
+          "queryMs": 1,
+          "contextChars": 699,
+          "sourcePaths": [
+            "Knowledge/Latency.md",
+            "Knowledge/Index.md"
+          ]
+        },
+        {
+          "id": "duplicate-title",
+          "repetition": 1,
+          "totalMs": 15.5,
+          "readMs": 12.299999952316284,
+          "enumerationMs": 0,
+          "indexBuildMs": 14,
+          "queryMs": 0,
+          "contextChars": 884,
+          "sourcePaths": [
+            "Knowledge/Infra/Cache.md",
+            "Knowledge/Transport.md"
+          ]
+        },
+        {
+          "id": "backoff-numeric",
+          "repetition": 1,
+          "totalMs": 40.40000009536743,
+          "readMs": 33.60000014305115,
+          "enumerationMs": 0,
+          "indexBuildMs": 35,
+          "queryMs": 1,
+          "contextChars": 1202,
+          "sourcePaths": [
+            "Knowledge/Rate limits.md",
+            "Knowledge/Transport.md",
+            "Knowledge/Infra/Cache.md"
+          ]
+        },
+        {
+          "id": "mixed-scope-office",
+          "repetition": 1,
+          "totalMs": 8.200000047683716,
+          "readMs": 5.999999761581421,
+          "enumerationMs": 0.10000014305114746,
+          "indexBuildMs": 7,
+          "queryMs": 1,
+          "contextChars": 345,
+          "sourcePaths": [
+            "References/Office.md"
+          ]
+        },
+        {
+          "id": "navigation-title",
+          "repetition": 1,
+          "totalMs": 12.299999952316284,
+          "readMs": 10.199999570846558,
+          "enumerationMs": 0,
+          "indexBuildMs": 11,
+          "queryMs": 0,
+          "contextChars": 261,
+          "sourcePaths": [
+            "Knowledge/Index.md"
+          ]
+        },
+        {
+          "id": "scope-exclusion",
+          "repetition": 1,
+          "totalMs": 8.700000047683716,
+          "readMs": 5.500000238418579,
+          "enumerationMs": 0,
+          "indexBuildMs": 7,
+          "queryMs": 1,
+          "contextChars": 0,
+          "sourcePaths": []
+        },
+        {
+          "id": "current-file-exclusion",
+          "repetition": 1,
+          "totalMs": 8,
+          "readMs": 5.5,
+          "enumerationMs": 0,
+          "indexBuildMs": 6,
+          "queryMs": 1,
+          "contextChars": 316,
+          "sourcePaths": [
+            "Knowledge/Rate limits.md"
+          ]
+        },
+        {
+          "id": "nonsense",
+          "repetition": 1,
+          "totalMs": 9,
+          "readMs": 5.599999666213989,
+          "enumerationMs": 0.09999990463256836,
+          "indexBuildMs": 7,
+          "queryMs": 1,
+          "contextChars": 0,
+          "sourcePaths": []
+        },
+        {
+          "id": "long-section",
+          "repetition": 1,
+          "totalMs": 8.099999904632568,
+          "readMs": 5.699999809265137,
+          "enumerationMs": 0,
+          "indexBuildMs": 6,
+          "queryMs": 1,
+          "contextChars": 753,
+          "sourcePaths": [
+            "Knowledge/Transport.md"
+          ]
+        },
+        {
+          "id": "synonymous-payment",
+          "repetition": 2,
+          "totalMs": 7.599999904632568,
+          "readMs": 5.199999570846558,
+          "enumerationMs": 0,
+          "indexBuildMs": 6,
+          "queryMs": 0,
+          "contextChars": 1133,
+          "sourcePaths": [
+            "Knowledge/Transport.md",
+            "Knowledge/Latency.md",
+            "Knowledge/Geography/Cache.md"
+          ]
+        },
+        {
+          "id": "operation-abort",
+          "repetition": 2,
+          "totalMs": 8.900000095367432,
+          "readMs": 5.499999761581421,
+          "enumerationMs": 0,
+          "indexBuildMs": 7,
+          "queryMs": 1,
+          "contextChars": 1159,
+          "sourcePaths": [
+            "Knowledge/Transport.md",
+            "Knowledge/Cancellation.md",
+            "Knowledge/Geography/Cache.md"
+          ]
+        },
+        {
+          "id": "cjk-concurrency",
+          "repetition": 2,
+          "totalMs": 7.700000047683716,
+          "readMs": 5.099999904632568,
+          "enumerationMs": 0,
+          "indexBuildMs": 7,
+          "queryMs": 0,
+          "contextChars": 0,
+          "sourcePaths": []
+        },
+        {
+          "id": "cjk-recovery",
+          "repetition": 2,
+          "totalMs": 8.899999856948853,
+          "readMs": 5.500000238418579,
+          "enumerationMs": 0.10000014305114746,
+          "indexBuildMs": 7,
+          "queryMs": 1,
+          "contextChars": 168,
+          "sourcePaths": [
+            "Knowledge/原子存储.md"
+          ]
+        },
+        {
+          "id": "latency-statistics",
+          "repetition": 2,
+          "totalMs": 9.300000190734863,
+          "readMs": 6.099999666213989,
+          "enumerationMs": 0,
+          "indexBuildMs": 8,
+          "queryMs": 0,
+          "contextChars": 699,
+          "sourcePaths": [
+            "Knowledge/Latency.md",
+            "Knowledge/Index.md"
+          ]
+        },
+        {
+          "id": "duplicate-title",
+          "repetition": 2,
+          "totalMs": 14.199999809265137,
+          "readMs": 11,
+          "enumerationMs": 0.10000014305114746,
+          "indexBuildMs": 12,
+          "queryMs": 0,
+          "contextChars": 884,
+          "sourcePaths": [
+            "Knowledge/Infra/Cache.md",
+            "Knowledge/Transport.md"
+          ]
+        },
+        {
+          "id": "backoff-numeric",
+          "repetition": 2,
+          "totalMs": 9.600000143051147,
+          "readMs": 7.299999952316284,
+          "enumerationMs": 0,
+          "indexBuildMs": 9,
+          "queryMs": 0,
+          "contextChars": 1202,
+          "sourcePaths": [
+            "Knowledge/Rate limits.md",
+            "Knowledge/Transport.md",
+            "Knowledge/Infra/Cache.md"
+          ]
+        },
+        {
+          "id": "mixed-scope-office",
+          "repetition": 2,
+          "totalMs": 7.700000047683716,
+          "readMs": 5.100000381469727,
+          "enumerationMs": 0.09999990463256836,
+          "indexBuildMs": 6,
+          "queryMs": 1,
+          "contextChars": 345,
+          "sourcePaths": [
+            "References/Office.md"
+          ]
+        },
+        {
+          "id": "navigation-title",
+          "repetition": 2,
+          "totalMs": 9.199999809265137,
+          "readMs": 6.300000190734863,
+          "enumerationMs": 0,
+          "indexBuildMs": 8,
+          "queryMs": 0,
+          "contextChars": 261,
+          "sourcePaths": [
+            "Knowledge/Index.md"
+          ]
+        },
+        {
+          "id": "scope-exclusion",
+          "repetition": 2,
+          "totalMs": 8.100000143051147,
+          "readMs": 5.599999904632568,
+          "enumerationMs": 0,
+          "indexBuildMs": 7,
+          "queryMs": 0,
+          "contextChars": 0,
+          "sourcePaths": []
+        },
+        {
+          "id": "current-file-exclusion",
+          "repetition": 2,
+          "totalMs": 8,
+          "readMs": 5.5,
+          "enumerationMs": 0.09999990463256836,
+          "indexBuildMs": 7,
+          "queryMs": 0,
+          "contextChars": 316,
+          "sourcePaths": [
+            "Knowledge/Rate limits.md"
+          ]
+        },
+        {
+          "id": "nonsense",
+          "repetition": 2,
+          "totalMs": 7.5,
+          "readMs": 4.899999618530273,
+          "enumerationMs": 0.10000014305114746,
+          "indexBuildMs": 6,
+          "queryMs": 1,
+          "contextChars": 0,
+          "sourcePaths": []
+        },
+        {
+          "id": "long-section",
+          "repetition": 2,
+          "totalMs": 8.099999904632568,
+          "readMs": 5.700000047683716,
+          "enumerationMs": 0,
+          "indexBuildMs": 7,
+          "queryMs": 1,
+          "contextChars": 753,
+          "sourcePaths": [
+            "Knowledge/Transport.md"
+          ]
+        },
+        {
+          "id": "synonymous-payment",
+          "repetition": 3,
+          "totalMs": 8.100000143051147,
+          "readMs": 5.099999904632568,
+          "enumerationMs": 0,
+          "indexBuildMs": 6,
+          "queryMs": 1,
+          "contextChars": 1133,
+          "sourcePaths": [
+            "Knowledge/Transport.md",
+            "Knowledge/Latency.md",
+            "Knowledge/Geography/Cache.md"
+          ]
+        },
+        {
+          "id": "operation-abort",
+          "repetition": 3,
+          "totalMs": 9.599999904632568,
+          "readMs": 5.099999666213989,
+          "enumerationMs": 0,
+          "indexBuildMs": 6,
+          "queryMs": 2,
+          "contextChars": 1159,
+          "sourcePaths": [
+            "Knowledge/Transport.md",
+            "Knowledge/Cancellation.md",
+            "Knowledge/Geography/Cache.md"
+          ]
+        },
+        {
+          "id": "cjk-concurrency",
+          "repetition": 3,
+          "totalMs": 8.799999952316284,
+          "readMs": 6.299999952316284,
+          "enumerationMs": 0,
+          "indexBuildMs": 8,
+          "queryMs": 0,
+          "contextChars": 0,
+          "sourcePaths": []
+        },
+        {
+          "id": "cjk-recovery",
+          "repetition": 3,
+          "totalMs": 7.900000095367432,
+          "readMs": 5.6000001430511475,
+          "enumerationMs": 0,
+          "indexBuildMs": 7,
+          "queryMs": 0,
+          "contextChars": 168,
+          "sourcePaths": [
+            "Knowledge/原子存储.md"
+          ]
+        },
+        {
+          "id": "latency-statistics",
+          "repetition": 3,
+          "totalMs": 8.599999904632568,
+          "readMs": 6.099999666213989,
+          "enumerationMs": 0,
+          "indexBuildMs": 7,
+          "queryMs": 1,
+          "contextChars": 699,
+          "sourcePaths": [
+            "Knowledge/Latency.md",
+            "Knowledge/Index.md"
+          ]
+        },
+        {
+          "id": "duplicate-title",
+          "repetition": 3,
+          "totalMs": 9.600000143051147,
+          "readMs": 7,
+          "enumerationMs": 0,
+          "indexBuildMs": 8,
+          "queryMs": 0,
+          "contextChars": 884,
+          "sourcePaths": [
+            "Knowledge/Infra/Cache.md",
+            "Knowledge/Transport.md"
+          ]
+        },
+        {
+          "id": "backoff-numeric",
+          "repetition": 3,
+          "totalMs": 7.699999809265137,
+          "readMs": 5.300000190734863,
+          "enumerationMs": 0,
+          "indexBuildMs": 7,
+          "queryMs": 0,
+          "contextChars": 1202,
+          "sourcePaths": [
+            "Knowledge/Rate limits.md",
+            "Knowledge/Transport.md",
+            "Knowledge/Infra/Cache.md"
+          ]
+        },
+        {
+          "id": "mixed-scope-office",
+          "repetition": 3,
+          "totalMs": 8,
+          "readMs": 5.6000001430511475,
+          "enumerationMs": 0,
+          "indexBuildMs": 6,
+          "queryMs": 0,
+          "contextChars": 345,
+          "sourcePaths": [
+            "References/Office.md"
+          ]
+        },
+        {
+          "id": "navigation-title",
+          "repetition": 3,
+          "totalMs": 7.300000190734863,
+          "readMs": 5.199999570846558,
+          "enumerationMs": 0,
+          "indexBuildMs": 6,
+          "queryMs": 0,
+          "contextChars": 261,
+          "sourcePaths": [
+            "Knowledge/Index.md"
+          ]
+        },
+        {
+          "id": "scope-exclusion",
+          "repetition": 3,
+          "totalMs": 7.599999904632568,
+          "readMs": 5.199999809265137,
+          "enumerationMs": 0,
+          "indexBuildMs": 7,
+          "queryMs": 0,
+          "contextChars": 0,
+          "sourcePaths": []
+        },
+        {
+          "id": "current-file-exclusion",
+          "repetition": 3,
+          "totalMs": 8.599999904632568,
+          "readMs": 5.700000047683716,
+          "enumerationMs": 0,
+          "indexBuildMs": 7,
+          "queryMs": 1,
+          "contextChars": 316,
+          "sourcePaths": [
+            "Knowledge/Rate limits.md"
+          ]
+        },
+        {
+          "id": "nonsense",
+          "repetition": 3,
+          "totalMs": 8.200000047683716,
+          "readMs": 5.59999942779541,
+          "enumerationMs": 0,
+          "indexBuildMs": 6,
+          "queryMs": 1,
+          "contextChars": 0,
+          "sourcePaths": []
+        },
+        {
+          "id": "long-section",
+          "repetition": 3,
+          "totalMs": 7.900000095367432,
+          "readMs": 5.599999904632568,
+          "enumerationMs": 0,
+          "indexBuildMs": 6,
+          "queryMs": 1,
+          "contextChars": 753,
+          "sourcePaths": [
+            "Knowledge/Transport.md"
+          ]
+        },
+        {
+          "id": "synonymous-payment",
+          "repetition": 4,
+          "totalMs": 7.599999904632568,
+          "readMs": 5.200000286102295,
+          "enumerationMs": 0.10000014305114746,
+          "indexBuildMs": 7,
+          "queryMs": 0,
+          "contextChars": 1133,
+          "sourcePaths": [
+            "Knowledge/Transport.md",
+            "Knowledge/Latency.md",
+            "Knowledge/Geography/Cache.md"
+          ]
+        },
+        {
+          "id": "operation-abort",
+          "repetition": 4,
+          "totalMs": 7.700000047683716,
+          "readMs": 5.200000286102295,
+          "enumerationMs": 0,
+          "indexBuildMs": 6,
+          "queryMs": 1,
+          "contextChars": 1159,
+          "sourcePaths": [
+            "Knowledge/Transport.md",
+            "Knowledge/Cancellation.md",
+            "Knowledge/Geography/Cache.md"
+          ]
+        },
+        {
+          "id": "cjk-concurrency",
+          "repetition": 4,
+          "totalMs": 9.200000047683716,
+          "readMs": 6.700000047683716,
+          "enumerationMs": 0,
+          "indexBuildMs": 8,
+          "queryMs": 0,
+          "contextChars": 0,
+          "sourcePaths": []
+        },
+        {
+          "id": "cjk-recovery",
+          "repetition": 4,
+          "totalMs": 8.5,
+          "readMs": 6.1000001430511475,
+          "enumerationMs": 0,
+          "indexBuildMs": 7,
+          "queryMs": 0,
+          "contextChars": 168,
+          "sourcePaths": [
+            "Knowledge/原子存储.md"
+          ]
+        },
+        {
+          "id": "latency-statistics",
+          "repetition": 4,
+          "totalMs": 7.599999904632568,
+          "readMs": 5.500000238418579,
+          "enumerationMs": 0.09999990463256836,
+          "indexBuildMs": 7,
+          "queryMs": 0,
+          "contextChars": 699,
+          "sourcePaths": [
+            "Knowledge/Latency.md",
+            "Knowledge/Index.md"
+          ]
+        },
+        {
+          "id": "duplicate-title",
+          "repetition": 4,
+          "totalMs": 8.600000143051147,
+          "readMs": 6.300000190734863,
+          "enumerationMs": 0,
+          "indexBuildMs": 7,
+          "queryMs": 1,
+          "contextChars": 884,
+          "sourcePaths": [
+            "Knowledge/Infra/Cache.md",
+            "Knowledge/Transport.md"
+          ]
+        },
+        {
+          "id": "backoff-numeric",
+          "repetition": 4,
+          "totalMs": 9.899999856948853,
+          "readMs": 7.399999380111694,
+          "enumerationMs": 0.10000014305114746,
+          "indexBuildMs": 8,
+          "queryMs": 1,
+          "contextChars": 1202,
+          "sourcePaths": [
+            "Knowledge/Rate limits.md",
+            "Knowledge/Transport.md",
+            "Knowledge/Infra/Cache.md"
+          ]
+        },
+        {
+          "id": "mixed-scope-office",
+          "repetition": 4,
+          "totalMs": 8.100000143051147,
+          "readMs": 5.300000190734863,
+          "enumerationMs": 0.09999990463256836,
+          "indexBuildMs": 6,
+          "queryMs": 1,
+          "contextChars": 345,
+          "sourcePaths": [
+            "References/Office.md"
+          ]
+        },
+        {
+          "id": "navigation-title",
+          "repetition": 4,
+          "totalMs": 8.199999809265137,
+          "readMs": 5.799999952316284,
+          "enumerationMs": 0,
+          "indexBuildMs": 7,
+          "queryMs": 0,
+          "contextChars": 261,
+          "sourcePaths": [
+            "Knowledge/Index.md"
+          ]
+        },
+        {
+          "id": "scope-exclusion",
+          "repetition": 4,
+          "totalMs": 8,
+          "readMs": 5.399999618530273,
+          "enumerationMs": 0.09999990463256836,
+          "indexBuildMs": 7,
+          "queryMs": 0,
+          "contextChars": 0,
+          "sourcePaths": []
+        },
+        {
+          "id": "current-file-exclusion",
+          "repetition": 4,
+          "totalMs": 8.300000190734863,
+          "readMs": 6.000000238418579,
+          "enumerationMs": 0,
+          "indexBuildMs": 7,
+          "queryMs": 0,
+          "contextChars": 316,
+          "sourcePaths": [
+            "Knowledge/Rate limits.md"
+          ]
+        },
+        {
+          "id": "nonsense",
+          "repetition": 4,
+          "totalMs": 8.699999809265137,
+          "readMs": 6.099999666213989,
+          "enumerationMs": 0,
+          "indexBuildMs": 7,
+          "queryMs": 1,
+          "contextChars": 0,
+          "sourcePaths": []
+        },
+        {
+          "id": "long-section",
+          "repetition": 4,
+          "totalMs": 9.400000095367432,
+          "readMs": 5.6000001430511475,
+          "enumerationMs": 0.10000014305114746,
+          "indexBuildMs": 6,
+          "queryMs": 1,
+          "contextChars": 753,
+          "sourcePaths": [
+            "Knowledge/Transport.md"
+          ]
+        }
+      ],
+      "totalMs": {
+        "p50": 8.599999904632568,
+        "p95": 23.799999952316284
+      },
+      "readMs": {
+        "p50": 5.599999904632568,
+        "p95": 16.499999284744263
+      },
+      "enumerationMs": {
+        "p50": 0,
+        "p95": 0.10000014305114746
+      }
+    },
+    "decision": "Preserve immutable per-batch snapshots and lexical retrieval. Do not tune to these labels; use a new validation split before CJK tokenization, stopword/ranking changes, or embeddings."
+  }
+}

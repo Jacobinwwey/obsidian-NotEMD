@@ -252,7 +252,7 @@ describe('saveDiagramArtifactFile', () => {
         );
     });
 
-    test('removes stale Notemd companion scope after saving inline Drawnix visuals', async () => {
+    test('preserves old Drawnix companions because generated names do not prove current write ownership', async () => {
         const reporter = createReporter();
         const staleFolder = Object.assign(new (TFolder as any)(), {
             path: 'Notes/Source_diagram.drawnix.assets',
@@ -309,7 +309,8 @@ describe('saveDiagramArtifactFile', () => {
             previewSvg: { content: '<svg />', mimeType: 'image/svg+xml' }
         }, reporter);
 
-        expect(mockApp.vault.delete).toHaveBeenCalledWith(staleFolder, true);
+        expect(mockApp.vault.delete).not.toHaveBeenCalled();
+        expect(reporter.log).toHaveBeenCalledWith(expect.stringContaining('Retained unused Drawnix companion folder'));
     });
 
     test('keeps default inline Drawnix visuals self-contained without creating an asset scope', async () => {
@@ -409,9 +410,9 @@ describe('saveDiagramArtifactFile', () => {
 
     test('restores existing files when a later artifact write fails', async () => {
         const reporter = createReporter();
-        const svgFile = Object.create(TFile.prototype) as TFile;
-        const artifactFile = Object.create(TFile.prototype) as TFile;
-        const wrapperFile = Object.create(TFile.prototype) as TFile;
+        const svgFile = Object.assign(Object.create(TFile.prototype), { path: 'Notes/Source_diagram.drawnix.svg' }) as TFile;
+        const artifactFile = Object.assign(Object.create(TFile.prototype), { path: 'Notes/Source_diagram.drawnix' }) as TFile;
+        const wrapperFile = Object.assign(Object.create(TFile.prototype), { path: 'Notes/Source_diagram.drawnix.md' }) as TFile;
         const originalContents = new Map<unknown, string>([
             [svgFile, '<svg>old</svg>'],
             [artifactFile, 'old drawnix'],
@@ -436,10 +437,22 @@ describe('saveDiagramArtifactFile', () => {
                 failWrapperWrite = false;
                 throw new Error('wrapper write failed');
             }
+            originalContents.set(file, content);
             return undefined;
         });
+        const atomicApp = {
+            ...mockApp,
+            vault: {
+                ...mockApp.vault,
+                process: async (file: TFile, transform: (content: string) => string) => {
+                    const content = transform(originalContents.get(file) ?? '');
+                    await mockApp.vault.modify(file, content);
+                    return content;
+                }
+            }
+        } as unknown as typeof mockApp;
 
-        await expect(saveDiagramArtifactFile(mockApp, mockSettings, originalFile, {
+        await expect(saveDiagramArtifactFile(atomicApp, mockSettings, originalFile, {
             target: 'drawnix',
             content: '{"type":"drawnix","elements":[]}',
             mimeType: 'application/vnd.drawnix+json',
@@ -450,5 +463,7 @@ describe('saveDiagramArtifactFile', () => {
         expect(mockApp.vault.modify).toHaveBeenCalledWith(svgFile, '<svg>old</svg>');
         expect(mockApp.vault.modify).toHaveBeenCalledWith(artifactFile, 'old drawnix');
         expect(mockApp.vault.modify).toHaveBeenCalledWith(wrapperFile, 'old wrapper');
+        expect(originalContents.get(svgFile)).toBe('<svg>old</svg>');
+        expect(originalContents.get(artifactFile)).toBe('old drawnix');
     });
 });

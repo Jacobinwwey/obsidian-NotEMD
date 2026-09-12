@@ -1,5 +1,11 @@
 # Drawnix Native Knowledge-Map Export
 
+## Application acceptance, September 13
+
+Drawnix commit `9939f452745c3f401766d378f98faa5d26bcc48a` / Plait 0.93.1 imported, edited, saved and reopened the archived fixture with 38 native nodes, one root and 12 semantic relation records. Native reflow detached the fixed-coordinate cross-branch arrows. `source.id`/`target.id` metadata is not Plait `boundId` attachment, and the upstream shape-binding contract excludes Mind nodes.
+
+The runtime now emits `drawnix-static-cross-relations`; the Plait gate reports `mindmap-and-static-arrow-serialization`. Use the SVG companion for faithful connectivity. [Application screenshot and evidence](./reliability-acceptance-2026-09-12.md#external-consumers) qualify all native-relation claims in this document; attached editable cross-links are not supported by this acceptance.
+
 Language: **English** | [简体中文](./drawnix-export-spike.zh-CN.md)
 
 This document records the native Drawnix knowledge-map path that Notemd supports without embedding Drawnix, Plait, or the Drawnix React host.

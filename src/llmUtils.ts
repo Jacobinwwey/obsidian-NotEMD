@@ -954,11 +954,22 @@ function normalizeRuntimeResponse(
     }, attempts);
 }
 
-async function requestViaObsidianTransport(options: RuntimeRequestOptions): Promise<RuntimeRequestResponse> {
+async function requestViaObsidianTransport(options: RuntimeRequestOptions, signal?: AbortSignal): Promise<RuntimeRequestResponse> {
     const startedAt = Date.now();
+    let cancelRequest: (() => void) | undefined;
 
     try {
-        const response = await requestUrl(options);
+        // Obsidian cannot abort the physical request; consuming both late outcomes
+        // prevents a cancelled logical call from resuming retries or persistence.
+        const response = await new Promise<Awaited<ReturnType<typeof requestUrl>>>((resolve, reject) => {
+            cancelRequest = () => reject(createAbortError());
+            if (signal?.aborted) {
+                cancelRequest();
+                return;
+            }
+            signal?.addEventListener('abort', cancelRequest, { once: true });
+            Promise.resolve(requestUrl(options)).then(resolve, reject);
+        });
         const attempt = createTransportDebugAttempt('requestUrl', options, {
             durationMs: Date.now() - startedAt,
             status: response.status,
@@ -978,6 +989,8 @@ async function requestViaObsidianTransport(options: RuntimeRequestOptions): Prom
         });
 
         throw attachTransportDebugToError(error, [attempt]);
+    } finally {
+        if (cancelRequest) signal?.removeEventListener('abort', cancelRequest);
     }
 }
 
@@ -1623,7 +1636,7 @@ async function requestOpenAICompatibleWithStreamingFallback(
 
     const requestUrlThenStreamingFallback = async (): Promise<RuntimeRequestResponse> => {
         try {
-            return await requestViaObsidianTransport(options);
+            return await requestViaObsidianTransport(options, signal);
         } catch (error: unknown) {
             const errorMessage = error instanceof Error ? error.message : String(error);
             const requestUrlAttempts = getTransportDebugAttempts(error);
@@ -2055,7 +2068,7 @@ async function requestRuntimeUrlWithStructuredStreamingFallback<State>(
     signal?: AbortSignal
 ): Promise<RuntimeRequestResponse> {
     try {
-        return await requestViaObsidianTransport(options);
+        return await requestViaObsidianTransport(options, signal);
     } catch (error: unknown) {
         const errorMessage = error instanceof Error ? error.message : String(error);
         const requestUrlAttempts = getTransportDebugAttempts(error);
@@ -2099,7 +2112,7 @@ async function requestRuntimeUrlWithDesktopFallback(
     signal?: AbortSignal
 ): Promise<RuntimeRequestResponse> {
     try {
-        return await requestViaObsidianTransport(options);
+        return await requestViaObsidianTransport(options, signal);
     } catch (error: unknown) {
         const errorMessage = error instanceof Error ? error.message : String(error);
         const requestUrlAttempts = getTransportDebugAttempts(error);
@@ -2463,89 +2476,106 @@ async function callApiWithRetry(
     settings: NotemdSettings,
     progressReporter: ProgressReporter,
     apiCallFunction: (provider: LLMProviderConfig, modelName: string, prompt: string, content: string, progressReporter: ProgressReporter, settings: NotemdSettings, signal?: AbortSignal) => Promise<string>,
-    signal?: AbortSignal // Accept optional signal
+    signal?: AbortSignal
 ): Promise<string> {
-    
-    let lastError: Error | null = null;
-    const stableRetryMaxAttempts = settings.apiCallMaxRetries + 1;
-    const stableRetryIntervalSeconds = settings.apiCallInterval;
-    let maxAttempts = settings.enableStableApiCall ? stableRetryMaxAttempts : 1;
-    let intervalSeconds = settings.enableStableApiCall ? stableRetryIntervalSeconds : 0;
-    let usingStableRetrySequence = settings.enableStableApiCall;
-
-    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
-        if (progressReporter.cancelled) {
-            // console.log(`${provider.name} API Call: Cancellation detected before attempt ${attempt}`);
-            throw new Error("Processing cancelled by user before API attempt.");
-        }
-
-        try {
-            // Pass settings and signal to the underlying API call function
-            return await apiCallFunction(provider, modelName, prompt, content, progressReporter, settings, signal);
-        } catch (error: unknown) {
-            const errorMessage = error instanceof Error ? error.message : String(error);
-            lastError = error instanceof Error ? error : new Error(errorMessage); // Store Error object if possible
-            progressReporter.log(`${provider.name} API Call: Attempt ${attempt} failed: ${errorMessage}`);
-            console.warn(`${provider.name} API Call: Attempt ${attempt} failed: ${errorMessage}`);
-
-            // Handle cancellation specifically
-            if ((error instanceof Error && error.name === 'AbortError') || errorMessage.includes("cancelled by user")) {
-                // console.log(`${provider.name} API Call: Cancellation detected during attempt ${attempt}.`);
-                throw new Error("API call cancelled by user."); // Propagate cancellation
-            }
-
-            const isTransientNetworkError = isTransientNetworkErrorMessage(errorMessage);
-
-            if (!usingStableRetrySequence && attempt === 1 && isTransientNetworkError) {
-                usingStableRetrySequence = true;
-                maxAttempts = stableRetryMaxAttempts;
-                intervalSeconds = stableRetryIntervalSeconds;
-                progressReporter.log(
-                    `Transient network error detected. Switching to stable API retry logic (${Math.max(maxAttempts - attempt, 0)} retries remaining, ${intervalSeconds} seconds interval).`
-                );
-            }
-
-            // Don't retry on certain fatal errors
-            // Check 1: HTTP Status Code (Client Errors)
-            const httpStatusMatch = errorMessage.match(/API error: (\d+)/);
-            const httpStatusCode = httpStatusMatch ? parseInt(httpStatusMatch[1], 10) : null;
-            if (httpStatusCode && (httpStatusCode === 400 || httpStatusCode === 401 || httpStatusCode === 403 || httpStatusCode === 404)) {
-                throw lastError; // Throw fatal client HTTP errors immediately
-            }
-            // Check 2: Specific Error Codes reported *within* JSON (Server Errors)
-            const jsonErrorCodeMatch = errorMessage.match(/\(Code: (\d+)\)/);
-            const jsonErrorCode = jsonErrorCodeMatch ? parseInt(jsonErrorCodeMatch[1], 10) : null;
-            if (jsonErrorCode && jsonErrorCode >= 500) { // Treat 5xx errors reported in JSON as fatal for retries
-                 progressReporter.log(`[callApiWithRetry] Detected non-retryable error code ${jsonErrorCode} within API response.`);
-                 throw lastError;
-            }
-            // Check 3: Specific non-retryable messages (optional, add if needed)
-            // if (errorMessage.includes("some specific non-retryable text")) {
-            //     throw lastError;
-            // }
-
-
-            // Check cancellation again before waiting for retry
-            if (progressReporter.cancelled) {
-                // console.log(`${provider.name} API Call: Cancellation detected after failed attempt ${attempt} (before retry wait).`);
-                throw new Error("Processing cancelled by user during API retry sequence.");
-            }
-
-            if (attempt < maxAttempts) {
-                const retryDelaySeconds = intervalSeconds;
-                progressReporter.log(`Waiting ${retryDelaySeconds} seconds before retry ${attempt + 1}...`);
-
-                await cancellableDelay(retryDelaySeconds * 1000, progressReporter);
-            }
-
-            if (attempt >= maxAttempts) {
-                break;
-            }
-        }
+    let requestSignal = signal ?? progressReporter.abortController?.signal;
+    let ownedController: AbortController | undefined;
+    if (!requestSignal) {
+        ownedController = new AbortController();
+        requestSignal = ownedController.signal;
+        progressReporter.abortController = ownedController;
     }
 
-    console.error(`${provider.name} API Call: All configured attempts failed.`);
-    throw lastError || new Error(`${provider.name} API call failed after multiple retries.`);
+    try {
+        let lastError: Error | null = null;
+        const stableRetryMaxAttempts = settings.apiCallMaxRetries + 1;
+        const stableRetryIntervalSeconds = settings.apiCallInterval;
+        let maxAttempts = settings.enableStableApiCall ? stableRetryMaxAttempts : 1;
+        let intervalSeconds = settings.enableStableApiCall ? stableRetryIntervalSeconds : 0;
+        let usingStableRetrySequence = settings.enableStableApiCall;
+
+        for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+            if (progressReporter.cancelled || requestSignal.aborted) {
+                // console.log(`${provider.name} API Call: Cancellation detected before attempt ${attempt}`);
+                throw new Error("Processing cancelled by user before API attempt.");
+            }
+
+            try {
+                // Pass settings and signal to the underlying API call function
+                const response = await apiCallFunction(provider, modelName, prompt, content, progressReporter, settings, requestSignal);
+                if (progressReporter.cancelled || requestSignal.aborted) throw createAbortError();
+                return response;
+            } catch (error: unknown) {
+                const errorMessage = error instanceof Error ? error.message : String(error);
+                lastError = error instanceof Error ? error : new Error(errorMessage); // Store Error object if possible
+                progressReporter.log(`${provider.name} API Call: Attempt ${attempt} failed: ${errorMessage}`);
+                console.warn(`${provider.name} API Call: Attempt ${attempt} failed: ${errorMessage}`);
+
+                // Handle cancellation specifically
+                if (requestSignal.aborted || progressReporter.cancelled || isAbortError(error) || errorMessage.includes("cancelled by user")) {
+                    // console.log(`${provider.name} API Call: Cancellation detected during attempt ${attempt}.`);
+                    const cancellation = new Error('API call cancelled by user.');
+                    cancellation.name = 'AbortError';
+                    throw attachTransportDebugToError(cancellation, getTransportDebugAttempts(error));
+                }
+
+                const isTransientNetworkError = isTransientNetworkErrorMessage(errorMessage);
+
+                if (!usingStableRetrySequence && attempt === 1 && isTransientNetworkError) {
+                    usingStableRetrySequence = true;
+                    maxAttempts = stableRetryMaxAttempts;
+                    intervalSeconds = stableRetryIntervalSeconds;
+                    progressReporter.log(
+                        `Transient network error detected. Switching to stable API retry logic (${Math.max(maxAttempts - attempt, 0)} retries remaining, ${intervalSeconds} seconds interval).`
+                    );
+                }
+
+                // Don't retry on certain fatal errors
+                // Check 1: HTTP Status Code (Client Errors)
+                const httpStatusMatch = errorMessage.match(/API error: (\d+)/);
+                const httpStatusCode = httpStatusMatch ? parseInt(httpStatusMatch[1], 10) : null;
+                if (httpStatusCode && (httpStatusCode === 400 || httpStatusCode === 401 || httpStatusCode === 403 || httpStatusCode === 404)) {
+                    throw lastError; // Throw fatal client HTTP errors immediately
+                }
+                // Check 2: Specific Error Codes reported *within* JSON (Server Errors)
+                const jsonErrorCodeMatch = errorMessage.match(/\(Code: (\d+)\)/);
+                const jsonErrorCode = jsonErrorCodeMatch ? parseInt(jsonErrorCodeMatch[1], 10) : null;
+                if (jsonErrorCode && jsonErrorCode >= 500) { // Treat 5xx errors reported in JSON as fatal for retries
+                     progressReporter.log(`[callApiWithRetry] Detected non-retryable error code ${jsonErrorCode} within API response.`);
+                     throw lastError;
+                }
+                // Check 3: Specific non-retryable messages (optional, add if needed)
+                // if (errorMessage.includes("some specific non-retryable text")) {
+                //     throw lastError;
+                // }
+
+
+                // Check cancellation again before waiting for retry
+                if (progressReporter.cancelled) {
+                    // console.log(`${provider.name} API Call: Cancellation detected after failed attempt ${attempt} (before retry wait).`);
+                    throw new Error("Processing cancelled by user during API retry sequence.");
+                }
+
+                if (attempt < maxAttempts) {
+                    const retryDelaySeconds = intervalSeconds;
+                    progressReporter.log(`Waiting ${retryDelaySeconds} seconds before retry ${attempt + 1}...`);
+
+                    await cancellableDelay(retryDelaySeconds * 1000, progressReporter, requestSignal);
+                }
+
+                if (attempt >= maxAttempts) {
+                    break;
+                }
+            }
+        }
+
+        console.error(`${provider.name} API Call: All configured attempts failed.`);
+        throw lastError || new Error(`${provider.name} API call failed after multiple retries.`);
+    } finally {
+        if (ownedController && progressReporter.abortController === ownedController) {
+            progressReporter.abortController = null;
+        }
+    }
 }
 
 
@@ -2690,15 +2720,7 @@ export function handleApiError(
 }
 
 
-// Helper function to manage AbortController/Signal
-function getAbortSignal(progressReporter: ProgressReporter, providedSignal?: AbortSignal): { signal: AbortSignal, controller: AbortController | null } {
-    if (providedSignal) {
-        return { signal: providedSignal, controller: null };
-    }
-    const controller = new AbortController();
-    progressReporter.abortController = controller;
-    return { signal: controller.signal, controller: controller };
-}
+
 
 async function executeDeepSeekAPI(provider: LLMProviderConfig, modelName: string, prompt: string, content: string, progressReporter: ProgressReporter, settings: NotemdSettings, signal?: AbortSignal): Promise<string> {
     return await executeOpenAICompatibleApi(provider, modelName, prompt, content, progressReporter, settings, signal);
@@ -2727,51 +2749,43 @@ async function executeAnthropicApi(provider: LLMProviderConfig, modelName: strin
         stream: true
     });
     
-    const { controller } = getAbortSignal(progressReporter, signal);
-
+    await cancellableDelay(1, progressReporter, signal); // Yield
+    let response;
     try {
-        await cancellableDelay(1, progressReporter); // Yield
-        let response;
-        try {
-            response = await requestRuntimeUrlWithStructuredStreamingFallback('Anthropic', {
-                url: url,
-                method: 'POST',
-                headers: { 
-                    'Content-Type': 'application/json', 
-                    'x-api-key': provider.apiKey, 
-                    'anthropic-version': '2023-06-01' 
-                }, 
-                body: requestBodyJson,
-                throw: false
-            }, {
-                url,
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Accept': 'text/event-stream',
-                    'x-api-key': provider.apiKey,
-                    'anthropic-version': '2023-06-01'
-                },
-                body: streamRequestBodyJson,
-                throw: false
-            }, createAnthropicStreamingStrategy(), progressReporter, signal);
-        } catch (error: any) {
-            handleApiError('Anthropic', error, progressReporter, settings.enableApiErrorDebugMode);
-        }
-
-        if (progressReporter.cancelled) throw new Error("Processing cancelled by user after API response.");
-        if (response.status < 200 || response.status >= 300) {
-            handleApiError('Anthropic', response, progressReporter, settings.enableApiErrorDebugMode);
-        }
-        const data = response.json;
-        if (progressReporter.cancelled) throw new Error("Processing cancelled by user after API success.");
-        if (!data.content?.[0]?.text) { throw new Error(`Unexpected response format from Anthropic API`); }
-        return data.content[0].text;
-    } finally { 
-        if (controller && progressReporter.abortController === controller) { 
-            progressReporter.abortController = null; 
-        } 
+        response = await requestRuntimeUrlWithStructuredStreamingFallback('Anthropic', {
+            url: url,
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'x-api-key': provider.apiKey,
+                'anthropic-version': '2023-06-01'
+            },
+            body: requestBodyJson,
+            throw: false
+        }, {
+            url,
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'text/event-stream',
+                'x-api-key': provider.apiKey,
+                'anthropic-version': '2023-06-01'
+            },
+            body: streamRequestBodyJson,
+            throw: false
+        }, createAnthropicStreamingStrategy(), progressReporter, signal);
+    } catch (error: any) {
+        handleApiError('Anthropic', error, progressReporter, settings.enableApiErrorDebugMode);
     }
+
+    if (progressReporter.cancelled) throw new Error("Processing cancelled by user after API response.");
+    if (response.status < 200 || response.status >= 300) {
+        handleApiError('Anthropic', response, progressReporter, settings.enableApiErrorDebugMode);
+    }
+    const data = response.json;
+    if (progressReporter.cancelled) throw new Error("Processing cancelled by user after API success.");
+    if (!data.content?.[0]?.text) { throw new Error(`Unexpected response format from Anthropic API`); }
+    return data.content[0].text;
 }
 
 async function executeGoogleApi(provider: LLMProviderConfig, modelName: string, prompt: string, content: string, progressReporter: ProgressReporter, settings: NotemdSettings, signal?: AbortSignal): Promise<string> {
@@ -2789,45 +2803,37 @@ async function executeGoogleApi(provider: LLMProviderConfig, modelName: string, 
     };
     const requestBodyJson = JSON.stringify(requestBody);
 
-    const { controller } = getAbortSignal(progressReporter, signal);
-
+    await cancellableDelay(1, progressReporter, signal); // Yield
+    let response;
     try {
-        await cancellableDelay(1, progressReporter); // Yield
-        let response;
-        try {
-            response = await requestRuntimeUrlWithStructuredStreamingFallback('Google', {
-                url: urlWithKey,
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: requestBodyJson,
-                throw: false
-            }, {
-                url: streamUrl.toString(),
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Accept': 'text/event-stream'
-                },
-                body: requestBodyJson,
-                throw: false
-            }, createGoogleStreamingStrategy(), progressReporter, signal);
-        } catch (error: any) {
-            handleApiError('Google', error, progressReporter, settings.enableApiErrorDebugMode);
-        }
-
-        if (progressReporter.cancelled) throw new Error("Processing cancelled by user after API response.");
-        if (response.status < 200 || response.status >= 300) {
-            handleApiError('Google', response, progressReporter, settings.enableApiErrorDebugMode);
-        }
-        const data = response.json;
-        if (progressReporter.cancelled) throw new Error("Processing cancelled by user after API success.");
-        if (!data.candidates?.[0]?.content?.parts?.[0]?.text) { throw new Error(`Unexpected response format from Google API`); }
-        return data.candidates[0].content.parts[0].text;
-    } finally { 
-        if (controller && progressReporter.abortController === controller) { 
-            progressReporter.abortController = null; 
-        } 
+        response = await requestRuntimeUrlWithStructuredStreamingFallback('Google', {
+            url: urlWithKey,
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: requestBodyJson,
+            throw: false
+        }, {
+            url: streamUrl.toString(),
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'text/event-stream'
+            },
+            body: requestBodyJson,
+            throw: false
+        }, createGoogleStreamingStrategy(), progressReporter, signal);
+    } catch (error: any) {
+        handleApiError('Google', error, progressReporter, settings.enableApiErrorDebugMode);
     }
+
+    if (progressReporter.cancelled) throw new Error("Processing cancelled by user after API response.");
+    if (response.status < 200 || response.status >= 300) {
+        handleApiError('Google', response, progressReporter, settings.enableApiErrorDebugMode);
+    }
+    const data = response.json;
+    if (progressReporter.cancelled) throw new Error("Processing cancelled by user after API success.");
+    if (!data.candidates?.[0]?.content?.parts?.[0]?.text) { throw new Error(`Unexpected response format from Google API`); }
+    return data.candidates[0].content.parts[0].text;
 }
 
 async function executeMistralApi(provider: LLMProviderConfig, modelName: string, prompt: string, content: string, progressReporter: ProgressReporter, settings: NotemdSettings, signal?: AbortSignal): Promise<string> {
@@ -2852,36 +2858,28 @@ async function executeAzureOpenAIApi(provider: LLMProviderConfig, modelName: str
         stream: true
     });
 
-    const { controller } = getAbortSignal(progressReporter, signal);
-
+    await cancellableDelay(1, progressReporter, signal); // Yield
+    let response;
     try {
-        await cancellableDelay(1, progressReporter); // Yield
-        let response;
-        try {
-            response = await requestOpenAICompatibleWithStreamingFallback('Azure OpenAI', {
-                url: url,
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'api-key': provider.apiKey },
-                body: requestBodyJson,
-                throw: false
-            }, streamRequestBodyJson, progressReporter, signal, settings.enableStableApiCall);
-        } catch (error: any) {
-            handleApiError('Azure OpenAI', error, progressReporter, settings.enableApiErrorDebugMode);
-        }
-
-        if (progressReporter.cancelled) throw new Error("Processing cancelled by user after API response.");
-        if (response.status < 200 || response.status >= 300) {
-            handleApiError('Azure OpenAI', response, progressReporter, settings.enableApiErrorDebugMode);
-        }
-        const data = response.json;
-        if (progressReporter.cancelled) throw new Error("Processing cancelled by user after API success.");
-        if (!data.choices?.[0]?.message?.content) { throw new Error(`Unexpected response format from Azure OpenAI API`); }
-        return data.choices[0].message.content;
-    } finally { 
-        if (controller && progressReporter.abortController === controller) { 
-            progressReporter.abortController = null; 
-        } 
+        response = await requestOpenAICompatibleWithStreamingFallback('Azure OpenAI', {
+            url: url,
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'api-key': provider.apiKey },
+            body: requestBodyJson,
+            throw: false
+        }, streamRequestBodyJson, progressReporter, signal, settings.enableStableApiCall);
+    } catch (error: any) {
+        handleApiError('Azure OpenAI', error, progressReporter, settings.enableApiErrorDebugMode);
     }
+
+    if (progressReporter.cancelled) throw new Error("Processing cancelled by user after API response.");
+    if (response.status < 200 || response.status >= 300) {
+        handleApiError('Azure OpenAI', response, progressReporter, settings.enableApiErrorDebugMode);
+    }
+    const data = response.json;
+    if (progressReporter.cancelled) throw new Error("Processing cancelled by user after API success.");
+    if (!data.choices?.[0]?.message?.content) { throw new Error(`Unexpected response format from Azure OpenAI API`); }
+    return data.choices[0].message.content;
 }
 
 async function executeLMStudioApi(provider: LLMProviderConfig, modelName: string, prompt: string, content: string, progressReporter: ProgressReporter, settings: NotemdSettings, signal?: AbortSignal): Promise<string> {
@@ -2906,45 +2904,37 @@ async function executeOllamaApi(provider: LLMProviderConfig, modelName: string, 
         stream: true
     });
     
-    const { controller } = getAbortSignal(progressReporter, signal);
-
+    await cancellableDelay(1, progressReporter, signal); // Yield
+    let response;
     try {
-        await cancellableDelay(1, progressReporter); // Yield
-        let response;
-        try {
-            response = await requestRuntimeUrlWithStructuredStreamingFallback('Ollama', {
-                url: url,
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: requestBodyJson,
-                throw: false
-            }, {
-                url,
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/x-ndjson'
-                },
-                body: streamRequestBodyJson,
-                throw: false
-            }, createOllamaStreamingStrategy(), progressReporter, signal);
-        } catch (error: any) {
-            handleApiError('Ollama', error, progressReporter, settings.enableApiErrorDebugMode);
-        }
-
-        if (progressReporter.cancelled) throw new Error("Processing cancelled by user after API response.");
-        if (response.status < 200 || response.status >= 300) {
-            handleApiError('Ollama', response, progressReporter, settings.enableApiErrorDebugMode);
-        }
-        const data = response.json;
-        if (progressReporter.cancelled) throw new Error("Processing cancelled by user after API success.");
-        if (!data.message?.content) { throw new Error(`Unexpected response format from Ollama`); }
-        return data.message.content;
-    } finally { 
-        if (controller && progressReporter.abortController === controller) { 
-            progressReporter.abortController = null; 
-        } 
+        response = await requestRuntimeUrlWithStructuredStreamingFallback('Ollama', {
+            url: url,
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: requestBodyJson,
+            throw: false
+        }, {
+            url,
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/x-ndjson'
+            },
+            body: streamRequestBodyJson,
+            throw: false
+        }, createOllamaStreamingStrategy(), progressReporter, signal);
+    } catch (error: any) {
+        handleApiError('Ollama', error, progressReporter, settings.enableApiErrorDebugMode);
     }
+
+    if (progressReporter.cancelled) throw new Error("Processing cancelled by user after API response.");
+    if (response.status < 200 || response.status >= 300) {
+        handleApiError('Ollama', response, progressReporter, settings.enableApiErrorDebugMode);
+    }
+    const data = response.json;
+    if (progressReporter.cancelled) throw new Error("Processing cancelled by user after API success.");
+    if (!data.message?.content) { throw new Error(`Unexpected response format from Ollama`); }
+    return data.message.content;
 }
 
 async function executeOpenRouterAPI(provider: LLMProviderConfig, modelName: string, prompt: string, content: string, progressReporter: ProgressReporter, settings: NotemdSettings, signal?: AbortSignal): Promise<string> {
@@ -2976,37 +2966,29 @@ async function executeOpenAICompatibleApi(provider: LLMProviderConfig, modelName
         stream: true
     });
 
-    const { controller } = getAbortSignal(progressReporter, signal);
-
+    await cancellableDelay(1, progressReporter, signal);
+    let response;
     try {
-        await cancellableDelay(1, progressReporter);
-        let response;
-        try {
-            response = await requestOpenAICompatibleWithStreamingFallback(provider.name, {
-                url,
-                method: 'POST',
-                headers: buildOpenAICompatibleProviderHeaders(provider),
-                body: requestBodyJson,
-                throw: false
-            }, streamRequestBodyJson, progressReporter, signal, settings.enableStableApiCall);
-        } catch (error: any) {
-            handleApiError(provider.name, error, progressReporter, settings.enableApiErrorDebugMode);
-        }
-
-        if (progressReporter.cancelled) throw new Error("Processing cancelled by user after API response.");
-        if (response.status < 200 || response.status >= 300) {
-            handleApiError(provider.name, response, progressReporter, settings.enableApiErrorDebugMode);
-        }
-
-        const data = response.json;
-        const fallbackText = typeof response.text === 'string' ? response.text : '';
-        if (progressReporter.cancelled) throw new Error("Processing cancelled by user after API success.");
-        return extractOpenAICompatibleText(provider.name, data, fallbackText);
-    } finally {
-        if (controller && progressReporter.abortController === controller) {
-            progressReporter.abortController = null;
-        }
+        response = await requestOpenAICompatibleWithStreamingFallback(provider.name, {
+            url,
+            method: 'POST',
+            headers: buildOpenAICompatibleProviderHeaders(provider),
+            body: requestBodyJson,
+            throw: false
+        }, streamRequestBodyJson, progressReporter, signal, settings.enableStableApiCall);
+    } catch (error: any) {
+        handleApiError(provider.name, error, progressReporter, settings.enableApiErrorDebugMode);
     }
+
+    if (progressReporter.cancelled) throw new Error("Processing cancelled by user after API response.");
+    if (response.status < 200 || response.status >= 300) {
+        handleApiError(provider.name, response, progressReporter, settings.enableApiErrorDebugMode);
+    }
+
+    const data = response.json;
+    const fallbackText = typeof response.text === 'string' ? response.text : '';
+    if (progressReporter.cancelled) throw new Error("Processing cancelled by user after API success.");
+    return extractOpenAICompatibleText(provider.name, data, fallbackText);
 }
 
 export async function callOpenAICompatibleDiagnosticWithMode(
@@ -3071,7 +3053,7 @@ export async function callOpenAICompatibleDiagnosticWithMode(
         }
         case 'openai-requesturl-only': {
             progressReporter.log(`[${provider.name}] Developer diagnostic: forcing requestUrl-only transport.`);
-            response = await requestViaObsidianTransport(baseOptions);
+            response = await requestViaObsidianTransport(baseOptions, signal);
             break;
         }
         case 'openai-direct-buffered': {
@@ -3196,6 +3178,9 @@ export async function callLLM(
     modelName?: string,
     signal?: AbortSignal
 ): Promise<string> {
+    if (progressReporter.cancelled || (signal ?? progressReporter.abortController?.signal)?.aborted) {
+        throw createAbortError();
+    }
     const modelToUse = modelName || provider.model;
 
     // Check cache for repeated identical calls

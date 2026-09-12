@@ -79,6 +79,14 @@ export class DrawnixRenderer implements DiagramRenderer {
                     : undefined
         }));
         const diagnostics = [...coverageDiagnostics, ...sourceVisualCompanions.diagnostics];
+        if (projection.crossRelations.length > 0) {
+            diagnostics.push({
+                severity: 'warning',
+                kind: 'drawnix-static-cross-relations',
+                message: 'Cross-branch arrows use fixed coordinates. Drawnix can move their nodes when importing or editing the mind map.',
+                advice: 'Use the SVG preview to inspect relationship connectivity. Native node editing is supported; automatic arrow attachment is not.'
+            });
+        }
 
         return {
             target: this.target,

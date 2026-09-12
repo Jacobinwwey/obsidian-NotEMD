@@ -1,5 +1,9 @@
 # draw.io 导出视觉回归 Runbook
 
+## 已记录应用验收：9 月 13 日
+
+diagrams.net 31.4.5 网页应用在 Chrome 152.0.7977.83 中导入生产 exporter XML，编辑含中文的标签、下载并重开，3 个原生顶点／2 条边完整保留。隔离上下文使用标准文件输入／下载。[保存的 XML 与截图](./reliability-acceptance-2026-09-12.zh-CN.md)提供独立应用证据，不推广到所有 diagrams.net 版本，也不替代下文确定性仓库门禁。
+
 语言: [English](./drawio-export-visual-regression.md) | **简体中文**
 
 本文定义 Notemd 确定性 draw.io exporter 的维护者本地核验层。这个 exporter 是一个 library boundary：它把内部 `SemanticFigureModel` 转换为未压缩 draw.io XML，可由 diagrams.net Desktop 或 diagrams.net web app 打开。它不会把 diagrams.net、Drawnix 或 Plait 嵌入插件运行时。

@@ -1,3 +1,11 @@
+import { cp } from 'node:fs/promises';
+import { resolve } from 'node:path';
+
+const nativeArtifactExtensions = ['drawio', 'drawnix', 'tex', 'log'];
+// Native evidence downloads are assets, not documentation page routes.
+process.env.VITE_EXTRA_EXTENSIONS = [process.env.VITE_EXTRA_EXTENSIONS, nativeArtifactExtensions.join(',')]
+    .filter(Boolean).join(',');
+
 const planRewrites = {
     'superpowers/plans/2026-03-26-agents-and-provider-expansion.en.md':
         'superpowers/plans/2026-03-26-agents-and-provider-expansion.md',
@@ -15,6 +23,11 @@ export default {
     cleanUrls: true,
     rewrites: planRewrites,
     srcExclude: ['archive/root-history/**', 'export/**', 'dist/**'],
+    vite: { assetsInclude: nativeArtifactExtensions.map(extension => `**/*.${extension}`) },
+    async buildEnd(siteConfig) {
+        // Markdown download links keep their relative URLs; publish their exact bytes there.
+        await cp(resolve(siteConfig.srcDir, 'maintainer/evidence'), resolve(siteConfig.outDir, 'maintainer/evidence'), { recursive: true });
+    },
     head: [['meta', { name: 'robots', content: 'noindex, nofollow' }]],
     themeConfig: {
         nav: [

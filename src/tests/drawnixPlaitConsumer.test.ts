@@ -80,6 +80,8 @@ describe('Drawnix Plait consumer contract', () => {
             targetId: 'presentation',
             text: ['selects delivery']
         }]);
+        expect(consumerReport).toHaveProperty('nativeBoundRelationCount', 0);
+        expect(consumerReport).toHaveProperty('staticRelationCount', 1);
     });
 
     test('runs the standalone gate against the production architecture fixture', () => {
@@ -99,6 +101,7 @@ describe('Drawnix Plait consumer contract', () => {
         expect(gateReport).toEqual(expect.objectContaining({
             status: 'passed',
             consumer: 'plait-public-api',
+            checkScope: 'mindmap-and-static-arrow-serialization',
             generatedProductionFixture: true,
             rootCount: 1
         }));

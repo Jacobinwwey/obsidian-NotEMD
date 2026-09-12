@@ -1,5 +1,9 @@
 # Slidev Editable PPTX Acceptance, 2026-06-21
 
+## Latest acceptance, September 13
+
+The [U8 PowerPoint record](./reliability-acceptance-2026-09-12.md#powerpoint-fidelity) adds actual PowerPoint 16.0 build 14332 native-cell edit/save/reopen evidence and the table-paint correction. Ten slides, 18 editable text boxes and two native tables survived; the existing visible-native fidelity profile passed. Raster-strict/font equivalence remains unclaimed. The June results below remain historical evidence for their original renderer and export mode.
+
 Language: **English** | [简体中文](./slidev-editable-pptx-acceptance-2026-06-21.zh-CN.md)
 
 This record covers the first real NoteMD `HTML Slides -> editable PPTX` acceptance run against `docs/architecture.zh-CN.md`.

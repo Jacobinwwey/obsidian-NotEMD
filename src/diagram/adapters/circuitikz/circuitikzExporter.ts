@@ -634,139 +634,104 @@ function renderCmosTransmissionGateTemplate(spec: CircuitSpec): string {
     const mnLabel = componentLabel(spec, 'MN', '$M_N$');
     const inputSide = layoutSide(spec.layoutHints?.inputSide, 'left');
     const outputSide = layoutSide(spec.layoutHints?.outputSide, 'right');
-    const inputPortX = inputSide === 'left' ? '0.8' : '5.2';
-    const outputPortX = outputSide === 'right' ? '5.2' : '0.8';
+    const inputPortX = inputSide === 'left' ? '0.8' : '5.6';
+    const outputPortX = outputSide === 'right' ? '5.6' : '0.8';
+    const inputBusX = inputSide === 'left' ? '1.6' : '4.8';
+    const outputBusX = inputSide === 'left' ? '4.8' : '1.6';
+    const rotation = inputSide === 'left' ? '90' : '-90';
+    const pMirror = inputSide === 'left' ? ', xscale=-1' : '';
+    const nMirror = inputSide === 'right' ? ', xscale=-1' : '';
+    const outputY = outputSide === inputSide ? '0' : '2.8';
 
     return renderCircuitikzDocument(spec, `
 \\draw
-  (${inputPortX},3.1) to [short, o-] (2.2,3.1)
-  node[${inputSide}]{$v_{in}$}
-  (2.2,3.1) to [short] (2.2,3.8)
-  node[pmos, anchor=S] (MP) {${mpLabel}}
-  (MP.D) to [short] (3.8,3.8)
-  (3.8,3.8) to [short] (3.8,3.1)
-  (2.2,3.1) to [short] (2.2,2.4)
-  node[nmos, anchor=D] (MN) {${mnLabel}}
-  (MN.S) to [short] (3.8,2.4)
-  (3.8,2.4) to [short] (3.8,3.1)
-  (3.8,3.1) to [short, -o] (${outputPortX},3.1) node[${outputSide}]{$v_{out}$};
+  (3.2,3.8) node[pmos, rotate=${rotation}${pMirror}] (MP) {}
+  (3.2,1.8) node[nmos, rotate=${rotation}${nMirror}] (MN) {};
+\\node[right] at (3.8,4.3) {${mpLabel}};
+\\node[right] at (3.8,1.3) {${mnLabel}};
 \\draw
-  (MP.G) to [short] (3.0,4.6)
-  to [short, -o] (3.0,5.1)
-  node[above]{$\\bar{\\phi}$};
+  (${inputPortX},2.8) node[${inputSide}]{$v_{in}$}
+  to [short, o-*] (${inputBusX},2.8)
+  (${inputBusX},2.8) |- (MP.S)
+  (${inputBusX},2.8) |- (MN.D)
+  (MP.D) -| (${outputBusX},2.8)
+  (MN.S) -| (${outputBusX},2.8);
 \\draw
-  (MN.G) to [short] (3.0,1.6)
-  to [short, -o] (3.0,1.1)
-  node[below]{$\\phi$};
+  (${outputBusX},2.8) to [short, *-] (${outputBusX},${outputY})
+  to [short, -o] (${outputPortX},${outputY}) node[${outputSide}]{$v_{out}$};
+\\draw (MP.G) to [short, -o] (3.2,5.2) node[above]{$\\bar{\\phi}$};
+\\draw (MN.G) to [short, -o] (3.2,0.5) node[below]{$\\phi$};
 `);
 }
 
+function renderCmosGateLabels(spec: CircuitSpec, inputSide: 'left' | 'right'): string {
+    const offset = inputSide === 'left' ? '-0.65' : '0.65';
+    const componentSide = inputSide === 'left' ? 'right' : 'left';
+    const componentOffset = inputSide === 'left' ? '0.45' : '-0.45';
+    // Repeated net names express the shared gate signals without crossing a
+    // complementary transistor stack. Separate text nodes avoid inheriting the
+    // device's mirror transform when gates face right.
+    return [['MPA', 'v_A', '$M_{PA}$'], ['MNA', 'v_A', '$M_{NA}$'], ['MPB', 'v_B', '$M_{PB}$'], ['MNB', 'v_B', '$M_{NB}$']]
+        .map(([id, net, fallback]) => `\\draw (${id}.G) to [short, -o] ++(${offset},0) node[${inputSide}]{$${net}$};
+\\node[${componentSide}] at ([xshift=${componentOffset}cm]${id}.center) {${componentLabel(spec, id, fallback)}};`)
+        .join('\n');
+}
+
 function renderCmosNand2Template(spec: CircuitSpec): string {
-    const mpaLabel = componentLabel(spec, 'MPA', '$M_{PA}$');
-    const mpbLabel = componentLabel(spec, 'MPB', '$M_{PB}$');
-    const mnaLabel = componentLabel(spec, 'MNA', '$M_{NA}$');
-    const mnbLabel = componentLabel(spec, 'MNB', '$M_{NB}$');
     const inputSide = layoutSide(spec.layoutHints?.inputSide, 'left');
     const outputSide = layoutSide(spec.layoutHints?.outputSide, 'right');
-    const inputRoute = inputSide === 'left'
-        ? `  (MPA.G) to [short] (1.7,4.2)
-  (MNA.G) to [short] (1.7,2.7)
-  (1.7,4.2) to [short] (1.7,2.7)
-  to [short, -o] (${extendedPortX(inputSide)},3.45)
-  node[left]{$v_A$}
-  (MPB.G) to [short] (1.3,4.2)
-  (MNB.G) to [short] (1.3,1.8)
-  (1.3,4.2) to [short] (1.3,1.8)
-  to [short, -o] (${extendedPortX(inputSide)},2.7)
-  node[left]{$v_B$};`
-        : `  (MPA.G) to [short] (4.1,4.2)
-  (MNA.G) to [short] (4.1,2.7)
-  (4.1,4.2) to [short] (4.1,2.7)
-  to [short] (4.5,2.7)
-  to [short, -o] (${extendedPortX(inputSide)},4.15)
-  node[right]{$v_A$}
-  (MPB.G) to [short] (4.5,4.2)
-  (MNB.G) to [short] (4.5,1.8)
-  (4.5,4.2) to [short] (4.5,1.8)
-  to [short, -o] (${extendedPortX(inputSide)},1.85)
-  node[right]{$v_B$};`;
+    const mirror = inputSide === 'right' ? ', xscale=-1' : '';
+    const outputPortX = outputSide === 'right' ? '7.2' : '0';
 
     return renderCircuitikzDocument(spec, `
 \\draw
-  (3,5) node[vcc]{$V_{DD}$}
-  to [short] (3,4.8)
-  (2.5,4.2) node[pmos, anchor=S] (MPA) {${mpaLabel}}
-  (3.5,4.2) node[pmos, anchor=S] (MPB) {${mpbLabel}}
-  (MPA.S) to [short] (2.5,4.8)
-  (MPB.S) to [short] (3.5,4.8)
-  (2.5,4.8) to [short] (3.5,4.8)
-  (MPA.D) to [short] (2.5,3.2)
-  (MPB.D) to [short] (3.5,3.2)
-  (2.5,3.2) to [short] (3.5,3.2)
-  (3,3.2) to [short, *-o] (${commonPortX(outputSide)},3.2) node[${outputSide}]{$v_{out}$};
+  (1.4,5) node[pmos, anchor=S${mirror}] (MPA) {}
+  (5.8,5) node[pmos, anchor=S${mirror}] (MPB) {}
+  (MPA.S) to [short] (1.4,5.8)
+  (MPB.S) to [short] (5.8,5.8)
+  (1.4,5.8) to [short] (5.8,5.8)
+  (3.6,5.8) node[vcc]{$V_{DD}$}
+  (MPA.D) to [short] (1.4,3.2)
+  (MPB.D) to [short] (5.8,3.2)
+  (1.4,3.2) to [short] (5.8,3.2)
+  (3.6,3.2) to [short, *-o] (${outputPortX},3.2) node[${outputSide}]{$v_{out}$};
 \\draw
-  (3,3.2) to [short] (3,2.7)
-  node[nmos, anchor=D] (MNA) {${mnaLabel}}
-  (MNA.S) to [short] (3,1.8)
-  node[nmos, anchor=D] (MNB) {${mnbLabel}}
-  (MNB.S) to [short] (3,0.7)
+  (3.6,3.2) to [short] (3.6,2.5)
+  node[nmos, anchor=D${mirror}] (MNA) {}
+  (MNA.S) to [short] (3.6,0.4)
+  node[nmos, anchor=D${mirror}] (MNB) {}
+  (MNB.S) to [short] (3.6,-1.8)
   node[ground]{};
-\\draw
-${inputRoute}
+${renderCmosGateLabels(spec, inputSide)}
 `);
 }
 
 function renderCmosNor2Template(spec: CircuitSpec): string {
-    const mpaLabel = componentLabel(spec, 'MPA', '$M_{PA}$');
-    const mpbLabel = componentLabel(spec, 'MPB', '$M_{PB}$');
-    const mnaLabel = componentLabel(spec, 'MNA', '$M_{NA}$');
-    const mnbLabel = componentLabel(spec, 'MNB', '$M_{NB}$');
     const inputSide = layoutSide(spec.layoutHints?.inputSide, 'left');
     const outputSide = layoutSide(spec.layoutHints?.outputSide, 'right');
-    const inputRoute = inputSide === 'left'
-        ? `  (MPA.G) to [short] (1.7,4.35)
-  (MNA.G) to [short] (1.7,1.95)
-  (1.7,4.35) to [short] (1.7,1.95)
-  to [short, -o] (${extendedPortX(inputSide)},4.35)
-  node[left]{$v_A$}
-  (MPB.G) to [short] (1.3,3.35)
-  (MNB.G) to [short] (1.3,1.45)
-  (1.3,3.35) to [short] (1.3,1.45)
-  to [short, -o] (${extendedPortX(inputSide)},1.95)
-  node[left]{$v_B$};`
-        : `  (MPA.G) to [short] (4.1,4.35)
-  (MNA.G) to [short] (4.1,1.95)
-  (4.1,4.35) to [short] (4.1,1.95)
-  to [short] (4.5,1.95)
-  to [short, -o] (${extendedPortX(inputSide)},4.35)
-  node[right]{$v_A$}
-  (MPB.G) to [short] (4.5,3.35)
-  (MNB.G) to [short] (4.5,1.45)
-  (4.5,3.35) to [short] (4.5,1.45)
-  to [short, -o] (${extendedPortX(inputSide)},1.95)
-  node[right]{$v_B$};`;
+    const mirror = inputSide === 'right' ? ', xscale=-1' : '';
+    const outputPortX = outputSide === 'right' ? '7.2' : '0';
 
     return renderCircuitikzDocument(spec, `
 \\draw
-  (3,5) node[vcc]{$V_{DD}$}
-  to [short] (3,4.8)
-  node[pmos, anchor=S] (MPA) {${mpaLabel}}
-  (MPA.D) to [short] (3,3.75)
-  node[pmos, anchor=S] (MPB) {${mpbLabel}}
-  (MPB.D) to [short] (3,2.75);
+  (3.6,6.5) node[vcc]{$V_{DD}$}
+  to [short] (3.6,5.8)
+  node[pmos, anchor=S${mirror}] (MPA) {}
+  (MPA.D) to [short] (3.6,3.7)
+  node[pmos, anchor=S${mirror}] (MPB) {}
+  (MPB.D) to [short] (3.6,1.6);
 \\draw
-  (3,2.75) to [short, *-o] (${commonPortX(outputSide)},2.75) node[${outputSide}]{$v_{out}$};
+  (3.6,1.6) to [short, *-o] (${outputPortX},1.6) node[${outputSide}]{$v_{out}$};
 \\draw
-  (3,2.75) to [short] (2.5,2.2)
-  node[nmos, anchor=D] (MNA) {${mnaLabel}}
-  (MNA.S) to [short] (2.5,0.7)
-  (3,2.75) to [short] (3.5,2.2)
-  node[nmos, anchor=D] (MNB) {${mnbLabel}}
-  (MNB.S) to [short] (3.5,0.7)
-  (2.5,0.7) to [short] (3.5,0.7)
-  (3,0.7) node[ground]{};
-\\draw
-${inputRoute}
+  (1.4,1.1) node[nmos, anchor=D${mirror}] (MNA) {}
+  (5.8,1.1) node[nmos, anchor=D${mirror}] (MNB) {}
+  (3.6,1.6) -| (MNA.D)
+  (3.6,1.6) -| (MNB.D)
+  (MNA.S) to [short] (1.4,-1)
+  (MNB.S) to [short] (5.8,-1)
+  (1.4,-1) to [short] (5.8,-1)
+  (3.6,-1) node[ground]{};
+${renderCmosGateLabels(spec, inputSide)}
 `);
 }
 

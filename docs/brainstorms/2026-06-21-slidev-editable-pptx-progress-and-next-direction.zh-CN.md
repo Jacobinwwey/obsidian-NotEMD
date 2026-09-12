@@ -1,5 +1,11 @@
 # Slidev 可编辑 PPTX 推进记录与后续方向，2026-06-21
 
+## 9 月 13 日有界保真更新
+
+U8 修复原生表格边线顺序、各侧透明度、折叠行分隔线及合并单元格外边框。PowerPoint 16.0 build 14332 编辑原生单元格，另存后重开全部 10 页。表格页 RMSE 从 0.192665 改善到 0.159463，既有 visible-native 门禁通过，没有放宽阈值。
+
+[当前验收记录](../maintainer/reliability-acceptance-2026-09-12.zh-CN.md)负责 fixture、渲染、版本和限制。下文按时间保留早期决策与证据。raster-strict 保真仍失败，原生字体整形仍不同于 Chromium，Mermaid／SVG 几何仍采用图片 fallback。
+
 ## 问题定义
 
 本需求不是“生成一个 `.pptx` 文件”。每页一张截图的 PPTX 很容易做，但不满足“可编辑 PPTX”的要求。真正有价值的目标是：PowerPoint 用户能直接编辑 slide 文本，同时 Slidev 渲染出的复杂视觉结果仍然被保留。

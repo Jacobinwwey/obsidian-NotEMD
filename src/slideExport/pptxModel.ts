@@ -85,6 +85,12 @@ export type SlidevPptxVerticalAlign = 'top' | 'middle' | 'bottom';
 
 export type SlidevPptxTableBorderModel = 'collapsed' | 'separate';
 
+export interface SlidevPptxTableBorderSide {
+	color: string | null;
+	widthPt: number;
+	opacity: number;
+}
+
 export interface SlidevPptxTableCell {
 	text: string;
 	rowSpan: number;
@@ -101,6 +107,8 @@ export interface SlidevPptxTableCell {
 	fillColor: string | null;
 	borderColor: string | null;
 	borderWidthPt: number;
+	/** Per-edge CSS paint; legacy uniform borders remain accepted by the writer. */
+	borderSides?: Record<'top' | 'right' | 'bottom' | 'left', SlidevPptxTableBorderSide>;
 	lineSpacingPt?: number;
 	charSpacingPt?: number;
 	paddingLeftIn?: number;

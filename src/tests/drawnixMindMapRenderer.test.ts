@@ -90,6 +90,16 @@ function pointOnPolyline(points: Array<[number, number]>, position: number): [nu
 }
 
 describe('Drawnix mind-map renderer', () => {
+    test('exposes static cross-relation limits without warning on a hierarchy-only map', async () => {
+        const renderer = new DrawnixRenderer();
+        const connected = await renderer.render(createKnowledgeMapSpec());
+        expect(connected.diagnostics).toEqual(expect.arrayContaining([
+            expect.objectContaining({ kind: 'drawnix-static-cross-relations', severity: 'warning' })
+        ]));
+        const hierarchy = await renderer.render({ ...createKnowledgeMapSpec(), edges: [] });
+        expect(hierarchy.diagnostics?.some(diagnostic => diagnostic.kind === 'drawnix-static-cross-relations') ?? false).toBe(false);
+    });
+
     test('accepts only the dedicated Drawnix knowledge-map contract', () => {
         const renderer = new DrawnixRenderer();
 

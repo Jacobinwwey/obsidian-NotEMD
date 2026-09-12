@@ -344,13 +344,38 @@ describe('circuitikz exporter', () => {
 
         expect(assertValidCircuitSpec(spec)).toBe(spec);
         expect(output).toContain('\\begin{circuitikz}[american voltages]');
-        expect(output).toContain('node[pmos, anchor=S] (MP) {$M_P$}');
-        expect(output).toContain('node[nmos, anchor=D] (MN) {$M_N$}');
-        expect(output).toContain('(0.8,3.1) to [short, o-] (2.2,3.1)');
-        expect(output).toContain('(3.8,3.1) to [short, -o] (5.2,3.1) node[right]{$v_{out}$};');
+        expect(output).toContain('node[pmos, rotate=90, xscale=-1] (MP) {}');
+        expect(output).toContain('node[nmos, rotate=90] (MN) {}');
+        expect(output).toContain('(1.6,2.8) |- (MP.S)');
+        expect(output).toContain('(1.6,2.8) |- (MN.D)');
+        expect(output).toContain('(MP.D) -| (4.8,2.8)');
+        expect(output).toContain('(MN.S) -| (4.8,2.8)');
         expect(output).toContain('node[left]{$v_{in}$}');
         expect(output).toContain('node[above]{$\\bar{\\phi}$}');
         expect(output).toContain('node[below]{$\\phi$}');
+    });
+
+    test.each([createCmosNand2Spec, createCmosNor2Spec])('uses explicit repeated gate net labels instead of crossing control wires', createSpec => {
+        const spec = createSpec();
+        const signature = createCircuitTopologySignature(spec);
+        const output = exportCircuitSpecToCircuitikz(spec);
+        expect(output.match(/node\[left\]\{\$v_A\$\}/g)).toHaveLength(2);
+        expect(output.match(/node\[left\]\{\$v_B\$\}/g)).toHaveLength(2);
+        expect(output).toContain('(MPA.G) to [short, -o] ++(-0.65,0)');
+        expect(output).toContain('(MNB.G) to [short, -o] ++(-0.65,0)');
+        expect(createCircuitTopologySignature(spec)).toBe(signature);
+    });
+
+    test.each([createCmosNand2Spec, createCmosNor2Spec])('keeps component text outside mirrored transistor transforms', createSpec => {
+        const spec = createSpec();
+        spec.layoutHints = { inputSide: 'right', outputSide: 'left', routingStyle: 'orthogonal' };
+        spec.components[0].label = '$P_{custom}$';
+        const output = exportCircuitSpecToCircuitikz(spec);
+
+        expect(output).not.toMatch(/node\[[^\]]*xscale=-1[^\]]*\] \([^)]+\) \{[^}]+\}/);
+        expect(output).toMatch(/\\node\[left\][^\n]*MPA\.center[^\n]*\{\$P_\{custom\}\$\};/);
+        expect(output.match(/\$P_\{custom\}\$/g)).toHaveLength(1);
+        expect(output.match(/\\node\[left\][^\n]*M(?:P|N)(?:A|B)\.center/g)).toHaveLength(4);
     });
 
     test('projects CMOS transmission gate layout hints into deterministic bidirectional ports', () => {
@@ -365,8 +390,10 @@ describe('circuitikz exporter', () => {
         const output = exportCircuitSpecToCircuitikz(spec);
 
         expect(createCircuitTopologySignature(spec)).toBe(createCircuitTopologySignature(reference));
-        expect(output).toContain('(5.2,3.1) to [short, o-] (2.2,3.1)');
-        expect(output).toContain('(3.8,3.1) to [short, -o] (0.8,3.1) node[left]{$v_{out}$};');
+        expect(output).toContain('(5.6,2.8) node[right]{$v_{in}$}');
+        expect(output).toContain('(4.8,2.8) |- (MP.S)');
+        expect(output).toContain('(MN.S) -| (1.6,2.8)');
+        expect(output).toContain('to [short, -o] (0.8,2.8) node[left]{$v_{out}$};');
         expect(output).toContain('node[right]{$v_{in}$}');
     });
 
@@ -386,13 +413,13 @@ describe('circuitikz exporter', () => {
 
         expect(assertValidCircuitSpec(spec)).toBe(spec);
         expect(output).toContain('\\begin{circuitikz}[american voltages]');
-        expect(output).toContain('node[pmos, anchor=S] (MPA) {$M_{PA}$}');
-        expect(output).toContain('node[pmos, anchor=S] (MPB) {$M_{PB}$}');
-        expect(output).toContain('node[nmos, anchor=D] (MNA) {$M_{NA}$}');
-        expect(output).toContain('node[nmos, anchor=D] (MNB) {$M_{NB}$}');
-        expect(output).toContain('(MNA.S) to [short] (3,1.8)');
-        expect(output).toContain('(MNB.S) to [short] (3,0.7)');
-        expect(output).toContain('(3,3.2) to [short, *-o] (5,3.2) node[right]{$v_{out}$};');
+        expect(output).toContain('node[pmos, anchor=S] (MPA) {}');
+        expect(output).toContain('node[pmos, anchor=S] (MPB) {}');
+        expect(output).toContain('node[nmos, anchor=D] (MNA) {}');
+        expect(output).toContain('node[nmos, anchor=D] (MNB) {}');
+        expect(output).toContain('(MNA.S) to [short] (3.6,0.4)');
+        expect(output).toContain('(MNB.S) to [short] (3.6,-1.8)');
+        expect(output).toContain('(3.6,3.2) to [short, *-o] (7.2,3.2) node[right]{$v_{out}$};');
         expect(output).toContain('node[left]{$v_A$}');
         expect(output).toContain('node[left]{$v_B$};');
     });
@@ -409,10 +436,10 @@ describe('circuitikz exporter', () => {
         const output = exportCircuitSpecToCircuitikz(spec);
 
         expect(createCircuitTopologySignature(spec)).toBe(createCircuitTopologySignature(reference));
-        expect(output).toContain('(3,3.2) to [short, *-o] (0.8,3.2) node[left]{$v_{out}$};');
-        expect(output).toContain('to [short, -o] (5.2,4.15)');
+        expect(output).toContain('(3.6,3.2) to [short, *-o] (0,3.2) node[left]{$v_{out}$};');
+        expect(output).toContain('(MPA.G) to [short, -o] ++(0.65,0)');
         expect(output).toContain('node[right]{$v_A$}');
-        expect(output).toContain('to [short, -o] (5.2,1.85)');
+        expect(output).toContain('(MNB.G) to [short, -o] ++(0.65,0)');
         expect(output).toContain('node[right]{$v_B$};');
     });
 
@@ -432,13 +459,13 @@ describe('circuitikz exporter', () => {
 
         expect(assertValidCircuitSpec(spec)).toBe(spec);
         expect(output).toContain('\\begin{circuitikz}[american voltages]');
-        expect(output).toContain('node[pmos, anchor=S] (MPA) {$M_{PA}$}');
-        expect(output).toContain('node[pmos, anchor=S] (MPB) {$M_{PB}$}');
-        expect(output).toContain('node[nmos, anchor=D] (MNA) {$M_{NA}$}');
-        expect(output).toContain('node[nmos, anchor=D] (MNB) {$M_{NB}$}');
-        expect(output).toContain('(MPA.D) to [short] (3,3.75)');
-        expect(output).toContain('(MPB.D) to [short] (3,2.75)');
-        expect(output).toContain('(3,2.75) to [short, *-o] (5,2.75) node[right]{$v_{out}$};');
+        expect(output).toContain('node[pmos, anchor=S] (MPA) {}');
+        expect(output).toContain('node[pmos, anchor=S] (MPB) {}');
+        expect(output).toContain('node[nmos, anchor=D] (MNA) {}');
+        expect(output).toContain('node[nmos, anchor=D] (MNB) {}');
+        expect(output).toContain('(MPA.D) to [short] (3.6,3.7)');
+        expect(output).toContain('(MPB.D) to [short] (3.6,1.6)');
+        expect(output).toContain('(3.6,1.6) to [short, *-o] (7.2,1.6) node[right]{$v_{out}$};');
         expect(output).toContain('node[left]{$v_A$}');
         expect(output).toContain('node[left]{$v_B$};');
     });
@@ -455,10 +482,10 @@ describe('circuitikz exporter', () => {
         const output = exportCircuitSpecToCircuitikz(spec);
 
         expect(createCircuitTopologySignature(spec)).toBe(createCircuitTopologySignature(reference));
-        expect(output).toContain('(3,2.75) to [short, *-o] (0.8,2.75) node[left]{$v_{out}$};');
-        expect(output).toContain('to [short, -o] (5.2,4.35)');
+        expect(output).toContain('(3.6,1.6) to [short, *-o] (0,1.6) node[left]{$v_{out}$};');
+        expect(output).toContain('(MPA.G) to [short, -o] ++(0.65,0)');
         expect(output).toContain('node[right]{$v_A$}');
-        expect(output).toContain('to [short, -o] (5.2,1.95)');
+        expect(output).toContain('(MNB.G) to [short, -o] ++(0.65,0)');
         expect(output).toContain('node[right]{$v_B$};');
     });
 

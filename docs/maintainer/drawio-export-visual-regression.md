@@ -1,5 +1,9 @@
 # draw.io Export Visual Regression Runbook
 
+## Recorded application acceptance, September 13
+
+The diagrams.net 31.4.5 web application on Chrome 152.0.7977.83 imported the production exporter XML, edited a CJK-bearing label, downloaded and reopened it with three native vertices/two edges intact. The isolated context used standard file input/download. [Saved XML and screenshot](./reliability-acceptance-2026-09-12.md#external-consumers) provide independent application evidence; this does not promote all diagrams.net versions or replace the deterministic repo gates below.
+
 Language: **English** | [简体中文](./drawio-export-visual-regression.zh-CN.md)
 
 This runbook covers the maintainer-local validation layer for Notemd's deterministic draw.io exporter. The exporter is intentionally a library boundary: it converts the internal `SemanticFigureModel` into uncompressed draw.io XML that can be opened by diagrams.net Desktop or the web app. It does not embed diagrams.net, Drawnix, or Plait in the plugin runtime.

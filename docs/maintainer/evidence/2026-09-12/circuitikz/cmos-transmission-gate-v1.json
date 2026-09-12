@@ -1,0 +1,76 @@
+{
+  "circuitKind": "cmos-transmission-gate",
+  "title": "CMOS Transmission Gate",
+  "goldenReferenceId": "cmos-transmission-gate-v1",
+  "style": {
+    "package": "circuitikz",
+    "voltageConvention": "american voltages"
+  },
+  "nets": [
+    "vin",
+    "vout",
+    "phi",
+    "phib"
+  ],
+  "components": [
+    {
+      "id": "MP",
+      "type": "pmos",
+      "label": "$M_P$",
+      "terminals": {
+        "S": "vin",
+        "G": "phib",
+        "D": "vout"
+      }
+    },
+    {
+      "id": "MN",
+      "type": "nmos",
+      "label": "$M_N$",
+      "terminals": {
+        "D": "vin",
+        "G": "phi",
+        "S": "vout"
+      }
+    }
+  ],
+  "connections": [
+    {
+      "from": "vin",
+      "to": "MP.S"
+    },
+    {
+      "from": "MP.D",
+      "to": "vout"
+    },
+    {
+      "from": "vin",
+      "to": "MN.D"
+    },
+    {
+      "from": "MN.S",
+      "to": "vout"
+    },
+    {
+      "from": "phib",
+      "to": "MP.G"
+    },
+    {
+      "from": "phi",
+      "to": "MN.G"
+    },
+    {
+      "from": "MP.S",
+      "to": "MN.D"
+    },
+    {
+      "from": "MP.D",
+      "to": "MN.S"
+    }
+  ],
+  "layoutHints": {
+    "inputSide": "left",
+    "outputSide": "right",
+    "routingStyle": "orthogonal"
+  }
+}

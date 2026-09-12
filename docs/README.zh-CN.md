@@ -7,12 +7,14 @@
 ## 当前真值与布局入口
 
 - [当前 Main 进度与后续推进计划](./brainstorms/2026-09-02-current-main-progress-and-forward-plan.zh-CN.md)
-- [当前 Main 真值收敛计划](./superpowers/plans/2026-09-02-current-main-truth-convergence.zh-CN.md)
+- [项目计划进度与工程评估](./maintainer/project-plan-status.zh-CN.md)
+- [主线可靠性与证据推进计划](./plans/2026-09-12-mainline-reliability-and-evidence.zh-CN.md)
+- [可靠性实现与验收（9 月 12–13 日）](./maintainer/reliability-acceptance-2026-09-12.zh-CN.md)
+- [当前 Main 真值收敛计划（9 月 2 日已完成）](./superpowers/plans/2026-09-02-current-main-truth-convergence.zh-CN.md)
 - [架构总览](./architecture.zh-CN.md)
 - [图形 Gallery](./diagram-gallery.zh-CN.md)
 - [Mainline 图形架构进度审计](./brainstorms/2026-08-16-mainline-diagram-architecture-progress-and-next-direction.zh-CN.md)
 - [图形能力目录](./maintainer/diagram-capability-catalog.zh-CN.md)
-- [图形 Gallery](./diagram-gallery.zh-CN.md)
 - [Mainline Progress Audit And Next-Level Direction（历史）](./brainstorms/2026-05-28-mainline-progress-audit-and-next-level-direction.zh-CN.md)
 - [Mainline CI, GEO, CLI, And Slidev Closeout Plan](./brainstorms/2026-07-02-mainline-ci-geo-cli-slidev-closeout-plan.zh-CN.md)
 - [仓库文档布局规则](./maintainer/repository-document-layout.zh-CN.md)

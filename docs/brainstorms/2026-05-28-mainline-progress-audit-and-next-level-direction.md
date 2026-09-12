@@ -1,11 +1,15 @@
 ---
 date: 2026-05-28
-last_updated: 2026-07-03
+last_updated: 2026-09-12
 topic: mainline-progress-audit-and-next-level-direction
-canonical: true
+canonical: false
+status: superseded
+superseded_by: ./2026-09-02-current-main-progress-and-forward-plan.md
 ---
 
 # Mainline Progress Audit And Next-Level Direction
+
+> Historical global audit. As of 2026-09-12, use the [current-progress record](./2026-09-02-current-main-progress-and-forward-plan.md) and [plan register](../maintainer/project-plan-status.md). Older counts, backup-branch conclusions and packaging-first priorities below are dated evidence, not current execution instructions.
 
 ## 2026-07-23 Drawnix Implementation Truth
 

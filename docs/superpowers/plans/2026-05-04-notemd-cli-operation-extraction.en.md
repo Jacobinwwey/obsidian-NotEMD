@@ -1,5 +1,7 @@
 # Notemd CLI Operation Extraction Plan
 
+> Progress reassessed 2026-09-12: registry/host extraction is delivered at bounded depth; broader public mutation contracts remain deferred. Packaging isolation is not a prerequisite for an otherwise well-bounded operation contract. Correct cancellation and mutation ownership first; see [P06](../../maintainer/project-plan-status.md) and [U1–U3](../../plans/2026-09-12-mainline-reliability-and-evidence.en.md).
+
 > **For agentic workers:** Execute in a clean worktree. Treat the official `obsidian` CLI as a command-trigger substrate, not as a complete plugin automation contract.
 
 **Goal:** Turn Notemd from a plugin-command bundle into an operation-oriented system that can be invoked safely from the official Obsidian CLI, future `obsidian-cli` wrappers, and maintainer automation without duplicating orchestration logic.

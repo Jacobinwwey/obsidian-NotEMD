@@ -1,0 +1,39 @@
+{
+  "observedAt": "2026-09-12T19:12:19.535Z",
+  "appVersion": "1.13.7",
+  "passed": true,
+  "testedBundleSha256": "bedb0e0d92106f490c407e8b475b596c5fcb8c43deca579b683032004c442fe7",
+  "disposableVaultMarkerRequired": true,
+  "cases": [
+    {
+      "scenario": "atomic-write-move",
+      "rejected": true,
+      "movedFilePreserved": true,
+      "queueUsable": true
+    },
+    {
+      "scenario": "legacy-write-move",
+      "rejected": true,
+      "movedFilePreserved": true,
+      "queueUsable": true
+    },
+    {
+      "scenario": "binary-write-move",
+      "rejected": true,
+      "movedFilePreserved": true,
+      "queueUsable": true
+    },
+    {
+      "scenario": "compensation-move",
+      "rejected": true,
+      "movedFilePreserved": true,
+      "queueUsable": true
+    },
+    {
+      "scenario": "compensation-replacement",
+      "rejected": true,
+      "movedFilePreserved": true,
+      "queueUsable": true
+    }
+  ]
+}

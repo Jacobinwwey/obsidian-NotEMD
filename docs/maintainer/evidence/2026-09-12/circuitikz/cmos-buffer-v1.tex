@@ -1,0 +1,39 @@
+\documentclass[border=8pt]{standalone}
+\usepackage{circuitikz}
+\begin{document}
+\begin{circuitikz}[american voltages]
+\draw
+  (3,5) node[vcc]{$V_{DD}$}
+  to [short] (3,4.4)
+  node[pmos, anchor=S] (MP1) {$M_{P1}$}
+  (MP1.D) to [short] (3,2.75)
+  to [short] (3,2.6)
+  node[nmos, anchor=D] (MN1) {$M_{N1}$}
+  (MN1.S) to [short] (3,0.8)
+  node[ground]{};
+\draw
+  (5.4,5) node[vcc]{$V_{DD}$}
+  to [short] (5.4,4.4)
+  node[pmos, anchor=S] (MP2) {$M_{P2}$}
+  (MP2.D) to [short] (5.4,2.75)
+  to [short] (5.4,2.6)
+  node[nmos, anchor=D] (MN2) {$M_{N2}$}
+  (MN2.S) to [short] (5.4,0.8)
+  node[ground]{};
+\draw
+  (3,2.75) to [short, *-] (4.2,2.75)
+  node[above]{$v_{mid}$}
+  (4.2,2.75) to [short] (4.2,3.5)
+  (MP2.G) to [short] (4.2,3.5)
+  (MN2.G) to [short] (4.2,2.0)
+  (4.2,3.5) to [short] (4.2,2.0);
+\draw
+  (MP1.G) to [short] (1.5,3.5)
+  (MN1.G) to [short] (1.5,2.0)
+  (1.5,3.5) to [short] (1.5,2.0)
+  to [short, -o] (0.8,2.75)
+  node[left]{$v_{in}$};
+\draw
+  (5.4,2.75) to [short, *-o] (7.2,2.75) node[right]{$v_{out}$};
+\end{circuitikz}
+\end{document}

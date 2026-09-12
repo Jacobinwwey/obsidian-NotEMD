@@ -1,11 +1,15 @@
 ---
 date: 2026-05-20
-last_updated: 2026-06-09
+last_updated: 2026-09-12
 topic: unified-follow-through-matrix
-canonical: true
+canonical: false
+status: superseded
+superseded_by: ./2026-09-02-current-main-progress-and-forward-plan.md
 ---
 
 # Unified Follow-Through Matrix
+
+> Historical checkpoint, superseded as the global execution authority on 2026-09-12. The rules and priorities below describe the recovery period. Update the [current-progress record](./2026-09-02-current-main-progress-and-forward-plan.md) and [plan register](../maintainer/project-plan-status.md) for new work; packaging isolation is no longer a universal prerequisite.
 
 > Purpose: keep one current execution matrix that distinguishes the **rewritten live mainline** from the **backup branch that still contains later work**, so future planning does not overclaim shipped progress or hide the next structural bottleneck.
 

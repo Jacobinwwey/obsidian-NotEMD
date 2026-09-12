@@ -1,5 +1,7 @@
 # Notemd Note-Processing Registry Hardening 实施计划
 
+> 2026-09-12 进度复核：registry 接入和 host 抽取已交付；审计复现了取消后继续写入／移动，因此 utility 副作用加固仅部分完成。[P07](../../maintainer/project-plan-status.zh-CN.md) 记录状态，[U1](../../plans/2026-09-12-mainline-reliability-and-evidence.zh-CN.md) 承接剩余生命周期工作；不重开已完成的 wrapper 抽取，也不把历史未勾选步骤当作功能缺失。
+
 > **给代理执行者：** 必须使用 `superpowers:subagent-driven-development`（推荐）或 `superpowers:executing-plans` 逐任务执行本计划。步骤继续使用复选框 `- [ ]` 语法跟踪。
 
 **目标：** 将已落地的 note-processing host adapter 推进到 registry/capability/contract 层，并继续收紧 translation/extraction utility 的宿主副作用边界。

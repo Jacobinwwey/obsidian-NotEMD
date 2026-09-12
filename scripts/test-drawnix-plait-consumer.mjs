@@ -50,6 +50,9 @@ function inspectDrawnixConsumerData(data) {
     return {
         nodeIds: mindElements.map(element => element.id).sort(),
         rootIds: rootElements.map(element => element.id).sort(),
+        // source.id/target.id are Notemd semantic references, not Plait boundId handles.
+        nativeBoundRelationCount: arrows.filter(arrow => arrow.source?.boundId && arrow.target?.boundId).length,
+        staticRelationCount: arrows.filter(arrow => !arrow.source?.boundId || !arrow.target?.boundId).length,
         relations: arrows.map(arrow => ({
             id: arrow.id,
             sourceId: arrow.source?.id,

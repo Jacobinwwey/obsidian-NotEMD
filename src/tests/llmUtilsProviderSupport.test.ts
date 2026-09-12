@@ -43,6 +43,12 @@ function createReporter(): ProgressReporter {
     };
 }
 
+function abortCurrentRequest(reporter: ProgressReporter): void {
+    const controller = reporter.abortController;
+    if (!controller) throw new Error('The active API call did not expose its cancellation controller.');
+    controller.abort();
+}
+
 function mockDesktopTransportSuccess(
     transportModule: typeof http | typeof https,
     responseBody: unknown,
@@ -397,6 +403,93 @@ describe('llmUtils expanded provider support', () => {
             configurable: true,
             writable: true
         });
+    });
+
+    test.each(['OpenAI', 'Anthropic', 'Google', 'Azure OpenAI', 'Ollama'])('%s cancels its owned requestUrl lifetime before a non-abortable host call returns', async providerName => {
+        reporter.abortController = null;
+        settings.enableStableApiCall = false;
+        let announceStarted!: () => void;
+        const started = new Promise<void>(resolve => { announceStarted = resolve; });
+        let finishResponse!: (response: unknown) => void;
+        (requestUrl as jest.Mock).mockImplementation(() => {
+            announceStarted();
+            return new Promise(resolve => { finishResponse = resolve; });
+        });
+        const provider = createDefaultProviders().find(candidate => candidate.name === providerName)!;
+        let outcome: unknown;
+        const running = callLLM({ ...provider, apiKey: 'test-key', baseUrl: 'https://provider.example.test', apiVersion: '2024-02-15-preview' }, 'cancel', providerName, settings, reporter)
+            .then(value => { outcome = value; }, error => { outcome = error; });
+        await started;
+        abortCurrentRequest(reporter);
+        await new Promise(resolve => setImmediate(resolve));
+        const cancelledOutcome = outcome;
+        finishResponse({ status: 200, text: '{}', json: {
+            choices: [{ message: { content: 'late' } }], content: [{ text: 'late' }],
+            candidates: [{ content: { parts: [{ text: 'late' }] } }], message: { content: 'late' }
+        } });
+        await running;
+        expect(cancelledOutcome).toEqual(expect.objectContaining({ message: expect.stringMatching(/cancelled/i) }));
+        expect(requestUrl).toHaveBeenCalledTimes(1);
+        expect(reporter.abortController).toBeNull();
+    });
+
+    test('aborts the default desktop stream through the internally owned controller', async () => {
+        reporter.abortController = null;
+        settings.enableStableApiCall = true;
+        const response = Object.assign(new EventEmitter(), { statusCode: 200, headers: {} });
+        const request = Object.assign(new EventEmitter(), { write: jest.fn(), end: jest.fn(), destroy: jest.fn() });
+        let announceStarted!: () => void;
+        const started = new Promise<void>(resolve => { announceStarted = resolve; });
+        request.destroy.mockImplementation(error => request.emit('error', error));
+        (https.request as unknown as jest.Mock).mockImplementation((_options, callback) => {
+            request.end.mockImplementation(() => { callback(response); announceStarted(); });
+            return request;
+        });
+        const provider = createDefaultProviders().find(candidate => candidate.name === 'OpenAI')!;
+        const running = callLLM({ ...provider, apiKey: 'test-key' }, 'cancel', 'owned desktop', settings, reporter)
+            .catch(error => error);
+        await started;
+        abortCurrentRequest(reporter);
+        const destroyCount = request.destroy.mock.calls.length;
+        response.emit('data', Buffer.from('data: {"choices":[{"delta":{"content":"late"}}]}\n\ndata: [DONE]\n\n'));
+        response.emit('end');
+        const outcome = await running;
+        expect(destroyCount).toBe(1);
+        expect(outcome).toEqual(expect.objectContaining({ message: expect.stringMatching(/cancelled/i) }));
+        expect(requestUrl).not.toHaveBeenCalled();
+        expect(reporter.abortController).toBeNull();
+    });
+
+    test('rejects cancelled callers before returning a cached response', async () => {
+        const provider = createDefaultProviders().find(candidate => candidate.name === 'OpenAI')!;
+        const configured = { ...provider, apiKey: 'test-key' };
+        settings.enableStableApiCall = false;
+        (requestUrl as jest.Mock).mockResolvedValue({ status: 200, text: '', json: { choices: [{ message: { content: 'cached' } }] } });
+        await expect(callLLM(configured, 'cache', 'cancellation', settings, reporter)).resolves.toBe('cached');
+        const controller = new AbortController();
+        controller.abort();
+        await expect(callLLM(configured, 'cache', 'cancellation', settings, reporter, undefined, controller.signal)).rejects.toThrow(/abort|cancel/i);
+        expect(requestUrl).toHaveBeenCalledTimes(1);
+    });
+
+    test('keeps caller-owned cancellation intact while cancelling a retry wait', async () => {
+        const controller = new AbortController();
+        const inheritedController = reporter.abortController;
+        settings.enableStableApiCall = false;
+        settings.apiCallMaxRetries = 2;
+        settings.apiCallInterval = 30;
+        (requestUrl as jest.Mock).mockRejectedValue(new Error('net::ERR_CONNECTION_CLOSED'));
+        mockDesktopTransportFailure(https);
+        (reporter.log as jest.Mock).mockImplementation(message => {
+            if (message.startsWith('Waiting ')) controller.abort();
+        });
+        const provider = createDefaultProviders().find(candidate => candidate.name === 'OpenAI')!;
+        await expect(callLLM({ ...provider, apiKey: 'test-key' }, 'retry', 'cancel wait', settings, reporter, undefined, controller.signal))
+            .rejects.toThrow(/cancelled/i);
+        expect(requestUrl).toHaveBeenCalledTimes(1);
+        expect(https.request).toHaveBeenCalledTimes(1);
+        expect(reporter.abortController).toBe(inheritedController);
+        expect(inheritedController?.signal.aborted).toBe(false);
     });
 
     test('callLLM routes Groq through the OpenAI-compatible runtime', async () => {

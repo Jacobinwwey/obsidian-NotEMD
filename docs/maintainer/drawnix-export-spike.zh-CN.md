@@ -1,5 +1,11 @@
 # Drawnix 原生知识导图导出
 
+## 应用验收：9 月 13 日
+
+Drawnix commit `9939f452745c3f401766d378f98faa5d26bcc48a`／Plait 0.93.1 导入、编辑、保存并重开归档 fixture，保留 38 个原生节点、1 根及 12 条语义关系。原生重排使固定坐标跨枝箭头脱离；`source.id`／`target.id` metadata 不是 Plait `boundId` 附着，上游 shape-binding 契约也不包含 Mind 节点。
+
+Runtime 现报告 `drawnix-static-cross-relations`，Plait 门禁标明 `mindmap-and-static-arrow-serialization`。需要保留连接视觉时使用 SVG companion。[应用截图与证据](./reliability-acceptance-2026-09-12.zh-CN.md)限定本文所有原生关系声明，本次验收不支持附着式可编辑跨枝连线。
+
 语言: [English](./drawnix-export-spike.md) | **简体中文**
 
 本文记录 Notemd 在不嵌入 Drawnix、Plait 或 Drawnix React host 的前提下支持的 Drawnix 路径。

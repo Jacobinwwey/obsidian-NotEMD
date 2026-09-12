@@ -1,0 +1,69 @@
+name: Verify plugin
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main, 'codex/**']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: verify-plugin-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    name: Plugin / ${{ matrix.os }} / Node ${{ matrix.node }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        node: [20]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
+    env:
+      PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: '1'
+      NOTEMD_LINT_BASE_REF: ${{ github.event.pull_request.base.sha || github.event.before || 'origin/main' }}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@v6
+        with:
+          node-version: ${{ matrix.node }}
+          cache: npm
+      - name: Install locked dependencies
+        run: npm ci
+      - name: Install pinned Chromium
+        run: npx --no-install playwright install --with-deps chromium
+      - name: Install the exporter Chromium revision
+        run: node node_modules/playwright-chromium/cli.js install chromium
+      - name: Typecheck and build
+        run: npm run build
+      - name: Test plugin
+        run: npm test -- --runInBand --json --outputFile=.cache/verification/jest.json
+      - name: Audit UI strings
+        run: npm run audit:i18n-ui
+      - name: Audit render-host packaging
+        run: npm run audit:render-host
+      - name: Reject new lint debt
+        run: npm run lint:regressions
+      - name: Check patch whitespace
+        shell: bash
+        run: |
+          BASE="$NOTEMD_LINT_BASE_REF"
+          if [ -z "$BASE" ] || [[ "$BASE" =~ ^0+$ ]]; then BASE=origin/main; fi
+          git diff --check "$(git merge-base "$BASE" HEAD)" HEAD
+          git diff --check
+      - name: Retain verification evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: plugin-verification-${{ matrix.os }}-node${{ matrix.node }}
+          path: .cache/verification/
+          if-no-files-found: ignore
+          retention-days: 14

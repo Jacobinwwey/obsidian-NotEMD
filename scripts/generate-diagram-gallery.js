@@ -2,6 +2,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const { createHash } = require('crypto');
 const {
   buildGalleryManifest,
   collectStaleGalleryAssetNames,
@@ -32,23 +33,38 @@ function expectedAssetNames(manifest) {
   ]);
 }
 
-function verifyCommittedGallery(entries, manifest) {
+function verifyCommittedGallery(entries, archiveRoot) {
   const failures = [];
-  const manifestPath = path.join(outputRoot, 'manifest.json');
-  if (!fs.existsSync(manifestPath) || fs.readFileSync(manifestPath, 'utf8') !== manifestText(manifest)) {
+  const manifestPath = path.join(archiveRoot, 'manifest.json');
+  if (!fs.existsSync(manifestPath)) throw new Error('Diagram gallery manifest.json is missing');
+  const committed = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
+  const manifest = buildGalleryManifest(entries);
+  // SVG execution remains deterministic. PNG hashes attest to the archived bytes,
+  // not to pixel equivalence across browser/font/OS rasterizers.
+  manifest.entries = manifest.entries.map((entry, index) => ({
+    ...entry, pngSha256: committed.entries?.[index]?.pngSha256
+  }));
+  if (manifestText(committed) !== manifestText(manifest)) {
     failures.push('manifest.json is stale');
   }
-  for (const entry of entries) {
-    const svgPath = path.join(outputRoot, `${entry.fixtureId}.svg`);
-    const pngPath = path.join(outputRoot, `${entry.fixtureId}.png`);
-    if (!fs.existsSync(svgPath) || fs.readFileSync(svgPath, 'utf8') !== entry.svg) {
+  for (const [index, entry] of entries.entries()) {
+    const svgPath = path.join(archiveRoot, `${entry.fixtureId}.svg`);
+    const pngPath = path.join(archiveRoot, `${entry.fixtureId}.png`);
+    // Git may check text assets out with CRLF on Windows; compare their canonical text.
+    if (!fs.existsSync(svgPath) || fs.readFileSync(svgPath, 'utf8').replace(/\r\n/g, '\n') !== entry.svg.replace(/\r\n/g, '\n')) {
       failures.push(`${entry.fixtureId}.svg is stale`);
     }
     if (!fs.existsSync(pngPath) || !isPngBuffer(fs.readFileSync(pngPath))) {
       failures.push(`${entry.fixtureId}.png is missing or invalid`);
+    } else {
+      const expectedHash = manifest.entries[index].pngSha256;
+      const actualHash = createHash('sha256').update(fs.readFileSync(pngPath)).digest('hex');
+      if (!/^[a-f0-9]{64}$/.test(expectedHash ?? '') || actualHash !== expectedHash) {
+        failures.push(`${entry.fixtureId}.png hash does not match its archived identity`);
+      }
     }
   }
-  const existingNames = fs.existsSync(outputRoot) ? fs.readdirSync(outputRoot) : [];
+  const existingNames = fs.readdirSync(archiveRoot);
   const staleNames = collectStaleGalleryAssetNames(existingNames, expectedAssetNames(manifest));
   failures.push(...staleNames.map(name => `${name} is obsolete`));
   if (failures.length > 0) {
@@ -80,7 +96,7 @@ async function main() {
   const manifest = buildGalleryManifest(entries);
   let removed = [];
   if (checkOnly) {
-    verifyCommittedGallery(entries, manifest);
+    verifyCommittedGallery(entries, outputRoot);
   } else {
     removed = writeGallery(entries, manifest);
   }
@@ -92,7 +108,9 @@ async function main() {
   }, null, 2)}\n`);
 }
 
-main().catch(error => {
+if (require.main === module) main().catch(error => {
   process.stderr.write(`${error instanceof Error ? error.message : String(error)}\n`);
   process.exitCode = 1;
 });
+
+module.exports = { verifyCommittedGallery };

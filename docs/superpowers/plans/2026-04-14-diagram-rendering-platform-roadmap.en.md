@@ -1,5 +1,7 @@
 # Notemd Diagram Rendering Platform Roadmap
 
+> Progress reassessed 2026-09-12: core platform and Mermaid phases 0–3 are delivered; complete legacy decomposition remains open. Heavy-runtime isolation is conditional on host measurements, not the default next batch. Cancellation and artifact-save ownership take priority. See [P04 in the plan register](../../maintainer/project-plan-status.md) and the [next implementation plan](../../plans/2026-09-12-mainline-reliability-and-evidence.en.md); dated sections below retain their original context.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 ## 2026-05-02 Progress Update

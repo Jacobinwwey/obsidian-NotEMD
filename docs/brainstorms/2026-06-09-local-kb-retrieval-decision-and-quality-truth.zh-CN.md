@@ -6,6 +6,12 @@ canonical: true
 
 # Local KB Retrieval 方案决策与质量真值
 
+## 9 月 13 日决策更新
+
+保持本地词法检索和 batch 快照复用。U7 在不按标签调参的前提下测量固定独立语料：Top-1 召回 6/9，Top-3 召回 7/9，Top-3 同时增加精度／上下文成本。小规模热缓存语料下，真实 Obsidian inspect 重建 p50／p95 为 8.6／23.8 ms；正常 batch 查询复用 retriever。
+
+[验收记录](../maintainer/reliability-acceptance-2026-09-12.zh-CN.md)负责未命中结果、范围语义和成本拆分。embedding 与持久索引仍需新的决策，不是原设计中隐含的未完成阶段。
+
 ## 1. 为什么要新增这份文档
 
 当前本地知识库检索切片已经发货到 `main`，但最清晰的方案比较与质量评估最初主要落在：

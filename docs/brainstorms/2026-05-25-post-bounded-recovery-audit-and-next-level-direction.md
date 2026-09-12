@@ -1,11 +1,15 @@
 ---
 date: 2026-05-25
-last_updated: 2026-06-06
+last_updated: 2026-09-12
 topic: post-bounded-recovery-audit-and-next-level-direction
-canonical: true
+canonical: false
+status: superseded
+superseded_by: ./2026-09-02-current-main-progress-and-forward-plan.md
 ---
 
 # Post-Bounded-Recovery Audit And Next-Level Direction
+
+> Historical recovery snapshot. As of 2026-09-12, current status and ordering live in the [current-progress record](./2026-09-02-current-main-progress-and-forward-plan.md) and [plan register](../maintainer/project-plan-status.md). Retain the following evidence as dated history, not a competing current backlog.
 
 ## 1. Why This Document Exists
 

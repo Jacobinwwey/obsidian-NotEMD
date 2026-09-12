@@ -592,8 +592,9 @@ async function buildLocalKnowledgeRetrieverState(
     const candidateFiles = app.vault
         .getFiles()
         .filter(isKnowledgeFileCandidate)
-        .filter(file => matchesConfiguredKnowledgePath(file, pathConfig.paths));
-    const candidateFilePaths = candidateFiles.map(file => file.path);
+        .filter(file => matchesConfiguredKnowledgePath(file, pathConfig.paths))
+        .map(file => ({ file, path: file.path, basename: file.basename }));
+    const candidateFilePaths = candidateFiles.map(candidate => candidate.path);
 
     if (candidateFiles.length === 0) {
         reporter?.log('No eligible local knowledge files were found for the configured knowledge base paths.');
@@ -612,10 +613,31 @@ async function buildLocalKnowledgeRetrieverState(
     const documents: LocalKnowledgeDocument[] = [];
     const seenFilePaths = new Set<string>();
 
-    for (const file of candidateFiles) {
-        const markdown = await app.vault.read(file);
-        const sections = parseMarkdownSections(markdown, file.basename);
-        seenFilePaths.add(file.path);
+    for (const { file, path: candidatePath, basename } of candidateFiles) {
+        if (reporter?.cancelled) throw new Error('Local knowledge indexing cancelled by user.');
+        if (file.path !== candidatePath) {
+            reporter?.log(`Skipped local knowledge file moved during indexing: ${candidatePath}`);
+            continue;
+        }
+        let markdown: string;
+        try {
+            markdown = await app.vault.read(file);
+        } catch (error) {
+            if (file.path !== candidatePath || !app.vault.getFiles().includes(file)) {
+                reporter?.log(`Skipped local knowledge file removed during indexing: ${candidatePath}`);
+                continue;
+            }
+            throw error;
+        }
+        if (reporter?.cancelled) throw new Error('Local knowledge indexing cancelled by user.');
+        // TFile is mutable. Never turn an enumerated in-scope file into an out-of-scope
+        // citation when a rename races its read; completed retrievers keep their snapshot.
+        if (file.path !== candidatePath) {
+            reporter?.log(`Skipped local knowledge file moved during indexing: ${candidatePath}`);
+            continue;
+        }
+        const sections = parseMarkdownSections(markdown, basename);
+        seenFilePaths.add(candidatePath);
 
         sections.forEach((section, index) => {
             const excerpt = section.markdown.trim();
@@ -625,9 +647,9 @@ async function buildLocalKnowledgeRetrieverState(
             }
 
             documents.push({
-                id: `${file.path}::${index}`,
-                path: file.path,
-                fileTitle: file.basename,
+                id: `${candidatePath}::${index}`,
+                path: candidatePath,
+                fileTitle: basename,
                 heading: section.level > 0 ? section.title : '',
                 breadcrumb: section.breadcrumb.join(' > '),
                 sectionIndex: index,

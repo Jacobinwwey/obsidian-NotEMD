@@ -1,5 +1,7 @@
 # Notemd CLI Operation 抽取实施计划
 
+> 2026-09-12 进度复核：registry／host 抽取已按有界深度交付，更广的公开变更契约仍延后。边界完整的 operation 契约不以打包隔离为前置；先修正取消与变更归属，参见[P06](../../maintainer/project-plan-status.zh-CN.md)及[U1–U3](../../plans/2026-09-12-mainline-reliability-and-evidence.zh-CN.md)。
+
 > **给代理执行者：** 在干净 worktree 中执行。把官方 `obsidian` CLI 视为命令触发底座，而不是完整插件自动化协议。
 
 **目标：** 把 Notemd 从“插件命令集合”推进成“可被官方 Obsidian CLI、未来 `obsidian-cli` 包装器以及维护者自动化共同调用的 operation 系统”，且不重复复制 orchestration 逻辑。

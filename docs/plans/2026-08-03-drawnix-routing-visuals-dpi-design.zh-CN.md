@@ -1,5 +1,6 @@
 ---
 topic: drawnix-routing-visuals-dpi
+last_updated: 2026-09-12
 status: implemented
 superseded_by: ../brainstorms/2026-08-08-diagram-platform-robustness-and-settings-integrity-plan.zh-CN.md
 ---
@@ -30,7 +31,7 @@ Drawnix 知识图可以包含多个顶层 root。当一个无关 root 位于跨 
 - 端点完全相同的并行关系会在网格路由前分配确定性的偏移车道，保证标签和箭头笔画可读，同时不改变语义边契约。
 - 源视觉采用当前双层持久化契约。原生 `.drawnix` JSON 默认在命名空间 `metadata.notemd.sourceVisuals` 中内联安全 Mermaid SVG/source 与已解析的二进制预览；完整 Mermaid companion 集合只在显式外部交付时写入 `.assets`。不向原生元素流注入未经验证的 Drawnix 图片元素。
 - 显式 `drawnix` 渲染目标是强约束边界：输入构建器会把它归一化为 `drawnixMindmap` 并在 legacy Mermaid 兼容模式下自动提升到 `best-fit`；prompt 仍要求模型返回该 intent，但解析后的 spec 会在 intent mismatch 重试之前再次归一化并校验。这样即使 DeepSeek 返回通用 `mindmap`，也不会静默退回 Mermaid 或丢失 Drawnix 树状结构。
-- artifact 保存对新建文件和已有文件都具备事务语义。文本与二进制文件在覆盖前建立快照；后续 companion、artifact 或 wrapper 写入失败时恢复原内容。
+- artifact 保存对文本／二进制建立快照，补偿单次失败保存。2026-09-12 审计已复现回滚覆盖另一笔并发保存；这不构成事务隔离或崩溃原子性。[U2](./2026-09-12-mainline-reliability-and-evidence.zh-CN.md) 承接写入协调与冲突感知恢复。
 
 ## 验证
 

@@ -37,6 +37,21 @@ Verification requirements:
 - Run targeted Jest tests first when doing TDD, then rerun the full suite before commit or release.
 - Run `git diff --check` before committing to catch whitespace and patch-format issues.
 
+### Pull Request Verification
+
+- `.github/workflows/verify-plugin.yml` runs build, full Jest, UI-string/render-host audits, lint regression comparison and diff hygiene on Linux and Windows with Node 20. It has read-only permissions and no release or provider credentials.
+- Run `npm run lint:regressions -- --base-ref origin/main` locally. The checker compares individual diagnostics with the merge-base, including renamed and shifted files; a smaller aggregate error count does not excuse new errors.
+- Legacy ESLint debt remains tracked. New errors and correctness warnings must pass the ratchet; do not globally autofix unrelated files.
+- Install browser revisions for both `playwright` and `playwright-chromium` when preparing a fresh verification environment; the lockfile currently resolves different package versions.
+- Workflow presence does not establish required branch protection. Check remote run results before integrating; configure repository protection separately when requested.
+
+### Native Consumer Evidence
+
+- `scripts/verify-obsidian-host.cjs` only operates on a disposable Vault marked with `.notemd-host-verification`; keep that Vault visible for comparable preview timing.
+- `scripts/verify-obsidian-persistence.cjs` uses the same marker and bundle checks to exercise real rename/replacement races without timing a window. Reload the copied plugin first; it restores injected Vault methods/settings after each run.
+- `scripts/verify-powerpoint-roundtrip.ps1` saves an editable table change to a separate PPTX, reopens it and renders it with installed PowerPoint. It refuses an existing PowerPoint session.
+- The Drawnix Plait gate verifies hierarchy and static arrow serialization. It must not be reported as proof of attached cross-branch arrows in the Drawnix application.
+
 ### Obsidian CLI Checks
 
 When release or integration verification is requested:

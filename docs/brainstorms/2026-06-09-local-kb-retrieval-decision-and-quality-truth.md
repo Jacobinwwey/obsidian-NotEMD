@@ -6,6 +6,12 @@ canonical: true
 
 # Local KB Retrieval Decision And Quality Truth
 
+## September 13 decision update
+
+Keep local lexical retrieval and per-batch snapshot reuse. U7 measured the frozen independent corpus without tuning to its labels: Top-1 recall 6/9, Top-3 recall 7/9, with additional precision/context cost at Top-3. Real Obsidian inspect rebuild p50/p95 was 8.6/23.8 ms on the small warm-cache corpus; normal batch queries reuse their retriever.
+
+The [acceptance record](../maintainer/reliability-acceptance-2026-09-12.md#retrieval-quality-and-batch-semantics) owns the measured misses, scope semantics and cost breakdown. Embeddings and persistent indexing remain new decisions, not implied unfinished phases of the original design.
+
 ## 1. Why This Document Exists
 
 The current local knowledge-base retrieval slice is already shipped on `main`, but the clearest comparison research and evaluation framing originally lived under:

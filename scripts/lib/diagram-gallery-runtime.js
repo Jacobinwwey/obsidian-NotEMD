@@ -28,7 +28,8 @@ function buildGalleryManifest(entries) {
         previewTarget: entry.previewTarget,
         svgPath: `./${entry.fixtureId}.svg`,
         pngPath: `./${entry.fixtureId}.png`,
-        svgSha256: sha256(entry.svg)
+        svgSha256: sha256(entry.svg),
+        pngSha256: sha256(entry.png)
       };
     })
   };
