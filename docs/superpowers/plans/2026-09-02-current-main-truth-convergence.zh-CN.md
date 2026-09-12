@@ -1,15 +1,15 @@
 ---
 date: 2026-09-02
-last_updated: 2026-09-02
+last_updated: 2026-09-12
 topic: current-main-truth-convergence
 status: completed
-canonical_for:
-  - current-main-progress
-  - plan-status-convergence
+canonical_for: truth-convergence-2026-09-02
 superseded_by: null
 ---
 
 # 当前 Main 真值收敛实施计划
+
+> 本历史切片于 9 月 2 日完成。9 月 12 日审计更新了[当前进度记录](../../brainstorms/2026-09-02-current-main-progress-and-forward-plan.zh-CN.md)、[逐项计划状态](../../maintainer/project-plan-status.zh-CN.md)和[下一步实施工作](../../plans/2026-09-12-mainline-reliability-and-evidence.zh-CN.md)，不重开或重跑下方已完成的发布步骤。
 
 > **面向执行 agent：** 在当前 checkout 中内联执行。步骤使用复选框（`- [ ]`）跟踪。
 

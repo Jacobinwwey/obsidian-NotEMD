@@ -1,5 +1,7 @@
 # Notemd Note-Processing Registry Hardening Implementation Plan
 
+> Progress reassessed 2026-09-12: registry onboarding and host extraction are delivered; utility side-effect hardening is partial because the audit reproduced post-cancel writes/moves. [P07](../../maintainer/project-plan-status.md) records the disposition and [U1](../../plans/2026-09-12-mainline-reliability-and-evidence.en.md) owns the remaining lifecycle work. Do not restart completed wrapper extraction or treat historical unchecked steps as absent features.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Move the landed note-processing host adapters into the registry/capability/contract layer and continue tightening translation/extraction utility side-effect boundaries.

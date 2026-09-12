@@ -1,6 +1,6 @@
 ---
 date: 2026-09-02
-last_updated: 2026-09-02
+last_updated: 2026-09-12
 topic: current-main-progress-and-forward-plan
 status: current
 canonical_for:
@@ -14,11 +14,15 @@ superseded_by: null
 
 这是当前 main 的执行记录。它把已交付实现、活跃收敛工作、延后的外部证据和历史计划分开。运行时 registry、manifest 与检入的验证输出是唯一真值来源；旧计划中的 checkbox 数量不是完成证据。
 
+语言：[English](./2026-09-02-current-main-progress-and-forward-plan.md) | **简体中文**
+
+[计划进度登记表](../maintainer/project-plan-status.zh-CN.md) 逐项核对了已有的 19 份正式计划、32 份 brainstorming 记录及相关维护者工作线。[可靠性与证据推进计划](../plans/2026-09-12-mainline-reliability-and-evidence.zh-CN.md) 定义下一批建议实施单元。本文继续作为当前进度入口；9 月 2 日的真值收敛实施仍是已完成的历史切片。
+
 ## 总体判断
 
-当前 `main` 可发布，内部覆盖已经足够完整。项目不再受限于缺少图表 primitive，主导风险已经转为真值漂移：文档可能超过当前 build 的实际能力，兼容 alias 可能超过迁移窗口，serializer 或 public API consumer 的通过也可能被误读为应用级互操作。
+本次基线为 `main@7638cec`、版本 `1.9.7`。构建和既有测试通过，但 9 月 2 日“内部覆盖已经足够完整”的判断过强。四项确定性本地探针复现了取消与持久化缺陷：取消后的队列可能不结束、并行任务取消后仍可写入、内部创建的取消信号没有到达传输层、失败保存的回滚可以覆盖另一笔并发成功的保存。这些缺陷尚未修复；本轮只修改文档。
 
-下一步应是有控制的收敛，而不是继续增加 renderer。除非有实测需求，否则保持当前单入口 `main.js` + 内联 `srcdoc` 打包契约。只有当 runtime、持久化、预览、文档和 consumer 证据一起前进时，才提升新的 target 声明。
+下一补丁应先修复操作取消与 artifact 写入归属，并用 PR 验证保护这些变更。在测量实际成本期间保持单入口 `main.js` + 内联 `srcdoc`。打包隔离是条件性优化，不是正确性修复、检索评估或有界 CLI 契约的前置条件。现有操作的可信度优先于新增 renderer。
 
 ## 当前源代码数量
 
@@ -39,22 +43,24 @@ superseded_by: null
 
 ## 验证快照
 
-2026-09-02 针对当前 `main` 实现验证；clean-worktree 状态仍是最终发布门禁：
+2026-09-12 在 Windows x64、Node `22.19.0` 上重新验证，生产代码基线为 `7638cec`。仓库命令通过 `rtk proxy npm.cmd` 执行；本机 `rtk npm` 专用入口无法解析 npm。
 
 - `npm.cmd run build`：通过。
-- `npm.cmd test -- --runInBand`：275 个 suite 通过；2511 个测试通过；1 个 skipped。
-- `npm.cmd run docs:build`：通过。
+- `npm.cmd test -- --runInBand`：275 个 suite 通过；2515 个测试通过；1 个 skipped。
+- VitePress 文档构建（`1.6.4`，离线）：通过。
 - `npm.cmd --prefix website run build`：34 个已发布 locale 全部通过。
 - `npm.cmd --prefix website run audit:build`：通过。
-- `npm.cmd run diagram:examples:check`：33 条通过。
-- `npm.cmd run diagram:gallery:check`：33 个 fixture 资产通过。
+- `npm.cmd run diagram:examples:check`：33 条历史示例通过一致性／哈希校验；本轮未重新调用 provider 或在 Vault 中生成。
+- `npm.cmd run diagram:gallery:check`：33 个 fixture 通过现有门禁。SVG 比较实际内容；PNG 当前仅检查签名／存在性，不比较像素或 PNG 哈希。
 - `npm.cmd run audit:i18n-ui`：通过。
 - `npm.cmd run audit:render-host`：通过。
-- `npm.cmd run verify:local-kb-fixtures`：9 个测试通过。
-- `npm.cmd run diagram:consumer:drawnix`：Plait public-API consumer 通过，20 个节点、12 条关系、1 个根节点。
-- `npm.cmd run lint`：受仓库既有债务影响失败（`231` 个 error、`1374` 个 warning）；在建立 changed-lines ratchet 前，不应将其归类为本功能回归。
+- Local KB 离线 fixture：全量 Jest 中的 9 个测试通过；项目已有评估语料。
+- `npm.cmd run diagram:consumer:drawnix -- --input docs/diagram-examples/drawnix-knowledge-map/artifact.drawnix`：Plait public-API consumer 通过，38 个节点、12 条关系、1 个根节点。输入是历史示例，不是先前的 20 节点生成 fixture。
+- ESLint：按 `npm.cmd run lint` 相同的 `eslint . --ext .ts` 范围运行，检查 512 个文件，报告 `231` 个 error、`1374` 个 warning。基线未增加，但仍没有防止新增债务的门禁。
+- 隔离故障探针：使用虚拟时钟、内存 Vault／HTTP 边界，针对生产函数确认四项异常。探针通过表示缺陷被复现，不表示已修复。
+- 生产 `main.js`：`10,056,115` 字节；gzip：`3,728,761` 字节。这是产物体积，不是启动时间或内存测量。
 
-远端 `1.9.7` Release 已发布，包含 `main.js`、`manifest.json`、`README.md` 和 `styles.css`。Release body 的英文和简体中文均可独立阅读，只保留 `Highlights` / `Fixes And Robustness` 与 `重点更新` / `修复与鲁棒性` 两组。
+本地 `1.9.7` tag 指向 `ef77788`；从该 tag 到本次基线，生产源码未变化。9 月 2 日的审计记录了含 `main.js`、`manifest.json`、`README.md`、`styles.css` 的远端双语 Release。本轮未重新验证远端发布资产、分支保护、真实 provider、Obsidian 应用行为、Drawnix／Draw.io 应用或 Office 渲染。发布 CI 使用 Node 20，网站 CI 使用 Node 24；本地 Node 22 的结果不替代这两类 CI 环境。
 
 ## 计划状态矩阵
 
@@ -62,20 +68,20 @@ superseded_by: null
 |---|---|---|
 | Provider 扩展各轮 | 已交付 / 历史 | 上游 API 变化时保持 metadata、discovery、文档和测试同步。 |
 | Language Support 多阶段 | 已交付 / 历史 | 没有剩余实现阶段；保持 Codex 离线发布翻译策略。 |
-| 主线稳定化与 CI 加固 | 已交付 / 历史 | 维护 clean-worktree 与 release-helper 门禁，不重开已完成的 wrapper 工作。 |
-| CLI operation 抽取与 registry 加固 | 已达到当前契约深度 | packaging-aware contract promotion 仍需单独决策；当前 operation binding 不自动等于 public API。 |
-| 图表渲染路线图 | 活跃并带延后边界 | 重型 runtime 隔离和 Mermaid legacy 全拆解仍开放；PlantUML/Graphviz/Draw.io 继续延后。 |
-| Vault 历史、设置导航、批处理文件夹 | 已交付 | 只做回归维护；文件夹批量变更与更丰富 history retention 需要新契约。 |
+| 主线稳定化与 CI 加固 | 发布侧范围已交付 | 目前只有标签发布与网站部署工作流；插件 PR 构建／测试验证仍缺失。 |
+| CLI operation 抽取与 registry 加固 | registry／host 抽取已交付；生命周期加固部分完成 | 29 个 operation 不等于 29 个 public-safe API。扩展变更契约前先修取消；打包不是通用前置条件。 |
+| 图表渲染路线图 | 核心已交付；部分后续项有条件推进 | 测量打包成本，保留保守的 Mermaid 兼容边界；PlantUML／Graphviz／Draw.io runtime 继续延后。 |
+| Vault 历史、设置导航、批处理文件夹 | 有限功能范围已交付 | history 自带写队列；artifact 持久化不会自动获得这层保护。批量取消与 artifact 回滚需单独修复。 |
 | 图表预览/历史自适应 | modal 架构已交付 | focus-trapped 内部 drawer 是新的交互系统变更，不是未修复 bug。 |
 | Mermaid 规范化合并 | Phase 0-3 已交付 | 删除兼容导出前先盘点调用方；unknown family 继续采用 parser-backed 保守准入。 |
 | 图表能力目录与向前架构 | runtime 基础已交付，外部门禁活跃 | Draw.io 与真实 Drawnix 应用证据不可用；Plait 门禁不代表应用兼容。 |
 | 参考扩展 | 已完成 | 33 个可执行行、有界 payload、确定性 adapter、preview/gallery/docs 门禁全部通过。 |
-| 真实 Vault 图表示例 | 已完成 | 仅在 provider 或 renderer 证据变化时重新生成；失败必须显式保留，不能用 fixture 替代。 |
+| 真实 Vault 图表示例 | 历史证据集已完成 | 相关输入／runtime 变化时有意识地刷新；哈希校验不等于重跑 provider，更不证明所有 host。 |
 | Local KB 与 Chapter Split | 有界设计已交付 | 当前是 MiniSearch 词法检索与 managed artifact；语义/vector retrieval 属于新架构线。 |
 | Slidev 可编辑 PPTX | 质量线活跃 | Office 字体替换、表格基线、段落间距和 native geometry fidelity 仍有可测缺口。 |
 | GEO/GitHub Pages/release | 运行上已交付 | Search Console 与 AI visibility 仍需部署后的外部证据。 |
 
-旧计划保留 checkbox 与历史理由用于追溯。阅读时必须与本矩阵及计划进度段落结合；历史 TDD 步骤未勾选，不代表对应生产行为不存在。
+旧计划保留 checkbox 与历史理由用于追溯。每份计划的处置及证据归属见[计划进度登记表](../maintainer/project-plan-status.zh-CN.md)。历史 TDD 步骤未勾选或文档任务已完成，都不能单独决定当前运行时可靠性。
 
 ## 证据与非声明
 
@@ -84,74 +90,54 @@ superseded_by: null
 | Mermaid | canonical normalizer、35-stage legacy registry、family gate、幂等测试、runtime SVG safety | 已交付且保守兼容 legacy 的 Mermaid 路径 |
 | Native editable SVG | 确定性 renderer、layout diagnostics、Chromium gallery gate、33 组 fixture 资产 | 在已测试 host/presentation 契约下交付 native family 预览 |
 | Drawnix | `.drawnix` serializer 与 `@plait/*` public API consumer gate | Plait public-API 兼容；不宣称真实 Drawnix 应用导入 |
-| Draw.io | 只有 exporter 与 XML 测试；当前工作区没有 diagrams.net 可执行程序 | 只能声明 serializer 契约，不声明应用互操作 |
-| Circuitikz | 6 个 golden template 与本地 native compiler 证据 | 有界 native compile 路径；CI 工具/版本证据仍需补齐 |
+| Draw.io | exporter 与 XML 测试；本轮没有新的应用实测 | 只能声明 serializer 契约，不声明应用互操作 |
+| Circuitikz | 6 个 golden template、回归覆盖、历史本地 compiler 证据 | 有界 native compile 路径；新鲜 CI 工具／版本证据仍需补齐 |
 | Render host | `main.js` 内联 `srcdoc`、render-host audit、fail-closed runtime module resolver | 当前自包含打包；不等于独立重型 runtime 隔离 |
 | Local KB | MiniSearch、标题感知分块、离线 fixture、inspect diagnostics | 插件内词法检索；不等于 vector/RAG service 语义 |
 | Slidev/PPTX | native standalone export 与 rendered layout audit | 有界可编辑性和明确图片 fallback；不等于 Office 往返像素一致 |
 
 ## 兼容层盘点与 Ponytail 审计
 
-全仓过度设计审计没有发现可以在本次收敛切片中安全删除的生产依赖。当前候选及证据如下：
+9 月 2 日审计记载“没有发现可以在本次收敛切片中安全删除的生产依赖”。这是该切片不做删除的决定，不代表每个内部 export 都属于受支持的 public API。本次盘点区分持久化契约、已公开的 maintainer API 和内部源码 import：
 
 | 候选 | 当前调用方/证据 | 决策 |
 |---|---|---|
-| `src/rendering/preview/mermaidDefinitionShared.ts` | 兼容 re-export；当前没有生产 import；无法证明旧源码调用方已经消失 | 在记录外部迁移窗口前保留 |
-| `src/diagram/adapters/drawnix/drawnixCrossRootRouter.ts` | 废弃 re-export，仍由 routing focused tests 消费 | 保留；测试是当前兼容证据 |
-| `routeDrawnixCrossRootRelation()` | 没有生产调用方；canonical router 和兼容测试仍引用 | 作为明确的兼容 API 保留；不把它宣传为生产路由 |
-| `mergeDrawnixSourceCoverage()` | maintainer 文档和测试仍引用该别名 | 在下游迁移到 `enrichDrawnixSourceCoverage()` 前保留 |
-| `rewriteLegacyTrailingDoubleDashArrow` | 仓库内部看起来没有引用；不能排除外部脚本 | 未完成外部 consumer 检查前不删除 |
+| `src/rendering/preview/mermaidDefinitionShared.ts` | 兼容 re-export；当前未记录生产 import | 先界定支持范围；假想的未知调用方不能单独成为无限期保留理由 |
+| `src/diagram/adapters/drawnix/drawnixCrossRootRouter.ts` | 废弃 re-export，routing focused tests 仍消费 | 内部测试随调用方迁移；测试引用本身不构成公开兼容承诺 |
+| `routeDrawnixCrossRootRelation()` | 兼容 router／测试仍引用 | 本次不做删除；根据已承诺的支持范围和真实调用方决定移除 |
+| `mergeDrawnixSourceCoverage()` | maintainer 文档和测试仍引用 | 先将已知引用迁移到 `enrichDrawnixSourceCoverage()` |
+| `rewriteLegacyTrailingDoubleDashArrow` | 未记录仓库调用方 | 核对已声明的支持接口；只有存在该契约时才要求弃用窗口 |
 | `runCircuitikzRepairLoop()` | focused tests 和 maintainer acceptance 文档消费该 SDK | 继续 maintainer-only；绝不接入普通生成 fallback |
 | `stripWrappingDoubleQuotes()` / `stripWrappedQuotedLabel()` | `legacyFixerUtils.ts` 中字节相同的私有实现 | 作为未来小幅 shrink 候选；延后到独立的行为保持变更 |
 
-因此本次审计建议建立迁移 ledger 并引入 changed-lines lint ratchet，而不是猜测式删除。这样能降低未来债务，同时不破坏旧 artifact 或隐藏调用方，是当前最小且稳妥的改动。
+持久化设置 ID、command ID、artifact schema 仍必须有明确迁移纪律。私有 TypeScript re-export 不自动需要对外 sunset 流程。当前文档测试还锁定了旧审计措辞，后续应验证契约和引用，不应冻结工程判断。本轮不删除兼容代码。
 
 ## 有序推进计划
 
-### Phase A：真值控制面
+### 下一补丁：操作正确性与 PR 验证
 
-1. 保持本文与中文对应文档作为 current-main 入口。
-2. 在测试中从 runtime manifest 派生数字声明，不再维护第二份手写目录。
-3. 计划状态统一使用 `current`、`active`、`shipped`、`deferred`、`historical`、`superseded`，并记录证据路径。
-4. 将 release body、检入的 release notes、tag tree 与 release assets 视为相互校验而非同一产物。
+1. 一次运行拥有统一取消生命周期：首次 timer 前取消也要结束队列；子任务读取实时取消状态；可取消传输收到实际生效的 signal；观察到取消后不再启动新的写入／移动。
+2. 在持久化责任方串行化重叠 artifact 写入。只恢复仍归属于失败操作的写入；回滚冲突／失败必须连同恢复证据上报。补偿不等于多文件崩溃原子性。
+3. 建立不依赖密钥的 PR 构建／测试工作流，以及 lint 基线约束。发布操作继续仅由 tag 触发。
 
-退出门禁：docs contract tests、两套 docs build、完整 Jest、干净 Git 状态。
+退出门禁：四项已复现异常变为验证正确行为的回归用例；Linux／Windows 检查实际运行；原有全量测试、构建、i18n、打包门禁保持通过。这些是建议实施的修复，不是本次已完成工作。
 
-### Phase B：仅在实测支持时做 Packaging 决策
+### 后续切片：证据质量与实测预算
 
-1. 在代表性 target 上测量 `main.js` 大小、启动成本、预览加载时间与移动端压力。
-2. 若当前 inline host 仍在预算内则保持它；单纯减少源码文件大小不是增加第二资产的理由。
-3. 若隔离确有必要，则在同一原子批次完成 build 输出、runtime loader、audit 规则、release assets、workflow、维护者文档和真实 Obsidian 证据。
+1. 将 gallery PNG 资产身份校验与视觉保真度分开；移除冻结审计结论的测试断言。
+2. 在明确的 Obsidian 版本和设备上测量启动、冷／热预览延迟与内存。manifest 允许移动端并声明 `minAppVersion: 0.15.0`；mock 不能证明整个支持范围。
+3. 只有测量支持 runtime 隔离时，才同时变更 build／loader／release／audit／host 证据；否则以明确的保持内联决定关闭调查。
+4. 目标应用可用时，逐 target 补导入／编辑／重开证据。consumer 证据缺失只限制相应能力声明。
 
-退出门禁：release artifact 与 runtime-consumption 链路共同证明前，不得声称重型 runtime 已隔离。
+退出门禁：每份证据记录输入版本、环境、哈希、适用范围和失败状态；不对无关工作施加统一的打包前置条件。
 
-### Phase C：兼容层 sunset
+### 产品深化：优先检索质量，导出需求明确时推进 Office 保真度
 
-1. 盘点 `mermaidDefinitionShared.ts`、`drawnixCrossRootRouter.ts`、`mergeDrawnixSourceCoverage()`、`routeDrawnixCrossRootRelation()` 与 legacy Mermaid alias 的生产、测试、maintainer 脚本和外部调用方。
-2. 删除 export 前先增加弃用窗口和迁移诊断。
-3. 继续保持 `runCircuitikzRepairLoop()` 为 maintainer-only；LLM repair loop 不得成为普通生成的隐式 fallback。
+1. 扩展已有词法检索语料，覆盖独立留出集、多语言、低信号查询与变化中的 Vault。先测质量和上下文成本，再决定持久索引或 embedding。
+2. 对指定的 Office renderer 改善 PPTX 字体／表格／基线，同时保留明确的 Mermaid／SVG fallback。
+3. Provider 和 locale 通过共享 metadata 维护。新增 engine 必须有明确未满足用例、有界 runtime 与 consumer 契约。
 
-退出门禁：调用方清单、迁移覆盖、focused regression 和明确的移除版本。
-
-### Phase D：Consumer 证据
-
-1. 当具备稳定 executable 或 CI container 时，增加真实 diagrams.net open/import 门禁。
-2. 增加真实 Drawnix 应用打开/import 证据；Plait public-API gate 作为较低层契约保留。
-3. 在 CI 固定 Circuitikz compiler/tool 版本，并按输入/输出 hash 归档日志。
-
-退出门禁：能力目录中明确区分 serializer、public-API 和 application-level 状态。
-
-### Phase E：不扩张 runtime 的质量深化
-
-1. Local KB：先建立离线 query corpus，测量 recall、上下文膨胀、延迟、旧索引行为和低信号导航笔记，再考虑 embedding。
-2. Slidev：优先处理 Office table/font/baseline fidelity，不急于扩大 native object extraction。
-3. Lint：引入 baseline + changed-lines ratchet；功能开发期间不要全仓 `--fix`。
-
-退出门禁：每个质量变更都有 before/after 指标，并且既有 release 门禁不回归。
-
-### Phase F：收敛后再增加新引擎
-
-PlantUML、Graphviz、Draw.io runtime 集成、Mermaid vector reconstruction 与 semantic/vector retrieval 均保持 deferred。必须先有需求证据并通过 Phase B-D 门禁。
+责任边界、替代方案、依赖、测试路径及停止条件见[实施计划](../plans/2026-09-12-mainline-reliability-and-evidence.zh-CN.md)。
 
 ## 风险控制
 
@@ -163,4 +149,4 @@ PlantUML、Graphviz、Draw.io runtime 集成、Mermaid vector reconstruction 与
 
 ## 决策
 
-下一次 release-sized 工作应是 truth/packaging/consumer 收敛批次，而不是继续扩展 catalog。任何无法明确 owner、invariant、evidence artifact 和 rollback/deferral 条件的提案，都还没有达到实现门槛。
+优先处理取消、artifact 持久化和 PR 验证。主约束是失败与取消时保护用户成果，不是缺少图表类型。优化和外部能力扩展必须有实测依据；不要让假想调用方或宽泛架构偏好成为永久阻塞项。

@@ -1,6 +1,6 @@
 ---
 date: 2026-09-02
-last_updated: 2026-09-02
+last_updated: 2026-09-12
 topic: current-main-progress-and-forward-plan
 status: current
 canonical_for:
@@ -14,11 +14,15 @@ superseded_by: null
 
 This is the current-main execution record. It separates shipped implementation, active convergence work, deferred external evidence, and historical plans. Runtime registries, manifests, and checked-in verification output are the sources of truth; checkbox counts in older plans are not completion evidence.
 
+Language: **English** | [简体中文](./2026-09-02-current-main-progress-and-forward-plan.zh-CN.md)
+
+The [plan register](../maintainer/project-plan-status.md) reconciles all 19 pre-existing formal plans, 32 brainstorm records, and the related maintainer tracks. The [reliability and evidence plan](../plans/2026-09-12-mainline-reliability-and-evidence.en.md) owns the proposed next implementation units. This file remains the current-progress entry; the September 2 convergence implementation remains a completed historical slice.
+
 ## Executive Judgment
 
-`main` is releaseable and internally well covered. The project is no longer blocked by missing diagram primitives. The dominant risk is truth drift: documentation can claim more than the current build, a compatibility alias can outlive its migration window, and a passing serializer or public API consumer can be mistaken for application interoperability.
+The audited baseline is `main@7638cec`, version `1.9.7`. Build and existing tests pass, but the September 2 judgment that internal coverage was sufficient was too strong. Four deterministic local probes reproduce cancellation and persistence defects: a cancelled queue can remain unsettled, active parallel tasks can write after cancellation, an internally created abort signal does not reach transport, and a failed save can overwrite a concurrent successful save during rollback. These defects are open; this audit changes documentation only.
 
-The next engineering move is controlled convergence, not another renderer expansion. Keep the current single-entry `main.js` plus inline `srcdoc` packaging contract until a measured need justifies a new asset boundary. Promote a target only when its runtime, persistence, preview, documentation, and consumer evidence move together.
+The next patch should fix operation cancellation and artifact-write ownership, with PR verification protecting the changes. Keep the single-entry `main.js` plus inline `srcdoc` contract while measuring its actual cost. Packaging isolation is conditional optimization, not a prerequisite for correctness fixes, retrieval evaluation, or bounded CLI contracts. Additional renderers have lower priority than trustworthy existing operations.
 
 ## Current Source Counts
 
@@ -39,22 +43,24 @@ The 33 catalog rows are not 33 independent rendering engines. Several rows share
 
 ## Verification Snapshot
 
-Verified on 2026-09-02 against the current `main` implementation; clean-worktree status is a final publication gate:
+Reverified on 2026-09-12 on Windows x64, Node `22.19.0`, against production source at `7638cec`. Repository commands ran through `rtk proxy npm.cmd`; the dedicated `rtk npm` runner could not resolve npm on this machine.
 
 - `npm.cmd run build`: passed.
-- `npm.cmd test -- --runInBand`: 275 suites passed; 2511 tests passed; 1 skipped.
-- `npm.cmd run docs:build`: passed.
+- `npm.cmd test -- --runInBand`: 275 suites passed; 2515 tests passed; 1 skipped.
+- VitePress documentation build (`1.6.4`, offline): passed.
 - `npm.cmd --prefix website run build`: passed for all 34 published locales.
 - `npm.cmd --prefix website run audit:build`: passed.
-- `npm.cmd run diagram:examples:check`: 33 entries passed.
-- `npm.cmd run diagram:gallery:check`: 33 fixture assets passed.
+- `npm.cmd run diagram:examples:check`: 33 archived entries passed consistency/hash checks; no new provider or Vault generation was performed.
+- `npm.cmd run diagram:gallery:check`: 33 fixtures passed the current gate. SVG content is compared; PNG checking currently verifies signature/existence, not pixel equivalence or PNG hashes.
 - `npm.cmd run audit:i18n-ui`: passed.
 - `npm.cmd run audit:render-host`: passed.
-- `npm.cmd run verify:local-kb-fixtures`: 9 tests passed.
-- `npm.cmd run diagram:consumer:drawnix`: Plait public-API consumer passed with 20 nodes, 12 relations, and one root.
-- `npm.cmd run lint`: failed on repository baseline debt (`231` errors, `1374` warnings); this is not a release-blocking feature regression until a changed-lines ratchet is introduced.
+- Local KB offline fixture suite: 9 tests passed within the full Jest run; an evaluation corpus already exists.
+- `npm.cmd run diagram:consumer:drawnix -- --input docs/diagram-examples/drawnix-knowledge-map/artifact.drawnix`: Plait public-API consumer passed with 38 nodes, 12 relations, and one root. This uses the archived example, not the earlier 20-node generated fixture.
+- ESLint, using the same `eslint . --ext .ts` scope as `npm.cmd run lint`: failed with `231` errors and `1374` warnings across 512 inspected files. The baseline is unchanged; there is still no ratchet enforcing improvement.
+- Isolated fault probes: four observations confirmed against production functions, using fake timers and in-memory Vault/HTTP boundaries. Passing these probes reproduces the defects; it does not mean they are fixed.
+- Production `main.js`: `10,056,115` bytes; gzip: `3,728,761` bytes. These are artifact sizes, not startup-time or memory measurements.
 
-The remote `1.9.7` Release is published with `main.js`, `manifest.json`, `README.md`, and `styles.css`. Its body is independently readable in English and Simplified Chinese, with only `Highlights` / `Fixes And Robustness` and `重点更新` / `修复与鲁棒性` sections.
+The local `1.9.7` tag points to `ef77788`; production source has not changed between that tag and this audit baseline. The September 2 audit recorded a published bilingual GitHub Release with `main.js`, `manifest.json`, `README.md`, and `styles.css`. Remote release assets, branch protection, live providers, actual Obsidian application behavior, Drawnix/Draw.io applications, and Office rendering were not revalidated in this audit. Local release CI uses Node 20 and website CI uses Node 24; this local Node 22 result does not replace either CI environment.
 
 ## Plan Status Matrix
 
@@ -62,20 +68,20 @@ The remote `1.9.7` Release is published with `main.js`, `manifest.json`, `README
 |---|---|---|
 | Provider expansion rounds | Shipped / historical | Keep provider metadata, discovery, docs, and tests synchronized as upstream APIs change. |
 | Language support multiphase | Shipped / historical | No implementation phase remains; preserve offline Codex-authored release translation policy. |
-| Mainline stabilization and CI hardening | Shipped / historical | Keep the clean-worktree and release-helper gates; do not reopen completed wrapper work. |
-| CLI operation extraction and registry hardening | Shipped at current contract depth | Packaging-aware contract promotion remains a separate decision; current operation bindings are not automatically public APIs. |
-| Diagram rendering roadmap | Active with deferred boundaries | Heavy-runtime packaging isolation and full Mermaid legacy decomposition remain open; PlantUML/Graphviz/Draw.io remain deferred. |
-| Vault history, settings navigation, batch folder | Shipped | Regression maintenance only. Folder-batch mutation and richer history retention require a new contract. |
+| Mainline stabilization and CI hardening | Release-side scope shipped | Only tag-release and website-deploy workflows exist. Plugin PR build/test verification is open work. |
+| CLI operation extraction and registry hardening | Registry/host extraction shipped; lifecycle hardening partial | 29 operations are not 29 public-safe APIs. Fix cancellation before expanding mutation contracts; packaging is not a universal dependency. |
+| Diagram rendering roadmap | Core shipped; selected follow-ups conditional | Measure packaging cost; retain conservative Mermaid compatibility. PlantUML/Graphviz/Draw.io runtime remain deferred. |
+| Vault history, settings navigation, batch folder | Finite feature scope shipped | History has its own write queue. Artifact persistence does not inherit that protection; batch cancellation and artifact rollback need separate fixes. |
 | Diagram preview/history adaptation | Shipped modal architecture | A focus-trapped internal drawer would be a new interaction-system change, not an unfinished bug fix. |
 | Mermaid normalization consolidation | Phases 0-3 shipped | Inventory consumers before removing compatibility exports; parser-backed admission for unknown families remains conservative. |
 | Diagram capability catalog and forward architecture | Runtime foundation shipped; external gates active | Draw.io and real Drawnix application evidence are unavailable; the Plait gate is not an application claim. |
 | Reference expansion | Completed | 33 executable rows, bounded payloads, deterministic adapters, preview/gallery/docs gates all pass. |
-| Real-Vault diagram examples | Completed | Regenerate only when provider or renderer evidence changes; keep failures explicit rather than replacing them with fixtures. |
+| Real-Vault diagram examples | Archived evidence set completed | Refresh intentionally when relevant inputs/runtime change; a hash check does not rerun the provider or prove all hosts. |
 | Local KB retrieval and chapter split | Shipped bounded design | Current implementation is lexical MiniSearch plus managed artifacts; semantic/vector retrieval is a new architecture lane. |
 | Slidev editable PPTX | Active quality track | Office font substitution, table baseline, paragraph spacing, and native geometry fidelity remain measurable gaps. |
 | GEO/GitHub Pages/release | Operationally shipped | Search Console and AI-visibility observations remain external post-deploy evidence. |
 
-Older plan documents retain their checklists and rationale for traceability. Their status headers and progress sections must be read together with this matrix; an unchecked historical TDD step does not mean the corresponding production behavior is absent.
+Older plan documents retain their checklists and rationale for traceability. The individual dispositions and evidence owners are in the [plan register](../maintainer/project-plan-status.md). Neither unchecked historical TDD steps nor completed documentation tasks determine current runtime reliability.
 
 ## Evidence And Non-Claims
 
@@ -84,74 +90,54 @@ Older plan documents retain their checklists and rationale for traceability. The
 | Mermaid | Canonical normalizer, 35-stage legacy registry, family gate, idempotency tests, runtime SVG safety | Shipped Mermaid path with conservative legacy compatibility |
 | Native editable SVG | Deterministic renderers, layout diagnostics, Chromium gallery gate, 33 fixture assets | Shipped native family previews under the tested host/presentation contract |
 | Drawnix | `.drawnix` serializer plus `@plait/*` public API consumer gate | Plait public-API compatibility; real Drawnix application import remains unclaimed |
-| Draw.io | Exporter and XML tests only; no diagrams.net executable in this workspace | Serializer contract only; no application interoperability claim |
-| Circuitikz | Six golden templates and local native compiler evidence | Constrained native compile path; CI tool/version evidence still required |
+| Draw.io | Exporter and XML tests; no new application run in this audit | Serializer contract only; no application interoperability claim |
+| Circuitikz | Six golden templates, regression coverage, historical local compiler evidence | Constrained native compile path; fresh CI tool/version evidence still required |
 | Render host | `main.js` inline `srcdoc`, render-host audit, fail-closed runtime module resolver | Self-contained current packaging; not independent heavy-runtime isolation |
 | Local KB | MiniSearch, heading-aware chunks, offline fixtures, inspect diagnostics | Plugin-native lexical retrieval; not vector/RAG service semantics |
 | Slidev/PPTX | Native standalone export and rendered layout audits | Bounded editability with explicit image fallback; not pixel-identical Office round-trip fidelity |
 
 ## Compatibility Inventory And Ponytail Audit
 
-The repo-wide over-engineering audit found no production dependency that can be removed safely in this convergence slice. The bounded candidates are:
+The September 2 audit reported "no production dependency that can be removed safely" in its convergence slice. That was a scoped non-deletion decision, not proof that every internal export is a supported public API. The updated inventory separates persisted contracts, documented maintainer APIs, and internal source imports:
 
 | Candidate | Current consumers/evidence | Decision |
 |---|---|---|
-| `src/rendering/preview/mermaidDefinitionShared.ts` | Compatibility re-export; no current production import; older source consumers are not provably absent | Keep until an external migration window is recorded |
-| `src/diagram/adapters/drawnix/drawnixCrossRootRouter.ts` | Deprecated re-export consumed by focused routing tests | Keep; tests are the current compatibility evidence |
-| `routeDrawnixCrossRootRelation()` | No production caller; canonical router and compatibility tests still reference it | Keep as explicit compatibility-only API; do not advertise as the production route |
-| `mergeDrawnixSourceCoverage()` | Maintainer documentation and tests still reference the alias | Keep until downstream callers migrate to `enrichDrawnixSourceCoverage()` |
-| `rewriteLegacyTrailingDoubleDashArrow` | Alias appears unreferenced inside the repository; external scripts cannot be ruled out | Do not delete without an external-consumer check |
+| `src/rendering/preview/mermaidDefinitionShared.ts` | Compatibility re-export; no current production import recorded | Classify support scope; unknown hypothetical consumers alone cannot justify indefinite retention |
+| `src/diagram/adapters/drawnix/drawnixCrossRootRouter.ts` | Deprecated re-export consumed by focused routing tests | Migrate internal tests with callers; tests alone do not establish a public compatibility promise |
+| `routeDrawnixCrossRootRelation()` | Compatibility router/tests reference it | Keep this audit non-destructive; decide removal from documented support and real consumers |
+| `mergeDrawnixSourceCoverage()` | Maintainer documentation and tests reference the alias | Migrate known references to `enrichDrawnixSourceCoverage()` before removal |
+| `rewriteLegacyTrailingDoubleDashArrow` | No repository consumer recorded | Check documented supported exports; require a deprecation window only if such a contract exists |
 | `runCircuitikzRepairLoop()` | Focused tests and maintainer acceptance docs consume the SDK | Keep maintainer-only; never wire it as normal-generation fallback |
 | `stripWrappingDoubleQuotes()` / `stripWrappedQuotedLabel()` | Byte-identical private implementations in `legacyFixerUtils.ts` | Small future shrink candidate; defer to a behavior-preserving focused change |
 
-The audit therefore recommends a migration ledger and changed-lines lint ratchet, not a speculative deletion pass. This is the smallest change that reduces future debt without invalidating old artifacts or hidden consumers.
+Persisted setting IDs, command IDs, and artifact schemas still require explicit migration discipline. Private TypeScript re-exports do not automatically need an external sunset program. Current docs tests also pin the old audit wording; future tests should assert contracts and references, not engineering opinions. No compatibility code is deleted in this audit.
 
 ## Ordered Forward Plan
 
-### Phase A: Truth control plane
+### Next patch: operation correctness and PR verification
 
-1. Keep this document and its Chinese counterpart as the current-main entry.
-2. Derive numeric claims from runtime manifests in tests; do not hand-maintain a second catalog.
-3. Keep every plan in one of `current`, `active`, `shipped`, `deferred`, `historical`, or `superseded` and record the evidence path.
-4. Treat release body, checked-in release notes, tag tree, and release assets as separate but cross-checked artifacts.
+1. Give a running operation one cancellation lifetime. Settle a queue cancelled before its first timer, propagate the live cancellation state to every child, forward the effective signal to abortable transports, and prevent new writes/moves after cancellation is observed.
+2. Serialize overlapping artifact writes at the persistence owner. Restore only writes still owned by the failed operation; report rollback conflicts/failures with recovery evidence. Compensation is not crash-atomic multi-file storage.
+3. Add a secret-free PR build/test job and a lint baseline ratchet. Keep release publishing tag-scoped.
 
-Exit gate: docs contract tests, both docs builds, full Jest, clean Git state.
+Exit gate: the four reproduced failures become passing regression cases for corrected behavior; Linux/Windows checks run; existing full-suite, build, i18n and packaging gates remain green. These are proposed fixes, not completed work.
 
-### Phase B: Packaging decision, only if measurements justify it
+### Following slice: evidence quality and measured budgets
 
-1. Measure `main.js` size, startup cost, preview load time, and mobile pressure across representative targets.
-2. If the current inline host remains within budget, keep it; reducing source-file size alone is not a justification for a second asset.
-3. If isolation is justified, land build output, runtime loader, audit rules, release assets, workflow, maintainer docs, and real Obsidian evidence in one atomic batch.
+1. Verify gallery PNG identity separately from visual fidelity, and remove tests that freeze audit conclusions.
+2. Measure startup, cold/warm preview latency and memory on named Obsidian versions and devices. The manifest allows mobile and declares `minAppVersion: 0.15.0`; mocks do not prove that support range.
+3. If measurements justify runtime isolation, change build/loader/release/audit/host evidence together. Otherwise close the investigation with an explicit keep-inline decision.
+4. Add application import/edit/reopen evidence per target when the relevant application is available. Missing consumer evidence blocks only that capability claim.
 
-Exit gate: no claim of heavy-runtime isolation until the release artifact and runtime-consumption chain prove it.
+Exit gate: versioned inputs, environment, hashes, scope and failure states accompany every evidence record; no universal packaging prerequisite is imposed on unrelated work.
 
-### Phase C: Compatibility sunset
+### Product depth: retrieval first, Office fidelity when export demand warrants it
 
-1. Inventory production, tests, maintainer scripts, and external consumers for `mermaidDefinitionShared.ts`, `drawnixCrossRootRouter.ts`, `mergeDrawnixSourceCoverage()`, `routeDrawnixCrossRootRelation()`, and legacy Mermaid aliases.
-2. Add a deprecation window and migration diagnostics before deleting any export.
-3. Keep `runCircuitikzRepairLoop()` maintainer-only; an LLM repair loop must never become an implicit normal-generation fallback.
+1. Extend the existing lexical retrieval corpus with held-out multilingual, low-signal and changing-Vault cases. Measure retrieval quality and context cost before choosing persistent indexing or embeddings.
+2. Improve PPTX font/table/baseline behavior against a named Office renderer; preserve explicit Mermaid/SVG fallback.
+3. Maintain provider presets and locales through shared metadata. Admit a new engine only for a demonstrated unmet use case with a bounded runtime and consumer contract.
 
-Exit gate: consumer inventory, migration coverage, focused regression tests, and a documented removal version.
-
-### Phase D: Consumer evidence
-
-1. Add a real diagrams.net open/import gate when a stable executable or CI container is available.
-2. Add real Drawnix application open/import evidence; keep the Plait public-API gate as a lower-level contract.
-3. Pin Circuitikz compiler/tool versions in CI and archive logs with input/output hashes.
-
-Exit gate: distinguish serializer, public-API, and application-level statuses in the capability catalog.
-
-### Phase E: Quality depth without runtime sprawl
-
-1. Local KB: build an offline query corpus and measure recall, context inflation, latency, stale-index behavior, and low-signal navigation notes before considering embeddings.
-2. Slidev: prioritize Office table/font/baseline fidelity over broadening native object extraction.
-3. Lint: introduce baseline-plus-changed-lines ratcheting; do not apply a repository-wide autofix sweep during feature work.
-
-Exit gate: each quality change has before/after measurements and no regression in the existing release gates.
-
-### Phase F: New engines only after convergence
-
-PlantUML, Graphviz, Draw.io runtime integration, vector Mermaid reconstruction, and semantic/vector retrieval remain deferred. Demand evidence and the Phase B-D gates must precede implementation.
+Owners, alternatives, dependencies, test paths and stop conditions are specified in the [implementation plan](../plans/2026-09-12-mainline-reliability-and-evidence.en.md).
 
 ## Risk Controls
 
@@ -163,4 +149,4 @@ PlantUML, Graphviz, Draw.io runtime integration, vector Mermaid reconstruction, 
 
 ## Decision
 
-The next release-sized work should be a truth/packaging/consumer convergence batch, not another catalog expansion. Any proposal that cannot name its owner, invariant, evidence artifact, and rollback/deferral condition is not ready for implementation.
+Prioritize cancellation, artifact persistence, and PR verification. The main constraint is preserving user work through failure and cancellation, not missing diagram types. Keep optimization and external capability expansion conditional on measurements; do not turn unknown consumers or broad architectural preferences into permanent blockers.

@@ -1,15 +1,15 @@
 ---
 date: 2026-09-02
-last_updated: 2026-09-02
+last_updated: 2026-09-12
 topic: current-main-truth-convergence
 status: completed
-canonical_for:
-  - current-main-progress
-  - plan-status-convergence
+canonical_for: truth-convergence-2026-09-02
 superseded_by: null
 ---
 
 # Current Main Truth Convergence Implementation Plan
+
+> Historical slice completed on September 2. The September 12 audit updates the [current-progress record](../../brainstorms/2026-09-02-current-main-progress-and-forward-plan.md), [individual plan statuses](../../maintainer/project-plan-status.md) and [next implementation work](../../plans/2026-09-12-mainline-reliability-and-evidence.en.md). It does not reopen or re-execute the completed publication steps below.
 
 > **For agentic workers:** Execute inline in the current checkout. Steps use checkbox (`- [ ]`) syntax for tracking.
 

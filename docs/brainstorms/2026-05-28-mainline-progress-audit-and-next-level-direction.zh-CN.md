@@ -1,11 +1,15 @@
 ---
 date: 2026-05-28
-last_updated: 2026-07-03
+last_updated: 2026-09-12
 topic: mainline-progress-audit-and-next-level-direction
-canonical: true
+canonical: false
+status: superseded
+superseded_by: ./2026-09-02-current-main-progress-and-forward-plan.zh-CN.md
 ---
 
 # 当前主线进度审计与 Next-Level 方向
+
+> 历史全局审计。2026-09-12 起请使用[当前进度记录](./2026-09-02-current-main-progress-and-forward-plan.zh-CN.md)和[计划登记表](../maintainer/project-plan-status.zh-CN.md)。下文旧数量、backup branch 结论及打包优先顺序保留为有日期的证据，不再作为当前执行指令。
 
 ## 2026-07-23 Drawnix 实现真值
 

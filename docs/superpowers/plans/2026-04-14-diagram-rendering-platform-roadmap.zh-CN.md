@@ -1,5 +1,7 @@
 # Notemd 图形渲染平台路线图
 
+> 2026-09-12 进度复核：平台核心和 Mermaid 阶段 0–3 已交付，legacy 完整拆解仍开放。重型 runtime 隔离取决于 host 实测，不默认作为下一批；优先处理取消与 artifact 保存归属。参见[计划登记表 P04](../../maintainer/project-plan-status.zh-CN.md)及[下一步实施计划](../../plans/2026-09-12-mainline-reliability-and-evidence.zh-CN.md)，下方有日期的章节保留原有上下文。
+
 > **给代理执行者：** 必须使用 `superpowers:subagent-driven-development`（推荐）或 `superpowers:executing-plans`，按任务逐步执行本计划。步骤继续使用复选框 `- [ ]` 语法跟踪。
 
 ## 2026-05-02 进展更新

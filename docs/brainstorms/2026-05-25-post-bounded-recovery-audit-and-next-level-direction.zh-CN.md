@@ -1,11 +1,15 @@
 ---
 date: 2026-05-25
-last_updated: 2026-06-06
+last_updated: 2026-09-12
 topic: post-bounded-recovery-audit-and-next-level-direction
-canonical: true
+canonical: false
+status: superseded
+superseded_by: ./2026-09-02-current-main-progress-and-forward-plan.zh-CN.md
 ---
 
 # Bounded Recovery 之后的主线审计与 Next-Level 方向
+
+> 历史恢复快照。2026-09-12 起，当前状态与顺序以[当前进度记录](./2026-09-02-current-main-progress-and-forward-plan.zh-CN.md)和[计划登记表](../maintainer/project-plan-status.zh-CN.md)为准。下文证据保留为有日期的历史，不再形成另一套当前 backlog。
 
 ## 1. 为什么需要这份文档
 

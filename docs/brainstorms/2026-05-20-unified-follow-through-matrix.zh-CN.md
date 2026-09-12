@@ -1,11 +1,15 @@
 ---
 date: 2026-05-20
-last_updated: 2026-06-09
+last_updated: 2026-09-12
 topic: unified-follow-through-matrix
-canonical: true
+canonical: false
+status: superseded
+superseded_by: ./2026-09-02-current-main-progress-and-forward-plan.zh-CN.md
 ---
 
 # 主线统一推进矩阵
+
+> 历史检查点，2026-09-12 起不再作为全局执行权威。下文规则与优先级描述恢复时期。新工作更新[当前进度记录](./2026-09-02-current-main-progress-and-forward-plan.zh-CN.md)和[计划登记表](../maintainer/project-plan-status.zh-CN.md)；打包隔离不再是所有工作的通用前置条件。
 
 > 目的：保留一份单一执行矩阵，明确区分 **被重写后的 live mainline** 与 **仍保留更多后续工作结果的备份分支**，避免后续规划继续高估当前主线已发货进展，或把新的结构性瓶颈继续隐藏起来。
 

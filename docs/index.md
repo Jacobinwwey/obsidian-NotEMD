@@ -19,6 +19,8 @@ Repository docs preview for `obsidian-NotEMD`.
 
 ## Planning Docs
 
+- [Project Plan Status And Engineering Assessment (EN)](./maintainer/project-plan-status.md)
+- [Mainline Reliability And Evidence Implementation Plan (EN)](./plans/2026-09-12-mainline-reliability-and-evidence.en.md)
 - [Current Main Progress And Forward Plan (EN)](./brainstorms/2026-09-02-current-main-progress-and-forward-plan.md)
 - [Current Main Truth Convergence Plan (EN)](./superpowers/plans/2026-09-02-current-main-truth-convergence.en.md)
 - [Diagram Capability Catalog And Forward Architecture (EN)](./superpowers/plans/2026-08-16-diagram-capability-catalog-and-forward-architecture.en.md)
