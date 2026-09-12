@@ -79,20 +79,38 @@ export function estimateTokens(text: string): number {
  * @param progressReporter The reporter to check for cancellation.
  * @returns A promise that resolves on completion or rejects on cancellation.
  */
-export function cancellableDelay(ms: number, progressReporter: ProgressReporter): Promise<void> {
+export function cancellableDelay(
+    ms: number,
+    progressReporter: ProgressReporter,
+    signal: AbortSignal | undefined = progressReporter.abortController?.signal
+): Promise<void> {
+    if (progressReporter.cancelled || signal?.aborted) {
+        return Promise.reject(new Error('Processing cancelled by user during API retry wait.'));
+    }
     return new Promise((resolve, reject) => {
-        const timeoutId = setTimeout(() => {
+        const cleanup = () => {
+            clearTimeout(timeoutId);
             clearInterval(intervalId);
+            signal?.removeEventListener('abort', cancel);
+        };
+        const cancel = () => {
+            cleanup();
+            reject(new Error('Processing cancelled by user during API retry wait.'));
+        };
+        const timeoutId = setTimeout(() => {
+            if (progressReporter.cancelled) {
+                cancel();
+                return;
+            }
+            cleanup();
             resolve();
         }, ms);
 
+        // Legacy reporters can expose cancellation without an AbortSignal.
         const intervalId = setInterval(() => {
-            if (progressReporter.cancelled) {
-                clearTimeout(timeoutId);
-                clearInterval(intervalId);
-                reject(new Error("Processing cancelled by user during API retry wait."));
-            }
-        }, 100); // Check frequently
+            if (progressReporter.cancelled) cancel();
+        }, 100);
+        signal?.addEventListener('abort', cancel, { once: true });
     });
 }
 
@@ -194,93 +212,47 @@ export async function delayedExecution<T>(fn: () => Promise<T>, intervalMs: numb
     return result;
 }
 
-// Concurrent Processor using a worker pattern
 export function createConcurrentProcessor<T, R>(
     concurrency: number,
     apiCallIntervalMs: number,
     progressReporter: ProgressReporter
 ) {
-    return function (tasks: (() => Promise<T>)[]) : Promise<R[]> {
-        return new Promise((resolve, reject) => {
-            const results: R[] = [];
-            const taskQueue = [...tasks]; // Clone queue to manage tasks safely
-            let workersActive = 0;
-            let taskIndex = 0; // Track original index to maintain result order
-
-            // The recursive worker function
-            const processNextTask = async () => {
-                // 1. Check Cancellation
-                if (progressReporter.cancelled) {
-                    // Check if we are the last active worker to shut down
-                    if (workersActive === 0) resolve(results);
-                    return;
-                }
-
-                // 2. Check Queue Exhaustion
-                if (taskQueue.length === 0) {
-                    if (workersActive === 0) resolve(results);
-                    return;
-                }
-
-                // 3. Dequeue Next Task
-                // Capture index immediately to ensure result order
-                const currentTaskIndex = taskIndex++;
-                const taskFn = taskQueue.shift();
-
-                if (taskFn) {
-                    workersActive++;
+    if (!Number.isInteger(concurrency) || concurrency < 1) {
+        throw new RangeError('Concurrency must be a positive integer.');
+    }
+    if (!Number.isFinite(apiCallIntervalMs) || apiCallIntervalMs < 0) {
+        throw new RangeError('The task interval must be a finite non-negative duration.');
+    }
+    return async (tasks: (() => Promise<T>)[]): Promise<R[]> => {
+        const results: R[] = [];
+        let nextTaskIndex = 0;
+        const runWorker = async (initialDelay: number): Promise<void> => {
+            try {
+                await cancellableDelay(initialDelay, progressReporter);
+                while (!progressReporter.cancelled && !progressReporter.abortController?.signal.aborted
+                    && nextTaskIndex < tasks.length) {
+                    const taskIndex = nextTaskIndex++;
                     progressReporter.updateActiveTasks(1);
-
                     try {
-                        // 4. Execute Task (Delay is handled by staggered start + post-task delay)
-                        const result = await taskFn();
-                        results[currentTaskIndex] = result as unknown as R;
+                        results[taskIndex] = await tasks[taskIndex]() as unknown as R;
                     } catch (error) {
-                        results[currentTaskIndex] = { success: false, error: error } as unknown as R;
-                        console.error("Error in concurrent task:", error);
+                        results[taskIndex] = { success: false, error } as unknown as R;
+                        console.error('Error in concurrent task:', error);
                     } finally {
-                        workersActive--;
                         progressReporter.updateActiveTasks(-1);
-
-                        // 5. Chain Next Task with Interval
-                        if (!progressReporter.cancelled) {
-                             // Apply delay *after* a task finishes, before picking up the next.
-                             // This maintains the rhythm established by the staggered start.
-                             if (apiCallIntervalMs > 0 && taskQueue.length > 0) {
-                                await delay(apiCallIntervalMs);
-                             }
-                             processNextTask();
-                        } else {
-                            // If cancelled during task, ensure we check for resolution
-                            if (workersActive === 0) resolve(results);
-                        }
+                    }
+                    if (nextTaskIndex < tasks.length) {
+                        await cancellableDelay(apiCallIntervalMs, progressReporter);
                     }
                 }
-            };
-
-            if (tasks.length === 0) {
-                resolve([]);
-                return;
+            } catch (error) {
+                if (!progressReporter.cancelled && !progressReporter.abortController?.signal.aborted) throw error;
             }
-
-            // --- KEY FIX: Staggered Start ---
-            // Start workers one by one, spaced out by the apiCallIntervalMs.
-            // This prevents the "burst" effect at T=delay.
-            const actualConcurrency = Math.min(concurrency, tasks.length);
-            
-            for (let i = 0; i < actualConcurrency; i++) {
-                // Worker 0 starts immediately (0ms)
-                // Worker 1 starts at 1 * interval ms
-                // Worker 2 starts at 2 * interval ms
-                const startDelay = i * apiCallIntervalMs;
-                
-                setTimeout(() => {
-                    if (!progressReporter.cancelled) {
-                        processNextTask();
-                    }
-                }, startDelay);
-            }
-        });
+        };
+        // Awaiting every worker also settles a queue cancelled before any task starts.
+        await Promise.all(Array.from({ length: Math.min(concurrency, tasks.length) },
+            (_, index) => runWorker(index * apiCallIntervalMs)));
+        return results;
     };
 }
 

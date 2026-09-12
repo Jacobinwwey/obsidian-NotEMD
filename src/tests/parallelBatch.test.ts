@@ -41,12 +41,90 @@ const mockProgressReporter: ProgressReporter = {
     updateActiveTasks: jest.fn(),
 };
 
+function createCancellableReporter(): ProgressReporter {
+    let cancelled = false;
+    return {
+        log: jest.fn(), updateStatus: jest.fn(), clearDisplay: jest.fn(),
+        get cancelled() { return cancelled; },
+        requestCancel() { cancelled = true; this.abortController?.abort(); },
+        abortController: null, activeTasks: 0, updateActiveTasks: jest.fn()
+    };
+}
+
 describe('batchGenerateContentForTitles', () => {
     let settings: NotemdSettings;
 
     beforeEach(() => {
         settings = { ...DEFAULT_SETTINGS };
         jest.clearAllMocks();
+    });
+
+    it('propagates cancellation to every running child and prevents late writes and moves', async () => {
+        settings.enableBatchParallelism = true;
+        settings.batchConcurrency = 2;
+        settings.batchSize = 2;
+        settings.apiCallIntervalMs = 0;
+        settings.enableResearchInGenerateContent = false;
+        settings.enableLocalKnowledgeRetrieval = false;
+        const reporter = createCancellableReporter();
+        const files = ['one', 'two'].map(name => Object.assign(new TFile(), {
+            path: `folder/${name}.md`, name: `${name}.md`, basename: name, extension: 'md'
+        }));
+        const folder = Object.assign(new TFolder(), { path: 'folder', name: 'folder', children: files });
+        (mockApp.vault.getAbstractFileByPath as jest.Mock).mockImplementation(path => path === 'folder' ? folder : null);
+        (mockApp.vault.getMarkdownFiles as jest.Mock).mockReturnValue(files);
+        (mockApp.vault.adapter.exists as jest.Mock).mockImplementation(async path => path === 'folder_complete' || path.startsWith('folder/'));
+        (mockApp.vault.adapter.stat as jest.Mock).mockResolvedValue({ type: 'folder' });
+        let announceStarted!: () => void;
+        const started = new Promise<void>(resolve => { announceStarted = resolve; });
+        let releaseResponses!: (content: string) => void;
+        const responses = new Promise<string>(resolve => { releaseResponses = resolve; });
+        const children: ProgressReporter[] = [];
+        (callLLM as jest.Mock).mockImplementation((_provider, _prompt, _content, _settings, child) => {
+            children.push(child);
+            if (children.length === 2) announceStarted();
+            return responses;
+        });
+        try {
+            const running = batchGenerateContentForTitles(mockApp, settings, 'folder', reporter);
+            await started;
+            const controller = reporter.abortController;
+            reporter.requestCancel();
+            releaseResponses('late generated content');
+            const result = await running;
+            expect(children.map(child => child.cancelled)).toEqual([true, true]);
+            expect(controller?.signal.aborted).toBe(true);
+            expect(result).toEqual(expect.objectContaining({ cancelled: true, generatedCount: 0, movedCount: 0 }));
+            expect(mockApp.vault.modify).not.toHaveBeenCalled();
+            expect(mockApp.vault.rename).not.toHaveBeenCalled();
+            expect(reporter.abortController).toBeNull();
+        } finally {
+            releaseResponses('cleanup');
+            (callLLM as jest.Mock).mockResolvedValue('processed content');
+        }
+    });
+
+    test.each([false, true])('retains a completed write when cancellation prevents its move (parallel=%s)', parallel => {
+        settings.enableBatchParallelism = parallel;
+        settings.batchConcurrency = 2;
+        settings.batchSize = 2;
+        settings.apiCallIntervalMs = 0;
+        settings.enableResearchInGenerateContent = false;
+        settings.enableLocalKnowledgeRetrieval = false;
+        const reporter = createCancellableReporter();
+        const file = Object.assign(new TFile(), { path: 'folder/one.md', name: 'one.md', basename: 'one', extension: 'md' });
+        const folder = Object.assign(new TFolder(), { path: 'folder', name: 'folder', children: [file] });
+        (mockApp.vault.getAbstractFileByPath as jest.Mock).mockImplementation(path => path === 'folder' ? folder : null);
+        (mockApp.vault.getMarkdownFiles as jest.Mock).mockReturnValue([file]);
+        (mockApp.vault.adapter.exists as jest.Mock).mockImplementation(async path => path === 'folder_complete' || path === file.path);
+        (mockApp.vault.adapter.stat as jest.Mock).mockResolvedValue({ type: 'folder' });
+        (mockApp.vault.modify as jest.Mock).mockImplementationOnce(async () => reporter.requestCancel());
+        return batchGenerateContentForTitles(mockApp, settings, 'folder', reporter).then(result => {
+            expect(result).toEqual(expect.objectContaining({ cancelled: true, generatedCount: 1, movedCount: 0, errors: [] }));
+            expect(result.fileResults).toHaveLength(1);
+            expect(result.fileResults[0].modified).toBe(true);
+            expect(mockApp.vault.rename).not.toHaveBeenCalled();
+        });
     });
 
     it('should process files in parallel when enabled', async () => {

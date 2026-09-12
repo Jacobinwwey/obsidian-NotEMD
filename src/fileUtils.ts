@@ -2,7 +2,7 @@ import { getSystemPrompt } from './promptUtils';
 import { App, TFile, TFolder, Notice, Vault } from 'obsidian';
 import { LLMProviderConfig, NotemdSettings, ProgressReporter, TaskKey } from './types';
 import { DEFAULT_SETTINGS } from './constants';
-import { normalizeNameForFilePath, splitContent, getProviderForTask, getModelForTask, delay, createConcurrentProcessor, chunkArray, retry } from './utils'; // Added delay import
+import { normalizeNameForFilePath, splitContent, getProviderForTask, getModelForTask, delay, cancellableDelay, createConcurrentProcessor, chunkArray } from './utils';
 import { callLLM } from './llmUtils';
 import { refineMermaidBlocks, cleanupLatexDelimiters, deepDebugMermaid, applyDeepDebugToMermaidBlocks, checkMermaidErrors } from './mermaidProcessor'; // Assuming this will be moved or imported correctly later
 import { _performResearch } from './searchUtils'; // Assuming this will be moved or imported correctly later
@@ -323,54 +323,6 @@ function hasInlineDrawnixMermaidVisuals(content: string): boolean {
         ));
     } catch {
         return false;
-    }
-}
-
-function isGeneratedDrawnixCompanionFile(file: TFile): boolean {
-    return /^(?:source-visual-manifest\.json|source-visual-[A-Za-z0-9_-]+\.(?:mermaid\.md|svg|png|jpe?g|gif|webp|bmp|bin))$/iu.test(file.name);
-}
-
-async function removeStaleInlineDrawnixCompanionScope(
-    app: App,
-    folderPath: string,
-    progressReporter: ProgressReporter
-): Promise<void> {
-    const existingFolder = app.vault.getAbstractFileByPath(folderPath);
-    if (!(existingFolder instanceof TFolder)) {
-        return;
-    }
-
-    const children = existingFolder.children ?? [];
-    if (children.some(child => !(child instanceof TFile) || !isGeneratedDrawnixCompanionFile(child))) {
-        progressReporter.log(`Preserved Drawnix companion folder with user-managed files: ${folderPath}`);
-        return;
-    }
-
-    const manifest = children.find((child): child is TFile => (
-        child instanceof TFile && child.name === 'source-visual-manifest.json'
-    ));
-    if (children.length > 0 && !manifest) {
-        progressReporter.log(`Preserved Drawnix companion folder without a Notemd manifest: ${folderPath}`);
-        return;
-    }
-    if (manifest) {
-        try {
-            const parsedManifest = JSON.parse(await app.vault.read(manifest)) as unknown;
-            if (!isObjectRecord(parsedManifest) || parsedManifest.version !== 1 || !Array.isArray(parsedManifest.visuals)) {
-                progressReporter.log(`Preserved Drawnix companion folder with an unrecognized manifest: ${folderPath}`);
-                return;
-            }
-        } catch {
-            progressReporter.log(`Preserved Drawnix companion folder with an unreadable manifest: ${folderPath}`);
-            return;
-        }
-    }
-
-    try {
-        await app.vault.delete(existingFolder, true);
-        progressReporter.log(`Removed stale Drawnix companion folder: ${folderPath}`);
-    } catch (error: unknown) {
-        progressReporter.log(`Could not remove stale Drawnix companion folder '${folderPath}': ${error instanceof Error ? error.message : String(error)}`);
     }
 }
 
@@ -1246,7 +1198,13 @@ async function moveGeneratedFileToCompleteFolder(
 
     if (progressReporter.cancelled) {
         progressReporter.log(`⚠️ Cancellation requested before moving ${file.name}. Skipping move.`);
-        throw new Error('cancelled by user');
+        // Content has already been written; cancellation must not erase that success from the batch report.
+        return {
+            completeDestinationPath,
+            movedToCompleteFolder: false,
+            skippedMoveBecauseDestinationExists: false,
+            skippedMoveBecauseSourceMissing: false
+        };
     }
 
     await app.vault.rename(file, completeDestinationPath);
@@ -1393,102 +1351,115 @@ export async function batchGenerateContentForTitles(
     const fileBatches = chunkArray(filesToProcess, settings.batchSize);
 
     let processedCount = 0;
+    const inheritedController = progressReporter.abortController;
+    const batchController = inheritedController ?? new AbortController();
+    progressReporter.abortController = batchController;
 
-    for (let b = 0; b < fileBatches.length; b++) {
-        const batch = fileBatches[b];
-        progressReporter.log(`Processing batch ${b + 1}/${fileBatches.length} (${batch.length} files)`);
-        if (progressReporter.cancelled) break;
+    try {
+        for (let b = 0; b < fileBatches.length; b++) {
+            const batch = fileBatches[b];
+            progressReporter.log(`Processing batch ${b + 1}/${fileBatches.length} (${batch.length} files)`);
+            if (progressReporter.cancelled || batchController.signal.aborted) break;
 
-        const tasks = batch.map(file => async () => {
-            // Each task represents processing a single file
-            const fileProgressReporter: ProgressReporter = { // Mini-reporter for individual file progress
-                log: (msg: string) => progressReporter.log(`[${file.name}] ${msg}`),
-                updateStatus: (msg: string, percentage?: number) => {
-                    // Update overall batch progress, maybe combine with active tasks
-                    const batchStatus = formatStepStatus(
-                        i18n,
-                        Math.min(processedCount + 1, filesToProcess.length),
-                        filesToProcess.length,
-                        `${file.name}: ${msg}`
-                    );
-                    if (percentage !== undefined) {
-                        const overallProgress = Math.floor(((processedCount + (percentage / 100)) / filesToProcess.length) * 100);
-                        progressReporter.updateStatus(batchStatus, overallProgress);
-                    } else {
-                        progressReporter.updateStatus(batchStatus);
-                    }
-                },
-                cancelled: progressReporter.cancelled,
-                requestCancel: () => progressReporter.requestCancel(),
-                clearDisplay: () => { },
-                abortController: progressReporter.abortController,
-                activeTasks: progressReporter.activeTasks, // Pass through
-                updateActiveTasks: (delta: number) => progressReporter.updateActiveTasks(delta), // Pass through
-                updateApiLiveness: (event) => progressReporter.updateApiLiveness?.(event)
-            };
-
-            try {
-                const fileResult = await generateContentForTitle(app, settings, file, fileProgressReporter, {
-                    enableLocalKnowledge: settings.enableLocalKnowledgeForBatchGenerateFromTitles,
-                    localKnowledgeRetriever,
-                    localKnowledgeTaskScope: 'batchGenerateFromTitles'
-                });
-                const moveResult = await moveGeneratedFileToCompleteFolder(app, file, completeFolderPath, fileProgressReporter);
-                return {
-                    file,
-                    success: true,
-                    result: {
-                        ...fileResult,
-                        ...moveResult
-                    }
+            const tasks = batch.map(file => async () => {
+                // Each task represents processing a single file
+                const fileProgressReporter: ProgressReporter = { // Mini-reporter for individual file progress
+                    log: (msg: string) => progressReporter.log(`[${file.name}] ${msg}`),
+                    updateStatus: (msg: string, percentage?: number) => {
+                        // Update overall batch progress, maybe combine with active tasks
+                        const batchStatus = formatStepStatus(
+                            i18n,
+                            Math.min(processedCount + 1, filesToProcess.length),
+                            filesToProcess.length,
+                            `${file.name}: ${msg}`
+                        );
+                        if (percentage !== undefined) {
+                            const overallProgress = Math.floor(((processedCount + (percentage / 100)) / filesToProcess.length) * 100);
+                            progressReporter.updateStatus(batchStatus, overallProgress);
+                        } else {
+                            progressReporter.updateStatus(batchStatus);
+                        }
+                    },
+                    get cancelled() { return progressReporter.cancelled || batchController.signal.aborted; },
+                    requestCancel: () => progressReporter.requestCancel(),
+                    clearDisplay: () => { },
+                    abortController: batchController,
+                    activeTasks: progressReporter.activeTasks, // Pass through
+                    updateActiveTasks: (delta: number) => progressReporter.updateActiveTasks(delta), // Pass through
+                    updateApiLiveness: (event) => progressReporter.updateApiLiveness?.(event)
                 };
-            } catch (e: unknown) {
-                const errorMessage = e instanceof Error ? e.message : String(e);
-                fileProgressReporter.log(`❌ Error processing ${file.name}: ${errorMessage}`);
-                return { file, success: false, error: e };
-            }
-        });
 
-        const results = await processor(tasks); // Execute batch in parallel
-        processedCount += batch.length; // Update count for overall progress
-
-        results.forEach(r => {
-            const taskResult = r as {
-                success: boolean;
-                file: TFile;
-                error?: unknown;
-                result?: BatchGenerateContentFileResult;
-            };
-            if (taskResult.success && taskResult.result) {
-                result.fileResults.push(taskResult.result);
-                result.generatedCount += 1;
-                if (taskResult.result.movedToCompleteFolder) {
-                    result.movedCount += 1;
+                try {
+                    const fileResult = await generateContentForTitle(app, settings, file, fileProgressReporter, {
+                        enableLocalKnowledge: settings.enableLocalKnowledgeForBatchGenerateFromTitles,
+                        localKnowledgeRetriever,
+                        localKnowledgeTaskScope: 'batchGenerateFromTitles'
+                    });
+                    const moveResult = await moveGeneratedFileToCompleteFolder(app, file, completeFolderPath, fileProgressReporter);
+                    return {
+                        file,
+                        success: true,
+                        result: {
+                            ...fileResult,
+                            ...moveResult
+                        }
+                    };
+                } catch (e: unknown) {
+                    const errorMessage = e instanceof Error ? e.message : String(e);
+                    fileProgressReporter.log(`❌ Error processing ${file.name}: ${errorMessage}`);
+                    return { file, success: false, error: e };
                 }
-                return;
+            });
+
+            const results = await processor(tasks); // Execute batch in parallel
+            processedCount += results.length;
+
+            results.forEach(r => {
+                const taskResult = r as {
+                    success: boolean;
+                    file: TFile;
+                    error?: unknown;
+                    result?: BatchGenerateContentFileResult;
+                };
+                if (taskResult.success && taskResult.result) {
+                    result.fileResults.push(taskResult.result);
+                    result.generatedCount += 1;
+                    if (taskResult.result.movedToCompleteFolder) {
+                        result.movedCount += 1;
+                    }
+                    return;
+                }
+
+                if (!taskResult.success && taskResult.error) {
+                    const errorMessage = taskResult.error instanceof Error
+                        ? taskResult.error.message
+                        : String(taskResult.error);
+                    result.errors.push({ file: taskResult.file.name, message: errorMessage });
+                }
+            });
+
+            if (progressReporter.cancelled || batchController.signal.aborted) {
+                progressReporter.log('Cancellation requested, stopping batch processing.');
+                break;
             }
 
-            if (!taskResult.success && taskResult.error) {
-                const errorMessage = taskResult.error instanceof Error
-                    ? taskResult.error.message
-                    : String(taskResult.error);
-                result.errors.push({ file: taskResult.file.name, message: errorMessage });
+            // Delay between batches
+            if (settings.batchInterDelayMs > 0 && b < fileBatches.length - 1) {
+                progressReporter.log(`Delaying for ${settings.batchInterDelayMs}ms before next batch...`);
+                await cancellableDelay(settings.batchInterDelayMs, progressReporter, batchController.signal);
             }
-        });
-
-        if (progressReporter.cancelled) {
-            progressReporter.log('Cancellation requested, stopping batch processing.');
-            break;
         }
-
-        // Delay between batches
-        if (settings.batchInterDelayMs > 0 && b < fileBatches.length - 1) {
-            progressReporter.log(`Delaying for ${settings.batchInterDelayMs}ms before next batch...`);
-            await delay(settings.batchInterDelayMs);
+        result.cancelled = progressReporter.cancelled || batchController.signal.aborted;
+        return result;
+    } catch (error) {
+        if (!progressReporter.cancelled && !batchController.signal.aborted) throw error;
+        result.cancelled = true;
+        return result;
+    } finally {
+        if (!inheritedController && progressReporter.abortController === batchController) {
+            progressReporter.abortController = null;
         }
     }
-    result.cancelled = progressReporter.cancelled;
-    return result;
 }
 
 /**
@@ -1866,6 +1837,35 @@ export async function saveMermaidSummaryFile(app: App, settings: NotemdSettings,
     return outputPath;
 }
 
+interface DiagramArtifactRecovery {
+    path: string;
+    reason: string;
+    recoveryPath?: string;
+    recoveryError?: string;
+}
+
+class DiagramArtifactSaveError extends Error {
+    readonly cause: unknown;
+    constructor(cause: unknown, readonly recovery: DiagramArtifactRecovery[]) {
+        const message = cause instanceof Error ? cause.message : String(cause);
+        const details = recovery.map(entry => `${entry.path}: ${entry.reason}`
+            + (entry.recoveryPath ? ` Recovery location: ${entry.recoveryPath}.` : '')
+            + (entry.recoveryError ? ` Recovery failed: ${entry.recoveryError}.` : ''));
+        super(details.length ? `${message}\n${details.join('\n')}` : message);
+        this.name = 'DiagramArtifactSaveError';
+        this.cause = cause;
+    }
+}
+
+const diagramArtifactWriteTails = new WeakMap<App['vault'], Map<string, Promise<void>>>();
+let diagramArtifactRecoverySequence = 0;
+
+function nextDiagramRecoveryPath(path: string): string {
+    const suffix = `.notemd-recovery-${Date.now().toString(36)}-${(++diagramArtifactRecoverySequence).toString(36)}`;
+    // A distinct extension keeps recovery copies out of ordinary Markdown batches.
+    return `${path}${suffix}`;
+}
+
 export async function saveDiagramArtifactFile(
     app: App,
     settings: NotemdSettings,
@@ -1873,28 +1873,10 @@ export async function saveDiagramArtifactFile(
     artifact: RenderArtifact,
     progressReporter: ProgressReporter
 ): Promise<string> {
-    let saveDir = '';
-    if (settings.useCustomSummarizeToMermaidSavePath && settings.summarizeToMermaidSavePath) {
-        saveDir = settings.summarizeToMermaidSavePath;
-    } else {
-        saveDir = originalFile.parent?.path || '';
-    }
-
-    saveDir = saveDir.replace(/^\/|\/$/g, '');
-    if (saveDir && !saveDir.endsWith('/')) saveDir += '/';
-
-    const targetSaveFolder = saveDir.replace(/\/$/, '');
-    const existingFolder = targetSaveFolder ? app.vault.getAbstractFileByPath(targetSaveFolder) : null;
-    if (targetSaveFolder && !existingFolder) {
-        await app.vault.createFolder(targetSaveFolder);
-        progressReporter.log(`Created diagram output folder: ${targetSaveFolder}`);
-    } else if (targetSaveFolder && !(existingFolder instanceof TFolder)) {
-        const errorMsg = `Diagram output path '${targetSaveFolder}' exists but is not a folder.`;
-        progressReporter.log(errorMsg);
-        new Notice(errorMsg, 10000);
-        throw new Error(errorMsg);
-    }
-
+    const folder = settings.useCustomSummarizeToMermaidSavePath && settings.summarizeToMermaidSavePath
+        ? settings.summarizeToMermaidSavePath
+        : originalFile.parent?.path || '';
+    const saveDirectory = folder.replace(/\\/g, '/').replace(/^\/+|\/+$/g, '');
     const descriptor = getRenderTargetDescriptor(artifact.target);
     const suffix = artifact.target === 'mermaid'
         ? settings.useCustomSummarizeToMermaidSuffix && settings.summarizeToMermaidCustomSuffix
@@ -1902,186 +1884,202 @@ export async function saveDiagramArtifactFile(
             : DEFAULT_SETTINGS.summarizeToMermaidCustomSuffix
         : '_diagram';
     const normalizedSuffix = artifact.target === 'mermaid' && suffix.toLowerCase().endsWith('.md')
-        ? suffix.substring(0, suffix.length - 3)
-        : suffix;
-    const extension = descriptor.vaultExtension;
-
-    const outputFileName = `${originalFile.basename}${normalizedSuffix}${extension}`;
-    const outputPath = `${saveDir}${outputFileName}`;
-    progressReporter.log(`Saving diagram artifact to: ${outputPath}`);
-
-    const createdPaths: string[] = [];
-    const modifiedSnapshots = new Map<string, {
-        file: TFile;
-        binary: boolean;
-        content: string | ArrayBuffer;
-    }>();
-    const snapshotExistingFile = async (path: string, file: TFile, binary: boolean): Promise<void> => {
-        if (modifiedSnapshots.has(path)) {
-            return;
-        }
-        const content = binary
-            ? (await app.vault.readBinary(file)).slice(0)
-            : await app.vault.read(file);
-        modifiedSnapshots.set(path, { file, binary, content });
-    };
-    const writeTextArtifact = async (path: string, content: string, label: string): Promise<void> => {
-        const existingFile = app.vault.getAbstractFileByPath(path);
-        if (existingFile instanceof TFile) {
-            await snapshotExistingFile(path, existingFile, false);
-            await app.vault.modify(existingFile, content);
-            progressReporter.log(`Overwrote existing ${label}: ${path}`);
-        } else {
-            await app.vault.create(path, content);
-            createdPaths.push(path);
-            progressReporter.log(`Created ${label}: ${path}`);
-        }
-    };
-
-    const writeBinaryArtifact = async (path: string, content: ArrayBuffer, label: string): Promise<void> => {
-        const existingFile = app.vault.getAbstractFileByPath(path);
-        if (existingFile instanceof TFile) {
-            await snapshotExistingFile(path, existingFile, true);
-            await app.vault.modifyBinary(existingFile, content);
-            progressReporter.log(`Overwrote existing ${label}: ${path}`);
-        } else {
-            await app.vault.createBinary(path, content);
-            createdPaths.push(path);
-            progressReporter.log(`Created ${label}: ${path}`);
-        }
-    };
-
-    const companionScopeFolder = artifact.target === 'drawnix' && (artifact.companions?.length ?? 0) > 0
-        ? `${outputPath}.assets`
-        : undefined;
+        ? suffix.slice(0, -3) : suffix;
+    const outputPath = normalizeDiagramCompanionRelativePath(
+        `${saveDirectory ? `${saveDirectory}/` : ''}${originalFile.basename}${normalizedSuffix}${descriptor.vaultExtension}`
+    );
     const companionDirectory = outputPath.includes('/') ? outputPath.slice(0, outputPath.lastIndexOf('/') + 1) : '';
+    const companionScopeFolder = artifact.target === 'drawnix' && (artifact.companions?.length ?? 0) > 0
+        ? `${outputPath}.assets` : undefined;
     const companionPathMap = new Map<string, string>();
-    for (const companion of artifact.companions ?? []) {
-        const normalized = normalizeDiagramCompanionRelativePath(companion.path);
-        const scopedRelativePath = companionScopeFolder
-            ? `${getVaultFileName(companionScopeFolder)}/${normalized}`
-            : normalized;
-        if (companionPathMap.has(normalized)) {
-            throw new Error(`Diagram companion path collides with another artifact: "${companion.path}".`);
-        }
-        companionPathMap.set(normalized, scopedRelativePath);
+    const companions = (artifact.companions ?? []).map(companion => {
+        const relativePath = normalizeDiagramCompanionRelativePath(companion.path);
+        const scopedPath = companionScopeFolder ? `${getVaultFileName(companionScopeFolder)}/${relativePath}` : relativePath;
+        companionPathMap.set(relativePath, scopedPath);
+        return { ...companion, path: `${companionDirectory}${scopedPath}` };
+    });
+    const svgPath = artifact.previewSvg?.content?.trim() ? buildDiagramSvgCompanionPath(outputPath) : undefined;
+    const wrapperPath = svgPath || companions.length > 0 ? buildDiagramObsidianPreviewWrapperPath(outputPath) : undefined;
+    const outputPaths = [outputPath, ...(svgPath ? [svgPath] : []), ...(wrapperPath ? [wrapperPath] : []), ...companions.map(file => file.path)];
+    const normalizedPaths = outputPaths.map(path => normalizeDiagramCompanionRelativePath(path));
+    const pathKeys = normalizedPaths.map(path => path.toLowerCase());
+    if (new Set(pathKeys).size !== pathKeys.length) {
+        throw new Error('Diagram companion path collides with another artifact.');
     }
-
-    const resolveCompanionPath = (relativePath: string): string => {
-        const normalized = normalizeDiagramCompanionRelativePath(relativePath);
-        const scopedRelativePath = companionPathMap.get(normalized);
-        if (!scopedRelativePath) {
-            throw new Error(`Diagram companion path was not registered: "${relativePath}".`);
+    for (const companion of companions) {
+        if (!(typeof companion.content === 'string' && !companion.binary) && !(companion.content instanceof ArrayBuffer)) {
+            throw new Error(`Diagram companion "${companion.path}" has an unsupported content representation.`);
         }
-        return `${companionDirectory}${scopedRelativePath}`;
-    };
+    }
 
     let finalContent = artifact.content;
     if (artifact.target === 'mermaid') {
-        finalContent = ensureTrailingNewlines(artifact.content);
+        finalContent = ensureTrailingNewlines(finalContent);
     } else if (artifact.target === 'vega-lite') {
-        // Wrap Vega-Lite JSON in a readable markdown file.
-        const vlTitle = artifact.sourceIntent || 'Data Chart';
-        finalContent = `# ${vlTitle}\n\n> Preview this chart using the "Preview diagram" command in Notemd.\n\n\`\`\`vega-lite\n${artifact.content}\n\`\`\`\n`;
-    }
-    if (artifact.target === 'drawnix') {
+        finalContent = `# ${artifact.sourceIntent || 'Data Chart'}\n\n> Preview this chart using the "Preview diagram" command in Notemd.\n\n\`\`\`vega-lite\n${finalContent}\n\`\`\`\n`;
+    } else if (artifact.target === 'drawnix') {
         finalContent = rewriteDrawnixArtifactCompanionPaths(finalContent, companionPathMap);
     }
-    const staleInlineDrawnixCompanionScope = artifact.target === 'drawnix'
-        && (artifact.companions?.length ?? 0) === 0
-        && hasInlineDrawnixMermaidVisuals(finalContent)
-        ? `${outputPath}.assets`
-        : undefined;
-
-    const companionPaths: string[] = [];
-    const writtenCompanionPaths = new Set<string>();
-    try {
-        if (companionScopeFolder) {
-            const existingCompanionScope = app.vault.getAbstractFileByPath(companionScopeFolder);
-            if (!existingCompanionScope) {
-                await app.vault.createFolder(companionScopeFolder);
-                createdPaths.push(companionScopeFolder);
-                progressReporter.log(`Created diagram companion folder: ${companionScopeFolder}`);
-            } else if (!(existingCompanionScope instanceof TFolder)) {
-                throw new Error(`Diagram companion path '${companionScopeFolder}' exists but is not a folder.`);
-            }
+    const staleCompanionScope = artifact.target === 'drawnix' && companions.length === 0 && hasInlineDrawnixMermaidVisuals(finalContent)
+        ? `${outputPath}.assets` : undefined;
+    const resources = [...pathKeys, ...[companionScopeFolder, staleCompanionScope].filter((path): path is string => !!path).map(path => `${path.toLowerCase()}/`)];
+    let tails = diagramArtifactWriteTails.get(app.vault);
+    if (!tails) {
+        tails = new Map();
+        diagramArtifactWriteTails.set(app.vault, tails);
+    }
+    const predecessors = new Set<Promise<void>>();
+    for (const [existingPath, completion] of tails) {
+        if (resources.some(path => path === existingPath
+            || (path.endsWith('/') && existingPath.startsWith(path))
+            || (existingPath.endsWith('/') && path.startsWith(existingPath)))) {
+            predecessors.add(completion);
         }
+    }
+    let release!: () => void;
+    const completion = new Promise<void>(resolve => { release = resolve; });
+    // Reserve the complete set synchronously: dependencies only point to earlier saves.
+    resources.forEach(path => tails.set(path, completion));
+    await Promise.all(predecessors);
 
-        if (artifact.previewSvg?.content?.trim()) {
-            const svgPath = buildDiagramSvgCompanionPath(outputPath);
-            await writeTextArtifact(svgPath, artifact.previewSvg.content, 'diagram SVG preview file');
-            companionPaths.push(svgPath);
-            writtenCompanionPaths.add(svgPath);
-            progressReporter.log(`Saved diagram SVG companion for Obsidian preview: ${svgPath}`);
-        }
-
-        for (const companion of artifact.companions ?? []) {
-            const companionPath = resolveCompanionPath(companion.path);
-            if (companionPath === outputPath || writtenCompanionPaths.has(companionPath)) {
-                throw new Error(`Diagram companion path collides with another artifact: "${companion.path}".`);
-            }
-            if (typeof companion.content === 'string' && !companion.binary) {
-                const content = companion.mimeType === 'application/json'
-                    ? rewriteSourceVisualManifestCompanionPaths(companion.content, companionPathMap)
-                    : companion.content;
-                await writeTextArtifact(companionPath, content, 'diagram source visual companion');
-            } else if (companion.content instanceof ArrayBuffer) {
-                await writeBinaryArtifact(companionPath, companion.content, 'diagram source visual companion');
+    const attemptedCreationPaths: string[] = [];
+    const textSnapshots = new Map<string, { file: TFile; before: string; written: string }>();
+    const binarySnapshots = new Map<string, { file: TFile; before: ArrayBuffer }>();
+    const atomicTextUpdate: App['vault']['process'] | undefined = typeof app.vault.process === 'function'
+        ? app.vault.process.bind(app.vault) : undefined;
+    const writeTextArtifact = async (path: string, content: string, label: string): Promise<void> => {
+        if (progressReporter.cancelled) throw new Error('Diagram save cancelled by user.');
+        const existing = app.vault.getAbstractFileByPath(path);
+        if (existing instanceof TFile) {
+            const captureTextReplacement = (current: string): string => {
+                if (progressReporter.cancelled) throw new Error('Diagram save cancelled by user.');
+                // TFile identity/path can change while a host read or process call waits.
+                if (existing.path !== path || app.vault.getAbstractFileByPath(path) !== existing) {
+                    throw new Error('Diagram output file was replaced or moved.');
+                }
+                textSnapshots.set(path, { file: existing, before: current, written: content });
+                return content;
+            };
+            if (atomicTextUpdate) {
+                await atomicTextUpdate(existing, captureTextReplacement);
             } else {
-                throw new Error(`Diagram companion "${companion.path}" has an unsupported content representation.`);
+                await app.vault.modify(existing, captureTextReplacement(await app.vault.read(existing)));
             }
-            companionPaths.push(companionPath);
-            writtenCompanionPaths.add(companionPath);
+            progressReporter.log(`Overwrote existing ${label}: ${path}`);
+        } else {
+            attemptedCreationPaths.push(path);
+            await app.vault.create(path, content);
+            progressReporter.log(`Created ${label}: ${path}`);
         }
+    };
+    const writeBinaryArtifact = async (path: string, content: ArrayBuffer): Promise<void> => {
+        if (progressReporter.cancelled) throw new Error('Diagram save cancelled by user.');
+        const existing = app.vault.getAbstractFileByPath(path);
+        if (existing instanceof TFile) {
+            const before = (await app.vault.readBinary(existing)).slice(0);
+            if (progressReporter.cancelled) throw new Error('Diagram save cancelled by user.');
+            if (existing.path !== path || app.vault.getAbstractFileByPath(path) !== existing) {
+                throw new Error('Diagram output file was replaced or moved.');
+            }
+            binarySnapshots.set(path, { file: existing, before });
+            await app.vault.modifyBinary(existing, content);
+        } else {
+            attemptedCreationPaths.push(path);
+            await app.vault.createBinary(path, content);
+        }
+    };
 
+    try {
+        if (progressReporter.cancelled) throw new Error('Diagram save cancelled by user.');
+        const directories = new Set<string>();
+        for (const path of normalizedPaths) {
+            const segments = path.split('/');
+            for (let index = 1; index < segments.length; index++) directories.add(segments.slice(0, index).join('/'));
+            const existing = app.vault.getAbstractFileByPath(path);
+            if (existing && !(existing instanceof TFile)) throw new Error(`Diagram output path '${path}' is not a file.`);
+        }
+        for (const directory of directories) {
+            const existing = app.vault.getAbstractFileByPath(directory);
+            if (existing && !(existing instanceof TFolder)) throw new Error(`Diagram output path '${directory}' exists but is not a folder.`);
+        }
+        for (const directory of directories) {
+            if (app.vault.getAbstractFileByPath(directory)) continue;
+            if (progressReporter.cancelled) throw new Error('Diagram save cancelled by user.');
+            try {
+                await app.vault.createFolder(directory);
+            } catch (error) {
+                // Independent artifacts can discover the same missing parent concurrently.
+                if (!(app.vault.getAbstractFileByPath(directory) instanceof TFolder)) throw error;
+            }
+        }
+        progressReporter.log(`Saving diagram artifact to: ${outputPath}`);
+        if (svgPath && artifact.previewSvg) await writeTextArtifact(svgPath, artifact.previewSvg.content, 'diagram SVG preview file');
+        for (const companion of companions) {
+            if (typeof companion.content === 'string') {
+                const content = companion.mimeType === 'application/json'
+                    ? rewriteSourceVisualManifestCompanionPaths(companion.content, companionPathMap) : companion.content;
+                await writeTextArtifact(companion.path, content, 'diagram source visual companion');
+            } else {
+                await writeBinaryArtifact(companion.path, companion.content);
+            }
+        }
         await writeTextArtifact(outputPath, finalContent, 'diagram artifact file');
-
-        let savedPath = outputPath;
-        if (artifact.previewSvg?.content?.trim() || companionPaths.length > 0) {
-            const wrapperPath = buildDiagramObsidianPreviewWrapperPath(outputPath);
-            const svgPath = artifact.previewSvg?.content?.trim()
-                ? buildDiagramSvgCompanionPath(outputPath)
-                : undefined;
-            await writeTextArtifact(
-                wrapperPath,
-                buildDiagramObsidianPreviewWrapperContent({
-                    title: `${originalFile.basename} diagram preview`,
-                    sourceArtifactPath: outputPath,
-                    svgArtifactPath: svgPath,
-                    companionArtifactPaths: companionPaths.filter(path => path !== svgPath),
-                    target: artifact.target
-                }),
-                'diagram Obsidian preview wrapper'
-            );
-            savedPath = wrapperPath;
+        if (wrapperPath) {
+            await writeTextArtifact(wrapperPath, buildDiagramObsidianPreviewWrapperContent({
+                title: `${originalFile.basename} diagram preview`, sourceArtifactPath: outputPath,
+                svgArtifactPath: svgPath, companionArtifactPaths: companions.map(file => file.path), target: artifact.target
+            }), 'diagram Obsidian preview wrapper');
         }
-
-        if (staleInlineDrawnixCompanionScope) {
-            await removeStaleInlineDrawnixCompanionScope(app, staleInlineDrawnixCompanionScope, progressReporter);
+        if (staleCompanionScope && app.vault.getAbstractFileByPath(staleCompanionScope) instanceof TFolder) {
+            // Generated names and manifests do not establish ownership after editor/sync writes.
+            progressReporter.log(`Retained unused Drawnix companion folder for manual inspection: ${staleCompanionScope}`);
         }
-        return savedPath;
+        return wrapperPath ?? outputPath;
     } catch (error: unknown) {
-        for (const snapshot of Array.from(modifiedSnapshots.values()).reverse()) {
+        const recovery: DiagramArtifactRecovery[] = [];
+        for (const [path, snapshot] of [...textSnapshots].reverse()) {
             try {
-                if (snapshot.binary) {
-                    await app.vault.modifyBinary(snapshot.file, snapshot.content as ArrayBuffer);
-                } else {
-                    await app.vault.modify(snapshot.file, snapshot.content as string);
+                if (!atomicTextUpdate) throw new Error('This host has no atomic text restoration API.');
+                await atomicTextUpdate(snapshot.file, current => {
+                    if (app.vault.getAbstractFileByPath(path) !== snapshot.file || snapshot.file.path !== path) {
+                        throw new Error('The saved file was replaced or moved.');
+                    }
+                    if (current === snapshot.before) return current;
+                    if (current !== snapshot.written) throw new Error('Contents changed after this save; the current edit was preserved.');
+                    return snapshot.before;
+                });
+            } catch (restoreError) {
+                const entry: DiagramArtifactRecovery = { path, reason: restoreError instanceof Error ? restoreError.message : String(restoreError) };
+                try {
+                    const recoveryPath = nextDiagramRecoveryPath(path);
+                    entry.recoveryPath = recoveryPath;
+                    await app.vault.create(recoveryPath, snapshot.before);
+                } catch (copyError) {
+                    entry.recoveryError = copyError instanceof Error ? copyError.message : String(copyError);
                 }
-            } catch {
+                recovery.push(entry);
             }
         }
-        for (const path of [...createdPaths].reverse()) {
+        for (const [path, snapshot] of binarySnapshots) {
+            const entry: DiagramArtifactRecovery = { path, reason: 'Atomic binary restoration is unavailable; the current file was retained.' };
             try {
-                const createdFile = app.vault.getAbstractFileByPath(path);
-                if (createdFile && typeof app.vault.delete === 'function') {
-                    await app.vault.delete(createdFile);
-                }
-            } catch {
-                // Preserve the original save error; cleanup is best effort.
+                const recoveryPath = nextDiagramRecoveryPath(path);
+                entry.recoveryPath = recoveryPath;
+                await app.vault.createBinary(recoveryPath, snapshot.before);
+            } catch (copyError) {
+                entry.recoveryError = copyError instanceof Error ? copyError.message : String(copyError);
             }
+            recovery.push(entry);
         }
-        throw error;
+        // Vault exposes no compare-and-delete primitive. Retain partial creations
+        // instead of risking deletion of edits made after our successful create.
+        attemptedCreationPaths.forEach(path => recovery.push({ path, reason: 'Possible partial output retained; inspect before removing it.' }));
+        const failure = new DiagramArtifactSaveError(error, recovery);
+        progressReporter.log(failure.message);
+        throw failure;
+    } finally {
+        release();
+        resources.forEach(path => { if (tails.get(path) === completion) tails.delete(path); });
     }
 }
 
