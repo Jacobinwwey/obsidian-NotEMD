@@ -1,0 +1,329 @@
+{
+  "schemaVersion": 1,
+  "recordedDate": "2026-09-13",
+  "workflow": ".github/workflows/verify-plugin.yml",
+  "positive": {
+    "runId": 34716224065,
+    "event": "pull_request",
+    "headSha": "805bda2269b13d09ae29af19c6e5635c5d2e2dee",
+    "conclusion": "success",
+    "url": "https://github.com/Jacobinwwey/obsidian-NotEMD/actions/runs/34716224065",
+    "jobs": [
+      {
+        "name": "Plugin / ubuntu-latest / Node 20",
+        "url": "https://github.com/Jacobinwwey/obsidian-NotEMD/actions/runs/34716224065/job/103613834864",
+        "conclusion": "success",
+        "steps": [
+          {
+            "name": "Run actions/checkout@v6",
+            "conclusion": "success"
+          },
+          {
+            "name": "Run actions/setup-node@v6",
+            "conclusion": "success"
+          },
+          {
+            "name": "Install locked dependencies",
+            "conclusion": "success"
+          },
+          {
+            "name": "Install pinned Chromium",
+            "conclusion": "success"
+          },
+          {
+            "name": "Install the exporter Chromium revision",
+            "conclusion": "success"
+          },
+          {
+            "name": "Typecheck and build",
+            "conclusion": "success"
+          },
+          {
+            "name": "Test plugin",
+            "conclusion": "success"
+          },
+          {
+            "name": "Audit UI strings",
+            "conclusion": "success"
+          },
+          {
+            "name": "Audit render-host packaging",
+            "conclusion": "success"
+          },
+          {
+            "name": "Reject new lint debt",
+            "conclusion": "success"
+          },
+          {
+            "name": "Check patch whitespace",
+            "conclusion": "success"
+          },
+          {
+            "name": "Retain verification evidence",
+            "conclusion": "success"
+          }
+        ],
+        "tests": {
+          "suitesPassed": 282,
+          "passed": 2590,
+          "failed": 0,
+          "skipped": 0,
+          "failures": []
+        },
+        "lint": {
+          "checkedFiles": 25,
+          "regressions": 0,
+          "baseline": "7638ceceb95011c08f9c91a2f65825c75e80e573"
+        }
+      },
+      {
+        "name": "Plugin / windows-latest / Node 20",
+        "url": "https://github.com/Jacobinwwey/obsidian-NotEMD/actions/runs/34716224065/job/103613834970",
+        "conclusion": "success",
+        "steps": [
+          {
+            "name": "Run actions/checkout@v6",
+            "conclusion": "success"
+          },
+          {
+            "name": "Run actions/setup-node@v6",
+            "conclusion": "success"
+          },
+          {
+            "name": "Install locked dependencies",
+            "conclusion": "success"
+          },
+          {
+            "name": "Install pinned Chromium",
+            "conclusion": "success"
+          },
+          {
+            "name": "Install the exporter Chromium revision",
+            "conclusion": "success"
+          },
+          {
+            "name": "Typecheck and build",
+            "conclusion": "success"
+          },
+          {
+            "name": "Test plugin",
+            "conclusion": "success"
+          },
+          {
+            "name": "Audit UI strings",
+            "conclusion": "success"
+          },
+          {
+            "name": "Audit render-host packaging",
+            "conclusion": "success"
+          },
+          {
+            "name": "Reject new lint debt",
+            "conclusion": "success"
+          },
+          {
+            "name": "Check patch whitespace",
+            "conclusion": "success"
+          },
+          {
+            "name": "Retain verification evidence",
+            "conclusion": "success"
+          }
+        ],
+        "tests": {
+          "suitesPassed": 282,
+          "passed": 2589,
+          "failed": 0,
+          "skipped": 1,
+          "failures": []
+        },
+        "lint": {
+          "checkedFiles": 25,
+          "regressions": 0,
+          "baseline": "7638ceceb95011c08f9c91a2f65825c75e80e573"
+        }
+      }
+    ]
+  },
+  "negative": {
+    "runId": 34716310309,
+    "event": "pull_request",
+    "headSha": "4d472ca30b2b4be21e8fa2dc6b80831bebd685d9",
+    "conclusion": "failure",
+    "url": "https://github.com/Jacobinwwey/obsidian-NotEMD/actions/runs/34716310309",
+    "jobs": [
+      {
+        "name": "Plugin / ubuntu-latest / Node 20",
+        "url": "https://github.com/Jacobinwwey/obsidian-NotEMD/actions/runs/34716310309/job/103614074253",
+        "conclusion": "failure",
+        "steps": [
+          {
+            "name": "Run actions/checkout@v6",
+            "conclusion": "success"
+          },
+          {
+            "name": "Run actions/setup-node@v6",
+            "conclusion": "success"
+          },
+          {
+            "name": "Install locked dependencies",
+            "conclusion": "success"
+          },
+          {
+            "name": "Install pinned Chromium",
+            "conclusion": "success"
+          },
+          {
+            "name": "Install the exporter Chromium revision",
+            "conclusion": "success"
+          },
+          {
+            "name": "Typecheck and build",
+            "conclusion": "success"
+          },
+          {
+            "name": "Test plugin",
+            "conclusion": "failure"
+          },
+          {
+            "name": "Audit UI strings",
+            "conclusion": "skipped"
+          },
+          {
+            "name": "Audit render-host packaging",
+            "conclusion": "skipped"
+          },
+          {
+            "name": "Reject new lint debt",
+            "conclusion": "skipped"
+          },
+          {
+            "name": "Check patch whitespace",
+            "conclusion": "skipped"
+          },
+          {
+            "name": "Retain verification evidence",
+            "conclusion": "success"
+          }
+        ],
+        "tests": {
+          "suitesPassed": 282,
+          "passed": 2590,
+          "failed": 1,
+          "skipped": 0,
+          "failures": [
+            "intentionally rejects the isolated CI negative acceptance branch"
+          ]
+        }
+      },
+      {
+        "name": "Plugin / windows-latest / Node 20",
+        "url": "https://github.com/Jacobinwwey/obsidian-NotEMD/actions/runs/34716310309/job/103614074291",
+        "conclusion": "failure",
+        "steps": [
+          {
+            "name": "Run actions/checkout@v6",
+            "conclusion": "success"
+          },
+          {
+            "name": "Run actions/setup-node@v6",
+            "conclusion": "success"
+          },
+          {
+            "name": "Install locked dependencies",
+            "conclusion": "success"
+          },
+          {
+            "name": "Install pinned Chromium",
+            "conclusion": "success"
+          },
+          {
+            "name": "Install the exporter Chromium revision",
+            "conclusion": "success"
+          },
+          {
+            "name": "Typecheck and build",
+            "conclusion": "success"
+          },
+          {
+            "name": "Test plugin",
+            "conclusion": "failure"
+          },
+          {
+            "name": "Audit UI strings",
+            "conclusion": "skipped"
+          },
+          {
+            "name": "Audit render-host packaging",
+            "conclusion": "skipped"
+          },
+          {
+            "name": "Reject new lint debt",
+            "conclusion": "skipped"
+          },
+          {
+            "name": "Check patch whitespace",
+            "conclusion": "skipped"
+          },
+          {
+            "name": "Retain verification evidence",
+            "conclusion": "success"
+          }
+        ],
+        "tests": {
+          "suitesPassed": 282,
+          "passed": 2589,
+          "failed": 1,
+          "skipped": 1,
+          "failures": [
+            "intentionally rejects the isolated CI negative acceptance branch"
+          ]
+        }
+      }
+    ],
+    "pullRequest": {
+      "headRefOid": "4d472ca30b2b4be21e8fa2dc6b80831bebd685d9",
+      "mergedAt": null,
+      "state": "CLOSED",
+      "url": "https://github.com/Jacobinwwey/obsidian-NotEMD/pull/13"
+    },
+    "source": "test('intentionally rejects the isolated CI negative acceptance branch', () => { expect('deliberate negative fixture').toBe('this branch must never merge'); });"
+  },
+  "isolatedLocalRejections": {
+    "compiler": {
+      "exitCode": 1,
+      "diagnostic": "TS2322: Type 'string' is not assignable to type 'number'.",
+      "probe": "export const ciCompilerProbe: number = 'intentional compiler rejection';"
+    },
+    "lint": {
+      "exitCode": 1,
+      "regressions": 1,
+      "diagnostics": [
+        {
+          "ruleId": "no-debugger",
+          "severity": 2,
+          "message": "Unexpected 'debugger' statement.",
+          "line": 2,
+          "column": 5,
+          "nodeType": "DebuggerStatement",
+          "messageId": "unexpected",
+          "endLine": 2,
+          "endColumn": 14
+        }
+      ]
+    },
+    "jest": {
+      "exitCode": 1,
+      "failed": 1,
+      "scope": "Only the isolated negative fixture; remote runs use the full unchanged workflow."
+    }
+  },
+  "initialFailure": {
+    "runId": 34715344072,
+    "url": "https://github.com/Jacobinwwey/obsidian-NotEMD/actions/runs/34715344072",
+    "cause": "A newly tracked Office fixture lacked its Chinese pair. Local documentation discovery previously omitted untracked files.",
+    "resolution": "Added the Chinese fixture and included non-ignored untracked repository documents in bilingual checks; the positive run above validates the corrected tree."
+  },
+  "branchProtectionChanged": false,
+  "releaseCreated": false
+}

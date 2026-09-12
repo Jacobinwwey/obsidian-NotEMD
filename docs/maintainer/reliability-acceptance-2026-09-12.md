@@ -17,7 +17,7 @@ The [implementation plan](../plans/2026-09-12-mainline-reliability-and-evidence.
 |---|---|---|
 | U1 | Scheduler settlement, live child cancellation, effective signals through five transports and retries; completed writes retain their count | Real Obsidian cancellation passed; non-abortable `requestUrl` still cannot stop server-side work |
 | U2 | Complete output reservation, per-Vault overlap serialization, atomic text compensation, recovery copies and explicit failures | No cross-process/crash transaction promise; retain creations/binaries when ownership cannot be proved |
-| U3 | Linux/Windows Node 20 verification and diagnostic-level lint ratchet | Local gates passed; remote positive/negative execution is recorded at integration |
+| U3 | Linux/Windows Node 20 verification and diagnostic-level lint ratchet | Normal PR passed; isolated negative PR failed only the intended assertion on both platforms and was closed unmerged |
 | U4 | PNG hashes, canonical SVG text comparison, structural docs tests | Archive integrity is separate from pixel equivalence and consumer acceptance |
 | U5 | Named host timing, repeated preview/GC control, desktop/mobile-emulation checks | Keep inline; physical mobile and Obsidian 0.15.0 remain unverified |
 | U6 | Drawnix and diagrams.net edit/save/reopen; six compiler fixtures plus five orientation variants | Drawnix node roundtrip passed, attached cross-branch arrows failed; its runtime now reports that limitation |
@@ -59,7 +59,9 @@ git diff --check
 
 Use `rtk proxy npm.cmd` / `rtk proxy git` on this Windows workstation. The fresh-install CI gate is the cross-platform verification source, not local Node 22 alone.
 
-VitePress 1.6.4 and the 34-locale Docusaurus website build/audit passed. The 28 changed paired Markdown documents have valid local links and matching plan/finding IDs; the register covers all 19 historical formal plans and 32 brainstorm records. Native evidence downloads are published at their relative URLs with byte equality checked; scoped Git attributes preserve archived bytes across Windows/POSIX checkouts.
+VitePress 1.6.4 and the 34-locale Docusaurus website build/audit passed. Paired Markdown documents have valid local links and matching plan/finding IDs; the register covers all 19 historical formal plans and 32 brainstorm records. Native evidence downloads are published at their relative URLs with byte equality checked; scoped Git attributes preserve archived bytes across Windows/POSIX checkouts.
+
+The [positive PR run](https://github.com/Jacobinwwey/obsidian-NotEMD/actions/runs/34716224065) verified `805bda2` with **282 suites / 2590 tests on Linux**, and **282 suites / 2589 tests plus one POSIX skip on Windows**; build, audits, lint and diff hygiene all passed. The [negative PR run](https://github.com/Jacobinwwey/obsidian-NotEMD/actions/runs/34716310309) rejected only the deliberate `ciGateNegative` assertion on each platform. [PR 13](https://github.com/Jacobinwwey/obsidian-NotEMD/pull/13) is closed and unmerged; its remote branch was removed. Independent local compiler and lint probes rejected TS2322 and `no-debugger` respectively. The [machine receipt](./evidence/2026-09-12/ci-verification.json) retains revision/job URLs and counts, including the first CI-discovered bilingual-fixture gap and its correction. No gate was weakened to obtain acceptance.
 
 ## Host Cost And Packaging Decision
 

@@ -2,7 +2,7 @@
 date: 2026-09-12
 last_updated: 2026-09-13
 type: fix
-status: active
+status: complete
 origin: docs/maintainer/project-plan-status.zh-CN.md
 audit_commit: 7638cec
 ---
@@ -19,7 +19,7 @@ audit_commit: 7638cec
 |---|---|---|
 | U1 | 已实现并验证 | 红／绿回归、真实 HTTP／fetch 中断、Obsidian 1.13.7 取消实测；保留调用方 signal 所有权。 |
 | U2 | 已实现并验证 | 重叠输出预留、受控文本补偿、恢复副本；真实 Vault 冲突／重试通过。 |
-| U3 | 已实现；远端验收中 | Linux／Windows Node 20 工作流、按诊断比较的 lint 约束通过本地检查；正／负 PR 运行是最后的集成门禁。 |
+| U3 | 已完成 | Linux／Windows Node 20 PR 检查通过；隔离 PR 在两端都只失败于故意加入的 Jest 断言，已关闭且未合入。Compiler／lint 负例也拒绝了注入错误。[CI 验收记录](../maintainer/evidence/2026-09-12/ci-verification.json)。 |
 | U4 | 已完成 | 已提交 PNG 哈希、规范化 SVG 比较、面向契约的文档断言。 |
 | U5 | 调查关闭：保持内联 | 激活 p95 289.3 ms、密集 Mermaid p95 120 ms、预热预览堆占用稳定；物理移动设备与 Obsidian 0.15.0 仍未验证。 |
 | U6 | 评估完成；逐 target 限定声明 | diagrams.net 编辑／保存／重开通过；6 个 Tectonic 模板及 5 个方向变体完成编译与视觉复核。Drawnix 原生节点往返通过，跨枝连线附着失败并明确不支持。 |
@@ -66,7 +66,7 @@ flowchart TB
 
 - [x] 实现并验证 Q1，关闭 R1、R2、R3。
 
-**责任方与文件：** `src/utils.ts#createConcurrentProcessor`、`src/fileUtils.ts#batchGenerateContentForTitles`、`src/llmUtils.ts#getAbortSignal` 及各 provider executor。仅当生命周期契约跨越边界时检查 `src/types.ts`、`src/ui/ProgressModal.ts`、operation／host caller。回归文件：`src/tests/parallelBatch.test.ts`、`src/tests/llmUtilsProviderSupport.test.ts`；新增聚焦排程终态的 `src/tests/concurrentProcessorCancellation.test.ts`。
+**责任方与文件：** `src/utils.ts#createConcurrentProcessor`、`src/fileUtils.ts#batchGenerateContentForTitles`、`src/llmUtils.ts#callApiWithRetry` 及各 provider executor。仅当生命周期契约跨越边界时检查 `src/types.ts`、`src/ui/ProgressModal.ts`、operation／host caller。回归文件：`src/tests/parallelBatch.test.ts`、`src/tests/llmUtilsProviderSupport.test.ts`；新增聚焦排程终态的 `src/tests/concurrentProcessorCancellation.test.ts`。
 
 **方案：** operation 拥有取消，scheduler 拥有结束责任，各 transport 拥有物理中断能力。子任务读取实时状态、消费 operation signal，不能用请求局部状态替换父 controller。向下传递已有边界生成的实际生效 signal。即使第一个 worker 尚未启动，排队／错峰 callback 在取消后也必须只结束一次。保留已完成结果，观察到取消后禁止启动额外变更。
 
@@ -104,7 +104,7 @@ flowchart TB
 
 ## U3 — 合并前验证插件变更
 
-- [ ] 实现并验证 Q3，关闭 R5，并开始控制新增 lint 债务。
+- [x] 实现并验证 Q3，关闭 R5，并开始控制新增 lint 债务。
 
 **责任方与文件：** 新增 `.github/workflows/verify-plugin.yml`；既有发布工作流继续限于 tag。使用 `package-lock.json` 和仓库脚本。小型 lint 比较脚本放入 `scripts/`，以 `src/tests/lintBaselineRatchet.test.ts` 验证比较行为。按需检查 `src/tests/toolingIsolationConfig.test.ts`、`.eslintrc`、`.eslintignore`。
 

@@ -2,7 +2,7 @@
 date: 2026-09-12
 last_updated: 2026-09-13
 type: fix
-status: active
+status: complete
 origin: docs/maintainer/project-plan-status.md
 audit_commit: 7638cec
 ---
@@ -19,7 +19,7 @@ This plan follows the [September 12 assessment](../maintainer/project-plan-statu
 |---|---|---|
 | U1 | Implemented and verified | Red/green regressions, real HTTP/fetch abort and Obsidian 1.13.7 cancellation; caller-owned signals preserved. |
 | U2 | Implemented and verified | Overlapping output reservations, guarded text compensation and recovery copies; real Vault conflict/retry verified. |
-| U3 | Implemented; remote acceptance in progress | Linux/Windows Node 20 workflow and diagnostic-level lint ratchet pass local checks; positive/negative PR runs are the final integration gate. |
+| U3 | Complete | Linux/Windows Node 20 PR checks passed; an isolated PR failed only its deliberate Jest assertion on both platforms and was closed unmerged. Compiler/lint negative probes also rejected their injected errors. [CI receipt](../maintainer/evidence/2026-09-12/ci-verification.json). |
 | U4 | Complete | Committed PNG hashes, normalized SVG comparison and contract-focused docs assertions. |
 | U5 | Investigation closed: keep inline | Activation p95 289.3 ms, dense Mermaid p95 120 ms, stable warmed preview heap. Physical mobile and Obsidian 0.15.0 remain unverified. |
 | U6 | Evaluation complete; claims qualified by target | diagrams.net edit/save/reopen passed; six Tectonic templates plus five orientation variants compiled and visually reviewed. Drawnix native nodes roundtrip; attached cross-links fail and are explicitly unsupported. |
@@ -66,7 +66,7 @@ Planning estimate for one engineer familiar with the repository: U1 **2–3**, U
 
 - [x] Implement and verify Q1; closes R1, R2 and R3.
 
-**Owner and files:** `src/utils.ts#createConcurrentProcessor`, `src/fileUtils.ts#batchGenerateContentForTitles`, `src/llmUtils.ts#getAbortSignal` and provider executors. Check `src/types.ts`, `src/ui/ProgressModal.ts` and the operation/host caller only where the lifetime contract crosses them. Regression files: `src/tests/parallelBatch.test.ts`, `src/tests/llmUtilsProviderSupport.test.ts`; create a focused `src/tests/concurrentProcessorCancellation.test.ts` for scheduler terminal-state coverage.
+**Owner and files:** `src/utils.ts#createConcurrentProcessor`, `src/fileUtils.ts#batchGenerateContentForTitles`, `src/llmUtils.ts#callApiWithRetry` and provider executors. Check `src/types.ts`, `src/ui/ProgressModal.ts` and the operation/host caller only where the lifetime contract crosses them. Regression files: `src/tests/parallelBatch.test.ts`, `src/tests/llmUtilsProviderSupport.test.ts`; create a focused `src/tests/concurrentProcessorCancellation.test.ts` for scheduler terminal-state coverage.
 
 **Approach:** the operation owns cancellation, the scheduler owns settlement, and each transport owns its physical abort capability. Children read live state and consume the operation signal; they must not replace the parent's controller with request-local state. Forward the effective signal produced by the existing boundary. Ensure queued/staggered callbacks settle exactly once even when cancellation occurs before any worker starts. Preserve completed results and prohibit additional mutation starts after cancellation is observed.
 
@@ -104,7 +104,7 @@ A separate read-then-`modify` comparison is not an atomic compare-and-swap again
 
 ## U3 — Verify Plugin Changes Before Merge
 
-- [ ] Implement and verify Q3; closes R5 and starts lint debt containment.
+- [x] Implement and verify Q3; closes R5 and starts lint debt containment.
 
 **Owner and files:** new `.github/workflows/verify-plugin.yml`; existing release workflow stays tag-scoped. Use `package-lock.json` and repository scripts. A small lint comparison script belongs under `scripts/`; add `src/tests/lintBaselineRatchet.test.ts` for its comparison behavior. Review `src/tests/toolingIsolationConfig.test.ts`, `.eslintrc` and `.eslintignore` only as needed.
 

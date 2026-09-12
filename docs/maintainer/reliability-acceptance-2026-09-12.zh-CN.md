@@ -17,7 +17,7 @@ Language: [English](./reliability-acceptance-2026-09-12.md) | **简体中文**
 |---|---|---|
 | U1 | 调度器收敛、子任务实时取消、五种传输与重试使用有效信号；保留已完成写入的计数 | 真实 Obsidian 取消通过；不可物理中止的 `requestUrl` 仍不能停止服务端工作 |
 | U2 | 完整输出集合预留、Vault 内重叠写入串行化、原子文本补偿、恢复副本与显式失败 | 不承诺跨进程或崩溃事务；无法证明归属时保留新建文件和二进制输出 |
-| U3 | Linux/Windows Node 20 验证及逐条诊断的 lint 门禁 | 本地门禁通过；远端正反例执行在集成时补录 |
+| U3 | Linux/Windows Node 20 验证及逐条诊断的 lint 门禁 | 正常 PR 通过；隔离负例 PR 在两端都只失败于预期断言，已关闭且未合入 |
 | U4 | PNG 哈希、规范化 SVG 文本比较、结构性文档测试 | 归档完整性、像素一致性和消费端验收分别记录 |
 | U5 | 明确宿主的耗时、预览循环/GC 对照、桌面与移动模拟 | 保留内联打包；物理移动设备及 Obsidian 0.15.0 未验证 |
 | U6 | Drawnix、diagrams.net 编辑保存重开；六个编译样例加五个方向变体 | Drawnix 节点往返通过，跨分支箭头附着失败；运行时已提示限制 |
@@ -59,7 +59,9 @@ git diff --check
 
 本 Windows 工作站使用 `rtk proxy npm.cmd` / `rtk proxy git`。跨平台判断依赖全新安装的 CI，不能由本地 Node 22 的结果代替。
 
-VitePress 1.6.4 与 34 locale 的 Docusaurus 网站构建／审计通过。28 份变更的配对 Markdown 本地链接有效、计划／缺陷 ID 一致；登记表覆盖全部 19 份历史正式计划和 32 份 brainstorming 记录。原生证据下载按相对 URL 发布，并验证字节一致；限定目录的 Git 属性防止 Windows／POSIX checkout 改写归档字节。
+VitePress 1.6.4 与 34 locale 的 Docusaurus 网站构建／审计通过。配对 Markdown 本地链接有效、计划／缺陷 ID 一致；登记表覆盖全部 19 份历史正式计划和 32 份 brainstorming 记录。原生证据下载按相对 URL 发布，并验证字节一致；限定目录的 Git 属性防止 Windows／POSIX checkout 改写归档字节。
+
+[正常 PR 运行](https://github.com/Jacobinwwey/obsidian-NotEMD/actions/runs/34716224065)验证 `805bda2`：**Linux 282 个 suite／2590 项通过**，**Windows 282 个 suite／2589 项通过、1 项 POSIX 跳过**，构建、审计、lint、diff 检查全部通过。[负例 PR 运行](https://github.com/Jacobinwwey/obsidian-NotEMD/actions/runs/34716310309)在每个平台都只拒绝故意加入的 `ciGateNegative` 断言。[PR 13](https://github.com/Jacobinwwey/obsidian-NotEMD/pull/13)已关闭、未合入，远端分支已删除。独立本地 compiler／lint 探针分别拒绝 TS2322 和 `no-debugger`；[机器记录](./evidence/2026-09-12/ci-verification.json)保留 revision／job 链接、数量，以及首轮 CI 发现的双语 fixture 缺口和修正。验收没有放宽门禁。
 
 ## 宿主成本与打包决策
 
