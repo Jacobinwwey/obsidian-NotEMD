@@ -6,6 +6,7 @@ This directory contains repository-level documentation for maintainers and contr
 
 ## Current Truth And Layout
 
+- [Release 1.9.8, Documentation, And Discoverability Plan (active)](./plans/2026-09-13-001-feat-1-9-8-release-docs-geo-plan.en.md)
 - [Current Main Progress And Forward Plan](./brainstorms/2026-09-02-current-main-progress-and-forward-plan.md)
 - [Project Plan Status And Engineering Assessment](./maintainer/project-plan-status.md)
 - [Mainline Reliability And Evidence Implementation Plan](./plans/2026-09-12-mainline-reliability-and-evidence.en.md)

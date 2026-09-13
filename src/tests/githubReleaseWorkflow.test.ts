@@ -1,391 +1,291 @@
 import * as fs from 'fs';
-import * as os from 'os';
 import * as path from 'path';
 import { execFileSync, spawnSync } from 'child_process';
-const packagingContract = require('../../scripts/lib/packaging-contract.js');
+import { createRequire } from 'module';
+
+const requireScript = createRequire(__filename);
+const contract = requireScript('../../scripts/lib/packaging-contract.js');
+const repoRoot = path.join(__dirname, '..', '..');
+const publisherPath = 'scripts/release/publish-github-release.js';
+const version = '1.9.8';
 
 describe('GitHub release workflow', () => {
-    const repoRoot = path.join(__dirname, '..', '..');
-    const packageJsonPath = path.join(repoRoot, 'package.json');
-    const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
-    const releaseScriptRelativePath = path.posix.join('scripts', 'release', 'publish-github-release.js');
-    const releaseScriptPath = path.join(repoRoot, releaseScriptRelativePath);
-    const validateTagScriptRelativePath = path.posix.join('scripts', 'release', 'validate-release-tag.js');
-    const validateTagScriptPath = path.join(repoRoot, validateTagScriptRelativePath);
-    const releaseWorkflowPath = path.join(repoRoot, '.github', 'workflows', 'release.yml');
-
-    function prependPathEnv(tempRoot: string): NodeJS.ProcessEnv {
-        const nextPath = `${tempRoot}${path.delimiter}${process.env.Path || process.env.PATH || ''}`;
-        return { ...process.env, PATH: nextPath, Path: nextPath };
-    }
-
-    test('exposes a checked-in GitHub release helper and notes for the current version', () => {
-        expect(packageJson.scripts['release:github']).toBe(`node ${releaseScriptRelativePath}`);
-        expect(packageJson.scripts['chronicle:sync-repo-saga']).toBe('node scripts/repo-saga/update-quarterly-saga.mjs --sync-only');
-        expect(packageJson.scripts['chronicle:update']).toBe('node scripts/repo-saga/update-quarterly-saga.mjs');
-        expect(fs.existsSync(releaseScriptPath)).toBe(true);
-
-        const currentReleaseNotesPath = path.join(repoRoot, 'docs', 'releases', `${packageJson.version}.md`);
-        const currentReleaseNotesZhPath = path.join(repoRoot, 'docs', 'releases', `${packageJson.version}.zh-CN.md`);
-        expect(fs.existsSync(currentReleaseNotesPath)).toBe(true);
-        expect(fs.existsSync(currentReleaseNotesZhPath)).toBe(true);
-    });
-
-    test('checks in a GitHub Actions workflow that reuses the release helper for tag and manual publishing', () => {
-        expect(fs.existsSync(releaseWorkflowPath)).toBe(true);
-        expect(fs.existsSync(validateTagScriptPath)).toBe(true);
-
-        const workflow = fs.readFileSync(releaseWorkflowPath, 'utf8');
-
-        expect(workflow).toContain('workflow_dispatch:');
-        expect(workflow).toContain('push:');
-        expect(packagingContract.RELEASE_WORKFLOW_TAG_TRIGGER_GLOB).toBe('*.*.*');
-        expect(packagingContract.RELEASE_WORKFLOW_DISALLOWED_TAG_TRIGGER_GLOBS).toEqual([
-            'v*.*.*',
-            'V*.*.*'
-        ]);
-        expect(workflow).toContain(`- '${packagingContract.RELEASE_WORKFLOW_TAG_TRIGGER_GLOB}'`);
-        for (const disallowedTagTriggerGlob of packagingContract.RELEASE_WORKFLOW_DISALLOWED_TAG_TRIGGER_GLOBS) {
-            expect(workflow).not.toContain(`- '${disallowedTagTriggerGlob}'`);
-            expect(workflow).not.toContain(`- "${disallowedTagTriggerGlob}"`);
+    test('uses the shared numeric tag, four assets and bilingual notes', () => {
+        const publisher = requireScript(path.join(repoRoot, publisherPath));
+        expect(publisher.REQUIRED_RELEASE_ASSETS).toEqual(contract.REQUIRED_RELEASE_ASSET_FILES);
+        expect(publisher.OBSIDIAN_RELEASE_TAG_PATTERN.source).toBe(contract.RELEASE_TAG_PATTERN_SOURCE);
+        const metadata = JSON.parse(fs.readFileSync(path.join(repoRoot, 'package.json'), 'utf8'));
+        expect(metadata.scripts['release:github']).toBe(`node ${publisherPath}`);
+        for (const relative of Object.values(contract.resolveReleaseNotesRelativePaths(metadata.version))) {
+            expect(fs.existsSync(path.join(repoRoot, relative as string))).toBe(true);
         }
-        expect(workflow).toContain('contents: write');
-        expect(workflow).toContain('actions/checkout@v6');
-        expect(workflow).toContain('actions/setup-node@v6');
-        expect(workflow).toContain('npm ci');
-        expect(workflow).toContain('npm run build');
-        expect(workflow).toContain('npm test -- --runInBand');
-        expect(workflow).toContain('npm run audit:i18n-ui');
-        expect(workflow).toContain('npm run audit:render-host');
-        expect(workflow).toContain('npm run release:github -- "$TAG_NAME"');
-        expect(workflow).toContain('node scripts/release/validate-release-tag.js "$TAG_NAME"');
-        expect(workflow).toContain('if [ "${{ github.event_name }}" = "workflow_dispatch" ]');
-        expect(workflow).toContain('inputs.tag');
-        expect(workflow).toContain('refresh_chronicle:');
-        expect(workflow).toContain('needs: publish');
-        expect(packagingContract.RELEASE_WORKFLOW_SOURCE_BRANCH).toBe('main');
-        expect(packagingContract.RELEASE_CHRONICLE_REFRESH_TARGET_BRANCH).toBe('main');
-        expect(workflow).toContain(`NOTEMD_RELEASE_WORKFLOW_SOURCE_BRANCH: ${packagingContract.RELEASE_WORKFLOW_SOURCE_BRANCH}`);
-        expect(workflow).toContain(`NOTEMD_RELEASE_CHRONICLE_TARGET_BRANCH: ${packagingContract.RELEASE_CHRONICLE_REFRESH_TARGET_BRANCH}`);
-        expect(workflow).toContain('ref: ${{ env.NOTEMD_RELEASE_WORKFLOW_SOURCE_BRANCH }}');
-        expect(workflow).toContain('ref: ${{ env.NOTEMD_RELEASE_CHRONICLE_TARGET_BRANCH }}');
-        expect(workflow).toContain('node scripts/repo-saga/update-quarterly-saga.mjs --tag "$TAG_NAME"');
-        expect(workflow).toContain('node scripts/release/commit-chronicle-refresh.js "$TAG_NAME" --target-branch "$NOTEMD_RELEASE_CHRONICLE_TARGET_BRANCH"');
     });
 
-    function writeFakeGh(tempRoot: string, releaseViewExitCode: number) {
-        const scriptPath = path.join(tempRoot, 'gh');
-        const cmdScriptPath = path.join(tempRoot, 'gh.cmd');
-        const argsPath = path.join(tempRoot, 'gh-args.jsonl');
-        const scriptSource = `#!/usr/bin/env node
+    test('serializes same-tag runs and prepares both locked Chromium revisions', () => {
+        const workflow = fs.readFileSync(path.join(repoRoot, '.github/workflows/release.yml'), 'utf8');
+        for (const required of [
+            `- '${contract.RELEASE_WORKFLOW_TAG_TRIGGER_GLOB}'`, 'concurrency:', 'cancel-in-progress: false',
+            'inputs.tag || github.ref_name', 'npx --no-install playwright install --with-deps chromium',
+            'node node_modules/playwright-chromium/cli.js install chromium', 'npm ci',
+            'npm test -- --runInBand', 'npm run audit:i18n-ui', 'npm run audit:render-host',
+            'npm run release:github -- "$TAG_NAME"', 'needs: publish',
+            'NOTEMD_RELEASE_WORKFLOW_SOURCE_BRANCH: main', 'NOTEMD_RELEASE_CHRONICLE_TARGET_BRANCH: main'
+        ]) expect(workflow).toContain(required);
+    });
+
+    test('validates dispatch input as env data before writing GitHub outputs', () => {
+        const workflow = fs.readFileSync(path.join(repoRoot, '.github/workflows/release.yml'), 'utf8');
+        expect(workflow).toContain('REQUESTED_TAG: ${{ inputs.tag || github.ref_name }}');
+        expect(workflow).not.toMatch(/TAG_NAME="\$\{\{\s*inputs\.tag/);
+        const validation = workflow.indexOf('validate-release-tag.js "$REQUESTED_TAG"');
+        expect(validation).toBeGreaterThan(-1);
+        expect(validation).toBeLessThan(workflow.indexOf('tag_name=$REQUESTED_TAG'));
+    });
+});
+
+describe('release publisher process boundary', () => {
+    let fixture: string;
+    let sourceCommit: string;
+    let processEnv: NodeJS.ProcessEnv;
+    const write = (relative: string, content: string) => {
+        const target = path.join(fixture, relative);
+        fs.mkdirSync(path.dirname(target), { recursive: true });
+        fs.writeFileSync(target, content, 'utf8');
+    };
+    const git = (...args: string[]) => execFileSync('git', args, { cwd: fixture, encoding: 'utf8' }).trim();
+    const remote = () => JSON.parse(fs.readFileSync(path.join(fixture, '.cache/remote.json'), 'utf8'));
+    const saveRemote = (state: Record<string, unknown>) => write('.cache/remote.json', JSON.stringify(state));
+    const calls = (): string[][] => {
+        const filename = path.join(fixture, '.cache/gh-calls.jsonl');
+        return fs.existsSync(filename) ? fs.readFileSync(filename, 'utf8').trim().split('\n').filter(Boolean).map(line => JSON.parse(line)) : [];
+    };
+    const run = (...args: string[]) => spawnSync(process.execPath, [path.join(fixture, publisherPath), ...args], {
+        cwd: fixture, encoding: 'utf8', env: processEnv, timeout: 20000
+    });
+    const mutations = () => calls().filter(args => args[0] === 'release' && ['create', 'upload', 'edit'].includes(args[1]));
+
+    beforeEach(() => {
+        const parent = path.join(repoRoot, '.cache/release-tests');
+        fs.mkdirSync(parent, { recursive: true });
+        fixture = fs.mkdtempSync(path.join(parent, 'candidate-'));
+        for (const relative of [publisherPath, 'scripts/release/validate-release-tag.js', 'scripts/lib/packaging-contract.js', 'scripts/lib/cross-platform-command.js']) {
+            write(relative, fs.readFileSync(path.join(repoRoot, relative), 'utf8'));
+        }
+        write('.gitignore', '.cache/\nmain.js\n');
+        write('package.json', JSON.stringify({ version, scripts: { build: 'node fixture-build.cjs' } }));
+        write('package-lock.json', JSON.stringify({ version, packages: { '': { version } } }));
+        write('manifest.json', JSON.stringify({ id: 'notemd', version, minAppVersion: '0.15.0' }));
+        write('versions.json', JSON.stringify({ [version]: '0.15.0' }));
+        write('styles.css', '.notemd {}\n');
+        write('README.md', '# Notemd\n');
+        write(`docs/releases/${version}.md`, `# Notemd v${version}\n\nComplete English release notes.\n`);
+        write(`docs/releases/${version}.zh-CN.md`, `# Notemd v${version}\n\n完整的中文发布说明。\n`);
+        write('main.js', 'stale build\n');
+        write('fixture-build.cjs', "const fs = require('fs'); fs.writeFileSync('main.js', 'fresh plugin'); fs.appendFileSync('.cache/builds', 'build\\n');\n");
+        git('init', '-q');
+        git('config', 'core.autocrlf', 'false');
+        git('add', '.');
+        git('-c', 'user.name=Release test', '-c', 'user.email=release-test@example.invalid', 'commit', '-qm', 'candidate');
+        git('tag', version);
+        sourceCommit = git('rev-parse', 'HEAD');
+        saveRemote({ commit: sourceCommit, release: null, assets: {} });
+
+        // Git, build and hashing are real; only the remote transport is substituted.
+        write('.cache/bin/gh', `#!/usr/bin/env node
 const fs = require('fs');
-const path = ${JSON.stringify(argsPath)};
+const path = require('path');
 const args = process.argv.slice(2);
-fs.appendFileSync(path, JSON.stringify(args) + '\\n');
-if (args[0] === 'release' && args[1] === 'view') {
-  process.exit(${releaseViewExitCode});
-}
-process.exit(0);
-`;
-        fs.writeFileSync(scriptPath, scriptSource, { encoding: 'utf8', mode: 0o755 });
-        fs.writeFileSync(cmdScriptPath, `@echo off\r\n"${process.execPath}" "${scriptPath}" %*\r\n`, 'utf8');
-        return { scriptPath, argsPath };
-    }
-
-    test('real validate-release-tag entrypoint passes numeric tags and fails fast on invalid input', () => {
-        const ok = spawnSync(process.execPath, [validateTagScriptPath, packageJson.version], {
-            cwd: repoRoot,
-            encoding: 'utf8'
-        });
-        expect(ok.status).toBe(0);
-        expect(ok.stdout).toBe('');
-        expect(ok.stderr).toBe('');
-
-        const bad = spawnSync(process.execPath, [validateTagScriptPath, `v${packageJson.version}`], {
-            cwd: repoRoot,
-            encoding: 'utf8'
-        });
-        expect(bad.status).toBe(1);
-        expect(bad.stdout).toBe('');
-        expect(bad.stderr).toContain('numeric x.x.x tags');
-
-        const missing = spawnSync(process.execPath, [validateTagScriptPath], {
-            cwd: repoRoot,
-            encoding: 'utf8'
-        });
-        expect(missing.status).toBe(1);
-        expect(missing.stdout).toBe('');
-        expect(missing.stderr).toContain('Usage: node scripts/release/validate-release-tag.js <tag>');
+fs.appendFileSync('.cache/gh-calls.jsonl', JSON.stringify(args) + '\\n');
+const remote = JSON.parse(fs.readFileSync('.cache/remote.json', 'utf8'));
+const save = () => fs.writeFileSync('.cache/remote.json', JSON.stringify(remote));
+const flag = name => args[args.indexOf(name) + 1];
+if (args[0] === 'api') {
+  if (process.env.FAKE_GH_ERROR) { console.error(process.env.FAKE_GH_ERROR); process.exit(1); }
+  if (args[1].includes('/git/ref/tags/')) console.log(JSON.stringify({ object: { type: 'commit', sha: remote.commit } }));
+  else if (args[1].includes('/releases/tags/')) {
+    if (process.env.FAKE_GH_RELEASE_ERROR) { console.error(process.env.FAKE_GH_RELEASE_ERROR); process.exit(1); }
+    if (!remote.release || (remote.release.draft && process.env.FAKE_GH_HIDE_DRAFT)) { console.error('gh: Not Found (HTTP 404)'); process.exit(1); }
+    console.log(JSON.stringify({ ...remote.release, assets: Object.keys(remote.assets).map(name => ({ name, state: 'uploaded', size: Buffer.from(remote.assets[name], 'base64').length })) }));
+  } else if (args[1].endsWith('/releases?per_page=100')) {
+    console.log(JSON.stringify([remote.release ? [{ ...remote.release, assets: Object.keys(remote.assets).map(name => ({ name, state: 'uploaded', size: Buffer.from(remote.assets[name], 'base64').length })) }] : []]));
+  } else throw new Error('Unexpected API ' + args[1]);
+} else if (args[1] === 'create') {
+  if (remote.release) process.exit(1);
+  remote.release = { tag_name: args[2], draft: args.includes('--draft'), body: fs.readFileSync(flag('--notes-file'), 'utf8') };
+  save();
+} else if (args[1] === 'upload') {
+  for (const filename of args.slice(3).filter(arg => !arg.startsWith('--'))) {
+    if (process.env.FAKE_GH_UPLOAD_FAIL) { console.error('upload interrupted'); process.exit(1); }
+    remote.assets[path.basename(filename)] = fs.readFileSync(filename).toString('base64');
+  }
+  save();
+} else if (args[1] === 'download') {
+  for (let i = 0; i < args.length; i++) if (args[i] === '--pattern') {
+    const name = args[++i];
+    if (!remote.assets[name]) process.exit(1);
+    fs.writeFileSync(path.join(flag('--dir'), name), process.env.FAKE_GH_CORRUPT === name ? Buffer.from('corrupt') : Buffer.from(remote.assets[name], 'base64'));
+  }
+} else if (args[1] === 'edit') {
+  if (args.includes('--draft=false')) remote.release.draft = false;
+  save();
+} else throw new Error('Unexpected gh ' + args.join(' '));
+`);
+        fs.chmodSync(path.join(fixture, '.cache/bin/gh'), 0o755);
+        write('.cache/bin/gh.cmd', `@echo off\r\n"${process.execPath}" "${path.join(fixture, '.cache/bin/gh')}" %*\r\n`);
+        const executablePath = `${path.join(fixture, '.cache/bin')}${path.delimiter}${process.env.Path || process.env.PATH || ''}`;
+        processEnv = { ...process.env, PATH: executablePath, Path: executablePath };
     });
+    afterEach(() => fs.rmSync(fixture, { recursive: true, force: true }));
 
-    const maybeDescribeReleaseScript = fs.existsSync(releaseScriptPath) ? describe : describe.skip;
-
-    maybeDescribeReleaseScript('publish-github-release helper', () => {
-        let composeReleaseNotesFile: (args: {
-            tag: string;
-            englishNotesFile: string;
-            chineseNotesFile: string;
-        }) => string;
-        let buildGhReleaseCommands: (args: {
-            tag: string;
-            title: string;
-            notesFile: string;
-            assets: string[];
-            releaseExists: boolean;
-        }) => string[][];
-        let validateReleaseTagMain: (argv?: string[]) => number;
-        let resolveReleaseInputs: (repoRoot: string, tag: string) => {
-            tag: string;
-            title: string;
-            englishNotesFile: string;
-            chineseNotesFile: string;
-            assets: string[];
-        };
-        let REQUIRED_RELEASE_ASSETS: string[];
-        let OBSIDIAN_RELEASE_TAG_PATTERN: RegExp;
-
-        beforeAll(() => {
-            ({
-                OBSIDIAN_RELEASE_TAG_PATTERN,
-                buildGhReleaseCommands,
-                composeReleaseNotesFile,
-                resolveReleaseInputs,
-                REQUIRED_RELEASE_ASSETS
-            } = require(releaseScriptPath));
-            ({ main: validateReleaseTagMain } = require(validateTagScriptPath));
-        });
-
-        test('reuses the shared release asset and tag contracts', () => {
-            expect(REQUIRED_RELEASE_ASSETS).toEqual(packagingContract.REQUIRED_RELEASE_ASSET_FILES);
-            expect(OBSIDIAN_RELEASE_TAG_PATTERN.source).toBe(packagingContract.RELEASE_TAG_PATTERN_SOURCE);
-        });
-
-        test('reuses the checked-in tag-validation helper wrapper', () => {
-            expect(validateReleaseTagMain(['1.9.2'])).toBe(0);
-            expect(() => validateReleaseTagMain(['v1.9.2'])).toThrow('numeric x.x.x tags');
-        });
-
-        test('real release helper dry-run prints create commands and cleans up the temporary notes file', () => {
-            const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'notemd-release-dry-run-create-'));
-            const fakeGh = writeFakeGh(tempRoot, 1);
-
-            try {
-                const output = execFileSync(
-                    process.execPath,
-                    [releaseScriptPath, packageJson.version, '--dry-run'],
-                    {
-                        cwd: repoRoot,
-                        encoding: 'utf8',
-                        env: prependPathEnv(tempRoot)
-                    }
-                );
-
-                expect(output).toContain(`gh release create ${packageJson.version}`);
-                expect(output).toContain('--verify-tag');
-                expect(output).toContain(path.join(repoRoot, 'main.js'));
-                expect(output).toContain(path.join(repoRoot, 'manifest.json'));
-                expect(output).toContain(path.join(repoRoot, 'styles.css'));
-                expect(output).toContain(path.join(repoRoot, 'README.md'));
-
-                const ghCalls = fs.readFileSync(fakeGh.argsPath, 'utf8').trim().split('\n').map((line) => JSON.parse(line));
-                expect(ghCalls).toEqual([['release', 'view', packageJson.version]]);
-
-                const notesFileMatch = output.match(/--notes-file\s+(\S+)/);
-                expect(notesFileMatch).not.toBeNull();
-                expect(fs.existsSync(notesFileMatch![1])).toBe(false);
-            } finally {
-                fs.rmSync(tempRoot, { recursive: true, force: true });
-            }
-        });
-
-        test('real release helper dry-run prints repair commands when the release already exists', () => {
-            const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'notemd-release-dry-run-repair-'));
-            const fakeGh = writeFakeGh(tempRoot, 0);
-
-            try {
-                const output = execFileSync(
-                    process.execPath,
-                    [releaseScriptPath, packageJson.version, '--dry-run'],
-                    {
-                        cwd: repoRoot,
-                        encoding: 'utf8',
-                        env: prependPathEnv(tempRoot)
-                    }
-                );
-
-                expect(output).toContain(`gh release edit ${packageJson.version}`);
-                expect(output).toContain(`gh release upload ${packageJson.version}`);
-                expect(output).toContain('--clobber');
-
-                const ghCalls = fs.readFileSync(fakeGh.argsPath, 'utf8').trim().split('\n').map((line) => JSON.parse(line));
-                expect(ghCalls).toEqual([['release', 'view', packageJson.version]]);
-            } finally {
-                fs.rmSync(tempRoot, { recursive: true, force: true });
-            }
-        });
-
-        test('real release helper fails fast on invalid or missing tag arguments before invoking GitHub', () => {
-            const invalid = spawnSync(
-                process.execPath,
-                [releaseScriptPath, `v${packageJson.version}`, '--dry-run'],
-                {
-                    cwd: repoRoot,
-                    encoding: 'utf8'
-                }
-            );
-            expect(invalid.status).toBe(1);
-            expect(invalid.stdout).toBe('');
-            expect(invalid.stderr).toContain('numeric x.x.x tags');
-
-            const missing = spawnSync(
-                process.execPath,
-                [releaseScriptPath, '--dry-run'],
-                {
-                    cwd: repoRoot,
-                    encoding: 'utf8'
-                }
-            );
-            expect(missing.status).toBe(1);
-            expect(missing.stdout).toBe('');
-            expect(missing.stderr).toContain('Usage: node scripts/release/publish-github-release.js <tag> [--dry-run]');
-        });
-
-        function createTempRepoRoot(): string {
-            const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'notemd-release-'));
-            fs.mkdirSync(path.join(tempRoot, 'docs', 'releases'), { recursive: true });
-            return tempRoot;
-        }
-
-        function writeFile(tempRoot: string, relativePath: string): string {
-            const absolutePath = path.join(tempRoot, relativePath);
-            fs.mkdirSync(path.dirname(absolutePath), { recursive: true });
-            fs.writeFileSync(absolutePath, `${relativePath}\n`, 'utf8');
-            return absolutePath;
-        }
-
-        test('plans gh release create with required packaged assets and checked-in notes', () => {
-            const tempRoot = createTempRepoRoot();
-            try {
-                writeFile(tempRoot, 'main.js');
-                writeFile(tempRoot, 'manifest.json');
-                writeFile(tempRoot, 'styles.css');
-                writeFile(tempRoot, 'README.md');
-                const releaseNotesRelativePaths = packagingContract.resolveReleaseNotesRelativePaths('1.8.2');
-                const englishNotesRelativePath = releaseNotesRelativePaths.english;
-                const chineseNotesRelativePath = releaseNotesRelativePaths.simplifiedChinese;
-                const englishNotesFile = writeFile(tempRoot, englishNotesRelativePath);
-                const chineseNotesFile = writeFile(tempRoot, chineseNotesRelativePath);
-
-                const inputs = resolveReleaseInputs(tempRoot, '1.8.2');
-                const notesFile = composeReleaseNotesFile(inputs);
-                const commands = buildGhReleaseCommands({ ...inputs, notesFile, releaseExists: false });
-
-                expect(inputs).toEqual({
-                    tag: '1.8.2',
-                    title: 'Notemd 1.8.2',
-                    englishNotesFile,
-                    chineseNotesFile,
-                    assets: [
-                        path.join(tempRoot, 'main.js'),
-                        path.join(tempRoot, 'manifest.json'),
-                        path.join(tempRoot, 'styles.css'),
-                        path.join(tempRoot, 'README.md')
-                    ]
-                });
-                expect(fs.readFileSync(notesFile, 'utf8')).toBe(
-                    [
-                        englishNotesRelativePath,
-                        '',
-                        '---',
-                        '',
-                        chineseNotesRelativePath,
-                        ''
-                    ].join('\n')
-                );
-                expect(commands).toEqual([[
-                    'release',
-                    'create',
-                    '1.8.2',
-                    path.join(tempRoot, 'main.js'),
-                    path.join(tempRoot, 'manifest.json'),
-                    path.join(tempRoot, 'styles.css'),
-                    path.join(tempRoot, 'README.md'),
-                    '--title',
-                    'Notemd 1.8.2',
-                    '--notes-file',
-                    expect.any(String),
-                    '--verify-tag'
-                ]]);
-            } finally {
-                fs.rmSync(tempRoot, { recursive: true, force: true });
-            }
-        });
-
-        test('plans gh release repair by rewriting notes before uploading assets when the release already exists', () => {
-            const commands = buildGhReleaseCommands({
-                tag: '1.8.2',
-                title: 'Notemd 1.8.2',
-                notesFile: '/tmp/notes.md',
-                assets: ['/tmp/main.js', '/tmp/manifest.json', '/tmp/styles.css', '/tmp/README.md'],
-                releaseExists: true
-            });
-
-            expect(commands).toEqual([
-                [
-                    'release',
-                    'edit',
-                    '1.8.2',
-                    '--title',
-                    'Notemd 1.8.2',
-                    '--notes-file',
-                    '/tmp/notes.md'
-                ],
-                [
-                    'release',
-                    'upload',
-                    '1.8.2',
-                    '/tmp/main.js',
-                    '/tmp/manifest.json',
-                    '/tmp/styles.css',
-                    '/tmp/README.md',
-                    '--clobber'
-                ]
-            ]);
-        });
-
-        test('rejects missing packaged assets before invoking gh release', () => {
-            const tempRoot = createTempRepoRoot();
-            try {
-                writeFile(tempRoot, 'main.js');
-                writeFile(tempRoot, 'manifest.json');
-                writeFile(tempRoot, 'styles.css');
-                writeFile(tempRoot, path.join('docs', 'releases', '1.8.2.md'));
-                writeFile(tempRoot, path.join('docs', 'releases', '1.8.2.zh-CN.md'));
-
-                expect(() => resolveReleaseInputs(tempRoot, '1.8.2')).toThrow(
-                    path.join(tempRoot, 'README.md')
-                );
-            } finally {
-                fs.rmSync(tempRoot, { recursive: true, force: true });
-            }
-        });
-
-        test('rejects non-numeric tags that Obsidian cannot publish correctly', () => {
-            const tempRoot = createTempRepoRoot();
-            try {
-                writeFile(tempRoot, 'main.js');
-                writeFile(tempRoot, 'manifest.json');
-                writeFile(tempRoot, 'styles.css');
-                writeFile(tempRoot, 'README.md');
-                writeFile(tempRoot, path.join('docs', 'releases', 'v1.8.2.md'));
-                writeFile(tempRoot, path.join('docs', 'releases', 'v1.8.2.zh-CN.md'));
-
-                expect(() => resolveReleaseInputs(tempRoot, 'v1.8.2')).toThrow(
-                    'numeric x.x.x tags'
-                );
-            } finally {
-                fs.rmSync(tempRoot, { recursive: true, force: true });
-            }
-        });
+    test('preview is offline and reports local identity without rebuilding', () => {
+        processEnv.FAKE_GH_ERROR = 'network unavailable';
+        const output = run(version, '--dry-run');
+        expect(output.status).toBe(0);
+        const preview = JSON.parse(output.stdout);
+        expect(preview).toMatchObject({ tag: version, sourceCommit, remoteState: 'not queried' });
+        expect(Object.keys(preview.assetSha256)).toEqual(contract.REQUIRED_RELEASE_ASSET_FILES);
+        expect(calls()).toEqual([]);
+        expect(fs.existsSync(path.join(fixture, '.cache/builds'))).toBe(false);
+    });
+    test.each([['--dryrun'], ['--dry-run', '--dry-run'], ['--unknown'], ['1.9.9'], ['--dry-run', 'extra']])('rejects extra arguments %j', (...extra: string[]) => {
+        const output = run(version, ...extra);
+        expect(output.status).toBe(1);
+        expect(output.stderr).toMatch(/Unknown|Unexpected|Duplicate/);
+        expect(calls()).toEqual([]);
+    });
+    test.each(['v1.9.8', '1.9.8\n', '1.9.8\nINJECT=1', '1.9.8;exit', '$(echo injected)'])('rejects invalid tag %s', tag => {
+        expect(run(tag, '--dry-run').stderr).toContain('numeric x.x.x');
+        expect(calls()).toEqual([]);
+    });
+    test('rejects missing tags', () => {
+        expect(run('--dry-run').stderr).toContain('Usage:');
+        expect(calls()).toEqual([]);
+    });
+    test.each(['package.json', 'manifest.json', 'package-lock.json', 'versions.json'])('rejects inconsistent version in %s', relative => {
+        const metadata = JSON.parse(fs.readFileSync(path.join(fixture, relative), 'utf8'));
+        if (relative === 'versions.json') metadata[version] = '9.0.0';
+        else metadata.version = '1.9.7';
+        write(relative, JSON.stringify(metadata));
+        expect(run(version, '--dry-run').stderr).toMatch(/version|Version/);
+        expect(calls()).toEqual([]);
+    });
+    test.each(['main.js', 'README.md', `docs/releases/${version}.md`, `docs/releases/${version}.zh-CN.md`])('rejects missing file %s', relative => {
+        fs.unlinkSync(path.join(fixture, relative));
+        expect(run(version, '--dry-run').stderr).toContain('Missing required release file');
+        expect(calls()).toEqual([]);
+    });
+    test('rejects empty notes', () => {
+        write(`docs/releases/${version}.zh-CN.md`, ' \n');
+        expect(run(version, '--dry-run').stderr).toMatch(/empty|Empty/);
+        expect(calls()).toEqual([]);
+    });
+    test('refuses dirty sources', () => {
+        write('README.md', 'uncommitted');
+        expect(run(version).stderr).toContain('clean');
+        expect(mutations()).toEqual([]);
+    });
+    test('refuses unrelated worktrees with matching package version', () => {
+        write('README.md', 'later revision');
+        git('add', 'README.md');
+        git('-c', 'user.name=Release test', '-c', 'user.email=release-test@example.invalid', 'commit', '-qm', 'later change');
+        expect(run(version).stderr).toContain('tag');
+        expect(mutations()).toEqual([]);
+    });
+    test('refuses remote tag divergence', () => {
+        saveRemote({ ...remote(), commit: 'a'.repeat(40) });
+        expect(run(version).stderr).toContain('remote tag');
+        expect(mutations()).toEqual([]);
+    });
+    test.each(['gh: Bad credentials (HTTP 401)', 'gh: Forbidden (HTTP 403)', 'gh: Server Error (HTTP 500)', 'EOF'])('propagates remote error %s', message => {
+        processEnv.FAKE_GH_ERROR = message;
+        const output = run(version);
+        expect(output.status).toBe(1);
+        expect(output.stderr).toContain(message);
+        expect(mutations()).toEqual([]);
+    });
+    test('rebuilds tagged sources, uploads draft, verifies downloaded bytes, then publishes', () => {
+        const output = run(version);
+        expect(output.stderr).toBe('');
+        expect(output.status).toBe(0);
+        expect(remote().release.draft).toBe(false);
+        expect(remote().release.body).toContain('Complete English release notes.');
+        expect(remote().release.body).toContain('完整的中文发布说明。');
+        expect(remote().release.body).toContain(sourceCommit);
+        expect(Buffer.from(remote().assets['main.js'], 'base64').toString()).toBe('fresh plugin');
+        expect(Object.keys(remote().assets)).toEqual(contract.REQUIRED_RELEASE_ASSET_FILES);
+        expect(calls().find(args => args[1] === 'create')).toEqual(expect.arrayContaining(['--draft', '--verify-tag']));
+        expect(calls().findIndex(args => args[1] === 'download')).toBeLessThan(calls().findIndex(args => args.includes('--draft=false')));
+        expect(fs.readFileSync(path.join(fixture, '.cache/builds'), 'utf8')).toBe('build\n');
+    });
+    test.each(['FAKE_GH_UPLOAD_FAIL', 'FAKE_GH_CORRUPT'])('retains failed draft and resumes the same candidate: %s', failure => {
+        processEnv[failure] = failure === 'FAKE_GH_CORRUPT' ? 'main.js' : '1';
+        expect(run(version).status).toBe(1);
+        expect(remote().release.draft).toBe(true);
+        expect(calls().some(args => args.includes('--draft=false'))).toBe(false);
+        delete processEnv[failure];
+        const resumed = run(version);
+        expect(resumed.stderr).toBe('');
+        expect(resumed.status).toBe(0);
+        expect(remote().release.draft).toBe(false);
+        expect(calls().filter(args => args[1] === 'create')).toHaveLength(1);
+    });
+    test('does not overwrite public assets on identical retries', () => {
+        expect(run(version).status).toBe(0);
+        write('.cache/gh-calls.jsonl', '');
+        expect(run(version).status).toBe(0);
+        expect(mutations()).toEqual([]);
+    });
+    test('refuses repair without matching provenance', () => {
+        saveRemote({ ...remote(), release: { tag_name: version, draft: true, body: 'unrelated draft' } });
+        expect(run(version).stderr).toContain('provenance');
+        expect(mutations()).toEqual([]);
+    });
+    test('finds authenticated drafts when the by-tag endpoint only exposes published releases', () => {
+        processEnv.FAKE_GH_HIDE_DRAFT = '1';
+        const output = run(version);
+        expect(output.stderr).toBe('');
+        expect(output.status).toBe(0);
+        expect(remote().release.draft).toBe(false);
+        expect(calls().filter(args => args[1] === 'create')).toHaveLength(1);
+    });
+    test.each(['gh: Bad credentials (HTTP 401)', 'gh: Forbidden (HTTP 403)', 'gh: Server Error (HTTP 503)', 'EOF'])('does not mistake release lookup errors for absence: %s', message => {
+        processEnv.FAKE_GH_RELEASE_ERROR = message;
+        const output = run(version);
+        expect(output.status).toBe(1);
+        expect(output.stderr).toContain(message);
+        expect(mutations()).toEqual([]);
+    });
+    test('repairs a missing public asset without replacing existing assets', () => {
+        expect(run(version).status).toBe(0);
+        const state = remote();
+        delete state.assets['README.md'];
+        saveRemote(state);
+        write('.cache/gh-calls.jsonl', '');
+        expect(run(version).status).toBe(0);
+        expect(Object.keys(remote().assets)).toEqual(contract.REQUIRED_RELEASE_ASSET_FILES);
+        expect(mutations()).toHaveLength(1);
+        expect(mutations()[0][1]).toBe('upload');
+        expect(mutations()[0]).not.toContain('--clobber');
+        expect(mutations()[0]).toHaveLength(4);
+    });
+    test('refuses corrupted public assets without overwriting them', () => {
+        expect(run(version).status).toBe(0);
+        const state = remote();
+        state.assets['main.js'] = Buffer.from('corrupt public bytes').toString('base64');
+        saveRemote(state);
+        write('.cache/gh-calls.jsonl', '');
+        expect(run(version).stderr).toContain('hash mismatch');
+        expect(mutations()).toEqual([]);
+    });
+    test('refuses concurrent local publishers and preserves their lock', () => {
+        write(`.cache/.release-${version}.lock`, 'another publisher');
+        expect(run(version).stderr).toContain('lock');
+        expect(fs.readFileSync(path.join(fixture, `.cache/.release-${version}.lock`), 'utf8')).toBe('another publisher');
+        expect(mutations()).toEqual([]);
+    });
+    test('the tag-validator rejects unexpected options', () => {
+        const output = spawnSync(process.execPath, [path.join(fixture, 'scripts/release/validate-release-tag.js'), version, '--oops'], { encoding: 'utf8' });
+        expect(output.status).toBe(1);
+        expect(output.stderr).toMatch(/Usage|Unexpected/);
     });
 });

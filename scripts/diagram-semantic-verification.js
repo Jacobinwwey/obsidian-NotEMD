@@ -446,15 +446,15 @@ function resolveReleasePackagingContractFacts({
         const tagPattern = releaseHelper.OBSIDIAN_RELEASE_TAG_PATTERN instanceof RegExp
             ? releaseHelper.OBSIDIAN_RELEASE_TAG_PATTERN.source
             : fallbackTagPattern;
-        const supportsReleaseModeSwitch = typeof releaseHelper.buildGhReleaseCommands === 'function'
-            || typeof releaseHelper.buildGhReleaseCommand === 'function';
+        const supportsVerifiedPublication = typeof releaseHelper.previewRelease === 'function'
+            && typeof releaseHelper.publishRelease === 'function';
 
         if (requiredAssets.length > 0) {
             return {
                 sourcePath: releaseHelperPath,
                 requiredAssets,
                 releaseTagPattern: tagPattern,
-                supportsReleaseModeSwitch,
+                supportsVerifiedPublication,
                 resolvedFromReleaseHelper: true
             };
         }
@@ -466,7 +466,7 @@ function resolveReleasePackagingContractFacts({
         sourcePath: releaseHelperPath,
         requiredAssets: [...DEFAULT_REQUIRED_RELEASE_ASSETS],
         releaseTagPattern: fallbackTagPattern,
-        supportsReleaseModeSwitch: false,
+        supportsVerifiedPublication: false,
         resolvedFromReleaseHelper: false
     };
 }
@@ -526,7 +526,7 @@ function resolveReleaseWorkflowTriggerFacts({
 } = {}) {
     try {
         const workflowSource = fs.readFileSync(releaseWorkflowPath, 'utf8');
-        const validatesWithSharedHelper = workflowSource.includes('node scripts/release/validate-release-tag.js "$TAG_NAME"');
+        const validatesWithSharedHelper = /node scripts\/release\/validate-release-tag\.js "\$(?:REQUESTED_TAG|TAG_NAME)"/.test(workflowSource);
         const workflowSourceEnvLine = `NOTEMD_RELEASE_WORKFLOW_SOURCE_BRANCH: ${RELEASE_WORKFLOW_SOURCE_BRANCH}`;
         const chronicleTargetEnvLine = `NOTEMD_RELEASE_CHRONICLE_TARGET_BRANCH: ${RELEASE_CHRONICLE_REFRESH_TARGET_BRANCH}`;
         const checkoutsWorkflowSourcesFromConfiguredBranch = workflowSource.includes('Check out workflow sources')
@@ -787,9 +787,9 @@ function buildReleasePackagingContractChecklistLines(
         : `fallback default because \`${releaseHelperPath}\` could not be loaded`;
     const requiredAssets = releaseFacts.requiredAssets.map((asset) => `\`${asset}\``).join(', ');
     const releaseTagPattern = releaseFacts.releaseTagPattern || '^\\d+\\.\\d+\\.\\d+$';
-    const releaseModeDescriptor = releaseFacts.supportsReleaseModeSwitch
-        ? 'derived from release helper create/upload mode logic'
-        : 'fallback reminder because release helper mode logic could not be inspected';
+    const publicationDescriptor = releaseFacts.supportsVerifiedPublication
+        ? 'derived from release helper preview and publish operations'
+        : 'fallback reminder because release helper operations could not be inspected';
     const workflowDescriptor = workflowFacts.resolvedFromWorkflowFile
         ? `derived from \`${releaseWorkflowPath}\``
         : `fallback reminder because \`${releaseWorkflowPath}\` could not be loaded`;
@@ -811,7 +811,7 @@ function buildReleasePackagingContractChecklistLines(
     return [
         `- [ ] Confirm release asset contract remains ${sourceDescriptor}: ${requiredAssets}.`,
         `- [ ] Confirm release tag contract remains numeric-only: \`/${releaseTagPattern}/\` (no \`v\` prefix).`,
-        `- [ ] Confirm release publish mode contract remains ${releaseModeDescriptor}: create path composes bilingual notes, existing-release path uploads assets with \`--clobber\`.`,
+        `- [ ] Confirm release publication contract remains ${publicationDescriptor}: offline preview, bilingual candidate provenance, draft upload, downloaded SHA-256 verification; published assets remain immutable.`,
         `- [ ] Confirm release workflow trigger contract remains ${workflowDescriptor} with ${triggerContractOwner}: ${triggerDescriptor}.`,
         `- [ ] Confirm release workflow source-checkout contract remains ${workflowDescriptor}: ${workflowSourceCheckoutDescriptor}.`,
         `- [ ] Confirm release workflow tag-guard contract remains ${workflowDescriptor}: ${tagGuardDescriptor}.`,

@@ -135,6 +135,8 @@ If you touch Mermaid-related behavior:
 
 Documentation is part of the feature. If behavior, provider support, or release workflow changes, update the docs in the same branch.
 
+For the 1.9.8 documentation program, author translations directly and review every affected locale against the corrected English source. Do not call LM Studio or translation APIs, or run legacy translation write scripts. Preserve executable syntax and translate instructional prose. This does not change LM Studio support inside the plugin.
+
 At minimum, evaluate whether these files need updates:
 
 - `README.md`
@@ -176,6 +178,8 @@ Every GitHub release for this plugin must upload all of the following assets:
 - `README.md`
 
 This is mandatory. Do not publish a release that omits `README.md`.
+
+Use the checked-in publisher from a clean checkout at the release tag. `--dry-run` is offline and reports local candidate facts only. Publishing verifies local/remote tag identity, rebuilds the ignored bundle, uploads a draft, and verifies downloaded asset hashes before publication. Same-tag repair requires identical provenance; public assets are immutable. Use one publisher and explicitly deploy Pages after the Release is verified as public. Keep historical chronicle refresh tags independent of the current package version.
 
 ## Git Safety Rules
 

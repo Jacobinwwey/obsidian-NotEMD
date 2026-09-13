@@ -6,6 +6,7 @@
 
 ## 当前真值与布局入口
 
+- [1.9.8 发布、文档与可发现性实施方案（执行中）](./plans/2026-09-13-001-feat-1-9-8-release-docs-geo-plan.zh-CN.md)
 - [当前 Main 进度与后续推进计划](./brainstorms/2026-09-02-current-main-progress-and-forward-plan.zh-CN.md)
 - [项目计划进度与工程评估](./maintainer/project-plan-status.zh-CN.md)
 - [主线可靠性与证据推进计划](./plans/2026-09-12-mainline-reliability-and-evidence.zh-CN.md)

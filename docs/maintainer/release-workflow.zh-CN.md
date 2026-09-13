@@ -23,18 +23,17 @@ npm run regression:language-compare
 执行：
 
 ```bash
-npm run chronicle:sync-repo-saga
-npm run chronicle:update
 npm run build
 npm test -- --runInBand
 npm run audit:i18n-ui
 npm run audit:render-host
+npm run lint:regressions -- --base-ref origin/main
 obsidian help
 obsidian-cli help
 git diff --check
 ```
 
-`npm run chronicle:sync-repo-saga` 与 `npm run chronicle:update` 必须串行执行。它们共享 `.cache/repo-saga-*` 状态，并且现在会强制使用 `.cache/.repo-saga-execution.lock`；如果残留锁文件，先确认没有任何 repo-saga sync/update 进程仍在运行，再手动移除。
+Release 公开后，串行执行 `npm run chronicle:sync-repo-saga` 与 `npm run chronicle:update -- --tag <tag>`，或交由发布工作流刷新。它们共享 `.cache/repo-saga-*` 状态，并强制使用 `.cache/.repo-saga-execution.lock`；如果残留锁文件，先确认没有任何 repo-saga sync/update 进程仍在运行，再手动移除。不得把旧编年史证据改标为尚未发布的版本。
 
 如果本地环境缺少 `obsidian-cli`，请在发布说明或交接证据中明确记录。
 如果改动触及图表语义，还必须执行 `docs/maintainer/diagram-semantic-verification.zh-CN.md` 中定义的维护者本地语义核验层。
@@ -52,13 +51,14 @@ npm run verify:diagram-semantics -- --vault "<vault-name>" --commit "<sha>" --ve
 对于 renderer 相关改动，还应把 helper 生成出的 packaging-boundary、render-host audit、render-host runtime-consumption、implementation-readiness、packaging-contract、contract-promotion-boundary 与 Stage-C gate 区块都视为必填真值维护项：`npm run audit:render-host` 并不等于真正的重型运行时隔离已经完成，它当前只证明内联 `srcdoc` host 仍按既有契约自包含于 `main.js`，并会通过共享 packaging contract 拒绝当前主线上残留的 `render-host.mjs` 资产或引用。
 在当前单入口主线上，这份 packaging-boundary 真值还要求 latent runtime helper 保持 fail-closed：除非 dedicated runtime asset 被显式配置并在同批真实发货，否则不得默认合成 standalone `render-host.mjs` module specifier。
 它还要求当前 `main` 上的 `createRenderHostBundleBuildOptions()` 保持 candidate-only：除非 standalone render-host release assets、audit logic、maintainer/release docs 同批前进，否则 production `esbuild.config.mjs` 路径不得消费它。
-packaging-contract 区块现在还会记录数字 tag 规则、workflow tag-trigger glob 规则、create/upload 发布模式行为、tag-only 触发防护、workflow-source 分支与 chronicle-target 分支；这些也应视为同一套 release 真值契约的一部分，而不是仅靠口头流程记忆。
+packaging-contract 区块记录数字 tag、workflow tag-trigger glob、离线预览、候选版本归属、草稿验证、workflow-source 分支与 chronicle-target 分支；这些共同组成发布契约。
 
 ## 3. 版本同步
 
 发布前请确保以下文件版本一致：
 
 - `package.json`
+- `package-lock.json`（根版本及根 package 版本）
 - `manifest.json`
 - `versions.json`
 - `README.md`
@@ -69,45 +69,15 @@ Release tag 必须使用纯数字 `x.x.x` 格式，不能加 `v` 前缀；Obsidi
 
 ## 4. 文档翻译交付
 
-公开图表手册的源文件是 `website/docs/features/diagrams.mdx`，通过 `website/scripts/translate-diagrams-user-guide.cjs` 生成各语言版本。检入的流程使用 LM Studio 的 OpenAI-compatible API 地址 `http://100.80.17.113:301/v1/chat/completions` 和模型 `hy-mt2-7b`；这个地址是 API 端点而不是网站 URL，仓库中不得写入任何凭据。
+1.9.8 及此政策下的后续工作，由 Codex 直接撰写和复核翻译。不得调用 LM Studio、外部翻译 API 或旧版 `translate-*.cjs --write` 命令。此撰写政策不改变插件对 LM Studio provider 的支持。
 
-设置/收藏章节的源文件是 `website/docs/getting-started/configuration.mdx`，通过 `website/scripts/translate-settings-favorites-guide.cjs` 生成各语言版本；根目录 README 的设置说明则通过 `scripts/translate-readme-settings-guide.cjs` 生成。两个脚本都会保留结构化 token，并拒绝超过 8 个 locale 的批次或估算上下文达到 30,000 token 及以上的请求。
+1. 翻译前，依据命令、默认值和实际支持行为校核英文源文档。
+2. 冻结源 revision，再更新所有受影响的已发布语言。网站有 34 个 locale，插件 UI 有 21 个，两者不可混同。
+3. 每种语言必须独立可读。保留可执行代码、command id、URL、MDX 和表格结构；旧指南误放进代码块的说明文字仍需翻译。
+4. 记录源 revision，并逐语言复核修改内容。AI 撰写不等于独立母语人士审阅，也不会自动使一个 locale 获得搜索索引资格。
+5. 运行 `npm --prefix website run build`、`npm --prefix website run audit:build`、仓库文档检查和 `git diff --check`；检查代表性 RTL、CJK 与窄屏布局。
 
-按语言组串行执行，每次最多八个 locale。这样可以让每个请求稳定低于模型 32k 上下文窗口（脚本会拒绝过大的语言组，并校验 frontmatter、标题层级、产品术语以及维护者内容边界）：
-
-```bash
-node website/scripts/translate-diagrams-user-guide.cjs --write --locales zh-CN,zh-Hant,zh-TW,ja,fr,de,es,ko
-node website/scripts/translate-diagrams-user-guide.cjs --write --locales it,pt,pt-BR,ru,ar,fa,hi,bn
-node website/scripts/translate-diagrams-user-guide.cjs --write --locales nl,sv,fi,da,no,pl,tr,he
-node website/scripts/translate-diagrams-user-guide.cjs --write --locales th,el,cs,hu,ro,uk,vi,id
-node website/scripts/translate-diagrams-user-guide.cjs --write --locales ms
-
-node website/scripts/translate-settings-favorites-guide.cjs --write --locales zh-CN,zh-Hant,zh-TW,ja,fr,de,es,ko
-node website/scripts/translate-settings-favorites-guide.cjs --write --locales it,pt,pt-BR,ru,ar,fa,hi,bn
-node website/scripts/translate-settings-favorites-guide.cjs --write --locales nl,sv,fi,da,no,pl,tr,he
-node website/scripts/translate-settings-favorites-guide.cjs --write --locales th,el,cs,hu,ro,uk,vi,id
-node website/scripts/translate-settings-favorites-guide.cjs --write --locales ms
-
-node scripts/translate-readme-settings-guide.cjs --write --locales=ar,bn,cs,da,de,el,es,fi
-node scripts/translate-readme-settings-guide.cjs --write --locales=fr,he,hi,hu,id,it,ja,ko
-node scripts/translate-readme-settings-guide.cjs --write --locales=ms,nl,no,pl,pt,ro,ru,sv
-node scripts/translate-readme-settings-guide.cjs --write --locales=th,tr,uk,vi,zh_Hant
-```
-
-提交前再使用 `--normalize-existing` 执行语言组（去掉 `--write` 可只读试跑）进行不联网的结构校验，然后构建并审计网站。不要替换成普通网页翻译器：该手册包含 MDX、Mermaid、文件扩展名与导出术语，结构必须保持稳定。
-
-### 1.9.7 Codex 翻译补充
-
-为兼容已有维护记录，上述流程继续保留，但本版本不按其中的联网翻译命令执行。英文源文件与简体中文对应文件由 Codex 直接撰写；其他需要更新的语言也由 Codex 直接完成，同时保持 frontmatter、标题层级、Markdown/MDX 结构、Mermaid fence、表格列数、代码片段、命令、URL、文件扩展名和产品名称不变。
-
-本版本候选包采用以下离线顺序：
-
-1. 更新 `website/docs/` 下的英文 canonical MDX。
-2. 在 `website/i18n/zh-CN/` 写入对应的简体中文 MDX；如果其他已发布语言需要可见行为一致，再同步更新相应 locale。
-3. 逐语言对照检查语义完整性；每种语言保留在自己的完整文件中。
-4. 执行 `npm --prefix website run build`、`npm --prefix website run audit:build`，然后运行仓库图表/文档测试和 `git diff --check`。
-
-准备 `1.9.7` 时不要运行旧版 `translate-*.cjs` 的 `--write` 命令，不要配置 LM Studio endpoint，也不要调用任何外部翻译 API。只有 Codex 翻译文件通过离线网站审计，发布才算合格。
+工具可枚举文件、检查结构和渲染已撰写内容，但不得通过外部模型生成翻译。其他语言取得独立发布证据之前，保留当前索引政策。
 
 ## 5. Release Notes 契约
 
@@ -133,15 +103,17 @@ Release 必需资产：
 npm run release:github -- <tag>
 ```
 
-对维护者本地验证来说，`npm run release:github -- <tag> --dry-run` 是已检入的无网络证明路径：它仍会校验纯数字 tag、必需资产、已提交的双语 release notes、release 是否已存在所对应的分支选择，以及最终组合出的 `gh release ...` 命令形态，但不会真正执行发布。
+对维护者本地验证来说，`npm run release:github -- <tag> --dry-run` 是已检入的无网络证明路径：校验本地版本元数据、必需资产与双语说明，以 JSON 输出源 commit、工作树状态和资产 SHA-256。它不重新构建、不查询 GitHub，也不推断 Release 是否存在。未知、重复和多余参数会在外部命令执行前失败。
 
-该辅助命令会在调用 GitHub 前强制校验必须打包的资产，以及两份已提交的 release notes：
+发布操作负责完整事务：
 
-- 如果 release 尚不存在，则会先组合 `docs/releases/<tag>.md` 与 `docs/releases/<tag>.zh-CN.md`，再执行 `gh release create ... --verify-tag`。
-- 如果 release 已存在，则会先用这两份双语 notes 回写现有 release 的 body/title，然后再执行 `gh release upload ... --clobber`。
-- 如果 tag 不是纯数字 `x.x.x`，则立即失败。
+- 要求干净 checkout 位于本地 tag，版本元数据一致，远端 tag 解引用后的 commit 相同。鉴权、网络和服务器错误必须失败；按 tag 查询返回 404 后，还会查询已鉴权的草稿列表。
+- 从干净的 tag 源码重新构建。工作流使用锁定依赖与 Linux Node 20 作为权威发布环境，Windows 独立验证行为。已有且被忽略的 `main.js` 不能证明归属。
+- 冻结实际上传字节，组合两份说明，在 release body 的隐藏候选版本注释中记录源 commit 和 SHA-256。
+- 以 `--verify-tag` 创建草稿，上传四项资产，重新下载核对状态与哈希后才公开。上传中断或哈希失败时保留草稿。
+- 只恢复归属和双语正文完全相同的候选版本。草稿资产可以用同一候选版本字节替换；已公开资产必须匹配且不得覆盖，只允许补齐缺失项。没有匹配归属的历史 Release 不能由此 publisher 修复。
 
-第二条路径就是这类问题的修复路径：当 release 文案与仓库 notes 漂移，或 release 文案已发布但插件安装资产未上传时，可直接修正并补传。
+同 tag 的 Actions 运行串行执行。本地发布使用 `.cache/.release-<tag>.lock`，异常退出可能留下锁；确认其中记录的进程已停止后，才能删除该锁。使用单一 publisher，不得让本地发布与 Actions 竞争。公开后的代码修正需要新补丁版本，不得移动已发布 tag 或静默替换二进制。
 
 ## 8. CI 自动化
 
@@ -151,10 +123,10 @@ npm run release:github -- <tag>
 - 通过 `workflow_dispatch` 并传入纯数字 `x.x.x` 的 `tag` 参数，可在 CI 中修复已有 release。
 - 同一个工作流现在会在发布后重新生成季度版发展编年史，刷新所有根目录 `README*.md` 中的编年史区块，重写每个语言对应的 `docs/repo-saga/notemd-development-history.<locale>.svg`，同步刷新英文别名 `docs/repo-saga/notemd-development-history.svg`，并将这次纯文档更新推回 `main`。
 - `npm run chronicle:sync-repo-saga` 会把当前依赖的两条上游 `repo-saga` 分支组装成 `.cache/repo-saga-upstream`：`feat/timeline-granularity` 提供季度切片能力，`feat-locale-i18n` 提供语言扩展能力。
-- 该工作流**不会**在 `main` 的普通 push 或 PR 上自动运行；合并前验证仍需在本地执行。
-- `main` 当前没有 branch protection，也没有普通 push/PR workflow。如果 commit-status API 在 `main` 上显示 `pending` 且 `statuses=[]`，应以 GitHub Actions runs 与 `check-suites` / `check-runs` 结果作为真实状态来源；release tag 触发的运行仍可能把成功 checks 挂到同一个 commit 上。
+- `.github/workflows/verify-plugin.yml` 在 Linux 和 Windows 上验证普通 PR 与 push，包括构建、全量 Jest、审计、lint 回归比较和 diff 格式。它与 tag 触发的 publisher 独立。
+- 检查实际候选 commit 的 Actions runs 与 check-runs。工作流存在不等于分支保护或必需检查已启用；旧 commit-status API 没有 statuses 也不能直接推断失败。
 - 工作流现已固定使用 `actions/checkout@v6` 与 `actions/setup-node@v6`，避免继续保留旧版 Node 20 JavaScript-action 运行时弃用告警。
-- 发布 job 会执行 `npm ci`、`npm run build`、`npm test -- --runInBand`、`npm run audit:i18n-ui`、`npm run audit:render-host`、`git diff --check`，最后执行 `npm run release:github -- "$TAG_NAME"`。
+- 发布 job 执行 `npm ci`，安装两个 Playwright 包锁定的 Chromium，构建、运行全量 Jest 和审计、检查 diff，再调用 publisher。publisher 再次构建，以证明被忽略 bundle 的来源。
 - 随后的编年史 job 会在 `main` 上执行 `node scripts/repo-saga/update-quarterly-saga.mjs --tag "$TAG_NAME"`，如果 `README*.md` 编年史区块或多语言季度 SVG 有变化，就自动提交并推送。
 - workflow-source checkout 分支与 chronicle push 目标现在会在 workflow 中分别显式命名为 `NOTEMD_RELEASE_WORKFLOW_SOURCE_BRANCH` 与 `NOTEMD_RELEASE_CHRONICLE_TARGET_BRANCH`，而仓库侧默认契约归 `scripts/lib/packaging-contract.js` 管。GitHub Actions 在首次 checkout 前仍需要 bootstrap env 值，但脚本、helper 输出与测试现在都把这些分支名作为 release-contract 真值处理，而不是各自维护 release 脚本默认值。
 - release workflow 的 tag trigger 会继续保留 GitHub Actions bootstrap 字面量 `*.*.*`，但这条字面量的所有者现在是 `scripts/lib/packaging-contract.js` 中的 `RELEASE_WORKFLOW_TAG_TRIGGER_GLOB`；`RELEASE_WORKFLOW_DISALLOWED_TAG_TRIGGER_GLOBS` 会把 `v*.*.*` / `V*.*.*` 排除在触发列表之外。这个 wildcard 只决定 workflow 是否启动，真正的纯数字 `x.x.x` 准入仍由已检入的 tag validator 执行。
@@ -166,6 +138,8 @@ npm run release:github -- <tag>
 - 工作流现在会在 checkout release ref 之前通过已检入的 `scripts/release/validate-release-tag.js` helper 做 tag 校验，因此 CI 与仓库内 release helper 复用同一套纯数字 tag 契约，并继续拒绝 `v1.8.2` 这类 tag。
 
 工作流刻意复用仓库内的 release 辅助脚本，而不是在 YAML-local 脚本片段中重复维护资产清单、release notes 逻辑、tag 校验或 chronicle 目标分支默认值，避免多套规则漂移。
+
+Release 与编年史验证后显式部署 Pages。`GITHUB_TOKEN` 创建的 Release 或 push 不会自动触发另一个 release/push workflow。网站将新版本标为稳定版之前，先确认公开 Release 可下载；部署后核对网页版本、canonical、语言政策和部署源码 revision。
 
 ## 9. 图表语义层
 

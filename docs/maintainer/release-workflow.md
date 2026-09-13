@@ -23,18 +23,17 @@ npm run regression:language-compare
 Run:
 
 ```bash
-npm run chronicle:sync-repo-saga
-npm run chronicle:update
 npm run build
 npm test -- --runInBand
 npm run audit:i18n-ui
 npm run audit:render-host
+npm run lint:regressions -- --base-ref origin/main
 obsidian help
 obsidian-cli help
 git diff --check
 ```
 
-Run `npm run chronicle:sync-repo-saga` and `npm run chronicle:update` serially. They share `.cache/repo-saga-*` state and now enforce `.cache/.repo-saga-execution.lock`; if a stale lock remains behind, verify that no repo-saga sync/update process is still running before removing it.
+After the Release is public, run `npm run chronicle:sync-repo-saga` and `npm run chronicle:update -- --tag <tag>` serially, or let the release workflow refresh it. They share `.cache/repo-saga-*` state and enforce `.cache/.repo-saga-execution.lock`; if a stale lock remains behind, verify that no repo-saga sync/update process is still running before removing it. Do not relabel old chronicle evidence with an unpublished version.
 
 If `obsidian-cli` is unavailable in the local environment, record it in release notes or release-handoff evidence.
 If the change affects diagram semantics, also run the maintainer-local semantic layer in `docs/maintainer/diagram-semantic-verification.md`.
@@ -52,13 +51,14 @@ The helper reads packaging entry/output facts from `esbuild.config.mjs` and, whe
 Treat the helper's packaging-boundary, render-host audit, render-host runtime-consumption, implementation-readiness, packaging-contract, contract-promotion-boundary, and Stage-C gate sections as required truth maintenance for renderer-affecting changes: `npm run audit:render-host` does not prove true heavy-runtime isolation; it only proves the current self-contained `main.js` + inline `srcdoc` host contract and rejects stray `render-host.mjs` assets/references on current `main` through the shared packaging contract.
 On the current single-entry lane, that packaging-boundary truth also requires the latent runtime helper to stay fail-closed: no default standalone `render-host.mjs` module specifier may be synthesized unless a dedicated runtime asset is explicitly configured and shipped in the same batch.
 It also requires `createRenderHostBundleBuildOptions()` to remain candidate-only on current `main`: the production `esbuild.config.mjs` path must not consume it unless standalone render-host release assets, audit logic, and maintainer/release docs move together.
-The packaging-contract section now also records numeric tag policy, workflow tag-trigger glob policy, create/upload mode behavior, tag-only trigger guardrails, workflow-source branch, and chronicle-target branch; treat those as part of the same release-truth contract rather than informal release habits.
+The packaging-contract section records numeric tag policy, workflow tag-trigger glob policy, offline preview, candidate provenance, draft verification, workflow-source branch, and chronicle-target branch. Treat these as one release contract.
 
 ## 3. Version Synchronization
 
 Before publishing, ensure version references are aligned:
 
 - `package.json`
+- `package-lock.json` (root version and root package version)
 - `manifest.json`
 - `versions.json`
 - `README.md`
@@ -69,45 +69,15 @@ Release tags must use numeric `x.x.x` format. Do not add a `v` prefix: Obsidian 
 
 ## 4. Documentation Translation Delivery
 
-The public diagrams guide is localized from `website/docs/features/diagrams.mdx` through `website/scripts/translate-diagrams-user-guide.cjs`. The checked-in workflow uses the LM Studio OpenAI-compatible endpoint `http://100.80.17.113:301/v1/chat/completions` with model `hy-mt2-7b`; the address is an API endpoint, not a website URL, and no credential belongs in the repository.
+For 1.9.8 and subsequent work under this policy, Codex authors and reviews translations directly. Do not call LM Studio, an external translation API, or the legacy `translate-*.cjs --write` commands. This authoring policy does not change LM Studio support as a plugin provider.
 
-The settings/favorites section is localized from `website/docs/getting-started/configuration.mdx` through `website/scripts/translate-settings-favorites-guide.cjs`. Root README settings guidance is localized through `scripts/translate-readme-settings-guide.cjs`. Both scripts preserve structural tokens and reject a locale batch larger than eight or an estimated request context at/above 30,000 tokens.
+1. Verify the English source against commands, defaults and supported behavior before translating.
+2. Freeze the source revision, then update every affected published locale. The website has 34 locales; the plugin UI has 21. Preserve that distinction.
+3. Keep each language independently readable. Preserve executable code, command IDs, URLs, MDX and table structure; translate prose even when an older guide placed it inside a code fence.
+4. Record source revisions and review the changed content in each language. AI authorship is not independent native-speaker review and does not by itself qualify a locale for search indexing.
+5. Run `npm --prefix website run build` and `npm --prefix website run audit:build`, the repository documentation checks, and `git diff --check`. Inspect representative RTL, CJK and narrow layouts.
 
-Run locale groups sequentially, with no more than eight locales per invocation. This keeps each request well below the model's 32k context window (the script rejects larger locale groups and validates frontmatter, heading levels, product tokens, and maintainer-content boundaries):
-
-```bash
-node website/scripts/translate-diagrams-user-guide.cjs --write --locales zh-CN,zh-Hant,zh-TW,ja,fr,de,es,ko
-node website/scripts/translate-diagrams-user-guide.cjs --write --locales it,pt,pt-BR,ru,ar,fa,hi,bn
-node website/scripts/translate-diagrams-user-guide.cjs --write --locales nl,sv,fi,da,no,pl,tr,he
-node website/scripts/translate-diagrams-user-guide.cjs --write --locales th,el,cs,hu,ro,uk,vi,id
-node website/scripts/translate-diagrams-user-guide.cjs --write --locales ms
-
-node website/scripts/translate-settings-favorites-guide.cjs --write --locales zh-CN,zh-Hant,zh-TW,ja,fr,de,es,ko
-node website/scripts/translate-settings-favorites-guide.cjs --write --locales it,pt,pt-BR,ru,ar,fa,hi,bn
-node website/scripts/translate-settings-favorites-guide.cjs --write --locales nl,sv,fi,da,no,pl,tr,he
-node website/scripts/translate-settings-favorites-guide.cjs --write --locales th,el,cs,hu,ro,uk,vi,id
-node website/scripts/translate-settings-favorites-guide.cjs --write --locales ms
-
-node scripts/translate-readme-settings-guide.cjs --write --locales=ar,bn,cs,da,de,el,es,fi
-node scripts/translate-readme-settings-guide.cjs --write --locales=fr,he,hi,hu,id,it,ja,ko
-node scripts/translate-readme-settings-guide.cjs --write --locales=ms,nl,no,pl,pt,ro,ru,sv
-node scripts/translate-readme-settings-guide.cjs --write --locales=th,tr,uk,vi,zh_Hant
-```
-
-Before committing, run the locale groups again with `--normalize-existing` (and without `--write` for a dry run) for a validation-only pass, then build and audit the site. Do not substitute a generic web translator: the guide contains MDX, Mermaid, file extensions, and export tokens that must remain structurally stable.
-
-### 1.9.7 Codex translation supplement
-
-For this release, the checked-in workflow above remains documented for compatibility, but it is not the execution path. Codex authors the English source and the Simplified Chinese counterpart directly, and writes any additional locale updates while preserving frontmatter, heading levels, Markdown/MDX structure, Mermaid fences, table columns, code spans, commands, URLs, file extensions, and product names.
-
-Use the offline sequence below for the release candidate:
-
-1. Update the canonical English MDX under `website/docs/`.
-2. Write the matching Simplified Chinese MDX under `website/i18n/zh-CN/` and update any explicitly published locale that needs visible behavior parity.
-3. Review each language side by side for semantic parity; keep each language in its own complete file.
-4. Run `npm --prefix website run build` and `npm --prefix website run audit:build`, then run the repository diagram/docs tests and `git diff --check`.
-
-Do not run the legacy `translate-*.cjs` `--write` commands, configure an LM Studio endpoint, or call an external translation API while preparing `1.9.7`. The release is accepted only when the Codex-authored files pass the offline site audit.
+Tools may enumerate files, check structure and render the authored content. They must not generate translations through external models. Keep the current indexability policy until each additional locale has independent publication evidence.
 
 ## 5. Release Notes Contract
 
@@ -133,15 +103,17 @@ Required release assets:
 npm run release:github -- <tag>
 ```
 
-For maintainer-side verification, `npm run release:github -- <tag> --dry-run` is the checked-in no-network proof path: it still validates the numeric tag, required assets, checked-in bilingual release notes, release-exists branch selection, and composed `gh release ...` command shape without performing the publish.
+For maintainer-side verification, `npm run release:github -- <tag> --dry-run` is the checked-in no-network proof path: it validates local version metadata, required assets and bilingual notes, then reports the source commit, working-tree state and asset SHA-256 values as JSON. It does not rebuild, query GitHub, or claim to know whether a release exists. Unknown, duplicated or extra arguments fail before external commands.
 
-The helper now enforces the required packaged assets plus both checked-in release-note files before invoking GitHub:
+The publishing operation owns the full transaction:
 
-- If the release does not exist yet, it combines `docs/releases/<tag>.md` and `docs/releases/<tag>.zh-CN.md`, then runs `gh release create ... --verify-tag`.
-- If the release already exists, it first rewrites the existing release body/title from those checked-in bilingual notes and then runs `gh release upload ... --clobber`.
-- If the tag is not numeric `x.x.x`, it fails immediately.
+- Require a clean checkout at the local tag, matching version metadata, and an identical remote tag commit. Annotated tags are dereferenced. Authentication, network and server failures are fatal; a by-tag 404 also checks authenticated draft listings.
+- Rebuild from the clean tagged sources. The workflow uses locked dependencies and Linux Node 20 as the authoritative publishing environment; Windows has separate behavioral verification. A pre-existing ignored `main.js` is not provenance.
+- Freeze the exact upload bytes, compose both note files, and record source commit and SHA-256 values in a hidden candidate-provenance comment in the release body.
+- Create a draft with `--verify-tag`, upload all four assets, download them again, and verify their state and hashes before making the release public. A failed upload or hash check leaves the release in draft.
+- Resume only a candidate with the same provenance and bilingual notes. Draft assets may be replaced with those same candidate bytes. Existing public assets must match and are never overwritten; a retry may only fill missing assets. Historical releases without matching provenance cannot be repaired by this publisher.
 
-That second path is the repair path for cases where a release body drifted from checked-in notes or plugin assets were not uploaded.
+Same-tag Actions runs are serialized. Local publication uses `.cache/.release-<tag>.lock`; a crash may leave it behind. Verify the recorded process is no longer active before removing that exact lock. Use one publisher, not concurrent local and Actions publishing. Public code fixes require a new patch version; never move a published tag or silently replace its binaries.
 
 ## 8. CI Automation
 
@@ -151,10 +123,10 @@ The repository also ships `.github/workflows/release.yml`:
 - Use `workflow_dispatch` with a numeric `x.x.x` `tag` input to repair an existing release from CI.
 - The same workflow now regenerates the quarterly development chronicle after publish, refreshes every root `README*.md` chronicle block, rewrites each localized `docs/repo-saga/notemd-development-history.<locale>.svg`, refreshes the English alias `docs/repo-saga/notemd-development-history.svg`, and pushes that documentation-only update back to `main`.
 - `npm run chronicle:sync-repo-saga` assembles `.cache/repo-saga-upstream` from the two upstream `repo-saga` branches we currently depend on: `feat/timeline-granularity` for quarter slicing and `feat-locale-i18n` for locale expansion.
-- This workflow does **not** run automatically for ordinary `main` pushes or PRs; pre-merge verification is still a local maintainer responsibility.
-- `main` currently has no branch protection and no ordinary push/PR workflow. If the commit-status API shows `pending` with zero statuses on `main`, treat GitHub Actions runs plus `check-suites` / `check-runs` as the real source of truth; release-tag runs may still attach successful checks to the same commit.
+- `.github/workflows/verify-plugin.yml` verifies ordinary PRs and pushes on Linux and Windows, including build, full Jest, audits, lint regression comparison and diff hygiene. These runs are separate from the tag-triggered publisher.
+- Inspect Actions runs and check-runs for the actual candidate commit. Workflow presence does not prove branch protection or a required check; do not infer failure from the legacy commit-status API returning no statuses.
 - The workflow now pins `actions/checkout@v6` and `actions/setup-node@v6` so the release path does not keep the older Node 20 JavaScript-action runtime warning alive.
-- The publish job runs `npm ci`, `npm run build`, `npm test -- --runInBand`, `npm run audit:i18n-ui`, `npm run audit:render-host`, `git diff --check`, and finally `npm run release:github -- "$TAG_NAME"`.
+- The publish job runs `npm ci`, installs the pinned Chromium revisions for both Playwright packages, builds, runs the full Jest suite and audits, checks diff hygiene, and invokes the publisher. The publisher rebuilds again to prove the origin of the ignored bundle.
 - The follow-up chronicle job runs `node scripts/repo-saga/update-quarterly-saga.mjs --tag "$TAG_NAME"` on `main`, then commits the refreshed `README*.md` blocks plus localized quarterly SVG set if anything changed.
 - The workflow-source checkout branch and chronicle push target are now named explicitly as `NOTEMD_RELEASE_WORKFLOW_SOURCE_BRANCH` and `NOTEMD_RELEASE_CHRONICLE_TARGET_BRANCH` in the workflow, while the repo-side default contract lives in `scripts/lib/packaging-contract.js`. GitHub Actions still needs bootstrap env values before the first checkout, but scripts, helper output, and tests now treat those branch names as release-contract truth instead of independent release-script defaults.
 - The release workflow tag trigger intentionally remains the GitHub Actions bootstrap literal `*.*.*`, but the owner of that literal is now `RELEASE_WORKFLOW_TAG_TRIGGER_GLOB` in `scripts/lib/packaging-contract.js`; `RELEASE_WORKFLOW_DISALLOWED_TAG_TRIGGER_GLOBS` keeps `v*.*.*` / `V*.*.*` out of the trigger list. The wildcard only decides whether the workflow starts. The checked-in tag validator remains the numeric `x.x.x` enforcement point.
@@ -166,6 +138,8 @@ The repository also ships `.github/workflows/release.yml`:
 - The workflow now validates tags through the checked-in `scripts/release/validate-release-tag.js` helper before checking out the release ref, so CI and repo-owned release helpers reuse the same numeric tag contract and still reject `v1.8.2`-style tags.
 
 The workflow intentionally reuses checked-in release helpers instead of duplicating asset lists, release-note logic, tag validation, or chronicle target defaults inside YAML-local script fragments.
+
+Deploy Pages explicitly after Release and chronicle verification. A Release or push created with `GITHUB_TOKEN` does not automatically trigger another release/push workflow. Confirm the public Release is downloadable before promoting it as the stable version on Pages; verify the live site's version, canonical links, language policy and deployment source revision.
 
 ## 9. Diagram Semantic Layer
 

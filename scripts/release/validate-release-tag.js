@@ -1,12 +1,10 @@
 const { validateReleaseTag } = require('./publish-github-release.js');
 
 function main(argv = process.argv.slice(2)) {
-    const tag = argv.find((arg) => !arg.startsWith('--'));
-    if (!tag) {
+    if (argv.length !== 1 || !argv[0] || argv[0].startsWith('--')) {
         throw new Error('Usage: node scripts/release/validate-release-tag.js <tag>');
     }
-
-    validateReleaseTag(tag);
+    validateReleaseTag(argv[0]);
     return 0;
 }
 

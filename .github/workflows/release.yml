@@ -14,34 +14,37 @@ on:
 permissions:
   contents: write
 
+concurrency:
+  group: release-${{ inputs.tag || github.ref_name }}
+  cancel-in-progress: false
+
 env:
   NOTEMD_RELEASE_WORKFLOW_SOURCE_BRANCH: main
   NOTEMD_RELEASE_CHRONICLE_TARGET_BRANCH: main
+  PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: '1'
 
 jobs:
   publish:
     runs-on: ubuntu-latest
+    outputs:
+      tag_name: ${{ steps.resolve_tag.outputs.tag_name }}
 
     steps:
-      - name: Resolve tag name
-        id: resolve_tag
-        shell: bash
-        run: |
-          TAG_NAME="${GITHUB_REF_NAME}"
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            TAG_NAME="${{ inputs.tag }}"
-          fi
-          echo "tag_name=$TAG_NAME" >> "$GITHUB_OUTPUT"
-          echo "TAG_NAME=$TAG_NAME" >> "$GITHUB_ENV"
-
       - name: Check out workflow sources
         uses: actions/checkout@v6
         with:
           fetch-depth: 0
           ref: ${{ env.NOTEMD_RELEASE_WORKFLOW_SOURCE_BRANCH }}
 
-      - name: Validate Obsidian release tag format
-        run: node scripts/release/validate-release-tag.js "$TAG_NAME"
+      - name: Resolve tag name
+        id: resolve_tag
+        shell: bash
+        env:
+          REQUESTED_TAG: ${{ inputs.tag || github.ref_name }}
+        run: |
+          node scripts/release/validate-release-tag.js "$REQUESTED_TAG"
+          echo "tag_name=$REQUESTED_TAG" >> "$GITHUB_OUTPUT"
+          echo "TAG_NAME=$REQUESTED_TAG" >> "$GITHUB_ENV"
 
       - name: Check out release ref
         uses: actions/checkout@v6
@@ -57,6 +60,12 @@ jobs:
 
       - name: Install dependencies
         run: npm ci
+
+      - name: Install pinned Chromium
+        run: npx --no-install playwright install --with-deps chromium
+
+      - name: Install the exporter Chromium revision
+        run: node node_modules/playwright-chromium/cli.js install chromium
 
       - name: Build plugin
         run: npm run build
@@ -81,19 +90,10 @@ jobs:
   refresh_chronicle:
     needs: publish
     runs-on: ubuntu-latest
+    env:
+      TAG_NAME: ${{ needs.publish.outputs.tag_name }}
 
     steps:
-      - name: Resolve tag name
-        id: resolve_tag
-        shell: bash
-        run: |
-          TAG_NAME="${GITHUB_REF_NAME}"
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            TAG_NAME="${{ inputs.tag }}"
-          fi
-          echo "tag_name=$TAG_NAME" >> "$GITHUB_OUTPUT"
-          echo "TAG_NAME=$TAG_NAME" >> "$GITHUB_ENV"
-
       - name: Check out chronicle target branch
         uses: actions/checkout@v6
         with:

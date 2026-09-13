@@ -201,7 +201,7 @@ describe('diagram semantic verification helper', () => {
             sourcePath: string;
             requiredAssets: string[];
             releaseTagPattern: string;
-            supportsReleaseModeSwitch: boolean;
+            supportsVerifiedPublication: boolean;
             resolvedFromReleaseHelper: boolean;
         };
         let resolveRenderHostAuditFacts: (args?: { auditScriptPath?: string }) => {
@@ -268,7 +268,7 @@ describe('diagram semantic verification helper', () => {
             sourcePath: string;
             requiredAssets: string[];
             releaseTagPattern: string;
-            supportsReleaseModeSwitch: boolean;
+            supportsVerifiedPublication: boolean;
             resolvedFromReleaseHelper: boolean;
         }, workflowFacts?: {
             sourcePath: string;
@@ -340,7 +340,7 @@ describe('diagram semantic verification helper', () => {
                 sourcePath: string;
                 requiredAssets: string[];
                 releaseTagPattern: string;
-                supportsReleaseModeSwitch: boolean;
+                supportsVerifiedPublication: boolean;
                 resolvedFromReleaseHelper: boolean;
             };
         }) => string;
@@ -827,7 +827,7 @@ const context = await esbuild.context({
             expect(OBSIDIAN_RELEASE_TAG_PATTERN.source).toBe(packagingContract.RELEASE_TAG_PATTERN_SOURCE);
             expect(facts.requiredAssets).toEqual(REQUIRED_RELEASE_ASSETS);
             expect(facts.releaseTagPattern).toBe(packagingContract.RELEASE_TAG_PATTERN_SOURCE);
-            expect(facts.supportsReleaseModeSwitch).toBe(true);
+            expect(facts.supportsVerifiedPublication).toBe(true);
             expect(facts.resolvedFromReleaseHelper).toBe(true);
             expect(workflowFacts.hasWorkflowDispatch).toBe(true);
             expect(workflowFacts.hasTagPushTrigger).toBe(true);
@@ -846,8 +846,9 @@ const context = await esbuild.context({
                 expect(lines[0]).toContain(`\`${assetName}\``);
             }
             expect(lines[1]).toContain('/^\\d+\\.\\d+\\.\\d+$/');
-            expect(lines[2]).toContain('create path composes bilingual notes');
-            expect(lines[2]).toContain('`--clobber`');
+            expect(lines[2]).toContain('offline preview');
+            expect(lines[2]).toContain('downloaded SHA-256');
+            expect(lines[2]).toContain('published assets remain immutable');
             expect(lines[3]).toContain(`tag push (\`${packagingContract.RELEASE_WORKFLOW_TAG_TRIGGER_GLOB}\`) + \`workflow_dispatch\``);
             expectReleaseWorkflowTriggerContractOwnerText(lines[3]);
             expect(lines[4]).toContain(`checked-in workflow sources are validated from configured workflow-source branch \`${packagingContract.RELEASE_WORKFLOW_SOURCE_BRANCH}\``);
@@ -867,7 +868,7 @@ const context = await esbuild.context({
             });
             expect(facts.requiredAssets).toEqual(packagingContract.REQUIRED_RELEASE_ASSET_FILES);
             expect(facts.releaseTagPattern).toBe(packagingContract.RELEASE_TAG_PATTERN_SOURCE);
-            expect(facts.supportsReleaseModeSwitch).toBe(false);
+            expect(facts.supportsVerifiedPublication).toBe(false);
             expect(facts.resolvedFromReleaseHelper).toBe(false);
             expect(workflowFacts.hasWorkflowDispatch).toBe(false);
             expect(workflowFacts.hasTagPushTrigger).toBe(false);
@@ -1033,8 +1034,8 @@ const context = await esbuild.context({
             expect(template).toContain('`styles.css`');
             expect(template).toContain('`README.md`');
             expect(template).toContain('/^\\d+\\.\\d+\\.\\d+$/');
-            expect(template).toContain('create path composes bilingual notes');
-            expect(template).toContain('`--clobber`');
+            expect(template).toContain('bilingual candidate provenance');
+            expect(template).toContain('published assets remain immutable');
             expect(template).toContain(`tag push (\`${packagingContract.RELEASE_WORKFLOW_TAG_TRIGGER_GLOB}\`) + \`workflow_dispatch\``);
             expectReleaseWorkflowTriggerContractOwnerText(template);
             expect(template).toContain(`checked-in workflow sources are validated from configured workflow-source branch \`${packagingContract.RELEASE_WORKFLOW_SOURCE_BRANCH}\``);
