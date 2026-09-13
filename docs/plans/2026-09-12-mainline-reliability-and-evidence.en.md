@@ -24,7 +24,7 @@ This plan follows the [September 12 assessment](../maintainer/project-plan-statu
 | U5 | Investigation closed: keep inline | Activation p95 289.3 ms, dense Mermaid p95 120 ms, stable warmed preview heap. Physical mobile and Obsidian 0.15.0 remain unverified. |
 | U6 | Evaluation complete; claims qualified by target | diagrams.net edit/save/reopen passed; six Tectonic templates plus five orientation variants compiled and visually reviewed. Drawnix native nodes roundtrip; attached cross-links fail and are explicitly unsupported. |
 | U7 | Bounded lane complete | Frozen 13-query corpus, snapshots, real Vault I/O, estimated context tokens and GC-controlled retained/released heap. `benchmark:local-kb` records build/query distributions; semantic/CJK misses remain visible. |
-| U8 | Bounded lane complete | Table border/alpha/merge fixes, actual PowerPoint 16 edit/save/reopen and unchanged visible-native fidelity gate. Raster-strict fidelity remains unclaimed. |
+| U8 | Bounded lane complete | Table border/alpha/merge fixes, actual PowerPoint 16 edit/save/reopen and unchanged visible-native fidelity gate. Follow-up native border assertions reject the old partial merged separator and pass both corrected exports and reopened files. Raster-strict fidelity remains unclaimed. |
 
 The [acceptance record](../maintainer/reliability-acceptance-2026-09-12.md) owns versions, measurements, hashes, screenshots and integration results. The user's full execution request included both bounded product lanes: U7 measures retrieval and fixes snapshot semantics; U8 fixes the observed table-paint defect family. Neither adds embeddings or general native Office reconstruction. Completed evaluation does not turn an unavailable device or failed consumer capability into a passing support claim.
 
@@ -171,6 +171,8 @@ Index construction currently enumerates Vault files and serially reads candidate
 **Approach:** fix one defect family at a time: font substitution, table padding/baseline, paragraph/list spacing, or layer order. Compare rendered-HTML reference with actual opened/reopened Office output. Attribute native text/table/shapes separately from fallback images. LibreOffice evidence must be labeled as LibreOffice; do not generalize it to PowerPoint.
 
 **Tests/exit:** CJK and missing-font cases, long/merged table cells, inline code, rich text and z-order maintain editable visible text without duplicate/background residue; per-slide drift and fallback ownership are recorded. Mermaid/SVG geometry remains explicit fallback unless a separate user requirement warrants native reconstruction. Without a real consumer, this stays a local writer/structure improvement and cannot close the Office fidelity claim.
+
+**Completion-audit follow-up:** a full-slide RMSE pass missed a half-width merged-header separator. The existing DOM extraction boundary now resolves adjacent row edges, with hidden/tie/rowspan/separate-table regressions. `scripts/verify-powerpoint-merged-border.ps1` rejects the archived baseline and checks native visibility, color, opacity and width on both corrected export and saved/reopened files. [Evidence](../maintainer/evidence/2026-09-13/pptx-collapsed-row-borders.json) supplements the existing visual gate without changing its thresholds.
 
 ## Tradeoffs And Rejected Shortcuts
 

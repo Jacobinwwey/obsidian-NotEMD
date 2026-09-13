@@ -2,6 +2,10 @@
   "schemaVersion": 1,
   "recordedDate": "2026-09-13",
   "baselineMain": "090098ffece758a027ce48f19f171e5707509aa0",
+  "followUp": {
+    "record": "../2026-09-13/pptx-collapsed-row-borders.json",
+    "reason": "The initial U8 whole-slide gate missed a partial merged-header separator. The follow-up fixes adjacent row-edge projection and adds native PowerPoint rejection/acceptance. localVerification below remains the original audit snapshot."
+  },
   "localVerification": {
     "build": "passed",
     "suitesPassed": 282,
@@ -123,9 +127,10 @@
       ],
       "evidence": [
         "office-roundtrip.json",
-        "verification.json#/consumers/powerpoint"
+        "verification.json#/consumers/powerpoint",
+        "../2026-09-13/pptx-collapsed-row-borders.json"
       ],
-      "disposition": "The selected table-paint defect family passes actual PowerPoint roundtrip and the unchanged visible-native gate.",
+      "disposition": "The selected table-paint defect family passes actual PowerPoint roundtrip, the unchanged visible-native gate and the follow-up native merged-border assertion.",
       "notPromoted": [
         "raster-strict equivalence",
         "fully native Mermaid/SVG reconstruction"

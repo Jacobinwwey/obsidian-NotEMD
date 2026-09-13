@@ -1,7 +1,7 @@
 import { cp } from 'node:fs/promises';
 import { resolve } from 'node:path';
 
-const nativeArtifactExtensions = ['drawio', 'drawnix', 'tex', 'log'];
+const nativeArtifactExtensions = ['drawio', 'drawnix', 'tex', 'log', 'pptx'];
 // Native evidence downloads are assets, not documentation page routes.
 process.env.VITE_EXTRA_EXTENSIONS = [process.env.VITE_EXTRA_EXTENSIONS, nativeArtifactExtensions.join(',')]
     .filter(Boolean).join(',');

@@ -9,7 +9,7 @@ plan: ../plans/2026-09-12-mainline-reliability-and-evidence.en.md
 
 Language: **English** | [简体中文](./reliability-acceptance-2026-09-12.zh-CN.md)
 
-The [implementation plan](../plans/2026-09-12-mainline-reliability-and-evidence.en.md) follows the `7638cec` audit. This record owns execution evidence. [Machine-readable measurements and artifact hashes](./evidence/2026-09-12/verification.json) distinguish each measured bundle from the final production bundle. Version metadata remains `1.9.7`; this batch does not create a release or tag.
+The [implementation plan](../plans/2026-09-12-mainline-reliability-and-evidence.en.md) follows the `7638cec` audit. This record owns execution evidence. The [initial measurements and hashes](./evidence/2026-09-12/verification.json) identify their measured bundles; the [subsequent U8 record](./evidence/2026-09-13/pptx-collapsed-row-borders.json) identifies the corrected exporter and its new production bundle. Version metadata remains `1.9.7`; this batch does not create a release or tag.
 
 ## Disposition
 
@@ -22,7 +22,7 @@ The [implementation plan](../plans/2026-09-12-mainline-reliability-and-evidence.
 | U5 | Named host timing, repeated preview/GC control, desktop/mobile-emulation checks | Keep inline; physical mobile and Obsidian 0.15.0 remain unverified |
 | U6 | Drawnix and diagrams.net edit/save/reopen; six compiler fixtures plus five orientation variants | Drawnix node roundtrip passed, attached cross-branch arrows failed; its runtime now reports that limitation |
 | U7 | Immutable batch snapshots, removed/moved-file handling, frozen corpus and real Vault timing | Lexical quality has measured misses; this is not semantic-search acceptance |
-| U8 | Correct DrawingML ordering, per-edge alpha, collapsed row separators, merged outer borders | Actual PowerPoint edit/save/reopen passed; native fonts are not pixel-identical to Chromium |
+| U8 | Correct DrawingML ordering, per-edge alpha and both sides of collapsed row separators, including merged headers | Actual PowerPoint edit/save/reopen and native border assertions passed; native fonts are not pixel-identical to Chromium |
 
 ## Cancellation And Persistence
 
@@ -30,7 +30,7 @@ The [implementation plan](../plans/2026-09-12-mainline-reliability-and-evidence.
 
 Artifact saves reserve the complete primary/SVG/wrapper/companion path set synchronously. Conflicting saves serialize within one Vault; independent outputs can progress concurrently. Text preimages are captured through `Vault.process`. Compensation changes a file only when its identity and current contents still match this operation. Legacy hosts without that atomic API receive recovery copies instead of unsafe read-then-write rollback.
 
-Path identity is checked inside the host's atomic transform, and after legacy text/binary snapshot reads. Checking before an asynchronous `Vault.process` call was insufficient: a queued callback could act on a renamed/replaced file. Five new red/green cases cover those schedules. All five also passed in real Obsidian on the final bundle, including recovery-copy contents and subsequent queue usability: [host evidence](./evidence/2026-09-12/obsidian-persistence.json). The separate `verify:obsidian-persistence` probe requires the disposable-Vault marker and performs no window timing measurements.
+Path identity is checked inside the host's atomic transform, and after legacy text/binary snapshot reads. Checking before an asynchronous `Vault.process` call was insufficient: a queued callback could act on a renamed/replaced file. Five new red/green cases cover those schedules. All five also passed in real Obsidian on the initial reliability bundle, including recovery-copy contents and subsequent queue usability: [host evidence](./evidence/2026-09-12/obsidian-persistence.json). The separate `verify:obsidian-persistence` probe requires the disposable-Vault marker and performs no window timing measurements.
 
 There is no atomic binary restore or compare-and-delete API. Partial creations and binary outputs are retained and reported; recovery filenames end in `.notemd-recovery-<id>` so Markdown batches do not consume them. Old Drawnix companion folders are retained for inspection: generated names and a manifest do not establish ownership after editor/sync changes. Cancellation is checked again after snapshot reads and before subsequent directory creation.
 
@@ -42,7 +42,7 @@ Real Obsidian 1.13.7, installer 1.12.7, Electron 39.8.3 / Chromium 142.0.7444.26
 
 ## Verification And CI
 
-The completion audit's fresh build and full Jest passed: **282 suites, 2593 tests, 1 skipped**. The skipped case requires POSIX descendant-process termination. Its three changed TypeScript test files add **zero lint regressions** against `090098f`; the earlier 25-file implementation comparison remains in the original evidence. UI-string and render-host audits, 33 gallery fixtures, and 33 archived real-Vault examples passed. Full lint still has historical debt. Bilingual coverage includes untracked repository documents, and the Office fixture has a separate Chinese counterpart.
+The initial completion audit's fresh build and full Jest passed: **282 suites, 2593 tests, 1 skipped**. The skipped case requires POSIX descendant-process termination. Its three changed TypeScript test files add **zero lint regressions** against `090098f`; the earlier 25-file implementation comparison remains in the original evidence. UI-string and render-host audits, 33 gallery fixtures, and 33 archived real-Vault examples passed. The [U8 follow-up receipt](./evidence/2026-09-13/pptx-collapsed-row-borders.json) records a fresh build, **282 suites / 2598 passing tests / one POSIX skip**, zero lint regressions across two TypeScript files, both audits and the VitePress build. Full lint still has historical debt. Bilingual coverage includes untracked repository documents, and the Office fixture has a separate Chinese counterpart.
 
 The workflow uses `npm ci`, Node 20 on Linux and Windows, and installs the browser revisions resolved by both `playwright` 1.61.0 and `playwright-chromium` 1.61.1. It has read-only repository permission, no provider secrets and no publication step. The ratchet matches path/rule/severity/message/column and mapped original line, consumes duplicate diagnostics one-to-one, handles renames and fails closed on tool/configuration failure. Removed debt cannot hide a different new error. Branch protection remains a separate administrative setting.
 
@@ -66,7 +66,7 @@ The [positive PR run](https://github.com/Jacobinwwey/obsidian-NotEMD/actions/run
 
 ## Completion Audit Against The Original Plan
 
-The [completion audit](./evidence/2026-09-12/completion-audit.json) maps every unit to current passing test files and retained evidence. It closes two evidence gaps without changing production behavior: same-basename/shared-companion failure schedules in U2, and controlled retained heap plus context-token estimates in U7. The production bundle remains byte-identical to the real-host-tested bundle.
+The [initial completion audit](./evidence/2026-09-12/completion-audit.json) maps every unit to passing tests and retained evidence. It closed two evidence gaps without changing production behavior: same-basename/shared-companion failure schedules in U2, and controlled retained heap plus context-token estimates in U7. Its bundle at `607c35d` was byte-identical to the real-host-tested bundle. The subsequent audit reproduced U8's partial merged-header separator in that accepted PowerPoint file and corrected the DOM exporter. Its new bundle, native negative/positive checks and archived PPTX files are recorded separately; the original host observations are not relabeled as tests of the new bundle.
 
 | Unit | Requirement and evidence | Disposition |
 |---|---|---|
@@ -77,11 +77,11 @@ The [completion audit](./evidence/2026-09-12/completion-audit.json) maps every u
 | U5 | Named host activation/preview/GC budget and keep-inline decision | Original timeboxed exit satisfied; physical mobile/0.15.0 remain explicitly unverified |
 | U6 | Native edit/save/reopen and pinned compiler/PDFium records | Original target-specific admission completed; failed Drawnix attachment is not promoted |
 | U7 | Frozen relevance labels, snapshots, context cost, build/query distributions, real-Vault I/O and GC-controlled retained/released heap | Verified; no tuning to held-out labels |
-| U8 | Native table-paint fixes, CJK/missing-font/merge/layer fixture, actual PowerPoint roundtrip and unchanged visible-native gate | Selected defect family verified; raster equivalence remains unclaimed |
+| U8 | Native table-paint fixes, CJK/missing-font/merge/layer fixture, actual PowerPoint roundtrip, unchanged visible-native gate and explicit merged-border rejection/acceptance | Selected defect family verified; raster equivalence remains unclaimed |
 
 ## Host Cost And Packaging Decision
 
-Measured on an i5-12600K with 64 GiB RAM. The final bundle is **10,059,753 bytes**, gzip **3,730,433 bytes**. Recorded activation is an eight-sample disable/enable measurement in an already running renderer, not complete OS process startup. Performance and final persistence probes identify their respective tested bundle hashes in the evidence JSON.
+Measured on an i5-12600K with 64 GiB RAM. The initial reliability bundle was **10,059,753 bytes**, gzip **3,730,433 bytes**; the U8 follow-up is **10,060,011 bytes**, gzip **3,730,501 bytes**. Recorded activation is an eight-sample disable/enable measurement in an already running renderer, not complete OS process startup. The performance and persistence observations below retain their original tested bundle hashes; the follow-up changes only table extraction.
 
 | Foreground path | First use (ms) | Warm p50 / p95 (ms), n=8 |
 |---|---:|---:|
@@ -133,17 +133,24 @@ The evaluator's tests assert scope/budget/schema behavior. Its score report can 
 
 ## PowerPoint Fidelity
 
-The [bilingual content fixture](./fixtures/pptx-office-fidelity.md) produced 10 slides, 18 editable text boxes and two native tables. PowerPoint **16.0 build 14332** edited a native cell, saved a separate PPTX, reopened it and rendered all ten slides. The edited cell and all six CJK-bearing table grid cells survived. [Roundtrip report](./evidence/2026-09-12/office-roundtrip.json).
+The [bilingual content fixture](./fixtures/pptx-office-fidelity.md) produced 10 slides, 18 editable text boxes and two native tables. PowerPoint **16.0 build 14332** edited a native cell, saved a separate PPTX, reopened it and rendered all ten slides. The edited cell and all six CJK-bearing table grid cells survived. [Latest roundtrip report](./evidence/2026-09-13/office-roundtrip.json).
 
 The fix family is table paint: DrawingML line properties now precede the fill group, each edge retains its opacity, collapsed row separators reach native cells, and merged continuation cells carry only the external border. Before/after table-slide RMSE improved from **0.192665 to 0.159463**. The repository's existing visible-native profile passed (max 0.25, mean 0.145); the additional raster-strict experiment (0.12/0.08) remains failed. No thresholds were changed. Font shaping, CJK baselines and complex CSS still differ between Chromium and Office; Mermaid/SVG geometry remains explicit image fallback.
 
-![Before: Chromium reference and PowerPoint](./evidence/2026-09-12/office-table-before.png)
+The subsequent completion audit found that this aggregate gate had missed a half-width merged-header separator. `pptxDomExtractor.ts` now includes the opposite edge of adjoining rows when resolving collapsed row paint, preserving hidden-edge precedence, equal-width upper-row precedence, rowspan outer boundaries and separate-table behavior. Eight focused cases pass. A native PowerPoint check rejects the archived baseline's mixed/invisible border and accepts the corrected export and reopened PPTX: all three touching edges are visible with color `9CA3AF`, transparency `0.8` and width approximately `0.97827 pt`. The table-slide RMSE remains **0.159463** at reported precision, which demonstrates why this localized contract needs a native assertion in addition to a whole-slide score. [Full receipt and artifact hashes](./evidence/2026-09-13/pptx-collapsed-row-borders.json).
 
-![After: Chromium reference and PowerPoint](./evidence/2026-09-12/office-table-after.png)
+![Before the shared-edge fix: Chromium reference and PowerPoint](./evidence/2026-09-13/office-table-before.png)
+
+![After the shared-edge fix: Chromium reference and PowerPoint](./evidence/2026-09-13/office-table-after.png)
 
 ```bash
 npm run verify:slidev-export -- --vault docs/maintainer/fixtures --source pptx-office-fidelity.md --format pptx --output-subfolder export --sample-slides all --require-pptx-visual-match --pptx-visual-renderer powerpoint --json
+powershell -NoProfile -File scripts/verify-powerpoint-merged-border.ps1 -InputPptx docs/maintainer/evidence/2026-09-13/office-roundtrip.pptx -ReportPath .cache/office-merged-border.json
 ```
+
+Use a fresh report path for each native-border run. The archived `office-before.pptx` must fail the same check; `office-after.pptx` and `office-roundtrip.pptx` must pass. The read-only probe refuses an existing PowerPoint session and waits for its COM references/process to finish before returning.
+
+Download the [baseline PPTX](./evidence/2026-09-13/office-before.pptx), [corrected export](./evidence/2026-09-13/office-after.pptx) and [saved/reopened PPTX](./evidence/2026-09-13/office-roundtrip.pptx) to rerun the native acceptance independently.
 
 For native editing acceptance on Windows, run `scripts/verify-powerpoint-roundtrip.ps1` with `-InputPptx` and a new `-OutputDirectory`; it refuses an already running PowerPoint session and never overwrites the input. For Obsidian, use `npm run verify:obsidian-host -- --vault <disposable-vault> --cli <obsidian-cli-executable>` after copying the built plugin and creating the explicit marker. No committed gate depends on `.trellis/` or an untracked cache report.
 

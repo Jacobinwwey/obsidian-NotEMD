@@ -1,0 +1,39 @@
+{
+  "observedAt": "2026-09-13T00:33:58.2841871Z",
+  "passed": true,
+  "application": "Microsoft PowerPoint",
+  "version": "16.0",
+  "build": "14332",
+  "sourceSha256": "19e58f176b2dd8d5073c18d0bfc390a37736181563aeb771268cf40913530c49",
+  "slide": 5,
+  "borders": [
+    {
+      "row": 1,
+      "column": 1,
+      "edge": 3,
+      "visible": -1,
+      "colorRgb": 11510684,
+      "transparency": 0.800000011920929,
+      "weightPt": 0.9782677292823792
+    },
+    {
+      "row": 2,
+      "column": 1,
+      "edge": 1,
+      "visible": -1,
+      "colorRgb": 11510684,
+      "transparency": 0.800000011920929,
+      "weightPt": 0.9782677292823792
+    },
+    {
+      "row": 2,
+      "column": 2,
+      "edge": 1,
+      "visible": -1,
+      "colorRgb": 11510684,
+      "transparency": 0.800000011920929,
+      "weightPt": 0.9782677292823792
+    }
+  ],
+  "failures": []
+}

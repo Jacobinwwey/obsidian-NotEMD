@@ -51,6 +51,7 @@ Verification requirements:
 - `scripts/verify-obsidian-host.cjs` only operates on a disposable Vault marked with `.notemd-host-verification`; keep that Vault visible for comparable preview timing.
 - `scripts/verify-obsidian-persistence.cjs` uses the same marker and bundle checks to exercise real rename/replacement races without timing a window. Reload the copied plugin first; it restores injected Vault methods/settings after each run.
 - `scripts/verify-powerpoint-roundtrip.ps1` saves an editable table change to a separate PPTX, reopens it and renders it with installed PowerPoint. It refuses an existing PowerPoint session.
+- `scripts/verify-powerpoint-merged-border.ps1` checks the Office fidelity fixture's merged separator through native PowerPoint properties. Run it on exported and reopened PPTX files; full-slide RMSE and DrawingML node presence cannot prove a complete border. It opens read-only, refuses an existing session/report and waits for its COM session to close.
 - The Drawnix Plait gate verifies hierarchy and static arrow serialization. It must not be reported as proof of attached cross-branch arrows in the Drawnix application.
 
 ### Obsidian CLI Checks

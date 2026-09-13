@@ -1,0 +1,196 @@
+{
+  "schemaVersion": 1,
+  "observedAt": "2026-09-13T00:46:03.180Z",
+  "baselineMain": "607c35d10600c3fa8d9c23241f98ee159c0106ac",
+  "unit": "U8",
+  "defect": "A collapsed row border was not projected onto the opposite edge of the adjoining row. PowerPoint dropped half of the merged-header separator despite existing XML and full-slide RMSE checks passing.",
+  "implementation": "Resolve bordering row paint in pptxDomExtractor, preserving hidden precedence, equal-width upper-row precedence, rowspan outer edges and separate-table behavior.",
+  "sourceHashNormalization": "UTF-8/LF",
+  "sources": [
+    {
+      "file": "src/slideExport/pptxDomExtractor.ts",
+      "sha256": "57cfd58089339ca5fd17df85f10b2875cf4e9d9c4e7fa3c508695ecf047f0050"
+    },
+    {
+      "file": "src/tests/pptxTableBorderFidelity.test.ts",
+      "sha256": "e23214c64bb937e8ba2574270faaac95c87fedd40fcdc2a8c5fe63e88b7313fc"
+    },
+    {
+      "file": "scripts/verify-powerpoint-merged-border.ps1",
+      "sha256": "41fbc9dff1e1c1ff7bfe14d0c4b9af309a4a77fc79d5dfa4ccd3b9fcd346a339"
+    },
+    {
+      "file": "docs/maintainer/fixtures/pptx-office-fidelity.md",
+      "sha256": "0326d1f70364c9f7a17f1029814ab0aee9adad6c180a5c7dd8ad5c18dfac2046"
+    }
+  ],
+  "productionBundle": {
+    "bytes": 10060011,
+    "gzipBytes": 3730501,
+    "sha256": "cf3166981cda70ed0a6a5c4f03d1e4159c3882d99ca6d099d42324d6c5cc99a7"
+  },
+  "regression": {
+    "failingAssertionsBeforeFix": 4,
+    "existingPassingCasesBeforeFix": 3,
+    "focusedCasesAfterFix": 8,
+    "freshFullSuite": {
+      "passed": true,
+      "suitesPassed": 282,
+      "testsPassed": 2598,
+      "testsFailed": 0,
+      "testsSkipped": 1,
+      "skipReason": "POSIX descendant-process termination is not available on Windows",
+      "command": "npm test -- --runInBand"
+    },
+    "build": "passed",
+    "lint": {
+      "changedTypeScriptFiles": 2,
+      "regressions": 0,
+      "base": "607c35d"
+    },
+    "i18nUiAudit": "passed",
+    "renderHostAudit": "passed",
+    "vitepressBuild": "passed"
+  },
+  "nativeBorder": {
+    "before": "office-border-before.json",
+    "after": "office-border-after.json",
+    "reopened": "office-border-reopened.json",
+    "expectedBeforePassed": false,
+    "afterPassed": true,
+    "reopenedPassed": true
+  },
+  "nativeRoundtrip": {
+    "passed": true,
+    "application": "Microsoft PowerPoint",
+    "version": "16.0",
+    "build": "14332",
+    "sourceSha256": "c30054e56a2d35d639d67b655bc026729e33414b9d6ebb5c452520eb7028cc99",
+    "roundtripSha256": "19e58f176b2dd8d5073c18d0bfc390a37736181563aeb771268cf40913530c49",
+    "slideCount": 10,
+    "nativeTableCount": 2,
+    "editedCellCount": 1,
+    "reopenedMatchingCellCount": 1,
+    "cjkTableCellCountBefore": 6,
+    "cjkTableCellCountAfter": 6,
+    "pngCount": 10
+  },
+  "visualGate": {
+    "required": true,
+    "referenceSource": "pptx-rendered-html-reference",
+    "observedPassed": true,
+    "passed": true,
+    "failures": [],
+    "thresholds": {
+      "maxRmse": 0.25,
+      "meanRmse": 0.145
+    },
+    "thresholdProfile": "visible-native-rendered-html",
+    "thresholdOverrides": {
+      "maxRmse": false,
+      "meanRmse": false
+    }
+  },
+  "visualComparison": {
+    "renderer": "Microsoft PowerPoint 16.0 build 14332",
+    "meanRmse": 0.10418424,
+    "maxRmse": 0.165596,
+    "perSlide": [
+      {
+        "slide": 1,
+        "rmse": 0.165596
+      },
+      {
+        "slide": 2,
+        "rmse": 0.101428
+      },
+      {
+        "slide": 3,
+        "rmse": 0.145045
+      },
+      {
+        "slide": 4,
+        "rmse": 0.10449
+      },
+      {
+        "slide": 5,
+        "rmse": 0.159463
+      },
+      {
+        "slide": 6,
+        "rmse": 0.0906794
+      },
+      {
+        "slide": 7,
+        "rmse": 0.0517177
+      },
+      {
+        "slide": 8,
+        "rmse": 0.113958
+      },
+      {
+        "slide": 9,
+        "rmse": 0.0971335
+      },
+      {
+        "slide": 10,
+        "rmse": 0.0123318
+      }
+    ],
+    "limitation": "The table-slide RMSE remains 0.159463 at the reported precision; low-contrast missing borders require a native property assertion and visual inspection. Existing thresholds are unchanged."
+  },
+  "artifacts": [
+    {
+      "file": "office-before.pptx",
+      "bytes": 64805,
+      "sha256": "3d05485272743d172f1ecb6ed51e85b5d0ad8c2cbe0da1ea2035b16c287e3e94"
+    },
+    {
+      "file": "office-after.pptx",
+      "bytes": 64842,
+      "sha256": "c30054e56a2d35d639d67b655bc026729e33414b9d6ebb5c452520eb7028cc99"
+    },
+    {
+      "file": "office-roundtrip.pptx",
+      "bytes": 154180,
+      "sha256": "19e58f176b2dd8d5073c18d0bfc390a37736181563aeb771268cf40913530c49"
+    },
+    {
+      "file": "office-table-before.png",
+      "bytes": 474380,
+      "sha256": "da956cda96a68766a5b2bc8fdafa2a5c1ddb5ef14327d05b0f7887a7ef695e88"
+    },
+    {
+      "file": "office-table-after.png",
+      "bytes": 474367,
+      "sha256": "3815619178cc395c74f0688fce72453c48539bebfeac8c41ad83b88c735d7ae1"
+    },
+    {
+      "file": "office-table-reopened.png",
+      "bytes": 37298,
+      "sha256": "e92b836ce62cb70611594de65af44c01fa127beaf1470f011b01c9b9a7a4136f"
+    },
+    {
+      "file": "office-border-before.json",
+      "bytes": 1018,
+      "sha256": "2872b725600ff1b8bd6a07fb34ba56ffc1ff809391e5cbe5e7adbc5f56df91da"
+    },
+    {
+      "file": "office-border-after.json",
+      "bytes": 864,
+      "sha256": "f247d48390262ffb094cc5176002197014c503d32a8452122121d6664e0da4be"
+    },
+    {
+      "file": "office-border-reopened.json",
+      "bytes": 864,
+      "sha256": "28038f17b9f0518f39af2575fd977bd055f943c9c9375935526c705a84864fc3"
+    },
+    {
+      "file": "office-roundtrip.json",
+      "bytes": 462,
+      "sha256": "386dfa1f6f09536b480231b29faea6b12f469794b3947b549154332175134b78"
+    }
+  ],
+  "scope": "Collapsed row-owned separators only. This does not promote arbitrary CSS border conflict resolution, raster equivalence, native Mermaid/SVG reconstruction, or additional host/device support.",
+  "reportSerialization": "Diagnostic JSON is canonical UTF-8/LF with unchanged values; PPTX and PNG assets retain their original producer bytes."
+}

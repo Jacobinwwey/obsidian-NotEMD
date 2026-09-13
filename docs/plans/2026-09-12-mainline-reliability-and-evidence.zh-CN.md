@@ -24,7 +24,7 @@ audit_commit: 7638cec
 | U5 | 调查关闭：保持内联 | 激活 p95 289.3 ms、密集 Mermaid p95 120 ms、预热预览堆占用稳定；物理移动设备与 Obsidian 0.15.0 仍未验证。 |
 | U6 | 评估完成；逐 target 限定声明 | diagrams.net 编辑／保存／重开通过；6 个 Tectonic 模板及 5 个方向变体完成编译与视觉复核。Drawnix 原生节点往返通过，跨枝连线附着失败并明确不支持。 |
 | U7 | 有界质量线已完成 | 固定 13 查询语料、快照、真实 Vault I/O、上下文 token 估算、GC 控制的保留／释放堆；`benchmark:local-kb` 记录构建／查询分布，语义／中文未命中仍可见。 |
-| U8 | 有界质量线已完成 | 表格边框／透明度／合并修复，真实 PowerPoint 16 编辑／保存／重开，既有 visible-native 门禁通过；不宣称 raster-strict 保真。 |
+| U8 | 有界质量线已完成 | 表格边框／透明度／合并修复，真实 PowerPoint 16 编辑／保存／重开，既有 visible-native 门禁通过。后续原生边框断言拒绝旧版不完整合并分隔线，并通过修正后的导出和重开文件；不宣称 raster-strict 保真。 |
 
 [验收记录](../maintainer/reliability-acceptance-2026-09-12.zh-CN.md) 负责版本、测量、哈希、截图和集成结果。用户要求全量执行，因此覆盖两条有界产品线：U7 测量检索并修复快照语义，U8 修复实测表格绘制缺陷；均不引入 embedding 或通用 Office 原生重建。评估完成不代表不可用设备或失败的 consumer 能力已通过支持验收。
 
@@ -171,6 +171,8 @@ flowchart TB
 **方案：** 每次只修一类缺陷：字体替换、table padding／baseline、段落／列表间距、layer order。将 rendered HTML reference 与真实 Office 打开／重开输出比较，单独归因 native text／table／shape 与 fallback image。LibreOffice 证据标记为 LibreOffice，不推及 PowerPoint。
 
 **测试／退出：** CJK、缺失字体、长／合并单元格、inline code、rich text、z-order 保持可见可编辑文本，没有重复／背景残留；记录每页 drift 和 fallback 归属。除非另有明确用户需求，Mermaid／SVG geometry 保持显式 fallback。没有真实 consumer 时，只能称为本地 writer／结构改善，不能关闭 Office 保真声明。
+
+**完成度复核补充：** 全页 RMSE 通过仍漏掉了合并表头半宽分隔线。现有 DOM 提取边界补齐相邻行边框，回归覆盖 hidden、同宽优先级、跨行及非折叠表格。`scripts/verify-powerpoint-merged-border.ps1` 拒绝归档旧产物，并检查修正后的导出和保存重开文件中边线的原生可见性、颜色、透明度和宽度。[证据](../maintainer/evidence/2026-09-13/pptx-collapsed-row-borders.json) 补充既有视觉门禁，不修改其阈值。
 
 ## 权衡与否决的捷径
 

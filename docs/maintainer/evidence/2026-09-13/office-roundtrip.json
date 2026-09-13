@@ -1,0 +1,15 @@
+{
+  "passed": true,
+  "application": "Microsoft PowerPoint",
+  "version": "16.0",
+  "build": "14332",
+  "sourceSha256": "c30054e56a2d35d639d67b655bc026729e33414b9d6ebb5c452520eb7028cc99",
+  "roundtripSha256": "19e58f176b2dd8d5073c18d0bfc390a37736181563aeb771268cf40913530c49",
+  "slideCount": 10,
+  "nativeTableCount": 2,
+  "editedCellCount": 1,
+  "reopenedMatchingCellCount": 1,
+  "cjkTableCellCountBefore": 6,
+  "cjkTableCellCountAfter": 6,
+  "pngCount": 10
+}
