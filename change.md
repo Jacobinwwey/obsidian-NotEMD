@@ -14,6 +14,7 @@ This document summarizes the major functional and architectural changes implemen
 - Fixed knowledge indexing when notes disappear or move outside the selected scope. Added a frozen multilingual evaluation corpus and documented immutable batch snapshot semantics.
 - Completed same-basename/shared-companion save regressions and added a fresh-process retrieval cost benchmark with collected retained/released heap, context-token estimates and stable corpus hashes across checkout line endings.
 - Fixed PowerPoint table border child ordering, independent edge paint/opacity, collapsed row separators and merged-cell outer borders. Verified editable save/reopen with PowerPoint 16.0 build 14332.
+- Completed collapsed row separators on both touching cell edges, including merged headers and rowspan boundaries. Added a native PowerPoint border gate that rejects the previously accepted half-width separator while preserving hidden-edge precedence and separate-table behavior.
 - Fixed Circuitikz NAND/NOR gate routing and mirrored component labels, plus transmission-gate terminal/control routing. Six golden templates and five orientation variants passed pinned offline compilation and independent PDFium visual review.
 - Measured the Obsidian host and external consumers. Drawnix now warns about static cross-branch arrows; native node roundtrip does not imply attached arrows after application reflow. Kept the existing inline bundle based on measured preview cost.
 
@@ -25,6 +26,7 @@ This document summarizes the major functional and architectural changes implemen
 - 修复知识索引期间笔记被删除或移出选定范围的问题。新增冻结的多语言评估语料，明确批处理不可变读取快照语义。
 - 补齐同名来源／共享附件的保存回归，新增独立进程检索成本基准，包含 GC 后保留／释放堆、上下文 token 估算及跨 checkout 换行稳定的语料哈希。
 - 修复 PowerPoint 表格边线节点顺序、独立侧边与透明度、折叠行分隔线及合并单元格外边线；在 PowerPoint 16.0 build 14332 中验证原生单元格编辑、保存与重开。
+- 补齐折叠行边框在两侧相邻单元格上的投影，覆盖合并表头和跨行边界。新增原生 PowerPoint 边框门禁，拒绝先前漏检的半宽分隔线，并保留 hidden 边优先级及非折叠表格行为。
 - 修复 Circuitikz NAND／NOR 栅极连线与镜像器件标签，以及传输门端子／控制线布局；6 个 golden template 和 5 个方向变体通过固定版本离线编译及独立 PDFium 视觉复核。
 - 完成 Obsidian 宿主及外部消费端测量。Drawnix 新增固定坐标跨分支箭头限制提示，节点往返成功不代表应用重排后连线仍附着。根据预览成本实测保留当前内联打包。
 

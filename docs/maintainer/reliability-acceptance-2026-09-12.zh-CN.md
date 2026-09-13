@@ -9,7 +9,7 @@ plan: ../plans/2026-09-12-mainline-reliability-and-evidence.zh-CN.md
 
 Language: [English](./reliability-acceptance-2026-09-12.md) | **简体中文**
 
-[实施计划](../plans/2026-09-12-mainline-reliability-and-evidence.zh-CN.md) 承接 `7638cec` 审计。本记录负责执行证据，[机器可读测量与产物哈希](./evidence/2026-09-12/verification.json) 分别标识各阶段实测 bundle 和最终生产 bundle。版本元数据保持 `1.9.7`，本批次不创建 release 或 tag。
+[实施计划](../plans/2026-09-12-mainline-reliability-and-evidence.zh-CN.md) 承接 `7638cec` 审计。本记录负责执行证据。[初始测量与哈希](./evidence/2026-09-12/verification.json) 标识各自实测 bundle；[后续 U8 记录](./evidence/2026-09-13/pptx-collapsed-row-borders.json) 标识修正后的 exporter 及新的生产 bundle。版本元数据保持 `1.9.7`，本批次不创建 release 或 tag。
 
 ## 各阶段结论
 
@@ -22,7 +22,7 @@ Language: [English](./reliability-acceptance-2026-09-12.md) | **简体中文**
 | U5 | 明确宿主的耗时、预览循环/GC 对照、桌面与移动模拟 | 保留内联打包；物理移动设备及 Obsidian 0.15.0 未验证 |
 | U6 | Drawnix、diagrams.net 编辑保存重开；六个编译样例加五个方向变体 | Drawnix 节点往返通过，跨分支箭头附着失败；运行时已提示限制 |
 | U7 | 批处理不可变快照、删除/移动文件处理、冻结语料及真实 Vault 耗时 | 词法检索仍有实测漏召回，不构成语义搜索验收 |
-| U8 | DrawingML 顺序、各侧透明度、折叠行分隔线、合并外边线修正 | 真实 PowerPoint 编辑保存重开通过；字体与 Chromium 不保证像素一致 |
+| U8 | DrawingML 顺序、各侧透明度、折叠行分隔线两侧及合并表头修正 | 真实 PowerPoint 编辑保存重开和原生边框断言通过；字体与 Chromium 不保证像素一致 |
 
 ## 取消与持久化
 
@@ -30,7 +30,7 @@ Language: [English](./reliability-acceptance-2026-09-12.md) | **简体中文**
 
 图表保存同步预留 primary/SVG/wrapper/companion 的完整路径集合。相同 Vault 内的冲突保存串行，不同输出仍可并行。文本旧内容由 `Vault.process` 原子捕获；补偿只操作身份和当前内容仍属于本次写入的文件。旧宿主没有该原子 API 时，生成恢复副本，避免读后再覆盖的非原子回滚。
 
-路径身份校验位于 host 原子变换内部，以及旧宿主文本／二进制快照读取之后。仅在异步 `Vault.process` 之前检查不足：排队 callback 可能作用于已移动／替换的文件。新增五项红／绿回归覆盖这些调度，且五项均在真实 Obsidian 的最终 bundle 上通过，包括恢复副本内容和队列后续可用性：[host 证据](./evidence/2026-09-12/obsidian-persistence.json)。独立的 `verify:obsidian-persistence` 探针要求 disposable-Vault 标记，不进行窗口耗时测量。
+路径身份校验位于 host 原子变换内部，以及旧宿主文本／二进制快照读取之后。仅在异步 `Vault.process` 之前检查不足：排队 callback 可能作用于已移动／替换的文件。新增五项红／绿回归覆盖这些调度，且五项均在真实 Obsidian 的初始可靠性 bundle 上通过，包括恢复副本内容和队列后续可用性：[host 证据](./evidence/2026-09-12/obsidian-persistence.json)。独立的 `verify:obsidian-persistence` 探针要求 disposable-Vault 标记，不进行窗口耗时测量。
 
 宿主没有原子二进制恢复或比较后删除 API。因此保留并报告部分新建文件及二进制输出；恢复文件名以 `.notemd-recovery-<id>` 结尾，避免进入 Markdown 批处理。旧 Drawnix 附件目录保留供检查：生成文件名和 manifest 无法证明编辑器/同步修改后的归属。快照读取之后、下一次创建目录之前再次检查动态取消状态。
 
@@ -42,7 +42,7 @@ Language: [English](./reliability-acceptance-2026-09-12.md) | **简体中文**
 
 ## 验证与 CI
 
-完成度复核的新鲜构建及全量 Jest 通过：**282 个套件，2593 项测试，1 项跳过**；跳过项依赖 POSIX 后代进程终止行为。本次三个 TypeScript 测试文件相对 `090098f` **没有新增 lint 回归**，先前 25 文件的实现比较保留在原证据中。UI 字符串与渲染宿主审计、33 个 gallery 样例、33 个真实 Vault 归档样例均通过；全局 ESLint 仍有历史债务。双语检查包含尚未跟踪的仓库文档，Office fixture 已有独立中文配对。
+初始完成度复核的新鲜构建及全量 Jest 通过：**282 个套件，2593 项测试，1 项跳过**；跳过项依赖 POSIX 后代进程终止行为。当时三个 TypeScript 测试文件相对 `090098f` **没有新增 lint 回归**，先前 25 文件的实现比较保留在原证据中。UI 字符串与渲染宿主审计、33 个 gallery 样例、33 个真实 Vault 归档样例均通过；[U8 后续记录](./evidence/2026-09-13/pptx-collapsed-row-borders.json) 登记新鲜构建、**282 个套件／2598 项通过／1 项 POSIX 跳过**、两个 TypeScript 文件零 lint 回归、两项审计及 VitePress 构建通过。全局 ESLint 仍有历史债务。双语检查包含尚未跟踪的仓库文档，Office fixture 已有独立中文配对。
 
 工作流在 Linux/Windows 上使用 `npm ci` 和 Node 20，并安装锁文件中 `playwright` 1.61.0 与 `playwright-chromium` 1.61.1 各自对应的浏览器版本。权限只读，不传 provider 密钥，也不发布。lint 按路径、规则、严重度、消息、列和映射后的原行号匹配，重复诊断逐条消耗，处理重命名并在工具/配置失败时关闭门禁。减少旧债不能抵消另一条新错误。分支保护属于独立管理员设置。
 
@@ -66,7 +66,7 @@ VitePress 1.6.4 与 34 locale 的 Docusaurus 网站构建／审计通过。配�
 
 ## 对照原计划的完成度复核
 
-[完成度记录](./evidence/2026-09-12/completion-audit.json)将每个单元映射到当前通过的测试文件和保留证据。补齐了两处证据缺口：U2 的同名来源／共享附件失败调度，U7 的受控保留堆与上下文 token 估算；生产行为未改变，bundle 与实测宿主使用的产物逐字节一致。
+[初始完成度记录](./evidence/2026-09-12/completion-audit.json)将每个单元映射到通过的测试和保留证据。当时补齐了 U2 的同名来源／共享附件失败调度，以及 U7 的受控保留堆与上下文 token 估算，未改变生产行为；`607c35d` 的 bundle 与实测宿主产物逐字节一致。后续复核在已验收的 PowerPoint 文件中复现 U8 合并表头分隔线不完整，修正了 DOM exporter。新 bundle、原生正／负例和归档 PPTX 单独记录；原宿主测量没有被重新标记为新 bundle 的实测。
 
 | 单元 | 要求与证据 | 处置 |
 |---|---|---|
@@ -77,11 +77,11 @@ VitePress 1.6.4 与 34 locale 的 Docusaurus 网站构建／审计通过。配�
 | U5 | 明确宿主的激活／预览／GC 预算及保持内联决定 | 满足原计划限时调查退出条件；物理移动设备／0.15.0 仍明确未验证 |
 | U6 | 原生编辑／保存／重开及固定 compiler／PDFium 记录 | 完成原计划逐 target 准入；失败的 Drawnix 附着能力不提升声明 |
 | U7 | 固定相关性标签、快照、上下文成本、构建／查询分布、真实 Vault I/O、GC 控制的保留／释放堆 | 已验证；未按留出标签调参 |
-| U8 | 原生表格绘制修复、中文／缺失字体／合并／图层 fixture、真实 PowerPoint 往返、未放宽的 visible-native 门禁 | 已选缺陷族通过；不宣称像素等价 |
+| U8 | 原生表格绘制修复、中文／缺失字体／合并／图层 fixture、真实 PowerPoint 往返、未放宽的 visible-native 门禁及明确的合并边框拒绝／准入 | 已选缺陷族通过；不宣称像素等价 |
 
 ## 宿主成本与打包决策
 
-测量机器为 i5-12600K、64 GiB 内存。最终 bundle 为 **10,059,753 bytes**，gzip **3,730,433 bytes**。激活数据来自已运行 renderer 内八次禁用/启用，不等于完整操作系统进程启动耗时；性能探针与最终持久化探针各自测试的 bundle 哈希记录于证据 JSON。
+测量机器为 i5-12600K、64 GiB 内存。初始可靠性 bundle 为 **10,059,753 bytes**，gzip **3,730,433 bytes**；U8 后续 bundle 为 **10,060,011 bytes**，gzip **3,730,501 bytes**。激活数据来自已运行 renderer 内八次禁用/启用，不等于完整操作系统进程启动耗时；下列性能和持久化观测保留原实测 bundle 哈希，后续变更仅涉及表格提取。
 
 | 前台路径 | 首次使用（ms） | 暖路径 p50 / p95（ms），n=8 |
 |---|---:|---:|
@@ -133,17 +133,24 @@ npm test -- --runInBand src/tests/localKnowledgeSnapshot.test.ts
 
 ## PowerPoint 保真度
 
-[中英内容样例](./fixtures/pptx-office-fidelity.md) 生成十页、18 个可编辑文本框和两个原生表格。PowerPoint **16.0 build 14332** 修改原生单元格、另存 PPTX、重开并渲染全部十页；修改内容与六个含中文的表格网格单元均保留。[往返报告](./evidence/2026-09-12/office-roundtrip.json)。
+[中英内容样例](./fixtures/pptx-office-fidelity.md) 生成十页、18 个可编辑文本框和两个原生表格。PowerPoint **16.0 build 14332** 修改原生单元格、另存 PPTX、重开并渲染全部十页；修改内容与六个含中文的表格网格单元均保留。[最新往返报告](./evidence/2026-09-13/office-roundtrip.json)。
 
 本轮修复集中在表格绘制：DrawingML 边线节点位于 fill 组之前，各侧保留透明度，折叠行分隔线进入原生单元格，合并续接网格只保留外边线。表格页 RMSE 从 **0.192665 降至 0.159463**。仓库既有 visible-native profile 通过（最大 0.25、均值 0.145），额外的严格 raster 实验（0.12/0.08）仍失败，未修改阈值。字体 shaping、中文基线及复杂 CSS 在 Chromium 与 Office 中仍有差异；Mermaid/SVG 几何继续作为显式图片回退。
 
-![修复前：Chromium 参考与 PowerPoint](./evidence/2026-09-12/office-table-before.png)
+后续完成度复核发现，全页门禁漏掉了合并表头半宽分隔线。`pptxDomExtractor.ts` 现在解析折叠行边框时包含相邻行的反向边，保留 hidden 优先级、同宽时上方行优先、跨行外边界及非折叠表格行为。8 项聚焦测试通过。原生 PowerPoint 检查拒绝归档旧产物的 mixed／不可见边框，并通过修正后的导出及重开 PPTX：三条相邻边均可见，颜色为 `9CA3AF`、透明度为 `0.8`、线宽约 `0.97827 pt`。表格页 RMSE 在报告精度下仍为 **0.159463**，说明局部契约需要原生断言，不能只依赖全页分数。[完整记录与产物哈希](./evidence/2026-09-13/pptx-collapsed-row-borders.json)。
 
-![修复后：Chromium 参考与 PowerPoint](./evidence/2026-09-12/office-table-after.png)
+![共享边修复前：Chromium 参考与 PowerPoint](./evidence/2026-09-13/office-table-before.png)
+
+![共享边修复后：Chromium 参考与 PowerPoint](./evidence/2026-09-13/office-table-after.png)
 
 ```bash
 npm run verify:slidev-export -- --vault docs/maintainer/fixtures --source pptx-office-fidelity.md --format pptx --output-subfolder export --sample-slides all --require-pptx-visual-match --pptx-visual-renderer powerpoint --json
+powershell -NoProfile -File scripts/verify-powerpoint-merged-border.ps1 -InputPptx docs/maintainer/evidence/2026-09-13/office-roundtrip.pptx -ReportPath .cache/office-merged-border.json
 ```
+
+每次原生边框检查使用新的报告路径。归档 `office-before.pptx` 应被同一检查拒绝，`office-after.pptx` 和 `office-roundtrip.pptx` 应通过。只读探针拒绝已有 PowerPoint 会话，并等待自身 COM 引用／进程退出后返回。
+
+可下载[旧版 PPTX](./evidence/2026-09-13/office-before.pptx)、[修正后的导出](./evidence/2026-09-13/office-after.pptx)及[保存重开的 PPTX](./evidence/2026-09-13/office-roundtrip.pptx)，独立重跑原生验收。
 
 Windows 原生编辑验收运行 `scripts/verify-powerpoint-roundtrip.ps1`，传入 `-InputPptx` 与新的 `-OutputDirectory`；脚本拒绝已有 PowerPoint 会话且不覆盖输入。Obsidian 先向专用 Vault 复制构建插件并创建显式 marker，再运行 `npm run verify:obsidian-host -- --vault <disposable-vault> --cli <obsidian-cli-executable>`。已提交门禁不依赖 `.trellis/` 或未跟踪的缓存报告。
 

@@ -1,0 +1,43 @@
+{
+  "observedAt": "2026-09-13T00:40:07.6830609Z",
+  "passed": false,
+  "application": "Microsoft PowerPoint",
+  "version": "16.0",
+  "build": "14332",
+  "sourceSha256": "3d05485272743d172f1ecb6ed51e85b5d0ad8c2cbe0da1ea2035b16c287e3e94",
+  "slide": 5,
+  "borders": [
+    {
+      "row": 1,
+      "column": 1,
+      "edge": 3,
+      "visible": -1,
+      "colorRgb": -2147483648,
+      "transparency": -2147483648,
+      "weightPt": 0.9782677292823792
+    },
+    {
+      "row": 2,
+      "column": 1,
+      "edge": 1,
+      "visible": -1,
+      "colorRgb": 11510684,
+      "transparency": 0.800000011920929,
+      "weightPt": 0.9782677292823792
+    },
+    {
+      "row": 2,
+      "column": 2,
+      "edge": 1,
+      "visible": 0,
+      "colorRgb": 16777215,
+      "transparency": -2147483648,
+      "weightPt": -2147483648
+    }
+  ],
+  "failures": [
+    "Cell 1,1 has a missing or mixed separator.",
+    "Cell 2,1 does not share the merged header's separator paint.",
+    "Cell 2,2 has a missing or mixed separator."
+  ]
+}

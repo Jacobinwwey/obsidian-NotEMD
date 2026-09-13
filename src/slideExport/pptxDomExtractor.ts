@@ -1975,12 +1975,21 @@ export async function extractSlidevPptxSlideFromPage(page: any, slideNumber: num
 						right: [cellStyle, ...(atRight ? [rowTop, tableStyle] : [])],
 					};
 					for (const side of ['top', 'right', 'bottom', 'left'] as const) {
-						if (candidates[side].some(style => style.getPropertyValue(`border-${side}-style`) === 'hidden')) {
+						const edgeSources = candidates[side].map(style => ({ style, side }));
+						// A collapsed row separator belongs to both touching cell edges. Office
+						// otherwise drops segments where a merged cell meets unmerged cells.
+						if (side === 'top' && placement.rowIndex > 0) {
+							edgeSources.splice(1, 0, { style: window.getComputedStyle(rowElements[placement.rowIndex - 1]), side: 'bottom' });
+						}
+						if (side === 'bottom' && lastRow + 1 < rowElements.length) {
+							edgeSources.push({ style: window.getComputedStyle(rowElements[lastRow + 1]), side: 'top' });
+						}
+						if (edgeSources.some(source => source.style.getPropertyValue(`border-${source.side}-style`) === 'hidden')) {
 							borderSides[side] = { color: null, widthPt: 0, opacity: 0 };
 							continue;
 						}
-						for (const style of candidates[side]) {
-							const candidate = tableBorderSidesFor(style)[side];
+						for (const source of edgeSources) {
+							const candidate = tableBorderSidesFor(source.style)[source.side];
 							if (candidate.widthPt > borderSides[side].widthPt) borderSides[side] = candidate;
 						}
 					}
