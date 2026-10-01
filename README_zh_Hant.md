@@ -795,7 +795,7 @@ MIT 授權條款 - 詳情請見 [LICENSE](LICENSE)。
 
 ![Notemd Development Chronicle](./docs/repo-saga/notemd-development-history.zh_Hant.svg)
 
-_最近一次已針對發佈 tag `1.9.7` 於 2026-08-31 刷新。 最新提交日期：2026-08-31。_
+_最近一次已針對發佈 tag `1.9.8` 於 2026-10-01 刷新。 最新提交日期：2026-10-01。_
 <!-- repo-chronicle:end -->
 
 
