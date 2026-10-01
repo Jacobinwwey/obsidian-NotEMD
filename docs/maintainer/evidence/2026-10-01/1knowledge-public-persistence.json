@@ -1,0 +1,41 @@
+{
+  "observedAt": "2026-10-01T06:30:41.226Z",
+  "authorization": "User requested already-open 1Knowledge; only uniquely owned fixture files are mutated",
+  "bundleSha256": "3cb3b066c33e3a41f223efd7e949b224d72150ff318b1131590cd1cc9139b2da",
+  "settingsUnchanged": true,
+  "passed": true,
+  "appVersion": "1.13.7",
+  "cases": [
+    {
+      "scenario": "atomic-write-move",
+      "rejected": true,
+      "movedFilePreserved": true,
+      "queueUsable": true
+    },
+    {
+      "scenario": "legacy-write-move",
+      "rejected": true,
+      "movedFilePreserved": true,
+      "queueUsable": true
+    },
+    {
+      "scenario": "binary-write-move",
+      "rejected": true,
+      "movedFilePreserved": true,
+      "queueUsable": true
+    },
+    {
+      "scenario": "compensation-move",
+      "rejected": true,
+      "movedFilePreserved": true,
+      "queueUsable": true
+    },
+    {
+      "scenario": "compensation-replacement",
+      "rejected": true,
+      "movedFilePreserved": true,
+      "queueUsable": true
+    }
+  ],
+  "fixtureFolder": "Notemd-1.9.8-persistence-1790836240584"
+}

@@ -1,0 +1,70 @@
+{
+  "baseTag": "1.9.7",
+  "releaseTag": "1.9.8",
+  "commits": [
+    {
+      "commit": "b26e466272a5e1357ce3f199d8cd71d599ea2e2e",
+      "subject": "docs: refresh quarterly chronicle for 1.9.7"
+    },
+    {
+      "commit": "af68ebfb63807c9d1fea97efbb8726f05295c79b",
+      "subject": "docs(release): summarize 1.9.7 changes by category"
+    },
+    {
+      "commit": "7638ceceb95011c08f9c91a2f65825c75e80e573",
+      "subject": "docs: reconcile current main capability truth"
+    },
+    {
+      "commit": "ff4193834c4b6a57e15df30b8b704d85834f5557",
+      "subject": "docs: reconcile plan status and prioritize operation reliability"
+    },
+    {
+      "commit": "cb1902c893e1a02fd9a1a5eba9ca3ea150cb4ef4",
+      "subject": "fix: preserve cancellation lifetime and artifact write ownership"
+    },
+    {
+      "commit": "e4c1486f3b49505d3b171b5dcb9b9c1d530bd05a",
+      "subject": "fix: preserve native export fidelity and retrieval snapshots"
+    },
+    {
+      "commit": "e969f5229c2da2821b7172ff324e9ef1ba4a3d27",
+      "subject": "ci: gate plugin regressions and record bilingual consumer acceptance"
+    },
+    {
+      "commit": "805bda2269b13d09ae29af19c6e5635c5d2e2dee",
+      "subject": "test: include new documentation in bilingual coverage"
+    },
+    {
+      "commit": "c9e30e7304c2623731228e6463949b372f8b2739",
+      "subject": "docs: close reliability phases with verified CI receipts"
+    },
+    {
+      "commit": "090098ffece758a027ce48f19f171e5707509aa0",
+      "subject": "Merge pull request #12 from Jacobinwwey/codex/plan-progress-audit-2026-09-12"
+    },
+    {
+      "commit": "845c312341b3aaff26851cff34d4ef204ea715df",
+      "subject": "test: verify shared artifact writes and retained retrieval heap"
+    },
+    {
+      "commit": "607c35d10600c3fa8d9c23241f98ee159c0106ac",
+      "subject": "Merge pull request #14 from Jacobinwwey/codex/completion-evidence-2026-09-13"
+    },
+    {
+      "commit": "7ad4888b3120e871c1e37425bed84d61f534f31e",
+      "subject": "fix: preserve collapsed row borders beneath merged PPTX cells"
+    },
+    {
+      "commit": "291ea45ba84d0a63664681a65e8feb092fa37b38",
+      "subject": "Merge pull request #15 from Jacobinwwey/codex/pptx-collapsed-row-borders-2026-09-13"
+    },
+    {
+      "commit": "71a1f32685962b1339744f82218c158f11502a3e",
+      "subject": "fix(release): verify candidate provenance before publication"
+    },
+    {
+      "commit": "4ac48b59e6f95b4cfa737f1c86b542673ecd1e56",
+      "subject": "feat: complete 1.9.8 reliability and multilingual documentation"
+    }
+  ]
+}

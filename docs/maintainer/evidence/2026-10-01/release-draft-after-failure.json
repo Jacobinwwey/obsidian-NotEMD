@@ -1,0 +1,19 @@
+{
+  "observedAt": "2026-10-01T06:26:03.450Z",
+  "id": 400696731,
+  "draft": true,
+  "assetCount": 0,
+  "provenance": {
+    "schema": 1,
+    "tag": "1.9.8",
+    "sourceCommit": "4ac48b59e6f95b4cfa737f1c86b542673ecd1e56",
+    "assetSha256": {
+      "main.js": "3cb3b066c33e3a41f223efd7e949b224d72150ff318b1131590cd1cc9139b2da",
+      "manifest.json": "1852490833b18b225471096b633067ba7d73d6274e57ce1d11e3b1654dfe3677",
+      "styles.css": "9ab0f530745a5796bb970825b967bced6acbaf92e1fb50d4f11d0fdca61b849e",
+      "README.md": "3d70485de56e2f7de4fa3105310ec6c3d872df793eb70a3ce6c2d37a032c293f"
+    },
+    "notesSha256": "d9558730de182b45a84fd4c0a4b4df395de0852ea86f0549f934750481e984ef"
+  },
+  "reason": "Workflow failed immediately after draft creation; authenticated subsequent read finds the expected draft"
+}

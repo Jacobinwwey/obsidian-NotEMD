@@ -1,0 +1,232 @@
+{
+  "attempt": 1,
+  "conclusion": "success",
+  "databaseId": 36825274177,
+  "headSha": "31811dffe0c60f70358f504d975ed9fa9ac61497",
+  "jobs": [
+    {
+      "completedAt": "2026-10-01T06:51:48Z",
+      "conclusion": "success",
+      "databaseId": 110249454696,
+      "name": "build",
+      "startedAt": "2026-10-01T06:32:01Z",
+      "status": "completed",
+      "steps": [
+        {
+          "completedAt": "2026-10-01T06:32:03Z",
+          "conclusion": "success",
+          "name": "Set up job",
+          "number": 1,
+          "startedAt": "2026-10-01T06:32:02Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-01T06:32:06Z",
+          "conclusion": "success",
+          "name": "Checkout",
+          "number": 2,
+          "startedAt": "2026-10-01T06:32:03Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-01T06:32:07Z",
+          "conclusion": "success",
+          "name": "Setup Node.js",
+          "number": 3,
+          "startedAt": "2026-10-01T06:32:06Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-01T06:32:55Z",
+          "conclusion": "success",
+          "name": "Install dependencies",
+          "number": 4,
+          "startedAt": "2026-10-01T06:32:07Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-01T06:49:17Z",
+          "conclusion": "success",
+          "name": "Build website",
+          "number": 5,
+          "startedAt": "2026-10-01T06:32:55Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-01T06:49:17Z",
+          "conclusion": "success",
+          "name": "Audit website build",
+          "number": 6,
+          "startedAt": "2026-10-01T06:49:17Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-01T06:49:44Z",
+          "conclusion": "success",
+          "name": "Install pinned browser",
+          "number": 7,
+          "startedAt": "2026-10-01T06:49:17Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-01T06:51:38Z",
+          "conclusion": "success",
+          "name": "Verify audience journeys and accessibility",
+          "number": 8,
+          "startedAt": "2026-10-01T06:49:44Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-01T06:51:40Z",
+          "conclusion": "success",
+          "name": "Retain browser evidence",
+          "number": 9,
+          "startedAt": "2026-10-01T06:51:38Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-01T06:51:46Z",
+          "conclusion": "success",
+          "name": "Upload artifact",
+          "number": 10,
+          "startedAt": "2026-10-01T06:51:40Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-01T06:51:46Z",
+          "conclusion": "success",
+          "name": "Post Setup Node.js",
+          "number": 19,
+          "startedAt": "2026-10-01T06:51:46Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-01T06:51:46Z",
+          "conclusion": "success",
+          "name": "Post Checkout",
+          "number": 20,
+          "startedAt": "2026-10-01T06:51:46Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-01T06:51:46Z",
+          "conclusion": "success",
+          "name": "Complete job",
+          "number": 21,
+          "startedAt": "2026-10-01T06:51:46Z",
+          "status": "completed"
+        }
+      ],
+      "url": "https://github.com/Jacobinwwey/obsidian-NotEMD/actions/runs/36825274177/job/110249454696"
+    },
+    {
+      "completedAt": "2026-10-01T06:52:09Z",
+      "conclusion": "success",
+      "databaseId": 110255009238,
+      "name": "deploy",
+      "startedAt": "2026-10-01T06:51:52Z",
+      "status": "completed",
+      "steps": [
+        {
+          "completedAt": "2026-10-01T06:51:54Z",
+          "conclusion": "success",
+          "name": "Set up job",
+          "number": 1,
+          "startedAt": "2026-10-01T06:51:53Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-01T06:51:57Z",
+          "conclusion": "success",
+          "name": "Checkout verified documentation revision",
+          "number": 2,
+          "startedAt": "2026-10-01T06:51:54Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-01T06:51:57Z",
+          "conclusion": "success",
+          "name": "Setup Node.js",
+          "number": 3,
+          "startedAt": "2026-10-01T06:51:57Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-01T06:51:59Z",
+          "conclusion": "success",
+          "name": "Require the advertised public release",
+          "number": 4,
+          "startedAt": "2026-10-01T06:51:57Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-01T06:52:06Z",
+          "conclusion": "success",
+          "name": "Deploy to GitHub Pages",
+          "number": 5,
+          "startedAt": "2026-10-01T06:51:59Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-01T06:52:06Z",
+          "conclusion": "skipped",
+          "name": "Wait before Pages deploy retry",
+          "number": 6,
+          "startedAt": "2026-10-01T06:52:06Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-01T06:52:06Z",
+          "conclusion": "skipped",
+          "name": "Retry deploy to GitHub Pages",
+          "number": 7,
+          "startedAt": "2026-10-01T06:52:06Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-01T06:52:06Z",
+          "conclusion": "skipped",
+          "name": "Wait before final Pages deploy retry",
+          "number": 8,
+          "startedAt": "2026-10-01T06:52:06Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-01T06:52:06Z",
+          "conclusion": "skipped",
+          "name": "Final deploy to GitHub Pages",
+          "number": 9,
+          "startedAt": "2026-10-01T06:52:06Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-01T06:52:06Z",
+          "conclusion": "success",
+          "name": "Post Setup Node.js",
+          "number": 17,
+          "startedAt": "2026-10-01T06:52:06Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-01T06:52:07Z",
+          "conclusion": "success",
+          "name": "Post Checkout verified documentation revision",
+          "number": 18,
+          "startedAt": "2026-10-01T06:52:06Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-01T06:52:07Z",
+          "conclusion": "success",
+          "name": "Complete job",
+          "number": 19,
+          "startedAt": "2026-10-01T06:52:07Z",
+          "status": "completed"
+        }
+      ],
+      "url": "https://github.com/Jacobinwwey/obsidian-NotEMD/actions/runs/36825274177/job/110255009238"
+    }
+  ],
+  "status": "completed",
+  "url": "https://github.com/Jacobinwwey/obsidian-NotEMD/actions/runs/36825274177"
+}

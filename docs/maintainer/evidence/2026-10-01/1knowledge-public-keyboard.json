@@ -1,0 +1,20 @@
+{
+  "observedAt": "2026-10-01T06:30:34.126Z",
+  "vault": "1Knowledge",
+  "transport": "Official Obsidian CLI dev:cdp Input events",
+  "passed": true,
+  "consecutiveSearch": {
+    "text": "abc",
+    "focused": true
+  },
+  "tabPresses": 12,
+  "escape": {
+    "drawerClosed": true,
+    "previewAlive": true,
+    "focusRestored": true
+  },
+  "secondEscapeClosesPreview": true,
+  "cleanup": {
+    "fixturePreviewClosed": true
+  }
+}

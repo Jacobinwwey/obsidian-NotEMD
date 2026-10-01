@@ -2,7 +2,7 @@
 title: Release 1.9.8, Documentation, And Discoverability
 date: 2026-09-13
 type: feat
-status: active
+status: complete
 origin: docs/maintainer/project-plan-status.md
 baseline_tag: 1.9.7
 baseline_tag_commit: ef777883c2df0ab37fcbdeb0df5b36327aa1896f
@@ -17,19 +17,19 @@ Language: **English** | [简体中文](./2026-09-13-001-feat-1-9-8-release-docs-
 
 Position 1.9.8 as a **reliability and documentation release**. Its strongest existing improvements are cancellation, artifact ownership, retrieval snapshots, native export correctness, and reproducible verification. The 36 provider presets and 33 diagram catalog entries already existed in 1.9.7; they are product context, not new features in 1.9.8.
 
-Execution is active. The current public release is still 1.9.7; implementation and publication are tracked separately below. Work continues in this thread; the execution environment required bounded delegated implementation and review tasks. All new or revised translations are authored and reviewed directly by Codex, without LM Studio or a translation API.
+Execution and publication are complete for 1.9.8; the current checkpoint below records the verified release and deployment. Work was completed in this thread; the execution environment required bounded delegated implementation and review tasks. All new or revised translations are authored and reviewed directly by Codex, without LM Studio or a translation API.
 
 “Excellent documentation” means readers can complete their task, claims match the implementation, translations preserve those claims, and published artifacts can be verified. Search ranking, indexing and AI citations remain external observations rather than promised release outcomes.
 
 ## Current checkpoint — 2026-10-01
 
-V0–V4 implementation and local acceptance are complete. All 816 website documents, 34 homepage/navigation sets and 31 README fronts/affected instructions are authored and reviewed. The repository About homepage now points to the canonical Pages URL. Translation receipts cover all 792 translated documents; Codex review does not constitute independent native-human review or promotion of indexing eligibility.
+V0–V6 are complete. Release [1.9.8](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.8) is public at `4ac48b59e6f95b4cfa737f1c86b542673ecd1e56`. Both candidate Linux/Windows Node 20 jobs and the mainline recheck passed. Four downloaded assets match the publisher's canonical Linux build hashes, and both complete language sections match the tagged notes. Pages [run 36825274177](https://github.com/Jacobinwwey/obsidian-NotEMD/actions/runs/36825274177) deployed `31811dffe0c60f70358f504d975ed9fa9ac61497`; 850 live HTML files across 34 locales and 4 discovery files matched that workflow artifact byte for byte. All 102 linked scripts and stylesheets also matched the artifact. The repository homepage and official Obsidian catalog were verified.
 
-Final local verification passes: plugin build, 289 Jest suites / 2703 tests (one platform skip), lint regression, UI/render-host audits, both archives, VitePress, Node 24 full website build/audit and 816 real Tab-navigation scenarios. F16–F18 review fixes remain verified. F19 was reproduced in the user's open 1Knowledge Vault: host Escape closed the parent preview before DOM bubbling. The drawer now owns an Obsidian Scope while open; eleven Chromium keyboard tests and native CLI search/Tab/two-Escape checks pass. Five native persistence races pass; original settings bytes are preserved.
+The release workflow's first attempt stopped after draft creation; the expected empty draft was subsequently visible. Attempt 2 resumed the same provenance, verified uploaded/downloaded bytes, published and refreshed the chronicle. No tag or public asset was replaced. The normal pre-release Pages run was cancelled; the explicit post-release run is the deployment receipt. The post-release chronicle is `31811dffe0c60f70358f504d975ed9fa9ac61497`; it changes README/SVG documentation and leaves website/runtime sources unchanged.
 
-Native default workflow/four public exports, cancellation/recovery and five previews passed in 1Knowledge using CLI only. PowerPoint complete export/visual gate, edit-save-reopen, exported/reopened merged borders and the historical broken-file negative check pass. Six CircuitikZ golden fixtures and five orientation variants compile. The paired release-1.9.8-acceptance record and sanitized evidence under docs/maintainer/evidence/2026-10-01 retain hashes and limits. Local binary receipts are distinct from the canonical Linux release build.
+The official downloaded runtime files were installed in the user-selected 1Knowledge Vault. CLI keyboard and all five persistence races passed again, with original settings bytes preserved. Physical mobile, minimum-host compatibility and the known native-output/retrieval limits below remain qualified.
 
-V5 remains open for fresh remote Linux/Windows Node 20 CI and exact candidate identity; V6 remains open for main integration, Release, chronicle and live Pages. No 1.9.8 tag or public release has been created at this checkpoint. Earlier dated checkpoints are historical and do not override these totals.
+All 816 guides, 34 homepage/navigation sets and 31 READMEs are complete. The paired release-1.9.8-acceptance record owns final local tests, 816 keyboard scenarios and native-consumer evidence. Earlier checkpoints below remain historical.
 
 ## Verified Baseline
 
@@ -211,7 +211,7 @@ flowchart TB
 
   **Exit:** built-site contract coverage, working public support/install destinations, repository homepage set to the canonical Pages URL, and a documented distinction between local technical checks and external search observations.
 
-- [ ] **V5 — Freeze and verify the complete release candidate**
+- [x] **V5 — Freeze and verify the complete release candidate**
 
   **Requirements / dependencies:** N1–N8; V0, V3 and V4 complete.
 
@@ -223,7 +223,7 @@ flowchart TB
 
   **Exit:** one exact candidate revision with a traceable verification receipt and no unresolved release blockers. Successful historical tests or document presence alone do not close this unit.
 
-- [ ] **V6 — Publish 1.9.8 and verify the public result**
+- [x] **V6 — Publish 1.9.8 and verify the public result**
 
   **Requirements / dependencies:** N2, N3, N6, N7; V5 complete.
 

@@ -2,7 +2,7 @@
   "observedAt": "2026-10-01T05:56:02.397Z",
   "version": "1.9.8",
   "baseCommit": "71a1f32685962b1339744f82218c158f11502a3e",
-  "candidateState": "Uncommitted implementation verified locally; remote CI and public delivery tracked in acceptance markdown.",
+  "candidateState": "Accepted as tag 1.9.8 after Linux/Windows Node 20 CI; public asset hashes are in public-release.json. Source-file hashes below retain the original local verification bytes.",
   "sourceManifestSha256": "98e597fa55c9bf0e9d33f5d44fad25745d7371d79fdf7519aaaf7f0099f17e9d",
   "runtimeAssets": {
     "main.js": "3cb3b066c33e3a41f223efd7e949b224d72150ff318b1131590cd1cc9139b2da",
@@ -40,5 +40,13 @@
     "history-native-scope-green.log": "f6f78f61057b8436f2f63afc9aaeaa5f80803ab8f65ebf92f58955509079c5b5",
     "v5-office-export-recheck.log": "5f33501d9904de80c24bdf4b3b8102287bd3f71e944b72d40c967538f1b8310d",
     "v5-circuitikz-orientations.log": "480e15acea415d846f48df2c1ac006db316beba57c04414a59eff0e1a117d05f"
+  },
+  "acceptedCommit": "4ac48b59e6f95b4cfa737f1c86b542673ecd1e56",
+  "acceptedGitTree": "874d5a3a72e6b9aab80545c0d73d3dec109e97de",
+  "remoteCi": {
+    "run": "https://github.com/Jacobinwwey/obsidian-NotEMD/actions/runs/36823159948",
+    "linuxTests": 2706,
+    "windowsTests": 2705,
+    "windowsPlatformSkips": 1
   }
 }

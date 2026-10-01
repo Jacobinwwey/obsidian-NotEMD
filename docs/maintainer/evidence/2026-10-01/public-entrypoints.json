@@ -1,0 +1,13 @@
+{
+  "observedAt": "2026-10-01T06:36:13.029Z",
+  "passed": true,
+  "officialPlugin": {
+    "id": "notemd",
+    "name": "Notemd",
+    "author": "jacobinwwey",
+    "description": "Integrates with various LLMs to process notes, generate wiki-links, and create concept notes",
+    "repo": "jacobinwwey/obsidian-NotEMD"
+  },
+  "issuesEnabled": true,
+  "homepage": "https://jacobinwwey.github.io/obsidian-NotEMD/"
+}

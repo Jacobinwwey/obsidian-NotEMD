@@ -2,11 +2,15 @@
 
 Language: **English** | [简体中文](./release-1.9.8-acceptance.zh-CN.md)
 
-## Candidate status
+## Public delivery
 
-Local candidate acceptance completed on 2026-10-01. Remote Linux/Windows Node 20 CI, mainline integration, public Release, chronicle refresh and live Pages verification remain pending. This record does not treat local checks as public delivery.
+V0–V6 are complete. Release [1.9.8](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.8) is public at `4ac48b59e6f95b4cfa737f1c86b542673ecd1e56`. Both candidate Linux/Windows Node 20 jobs and the mainline recheck passed. Four downloaded assets match the publisher's canonical Linux build hashes, and both complete language sections match the tagged notes. Pages [run 36825274177](https://github.com/Jacobinwwey/obsidian-NotEMD/actions/runs/36825274177) deployed `31811dffe0c60f70358f504d975ed9fa9ac61497`; 850 live HTML files across 34 locales and 4 discovery files matched that workflow artifact byte for byte. All 102 linked scripts and stylesheets also matched the artifact. The repository homepage and official Obsidian catalog were verified.
 
-The [candidate receipt](./evidence/2026-10-01/candidate.json) retains asset hashes, test totals and log hashes. Its [source manifest](./evidence/2026-10-01/candidate-source-hashes.json) identifies the verified working files; a null hash denotes a removed file. The public binary must come from the clean Linux Node 20 release workflow, so its hash is verified separately from the Windows build used below.
+The release workflow's first attempt stopped after draft creation; the expected empty draft was subsequently visible. Attempt 2 resumed the same provenance, verified uploaded/downloaded bytes, published and refreshed the chronicle. No tag or public asset was replaced. The normal pre-release Pages run was cancelled; the explicit post-release run is the deployment receipt. The post-release chronicle is `31811dffe0c60f70358f504d975ed9fa9ac61497`; it changes README/SVG documentation and leaves website/runtime sources unchanged.
+
+The official downloaded runtime files were installed in the user-selected 1Knowledge Vault. CLI keyboard and all five persistence races passed again, with original settings bytes preserved. Physical mobile, minimum-host compatibility and the known native-output/retrieval limits below remain qualified.
+
+The [candidate receipt](./evidence/2026-10-01/candidate.json) retains local source hashes and accepted remote identity. [public-release.json](./evidence/2026-10-01/public-release.json) owns the public asset hashes.
 
 ## Local gates
 
@@ -40,11 +44,11 @@ The host/workflow probes preceded the isolated F19 fix and used bundle `dbccc6d3
 
 [Six CircuitikZ templates](./evidence/2026-10-01/circuitikz-golden.json) and [five orientation variants](./evidence/2026-10-01/circuitikz-orientations.json) compiled into nonempty PDFs with the cached Tectonic executable. Orientation variants preserved topology and used offline/untrusted compilation. Windows emitted a Fontconfig configuration warning; successful compilation does not imply a warning-free environment.
 
-## Release ledger and remaining delivery
+## Release ledger and delivery receipts
 
 The [plan ledger](../plans/2026-09-13-001-feat-1-9-8-release-docs-geo-plan.en.md#every-commit-since-197) accounts for all fourteen commits from `1.9.7` to `291ea45`, including merges. `71a1f32` subsequently added strict candidate provenance, draft/download-hash checks and a reproducible release workflow. The current candidate adds final-I/O cancellation checks, translation directory-race handling, history keyboard/focus fixes, source-owned release facts, audience routes, all locale/README authoring and strict website/publication gates. Merge records do not add duplicate feature claims.
 
-Remote candidate identities, successful Linux/Windows run URLs, numeric tag, public four-asset hashes, chronicle commit and deployed revision will be added after their actual execution. V5/V6 remain open until those checks pass.
+The complete [16-commit release ledger](./evidence/2026-10-01/release-ledger.json) includes `71a1f32` and `4ac48b5` after the fourteen-commit baseline. [Candidate CI](https://github.com/Jacobinwwey/obsidian-NotEMD/actions/runs/36823159948) passed 289 suites on each platform: Linux 2706 tests; Windows 2705 tests and one POSIX-only skip. The [mainline recheck](https://github.com/Jacobinwwey/obsidian-NotEMD/actions/runs/36823959893) also passed. The [Release workflow](https://github.com/Jacobinwwey/obsidian-NotEMD/actions/runs/36824052373), [Pages workflow](https://github.com/Jacobinwwey/obsidian-NotEMD/actions/runs/36825274177), [live hashes](./evidence/2026-10-01/live-pages.json) and [deployment identity](./evidence/2026-10-01/pages-deployment.json) close V5/V6. The chronological receipts preserve failed preparation and draft-discovery outcomes instead of calling them successful first attempts.
 
 ## Limits
 

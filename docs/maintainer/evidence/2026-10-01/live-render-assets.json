@@ -1,0 +1,618 @@
+{
+  "observedAt": "2026-10-01T06:58:00.260Z",
+  "passed": true,
+  "assets": [
+    {
+      "url": "https://jacobinwwey.github.io/obsidian-NotEMD/ar/assets/css/styles.69fee372.css",
+      "sha256": "79ae08515ad8b60cce67caa037b215ef28173e38fb892078009a5b59cf8d6c9b",
+      "bytes": 76416,
+      "matchesWorkflowArtifact": true
+    },
+    {
+      "url": "https://jacobinwwey.github.io/obsidian-NotEMD/ar/assets/js/main.0f48cab0.js",
+      "sha256": "fdedf3af13c9043473f0933889d17fae79bd76990e1ed25e85e8fffc4c263391",
+      "bytes": 429646,
+      "matchesWorkflowArtifact": true
+    },
+    {
+      "url": "https://jacobinwwey.github.io/obsidian-NotEMD/ar/assets/js/runtime~main.45c23146.js",
+      "sha256": "51425144e3ead1c7565a423362b71b53f4b0fbf85f89feaee726043be3ef56ef",
+      "bytes": 5692,
+      "matchesWorkflowArtifact": true
+    },
+    {
+      "url": "https://jacobinwwey.github.io/obsidian-NotEMD/assets/css/styles.781f276a.css",
+      "sha256": "f5bc1f87170346903d5b37d6092d68ffa27f7473eeeff359b4ad6b399f500427",
+      "bytes": 76335,
+      "matchesWorkflowArtifact": true
+    },
+    {
+      "url": "https://jacobinwwey.github.io/obsidian-NotEMD/assets/js/main.424fb497.js",
+      "sha256": "4cadb25aa452f6181c340943b3e1658d5629c89bb2dfd46ec77eea2bc54112bd",
+      "bytes": 417185,
+      "matchesWorkflowArtifact": true
+    },
+    {
+      "url": "https://jacobinwwey.github.io/obsidian-NotEMD/assets/js/runtime~main.c6b980f1.js",
+      "sha256": "ae0a9ff55d18c88d58c61913c5bc64212ab94a43aeefc07f7475a421a91734db",
+      "bytes": 5690,
+      "matchesWorkflowArtifact": true
+    },
+    {
+      "url": "https://jacobinwwey.github.io/obsidian-NotEMD/bn/assets/css/styles.781f276a.css",
+      "sha256": "f5bc1f87170346903d5b37d6092d68ffa27f7473eeeff359b4ad6b399f500427",
+      "bytes": 76335,
+      "matchesWorkflowArtifact": true
+    },
+    {
+      "url": "https://jacobinwwey.github.io/obsidian-NotEMD/bn/assets/js/main.ea717f86.js",
+      "sha256": "a2fa056ec8b091bc85434d66b6001f2756384a26b9ca0f22db8a96a35e0b0bec",
+      "bytes": 429521,
+      "matchesWorkflowArtifact": true
+    },
+    {
+      "url": "https://jacobinwwey.github.io/obsidian-NotEMD/bn/assets/js/runtime~main.3beb6a12.js",
+      "sha256": "48a7d1d7abc5557e4a1015f015f4b8b2b4b086b9b30728221ebc90f672d6dc3b",
+      "bytes": 5693,
+      "matchesWorkflowArtifact": true
+    },
+    {
+      "url": "https://jacobinwwey.github.io/obsidian-NotEMD/cs/assets/css/styles.781f276a.css",
+      "sha256": "f5bc1f87170346903d5b37d6092d68ffa27f7473eeeff359b4ad6b399f500427",
+      "bytes": 76335,
+      "matchesWorkflowArtifact": true
+    },
+    {
+      "url": "https://jacobinwwey.github.io/obsidian-NotEMD/cs/assets/js/main.9a2a031d.js",
+      "sha256": "e80c0931e2b2d8adb7e45bcce28eb697c50c0048c1d9bc1bbcd78e773ca07270",
+      "bytes": 424603,
+      "matchesWorkflowArtifact": true
+    },
+    {
+      "url": "https://jacobinwwey.github.io/obsidian-NotEMD/cs/assets/js/runtime~main.bf0c174c.js",
+      "sha256": "19183ec94ef9da005626ba082c84b9270dc96412f5c66951a89774a639b256f8",
+      "bytes": 5694,
+      "matchesWorkflowArtifact": true
+    },
+    {
+      "url": "https://jacobinwwey.github.io/obsidian-NotEMD/da/assets/css/styles.781f276a.css",
+      "sha256": "f5bc1f87170346903d5b37d6092d68ffa27f7473eeeff359b4ad6b399f500427",
+      "bytes": 76335,
+      "matchesWorkflowArtifact": true
+    },
+    {
+      "url": "https://jacobinwwey.github.io/obsidian-NotEMD/da/assets/js/main.bc4a7837.js",
+      "sha256": "4d11afaca9be035ab56e15d3be7b1e7875ec4ffe3bae759048d5b5ded84add97",
+      "bytes": 423965,
+      "matchesWorkflowArtifact": true
+    },
+    {
+      "url": "https://jacobinwwey.github.io/obsidian-NotEMD/da/assets/js/runtime~main.809cd789.js",
+      "sha256": "ce7fce1e84b5797050f1daf7667ac08a3141940b58e8da850269625ad208d73e",
+      "bytes": 5695,
+      "matchesWorkflowArtifact": true
+    },
+    {
+      "url": "https://jacobinwwey.github.io/obsidian-NotEMD/de/assets/css/styles.454f39fd.css",
+      "sha256": "596942f382447f0f7411fc4b5cb566d1d5c984f434322e488d9487763c7f8c9c",
+      "bytes": 76335,
+      "matchesWorkflowArtifact": true
+    },
+    {
+      "url": "https://jacobinwwey.github.io/obsidian-NotEMD/de/assets/js/main.2bc9d728.js",
+      "sha256": "fd8c8be9ad70ea6eefa81e0f4925532633d60273eeae7ebd5e975c25ee21682b",
+      "bytes": 424144,
+      "matchesWorkflowArtifact": true
+    },
+    {
+      "url": "https://jacobinwwey.github.io/obsidian-NotEMD/de/assets/js/runtime~main.8f50295c.js",
+      "sha256": "df81013bbe180369dbf719edfa9ee77618870d23a974e27afd47c766187d9d76",
+      "bytes": 5695,
+      "matchesWorkflowArtifact": true
+    },
+    {
+      "url": "https://jacobinwwey.github.io/obsidian-NotEMD/el/assets/css/styles.454f39fd.css",
+      "sha256": "596942f382447f0f7411fc4b5cb566d1d5c984f434322e488d9487763c7f8c9c",
+      "bytes": 76335,
+      "matchesWorkflowArtifact": true
+    },
+    {
+      "url": "https://jacobinwwey.github.io/obsidian-NotEMD/el/assets/js/main.92c8a2ed.js",
+      "sha256": "0c4e006f5a09ff79c13e5a208a214f87b5ced9d18ada4faf0df85fbd32d28e3c",
+      "bytes": 423857,
+      "matchesWorkflowArtifact": true
+    },
+    {
+      "url": "https://jacobinwwey.github.io/obsidian-NotEMD/el/assets/js/runtime~main.6ba9d448.js",
+      "sha256": "c542d3bb68dfd24a27d04a43b7fbabb82f75eb37f27b1a71b0822a6b1a42af77",
+      "bytes": 5687,
+      "matchesWorkflowArtifact": true
+    },
+    {
+      "url": "https://jacobinwwey.github.io/obsidian-NotEMD/es/assets/css/styles.781f276a.css",
+      "sha256": "f5bc1f87170346903d5b37d6092d68ffa27f7473eeeff359b4ad6b399f500427",
+      "bytes": 76335,
+      "matchesWorkflowArtifact": true
+    },
+    {
+      "url": "https://jacobinwwey.github.io/obsidian-NotEMD/es/assets/js/main.738b79f5.js",
+      "sha256": "d0962542f568658e644809abac5edd437aa87b2c886de23b4c1f9e913a361688",
+      "bytes": 424411,
+      "matchesWorkflowArtifact": true
+    },
+    {
+      "url": "https://jacobinwwey.github.io/obsidian-NotEMD/es/assets/js/runtime~main.11f6c4a5.js",
+      "sha256": "31900724a45f057aebdaafffe6d52278d79fd42f56a5a105f1c83505ea667181",
+      "bytes": 5698,
+      "matchesWorkflowArtifact": true
+    },
+    {
+      "url": "https://jacobinwwey.github.io/obsidian-NotEMD/fa/assets/css/styles.5ce403b6.css",
+      "sha256": "3775dc6be01b0326a3508271bce9c8010078d7a52de648ad713c3c2b43d50b7f",
+      "bytes": 76416,
+      "matchesWorkflowArtifact": true
+    },
+    {
+      "url": "https://jacobinwwey.github.io/obsidian-NotEMD/fa/assets/js/main.8d603ea9.js",
+      "sha256": "548a6a4e290309a2d61d50679d9165c9148b0b8e76d576f213d7c6bc465cde9d",
+      "bytes": 430084,
+      "matchesWorkflowArtifact": true
+    },
+    {
+      "url": "https://jacobinwwey.github.io/obsidian-NotEMD/fa/assets/js/runtime~main.66885d45.js",
+      "sha256": "37c3d1b7e3e7c181104370344ca3db2e9c71647cb164bc85c6b7277d456be1ef",
+      "bytes": 5700,
+      "matchesWorkflowArtifact": true
+    },
+    {
+      "url": "https://jacobinwwey.github.io/obsidian-NotEMD/fi/assets/css/styles.781f276a.css",
+      "sha256": "f5bc1f87170346903d5b37d6092d68ffa27f7473eeeff359b4ad6b399f500427",
+      "bytes": 76335,
+      "matchesWorkflowArtifact": true
+    },
+    {
+      "url": "https://jacobinwwey.github.io/obsidian-NotEMD/fi/assets/js/main.a5c7e141.js",
+      "sha256": "23fde1d6e26e78c23f7938ec22d67d49cea6c29aa786bda9ef7616d6d6c0b995",
+      "bytes": 420182,
+      "matchesWorkflowArtifact": true
+    },
+    {
+      "url": "https://jacobinwwey.github.io/obsidian-NotEMD/fi/assets/js/runtime~main.72a5705a.js",
+      "sha256": "65b1773e3cde1993cf70a952ce3197c8b943f5d9604e652d2076c47c4f838be3",
+      "bytes": 5694,
+      "matchesWorkflowArtifact": true
+    },
+    {
+      "url": "https://jacobinwwey.github.io/obsidian-NotEMD/fr/assets/css/styles.781f276a.css",
+      "sha256": "f5bc1f87170346903d5b37d6092d68ffa27f7473eeeff359b4ad6b399f500427",
+      "bytes": 76335,
+      "matchesWorkflowArtifact": true
+    },
+    {
+      "url": "https://jacobinwwey.github.io/obsidian-NotEMD/fr/assets/js/main.c466cffd.js",
+      "sha256": "d3a343d3a3ef06b9904351ba39858c48bf53a2a36d9eaadf1b31252554dc264a",
+      "bytes": 424406,
+      "matchesWorkflowArtifact": true
+    },
+    {
+      "url": "https://jacobinwwey.github.io/obsidian-NotEMD/fr/assets/js/runtime~main.3cb7653e.js",
+      "sha256": "ba0fc6cbe9315b338ccddb4db6745192d50facee72acdab972493889b422005a",
+      "bytes": 5685,
+      "matchesWorkflowArtifact": true
+    },
+    {
+      "url": "https://jacobinwwey.github.io/obsidian-NotEMD/he/assets/css/styles.5ce403b6.css",
+      "sha256": "3775dc6be01b0326a3508271bce9c8010078d7a52de648ad713c3c2b43d50b7f",
+      "bytes": 76416,
+      "matchesWorkflowArtifact": true
+    },
+    {
+      "url": "https://jacobinwwey.github.io/obsidian-NotEMD/he/assets/js/main.a927d791.js",
+      "sha256": "f54508da1b44e253b2fff86cc2ff96c204c315396a13ec519e9c50693cb3514d",
+      "bytes": 427416,
+      "matchesWorkflowArtifact": true
+    },
+    {
+      "url": "https://jacobinwwey.github.io/obsidian-NotEMD/he/assets/js/runtime~main.b9270a3d.js",
+      "sha256": "86ab097236f14009ed2c1cf4d32791c81e480886f9d54a4bcc37504be73c4c31",
+      "bytes": 5701,
+      "matchesWorkflowArtifact": true
+    },
+    {
+      "url": "https://jacobinwwey.github.io/obsidian-NotEMD/hi/assets/css/styles.781f276a.css",
+      "sha256": "f5bc1f87170346903d5b37d6092d68ffa27f7473eeeff359b4ad6b399f500427",
+      "bytes": 76335,
+      "matchesWorkflowArtifact": true
+    },
+    {
+      "url": "https://jacobinwwey.github.io/obsidian-NotEMD/hi/assets/js/main.47ea1540.js",
+      "sha256": "4c05337dfb3e2fccc18262d03f2caa529aef3fb2976af4ff3daa7e2432258d77",
+      "bytes": 429090,
+      "matchesWorkflowArtifact": true
+    },
+    {
+      "url": "https://jacobinwwey.github.io/obsidian-NotEMD/hi/assets/js/runtime~main.e5e9fcbb.js",
+      "sha256": "44b4b255a49daa39b29dc363f08c7801270a254f12fd5e54892e21eb545929fc",
+      "bytes": 5687,
+      "matchesWorkflowArtifact": true
+    },
+    {
+      "url": "https://jacobinwwey.github.io/obsidian-NotEMD/hu/assets/css/styles.781f276a.css",
+      "sha256": "f5bc1f87170346903d5b37d6092d68ffa27f7473eeeff359b4ad6b399f500427",
+      "bytes": 76335,
+      "matchesWorkflowArtifact": true
+    },
+    {
+      "url": "https://jacobinwwey.github.io/obsidian-NotEMD/hu/assets/js/main.c7c08e11.js",
+      "sha256": "0b8ed4a3382705f5586a1a215f30300cee39ede79f8fbc0ccdb3b81df01383b3",
+      "bytes": 424735,
+      "matchesWorkflowArtifact": true
+    },
+    {
+      "url": "https://jacobinwwey.github.io/obsidian-NotEMD/hu/assets/js/runtime~main.8b3ee9c6.js",
+      "sha256": "fd1ac5f7d7f56d724e641021ad943df282646cd00881666e101a762a73337f2b",
+      "bytes": 5685,
+      "matchesWorkflowArtifact": true
+    },
+    {
+      "url": "https://jacobinwwey.github.io/obsidian-NotEMD/id/assets/css/styles.781f276a.css",
+      "sha256": "f5bc1f87170346903d5b37d6092d68ffa27f7473eeeff359b4ad6b399f500427",
+      "bytes": 76335,
+      "matchesWorkflowArtifact": true
+    },
+    {
+      "url": "https://jacobinwwey.github.io/obsidian-NotEMD/id/assets/js/main.0124723f.js",
+      "sha256": "b96647d0d715740f9b23b340b1388bcaf32a638151d818f8d6914e76823c2695",
+      "bytes": 423961,
+      "matchesWorkflowArtifact": true
+    },
+    {
+      "url": "https://jacobinwwey.github.io/obsidian-NotEMD/id/assets/js/runtime~main.c1428cf1.js",
+      "sha256": "b7a2424d08881c201dea8f5c84bc6213ec41b86c0ce52ea3269210c8044a5bfd",
+      "bytes": 5693,
+      "matchesWorkflowArtifact": true
+    },
+    {
+      "url": "https://jacobinwwey.github.io/obsidian-NotEMD/it/assets/css/styles.781f276a.css",
+      "sha256": "f5bc1f87170346903d5b37d6092d68ffa27f7473eeeff359b4ad6b399f500427",
+      "bytes": 76335,
+      "matchesWorkflowArtifact": true
+    },
+    {
+      "url": "https://jacobinwwey.github.io/obsidian-NotEMD/it/assets/js/main.ef0a878e.js",
+      "sha256": "10e74a4749f24637825e1e57b0ef3d84b593d4351e17a98a20afbc0c7c7c1769",
+      "bytes": 424308,
+      "matchesWorkflowArtifact": true
+    },
+    {
+      "url": "https://jacobinwwey.github.io/obsidian-NotEMD/it/assets/js/runtime~main.67295b07.js",
+      "sha256": "d7a4d08c1c63d50f554ad57590867bceb16491d3a02c09133d3bbfaecd53166b",
+      "bytes": 5698,
+      "matchesWorkflowArtifact": true
+    },
+    {
+      "url": "https://jacobinwwey.github.io/obsidian-NotEMD/ja/assets/css/styles.781f276a.css",
+      "sha256": "f5bc1f87170346903d5b37d6092d68ffa27f7473eeeff359b4ad6b399f500427",
+      "bytes": 76335,
+      "matchesWorkflowArtifact": true
+    },
+    {
+      "url": "https://jacobinwwey.github.io/obsidian-NotEMD/ja/assets/js/main.92b86394.js",
+      "sha256": "5789fbeb4537882a471f125550dfc7c7c6724d9d108013e641eab08351536b5b",
+      "bytes": 426982,
+      "matchesWorkflowArtifact": true
+    },
+    {
+      "url": "https://jacobinwwey.github.io/obsidian-NotEMD/ja/assets/js/runtime~main.13eb9332.js",
+      "sha256": "822004d2b59cc04d89a1a6c08129408866848b78113e542d2569e4af3d93bcc9",
+      "bytes": 5693,
+      "matchesWorkflowArtifact": true
+    },
+    {
+      "url": "https://jacobinwwey.github.io/obsidian-NotEMD/ko/assets/css/styles.781f276a.css",
+      "sha256": "f5bc1f87170346903d5b37d6092d68ffa27f7473eeeff359b4ad6b399f500427",
+      "bytes": 76335,
+      "matchesWorkflowArtifact": true
+    },
+    {
+      "url": "https://jacobinwwey.github.io/obsidian-NotEMD/ko/assets/js/main.7b6d802c.js",
+      "sha256": "5d4e05df1fc4ddd972f01da47c94f29f67caf9d87fc78b4dc17d770575585392",
+      "bytes": 426093,
+      "matchesWorkflowArtifact": true
+    },
+    {
+      "url": "https://jacobinwwey.github.io/obsidian-NotEMD/ko/assets/js/runtime~main.2c931bbe.js",
+      "sha256": "d9ed2fab5c3b8a59e0993c7e8da1d60320c2787ff242db0247cc7e12fd491ae9",
+      "bytes": 5694,
+      "matchesWorkflowArtifact": true
+    },
+    {
+      "url": "https://jacobinwwey.github.io/obsidian-NotEMD/ms/assets/css/styles.781f276a.css",
+      "sha256": "f5bc1f87170346903d5b37d6092d68ffa27f7473eeeff359b4ad6b399f500427",
+      "bytes": 76335,
+      "matchesWorkflowArtifact": true
+    },
+    {
+      "url": "https://jacobinwwey.github.io/obsidian-NotEMD/ms/assets/js/main.bdc893cf.js",
+      "sha256": "c8f00fba3290788dd40db75fa2d9bb16eb8c3dc84d6656be9a87942239202608",
+      "bytes": 420035,
+      "matchesWorkflowArtifact": true
+    },
+    {
+      "url": "https://jacobinwwey.github.io/obsidian-NotEMD/ms/assets/js/runtime~main.6b6217d8.js",
+      "sha256": "3e7a14c2a3188d659169bb9ed7910ea1f6d730f40d0d5e54cc5bde38547490d9",
+      "bytes": 5686,
+      "matchesWorkflowArtifact": true
+    },
+    {
+      "url": "https://jacobinwwey.github.io/obsidian-NotEMD/nl/assets/css/styles.781f276a.css",
+      "sha256": "f5bc1f87170346903d5b37d6092d68ffa27f7473eeeff359b4ad6b399f500427",
+      "bytes": 76335,
+      "matchesWorkflowArtifact": true
+    },
+    {
+      "url": "https://jacobinwwey.github.io/obsidian-NotEMD/nl/assets/js/main.6afbd36c.js",
+      "sha256": "6f90b04755a859e5d7cb25ff541f002fa7982f9872436fb2674e6759ea3e0397",
+      "bytes": 424098,
+      "matchesWorkflowArtifact": true
+    },
+    {
+      "url": "https://jacobinwwey.github.io/obsidian-NotEMD/nl/assets/js/runtime~main.4c10d3ae.js",
+      "sha256": "f75d56825246d20e777627711e6bb232a54bb8911213e9b60239c5514b045ed6",
+      "bytes": 5708,
+      "matchesWorkflowArtifact": true
+    },
+    {
+      "url": "https://jacobinwwey.github.io/obsidian-NotEMD/no/assets/css/styles.781f276a.css",
+      "sha256": "f5bc1f87170346903d5b37d6092d68ffa27f7473eeeff359b4ad6b399f500427",
+      "bytes": 76335,
+      "matchesWorkflowArtifact": true
+    },
+    {
+      "url": "https://jacobinwwey.github.io/obsidian-NotEMD/no/assets/js/main.4d8e5a09.js",
+      "sha256": "5799693ae5aa5a686652cf6d10c51a1301a5e51fa919f961d559bed323d514bc",
+      "bytes": 420094,
+      "matchesWorkflowArtifact": true
+    },
+    {
+      "url": "https://jacobinwwey.github.io/obsidian-NotEMD/no/assets/js/runtime~main.08064fc0.js",
+      "sha256": "e95758f2f6514b21f6408b8c332d0d7f248490f746831a367d1c909493aecfdf",
+      "bytes": 5691,
+      "matchesWorkflowArtifact": true
+    },
+    {
+      "url": "https://jacobinwwey.github.io/obsidian-NotEMD/pl/assets/css/styles.781f276a.css",
+      "sha256": "f5bc1f87170346903d5b37d6092d68ffa27f7473eeeff359b4ad6b399f500427",
+      "bytes": 76335,
+      "matchesWorkflowArtifact": true
+    },
+    {
+      "url": "https://jacobinwwey.github.io/obsidian-NotEMD/pl/assets/js/main.a1520855.js",
+      "sha256": "bbc53b44c025706ab14a29943da3f48595a969d005e945e79700a78235748021",
+      "bytes": 424865,
+      "matchesWorkflowArtifact": true
+    },
+    {
+      "url": "https://jacobinwwey.github.io/obsidian-NotEMD/pl/assets/js/runtime~main.5e3425a2.js",
+      "sha256": "8c868881ad5d6bd7115db7b2396d1f82fe4111be7b1d45b6a38117c1c367cc0e",
+      "bytes": 5704,
+      "matchesWorkflowArtifact": true
+    },
+    {
+      "url": "https://jacobinwwey.github.io/obsidian-NotEMD/pt-BR/assets/css/styles.781f276a.css",
+      "sha256": "f5bc1f87170346903d5b37d6092d68ffa27f7473eeeff359b4ad6b399f500427",
+      "bytes": 76335,
+      "matchesWorkflowArtifact": true
+    },
+    {
+      "url": "https://jacobinwwey.github.io/obsidian-NotEMD/pt-BR/assets/js/main.876e1b24.js",
+      "sha256": "bf9e853305f68d5c1f057abe482b1c280169cedfc3d3fce88e2e0cd7941e689e",
+      "bytes": 424974,
+      "matchesWorkflowArtifact": true
+    },
+    {
+      "url": "https://jacobinwwey.github.io/obsidian-NotEMD/pt-BR/assets/js/runtime~main.409c7396.js",
+      "sha256": "fa71e6381ca4b8165a65a42749279f44ad6c27aab7acc1bc5bd8e8703dabd24d",
+      "bytes": 5702,
+      "matchesWorkflowArtifact": true
+    },
+    {
+      "url": "https://jacobinwwey.github.io/obsidian-NotEMD/pt/assets/css/styles.781f276a.css",
+      "sha256": "f5bc1f87170346903d5b37d6092d68ffa27f7473eeeff359b4ad6b399f500427",
+      "bytes": 76335,
+      "matchesWorkflowArtifact": true
+    },
+    {
+      "url": "https://jacobinwwey.github.io/obsidian-NotEMD/pt/assets/js/main.d3687541.js",
+      "sha256": "341ae6cd6fb40cb85688a6cabd458122ab885f408b860a86c6c7121a7fe620d3",
+      "bytes": 424561,
+      "matchesWorkflowArtifact": true
+    },
+    {
+      "url": "https://jacobinwwey.github.io/obsidian-NotEMD/pt/assets/js/runtime~main.83e42605.js",
+      "sha256": "77c498dfda86afd45bdd735c38ea5bcc58e3de0d021d0ca69032645b04d44a4f",
+      "bytes": 5691,
+      "matchesWorkflowArtifact": true
+    },
+    {
+      "url": "https://jacobinwwey.github.io/obsidian-NotEMD/ro/assets/css/styles.781f276a.css",
+      "sha256": "f5bc1f87170346903d5b37d6092d68ffa27f7473eeeff359b4ad6b399f500427",
+      "bytes": 76335,
+      "matchesWorkflowArtifact": true
+    },
+    {
+      "url": "https://jacobinwwey.github.io/obsidian-NotEMD/ro/assets/js/main.e988ef38.js",
+      "sha256": "9a1d007597b32182afc9c3ae0fff51228d1a0102440710afb65bd2a4102fb25d",
+      "bytes": 420400,
+      "matchesWorkflowArtifact": true
+    },
+    {
+      "url": "https://jacobinwwey.github.io/obsidian-NotEMD/ro/assets/js/runtime~main.a8d342f9.js",
+      "sha256": "d4b867bb8c8df9c26746bca3f621b67c91821d4798a46dbe3d10525e8d53e5df",
+      "bytes": 5695,
+      "matchesWorkflowArtifact": true
+    },
+    {
+      "url": "https://jacobinwwey.github.io/obsidian-NotEMD/ru/assets/css/styles.781f276a.css",
+      "sha256": "f5bc1f87170346903d5b37d6092d68ffa27f7473eeeff359b4ad6b399f500427",
+      "bytes": 76335,
+      "matchesWorkflowArtifact": true
+    },
+    {
+      "url": "https://jacobinwwey.github.io/obsidian-NotEMD/ru/assets/js/main.cc8474fc.js",
+      "sha256": "9cd2d1e86eb72029affdfc5dd4c5958e8632dd5afea443df3194842d3a0fd1d2",
+      "bytes": 431316,
+      "matchesWorkflowArtifact": true
+    },
+    {
+      "url": "https://jacobinwwey.github.io/obsidian-NotEMD/ru/assets/js/runtime~main.49c808a6.js",
+      "sha256": "6884ff7266e5605aa17ef8dded4f637901bc821f7ca86390f7dd73476f18dd40",
+      "bytes": 5685,
+      "matchesWorkflowArtifact": true
+    },
+    {
+      "url": "https://jacobinwwey.github.io/obsidian-NotEMD/sv/assets/css/styles.781f276a.css",
+      "sha256": "f5bc1f87170346903d5b37d6092d68ffa27f7473eeeff359b4ad6b399f500427",
+      "bytes": 76335,
+      "matchesWorkflowArtifact": true
+    },
+    {
+      "url": "https://jacobinwwey.github.io/obsidian-NotEMD/sv/assets/js/main.9ad09843.js",
+      "sha256": "b4d591f44c62e602c473d78020251f4175176bcb03019e40d6c2bd2f4a22fe11",
+      "bytes": 424125,
+      "matchesWorkflowArtifact": true
+    },
+    {
+      "url": "https://jacobinwwey.github.io/obsidian-NotEMD/sv/assets/js/runtime~main.9d3689d7.js",
+      "sha256": "d8b03271796d002290f928c75fdba8ff14b2d21c9715576e23cafc04ce4be1fa",
+      "bytes": 5697,
+      "matchesWorkflowArtifact": true
+    },
+    {
+      "url": "https://jacobinwwey.github.io/obsidian-NotEMD/th/assets/css/styles.781f276a.css",
+      "sha256": "f5bc1f87170346903d5b37d6092d68ffa27f7473eeeff359b4ad6b399f500427",
+      "bytes": 76335,
+      "matchesWorkflowArtifact": true
+    },
+    {
+      "url": "https://jacobinwwey.github.io/obsidian-NotEMD/th/assets/js/main.b04dfee2.js",
+      "sha256": "4dfe646d358f2291ef47cdb4acf784f080a08129a3f6a8b51e53b77c1eb71556",
+      "bytes": 422659,
+      "matchesWorkflowArtifact": true
+    },
+    {
+      "url": "https://jacobinwwey.github.io/obsidian-NotEMD/th/assets/js/runtime~main.6a5b17d7.js",
+      "sha256": "bae7f0d1a42523e9970eacd0488df57bece7b10012dfc114bc5ac191cc01d25a",
+      "bytes": 5699,
+      "matchesWorkflowArtifact": true
+    },
+    {
+      "url": "https://jacobinwwey.github.io/obsidian-NotEMD/tr/assets/css/styles.781f276a.css",
+      "sha256": "f5bc1f87170346903d5b37d6092d68ffa27f7473eeeff359b4ad6b399f500427",
+      "bytes": 76335,
+      "matchesWorkflowArtifact": true
+    },
+    {
+      "url": "https://jacobinwwey.github.io/obsidian-NotEMD/tr/assets/js/main.a23f886b.js",
+      "sha256": "579f60fa95b287467b172855cac6c54f4b55f99e2966ac4464af394739bc14e2",
+      "bytes": 424758,
+      "matchesWorkflowArtifact": true
+    },
+    {
+      "url": "https://jacobinwwey.github.io/obsidian-NotEMD/tr/assets/js/runtime~main.2c6f66fe.js",
+      "sha256": "cf9411f8824cd88b84dd9fb77f8c9c4c72ae42e6f7eb41d41edc260b98e9cbb9",
+      "bytes": 5699,
+      "matchesWorkflowArtifact": true
+    },
+    {
+      "url": "https://jacobinwwey.github.io/obsidian-NotEMD/uk/assets/css/styles.781f276a.css",
+      "sha256": "f5bc1f87170346903d5b37d6092d68ffa27f7473eeeff359b4ad6b399f500427",
+      "bytes": 76335,
+      "matchesWorkflowArtifact": true
+    },
+    {
+      "url": "https://jacobinwwey.github.io/obsidian-NotEMD/uk/assets/js/main.70e52e7e.js",
+      "sha256": "4741f85e5b37822b34d01cc93403e67988ca7f884ecdfc92d4402e03660ad42f",
+      "bytes": 433580,
+      "matchesWorkflowArtifact": true
+    },
+    {
+      "url": "https://jacobinwwey.github.io/obsidian-NotEMD/uk/assets/js/runtime~main.ba6f70e3.js",
+      "sha256": "81dbc4851abe6f3f1b24f8069ce49da70926eb48bc51a8c20e1e17ba114df4d0",
+      "bytes": 5701,
+      "matchesWorkflowArtifact": true
+    },
+    {
+      "url": "https://jacobinwwey.github.io/obsidian-NotEMD/vi/assets/css/styles.781f276a.css",
+      "sha256": "f5bc1f87170346903d5b37d6092d68ffa27f7473eeeff359b4ad6b399f500427",
+      "bytes": 76335,
+      "matchesWorkflowArtifact": true
+    },
+    {
+      "url": "https://jacobinwwey.github.io/obsidian-NotEMD/vi/assets/js/main.9faf46e4.js",
+      "sha256": "b29ea81e0882921caa39096cca8ecceb357f25508015cb51989bb7473f9269d3",
+      "bytes": 425806,
+      "matchesWorkflowArtifact": true
+    },
+    {
+      "url": "https://jacobinwwey.github.io/obsidian-NotEMD/vi/assets/js/runtime~main.12174cee.js",
+      "sha256": "7f898e8ca749b5b1296a7431346e1cbe4a216ed7fa4c3fc0a1fcdb0884f7bd50",
+      "bytes": 5701,
+      "matchesWorkflowArtifact": true
+    },
+    {
+      "url": "https://jacobinwwey.github.io/obsidian-NotEMD/zh-CN/assets/css/styles.781f276a.css",
+      "sha256": "f5bc1f87170346903d5b37d6092d68ffa27f7473eeeff359b4ad6b399f500427",
+      "bytes": 76335,
+      "matchesWorkflowArtifact": true
+    },
+    {
+      "url": "https://jacobinwwey.github.io/obsidian-NotEMD/zh-CN/assets/js/main.92a25b34.js",
+      "sha256": "474f40400288add9df582e6042b662d6816ece9bec7e192a48932470ac7b2da2",
+      "bytes": 425809,
+      "matchesWorkflowArtifact": true
+    },
+    {
+      "url": "https://jacobinwwey.github.io/obsidian-NotEMD/zh-CN/assets/js/runtime~main.49ce3995.js",
+      "sha256": "ee1e0ea5afeeb5edaa306fe44ab5f9e0654f88ecd88554089c04dc5fec67ffc0",
+      "bytes": 5693,
+      "matchesWorkflowArtifact": true
+    },
+    {
+      "url": "https://jacobinwwey.github.io/obsidian-NotEMD/zh-Hant/assets/css/styles.781f276a.css",
+      "sha256": "f5bc1f87170346903d5b37d6092d68ffa27f7473eeeff359b4ad6b399f500427",
+      "bytes": 76335,
+      "matchesWorkflowArtifact": true
+    },
+    {
+      "url": "https://jacobinwwey.github.io/obsidian-NotEMD/zh-Hant/assets/js/main.9fac0d0e.js",
+      "sha256": "3c3850be1150bef390fc2b81faf059e83f27d8fa84db8f42080cb33e1efb5300",
+      "bytes": 425902,
+      "matchesWorkflowArtifact": true
+    },
+    {
+      "url": "https://jacobinwwey.github.io/obsidian-NotEMD/zh-Hant/assets/js/runtime~main.4b2f54e3.js",
+      "sha256": "37694ad3ed1db374aaaba764f1e9ceee97438a5e67cbaa0f1d436b275716adc3",
+      "bytes": 5699,
+      "matchesWorkflowArtifact": true
+    },
+    {
+      "url": "https://jacobinwwey.github.io/obsidian-NotEMD/zh-TW/assets/css/styles.781f276a.css",
+      "sha256": "f5bc1f87170346903d5b37d6092d68ffa27f7473eeeff359b4ad6b399f500427",
+      "bytes": 76335,
+      "matchesWorkflowArtifact": true
+    },
+    {
+      "url": "https://jacobinwwey.github.io/obsidian-NotEMD/zh-TW/assets/js/main.f9d2ac1a.js",
+      "sha256": "f75a7fcf4f018b88d0d782148b23ad566879ab3293ebcdb05fc462a502655ab5",
+      "bytes": 425756,
+      "matchesWorkflowArtifact": true
+    },
+    {
+      "url": "https://jacobinwwey.github.io/obsidian-NotEMD/zh-TW/assets/js/runtime~main.78b78b25.js",
+      "sha256": "f50c1002ed7aa5e4f11290d84f28681c7c45abecb8b528fa15172ba2476d1efe",
+      "bytes": 5686,
+      "matchesWorkflowArtifact": true
+    }
+  ]
+}

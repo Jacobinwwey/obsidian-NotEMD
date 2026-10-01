@@ -1,0 +1,256 @@
+{
+  "attempt": 2,
+  "conclusion": "success",
+  "databaseId": 36824052373,
+  "headSha": "4ac48b59e6f95b4cfa737f1c86b542673ecd1e56",
+  "jobs": [
+    {
+      "completedAt": "2026-10-01T06:28:30Z",
+      "conclusion": "success",
+      "databaseId": 110247833223,
+      "name": "publish",
+      "startedAt": "2026-10-01T06:26:12Z",
+      "status": "completed",
+      "steps": [
+        {
+          "completedAt": "2026-10-01T06:26:13Z",
+          "conclusion": "success",
+          "name": "Set up job",
+          "number": 1,
+          "startedAt": "2026-10-01T06:26:13Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-01T06:26:18Z",
+          "conclusion": "success",
+          "name": "Check out workflow sources",
+          "number": 2,
+          "startedAt": "2026-10-01T06:26:13Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-01T06:26:20Z",
+          "conclusion": "success",
+          "name": "Resolve tag name",
+          "number": 3,
+          "startedAt": "2026-10-01T06:26:18Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-01T06:26:21Z",
+          "conclusion": "success",
+          "name": "Check out release ref",
+          "number": 4,
+          "startedAt": "2026-10-01T06:26:20Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-01T06:26:26Z",
+          "conclusion": "success",
+          "name": "Set up Node.js",
+          "number": 5,
+          "startedAt": "2026-10-01T06:26:21Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-01T06:26:35Z",
+          "conclusion": "success",
+          "name": "Install dependencies",
+          "number": 6,
+          "startedAt": "2026-10-01T06:26:26Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-01T06:27:06Z",
+          "conclusion": "success",
+          "name": "Install pinned Chromium",
+          "number": 7,
+          "startedAt": "2026-10-01T06:26:35Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-01T06:27:07Z",
+          "conclusion": "success",
+          "name": "Install the exporter Chromium revision",
+          "number": 8,
+          "startedAt": "2026-10-01T06:27:06Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-01T06:27:13Z",
+          "conclusion": "success",
+          "name": "Build plugin",
+          "number": 9,
+          "startedAt": "2026-10-01T06:27:07Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-01T06:28:11Z",
+          "conclusion": "success",
+          "name": "Run test suite",
+          "number": 10,
+          "startedAt": "2026-10-01T06:27:13Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-01T06:28:11Z",
+          "conclusion": "success",
+          "name": "Audit UI i18n surfaces",
+          "number": 11,
+          "startedAt": "2026-10-01T06:28:11Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-01T06:28:11Z",
+          "conclusion": "success",
+          "name": "Audit render-host bundle packaging",
+          "number": 12,
+          "startedAt": "2026-10-01T06:28:11Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-01T06:28:11Z",
+          "conclusion": "success",
+          "name": "Check diff hygiene",
+          "number": 13,
+          "startedAt": "2026-10-01T06:28:11Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-01T06:28:27Z",
+          "conclusion": "success",
+          "name": "Publish or repair GitHub release assets",
+          "number": 14,
+          "startedAt": "2026-10-01T06:28:11Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-01T06:28:27Z",
+          "conclusion": "success",
+          "name": "Post Set up Node.js",
+          "number": 26,
+          "startedAt": "2026-10-01T06:28:27Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-01T06:28:27Z",
+          "conclusion": "success",
+          "name": "Post Check out release ref",
+          "number": 27,
+          "startedAt": "2026-10-01T06:28:27Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-01T06:28:27Z",
+          "conclusion": "success",
+          "name": "Post Check out workflow sources",
+          "number": 28,
+          "startedAt": "2026-10-01T06:28:27Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-01T06:28:27Z",
+          "conclusion": "success",
+          "name": "Complete job",
+          "number": 29,
+          "startedAt": "2026-10-01T06:28:27Z",
+          "status": "completed"
+        }
+      ],
+      "url": "https://github.com/Jacobinwwey/obsidian-NotEMD/actions/runs/36824052373/job/110247833223"
+    },
+    {
+      "completedAt": "2026-10-01T06:30:49Z",
+      "conclusion": "success",
+      "databaseId": 110248472858,
+      "name": "refresh_chronicle",
+      "startedAt": "2026-10-01T06:28:33Z",
+      "status": "completed",
+      "steps": [
+        {
+          "completedAt": "2026-10-01T06:28:34Z",
+          "conclusion": "success",
+          "name": "Set up job",
+          "number": 1,
+          "startedAt": "2026-10-01T06:28:33Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-01T06:28:39Z",
+          "conclusion": "success",
+          "name": "Check out chronicle target branch",
+          "number": 2,
+          "startedAt": "2026-10-01T06:28:34Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-01T06:28:43Z",
+          "conclusion": "success",
+          "name": "Set up Node.js",
+          "number": 3,
+          "startedAt": "2026-10-01T06:28:39Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-01T06:28:44Z",
+          "conclusion": "success",
+          "name": "Set up Bun",
+          "number": 4,
+          "startedAt": "2026-10-01T06:28:43Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-01T06:30:39Z",
+          "conclusion": "success",
+          "name": "Refresh quarterly development chronicle",
+          "number": 5,
+          "startedAt": "2026-10-01T06:28:44Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-01T06:30:47Z",
+          "conclusion": "success",
+          "name": "Commit chronicle refresh",
+          "number": 6,
+          "startedAt": "2026-10-01T06:30:39Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-01T06:30:47Z",
+          "conclusion": "success",
+          "name": "Post Set up Bun",
+          "number": 10,
+          "startedAt": "2026-10-01T06:30:47Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-01T06:30:48Z",
+          "conclusion": "success",
+          "name": "Post Set up Node.js",
+          "number": 11,
+          "startedAt": "2026-10-01T06:30:47Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-01T06:30:48Z",
+          "conclusion": "success",
+          "name": "Post Check out chronicle target branch",
+          "number": 12,
+          "startedAt": "2026-10-01T06:30:48Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-01T06:30:48Z",
+          "conclusion": "success",
+          "name": "Complete job",
+          "number": 13,
+          "startedAt": "2026-10-01T06:30:48Z",
+          "status": "completed"
+        }
+      ],
+      "url": "https://github.com/Jacobinwwey/obsidian-NotEMD/actions/runs/36824052373/job/110248472858"
+    }
+  ],
+  "status": "completed",
+  "url": "https://github.com/Jacobinwwey/obsidian-NotEMD/actions/runs/36824052373"
+}
