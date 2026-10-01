@@ -50,6 +50,8 @@ export interface SlidevMeasuredElement {
 	scrollHeight: number;
 	clientWidth: number;
 	clientHeight: number;
+	overflowX?: string;
+	overflowY?: string;
 	rect: SlidevRect;
 }
 
@@ -334,9 +336,12 @@ export function analyzeRenderedSlideMeasurement(
 			measurement.slideRoot,
 			resolvedConfig.overflowTolerancePx,
 		);
-		const scrollOverflow =
-			element.scrollWidth - element.clientWidth > resolvedConfig.overflowTolerancePx ||
-			element.scrollHeight - element.clientHeight > resolvedConfig.overflowTolerancePx;
+		// Text ranges already measure visible ink; tall CJK glyphs may exceed an unclipped line box.
+		const scrollWidthOverflow = element.scrollWidth - element.clientWidth > resolvedConfig.overflowTolerancePx
+			&& !(element.kind === 'text' && element.overflowX === 'visible');
+		const scrollHeightOverflow = element.scrollHeight - element.clientHeight > resolvedConfig.overflowTolerancePx
+			&& !(element.kind === 'text' && element.overflowY === 'visible');
+		const scrollOverflow = scrollWidthOverflow || scrollHeightOverflow;
 
 		if (!hasOverflow(elementOverflow) && !scrollOverflow) {
 			continue;
@@ -357,8 +362,8 @@ export function analyzeRenderedSlideMeasurement(
 			textPreview: element.textPreview,
 			overflowAxis: resolveOverflowAxis(
 				elementOverflow,
-				element.scrollWidth - element.clientWidth > resolvedConfig.overflowTolerancePx,
-				element.scrollHeight - element.clientHeight > resolvedConfig.overflowTolerancePx,
+				scrollWidthOverflow,
+				scrollHeightOverflow,
 			),
 			overflow: elementOverflow,
 		});
@@ -1260,8 +1265,10 @@ function computeScrollableContentScale(element: SlidevMeasuredElement): number |
 		return null;
 	}
 
-	const widthScale = element.scrollWidth > element.clientWidth ? element.clientWidth / element.scrollWidth : 1;
-	const heightScale = element.scrollHeight > element.clientHeight ? element.clientHeight / element.scrollHeight : 1;
+	const widthScale = element.scrollWidth > element.clientWidth && !(element.kind === 'text' && element.overflowX === 'visible')
+		? element.clientWidth / element.scrollWidth : 1;
+	const heightScale = element.scrollHeight > element.clientHeight && !(element.kind === 'text' && element.overflowY === 'visible')
+		? element.clientHeight / element.scrollHeight : 1;
 	const scale = Math.min(widthScale, heightScale);
 	return scale > 0 && Number.isFinite(scale) ? Math.min(1, scale) : null;
 }

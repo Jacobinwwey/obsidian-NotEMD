@@ -1522,6 +1522,8 @@ async function requestViaDesktopHttpOpenAICompatibleStreamTransport(
             const responseHeaders = response.headers as Record<string, unknown> | undefined;
             const statusCode = response.statusCode ?? 0;
             const state = createOpenAICompatibleStreamState();
+            // TCP chunks may split a UTF-8 code point; retain incomplete bytes until the next chunk.
+            const decoder = new TextDecoder();
 
             const rejectWithTransportDebug = (error: unknown) => {
                 rejectOnce(createOpenAICompatibleStreamTransportError(
@@ -1537,7 +1539,7 @@ async function requestViaDesktopHttpOpenAICompatibleStreamTransport(
 
             response.on('data', (chunk: Buffer | string) => {
                 try {
-                    const chunkText = Buffer.isBuffer(chunk) ? chunk.toString('utf8') : chunk;
+                    const chunkText = Buffer.isBuffer(chunk) ? decoder.decode(chunk, { stream: true }) : chunk;
                     state.rawResponseText += chunkText;
                     state.buffer += chunkText;
                     drainOpenAICompatibleSseBuffer(providerName, state);
@@ -1548,6 +1550,9 @@ async function requestViaDesktopHttpOpenAICompatibleStreamTransport(
             response.on('end', () => {
                 responseEnded = true;
                 try {
+                    const tail = decoder.decode();
+                    state.rawResponseText += tail;
+                    state.buffer += tail;
                     resolveOnce(buildOpenAICompatibleStreamResponse(
                         providerName,
                         transportName,
@@ -1965,6 +1970,8 @@ async function requestViaDesktopHttpStructuredStreamingTransport<State>(
             const responseHeaders = response.headers as Record<string, unknown> | undefined;
             const statusCode = response.statusCode ?? 0;
             const state = strategy.createState();
+            // Decode bytes before protocol parsing so every streaming provider preserves Unicode.
+            const decoder = new TextDecoder();
 
             const rejectWithTransportDebug = (error: unknown) => {
                 rejectOnce(createStructuredStreamingTransportError(
@@ -1981,7 +1988,7 @@ async function requestViaDesktopHttpStructuredStreamingTransport<State>(
 
             response.on('data', (chunk: Buffer | string) => {
                 try {
-                    strategy.onChunk(providerName, state, Buffer.isBuffer(chunk) ? chunk.toString('utf8') : chunk);
+                    strategy.onChunk(providerName, state, Buffer.isBuffer(chunk) ? decoder.decode(chunk, { stream: true }) : chunk);
                 } catch (error: unknown) {
                     rejectWithTransportDebug(error);
                 }
@@ -1989,6 +1996,7 @@ async function requestViaDesktopHttpStructuredStreamingTransport<State>(
             response.on('end', () => {
                 responseEnded = true;
                 try {
+                    strategy.onChunk(providerName, state, decoder.decode());
                     resolveOnce(buildStructuredStreamingResponse(
                         providerName,
                         transportName,

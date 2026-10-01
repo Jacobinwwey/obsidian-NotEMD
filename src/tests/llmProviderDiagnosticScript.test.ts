@@ -1,14 +1,47 @@
+import * as http from 'http';
+import { EventEmitter } from 'events';
+
 const {
     buildDiagnosticPlan,
     createProtocolAccumulator,
     ingestProtocolChunk,
     finalizeProtocolAccumulator,
     formatDiagnosticText,
+    runDiagnostic,
     parseCliArgs,
     validateCliConfig
 } = require('../../scripts/lib/llm-provider-diagnostic.js');
 
 describe('llm provider diagnostic script helpers', () => {
+    test.each(['buffered', 'streaming'])('preserves byte-split UTF-8 in %s diagnostic responses', async mode => {
+        const content = '中文 café 🧬';
+        const body = mode === 'streaming'
+            ? `data: ${JSON.stringify({ choices: [{ delta: { content } }] })}\n\ndata: [DONE]\n\n`
+            : JSON.stringify({ choices: [{ message: { content } }] });
+        const spy = jest.spyOn(http, 'request').mockImplementation((_options, callback: any) => {
+            const response = Object.assign(new EventEmitter(), { statusCode: 200, headers: {} });
+            const request = Object.assign(new EventEmitter(), {
+                write: jest.fn(), setTimeout: jest.fn(), destroy: jest.fn(),
+                end: () => {
+                    callback(response);
+                    for (const byte of Buffer.from(body)) response.emit('data', Buffer.from([byte]));
+                    response.emit('end');
+                }
+            });
+            return request as unknown as http.ClientRequest;
+        });
+        try {
+            const report = await runDiagnostic({
+                transport: 'openai-compatible', providerName: 'OpenAI', baseUrl: 'http://localhost:9999/v1',
+                apiKey: 'test-key', model: 'test-model', prompt: 'System', content: 'Unicode', mode
+            });
+            expect(report.attempts[0].response.body).toBe(body);
+            if (mode === 'streaming') expect(report.attempts[0].response.parsedText).toBe(content);
+        } finally {
+            spy.mockRestore();
+        }
+    });
+
     test('buildDiagnosticPlan creates OpenRouter compare requests with gateway headers and streamed fallback body', () => {
         const plan = buildDiagnosticPlan({
             transport: 'openai-compatible',

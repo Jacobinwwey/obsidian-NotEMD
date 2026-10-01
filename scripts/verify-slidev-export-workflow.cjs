@@ -841,15 +841,26 @@ function resolveSlidesToAudit(sampleSlides, deckMarkdown, slideExport) {
 
 function checkGitIgnoreStatus(pathsToCheck) {
 	const existingPaths = pathsToCheck.filter(Boolean).filter(filePath => fs.existsSync(filePath));
-	if (existingPaths.length === 0) {
+	const externalOutputs = [];
+	const relativePaths = [];
+	for (const filePath of existingPaths) {
+		const relative = path.relative(process.cwd(), filePath);
+		// An explicitly selected external Vault cannot add artifacts to this repository.
+		if (path.isAbsolute(relative) || relative === '..' || relative.startsWith(`..${path.sep}`)) {
+			externalOutputs.push(filePath);
+		} else {
+			relativePaths.push(normalizeGitRelativePath(relative));
+		}
+	}
+	if (relativePaths.length === 0) {
 		return {
 			ignoredOutputs: [],
 			unignoredOutputs: [],
+			externalOutputs,
 			error: null,
 		};
 	}
 
-	const relativePaths = existingPaths.map(filePath => normalizeGitRelativePath(path.relative(process.cwd(), filePath)));
 	const result = childProcess.spawnSync('git', ['check-ignore', '-v', '--stdin'], {
 		cwd: process.cwd(),
 		encoding: 'utf8',
@@ -868,6 +879,7 @@ function checkGitIgnoreStatus(pathsToCheck) {
 	return {
 		ignoredOutputs,
 		unignoredOutputs: relativePaths.filter(filePath => !ignoredRelativePaths.has(filePath)),
+		externalOutputs,
 		error: result.status && result.status > 1 ? (result.stderr || result.stdout || `git check-ignore exited ${result.status}`) : null,
 	};
 }
@@ -1606,6 +1618,7 @@ async function main() {
 		layoutPatchAttempts,
 		ignoredOutputs,
 		unignoredOutputs,
+		externalOutputs: gitIgnoreStatus.externalOutputs,
 		gitIgnoreCheckError: gitIgnoreStatus.error,
 		progress,
 	};
@@ -1637,6 +1650,7 @@ if (require.main === module) {
 	module.exports = {
 		buildRenderedLayoutGate,
 		buildTableBodyLayoutGate,
+		checkGitIgnoreStatus,
 		inspectPptx,
 		selectPptxVisualThresholdProfile,
 		selectPptxHardGateReferenceSource,

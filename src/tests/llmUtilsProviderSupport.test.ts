@@ -151,7 +151,7 @@ function mockDesktopTransportInterruptedResponse(
 
 function mockDesktopTransportStreamingSuccess(
     transportModule: typeof http | typeof https,
-    frames: string[],
+    frames: (string | Buffer)[],
     options: {
         statusCode?: number;
         headers?: Record<string, string>;
@@ -198,7 +198,7 @@ function mockDesktopTransportStreamingSuccess(
 function mockDesktopTransportStreamingInterruption(
     transportModule: typeof http | typeof https,
     options: {
-        frames?: string[];
+        frames?: (string | Buffer)[];
         errorMessage?: string;
         statusCode?: number;
         headers?: Record<string, string>;
@@ -269,8 +269,8 @@ function mockFetchSuccess(
     return fetchMock;
 }
 
-function createStreamingReader(chunks: string[], errorMessage?: string): { read: jest.Mock; releaseLock: jest.Mock } {
-    const encodedChunks = chunks.map(chunk => new TextEncoder().encode(chunk));
+function createStreamingReader(chunks: (string | Uint8Array)[], errorMessage?: string): { read: jest.Mock; releaseLock: jest.Mock } {
+    const encodedChunks = chunks.map(chunk => typeof chunk === 'string' ? new TextEncoder().encode(chunk) : chunk);
     let index = 0;
 
     return {
@@ -290,7 +290,7 @@ function createStreamingReader(chunks: string[], errorMessage?: string): { read:
 }
 
 function mockFetchStreamingSuccess(
-    frames: string[],
+    frames: (string | Uint8Array)[],
     options: {
         status?: number;
         headers?: Record<string, string>;
@@ -2196,6 +2196,85 @@ describe('llmUtils expanded provider support', () => {
         expect(debugInfo).toContain('Attempt 1 [desktop-http]');
         expect(debugInfo).toContain('Request: POST https://api.example.com/v1/chat/completions?key=[REDACTED]');
         expect(debugInfo).toContain('Partial Response: {"message":"partial"}');
+    });
+
+    test.each(['OpenAI', 'DeepSeek', 'Anthropic', 'Google', 'Azure OpenAI', 'Ollama'])(
+        'callLLM preserves UTF-8 split across desktop stream chunks for %s',
+        async name => {
+            const content = '目前无法解读遗传密码 — café 🌍';
+            const provider = { ...createDefaultProviders().find(candidate => candidate.name === name)!, apiKey: 'test-key' };
+            if (name === 'Azure OpenAI') {
+                provider.baseUrl = 'https://azure.example.com';
+                provider.apiVersion = '2025-01-01-preview';
+            }
+            settings = { ...settings, enableStableApiCall: name === 'OpenAI' || name === 'DeepSeek', apiCallMaxRetries: 0 };
+            if (!settings.enableStableApiCall) {
+                (requestUrl as jest.Mock).mockRejectedValueOnce(new Error('net::ERR_CONNECTION_CLOSED'));
+            }
+            const payload = name === 'Anthropic'
+                ? `data: ${JSON.stringify({ type: 'content_block_delta', index: 0, delta: { type: 'text_delta', text: content } })}\n\ndata: {"type":"message_stop"}\n\n`
+                : name === 'Google'
+                    ? `data: ${JSON.stringify({ candidates: [{ content: { parts: [{ text: content }] } }] })}\n\n`
+                    : name === 'Ollama'
+                        ? `${JSON.stringify({ message: { role: 'assistant', content }, done: true })}\n`
+                        : `data: ${JSON.stringify({ choices: [{ delta: { content }, finish_reason: 'stop' }] })}\n\ndata: [DONE]\n\n`;
+            // TCP chunk boundaries can fall inside any two-, three-, or four-byte character.
+            const frames = Array.from(Buffer.from(payload), byte => Buffer.from([byte]));
+            mockDesktopTransportStreamingSuccess(name === 'Ollama' ? http : https, frames);
+
+            await expect(callLLM(provider, 'System prompt', 'Byte-split Unicode', settings, reporter)).resolves.toBe(content);
+        }
+    );
+
+    test('callLLM preserves byte-split UTF-8 in a JSON response to a desktop stream request', async () => {
+        const content = '中文与 emoji 🧬';
+        const provider = { ...createDefaultProviders().find(candidate => candidate.name === 'OpenAI')!, apiKey: 'test-key' };
+        settings = { ...settings, enableStableApiCall: true, apiCallMaxRetries: 0 };
+        const bytes = Buffer.from(JSON.stringify({ choices: [{ message: { content } }] }));
+        mockDesktopTransportStreamingSuccess(https, Array.from(bytes, byte => Buffer.from([byte])), {
+            headers: { 'content-type': 'application/json' }
+        });
+        await expect(callLLM(provider, 'System prompt', 'Byte-split JSON', settings, reporter)).resolves.toBe(content);
+    });
+
+    test.each(['OpenAI', 'Anthropic'])('preserves UTF-8 in the web fetch stream for %s', async name => {
+        const content = '中文 café 🌍';
+        const provider = { ...createDefaultProviders().find(candidate => candidate.name === name)!, apiKey: 'test-key' };
+        settings = { ...settings, enableStableApiCall: false, apiCallMaxRetries: 0 };
+        (requestUrl as jest.Mock).mockRejectedValueOnce(new Error('net::ERR_CONNECTION_CLOSED'));
+        const payload = name === 'Anthropic'
+            ? `data: ${JSON.stringify({ type: 'content_block_delta', delta: { type: 'text_delta', text: content } })}\n\ndata: {"type":"message_stop"}\n\n`
+            : `data: ${JSON.stringify({ choices: [{ delta: { content } }] })}\n\ndata: [DONE]\n\n`;
+        mockFetchStreamingSuccess(Array.from(Buffer.from(payload), byte => new Uint8Array([byte])));
+        await withDesktopNodeTransportDisabled(async () => {
+            await expect(callLLM(provider, 'System', 'Web UTF-8', settings, reporter)).resolves.toBe(content);
+        });
+    });
+
+    test.each(['OpenAI', 'Anthropic'])('retains complete UTF-8 in interrupted desktop diagnostics for %s', async name => {
+        const content = '部分中文 café 🧬';
+        const provider = { ...createDefaultProviders().find(candidate => candidate.name === name)!, apiKey: 'test-key' };
+        settings = { ...settings, enableStableApiCall: false, enableApiErrorDebugMode: true, apiCallMaxRetries: 0 };
+        (requestUrl as jest.Mock).mockRejectedValueOnce(new Error('net::ERR_CONNECTION_CLOSED'));
+        const payload = name === 'Anthropic'
+            ? `data: ${JSON.stringify({ type: 'content_block_delta', delta: { type: 'text_delta', text: content } })}\n\n`
+            : `data: ${JSON.stringify({ choices: [{ delta: { content } }] })}\n\n`;
+        const frames = Array.from(Buffer.from(payload), byte => Buffer.from([byte]));
+        frames.push(Buffer.from('data: '), Buffer.from([0xf0]));
+        mockDesktopTransportStreamingInterruption(https, { frames });
+        await expect(callLLM(provider, 'System', 'Interrupted UTF-8', settings, reporter)).rejects.toThrow('socket hang up');
+        const logs = (reporter.log as jest.Mock).mock.calls.map(call => String(call[0])).join('\n');
+        expect(logs).toContain(`Partial Parsed Response: ${content}`);
+        expect(logs).not.toContain('\ufffd');
+    });
+
+    test('preserves an intentional replacement character supplied by the provider', async () => {
+        const content = '原文包含 \ufffd，不能用清洗掩盖传输错误';
+        const provider = { ...createDefaultProviders().find(candidate => candidate.name === 'OpenAI')!, apiKey: 'test-key' };
+        settings = { ...settings, enableStableApiCall: true };
+        const payload = `data: ${JSON.stringify({ choices: [{ delta: { content } }] })}\n\ndata: [DONE]\n\n`;
+        mockDesktopTransportStreamingSuccess(https, Array.from(Buffer.from(payload), byte => Buffer.from([byte])));
+        await expect(callLLM(provider, 'System', 'Intentional character', settings, reporter)).resolves.toBe(content);
     });
 
     test('callLLM uses desktop streaming transport as primary long-request path for OpenAI-compatible providers when stable mode is enabled', async () => {

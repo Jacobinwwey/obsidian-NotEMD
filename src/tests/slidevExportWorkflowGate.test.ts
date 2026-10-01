@@ -1,9 +1,31 @@
+import * as fs from 'fs';
+import * as os from 'os';
+import * as path from 'path';
+
 const {
 	buildRenderedLayoutGate,
 	buildTableBodyLayoutGate,
+	checkGitIgnoreStatus,
 } = require('../../scripts/verify-slidev-export-workflow.cjs');
 
 describe('Slidev export workflow layout gates', () => {
+	test('classifies output in an external vault without asking this repository to ignore it', () => {
+		const external = fs.mkdtempSync(path.join(os.tmpdir(), 'notemd-external-vault-'));
+		const artifact = path.join(external, 'slides.html');
+		fs.writeFileSync(artifact, 'export');
+		try {
+			const status = checkGitIgnoreStatus([artifact]);
+			expect(status.error).toBeNull();
+			expect(status.unignoredOutputs).toEqual([]);
+			expect(status.externalOutputs).toEqual([artifact]);
+			const mixed = checkGitIgnoreStatus([artifact, path.resolve('README.md')]);
+			expect(mixed.error).toBeNull();
+			expect(mixed.unignoredOutputs).toContain('README.md');
+		} finally {
+			fs.rmSync(external, { recursive: true, force: true });
+		}
+	});
+
 	test('fails table/body gate for content findings on table or body-text slides', () => {
 		const gate = buildTableBodyLayoutGate([
 			{

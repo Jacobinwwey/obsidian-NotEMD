@@ -33,6 +33,28 @@ function createMeasurement(overrides: Partial<RenderedSlideMeasurement> = {}): R
 }
 
 describe('slidevLayoutAudit', () => {
+	test.each(['visible', 'hidden', 'clip', 'auto', 'scroll'])('distinguishes visible text ink from %s scroll-box clipping', overflow => {
+		const rect = { left: 100, top: 100, right: 1000, bottom: 220, width: 900, height: 120 };
+		const element = {
+			kind: 'text' as const, selector: 'h1', textLength: 8, rect,
+			scrollWidth: 900, clientWidth: 900, scrollHeight: 120, clientHeight: 100,
+			overflowX: overflow, overflowY: overflow,
+		};
+		const audit = analyzeRenderedSlideMeasurement(createMeasurement({ pageScale: 1, contentBounds: rect, elements: [element] }));
+		expect(audit.findings.some(finding => finding.kind === 'overflow')).toBe(overflow !== 'visible');
+	});
+
+	test('still rejects visible text extending beyond the slide viewport', () => {
+		const rect = { left: 100, top: 650, right: 1000, bottom: 780, width: 900, height: 130 };
+		const element = {
+			kind: 'text' as const, selector: 'h1', textLength: 8, rect,
+			scrollWidth: 900, clientWidth: 900, scrollHeight: 130, clientHeight: 100,
+			overflowX: 'visible', overflowY: 'visible',
+		};
+		const audit = analyzeRenderedSlideMeasurement(createMeasurement({ pageScale: 1, contentBounds: rect, elements: [element] }));
+		expect(audit.findings).toEqual(expect.arrayContaining([expect.objectContaining({ kind: 'overflow', target: 'text' })]));
+	});
+
 	test('reports overflow and recommends a smaller scale for oversized Mermaid slides', () => {
 		const audit = analyzeRenderedSlideMeasurement(createMeasurement());
 

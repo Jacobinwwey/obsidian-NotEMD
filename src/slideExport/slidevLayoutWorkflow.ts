@@ -542,6 +542,8 @@ export async function collectRenderedSlideMeasurement(page: any, slide: number):
 				scrollHeight: number;
 				clientWidth: number;
 				clientHeight: number;
+				overflowX: string;
+				overflowY: string;
 				rect: BrowserRect;
 			};
 		}> = [];
@@ -598,6 +600,8 @@ export async function collectRenderedSlideMeasurement(page: any, slide: number):
 						scrollHeight: element.scrollHeight || rect.height,
 						clientWidth: element.clientWidth || rect.width,
 						clientHeight: element.clientHeight || rect.height,
+						overflowX: style.overflowX,
+						overflowY: style.overflowY,
 						rect,
 					},
 				});

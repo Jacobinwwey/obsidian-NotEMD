@@ -100,6 +100,47 @@ function hasStandaloneLoaderBinding(entryModuleCode: string, loaderRef: string):
 	return new RegExp(`(^|[^A-Za-z0-9_$])${escapedLoaderRef}\\s*=`).test(entryModuleCode);
 }
 
+function inlineStandaloneStylesheetAssets(html: string, outputDirectory: string): string {
+	const mimeTypes: Record<string, string> = {
+		'.woff2': 'font/woff2', '.woff': 'font/woff', '.ttf': 'font/ttf', '.otf': 'font/otf',
+		'.eot': 'application/vnd.ms-fontobject', '.svg': 'image/svg+xml', '.png': 'image/png',
+		'.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.gif': 'image/gif', '.webp': 'image/webp',
+		'.avif': 'image/avif', '.ico': 'image/x-icon',
+	};
+	const embeddedAssets = new Map<string, string>();
+	return html.replace(/(<style\b[^>]*>)([\s\S]*?)(<\/style>)/gi, (_style, opening: string, css: string, closing: string) => {
+		const embeddedCss = css.replace(/url\(\s*(?:"([^"\r\n]*)"|'([^'\r\n]*)'|([^)'"\s]+))\s*\)/gi, (original, doubleQuoted: string, singleQuoted: string, unquoted: string) => {
+			const reference = doubleQuoted ?? singleQuoted ?? unquoted;
+			if (!reference || /^(?:[a-z][a-z0-9+.-]*:|\/\/|#)/i.test(reference)) return original;
+			const fs = safeRequire('fs');
+			const path = safeRequire('path');
+			if (!fs || !path) throw new Error('Standalone stylesheet asset embedding requires desktop filesystem access.');
+			const root = fs.realpathSync(outputDirectory);
+			const fragmentIndex = reference.indexOf('#');
+			const fragment = fragmentIndex >= 0 ? reference.slice(fragmentIndex) : '';
+			const relativePath = decodeURIComponent(reference.split(/[?#]/)[0]);
+			const staysInsideOutput = (candidate: string): boolean => {
+				const relative = path.relative(root, candidate);
+				return relative !== '..' && !relative.startsWith(`..${path.sep}`) && !path.isAbsolute(relative);
+			};
+			// The fork hoists CSS from assets/ into HTML without rebasing its relative font URLs.
+			const candidates = [path.resolve(root, relativePath), path.resolve(root, 'assets', relativePath)];
+			const assetPath = candidates.find(candidate => staysInsideOutput(candidate) && fs.existsSync(candidate));
+			if (!assetPath || !staysInsideOutput(fs.realpathSync(assetPath)) || !fs.statSync(assetPath).isFile()) {
+				throw new Error(`Standalone stylesheet asset is missing or outside the export directory: ${reference}`);
+			}
+			let embedded = embeddedAssets.get(assetPath);
+			if (!embedded) {
+				const mimeType = mimeTypes[path.extname(assetPath).toLowerCase()] ?? 'application/octet-stream';
+				embedded = `data:${mimeType};base64,${fs.readFileSync(assetPath).toString('base64')}`;
+				embeddedAssets.set(assetPath, embedded);
+			}
+			return `url("${embedded}${fragment}")`;
+		});
+		return opening + embeddedCss + closing;
+	});
+}
+
 async function injectMermaidPostFitIntoExportHtml(
 	app: App,
 	exportPath: string,
@@ -217,7 +258,9 @@ async function exportSlidevStandaloneHtml(
 	copyPreparedLocalFileReferencesToExport(source, vaultRoot, outputDir, onProgress);
 
 	const standaloneHtmlPath = `${config.outputSubfolder}/${source.outputBasename}-slides/index-standalone.html`;
-	const standaloneHtml = await app.vault.adapter.read(standaloneHtmlPath);
+	const builtHtml = await app.vault.adapter.read(standaloneHtmlPath);
+	const standaloneHtml = inlineStandaloneStylesheetAssets(builtHtml, outputDir);
+	if (standaloneHtml !== builtHtml) await app.vault.adapter.write(standaloneHtmlPath, standaloneHtml);
 	const loaderGaps = detectStandaloneBundleLoaderGaps(standaloneHtml);
 	if (loaderGaps.length === 0) {
 		await injectMermaidPostFitIntoExportHtml(app, standaloneHtmlPath, onProgress);

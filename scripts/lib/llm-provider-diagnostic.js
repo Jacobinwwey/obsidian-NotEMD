@@ -3,6 +3,7 @@
 const http = require('http');
 const https = require('https');
 const fs = require('fs');
+const { StringDecoder } = require('string_decoder');
 
 const SENSITIVE_QUERY_PARAMS = new Set([
     'access_token',
@@ -607,13 +608,14 @@ function requestWithNode(options, timeoutMs, accumulator) {
             headers
         }, (response) => {
             const chunks = [];
+            const decoder = new StringDecoder('utf8');
             let finished = false;
 
             response.on('data', (chunk) => {
                 if (firstByteMs === undefined) {
                     firstByteMs = Date.now() - startedAt;
                 }
-                const text = Buffer.isBuffer(chunk) ? chunk.toString('utf8') : String(chunk);
+                const text = Buffer.isBuffer(chunk) ? decoder.write(chunk) : String(chunk);
                 chunks.push(text);
                 if (accumulator) {
                     ingestProtocolChunk(accumulator.transport, accumulator, text);
@@ -622,6 +624,9 @@ function requestWithNode(options, timeoutMs, accumulator) {
 
             response.on('end', () => {
                 finished = true;
+                const tail = decoder.end();
+                chunks.push(tail);
+                if (accumulator) ingestProtocolChunk(accumulator.transport, accumulator, tail);
                 const parsed = accumulator ? finalizeProtocolAccumulator(accumulator.transport, accumulator) : null;
                 resolve({
                     ok: true,
